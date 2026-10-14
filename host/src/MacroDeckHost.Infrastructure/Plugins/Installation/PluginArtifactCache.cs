@@ -18,7 +18,8 @@ public sealed class PluginArtifactCache : IPluginArtifactCache
 	private readonly object _lock = new();
 	private readonly DurableJsonFile _files;
 
-	public PluginArtifactCache(IMacroDeckPaths paths,
+	public PluginArtifactCache(
+		IMacroDeckPaths paths,
 		PluginInstallerOptions options,
 		ILogger logger)
 	{
@@ -66,7 +67,7 @@ public sealed class PluginArtifactCache : IPluginArtifactCache
 
 		try
 		{
-			File.Move(sourcePath, destinationPath, overwrite: true);
+			File.Move(sourcePath, destinationPath, true);
 		}
 		catch (IOException)
 		{
@@ -207,8 +208,10 @@ public sealed class PluginArtifactCache : IPluginArtifactCache
 		}
 	}
 
-	private string CachedFilePath(string key) =>
-		Path.Combine(_cacheDirectory, key + PluginArtifactFiles.MacroDeckPluginExtension);
+	private string CachedFilePath(string key)
+	{
+		return Path.Combine(_cacheDirectory, key + PluginArtifactFiles.MacroDeckPluginExtension);
+	}
 
 	private static string NormalizeKey(string sha256)
 	{

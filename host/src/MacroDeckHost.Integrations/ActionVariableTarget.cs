@@ -20,8 +20,8 @@ internal static class ActionVariableTarget
 		{
 			// Variables this integration created for a target before targets became user variables keep
 			// updating, so widgets bound to them do not go stale.
-			if (integrationVariables is not null &&
-				await integrationVariables.GetByNameAsync(name).ConfigureAwait(false) is { } owned)
+			if (integrationVariables is not null
+				&& await integrationVariables.GetByNameAsync(name).ConfigureAwait(false) is { } owned)
 			{
 				await integrationVariables.SetValueAsync(owned.Id, value).ConfigureAwait(false);
 				return true;
@@ -80,13 +80,16 @@ internal static class ActionVariableTarget
 	}
 
 	// UserVariableWriter parses numbers without exponents, so doubles go through decimal first.
-	private static string Format(object value) => value switch
+	private static string Format(object value)
 	{
-		bool flag => flag ? "true" : "false",
-		string text => text,
-		double or float or decimal or int or long or short or byte or uint or ulong or ushort or sbyte
-			=> Convert.ToDecimal(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
-		IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-		_ => value.ToString() ?? string.Empty
-	};
+		return value switch
+		{
+			bool flag => flag ? "true" : "false",
+			string text => text,
+			double or float or decimal or int or long or short or byte or uint or ulong or ushort or sbyte
+				=> Convert.ToDecimal(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
+			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+			_ => value.ToString() ?? string.Empty
+		};
+	}
 }

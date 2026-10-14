@@ -37,7 +37,9 @@ internal static class ImapInboxId
 	}
 
 	private static string? ReadString(IReadOnlyDictionary<string, JsonElement> values, string key)
-		=> values.TryGetValue(key, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return values.TryGetValue(key, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString()
 			: null;
+	}
 }

@@ -52,7 +52,7 @@ public class ExampleIntegration : IIntegration, IVariableProvider, IConfigFlowPr
 			with
 			{
 				DisplayName = AppStrings.Integrations.Example.Variables.Flaky()
-			},
+			}
 	];
 
 	public Task InitializeAsync(IIntegrationContext context)
@@ -77,7 +77,10 @@ public class ExampleIntegration : IIntegration, IVariableProvider, IConfigFlowPr
 		return ValueTask.FromResult(VariableReading.Of(value));
 	}
 
-	public IConfigFlow CreateConfigFlow() => new ExampleConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new ExampleConfigFlow();
+	}
 
 	public Task ShutdownAsync()
 	{

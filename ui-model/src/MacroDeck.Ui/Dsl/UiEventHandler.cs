@@ -181,7 +181,10 @@ public sealed record UiEventHandler
 /// </summary>
 public readonly record struct UiEventOutcome
 {
-	private UiEventOutcome(string? rejectionReason) => RejectionReason = rejectionReason;
+	private UiEventOutcome(string? rejectionReason)
+	{
+		RejectionReason = rejectionReason;
+	}
 
 	/// <summary>The handler accepted the event. Equal to <c>default(UiEventOutcome)</c>.</summary>
 	public static UiEventOutcome Accepted => default;
@@ -211,7 +214,10 @@ public readonly record struct UiEventOutcome
 /// </summary>
 public readonly record struct UiEventData
 {
-	internal UiEventData(JsonElement? raw) => Raw = raw;
+	internal UiEventData(JsonElement? raw)
+	{
+		Raw = raw;
+	}
 
 	/// <summary>The payload verbatim, or <c>null</c> when the event carried none.</summary>
 	public JsonElement? Raw { get; }
@@ -265,10 +271,10 @@ public readonly record struct UiEventData
 	{
 		value = default;
 
-		if (Raw is not { ValueKind: JsonValueKind.Object } element ||
-			!TryReadSample(element, out var sample) ||
-			!TryReadNumber(element, "width", out var width) ||
-			!TryReadNumber(element, "height", out var height))
+		if (Raw is not { ValueKind: JsonValueKind.Object } element
+			|| !TryReadSample(element, out var sample)
+			|| !TryReadNumber(element, "width", out var width)
+			|| !TryReadNumber(element, "height", out var height))
 		{
 			return false;
 		}
@@ -284,9 +290,9 @@ public readonly record struct UiEventData
 	{
 		samples = [];
 
-		if (Raw is not { ValueKind: JsonValueKind.Object } element ||
-			!element.TryGetProperty("samples", out var array) ||
-			array.ValueKind != JsonValueKind.Array)
+		if (Raw is not { ValueKind: JsonValueKind.Object } element
+			|| !element.TryGetProperty("samples", out var array)
+			|| array.ValueKind != JsonValueKind.Array)
 		{
 			return false;
 		}
@@ -330,11 +336,11 @@ public readonly record struct UiEventData
 	{
 		pointers = 0;
 
-		if (Raw is not { ValueKind: JsonValueKind.Object } element ||
-			!element.TryGetProperty("pointers", out var count) ||
-			count.ValueKind != JsonValueKind.Number ||
-			!count.TryGetInt32(out var read) ||
-			read < 1)
+		if (Raw is not { ValueKind: JsonValueKind.Object } element
+			|| !element.TryGetProperty("pointers", out var count)
+			|| count.ValueKind != JsonValueKind.Number
+			|| !count.TryGetInt32(out var read)
+			|| read < 1)
 		{
 			return false;
 		}
@@ -348,13 +354,13 @@ public readonly record struct UiEventData
 	{
 		sample = default;
 
-		if (element.ValueKind != JsonValueKind.Object ||
-			!element.TryGetProperty("id", out var id) ||
-			id.ValueKind != JsonValueKind.Number ||
-			!id.TryGetInt32(out var pointerId) ||
-			!TryReadNumber(element, "x", out var x) ||
-			!TryReadNumber(element, "y", out var y) ||
-			!TryReadNumber(element, "t", out var time))
+		if (element.ValueKind != JsonValueKind.Object
+			|| !element.TryGetProperty("id", out var id)
+			|| id.ValueKind != JsonValueKind.Number
+			|| !id.TryGetInt32(out var pointerId)
+			|| !TryReadNumber(element, "x", out var x)
+			|| !TryReadNumber(element, "y", out var y)
+			|| !TryReadNumber(element, "t", out var time))
 		{
 			return false;
 		}
@@ -368,8 +374,8 @@ public readonly record struct UiEventData
 	{
 		value = 0;
 
-		return element.TryGetProperty(name, out var member) &&
-			member.ValueKind == JsonValueKind.Number &&
-			member.TryGetDouble(out value);
+		return element.TryGetProperty(name, out var member)
+			&& member.ValueKind == JsonValueKind.Number
+			&& member.TryGetDouble(out value);
 	}
 }

@@ -8,14 +8,22 @@ import {
   ArtworkCrossfadeState,
   createArtworkCrossfadeState,
   releaseArtworkCrossfade,
+  showsBitmap,
   swapArtwork,
 } from './artwork-crossfade';
 import { px } from './px.util';
 import { setImageSource } from './image-recovery';
 import { maskImageUrl, repaintOnLoad, supportsMasks } from './artwork-tint';
 
+interface ImageArtworkLook {
+  transform: string;
+  filter: string | null;
+  opacity: number;
+  tint: string | null;
+}
+
 export interface UiImageState {
-  artwork: ArtworkCrossfadeState;
+  artwork: ArtworkCrossfadeState<ImageArtworkLook>;
 }
 
 export const uiImageComponent: UiComponentDefinition<UiImageState> = {
@@ -41,8 +49,15 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
       edge !== undefined && edge > 0 ? { displayPx: edge * buttonZoom(node) } : undefined);
     const state = ctx.state.artwork;
     const tint = supportsMasks() ? nodeHexColor(node, UiComponentProperties.Tint) ?? null : null;
+    const look: ImageArtworkLook = {
+      transform: buttonArtworkTransform(node),
+      filter: artworkFilter(node),
+      opacity: buttonOpacity(node),
+      tint,
+    };
 
     const repaintArtwork = () => {
+      const settledLook = state.settledLook ?? look;
       if (state.settled === null) {
         ctx.dropPart('image');
         ctx.dropPart('image-tint');
@@ -52,25 +67,26 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
         ctx.setAttribute(image, 'draggable', 'false');
         ctx.setStyle(image, 'width', px(edge));
         ctx.setStyle(image, 'height', px(edge));
-        ctx.setStyle(image, 'transform', buttonArtworkTransform(node));
-        ctx.setStyle(image, 'filter', artworkFilter(node));
+        ctx.setStyle(image, 'transform', settledLook.transform);
+        ctx.setStyle(image, 'filter', settledLook.filter);
         setImageSource(image, state.settled);
         // The mask fetch has no retry of its own, so the untinted image stays until it has loaded.
-        const tinted = tint !== null && image.complete && image.naturalWidth > 0;
-        ctx.setStyle(image, 'opacity', tinted ? '0' : String(buttonOpacity(node)));
+        const settledTint = settledLook.tint;
+        const tinted = settledTint !== null && image.complete && image.naturalWidth > 0;
+        ctx.setStyle(image, 'opacity', tinted ? '0' : String(settledLook.opacity));
         if (tinted) {
           const layer = ctx.part('image-tint', 'div') as HTMLElement;
           ctx.setClassName(layer, 'widget-image-tint');
           ctx.setAttribute(layer, 'aria-hidden', 'true');
           ctx.setStyle(layer, 'width', px(edge));
           ctx.setStyle(layer, 'height', px(edge));
-          ctx.setStyle(layer, 'background-color', tint);
+          ctx.setStyle(layer, 'background-color', settledTint);
           ctx.setStyle(layer, 'mask-image', maskImageUrl(state.settled));
-          ctx.setStyle(layer, 'opacity', String(buttonOpacity(node)));
-          ctx.setStyle(layer, 'filter', artworkFilter(node));
+          ctx.setStyle(layer, 'opacity', String(settledLook.opacity));
+          ctx.setStyle(layer, 'filter', settledLook.filter);
         } else {
           ctx.dropPart('image-tint');
-          if (tint !== null) repaintOnLoad(image, ctx);
+          if (settledTint !== null) repaintOnLoad(image, ctx);
         }
       }
 
@@ -84,15 +100,18 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
         ctx.setAttribute(image, 'aria-hidden', 'true');
         ctx.setStyle(image, 'width', px(edge));
         ctx.setStyle(image, 'height', px(edge));
-        ctx.setStyle(image, '--widget-artwork-opacity', String(buttonOpacity(node)));
+        const incomingLook = state.incomingLook ?? look;
+        ctx.setStyle(image, '--widget-artwork-opacity', String(incomingLook.opacity));
         // No inline transform: the stylesheet centres this layer with one, and overriding it here would
         // drop the incoming artwork into the box's top-left corner for the length of the fade.
-        ctx.setStyle(image, 'filter', artworkFilter(node));
+        ctx.setStyle(image, 'filter', incomingLook.filter);
         setImageSource(image, state.incoming);
       }
     };
 
-    swapArtwork(state, source, artworkCrossfades(node) && tint === null, repaintArtwork);
+    const outgoing = state.settled === null ? null : ctx.part('image', 'img') as HTMLImageElement;
+    swapArtwork(state, source, look, artworkCrossfades(node) && tint === null, showsBitmap(outgoing),
+      () => ctx.repaint());
     repaintArtwork();
   },
 

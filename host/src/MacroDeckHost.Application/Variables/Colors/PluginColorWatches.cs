@@ -25,7 +25,8 @@ public sealed class PluginColorWatches : IDisposable
 	private readonly Dictionary<string, PluginWatches> _byPlugin = new(StringComparer.Ordinal);
 	private long _revision;
 
-	public PluginColorWatches(IColorReferenceResolver colors,
+	public PluginColorWatches(
+		IColorReferenceResolver colors,
 		IFolderCache folders,
 		IPluginSessionRegistry sessions,
 		ColorChangeSignal signal,
@@ -64,8 +65,8 @@ public sealed class PluginColorWatches : IDisposable
 		Guid? widget = null;
 		if (widgetId is not null)
 		{
-			if (!Guid.TryParse(widgetId, out var parsed) ||
-				!_folders.GetAllFolders().Any(folder => folder.Widgets.Any(candidate => candidate.Id == parsed)))
+			if (!Guid.TryParse(widgetId, out var parsed)
+				|| !_folders.GetAllFolders().Any(folder => folder.Widgets.Any(candidate => candidate.Id == parsed)))
 			{
 				return null;
 			}
@@ -75,8 +76,9 @@ public sealed class PluginColorWatches : IDisposable
 
 		return ColorReference.TryParse(value, out var reference)
 			? _colors.ResolveColor(reference,
-				widget is null ? VariableScope.Global : VariableScope.Widget,
-				widget?.ToString())?.ToString()
+					widget is null ? VariableScope.Global : VariableScope.Widget,
+					widget?.ToString())
+				?.ToString()
 			: RgbaColor.Canonicalize(value);
 	}
 
@@ -136,9 +138,9 @@ public sealed class PluginColorWatches : IDisposable
 	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e)
 	{
 		var stillConnected = _sessions.Snapshot()
-			.Any(session => string.Equals(session.PluginId, e.PluginId, StringComparison.Ordinal) &&
-				!string.Equals(session.SessionId, e.SessionId, StringComparison.Ordinal) &&
-				session.State is PluginSessionState.Connected or PluginSessionState.Awaiting);
+			.Any(session => string.Equals(session.PluginId, e.PluginId, StringComparison.Ordinal)
+				&& !string.Equals(session.SessionId, e.SessionId, StringComparison.Ordinal)
+				&& session.State is PluginSessionState.Connected or PluginSessionState.Awaiting);
 
 		if (!stillConnected)
 		{
@@ -211,7 +213,8 @@ public sealed class PluginColorWatches : IDisposable
 	}
 
 	private ProtocolEnvelope Envelope(Dictionary<string, string?> values)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.CreateVersion7().ToString(),
@@ -221,17 +224,25 @@ public sealed class PluginColorWatches : IDisposable
 					Data = JsonSerializer.SerializeToElement(new ColorWatchStateDto
 						{
 							Revision = Interlocked.Increment(ref _revision),
-							Values = [.. values.Select(pair => new ColorWatchValueDto { WatchId = pair.Key, Color = pair.Value })]
+							Values =
+							[
+								.. values.Select(pair => new ColorWatchValueDto
+									{ WatchId = pair.Key, Color = pair.Value })
+							]
 						},
 						PluginProtocolJson.Options)
 				},
 				PluginProtocolJson.Options)
 		};
+	}
 
 	private static bool Same(Dictionary<string, string?> left, Dictionary<string, string?> right)
-		=> left.Count == right.Count &&
-			left.All(pair => right.TryGetValue(pair.Key, out var other) &&
-				string.Equals(pair.Value, other, StringComparison.Ordinal));
+	{
+		return left.Count == right.Count
+			&& left.All(pair
+				=> right.TryGetValue(pair.Key, out var other)
+				&& string.Equals(pair.Value, other, StringComparison.Ordinal));
+	}
 
 	private sealed class PluginWatches
 	{

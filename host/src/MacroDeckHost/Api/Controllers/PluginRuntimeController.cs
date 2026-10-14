@@ -44,22 +44,31 @@ public class PluginRuntimeController : ControllerBase
 
 	[HttpGet]
 	public GetPluginRuntimeResponse GetAll()
-		=> new(_supervisor.Snapshot().Select(ToBody).ToList());
+	{
+		return new GetPluginRuntimeResponse(_supervisor.Snapshot().Select(ToBody).ToList());
+	}
 
 	[HttpPost("{pluginId}/start")]
 	public async Task<PluginRuntimeActionResponse> Start(string pluginId, CancellationToken ct)
-		=> ToResponse(await _supervisor.Start(pluginId, ct));
+	{
+		return ToResponse(await _supervisor.Start(pluginId, ct));
+	}
 
 	[HttpPost("{pluginId}/stop")]
 	public async Task<PluginRuntimeActionResponse> Stop(string pluginId, CancellationToken ct)
-		=> ToResponse(await _supervisor.Stop(pluginId, PluginStopReason.UserRequested, ct));
+	{
+		return ToResponse(await _supervisor.Stop(pluginId, PluginStopReason.UserRequested, ct));
+	}
 
 	[HttpPost("{pluginId}/restart")]
 	public async Task<PluginRuntimeActionResponse> Restart(string pluginId, CancellationToken ct)
-		=> ToResponse(await _supervisor.Restart(pluginId, ct));
+	{
+		return ToResponse(await _supervisor.Restart(pluginId, ct));
+	}
 
 	private static PluginRuntimeActionResponse ToResponse(PluginSupervisorResult result)
-		=> result.Success
+	{
+		return result.Success
 			? new PluginRuntimeActionResponse(true, null)
 			: new PluginRuntimeActionResponse(false,
 				new TransportError
@@ -69,75 +78,91 @@ public class PluginRuntimeController : ControllerBase
 						? AppStrings.Errors.Plugins.TakenOverByDevelopmentBuild()
 						: result.Message ?? string.Empty
 				});
+	}
 
-	private static string ToErrorCode(PluginSupervisorError error) => error switch
+	private static string ToErrorCode(PluginSupervisorError error)
 	{
-		PluginSupervisorError.NotInstalled => "not_installed",
-		PluginSupervisorError.ManifestInvalid => "manifest_invalid",
-		PluginSupervisorError.NoEntrypointForRuntime => "no_entrypoint",
-		PluginSupervisorError.AlreadyRunning => "already_running",
-		PluginSupervisorError.NotRunning => "not_running",
-		PluginSupervisorError.SelfRegistering => "self_registering",
-		PluginSupervisorError.LaunchFailed => "launch_failed",
-		PluginSupervisorError.IntegrityFailed => "integrity_failed",
-		PluginSupervisorError.TakenOverByDevelopmentBuild => "taken_over_by_development_build",
-		_ => "failed"
-	};
+		return error switch
+		{
+			PluginSupervisorError.NotInstalled => "not_installed",
+			PluginSupervisorError.ManifestInvalid => "manifest_invalid",
+			PluginSupervisorError.NoEntrypointForRuntime => "no_entrypoint",
+			PluginSupervisorError.AlreadyRunning => "already_running",
+			PluginSupervisorError.NotRunning => "not_running",
+			PluginSupervisorError.SelfRegistering => "self_registering",
+			PluginSupervisorError.LaunchFailed => "launch_failed",
+			PluginSupervisorError.IntegrityFailed => "integrity_failed",
+			PluginSupervisorError.TakenOverByDevelopmentBuild => "taken_over_by_development_build",
+			_ => "failed"
+		};
+	}
 
-	private static PluginRuntimeSnapshotBody ToBody(PluginRuntimeSnapshot snapshot) => new(snapshot.PluginId,
-		snapshot.DisplayName,
-		snapshot.Version,
-		ToWireState(snapshot.State),
-		ToWireHealth(snapshot.Health),
-		snapshot.Managed,
-		snapshot.ProcessId,
-		snapshot.LaunchId,
-		snapshot.StartedAt,
-		snapshot.LastExitCode,
-		ToWireStopReason(snapshot.LastStopReason),
-		snapshot.LastExitAt,
-		snapshot.LastHeartbeatAt,
-		snapshot.LastHealthCheckAt,
-		snapshot.ConsecutiveHealthFailures,
-		snapshot.RestartCount,
-		snapshot.NextRestartAt,
-		snapshot.LastError,
-		snapshot.BootstrapOutput,
-		snapshot.TakenOverByDevelopmentBuild);
-
-	private static string ToWireState(PluginRuntimeState state) => state switch
+	private static PluginRuntimeSnapshotBody ToBody(PluginRuntimeSnapshot snapshot)
 	{
-		PluginRuntimeState.Stopped => "stopped",
-		PluginRuntimeState.Starting => "starting",
-		PluginRuntimeState.Running => "running",
-		PluginRuntimeState.Stopping => "stopping",
-		PluginRuntimeState.Backoff => "backoff",
-		PluginRuntimeState.Failed => "failed",
-		_ => "stopped"
-	};
+		return new PluginRuntimeSnapshotBody(snapshot.PluginId,
+			snapshot.DisplayName,
+			snapshot.Version,
+			ToWireState(snapshot.State),
+			ToWireHealth(snapshot.Health),
+			snapshot.Managed,
+			snapshot.ProcessId,
+			snapshot.LaunchId,
+			snapshot.StartedAt,
+			snapshot.LastExitCode,
+			ToWireStopReason(snapshot.LastStopReason),
+			snapshot.LastExitAt,
+			snapshot.LastHeartbeatAt,
+			snapshot.LastHealthCheckAt,
+			snapshot.ConsecutiveHealthFailures,
+			snapshot.RestartCount,
+			snapshot.NextRestartAt,
+			snapshot.LastError,
+			snapshot.BootstrapOutput,
+			snapshot.TakenOverByDevelopmentBuild);
+	}
 
-	private static string ToWireHealth(PluginHealthState health) => health switch
+	private static string ToWireState(PluginRuntimeState state)
 	{
-		PluginHealthState.Unknown => "unknown",
-		PluginHealthState.Healthy => "healthy",
-		PluginHealthState.Degraded => "degraded",
-		PluginHealthState.Unhealthy => "unhealthy",
-		PluginHealthState.Crashed => "crashed",
-		PluginHealthState.Failed => "failed",
-		_ => "unknown"
-	};
+		return state switch
+		{
+			PluginRuntimeState.Stopped => "stopped",
+			PluginRuntimeState.Starting => "starting",
+			PluginRuntimeState.Running => "running",
+			PluginRuntimeState.Stopping => "stopping",
+			PluginRuntimeState.Backoff => "backoff",
+			PluginRuntimeState.Failed => "failed",
+			_ => "stopped"
+		};
+	}
 
-	private static string ToWireStopReason(PluginStopReason reason) => reason switch
+	private static string ToWireHealth(PluginHealthState health)
 	{
-		PluginStopReason.None => "none",
-		PluginStopReason.UserRequested => "user_requested",
-		PluginStopReason.HostShutdown => "host_shutdown",
-		PluginStopReason.Update => "update",
-		PluginStopReason.ManualRestart => "manual_restart",
-		PluginStopReason.Crash => "crash",
-		PluginStopReason.HealthFailure => "health_failure",
-		PluginStopReason.LaunchFailure => "launch_failure",
-		PluginStopReason.DevelopmentTakeover => "development_takeover",
-		_ => "none"
-	};
+		return health switch
+		{
+			PluginHealthState.Unknown => "unknown",
+			PluginHealthState.Healthy => "healthy",
+			PluginHealthState.Degraded => "degraded",
+			PluginHealthState.Unhealthy => "unhealthy",
+			PluginHealthState.Crashed => "crashed",
+			PluginHealthState.Failed => "failed",
+			_ => "unknown"
+		};
+	}
+
+	private static string ToWireStopReason(PluginStopReason reason)
+	{
+		return reason switch
+		{
+			PluginStopReason.None => "none",
+			PluginStopReason.UserRequested => "user_requested",
+			PluginStopReason.HostShutdown => "host_shutdown",
+			PluginStopReason.Update => "update",
+			PluginStopReason.ManualRestart => "manual_restart",
+			PluginStopReason.Crash => "crash",
+			PluginStopReason.HealthFailure => "health_failure",
+			PluginStopReason.LaunchFailure => "launch_failure",
+			PluginStopReason.DevelopmentTakeover => "development_takeover",
+			_ => "none"
+		};
+	}
 }

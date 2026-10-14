@@ -15,7 +15,7 @@ public enum UiDispatchOutcome
 
 	/// <summary>The event was meant for this node but could not be honoured - a payload of the wrong shape, a
 	/// read-only binding, or a handler that faulted.</summary>
-	Rejected,
+	Rejected
 }
 
 /// <summary>
@@ -44,7 +44,10 @@ public readonly record struct UiDispatchResult
 	public bool IsAccepted => Outcome == UiDispatchOutcome.Accepted;
 
 	/// <summary>The accepted result.</summary>
-	public static UiDispatchResult Accepted() => new(UiDispatchOutcome.Accepted, null);
+	public static UiDispatchResult Accepted()
+	{
+		return new UiDispatchResult(UiDispatchOutcome.Accepted, null);
+	}
 
 	/// <summary>An ignored result carrying <paramref name="reason" />.</summary>
 	public static UiDispatchResult Ignored(string reason)

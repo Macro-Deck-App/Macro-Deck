@@ -23,10 +23,16 @@ internal sealed class IconPackAppearanceFormatTests
 	private IconTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new IconTestHarness();
+	public void SetUp()
+	{
+		_harness = new IconTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task An_export_nests_each_ready_appearance_under_its_icon_and_declares_its_master()
@@ -51,7 +57,8 @@ internal sealed class IconPackAppearanceFormatTests
 			Assert.That(nested.AvailableSizes, Is.Empty);
 			Assert.That(nested.ImportBatchId, Is.Null);
 			Assert.That(manifest.Files!.Select(file => file.Path),
-				Is.EqualTo(new[] { $"icons/{dark.Id}/master.webp", $"icons/{play.Id}/master.webp" }.Order(StringComparer.Ordinal)));
+				Is.EqualTo(new[] { $"icons/{dark.Id}/master.webp", $"icons/{play.Id}/master.webp" }.Order(StringComparer
+					.Ordinal)));
 			Assert.That(EntryBytes(archive, $"icons/{dark.Id}/master.webp"), Is.EqualTo(Bytes("play-dark")));
 		});
 	}
@@ -205,7 +212,8 @@ internal sealed class IconPackAppearanceFormatTests
 		var appearance = _harness.Cache.GetAppearances(merged.Id).Single();
 		Assert.Multiple(() =>
 		{
-			Assert.That(_harness.Cache.GetIconsByPackId(target.Id).Select(icon => icon.Id), Is.EqualTo(new[] { merged.Id }));
+			Assert.That(_harness.Cache.GetIconsByPackId(target.Id).Select(icon => icon.Id),
+				Is.EqualTo(new[] { merged.Id }));
 			Assert.That(appearance.PackId, Is.EqualTo(target.Id));
 			Assert.That(appearance.ImportBatchId, Is.EqualTo(batchId));
 		});
@@ -214,7 +222,8 @@ internal sealed class IconPackAppearanceFormatTests
 	[Test]
 	public async Task An_upgrade_that_changes_only_appearances_updates_the_icon_in_place()
 	{
-		var installed = await Install(await BuildArchive("1.0.0", ("colorScheme=dark", "dark-one"), ("contrast=high", "high")));
+		var installed
+			= await Install(await BuildArchive("1.0.0", ("colorScheme=dark", "dark-one"), ("contrast=high", "high")));
 		var icon = _harness.Cache.GetIconsByPackId(installed.Id).Single();
 		var darkId = AppearanceId(icon, "colorScheme=dark");
 		_harness.Mediator.Published.Clear();
@@ -231,7 +240,9 @@ internal sealed class IconPackAppearanceFormatTests
 			Assert.That(result.Success, Is.True);
 			Assert.That(_harness.Cache.GetIconsByPackId(installed.Id).Single().Id, Is.EqualTo(icon.Id));
 			Assert.That(appearances.Select(KeyOf), Is.EqualTo(new[] { "colorScheme=dark", "motion=static" }));
-			Assert.That(AppearanceId(icon, "colorScheme=dark"), Is.EqualTo(darkId), "a kind the update keeps keeps its id");
+			Assert.That(AppearanceId(icon, "colorScheme=dark"),
+				Is.EqualTo(darkId),
+				"a kind the update keeps keeps its id");
 			Assert.That(_harness.Mediator.Published.OfType<IconUpdatedNotification>().Select(n => n.Icon.Id),
 				Is.EqualTo(new[] { icon.Id }));
 			Assert.That(_harness.Mediator.Published.OfType<IconsAddedNotification>(), Is.Empty);
@@ -272,7 +283,8 @@ internal sealed class IconPackAppearanceFormatTests
 	public async Task Replacing_a_plugin_pack_replaces_an_icons_appearances_wholesale()
 	{
 		var stamp = new IconPackSourceStamp(IconPackSourceType.Plugin, "com.example/logos", "rev-1");
-		var installed = await Install(await BuildArchive("1.0.0", ("colorScheme=dark", "dark"), ("contrast=high", "high")));
+		var installed
+			= await Install(await BuildArchive("1.0.0", ("colorScheme=dark", "dark"), ("contrast=high", "high")));
 		var icon = _harness.Cache.GetIconsByPackId(installed.Id).Single();
 		_harness.Mediator.Published.Clear();
 
@@ -332,7 +344,8 @@ internal sealed class IconPackAppearanceFormatTests
 	}
 
 	[Test]
-	public async Task An_upgrade_that_adds_or_drops_an_appearance_on_every_icon_writes_the_pack_a_bounded_number_of_times()
+	public async Task
+		An_upgrade_that_adds_or_drops_an_appearance_on_every_icon_writes_the_pack_a_bounded_number_of_times()
 	{
 		const int iconCount = 40;
 		var store = new CountingIconPackStore(_harness.PackStore);
@@ -345,22 +358,23 @@ internal sealed class IconPackAppearanceFormatTests
 			new IconPackOwnerRegistry([]),
 			_harness.Logger);
 		var installed = await restore.RestoreAsNewPack("pack.macroDeckIconPack",
-			new MemoryStream(await BuildManyIconArchive("1.0.0", iconCount, withDarkAppearance: false)),
+			new MemoryStream(await BuildManyIconArchive("1.0.0", iconCount, false)),
 			CancellationToken.None);
 		var packId = installed.Data!.Id;
 
 		store.Saves = 0;
 		var withAppearances = await restore.UpgradePack(packId,
 			"pack.macroDeckIconPack",
-			new MemoryStream(await BuildManyIconArchive("1.1.0", iconCount, withDarkAppearance: true)),
+			new MemoryStream(await BuildManyIconArchive("1.1.0", iconCount, true)),
 			CancellationToken.None);
 		var savesAdding = store.Saves;
-		var appearanceCounts = cache.GetIconsByPackId(packId).Select(icon => cache.GetAppearances(icon.Id).Count).ToList();
+		var appearanceCounts
+			= cache.GetIconsByPackId(packId).Select(icon => cache.GetAppearances(icon.Id).Count).ToList();
 
 		store.Saves = 0;
 		var withoutAppearances = await restore.UpgradePack(packId,
 			"pack.macroDeckIconPack",
-			new MemoryStream(await BuildManyIconArchive("1.2.0", iconCount, withDarkAppearance: false)),
+			new MemoryStream(await BuildManyIconArchive("1.2.0", iconCount, false)),
 			CancellationToken.None);
 		var savesDropping = store.Saves;
 
@@ -378,7 +392,10 @@ internal sealed class IconPackAppearanceFormatTests
 	{
 		public int Saves { get; set; }
 
-		public IReadOnlyList<IconPackManifest> LoadAll() => inner.LoadAll();
+		public IReadOnlyList<IconPackManifest> LoadAll()
+		{
+			return inner.LoadAll();
+		}
 
 		public void Save(IconPackManifest manifest)
 		{
@@ -386,7 +403,10 @@ internal sealed class IconPackAppearanceFormatTests
 			inner.Save(manifest);
 		}
 
-		public void Delete(Guid packId) => inner.Delete(packId);
+		public void Delete(Guid packId)
+		{
+			inner.Delete(packId);
+		}
 	}
 
 	private async Task<byte[]> BuildManyIconArchive(string version, int iconCount, bool withDarkAppearance)
@@ -407,7 +427,11 @@ internal sealed class IconPackAppearanceFormatTests
 				CreatedAt = DateTime.UtcNow
 			};
 			await _harness.Cache.AddIcons(source.Id, [icon]);
-			await _harness.Storage.WriteVariant(source.Id, icon.Id, IconVariants.Master, master, CancellationToken.None);
+			await _harness.Storage.WriteVariant(source.Id,
+				icon.Id,
+				IconVariants.Master,
+				master,
+				CancellationToken.None);
 			if (withDarkAppearance)
 			{
 				await _harness.AddReadyAppearance(icon, "colorScheme=dark", Bytes($"master:dark-{index}"));
@@ -460,9 +484,14 @@ internal sealed class IconPackAppearanceFormatTests
 	}
 
 	private Guid AppearanceId(IconEntity icon, string key)
-		=> _harness.Cache.GetAppearances(icon.Id).Single(appearance => KeyOf(appearance) == key).Id;
+	{
+		return _harness.Cache.GetAppearances(icon.Id).Single(appearance => KeyOf(appearance) == key).Id;
+	}
 
-	private static string KeyOf(IconEntity appearance) => IconAppearanceTraits.ToKey(appearance.AppearanceTraits!);
+	private static string KeyOf(IconEntity appearance)
+	{
+		return IconAppearanceTraits.ToKey(appearance.AppearanceTraits!);
+	}
 
 	private async Task<byte[]> Export(Guid packId)
 	{
@@ -481,9 +510,15 @@ internal sealed class IconPackAppearanceFormatTests
 	}
 
 	private static IconPackManifest ReadManifest(byte[] archive)
-		=> JsonSerializer.Deserialize<IconPackManifest>(EntryText(archive, "pack.json"), PersistenceJsonOptions.Default)!;
+	{
+		return JsonSerializer.Deserialize<IconPackManifest>(EntryText(archive, "pack.json"),
+			PersistenceJsonOptions.Default)!;
+	}
 
-	private static string EntryText(byte[] archive, string name) => Encoding.UTF8.GetString(EntryBytes(archive, name));
+	private static string EntryText(byte[] archive, string name)
+	{
+		return Encoding.UTF8.GetString(EntryBytes(archive, name));
+	}
 
 	private static byte[] EntryBytes(byte[] archive, string name)
 	{
@@ -498,7 +533,8 @@ internal sealed class IconPackAppearanceFormatTests
 	{
 		using var source = new ZipArchive(new MemoryStream(archive), ZipArchiveMode.Read);
 		return Zip(source.Entries
-			.Select(entry => (entry.FullName, entry.FullName == name ? replacement : EntryBytes(archive, entry.FullName)))
+			.Select(entry
+				=> (entry.FullName, entry.FullName == name ? replacement : EntryBytes(archive, entry.FullName)))
 			.ToArray());
 	}
 
@@ -531,14 +567,15 @@ internal sealed class IconPackAppearanceFormatTests
 		return Zip([
 			("pack.json", Encoding.UTF8.GetBytes(manifest.ToJsonString())),
 			($"icons/{parentId}/master.webp", Bytes("play")),
-			.. appearances.Select(appearance => ($"icons/{appearance.Id}/master.webp", Bytes($"appearance:{appearance.Id}")))
+			.. appearances.Select(appearance
+				=> ($"icons/{appearance.Id}/master.webp", Bytes($"appearance:{appearance.Id}")))
 		]);
 	}
 
 	private static byte[] Zip((string Name, byte[] Content)[] entries)
 	{
 		using var stream = new MemoryStream();
-		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			foreach (var (name, content) in entries)
 			{
@@ -550,5 +587,8 @@ internal sealed class IconPackAppearanceFormatTests
 		return stream.ToArray();
 	}
 
-	private static byte[] Bytes(string text) => Encoding.UTF8.GetBytes(text);
+	private static byte[] Bytes(string text)
+	{
+		return Encoding.UTF8.GetBytes(text);
+	}
 }

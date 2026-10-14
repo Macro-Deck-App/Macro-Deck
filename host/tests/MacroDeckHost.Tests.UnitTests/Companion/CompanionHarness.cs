@@ -43,7 +43,8 @@ internal sealed class CompanionHarness
 {
 	public const string IntegrationId = CompanionIntegration.IntegrationId;
 
-	public CompanionHarness(bool storedOff = false,
+	public CompanionHarness(
+		bool storedOff = false,
 		Func<int>? suffixFactory = null,
 		bool register = true,
 		IPluginCompanionDeviceAccessPolicy? pluginAccess = null,
@@ -79,8 +80,8 @@ internal sealed class CompanionHarness
 				new RecordingMediator(),
 				new FakeVariableFileSystem(),
 				Serilog.Core.Logger.None),
-				new TemplateVariableSynchronizer(VariableRegistry, new RecordingMediator()),
-				Serilog.Core.Logger.None);
+			new TemplateVariableSynchronizer(VariableRegistry, new RecordingMediator()),
+			Serilog.Core.Logger.None);
 		Integration = new CompanionIntegration(suffixFactory);
 		Coordinator = new GatedCoordinator(new IntegrationConfigMutationCoordinator(ScopeFactory,
 			new InitializingLifecycle(this),
@@ -143,9 +144,11 @@ internal sealed class CompanionHarness
 	public FakeTimeProvider Time { get; } = new();
 	public CompanionCommandRequests Requests { get; }
 	public RecordingPublisher Events { get; } = new();
+
 	public DeviceConnectionTracker Connections { get; } = new(new RecordingEventBus(),
 		TimeProvider.System,
 		new DeckClientTracker(Serilog.Core.Logger.None));
+
 	public RecordingVariableApi VariableApi { get; } = new();
 	public UserVariableWriter UserVariables { get; }
 	public CompanionDeviceRegistry DeviceRegistry { get; }
@@ -161,7 +164,10 @@ internal sealed class CompanionHarness
 		return id;
 	}
 
-	public void RemoveDeviceRow(Guid deviceId) => Devices.Devices.RemoveAll(device => device.Id == deviceId);
+	public void RemoveDeviceRow(Guid deviceId)
+	{
+		Devices.Devices.RemoveAll(device => device.Id == deviceId);
+	}
 
 	public async Task ReportAsync(string connectionId, Guid deviceId, ReportCompanionStateRequest? report = null)
 	{
@@ -171,10 +177,13 @@ internal sealed class CompanionHarness
 	}
 
 	public async Task<VariableReading> ReadAsync(Guid entryId, string slot)
-		=> await Integration.ReadAsync($"entry-{entryId:N}-{slot.Replace('_', '-')}");
+	{
+		return await Integration.ReadAsync($"entry-{entryId:N}-{slot.Replace('_', '-')}");
+	}
 
 	public static ReportCompanionStateRequest Report(string appVersion = "1.0.0", params string[] capabilities)
-		=> new()
+	{
+		return new ReportCompanionStateRequest
 		{
 			Capabilities = [.. capabilities],
 			BatteryLevelPercent = 80,
@@ -185,6 +194,7 @@ internal sealed class CompanionHarness
 			Platform = "Android 14",
 			AppVersion = appVersion
 		};
+	}
 
 	internal sealed class GatedCoordinator : IIntegrationConfigMutationCoordinator
 	{
@@ -201,7 +211,8 @@ internal sealed class CompanionHarness
 
 		public Exception? DeleteFailure { get; set; }
 
-		public async Task<IntegrationConfigMutationOutcome> CompleteAsync(string integrationId,
+		public async Task<IntegrationConfigMutationOutcome> CompleteAsync(
+			string integrationId,
 			Guid entryId,
 			string title,
 			IReadOnlyDictionary<string, JsonElement> values,
@@ -217,7 +228,8 @@ internal sealed class CompanionHarness
 
 		public Func<Task>? AfterComplete { get; set; }
 
-		public async Task<IntegrationConfigMutationOutcome> CompleteUnlessDisabledAsync(string integrationId,
+		public async Task<IntegrationConfigMutationOutcome> CompleteUnlessDisabledAsync(
+			string integrationId,
 			Guid entryId,
 			string title,
 			IReadOnlyDictionary<string, JsonElement> values,
@@ -241,22 +253,31 @@ internal sealed class CompanionHarness
 			return outcome;
 		}
 
-		public Task<IntegrationConfigMutationOutcome> RenameAsync(string integrationId,
+		public Task<IntegrationConfigMutationOutcome> RenameAsync(
+			string integrationId,
 			Guid entryId,
 			string title,
 			CancellationToken cancellationToken)
-			=> Inner.RenameAsync(integrationId, entryId, title, cancellationToken);
+		{
+			return Inner.RenameAsync(integrationId, entryId, title, cancellationToken);
+		}
 
-		public Task<IntegrationConfigMutationOutcome> DeleteAsync(string integrationId,
+		public Task<IntegrationConfigMutationOutcome> DeleteAsync(
+			string integrationId,
 			Guid entryId,
 			bool confirmed,
 			CancellationToken cancellationToken)
-			=> Hooked(() => Inner.DeleteAsync(integrationId, entryId, confirmed, cancellationToken));
+		{
+			return Hooked(() => Inner.DeleteAsync(integrationId, entryId, confirmed, cancellationToken));
+		}
 
-		public Task<IntegrationConfigMutationOutcome> DeleteWithoutStoringDisabledAsync(string integrationId,
+		public Task<IntegrationConfigMutationOutcome> DeleteWithoutStoringDisabledAsync(
+			string integrationId,
 			Guid entryId,
 			CancellationToken cancellationToken)
-			=> Hooked(() => Inner.DeleteWithoutStoringDisabledAsync(integrationId, entryId, cancellationToken));
+		{
+			return Hooked(() => Inner.DeleteWithoutStoringDisabledAsync(integrationId, entryId, cancellationToken));
+		}
 
 		private async Task<IntegrationConfigMutationOutcome> Hooked(Func<Task<IntegrationConfigMutationOutcome>> delete)
 		{
@@ -274,23 +295,32 @@ internal sealed class CompanionHarness
 			return outcome;
 		}
 
-		public Task<IReadOnlyList<IntegrationConfigEntryDescription>> DescribeAsync(string integrationId,
+		public Task<IReadOnlyList<IntegrationConfigEntryDescription>> DescribeAsync(
+			string integrationId,
 			CancellationToken cancellationToken)
-			=> Inner.DescribeAsync(integrationId, cancellationToken);
+		{
+			return Inner.DescribeAsync(integrationId, cancellationToken);
+		}
 	}
 
 	internal sealed class FixedInterfaces : INetworkInterfaceSnapshotProvider
 	{
 		public List<NetworkInterfaceSnapshot> Interfaces { get; } = [];
 
-		public IReadOnlyList<NetworkInterfaceSnapshot> GetInterfaces() => Interfaces;
+		public IReadOnlyList<NetworkInterfaceSnapshot> GetInterfaces()
+		{
+			return Interfaces;
+		}
 	}
 
 	internal sealed class FixedHostNames : IHostNameProvider
 	{
 		public string MachineName => "studio-pc";
 
-		public IReadOnlyList<string> GetHostNames() => [MachineName];
+		public IReadOnlyList<string> GetHostNames()
+		{
+			return [MachineName];
+		}
 	}
 
 	internal sealed class MemoryStateStore : IIntegrationStateStore
@@ -302,9 +332,15 @@ internal sealed class CompanionHarness
 
 		public Dictionary<string, bool> States { get; private set; }
 
-		public IReadOnlyDictionary<string, bool> Load() => States;
+		public IReadOnlyDictionary<string, bool> Load()
+		{
+			return States;
+		}
 
-		public void Save(IReadOnlyDictionary<string, bool> states) => States = new Dictionary<string, bool>(states);
+		public void Save(IReadOnlyDictionary<string, bool> states)
+		{
+			States = new Dictionary<string, bool>(states);
+		}
 	}
 
 	internal sealed class MemoryConfigStore : IIntegrationConfigStore
@@ -334,9 +370,12 @@ internal sealed class CompanionHarness
 		}
 
 		public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<bool> Create(Guid entryId,
+		public Task<bool> Create(
+			Guid entryId,
 			string integrationId,
 			string title,
 			IReadOnlyDictionary<string, JsonElement> values)
@@ -354,7 +393,9 @@ internal sealed class CompanionHarness
 		}
 
 		public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
 		{
@@ -385,7 +426,10 @@ internal sealed class CompanionHarness
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 
 	private sealed class InitializingLifecycle : IIntegrationLifecycle
@@ -404,12 +448,17 @@ internal sealed class CompanionHarness
 		}
 
 		public Task ShutdownAsync(string integrationId, CancellationToken cancellationToken = default)
-			=> _harness.Integration.ShutdownAsync();
+		{
+			return _harness.Integration.ShutdownAsync();
+		}
 	}
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{

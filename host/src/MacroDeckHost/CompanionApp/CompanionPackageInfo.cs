@@ -13,9 +13,11 @@ public sealed record CompanionPackageInfo(int VersionCode, string? VersionName, 
 public static partial class CompanionPackageInfoParser
 {
 	public static int? ParseSdkLevel(string output)
-		=> int.TryParse(output.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var level) && level > 0
+	{
+		return int.TryParse(output.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var level) && level > 0
 			? level
 			: null;
+	}
 
 	// An updated system app lists its factory version again under "Hidden system packages:", so only
 	// the entry under "Packages:" counts.
@@ -26,7 +28,9 @@ public static partial class CompanionPackageInfoParser
 		var section = Array.FindIndex(lines, line => line.Trim() == "Packages:");
 		var start = section < 0
 			? -1
-			: Array.FindIndex(lines, section + 1, line => line.TrimStart().StartsWith(header, StringComparison.Ordinal));
+			: Array.FindIndex(lines,
+				section + 1,
+				line => line.TrimStart().StartsWith(header, StringComparison.Ordinal));
 		if (start < 0)
 		{
 			return null;
@@ -49,8 +53,9 @@ public static partial class CompanionPackageInfoParser
 				break;
 			}
 
-			if (versionCode is null && VersionCodeRegex().Match(line) is { Success: true } code &&
-				int.TryParse(code.Groups[1].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed))
+			if (versionCode is null
+				&& VersionCodeRegex().Match(line) is { Success: true } code
+				&& int.TryParse(code.Groups[1].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed))
 			{
 				versionCode = parsed;
 			}
@@ -71,7 +76,10 @@ public static partial class CompanionPackageInfoParser
 		return versionCode is { } version ? new CompanionPackageInfo(version, versionName, installer) : null;
 	}
 
-	private static int Indent(string line) => line.Length - line.TrimStart().Length;
+	private static int Indent(string line)
+	{
+		return line.Length - line.TrimStart().Length;
+	}
 
 	[GeneratedRegex(@"^\s*versionCode=(\d+)")]
 	private static partial Regex VersionCodeRegex();

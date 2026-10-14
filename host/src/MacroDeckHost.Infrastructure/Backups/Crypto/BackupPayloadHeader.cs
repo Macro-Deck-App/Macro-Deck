@@ -17,14 +17,14 @@ public sealed class BackupPayloadHeader
 	public const int MinChunkSizeLog2 = 16;
 	public const int MaxChunkSizeLog2 = 24;
 
-	public const int TotalBytes = MagicBytes +
-		1 +
-		BackupKeyDerivation.SaltBytes +
-		NonceBytes +
-		BackupKeyDerivation.KeyBytes +
-		TagBytes +
-		NoncePrefixBytes +
-		1;
+	public const int TotalBytes = MagicBytes
+		+ 1
+		+ BackupKeyDerivation.SaltBytes
+		+ NonceBytes
+		+ BackupKeyDerivation.KeyBytes
+		+ TagBytes
+		+ NoncePrefixBytes
+		+ 1;
 
 	private const int MagicBytes = 4;
 
@@ -45,7 +45,8 @@ public sealed class BackupPayloadHeader
 	public int ChunkSize => 1 << ChunkSizeLog2;
 
 	public static BackupPayloadHeader Create()
-		=> new()
+	{
+		return new BackupPayloadHeader
 		{
 			Salt = RandomNumberGenerator.GetBytes(BackupKeyDerivation.SaltBytes),
 			WrapNonce = RandomNumberGenerator.GetBytes(NonceBytes),
@@ -54,6 +55,7 @@ public sealed class BackupPayloadHeader
 			NoncePrefix = RandomNumberGenerator.GetBytes(NoncePrefixBytes),
 			ChunkSizeLog2 = DefaultChunkSizeLog2
 		};
+	}
 
 	public static BackupPayloadHeader Parse(ReadOnlySpan<byte> bytes)
 	{

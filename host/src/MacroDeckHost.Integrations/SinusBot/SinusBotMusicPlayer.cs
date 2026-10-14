@@ -4,7 +4,6 @@ using System.Text;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.MusicPlayer;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.SinusBot;
 
@@ -114,7 +113,9 @@ internal sealed class SinusBotMusicPlayer : ICatalogMusicPlayer
 	}
 
 	private MusicPlayerState Unavailable()
-		=> MusicPlayerState.Unavailable("SinusBot is not responding") with { DeviceName = _instanceName };
+	{
+		return MusicPlayerState.Unavailable("SinusBot is not responding") with { DeviceName = _instanceName };
+	}
 
 	private bool NoteReadFailure(Exception ex)
 	{
@@ -127,9 +128,8 @@ internal sealed class SinusBotMusicPlayer : ICatalogMusicPlayer
 					_instanceName);
 				return false;
 			case FailureEpisodeSignalKind.SummaryDue:
-				_logger.Information(
-					"SinusBot state reads for {Instance} have been failing for {Duration} ({Failures} " +
-					"consecutive failures; last error: {LastError})",
+				_logger.Information("SinusBot state reads for {Instance} have been failing for {Duration} ({Failures} "
+					+ "consecutive failures; last error: {LastError})",
 					_instanceName,
 					signal.Duration,
 					signal.ConsecutiveFailures,
@@ -160,11 +160,12 @@ internal sealed class SinusBotMusicPlayer : ICatalogMusicPlayer
 			return MusicPlayerTransientFailure.IsTransientStatusCode((int)statusCode);
 		}
 
-		return MusicPlayerTransientFailure.IsNetworkLevel(ex) ||
-			(ex is SinusBotAuthException && MusicPlayerTransientFailure.IsNetworkLevel(ex.InnerException ?? ex));
+		return MusicPlayerTransientFailure.IsNetworkLevel(ex)
+			|| ex is SinusBotAuthException && MusicPlayerTransientFailure.IsNetworkLevel(ex.InnerException ?? ex);
 	}
 
-	public async Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+	public async Task<MusicPlayerArtwork?> GetArtworkAsync(
+		string artworkId,
 		CancellationToken cancellationToken = default)
 	{
 		if (!_artworkUrls.TryGetValue(artworkId, out var url))
@@ -185,37 +186,57 @@ internal sealed class SinusBotMusicPlayer : ICatalogMusicPlayer
 	}
 
 	public Task PlayAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.PlayAsync(id, ct), "play", cancellationToken);
+	{
+		return GuardCommand((client, id, ct) => client.PlayAsync(id, ct), "play", cancellationToken);
+	}
 
 	public Task PauseAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.PauseAsync(id, ct), "pause", cancellationToken);
+	{
+		return GuardCommand((client, id, ct) => client.PauseAsync(id, ct), "pause", cancellationToken);
+	}
 
 	public Task StopAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.StopAsync(id, ct), "stop", cancellationToken);
+	{
+		return GuardCommand((client, id, ct) => client.StopAsync(id, ct), "stop", cancellationToken);
+	}
 
 	public Task NextAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.NextAsync(id, ct), "next", cancellationToken);
+	{
+		return GuardCommand((client, id, ct) => client.NextAsync(id, ct), "next", cancellationToken);
+	}
 
 	public Task PreviousAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.PreviousAsync(id, ct), "previous", cancellationToken);
+	{
+		return GuardCommand((client, id, ct) => client.PreviousAsync(id, ct), "previous", cancellationToken);
+	}
 
 	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.SeekAsync(id, (int)position.TotalSeconds, ct),
+	{
+		return GuardCommand((client, id, ct) => client.SeekAsync(id, (int)position.TotalSeconds, ct),
 			"seek",
 			cancellationToken);
+	}
 
 	public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.SetVolumeAsync(id, Math.Clamp(volumePercent, 0, 100), ct),
+	{
+		return GuardCommand((client, id, ct) => client.SetVolumeAsync(id, Math.Clamp(volumePercent, 0, 100), ct),
 			"set volume",
 			cancellationToken);
+	}
 
 	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.SetShuffleAsync(id, enabled, ct), "set shuffle", cancellationToken);
+	{
+		return GuardCommand((client, id, ct) => client.SetShuffleAsync(id, enabled, ct),
+			"set shuffle",
+			cancellationToken);
+	}
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-		=> GuardCommand((client, id, ct) => client.SetRepeatAsync(id, mode != RepeatMode.Off, ct),
+	{
+		return GuardCommand((client, id, ct) => client.SetRepeatAsync(id, mode != RepeatMode.Off, ct),
 			"set repeat",
 			cancellationToken);
+	}
 
 	public Task PlayItemAsync(MusicPlayerCatalogItem item, CancellationToken cancellationToken = default)
 	{
@@ -267,7 +288,9 @@ internal sealed class SinusBotMusicPlayer : ICatalogMusicPlayer
 	}
 
 	private static bool Contains(string? haystack, string needle)
-		=> !string.IsNullOrEmpty(haystack) && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
+	{
+		return !string.IsNullOrEmpty(haystack) && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
+	}
 
 	private MusicPlayerCatalogItem? MapFile(string instanceId, SinusBotFile file)
 	{

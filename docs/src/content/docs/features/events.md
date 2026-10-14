@@ -183,7 +183,7 @@ table of its own:
 ```csharp
 using MacroDeck.Sdk.Input;
 
-KeyCode key = NativeKeys.FromWindows(virtualKey, scanCode, isExtended); // or FromMacOS(code), FromLinux(code)
+KeyCode key = NativeKeys.FromWindows(virtualKey, scanCode, isExtended); // or FromMacOs(code), FromLinux(code)
 
 if (KeyNames.TryGetModifier(key, out var modifier))
 {
@@ -211,10 +211,10 @@ as different modifiers, so a trigger bound as `Ctrl` does not fire for `RightCtr
 | Platform | Method | Notes |
 | --- | --- | --- |
 | Windows | `NativeKeys.FromWindows(virtualKey, scanCode, isExtended)` | Pass the extended flag: it tells `NumpadEnter` from `Enter` and a navigation key from the numpad key that reports the same virtual key while NumLock is off. The scan code (without the extended prefix) names a punctuation key's position exactly. The overload without it reads the foreground window's layout instead. |
-| macOS | `NativeKeys.FromMacOS(keyCode)` | Letters are resolved through the active input source, so key code 6 is `Y` on German. A letter position whose key types no Latin letter (Cyrillic) keeps its US letter. Key code 10 is `IntlBackslash` and 50 is `Backquote`, as Safari and the combo editor report them; on ISO Apple keyboards those two are swapped relative to the key's position. Function keys above `F20`, the Fn key and media keys have no key code and return `None`. |
+| macOS | `NativeKeys.FromMacOs(keyCode)` | Letters are resolved through the active input source, so key code 6 is `Y` on German. A letter position whose key types no Latin letter (Cyrillic) keeps its US letter. Key code 10 is `IntlBackslash` and 50 is `Backquote`, as Safari and the combo editor report them; on ISO Apple keyboards those two are swapped relative to the key's position. Function keys above `F20`, the Fn key and media keys have no key code and return `None`. |
 | Linux | `NativeKeys.FromLinux(evdevCode)` | An evdev code is a position, so letters follow US positions on every layout: the Z-labeled key of a German layout is `Y`. |
 
-`FromMacOS` reads the input source with the Text Input Sources API, which Apple documents for the main thread. It
+`FromMacOs` reads the input source with the Text Input Sources API, which Apple documents for the main thread. It
 has been exercised from a thread-pool thread, not from an event tap callback.
 
 To send a key the other way, from a `KeyCode` to the native code a synthetic key event needs, the letter,
@@ -231,7 +231,7 @@ if (NativeKeys.IsPositional(key) && NativeKeys.TryGetWindowsScanCode(key, out va
 | --- | --- |
 | `NativeKeys.IsPositional(key)` | `true` for the punctuation keys, which type a different character on each layout and are best sent by position |
 | `NativeKeys.TryGetWindowsScanCode(key, out scan)` | The PC set-1 scan code; Linux evdev numbers these keys the same way |
-| `NativeKeys.TryGetMacOSKeyCode(key, out code)` | The `kVK_*` key code, with WebKit's ISO naming (`IntlBackslash` 10, `Backquote` 50) |
+| `NativeKeys.TryGetMacOsKeyCode(key, out code)` | The `kVK_*` key code, with WebKit's ISO naming (`IntlBackslash` 10, `Backquote` 50) |
 | `NativeKeys.TryFromWindowsScanCode(scan, out key)` | The key at a scan code's US position, the inverse of `TryGetWindowsScanCode` |
 
 Each `TryGet` method returns `false` for keys outside that block (function, navigation, media and modifier

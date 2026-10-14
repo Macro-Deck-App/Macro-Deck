@@ -44,7 +44,8 @@ public class IntegrationVariableRefreshTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(refresh.DrainDefinitionsFor(IntegrationId), Is.EquivalentTo(new[] { "volume-percent", "muted" }));
+			Assert.That(refresh.DrainDefinitionsFor(IntegrationId),
+				Is.EquivalentTo(new[] { "volume-percent", "muted" }));
 			Assert.That(refresh.DrainEagerRefreshRequested(IntegrationId), Is.False);
 		});
 	}
@@ -54,7 +55,8 @@ public class IntegrationVariableRefreshTests
 	{
 		var api = new IntegrationVariableApi(IntegrationId, null!);
 
-		Assert.ThrowsAsync<NotSupportedException>(() => api.BindAsync(
-			[new MacroDeck.Sdk.Variables.VariableBindingRequest("a/b", "a_b", MacroDeck.Sdk.Variables.VariableType.Text)]));
+		Assert.ThrowsAsync<NotSupportedException>(() => api.BindAsync([
+			new MacroDeck.Sdk.Variables.VariableBindingRequest("a/b", "a_b", MacroDeck.Sdk.Variables.VariableType.Text)
+		]));
 	}
 }

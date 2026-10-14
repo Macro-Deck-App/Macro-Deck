@@ -34,20 +34,23 @@ internal sealed class SendChatMessageActionDefinition : IActionDefinition
 				new ActionParameterOption { Value = "trovo", Label = "Trovo" },
 				new ActionParameterOption { Value = "kick", Label = "Kick" }
 			],
-			label: AppStrings.Integrations.Streamerbot.Actions.PlatformLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.PlatformLabel(),
 			defaultValue: "twitch",
 			required: true),
 		ActionParameter.MultilineText(MessageParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.MessageLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.MessageDescription(),
+			AppStrings.Integrations.Streamerbot.Actions.MessageLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.MessageDescription(),
 			required: true,
 			maxLength: 500),
 		ActionParameter.Toggle(BotParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.SendAsBotLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.SendAsBotDescription())
+			AppStrings.Integrations.Streamerbot.Actions.SendAsBotLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.SendAsBotDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

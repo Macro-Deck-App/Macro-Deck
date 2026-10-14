@@ -21,7 +21,8 @@ public interface IIntegrationStorage
 	/// again in that session, or it replaces the copies a user could still recover.
 	/// </summary>
 	/// <exception cref="ArgumentException"><paramref name="key" /> is not a valid key.</exception>
-	Task<IntegrationStorageReadResult> ReadAsync(string key,
+	Task<IntegrationStorageReadResult> ReadAsync(
+		string key,
 		Func<string, bool>? isValid = null,
 		CancellationToken cancellationToken = default);
 

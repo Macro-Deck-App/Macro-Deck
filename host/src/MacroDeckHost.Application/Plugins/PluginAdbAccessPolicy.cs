@@ -33,6 +33,7 @@ public sealed class PluginAdbAccessPolicy(
 {
 	private readonly PluginPermissionDeclarations _declarations =
 		new(PluginPermissions.HostAdb, sessionRegistry, installationCatalog, manifestReader);
+
 	private volatile StrongBox<bool>? _allowPlugins;
 
 	public async Task<PluginAdbAccess> EvaluateAsync(string pluginId, CancellationToken cancellationToken = default)
@@ -51,9 +52,15 @@ public sealed class PluginAdbAccessPolicy(
 		return _declarations.IsGrantable(pluginId) ? PluginAdbAccess.Available : PluginAdbAccess.NotAllowed;
 	}
 
-	public bool CanBeGranted(string pluginId) => _declarations.IsGrantable(pluginId);
+	public bool CanBeGranted(string pluginId)
+	{
+		return _declarations.IsGrantable(pluginId);
+	}
 
-	public void Refresh(AdbSettings settings) => _allowPlugins = new StrongBox<bool>(settings.AllowPlugins);
+	public void Refresh(AdbSettings settings)
+	{
+		_allowPlugins = new StrongBox<bool>(settings.AllowPlugins);
+	}
 
 	private async Task<bool> AllowPluginsAsync()
 	{

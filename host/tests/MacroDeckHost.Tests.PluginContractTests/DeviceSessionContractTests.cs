@@ -48,20 +48,24 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 	private Guid _deviceId;
 
 	private static DeclaredCapability Provider(int maximum = 2)
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.DeviceProvider,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = maximum }
 		};
+	}
 
 	private static DeviceDescriptor Deck()
-		=> new(ProviderDeviceId,
+	{
+		return new DeviceDescriptor(ProviderDeviceId,
 			"Contract Deck",
 			"Deck 3x2",
 			"Example",
 			ContractDeck.LayoutReference,
 			new DeviceCapabilities { KeyCount = 6, SupportsImages = true });
+	}
 
 	[TearDown]
 	public void DeviceTearDown()
@@ -97,7 +101,7 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			_surfaces,
@@ -108,7 +112,8 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 			=> router.RouteAsync(PluginId, Guid.NewGuid().ToString(), payload, cancellationToken);
 	}
 
-	private async Task<IDeviceSurfaceProvider> ConnectSessionCapablePluginAsync(int declaredMaximum = 2,
+	private async Task<IDeviceSurfaceProvider> ConnectSessionCapablePluginAsync(
+		int declaredMaximum = 2,
 		int negotiatedVersion = 2)
 	{
 		await ConnectAsync([
@@ -141,8 +146,8 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 	private JsonElement LastSurfaceFrame()
 	{
 		var frame = Link.SentByHost.Last(envelope
-			=> string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal) &&
-			envelope.Payload!.Value.GetRawText()
+			=> string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal)
+			&& envelope.Payload!.Value.GetRawText()
 				.Contains(CapabilityOperations.DeviceProvider.SessionSurface, StringComparison.Ordinal));
 
 		return frame.Payload!.Value;
@@ -293,7 +298,7 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 			NotModified = false
 		};
 
-		var icon = await _provider.Session!.GetIconAsync(ContractDeck.IconId.ToString(), size: 144);
+		var icon = await _provider.Session!.GetIconAsync(ContractDeck.IconId.ToString(), 144);
 
 		Assert.Multiple(() =>
 		{
@@ -326,8 +331,8 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 		};
 
 		var icon = await _provider.Session!.GetIconAsync(ContractDeck.IconId.ToString(),
-			size: 72,
-			knownETag: "etag-1");
+			72,
+			"etag-1");
 
 		Assert.Multiple(() =>
 		{
@@ -390,7 +395,7 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 		};
 
 		var icon = await _provider.Session!.GetWidgetIconAsync(ContractDeck.WidgetId.ToString(),
-			knownETag: "sha256:v1");
+			"sha256:v1");
 
 		Assert.Multiple(() =>
 		{
@@ -455,7 +460,7 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 					CreatePluginHostInvoker(),
 					PluginHostAssets)
 			],
-			[Provider(maximum: 1)],
+			[Provider(1)],
 			[CapabilityKinds.DeviceProvider],
 			negotiatedCapabilityVersion: 1);
 
@@ -485,8 +490,8 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 
 		var stillOnline = DeviceRegistry.IsOnline(PluginId, ProviderDeviceId);
 		var sessionOpens = Link.SentByHost.Count(envelope
-			=> string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal) &&
-			envelope.Payload!.Value.GetRawText()
+			=> string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal)
+			&& envelope.Payload!.Value.GetRawText()
 				.Contains(CapabilityOperations.DeviceProvider.SessionOpen, StringComparison.Ordinal));
 
 		Assert.Multiple(() =>
@@ -502,7 +507,8 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 	}
 
 	private static DeviceDescriptorDto DeviceDescriptorDtoOf(DeviceDescriptor device)
-		=> new()
+	{
+		return new DeviceDescriptorDto
 		{
 			Id = device.Id,
 			Name = device.Name,
@@ -511,6 +517,7 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 			LayoutReference = device.LayoutReference,
 			Presence = device.Presence.ToString()
 		};
+	}
 
 	/// <summary>A plugin-side provider that keeps whatever session the host offers it, and every surface
 	/// pushed to it.</summary>
@@ -526,18 +533,32 @@ internal sealed class DeviceSessionContractTests : CapabilityContractFixture
 
 		public string? CloseReason { get; private set; }
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public string ProviderName => "Contract Deck";
 
 		public Task InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task ShutdownAsync(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<DeviceDescriptor> GetDevices() => [Deck()];
+		public IReadOnlyList<DeviceDescriptor> GetDevices()
+		{
+			return [Deck()];
+		}
 
 		public Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
 		{

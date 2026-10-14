@@ -20,11 +20,20 @@ internal sealed class MessagingCapabilityHandler(RemoteMessageChannel channel, P
 	// Declared unless a host said it has no message channel: an older host would otherwise mark every
 	// plugin built on this SDK as partially incompatible for a capability it never asked for.
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> state.HostMessaging == HostMessagingSupport.NotAdvertised
+	{
+		return state.HostMessaging == HostMessagingSupport.NotAdvertised
 			? []
-			: [new DeclaredCapability { Kind = CapabilityKinds.Messaging, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version }];
+			:
+			[
+				new DeclaredCapability
+				{
+					Kind = CapabilityKinds.Messaging, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
+				}
+			];
+	}
 
-	public async Task<CapabilityInvocationResult> InvokeAsync(CapabilityInvocation invocation,
+	public async Task<CapabilityInvocationResult> InvokeAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(invocation);

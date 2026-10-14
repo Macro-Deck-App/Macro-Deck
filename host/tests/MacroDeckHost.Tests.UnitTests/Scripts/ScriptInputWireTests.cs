@@ -93,7 +93,8 @@ public class ScriptInputWireTests
 
 		using var document = JsonDocument.Parse(
 			JsonSerializer.Serialize(new Script { Id = "s1", Name = "Alpha", Inputs = inputs }, _web));
-		var spellings = document.RootElement.GetProperty("inputs").EnumerateArray()
+		var spellings = document.RootElement.GetProperty("inputs")
+			.EnumerateArray()
 			.Select(declared => declared.GetProperty("type").GetString())
 			.ToList();
 

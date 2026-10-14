@@ -51,14 +51,20 @@ internal sealed class FakeSpotifyOAuthClient : ISpotifyOAuthClient
 	}
 
 	public static Func<SpotifyRefreshedToken> Rejected(string message = "invalid_grant")
-		=> () => throw new SpotifyAuthRejectedException(message);
+	{
+		return () => throw new SpotifyAuthRejectedException(message);
+	}
 
 	public static Func<SpotifyRefreshedToken> Unreachable(string message = "token endpoint unreachable")
-		=> () => throw new SpotifyAuthTransientException(message);
+	{
+		return () => throw new SpotifyAuthTransientException(message);
+	}
 
 	public static Func<SpotifyRefreshedToken> RateLimited(TimeSpan retryAfter)
-		=> () => throw new SpotifyAuthTransientException("Spotify is rate-limiting the token endpoint.")
+	{
+		return () => throw new SpotifyAuthTransientException("Spotify is rate-limiting the token endpoint.")
 		{
 			IsRateLimit = true, RetryAfter = retryAfter
 		};
+	}
 }

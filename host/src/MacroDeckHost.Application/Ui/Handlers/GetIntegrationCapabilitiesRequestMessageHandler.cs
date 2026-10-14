@@ -179,7 +179,8 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 		return $"{label} ({mapped.Type})";
 	}
 
-	private void AddHostPublishedVariables(GetIntegrationCapabilitiesResponse response,
+	private void AddHostPublishedVariables(
+		GetIntegrationCapabilitiesResponse response,
 		string integrationId,
 		bool enabled,
 		bool requiresSetup)
@@ -217,8 +218,8 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 		Func<Dictionary<string, VariableEntity>> ownerVariablesByName)
 	{
 		var name = declared.Name ?? declared.ResolvedId ?? string.Empty;
-		var isTemplate = variablesDependOnConfiguration &&
-			name.Contains(VariableNameTemplate.PlaceholderStart, StringComparison.Ordinal);
+		var isTemplate = variablesDependOnConfiguration
+			&& name.Contains(VariableNameTemplate.PlaceholderStart, StringComparison.Ordinal);
 
 		CapabilityAvailability availability;
 		string reason;

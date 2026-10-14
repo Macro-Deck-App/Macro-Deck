@@ -17,7 +17,8 @@ public class IntegrationContextMessagesCompatibilityTests
 	{
 		IIntegrationContext context = new ContextWrittenBeforeMessaging();
 
-		var exception = Assert.ThrowsAsync<MessageChannelException>(() => context.Messages.PublishAsync("obs.scene.changed"));
+		var exception
+			= Assert.ThrowsAsync<MessageChannelException>(() => context.Messages.PublishAsync("obs.scene.changed"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(MessageChannelErrorCode.Unsupported));
 	}

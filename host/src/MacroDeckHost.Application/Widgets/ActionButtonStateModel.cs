@@ -91,9 +91,14 @@ public sealed class ActionButtonStateModel
 	public required JsonObject Data { get; init; }
 
 	public ActionButtonStateEntry? FindState(string? id)
-		=> id is null ? null : States.FirstOrDefault(s => string.Equals(s.Id, id, StringComparison.Ordinal));
+	{
+		return id is null ? null : States.FirstOrDefault(s => string.Equals(s.Id, id, StringComparison.Ordinal));
+	}
 
-	public static ActionButtonStateModel Read(string? data) => Read(ActionButtonStateJson.ParseDataBag(data));
+	public static ActionButtonStateModel Read(string? data)
+	{
+		return Read(ActionButtonStateJson.ParseDataBag(data));
+	}
 
 	public static ActionButtonStateModel Read(JsonObject data)
 	{
@@ -119,9 +124,9 @@ public sealed class ActionButtonStateModel
 
 		UpgradeStatesArray(data, wasToggleMode);
 
-		if (data["activeStateId"] is null &&
-			data["isToggled"] is JsonValue toggledValue &&
-			toggledValue.TryGetValue<bool>(out var isToggled))
+		if (data["activeStateId"] is null
+			&& data["isToggled"] is JsonValue toggledValue
+			&& toggledValue.TryGetValue<bool>(out var isToggled))
 		{
 			data["activeStateId"] = JsonValue.Create(isToggled ? DefaultOnStateId : DefaultOffStateId);
 		}
@@ -189,7 +194,8 @@ public sealed class ActionButtonStateModel
 	/// legacy face's own bare <c>iconId</c> is migrated to the typed <c>icon</c> shape as it is carried
 	/// across, so this stays the one place a copied face can reintroduce the retired key.</summary>
 	internal static JsonArray BuildStatePair(JsonObject? off, JsonObject? on)
-		=> new()
+	{
+		return new JsonArray
 		{
 			new JsonObject
 			{
@@ -204,6 +210,7 @@ public sealed class ActionButtonStateModel
 				["appearance"] = MigratedAppearance(on)
 			}
 		};
+	}
 
 	private static JsonObject MigratedAppearance(JsonObject? face)
 	{
@@ -214,15 +221,15 @@ public sealed class ActionButtonStateModel
 
 	private static ActionButtonStateModel Build(JsonObject data)
 	{
-		var stateMode = data["stateMode"] is JsonValue modeValue &&
-			modeValue.TryGetValue<bool>(out var modeFlag) &&
-			modeFlag;
+		var stateMode = data["stateMode"] is JsonValue modeValue
+			&& modeValue.TryGetValue<bool>(out var modeFlag)
+			&& modeFlag;
 
 		return new ActionButtonStateModel
 		{
 			StateMode = stateMode,
 			States = ReadStates(data["states"] as JsonArray),
-			CycleStatesOnPress = ReadBool(data, "cycleStatesOnPress", whenAbsent: true),
+			CycleStatesOnPress = ReadBool(data, "cycleStatesOnPress", true),
 			StateMapping = ReadMapping(data["stateMapping"] as JsonObject),
 			StateProvider = ReadProvider(data["stateProvider"] as JsonObject),
 			IconProvider = ReadIconProvider(data["iconProvider"] as JsonObject),
@@ -372,8 +379,12 @@ public sealed class ActionButtonStateModel
 	}
 
 	private static string? ReadString(JsonObject data, string key)
-		=> data[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	{
+		return data[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	}
 
 	private static bool ReadBool(JsonObject data, string key, bool whenAbsent)
-		=> data[key] is JsonValue value && value.TryGetValue<bool>(out var flag) ? flag : whenAbsent;
+	{
+		return data[key] is JsonValue value && value.TryGetValue<bool>(out var flag) ? flag : whenAbsent;
+	}
 }

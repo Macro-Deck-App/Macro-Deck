@@ -1,12 +1,12 @@
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Integrations;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Events;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Identity;
+using MacroDeckHost.Application.HostLocking;
 using Serilog;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
@@ -94,9 +94,11 @@ public sealed class TriggerEventRequestMessageHandler
 	}
 
 	private static ValueTask<TriggerEventResponse> Fail(string code, string message)
-		=> ValueTask.FromResult(new TriggerEventResponse
+	{
+		return ValueTask.FromResult(new TriggerEventResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = code, Message = message }
 		});
+	}
 }

@@ -1,4 +1,3 @@
-using System.Net.Http;
 using MacroDeckHost.Application.Services;
 
 namespace MacroDeckHost.Application.Network.Http;

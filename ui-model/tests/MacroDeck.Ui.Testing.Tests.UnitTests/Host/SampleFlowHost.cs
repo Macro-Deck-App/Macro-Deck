@@ -17,10 +17,14 @@ internal sealed record HeaderItem(string Id);
 internal static class SampleFlowHost
 {
 	/// <summary>Renders the fixture with two header items, keyed <c>h1</c> and <c>h2</c>.</summary>
-	internal static UiTestHost Render() => UiTestHost.Render(Build([new HeaderItem("h1"), new HeaderItem("h2")]));
+	internal static UiTestHost Render()
+	{
+		return UiTestHost.Render(Build([new HeaderItem("h1"), new HeaderItem("h2")]));
+	}
 
 	private static UiFlow Build(IReadOnlyList<HeaderItem> headers)
-		=> new()
+	{
+		return new UiFlow
 		{
 			Key = "setup",
 			Children =
@@ -35,7 +39,7 @@ internal static class SampleFlowHost
 						new UiObjectInput
 						{
 							Key = "endpoint",
-							Children = [new UiStringInput { Key = "host" }, new UiStringInput { Key = "port" }],
+							Children = [new UiStringInput { Key = "host" }, new UiStringInput { Key = "port" }]
 						},
 						new UiArrayInput
 						{
@@ -53,11 +57,11 @@ internal static class SampleFlowHost
 										Children =
 										[
 											new UiStringInput { Key = "name" },
-											new UiStringInput { Key = "value" },
-										],
-									},
-								},
-							],
+											new UiStringInput { Key = "value" }
+										]
+									}
+								}
+							]
 						},
 						new UiWhen
 						{
@@ -66,12 +70,13 @@ internal static class SampleFlowHost
 							Content = () => new UiAdvancedSection
 							{
 								Key = "advanced",
-								Children = [new UiDurationInput { Key = "timeout" }],
-							},
-						},
-					],
+								Children = [new UiDurationInput { Key = "timeout" }]
+							}
+						}
+					]
 				},
-				new UiStep { Key = "verify" },
-			],
+				new UiStep { Key = "verify" }
+			]
 		};
+	}
 }

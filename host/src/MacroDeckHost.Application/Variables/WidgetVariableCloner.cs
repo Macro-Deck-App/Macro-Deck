@@ -76,5 +76,7 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 	}
 
 	public async Task Clone(Guid sourceWidgetId, Guid targetWidgetId)
-		=> await Restore(targetWidgetId, await Snapshot(sourceWidgetId));
+	{
+		await Restore(targetWidgetId, await Snapshot(sourceWidgetId));
+	}
 }

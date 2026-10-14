@@ -88,7 +88,13 @@ public sealed class JsonAutomationStore : IAutomationStore
 		}
 	}
 
-	private object LockFor(Guid id) => _locks.GetOrAdd(id, _ => new object());
+	private object LockFor(Guid id)
+	{
+		return _locks.GetOrAdd(id, _ => new object());
+	}
 
-	private string PathFor(Guid id) => Path.Combine(_directory, id + ".json");
+	private string PathFor(Guid id)
+	{
+		return Path.Combine(_directory, id + ".json");
+	}
 }

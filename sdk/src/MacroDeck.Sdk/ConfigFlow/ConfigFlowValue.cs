@@ -16,7 +16,13 @@ public sealed record ConfigFlowValue
 
 	public bool IsSecret { get; }
 
-	public static ConfigFlowValue Plain(string? value) => new(value, false);
+	public static ConfigFlowValue Plain(string? value)
+	{
+		return new ConfigFlowValue(value, false);
+	}
 
-	public static ConfigFlowValue Secret(string? value) => new(value, true);
+	public static ConfigFlowValue Secret(string? value)
+	{
+		return new ConfigFlowValue(value, true);
+	}
 }

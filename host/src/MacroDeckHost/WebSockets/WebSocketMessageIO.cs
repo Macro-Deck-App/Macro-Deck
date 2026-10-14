@@ -3,9 +3,10 @@ using System.Net.WebSockets;
 namespace MacroDeckHost.WebSockets;
 
 /// <summary>Protocol-neutral framing and bounded-send primitives shared by host WebSocket protocols.</summary>
-internal static class WebSocketMessageIO
+internal static class WebSocketMessageIo
 {
-	public static async Task<byte[]?> ReceiveAsync(WebSocket socket,
+	public static async Task<byte[]?> ReceiveAsync(
+		WebSocket socket,
 		int maxMessageBytes,
 		bool requireText,
 		bool rejectOversized,
@@ -46,7 +47,8 @@ internal static class WebSocketMessageIO
 		}
 	}
 
-	public static async Task SendTextAsync(WebSocket socket,
+	public static async Task SendTextAsync(
+		WebSocket socket,
 		ReadOnlyMemory<byte> payload,
 		TimeSpan timeout,
 		TimeProvider timeProvider,
@@ -65,8 +67,10 @@ internal static class WebSocketMessageIO
 	}
 
 	private static void ObserveAbandoned(Task task)
-		=> _ = task.ContinueWith(static completed => _ = completed.Exception,
+	{
+		_ = task.ContinueWith(static completed => _ = completed.Exception,
 			CancellationToken.None,
 			TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted,
 			TaskScheduler.Default);
+	}
 }

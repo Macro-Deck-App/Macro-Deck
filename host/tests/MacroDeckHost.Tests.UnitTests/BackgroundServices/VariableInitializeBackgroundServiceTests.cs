@@ -50,7 +50,7 @@ internal sealed class VariableInitializeBackgroundServiceTests
 	{
 		var path = Path.Combine(Path.GetTempPath(), "md-load", "counter.txt");
 		var files = new FakeVariableFileSystem();
-		files.SetFile(path, "42\n", notify: false);
+		files.SetFile(path, "42\n", false);
 		var missingPath = Path.Combine(Path.GetTempPath(), "md-load", "missing.txt");
 		var stored = new[]
 		{
@@ -101,7 +101,8 @@ internal sealed class VariableInitializeBackgroundServiceTests
 			Value = "3"
 		};
 		var sharedStore = new InMemorySharedVariableStore();
-		sharedStore.Entries.Add(new SharedVariable { UserVariableId = deaths.Id, Name = "deaths", Type = VariableType.Numeric });
+		sharedStore.Entries.Add(new SharedVariable
+			{ UserVariableId = deaths.Id, Name = "deaths", Type = VariableType.Numeric });
 		var registry = new VariableRegistry();
 		var mediator = new RecordingMediator();
 		var readiness = new StartupReadiness();
@@ -128,19 +129,25 @@ internal sealed class VariableInitializeBackgroundServiceTests
 		Assert.That(response.Variables.Single(v => v.Name == "deaths").Shared, Is.True);
 	}
 
-	private static VariableEntity FileVariable(string name, VariableType type, string path) => new()
+	private static VariableEntity FileVariable(string name, VariableType type, string path)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		FileSource = new VariableFileSource(path, false)
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			FileSource = new VariableFileSource(path, false)
+		};
+	}
 
 	private sealed class StoredUserVariableStore(IReadOnlyList<VariableEntity> stored) : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => stored;
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return stored;
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -149,9 +156,15 @@ internal sealed class VariableInitializeBackgroundServiceTests
 
 	private sealed class FailingUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => throw new IOException("variables file unreadable");
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			throw new IOException("variables file unreadable");
+		}
 
-		public void Save(IEnumerable<VariableEntity> userVariables) => throw new NotSupportedException();
+		public void Save(IEnumerable<VariableEntity> userVariables)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RecordingHostLifetime : IHostApplicationLifetime
@@ -162,6 +175,9 @@ internal sealed class VariableInitializeBackgroundServiceTests
 
 		public bool StopRequested { get; private set; }
 
-		public void StopApplication() => StopRequested = true;
+		public void StopApplication()
+		{
+			StopRequested = true;
+		}
 	}
 }

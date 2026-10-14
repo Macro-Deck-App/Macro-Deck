@@ -6,7 +6,7 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class VariableFileSystemTests
 {
-	private static readonly TimeSpan EventTimeout = TimeSpan.FromSeconds(10);
+	private static readonly TimeSpan _eventTimeout = TimeSpan.FromSeconds(10);
 
 	private string _folder = null!;
 	private VariableFileSystem _files = null!;
@@ -38,7 +38,7 @@ public class VariableFileSystemTests
 
 		await File.WriteAllTextAsync(path, "hello");
 
-		Assert.That(await Task.WhenAny(changed.Task, Task.Delay(EventTimeout)), Is.SameAs(changed.Task));
+		Assert.That(await Task.WhenAny(changed.Task, Task.Delay(_eventTimeout)), Is.SameAs(changed.Task));
 		Assert.That((await _files.ReadAsync(path)).Content, Is.EqualTo("hello"));
 	}
 
@@ -53,7 +53,7 @@ public class VariableFileSystemTests
 		Directory.CreateDirectory(folder);
 		await File.WriteAllTextAsync(path, "late");
 
-		Assert.That(await Task.WhenAny(changed.Task, Task.Delay(EventTimeout)), Is.SameAs(changed.Task));
+		Assert.That(await Task.WhenAny(changed.Task, Task.Delay(_eventTimeout)), Is.SameAs(changed.Task));
 	}
 
 	[Test]
@@ -62,7 +62,7 @@ public class VariableFileSystemTests
 		var tooLarge = Path.Combine(_folder, "large.txt");
 		await File.WriteAllTextAsync(tooLarge, new string('x', 300 * 1024));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _files.ReadAsync(Path.Combine(_folder, "missing.txt"))).Available, Is.False);
 			Assert.That((await _files.ReadAsync(_folder)).Available, Is.False);
@@ -83,7 +83,7 @@ public class VariableFileSystemTests
 
 		await _files.WriteAsync(OperatingSystem.IsWindows() ? target : link, "new");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await File.ReadAllBytesAsync(target), Is.EqualTo("new"u8.ToArray()));
 			if (!OperatingSystem.IsWindows())

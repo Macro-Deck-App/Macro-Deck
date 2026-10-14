@@ -17,14 +17,17 @@ public class PreviewFileNamesTests
 	[Test]
 	public void Scenarios_that_share_a_name_are_told_apart_by_their_view()
 	{
-		var names = PreviewFileNames.BaseNames([Preview("a", "Clock", "Default"), Preview("b", "Weather", "Default"), Preview("c", "Clock", "Tinted")]);
+		var names = PreviewFileNames.BaseNames([
+			Preview("a", "Clock", "Default"), Preview("b", "Weather", "Default"), Preview("c", "Clock", "Tinted")
+		]);
 
-		Assert.That(names, Is.EqualTo(new Dictionary<string, string>
-		{
-			["a"] = "clock-default",
-			["b"] = "weather-default",
-			["c"] = "tinted"
-		}));
+		Assert.That(names,
+			Is.EqualTo(new Dictionary<string, string>
+			{
+				["a"] = "clock-default",
+				["b"] = "weather-default",
+				["c"] = "tinted"
+			}));
 	}
 
 	[Test]
@@ -36,5 +39,7 @@ public class PreviewFileNamesTests
 	}
 
 	private static UiPreviewDescriptorDto Preview(string id, string view, string scenario)
-		=> new() { Id = id, View = view, Scenario = scenario, Profile = "widget" };
+	{
+		return new UiPreviewDescriptorDto { Id = id, View = view, Scenario = scenario, Profile = "widget" };
+	}
 }

@@ -24,12 +24,15 @@ public static class DeviceDescriptorMapper
 	/// a plugin built against a later SDK must not break registration by naming a state this host has
 	/// not heard of.</summary>
 	public static DevicePresence ToPresence(string? presence)
-		=> Enum.TryParse<DevicePresence>(presence, ignoreCase: true, out var parsed)
+	{
+		return Enum.TryParse<DevicePresence>(presence, true, out var parsed)
 			? parsed
 			: DevicePresence.Unknown;
+	}
 
 	private static DeviceCapabilities? ToCapabilities(DeviceCapabilitiesDto? dto)
-		=> dto is null
+	{
+		return dto is null
 			? null
 			: new DeviceCapabilities
 			{
@@ -40,4 +43,5 @@ public static class DeviceDescriptorMapper
 				SupportsText = dto.SupportsText,
 				Extra = dto.Extra
 			};
+	}
 }

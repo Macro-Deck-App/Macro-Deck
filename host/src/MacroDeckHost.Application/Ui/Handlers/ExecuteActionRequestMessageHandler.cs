@@ -1,13 +1,13 @@
 using System.Diagnostics;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Integrations;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Application.HostLocking;
 using Serilog;
 using MacroDeckHost.Localization;
 
@@ -102,8 +102,8 @@ public sealed class ExecuteActionRequestMessageHandler
 				Status = status
 			};
 		}
-		catch (OperationCanceledException) when (timeoutSource.IsCancellationRequested &&
-			!cancellationToken.IsCancellationRequested)
+		catch (OperationCanceledException) when (timeoutSource.IsCancellationRequested
+			&& !cancellationToken.IsCancellationRequested)
 		{
 			stopwatch.Stop();
 			_logger.Warning("Test run of action {IntegrationId}.{ActionId} timed out after {Timeout}s",
@@ -111,7 +111,7 @@ public sealed class ExecuteActionRequestMessageHandler
 				request.ActionId,
 				_executionTimeout.TotalSeconds);
 			return Fail("TIMEOUT",
-				AppStrings.Errors.Actions.ActionTimedOut(seconds: (int)_executionTimeout.TotalSeconds),
+				AppStrings.Errors.Actions.ActionTimedOut((int)_executionTimeout.TotalSeconds),
 				executionId,
 				stopwatch.ElapsedMilliseconds);
 		}
@@ -135,7 +135,8 @@ public sealed class ExecuteActionRequestMessageHandler
 		LocalizedText message,
 		Guid executionId,
 		long durationMs = 0)
-		=> new()
+	{
+		return new ExecuteActionResponse
 		{
 			Success = false,
 			DurationMs = durationMs,
@@ -143,4 +144,5 @@ public sealed class ExecuteActionRequestMessageHandler
 			ExecutionId = executionId.ToString(),
 			Status = ActionExecutionStatus.Failed
 		};
+	}
 }

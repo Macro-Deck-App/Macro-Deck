@@ -54,8 +54,8 @@ internal static class ClockWidgetConfigView
 						Binding = Bind.To(style),
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of("digital", AppStrings.Widgets.Clock.StyleDigital()),
-							UiOption.Of("analog", AppStrings.Widgets.Clock.StyleAnalog()),
-						]),
+							UiOption.Of("analog", AppStrings.Widgets.Clock.StyleAnalog())
+						])
 					},
 					new UiDynamicChoiceInput
 					{
@@ -65,11 +65,11 @@ internal static class ClockWidgetConfigView
 						Description = AppStrings.Widgets.Clock.TimeZoneHint(),
 						Binding = Bind.To(timeZone),
 						OptionsState = timeZoneOptions,
-						AllowsCustomValue = true,
+						AllowsCustomValue = true
 					},
 					new UiHeading
 					{
-						Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance(),
+						Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance()
 					},
 					WidgetConfigFragments.Background(backgroundColor),
 					new UiColorInput
@@ -78,7 +78,7 @@ internal static class ClockWidgetConfigView
 						AllowVariables = true,
 						Label = AppStrings.Widgets.Clock.TextColor(),
 						Binding = Bind.To(textColor),
-						SupportsReset = true,
+						SupportsReset = true
 					},
 					new UiHeading { Key = "display-heading", Text = AppStrings.Widgets.Editor.Display() },
 					new UiChoiceInput
@@ -89,8 +89,8 @@ internal static class ClockWidgetConfigView
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of("auto", AppStrings.Widgets.Clock.HourCycleAuto()),
 							UiOption.Of("12h", "12"),
-							UiOption.Of("24h", "24"),
-						]),
+							UiOption.Of("24h", "24")
+						])
 					},
 					new UiChoiceInput
 					{
@@ -102,9 +102,9 @@ internal static class ClockWidgetConfigView
 							UiOption.Of("day-first", AppStrings.Widgets.Clock.DateFormatDayFirst()),
 							UiOption.Of("month-first", AppStrings.Widgets.Clock.DateFormatMonthFirst()),
 							UiOption.Of("iso", AppStrings.Widgets.Clock.DateFormatIso()),
-							UiOption.Of("long", AppStrings.Widgets.Clock.DateFormatLong()),
+							UiOption.Of("long", AppStrings.Widgets.Clock.DateFormatLong())
 						]),
-						VisibleWhen = new UiVisibleWhen { ParameterName = "showDate", Values = ["true"] },
+						VisibleWhen = new UiVisibleWhen { ParameterName = "showDate", Values = ["true"] }
 					},
 					new UiChoiceInput
 					{
@@ -115,21 +115,21 @@ internal static class ClockWidgetConfigView
 							UiOption.Of("below", AppStrings.Widgets.Clock.DatePositionBelow()),
 							UiOption.Of("above", AppStrings.Widgets.Clock.DatePositionAbove()),
 							UiOption.Of("left", AppStrings.Widgets.Clock.DatePositionLeft()),
-							UiOption.Of("right", AppStrings.Widgets.Clock.DatePositionRight()),
+							UiOption.Of("right", AppStrings.Widgets.Clock.DatePositionRight())
 						]),
-						VisibleWhen = new UiVisibleWhen { ParameterName = "showDate", Values = ["true"] },
+						VisibleWhen = new UiVisibleWhen { ParameterName = "showDate", Values = ["true"] }
 					},
 					new UiBooleanInput
 					{
 						Key = "showSeconds",
 						Label = AppStrings.Widgets.Clock.Seconds(),
-						Binding = Bind.To(showSeconds),
+						Binding = Bind.To(showSeconds)
 					},
 					new UiBooleanInput
 					{
 						Key = "showDate",
 						Label = AppStrings.Widgets.Clock.Date(),
-						Binding = Bind.To(showDate),
+						Binding = Bind.To(showDate)
 					},
 					new UiBooleanInput
 					{
@@ -139,7 +139,7 @@ internal static class ClockWidgetConfigView
 						// hint says rather than hiding a control whose stored value still applies once
 						// a face is chosen.
 						Description = AppStrings.Widgets.Clock.LeadingZeroAutoHint(),
-						Binding = Bind.To(leadingZero),
+						Binding = Bind.To(leadingZero)
 					},
 					// Structural rather than VisibleWhen: the row is offered exactly while a zone is
 					// named, and "any value but the empty one" is not something a value list can say.
@@ -151,14 +151,14 @@ internal static class ClockWidgetConfigView
 						{
 							Key = "showOffset",
 							Label = AppStrings.Widgets.Clock.Offset(),
-							Binding = Bind.To(showOffset),
-						},
+							Binding = Bind.To(showOffset)
+						}
 					},
 					new UiBooleanInput
 					{
 						Key = "showLabel",
 						Label = AppStrings.Widgets.Editor.Label(),
-						Binding = Bind.To(showLabel),
+						Binding = Bind.To(showLabel)
 					},
 					new UiStringInput
 					{
@@ -167,14 +167,14 @@ internal static class ClockWidgetConfigView
 						Description = AppStrings.Widgets.Clock.CaptionHint(),
 						Binding = Bind.To(label),
 						HideLabel = true,
-						VisibleWhen = new UiVisibleWhen { ParameterName = "showLabel", Values = ["true"] },
+						VisibleWhen = new UiVisibleWhen { ParameterName = "showLabel", Values = ["true"] }
 					},
 					new UiProse { Key = "update-hint", Text = AppStrings.Widgets.Clock.UpdateHint() },
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
-					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-				],
+					WidgetConfigFragments.Border(borderStyle, borderColor, false)
+				]
 			},
-			Editor = WidgetConfigFragments.FlowsEditor(flows),
+			Editor = WidgetConfigFragments.FlowsEditor(flows)
 		};
 	}
 }

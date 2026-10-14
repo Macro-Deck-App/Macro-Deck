@@ -4,7 +4,6 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Integrations.Steam;
 using MacroDeckHost.Integrations.Steam.Widgets;
 using MacroDeckHost.Tests.UnitTests.Calendar;
@@ -30,7 +29,10 @@ internal sealed class SteamNewWidgetTests
 	}
 
 	[TearDown]
-	public void TearDown() => _artwork.Dispose();
+	public void TearDown()
+	{
+		_artwork.Dispose();
+	}
 
 	[Test]
 	public async Task The_friends_widget_counts_who_is_online_and_playing_and_lists_them()
@@ -168,7 +170,11 @@ internal sealed class SteamNewWidgetTests
 		_source.Snapshot = new SteamSnapshot { SteamFound = true };
 
 		await using var session = await OpenAsync(SteamWidgetType.GameLauncherQualifiedId,
-			new { source = "favorites", favorites = Enumerable.Range(1, 9).Select(id => id.ToString(CultureInfo.InvariantCulture)).ToArray() });
+			new
+			{
+				source = "favorites",
+				favorites = Enumerable.Range(1, 9).Select(id => id.ToString(CultureInfo.InvariantCulture)).ToArray()
+			});
 
 		Assert.That(Tiles(session, ".grid"), Has.Count.EqualTo(6));
 	}
@@ -178,7 +184,8 @@ internal sealed class SteamNewWidgetTests
 	{
 		_source.Snapshot = new SteamSnapshot { SteamFound = true };
 
-		await using var session = await OpenAsync(SteamWidgetType.GameLauncherQualifiedId, new { source = "favorites" });
+		await using var session
+			= await OpenAsync(SteamWidgetType.GameLauncherQualifiedId, new { source = "favorites" });
 
 		Assert.That(CalendarTree.Texts(session.BuildTree().Root),
 			Does.Contain("Choose your favorite games in the widget settings."));
@@ -189,13 +196,15 @@ internal sealed class SteamNewWidgetTests
 	{
 		var options = SteamWidgetSettings.ParseLauncher(JsonSerializer.SerializeToElement(new { source = "bogus" }));
 
-		Assert.That((options.Source, options.Count), Is.EqualTo((SteamWidgetType.RecentSource, SteamWidgetType.DefaultCount)));
+		Assert.That((options.Source, options.Count),
+			Is.EqualTo((SteamWidgetType.RecentSource, SteamWidgetType.DefaultCount)));
 	}
 
 	[Test]
 	public async Task The_launcher_settings_offer_a_favorites_source_with_a_choice_of_games()
 	{
-		_source.Snapshot = new SteamSnapshot { SteamFound = true, Games = [new SteamGame(730, "Counter-Strike 2", null)] };
+		_source.Snapshot = new SteamSnapshot
+			{ SteamFound = true, Games = [new SteamGame(730, "Counter-Strike 2", null)] };
 
 		await using var session = OpenConfig(SteamWidgetType.GameLauncherQualifiedId);
 		var tree = JsonSerializer.Serialize(session.BuildTree().Root);
@@ -230,62 +239,86 @@ internal sealed class SteamNewWidgetTests
 	{
 		_source.Snapshot = WithAccount(Connected("e1") with { Friends = SteamFriendsState.Available });
 
-		await using var session = await OpenAsync(SteamWidgetType.FriendsQualifiedId, new { backgroundColor = background });
+		await using var session
+			= await OpenAsync(SteamWidgetType.FriendsQualifiedId, new { backgroundColor = background });
 
 		Assert.That(JsonSerializer.Serialize(session.BuildTree().Root).Contains("linear", StringComparison.Ordinal),
 			Is.EqualTo(face));
 	}
 
 	private static List<string> Tiles(IUiSession session, string layout)
-		=> [.. CalendarTree.Flatten(session.BuildTree().Root)
-			.Where(node => CalendarTree.IsPressable(node) &&
-				node.Id.Contains(layout, StringComparison.Ordinal) &&
-				node.Id.Split('.')[^1].StartsWith("game-", StringComparison.Ordinal))
-			.Select(node => node.Id.Split('.')[^1])];
+	{
+		return
+		[
+			.. CalendarTree.Flatten(session.BuildTree().Root)
+				.Where(node => CalendarTree.IsPressable(node)
+					&& node.Id.Contains(layout, StringComparison.Ordinal)
+					&& node.Id.Split('.')[^1].StartsWith("game-", StringComparison.Ordinal))
+				.Select(node => node.Id.Split('.')[^1])
+		];
+	}
 
 	private static SteamAccountSnapshot Connected(string entryId)
-		=> new(entryId, "Main", "main") { Web = SteamWebState.Connected };
+	{
+		return new SteamAccountSnapshot(entryId, "Main", "main") { Web = SteamWebState.Connected };
+	}
 
 	private static SteamSnapshot WithAccount(params SteamAccountSnapshot[] accounts)
-		=> new() { SteamFound = true, Accounts = accounts };
+	{
+		return new SteamSnapshot { SteamFound = true, Accounts = accounts };
+	}
 
 	private Task<IUiSession> OpenAsync(string widgetType, object data)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data)
 		};
 
 		return Task.FromResult(SteamWidgetSessions.Create(new UiSessionRequest
-		{
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared, Attributes = attributes },
-			UiModelVersion = 1,
-		}, _source, _artwork, null, _time)!);
+			{
+				Surface = new UiSurface
+					{ Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared, Attributes = attributes },
+				UiModelVersion = 1
+			},
+			_source,
+			_artwork,
+			null,
+			_time)!);
 	}
 
 	private IUiSession OpenConfig(string widgetType)
-		=> SteamWidgetSessions.Create(new UiSessionRequest
-		{
-			Surface = new UiSurface
+	{
+		return SteamWidgetSessions.Create(new UiSessionRequest
 			{
-				Kind = UiSurfaceKinds.Config,
-				SessionMode = UiSessionModes.Exclusive,
-				Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+				Surface = new UiSurface
 				{
-					[UiConfigSurfaceAttributes.EntryPoint] =
-						JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
-					[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
+					Kind = UiSurfaceKinds.Config,
+					SessionMode = UiSessionModes.Exclusive,
+					Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+					{
+						[UiConfigSurfaceAttributes.EntryPoint] =
+							JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
+						[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType)
+					}
 				},
+				UiModelVersion = 1
 			},
-			UiModelVersion = 1,
-		}, _source, _artwork, null, _time)!;
+			_source,
+			_artwork,
+			null,
+			_time)!;
+	}
 
 	private sealed class NotFoundHandler : HttpMessageHandler
 	{
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+		{
+			return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+		}
 	}
 
 	private sealed class Source : ISteamSource
@@ -301,6 +334,8 @@ internal sealed class SteamNewWidgetTests
 		public SteamSnapshot Snapshot { get; set; } = SteamSnapshot.Empty;
 
 		public Task<SteamCommandOutcome> ExecuteAsync(SteamCommand command, CancellationToken cancellationToken)
-			=> Task.FromResult(SteamCommandOutcome.Succeeded);
+		{
+			return Task.FromResult(SteamCommandOutcome.Succeeded);
+		}
 	}
 }

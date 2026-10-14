@@ -17,18 +17,18 @@ public sealed record AdbStatus(
 	int StaleTunnelsCleaned)
 {
 	// Supported describes platform capability, not whether adb is enabled or installed.
-	public static AdbStatus Disabled { get; } = new(Enabled: false,
-		UsbConnectionsEnabled: false,
-		Supported: true,
-		ResolvedExecutablePath: null,
-		ExecutableSource: AdbExecutableSource.None,
-		AdbVersion: null,
-		ServerReachable: false,
-		ServerStartedByMacroDeck: false,
-		DefaultDeviceSerial: null,
-		LastFailure: null,
-		LastFailureMessage: null,
-		LastFailureAt: null,
-		PreviousShutdownWasUnclean: false,
-		StaleTunnelsCleaned: 0);
+	public static AdbStatus Disabled { get; } = new(false,
+		false,
+		true,
+		null,
+		AdbExecutableSource.None,
+		null,
+		false,
+		false,
+		null,
+		null,
+		null,
+		null,
+		false,
+		0);
 }

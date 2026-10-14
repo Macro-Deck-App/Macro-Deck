@@ -19,7 +19,8 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 	private readonly IWidgetDataSchemaProvider _schemas;
 	private readonly IFolderCache _folderCache;
 
-	public UpdateWidgetRequestMessageHandler(IWidgetService widgetService,
+	public UpdateWidgetRequestMessageHandler(
+		IWidgetService widgetService,
 		IWidgetDataSchemaProvider schemas,
 		IFolderCache folderCache)
 	{
@@ -57,7 +58,7 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 			if (GrowsPastStateLimit(bag, widgetId, folderId))
 			{
 				return Fail("VALIDATION_ERROR",
-					AppStrings.Errors.Widgets.TooManyStates(max: ActionButtonStateModel.MaxStates));
+					AppStrings.Errors.Widgets.TooManyStates(ActionButtonStateModel.MaxStates));
 			}
 
 			data = bag.ToJsonString();
@@ -146,9 +147,9 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 					.Select(p => $"{(string.IsNullOrEmpty(p.Pointer) ? "(root)" : p.Pointer)}: {p.Message}"));
 
 			return problems.Count > maxShown
-				? AppStrings.Errors.Widgets.DataValidationFailedWithMore(details: shown,
-					more: problems.Count - maxShown)
-				: AppStrings.Errors.Widgets.DataValidationFailed(details: shown);
+				? AppStrings.Errors.Widgets.DataValidationFailedWithMore(shown,
+					problems.Count - maxShown)
+				: AppStrings.Errors.Widgets.DataValidationFailed(shown);
 		}
 	}
 
@@ -156,8 +157,8 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 	// limit stays repairable, and an adopted provider set is the provider's own and never blocked here.
 	private bool GrowsPastStateLimit(JsonObject incoming, Guid widgetId, Guid folderId)
 	{
-		if (StateCount(incoming) <= ActionButtonStateModel.MaxStates ||
-			ActionButtonStateModel.Read(incoming).StateProvider is not null)
+		if (StateCount(incoming) <= ActionButtonStateModel.MaxStates
+			|| ActionButtonStateModel.Read(incoming).StateProvider is not null)
 		{
 			return false;
 		}
@@ -165,19 +166,24 @@ public class UpdateWidgetRequestMessageHandler : IUiTransportMessageHandler<Upda
 		var stored = _folderCache.GetFolderById(folderId)?.Widgets.FirstOrDefault(w => w.Id == widgetId);
 		var storedBag = ActionButtonStateJson.ParseDataBag(stored?.Data);
 
-		return StateCount(incoming) >
-			Math.Max(StateCount(storedBag),
+		return StateCount(incoming)
+			> Math.Max(StateCount(storedBag),
 				StateCount(storedBag["manualStateBackup"] as JsonObject));
 	}
 
 	// The stored bag may still hold the legacy off/on object rather than an array, which counts as no
 	// states at all: only the array form can carry a count this limit is about.
-	private static int StateCount(JsonObject? data) => (data?["states"] as JsonArray)?.Count ?? 0;
+	private static int StateCount(JsonObject? data)
+	{
+		return (data?["states"] as JsonArray)?.Count ?? 0;
+	}
 
 	private static UpdateWidgetResponse Fail(string code, LocalizedText message)
-		=> new()
+	{
+		return new UpdateWidgetResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = code, Message = message }
 		};
+	}
 }

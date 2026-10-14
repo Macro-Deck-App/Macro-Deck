@@ -34,7 +34,8 @@ internal static class PluginSubjectResolver
 	/// exactly one project file - then resolves the printed path the same way
 	/// <see cref="ResolveExecutable" /> does.
 	/// </summary>
-	public static async Task<PluginLaunchSpec> ResolveProjectAsync(string projectPath,
+	public static async Task<PluginLaunchSpec> ResolveProjectAsync(
+		string projectPath,
 		CliConsole console,
 		CancellationToken cancellationToken)
 	{
@@ -42,12 +43,13 @@ internal static class PluginSubjectResolver
 		return ResolveExecutable(targetPath);
 	}
 
-	private static async Task<string> GetTargetPathAsync(string projectPath,
+	private static async Task<string> GetTargetPathAsync(
+		string projectPath,
 		CliConsole console,
 		CancellationToken cancellationToken)
 	{
-		if (Directory.Exists(projectPath) &&
-			!Directory.EnumerateFiles(projectPath, "*.csproj")
+		if (Directory.Exists(projectPath)
+			&& !Directory.EnumerateFiles(projectPath, "*.csproj")
 				.Concat(Directory.EnumerateFiles(projectPath, "*.fsproj"))
 				.Concat(Directory.EnumerateFiles(projectPath, "*.vbproj"))
 				.Any())
@@ -77,8 +79,8 @@ internal static class PluginSubjectResolver
 
 		console.Trace($"Running: dotnet build {projectPath} -t:Build -getProperty:TargetPath");
 
-		using var process = Process.Start(startInfo) ??
-			throw new PluginSubjectException("dotnet-not-found", "Failed to start 'dotnet build'.");
+		using var process = Process.Start(startInfo)
+			?? throw new PluginSubjectException("dotnet-not-found", "Failed to start 'dotnet build'.");
 
 		var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
 		var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
@@ -105,8 +107,8 @@ internal static class PluginSubjectResolver
 		if (targetPath.Length == 0 || !File.Exists(targetPath))
 		{
 			throw new PluginSubjectException("build-output-missing",
-				$"'dotnet build' for '{CliText.DisplayPath(projectPath)}' did not resolve to an existing file " +
-				$"(got '{targetPath}').");
+				$"'dotnet build' for '{CliText.DisplayPath(projectPath)}' did not resolve to an existing file "
+				+ $"(got '{targetPath}').");
 		}
 
 		return targetPath;

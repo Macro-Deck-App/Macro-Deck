@@ -82,7 +82,7 @@ internal sealed record MusicPlayerViewState
 	public bool HasTrack => !string.IsNullOrEmpty(TrackName);
 
 	/// <summary>Playing and paused both get a badge; stopped, loading and disconnected get none.</summary>
-	public bool ShowPlaybackBadge => (IsConnected && IsPlaying) || IsPaused;
+	public bool ShowPlaybackBadge => IsConnected && IsPlaying || IsPaused;
 
 	/// <summary>Whether the corner carries the badge that says this widget is not showing live state.
 	/// A stale selection is the more specific problem, so it wins over the outage hint, and both win over

@@ -34,7 +34,9 @@ public sealed record ConformanceCheckResult
 
 	/// <summary>The subject satisfied the check.</summary>
 	public static ConformanceCheckResult Pass(IReadOnlyList<ConformanceObservation>? observations = null)
-		=> new() { Outcome = ConformanceOutcome.Passed, Observations = observations ?? [] };
+	{
+		return new ConformanceCheckResult { Outcome = ConformanceOutcome.Passed, Observations = observations ?? [] };
+	}
 
 	/// <summary>
 	/// The subject violated the check. <paramref name="expected" /> and <paramref name="actual" /> must both
@@ -79,5 +81,8 @@ public sealed record ConformanceCheckResult
 	}
 
 	/// <summary>Returns a copy with <see cref="Duration" /> set. Internal: only <see cref="ConformanceRunner" /> times a check.</summary>
-	internal ConformanceCheckResult WithDuration(TimeSpan duration) => this with { Duration = duration };
+	internal ConformanceCheckResult WithDuration(TimeSpan duration)
+	{
+		return this with { Duration = duration };
+	}
 }

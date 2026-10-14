@@ -107,9 +107,15 @@ internal sealed class VoicemeeterConnection : IDisposable
 		}
 	}
 
-	public void SetParameter(string name, float value) => Write(name, () => _remote.SetParameter(name, value));
+	public void SetParameter(string name, float value)
+	{
+		Write(name, () => _remote.SetParameter(name, value));
+	}
 
-	public void SetParameter(string name, string value) => Write(name, () => _remote.SetParameter(name, value));
+	public void SetParameter(string name, string value)
+	{
+		Write(name, () => _remote.SetParameter(name, value));
+	}
 
 	public float? GetParameter(string name)
 	{
@@ -211,8 +217,11 @@ internal sealed class VoicemeeterConnection : IDisposable
 		_cts.Dispose();
 	}
 
-	internal static string FormatVersion(int packed) => string.Create(CultureInfo.InvariantCulture,
-		$"{(packed >> 24) & 0xFF}.{(packed >> 16) & 0xFF}.{(packed >> 8) & 0xFF}.{packed & 0xFF}");
+	internal static string FormatVersion(int packed)
+	{
+		return string.Create(CultureInfo.InvariantCulture,
+			$"{packed >> 24 & 0xFF}.{packed >> 16 & 0xFF}.{packed >> 8 & 0xFF}.{packed & 0xFF}");
+	}
 
 	private async Task RunLoop(CancellationToken cancellationToken)
 	{
@@ -308,7 +317,7 @@ internal sealed class VoicemeeterConnection : IDisposable
 				ReadFloat(VoicemeeterParameters.Bus(index, VoicemeeterParameters.Gain)),
 				ReadFlag(VoicemeeterParameters.Bus(index, VoicemeeterParameters.Mute)),
 				ReadFlag(VoicemeeterParameters.Bus(index, VoicemeeterParameters.Mono)),
-				Solo: false,
+				false,
 				new Dictionary<string, bool>(StringComparer.Ordinal)));
 		}
 
@@ -330,22 +339,28 @@ internal sealed class VoicemeeterConnection : IDisposable
 		var buttons = new Dictionary<int, bool>(MacroButtonCount);
 		for (var button = 0; button < MacroButtonCount; button++)
 		{
-			buttons[button] = _remote.GetMacroButton(button, VoicemeeterMacroButtonMode.StateOnly, out var state) ==
-				VoicemeeterResult.Ok &&
-				state;
+			buttons[button] = _remote.GetMacroButton(button, VoicemeeterMacroButtonMode.StateOnly, out var state)
+				== VoicemeeterResult.Ok
+				&& state;
 		}
 
 		return buttons;
 	}
 
 	private float ReadFloat(string parameter)
-		=> _remote.GetParameter(parameter, out float value) == VoicemeeterResult.Ok ? value : 0f;
+	{
+		return _remote.GetParameter(parameter, out float value) == VoicemeeterResult.Ok ? value : 0f;
+	}
 
 	private bool ReadFlag(string parameter)
-		=> _remote.GetParameter(parameter, out float value) == VoicemeeterResult.Ok && value > 0.5f;
+	{
+		return _remote.GetParameter(parameter, out float value) == VoicemeeterResult.Ok && value > 0.5f;
+	}
 
 	private string ReadLabel(string parameter)
-		=> _remote.GetParameter(parameter, out string value) == VoicemeeterResult.Ok ? value.Trim() : string.Empty;
+	{
+		return _remote.GetParameter(parameter, out string value) == VoicemeeterResult.Ok ? value.Trim() : string.Empty;
+	}
 
 	private static void Write(string parameter, Func<VoicemeeterResult> write)
 	{
@@ -357,13 +372,18 @@ internal sealed class VoicemeeterConnection : IDisposable
 	}
 
 	private static void LogFailure(string parameter, VoicemeeterResult result)
-		=> _logger.Warning("Voicemeeter parameter '{Parameter}' failed: {Reason}", parameter, Describe(result));
-
-	private static string Describe(VoicemeeterResult result) => result switch
 	{
-		VoicemeeterResult.NoServer => "Voicemeeter is not running",
-		VoicemeeterResult.Unavailable => "the Voicemeeter remote API is unavailable",
-		VoicemeeterResult.UnknownParameter => "this Voicemeeter edition does not have that parameter",
-		_ => result.ToString()
-	};
+		_logger.Warning("Voicemeeter parameter '{Parameter}' failed: {Reason}", parameter, Describe(result));
+	}
+
+	private static string Describe(VoicemeeterResult result)
+	{
+		return result switch
+		{
+			VoicemeeterResult.NoServer => "Voicemeeter is not running",
+			VoicemeeterResult.Unavailable => "the Voicemeeter remote API is unavailable",
+			VoicemeeterResult.UnknownParameter => "this Voicemeeter edition does not have that parameter",
+			_ => result.ToString()
+		};
+	}
 }

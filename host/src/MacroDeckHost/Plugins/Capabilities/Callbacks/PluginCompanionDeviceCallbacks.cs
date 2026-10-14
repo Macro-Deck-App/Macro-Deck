@@ -17,7 +17,8 @@ public sealed class PluginCompanionDeviceCallbacks(
 	IPluginSessionRegistry? sessions = null,
 	IPluginHostAssetSender? assets = null)
 {
-	public async Task<HostCallbackResult?> AdmitAsync(string pluginId,
+	public async Task<HostCallbackResult?> AdmitAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -31,39 +32,41 @@ public sealed class PluginCompanionDeviceCallbacks(
 			ProtocolErrorMessages.For(ProtocolErrorCodes.CompanionDevicesNotAllowed));
 	}
 
-	public async Task<HostCallbackResult> ExecuteAsync(string pluginId,
+	public async Task<HostCallbackResult> ExecuteAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
 		switch (payload.Operation)
 		{
 			case HostOperations.CompanionDevices.Wait
-				when Read<CompanionDeviceArguments>(payload) is { } arguments && TryParse(arguments.DeviceId, out var id):
+				when Read<CompanionDeviceArguments>(payload) is { } arguments
+				&& TryParse(arguments.DeviceId, out var id):
 				return HostCallbackResult.Ok(new CompanionDeviceWaitResultDto
 				{
 					Ready = await devices.WaitForDeviceAsync(id, cancellationToken)
 				});
 
 			case HostOperations.CompanionDevices.Send
-				when Read<CompanionDeviceCommandArguments>(payload) is { } arguments &&
-				TryParse(arguments.DeviceId, out var id) &&
-				CompanionDeviceWire.ToCommand(arguments) is { } command:
+				when Read<CompanionDeviceCommandArguments>(payload) is { } arguments
+				&& TryParse(arguments.DeviceId, out var id)
+				&& CompanionDeviceWire.ToCommand(arguments) is { } command:
 				return HostCallbackResult.Ok(new CompanionDeviceSendResultDto
 				{
 					Sent = await devices.SendAsync(id, command, cancellationToken)
 				});
 
 			case HostOperations.CompanionDevices.Request
-				when Read<CompanionDeviceCommandArguments>(payload) is { } arguments &&
-				TryParse(arguments.DeviceId, out var id) &&
-				CompanionDeviceWire.ToCommand(arguments) is { } command:
+				when Read<CompanionDeviceCommandArguments>(payload) is { } arguments
+				&& TryParse(arguments.DeviceId, out var id)
+				&& CompanionDeviceWire.ToCommand(arguments) is { } command:
 				return HostCallbackResult.Ok(
 					CompanionDeviceWire.ToDto(await devices.RequestAsync(id, command, cancellationToken)));
 
 			case HostOperations.CompanionDevices.Screenshot
-				when Read<CompanionScreenshotArguments>(payload) is { } arguments &&
-				TryParse(arguments.DeviceId, out var id) &&
-				CompanionDeviceWire.ToMode(arguments.Mode) is { } mode:
+				when Read<CompanionScreenshotArguments>(payload) is { } arguments
+				&& TryParse(arguments.DeviceId, out var id)
+				&& CompanionDeviceWire.ToMode(arguments.Mode) is { } mode:
 				return await ScreenshotAsync(pluginId, id, mode, cancellationToken);
 
 			default:
@@ -74,7 +77,8 @@ public sealed class PluginCompanionDeviceCallbacks(
 
 	// The bytes cannot ride the reply, which is capped at the protocol message size, so they follow over
 	// host.asset like an Android screenshot. The transfer is not awaited: the plugin correlates it by its id.
-	private async Task<HostCallbackResult> ScreenshotAsync(string pluginId,
+	private async Task<HostCallbackResult> ScreenshotAsync(
+		string pluginId,
 		Guid deviceId,
 		CompanionScreenshotMode mode,
 		CancellationToken cancellationToken)
@@ -130,11 +134,15 @@ public sealed class PluginCompanionDeviceCallbacks(
 			return;
 		}
 
-		var name = sessions?.Snapshot().FirstOrDefault(session => session.PluginId == pluginId)?.DisplayName ?? pluginId;
+		var name = sessions?.Snapshot().FirstOrDefault(session => session.PluginId == pluginId)?.DisplayName
+			?? pluginId;
 		await consent.AskAfterRefusalAsync(pluginId, name, cancellationToken);
 	}
 
-	private static bool TryParse(string? value, out Guid deviceId) => Guid.TryParse(value, out deviceId);
+	private static bool TryParse(string? value, out Guid deviceId)
+	{
+		return Guid.TryParse(value, out deviceId);
+	}
 
 	private static T? Read<T>(HostInvokePayload payload)
 		where T : class
@@ -156,13 +164,19 @@ public sealed class PluginCompanionDeviceInvokeRunner(
 	Serilog.ILogger logger)
 	: PluginBackgroundInvokeRunner(router, logger.ForContext<PluginCompanionDeviceInvokeRunner>(), "Companion device")
 {
-	protected override Task<HostCallbackResult?> AdmitAsync(string pluginId,
+	protected override Task<HostCallbackResult?> AdmitAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
-		=> callbacks.AdmitAsync(pluginId, payload, cancellationToken);
+	{
+		return callbacks.AdmitAsync(pluginId, payload, cancellationToken);
+	}
 
-	protected override Task<HostCallbackResult> ExecuteAsync(string pluginId,
+	protected override Task<HostCallbackResult> ExecuteAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
-		=> callbacks.ExecuteAsync(pluginId, payload, cancellationToken);
+	{
+		return callbacks.ExecuteAsync(pluginId, payload, cancellationToken);
+	}
 }

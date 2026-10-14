@@ -24,8 +24,8 @@ internal sealed class UiEventOriginContractTests : UiContractFixture
 	private static readonly Guid _widgetId = Guid.Parse("8e8c6a0c-1f2b-4d1a-9a55-2b8f3c1d7e60");
 
 	private const string WidgetTree =
-		"{\"revision\":1,\"surface\":{\"kind\":\"widget\",\"sessionMode\":\"shared\",\"attributes\":{}}," +
-		"\"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[]}}";
+		"{\"revision\":1,\"surface\":{\"kind\":\"widget\",\"sessionMode\":\"shared\",\"attributes\":{}},"
+		+ "\"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[]}}";
 
 	private TestUiCapabilityHandler _handler = null!;
 
@@ -60,7 +60,8 @@ internal sealed class UiEventOriginContractTests : UiContractFixture
 		Assert.That(ticket.Accepted, Is.True, "The plugin's widget session did not open.");
 		Assert.That(Attach(ticket.SessionId, Connection).Accepted, Is.True);
 
-		Broker.SendEvent(new UiSendEventRequest { SessionId = ticket.SessionId, NodeId = "root", Name = UiComponentEvents.Press },
+		Broker.SendEvent(new UiSendEventRequest
+				{ SessionId = ticket.SessionId, NodeId = "root", Name = UiComponentEvents.Press },
 			Connection,
 			ClientId);
 		await WaitForUiAsync(() => _handler.Events.Count == 1, "The press never reached the plugin.");
@@ -68,7 +69,8 @@ internal sealed class UiEventOriginContractTests : UiContractFixture
 	}
 
 	private Task<HostCallbackResult> InvokeAsync(string operation, object arguments)
-		=> HostInvokeHandler!(Guid.NewGuid().ToString("N"),
+	{
+		return HostInvokeHandler!(Guid.NewGuid().ToString("N"),
 			new HostInvokePayload
 			{
 				Api = HostApis.Ui,
@@ -76,11 +78,17 @@ internal sealed class UiEventOriginContractTests : UiContractFixture
 				Arguments = JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options)
 			},
 			CancellationToken.None);
+	}
 
 	private IReadOnlyList<ActionExecutionStatusEvent> FailuresShownToTheClient()
-		=> [.. UiTransport.All.Where(recorded => recorded.Group == UiClientGroups.For(ClientId))
-			.Select(recorded => recorded.Message)
-			.OfType<ActionExecutionStatusEvent>()];
+	{
+		return
+		[
+			.. UiTransport.All.Where(recorded => recorded.Group == UiClientGroups.For(ClientId))
+				.Select(recorded => recorded.Message)
+				.OfType<ActionExecutionStatusEvent>()
+		];
+	}
 
 	[Test]
 	public async Task The_plugin_learns_which_client_pressed_and_can_show_it_a_failure()
@@ -100,7 +108,8 @@ internal sealed class UiEventOriginContractTests : UiContractFixture
 		Assert.Multiple(() =>
 		{
 			Assert.That(_handler.Events.Single().ClientId, Is.EqualTo(ClientId));
-			Assert.That(result.Data!.Value.Deserialize<UiOriginReportFailureResult>(PluginProtocolJson.Options)!.Delivered,
+			Assert.That(result.Data!.Value.Deserialize<UiOriginReportFailureResult>(PluginProtocolJson.Options)!
+					.Delivered,
 				Is.True);
 			Assert.That(failure.Status, Is.EqualTo(ActionExecutionStatus.Failed));
 			Assert.That(failure.WidgetId, Is.EqualTo(_widgetId.ToString()));
@@ -124,7 +133,8 @@ internal sealed class UiEventOriginContractTests : UiContractFixture
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(failure.Data!.Value.Deserialize<UiOriginReportFailureResult>(PluginProtocolJson.Options)!.Delivered,
+			Assert.That(failure.Data!.Value.Deserialize<UiOriginReportFailureResult>(PluginProtocolJson.Options)!
+					.Delivered,
 				Is.False);
 			Assert.That(modal.Data!.Value.Deserialize<UiOriginShowModalResult>(PluginProtocolJson.Options)!.Opened,
 				Is.False);

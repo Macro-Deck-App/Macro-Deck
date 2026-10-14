@@ -16,18 +16,21 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 public class VariableStateTemplateTests
 {
 	private const string StateTemplate =
-		"{{ vars.artist.state.is_available }}|{{ vars.artist.state.is_not_available }}|" +
-		"{{ vars.artist.state.is_empty }}|{{ vars.artist.state.is_not_empty }}";
+		"{{ vars.artist.state.is_available }}|{{ vars.artist.state.is_not_available }}|"
+		+ "{{ vars.artist.state.is_empty }}|{{ vars.artist.state.is_not_empty }}";
 
-	private static VariableEntity Var(string name, VariableType type, string value) => new()
+	private static VariableEntity Var(string name, VariableType type, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
 	private static VariableEntity StaleArtist(bool attributed)
 	{
@@ -80,7 +83,8 @@ public class VariableStateTemplateTests
 	// freshness window), each run bare and with a "%" unit attribute.
 	[Test]
 	public void An_available_non_empty_variable_reports_available_and_not_empty()
-		=> Both(StateTemplate,
+	{
+		Both(StateTemplate,
 			"true|false|false|true",
 			attributed =>
 			{
@@ -92,10 +96,12 @@ public class VariableStateTemplateTests
 
 				return v;
 			});
+	}
 
 	[Test]
 	public void An_available_empty_valued_variable_reports_available_and_empty()
-		=> Both(StateTemplate,
+	{
+		Both(StateTemplate,
 			"true|false|true|false",
 			attributed =>
 			{
@@ -107,17 +113,20 @@ public class VariableStateTemplateTests
 
 				return v;
 			});
+	}
 
 	[Test]
 	public void An_unavailable_variable_reports_not_available_and_neither_empty_nor_not_empty()
-		=> Both(StateTemplate, "false|true|false|false", StaleArtist);
+	{
+		Both(StateTemplate, "false|true|false|false", StaleArtist);
+	}
 
 	// C2 - an undeclared name.
 	[Test]
 	public void An_undeclared_name_reports_not_available_and_neither_empty_nor_not_empty()
 	{
-		var rendered = Render("{{ vars.nope.state.is_not_available }}|{{ vars.nope.state.is_available }}|" +
-			"{{ vars.nope.state.is_empty }}|{{ vars.nope.state.is_not_empty }}");
+		var rendered = Render("{{ vars.nope.state.is_not_available }}|{{ vars.nope.state.is_available }}|"
+			+ "{{ vars.nope.state.is_empty }}|{{ vars.nope.state.is_not_empty }}");
 
 		Assert.That(rendered, Is.EqualTo("true|false|false|false"));
 	}
@@ -166,14 +175,16 @@ public class VariableStateTemplateTests
 		{
 			Assert.That(Render("{{ vars.artist }}", available), Is.EqualTo("Radiohead"));
 			Assert.That(Render("{{ vars.artist }}", empty), Is.EqualTo(string.Empty));
-			Assert.That(Render("{{ vars.artist }}", StaleArtist(attributed: false)),
+			Assert.That(Render("{{ vars.artist }}", StaleArtist(false)),
 				Is.EqualTo(VariableTemplateRenderer.UnavailablePlaceholder));
 		});
 	}
 
 	[Test]
 	public void An_unavailable_attributed_variable_still_resolves_its_unit()
-		=> Assert.That(Render("{{ vars.artist.unit }}", StaleArtist(attributed: true)), Is.EqualTo("%"));
+	{
+		Assert.That(Render("{{ vars.artist.unit }}", StaleArtist(true)), Is.EqualTo("%"));
+	}
 
 	// If this one fails, report it - do not adjust it. It proves the container delegates a member it does
 	// not own (a plain string's "size") back to the accessor Scriban would have used on the bare value,
@@ -206,7 +217,9 @@ public class VariableStateTemplateTests
 	];
 
 	private static IEnumerable<TestCaseData> _crossSurfaceCellSource()
-		=> _crossSurfaceCells.Select(cell => new TestCaseData(cell).SetArgDisplayNames($"{cell.State}_{cell.Op}"));
+	{
+		return _crossSurfaceCells.Select(cell => new TestCaseData(cell).SetArgDisplayNames($"{cell.State}_{cell.Op}"));
+	}
 
 	[TestCaseSource(nameof(_crossSurfaceCellSource))]
 	public void Condition_and_template_agree_on_every_state_cell(

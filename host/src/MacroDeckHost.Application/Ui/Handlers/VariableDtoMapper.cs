@@ -48,16 +48,19 @@ internal static class VariableDtoMapper
 			CommitOnRelease = entity.CommitOnRelease,
 			Available = available,
 			DynamicResourceId = dynamicResourceId,
-			Shared = shared,
+			Shared = shared
 		};
 	}
 
-	public static string ScopeToWire(DomainScope s) => s switch
+	public static string ScopeToWire(DomainScope s)
 	{
-		DomainScope.Global => "global",
-		DomainScope.Widget => "widget",
-		_ => s.ToString().ToLowerInvariant()
-	};
+		return s switch
+		{
+			DomainScope.Global => "global",
+			DomainScope.Widget => "widget",
+			_ => s.ToString().ToLowerInvariant()
+		};
+	}
 
 	public static DomainScope? ScopeFromWire(string? wire)
 	{
@@ -77,14 +80,17 @@ internal static class VariableDtoMapper
 		};
 	}
 
-	public static string TypeToWire(DomainType t) => t switch
+	public static string TypeToWire(DomainType t)
 	{
-		DomainType.Text => "text",
-		DomainType.Numeric => "numeric",
-		DomainType.Boolean => "boolean",
-		DomainType.Color => "color",
-		_ => t.ToString().ToLowerInvariant()
-	};
+		return t switch
+		{
+			DomainType.Text => "text",
+			DomainType.Numeric => "numeric",
+			DomainType.Boolean => "boolean",
+			DomainType.Color => "color",
+			_ => t.ToString().ToLowerInvariant()
+		};
+	}
 
 	public static DomainType? TypeFromWire(string? wire)
 	{
@@ -103,19 +109,26 @@ internal static class VariableDtoMapper
 		};
 	}
 
-	public static string ClassificationToWire(DomainClassification c) => c switch
+	public static string ClassificationToWire(DomainClassification c)
 	{
-		DomainClassification.User => "user",
-		DomainClassification.Integration => "integration",
-		DomainClassification.Widget => "widget",
-		_ => c.ToString().ToLowerInvariant()
-	};
+		return c switch
+		{
+			DomainClassification.User => "user",
+			DomainClassification.Integration => "integration",
+			DomainClassification.Widget => "widget",
+			_ => c.ToString().ToLowerInvariant()
+		};
+	}
 
 	public static VariableFileSource? FileSourceFromWire(VariableFileSourceDto? dto)
-		=> dto is null ? null : new VariableFileSource(dto.Path, dto.AllowWriteBack);
+	{
+		return dto is null ? null : new VariableFileSource(dto.Path, dto.AllowWriteBack);
+	}
 
 	public static VariableTemplateSource? TemplateSourceFromWire(VariableTemplateSourceDto? dto)
-		=> dto is null ? null : new VariableTemplateSource(dto.Template);
+	{
+		return dto is null ? null : new VariableTemplateSource(dto.Template);
+	}
 
 	public static object? ParseInputValue(DomainType type, string? raw)
 	{
@@ -143,7 +156,7 @@ internal static class VariableDtoMapper
 			VariableError.InvalidTemplate => new Transport.Messages.TransportError
 			{
 				Code = error.ToString(),
-				Message = AppStrings.Errors.Variables.InvalidTemplate(details: message ?? string.Empty)
+				Message = AppStrings.Errors.Variables.InvalidTemplate(message ?? string.Empty)
 			},
 			VariableError.CircularTemplate => new Transport.Messages.TransportError
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.CircularTemplate() },
@@ -164,26 +177,29 @@ internal static class VariableDtoMapper
 		string? message,
 		string? ownerIntegrationId,
 		VariableOwnerNames ownerNames)
-		=> error switch
+	{
+		return error switch
 		{
 			VariableError.NotWritable => new Transport.Messages.TransportError
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.NotWritable() },
 			VariableError.OwnerUnavailable => new Transport.Messages.TransportError
 			{
 				Code = error.ToString(),
-				Message = AppStrings.Errors.Variables.OwnerUnavailable(integration: await ownerNames.Resolve(ownerIntegrationId))
+				Message = AppStrings.Errors.Variables.OwnerUnavailable(await ownerNames.Resolve(ownerIntegrationId))
 			},
 			VariableError.WriteFailed => new Transport.Messages.TransportError
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.WriteFailed() },
 			_ => ToError(error, message)
 		};
+	}
 
 	public static async Task<Transport.Messages.TransportError> ToValueWriteError(
 		VariableError error,
 		string? message,
 		string? ownerIntegrationId,
 		VariableOwnerNames ownerNames)
-		=> error switch
+	{
+		return error switch
 		{
 			VariableError.InvalidValue => new Transport.Messages.TransportError
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.ValueNotAccepted() },
@@ -191,4 +207,5 @@ internal static class VariableDtoMapper
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.NotFound() },
 			_ => await ToWriteError(error, message, ownerIntegrationId, ownerNames)
 		};
+	}
 }

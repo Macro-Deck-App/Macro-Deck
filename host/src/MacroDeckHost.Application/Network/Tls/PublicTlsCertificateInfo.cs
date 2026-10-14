@@ -14,7 +14,13 @@ public sealed record PublicTlsCertificateInfo(
 	DateTimeOffset NotAfter,
 	PublicTlsCertificateSource Source)
 {
-	public bool IsExpired(DateTimeOffset now) => now > NotAfter;
+	public bool IsExpired(DateTimeOffset now)
+	{
+		return now > NotAfter;
+	}
 
-	public bool IsNotYetValid(DateTimeOffset now) => now < NotBefore;
+	public bool IsNotYetValid(DateTimeOffset now)
+	{
+		return now < NotBefore;
+	}
 }

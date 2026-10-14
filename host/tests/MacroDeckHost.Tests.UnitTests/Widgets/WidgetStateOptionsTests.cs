@@ -8,9 +8,9 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets;
 [TestFixture]
 public class WidgetStateOptionsTests
 {
-	private const string _twoStateWidget = "44444444-4444-4444-4444-444444444444";
-	private const string _singleStateWidget = "55555555-5555-5555-5555-555555555555";
-	private const string _unknownWidget = "66666666-6666-6666-6666-666666666666";
+	private const string TwoStateWidget = "44444444-4444-4444-4444-444444444444";
+	private const string SingleStateWidget = "55555555-5555-5555-5555-555555555555";
+	private const string UnknownWidget = "66666666-6666-6666-6666-666666666666";
 
 	private FakeWidgetApi _widgets = null!;
 	private WidgetIntegration _integration = null!;
@@ -23,7 +23,7 @@ public class WidgetStateOptionsTests
 		// hard-coded legacy vocabulary the implementation happens to still recognize.
 		_widgets.Widgets.Add(new WidgetTargetInfo
 		{
-			Id = _twoStateWidget,
+			Id = TwoStateWidget,
 			Label = "Toggle",
 			Location = "Main / Home",
 			Type = "action-button",
@@ -31,7 +31,7 @@ public class WidgetStateOptionsTests
 		});
 		_widgets.Widgets.Add(new WidgetTargetInfo
 		{
-			Id = _singleStateWidget,
+			Id = SingleStateWidget,
 			Label = "Button",
 			Location = "Main / Home",
 			Type = "action-button"
@@ -44,7 +44,7 @@ public class WidgetStateOptionsTests
 	[Test]
 	public async Task TwoStateTarget_OffersAllFourChoices()
 	{
-		var options = await Resolve(_twoStateWidget);
+		var options = await Resolve(TwoStateWidget);
 
 		Assert.That(options.Select(o => o.Value), Is.EquivalentTo(["current", "both", "left", "right"]));
 	}
@@ -52,7 +52,7 @@ public class WidgetStateOptionsTests
 	[Test]
 	public async Task SingleStateTarget_OffersOnlyCurrent()
 	{
-		var options = await Resolve(_singleStateWidget);
+		var options = await Resolve(SingleStateWidget);
 
 		Assert.That(options.Select(o => o.Value), Is.EqualTo(["current"]));
 	}
@@ -84,7 +84,7 @@ public class WidgetStateOptionsTests
 	[Test]
 	public async Task UnknownTarget_OffersOnlyCurrent_RatherThanGuessingALegacyVocabulary()
 	{
-		var options = await Resolve(_unknownWidget);
+		var options = await Resolve(UnknownWidget);
 
 		Assert.That(options.Select(o => o.Value), Is.EqualTo(["current"]));
 	}
@@ -98,32 +98,47 @@ public class WidgetStateOptionsTests
 	}
 
 	private static DynamicOptionsContext Context(string target)
-		=> new()
+	{
+		return new DynamicOptionsContext
 		{
 			ParameterName = "state",
 			CurrentParameters = new Dictionary<string, object?> { ["widget"] = target }
 		};
+	}
 
 	private sealed class FakeWidgetApi : IWidgetApi
 	{
 		public List<WidgetTargetInfo> Widgets { get; } = [];
 
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => Widgets;
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return Widgets;
+		}
 
-		public bool Exists(string widgetId) => Widgets.Any(w => w.Id == widgetId);
+		public bool Exists(string widgetId)
+		{
+			return Widgets.Any(w => w.Id == widgetId);
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> Task.FromResult(true);
+		{
+			return Task.FromResult(true);
+		}
 
 		public Task<WidgetStateWriteResult> SetStateAsync(
 			string widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
-		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+		public Task<WidgetStateWriteResult> AdvanceStateAsync(
+			string widgetId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 	}
 
 	private sealed class FakeIntegrationContext : IIntegrationContext

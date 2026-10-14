@@ -24,15 +24,18 @@ internal static class HttpActionValues
 	}
 
 	public static bool ReadBool(IReadOnlyDictionary<string, object> parameters, string name, bool fallback)
-		=> parameters.GetValueOrDefault(name) switch
+	{
+		return parameters.GetValueOrDefault(name) switch
 		{
 			bool b => b,
 			string s when bool.TryParse(s, out var parsed) => parsed,
 			_ => fallback
 		};
+	}
 
 	public static double ReadNumber(IReadOnlyDictionary<string, object> parameters, string name, double fallback)
-		=> parameters.GetValueOrDefault(name) switch
+	{
+		return parameters.GetValueOrDefault(name) switch
 		{
 			long l => l,
 			double d => d,
@@ -40,18 +43,21 @@ internal static class HttpActionValues
 				parsed,
 			_ => fallback
 		};
+	}
 
 	public static double ReadDurationMilliseconds(
 		IReadOnlyDictionary<string, object> parameters,
 		string name,
 		double fallback)
-		=> parameters.GetValueOrDefault(name) switch
+	{
+		return parameters.GetValueOrDefault(name) switch
 		{
 			long l => l,
 			double d => d,
 			string s when TryParseDurationMilliseconds(s, out var milliseconds) => milliseconds,
 			_ => fallback
 		};
+	}
 
 	public static IReadOnlyDictionary<string, string> ReadKeyValue(
 		IReadOnlyDictionary<string, object> parameters,
@@ -87,8 +93,11 @@ internal static class HttpActionValues
 			_ => (0d, 0)
 		};
 
-		if (suffixLength > 0 &&
-			double.TryParse(trimmed[..^suffixLength], NumberStyles.Float, CultureInfo.InvariantCulture, out var number))
+		if (suffixLength > 0
+			&& double.TryParse(trimmed[..^suffixLength],
+				NumberStyles.Float,
+				CultureInfo.InvariantCulture,
+				out var number))
 		{
 			milliseconds = number * factor;
 			return true;
@@ -163,21 +172,27 @@ internal static class HttpActionValues
 		return result;
 	}
 
-	private static string Stringify(object? value) => value switch
+	private static string Stringify(object? value)
 	{
-		null => string.Empty,
-		string s => s,
-		bool b => b ? "true" : "false",
-		IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-		_ => value.ToString() ?? string.Empty
-	};
+		return value switch
+		{
+			null => string.Empty,
+			string s => s,
+			bool b => b ? "true" : "false",
+			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+			_ => value.ToString() ?? string.Empty
+		};
+	}
 
-	private static string Stringify(JsonElement value) => value.ValueKind switch
+	private static string Stringify(JsonElement value)
 	{
-		JsonValueKind.String => value.GetString() ?? string.Empty,
-		JsonValueKind.True => "true",
-		JsonValueKind.False => "false",
-		JsonValueKind.Null => string.Empty,
-		_ => value.GetRawText()
-	};
+		return value.ValueKind switch
+		{
+			JsonValueKind.String => value.GetString() ?? string.Empty,
+			JsonValueKind.True => "true",
+			JsonValueKind.False => "false",
+			JsonValueKind.Null => string.Empty,
+			_ => value.GetRawText()
+		};
+	}
 }

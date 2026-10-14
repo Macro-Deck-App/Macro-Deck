@@ -31,6 +31,7 @@ public sealed record PortableArchiveInfo(
 
 public interface IPortableArchiveInspector
 {
-	Task<Result<PortableArchiveInfo, PortabilityError>> Inspect(byte[] archiveBytes,
+	Task<Result<PortableArchiveInfo, PortabilityError>> Inspect(
+		byte[] archiveBytes,
 		CancellationToken cancellationToken);
 }

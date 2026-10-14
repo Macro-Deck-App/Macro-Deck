@@ -18,14 +18,20 @@ public enum ColorModifier
 	Mix
 }
 
-public sealed record ColorStep(ColorModifier Modifier, double Amount, string? MixVariable = null, RgbaColor? MixColor = null);
+public sealed record ColorStep(
+	ColorModifier Modifier,
+	double Amount,
+	string? MixVariable = null,
+	RgbaColor? MixColor = null);
 
 public sealed partial record ColorReference(string Variable, IReadOnlyList<ColorStep> Steps)
 {
 	public static bool MightBeReference(string? text)
-		=> text is not null &&
-			text.Contains("{{", StringComparison.Ordinal) &&
-			text.Contains("color", StringComparison.Ordinal);
+	{
+		return text is not null
+			&& text.Contains("{{", StringComparison.Ordinal)
+			&& text.Contains("color", StringComparison.Ordinal);
+	}
 
 	public static bool TryParse(string? text, out ColorReference reference)
 	{
@@ -103,7 +109,7 @@ public sealed partial record ColorReference(string Variable, IReadOnlyList<Color
 		var value = Number(mix.Groups["amount"].Value);
 		if (mix.Groups["var"].Success)
 		{
-			return new ColorStep(ColorModifier.Mix, value, MixVariable: mix.Groups["var"].Value);
+			return new ColorStep(ColorModifier.Mix, value, mix.Groups["var"].Value);
 		}
 
 		return RgbaColor.TryParse(mix.Groups["hex"].Value, out var color)
@@ -111,19 +117,25 @@ public sealed partial record ColorReference(string Variable, IReadOnlyList<Color
 			: null;
 	}
 
-	private static ColorModifier ModifierOf(string op) => op switch
+	private static ColorModifier ModifierOf(string op)
 	{
-		"lighten" => ColorModifier.Lighten,
-		"darken" => ColorModifier.Darken,
-		"saturate" => ColorModifier.Saturate,
-		"desaturate" => ColorModifier.Desaturate,
-		"opacity" => ColorModifier.Opacity,
-		"increase_opacity" => ColorModifier.IncreaseOpacity,
-		"reduce_opacity" => ColorModifier.ReduceOpacity,
-		_ => ColorModifier.Hue
-	};
+		return op switch
+		{
+			"lighten" => ColorModifier.Lighten,
+			"darken" => ColorModifier.Darken,
+			"saturate" => ColorModifier.Saturate,
+			"desaturate" => ColorModifier.Desaturate,
+			"opacity" => ColorModifier.Opacity,
+			"increase_opacity" => ColorModifier.IncreaseOpacity,
+			"reduce_opacity" => ColorModifier.ReduceOpacity,
+			_ => ColorModifier.Hue
+		};
+	}
 
-	private static double Number(string text) => double.Parse(text, NumberStyles.Float, CultureInfo.InvariantCulture);
+	private static double Number(string text)
+	{
+		return double.Parse(text, NumberStyles.Float, CultureInfo.InvariantCulture);
+	}
 
 	[GeneratedRegex(@"\A\s*vars\.(?<name>[a-z][a-z0-9_]*)\s*\z", RegexOptions.CultureInvariant)]
 	private static partial Regex RootPattern();
@@ -131,7 +143,8 @@ public sealed partial record ColorReference(string Variable, IReadOnlyList<Color
 	[GeneratedRegex(@"\A\s*color\s*\z", RegexOptions.CultureInvariant)]
 	private static partial Regex ColorFilterPattern();
 
-	[GeneratedRegex(@"\A\s*color_(?<op>lighten|darken|saturate|desaturate|opacity|increase_opacity|reduce_opacity|hue)\s*:\s*(?<amount>-?\d+(?:\.\d+)?)\s*\z",
+	[GeneratedRegex(
+		@"\A\s*color_(?<op>lighten|darken|saturate|desaturate|opacity|increase_opacity|reduce_opacity|hue)\s*:\s*(?<amount>-?\d+(?:\.\d+)?)\s*\z",
 		RegexOptions.CultureInvariant)]
 	private static partial Regex AmountStepPattern();
 
@@ -166,8 +179,10 @@ public static class ColorReferenceScanner
 	}
 
 	public static bool References(string? value, string variableName)
-		=> ColorReference.TryParse(value, out var reference) &&
-			reference.VariableNames().Contains(variableName, StringComparer.Ordinal);
+	{
+		return ColorReference.TryParse(value, out var reference)
+			&& reference.VariableNames().Contains(variableName, StringComparer.Ordinal);
+	}
 
 	private static void Collect(JsonElement element, HashSet<string> names)
 	{

@@ -53,7 +53,6 @@ using MacroDeck.Sdk.Companion;
 using MacroDeckHost.CompanionApp;
 using MacroDeckHost.Application.CompanionApp;
 using MacroDeckHost.Infrastructure.CompanionApp;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Notifications;
@@ -107,7 +106,6 @@ using MacroDeckHost.Infrastructure.IconPacks;
 using MacroDeckHost.Infrastructure.Icons;
 using MacroDeckHost.Infrastructure.Icons.AppIcons;
 using MacroDeckHost.Infrastructure.Lifecycle;
-using MacroDeckHost.Infrastructure.HostLocking;
 using MacroDeckHost.Infrastructure.MusicPlayer;
 using MacroDeckHost.Infrastructure.Network.Discovery;
 using MacroDeckHost.Infrastructure.Network.Tls;
@@ -180,7 +178,9 @@ using MacroDeckHost.Platform.Native;
 using MacroDeckHost.Platform.Notifications;
 using MacroDeckHost.Plugins.Pairing;
 using MacroDeckHost.Application.Announcements;
+using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Infrastructure.Announcements;
+using MacroDeckHost.Infrastructure.HostLocking;
 
 namespace MacroDeckHost;
 
@@ -314,8 +314,10 @@ public class Startup
 		services.AddSingleton<TimerWidgetCoordinator>();
 		services.AddSingleton<TimerWidgetSessionFactory>();
 		services.AddSingleton<CountdownWidgetUiProvider>();
-		services.AddSingleton<IBuiltInWidgetUiProvider>(provider => provider.GetRequiredService<CountdownWidgetUiProvider>());
-		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<CountdownWidgetUiProvider>());
+		services.AddSingleton<IBuiltInWidgetUiProvider>(provider
+			=> provider.GetRequiredService<CountdownWidgetUiProvider>());
+		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider
+			=> provider.GetRequiredService<CountdownWidgetUiProvider>());
 		services.AddSingleton<IBuiltInWidgetUiProvider, StopwatchWidgetUiProvider>();
 		services.AddSingleton(provider => new WidgetUiProviderRegistry(provider.GetRequiredService<IFolderCache>(),
 			provider.GetRequiredService<IEnumerable<IBuiltInWidgetUiProvider>>(),
@@ -325,8 +327,7 @@ public class Startup
 		services.AddSingleton<IWidgetProviderAvailability, WidgetProviderAvailability>();
 		services.AddSingleton<UnavailableWidgetSessionRecovery>();
 		services.AddSingleton<IUiPreviewSource, WidgetUiPreviewSource>();
-		services.AddSingleton<IUiPreviewSource>(
-			new IntegrationUiPreviewSource(typeof(IntegrationDiscovery).Assembly));
+		services.AddSingleton<IUiPreviewSource>(new IntegrationUiPreviewSource(typeof(IntegrationDiscovery).Assembly));
 		services.AddSingleton(provider => new UiPreviewProviderRegistry(
 			provider.GetRequiredService<IEnumerable<IUiPreviewSource>>(),
 			provider.GetRequiredService<IUiSessionSink>,
@@ -343,8 +344,10 @@ public class Startup
 		services.AddSingleton<IBuiltInIntegrationUiProvider, EmailInboxUiProvider>();
 
 		services.AddSingleton<BuiltInScreenSaverProvider>();
-		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
-		services.AddSingleton<IScreenSaverProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
+		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider
+			=> provider.GetRequiredService<BuiltInScreenSaverProvider>());
+		services.AddSingleton<IScreenSaverProvider>(provider
+			=> provider.GetRequiredService<BuiltInScreenSaverProvider>());
 		services.AddSingleton<UiSessionBroker>();
 		services.AddSingleton<IUiSessionBroker>(provider => provider.GetRequiredService<UiSessionBroker>());
 		services.AddSingleton<IUiSessionSink>(provider => provider.GetRequiredService<UiSessionBroker>());
@@ -477,7 +480,8 @@ public class Startup
 		// the client timeout is off and the relay bounds header and idle time itself.
 		services.AddHttpClient(VideoStreamRelay.HttpClientName)
 			.ConfigureHttpClient(client => client.Timeout = Timeout.InfiniteTimeSpan)
-			.AddHttpMessageHandler(provider => new UserAgentHandler(provider.GetRequiredService<IHttpUserAgentSource>()))
+			.AddHttpMessageHandler(provider
+				=> new UserAgentHandler(provider.GetRequiredService<IHttpUserAgentSource>()))
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
 			{
 				UseProxy = false,
@@ -486,7 +490,8 @@ public class Startup
 			})
 			.RemoveAllLoggers();
 		services.AddSingleton<VideoStreamSessionBroker>();
-		services.AddSingleton<IVideoStreamSessionBroker>(provider => provider.GetRequiredService<VideoStreamSessionBroker>());
+		services.AddSingleton<IVideoStreamSessionBroker>(provider
+			=> provider.GetRequiredService<VideoStreamSessionBroker>());
 		services.AddSingleton<VideoStreamPluginSessions>();
 		services.AddHostedService(provider => provider.GetRequiredService<VideoStreamPluginSessions>());
 		services.AddSingleton<VideoStreamProviderHost>();
@@ -552,7 +557,7 @@ public class Startup
 		services.AddSingleton<AccessTokenCutoff>();
 		services.AddSingleton<RefreshServingEpoch>();
 		services.AddSingleton<DeviceSessionGuard>();
-		services.AddSingleton<ILastServedRotation, Infrastructure.Auth.LastServedRotation>();
+		services.AddSingleton<ILastServedRotation, LastServedRotation>();
 		services.AddSingleton<FailedLoginNotificationTracker>();
 		services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 		services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
@@ -678,7 +683,10 @@ public class Startup
 		services.AddSingleton<IPluginProcessJobFactory, PluginProcessJobFactory>();
 		services.AddSingleton<IPluginProcessLauncher, PluginProcessLauncher>();
 		services.AddSingleton<IPluginHealthProbe, PluginHealthProbe>();
-		services.AddHttpClient(PluginHealthProbeHttpClient.Name, client => { })
+		services.AddHttpClient(PluginHealthProbeHttpClient.Name,
+				client =>
+				{
+				})
 			.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 			{
 				UseProxy = false,
@@ -717,7 +725,10 @@ public class Startup
 		services.AddScoped<IPluginTrustRecordRepository, PluginTrustRecordRepository>();
 		services.AddScoped<IPluginTrustBaseline, PluginTrustBaseline>();
 		services.AddHostedService<PluginTrustBaselineBackgroundService>();
-		services.AddHttpClient(PluginArtifactAcquirer.HttpClientName, client => { })
+		services.AddHttpClient(PluginArtifactAcquirer.HttpClientName,
+				client =>
+				{
+				})
 			.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 			{
 				UseProxy = false,
@@ -734,13 +745,19 @@ public class Startup
 		// The client names must match the internal StoreHttp.RegistryClientName/ArtifactClientName
 		// constants in MacroDeckHost.Infrastructure - that type is internal to its own assembly, so the
 		// literal is duplicated here rather than referenced.
-		services.AddHttpClient("store-registry", client => { })
+		services.AddHttpClient("store-registry",
+				client =>
+				{
+				})
 			.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 			{
 				UseProxy = false,
 				AllowAutoRedirect = false
 			});
-		services.AddHttpClient("store-artifact", client => { })
+		services.AddHttpClient("store-artifact",
+				client =>
+				{
+				})
 			.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 			{
 				UseProxy = false,
@@ -751,7 +768,7 @@ public class Startup
 		services.AddSingleton<StoreRegistryReader>();
 		services.AddSingleton<IStoreRegistryStateStore, JsonStoreRegistryStateStore>();
 		services.AddSingleton<IStoreInstallationStore, JsonStoreInstallationStore>();
-		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestInstallationStore, JsonStoreTestInstallationStore>();
+		services.AddSingleton<Application.Store.Testing.IStoreTestInstallationStore, JsonStoreTestInstallationStore>();
 		services.AddSingleton<IStoreOperationStore, JsonStoreOperationStore>();
 		services.AddSingleton<IStoreOperationTracker, StoreOperationTracker>();
 		services.AddSingleton<StoreOperationChannel>();
@@ -779,7 +796,10 @@ public class Startup
 		services.AddHostedService<StoreWithdrawalNotificationBackgroundService>();
 		services.AddHostedService<StoreRegistryRefreshBroadcastBackgroundService>();
 
-		services.AddHttpClient(ConnectIdentityClient.HttpClientName, client => { })
+		services.AddHttpClient(ConnectIdentityClient.HttpClientName,
+				client =>
+				{
+				})
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15));
 		services.AddHttpClient(ConnectAvatarCache.HttpClientName)
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
@@ -820,7 +840,8 @@ public class Startup
 		services.AddSingleton<IGitHubStarPromptService, GitHubStarPromptService>();
 		services.AddSingleton<StoreCatalogPopularity>();
 		services.AddSingleton<StoreSimilarPackages>();
-		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestService, MacroDeckHost.Application.Store.Testing.StoreTestService>();
+		services
+			.AddSingleton<Application.Store.Testing.IStoreTestService, Application.Store.Testing.StoreTestService>();
 		services.AddHostedService<StoreEntitlementSyncBackgroundService>();
 
 		services.AddScoped<ISecretRepository, SecretRepository>();
@@ -1084,8 +1105,8 @@ public class Startup
 	private static void FreezeBackgroundWork(IServiceCollection services)
 	{
 		foreach (var descriptor in services
-			.Where(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
-				descriptor.ImplementationType != typeof(LoopbackPortFileService))
+			.Where(descriptor => descriptor.ServiceType == typeof(IHostedService)
+				&& descriptor.ImplementationType != typeof(LoopbackPortFileService))
 			.ToList())
 		{
 			services.Remove(descriptor);
@@ -1138,14 +1159,15 @@ public class Startup
 		// ids and executable paths - and POST an approval.
 		// The loopback listener's trust is ambient in the desktop webview, so it never answers with a CORS
 		// grant: the desktop UI is same-origin with it, and no other page may read or preflight it.
-		app.UseWhen(context => !LoopbackConnection.IsLoopbackListener(context) &&
-				!ProtocolConstants.All.Any(path => context.Request.Path.StartsWithSegments(path)) &&
-				!context.Request.Path.StartsWithSegments("/api/plugin-pairing") &&
+		app.UseWhen(context => !LoopbackConnection.IsLoopbackListener(context)
+				&& !ProtocolConstants.All.Any(path => context.Request.Path.StartsWithSegments(path))
+				&& !context.Request.Path.StartsWithSegments("/api/plugin-pairing")
+				&&
 				// api/client-targets is excluded for exactly the reason api/plugin-pairing is: every
 				// action on it is gated on LoopbackConnection.IsTrusted, an ambient credential, so
 				// without this any page the user has open could drive a device attached to this machine.
-				!context.Request.Path.StartsWithSegments("/api/client-targets") &&
-				!context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),
+				!context.Request.Path.StartsWithSegments("/api/client-targets")
+				&& !context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),
 			branch => branch.UseCors("AllowAny"));
 
 		app.UseSpaShellNoCache();

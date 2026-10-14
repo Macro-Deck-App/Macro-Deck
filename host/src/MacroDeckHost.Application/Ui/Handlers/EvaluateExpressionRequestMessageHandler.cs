@@ -62,7 +62,7 @@ public class EvaluateExpressionRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "EVALUATION_ERROR",
-					Message = AppStrings.Errors.Scripting.EvaluationFailed(details: ex.Message)
+					Message = AppStrings.Errors.Scripting.EvaluationFailed(ex.Message)
 				},
 				Leaves = leaves
 			};

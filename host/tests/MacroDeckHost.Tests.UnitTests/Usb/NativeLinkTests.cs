@@ -41,10 +41,10 @@ public class NativeLinkTests
 	[Test]
 	public async Task The_host_says_hello_and_resends_it_every_second_until_it_is_answered()
 	{
-		var first = LinkHello.Parse(await _carrier.NextAsync(IsHello(ack: false)));
+		var first = LinkHello.Parse(await _carrier.NextAsync(IsHello(false)));
 
 		_time.Advance(TimeSpan.FromSeconds(1));
-		var resent = LinkHello.Parse(await _carrier.NextAsync(IsHello(ack: false), after: 1));
+		var resent = LinkHello.Parse(await _carrier.NextAsync(IsHello(false), 1));
 
 		Assert.Multiple(() =>
 		{
@@ -61,8 +61,8 @@ public class NativeLinkTests
 	{
 		var hostEpoch = await HandshakeAsync();
 
-		var ack = LinkHello.Parse(await _carrier.NextAsync(frame => IsHello(ack: true)(frame) &&
-			LinkHello.Parse(frame).Echo == AppEpoch));
+		var ack = LinkHello.Parse(await _carrier.NextAsync(frame
+			=> IsHello(true)(frame) && LinkHello.Parse(frame).Echo == AppEpoch));
 
 		Assert.Multiple(() =>
 		{
@@ -74,9 +74,9 @@ public class NativeLinkTests
 	[Test]
 	public async Task An_open_before_the_host_epoch_is_answered_is_closed_without_a_dial()
 	{
-		var hello = LinkHello.Parse(await _carrier.NextAsync(IsHello(ack: false)));
+		var hello = LinkHello.Parse(await _carrier.NextAsync(IsHello(false)));
 		_carrier.Send(LinkFrame.Hello(false, AppEpoch, 0), LinkFrame.Open(3));
-		await _carrier.NextAsync(IsHello(ack: true));
+		await _carrier.NextAsync(IsHello(true));
 		await _carrier.NextAsync(frame => frame.Type == LinkFrameType.Close && frame.Stream == 3);
 
 		_carrier.Send(LinkFrame.Hello(true, AppEpoch, hello.Epoch), LinkFrame.Open(4));
@@ -128,7 +128,8 @@ public class NativeLinkTests
 			Assert.That(beforeGrant, Is.EqualTo(LinkProtocol.InitialWindow));
 			Assert.That(_carrier.DataOn(5), Has.Length.EqualTo(LinkProtocol.InitialWindow + 10_000));
 			Assert.That(_carrier.Written.Where(frame => frame.Type == LinkFrameType.Data)
-				.All(frame => frame.Payload.Length <= LinkProtocol.MaxPayloadLength), Is.True);
+					.All(frame => frame.Payload.Length <= LinkProtocol.MaxPayloadLength),
+				Is.True);
 		});
 	}
 
@@ -201,7 +202,11 @@ public class NativeLinkTests
 		});
 		never.SetResult();
 		_dialer.Dispose();
-		await Task.WhenAll(writes).ContinueWith(_ => { }, TaskScheduler.Default);
+		await Task.WhenAll(writes)
+			.ContinueWith(_ =>
+				{
+				},
+				TaskScheduler.Default);
 	}
 
 	[Test]
@@ -327,7 +332,7 @@ public class NativeLinkTests
 
 		_carrier.Send(LinkFrame.Hello(false, AppEpoch + 1, 0));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await StreamAssertions.ClosesAsync(local), Is.True);
 			Assert.That(_carrier.Written.Any(frame => frame.Type == LinkFrameType.Close), Is.False);
@@ -368,9 +373,9 @@ public class NativeLinkTests
 		var written = _carrier.Written.Count;
 
 		_carrier.SendRaw([0x09]);
-		var restarted = LinkHello.Parse(await _carrier.NextAsync(IsHello(ack: false), written));
+		var restarted = LinkHello.Parse(await _carrier.NextAsync(IsHello(false), written));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(restarted.Epoch, Is.Not.EqualTo(firstEpoch));
 			Assert.That(_link.IsLinked, Is.False);
@@ -391,11 +396,12 @@ public class NativeLinkTests
 		reads = _link.ReadsHandled;
 		_carrier.Send(LinkFrame.Hello(false, AppEpoch, 0));
 		await Eventually.True(() => _link.ReadsHandled > reads, "the resent hello was read");
-		var answeredWhileStuck = _carrier.Written.Skip(written).Any(IsHello(ack: true));
+		var answeredWhileStuck = _carrier.Written.Skip(written).Any(IsHello(true));
 		_time.Advance(TimeSpan.FromSeconds(1));
-		var restarted = LinkHello.Parse(await _carrier.NextAsync(IsHello(ack: false), written));
-		var answer = LinkHello.Parse(await _carrier.NextAsync(frame => IsHello(ack: true)(frame) &&
-			LinkHello.Parse(frame).Epoch == restarted.Epoch, written));
+		var restarted = LinkHello.Parse(await _carrier.NextAsync(IsHello(false), written));
+		var answer = LinkHello.Parse(await _carrier.NextAsync(frame
+				=> IsHello(true)(frame) && LinkHello.Parse(frame).Epoch == restarted.Epoch,
+			written));
 		_carrier.Send(LinkFrame.Hello(true, AppEpoch, restarted.Epoch));
 
 		await Eventually.True(() => _link.IsLinked, "the link came back");
@@ -417,9 +423,9 @@ public class NativeLinkTests
 			_time.Advance(TimeSpan.FromSeconds(1));
 		}
 
-		var restarted = LinkHello.Parse(await _carrier.NextAsync(IsHello(ack: false), written));
+		var restarted = LinkHello.Parse(await _carrier.NextAsync(IsHello(false), written));
 		_carrier.Send(LinkFrame.Hello(false, AppEpoch + 7, 0), LinkFrame.Hello(true, AppEpoch + 7, restarted.Epoch));
-		await _carrier.NextAsync(frame => IsHello(ack: true)(frame) && LinkHello.Parse(frame).Echo == AppEpoch + 7);
+		await _carrier.NextAsync(frame => IsHello(true)(frame) && LinkHello.Parse(frame).Echo == AppEpoch + 7);
 
 		await Eventually.True(() => _link.IsLinked, "both restarted epochs were answered");
 		Assert.That(restarted.Epoch, Is.Not.EqualTo(firstEpoch));
@@ -442,7 +448,7 @@ public class NativeLinkTests
 			_time.Advance(TimeSpan.FromSeconds(1));
 		}
 
-		var restarted = LinkHello.Parse(await _carrier.NextAsync(IsHello(ack: false), written));
+		var restarted = LinkHello.Parse(await _carrier.NextAsync(IsHello(false), written));
 
 		Assert.Multiple(() =>
 		{
@@ -506,7 +512,8 @@ public class NativeLinkTests
 			}
 
 			var expected = round + 1;
-			await Eventually.True(() => _carrier.WriteAttempts >= expected, "the timed out hello was followed by another");
+			await Eventually.True(() => _carrier.WriteAttempts >= expected,
+				"the timed out hello was followed by another");
 		}
 
 		Assert.Multiple(() =>
@@ -536,10 +543,10 @@ public class NativeLinkTests
 
 	private async Task<uint> HandshakeAsync()
 	{
-		var hello = LinkHello.Parse(await _carrier.NextAsync(IsHello(ack: false)));
+		var hello = LinkHello.Parse(await _carrier.NextAsync(IsHello(false)));
 		_carrier.Send(LinkFrame.Hello(true, AppEpoch, hello.Epoch), LinkFrame.Hello(false, AppEpoch, 0));
 		await Eventually.True(() => _link.IsLinked, "the handshake completed");
-		await _carrier.NextAsync(frame => IsHello(ack: true)(frame) && LinkHello.Parse(frame).Echo == AppEpoch);
+		await _carrier.NextAsync(frame => IsHello(true)(frame) && LinkHello.Parse(frame).Echo == AppEpoch);
 		return hello.Epoch;
 	}
 
@@ -547,9 +554,11 @@ public class NativeLinkTests
 	{
 		var written = _carrier.Written.Count;
 		_carrier.Send(probe ?? LinkFrame.Hello(false, AppEpoch, 0));
-		await _carrier.NextAsync(IsHello(ack: true), written);
+		await _carrier.NextAsync(IsHello(true), written);
 	}
 
 	private static Func<LinkFrame, bool> IsHello(bool ack)
-		=> frame => frame.Type == LinkFrameType.Hello && ((frame.Flags & LinkProtocol.AckFlag) != 0) == ack;
+	{
+		return frame => frame.Type == LinkFrameType.Hello && (frame.Flags & LinkProtocol.AckFlag) != 0 == ack;
+	}
 }

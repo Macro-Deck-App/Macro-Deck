@@ -5,7 +5,6 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.HomeAssistant;
 
@@ -49,7 +48,8 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 	}
 
 	private static ConfigFlowStep ConnectionStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = ConnectionStepId,
 			Title = AppStrings.Integrations.HomeAssistant.Config.ConnectTitle(),
@@ -78,18 +78,18 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Url(HomeAssistantConfigKeys.BaseUrl,
-					label: AppStrings.Integrations.HomeAssistant.Config.AddressLabel(),
-					description: AppStrings.Integrations.HomeAssistant.Config.AddressDescription(
-						exampleUrl: HomeAssistantEndpoint.ExampleUrl),
-					placeholder: HomeAssistantEndpoint.ExampleUrl,
-					required: true,
-					autoPrefixHttps: true),
+					AppStrings.Integrations.HomeAssistant.Config.AddressLabel(),
+					AppStrings.Integrations.HomeAssistant.Config.AddressDescription(HomeAssistantEndpoint.ExampleUrl),
+					HomeAssistantEndpoint.ExampleUrl,
+					true,
+					true),
 				ActionParameter.Secret(HomeAssistantConfigKeys.Token,
-					label: AppStrings.Integrations.HomeAssistant.Config.TokenLabel(),
-					description: AppStrings.Integrations.HomeAssistant.Config.TokenDescription(),
-					required: true)
+					AppStrings.Integrations.HomeAssistant.Config.TokenLabel(),
+					AppStrings.Integrations.HomeAssistant.Config.TokenDescription(),
+					true)
 			]
 		};
+	}
 
 	private async Task<ConfigFlowResult> SubmitConnection(
 		IReadOnlyDictionary<string, object?> input,
@@ -103,7 +103,7 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 		if (uri is null)
 		{
 			fieldErrors[HomeAssistantConfigKeys.BaseUrl] =
-				AppStrings.Integrations.HomeAssistant.Config.EnterAddress(exampleUrl: HomeAssistantEndpoint.ExampleUrl);
+				AppStrings.Integrations.HomeAssistant.Config.EnterAddress(HomeAssistantEndpoint.ExampleUrl);
 		}
 
 		if (token.Length == 0)
@@ -178,8 +178,8 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 			// Linux browser's own store, so the wording has to say where to trust it.
 			_logger.Warning(ex, "Home Assistant certificate validation failed for {Uri}", uri);
 			return new TestResult(null,
-				$"The certificate presented by {uri.Host} could not be validated. Trust it in your operating " +
-				"system certificate store, or connect over http:// on your local network.",
+				$"The certificate presented by {uri.Host} could not be validated. Trust it in your operating "
+				+ "system certificate store, or connect over http:// on your local network.",
 				null);
 		}
 		catch (HomeAssistantRequestException ex)
@@ -187,8 +187,8 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 			_logger.Warning(ex, "Home Assistant handshake failed for {Uri}", uri);
 			return new TestResult(null, "That address answered, but it is not the Home Assistant WebSocket API.", null);
 		}
-		catch (Exception ex) when (ex is OperationCanceledException or TimeoutException &&
-			!cancellationToken.IsCancellationRequested)
+		catch (Exception ex) when (ex is OperationCanceledException or TimeoutException
+			&& !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Debug(ex, "Home Assistant connection test timed out for {Uri}", uri);
 			return new TestResult(null, authenticated ? TooSlow(uri) : Unreachable(uri), null);
@@ -209,12 +209,16 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 	}
 
 	private static string TooSlow(Uri uri)
-		=> $"Connected to Home Assistant at {uri.Host}, but it did not answer in time. Try again in a moment - " +
-			"a Home Assistant that is still starting up can be slow to respond.";
+	{
+		return $"Connected to Home Assistant at {uri.Host}, but it did not answer in time. Try again in a moment - "
+			+ "a Home Assistant that is still starting up can be slow to respond.";
+	}
 
 	private static string Unreachable(Uri uri)
-		=> $"Could not reach Home Assistant at {uri.Host}. Check the address and that Home Assistant is " +
-			"running. The default port is 8123.";
+	{
+		return $"Could not reach Home Assistant at {uri.Host}. Check the address and that Home Assistant is "
+			+ "running. The default port is 8123.";
+	}
 
 	private sealed record TestResult(string? LocationName, string? Error, string? TokenError);
 }

@@ -32,7 +32,7 @@ public sealed class UiPreview
 	{
 		ArgumentNullException.ThrowIfNull(root);
 
-		return new UiPreview(root, resources: null);
+		return new UiPreview(root, null);
 	}
 
 	/// <summary>A scenario whose mocks must be disposed when the preview ends.</summary>
@@ -57,7 +57,10 @@ public sealed class UiPreview
 	{
 		private readonly IDisposable _inner;
 
-		public SyncResources(IDisposable inner) => _inner = inner;
+		public SyncResources(IDisposable inner)
+		{
+			_inner = inner;
+		}
 
 		public ValueTask DisposeAsync()
 		{

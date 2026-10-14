@@ -34,7 +34,8 @@ public class IconPackService : IIconPackService
 		_logger = logger;
 	}
 
-	public async Task<Result<IconPackEntity, IconPackError>> Create(string name,
+	public async Task<Result<IconPackEntity, IconPackError>> Create(
+		string name,
 		string? description,
 		string? author,
 		string? version,
@@ -61,7 +62,8 @@ public class IconPackService : IIconPackService
 		return Result.Ok<IconPackEntity, IconPackError>(pack);
 	}
 
-	public async Task<Result<IconPackEntity, IconPackError>> Update(Guid id,
+	public async Task<Result<IconPackEntity, IconPackError>> Update(
+		Guid id,
 		string name,
 		string? description,
 		string? author,
@@ -149,5 +151,7 @@ public class IconPackService : IIconPackService
 	}
 
 	private static string? NormalizeOptional(string? value)
-		=> string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	}
 }

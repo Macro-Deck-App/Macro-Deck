@@ -20,7 +20,10 @@ internal sealed class AdbDeviceTrackerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _tracker?.Dispose();
+	public void TearDown()
+	{
+		_tracker?.Dispose();
+	}
 
 	private void Track()
 	{
@@ -58,15 +61,18 @@ internal sealed class AdbDeviceTrackerTests
 	[TestCase(null, AdbDeviceStatus.Sideload, AdbDeviceChangeKind.Connected)]
 	[TestCase(AdbDeviceStatus.Device, AdbDeviceStatus.Device, null)]
 	[TestCase(AdbDeviceStatus.Disconnected, AdbDeviceStatus.Disconnected, null)]
-	public void Each_transition_raises_the_event_it_always_raised(AdbDeviceStatus? previous,
+	public void Each_transition_raises_the_event_it_always_raised(
+		AdbDeviceStatus? previous,
 		AdbDeviceStatus current,
 		AdbDeviceChangeKind? expected)
-		=> Assert.That(AdbDeviceTracker.KindFor(previous, current), Is.EqualTo(expected));
+	{
+		Assert.That(AdbDeviceTracker.KindFor(previous, current), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void Devices_attached_before_tracking_starts_raise_nothing()
 	{
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 
 		Track();
 
@@ -82,10 +88,10 @@ internal sealed class AdbDeviceTrackerTests
 	{
 		Track();
 
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 		_devices.Detach("S1");
 		_time.Advance(TimeSpan.FromMinutes(4));
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 
 		Assert.That(_events,
 			Is.EqualTo(new[] { "Connected:S1:Device", "Disconnected:S1:Disconnected", "Online:S1:Device" }));
@@ -96,10 +102,10 @@ internal sealed class AdbDeviceTrackerTests
 	{
 		Track();
 
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 		_devices.Detach("S1");
 		_time.Advance(TimeSpan.FromMinutes(6));
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 
 		Assert.That(_events,
 			Is.EqualTo(new[] { "Connected:S1:Device", "Disconnected:S1:Disconnected", "Connected:S1:Device" }));
@@ -112,7 +118,7 @@ internal sealed class AdbDeviceTrackerTests
 		var changes = new List<AdbDeviceChange>();
 		_tracker.Changed += (_, change) => changes.Add(change);
 
-		_devices.Attach("S1", stableId: null, model: "Pixel 8");
+		_devices.Attach("S1", null, model: "Pixel 8");
 		_devices.Detach("S1");
 
 		Assert.That(changes.Last().Device.Model, Is.EqualTo("Pixel 8"));
@@ -122,9 +128,9 @@ internal sealed class AdbDeviceTrackerTests
 	public void Losing_usb_permission_raises_nothing_and_getting_it_back_while_unauthorized_raises_unauthorized()
 	{
 		Track();
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 
-		_devices.SetState("S1", AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
+		_devices.SetState("S1", AndroidDeviceState.Unauthorized, true);
 		_devices.SetState("S1", AndroidDeviceState.Unauthorized);
 
 		Assert.That(_events,
@@ -136,7 +142,7 @@ internal sealed class AdbDeviceTrackerTests
 	{
 		Track();
 
-		_devices.Attach("S1", stableId: null, state: AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
+		_devices.Attach("S1", null, state: AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
 
 		Assert.That(_events, Is.EqualTo(new[] { "Connected:S1:NoPermissions" }));
 	}
@@ -146,7 +152,7 @@ internal sealed class AdbDeviceTrackerTests
 	{
 		Track();
 
-		_devices.Attach("S1", stableId: null, state: AndroidDeviceState.Connecting);
+		_devices.Attach("S1", null, state: AndroidDeviceState.Connecting);
 		_devices.SetState("S1", AndroidDeviceState.Online);
 		_devices.SetState("S1", AndroidDeviceState.Offline);
 
@@ -158,7 +164,7 @@ internal sealed class AdbDeviceTrackerTests
 	public void A_device_going_into_recovery_raises_nothing_and_leaving_it_for_offline_raises_offline()
 	{
 		Track();
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 
 		_devices.SetState("S1", AndroidDeviceState.Offline, mode: AndroidDeviceMode.Recovery);
 		_devices.SetState("S1", AndroidDeviceState.Offline);
@@ -171,7 +177,7 @@ internal sealed class AdbDeviceTrackerTests
 	{
 		Track();
 
-		_devices.Attach("S1", stableId: null, state: AndroidDeviceState.Offline, mode: AndroidDeviceMode.Bootloader);
+		_devices.Attach("S1", null, state: AndroidDeviceState.Offline, mode: AndroidDeviceMode.Bootloader);
 
 		Assert.That(_events, Is.EqualTo(new[] { "Connected:S1:Bootloader" }));
 	}
@@ -180,7 +186,7 @@ internal sealed class AdbDeviceTrackerTests
 	public void Withdrawn_access_disconnects_every_device()
 	{
 		Track();
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 
 		_devices.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
 
@@ -193,7 +199,7 @@ internal sealed class AdbDeviceTrackerTests
 		Track();
 		_tracker.Dispose();
 
-		_devices.Attach("S1", stableId: null);
+		_devices.Attach("S1", null);
 
 		Assert.That(_events, Is.Empty);
 	}

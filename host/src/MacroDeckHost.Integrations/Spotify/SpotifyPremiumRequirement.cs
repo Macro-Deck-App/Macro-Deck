@@ -10,9 +10,9 @@ internal static class SpotifyPremiumRequirement
 	{
 		for (var current = ex; current is not null; current = current.InnerException)
 		{
-			if (current is APIException { Response: { } response } api &&
-				(int)response.StatusCode == 403 &&
-				Mentions(response.Body as string, api.Message))
+			if (current is APIException { Response: { } response } api
+				&& (int)response.StatusCode == 403
+				&& Mentions(response.Body as string, api.Message))
 			{
 				return true;
 			}
@@ -22,7 +22,9 @@ internal static class SpotifyPremiumRequirement
 	}
 
 	private static bool Mentions(string? body, string message)
-		=> _markers.Any(marker =>
-			body?.Contains(marker, StringComparison.OrdinalIgnoreCase) == true ||
-			message.Contains(marker, StringComparison.OrdinalIgnoreCase));
+	{
+		return _markers.Any(marker =>
+			body?.Contains(marker, StringComparison.OrdinalIgnoreCase) == true
+			|| message.Contains(marker, StringComparison.OrdinalIgnoreCase));
+	}
 }

@@ -27,21 +27,26 @@ internal sealed class SceneActionDefinition : IDynamicOptionsActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(EntityParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Scene.EntityLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Scene.EntityLabel(),
 			required: true),
 		ActionParameter.Number(TransitionParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Scene.TransitionLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.Scene.TransitionDescription(),
-			min: 0,
-			max: 300)
+			AppStrings.Integrations.HomeAssistant.Actions.Scene.TransitionLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Scene.TransitionDescription(),
+			0,
+			300)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, SceneDomain));
+	{
+		return Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, SceneDomain));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

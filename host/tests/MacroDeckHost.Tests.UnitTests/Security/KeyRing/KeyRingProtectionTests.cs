@@ -34,7 +34,7 @@ public class KeyRingProtectionTests
 		var root = Directory.GetParent(_keysDirectory)!.FullName;
 		if (Directory.Exists(root))
 		{
-			Directory.Delete(root, recursive: true);
+			Directory.Delete(root, true);
 		}
 	}
 
@@ -58,7 +58,7 @@ public class KeyRingProtectionTests
 		Migrate(kek);
 
 		// Exactly what someone holding a Time Machine copy has: the files, and no keystore.
-		Assert.Throws<CryptographicException>(() => Unprotect(protectedPayload, kek: null));
+		Assert.Throws<CryptographicException>(() => Unprotect(protectedPayload, null));
 	}
 
 	// A wrap under a constant, a machine id, or anything else an attacker can recompute would pass the
@@ -178,13 +178,14 @@ public class KeyRingProtectionTests
 		holder.Set(kek);
 
 		Assert.Throws<CryptographicException>(() =>
-			new KeyRingXmlDecryptor(holder).Decrypt(XDocument.Load(path).Descendants(KeyRingXmlNames.SecretElement)
+			new KeyRingXmlDecryptor(holder).Decrypt(XDocument.Load(path)
+				.Descendants(KeyRingXmlNames.SecretElement)
 				.First()));
 	}
 
 	private byte[] ProtectWithUnprotectedRing(string value)
 	{
-		using var services = BuildProvider(kek: null, KeyRingProtectionMode.Unprotected);
+		using var services = BuildProvider(null, KeyRingProtectionMode.Unprotected);
 
 		return services.GetRequiredService<IDataProtectionProvider>()
 			.CreateProtector("MacroDeck.Secrets")
@@ -228,17 +229,22 @@ public class KeyRingProtectionTests
 	}
 
 	private List<string> ReadMasterKeyValues()
-		=>
+	{
+		return
 		[
 			.. Directory.EnumerateFiles(_keysDirectory, KeyRingFileInspector.KeyFilePattern)
-				.SelectMany(path => XDocument.Load(path).Descendants()
+				.SelectMany(path => XDocument.Load(path)
+					.Descendants()
 					.Where(KeyRingFileInspector.RequiresEncryption)
 					.Descendants()
 					.Select(element => element.Value)
 					.Where(value => value.Length > 20))
 		];
+	}
 
 	private Dictionary<string, string> ReadAllKeyFiles()
-		=> Directory.EnumerateFiles(_keysDirectory, KeyRingFileInspector.KeyFilePattern)
+	{
+		return Directory.EnumerateFiles(_keysDirectory, KeyRingFileInspector.KeyFilePattern)
 			.ToDictionary(path => Path.GetFileName(path), File.ReadAllText, StringComparer.Ordinal);
+	}
 }

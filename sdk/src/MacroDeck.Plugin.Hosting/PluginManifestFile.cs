@@ -75,8 +75,8 @@ internal static class PluginManifestFileReader
 			fileInfo = new FileInfo(manifestPath);
 			if (!fileInfo.Exists)
 			{
-				problems.Add($"No manifest at '{manifestPath}'. A plugin declares its id, name, version, " +
-					"description and icon there.");
+				problems.Add($"No manifest at '{manifestPath}'. A plugin declares its id, name, version, "
+					+ "description and icon there.");
 				return null;
 			}
 

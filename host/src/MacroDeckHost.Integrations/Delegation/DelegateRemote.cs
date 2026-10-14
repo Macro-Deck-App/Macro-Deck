@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
 using MacroDeckHost.Integrations.Delegation.Protocol;
-using MacroDeckHost.Integrations.Scripts;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
@@ -12,9 +11,9 @@ namespace MacroDeckHost.Integrations.Delegation;
 
 internal sealed class DelegateRemote : IDisposable
 {
-	private static readonly TimeSpan InitialProbeDelay = TimeSpan.FromSeconds(5);
-	private static readonly TimeSpan MaxProbeDelay = TimeSpan.FromMinutes(5);
-	private static readonly TimeSpan ScriptRefreshInterval = TimeSpan.FromSeconds(60);
+	private static readonly TimeSpan _initialProbeDelay = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan _maxProbeDelay = TimeSpan.FromMinutes(5);
+	private static readonly TimeSpan _scriptRefreshInterval = TimeSpan.FromSeconds(60);
 	internal static readonly TimeSpan SharedVariableInterval = TimeSpan.FromSeconds(2);
 	internal static readonly TimeSpan SharingUnsupportedRecheck = TimeSpan.FromMinutes(5);
 	private const int MaxConcurrentRuns = 4;
@@ -82,13 +81,15 @@ internal sealed class DelegateRemote : IDisposable
 	public DateTimeOffset? ThrottledUntil => _session.ThrottledUntil;
 
 	public IReadOnlyList<ActionParameterOption> ScriptOptions()
-		=> _scripts.Select(pair => new ActionParameterOption
+	{
+		return _scripts.Select(pair => new ActionParameterOption
 			{
 				Value = pair.Key,
 				Label = pair.Value.Name,
 				Metadata = ScriptInputParameters.Metadata(pair.Value.Inputs, pair.Value.RunsOnWidget)
 			})
 			.ToList();
+	}
 
 	public void Start()
 	{
@@ -146,7 +147,7 @@ internal sealed class DelegateRemote : IDisposable
 		if (!await _inFlight.WaitAsync(0, cancellationToken))
 		{
 			return ActionResult.Failed(ActionErrorCodes.ProviderRejected,
-				AppStrings.Integrations.Delegation.Errors.TooManyRunning(label: Instance.Label));
+				AppStrings.Integrations.Delegation.Errors.TooManyRunning(Instance.Label));
 		}
 
 		try
@@ -154,7 +155,7 @@ internal sealed class DelegateRemote : IDisposable
 			if (!IsReachable)
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotConnected,
-					AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(label: Instance.Label));
+					AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(Instance.Label));
 			}
 
 			using var timeoutCts = new CancellationTokenSource(timeout, _time);
@@ -239,9 +240,9 @@ internal sealed class DelegateRemote : IDisposable
 		{
 			return ActionResult.Failed(ActionErrorCodes.ProviderError,
 				result.Error is { Length: > 0 } error
-					? AppStrings.Integrations.Delegation.Errors.ScriptFailedWithError(label: Instance.Label,
-						error: error)
-					: AppStrings.Integrations.Delegation.Errors.ScriptFailed(label: Instance.Label));
+					? AppStrings.Integrations.Delegation.Errors.ScriptFailedWithError(Instance.Label,
+						error)
+					: AppStrings.Integrations.Delegation.Errors.ScriptFailed(Instance.Label));
 		}
 
 		// The remote reports which inputs it applied. A remote that does not know about inputs omits the
@@ -254,9 +255,9 @@ internal sealed class DelegateRemote : IDisposable
 			if (ignored.Count > 0)
 			{
 				return ActionResult.Failed(ActionErrorCodes.ProviderRejected,
-					AppStrings.Integrations.Delegation.Errors.InputsNotApplied(label: Instance.Label,
-						script: ScriptLabel(scriptId),
-						inputs: string.Join(", ", ignored)));
+					AppStrings.Integrations.Delegation.Errors.InputsNotApplied(Instance.Label,
+						ScriptLabel(scriptId),
+						string.Join(", ", ignored)));
 			}
 		}
 
@@ -264,15 +265,18 @@ internal sealed class DelegateRemote : IDisposable
 	}
 
 	public DelegateSharedVariable? ReadShared(string name)
-		=> ImportsSharedVariables &&
-			IsReachable &&
-			_sharedFresh &&
-			_shared.TryGetValue(name, out var variable) &&
-			variable is { Present: true, Available: true }
+	{
+		return ImportsSharedVariables
+			&& IsReachable
+			&& _sharedFresh
+			&& _shared.TryGetValue(name, out var variable)
+			&& variable is { Present: true, Available: true }
 				? variable
 				: null;
+	}
 
-	public async Task<VariableWriteResult> WriteSharedAsync(string name,
+	public async Task<VariableWriteResult> WriteSharedAsync(
+		string name,
 		string? value,
 		CancellationToken cancellationToken)
 	{
@@ -284,14 +288,14 @@ internal sealed class DelegateRemote : IDisposable
 		if (!IsReachable)
 		{
 			return VariableWriteResult.Unavailable(
-				AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(label: Instance.Label));
+				AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(Instance.Label));
 		}
 
 		DelegateWriteResult result;
 		try
 		{
-			result = await WithTokenAsync(
-				token => _client.SetSharedVariableAsync(Instance.BaseUrl, token, name, value, cancellationToken),
+			result = await WithTokenAsync(token
+					=> _client.SetSharedVariableAsync(Instance.BaseUrl, token, name, value, cancellationToken),
 				cancellationToken);
 		}
 		catch (OperationCanceledException)
@@ -302,7 +306,7 @@ internal sealed class DelegateRemote : IDisposable
 		{
 			_logger.Debug(ex, "Delegate shared variable write failed for {Instance}", Instance.Label);
 			return VariableWriteResult.Unavailable(
-				AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(label: Instance.Label));
+				AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(Instance.Label));
 		}
 
 		if (result.Success)
@@ -314,13 +318,13 @@ internal sealed class DelegateRemote : IDisposable
 		return result.ErrorCode switch
 		{
 			"HOST_LOCKED" => VariableWriteResult.Failed(
-				AppStrings.Integrations.Delegation.Errors.RemoteLocked(label: Instance.Label)),
+				AppStrings.Integrations.Delegation.Errors.RemoteLocked(Instance.Label)),
 			"InvalidValue" => VariableWriteResult.InvalidValue(
-				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(label: Instance.Label)),
+				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(Instance.Label)),
 			"NotWritable" => VariableWriteResult.NotWritable(
-				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(label: Instance.Label)),
+				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(Instance.Label)),
 			_ => VariableWriteResult.Failed(
-				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(label: Instance.Label))
+				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(Instance.Label))
 		};
 	}
 
@@ -366,8 +370,8 @@ internal sealed class DelegateRemote : IDisposable
 		IReadOnlyList<DelegateSharedVariable> fetched;
 		try
 		{
-			fetched = await WithTokenAsync(
-				token => _client.GetSharedVariablesAsync(Instance.BaseUrl, token, cancellationToken),
+			fetched = await WithTokenAsync(token
+					=> _client.GetSharedVariablesAsync(Instance.BaseUrl, token, cancellationToken),
 				cancellationToken);
 		}
 		catch (OperationCanceledException)
@@ -404,7 +408,8 @@ internal sealed class DelegateRemote : IDisposable
 		try
 		{
 			await StoreAsync(DelegateConfigKeys.SharedVariables,
-				JsonSerializer.Serialize(next.Values.Select(v => v with { Value = string.Empty }), DelegateJson.Options),
+				JsonSerializer.Serialize(next.Values.Select(v => v with { Value = string.Empty }),
+					DelegateJson.Options),
 				cancellationToken);
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
@@ -436,11 +441,14 @@ internal sealed class DelegateRemote : IDisposable
 	private static bool SameShape(
 		IReadOnlyDictionary<string, DelegateSharedVariable> previous,
 		Dictionary<string, DelegateSharedVariable> next)
-		=> previous.Count == next.Count &&
-			next.All(pair => previous.TryGetValue(pair.Key, out var old) && ShapeOf(old) == ShapeOf(pair.Value));
+	{
+		return previous.Count == next.Count
+			&& next.All(pair => previous.TryGetValue(pair.Key, out var old) && ShapeOf(old) == ShapeOf(pair.Value));
+	}
 
 	private static DelegateSharedVariable ShapeOf(DelegateSharedVariable variable)
-		=> variable with
+	{
+		return variable with
 		{
 			Value = string.Empty,
 			Present = false,
@@ -449,6 +457,7 @@ internal sealed class DelegateRemote : IDisposable
 			Max = null,
 			Step = null
 		};
+	}
 
 	internal static IReadOnlyList<DelegateSharedVariable> ParseSharedVariables(string? stored)
 	{
@@ -459,10 +468,12 @@ internal sealed class DelegateRemote : IDisposable
 
 		try
 		{
-			return JsonSerializer.Deserialize<List<DelegateSharedVariable>>(stored, DelegateJson.Options)?
-				.Where(v => !string.IsNullOrEmpty(v.Name))
-				.Select(v => v with { Present = false, Available = false })
-				.ToList() ?? [];
+			return JsonSerializer.Deserialize<List<DelegateSharedVariable>>(stored, DelegateJson.Options)
+					?
+					.Where(v => !string.IsNullOrEmpty(v.Name))
+					.Select(v => v with { Present = false, Available = false })
+					.ToList()
+				?? [];
 		}
 		catch (JsonException)
 		{
@@ -471,50 +482,55 @@ internal sealed class DelegateRemote : IDisposable
 	}
 
 	private string ScriptLabel(string scriptId)
-		=> _scripts.TryGetValue(scriptId, out var summary) ? summary.Name : scriptId;
-
-	private ActionResult? MapFailure(Exception ex, CancellationToken originalCt) => ex switch
 	{
-		OperationCanceledException when !originalCt.IsCancellationRequested =>
-			ActionResult.Failed(ActionErrorCodes.Timeout,
-				AppStrings.Integrations.Delegation.Errors.RunTimedOut(label: Instance.Label)),
-		OperationCanceledException => null,
-		DelegateCredentialsRejectedException or DelegateUnauthorizedException =>
-			ActionResult.Failed(ActionErrorCodes.PermissionDenied,
-				AppStrings.Integrations.Delegation.Errors.SignInRejected(label: Instance.Label)),
-		DelegateThrottledException =>
-			ActionResult.Failed(ActionErrorCodes.ProviderRejected,
-				AppStrings.Integrations.Delegation.Errors.LockedOut(label: Instance.Label)),
-		DelegateRateLimitedException =>
-			ActionResult.Failed(ActionErrorCodes.ProviderRejected,
-				AppStrings.Integrations.Delegation.Errors.LockedOut(label: Instance.Label)),
-		DelegateNotFoundException =>
-			ActionResult.Failed(ActionErrorCodes.NotFound,
-				AppStrings.Integrations.Delegation.Errors.ScriptNoLongerExists(label: Instance.Label)),
-		DelegateForbiddenException =>
-			ActionResult.Failed(ActionErrorCodes.PermissionDenied,
-				AppStrings.Integrations.Delegation.Errors.CannotRunScripts(label: Instance.Label)),
-		DelegateDepthExceededException =>
-			ActionResult.Failed(ActionErrorCodes.ProviderRejected,
-				AppStrings.Integrations.Delegation.Errors.DelegateCycle(label: Instance.Label)),
-		DelegateServerErrorException =>
-			ActionResult.Failed(ActionErrorCodes.ProviderError,
-				AppStrings.Integrations.Delegation.Errors.UnexpectedError(label: Instance.Label)),
-		DelegateUnreachableException or DelegateTlsException or DelegateNotMacroDeckException =>
-			ActionResult.Failed(ActionErrorCodes.NotConnected,
-				AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(label: Instance.Label)),
-		_ => null
-	};
+		return _scripts.TryGetValue(scriptId, out var summary) ? summary.Name : scriptId;
+	}
+
+	private ActionResult? MapFailure(Exception ex, CancellationToken originalCt)
+	{
+		return ex switch
+		{
+			OperationCanceledException when !originalCt.IsCancellationRequested =>
+				ActionResult.Failed(ActionErrorCodes.Timeout,
+					AppStrings.Integrations.Delegation.Errors.RunTimedOut(Instance.Label)),
+			OperationCanceledException => null,
+			DelegateCredentialsRejectedException or DelegateUnauthorizedException =>
+				ActionResult.Failed(ActionErrorCodes.PermissionDenied,
+					AppStrings.Integrations.Delegation.Errors.SignInRejected(Instance.Label)),
+			DelegateThrottledException =>
+				ActionResult.Failed(ActionErrorCodes.ProviderRejected,
+					AppStrings.Integrations.Delegation.Errors.LockedOut(Instance.Label)),
+			DelegateRateLimitedException =>
+				ActionResult.Failed(ActionErrorCodes.ProviderRejected,
+					AppStrings.Integrations.Delegation.Errors.LockedOut(Instance.Label)),
+			DelegateNotFoundException =>
+				ActionResult.Failed(ActionErrorCodes.NotFound,
+					AppStrings.Integrations.Delegation.Errors.ScriptNoLongerExists(Instance.Label)),
+			DelegateForbiddenException =>
+				ActionResult.Failed(ActionErrorCodes.PermissionDenied,
+					AppStrings.Integrations.Delegation.Errors.CannotRunScripts(Instance.Label)),
+			DelegateDepthExceededException =>
+				ActionResult.Failed(ActionErrorCodes.ProviderRejected,
+					AppStrings.Integrations.Delegation.Errors.DelegateCycle(Instance.Label)),
+			DelegateServerErrorException =>
+				ActionResult.Failed(ActionErrorCodes.ProviderError,
+					AppStrings.Integrations.Delegation.Errors.UnexpectedError(Instance.Label)),
+			DelegateUnreachableException or DelegateTlsException or DelegateNotMacroDeckException =>
+				ActionResult.Failed(ActionErrorCodes.NotConnected,
+					AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(Instance.Label)),
+			_ => null
+		};
+	}
 
 	private async Task RunProbeLoopAsync(CancellationToken cancellationToken)
 	{
-		var delay = InitialProbeDelay;
+		var delay = _initialProbeDelay;
 		while (!cancellationToken.IsCancellationRequested)
 		{
 			await ProbeOnceAsync(cancellationToken);
 			delay = IsReachable
-				? InitialProbeDelay
-				: TimeSpan.FromSeconds(Math.Min(delay.TotalSeconds * 2, MaxProbeDelay.TotalSeconds));
+				? _initialProbeDelay
+				: TimeSpan.FromSeconds(Math.Min(delay.TotalSeconds * 2, _maxProbeDelay.TotalSeconds));
 
 			try
 			{
@@ -553,7 +569,7 @@ internal sealed class DelegateRemote : IDisposable
 	private async Task MaybeRefreshScriptsAsync(CancellationToken cancellationToken)
 	{
 		var now = _time.GetUtcNow();
-		if (_lastScriptRefresh != DateTimeOffset.MinValue && now - _lastScriptRefresh < ScriptRefreshInterval)
+		if (_lastScriptRefresh != DateTimeOffset.MinValue && now - _lastScriptRefresh < _scriptRefreshInterval)
 		{
 			return;
 		}
@@ -627,10 +643,12 @@ internal sealed class DelegateRemote : IDisposable
 	}
 
 	internal static DateTimeOffset? ParseTimestamp(string? value)
-		=> DateTimeOffset.TryParse(value,
+	{
+		return DateTimeOffset.TryParse(value,
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.RoundtripKind,
 			out var parsed)
 			? parsed
 			: null;
+	}
 }

@@ -22,7 +22,7 @@ namespace MacroDeckHost.Tests.UnitTests.Auth;
 [NonParallelizable]
 public class AuthPolicyMatrixTests
 {
-	private static readonly string[] UnsubscribeLabelArguments = ["widget-1", "default"];
+	private static readonly string[] _unsubscribeLabelArguments = ["widget-1", "default"];
 	private IHost _host = null!;
 	private HttpClient _client = null!;
 	private string _dataDir = null!;
@@ -78,7 +78,7 @@ public class AuthPolicyMatrixTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -126,7 +126,8 @@ public class AuthPolicyMatrixTests
 	[Test]
 	public async Task The_video_stream_relay_is_anonymous_and_only_serves_a_token_the_host_issued()
 	{
-		var unknown = await Send(HttpMethod.Get, "/api/video-streams/relay/" + new string('A', 43) + "/live/index.m3u8");
+		var unknown = await Send(HttpMethod.Get,
+			"/api/video-streams/relay/" + new string('A', 43) + "/live/index.m3u8");
 		var malformed = await Send(HttpMethod.Get, "/api/video-streams/relay/not-a-token/live/index.m3u8");
 		var asAdmin = await Send(HttpMethod.Get,
 			"/api/video-streams/relay/" + new string('A', 43) + "/live/index.m3u8",
@@ -425,8 +426,8 @@ public class AuthPolicyMatrixTests
 		{
 			Assert.That(first.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(scope, Is.EqualTo("client"));
-			Assert.That(first.Headers.TryGetValues("Set-Cookie", out var cookies) &&
-				cookies.Any(cookie => cookie.StartsWith(AuthDefaults.RefreshCookie, StringComparison.Ordinal)),
+			Assert.That(first.Headers.TryGetValues("Set-Cookie", out var cookies)
+				&& cookies.Any(cookie => cookie.StartsWith(AuthDefaults.RefreshCookie, StringComparison.Ordinal)),
 				Is.True);
 			Assert.That(replay.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 		});
@@ -505,9 +506,18 @@ public class AuthPolicyMatrixTests
 	[Test]
 	public async Task Redeeming_a_promo_code_is_admin_only_and_answers_with_a_status()
 	{
-		var client = await SendJson(HttpMethod.Post, "/api/settings/license/promo-code", new { code = "ABCD" }, _clientToken);
-		var blank = await SendJson(HttpMethod.Post, "/api/settings/license/promo-code", new { code = " " }, _adminToken);
-		var signedOut = await SendJson(HttpMethod.Post, "/api/settings/license/promo-code", new { code = "ABCD" }, _adminToken);
+		var client = await SendJson(HttpMethod.Post,
+			"/api/settings/license/promo-code",
+			new { code = "ABCD" },
+			_clientToken);
+		var blank = await SendJson(HttpMethod.Post,
+			"/api/settings/license/promo-code",
+			new { code = " " },
+			_adminToken);
+		var signedOut = await SendJson(HttpMethod.Post,
+			"/api/settings/license/promo-code",
+			new { code = "ABCD" },
+			_adminToken);
 		using var blankBody = JsonDocument.Parse(await blank.Content.ReadAsStringAsync());
 		using var signedOutBody = JsonDocument.Parse(await signedOut.Content.ReadAsStringAsync());
 
@@ -517,7 +527,8 @@ public class AuthPolicyMatrixTests
 			Assert.That(blank.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(blankBody.RootElement.GetProperty("status").GetString(), Is.EqualTo("invalid"));
 			Assert.That(signedOutBody.RootElement.GetProperty("status").GetString(), Is.EqualTo("signedOut"));
-			Assert.That(signedOutBody.RootElement.GetProperty("retryAfterSeconds").ValueKind, Is.EqualTo(JsonValueKind.Null));
+			Assert.That(signedOutBody.RootElement.GetProperty("retryAfterSeconds").ValueKind,
+				Is.EqualTo(JsonValueKind.Null));
 		});
 	}
 
@@ -530,7 +541,10 @@ public class AuthPolicyMatrixTests
 			await Send(HttpMethod.Get, "/api/settings/companion-app/apk", _clientToken),
 			await SendJson(HttpMethod.Put, "/api/settings/companion-app", new { autoUpdate = true }, _clientToken),
 			await SendJson(HttpMethod.Post, "/api/settings/companion-app/check", new { }, _clientToken),
-			await SendJson(HttpMethod.Post, "/api/settings/companion-app/install", new { serial = "R58M12ABCDE" }, _clientToken)
+			await SendJson(HttpMethod.Post,
+				"/api/settings/companion-app/install",
+				new { serial = "R58M12ABCDE" },
+				_clientToken)
 		};
 		var adminStatus = await Send(HttpMethod.Get, "/api/settings/companion-app", _adminToken);
 
@@ -855,7 +869,8 @@ public class AuthPolicyMatrixTests
 		var removal = await Send(HttpMethod.Delete, $"/api/devices/{target}", _adminToken);
 		var removalBody = await ReadJson(removal);
 		var remaining = await ReadJson(await Send(HttpMethod.Get, "/api/devices", _adminToken));
-		var remainingIds = remaining.GetProperty("devices").EnumerateArray()
+		var remainingIds = remaining.GetProperty("devices")
+			.EnumerateArray()
 			.Select(device => device.GetProperty("id").GetString())
 			.ToArray();
 		var refreshAfterRemoval = await Send(HttpMethod.Post, "/api/auth/refresh", cookie: targetRefresh);
@@ -966,7 +981,7 @@ public class AuthPolicyMatrixTests
 				"UnsubscribeLabel",
 				null,
 				null,
-				JsonSerializer.SerializeToElement(UnsubscribeLabelArguments),
+				JsonSerializer.SerializeToElement(_unsubscribeLabelArguments),
 				null));
 		await SendUiEnvelope(socket, new UiWebSocketEnvelope(1, "ping", null, "ping-1", null, null, null));
 		var pong = await ReceiveUiEnvelope(socket);
@@ -1156,10 +1171,12 @@ public class AuthPolicyMatrixTests
 	}
 
 	private async Task<string?> LoginRefreshCookie()
-		=> ExtractCookie(await SendJson(HttpMethod.Post,
+	{
+		return ExtractCookie(await SendJson(HttpMethod.Post,
 				"/api/auth/login",
 				new { username = "admin", password = "password123", scope = "client" }),
 			"md_refresh");
+	}
 
 	[Test]
 	public async Task Access_cookie_authenticates_media_gets_but_never_mutations()
@@ -1192,12 +1209,12 @@ public class AuthPolicyMatrixTests
 		var deviceId = body.GetProperty("device").GetProperty("deviceId").GetString()!;
 		// A guarded route, not the anonymous status endpoint: NotFound here means the request was
 		// authorized and only the icon is missing.
-		var before = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", bearerToken: token);
+		var before = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", token);
 
 		await Send(HttpMethod.Post, $"/api/devices/{deviceId}/logout", loopback: true);
 
-		var after = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", bearerToken: token);
-		var status = await ReadJson(await Send(HttpMethod.Get, "/api/auth/status", bearerToken: token));
+		var after = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", token);
+		var status = await ReadJson(await Send(HttpMethod.Get, "/api/auth/status", token));
 
 		Assert.Multiple(() =>
 		{
@@ -1235,7 +1252,7 @@ public class AuthPolicyMatrixTests
 				}
 			});
 		var token = (await ReadJson(again)).GetProperty("accessToken").GetString()!;
-		var guarded = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", bearerToken: token);
+		var guarded = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", token);
 
 		Assert.Multiple(() =>
 		{
@@ -1293,7 +1310,9 @@ public class AuthPolicyMatrixTests
 		string? bearerToken = null,
 		bool loopback = false,
 		string? cookie = null)
-		=> SendCore(method, path, null, bearerToken, loopback, cookie);
+	{
+		return SendCore(method, path, null, bearerToken, loopback, cookie);
+	}
 
 	private Task<HttpResponseMessage> SendJson(
 		HttpMethod method,
@@ -1302,7 +1321,9 @@ public class AuthPolicyMatrixTests
 		string? bearerToken = null,
 		bool loopback = false,
 		string? cookie = null)
-		=> SendCore(method, path, body, bearerToken, loopback, cookie);
+	{
+		return SendCore(method, path, body, bearerToken, loopback, cookie);
+	}
 
 	private async Task<HttpResponseMessage> SendCore(
 		HttpMethod method,
@@ -1337,7 +1358,9 @@ public class AuthPolicyMatrixTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	/// <summary>The refresh cookie's absolute expiry, or null when it is a session cookie.</summary>
 	private static DateTimeOffset? RefreshCookieExpiry(HttpResponseMessage response)
@@ -1363,8 +1386,9 @@ public class AuthPolicyMatrixTests
 
 		// The cookies are named per listener (md_access_<port>), so the caller names the family rather than
 		// the exact cookie.
-		var match = cookies.FirstOrDefault(c => c.StartsWith(name + "=", StringComparison.Ordinal) ||
-			c.StartsWith(name + "_", StringComparison.Ordinal));
+		var match = cookies.FirstOrDefault(c
+			=> c.StartsWith(name + "=", StringComparison.Ordinal)
+			|| c.StartsWith(name + "_", StringComparison.Ordinal));
 
 		return match?.Split(';')[0];
 	}

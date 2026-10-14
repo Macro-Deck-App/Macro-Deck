@@ -16,8 +16,8 @@ public sealed class RunningApplicationCatalog : IRunningApplicationCatalog
 		if (!string.IsNullOrWhiteSpace(filter))
 		{
 			apps = apps.Where(a =>
-				a.Label.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
-				a.Identity.Contains(filter, StringComparison.OrdinalIgnoreCase));
+				a.Label.Contains(filter, StringComparison.OrdinalIgnoreCase)
+				|| a.Identity.Contains(filter, StringComparison.OrdinalIgnoreCase));
 		}
 
 		IReadOnlyList<RunningApplication> result = apps
@@ -131,13 +131,13 @@ public sealed class RunningApplicationCatalog : IRunningApplicationCatalog
 					continue;
 				}
 
-				var bundleId = ReadNSString(app, "bundleIdentifier");
+				var bundleId = ReadNsString(app, "bundleIdentifier");
 				if (string.IsNullOrEmpty(bundleId))
 				{
 					continue;
 				}
 
-				var label = ReadNSString(app, "localizedName") ?? bundleId;
+				var label = ReadNsString(app, "localizedName") ?? bundleId;
 				result.Add(new RunningApplication(bundleId, ApplicationIdentityKind.BundleId, label));
 			}
 
@@ -149,7 +149,7 @@ public sealed class RunningApplicationCatalog : IRunningApplicationCatalog
 		}
 	}
 
-	private static string? ReadNSString(IntPtr receiver, string selectorName)
+	private static string? ReadNsString(IntPtr receiver, string selectorName)
 	{
 		var value = objc_msgSend_noArgs(receiver, sel_registerName(Utf8(selectorName)));
 		if (value == IntPtr.Zero)
@@ -161,7 +161,10 @@ public sealed class RunningApplicationCatalog : IRunningApplicationCatalog
 		return utf8 == IntPtr.Zero ? null : Marshal.PtrToStringUTF8(utf8);
 	}
 
-	private static byte[] Utf8(string value) => System.Text.Encoding.UTF8.GetBytes(value + '\0');
+	private static byte[] Utf8(string value)
+	{
+		return System.Text.Encoding.UTF8.GetBytes(value + '\0');
+	}
 
 	private const string LibObjC = "/usr/lib/libobjc.dylib";
 	private const string AppKit = "/System/Library/Frameworks/AppKit.framework/AppKit";

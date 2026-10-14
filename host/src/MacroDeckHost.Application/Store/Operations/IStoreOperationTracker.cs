@@ -10,7 +10,8 @@ public interface IStoreOperationTracker
 
 	StoreOperation? FindLive(StoreExtensionKind kind, string packageId);
 
-	StoreOperation Create(StoreOperationKind kind,
+	StoreOperation Create(
+		StoreOperationKind kind,
 		StoreExtensionKind extensionKind,
 		string packageId,
 		string version,
@@ -20,7 +21,8 @@ public interface IStoreOperationTracker
 		StoreTestBuildReference? testBuild = null,
 		bool versionPinned = false);
 
-	StoreOperation? Transition(Guid operationId,
+	StoreOperation? Transition(
+		Guid operationId,
 		StoreOperationState state,
 		StoreOperationError? failure = null,
 		string? errorMessage = null);

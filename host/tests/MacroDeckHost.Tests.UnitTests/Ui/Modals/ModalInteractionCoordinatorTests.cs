@@ -29,12 +29,16 @@ public class ModalInteractionCoordinatorTests
 
 	[Test]
 	public void AModalWithNoClientToShowItOn_IsRefused()
-		=> Assert.That(_coordinator.Register(IntegrationId, originClientId: null, Definition()), Is.Null);
+	{
+		Assert.That(_coordinator.Register(IntegrationId, null, Definition()), Is.Null);
+	}
 
 	[Test]
 	public void AModalNamingNoView_IsRefused()
-		=> Assert.That(_coordinator.Register(IntegrationId, ClientId, new ModalDefinition { ViewId = string.Empty }),
+	{
+		Assert.That(_coordinator.Register(IntegrationId, ClientId, new ModalDefinition { ViewId = string.Empty }),
 			Is.Null);
+	}
 
 	/// <summary>A dialog interrupts the user, so several stacked on one client is a bug to refuse rather
 	/// than a workload to serve.</summary>
@@ -67,7 +71,7 @@ public class ModalInteractionCoordinatorTests
 		var waiting = _coordinator.AwaitAsync(modalId, CancellationToken.None);
 		_coordinator.TryClaim(modalId, Principal, out _);
 
-		Assert.That(_coordinator.Settle(modalId, Principal, cancelled: false, Value("device-1")), Is.True);
+		Assert.That(_coordinator.Settle(modalId, Principal, false, Value("device-1")), Is.True);
 
 		var result = await waiting;
 		Assert.That(result.Cancelled, Is.False);
@@ -81,7 +85,7 @@ public class ModalInteractionCoordinatorTests
 		var waiting = _coordinator.AwaitAsync(modalId, CancellationToken.None);
 		_coordinator.TryClaim(modalId, Principal, out _);
 
-		_coordinator.Settle(modalId, Principal, cancelled: true, value: null);
+		_coordinator.Settle(modalId, Principal, true, null);
 
 		Assert.That((await waiting).Cancelled, Is.True);
 	}
@@ -95,7 +99,7 @@ public class ModalInteractionCoordinatorTests
 		var waiting = _coordinator.AwaitAsync(modalId, CancellationToken.None);
 		_coordinator.TryClaim(modalId, Principal, out _);
 
-		_coordinator.Settle(modalId, Principal, cancelled: false, value: null);
+		_coordinator.Settle(modalId, Principal, false, null);
 
 		Assert.That((await waiting).Cancelled, Is.True);
 	}
@@ -170,7 +174,7 @@ public class ModalInteractionCoordinatorTests
 		var modalId = _coordinator.Register(IntegrationId, ClientId, Definition())!;
 		_coordinator.TryClaim(modalId, Principal, out _);
 
-		Assert.That(_coordinator.Settle(modalId, OtherPrincipal, cancelled: false, Value("device-1")), Is.False);
+		Assert.That(_coordinator.Settle(modalId, OtherPrincipal, false, Value("device-1")), Is.False);
 	}
 
 	[Test]
@@ -178,24 +182,26 @@ public class ModalInteractionCoordinatorTests
 	{
 		var modalId = _coordinator.Register(IntegrationId, ClientId, Definition())!;
 
-		Assert.That(_coordinator.Settle(modalId, Principal, cancelled: true, value: null), Is.False);
+		Assert.That(_coordinator.Settle(modalId, Principal, true, null), Is.False);
 	}
 
 	[Test]
 	public async Task AwaitingAModalThatWasNeverRegistered_IsACancellationRatherThanAHang()
-		=> Assert.That((await _coordinator.AwaitAsync("nope", CancellationToken.None)).Cancelled, Is.True);
+	{
+		Assert.That((await _coordinator.AwaitAsync("nope", CancellationToken.None)).Cancelled, Is.True);
+	}
 
 	/// <summary>Far past any cap a dialog surface could sensibly have, so the loop below measures the cap
 	/// rather than restating it.</summary>
-	private const int _wellPastAnySaneCap = 100;
+	private const int WellPastAnySaneCap = 100;
 
 	/// <summary>Registers modals for one client until it is refused. Returns how many were accepted.</summary>
 	private int FillUntilRefused(string clientId)
 	{
 		var accepted = 0;
 
-		while (accepted < _wellPastAnySaneCap &&
-			_coordinator.Register(IntegrationId, clientId, Definition()) is not null)
+		while (accepted < WellPastAnySaneCap
+			&& _coordinator.Register(IntegrationId, clientId, Definition()) is not null)
 		{
 			accepted++;
 		}
@@ -203,8 +209,13 @@ public class ModalInteractionCoordinatorTests
 		return accepted;
 	}
 
-	private static ModalDefinition Definition() => new() { ViewId = "weather-details" };
+	private static ModalDefinition Definition()
+	{
+		return new ModalDefinition { ViewId = "weather-details" };
+	}
 
 	private static JsonElement Value(string deviceId)
-		=> JsonSerializer.SerializeToElement(new { deviceId });
+	{
+		return JsonSerializer.SerializeToElement(new { deviceId });
+	}
 }

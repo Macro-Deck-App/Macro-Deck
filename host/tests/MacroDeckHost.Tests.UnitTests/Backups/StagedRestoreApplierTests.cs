@@ -22,11 +22,16 @@ public class StagedRestoreApplierTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void DoesNothingWhenNoRestoreIsStaged()
-		=> Assert.That(StagedRestoreApplier.ApplyPending(_paths), Is.EqualTo(StagedRestoreOutcome.NothingPending));
+	{
+		Assert.That(StagedRestoreApplier.ApplyPending(_paths), Is.EqualTo(StagedRestoreOutcome.NothingPending));
+	}
 
 	[Test]
 	public void ReplacesTheSelectedGroupAndRemovesWhatTheBackupDoesNotHave()
@@ -95,7 +100,7 @@ public class StagedRestoreApplierTests
 	public void RecreatesTheWorkingDirectoriesTheArchiveDeliberatelyOmits()
 	{
 		Write("plugins/demo/current.json", "before");
-		Directory.Delete(_paths.PluginStagingDirectory, recursive: true);
+		Directory.Delete(_paths.PluginStagingDirectory, true);
 
 		Stage([BackupComponentGroup.Plugins], ("plugins/demo/current.json", "after"));
 		StagedRestoreApplier.ApplyPending(_paths);
@@ -136,7 +141,8 @@ public class StagedRestoreApplierTests
 
 	private string MarkerPath => Path.Combine(_paths.RestoreStagingDirectory, PendingRestoreDocument.FileName);
 
-	private PendingRestoreDocument Stage(BackupComponentGroup[] components,
+	private PendingRestoreDocument Stage(
+		BackupComponentGroup[] components,
 		params (string Path, string Content)[] files)
 	{
 		var staging = Path.Combine(_paths.RestoreStagingDirectory, Guid.NewGuid().ToString("N"));
@@ -167,12 +173,12 @@ public class StagedRestoreApplierTests
 			});
 		}
 
-		File.WriteAllText(MarkerPath, JsonSerializer.Serialize(document, Json));
+		File.WriteAllText(MarkerPath, JsonSerializer.Serialize(document, _json));
 
 		return document;
 	}
 
-	private static readonly JsonSerializerOptions Json =
+	private static readonly JsonSerializerOptions _json =
 		new(JsonSerializerDefaults.Web) { Converters = { new JsonStringEnumConverter() } };
 
 	private static string Sha256(string path)
@@ -190,8 +196,13 @@ public class StagedRestoreApplierTests
 	}
 
 	private string Read(string relativePath)
-		=> File.ReadAllText(Path.Combine(_paths.BaseDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+	{
+		return File.ReadAllText(Path.Combine(_paths.BaseDirectory,
+			relativePath.Replace('/', Path.DirectorySeparatorChar)));
+	}
 
 	private bool Exists(string relativePath)
-		=> File.Exists(Path.Combine(_paths.BaseDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+	{
+		return File.Exists(Path.Combine(_paths.BaseDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+	}
 }

@@ -41,9 +41,9 @@ internal sealed class YouTubeStreamWidgetsTests
 		var rule = YouTubeStreamPlatform.Platform.Thumbnails!;
 		var uri = new Uri(url);
 
-		var accepted = string.Equals(uri.Host, rule.AllowedHost, StringComparison.OrdinalIgnoreCase) &&
-			uri.AbsolutePath.StartsWith(rule.AllowedPathPrefix, StringComparison.Ordinal) &&
-			rule.IsValidAccountId(channelId);
+		var accepted = string.Equals(uri.Host, rule.AllowedHost, StringComparison.OrdinalIgnoreCase)
+			&& uri.AbsolutePath.StartsWith(rule.AllowedPathPrefix, StringComparison.Ordinal)
+			&& rule.IsValidAccountId(channelId);
 
 		Assert.That(accepted, Is.EqualTo(allowed));
 	}
@@ -58,13 +58,16 @@ internal sealed class YouTubeStreamWidgetsTests
 			["like_count"] = 318L,
 			["subscriber_count"] = 12400L,
 			["stream_title"] = "Speedrun night",
-			["uptime_seconds"] = 3600L,
+			["uptime_seconds"] = 3600L
 		};
 		var account = new StreamStatsAccount("UCmine", "My Channel", "youtube_mine_");
 		var source = new StreamStatsSource((candidate, name)
 			=> candidate.AccountId == "UCmine" ? values.GetValueOrDefault(name) : null);
 
-		var state = StreamStatsResolver.Resolve(YouTubeStreamPlatform.Platform, source, account, [],
+		var state = StreamStatsResolver.Resolve(YouTubeStreamPlatform.Platform,
+			source,
+			account,
+			[],
 			new NoStreamThumbnails());
 
 		Assert.Multiple(() =>
@@ -88,14 +91,17 @@ internal sealed class YouTubeStreamWidgetsTests
 		var provider = StreamPlatformTestSupport.Provider(YouTubeStreamPlatform.Platform, youtube);
 
 		await using var session = (await provider.CreateSessionAsync(new UiSessionRequest
-		{
-			Surface = ConfigSurface(YouTubeStreamPlatform.Platform.ChatWidgetTypeId),
-			UiModelVersion = 1
-		}, CancellationToken.None))!;
+			{
+				Surface = ConfigSurface(YouTubeStreamPlatform.Platform.ChatWidgetTypeId),
+				UiModelVersion = 1
+			},
+			CancellationToken.None))!;
 
-		var account = Flatten(session.BuildTree().Root).First(node =>
-			node.Id == StreamChatWidgetType.AccountKey && node.Properties.ContainsKey(UiConfigProperties.Options));
-		var values = account.Properties[UiConfigProperties.Options].EnumerateArray()
+		var account = Flatten(session.BuildTree().Root)
+			.First(node =>
+				node.Id == StreamChatWidgetType.AccountKey && node.Properties.ContainsKey(UiConfigProperties.Options));
+		var values = account.Properties[UiConfigProperties.Options]
+			.EnumerateArray()
 			.Select(option => option.GetProperty("value").GetString())
 			.ToList();
 
@@ -103,7 +109,8 @@ internal sealed class YouTubeStreamWidgetsTests
 	}
 
 	private static UiSurface ConfigSurface(string widgetType)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
@@ -112,9 +119,10 @@ internal sealed class YouTubeStreamWidgetsTests
 				[UiConfigSurfaceAttributes.EntryPoint] =
 					JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "" }),
-			},
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "" })
+			}
 		};
+	}
 
 	private static IEnumerable<UiNode> Flatten(UiNode node)
 	{

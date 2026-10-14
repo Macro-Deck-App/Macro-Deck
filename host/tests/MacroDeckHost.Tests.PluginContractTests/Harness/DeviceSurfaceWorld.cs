@@ -44,7 +44,8 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 		services.AddSingleton<ILocalizationResolver>(new LocalizationResolver(new LocalizationCatalogRegistry()));
 		services.AddSingleton<IAppPreferenceService>(new ContractAppPreferences());
 		services.AddSingleton<IIconPackCache>(new ContractIconPacks());
-		services.AddSingleton<MacroDeckHost.Application.Widgets.IWidgetDefaultShortPress>(new ContractNoDefaultShortPress());
+		services.AddSingleton<MacroDeckHost.Application.Widgets.IWidgetDefaultShortPress>(
+			new ContractNoDefaultShortPress());
 		services.AddSingleton<DeviceSurfaceBuilder>();
 		services.AddSingleton<IColorReferenceResolver>(new ColorReferenceResolver(new VariableRegistry()));
 		services
@@ -58,13 +59,17 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 			new SingleProviderResolver(provider, providerId),
 			Profiles,
 			Presence,
-			new DeviceInteractionRouter(scopeFactory, new CallbackFakeHostLockState(), Time, Serilog.Core.Logger.None, Profiles),
+			new DeviceInteractionRouter(scopeFactory,
+				new CallbackFakeHostLockState(),
+				Time,
+				Serilog.Core.Logger.None,
+				Profiles),
 			new NoFocusRules(),
 			new NoEventBus(),
 			new WidgetStateSubscriptionTracker(),
 			new LabelSubscriptionTracker(),
 			Time,
-			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			new DeckClientTracker(Serilog.Core.Logger.None),
 			Serilog.Core.Logger.None);
 	}
 
@@ -90,7 +95,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 	{
 		var deviceId = Guid.NewGuid();
 		await Devices.Create(ContractDeck.Device(deviceId, ProviderId, providerDeviceId));
-		Presence.Set(deviceId, online: true);
+		Presence.Set(deviceId, true);
 		await Service.OpenAsync(deviceId, ProviderId, providerDeviceId);
 		return deviceId;
 	}
@@ -113,24 +118,37 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 		}
 
 		public IDeviceSurfaceProvider? Resolve(string providerId)
-			=> string.Equals(providerId, _providerId, StringComparison.Ordinal) ? _provider : null;
+		{
+			return string.Equals(providerId, _providerId, StringComparison.Ordinal) ? _provider : null;
+		}
 	}
 
 	private sealed class NoFocusRules : IApplicationFocusCoordinator
 	{
 		public Task OnFocusChanged(FocusedApplication app, CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task OnFolderReported(Guid deviceId,
+		public Task OnFolderReported(
+			Guid deviceId,
 			Guid folderId,
 			string? navigationToken,
 			bool isResync,
-			CancellationToken cancellationToken) => Task.CompletedTask;
+			CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task OnDevicePresenceChanged(Guid deviceId, bool online, CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task OnRulesChanged(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task OnRulesChanged(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class NoEventBus : IEventBus
@@ -140,7 +158,10 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 
 		public System.Threading.Channels.ChannelReader<EventOccurrence> Reader => _channel.Reader;
 
-		public void Publish(EventOccurrence occurrence) => _channel.Writer.TryWrite(occurrence);
+		public void Publish(EventOccurrence occurrence)
+		{
+			_channel.Writer.TryWrite(occurrence);
+		}
 	}
 }
 
@@ -179,21 +200,35 @@ internal sealed class ContractDeviceRepository : IDeviceRepository
 {
 	public List<DeviceEntity> Devices { get; } = [];
 
-	public Task<DeviceEntity?> GetById(Guid id) => Task.FromResult(Devices.FirstOrDefault(device => device.Id == id));
+	public Task<DeviceEntity?> GetById(Guid id)
+	{
+		return Task.FromResult(Devices.FirstOrDefault(device => device.Id == id));
+	}
 
 	public Task<DeviceEntity?> GetByProviderIdentity(string providerId, string providerDeviceId)
-		=> Task.FromResult(Devices.FirstOrDefault(device
+	{
+		return Task.FromResult(Devices.FirstOrDefault(device
 			=> device.ProviderId == providerId && device.ProviderDeviceId == providerDeviceId));
+	}
 
 	public Task<IReadOnlyList<DeviceEntity>> GetByProviderId(string providerId)
-		=> Task.FromResult<IReadOnlyList<DeviceEntity>>([.. Devices.Where(device => device.ProviderId == providerId)]);
+	{
+		return Task.FromResult<IReadOnlyList<DeviceEntity>>([
+			.. Devices.Where(device => device.ProviderId == providerId)
+		]);
+	}
 
-	public Task<IReadOnlyList<DeviceEntity>> GetAll() => Task.FromResult<IReadOnlyList<DeviceEntity>>([.. Devices]);
+	public Task<IReadOnlyList<DeviceEntity>> GetAll()
+	{
+		return Task.FromResult<IReadOnlyList<DeviceEntity>>([.. Devices]);
+	}
 
 	public Task<IReadOnlyList<DeviceEntity>> GetByStartupProfileId(string profileId)
-		=> Task.FromResult<IReadOnlyList<DeviceEntity>>([
+	{
+		return Task.FromResult<IReadOnlyList<DeviceEntity>>([
 			.. Devices.Where(device => device.StartupProfileId == profileId)
 		]);
+	}
 
 	public Task Create(DeviceEntity device)
 	{
@@ -229,10 +264,15 @@ internal sealed class ContractDeviceRepository : IDeviceRepository
 		return Task.FromResult(device is not null);
 	}
 
-	public Task TouchLastSeen(IReadOnlyCollection<Guid> ids, DateTime seenAt) => Task.CompletedTask;
+	public Task TouchLastSeen(IReadOnlyCollection<Guid> ids, DateTime seenAt)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task<IReadOnlyList<DeviceEntity>> GetStale(DateTime lastSeenBefore)
-		=> Task.FromResult<IReadOnlyList<DeviceEntity>>([]);
+	{
+		return Task.FromResult<IReadOnlyList<DeviceEntity>>([]);
+	}
 
 	public Task DeleteMany(IReadOnlyCollection<Guid> ids)
 	{

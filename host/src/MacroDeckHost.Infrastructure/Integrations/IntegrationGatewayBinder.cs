@@ -8,7 +8,8 @@ namespace MacroDeckHost.Infrastructure.Integrations;
 
 internal static class IntegrationGatewayBinder
 {
-	public static void Bind(IIntegration integration,
+	public static void Bind(
+		IIntegration integration,
 		CalendarHostServices? calendarServices = null,
 		EmailHostServices? emailServices = null)
 	{

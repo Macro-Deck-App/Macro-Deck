@@ -70,10 +70,17 @@ public sealed record ConfigEntryPreparationResult
 	public bool RetryOnConflict { get; init; }
 
 	/// <summary>Stores the entry, with <paramref name="values" /> when given.</summary>
-	public static ConfigEntryPreparationResult Accept(IReadOnlyDictionary<string, JsonElement>? values = null,
+	public static ConfigEntryPreparationResult Accept(
+		IReadOnlyDictionary<string, JsonElement>? values = null,
 		IReadOnlyList<VariableDefinition>? reservedVariables = null)
-		=> new() { Success = true, Values = values, ReservedVariables = reservedVariables ?? [] };
+	{
+		return new ConfigEntryPreparationResult
+			{ Success = true, Values = values, ReservedVariables = reservedVariables ?? [] };
+	}
 
 	/// <summary>Refuses the entry and shows <paramref name="error" />.</summary>
-	public static ConfigEntryPreparationResult Refuse(LocalizedText error) => new() { Success = false, Error = error };
+	public static ConfigEntryPreparationResult Refuse(LocalizedText error)
+	{
+		return new ConfigEntryPreparationResult { Success = false, Error = error };
+	}
 }

@@ -14,7 +14,8 @@ internal static class HistoryGraphTestSupport
 
 	/// <summary>The unit is a property of the variable, not of the widget - see ADR 0081 - so a test that
 	/// wants the card to show one declares it here rather than in the widget data.</summary>
-	public static VariableRegistry Registry(string value = "73",
+	public static VariableRegistry Registry(
+		string value = "73",
 		int? decimalPlaces = 0,
 		string? caption = "Apple M3 Max",
 		string? unit = null)
@@ -31,7 +32,7 @@ internal static class HistoryGraphTestSupport
 			Value = value,
 			DecimalPlaces = decimalPlaces,
 			Unit = unit,
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		});
 
 		if (caption is not null)
@@ -44,7 +45,7 @@ internal static class HistoryGraphTestSupport
 				Type = VariableType.Text,
 				Classification = VariableClassification.User,
 				Value = caption,
-				UpdatedAt = DateTime.UtcNow,
+				UpdatedAt = DateTime.UtcNow
 			});
 		}
 
@@ -52,13 +53,17 @@ internal static class HistoryGraphTestSupport
 	}
 
 	public static HistoryGraphWidgetData Config(object data)
-		=> HistoryGraphWidgetData.Parse(JsonSerializer.SerializeToElement(data));
+	{
+		return HistoryGraphWidgetData.Parse(JsonSerializer.SerializeToElement(data));
+	}
 
 	public static HistoryGraphViewStateResolver Resolver(
 		object data,
 		VariableRegistry? variables = null,
 		string? scopeRefId = null)
-		=> new(Config(data), variables ?? Registry(), scopeRefId);
+	{
+		return new HistoryGraphViewStateResolver(Config(data), variables ?? Registry(), scopeRefId);
+	}
 
 	public static VariableRegistry WithVariable(
 		this VariableRegistry registry,
@@ -79,7 +84,7 @@ internal static class HistoryGraphTestSupport
 			Classification = VariableClassification.User,
 			Value = value,
 			DecimalPlaces = decimalPlaces,
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		});
 
 		return registry;

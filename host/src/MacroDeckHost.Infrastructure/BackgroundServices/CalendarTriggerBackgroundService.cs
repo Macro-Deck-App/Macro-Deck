@@ -53,7 +53,9 @@ public sealed class CalendarTriggerBackgroundService : HostReadyBackgroundServic
 				}
 				catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
 				{
-					_logger.Error(exception, "Planning calendar triggers failed; retrying in {Delay}", _retryAfterFailure);
+					_logger.Error(exception,
+						"Planning calendar triggers failed; retrying in {Delay}",
+						_retryAfterFailure);
 					sleep = _retryAfterFailure;
 				}
 

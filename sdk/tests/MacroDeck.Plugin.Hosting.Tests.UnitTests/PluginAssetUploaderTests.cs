@@ -30,9 +30,9 @@ public class PluginAssetUploaderTests
 			state,
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
-			hostInvoker: null,
-			hostStateCache: null,
-			assetUploader: uploader);
+			null,
+			null,
+			uploader);
 
 		state.ActiveConnection = connection;
 
@@ -47,8 +47,10 @@ public class PluginAssetUploaderTests
 		return (uploader, socket, run);
 	}
 
-	private static async Task AwaitHandshakeAsync(FakePluginSocket socket) =>
+	private static async Task AwaitHandshakeAsync(FakePluginSocket socket)
+	{
 		await socket.NextAsync(MessageTypes.SessionHello);
+	}
 
 	private static void Accept(FakePluginSocket socket, ProtocolEnvelope step)
 	{

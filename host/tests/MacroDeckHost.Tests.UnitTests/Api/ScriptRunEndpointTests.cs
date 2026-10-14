@@ -95,7 +95,7 @@ public class ScriptRunEndpointTests
 
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -128,11 +128,13 @@ public class ScriptRunEndpointTests
 	}
 
 	private static string? ValueOf(JsonElement variables, string name)
-		=> variables.GetProperty("variables")
+	{
+		return variables.GetProperty("variables")
 			.EnumerateArray()
 			.First(v => v.GetProperty("name").GetString() == name)
 			.GetProperty("value")
 			.GetString();
+	}
 
 	private async Task CreateOutputVariable(string name, string type, string initialValue)
 	{
@@ -222,7 +224,9 @@ public class ScriptRunEndpointTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -236,7 +240,8 @@ public class ScriptRunEndpointTests
 	private sealed class LoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -256,5 +261,6 @@ public class ScriptRunEndpointTests
 				});
 				next(app);
 			};
+		}
 	}
 }

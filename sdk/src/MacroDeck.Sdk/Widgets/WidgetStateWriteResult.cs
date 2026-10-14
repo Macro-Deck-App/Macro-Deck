@@ -19,7 +19,13 @@ public enum WidgetStateWriteError
 /// <summary>Outcome of an explicit state write. Nothing is written in any failure case.</summary>
 public sealed record WidgetStateWriteResult(bool Success, WidgetStateWriteError? Error, string? StateId)
 {
-	public static WidgetStateWriteResult Succeeded(string stateId) => new(true, null, stateId);
+	public static WidgetStateWriteResult Succeeded(string stateId)
+	{
+		return new WidgetStateWriteResult(true, null, stateId);
+	}
 
-	public static WidgetStateWriteResult Failed(WidgetStateWriteError error) => new(false, error, null);
+	public static WidgetStateWriteResult Failed(WidgetStateWriteError error)
+	{
+		return new WidgetStateWriteResult(false, error, null);
+	}
 }

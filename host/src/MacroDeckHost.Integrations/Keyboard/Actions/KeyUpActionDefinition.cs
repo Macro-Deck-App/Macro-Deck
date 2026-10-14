@@ -22,12 +22,15 @@ internal sealed class KeyUpActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.KeyboardCombo("keys",
-			label: AppStrings.Integrations.Keyboard.Actions.KeyParameterLabel(),
-			description: AppStrings.Integrations.Keyboard.Actions.KeyUpParameterDescription(),
-			required: true)
+			AppStrings.Integrations.Keyboard.Actions.KeyParameterLabel(),
+			AppStrings.Integrations.Keyboard.Actions.KeyUpParameterDescription(),
+			true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input, _layout);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input, _layout);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

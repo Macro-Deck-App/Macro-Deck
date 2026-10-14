@@ -26,7 +26,15 @@ public class HostStatePusherEventBindingTests
 		_registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		_connection = new FakePluginConnection();
 		_tracker = new CapturingTracker();
-		_pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(), _tracker, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
+		_pusher = new HostStatePusher(_registry,
+			new FakeDeckNavigator(),
+			new FakeScriptApi(),
+			new FakeWidgetApi(),
+			_tracker,
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			new Adb.FakeAdbManager(),
+			new FixedAdbAccessPolicy(),
+			Serilog.Core.Logger.None);
 
 		await _registry.Create(new PluginSessionRecord
 		{
@@ -45,7 +53,10 @@ public class HostStatePusherEventBindingTests
 	}
 
 	[TearDown]
-	public void DisposeStatePusher() => _pusher.Dispose();
+	public void DisposeStatePusher()
+	{
+		_pusher.Dispose();
+	}
 
 	[Test]
 	public async Task A_change_to_a_connected_plugins_bindings_pushes_its_current_list()
@@ -87,14 +98,19 @@ public class HostStatePusherEventBindingTests
 	}
 
 	private List<List<EventBindingDto>> EventBindingPushes()
-		=> _connection.Sent
+	{
+		return _connection.Sent
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.EventBindings)
 			.Select(payload => payload.Data!.Value.Deserialize<List<EventBindingDto>>(PluginProtocolJson.Options)!)
 			.ToList();
+	}
 
-	private static EventBindingDto Binding(string eventId) => new() { EventId = eventId };
+	private static EventBindingDto Binding(string eventId)
+	{
+		return new EventBindingDto { EventId = eventId };
+	}
 
 	private sealed class CapturingTracker : IEventBindingTracker
 	{
@@ -102,7 +118,10 @@ public class HostStatePusherEventBindingTests
 
 		public IReadOnlyList<EventBindingDto> Current { get; set; } = [];
 
-		public IReadOnlyList<EventBindingDto> BindingsFor(string providerId) => Current;
+		public IReadOnlyList<EventBindingDto> BindingsFor(string providerId)
+		{
+			return Current;
+		}
 
 		public IDisposable Subscribe(Func<string, IReadOnlyList<EventBindingDto>, Task> onChanged)
 		{
@@ -110,9 +129,15 @@ public class HostStatePusherEventBindingTests
 			return new Unsubscriber();
 		}
 
-		public Task FlushAsync() => Task.CompletedTask;
+		public Task FlushAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task Deliver(string providerId, IReadOnlyList<EventBindingDto> bindings) => _listener!(providerId, bindings);
+		public Task Deliver(string providerId, IReadOnlyList<EventBindingDto> bindings)
+		{
+			return _listener!(providerId, bindings);
+		}
 
 		private sealed class Unsubscriber : IDisposable
 		{

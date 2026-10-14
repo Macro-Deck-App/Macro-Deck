@@ -90,13 +90,15 @@ internal sealed class StreamerbotConnection : IDisposable
 		string triggerName,
 		IReadOnlyDictionary<string, object?>? arguments,
 		CancellationToken cancellationToken = default)
-		=> SendAsync("ExecuteCodeTrigger",
+	{
+		return SendAsync("ExecuteCodeTrigger",
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["triggerName"] = triggerName,
 				["args"] = arguments
 			},
 			cancellationToken);
+	}
 
 	public Task SendChatMessageAsync(
 		string platform,
@@ -106,8 +108,8 @@ internal sealed class StreamerbotConnection : IDisposable
 	{
 		if (!_authenticated)
 		{
-			_logger.Warning("Streamer.bot chat message skipped: sending messages requires authentication. " +
-				"Enable authentication in the Streamer.bot WebSocket server settings and set the password here.");
+			_logger.Warning("Streamer.bot chat message skipped: sending messages requires authentication. "
+				+ "Enable authentication in the Streamer.bot WebSocket server settings and set the password here.");
 			return Task.CompletedTask;
 		}
 
@@ -213,7 +215,10 @@ internal sealed class StreamerbotConnection : IDisposable
 		var client = _clientFactory();
 		var closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		void OnDisconnected(object? sender, string? reason) => closed.TrySetResult();
+		void OnDisconnected(object? sender, string? reason)
+		{
+			closed.TrySetResult();
+		}
 
 		client.Disconnected += OnDisconnected;
 		client.EventReceived += OnEventReceived;

@@ -7,6 +7,6 @@ public static class PluginPairingChallengeMethods
 
 	public static readonly IReadOnlyList<string> All =
 	[
-		S256,
+		S256
 	];
 }

@@ -79,7 +79,8 @@ public sealed class FakeActionInteractions : IActionInteractions
 	}
 
 	/// <inheritdoc />
-	public void RequestItemPicker(string? originClientId,
+	public void RequestItemPicker(
+		string? originClientId,
 		string instanceId,
 		MusicPlayerCatalogItemKind kind,
 		string? prompt = null)
@@ -97,7 +98,8 @@ public sealed class FakeActionInteractions : IActionInteractions
 	}
 
 	/// <inheritdoc />
-	public void RequestDevicePicker(string? originClientId,
+	public void RequestDevicePicker(
+		string? originClientId,
 		string instanceId,
 		bool startPlayback,
 		string? prompt = null)

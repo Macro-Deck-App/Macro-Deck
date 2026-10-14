@@ -25,11 +25,13 @@ internal readonly record struct AdbSettingsProjection(
 	bool Supported,
 	string? UnsupportedReason)
 {
-	public static AdbSettingsProjection From(AdbSettings settings,
+	public static AdbSettingsProjection From(
+		AdbSettings settings,
 		AdbStatus status,
 		IReadOnlyList<AdbDevice> devices,
 		int activePublicPort)
-		=> new(settings.Enabled,
+	{
+		return new AdbSettingsProjection(settings.Enabled,
 			settings.ExecutablePath,
 			status.ResolvedExecutablePath,
 			status.ExecutableSource.ToString(),
@@ -50,4 +52,5 @@ internal readonly record struct AdbSettingsProjection(
 			// AdbStatus carries no dedicated reason field: null here just means none was recorded, for
 			// example because the integration is simply turned off rather than genuinely unsupported.
 			status.Supported ? null : status.LastFailureMessage);
+	}
 }

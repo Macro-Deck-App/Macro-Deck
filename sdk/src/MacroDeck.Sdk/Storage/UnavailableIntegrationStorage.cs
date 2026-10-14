@@ -13,7 +13,8 @@ public sealed class UnavailableIntegrationStorage : IIntegrationStorage
 	{
 	}
 
-	public Task<IntegrationStorageReadResult> ReadAsync(string key,
+	public Task<IntegrationStorageReadResult> ReadAsync(
+		string key,
 		Func<string, bool>? isValid = null,
 		CancellationToken cancellationToken = default)
 	{

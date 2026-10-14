@@ -23,7 +23,10 @@ public sealed class WidgetDataWriteLock : IWidgetDataWriteLock
 		private readonly SemaphoreSlim _gate;
 		private int _released;
 
-		public Release(SemaphoreSlim gate) => _gate = gate;
+		public Release(SemaphoreSlim gate)
+		{
+			_gate = gate;
+		}
 
 		public void Dispose()
 		{

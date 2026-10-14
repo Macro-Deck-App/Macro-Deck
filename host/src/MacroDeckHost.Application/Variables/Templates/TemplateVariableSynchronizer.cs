@@ -39,7 +39,10 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 		}
 	}
 
-	public string? FindParseError(string template) => _renderer.FindParseError(template);
+	public string? FindParseError(string template)
+	{
+		return _renderer.FindParseError(template);
+	}
 
 	public void NoteChanged(VariableEntity entity)
 	{
@@ -55,7 +58,10 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 		Enqueue(entity.Name, previous);
 	}
 
-	public void Forget(Guid id) => _reads.TryRemove(id, out _);
+	public void Forget(Guid id)
+	{
+		_reads.TryRemove(id, out _);
+	}
 
 	public async Task WaitForChangesAsync(CancellationToken cancellationToken)
 	{
@@ -75,8 +81,8 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 	// to the registry, whose Created notification then wakes every template that already reads its name.
 	public async Task<TemplateEvaluation> AttachAsync(VariableEntity entity)
 	{
-		var template = entity.TemplateSource?.Template ??
-			throw new ArgumentException("The variable has no template source.", nameof(entity));
+		var template = entity.TemplateSource?.Template
+			?? throw new ArgumentException("The variable has no template source.", nameof(entity));
 
 		await _gate.WaitAsync().ConfigureAwait(false);
 		try
@@ -86,8 +92,8 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 			{
 				_reads[entity.Id] = evaluation.Reads;
 				_names[entity.Id] = entity.Name;
-				entity.Value = evaluation.Value ??
-					VariableValueSerializer.Serialize(entity.Type, null, entity.DecimalPlaces);
+				entity.Value = evaluation.Value
+					?? VariableValueSerializer.Serialize(entity.Type, null, entity.DecimalPlaces);
 				entity.TemplateError = evaluation.Error;
 			}
 
@@ -219,7 +225,7 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 			ScopeRefId = scopeRefId,
 			Type = type,
 			Classification = VariableClassification.User,
-			DecimalPlaces = type == VariableType.Numeric ? decimalPlaces : null,
+			DecimalPlaces = type == VariableType.Numeric ? decimalPlaces : null
 		};
 
 		return Evaluate(probe, template, new VariableTemplateRenderer(_registry));
@@ -229,8 +235,8 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 	{
 		var probe = variable.CopyWithValue(variable.Value);
 		probe.Name = name;
-		return Evaluate(probe, template, new VariableTemplateRenderer(_registry)).Error?.Code ==
-			VariableTemplateError.CircularReference;
+		return Evaluate(probe, template, new VariableTemplateRenderer(_registry)).Error?.Code
+			== VariableTemplateError.CircularReference;
 	}
 
 	public void Dispose()
@@ -273,9 +279,9 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 		foreach (var template in templates)
 		{
 			// A variable's own publish names it, and that must not wake it again.
-			var triggered = !_reads.TryGetValue(template.Id, out var reads) ||
-				reads.Any(name => changed.Contains(name) &&
-					!string.Equals(name, template.Name, StringComparison.Ordinal));
+			var triggered = !_reads.TryGetValue(template.Id, out var reads)
+				|| reads.Any(name
+					=> changed.Contains(name) && !string.Equals(name, template.Name, StringComparison.Ordinal));
 			if (triggered && affected.TryAdd(template.Id, template))
 			{
 				frontier.Enqueue(template);
@@ -340,7 +346,9 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 	}
 
 	private TemplateEvaluation Evaluate(VariableEntity variable, string template)
-		=> Evaluate(variable, template, _renderer);
+	{
+		return Evaluate(variable, template, _renderer);
+	}
 
 	private TemplateEvaluation Evaluate(VariableEntity variable, string template, VariableTemplateRenderer renderer)
 	{
@@ -384,8 +392,8 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 
 		variable.TemplateError = evaluation.Error;
 
-		var valueChanged = !string.Equals(previousValue, variable.Value, StringComparison.Ordinal) ||
-			wasAvailable != available;
+		var valueChanged = !string.Equals(previousValue, variable.Value, StringComparison.Ordinal)
+			|| wasAvailable != available;
 		var errorChanged = !Equals(previousError, evaluation.Error);
 		if (!valueChanged && !errorChanged)
 		{
@@ -421,8 +429,10 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 	}
 
 	private bool DependsOn(VariableEntity reader, VariableEntity upstream)
-		=> _reads.TryGetValue(reader.Id, out var reads) &&
-			reads.Any(name => Resolve(reader.Scope, reader.ScopeRefId, name)?.Id == upstream.Id);
+	{
+		return _reads.TryGetValue(reader.Id, out var reads)
+			&& reads.Any(name => Resolve(reader.Scope, reader.ScopeRefId, name)?.Id == upstream.Id);
+	}
 
 	// The variable may be unregistered or about to be renamed, so its own name is matched by visibility
 	// rather than through the registry, and its registered old name no longer counts as itself.
@@ -447,9 +457,9 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 					continue;
 				}
 
-				if (target.TemplateSource is not null &&
-					visited.Add(target.Id) &&
-					_reads.TryGetValue(target.Id, out var targetReads))
+				if (target.TemplateSource is not null
+					&& visited.Add(target.Id)
+					&& _reads.TryGetValue(target.Id, out var targetReads))
 				{
 					stack.Push((target.Scope, target.ScopeRefId, targetReads));
 				}

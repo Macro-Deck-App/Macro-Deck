@@ -34,8 +34,13 @@ internal sealed class SpotifyTokenPersisterTests
 	[Test]
 	public async Task Rotated_refresh_token_survives_a_simulated_restart()
 	{
-		var store = new RecordingIntegrationConfig();
-		store.Secrets[SpotifyConfigKeys.RefreshToken] = "old-refresh";
+		var store = new RecordingIntegrationConfig
+		{
+			Secrets =
+			{
+				[SpotifyConfigKeys.RefreshToken] = "old-refresh"
+			}
+		};
 		var persister = new SpotifyTokenPersister(store, SilentLogger());
 
 		persister.Enqueue(_entryId, "new-access", "new-refresh", DateTime.UtcNow);
@@ -48,11 +53,16 @@ internal sealed class SpotifyTokenPersisterTests
 	[Test]
 	public async Task Keeps_existing_refresh_token_when_the_response_omits_one()
 	{
-		var config = new RecordingIntegrationConfig();
-		config.Secrets[SpotifyConfigKeys.RefreshToken] = "existing-refresh";
+		var config = new RecordingIntegrationConfig
+		{
+			Secrets =
+			{
+				[SpotifyConfigKeys.RefreshToken] = "existing-refresh"
+			}
+		};
 		var persister = new SpotifyTokenPersister(config, SilentLogger());
 
-		persister.Enqueue(_entryId, "new-access", refreshToken: null, DateTime.UtcNow);
+		persister.Enqueue(_entryId, "new-access", null, DateTime.UtcNow);
 		await persister.FlushAsync();
 
 		Assert.Multiple(() =>
@@ -260,5 +270,8 @@ internal sealed class SpotifyTokenPersisterTests
 		Assert.That(await persister.EnqueueAndWaitAsync(_entryId, "access", "refresh", DateTime.UtcNow), Is.False);
 	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 }

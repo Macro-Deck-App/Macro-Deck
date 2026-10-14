@@ -23,12 +23,12 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets;
 public class ActionButtonStateServiceTests
 {
 	private const string TwoStates =
-		"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}]," +
-		"\"activeStateId\":\"off\"}";
+		"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}],"
+		+ "\"activeStateId\":\"off\"}";
 
 	private const string ThreeStates =
-		"{\"stateMode\":true,\"states\":[{\"id\":\"away\",\"label\":\"Away\"},{\"id\":\"off\",\"label\":\"Off\"}," +
-		"{\"id\":\"on\",\"label\":\"On\"}],\"activeStateId\":\"away\"}";
+		"{\"stateMode\":true,\"states\":[{\"id\":\"away\",\"label\":\"Away\"},{\"id\":\"off\",\"label\":\"Off\"},"
+		+ "{\"id\":\"on\",\"label\":\"On\"}],\"activeStateId\":\"away\"}";
 
 	[Test]
 	public async Task SetStateAction_SetsTheActiveStateWhenNoProviderOrMappingIsActive()
@@ -71,9 +71,9 @@ public class ActionButtonStateServiceTests
 	public async Task SetStateAction_FailsWhenTheStateIsDeterminedByAProvider()
 	{
 		const string data =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}]," +
-			"\"activeStateId\":\"off\",\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"i\"," +
-			"\"actionId\":\"a\",\"states\":[{\"id\":\"off\",\"label\":\"Off\"}]}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}],"
+			+ "\"activeStateId\":\"off\",\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"i\","
+			+ "\"actionId\":\"a\",\"states\":[{\"id\":\"off\",\"label\":\"Off\"}]}}";
 		var fixture = new Fixture(data);
 
 		var result = await fixture.Service.SetAsync(fixture.WidgetId, "on");
@@ -93,10 +93,10 @@ public class ActionButtonStateServiceTests
 		// A rule-carrying mapping is authoritative, unlike the rules-less case covered below - it can
 		// answer something activeStateId alone cannot, so it still locks out Set/Cycle State.
 		const string data =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}]," +
-			"\"activeStateId\":\"off\",\"stateMapping\":{\"rules\":[{\"id\":\"r1\",\"stateId\":\"on\"," +
-			"\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}]," +
-			"\"fallbackStateId\":\"off\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}],"
+			+ "\"activeStateId\":\"off\",\"stateMapping\":{\"rules\":[{\"id\":\"r1\",\"stateId\":\"on\","
+			+ "\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}],"
+			+ "\"fallbackStateId\":\"off\"}}";
 		var fixture = new Fixture(data);
 
 		var result = await fixture.Service.AdvanceAsync(fixture.WidgetId);
@@ -119,8 +119,8 @@ public class ActionButtonStateServiceTests
 	public async Task ToggleStateAction_AdvancesWhenTheStoredMappingHasNoRules()
 	{
 		const string data =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}]," +
-			"\"activeStateId\":\"a\",\"stateMapping\":{\"rules\":[],\"fallbackStateId\":\"a\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}],"
+			+ "\"activeStateId\":\"a\",\"stateMapping\":{\"rules\":[],\"fallbackStateId\":\"a\"}}";
 		var fixture = new Fixture(data);
 
 		var result = await fixture.Service.AdvanceAsync(fixture.WidgetId);
@@ -288,7 +288,8 @@ public class ActionButtonStateServiceTests
 	{
 		public Func<Task>? OnFlowExecuting { get; set; }
 
-		public async Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request,
+		public async Task<FlowExecutionResult> ExecuteAsync(
+			FlowExecutionRequest request,
 			CancellationToken cancellationToken)
 		{
 			if (OnFlowExecuting is { } callback)
@@ -309,7 +310,8 @@ public class ActionButtonStateServiceTests
 	{
 		public int Calls { get; private set; }
 
-		public Task PublishIfChanged(Guid widgetId,
+		public Task PublishIfChanged(
+			Guid widgetId,
 			WidgetStateReconciliation result,
 			CancellationToken cancellationToken = default)
 		{
@@ -322,7 +324,8 @@ public class ActionButtonStateServiceTests
 	{
 		public List<(string Name, object? Value)> Upserts { get; } = [];
 
-		public Task UpsertWidgetVariable(VariableScope scope,
+		public Task UpsertWidgetVariable(
+			VariableScope scope,
 			string scopeRefId,
 			string name,
 			VariableType type,
@@ -332,17 +335,30 @@ public class ActionButtonStateServiceTests
 			return Task.CompletedTask;
 		}
 
-		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name) => Task.CompletedTask;
+		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<IReadOnlyList<VariableEntity>> GetAll() => throw new NotSupportedException();
+		public Task<IReadOnlyList<VariableEntity>> GetAll()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetById(Guid id) => throw new NotSupportedException();
+		public Task<VariableEntity?> GetById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
 			string name,
@@ -352,20 +368,33 @@ public class ActionButtonStateServiceTests
 			object? initialValue,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+			VariableTemplateSource? templateSource = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+		public Task<Result<VariableEntity, VariableError>> SetValue(
+			Guid id,
 			object? value,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 			Guid id,
 			string? name,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+			VariableTemplateSource? templateSource = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+		public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
 			string integrationId,
@@ -378,37 +407,58 @@ public class ActionButtonStateServiceTests
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
 			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
-			bool publishedByHost = false) => throw new NotSupportedException();
+			bool publishedByHost = false)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+			string integrationId,
 			string resourceId,
 			string name,
 			VariableType type,
 			int? decimalPlaces,
-			VariableDeclaration? declaration = null) =>
+			VariableDeclaration? declaration = null)
+		{
 			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> GetByDefinition(MacroDeck.Sdk.Identity.QualifiedId definitionId)
-			=> Task.FromResult<VariableEntity?>(null);
+		{
+			return Task.FromResult<VariableEntity?>(null);
+		}
 
 		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
 			string integrationId,
 			Guid id,
 			object? value,
-			VariableBounds? bounds = null) => throw new NotSupportedException();
+			VariableBounds? bounds = null)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> SetIntegrationVariableAvailability(
 			string integrationId,
 			Guid id,
-			bool available) => throw new NotSupportedException();
+			bool available)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId) => throw new NotSupportedException();
+		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class SingleWidgetFolderCache : IFolderCache
@@ -416,20 +466,49 @@ public class ActionButtonStateServiceTests
 		private readonly FolderEntity _folder;
 
 		public SingleWidgetFolderCache(WidgetEntity widget)
-			=> _folder = new FolderEntity { Id = widget.FolderId, Name = "f", Order = 0, Widgets = [widget] };
+		{
+			_folder = new FolderEntity { Id = widget.FolderId, Name = "f", Order = 0, Widgets = [widget] };
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -474,38 +553,56 @@ public class ActionButtonStateServiceTests
 			return Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
 		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
 			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

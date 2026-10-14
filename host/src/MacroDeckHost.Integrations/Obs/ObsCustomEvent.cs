@@ -26,7 +26,9 @@ internal static partial class ObsCustomEvent
 	private static partial Regex FieldNamePattern();
 
 	public static string Serialize(JObject? data)
-		=> data is null || ExceedsDepth(data, 0) ? string.Empty : data.ToString(Newtonsoft.Json.Formatting.None);
+	{
+		return data is null || ExceedsDepth(data, 0) ? string.Empty : data.ToString(Newtonsoft.Json.Formatting.None);
+	}
 
 	public static IReadOnlyDictionary<string, object?>? Parse(string? json)
 	{
@@ -112,7 +114,9 @@ internal static partial class ObsCustomEvent
 	}
 
 	private static string Truncate(string? text, int max)
-		=> text is null ? string.Empty : text.Length <= max ? text : text[..max];
+	{
+		return text is null ? string.Empty : text.Length <= max ? text : text[..max];
+	}
 
 	private static bool ExceedsDepth(JToken token, int depth)
 	{

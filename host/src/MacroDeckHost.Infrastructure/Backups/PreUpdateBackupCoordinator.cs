@@ -11,7 +11,10 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 	private readonly Lock _sync = new();
 	private readonly HashSet<string> _backedUpBatchIds = [];
 
-	public PreUpdateBackupCoordinator(IServiceScopeFactory scopeFactory) => _scopeFactory = scopeFactory;
+	public PreUpdateBackupCoordinator(IServiceScopeFactory scopeFactory)
+	{
+		_scopeFactory = scopeFactory;
+	}
 
 	public bool IsRestorePending
 	{
@@ -23,7 +26,8 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 		}
 	}
 
-	public async Task<PreUpdateBackupOutcome> CreateBeforeHostUpdate(string? version,
+	public async Task<PreUpdateBackupOutcome> CreateBeforeHostUpdate(
+		string? version,
 		CancellationToken cancellationToken = default)
 	{
 		var settings = await GetBackupSettings();
@@ -45,7 +49,8 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 		return await CreateBackup(request, cancellationToken);
 	}
 
-	public async Task<PreUpdateBackupOutcome> EnsureBeforePluginUpdate(string pluginId,
+	public async Task<PreUpdateBackupOutcome> EnsureBeforePluginUpdate(
+		string pluginId,
 		string? batchId,
 		Action? starting = null,
 		CancellationToken cancellationToken = default)
@@ -89,7 +94,8 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 		return outcome;
 	}
 
-	private async Task<PreUpdateBackupOutcome> CreateBackup(CreateBackupRequest request,
+	private async Task<PreUpdateBackupOutcome> CreateBackup(
+		CreateBackupRequest request,
 		CancellationToken cancellationToken)
 	{
 		await using var scope = _scopeFactory.CreateAsyncScope();

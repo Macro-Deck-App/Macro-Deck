@@ -58,7 +58,9 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 
 	/// <inheritdoc />
 	public IAndroidDevice? FindDevice(string serial)
-		=> Devices.FirstOrDefault(device => string.Equals(device.Serial, serial, StringComparison.Ordinal));
+	{
+		return Devices.FirstOrDefault(device => string.Equals(device.Serial, serial, StringComparison.Ordinal));
+	}
 
 	/// <inheritdoc />
 	/// <remarks>The device named by <see cref="DefaultDeviceSerial" />, attached or added and removed earlier, or the only
@@ -193,7 +195,8 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 
 	/// <summary>Attaches a device and raises <see cref="DeviceConnected" />. A device removed earlier comes back as the same
 	/// instance.</summary>
-	public FakeAndroidDevice AddDevice(string serial,
+	public FakeAndroidDevice AddDevice(
+		string serial,
 		AndroidDeviceState state = AndroidDeviceState.Online,
 		AndroidDeviceInfo? info = null)
 	{
@@ -249,8 +252,9 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 		FakeAndroidDevice device;
 		lock (_gate)
 		{
-			device = _devices.FirstOrDefault(existing => string.Equals(existing.Serial, serial, StringComparison.Ordinal)) ??
-				throw new InvalidOperationException($"No device with serial '{serial}' is attached.");
+			device = _devices.FirstOrDefault(existing
+					=> string.Equals(existing.Serial, serial, StringComparison.Ordinal))
+				?? throw new InvalidOperationException($"No device with serial '{serial}' is attached.");
 		}
 
 		var previous = device.State;
@@ -270,8 +274,9 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 		FakeAndroidDevice device;
 		lock (_gate)
 		{
-			device = _devices.FirstOrDefault(existing => string.Equals(existing.Serial, serial, StringComparison.Ordinal)) ??
-				throw new InvalidOperationException($"No device with serial '{serial}' is attached.");
+			device = _devices.FirstOrDefault(existing
+					=> string.Equals(existing.Serial, serial, StringComparison.Ordinal))
+				?? throw new InvalidOperationException($"No device with serial '{serial}' is attached.");
 		}
 
 		if (device.LacksUsbPermission == lacksUsbPermission)
@@ -290,8 +295,9 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 		FakeAndroidDevice device;
 		lock (_gate)
 		{
-			device = _devices.FirstOrDefault(existing => string.Equals(existing.Serial, serial, StringComparison.Ordinal)) ??
-				throw new InvalidOperationException($"No device with serial '{serial}' is attached.");
+			device = _devices.FirstOrDefault(existing
+					=> string.Equals(existing.Serial, serial, StringComparison.Ordinal))
+				?? throw new InvalidOperationException($"No device with serial '{serial}' is attached.");
 		}
 
 		if (device.Mode == mode)

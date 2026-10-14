@@ -21,7 +21,11 @@ public interface IWidgetAppearanceService
 	async Task<WidgetAppearanceOutcome> ApplyWithOutcomeAsync(
 		WidgetAppearanceRequest request,
 		CancellationToken cancellationToken = default)
-		=> await ApplyAsync(request, cancellationToken) ? WidgetAppearanceOutcome.Changed : WidgetAppearanceOutcome.Unchanged;
+	{
+		return await ApplyAsync(request, cancellationToken)
+			? WidgetAppearanceOutcome.Changed
+			: WidgetAppearanceOutcome.Unchanged;
+	}
 }
 
 public sealed class WidgetAppearanceService : IWidgetAppearanceService
@@ -92,12 +96,17 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		return result;
 	}
 
-	public bool Exists(string widgetId) => Guid.TryParse(widgetId, out var id) && FindWidget(id) is not null;
+	public bool Exists(string widgetId)
+	{
+		return Guid.TryParse(widgetId, out var id) && FindWidget(id) is not null;
+	}
 
 	public async Task<bool> ApplyAsync(
 		WidgetAppearanceRequest request,
 		CancellationToken cancellationToken = default)
-		=> await ApplyWithOutcomeAsync(request, cancellationToken) == WidgetAppearanceOutcome.Changed;
+	{
+		return await ApplyWithOutcomeAsync(request, cancellationToken) == WidgetAppearanceOutcome.Changed;
+	}
 
 	public async Task<WidgetAppearanceOutcome> ApplyWithOutcomeAsync(
 		WidgetAppearanceRequest request,
@@ -110,7 +119,8 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 
 		if (!TryCanonicalizeIconAppearance(request.Patch, out var requestedPatch))
 		{
-			_logger.Warning("Widget appearance change on widget {WidgetId} skipped: the icon appearance is not a valid key",
+			_logger.Warning(
+				"Widget appearance change on widget {WidgetId} skipped: the icon appearance is not a valid key",
 				request.WidgetId);
 			return WidgetAppearanceOutcome.Rejected;
 		}
@@ -183,8 +193,8 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		var hasSchema = _schemas.TryGet(widget.Type, out var schema);
 		foreach (var property in WidgetAppearanceJson.ProviderOptionalProperties)
 		{
-			if (declared.Contains(property) &&
-				(!hasSchema || _schemaProbe.Accepts(widget.Type, schema!, widget.Data ?? string.Empty, property)))
+			if (declared.Contains(property)
+				&& (!hasSchema || _schemaProbe.Accepts(widget.Type, schema!, widget.Data ?? string.Empty, property)))
 			{
 				supported.Add(property);
 			}
@@ -225,7 +235,9 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 	/// can answer right now (issue #425 decision 2).
 	/// </summary>
 	private static bool HasActiveIconProvider(WidgetEntity widget, JsonObject data)
-		=> widget.Type == WidgetTypeIds.ActionButton && ActionButtonStateModel.Read(data).IconProvider is not null;
+	{
+		return widget.Type == WidgetTypeIds.ActionButton && ActionButtonStateModel.Read(data).IconProvider is not null;
+	}
 
 	/// <summary>
 	/// Drops the icon property from a patch/clear-request exactly as a property the target type has no
@@ -234,11 +246,14 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 	/// </summary>
 	private static (WidgetAppearancePatch Patch, IReadOnlyCollection<WidgetAppearanceProperty> ClearProperties)
 		WithoutIcon(WidgetAppearancePatch patch, IReadOnlyCollection<WidgetAppearanceProperty> clearProperties)
-		=> (patch with { IconId = null, IconAppearance = null },
+	{
+		return (patch with { IconId = null, IconAppearance = null },
 			clearProperties.Count == 0
 				? clearProperties
 				: clearProperties.Where(property => property is not (WidgetAppearanceProperty.Icon
-					or WidgetAppearanceProperty.IconAppearance)).ToList());
+						or WidgetAppearanceProperty.IconAppearance))
+					.ToList());
+	}
 
 	private static bool TryCanonicalizeIconAppearance(WidgetAppearancePatch patch, out WidgetAppearancePatch canonical)
 	{
@@ -291,7 +306,9 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 	}
 
 	private WidgetEntity? FindWidget(Guid id)
-		=> _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(w => w.Id == id);
+	{
+		return _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(w => w.Id == id);
+	}
 
 	/// <summary>
 	/// Never a live provider read - <see cref="GetWidgets" /> runs synchronously on every options
@@ -348,14 +365,17 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		return string.IsNullOrWhiteSpace(label) ? DescribeType(widget.Type) : label;
 	}
 
-	public static string DescribeType(string type) => type switch
+	public static string DescribeType(string type)
 	{
-		WidgetTypeIds.ActionButton => "Button",
-		WidgetTypeIds.MusicPlayer => "Music Player",
-		WidgetTypeIds.Slider => "Slider",
-		WidgetTypeIds.Weather => "Weather",
-		WidgetTypeIds.HistoryGraph => "History Graph",
-		WidgetTypeIds.Clock => "Clock",
-		_ => "Widget"
-	};
+		return type switch
+		{
+			WidgetTypeIds.ActionButton => "Button",
+			WidgetTypeIds.MusicPlayer => "Music Player",
+			WidgetTypeIds.Slider => "Slider",
+			WidgetTypeIds.Weather => "Weather",
+			WidgetTypeIds.HistoryGraph => "History Graph",
+			WidgetTypeIds.Clock => "Clock",
+			_ => "Widget"
+		};
+	}
 }

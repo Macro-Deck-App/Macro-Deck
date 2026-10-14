@@ -25,7 +25,8 @@ public sealed class RemoteUiSessionProvider : IUiSessionProvider
 
 	public bool GatedByHostLock => true;
 
-	public async Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command,
+	public async Task<UiSessionOpenOutcome> OpenAsync(
+		UiSessionOpenCommand command,
 		CancellationToken cancellationToken)
 	{
 		var data = await InvokeAsync(CapabilityOperations.Ui.SessionOpen,
@@ -55,16 +56,21 @@ public sealed class RemoteUiSessionProvider : IUiSessionProvider
 	}
 
 	public Task CloseAsync(string sessionId, string reason, CancellationToken cancellationToken)
-		=> InvokeAsync(CapabilityOperations.Ui.SessionClose,
+	{
+		return InvokeAsync(CapabilityOperations.Ui.SessionClose,
 			new UiSessionCloseArguments { SessionId = sessionId, Reason = reason },
 			cancellationToken);
+	}
 
 	public Task RequestSnapshotAsync(string sessionId, CancellationToken cancellationToken)
-		=> InvokeAsync(CapabilityOperations.Ui.SessionSnapshot,
+	{
+		return InvokeAsync(CapabilityOperations.Ui.SessionSnapshot,
 			new UiSessionSnapshotArguments { SessionId = sessionId },
 			cancellationToken);
+	}
 
-	public async Task DispatchEventAsync(string sessionId,
+	public async Task DispatchEventAsync(
+		string sessionId,
 		UiSessionEventCommand command,
 		CancellationToken cancellationToken)
 	{
@@ -91,11 +97,14 @@ public sealed class RemoteUiSessionProvider : IUiSessionProvider
 	}
 
 	private static bool IsDroppableMove(UiSessionEventCommand command, RemoteCapabilityException exception)
-		=> string.Equals(command.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal) &&
-			(string.Equals(exception.Code, ProtocolErrorCodes.RateLimited, StringComparison.Ordinal) ||
-				string.Equals(exception.Code, ProtocolErrorCodes.Timeout, StringComparison.Ordinal));
+	{
+		return string.Equals(command.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal)
+			&& (string.Equals(exception.Code, ProtocolErrorCodes.RateLimited, StringComparison.Ordinal)
+				|| string.Equals(exception.Code, ProtocolErrorCodes.Timeout, StringComparison.Ordinal));
+	}
 
-	private async Task<JsonElement?> InvokeAsync(string operation,
+	private async Task<JsonElement?> InvokeAsync(
+		string operation,
 		object arguments,
 		CancellationToken cancellationToken)
 	{

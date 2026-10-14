@@ -24,7 +24,11 @@ public class RemoteNotificationServiceTests
 	[SetUp]
 	public void SetUp()
 	{
-		_invoker = new ScriptedInvoker { Reply = _ => JsonSerializer.SerializeToElement(new NotificationsShowResult { Id = _id }, PluginProtocolJson.Options) };
+		_invoker = new ScriptedInvoker
+		{
+			Reply = _ => JsonSerializer.SerializeToElement(new NotificationsShowResult { Id = _id },
+				PluginProtocolJson.Options)
+		};
 		_state = new PluginConnectionState();
 		_results = new NotificationResultStore();
 		_service = new RemoteNotificationService(_invoker, _state, _results);
@@ -74,9 +78,12 @@ public class RemoteNotificationServiceTests
 	[Test]
 	public async Task The_handle_completes_once_with_what_the_host_reports()
 	{
-		var handle = await _service.ShowAsync(new NotificationOptions { Title = "Q", Popup = NotificationPopup.Dialog });
+		var handle = await _service.ShowAsync(new NotificationOptions
+			{ Title = "Q", Popup = NotificationPopup.Dialog });
 
-		_results.Complete(Result(NotificationsWire.CloseReason.Action, "yes", "admin",
+		_results.Complete(Result(NotificationsWire.CloseReason.Action,
+			"yes",
+			"admin",
 			new Dictionary<string, JsonElement> { ["name"] = JsonSerializer.SerializeToElement("Ada") }));
 		_results.Complete(Result(NotificationsWire.CloseReason.Dismissed, null, "other"));
 		var result = await handle.Completion;
@@ -96,7 +103,8 @@ public class RemoteNotificationServiceTests
 		_invoker.Reply = _ =>
 		{
 			_results.Complete(Result(NotificationsWire.CloseReason.Timeout, null, null));
-			return JsonSerializer.SerializeToElement(new NotificationsShowResult { Id = _id }, PluginProtocolJson.Options);
+			return JsonSerializer.SerializeToElement(new NotificationsShowResult { Id = _id },
+				PluginProtocolJson.Options);
 		};
 
 		var handle = await _service.ShowAsync(new NotificationOptions { Title = "Quick" });
@@ -117,11 +125,12 @@ public class RemoteNotificationServiceTests
 	[Test]
 	public async Task A_new_session_ends_every_pending_notification_as_host_unavailable_but_a_resume_does_not()
 	{
-		var handle = await _service.ShowAsync(new NotificationOptions { Title = "Q", Popup = NotificationPopup.Dialog });
+		var handle = await _service.ShowAsync(new NotificationOptions
+			{ Title = "Q", Popup = NotificationPopup.Dialog });
 
-		_state.RaiseConnected(resumed: true);
+		_state.RaiseConnected(true);
 		var afterResume = handle.Completion.IsCompleted;
-		_state.RaiseConnected(resumed: false);
+		_state.RaiseConnected(false);
 
 		Assert.That(afterResume, Is.False);
 		Assert.That((await handle.Completion).CloseReason, Is.EqualTo(NotificationCloseReason.HostUnavailable));
@@ -164,7 +173,8 @@ public class RemoteNotificationServiceTests
 	{
 		using var cancellation = new CancellationTokenSource();
 
-		var wait = _service.ShowForResultAsync(new NotificationOptions { Title = "Q", Popup = NotificationPopup.Dialog },
+		var wait = _service.ShowForResultAsync(
+			new NotificationOptions { Title = "Q", Popup = NotificationPopup.Dialog },
 			cancellation.Token);
 		await _invoker.WaitForCallsAsync(1);
 		await cancellation.CancelAsync();
@@ -174,14 +184,17 @@ public class RemoteNotificationServiceTests
 		Assert.That(_invoker.Calls[1].Operation, Is.EqualTo(HostOperations.Notifications.Close));
 	}
 
-	private UiNotificationResultArguments Result(string reason,
+	private UiNotificationResultArguments Result(
+		string reason,
 		string? actionId,
 		string? clientId,
 		IReadOnlyDictionary<string, JsonElement>? values = null)
-		=> new()
+	{
+		return new UiNotificationResultArguments
 		{
 			NotificationId = _id, CloseReason = reason, ActionId = actionId, ClientId = clientId, Values = values
 		};
+	}
 
 	private sealed record Call(string Api, string Operation, object? Arguments);
 
@@ -206,7 +219,8 @@ public class RemoteNotificationServiceTests
 			}
 		}
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -229,9 +243,15 @@ public class RemoteNotificationServiceTests
 				: null);
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 
-		public void Dispose() => _signal.Dispose();
+		public void Dispose()
+		{
+			_signal.Dispose();
+		}
 
 		public async Task WaitForCallsAsync(int count)
 		{

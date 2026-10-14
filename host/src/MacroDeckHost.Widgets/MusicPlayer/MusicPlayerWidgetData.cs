@@ -86,7 +86,7 @@ public sealed record MusicPlayerWidgetData
 			ShowTimeline = ReadBool(data, "showTimeline") ?? true,
 			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
 			ShowSource = ReadBool(data, "showSource") ?? true,
-			InstanceOptionsJson = CanonicalObject(data, "instanceOptions"),
+			InstanceOptionsJson = CanonicalObject(data, "instanceOptions")
 		};
 	}
 
@@ -120,12 +120,16 @@ public sealed record MusicPlayerWidgetData
 	}
 
 	private static string? ReadString(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool? ReadBool(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
 			? value.GetBoolean()
 			: null;
+	}
 }

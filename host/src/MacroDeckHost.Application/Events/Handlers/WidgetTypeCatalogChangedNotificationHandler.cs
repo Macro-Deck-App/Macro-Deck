@@ -14,7 +14,8 @@ public sealed class WidgetTypeCatalogChangedNotificationHandler
 	private readonly IUiTransport _uiTransport;
 	private readonly IIntegrationRegistry _integrations;
 
-	public WidgetTypeCatalogChangedNotificationHandler(IWidgetTypeRegistry registry,
+	public WidgetTypeCatalogChangedNotificationHandler(
+		IWidgetTypeRegistry registry,
 		IUiTransport uiTransport,
 		IIntegrationRegistry integrations)
 	{

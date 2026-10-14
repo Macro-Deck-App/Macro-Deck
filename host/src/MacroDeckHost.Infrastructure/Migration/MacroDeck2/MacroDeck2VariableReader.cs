@@ -69,10 +69,12 @@ internal static class MacroDeck2VariableReader
 	/// precision separately, so both collapse onto <see cref="VariableType.Numeric" />.
 	/// </summary>
 	private static VariableType MapType(string? type)
-		=> type?.Trim().ToLowerInvariant() switch
+	{
+		return type?.Trim().ToLowerInvariant() switch
 		{
 			"bool" or "boolean" => VariableType.Boolean,
 			"integer" or "int" or "float" or "double" or "number" => VariableType.Numeric,
 			_ => VariableType.Text
 		};
+	}
 }

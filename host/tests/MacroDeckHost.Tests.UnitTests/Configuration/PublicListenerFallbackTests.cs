@@ -151,8 +151,8 @@ public class PublicListenerFallbackTests
 		Assert.DoesNotThrow(() =>
 			plan = HostListenerPlan.Create(PublicEndpointSet.HttpOnly(port),
 				0,
-				certificate: null,
-				probe: _ => new PublicListenerProbeResult(false, error, 10013)));
+				null,
+				_ => new PublicListenerProbeResult(false, error, 10013)));
 
 		Assert.That(plan!.PublicListenerAvailable, Is.False);
 	}
@@ -217,7 +217,7 @@ public class PublicListenerFallbackTests
 	public async Task A_certificate_that_cannot_be_loaded_leaves_no_public_listener_in_replace_mode()
 	{
 		var publicPort = GetFreeTcpPort();
-		var plan = HostListenerPlan.Create(PublicEndpointSet.HttpsReplacingHttp(publicPort), 0, certificate: null);
+		var plan = HostListenerPlan.Create(PublicEndpointSet.HttpsReplacingHttp(publicPort), 0, null);
 
 		using var host = await StartMinimalHostAsync(plan.Apply);
 		try
@@ -248,7 +248,7 @@ public class PublicListenerFallbackTests
 		var httpsPort = GetFreeTcpPort();
 		var plan = HostListenerPlan.Create(PublicEndpointSet.HttpAndHttps(httpPort, httpsPort),
 			0,
-			certificate: null);
+			null);
 
 		using var host = await StartMinimalHostAsync(plan.Apply);
 		try
@@ -315,15 +315,17 @@ public class PublicListenerFallbackTests
 			DateTimeOffset.UtcNow.AddDays(1));
 
 		return X509CertificateLoader.LoadPkcs12(certificate.Export(X509ContentType.Pkcs12),
-			password: null,
+			null,
 			PublicTlsServerCertificate.KeyStorageFlags);
 	}
 
 	private static HttpClient CreateCertificateIgnoringClient()
-		=> new(new HttpClientHandler
+	{
+		return new HttpClient(new HttpClientHandler
 		{
 			ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
 		});
+	}
 
 	private static async Task<IHost> StartMinimalHostAsync(Action<KestrelServerOptions> configureKestrel)
 	{
@@ -353,14 +355,18 @@ public class PublicListenerFallbackTests
 	}
 
 	private static ICollection<string> GetServerAddresses(IHost host)
-		=> host.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses;
+	{
+		return host.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses;
+	}
 
 	private static int GetBoundLoopbackPort(IHost host)
-		=> GetServerAddresses(host)
+	{
+		return GetServerAddresses(host)
 			.Select(address => new Uri(address))
 			.Where(uri => uri.Host is "127.0.0.1" or "localhost")
 			.Select(uri => uri.Port)
 			.Single();
+	}
 
 	private static Socket HoldPortOnAny()
 	{

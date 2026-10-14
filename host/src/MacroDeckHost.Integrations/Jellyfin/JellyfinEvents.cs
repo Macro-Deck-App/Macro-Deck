@@ -56,48 +56,58 @@ internal static class JellyfinEventDefinitions
 		Server(JellyfinEventIds.Disconnected, MacroDeckStrings.Connection.Disconnected())
 	];
 
-	private static EventDefinition Session(string id, LocalizedText name, LocalizedText description) => new()
+	private static EventDefinition Session(string id, LocalizedText name, LocalizedText description)
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = Strings.Category(),
-		ConfigurationParameters = [ConfigurationParameter(), DeviceParameter()],
-		PayloadParameters =
-		[
-			ConfigurationParameter(),
-			ActionParameter.Text(JellyfinEventPayload.Server, label: Params.Server()),
-			ActionParameter.Text(JellyfinEventPayload.SessionId, label: Params.Session()),
-			DeviceParameter(),
-			ActionParameter.Text(JellyfinEventPayload.Device, label: Params.Device()),
-			ActionParameter.Text(JellyfinEventPayload.Client, label: Params.Client()),
-			ActionParameter.Text(JellyfinEventPayload.User, label: Params.User()),
-			ActionParameter.Text(JellyfinEventPayload.ItemId, label: Params.ItemId()),
-			ActionParameter.Text(JellyfinEventPayload.ItemName, label: Params.ItemName()),
-			ActionParameter.Text(JellyfinEventPayload.ItemType, label: Params.ItemType()),
-			ActionParameter.Text(JellyfinEventPayload.Series, label: Params.Series()),
-			ActionParameter.Text(JellyfinEventPayload.Album, label: Params.Album())
-		]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = Strings.Category(),
+			ConfigurationParameters = [ConfigurationParameter(), DeviceParameter()],
+			PayloadParameters =
+			[
+				ConfigurationParameter(),
+				ActionParameter.Text(JellyfinEventPayload.Server, Params.Server()),
+				ActionParameter.Text(JellyfinEventPayload.SessionId, Params.Session()),
+				DeviceParameter(),
+				ActionParameter.Text(JellyfinEventPayload.Device, Params.Device()),
+				ActionParameter.Text(JellyfinEventPayload.Client, Params.Client()),
+				ActionParameter.Text(JellyfinEventPayload.User, Params.User()),
+				ActionParameter.Text(JellyfinEventPayload.ItemId, Params.ItemId()),
+				ActionParameter.Text(JellyfinEventPayload.ItemName, Params.ItemName()),
+				ActionParameter.Text(JellyfinEventPayload.ItemType, Params.ItemType()),
+				ActionParameter.Text(JellyfinEventPayload.Series, Params.Series()),
+				ActionParameter.Text(JellyfinEventPayload.Album, Params.Album())
+			]
+		};
+	}
 
-	private static EventDefinition Server(string id, LocalizedText name) => new()
+	private static EventDefinition Server(string id, LocalizedText name)
 	{
-		Id = id,
-		Name = name,
-		Category = Strings.Category(),
-		ConfigurationParameters = [ConfigurationParameter()],
-		PayloadParameters =
-		[
-			ConfigurationParameter(),
-			ActionParameter.Text(JellyfinEventPayload.Server, label: Params.Server())
-		]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Category = Strings.Category(),
+			ConfigurationParameters = [ConfigurationParameter()],
+			PayloadParameters =
+			[
+				ConfigurationParameter(),
+				ActionParameter.Text(JellyfinEventPayload.Server, Params.Server())
+			]
+		};
+	}
 
 	private static ActionParameter ConfigurationParameter()
-		=> ActionParameter.DynamicChoice(JellyfinEventPayload.Configuration, label: Params.Server());
+	{
+		return ActionParameter.DynamicChoice(JellyfinEventPayload.Configuration, Params.Server());
+	}
 
 	private static ActionParameter DeviceParameter()
-		=> ActionParameter.DynamicChoice(JellyfinEventPayload.DeviceId, label: Params.Device());
+	{
+		return ActionParameter.DynamicChoice(JellyfinEventPayload.DeviceId, Params.Device());
+	}
 }
 
 internal static class JellyfinEventDiff
@@ -111,7 +121,8 @@ internal static class JellyfinEventDiff
 		JellyfinServerState current)
 	{
 		var events = new List<JellyfinEvent>();
-		var wasDown = previous.Status is JellyfinConnectionStatus.Connecting or JellyfinConnectionStatus.Disconnected
+		var wasDown = previous.Status is JellyfinConnectionStatus.Connecting
+			or JellyfinConnectionStatus.Disconnected
 			or JellyfinConnectionStatus.AuthenticationFailed;
 		var isDown = current.Status is JellyfinConnectionStatus.Disconnected
 			or JellyfinConnectionStatus.AuthenticationFailed;
@@ -124,7 +135,9 @@ internal static class JellyfinEventDiff
 			events.Add(new JellyfinEvent(JellyfinEventIds.Disconnected, ServerPayload(entryId, serverTitle)));
 		}
 
-		if (previous.LastSuccess is null || !current.IsConnected || ReferenceEquals(previous.Sessions, current.Sessions))
+		if (previous.LastSuccess is null
+			|| !current.IsConnected
+			|| ReferenceEquals(previous.Sessions, current.Sessions))
 		{
 			return events;
 		}
@@ -136,10 +149,18 @@ internal static class JellyfinEventDiff
 		{
 			if (!before.TryGetValue(deviceId, out var old))
 			{
-				events.Add(SessionEvent(JellyfinEventIds.SessionConnected, entryId, serverTitle, session, session.NowPlaying));
+				events.Add(SessionEvent(JellyfinEventIds.SessionConnected,
+					entryId,
+					serverTitle,
+					session,
+					session.NowPlaying));
 				if (session.NowPlaying is not null)
 				{
-					events.Add(SessionEvent(JellyfinEventIds.PlaybackStarted, entryId, serverTitle, session, session.NowPlaying));
+					events.Add(SessionEvent(JellyfinEventIds.PlaybackStarted,
+						entryId,
+						serverTitle,
+						session,
+						session.NowPlaying));
 				}
 
 				continue;
@@ -191,19 +212,24 @@ internal static class JellyfinEventDiff
 	}
 
 	private static Dictionary<string, JellyfinSession> ByDevice(IReadOnlyList<JellyfinSession> sessions)
-		=> sessions
+	{
+		return sessions
 			.GroupBy(session => session.DeviceId, StringComparer.Ordinal)
 			.ToDictionary(group => group.Key,
 				group => group.OrderByDescending(session => session.IsActive)
 					.ThenByDescending(session => session.LastActivity)
 					.First(),
 				StringComparer.Ordinal);
+	}
 
-	private static Dictionary<string, object?> ServerPayload(Guid entryId, string serverTitle) => new()
+	private static Dictionary<string, object?> ServerPayload(Guid entryId, string serverTitle)
 	{
-		[JellyfinEventPayload.Configuration] = entryId.ToString("D"),
-		[JellyfinEventPayload.Server] = serverTitle
-	};
+		return new Dictionary<string, object?>
+		{
+			[JellyfinEventPayload.Configuration] = entryId.ToString("D"),
+			[JellyfinEventPayload.Server] = serverTitle
+		};
+	}
 
 	private static JellyfinEvent SessionEvent(
 		string id,
@@ -222,7 +248,8 @@ internal static class JellyfinEventDiff
 		payload[JellyfinEventPayload.ItemName] = item?.Name ?? string.Empty;
 		payload[JellyfinEventPayload.ItemType] = item?.Type ?? string.Empty;
 		payload[JellyfinEventPayload.Series] = item?.SeriesName ?? string.Empty;
-		payload[JellyfinEventPayload.Album] = item?.IsAudio == true ? item.Album ?? string.Empty : item?.SeasonName ?? string.Empty;
+		payload[JellyfinEventPayload.Album]
+			= item?.IsAudio == true ? item.Album ?? string.Empty : item?.SeasonName ?? string.Empty;
 		return new JellyfinEvent(id, payload);
 	}
 }

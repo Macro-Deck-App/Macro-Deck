@@ -25,8 +25,8 @@ internal sealed class OrdinalKeyOrderedMapConverter : JsonConverterFactory
 			return false;
 		}
 
-		return typeToConvert.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>) &&
-			typeToConvert.GetGenericArguments()[0] == typeof(string);
+		return typeToConvert.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)
+			&& typeToConvert.GetGenericArguments()[0] == typeof(string);
 	}
 
 	public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)

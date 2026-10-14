@@ -22,9 +22,13 @@ public class WidgetIconResourcesTests
 
 		public string Type => WidgetIconReference.IconPackType;
 
-		public string? GetVersion(string reference) => null;
+		public string? GetVersion(string reference)
+		{
+			return null;
+		}
 
-		public Task<WidgetIconImage?> GetImageAsync(string reference,
+		public Task<WidgetIconImage?> GetImageAsync(
+			string reference,
 			int size,
 			bool acceptWebp,
 			bool staticFrame,
@@ -41,9 +45,15 @@ public class WidgetIconResourcesTests
 	{
 		private readonly IWidgetIconSource _source;
 
-		public SingleSourceRegistry(IWidgetIconSource source) => _source = source;
+		public SingleSourceRegistry(IWidgetIconSource source)
+		{
+			_source = source;
+		}
 
-		public IWidgetIconSource? Find(string type) => type == _source.Type ? _source : null;
+		public IWidgetIconSource? Find(string type)
+		{
+			return type == _source.Type ? _source : null;
+		}
 	}
 
 	private static (IWidgetIconResources Resources, FakeWidgetIconSource Source, UiResourceStore Store) Create()
@@ -53,12 +63,15 @@ public class WidgetIconResourcesTests
 		var resources = new WidgetIconResources(new SingleSourceRegistry(source),
 			store,
 			Log.Logger,
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
+			new Devices.Surfaces.StubIconPackCache());
 
 		return (resources, source, store);
 	}
 
-	private static WidgetIconReference IconPack(Guid id) => WidgetIconReference.IconPack(id.ToString());
+	private static WidgetIconReference IconPack(Guid id)
+	{
+		return WidgetIconReference.IconPack(id.ToString());
+	}
 
 	[Test]
 	public async Task A_configured_icon_becomes_a_resolvable_UiResource()

@@ -39,7 +39,8 @@ internal sealed class NativeLink
 	private bool _helloQueued;
 	private bool _ackQueued;
 
-	public NativeLink(ILinkCarrier carrier,
+	public NativeLink(
+		ILinkCarrier carrier,
 		string deviceKey,
 		ILinkStreamDialer dialer,
 		TimeProvider time,
@@ -88,7 +89,7 @@ internal sealed class NativeLink
 		{
 			var now = _time.GetUtcNow();
 			_lastReceivedAt = now;
-			Restart(now, "carrier opened", enterSeeking: true);
+			Restart(now, "carrier opened", true);
 		}
 
 		var loops = new[] { ReadLoopAsync(run.Token), WriteLoopAsync(run.Token) };
@@ -136,9 +137,14 @@ internal sealed class NativeLink
 	// DATA takes a slot that is only freed once the frame is written, so a carrier that stops accepting
 	// writes stops the stream pumps instead of queueing without bound.
 	internal ValueTask AcquireDataSlotAsync(CancellationToken cancellationToken)
-		=> _dataSlots.Writer.WriteAsync(true, cancellationToken);
+	{
+		return _dataSlots.Writer.WriteAsync(true, cancellationToken);
+	}
 
-	internal void ReleaseDataSlot() => _dataSlots.Reader.TryRead(out _);
+	internal void ReleaseDataSlot()
+	{
+		_dataSlots.Reader.TryRead(out _);
+	}
 
 	internal bool TrySendData(NativeLinkStream stream, ReadOnlyMemory<byte> payload)
 	{
@@ -149,7 +155,9 @@ internal sealed class NativeLink
 				return false;
 			}
 
-			_outbound.Writer.TryWrite(new Outbound(OutboundKind.Data, LinkFrame.Data(stream.Id, payload).Encode(), stream));
+			_outbound.Writer.TryWrite(new Outbound(OutboundKind.Data,
+				LinkFrame.Data(stream.Id, payload).Encode(),
+				stream));
 			_lastSentAt = _time.GetUtcNow();
 			return true;
 		}
@@ -184,7 +192,9 @@ internal sealed class NativeLink
 	}
 
 	private bool IsCurrent(NativeLinkStream stream)
-		=> _streams.TryGetValue(stream.Id, out var current) && ReferenceEquals(current, stream);
+	{
+		return _streams.TryGetValue(stream.Id, out var current) && ReferenceEquals(current, stream);
+	}
 
 	private async Task ReadLoopAsync(CancellationToken cancellationToken)
 	{
@@ -232,8 +242,8 @@ internal sealed class NativeLink
 				_writing = true;
 				await _carrier.WriteFrameAsync(frame, linked.Token);
 			}
-			catch (Exception ex) when (!cancellationToken.IsCancellationRequested &&
-				(ex is TimeoutException || (ex is OperationCanceledException && timeout.IsCancellationRequested)))
+			catch (Exception ex) when (!cancellationToken.IsCancellationRequested
+				&& (ex is TimeoutException || ex is OperationCanceledException && timeout.IsCancellationRequested))
 			{
 				// Before the app ever answered, nothing reads the other end yet: the frame is dropped and HELLO
 				// keeps being offered on the same carrier instead of reopening it every 15 seconds.
@@ -296,7 +306,7 @@ internal sealed class NativeLink
 			if (now - _lastReceivedAt >= LinkProtocol.PeerTimeout)
 			{
 				_lastReceivedAt = now;
-				Restart(now, "peer silent", enterSeeking: true);
+				Restart(now, "peer silent", true);
 			}
 
 			var nothingQueued = !_writing && _outbound.Reader.Count == 0;
@@ -319,7 +329,7 @@ internal sealed class NativeLink
 			if (item.Resync)
 			{
 				// The reader already rescanned what it had buffered; seeking again would drop what it found.
-				Restart(now, "malformed or incomplete frame", enterSeeking: false);
+				Restart(now, "malformed or incomplete frame", false);
 				continue;
 			}
 
@@ -343,7 +353,8 @@ internal sealed class NativeLink
 
 					break;
 				case LinkFrameType.Window:
-					if (frame.Stream != LinkProtocol.ControlStream && _streams.TryGetValue(frame.Stream, out var granted))
+					if (frame.Stream != LinkProtocol.ControlStream
+						&& _streams.TryGetValue(frame.Stream, out var granted))
 					{
 						granted.Grant(frame.Credit);
 					}

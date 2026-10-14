@@ -116,8 +116,8 @@ public class PluginRegistrationController : ControllerBase
 		}
 
 		var authResult = await HttpContext.AuthenticateAsync(AuthDefaults.PolicySchemeName);
-		if (!authResult.Succeeded ||
-			!string.Equals(authResult.Principal?.FindFirst(AuthDefaults.ScopeClaim)?.Value,
+		if (!authResult.Succeeded
+			|| !string.Equals(authResult.Principal?.FindFirst(AuthDefaults.ScopeClaim)?.Value,
 				AuthDefaults.AdminScope,
 				StringComparison.Ordinal))
 		{

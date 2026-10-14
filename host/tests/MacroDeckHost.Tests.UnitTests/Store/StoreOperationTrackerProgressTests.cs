@@ -18,7 +18,7 @@ internal sealed class StoreOperationTrackerProgressTests
 			"com.acme.hue",
 			"1.0.0",
 			"Hue Bridge",
-			previousVersion: null);
+			null);
 
 		tracker.Transition(operation.Id, StoreOperationState.Completed);
 		tracker.Transition(operation.Id, StoreOperationState.Cancelled);
@@ -35,7 +35,7 @@ internal sealed class StoreOperationTrackerProgressTests
 			"com.acme.hue",
 			"1.1.0",
 			"Hue Bridge",
-			previousVersion: "1.0.0");
+			"1.0.0");
 		tracker.Transition(operation.Id, StoreOperationState.Downloading);
 		tracker.Transition(operation.Id, StoreOperationState.Installing);
 
@@ -55,7 +55,7 @@ internal sealed class StoreOperationTrackerProgressTests
 				"com.acme.hue",
 				"1.0.0",
 				"Hue Bridge",
-				previousVersion: null);
+				null);
 
 			using var start = new ManualResetEventSlim();
 			var reporter = Task.Run(() =>

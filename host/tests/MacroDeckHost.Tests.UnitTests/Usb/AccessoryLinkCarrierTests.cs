@@ -21,9 +21,15 @@ public class AccessoryLinkCarrierTests
 
 		public UsbTransferResult NextRead { get; set; } = new(UsbTransferStatus.TimedOut, 0);
 
-		public void ThenWrite(Func<int, UsbTransferResult> result) => _writes.Enqueue(result);
+		public void ThenWrite(Func<int, UsbTransferResult> result)
+		{
+			_writes.Enqueue(result);
+		}
 
-		public UsbTransferResult Read(byte[] buffer, int timeoutMilliseconds) => NextRead;
+		public UsbTransferResult Read(byte[] buffer, int timeoutMilliseconds)
+		{
+			return NextRead;
+		}
 
 		public UsbTransferResult Write(byte[] buffer, int offset, int count, int timeoutMilliseconds)
 		{
@@ -42,7 +48,10 @@ public class AccessoryLinkCarrierTests
 
 		public bool Disposed { get; private set; }
 
-		public void Dispose() => Disposed = true;
+		public void Dispose()
+		{
+			Disposed = true;
+		}
 	}
 
 	[Test]
@@ -76,7 +85,8 @@ public class AccessoryLinkCarrierTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(pipe.WriteCalls.Select(call => call.Count), Is.EqualTo(new[] { transfer.Length, transfer.Length - 512 }));
+			Assert.That(pipe.WriteCalls.Select(call => call.Count),
+				Is.EqualTo(new[] { transfer.Length, transfer.Length - 512 }));
 			Assert.That(pipe.Written, Is.EqualTo(transfer));
 		});
 	}
@@ -115,7 +125,8 @@ public class AccessoryLinkCarrierTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(() => carrier.Write(new byte[1000], stop.Token), Throws.InstanceOf<OperationCanceledException>());
+			Assert.That(() => carrier.Write(new byte[1000], stop.Token),
+				Throws.InstanceOf<OperationCanceledException>());
 			Assert.That(pipe.WriteCalls, Has.Count.EqualTo(1));
 		});
 	}

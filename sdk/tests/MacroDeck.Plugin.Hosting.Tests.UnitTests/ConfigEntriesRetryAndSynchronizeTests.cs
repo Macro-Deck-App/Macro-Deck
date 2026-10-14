@@ -87,11 +87,13 @@ public class ConfigEntriesRetryAndSynchronizeTests
 			Assert.That(withoutEntry.Kind, Is.EqualTo(nameof(ConfigFlowResultKind.Complete)));
 			Assert.That(withoutEntry.WithoutEntry, Is.True);
 			Assert.That(complete.WithoutEntry, Is.Null);
-			Assert.That(JsonSerializer.Serialize(complete, PluginProtocolJson.Options), Does.Not.Contain("withoutEntry"));
+			Assert.That(JsonSerializer.Serialize(complete, PluginProtocolJson.Options),
+				Does.Not.Contain("withoutEntry"));
 		});
 	}
 
-	private static async Task<ConfigEntryPrepareResult> PrepareAsync(ConfigEntriesCapabilityHandler handler,
+	private static async Task<ConfigEntryPrepareResult> PrepareAsync(
+		ConfigEntriesCapabilityHandler handler,
 		ConfigEntryPrepareArguments arguments)
 	{
 		var result = await handler.InvokeAsync(Invocation(CapabilityOperations.ConfigEntries.Prepare, arguments),
@@ -100,7 +102,8 @@ public class ConfigEntriesRetryAndSynchronizeTests
 	}
 
 	private static CapabilityInvocation Invocation(string operation, object arguments)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.ConfigEntries,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -109,6 +112,7 @@ public class ConfigEntriesRetryAndSynchronizeTests
 			CorrelationId = "c1",
 			Services = new ServiceCollection().BuildServiceProvider()
 		};
+	}
 
 	private sealed class RetryingIntegration : IPluginIntegration, IConfigEntryLifecycle
 	{
@@ -118,25 +122,34 @@ public class ConfigEntriesRetryAndSynchronizeTests
 
 		public List<IVariableApi?> SynchronizedWith { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+		public Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+			ConfigEntryPreparation preparation,
 			CancellationToken cancellationToken = default)
 		{
 			Rejections.Add(preparation.RejectedVariableNames);
 			return Task.FromResult(ConfigEntryPreparationResult.Accept() with { RetryOnConflict = true });
 		}
 
-		public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+		public Task SynchronizeEntriesAsync(
+			IReadOnlyList<StoredConfigEntry> entries,
 			CancellationToken cancellationToken = default)
 		{
 			SynchronizedWith.Add(null);
 			return Task.CompletedTask;
 		}
 
-		public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+		public Task SynchronizeEntriesAsync(
+			IReadOnlyList<StoredConfigEntry> entries,
 			IVariableApi variables,
 			CancellationToken cancellationToken)
 		{
@@ -159,12 +172,18 @@ public class ConfigEntriesRetryAndSynchronizeTests
 
 	private sealed class SilentHost : IHostInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<JsonElement?>(null);
+		{
+			return Task.FromResult<JsonElement?>(null);
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

@@ -76,7 +76,7 @@ public class ActionExecutionCoordinatorTests
 	[Test]
 	public async Task A_slow_run_with_no_origin_client_publishes_nothing()
 	{
-		var request = Request(originClientId: null);
+		var request = Request(null);
 		_flow.AddGate(request.ExecutionId);
 
 		var dispatch = await _coordinator.RunBoundedAsync(request, _tinyBound, CancellationToken.None);
@@ -100,7 +100,7 @@ public class ActionExecutionCoordinatorTests
 		var dispatch = await _coordinator.RunBoundedAsync(request, _tinyBound, callerCts.Token);
 		Assert.That(dispatch.Result, Is.Null);
 
-		callerCts.Cancel();
+		await callerCts.CancelAsync();
 
 		_flow.Release(request.ExecutionId, Succeeded(request.ExecutionId));
 		await _transport.WaitForSendAsync();
@@ -113,8 +113,8 @@ public class ActionExecutionCoordinatorTests
 	[Test]
 	public async Task Two_concurrent_slow_runs_publish_two_events_with_distinct_execution_ids()
 	{
-		var requestA = Request(originClientId: "client-a");
-		var requestB = Request(originClientId: "client-b");
+		var requestA = Request("client-a");
+		var requestB = Request("client-b");
 		_flow.AddGate(requestA.ExecutionId);
 		_flow.AddGate(requestB.ExecutionId);
 
@@ -129,7 +129,7 @@ public class ActionExecutionCoordinatorTests
 
 		_flow.Release(requestA.ExecutionId, Succeeded(requestA.ExecutionId));
 		_flow.Release(requestB.ExecutionId, Succeeded(requestB.ExecutionId));
-		await _transport.WaitForSendAsync(count: 2);
+		await _transport.WaitForSendAsync(2);
 
 		Assert.Multiple(() =>
 		{
@@ -232,7 +232,7 @@ public class ActionExecutionCoordinatorTests
 			callerCts.Token);
 		Assert.That(dispatch.Result, Is.Null, "the run is still going, so it must answer Accepted");
 
-		callerCts.Cancel();
+		await callerCts.CancelAsync();
 		var token = await runToken.Task;
 		Assert.That(token.IsCancellationRequested, Is.False, "the caller's token must not reach the run");
 
@@ -258,19 +258,24 @@ public class ActionExecutionCoordinatorTests
 	}
 
 	private static FlowExecutionRequest Request(string? originClientId = "client-1", Guid? executionId = null)
-		=> new()
+	{
+		return new FlowExecutionRequest
 		{
 			ExecutionId = executionId ?? Guid.NewGuid(),
 			Trigger = TriggerSelector.ByType("onShortPress"),
 			OriginClientId = originClientId
 		};
+	}
 
-	private static FlowExecutionResult Succeeded(Guid executionId) => new()
+	private static FlowExecutionResult Succeeded(Guid executionId)
 	{
-		ExecutionId = executionId,
-		Status = FlowExecutionStatus.Succeeded,
-		MatchedFlows = 1
-	};
+		return new FlowExecutionResult
+		{
+			ExecutionId = executionId,
+			Status = FlowExecutionStatus.Succeeded,
+			MatchedFlows = 1
+		};
+	}
 
 	private sealed class GatedFlowExecutor : IFlowExecutor
 	{
@@ -317,23 +322,34 @@ public class ActionExecutionCoordinatorTests
 	{
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		private readonly SemaphoreSlim _signal = new(0);
 
-		public void Dispose() => _signal.Dispose();
+		public void Dispose()
+		{
+			_signal.Dispose();
+		}
 
 		public List<(string Group, object Message)> Sent { get; } = [];
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
@@ -379,10 +395,19 @@ public class ActionExecutionCoordinatorTests
 		public CancellationToken ApplicationStopping => _stopping.Token;
 		public CancellationToken ApplicationStopped => CancellationToken.None;
 
-		public void StopApplication() => Stop();
+		public void StopApplication()
+		{
+			Stop();
+		}
 
-		public void Stop() => _stopping.Cancel();
+		public void Stop()
+		{
+			_stopping.Cancel();
+		}
 
-		public void Dispose() => _stopping.Dispose();
+		public void Dispose()
+		{
+			_stopping.Dispose();
+		}
 	}
 }

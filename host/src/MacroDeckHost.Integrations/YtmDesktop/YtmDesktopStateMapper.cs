@@ -46,12 +46,14 @@ internal static class YtmDesktopStateMapper
 	}
 
 	public static int ToCompanionRepeatMode(RepeatMode mode)
-		=> mode switch
+	{
+		return mode switch
 		{
 			RepeatMode.Track => (int)YtmRepeatMode.One,
 			RepeatMode.Context => (int)YtmRepeatMode.All,
 			_ => (int)YtmRepeatMode.None
 		};
+	}
 
 	private static PlaybackState ToPlaybackState(YtmTrackState trackState, YtmVideoInfo? video)
 	{
@@ -71,15 +73,19 @@ internal static class YtmDesktopStateMapper
 	}
 
 	private static RepeatMode ToRepeatMode(YtmRepeatMode mode)
-		=> mode switch
+	{
+		return mode switch
 		{
 			YtmRepeatMode.One => RepeatMode.Track,
 			YtmRepeatMode.All => RepeatMode.Context,
 			_ => RepeatMode.Off
 		};
+	}
 
 	private static TimeSpan? ToDuration(int? durationSeconds)
-		=> durationSeconds is > 0 ? TimeSpan.FromSeconds(durationSeconds.Value) : null;
+	{
+		return durationSeconds is > 0 ? TimeSpan.FromSeconds(durationSeconds.Value) : null;
+	}
 
 	private static string? RegisterLargestThumbnail(
 		IReadOnlyList<YtmThumbnail>? thumbnails,
@@ -108,8 +114,12 @@ internal static class YtmDesktopStateMapper
 	}
 
 	private static YtmLikeStatus? Known(YtmLikeStatus? status)
-		=> status is null or YtmLikeStatus.Unknown ? null : status;
+	{
+		return status is null or YtmLikeStatus.Unknown ? null : status;
+	}
 
 	private static YtmVideoType? Known(YtmVideoType? type)
-		=> type is null or YtmVideoType.Unknown ? null : type;
+	{
+		return type is null or YtmVideoType.Unknown ? null : type;
+	}
 }

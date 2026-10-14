@@ -28,7 +28,10 @@ internal sealed class StoreOperationTrackerRestoreTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void An_operation_left_downloading_in_the_persisted_store_comes_back_as_failed_interrupted_and_retryable()
@@ -94,10 +97,10 @@ internal sealed class StoreOperationTrackerRestoreTests
 	public void A_version_refusal_recorded_by_another_Macro_Deck_version_is_dropped_so_the_package_can_be_offered_again(
 		StoreOperationError error)
 	{
-		var refusedEarlier = Failed(error, hostVersion: "3.0.0-beta.11");
-		var refusedWithoutVersion = Failed(error, hostVersion: null);
-		var refusedNow = Failed(error, hostVersion: "3.0.0-beta.12");
-		var otherFailure = Failed(StoreOperationError.DownloadFailed, hostVersion: "3.0.0-beta.11");
+		var refusedEarlier = Failed(error, "3.0.0-beta.11");
+		var refusedWithoutVersion = Failed(error, null);
+		var refusedNow = Failed(error, "3.0.0-beta.12");
+		var otherFailure = Failed(StoreOperationError.DownloadFailed, "3.0.0-beta.11");
 		_store.SaveAll([refusedEarlier, refusedWithoutVersion, refusedNow, otherFailure]);
 
 		var tracker = new StoreOperationTracker(_store, _time, new FixedBuildEnvironment("3.0.0-beta.12"));
@@ -124,7 +127,7 @@ internal sealed class StoreOperationTrackerRestoreTests
 			"com.acme.hue",
 			"1.0.0",
 			"Hue Bridge",
-			previousVersion: null,
+			null,
 			versionPinned: true);
 
 		var persisted = _store.LoadAll().Single();
@@ -136,21 +139,24 @@ internal sealed class StoreOperationTrackerRestoreTests
 		});
 	}
 
-	private StoreOperation Failed(StoreOperationError error, string? hostVersion) => new()
+	private StoreOperation Failed(StoreOperationError error, string? hostVersion)
 	{
-		Id = Guid.CreateVersion7(),
-		Kind = StoreOperationKind.Install,
-		ExtensionKind = StoreExtensionKind.Plugin,
-		PackageId = "com.acme.soundbox",
-		Version = "1.0.0",
-		DisplayName = "SoundBox",
-		State = StoreOperationState.Failed,
-		Error = error,
-		HostVersion = hostVersion,
-		StartedAt = _time.Now,
-		UpdatedAt = _time.Now,
-		CompletedAt = _time.Now
-	};
+		return new StoreOperation
+		{
+			Id = Guid.CreateVersion7(),
+			Kind = StoreOperationKind.Install,
+			ExtensionKind = StoreExtensionKind.Plugin,
+			PackageId = "com.acme.soundbox",
+			Version = "1.0.0",
+			DisplayName = "SoundBox",
+			State = StoreOperationState.Failed,
+			Error = error,
+			HostVersion = hostVersion,
+			StartedAt = _time.Now,
+			UpdatedAt = _time.Now,
+			CompletedAt = _time.Now
+		};
+	}
 
 	private sealed class FixedBuildEnvironment(string version) : IBuildEnvironment
 	{

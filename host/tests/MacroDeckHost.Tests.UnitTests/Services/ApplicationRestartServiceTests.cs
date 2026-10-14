@@ -26,10 +26,13 @@ public class ApplicationRestartServiceTests
 		}
 	}
 
-	private static ApplicationRestartService CreateService(FakeLifetime lifetime,
+	private static ApplicationRestartService CreateService(
+		FakeLifetime lifetime,
 		string? shellExecutable,
 		TimeSpan? shutdownDelay = null)
-		=> new(lifetime, shellExecutable, shutdownDelay ?? TimeSpan.Zero);
+	{
+		return new ApplicationRestartService(lifetime, shellExecutable, shutdownDelay ?? TimeSpan.Zero);
+	}
 
 	[Test]
 	public async Task Restarting_stops_the_application_and_marks_the_exit_code()

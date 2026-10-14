@@ -90,7 +90,7 @@ public class StreamlabsJsonRpcClientTests
 		await _pair.SendAsync(Reply(secondRequest, """["sources"]"""));
 		await _pair.SendAsync(Reply(firstRequest, """["scenes"]"""));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await first)[0].GetString(), Is.EqualTo("scenes"));
 			Assert.That((await second)[0].GetString(), Is.EqualTo("sources"));
@@ -227,7 +227,7 @@ public class StreamlabsJsonRpcClientTests
 
 		await _pair.Server.SendAsync(new byte[] { 1, 2, 3 },
 			WebSocketMessageType.Binary,
-			endOfMessage: true,
+			true,
 			CancellationToken.None);
 
 		var invoke = _client.InvokeAsync("ScenesService", "getScenes", null, CancellationToken.None);
@@ -290,10 +290,15 @@ public class StreamlabsJsonRpcClientTests
 	}
 
 	private static string Reply(string request, string result)
-		=> $$$"""{"jsonrpc":"2.0","id":{{{IdOf(request)}}},"result":{{{result}}}}""";
+	{
+		return $$$"""{"jsonrpc":"2.0","id":{{{IdOf(request)}}},"result":{{{result}}}}""";
+	}
 
 	private static string Error(string request, int code, string message)
-		=> $$$"""{"jsonrpc":"2.0","id":{{{IdOf(request)}}},"error":{"code":{{{code}}},"message":"{{{message}}}"}}""";
+	{
+		return
+			$$$"""{"jsonrpc":"2.0","id":{{{IdOf(request)}}},"error":{"code":{{{code}}},"message":"{{{message}}}"}}""";
+	}
 
 	private static long IdOf(string request)
 	{

@@ -24,8 +24,10 @@ internal static class SpotifyApiLimits
 	];
 
 	internal static bool IsRateLimited(Exception ex)
-		=> ex is APITooManyRequestsException ||
-			(ex is APIException { Response: { } response } && (int)response.StatusCode == 429);
+	{
+		return ex is APITooManyRequestsException
+			|| ex is APIException { Response: { } response } && (int)response.StatusCode == 429;
+	}
 
 	internal static TimeSpan PauseFor(Exception ex, TimeSpan fallback)
 	{
@@ -44,9 +46,9 @@ internal static class SpotifyApiLimits
 	{
 		for (var current = ex; current is not null; current = current.InnerException)
 		{
-			if (current is APIException { Response: { } response } api &&
-				(int)response.StatusCode == 403 &&
-				MentionsQuota(response.Body as string, api.Message))
+			if (current is APIException { Response: { } response } api
+				&& (int)response.StatusCode == 403
+				&& MentionsQuota(response.Body as string, api.Message))
 			{
 				return true;
 			}
@@ -56,7 +58,9 @@ internal static class SpotifyApiLimits
 	}
 
 	private static bool MentionsQuota(string? body, string message)
-		=> _quotaMarkers.Any(marker =>
-			body?.Contains(marker, StringComparison.OrdinalIgnoreCase) == true ||
-			message.Contains(marker, StringComparison.OrdinalIgnoreCase));
+	{
+		return _quotaMarkers.Any(marker =>
+			body?.Contains(marker, StringComparison.OrdinalIgnoreCase) == true
+			|| message.Contains(marker, StringComparison.OrdinalIgnoreCase));
+	}
 }

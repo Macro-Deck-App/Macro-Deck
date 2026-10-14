@@ -19,11 +19,20 @@ public sealed record KekStoreAvailability(bool Supported, string? Reason);
 
 public readonly record struct KekStoreReadResult(KekStoreStatus Status, byte[]? Kek, string? Reason)
 {
-	public static KekStoreReadResult Found(byte[] kek) => new(KekStoreStatus.Found, kek, null);
+	public static KekStoreReadResult Found(byte[] kek)
+	{
+		return new KekStoreReadResult(KekStoreStatus.Found, kek, null);
+	}
 
-	public static KekStoreReadResult NotFound() => new(KekStoreStatus.NotFound, null, null);
+	public static KekStoreReadResult NotFound()
+	{
+		return new KekStoreReadResult(KekStoreStatus.NotFound, null, null);
+	}
 
-	public static KekStoreReadResult Unavailable(string reason) => new(KekStoreStatus.Unavailable, null, reason);
+	public static KekStoreReadResult Unavailable(string reason)
+	{
+		return new KekStoreReadResult(KekStoreStatus.Unavailable, null, reason);
+	}
 }
 
 /// <summary>
@@ -35,7 +44,9 @@ public sealed record KekStoreIdentity(string Service, string Account)
 	public const string AccountPrefix = "key-ring-kek";
 
 	public static KekStoreIdentity For(string applicationDisplayName, Guid installationId)
-		=> new(applicationDisplayName, $"{AccountPrefix}:{installationId:D}");
+	{
+		return new KekStoreIdentity(applicationDisplayName, $"{AccountPrefix}:{installationId:D}");
+	}
 }
 
 public interface IKekStore

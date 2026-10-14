@@ -27,8 +27,8 @@ public static class UiPatchSequencing
 		if (currentRevision != patch.FromRevision)
 		{
 			return UiPatchOutcome.Reject(
-				$"The patch applies from revision {patch.FromRevision}, but the current revision is " +
-				$"{currentRevision}.");
+				$"The patch applies from revision {patch.FromRevision}, but the current revision is "
+				+ $"{currentRevision}.");
 		}
 
 		if (patch.ToRevision <= patch.FromRevision)

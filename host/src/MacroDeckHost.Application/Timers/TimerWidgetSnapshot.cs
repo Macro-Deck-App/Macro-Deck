@@ -30,7 +30,10 @@ public sealed record TimerWidgetSnapshot
 		return DurationMs is { } duration ? Math.Min(duration, elapsed) : elapsed;
 	}
 
-	public int ElapsedSecondsAt(DateTimeOffset now) => (int)(ElapsedAt(now) / 1000);
+	public int ElapsedSecondsAt(DateTimeOffset now)
+	{
+		return (int)(ElapsedAt(now) / 1000);
+	}
 
 	public int RemainingSecondsAt(DateTimeOffset now)
 	{
@@ -45,12 +48,19 @@ public sealed record TimerWidgetSnapshot
 	}
 
 	public double RemainingFractionAt(DateTimeOffset now)
-		=> DurationMs is { } duration && duration > 0
+	{
+		return DurationMs is { } duration && duration > 0
 			? Math.Clamp(RemainingSecondsAt(now) * 1000d / duration, 0, 1)
 			: 0;
+	}
 
 	public bool HasReachedEnd(DateTimeOffset now)
-		=> Kind == TimerWidgetKind.Countdown && IsRunning && DurationMs is { } duration && ElapsedAt(now) >= duration;
+	{
+		return Kind == TimerWidgetKind.Countdown
+			&& IsRunning
+			&& DurationMs is { } duration
+			&& ElapsedAt(now) >= duration;
+	}
 }
 
 public sealed record TimerWidgetTransition(TimerWidgetSnapshot Snapshot, IReadOnlyList<string> Triggers)

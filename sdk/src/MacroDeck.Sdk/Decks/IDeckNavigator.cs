@@ -4,12 +4,14 @@ namespace MacroDeck.Sdk.Decks;
 public interface IDeckNavigator
 {
 	/// <summary>Changes to a folder. Set <paramref name="originClientId"/> to target one client.</summary>
-	Task ChangeFolderAsync(string folderId,
+	Task ChangeFolderAsync(
+		string folderId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>Changes to a profile's start folder. Set <paramref name="originClientId"/> to target one client.</summary>
-	Task ChangeProfileAsync(string profileId,
+	Task ChangeProfileAsync(
+		string profileId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default);
 
@@ -29,7 +31,10 @@ public interface IDeckNavigator
 	/// Where each connected client currently is. Empty on a host that does not report clients. A client
 	/// leaves the list when it disconnects or, for a paired device, goes offline.
 	/// </summary>
-	IReadOnlyList<DeckClient> GetClients() => [];
+	IReadOnlyList<DeckClient> GetClients()
+	{
+		return [];
+	}
 
 	/// <summary>
 	/// Raised when a client is first seen or moves to another folder or profile, never for a client that

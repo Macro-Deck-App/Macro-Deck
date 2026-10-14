@@ -13,8 +13,8 @@ public class GridInheritanceMigrationTests
 	[Test]
 	public void Normalize_RootMatchingTheDefault_IsClearedAndReportsChanged()
 	{
-		var profile = Profile(defaultRows: 3, defaultColumns: 5);
-		var root = Folder(rows: 3, columns: 5);
+		var profile = Profile(3, 5);
+		var root = Folder(3, 5);
 
 		var changed = GridInheritanceMigration.Normalize(profile, [root]);
 
@@ -29,8 +29,8 @@ public class GridInheritanceMigrationTests
 	[Test]
 	public void Normalize_ADifferentGrid_IsKept()
 	{
-		var profile = Profile(defaultRows: 3, defaultColumns: 5);
-		var root = Folder(rows: 6, columns: 8);
+		var profile = Profile(3, 5);
+		var root = Folder(6, 8);
 
 		var changed = GridInheritanceMigration.Normalize(profile, [root]);
 
@@ -45,8 +45,8 @@ public class GridInheritanceMigrationTests
 	[Test]
 	public void Normalize_ClearsEachAxisIndependently()
 	{
-		var profile = Profile(defaultRows: 3, defaultColumns: 5);
-		var root = Folder(rows: 3, columns: 8); // rows matches the default, columns does not
+		var profile = Profile(3, 5);
+		var root = Folder(3, 8); // rows matches the default, columns does not
 
 		GridInheritanceMigration.Normalize(profile, [root]);
 
@@ -60,8 +60,8 @@ public class GridInheritanceMigrationTests
 	[Test]
 	public void Normalize_AlreadyInherited_IsANoOp()
 	{
-		var profile = Profile(defaultRows: 3, defaultColumns: 5);
-		var root = Folder(rows: null, columns: null);
+		var profile = Profile(3, 5);
+		var root = Folder(null, null);
 
 		var changed = GridInheritanceMigration.Normalize(profile, [root]);
 
@@ -126,9 +126,9 @@ public class GridInheritanceMigrationTests
 	[Test]
 	public void Normalize_NestedFolder_StaysPinnedWhenClearingWouldChangeItsResolvedValue()
 	{
-		var profile = Profile(defaultRows: 3, defaultColumns: 5);
-		var root = Folder(rows: 6, columns: 8);
-		var child = Folder(rows: 3, columns: 5, parentId: root.Id);
+		var profile = Profile(3, 5);
+		var root = Folder(6, 8);
+		var child = Folder(3, 5, root.Id);
 
 		var changed = GridInheritanceMigration.Normalize(profile, [root, child]);
 
@@ -145,10 +145,10 @@ public class GridInheritanceMigrationTests
 	[Test]
 	public void Normalize_BreadthFirst_AWholeMatchingChainClearsInOnePass()
 	{
-		var profile = Profile(defaultRows: 3, defaultColumns: 5);
-		var root = Folder(rows: 3, columns: 5);
-		var child = Folder(rows: 3, columns: 5, parentId: root.Id);
-		var grandchild = Folder(rows: 3, columns: 5, parentId: child.Id);
+		var profile = Profile(3, 5);
+		var root = Folder(3, 5);
+		var child = Folder(3, 5, root.Id);
+		var grandchild = Folder(3, 5, child.Id);
 
 		// Deliberately handed in reverse-of-tree order - Normalize must still process parent before child.
 		GridInheritanceMigration.Normalize(profile, [grandchild, child, root]);
@@ -162,11 +162,16 @@ public class GridInheritanceMigrationTests
 	}
 
 	private static ProfileEntity Profile(int defaultRows, int defaultColumns)
-		=> new() { Id = Guid.NewGuid(), Name = "P", DefaultRows = defaultRows, DefaultColumns = defaultColumns };
+	{
+		return new ProfileEntity
+			{ Id = Guid.NewGuid(), Name = "P", DefaultRows = defaultRows, DefaultColumns = defaultColumns };
+	}
 
 	private static FolderEntity Folder(int? rows, int? columns, Guid? parentId = null)
-		=> new()
+	{
+		return new FolderEntity
 		{
 			Id = Guid.NewGuid(), Name = "F", Order = 0, ParentId = parentId, Rows = rows, Columns = columns
 		};
+	}
 }

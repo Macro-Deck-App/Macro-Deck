@@ -17,7 +17,8 @@ public sealed class NativeUsbBackgroundService : HostReadyBackgroundService
 
 	private NativeUsbStatus _lastBroadcast = NativeUsbStatus.Initial;
 
-	public NativeUsbBackgroundService(IHostApplicationLifetime lifetime,
+	public NativeUsbBackgroundService(
+		IHostApplicationLifetime lifetime,
 		INativeUsbManager manager,
 		IUiTransport transport,
 		TimeProvider timeProvider,
@@ -87,11 +88,13 @@ public sealed class NativeUsbBackgroundService : HostReadyBackgroundService
 	}
 
 	private static bool SameStatus(NativeUsbStatus left, NativeUsbStatus right)
-		=> left.Enabled == right.Enabled &&
-			left.AndroidAvailable == right.AndroidAvailable &&
-			left.IosAvailable == right.IosAvailable &&
-			left.BridgeAvailable == right.BridgeAvailable &&
-			left.HttpsOnly == right.HttpsOnly &&
-			left.Devices.SequenceEqual(right.Devices) &&
-			left.RememberedDevices.SequenceEqual(right.RememberedDevices);
+	{
+		return left.Enabled == right.Enabled
+			&& left.AndroidAvailable == right.AndroidAvailable
+			&& left.IosAvailable == right.IosAvailable
+			&& left.BridgeAvailable == right.BridgeAvailable
+			&& left.HttpsOnly == right.HttpsOnly
+			&& left.Devices.SequenceEqual(right.Devices)
+			&& left.RememberedDevices.SequenceEqual(right.RememberedDevices);
+	}
 }

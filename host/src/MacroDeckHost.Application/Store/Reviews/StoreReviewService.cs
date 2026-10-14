@@ -7,13 +7,18 @@ namespace MacroDeckHost.Application.Store.Reviews;
 
 public interface IStoreReviewService
 {
-	Task<GetStoreRatingsResponse> GetRatings(IReadOnlyCollection<string> packageIds, CancellationToken cancellationToken);
+	Task<GetStoreRatingsResponse> GetRatings(
+		IReadOnlyCollection<string> packageIds,
+		CancellationToken cancellationToken);
 
-	Task<GetStoreInstallsResponse> GetInstalls(IReadOnlyCollection<string> packageIds, CancellationToken cancellationToken);
+	Task<GetStoreInstallsResponse> GetInstalls(
+		IReadOnlyCollection<string> packageIds,
+		CancellationToken cancellationToken);
 
 	Task<GetStoreRatingResponse> GetRating(StoreExtensionKind kind, string id, CancellationToken cancellationToken);
 
-	Task<GetStoreReviewsResponse> GetReviews(StoreExtensionKind kind,
+	Task<GetStoreReviewsResponse> GetReviews(
+		StoreExtensionKind kind,
 		string id,
 		int page,
 		int pageSize,
@@ -21,21 +26,30 @@ public interface IStoreReviewService
 		int? rating,
 		CancellationToken cancellationToken);
 
-	Task<GetStoreOwnReviewResponse> GetOwnReview(StoreExtensionKind kind, string id, CancellationToken cancellationToken);
+	Task<GetStoreOwnReviewResponse> GetOwnReview(
+		StoreExtensionKind kind,
+		string id,
+		CancellationToken cancellationToken);
 
-	Task<StoreOwnReviewWriteResponse> PutOwnReview(StoreExtensionKind kind,
+	Task<StoreOwnReviewWriteResponse> PutOwnReview(
+		StoreExtensionKind kind,
 		string id,
 		PutStoreOwnReviewRequest request,
 		CancellationToken cancellationToken);
 
-	Task<StoreOwnReviewWriteResponse> DeleteOwnReview(StoreExtensionKind kind, string id, CancellationToken cancellationToken);
+	Task<StoreOwnReviewWriteResponse> DeleteOwnReview(
+		StoreExtensionKind kind,
+		string id,
+		CancellationToken cancellationToken);
 
-	Task<StoreReportResponse> ReportEntry(StoreExtensionKind kind,
+	Task<StoreReportResponse> ReportEntry(
+		StoreExtensionKind kind,
 		string id,
 		ReportStoreContentRequest request,
 		CancellationToken cancellationToken);
 
-	Task<StoreReportResponse> ReportReview(StoreExtensionKind kind,
+	Task<StoreReportResponse> ReportReview(
+		StoreExtensionKind kind,
 		string id,
 		Guid reviewId,
 		ReportStoreContentRequest request,
@@ -71,7 +85,8 @@ public sealed class StoreReviewService : IStoreReviewService
 	private readonly ConcurrentDictionary<string, CachedInstalls> _installs = new(StringComparer.Ordinal);
 	private long _installsUnavailableUntilTicks;
 
-	public StoreReviewService(IStorePlatformClient platform,
+	public StoreReviewService(
+		IStorePlatformClient platform,
 		IStoreOfficialPackages packages,
 		IConnectSessionService session,
 		StorePlatformOptions options,
@@ -84,7 +99,8 @@ public sealed class StoreReviewService : IStoreReviewService
 		_timeProvider = timeProvider;
 	}
 
-	public async Task<GetStoreRatingsResponse> GetRatings(IReadOnlyCollection<string> packageIds,
+	public async Task<GetStoreRatingsResponse> GetRatings(
+		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken)
 	{
 		var ids = _packages.ListedPackageIds(packageIds);
@@ -119,14 +135,16 @@ public sealed class StoreReviewService : IStoreReviewService
 		{
 			if (_ratings.TryGetValue(id, out var cached) && cached.Rating is { RatingCount: > 0 } rating)
 			{
-				response.Ratings[id] = new StoreRatingSummaryBody { Rating = rating.Rating, RatingCount = rating.RatingCount };
+				response.Ratings[id] = new StoreRatingSummaryBody
+					{ Rating = rating.Rating, RatingCount = rating.RatingCount };
 			}
 		}
 
 		return response;
 	}
 
-	public async Task<GetStoreInstallsResponse> GetInstalls(IReadOnlyCollection<string> packageIds,
+	public async Task<GetStoreInstallsResponse> GetInstalls(
+		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken)
 	{
 		var ids = _packages.ListedPackageIds(packageIds);
@@ -145,7 +163,8 @@ public sealed class StoreReviewService : IStoreReviewService
 			var fetched = await _platform.GetInstalls(missing, cancellationToken);
 			if (!fetched.Success)
 			{
-				Interlocked.Exchange(ref _installsUnavailableUntilTicks, (now + _options.RatingsCacheLifetime).UtcTicks);
+				Interlocked.Exchange(ref _installsUnavailableUntilTicks,
+					(now + _options.RatingsCacheLifetime).UtcTicks);
 				return new GetStoreInstallsResponse { Available = false };
 			}
 
@@ -168,7 +187,8 @@ public sealed class StoreReviewService : IStoreReviewService
 		return response;
 	}
 
-	public async Task<GetStoreRatingResponse> GetRating(StoreExtensionKind kind,
+	public async Task<GetStoreRatingResponse> GetRating(
+		StoreExtensionKind kind,
 		string id,
 		CancellationToken cancellationToken)
 	{
@@ -198,7 +218,8 @@ public sealed class StoreReviewService : IStoreReviewService
 		};
 	}
 
-	public async Task<GetStoreReviewsResponse> GetReviews(StoreExtensionKind kind,
+	public async Task<GetStoreReviewsResponse> GetReviews(
+		StoreExtensionKind kind,
 		string id,
 		int page,
 		int pageSize,
@@ -214,7 +235,9 @@ public sealed class StoreReviewService : IStoreReviewService
 		var result = await _platform.GetReviews(packageId,
 			Math.Max(1, page),
 			Math.Clamp(pageSize, 1, MaxPageSize),
-			sort == StoreReviewSortOrder.Oldest ? StorePlatformReviewSort.OldestFirst : StorePlatformReviewSort.NewestFirst,
+			sort == StoreReviewSortOrder.Oldest
+				? StorePlatformReviewSort.OldestFirst
+				: StorePlatformReviewSort.NewestFirst,
 			rating is >= 1 and <= 5 ? rating : null,
 			cancellationToken);
 		if (!result.Success || result.Value is not { } reviews)
@@ -233,7 +256,8 @@ public sealed class StoreReviewService : IStoreReviewService
 		};
 	}
 
-	public async Task<GetStoreOwnReviewResponse> GetOwnReview(StoreExtensionKind kind,
+	public async Task<GetStoreOwnReviewResponse> GetOwnReview(
+		StoreExtensionKind kind,
 		string id,
 		CancellationToken cancellationToken)
 	{
@@ -264,10 +288,12 @@ public sealed class StoreReviewService : IStoreReviewService
 			};
 		}
 
-		return new GetStoreOwnReviewResponse { State = state, Review = own.Value is { } review ? ToBody(review) : null };
+		return new GetStoreOwnReviewResponse
+			{ State = state, Review = own.Value is { } review ? ToBody(review) : null };
 	}
 
-	public async Task<StoreOwnReviewWriteResponse> PutOwnReview(StoreExtensionKind kind,
+	public async Task<StoreOwnReviewWriteResponse> PutOwnReview(
+		StoreExtensionKind kind,
 		string id,
 		PutStoreOwnReviewRequest request,
 		CancellationToken cancellationToken)
@@ -314,7 +340,8 @@ public sealed class StoreReviewService : IStoreReviewService
 		}
 
 		var result = await _platform.PutOwnReview(packageId, request.Rating, title, body, cancellationToken);
-		if (result.Failure == StorePlatformFailure.DownloadRequired && await ClaimIfInstalled(packageId, cancellationToken))
+		if (result.Failure == StorePlatformFailure.DownloadRequired
+			&& await ClaimIfInstalled(packageId, cancellationToken))
 		{
 			result = await _platform.PutOwnReview(packageId, request.Rating, title, body, cancellationToken);
 		}
@@ -325,10 +352,12 @@ public sealed class StoreReviewService : IStoreReviewService
 		}
 
 		_ratings.TryRemove(packageId, out _);
-		return new StoreOwnReviewWriteResponse { Success = true, Review = result.Value is { } review ? ToBody(review) : null };
+		return new StoreOwnReviewWriteResponse
+			{ Success = true, Review = result.Value is { } review ? ToBody(review) : null };
 	}
 
-	public async Task<StoreOwnReviewWriteResponse> DeleteOwnReview(StoreExtensionKind kind,
+	public async Task<StoreOwnReviewWriteResponse> DeleteOwnReview(
+		StoreExtensionKind kind,
 		string id,
 		CancellationToken cancellationToken)
 	{
@@ -343,7 +372,8 @@ public sealed class StoreReviewService : IStoreReviewService
 		}
 
 		var result = await _platform.DeleteOwnReview(packageId, cancellationToken);
-		if (result.Failure == StorePlatformFailure.DownloadRequired && await ClaimIfInstalled(packageId, cancellationToken))
+		if (result.Failure == StorePlatformFailure.DownloadRequired
+			&& await ClaimIfInstalled(packageId, cancellationToken))
 		{
 			result = await _platform.DeleteOwnReview(packageId, cancellationToken);
 		}
@@ -357,7 +387,8 @@ public sealed class StoreReviewService : IStoreReviewService
 		return new StoreOwnReviewWriteResponse { Success = true };
 	}
 
-	public async Task<StoreReportResponse> ReportEntry(StoreExtensionKind kind,
+	public async Task<StoreReportResponse> ReportEntry(
+		StoreExtensionKind kind,
 		string id,
 		ReportStoreContentRequest request,
 		CancellationToken cancellationToken)
@@ -374,7 +405,8 @@ public sealed class StoreReviewService : IStoreReviewService
 			: ReportResult(result);
 	}
 
-	public async Task<StoreReportResponse> ReportReview(StoreExtensionKind kind,
+	public async Task<StoreReportResponse> ReportReview(
+		StoreExtensionKind kind,
 		string id,
 		Guid reviewId,
 		ReportStoreContentRequest request,
@@ -386,8 +418,11 @@ public sealed class StoreReviewService : IStoreReviewService
 			return refused!;
 		}
 
-		return ReportResult(
-			await _platform.ReportReview(report.PackageId, reviewId, report.Category, report.Detail, cancellationToken));
+		return ReportResult(await _platform.ReportReview(report.PackageId,
+			reviewId,
+			report.Category,
+			report.Detail,
+			cancellationToken));
 	}
 
 	public async Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken cancellationToken)
@@ -398,23 +433,28 @@ public sealed class StoreReviewService : IStoreReviewService
 			: new GetStoreCreatorGuidelinesResponse { Available = false };
 	}
 
-	public static string ErrorCode(StorePlatformFailure failure) => failure switch
+	public static string ErrorCode(StorePlatformFailure failure)
 	{
-		StorePlatformFailure.AlreadyReported => "already_reported",
-		StorePlatformFailure.RetryLater => "retry_later",
-		StorePlatformFailure.SignInRequired => "sign_in_required",
-		StorePlatformFailure.AccountSuspended => "account_suspended",
-		StorePlatformFailure.DownloadRequired => "download_required",
-		StorePlatformFailure.Forbidden => "forbidden",
-		StorePlatformFailure.Moderated => "moderated",
-		StorePlatformFailure.Gone => "gone",
-		StorePlatformFailure.Cooldown => "cooldown",
-		StorePlatformFailure.Validation => "validation",
-		StorePlatformFailure.NotFound => "not_found",
-		_ => "platform_unavailable"
-	};
+		return failure switch
+		{
+			StorePlatformFailure.AlreadyReported => "already_reported",
+			StorePlatformFailure.RetryLater => "retry_later",
+			StorePlatformFailure.SignInRequired => "sign_in_required",
+			StorePlatformFailure.AccountSuspended => "account_suspended",
+			StorePlatformFailure.DownloadRequired => "download_required",
+			StorePlatformFailure.Forbidden => "forbidden",
+			StorePlatformFailure.Moderated => "moderated",
+			StorePlatformFailure.Gone => "gone",
+			StorePlatformFailure.Cooldown => "cooldown",
+			StorePlatformFailure.Validation => "validation",
+			StorePlatformFailure.NotFound => "not_found",
+			_ => "platform_unavailable"
+		};
+	}
 
-	private async Task<StoreReviewComposeState> ResolveEntitlement(string packageId, CancellationToken cancellationToken)
+	private async Task<StoreReviewComposeState> ResolveEntitlement(
+		string packageId,
+		CancellationToken cancellationToken)
 	{
 		var entitlements = await _platform.GetEntitlements([packageId], cancellationToken);
 		if (!entitlements.Success)
@@ -424,7 +464,9 @@ public sealed class StoreReviewService : IStoreReviewService
 				: StoreReviewComposeState.Unavailable;
 		}
 
-		var status = entitlements.Value!.TryGetValue(packageId, out var value) ? value : StoreEntitlementStatus.Unavailable;
+		var status = entitlements.Value!.TryGetValue(packageId, out var value)
+			? value
+			: StoreEntitlementStatus.Unavailable;
 		return status switch
 		{
 			StoreEntitlementStatus.Entitled => StoreReviewComposeState.Entitled,
@@ -443,12 +485,13 @@ public sealed class StoreReviewService : IStoreReviewService
 		}
 
 		var claim = await _platform.ClaimEntitlements([packageId], cancellationToken);
-		return claim.Success &&
-			claim.Value!.TryGetValue(packageId, out var status) &&
-			status is StoreEntitlementClaimStatus.Claimed or StoreEntitlementClaimStatus.AlreadyEntitled;
+		return claim.Success
+			&& claim.Value!.TryGetValue(packageId, out var status)
+			&& status is StoreEntitlementClaimStatus.Claimed or StoreEntitlementClaimStatus.AlreadyEntitled;
 	}
 
-	private (PreparedReport? Report, StoreReportResponse? Refused) PrepareReport(StoreExtensionKind kind,
+	private (PreparedReport? Report, StoreReportResponse? Refused) PrepareReport(
+		StoreExtensionKind kind,
 		string id,
 		ReportStoreContentRequest request,
 		IReadOnlyList<string> categories)
@@ -474,89 +517,121 @@ public sealed class StoreReviewService : IStoreReviewService
 
 		var detail = Normalize(request.Detail);
 		// The Platform's rule: nothing below 0x20 except tab, CR and LF, while DEL and C1 are accepted.
-		if ((detail is null && category == OtherReportCategory) ||
-			(detail is not null && (CodePoints(detail) > MaxReportDetailLength || detail.Any(IsDisallowedControl))))
+		if (detail is null && category == OtherReportCategory
+			|| detail is not null && (CodePoints(detail) > MaxReportDetailLength || detail.Any(IsDisallowedControl)))
 		{
 			return Refuse(StorePlatformFailure.Validation, "Detail");
 		}
 
 		return (new PreparedReport(packageId, category, detail), null);
 
-		static (PreparedReport?, StoreReportResponse?) Refuse(StorePlatformFailure failure, string? field = null) =>
-			(null, ReportResult(StorePlatformResult.Fail<bool>(failure, field: field)));
+		static (PreparedReport?, StoreReportResponse?) Refuse(StorePlatformFailure failure, string? field = null)
+		{
+			return (null, ReportResult(StorePlatformResult.Fail<bool>(failure, field: field)));
+		}
 	}
 
-	private static bool IsDisallowedControl(char character) =>
-		character < '\u0020' && character is not ('\t' or '\r' or '\n');
-
-	private static StoreReportResponse ReportResult(StorePlatformResult<bool> result) =>
-		result.Success ? new StoreReportResponse { Success = true } : ReportFailure(ErrorCode(result.Failure), result);
-
-	private static StoreReportResponse ReportFailure(string code, StorePlatformResult<bool> result) => new()
+	private static bool IsDisallowedControl(char character)
 	{
-		Success = false,
-		Error = new StoreReviewWriteError
+		return character < '\u0020' && character is not ('\t' or '\r' or '\n');
+	}
+
+	private static StoreReportResponse ReportResult(StorePlatformResult<bool> result)
+	{
+		return result.Success
+			? new StoreReportResponse { Success = true }
+			: ReportFailure(ErrorCode(result.Failure), result);
+	}
+
+	private static StoreReportResponse ReportFailure(string code, StorePlatformResult<bool> result)
+	{
+		return new StoreReportResponse
 		{
-			Code = code,
-			Field = result.Field,
-			RetryAfterSeconds = result.RetryAfter is { } retryAfter ? (int)Math.Ceiling(retryAfter.TotalSeconds) : null
-		}
-	};
-
-	private static int CodePoints(string value) => value.EnumerateRunes().Count();
-
-	private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-
-	private static StoreOwnReviewWriteResponse ValidationFailure(string field) =>
-		Failure(StorePlatformResult.Fail<bool>(StorePlatformFailure.Validation, field: field));
-
-	private static StoreOwnReviewWriteResponse Failure<T>(StorePlatformResult<T> result) => new()
-	{
-		Success = false,
-		Error = new StoreReviewWriteError
-		{
-			Code = ErrorCode(result.Failure),
-			Field = result.Field,
-			RetryAfterSeconds = result.RetryAfter is { } retryAfter ? (int)Math.Ceiling(retryAfter.TotalSeconds) : null
-		}
-	};
-
-	private static StoreReviewBody ToBody(StorePlatformReview review) => new()
-	{
-		Id = review.Id,
-		Rating = review.Rating,
-		Title = review.Title,
-		Body = review.Body,
-		AuthorDisplayName = review.Author.DisplayName,
-		AuthorAvatarUrl = ConnectAssetUrls.IsTrusted(review.Author.AvatarUrl)
-			? $"{AvatarRoute}?src={Uri.EscapeDataString(review.Author.AvatarUrl!)}"
-			: null,
-		CreatedAt = review.CreatedAt,
-		IsEdited = review.IsEdited,
-		DownloadedBeforeReview = review.DownloadedBeforeReview,
-		Reply = review.Reply is { } reply && !string.IsNullOrWhiteSpace(reply.Body)
-			? new StoreReviewReplyBody
+			Success = false,
+			Error = new StoreReviewWriteError
 			{
-				Body = reply.Body,
-				CreatedAt = reply.CreatedAt,
-				UpdatedAt = reply.UpdatedAt,
-				IsEdited = reply.IsEdited
+				Code = code,
+				Field = result.Field,
+				RetryAfterSeconds = result.RetryAfter is { } retryAfter
+					? (int)Math.Ceiling(retryAfter.TotalSeconds)
+					: null
 			}
-			: null
-	};
+		};
+	}
 
-	private static StoreOwnReviewBody ToBody(StorePlatformOwnReview review) => new()
+	private static int CodePoints(string value)
 	{
-		Id = review.Id,
-		Rating = review.Rating,
-		Title = review.Title,
-		Body = review.Body,
-		Visibility = review.Visibility,
-		ModerationReason = review.ModerationReason,
-		CreatedAt = review.CreatedAt,
-		UpdatedAt = review.UpdatedAt,
-		IsEdited = review.IsEdited
-	};
+		return value.EnumerateRunes().Count();
+	}
+
+	private static string? Normalize(string? value)
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	}
+
+	private static StoreOwnReviewWriteResponse ValidationFailure(string field)
+	{
+		return Failure(StorePlatformResult.Fail<bool>(StorePlatformFailure.Validation, field: field));
+	}
+
+	private static StoreOwnReviewWriteResponse Failure<T>(StorePlatformResult<T> result)
+	{
+		return new StoreOwnReviewWriteResponse
+		{
+			Success = false,
+			Error = new StoreReviewWriteError
+			{
+				Code = ErrorCode(result.Failure),
+				Field = result.Field,
+				RetryAfterSeconds = result.RetryAfter is { } retryAfter
+					? (int)Math.Ceiling(retryAfter.TotalSeconds)
+					: null
+			}
+		};
+	}
+
+	private static StoreReviewBody ToBody(StorePlatformReview review)
+	{
+		return new StoreReviewBody
+		{
+			Id = review.Id,
+			Rating = review.Rating,
+			Title = review.Title,
+			Body = review.Body,
+			AuthorDisplayName = review.Author.DisplayName,
+			AuthorAvatarUrl = ConnectAssetUrls.IsTrusted(review.Author.AvatarUrl)
+				? $"{AvatarRoute}?src={Uri.EscapeDataString(review.Author.AvatarUrl!)}"
+				: null,
+			CreatedAt = review.CreatedAt,
+			IsEdited = review.IsEdited,
+			DownloadedBeforeReview = review.DownloadedBeforeReview,
+			Reply = review.Reply is { } reply && !string.IsNullOrWhiteSpace(reply.Body)
+				? new StoreReviewReplyBody
+				{
+					Body = reply.Body,
+					CreatedAt = reply.CreatedAt,
+					UpdatedAt = reply.UpdatedAt,
+					IsEdited = reply.IsEdited
+				}
+				: null
+		};
+	}
+
+	private static StoreOwnReviewBody ToBody(StorePlatformOwnReview review)
+	{
+		return new StoreOwnReviewBody
+		{
+			Id = review.Id,
+			Rating = review.Rating,
+			Title = review.Title,
+			Body = review.Body,
+			Visibility = review.Visibility,
+			ModerationReason = review.ModerationReason,
+			CreatedAt = review.CreatedAt,
+			UpdatedAt = review.UpdatedAt,
+			IsEdited = review.IsEdited
+		};
+	}
 
 	private sealed record CachedRating(StorePlatformRating? Rating, DateTimeOffset ExpiresAt);
 

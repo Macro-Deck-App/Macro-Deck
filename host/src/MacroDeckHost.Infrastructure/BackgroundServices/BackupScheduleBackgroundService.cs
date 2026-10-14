@@ -18,7 +18,8 @@ public sealed class BackupScheduleBackgroundService : HostReadyBackgroundService
 	private readonly TimeProvider _time;
 	private readonly ILogger _logger;
 
-	public BackupScheduleBackgroundService(IHostApplicationLifetime lifetime,
+	public BackupScheduleBackgroundService(
+		IHostApplicationLifetime lifetime,
 		IServiceScopeFactory scopeFactory,
 		IBackupService backups,
 		TimeProvider time,
@@ -95,5 +96,7 @@ public sealed class BackupScheduleBackgroundService : HostReadyBackgroundService
 	}
 
 	private static TimeSpan Clamp(TimeSpan value)
-		=> value < TimeSpan.Zero ? TimeSpan.Zero : value > _maximumSleep ? _maximumSleep : value;
+	{
+		return value < TimeSpan.Zero ? TimeSpan.Zero : value > _maximumSleep ? _maximumSleep : value;
+	}
 }

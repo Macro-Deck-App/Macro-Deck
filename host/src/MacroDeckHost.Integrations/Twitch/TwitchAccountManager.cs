@@ -36,22 +36,32 @@ internal sealed class TwitchAccountManager : IDisposable
 	{
 		_oauthClientFactory = oauthClientFactory;
 		_logger = logger;
-		_helixFactory = helixFactory ??
-			((account, tokens) =>
+		_helixFactory = helixFactory
+			?? ((account, tokens) =>
 				new TwitchHelixClient(TwitchHelixClient.CreateApi(account.ClientId), tokens, logger));
 	}
 
 	public IReadOnlyList<TwitchAccountConnection> Connections => _connections;
 
-	public void UseChatSink(IStreamChatSink? chatSink) => _chatSink = chatSink;
+	public void UseChatSink(IStreamChatSink? chatSink)
+	{
+		_chatSink = chatSink;
+	}
 
 	public IReadOnlyList<ChatAccount> ChatAccounts()
-		=> [.. _connections.Select(c => new ChatAccount(c.Account.UserId, c.Account.Label))];
+	{
+		return [.. _connections.Select(c => new ChatAccount(c.Account.UserId, c.Account.Label))];
+	}
 
 	public IReadOnlyList<StreamStatsAccount> StatsAccounts()
-		=> [.. _connections.Select(c => new StreamStatsAccount(c.Account.UserId,
-			c.Account.Label,
-			TwitchVariables.AccountPrefix(c.Account.VariableKey)))];
+	{
+		return
+		[
+			.. _connections.Select(c => new StreamStatsAccount(c.Account.UserId,
+				c.Account.Label,
+				TwitchVariables.AccountPrefix(c.Account.VariableKey)))
+		];
+	}
 
 	public async Task ReloadAsync(
 		IIntegrationConfig config,
@@ -107,9 +117,11 @@ internal sealed class TwitchAccountManager : IDisposable
 	}
 
 	public IReadOnlyList<ActionParameterOption> AccountOptions()
-		=> _connections
+	{
+		return _connections
 			.Select(c => new ActionParameterOption { Value = c.Account.UserId, Label = c.Account.Label })
 			.ToList();
+	}
 
 	public IReadOnlyList<IntegrationIssue> Issues()
 	{
@@ -120,7 +132,7 @@ internal sealed class TwitchAccountManager : IDisposable
 			issues.Add(new IntegrationIssue
 			{
 				Id = TokenIssuePrefix + connection.Account.UserId,
-				Title = AppStrings.Integrations.Twitch.Issues.SignInExpiredTitle(account: connection.Account.Label),
+				Title = AppStrings.Integrations.Twitch.Issues.SignInExpiredTitle(connection.Account.Label),
 				Description = AppStrings.Integrations.Twitch.Issues.SignInExpiredDescription(),
 				Severity = IntegrationIssueSeverity.Error,
 				ActionLabel = AppStrings.Integrations.Twitch.Issues.ReconnectAction()
@@ -136,8 +148,8 @@ internal sealed class TwitchAccountManager : IDisposable
 			issues.Add(new IntegrationIssue
 			{
 				Id = MissingScopeIssuePrefix + connection.Account.UserId,
-				Title = AppStrings.Integrations.Twitch.Issues.MissingScopeTitle(account: connection.Account.Label),
-				Description = AppStrings.Integrations.Twitch.Issues.MissingScopeDescription(events: ids),
+				Title = AppStrings.Integrations.Twitch.Issues.MissingScopeTitle(connection.Account.Label),
+				Description = AppStrings.Integrations.Twitch.Issues.MissingScopeDescription(ids),
 				Severity = IntegrationIssueSeverity.Warning,
 				ActionLabel = AppStrings.Integrations.Twitch.Issues.ReconnectAction()
 			});
@@ -148,8 +160,7 @@ internal sealed class TwitchAccountManager : IDisposable
 			issues.Add(new IntegrationIssue
 			{
 				Id = MissingChattersScopeIssuePrefix + connection.Account.UserId,
-				Title = AppStrings.Integrations.Twitch.Issues.MissingChattersScopeTitle(
-					account: connection.Account.Label),
+				Title = AppStrings.Integrations.Twitch.Issues.MissingChattersScopeTitle(connection.Account.Label),
 				Description = AppStrings.Integrations.Twitch.Issues.MissingChattersScopeDescription(),
 				Severity = IntegrationIssueSeverity.Warning,
 				ActionLabel = AppStrings.Integrations.Twitch.Issues.ReconnectAction()
@@ -162,7 +173,7 @@ internal sealed class TwitchAccountManager : IDisposable
 			{
 				Id = DuplicateIssuePrefix + stale.UserId,
 				Title = AppStrings.Integrations.Twitch.Issues.DuplicateAccountTitle(),
-				Description = AppStrings.Integrations.Twitch.Issues.DuplicateAccountDescription(title: stale.Title),
+				Description = AppStrings.Integrations.Twitch.Issues.DuplicateAccountDescription(stale.Title),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
@@ -170,7 +181,10 @@ internal sealed class TwitchAccountManager : IDisposable
 		return issues;
 	}
 
-	public Task FlushAsync() => _persister?.FlushAsync() ?? Task.CompletedTask;
+	public Task FlushAsync()
+	{
+		return _persister?.FlushAsync() ?? Task.CompletedTask;
+	}
 
 	public async Task ShutdownAsync()
 	{
@@ -226,11 +240,11 @@ internal sealed class TwitchAccountManager : IDisposable
 		var accessToken = await config.GetSecretAsync(entry.Id, TwitchConfigKeys.AccessToken, cancellationToken);
 		var refreshToken = await config.GetSecretAsync(entry.Id, TwitchConfigKeys.RefreshToken, cancellationToken);
 
-		if (string.IsNullOrEmpty(clientId) ||
-			string.IsNullOrEmpty(userId) ||
-			string.IsNullOrEmpty(login) ||
-			string.IsNullOrEmpty(accessToken) ||
-			string.IsNullOrEmpty(refreshToken))
+		if (string.IsNullOrEmpty(clientId)
+			|| string.IsNullOrEmpty(userId)
+			|| string.IsNullOrEmpty(login)
+			|| string.IsNullOrEmpty(accessToken)
+			|| string.IsNullOrEmpty(refreshToken))
 		{
 			// One broken entry must not take the working ones with it, so it is skipped, not thrown on.
 			_logger.Warning("Twitch config entry {EntryId} is incomplete; skipping", entry.Id);
@@ -311,12 +325,14 @@ internal sealed class TwitchAccountManager : IDisposable
 	}
 
 	private static DateTimeOffset? ParseTimestamp(string? value)
-		=> DateTimeOffset.TryParse(value,
+	{
+		return DateTimeOffset.TryParse(value,
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.RoundtripKind,
 			out var parsed)
 			? parsed
 			: null;
+	}
 
 	private sealed record Candidate(
 		Guid EntryId,

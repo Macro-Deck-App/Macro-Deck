@@ -144,13 +144,19 @@ internal sealed class SpotifyTopItemsTests
 	}
 
 	private static Func<IRequest, IResponse> TopItemsHandler(string tracksJson, string artistsJson)
-		=> request => Json(HttpStatusCode.OK, IsTopArtistsRequest(request) ? artistsJson : tracksJson);
+	{
+		return request => Json(HttpStatusCode.OK, IsTopArtistsRequest(request) ? artistsJson : tracksJson);
+	}
 
 	private static bool IsTopTracksRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("top/tracks", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("top/tracks", StringComparison.Ordinal);
+	}
 
 	private static bool IsTopArtistsRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("top/artists", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("top/artists", StringComparison.Ordinal);
+	}
 
 	private static async Task<SpotifyTopItems?> WaitForSnapshotAsync(SpotifyMusicPlayer player)
 	{
@@ -169,20 +175,26 @@ internal sealed class SpotifyTopItemsTests
 	}
 
 	private static Response Json(HttpStatusCode statusCode, string body)
-		=> new(new Dictionary<string, string>())
+	{
+		return new Response(new Dictionary<string, string>())
 		{
 			StatusCode = statusCode,
 			ContentType = "application/json",
 			Body = body
 		};
+	}
 
 	private static SpotifyMusicPlayer CreatePlayer(StubSpotifyHttpClient http)
-		=> CreatePlayer(new FakeSpotifyOAuthClient(), http, TimeSpan.FromHours(1));
+	{
+		return CreatePlayer(new FakeSpotifyOAuthClient(), http, TimeSpan.FromHours(1));
+	}
 
 	private static SpotifyMusicPlayer CreatePlayerWithExpiredToken(
 		FakeSpotifyOAuthClient oauth,
 		StubSpotifyHttpClient http)
-		=> CreatePlayer(oauth, http, TimeSpan.Zero);
+	{
+		return CreatePlayer(oauth, http, TimeSpan.Zero);
+	}
 
 	private static SpotifyMusicPlayer CreatePlayer(
 		FakeSpotifyOAuthClient oauth,

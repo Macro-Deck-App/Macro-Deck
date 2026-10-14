@@ -32,9 +32,9 @@ internal sealed class GaugesViewStateResolver
 
 		var variable = Find(gauge.Variable);
 
-		if (variable is null ||
-			!double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ||
-			!double.IsFinite(value))
+		if (variable is null
+			|| !double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+			|| !double.IsFinite(value))
 		{
 			return new GaugeFace { Color = gauge.Color, Name = ResolveName(gauge.Name) };
 		}
@@ -50,7 +50,7 @@ internal sealed class GaugesViewStateResolver
 			Value = formatted.Value.Literal ?? Unavailable,
 			Unit = formatted.Unit,
 			Color = ColorOf(value, gauge, variable),
-			Name = ResolveName(gauge.Name),
+			Name = ResolveName(gauge.Name)
 		};
 	}
 
@@ -63,7 +63,9 @@ internal sealed class GaugesViewStateResolver
 
 		try
 		{
-			return _templates.Render(name, _scopeRefId is null ? VariableScope.Global : VariableScope.Widget, _scopeRefId);
+			return _templates.Render(name,
+				_scopeRefId is null ? VariableScope.Global : VariableScope.Widget,
+				_scopeRefId);
 		}
 		catch (Exception e) when (e is not OutOfMemoryException and not StackOverflowException)
 		{
@@ -109,12 +111,14 @@ internal sealed class GaugesViewStateResolver
 	}
 
 	public static bool IsWarning(double value, GaugeConfig gauge)
-		=> gauge.WarnWhen switch
+	{
+		return gauge.WarnWhen switch
 		{
 			GaugeConfig.WarnAbove => value >= (gauge.WarnAt ?? 0),
 			GaugeConfig.WarnBelow => value <= (gauge.WarnAt ?? 0),
-			_ => false,
+			_ => false
 		};
+	}
 
 	private VariableEntity? Find(string? name)
 	{
@@ -123,8 +127,8 @@ internal sealed class GaugesViewStateResolver
 			return null;
 		}
 
-		var variable = (_scopeRefId is null ? null : _variables.FindByName(VariableScope.Widget, _scopeRefId, name)) ??
-			_variables.FindByName(VariableScope.Global, null, name);
+		var variable = (_scopeRefId is null ? null : _variables.FindByName(VariableScope.Widget, _scopeRefId, name))
+			?? _variables.FindByName(VariableScope.Global, null, name);
 
 		return variable is not null && _variables.IsAvailable(variable.Id) ? variable : null;
 	}

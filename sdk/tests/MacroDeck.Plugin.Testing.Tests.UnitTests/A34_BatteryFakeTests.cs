@@ -12,10 +12,12 @@ using MacroDeck.Sdk.Batteries;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A34_BatteryFakeTests
+public class A34BatteryFakeTests
 {
 	private static BatteryDevice Device(string id, int level = 50)
-		=> new() { Id = id, Name = id, Kind = BatteryDeviceKinds.Controller, LevelPercent = level };
+	{
+		return new BatteryDevice { Id = id, Name = id, Kind = BatteryDeviceKinds.Controller, LevelPercent = level };
+	}
 
 	[Test]
 	public async Task Publishing_a_known_id_again_replaces_the_device()
@@ -32,7 +34,9 @@ public class A34_BatteryFakeTests
 	public async Task A_list_that_would_exceed_the_limit_is_refused_as_a_whole()
 	{
 		var context = new FakeBatteryProviderContext();
-		await context.PublishAsync([.. Enumerable.Range(0, BatteryLimits.MaxDevicesPerProvider - 1).Select(index => Device($"d{index}"))]);
+		await context.PublishAsync([
+			.. Enumerable.Range(0, BatteryLimits.MaxDevicesPerProvider - 1).Select(index => Device($"d{index}"))
+		]);
 
 		Assert.That(() => context.PublishAsync([Device("x"), Device("y")]), Throws.InvalidOperationException);
 		Assert.That(context.Devices, Has.Count.EqualTo(BatteryLimits.MaxDevicesPerProvider - 1));
@@ -57,9 +61,11 @@ public class A34_BatteryFakeTests
 	[Test]
 	public async Task The_harness_starts_a_battery_provider_against_its_fake_and_serves_reads_from_its_fake()
 	{
-		await using var harness = PluginTestHarness.Create(builder => builder.RegisterIntegration(_ => new PadIntegration()));
+		await using var harness
+			= PluginTestHarness.Create(builder => builder.RegisterIntegration(_ => new PadIntegration()));
 		harness.Context.Batteries.Set([
-			new BatteryDeviceSnapshot { Id = "adb:phone", LocalId = "phone", ProviderId = "adb", Name = "Phone", LevelPercent = 12 }
+			new BatteryDeviceSnapshot
+				{ Id = "adb:phone", LocalId = "phone", ProviderId = "adb", Name = "Phone", LevelPercent = 12 }
 		]);
 
 		await harness.InitializeIntegrationsAsync();
@@ -67,7 +73,8 @@ public class A34_BatteryFakeTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(harness.Context.BatteryProvider.Devices.Keys.Single(), Is.EqualTo("pad"));
-			Assert.That(((IIntegrationContext)harness.Context).Batteries.Find("adb:phone")?.LevelPercent, Is.EqualTo(12));
+			Assert.That(((IIntegrationContext)harness.Context).Batteries.Find("adb:phone")?.LevelPercent,
+				Is.EqualTo(12));
 		});
 	}
 
@@ -83,30 +90,44 @@ public class A34_BatteryFakeTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(session.Declared.Select(capability => capability.Kind), Does.Contain(CapabilityKinds.BatteryProvider));
+			Assert.That(session.Declared.Select(capability => capability.Kind),
+				Does.Contain(CapabilityKinds.BatteryProvider));
 			Assert.That(BatteryResults(host).Select(result => result.Error), Is.All.Null);
 		});
 	}
 
 	private static IEnumerable<ProtocolEnvelope> BatteryResults(MacroDeckTestHost host)
-		=> host.Messages.OfType(MessageTypes.HostInvoke)
-			.Where(message => message.Envelope.Payload?.Deserialize<HostInvokePayload>(PluginProtocolJson.Options)?.Api ==
-				HostApis.Batteries)
+	{
+		return host.Messages.OfType(MessageTypes.HostInvoke)
+			.Where(message => message.Envelope.Payload?.Deserialize<HostInvokePayload>(PluginProtocolJson.Options)?.Api
+				== HostApis.Batteries)
 			.SelectMany(invoke => host.Messages.WithCorrelationId(invoke.Envelope.Id))
 			.Where(message => message.Envelope.Type == MessageTypes.HostResult)
 			.Select(message => message.Envelope);
+	}
 
 	private sealed class PadIntegration : IPluginIntegration, IBatteryProvider
 	{
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken = default)
-			=> context.PublishAsync(Device("pad", 80), cancellationToken);
+		{
+			return context.PublishAsync(Device("pad", 80), cancellationToken);
+		}
 
-		public Task ShutdownAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task ShutdownAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

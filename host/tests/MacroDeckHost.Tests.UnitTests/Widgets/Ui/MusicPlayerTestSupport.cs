@@ -20,7 +20,7 @@ internal sealed class MusicPlayerTestHarness
 
 	private readonly FakeTimeProvider _time = new()
 	{
-		Now = new DateTimeOffset(2026, 8, 25, 12, 0, 0, TimeSpan.Zero),
+		Now = new DateTimeOffset(2026, 8, 25, 12, 0, 0, TimeSpan.Zero)
 	};
 
 	private readonly StubRegistry _registry = new();
@@ -48,7 +48,10 @@ internal sealed class MusicPlayerTestHarness
 
 	public int ArtworkFetches => _artwork.Fetches;
 
-	public void Record(MusicPlayerStatePayload payload) => _stateCache.Record(InstanceId, payload);
+	public void Record(MusicPlayerStatePayload payload)
+	{
+		_stateCache.Record(InstanceId, payload);
+	}
 
 	public void RecordSecond(MusicPlayerStatePayload payload)
 	{
@@ -57,10 +60,16 @@ internal sealed class MusicPlayerTestHarness
 		_stateCache.Record(StubRegistry.SecondInstanceId, payload);
 	}
 
-	public void Focus(string? instanceId) => _stateCache.ActiveInstanceId = instanceId;
+	public void Focus(string? instanceId)
+	{
+		_stateCache.ActiveInstanceId = instanceId;
+	}
 
 
-	public void Advance(TimeSpan by) => _time.Advance(by);
+	public void Advance(TimeSpan by)
+	{
+		_time.Advance(by);
+	}
 
 	/// <summary>The resolver these stubs feed, so a session test can drive the real one.</summary>
 	public MusicPlayerViewStateResolver Resolver => _resolver;
@@ -68,9 +77,11 @@ internal sealed class MusicPlayerTestHarness
 	public Task<MusicPlayerViewState> ResolveAsync(
 		MusicPlayerViewState? previous = null,
 		MusicPlayerWidgetData? config = null)
-		=> _resolver.ResolveAsync(config ?? new MusicPlayerWidgetData(),
+	{
+		return _resolver.ResolveAsync(config ?? new MusicPlayerWidgetData(),
 			previous ?? MusicPlayerViewState.Loading,
 			CancellationToken.None);
+	}
 }
 
 internal sealed class StubRegistry : IMusicPlayerRegistry
@@ -79,25 +90,37 @@ internal sealed class StubRegistry : IMusicPlayerRegistry
 
 	public bool HasSecondInstance { get; set; }
 
-	public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() =>
-	[
-		new(MusicPlayerTestHarness.InstanceId,
-			"app.macro-deck.spotify",
-			LocalizedText.FromLiteral("Spotify"),
-			"Spotify",
-			false),
-		.. HasSecondInstance
-			? new MusicPlayerInstanceDescriptor[]
-			{
-				new(SecondInstanceId, "app.macro-deck.ytm", LocalizedText.FromLiteral("YouTube Music"), "YouTube Music", false),
-			}
-			: [],
-	];
+	public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+	{
+		return
+		[
+			new MusicPlayerInstanceDescriptor(MusicPlayerTestHarness.InstanceId,
+				"app.macro-deck.spotify",
+				LocalizedText.FromLiteral("Spotify"),
+				"Spotify",
+				false),
+			.. HasSecondInstance
+				? new MusicPlayerInstanceDescriptor[]
+				{
+					new(SecondInstanceId,
+						"app.macro-deck.ytm",
+						LocalizedText.FromLiteral("YouTube Music"),
+						"YouTube Music",
+						false)
+				}
+				: []
+		];
+	}
 
-	public IMusicPlayer? GetPlayer(string instanceId) => null;
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return null;
+	}
 
 	public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-		=> GetPlayer(instanceId);
+	{
+		return GetPlayer(instanceId);
+	}
 
 	public IMusicPlayer? DefaultPlayer => null;
 }
@@ -107,13 +130,21 @@ internal sealed class StubStateCache : IMusicPlayerStateCache
 	private readonly Dictionary<string, MusicPlayerStatePayload> _states = new(StringComparer.Ordinal);
 
 	public MusicPlayerStatePayload? GetState(string instanceId)
-		=> _states.GetValueOrDefault(instanceId);
+	{
+		return _states.GetValueOrDefault(instanceId);
+	}
 
-	public IReadOnlyList<MusicPlayerStatePayload> GetAll() => _states.Values.ToList();
+	public IReadOnlyList<MusicPlayerStatePayload> GetAll()
+	{
+		return _states.Values.ToList();
+	}
 
 	public string? ActiveInstanceId { get; set; }
 
-	public void Record(string instanceId, MusicPlayerStatePayload payload) => _states[instanceId] = payload;
+	public void Record(string instanceId, MusicPlayerStatePayload payload)
+	{
+		_states[instanceId] = payload;
+	}
 
 	public void Forget(IReadOnlySet<string> keep)
 	{
@@ -124,15 +155,22 @@ internal sealed class StubArtworkService : IMusicPlayerArtworkService
 {
 	public int Fetches { get; private set; }
 
-	public string GetETag(string artworkId, int? size) => $"\"{artworkId}\"";
+	public string GetETag(string artworkId, int? size)
+	{
+		return $"\"{artworkId}\"";
+	}
 
-	public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+	public Task<ArtworkImageResult?> GetImage(
+		MusicPlayerVariant variant,
 		string artworkId,
 		int? size,
 		CancellationToken cancellationToken)
-		=> GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+	{
+		return GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+	}
 
-	public Task<ArtworkImageResult?> GetImage(string instanceId,
+	public Task<ArtworkImageResult?> GetImage(
+		string instanceId,
 		string artworkId,
 		int? size,
 		CancellationToken cancellationToken)
@@ -147,5 +185,8 @@ internal sealed class StubArtworkService : IMusicPlayerArtworkService
 
 internal sealed class StubPaletteExtractor : IArtworkPaletteExtractor
 {
-	public ArtworkPalette? Extract(byte[] image) => new("#aabbcc", "#112233", "#445566");
+	public ArtworkPalette? Extract(byte[] image)
+	{
+		return new ArtworkPalette("#aabbcc", "#112233", "#445566");
+	}
 }

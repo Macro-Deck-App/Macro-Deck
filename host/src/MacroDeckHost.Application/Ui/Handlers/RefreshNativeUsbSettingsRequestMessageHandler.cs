@@ -7,7 +7,8 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 public class RefreshNativeUsbSettingsRequestMessageHandler(INativeUsbManager manager)
 	: IUiTransportMessageHandler<RefreshNativeUsbSettingsRequest, GetNativeUsbSettingsResponse>
 {
-	public async ValueTask<GetNativeUsbSettingsResponse> Handle(RefreshNativeUsbSettingsRequest request,
+	public async ValueTask<GetNativeUsbSettingsResponse> Handle(
+		RefreshNativeUsbSettingsRequest request,
 		CancellationToken cancellationToken)
 	{
 		await manager.PollAsync(cancellationToken);

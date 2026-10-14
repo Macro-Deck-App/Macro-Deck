@@ -10,7 +10,9 @@ namespace MacroDeckHost.Application.Services;
 public static class ActiveLocalization
 {
 	public static async Task<string?> Culture(IServiceProvider services)
-		=> (await services.GetRequiredService<IAppPreferenceService>().GetLocalization()).Culture;
+	{
+		return (await services.GetRequiredService<IAppPreferenceService>().GetLocalization()).Culture;
+	}
 
 	public static async Task<string?> Culture(IServiceScopeFactory scopeFactory)
 	{

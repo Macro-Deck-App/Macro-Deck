@@ -8,11 +8,13 @@ public interface IProfilePortabilityService
 {
 	Result<string, PortabilityError> GetExportFileName(Guid profileId);
 
-	Task<Result<byte[], PortabilityError>> Export(Guid profileId,
+	Task<Result<byte[], PortabilityError>> Export(
+		Guid profileId,
 		PortableExportOptions options,
 		CancellationToken cancellationToken);
 
-	Task<Result<ProfileEntity, PortabilityError>> Import(byte[] archiveBytes,
+	Task<Result<ProfileEntity, PortabilityError>> Import(
+		byte[] archiveBytes,
 		string? password,
 		CancellationToken cancellationToken);
 
@@ -26,7 +28,8 @@ public interface IProfilePortabilityService
 	/// A caller that already resolved its images to local icon ids passes no <paramref name="iconFiles" />;
 	/// those ids are left alone, because only the ids minted here are ever rewritten.
 	/// </remarks>
-	Task<Result<ProfileEntity, PortabilityError>> ImportContent(PortableContent content,
+	Task<Result<ProfileEntity, PortabilityError>> ImportContent(
+		PortableContent content,
 		IReadOnlyList<PortableIconFile> iconFiles,
 		IReadOnlyList<PortableFontFile> fontFiles,
 		CancellationToken cancellationToken);

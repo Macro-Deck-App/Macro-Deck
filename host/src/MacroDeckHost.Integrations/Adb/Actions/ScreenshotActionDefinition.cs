@@ -27,16 +27,19 @@ internal sealed class ScreenshotActionDefinition : IActionDefinition
 	[
 		AdbActionDefinition.DeviceParameter(AppStrings.Integrations.Adb.Params.DeviceDescription()),
 		ActionParameter.Folder("folder",
-			label: AppStrings.Integrations.Adb.Actions.ScreenshotFolderLabel(),
-			description: AppStrings.Integrations.Adb.Actions.ScreenshotFolderDescription(),
-			required: true),
+			AppStrings.Integrations.Adb.Actions.ScreenshotFolderLabel(),
+			AppStrings.Integrations.Adb.Actions.ScreenshotFolderDescription(),
+			true),
 		ActionParameter.Autocomplete("fileNameVariable",
-			label: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableLabel(),
-			description: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription(),
+			AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableLabel(),
+			AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_services);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_services);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -64,7 +67,9 @@ internal sealed class ScreenshotActionDefinition : IActionDefinition
 					AppStrings.Integrations.Adb.Errors.FolderRequired());
 			}
 
-			var target = new AdbTarget(manager, _services.Tracker(), AdbActionDefinition.ReadDevice(context.Parameters));
+			var target = new AdbTarget(manager,
+				_services.Tracker(),
+				AdbActionDefinition.ReadDevice(context.Parameters));
 			var (result, png) =
 				await target.RunAsync(device => device.CaptureScreenshotAsync(context.CancellationToken));
 			_services.Health.Record(result);

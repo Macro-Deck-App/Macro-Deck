@@ -38,7 +38,9 @@ internal sealed class MacroDeck2Paths
 	/// the decision.
 	/// </summary>
 	public bool LooksLikeMacroDeck2()
-		=> Directory.Exists(ProfilesDirectory) || File.Exists(LegacyProfilesDatabase) || File.Exists(ConfigFile);
+	{
+		return Directory.Exists(ProfilesDirectory) || File.Exists(LegacyProfilesDatabase) || File.Exists(ConfigFile);
+	}
 
 	public static string? TryDetectDefaultPath()
 	{

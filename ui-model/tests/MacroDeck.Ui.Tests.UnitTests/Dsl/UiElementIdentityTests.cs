@@ -41,7 +41,7 @@ public class UiElementIdentityTests
 			{
 				Key = "gate",
 				Condition = () => true,
-				Content = () => new UiFragment { Key = "group", Children = [wrapped] },
+				Content = () => new UiFragment { Key = "group", Children = [wrapped] }
 			};
 		}
 
@@ -60,7 +60,7 @@ public class UiElementIdentityTests
 						new UiObjectInput
 						{
 							Key = "endpoint",
-							Children = [new UiStringInput { Key = "host" }, new UiStringInput { Key = "port" }],
+							Children = [new UiStringInput { Key = "host" }, new UiStringInput { Key = "port" }]
 						},
 						new UiArrayInput
 						{
@@ -79,11 +79,11 @@ public class UiElementIdentityTests
 										Key = item.Id,
 										Children =
 										[
-											new UiStringInput { Key = "name" }, new UiStringInput { Key = "value" },
-										],
-									},
-								},
-							],
+											new UiStringInput { Key = "name" }, new UiStringInput { Key = "value" }
+										]
+									}
+								}
+							]
 						},
 						new UiWhen
 						{
@@ -92,18 +92,20 @@ public class UiElementIdentityTests
 							Content = () => new UiAdvancedSection
 							{
 								Key = "advanced",
-								Children = [new UiDurationInput { Key = "timeout" }],
-							},
-						},
-					],
+								Children = [new UiDurationInput { Key = "timeout" }]
+							}
+						}
+					]
 				},
-				new UiStep { Key = "verify" },
-			],
+				new UiStep { Key = "verify" }
+			]
 		};
 	}
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiNode? FindById(UiNode node, string id)
 	{
@@ -183,7 +185,7 @@ public class UiElementIdentityTests
 	[Test]
 	public void A_top_level_input_node_id_is_its_bare_key_regardless_of_its_chrome_ancestry()
 	{
-		var tree = UiViewBuilder.Build(ConfigSurface(), BuildSampleFlow(headers: []));
+		var tree = UiViewBuilder.Build(ConfigSurface(), BuildSampleFlow([]));
 
 		var apiKey = FindById(tree.Root, "apiKey");
 
@@ -226,15 +228,15 @@ public class UiElementIdentityTests
 	[Test]
 	public void UiWhen_and_UiFragment_contribute_neither_a_node_nor_a_path_segment()
 	{
-		var plain = UiViewBuilder.Build(ConfigSurface(), BuildSampleFlow(headers: []));
+		var plain = UiViewBuilder.Build(ConfigSurface(), BuildSampleFlow([]));
 		var wrapped = UiViewBuilder.Build(ConfigSurface(),
-			BuildSampleFlow(headers: [], wrapApiKeyInWhenAndFragment: true));
+			BuildSampleFlow([], wrapApiKeyInWhenAndFragment: true));
 
 		// Not the real 41-member vocabulary, which the configuration fixtures own - just the subset SampleFlow
 		// uses, so this negatively asserts that "ui-when"/"ui-fragment" never leak in as node types.
 		var allowedTypes = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"flow", "step", "advanced-section", "string", "choice", "duration", "object", "array",
+			"flow", "step", "advanced-section", "string", "choice", "duration", "object", "array"
 		};
 
 		Assert.Multiple(() =>
@@ -269,7 +271,7 @@ public class UiElementIdentityTests
 		// The same removal against a live view, so the id stability above is asserted of the node instances that
 		// actually survived rather than of a freshly rebuilt tree.
 		var headerState = new UiState<IReadOnlyList<HeaderItem>>(headers);
-		var view = new UiView(ConfigSurface(), BuildSampleFlow(headers: [], headerState: headerState));
+		var view = new UiView(ConfigSurface(), BuildSampleFlow([], headerState: headerState));
 
 		view.DrainPatches();
 		headerState.Value = [headers[1], headers[2]];
@@ -343,9 +345,9 @@ public class UiElementIdentityTests
 					new UiStep
 					{
 						Key = "credentials",
-						Children = [new UiStringInput { Key = "apiKey" }],
-					},
-				],
+						Children = [new UiStringInput { Key = "apiKey" }]
+					}
+				]
 			}));
 
 		// Case 2: two repeat items whose KeySelector returns the same string.
@@ -365,10 +367,10 @@ public class UiElementIdentityTests
 						Children =
 						[
 							new UiStringInput { Key = "apiKey" },
-							new UiStringInput { Key = "mode", Fallback = new UiStringInput { Key = "apiKey" } },
-						],
-					},
-				],
+							new UiStringInput { Key = "mode", Fallback = new UiStringInput { Key = "apiKey" } }
+						]
+					}
+				]
 			}));
 
 		// Control: a Fallback with a distinct key does not throw and is reachable.
@@ -383,10 +385,10 @@ public class UiElementIdentityTests
 						Key = "credentials",
 						Children =
 						[
-							new UiStringInput { Key = "mode", Fallback = new UiStringInput { Key = "modeFallback" } },
-						],
-					},
-				],
+							new UiStringInput { Key = "mode", Fallback = new UiStringInput { Key = "modeFallback" } }
+						]
+					}
+				]
 			});
 
 		var mode = FindById(withDistinctFallback.Root, "mode");
@@ -410,8 +412,8 @@ public class UiElementIdentityTests
 				Children =
 				[
 					new UiStringInput { Key = "widget", RequiredComponentVersion = 2 },
-					new UiStringInput { Key = "plainField" },
-				],
+					new UiStringInput { Key = "plainField" }
+				]
 			});
 
 		var json = UiCanonicalJson.Serialize(tree);

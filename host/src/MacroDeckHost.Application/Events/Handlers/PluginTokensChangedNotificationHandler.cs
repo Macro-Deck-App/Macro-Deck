@@ -14,5 +14,9 @@ public sealed class PluginTokensChangedNotificationHandler : INotificationHandle
 	}
 
 	public ValueTask Handle(PluginTokensChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_uiTransport.SendToGroup(UiAdminGroups.Admin, new PluginTokensChangedEvent(), cancellationToken));
+	{
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin,
+			new PluginTokensChangedEvent(),
+			cancellationToken));
+	}
 }

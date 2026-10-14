@@ -59,14 +59,21 @@ public class ShellFirstNotificationServiceTests
 			string title,
 			string message,
 			CancellationToken cancellationToken = default)
-			=> Failure is null ? Task.FromResult(Result) : Task.FromException<bool>(Failure);
+		{
+			return Failure is null ? Task.FromResult(Result) : Task.FromException<bool>(Failure);
+		}
 
 		public Task<IReadOnlyList<ShellNotification>> WaitAsync(
 			TimeSpan hold,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public void Report(long id, bool shown) => throw new NotSupportedException();
+		public void Report(long id, bool shown)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RecordingNotificationService : IPlatformNotificationService

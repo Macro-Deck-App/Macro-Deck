@@ -67,7 +67,7 @@ internal static class MusicPlayerWidgetConfigView
 						Key = "instance-options",
 						Items = UiValue.From(() => optionFields.Value),
 						KeySelector = fields => fields.ItemKey,
-						Template = (fields, _) => fields.Build(),
+						Template = (fields, _) => fields.Build()
 					},
 					new UiHeading { Key = "style-heading", Text = AppStrings.Widgets.Editor.Style() },
 					new UiChoiceInput
@@ -78,44 +78,44 @@ internal static class MusicPlayerWidgetConfigView
 						Cards = true,
 						Binding = Bind.To(coverStyle),
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
-							new()
+							new UiOption
 							{
 								Value = MusicPlayerWidgetData.SmallCoverStyle,
 								Label = AppStrings.Widgets.Music.SmallCover(),
-								Description = AppStrings.Widgets.Music.SmallCoverDesc(),
+								Description = AppStrings.Widgets.Music.SmallCoverDesc()
 							},
-							new()
+							new UiOption
 							{
 								Value = MusicPlayerWidgetData.FullCoverStyle,
 								Label = AppStrings.Widgets.Music.FullCover(),
-								Description = AppStrings.Widgets.Music.FullCoverDesc(),
-							},
-						]),
+								Description = AppStrings.Widgets.Music.FullCoverDesc()
+							}
+						])
 					},
 					new UiHeading { Key = "display-heading", Text = AppStrings.Widgets.Editor.Display() },
 					new UiBooleanInput
 					{
 						Key = "showHeader",
 						Label = AppStrings.Widgets.Music.HeaderProvider(),
-						Binding = Bind.To(showHeader),
+						Binding = Bind.To(showHeader)
 					},
 					new UiBooleanInput
 					{
 						Key = "showSource",
 						Label = AppStrings.Widgets.Music.Source(),
-						Binding = Bind.To(showSource),
+						Binding = Bind.To(showSource)
 					},
 					new UiBooleanInput
 					{
 						Key = "showTitle",
 						Label = AppStrings.Widgets.Music.Title(),
-						Binding = Bind.To(showTitle),
+						Binding = Bind.To(showTitle)
 					},
 					new UiBooleanInput
 					{
 						Key = "showArtist",
 						Label = AppStrings.Widgets.Music.Artist(),
-						Binding = Bind.To(showArtist),
+						Binding = Bind.To(showArtist)
 					},
 					new UiBooleanInput
 					{
@@ -125,26 +125,26 @@ internal static class MusicPlayerWidgetConfigView
 						VisibleWhen = new UiVisibleWhen
 						{
 							ParameterName = "coverStyle",
-							Values = [MusicPlayerWidgetData.SmallCoverStyle],
-						},
+							Values = [MusicPlayerWidgetData.SmallCoverStyle]
+						}
 					},
 					new UiBooleanInput
 					{
 						Key = "showTimeline",
 						Label = AppStrings.Widgets.Music.Timeline(),
-						Binding = Bind.To(showTimeline),
+						Binding = Bind.To(showTimeline)
 					},
 					new UiProse
 					{
-						Key = "live-update-hint", Text = AppStrings.Widgets.Music.LiveUpdateHint(),
+						Key = "live-update-hint", Text = AppStrings.Widgets.Music.LiveUpdateHint()
 					},
 					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
 					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
-					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-				],
+					WidgetConfigFragments.Border(borderStyle, borderColor, false)
+				]
 			},
-			Editor = WidgetConfigFragments.FlowsEditor(flows),
+			Editor = WidgetConfigFragments.FlowsEditor(flows)
 		};
 	}
 
@@ -168,13 +168,13 @@ internal static class MusicPlayerWidgetConfigView
 					// changes, so the fields are never built for one instance from another's cells.
 					if (!string.Equals(value, instanceId.Peek(), StringComparison.Ordinal))
 					{
-						optionFields.Value = InstanceOptionFields.For(registry, value, stored: null);
+						optionFields.Value = InstanceOptionFields.For(registry, value, null);
 					}
 
 					instanceId.Value = value;
 					instanceOptions.Reload();
 				}),
-			OptionsState = instanceOptions,
+			OptionsState = instanceOptions
 		};
 
 		return registry.GetInstances().Count == 0
@@ -189,13 +189,13 @@ internal static class MusicPlayerWidgetConfigView
 		var options = new List<UiOption>
 		{
 			// UiOption.Of rejects an empty value, so the active-player sentinel is composed directly.
-			new() { Value = string.Empty, Label = AppStrings.Widgets.Music.ActivePlayer() },
+			new() { Value = string.Empty, Label = AppStrings.Widgets.Music.ActivePlayer() }
 		};
 
 		options.AddRange(instances.Select(instance => UiOption.Of(instance.InstanceId, instance.DisplayName)));
 
-		if (!string.IsNullOrEmpty(selected) &&
-			!instances.Any(instance => string.Equals(instance.InstanceId, selected, StringComparison.Ordinal)))
+		if (!string.IsNullOrEmpty(selected)
+			&& !instances.Any(instance => string.Equals(instance.InstanceId, selected, StringComparison.Ordinal)))
 		{
 			options.Add(UiOption.Of(selected, AppStrings.Widgets.Music.UnavailablePlayer()));
 		}
@@ -220,7 +220,8 @@ internal static class MusicPlayerWidgetConfigView
 				{
 					double number => (object)new UiState<double>(number),
 					bool flag => new UiState<bool>(flag),
-					var other => new UiState<string>(Convert.ToString(other, CultureInfo.InvariantCulture) ?? string.Empty),
+					var other => new UiState<string>(Convert.ToString(other, CultureInfo.InvariantCulture)
+						?? string.Empty)
 				},
 				StringComparer.Ordinal);
 		}
@@ -245,12 +246,14 @@ internal static class MusicPlayerWidgetConfigView
 		}
 
 		public UiElement Build()
-			=> new UiObjectInput
+		{
+			return new UiObjectInput
 			{
 				Key = "instanceOptions",
 				HideLabel = true,
-				Children = [.. _options.Select(Field)],
+				Children = [.. _options.Select(Field)]
 			};
+		}
 
 		private UiElement Field(ActionParameter option)
 		{
@@ -267,11 +270,11 @@ internal static class MusicPlayerWidgetConfigView
 					Min = option.Min is { } min ? min : default(UiValue<double>),
 					Max = option.Max is { } max ? max : default(UiValue<double>),
 					Step = option.Step is { } step ? step : default(UiValue<double>),
-					ShowSlider = option.ShowSlider,
+					ShowSlider = option.ShowSlider
 				},
 				UiState<bool> flag => new UiBooleanInput
 				{
-					Key = option.Name, Label = label, Description = option.Description, Binding = Bind.To(flag),
+					Key = option.Name, Label = label, Description = option.Description, Binding = Bind.To(flag)
 				},
 				UiState<string> text when option.Type == ActionParameterType.Choice => new UiChoiceInput
 				{
@@ -284,15 +287,15 @@ internal static class MusicPlayerWidgetConfigView
 						.. option.Options!.Select(choice => new UiOption
 						{
 							Value = choice.Value,
-							Label = choice.Label.IsEmpty ? LocalizedText.FromLiteral(choice.Value) : choice.Label,
-						}),
-					]),
+							Label = choice.Label.IsEmpty ? LocalizedText.FromLiteral(choice.Value) : choice.Label
+						})
+					])
 				},
 				UiState<string> text => new UiStringInput
 				{
-					Key = option.Name, Label = label, Description = option.Description, Binding = Bind.To(text),
+					Key = option.Name, Label = label, Description = option.Description, Binding = Bind.To(text)
 				},
-				_ => throw new InvalidOperationException($"No field for music player option '{option.Name}'."),
+				_ => throw new InvalidOperationException($"No field for music player option '{option.Name}'.")
 			};
 		}
 	}

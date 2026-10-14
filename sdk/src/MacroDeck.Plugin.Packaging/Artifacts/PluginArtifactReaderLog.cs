@@ -7,7 +7,9 @@ namespace MacroDeck.Plugin.Packaging.Artifacts;
 internal static class PluginArtifactReaderLog
 {
 	public static void ExtractCleanupFailed(ILogger logger, string targetDirectory, Exception exception)
-		=> logger.Warning(exception,
+	{
+		logger.Warning(exception,
 			"Failed to clean up partially extracted plugin artifact at '{TargetDirectory}'.",
 			targetDirectory);
+	}
 }

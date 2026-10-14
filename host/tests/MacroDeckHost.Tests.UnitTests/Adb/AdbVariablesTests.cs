@@ -33,20 +33,26 @@ internal sealed partial class AdbVariablesTests
 	}
 
 	[TearDown]
-	public void TearDown() => _tracker.Dispose();
+	public void TearDown()
+	{
+		_tracker.Dispose();
+	}
 
-	private ScriptedAndroidDevice Attach(string serial,
+	private ScriptedAndroidDevice Attach(
+		string serial,
 		AndroidDeviceState state = AndroidDeviceState.Online,
 		string? model = null,
 		string? manufacturer = null)
 	{
-		var device = _devices.Attach(serial, stableId: null, state: state, model: model);
+		var device = _devices.Attach(serial, null, state: state, model: model);
 		device.Info = device.Info with { Manufacturer = manufacturer };
 		return device;
 	}
 
 	private ValueTask<VariableReading> Read(string localId)
-		=> AdbVariables.ReadAsync(_devices, _tracker, localId, CancellationToken.None);
+	{
+		return AdbVariables.ReadAsync(_devices, _tracker, localId, CancellationToken.None);
+	}
 
 	[Test]
 	public void ProvidedVariables_is_exactly_the_documented_eleven_names()
@@ -95,11 +101,12 @@ internal sealed partial class AdbVariablesTests
 	[Test]
 	public async Task Without_android_devices_every_variable_is_unavailable()
 	{
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			foreach (var variable in AdbVariables.All)
 			{
-				Assert.That((await AdbVariables.ReadAsync(null, null, variable.ResolvedId!, CancellationToken.None)).Value,
+				Assert.That((await AdbVariables.ReadAsync(null, null, variable.ResolvedId!, CancellationToken.None))
+					.Value,
 					Is.Null,
 					variable.Name);
 			}
@@ -112,7 +119,7 @@ internal sealed partial class AdbVariablesTests
 		Attach("S1");
 		_devices.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			foreach (var variable in AdbVariables.All)
 			{
@@ -126,7 +133,8 @@ internal sealed partial class AdbVariablesTests
 	{
 		var device = Attach("S1");
 		_devices.DefaultSerial = "S1";
-		device.Status = new AndroidDeviceStatus { IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" };
+		device.Status = new AndroidDeviceStatus
+			{ IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" };
 
 		foreach (var variable in AdbVariables.All)
 		{
@@ -149,7 +157,7 @@ internal sealed partial class AdbVariablesTests
 		Attach("S3", AndroidDeviceState.Online);
 		_devices.Detach("S3");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await Read(AdbVariables.ConnectedDeviceCount)).Value, Is.EqualTo(2));
 			Assert.That((await Read(AdbVariables.AuthorizedDeviceCount)).Value, Is.EqualTo(1));
@@ -171,7 +179,7 @@ internal sealed partial class AdbVariablesTests
 		Attach("S2", AndroidDeviceState.Online, "Galaxy S24", "Samsung");
 		_devices.DefaultSerial = "S2";
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await Read(AdbVariables.DeviceModel)).Value, Is.EqualTo("Galaxy S24"));
 			Assert.That((await Read(AdbVariables.DeviceManufacturer)).Value, Is.EqualTo("Samsung"));
@@ -183,7 +191,7 @@ internal sealed partial class AdbVariablesTests
 	{
 		Attach("S1", AndroidDeviceState.Online, "Pixel 8");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await Read(AdbVariables.DeviceConnected)).Value, Is.True);
 			Assert.That((await Read(AdbVariables.DeviceModel)).Value, Is.EqualTo("Pixel 8"));
@@ -196,7 +204,7 @@ internal sealed partial class AdbVariablesTests
 		Attach("S1");
 		Attach("S2");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await Read(AdbVariables.DeviceConnected)).Value, Is.Null);
 			Assert.That((await Read(AdbVariables.DeviceModel)).Value, Is.Null);
@@ -210,7 +218,7 @@ internal sealed partial class AdbVariablesTests
 		_devices.Detach("S1");
 		_devices.DefaultSerial = "S1";
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await Read(AdbVariables.DeviceConnected)).Value, Is.False);
 			Assert.That((await Read(AdbVariables.DeviceAuthorized)).Value, Is.False);
@@ -223,9 +231,10 @@ internal sealed partial class AdbVariablesTests
 	{
 		var device = Attach("S1");
 		device.Battery = device.Battery with { Level = 42 };
-		device.Status = new AndroidDeviceStatus { IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" };
+		device.Status = new AndroidDeviceStatus
+			{ IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" };
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await Read(AdbVariables.DeviceBatteryLevel)).Value, Is.EqualTo(42));
 			Assert.That((await Read(AdbVariables.DeviceScreenOn)).Value, Is.True);

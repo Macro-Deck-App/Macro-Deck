@@ -25,13 +25,24 @@ public class IntegrationIconControllerTests
 
 		public string IconMimeType => "image/svg+xml";
 
-		public byte[] GetIcon() => Icon;
+		public byte[] GetIcon()
+		{
+			return Icon;
+		}
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
-	private static IntegrationIconController CreateController(IIntegration integration,
+	private static IntegrationIconController CreateController(
+		IIntegration integration,
 		string? ifNoneMatch = null)
 	{
 		var controller = new IntegrationIconController(new ConfigurableIntegrationRegistry([integration]));
@@ -80,7 +91,7 @@ public class IntegrationIconControllerTests
 		var integration = new IconIntegration();
 		var etag = ETagOf(integration);
 
-		var controller = CreateController(integration, ifNoneMatch: etag);
+		var controller = CreateController(integration, etag);
 		var result = controller.GetIcon(IntegrationId);
 
 		Assert.That(result, Is.InstanceOf<StatusCodeResult>());
@@ -94,7 +105,7 @@ public class IntegrationIconControllerTests
 		var stale = ETagOf(integration);
 
 		integration.Icon = [42];
-		var controller = CreateController(integration, ifNoneMatch: stale);
+		var controller = CreateController(integration, stale);
 		var result = controller.GetIcon(IntegrationId);
 
 		Assert.That(result, Is.InstanceOf<FileContentResult>());

@@ -13,9 +13,10 @@ public class UiContainerLengthTests
 	private const int MaxTreeBytes = 192 * 1024;
 
 	private static UiTree Build(params UiElement[] children)
-		=> UiViewBuilder.Build(
-			new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
+	{
+		return UiViewBuilder.Build(new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 			new UiStack { Key = "root", Children = children });
+	}
 
 	[Test]
 	public void A_length_relative_to_the_parent_travels_with_the_basis_an_older_reader_uses()
@@ -39,8 +40,10 @@ public class UiContainerLengthTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiCanonicalJson.Serialize(UiLength.OfBasis(0.2)), Is.EqualTo("""{"basis":0.2}"""));
-			Assert.That(UiCanonicalJson.Serialize(UiLength.OfBasis(0.2, 0.5)), Is.EqualTo("""{"basis":0.2,"maxOfCross":0.5}"""));
-			Assert.That(UiCanonicalJson.Serialize(UiLength.Capped(0.2, 12)), Is.EqualTo("""{"basis":0.2,"maxOfCell":0.1}"""));
+			Assert.That(UiCanonicalJson.Serialize(UiLength.OfBasis(0.2, 0.5)),
+				Is.EqualTo("""{"basis":0.2,"maxOfCross":0.5}"""));
+			Assert.That(UiCanonicalJson.Serialize(UiLength.Capped(0.2, 12)),
+				Is.EqualTo("""{"basis":0.2,"maxOfCell":0.1}"""));
 		});
 	}
 
@@ -75,8 +78,7 @@ public class UiContainerLengthTests
 	[Test]
 	public void A_frame_rejects_a_negative_parent_fraction()
 	{
-		Assert.Throws<ArgumentOutOfRangeException>(
-			() => _ = new UiFrame { MaxWidth = UiLength.OfParent(-0.1, 0.1) });
+		Assert.Throws<ArgumentOutOfRangeException>(() => _ = new UiFrame { MaxWidth = UiLength.OfParent(-0.1, 0.1) });
 	}
 
 	[Test]
@@ -87,7 +89,7 @@ public class UiContainerLengthTests
 			Key = "rings",
 			Columns = 4,
 			MinCellSize = UiLength.OfBasis(0.25),
-			Children = [new UiTextRun { Key = "a", Text = "a" }],
+			Children = [new UiTextRun { Key = "a", Text = "a" }]
 		});
 
 		var grid = tree.Root.Children.Single();
@@ -102,7 +104,8 @@ public class UiContainerLengthTests
 	[Test]
 	public void A_grid_without_a_minimum_cell_size_sends_no_such_property()
 	{
-		var tree = Build(new UiGrid { Key = "rings", Columns = 2, Children = [new UiTextRun { Key = "a", Text = "a" }] });
+		var tree = Build(
+			new UiGrid { Key = "rings", Columns = 2, Children = [new UiTextRun { Key = "a", Text = "a" }] });
 
 		Assert.That(tree.Root.Children.Single().Properties.ContainsKey("minCellSize"), Is.False);
 	}
@@ -113,7 +116,8 @@ public class UiContainerLengthTests
 		static long TreeBytes(int devices)
 		{
 			var rings = Enumerable.Range(0, devices).Select(index => (UiElement)RingFor(index)).ToArray();
-			var tree = Build(new UiGrid { Key = "rings", MinCellSize = UiLength.OfBasis(0.25), Columns = 4, Children = rings });
+			var tree = Build(new UiGrid
+				{ Key = "rings", MinCellSize = UiLength.OfBasis(0.25), Columns = 4, Children = rings });
 
 			return UiCanonicalJson.SerializeToUtf8Bytes(tree).Length;
 		}
@@ -126,18 +130,23 @@ public class UiContainerLengthTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(fifteen, Is.LessThan(MaxTreeBytes / 4));
-			Assert.That(fifteen - eight, Is.EqualTo(perDevice * 7).Within(perDevice * 0.35), "linear in the number of devices");
+			Assert.That(fifteen - eight,
+				Is.EqualTo(perDevice * 7).Within(perDevice * 0.35),
+				"linear in the number of devices");
 		});
 	}
 
-	private static UiLayer RingFor(int index) => new()
+	private static UiLayer RingFor(int index)
 	{
-		Key = $"ring{index}",
-		Children =
-		[
-			new UiGauge { Key = $"gauge{index}", Level = 0.5, Thickness = UiLength.OfParent(0.085, 0.01) },
-			new UiIcon { Key = $"icon{index}", Icon = "battery", Size = UiLength.OfParent(0.3, 0.05) },
-			new UiTextRun { Key = $"percent{index}", Text = "50 %", Size = UiLength.OfParent(0.18, 0.03) },
-		],
-	};
+		return new UiLayer
+		{
+			Key = $"ring{index}",
+			Children =
+			[
+				new UiGauge { Key = $"gauge{index}", Level = 0.5, Thickness = UiLength.OfParent(0.085, 0.01) },
+				new UiIcon { Key = $"icon{index}", Icon = "battery", Size = UiLength.OfParent(0.3, 0.05) },
+				new UiTextRun { Key = $"percent{index}", Text = "50 %", Size = UiLength.OfParent(0.18, 0.03) }
+			]
+		};
+	}
 }

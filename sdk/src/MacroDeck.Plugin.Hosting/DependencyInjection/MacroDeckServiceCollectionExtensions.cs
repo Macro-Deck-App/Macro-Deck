@@ -169,7 +169,8 @@ internal static class MacroDeckServiceCollectionExtensions
 
 		if (typeof(IConfigEntryLifecycle).IsAssignableFrom(typeof(TIntegration)))
 		{
-			services.TryAddEnumerable(ServiceDescriptor.Singleton<ICapabilityHandler, ConfigEntriesCapabilityHandler>());
+			services.TryAddEnumerable(ServiceDescriptor
+				.Singleton<ICapabilityHandler, ConfigEntriesCapabilityHandler>());
 		}
 
 		if (typeof(IIntegrationIssueProvider).IsAssignableFrom(typeof(TIntegration)))
@@ -222,8 +223,8 @@ internal static class MacroDeckServiceCollectionExtensions
 
 		if (typeof(ICompanionDeviceConfigEntries).IsAssignableFrom(typeof(TIntegration)))
 		{
-			services.TryAddEnumerable(
-				ServiceDescriptor.Singleton<ICapabilityHandler, CompanionDeviceEntriesCapabilityHandler>());
+			services.TryAddEnumerable(ServiceDescriptor
+				.Singleton<ICapabilityHandler, CompanionDeviceEntriesCapabilityHandler>());
 		}
 
 		if (typeof(ILayoutProvider).IsAssignableFrom(typeof(TIntegration)))

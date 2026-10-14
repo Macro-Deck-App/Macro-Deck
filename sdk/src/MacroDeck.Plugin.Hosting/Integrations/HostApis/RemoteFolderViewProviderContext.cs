@@ -33,8 +33,10 @@ internal sealed class RemoteFolderViewProviderContext(IHostInvoker invoker) : IF
 	}
 
 	public Task UnregisterFolderViewAsync(string folderViewId, CancellationToken cancellationToken = default)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.FolderViews,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.FolderViews,
 			HostOperations.FolderViews.Unregister,
 			new FolderViewsUnregisterArguments { FolderViewId = folderViewId },
 			cancellationToken);
+	}
 }

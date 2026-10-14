@@ -121,8 +121,8 @@ public static class AutostartEntryContent
 		foreach (var line in content.Split('\n'))
 		{
 			var value = line.Trim();
-			if (value.StartsWith("<string>", StringComparison.Ordinal) &&
-				value.EndsWith("</string>", StringComparison.Ordinal))
+			if (value.StartsWith("<string>", StringComparison.Ordinal)
+				&& value.EndsWith("</string>", StringComparison.Ordinal))
 			{
 				arguments.Add(SecurityElementUnescape(value["<string>".Length..^"</string>".Length]));
 			}

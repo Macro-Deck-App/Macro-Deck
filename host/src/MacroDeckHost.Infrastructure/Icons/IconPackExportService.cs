@@ -32,7 +32,11 @@ public sealed class IconPackExportService : IIconPackExportService
 	private readonly IMacroDeckPaths _paths;
 	private readonly ILogger _logger;
 
-	public IconPackExportService(IIconPackCache iconPackCache, IIconStorage storage, IMacroDeckPaths paths, ILogger logger)
+	public IconPackExportService(
+		IIconPackCache iconPackCache,
+		IIconStorage storage,
+		IMacroDeckPaths paths,
+		ILogger logger)
 	{
 		_iconPackCache = iconPackCache;
 		_storage = storage;
@@ -58,7 +62,8 @@ public sealed class IconPackExportService : IIconPackExportService
 		return Result.Ok<string, IconPackError>(name + FileExtension);
 	}
 
-	public async Task<Result<IconPackError>> Export(Guid packId,
+	public async Task<Result<IconPackError>> Export(
+		Guid packId,
 		Stream destination,
 		CancellationToken cancellationToken)
 	{
@@ -87,6 +92,7 @@ public sealed class IconPackExportService : IIconPackExportService
 		{
 			manifest.SourceType = IconPackSourceType.User;
 		}
+
 		foreach (var entry in manifest.Icons.SelectMany(entry => (entry.Appearances ?? []).Prepend(entry)))
 		{
 			entry.ImportBatchId = null;
@@ -141,13 +147,14 @@ public sealed class IconPackExportService : IIconPackExportService
 		}
 	}
 
-	private async Task<bool> WriteArchive(Guid packId,
+	private async Task<bool> WriteArchive(
+		Guid packId,
 		IconPackManifest manifest,
 		IReadOnlyList<IconEntity> icons,
 		Stream destination,
 		CancellationToken cancellationToken)
 	{
-		await using var archive = new ZipArchive(destination, ZipArchiveMode.Create, leaveOpen: true);
+		await using var archive = new ZipArchive(destination, ZipArchiveMode.Create, true);
 		var files = new List<PackageFileDigest>();
 		var missingAppearances = new HashSet<Guid>();
 
@@ -202,7 +209,8 @@ public sealed class IconPackExportService : IIconPackExportService
 		return true;
 	}
 
-	private static async Task<(string Sha256, long Size)> CopyAndHash(Stream source,
+	private static async Task<(string Sha256, long Size)> CopyAndHash(
+		Stream source,
 		Stream destination,
 		CancellationToken cancellationToken)
 	{

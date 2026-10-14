@@ -9,23 +9,40 @@ internal sealed class SignalForwardingVariableApi(
 	IVariableRefreshSignal? refresh = null,
 	IVariablePollingInvalidationSignal? declarations = null) : IVariableApi
 {
-	public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => inner.GetAllAsync();
+	public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+	{
+		return inner.GetAllAsync();
+	}
 
-	public Task<VariableHandle?> GetByNameAsync(string name) => inner.GetByNameAsync(name);
+	public Task<VariableHandle?> GetByNameAsync(string name)
+	{
+		return inner.GetByNameAsync(name);
+	}
 
-	public Task<VariableHandle> CreateAsync(string name,
+	public Task<VariableHandle> CreateAsync(
+		string name,
 		VariableType type,
 		object? initialValue = null,
 		int? decimalPlaces = null,
 		string? definitionId = null)
-		=> inner.CreateAsync(name, type, initialValue, decimalPlaces, definitionId);
+	{
+		return inner.CreateAsync(name, type, initialValue, decimalPlaces, definitionId);
+	}
 
 	public Task<VariableHandle> CreateAsync(VariableDefinition declaration, object? initialValue = null)
-		=> inner.CreateAsync(declaration, initialValue);
+	{
+		return inner.CreateAsync(declaration, initialValue);
+	}
 
-	public Task SetValueAsync(Guid variableId, object? value) => inner.SetValueAsync(variableId, value);
+	public Task SetValueAsync(Guid variableId, object? value)
+	{
+		return inner.SetValueAsync(variableId, value);
+	}
 
-	public Task DeleteAsync(Guid variableId) => inner.DeleteAsync(variableId);
+	public Task DeleteAsync(Guid variableId)
+	{
+		return inner.DeleteAsync(variableId);
+	}
 
 	public Task RequestRefreshAsync(CancellationToken cancellationToken = default)
 	{
@@ -33,7 +50,8 @@ internal sealed class SignalForwardingVariableApi(
 		return Task.CompletedTask;
 	}
 
-	public Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+	public Task RequestDefinitionRefreshAsync(
+		IReadOnlyCollection<string> definitionIds,
 		CancellationToken cancellationToken = default)
 	{
 		foreach (var definitionId in definitionIds)

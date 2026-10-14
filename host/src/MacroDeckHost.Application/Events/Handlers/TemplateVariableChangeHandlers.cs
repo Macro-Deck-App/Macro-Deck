@@ -7,7 +7,10 @@ public sealed class TemplateVariableCreatedHandler : INotificationHandler<Variab
 {
 	private readonly TemplateVariableSynchronizer _templates;
 
-	public TemplateVariableCreatedHandler(TemplateVariableSynchronizer templates) => _templates = templates;
+	public TemplateVariableCreatedHandler(TemplateVariableSynchronizer templates)
+	{
+		_templates = templates;
+	}
 
 	public ValueTask Handle(VariableCreatedNotification notification, CancellationToken cancellationToken)
 	{
@@ -20,7 +23,10 @@ public sealed class TemplateVariableUpdatedHandler : INotificationHandler<Variab
 {
 	private readonly TemplateVariableSynchronizer _templates;
 
-	public TemplateVariableUpdatedHandler(TemplateVariableSynchronizer templates) => _templates = templates;
+	public TemplateVariableUpdatedHandler(TemplateVariableSynchronizer templates)
+	{
+		_templates = templates;
+	}
 
 	public ValueTask Handle(VariableUpdatedNotification notification, CancellationToken cancellationToken)
 	{
@@ -33,7 +39,10 @@ public sealed class TemplateVariableDeletedHandler : INotificationHandler<Variab
 {
 	private readonly TemplateVariableSynchronizer _templates;
 
-	public TemplateVariableDeletedHandler(TemplateVariableSynchronizer templates) => _templates = templates;
+	public TemplateVariableDeletedHandler(TemplateVariableSynchronizer templates)
+	{
+		_templates = templates;
+	}
 
 	public ValueTask Handle(VariableDeletedNotification notification, CancellationToken cancellationToken)
 	{

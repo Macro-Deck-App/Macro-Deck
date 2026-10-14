@@ -29,7 +29,8 @@ public class PluginCompatibilityServiceTests
 		string pluginId = PluginId,
 		string? sdkVersion = "1.0.0",
 		int? protocolVersion = 1)
-		=> new()
+	{
+		return new PluginCompatibilityEvaluation
 		{
 			PluginId = pluginId,
 			DisplayName = "Example",
@@ -40,6 +41,7 @@ public class PluginCompatibilityServiceTests
 			],
 			Sdk = sdkVersion is null ? null : new PluginSdkUsage { SdkVersion = sdkVersion }
 		};
+	}
 
 	[Test]
 	public void A_recorded_report_is_returned_by_Find_and_Snapshot()
@@ -61,7 +63,9 @@ public class PluginCompatibilityServiceTests
 
 	[Test]
 	public void An_unrecorded_plugin_is_not_found()
-		=> Assert.That(_service.Find("com.example.never-seen"), Is.Null);
+	{
+		Assert.That(_service.Find("com.example.never-seen"), Is.Null);
+	}
 
 	[Test]
 	public void Recording_again_replaces_the_previous_verdict()
@@ -98,7 +102,7 @@ public class PluginCompatibilityServiceTests
 	public void Clear_leaves_other_plugins_alone()
 	{
 		_service.Record(Evaluation());
-		_service.Record(Evaluation(pluginId: OtherPluginId));
+		_service.Record(Evaluation(OtherPluginId));
 
 		_service.Clear(PluginId);
 
@@ -152,7 +156,7 @@ public class PluginCompatibilityServiceTests
 		_service.Record(Evaluation());
 		var afterFirst = _logger.Entries.Count;
 
-		_service.Record(Evaluation(pluginId: OtherPluginId));
+		_service.Record(Evaluation(OtherPluginId));
 
 		Assert.That(_logger.Entries, Has.Count.GreaterThan(afterFirst));
 	}
@@ -163,9 +167,14 @@ public class PluginCompatibilityServiceTests
 
 		public IDisposable? BeginScope<TState>(TState state)
 			where TState : notnull
-			=> null;
+		{
+			return null;
+		}
 
-		public bool IsEnabled(LogLevel logLevel) => true;
+		public bool IsEnabled(LogLevel logLevel)
+		{
+			return true;
+		}
 
 		public void Log<TState>(
 			LogLevel logLevel,
@@ -173,6 +182,8 @@ public class PluginCompatibilityServiceTests
 			TState state,
 			Exception? exception,
 			Func<TState, Exception?, string> formatter)
-			=> Entries.Add((logLevel, formatter(state, exception)));
+		{
+			Entries.Add((logLevel, formatter(state, exception)));
+		}
 	}
 }

@@ -43,9 +43,9 @@ public readonly record struct DeviceScreenSaverSettings(
 
 		var selected = string.IsNullOrEmpty(screenSaverId) ? null : screenSaverId;
 
-		if (selected is not null &&
-			!string.Equals(selected, storedScreenSaverId, StringComparison.Ordinal) &&
-			!registry.TryResolve(selected, out _))
+		if (selected is not null
+			&& !string.Equals(selected, storedScreenSaverId, StringComparison.Ordinal)
+			&& !registry.TryResolve(selected, out _))
 		{
 			return Result.Fail<DeviceScreenSaverSettings, DeviceError>(DeviceError.ValidationError,
 				$"No screensaver '{selected}' is available.");

@@ -14,13 +14,19 @@ public class PluginAccessTokenRepository : IPluginAccessTokenRepository
 	}
 
 	public Task<PluginAccessTokenEntity?> GetById(Guid id)
-		=> _context.PluginAccessTokens.FirstOrDefaultAsync(t => t.Id == id);
+	{
+		return _context.PluginAccessTokens.FirstOrDefaultAsync(t => t.Id == id);
+	}
 
 	public Task<PluginAccessTokenEntity?> GetByHash(string tokenHash)
-		=> _context.PluginAccessTokens.FirstOrDefaultAsync(t => t.TokenHash == tokenHash);
+	{
+		return _context.PluginAccessTokens.FirstOrDefaultAsync(t => t.TokenHash == tokenHash);
+	}
 
 	public async Task<IReadOnlyList<PluginAccessTokenEntity>> GetAll()
-		=> await _context.PluginAccessTokens.OrderByDescending(t => t.CreatedAt).ToListAsync();
+	{
+		return await _context.PluginAccessTokens.OrderByDescending(t => t.CreatedAt).ToListAsync();
+	}
 
 	public async Task Create(PluginAccessTokenEntity token)
 	{
@@ -29,17 +35,23 @@ public class PluginAccessTokenRepository : IPluginAccessTokenRepository
 	}
 
 	public Task TouchLastUsed(Guid id, DateTime at)
-		=> _context.PluginAccessTokens
+	{
+		return _context.PluginAccessTokens
 			.Where(t => t.Id == id)
 			.ExecuteUpdateAsync(s => s.SetProperty(t => t.LastUsedAt, at));
+	}
 
 	public Task Revoke(Guid id, DateTime at)
-		=> _context.PluginAccessTokens
+	{
+		return _context.PluginAccessTokens
 			.Where(t => t.Id == id && t.RevokedAt == null)
 			.ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, at));
+	}
 
 	public Task Delete(Guid id)
-		=> _context.PluginAccessTokens
+	{
+		return _context.PluginAccessTokens
 			.Where(t => t.Id == id)
 			.ExecuteDeleteAsync();
+	}
 }

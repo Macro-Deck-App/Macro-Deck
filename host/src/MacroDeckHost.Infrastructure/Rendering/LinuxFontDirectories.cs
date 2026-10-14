@@ -61,8 +61,13 @@ internal static class LinuxFontDirectories
 			.ToList();
 	}
 
-	private static bool IsAbsolute(string? path) => !string.IsNullOrWhiteSpace(path) && path.StartsWith('/');
+	private static bool IsAbsolute(string? path)
+	{
+		return !string.IsNullOrWhiteSpace(path) && path.StartsWith('/');
+	}
 
-	private static string Normalize(string path) =>
-		"/" + string.Join('/', path.Split('/', StringSplitOptions.RemoveEmptyEntries));
+	private static string Normalize(string path)
+	{
+		return "/" + string.Join('/', path.Split('/', StringSplitOptions.RemoveEmptyEntries));
+	}
 }

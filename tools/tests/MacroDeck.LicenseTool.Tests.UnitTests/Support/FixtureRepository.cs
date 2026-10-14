@@ -7,12 +7,12 @@ namespace MacroDeck.LicenseTool.Tests.UnitTests.Support;
 internal sealed class FixtureRepository : IDisposable
 {
 	private const string Policy = """
-		noticeHeader: |
-		  Fixture product
-		policy:
-		  allowedLicenses: [MIT, ISC, BSD-3-Clause, Apache-2.0]
-		  allowedExceptions: [LLVM-exception]
-		""";
+								  noticeHeader: |
+								    Fixture product
+								  policy:
+								    allowedLicenses: [MIT, ISC, BSD-3-Clause, Apache-2.0]
+								    allowedExceptions: [LLVM-exception]
+								  """;
 
 	private readonly JsonObject _assetsTargets = new();
 	private readonly JsonObject _assetsLibraries = new();
@@ -35,7 +35,10 @@ internal sealed class FixtureRepository : IDisposable
 
 	public FakeCargoMetadata Cargo { get; } = new();
 
-	public void Dispose() => Directory.Delete(Root, recursive: true);
+	public void Dispose()
+	{
+		Directory.Delete(Root, true);
+	}
 
 	public void Write(string relativePath, string content)
 	{
@@ -44,22 +47,32 @@ internal sealed class FixtureRepository : IDisposable
 		File.WriteAllText(path, content);
 	}
 
-	public void Overrides(string yaml) => _overrides = yaml;
+	public void Overrides(string yaml)
+	{
+		_overrides = yaml;
+	}
 
-	public void Attributions(string yaml) => _attributions = yaml;
+	public void Attributions(string yaml)
+	{
+		_attributions = yaml;
+	}
 
-	public void UseNuGet(params string[] runtimeIdentifiers) => UseNuGet(runtimeIdentifiers, runtimeIdentifiers);
+	public void UseNuGet(params string[] runtimeIdentifiers)
+	{
+		UseNuGet(runtimeIdentifiers, runtimeIdentifiers);
+	}
 
 	public void UseNuGet(string[] runtimeIdentifiers, string[] restoredRuntimeIdentifiers)
 	{
-		var rids = string.Join("\n", runtimeIdentifiers.Select(rid => $"      - id: {rid}\n        platform: {Platform(rid)}"));
+		var rids = string.Join("\n",
+			runtimeIdentifiers.Select(rid => $"      - id: {rid}\n        platform: {Platform(rid)}"));
 		_sections.Add($"""
-			nuget:
-			  - project: host/App/App.csproj
-			    targetFramework: net10.0
-			    runtimeIdentifiers:
-			{rids}
-			""");
+					   nuget:
+					     - project: host/App/App.csproj
+					       targetFramework: net10.0
+					       runtimeIdentifiers:
+					   {rids}
+					   """);
 		foreach (var rid in restoredRuntimeIdentifiers)
 		{
 			_assetsTargets[$"net10.0/{rid}"] = new JsonObject();
@@ -77,19 +90,22 @@ internal sealed class FixtureRepository : IDisposable
 		var folder = $"{id.ToLowerInvariant()}/{version}";
 		var license = licenseExpression is not null
 			? $"<license type=\"expression\">{licenseExpression}</license>"
-			: licenseFile is not null ? $"<license type=\"file\">{licenseFile}</license>" : "";
-		Write($"packages/{folder}/{id.ToLowerInvariant()}.nuspec", $"""
-			<?xml version="1.0" encoding="utf-8"?>
-			<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-			  <metadata>
-			    <id>{id}</id>
-			    <version>{version}</version>
-			    <authors>{id} Authors</authors>
-			    {license}
-			    <projectUrl>https://example.com/{id}</projectUrl>
-			  </metadata>
-			</package>
-			""");
+			: licenseFile is not null
+				? $"<license type=\"file\">{licenseFile}</license>"
+				: "";
+		Write($"packages/{folder}/{id.ToLowerInvariant()}.nuspec",
+			$"""
+			 <?xml version="1.0" encoding="utf-8"?>
+			 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+			   <metadata>
+			     <id>{id}</id>
+			     <version>{version}</version>
+			     <authors>{id} Authors</authors>
+			     {license}
+			     <projectUrl>https://example.com/{id}</projectUrl>
+			   </metadata>
+			 </package>
+			 """);
 		var files = new JsonArray($"{id.ToLowerInvariant()}.nuspec");
 		foreach (var (name, content) in rootFiles ?? new Dictionary<string, string>())
 		{
@@ -101,7 +117,7 @@ internal sealed class FixtureRepository : IDisposable
 		{
 			["type"] = "package",
 			["path"] = folder,
-			["files"] = files,
+			["files"] = files
 		};
 		foreach (var (targetName, target) in _assetsTargets)
 		{
@@ -117,7 +133,7 @@ internal sealed class FixtureRepository : IDisposable
 			{
 				["type"] = "package",
 				["runtime"] = runtime,
-				["native"] = native,
+				["native"] = native
 			};
 		}
 	}
@@ -125,16 +141,18 @@ internal sealed class FixtureRepository : IDisposable
 	public void UseNpm(string workspacesYaml)
 	{
 		_sections.Add($"""
-			npm:
-			  root: ui
-			  workspaces:
-			{workspacesYaml}
-			""");
+					   npm:
+					     root: ui
+					     workspaces:
+					   {workspacesYaml}
+					   """);
 		_lockPackages[""] = new JsonObject { ["name"] = "root" };
 	}
 
-	public void NpmWorkspace(string path, params string[] dependencies) =>
+	public void NpmWorkspace(string path, params string[] dependencies)
+	{
 		_lockPackages[path] = new JsonObject { ["dependencies"] = Dependencies(dependencies) };
+	}
 
 	public void NpmPackage(
 		string key,
@@ -171,28 +189,32 @@ internal sealed class FixtureRepository : IDisposable
 		if (install)
 		{
 			var name = key[(key.LastIndexOf("node_modules/", StringComparison.Ordinal) + "node_modules/".Length)..];
-			Write($"ui/{key}/package.json", JsonSerializer.Serialize(new { name, version, repository = $"github:example/{name}" }));
+			Write($"ui/{key}/package.json",
+				JsonSerializer.Serialize(new { name, version, repository = $"github:example/{name}" }));
 			Write($"ui/{key}/LICENSE", licenseText ?? $"{license} license of {name} {version}");
 		}
 	}
 
-	public void UseAssets(string root, string firstParty) =>
+	public void UseAssets(string root, string firstParty)
+	{
 		_sections.Add($"""
-			assets:
-			  roots: [{root}]
-			  extensions: [.svg, .png]
-			  firstParty: [{firstParty}]
-			""");
+					   assets:
+					     roots: [{root}]
+					     extensions: [.svg, .png]
+					     firstParty: [{firstParty}]
+					   """);
+	}
 
 	public void UseCargo(params string[] triples)
 	{
-		var targets = string.Join("\n", triples.Select(triple => $"      - id: {triple}\n        platform: {Platform(triple)}"));
+		var targets = string.Join("\n",
+			triples.Select(triple => $"      - id: {triple}\n        platform: {Platform(triple)}"));
 		_sections.Add($"""
-			cargo:
-			  - manifestDirectory: app
-			    targets:
-			{targets}
-			""");
+					   cargo:
+					     - manifestDirectory: app
+					       targets:
+					   {targets}
+					   """);
 	}
 
 	public GenerationResult Generate()
@@ -202,27 +224,33 @@ internal sealed class FixtureRepository : IDisposable
 		Write("third-party/attributions.yml", _attributions);
 		if (_assetsTargets.Count > 0)
 		{
-			Write("host/App/obj/project.assets.json", new JsonObject
-			{
-				["targets"] = _assetsTargets.DeepClone(),
-				["libraries"] = _assetsLibraries.DeepClone(),
-				["packageFolders"] = new JsonObject { [Path.Combine(Root, "packages") + Path.DirectorySeparatorChar] = new JsonObject() },
-			}.ToJsonString());
+			Write("host/App/obj/project.assets.json",
+				new JsonObject
+				{
+					["targets"] = _assetsTargets.DeepClone(),
+					["libraries"] = _assetsLibraries.DeepClone(),
+					["packageFolders"] = new JsonObject
+						{ [Path.Combine(Root, "packages") + Path.DirectorySeparatorChar] = new JsonObject() }
+				}.ToJsonString());
 		}
 
 		if (_lockPackages.Count > 0)
 		{
-			Write("ui/package-lock.json", new JsonObject
-			{
-				["lockfileVersion"] = 3,
-				["packages"] = _lockPackages.DeepClone(),
-			}.ToJsonString());
+			Write("ui/package-lock.json",
+				new JsonObject
+				{
+					["lockfileVersion"] = 3,
+					["packages"] = _lockPackages.DeepClone()
+				}.ToJsonString());
 		}
 
 		return NoticeGenerator.Generate(Root, Cargo);
 	}
 
-	public string CrateDirectory(string name, string version) => Path.Combine(Root, "cargo-registry", $"{name}-{version}");
+	public string CrateDirectory(string name, string version)
+	{
+		return Path.Combine(Root, "cargo-registry", $"{name}-{version}");
+	}
 
 	private static JsonObject Dependencies(IEnumerable<string> names)
 	{
@@ -235,19 +263,30 @@ internal sealed class FixtureRepository : IDisposable
 		return result;
 	}
 
-	private static string Platform(string target) => target switch
+	private static string Platform(string target)
 	{
-		_ when target.StartsWith("win", StringComparison.Ordinal) || target.Contains("windows", StringComparison.Ordinal) => "Windows",
-		_ when target.StartsWith("osx", StringComparison.Ordinal) || target.Contains("darwin", StringComparison.Ordinal) => "macOS",
-		_ => "Linux",
-	};
+		return target switch
+		{
+			_ when target.StartsWith("win", StringComparison.Ordinal)
+				|| target.Contains("windows", StringComparison.Ordinal) => "Windows",
+			_ when target.StartsWith("osx", StringComparison.Ordinal)
+				|| target.Contains("darwin", StringComparison.Ordinal) => "macOS",
+			_ => "Linux"
+		};
+	}
 }
 
 internal sealed class FakeCargoMetadata : ICargoMetadataSource
 {
 	private readonly Dictionary<string, string> _byTriple = new(StringComparer.Ordinal);
 
-	public void Set(string triple, string json) => _byTriple[triple] = json;
+	public void Set(string triple, string json)
+	{
+		_byTriple[triple] = json;
+	}
 
-	public string Read(string manifestDirectory, string targetTriple) => _byTriple[targetTriple];
+	public string Read(string manifestDirectory, string targetTriple)
+	{
+		return _byTriple[targetTriple];
+	}
 }

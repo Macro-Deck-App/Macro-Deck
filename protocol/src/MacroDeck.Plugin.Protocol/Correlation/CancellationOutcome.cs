@@ -8,5 +8,5 @@ public enum CancellationOutcome
 	EmitCancelledResult,
 
 	/// <summary>Do nothing - either the correlation is unknown, or a reply was already sent.</summary>
-	NoOp,
+	NoOp
 }

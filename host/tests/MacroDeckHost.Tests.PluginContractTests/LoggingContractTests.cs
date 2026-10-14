@@ -42,7 +42,10 @@ internal sealed class LoggingContractTests : CapabilityContractFixture
 	}
 
 	[TearDown]
-	public void LoggingTearDown() => _hostLogger.Dispose();
+	public void LoggingTearDown()
+	{
+		_hostLogger.Dispose();
+	}
 
 	[Test]
 	public async Task A_plugin_serilog_event_reaches_the_host_with_every_supported_field()
@@ -141,9 +144,11 @@ internal sealed class LoggingContractTests : CapabilityContractFixture
 	}
 
 	private static string? ReadProperty(LogEvent logEvent, string name)
-		=> logEvent.Properties.TryGetValue(name, out var value) && value is ScalarValue { Value: string text }
+	{
+		return logEvent.Properties.TryGetValue(name, out var value) && value is ScalarValue { Value: string text }
 			? text
 			: null;
+	}
 
 	private static string FormatHeaderLine(LogEvent logEvent)
 	{

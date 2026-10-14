@@ -9,5 +9,7 @@ internal sealed class SpotifyRetryHandler : IRetryHandler
 		IResponse response,
 		IRetryHandler.RetryFunc retry,
 		CancellationToken cancel = default)
-		=> Task.FromResult(response);
+	{
+		return Task.FromResult(response);
+	}
 }

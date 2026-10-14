@@ -15,7 +15,7 @@ public static class PluginBrowserGuard
 		}
 
 		var secFetchSite = request.Headers[SecFetchSiteHeader].ToString();
-		return string.Equals(secFetchSite, "cross-site", StringComparison.OrdinalIgnoreCase) ||
-			string.Equals(secFetchSite, "same-site", StringComparison.OrdinalIgnoreCase);
+		return string.Equals(secFetchSite, "cross-site", StringComparison.OrdinalIgnoreCase)
+			|| string.Equals(secFetchSite, "same-site", StringComparison.OrdinalIgnoreCase);
 	}
 }

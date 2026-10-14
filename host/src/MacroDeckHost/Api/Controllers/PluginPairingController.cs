@@ -44,11 +44,11 @@ public class PluginPairingController : ControllerBase
 		}
 
 		var body = await PluginProtocolHttp.ReadBodyAsync<PluginPairingRequest>(Request, cancellationToken);
-		if (body is null ||
-			string.IsNullOrEmpty(body.PluginId) ||
-			string.IsNullOrEmpty(body.DisplayName) ||
-			string.IsNullOrEmpty(body.CodeChallenge) ||
-			string.IsNullOrEmpty(body.CodeChallengeMethod))
+		if (body is null
+			|| string.IsNullOrEmpty(body.PluginId)
+			|| string.IsNullOrEmpty(body.DisplayName)
+			|| string.IsNullOrEmpty(body.CodeChallenge)
+			|| string.IsNullOrEmpty(body.CodeChallengeMethod))
 		{
 			return PluginProtocolHttp.Error(PluginErrors.InvalidPayload(), StatusCodes.Status400BadRequest);
 		}

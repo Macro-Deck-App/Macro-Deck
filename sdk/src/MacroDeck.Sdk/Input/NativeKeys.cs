@@ -23,7 +23,9 @@ public static class NativeKeys
 	/// through the foreground window's layout. Prefer the overload that takes the scan code.
 	/// </remarks>
 	public static KeyCode FromWindows(int virtualKey, bool isExtended)
-		=> NativeKeyTables.FromWindows(virtualKey, 0, isExtended, WindowsKeyboardLayout.ScanCodeOf);
+	{
+		return NativeKeyTables.FromWindows(virtualKey, 0, isExtended, WindowsKeyboardLayout.ScanCodeOf);
+	}
 
 	/// <summary>
 	/// Translates a Windows virtual-key code with the scan code of the event (<c>KBDLLHOOKSTRUCT.scanCode</c>, the
@@ -32,7 +34,9 @@ public static class NativeKeys
 	/// unknown falls back to <see cref="FromWindows(int, bool)" />.
 	/// </summary>
 	public static KeyCode FromWindows(int virtualKey, int scanCode, bool isExtended)
-		=> NativeKeyTables.FromWindows(virtualKey, scanCode, isExtended, WindowsKeyboardLayout.ScanCodeOf);
+	{
+		return NativeKeyTables.FromWindows(virtualKey, scanCode, isExtended, WindowsKeyboardLayout.ScanCodeOf);
+	}
 
 	/// <summary>
 	/// Translates a macOS key code (<c>kVK_*</c>, <c>kCGKeyboardEventKeycode</c>). The code is a US key position, so
@@ -44,15 +48,20 @@ public static class NativeKeys
 	/// Off macOS, or when the input source cannot be read, letters follow US positions. The input source is read
 	/// with the Text Input Sources API, which Apple documents for the main thread.
 	/// </remarks>
-	public static KeyCode FromMacOS(int keyCode)
-		=> NativeKeyTables.FromMacOS(keyCode, MacOsInputSource.Translate);
+	public static KeyCode FromMacOs(int keyCode)
+	{
+		return NativeKeyTables.FromMacOs(keyCode, MacOsInputSource.Translate);
+	}
 
 	/// <summary>
 	/// Translates a Linux evdev code (<c>KEY_*</c> from <c>input-event-codes.h</c>). An evdev code names a
 	/// position, so letters follow US positions on every layout: on a German layout the Z-labeled key is
 	/// <see cref="KeyCode.Y" /> here.
 	/// </summary>
-	public static KeyCode FromLinux(int evdevCode) => NativeKeyTables.FromLinux(evdevCode);
+	public static KeyCode FromLinux(int evdevCode)
+	{
+		return NativeKeyTables.FromLinux(evdevCode);
+	}
 
 	/// <summary>
 	/// Whether <paramref name="key" /> names a physical position rather than a character: the punctuation keys
@@ -60,7 +69,10 @@ public static class NativeKeys
 	/// Such a key types a different character on each layout, so it is sent by its scan code or key code, not by
 	/// a virtual key.
 	/// </summary>
-	public static bool IsPositional(KeyCode key) => NativeKeyTables.IsPositional(key);
+	public static bool IsPositional(KeyCode key)
+	{
+		return NativeKeyTables.IsPositional(key);
+	}
 
 	/// <summary>
 	/// The PC set-1 scan code of a letter, digit or punctuation key at its US position, as Windows
@@ -68,20 +80,26 @@ public static class NativeKeys
 	/// way. Returns <c>false</c> for any other key.
 	/// </summary>
 	public static bool TryGetWindowsScanCode(KeyCode key, out ushort scanCode)
-		=> NativeKeyTables.TryGetScanCode(key, out scanCode);
+	{
+		return NativeKeyTables.TryGetScanCode(key, out scanCode);
+	}
 
 	/// <summary>
 	/// The macOS key code (<c>kVK_*</c>) of a letter, digit or punctuation key at its US position, following
 	/// WebKit's naming for ISO keyboards (<see cref="KeyCode.IntlBackslash" /> is 10, <see cref="KeyCode.Backquote" />
 	/// is 50). Returns <c>false</c> for any other key.
 	/// </summary>
-	public static bool TryGetMacOSKeyCode(KeyCode key, out ushort keyCode)
-		=> NativeKeyTables.TryGetMacKeyCode(key, out keyCode);
+	public static bool TryGetMacOsKeyCode(KeyCode key, out ushort keyCode)
+	{
+		return NativeKeyTables.TryGetMacKeyCode(key, out keyCode);
+	}
 
 	/// <summary>
 	/// The letter, digit or punctuation key at the US position of a PC set-1 scan code, the inverse of
 	/// <see cref="TryGetWindowsScanCode" />. Returns <c>false</c> for a scan code outside that block.
 	/// </summary>
 	public static bool TryFromWindowsScanCode(ushort scanCode, out KeyCode key)
-		=> NativeKeyTables.TryFromScanCode(scanCode, out key);
+	{
+		return NativeKeyTables.TryFromScanCode(scanCode, out key);
+	}
 }

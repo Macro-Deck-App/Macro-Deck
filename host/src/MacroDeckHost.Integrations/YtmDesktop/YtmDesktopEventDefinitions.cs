@@ -17,7 +17,6 @@ internal static class YtmDesktopEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.Choice("likeStatus",
-					options:
 					[
 						new ActionParameterOption
 							{ Value = string.Empty, Label = AppStrings.Integrations.YtmDesktop.Events.AnyRating() },
@@ -30,17 +29,17 @@ internal static class YtmDesktopEventDefinitions
 							Value = "indifferent", Label = AppStrings.Integrations.YtmDesktop.Events.RatingCleared()
 						}
 					],
-					label: AppStrings.Integrations.YtmDesktop.Events.RatingLabel(),
-					description: AppStrings.Integrations.YtmDesktop.Events.RatingDescription(),
-					defaultValue: string.Empty)
+					AppStrings.Integrations.YtmDesktop.Events.RatingLabel(),
+					AppStrings.Integrations.YtmDesktop.Events.RatingDescription(),
+					string.Empty)
 			],
 			PayloadParameters =
 			[
-				ActionParameter.Text("likeStatus", label: AppStrings.Integrations.YtmDesktop.Events.RatingLabel()),
+				ActionParameter.Text("likeStatus", AppStrings.Integrations.YtmDesktop.Events.RatingLabel()),
 				ActionParameter.Text("previousLikeStatus",
-					label: AppStrings.Integrations.YtmDesktop.Events.PreviousRatingLabel()),
-				ActionParameter.Text("trackName", label: AppStrings.Integrations.YtmDesktop.Events.TrackLabel()),
-				ActionParameter.Text("videoId", label: AppStrings.Integrations.YtmDesktop.Events.VideoIdLabel())
+					AppStrings.Integrations.YtmDesktop.Events.PreviousRatingLabel()),
+				ActionParameter.Text("trackName", AppStrings.Integrations.YtmDesktop.Events.TrackLabel()),
+				ActionParameter.Text("videoId", AppStrings.Integrations.YtmDesktop.Events.VideoIdLabel())
 			]
 		}
 	];

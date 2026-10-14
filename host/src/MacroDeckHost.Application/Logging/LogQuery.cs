@@ -42,15 +42,14 @@ public sealed record LogQuery
 			return false;
 		}
 
-		if (!string.IsNullOrEmpty(IntegrationId) &&
-			(entry.Source != LogEntrySource.Integration ||
-				!string.Equals(entry.SourceId, IntegrationId, StringComparison.Ordinal)))
+		if (!string.IsNullOrEmpty(IntegrationId)
+			&& (entry.Source != LogEntrySource.Integration
+				|| !string.Equals(entry.SourceId, IntegrationId, StringComparison.Ordinal)))
 		{
 			return false;
 		}
 
-		if (!string.IsNullOrEmpty(Category) &&
-			!string.Equals(entry.Category, Category, StringComparison.Ordinal))
+		if (!string.IsNullOrEmpty(Category) && !string.Equals(entry.Category, Category, StringComparison.Ordinal))
 		{
 			return false;
 		}
@@ -66,8 +65,10 @@ public sealed record LogQuery
 	}
 
 	private static bool MatchesSearch(LogEntry entry, string search)
-		=> entry.Message.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-			entry.Category?.Contains(search, StringComparison.OrdinalIgnoreCase) == true ||
-			entry.SourceId?.Contains(search, StringComparison.OrdinalIgnoreCase) == true ||
-			entry.Exception?.Contains(search, StringComparison.OrdinalIgnoreCase) == true;
+	{
+		return entry.Message.Contains(search, StringComparison.OrdinalIgnoreCase)
+			|| entry.Category?.Contains(search, StringComparison.OrdinalIgnoreCase) == true
+			|| entry.SourceId?.Contains(search, StringComparison.OrdinalIgnoreCase) == true
+			|| entry.Exception?.Contains(search, StringComparison.OrdinalIgnoreCase) == true;
+	}
 }

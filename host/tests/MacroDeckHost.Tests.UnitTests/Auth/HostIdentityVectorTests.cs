@@ -11,21 +11,27 @@ namespace MacroDeckHost.Tests.UnitTests.Auth;
 [TestFixture]
 public class HostIdentityVectorTests
 {
-	private static readonly JsonElement Vector = JsonDocument.Parse(File.ReadAllText(
+	private static readonly JsonElement _vector = JsonDocument.Parse(File.ReadAllText(
 			Path.Combine(TestContext.CurrentContext.TestDirectory, "Auth", "host-identity-vector.json")))
 		.RootElement;
 
-	private static string Field(string name) => Vector.GetProperty(name).GetString()!;
+	private static string Field(string name)
+	{
+		return _vector.GetProperty(name).GetString()!;
+	}
 
 	[Test]
 	public void The_message_is_the_domain_line_key_endpoint_and_nonce_joined_by_newlines()
-		=> Assert.That(Field("message"),
+	{
+		Assert.That(Field("message"),
 			Is.EqualTo($"macrodeck-host-identity/v1\n{Field("publicKey")}\n{Field("endpoint")}\n{Field("nonce")}"));
+	}
 
 	[Test]
 	public void The_vector_verifies_and_any_changed_field_does_not()
 	{
-		var tamperedEndpoint = Field("message").Replace(Field("endpoint"), "192.168.1.20:8194", StringComparison.Ordinal);
+		var tamperedEndpoint
+			= Field("message").Replace(Field("endpoint"), "192.168.1.20:8194", StringComparison.Ordinal);
 
 		Assert.Multiple(() =>
 		{
@@ -52,13 +58,17 @@ public class HostIdentityVectorTests
 
 	[Test]
 	public void The_fingerprint_is_the_first_twelve_hash_bytes_in_six_groups()
-		=> Assert.That(HostIdentityMessage.Fingerprint(Convert.FromBase64String(Field("publicKey"))),
+	{
+		Assert.That(HostIdentityMessage.Fingerprint(Convert.FromBase64String(Field("publicKey"))),
 			Is.EqualTo(Field("fingerprint")));
+	}
 
 	[Test]
 	public void The_connect_payload_fingerprint_is_the_same_value_without_spaces()
-		=> Assert.That(Field("fingerprint").Replace(" ", string.Empty, StringComparison.Ordinal),
+	{
+		Assert.That(Field("fingerprint").Replace(" ", string.Empty, StringComparison.Ordinal),
 			Is.EqualTo(Field("compactFingerprint")).And.Match("^[0-9A-F]{24}$"));
+	}
 
 	private static bool Verifies(string message)
 	{

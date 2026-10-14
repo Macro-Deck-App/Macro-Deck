@@ -7,7 +7,10 @@ public class ResolvedPublicEndpointsTests
 {
 	[SetUp]
 	[TearDown]
-	public void ResetResolvedEndpoints() => ResolvedPublicEndpoints.ResetForTests();
+	public void ResetResolvedEndpoints()
+	{
+		ResolvedPublicEndpoints.ResetForTests();
+	}
 
 	[Test]
 	public void Falls_back_to_a_plain_http_listener_on_the_build_port_until_it_is_resolved()

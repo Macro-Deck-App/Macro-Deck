@@ -38,37 +38,43 @@ internal static class AdGuardHomeWidgetSettings
 			View = view is not null && AdGuardHomeWidgetType.Views.Contains(view, StringComparer.Ordinal)
 				? view
 				: AdGuardHomeWidgetType.ControlView,
-			Statistics = ReadList(data, AdGuardHomeWidgetType.StatisticsKey, AdGuardHomeWidgetType.Statistics) ??
-				AdGuardHomeWidgetType.DefaultStatistics,
-			Durations = ReadList(data, AdGuardHomeWidgetType.DurationsKey, AdGuardHomeWidgetType.DurationIds) ??
-				AdGuardHomeWidgetType.DefaultDurations,
+			Statistics = ReadList(data, AdGuardHomeWidgetType.StatisticsKey, AdGuardHomeWidgetType.Statistics)
+				?? AdGuardHomeWidgetType.DefaultStatistics,
+			Durations = ReadList(data, AdGuardHomeWidgetType.DurationsKey, AdGuardHomeWidgetType.DurationIds)
+				?? AdGuardHomeWidgetType.DefaultDurations,
 			ShowVersion = ReadBool(data, AdGuardHomeWidgetType.ShowVersionKey) ?? true,
-			ShowStatus = ReadBool(data, AdGuardHomeWidgetType.ShowStatusKey) ?? true,
+			ShowStatus = ReadBool(data, AdGuardHomeWidgetType.ShowStatusKey) ?? true
 		};
 	}
 
 	public static string? BackgroundColor(JsonElement data)
-		=> WidgetBackgroundColor.Normalize(ReadString(data, AdGuardHomeWidgetType.BackgroundColorKey));
+	{
+		return WidgetBackgroundColor.Normalize(ReadString(data, AdGuardHomeWidgetType.BackgroundColorKey));
+	}
 
 	private static string? ReadString(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private static bool? ReadBool(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.True or JsonValueKind.False
 				? value.GetBoolean()
 				: null;
+	}
 
 	private static IReadOnlyList<string>? ReadList(JsonElement data, string name, IReadOnlyList<string> known)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty(name, out var list) ||
-			list.ValueKind != JsonValueKind.Array)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty(name, out var list)
+			|| list.ValueKind != JsonValueKind.Array)
 		{
 			return null;
 		}
@@ -79,7 +85,7 @@ internal static class AdGuardHomeWidgetSettings
 				.Where(item => item.ValueKind == JsonValueKind.String)
 				.Select(item => item.GetString()!)
 				.Where(id => known.Contains(id, StringComparer.Ordinal))
-				.Distinct(StringComparer.Ordinal),
+				.Distinct(StringComparer.Ordinal)
 		];
 	}
 }

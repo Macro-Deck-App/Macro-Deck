@@ -97,10 +97,10 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 
 	public string Kind => CapabilityKinds.Ui;
 
-	private bool ServesUi => _providers.Count > 0 ||
-		_configFlowServesUiTree ||
-		_actions.Any(action => action is IUiConfigurableActionDefinition) ||
-		Previews.Registrations.Count > 0;
+	private bool ServesUi => _providers.Count > 0
+		|| _configFlowServesUiTree
+		|| _actions.Any(action => action is IUiConfigurableActionDefinition)
+		|| Previews.Registrations.Count > 0;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
 	{
@@ -209,10 +209,10 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		// A config entry point can serve a tree without any IUiProvider declaring a config surface -
 		// the flow or the action, not an IUiProvider, is what renders it. Added only when nothing above
 		// already said so, so the host's describe view is truthful either way.
-		var servesConfigTree = _configFlowServesUiTree ||
-			_actions.Any(action => action is IUiConfigurableActionDefinition);
-		if (servesConfigTree &&
-			!surfaces.Any(surface => string.Equals(surface.Kind, UiSurfaceKinds.Config, StringComparison.Ordinal)))
+		var servesConfigTree
+			= _configFlowServesUiTree || _actions.Any(action => action is IUiConfigurableActionDefinition);
+		if (servesConfigTree
+			&& !surfaces.Any(surface => string.Equals(surface.Kind, UiSurfaceKinds.Config, StringComparison.Ordinal)))
 		{
 			surfaces.Add(new UiSurfaceDescriptorDto
 				{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive });
@@ -235,7 +235,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		});
 	}
 
-	private async Task<CapabilityInvocationResult> OpenAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> OpenAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		if (Read<UiSessionOpenArguments>(invocation) is not { } arguments)
@@ -291,10 +292,10 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		UiSessionOpenArguments arguments,
 		UiSessionRequest request)
 	{
-		if (!request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var id) ||
-			id.ValueKind != JsonValueKind.String ||
-			id.GetString() is not { } previewId ||
-			FindPreview(previewId) is null)
+		if (!request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var id)
+			|| id.ValueKind != JsonValueKind.String
+			|| id.GetString() is not { } previewId
+			|| FindPreview(previewId) is null)
 		{
 			return CapabilityInvocationResult.Ok(new UiSessionOpenResult
 			{
@@ -306,8 +307,9 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		UiPreviewSession session;
 		try
 		{
-			session = new UiPreviewSession(() => FindPreview(previewId)?.Create(request.Surface) ??
-				throw new InvalidOperationException("This plugin no longer declares that preview."));
+			session = new UiPreviewSession(()
+				=> FindPreview(previewId)?.Create(request.Surface)
+				?? throw new InvalidOperationException("This plugin no longer declares that preview."));
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
@@ -321,8 +323,10 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 	}
 
 	private UiPreviewRegistration? FindPreview(string previewId)
-		=> Previews.Registrations.FirstOrDefault(preview =>
+	{
+		return Previews.Registrations.FirstOrDefault(preview =>
 			string.Equals(preview.Declaration.Id, previewId, StringComparison.Ordinal));
+	}
 
 	/// <summary>
 	/// Routes an <c>integration-config</c> or <c>action-config</c> surface (see
@@ -344,9 +348,9 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 
 		if (string.Equals(entryPoint, UiConfigEntryPoints.IntegrationConfig, StringComparison.Ordinal))
 		{
-			if (!TryGetString(attributes, UiConfigSurfaceAttributes.ConfigFlowSessionId, out var flowSessionId) ||
-				!_configFlowSessions.TryGetFlow(flowSessionId, out var flow) ||
-				flow is not IUiConfigFlow uiFlow)
+			if (!TryGetString(attributes, UiConfigSurfaceAttributes.ConfigFlowSessionId, out var flowSessionId)
+				|| !_configFlowSessions.TryGetFlow(flowSessionId, out var flow)
+				|| flow is not IUiConfigFlow uiFlow)
 			{
 				return null;
 			}
@@ -356,8 +360,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 
 		if (string.Equals(entryPoint, UiConfigEntryPoints.ActionConfig, StringComparison.Ordinal))
 		{
-			if (!TryGetString(attributes, UiConfigSurfaceAttributes.ActionId, out var actionId) ||
-				FindConfigurableAction(actionId) is not { } configurable)
+			if (!TryGetString(attributes, UiConfigSurfaceAttributes.ActionId, out var actionId)
+				|| FindConfigurableAction(actionId) is not { } configurable)
 			{
 				return null;
 			}
@@ -378,10 +382,14 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 	}
 
 	private IUiConfigurableActionDefinition? FindConfigurableAction(string actionId)
-		=> _actions.FirstOrDefault(action => string.Equals(action.Id, actionId, StringComparison.Ordinal))
+	{
+		return _actions.FirstOrDefault(action => string.Equals(action.Id, actionId, StringComparison.Ordinal))
 			as IUiConfigurableActionDefinition;
+	}
 
-	private async Task<CapabilityInvocationResult> AcceptSessionAsync(string sessionId, IUiSession session,
+	private async Task<CapabilityInvocationResult> AcceptSessionAsync(
+		string sessionId,
+		IUiSession session,
 		string surfaceKind)
 	{
 		if (_sessions.TryAdd(sessionId, session, surfaceKind))
@@ -466,8 +474,10 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 	}
 
 	private static CapabilityInvocationResult UnknownSession(string sessionId)
-		=> CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
+	{
+		return CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
 			$"No UI session '{sessionId}' is open in this plugin.");
+	}
 
 	private static Dictionary<string, JsonElement> ReadAttributes(JsonElement? attributes)
 	{
@@ -486,5 +496,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 
 	private static T? Read<T>(CapabilityInvocation invocation)
 		where T : class
-		=> invocation.Arguments?.Deserialize<T>(PluginProtocolJson.Options);
+	{
+		return invocation.Arguments?.Deserialize<T>(PluginProtocolJson.Options);
+	}
 }

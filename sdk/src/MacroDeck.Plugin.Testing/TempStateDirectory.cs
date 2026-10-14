@@ -17,7 +17,9 @@ public sealed class TempStateDirectory : IDisposable
 
 	/// <summary>Creates and reserves a new, empty directory.</summary>
 	public TempStateDirectory()
-		=> Path = Directory.CreateTempSubdirectory("macrodeck-plugin-test-state-").FullName;
+	{
+		Path = Directory.CreateTempSubdirectory("macrodeck-plugin-test-state-").FullName;
+	}
 
 	/// <summary>The directory's full path.</summary>
 	public string Path { get; }
@@ -36,7 +38,7 @@ public sealed class TempStateDirectory : IDisposable
 		{
 			if (Directory.Exists(Path))
 			{
-				Directory.Delete(Path, recursive: true);
+				Directory.Delete(Path, true);
 			}
 		}
 		catch (IOException)

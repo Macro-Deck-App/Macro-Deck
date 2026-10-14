@@ -9,11 +9,12 @@ namespace MacroDeckHost.Tests.UnitTests.BackgroundServices;
 internal sealed class AnnouncementRefreshBackgroundServiceTests
 {
 	[Test]
-	public async Task Announcements_are_checked_within_seconds_of_starting_and_then_about_every_six_hours_even_after_a_failure()
+	public async Task
+		Announcements_are_checked_within_seconds_of_starting_and_then_about_every_six_hours_even_after_a_failure()
 	{
 		var time = new ManualTimeProvider();
 		var announcements = new FailingOnceAnnouncements();
-		using var lifetime = new StubHostApplicationLifetime(started: true);
+		using var lifetime = new StubHostApplicationLifetime(true);
 		using var service = new AnnouncementRefreshBackgroundService(lifetime,
 			announcements,
 			time,
@@ -53,11 +54,16 @@ internal sealed class AnnouncementRefreshBackgroundServiceTests
 		public Announcement? Pending => null;
 
 		public Task Refresh(CancellationToken cancellationToken)
-			=> Interlocked.Increment(ref _count) == 1
+		{
+			return Interlocked.Increment(ref _count) == 1
 				? throw new InvalidOperationException("platform down")
 				: Task.CompletedTask;
+		}
 
-		public Task MarkSeen(int number, CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task MarkSeen(int number, CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
 		public async Task WaitForCount(int expected)
 		{

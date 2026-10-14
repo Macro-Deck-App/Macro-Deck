@@ -130,7 +130,7 @@ public class CliEntryPointTests
 		finally
 		{
 			Environment.CurrentDirectory = originalDirectory;
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 

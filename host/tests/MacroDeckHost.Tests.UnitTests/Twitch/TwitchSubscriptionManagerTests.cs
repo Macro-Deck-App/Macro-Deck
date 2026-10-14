@@ -144,7 +144,12 @@ internal sealed class TwitchSubscriptionManagerTests
 	}
 
 	private TwitchSubscriptionManager Manager(IReadOnlyList<string>? granted = null)
-		=> new(_helix, "111", () => granted ?? TwitchScopes.All, SilentLogger());
+	{
+		return new TwitchSubscriptionManager(_helix, "111", () => granted ?? TwitchScopes.All, SilentLogger());
+	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 }

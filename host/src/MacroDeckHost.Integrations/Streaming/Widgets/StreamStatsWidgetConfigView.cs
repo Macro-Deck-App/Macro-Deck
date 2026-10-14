@@ -15,8 +15,8 @@ internal static class StreamStatsWidgetConfigView
 		ArgumentNullException.ThrowIfNull(platform);
 		ArgumentNullException.ThrowIfNull(accounts);
 
-		var account = new UiState<string>(StreamWidgetJson.ReadString(data, StreamStatsWidgetType.AccountKey) ??
-			string.Empty);
+		var account = new UiState<string>(StreamWidgetJson.ReadString(data, StreamStatsWidgetType.AccountKey)
+			?? string.Empty);
 		var options = StreamStatsWidgetSettings.Options(platform, data);
 		var style = new UiState<string>(options.Style);
 		var metric = new UiState<string>(options.Metric);
@@ -42,10 +42,9 @@ internal static class StreamStatsWidgetConfigView
 						Binding = Bind.To(account),
 						SupportsReset = true,
 						DefaultValue = string.Empty,
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
-							.. accounts.Select(candidate => UiOption.Of(candidate.AccountId, candidate.Label)),
-						]),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							.. accounts.Select(candidate => UiOption.Of(candidate.AccountId, candidate.Label))
+						])
 					},
 					new UiChoiceInput
 					{
@@ -53,14 +52,13 @@ internal static class StreamStatsWidgetConfigView
 						Label = Strings.Style(),
 						Description = Strings.StyleDescription(),
 						Binding = Bind.To(style),
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of(StreamStatsStyles.Overview, Strings.StyleOverview()),
 							UiOption.Of(StreamStatsStyles.StatsRow, Strings.StyleStatsRow()),
 							UiOption.Of(StreamStatsStyles.LiveRow, Strings.StyleLiveRow()),
 							UiOption.Of(StreamStatsStyles.ValueGraph, Strings.StyleValueGraph()),
-							UiOption.Of(StreamStatsStyles.Value, Strings.StyleValue()),
-						]),
+							UiOption.Of(StreamStatsStyles.Value, Strings.StyleValue())
+						])
 					},
 					new UiChoiceInput
 					{
@@ -68,16 +66,15 @@ internal static class StreamStatsWidgetConfigView
 						Label = Strings.Metric(),
 						Description = Strings.MetricDescription(),
 						Binding = Bind.To(metric),
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
-							.. platform.Stats.Metrics.Select(candidate => UiOption.Of(candidate.Id, candidate.Label())),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							.. platform.Stats.Metrics.Select(candidate => UiOption.Of(candidate.Id, candidate.Label()))
 						]),
 						VisibleWhen = new UiVisibleWhen
 						{
 							ParameterName = StreamStatsWidgetType.StyleKey,
 							Values = StreamStatsStyles.WithMetric,
-							SiblingValue = () => style.Value,
-						},
+							SiblingValue = () => style.Value
+						}
 					},
 					new UiMultiSelectInput
 					{
@@ -86,16 +83,15 @@ internal static class StreamStatsWidgetConfigView
 						Description = Strings.TilesDescription(),
 						Binding = Bind.To(tiles),
 						Reorderable = true,
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
-							.. platform.Stats.Metrics.Select(candidate => UiOption.Of(candidate.Id, candidate.Label())),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							.. platform.Stats.Metrics.Select(candidate => UiOption.Of(candidate.Id, candidate.Label()))
 						]),
 						VisibleWhen = new UiVisibleWhen
 						{
 							ParameterName = StreamStatsWidgetType.StyleKey,
 							Values = StreamStatsStyles.WithTiles,
-							SiblingValue = () => style.Value,
-						},
+							SiblingValue = () => style.Value
+						}
 					},
 					new UiMultiSelectInput
 					{
@@ -104,16 +100,15 @@ internal static class StreamStatsWidgetConfigView
 						Description = Strings.DetailsDescription(),
 						Binding = Bind.To(details),
 						Reorderable = true,
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
-							.. platform.Stats.Details.Select(candidate => UiOption.Of(candidate.Id, candidate.Label())),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							.. platform.Stats.Details.Select(candidate => UiOption.Of(candidate.Id, candidate.Label()))
 						]),
 						VisibleWhen = new UiVisibleWhen
 						{
 							ParameterName = StreamStatsWidgetType.StyleKey,
 							Values = StreamStatsStyles.WithDetails,
-							SiblingValue = () => style.Value,
-						},
+							SiblingValue = () => style.Value
+						}
 					},
 					new UiBooleanInput
 					{
@@ -124,15 +119,16 @@ internal static class StreamStatsWidgetConfigView
 						{
 							ParameterName = StreamStatsWidgetType.StyleKey,
 							Values = StreamStatsStyles.WithDetails,
-							SiblingValue = () => style.Value,
-						},
+							SiblingValue = () => style.Value
+						}
 					},
 					UiWidgetAppearance.Section(data,
-						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |
-						UiWidgetAppearanceFields.TransparentBackground |
-						UiWidgetAppearanceFields.ColorVariables),
-				],
-			},
+						UiWidgetAppearanceFields.Border
+						| UiWidgetAppearanceFields.BackgroundColor
+						| UiWidgetAppearanceFields.TransparentBackground
+						| UiWidgetAppearanceFields.ColorVariables)
+				]
+			}
 		};
 	}
 }

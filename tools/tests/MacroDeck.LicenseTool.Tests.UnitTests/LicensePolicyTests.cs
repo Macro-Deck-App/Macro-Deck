@@ -4,7 +4,7 @@ namespace MacroDeck.LicenseTool.Tests.UnitTests;
 
 public sealed class LicensePolicyTests
 {
-	private static readonly LicensePolicy Policy = new(["MIT", "ISC", "Apache-2.0"], ["LLVM-exception"]);
+	private static readonly LicensePolicy _policy = new(["MIT", "ISC", "Apache-2.0"], ["LLVM-exception"]);
 
 	[TestCase("MIT OR Apache-2.0")]
 	[TestCase("Apache-2.0 OR MIT")]
@@ -13,7 +13,7 @@ public sealed class LicensePolicyTests
 	[TestCase("MIT/Apache-2.0")]
 	public void A_choice_is_attributed_under_the_preferred_allowed_license(string expression)
 	{
-		var selected = Policy.Select(expression, []);
+		var selected = _policy.Select(expression, []);
 
 		Assert.That(selected!.Select(license => license.ToString()), Is.EqualTo(new[] { "MIT" }));
 	}
@@ -21,7 +21,7 @@ public sealed class LicensePolicyTests
 	[Test]
 	public void A_choice_falls_back_to_the_allowed_branch_when_the_other_is_not_allowed()
 	{
-		var selected = Policy.Select("GPL-3.0-only OR ISC", []);
+		var selected = _policy.Select("GPL-3.0-only OR ISC", []);
 
 		Assert.That(selected!.Select(license => license.ToString()), Is.EqualTo(new[] { "ISC" }));
 	}
@@ -31,9 +31,9 @@ public sealed class LicensePolicyTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(Policy.Select("Apache-2.0 AND ISC", [])!.Select(license => license.ToString()),
+			Assert.That(_policy.Select("Apache-2.0 AND ISC", [])!.Select(license => license.ToString()),
 				Is.EqualTo(new[] { "Apache-2.0", "ISC" }));
-			Assert.That(Policy.Select("MIT AND GPL-3.0-only", []), Is.Null);
+			Assert.That(_policy.Select("MIT AND GPL-3.0-only", []), Is.Null);
 		});
 	}
 
@@ -42,8 +42,9 @@ public sealed class LicensePolicyTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(Policy.Select("LicenseRef-Custom", []), Is.Null);
-			Assert.That(Policy.Select("LicenseRef-Custom", ["LicenseRef-Custom"])!.Single().Id, Is.EqualTo("LicenseRef-Custom"));
+			Assert.That(_policy.Select("LicenseRef-Custom", []), Is.Null);
+			Assert.That(_policy.Select("LicenseRef-Custom", ["LicenseRef-Custom"])!.Single().Id,
+				Is.EqualTo("LicenseRef-Custom"));
 		});
 	}
 
@@ -52,15 +53,17 @@ public sealed class LicensePolicyTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(Policy.Select("Apache-2.0 WITH LLVM-exception", [])!.Single().ToString(),
+			Assert.That(_policy.Select("Apache-2.0 WITH LLVM-exception", [])!.Single().ToString(),
 				Is.EqualTo("Apache-2.0 WITH LLVM-exception"));
-			Assert.That(Policy.Select("Apache-2.0 WITH Classpath-exception-2.0", []), Is.Null);
+			Assert.That(_policy.Select("Apache-2.0 WITH Classpath-exception-2.0", []), Is.Null);
 		});
 	}
 
 	[TestCase("MIT OR")]
 	[TestCase("(MIT")]
 	[TestCase("AND MIT")]
-	public void A_malformed_expression_is_reported(string expression) =>
-		Assert.That(() => Policy.Select(expression, []), Throws.TypeOf<FormatException>());
+	public void A_malformed_expression_is_reported(string expression)
+	{
+		Assert.That(() => _policy.Select(expression, []), Throws.TypeOf<FormatException>());
+	}
 }

@@ -19,7 +19,7 @@ public sealed class ClockWidgetUiProvider : IBuiltInWidgetUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -47,5 +47,7 @@ public sealed class ClockWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static JsonElement DataElement(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	}
 }

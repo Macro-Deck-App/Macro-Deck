@@ -9,7 +9,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// first, and never throws.
 /// </summary>
 [TestFixture]
-public class A10_ProblemsOfTests
+public class A10ProblemsOfTests
 {
 	[Test]
 	public void ProblemsOf_reports_every_simultaneous_problem_without_throwing()
@@ -19,7 +19,7 @@ public class A10_ProblemsOfTests
 		// Id validity now comes from the manifest rather than a builder call, so a deliberately invalid
 		// id ("MyPlugin" - no dot, not lowercase-kebab) has to be supplied through one, disposed here
 		// since ProblemsOf never returns anything else that would own it.
-		using var manifest = new PluginTestManifest(id: "MyPlugin");
+		using var manifest = new PluginTestManifest("MyPlugin");
 
 		Assert.DoesNotThrow(() =>
 		{

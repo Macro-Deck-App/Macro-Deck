@@ -2,10 +2,10 @@ using MacroDeckHost.Application.Backups;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text.Json;
-using MacroDeck.Plugin.Analyzers;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Plugin.Packaging.Versioning;
+using MacroDeck.Plugin.Analyzers;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Versioning;
@@ -73,7 +73,8 @@ public sealed class PluginInstaller : IPluginInstaller
 	private readonly IPluginIconPackSync? _iconPackSync;
 	private readonly IPluginCompanionDeviceConsentNotifier? _companionConsent;
 
-	public PluginInstaller(IMacroDeckPaths paths,
+	public PluginInstaller(
+		IMacroDeckPaths paths,
 		IPluginArtifactReader artifactReader,
 		IPluginArtifactAcquirer acquirer,
 		IPluginArtifactCache cache,
@@ -115,7 +116,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		_currentVersionFiles = new DurableJsonFile("plugin version pointer", PersistenceJsonOptions.Default, _logger);
 	}
 
-	public async Task<PluginInstallResult> Inspect(PluginArtifactSource source,
+	public async Task<PluginInstallResult> Inspect(
+		PluginArtifactSource source,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(source);
@@ -140,9 +142,12 @@ public sealed class PluginInstaller : IPluginInstaller
 			if (Incompatibility(manifest) is { } incompatibility)
 			{
 				return PluginInstallResult.Fail(PluginInstallError.Incompatible,
-					incompatibility.Message,
-					manifest.Id,
-					manifest.Version) with { Incompatibility = incompatibility.Direction };
+						incompatibility.Message,
+						manifest.Id,
+						manifest.Version) with
+					{
+						Incompatibility = incompatibility.Direction
+					};
 			}
 
 			var extractDirectory = Path.Combine(stagingDirectory, "extract");
@@ -193,7 +198,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			return PluginInstallResult.Ok(manifest.Id,
 					manifest.Version,
 					ActiveVersionOf(manifest.Id),
-					activated: false,
+					false,
 					warnings) with
 				{
 					Publisher = manifest.Publisher,
@@ -215,7 +220,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 	}
 
-	public async Task<PluginInstallResult> Install(PluginArtifactSource source,
+	public async Task<PluginInstallResult> Install(
+		PluginArtifactSource source,
 		PluginInstallRequest request,
 		CancellationToken cancellationToken = default)
 	{
@@ -241,8 +247,8 @@ public sealed class PluginInstaller : IPluginInstaller
 					inspection.ErrorMessage ?? "The artifact could not be read.");
 			}
 
-			if (request.ExpectedPluginId is { } expectedId &&
-				!string.Equals(expectedId, manifest.Id, StringComparison.Ordinal))
+			if (request.ExpectedPluginId is { } expectedId
+				&& !string.Equals(expectedId, manifest.Id, StringComparison.Ordinal))
 			{
 				return PluginInstallResult.Fail(PluginInstallError.IdMismatch,
 					$"The artifact contains '{manifest.Id}' but '{expectedId}' was requested.",
@@ -253,9 +259,12 @@ public sealed class PluginInstaller : IPluginInstaller
 			if (Incompatibility(manifest) is { } incompatibility)
 			{
 				return PluginInstallResult.Fail(PluginInstallError.Incompatible,
-					incompatibility.Message,
-					manifest.Id,
-					manifest.Version) with { Incompatibility = incompatibility.Direction };
+						incompatibility.Message,
+						manifest.Id,
+						manifest.Version) with
+					{
+						Incompatibility = incompatibility.Direction
+					};
 			}
 
 			request.Stage?.Invoke(PluginInstallStage.Acquired);
@@ -317,7 +326,8 @@ public sealed class PluginInstaller : IPluginInstaller
 	/// lose and is not backed up; a failed backup refuses the install rather than replacing data the user
 	/// asked to have a copy of first.
 	/// </summary>
-	private async Task<PluginInstallResult?> RefuseWhenPreUpdateBackupFails(string pluginId,
+	private async Task<PluginInstallResult?> RefuseWhenPreUpdateBackupFails(
+		string pluginId,
 		PluginInstallRequest request,
 		CancellationToken cancellationToken)
 	{
@@ -350,12 +360,13 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 
 		return PluginInstallResult.Fail(PluginInstallError.Failed,
-			$"The backup before updating '{pluginId}' failed, so the plugin was not updated. " +
-			(outcome.Reason ?? "The backup could not be created."),
+			$"The backup before updating '{pluginId}' failed, so the plugin was not updated. "
+			+ (outcome.Reason ?? "The backup could not be created."),
 			pluginId);
 	}
 
-	public async Task<PluginInstallResult> Activate(string pluginId,
+	public async Task<PluginInstallResult> Activate(
+		string pluginId,
 		string version,
 		CancellationToken cancellationToken = default)
 	{
@@ -407,7 +418,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				warnings,
 				HasEntrypointForThisHost(manifest),
 				PluginRollbackPlan.None,
-				runningBeforeInstall: null,
+				null,
 				cancellationToken);
 
 			activated = result with { Signature = trust };
@@ -425,7 +436,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		return activated;
 	}
 
-	public async Task<PluginInstallResult> Uninstall(string pluginId,
+	public async Task<PluginInstallResult> Uninstall(
+		string pluginId,
 		PluginUninstallRequest request,
 		CancellationToken cancellationToken = default)
 	{
@@ -517,8 +529,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			PluginInstallerLog.Uninstalled(_logger, pluginId, request.KeepData);
 			uninstalled = PluginInstallResult.Ok(pluginId,
 				installed?.ActiveVersion?.Version ?? string.Empty,
-				previousVersion: null,
-				activated: false);
+				null,
+				false);
 		}
 		catch (OperationCanceledException)
 		{
@@ -593,7 +605,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 	}
 
-	private async Task<bool> AnyInstallationResidue(InstalledPlugin? installed,
+	private async Task<bool> AnyInstallationResidue(
+		InstalledPlugin? installed,
 		string pluginDirectory,
 		string pluginId)
 	{
@@ -676,7 +689,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			: PluginTrustVerdict.Unsigned;
 	}
 
-	private async Task UpsertTrustRecord(string pluginId,
+	private async Task UpsertTrustRecord(
+		string pluginId,
 		string version,
 		PluginTrustVerdict verdict,
 		string? certificateId)
@@ -709,7 +723,11 @@ public sealed class PluginInstaller : IPluginInstaller
 
 		using var scope = _scopeFactory.CreateScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IPluginTrustRecordRepository>();
-		await repository.Upsert(undo.PluginId, undo.Version, prior.AdmittedVerdict, prior.CertificateId, prior.InstalledAt);
+		await repository.Upsert(undo.PluginId,
+			undo.Version,
+			prior.AdmittedVerdict,
+			prior.CertificateId,
+			prior.InstalledAt);
 	}
 
 	private async Task DeleteTrustRecord(string pluginId, string version)
@@ -733,7 +751,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		await repository.DeleteVersion(pluginId, version);
 	}
 
-	private async Task<PluginTrustGateDecision> EvaluateTrustGate(string pluginId,
+	private async Task<PluginTrustGateDecision> EvaluateTrustGate(
+		string pluginId,
 		string version,
 		PluginTrustResult onDisk,
 		CancellationToken cancellationToken)
@@ -751,7 +770,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			baselineExists);
 	}
 
-	private Task ApplyTrustGateAction(string pluginId,
+	private Task ApplyTrustGateAction(
+		string pluginId,
 		string version,
 		PluginTrustGateAction action,
 		PluginTrustResult onDisk)
@@ -766,11 +786,14 @@ public sealed class PluginInstaller : IPluginInstaller
 	// SigningErrorTrustMapping only ever produces Trusted for a package that still verifies. Every other
 	// refusal is a real crypto/revocation failure and maps normally.
 	private static PluginInstallError ToActivationError(PluginTrustResult onDisk)
-		=> onDisk.Verdict == PluginTrustVerdict.Trusted
+	{
+		return onDisk.Verdict == PluginTrustVerdict.Trusted
 			? PluginInstallError.SignatureUnverifiable
 			: onDisk.Verdict.ToInstallError();
+	}
 
-	private async Task<PluginInstallResult> InstallLocked(PluginManifest manifest,
+	private async Task<PluginInstallResult> InstallLocked(
+		PluginManifest manifest,
 		PluginArtifactAcquisition acquisition,
 		PluginInstallRequest request,
 		string stagingDirectory,
@@ -796,8 +819,8 @@ public sealed class PluginInstaller : IPluginInstaller
 				};
 		}
 
-		if (acquisition.Sha256 is { } acquiredHash &&
-			!string.Equals(ComputeSha256(acquisition.ArtifactPath!), acquiredHash, StringComparison.Ordinal))
+		if (acquisition.Sha256 is { } acquiredHash
+			&& !string.Equals(ComputeSha256(acquisition.ArtifactPath!), acquiredHash, StringComparison.Ordinal))
 		{
 			return PluginInstallResult.Fail(PluginInstallError.HashMismatch,
 				"The artifact changed on disk between validation and installation.",
@@ -843,12 +866,12 @@ public sealed class PluginInstaller : IPluginInstaller
 		var admittedVerdict = await GetHighestAdmittedTier(manifest.Id);
 
 		// A revoked certificate is refused as revoked below, not reported as a lower trust tier.
-		if (trust.Verdict != PluginTrustVerdict.Revoked &&
-			PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
+		if (trust.Verdict != PluginTrustVerdict.Revoked
+			&& PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
 		{
 			return PluginInstallResult.Fail(PluginInstallError.TrustDowngrade,
-					$"'{manifest.Id}' was previously admitted as trusted; this update verifies as " +
-					$"{trust.Verdict} and would install at a lower trust tier.",
+					$"'{manifest.Id}' was previously admitted as trusted; this update verifies as "
+					+ $"{trust.Verdict} and would install at a lower trust tier.",
 					manifest.Id,
 					manifest.Version,
 					previousVersion)
@@ -861,10 +884,10 @@ public sealed class PluginInstaller : IPluginInstaller
 		// Written as an equality, never as a negation of "is trusted": widening this to admit any verdict
 		// that merely isn't a hard failure would silently reopen the unsigned-consent path to a signature
 		// that actively failed verification.
-		var permitted = trust.Verdict == PluginTrustVerdict.Trusted ||
-			(trust.Verdict == PluginTrustVerdict.Unsigned &&
-				request.AllowUnsigned &&
-				PluginTrustPolicy.PermitsUnsignedConsent(acquisition.SourceKind, await DeveloperModeEnabled()));
+		var permitted = trust.Verdict == PluginTrustVerdict.Trusted
+			|| trust.Verdict == PluginTrustVerdict.Unsigned
+			&& request.AllowUnsigned
+			&& PluginTrustPolicy.PermitsUnsignedConsent(acquisition.SourceKind, await DeveloperModeEnabled());
 
 		if (!permitted)
 		{
@@ -937,7 +960,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			// perfectly good install of a cross-platform artifact.
 			canStart = request.StartAfterActivation && HasEntrypointForThisHost(manifest);
 			previouslyDeclaredAdb = ActiveVersionDeclaresAdb(manifest.Id);
-			previouslyDeclaredCompanionDevices = ActiveVersionDeclares(manifest.Id, PluginPermissions.HostCompanionDevices);
+			previouslyDeclaredCompanionDevices
+				= ActiveVersionDeclares(manifest.Id, PluginPermissions.HostCompanionDevices);
 			handedOver = true;
 		}
 		finally
@@ -952,7 +976,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			}
 		}
 
-		var rollback = new PluginRollbackPlan(displacedDirectory, DeleteFailedVersion: true, trustUndo);
+		var rollback = new PluginRollbackPlan(displacedDirectory, true, trustUndo);
 		var result = await ActivateAndValidate(manifest.Id,
 			manifest.Version,
 			warnings,
@@ -999,7 +1023,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		};
 	}
 
-	private async Task<PluginInstallResult> ActivateAndValidate(string pluginId,
+	private async Task<PluginInstallResult> ActivateAndValidate(
+		string pluginId,
 		string version,
 		IReadOnlyList<PluginInstallWarning> warnings,
 		bool startAfterActivation,
@@ -1056,12 +1081,12 @@ public sealed class PluginInstaller : IPluginInstaller
 		var blocked = warnings.Any(warning => warning.Severity == PluginInstallWarningSeverity.Blocking);
 		if (!startAfterActivation || blocked)
 		{
-			return PluginInstallResult.Ok(pluginId, version, previousVersion, activated: true, warnings);
+			return PluginInstallResult.Ok(pluginId, version, previousVersion, true, warnings);
 		}
 
 		if (await ReachesHealthy(pluginId, cancellationToken))
 		{
-			return PluginInstallResult.Ok(pluginId, version, previousVersion, activated: true, warnings);
+			return PluginInstallResult.Ok(pluginId, version, previousVersion, true, warnings);
 		}
 
 		PluginInstallerLog.HealthValidationFailed(_logger, pluginId, version);
@@ -1081,7 +1106,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			warnings);
 	}
 
-	private async Task<bool> RollBack(string pluginId,
+	private async Task<bool> RollBack(
+		string pluginId,
 		string failedVersion,
 		string? previousVersion,
 		bool restartPrevious,
@@ -1123,9 +1149,7 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			_catalog.Invalidate();
 
-			if (restartPrevious &&
-				previousVersion is not null &&
-				Directory.Exists(previousDirectory))
+			if (restartPrevious && previousVersion is not null && Directory.Exists(previousDirectory))
 			{
 				await _supervisor.Start(pluginId, cancellationToken);
 			}
@@ -1140,18 +1164,23 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 	}
 
-	private readonly record struct PluginRollbackPlan(string? DisplacedDirectory,
+	private readonly record struct PluginRollbackPlan(
+		string? DisplacedDirectory,
 		bool DeleteFailedVersion,
 		PluginTrustUndo? TrustUndo = null)
 	{
-		public static PluginRollbackPlan None => new(null, DeleteFailedVersion: false);
+		public static PluginRollbackPlan None => new(null, false);
 	}
 
 	private sealed record PluginTrustUndo(string PluginId, string Version, PriorTrustRecord? Prior);
 
-	private readonly record struct PriorTrustRecord(string AdmittedVerdict, string? CertificateId, DateTime InstalledAt);
+	private readonly record struct PriorTrustRecord(
+		string AdmittedVerdict,
+		string? CertificateId,
+		DateTime InstalledAt);
 
-	private async Task RestoreReplacedVersion(string pluginId,
+	private async Task RestoreReplacedVersion(
+		string pluginId,
 		string versionDirectory,
 		string displacedDirectory,
 		PluginTrustUndo? trustUndo,
@@ -1210,8 +1239,8 @@ public sealed class PluginInstaller : IPluginInstaller
 					return false;
 				}
 
-				if (snapshot.State == PluginRuntimeState.Running &&
-					snapshot.Health is PluginHealthState.Healthy or PluginHealthState.Degraded)
+				if (snapshot.State == PluginRuntimeState.Running
+					&& snapshot.Health is PluginHealthState.Healthy or PluginHealthState.Degraded)
 				{
 					return true;
 				}
@@ -1230,11 +1259,12 @@ public sealed class PluginInstaller : IPluginInstaller
 			return null;
 		}
 
-		if (compatibility.Protocol is { } protocol &&
-			(protocol.Minimum > ProtocolVersions.Current || protocol.Maximum < ProtocolVersions.Minimum))
+		if (compatibility.Protocol is { } protocol
+			&& (protocol.Minimum > ProtocolVersions.Current || protocol.Maximum < ProtocolVersions.Minimum))
 		{
-			return ($"The plugin needs plugin protocol {protocol.Minimum}-{protocol.Maximum}; this host " +
-				$"speaks {ProtocolVersions.Minimum}-{ProtocolVersions.Current}.",
+			return (
+				$"The plugin needs plugin protocol {protocol.Minimum}-{protocol.Maximum}; this host "
+				+ $"speaks {ProtocolVersions.Minimum}-{ProtocolVersions.Current}.",
 				protocol.Minimum > ProtocolVersions.Current
 					? PluginIncompatibility.HostTooOld
 					: PluginIncompatibility.HostTooNew);
@@ -1251,9 +1281,9 @@ public sealed class PluginInstaller : IPluginInstaller
 			return null;
 		}
 
-		if (SemanticVersionRange.TryParse(hostRange, out var range) &&
-			SemanticVersion.TryParse(HostVersion.Current, out var current) &&
-			range.Satisfies(current))
+		if (SemanticVersionRange.TryParse(hostRange, out var range)
+			&& SemanticVersion.TryParse(HostVersion.Current, out var current)
+			&& range.Satisfies(current))
 		{
 			return null;
 		}
@@ -1262,12 +1292,18 @@ public sealed class PluginInstaller : IPluginInstaller
 			PluginHostCompatibility.ClassifyMacroDeckRange(hostRange, HostVersion.Current));
 	}
 
-	private static bool DeclaresAdb(PluginManifest manifest) => Declares(manifest, PluginPermissions.HostAdb);
+	private static bool DeclaresAdb(PluginManifest manifest)
+	{
+		return Declares(manifest, PluginPermissions.HostAdb);
+	}
 
 	private static bool Declares(PluginManifest manifest, string permission)
-		=> manifest.Permissions?.Contains(permission, StringComparer.Ordinal) == true;
+	{
+		return manifest.Permissions?.Contains(permission, StringComparer.Ordinal) == true;
+	}
 
-	private async Task AskForCompanionDeviceConsentAsync(PluginManifest manifest,
+	private async Task AskForCompanionDeviceConsentAsync(
+		PluginManifest manifest,
 		bool previouslyDeclared,
 		CancellationToken cancellationToken)
 	{
@@ -1291,12 +1327,15 @@ public sealed class PluginInstaller : IPluginInstaller
 	}
 
 	private bool ActiveVersionDeclares(string pluginId, string permission)
-		=> _catalog.TryResolveActive(pluginId, out var active) &&
-			active is not null &&
-			_manifestReader.Read(active.ManifestPath, pluginId, active.Version).Manifest is { } manifest &&
-			Declares(manifest, permission);
+	{
+		return _catalog.TryResolveActive(pluginId, out var active)
+			&& active is not null
+			&& _manifestReader.Read(active.ManifestPath, pluginId, active.Version).Manifest is { } manifest
+			&& Declares(manifest, permission);
+	}
 
-	private async Task AskForAdbConsentAsync(PluginManifest manifest,
+	private async Task AskForAdbConsentAsync(
+		PluginManifest manifest,
 		bool previouslyDeclaredAdb,
 		CancellationToken cancellationToken)
 	{
@@ -1320,12 +1359,15 @@ public sealed class PluginInstaller : IPluginInstaller
 	}
 
 	private bool ActiveVersionDeclaresAdb(string pluginId)
-		=> _catalog.TryResolveActive(pluginId, out var active) &&
-			active is not null &&
-			_manifestReader.Read(active.ManifestPath, pluginId, active.Version).Manifest is { } manifest &&
-			DeclaresAdb(manifest);
+	{
+		return _catalog.TryResolveActive(pluginId, out var active)
+			&& active is not null
+			&& _manifestReader.Read(active.ManifestPath, pluginId, active.Version).Manifest is { } manifest
+			&& DeclaresAdb(manifest);
+	}
 
-	private List<PluginInstallWarning> CollectWarnings(PluginManifest manifest,
+	private List<PluginInstallWarning> CollectWarnings(
+		PluginManifest manifest,
 		PluginTrustResult? trust)
 	{
 		var warnings = new List<PluginInstallWarning>(_dependencyResolver.Resolve(manifest));
@@ -1339,8 +1381,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		if (manifest.Compatibility?.Sdk is { } sdkRange && !string.IsNullOrWhiteSpace(sdkRange))
 		{
 			warnings.Add(PluginInstallWarning.Advisory(PluginDependencyWarningCodes.SdkCompatibilityUnchecked,
-				$"The plugin declares SDK compatibility '{sdkRange}', which is recorded but not checked " +
-				"until the plugin connects."));
+				$"The plugin declares SDK compatibility '{sdkRange}', which is recorded but not checked "
+				+ "until the plugin connects."));
 		}
 
 		if (manifest.Permissions is { Count: > 0 } permissions)
@@ -1367,8 +1409,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			// is perfectly valid and worth keeping installed. It just cannot be started here, which the
 			// caller handles separately - see how StartAfterActivation is computed.
 			warnings.Add(PluginInstallWarning.Advisory(PluginDependencyWarningCodes.NoEntrypointForRuntime,
-				$"The artifact ships no entrypoint for {PluginRuntimeIdentifiers.Current}, so it cannot " +
-				"run on this machine."));
+				$"The artifact ships no entrypoint for {PluginRuntimeIdentifiers.Current}, so it cannot "
+				+ "run on this machine."));
 		}
 
 		switch (trust?.Verdict)
@@ -1395,7 +1437,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		return candidates.Any(manifest.Entrypoints.ContainsKey);
 	}
 
-	private static string? VerifyDigests(PluginManifest manifest,
+	private static string? VerifyDigests(
+		PluginManifest manifest,
 		IReadOnlyList<string> extractedFiles,
 		string extractDirectory)
 	{
@@ -1451,9 +1494,11 @@ public sealed class PluginInstaller : IPluginInstaller
 	/// alongside it. An unsigned artifact has no certificate to exclude, so it must declare those two
 	/// paths like any other file rather than smuggle them past the check.</summary>
 	private static bool IsRootSignatureMaterial(string relativePath, bool signed, bool withIssuer)
-		=> string.Equals(relativePath, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase) ||
-			(signed && _certificateFiles.Contains(relativePath)) ||
-			(withIssuer && _issuerFiles.Contains(relativePath));
+	{
+		return string.Equals(relativePath, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase)
+			|| signed && _certificateFiles.Contains(relativePath)
+			|| withIssuer && _issuerFiles.Contains(relativePath);
+	}
 
 	// Unverified: only decides which root files count as signature material; the trust evaluator verifies them.
 	private static bool CertificateNamesIssuer(string extractDirectory)
@@ -1462,9 +1507,9 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			using var document = JsonDocument.Parse(
 				File.ReadAllBytes(Path.Combine(extractDirectory, PluginArtifactFiles.CertificateFileName)));
-			return document.RootElement.ValueKind == JsonValueKind.Object &&
-				document.RootElement.TryGetProperty("issuer", out var issuer) &&
-				issuer.ValueKind != JsonValueKind.Null;
+			return document.RootElement.ValueKind == JsonValueKind.Object
+				&& document.RootElement.TryGetProperty("issuer", out var issuer)
+				&& issuer.ValueKind != JsonValueKind.Null;
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
 		{
@@ -1485,13 +1530,13 @@ public sealed class PluginInstaller : IPluginInstaller
 			return;
 		}
 
-		const UnixFileMode executableMode = UnixFileMode.UserRead |
-			UnixFileMode.UserWrite |
-			UnixFileMode.UserExecute |
-			UnixFileMode.GroupRead |
-			UnixFileMode.GroupExecute |
-			UnixFileMode.OtherRead |
-			UnixFileMode.OtherExecute;
+		const UnixFileMode executableMode = UnixFileMode.UserRead
+			| UnixFileMode.UserWrite
+			| UnixFileMode.UserExecute
+			| UnixFileMode.GroupRead
+			| UnixFileMode.GroupExecute
+			| UnixFileMode.OtherRead
+			| UnixFileMode.OtherExecute;
 
 		foreach (var rid in PluginRuntimeIdentifiers.CandidatesFor(PluginRuntimeIdentifiers.Current))
 		{
@@ -1518,7 +1563,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 	}
 
-	private async Task<string?> PromoteStagedVersion(string pluginId,
+	private async Task<string?> PromoteStagedVersion(
+		string pluginId,
 		string extractDirectory,
 		string versionDirectory,
 		string displacedDirectory,
@@ -1560,7 +1606,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 	}
 
-	private async Task DisplaceVersionDirectory(string pluginId,
+	private async Task DisplaceVersionDirectory(
+		string pluginId,
 		string versionDirectory,
 		string displacedDirectory,
 		CancellationToken cancellationToken)
@@ -1576,14 +1623,15 @@ public sealed class PluginInstaller : IPluginInstaller
 				Directory.Move(versionDirectory, displacedDirectory);
 				return;
 			}
-			catch (Exception ex) when ((ex is IOException or UnauthorizedAccessException) && attempt < DeleteAttempts)
+			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException && attempt < DeleteAttempts)
 			{
 				await Task.Delay(_deleteRetryDelay, cancellationToken);
 			}
 		}
 	}
 
-	private async Task FinishArtifact(PluginArtifactAcquisition acquisition,
+	private async Task FinishArtifact(
+		PluginArtifactAcquisition acquisition,
 		PluginInstallRequest request,
 		bool installSucceeded,
 		CancellationToken cancellationToken)
@@ -1630,8 +1678,8 @@ public sealed class PluginInstaller : IPluginInstaller
 		var candidates = Directory.EnumerateDirectories(versionsDirectory)
 			.Select(Path.GetFileName)
 			.OfType<string>()
-			.Where(version => !string.Equals(version, active, StringComparison.Ordinal) &&
-				!string.Equals(version, rollbackTarget, StringComparison.Ordinal))
+			.Where(version => !string.Equals(version, active, StringComparison.Ordinal)
+				&& !string.Equals(version, rollbackTarget, StringComparison.Ordinal))
 			.OrderByDescending(version =>
 				SemanticVersion.TryParse(version, out var parsed) ? parsed : null)
 			.ThenByDescending(version => version, StringComparer.Ordinal)
@@ -1731,7 +1779,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			try
 			{
-				Directory.Delete(path, recursive: true);
+				Directory.Delete(path, true);
 				return true;
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

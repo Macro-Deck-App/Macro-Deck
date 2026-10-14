@@ -138,16 +138,16 @@ public sealed class WidgetStateService : IWidgetStateService
 		// a snapshot carrying one is unusable in the same way an empty or self-contradictory one is,
 		// and the button holds its last known state instead. Conformance check MDC0310 tells a plugin
 		// author about this at build time rather than leaving them to discover it here.
-		var usable = snapshot is { States.Count: > 0 } &&
-			snapshot.States.All(s => ActionButtonStateJson.IsValidId(s.Id)) &&
-			(snapshot.ActiveStateId is null || snapshot.States.Any(s => s.Id == snapshot.ActiveStateId));
+		var usable = snapshot is { States.Count: > 0 }
+			&& snapshot.States.All(s => ActionButtonStateJson.IsValidId(s.Id))
+			&& (snapshot.ActiveStateId is null || snapshot.States.Any(s => s.Id == snapshot.ActiveStateId));
 
 		if (!usable)
 		{
 			while (identity is not null && optimistic is not null)
 			{
-				if (!ActionButtonStateJson.IsValidId(optimistic.ExpectedStateId) ||
-					!provider.States.Any(state => state.Id == optimistic.ExpectedStateId))
+				if (!ActionButtonStateJson.IsValidId(optimistic.ExpectedStateId)
+					|| !provider.States.Any(state => state.Id == optimistic.ExpectedStateId))
 				{
 					optimisticSnapshot = _optimisticStates!.Remove(identity, optimistic.Generation);
 					optimistic = optimisticSnapshot.State;
@@ -168,11 +168,10 @@ public sealed class WidgetStateService : IWidgetStateService
 			// provider states, else the first of the stored states - the provider defines the
 			// complete set and the host never invents a state it did not declare.
 			var fallbackOptions = provider.States.Count > 0 ? ToOptions(provider.States) : ToOptions(model.States);
-			var fallbackId = _derivedStates.TryGet(widgetId) ??
-				(provider.States.Count > 0 ? provider.States[0].Id : null) ??
-				model.States[0].Id;
-			var fallbackLabel = fallbackOptions.FirstOrDefault(o => o.Id == fallbackId)?.Label ??
-				model.FindState(fallbackId)?.Label ?? fallbackId;
+			var fallbackId = _derivedStates.TryGet(widgetId)
+				?? (provider.States.Count > 0 ? provider.States[0].Id : null) ?? model.States[0].Id;
+			var fallbackLabel = fallbackOptions.FirstOrDefault(o => o.Id == fallbackId)?.Label
+				?? model.FindState(fallbackId)?.Label ?? fallbackId;
 			return new WidgetStateResolution(fallbackId, fallbackLabel, fallbackOptions, false)
 			{
 				OptimisticState = optimisticSnapshot?.Version
@@ -185,8 +184,8 @@ public sealed class WidgetStateService : IWidgetStateService
 		var activeLabel = snapshot.States.First(s => s.Id == activeId).Label;
 		while (identity is not null && optimistic is not null)
 		{
-			if (!ActionButtonStateJson.IsValidId(optimistic.ExpectedStateId) ||
-				!snapshot.States.Any(state => state.Id == optimistic.ExpectedStateId))
+			if (!ActionButtonStateJson.IsValidId(optimistic.ExpectedStateId)
+				|| !snapshot.States.Any(state => state.Id == optimistic.ExpectedStateId))
 			{
 				optimisticSnapshot = _optimisticStates!.Remove(identity, optimistic.Generation);
 				optimistic = optimisticSnapshot.State;
@@ -256,9 +255,9 @@ public sealed class WidgetStateService : IWidgetStateService
 			WidgetEntity widget,
 			ActionButtonStateProvider provider)
 	{
-		if (!ActionFlowJson.TryFindBlock(ActionFlowJson.ParseFlows(widget.Data), provider.BlockId, out var block) ||
-			block is null ||
-			block.Disabled)
+		if (!ActionFlowJson.TryFindBlock(ActionFlowJson.ParseFlows(widget.Data), provider.BlockId, out var block)
+			|| block is null
+			|| block.Disabled)
 		{
 			return null;
 		}
@@ -310,8 +309,7 @@ public sealed class WidgetStateService : IWidgetStateService
 
 		for (var i = 0; i < cached.Count; i++)
 		{
-			if (!string.Equals(cached[i].Id, live[i].Id, StringComparison.Ordinal) ||
-				cached[i].Label != live[i].Label)
+			if (!string.Equals(cached[i].Id, live[i].Id, StringComparison.Ordinal) || cached[i].Label != live[i].Label)
 			{
 				return false;
 			}
@@ -321,13 +319,19 @@ public sealed class WidgetStateService : IWidgetStateService
 	}
 
 	private static List<WidgetStateOption> ToOptions(IReadOnlyList<ActionButtonStateEntry> states)
-		=> states.Select(s => new WidgetStateOption(s.Id, s.Label)).ToList();
+	{
+		return states.Select(s => new WidgetStateOption(s.Id, s.Label)).ToList();
+	}
 
 	private static List<WidgetStateOption> ToOptions(IReadOnlyList<ActionButtonStateProviderOption> states)
-		=> states.Select(s => new WidgetStateOption(s.Id, s.Label)).ToList();
+	{
+		return states.Select(s => new WidgetStateOption(s.Id, s.Label)).ToList();
+	}
 
 	private static List<WidgetStateOption> ToOptions(IReadOnlyList<ActionStateDefinition> states)
-		=> states.Select(s => new WidgetStateOption(s.Id, s.Label)).ToList();
+	{
+		return states.Select(s => new WidgetStateOption(s.Id, s.Label)).ToList();
+	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)
 	{

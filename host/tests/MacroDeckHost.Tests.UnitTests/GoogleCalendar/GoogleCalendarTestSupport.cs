@@ -27,22 +27,27 @@ internal sealed class GoogleRecordedRequest(HttpMethod method, Uri uri, string? 
 	public IReadOnlyDictionary<string, string> Query => ParseQuery(Uri.Query.TrimStart('?'));
 
 	private static Dictionary<string, string> ParseQuery(string query)
-		=> query.Split('&', StringSplitOptions.RemoveEmptyEntries)
+	{
+		return query.Split('&', StringSplitOptions.RemoveEmptyEntries)
 			.Select(pair => pair.Split('=', 2))
 			.ToDictionary(pair => Uri.UnescapeDataString(pair[0].Replace('+', ' ')),
 				pair => pair.Length > 1 ? Uri.UnescapeDataString(pair[1].Replace('+', ' ')) : string.Empty,
 				StringComparer.Ordinal);
+	}
 }
 
 internal sealed class GoogleFakeServer : HttpMessageHandler
 {
-	private readonly List<(Func<GoogleRecordedRequest, bool> Match, Func<GoogleRecordedRequest, (HttpStatusCode, string)> Reply)>
+	private readonly List<(Func<GoogleRecordedRequest, bool> Match,
+			Func<GoogleRecordedRequest, (HttpStatusCode, string)> Reply)>
 		_routes = [];
 
 	public List<GoogleRecordedRequest> Requests { get; } = [];
 
 	public GoogleFakeServer On(Func<GoogleRecordedRequest, bool> match, HttpStatusCode status, string body)
-		=> On(match, _ => (status, body));
+	{
+		return On(match, _ => (status, body));
+	}
 
 	public GoogleFakeServer On(
 		Func<GoogleRecordedRequest, bool> match,
@@ -53,7 +58,9 @@ internal sealed class GoogleFakeServer : HttpMessageHandler
 	}
 
 	public IReadOnlyList<GoogleRecordedRequest> To(string pathPrefix)
-		=> Requests.Where(r => r.Uri.AbsolutePath.StartsWith(pathPrefix, StringComparison.Ordinal)).ToList();
+	{
+		return Requests.Where(r => r.Uri.AbsolutePath.StartsWith(pathPrefix, StringComparison.Ordinal)).ToList();
+	}
 
 	protected override async Task<HttpResponseMessage> SendAsync(
 		HttpRequestMessage request,
@@ -109,14 +116,16 @@ internal sealed class GoogleCalendarHarness : IDisposable
 		string? title = null,
 		string accessToken = "access-0",
 		string refreshToken = "refresh-0")
-		=> Config.AddEntry(title ?? email,
+	{
+		return Config.AddEntry(title ?? email,
 			new Dictionary<string, string?>
 			{
 				[GoogleCalendarConfigKeys.ClientId] = "client-id",
 				[GoogleCalendarConfigKeys.Email] = email,
 				[GoogleCalendarConfigKeys.ExpiresAt] = (Time.Now + (expiresIn ?? TimeSpan.FromHours(1)))
 					.ToString("o", CultureInfo.InvariantCulture),
-				[GoogleCalendarConfigKeys.ConnectedAt] = (connectedAt ?? Time.Now).ToString("o", CultureInfo.InvariantCulture)
+				[GoogleCalendarConfigKeys.ConnectedAt]
+					= (connectedAt ?? Time.Now).ToString("o", CultureInfo.InvariantCulture)
 			},
 			new Dictionary<string, string>
 			{
@@ -124,8 +133,12 @@ internal sealed class GoogleCalendarHarness : IDisposable
 				[GoogleCalendarConfigKeys.AccessToken] = accessToken,
 				[GoogleCalendarConfigKeys.RefreshToken] = refreshToken
 			});
+	}
 
-	public Task StartAsync() => Integration.InitializeAsync(new SpotifyContextStub(Config));
+	public Task StartAsync()
+	{
+		return Integration.InitializeAsync(new SpotifyContextStub(Config));
+	}
 
 	public GoogleCalendarHarness Calendars(params string[] items)
 	{
@@ -144,12 +157,19 @@ internal sealed class GoogleCalendarHarness : IDisposable
 	}
 
 	public static string EventsPath(string calendarId)
-		=> $"/calendar/v3/calendars/{Uri.EscapeDataString(calendarId)}/events";
+	{
+		return $"/calendar/v3/calendars/{Uri.EscapeDataString(calendarId)}/events";
+	}
 
 	public static string IdToken(string email)
-		=> $"{Segment("""{"alg":"RS256"}""")}.{Segment($$"""{"email":"{{email}}","sub":"1"}""")}.signature";
+	{
+		return $"{Segment("""{"alg":"RS256"}""")}.{Segment($$"""{"email":"{{email}}","sub":"1"}""")}.signature";
+	}
 
-	private static string Segment(string json) => Base64Url.EncodeToString(Encoding.UTF8.GetBytes(json));
+	private static string Segment(string json)
+	{
+		return Base64Url.EncodeToString(Encoding.UTF8.GetBytes(json));
+	}
 
 	public void Dispose()
 	{

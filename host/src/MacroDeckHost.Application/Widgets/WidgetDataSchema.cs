@@ -26,7 +26,8 @@ internal static class WidgetDataSchema
 		return problems;
 	}
 
-	private static void Collect(EvaluationResults node,
+	private static void Collect(
+		EvaluationResults node,
 		List<WidgetDataProblem> problems,
 		HashSet<(string Pointer, string Keyword)> seen)
 	{

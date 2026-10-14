@@ -55,7 +55,7 @@ public class CalendarRegistryTests
 	{
 		var provider = new FakeCalendarIntegration("app.google").WithAccount("alice");
 		var registry = new MacroDeckHost.Application.Calendar.CalendarRegistry(
-			new ConfigurableIntegrationRegistry([provider], disabled: ["app.google"]),
+			new ConfigurableIntegrationRegistry([provider], ["app.google"]),
 			CalendarTesting.Logger());
 
 		Assert.Multiple(() =>

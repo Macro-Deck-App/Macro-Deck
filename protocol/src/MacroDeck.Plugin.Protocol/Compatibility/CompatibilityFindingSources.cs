@@ -31,5 +31,8 @@ public static class CompatibilityFindingSources
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 
-	public static bool IsKnown(string? source) => source is not null && _known.Contains(source);
+	public static bool IsKnown(string? source)
+	{
+		return source is not null && _known.Contains(source);
+	}
 }

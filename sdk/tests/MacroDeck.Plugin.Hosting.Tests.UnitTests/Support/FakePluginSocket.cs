@@ -83,10 +83,15 @@ internal sealed class FakePluginSocket : IPluginSocket
 
 	/// <summary>Queues a message from the host.</summary>
 	public void Push(ProtocolEnvelope envelope)
-		=> _fromHost.Writer.TryWrite(ProtocolEnvelopeWriter.WriteToUtf8Bytes(envelope));
+	{
+		_fromHost.Writer.TryWrite(ProtocolEnvelopeWriter.WriteToUtf8Bytes(envelope));
+	}
 
 	/// <summary>Queues a raw body, for the malformed and unknown-type cases.</summary>
-	public void PushRaw(string body) => _fromHost.Writer.TryWrite(Encoding.UTF8.GetBytes(body));
+	public void PushRaw(string body)
+	{
+		_fromHost.Writer.TryWrite(Encoding.UTF8.GetBytes(body));
+	}
 
 	/// <summary>Closes from the host's side with the given code, ending the plugin's receive loop.</summary>
 	public void CloseFromHost(int closeCode, string? description = null)
@@ -138,6 +143,8 @@ internal sealed class FakePluginSocket : IPluginSocket
 		}
 	}
 
-	public static JsonElement Payload<T>(T value) =>
-		JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	public static JsonElement Payload<T>(T value)
+	{
+		return JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	}
 }

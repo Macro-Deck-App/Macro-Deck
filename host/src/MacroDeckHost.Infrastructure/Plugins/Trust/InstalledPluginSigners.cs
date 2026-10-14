@@ -23,9 +23,9 @@ public sealed class InstalledPluginSigners : IInstalledPluginSigners
 
 			using var document = JsonDocument.Parse(File.ReadAllBytes(path));
 			var root = document.RootElement;
-			if (root.ValueKind != JsonValueKind.Object ||
-				!root.TryGetProperty("certificateId", out var certificateId) ||
-				certificateId.ValueKind != JsonValueKind.String)
+			if (root.ValueKind != JsonValueKind.Object
+				|| !root.TryGetProperty("certificateId", out var certificateId)
+				|| certificateId.ValueKind != JsonValueKind.String)
 			{
 				return null;
 			}

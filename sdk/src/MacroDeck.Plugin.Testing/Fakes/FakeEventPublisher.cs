@@ -38,7 +38,10 @@ public sealed class FakeEventPublisher : IEventPublisher
 	}
 
 	/// <summary>What <see cref="SetBindings" /> last set; empty until then.</summary>
-	public IReadOnlyList<EventBinding> GetBindings() => _bindings;
+	public IReadOnlyList<EventBinding> GetBindings()
+	{
+		return _bindings;
+	}
 
 	/// <summary>
 	/// Replaces the bound triggers and raises <see cref="BindingsChanged" />, standing in for a user who

@@ -20,10 +20,14 @@ public sealed class PluginMessagingRegistrations : IDisposable
 	private readonly IPluginSessionRegistry _sessionRegistry;
 	private readonly IPluginCapabilityInvoker _invoker;
 	private readonly IRemotePluginConnectionState _connectionState;
-	private readonly ConcurrentDictionary<string, RemotePluginMessageParticipant> _participants = new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, RemotePluginMessageParticipant> _participants
+		= new(StringComparer.Ordinal);
+
 	private readonly Lock _lock = new();
 
-	public PluginMessagingRegistrations(IMessageBroker broker,
+	public PluginMessagingRegistrations(
+		IMessageBroker broker,
 		IPluginSessionRegistry sessionRegistry,
 		IPluginCapabilityInvoker invoker,
 		IRemotePluginConnectionState connectionState)
@@ -36,8 +40,10 @@ public sealed class PluginMessagingRegistrations : IDisposable
 	}
 
 	public bool HasDeclaredMessaging(string pluginId)
-		=> _sessionRegistry.GetCapabilities(pluginId)?.Capabilities.GetValueOrDefault(CapabilityKinds.Messaging)
+	{
+		return _sessionRegistry.GetCapabilities(pluginId)?.Capabilities.GetValueOrDefault(CapabilityKinds.Messaging)
 			is { Accepted: true };
+	}
 
 	public (PluginMessagingSyncOutcome Outcome, IReadOnlyList<MessageRegistrationRejection> Rejected) Replace(
 		string pluginId,
@@ -63,11 +69,15 @@ public sealed class PluginMessagingRegistrations : IDisposable
 				return (PluginMessagingSyncOutcome.SessionNotCurrent, []);
 			}
 
-			return (PluginMessagingSyncOutcome.Applied, _broker.Replace(pluginId, sessionId, participant, registrations));
+			return (PluginMessagingSyncOutcome.Applied,
+				_broker.Replace(pluginId, sessionId, participant, registrations));
 		}
 	}
 
-	public void Dispose() => _sessionRegistry.SessionEnded -= OnSessionEnded;
+	public void Dispose()
+	{
+		_sessionRegistry.SessionEnded -= OnSessionEnded;
+	}
 
 	// Detached sessions keep their claims through the resume window; only a pruned or replaced session
 	// releases them, and only the entries that session itself registered.

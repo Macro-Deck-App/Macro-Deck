@@ -15,7 +15,8 @@ public class GetIconImportBatchRequestMessageHandler
 		_batchTracker = batchTracker;
 	}
 
-	public ValueTask<GetIconImportBatchResponse> Handle(GetIconImportBatchRequest request,
+	public ValueTask<GetIconImportBatchResponse> Handle(
+		GetIconImportBatchRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(request.BatchId, out var batchId))

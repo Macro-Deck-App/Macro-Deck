@@ -5,7 +5,10 @@ namespace MacroDeck.Sdk.Ui;
 public sealed class UiResourceException : Exception
 {
 	public UiResourceException(UiResourceErrorCode errorCode, string message, Exception? innerException = null)
-		: base(message, innerException) => ErrorCode = errorCode;
+		: base(message, innerException)
+	{
+		ErrorCode = errorCode;
+	}
 
 	public UiResourceException()
 	{

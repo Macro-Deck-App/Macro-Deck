@@ -34,7 +34,7 @@ public static class LoopbackSecretSource
 				writer.Write(secret);
 			}
 
-			File.Move(temporary, path, overwrite: true);
+			File.Move(temporary, path, true);
 		}
 		finally
 		{
@@ -65,7 +65,7 @@ public static class LoopbackSecretSource
 	{
 		var user = WindowsIdentity.GetCurrent().User!;
 		var security = new FileSecurity();
-		security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
+		security.SetAccessRuleProtection(true, false);
 		security.SetOwner(user);
 		security.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.FullControl, AccessControlType.Allow));
 

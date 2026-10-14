@@ -4,7 +4,11 @@ namespace MacroDeckHost.Integrations.Steam.Widgets;
 
 internal sealed record SteamPlayingOptions(bool ShowSessionTime, string? AccountId = null);
 
-internal sealed record SteamLauncherOptions(string Source, int? GameAppId, int Count, IReadOnlyList<int>? Favorites = null)
+internal sealed record SteamLauncherOptions(
+	string Source,
+	int? GameAppId,
+	int Count,
+	IReadOnlyList<int>? Favorites = null)
 {
 	public IReadOnlyList<int> FavoriteAppIds => Favorites ?? [];
 }
@@ -14,8 +18,10 @@ internal sealed record SteamAccountOptions(string? AccountId);
 internal static class SteamWidgetSettings
 {
 	public static SteamPlayingOptions ParsePlaying(JsonElement data)
-		=> new(SteamSurfaces.ReadBool(data, SteamWidgetType.ShowSessionTimeKey) ?? true,
+	{
+		return new SteamPlayingOptions(SteamSurfaces.ReadBool(data, SteamWidgetType.ShowSessionTimeKey) ?? true,
 			SteamSurfaces.ReadString(data, SteamWidgetType.AccountKey) is { Length: > 0 } account ? account : null);
+	}
 
 	public static SteamLauncherOptions ParseLauncher(JsonElement data)
 	{
@@ -41,8 +47,15 @@ internal static class SteamWidgetSettings
 	}
 
 	public static SteamAccountOptions ParseAccount(JsonElement data)
-		=> new(SteamSurfaces.ReadString(data, SteamWidgetType.AccountKey) is { Length: > 0 } account ? account : null);
+	{
+		return new SteamAccountOptions(SteamSurfaces.ReadString(data, SteamWidgetType.AccountKey) is
+			{ Length: > 0 } account
+			? account
+			: null);
+	}
 
 	public static string? BackgroundColor(JsonElement data)
-		=> SteamSurfaces.NormalizeBackground(SteamSurfaces.ReadString(data, SteamWidgetType.BackgroundColorKey));
+	{
+		return SteamSurfaces.NormalizeBackground(SteamSurfaces.ReadString(data, SteamWidgetType.BackgroundColorKey));
+	}
 }

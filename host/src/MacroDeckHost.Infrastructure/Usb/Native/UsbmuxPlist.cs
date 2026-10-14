@@ -8,9 +8,9 @@ namespace MacroDeckHost.Infrastructure.Usb.Native;
 internal static class UsbmuxPlist
 {
 	private const string Header = """
-		<?xml version="1.0" encoding="UTF-8"?>
-		<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-		""";
+								  <?xml version="1.0" encoding="UTF-8"?>
+								  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+								  """;
 
 	public static byte[] Write(IReadOnlyDictionary<string, object> values)
 	{
@@ -33,7 +33,8 @@ internal static class UsbmuxPlist
 	}
 
 	private static XElement WriteValue(object value)
-		=> value switch
+	{
+		return value switch
 		{
 			string text => new XElement("string", text),
 			bool flag => new XElement(flag ? "true" : "false"),
@@ -45,6 +46,7 @@ internal static class UsbmuxPlist
 			IEnumerable<object> items => new XElement("array", items.Select(WriteValue)),
 			_ => throw new ArgumentException($"Unsupported property list value {value.GetType().Name}.", nameof(value))
 		};
+	}
 
 	private static Dictionary<string, object> ReadDict(XElement dict)
 	{
@@ -71,7 +73,8 @@ internal static class UsbmuxPlist
 	}
 
 	private static object ReadValue(XElement element)
-		=> element.Name.LocalName switch
+	{
+		return element.Name.LocalName switch
 		{
 			"dict" => ReadDict(element),
 			"array" => element.Elements().Select(ReadValue).ToList(),
@@ -84,4 +87,5 @@ internal static class UsbmuxPlist
 			"date" => DateTimeOffset.Parse(element.Value, CultureInfo.InvariantCulture),
 			_ => throw new FormatException($"Unsupported property list element {element.Name.LocalName}.")
 		};
+	}
 }

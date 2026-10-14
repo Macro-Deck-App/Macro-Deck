@@ -11,7 +11,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// written against it handles ADB being off or not allowed.
 /// </summary>
 [TestFixture]
-public class A28_AndroidDeviceFakeTests
+public class A28AndroidDeviceFakeTests
 {
 	private static readonly string[] _lifecycleEvents = ["connected:A1", "state:Connecting->Online", "disconnected:A1"];
 	private static readonly string[] _connectedAddress = ["192.168.1.20:5555"];
@@ -48,7 +48,8 @@ public class A28_AndroidDeviceFakeTests
 
 	[TestCase(AndroidDeviceAccess.AdbNotEnabled, AndroidDeviceErrorCode.AdbNotEnabled)]
 	[TestCase(AndroidDeviceAccess.AdbNotAllowed, AndroidDeviceErrorCode.AdbNotAllowed)]
-	public void Without_access_the_devices_are_hidden_and_every_operation_is_refused(AndroidDeviceAccess access,
+	public void Without_access_the_devices_are_hidden_and_every_operation_is_refused(
+		AndroidDeviceAccess access,
 		AndroidDeviceErrorCode expected)
 	{
 		var manager = new FakeAndroidDeviceManager();
@@ -88,7 +89,10 @@ public class A28_AndroidDeviceFakeTests
 	public async Task A_scripted_shell_answer_is_returned_as_given()
 	{
 		var device = new FakeAndroidDeviceManager().AddDevice("A1");
-		device.ShellHandler = command => new AndroidShellResult(command == "getprop ro.product.model" ? 0 : 127, "Pixel 8", string.Empty, false);
+		device.ShellHandler = command => new AndroidShellResult(command == "getprop ro.product.model" ? 0 : 127,
+			"Pixel 8",
+			string.Empty,
+			false);
 
 		var result = await device.ExecuteShellAsync("getprop ro.product.model");
 
@@ -125,7 +129,8 @@ public class A28_AndroidDeviceFakeTests
 	[Test]
 	public async Task In_the_harness_the_context_and_dependency_injection_hand_out_the_same_manager()
 	{
-		await using var harness = PluginTestHarness.Create(builder => builder.RegisterIntegration(_ => new TestIntegration("test.a28")));
+		await using var harness = PluginTestHarness.Create(builder
+			=> builder.RegisterIntegration(_ => new TestIntegration("test.a28")));
 		var own = new FakeAndroidDeviceManager();
 		await using var withOwn = PluginTestHarness.Create(builder => builder
 			.RegisterIntegration(_ => new TestIntegration("test.a28.own"))
@@ -133,8 +138,10 @@ public class A28_AndroidDeviceFakeTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(((IIntegrationContext)harness.Context).AndroidDevices, Is.SameAs(harness.Context.AndroidDevices));
-			Assert.That(harness.Services.GetRequiredService<IAndroidDeviceManager>(), Is.SameAs(harness.Context.AndroidDevices));
+			Assert.That(((IIntegrationContext)harness.Context).AndroidDevices,
+				Is.SameAs(harness.Context.AndroidDevices));
+			Assert.That(harness.Services.GetRequiredService<IAndroidDeviceManager>(),
+				Is.SameAs(harness.Context.AndroidDevices));
 			Assert.That(harness.Context.AndroidDevices.Access, Is.EqualTo(AndroidDeviceAccess.Unsupported));
 			Assert.That(((IIntegrationContext)withOwn.Context).AndroidDevices, Is.SameAs(own));
 			Assert.That(withOwn.Services.GetRequiredService<IAndroidDeviceManager>(), Is.SameAs(own));
@@ -160,7 +167,8 @@ public class A28_AndroidDeviceFakeTests
 			Assert.That(device.Calls.Select(call => call.Operation),
 				Is.EqualTo(new[]
 				{
-					nameof(IAndroidDevice.SendKeyAsync), nameof(IAndroidDevice.TapAsync), nameof(IAndroidDevice.RebootAsync),
+					nameof(IAndroidDevice.SendKeyAsync), nameof(IAndroidDevice.TapAsync),
+					nameof(IAndroidDevice.RebootAsync),
 					nameof(IAndroidDevice.CaptureScreenshotAsync), nameof(IAndroidDevice.GetStatusAsync)
 				}));
 			Assert.That(device.Calls[0].Arguments, Is.EqualTo(_keyArguments));
@@ -226,7 +234,8 @@ public class A28_AndroidDeviceFakeTests
 		var manager = new FakeAndroidDeviceManager();
 		var device = manager.AddDevice("A1", AndroidDeviceState.Unauthorized);
 		var seen = new List<string>();
-		manager.DeviceStateChanged += (_, e) => seen.Add($"{e.PreviousState}->{e.Device.State}:{e.Device.LacksUsbPermission}");
+		manager.DeviceStateChanged += (_, e)
+			=> seen.Add($"{e.PreviousState}->{e.Device.State}:{e.Device.LacksUsbPermission}");
 
 		manager.SetLacksUsbPermission("A1", true);
 

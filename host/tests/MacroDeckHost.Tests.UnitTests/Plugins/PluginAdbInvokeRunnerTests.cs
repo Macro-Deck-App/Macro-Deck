@@ -128,11 +128,15 @@ public class PluginAdbInvokeRunnerTests
 		Assert.That(connection.Sent.Single().Error?.Code, Is.EqualTo(ProtocolErrorCodes.InternalError));
 	}
 
-	private static HostInvokePayload Shell() => PluginAdbCallbacksTests.Payload(HostOperations.Adb.Shell);
+	private static HostInvokePayload Shell()
+	{
+		return PluginAdbCallbacksTests.Payload(HostOperations.Adb.Shell);
+	}
 
 	private sealed class World
 	{
-		private readonly TaskCompletionSource<AdbShellOutput> _shell = new(TaskCreationOptions.RunContinuationsAsynchronously);
+		private readonly TaskCompletionSource<AdbShellOutput> _shell
+			= new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 		public World(PluginAdbAccess access = PluginAdbAccess.Available)
 		{
@@ -152,15 +156,19 @@ public class PluginAdbInvokeRunnerTests
 
 		public PluginAdbInvokeRunner Runner { get; }
 
-		public void Finish(AdbShellOutput output) => _shell.TrySetResult(output);
+		public void Finish(AdbShellOutput output)
+		{
+			_shell.TrySetResult(output);
+		}
 
 		public async Task<ProtocolEnvelope> ResultFor(string correlationId)
 		{
 			var deadline = DateTime.UtcNow.AddSeconds(5);
 			while (DateTime.UtcNow < deadline)
 			{
-				var sent = Connection.Sent.ToList().FirstOrDefault(envelope =>
-					envelope.CorrelationId == correlationId && envelope.Type == MessageTypes.HostResult);
+				var sent = Connection.Sent.ToList()
+					.FirstOrDefault(envelope =>
+						envelope.CorrelationId == correlationId && envelope.Type == MessageTypes.HostResult);
 				if (sent is not null)
 				{
 					return sent;
@@ -177,16 +185,24 @@ public class PluginAdbInvokeRunnerTests
 	{
 		public int Admissions { get; private set; }
 
-		public Task<HostCallbackResult> RouteAsync(string pluginId,
+		public Task<HostCallbackResult> RouteAsync(
+			string pluginId,
 			string correlationId,
 			HostInvokePayload payload,
-			CancellationToken cancellationToken) => throw new NotSupportedException();
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<HostCallbackResult> RouteAsync(string pluginId,
+		public Task<HostCallbackResult> RouteAsync(
+			string pluginId,
 			string? sessionId,
 			string correlationId,
 			HostInvokePayload payload,
-			CancellationToken cancellationToken) => throw new NotSupportedException();
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
 		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload)
 		{
@@ -199,11 +215,16 @@ public class PluginAdbInvokeRunnerTests
 internal sealed class ThrowingAccessPolicy : IPluginAdbAccessPolicy
 {
 	public Task<PluginAdbAccess> EvaluateAsync(string pluginId, CancellationToken cancellationToken = default)
-		=> throw new IOException("The preferences could not be read.");
+	{
+		throw new IOException("The preferences could not be read.");
+	}
 
 	public void Refresh(MacroDeckHost.Application.Services.AdbSettings settings)
 	{
 	}
 
-	public bool CanBeGranted(string pluginId) => false;
+	public bool CanBeGranted(string pluginId)
+	{
+		return false;
+	}
 }

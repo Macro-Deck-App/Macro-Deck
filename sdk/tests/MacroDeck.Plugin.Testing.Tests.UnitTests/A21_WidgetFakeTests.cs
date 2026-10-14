@@ -8,7 +8,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// fake that reports a clear-only request as a no-op and fails a plugin the real host would serve.
 /// </summary>
 [TestFixture]
-public class A21_WidgetFakeTests
+public class A21WidgetFakeTests
 {
 	private static FakeWidgetApi SeededApi()
 	{

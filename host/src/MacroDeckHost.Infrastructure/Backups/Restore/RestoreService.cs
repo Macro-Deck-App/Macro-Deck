@@ -23,7 +23,7 @@ namespace MacroDeckHost.Infrastructure.Backups.Restore;
 public sealed class RestoreService : IRestoreService
 {
 	private static readonly TimeSpan _leaseTimeout = TimeSpan.FromSeconds(60);
-	private const int _supportedEncryptionVersion = 1;
+	private const int SupportedEncryptionVersion = 1;
 
 	private readonly IBackupOperationGate _gate;
 	private readonly IBackupProgressReporter _progress;
@@ -47,7 +47,8 @@ public sealed class RestoreService : IRestoreService
 	private PendingRestoreInfo? _cachedPending;
 	private bool _pendingLoaded;
 
-	public RestoreService(IBackupOperationGate gate,
+	public RestoreService(
+		IBackupOperationGate gate,
 		IBackupProgressReporter progress,
 		IBackupCatalog catalog,
 		IBackupStorageRegistry storageRegistry,
@@ -96,7 +97,8 @@ public sealed class RestoreService : IRestoreService
 		}
 	}
 
-	public async Task<Result<PreparedRestore, BackupError>> Prepare(PrepareRestoreRequest request,
+	public async Task<Result<PreparedRestore, BackupError>> Prepare(
+		PrepareRestoreRequest request,
 		bool proceedWithoutSafetyBackup = false,
 		CancellationToken cancellationToken = default)
 	{
@@ -170,7 +172,7 @@ public sealed class RestoreService : IRestoreService
 					"This archive was created by a newer version of Macro Deck.");
 			}
 
-			if (manifest.Encryption.Version != _supportedEncryptionVersion)
+			if (manifest.Encryption.Version != SupportedEncryptionVersion)
 			{
 				return Fail(operationId,
 					request.BackupId,
@@ -303,7 +305,7 @@ public sealed class RestoreService : IRestoreService
 
 			var safetyBackup = await _backupService.Create(new CreateBackupRequest(BackupTrigger.BeforeRestore,
 					$"Before restoring backup {request.BackupId:N}",
-					Protected: true),
+					true),
 				cancellationToken);
 
 			if (safetyBackup.Success)
@@ -425,7 +427,8 @@ public sealed class RestoreService : IRestoreService
 		}
 	}
 
-	public Task<Result<CommitRestoreResult, BackupError>> Commit(Guid restoreId,
+	public Task<Result<CommitRestoreResult, BackupError>> Commit(
+		Guid restoreId,
 		CancellationToken cancellationToken = default)
 	{
 		var pending = Pending;
@@ -448,7 +451,7 @@ public sealed class RestoreService : IRestoreService
 	public async Task<Result<BackupError>> Cancel(Guid restoreId, CancellationToken cancellationToken = default)
 	{
 		var markerPath = MarkerPath();
-		var document = _pendingStore.Read<PendingRestoreDocument>(markerPath, repair: false);
+		var document = _pendingStore.Read<PendingRestoreDocument>(markerPath, false);
 		if (document is null || document.RestoreId != restoreId)
 		{
 			return Result.Fail(BackupError.NotFound, "No matching pending restore was found.");
@@ -465,7 +468,8 @@ public sealed class RestoreService : IRestoreService
 		return Result.Ok<BackupError>();
 	}
 
-	private static async Task<Result<List<PendingRestoreFile>, BackupError>> ExtractFiles(ZipArchive payloadZip,
+	private static async Task<Result<List<PendingRestoreFile>, BackupError>> ExtractFiles(
+		ZipArchive payloadZip,
 		IEnumerable<BackupContentEntry> entries,
 		string applyDirectory,
 		CancellationToken cancellationToken)
@@ -509,7 +513,8 @@ public sealed class RestoreService : IRestoreService
 		return Result.Ok<List<PendingRestoreFile>, BackupError>(files);
 	}
 
-	private static async Task<Result<string, BackupError>> ExtractDatabase(ZipArchive payloadZip,
+	private static async Task<Result<string, BackupError>> ExtractDatabase(
+		ZipArchive payloadZip,
 		BackupContentIndex contentIndex,
 		string stagingDirectory,
 		CancellationToken cancellationToken)
@@ -530,8 +535,8 @@ public sealed class RestoreService : IRestoreService
 		}
 
 		var expectedHash = contentIndex.Database?.Sha256;
-		if (!string.IsNullOrEmpty(expectedHash) &&
-			!string.Equals(Sha256(databasePath), expectedHash, StringComparison.OrdinalIgnoreCase))
+		if (!string.IsNullOrEmpty(expectedHash)
+			&& !string.Equals(Sha256(databasePath), expectedHash, StringComparison.OrdinalIgnoreCase))
 		{
 			return Result.Fail<string, BackupError>(BackupError.IntegrityFailure,
 				"The staged database does not match its recorded checksum.");
@@ -540,7 +545,8 @@ public sealed class RestoreService : IRestoreService
 		return Result.Ok<string, BackupError>(databasePath);
 	}
 
-	private async Task<Result<byte[], BackupError>> ResolveRecoveryKey(BackupArchiveManifest manifest,
+	private async Task<Result<byte[], BackupError>> ResolveRecoveryKey(
+		BackupArchiveManifest manifest,
 		string? providedKey,
 		CancellationToken cancellationToken)
 	{
@@ -590,21 +596,26 @@ public sealed class RestoreService : IRestoreService
 
 	private PendingRestoreInfo? ReadPendingFromDisk()
 	{
-		var document = _pendingStore.Read<PendingRestoreDocument>(MarkerPath(), repair: false);
+		var document = _pendingStore.Read<PendingRestoreDocument>(MarkerPath(), false);
 
 		return document is null
 			? null
 			: new PendingRestoreInfo(document.RestoreId, document.BackupId, document.StagedAt, document.Components);
 	}
 
-	private string MarkerPath() => Path.Combine(_paths.RestoreStagingDirectory, PendingRestoreDocument.FileName);
+	private string MarkerPath()
+	{
+		return Path.Combine(_paths.RestoreStagingDirectory, PendingRestoreDocument.FileName);
+	}
 
-	private void ReportStatus(Guid operationId,
+	private void ReportStatus(
+		Guid operationId,
 		BackupOperationStage stage,
 		Guid? backupId,
 		BackupError? error = null,
 		string? errorMessage = null)
-		=> _progress.Report(new BackupOperationStatus(operationId,
+	{
+		_progress.Report(new BackupOperationStatus(operationId,
 			BackupOperationKind.Restore,
 			stage,
 			BackupTrigger.BeforeRestore,
@@ -615,8 +626,10 @@ public sealed class RestoreService : IRestoreService
 			error,
 			errorMessage,
 			_time.GetUtcNow()));
+	}
 
-	private Result<PreparedRestore, BackupError> Fail(Guid operationId,
+	private Result<PreparedRestore, BackupError> Fail(
+		Guid operationId,
 		Guid? backupId,
 		BackupError error,
 		string? errorMessage)
@@ -626,7 +639,8 @@ public sealed class RestoreService : IRestoreService
 	}
 
 	private static BackupError MapCryptoError(BackupDecryptResult result)
-		=> result switch
+	{
+		return result switch
 		{
 			BackupDecryptResult.WrongKey => BackupError.RecoveryKeyInvalid,
 			BackupDecryptResult.Corrupt or BackupDecryptResult.Truncated => BackupError.IntegrityFailure,
@@ -634,6 +648,7 @@ public sealed class RestoreService : IRestoreService
 			BackupDecryptResult.TooLarge => BackupError.TooLarge,
 			_ => BackupError.InvalidArchive
 		};
+	}
 
 	private static string Sha256(string path)
 	{
@@ -642,7 +657,10 @@ public sealed class RestoreService : IRestoreService
 		return Convert.ToHexStringLower(SHA256.HashData(stream));
 	}
 
-	private static string ToNativePath(string relativePath) => relativePath.Replace('/', Path.DirectorySeparatorChar);
+	private static string ToNativePath(string relativePath)
+	{
+		return relativePath.Replace('/', Path.DirectorySeparatorChar);
+	}
 
 	private static void TryDeleteDirectory(string path)
 	{
@@ -650,7 +668,7 @@ public sealed class RestoreService : IRestoreService
 		{
 			if (Directory.Exists(path))
 			{
-				Directory.Delete(path, recursive: true);
+				Directory.Delete(path, true);
 			}
 		}
 		catch (Exception e) when (e is IOException or UnauthorizedAccessException)

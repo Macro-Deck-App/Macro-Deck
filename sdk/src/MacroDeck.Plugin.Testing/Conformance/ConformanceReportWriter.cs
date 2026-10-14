@@ -22,20 +22,36 @@ public static class ConformanceReportWriter
 		var builder = new StringBuilder();
 
 		builder.Append("Macro Deck plugin conformance report (suite ").Append(report.SuiteVersion).Append(")\n");
-		builder.Append("Plugin: ").Append(report.PluginId ?? "(unknown)").Append(' ')
-			.Append(report.PluginVersion ?? "(unknown)").Append('\n');
+		builder.Append("Plugin: ")
+			.Append(report.PluginId ?? "(unknown)")
+			.Append(' ')
+			.Append(report.PluginVersion ?? "(unknown)")
+			.Append('\n');
 		builder.Append("Started: ")
 			.Append(report.StartedAt.ToString("O", System.Globalization.CultureInfo.InvariantCulture))
-			.Append(", duration: ").Append(report.Duration).Append('\n');
-		builder.Append("Passed: ").Append(report.Passed).Append(", Failed: ").Append(report.Failed)
-			.Append(", Skipped: ").Append(report.Skipped).Append('\n');
+			.Append(", duration: ")
+			.Append(report.Duration)
+			.Append('\n');
+		builder.Append("Passed: ")
+			.Append(report.Passed)
+			.Append(", Failed: ")
+			.Append(report.Failed)
+			.Append(", Skipped: ")
+			.Append(report.Skipped)
+			.Append('\n');
 		builder.Append("Conformant: ").Append(report.Conformant ? "yes" : "no").Append("\n\n");
 
 		foreach (var result in report.Results)
 		{
-			builder.Append('[').Append(Tag(result.Result.Outcome)).Append("] ")
-				.Append(result.Id).Append(' ').Append(result.Title)
-				.Append(" (").Append(result.Requirement).Append(")\n");
+			builder.Append('[')
+				.Append(Tag(result.Result.Outcome))
+				.Append("] ")
+				.Append(result.Id)
+				.Append(' ')
+				.Append(result.Title)
+				.Append(" (")
+				.Append(result.Requirement)
+				.Append(")\n");
 
 			switch (result.Result.Outcome)
 			{
@@ -74,11 +90,19 @@ public static class ConformanceReportWriter
 
 		builder.Append("# Macro Deck plugin conformance report\n\n");
 		builder.Append("Suite version: `").Append(report.SuiteVersion).Append("`  \n");
-		builder.Append("Plugin: `").Append(report.PluginId ?? "(unknown)").Append("` `")
-			.Append(report.PluginVersion ?? "(unknown)").Append("`  \n");
+		builder.Append("Plugin: `")
+			.Append(report.PluginId ?? "(unknown)")
+			.Append("` `")
+			.Append(report.PluginVersion ?? "(unknown)")
+			.Append("`  \n");
 		builder.Append("Conformant: **").Append(report.Conformant ? "yes" : "no").Append("**  \n");
-		builder.Append("Passed: ").Append(report.Passed).Append(" - Failed: ").Append(report.Failed)
-			.Append(" - Skipped: ").Append(report.Skipped).Append("\n\n");
+		builder.Append("Passed: ")
+			.Append(report.Passed)
+			.Append(" - Failed: ")
+			.Append(report.Failed)
+			.Append(" - Skipped: ")
+			.Append(report.Skipped)
+			.Append("\n\n");
 
 		builder.Append("| Id | Title | Category | Requirement | Outcome | Detail |\n");
 		builder.Append("|---|---|---|---|---|---|\n");
@@ -93,28 +117,39 @@ public static class ConformanceReportWriter
 				_ => string.Empty
 			};
 
-			builder.Append("| ").Append(result.Id)
-				.Append(" | ").Append(Escape(result.Title))
-				.Append(" | ").Append(result.Category)
-				.Append(" | ").Append(result.Requirement)
-				.Append(" | ").Append(Tag(result.Result.Outcome))
-				.Append(" | ").Append(detail)
+			builder.Append("| ")
+				.Append(result.Id)
+				.Append(" | ")
+				.Append(Escape(result.Title))
+				.Append(" | ")
+				.Append(result.Category)
+				.Append(" | ")
+				.Append(result.Requirement)
+				.Append(" | ")
+				.Append(Tag(result.Result.Outcome))
+				.Append(" | ")
+				.Append(detail)
 				.Append(" |\n");
 		}
 
 		return builder.ToString();
 	}
 
-	private static string Tag(ConformanceOutcome outcome) => outcome switch
+	private static string Tag(ConformanceOutcome outcome)
 	{
-		ConformanceOutcome.Passed => "PASS",
-		ConformanceOutcome.Failed => "FAIL",
-		ConformanceOutcome.Skipped => "SKIP",
-		ConformanceOutcome.Inconclusive => "INCONCLUSIVE",
-		_ => outcome.ToString()
-	};
+		return outcome switch
+		{
+			ConformanceOutcome.Passed => "PASS",
+			ConformanceOutcome.Failed => "FAIL",
+			ConformanceOutcome.Skipped => "SKIP",
+			ConformanceOutcome.Inconclusive => "INCONCLUSIVE",
+			_ => outcome.ToString()
+		};
+	}
 
 	private static string Escape(string? text)
-		=> (text ?? string.Empty).Replace("|", "\\|", StringComparison.Ordinal)
+	{
+		return (text ?? string.Empty).Replace("|", "\\|", StringComparison.Ordinal)
 			.Replace("\n", " ", StringComparison.Ordinal);
+	}
 }

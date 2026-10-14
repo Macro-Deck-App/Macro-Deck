@@ -17,7 +17,7 @@ internal enum UiCellChange
 	/// <summary>The value became absent, so the key belongs in <c>RemovedProperties</c> - never in
 	/// <c>Properties</c> with a JSON <c>null</c>, which the model defines as "explicitly null" instead.
 	/// </summary>
-	Removed,
+	Removed
 }
 
 /// <summary>
@@ -27,7 +27,10 @@ internal enum UiCellChange
 /// </summary>
 internal abstract class UiPropertyCell : UiDependent
 {
-	protected UiPropertyCell(string key) => Key = key;
+	protected UiPropertyCell(string key)
+	{
+		Key = key;
+	}
 
 	/// <summary>The property key this cell feeds.</summary>
 	internal string Key { get; }
@@ -44,7 +47,10 @@ internal abstract class UiPropertyCell : UiDependent
 	internal bool IsDirty { get; set; }
 
 	/// <summary>Attaches this cell to the node it feeds.</summary>
-	internal void Attach(UiMaterializedNode owner) => Owner = owner;
+	internal void Attach(UiMaterializedNode owner)
+	{
+		Owner = owner;
+	}
 
 	/// <summary>Evaluates this cell for the first time, returning the property value or <c>null</c> when the
 	/// value is absent and the key is therefore omitted from the node.</summary>
@@ -95,7 +101,9 @@ internal sealed class UiPropertyCell<T> : UiPropertyCell
 
 	internal UiPropertyCell(string key, UiValue<T> value)
 		: base(key)
-		=> _value = value;
+	{
+		_value = value;
+	}
 
 	internal UiValue<T> Value => _value;
 
@@ -158,9 +166,9 @@ internal sealed class UiPropertyCell<T> : UiPropertyCell
 
 		if (current is JsonElement { ValueKind: JsonValueKind.Undefined })
 		{
-			throw new UiViewException($"The property '{Key}' of the node '{NodeId}' holds an undefined JsonElement " +
-				"(default(JsonElement)), which has no JSON form. Use a defined value such as an empty array: " +
-				"JsonSerializer.SerializeToElement(Array.Empty<object>()).");
+			throw new UiViewException($"The property '{Key}' of the node '{NodeId}' holds an undefined JsonElement "
+				+ "(default(JsonElement)), which has no JSON form. Use a defined value such as an empty array: "
+				+ "JsonSerializer.SerializeToElement(Array.Empty<object>()).");
 		}
 
 		JsonElement element;
@@ -171,8 +179,8 @@ internal sealed class UiPropertyCell<T> : UiPropertyCell
 		}
 		catch (InvalidOperationException exception)
 		{
-			throw new UiViewException($"The property '{Key}' of the node '{NodeId}' could not be serialized. " +
-				"An undefined JsonElement (default(JsonElement)) nested inside the value is the usual cause.",
+			throw new UiViewException($"The property '{Key}' of the node '{NodeId}' could not be serialized. "
+				+ "An undefined JsonElement (default(JsonElement)) nested inside the value is the usual cause.",
 				exception);
 		}
 

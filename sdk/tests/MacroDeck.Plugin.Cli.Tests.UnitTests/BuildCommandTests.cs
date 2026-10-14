@@ -16,10 +16,16 @@ public class BuildCommandTests
 	private string _output = null!;
 
 	[SetUp]
-	public void SetUp() => _output = Directory.CreateTempSubdirectory("macrodeck-build-cmd-out-").FullName;
+	public void SetUp()
+	{
+		_output = Directory.CreateTempSubdirectory("macrodeck-build-cmd-out-").FullName;
+	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_output, recursive: true);
+	public void TearDown()
+	{
+		Directory.Delete(_output, true);
+	}
 
 	[Test]
 	public async Task Build_is_offered_by_the_root_command_and_documents_its_own_options()
@@ -61,7 +67,7 @@ public class BuildCommandTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -90,7 +96,7 @@ public class BuildCommandTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -120,7 +126,7 @@ public class BuildCommandTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -148,7 +154,7 @@ public class BuildCommandTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 

@@ -19,13 +19,20 @@ public class LayoutProviderCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(string localId, string operation)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.LayoutProvider,
 			LocalId = localId,
@@ -33,6 +40,7 @@ public class LayoutProviderCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id()
@@ -52,9 +60,11 @@ public class LayoutProviderCapabilityHandlerTests
 
 	[Test]
 	public void An_integration_that_is_not_a_layout_provider_declares_nothing()
-		=> Assert.That(new LayoutProviderCapabilityHandler([new TestIntegration()], TestMetadata.Default)
+	{
+		Assert.That(new LayoutProviderCapabilityHandler([new TestIntegration()], TestMetadata.Default)
 				.DeclareCapabilities(),
 			Is.Empty);
+	}
 
 	[Test]
 	public async Task Describe_reports_the_provider_name_and_layouts()
@@ -193,7 +203,8 @@ public class LayoutProviderCapabilityHandlerTests
 	}
 
 	private static LayoutDescriptor FullyPopulatedLayout()
-		=> new("xl",
+	{
+		return new LayoutDescriptor("xl",
 			"Stream Deck XL",
 			[
 				new LayoutRegion
@@ -223,6 +234,7 @@ public class LayoutProviderCapabilityHandlerTests
 				Extra = new Dictionary<string, string>(StringComparer.Ordinal) { ["vendor"] = "Elgato" }
 			},
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["serial"] = "abc123" });
+	}
 
 	private sealed class TestLayoutIntegration(string providerName, IReadOnlyList<LayoutDescriptor> layouts)
 		: ILayoutProvider, IPluginIntegration
@@ -231,13 +243,24 @@ public class LayoutProviderCapabilityHandlerTests
 
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InitializeAsync(ILayoutProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<LayoutDescriptor> GetLayouts() => layouts;
+		public IReadOnlyList<LayoutDescriptor> GetLayouts()
+		{
+			return layouts;
+		}
 	}
 }

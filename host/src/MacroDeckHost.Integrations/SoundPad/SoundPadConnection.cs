@@ -25,7 +25,9 @@ internal sealed class SoundPadConnection : IDisposable
 	private ISoundPadClient? _client;
 	private CancellationTokenSource? _loop;
 
-	public SoundPadConnection(Func<ISoundPadClient> clientFactory, TimeSpan? retryInterval = null,
+	public SoundPadConnection(
+		Func<ISoundPadClient> clientFactory,
+		TimeSpan? retryInterval = null,
 		TimeSpan? commandTimeout = null)
 	{
 		_clientFactory = clientFactory;
@@ -70,9 +72,13 @@ internal sealed class SoundPadConnection : IDisposable
 		client?.Dispose();
 	}
 
-	public Task RunAsync(Func<ISoundPadClient, Task> call, CancellationToken cancellationToken,
-		bool connectOnDemand = false, TimeSpan? timeout = null)
-		=> RunAsync(async client =>
+	public Task RunAsync(
+		Func<ISoundPadClient, Task> call,
+		CancellationToken cancellationToken,
+		bool connectOnDemand = false,
+		TimeSpan? timeout = null)
+	{
+		return RunAsync(async client =>
 			{
 				await call(client);
 				return true;
@@ -80,9 +86,13 @@ internal sealed class SoundPadConnection : IDisposable
 			cancellationToken,
 			connectOnDemand,
 			timeout);
+	}
 
-	public async Task<T> RunAsync<T>(Func<ISoundPadClient, Task<T>> call, CancellationToken cancellationToken,
-		bool connectOnDemand = false, TimeSpan? timeout = null)
+	public async Task<T> RunAsync<T>(
+		Func<ISoundPadClient, Task<T>> call,
+		CancellationToken cancellationToken,
+		bool connectOnDemand = false,
+		TimeSpan? timeout = null)
 	{
 		var client = _client ?? throw new SoundPadUnavailableException("The SoundPad connection is stopped.");
 

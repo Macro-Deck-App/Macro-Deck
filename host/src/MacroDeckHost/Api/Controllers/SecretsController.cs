@@ -30,21 +30,31 @@ public class SecretsController : ControllerBase
 
 	[HttpPost]
 	public Task<CreateSecretResponse> Create(CreateSecretRequest body, CancellationToken ct)
-		=> _createSecret.Handle(body, ct).AsTask();
+	{
+		return _createSecret.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut]
 	public Task<UpdateSecretResponse> Update(UpdateSecretRequest body, CancellationToken ct)
-		=> _updateSecret.Handle(body, ct).AsTask();
+	{
+		return _updateSecret.Handle(body, ct).AsTask();
+	}
 
 	[HttpDelete("{id:guid}")]
 	public Task<DeleteSecretResponse> Delete(Guid id, CancellationToken ct)
-		=> _deleteSecret.Handle(new DeleteSecretRequest { Id = id }, ct).AsTask();
+	{
+		return _deleteSecret.Handle(new DeleteSecretRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost("{id:guid}/reveal")]
 	public Task<RevealSecretResponse> Reveal(Guid id, CancellationToken ct)
-		=> _revealSecret.Handle(new RevealSecretRequest { Id = id }, ct).AsTask();
+	{
+		return _revealSecret.Handle(new RevealSecretRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost("{id:guid}/clone")]
 	public Task<CloneSecretResponse> Clone(Guid id, CancellationToken ct)
-		=> _cloneSecret.Handle(new CloneSecretRequest { Id = id }, ct).AsTask();
+	{
+		return _cloneSecret.Handle(new CloneSecretRequest { Id = id }, ct).AsTask();
+	}
 }

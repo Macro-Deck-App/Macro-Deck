@@ -127,9 +127,9 @@ public class ReportUpdateStateRequestMessageHandler
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.Update,
-			Title = _localization.Resolve(AppStrings.Notifications.UpdateAvailable(version: request.Version),
-					culture),
-			Message = _localization.Resolve(AppStrings.Notifications.UpdateAvailableMessage(version: request.Version),
+			Title = _localization.Resolve(AppStrings.Notifications.UpdateAvailable(request.Version),
+				culture),
+			Message = _localization.Resolve(AppStrings.Notifications.UpdateAvailableMessage(request.Version),
 				culture),
 			Actions = actions,
 			DedupeKey = DedupeKey
@@ -158,7 +158,7 @@ public class ReportUpdateStateRequestMessageHandler
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.Update,
-			Title = _localization.Resolve(AppStrings.Notifications.UpdateDownloading(version: request.Version),
+			Title = _localization.Resolve(AppStrings.Notifications.UpdateDownloading(request.Version),
 				culture),
 			Progress = progress,
 			CancelKey = DedupeKey,
@@ -179,7 +179,7 @@ public class ReportUpdateStateRequestMessageHandler
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.Update,
-			Title = _localization.Resolve(AppStrings.Notifications.UpdateReady(version: request.Version), culture),
+			Title = _localization.Resolve(AppStrings.Notifications.UpdateReady(request.Version), culture),
 			Actions =
 			[
 				new UserNotificationAction(UserNotificationActionKind.OpenUpdateDetails, request.Version),
@@ -210,7 +210,7 @@ public class ReportUpdateStateRequestMessageHandler
 		{
 			Severity = UserNotificationSeverity.Warning,
 			Kind = UserNotificationKind.Update,
-			Title = _localization.Resolve(AppStrings.Notifications.UpdateFailed(version: request.Version), culture),
+			Title = _localization.Resolve(AppStrings.Notifications.UpdateFailed(request.Version), culture),
 			Message = request.Error,
 			Actions =
 			[
@@ -251,5 +251,7 @@ public class ReportUpdateStateRequestMessageHandler
 
 	// Older bootstrappers send no failure kind; without a version, only a check can have failed.
 	private static bool IsCheckFailure(ReportUpdateStateRequest request)
-		=> request.Failure is null ? request.Version is null : request.Failure == "check";
+	{
+		return request.Failure is null ? request.Version is null : request.Failure == "check";
+	}
 }

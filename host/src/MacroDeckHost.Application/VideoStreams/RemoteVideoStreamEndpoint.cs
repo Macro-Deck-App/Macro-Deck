@@ -51,18 +51,20 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 		return
 		[
 			.. (result?.Providers ?? [])
-				.Where(provider => provider is not null)
-				.Select(provider => new VideoStreamProviderInfo(provider.Id,
-					provider.Name,
-					provider.Description,
-					provider.RegistrationId))
+			.Where(provider => provider is not null)
+			.Select(provider => new VideoStreamProviderInfo(provider.Id,
+				provider.Name,
+				provider.Description,
+				provider.RegistrationId))
 		];
 	}
 
-	public async Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(string providerId,
+	public async Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(
+		string providerId,
 		CancellationToken cancellationToken)
 	{
-		var result = await InvokeAsync<VideoStreamProviderStreamsResult>(CapabilityOperations.VideoStreamProvider.Streams,
+		var result = await InvokeAsync<VideoStreamProviderStreamsResult>(
+				CapabilityOperations.VideoStreamProvider.Streams,
 				new VideoStreamProviderStreamsArguments { ProviderId = providerId },
 				() => true,
 				cancellationToken)
@@ -71,12 +73,14 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 		return [.. (result?.Streams ?? []).Where(stream => stream is not null).Select(VideoStreamWire.ToDescriptor)];
 	}
 
-	public async Task<VideoStreamOpenResult> OpenAsync(string providerId,
+	public async Task<VideoStreamOpenResult> OpenAsync(
+		string providerId,
 		VideoStreamOpenRequest request,
 		Func<bool> proceed,
 		CancellationToken cancellationToken)
 	{
-		var result = await InvokeAsync<VideoStreamSessionOpenResult>(CapabilityOperations.VideoStreamProvider.SessionOpen,
+		var result = await InvokeAsync<VideoStreamSessionOpenResult>(
+				CapabilityOperations.VideoStreamProvider.SessionOpen,
 				new VideoStreamSessionOpenArguments
 				{
 					SessionId = request.SessionId,
@@ -98,13 +102,20 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 		return new VideoStreamOpenResult(result.Description, result.RegistrationId);
 	}
 
-	public Task SuspendAsync(string providerId, string sessionId, Func<bool> proceed, CancellationToken cancellationToken)
-		=> InvokeAsync<object>(CapabilityOperations.VideoStreamProvider.SessionSuspend,
+	public Task SuspendAsync(
+		string providerId,
+		string sessionId,
+		Func<bool> proceed,
+		CancellationToken cancellationToken)
+	{
+		return InvokeAsync<object>(CapabilityOperations.VideoStreamProvider.SessionSuspend,
 			new VideoStreamSessionArguments { SessionId = sessionId, ProviderId = providerId },
 			proceed,
 			cancellationToken);
+	}
 
-	public async Task<VideoStreamSessionDescriptionDto?> ResumeAsync(string providerId,
+	public async Task<VideoStreamSessionDescriptionDto?> ResumeAsync(
+		string providerId,
 		string sessionId,
 		Func<bool> proceed,
 		CancellationToken cancellationToken)
@@ -119,7 +130,8 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 		return result?.Description;
 	}
 
-	public async Task CloseAsync(string providerId,
+	public async Task CloseAsync(
+		string providerId,
 		string sessionId,
 		VideoStreamSessionReason reason,
 		CancellationToken cancellationToken)
@@ -141,7 +153,8 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 		}
 	}
 
-	private async Task<T?> InvokeAsync<T>(string operation,
+	private async Task<T?> InvokeAsync<T>(
+		string operation,
 		object? arguments,
 		Func<bool> proceed,
 		CancellationToken cancellationToken)
@@ -220,8 +233,8 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 	private static VideoStreamEndpointException Map(RemoteCapabilityException exception)
 	{
 		var reason = exception.Details?.GetValueOrDefault("reason");
-		if ((reason is not null && reason.StartsWith("video_stream_", StringComparison.Ordinal)) ||
-			string.Equals(exception.Code, ProtocolErrorCodes.CapabilityUnsupported, StringComparison.Ordinal))
+		if (reason is not null && reason.StartsWith("video_stream_", StringComparison.Ordinal)
+			|| string.Equals(exception.Code, ProtocolErrorCodes.CapabilityUnsupported, StringComparison.Ordinal))
 		{
 			return new VideoStreamEndpointException(VideoStreamEndpointFailure.Rejected,
 				VideoStreamWire.FromError(exception.Code, reason),
@@ -248,7 +261,9 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 	}
 
 	private static VideoStreamEndpointException Busy()
-		=> new(VideoStreamEndpointFailure.Rejected,
+	{
+		return new VideoStreamEndpointException(VideoStreamEndpointFailure.Rejected,
 			VideoStreamErrorCode.Busy,
 			"The plugin is already handling as many video stream calls as it may.");
+	}
 }

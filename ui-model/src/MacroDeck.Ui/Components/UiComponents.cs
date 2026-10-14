@@ -110,6 +110,6 @@ public static class UiComponents
 	[
 		Stack, Text, Image, RangeBar, Slider, Button, Layer, Chart, TextField, List, Transform,
 		Shape, Icon, Grid, Gauge, Toggle, Segmented, Dial,
-		Modifier, Responsive, FirstFit,
+		Modifier, Responsive, FirstFit
 	];
 }

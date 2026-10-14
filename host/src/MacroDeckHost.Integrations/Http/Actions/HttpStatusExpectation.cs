@@ -4,7 +4,7 @@ namespace MacroDeckHost.Integrations.Http.Actions;
 
 internal sealed class HttpStatusExpectation
 {
-	private static readonly HttpStatusExpectation _empty = new([], matchesAny: false);
+	private static readonly HttpStatusExpectation _empty = new([], false);
 
 	private readonly IReadOnlyList<(int Min, int Max)> _ranges;
 	private readonly bool _matchesAny;
@@ -16,16 +16,18 @@ internal sealed class HttpStatusExpectation
 	}
 
 	public bool Matches(int statusCode)
-		=> _matchesAny || _ranges.Any(range => statusCode >= range.Min && statusCode <= range.Max);
+	{
+		return _matchesAny || _ranges.Any(range => statusCode >= range.Min && statusCode <= range.Max);
+	}
 
 	public static bool TryParse(string? expression, out HttpStatusExpectation expectation)
 	{
 		var text = string.IsNullOrWhiteSpace(expression) ? "2xx" : expression.Trim();
 
-		if (string.Equals(text, "*", StringComparison.Ordinal) ||
-			string.Equals(text, "any", StringComparison.OrdinalIgnoreCase))
+		if (string.Equals(text, "*", StringComparison.Ordinal)
+			|| string.Equals(text, "any", StringComparison.OrdinalIgnoreCase))
 		{
-			expectation = new HttpStatusExpectation([], matchesAny: true);
+			expectation = new HttpStatusExpectation([], true);
 			return true;
 		}
 
@@ -48,7 +50,7 @@ internal sealed class HttpStatusExpectation
 			ranges.Add(range);
 		}
 
-		expectation = new HttpStatusExpectation(ranges, matchesAny: false);
+		expectation = new HttpStatusExpectation(ranges, false);
 		return true;
 	}
 
@@ -59,16 +61,16 @@ internal sealed class HttpStatusExpectation
 		if (token.Length == 3 && token[0] is >= '1' and <= '5' && token[1] is 'x' or 'X' && token[2] is 'x' or 'X')
 		{
 			var digit = token[0] - '0';
-			range = (digit * 100, (digit * 100) + 99);
+			range = (digit * 100, digit * 100 + 99);
 			return true;
 		}
 
 		var dash = token.IndexOf('-', StringComparison.Ordinal);
 		if (dash > 0)
 		{
-			if (TryParseCode(token[..dash], out var min) &&
-				TryParseCode(token[(dash + 1)..], out var max) &&
-				min <= max)
+			if (TryParseCode(token[..dash], out var min)
+				&& TryParseCode(token[(dash + 1)..], out var max)
+				&& min <= max)
 			{
 				range = (min, max);
 				return true;

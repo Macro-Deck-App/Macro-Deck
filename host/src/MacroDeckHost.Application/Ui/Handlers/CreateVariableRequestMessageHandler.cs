@@ -14,7 +14,9 @@ public class CreateVariableRequestMessageHandler
 	private readonly VariableRegistry _registry;
 	private readonly SharedVariables _sharedVariables;
 
-	public CreateVariableRequestMessageHandler(IVariableService service, VariableRegistry registry,
+	public CreateVariableRequestMessageHandler(
+		IVariableService service,
+		VariableRegistry registry,
 		SharedVariables sharedVariables)
 	{
 		_service = service;
@@ -62,7 +64,9 @@ public class CreateVariableRequestMessageHandler
 		return new CreateVariableResponse
 		{
 			Success = true,
-			Variable = VariableDtoMapper.ToDto(result.Data, _registry.IsAvailable(result.Data.Id), null,
+			Variable = VariableDtoMapper.ToDto(result.Data,
+				_registry.IsAvailable(result.Data.Id),
+				null,
 				_sharedVariables.IsShared(result.Data))
 		};
 	}

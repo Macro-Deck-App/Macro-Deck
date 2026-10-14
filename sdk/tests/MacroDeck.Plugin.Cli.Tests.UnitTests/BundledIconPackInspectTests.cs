@@ -32,8 +32,8 @@ public class BundledIconPackInspectTests
 	[TearDown]
 	public void TearDown()
 	{
-		Directory.Delete(_directory, recursive: true);
-		Directory.Delete(_output, recursive: true);
+		Directory.Delete(_directory, true);
+		Directory.Delete(_output, true);
 	}
 
 	[Test]
@@ -108,7 +108,7 @@ public class BundledIconPackInspectTests
 		var pack = await PluginPacker.PackAsync(_directory,
 			Path.Combine(_directory, PluginArtifactFiles.ManifestFileName),
 			_ => outputPath,
-			force: true);
+			true);
 
 		Assert.That(pack.Success, Is.True, pack.FailureMessage);
 		return outputPath;

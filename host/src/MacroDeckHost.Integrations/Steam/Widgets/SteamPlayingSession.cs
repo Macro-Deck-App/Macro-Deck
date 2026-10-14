@@ -59,11 +59,20 @@ internal sealed class SteamPlayingSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -85,10 +94,15 @@ internal sealed class SteamPlayingSession : IUiSession
 		return ValueTask.CompletedTask;
 	}
 
-	private void OnChanged(object? sender, EventArgs args) => Refresh();
+	private void OnChanged(object? sender, EventArgs args)
+	{
+		Refresh();
+	}
 
 	private SteamPlayingState Compute()
-		=> SteamWidgetStates.Playing(_source, _options, _time.GetUtcNow(), _artwork, _glyph);
+	{
+		return SteamWidgetStates.Playing(_source, _options, _time.GetUtcNow(), _artwork, _glyph);
+	}
 
 	private void Refresh()
 	{

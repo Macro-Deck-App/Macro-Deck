@@ -8,11 +8,14 @@ public class PublicTlsSelectorTests
 	private const int HttpsPort = 8194;
 	private const int LoopbackPort = 54321;
 
-	private static PublicTlsSelection Resolve(string? enabled,
+	private static PublicTlsSelection Resolve(
+		string? enabled,
 		string? mode = "Additional",
 		string? httpsPort = "8194",
 		bool certificateConfigured = true)
-		=> PublicTlsSelector.Resolve(enabled, mode, httpsPort, certificateConfigured, PublicPort, LoopbackPort);
+	{
+		return PublicTlsSelector.Resolve(enabled, mode, httpsPort, certificateConfigured, PublicPort, LoopbackPort);
+	}
 
 	// A browser only grants a secure context, and with it the service worker the web client installs
 	// from, over HTTPS. An installation that never opened the network settings has to get one anyway,
@@ -64,7 +67,7 @@ public class PublicTlsSelectorTests
 	[Test]
 	public void Replace_mode_serves_https_on_the_public_port_and_ignores_the_stored_https_port()
 	{
-		var selection = Resolve("True", mode: "Replace", httpsPort: "80");
+		var selection = Resolve("True", "Replace", "80");
 
 		Assert.Multiple(() =>
 		{
@@ -91,7 +94,8 @@ public class PublicTlsSelectorTests
 
 	[TestCase("8193", PublicTlsRejection.HttpsPortConflictsWithPublicPort)]
 	[TestCase("54321", PublicTlsRejection.HttpsPortConflictsWithLoopbackPort)]
-	public void An_https_port_that_collides_with_another_listener_is_refused_without_disturbing_http(string stored,
+	public void An_https_port_that_collides_with_another_listener_is_refused_without_disturbing_http(
+		string stored,
 		PublicTlsRejection expected)
 	{
 		var selection = Resolve("True", httpsPort: stored);
@@ -136,7 +140,7 @@ public class PublicTlsSelectorTests
 	[Test]
 	public void An_unrecognised_mode_keeps_the_public_http_listener()
 	{
-		var selection = Resolve("True", mode: "nonsense");
+		var selection = Resolve("True", "nonsense");
 
 		Assert.Multiple(() =>
 		{

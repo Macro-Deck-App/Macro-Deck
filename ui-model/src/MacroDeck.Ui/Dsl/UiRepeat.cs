@@ -18,7 +18,7 @@ public sealed record UiRepeat<TItem> : UiElement, IUiRepeatElement
 	{
 		if (!Items.TryEvaluate(out var items))
 		{
-			return new UiRepeatExpansion(itemList: null, []);
+			return new UiRepeatExpansion(null, []);
 		}
 
 		var expanded = new List<UiRepeatItem>();

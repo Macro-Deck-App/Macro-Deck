@@ -37,7 +37,9 @@ public static class BackupEntryCompression
 	};
 
 	public static CompressionLevel For(string relativePath)
-		=> _alreadyCompressed.Contains(Path.GetExtension(relativePath))
+	{
+		return _alreadyCompressed.Contains(Path.GetExtension(relativePath))
 			? CompressionLevel.NoCompression
 			: CompressionLevel.Fastest;
+	}
 }

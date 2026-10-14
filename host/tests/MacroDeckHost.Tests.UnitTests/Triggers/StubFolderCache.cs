@@ -24,33 +24,61 @@ internal sealed class StubFolderCache : IFolderCache
 		return folder;
 	}
 
-	public void RemoveFolder(Guid folderId) => _folders.RemoveAll(f => f.Id == folderId);
-
-	public static WidgetEntity Widget(string? data) => new()
+	public void RemoveFolder(Guid folderId)
 	{
-		Id = Guid.NewGuid(),
-		FolderId = Guid.Empty,
-		Type = WidgetTypeIds.ActionButton,
-		Data = data
-	};
+		_folders.RemoveAll(f => f.Id == folderId);
+	}
 
-	public Task InitializeCache() => Task.CompletedTask;
+	public static WidgetEntity Widget(string? data)
+	{
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			FolderId = Guid.Empty,
+			Type = WidgetTypeIds.ActionButton,
+			Data = data
+		};
+	}
 
-	public FolderEntity? GetFolderById(Guid id) => _folders.FirstOrDefault(f => f.Id == id);
+	public Task InitializeCache()
+	{
+		return Task.CompletedTask;
+	}
 
-	public List<FolderEntity> GetAllFolders() => _folders.ToList();
+	public FolderEntity? GetFolderById(Guid id)
+	{
+		return _folders.FirstOrDefault(f => f.Id == id);
+	}
 
-	public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [];
+	public List<FolderEntity> GetAllFolders()
+	{
+		return _folders.ToList();
+	}
+
+	public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+	{
+		return [];
+	}
 
 	public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
-		=> _folders.Where(f => f.ProfileId == profileId).ToList();
+	{
+		return _folders.Where(f => f.ProfileId == profileId).ToList();
+	}
 
-	public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+	public Task AddOrUpdate(FolderEntity folder)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+	public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-		=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+	{
+		return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+	}
 
 	public void AddWidget(Guid folderId, WidgetEntity widget)
 	{

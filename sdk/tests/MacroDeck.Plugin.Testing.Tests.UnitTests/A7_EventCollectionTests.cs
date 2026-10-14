@@ -13,7 +13,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// <c>state.update</c> or <c>capability.result</c> traffic the same action also generates.
 /// </summary>
 [TestFixture]
-public class A7_EventCollectionTests
+public class A7EventCollectionTests
 {
 	[Test]
 	public async Task PluginEventCollector_records_only_real_event_publish_messages()

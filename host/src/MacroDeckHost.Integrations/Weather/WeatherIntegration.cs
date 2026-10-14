@@ -10,7 +10,6 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
 using MacroDeckHost.Integrations.Weather.Details;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Weather;
 
@@ -112,21 +111,35 @@ public sealed class WeatherIntegration
 			}
 	];
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new WeatherConfigFlow(_client);
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new WeatherConfigFlow(_client);
+	}
 
 	public IReadOnlyList<WeatherStationInstance> GetInstances()
-		=> _stations.Select(s => new WeatherStationInstance(s.EntryId, s.Station.DisplayName)).ToList();
+	{
+		return _stations.Select(s => new WeatherStationInstance(s.EntryId, s.Station.DisplayName)).ToList();
+	}
 
 	public IWeatherStation? GetStation(string instanceId)
-		=> _stations.FirstOrDefault(s => s.EntryId == instanceId)?.Station;
+	{
+		return _stations.FirstOrDefault(s => s.EntryId == instanceId)?.Station;
+	}
 
 	WeatherSnapshot? IWeatherStations.Snapshot(string stationId)
-		=> _stations.FirstOrDefault(s => s.EntryId == stationId)?.Station.Current;
+	{
+		return _stations.FirstOrDefault(s => s.EntryId == stationId)?.Station.Current;
+	}
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-		=> _details.CreateSessionAsync(request, cancellationToken);
+	{
+		return _details.CreateSessionAsync(request, cancellationToken);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -205,8 +218,8 @@ public sealed class WeatherIntegration
 			var unitRaw = await context.Config.GetStringAsync(entry.Id, WeatherConfigKeys.Unit);
 			var displayName = await context.Config.GetStringAsync(entry.Id, WeatherConfigKeys.DisplayName);
 
-			if (!double.TryParse(latRaw, NumberStyles.Any, CultureInfo.InvariantCulture, out var latitude) ||
-				!double.TryParse(lonRaw, NumberStyles.Any, CultureInfo.InvariantCulture, out var longitude))
+			if (!double.TryParse(latRaw, NumberStyles.Any, CultureInfo.InvariantCulture, out var latitude)
+				|| !double.TryParse(lonRaw, NumberStyles.Any, CultureInfo.InvariantCulture, out var longitude))
 			{
 				_logger.Warning("Weather config entry {EntryId} has invalid coordinates; skipping", entry.Id);
 				continue;
@@ -229,10 +242,9 @@ public sealed class WeatherIntegration
 
 			// Carried over only when the location itself is unchanged: seeding a moved station would report
 			// the previous location's weather, and a provider outage would keep it doing so.
-			var seed = prior is not null &&
-				prior.Station.Matches(latitude, longitude, unit, prior.Station.DisplayName)
-					? prior.Station.Current
-					: null;
+			var seed = prior is not null && prior.Station.Matches(latitude, longitude, unit, prior.Station.DisplayName)
+				? prior.Station.Current
+				: null;
 
 			stations.Add(new ConfiguredStation(entryId,
 				new WeatherStation(_client, latitude, longitude, unit, name, seed)));

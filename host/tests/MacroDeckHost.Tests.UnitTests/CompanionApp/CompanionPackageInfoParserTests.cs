@@ -6,25 +6,31 @@ public class CompanionPackageInfoParserTests
 {
 	private const string Package = "app.macrodeck.companion";
 
-	internal static string Installed(int versionCode, string versionName, string installer = "null", bool userZeroInstalled = true)
-		=> $$"""
-			Activity Resolver Table:
-			  Non-Data Actions:
-			      android.intent.action.MAIN:
-			        5f1 app.macrodeck.companion/.MainActivity filter 9a2
+	internal static string Installed(
+		int versionCode,
+		string versionName,
+		string installer = "null",
+		bool userZeroInstalled = true)
+	{
+		return $$"""
+				 Activity Resolver Table:
+				   Non-Data Actions:
+				       android.intent.action.MAIN:
+				         5f1 app.macrodeck.companion/.MainActivity filter 9a2
 
-			Packages:
-			  Package [app.macrodeck.companion] (c0ffee):
-			    appId=10234
-			    pkg=Package{d4 app.macrodeck.companion}
-			    versionCode={{versionCode}} minSdk=23 targetSdk=35
-			    versionName={{versionName}}
-			    installerPackageName={{installer}}
-			    User 0: ceDataInode=12345 installed={{(userZeroInstalled ? "true" : "false")}} hidden=false stopped=false
+				 Packages:
+				   Package [app.macrodeck.companion] (c0ffee):
+				     appId=10234
+				     pkg=Package{d4 app.macrodeck.companion}
+				     versionCode={{versionCode}} minSdk=23 targetSdk=35
+				     versionName={{versionName}}
+				     installerPackageName={{installer}}
+				     User 0: ceDataInode=12345 installed={{(userZeroInstalled ? "true" : "false")}} hidden=false stopped=false
 
-			Queries:
-			  system apps queryable: false
-			""";
+				 Queries:
+				   system apps queryable: false
+				 """;
+	}
 
 	[Test]
 	public void A_sideloaded_install_reports_its_version_and_no_installer()
@@ -46,8 +52,8 @@ public class CompanionPackageInfoParserTests
 	[Test]
 	public void Android_6_output_with_carriage_returns_is_read()
 	{
-		var output = "Packages:\r\n  Package [app.macrodeck.companion] (3f):\r\n    userId=10080\r\n" +
-			"    versionCode=7 targetSdk=23\r\n    versionName=25.9.0\r\n    installerPackageName=null\r\n";
+		var output = "Packages:\r\n  Package [app.macrodeck.companion] (3f):\r\n    userId=10080\r\n"
+			+ "    versionCode=7 targetSdk=23\r\n    versionName=25.9.0\r\n    installerPackageName=null\r\n";
 
 		Assert.That(CompanionPackageInfoParser.ParsePackageInfo(output, Package),
 			Is.EqualTo(new CompanionPackageInfo(7, "25.9.0", null)));
@@ -64,15 +70,16 @@ public class CompanionPackageInfoParserTests
 	[Test]
 	public void An_install_for_another_user_only_is_not_installed_for_the_device_owner()
 	{
-		Assert.That(CompanionPackageInfoParser.ParsePackageInfo(Installed(9, "26.1.0", userZeroInstalled: false), Package),
+		Assert.That(
+			CompanionPackageInfoParser.ParsePackageInfo(Installed(9, "26.1.0", userZeroInstalled: false), Package),
 			Is.Null);
 	}
 
 	[Test]
 	public void The_hidden_factory_copy_of_an_updated_system_app_does_not_count()
 	{
-		var output = Installed(9, "26.1.0") +
-			"\nHidden system packages:\n  Package [app.macrodeck.companion] (b1):\n    versionCode=1 targetSdk=35\n    versionName=1.0.0\n";
+		var output = Installed(9, "26.1.0")
+			+ "\nHidden system packages:\n  Package [app.macrodeck.companion] (b1):\n    versionCode=1 targetSdk=35\n    versionName=1.0.0\n";
 
 		Assert.That(CompanionPackageInfoParser.ParsePackageInfo(output, Package)!.VersionCode, Is.EqualTo(9));
 	}

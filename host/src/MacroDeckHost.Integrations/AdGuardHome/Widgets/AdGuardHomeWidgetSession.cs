@@ -55,8 +55,7 @@ internal sealed class AdGuardHomeWidgetSession : IUiSession
 			AdGuardHomeWidgetView.Build(_state,
 				options,
 				_icons,
-				new AdGuardHomeWidgetCommands(
-					id => Press(new AdGuardHomeCommand(AdGuardHomeCommandKind.PauseProtection,
+				new AdGuardHomeWidgetCommands(id => Press(new AdGuardHomeCommand(AdGuardHomeCommandKind.PauseProtection,
 						AdGuardHomeWidgetType.Duration(id)?.Length)),
 					() => Press(new AdGuardHomeCommand(AdGuardHomeCommandKind.EnableProtection))),
 				UiWidgetSafeArea.RadiusOf(surface),
@@ -75,13 +74,25 @@ internal sealed class AdGuardHomeWidgetSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => Deliver(uiEvent, null);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		Deliver(uiEvent, null);
+	}
 
-	public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin) => Deliver(uiEvent, origin);
+	public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin)
+	{
+		Deliver(uiEvent, origin);
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -114,7 +125,10 @@ internal sealed class AdGuardHomeWidgetSession : IUiSession
 		}
 	}
 
-	private void OnInstancesChanged(object? sender, EventArgs args) => Refresh();
+	private void OnInstancesChanged(object? sender, EventArgs args)
+	{
+		Refresh();
+	}
 
 	private UiEventOutcome Press(AdGuardHomeCommand command)
 	{
@@ -144,7 +158,7 @@ internal sealed class AdGuardHomeWidgetSession : IUiSession
 			AdGuardHomeCommandOutcome.Incompatible => Strings.Incompatible(),
 			AdGuardHomeCommandOutcome.Redirected => Strings.Redirected(),
 			AdGuardHomeCommandOutcome.Unreachable => Strings.Offline(),
-			_ => Strings.CommandFailed(),
+			_ => Strings.CommandFailed()
 		};
 
 		lock (_sync)
@@ -193,7 +207,8 @@ internal sealed class AdGuardHomeWidgetSession : IUiSession
 				delay = _failureUntil - now;
 			}
 
-			if (next.Protection == AdGuardHomeProtection.Paused && (delay == Timeout.InfiniteTimeSpan || delay > _countdownTick))
+			if (next.Protection == AdGuardHomeProtection.Paused
+				&& (delay == Timeout.InfiniteTimeSpan || delay > _countdownTick))
 			{
 				delay = _countdownTick;
 			}

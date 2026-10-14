@@ -14,15 +14,18 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class ConditionStateOperatorTests
 {
-	private static VariableEntity Var(string name, VariableType type, string value) => new()
+	private static VariableEntity Var(string name, VariableType type, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
 	private static readonly VariableEntity[] _catalog =
 	[
@@ -68,7 +71,9 @@ public class ConditionStateOperatorTests
 	[TestCase("artist", "isAvailable", ExpectedResult = true)]
 	[TestCase("artist", "isNotAvailable", ExpectedResult = false)]
 	public bool The_twelve_cell_truth_table(string name, string op)
-		=> Evaluate($$"""{"$var":"{{name}}"}""", op, "null", _catalog);
+	{
+		return Evaluate($$"""{"$var":"{{name}}"}""", op, "null", _catalog);
+	}
 
 	// A2 - relationships, not literals. isEmpty and isNotEmpty are deliberately NOT complements: for an
 	// operand that never resolved, both come out false at once, which no boolean negation can produce.
@@ -148,8 +153,10 @@ public class ConditionStateOperatorTests
 	}
 
 	private static IEnumerable<TestCaseData> _stateOperatorCellSource()
-		=> _stateOperatorCells.Select(cell => new TestCaseData(cell.Name, cell.Op, cell.Expected)
+	{
+		return _stateOperatorCells.Select(cell => new TestCaseData(cell.Name, cell.Op, cell.Expected)
 			.SetArgDisplayNames(cell.Name, cell.Op));
+	}
 
 	[TestCaseSource(nameof(_stateOperatorCellSource))]
 	public void The_right_operand_cannot_influence_the_verdict(string name, string op, bool expected)
@@ -210,7 +217,9 @@ public class ConditionStateOperatorTests
 
 	[Test]
 	public void A_literal_json_null_operand_is_not_available()
-		=> Assert.That(Evaluate("null", "isNotAvailable", "null", _catalog), Is.True);
+	{
+		Assert.That(Evaluate("null", "isNotAvailable", "null", _catalog), Is.True);
+	}
 
 	// Why the UI forbids authoring a state operator against free text. A free-text operand is rendered as a
 	// Liquid template before it is compared (ResolveSide's String case), so it always resolves to a string

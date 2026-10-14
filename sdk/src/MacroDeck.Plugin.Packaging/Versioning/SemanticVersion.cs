@@ -208,16 +208,16 @@ public sealed class SemanticVersion : IComparable<SemanticVersion>
 			return false;
 		}
 
-		return int.TryParse(identifiers[0], out major) &&
-			int.TryParse(identifiers[1], out minor) &&
-			int.TryParse(identifiers[2], out patch);
+		return int.TryParse(identifiers[0], out major)
+			&& int.TryParse(identifiers[1], out minor)
+			&& int.TryParse(identifiers[2], out patch);
 	}
 
 	private static bool HasValidIdentifiers(string value, bool rejectLeadingZeroesInNumericIdentifiers)
 	{
 		var identifiers = value.Split('.');
-		return identifiers.Length > 0 &&
-			identifiers.All(identifier =>
+		return identifiers.Length > 0
+			&& identifiers.All(identifier =>
 				IsValidIdentifier(identifier, rejectLeadingZeroesInNumericIdentifiers));
 	}
 
@@ -233,9 +233,9 @@ public sealed class SemanticVersion : IComparable<SemanticVersion>
 			return false;
 		}
 
-		return !rejectLeadingZeroesInNumericIdentifiers ||
-			!value.All(char.IsAsciiDigit) ||
-			value.Length == 1 ||
-			value[0] != '0';
+		return !rejectLeadingZeroesInNumericIdentifiers
+			|| !value.All(char.IsAsciiDigit)
+			|| value.Length == 1
+			|| value[0] != '0';
 	}
 }

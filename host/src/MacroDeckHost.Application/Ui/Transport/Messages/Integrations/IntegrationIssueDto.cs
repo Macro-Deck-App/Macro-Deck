@@ -15,22 +15,30 @@ public class IntegrationIssueDto
 
 	public LocalizedText ActionLabel { get; set; }
 
-	public static IntegrationIssueDto From(IntegrationIssue issue) => new()
+	public static IntegrationIssueDto From(IntegrationIssue issue)
 	{
-		Id = issue.Id,
-		Title = issue.Title,
-		Description = issue.Description,
-		Severity = SeverityName(issue.Severity),
-		ActionLabel = issue.ActionLabel
-	};
+		return new IntegrationIssueDto
+		{
+			Id = issue.Id,
+			Title = issue.Title,
+			Description = issue.Description,
+			Severity = SeverityName(issue.Severity),
+			ActionLabel = issue.ActionLabel
+		};
+	}
 
-	public static string SeverityName(IntegrationIssueSeverity severity) => severity switch
+	public static string SeverityName(IntegrationIssueSeverity severity)
 	{
-		IntegrationIssueSeverity.Error => "error",
-		IntegrationIssueSeverity.Warning => "warning",
-		_ => "info"
-	};
+		return severity switch
+		{
+			IntegrationIssueSeverity.Error => "error",
+			IntegrationIssueSeverity.Warning => "warning",
+			_ => "info"
+		};
+	}
 
 	public static string? MaxSeverityName(IReadOnlyList<IntegrationIssue> issues)
-		=> issues.Count == 0 ? null : SeverityName(issues.Max(i => i.Severity));
+	{
+		return issues.Count == 0 ? null : SeverityName(issues.Max(i => i.Severity));
+	}
 }

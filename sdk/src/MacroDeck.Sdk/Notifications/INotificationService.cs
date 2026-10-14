@@ -25,6 +25,7 @@ public interface INotificationService
 	/// Shows a notification and waits until it closes. Cancelling the token dismisses the notification and
 	/// throws <see cref="OperationCanceledException" />.
 	/// </summary>
-	Task<NotificationResult> ShowForResultAsync(NotificationOptions options,
+	Task<NotificationResult> ShowForResultAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default);
 }

@@ -8,17 +8,23 @@ public class CountdownAskModeTests
 	private TimerWidgetHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new TimerWidgetHarness();
+	public void SetUp()
+	{
+		_harness = new TimerWidgetHarness();
+	}
 
 	[TearDown]
-	public async Task TearDown() => await _harness.DisposeAsync();
+	public async Task TearDown()
+	{
+		await _harness.DisposeAsync();
+	}
 
 	[Test]
 	public async Task A_tap_asks_the_pressing_client_for_the_duration_and_its_answer_starts_the_countdown()
 	{
 		var widget = await _harness.AddCountdownAsync(ask: true);
 
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 		var prompt = _harness.Prompt.Calls.Single();
 		prompt.Answer.SetResult(90);
 		await TimerWidgetHarness.EventuallyAsync(() => _harness.Phase(widget) == TimerWidgetPhase.Running);
@@ -27,7 +33,8 @@ public class CountdownAskModeTests
 		{
 			Assert.That(prompt.ClientId, Is.EqualTo("tablet"));
 			Assert.That(_harness.Phase(widget), Is.EqualTo(TimerWidgetPhase.Running));
-			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.CountdownRemainingSeconds), Is.EqualTo("90"));
+			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.CountdownRemainingSeconds),
+				Is.EqualTo("90"));
 			Assert.That(_harness.Triggers.Calls.Single().Trigger, Is.EqualTo(WidgetTriggerTypes.CountdownStarted));
 		});
 	}
@@ -45,7 +52,7 @@ public class CountdownAskModeTests
 	{
 		var widget = await _harness.AddCountdownAsync(ask: true);
 
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 		_harness.Prompt.Calls.Single().Answer.SetResult(null);
 		await TimerWidgetHarness.QuietPeriodAsync();
 
@@ -60,18 +67,18 @@ public class CountdownAskModeTests
 	public async Task After_a_reset_or_a_dismiss_the_next_tap_asks_again_prefilled_with_the_last_duration()
 	{
 		var widget = await _harness.AddCountdownAsync(ask: true);
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 		_harness.Prompt.Calls[0].Answer.SetResult(30);
 		await TimerWidgetHarness.EventuallyAsync(() => _harness.Phase(widget) == TimerWidgetPhase.Running);
-		await _harness.HoldAsync(widget, clientId: "tablet");
+		await _harness.HoldAsync(widget, "tablet");
 
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 		_harness.Prompt.Calls[1].Answer.SetResult(5);
 		await TimerWidgetHarness.EventuallyAsync(() => _harness.Phase(widget) == TimerWidgetPhase.Running);
 		await _harness.AdvanceAsync(TimeSpan.FromSeconds(5));
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 		await _harness.AdvanceAsync(TimeSpan.FromSeconds(1));
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 
 		Assert.Multiple(() =>
 		{
@@ -86,7 +93,7 @@ public class CountdownAskModeTests
 	public async Task A_press_without_a_client_reuses_the_last_entered_duration()
 	{
 		var widget = await _harness.AddCountdownAsync(ask: true);
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 		_harness.Prompt.Calls[0].Answer.SetResult(45);
 		await TimerWidgetHarness.EventuallyAsync(() => _harness.Phase(widget) == TimerWidgetPhase.Running);
 		await _harness.HoldAsync(widget);
@@ -97,7 +104,8 @@ public class CountdownAskModeTests
 		{
 			Assert.That(_harness.Prompt.Calls, Has.Count.EqualTo(1));
 			Assert.That(_harness.Phase(widget), Is.EqualTo(TimerWidgetPhase.Running));
-			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.CountdownRemainingSeconds), Is.EqualTo("45"));
+			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.CountdownRemainingSeconds),
+				Is.EqualTo("45"));
 		});
 	}
 
@@ -122,9 +130,9 @@ public class CountdownAskModeTests
 	{
 		var widget = await _harness.AddCountdownAsync(ask: true);
 
-		await _harness.PressAsync(widget, clientId: "phone");
+		await _harness.PressAsync(widget, "phone");
 		await _harness.AdvanceAsync(TimeSpan.FromSeconds(1));
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 		var phone = _harness.Prompt.Calls[0];
 		var tablet = _harness.Prompt.Calls[1];
 		tablet.Answer.SetResult(60);
@@ -136,7 +144,8 @@ public class CountdownAskModeTests
 		{
 			Assert.That(tablet.ClientId, Is.EqualTo("tablet"));
 			Assert.That(phone.Cancellation.IsCancellationRequested, Is.True);
-			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.CountdownRemainingSeconds), Is.EqualTo("60"));
+			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.CountdownRemainingSeconds),
+				Is.EqualTo("60"));
 			Assert.That(_harness.Triggers.Calls, Has.Count.EqualTo(1));
 		});
 	}
@@ -146,9 +155,9 @@ public class CountdownAskModeTests
 	{
 		var widget = await _harness.AddCountdownAsync(ask: true);
 
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 		await _harness.AdvanceAsync(TimeSpan.FromSeconds(1));
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 
 		Assert.Multiple(() =>
 		{
@@ -162,7 +171,7 @@ public class CountdownAskModeTests
 	public async Task An_answer_arriving_after_the_host_was_locked_does_not_start_the_countdown()
 	{
 		var widget = await _harness.AddCountdownAsync(ask: true);
-		await _harness.PressAsync(widget, clientId: "tablet");
+		await _harness.PressAsync(widget, "tablet");
 
 		_harness.LockState.IsLocked = true;
 		_harness.Prompt.Calls.Single().Answer.SetResult(30);

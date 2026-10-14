@@ -59,7 +59,8 @@ public sealed class LocalizationGenerator : IIncrementalGenerator
 				Emit(sourceContext, source.Left.Left, source.Left.Right, source.Right));
 	}
 
-	private static void Emit(SourceProductionContext context,
+	private static void Emit(
+		SourceProductionContext context,
 		ImmutableArray<ResourceInput> resources,
 		ImmutableArray<string?> manifestIds,
 		GeneratorOptions options)
@@ -118,7 +119,8 @@ public sealed class LocalizationGenerator : IIncrementalGenerator
 		return null;
 	}
 
-	private static List<KeyValuePair<string, LocalizationResourceSet>> GroupIntoSets(string scope,
+	private static List<KeyValuePair<string, LocalizationResourceSet>> GroupIntoSets(
+		string scope,
 		ImmutableArray<ResourceInput> resources)
 	{
 		var sets = new Dictionary<string, LocalizationResourceSet>(StringComparer.OrdinalIgnoreCase);
@@ -239,10 +241,14 @@ public sealed class LocalizationGenerator : IIncrementalGenerator
 	}
 
 	private static string? Value(AnalyzerConfigOptions options, string key)
-		=> options.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value : null;
+	{
+		return options.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value : null;
+	}
 
 	private static bool HasExtension(string path, string extension)
-		=> path.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
+	{
+		return path.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
+	}
 
 	private static string FileNameOf(string path)
 	{
@@ -272,12 +278,20 @@ public sealed class LocalizationGenerator : IIncrementalGenerator
 		public string Content { get; }
 
 		public bool Equals(ResourceInput other)
-			=> string.Equals(Path, other.Path, StringComparison.Ordinal) &&
-				string.Equals(Content, other.Content, StringComparison.Ordinal);
+		{
+			return string.Equals(Path, other.Path, StringComparison.Ordinal)
+				&& string.Equals(Content, other.Content, StringComparison.Ordinal);
+		}
 
-		public override bool Equals(object? obj) => obj is ResourceInput other && Equals(other);
+		public override bool Equals(object? obj)
+		{
+			return obj is ResourceInput other && Equals(other);
+		}
 
-		public override int GetHashCode() => (Path.GetHashCode() * 397) ^ Content.GetHashCode();
+		public override int GetHashCode()
+		{
+			return Path.GetHashCode() * 397 ^ Content.GetHashCode();
+		}
 	}
 
 	private readonly struct GeneratorOptions : IEquatable<GeneratorOptions>
@@ -296,12 +310,19 @@ public sealed class LocalizationGenerator : IIncrementalGenerator
 		public string? RootNamespace { get; }
 
 		public bool Equals(GeneratorOptions other)
-			=> Scope == other.Scope && ClassName == other.ClassName && RootNamespace == other.RootNamespace;
+		{
+			return Scope == other.Scope && ClassName == other.ClassName && RootNamespace == other.RootNamespace;
+		}
 
-		public override bool Equals(object? obj) => obj is GeneratorOptions other && Equals(other);
+		public override bool Equals(object? obj)
+		{
+			return obj is GeneratorOptions other && Equals(other);
+		}
 
 		public override int GetHashCode()
-			=> ((Scope?.GetHashCode() ?? 0) * 397 ^ (ClassName?.GetHashCode() ?? 0)) * 397 ^
-				(RootNamespace?.GetHashCode() ?? 0);
+		{
+			return ((Scope?.GetHashCode() ?? 0) * 397 ^ (ClassName?.GetHashCode() ?? 0)) * 397
+				^ (RootNamespace?.GetHashCode() ?? 0);
+		}
 	}
 }

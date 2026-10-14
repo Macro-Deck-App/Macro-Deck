@@ -91,9 +91,9 @@ internal sealed class MusicPlayerViewStateResolver
 
 		var instances = _registry.GetInstances();
 		var configured = string.IsNullOrEmpty(config.InstanceId) ? null : config.InstanceId;
-		var missing = configured is not null &&
-			instances.Count > 0 &&
-			!instances.Any(instance => string.Equals(instance.InstanceId, configured, StringComparison.Ordinal));
+		var missing = configured is not null
+			&& instances.Count > 0
+			&& !instances.Any(instance => string.Equals(instance.InstanceId, configured, StringComparison.Ordinal));
 
 		var instanceId = missing
 			? instances[0].InstanceId
@@ -132,7 +132,7 @@ internal sealed class MusicPlayerViewStateResolver
 				IsLoading = true,
 				InstanceMissing = missing,
 				Label = LabelFor(descriptor),
-				ProviderIcon = ResolveProviderIcon(descriptor),
+				ProviderIcon = ResolveProviderIcon(descriptor)
 			};
 		}
 
@@ -150,15 +150,14 @@ internal sealed class MusicPlayerViewStateResolver
 			IsConnected = payload.IsConnected,
 			IsUnavailable = !payload.IsConnected && payload.IsUnavailable,
 			IsPlaying = payload.IsPlaying,
-			IsPaused = payload.IsConnected &&
-				string.Equals(payload.PlaybackState, "paused", StringComparison.Ordinal),
+			IsPaused = payload.IsConnected && string.Equals(payload.PlaybackState, "paused", StringComparison.Ordinal),
 			TrackName = payload.TrackName,
 			ArtistName = payload.ArtistName,
 			AlbumName = payload.AlbumName,
 			StatusMessage = payload.StatusMessage,
 			SourceName = string.IsNullOrWhiteSpace(payload.DeviceName) ? null : payload.DeviceName.Trim(),
 			Badge = CapBadge(payload.Badge),
-			Position = ResolvePosition(payload, previous),
+			Position = ResolvePosition(payload, previous)
 		};
 	}
 
@@ -182,10 +181,10 @@ internal sealed class MusicPlayerViewStateResolver
 		var advancing = payload is { IsConnected: true, IsPlaying: true };
 		var now = _timeProvider.GetUtcNow();
 
-		if (previous.Position is { } prior &&
-			prior.DurationMs == duration &&
-			(prior.Rate is null) == advancing &&
-			string.Equals(previous.TrackName, payload.TrackName, StringComparison.Ordinal))
+		if (previous.Position is { } prior
+			&& prior.DurationMs == duration
+			&& prior.Rate is null == advancing
+			&& string.Equals(previous.TrackName, payload.TrackName, StringComparison.Ordinal))
 		{
 			var elapsed = advancing ? (now - prior.Anchor).TotalMilliseconds : 0;
 			var predicted = prior.PositionMs + elapsed;
@@ -238,7 +237,10 @@ internal sealed class MusicPlayerViewStateResolver
 			=> resources.Remove($"{MusicPlayerWidgetIcons.OwnerId}.{ArtworkResourceName(variant.Key)}");
 	}
 
-	private static string ArtworkResourceName(string slot) => $"artwork.{Slug(slot)}";
+	private static string ArtworkResourceName(string slot)
+	{
+		return $"artwork.{Slug(slot)}";
+	}
 
 	private async Task ResolveArtworkAsync(
 		string instanceId,
@@ -284,7 +286,7 @@ internal sealed class MusicPlayerViewStateResolver
 			OwnerId = MusicPlayerWidgetIcons.OwnerId,
 			Name = ArtworkResourceName(slot),
 			MediaType = image.ContentType,
-			Content = image.Content,
+			Content = image.Content
 		});
 		_palette = _paletteExtractor.Extract(image.Content);
 	}
@@ -358,7 +360,7 @@ internal sealed class MusicPlayerViewStateResolver
 			OwnerId = MusicPlayerWidgetIcons.OwnerId,
 			Name = $"provider.{Slug(descriptor.IntegrationId)}",
 			MediaType = iconProvider.IconMimeType,
-			Content = bytes,
+			Content = bytes
 		});
 
 		return _providerIcon;

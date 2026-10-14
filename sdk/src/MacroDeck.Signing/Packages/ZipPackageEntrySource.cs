@@ -40,13 +40,13 @@ internal sealed class ZipPackageEntrySource : IPackageEntrySource
 	public static async Task<ZipPackageEntrySource> OpenAsync(string packagePath, CancellationToken cancellationToken)
 	{
 		return new ZipPackageEntrySource(await ZipFile.OpenReadAsync(packagePath, cancellationToken),
-			ownsArchive: true);
+			true);
 	}
 
 	/// <summary>Views an archive the caller keeps open and disposes itself.</summary>
 	public static ZipPackageEntrySource Wrap(ZipArchive archive)
 	{
-		return new ZipPackageEntrySource(archive, ownsArchive: false);
+		return new ZipPackageEntrySource(archive, false);
 	}
 
 	public PackageEntry? Find(string name)

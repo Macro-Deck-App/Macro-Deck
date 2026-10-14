@@ -25,7 +25,8 @@ internal static class PluginEnvironmentComposer
 	/// <c>ASPNETCORE_URLS</c> itself. A variable outside that vocabulary (a caller's own
 	/// <c>PATH</c>, say) passes through untouched.
 	/// </summary>
-	public static IReadOnlyDictionary<string, string?> Compose(PluginEnvironmentRequest request,
+	public static IReadOnlyDictionary<string, string?> Compose(
+		PluginEnvironmentRequest request,
 		IReadOnlyDictionary<string, string?>? inherited = null)
 	{
 		ArgumentNullException.ThrowIfNull(request);
@@ -62,39 +63,41 @@ internal static class PluginEnvironmentComposer
 	/// things <c>plugin-hosting.md</c> says are scrubbed from the child's environment before the
 	/// supervisor's own values are applied.</summary>
 	public static bool IsScrubbed(string variable)
-		=> variable.StartsWith(PluginEnvironmentConfiguration.Prefix, StringComparison.Ordinal) ||
-			string.Equals(variable, "ASPNETCORE_URLS", StringComparison.Ordinal);
+	{
+		return variable.StartsWith(PluginEnvironmentConfiguration.Prefix, StringComparison.Ordinal)
+			|| string.Equals(variable, "ASPNETCORE_URLS", StringComparison.Ordinal);
+	}
 
 	private static Dictionary<string, string?> ValuesByConfigKey(PluginEnvironmentRequest request)
 	{
-		const string Section = PluginHostOptions.SectionName;
+		const string section = PluginHostOptions.SectionName;
 
 		var values = new Dictionary<string, string?>(StringComparer.Ordinal)
 		{
-			[$"{Section}:Mode"] = request.Mode == PluginRegistrationMode.Managed
+			[$"{section}:Mode"] = request.Mode == PluginRegistrationMode.Managed
 				? nameof(PluginRegistrationMode.Managed)
 				: nameof(PluginRegistrationMode.SelfRegistering),
-			[$"{Section}:HostUrl"] = request.HostUrl,
-			[$"{Section}:InstanceId"] = request.InstanceId
+			[$"{section}:HostUrl"] = request.HostUrl,
+			[$"{section}:InstanceId"] = request.InstanceId
 		};
 
 		if (request.Mode == PluginRegistrationMode.Managed)
 		{
-			values[$"{Section}:Id"] = request.PluginId;
-			values[$"{Section}:Secret"] = request.Secret;
-			values[$"{Section}:DataDirectory"] = request.DataDirectory;
-			values[$"{Section}:LaunchId"] = request.LaunchId;
+			values[$"{section}:Id"] = request.PluginId;
+			values[$"{section}:Secret"] = request.Secret;
+			values[$"{section}:DataDirectory"] = request.DataDirectory;
+			values[$"{section}:LaunchId"] = request.LaunchId;
 		}
 		else
 		{
-			values[$"{Section}:EnrollmentToken"] = request.EnrollmentToken;
-			values[$"{Section}:StateDirectory"] = request.StateDirectory;
-			values[$"{Section}:PairingEnabled"] = request.PairingEnabled ? "true" : "false";
+			values[$"{section}:EnrollmentToken"] = request.EnrollmentToken;
+			values[$"{section}:StateDirectory"] = request.StateDirectory;
+			values[$"{section}:PairingEnabled"] = request.PairingEnabled ? "true" : "false";
 
 			if (request.RealHost)
 			{
-				values[$"{Section}:BundledIconPacks"] = request.Watch ? "watch" : "sync";
-				values[$"{Section}:BundledIconPacksRoot"] = request.BundledIconPacksRoot;
+				values[$"{section}:BundledIconPacks"] = request.Watch ? "watch" : "sync";
+				values[$"{section}:BundledIconPacksRoot"] = request.BundledIconPacksRoot;
 			}
 		}
 

@@ -58,7 +58,7 @@ public class ActionProviderProbeTests
 				await Task.Delay(Timeout.InfiniteTimeSpan, token);
 
 				return null;
-			},
+			}
 		};
 		var probe = Probe(Registry(action), time);
 
@@ -74,7 +74,7 @@ public class ActionProviderProbeTests
 	{
 		var action = new ControllableStateProviderAction
 		{
-			Answer = (_, _) => throw new InvalidOperationException("device went away"),
+			Answer = (_, _) => throw new InvalidOperationException("device went away")
 		};
 
 		var result = await Probe(Registry(action))
@@ -89,7 +89,7 @@ public class ActionProviderProbeTests
 		var action = new ControllableStateProviderAction
 		{
 			Answer = (_, _) => Task.FromResult<ActionStateSnapshot?>(
-				ControllableStateProviderAction.Snapshot(new ActionStateDefinition("not a valid id!", "Broken"))),
+				ControllableStateProviderAction.Snapshot(new ActionStateDefinition("not a valid id!", "Broken")))
 		};
 
 		var result = await Probe(Registry(action))
@@ -107,8 +107,10 @@ public class ActionProviderProbeTests
 	}
 
 	private static ActionProviderProbe Probe(FakeIntegrationRegistry registry, TimeProvider? time = null)
-		=> new(registry,
+	{
+		return new ActionProviderProbe(registry,
 			new RemoteIconProviderActionRegistry(null!, null!, null!),
 			time ?? TimeProvider.System,
 			Serilog.Core.Logger.None);
+	}
 }

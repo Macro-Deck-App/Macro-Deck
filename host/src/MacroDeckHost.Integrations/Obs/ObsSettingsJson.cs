@@ -35,8 +35,7 @@ internal static class ObsSettingsJson
 
 		using (document)
 		{
-			if (document.RootElement.TryGetProperty(key, out var element) &&
-				element.ValueKind != JsonValueKind.Null)
+			if (document.RootElement.TryGetProperty(key, out var element) && element.ValueKind != JsonValueKind.Null)
 			{
 				kind = element.ValueKind;
 			}

@@ -12,7 +12,6 @@ using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop;
 
@@ -63,9 +62,15 @@ public sealed class StreamlabsDesktopIntegration
 
 	public bool AllowsMultipleConfigurations => false;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new StreamlabsDesktopConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new StreamlabsDesktopConfigFlow();
+	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new StreamlabsDesktopMacroDeck2Migration()];
 
@@ -178,12 +183,16 @@ public sealed class StreamlabsDesktopIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId == AuthorizationIssueId
+	{
+		return Task.FromResult(issueId == AuthorizationIssueId
 			? IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow)
 			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	private static int? ElapsedSeconds(DateTimeOffset? since)
-		=> since is { } start ? (int)Math.Max(0d, (DateTimeOffset.UtcNow - start).TotalSeconds) : null;
+	{
+		return since is { } start ? (int)Math.Max(0d, (DateTimeOffset.UtcNow - start).TotalSeconds) : null;
+	}
 
 	private async Task ConnectFromConfig(IIntegrationContext context)
 	{

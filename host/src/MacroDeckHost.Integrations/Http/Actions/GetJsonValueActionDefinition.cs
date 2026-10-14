@@ -31,23 +31,26 @@ internal sealed class GetJsonValueActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Url(HttpRequestBuilder.UrlParameter,
-			label: AppStrings.Integrations.Http.Params.UrlLabel(),
+			AppStrings.Integrations.Http.Params.UrlLabel(),
 			required: true,
 			autoPrefixHttps: true),
 		ActionParameter.KeyValue(HttpRequestBuilder.HeadersParameter,
-			label: AppStrings.Integrations.Http.Params.HeadersLabel()),
+			AppStrings.Integrations.Http.Params.HeadersLabel()),
 		.. HttpAuthParameters.Declare(),
 		ActionParameter.Text(PathParameter,
-			label: AppStrings.Integrations.Http.Actions.GetJsonValuePathLabel(),
-			description: AppStrings.Integrations.Http.Actions.GetJsonValuePathDescription(),
+			AppStrings.Integrations.Http.Actions.GetJsonValuePathLabel(),
+			AppStrings.Integrations.Http.Actions.GetJsonValuePathDescription(),
 			defaultValue: "$"),
 		ActionParameter.Autocomplete(VariableParameter,
-			label: AppStrings.Integrations.Http.Params.SaveToVariableLabel(),
+			AppStrings.Integrations.Http.Params.SaveToVariableLabel(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_client, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_client, _variables);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

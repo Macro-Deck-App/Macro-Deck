@@ -25,18 +25,23 @@ internal sealed class IncreaseVolumeActionDefinition : IDynamicOptionsActionDefi
 		ActionParameter.Slider("amount",
 			1,
 			50,
-			label: AppStrings.Integrations.System.Actions.VolumeAmount.Label(),
+			AppStrings.Integrations.System.Actions.VolumeAmount.Label(),
 			step: 1,
 			defaultValue: 5),
 		AudioDeviceParameter.Create()
 	];
 
-	public IActionExecutor CreateExecutor() => new VolumeStepExecutor(_volume, 1);
+	public IActionExecutor CreateExecutor()
+	{
+		return new VolumeStepExecutor(_volume, 1);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
+	{
+		return AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
+	}
 }
 
 internal sealed class VolumeStepExecutor : IActionExecutor
@@ -54,9 +59,9 @@ internal sealed class VolumeStepExecutor : IActionExecutor
 	{
 		var amount = SystemActionValues.ReadDouble(context.Parameters, "amount", 5);
 		if (!AudioDeviceParameter.TryRead(context.Parameters.GetValueOrDefault(AudioDeviceParameter.Name),
-				out var target) ||
-			await _volume.GetVolumeAsync(target, context.CancellationToken) is not { } current ||
-			!await _volume.SetVolumeAsync(target,
+				out var target)
+			|| await _volume.GetVolumeAsync(target, context.CancellationToken) is not { } current
+			|| !await _volume.SetVolumeAsync(target,
 				Math.Clamp(current + _direction * (float)(amount / 100), 0f, 1f),
 				context.CancellationToken))
 		{

@@ -81,32 +81,47 @@ public sealed record UiLength
 	public double? ParentFraction { get; init; }
 
 	/// <summary>A length that is purely a fraction of the widget basis.</summary>
-	public static UiLength OfBasis(double basis) => new() { Basis = basis };
+	public static UiLength OfBasis(double basis)
+	{
+		return new UiLength { Basis = basis };
+	}
 
 	/// <summary>A length that is a fraction of the containing box's smaller side. A reader that does not
 	/// know the member draws the same fraction of the <b>widget</b> basis, which on a part of a small cell
 	/// is far too large: use <see cref="OfParent(double, double)" /> to say what such a reader should
 	/// use.</summary>
-	public static UiLength OfParent(double fraction) => OfParent(fraction, fraction);
+	public static UiLength OfParent(double fraction)
+	{
+		return OfParent(fraction, fraction);
+	}
 
 	/// <summary>A length that is a fraction of the containing box's smaller side, with the fraction of the
 	/// widget basis a reader uses when it does not know the member or has no definite containing
 	/// box.</summary>
 	public static UiLength OfParent(double fraction, double fallbackBasis)
-		=> new() { Basis = fallbackBasis, ParentFraction = fraction };
+	{
+		return new UiLength { Basis = fallbackBasis, ParentFraction = fraction };
+	}
 
 	/// <summary>A length clamped against the containing stack's cross extent.</summary>
 	public static UiLength OfBasis(double basis, double maxOfCross)
-		=> new() { Basis = basis, MaxOfCross = maxOfCross };
+	{
+		return new UiLength { Basis = basis, MaxOfCross = maxOfCross };
+	}
 
 	/// <summary>A length that stops growing at <paramref name="referenceExtent" />, stated in the same
 	/// reference space as <see cref="Cell" /> so a call site can write the extent it means rather than
 	/// dividing by the cell itself.</summary>
 	public static UiLength Capped(double basis, double referenceExtent)
-		=> new() { Basis = basis, MaxOfCell = referenceExtent / Cell };
+	{
+		return new UiLength { Basis = basis, MaxOfCell = referenceExtent / Cell };
+	}
 
 	/// <summary>Reads as <see cref="OfBasis(double)" />, so a bare fraction is assignable.</summary>
-	public static implicit operator UiLength(double basis) => OfBasis(basis);
+	public static implicit operator UiLength(double basis)
+	{
+		return OfBasis(basis);
+	}
 }
 
 /// <summary>
@@ -120,7 +135,10 @@ public sealed record UiLength
 /// </remarks>
 public readonly record struct UiSize
 {
-	private UiSize(UiValue<UiLength> value) => Value = value;
+	private UiSize(UiValue<UiLength> value)
+	{
+		Value = value;
+	}
 
 	/// <summary>The underlying value, evaluated by the runtime when it composes node properties.</summary>
 	internal UiValue<UiLength> Value { get; }
@@ -129,38 +147,62 @@ public readonly record struct UiSize
 	public bool IsDeclared => Value.IsDeclared;
 
 	/// <summary>A bare fraction of the widget basis.</summary>
-	public static implicit operator UiSize(double basis) => Of(UiLength.OfBasis(basis));
+	public static implicit operator UiSize(double basis)
+	{
+		return Of(UiLength.OfBasis(basis));
+	}
 
 	/// <summary>An already-built length.</summary>
-	public static implicit operator UiSize(UiLength length) => Of(length);
+	public static implicit operator UiSize(UiLength length)
+	{
+		return Of(length);
+	}
 
 	/// <summary>An already-wrapped value, so <c>UiValue.From(() =&gt; …)</c> call sites keep working.</summary>
-	public static implicit operator UiSize(UiValue<UiLength> value) => new(value);
+	public static implicit operator UiSize(UiValue<UiLength> value)
+	{
+		return new UiSize(value);
+	}
 
 	/// <summary>A fraction of the widget basis, for a call site that cannot rely on the implicit
 	/// conversion.</summary>
-	public static UiSize FromBasis(double basis) => Of(UiLength.OfBasis(basis));
+	public static UiSize FromBasis(double basis)
+	{
+		return Of(UiLength.OfBasis(basis));
+	}
 
 	/// <summary>A fraction clamped against the containing stack's cross extent.</summary>
 	public static UiSize FromBasis(double basis, double maxOfCross)
-		=> Of(UiLength.OfBasis(basis, maxOfCross));
+	{
+		return Of(UiLength.OfBasis(basis, maxOfCross));
+	}
 
 	/// <summary>A fraction that stops growing at <paramref name="referenceExtent" /> - see
 	/// <see cref="UiLength.Capped" />.</summary>
 	public static UiSize Capped(double basis, double referenceExtent)
-		=> Of(UiLength.Capped(basis, referenceExtent));
+	{
+		return Of(UiLength.Capped(basis, referenceExtent));
+	}
 
 	/// <summary>A fraction of the containing box's smaller side - see <see cref="UiLength.OfParent(double)" />.
 	/// </summary>
-	public static UiSize FromParent(double fraction) => Of(UiLength.OfParent(fraction));
+	public static UiSize FromParent(double fraction)
+	{
+		return Of(UiLength.OfParent(fraction));
+	}
 
 	/// <summary>A fraction of the containing box's smaller side with the widget-basis fraction older
 	/// readers use - see <see cref="UiLength.OfParent(double, double)" />.</summary>
 	public static UiSize FromParent(double fraction, double fallbackBasis)
-		=> Of(UiLength.OfParent(fraction, fallbackBasis));
+	{
+		return Of(UiLength.OfParent(fraction, fallbackBasis));
+	}
 
 	/// <summary>A constant length, for a call site that cannot rely on the implicit conversion.</summary>
-	public static UiSize Of(UiLength length) => new(UiValue.Of(length));
+	public static UiSize Of(UiLength length)
+	{
+		return new UiSize(UiValue.Of(length));
+	}
 
 	/// <summary>A length computed on each evaluation.</summary>
 	public static UiSize From(Func<UiLength> compute)
@@ -179,9 +221,15 @@ public readonly record struct UiSize
 	}
 
 	/// <summary>The absent value.</summary>
-	public static UiSize None() => default;
+	public static UiSize None()
+	{
+		return default;
+	}
 
 	/// <summary>Evaluates the property.</summary>
 	/// <returns><c>false</c> when the property is absent.</returns>
-	public bool TryEvaluate(out UiLength length) => Value.TryEvaluate(out length!);
+	public bool TryEvaluate(out UiLength length)
+	{
+		return Value.TryEvaluate(out length!);
+	}
 }

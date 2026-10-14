@@ -34,31 +34,37 @@ internal sealed class GetGlobalVariableActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Text(VariableParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.VariableLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.VariableDescription(),
+			AppStrings.Integrations.Streamerbot.Actions.VariableLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.VariableDescription(),
 			required: true),
 		ActionParameter.Toggle(PersistedParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.PersistedLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.PersistedDescription(),
-			defaultValue: true),
+			AppStrings.Integrations.Streamerbot.Actions.PersistedLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.PersistedDescription(),
+			true),
 		ActionParameter.Autocomplete(TargetParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.SaveToVariableLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.SaveToVariableDescription(),
+			AppStrings.Integrations.Streamerbot.Actions.SaveToVariableLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.SaveToVariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
-
-	internal static (VariableType Type, object Value) Convert(JsonElement value) => value.ValueKind switch
+	public IActionExecutor CreateExecutor()
 	{
-		JsonValueKind.True => (VariableType.Boolean, true),
-		JsonValueKind.False => (VariableType.Boolean, false),
-		JsonValueKind.Number when value.TryGetDouble(out var number) => (VariableType.Numeric, number),
-		JsonValueKind.String => (VariableType.Text, (object)(value.GetString() ?? string.Empty)),
-		JsonValueKind.Null or JsonValueKind.Undefined => (VariableType.Text, string.Empty),
-		_ => (VariableType.Text, value.GetRawText())
-	};
+		return new Executor(_resolver, _variables);
+	}
+
+	internal static (VariableType Type, object Value) Convert(JsonElement value)
+	{
+		return value.ValueKind switch
+		{
+			JsonValueKind.True => (VariableType.Boolean, true),
+			JsonValueKind.False => (VariableType.Boolean, false),
+			JsonValueKind.Number when value.TryGetDouble(out var number) => (VariableType.Numeric, number),
+			JsonValueKind.String => (VariableType.Text, (object)(value.GetString() ?? string.Empty)),
+			JsonValueKind.Null or JsonValueKind.Undefined => (VariableType.Text, string.Empty),
+			_ => (VariableType.Text, value.GetRawText())
+		};
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -99,13 +105,13 @@ internal sealed class GetGlobalVariableActionDefinition : IActionDefinition
 			}
 
 			var persisted
-				= StreamerbotActionValues.ReadBool(context.Parameters, PersistedParameterName, fallback: true);
+				= StreamerbotActionValues.ReadBool(context.Parameters, PersistedParameterName, true);
 			var value = await connection.GetGlobalAsync(variable, persisted, context.CancellationToken);
 			if (value is not { } element)
 			{
 				_logger.Warning("Streamer.bot global '{Variable}' is unavailable", variable);
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.Streamerbot.Errors.VariableNotFound(variable: variable));
+					AppStrings.Integrations.Streamerbot.Errors.VariableNotFound(variable));
 			}
 
 			var (type, converted) = Convert(element);

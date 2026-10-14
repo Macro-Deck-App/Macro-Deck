@@ -34,12 +34,16 @@ public class CalendarWidgetConfigTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(host.ById(CalendarWidgetTypes.LayoutKey).Text(UiConfigProperties.Value),
-				Is.EqualTo(CalendarWidgetTypes.LayoutAgenda), "a widget without a layout is an agenda");
+				Is.EqualTo(CalendarWidgetTypes.LayoutAgenda),
+				"a widget without a layout is an agenda");
 			Assert.That(host.ById(CalendarWidgetTypes.LayoutKey).Property(UiConfigProperties.Options)!.Value
-					.EnumerateArray().Select(option => option.GetProperty("value").GetString()),
+					.EnumerateArray()
+					.Select(option => option.GetProperty("value").GetString()),
 				Is.EqualTo(new[] { CalendarWidgetTypes.LayoutAgenda, CalendarWidgetTypes.LayoutNextEvent }));
 			Assert.That(host.ById(CalendarWidgetTypes.CalendarsKey).Property(UiConfigProperties.Value)!.Value
-				.GetArrayLength(), Is.Zero, "no selection means every calendar");
+					.GetArrayLength(),
+				Is.Zero,
+				"no selection means every calendar");
 			Assert.That(host.ById(CalendarWidgetTypes.DaysKey).Number(UiConfigProperties.Value), Is.EqualTo(1));
 			Assert.That(Flag(host, CalendarWidgetTypes.ShowDateKey), Is.True);
 			Assert.That(Flag(host, CalendarWidgetTypes.ShowAllDayKey), Is.True);
@@ -56,12 +60,12 @@ public class CalendarWidgetConfigTests
 		string[] agendaOnly =
 		[
 			CalendarWidgetTypes.DaysKey, CalendarWidgetTypes.ShowTimeKey, CalendarWidgetTypes.ShowLocationKey,
-			CalendarWidgetTypes.ShowCalendarKey,
+			CalendarWidgetTypes.ShowCalendarKey
 		];
 		string[] shared =
 		[
 			CalendarWidgetTypes.CalendarsKey, CalendarWidgetTypes.LeadTimeKey, CalendarWidgetTypes.ShowDateKey,
-			CalendarWidgetTypes.ShowAllDayKey,
+			CalendarWidgetTypes.ShowAllDayKey
 		];
 		var asAgenda = Visibility(host, [.. agendaOnly, .. shared, CalendarWidgetTypes.WhenStartedKey]);
 		string[] fields = [CalendarWidgetTypes.LayoutKey, .. agendaOnly, .. shared, CalendarWidgetTypes.WhenStartedKey];
@@ -100,7 +104,9 @@ public class CalendarWidgetConfigTests
 		{
 			Assert.That(days.Number(UiConfigProperties.Min), Is.EqualTo(CalendarWidgetTypes.MinDays));
 			Assert.That(days.Number(UiConfigProperties.Max), Is.EqualTo(CalendarWidgetTypes.MaxDays));
-			Assert.That(days.Number(UiConfigProperties.Value), Is.EqualTo(7), "a stored value outside the range is clamped");
+			Assert.That(days.Number(UiConfigProperties.Value),
+				Is.EqualTo(7),
+				"a stored value outside the range is clamped");
 			Assert.That(days.Property(UiConfigProperties.Options)!.Value.EnumerateArray()
 					.Select(option => option.GetProperty("value").GetString()),
 				Is.EqualTo(new[] { "1", "2", "3", "4", "5", "6", "7" }));
@@ -115,7 +121,8 @@ public class CalendarWidgetConfigTests
 			.EnumerateArray()
 			.ToList();
 
-		var team = options.Single(option => option.GetProperty("value").GetString() == CalendarWidgetHarness.CalendarKey("team"));
+		var team = options.Single(option
+			=> option.GetProperty("value").GetString() == CalendarWidgetHarness.CalendarKey("team"));
 
 		Assert.Multiple(() =>
 		{
@@ -123,12 +130,12 @@ public class CalendarWidgetConfigTests
 				Is.EquivalentTo(new[]
 				{
 					CalendarWidgetHarness.CalendarKey("main"), CalendarWidgetHarness.CalendarKey("team"),
-					CalendarWidgetHarness.CalendarKey("work", "bob"),
+					CalendarWidgetHarness.CalendarKey("work", "bob")
 				}));
 			Assert.That(Resolve(team.GetProperty("label").Deserialize<LocalizedText>()),
-				Is.EqualTo(Resolve(Strings.Details.Source(calendar: "Calendar team",
-					account: "alice@example.com",
-					provider: "Google Calendar"))));
+				Is.EqualTo(Resolve(Strings.Details.Source("Calendar team",
+					"alice@example.com",
+					"Google Calendar"))));
 		});
 	}
 
@@ -140,7 +147,8 @@ public class CalendarWidgetConfigTests
 			_harness.Cache));
 
 		Assert.That(host.ById(CalendarWidgetTypes.CalendarsKey).Property(UiConfigProperties.Value)!.Value
-				.EnumerateArray().Select(item => item.GetString()),
+				.EnumerateArray()
+				.Select(item => item.GetString()),
 			Is.EqualTo(new[] { CalendarWidgetHarness.CalendarKey("team") }));
 	}
 
@@ -191,7 +199,9 @@ public class CalendarWidgetConfigTests
 			Assert.That(nextEvent.GetProperty(CalendarWidgetTypes.LayoutKey).GetString(),
 				Is.EqualTo(CalendarWidgetTypes.LayoutNextEvent));
 			Assert.That(WidgetDataSchema.Validate(schema!,
-				JsonSerializer.SerializeToElement(new { layout = "week" })), Is.Not.Empty, "an unknown layout is refused");
+					JsonSerializer.SerializeToElement(new { layout = "week" })),
+				Is.Not.Empty,
+				"an unknown layout is refused");
 		});
 	}
 
@@ -203,11 +213,12 @@ public class CalendarWidgetConfigTests
 		string[] expected =
 		[
 			"onShortPress", "onLongPress", "onDoublePress", "onTouchStart", "onTouchEnd",
-			"onCalendarEventStartsSoon", "onCalendarEventStarted", "onCalendarEventEnded",
+			"onCalendarEventStartsSoon", "onCalendarEventStarted", "onCalendarEventEnded"
 		];
 
 		Assert.That(host.ById("flows").Property(UiConfigProperties.Triggers)!.Value.EnumerateArray()
-			.Select(trigger => trigger.GetString()), Is.EquivalentTo(expected));
+				.Select(trigger => trigger.GetString()),
+			Is.EquivalentTo(expected));
 	}
 
 	[Test]
@@ -235,10 +246,11 @@ public class CalendarWidgetConfigTests
 	{
 		var calendar = await _harness.OpenConfigAsync(new { layout = CalendarWidgetTypes.LayoutNextEvent });
 		var other = await _harness.Provider.CreateSessionAsync(new MacroDeck.Sdk.Ui.UiSessionRequest
-		{
-			Surface = CalendarWidgetHarness.ConfigSurface("app.macro-deck.calendar::agenda", new { }),
-			UiModelVersion = 1,
-		}, CancellationToken.None);
+			{
+				Surface = CalendarWidgetHarness.ConfigSurface("app.macro-deck.calendar::agenda", new { }),
+				UiModelVersion = 1
+			},
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -268,37 +280,55 @@ public class CalendarWidgetConfigTests
 		return host;
 	}
 
-	private static bool? Flag(UiTestHost host, string key) => host.ById(key).Flag(UiConfigProperties.Value);
+	private static bool? Flag(UiTestHost host, string key)
+	{
+		return host.ById(key).Flag(UiConfigProperties.Value);
+	}
 
 	private static Dictionary<string, bool> Visibility(UiTestHost host, IEnumerable<string> keys)
-		=> keys.ToDictionary(key => key, key =>
-		{
-			if (host.ById(key).Property(UiConfigProperties.VisibleWhen) is not { ValueKind: JsonValueKind.Object } rule)
+	{
+		return keys.ToDictionary(key => key,
+			key =>
 			{
-				return true;
-			}
+				if (host.ById(key).Property(UiConfigProperties.VisibleWhen) is not
+					{ ValueKind: JsonValueKind.Object } rule)
+				{
+					return true;
+				}
 
-			var sibling = host.ById(rule.GetProperty("parameterName").GetString()!).Text(UiConfigProperties.Value);
-			return rule.GetProperty("values").EnumerateArray().Any(value => value.GetString() == sibling);
-		});
+				var sibling = host.ById(rule.GetProperty("parameterName").GetString()!).Text(UiConfigProperties.Value);
+				return rule.GetProperty("values").EnumerateArray().Any(value => value.GetString() == sibling);
+			});
+	}
 
 	private static JsonElement Compose(UiTestHost host, string flows)
-		=> JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+	{
+		return JsonSerializer.SerializeToElement(new Dictionary<string, object?>
 		{
 			[CalendarWidgetTypes.LayoutKey] = host.ById(CalendarWidgetTypes.LayoutKey).Text(UiConfigProperties.Value),
-			[CalendarWidgetTypes.CalendarsKey] = host.ById(CalendarWidgetTypes.CalendarsKey).Property(UiConfigProperties.Value),
+			[CalendarWidgetTypes.CalendarsKey]
+				= host.ById(CalendarWidgetTypes.CalendarsKey).Property(UiConfigProperties.Value),
 			[CalendarWidgetTypes.DaysKey] = host.ById(CalendarWidgetTypes.DaysKey).Number(UiConfigProperties.Value),
-			[CalendarWidgetTypes.WhenStartedKey] = host.ById(CalendarWidgetTypes.WhenStartedKey).Text(UiConfigProperties.Value),
+			[CalendarWidgetTypes.WhenStartedKey]
+				= host.ById(CalendarWidgetTypes.WhenStartedKey).Text(UiConfigProperties.Value),
 			[CalendarWidgetTypes.ShowDateKey] = Flag(host, CalendarWidgetTypes.ShowDateKey),
 			[CalendarWidgetTypes.ShowAllDayKey] = Flag(host, CalendarWidgetTypes.ShowAllDayKey),
 			[CalendarWidgetTypes.ShowTimeKey] = Flag(host, CalendarWidgetTypes.ShowTimeKey),
 			[CalendarWidgetTypes.ShowLocationKey] = Flag(host, CalendarWidgetTypes.ShowLocationKey),
 			[CalendarWidgetTypes.ShowCalendarKey] = Flag(host, CalendarWidgetTypes.ShowCalendarKey),
-			[CalendarWidgetTypes.LeadTimeKey] = host.ById(CalendarWidgetTypes.LeadTimeKey).Number(UiConfigProperties.Value),
-			["flows"] = JsonDocument.Parse(flows).RootElement.Clone(),
+			[CalendarWidgetTypes.LeadTimeKey]
+				= host.ById(CalendarWidgetTypes.LeadTimeKey).Number(UiConfigProperties.Value),
+			["flows"] = JsonDocument.Parse(flows).RootElement.Clone()
 		});
+	}
 
-	private static JsonElement Empty() => Data(new { });
+	private static JsonElement Empty()
+	{
+		return Data(new { });
+	}
 
-	private static JsonElement Data(object value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement Data(object value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 }

@@ -81,7 +81,8 @@ public sealed class ImageSharpArtworkProcessor : IArtworkProcessor
 		return new ProcessedArtworkResult(master, variants);
 	}
 
-	private static async Task<byte[]> EncodeToBytes(Image image,
+	private static async Task<byte[]> EncodeToBytes(
+		Image image,
 		WebpEncoder encoder,
 		CancellationToken cancellationToken)
 	{

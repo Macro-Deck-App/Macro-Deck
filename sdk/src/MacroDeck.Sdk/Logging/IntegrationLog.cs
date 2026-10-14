@@ -23,16 +23,22 @@ public static class IntegrationLog
 
 	/// <summary>The logger of the integration with the given id.</summary>
 	public static ILogger For(string integrationId)
-		=> Log.ForContext(IntegrationPropertyName, integrationId);
+	{
+		return Log.ForContext(IntegrationPropertyName, integrationId);
+	}
 
 	/// <summary>The logger of the given integration, scoped to the source type that writes to it.</summary>
 	public static ILogger For<TSource>(string integrationId)
-		=> For(integrationId).ForContext<TSource>();
+	{
+		return For(integrationId).ForContext<TSource>();
+	}
 
 	/// <summary>
 	/// The logger of the given integration, scoped to a source type that is only known at runtime
 	/// (a base class logging on behalf of its implementations).
 	/// </summary>
 	public static ILogger For(string integrationId, Type source)
-		=> For(integrationId).ForContext(source);
+	{
+		return For(integrationId).ForContext(source);
+	}
 }

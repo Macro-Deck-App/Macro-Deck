@@ -3,7 +3,7 @@ namespace MacroDeckHost.Application.Persistence;
 public enum PersistenceRecoverySource
 {
 	PendingWrite,
-	Backup,
+	Backup
 }
 
 public sealed record PersistenceRecovery(

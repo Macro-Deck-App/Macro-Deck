@@ -29,7 +29,7 @@ internal sealed class PackageSignerPluginTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -42,9 +42,15 @@ internal sealed class PackageSignerPluginTests
 		return materialResult.Material!;
 	}
 
-	private string PackagePath(string name = "plugin.macroDeckPlugin") => Path.Combine(_directory, name);
+	private string PackagePath(string name = "plugin.macroDeckPlugin")
+	{
+		return Path.Combine(_directory, name);
+	}
 
-	private string OutputPath(string name = "plugin.signed.macroDeckPlugin") => Path.Combine(_directory, name);
+	private string OutputPath(string name = "plugin.signed.macroDeckPlugin")
+	{
+		return Path.Combine(_directory, name);
+	}
 
 	[Test]
 	public async Task
@@ -66,7 +72,7 @@ internal sealed class PackageSignerPluginTests
 
 		var signedManifestJson = PackageArchiveFixtures.ReadEntryText(outputPath, "manifest.json");
 		var readResult
-			= _manifestReader.ReadFromJson(signedManifestJson, versionDirectory: null, "com.example.test", "1.0.0");
+			= _manifestReader.ReadFromJson(signedManifestJson, null, "com.example.test", "1.0.0");
 		Assert.That(readResult.Success, Is.True);
 
 		var signature = readResult.Manifest!.Signature!;
@@ -137,7 +143,7 @@ internal sealed class PackageSignerPluginTests
 			"com.example.test",
 			"1.0.0",
 			declared,
-			entrypointExecutable: "app");
+			"app");
 
 		// Remove the archive entry the manifest still declares.
 		using (var stream = new FileStream(packagePath, FileMode.Open, FileAccess.ReadWrite))
@@ -282,7 +288,7 @@ internal sealed class PackageSignerPluginTests
 
 		var unsignedManifestJson = PackageArchiveFixtures.ReadEntryText(packagePath, "manifest.json");
 		var unsignedReadResult
-			= _manifestReader.ReadFromJson(unsignedManifestJson, versionDirectory: null, "com.example.test", "1.0.0");
+			= _manifestReader.ReadFromJson(unsignedManifestJson, null, "com.example.test", "1.0.0");
 		var unsignedDigest = PluginArtifactDigest.Compute(unsignedReadResult.Manifest!);
 
 		using var signer = CreateSigner(out var issued);
@@ -296,7 +302,7 @@ internal sealed class PackageSignerPluginTests
 
 		var signedManifestJson = PackageArchiveFixtures.ReadEntryText(outputPath, "manifest.json");
 		var signedReadResult
-			= _manifestReader.ReadFromJson(signedManifestJson, versionDirectory: null, "com.example.test", "1.0.0");
+			= _manifestReader.ReadFromJson(signedManifestJson, null, "com.example.test", "1.0.0");
 		var signedDigest = PluginArtifactDigest.Compute(signedReadResult.Manifest! with { Signature = null });
 
 		using var stream = new FileStream(outputPath, FileMode.Open, FileAccess.Read);

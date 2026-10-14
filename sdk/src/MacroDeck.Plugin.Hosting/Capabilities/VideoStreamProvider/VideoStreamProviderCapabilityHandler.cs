@@ -25,7 +25,8 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 	public string Kind => CapabilityKinds.VideoStreamProvider;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _declared
+	{
+		return _declared
 			?
 			[
 				new DeclaredCapability
@@ -35,6 +36,7 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 				}
 			]
 			: [];
+	}
 
 	public async Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -46,7 +48,8 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 		// arrived on and is swept with that connection, never with the next one.
 		var epoch = registry.Sessions.CurrentEpoch;
 
-		if (string.Equals(invocation.Operation, CapabilityOperations.VideoStreamProvider.Describe,
+		if (string.Equals(invocation.Operation,
+			CapabilityOperations.VideoStreamProvider.Describe,
 			StringComparison.Ordinal))
 		{
 			return CapabilityInvocationResult.Ok(Describe());
@@ -96,7 +99,8 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 	}
 
 	private VideoStreamProviderDescribePayload Describe()
-		=> new()
+	{
+		return new VideoStreamProviderDescribePayload
 		{
 			Providers =
 			[
@@ -110,6 +114,7 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 					})
 			]
 		};
+	}
 
 	private async Task<CapabilityInvocationResult> StreamsAsync(
 		VideoStreamProviderStreamsArguments? arguments,
@@ -156,11 +161,11 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 		long epoch,
 		CancellationToken cancellationToken)
 	{
-		if (arguments is null ||
-			string.IsNullOrEmpty(arguments.SessionId) ||
-			!VideoStreamLimits.IsValidStreamId(arguments.StreamId) ||
-			arguments.AcceptedTransports is not { Count: > 0 } accepted ||
-			!accepted.All(VideoStreamLimits.IsValidTransport))
+		if (arguments is null
+			|| string.IsNullOrEmpty(arguments.SessionId)
+			|| !VideoStreamLimits.IsValidStreamId(arguments.StreamId)
+			|| arguments.AcceptedTransports is not { Count: > 0 } accepted
+			|| !accepted.All(VideoStreamLimits.IsValidTransport))
 		{
 			return InvalidPayload(
 				"session.open requires a sessionId, a valid streamId and at least one valid accepted transport.");
@@ -217,7 +222,8 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 				});
 
 			case VideoStreamOpenOutcome.Open:
-				_logger.Warning("Provider {ProviderId} opened session {SessionId} with an unusable description: {Problem}",
+				_logger.Warning(
+					"Provider {ProviderId} opened session {SessionId} with an unusable description: {Problem}",
 					registration.ProviderId,
 					arguments.SessionId,
 					problem);
@@ -286,8 +292,8 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 		}
 
 		var sessions = registry.Sessions;
-		if (sessions.TryGet(arguments.SessionId, out var session) &&
-			!string.Equals(session.ProviderId, arguments.ProviderId, StringComparison.Ordinal))
+		if (sessions.TryGet(arguments.SessionId, out var session)
+			&& !string.Equals(session.ProviderId, arguments.ProviderId, StringComparison.Ordinal))
 		{
 			return Failure(VideoStreamErrorCode.UnknownSession, "The provider has no session with this id.");
 		}
@@ -301,7 +307,8 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 		return CapabilityInvocationResult.Ok();
 	}
 
-	private bool TryResolveOpenSession(string? sessionId,
+	private bool TryResolveOpenSession(
+		string? sessionId,
 		string? providerId,
 		out IVideoStreamProvider provider,
 		out CapabilityInvocationResult failure)
@@ -319,9 +326,9 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 			return false;
 		}
 
-		if (!registry.Sessions.TryGet(sessionId, out var session) ||
-			session.Phase != VideoStreamSessionPhase.Open ||
-			!string.Equals(session.ProviderId, registration.ProviderId, StringComparison.Ordinal))
+		if (!registry.Sessions.TryGet(sessionId, out var session)
+			|| session.Phase != VideoStreamSessionPhase.Open
+			|| !string.Equals(session.ProviderId, registration.ProviderId, StringComparison.Ordinal))
 		{
 			failure = Failure(VideoStreamErrorCode.UnknownSession, "The provider has no open session with this id.");
 			return false;
@@ -348,13 +355,19 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 	}
 
 	private static CapabilityInvocationResult Failure(VideoStreamErrorCode code, string message)
-		=> CapabilityInvocationResult.Failed(VideoStreamWire.ToError(code, message));
+	{
+		return CapabilityInvocationResult.Failed(VideoStreamWire.ToError(code, message));
+	}
 
 	private static CapabilityInvocationResult UnknownProvider(string? providerId)
-		=> Failure(VideoStreamErrorCode.UnknownProvider, $"No video stream provider '{providerId}' is registered.");
+	{
+		return Failure(VideoStreamErrorCode.UnknownProvider, $"No video stream provider '{providerId}' is registered.");
+	}
 
 	private static CapabilityInvocationResult InvalidPayload(string message)
-		=> CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload, message);
+	{
+		return CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload, message);
+	}
 
 	private static T? Arguments<T>(CapabilityInvocation invocation)
 		where T : class

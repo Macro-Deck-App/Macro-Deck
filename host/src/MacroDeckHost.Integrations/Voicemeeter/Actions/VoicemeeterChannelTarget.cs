@@ -31,14 +31,23 @@ internal sealed record VoicemeeterChannelTarget(VoicemeeterChannelKind Kind)
 		? AppStrings.Integrations.Voicemeeter.Common.WhichStripDescription()
 		: AppStrings.Integrations.Voicemeeter.Common.WhichBusDescription();
 
-	public string Parameter(int index, string parameter) => Kind == VoicemeeterChannelKind.Strip
-		? VoicemeeterParameters.Strip(index, parameter)
-		: VoicemeeterParameters.Bus(index, parameter);
+	public string Parameter(int index, string parameter)
+	{
+		return Kind == VoicemeeterChannelKind.Strip
+			? VoicemeeterParameters.Strip(index, parameter)
+			: VoicemeeterParameters.Bus(index, parameter);
+	}
 
-	public ActionParameter Picker() => ActionParameter.DynamicChoice(ParameterName,
-		label: PickerLabel,
-		description: PickerDescription,
-		required: true);
+	public ActionParameter Picker()
+	{
+		return ActionParameter.DynamicChoice(ParameterName,
+			PickerLabel,
+			PickerDescription,
+			required: true);
+	}
 
-	public VoicemeeterChannel? Channel(VoicemeeterState state, int index) => state.Channel(Kind, index);
+	public VoicemeeterChannel? Channel(VoicemeeterState state, int index)
+	{
+		return state.Channel(Kind, index);
+	}
 }

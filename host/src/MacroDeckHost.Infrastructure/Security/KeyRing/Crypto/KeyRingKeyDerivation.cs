@@ -16,7 +16,10 @@ public static class KeyRingKeyDerivation
 	private static ReadOnlySpan<byte> KekIdInfo => "MacroDeck.KeyRing.v1.kekid"u8;
 	private static ReadOnlySpan<byte> EscrowInfo => "MacroDeck.KeyRing.v1.escrow"u8;
 
-	public static byte[] CreateKek() => RandomNumberGenerator.GetBytes(KekBytes);
+	public static byte[] CreateKek()
+	{
+		return RandomNumberGenerator.GetBytes(KekBytes);
+	}
 
 	/// <summary>
 	/// Names a key-encryption key without revealing it, so a key file can say which key opens it and a
@@ -25,7 +28,7 @@ public static class KeyRingKeyDerivation
 	public static string DeriveKekId(ReadOnlySpan<byte> kek)
 	{
 		Span<byte> id = stackalloc byte[KekIdBytes];
-		HKDF.DeriveKey(HashAlgorithmName.SHA256, kek, id, salt: default, KekIdInfo);
+		HKDF.DeriveKey(HashAlgorithmName.SHA256, kek, id, default, KekIdInfo);
 
 		return Convert.ToHexStringLower(id);
 	}

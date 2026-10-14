@@ -10,7 +10,8 @@ namespace MacroDeckHost.Application.Plugins;
 
 public interface IPluginAdbConsentNotifier
 {
-	Task NotifyIfNeededAsync(string pluginId,
+	Task NotifyIfNeededAsync(
+		string pluginId,
 		string pluginName,
 		bool declaresAdb,
 		bool previouslyDeclaredAdb,
@@ -32,7 +33,8 @@ public sealed class PluginAdbConsentNotifier(
 	private readonly ConcurrentDictionary<string, byte> _raisedKeys = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, byte> _askedAfterRefusal = new(StringComparer.Ordinal);
 
-	public async Task NotifyIfNeededAsync(string pluginId,
+	public async Task NotifyIfNeededAsync(
+		string pluginId,
 		string pluginName,
 		bool declaresAdb,
 		bool previouslyDeclaredAdb,
@@ -61,10 +63,10 @@ public sealed class PluginAdbConsentNotifier(
 			Kind = UserNotificationKind.Security,
 			Title = localization.Resolve(AppStrings.Notifications.PluginAdbAccessRequested(), culture) ?? pluginName,
 			Message = localization.Resolve(!settings.Enabled
-					? AppStrings.Notifications.PluginAdbAccessRequestedAdbOffMessage(name: pluginName)
+					? AppStrings.Notifications.PluginAdbAccessRequestedAdbOffMessage(pluginName)
 					: !settings.AllowPlugins
-						? AppStrings.Notifications.PluginAdbAccessRequestedMessage(name: pluginName)
-						: AppStrings.Notifications.PluginAdbAccessRequestedAdbMissingMessage(name: pluginName),
+						? AppStrings.Notifications.PluginAdbAccessRequestedMessage(pluginName)
+						: AppStrings.Notifications.PluginAdbAccessRequestedAdbMissingMessage(pluginName),
 				culture),
 			SourceId = pluginId,
 			SourceName = pluginName,
@@ -78,9 +80,11 @@ public sealed class PluginAdbConsentNotifier(
 	}
 
 	public Task AskAfterRefusalAsync(string pluginId, string pluginName, CancellationToken cancellationToken = default)
-		=> _askedAfterRefusal.TryAdd(pluginId, 0)
-			? NotifyIfNeededAsync(pluginId, pluginName, declaresAdb: true, previouslyDeclaredAdb: false, cancellationToken)
+	{
+		return _askedAfterRefusal.TryAdd(pluginId, 0)
+			? NotifyIfNeededAsync(pluginId, pluginName, true, false, cancellationToken)
 			: Task.CompletedTask;
+	}
 
 	public void Dismiss(string pluginId)
 	{
@@ -102,5 +106,8 @@ public sealed class PluginAdbConsentNotifier(
 		_askedAfterRefusal.Clear();
 	}
 
-	private static string KeyFor(string pluginId) => $"plugin-adb-access:{pluginId}";
+	private static string KeyFor(string pluginId)
+	{
+		return $"plugin-adb-access:{pluginId}";
+	}
 }

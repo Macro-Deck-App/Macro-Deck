@@ -4,7 +4,6 @@ using System.Security.Authentication;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.HomeAssistant.Protocol;
 
@@ -106,8 +105,8 @@ internal sealed class HomeAssistantClient : IHomeAssistantClient
 			return outcome.Status switch
 			{
 				HomeAssistantAuthStatus.Ok => new HomeAssistantHello(outcome.Version),
-				HomeAssistantAuthStatus.Invalid => throw new HomeAssistantAuthenticationException(outcome.Message ??
-					"Home Assistant rejected the access token."),
+				HomeAssistantAuthStatus.Invalid => throw new HomeAssistantAuthenticationException(outcome.Message
+					?? "Home Assistant rejected the access token."),
 				_ => throw new HomeAssistantRequestException("The connection closed during the handshake.")
 			};
 		}
@@ -246,11 +245,13 @@ internal sealed class HomeAssistantClient : IHomeAssistantClient
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private async Task SendAsync(
 		WebSocket socket,
@@ -263,7 +264,7 @@ internal sealed class HomeAssistantClient : IHomeAssistantClient
 		try
 		{
 			await socket
-				.SendAsync(bytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken)
+				.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken)
 				.ConfigureAwait(false);
 		}
 		finally
@@ -377,9 +378,9 @@ internal sealed class HomeAssistantClient : IHomeAssistantClient
 
 	private void DispatchEvent(JsonElement root)
 	{
-		if (!root.TryGetProperty("event", out var element) ||
-			element.ValueKind != JsonValueKind.Object ||
-			ReadString(element, "event_type") is not { Length: > 0 } eventType)
+		if (!root.TryGetProperty("event", out var element)
+			|| element.ValueKind != JsonValueKind.Object
+			|| ReadString(element, "event_type") is not { Length: > 0 } eventType)
 		{
 			return;
 		}
@@ -413,9 +414,9 @@ internal sealed class HomeAssistantClient : IHomeAssistantClient
 
 	private bool TryTakePending(JsonElement root, out TaskCompletionSource<JsonElement> pending)
 	{
-		if (root.TryGetProperty("id", out var id) &&
-			id.ValueKind == JsonValueKind.Number &&
-			id.TryGetInt32(out var value))
+		if (root.TryGetProperty("id", out var id)
+			&& id.ValueKind == JsonValueKind.Number
+			&& id.TryGetInt32(out var value))
 		{
 			return _pending.TryRemove(value, out pending!);
 		}

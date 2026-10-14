@@ -68,24 +68,35 @@ public class IntegrationConfigStoreTests
 	}
 
 	private static Dictionary<string, JsonElement> Values(params (string Key, JsonElement Value)[] pairs)
-		=> pairs.ToDictionary(p => p.Key, p => p.Value);
+	{
+		return pairs.ToDictionary(p => p.Key, p => p.Value);
+	}
 
 	private static JsonElement SecretRef(Guid id)
-		=> JsonSerializer.SerializeToElement(new Dictionary<string, string> { ["$secret"] = id.ToString() });
+	{
+		return JsonSerializer.SerializeToElement(new Dictionary<string, string> { ["$secret"] = id.ToString() });
+	}
 
-	private static JsonElement JsonValue(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonValue(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private sealed class FakeConfigEntryRepository : IIntegrationConfigEntryRepository
 	{
 		private readonly List<IntegrationConfigEntryEntity> _entries = [];
 
 		public Task<IReadOnlyList<IntegrationConfigEntryEntity>> GetByIntegrationId(string integrationId)
-			=> Task.FromResult<IReadOnlyList<IntegrationConfigEntryEntity>>(_entries
+		{
+			return Task.FromResult<IReadOnlyList<IntegrationConfigEntryEntity>>(_entries
 				.Where(e => e.IntegrationId == integrationId)
 				.ToList());
+		}
 
 		public Task<IntegrationConfigEntryEntity?> GetById(Guid id)
-			=> Task.FromResult(_entries.FirstOrDefault(e => e.Id == id));
+		{
+			return Task.FromResult(_entries.FirstOrDefault(e => e.Id == id));
+		}
 
 		public Task Create(IntegrationConfigEntryEntity entry)
 		{
@@ -93,7 +104,10 @@ public class IntegrationConfigStoreTests
 			return Task.CompletedTask;
 		}
 
-		public Task Update(IntegrationConfigEntryEntity entry) => Task.CompletedTask;
+		public Task Update(IntegrationConfigEntryEntity entry)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task TryDeleteById(Guid id)
 		{

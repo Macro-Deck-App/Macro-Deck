@@ -74,7 +74,8 @@ public sealed class FakeScriptApi : IScriptApi
 	/// <see cref="ActionResultStatus.Failed" /> when nothing was seeded under that id - matching the
 	/// interface's own contract that an unknown id is a reported failure, not a silent no-op.
 	/// </summary>
-	public Task<ActionResult> RunAsync(string scriptId,
+	public Task<ActionResult> RunAsync(
+		string scriptId,
 		IReadOnlyDictionary<string, object?>? inputs = null,
 		string? originClientId = null,
 		string? ownerWidgetId = null,
@@ -93,8 +94,8 @@ public sealed class FakeScriptApi : IScriptApi
 			_behaviors.TryGetValue(scriptId, out behavior);
 		}
 
-		var result = behavior?.Invoke() ??
-			ActionResult.Failed(ActionErrorCodes.NotFound, $"No script with id '{scriptId}' has been seeded.");
+		var result = behavior?.Invoke()
+			?? ActionResult.Failed(ActionErrorCodes.NotFound, $"No script with id '{scriptId}' has been seeded.");
 
 		return Task.FromResult(result);
 	}

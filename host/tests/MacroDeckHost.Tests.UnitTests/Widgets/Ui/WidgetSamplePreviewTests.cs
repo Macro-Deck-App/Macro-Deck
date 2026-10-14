@@ -36,8 +36,8 @@ public class WidgetSamplePreviewTests
 			TestLocalization.SampleText,
 			Serilog.Log.Logger);
 
-		var sample = await Texts(provider, sample: true);
-		var live = await Texts(provider, sample: false);
+		var sample = await Texts(provider, true);
+		var live = await Texts(provider, false);
 
 		Assert.Multiple(() =>
 		{
@@ -58,8 +58,8 @@ public class WidgetSamplePreviewTests
 			TestLocalization.SampleText,
 			new MacroDeckHost.Application.Rendering.WidgetRenderSignals());
 
-		var sample = await Tree(provider, sample: true);
-		var live = await Tree(provider, sample: false);
+		var sample = await Tree(provider, true);
+		var live = await Tree(provider, false);
 
 		Assert.Multiple(() =>
 		{
@@ -78,8 +78,8 @@ public class WidgetSamplePreviewTests
 			new SliderWidgetConfigTests.FakeWidgetIconResources(),
 			TestLocalization.SampleText);
 
-		var sample = await Tree(provider, sample: true);
-		var live = await Tree(provider, sample: false);
+		var sample = await Tree(provider, true);
+		var live = await Tree(provider, false);
 
 		Assert.Multiple(() =>
 		{
@@ -95,8 +95,8 @@ public class WidgetSamplePreviewTests
 		var provider = new MacroDeckHost.Widgets.Battery.BatteryWidgetUiProvider(new FakeBatteries(),
 			TestLocalization.SampleText);
 
-		var sample = await Tree(provider, sample: true);
-		var live = await Tree(provider, sample: false);
+		var sample = await Tree(provider, true);
+		var live = await Tree(provider, false);
 
 		Assert.Multiple(() =>
 		{
@@ -123,8 +123,8 @@ public class WidgetSamplePreviewTests
 			TimeProvider.System,
 			Serilog.Log.Logger);
 
-		var sample = await Texts(provider, sample: true);
-		var live = await Texts(provider, sample: false);
+		var sample = await Texts(provider, true);
+		var live = await Texts(provider, false);
 
 		Assert.Multiple(() =>
 		{
@@ -149,9 +149,9 @@ public class WidgetSamplePreviewTests
 			new StubFolderCache(),
 			new SliderWidgetSessionTests.NullUiTransport(),
 			new MacroDeckHost.Application.Rendering.WidgetRenderSignals(),
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
+			new Devices.Surfaces.StubIconPackCache());
 
-		var sample = await Tree(provider, sample: true);
+		var sample = await Tree(provider, true);
 
 		Assert.Multiple(() =>
 		{
@@ -165,7 +165,7 @@ public class WidgetSamplePreviewTests
 	{
 		var provider = new ClockWidgetUiProvider();
 
-		var sample = await Tree(provider, sample: true);
+		var sample = await Tree(provider, true);
 
 		// The Clock reads nothing live to begin with - it carries a time reference the reader resolves -
 		// so its sample is the widget itself, and this is what says so.
@@ -173,7 +173,9 @@ public class WidgetSamplePreviewTests
 	}
 
 	private static string Resolve(MacroDeck.Localization.LocalizedString value)
-		=> TestLocalization.Resolve(value, "en");
+	{
+		return TestLocalization.Resolve(value, "en");
+	}
 
 	private static async Task<UiNode> Tree(IUiProvider provider, bool sample)
 	{
@@ -188,22 +190,34 @@ public class WidgetSamplePreviewTests
 		return root;
 	}
 
-	private static async Task<string> Texts(IUiProvider provider, bool sample) => TextsOf(await Tree(provider, sample));
+	private static async Task<string> Texts(IUiProvider provider, bool sample)
+	{
+		return TextsOf(await Tree(provider, sample));
+	}
 
-	private static string TextsOf(UiNode root) => string.Join('\n',
-		Walk(root)
-			.Select(node => node.Properties.TryGetValue("text", out var text) ? text.ToString() : string.Empty));
+	private static string TextsOf(UiNode root)
+	{
+		return string.Join('\n',
+			Walk(root)
+				.Select(node => node.Properties.TryGetValue("text", out var text) ? text.ToString() : string.Empty));
+	}
 
 	/// <summary>Every property on every node, flattened - for an assertion about what the tree carries
 	/// rather than about which node carries it.</summary>
-	private static string AllProperties(UiNode root) => string.Join('\n',
-		Walk(root)
-			.SelectMany(node => node.Properties.Values.Select(value => value.ToString())));
+	private static string AllProperties(UiNode root)
+	{
+		return string.Join('\n',
+			Walk(root)
+				.SelectMany(node => node.Properties.Values.Select(value => value.ToString())));
+	}
 
-	private static string Properties(UiNode root, string name) => string.Join('\n',
-		Walk(root)
-			.Where(node => node.Properties.ContainsKey(name))
-			.Select(node => node.Properties[name].ToString()));
+	private static string Properties(UiNode root, string name)
+	{
+		return string.Join('\n',
+			Walk(root)
+				.Where(node => node.Properties.ContainsKey(name))
+				.Select(node => node.Properties[name].ToString()));
+	}
 
 	private static List<double> Points(UiNode root)
 	{
@@ -242,7 +256,7 @@ public class WidgetSamplePreviewTests
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.Data] = JsonDocument.Parse("{}").RootElement.Clone(),
+			[UiWidgetSurfaceAttributes.Data] = JsonDocument.Parse("{}").RootElement.Clone()
 		};
 
 		if (sample)
@@ -255,16 +269,22 @@ public class WidgetSamplePreviewTests
 			UiModelVersion = 1,
 			Surface = new UiSurface
 			{
-				Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared, Attributes = attributes,
-			},
+				Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared, Attributes = attributes
+			}
 		};
 	}
 
 	private sealed class EmptyWeatherRegistry : IWeatherRegistry
 	{
-		public IReadOnlyList<WeatherStationDescriptor> GetInstances() => [];
+		public IReadOnlyList<WeatherStationDescriptor> GetInstances()
+		{
+			return [];
+		}
 
-		public IWeatherStation? GetStation(string instanceId) => null;
+		public IWeatherStation? GetStation(string instanceId)
+		{
+			return null;
+		}
 
 		public IWeatherStation? DefaultStation => null;
 	}
@@ -272,21 +292,28 @@ public class WidgetSamplePreviewTests
 	/// <summary>No variable is chosen either, so opening a history window at all is the failure.</summary>
 	private sealed class UnusedVariableHistory : IVariableHistory
 	{
-		public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null) =>
+		public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null)
+		{
 			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class NoWidgetIcons : MacroDeckHost.Application.Widgets.IWidgetIconResources
 	{
-		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(MacroDeckHost.Domain.Widgets.WidgetIconReference? reference,
+		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(
+			MacroDeckHost.Domain.Widgets.WidgetIconReference? reference,
 			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
 			CancellationToken cancellationToken)
-			=> ResolveAsync(reference, cancellationToken);
+		{
+			return ResolveAsync(reference, cancellationToken);
+		}
 
 		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(
 			MacroDeckHost.Domain.Widgets.WidgetIconReference? reference,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<MacroDeck.Ui.Model.Resources.UiResource?>(null);
+		{
+			return Task.FromResult<MacroDeck.Ui.Model.Resources.UiResource?>(null);
+		}
 
 		public void Evict(Guid widgetId)
 		{

@@ -26,7 +26,7 @@ internal sealed class IssuerSignedPackageTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -64,7 +64,8 @@ internal sealed class IssuerSignedPackageTests
 		};
 	}
 
-	private async Task<(string Output, TestPki.IssuedCertificate Issuer)> SignWithIssuer(string extension,
+	private async Task<(string Output, TestPki.IssuedCertificate Issuer)> SignWithIssuer(
+		string extension,
 		TestPki.IssuedCertificate? issuer = null,
 		TestPki.IssuedCertificate? certificate = null)
 	{
@@ -85,8 +86,10 @@ internal sealed class IssuerSignedPackageTests
 		return (output, issuer);
 	}
 
-	private static Task<PackageVerifyResult> Verify(string path) =>
-		PackageVerifier.VerifyAsync(path, _manifestReader, TestPki.Root.PublicKey);
+	private static Task<PackageVerifyResult> Verify(string path)
+	{
+		return PackageVerifier.VerifyAsync(path, _manifestReader, TestPki.Root.PublicKey);
+	}
 
 	[TestCase(".macroDeckPlugin")]
 	[TestCase(".macroDeckIconPack")]
@@ -111,7 +114,7 @@ internal sealed class IssuerSignedPackageTests
 	{
 		var (output, issuer) = await SignWithIssuer(".macroDeckPlugin");
 		var extracted = Path.Combine(_directory, "extracted");
-		ZipFile.ExtractToDirectory(output, extracted);
+		await ZipFile.ExtractToDirectoryAsync(output, extracted);
 
 		var result = await PackageVerifier.VerifyExtractedAsync(extracted,
 			SignablePackageFormat.Plugin,
@@ -272,8 +275,8 @@ internal sealed class IssuerSignedPackageTests
 	[Test]
 	public async Task A_package_signed_after_its_issuer_expired_is_refused()
 	{
-		var issuer = TestPki.IssueIssuer(notBefore: DateTimeOffset.UtcNow.AddYears(-2),
-			notAfter: DateTimeOffset.UtcNow.AddYears(-1));
+		var issuer = TestPki.IssueIssuer(DateTimeOffset.UtcNow.AddYears(-2),
+			DateTimeOffset.UtcNow.AddYears(-1));
 		var certificate = TestPki.IssueCertificate(notBefore: DateTimeOffset.UtcNow.AddYears(-2).AddDays(1),
 			notAfter: DateTimeOffset.UtcNow.AddYears(-1).AddDays(-1),
 			issuer: issuer);
@@ -380,7 +383,7 @@ internal sealed class IssuerSignedPackageTests
 			_manifestReader);
 		var verifyResult = await Verify(output);
 
-		using var archive = ZipFile.OpenRead(output);
+		using var archive = await ZipFile.OpenReadAsync(output);
 		Assert.Multiple(() =>
 		{
 			Assert.That(signResult.Success, Is.True, signResult.Message);

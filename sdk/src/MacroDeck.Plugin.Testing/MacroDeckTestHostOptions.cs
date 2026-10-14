@@ -58,7 +58,9 @@ public sealed class MacroDeckTestHostOptions
 
 	/// <summary>Resolves a negotiation result for <paramref name="capability" />, applying <see cref="NegotiateCapability" /> when set.</summary>
 	internal CapabilityNegotiationResult Negotiate(DeclaredCapability capability)
-		=> NegotiateCapability is { } negotiate
+	{
+		return NegotiateCapability is { } negotiate
 			? negotiate(capability)
 			: CapabilityVersionNegotiator.Negotiate(capability.Kind, capability.VersionRange);
+	}
 }

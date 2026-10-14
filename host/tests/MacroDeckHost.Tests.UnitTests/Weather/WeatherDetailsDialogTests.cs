@@ -72,7 +72,10 @@ internal sealed class WeatherDetailsDialogTests
 		Assert.That(session, Is.Null);
 	}
 
-	private static string Tree(IUiSession session) => UiCanonicalJson.Serialize(session.BuildTree());
+	private static string Tree(IUiSession session)
+	{
+		return UiCanonicalJson.Serialize(session.BuildTree());
+	}
 
 	private static UiSessionRequest Request(string viewId, string? instanceId)
 	{
@@ -91,9 +94,9 @@ internal sealed class WeatherDetailsDialogTests
 				{
 					[UiDialogSurfaceAttributes.ModalId] = JsonSerializer.SerializeToElement("modal"),
 					[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(viewId),
-					[UiDialogSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
-				},
-			},
+					[UiDialogSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data)
+				}
+			}
 		};
 	}
 
@@ -107,13 +110,16 @@ internal sealed class WeatherDetailsDialogTests
 			{
 				UiResources = new BuiltInUiResources(WeatherIntegration.IntegrationId,
 					new UiResourceStore(),
-					typeof(WeatherIntegration)),
+					typeof(WeatherIntegration))
 			};
-			EntryIds = [.. locations.Select(location =>
-				_context.ConfigStore.AddEntry(location, latitude: "52.52", longitude: "13.41").ToString())];
+			EntryIds =
+			[
+				.. locations.Select(location =>
+					_context.ConfigStore.AddEntry(location, "52.52", "13.41").ToString())
+			];
 			Integration = new WeatherIntegration(new FakeOpenMeteoClient
 			{
-				Forecast = WeatherIntegrationTests.ForecastWith(21),
+				Forecast = WeatherIntegrationTests.ForecastWith(21)
 			});
 		}
 
@@ -121,7 +127,10 @@ internal sealed class WeatherDetailsDialogTests
 
 		public IReadOnlyList<string> EntryIds { get; }
 
-		public static Harness Create(params string[] locations) => new(locations);
+		public static Harness Create(params string[] locations)
+		{
+			return new Harness(locations);
+		}
 
 		public static async Task<Harness> StartAsync(params string[] locations)
 		{
@@ -143,7 +152,10 @@ internal sealed class WeatherDetailsDialogTests
 		}
 
 		public async Task<IUiSession> OpenAsync(string? instanceId)
-			=> (await Integration.CreateSessionAsync(Request("weather-details", instanceId), CancellationToken.None))!;
+		{
+			return (await Integration.CreateSessionAsync(Request("weather-details", instanceId),
+				CancellationToken.None))!;
+		}
 
 		public async ValueTask DisposeAsync()
 		{

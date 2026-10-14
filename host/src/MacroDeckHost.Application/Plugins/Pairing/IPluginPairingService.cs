@@ -28,10 +28,15 @@ public sealed record PluginPairingCreateOutcome
 	public bool TakesOverInstalledPlugin { get; init; }
 
 	public static PluginPairingCreateOutcome Success(PluginPairingRequestRecord record, bool takesOverInstalledPlugin)
-		=> new() { Succeeded = true, Record = record, TakesOverInstalledPlugin = takesOverInstalledPlugin };
+	{
+		return new PluginPairingCreateOutcome
+			{ Succeeded = true, Record = record, TakesOverInstalledPlugin = takesOverInstalledPlugin };
+	}
 
 	public static PluginPairingCreateOutcome Fail(PluginPairingCreateError error, string? detail = null)
-		=> new() { Succeeded = false, Error = error, ErrorDetail = detail };
+	{
+		return new PluginPairingCreateOutcome { Succeeded = false, Error = error, ErrorDetail = detail };
+	}
 }
 
 public sealed record PluginPairingStatusOutcome(string Status, DateTimeOffset ExpiresAt);
@@ -67,7 +72,9 @@ public sealed record PluginPairingApproveOutcome
 	public static readonly PluginPairingApproveOutcome Success = new() { Succeeded = true };
 
 	public static PluginPairingApproveOutcome Fail(PluginPairingApproveError error)
-		=> new() { Succeeded = false, Error = error };
+	{
+		return new PluginPairingApproveOutcome { Succeeded = false, Error = error };
+	}
 }
 
 public sealed record PluginPairingRedeemOutcome
@@ -81,7 +88,9 @@ public sealed record PluginPairingRedeemOutcome
 	public static readonly PluginPairingRedeemOutcome Fail = new() { Succeeded = false };
 
 	public static PluginPairingRedeemOutcome Success(string pluginId, string pluginSecret)
-		=> new() { Succeeded = true, PluginId = pluginId, PluginSecret = pluginSecret };
+	{
+		return new PluginPairingRedeemOutcome { Succeeded = true, PluginId = pluginId, PluginSecret = pluginSecret };
+	}
 }
 
 public sealed record PluginPairedRegistration(
@@ -94,7 +103,8 @@ public sealed record PluginPairedRegistration(
 
 public interface IPluginPairingService
 {
-	Task<PluginPairingCreateOutcome> Create(string pluginId,
+	Task<PluginPairingCreateOutcome> Create(
+		string pluginId,
 		string displayName,
 		string codeChallenge,
 		string codeChallengeMethod,
@@ -105,7 +115,8 @@ public interface IPluginPairingService
 
 	Task<IReadOnlyList<PluginPairingPendingItem>> Pending();
 
-	Task<PluginPairingApproveOutcome> Approve(string requestId,
+	Task<PluginPairingApproveOutcome> Approve(
+		string requestId,
 		bool replaceExistingRegistration,
 		bool takeOverInstalledPlugin = false);
 

@@ -120,7 +120,11 @@ internal sealed class StoreInstallExecutorTests
 			TimeProvider.System);
 
 		_executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
+			new StoreCatalogQueryService(_catalog,
+				_pluginCatalog,
+				_installations,
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+				new InstalledPluginSigners()),
 			_tracker,
 			downloader,
 			_pluginInstaller,
@@ -142,35 +146,41 @@ internal sealed class StoreInstallExecutorTests
 		_iconHarness.Dispose();
 	}
 
-	private static StoreCatalogEntry PluginEntry() => new()
+	private static StoreCatalogEntry PluginEntry()
 	{
-		Kind = StoreExtensionKind.Plugin,
-		Id = PluginId,
-		Name = "Store Plugin",
-		LatestVersion = "1.0.0",
-		LatestRelease = new StoreReleaseManifest
+		return new StoreCatalogEntry
 		{
-			Version = "1.0.0",
-			ArtifactUrl = new Uri("https://cdn.example/store-plugin.macroDeckPlugin"),
-			Sha256 = WrongDeclaredSha256,
-			Size = _servedBytes.LongLength
-		}
-	};
+			Kind = StoreExtensionKind.Plugin,
+			Id = PluginId,
+			Name = "Store Plugin",
+			LatestVersion = "1.0.0",
+			LatestRelease = new StoreReleaseManifest
+			{
+				Version = "1.0.0",
+				ArtifactUrl = new Uri("https://cdn.example/store-plugin.macroDeckPlugin"),
+				Sha256 = WrongDeclaredSha256,
+				Size = _servedBytes.LongLength
+			}
+		};
+	}
 
-	private static StoreCatalogEntry IconPackEntry() => new()
+	private static StoreCatalogEntry IconPackEntry()
 	{
-		Kind = StoreExtensionKind.IconPack,
-		Id = IconPackId,
-		Name = "Store Icons",
-		LatestVersion = "1.0.0",
-		LatestRelease = new StoreReleaseManifest
+		return new StoreCatalogEntry
 		{
-			Version = "1.0.0",
-			ArtifactUrl = new Uri("https://cdn.example/store-icons.macroDeckIconPack"),
-			Sha256 = WrongDeclaredSha256,
-			Size = _servedBytes.LongLength
-		}
-	};
+			Kind = StoreExtensionKind.IconPack,
+			Id = IconPackId,
+			Name = "Store Icons",
+			LatestVersion = "1.0.0",
+			LatestRelease = new StoreReleaseManifest
+			{
+				Version = "1.0.0",
+				ArtifactUrl = new Uri("https://cdn.example/store-icons.macroDeckIconPack"),
+				Sha256 = WrongDeclaredSha256,
+				Size = _servedBytes.LongLength
+			}
+		};
+	}
 
 	[Test]
 	public async Task
@@ -182,7 +192,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			"1.0.0",
 			"Store Plugin",
-			previousVersion: null);
+			null);
 
 		await _executor.Execute(operation.Id);
 
@@ -206,7 +216,11 @@ internal sealed class StoreInstallExecutorTests
 			}
 		};
 		var executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
+			new StoreCatalogQueryService(_catalog,
+				_pluginCatalog,
+				_installations,
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+				new InstalledPluginSigners()),
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			installer,
@@ -225,7 +239,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			"1.0.0",
 			"Store Plugin",
-			previousVersion: null);
+			null);
 
 		await executor.Execute(operation.Id);
 
@@ -239,15 +253,20 @@ internal sealed class StoreInstallExecutorTests
 	}
 
 	[Test]
-	public async Task A_plugin_update_reports_installing_once_the_download_is_done_and_remembers_it_came_from_the_store()
+	public async Task
+		A_plugin_update_reports_installing_once_the_download_is_done_and_remembers_it_came_from_the_store()
 	{
 		var installer = new Plugins.Installation.FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Ok(PluginId, "1.1.0", "1.0.0", activated: true)
+			ResultToReturn = PluginInstallResult.Ok(PluginId, "1.1.0", "1.0.0", true)
 		};
 		var batches = new StoreInstallBackupBatches();
 		var executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
+			new StoreCatalogQueryService(_catalog,
+				_pluginCatalog,
+				_installations,
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+				new InstalledPluginSigners()),
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			installer,
@@ -266,7 +285,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			"1.1.0",
 			"Store Plugin",
-			previousVersion: "1.0.0");
+			"1.0.0");
 		batches.Record(operation.Id, "batch-1");
 		var states = new List<StoreOperationState>();
 		_tracker.Changed += changed =>
@@ -281,10 +300,11 @@ internal sealed class StoreInstallExecutorTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(states, Is.EqualTo(new[]
-			{
-				StoreOperationState.Downloading, StoreOperationState.Installing, StoreOperationState.Completed
-			}));
+			Assert.That(states,
+				Is.EqualTo(new[]
+				{
+					StoreOperationState.Downloading, StoreOperationState.Installing, StoreOperationState.Completed
+				}));
 			Assert.That(installer.LastInstallRequest!.BackupBatchId, Is.EqualTo("batch-1"));
 			Assert.That(_installations.Find(StoreExtensionKind.Plugin, PluginId)?.Version, Is.EqualTo("1.1.0"));
 		});
@@ -300,7 +320,7 @@ internal sealed class StoreInstallExecutorTests
 			IconPackId,
 			"1.0.0",
 			"Store Icons",
-			previousVersion: null);
+			null);
 
 		await _executor.Execute(operation.Id);
 
@@ -324,7 +344,7 @@ internal sealed class StoreInstallExecutorTests
 			IconPackId,
 			"1.0.0",
 			"Store Icons",
-			previousVersion: null);
+			null);
 		_iconHarness.Mediator.Published.Clear();
 
 		await _executor.Execute(operation.Id);
@@ -349,7 +369,7 @@ internal sealed class StoreInstallExecutorTests
 			IconPackId,
 			"1.0.0",
 			"Store Icons",
-			previousVersion: null);
+			null);
 		await _executor.Execute(install.Id);
 		var installed = _iconHarness.Cache.GetAllPacks().Single();
 
@@ -359,7 +379,7 @@ internal sealed class StoreInstallExecutorTests
 			IconPackId,
 			"1.1.0",
 			"Store Icons",
-			previousVersion: "1.0.0");
+			"1.0.0");
 		await _executor.Execute(update.Id);
 
 		var packs = _iconHarness.Cache.GetAllPacks();
@@ -380,7 +400,7 @@ internal sealed class StoreInstallExecutorTests
 		ServePlugins(older, PluginArtifact("2.0.0"));
 		_httpClientFactory.Body = older.Bytes;
 
-		var operation = await Run(StoreOperationKind.Install, "1.0.0", previousVersion: null, pinned: true);
+		var operation = await Run(StoreOperationKind.Install, "1.0.0", null, true);
 
 		var record = _installations.Find(StoreExtensionKind.Plugin, PluginId);
 		Assert.Multiple(() =>
@@ -400,19 +420,19 @@ internal sealed class StoreInstallExecutorTests
 		var latest = PluginArtifact("2.0.0");
 		ServePlugins(older, latest);
 		_httpClientFactory.Body = older.Bytes;
-		await Run(StoreOperationKind.Install, "1.0.0", previousVersion: null, pinned: true);
+		await Run(StoreOperationKind.Install, "1.0.0", null, true);
 		_httpClientFactory.Body = latest.Bytes;
-		var update = await Run(StoreOperationKind.Update, "2.0.0", previousVersion: "1.0.0", pinned: false);
+		var update = await Run(StoreOperationKind.Update, "2.0.0", "1.0.0", false);
 		Assert.That(update.State, Is.EqualTo(StoreOperationState.Completed), update.ErrorMessage);
 		Assert.That(Directory.Exists(PluginVersionDirectory("1.0.0")), Is.True, "the update keeps 1.0.0 for rollback");
 
 		_httpClientFactory.Body = older.Bytes;
-		var downgrade = await Run(StoreOperationKind.Update, "1.0.0", previousVersion: "2.0.0", pinned: true);
+		var downgrade = await Run(StoreOperationKind.Update, "1.0.0", "2.0.0", true);
 		var heldAfterDowngrade = _installations.Find(StoreExtensionKind.Plugin, PluginId)?.Held;
 		var activeAfterDowngrade = ActivePluginVersion();
 
 		_httpClientFactory.Body = latest.Bytes;
-		var backUp = await Run(StoreOperationKind.Update, "2.0.0", previousVersion: "1.0.0", pinned: false);
+		var backUp = await Run(StoreOperationKind.Update, "2.0.0", "1.0.0", false);
 
 		var record = _installations.Find(StoreExtensionKind.Plugin, PluginId);
 		Assert.Multiple(() =>
@@ -434,7 +454,7 @@ internal sealed class StoreInstallExecutorTests
 		ServePlugins(PluginArtifact("1.0.0"), latest);
 		_httpClientFactory.Body = latest.Bytes;
 
-		var operation = await Run(StoreOperationKind.Install, "2.0.0", previousVersion: null, pinned: false);
+		var operation = await Run(StoreOperationKind.Install, "2.0.0", null, false);
 
 		Assert.Multiple(() =>
 		{
@@ -449,7 +469,7 @@ internal sealed class StoreInstallExecutorTests
 	{
 		var installer = new Plugins.Installation.FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Ok(PluginId, "3.0.0", "1.0.0", activated: true)
+			ResultToReturn = PluginInstallResult.Ok(PluginId, "3.0.0", "1.0.0", true)
 		};
 		var executor = ExecutorWith(installer);
 		ServePlugins(PluginArtifact("1.0.0"), PluginArtifact("3.0.0"));
@@ -458,7 +478,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			"2.0.0",
 			"Store Plugin",
-			previousVersion: "1.0.0");
+			"1.0.0");
 
 		await executor.Execute(operation.Id);
 
@@ -481,7 +501,7 @@ internal sealed class StoreInstallExecutorTests
 		Withdraw("1.0.0");
 		_httpClientFactory.Body = latest.Bytes;
 
-		var operation = await Run(StoreOperationKind.Install, "2.0.0", previousVersion: null, pinned: false);
+		var operation = await Run(StoreOperationKind.Install, "2.0.0", null, false);
 
 		Assert.Multiple(() =>
 		{
@@ -498,7 +518,7 @@ internal sealed class StoreInstallExecutorTests
 		Withdraw("1.0.0");
 		_httpClientFactory.Body = older.Bytes;
 
-		var operation = await Run(StoreOperationKind.Install, "1.0.0", previousVersion: null, pinned: true);
+		var operation = await Run(StoreOperationKind.Install, "1.0.0", null, true);
 
 		Assert.Multiple(() =>
 		{
@@ -516,7 +536,7 @@ internal sealed class StoreInstallExecutorTests
 		Withdraw("2.0.0");
 		_httpClientFactory.Body = latest.Bytes;
 
-		var operation = await Run(StoreOperationKind.Install, "2.0.0", previousVersion: null, pinned: false);
+		var operation = await Run(StoreOperationKind.Install, "2.0.0", null, false);
 
 		Assert.Multiple(() =>
 		{
@@ -536,7 +556,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			"1.0.0",
 			"Store Plugin",
-			previousVersion: null,
+			null,
 			versionPinned: true);
 
 		await executor.Execute(operation.Id);
@@ -553,12 +573,13 @@ internal sealed class StoreInstallExecutorTests
 
 	[TestCase("1.0.0+build.7", false)]
 	[TestCase("2.0.0", true)]
-	public async Task Only_a_version_other_than_the_active_one_replaces_an_existing_version_folder(string target,
+	public async Task Only_a_version_other_than_the_active_one_replaces_an_existing_version_folder(
+		string target,
 		bool forced)
 	{
 		var installer = new Plugins.Installation.FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Ok(PluginId, target, "1.0.0", activated: true)
+			ResultToReturn = PluginInstallResult.Ok(PluginId, target, "1.0.0", true)
 		};
 		var executor = ExecutorWith(installer);
 		await InstallActivePlugin(PluginArtifact("1.0.0"));
@@ -568,7 +589,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			target,
 			"Store Plugin",
-			previousVersion: "1.0.0",
+			"1.0.0",
 			versionPinned: true);
 
 		await executor.Execute(operation.Id);
@@ -578,13 +599,14 @@ internal sealed class StoreInstallExecutorTests
 
 	[TestCase("1.0.0", "2.0.0", StoreDownloadOperation.Update)]
 	[TestCase("1.0.0", "1.0.0", StoreDownloadOperation.Repair)]
-	public async Task The_download_is_described_against_the_version_actually_installed(string target,
+	public async Task The_download_is_described_against_the_version_actually_installed(
+		string target,
 		string installed,
 		StoreDownloadOperation expected)
 	{
 		var installer = new Plugins.Installation.FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Ok(PluginId, target, installed, activated: true)
+			ResultToReturn = PluginInstallResult.Ok(PluginId, target, installed, true)
 		};
 		var executor = ExecutorWith(installer);
 		ServePlugins(PluginArtifact("1.0.0"), PluginArtifact("2.0.0"));
@@ -593,7 +615,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			target,
 			"Store Plugin",
-			previousVersion: installed,
+			installed,
 			versionPinned: true);
 
 		await executor.Execute(operation.Id);
@@ -628,7 +650,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			"1.0.0",
 			"Store Plugin",
-			previousVersion: null);
+			null);
 
 		await executor.Execute(operation.Id);
 
@@ -645,7 +667,7 @@ internal sealed class StoreInstallExecutorTests
 		ServePlugins(artifact);
 		_httpClientFactory.Body = artifact.Bytes;
 
-		var operation = await Run(StoreOperationKind.Install, "1.0.0", previousVersion: null, pinned: false);
+		var operation = await Run(StoreOperationKind.Install, "1.0.0", null, false);
 
 		Assert.Multiple(() =>
 		{
@@ -658,7 +680,8 @@ internal sealed class StoreInstallExecutorTests
 	[TestCase(PluginInstallError.ArtifactLimitExceeded, StoreOperationError.MalformedPackage)]
 	[TestCase(PluginInstallError.IdMismatch, StoreOperationError.MalformedPackage)]
 	[TestCase(PluginInstallError.SignatureRevoked, StoreOperationError.SignatureUntrusted)]
-	public async Task A_plugin_refusal_is_reported_with_the_store_error_that_describes_it(PluginInstallError error,
+	public async Task A_plugin_refusal_is_reported_with_the_store_error_that_describes_it(
+		PluginInstallError error,
 		StoreOperationError expected)
 	{
 		var executor = ExecutorWith(new Plugins.Installation.FakePluginInstaller
@@ -671,7 +694,7 @@ internal sealed class StoreInstallExecutorTests
 			PluginId,
 			"1.0.0",
 			"Store Plugin",
-			previousVersion: null);
+			null);
 
 		await executor.Execute(operation.Id);
 
@@ -702,7 +725,7 @@ internal sealed class StoreInstallExecutorTests
 			IconPackId,
 			"1.0.0",
 			"Store Icons",
-			previousVersion: null,
+			null,
 			versionPinned: true);
 
 		await _executor.Execute(operation.Id);
@@ -717,13 +740,16 @@ internal sealed class StoreInstallExecutorTests
 		});
 	}
 
-	private static StoreReleaseManifest IconPackRelease(string version, byte[] artifact) => new()
+	private static StoreReleaseManifest IconPackRelease(string version, byte[] artifact)
 	{
-		Version = version,
-		ArtifactUrl = new Uri($"https://cdn.example/store-icons-{version}.macroDeckIconPack"),
-		Sha256 = Convert.ToHexStringLower(SHA256.HashData(artifact)),
-		Size = artifact.LongLength
-	};
+		return new StoreReleaseManifest
+		{
+			Version = version,
+			ArtifactUrl = new Uri($"https://cdn.example/store-icons-{version}.macroDeckIconPack"),
+			Sha256 = Convert.ToHexStringLower(SHA256.HashData(artifact)),
+			Size = artifact.LongLength
+		};
+	}
 
 	private sealed record BuiltPlugin(string Version, string Path, byte[] Bytes)
 	{
@@ -741,13 +767,16 @@ internal sealed class StoreInstallExecutorTests
 		return new BuiltPlugin(version, path, File.ReadAllBytes(path));
 	}
 
-	private static StoreReleaseManifest Release(string version, BuiltPlugin artifact) => new()
+	private static StoreReleaseManifest Release(string version, BuiltPlugin artifact)
 	{
-		Version = version,
-		ArtifactUrl = new Uri($"https://cdn.example/store-plugin-{version}.macroDeckPlugin"),
-		Sha256 = artifact.Sha256,
-		Size = artifact.Bytes.LongLength
-	};
+		return new StoreReleaseManifest
+		{
+			Version = version,
+			ArtifactUrl = new Uri($"https://cdn.example/store-plugin-{version}.macroDeckPlugin"),
+			Sha256 = artifact.Sha256,
+			Size = artifact.Bytes.LongLength
+		};
+	}
 
 	private void ServePlugins(params BuiltPlugin[] releases)
 	{
@@ -767,13 +796,19 @@ internal sealed class StoreInstallExecutorTests
 		});
 	}
 
-	private void Withdraw(string version) =>
+	private void Withdraw(string version)
+	{
 		_catalog.Swap(_catalog.Snapshot with
 		{
 			RemovedPackages = [new StoreRemovedPackage { Id = PluginId, Version = version, Reason = "Compromised" }]
 		});
+	}
 
-	private async Task<StoreOperation> Run(StoreOperationKind kind, string version, string? previousVersion, bool pinned)
+	private async Task<StoreOperation> Run(
+		StoreOperationKind kind,
+		string version,
+		string? previousVersion,
+		bool pinned)
 	{
 		var operation = _tracker.Create(kind,
 			StoreExtensionKind.Plugin,
@@ -793,19 +828,27 @@ internal sealed class StoreInstallExecutorTests
 		return _pluginCatalog.Discover().SingleOrDefault(plugin => plugin.PluginId == PluginId)?.ActiveVersion?.Version;
 	}
 
-	private string PluginVersionDirectory(string version) =>
-		PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, PluginId, version);
+	private string PluginVersionDirectory(string version)
+	{
+		return PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, PluginId, version);
+	}
 
 	private async Task InstallActivePlugin(BuiltPlugin artifact)
 	{
-		var result = await _pluginInstaller.Install(PluginArtifactSource.FromPath(artifact.Path), new PluginInstallRequest());
+		var result = await _pluginInstaller.Install(PluginArtifactSource.FromPath(artifact.Path),
+			new PluginInstallRequest());
 		Assert.That(result.Success, Is.True, result.ErrorMessage);
 		_pluginCatalog.Invalidate();
 	}
 
-	private StoreInstallExecutor ExecutorWith(IPluginInstaller installer) =>
-		new(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
+	private StoreInstallExecutor ExecutorWith(IPluginInstaller installer)
+	{
+		return new StoreInstallExecutor(_catalog,
+			new StoreCatalogQueryService(_catalog,
+				_pluginCatalog,
+				_installations,
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+				new InstalledPluginSigners()),
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			installer,
@@ -818,9 +861,11 @@ internal sealed class StoreInstallExecutorTests
 			StoreRegistryOptions.Default,
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
+	}
 
 	private IconPackOwnerRegistry OwnerRegistry()
-		=> new([
+	{
+		return new IconPackOwnerRegistry([
 			new StoreIconPackOwner(_installations,
 				new StoreUpdateDetector(_catalog,
 					_pluginCatalog,
@@ -830,6 +875,7 @@ internal sealed class StoreInstallExecutorTests
 					StoreRegistryOptions.Default),
 				Serilog.Core.Logger.None)
 		]);
+	}
 
 	private void ServeIconPack(byte[] artifact, string version)
 	{
@@ -865,10 +911,11 @@ internal sealed class StoreInstallExecutorTests
 			await File.WriteAllBytesAsync(unsigned, PackWithSizeFiles(iconId, IconImage(1024)));
 			var signed = await SignIconPack(unsigned, directory);
 			var delivered = await File.ReadAllBytesAsync(signed);
-			var verified = await PackageVerifier.VerifyAsync(signed, new PluginManifestReader(), TestPki.Root.PublicKey);
+			var verified
+				= await PackageVerifier.VerifyAsync(signed, new PluginManifestReader(), TestPki.Root.PublicKey);
 			ServeIconPack(delivered, "1.0.0");
 
-			var operation = await RunIconPack(StoreOperationKind.Install, "1.0.0", previousVersion: null);
+			var operation = await RunIconPack(StoreOperationKind.Install, "1.0.0", null);
 			var icon = _iconHarness.Cache.GetIconsByPackId(_iconHarness.Cache.GetAllPacks().Single().Id).Single();
 			var edge = await ServedEdge(icon.Id, 128);
 
@@ -881,7 +928,7 @@ internal sealed class StoreInstallExecutorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -891,7 +938,7 @@ internal sealed class StoreInstallExecutorTests
 		var iconId = Guid.CreateVersion7();
 		var master = IconImage(1024);
 		ServeIconPack(PackWithSizeFiles(iconId, master), "1.0.0");
-		await RunIconPack(StoreOperationKind.Install, "1.0.0", previousVersion: null);
+		await RunIconPack(StoreOperationKind.Install, "1.0.0", null);
 		var icon = _iconHarness.Cache.GetIconsByPackId(_iconHarness.Cache.GetAllPacks().Single().Id).Single();
 		var olderHostVariant = IconImage(128);
 		await _iconHarness.Storage.WriteVariant(icon.PackId, icon.Id, "128", olderHostVariant, CancellationToken.None);
@@ -899,7 +946,7 @@ internal sealed class StoreInstallExecutorTests
 		await _iconHarness.Cache.UpdateIcon(icon);
 
 		ServeIconPack(PackWithSizeFiles(iconId, master), "1.1.0");
-		var update = await RunIconPack(StoreOperationKind.Update, "1.1.0", previousVersion: "1.0.0");
+		var update = await RunIconPack(StoreOperationKind.Update, "1.1.0", "1.0.0");
 		await using var served = _iconHarness.Storage.OpenVariant(icon.PackId, icon.Id, "128")!;
 		using var buffer = new MemoryStream();
 		await served.CopyToAsync(buffer);
@@ -914,7 +961,12 @@ internal sealed class StoreInstallExecutorTests
 
 	private async Task<StoreOperation> RunIconPack(StoreOperationKind kind, string version, string? previousVersion)
 	{
-		var operation = _tracker.Create(kind, StoreExtensionKind.IconPack, IconPackId, version, "Store Icons", previousVersion);
+		var operation = _tracker.Create(kind,
+			StoreExtensionKind.IconPack,
+			IconPackId,
+			version,
+			"Store Icons",
+			previousVersion);
 		await _executor.Execute(operation.Id);
 		return _tracker.Find(operation.Id)!;
 	}
@@ -928,7 +980,7 @@ internal sealed class StoreInstallExecutorTests
 			_iconHarness.Coalescer,
 			_iconHarness.Mediator,
 			OwnerRegistry());
-		var result = await service.GetImage(iconId, size, acceptWebp: true, staticFrame: false, CancellationToken.None);
+		var result = await service.GetImage(iconId, size, true, false, CancellationToken.None);
 		await using var content = result.Data!.Content;
 		using var image = await SixLabors.ImageSharp.Image.LoadAsync(content);
 		return Math.Max(image.Width, image.Height);
@@ -966,7 +1018,7 @@ internal sealed class StoreInstallExecutorTests
 		};
 
 		using var stream = new MemoryStream();
-		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			WriteEntry(zip, "pack.json", JsonSerializer.SerializeToUtf8Bytes(manifest, PersistenceJsonOptions.Default));
 			foreach (var (path, content) in contents)
@@ -1004,7 +1056,8 @@ internal sealed class StoreInstallExecutorTests
 			issuer.CertificateSignatureBytes,
 			TestPki.Root.PublicKey,
 			SigningCertificateChain.PackageKeyUsage);
-		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate).Material!;
+		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate)
+			.Material!;
 		var output = Path.Combine(directory, "signed.macroDeckIconPack");
 		var result = await PackageSigner.SignAsync(package,
 			output,
@@ -1037,7 +1090,13 @@ internal sealed class InMemoryStoreOperationStore : IStoreOperationStore
 {
 	private IReadOnlyList<StoreOperation> _operations = [];
 
-	public IReadOnlyList<StoreOperation> LoadAll() => _operations;
+	public IReadOnlyList<StoreOperation> LoadAll()
+	{
+		return _operations;
+	}
 
-	public void SaveAll(IReadOnlyList<StoreOperation> operations) => _operations = operations;
+	public void SaveAll(IReadOnlyList<StoreOperation> operations)
+	{
+		_operations = operations;
+	}
 }

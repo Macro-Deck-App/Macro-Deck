@@ -14,36 +14,44 @@ internal static class WidgetConfigJson
 	private static readonly JsonElement _emptyArray = JsonDocument.Parse("[]").RootElement;
 
 	public static string? ReadString(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	public static bool? ReadBool(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.True or JsonValueKind.False
 				? value.GetBoolean()
 				: null;
+	}
 
 	public static double? ReadDouble(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number) &&
-			double.IsFinite(number)
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
+			&& double.IsFinite(number)
 				? number
 				: null;
+	}
 
 	/// <summary>The nested <c>border</c> object, or an empty one when absent or malformed - so
 	/// <c>border.style</c>/<c>border.color</c> read as absent rather than throwing.</summary>
 	public static JsonElement ReadObject(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Object
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Object
 				? value
 				: _emptyObject;
+	}
 
 	/// <summary>
 	/// The stored <c>flows</c> key as the JSON array the actions-list editor renders: an already-array value

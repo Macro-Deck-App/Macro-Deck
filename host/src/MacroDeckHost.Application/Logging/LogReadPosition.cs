@@ -16,7 +16,9 @@ public readonly record struct LogReadPosition(string FileStamp, long Offset)
 	}
 
 	public string Encode()
-		=> HasFile ? $"{FileStamp}:{Offset.ToString(CultureInfo.InvariantCulture)}" : string.Empty;
+	{
+		return HasFile ? $"{FileStamp}:{Offset.ToString(CultureInfo.InvariantCulture)}" : string.Empty;
+	}
 
 	public static bool TryParse(string? value, out LogReadPosition position)
 	{
@@ -27,8 +29,8 @@ public readonly record struct LogReadPosition(string FileStamp, long Offset)
 		}
 
 		var separator = value.IndexOf(':', StringComparison.Ordinal);
-		if (separator <= 0 ||
-			!long.TryParse(value[(separator + 1)..],
+		if (separator <= 0
+			|| !long.TryParse(value[(separator + 1)..],
 				NumberStyles.None,
 				CultureInfo.InvariantCulture,
 				out var offset))

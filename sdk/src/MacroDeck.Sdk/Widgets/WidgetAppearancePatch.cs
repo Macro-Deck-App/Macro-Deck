@@ -87,22 +87,22 @@ public sealed record WidgetAppearancePatch
 	/// </summary>
 	public string? AccentColor { get; init; }
 
-	public bool IsEmpty => Label is null &&
-		BackgroundColor is null &&
-		LabelColor is null &&
-		IconId is null &&
-		IconFit is null &&
-		IconZoom is null &&
-		IconOffsetX is null &&
-		IconOffsetY is null &&
-		IconOpacity is null &&
-		IconColor is null &&
-		IconAppearance is null &&
-		FontFaceId is null &&
-		FontSize is null &&
-		TextAlign is null &&
-		LabelPosition is null &&
-		BorderStyle is null &&
-		BorderColor is null &&
-		AccentColor is null;
+	public bool IsEmpty => Label is null
+		&& BackgroundColor is null
+		&& LabelColor is null
+		&& IconId is null
+		&& IconFit is null
+		&& IconZoom is null
+		&& IconOffsetX is null
+		&& IconOffsetY is null
+		&& IconOpacity is null
+		&& IconColor is null
+		&& IconAppearance is null
+		&& FontFaceId is null
+		&& FontSize is null
+		&& TextAlign is null
+		&& LabelPosition is null
+		&& BorderStyle is null
+		&& BorderColor is null
+		&& AccentColor is null;
 }

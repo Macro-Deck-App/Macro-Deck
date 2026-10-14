@@ -51,7 +51,7 @@ public class PluginLanguagesTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -66,7 +66,7 @@ public class PluginLanguagesTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -84,7 +84,7 @@ public class PluginLanguagesTests
 			var result = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, PluginArtifactFiles.ManifestFileName),
 				_ => outputPath,
-				force: false);
+				false);
 
 			Assert.That(result.Success, Is.True, result.FailureMessage);
 
@@ -97,7 +97,7 @@ public class PluginLanguagesTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (File.Exists(outputPath))
 			{
@@ -124,7 +124,7 @@ public class PluginLanguagesTests
 						"\"manifestVersion\": 1,\n\t\"languages\": [\"en\", \"fr\"],",
 						StringComparison.Ordinal));
 
-			var result = await PluginPacker.PackAsync(directory, manifestPath, _ => outputPath, force: false);
+			var result = await PluginPacker.PackAsync(directory, manifestPath, _ => outputPath, false);
 
 			Assert.That(result.Success, Is.True, result.FailureMessage);
 
@@ -141,7 +141,7 @@ public class PluginLanguagesTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (File.Exists(outputPath))
 			{
@@ -168,7 +168,7 @@ public class PluginLanguagesTests
 						"\"manifestVersion\": 1,\n\t\"languages\": [\"en\", \"fr\"],",
 						StringComparison.Ordinal));
 
-			var result = await PluginPacker.PackAsync(directory, manifestPath, _ => outputPath, force: false);
+			var result = await PluginPacker.PackAsync(directory, manifestPath, _ => outputPath, false);
 
 			Assert.That(result.Success, Is.True, result.FailureMessage);
 
@@ -181,7 +181,7 @@ public class PluginLanguagesTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (File.Exists(outputPath))
 			{

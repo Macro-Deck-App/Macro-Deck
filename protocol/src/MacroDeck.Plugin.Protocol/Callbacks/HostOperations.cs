@@ -544,14 +544,19 @@ public static class HostOperations
 			[HostApis.Http] = Http.All,
 			[HostApis.CompanionDevices] = CompanionDevices.All,
 			[HostApis.MusicPlayers] = MusicPlayers.All,
-			[HostApis.DesktopNotifications] = DesktopNotifications.All,
+			[HostApis.DesktopNotifications] = DesktopNotifications.All
 		};
 
-	public static IReadOnlyList<string> For(string api) => _byApi[api];
+	public static IReadOnlyList<string> For(string api)
+	{
+		return _byApi[api];
+	}
 
 	public static bool IsKnown(string? api, string? operation)
-		=> api is not null &&
-			operation is not null &&
-			_byApi.TryGetValue(api, out var operations) &&
-			operations.Contains(operation, StringComparer.Ordinal);
+	{
+		return api is not null
+			&& operation is not null
+			&& _byApi.TryGetValue(api, out var operations)
+			&& operations.Contains(operation, StringComparer.Ordinal);
+	}
 }

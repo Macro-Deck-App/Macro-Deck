@@ -66,11 +66,11 @@ internal static class CarThingFirmwareDetector
 			.Select(name => name!)
 			.ToList();
 
-		return names.FirstOrDefault(name => string.Equals(name, "chromium", StringComparison.OrdinalIgnoreCase)) ??
-			names.FirstOrDefault(name =>
-				name.Contains("chromium", StringComparison.OrdinalIgnoreCase) ||
-				name.Contains("chrome", StringComparison.OrdinalIgnoreCase) ||
-				name.Contains("kiosk", StringComparison.OrdinalIgnoreCase));
+		return names.FirstOrDefault(name => string.Equals(name, "chromium", StringComparison.OrdinalIgnoreCase))
+			?? names.FirstOrDefault(name =>
+				name.Contains("chromium", StringComparison.OrdinalIgnoreCase)
+				|| name.Contains("chrome", StringComparison.OrdinalIgnoreCase)
+				|| name.Contains("kiosk", StringComparison.OrdinalIgnoreCase));
 	}
 
 	private static async Task<string?> FindWebRootAsync(

@@ -356,16 +356,24 @@ internal sealed class HomeAssistantVariableCatalogTests
 		}
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(
-				[new ConfigEntrySnapshot(_entryId, "Home Assistant")]);
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([
+				new ConfigEntrySnapshot(_entryId, "Home Assistant")
+			]);
+		}
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult(_values.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_values.GetValueOrDefault(key));
+		}
 
 		public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 
-		public Task SetStringAsync(Guid entryId,
+		public Task SetStringAsync(
+			Guid entryId,
 			string key,
 			string? value,
 			CancellationToken cancellationToken = default)
@@ -374,10 +382,13 @@ internal sealed class HomeAssistantVariableCatalogTests
 			return Task.CompletedTask;
 		}
 
-		public Task SetSecretAsync(Guid entryId,
+		public Task SetSecretAsync(
+			Guid entryId,
 			string key,
 			string value,
 			CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

@@ -18,7 +18,8 @@ internal sealed class DelegateUnreachableException : DelegateClientException
 
 internal sealed class DelegateTlsException : DelegateClientException
 {
-	public DelegateTlsException(string message = "The certificate presented by the remote could not be validated.",
+	public DelegateTlsException(
+		string message = "The certificate presented by the remote could not be validated.",
 		Exception? inner = null)
 		: base(message, inner)
 	{
@@ -27,7 +28,8 @@ internal sealed class DelegateTlsException : DelegateClientException
 
 internal sealed class DelegateNotMacroDeckException : DelegateClientException
 {
-	public DelegateNotMacroDeckException(string message = "That address did not answer as a Macro Deck.",
+	public DelegateNotMacroDeckException(
+		string message = "That address did not answer as a Macro Deck.",
 		Exception? inner = null)
 		: base(message, inner)
 	{
@@ -62,14 +64,17 @@ internal sealed class DelegateRateLimitedException : DelegateClientException
 {
 	public DelegateRateLimitedException(TimeSpan retryAfter, string message = "Too many attempts.")
 		: base(message)
-		=> RetryAfter = retryAfter;
+	{
+		RetryAfter = retryAfter;
+	}
 
 	public TimeSpan RetryAfter { get; }
 }
 
 internal sealed class DelegateServerErrorException : DelegateClientException
 {
-	public DelegateServerErrorException(string message = "The remote returned an unexpected error.",
+	public DelegateServerErrorException(
+		string message = "The remote returned an unexpected error.",
 		Exception? inner = null)
 		: base(message, inner)
 	{
@@ -96,7 +101,9 @@ internal sealed class DelegateThrottledException : DelegateClientException
 {
 	public DelegateThrottledException(TimeSpan remaining)
 		: base("The remote is temporarily locked out.")
-		=> Remaining = remaining;
+	{
+		Remaining = remaining;
+	}
 
 	public TimeSpan Remaining { get; }
 }

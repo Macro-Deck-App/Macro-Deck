@@ -9,34 +9,43 @@ namespace MacroDeckHost.Widgets.MusicPlayer;
 internal static class MusicPlayerWidgetViewPreviews
 {
 	[UiPreview("Playing", Profile = UiPreviewProfiles.Widget)]
-	public static UiElement Playing() => Build(new MusicPlayerViewState
+	public static UiElement Playing()
 	{
-		IsLoading = false,
-		Label = LocalizedText.FromLiteral("Spotify"),
-		IsConnected = true,
-		IsPlaying = true,
-		TrackName = "Nightbird",
-		ArtistName = "The Wandering Sound",
-		AlbumName = "Distant Shores",
-	});
+		return Build(new MusicPlayerViewState
+		{
+			IsLoading = false,
+			Label = LocalizedText.FromLiteral("Spotify"),
+			IsConnected = true,
+			IsPlaying = true,
+			TrackName = "Nightbird",
+			ArtistName = "The Wandering Sound",
+			AlbumName = "Distant Shores"
+		});
+	}
 
 	[UiPreview("Paused", Profile = UiPreviewProfiles.Widget)]
-	public static UiElement Paused() => Build(new MusicPlayerViewState
+	public static UiElement Paused()
 	{
-		IsLoading = false,
-		Label = LocalizedText.FromLiteral("Spotify"),
-		IsConnected = true,
-		IsPaused = true,
-		TrackName = "Nightbird",
-		ArtistName = "The Wandering Sound",
-		AlbumName = "Distant Shores",
-	});
+		return Build(new MusicPlayerViewState
+		{
+			IsLoading = false,
+			Label = LocalizedText.FromLiteral("Spotify"),
+			IsConnected = true,
+			IsPaused = true,
+			TrackName = "Nightbird",
+			ArtistName = "The Wandering Sound",
+			AlbumName = "Distant Shores"
+		});
+	}
 
 	[UiPreview("Not connected", Profile = UiPreviewProfiles.Widget)]
-	public static UiElement NotConnected() => Build(new MusicPlayerViewState
+	public static UiElement NotConnected()
 	{
-		IsLoading = false, Label = LocalizedText.FromLiteral("Spotify"), IsConnected = false,
-	});
+		return Build(new MusicPlayerViewState
+		{
+			IsLoading = false, Label = LocalizedText.FromLiteral("Spotify"), IsConnected = false
+		});
+	}
 
 	private static UiElement Build(MusicPlayerViewState state)
 	{

@@ -50,7 +50,9 @@ public sealed record BatteryDevice
 		{
 			if (value is < 0 or > 100)
 			{
-				throw new ArgumentOutOfRangeException(nameof(LevelPercent), value, "A battery level is between 0 and 100.");
+				throw new ArgumentOutOfRangeException(nameof(LevelPercent),
+					value,
+					"A battery level is between 0 and 100.");
 			}
 
 			_levelPercent = value;

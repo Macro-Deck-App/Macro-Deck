@@ -16,16 +16,23 @@ public class CalendarWidgetTriggerSchedulerTests
 	private CalendarWidgetAutomationHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new CalendarWidgetAutomationHarness();
+	public void SetUp()
+	{
+		_harness = new CalendarWidgetAutomationHarness();
+	}
 
 	[TearDown]
-	public async Task TearDown() => await _harness.DisposeAsync();
+	public async Task TearDown()
+	{
+		await _harness.DisposeAsync();
+	}
 
 	[Test]
 	public async Task Starts_soon_runs_the_widgets_flow_at_its_own_lead_time_once_with_the_event_as_payload()
 	{
 		_harness.With(Event("review", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), title: "Review"));
-		var widget = _harness.Folders.AddCalendar(CalendarWidgetTypes.LayoutNextEvent, Data(new { leadTime = 10 }, StartsSoon));
+		var widget = _harness.Folders.AddCalendar(CalendarWidgetTypes.LayoutNextEvent,
+			Data(new { leadTime = 10 }, StartsSoon));
 
 		await _harness.RunAtAsync(Noon.AddMinutes(19));
 		var early = _harness.Executor.Requests.Count;
@@ -61,11 +68,13 @@ public class CalendarWidgetTriggerSchedulerTests
 			await _harness.RunAtAsync(instant);
 		}
 
-		Assert.That(_harness.Executor.Requests.Select(r => r.EventParameters!["eventId"]), Is.EqualTo(new[] { "team" }));
+		Assert.That(_harness.Executor.Requests.Select(r => r.EventParameters!["eventId"]),
+			Is.EqualTo(new[] { "team" }));
 	}
 
 	[Test]
-	public async Task Started_and_ended_run_as_the_event_passes_but_an_event_over_before_the_widget_existed_never_replays()
+	public async Task
+		Started_and_ended_run_as_the_event_passes_but_an_event_over_before_the_widget_existed_never_replays()
 	{
 		_harness.With(Event("morning", Noon.AddMinutes(10), TimeSpan.FromMinutes(20)))
 			.With(Event("afternoon", Noon.AddMinutes(70), TimeSpan.FromMinutes(10)));
@@ -117,7 +126,8 @@ public class CalendarWidgetTriggerSchedulerTests
 		await service.StartAsync(CancellationToken.None);
 		await SleepingUntilAsync(Noon.AddHours(1));
 
-		var widget = _harness.Folders.AddCalendar(CalendarWidgetTypes.LayoutNextEvent, Data(new { leadTime = 5 }, StartsSoon));
+		var widget = _harness.Folders.AddCalendar(CalendarWidgetTypes.LayoutNextEvent,
+			Data(new { leadTime = 5 }, StartsSoon));
 		await _harness.Lifecycle.ChangedAsync([widget]);
 		await SleepingUntilAsync(Noon.AddMinutes(1));
 		var beforeChange = _harness.Executor.Requests.Count;
@@ -130,12 +140,16 @@ public class CalendarWidgetTriggerSchedulerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(beforeChange, Is.Zero);
-			Assert.That(_harness.Time.Now, Is.EqualTo(Noon), "nothing but the change itself may have woken the planner");
+			Assert.That(_harness.Time.Now,
+				Is.EqualTo(Noon),
+				"nothing but the change itself may have woken the planner");
 		});
 	}
 
 	private async Task SleepingUntilAsync(DateTimeOffset instant)
-		=> await EventuallyAsync(() => _harness.Time.ActiveDueTimes.Contains(instant));
+	{
+		await EventuallyAsync(() => _harness.Time.ActiveDueTimes.Contains(instant));
+	}
 
 	private static async Task EventuallyAsync(Func<bool> condition)
 	{

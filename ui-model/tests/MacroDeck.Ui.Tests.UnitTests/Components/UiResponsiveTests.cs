@@ -19,13 +19,19 @@ public class UiResponsiveTests
 	private static readonly string[] _variantOnly = ["root.weather.caption"];
 
 	private static UiSurface WidgetSurface()
-		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	}
 
 	private static UiTree Build(params UiElement[] children)
-		=> UiViewBuilder.Build(WidgetSurface(), new UiStack { Key = "root", Children = children });
+	{
+		return UiViewBuilder.Build(WidgetSurface(), new UiStack { Key = "root", Children = children });
+	}
 
 	private static UiView View(params UiElement[] children)
-		=> new(WidgetSurface(), new UiStack { Key = "root", Children = children });
+	{
+		return new UiView(WidgetSurface(), new UiStack { Key = "root", Children = children });
+	}
 
 	private static IEnumerable<UiNode> Walk(UiNode node)
 	{
@@ -45,22 +51,25 @@ public class UiResponsiveTests
 		}
 	}
 
-	private static UiResponsive Weather(UiElement? fallback = null) => new()
+	private static UiResponsive Weather(UiElement? fallback = null)
 	{
-		Key = "weather",
-		Fill = true,
-		Fallback = fallback,
-		Default = new UiStack { Key = "compact", Children = [new UiTextRun { Key = "temp", Text = "21°" }] },
-		Variants =
-		[
-			new UiResponsiveVariant
-			{
-				MinWidth = 1.5,
-				Content = new UiStack { Key = "wide", Direction = UiComponentDirections.Horizontal },
-			},
-			new UiResponsiveVariant { MaxAspect = 0.67, Content = new UiStack { Key = "tall" } },
-		],
-	};
+		return new UiResponsive
+		{
+			Key = "weather",
+			Fill = true,
+			Fallback = fallback,
+			Default = new UiStack { Key = "compact", Children = [new UiTextRun { Key = "temp", Text = "21°" }] },
+			Variants =
+			[
+				new UiResponsiveVariant
+				{
+					MinWidth = 1.5,
+					Content = new UiStack { Key = "wide", Direction = UiComponentDirections.Horizontal }
+				},
+				new UiResponsiveVariant { MaxAspect = 0.67, Content = new UiStack { Key = "tall" } }
+			]
+		};
+	}
 
 	private static int Select(string variants, int childCount, double? width, double? height)
 	{
@@ -101,8 +110,7 @@ public class UiResponsiveTests
 	[Test]
 	public void A_default_keyed_like_the_node_or_a_sibling_builds_without_colliding_ids()
 	{
-		var tree = Build(
-			new UiTextRun { Key = "compact", Text = "sibling" },
+		var tree = Build(new UiTextRun { Key = "compact", Text = "sibling" },
 			new UiResponsive { Key = "weather", Default = new UiStack { Key = "weather" } },
 			new UiResponsive { Key = "other", Default = new UiStack { Key = "compact" } });
 
@@ -119,7 +127,8 @@ public class UiResponsiveTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(responsive.Fallback!.Id, Is.EqualTo("root.plain"));
-			Assert.That(Walk(responsive).Any(node => node.Id.Contains("_fallback", StringComparison.Ordinal)), Is.False);
+			Assert.That(Walk(responsive).Any(node => node.Id.Contains("_fallback", StringComparison.Ordinal)),
+				Is.False);
 		});
 	}
 
@@ -134,8 +143,8 @@ public class UiResponsiveTests
 			Components = new Dictionary<string, UiVersionRange>
 			{
 				["ui.stack"] = new() { Minimum = 1, Maximum = 1 },
-				["ui.text"] = new() { Minimum = 1, Maximum = 1 },
-			},
+				["ui.text"] = new() { Minimum = 1, Maximum = 1 }
+			}
 		};
 
 		Assert.Multiple(() =>
@@ -156,8 +165,8 @@ public class UiResponsiveTests
 			Default = new UiButton
 			{
 				Key = "play",
-				Events = [UiEventHandler.On(UiComponentEvents.Press, () => presses++)],
-			},
+				Events = [UiEventHandler.On(UiComponentEvents.Press, () => presses++)]
+			}
 		});
 
 		var drawn = view.Dispatch(new UiEvent { NodeId = "root.tile.play", Name = UiComponentEvents.Press });
@@ -178,7 +187,7 @@ public class UiResponsiveTests
 		var view = View(new UiResponsive
 		{
 			Key = "weather",
-			Default = new UiTextRun { Key = "temp", Text = UiText.From(() => temperature.Value) },
+			Default = new UiTextRun { Key = "temp", Text = UiText.From(() => temperature.Value) }
 		});
 		view.DrainPatches();
 
@@ -206,9 +215,9 @@ public class UiResponsiveTests
 				new UiResponsiveVariant
 				{
 					MinWidth = 1.5,
-					Content = new UiTextRun { Key = "caption", Text = UiText.From(() => label.Value) },
-				},
-			],
+					Content = new UiTextRun { Key = "caption", Text = UiText.From(() => label.Value) }
+				}
+			]
 		});
 		view.DrainPatches();
 
@@ -225,33 +234,42 @@ public class UiResponsiveTests
 		Assert.Multiple(() =>
 		{
 			Assert.Throws<UiViewException>(() => Build(new UiResponsive
-			{
-				Key = "r",
-				Default = new UiStack { Key = "d" },
-				Children = [new UiStack { Key = "c" }],
-			}), "children");
+				{
+					Key = "r",
+					Default = new UiStack { Key = "d" },
+					Children = [new UiStack { Key = "c" }]
+				}),
+				"children");
 			Assert.Throws<UiViewException>(() => Build(new UiResponsive
-			{
-				Key = "r",
-				Default = new UiWhen { Key = "w", Condition = () => true, Content = () => new UiStack { Key = "d" } },
-			}), "conditional default");
+				{
+					Key = "r",
+					Default = new UiWhen
+						{ Key = "w", Condition = () => true, Content = () => new UiStack { Key = "d" } }
+				}),
+				"conditional default");
 			Assert.Throws<UiViewException>(() => Build(new UiResponsive
-			{
-				Key = "r",
-				Default = new UiStack { Key = "d" },
-				Variants = [new UiResponsiveVariant { MinWidth = 2, Content = new UiStack { Key = "_fallback" } }],
-			}), "reserved key");
+				{
+					Key = "r",
+					Default = new UiStack { Key = "d" },
+					Variants = [new UiResponsiveVariant { MinWidth = 2, Content = new UiStack { Key = "_fallback" } }]
+				}),
+				"reserved key");
 			Assert.Throws<UiViewException>(() => Build(new UiResponsive
-			{
-				Key = "r",
-				Default = new UiStack { Key = "d", Fill = true },
-			}), "slot property on a layout");
+				{
+					Key = "r",
+					Default = new UiStack { Key = "d", Fill = true }
+				}),
+				"slot property on a layout");
 			Assert.Throws<UiViewException>(() => Build(new UiResponsive
-			{
-				Key = "r",
-				Default = new UiStack { Key = "d" },
-				Variants = [new UiResponsiveVariant { MinWidth = 2, MaxWidth = 2, Content = new UiStack { Key = "v" } }],
-			}), "a variant that can never hold");
+				{
+					Key = "r",
+					Default = new UiStack { Key = "d" },
+					Variants =
+					[
+						new UiResponsiveVariant { MinWidth = 2, MaxWidth = 2, Content = new UiStack { Key = "v" } }
+					]
+				}),
+				"a variant that can never hold");
 		});
 	}
 
@@ -263,7 +281,8 @@ public class UiResponsiveTests
 			Assert.Throws<ArgumentOutOfRangeException>(() =>
 				_ = new UiResponsiveVariant { MinWidth = -1, Content = new UiStack { Key = "v" } });
 			Assert.Throws<ArgumentOutOfRangeException>(() =>
-				_ = new UiResponsiveVariant { MaxHeight = double.PositiveInfinity, Content = new UiStack { Key = "v" } });
+				_ = new UiResponsiveVariant
+					{ MaxHeight = double.PositiveInfinity, Content = new UiStack { Key = "v" } });
 			Assert.Throws<ArgumentOutOfRangeException>(() =>
 				_ = new UiResponsiveVariant { MinAspect = 0, Content = new UiStack { Key = "v" } });
 		});
@@ -273,12 +292,17 @@ public class UiResponsiveTests
 	public void An_input_in_a_default_that_is_copied_is_rejected_naming_the_explicit_fallback_way_out()
 	{
 		var text = new UiState<string>("");
-		UiResponsive Form(UiElement? fallback) => new()
+
+		UiResponsive Form(UiElement? fallback)
 		{
-			Key = "form",
-			Fallback = fallback,
-			Default = new UiStack { Key = "fields", Children = [new UiStringInput { Key = "name", Binding = Bind.To(text) }] },
-		};
+			return new UiResponsive
+			{
+				Key = "form",
+				Fallback = fallback,
+				Default = new UiStack
+					{ Key = "fields", Children = [new UiStringInput { Key = "name", Binding = Bind.To(text) }] }
+			};
+		}
 
 		var exception = Assert.Throws<UiViewException>(() => Build(Form(null)));
 
@@ -306,10 +330,10 @@ public class UiResponsiveTests
 					{
 						Key = "edit",
 						Condition = () => editing.Value,
-						Content = () => new UiStringInput { Key = "name", Binding = Bind.To(text) },
-					},
-				],
-			},
+						Content = () => new UiStringInput { Key = "name", Binding = Bind.To(text) }
+					}
+				]
+			}
 		});
 
 		var exception = Assert.Catch<Exception>(() => editing.Set(true));
@@ -327,7 +351,7 @@ public class UiResponsiveTests
 		var exception = Assert.Throws<UiViewException>(() => Build(new UiResponsive
 		{
 			Key = "tile",
-			Default = new UiStack { Key = longKey },
+			Default = new UiStack { Key = longKey }
 		}));
 
 		Assert.That(exception!.Message, Does.Contain("'tile'").And.Contain("explicit Fallback"));

@@ -5,7 +5,7 @@ using MacroDeck.Sdk.Widgets;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A36_WidgetDataAndHistoryFakeTests
+public class A36WidgetDataAndHistoryFakeTests
 {
 	[Test]
 	public async Task Only_a_seeded_widget_has_data()

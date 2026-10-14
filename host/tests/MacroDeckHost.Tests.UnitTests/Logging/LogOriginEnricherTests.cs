@@ -17,7 +17,7 @@ public class LogOriginEnricherTests
 	[Test]
 	public void A_Source_Context_Becomes_Its_Short_Type_Name()
 	{
-		Assert.That(Origin(sourceContext: "MacroDeckHost.Ui.UiHub"), Is.EqualTo("Host/UiHub"));
+		Assert.That(Origin("MacroDeckHost.Ui.UiHub"), Is.EqualTo("Host/UiHub"));
 	}
 
 	[Test]
@@ -38,7 +38,10 @@ public class LogOriginEnricherTests
 	[TestCase("key:value", ExpectedResult = "Integration/key_value")]
 	[TestCase("br[ack]ets", ExpectedResult = "Integration/br_ack_ets")]
 	[TestCase("sla/sh", ExpectedResult = "Integration/sla_sh")]
-	public string An_Unruly_Integration_Id_Is_Sanitized(string integrationId) => Origin(integrationId: integrationId);
+	public string An_Unruly_Integration_Id_Is_Sanitized(string integrationId)
+	{
+		return Origin(integrationId: integrationId);
+	}
 
 	private static string Origin(string? sourceContext = null, string? integrationId = null)
 	{
@@ -70,6 +73,8 @@ public class LogOriginEnricherTests
 	private sealed class PropertyFactory : ILogEventPropertyFactory
 	{
 		public LogEventProperty CreateProperty(string name, object? value, bool destructureObjects = false)
-			=> new(name, new ScalarValue(Convert.ToString(value, CultureInfo.InvariantCulture)));
+		{
+			return new LogEventProperty(name, new ScalarValue(Convert.ToString(value, CultureInfo.InvariantCulture)));
+		}
 	}
 }

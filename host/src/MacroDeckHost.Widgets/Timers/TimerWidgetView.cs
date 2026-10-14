@@ -8,11 +8,12 @@ namespace MacroDeckHost.Widgets.Timers;
 
 internal static class TimerWidgetView
 {
-	private const string _pausedColor = "#8a8a8a";
-	private const string _alertColor = "#c62828";
-	private const string _alertTextColor = "#ffffff";
+	private const string PausedColor = "#8a8a8a";
+	private const string AlertColor = "#c62828";
+	private const string AlertTextColor = "#ffffff";
 
-	public static UiElement Build(UiState<TimerFace> face,
+	public static UiElement Build(
+		UiState<TimerFace> face,
 		TimerWidgetSettings settings,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
 		IReadOnlyList<UiEventHandler>? events = null)
@@ -34,7 +35,7 @@ internal static class TimerWidgetView
 				{
 					Key = "finishedGate",
 					Condition = () => face.Value.IsFinished,
-					Content = () => Finished(settings, safeArea),
+					Content = () => Finished(settings, safeArea)
 				},
 				new UiWhen
 				{
@@ -44,10 +45,10 @@ internal static class TimerWidgetView
 					{
 						Key = "clockLayer",
 						Fill = true,
-						Children = [Ring(face, settings, safeArea), Readout(face, settings, safeArea)],
-					},
-				},
-			],
+						Children = [Ring(face, settings, safeArea), Readout(face, settings, safeArea)]
+					}
+				}
+			]
 		};
 	}
 
@@ -71,17 +72,17 @@ internal static class TimerWidgetView
 					EndAngle = fullTurn ? UiValue.Of(360d) : UiValue.None<double>(),
 					Level = UiValue.From(() => face.Value.Level),
 					LevelColor = UiValue.Optional(() => face.Value.IsPaused
-						? UiValue.Of(_pausedColor)
+						? UiValue.Of(PausedColor)
 						: Tint(settings.AccentColor)),
 					Fallback = new UiRangeBar
 					{
 						Key = "ringFallback",
 						Thickness = 0.05,
 						Start = 0d,
-						End = UiValue.From(() => face.Value.Level),
-					},
-				},
-			],
+						End = UiValue.From(() => face.Value.Level)
+					}
+				}
+			]
 		};
 	}
 
@@ -98,26 +99,26 @@ internal static class TimerWidgetView
 					Key = "state",
 					Size = 0.1,
 					Role = UiComponentTextRoles.Muted,
-					Icon = UiValue.From(() => face.Value.IsPaused ? UiIcons.Pause : UiIcons.Play),
-				},
+					Icon = UiValue.From(() => face.Value.IsPaused ? UiIcons.Pause : UiIcons.Play)
+				}
 			},
 			new UiWhen
 			{
 				Key = "timeGate",
 				Condition = () => !face.Value.AwaitsDuration,
-				Content = () => Time(face),
+				Content = () => Time(face)
 			},
 			new UiWhen
 			{
 				Key = "setGate",
 				Condition = () => face.Value.AwaitsDuration,
-				Content = () => Hint("setHint", AppStrings.Widgets.Countdown.TapToSet(), color: null),
-			},
+				Content = () => Hint("setHint", AppStrings.Widgets.Countdown.TapToSet(), null)
+			}
 		};
 
 		if (settings is { ShowLabel: true, Label: { } label })
 		{
-			children.Add(Caption(label, color: null));
+			children.Add(Caption(label, null));
 		}
 
 		return new UiStack
@@ -129,12 +130,13 @@ internal static class TimerWidgetView
 			Justify = UiComponentJustify.Center,
 			Align = UiComponentAlignments.Center,
 			Gap = 0.02,
-			Children = children,
+			Children = children
 		};
 	}
 
 	private static UiProgressText Time(UiState<TimerFace> face)
-		=> new()
+	{
+		return new UiProgressText
 		{
 			Key = "time",
 			Value = UiValue.From(() => face.Value.Progress),
@@ -153,9 +155,10 @@ internal static class TimerWidgetView
 				Size = 0.19,
 				MinSize = 0.09,
 				Weight = UiComponentTextWeights.Bold,
-				Align = UiComponentAlignments.Center,
-			},
+				Align = UiComponentAlignments.Center
+			}
 		};
+	}
 
 	private static UiButton Finished(TimerWidgetSettings settings, UiSize safeArea)
 	{
@@ -168,15 +171,15 @@ internal static class TimerWidgetView
 				Size = 0.19,
 				MinSize = 0.09,
 				Weight = UiComponentTextWeights.Bold,
-				Color = _alertTextColor,
-				Align = UiComponentAlignments.Center,
+				Color = AlertTextColor,
+				Align = UiComponentAlignments.Center
 			},
-			Hint("dismissHint", AppStrings.Widgets.Countdown.TapToDismiss(), _alertTextColor),
+			Hint("dismissHint", AppStrings.Widgets.Countdown.TapToDismiss(), AlertTextColor)
 		};
 
 		if (settings is { ShowLabel: true, Label: { } label })
 		{
-			children.Insert(0, Caption(label, _alertTextColor));
+			children.Insert(0, Caption(label, AlertTextColor));
 		}
 
 		return new UiButton
@@ -184,20 +187,21 @@ internal static class TimerWidgetView
 			Key = "finished",
 			Fill = true,
 			Corner = UiComponentButtonCorners.Tile,
-			Background = _alertColor,
+			Background = AlertColor,
 			BorderStyle = UiComponentBorderStyles.Heartbeat,
-			BorderColor = _alertTextColor,
+			BorderColor = AlertTextColor,
 			Padding = safeArea,
 			Direction = UiComponentDirections.Vertical,
 			Justify = UiComponentJustify.Center,
 			Align = UiComponentAlignments.Center,
 			Gap = 0.03,
-			Children = children,
+			Children = children
 		};
 	}
 
 	private static UiTextRun Hint(string key, UiText text, string? color)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
@@ -207,11 +211,13 @@ internal static class TimerWidgetView
 			Role = UiComponentTextRoles.Secondary,
 			Color = color is null ? UiValue.None<string>() : UiValue.Of(color),
 			Align = UiComponentAlignments.Center,
-			MaxLines = 2,
+			MaxLines = 2
 		};
+	}
 
 	private static UiTextRun Caption(string label, string? color)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = "caption",
 			Text = UiText.Of(label),
@@ -220,9 +226,12 @@ internal static class TimerWidgetView
 			Weight = UiComponentTextWeights.SemiBold,
 			Role = UiComponentTextRoles.Muted,
 			Color = color is null ? UiValue.None<string>() : UiValue.Of(color),
-			Align = UiComponentAlignments.Center,
+			Align = UiComponentAlignments.Center
 		};
+	}
 
 	private static UiValue<string> Tint(string? color)
-		=> color is null ? UiValue.None<string>() : UiValue.Of(color);
+	{
+		return color is null ? UiValue.None<string>() : UiValue.Of(color);
+	}
 }

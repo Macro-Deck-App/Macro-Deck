@@ -15,8 +15,7 @@ internal static class ImageSharpDecoding
 {
 	// Every default format except TIFF: icons and artwork are untrusted input, and the TIFF decoder
 	// carries an unpatched 3.x advisory (GHSA-wmxv-xphr-5c9g) that no supported source needs.
-	public static Configuration Configuration { get; } = new(
-		new PngConfigurationModule(),
+	public static Configuration Configuration { get; } = new(new PngConfigurationModule(),
 		new JpegConfigurationModule(),
 		new GifConfigurationModule(),
 		new BmpConfigurationModule(),

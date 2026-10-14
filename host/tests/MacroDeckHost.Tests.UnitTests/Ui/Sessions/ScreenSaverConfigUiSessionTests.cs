@@ -1,5 +1,4 @@
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Sessions;
@@ -80,11 +79,13 @@ internal sealed class ScreenSaverConfigUiSessionTests
 			Assert.That(session.ProviderId, Is.EqualTo(ProviderId));
 			Assert.That(session.Surface.Attributes[UiConfigSurfaceAttributes.EntryPoint].GetString(),
 				Is.EqualTo(UiConfigEntryPoints.ScreenSaverConfig));
-			Assert.That(session.Surface.Attributes[UiConfigSurfaceAttributes.DeviceId].GetString(), Is.EqualTo(DeviceA));
+			Assert.That(session.Surface.Attributes[UiConfigSurfaceAttributes.DeviceId].GetString(),
+				Is.EqualTo(DeviceA));
 			Assert.That(session.Surface.Attributes[UiConfigSurfaceAttributes.ScreenSaverId].GetString(),
 				Is.EqualTo(_screenSaverId));
 			Assert.That(session.Surface.Attributes[UiConfigSurfaceAttributes.ScreenSaverConfiguration]
-					.GetProperty("album").GetString(),
+					.GetProperty("album")
+					.GetString(),
 				Is.EqualTo("holiday"));
 		});
 	}
@@ -98,7 +99,8 @@ internal sealed class ScreenSaverConfigUiSessionTests
 
 		var ticket = _opener.Open(new OpenConfigUiSessionRequest
 			{
-				EntryPoint = UiConfigEntryPoints.ScreenSaverConfig, IntegrationId = ProviderId, ScreenSaverId = plain.ScreenSaverId
+				EntryPoint = UiConfigEntryPoints.ScreenSaverConfig, IntegrationId = ProviderId,
+				ScreenSaverId = plain.ScreenSaverId
 			},
 			DeviceA);
 
@@ -112,7 +114,11 @@ internal sealed class ScreenSaverConfigUiSessionTests
 	private sealed class AcceptingResolver(string providerId) : IUiSessionProviderResolver
 	{
 		public IUiSessionProvider? Resolve(string candidate)
-			=> string.Equals(candidate, providerId, StringComparison.Ordinal) ? new AcceptingProvider(candidate) : null;
+		{
+			return string.Equals(candidate, providerId, StringComparison.Ordinal)
+				? new AcceptingProvider(candidate)
+				: null;
+		}
 	}
 
 	private sealed class AcceptingProvider(string providerId) : IUiSessionProvider
@@ -120,13 +126,26 @@ internal sealed class ScreenSaverConfigUiSessionTests
 		public string ProviderId => providerId;
 
 		public Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command, CancellationToken cancellationToken)
-			=> Task.FromResult(UiSessionOpenOutcome.Accept(command.UiModelVersion));
+		{
+			return Task.FromResult(UiSessionOpenOutcome.Accept(command.UiModelVersion));
+		}
 
-		public Task CloseAsync(string sessionId, string reason, CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task CloseAsync(string sessionId, string reason, CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task RequestSnapshotAsync(string sessionId, CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task RequestSnapshotAsync(string sessionId, CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task DispatchEventAsync(string sessionId, UiSessionEventCommand command, CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		public Task DispatchEventAsync(
+			string sessionId,
+			UiSessionEventCommand command,
+			CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

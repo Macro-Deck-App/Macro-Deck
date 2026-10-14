@@ -6,5 +6,8 @@ public sealed class NullLockStateReader : ILockStateReader
 
 	public string? UnsupportedReason => "Lock-state detection is not supported on this operating system.";
 
-	public bool? IsLocked() => null;
+	public bool? IsLocked()
+	{
+		return null;
+	}
 }

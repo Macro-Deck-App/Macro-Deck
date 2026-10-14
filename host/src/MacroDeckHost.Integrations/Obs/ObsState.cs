@@ -54,51 +54,57 @@ internal sealed record ObsState
 
 	public DateTime? SampledAtUtc { get; init; }
 
-	public static ObsState FromStatus(ObsStatus status, ObsState? previous, DateTime nowUtc) => new()
+	public static ObsState FromStatus(ObsStatus status, ObsState? previous, DateTime nowUtc)
 	{
-		IsConnected = true,
-		CurrentScene = status.CurrentScene,
-		PreviewScene = status.PreviewScene,
-		CurrentProfile = status.CurrentProfile,
-		CurrentSceneCollection = status.CurrentSceneCollection,
-		IsRecording = status.IsRecording,
-		RecordingPaused = status.RecordingPaused,
-		RecordingTimecode = status.RecordingTimecode,
-		IsStreaming = status.IsStreaming,
-		StreamingTimecode = status.StreamingTimecode,
-		VirtualCamActive = status.VirtualCamActive,
-		ReplayBufferActive = status.ReplayBufferActive,
-		StudioModeActive = status.StudioModeActive,
-		Fps = status.Fps,
-		MaxFps = status.MaxFps,
-		CpuUsage = status.CpuUsage,
-		StreamingBitrateKbps = BitrateKbps(status.IsStreaming,
-			status.StreamBytes,
-			previous?.StreamBytes,
-			previous?.StreamingBitrateKbps ?? 0,
-			Elapsed(previous, nowUtc)),
-		RecordingBitrateKbps = BitrateKbps(status.IsRecording,
-			status.RecordBytes,
-			previous?.RecordBytes,
-			previous?.RecordingBitrateKbps ?? 0,
-			Elapsed(previous, nowUtc)),
-		DroppedFrames = status.StreamSkippedFrames,
-		DroppedFramesPercent = Percent(status.StreamSkippedFrames, status.StreamTotalFrames),
-		EncoderSkippedFrames = status.EncoderSkippedFrames,
-		EncoderSkippedFramesPercent = Percent(status.EncoderSkippedFrames, status.EncoderTotalFrames),
-		StreamBytes = status.StreamBytes,
-		RecordBytes = status.RecordBytes,
-		SampledAtUtc = nowUtc
-	};
+		return new ObsState
+		{
+			IsConnected = true,
+			CurrentScene = status.CurrentScene,
+			PreviewScene = status.PreviewScene,
+			CurrentProfile = status.CurrentProfile,
+			CurrentSceneCollection = status.CurrentSceneCollection,
+			IsRecording = status.IsRecording,
+			RecordingPaused = status.RecordingPaused,
+			RecordingTimecode = status.RecordingTimecode,
+			IsStreaming = status.IsStreaming,
+			StreamingTimecode = status.StreamingTimecode,
+			VirtualCamActive = status.VirtualCamActive,
+			ReplayBufferActive = status.ReplayBufferActive,
+			StudioModeActive = status.StudioModeActive,
+			Fps = status.Fps,
+			MaxFps = status.MaxFps,
+			CpuUsage = status.CpuUsage,
+			StreamingBitrateKbps = BitrateKbps(status.IsStreaming,
+				status.StreamBytes,
+				previous?.StreamBytes,
+				previous?.StreamingBitrateKbps ?? 0,
+				Elapsed(previous, nowUtc)),
+			RecordingBitrateKbps = BitrateKbps(status.IsRecording,
+				status.RecordBytes,
+				previous?.RecordBytes,
+				previous?.RecordingBitrateKbps ?? 0,
+				Elapsed(previous, nowUtc)),
+			DroppedFrames = status.StreamSkippedFrames,
+			DroppedFramesPercent = Percent(status.StreamSkippedFrames, status.StreamTotalFrames),
+			EncoderSkippedFrames = status.EncoderSkippedFrames,
+			EncoderSkippedFramesPercent = Percent(status.EncoderSkippedFrames, status.EncoderTotalFrames),
+			StreamBytes = status.StreamBytes,
+			RecordBytes = status.RecordBytes,
+			SampledAtUtc = nowUtc
+		};
+	}
 
 	private static TimeSpan? Elapsed(ObsState? previous, DateTime nowUtc)
-		=> previous is { IsConnected: true, SampledAtUtc: { } sampledAt } ? nowUtc - sampledAt : null;
+	{
+		return previous is { IsConnected: true, SampledAtUtc: { } sampledAt } ? nowUtc - sampledAt : null;
+	}
 
 	// OBS reports no bitrate, only a cumulative byte counter per output, so the rate is the delta
 	// between two samples. State-change events refresh the status outside the poll interval, which can
 	// put two samples milliseconds apart; measuring over that window turns rounding noise into a wild
 	// spike, so a too-short window carries the previous rate instead of recomputing.
-	private static double BitrateKbps(bool outputActive,
+	private static double BitrateKbps(
+		bool outputActive,
 		long bytes,
 		long? previousBytes,
 		double previousKbps,
@@ -123,5 +129,8 @@ internal sealed record ObsState
 		return bytes < before ? 0 : (bytes - before) * 8 / window.TotalSeconds / 1000;
 	}
 
-	private static double Percent(long part, long total) => total > 0 ? part * 100d / total : 0;
+	private static double Percent(long part, long total)
+	{
+		return total > 0 ? part * 100d / total : 0;
+	}
 }

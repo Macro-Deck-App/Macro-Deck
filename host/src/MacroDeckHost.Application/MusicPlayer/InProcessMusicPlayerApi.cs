@@ -15,7 +15,8 @@ public sealed class InProcessMusicPlayerApi : IMusicPlayerApi, IDisposable
 	private Task _raising = Task.CompletedTask;
 	private bool _disposed;
 
-	public InProcessMusicPlayerApi(IMusicPlayerRegistry registry,
+	public InProcessMusicPlayerApi(
+		IMusicPlayerRegistry registry,
 		IMusicPlayerAlbumColor albumColor,
 		IMusicPlayerStateNotifier notifier,
 		ILogger logger)
@@ -157,15 +158,20 @@ public sealed class InProcessMusicPlayerApi : IMusicPlayerApi, IDisposable
 
 public static class MusicPlayerInstanceSnapshots
 {
-	public static IReadOnlyList<MusicPlayerInstanceSnapshot> From(IReadOnlyList<MusicPlayerInstanceDescriptor> descriptors)
-		=> [.. descriptors.Select(From)];
+	public static IReadOnlyList<MusicPlayerInstanceSnapshot> From(
+		IReadOnlyList<MusicPlayerInstanceDescriptor> descriptors)
+	{
+		return [.. descriptors.Select(From)];
+	}
 
 	public static MusicPlayerInstanceSnapshot From(MusicPlayerInstanceDescriptor descriptor)
-		=> new()
+	{
+		return new MusicPlayerInstanceSnapshot
 		{
 			Id = descriptor.InstanceId,
 			ProviderId = descriptor.IntegrationId,
 			ProviderName = descriptor.ProviderName,
 			DisplayName = descriptor.DisplayName
 		};
+	}
 }

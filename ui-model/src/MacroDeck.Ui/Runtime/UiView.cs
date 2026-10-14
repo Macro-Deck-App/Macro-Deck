@@ -293,7 +293,7 @@ public sealed class UiView : IDisposable
 		}
 
 		var element = target.Element;
-		var isChange = string.Equals(@event.Name, _changeEvent, StringComparison.Ordinal);
+		var isChange = string.Equals(@event.Name, ChangeEvent, StringComparison.Ordinal);
 		var input = element as IUiInputElement;
 		var handlers = HandlersFor(target, @event.Name);
 
@@ -671,7 +671,9 @@ public sealed class UiView : IDisposable
 	}
 
 	private void RaiseHandlerFault(string nodeId, string eventName, Exception exception)
-		=> UiSyncRoot.Raise(this, new UiHandlerFaultEventArgs(nodeId, eventName, exception));
+	{
+		UiSyncRoot.Raise(this, new UiHandlerFaultEventArgs(nodeId, eventName, exception));
+	}
 
 	private void EndBatch()
 	{
@@ -727,7 +729,7 @@ public sealed class UiView : IDisposable
 		{
 			FromRevision = fromRevision,
 			ToRevision = toRevision,
-			Operations = operations,
+			Operations = operations
 		});
 
 		// Queued rather than raised: the patch is enqueued and the tree swapped under the gate first, so a
@@ -847,7 +849,7 @@ public sealed class UiView : IDisposable
 				Op = UiPatchOperations.SetProperties,
 				NodeId = node.Node.Id,
 				Properties = node.PendingSets,
-				RemovedProperties = node.PendingRemovals,
+				RemovedProperties = node.PendingRemovals
 			});
 
 			node.MarkForRebuild();
@@ -912,7 +914,7 @@ public sealed class UiView : IDisposable
 		{
 			Properties = properties,
 			Children = children,
-			Fallback = node.Fallback?.Node,
+			Fallback = node.Fallback?.Node
 		};
 	}
 
@@ -922,7 +924,10 @@ public sealed class UiView : IDisposable
 	{
 		private UiView? _view;
 
-		internal UiBatchScope(UiView view) => _view = view;
+		internal UiBatchScope(UiView view)
+		{
+			_view = view;
+		}
 
 		public void Dispose()
 		{
@@ -940,5 +945,5 @@ public sealed class UiView : IDisposable
 
 	/// <summary>The event name a writable binding answers to. A local literal rather than a shared constant,
 	/// which the configuration event vocabulary owns.</summary>
-	private const string _changeEvent = "change";
+	private const string ChangeEvent = "change";
 }

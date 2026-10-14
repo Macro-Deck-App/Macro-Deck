@@ -34,7 +34,8 @@ public static class StartFolderInvariant
 		return MarkAsStart(profileFolders, startFolder).Count > 0 || changed;
 	}
 
-	public static IReadOnlyList<FolderEntity> MarkAsStart(IEnumerable<FolderEntity> folders,
+	public static IReadOnlyList<FolderEntity> MarkAsStart(
+		IEnumerable<FolderEntity> folders,
 		FolderEntity startFolder)
 	{
 		if (startFolder.ParentId is not null)
@@ -70,7 +71,8 @@ public static class StartFolderInvariant
 	}
 
 	private static FolderEntity CreateHomeFolder(ProfileEntity profile)
-		=> new()
+	{
+		return new FolderEntity
 		{
 			Id = Guid.NewGuid(),
 			ProfileId = profile.Id,
@@ -83,6 +85,7 @@ public static class StartFolderInvariant
 			IsDefault = true,
 			CreatedAt = DateTime.UtcNow
 		};
+	}
 
 	private static FolderEntity SelectOldest(IReadOnlyCollection<FolderEntity> folders)
 	{

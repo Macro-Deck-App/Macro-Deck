@@ -48,14 +48,20 @@ public static class EmailChangeDetector
 	// Providers answer Connecting or Disconnected with last known data or none, so only a live
 	// Connected read is trusted to say which mail already existed.
 	private static bool IsBaseline(EmailInboxState? state)
-		=> state is { Status: EmailInboxStatus.Connected, IsStale: false, HasData: true };
+	{
+		return state is { Status: EmailInboxStatus.Connected, IsStale: false, HasData: true };
+	}
 
 	private static IEnumerable<EmailInboxChange> Messages(EmailInboxState previous, EmailInboxState next)
 	{
 		var before = previous.Latest.ToDictionary(message => message.Id, StringComparer.Ordinal);
 		var overlap = next.Latest.Any(message => before.ContainsKey(message.Id));
-		var oldest = previous.Latest.Count == 0 ? (DateTimeOffset?)null : previous.Latest.Min(message => message.ReceivedAt);
-		var newest = previous.Latest.Count == 0 ? (DateTimeOffset?)null : previous.Latest.Max(message => message.ReceivedAt);
+		var oldest = previous.Latest.Count == 0
+			? (DateTimeOffset?)null
+			: previous.Latest.Min(message => message.ReceivedAt);
+		var newest = previous.Latest.Count == 0
+			? (DateTimeOffset?)null
+			: previous.Latest.Max(message => message.ReceivedAt);
 
 		foreach (var message in next.Latest.OrderBy(message => message.ReceivedAt))
 		{
@@ -64,8 +70,7 @@ public static class EmailChangeDetector
 				continue;
 			}
 
-			if (oldest is null ||
-				(message.ReceivedAt >= oldest && (overlap || message.ReceivedAt > newest)))
+			if (oldest is null || message.ReceivedAt >= oldest && (overlap || message.ReceivedAt > newest))
 			{
 				yield return new EmailReceived(next.Inbox, message);
 			}
@@ -85,10 +90,13 @@ public static class EmailChangeDetector
 		}
 	}
 
-	private static bool? Definitive(EmailInboxStatus status) => status switch
+	private static bool? Definitive(EmailInboxStatus status)
 	{
-		EmailInboxStatus.Connected => true,
-		EmailInboxStatus.Disconnected or EmailInboxStatus.Error => false,
-		_ => null
-	};
+		return status switch
+		{
+			EmailInboxStatus.Connected => true,
+			EmailInboxStatus.Disconnected or EmailInboxStatus.Error => false,
+			_ => null
+		};
+	}
 }

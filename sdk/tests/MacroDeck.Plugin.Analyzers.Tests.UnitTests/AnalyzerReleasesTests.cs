@@ -13,10 +13,12 @@ namespace MacroDeck.Plugin.Analyzers.Tests.UnitTests;
 public class AnalyzerReleasesTests
 {
 	private static IEnumerable<DiagnosticDescriptor> AllDescriptors()
-		=> typeof(DiagnosticDescriptors)
+	{
+		return typeof(DiagnosticDescriptors)
 			.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
 			.Where(field => field.FieldType == typeof(DiagnosticDescriptor))
 			.Select(field => (DiagnosticDescriptor)field.GetValue(null)!);
+	}
 
 	private static string RepositoryRoot()
 	{
@@ -31,18 +33,22 @@ public class AnalyzerReleasesTests
 	}
 
 	private static string[] ShippedFileLines()
-		=> File.ReadAllLines(Path.Combine(RepositoryRoot(),
+	{
+		return File.ReadAllLines(Path.Combine(RepositoryRoot(),
 			"sdk",
 			"src",
 			"MacroDeck.Plugin.Analyzers",
 			"AnalyzerReleases.Shipped.md"));
+	}
 
 	private static string[] UnshippedFileLines()
-		=> File.ReadAllLines(Path.Combine(RepositoryRoot(),
+	{
+		return File.ReadAllLines(Path.Combine(RepositoryRoot(),
 			"sdk",
 			"src",
 			"MacroDeck.Plugin.Analyzers",
 			"AnalyzerReleases.Unshipped.md"));
+	}
 
 	/// <summary>
 	/// Only the "### New Rules" table's rows - the ones this test can hold to the same
@@ -54,11 +60,14 @@ public class AnalyzerReleasesTests
 	/// <summary>Whether a line is a rule row rather than a comment or a differently shaped table.
 	/// Both id families count: MDPnnnn for the analyzers, MDLOCnnn for the localization compiler.</summary>
 	private static bool IsRuleRow(string line)
-		=> line.StartsWith("MDP", StringComparison.Ordinal) ||
-			line.StartsWith("MDLOC", StringComparison.Ordinal);
+	{
+		return line.StartsWith("MDP", StringComparison.Ordinal) || line.StartsWith("MDLOC", StringComparison.Ordinal);
+	}
 
 	private static IEnumerable<string> UnshippedNewRuleLines()
-		=> UnshippedFileLines().Where(IsRuleRow);
+	{
+		return UnshippedFileLines().Where(IsRuleRow);
+	}
 
 	[Test]
 	public void
@@ -74,8 +83,8 @@ public class AnalyzerReleasesTests
 			foreach (var descriptor in AllDescriptors())
 			{
 				var row = shippedLines.FirstOrDefault(line =>
-						line.StartsWith(descriptor.Id + " ", StringComparison.Ordinal)) ??
-					unshippedLines.FirstOrDefault(line =>
+						line.StartsWith(descriptor.Id + " ", StringComparison.Ordinal))
+					?? unshippedLines.FirstOrDefault(line =>
 						line.StartsWith(descriptor.Id + " ", StringComparison.Ordinal));
 
 				Assert.That(row,

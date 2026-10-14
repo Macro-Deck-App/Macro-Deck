@@ -12,7 +12,10 @@ namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
 [TestFixture]
 public class PluginHostBuilderTests
 {
-	private static PluginHostBuilder Valid() => MacroDeckPlugin.CreatePlugin();
+	private static PluginHostBuilder Valid()
+	{
+		return MacroDeckPlugin.CreatePlugin();
+	}
 
 	[Test]
 	public void ConfigureServices_callbacks_run_in_registration_order()
@@ -138,7 +141,7 @@ public class PluginHostBuilderTests
 		// directly - every IIntegrationContext member is now a call back into the host, so it cannot
 		// run before PluginConnectionHostedService has a session. There is no real host in this test,
 		// so the connect is simulated the same way PluginSessionConnection itself signals one.
-		plugin.Services.GetRequiredService<PluginConnectionState>().RaiseConnected(resumed: false);
+		plugin.Services.GetRequiredService<PluginConnectionState>().RaiseConnected(false);
 		Assert.That(integration.IsInitialized, Is.True);
 
 		await plugin.StopAsync();
@@ -158,13 +161,13 @@ public class PluginHostBuilderTests
 
 		var state = plugin.Services.GetRequiredService<PluginConnectionState>();
 
-		state.RaiseConnected(resumed: false);
+		state.RaiseConnected(false);
 		Assert.That(integration.ShutdownCount, Is.EqualTo(0));
 
-		state.RaiseConnected(resumed: true);
+		state.RaiseConnected(true);
 		Assert.That(integration.ShutdownCount, Is.EqualTo(0), "a resume must not tear down and rebuild state");
 
-		state.RaiseConnected(resumed: false);
+		state.RaiseConnected(false);
 		Assert.That(integration.ShutdownCount, Is.EqualTo(1), "a reconnect that is not a resume must re-initialize");
 	}
 
@@ -205,7 +208,10 @@ public class PluginHostBuilderTests
 
 	private sealed class RecordingStartup : IPluginStartup
 	{
-		public RecordingStartup() => Instances++;
+		public RecordingStartup()
+		{
+			Instances++;
+		}
 
 		public static List<string> Calls { get; } = [];
 
@@ -217,9 +223,15 @@ public class PluginHostBuilderTests
 			Instances = 0;
 		}
 
-		public void ConfigureServices(IServiceCollection services) => Calls.Add("services");
+		public void ConfigureServices(IServiceCollection services)
+		{
+			Calls.Add("services");
+		}
 
-		public void Configure(IApplicationBuilder app) => Calls.Add("configure");
+		public void Configure(IApplicationBuilder app)
+		{
+			Calls.Add("configure");
+		}
 	}
 
 	private sealed class InjectedIntegration(IHttpClientFactory factory) : TestIntegration
@@ -238,15 +250,24 @@ public class PluginHostBuilderTests
 
 	private sealed class SignallingService : IHostedService
 	{
-		public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task StartAsync(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task StopAsync(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class TrackedDisposable : IDisposable
 	{
 		public bool Disposed { get; private set; }
 
-		public void Dispose() => Disposed = true;
+		public void Dispose()
+		{
+			Disposed = true;
+		}
 	}
 }

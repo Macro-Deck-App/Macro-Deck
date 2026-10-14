@@ -107,14 +107,17 @@ public sealed class DeprecatedSdkApiAnalyzer : DiagnosticAnalyzer
 			metadata.DescribeGuidance()));
 	}
 
-	private static ISymbol? ReferencedSymbol(IOperation operation) => operation switch
+	private static ISymbol? ReferencedSymbol(IOperation operation)
 	{
-		IInvocationOperation invocation => invocation.TargetMethod,
-		IPropertyReferenceOperation property => property.Property,
-		IFieldReferenceOperation field => field.Field,
-		IEventReferenceOperation eventReference => eventReference.Event,
-		IObjectCreationOperation creation => creation.Constructor,
-		IMethodReferenceOperation methodReference => methodReference.Method,
-		_ => null
-	};
+		return operation switch
+		{
+			IInvocationOperation invocation => invocation.TargetMethod,
+			IPropertyReferenceOperation property => property.Property,
+			IFieldReferenceOperation field => field.Field,
+			IEventReferenceOperation eventReference => eventReference.Event,
+			IObjectCreationOperation creation => creation.Constructor,
+			IMethodReferenceOperation methodReference => methodReference.Method,
+			_ => null
+		};
+	}
 }

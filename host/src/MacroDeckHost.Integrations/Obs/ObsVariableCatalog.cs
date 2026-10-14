@@ -91,7 +91,7 @@ internal sealed class ObsVariableCatalog
 				VariableType.Boolean,
 				null,
 				TimeSpan.FromSeconds(5),
-				AppStrings.Integrations.Obs.VariableCatalog.AudioTrack(track: digits),
+				AppStrings.Integrations.Obs.VariableCatalog.AudioTrack(digits),
 				"track_" + digits);
 		})
 		.ToArray();
@@ -375,10 +375,15 @@ internal sealed class ObsVariableCatalog
 	}
 
 	/// <summary>OBS's linear multiplier as a percentage, expressed on OBS's own decibel scale.</summary>
-	private static double ToDecibels(double percent) => ObsVolumeScale.ToDecibels(percent / 100.0);
+	private static double ToDecibels(double percent)
+	{
+		return ObsVolumeScale.ToDecibels(percent / 100.0);
+	}
 
 	private static double ToPercent(double decibels)
-		=> decibels <= MinimumVolumeDb ? 0d : Math.Pow(10, decibels / 20.0) * 100.0;
+	{
+		return decibels <= MinimumVolumeDb ? 0d : Math.Pow(10, decibels / 20.0) * 100.0;
+	}
 
 	private static bool TryReadNumber(object? value, out double percent)
 	{
@@ -397,9 +402,15 @@ internal sealed class ObsVariableCatalog
 		return double.IsFinite(percent);
 	}
 
-	private ObsRuntime? FindRuntime(Guid runtimeId) => _runtimes().FirstOrDefault(runtime => runtime.Id == runtimeId);
+	private ObsRuntime? FindRuntime(Guid runtimeId)
+	{
+		return _runtimes().FirstOrDefault(runtime => runtime.Id == runtimeId);
+	}
 
-	private string TitleOf(Guid runtimeId) => FindRuntime(runtimeId)?.Title ?? runtimeId.ToString("D");
+	private string TitleOf(Guid runtimeId)
+	{
+		return FindRuntime(runtimeId)?.Title ?? runtimeId.ToString("D");
+	}
 
 	private VariableCatalogPage DiscoverRoots(VariableCatalogQuery query)
 	{
@@ -630,54 +641,66 @@ internal sealed class ObsVariableCatalog
 	}
 
 	private static VariableDefinition ConnectionDefinition(Guid runtimeId, string title)
-		=> VariableDefinition.OnDemand(RootId(runtimeId), VariableType.Text) with
+	{
+		return VariableDefinition.OnDemand(RootId(runtimeId), VariableType.Text) with
 		{
 			DisplayName = title,
 			IsContainer = true,
 			IsBindable = false
 		};
+	}
 
 	private static VariableDefinition InputContainerDefinition(Guid runtimeId, string inputName)
-		=> VariableDefinition.OnDemand(InputContainerId(runtimeId, inputName), VariableType.Text) with
+	{
+		return VariableDefinition.OnDemand(InputContainerId(runtimeId, inputName), VariableType.Text) with
 		{
 			DisplayName = inputName,
 			ParentId = RootId(runtimeId),
 			IsContainer = true,
 			IsBindable = false
 		};
+	}
 
 	private static VariableDefinition SceneContainerDefinition(Guid runtimeId, string sceneName)
-		=> VariableDefinition.OnDemand(SceneContainerId(runtimeId, sceneName), VariableType.Text) with
+	{
+		return VariableDefinition.OnDemand(SceneContainerId(runtimeId, sceneName), VariableType.Text) with
 		{
 			DisplayName = sceneName,
 			ParentId = RootId(runtimeId),
 			IsContainer = true,
 			IsBindable = false
 		};
+	}
 
 	private static VariableDefinition FilterContainerDefinition(string id, string parentId, string filterName)
-		=> VariableDefinition.OnDemand(id, VariableType.Text) with
+	{
+		return VariableDefinition.OnDemand(id, VariableType.Text) with
 		{
 			DisplayName = filterName,
 			ParentId = parentId,
 			IsContainer = true,
 			IsBindable = false
 		};
+	}
 
 	private static VariableDefinition ItemContainerDefinition(string id, string parentId, string itemName)
-		=> VariableDefinition.OnDemand(id, VariableType.Text) with
+	{
+		return VariableDefinition.OnDemand(id, VariableType.Text) with
 		{
 			DisplayName = itemName,
 			ParentId = parentId,
 			IsContainer = true,
 			IsBindable = false
 		};
+	}
 
-	private static VariableDefinition LeafDefinition(string id,
+	private static VariableDefinition LeafDefinition(
+		string id,
 		string parentId,
 		string sourceName,
 		LeafSpec spec)
-		=> VariableDefinition.OnDemand(id, spec.Type) with
+	{
+		return VariableDefinition.OnDemand(id, spec.Type) with
 		{
 			Name = SuggestedName(sourceName, spec.SuggestedSuffix),
 			DisplayName = spec.Segment,
@@ -689,12 +712,15 @@ internal sealed class ObsVariableCatalog
 			SemanticKind = spec.SemanticKind,
 			Write = spec.Write
 		};
+	}
 
-	private static VariableDefinition SettingDefinition(Guid runtimeId,
+	private static VariableDefinition SettingDefinition(
+		Guid runtimeId,
 		string inputName,
 		string key,
 		VariableType type)
-		=> VariableDefinition.OnDemand(InputSettingId(runtimeId, inputName, key), type) with
+	{
+		return VariableDefinition.OnDemand(InputSettingId(runtimeId, inputName, key), type) with
 		{
 			Name = SuggestedName(inputName, Sanitize(key)),
 			DisplayName = key,
@@ -702,13 +728,15 @@ internal sealed class ObsVariableCatalog
 			RefreshInterval = TimeSpan.FromSeconds(5),
 			Description = AppStrings.Integrations.Obs.VariableCatalog.InputSetting()
 		};
+	}
 
 	private static VariableDefinition FilterEnabledDefinition(
 		string id,
 		string parentId,
 		string sourceName,
 		string filterName)
-		=> VariableDefinition.OnDemand(id, VariableType.Boolean) with
+	{
+		return VariableDefinition.OnDemand(id, VariableType.Boolean) with
 		{
 			Name = $"{SuggestedName(sourceName, Sanitize(filterName))}_{EnabledLeaf}",
 			DisplayName = EnabledLeaf,
@@ -716,13 +744,15 @@ internal sealed class ObsVariableCatalog
 			RefreshInterval = TimeSpan.FromSeconds(2),
 			Description = AppStrings.Integrations.Obs.VariableCatalog.FilterEnabled()
 		};
+	}
 
 	private static VariableDefinition SceneItemVisibleDefinition(
 		string id,
 		string parentId,
 		string sceneName,
 		string itemName)
-		=> VariableDefinition.OnDemand(id, VariableType.Boolean) with
+	{
+		return VariableDefinition.OnDemand(id, VariableType.Boolean) with
 		{
 			Name = $"{SuggestedName(sceneName, Sanitize(itemName))}_{VisibleLeaf}",
 			DisplayName = VisibleLeaf,
@@ -730,8 +760,12 @@ internal sealed class ObsVariableCatalog
 			RefreshInterval = TimeSpan.FromSeconds(1),
 			Description = AppStrings.Integrations.Obs.VariableCatalog.Visible()
 		};
+	}
 
-	private static string SuggestedName(string sourceName, string suffix) => $"obs_{Sanitize(sourceName)}_{suffix}";
+	private static string SuggestedName(string sourceName, string suffix)
+	{
+		return $"obs_{Sanitize(sourceName)}_{suffix}";
+	}
 
 	private static string Sanitize(string value)
 	{
@@ -761,8 +795,8 @@ internal sealed class ObsVariableCatalog
 
 		using (document)
 		{
-			if (document.RootElement.ValueKind != JsonValueKind.Object ||
-				!document.RootElement.TryGetProperty(key, out var element))
+			if (document.RootElement.ValueKind != JsonValueKind.Object
+				|| !document.RootElement.TryGetProperty(key, out var element))
 			{
 				return false;
 			}
@@ -776,56 +810,84 @@ internal sealed class ObsVariableCatalog
 	// "75") stays Text with that literal CLR string, matching what OBS actually reports rather than what
 	// the text happens to look like. Object, array and null values fall through to their raw JSON text -
 	// none of GetValueAsync's three legal shapes (string, number, bool) can carry them losslessly.
-	private static (VariableType Type, object Value) MapSettingValue(JsonElement element) => element.ValueKind switch
+	private static (VariableType Type, object Value) MapSettingValue(JsonElement element)
 	{
-		JsonValueKind.True => (VariableType.Boolean, true),
-		JsonValueKind.False => (VariableType.Boolean, false),
-		// A JSON number is arbitrary-precision, and .NET's own double parsing saturates rather than failing
-		// on overflow - TryGetDouble reports success with a PositiveInfinity/NegativeInfinity result for a
-		// magnitude like 1e999, not false - so IsFinite is what actually catches an unrepresentable value;
-		// TryGetDouble's own bool is kept as a defensive first check. Either failure falls back to the raw
-		// JSON text rather than a substituted 0, exactly like the neighbouring default case below.
-		JsonValueKind.Number => element.TryGetDouble(out var number) && double.IsFinite(number)
-			? (VariableType.Numeric, number)
-			: (VariableType.Text, element.GetRawText()),
-		JsonValueKind.String => (VariableType.Text, (object)(element.GetString() ?? string.Empty)),
-		_ => (VariableType.Text, element.GetRawText())
-	};
+		return element.ValueKind switch
+		{
+			JsonValueKind.True => (VariableType.Boolean, true),
+			JsonValueKind.False => (VariableType.Boolean, false),
+			// A JSON number is arbitrary-precision, and .NET's own double parsing saturates rather than failing
+			// on overflow - TryGetDouble reports success with a PositiveInfinity/NegativeInfinity result for a
+			// magnitude like 1e999, not false - so IsFinite is what actually catches an unrepresentable value;
+			// TryGetDouble's own bool is kept as a defensive first check. Either failure falls back to the raw
+			// JSON text rather than a substituted 0, exactly like the neighbouring default case below.
+			JsonValueKind.Number => element.TryGetDouble(out var number) && double.IsFinite(number)
+				? (VariableType.Numeric, number)
+				: (VariableType.Text, element.GetRawText()),
+			JsonValueKind.String => (VariableType.Text, (object)(element.GetString() ?? string.Empty)),
+			_ => (VariableType.Text, element.GetRawText())
+		};
+	}
 
-	private static string RootId(Guid runtimeId) => runtimeId.ToString("D");
+	private static string RootId(Guid runtimeId)
+	{
+		return runtimeId.ToString("D");
+	}
 
 	private static string InputContainerId(Guid runtimeId, string inputName)
-		=> $"{RootId(runtimeId)}/{InputSegment}/{CatalogResourceIds.Encode(inputName)}";
+	{
+		return $"{RootId(runtimeId)}/{InputSegment}/{CatalogResourceIds.Encode(inputName)}";
+	}
 
 	private static string InputLeafId(Guid runtimeId, string inputName, string leaf)
-		=> $"{InputContainerId(runtimeId, inputName)}/{leaf}";
+	{
+		return $"{InputContainerId(runtimeId, inputName)}/{leaf}";
+	}
 
 	private static string InputSettingId(Guid runtimeId, string inputName, string key)
-		=> $"{InputContainerId(runtimeId, inputName)}/{SettingSegment}/{CatalogResourceIds.Encode(key)}";
+	{
+		return $"{InputContainerId(runtimeId, inputName)}/{SettingSegment}/{CatalogResourceIds.Encode(key)}";
+	}
 
 	private static string InputFilterContainerId(Guid runtimeId, string inputName, string filterName)
-		=> $"{InputContainerId(runtimeId, inputName)}/{FilterSegment}/{CatalogResourceIds.Encode(filterName)}";
+	{
+		return $"{InputContainerId(runtimeId, inputName)}/{FilterSegment}/{CatalogResourceIds.Encode(filterName)}";
+	}
 
 	private static string InputFilterEnabledId(Guid runtimeId, string inputName, string filterName)
-		=> $"{InputFilterContainerId(runtimeId, inputName, filterName)}/{EnabledLeaf}";
+	{
+		return $"{InputFilterContainerId(runtimeId, inputName, filterName)}/{EnabledLeaf}";
+	}
 
 	private static string SceneContainerId(Guid runtimeId, string sceneName)
-		=> $"{RootId(runtimeId)}/{SceneSegment}/{CatalogResourceIds.Encode(sceneName)}";
+	{
+		return $"{RootId(runtimeId)}/{SceneSegment}/{CatalogResourceIds.Encode(sceneName)}";
+	}
 
 	private static string SceneLeafId(Guid runtimeId, string sceneName, string leaf)
-		=> $"{SceneContainerId(runtimeId, sceneName)}/{leaf}";
+	{
+		return $"{SceneContainerId(runtimeId, sceneName)}/{leaf}";
+	}
 
 	private static string SceneItemContainerId(Guid runtimeId, string sceneName, string itemName)
-		=> $"{SceneContainerId(runtimeId, sceneName)}/{ItemSegment}/{CatalogResourceIds.Encode(itemName)}";
+	{
+		return $"{SceneContainerId(runtimeId, sceneName)}/{ItemSegment}/{CatalogResourceIds.Encode(itemName)}";
+	}
 
 	private static string SceneItemVisibleId(Guid runtimeId, string sceneName, string itemName)
-		=> $"{SceneItemContainerId(runtimeId, sceneName, itemName)}/{VisibleLeaf}";
+	{
+		return $"{SceneItemContainerId(runtimeId, sceneName, itemName)}/{VisibleLeaf}";
+	}
 
 	private static string SceneFilterContainerId(Guid runtimeId, string sceneName, string filterName)
-		=> $"{SceneContainerId(runtimeId, sceneName)}/{FilterSegment}/{CatalogResourceIds.Encode(filterName)}";
+	{
+		return $"{SceneContainerId(runtimeId, sceneName)}/{FilterSegment}/{CatalogResourceIds.Encode(filterName)}";
+	}
 
 	private static string SceneFilterEnabledId(Guid runtimeId, string sceneName, string filterName)
-		=> $"{SceneFilterContainerId(runtimeId, sceneName, filterName)}/{EnabledLeaf}";
+	{
+		return $"{SceneFilterContainerId(runtimeId, sceneName, filterName)}/{EnabledLeaf}";
+	}
 
 	private static ParsedId? ParseId(string id)
 	{
@@ -877,16 +939,16 @@ internal sealed class ObsVariableCatalog
 			};
 		}
 
-		if (leaf == SettingSegment &&
-			segments.Length == 5 &&
-			CatalogResourceIds.TryDecode(segments[4], out var settingKey))
+		if (leaf == SettingSegment
+			&& segments.Length == 5
+			&& CatalogResourceIds.TryDecode(segments[4], out var settingKey))
 		{
 			return new ParsedId(runtimeId, ResourceKind.InputSetting, inputName, settingKey);
 		}
 
-		if (leaf == FilterSegment &&
-			segments.Length is 5 or 6 &&
-			CatalogResourceIds.TryDecode(segments[4], out var filterName))
+		if (leaf == FilterSegment
+			&& segments.Length is 5 or 6
+			&& CatalogResourceIds.TryDecode(segments[4], out var filterName))
 		{
 			if (segments.Length == 5)
 			{
@@ -919,9 +981,9 @@ internal sealed class ObsVariableCatalog
 			};
 		}
 
-		if (leaf == ItemSegment &&
-			segments.Length is 5 or 6 &&
-			CatalogResourceIds.TryDecode(segments[4], out var itemName))
+		if (leaf == ItemSegment
+			&& segments.Length is 5 or 6
+			&& CatalogResourceIds.TryDecode(segments[4], out var itemName))
 		{
 			if (segments.Length == 5)
 			{
@@ -933,9 +995,9 @@ internal sealed class ObsVariableCatalog
 				: null;
 		}
 
-		if (leaf == FilterSegment &&
-			segments.Length is 5 or 6 &&
-			CatalogResourceIds.TryDecode(segments[4], out var filterName))
+		if (leaf == FilterSegment
+			&& segments.Length is 5 or 6
+			&& CatalogResourceIds.TryDecode(segments[4], out var filterName))
 		{
 			if (segments.Length == 5)
 			{
@@ -953,9 +1015,9 @@ internal sealed class ObsVariableCatalog
 	private static bool TryParseTrack(string leaf, out int track)
 	{
 		track = 0;
-		return leaf.StartsWith(TrackPrefix, StringComparison.Ordinal) &&
-			int.TryParse(leaf.AsSpan(TrackPrefix.Length), NumberStyles.None, CultureInfo.InvariantCulture, out track) &&
-			track is >= 1 and <= 6;
+		return leaf.StartsWith(TrackPrefix, StringComparison.Ordinal)
+			&& int.TryParse(leaf.AsSpan(TrackPrefix.Length), NumberStyles.None, CultureInfo.InvariantCulture, out track)
+			&& track is >= 1 and <= 6;
 	}
 
 	private enum ResourceKind

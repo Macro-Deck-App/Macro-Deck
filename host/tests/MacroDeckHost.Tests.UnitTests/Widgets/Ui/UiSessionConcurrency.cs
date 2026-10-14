@@ -40,7 +40,7 @@ internal static class UiSessionConcurrency
 			})
 			{
 				IsBackground = true,
-				Name = $"session-concurrency-{index}",
+				Name = $"session-concurrency-{index}"
 			};
 		}
 
@@ -58,9 +58,11 @@ internal static class UiSessionConcurrency
 	}
 
 	internal static void AssertNoWorkerFaulted(ConcurrentBag<Exception> failures)
-		=> Assert.That(failures,
+	{
+		Assert.That(failures,
 			Is.Empty,
 			failures.IsEmpty
 				? string.Empty
 				: string.Join(Environment.NewLine, failures.Select(failure => failure.ToString())));
+	}
 }

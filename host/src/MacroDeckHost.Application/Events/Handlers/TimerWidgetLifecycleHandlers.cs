@@ -88,7 +88,9 @@ public sealed class TimerWidgetDeletedHandler : INotificationHandler<WidgetDelet
 	}
 
 	public async ValueTask Handle(WidgetDeletedNotification notification, CancellationToken cancellationToken)
-		=> await _timers.ForgetAsync(notification.WidgetId).ConfigureAwait(false);
+	{
+		await _timers.ForgetAsync(notification.WidgetId).ConfigureAwait(false);
+	}
 }
 
 public sealed class TimerWidgetsDeletedHandler : INotificationHandler<WidgetsDeletedNotification>
@@ -120,5 +122,7 @@ public sealed class TimerWidgetProfileDeletedHandler : INotificationHandler<Prof
 	}
 
 	public async ValueTask Handle(ProfileDeletedNotification notification, CancellationToken cancellationToken)
-		=> await _timers.PruneMissingAsync().ConfigureAwait(false);
+	{
+		await _timers.PruneMissingAsync().ConfigureAwait(false);
+	}
 }

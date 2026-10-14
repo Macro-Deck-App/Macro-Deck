@@ -58,7 +58,7 @@ public sealed class UnavailableWidgetSessionRecovery : IDisposable
 			return false;
 		}
 
-		_sessions.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderUnavailable, RecoveredMessage, retryable: true);
+		_sessions.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderUnavailable, RecoveredMessage, true);
 		return true;
 	}
 
@@ -69,9 +69,14 @@ public sealed class UnavailableWidgetSessionRecovery : IDisposable
 	}
 
 	private void OnSessionEnded(object? sender, UiSessionEndedEventArgs e)
-		=> _widgetTypeBySession.TryRemove(e.Session.SessionId, out _);
+	{
+		_widgetTypeBySession.TryRemove(e.Session.SessionId, out _);
+	}
 
-	private void OnAvailabilityChanged(object? sender, IntegrationAvailabilityChangedEventArgs e) => Reevaluate();
+	private void OnAvailabilityChanged(object? sender, IntegrationAvailabilityChangedEventArgs e)
+	{
+		Reevaluate();
+	}
 }
 
 public sealed class UnavailableWidgetSessionRecoveryHandler
@@ -80,7 +85,10 @@ public sealed class UnavailableWidgetSessionRecoveryHandler
 {
 	private readonly UnavailableWidgetSessionRecovery _recovery;
 
-	public UnavailableWidgetSessionRecoveryHandler(UnavailableWidgetSessionRecovery recovery) => _recovery = recovery;
+	public UnavailableWidgetSessionRecoveryHandler(UnavailableWidgetSessionRecovery recovery)
+	{
+		_recovery = recovery;
+	}
 
 	public ValueTask Handle(WidgetTypeCatalogChangedNotification notification, CancellationToken cancellationToken)
 	{

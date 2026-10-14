@@ -40,7 +40,10 @@ public class NotificationManagerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _manager.Dispose();
+	public void TearDown()
+	{
+		_manager.Dispose();
+	}
 
 	[Test]
 	public async Task The_first_valid_response_wins_and_the_result_is_produced_once()
@@ -68,7 +71,8 @@ public class NotificationManagerTests
 		var shown = await _manager.ShowAsync(_plugin, Dialog(Ok("a"), Ok("b")));
 
 		var outcomes = await Task.WhenAll(Enumerable.Range(0, 32)
-			.Select(i => Task.Run(() => _manager.Respond(i % 2 == 0 ? _admin : _device, shown.Id, i % 2 == 0 ? "a" : "b", null))));
+			.Select(i => Task.Run(()
+				=> _manager.Respond(i % 2 == 0 ? _admin : _device, shown.Id, i % 2 == 0 ? "a" : "b", null))));
 
 		Assert.That(outcomes.Count(o => o.Status == NotificationRespondStatus.Accepted), Is.EqualTo(1));
 		Assert.That((await shown.Completion).CloseReason, Is.EqualTo(NotificationCloseReason.Action));
@@ -188,7 +192,8 @@ public class NotificationManagerTests
 
 		await _manager.UpdateAsync(_plugin, shown.Id, new NotificationUpdate { Message = "Step 1" });
 		revisions.Add(_manager.Find(shown.Id)!.Revision);
-		await _manager.UpdateAsync(_plugin, shown.Id,
+		await _manager.UpdateAsync(_plugin,
+			shown.Id,
 			new NotificationUpdate { Progress = new NotificationProgress(2, 4) });
 		revisions.Add(_manager.Find(shown.Id)!.Revision);
 
@@ -326,7 +331,8 @@ public class NotificationManagerTests
 	public async Task A_snapshot_lists_only_open_popups_a_principal_may_see()
 	{
 		var open = await _manager.ShowAsync(_plugin, Dialog(Ok("ok")));
-		await _manager.ShowAsync(_plugin, new NotificationOptions { Title = "Inbox only", Popup = NotificationPopup.None, Inbox = true });
+		await _manager.ShowAsync(_plugin,
+			new NotificationOptions { Title = "Inbox only", Popup = NotificationPopup.None, Inbox = true });
 		var closed = await _manager.ShowAsync(_plugin, Dialog(Ok("ok")));
 		_manager.Respond(_admin, closed.Id, "ok", null);
 
@@ -410,7 +416,8 @@ public class NotificationManagerTests
 		_manager.Respond(_admin, shown.Id, "ok", null);
 
 		Assert.That(_events.Select(e => e.Kind),
-			Is.EqualTo(new[] { NotificationEventKind.Shown, NotificationEventKind.Updated, NotificationEventKind.Closed }));
+			Is.EqualTo(new[]
+				{ NotificationEventKind.Shown, NotificationEventKind.Updated, NotificationEventKind.Closed }));
 		Assert.That(_events.Select(e => e.Notification.Revision), Is.Ordered.Ascending);
 	}
 
@@ -465,7 +472,9 @@ public class NotificationManagerTests
 		for (var step = 1; step <= 4; step++)
 		{
 			_time.Advance(TimeSpan.FromSeconds(4));
-			await _manager.UpdateAsync(_plugin, shown.Id, new NotificationUpdate { Progress = new NotificationProgress(step, 4) });
+			await _manager.UpdateAsync(_plugin,
+				shown.Id,
+				new NotificationUpdate { Progress = new NotificationProgress(step, 4) });
 		}
 
 		var stillOpen = !shown.Completion.IsCompleted;
@@ -531,23 +540,34 @@ public class NotificationManagerTests
 		Assert.That(exception!.ErrorCode, Is.EqualTo(NotificationErrorCode.Invalid));
 	}
 
-	private static IUserNotificationStore AsStore(object manager) => (IUserNotificationStore)manager;
+	private static IUserNotificationStore AsStore(object manager)
+	{
+		return (IUserNotificationStore)manager;
+	}
 
 	private static NotificationOptions Dialog(params NotificationAction[] actions)
-		=> new()
+	{
+		return new NotificationOptions
 		{
 			Title = "Question",
 			Popup = NotificationPopup.Dialog,
 			Actions = actions
 		};
+	}
 
-	private static NotificationAction Ok(string id) => new() { Id = id, Label = id };
+	private static NotificationAction Ok(string id)
+	{
+		return new NotificationAction { Id = id, Label = id };
+	}
 
 	private static Dictionary<string, JsonElement> Values(params (string Key, object Value)[] values)
-		=> values.ToDictionary(v => v.Key, v => JsonSerializer.SerializeToElement(v.Value));
+	{
+		return values.ToDictionary(v => v.Key, v => JsonSerializer.SerializeToElement(v.Value));
+	}
 
 	private static UiNode Form()
-		=> new()
+	{
+		return new UiNode
 		{
 			Id = "form",
 			Type = "ui.stack",
@@ -566,6 +586,7 @@ public class NotificationManagerTests
 				}
 			]
 		};
+	}
 
 	private static UiNode Input(string id, string type, params (string Key, object Value)[] properties)
 	{

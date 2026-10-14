@@ -97,10 +97,10 @@ internal sealed class WidgetUiSessionTests
 
 		var ticketA = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() },
 			DeviceA,
-			isAdmin: false);
+			false);
 		var ticketB = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() },
 			DeviceB,
-			isAdmin: false);
+			false);
 
 		await ticketA.Ready;
 		await ticketB.Ready;
@@ -124,10 +124,10 @@ internal sealed class WidgetUiSessionTests
 
 		var ticketA = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() },
 			DeviceA,
-			isAdmin: false);
+			false);
 		var ticketB = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() },
 			DeviceB,
-			isAdmin: false);
+			false);
 		await ticketA.Ready;
 		await ticketB.Ready;
 
@@ -147,10 +147,10 @@ internal sealed class WidgetUiSessionTests
 
 		var live = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() },
 			DeviceA,
-			isAdmin: false);
+			false);
 		var ghost = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString(), Ghost = true },
 			DeviceA,
-			isAdmin: false);
+			false);
 		await live.Ready;
 		await ghost.Ready;
 
@@ -177,13 +177,13 @@ internal sealed class WidgetUiSessionTests
 
 		var ticketA = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() },
 			DeviceA,
-			isAdmin: false);
+			false);
 		var ticketB = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() },
 			DeviceB,
-			isAdmin: false);
+			false);
 		var untouched = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = other.Id.ToString() },
 			DeviceA,
-			isAdmin: false);
+			false);
 		await ticketA.Ready;
 		await ticketB.Ready;
 		await untouched.Ready;
@@ -236,7 +236,7 @@ internal sealed class WidgetUiSessionTests
 				WidgetId = widget.Id.ToString(), Data = JsonSerializer.SerializeToElement(new { forecastDays = 999 })
 			},
 			DeviceA,
-			isAdmin: false);
+			false);
 		await ticket.Ready;
 
 		var session = _registry.Find(ticket.SessionId)!;
@@ -279,7 +279,7 @@ internal sealed class WidgetUiSessionTests
 		// which is what kept the Action Button's editor preview blank while the single-word Slider worked.
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = requestedType },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.That(ticket.Accepted, Is.True, ticket.Message);
 		await ticket.Ready;
@@ -298,7 +298,7 @@ internal sealed class WidgetUiSessionTests
 		// before the parse, nothing else does.
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = requestedType },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -315,10 +315,10 @@ internal sealed class WidgetUiSessionTests
 		// other's tree - the picker showing a half-typed draft, or the editor showing the sample.
 		var draft = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = WidgetTypeIds.Weather },
 			DeviceA,
-			isAdmin: true);
+			true);
 		var sample = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = WidgetTypeIds.Weather, Sample = true },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.That(draft.Accepted, Is.True, draft.Message);
 		Assert.That(sample.Accepted, Is.True, sample.Message);
@@ -350,11 +350,11 @@ internal sealed class WidgetUiSessionTests
 		var firstPreview = _opener.Open(new OpenWidgetUiSessionRequest
 				{ WidgetType = WidgetTypeIds.Weather, VariableScopeWidgetId = first.Id.ToString() },
 			DeviceA,
-			isAdmin: true);
+			true);
 		var secondPreview = _opener.Open(new OpenWidgetUiSessionRequest
 				{ WidgetType = WidgetTypeIds.Weather, VariableScopeWidgetId = second.Id.ToString() },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.That(firstPreview.Accepted, Is.True, firstPreview.Message);
 		Assert.That(secondPreview.Accepted, Is.True, secondPreview.Message);
@@ -377,7 +377,7 @@ internal sealed class WidgetUiSessionTests
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest
 				{ WidgetType = WidgetTypeIds.Weather, VariableScopeWidgetId = widget.Id.ToString() },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.That(ticket.Accepted, Is.True, ticket.Message);
 		await ticket.Ready;
@@ -397,7 +397,7 @@ internal sealed class WidgetUiSessionTests
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest
 				{ WidgetType = WidgetTypeIds.Weather, VariableScopeWidgetId = scope },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.That(ticket.Accepted, Is.True, ticket.Message);
 		await ticket.Ready;
@@ -411,7 +411,7 @@ internal sealed class WidgetUiSessionTests
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest
 				{ WidgetType = WidgetTypeIds.Weather, VariableScopeWidgetId = Guid.NewGuid().ToString() },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.That(ticket.Accepted, Is.True, ticket.Message);
 		await ticket.Ready;
@@ -420,10 +420,12 @@ internal sealed class WidgetUiSessionTests
 	}
 
 	private string? ScopeOf(string sessionId)
-		=> _registry.Find(sessionId)!.Surface.Attributes
+	{
+		return _registry.Find(sessionId)!.Surface.Attributes
 			.TryGetValue(UiWidgetSurfaceAttributes.VariableScopeWidgetId, out var scope)
 			? scope.GetString()
 			: null;
+	}
 
 	[Test]
 	public void A_non_admin_preview_is_rejected_with_a_forbidden_code_and_mints_no_session()
@@ -432,7 +434,7 @@ internal sealed class WidgetUiSessionTests
 
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = WidgetTypeIds.Weather },
 			DeviceA,
-			isAdmin: false);
+			false);
 
 		Assert.Multiple(() =>
 		{
@@ -452,7 +454,7 @@ internal sealed class WidgetUiSessionTests
 				Data = JsonSerializer.SerializeToElement(new { forecastDays })
 			},
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -469,7 +471,7 @@ internal sealed class WidgetUiSessionTests
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest
 				{ WidgetType = WidgetTypeIds.Weather, Data = data.RootElement },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -486,7 +488,7 @@ internal sealed class WidgetUiSessionTests
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest
 				{ WidgetType = WidgetTypeIds.Weather, Data = data.RootElement },
 			DeviceA,
-			isAdmin: true);
+			true);
 		await ticket.Ready;
 
 		var session = _registry.Find(ticket.SessionId)!;
@@ -495,7 +497,8 @@ internal sealed class WidgetUiSessionTests
 		{
 			Assert.That(ticket.Accepted, Is.True, "A widget saved by a newer client must stay renderable.");
 			Assert.That(session.Surface.Kind, Is.EqualTo(UiSurfaceKinds.Preview));
-			Assert.That(session.Surface.Attributes[UiWidgetSurfaceAttributes.Data].GetProperty("someFutureKey")
+			Assert.That(session.Surface.Attributes[UiWidgetSurfaceAttributes.Data]
+					.GetProperty("someFutureKey")
 					.GetInt32(),
 				Is.EqualTo(1),
 				"The preview surface did not carry the client's own draft data.");
@@ -508,9 +511,9 @@ internal sealed class WidgetUiSessionTests
 		var widget = AddWidget(WidgetTypeIds.Weather, "{}");
 		var request = new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() };
 
-		var first = _opener.Open(request, DeviceA, isAdmin: false);
+		var first = _opener.Open(request, DeviceA, false);
 		await first.Ready;
-		var second = _opener.Open(request, DeviceA, isAdmin: false);
+		var second = _opener.Open(request, DeviceA, false);
 
 		Assert.Multiple(() =>
 		{
@@ -527,7 +530,7 @@ internal sealed class WidgetUiSessionTests
 
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widgetId.ToString() },
 			DeviceA,
-			isAdmin: false);
+			false);
 
 		Assert.Multiple(() =>
 		{
@@ -545,7 +548,7 @@ internal sealed class WidgetUiSessionTests
 
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() },
 			DeviceA,
-			isAdmin: false);
+			false);
 
 		Assert.Multiple(() =>
 		{
@@ -678,10 +681,10 @@ internal sealed class WidgetUiSessionTests
 	{
 		var sample = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = GaugeType, Sample = true },
 			DeviceA,
-			isAdmin: true);
+			true);
 		var draft = _opener.Open(new OpenWidgetUiSessionRequest { WidgetType = GaugeType },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -695,7 +698,7 @@ internal sealed class WidgetUiSessionTests
 	public void Deleting_the_widget_drops_its_cached_placeholder_adapter()
 	{
 		var widget = AddWidget(GaugeType, "{}");
-		var providerId = WidgetUiProviderRegistry.UnavailableProviderIdFor(widget.Id, ghost: false);
+		var providerId = WidgetUiProviderRegistry.UnavailableProviderIdFor(widget.Id, false);
 		var before = _widgetProviders.Resolve(providerId);
 
 		_widgetProviders.EvictWidget(widget.Id);
@@ -704,14 +707,20 @@ internal sealed class WidgetUiSessionTests
 	}
 
 	private UiSessionOpenTicket OpenLive(WidgetEntity widget, string principal)
-		=> _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() }, principal, isAdmin: false);
+	{
+		return _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() }, principal, false);
+	}
 
 	private IReadOnlyList<UiSessionSnapshot> PlaceholderSessions(WidgetEntity widget)
-		=> _registry.SessionsForProvider(WidgetUiProviderRegistry.UnavailableProviderIdFor(widget.Id, ghost: false));
+	{
+		return _registry.SessionsForProvider(WidgetUiProviderRegistry.UnavailableProviderIdFor(widget.Id, false));
+	}
 
 	private Task<WidgetTypeRegistration> RegisterGauge()
-		=> _widgetTypes.Register(GaugeOwner,
+	{
+		return _widgetTypes.Register(GaugeOwner,
 			new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"), HasConfiguration: false));
+	}
 
 	private async Task<string> TreeOf(UiSessionOpenTicket ticket)
 	{
@@ -743,24 +752,29 @@ internal sealed class WidgetUiSessionTests
 			new WidgetProviderAvailability(_widgetTypes, _integrations, _connections),
 			_recovery,
 			new ColorReferenceResolver(variables));
-		const string Data = """{"backgroundColor":"{{ vars.primary | color | color_opacity: 50 }}"}""";
-		var widget = AddWidget(WidgetTypeIds.Weather, Data);
-		using var draft = JsonDocument.Parse(Data);
+		const string data = """{"backgroundColor":"{{ vars.primary | color | color_opacity: 50 }}"}""";
+		var widget = AddWidget(WidgetTypeIds.Weather, data);
+		using var draft = JsonDocument.Parse(data);
 
 		var live = opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() }, DeviceA, false);
-		var preview = opener.Open(new OpenWidgetUiSessionRequest { WidgetType = WidgetTypeIds.Weather, Data = draft.RootElement },
+		var preview = opener.Open(new OpenWidgetUiSessionRequest
+				{ WidgetType = WidgetTypeIds.Weather, Data = draft.RootElement },
 			DeviceA,
-			isAdmin: true);
+			true);
 		await live.Ready;
 		await preview.Ready;
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_registry.Find(live.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Data]
-				.GetProperty("backgroundColor").GetString(), Is.EqualTo("#3366ff80"));
+					.GetProperty("backgroundColor")
+					.GetString(),
+				Is.EqualTo("#3366ff80"));
 			Assert.That(_registry.Find(preview.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Data]
-				.GetProperty("backgroundColor").GetString(), Is.EqualTo("#3366ff80"));
-			Assert.That(widget.Data, Is.EqualTo(Data), "the stored reference stays for the editor");
+					.GetProperty("backgroundColor")
+					.GetString(),
+				Is.EqualTo("#3366ff80"));
+			Assert.That(widget.Data, Is.EqualTo(data), "the stored reference stays for the editor");
 		});
 	}
 
@@ -790,16 +804,18 @@ internal sealed class WidgetUiSessionTests
 				WidgetType = WidgetTypeIds.Weather, Data = draft.RootElement, Sample = true
 			},
 			DeviceA,
-			isAdmin: true);
+			true);
 		await live.Ready;
 		await sample.Ready;
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_registry.Find(live.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Culture]
-				.GetString(), Is.EqualTo("de"));
+					.GetString(),
+				Is.EqualTo("de"));
 			Assert.That(_registry.Find(sample.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Culture]
-				.GetString(), Is.EqualTo("pt-BR"));
+					.GetString(),
+				Is.EqualTo("pt-BR"));
 		});
 	}
 
@@ -814,14 +830,23 @@ internal sealed class WidgetUiSessionTests
 	{
 		private readonly Func<WidgetUiProviderRegistry> _widgets;
 
-		public WidgetOnlyResolver(Func<WidgetUiProviderRegistry> widgets) => _widgets = widgets;
+		public WidgetOnlyResolver(Func<WidgetUiProviderRegistry> widgets)
+		{
+			_widgets = widgets;
+		}
 
-		public IUiSessionProvider? Resolve(string providerId) => _widgets().Resolve(providerId);
+		public IUiSessionProvider? Resolve(string providerId)
+		{
+			return _widgets().Resolve(providerId);
+		}
 	}
 
 	private sealed class StubBuiltInWidgetUiProvider : IBuiltInWidgetUiProvider
 	{
-		public StubBuiltInWidgetUiProvider(string widgetType) => WidgetTypeId = widgetType;
+		public StubBuiltInWidgetUiProvider(string widgetType)
+		{
+			WidgetTypeId = widgetType;
+		}
 
 		public string WidgetTypeId { get; }
 
@@ -850,22 +875,60 @@ internal sealed class WidgetUiSessionTests
 	{
 		private readonly FolderEntity _folder = new() { Id = Guid.NewGuid(), Name = "folder", Order = 0 };
 
-		public void AddWidget(WidgetEntity widget) => _folder.Widgets.Add(widget);
+		public void AddWidget(WidgetEntity widget)
+		{
+			_folder.Widgets.Add(widget);
+		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
+
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
-		public void AddWidget(Guid folderId, WidgetEntity widget) => _folder.Widgets.Add(widget);
+		public void AddWidget(Guid folderId, WidgetEntity widget)
+		{
+			_folder.Widgets.Add(widget);
+		}
 
-		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets) => _folder.Widgets.AddRange(widgets);
+		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+		{
+			_folder.Widgets.AddRange(widgets);
+		}
 
 		public void UpdateWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -879,7 +942,10 @@ internal sealed class WidgetUiSessionTests
 		{
 		}
 
-		public void RemoveWidget(Guid folderId, Guid widgetId) => _folder.Widgets.RemoveAll(w => w.Id == widgetId);
+		public void RemoveWidget(Guid folderId, Guid widgetId)
+		{
+			_folder.Widgets.RemoveAll(w => w.Id == widgetId);
+		}
 
 		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds)
 		{
@@ -894,6 +960,9 @@ internal sealed class WidgetUiSessionTests
 	{
 		public string Current { get; private set; } = culture;
 
-		public void Use(string culture) => Current = culture;
+		public void Use(string culture)
+		{
+			Current = culture;
+		}
 	}
 }

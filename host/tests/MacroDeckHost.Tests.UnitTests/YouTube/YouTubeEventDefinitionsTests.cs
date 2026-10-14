@@ -11,16 +11,19 @@ internal sealed class YouTubeEventDefinitionsTests
 	[Test]
 	public void The_documented_events_are_declared()
 	{
-		Assert.That(YouTubeEventDefinitions.All.Select(definition => definition.Id), Is.EquivalentTo(new[]
-		{
-			"stream-online", "stream-offline", "super-chat", "super-sticker", "new-member", "member-milestone",
-			"membership-gift", "event"
-		}));
+		Assert.That(YouTubeEventDefinitions.All.Select(definition => definition.Id),
+			Is.EquivalentTo(new[]
+			{
+				"stream-online", "stream-offline", "super-chat", "super-sticker", "new-member", "member-milestone",
+				"membership-gift", "event"
+			}));
 	}
 
 	[Test]
 	public void Event_ids_are_unique()
-		=> Assert.That(YouTubeEventDefinitions.All.Select(definition => definition.Id), Is.Unique);
+	{
+		Assert.That(YouTubeEventDefinitions.All.Select(definition => definition.Id), Is.Unique);
+	}
 
 	[Test]
 	public void Every_configuration_parameter_has_a_payload_parameter_of_the_same_name()
@@ -115,21 +118,25 @@ internal sealed class YouTubeEventDefinitionsTests
 
 		connection.OnTransition(new YouTubeLiveTransition(true, YouTubeAccountState.Unknown with { IsLive = true }));
 		connection.OnTransition(new YouTubeLiveTransition(false, YouTubeAccountState.Unknown));
-		connection.OnChatMessages(
-		[
-			new("1", "superChatEvent", null, "a", author)
-			{
-				SuperChat = new YouTubeSuperChat(1, "USD", "$1", null, 1)
-			},
-			new("2", "superStickerEvent", null, "a", author)
-			{
-				SuperSticker = new YouTubeSuperSticker(1, "USD", "$1", 1,
-					null, null)
-			},
-			new("3", "newSponsorEvent", null, "a", author),
-			new("4", "memberMilestoneChatEvent", null, "a", author),
-			new("5", "membershipGiftingEvent", null, "a", author)
-		], true);
+		connection.OnChatMessages([
+				new YouTubeChatMessage("1", "superChatEvent", null, "a", author)
+				{
+					SuperChat = new YouTubeSuperChat(1, "USD", "$1", null, 1)
+				},
+				new YouTubeChatMessage("2", "superStickerEvent", null, "a", author)
+				{
+					SuperSticker = new YouTubeSuperSticker(1,
+						"USD",
+						"$1",
+						1,
+						null,
+						null)
+				},
+				new YouTubeChatMessage("3", "newSponsorEvent", null, "a", author),
+				new YouTubeChatMessage("4", "memberMilestoneChatEvent", null, "a", author),
+				new YouTubeChatMessage("5", "membershipGiftingEvent", null, "a", author)
+			],
+			true);
 		connection.Dispose();
 
 		var declared = YouTubeEventDefinitions.All.ToDictionary(definition => definition.Id,

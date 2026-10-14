@@ -27,20 +27,31 @@ public sealed class VariablesTestClient
 
 	private readonly ICapabilityInvoker _invoker;
 
-	internal VariablesTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal VariablesTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>The full variable catalogue, both halves - see <see cref="VariableCatalogPayload" />.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Variables,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Variables,
 			CatalogLocalId,
 			CapabilityOperations.Variables.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>Reads the current reading of the variable addressed by <paramref name="localId" /> - an
 	/// eager variable's declared local id, or a catalog resource id.</summary>
 	public Task<CapabilityInvocationOutcome> GetAsync(string localId, CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Variables, localId, CapabilityOperations.Variables.Get, null, options);
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Variables,
+			localId,
+			CapabilityOperations.Variables.Get,
+			null,
+			options);
+	}
 
 	/// <summary>Writes <paramref name="value" /> to the variable addressed by <paramref name="localId" />.
 	/// Succeeds as an invocation whether or not the write was applied - the outcome's
@@ -49,11 +60,13 @@ public sealed class VariablesTestClient
 		string localId,
 		VariableValueDto value,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Variables,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Variables,
 			localId,
 			CapabilityOperations.Variables.Set,
 			new VariableSetArguments { Value = value },
 			options);
+	}
 
 	/// <summary>Browses one page of the provider's on-demand catalog - see
 	/// <see cref="VariableCatalogPageResult" />.</summary>
@@ -63,7 +76,8 @@ public sealed class VariablesTestClient
 		string? continuationToken = null,
 		int pageSize = 100,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Variables,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Variables,
 			CatalogLocalId,
 			CapabilityOperations.Variables.Discover,
 			new VariableDiscoverArguments
@@ -71,23 +85,28 @@ public sealed class VariablesTestClient
 				ParentId = parentId, Search = search, ContinuationToken = continuationToken, PageSize = pageSize
 			},
 			options);
+	}
 
 	/// <summary>Resolves a single catalog resource id - see <see cref="VariableResolveResult" />.</summary>
 	public Task<CapabilityInvocationOutcome> ResolveAsync(string id, CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Variables,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Variables,
 			CatalogLocalId,
 			CapabilityOperations.Variables.Resolve,
 			new VariableResolveArguments { Id = id },
 			options);
+	}
 
 	/// <summary>Replaces the catalog's working set - see <see cref="VariableSubscribeResult" />.
 	/// <paramref name="ids" /> is the complete set to watch, not an increment.</summary>
 	public Task<CapabilityInvocationOutcome> SubscribeAsync(
 		IReadOnlyList<string> ids,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Variables,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Variables,
 			CatalogLocalId,
 			CapabilityOperations.Variables.Subscribe,
 			new VariableSubscribeArguments { Ids = ids },
 			options);
+	}
 }

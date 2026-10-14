@@ -125,7 +125,8 @@ public class UiWidgetAppearanceTests
 	public void The_background_field_offers_transparent_only_when_the_widget_opts_in()
 	{
 		var plain = Node(View("{}", UiWidgetAppearanceFields.BackgroundColor), UiWidgetAppearanceKeys.BackgroundColor);
-		var optedIn = Node(View("{}", UiWidgetAppearanceFields.BackgroundColor | UiWidgetAppearanceFields.TransparentBackground),
+		var optedIn = Node(View("{}",
+				UiWidgetAppearanceFields.BackgroundColor | UiWidgetAppearanceFields.TransparentBackground),
 			UiWidgetAppearanceKeys.BackgroundColor);
 
 		Assert.Multiple(() =>
@@ -138,21 +139,24 @@ public class UiWidgetAppearanceTests
 	[Test]
 	public void Colour_fields_offer_variables_only_when_the_widget_opts_in()
 	{
-		const UiWidgetAppearanceFields Colors = UiWidgetAppearanceFields.BackgroundColor |
-			UiWidgetAppearanceFields.LabelColor | UiWidgetAppearanceFields.AccentColor;
-		var plain = View("{}", Colors);
-		var optedIn = View("{}", Colors | UiWidgetAppearanceFields.ColorVariables);
+		const UiWidgetAppearanceFields colors = UiWidgetAppearanceFields.BackgroundColor
+			| UiWidgetAppearanceFields.LabelColor
+			| UiWidgetAppearanceFields.AccentColor;
+		var plain = View("{}", colors);
+		var optedIn = View("{}", colors | UiWidgetAppearanceFields.ColorVariables);
 
 		Assert.Multiple(() =>
 		{
 			foreach (var key in new[]
 				{
 					UiWidgetAppearanceKeys.BackgroundColor, UiWidgetAppearanceKeys.LabelColor,
-					UiWidgetAppearanceKeys.AccentColor,
+					UiWidgetAppearanceKeys.AccentColor
 				})
 			{
 				Assert.That(Node(plain, key).Properties.ContainsKey(UiConfigProperties.AllowVariables), Is.False, key);
-				Assert.That(Node(optedIn, key).Properties[UiConfigProperties.AllowVariables].GetBoolean(), Is.True, key);
+				Assert.That(Node(optedIn, key).Properties[UiConfigProperties.AllowVariables].GetBoolean(),
+					Is.True,
+					key);
 			}
 		});
 	}
@@ -195,10 +199,11 @@ public class UiWidgetAppearanceTests
 
 		var values = UiWidgetAppearance.Read(document.RootElement);
 
-		Assert.That(values, Is.EqualTo(new UiWidgetAppearanceValues
-		{
-			Label = "Photos", FontSize = 12, BorderStyle = "rgb"
-		}));
+		Assert.That(values,
+			Is.EqualTo(new UiWidgetAppearanceValues
+			{
+				Label = "Photos", FontSize = 12, BorderStyle = "rgb"
+			}));
 	}
 
 	private static UiView View(string data, UiWidgetAppearanceFields fields)
@@ -211,15 +216,20 @@ public class UiWidgetAppearanceTests
 				Properties = new UiWidgetProperties
 				{
 					Key = "properties",
-					Children = [UiWidgetAppearance.Section(document.RootElement.Clone(), fields)],
-				},
+					Children = [UiWidgetAppearance.Section(document.RootElement.Clone(), fields)]
+				}
 			});
 	}
 
-	private static JsonElement Value(UiView view, string key) => Node(view, key).Properties[UiConfigProperties.Value];
+	private static JsonElement Value(UiView view, string key)
+	{
+		return Node(view, key).Properties[UiConfigProperties.Value];
+	}
 
 	private static UiNode Node(UiView view, string key)
-		=> Find(view.Tree.Root, key) ?? throw new AssertionException($"no node for '{key}'");
+	{
+		return Find(view.Tree.Root, key) ?? throw new AssertionException($"no node for '{key}'");
+	}
 
 	private static UiNode? Find(UiNode node, string key)
 	{

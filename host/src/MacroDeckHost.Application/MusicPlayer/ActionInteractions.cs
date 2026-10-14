@@ -68,7 +68,8 @@ public sealed class ActionInteractions : IActionInteractions
 		_logger = logger.ForContext<ActionInteractions>();
 	}
 
-	public void RequestItemPicker(string? originClientId,
+	public void RequestItemPicker(
+		string? originClientId,
 		string instanceId,
 		MusicPlayerCatalogItemKind kind,
 		string? prompt = null)
@@ -83,7 +84,8 @@ public sealed class ActionInteractions : IActionInteractions
 		_ = Task.Run(() => PickAndPlayAsync(originClientId, instanceId, kind));
 	}
 
-	public void RequestDevicePicker(string? originClientId,
+	public void RequestDevicePicker(
+		string? originClientId,
 		string instanceId,
 		bool startPlayback,
 		string? prompt = null)
@@ -116,8 +118,8 @@ public sealed class ActionInteractions : IActionInteractions
 				Data = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 				{
 					[InstanceIdKey] = JsonSerializer.SerializeToElement(instanceId),
-					[KindKey] = JsonSerializer.SerializeToElement(kind.ToString()),
-				},
+					[KindKey] = JsonSerializer.SerializeToElement(kind.ToString())
+				}
 			};
 
 			var modalId = _coordinator.Register(PickerIntegrationId, originClientId, modal);
@@ -167,8 +169,8 @@ public sealed class ActionInteractions : IActionInteractions
 					: AppStrings.Dialogs.DevicePicker.TransferPlaybackTo(),
 				Data = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 				{
-					[InstanceIdKey] = JsonSerializer.SerializeToElement(instanceId),
-				},
+					[InstanceIdKey] = JsonSerializer.SerializeToElement(instanceId)
+				}
 			};
 
 			var modalId = _coordinator.Register(PickerIntegrationId, originClientId, modal);

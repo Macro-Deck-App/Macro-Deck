@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.References;
@@ -22,8 +24,9 @@ internal static partial class Scenes
 				Children =
 				[
 					new UiVideoStream { Key = "contained", Stream = program, Fill = true },
-					new UiVideoStream { Key = "covered", Stream = program, Fit = UiComponentImageFits.Cover, Fill = true },
-				],
+					new UiVideoStream
+						{ Key = "covered", Stream = program, Fit = UiComponentImageFits.Cover, Fill = true }
+				]
 			},
 			2);
 	}

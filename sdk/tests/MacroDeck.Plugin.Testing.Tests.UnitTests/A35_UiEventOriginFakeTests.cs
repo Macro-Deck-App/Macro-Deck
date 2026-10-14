@@ -5,7 +5,7 @@ using MacroDeck.Sdk.Ui;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A35_UiEventOriginFakeTests
+public class A35UiEventOriginFakeTests
 {
 	[Test]
 	public async Task It_records_what_a_session_showed_on_its_client()
@@ -43,7 +43,8 @@ public class A35_UiEventOriginFakeTests
 	[Test]
 	public async Task A_dialog_answers_with_the_scripted_value()
 	{
-		var origin = new FakeUiEventOrigin { ModalAnswer = _ => System.Text.Json.JsonSerializer.SerializeToElement("yes") };
+		var origin = new FakeUiEventOrigin
+			{ ModalAnswer = _ => System.Text.Json.JsonSerializer.SerializeToElement("yes") };
 
 		var answer = await origin.ShowModalAsync<string>(new ModalDefinition { ViewId = "confirm" });
 

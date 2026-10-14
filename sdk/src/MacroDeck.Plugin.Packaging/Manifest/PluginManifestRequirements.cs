@@ -146,7 +146,8 @@ public static class PluginManifestRequirements
 	/// is expected.
 	/// </para>
 	/// </summary>
-	public static IReadOnlyList<PluginManifestRequirementViolation> Evaluate(PluginManifest manifest,
+	public static IReadOnlyList<PluginManifestRequirementViolation> Evaluate(
+		PluginManifest manifest,
 		PluginManifestValidationLevel level)
 	{
 		var violations = new List<PluginManifestRequirementViolation>();
@@ -176,7 +177,8 @@ public static class PluginManifestRequirements
 		return violations;
 	}
 
-	private static void CheckPublicationString(string? value,
+	private static void CheckPublicationString(
+		string? value,
 		string pointer,
 		string fieldName,
 		List<PluginManifestRequirementViolation> violations)
@@ -188,13 +190,14 @@ public static class PluginManifestRequirements
 		}
 	}
 
-	private static void CheckCompatibility(PluginCompatibility? compatibility,
+	private static void CheckCompatibility(
+		PluginCompatibility? compatibility,
 		List<PluginManifestRequirementViolation> violations)
 	{
-		var satisfied = compatibility is not null &&
-			(!string.IsNullOrWhiteSpace(compatibility.Sdk) ||
-				compatibility.Protocol is not null ||
-				!string.IsNullOrWhiteSpace(compatibility.MacroDeck));
+		var satisfied = compatibility is not null
+			&& (!string.IsNullOrWhiteSpace(compatibility.Sdk)
+				|| compatibility.Protocol is not null
+				|| !string.IsNullOrWhiteSpace(compatibility.MacroDeck));
 
 		if (!satisfied)
 		{
@@ -220,23 +223,27 @@ public static class PluginManifestRequirements
 		}
 	}
 
-	private static PluginManifestRequirementViolation PublicationViolation(string pointer, string message) =>
-		new()
+	private static PluginManifestRequirementViolation PublicationViolation(string pointer, string message)
+	{
+		return new PluginManifestRequirementViolation
 		{
 			Pointer = pointer,
 			Requirement = For(pointer),
 			RequiredBy = PluginManifestValidationLevel.Publication,
 			Message = message
 		};
+	}
 
-	private static PluginManifestRequirementViolation GeneratedViolation(string pointer, string message) =>
-		new()
+	private static PluginManifestRequirementViolation GeneratedViolation(string pointer, string message)
+	{
+		return new PluginManifestRequirementViolation
 		{
 			Pointer = pointer,
 			Requirement = For(pointer),
 			RequiredBy = PluginManifestValidationLevel.Development,
 			Message = message
 		};
+	}
 
 	private static bool TryMatch(string pointer, out PluginManifestFieldRequirement requirement)
 	{
@@ -285,8 +292,8 @@ public static class PluginManifestRequirements
 	private static List<PluginManifestFieldRule> LoadRules()
 	{
 		using var stream = typeof(PluginManifestRequirements).Assembly
-				.GetManifestResourceStream("plugin-manifest-v1.schema.json") ??
-			throw new InvalidOperationException(
+				.GetManifestResourceStream("plugin-manifest-v1.schema.json")
+			?? throw new InvalidOperationException(
 				$"'{typeof(PluginManifestRequirements).Assembly.FullName}' does not embed 'plugin-manifest-v1.schema.json'.");
 
 		using var document = JsonDocument.Parse(stream);
@@ -309,7 +316,8 @@ public static class PluginManifestRequirements
 	/// concrete pointer segment or a <c>*</c> wildcard appended, as appropriate. Only local <c>#/$defs/...</c>
 	/// references exist in this schema, so that is the only <c>$ref</c> form resolved.
 	/// </summary>
-	private static void WalkObjectSchema(JsonElement objectSchema,
+	private static void WalkObjectSchema(
+		JsonElement objectSchema,
 		string basePointer,
 		JsonElement defs,
 		List<PluginManifestFieldRule> rules)
@@ -324,8 +332,8 @@ public static class PluginManifestRequirements
 			var pointer = basePointer + "/" + EscapePointerSegment(property.Name);
 			var propertySchema = property.Value;
 
-			if (propertySchema.TryGetProperty("x-macrodeck-requirement", out var requirementElement) &&
-				requirementElement.ValueKind == JsonValueKind.String)
+			if (propertySchema.TryGetProperty("x-macrodeck-requirement", out var requirementElement)
+				&& requirementElement.ValueKind == JsonValueKind.String)
 			{
 				var summary = propertySchema.TryGetProperty("description", out var descriptionElement)
 					? descriptionElement.GetString() ?? string.Empty
@@ -344,15 +352,15 @@ public static class PluginManifestRequirements
 				WalkObjectSchema(referenced, pointer, defs, rules);
 			}
 
-			if (propertySchema.TryGetProperty("items", out var itemsSchema) &&
-				TryResolveSubSchema(itemsSchema, defs, out var itemTarget))
+			if (propertySchema.TryGetProperty("items", out var itemsSchema)
+				&& TryResolveSubSchema(itemsSchema, defs, out var itemTarget))
 			{
 				WalkObjectSchema(itemTarget, pointer + "/*", defs, rules);
 			}
 
-			if (propertySchema.TryGetProperty("additionalProperties", out var additionalPropertiesSchema) &&
-				additionalPropertiesSchema.ValueKind == JsonValueKind.Object &&
-				TryResolveSubSchema(additionalPropertiesSchema, defs, out var valueTarget))
+			if (propertySchema.TryGetProperty("additionalProperties", out var additionalPropertiesSchema)
+				&& additionalPropertiesSchema.ValueKind == JsonValueKind.Object
+				&& TryResolveSubSchema(additionalPropertiesSchema, defs, out var valueTarget))
 			{
 				WalkObjectSchema(valueTarget, pointer + "/*", defs, rules);
 			}
@@ -361,9 +369,9 @@ public static class PluginManifestRequirements
 
 	private static bool TryResolveSubSchema(JsonElement schema, JsonElement defs, out JsonElement resolved)
 	{
-		if (schema.TryGetProperty("$ref", out var refElement) &&
-			refElement.ValueKind == JsonValueKind.String &&
-			TryResolveDefRef(refElement.GetString(), defs, out resolved))
+		if (schema.TryGetProperty("$ref", out var refElement)
+			&& refElement.ValueKind == JsonValueKind.String
+			&& TryResolveDefRef(refElement.GetString(), defs, out resolved))
 		{
 			return true;
 		}
@@ -383,9 +391,9 @@ public static class PluginManifestRequirements
 		resolved = default;
 
 		const string prefix = "#/$defs/";
-		if (reference is null ||
-			!reference.StartsWith(prefix, StringComparison.Ordinal) ||
-			defs.ValueKind != JsonValueKind.Object)
+		if (reference is null
+			|| !reference.StartsWith(prefix, StringComparison.Ordinal)
+			|| defs.ValueKind != JsonValueKind.Object)
 		{
 			return false;
 		}
@@ -394,14 +402,19 @@ public static class PluginManifestRequirements
 		return defs.TryGetProperty(name, out resolved);
 	}
 
-	private static string EscapePointerSegment(string segment) =>
-		segment.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
-
-	private static PluginManifestFieldRequirement ParseRequirement(string? value) => value switch
+	private static string EscapePointerSegment(string segment)
 	{
-		"runtime" => PluginManifestFieldRequirement.Runtime,
-		"publication" => PluginManifestFieldRequirement.Publication,
-		"generated" => PluginManifestFieldRequirement.Generated,
-		_ => PluginManifestFieldRequirement.Recommended
-	};
+		return segment.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+	}
+
+	private static PluginManifestFieldRequirement ParseRequirement(string? value)
+	{
+		return value switch
+		{
+			"runtime" => PluginManifestFieldRequirement.Runtime,
+			"publication" => PluginManifestFieldRequirement.Publication,
+			"generated" => PluginManifestFieldRequirement.Generated,
+			_ => PluginManifestFieldRequirement.Recommended
+		};
+	}
 }

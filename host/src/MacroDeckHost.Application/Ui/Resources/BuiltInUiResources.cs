@@ -17,7 +17,7 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 	[
 		(".svg", "image/svg+xml"),
 		(".png", "image/png"),
-		(".webp", "image/webp"),
+		(".webp", "image/webp")
 	];
 
 	private readonly string _ownerId;
@@ -31,7 +31,8 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 	private long _bytes;
 	private bool _released;
 
-	public BuiltInUiResources(string ownerId,
+	public BuiltInUiResources(
+		string ownerId,
 		IUiResourceStore store,
 		Type? integrationType = null,
 		IMusicPlayerArtworkService? artwork = null)
@@ -48,7 +49,8 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 
 	public string OwnerId => _ownerId;
 
-	public Task<UiResource> RegisterAsync(string name,
+	public Task<UiResource> RegisterAsync(
+		string name,
 		ReadOnlyMemory<byte> content,
 		string mediaType,
 		CancellationToken cancellationToken = default)
@@ -57,8 +59,8 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 
 		if (!UiResourceRules.IsSupportedMediaType(mediaType))
 		{
-			throw new ArgumentException("A UI resource must be one of: " +
-				string.Join(", ", UiResourceRules.SupportedMediaTypes) + ".",
+			throw new ArgumentException(
+				"A UI resource must be one of: " + string.Join(", ", UiResourceRules.SupportedMediaTypes) + ".",
 				nameof(mediaType));
 		}
 
@@ -126,7 +128,7 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 					OwnerId = _ownerId,
 					Name = resourceName,
 					MediaType = icon.MediaType,
-					Content = icon.Content,
+					Content = icon.Content
 				});
 			}
 			catch (ArgumentException exception)
@@ -142,13 +144,17 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 		}
 	}
 
-	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		CancellationToken cancellationToken = default)
-		=> RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, null, cancellationToken);
+	{
+		return RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, null, cancellationToken);
+	}
 
-	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		int maxSize,
@@ -158,7 +164,8 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 		return RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, (int?)maxSize, cancellationToken);
 	}
 
-	private async Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	private async Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		int? maxSize,
@@ -197,8 +204,8 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 			return null;
 		}
 
-		if (!UiResourceRules.IsSupportedMediaType(image.ContentType) ||
-			image.Content.Length > ProtocolLimits.MaxUiResourceBytes)
+		if (!UiResourceRules.IsSupportedMediaType(image.ContentType)
+			|| image.Content.Length > ProtocolLimits.MaxUiResourceBytes)
 		{
 			throw new UiResourceException(UiResourceErrorCode.Failed,
 				"The artwork cannot be registered as a UI resource.");
@@ -241,9 +248,9 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 
 			_entries.TryGetValue(name, out var existing);
 
-			if (existing is not null &&
-				string.Equals(existing.Handle.ContentHash, contentHash, StringComparison.Ordinal) &&
-				string.Equals(existing.Handle.MediaType, mediaType, StringComparison.Ordinal))
+			if (existing is not null
+				&& string.Equals(existing.Handle.ContentHash, contentHash, StringComparison.Ordinal)
+				&& string.Equals(existing.Handle.MediaType, mediaType, StringComparison.Ordinal))
 			{
 				return existing.Handle;
 			}
@@ -262,7 +269,7 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 				OwnerId = _ownerId,
 				Name = name,
 				MediaType = mediaType,
-				Content = content,
+				Content = content
 			});
 
 			_entries[name] = new Entry(handle, content.Length);
@@ -335,11 +342,16 @@ public sealed class BuiltInUiResources : IUiResourceRegistry
 	}
 
 	private static UiResourceException Released()
-		=> new(UiResourceErrorCode.Failed, "The integration has been shut down; its UI resources were released.");
+	{
+		return new UiResourceException(UiResourceErrorCode.Failed,
+			"The integration has been shut down; its UI resources were released.");
+	}
 
 	private static UiResourceException NotFound(string key, string name)
-		=> new(UiResourceErrorCode.PluginIconNotFound,
+	{
+		return new UiResourceException(UiResourceErrorCode.PluginIconNotFound,
 			$"The integration has no bundled icon '{name}' in the icon folder '{key}'.");
+	}
 
 	private sealed record Entry(UiResource Handle, int ByteLength);
 

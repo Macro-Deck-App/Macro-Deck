@@ -66,7 +66,8 @@ public class StoreTestsController : ControllerBase
 			return new StoreOperationActionResponse
 			{
 				Success = false,
-				Error = new TransportError { Code = "invalid_request", Message = "A package id and a build id are required." }
+				Error = new TransportError
+					{ Code = "invalid_request", Message = "A package id and a build id are required." }
 			};
 		}
 
@@ -75,22 +76,31 @@ public class StoreTestsController : ControllerBase
 			return new StoreOperationActionResponse
 			{
 				Success = false,
-				Error = new TransportError { Code = "consent_required", Message = "Installing a test build needs confirmation." }
+				Error = new TransportError
+					{ Code = "consent_required", Message = "Installing a test build needs confirmation." }
 			};
 		}
 
 		var result = await _tests.Install(body.PackageId, body.BuildId, body.Consent, ct);
 		return result.Success
-			? new StoreOperationActionResponse { Success = true, Operation = StoreOperationBodyFactory.Create(result.Operation!) }
+			? new StoreOperationActionResponse
+				{ Success = true, Operation = StoreOperationBodyFactory.Create(result.Operation!) }
 			: new StoreOperationActionResponse { Success = false, Error = ToError(result.Failure) };
 	}
 
-	private static TransportError ToError(StorePlatformFailure failure) => failure switch
+	private static TransportError ToError(StorePlatformFailure failure)
 	{
-		StorePlatformFailure.SignInRequired => new TransportError { Code = "sign_in_required", Message = "Sign in to see your tests." },
-		StorePlatformFailure.AccountSuspended => new TransportError { Code = "account_suspended", Message = "This account is suspended." },
-		StorePlatformFailure.NotFound => new TransportError { Code = "not_found", Message = "The test build is no longer available." },
-		StorePlatformFailure.Cooldown => new TransportError { Code = "rate_limited", Message = "Too many requests. Try again shortly." },
-		_ => new TransportError { Code = "unavailable", Message = "The Macro Deck Platform could not be reached." }
-	};
+		return failure switch
+		{
+			StorePlatformFailure.SignInRequired => new TransportError
+				{ Code = "sign_in_required", Message = "Sign in to see your tests." },
+			StorePlatformFailure.AccountSuspended => new TransportError
+				{ Code = "account_suspended", Message = "This account is suspended." },
+			StorePlatformFailure.NotFound => new TransportError
+				{ Code = "not_found", Message = "The test build is no longer available." },
+			StorePlatformFailure.Cooldown => new TransportError
+				{ Code = "rate_limited", Message = "Too many requests. Try again shortly." },
+			_ => new TransportError { Code = "unavailable", Message = "The Macro Deck Platform could not be reached." }
+		};
+	}
 }

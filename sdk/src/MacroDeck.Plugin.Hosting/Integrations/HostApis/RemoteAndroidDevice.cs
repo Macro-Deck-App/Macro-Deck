@@ -80,7 +80,9 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 		}
 	}
 
-	public async Task<AndroidShellResult> ExecuteShellAsync(string command, CancellationToken cancellationToken = default)
+	public async Task<AndroidShellResult> ExecuteShellAsync(
+		string command,
+		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(command);
 		var result = Read<AdbShellResultDto>(await InvokeAsync(HostOperations.Adb.Shell,
@@ -172,26 +174,33 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 	}
 
 	public Task SendKeyAsync(AndroidKey key, CancellationToken cancellationToken = default)
-		=> ToWireKey(key) is { } wireKey
+	{
+		return ToWireKey(key) is { } wireKey
 			? InvokeAsync(HostOperations.Adb.Key,
 				new AdbKeyArguments { Serial = Serial, Key = wireKey },
 				_commandTimeout,
 				cancellationToken)
-			: Task.FromException(new AndroidDeviceException(AndroidDeviceErrorCode.InvalidArgument, $"Unknown key {key}."));
+			: Task.FromException(new AndroidDeviceException(AndroidDeviceErrorCode.InvalidArgument,
+				$"Unknown key {key}."));
+	}
 
 	public Task TapAsync(int x, int y, CancellationToken cancellationToken = default)
-		=> InvokeAsync(HostOperations.Adb.Tap,
+	{
+		return InvokeAsync(HostOperations.Adb.Tap,
 			new AdbTapArguments { Serial = Serial, X = x, Y = y },
 			_commandTimeout,
 			cancellationToken);
+	}
 
-	public Task SwipeAsync(int fromX,
+	public Task SwipeAsync(
+		int fromX,
 		int fromY,
 		int toX,
 		int toY,
 		TimeSpan duration,
 		CancellationToken cancellationToken = default)
-		=> InvokeAsync(HostOperations.Adb.Swipe,
+	{
+		return InvokeAsync(HostOperations.Adb.Swipe,
 			new AdbSwipeArguments
 			{
 				Serial = Serial,
@@ -199,10 +208,12 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 				FromY = fromY,
 				ToX = toX,
 				ToY = toY,
-				DurationMilliseconds = (int)Math.Clamp(Math.Round(duration.TotalMilliseconds), int.MinValue, int.MaxValue)
+				DurationMilliseconds
+					= (int)Math.Clamp(Math.Round(duration.TotalMilliseconds), int.MinValue, int.MaxValue)
 			},
 			_commandTimeout,
 			cancellationToken);
+	}
 
 	public Task InputTextAsync(string text, CancellationToken cancellationToken = default)
 	{
@@ -240,9 +251,11 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 			cancellationToken);
 	}
 
-	public Task RebootAsync(AndroidRebootMode mode = AndroidRebootMode.Normal, CancellationToken cancellationToken = default)
+	public Task RebootAsync(
+		AndroidRebootMode mode = AndroidRebootMode.Normal,
+		CancellationToken cancellationToken = default)
 	{
-		string? wireMode = mode switch
+		var wireMode = mode switch
 		{
 			AndroidRebootMode.Normal => AdbRebootModes.Normal,
 			AndroidRebootMode.Recovery => AdbRebootModes.Recovery,
@@ -304,8 +317,8 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 				ProtocolTimeouts.DefaultRequest,
 				cancellationToken);
 		}
-		catch (AndroidDeviceException exception) when (exception.ErrorCode == AndroidDeviceErrorCode.Unsupported &&
-			exception.InnerException is HostInvocationException { Code: ProtocolErrorCodes.CapabilityUnsupported })
+		catch (AndroidDeviceException exception) when (exception.ErrorCode == AndroidDeviceErrorCode.Unsupported
+			&& exception.InnerException is HostInvocationException { Code: ProtocolErrorCodes.CapabilityUnsupported })
 		{
 			return null;
 		}
@@ -324,7 +337,8 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 		};
 	}
 
-	internal void Update(AndroidDeviceInfo info,
+	internal void Update(
+		AndroidDeviceInfo info,
 		AndroidDeviceState state,
 		bool lacksUsbPermission = false,
 		AndroidDeviceMode mode = AndroidDeviceMode.Normal)
@@ -338,32 +352,36 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 		}
 	}
 
-	private static string? ToWireKey(AndroidKey key) => key switch
+	private static string? ToWireKey(AndroidKey key)
 	{
-		AndroidKey.Home => AdbKeys.Home,
-		AndroidKey.Back => AdbKeys.Back,
-		AndroidKey.Enter => AdbKeys.Enter,
-		AndroidKey.Menu => AdbKeys.Menu,
-		AndroidKey.Search => AdbKeys.Search,
-		AndroidKey.VolumeUp => AdbKeys.VolumeUp,
-		AndroidKey.VolumeDown => AdbKeys.VolumeDown,
-		AndroidKey.VolumeMute => AdbKeys.VolumeMute,
-		AndroidKey.MediaPlayPause => AdbKeys.MediaPlayPause,
-		AndroidKey.MediaNext => AdbKeys.MediaNext,
-		AndroidKey.MediaPrevious => AdbKeys.MediaPrevious,
-		AndroidKey.Power => AdbKeys.Power,
-		AndroidKey.Sleep => AdbKeys.Sleep,
-		AndroidKey.Wakeup => AdbKeys.Wakeup,
-		AndroidKey.AppSwitch => AdbKeys.AppSwitch,
-		AndroidKey.DpadUp => AdbKeys.DpadUp,
-		AndroidKey.DpadDown => AdbKeys.DpadDown,
-		AndroidKey.DpadLeft => AdbKeys.DpadLeft,
-		AndroidKey.DpadRight => AdbKeys.DpadRight,
-		AndroidKey.DpadCenter => AdbKeys.DpadCenter,
-		_ => null
-	};
+		return key switch
+		{
+			AndroidKey.Home => AdbKeys.Home,
+			AndroidKey.Back => AdbKeys.Back,
+			AndroidKey.Enter => AdbKeys.Enter,
+			AndroidKey.Menu => AdbKeys.Menu,
+			AndroidKey.Search => AdbKeys.Search,
+			AndroidKey.VolumeUp => AdbKeys.VolumeUp,
+			AndroidKey.VolumeDown => AdbKeys.VolumeDown,
+			AndroidKey.VolumeMute => AdbKeys.VolumeMute,
+			AndroidKey.MediaPlayPause => AdbKeys.MediaPlayPause,
+			AndroidKey.MediaNext => AdbKeys.MediaNext,
+			AndroidKey.MediaPrevious => AdbKeys.MediaPrevious,
+			AndroidKey.Power => AdbKeys.Power,
+			AndroidKey.Sleep => AdbKeys.Sleep,
+			AndroidKey.Wakeup => AdbKeys.Wakeup,
+			AndroidKey.AppSwitch => AdbKeys.AppSwitch,
+			AndroidKey.DpadUp => AdbKeys.DpadUp,
+			AndroidKey.DpadDown => AdbKeys.DpadDown,
+			AndroidKey.DpadLeft => AdbKeys.DpadLeft,
+			AndroidKey.DpadRight => AdbKeys.DpadRight,
+			AndroidKey.DpadCenter => AdbKeys.DpadCenter,
+			_ => null
+		};
+	}
 
-	private async Task<JsonElement?> InvokeAsync(string operation,
+	private async Task<JsonElement?> InvokeAsync(
+		string operation,
 		object arguments,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
@@ -395,7 +413,9 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 		}
 		catch (JsonException exception)
 		{
-			throw new AndroidDeviceException(AndroidDeviceErrorCode.Unknown, "The host sent an unreadable result.", exception);
+			throw new AndroidDeviceException(AndroidDeviceErrorCode.Unknown,
+				"The host sent an unreadable result.",
+				exception);
 		}
 
 		throw new AndroidDeviceException(AndroidDeviceErrorCode.Unknown, "The host sent no result.");

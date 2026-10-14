@@ -51,10 +51,13 @@ public sealed class ReportFolderChangedRequestMessageHandler
 
 		// Tracked before the lock check: the client stays on this folder even when the host refuses the report.
 		// The device: prefix is reserved for device sessions and must not be claimable from a socket.
-		if (request.RegisteredClientId is { Length: > 0 } clientId &&
-			!clientId.StartsWith(DeviceOrigin.Prefix, StringComparison.Ordinal))
+		if (request.RegisteredClientId is { Length: > 0 } clientId
+			&& !clientId.StartsWith(DeviceOrigin.Prefix, StringComparison.Ordinal))
 		{
-			_clients.Publish(_clients.Report(clientId, request.DeviceId, folder.ProfileId.ToString(), folder.Id.ToString()));
+			_clients.Publish(_clients.Report(clientId,
+				request.DeviceId,
+				folder.ProfileId.ToString(),
+				folder.Id.ToString()));
 		}
 
 		if (_lockState.IsLocked)

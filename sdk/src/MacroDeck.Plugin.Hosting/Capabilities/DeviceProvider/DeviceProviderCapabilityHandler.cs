@@ -35,7 +35,8 @@ internal sealed class DeviceProviderCapabilityHandler(
 	public string Kind => CapabilityKinds.DeviceProvider;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -45,6 +46,7 @@ internal sealed class DeviceProviderCapabilityHandler(
 					VersionRange = _version
 				}
 			];
+	}
 
 	public async Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -60,8 +62,8 @@ internal sealed class DeviceProviderCapabilityHandler(
 			return CapabilityInvocationResult.Ok(new DeviceProviderDescribePayload
 			{
 				ProviderName = _providers.Select(provider => provider.ProviderName)
-						.FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-					metadata.Name,
+						.FirstOrDefault(name => !string.IsNullOrEmpty(name))
+					?? metadata.Name,
 				Devices = Devices()
 			});
 		}
@@ -86,8 +88,8 @@ internal sealed class DeviceProviderCapabilityHandler(
 			// for a session that has ended is stale by definition.
 			case CapabilityOperations.DeviceProvider.SessionSurface:
 			{
-				if (Arguments<DeviceSessionSurfaceArguments>(invocation) is { } arguments &&
-					_sessions.TryGetValue(arguments.SessionId, out var session))
+				if (Arguments<DeviceSessionSurfaceArguments>(invocation) is { } arguments
+					&& _sessions.TryGetValue(arguments.SessionId, out var session))
 				{
 					session.Apply(arguments.Surface);
 				}
@@ -97,8 +99,8 @@ internal sealed class DeviceProviderCapabilityHandler(
 
 			case CapabilityOperations.DeviceProvider.SessionClose:
 			{
-				if (Arguments<DeviceSessionCloseArguments>(invocation) is { } arguments &&
-					_sessions.TryRemove(arguments.SessionId, out var session))
+				if (Arguments<DeviceSessionCloseArguments>(invocation) is { } arguments
+					&& _sessions.TryRemove(arguments.SessionId, out var session))
 				{
 					session.RaiseClosed(arguments.Reason);
 				}
@@ -141,8 +143,8 @@ internal sealed class DeviceProviderCapabilityHandler(
 		}
 
 		var provider = _providers.FirstOrDefault(candidate => candidate.GetDevices()
-				.Any(device => string.Equals(device.Id, arguments.ProviderDeviceId, StringComparison.Ordinal))) ??
-			(_providers.Count == 1 ? _providers[0] : null);
+				.Any(device => string.Equals(device.Id, arguments.ProviderDeviceId, StringComparison.Ordinal)))
+			?? (_providers.Count == 1 ? _providers[0] : null);
 
 		if (provider is null)
 		{
@@ -189,5 +191,7 @@ internal sealed class DeviceProviderCapabilityHandler(
 	}
 
 	private IReadOnlyList<DeviceDescriptorDto> Devices()
-		=> [.. _providers.SelectMany(provider => provider.GetDevices()).Select(DeviceDescriptorMapper.ToDto)];
+	{
+		return [.. _providers.SelectMany(provider => provider.GetDevices()).Select(DeviceDescriptorMapper.ToDto)];
+	}
 }

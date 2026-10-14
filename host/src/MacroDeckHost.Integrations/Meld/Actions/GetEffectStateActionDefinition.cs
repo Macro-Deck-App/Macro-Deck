@@ -25,17 +25,21 @@ internal sealed class GetEffectStateActionDefinition : IDynamicOptionsActionDefi
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(MeldActionParameters.Effect,
-			label: AppStrings.Integrations.Meld.Parameters.Effect(),
+			AppStrings.Integrations.Meld.Parameters.Effect(),
 			required: true),
 		ActionParameter.Autocomplete(MeldActionParameters.Variable,
-			label: AppStrings.Integrations.Meld.Parameters.SaveToVariable(),
+			AppStrings.Integrations.Meld.Parameters.SaveToVariable(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables);
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		var session = _resolver()?.State.Session ?? MeldSession.Empty;
@@ -73,8 +77,8 @@ internal sealed class GetEffectStateActionDefinition : IDynamicOptionsActionDefi
 				return resolveError!;
 			}
 
-			if (context.Parameters.GetValueOrDefault(MeldActionParameters.Variable) is not string variable ||
-				string.IsNullOrWhiteSpace(variable))
+			if (context.Parameters.GetValueOrDefault(MeldActionParameters.Variable) is not string variable
+				|| string.IsNullOrWhiteSpace(variable))
 			{
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Meld.Errors.NoTargetVariable());
@@ -86,7 +90,7 @@ internal sealed class GetEffectStateActionDefinition : IDynamicOptionsActionDefi
 			return written
 				? ActionResult.Success()
 				: ActionResult.Failed(ActionErrorCodes.Unavailable,
-					AppStrings.Integrations.Meld.Errors.CouldNotWriteVariable(variable: variable));
+					AppStrings.Integrations.Meld.Errors.CouldNotWriteVariable(variable));
 		}
 	}
 }

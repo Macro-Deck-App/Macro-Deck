@@ -52,7 +52,9 @@ internal sealed class YouTubeTokenProvider : IDisposable
 	}
 
 	public Task<string> ForceRefreshAsync(CancellationToken cancellationToken)
-		=> RefreshAsync(_tokens, cancellationToken);
+	{
+		return RefreshAsync(_tokens, cancellationToken);
+	}
 
 	public async Task StopAsync()
 	{
@@ -63,7 +65,10 @@ internal sealed class YouTubeTokenProvider : IDisposable
 
 	// The connection's async stop drains users of the semaphore. Synchronous disposal only prevents
 	// new refreshes; disposing the semaphore itself can race an in-flight finally/release.
-	public void Dispose() => Interlocked.Exchange(ref _stopping, 1);
+	public void Dispose()
+	{
+		Interlocked.Exchange(ref _stopping, 1);
+	}
 
 	private async Task<string> RefreshAsync(YouTubeTokens observed, CancellationToken cancellationToken)
 	{
@@ -116,5 +121,7 @@ internal sealed class YouTubeTokenProvider : IDisposable
 	}
 
 	private bool IsExpiring(YouTubeTokens tokens)
-		=> tokens.ExpiresAt - _time.GetUtcNow() <= _refreshMargin;
+	{
+		return tokens.ExpiresAt - _time.GetUtcNow() <= _refreshMargin;
+	}
 }

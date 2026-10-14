@@ -66,7 +66,10 @@ internal sealed class FakeJellyfinClient : IJellyfinClient
 		return Task.FromResult(_sessions);
 	}
 
-	public Task SendPlaystateAsync(string sessionId, string command, long? seekPositionTicks,
+	public Task SendPlaystateAsync(
+		string sessionId,
+		string command,
+		long? seekPositionTicks,
 		CancellationToken cancellationToken)
 	{
 		Commands.Enqueue(seekPositionTicks is { } ticks
@@ -75,15 +78,24 @@ internal sealed class FakeJellyfinClient : IJellyfinClient
 		return Task.CompletedTask;
 	}
 
-	public Task SendGeneralCommandAsync(string sessionId, string command,
-		IReadOnlyDictionary<string, string>? arguments, CancellationToken cancellationToken)
+	public Task SendGeneralCommandAsync(
+		string sessionId,
+		string command,
+		IReadOnlyDictionary<string, string>? arguments,
+		CancellationToken cancellationToken)
 	{
-		var args = arguments is null ? string.Empty : string.Join(',', arguments.Select(pair => $"{pair.Key}={pair.Value}"));
+		var args = arguments is null
+			? string.Empty
+			: string.Join(',', arguments.Select(pair => $"{pair.Key}={pair.Value}"));
 		Commands.Enqueue($"command:{sessionId}:{command}:{args}");
 		return Task.CompletedTask;
 	}
 
-	public Task SendMessageAsync(string sessionId, string? header, string text, int? timeoutMs,
+	public Task SendMessageAsync(
+		string sessionId,
+		string? header,
+		string text,
+		int? timeoutMs,
 		CancellationToken cancellationToken)
 	{
 		Commands.Enqueue($"message:{sessionId}:{header}:{text}:{timeoutMs}");
@@ -96,19 +108,27 @@ internal sealed class FakeJellyfinClient : IJellyfinClient
 		return Task.CompletedTask;
 	}
 
-	public Task<IReadOnlyList<JellyfinItemDto>> SearchItemsAsync(string searchTerm, IReadOnlyList<string> itemTypes,
-		string? userId, CancellationToken cancellationToken)
+	public Task<IReadOnlyList<JellyfinItemDto>> SearchItemsAsync(
+		string searchTerm,
+		IReadOnlyList<string> itemTypes,
+		string? userId,
+		CancellationToken cancellationToken)
 	{
 		Commands.Enqueue($"search:{searchTerm}:{string.Join(',', itemTypes)}:{userId}");
 		return Task.FromResult(SearchResults);
 	}
 
 	public Task<JellyfinImage?> GetPrimaryImageAsync(string itemId, string? tag, CancellationToken cancellationToken)
-		=> Task.FromResult<JellyfinImage?>(new JellyfinImage([1, 2, 3], "image/png"));
+	{
+		return Task.FromResult<JellyfinImage?>(new JellyfinImage([1, 2, 3], "image/png"));
+	}
 
-	public Task RunSessionSocketAsync(Action<IReadOnlyList<JellyfinSessionDto>> onSessions,
+	public Task RunSessionSocketAsync(
+		Action<IReadOnlyList<JellyfinSessionDto>> onSessions,
 		CancellationToken cancellationToken)
-		=> throw new JellyfinSocketException("no socket in tests");
+	{
+		throw new JellyfinSocketException("no socket in tests");
+	}
 
 	private void ThrowIfDown()
 	{
@@ -141,9 +161,14 @@ internal sealed class JellyfinTestContext : IIntegrationContext
 	public IWidgetApi Widgets => throw new NotSupportedException();
 	public IUserNotifier Notifications => throw new NotSupportedException();
 
-	public Guid AddServer(string title, string url = "http://jellyfin.local:8096", string apiKey = "key",
-		string? variableKey = null, string? devices = null)
-		=> ConfigStore.AddEntry(title,
+	public Guid AddServer(
+		string title,
+		string url = "http://jellyfin.local:8096",
+		string apiKey = "key",
+		string? variableKey = null,
+		string? devices = null)
+	{
+		return ConfigStore.AddEntry(title,
 			new Dictionary<string, string?>
 			{
 				[JellyfinConfigKeys.Url] = url,
@@ -153,6 +178,7 @@ internal sealed class JellyfinTestContext : IIntegrationContext
 				[JellyfinConfigKeys.Devices] = devices
 			},
 			new Dictionary<string, string> { [JellyfinConfigKeys.ApiKey] = apiKey });
+	}
 }
 
 internal sealed class JellyfinTestVariables : IVariableApi
@@ -177,12 +203,18 @@ internal sealed class JellyfinTestVariables : IVariableApi
 		}
 	}
 
-	public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => Task.FromResult(All);
+	public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+	{
+		return Task.FromResult(All);
+	}
 
 	public Task<VariableHandle?> GetByNameAsync(string name)
-		=> Task.FromResult(All.FirstOrDefault(variable => variable.Name == name));
+	{
+		return Task.FromResult(All.FirstOrDefault(variable => variable.Name == name));
+	}
 
-	public Task<VariableHandle> CreateAsync(string name,
+	public Task<VariableHandle> CreateAsync(
+		string name,
 		VariableType type,
 		object? initialValue = null,
 		int? decimalPlaces = null,
@@ -190,7 +222,8 @@ internal sealed class JellyfinTestVariables : IVariableApi
 	{
 		lock (_gate)
 		{
-			var existing = _variables.FindIndex(variable => definitionId is not null && variable.DefinitionId == definitionId);
+			var existing = _variables.FindIndex(variable
+				=> definitionId is not null && variable.DefinitionId == definitionId);
 			var handle = new VariableHandle(existing >= 0 ? _variables[existing].Id : Guid.NewGuid(),
 				name,
 				type,
@@ -209,7 +242,10 @@ internal sealed class JellyfinTestVariables : IVariableApi
 		}
 	}
 
-	public Task SetValueAsync(Guid variableId, object? value) => Task.CompletedTask;
+	public Task SetValueAsync(Guid variableId, object? value)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task DeleteAsync(Guid variableId)
 	{
@@ -239,7 +275,9 @@ internal sealed class RecordingEventPublisher : IEventPublisher
 	public ConcurrentQueue<(string Id, IReadOnlyDictionary<string, object?> Payload)> Events { get; } = new();
 
 	public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-		=> Events.Enqueue((eventId, parameters ?? new Dictionary<string, object?>()));
+	{
+		Events.Enqueue((eventId, parameters ?? new Dictionary<string, object?>()));
+	}
 }
 
 internal sealed class JellyfinTestConfig : IIntegrationConfig
@@ -248,7 +286,9 @@ internal sealed class JellyfinTestConfig : IIntegrationConfig
 	private readonly ConcurrentDictionary<(Guid EntryId, string Key), string?> _strings = new();
 	private readonly ConcurrentDictionary<(Guid EntryId, string Key), string> _secrets = new();
 
-	public Guid AddEntry(string title, IReadOnlyDictionary<string, string?> values,
+	public Guid AddEntry(
+		string title,
+		IReadOnlyDictionary<string, string?> values,
 		IReadOnlyDictionary<string, string> secrets)
 	{
 		var entryId = Guid.NewGuid();
@@ -266,16 +306,25 @@ internal sealed class JellyfinTestConfig : IIntegrationConfig
 		return entryId;
 	}
 
-	public string? Read(Guid entryId, string key) => _strings.GetValueOrDefault((entryId, key));
+	public string? Read(Guid entryId, string key)
+	{
+		return _strings.GetValueOrDefault((entryId, key));
+	}
 
 	public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+	}
 
 	public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken cancellationToken = default)
 	{
@@ -305,7 +354,8 @@ internal static class JellyfinSessions
 		string? sessionId = null,
 		long positionTicks = 0,
 		DateTimeOffset? lastActivity = null)
-		=> new()
+	{
+		return new JellyfinSessionDto
 		{
 			Id = sessionId ?? $"session-{deviceId}",
 			DeviceId = deviceId,
@@ -331,9 +381,11 @@ internal static class JellyfinSessions
 				PlayMethod = "DirectPlay"
 			}
 		};
+	}
 
 	public static JellyfinItemDto Movie(string id = "movie-1", string name = "Big Buck Bunny")
-		=> new()
+	{
+		return new JellyfinItemDto
 		{
 			Id = id,
 			Name = name,
@@ -343,9 +395,11 @@ internal static class JellyfinSessions
 			RunTimeTicks = TimeSpan.FromMinutes(10).Ticks,
 			ImageTags = new Dictionary<string, string> { ["Primary"] = "tag-m" }
 		};
+	}
 
 	public static JellyfinItemDto Episode()
-		=> new()
+	{
+		return new JellyfinItemDto
 		{
 			Id = "episode-1",
 			Name = "Pilot",
@@ -360,9 +414,11 @@ internal static class JellyfinSessions
 			RunTimeTicks = TimeSpan.FromMinutes(20).Ticks,
 			ImageTags = new Dictionary<string, string> { ["Primary"] = "tag-e" }
 		};
+	}
 
 	public static JellyfinItemDto Track()
-		=> new()
+	{
+		return new JellyfinItemDto
 		{
 			Id = "track-1",
 			Name = "Track 1",
@@ -374,6 +430,7 @@ internal static class JellyfinSessions
 			Artists = ["Test Artist"],
 			RunTimeTicks = TimeSpan.FromMinutes(3).Ticks
 		};
+	}
 
 	public static JellyfinConnectionTimings FastTimings { get; } = new(TimeSpan.FromMilliseconds(20),
 		TimeSpan.FromMinutes(5),

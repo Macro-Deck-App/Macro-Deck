@@ -14,7 +14,10 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class VariableAttributeTemplateTests
 {
-	private static string Bare(string template, params VariableEntity[] vars) => Render(template, vars);
+	private static string Bare(string template, params VariableEntity[] vars)
+	{
+		return Render(template, vars);
+	}
 
 	private static string Attributed(string template, params VariableEntity[] vars)
 	{
@@ -50,17 +53,23 @@ public class VariableAttributeTemplateTests
 		return renderer.Render(template, context);
 	}
 
-	private static VariableEntity Var(string name, VariableType type, string value) => new()
+	private static VariableEntity Var(string name, VariableType type, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
-	private static Func<VariableEntity> Cpu() => () => Var("cpu", VariableType.Numeric, "12.5");
+	private static Func<VariableEntity> Cpu()
+	{
+		return () => Var("cpu", VariableType.Numeric, "12.5");
+	}
 
 	/// <summary>
 	/// The case the whole unwrapping context exists for. Scriban's <c>ScriptBinaryExpression</c> dispatches
@@ -71,18 +80,24 @@ public class VariableAttributeTemplateTests
 	/// </summary>
 	[Test]
 	public void A_fractional_comparison_is_not_truncated_to_an_integer()
-		=> Both("{% if vars.cpu > 12 %}hot{% else %}cool{% endif %}", "hot", Cpu());
+	{
+		Both("{% if vars.cpu > 12 %}hot{% else %}cool{% endif %}", "hot", Cpu());
+	}
 
 	// The two mirrors of the case above. Truncation is not the only wrong coercion available: rounding
 	// 12.5 to 13 would answer the test above correctly and these two wrongly, so the three together pin
 	// that the comparison is made against 12.5 itself rather than against any integer near it.
 	[Test]
 	public void The_same_comparison_against_the_value_itself_is_false()
-		=> Both("{% if vars.cpu > 12.5 %}hot{% else %}cool{% endif %}", "cool", Cpu());
+	{
+		Both("{% if vars.cpu > 12.5 %}hot{% else %}cool{% endif %}", "cool", Cpu());
+	}
 
 	[Test]
 	public void The_mirrored_comparison_below_the_next_integer_is_true()
-		=> Both("{% if vars.cpu < 13 %}cool{% else %}hot{% endif %}", "cool", Cpu());
+	{
+		Both("{% if vars.cpu < 13 %}cool{% else %}hot{% endif %}", "cool", Cpu());
+	}
 
 	// The table in ADR 0081's Context section, rendered against a variable that actually carries an
 	// attribute - which is the column the ADR labels "container, unwrapping context".
@@ -118,8 +133,8 @@ public class VariableAttributeTemplateTests
 		cpu.Attributes = new Dictionary<string, string>(StringComparer.Ordinal) { ["sensor"] = "package" };
 
 		var rendered = Render(
-			"{{ vars.cpu }}|{{ vars.cpu.unit }}|{{ vars.cpu.semantic_kind }}|{{ vars.cpu.decimal_places }}" +
-			"|{{ vars.cpu.min }}|{{ vars.cpu.max }}|{{ vars.cpu.step }}|{{ vars.cpu.sensor }}",
+			"{{ vars.cpu }}|{{ vars.cpu.unit }}|{{ vars.cpu.semantic_kind }}|{{ vars.cpu.decimal_places }}"
+			+ "|{{ vars.cpu.min }}|{{ vars.cpu.max }}|{{ vars.cpu.step }}|{{ vars.cpu.sensor }}",
 			[cpu]);
 
 		Assert.That(rendered, Is.EqualTo("12.5|%|percentage|1|0|100|0.5|package"));
@@ -147,7 +162,10 @@ public class VariableAttributeTemplateTests
 	[Test]
 	public void A_false_boolean_stays_falsy_in_every_liquid_construct()
 	{
-		static Func<VariableEntity> Flag() => () => Var("flag", VariableType.Boolean, "false");
+		static Func<VariableEntity> Flag()
+		{
+			return () => Var("flag", VariableType.Boolean, "false");
+		}
 
 		Both("{% if vars.flag %}on{% else %}off{% endif %}", "off", Flag());
 		Both("{% unless vars.flag %}off{% endunless %}", "off", Flag());
@@ -173,7 +191,10 @@ public class VariableAttributeTemplateTests
 	[Test]
 	public void A_true_boolean_stays_truthy()
 	{
-		static Func<VariableEntity> Flag() => () => Var("flag", VariableType.Boolean, "true");
+		static Func<VariableEntity> Flag()
+		{
+			return () => Var("flag", VariableType.Boolean, "true");
+		}
 
 		Both("{% if vars.flag %}on{% else %}off{% endif %}", "on", Flag());
 		Both("{% unless vars.flag %}off{% endunless %}", string.Empty, Flag());
@@ -182,8 +203,15 @@ public class VariableAttributeTemplateTests
 	[Test]
 	public void A_comparison_with_a_variable_on_both_sides_compares_the_two_values()
 	{
-		static Func<VariableEntity> Left() => () => Var("used", VariableType.Numeric, "12.5");
-		static Func<VariableEntity> Right() => () => Var("limit", VariableType.Numeric, "12");
+		static Func<VariableEntity> Left()
+		{
+			return () => Var("used", VariableType.Numeric, "12.5");
+		}
+
+		static Func<VariableEntity> Right()
+		{
+			return () => Var("limit", VariableType.Numeric, "12");
+		}
 
 		Both("{% if vars.used > vars.limit %}over{% else %}under{% endif %}", "over", Left(), Right());
 		Both("{% if vars.limit > vars.used %}over{% else %}under{% endif %}", "under", Left(), Right());
@@ -200,9 +228,11 @@ public class VariableAttributeTemplateTests
 
 	[Test]
 	public void A_for_loop_iterates_the_value_and_not_the_container()
-		=> Both("{% for item in vars.tags | split: \",\" %}[{{ item }}]{% endfor %}",
+	{
+		Both("{% for item in vars.tags | split: \",\" %}[{{ item }}]{% endfor %}",
 			"[a][b][c]",
 			() => Var("tags", VariableType.Text, "a,b,c"));
+	}
 
 	/// <summary>
 	/// The broad transparency sweep. Every construct here reaches the value by a different route inside
@@ -222,7 +252,8 @@ public class VariableAttributeTemplateTests
 	}
 
 	private static IEnumerable<TestCaseData> _transparentText()
-		=> Cases(VariableType.Text,
+	{
+		return Cases(VariableType.Text,
 			"abc",
 			"{{ vars.x }}",
 			"{{ vars.x | upcase }}",
@@ -240,9 +271,11 @@ public class VariableAttributeTemplateTests
 			"{% if vars.x != 'abc' %}Y{% else %}N{% endif %}",
 			"{% if vars.x > 'a' %}Y{% else %}N{% endif %}",
 			"{% if vars.x %}T{% else %}F{% endif %}");
+	}
 
 	private static IEnumerable<TestCaseData> _transparentNumeric()
-		=> Cases(VariableType.Numeric,
+	{
+		return Cases(VariableType.Numeric,
 			"12.5",
 			"{{ vars.x }}",
 			"{{ vars.x | round: 0 }}",
@@ -260,9 +293,11 @@ public class VariableAttributeTemplateTests
 			"{% if vars.x >= 12.5 %}Y{% else %}N{% endif %}",
 			"{% if vars.x %}T{% else %}F{% endif %}",
 			"{% if vars.x == empty %}E{% else %}N{% endif %}");
+	}
 
 	private static IEnumerable<TestCaseData> _transparentBoolean()
-		=> Cases(VariableType.Boolean,
+	{
+		return Cases(VariableType.Boolean,
 			"false",
 			"{{ vars.x }}",
 			"{{ vars.x | default: 'd' }}",
@@ -273,11 +308,14 @@ public class VariableAttributeTemplateTests
 			"{% if vars.x or true %}Y{% else %}N{% endif %}",
 			"{% case vars.x %}{% when false %}off{% when true %}on{% endcase %}",
 			"{% if vars.x == empty %}E{% else %}N{% endif %}");
+	}
 
 	private static IEnumerable<TestCaseData> Cases(VariableType type, string value, params string[] templates)
-		=> templates.Select(template => new TestCaseData(type, value, template).SetArgDisplayNames(type.ToString(),
+	{
+		return templates.Select(template => new TestCaseData(type, value, template).SetArgDisplayNames(type.ToString(),
 			value,
 			template));
+	}
 
 	/// <summary>
 	/// An attribute a variable does not declare is absent from the container rather than present-and-empty.

@@ -197,8 +197,8 @@ public class FolderService : IFolderService
 
 		if (rows.HasValue || columns.HasValue || parentId is not null)
 		{
-			var candidateRows = rows.HasValue ? (rows.Value == -1 ? null : rows.Value) : folder.Rows;
-			var candidateColumns = columns.HasValue ? (columns.Value == -1 ? null : columns.Value) : folder.Columns;
+			var candidateRows = rows.HasValue ? rows.Value == -1 ? null : rows.Value : folder.Rows;
+			var candidateColumns = columns.HasValue ? columns.Value == -1 ? null : columns.Value : folder.Columns;
 			var conflict = FindNewGridConflicts(profile,
 				profileFolders,
 				folder.Id,
@@ -237,17 +237,17 @@ public class FolderService : IFolderService
 			}
 		}
 
-		if (widgetSpacing.HasValue &&
-			widgetSpacing.Value != -1 &&
-			(widgetSpacing.Value < 0 || widgetSpacing.Value > 40))
+		if (widgetSpacing.HasValue
+			&& widgetSpacing.Value != -1
+			&& (widgetSpacing.Value < 0 || widgetSpacing.Value > 40))
 		{
 			return Result.Fail<FolderEntity, FolderError>(FolderError.ValidationError,
 				"Widget spacing must be between 0 and 40");
 		}
 
-		if (widgetBorderRadius.HasValue &&
-			widgetBorderRadius.Value != -1 &&
-			(widgetBorderRadius.Value < 0 || widgetBorderRadius.Value > 60))
+		if (widgetBorderRadius.HasValue
+			&& widgetBorderRadius.Value != -1
+			&& (widgetBorderRadius.Value < 0 || widgetBorderRadius.Value > 60))
 		{
 			return Result.Fail<FolderEntity, FolderError>(FolderError.ValidationError,
 				"Widget border radius must be between 0 and 60");
@@ -400,8 +400,7 @@ public class FolderService : IFolderService
 			return Result.Fail(FolderError.CannotDeleteLastFolder, "Cannot delete the last folder");
 		}
 
-		if (subtree.Any(f => f.IsDefault) &&
-			!profileFolders.Any(f => !subtreeIds.Contains(f.Id) && f.ParentId is null))
+		if (subtree.Any(f => f.IsDefault) && !profileFolders.Any(f => !subtreeIds.Contains(f.Id) && f.ParentId is null))
 		{
 			return Result.Fail(FolderError.CannotDeleteLastFolder, "Cannot delete the only root start folder");
 		}
@@ -525,7 +524,8 @@ public class FolderService : IFolderService
 		return Result.Ok<FolderEntity, FolderError>(duplicateFolder);
 	}
 
-	public async Task<Result<IReadOnlyList<FolderEntity>, FolderError>> Move(Guid id,
+	public async Task<Result<IReadOnlyList<FolderEntity>, FolderError>> Move(
+		Guid id,
 		Guid targetId,
 		FolderMovePosition position)
 	{
@@ -685,16 +685,17 @@ public class FolderService : IFolderService
 		return Result.Ok<FolderError>();
 	}
 
-	private (FolderEntity Folder, FolderFocusRule Rule)? FindConflictingRule(FolderFocusRule candidate,
+	private (FolderEntity Folder, FolderFocusRule Rule)? FindConflictingRule(
+		FolderFocusRule candidate,
 		Guid excludeRuleId)
 	{
 		foreach (var folder in _folderCache.GetAllFolders())
 		{
 			foreach (var existing in folder.FocusRules)
 			{
-				if (existing.Id != excludeRuleId &&
-					existing.Enabled &&
-					ApplicationIdentityMatcher.SameTarget(candidate, existing))
+				if (existing.Id != excludeRuleId
+					&& existing.Enabled
+					&& ApplicationIdentityMatcher.SameTarget(candidate, existing))
 				{
 					return (folder, existing);
 				}
@@ -782,7 +783,8 @@ public class FolderService : IFolderService
 		return conflicts.Count > 0 ? PinnedWidgetLayout.DescribeReachConflicts(conflicts) : null;
 	}
 
-	private static int ResolvePlacementIndex(IReadOnlyList<FolderEntity> profileFolders,
+	private static int ResolvePlacementIndex(
+		IReadOnlyList<FolderEntity> profileFolders,
 		Guid movingFolderId,
 		Guid? newParentId,
 		FolderEntity target,
@@ -808,7 +810,8 @@ public class FolderService : IFolderService
 		return position == FolderMovePosition.Before ? targetIndex : targetIndex + 1;
 	}
 
-	private static List<FolderEntity> ApplyPlacement(FolderEntity folder,
+	private static List<FolderEntity> ApplyPlacement(
+		FolderEntity folder,
 		IReadOnlyList<FolderEntity> profileFolders,
 		Guid? newParentId,
 		int index)

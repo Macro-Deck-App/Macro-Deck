@@ -32,7 +32,8 @@ public static class WidgetFontFaceMigration
 
 		if (data["states"] is JsonObject states)
 		{
-			changed |= states["off"] is JsonObject off && MigrateNode(off, fontCatalog) | ResolveAlias(off, fontCatalog);
+			changed |= states["off"] is JsonObject off
+				&& MigrateNode(off, fontCatalog) | ResolveAlias(off, fontCatalog);
 			changed |= states["on"] is JsonObject on && MigrateNode(on, fontCatalog) | ResolveAlias(on, fontCatalog);
 		}
 		else if (data["states"] is JsonArray entries)
@@ -123,8 +124,12 @@ public static class WidgetFontFaceMigration
 	}
 
 	private static string? ReadString(JsonObject node, string key)
-		=> node[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	{
+		return node[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	}
 
 	private static bool ReadBool(JsonObject node, string key)
-		=> node[key] is JsonValue value && value.TryGetValue<bool>(out var flag) && flag;
+	{
+		return node[key] is JsonValue value && value.TryGetValue<bool>(out var flag) && flag;
+	}
 }

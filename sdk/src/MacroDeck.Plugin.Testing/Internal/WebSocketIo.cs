@@ -9,7 +9,8 @@ internal static class WebSocketIo
 
 	/// <summary>Returns the message bytes, an empty array for a message over <paramref name="maxBytes" />, or
 	/// null when the peer closed the socket. Cancelling <paramref name="cancellationToken" /> aborts the socket and throws.</summary>
-	public static async Task<byte[]?> ReceiveOneMessageAsync(WebSocket socket,
+	public static async Task<byte[]?> ReceiveOneMessageAsync(
+		WebSocket socket,
 		int maxBytes,
 		CancellationToken cancellationToken)
 	{

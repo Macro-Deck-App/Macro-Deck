@@ -28,7 +28,7 @@ internal sealed class MediaPlayerActionDefinition : IDynamicOptionsActionDefinit
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(EntityParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.MediaPlayer.EntityLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.MediaPlayer.EntityLabel(),
 			required: true),
 		ActionParameter.Choice(CommandParameterName,
 			[
@@ -82,22 +82,27 @@ internal sealed class MediaPlayerActionDefinition : IDynamicOptionsActionDefinit
 					Value = "unmute", Label = AppStrings.Integrations.HomeAssistant.Actions.MediaPlayer.CommandUnmute()
 				}
 			],
-			label: AppStrings.Integrations.HomeAssistant.Actions.MediaPlayer.CommandLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.MediaPlayer.CommandLabel(),
 			defaultValue: "play_pause",
 			required: true),
 		ActionParameter.Number(VolumeParameterName,
-				label: AppStrings.Integrations.HomeAssistant.Actions.MediaPlayer.VolumeLabel(),
+				AppStrings.Integrations.HomeAssistant.Actions.MediaPlayer.VolumeLabel(),
 				min: 0,
 				max: 100)
 			.OnlyWhen(CommandParameterName, "volume_set")
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, MediaPlayerDomain));
+	{
+		return Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, MediaPlayerDomain));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -147,8 +152,8 @@ internal sealed class MediaPlayerActionDefinition : IDynamicOptionsActionDefinit
 				case "volume_set":
 					service = "volume_set";
 					data["volume_level"] =
-						(HomeAssistantActionValues.ReadNumber(context.Parameters, VolumeParameterName, 0, 100) ?? 0d) /
-						100d;
+						(HomeAssistantActionValues.ReadNumber(context.Parameters, VolumeParameterName, 0, 100) ?? 0d)
+						/ 100d;
 					break;
 				case "volume_up":
 					service = "volume_up";

@@ -43,10 +43,10 @@ internal readonly record struct NetworkSettingsProjection(
 	public static NetworkSettingsProjection From(NetworkSettings settings, RestartAvailability restart)
 	{
 		var portRestartRequired =
-			(!settings.OverriddenByEnvironment &&
-				!settings.ConfiguredPortIgnored &&
-				settings.PublicPort != settings.ActivePublicPort) ||
-			(settings.PublicListenerUnavailable && !settings.OverriddenByEnvironment);
+			!settings.OverriddenByEnvironment
+			&& !settings.ConfiguredPortIgnored
+			&& settings.PublicPort != settings.ActivePublicPort
+			|| settings.PublicListenerUnavailable && !settings.OverriddenByEnvironment;
 
 		var restartRequired = portRestartRequired || NetworkListenerIdentity.TlsOrCertificateDiffers(settings);
 

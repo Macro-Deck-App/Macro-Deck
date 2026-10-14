@@ -15,5 +15,7 @@ public sealed class LocalLocaleApi : ILocaleApi
 	}
 
 	public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(new TimeOfDayFormat(CultureInfo.CurrentCulture, HourCycles.H23));
+	{
+		return Task.FromResult(new TimeOfDayFormat(CultureInfo.CurrentCulture, HourCycles.H23));
+	}
 }

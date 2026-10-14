@@ -10,8 +10,8 @@ internal static class NvidiaSmiParser
 		foreach (var line in output.Split('\n'))
 		{
 			var fields = line.Split(',');
-			if (fields.Length < 3 ||
-				!int.TryParse(fields[0].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var index))
+			if (fields.Length < 3
+				|| !int.TryParse(fields[0].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var index))
 			{
 				continue;
 			}

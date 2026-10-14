@@ -30,8 +30,10 @@ public sealed class ActionConfigUiProviderRegistry
 		_logger = logger;
 	}
 
-	public static string ProviderIdFor(string integrationId, string actionId) =>
-		$"action-config:{integrationId}:{actionId}";
+	public static string ProviderIdFor(string integrationId, string actionId)
+	{
+		return $"action-config:{integrationId}:{actionId}";
+	}
 
 	public IUiSessionProvider? Resolve(string providerId)
 	{
@@ -92,8 +94,8 @@ public sealed class ActionConfigUiProviderRegistry
 		private static Dictionary<string, JsonElement> ReadParameters(
 			IReadOnlyDictionary<string, JsonElement> attributes)
 		{
-			if (!attributes.TryGetValue(UiConfigSurfaceAttributes.Parameters, out var element) ||
-				element.ValueKind != JsonValueKind.Object)
+			if (!attributes.TryGetValue(UiConfigSurfaceAttributes.Parameters, out var element)
+				|| element.ValueKind != JsonValueKind.Object)
 			{
 				return new Dictionary<string, JsonElement>(StringComparer.Ordinal);
 			}

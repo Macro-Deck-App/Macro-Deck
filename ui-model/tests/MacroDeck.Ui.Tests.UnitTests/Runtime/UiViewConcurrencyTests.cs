@@ -31,7 +31,9 @@ namespace MacroDeck.Ui.Tests.UnitTests.Runtime;
 public class UiViewConcurrencyTests
 {
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiNode? FindById(UiNode node, string id)
 	{
@@ -52,24 +54,36 @@ public class UiViewConcurrencyTests
 	}
 
 	private static double NumberOf(UiView view, string nodeId)
-		=> FindById(view.Tree.Root, nodeId)!.Properties[UiConfigProperties.Value].GetDouble();
+	{
+		return FindById(view.Tree.Root, nodeId)!.Properties[UiConfigProperties.Value].GetDouble();
+	}
 
 	private static double NumberOf(UiTree tree, string nodeId)
-		=> FindById(tree.Root, nodeId)!.Properties[UiConfigProperties.Value].GetDouble();
+	{
+		return FindById(tree.Root, nodeId)!.Properties[UiConfigProperties.Value].GetDouble();
+	}
 
 	private static IEnumerable<UiPatchOperation> AllOperations(IEnumerable<UiPatch> patches)
-		=> patches.SelectMany(patch => patch.Operations);
+	{
+		return patches.SelectMany(patch => patch.Operations);
+	}
 
 	/// <summary>A read-only number node whose id is its key, so an assertion can name the node the state
 	/// feeds without knowing anything about how the runtime composes ids.</summary>
 	private static UiStringInput TextNode(string key, Func<string> read)
-		=> new() { Key = key, Binding = Bind.ReadOnly(UiValue.From(read)) };
+	{
+		return new UiStringInput { Key = key, Binding = Bind.ReadOnly(UiValue.From(read)) };
+	}
 
 	private static UiNumberInput NumberNode(string key, Func<double> read)
-		=> new() { Key = key, Binding = Bind.ReadOnly(UiValue.From(read)) };
+	{
+		return new UiNumberInput { Key = key, Binding = Bind.ReadOnly(UiValue.From(read)) };
+	}
 
 	private static UiEvent ChangeEvent(string nodeId, string payload)
-		=> new() { NodeId = nodeId, Name = UiConfigEvents.Change, Data = UiCanonicalJson.ToElement(payload) };
+	{
+		return new UiEvent { NodeId = nodeId, Name = UiConfigEvents.Change, Data = UiCanonicalJson.ToElement(payload) };
+	}
 
 	[Test]
 	[CancelAfter(30_000)]
@@ -98,15 +112,21 @@ public class UiViewConcurrencyTests
 					{
 						Key = "gate",
 						Condition = () => toggle.Value,
-						Content = () => NumberNode("gated", () => left.Value),
+						Content = () => NumberNode("gated", () => left.Value)
 					},
 					new UiStringInput
 					{
 						Key = "dispatchField",
 						Binding = Bind.ReadOnly(UiValue.From(() => "typed")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => { })],
-					},
-				],
+						Events =
+						[
+							UiEventHandler.On(UiConfigEvents.Change,
+								() =>
+								{
+								})
+						]
+					}
+				]
 			});
 
 		RunConcurrently(failures,
@@ -404,7 +424,7 @@ public class UiViewConcurrencyTests
 			new UiFlow
 			{
 				Key = "setup",
-				Children = [NumberNode("outer", () => outer.Value), NumberNode("inner", () => inner.Value)],
+				Children = [NumberNode("outer", () => outer.Value), NumberNode("inner", () => inner.Value)]
 			});
 
 		view.DrainPatches();
@@ -488,8 +508,8 @@ public class UiViewConcurrencyTests
 										: -1;
 
 									throw new InvalidOperationException("boom");
-								}),
-						],
+								})
+						]
 					},
 					new UiStringInput
 					{
@@ -506,10 +526,10 @@ public class UiViewConcurrencyTests
 										: -1;
 
 									return UiEventOutcome.Rejected(declined);
-								}),
-						],
-					},
-				],
+								})
+						]
+					}
+				]
 			});
 
 		var initial = view.Tree;
@@ -621,16 +641,22 @@ public class UiViewConcurrencyTests
 						Events =
 						[
 							UiEventHandler.On(UiConfigEvents.Change,
-								() => throw new InvalidOperationException("boom")),
-						],
+								() => throw new InvalidOperationException("boom"))
+						]
 					},
 					new UiStringInput
 					{
 						Key = "accepting",
 						Binding = Bind.ReadOnly(UiValue.From(() => "accepting")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => { })],
-					},
-				],
+						Events =
+						[
+							UiEventHandler.On(UiConfigEvents.Change,
+								() =>
+								{
+								})
+						]
+					}
+				]
 			});
 
 		var reentered = false;
@@ -698,8 +724,8 @@ public class UiViewConcurrencyTests
 							}
 
 							return value;
-						}),
-				],
+						})
+				]
 			});
 
 		var viewTwo = new UiView(ConfigSurface(),
@@ -723,7 +749,7 @@ public class UiViewConcurrencyTests
 		})
 		{
 			IsBackground = true,
-			Name = "wedged-writer",
+			Name = "wedged-writer"
 		};
 
 		wedged.Start();
@@ -750,7 +776,7 @@ public class UiViewConcurrencyTests
 		})
 		{
 			IsBackground = true,
-			Name = "independent-writer",
+			Name = "independent-writer"
 		};
 
 		independent.Start();
@@ -797,9 +823,15 @@ public class UiViewConcurrencyTests
 					{
 						Key = "bButton",
 						Binding = Bind.ReadOnly(UiValue.From(() => "b")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => { })],
-					},
-				],
+						Events =
+						[
+							UiEventHandler.On(UiConfigEvents.Change,
+								() =>
+								{
+								})
+						]
+					}
+				]
 			});
 
 		var treeA = viewA.Tree;
@@ -1030,9 +1062,9 @@ public class UiViewConcurrencyTests
 					{
 						Key = "aButton",
 						Binding = Bind.ReadOnly(UiValue.From(() => "a")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => foreign.Value = 9)],
-					},
-				],
+						Events = [UiEventHandler.On(UiConfigEvents.Change, () => foreign.Value = 9)]
+					}
+				]
 			});
 
 		var viewB = new UiView(ConfigSurface(),
@@ -1074,9 +1106,9 @@ public class UiViewConcurrencyTests
 					{
 						Key = "aButton",
 						Binding = Bind.ReadOnly(UiValue.From(() => "a")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => foreign.Value = 9)],
-					},
-				],
+						Events = [UiEventHandler.On(UiConfigEvents.Change, () => foreign.Value = 9)]
+					}
+				]
 			});
 
 		var viewB = new UiView(ConfigSurface(),
@@ -1125,8 +1157,8 @@ public class UiViewConcurrencyTests
 							stateC.Value = value + 1;
 
 							return value;
-						}),
-				],
+						})
+				]
 			});
 
 		var viewA = new UiView(ConfigSurface(),
@@ -1139,9 +1171,9 @@ public class UiViewConcurrencyTests
 					{
 						Key = "aButton",
 						Binding = Bind.ReadOnly(UiValue.From(() => "a")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => stateB.Value = 3)],
-					},
-				],
+						Events = [UiEventHandler.On(UiConfigEvents.Change, () => stateB.Value = 3)]
+					}
+				]
 			});
 
 		viewA.DrainPatches();
@@ -1254,7 +1286,7 @@ public class UiViewConcurrencyTests
 							new UiFlow
 							{
 								Key = "broken",
-								Children = [NumberNode("dup", () => state.Value), NumberNode("dup", () => 0)],
+								Children = [NumberNode("dup", () => state.Value), NumberNode("dup", () => 0)]
 							});
 					}
 					catch (UiViewException)
@@ -1317,9 +1349,9 @@ public class UiViewConcurrencyTests
 					{
 						Key = "aTrigger",
 						Binding = Bind.ReadOnly(UiValue.Of("go")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => readByB.Reload())],
-					},
-				],
+						Events = [UiEventHandler.On(UiConfigEvents.Change, () => readByB.Reload())]
+					}
+				]
 			});
 
 		var viewB = new UiView(ConfigSurface(),
@@ -1333,9 +1365,9 @@ public class UiViewConcurrencyTests
 					{
 						Key = "bTrigger",
 						Binding = Bind.ReadOnly(UiValue.Of("go")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => readByA.Reload())],
-					},
-				],
+						Events = [UiEventHandler.On(UiConfigEvents.Change, () => readByA.Reload())]
+					}
+				]
 			});
 
 		RunConcurrently(failures,
@@ -1395,9 +1427,9 @@ public class UiViewConcurrencyTests
 					{
 						Key = "reload",
 						Binding = Bind.ReadOnly(UiValue.Of("go")),
-						Events = [UiEventHandler.On(UiConfigEvents.Change, () => loaded.Reload())],
-					},
-				],
+						Events = [UiEventHandler.On(UiConfigEvents.Change, () => loaded.Reload())]
+					}
+				]
 			});
 
 		reader.DrainPatches();

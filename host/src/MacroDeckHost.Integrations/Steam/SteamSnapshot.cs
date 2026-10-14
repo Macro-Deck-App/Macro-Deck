@@ -78,21 +78,26 @@ public sealed record SteamAccountSnapshot(string EntryId, string Title, string V
 	public bool HasWebApi => Web != SteamWebState.NotConfigured;
 
 	public bool Equals(SteamAccountSnapshot? other)
-		=> other is not null &&
-			EntryId == other.EntryId &&
-			Title == other.Title &&
-			VariableKey == other.VariableKey &&
-			Web == other.Web &&
-			Friends == other.Friends &&
-			FriendsOnline == other.FriendsOnline &&
-			FriendsInGame == other.FriendsInGame &&
-			Persona == other.Persona &&
-			Owned == other.Owned &&
-			Equals(CurrentGame, other.CurrentGame) &&
-			FriendList.SequenceEqual(other.FriendList) &&
-			OwnedGames.SequenceEqual(other.OwnedGames);
+	{
+		return other is not null
+			&& EntryId == other.EntryId
+			&& Title == other.Title
+			&& VariableKey == other.VariableKey
+			&& Web == other.Web
+			&& Friends == other.Friends
+			&& FriendsOnline == other.FriendsOnline
+			&& FriendsInGame == other.FriendsInGame
+			&& Persona == other.Persona
+			&& Owned == other.Owned
+			&& Equals(CurrentGame, other.CurrentGame)
+			&& FriendList.SequenceEqual(other.FriendList)
+			&& OwnedGames.SequenceEqual(other.OwnedGames);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(EntryId, Web, Friends, Persona, Owned, CurrentGame);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(EntryId, Web, Friends, Persona, Owned, CurrentGame);
+	}
 }
 
 public sealed record SteamSnapshot
@@ -111,13 +116,18 @@ public sealed record SteamSnapshot
 	public bool IsPlaying => CurrentGame is not null;
 
 	public bool Equals(SteamSnapshot? other)
-		=> other is not null &&
-			SteamFound == other.SteamFound &&
-			Equals(CurrentGame, other.CurrentGame) &&
-			Games.SequenceEqual(other.Games) &&
-			Accounts.SequenceEqual(other.Accounts);
+	{
+		return other is not null
+			&& SteamFound == other.SteamFound
+			&& Equals(CurrentGame, other.CurrentGame)
+			&& Games.SequenceEqual(other.Games)
+			&& Accounts.SequenceEqual(other.Accounts);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(SteamFound, CurrentGame, Games.Count, Accounts.Count);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(SteamFound, CurrentGame, Games.Count, Accounts.Count);
+	}
 }
 
 public static class SteamPersona
@@ -137,7 +147,8 @@ public static class SteamPersona
 	public const int LookingToPlay = 6;
 
 	public static string Id(int state)
-		=> state switch
+	{
+		return state switch
 		{
 			Offline => "offline",
 			Busy => "busy",
@@ -147,6 +158,7 @@ public static class SteamPersona
 			LookingToPlay => "play",
 			_ => "online"
 		};
+	}
 }
 
 public enum SteamCommandKind

@@ -74,9 +74,15 @@ public sealed class EmailInboxCache : IEmailInboxCache, IDisposable
 
 	public event Action? Changed;
 
-	public EmailInboxAggregate Aggregate(IReadOnlyCollection<string> inboxRefs) => _snapshot.Aggregate(inboxRefs);
+	public EmailInboxAggregate Aggregate(IReadOnlyCollection<string> inboxRefs)
+	{
+		return _snapshot.Aggregate(inboxRefs);
+	}
 
-	public void RequestSync() => _signal.RequestAll();
+	public void RequestSync()
+	{
+		_signal.RequestAll();
+	}
 
 	public async Task SyncAsync(EmailSyncRequest request, CancellationToken cancellationToken)
 	{
@@ -151,7 +157,10 @@ public sealed class EmailInboxCache : IEmailInboxCache, IDisposable
 		}
 	}
 
-	public void Dispose() => _syncLock.Dispose();
+	public void Dispose()
+	{
+		_syncLock.Dispose();
+	}
 
 	private async Task<EmailInboxState> ReadAsync(
 		ResolvedEmailInbox resolved,
@@ -241,7 +250,10 @@ public sealed class EmailInboxCache : IEmailInboxCache, IDisposable
 	}
 
 	private static IReadOnlyList<EmailMessage> Normalize(IEnumerable<EmailMessage>? messages)
-		=> [.. (messages ?? [])
+	{
+		return
+		[
+			.. (messages ?? [])
 			.Where(message => message is not null && !string.IsNullOrEmpty(message.Id))
 			.DistinctBy(message => message.Id, StringComparer.Ordinal)
 			.Select(message => message with
@@ -252,11 +264,15 @@ public sealed class EmailInboxCache : IEmailInboxCache, IDisposable
 				Preview = EmailText.ClipOptional(message.Preview, ProtocolLimits.MaxEmailPreviewLength)
 			})
 			.OrderByDescending(message => message.ReceivedAt)
-			.Take(WindowSize)];
+			.Take(WindowSize)
+		];
+	}
 
 	private static IEnumerable<EmailInboxState> Order(IEnumerable<EmailInboxState> states)
-		=> states.OrderBy(state => state.Inbox.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+	{
+		return states.OrderBy(state => state.Inbox.DisplayName, StringComparer.CurrentCultureIgnoreCase)
 			.ThenBy(state => state.Ref, StringComparer.Ordinal);
+	}
 
 	private sealed class Tracking
 	{

@@ -11,7 +11,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Events;
 internal static class EventDescriptorMapper
 {
 	public static EventDescriptorDto ToDto(EventDefinition definition)
-		=> new()
+	{
+		return new EventDescriptorDto
 		{
 			LocalId = definition.Id,
 			Name = PluginText.ToWire(definition.Name),
@@ -22,4 +23,5 @@ internal static class EventDescriptorMapper
 			ConfigurationParameters = [.. definition.ConfigurationParameters.Select(ActionParameterMapper.ToDto)],
 			PayloadParameters = [.. definition.PayloadParameters.Select(ActionParameterMapper.ToDto)]
 		};
+	}
 }

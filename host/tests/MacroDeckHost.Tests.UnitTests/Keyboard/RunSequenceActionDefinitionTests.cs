@@ -8,7 +8,9 @@ namespace MacroDeckHost.Tests.UnitTests.Keyboard;
 public class RunSequenceActionDefinitionTests
 {
 	private static ActionExecutionContext Context(Dictionary<string, object> parameters)
-		=> new() { Parameters = parameters };
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
 	[Test]
 	public async Task Unparseable_sequence_json_fails_with_invalid_parameter()
@@ -16,10 +18,11 @@ public class RunSequenceActionDefinitionTests
 		var executor = new RecordingSequenceExecutor();
 		var action = new RunSequenceActionDefinition(executor);
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["sequence"] = "not json"
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["sequence"] = "not json"
+			}));
 
 		Assert.Multiple(() =>
 		{
@@ -35,10 +38,11 @@ public class RunSequenceActionDefinitionTests
 		var executor = new RecordingSequenceExecutor();
 		var action = new RunSequenceActionDefinition(executor);
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["sequence"] = "   "
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["sequence"] = "   "
+			}));
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 		Assert.That(executor.CallCount, Is.EqualTo(0));
@@ -50,10 +54,11 @@ public class RunSequenceActionDefinitionTests
 		var executor = new RecordingSequenceExecutor();
 		var action = new RunSequenceActionDefinition(executor);
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["sequence"] = """{"steps":[]}"""
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["sequence"] = """{"steps":[]}"""
+			}));
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 		Assert.That(executor.CallCount, Is.EqualTo(0));
@@ -66,10 +71,11 @@ public class RunSequenceActionDefinitionTests
 			{ Unavailable = KeyboardSessionUnavailableReason.TargetNotFound };
 		var action = new RunSequenceActionDefinition(executor);
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["sequence"] = """{"steps":[{"type":"keyCombo","modifiers":["Ctrl"],"key":"C"}]}"""
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["sequence"] = """{"steps":[{"type":"keyCombo","modifiers":["Ctrl"],"key":"C"}]}"""
+			}));
 
 		Assert.Multiple(() =>
 		{
@@ -85,10 +91,11 @@ public class RunSequenceActionDefinitionTests
 			{ Unavailable = KeyboardSessionUnavailableReason.FocusFailed };
 		var action = new RunSequenceActionDefinition(executor);
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["sequence"] = """{"steps":[{"type":"keyCombo","modifiers":["Ctrl"],"key":"C"}]}"""
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["sequence"] = """{"steps":[{"type":"keyCombo","modifiers":["Ctrl"],"key":"C"}]}"""
+			}));
 
 		Assert.Multiple(() =>
 		{
@@ -104,10 +111,11 @@ public class RunSequenceActionDefinitionTests
 			{ Unavailable = KeyboardSessionUnavailableReason.Unsupported };
 		var action = new RunSequenceActionDefinition(executor);
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["sequence"] = """{"steps":[{"type":"keyCombo","modifiers":["Ctrl"],"key":"C"}]}"""
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["sequence"] = """{"steps":[{"type":"keyCombo","modifiers":["Ctrl"],"key":"C"}]}"""
+			}));
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Unavailable));
 	}
@@ -119,10 +127,11 @@ public class RunSequenceActionDefinitionTests
 			{ Unavailable = KeyboardSessionUnavailableReason.NotFocused };
 		var action = new RunSequenceActionDefinition(executor);
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["sequence"] = """{"steps":[{"type":"keyCombo","modifiers":["Ctrl"],"key":"C"}]}"""
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["sequence"] = """{"steps":[{"type":"keyCombo","modifiers":["Ctrl"],"key":"C"}]}"""
+			}));
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 	}

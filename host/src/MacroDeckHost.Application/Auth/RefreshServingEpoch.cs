@@ -27,11 +27,16 @@ public sealed class RefreshServingEpoch
 		return true;
 	}
 
-	public static string Format(DateTime utc) => utc.ToString("O", CultureInfo.InvariantCulture);
+	public static string Format(DateTime utc)
+	{
+		return utc.ToString("O", CultureInfo.InvariantCulture);
+	}
 
 	// Anything unreadable reads as MinValue, which refuses the post-restart grace rather than widening it.
 	public static DateTime Parse(string? value)
-		=> DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
+	{
+		return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
 			? parsed.ToUniversalTime()
 			: DateTime.MinValue;
+	}
 }

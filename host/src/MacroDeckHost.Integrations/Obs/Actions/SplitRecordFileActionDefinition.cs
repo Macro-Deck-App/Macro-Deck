@@ -21,12 +21,17 @@ internal sealed class SplitRecordFileActionDefinition : IDynamicOptionsActionDef
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [ObsTargetResolver.Parameter()];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(_resolver.ConfigurationOptions());
+	{
+		return Task.FromResult(_resolver.ConfigurationOptions());
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

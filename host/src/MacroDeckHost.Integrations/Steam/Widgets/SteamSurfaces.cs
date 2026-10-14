@@ -2,7 +2,6 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
-using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Patches;
@@ -19,39 +18,52 @@ internal static partial class SteamSurfaces
 
 	private const string Transparent = "transparent";
 
-	private static readonly double _cornerClearance = 1 - (1 / Math.Sqrt(2));
+	private static readonly double _cornerClearance = 1 - 1 / Math.Sqrt(2);
 
 	private static readonly JsonElement _emptyObject = JsonDocument.Parse("{}").RootElement;
 
 	public static bool IsConfigFor(UiSurface surface, string widgetType)
-		=> ReadAttribute(surface, UiConfigSurfaceAttributes.EntryPoint) == UiConfigEntryPoints.WidgetConfig &&
-			ReadAttribute(surface, UiConfigSurfaceAttributes.WidgetType) == widgetType;
+	{
+		return ReadAttribute(surface, UiConfigSurfaceAttributes.EntryPoint) == UiConfigEntryPoints.WidgetConfig
+			&& ReadAttribute(surface, UiConfigSurfaceAttributes.WidgetType) == widgetType;
+	}
 
 	public static JsonElement ConfigData(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiConfigSurfaceAttributes.WidgetData, out var data) &&
-			data.ValueKind == JsonValueKind.Object
+	{
+		return surface.Attributes.TryGetValue(UiConfigSurfaceAttributes.WidgetData, out var data)
+			&& data.ValueKind == JsonValueKind.Object
 				? data
 				: _emptyObject;
+	}
 
 	public static JsonElement WidgetData(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) &&
-			data.ValueKind == JsonValueKind.Object
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data)
+			&& data.ValueKind == JsonValueKind.Object
 				? data
 				: _emptyObject;
+	}
 
-	public static string? WidgetType(UiSurface surface) => ReadAttribute(surface, UiWidgetSurfaceAttributes.WidgetType);
+	public static string? WidgetType(UiSurface surface)
+	{
+		return ReadAttribute(surface, UiWidgetSurfaceAttributes.WidgetType);
+	}
 
 	public static bool IsSampleRequested(UiSurface surface)
-		=> surface.Kind == UiSurfaceKinds.Preview &&
-			surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Sample, out var sample) &&
-			sample.ValueKind == JsonValueKind.True;
+	{
+		return surface.Kind == UiSurfaceKinds.Preview
+			&& surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Sample, out var sample)
+			&& sample.ValueKind == JsonValueKind.True;
+	}
 
 	public static int CornerRadius(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.CornerRadius, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var radius)
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.CornerRadius, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var radius)
 				? radius
 				: DefaultCornerRadius;
+	}
 
 	public static UiSize SafeArea(int cornerRadius)
 	{
@@ -61,34 +73,47 @@ internal static partial class SteamSurfaces
 	}
 
 	public static string? ReadString(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	public static IReadOnlyList<string> ReadStrings(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Array
-				? [.. value.EnumerateArray().Where(item => item.ValueKind == JsonValueKind.String).Select(item => item.GetString()!)]
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Array
+				?
+				[
+					.. value.EnumerateArray()
+						.Where(item => item.ValueKind == JsonValueKind.String)
+						.Select(item => item.GetString()!)
+				]
 				: [];
+	}
 
 	public static bool? ReadBool(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.True or JsonValueKind.False
 				? value.GetBoolean()
 				: null;
+	}
 
 	public static double? ReadDouble(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number) &&
-			double.IsFinite(number)
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
+			&& double.IsFinite(number)
 				? number
 				: null;
+	}
 
 	public static string? NormalizeBackground(string? raw)
 	{
@@ -102,9 +127,11 @@ internal static partial class SteamSurfaces
 	}
 
 	private static string? ReadAttribute(UiSurface surface, string name)
-		=> surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString()
 			: null;
+	}
 
 	[GeneratedRegex("^#[0-9a-fA-F]{6}$", RegexOptions.CultureInvariant)]
 	private static partial Regex HexColor();
@@ -128,11 +155,23 @@ internal sealed class SteamViewSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
-	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+	public ValueTask DisposeAsync()
+	{
+		return ValueTask.CompletedTask;
+	}
 }

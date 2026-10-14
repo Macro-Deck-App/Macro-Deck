@@ -17,16 +17,22 @@ public class WidgetPortabilityServiceTests
 	private PortabilityTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new PortabilityTestHarness();
+	public void SetUp()
+	{
+		_harness = new PortabilityTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Export_ThenImport_IntoAnotherFolder_RecreatesTheWidget_ReusingTheIcon()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var icon = await _harness.AddReadyIcon(pack.Id, "star", sizes: [128]);
+		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128]);
 		var (profile, sourceFolder, widget) = await _harness.SeedProfile(
 			$"{{\"states\":{{\"off\":{{\"iconId\":\"{icon.Id}\"}}}}}}");
 		var target = await AddFolder(profile.Id, "Target");
@@ -38,10 +44,10 @@ public class WidgetPortabilityServiceTests
 		Assert.That(export.Success, Is.True);
 
 		var import = await _harness.WidgetService.Import(target.Id,
-			anchorX: 2,
-			anchorY: 1,
+			2,
+			1,
 			export.Data!,
-			password: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
@@ -72,8 +78,8 @@ public class WidgetPortabilityServiceTests
 		Export_StillCollectsIconPackAssetsNestedUnderTheNewIconField_AndLeavesANonIconPackReferenceUntouched()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var iconA = await _harness.AddReadyIcon(pack.Id, "icon-a", sizes: [128]);
-		var iconB = await _harness.AddReadyIcon(pack.Id, "icon-b", sizes: [128]);
+		var iconA = await _harness.AddReadyIcon(pack.Id, "icon-a", [128]);
+		var iconB = await _harness.AddReadyIcon(pack.Id, "icon-b", [128]);
 
 		var (profile, sourceFolder, button) = await _harness.SeedProfile($$"""
 																		   {"stateMode":true,"states":[
@@ -103,7 +109,7 @@ public class WidgetPortabilityServiceTests
 			CancellationToken.None);
 		Assert.That(export.Success, Is.True);
 
-		var archive = PortableArchive.Read(export.Data!, password: null);
+		var archive = PortableArchive.Read(export.Data!, null);
 		Assert.Multiple(() =>
 		{
 			Assert.That(archive.Status, Is.EqualTo(PortableReadStatus.Success));
@@ -116,7 +122,7 @@ public class WidgetPortabilityServiceTests
 			0,
 			0,
 			export.Data!,
-			password: null,
+			null,
 			CancellationToken.None);
 		Assert.That(import.Success, Is.True);
 
@@ -160,8 +166,8 @@ public class WidgetPortabilityServiceTests
 		Export_OfAButtonWithAnActiveIconProvider_StillCollectsItsPerStateIconsAndImportsRenderingThemUnchanged()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var iconA = await _harness.AddReadyIcon(pack.Id, "icon-a", sizes: [128]);
-		var iconB = await _harness.AddReadyIcon(pack.Id, "icon-b", sizes: [128]);
+		var iconA = await _harness.AddReadyIcon(pack.Id, "icon-a", [128]);
+		var iconB = await _harness.AddReadyIcon(pack.Id, "icon-b", [128]);
 
 		var (profile, sourceFolder, button) = await _harness.SeedProfile($$"""
 																		   {"stateMode":true,"states":[
@@ -178,7 +184,7 @@ public class WidgetPortabilityServiceTests
 			CancellationToken.None);
 		Assert.That(export.Success, Is.True);
 
-		var archive = PortableArchive.Read(export.Data!, password: null);
+		var archive = PortableArchive.Read(export.Data!, null);
 		Assert.Multiple(() =>
 		{
 			Assert.That(archive.Status, Is.EqualTo(PortableReadStatus.Success));
@@ -191,7 +197,7 @@ public class WidgetPortabilityServiceTests
 			0,
 			0,
 			export.Data!,
-			password: null,
+			null,
 			CancellationToken.None);
 		Assert.That(import.Success, Is.True);
 
@@ -269,13 +275,13 @@ public class WidgetPortabilityServiceTests
 		var archiveBytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Widgets },
 			content,
 			iconFiles,
-			password: null);
+			null);
 
 		var import = await _harness.WidgetService.Import(folder.Id,
 			0,
 			0,
 			archiveBytes,
-			password: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
@@ -310,15 +316,17 @@ public class WidgetPortabilityServiceTests
 	}
 
 	private string? RenderedMasterHash(WidgetIconReference reference)
-		=> Guid.TryParse(reference.Reference, out var id)
+	{
+		return Guid.TryParse(reference.Reference, out var id)
 			? _harness.Icons.Cache.GetIconById(id)?.MasterContentHash
 			: null;
+	}
 
 	[Test]
 	public async Task Import_WhenFolderIsFull_ReturnsValidationError()
 	{
 		var (profile, sourceFolder, widget) = await _harness.SeedProfile("{\"label\":\"x\"}");
-		var target = await AddFolder(profile.Id, "Tiny", rows: 1, columns: 1);
+		var target = await AddFolder(profile.Id, "Tiny", 1, 1);
 		_harness.AddWidget(target.Id);
 
 		var export = await _harness.WidgetService.Export(sourceFolder.Id,
@@ -329,7 +337,7 @@ public class WidgetPortabilityServiceTests
 			0,
 			0,
 			export.Data!,
-			password: null,
+			null,
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -344,10 +352,10 @@ public class WidgetPortabilityServiceTests
 	{
 		var profile = await _harness.AddProfile("Source");
 		var main = await _harness.AddFolder(profile.Id, "Main", rows: 4, columns: 4);
-		var games = await _harness.AddFolder(profile.Id, "Games", main.Id, rows: 4, columns: 4);
-		var retro = await _harness.AddFolder(profile.Id, "Retro", games.Id, rows: 1, columns: 1);
+		var games = await _harness.AddFolder(profile.Id, "Games", main.Id, 4, 4);
+		var retro = await _harness.AddFolder(profile.Id, "Retro", games.Id, 1, 1);
 		var work = await _harness.AddFolder(profile.Id, "Work", rows: 4, columns: 4);
-		var mail = await _harness.AddFolder(profile.Id, "Mail", work.Id, rows: 4, columns: 4);
+		var mail = await _harness.AddFolder(profile.Id, "Mail", work.Id, 4, 4);
 
 		var pin = new WidgetEntity
 		{
@@ -372,12 +380,12 @@ public class WidgetPortabilityServiceTests
 		Assert.That(export.Success, Is.True);
 
 		var importMail =
-			await _harness.WidgetService.Import(mail.Id, 0, 0, export.Data!, password: null, CancellationToken.None);
+			await _harness.WidgetService.Import(mail.Id, 0, 0, export.Data!, null, CancellationToken.None);
 		var importRetro = await _harness.WidgetService.Import(retro.Id,
 			0,
 			0,
 			export.Data!,
-			password: null,
+			null,
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -413,5 +421,7 @@ public class WidgetPortabilityServiceTests
 	}
 
 	private Task<FolderEntity> AddFolder(Guid profileId, string name, int rows = 3, int columns = 5)
-		=> _harness.AddFolder(profileId, name, rows: rows, columns: columns);
+	{
+		return _harness.AddFolder(profileId, name, rows: rows, columns: columns);
+	}
 }

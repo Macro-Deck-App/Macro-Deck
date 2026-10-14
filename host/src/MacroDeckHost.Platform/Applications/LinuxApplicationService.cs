@@ -36,14 +36,16 @@ internal sealed class LinuxApplicationService(ILogger logger) : ApplicationServi
 			TryMakeExecutable(path);
 		}
 
-		base.StartProcess(path, arguments, workingDirectory, runAsAdmin: false);
+		base.StartProcess(path, arguments, workingDirectory, false);
 	}
 
 	internal static bool RequiresPathLookup(string path)
-		=> !string.IsNullOrWhiteSpace(path) &&
-			path.IndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar]) < 0 &&
-			!File.Exists(path) &&
-			!Directory.Exists(path);
+	{
+		return !string.IsNullOrWhiteSpace(path)
+			&& path.IndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar]) < 0
+			&& !File.Exists(path)
+			&& !Directory.Exists(path);
+	}
 
 	public override void OpenFolder(string path)
 	{

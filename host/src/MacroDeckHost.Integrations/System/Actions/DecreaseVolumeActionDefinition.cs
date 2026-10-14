@@ -25,16 +25,21 @@ internal sealed class DecreaseVolumeActionDefinition : IDynamicOptionsActionDefi
 		ActionParameter.Slider("amount",
 			1,
 			50,
-			label: AppStrings.Integrations.System.Actions.VolumeAmount.Label(),
+			AppStrings.Integrations.System.Actions.VolumeAmount.Label(),
 			step: 1,
 			defaultValue: 5),
 		AudioDeviceParameter.Create()
 	];
 
-	public IActionExecutor CreateExecutor() => new VolumeStepExecutor(_volume, -1);
+	public IActionExecutor CreateExecutor()
+	{
+		return new VolumeStepExecutor(_volume, -1);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
+	{
+		return AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
+	}
 }

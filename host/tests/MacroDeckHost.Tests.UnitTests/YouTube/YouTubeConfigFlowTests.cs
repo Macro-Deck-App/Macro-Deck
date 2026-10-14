@@ -41,7 +41,10 @@ internal sealed class YouTubeConfigFlowTests
 	}
 
 	[TearDown]
-	public void TearDown() => _oauth.Dispose();
+	public void TearDown()
+	{
+		_oauth.Dispose();
+	}
 
 	[Test]
 	public async Task Setup_starts_by_asking_for_the_google_client_and_says_where_to_create_it()
@@ -59,12 +62,13 @@ internal sealed class YouTubeConfigFlowTests
 				}));
 			Assert.That(step.AdvancedFields.Single().Name, Is.EqualTo(YouTubeConfigKeys.DailyQuota));
 			Assert.That(step.AdvancedFields.Single().DefaultValue, Is.EqualTo(10_000));
-			Assert.That(step.Links.Select(link => link.Url), Is.EquivalentTo(new[]
-			{
-				"https://console.cloud.google.com/apis/credentials",
-				"https://console.cloud.google.com/apis/library/youtube.googleapis.com",
-				"https://docs.macro-deck.app/guide/youtube/"
-			}));
+			Assert.That(step.Links.Select(link => link.Url),
+				Is.EquivalentTo(new[]
+				{
+					"https://console.cloud.google.com/apis/credentials",
+					"https://console.cloud.google.com/apis/library/youtube.googleapis.com",
+					"https://docs.macro-deck.app/guide/youtube/"
+				}));
 			Assert.That(step.Instructions.Select(i => TestLocalization.Resolve(i.Text)),
 				Has.Some.Contains("TVs and Limited Input devices"));
 			Assert.That(_oauth.Calls, Is.Empty, "nothing is sent to Google before the client is known");
@@ -237,11 +241,13 @@ internal sealed class YouTubeConfigFlowTests
 			Assert.That(values[YouTubeConfigKeys.ChannelId], Is.EqualTo(ConfigFlowValue.Plain("UCabc")));
 			Assert.That(values[YouTubeConfigKeys.ChannelTitle], Is.EqualTo(ConfigFlowValue.Plain("My Channel")));
 			Assert.That(values[YouTubeConfigKeys.ChannelHandle], Is.EqualTo(ConfigFlowValue.Plain("@mychannel")));
-			Assert.That(values[YouTubeConfigKeys.Scopes], Is.EqualTo(ConfigFlowValue.Plain(YouTubeOAuthEndpoints.Scope)));
-			Assert.That(values.Keys, Is.SupersetOf(new[]
-			{
-				YouTubeConfigKeys.ConnectedAt, YouTubeConfigKeys.ExpiresAt
-			}));
+			Assert.That(values[YouTubeConfigKeys.Scopes],
+				Is.EqualTo(ConfigFlowValue.Plain(YouTubeOAuthEndpoints.Scope)));
+			Assert.That(values.Keys,
+				Is.SupersetOf(new[]
+				{
+					YouTubeConfigKeys.ConnectedAt, YouTubeConfigKeys.ExpiresAt
+				}));
 			Assert.That(values.Where(pair => pair.Value.IsSecret).Select(pair => pair.Key),
 				Is.EquivalentTo(new[]
 				{
@@ -290,7 +296,8 @@ internal sealed class YouTubeConfigFlowTests
 	}
 
 	private Task<ConfigFlowResult> SubmitClient(object? quota = null)
-		=> _flow.SubmitAsync("client",
+	{
+		return _flow.SubmitAsync("client",
 			new Dictionary<string, object?>
 			{
 				[YouTubeConfigKeys.ClientId] = ClientId,
@@ -299,7 +306,10 @@ internal sealed class YouTubeConfigFlowTests
 			},
 			null!,
 			CancellationToken.None);
+	}
 
 	private Task<ConfigFlowResult> Continue()
-		=> _flow.SubmitAsync("link", new Dictionary<string, object?>(), null!, CancellationToken.None);
+	{
+		return _flow.SubmitAsync("link", new Dictionary<string, object?>(), null!, CancellationToken.None);
+	}
 }

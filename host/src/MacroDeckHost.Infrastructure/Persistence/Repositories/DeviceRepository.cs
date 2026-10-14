@@ -14,20 +14,30 @@ public class DeviceRepository : IDeviceRepository
 	}
 
 	public Task<DeviceEntity?> GetById(Guid id)
-		=> _context.Devices.FirstOrDefaultAsync(d => d.Id == id);
+	{
+		return _context.Devices.FirstOrDefaultAsync(d => d.Id == id);
+	}
 
 	public async Task<IReadOnlyList<DeviceEntity>> GetAll()
-		=> await _context.Devices.OrderByDescending(d => d.LastSeenAt).ToListAsync();
+	{
+		return await _context.Devices.OrderByDescending(d => d.LastSeenAt).ToListAsync();
+	}
 
 	public async Task<IReadOnlyList<DeviceEntity>> GetByStartupProfileId(string profileId)
-		=> await _context.Devices.Where(d => d.StartupProfileId == profileId).ToListAsync();
+	{
+		return await _context.Devices.Where(d => d.StartupProfileId == profileId).ToListAsync();
+	}
 
 	public Task<DeviceEntity?> GetByProviderIdentity(string providerId, string providerDeviceId)
-		=> _context.Devices.FirstOrDefaultAsync(d =>
+	{
+		return _context.Devices.FirstOrDefaultAsync(d =>
 			d.ProviderId == providerId && d.ProviderDeviceId == providerDeviceId);
+	}
 
 	public async Task<IReadOnlyList<DeviceEntity>> GetByProviderId(string providerId)
-		=> await _context.Devices.Where(d => d.ProviderId == providerId).ToListAsync();
+	{
+		return await _context.Devices.Where(d => d.ProviderId == providerId).ToListAsync();
+	}
 
 	public async Task Create(DeviceEntity device)
 	{
@@ -42,7 +52,9 @@ public class DeviceRepository : IDeviceRepository
 	}
 
 	public Task Delete(Guid id)
-		=> _context.Devices.Where(d => d.Id == id).ExecuteDeleteAsync();
+	{
+		return _context.Devices.Where(d => d.Id == id).ExecuteDeleteAsync();
+	}
 
 	public async Task<bool> SetSettingsButtonHidden(Guid id, bool hidden)
 	{
@@ -74,7 +86,9 @@ public class DeviceRepository : IDeviceRepository
 	}
 
 	public async Task<IReadOnlyList<DeviceEntity>> GetStale(DateTime lastSeenBefore)
-		=> await _context.Devices.Where(d => d.LastSeenAt < lastSeenBefore).ToListAsync();
+	{
+		return await _context.Devices.Where(d => d.LastSeenAt < lastSeenBefore).ToListAsync();
+	}
 
 	public Task DeleteMany(IReadOnlyCollection<Guid> ids)
 	{

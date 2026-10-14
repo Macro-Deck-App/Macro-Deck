@@ -18,7 +18,10 @@ public class PluginAssetDiskCacheTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void A_path_traversal_content_hash_is_never_read()
@@ -41,7 +44,7 @@ public class PluginAssetDiskCacheTests
 		}
 		finally
 		{
-			Directory.Delete(outsideDirectory, recursive: true);
+			Directory.Delete(outsideDirectory, true);
 		}
 	}
 
@@ -120,15 +123,21 @@ public class PluginAssetDiskCacheBoundsTests
 	private TestPaths _paths = null!;
 
 	[SetUp]
-	public void SetUp() => _paths = new TestPaths();
+	public void SetUp()
+	{
+		_paths = new TestPaths();
+	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void Writing_past_the_memory_bound_evicts_the_least_recently_used_entry()
 	{
-		var cache = new PluginAssetDiskCache(_paths, Serilog.Log.Logger, maxMemoryBytes: 20, maxDiskBytes: 1_000_000);
+		var cache = new PluginAssetDiskCache(_paths, Serilog.Log.Logger, 20, 1_000_000);
 
 		var first = new byte[10];
 		var second = new byte[10];
@@ -162,7 +171,7 @@ public class PluginAssetDiskCacheBoundsTests
 	[Test]
 	public void Committing_many_distinct_assets_keeps_the_on_disk_directory_bounded()
 	{
-		var cache = new PluginAssetDiskCache(_paths, Serilog.Log.Logger, maxMemoryBytes: 1_000_000, maxDiskBytes: 30);
+		var cache = new PluginAssetDiskCache(_paths, Serilog.Log.Logger, 1_000_000, 30);
 		var assetsDirectory = Path.Combine(_paths.PluginsDirectory, "assets");
 
 		for (var i = 0; i < 20; i++)

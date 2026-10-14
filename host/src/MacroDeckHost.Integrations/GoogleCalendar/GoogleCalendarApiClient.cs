@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Calendar;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.GoogleCalendar;
 
@@ -17,7 +16,7 @@ internal sealed partial class GoogleCalendarApiClient : IDisposable
 
 	private static readonly HttpClient _shared = CreateClient(
 		IntegrationHttp.CreateHandler(handler => handler.PooledConnectionLifetime = TimeSpan.FromMinutes(10)),
-		disposeHandler: true);
+		true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -30,7 +29,7 @@ internal sealed partial class GoogleCalendarApiClient : IDisposable
 
 	internal GoogleCalendarApiClient(HttpMessageHandler handler)
 	{
-		_http = CreateClient(handler, disposeHandler: false);
+		_http = CreateClient(handler, false);
 		_ownsClient = true;
 	}
 
@@ -67,10 +66,10 @@ internal sealed partial class GoogleCalendarApiClient : IDisposable
 		DateTimeOffset to,
 		CancellationToken cancellationToken)
 	{
-		var path = $"calendars/{Uri.EscapeDataString(calendarId)}/events" +
-			$"?timeMin={Uri.EscapeDataString(Rfc3339(from))}" +
-			$"&timeMax={Uri.EscapeDataString(Rfc3339(to))}" +
-			"&singleEvents=true&orderBy=startTime&maxResults=250";
+		var path = $"calendars/{Uri.EscapeDataString(calendarId)}/events"
+			+ $"?timeMin={Uri.EscapeDataString(Rfc3339(from))}"
+			+ $"&timeMax={Uri.EscapeDataString(Rfc3339(to))}"
+			+ "&singleEvents=true&orderBy=startTime&maxResults=250";
 
 		var events = new List<CalendarEvent>();
 		await foreach (var item in PagedItemsAsync(tokens, path, cancellationToken))
@@ -113,10 +112,10 @@ internal sealed partial class GoogleCalendarApiClient : IDisposable
 	private static CalendarEvent? MapEvent(JsonElement item, string calendarId)
 	{
 		var id = ReadString(item, "id");
-		if (string.IsNullOrEmpty(id) ||
-			string.Equals(ReadString(item, "status"), "cancelled", StringComparison.Ordinal) ||
-			ReadTime(item, "start") is not { } start ||
-			ReadTime(item, "end") is not { } end)
+		if (string.IsNullOrEmpty(id)
+			|| string.Equals(ReadString(item, "status"), "cancelled", StringComparison.Ordinal)
+			|| ReadTime(item, "start") is not { } start
+			|| ReadTime(item, "end") is not { } end)
 		{
 			return null;
 		}
@@ -225,14 +224,18 @@ internal sealed partial class GoogleCalendarApiClient : IDisposable
 			return null;
 		}
 
-		if (ReadString(time, "dateTime") is { } dateTime &&
-			DateTimeOffset.TryParse(dateTime, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+		if (ReadString(time, "dateTime") is { } dateTime
+			&& DateTimeOffset.TryParse(dateTime, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
 		{
 			return (parsed, false);
 		}
 
-		if (ReadString(time, "date") is { } date &&
-			DateOnly.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var day))
+		if (ReadString(time, "date") is { } date
+			&& DateOnly.TryParseExact(date,
+				"yyyy-MM-dd",
+				CultureInfo.InvariantCulture,
+				DateTimeStyles.None,
+				out var day))
 		{
 			return (new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero), true);
 		}
@@ -242,15 +245,15 @@ internal sealed partial class GoogleCalendarApiClient : IDisposable
 
 	private static string? ReadMeetingUrl(JsonElement item)
 	{
-		if (item.TryGetProperty("conferenceData", out var conference) &&
-			conference.ValueKind is JsonValueKind.Object &&
-			conference.TryGetProperty("entryPoints", out var entryPoints) &&
-			entryPoints.ValueKind is JsonValueKind.Array)
+		if (item.TryGetProperty("conferenceData", out var conference)
+			&& conference.ValueKind is JsonValueKind.Object
+			&& conference.TryGetProperty("entryPoints", out var entryPoints)
+			&& entryPoints.ValueKind is JsonValueKind.Array)
 		{
 			foreach (var entryPoint in entryPoints.EnumerateArray())
 			{
-				if (string.Equals(ReadString(entryPoint, "entryPointType"), "video", StringComparison.Ordinal) &&
-					ReadString(entryPoint, "uri") is { Length: > 0 } uri)
+				if (string.Equals(ReadString(entryPoint, "entryPointType"), "video", StringComparison.Ordinal)
+					&& ReadString(entryPoint, "uri") is { Length: > 0 } uri)
 				{
 					return uri;
 				}
@@ -302,21 +305,31 @@ internal sealed partial class GoogleCalendarApiClient : IDisposable
 	}
 
 	private static string? NormalizeColor(string? color)
-		=> color is not null && HexColor().IsMatch(color) ? color.ToUpperInvariant() : null;
+	{
+		return color is not null && HexColor().IsMatch(color) ? color.ToUpperInvariant() : null;
+	}
 
 	private static string Rfc3339(DateTimeOffset value)
-		=> value.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", CultureInfo.InvariantCulture);
+	{
+		return value.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", CultureInfo.InvariantCulture);
+	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
+	{
+		return root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool ReadBool(JsonElement root, string name)
-		=> root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True;
+	{
+		return root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True;
+	}
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
-		=> new(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(20) };
+	{
+		return IntegrationHttp.CreateClient(handler, disposeHandler, TimeSpan.FromSeconds(20));
+	}
 
 	[GeneratedRegex("^#[0-9A-Fa-f]{6}$")]
 	private static partial Regex HexColor();

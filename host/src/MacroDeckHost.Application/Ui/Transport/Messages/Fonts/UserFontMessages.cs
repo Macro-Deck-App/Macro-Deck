@@ -15,18 +15,21 @@ public class UserFontModel
 	public string Format { get; set; } = string.Empty;
 	public long SizeBytes { get; set; }
 
-	public static UserFontModel From(UserFont font) => new()
+	public static UserFontModel From(UserFont font)
 	{
-		FontId = font.FontId,
-		FaceId = font.FaceId,
-		Family = font.Family,
-		StyleName = font.StyleName,
-		Weight = font.Weight,
-		Width = font.Width,
-		Slant = font.Slant,
-		Format = font.Format,
-		SizeBytes = font.SizeBytes
-	};
+		return new UserFontModel
+		{
+			FontId = font.FontId,
+			FaceId = font.FaceId,
+			Family = font.Family,
+			StyleName = font.StyleName,
+			Weight = font.Weight,
+			Width = font.Width,
+			Slant = font.Slant,
+			Format = font.Format,
+			SizeBytes = font.SizeBytes
+		};
+	}
 }
 
 public class GetUserFontsResponse
@@ -37,8 +40,10 @@ public class GetUserFontsResponse
 public class UserFontImportResultModel
 {
 	public string FileName { get; set; } = string.Empty;
+
 	[JsonConverter(typeof(JsonStringEnumConverter))]
 	public UserFontImportStatus Status { get; set; }
+
 	public UserFontModel? Font { get; set; }
 }
 

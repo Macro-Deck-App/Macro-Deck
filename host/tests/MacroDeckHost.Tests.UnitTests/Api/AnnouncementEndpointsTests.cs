@@ -71,7 +71,7 @@ public class AnnouncementEndpointsTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -84,12 +84,12 @@ public class AnnouncementEndpointsTests
 			"## What's new",
 			DateTimeOffset.UtcNow.AddDays(-1),
 			DateTimeOffset.UtcNow));
-		await announcements.Refresh(default);
+		await announcements.Refresh(CancellationToken.None);
 
 		var pending = await ReadJson(await _client.GetAsync("/api/announcements/pending"));
 		var seen = await _client.PostAsJsonAsync("/api/announcements/seen", new { number = 4 });
 		var afterwards = await ReadJson(await _client.GetAsync("/api/announcements/pending"));
-		await announcements.Refresh(default);
+		await announcements.Refresh(CancellationToken.None);
 		var refetched = await ReadJson(await _client.GetAsync("/api/announcements/pending"));
 
 		Assert.Multiple(() =>
@@ -108,7 +108,10 @@ public class AnnouncementEndpointsTests
 	{
 		public AnnouncementFetch Next { get; set; } = new AnnouncementFetch.NonePublished();
 
-		public Task<AnnouncementFetch> GetLatest(CancellationToken cancellationToken) => Task.FromResult(Next);
+		public Task<AnnouncementFetch> GetLatest(CancellationToken cancellationToken)
+		{
+			return Task.FromResult(Next);
+		}
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
@@ -130,7 +133,8 @@ public class AnnouncementEndpointsTests
 	private sealed class LoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -141,5 +145,6 @@ public class AnnouncementEndpointsTests
 				});
 				next(app);
 			};
+		}
 	}
 }

@@ -37,5 +37,8 @@ public interface ILayoutProvider
 	/// The layouts this provider currently offers. The host reads this to recover its view after a
 	/// reconnect; a provider that keeps no catalog of its own may return an empty list.
 	/// </summary>
-	IReadOnlyList<LayoutDescriptor> GetLayouts() => [];
+	IReadOnlyList<LayoutDescriptor> GetLayouts()
+	{
+		return [];
+	}
 }

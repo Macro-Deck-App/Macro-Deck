@@ -70,9 +70,9 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 
 		foreach (var integration in _integrations.Integrations)
 		{
-			if (integration is not IVariableProvider provider ||
-				!_integrations.IsEnabled(integration.Id) ||
-				!integration.IsInitialized)
+			if (integration is not IVariableProvider provider
+				|| !_integrations.IsEnabled(integration.Id)
+				|| !integration.IsInitialized)
 			{
 				continue;
 			}
@@ -143,8 +143,8 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 		{
 			if (declared.Materialization != VariableMaterialization.Eager)
 			{
-				_logger.Error("Integration '{Integration}' declares '{Name}' as an eager variable but marks it " +
-					"{Materialization}; skipping it. A catalog resource is reached through the variable catalog.",
+				_logger.Error("Integration '{Integration}' declares '{Name}' as an eager variable but marks it "
+					+ "{Materialization}; skipping it. A catalog resource is reached through the variable catalog.",
 					integrationId,
 					declared.Name,
 					declared.Materialization);
@@ -154,8 +154,8 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 			var definitionId = declared.ResolvedId;
 			if (definitionId is null)
 			{
-				_logger.Error("Integration '{Integration}' declares an eager variable without a usable id; " +
-					"skipping it. A template name is only legal in DeclaredVariables.",
+				_logger.Error("Integration '{Integration}' declares an eager variable without a usable id; "
+					+ "skipping it. A template name is only legal in DeclaredVariables.",
 					integrationId);
 				continue;
 			}
@@ -175,8 +175,8 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 			{
 				if (registered.TryGetValue(result.Data.Id, out var claimedBy))
 				{
-					_logger.Error("Integration '{Integration}' declares '{Name}' and '{Other}' as the same variable; " +
-						"skipping '{Name}'. Variable definition ids must be unique within an integration.",
+					_logger.Error("Integration '{Integration}' declares '{Name}' and '{Other}' as the same variable; "
+						+ "skipping '{Name}'. Variable definition ids must be unique within an integration.",
 						integrationId,
 						name,
 						claimedBy,
@@ -218,9 +218,9 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 			return declared;
 		}
 
-		_logger.Error("Integration '{Integration}' declares {Count} eager variables; keeping the first {Limit} in " +
-			"declaration order and skipping the rest. A provider with more to offer exposes them through its " +
-			"variable catalog.",
+		_logger.Error("Integration '{Integration}' declares {Count} eager variables; keeping the first {Limit} in "
+			+ "declaration order and skipping the rest. A provider with more to offer exposes them through its "
+			+ "variable catalog.",
 			integrationId,
 			declared.Count,
 			VariableLimits.MaxEagerVariablesPerProvider);
@@ -308,8 +308,14 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 		public required string DefinitionId { get; init; }
 		public required VariablePollSchedule Schedule { get; init; }
 
-		public bool TryBeginRead() => Interlocked.CompareExchange(ref _reading, 1, 0) == 0;
+		public bool TryBeginRead()
+		{
+			return Interlocked.CompareExchange(ref _reading, 1, 0) == 0;
+		}
 
-		public void EndRead() => Interlocked.Exchange(ref _reading, 0);
+		public void EndRead()
+		{
+			Interlocked.Exchange(ref _reading, 0);
+		}
 	}
 }

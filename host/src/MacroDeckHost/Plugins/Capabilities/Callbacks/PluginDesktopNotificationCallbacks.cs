@@ -11,18 +11,23 @@ public sealed class PluginDesktopNotificationCallbacks(
 	IDesktopNotifier notifier,
 	IPluginDesktopNotificationAccessPolicy accessPolicy)
 {
-	public bool IsSupportedFor(string pluginId) => accessPolicy.IsAllowed(pluginId) && notifier.IsSupported;
+	public bool IsSupportedFor(string pluginId)
+	{
+		return accessPolicy.IsAllowed(pluginId) && notifier.IsSupported;
+	}
 
 	public HostCallbackResult? Admit(string pluginId)
-		=> accessPolicy.IsAllowed(pluginId)
+	{
+		return accessPolicy.IsAllowed(pluginId)
 			? null
 			: HostCallbackResult.Fail(ProtocolErrorCodes.DesktopNotificationsNotAllowed,
 				ProtocolErrorMessages.For(ProtocolErrorCodes.DesktopNotificationsNotAllowed));
+	}
 
 	public async Task<HostCallbackResult> ExecuteAsync(HostInvokePayload payload, CancellationToken cancellationToken)
 	{
-		if (payload.Operation != HostOperations.DesktopNotifications.Show ||
-			Read(payload) is not { Title: not null, Message: not null } arguments)
+		if (payload.Operation != HostOperations.DesktopNotifications.Show
+			|| Read(payload) is not { Title: not null, Message: not null } arguments)
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
 				ProtocolErrorMessages.For(ProtocolErrorCodes.InvalidPayload));
@@ -49,15 +54,23 @@ public sealed class PluginDesktopNotificationInvokeRunner(
 	IPluginCallbackRouter router,
 	PluginDesktopNotificationCallbacks callbacks,
 	Serilog.ILogger logger)
-	: PluginBackgroundInvokeRunner(router, logger.ForContext<PluginDesktopNotificationInvokeRunner>(), "desktop notification")
+	: PluginBackgroundInvokeRunner(router,
+		logger.ForContext<PluginDesktopNotificationInvokeRunner>(),
+		"desktop notification")
 {
-	protected override Task<HostCallbackResult?> AdmitAsync(string pluginId,
+	protected override Task<HostCallbackResult?> AdmitAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(callbacks.Admit(pluginId));
+	{
+		return Task.FromResult(callbacks.Admit(pluginId));
+	}
 
-	protected override Task<HostCallbackResult> ExecuteAsync(string pluginId,
+	protected override Task<HostCallbackResult> ExecuteAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
-		=> callbacks.ExecuteAsync(payload, cancellationToken);
+	{
+		return callbacks.ExecuteAsync(payload, cancellationToken);
+	}
 }

@@ -34,18 +34,21 @@ internal sealed class SetInputSettingActionDefinition : IDynamicOptionsActionDef
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(InputParameter,
-			label: AppStrings.Integrations.Obs.Params.Input(),
+			AppStrings.Integrations.Obs.Params.Input(),
 			required: true),
 		ActionParameter.Autocomplete(SettingParameter,
-			label: AppStrings.Integrations.Obs.Actions.SetInputSetting.SettingLabel(),
-			description: AppStrings.Integrations.Obs.Actions.SetInputSetting.SettingDescription(),
+			AppStrings.Integrations.Obs.Actions.SetInputSetting.SettingLabel(),
+			AppStrings.Integrations.Obs.Actions.SetInputSetting.SettingDescription(),
 			required: true),
 		ActionParameter.MultilineText(ValueParameter,
-			label: AppStrings.Integrations.Obs.Actions.SetInputSetting.ValueLabel(),
-			description: AppStrings.Integrations.Obs.Actions.SetInputSetting.ValueDescription())
+			AppStrings.Integrations.Obs.Actions.SetInputSetting.ValueLabel(),
+			AppStrings.Integrations.Obs.Actions.SetInputSetting.ValueDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -65,9 +68,9 @@ internal sealed class SetInputSettingActionDefinition : IDynamicOptionsActionDef
 			{
 				values = await connection.GetInputNamesAsync();
 			}
-			else if (context.ParameterName == SettingParameter &&
-				context.CurrentParameters.GetValueOrDefault(InputParameter) is string input &&
-				!string.IsNullOrWhiteSpace(input))
+			else if (context.ParameterName == SettingParameter
+				&& context.CurrentParameters.GetValueOrDefault(InputParameter) is string input
+				&& !string.IsNullOrWhiteSpace(input))
 			{
 				values = await SettingKeysAsync(connection, input, context.Filter);
 			}
@@ -122,8 +125,8 @@ internal sealed class SetInputSettingActionDefinition : IDynamicOptionsActionDef
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(InputParameter) is not string input ||
-				string.IsNullOrWhiteSpace(input))
+			if (context.Parameters.GetValueOrDefault(InputParameter) is not string input
+				|| string.IsNullOrWhiteSpace(input))
 			{
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Obs.Errors.NoInputSelected());
@@ -154,13 +157,14 @@ internal sealed class SetInputSettingActionDefinition : IDynamicOptionsActionDef
 			var text = ValueText(context.Parameters.GetValueOrDefault(ValueParameter));
 			if (!TryConvert(kind, text, out var value))
 			{
-				return ActionResult.Failed(ActionErrorCodes.InvalidParameter, kind switch
-				{
-					JsonValueKind.True or JsonValueKind.False =>
-						AppStrings.Integrations.Obs.Errors.SettingExpectsBoolean(setting: setting),
-					JsonValueKind.Number => AppStrings.Integrations.Obs.Errors.SettingExpectsNumber(setting: setting),
-					_ => AppStrings.Integrations.Obs.Errors.SettingExpectsJson(setting: setting)
-				});
+				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
+					kind switch
+					{
+						JsonValueKind.True or JsonValueKind.False =>
+							AppStrings.Integrations.Obs.Errors.SettingExpectsBoolean(setting),
+						JsonValueKind.Number => AppStrings.Integrations.Obs.Errors.SettingExpectsNumber(setting),
+						_ => AppStrings.Integrations.Obs.Errors.SettingExpectsJson(setting)
+					});
 			}
 
 			var settings = new JsonObject { [setting] = value }.ToJsonString();
@@ -177,17 +181,20 @@ internal sealed class SetInputSettingActionDefinition : IDynamicOptionsActionDef
 
 			_logger.Warning("OBS set-input-setting action skipped: settings unavailable for '{Input}'", input);
 			return ActionResult.Failed(ActionErrorCodes.NotFound,
-				AppStrings.Integrations.Obs.Errors.InputNotFound(input: input));
+				AppStrings.Integrations.Obs.Errors.InputNotFound(input));
 		}
 
-		private static string ValueText(object? raw) => raw switch
+		private static string ValueText(object? raw)
 		{
-			null => string.Empty,
-			string text => text,
-			bool flag => flag ? "true" : "false",
-			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-			_ => raw.ToString() ?? string.Empty
-		};
+			return raw switch
+			{
+				null => string.Empty,
+				string text => text,
+				bool flag => flag ? "true" : "false",
+				IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+				_ => raw.ToString() ?? string.Empty
+			};
+		}
 
 		private static bool TryConvert(JsonValueKind? kind, string text, out JsonNode? value)
 		{
@@ -235,8 +242,8 @@ internal sealed class SetInputSettingActionDefinition : IDynamicOptionsActionDef
 				return true;
 			}
 
-			if (!double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) ||
-				!double.IsFinite(number))
+			if (!double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number)
+				|| !double.IsFinite(number))
 			{
 				return false;
 			}

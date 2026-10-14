@@ -12,10 +12,10 @@ public sealed class WidgetStateSubscriptionTracker
 		{
 			(_connectionsByWidget.TryGetValue(widgetId, out var conns)
 				? conns
-				: _connectionsByWidget[widgetId] = new(StringComparer.Ordinal)).Add(connectionId);
+				: _connectionsByWidget[widgetId] = new HashSet<string>(StringComparer.Ordinal)).Add(connectionId);
 			(_widgetsByConnection.TryGetValue(connectionId, out var widgets)
 				? widgets
-				: _widgetsByConnection[connectionId] = new(StringComparer.Ordinal)).Add(widgetId);
+				: _widgetsByConnection[connectionId] = new HashSet<string>(StringComparer.Ordinal)).Add(widgetId);
 		}
 	}
 

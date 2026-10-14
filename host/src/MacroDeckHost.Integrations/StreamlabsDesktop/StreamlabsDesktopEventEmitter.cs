@@ -35,9 +35,15 @@ internal sealed class StreamlabsDesktopEventEmitter
 		}
 	}
 
-	public void PublishConnected() => _publisher.Publish(StreamlabsDesktopEventIds.Connected);
+	public void PublishConnected()
+	{
+		_publisher.Publish(StreamlabsDesktopEventIds.Connected);
+	}
 
-	public void PublishDisconnected() => _publisher.Publish(StreamlabsDesktopEventIds.Disconnected);
+	public void PublishDisconnected()
+	{
+		_publisher.Publish(StreamlabsDesktopEventIds.Disconnected);
+	}
 
 	public void PublishSceneChanged(string sceneName, string? previousSceneName)
 	{
@@ -163,12 +169,14 @@ internal sealed class StreamlabsDesktopEventEmitter
 	}
 
 	private void PublishStatusChanged(string eventId, string status, string previousStatus)
-		=> _publisher.Publish(eventId,
+	{
+		_publisher.Publish(eventId,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["status"] = status,
 				["previousStatus"] = previousStatus
 			});
+	}
 
 	private bool IsReady()
 	{

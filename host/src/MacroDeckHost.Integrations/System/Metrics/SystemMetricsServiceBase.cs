@@ -10,6 +10,7 @@ internal abstract class SystemMetricsServiceBase : ISystemMetricsService, IDispo
 	private readonly SemaphoreSlim _lock = new(1, 1);
 	private readonly Dictionary<int, string> _lastKnownGpuNames = new();
 	private readonly SemaphoreSlim _diskLock = new(1, 1);
+
 	private readonly Dictionary<string, (DiskCounters Counters, DateTimeOffset ReadAt)> _previousDiskCounters =
 		new(StringComparer.Ordinal);
 
@@ -99,7 +100,9 @@ internal abstract class SystemMetricsServiceBase : ISystemMetricsService, IDispo
 	}
 
 	public async Task<double?> GetGpuUsageAsync(int gpuIndex, CancellationToken cancellationToken = default)
-		=> (await GetGpuAsync(gpuIndex, cancellationToken))?.UsagePercent;
+	{
+		return (await GetGpuAsync(gpuIndex, cancellationToken))?.UsagePercent;
+	}
 
 	public async Task<string?> GetGpuNameAsync(int gpuIndex, CancellationToken cancellationToken = default)
 	{

@@ -19,10 +19,14 @@ public sealed record UiSessionOpenTicket
 	public required Task<UiSessionOpenTicket> Ready { get; init; }
 
 	public static UiSessionOpenTicket Rejected(string code, string message)
-		=> Settled(accepted: false, string.Empty, code, message);
+	{
+		return Settled(false, string.Empty, code, message);
+	}
 
 	public static UiSessionOpenTicket Opened(string sessionId)
-		=> Settled(accepted: true, sessionId, code: null, message: null);
+	{
+		return Settled(true, sessionId, null, null);
+	}
 
 	// Ready must hand back this very ticket, so it is completed after the record exists rather than
 	// built from a copy that is thrown away by the `with` that would follow it.
@@ -56,7 +60,8 @@ public interface IUiSessionBroker : IUiSessionSink
 	// Raised by the host itself, so unlike SendEvent it needs no attached connection.
 	bool DispatchHostEvent(string sessionId, UiSessionEventCommand command);
 
-	Task<UiSessionOpenTicket> OpenAsync(string providerId,
+	Task<UiSessionOpenTicket> OpenAsync(
+		string providerId,
 		UiSurface surface,
 		string ownerPrincipal,
 		CancellationToken cancellationToken);

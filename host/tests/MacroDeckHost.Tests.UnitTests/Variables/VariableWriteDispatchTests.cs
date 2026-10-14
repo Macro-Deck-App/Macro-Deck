@@ -72,7 +72,7 @@ public class VariableWriteDispatchTests
 	[Test]
 	public async Task A_provider_variable_that_declares_no_write_is_refused_without_the_provider_being_asked()
 	{
-		var id = await ProviderVariable(write: null);
+		var id = await ProviderVariable(null);
 
 		var result = await _service.SetValue(id, 42d);
 
@@ -136,7 +136,7 @@ public class VariableWriteDispatchTests
 	[Test]
 	public async Task A_write_outside_the_declared_range_is_dispatched_but_a_non_finite_one_is_not()
 	{
-		var id = await ProviderVariable(new VariableWriteCapability(), min: 0, max: 100);
+		var id = await ProviderVariable(new VariableWriteCapability(), 0, 100);
 
 		var beyond = await _service.SetValue(id, 250d);
 		var nonFinite = await _service.SetValue(id, double.NaN);
@@ -249,7 +249,10 @@ public class VariableWriteDispatchTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{

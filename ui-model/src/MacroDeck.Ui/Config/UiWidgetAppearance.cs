@@ -103,7 +103,7 @@ public enum UiWidgetAppearanceFields
 	/// data before a session reads it; a Macro Deck release older than this option shows fixed colours only.
 	/// A presentation option with no <c>MacroDeck.Sdk.Widgets.WidgetAppearanceProperty</c> counterpart; on its
 	/// own it builds nothing.</summary>
-	ColorVariables = 128,
+	ColorVariables = 128
 }
 
 /// <summary>A widget's standard appearance values as read from its stored data. Null means not set.</summary>
@@ -148,7 +148,7 @@ public static class UiWidgetAppearance
 	private static readonly IReadOnlyList<string> _colorBorderStyles =
 	[
 		UiComponentBorderStyles.Static, UiComponentBorderStyles.Heartbeat, UiComponentBorderStyles.Breathing,
-		UiComponentBorderStyles.Blink, UiComponentBorderStyles.Comet, UiComponentBorderStyles.Ants,
+		UiComponentBorderStyles.Blink, UiComponentBorderStyles.Comet, UiComponentBorderStyles.Ants
 	];
 
 	/// <summary>
@@ -171,11 +171,14 @@ public static class UiWidgetAppearance
 	{
 		var children = new List<UiElement>();
 
-		if ((fields & ~(UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.TransparentBackground |
-				UiWidgetAppearanceFields.ColorVariables)) !=
-			UiWidgetAppearanceFields.None)
+		if ((fields
+				& ~(UiWidgetAppearanceFields.Border
+					| UiWidgetAppearanceFields.TransparentBackground
+					| UiWidgetAppearanceFields.ColorVariables))
+			!= UiWidgetAppearanceFields.None)
 		{
-			children.Add(new UiHeading { Key = "appearance-heading", Text = MacroDeckStrings.Widgets.Appearance.Heading() });
+			children.Add(new UiHeading
+				{ Key = "appearance-heading", Text = MacroDeckStrings.Widgets.Appearance.Heading() });
 		}
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.Label))
@@ -184,14 +187,16 @@ public static class UiWidgetAppearance
 			{
 				Key = UiWidgetAppearanceKeys.Label,
 				Label = MacroDeckStrings.Widgets.Appearance.Label(),
-				Binding = OptionalText(ReadString(data, UiWidgetAppearanceKeys.Label)),
+				Binding = OptionalText(ReadString(data, UiWidgetAppearanceKeys.Label))
 			});
 		}
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.BackgroundColor))
 		{
-			var background = Color(data, UiWidgetAppearanceKeys.BackgroundColor,
-				MacroDeckStrings.Widgets.Appearance.BackgroundColor(), fields);
+			var background = Color(data,
+				UiWidgetAppearanceKeys.BackgroundColor,
+				MacroDeckStrings.Widgets.Appearance.BackgroundColor(),
+				fields);
 
 			children.Add(fields.HasFlag(UiWidgetAppearanceFields.TransparentBackground)
 				? background with { AllowTransparent = true }
@@ -200,13 +205,17 @@ public static class UiWidgetAppearance
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.LabelColor))
 		{
-			children.Add(Color(data, UiWidgetAppearanceKeys.LabelColor, MacroDeckStrings.Widgets.Appearance.LabelColor(),
+			children.Add(Color(data,
+				UiWidgetAppearanceKeys.LabelColor,
+				MacroDeckStrings.Widgets.Appearance.LabelColor(),
 				fields));
 		}
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.AccentColor))
 		{
-			children.Add(Color(data, UiWidgetAppearanceKeys.AccentColor, MacroDeckStrings.Widgets.Appearance.AccentColor(),
+			children.Add(Color(data,
+				UiWidgetAppearanceKeys.AccentColor,
+				MacroDeckStrings.Widgets.Appearance.AccentColor(),
 				fields));
 		}
 
@@ -241,11 +250,15 @@ public static class UiWidgetAppearance
 			LabelPosition = ReadString(data, UiWidgetAppearanceKeys.LabelPosition),
 			AccentColor = ReadString(data, UiWidgetAppearanceKeys.AccentColor),
 			BorderStyle = ReadString(border, UiWidgetAppearanceKeys.BorderStyle),
-			BorderColor = ReadString(border, UiWidgetAppearanceKeys.BorderColor),
+			BorderColor = ReadString(border, UiWidgetAppearanceKeys.BorderColor)
 		};
 	}
 
-	private static UiColorInput Color(JsonElement data, string key, LocalizedString label, UiWidgetAppearanceFields fields)
+	private static UiColorInput Color(
+		JsonElement data,
+		string key,
+		LocalizedString label,
+		UiWidgetAppearanceFields fields)
 	{
 		var state = new UiState<string>(ReadString(data, key) ?? string.Empty);
 
@@ -255,12 +268,14 @@ public static class UiWidgetAppearance
 			Label = label,
 			Binding = Bind.To(state),
 			SupportsReset = true,
-			AllowVariables = AllowsVariables(fields),
+			AllowVariables = AllowsVariables(fields)
 		};
 	}
 
 	private static UiValue<bool> AllowsVariables(UiWidgetAppearanceFields fields)
-		=> fields.HasFlag(UiWidgetAppearanceFields.ColorVariables) ? UiValue.Of(true) : UiValue.None<bool>();
+	{
+		return fields.HasFlag(UiWidgetAppearanceFields.ColorVariables) ? UiValue.Of(true) : UiValue.None<bool>();
+	}
 
 	private static IEnumerable<UiElement> FontFields(JsonElement data)
 	{
@@ -274,7 +289,7 @@ public static class UiWidgetAppearance
 			Label = MacroDeckStrings.Widgets.Appearance.Font(),
 			Binding = OptionalText(ReadString(data, UiWidgetAppearanceKeys.FontFaceId)),
 			OptionsSourceId = UiWidgetAppearanceKeys.FontsOptionsSource,
-			DynamicOptions = true,
+			DynamicOptions = true
 		};
 		yield return new UiNumberInput
 		{
@@ -283,7 +298,7 @@ public static class UiWidgetAppearance
 			Step = 1,
 			Binding = UiBinding<double>.Create(
 				UiValue.Optional(() => size.Value is { } value ? UiValue.Of(value) : UiValue.None<double>()),
-				value => size.Value = value),
+				value => size.Value = value)
 		};
 		yield return new UiChoiceInput
 		{
@@ -293,8 +308,8 @@ public static class UiWidgetAppearance
 			Options = UiValue.Of<IReadOnlyList<UiOption>>([
 				UiOption.Of("left", MacroDeckStrings.Widgets.Appearance.TextAlignLeft()),
 				UiOption.Of("center", MacroDeckStrings.Widgets.Appearance.TextAlignCenter()),
-				UiOption.Of("right", MacroDeckStrings.Widgets.Appearance.TextAlignRight()),
-			]),
+				UiOption.Of("right", MacroDeckStrings.Widgets.Appearance.TextAlignRight())
+			])
 		};
 		yield return new UiChoiceInput
 		{
@@ -304,16 +319,16 @@ public static class UiWidgetAppearance
 			Options = UiValue.Of<IReadOnlyList<UiOption>>([
 				UiOption.Of("top", MacroDeckStrings.Widgets.Appearance.LabelPositionTop()),
 				UiOption.Of("center", MacroDeckStrings.Widgets.Appearance.LabelPositionCenter()),
-				UiOption.Of("bottom", MacroDeckStrings.Widgets.Appearance.LabelPositionBottom()),
-			]),
+				UiOption.Of("bottom", MacroDeckStrings.Widgets.Appearance.LabelPositionBottom())
+			])
 		};
 	}
 
 	private static UiObjectInput BorderField(JsonElement data, UiWidgetAppearanceFields fields)
 	{
-		var stored = data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(UiWidgetAppearanceKeys.Border, out var node) &&
-			node.ValueKind == JsonValueKind.Object
+		var stored = data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(UiWidgetAppearanceKeys.Border, out var node)
+			&& node.ValueKind == JsonValueKind.Object
 				? JsonNode.Parse(node.GetRawText()) as JsonObject
 				: null;
 		var style = new UiState<string>(ReadString(stored, UiWidgetAppearanceKeys.BorderStyle) ?? string.Empty);
@@ -337,11 +352,12 @@ public static class UiWidgetAppearance
 		return new UiObjectInput
 		{
 			Key = UiWidgetAppearanceKeys.Border,
-			Binding = Bind.Custom(Compose, value =>
-			{
-				style.Value = ReadString(value, UiWidgetAppearanceKeys.BorderStyle) ?? string.Empty;
-				color.Value = ReadString(value, UiWidgetAppearanceKeys.BorderColor) ?? string.Empty;
-			}),
+			Binding = Bind.Custom(Compose,
+				value =>
+				{
+					style.Value = ReadString(value, UiWidgetAppearanceKeys.BorderStyle) ?? string.Empty;
+					color.Value = ReadString(value, UiWidgetAppearanceKeys.BorderColor) ?? string.Empty;
+				}),
 			Children =
 			[
 				new UiChoiceInput
@@ -352,14 +368,18 @@ public static class UiWidgetAppearance
 					Options = UiValue.Of<IReadOnlyList<UiOption>>([
 						UiOption.Of(Off, MacroDeckStrings.Widgets.Appearance.BorderOff()),
 						UiOption.Of(UiComponentBorderStyles.Static, MacroDeckStrings.Widgets.Appearance.BorderStatic()),
-						UiOption.Of(UiComponentBorderStyles.Heartbeat, MacroDeckStrings.Widgets.Appearance.BorderHeartbeat()),
-						UiOption.Of(UiComponentBorderStyles.Breathing, MacroDeckStrings.Widgets.Appearance.BorderBreathing()),
+						UiOption.Of(UiComponentBorderStyles.Heartbeat,
+							MacroDeckStrings.Widgets.Appearance.BorderHeartbeat()),
+						UiOption.Of(UiComponentBorderStyles.Breathing,
+							MacroDeckStrings.Widgets.Appearance.BorderBreathing()),
 						UiOption.Of(UiComponentBorderStyles.Blink, MacroDeckStrings.Widgets.Appearance.BorderBlink()),
 						UiOption.Of(UiComponentBorderStyles.Comet, MacroDeckStrings.Widgets.Appearance.BorderComet()),
-						UiOption.Of(UiComponentBorderStyles.Ants, MacroDeckStrings.Widgets.Appearance.BorderMarchingAnts()),
-						UiOption.Of(UiComponentBorderStyles.HueShift, MacroDeckStrings.Widgets.Appearance.BorderHueShift()),
-						UiOption.Of(UiComponentBorderStyles.Rgb, MacroDeckStrings.Widgets.Appearance.BorderRgb()),
-					]),
+						UiOption.Of(UiComponentBorderStyles.Ants,
+							MacroDeckStrings.Widgets.Appearance.BorderMarchingAnts()),
+						UiOption.Of(UiComponentBorderStyles.HueShift,
+							MacroDeckStrings.Widgets.Appearance.BorderHueShift()),
+						UiOption.Of(UiComponentBorderStyles.Rgb, MacroDeckStrings.Widgets.Appearance.BorderRgb())
+					])
 				},
 				new UiColorInput
 				{
@@ -372,10 +392,10 @@ public static class UiWidgetAppearance
 					VisibleWhen = new UiVisibleWhen
 					{
 						ParameterName = UiWidgetAppearanceKeys.BorderStyle,
-						Values = _colorBorderStyles,
-					},
-				},
-			],
+						Values = _colorBorderStyles
+					}
+				}
+			]
 		};
 	}
 
@@ -397,31 +417,40 @@ public static class UiWidgetAppearance
 	{
 		var state = new UiState<string>(initial ?? string.Empty);
 
-		return Bind.Custom<string>(() => state.Value.Length == 0 ? null! : state.Value, value => state.Value = value ?? string.Empty);
+		return Bind.Custom<string>(() => state.Value.Length == 0 ? null! : state.Value,
+			value => state.Value = value ?? string.Empty);
 	}
 
 	private static string? ReadString(JsonElement data, string key)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(key, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(key, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private static string? ReadString(JsonObject? data, string key)
-		=> data?[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	{
+		return data?[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	}
 
 	private static double? ReadNumber(JsonElement data, string key)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(key, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number)
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(key, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
 				? number
 				: null;
+	}
 
 	private static JsonElement ReadObject(JsonElement data, string key)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(key, out var value) &&
-			value.ValueKind == JsonValueKind.Object
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(key, out var value)
+			&& value.ValueKind == JsonValueKind.Object
 				? value
 				: default;
+	}
 }

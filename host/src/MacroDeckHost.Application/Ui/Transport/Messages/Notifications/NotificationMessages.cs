@@ -60,7 +60,8 @@ public sealed class ActiveNotificationDto
 	public NotificationProgressDto? Progress { get; set; }
 
 	public static ActiveNotificationDto From(ActiveNotification notification, DateTimeOffset now)
-		=> new()
+	{
+		return new ActiveNotificationDto
 		{
 			Id = notification.Id,
 			Revision = notification.Revision,
@@ -91,7 +92,9 @@ public sealed class ActiveNotificationDto
 			Dismissible = notification.Dismissible,
 			CreatedAt = notification.CreatedAt,
 			ExpiresAt = notification.ExpiresAt,
-			ExpiresInMs = notification.ExpiresAt is { } expires ? Math.Max(0, (long)(expires - now).TotalMilliseconds) : null,
+			ExpiresInMs = notification.ExpiresAt is { } expires
+				? Math.Max(0, (long)(expires - now).TotalMilliseconds)
+				: null,
 			Actions =
 			[
 				.. notification.Actions.Select(action => new NotificationActionDto
@@ -111,6 +114,7 @@ public sealed class ActiveNotificationDto
 				? new NotificationProgressDto { Processed = progress.Processed, Total = progress.Total }
 				: null
 		};
+	}
 }
 
 public sealed class NotificationShownEvent

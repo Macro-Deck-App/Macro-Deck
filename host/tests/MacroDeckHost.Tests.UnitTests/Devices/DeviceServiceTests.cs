@@ -6,7 +6,6 @@ using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
-using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.ScreenSavers;
 using MacroDeckHost.Domain.Entities;
@@ -40,7 +39,9 @@ public class DeviceServiceTests
 		_tokens = new InMemoryRefreshTokenRepository();
 		_time = new ManualTimeProvider();
 		_sessionGuard = new DeviceSessionGuard();
-		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
+		_tracker = new DeviceConnectionTracker(new RecordingEventBus(),
+			_time,
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_transport = new RecordingUiTransport();
 		_mediator = new RecordingMediator();
 		_profileRegistry = new FakeProfileRegistry();
@@ -65,13 +66,14 @@ public class DeviceServiceTests
 	}
 
 	private ClaimsPrincipal TokenFor(Guid deviceId)
-		=> new(new ClaimsIdentity(
-		[
+	{
+		return new ClaimsPrincipal(new ClaimsIdentity([
 			new Claim(AuthDefaults.DeviceClaim, deviceId.ToString()),
 			new Claim(AccessTokenIssuedAt.Claim,
 				AccessTokenIssuedAt.UnixSeconds(_time.GetUtcNow().UtcDateTime)
 					.ToString(CultureInfo.InvariantCulture))
 		]));
+	}
 
 	private async Task<DeviceEntity> SeedDevice(bool withLiveToken)
 	{
@@ -111,7 +113,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task Rename_trims_and_caps_the_name_and_marks_it_custom()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 
 		var result = await _service.Rename(device.Id, "  " + new string('x', 100) + "  ");
 
@@ -126,7 +128,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task Rename_rejects_a_name_that_sanitises_to_empty()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 
 		var result = await _service.Rename(device.Id, "   ");
 
@@ -158,7 +160,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task A_new_device_has_no_screensaver_until_one_is_turned_on()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 
 		var dto = await _service.ToDto(device);
 
@@ -172,7 +174,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task SetScreenSaver_stores_the_settings_and_tells_the_device_itself()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 
 		var result = await _service.SetScreenSaver(device.Id, true, 120, null, "{\"album\":\"a\"}");
 
@@ -185,8 +187,10 @@ public class DeviceServiceTests
 			Assert.That(result.Data.ScreenSaverConfiguration, Is.EqualTo("{\"album\":\"a\"}"));
 			Assert.That(_transport.GroupMessages.Select(sent => sent.Group),
 				Does.Contain(UiDeviceGroups.For(device.Id)));
-			Assert.That(_transport.GroupMessages.Select(sent => sent.Message).OfType<DeviceScreenSaverChangedEvent>()
-					.Single().IdleSeconds,
+			Assert.That(_transport.GroupMessages.Select(sent => sent.Message)
+					.OfType<DeviceScreenSaverChangedEvent>()
+					.Single()
+					.IdleSeconds,
 				Is.EqualTo(120));
 			Assert.That(_mediator.Published.OfType<DeviceChangedNotification>(), Is.Not.Empty);
 		});
@@ -195,7 +199,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task ShowScreenSaver_of_an_offline_device_fails_with_offline_and_pushes_nothing()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 
 		var result = await _service.ShowScreenSaver(device.Id);
 
@@ -209,8 +213,12 @@ public class DeviceServiceTests
 	[Test]
 	public async Task ShowScreenSaver_tells_the_online_device_to_show_it_now()
 	{
-		var device = await SeedDevice(withLiveToken: false);
-		_tracker.Attach("conn-1", device.Id, () => { });
+		var device = await SeedDevice(false);
+		_tracker.Attach("conn-1",
+			device.Id,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
 
 		var result = await _service.ShowScreenSaver(device.Id);
@@ -234,7 +242,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task SetScreenSaver_rejects_a_new_selection_nothing_provides_but_keeps_an_unchanged_one()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		device.ScreenSaverId = "com.example.gone::photos";
 
 		var rejected = await _service.SetScreenSaver(device.Id, true, 60, "com.example.other::x", null);
@@ -251,7 +259,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task A_new_device_keeps_its_settings_button()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 
 		var dto = await _service.ToDto(device);
 
@@ -261,8 +269,8 @@ public class DeviceServiceTests
 	[Test]
 	public async Task SetSettingsButtonHidden_stores_it_and_tells_only_that_device()
 	{
-		var device = await SeedDevice(withLiveToken: false);
-		var other = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
+		var other = await SeedDevice(false);
 
 		var result = await _service.SetSettingsButtonHidden(device.Id, true);
 
@@ -287,7 +295,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task SetSettingsButtonHidden_false_shows_the_button_again()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		await _service.SetSettingsButtonHidden(device.Id, true);
 
 		await _service.SetSettingsButtonHidden(device.Id, false);
@@ -297,7 +305,7 @@ public class DeviceServiceTests
 		{
 			Assert.That(stored!.SettingsButtonHidden, Is.False);
 			Assert.That(((DeviceClientSettingsChangedEvent)_transport.GroupMessages.Last().Message)
-					.SettingsButtonHidden,
+				.SettingsButtonHidden,
 				Is.False);
 		});
 	}
@@ -325,7 +333,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task SetStartupProfile_rejects_a_profile_id_that_does_not_resolve()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 
 		var result = await _service.SetStartupProfile(device.Id, "does-not-exist");
 
@@ -335,7 +343,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task SetStartupProfile_accepts_a_virtual_profile_id()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("obs::main", "OBS / Main");
 
 		var result = await _service.SetStartupProfile(device.Id, "obs::main");
@@ -350,7 +358,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task SetStartupProfile_with_null_clears_the_assignment()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("p1", "Profile One");
 		await _service.SetStartupProfile(device.Id, "p1");
 
@@ -366,7 +374,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task SetStartupProfile_publishes_a_device_changed_notification()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("p1", "Profile One");
 
 		await _service.SetStartupProfile(device.Id, "p1");
@@ -378,7 +386,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task ResolveStartupProfileId_returns_a_resolvable_assignment()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("p1", "Profile One");
 		await _service.SetStartupProfile(device.Id, "p1");
 
@@ -390,7 +398,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task ResolveStartupProfileId_clears_a_deleted_persisted_profile_once_caches_are_ready()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("p1", "Profile One");
 		await _service.SetStartupProfile(device.Id, "p1");
 		_profileRegistry.RemoveProfile("p1");
@@ -407,7 +415,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task ResolveStartupProfileId_keeps_a_deleted_looking_assignment_while_caches_are_not_ready()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("p1", "Profile One");
 		await _service.SetStartupProfile(device.Id, "p1");
 		_profileRegistry.RemoveProfile("p1");
@@ -438,7 +446,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task ResolveStartupProfileId_keeps_a_virtual_assignment_whose_integration_is_disabled()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("obs::main", "OBS / Main");
 		await _service.SetStartupProfile(device.Id, "obs::main");
 		_profileRegistry.RemoveProfile("obs::main"); // simulates the integration being disabled
@@ -455,9 +463,9 @@ public class DeviceServiceTests
 	[Test]
 	public async Task ClearStartupProfileAssignments_clears_only_matching_devices_and_notifies_each_once()
 	{
-		var matching1 = await SeedDevice(withLiveToken: false);
-		var matching2 = await SeedDevice(withLiveToken: false);
-		var other = await SeedDevice(withLiveToken: false);
+		var matching1 = await SeedDevice(false);
+		var matching2 = await SeedDevice(false);
+		var other = await SeedDevice(false);
 		_profileRegistry.AddProfile("p1", "Profile One");
 		_profileRegistry.AddProfile("p2", "Profile Two");
 		await _service.SetStartupProfile(matching1.Id, "p1");
@@ -484,7 +492,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task GetAll_resolves_the_startup_profile_name()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("p1", "Profile One");
 		await _service.SetStartupProfile(device.Id, "p1");
 
@@ -500,7 +508,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task GetAll_reports_a_null_name_when_the_assignment_does_not_currently_resolve()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("obs::main", "OBS / Main");
 		await _service.SetStartupProfile(device.Id, "obs::main");
 		_profileRegistry.RemoveProfile("obs::main");
@@ -517,7 +525,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task ToDto_resolves_the_startup_profile_name()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 		_profileRegistry.AddProfile("p1", "Profile One");
 		await _service.SetStartupProfile(device.Id, "p1");
 
@@ -529,7 +537,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task LogoutDevice_revokes_tokens_pushes_the_revoked_event_and_aborts_connections()
 	{
-		var device = await SeedDevice(withLiveToken: true);
+		var device = await SeedDevice(true);
 		var aborted = false;
 		_tracker.Attach("conn-1", device.Id, () => aborted = true);
 		_tracker.Register("conn-1", "tab-1");
@@ -558,8 +566,8 @@ public class DeviceServiceTests
 	[Test]
 	public async Task RemoveDevice_deletes_the_device_revokes_sessions_and_publishes_only_removed()
 	{
-		var device = await SeedDevice(withLiveToken: true);
-		var other = await SeedDevice(withLiveToken: true);
+		var device = await SeedDevice(true);
+		var other = await SeedDevice(true);
 		var aborted = false;
 		_tracker.Attach("conn-1", device.Id, () => aborted = true);
 		_tracker.Register("conn-1", "tab-1");
@@ -611,7 +619,7 @@ public class DeviceServiceTests
 	[Test]
 	public async Task OpenProfileOnDevice_of_an_offline_device_fails_with_offline_and_skips_the_navigator()
 	{
-		var device = await SeedDevice(withLiveToken: false);
+		var device = await SeedDevice(false);
 
 		var result = await _service.OpenProfileOnDevice(device.Id, "p1");
 
@@ -625,8 +633,12 @@ public class DeviceServiceTests
 	[Test]
 	public async Task OpenProfileOnDevice_of_an_online_device_with_an_unresolvable_profile_fails_with_not_found()
 	{
-		var device = await SeedDevice(withLiveToken: false);
-		_tracker.Attach("conn-1", device.Id, () => { });
+		var device = await SeedDevice(false);
+		_tracker.Attach("conn-1",
+			device.Id,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
 		_deckNavigator.ChangeProfileResult = false;
 
@@ -638,8 +650,12 @@ public class DeviceServiceTests
 	[Test]
 	public async Task OpenProfileOnDevice_happy_path_calls_the_navigator_once()
 	{
-		var device = await SeedDevice(withLiveToken: false);
-		_tracker.Attach("conn-1", device.Id, () => { });
+		var device = await SeedDevice(false);
+		_tracker.Attach("conn-1",
+			device.Id,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
 
 		var result = await _service.OpenProfileOnDevice(device.Id, "p1");

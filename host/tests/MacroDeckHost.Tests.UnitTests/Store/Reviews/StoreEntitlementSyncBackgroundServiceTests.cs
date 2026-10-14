@@ -127,8 +127,9 @@ internal sealed class StoreEntitlementSyncBackgroundServiceTests
 	[Test]
 	public async Task A_claim_that_fails_while_offline_is_sent_when_the_connection_returns()
 	{
-		_platform.ClaimResult = _ => StorePlatformResult.Fail<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>(
-			StorePlatformFailure.Unavailable);
+		_platform.ClaimResult = _
+			=> StorePlatformResult.Fail<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>(StorePlatformFailure
+				.Unavailable);
 		await _service.StartAsync(CancellationToken.None);
 		_session.Publish(Offline(FakeConnectSessionService.SignedIn(null)));
 		await WaitForClaims(1);
@@ -181,11 +182,15 @@ internal sealed class StoreEntitlementSyncBackgroundServiceTests
 		_operations.Transition(operation.Id, StoreOperationState.Completed);
 	}
 
-	private static ConnectSessionSnapshot Offline(ConnectSessionSnapshot snapshot) =>
-		snapshot with { Connectivity = ConnectConnectivity.Offline, OfflineSince = DateTimeOffset.UnixEpoch };
+	private static ConnectSessionSnapshot Offline(ConnectSessionSnapshot snapshot)
+	{
+		return snapshot with { Connectivity = ConnectConnectivity.Offline, OfflineSince = DateTimeOffset.UnixEpoch };
+	}
 
-	private Task WaitForClaims(int count) =>
-		ConnectTestHarness.WaitUntil(() => _platform.Claims.Count >= count, $"expected {count} claims");
+	private Task WaitForClaims(int count)
+	{
+		return ConnectTestHarness.WaitUntil(() => _platform.Claims.Count >= count, $"expected {count} claims");
+	}
 
 	private async Task AdvanceUntilClaims(TimeSpan step, int count)
 	{

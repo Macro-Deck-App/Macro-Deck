@@ -32,7 +32,7 @@ public sealed class SetWidgetTypeFavoriteRequestMessageHandler
 			WidgetTypeFavoriteOutcome.LimitReached => new TransportError
 			{
 				Code = LimitReachedCode,
-				Message = AppStrings.Errors.Widgets.TooManyFavorites(max: WidgetTypeFavoritesService.MaxFavorites)
+				Message = AppStrings.Errors.Widgets.TooManyFavorites(WidgetTypeFavoritesService.MaxFavorites)
 			},
 			_ => null
 		};

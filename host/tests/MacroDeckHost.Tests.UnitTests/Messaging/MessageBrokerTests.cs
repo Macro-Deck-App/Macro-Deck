@@ -12,10 +12,16 @@ public class MessageBrokerTests
 	private MessageBroker _broker = null!;
 
 	[SetUp]
-	public void SetUp() => _broker = new MessageBroker(Serilog.Core.Logger.None);
+	public void SetUp()
+	{
+		_broker = new MessageBroker(Serilog.Core.Logger.None);
+	}
 
 	[TearDown]
-	public void TearDown() => _broker.Dispose();
+	public void TearDown()
+	{
+		_broker.Dispose();
+	}
 
 	[Test]
 	public async Task An_event_reaches_every_matching_subscription_including_the_senders_own()
@@ -50,7 +56,8 @@ public class MessageBrokerTests
 
 		await deck.WaitForEventsAsync(20);
 
-		Assert.That(deck.Events.Select(message => message.Payload!.Value.GetInt32()), Is.EqualTo(Enumerable.Range(0, 20)));
+		Assert.That(deck.Events.Select(message => message.Payload!.Value.GetInt32()),
+			Is.EqualTo(Enumerable.Range(0, 20)));
 	}
 
 	[Test]
@@ -102,7 +109,11 @@ public class MessageBrokerTests
 	public void A_request_nobody_handles_fails_with_no_handler()
 	{
 		var exception = Assert.ThrowsAsync<MessageChannelException>(()
-			=> _broker.RequestAsync("deck", "obs.scene.current", null, TimeSpan.FromSeconds(1), CancellationToken.None));
+			=> _broker.RequestAsync("deck",
+				"obs.scene.current",
+				null,
+				TimeSpan.FromSeconds(1),
+				CancellationToken.None));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(MessageChannelErrorCode.NoHandler));
 	}
@@ -143,7 +154,8 @@ public class MessageBrokerTests
 		Assert.That(rejected.Select(rejection => (rejection.Topic, rejection.Reason)),
 			Is.EquivalentTo(new[]
 			{
-				("Obs.*", ProtocolErrorReasons.MessagingInvalidTopic), ("single", ProtocolErrorReasons.MessagingInvalidTopic)
+				("Obs.*", ProtocolErrorReasons.MessagingInvalidTopic),
+				("single", ProtocolErrorReasons.MessagingInvalidTopic)
 			}));
 	}
 
@@ -154,7 +166,11 @@ public class MessageBrokerTests
 		obs.RequestGate = new TaskCompletionSource();
 
 		var exception = Assert.ThrowsAsync<MessageChannelException>(()
-			=> _broker.RequestAsync("deck", "obs.scene.current", null, TimeSpan.FromMilliseconds(100), CancellationToken.None));
+			=> _broker.RequestAsync("deck",
+				"obs.scene.current",
+				null,
+				TimeSpan.FromMilliseconds(100),
+				CancellationToken.None));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(MessageChannelErrorCode.Timeout));
 	}
@@ -166,12 +182,20 @@ public class MessageBrokerTests
 		obs.RequestGate = new TaskCompletionSource();
 
 		var pending = Enumerable.Range(0, MessageBroker.MaxHandlerDeliveriesInFlight)
-			.Select(_ => _broker.RequestAsync("deck", "obs.scene.current", null, TimeSpan.FromSeconds(5), CancellationToken.None))
+			.Select(_ => _broker.RequestAsync("deck",
+				"obs.scene.current",
+				null,
+				TimeSpan.FromSeconds(5),
+				CancellationToken.None))
 			.ToList();
 		await obs.WaitForRequestsAsync(MessageBroker.MaxHandlerDeliveriesInFlight);
 
 		var exception = Assert.ThrowsAsync<MessageChannelException>(()
-			=> _broker.RequestAsync("deck", "obs.scene.current", null, TimeSpan.FromSeconds(5), CancellationToken.None));
+			=> _broker.RequestAsync("deck",
+				"obs.scene.current",
+				null,
+				TimeSpan.FromSeconds(5),
+				CancellationToken.None));
 
 		obs.RequestGate.SetResult();
 		await Task.WhenAll(pending);
@@ -207,7 +231,8 @@ public class MessageBrokerTests
 		Assert.DoesNotThrowAsync(() => successor.HandleCommandsAsync("obs.scene.switch", (_, _) => Task.CompletedTask));
 	}
 
-	private RecordingParticipant Participant(string id,
+	private RecordingParticipant Participant(
+		string id,
 		string key = "session-1",
 		string[]? events = null,
 		string[]? requests = null)
@@ -217,7 +242,10 @@ public class MessageBrokerTests
 		return participant;
 	}
 
-	private static JsonElement Json<T>(T value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement Json<T>(T value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private sealed class RecordingParticipant : IMessageParticipant
 	{
@@ -241,9 +269,12 @@ public class MessageBrokerTests
 		}
 
 		public Task HandleCommandAsync(MessageDelivery message, TimeSpan timeout, CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public async Task<JsonElement?> HandleRequestAsync(MessageDelivery message,
+		public async Task<JsonElement?> HandleRequestAsync(
+			MessageDelivery message,
 			TimeSpan timeout,
 			CancellationToken cancellationToken)
 		{

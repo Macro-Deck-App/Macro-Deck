@@ -9,13 +9,19 @@ public sealed class GetHostSessionRequestMessageHandler
 {
 	private readonly HostSession _session;
 
-	public GetHostSessionRequestMessageHandler(HostSession session) => _session = session;
+	public GetHostSessionRequestMessageHandler(HostSession session)
+	{
+		_session = session;
+	}
 
-	public ValueTask<GetHostSessionResponse> Handle(GetHostSessionRequest request,
+	public ValueTask<GetHostSessionResponse> Handle(
+		GetHostSessionRequest request,
 		CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new GetHostSessionResponse
+	{
+		return ValueTask.FromResult(new GetHostSessionResponse
 		{
 			SessionId = _session.Id,
 			RestoreApplied = _session.RestoreApplied
 		});
+	}
 }

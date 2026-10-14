@@ -31,7 +31,7 @@ internal sealed class LightActionDefinition : IDynamicOptionsActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(EntityParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Light.EntityLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Light.EntityLabel(),
 			required: true),
 		ActionParameter.Choice(StateParameterName,
 			[
@@ -48,38 +48,43 @@ internal sealed class LightActionDefinition : IDynamicOptionsActionDefinition
 					Value = "toggle", Label = AppStrings.Integrations.HomeAssistant.Actions.Light.StateToggle()
 				}
 			],
-			label: AppStrings.Integrations.HomeAssistant.Actions.Light.StateLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Light.StateLabel(),
 			defaultValue: "on",
 			required: true),
 		ActionParameter.Number(BrightnessParameterName,
-				label: AppStrings.Integrations.HomeAssistant.Actions.Light.BrightnessLabel(),
-				description: AppStrings.Integrations.HomeAssistant.Actions.Light.BrightnessDescription(),
-				min: 0,
-				max: 100)
+				AppStrings.Integrations.HomeAssistant.Actions.Light.BrightnessLabel(),
+				AppStrings.Integrations.HomeAssistant.Actions.Light.BrightnessDescription(),
+				0,
+				100)
 			.OnlyWhen(StateParameterName, "on", "toggle"),
 		ActionParameter.Color(ColorParameterName,
-				label: AppStrings.Integrations.HomeAssistant.Actions.Light.ColorLabel(),
-				description: AppStrings.Integrations.HomeAssistant.Actions.Light.ColorDescription())
+				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorLabel(),
+				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorDescription())
 			.OnlyWhen(StateParameterName, "on", "toggle"),
 		ActionParameter.Number(ColorTemperatureParameterName,
-				label: AppStrings.Integrations.HomeAssistant.Actions.Light.ColorTemperatureLabel(),
-				description: AppStrings.Integrations.HomeAssistant.Actions.Light.ColorTemperatureDescription(),
-				min: 2000,
-				max: 6500)
+				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorTemperatureLabel(),
+				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorTemperatureDescription(),
+				2000,
+				6500)
 			.OnlyWhen(StateParameterName, "on", "toggle"),
 		ActionParameter.Number(TransitionParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Light.TransitionLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.Light.TransitionDescription(),
-			min: 0,
-			max: 300)
+			AppStrings.Integrations.HomeAssistant.Actions.Light.TransitionLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Light.TransitionDescription(),
+			0,
+			300)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, LightDomain));
+	{
+		return Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, LightDomain));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

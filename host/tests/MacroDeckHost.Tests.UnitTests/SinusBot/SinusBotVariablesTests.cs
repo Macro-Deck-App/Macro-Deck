@@ -38,13 +38,17 @@ internal sealed class SinusBotVariablesTests
 	];
 
 	private static VariableDefinition Eager(string name, VariableType type, int? decimalPlaces = null, int refresh = 0)
-		=> VariableDefinition.Eager(name, type, decimalPlaces, TimeSpan.FromSeconds(refresh));
+	{
+		return VariableDefinition.Eager(name, type, decimalPlaces, TimeSpan.FromSeconds(refresh));
+	}
 
 	[Test]
 	public void Declare_matches_the_original_inline_shape()
-		=> Assert.That(SinusBotVariables.Declare("instance-1")
+	{
+		Assert.That(SinusBotVariables.Declare("instance-1")
 				.Select(variable => variable with { DisplayName = default }),
 			Is.EqualTo(_expected));
+	}
 
 	[Test]
 	public void Declare_namespaces_by_instance_key()

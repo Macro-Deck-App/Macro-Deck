@@ -31,7 +31,10 @@ internal sealed class ObsLiveEventsTests
 	}
 
 	[TearDown]
-	public void TearDown() => _connection.Dispose();
+	public void TearDown()
+	{
+		_connection.Dispose();
+	}
 
 	[Test]
 	public void A_burst_of_setting_changes_for_one_input_is_one_notification_and_no_status_query()
@@ -72,7 +75,9 @@ internal sealed class ObsLiveEventsTests
 		Assert.That(await _connection.GetInputSettingsJsonAsync("Cam"), Does.Contain("one"));
 
 		_fake.InputSettingsJson["Cam"] = """{"device":"two"}""";
-		Assert.That(await _connection.GetInputSettingsJsonAsync("Cam"), Does.Contain("one"), "still inside the cache window");
+		Assert.That(await _connection.GetInputSettingsJsonAsync("Cam"),
+			Does.Contain("one"),
+			"still inside the cache window");
 
 		_fake.RaiseInputSettingsChanged("Cam", "device");
 		_time.Advance(_window);
@@ -104,7 +109,7 @@ internal sealed class ObsLiveEventsTests
 		_fake.RaiseSourceFilterChanged("Scene", "Blur");
 		_time.Advance(_window);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _connection.GetSourceFilterEnabledCachedAsync("Scene", "Blur"), Is.True);
 			var runtime = Guid.NewGuid();
@@ -119,10 +124,11 @@ internal sealed class ObsLiveEventsTests
 	{
 		var runtime = Guid.NewGuid();
 		var ids = ObsVariableCatalog.DefinitionIdsFor(runtime,
-		[
-			new ObsTargetChange(ObsTargetKind.InputSettings, "Cam", null, ["device"]),
-			new ObsTargetChange(ObsTargetKind.SourceActivity, "Cam")
-		]).ToList();
+			[
+				new ObsTargetChange(ObsTargetKind.InputSettings, "Cam", null, ["device"]),
+				new ObsTargetChange(ObsTargetKind.SourceActivity, "Cam")
+			])
+			.ToList();
 
 		Assert.That(ids,
 			Is.EquivalentTo(new[]
@@ -215,6 +221,8 @@ internal sealed class ObsLiveEventsTests
 		public List<(string EventId, IReadOnlyDictionary<string, object?>? Parameters)> Published { get; } = [];
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

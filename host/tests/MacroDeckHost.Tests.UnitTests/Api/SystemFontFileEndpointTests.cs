@@ -20,7 +20,9 @@ public class SystemFontFileEndpointTests
 	private const string TrueTypeFaceId = "stub-family-700-5-italic";
 	private const string CffFaceId = "stub-family-400-5-upright";
 	private const string ImportedFaceId = "imported-family-400-5-upright";
-	private const string ImportedContentHash = "sha256:00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
+
+	private const string ImportedContentHash
+		= "sha256:00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
 
 	private IHost _host = null!;
 	private HttpClient _client = null!;
@@ -67,7 +69,7 @@ public class SystemFontFileEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -136,31 +138,38 @@ public class SystemFontFileEndpointTests
 
 	private sealed class StubFontCatalog : IFontCatalog
 	{
-		private static readonly Dictionary<string, byte[]> Files = new(StringComparer.Ordinal)
+		private static readonly Dictionary<string, byte[]> _files = new(StringComparer.Ordinal)
 		{
 			[TrueTypeFaceId] = [0x00, 0x01, 0x00, 0x00, 0x11, 0x22, 0x33, 0x44],
 			[CffFaceId] = [(byte)'O', (byte)'T', (byte)'T', (byte)'O', 0x11, 0x22, 0x33, 0x44],
 			[ImportedFaceId] = [0x00, 0x01, 0x00, 0x00, 0x55, 0x66, 0x77, 0x88]
 		};
 
-		public IReadOnlyList<FontFaceInfo> GetFaces() =>
-		[
-			new(TrueTypeFaceId, "Stub Family", 700, 5, "italic", "Bold Italic", true),
-			new(CffFaceId, "Stub Family", 400, 5, "upright", "Regular", true),
-			new(ImportedFaceId, "Imported Family", 400, 5, "upright", "Regular", true)
-			{
-				UserImported = true,
-				ContentHash = ImportedContentHash
-			}
-		];
+		public IReadOnlyList<FontFaceInfo> GetFaces()
+		{
+			return
+			[
+				new FontFaceInfo(TrueTypeFaceId, "Stub Family", 700, 5, "italic", "Bold Italic", true),
+				new FontFaceInfo(CffFaceId, "Stub Family", 400, 5, "upright", "Regular", true),
+				new FontFaceInfo(ImportedFaceId, "Imported Family", 400, 5, "upright", "Regular", true)
+				{
+					UserImported = true,
+					ContentHash = ImportedContentHash
+				}
+			];
+		}
 
-		public byte[]? GetFaceFile(string faceId) => Files.GetValueOrDefault(faceId);
+		public byte[]? GetFaceFile(string faceId)
+		{
+			return _files.GetValueOrDefault(faceId);
+		}
 	}
 
 	private sealed class TrustedLoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -171,5 +180,6 @@ public class SystemFontFileEndpointTests
 				});
 				next(app);
 			};
+		}
 	}
 }

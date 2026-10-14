@@ -15,8 +15,8 @@ public static class ResolvedPublicEndpoints
 		if (previous is not null && previous != endpoints)
 		{
 			throw new InvalidOperationException(
-				$"The public listeners were already resolved to {Describe(previous)} and cannot be changed to " +
-				$"{Describe(endpoints)}.");
+				$"The public listeners were already resolved to {Describe(previous)} and cannot be changed to "
+				+ $"{Describe(endpoints)}.");
 		}
 	}
 
@@ -26,7 +26,9 @@ public static class ResolvedPublicEndpoints
 	}
 
 	private static string Describe(PublicEndpointSet endpoints)
-		=> endpoints.Endpoints.Count == 0
+	{
+		return endpoints.Endpoints.Count == 0
 			? "no public listener"
 			: string.Join(", ", endpoints.Endpoints.Select(e => $"{(e.Ssl ? "https" : "http")}:{e.Port}"));
+	}
 }

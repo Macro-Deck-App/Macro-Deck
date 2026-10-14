@@ -54,8 +54,8 @@ internal sealed class PluginRegistrationClient(IHttpClientFactory httpClientFact
 
 		await ProtocolHttpHelpers.ThrowIfAlreadyRegisteredAsync(response,
 			pluginId,
-			$"The host already has a plugin registered as '{pluginId}'. Remove it there, or start " +
-			"this plugin with the secret it was issued.",
+			$"The host already has a plugin registered as '{pluginId}'. Remove it there, or start "
+			+ "this plugin with the secret it was issued.",
 			cancellationToken);
 
 		await EnsureSuccessAsync(response, "register the plugin", cancellationToken);
@@ -134,18 +134,18 @@ internal sealed class PluginRegistrationClient(IHttpClientFactory httpClientFact
 			// the generic handling report it.
 		}
 
-		if (error?.Details is null ||
-			!error.Details.TryGetValue("reason", out var reason) ||
-			!string.Equals(reason, ProtocolErrorReasons.DeveloperModeDisabled, StringComparison.Ordinal))
+		if (error?.Details is null
+			|| !error.Details.TryGetValue("reason", out var reason)
+			|| !string.Equals(reason, ProtocolErrorReasons.DeveloperModeDisabled, StringComparison.Ordinal))
 		{
 			return;
 		}
 
 		throw new PluginRegistrationException(
-			$"Developer Mode is disabled in Macro Deck, so this plugin cannot {what}. Enable it under " +
-			"Settings > Developer - this plugin keeps waiting and continues as soon as you do.",
+			$"Developer Mode is disabled in Macro Deck, so this plugin cannot {what}. Enable it under "
+			+ "Settings > Developer - this plugin keeps waiting and continues as soon as you do.",
 			response.StatusCode,
-			fatal: false);
+			false);
 	}
 
 	private HttpClient Create()
@@ -156,13 +156,17 @@ internal sealed class PluginRegistrationClient(IHttpClientFactory httpClientFact
 	}
 
 	private static Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
-		=> ProtocolHttpHelpers.ReadAsync<T>(response, cancellationToken);
+	{
+		return ProtocolHttpHelpers.ReadAsync<T>(response, cancellationToken);
+	}
 
 	private static Task EnsureSuccessAsync(
 		HttpResponseMessage response,
 		string what,
 		CancellationToken cancellationToken)
-		=> ProtocolHttpHelpers.EnsureSuccessAsync(response, what, cancellationToken);
+	{
+		return ProtocolHttpHelpers.EnsureSuccessAsync(response, what, cancellationToken);
+	}
 }
 
 /// <summary>A REST call in the handshake failed.</summary>
@@ -172,7 +176,9 @@ internal sealed class PluginRegistrationException : Exception
 
 	public PluginRegistrationException(string message, HttpStatusCode statusCode)
 		: base(message)
-		=> StatusCode = statusCode;
+	{
+		StatusCode = statusCode;
+	}
 
 	/// <summary>
 	/// Some failures are fatal regardless of what <see cref="StatusCode" /> would otherwise imply - e.g.
@@ -206,8 +212,8 @@ internal sealed class PluginRegistrationException : Exception
 	/// Whether retrying could ever help. Credentials the host rejects and a request it considers
 	/// malformed will be rejected identically forever; everything else is worth another attempt.
 	/// </summary>
-	public bool IsFatal => _fatalOverride ??
-		StatusCode is HttpStatusCode.Unauthorized
+	public bool IsFatal => _fatalOverride
+		?? StatusCode is HttpStatusCode.Unauthorized
 			or HttpStatusCode.Forbidden
 			or HttpStatusCode.BadRequest
 			or HttpStatusCode.UnprocessableContent;
@@ -257,17 +263,17 @@ internal static class ProtocolHttpHelpers
 		{
 		}
 
-		var installed = error?.Details is not null &&
-			error.Details.TryGetValue("reason", out var reason) &&
-			string.Equals(reason, ProtocolErrorReasons.PluginInstalled, StringComparison.Ordinal);
+		var installed = error?.Details is not null
+			&& error.Details.TryGetValue("reason", out var reason)
+			&& string.Equals(reason, ProtocolErrorReasons.PluginInstalled, StringComparison.Ordinal);
 
 		throw new PluginRegistrationException(installed
-				? $"Macro Deck has the plugin '{pluginId}' installed, so an enrollment token cannot register " +
-				"this build under the same id. Start it without an enrollment token and with Developer Mode " +
-				"on to take the installed plugin over temporarily, or uninstall it in Macro Deck."
+				? $"Macro Deck has the plugin '{pluginId}' installed, so an enrollment token cannot register "
+				+ "this build under the same id. Start it without an enrollment token and with Developer Mode "
+				+ "on to take the installed plugin over temporarily, or uninstall it in Macro Deck."
 				: registeredMessage,
 			response.StatusCode,
-			fatal: true);
+			true);
 	}
 
 	public static async Task EnsureSuccessAsync(

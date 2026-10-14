@@ -21,8 +21,8 @@ namespace MacroDeckHost.Tests.UnitTests.Ui;
 public class UpdateWidgetDataRuntimeGuardTests
 {
 	private const string BoundToggle =
-		"{\"mode\":\"toggle\",\"stateBinding\":{\"kind\":\"compare\",\"id\":\"c\"," +
-		"\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}";
+		"{\"mode\":\"toggle\",\"stateBinding\":{\"kind\":\"compare\",\"id\":\"c\","
+		+ "\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}";
 
 	private static async Task<(WidgetEntity Updated, RecordingFlowExecutor Flow)> Patch(
 		string initialData,
@@ -78,12 +78,13 @@ public class UpdateWidgetDataRuntimeGuardTests
 			Serilog.Log.Logger);
 
 		var press = handler.Handle(new UpdateWidgetDataRequest
-			{
-				WidgetId = widget.Id.ToString(),
-				FolderId = folderId.ToString(),
-				Data = "{\"isToggled\":true}"
-			},
-			CancellationToken.None).AsTask();
+				{
+					WidgetId = widget.Id.ToString(),
+					FolderId = folderId.ToString(),
+					Data = "{\"isToggled\":true}"
+				},
+				CancellationToken.None)
+			.AsTask();
 
 		var finished = await Task.WhenAny(press, Task.Delay(TimeSpan.FromSeconds(5)));
 		Assert.That(finished, Is.SameAs(press), "the press deadlocked on its own write gate");
@@ -137,10 +138,10 @@ public class UpdateWidgetDataRuntimeGuardTests
 			TestLocalization.Resolver,
 			Serilog.Log.Logger);
 
-		var initialData = "{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"}," +
-			"{\"id\":\"on\",\"label\":\"On\"}],\"activeStateId\":\"off\",\"flows\":" +
-			JsonNode.Parse(flow)!["flows"]!.ToJsonString() +
-			"}";
+		var initialData = "{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},"
+			+ "{\"id\":\"on\",\"label\":\"On\"}],\"activeStateId\":\"off\",\"flows\":"
+			+ JsonNode.Parse(flow)!["flows"]!.ToJsonString()
+			+ "}";
 
 		var folderId = Guid.NewGuid();
 		var widget = new WidgetEntity
@@ -196,9 +197,9 @@ public class UpdateWidgetDataRuntimeGuardTests
 	[Test]
 	public async Task UpgradedLegacyToggleButton_StopsFlippingOnPress_AndItsFlowsAreNotRewritten()
 	{
-		const string flowsJson = "[{\"triggerId\":\"t1\",\"triggerType\":\"onShortPress\",\"children\":" +
-			"[{\"id\":\"b1\",\"type\":\"action\",\"blockType\":\"integration.capture\"," +
-			"\"integrationId\":\"integration\",\"actionId\":\"capture\",\"parameters\":[]}]}]";
+		const string flowsJson = "[{\"triggerId\":\"t1\",\"triggerType\":\"onShortPress\",\"children\":"
+			+ "[{\"id\":\"b1\",\"type\":\"action\",\"blockType\":\"integration.capture\","
+			+ "\"integrationId\":\"integration\",\"actionId\":\"capture\",\"parameters\":[]}]}]";
 		var initialData = $"{{\"mode\":\"toggle\",\"isToggled\":false,\"flows\":{flowsJson}}}";
 		var expectedFlows = JsonNode.Parse(flowsJson)!.ToJsonString();
 
@@ -277,14 +278,16 @@ public class UpdateWidgetDataRuntimeGuardTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)
@@ -302,40 +305,57 @@ public class UpdateWidgetDataRuntimeGuardTests
 			return Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
 		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
 			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class FakeFolderCache : IFolderCache
@@ -347,18 +367,45 @@ public class UpdateWidgetDataRuntimeGuardTests
 			_folder = new FolderEntity { Id = folderId, Name = "f", Order = 0, Widgets = widgets.ToList() };
 		}
 
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

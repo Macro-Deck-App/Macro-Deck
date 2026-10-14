@@ -40,8 +40,10 @@ public sealed partial class CompanionAppService : IDisposable
 	private readonly Lock _sync = new();
 	private readonly SemaphoreSlim _workGate = new(1, 1);
 	private readonly CancellationTokenSource _lifetime = new();
+
 	private readonly Channel<bool> _wake =
 		Channel.CreateBounded<bool>(new BoundedChannelOptions(1) { FullMode = BoundedChannelFullMode.DropWrite });
+
 	private readonly Dictionary<string, DeviceEntry> _devices = new(StringComparer.Ordinal);
 	private readonly HashSet<(string Serial, int VersionCode)> _autoUpdateAttempts = [];
 	private readonly Dictionary<Guid, string> _names = [];
@@ -59,7 +61,8 @@ public sealed partial class CompanionAppService : IDisposable
 	private DateTimeOffset? _lastDeviceSweepAt;
 	private DateTimeOffset? _lastPageSweepAt;
 
-	public CompanionAppService(IAdbManager adb,
+	public CompanionAppService(
+		IAdbManager adb,
 		IAdbDeviceOperations operations,
 		ICompanionAppReleaseClient releases,
 		CompanionDeviceRegistry companions,
@@ -91,8 +94,9 @@ public sealed partial class CompanionAppService : IDisposable
 		lock (_sync)
 		{
 			var now = _time.GetUtcNow();
-			if (!_checking && (_lastAttemptAt is null || now - _lastAttemptAt >= StaleAfter) &&
-				(_lastCheckedAt is null || now - _lastCheckedAt >= StaleAfter))
+			if (!_checking
+				&& (_lastAttemptAt is null || now - _lastAttemptAt >= StaleAfter)
+				&& (_lastCheckedAt is null || now - _lastCheckedAt >= StaleAfter))
 			{
 				_refreshRequested = true;
 				Wake();
@@ -162,7 +166,8 @@ public sealed partial class CompanionAppService : IDisposable
 		return await PushIfChangedAsync(cancellationToken);
 	}
 
-	public async Task<(string? Error, CompanionAppStatus Status)> InstallAsync(string serial,
+	public async Task<(string? Error, CompanionAppStatus Status)> InstallAsync(
+		string serial,
 		CancellationToken cancellationToken)
 	{
 		await _workGate.WaitAsync(cancellationToken);
@@ -170,7 +175,7 @@ public sealed partial class CompanionAppService : IDisposable
 		{
 			SyncDevices();
 			// A closed settings page must not abort an adb install halfway.
-			var error = await InstallCoreAsync(serial, automatic: false, _lifetime.Token);
+			var error = await InstallCoreAsync(serial, false, _lifetime.Token);
 			return (error, await PushIfChangedAsync(_lifetime.Token));
 		}
 		finally
@@ -219,7 +224,8 @@ public sealed partial class CompanionAppService : IDisposable
 			lock (_sync)
 			{
 				var now = _time.GetUtcNow();
-				if (_devices.Count > 0 && (_lastDeviceSweepAt is null || now - _lastDeviceSweepAt >= DeviceRecheckInterval))
+				if (_devices.Count > 0
+					&& (_lastDeviceSweepAt is null || now - _lastDeviceSweepAt >= DeviceRecheckInterval))
 				{
 					MarkAllForProbe(now);
 				}
@@ -256,19 +262,31 @@ public sealed partial class CompanionAppService : IDisposable
 		_lifetime.Cancel();
 	}
 
-	private void OnChanged(object? sender, EventArgs e) => Wake();
+	private void OnChanged(object? sender, EventArgs e)
+	{
+		Wake();
+	}
 
-	private void OnCompanionChanged(object? sender, CompanionDeviceEventArgs e) => Wake();
+	private void OnCompanionChanged(object? sender, CompanionDeviceEventArgs e)
+	{
+		Wake();
+	}
 
-	private void Wake() => _wake.Writer.TryWrite(true);
+	private void Wake()
+	{
+		_wake.Writer.TryWrite(true);
+	}
 
-	private bool Interested() => _adb.Status.Enabled || ConnectedAndroidApps().Count > 0;
+	private bool Interested()
+	{
+		return _adb.Status.Enabled || ConnectedAndroidApps().Count > 0;
+	}
 
 	private bool ReleaseRefreshDue(bool interested)
 	{
 		lock (_sync)
 		{
-			return _refreshRequested || (interested && ReleaseDueAt() <= _time.GetUtcNow());
+			return _refreshRequested || interested && ReleaseDueAt() <= _time.GetUtcNow();
 		}
 	}
 
@@ -373,7 +391,8 @@ public sealed partial class CompanionAppService : IDisposable
 				}
 			}
 
-			foreach (var serial in _devices.Keys.Where(serial => devices.All(device => device.Serial != serial)).ToList())
+			foreach (var serial in _devices.Keys.Where(serial => devices.All(device => device.Serial != serial))
+				.ToList())
 			{
 				_devices.Remove(serial);
 				_autoUpdateAttempts.RemoveWhere(attempt => attempt.Serial == serial);
@@ -386,7 +405,10 @@ public sealed partial class CompanionAppService : IDisposable
 		List<string> due;
 		lock (_sync)
 		{
-			due = [.. _devices.Values.Where(entry => entry.NeedsProbe && !entry.Installing).Select(entry => entry.Serial)];
+			due =
+			[
+				.. _devices.Values.Where(entry => entry.NeedsProbe && !entry.Installing).Select(entry => entry.Serial)
+			];
 		}
 
 		foreach (var serial in due)
@@ -399,7 +421,7 @@ public sealed partial class CompanionAppService : IDisposable
 	{
 		var sdk = await _adb.QueryAsync(new AdbSdkLevelCommand(serial), cancellationToken);
 		Result<string, AdbFailureCode>? package = null;
-		int? level = sdk.Success ? CompanionPackageInfoParser.ParseSdkLevel(sdk.Data!) : null;
+		var level = sdk.Success ? CompanionPackageInfoParser.ParseSdkLevel(sdk.Data!) : null;
 		if (level >= MinimumSdkLevel)
 		{
 			package = await _adb.QueryAsync(new AdbPackageInfoCommand(serial, PackageName), cancellationToken);
@@ -416,7 +438,7 @@ public sealed partial class CompanionAppService : IDisposable
 			entry.Probed = true;
 			entry.SdkLevel = level;
 			entry.NotAndroid = level is null && (sdk.Success || sdk.Error == AdbFailureCode.CommandFailed);
-			entry.ProbeFailed = (!sdk.Success && !entry.NotAndroid) || package is { Success: false };
+			entry.ProbeFailed = !sdk.Success && !entry.NotAndroid || package is { Success: false };
 			var previous = entry.Package;
 			entry.Package = package is { Success: true } found
 				? CompanionPackageInfoParser.ParsePackageInfo(found.Data!, PackageName)
@@ -446,8 +468,8 @@ public sealed partial class CompanionAppService : IDisposable
 			outdated = [];
 			foreach (var entry in _devices.Values)
 			{
-				if (StateOf(entry, release) == CompanionAppDeviceStates.UpdateAvailable &&
-					_autoUpdateAttempts.Add((entry.Serial, release.VersionCode)))
+				if (StateOf(entry, release) == CompanionAppDeviceStates.UpdateAvailable
+					&& _autoUpdateAttempts.Add((entry.Serial, release.VersionCode)))
 				{
 					outdated.Add(entry.Serial);
 				}
@@ -456,7 +478,7 @@ public sealed partial class CompanionAppService : IDisposable
 
 		foreach (var serial in outdated)
 		{
-			await InstallCoreAsync(serial, automatic: true, cancellationToken);
+			await InstallCoreAsync(serial, true, cancellationToken);
 		}
 	}
 
@@ -534,7 +556,9 @@ public sealed partial class CompanionAppService : IDisposable
 			var installed = await _operations.InstallApkAsync(serial, apk, cancellationToken);
 			if (!installed.Success)
 			{
-				_logger.Warning("Installing the Companion app on {Serial} failed: {Output}", serial, installed.ErrorMessage);
+				_logger.Warning("Installing the Companion app on {Serial} failed: {Output}",
+					serial,
+					installed.ErrorMessage);
 				return SetError(entry, InstallFailure(installed));
 			}
 
@@ -579,11 +603,13 @@ public sealed partial class CompanionAppService : IDisposable
 		return result.Success ? result.Data!.Trim() : "unknown";
 	}
 
-	private async Task<(string? Path, string? Error)> EnsureApkAsync(CompanionAppRelease release,
+	private async Task<(string? Path, string? Error)> EnsureApkAsync(
+		CompanionAppRelease release,
 		CancellationToken cancellationToken)
 	{
 		var directory = Path.Combine(_paths.DataRootDirectory, "companion-app");
-		var path = Path.Combine(directory, $"macro-deck-companion-{release.VersionCode.ToString(CultureInfo.InvariantCulture)}.apk");
+		var path = Path.Combine(directory,
+			$"macro-deck-companion-{release.VersionCode.ToString(CultureInfo.InvariantCulture)}.apk");
 		try
 		{
 			Directory.CreateDirectory(directory);
@@ -657,7 +683,9 @@ public sealed partial class CompanionAppService : IDisposable
 			return CompanionAppErrors.DeviceTooOld;
 		}
 
-		return result.Error is AdbFailureCode.DeviceUnauthorized or AdbFailureCode.DeviceOffline or AdbFailureCode.DeviceNotFound
+		return result.Error is AdbFailureCode.DeviceUnauthorized
+			or AdbFailureCode.DeviceOffline
+			or AdbFailureCode.DeviceNotFound
 			? CompanionAppErrors.DeviceNotReady
 			: CompanionAppErrors.InstallFailed;
 	}
@@ -683,8 +711,13 @@ public sealed partial class CompanionAppService : IDisposable
 	}
 
 	private List<KeyValuePair<Guid, CompanionDeviceState>> ConnectedAndroidApps()
-		=> [.. _companions.ConnectedStates()
-			.Where(app => app.Value.Platform?.StartsWith("Android", StringComparison.OrdinalIgnoreCase) == true)];
+	{
+		return
+		[
+			.. _companions.ConnectedStates()
+				.Where(app => app.Value.Platform?.StartsWith("Android", StringComparison.OrdinalIgnoreCase) == true)
+		];
+	}
 
 	private async Task<CompanionAppStatus> PushIfChangedAsync(CancellationToken cancellationToken)
 	{
@@ -736,7 +769,10 @@ public sealed partial class CompanionAppService : IDisposable
 				Devices =
 				[
 					.. _devices.Values
-						.Where(entry => entry.AdbState is AdbDeviceState.Device or AdbDeviceState.Unauthorized or AdbDeviceState.Authorizing)
+						.Where(entry
+							=> entry.AdbState is AdbDeviceState.Device
+								or AdbDeviceState.Unauthorized
+								or AdbDeviceState.Authorizing)
 						.OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
 						.Select(entry => new CompanionAppDevice
 						{
@@ -757,9 +793,9 @@ public sealed partial class CompanionAppService : IDisposable
 							Name = _names.GetValueOrDefault(app.Key) ?? app.Value.Model ?? app.Key.ToString(),
 							Model = app.Value.Model,
 							AppVersion = app.Value.AppVersion,
-							UpdateAvailable = latest is not null &&
-								ParseVersion(app.Value.AppVersion) is { } current &&
-								current < latest
+							UpdateAvailable = latest is not null
+								&& ParseVersion(app.Value.AppVersion) is { } current
+								&& current < latest
 						})
 						.OrderBy(app => app.Name, StringComparer.OrdinalIgnoreCase)
 				]
@@ -858,7 +894,10 @@ public sealed partial class CompanionAppService : IDisposable
 		return Version.TryParse(text, out var version) ? version : null;
 	}
 
-	private static TimeSpan Max(TimeSpan left, TimeSpan right) => left > right ? left : right;
+	private static TimeSpan Max(TimeSpan left, TimeSpan right)
+	{
+		return left > right ? left : right;
+	}
 
 	[GeneratedRegex(@"^\d+(\.\d+){0,3}")]
 	private static partial Regex LeadingVersionRegex();

@@ -23,16 +23,16 @@ public class UiOpaquePayloadTests
 	// consecutive spaces before "toRevision", a duplicate "a" member, "z" declared before "a", the
 	// envelope members in reverse order, an unmapped "x-vendor" member and a 39-digit integer.
 	private const string AdversarialPatch =
-		"{\"operations\":[{\"op\":\"set-properties\",\"nodeId\":\"field.apiKey\",\"properties\":" +
-		"{\"z\":1.0,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\"," +
-		"\"n\":100000000000000000000000000000000000001}}],  " +
-		"\"toRevision\":2,\"fromRevision\":1,\"x-vendor\":{\"keep\":true}}";
+		"{\"operations\":[{\"op\":\"set-properties\",\"nodeId\":\"field.apiKey\",\"properties\":"
+		+ "{\"z\":1.0,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\","
+		+ "\"n\":100000000000000000000000000000000000001}}],  "
+		+ "\"toRevision\":2,\"fromRevision\":1,\"x-vendor\":{\"keep\":true}}";
 
 	private const string AdversarialTree =
-		"{\"revision\":1,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\",\"attributes\":{}}," +
-		"  \"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":" +
-		"{\"z\":1,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\",\"n\":100000000000000000000000000000000000001}," +
-		"\"children\":[],\"x-vendor\":{\"keep\":true}}}";
+		"{\"revision\":1,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\",\"attributes\":{}},"
+		+ "  \"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":"
+		+ "{\"z\":1,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\",\"n\":100000000000000000000000000000000000001},"
+		+ "\"children\":[],\"x-vendor\":{\"keep\":true}}}";
 
 	[Test]
 	public void A_ui_host_invoke_carries_the_tree_and_patch_as_opaque_json()
@@ -60,10 +60,10 @@ public class UiOpaquePayloadTests
 	public void A_ui_host_invoke_read_from_a_whole_envelope_still_carries_the_patch_verbatim()
 	{
 		// The bytes a plugin in any language would put on the socket, read the way the host reads them.
-		var wire = "{\"type\":\"host.invoke\",\"id\":\"01\",\"payload\":{\"api\":\"ui\",\"operation\":\"patch\"," +
-			"\"arguments\":{\"sessionId\":\"s1\",\"patch\":" +
-			AdversarialPatch +
-			"}}}";
+		var wire = "{\"type\":\"host.invoke\",\"id\":\"01\",\"payload\":{\"api\":\"ui\",\"operation\":\"patch\","
+			+ "\"arguments\":{\"sessionId\":\"s1\",\"patch\":"
+			+ AdversarialPatch
+			+ "}}}";
 
 		var envelope = ProtocolEnvelopeReader.Read(Encoding.UTF8.GetBytes(wire)).Envelope;
 		var payload = envelope!.Payload!.Value.Deserialize<HostInvokePayload>(PluginProtocolJson.Options);
@@ -77,11 +77,11 @@ public class UiOpaquePayloadTests
 	[Test]
 	public void A_ui_capability_invoke_carries_its_provider_authored_json_as_opaque_json()
 	{
-		var eventWire = "{\"sessionId\":\"s1\",\"nodeId\":\"field.apiKey\",\"name\":\"input\",\"data\":" +
-			"{\"value\":\"caf\\u00e9 a<b\",\"n\":100000000000000000000000000000000000001}}";
-		var openWire = "{\"sessionId\":\"s1\",\"surfaceKind\":\"config\",\"sessionMode\":\"exclusive\"," +
-			"\"surfaceAttributes\":{\"gridSize\":{\"w\":3,\"h\":2},\"x-vendor-unknown\":\"keep-me\"}," +
-			"\"uiModelVersion\":1}";
+		var eventWire = "{\"sessionId\":\"s1\",\"nodeId\":\"field.apiKey\",\"name\":\"input\",\"data\":"
+			+ "{\"value\":\"caf\\u00e9 a<b\",\"n\":100000000000000000000000000000000000001}}";
+		var openWire = "{\"sessionId\":\"s1\",\"surfaceKind\":\"config\",\"sessionMode\":\"exclusive\","
+			+ "\"surfaceAttributes\":{\"gridSize\":{\"w\":3,\"h\":2},\"x-vendor-unknown\":\"keep-me\"},"
+			+ "\"uiModelVersion\":1}";
 
 		var eventArguments = JsonSerializer.Deserialize<UiSessionEventArguments>(Encoding.UTF8.GetBytes(eventWire),
 			PluginProtocolJson.Options);
@@ -124,5 +124,7 @@ public class UiOpaquePayloadTests
 
 	[Test]
 	public void The_ui_host_api_offers_exactly_the_session_and_resource_operations()
-		=> Assert.That(HostOperations.For(HostApis.Ui), Is.EqualTo(_uiHostOperations));
+	{
+		Assert.That(HostOperations.For(HostApis.Ui), Is.EqualTo(_uiHostOperations));
+	}
 }

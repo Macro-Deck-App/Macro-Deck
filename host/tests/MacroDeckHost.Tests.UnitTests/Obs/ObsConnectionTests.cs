@@ -48,7 +48,7 @@ internal sealed class ObsConnectionTests
 		using var connection = new ObsConnection(fake,
 			"ws://localhost:4455",
 			null,
-			reconnectDelay: TimeSpan.FromMilliseconds(50));
+			TimeSpan.FromMilliseconds(50));
 
 		connection.Start();
 		Assert.That(fake.ConnectCount, Is.EqualTo(1));
@@ -70,7 +70,7 @@ internal sealed class ObsConnectionTests
 		var connection = new ObsConnection(fake,
 			"ws://localhost:4455",
 			null,
-			reconnectDelay: TimeSpan.FromMilliseconds(50));
+			TimeSpan.FromMilliseconds(50));
 		fake.RaiseStateChanged();
 		Assert.That(connection.State.IsConnected, Is.True);
 
@@ -98,7 +98,7 @@ internal sealed class ObsConnectionTests
 		using var connection = new ObsConnection(fake,
 			"ws://localhost:4455",
 			null,
-			reconnectDelay: TimeSpan.FromSeconds(10),
+			TimeSpan.FromSeconds(10),
 			logger: logger);
 
 		fake.RaiseDisconnected("unreachable");
@@ -121,7 +121,7 @@ internal sealed class ObsConnectionTests
 		var sink = new CollectingSink();
 		using var connection = Connected(fake, sink);
 
-		await FailFrom(fake, connection, attempts: 50);
+		await FailFrom(fake, connection, 50);
 
 		Assert.Multiple(() =>
 		{
@@ -141,7 +141,7 @@ internal sealed class ObsConnectionTests
 		var sink = new CollectingSink();
 		using var connection = Connected(fake, sink);
 
-		await FailFrom(fake, connection, attempts: 20);
+		await FailFrom(fake, connection, 20);
 
 		var attempts = sink.Events
 			.Where(logEvent => logEvent.MessageTemplate.Text.StartsWith("OBS connecting to",
@@ -161,7 +161,7 @@ internal sealed class ObsConnectionTests
 		var sink = new CollectingSink();
 		using var connection = Connected(fake, sink);
 
-		await FailFrom(fake, connection, attempts: 5);
+		await FailFrom(fake, connection, 5);
 		fake.ConnectRaisesConnected = true;
 		fake.ConnectRaisesDisconnected = false;
 		await WaitForAsync(() => Loud(sink).Count >= 3, TimeSpan.FromSeconds(15));
@@ -224,9 +224,11 @@ internal sealed class ObsConnectionTests
 	}
 
 	private static List<LogEvent> Summaries(CollectingSink sink)
-		=> sink.Events.Where(logEvent => logEvent.MessageTemplate.Text.StartsWith("OBS has been unreachable",
+	{
+		return sink.Events.Where(logEvent => logEvent.MessageTemplate.Text.StartsWith("OBS has been unreachable",
 				StringComparison.Ordinal))
 			.ToList();
+	}
 
 	private static ObsConnection Summarizing(FakeObsClient fake, CollectingSink sink)
 	{
@@ -234,7 +236,7 @@ internal sealed class ObsConnectionTests
 		var connection = new ObsConnection(fake,
 			"ws://localhost:4455",
 			null,
-			reconnectDelay: TimeSpan.FromMilliseconds(1),
+			TimeSpan.FromMilliseconds(1),
 			logger: logger,
 			failureSummaryInterval: TimeSpan.FromMilliseconds(50));
 		connection.Start();
@@ -251,7 +253,7 @@ internal sealed class ObsConnectionTests
 		var connection = new ObsConnection(fake,
 			"ws://localhost:4455",
 			null,
-			reconnectDelay: TimeSpan.FromMilliseconds(1),
+			TimeSpan.FromMilliseconds(1),
 			logger: logger,
 			failureSummaryInterval: TimeSpan.FromHours(1));
 		connection.Start();
@@ -274,10 +276,14 @@ internal sealed class ObsConnectionTests
 	}
 
 	private static List<LogEvent> Loud(CollectingSink sink)
-		=> sink.Events.Where(logEvent => logEvent.Level >= LogEventLevel.Information).ToList();
+	{
+		return sink.Events.Where(logEvent => logEvent.Level >= LogEventLevel.Information).ToList();
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
-		=> await WaitForAsync(condition, TimeSpan.FromSeconds(2));
+	{
+		await WaitForAsync(condition, TimeSpan.FromSeconds(2));
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition, TimeSpan budget)
 	{

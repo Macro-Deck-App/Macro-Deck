@@ -21,7 +21,8 @@ public static class MusicPlayerArtworkExtensions
 	/// <exception cref="ArgumentException">The name is not valid, or the artwork is empty, larger than one
 	/// resource may be, or of a media type Macro Deck does not accept, such as SVG. Nothing was sent.</exception>
 	/// <exception cref="UiResourceException">Macro Deck refused or could not complete the registration.</exception>
-	public static async Task<UiResource?> GetArtworkAsUiResourceAsync(this IMusicPlayer player,
+	public static async Task<UiResource?> GetArtworkAsUiResourceAsync(
+		this IMusicPlayer player,
 		IUiResourceRegistry resources,
 		string resourceName,
 		string? artworkId,

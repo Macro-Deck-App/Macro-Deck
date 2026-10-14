@@ -18,7 +18,9 @@ internal static class KnownAudioDevices
 	};
 
 	public static string Serialize(IReadOnlyList<KnownAudioDevice> devices)
-		=> JsonSerializer.Serialize(devices, _options);
+	{
+		return JsonSerializer.Serialize(devices, _options);
+	}
 
 	public static IReadOnlyList<KnownAudioDevice>? Deserialize(string content)
 	{
@@ -32,5 +34,8 @@ internal static class KnownAudioDevices
 		}
 	}
 
-	public static bool IsValid(string content) => Deserialize(content) is not null;
+	public static bool IsValid(string content)
+	{
+		return Deserialize(content) is not null;
+	}
 }

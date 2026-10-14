@@ -13,15 +13,18 @@ public sealed record ClockScreenSaverData
 	public bool ShowSeconds { get; init; }
 
 	public static ClockScreenSaverData Parse(JsonElement data)
-		=> new()
+	{
+		return new ClockScreenSaverData
 		{
 			HourCycle = WidgetConfigJson.ReadString(data, "hourCycle") ?? "auto",
 			ShowDate = WidgetConfigJson.ReadBool(data, "showDate") ?? true,
-			ShowSeconds = WidgetConfigJson.ReadBool(data, "showSeconds") ?? false,
+			ShowSeconds = WidgetConfigJson.ReadBool(data, "showSeconds") ?? false
 		};
+	}
 
 	public ClockWidgetData ToClock()
-		=> new()
+	{
+		return new ClockWidgetData
 		{
 			ShowDate = ShowDate,
 			ShowSeconds = ShowSeconds,
@@ -29,7 +32,8 @@ public sealed record ClockScreenSaverData
 			{
 				"12h" => ClockHourCycle.TwelveHour,
 				"24h" => ClockHourCycle.TwentyFourHour,
-				_ => ClockHourCycle.Auto,
-			},
+				_ => ClockHourCycle.Auto
+			}
 		};
+	}
 }

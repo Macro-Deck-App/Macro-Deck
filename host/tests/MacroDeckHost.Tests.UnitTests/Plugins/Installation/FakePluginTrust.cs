@@ -13,10 +13,13 @@ internal sealed class FakePluginTrustEvaluator : IPluginTrustEvaluator
 	public PluginTrustResult InstalledResult { get; set; }
 		= PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-fake");
 
-	public Task<PluginTrustResult> EvaluateInstalledAsync(string versionDirectory,
+	public Task<PluginTrustResult> EvaluateInstalledAsync(
+		string versionDirectory,
 		PluginRevocationCheck revocationCheck,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(InstalledResult);
+	{
+		return Task.FromResult(InstalledResult);
+	}
 }
 
 internal sealed class InMemoryPluginTrustRecordRepository : IPluginTrustRecordRepository
@@ -39,7 +42,8 @@ internal sealed class InMemoryPluginTrustRecordRepository : IPluginTrustRecordRe
 		return Task.FromResult(records);
 	}
 
-	public Task Upsert(string pluginId,
+	public Task Upsert(
+		string pluginId,
 		string version,
 		string admittedVerdict,
 		string? certificateId,
@@ -79,7 +83,10 @@ internal sealed class FakePluginTrustBaseline : IPluginTrustBaseline
 {
 	public bool ExistsValue { get; set; }
 
-	public Task<bool> Exists(CancellationToken cancellationToken = default) => Task.FromResult(ExistsValue);
+	public Task<bool> Exists(CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(ExistsValue);
+	}
 
 	public Task Establish(CancellationToken cancellationToken = default)
 	{

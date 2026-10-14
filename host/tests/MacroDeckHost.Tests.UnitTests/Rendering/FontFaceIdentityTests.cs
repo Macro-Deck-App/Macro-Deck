@@ -16,16 +16,21 @@ public class FontFaceIdentityTests
 	[TestCase("Arial  Black", 900, 5, "upright", ExpectedResult = "arial-black-900-5-upright")]
 	[TestCase("Avenir Next Condensed", 400, 3, "upright", ExpectedResult = "avenir-next-condensed-400-3-upright")]
 	public string Build_ForAFamilyName_ProducesTheStoredIdFormat(string family, int weight, int width, string slant)
-		=> FontFaceIdentity.Build(family, weight, width, slant);
+	{
+		return FontFaceIdentity.Build(family, weight, width, slant);
+	}
 
 	[TestCase("Roboto", false, false, ExpectedResult = "roboto-400-5-upright")]
 	[TestCase("Roboto", true, false, ExpectedResult = "roboto-700-5-upright")]
 	[TestCase("Roboto", false, true, ExpectedResult = "roboto-400-5-italic")]
 	[TestCase("Roboto", true, true, ExpectedResult = "roboto-700-5-italic")]
-	public string BuildLegacy_ForAFamilyBoldItalicTriple_ProducesTheStoredIdFormat(string family,
+	public string BuildLegacy_ForAFamilyBoldItalicTriple_ProducesTheStoredIdFormat(
+		string family,
 		bool bold,
 		bool italic)
-		=> FontFaceIdentity.BuildLegacy(family, bold, italic);
+	{
+		return FontFaceIdentity.BuildLegacy(family, bold, italic);
+	}
 
 	[Test]
 	public void Build_ForFamiliesWithNoAsciiLetters_KeepsThemApartWithoutRelyingOnEnumerationOrder()
@@ -63,6 +68,8 @@ public class FontFaceIdentityTests
 		Assert.That(ids.Where(id => !IsSafe(id)), Is.Empty, "every id must contain only [a-z0-9-]");
 	}
 
-	private static bool IsSafe(string id) =>
-		id.All(character => character is (>= 'a' and <= 'z') or (>= '0' and <= '9') or '-');
+	private static bool IsSafe(string id)
+	{
+		return id.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-');
+	}
 }

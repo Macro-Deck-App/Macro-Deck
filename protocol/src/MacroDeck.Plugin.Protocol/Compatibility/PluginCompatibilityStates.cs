@@ -34,25 +34,31 @@ public static class PluginCompatibilityStates
 
 	public static readonly IReadOnlyList<string> All =
 	[
-		Compatible, DeprecatedApis, UpdateRecommended, UpdateRequired, PartiallyIncompatible, Incompatible,
+		Compatible, DeprecatedApis, UpdateRecommended, UpdateRequired, PartiallyIncompatible, Incompatible
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 
-	public static bool IsKnown(string? state) => state is not null && _known.Contains(state);
+	public static bool IsKnown(string? state)
+	{
+		return state is not null && _known.Contains(state);
+	}
 
 	/// <summary>
 	/// Severity order, ascending. An unknown state ranks below everything so a state added by a newer
 	/// host never silently outranks one this host understands.
 	/// </summary>
-	public static int Rank(string? state) => state switch
+	public static int Rank(string? state)
 	{
-		Compatible => 0,
-		DeprecatedApis => 1,
-		UpdateRecommended => 2,
-		UpdateRequired => 3,
-		PartiallyIncompatible => 4,
-		Incompatible => 5,
-		_ => -1
-	};
+		return state switch
+		{
+			Compatible => 0,
+			DeprecatedApis => 1,
+			UpdateRecommended => 2,
+			UpdateRequired => 3,
+			PartiallyIncompatible => 4,
+			Incompatible => 5,
+			_ => -1
+		};
+	}
 }

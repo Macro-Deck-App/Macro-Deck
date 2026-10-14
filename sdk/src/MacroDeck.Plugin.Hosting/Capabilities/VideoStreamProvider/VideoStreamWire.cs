@@ -9,15 +9,24 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider;
 
 internal static class VideoStreamWire
 {
-	public static VideoStreamState ParseState(string? value) => Parse(value, VideoStreamState.Unavailable);
+	public static VideoStreamState ParseState(string? value)
+	{
+		return Parse(value, VideoStreamState.Unavailable);
+	}
 
 	public static VideoStreamSessionState ParseSessionState(string? value)
-		=> Parse(value, VideoStreamSessionState.Reconnecting);
+	{
+		return Parse(value, VideoStreamSessionState.Reconnecting);
+	}
 
-	public static VideoStreamSessionReason ParseReason(string? value) => Parse(value, VideoStreamSessionReason.None);
+	public static VideoStreamSessionReason ParseReason(string? value)
+	{
+		return Parse(value, VideoStreamSessionReason.None);
+	}
 
 	public static VideoStreamDescriptorDto ToDto(VideoStreamDescriptor stream)
-		=> new()
+	{
+		return new VideoStreamDescriptorDto
 		{
 			Id = stream.Id,
 			Name = stream.Name,
@@ -28,9 +37,11 @@ internal static class VideoStreamWire
 			State = stream.State.ToString(),
 			Metadata = stream.Metadata
 		};
+	}
 
 	public static VideoStreamDescriptor ToDescriptor(VideoStreamDescriptorDto dto)
-		=> new(dto.Id,
+	{
+		return new VideoStreamDescriptor(dto.Id,
 			dto.Name,
 			dto.Description,
 			dto.Width,
@@ -38,13 +49,18 @@ internal static class VideoStreamWire
 			dto.HasAudio,
 			ParseState(dto.State),
 			dto.Metadata);
+	}
 
 	public static VideoStreamSessionDescriptionDto ToDto(VideoStreamSessionDescription description)
-		=> new() { Transport = description.Transport, Url = description.Url };
+	{
+		return new VideoStreamSessionDescriptionDto { Transport = description.Transport, Url = description.Url };
+	}
 
 	public static VideoStreamSessionDescription ToDescription(VideoStreamSessionDescriptionDto dto)
-		=> VideoStreamSessionDescription.FromUrl(dto.Transport,
+	{
+		return VideoStreamSessionDescription.FromUrl(dto.Transport,
 			dto.Url ?? throw new ArgumentException("The description has no url.", nameof(dto)));
+	}
 
 	public static string? ValidateDescriptor(VideoStreamDescriptor? stream)
 	{
@@ -55,7 +71,8 @@ internal static class VideoStreamWire
 
 		if (!VideoStreamLimits.IsValidStreamId(stream.Id))
 		{
-			return $"A stream id must be 1 to {VideoStreamLimits.MaxStreamIdLength} characters without control characters.";
+			return
+				$"A stream id must be 1 to {VideoStreamLimits.MaxStreamIdLength} characters without control characters.";
 		}
 
 		if (stream.Name.IsEmpty)
@@ -82,7 +99,8 @@ internal static class VideoStreamWire
 
 		if (!VideoStreamLimits.IsValidTransport(description.Transport))
 		{
-			return $"The transport must be 1 to {VideoStreamLimits.MaxTransportLength} characters of a-z, 0-9, '.', '+' and '-'.";
+			return
+				$"The transport must be 1 to {VideoStreamLimits.MaxTransportLength} characters of a-z, 0-9, '.', '+' and '-'.";
 		}
 
 		if (description.Url is null)
@@ -110,8 +128,9 @@ internal static class VideoStreamWire
 		{
 			Code = ProtocolErrorCodes.CapabilityUnavailable,
 			Message = message,
-			Retryable = code is VideoStreamErrorCode.Busy or VideoStreamErrorCode.CapacityReached or
-				VideoStreamErrorCode.StreamUnavailable,
+			Retryable = code is VideoStreamErrorCode.Busy
+				or VideoStreamErrorCode.CapacityReached
+				or VideoStreamErrorCode.StreamUnavailable,
 			Details = reason is null
 				? null
 				: new Dictionary<string, string>(StringComparer.Ordinal) { ["reason"] = reason }
@@ -119,7 +138,8 @@ internal static class VideoStreamWire
 	}
 
 	public static VideoStreamErrorCode FromError(string code, string? reason)
-		=> reason switch
+	{
+		return reason switch
 		{
 			ProtocolErrorReasons.VideoStreamUnknownProvider => VideoStreamErrorCode.UnknownProvider,
 			ProtocolErrorReasons.VideoStreamUnknownStream => VideoStreamErrorCode.UnknownStream,
@@ -132,12 +152,16 @@ internal static class VideoStreamWire
 				VideoStreamErrorCode.Unsupported,
 			_ => VideoStreamErrorCode.Failed
 		};
+	}
 
 	public static bool IsVideoStreamReason(string? reason)
-		=> reason is not null && reason.StartsWith("video_stream_", StringComparison.Ordinal);
+	{
+		return reason is not null && reason.StartsWith("video_stream_", StringComparison.Ordinal);
+	}
 
 	private static string? ReasonFor(VideoStreamErrorCode code)
-		=> code switch
+	{
+		return code switch
 		{
 			VideoStreamErrorCode.UnknownProvider => ProtocolErrorReasons.VideoStreamUnknownProvider,
 			VideoStreamErrorCode.UnknownStream => ProtocolErrorReasons.VideoStreamUnknownStream,
@@ -148,6 +172,7 @@ internal static class VideoStreamWire
 			VideoStreamErrorCode.Busy => ProtocolErrorReasons.VideoStreamBusy,
 			_ => null
 		};
+	}
 
 	private static string? ValidateUrl(string url)
 	{
@@ -211,7 +236,9 @@ internal static class VideoStreamWire
 
 	private static T Parse<T>(string? value, T fallback)
 		where T : struct, Enum
-		=> value is not null && Enum.GetNames<T>().Contains(value, StringComparer.Ordinal)
+	{
+		return value is not null && Enum.GetNames<T>().Contains(value, StringComparer.Ordinal)
 			? Enum.Parse<T>(value)
 			: fallback;
+	}
 }

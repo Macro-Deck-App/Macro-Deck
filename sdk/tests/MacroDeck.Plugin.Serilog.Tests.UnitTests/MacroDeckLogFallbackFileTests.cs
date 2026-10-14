@@ -51,7 +51,7 @@ public class MacroDeckLogFallbackFileTests
 		{
 			if (Directory.Exists(directory))
 			{
-				Directory.Delete(directory, recursive: true);
+				Directory.Delete(directory, true);
 			}
 		}
 	}
@@ -77,16 +77,19 @@ public class MacroDeckLogFallbackFileTests
 		{
 			if (Directory.Exists(directory))
 			{
-				Directory.Delete(directory, recursive: true);
+				Directory.Delete(directory, true);
 			}
 		}
 	}
 
-	private static LogEventDto BuildDto(DateTimeOffset timestamp, string message) => new()
+	private static LogEventDto BuildDto(DateTimeOffset timestamp, string message)
 	{
-		Timestamp = timestamp,
-		Level = LogLevels.Information,
-		MessageTemplate = message,
-		RenderedMessage = message
-	};
+		return new LogEventDto
+		{
+			Timestamp = timestamp,
+			Level = LogLevels.Information,
+			MessageTemplate = message,
+			RenderedMessage = message
+		};
+	}
 }

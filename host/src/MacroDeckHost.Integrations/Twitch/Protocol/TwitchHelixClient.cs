@@ -50,7 +50,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 	}
 
 	public static TwitchAPI CreateApi(string clientId)
-		=> new(settings: new ApiSettings
+	{
+		return new TwitchAPI(settings: new ApiSettings
 		{
 			ClientId = clientId,
 
@@ -58,6 +59,7 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 
 			SkipAutoServerTokenGeneration = true
 		});
+	}
 
 	public Task<TwitchSubscriptionResult> CreateEventSubSubscriptionAsync(
 		string type,
@@ -65,16 +67,21 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		IReadOnlyDictionary<string, string> condition,
 		string sessionId,
 		CancellationToken cancellationToken)
-		=> CreateSubscriptionAsync(type, version, condition, sessionId, cancellationToken);
+	{
+		return CreateSubscriptionAsync(type, version, condition, sessionId, cancellationToken);
+	}
 
 	private static string? ResolveThumbnail(string? template)
-		=> string.IsNullOrEmpty(template)
+	{
+		return string.IsNullOrEmpty(template)
 			? null
 			: template.Replace("{width}", "440", StringComparison.Ordinal)
 				.Replace("{height}", "248", StringComparison.Ordinal);
+	}
 
 	public Task<TwitchStreamInfo> GetStreamAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				var response = await _api.Helix.Streams.GetStreamsAsync(userIds: [broadcasterId], accessToken: token);
 				var stream = response?.Streams?.FirstOrDefault();
@@ -89,9 +96,11 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 						ResolveThumbnail(stream.ThumbnailUrl));
 			},
 			cancellationToken);
+	}
 
 	public Task<TwitchChannelInfo> GetChannelAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				var response = await _api.Helix.Channels.GetChannelInformationAsync(broadcasterId, token);
 				var channel = response?.Data?.FirstOrDefault();
@@ -102,9 +111,11 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 					channel?.BroadcasterLanguage);
 			},
 			cancellationToken);
+	}
 
 	public Task<int?> GetFollowerCountAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync<int?>(async token =>
+	{
+		return CallAsync<int?>(async token =>
 			{
 				var response = await _api.Helix.Channels.GetChannelFollowersAsync(broadcasterId,
 					first: 1,
@@ -113,32 +124,38 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return response?.Total;
 			},
 			cancellationToken);
+	}
 
 	public Task<int?> GetChatterCountAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync<int?>(async token =>
+	{
+		return CallAsync<int?>(async token =>
 			{
 				var response = await _api.Helix.Chat.GetChattersAsync(broadcasterId,
 					broadcasterId,
-					first: 1,
+					1,
 					accessToken: token);
 
 				return response?.Total;
 			},
 			cancellationToken);
+	}
 
 	public Task<TwitchSubscriberInfo> GetSubscriberInfoAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				var response = await _api.Helix.Subscriptions.GetBroadcasterSubscriptionsAsync(broadcasterId,
-					first: 1,
+					1,
 					accessToken: token);
 
 				return new TwitchSubscriberInfo(response?.Total, response?.Points);
 			},
 			cancellationToken);
+	}
 
 	public Task<TwitchChatSettings> GetChatSettingsAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				var response = await _api.Helix.Chat.GetChatSettingsAsync(broadcasterId, broadcasterId, token);
 				var settings = response?.Data?.FirstOrDefault();
@@ -152,50 +169,59 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 					settings?.UniqueChatMode);
 			},
 			cancellationToken);
+	}
 
 	public Task<IReadOnlyList<TwitchCustomReward>> GetCustomRewardsAsync(
 		string broadcasterId,
 		CancellationToken cancellationToken)
-		=> CallAsync<IReadOnlyList<TwitchCustomReward>>(async token =>
+	{
+		return CallAsync<IReadOnlyList<TwitchCustomReward>>(async token =>
 			{
 				var response = await _api.Helix.ChannelPoints.GetCustomRewardAsync(broadcasterId, accessToken: token);
 
 				return response?.Data?.Select(reward => new TwitchCustomReward(reward.Id, reward.Title)).ToList() ?? [];
 			},
 			cancellationToken);
+	}
 
 	public Task<IReadOnlyList<TwitchChatBadgeImage>> GetGlobalChatBadgesAsync(CancellationToken cancellationToken)
-		=> CallAsync<IReadOnlyList<TwitchChatBadgeImage>>(async token =>
+	{
+		return CallAsync<IReadOnlyList<TwitchChatBadgeImage>>(async token =>
 			{
 				var response = await _api.Helix.Chat.GetGlobalChatBadgesAsync(token);
 
 				return ToBadgeImages(response?.EmoteSet);
 			},
 			cancellationToken);
+	}
 
 	public Task<IReadOnlyList<TwitchChatBadgeImage>> GetChannelChatBadgesAsync(
 		string broadcasterId,
 		CancellationToken cancellationToken)
-		=> CallAsync<IReadOnlyList<TwitchChatBadgeImage>>(async token =>
+	{
+		return CallAsync<IReadOnlyList<TwitchChatBadgeImage>>(async token =>
 			{
 				var response = await _api.Helix.Chat.GetChannelChatBadgesAsync(broadcasterId, token);
 
 				return ToBadgeImages(response?.EmoteSet);
 			},
 			cancellationToken);
+	}
 
 	public Task<TwitchUserInfo?> GetUserAsync(string? userId, string? login, CancellationToken cancellationToken)
-		=> CallAsync<TwitchUserInfo?>(async token =>
+	{
+		return CallAsync<TwitchUserInfo?>(async token =>
 			{
-				var response = await _api.Helix.Users.GetUsersAsync(ids: userId is null ? null : [userId],
-					logins: login is null ? null : [login],
-					accessToken: token);
+				var response = await _api.Helix.Users.GetUsersAsync(userId is null ? null : [userId],
+					login is null ? null : [login],
+					token);
 
 				var user = response?.Users?.FirstOrDefault();
 
 				return user is null ? null : new TwitchUserInfo(user.Id, user.Login, user.DisplayName);
 			},
 			cancellationToken);
+	}
 
 	public Task ModifyChannelAsync(
 		string broadcasterId,
@@ -203,7 +229,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		string? categoryId,
 		IReadOnlyList<string>? tags,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				var request = new ModifyChannelInformationRequest();
 				if (!string.IsNullOrEmpty(title))
@@ -225,9 +252,11 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task<string?> ResolveCategoryIdAsync(string name, CancellationToken cancellationToken)
-		=> CallAsync<string?>(async token =>
+	{
+		return CallAsync<string?>(async token =>
 			{
 				var exact = await _api.Helix.Games.GetGamesAsync(gameNames: [name], accessToken: token);
 				var match = exact?.Data?.FirstOrDefault();
@@ -240,6 +269,7 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return search?.Games?.FirstOrDefault()?.Id;
 			},
 			cancellationToken);
+	}
 
 	public Task SendChatMessageAsync(
 		string broadcasterId,
@@ -247,7 +277,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		string message,
 		string? replyToMessageId,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Chat.SendChatMessage(new SendChatMessageRequest
 					{
@@ -261,6 +292,7 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task SendAnnouncementAsync(
 		string broadcasterId,
@@ -268,7 +300,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		string message,
 		string color,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Chat.SendChatAnnouncementAsync(broadcasterId,
 					moderatorId,
@@ -279,25 +312,29 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task SendShoutoutAsync(
 		string fromBroadcasterId,
 		string toBroadcasterId,
 		string moderatorId,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Chat.SendShoutoutAsync(fromBroadcasterId, toBroadcasterId, moderatorId, token);
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task DeleteChatMessagesAsync(
 		string broadcasterId,
 		string moderatorId,
 		string? messageId,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Moderation.DeleteChatMessagesAsync(broadcasterId,
 					moderatorId,
@@ -307,6 +344,7 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task SetChatModeAsync(
 		string broadcasterId,
@@ -315,7 +353,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		bool enabled,
 		int? duration,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				var settings = new ChatSettingsRequest();
 				switch (mode)
@@ -358,9 +397,11 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task StartCommercialAsync(string broadcasterId, int lengthSeconds, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Channels.StartCommercialAsync(
 					new StartCommercialRequest { BroadcasterId = broadcasterId, Length = lengthSeconds },
@@ -369,40 +410,48 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task SnoozeNextAdAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Channels.SnoozeNextAdAsync(broadcasterId, token);
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task StartRaidAsync(string fromBroadcasterId, string toBroadcasterId, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Raids.StartRaidAsync(fromBroadcasterId, toBroadcasterId, token);
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task CancelRaidAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Raids.CancelRaidAsync(broadcasterId, token);
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task<TwitchCreatedClip?> CreateClipAsync(
 		string broadcasterId,
 		bool hasDelay,
 		CancellationToken cancellationToken)
-		=> CallAsync<TwitchCreatedClip?>(async token =>
+	{
+		return CallAsync<TwitchCreatedClip?>(async token =>
 			{
 				var url = string.Create(CultureInfo.InvariantCulture,
-					$"https://api.twitch.tv/helix/clips?broadcaster_id={Uri.EscapeDataString(broadcasterId)}" +
-					$"&has_delay={(hasDelay ? "true" : "false")}");
+					$"https://api.twitch.tv/helix/clips?broadcaster_id={Uri.EscapeDataString(broadcasterId)}"
+					+ $"&has_delay={(hasDelay ? "true" : "false")}");
 
 				var (_, body) = await _http.GeneralRequestAsync(url,
 					"POST",
@@ -422,20 +471,24 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 					clip.GetProperty("edit_url").GetString() ?? string.Empty);
 			},
 			cancellationToken);
+	}
 
 	public Task<bool> ClipExistsAsync(string clipId, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
-				var response = await _api.Helix.Clips.GetClipsAsync(clipIds: [clipId], accessToken: token);
+				var response = await _api.Helix.Clips.GetClipsAsync([clipId], accessToken: token);
 				return response?.Clips?.Any(clip => string.Equals(clip.Id, clipId, StringComparison.Ordinal)) ?? false;
 			},
 			cancellationToken);
+	}
 
 	public Task CreateStreamMarkerAsync(
 		string broadcasterId,
 		string? description,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Streams.CreateStreamMarkerAsync(
 					new CreateStreamMarkerRequest { UserId = broadcasterId, Description = description },
@@ -444,6 +497,7 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task BanUserAsync(
 		string broadcasterId,
@@ -452,7 +506,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		int? durationSeconds,
 		string? reason,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				var request = new BanUserRequest { UserId = targetUserId, Reason = reason ?? string.Empty };
 
@@ -465,18 +520,21 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task UnbanUserAsync(
 		string broadcasterId,
 		string moderatorId,
 		string targetUserId,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Moderation.UnbanUserAsync(broadcasterId, moderatorId, targetUserId, token);
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task CreatePollAsync(
 		string broadcasterId,
@@ -485,7 +543,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		int durationSeconds,
 		int? channelPointsPerVote,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				var request = new CreatePollRequest
 				{
@@ -505,9 +564,11 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task<TwitchActiveEvent?> GetActivePollAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync<TwitchActiveEvent?>(async token =>
+	{
+		return CallAsync<TwitchActiveEvent?>(async token =>
 			{
 				var response = await _api.Helix.Polls.GetPollsAsync(broadcasterId, first: 1, accessToken: token);
 				var poll = response?.Data?.FirstOrDefault();
@@ -519,9 +580,11 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 						poll.Choices?.Select(choice => new TwitchNamedOutcome(choice.Id, choice.Title)).ToList() ?? []);
 			},
 			cancellationToken);
+	}
 
 	public Task EndPollAsync(string broadcasterId, string pollId, bool archive, CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Polls.EndPollAsync(broadcasterId,
 					pollId,
@@ -531,6 +594,7 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task CreatePredictionAsync(
 		string broadcasterId,
@@ -538,7 +602,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		IReadOnlyList<string> outcomes,
 		int windowSeconds,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Predictions.CreatePredictionAsync(new CreatePredictionRequest
 					{
@@ -552,9 +617,11 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task<TwitchActiveEvent?> GetActivePredictionAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> CallAsync<TwitchActiveEvent?>(async token =>
+	{
+		return CallAsync<TwitchActiveEvent?>(async token =>
 			{
 				var response
 					= await _api.Helix.Predictions.GetPredictionsAsync(broadcasterId, first: 1, accessToken: token);
@@ -566,10 +633,11 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 					: new TwitchActiveEvent(prediction.Id,
 						prediction.Title,
 						prediction.Outcomes?.Select(outcome => new TwitchNamedOutcome(outcome.Id, outcome.Title))
-							.ToList() ??
-						[]);
+							.ToList()
+						?? []);
 			},
 			cancellationToken);
+	}
 
 	public Task EndPredictionAsync(
 		string broadcasterId,
@@ -577,7 +645,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		string status,
 		string? winningOutcomeId,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.Predictions.EndPredictionAsync(broadcasterId,
 					predictionId,
@@ -588,6 +657,7 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	public Task UpdateRedemptionStatusAsync(
 		string broadcasterId,
@@ -595,7 +665,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		string redemptionId,
 		bool fulfilled,
 		CancellationToken cancellationToken)
-		=> CallAsync(async token =>
+	{
+		return CallAsync(async token =>
 			{
 				await _api.Helix.ChannelPoints.UpdateRedemptionStatusAsync(broadcasterId,
 					rewardId,
@@ -611,6 +682,7 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 				return true;
 			},
 			cancellationToken);
+	}
 
 	private async Task<TwitchSubscriptionResult> CreateSubscriptionAsync(
 		string type,
@@ -658,8 +730,10 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 	}
 
 	private static bool IsDuplicate(Exception exception)
-		=> exception.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase) ||
-			exception.Message.Contains("conflict", StringComparison.OrdinalIgnoreCase);
+	{
+		return exception.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase)
+			|| exception.Message.Contains("conflict", StringComparison.OrdinalIgnoreCase);
+	}
 
 	private async Task<T> CallAsync<T>(Func<string, Task<T>> call, CancellationToken cancellationToken)
 	{
@@ -673,8 +747,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 			{
 				return await call(await _tokens.GetAsync(cancellationToken));
 			}
-			catch (Exception ex) when (!refreshed &&
-				ex is TokenExpiredException or BadTokenException or InvalidCredentialException)
+			catch (Exception ex) when (!refreshed
+				&& ex is TokenExpiredException or BadTokenException or InvalidCredentialException)
 			{
 				refreshed = true;
 				await _tokens.ForceRefreshAsync(cancellationToken);
@@ -692,15 +766,18 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 
 	private static List<TwitchChatBadgeImage> ToBadgeImages(
 		IEnumerable<TwitchLib.Api.Helix.Models.Chat.Badges.BadgeEmoteSet>? sets)
-		=>
+	{
+		return
 		[
 			.. (sets ?? []).SelectMany(set => (set.Versions ?? [])
 				.Where(version => !string.IsNullOrEmpty(version.ImageUrl2x))
 				.Select(version => new TwitchChatBadgeImage(set.SetId, version.Id, version.ImageUrl2x)))
 		];
+	}
 
 	private static AnnouncementColors ParseAnnouncementColor(string color)
-		=> color.ToLowerInvariant() switch
+	{
+		return color.ToLowerInvariant() switch
 		{
 			"blue" => AnnouncementColors.Blue,
 			"green" => AnnouncementColors.Green,
@@ -708,12 +785,15 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 			"purple" => AnnouncementColors.Purple,
 			_ => AnnouncementColors.Primary
 		};
+	}
 
 	private static PredictionEndStatus ParsePredictionStatus(string status)
-		=> status.ToUpperInvariant() switch
+	{
+		return status.ToUpperInvariant() switch
 		{
 			"CANCELED" => PredictionEndStatus.CANCELED,
 			"LOCKED" => PredictionEndStatus.LOCKED,
 			_ => PredictionEndStatus.RESOLVED
 		};
+	}
 }

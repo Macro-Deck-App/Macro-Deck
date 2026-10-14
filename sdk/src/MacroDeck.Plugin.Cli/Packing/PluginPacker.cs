@@ -45,7 +45,8 @@ internal static class PluginPacker
 	/// rather than a plain string, since the default output path (<c>&lt;id&gt;-&lt;version&gt;.macroDeckPlugin</c>)
 	/// is only knowable once the manifest has actually been read.</param>
 	/// <param name="force">Overwrite an existing file at the resolved output path.</param>
-	public static async Task<PluginPackResult> PackAsync(string sourceDirectory,
+	public static async Task<PluginPackResult> PackAsync(
+		string sourceDirectory,
 		string manifestPath,
 		Func<PluginManifest, string> resolveOutputPath,
 		bool force,
@@ -104,8 +105,8 @@ internal static class PluginPacker
 			if (length > PluginArtifactLimits.MaxEntryBytes)
 			{
 				return PluginPackResult.Fail(PluginPackFailureReason.LimitExceeded,
-					$"'{entry.RelativePath}' is {length} bytes, over the {PluginArtifactLimits.MaxEntryBytes}-byte " +
-					"per-entry limit.");
+					$"'{entry.RelativePath}' is {length} bytes, over the {PluginArtifactLimits.MaxEntryBytes}-byte "
+					+ "per-entry limit.");
 			}
 
 			totalUncompressedBytes += length;
@@ -139,8 +140,8 @@ internal static class PluginPacker
 		if (manifestJson.Length > PluginArtifactLimits.MaxManifestBytes)
 		{
 			return PluginPackResult.Fail(PluginPackFailureReason.LimitExceeded,
-				$"The recomputed manifest is {manifestJson.Length} bytes, over the " +
-				$"{PluginArtifactLimits.MaxManifestBytes}-byte limit.");
+				$"The recomputed manifest is {manifestJson.Length} bytes, over the "
+				+ $"{PluginArtifactLimits.MaxManifestBytes}-byte limit.");
 		}
 
 		totalUncompressedBytes += manifestJson.Length;
@@ -148,8 +149,8 @@ internal static class PluginPacker
 		if (totalUncompressedBytes > PluginArtifactLimits.MaxTotalUncompressedBytes)
 		{
 			return PluginPackResult.Fail(PluginPackFailureReason.LimitExceeded,
-				$"The archive would total {totalUncompressedBytes} uncompressed bytes, over the " +
-				$"{PluginArtifactLimits.MaxTotalUncompressedBytes}-byte limit.");
+				$"The archive would total {totalUncompressedBytes} uncompressed bytes, over the "
+				+ $"{PluginArtifactLimits.MaxTotalUncompressedBytes}-byte limit.");
 		}
 
 		// Checked before a byte is written, consistent with this type's own invariant (see remarks) - a
@@ -180,8 +181,8 @@ internal static class PluginPacker
 		if (LooksLikeDebugBuild(sourceRoot))
 		{
 			warnings.Add(new CliDiagnostic("source-looks-like-debug-build",
-				$"'{CliText.DisplayPath(sourceDirectory)}' looks like a Debug build (bin/Debug/...). " +
-				"Pack a Release build for distribution."));
+				$"'{CliText.DisplayPath(sourceDirectory)}' looks like a Debug build (bin/Debug/...). "
+				+ "Pack a Release build for distribution."));
 		}
 
 		var outputDirectory = Path.GetDirectoryName(Path.GetFullPath(outputPath));
@@ -218,8 +219,8 @@ internal static class PluginPacker
 
 		for (var i = 1; i < segments.Length; i++)
 		{
-			if (string.Equals(segments[i], "Debug", StringComparison.OrdinalIgnoreCase) &&
-				string.Equals(segments[i - 1], "bin", StringComparison.OrdinalIgnoreCase))
+			if (string.Equals(segments[i], "Debug", StringComparison.OrdinalIgnoreCase)
+				&& string.Equals(segments[i - 1], "bin", StringComparison.OrdinalIgnoreCase))
 			{
 				return true;
 			}
@@ -228,7 +229,8 @@ internal static class PluginPacker
 		return false;
 	}
 
-	private static async Task WriteArchiveAsync(string outputPath,
+	private static async Task WriteArchiveAsync(
+		string outputPath,
 		byte[] manifestJson,
 		IReadOnlyList<PayloadEntry> payload,
 		CancellationToken cancellationToken)
@@ -269,7 +271,7 @@ internal static class PluginPacker
 				}
 			}
 
-			File.Move(temporaryPath, outputPath, overwrite: true);
+			File.Move(temporaryPath, outputPath, true);
 		}
 		finally
 		{
@@ -288,8 +290,8 @@ internal static class PluginPacker
 
 		foreach (var absolutePath in Directory.EnumerateFiles(sourceRoot, "*", SearchOption.AllDirectories))
 		{
-			if (PluginArtifactFiles.HasArtifactExtension(absolutePath) ||
-				string.Equals(absolutePath,
+			if (PluginArtifactFiles.HasArtifactExtension(absolutePath)
+				|| string.Equals(absolutePath,
 					fullOutputPath,
 					OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase))
 			{
@@ -311,9 +313,9 @@ internal static class PluginPacker
 			if (fileInfo.LinkTarget is not null)
 			{
 				return (entries, PluginPackResult.Fail(PluginPackFailureReason.SourceEntryRejected,
-					$"'{relativePath}' is a symbolic link, which this tool refuses to pack: its target may " +
-					"resolve outside the source tree, and a fresh copy written by CreateEntry carries no mode " +
-					"bits to preserve it as one on the other end anyway."));
+					$"'{relativePath}' is a symbolic link, which this tool refuses to pack: its target may "
+					+ "resolve outside the source tree, and a fresh copy written by CreateEntry carries no mode "
+					+ "bits to preserve it as one on the other end anyway."));
 			}
 
 			// The same path-safety judgement a real archive entry is judged against - illegal characters,

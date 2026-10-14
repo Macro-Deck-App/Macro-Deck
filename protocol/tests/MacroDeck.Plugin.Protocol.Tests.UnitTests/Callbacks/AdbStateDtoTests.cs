@@ -8,9 +8,9 @@ namespace MacroDeck.Plugin.Protocol.Tests.UnitTests.Callbacks;
 public class AdbStateDtoTests
 {
 	private const string PushWithStableId = """
-		{"access":"available","revision":3,"devices":[
-			{"serial":"192.168.1.20:5555","state":"online","model":"Pixel 8","stableId":"3fa9c2d1e0b4a756"}]}
-		""";
+											{"access":"available","revision":3,"devices":[
+												{"serial":"192.168.1.20:5555","state":"online","model":"Pixel 8","stableId":"3fa9c2d1e0b4a756"}]}
+											""";
 
 	[Test]
 	public void A_reader_built_before_the_stable_id_existed_reads_a_push_that_carries_one()
@@ -48,9 +48,9 @@ public class AdbStateDtoTests
 	public void A_reader_built_before_usb_permission_and_the_default_device_reads_such_a_device_as_unauthorized()
 	{
 		const string push = """
-			{"access":"available","revision":4,"defaultDeviceSerial":"A1","adbUnavailable":true,"devices":[
-				{"serial":"A1","state":"unauthorized","lacksUsbPermission":true}]}
-			""";
+							{"access":"available","revision":4,"defaultDeviceSerial":"A1","adbUnavailable":true,"devices":[
+								{"serial":"A1","state":"unauthorized","lacksUsbPermission":true}]}
+							""";
 
 		var state = JsonSerializer.Deserialize<AdbStateBeforeStableId>(push, PluginProtocolJson.Options)!;
 
@@ -84,8 +84,8 @@ public class AdbStateDtoTests
 	public void A_reader_built_before_device_modes_reads_a_device_in_recovery_as_offline()
 	{
 		const string push = """
-			{"access":"available","revision":5,"devices":[{"serial":"A1","state":"offline","mode":"recovery"}]}
-			""";
+							{"access":"available","revision":5,"devices":[{"serial":"A1","state":"offline","mode":"recovery"}]}
+							""";
 
 		var older = JsonSerializer.Deserialize<AdbStateBeforeStableId>(push, PluginProtocolJson.Options)!;
 		var current = JsonSerializer.Deserialize<AdbStateDto>(push, PluginProtocolJson.Options)!;

@@ -16,7 +16,8 @@ public sealed class StoreArtifactDownloader : IStoreArtifactDownloader
 	private readonly IMacroDeckPaths _paths;
 	private readonly TimeProvider _timeProvider;
 
-	public StoreArtifactDownloader(IHttpClientFactory httpClientFactory,
+	public StoreArtifactDownloader(
+		IHttpClientFactory httpClientFactory,
 		StoreRegistryOptions options,
 		IMacroDeckPaths paths,
 		TimeProvider timeProvider)
@@ -27,7 +28,8 @@ public sealed class StoreArtifactDownloader : IStoreArtifactDownloader
 		_timeProvider = timeProvider;
 	}
 
-	public async Task<StoreArtifactDownloadResult> Download(Uri artifactUrl,
+	public async Task<StoreArtifactDownloadResult> Download(
+		Uri artifactUrl,
 		string expectedSha256Hex,
 		long expectedSize,
 		Guid operationId,
@@ -47,8 +49,8 @@ public sealed class StoreArtifactDownloader : IStoreArtifactDownloader
 		if (expectedSize > _options.MaxArtifactBytes)
 		{
 			return StoreArtifactDownloadResult.Fail(StoreArtifactDownloadError.ArtifactTooLarge,
-				$"'{artifactUrl}' declares {expectedSize} bytes, above the {_options.MaxArtifactBytes} byte " +
-				"limit.");
+				$"'{artifactUrl}' declares {expectedSize} bytes, above the {_options.MaxArtifactBytes} byte "
+				+ "limit.");
 		}
 
 		var directory = Path.Combine(_paths.StoreStagingDirectory, operationId.ToString("N"));
@@ -90,7 +92,8 @@ public sealed class StoreArtifactDownloader : IStoreArtifactDownloader
 		}
 	}
 
-	private async Task<StoreArtifactDownloadResult> CopyBounded(HttpResponseMessage response,
+	private async Task<StoreArtifactDownloadResult> CopyBounded(
+		HttpResponseMessage response,
 		Uri artifactUrl,
 		string expectedSha256Hex,
 		long expectedSize,
@@ -124,9 +127,9 @@ public sealed class StoreArtifactDownloader : IStoreArtifactDownloader
 				hash.AppendData(chunk, 0, read);
 				await fileStream.WriteAsync(chunk.AsMemory(0, read), cancellationToken);
 
-				if (progress is not null &&
-					(total - lastReportedBytes >= ProgressByteInterval ||
-						_timeProvider.GetElapsedTime(lastReportedAt) >= _progressTimeInterval))
+				if (progress is not null
+					&& (total - lastReportedBytes >= ProgressByteInterval
+						|| _timeProvider.GetElapsedTime(lastReportedAt) >= _progressTimeInterval))
 				{
 					progress.Report(new StoreArtifactDownloadProgress(total, expectedSize));
 					lastReportedBytes = total;

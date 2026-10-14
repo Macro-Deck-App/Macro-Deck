@@ -10,20 +10,24 @@ public interface IStorePlatformClient
 		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken = default);
 
-	Task<StorePlatformResult<StorePlatformRating>> GetRating(string packageId,
+	Task<StorePlatformResult<StorePlatformRating>> GetRating(
+		string packageId,
 		CancellationToken cancellationToken = default);
 
-	Task<StorePlatformResult<StorePlatformReviewPage>> GetReviews(string packageId,
+	Task<StorePlatformResult<StorePlatformReviewPage>> GetReviews(
+		string packageId,
 		int page,
 		int pageSize,
 		StorePlatformReviewSort sort,
 		int? rating,
 		CancellationToken cancellationToken = default);
 
-	Task<StorePlatformResult<StorePlatformOwnReview>> GetOwnReview(string packageId,
+	Task<StorePlatformResult<StorePlatformOwnReview>> GetOwnReview(
+		string packageId,
 		CancellationToken cancellationToken = default);
 
-	Task<StorePlatformResult<StorePlatformOwnReview>> PutOwnReview(string packageId,
+	Task<StorePlatformResult<StorePlatformOwnReview>> PutOwnReview(
+		string packageId,
 		int rating,
 		string? title,
 		string? body,
@@ -31,12 +35,14 @@ public interface IStorePlatformClient
 
 	Task<StorePlatformResult<bool>> DeleteOwnReview(string packageId, CancellationToken cancellationToken = default);
 
-	Task<StorePlatformResult<bool>> ReportPackage(string packageId,
+	Task<StorePlatformResult<bool>> ReportPackage(
+		string packageId,
 		string category,
 		string? detail,
 		CancellationToken cancellationToken = default);
 
-	Task<StorePlatformResult<bool>> ReportReview(string packageId,
+	Task<StorePlatformResult<bool>> ReportReview(
+		string packageId,
 		Guid reviewId,
 		string category,
 		string? detail,
@@ -52,7 +58,8 @@ public interface IStorePlatformClient
 
 	Task<StorePlatformResult<IReadOnlyList<StorePlatformTest>>> GetTests(CancellationToken cancellationToken = default);
 
-	Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(string packageId,
+	Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(
+		string packageId,
 		Guid buildId,
 		CancellationToken cancellationToken = default);
 

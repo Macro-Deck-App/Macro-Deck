@@ -40,11 +40,14 @@ internal sealed class WeatherDetailsActionDefinition : IDynamicOptionsActionDefi
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(InstanceParameter,
-			label: AppStrings.Integrations.Weather.Details.LocationLabel(),
+			AppStrings.Integrations.Weather.Details.LocationLabel(),
 			required: false)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor();
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor();
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -53,8 +56,9 @@ internal sealed class WeatherDetailsActionDefinition : IDynamicOptionsActionDefi
 		ArgumentNullException.ThrowIfNull(context);
 
 		var options = _instances()
-			.Where(instance => context.Filter is null ||
-				instance.DisplayName.Contains(context.Filter, StringComparison.OrdinalIgnoreCase))
+			.Where(instance
+				=> context.Filter is null
+				|| instance.DisplayName.Contains(context.Filter, StringComparison.OrdinalIgnoreCase))
 			// The stored value is resolved through the host's weather registry, which keys stations by
 			// their qualified id - offering the bare local id here yields a value nothing can look up,
 			// and the dialog falls back to its no-location empty state on a location the user did pick.

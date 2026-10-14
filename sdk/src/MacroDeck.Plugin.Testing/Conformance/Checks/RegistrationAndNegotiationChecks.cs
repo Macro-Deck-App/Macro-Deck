@@ -25,7 +25,8 @@ internal sealed class HandshakeAssertsGrantedValuesCheck() : ConformanceCheckBas
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var hellos = context.Host.Messages.OfType(MessageTypes.SessionHello);
@@ -79,7 +80,8 @@ internal sealed class HandshakeCompletesWithinTimeoutCheck() : ConformanceCheckB
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var hellos = context.Host.Messages.OfType(MessageTypes.SessionHello);
@@ -110,7 +112,8 @@ internal sealed class IncompatibleProtocolVersionIsFatalCheck() : ConformanceChe
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var incompatibleVersion = ProtocolVersions.Current + 1000;
@@ -139,8 +142,8 @@ internal sealed class IncompatibleProtocolVersionIsFatalCheck() : ConformanceChe
 					ConformanceCheckSupport.Observe("outcome", "exited cleanly before serving")
 				])
 				: ConformanceCheckResult.Fail(
-					"A subject that cannot speak the host's protocol version stops cleanly, so a supervisor " +
-					"reads it as a deliberate exit rather than a crash to restart.",
+					"A subject that cannot speak the host's protocol version stops cleanly, so a supervisor "
+					+ "reads it as a deliberate exit rather than a crash to restart.",
 					$"The subject exited with code {exitCode?.ToString(CultureInfo.InvariantCulture) ?? "(unknown)"}.");
 		}
 
@@ -153,11 +156,11 @@ internal sealed class IncompatibleProtocolVersionIsFatalCheck() : ConformanceChe
 			if (!IsStopped(report))
 			{
 				return ConformanceCheckResult.Fail(
-					"Connecting to a host whose only advertised protocol version this subject cannot speak eventually " +
-					"stops retrying - diagnostics status becomes 'Faulted', or the process stops serving " +
-					"altogether (a managed subject's documented default on a fatal protocol error).",
-					$"After 10 s, the subject was still live and diagnostics status was " +
-					$"'{report.Status ?? "(unreported)"}' - it still appears to be retrying.");
+					"Connecting to a host whose only advertised protocol version this subject cannot speak eventually "
+					+ "stops retrying - diagnostics status becomes 'Faulted', or the process stops serving "
+					+ "altogether (a managed subject's documented default on a fatal protocol error).",
+					$"After 10 s, the subject was still live and diagnostics status was "
+					+ $"'{report.Status ?? "(unreported)"}' - it still appears to be retrying.");
 			}
 
 			// A further real interval sampled repeatedly, to distinguish "genuinely stopped" from "merely
@@ -197,15 +200,19 @@ internal sealed class IncompatibleProtocolVersionIsFatalCheck() : ConformanceChe
 	/// stays up and simply reports <c>Faulted</c> forever instead.
 	/// </summary>
 	private static bool IsStopped(PluginHealthReport report)
-		=> !report.Live ||
-			string.Equals(report.Status, "Faulted", StringComparison.Ordinal) ||
-			string.Equals(report.Status, "Stopped", StringComparison.Ordinal);
+	{
+		return !report.Live
+			|| string.Equals(report.Status, "Faulted", StringComparison.Ordinal)
+			|| string.Equals(report.Status, "Stopped", StringComparison.Ordinal);
+	}
 
 	/// <summary>The only two statuses that mean an attempt is in flight or scheduled - see <c>PluginConnectionStatus</c>.</summary>
 	private static bool IsRetrying(PluginHealthReport report)
-		=> report.Live &&
-			(string.Equals(report.Status, "Connecting", StringComparison.Ordinal) ||
-				string.Equals(report.Status, "Reconnecting", StringComparison.Ordinal));
+	{
+		return report.Live
+			&& (string.Equals(report.Status, "Connecting", StringComparison.Ordinal)
+				|| string.Equals(report.Status, "Reconnecting", StringComparison.Ordinal));
+	}
 }
 
 /// <summary>
@@ -219,14 +226,15 @@ internal sealed class SelfRegistrationPersistsAcrossRestartsCheck() : Conformanc
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.Plugin is not InProcessPlugin)
 		{
 			return ConformanceCheckResult.Skip(
-				"This subject does not connect as a self-registering in-process plugin; state-directory sharing " +
-				"across two starts is not observable for an executable or artifact subject through this suite.");
+				"This subject does not connect as a self-registering in-process plugin; state-directory sharing "
+				+ "across two starts is not observable for an executable or artifact subject through this suite.");
 		}
 
 		using var stateDirectory = new TempStateDirectory();
@@ -261,8 +269,8 @@ internal sealed class SelfRegistrationPersistsAcrossRestartsCheck() : Conformanc
 				ConformanceCheckSupport.Observe("registrations across two starts", host.Registrations.Count)
 			])
 			: ConformanceCheckResult.Fail(
-				"Exactly one registration is recorded across two starts sharing the same state directory - the " +
-				"second reuses the credentials the first one persisted.",
+				"Exactly one registration is recorded across two starts sharing the same state directory - the "
+				+ "second reuses the credentials the first one persisted.",
 				$"{host.Registrations.Count} registrations were recorded.");
 	}
 }
@@ -276,21 +284,22 @@ internal sealed class SelfRegistrationPersistsAcrossRestartsCheck() : Conformanc
 /// credential's own remarks on why an automated harness must never wait on a human by default).
 /// </summary>
 internal sealed class InteractivePairingObtainsAndPersistsCredentialsCheck() : ConformanceCheckBase("MDC0206",
-	"A self-registering subject with no enrollment token pairs interactively - proving possession of its " +
-	"own verifier rather than sending it twice - and reuses the persisted credential on a later start " +
-	"without pairing again",
+	"A self-registering subject with no enrollment token pairs interactively - proving possession of its "
+	+ "own verifier rather than sending it twice - and reuses the persisted credential on a later start "
+	+ "without pairing again",
 	ConformanceCategory.RegistrationAndNegotiation,
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.Plugin is not InProcessPlugin)
 		{
 			return ConformanceCheckResult.Skip(
-				"This subject does not connect as a self-registering in-process plugin; interactive pairing is " +
-				"not observable for an executable or artifact subject through this suite.");
+				"This subject does not connect as a self-registering in-process plugin; interactive pairing is "
+				+ "not observable for an executable or artifact subject through this suite.");
 		}
 
 		using var stateDirectory = new TempStateDirectory();
@@ -307,8 +316,8 @@ internal sealed class InteractivePairingObtainsAndPersistsCredentialsCheck() : C
 		catch (PluginTestTimeoutException)
 		{
 			return ConformanceCheckResult.Fail(
-				"A self-registering subject with no enrollment token, and pairing enabled and supported by the " +
-				"host, obtains a working session through interactive pairing.",
+				"A self-registering subject with no enrollment token, and pairing enabled and supported by the "
+				+ "host, obtains a working session through interactive pairing.",
 				"No session completed its handshake before the deadline while pairing was available.");
 		}
 		finally
@@ -329,8 +338,8 @@ internal sealed class InteractivePairingObtainsAndPersistsCredentialsCheck() : C
 		if (string.Equals(challenge, verifier, StringComparison.Ordinal))
 		{
 			return ConformanceCheckResult.Fail(
-				"The code challenge sent when the pairing request is created is not the verifier redeemed with it " +
-				"- sending the same value twice would prove nothing about possession.",
+				"The code challenge sent when the pairing request is created is not the verifier redeemed with it "
+				+ "- sending the same value twice would prove nothing about possession.",
 				"The challenge and the verifier were identical.");
 		}
 
@@ -342,8 +351,8 @@ internal sealed class InteractivePairingObtainsAndPersistsCredentialsCheck() : C
 		if (!string.Equals(expectedChallenge, challenge, StringComparison.Ordinal))
 		{
 			return ConformanceCheckResult.Fail(
-				"base64url(SHA-256(verifier)) equals the challenge sent when the pairing request was created - " +
-				"proof of possession, PKCE-style.",
+				"base64url(SHA-256(verifier)) equals the challenge sent when the pairing request was created - "
+				+ "proof of possession, PKCE-style.",
 				"The redeemed verifier's hash did not match the original challenge.");
 		}
 
@@ -358,8 +367,8 @@ internal sealed class InteractivePairingObtainsAndPersistsCredentialsCheck() : C
 		catch (PluginTestTimeoutException)
 		{
 			return ConformanceCheckResult.Fail(
-				"A second start against the same state directory reuses the credential pairing persisted and " +
-				"reaches a working session without pairing again.",
+				"A second start against the same state directory reuses the credential pairing persisted and "
+				+ "reaches a working session without pairing again.",
 				"No session completed its handshake before the deadline on the second start.");
 		}
 		finally
@@ -370,8 +379,8 @@ internal sealed class InteractivePairingObtainsAndPersistsCredentialsCheck() : C
 		if (host.PairingRequests.Count != 1)
 		{
 			return ConformanceCheckResult.Fail(
-				"A second start against the same state directory reuses the credential pairing already persisted, " +
-				"rather than creating a second pairing request.",
+				"A second start against the same state directory reuses the credential pairing already persisted, "
+				+ "rather than creating a second pairing request.",
 				$"{host.PairingRequests.Count} pairing requests were recorded across two starts.");
 		}
 
@@ -389,7 +398,8 @@ internal sealed class ManagedSubjectNeverRegistersCheck() : ConformanceCheckBase
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.Plugin is not ExternalPlugin)

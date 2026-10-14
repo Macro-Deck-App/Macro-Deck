@@ -143,7 +143,10 @@ internal sealed class HostStateCache
 
 	/// <summary>The last pushed list for <paramref name="api"/>, or empty when nothing has been pushed
 	/// (or the host pushed nothing) yet.</summary>
-	public IReadOnlyList<T> GetList<T>(string api) => Get<List<T>>(api) ?? [];
+	public IReadOnlyList<T> GetList<T>(string api)
+	{
+		return Get<List<T>>(api) ?? [];
+	}
 
 	/// <summary>
 	/// The last pushed widgets list, reverse-mapped from whichever wire shape the negotiated protocol
@@ -178,7 +181,8 @@ internal sealed class HostStateCache
 		};
 
 	private static WidgetTargetInfo ToWidgetTargetInfo(WidgetTargetInfoDtoV2 dto)
-		=> new()
+	{
+		return new WidgetTargetInfo
 		{
 			Id = dto.Id,
 			Label = dto.Label,
@@ -188,6 +192,7 @@ internal sealed class HostStateCache
 			CurrentStateId = dto.CurrentStateId,
 			AppearanceProperties = [.. dto.AppearanceProperties.Select(property => (WidgetAppearanceProperty)property)]
 		};
+	}
 
 	/// <summary>The last pushed state for <paramref name="api"/>, deserialized as <typeparamref name="T"/>,
 	/// or the type's default when nothing has been pushed yet - used by an API whose pushed shape is not

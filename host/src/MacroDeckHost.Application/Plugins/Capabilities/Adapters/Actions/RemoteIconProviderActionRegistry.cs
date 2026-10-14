@@ -42,12 +42,15 @@ public sealed class RemoteIconProviderActionRegistry
 	}
 
 	public IReadOnlyList<string> GetIconProviderActionIds(string pluginId)
-		=> _snapshots.Has(pluginId)
-			? _snapshots.GetSnapshot(pluginId).Actions
+	{
+		return _snapshots.Has(pluginId)
+			? _snapshots.GetSnapshot(pluginId)
+				.Actions
 				.Where(action => action.ProvidesIcon)
 				.Select(action => action.LocalId)
 				.ToList()
 			: [];
+	}
 
 	public RemoteIconProviderAction? Resolve(string pluginId, string localId)
 	{
@@ -56,7 +59,8 @@ public sealed class RemoteIconProviderActionRegistry
 			return null;
 		}
 
-		var providesIcon = _snapshots.GetSnapshot(pluginId).Actions
+		var providesIcon = _snapshots.GetSnapshot(pluginId)
+			.Actions
 			.Any(action => string.Equals(action.LocalId, localId, StringComparison.Ordinal) && action.ProvidesIcon);
 
 		if (!providesIcon)
@@ -66,7 +70,11 @@ public sealed class RemoteIconProviderActionRegistry
 
 		return _adapters.GetOrAdd((pluginId, localId),
 			static (key, state) =>
-				new RemoteIconProviderAction(key.PluginId, key.LocalId, state.Invoker, state.AssetCache, state.PluginIcons),
+				new RemoteIconProviderAction(key.PluginId,
+					key.LocalId,
+					state.Invoker,
+					state.AssetCache,
+					state.PluginIcons),
 			(Invoker: _invoker, AssetCache: _assetCache, PluginIcons: _pluginIcons));
 	}
 }

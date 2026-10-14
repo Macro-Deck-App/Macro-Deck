@@ -34,7 +34,8 @@ internal sealed record SteamPlayingState(
 	UiResource? Cover,
 	UiResource? Glyph)
 {
-	public static SteamPlayingState Empty { get; } = new(SteamWidgetStatus.Unavailable, string.Empty, string.Empty, null, null);
+	public static SteamPlayingState Empty { get; }
+		= new(SteamWidgetStatus.Unavailable, string.Empty, string.Empty, null, null);
 }
 
 internal sealed record SteamLauncherTile(string Key, int AppId, string Name, UiResource? Cover);
@@ -47,16 +48,24 @@ internal sealed record SteamLauncherState(
 {
 	public static SteamLauncherState Empty { get; } = new(SteamWidgetStatus.Unavailable, [], null, default);
 
-	public IReadOnlyList<SteamLauncherTile> Row(int skip, int take) => [.. Tiles.Skip(skip).Take(take)];
+	public IReadOnlyList<SteamLauncherTile> Row(int skip, int take)
+	{
+		return [.. Tiles.Skip(skip).Take(take)];
+	}
 
 	public bool Equals(SteamLauncherState? other)
-		=> other is not null &&
-			Status == other.Status &&
-			Equals(Glyph, other.Glyph) &&
-			Failure.Equals(other.Failure) &&
-			Tiles.SequenceEqual(other.Tiles);
+	{
+		return other is not null
+			&& Status == other.Status
+			&& Equals(Glyph, other.Glyph)
+			&& Failure.Equals(other.Failure)
+			&& Tiles.SequenceEqual(other.Tiles);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(Status, Glyph, Failure, Tiles.Count);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(Status, Glyph, Failure, Tiles.Count);
+	}
 }
 
 internal static class SteamWidgetStates
@@ -80,9 +89,13 @@ internal static class SteamWidgetStates
 		if (options.AccountId is { } accountId)
 		{
 			var account = snapshot.Accounts.FirstOrDefault(candidate => candidate.EntryId == accountId);
-			if (account is null || (account.HasWebApi && account.Web != SteamWebState.Connected))
+			if (account is null || account.HasWebApi && account.Web != SteamWebState.Connected)
 			{
-				return new SteamPlayingState(SteamWidgetStatus.AccountUnavailable, string.Empty, string.Empty, null, glyph);
+				return new SteamPlayingState(SteamWidgetStatus.AccountUnavailable,
+					string.Empty,
+					string.Empty,
+					null,
+					glyph);
 			}
 
 			game = account.CurrentGame;
@@ -133,7 +146,8 @@ internal static class SteamWidgetStates
 				return new SteamLauncherState(SteamWidgetStatus.NoGameSelected, [], glyph, failure);
 			}
 
-			var name = snapshot.Games.FirstOrDefault(game => game.AppId == appId)?.Name ?? appId.ToString(CultureInfo.InvariantCulture);
+			var name = snapshot.Games.FirstOrDefault(game => game.AppId == appId)?.Name
+				?? appId.ToString(CultureInfo.InvariantCulture);
 			return new SteamLauncherState(SteamWidgetStatus.Ready, [Tile(appId, name, artwork)], glyph, failure);
 		}
 
@@ -141,12 +155,13 @@ internal static class SteamWidgetStates
 		{
 			var favorites = options.FavoriteAppIds
 				.Select(appId => Tile(appId,
-					snapshot.Games.FirstOrDefault(game => game.AppId == appId)?.Name ??
-					appId.ToString(CultureInfo.InvariantCulture),
+					snapshot.Games.FirstOrDefault(game => game.AppId == appId)?.Name
+					?? appId.ToString(CultureInfo.InvariantCulture),
 					artwork))
 				.ToList();
 
-			return new SteamLauncherState(favorites.Count == 0 ? SteamWidgetStatus.NoFavorites : SteamWidgetStatus.Ready,
+			return new SteamLauncherState(
+				favorites.Count == 0 ? SteamWidgetStatus.NoFavorites : SteamWidgetStatus.Ready,
 				favorites,
 				glyph,
 				failure);

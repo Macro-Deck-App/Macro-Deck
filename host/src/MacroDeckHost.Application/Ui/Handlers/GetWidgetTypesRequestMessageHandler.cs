@@ -20,8 +20,10 @@ public class GetWidgetTypesRequestMessageHandler
 	public ValueTask<GetWidgetTypesResponse> Handle(
 		GetWidgetTypesRequest request,
 		CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new GetWidgetTypesResponse
+	{
+		return ValueTask.FromResult(new GetWidgetTypesResponse
 		{
 			Types = WidgetTypeDtoMapper.MapToDto(_widgetTypes.All, _integrations)
 		});
+	}
 }

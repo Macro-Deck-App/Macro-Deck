@@ -74,7 +74,9 @@ public class MarkUserNotificationReadRequestMessageHandler
 	public ValueTask<MarkUserNotificationReadResponse> Handle(
 		MarkUserNotificationReadRequest request,
 		CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new MarkUserNotificationReadResponse { Success = _store.MarkRead(request.Id) });
+	{
+		return ValueTask.FromResult(new MarkUserNotificationReadResponse { Success = _store.MarkRead(request.Id) });
+	}
 }
 
 public class MarkAllUserNotificationsReadRequestMessageHandler
@@ -90,5 +92,7 @@ public class MarkAllUserNotificationsReadRequestMessageHandler
 	public ValueTask<MarkAllUserNotificationsReadResponse> Handle(
 		MarkAllUserNotificationsReadRequest request,
 		CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new MarkAllUserNotificationsReadResponse { Success = _store.MarkAllRead() });
+	{
+		return ValueTask.FromResult(new MarkAllUserNotificationsReadResponse { Success = _store.MarkAllRead() });
+	}
 }

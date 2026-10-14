@@ -2,7 +2,10 @@ namespace MacroDeckHost.Application.Variables;
 
 public sealed class VariableChangedEventArgs : EventArgs
 {
-	public VariableChangedEventArgs(string name) => Name = name;
+	public VariableChangedEventArgs(string name)
+	{
+		Name = name;
+	}
 
 	/// <summary>The variable's canonical name, without the public <c>vars.</c> prefix.</summary>
 	public string Name { get; }

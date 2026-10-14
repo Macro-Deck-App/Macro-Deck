@@ -22,8 +22,8 @@ public static class NetworkListenerIdentity
 			return true;
 		}
 
-		return configuredMode != PublicTlsMode.Disabled &&
-			!string.Equals(settings.TlsCertificateFingerprint,
+		return configuredMode != PublicTlsMode.Disabled
+			&& !string.Equals(settings.TlsCertificateFingerprint,
 				settings.ActiveTlsCertificateFingerprint,
 				StringComparison.Ordinal);
 	}

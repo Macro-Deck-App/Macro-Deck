@@ -179,10 +179,12 @@ public sealed record UiIconReference(string Type, string Reference)
 	// Restates PluginBundledIconPacks.IsValidKey from the packaging assembly, which the UI model must not
 	// reference.
 	private static bool IsBundledPackKey(string? key)
-		=> key is { Length: > 0 and <= 64 } &&
-			key.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-') &&
-			key[0] != '-' &&
-			key[^1] != '-';
+	{
+		return key is { Length: > 0 and <= 64 }
+			&& key.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-')
+			&& key[0] != '-'
+			&& key[^1] != '-';
+	}
 }
 
 /// <summary>

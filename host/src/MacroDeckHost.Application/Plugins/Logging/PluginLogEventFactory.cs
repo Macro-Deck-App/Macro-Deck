@@ -35,7 +35,7 @@ public static class PluginLogEventFactory
 		SessionIdPropertyName,
 		PluginVersionPropertyName,
 		ProcessIdPropertyName,
-		MessageTemplatePropertyName,
+		MessageTemplatePropertyName
 	};
 
 	public static LogEvent Create(
@@ -108,7 +108,8 @@ public static class PluginLogEventFactory
 	}
 
 	public static LogEventLevel MapLevel(string? level)
-		=> level switch
+	{
+		return level switch
 		{
 			LogLevels.Verbose => LogEventLevel.Verbose,
 			LogLevels.Debug => LogEventLevel.Debug,
@@ -118,6 +119,7 @@ public static class PluginLogEventFactory
 			LogLevels.Fatal => LogEventLevel.Fatal,
 			_ => LogEventLevel.Information
 		};
+	}
 
 	private static List<LogEventProperty> BuildProperties(IReadOnlyDictionary<string, string>? properties)
 	{
@@ -195,7 +197,9 @@ public static class PluginLogEventFactory
 	}
 
 	private static string Truncate(string? value, int maxLength)
-		=> value is null ? string.Empty : value.Length <= maxLength ? value : value[..maxLength];
+	{
+		return value is null ? string.Empty : value.Length <= maxLength ? value : value[..maxLength];
+	}
 }
 
 public sealed class ForwardedPluginException : Exception
@@ -217,7 +221,12 @@ public sealed class ForwardedPluginException : Exception
 	}
 
 	internal static ForwardedPluginException FromComposedText(string composedText)
-		=> new(composedText) { _composedText = composedText };
+	{
+		return new ForwardedPluginException(composedText) { _composedText = composedText };
+	}
 
-	public override string ToString() => _composedText ?? base.ToString();
+	public override string ToString()
+	{
+		return _composedText ?? base.ToString();
+	}
 }

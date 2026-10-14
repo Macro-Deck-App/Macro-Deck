@@ -34,10 +34,15 @@ public sealed record UiTimeReference
 	public string? Zone { get; init; }
 
 	/// <summary>The current instant in the reader's own zone.</summary>
-	public static UiTimeReference Now() => new();
+	public static UiTimeReference Now()
+	{
+		return new UiTimeReference();
+	}
 
 	/// <summary>The current instant in <paramref name="zone" />, or in the reader's own zone when it is
 	/// null or empty.</summary>
 	public static UiTimeReference InZone(string? zone)
-		=> string.IsNullOrWhiteSpace(zone) ? new UiTimeReference() : new UiTimeReference { Zone = zone };
+	{
+		return string.IsNullOrWhiteSpace(zone) ? new UiTimeReference() : new UiTimeReference { Zone = zone };
+	}
 }

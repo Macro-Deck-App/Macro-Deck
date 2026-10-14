@@ -17,10 +17,15 @@ public readonly record struct WidgetIconReference(string Type, string Reference)
 	public string? Appearance { get; init; }
 
 	public bool SameIcon(WidgetIconReference other)
-		=> string.Equals(Type, other.Type, StringComparison.Ordinal) &&
-			string.Equals(Reference, other.Reference, StringComparison.Ordinal);
+	{
+		return string.Equals(Type, other.Type, StringComparison.Ordinal)
+			&& string.Equals(Reference, other.Reference, StringComparison.Ordinal);
+	}
 
-	public static WidgetIconReference IconPack(string reference) => new(IconPackType, reference);
+	public static WidgetIconReference IconPack(string reference)
+	{
+		return new WidgetIconReference(IconPackType, reference);
+	}
 
 	/// <summary>
 	/// Reads the typed <c>icon</c> shape first, falling back to a legacy bare <c>iconId</c> string -
@@ -29,19 +34,19 @@ public readonly record struct WidgetIconReference(string Type, string Reference)
 	/// </summary>
 	public static WidgetIconReference? Read(JsonNode? icon, string? legacyIconId)
 	{
-		if (icon is JsonObject iconObject &&
-			iconObject["type"] is JsonValue typeValue &&
-			typeValue.TryGetValue<string>(out var type) &&
-			!string.IsNullOrEmpty(type) &&
-			iconObject["reference"] is JsonValue referenceValue &&
-			referenceValue.TryGetValue<string>(out var reference) &&
-			!string.IsNullOrEmpty(reference))
+		if (icon is JsonObject iconObject
+			&& iconObject["type"] is JsonValue typeValue
+			&& typeValue.TryGetValue<string>(out var type)
+			&& !string.IsNullOrEmpty(type)
+			&& iconObject["reference"] is JsonValue referenceValue
+			&& referenceValue.TryGetValue<string>(out var reference)
+			&& !string.IsNullOrEmpty(reference))
 		{
 			return new WidgetIconReference(type, reference)
 			{
-				Appearance = iconObject["appearance"] is JsonValue appearanceValue &&
-					appearanceValue.TryGetValue<string>(out var appearance) &&
-					!string.IsNullOrEmpty(appearance)
+				Appearance = iconObject["appearance"] is JsonValue appearanceValue
+					&& appearanceValue.TryGetValue<string>(out var appearance)
+					&& !string.IsNullOrEmpty(appearance)
 						? appearance
 						: null
 			};

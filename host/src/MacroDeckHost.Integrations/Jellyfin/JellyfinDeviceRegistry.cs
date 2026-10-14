@@ -45,7 +45,8 @@ internal sealed class JellyfinDeviceRegistry
 	{
 		lock (_sync)
 		{
-			return _devices.Values.FirstOrDefault(device => string.Equals(device.LocalId, localId, StringComparison.Ordinal));
+			return _devices.Values.FirstOrDefault(device
+				=> string.Equals(device.LocalId, localId, StringComparison.Ordinal));
 		}
 	}
 

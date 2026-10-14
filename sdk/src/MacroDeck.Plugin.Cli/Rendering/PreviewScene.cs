@@ -4,7 +4,8 @@ namespace MacroDeck.Plugin.Cli.Rendering;
 
 internal static class PreviewScene
 {
-	public static string Build(JsonElement root,
+	public static string Build(
+		JsonElement root,
 		PreviewSize size,
 		PreviewRenderOptions options,
 		IReadOnlyDictionary<string, string> resources,

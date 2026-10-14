@@ -17,8 +17,8 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class UiInvalidationContractTests : UiContractFixture
 {
 	private const string TreeAtThree =
-		"{\"revision\":3,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"shared\",\"attributes\":{}}," +
-		"\"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[]}}";
+		"{\"revision\":3,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"shared\",\"attributes\":{}},"
+		+ "\"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[]}}";
 
 	[Test]
 	public async Task Killing_an_out_of_process_plugin_mid_session_invalidates_every_client_once_and_immediately()
@@ -49,8 +49,9 @@ internal sealed class UiInvalidationContractTests : UiContractFixture
 
 		var first = Attach(sessionId, "c1");
 		var second = Attach(sessionId, "c2");
-		await WaitForUiAsync(() => UiTransport.MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count >= 1 &&
-				UiTransport.MessagesFor<UiSessionTreeUpdatedEvent>("c2").Count >= 1,
+		await WaitForUiAsync(()
+				=> UiTransport.MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count >= 1
+				&& UiTransport.MessagesFor<UiSessionTreeUpdatedEvent>("c2").Count >= 1,
 			"Both clients never received a tree, so nothing proves they were live.");
 
 		// The plugin will never answer this one.
@@ -64,8 +65,9 @@ internal sealed class UiInvalidationContractTests : UiContractFixture
 		// Exactly what the runtime does: the connection goes away and the session registry says so.
 		Disconnect();
 
-		await WaitForUiAsync(() => UiTransport.MessagesFor<UiSessionInvalidatedEvent>("c1").Count == 1 &&
-				UiTransport.MessagesFor<UiSessionInvalidatedEvent>("c2").Count == 1,
+		await WaitForUiAsync(()
+				=> UiTransport.MessagesFor<UiSessionInvalidatedEvent>("c1").Count == 1
+				&& UiTransport.MessagesFor<UiSessionInvalidatedEvent>("c2").Count == 1,
 			"A dead plugin left its clients rendering a tree nothing will ever update again.");
 		await SettleAsync();
 
@@ -148,8 +150,9 @@ internal sealed class UiInvalidationContractTests : UiContractFixture
 		var icon = new byte[64];
 		Random.Shared.NextBytes(icon);
 		await UploadAssetAsync(MacroDeck.Plugin.Protocol.Assets.AssetKinds.Icon, "image/png", icon);
-		await WaitForUiAsync(() => CurrentAdapter() is MacroDeck.Sdk.IIntegrationIconProvider current &&
-				!ReferenceEquals(current, before),
+		await WaitForUiAsync(()
+				=> CurrentAdapter() is MacroDeck.Sdk.IIntegrationIconProvider current
+				&& !ReferenceEquals(current, before),
 			"The host never swapped in the adapter carrying the new icon.");
 		await SettleAsync();
 
@@ -201,6 +204,8 @@ internal sealed class UiInvalidationContractTests : UiContractFixture
 	}
 
 	private MacroDeck.Sdk.IIntegration? CurrentAdapter()
-		=> IntegrationRegistry.Integrations
+	{
+		return IntegrationRegistry.Integrations
 			.SingleOrDefault(candidate => string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
+	}
 }

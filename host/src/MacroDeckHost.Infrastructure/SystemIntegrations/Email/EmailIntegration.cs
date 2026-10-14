@@ -56,7 +56,10 @@ public sealed class EmailIntegration : IIntegration, ISystemIntegration, IWidget
 
 	public IReadOnlyList<VariableDefinition> Variables => _variables.Definitions;
 
-	public void UseEmailServices(EmailHostServices services) => _services = services;
+	public void UseEmailServices(EmailHostServices services)
+	{
+		_services = services;
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -86,9 +89,11 @@ public sealed class EmailIntegration : IIntegration, ISystemIntegration, IWidget
 	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(_services is { } services
+	{
+		return ValueTask.FromResult(_services is { } services
 			? EmailInboxVariables.Read(services.Inboxes.Snapshot, _variables, localId)
 			: VariableReading.Unavailable);
+	}
 
 	public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
 	{
@@ -100,19 +105,24 @@ public sealed class EmailIntegration : IIntegration, ISystemIntegration, IWidget
 		}
 	}
 
-	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes() => [InboxWidgetType()];
+	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
+	{
+		return [InboxWidgetType()];
+	}
 
 	private static WidgetTypeDescriptor InboxWidgetType()
-		=> new(EmailWidgetTypes.LocalId,
+	{
+		return new WidgetTypeDescriptor(EmailWidgetTypes.LocalId,
 			AppStrings.Widgets.EmailInbox.Name(),
 			AppStrings.Widgets.EmailInbox.Description(),
-			DefaultData: DefaultData,
-			DataSchema: DataSchema,
-			HasConfiguration: true)
+			DefaultData,
+			DataSchema,
+			true)
 		{
 			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
-			SupportsFlows = true,
+			SupportsFlows = true
 		};
+	}
 
 	private void Refresh()
 	{

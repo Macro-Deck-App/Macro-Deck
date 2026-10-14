@@ -23,7 +23,8 @@ public class GetLogsRequest
 	public DateTimeOffset? To { get; set; }
 
 	public LogQuery ToQuery()
-		=> new()
+	{
+		return new LogQuery
 		{
 			Levels = Levels,
 			Source = Source,
@@ -33,4 +34,5 @@ public class GetLogsRequest
 			From = From,
 			To = To
 		};
+	}
 }

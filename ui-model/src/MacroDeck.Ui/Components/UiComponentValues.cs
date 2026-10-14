@@ -68,7 +68,7 @@ public static class UiComponentModifiers
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
 		Background, Radius, BorderWidth, BorderColor, BorderLine, AccessibilityLabel, AccessibilityHint,
-		Disabled,
+		Disabled
 	];
 
 	/// <summary>The opacity a reader multiplies a node's own opacity by when that node's own
@@ -388,7 +388,7 @@ public static class UiTimeFormats
 	[
 		Time, Date, ZoneName, ZoneOffset,
 		Time12Hour, Time12HourPadded, Time24Hour, Time24HourUnpadded,
-		DateDayFirst, DateMonthFirst, DateIso, DateLong,
+		DateDayFirst, DateMonthFirst, DateIso, DateLong
 	];
 }
 
@@ -709,7 +709,7 @@ public static class UiIcons
 		Download, ExternalLink, FileText, Folder, FolderPlus, Globe, Grid, Heart, HistoryGraphType, Image, Info, Layers,
 		ListPlay, Lock, LogOut, MessageSquare, Minus, Moon, MusicNote, MusicPlayerType, Pause, Pencil, Pin, PinOff,
 		Play, Plus, Power, Puzzle, Refresh, Scissors, Search, Settings, Sidebar, Sliders, Star, Store, Sun, Trash, Undo,
-		Unlock, Upload, User, WeatherType, Wifi, X, Zap,
+		Unlock, Upload, User, WeatherType, Wifi, X, Zap
 	];
 
 	/// <summary>The names <c>ui.icon</c> component version 2 adds: device and battery glyphs. A reader that
@@ -717,7 +717,7 @@ public static class UiIcons
 	public static readonly IReadOnlyList<string> Version2 =
 	[
 		DeviceLaptop, DeviceWatch, DeviceHeadphones, DeviceGamepad, DeviceMouse, DeviceKeyboard, DeviceSpeaker, Battery,
-		BatteryCharging,
+		BatteryCharging
 	];
 
 	/// <summary>Every name any version of <c>ui.icon</c> draws.</summary>
@@ -725,8 +725,10 @@ public static class UiIcons
 
 	/// <summary>The <c>ui.icon</c> component version that first draws <paramref name="name" />, or
 	/// <see langword="null" /> when no version does.</summary>
-	public static int? VersionOf(string name) =>
-		Version1.Contains(name, StringComparer.Ordinal) ? 1
-		: Version2.Contains(name, StringComparer.Ordinal) ? 2
-		: null;
+	public static int? VersionOf(string name)
+	{
+		return Version1.Contains(name, StringComparer.Ordinal) ? 1
+			: Version2.Contains(name, StringComparer.Ordinal) ? 2
+			: null;
+	}
 }

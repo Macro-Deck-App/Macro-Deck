@@ -66,7 +66,8 @@ internal static class TwitchEventPayload
 		string messageId,
 		JsonElement eventElement,
 		TwitchAccount account)
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
 		{
 			["account"] = account.UserId,
 			["accountLogin"] = account.Login,
@@ -79,6 +80,7 @@ internal static class TwitchEventPayload
 			["message"] = Resolve("message", eventElement) ?? string.Empty,
 			["data"] = eventElement.ValueKind is JsonValueKind.Undefined ? "{}" : eventElement.GetRawText()
 		};
+	}
 
 	private static object? Resolve(string name, JsonElement root)
 	{
@@ -133,7 +135,8 @@ internal static class TwitchEventPayload
 	}
 
 	private static object? ToPrimitive(JsonElement element)
-		=> element.ValueKind switch
+	{
+		return element.ValueKind switch
 		{
 			JsonValueKind.String => element.GetString(),
 			JsonValueKind.True => true,
@@ -146,6 +149,7 @@ internal static class TwitchEventPayload
 			JsonValueKind.Object => Describe(element),
 			_ => null
 		};
+	}
 
 	private static string JoinArray(JsonElement array)
 	{
@@ -166,7 +170,9 @@ internal static class TwitchEventPayload
 	}
 
 	private static string? Describe(JsonElement element)
-		=> ReadString(element, "title") ?? ReadString(element, "text") ?? ReadString(element, "name");
+	{
+		return ReadString(element, "title") ?? ReadString(element, "text") ?? ReadString(element, "name");
+	}
 
 	private static (string? Title, long Votes)? Winner(JsonElement root, string arrayName, string countName)
 	{
@@ -199,9 +205,9 @@ internal static class TwitchEventPayload
 	private static string? WinningOutcome(JsonElement root)
 	{
 		var winningId = ReadString(root, "winning_outcome_id");
-		if (winningId is null ||
-			!root.TryGetProperty("outcomes", out var outcomes) ||
-			outcomes.ValueKind is not JsonValueKind.Array)
+		if (winningId is null
+			|| !root.TryGetProperty("outcomes", out var outcomes)
+			|| outcomes.ValueKind is not JsonValueKind.Array)
 		{
 			return null;
 		}
@@ -218,11 +224,13 @@ internal static class TwitchEventPayload
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind is JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind is JsonValueKind.String
+	{
+		return element.ValueKind is JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind is JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private static string ToSnakeCase(string name)
 	{

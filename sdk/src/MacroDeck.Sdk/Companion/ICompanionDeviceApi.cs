@@ -65,7 +65,8 @@ public interface ICompanionDeviceApi
 	/// Cancelling the token withdraws a command the device has not accepted yet and then throws
 	/// <see cref="OperationCanceledException" />; once accepted, the request waits for the answer.
 	/// </remarks>
-	Task<CompanionDeviceCommandResult> RequestAsync(Guid deviceId,
+	Task<CompanionDeviceCommandResult> RequestAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default);
 
@@ -74,7 +75,8 @@ public interface ICompanionDeviceApi
 	/// permission prompt on the device and fails with <see cref="CompanionDeviceFailure.ConsentDenied" /> when its
 	/// user declines. Waits like <see cref="RequestAsync" />, with up to a minute once the device accepted.
 	/// </summary>
-	Task<CompanionScreenshotResult> CaptureScreenshotAsync(Guid deviceId,
+	Task<CompanionScreenshotResult> CaptureScreenshotAsync(
+		Guid deviceId,
 		CompanionScreenshotMode mode,
 		CancellationToken cancellationToken = default);
 }

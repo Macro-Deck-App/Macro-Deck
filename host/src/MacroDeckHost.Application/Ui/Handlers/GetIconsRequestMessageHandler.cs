@@ -21,7 +21,8 @@ public class GetIconsRequestMessageHandler : IUiTransportMessageHandler<GetIcons
 		}
 
 		var response = new GetIconsResponse();
-		response.Icons.AddRange(_iconPackCache.GetIconsByPackId(packId).Select(icon => IconMapper.ToDto(icon, _iconPackCache)));
+		response.Icons.AddRange(_iconPackCache.GetIconsByPackId(packId)
+			.Select(icon => IconMapper.ToDto(icon, _iconPackCache)));
 
 		return ValueTask.FromResult(response);
 	}

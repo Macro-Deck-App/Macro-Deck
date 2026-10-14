@@ -23,7 +23,8 @@ public class ApplicationRestartService : IApplicationRestartService
 	{
 	}
 
-	public ApplicationRestartService(IHostApplicationLifetime lifetime,
+	public ApplicationRestartService(
+		IHostApplicationLifetime lifetime,
 		string? shellExecutable,
 		TimeSpan shutdownDelay)
 	{

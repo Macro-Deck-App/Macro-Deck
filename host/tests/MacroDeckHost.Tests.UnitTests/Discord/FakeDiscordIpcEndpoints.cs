@@ -13,7 +13,10 @@ internal sealed class FakeDiscordIpcEndpoints
 
 	public List<FakeDiscordIpcTransport> Opened { get; } = [];
 
-	public IDiscordIpcTransport CreateTransport() => new RoutingTransport(this);
+	public IDiscordIpcTransport CreateTransport()
+	{
+		return new RoutingTransport(this);
+	}
 
 	private sealed class RoutingTransport : IDiscordIpcTransport
 	{
@@ -57,12 +60,19 @@ internal sealed class FakeDiscordIpcEndpoints
 			DiscordRpcOpcode opcode,
 			ReadOnlyMemory<byte> payload,
 			CancellationToken cancellationToken)
-			=> Selected.WriteFrameAsync(opcode, payload, cancellationToken);
+		{
+			return Selected.WriteFrameAsync(opcode, payload, cancellationToken);
+		}
 
 		public Task<DiscordIpcFrame?> ReadFrameAsync(CancellationToken cancellationToken)
-			=> Selected.ReadFrameAsync(cancellationToken);
+		{
+			return Selected.ReadFrameAsync(cancellationToken);
+		}
 
-		public void Dispose() => _selected?.Dispose();
+		public void Dispose()
+		{
+			_selected?.Dispose();
+		}
 
 		private FakeDiscordIpcTransport Selected
 			=> _selected ?? throw new DiscordIpcProtocolException("The transport is not connected.");

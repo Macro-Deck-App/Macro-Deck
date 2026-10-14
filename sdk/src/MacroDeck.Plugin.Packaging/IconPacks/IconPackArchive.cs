@@ -52,11 +52,13 @@ internal static class IconPackArchive
 	public static readonly StringComparer IconNameComparer = StringComparer.OrdinalIgnoreCase;
 
 	public static bool IsUsableIconName(string? name)
-		=> !string.IsNullOrWhiteSpace(name) &&
-			name.Length <= MaxIconNameLength &&
-			name.Trim().Length == name.Length &&
-			!name.Contains('/') &&
-			!name.Any(char.IsControl);
+	{
+		return !string.IsNullOrWhiteSpace(name)
+			&& name.Length <= MaxIconNameLength
+			&& name.Trim().Length == name.Length
+			&& !name.Contains('/')
+			&& !name.Any(char.IsControl);
+	}
 
 	public static IconPackArchiveReadResult Read(string path)
 	{
@@ -79,7 +81,7 @@ internal static class IconPackArchive
 	{
 		try
 		{
-			using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
+			using var archive = new ZipArchive(stream, ZipArchiveMode.Read, true);
 			return Read(archive);
 		}
 		catch (InvalidDataException)
@@ -129,17 +131,18 @@ internal static class IconPackArchive
 		{
 			foreach (var element in iconsElement.EnumerateArray())
 			{
-				if (element.ValueKind != JsonValueKind.Object ||
-					!TryGetProperty(element, "id", out var idElement) ||
-					idElement.ValueKind != JsonValueKind.String ||
-					!Guid.TryParse(idElement.GetString(), out var id))
+				if (element.ValueKind != JsonValueKind.Object
+					|| !TryGetProperty(element, "id", out var idElement)
+					|| idElement.ValueKind != JsonValueKind.String
+					|| !Guid.TryParse(idElement.GetString(), out var id))
 				{
 					continue;
 				}
 
-				var name = TryGetProperty(element, "name", out var nameElement) && nameElement.ValueKind == JsonValueKind.String
-					? nameElement.GetString() ?? string.Empty
-					: string.Empty;
+				var name = TryGetProperty(element, "name", out var nameElement)
+					&& nameElement.ValueKind == JsonValueKind.String
+						? nameElement.GetString() ?? string.Empty
+						: string.Empty;
 
 				icons.Add(new IconPackArchiveIcon { Id = id, Name = name, HasMaster = masters.Contains(id) });
 			}
@@ -179,10 +182,10 @@ internal static class IconPackArchive
 		foreach (var entry in archive.Entries)
 		{
 			var segments = entry.FullName.Replace('\\', '/').Split('/');
-			if (segments.Length == 3 &&
-				segments[0].Equals("icons", StringComparison.OrdinalIgnoreCase) &&
-				segments[2].Equals("master.webp", StringComparison.OrdinalIgnoreCase) &&
-				Guid.TryParse(segments[1], out var iconId))
+			if (segments.Length == 3
+				&& segments[0].Equals("icons", StringComparison.OrdinalIgnoreCase)
+				&& segments[2].Equals("master.webp", StringComparison.OrdinalIgnoreCase)
+				&& Guid.TryParse(segments[1], out var iconId))
 			{
 				masters.Add(iconId);
 			}
@@ -209,7 +212,11 @@ internal static class IconPackArchive
 	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> TryGetProperty(root, name, out var element) && element.ValueKind == JsonValueKind.String ? element.GetString() : null;
+	{
+		return TryGetProperty(root, name, out var element) && element.ValueKind == JsonValueKind.String
+			? element.GetString()
+			: null;
+	}
 
 	private static bool TryGetProperty(JsonElement element, string name, out JsonElement value)
 	{
@@ -226,5 +233,8 @@ internal static class IconPackArchive
 		return false;
 	}
 
-	private static IconPackArchiveReadResult Fail(string error) => new() { Error = error };
+	private static IconPackArchiveReadResult Fail(string error)
+	{
+		return new IconPackArchiveReadResult { Error = error };
+	}
 }

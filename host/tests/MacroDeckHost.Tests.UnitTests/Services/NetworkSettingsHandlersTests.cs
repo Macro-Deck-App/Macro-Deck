@@ -56,7 +56,9 @@ public class NetworkSettingsHandlersTests
 		}
 
 		public void Seed(string key, string value)
-			=> _store[key] = new AppPreferenceEntity { Key = key, Value = value };
+		{
+			_store[key] = new AppPreferenceEntity { Key = key, Value = value };
+		}
 	}
 
 	private sealed class FakeBuildEnvironment : IBuildEnvironment
@@ -74,26 +76,38 @@ public class NetworkSettingsHandlersTests
 
 		public bool RestartRequested => false;
 
-		public Result<RestartError> Request(string reason) => Result.Ok<RestartError>();
+		public Result<RestartError> Request(string reason)
+		{
+			return Result.Ok<RestartError>();
+		}
 	}
 
 	private sealed class FakeLocalAddressProvider : ILocalAddressProvider
 	{
-		public IReadOnlyList<IPAddress> GetReachableIpv4Addresses() => [];
+		public IReadOnlyList<IPAddress> GetReachableIpv4Addresses()
+		{
+			return [];
+		}
 	}
 
 	private sealed class FakeHostNameProvider : IHostNameProvider
 	{
 		public string MachineName => "deck-pc";
 
-		public IReadOnlyList<string> GetHostNames() => ["deck-pc", "deck-pc.local"];
+		public IReadOnlyList<string> GetHostNames()
+		{
+			return ["deck-pc", "deck-pc.local"];
+		}
 	}
 
 	private sealed class FakeDiscoveryRefresher : IDiscoveryAdvertisementRefresher
 	{
 		public int Requests { get; private set; }
 
-		public void RequestRefresh() => Requests++;
+		public void RequestRefresh()
+		{
+			Requests++;
+		}
 	}
 
 	private sealed record Fixture(
@@ -296,7 +310,7 @@ public class NetworkSettingsHandlersTests
 	[Test]
 	public async Task An_environment_override_suppresses_the_restart_hint()
 	{
-		var fixture = CreateFixture(overriddenByEnvironment: true);
+		var fixture = CreateFixture(true);
 		fixture.Repository.Seed(AppPreferenceService.PublicPortKey, "9100");
 
 		var response = await fixture.Get.Handle(new GetNetworkSettingsRequest(), CancellationToken.None);
@@ -410,8 +424,8 @@ public class NetworkSettingsHandlersTests
 			{
 				Assert.That(portResponse.Error,
 					Is.EqualTo(TestLocalization.Resolve(AppStrings.Settings.Network.PortRangeHint(
-							minimum: PublicPortSelector.MinimumConfigurablePort,
-							maximum: PublicPortSelector.MaximumConfigurablePort),
+							PublicPortSelector.MinimumConfigurablePort,
+							PublicPortSelector.MaximumConfigurablePort),
 						"de")));
 				Assert.That(portResponse.Error, Does.Not.StartWith("Enter"));
 				Assert.That(certificateResponse.Error,
@@ -561,7 +575,7 @@ public class NetworkSettingsHandlersTests
 	[Test]
 	public async Task Restart_is_not_offered_while_unavailable_under_an_environment_override()
 	{
-		var fixture = CreateFixture(overriddenByEnvironment: true, publicListenerAvailable: false);
+		var fixture = CreateFixture(true, publicListenerAvailable: false);
 
 		var response = await fixture.Get.Handle(new GetNetworkSettingsRequest(), CancellationToken.None);
 

@@ -4,7 +4,8 @@ namespace MacroDeck.Plugin.Serilog.Tests.UnitTests.Support;
 /// pointed at through <c>--contentRoot</c>.</summary>
 internal sealed class PluginContentRoot : IDisposable
 {
-	public PluginContentRoot() =>
+	public PluginContentRoot()
+	{
 		File.WriteAllText(Path.Combine(RootPath, "manifest.json"),
 			"""
 			{
@@ -14,6 +15,7 @@ internal sealed class PluginContentRoot : IDisposable
 			  "version": "1.0.0"
 			}
 			""");
+	}
 
 	public string RootPath { get; } = Directory.CreateTempSubdirectory("macro-deck-plugin-serilog-tests").FullName;
 
@@ -21,7 +23,7 @@ internal sealed class PluginContentRoot : IDisposable
 	{
 		if (Directory.Exists(RootPath))
 		{
-			Directory.Delete(RootPath, recursive: true);
+			Directory.Delete(RootPath, true);
 		}
 	}
 }

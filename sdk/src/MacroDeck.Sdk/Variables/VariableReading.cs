@@ -31,11 +31,16 @@ public sealed record VariableReading
 	/// <summary>
 	/// A reading that carries no bounds - the shape a variable with nothing adjustable about it returns.
 	/// </summary>
-	public static VariableReading Of(object? value) => new() { Value = value };
+	public static VariableReading Of(object? value)
+	{
+		return new VariableReading { Value = value };
+	}
 
 	/// <summary>A reading that also reports the bounds that apply to this value right now.</summary>
 	public static VariableReading Of(object? value, double? min, double? max, double? step)
-		=> new() { Value = value, Min = min, Max = max, Step = step };
+	{
+		return new VariableReading { Value = value, Min = min, Max = max, Step = step };
+	}
 
 	/// <summary>
 	/// "Not available right now" - the reading a provider returns for a variable whose backing resource

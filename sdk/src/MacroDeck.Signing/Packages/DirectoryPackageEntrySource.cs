@@ -66,7 +66,7 @@ internal sealed class DirectoryPackageEntrySource : IPackageEntrySource
 		{
 			if (new DirectoryInfo(path).Attributes.HasFlag(FileAttributes.ReparsePoint))
 			{
-				entries.Add(new PackageEntry(RelativeName(root, path), 0, IsRegularFile: false));
+				entries.Add(new PackageEntry(RelativeName(root, path), 0, false));
 				continue;
 			}
 

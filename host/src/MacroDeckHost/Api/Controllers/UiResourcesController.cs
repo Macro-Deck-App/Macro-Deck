@@ -17,7 +17,8 @@ public class UiResourcesController : ControllerBase
 	private readonly IPluginIconUiResources? _pluginIcons;
 	private readonly IIconUiResourceRenditions? _sizedIcons;
 
-	public UiResourcesController(IUiResourceStore resources,
+	public UiResourcesController(
+		IUiResourceStore resources,
 		IPluginIconUiResources? pluginIcons = null,
 		IIconUiResourceRenditions? sizedIcons = null)
 	{
@@ -28,7 +29,8 @@ public class UiResourcesController : ControllerBase
 
 	[HttpGet("{resourceId}")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public async Task<IActionResult> Get(string resourceId,
+	public async Task<IActionResult> Get(
+		string resourceId,
 		[FromQuery(Name = "v")] string? version = null,
 		[FromQuery(Name = "size")] string? size = null,
 		CancellationToken cancellationToken = default)
@@ -81,7 +83,8 @@ public class UiResourcesController : ControllerBase
 
 		// The v a tree carries names the default rendition, so it can vouch for a sized one only while that
 		// rendition is current and was not a degraded stand-in for a variant that failed to derive.
-		if (!sized.Stable || (version is not null && !string.Equals(version, resource.ContentHash, StringComparison.Ordinal)))
+		if (!sized.Stable
+			|| version is not null && !string.Equals(version, resource.ContentHash, StringComparison.Ordinal))
 		{
 			Response.Headers.CacheControl = "no-store";
 
@@ -99,7 +102,10 @@ public class UiResourcesController : ControllerBase
 		return File(content.Content.ToArray(), content.MediaType);
 	}
 
-	private async Task<SizedIconResource?> FindSized(string resourceId, string? size, CancellationToken cancellationToken)
+	private async Task<SizedIconResource?> FindSized(
+		string resourceId,
+		string? size,
+		CancellationToken cancellationToken)
 	{
 		if (_sizedIcons is null)
 		{

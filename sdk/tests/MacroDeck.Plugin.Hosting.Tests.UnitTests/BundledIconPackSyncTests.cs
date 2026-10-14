@@ -30,7 +30,10 @@ public class BundledIconPackSyncTests
 	}
 
 	[TearDown]
-	public void DeleteProject() => Directory.Delete(_projectDirectory, recursive: true);
+	public void DeleteProject()
+	{
+		Directory.Delete(_projectDirectory, true);
+	}
 
 	[Test]
 	public async Task A_new_session_sends_the_full_declared_set_uploads_what_the_host_asks_for_and_syncs_again()
@@ -154,7 +157,7 @@ public class BundledIconPackSyncTests
 		WritePack("logos", [1, 2, 3]);
 		WriteManifest("logos");
 		var host = new FakeIconPackHost();
-		await using var harness = await StartAsync(host, mode: null);
+		await using var harness = await StartAsync(host, null);
 
 		harness.Connect();
 		await Task.Delay(200);
@@ -212,7 +215,7 @@ public class BundledIconPackSyncTests
 			id = "com.example.icons",
 			name = "Icons",
 			version = "1.0.0",
-			bundledIconPacks = keys.Select(key => new { key, path = $"icon-packs/{key}.macroDeckIconPack" }).ToArray(),
+			bundledIconPacks = keys.Select(key => new { key, path = $"icon-packs/{key}.macroDeckIconPack" }).ToArray()
 		};
 
 		File.WriteAllText(Path.Combine(_projectDirectory, "manifest.json"), JsonSerializer.Serialize(manifest));
@@ -226,7 +229,7 @@ public class BundledIconPackSyncTests
 		var buildOutput = Path.Combine(_projectDirectory, "bin");
 		Directory.CreateDirectory(buildOutput);
 		var host = new FakeIconPackHost();
-		await using var harness = await StartAsync(host, "sync", contentRoot: buildOutput);
+		await using var harness = await StartAsync(host, "sync", buildOutput);
 
 		harness.Connect();
 		await WaitForAsync(() => host.Syncs.Count == 2);
@@ -254,8 +257,14 @@ public class BundledIconPackSyncTests
 		var log = new CollectingSink();
 		var logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Sink(log).CreateLogger();
 
-		var sync = new BundledIconPackSync(configuration, environment, host, host, connectionState, reloader,
-			TimeProvider.System, logger);
+		var sync = new BundledIconPackSync(configuration,
+			environment,
+			host,
+			host,
+			connectionState,
+			reloader,
+			TimeProvider.System,
+			logger);
 		await sync.StartAsync(CancellationToken.None);
 
 		return new Harness(sync, connectionState, reloader, log);
@@ -287,7 +296,7 @@ public class BundledIconPackSyncTests
 		public void Connect()
 		{
 			ConnectionState.Status = PluginConnectionStatus.Connected;
-			ConnectionState.RaiseConnected(resumed: false);
+			ConnectionState.RaiseConnected(false);
 		}
 
 		public async ValueTask DisposeAsync()
@@ -303,7 +312,10 @@ public class BundledIconPackSyncTests
 
 		public int Reloads => Volatile.Read(ref _reloads);
 
-		public void ReloadOpenSessions() => Interlocked.Increment(ref _reloads);
+		public void ReloadOpenSessions()
+		{
+			Interlocked.Increment(ref _reloads);
+		}
 	}
 
 	private sealed class CollectingSink : ILogEventSink
@@ -387,7 +399,8 @@ public class BundledIconPackSyncTests
 			}
 		}
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -416,8 +429,8 @@ public class BundledIconPackSyncTests
 				}
 
 				var declared = packs.ToDictionary(pack => pack.Key, pack => pack.ContentHash, StringComparer.Ordinal);
-				var changed = declared.Count != _applied.Count ||
-					declared.Any(pair => !_applied.TryGetValue(pair.Key, out var hash) || hash != pair.Value);
+				var changed = declared.Count != _applied.Count
+					|| declared.Any(pair => !_applied.TryGetValue(pair.Key, out var hash) || hash != pair.Value);
 				_applied = declared;
 
 				return Result(new IconPackSyncResult { Changed = changed });
@@ -436,9 +449,14 @@ public class BundledIconPackSyncTests
 			return Task.FromResult(hash);
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		private static Task<JsonElement?> Result(IconPackSyncResult result)
-			=> Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(result, PluginProtocolJson.Options));
+		{
+			return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(result, PluginProtocolJson.Options));
+		}
 	}
 }

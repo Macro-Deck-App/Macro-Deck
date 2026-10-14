@@ -12,9 +12,18 @@ internal sealed record PluginWizardOutcome
 
 	public PluginScaffoldRequest? Request { get; init; }
 
-	public static PluginWizardOutcome Decline() => new() { Declined = true };
+	public static PluginWizardOutcome Decline()
+	{
+		return new PluginWizardOutcome { Declined = true };
+	}
 
-	public static PluginWizardOutcome Invalid(CliDiagnostic error) => new() { Error = error };
+	public static PluginWizardOutcome Invalid(CliDiagnostic error)
+	{
+		return new PluginWizardOutcome { Error = error };
+	}
 
-	public static PluginWizardOutcome Accept(PluginScaffoldRequest request) => new() { Request = request };
+	public static PluginWizardOutcome Accept(PluginScaffoldRequest request)
+	{
+		return new PluginWizardOutcome { Request = request };
+	}
 }

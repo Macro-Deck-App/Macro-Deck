@@ -14,11 +14,15 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 	private readonly ConcurrentDictionary<string, PluginTransfers> _byPlugin = new(StringComparer.Ordinal);
 	private readonly IPluginAssetCache _cache;
 
-	public PluginAssetReceiver(IPluginAssetCache cache) => _cache = cache;
+	public PluginAssetReceiver(IPluginAssetCache cache)
+	{
+		_cache = cache;
+	}
 
 	public event EventHandler<AssetCommittedEventArgs>? AssetCommitted;
 
-	public AssetOperationResult Begin(string pluginId,
+	public AssetOperationResult Begin(
+		string pluginId,
 		string assetId,
 		string kind,
 		string mimeType,
@@ -27,12 +31,12 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 	{
 		ArgumentException.ThrowIfNullOrEmpty(pluginId);
 
-		if (string.IsNullOrEmpty(assetId) ||
-			!AssetKinds.IsKnown(kind) ||
-			kind is AssetKinds.AndroidScreenshot or AssetKinds.CompanionScreenshot ||
-			string.IsNullOrEmpty(mimeType) ||
-			string.IsNullOrEmpty(contentHash) ||
-			totalBytes < 0)
+		if (string.IsNullOrEmpty(assetId)
+			|| !AssetKinds.IsKnown(kind)
+			|| kind is AssetKinds.AndroidScreenshot or AssetKinds.CompanionScreenshot
+			|| string.IsNullOrEmpty(mimeType)
+			|| string.IsNullOrEmpty(contentHash)
+			|| totalBytes < 0)
 		{
 			return AssetOperationResult.Fail(ProtocolErrorCodes.InvalidPayload, "Malformed asset.begin.");
 		}
@@ -43,8 +47,8 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 				$"Asset '{assetId}' declares {totalBytes} bytes, over the {ProtocolLimits.MaxAssetBytes} byte limit.");
 		}
 
-		if (string.Equals(kind, AssetKinds.UiResource, StringComparison.Ordinal) &&
-			CheckUiResource(assetId, mimeType, totalBytes) is { } refused)
+		if (string.Equals(kind, AssetKinds.UiResource, StringComparison.Ordinal)
+			&& CheckUiResource(assetId, mimeType, totalBytes) is { } refused)
 		{
 			return refused;
 		}
@@ -171,8 +175,8 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 		// shared disk cache would keep them past a host restart and evict other plugins' icons.
 		// A development icon pack upload is consumed by the next sync and never served by hash, so it stays
 		// out of the disk cache as well.
-		if (!string.Equals(kind, AssetKinds.UiResource, StringComparison.Ordinal) &&
-			!string.Equals(kind, AssetKinds.IconPack, StringComparison.Ordinal))
+		if (!string.Equals(kind, AssetKinds.UiResource, StringComparison.Ordinal)
+			&& !string.Equals(kind, AssetKinds.IconPack, StringComparison.Ordinal))
 		{
 			_cache.Write(contentHash, mimeType, bytes);
 		}
@@ -215,7 +219,9 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 	}
 
 	private static AssetOperationResult UnknownAsset(string assetId)
-		=> AssetOperationResult.Fail(ProtocolErrorCodes.InvalidPayload, $"Unknown asset id '{assetId}'.");
+	{
+		return AssetOperationResult.Fail(ProtocolErrorCodes.InvalidPayload, $"Unknown asset id '{assetId}'.");
+	}
 
 	private static void RemoveTransfer(PluginTransfers plugin, string assetId, Transfer transfer)
 	{

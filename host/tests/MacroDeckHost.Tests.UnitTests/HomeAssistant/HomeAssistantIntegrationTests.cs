@@ -21,10 +21,16 @@ internal sealed class HomeAssistantIntegrationTests
 	private HomeAssistantIntegration _integration = null!;
 
 	[SetUp]
-	public void SetUp() => _integration = new HomeAssistantIntegration();
+	public void SetUp()
+	{
+		_integration = new HomeAssistantIntegration();
+	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+	}
 
 	[Test]
 	public void The_integration_is_identified()
@@ -195,14 +201,14 @@ internal sealed class HomeAssistantIntegrationTests
 		{
 			connection = await FailingAsync(client
 					=> client.ConnectException = new HomeAssistantAuthenticationException("bad token"),
-				condition: c => c.AuthInvalid);
+				c => c.AuthInvalid);
 		}
 		else if (issueId == HomeAssistantIntegration.CertificateIssueId)
 		{
 			connection = await FailingAsync(client
 					=> client.ConnectException
 						= new HomeAssistantTlsException("untrusted", new InvalidOperationException()),
-				condition: c => c.CertificateUntrusted);
+				c => c.CertificateUntrusted);
 		}
 		else
 		{
@@ -370,12 +376,14 @@ internal sealed class HomeAssistantIntegrationTests
 	}
 
 	private static EventOptionsContext Options(string eventId, string parameterName)
-		=> new()
+	{
+		return new EventOptionsContext
 		{
 			EventId = eventId,
 			ParameterName = parameterName,
 			CurrentParameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 		};
+	}
 
 	private void InjectConnection(HomeAssistantConnection connection)
 	{

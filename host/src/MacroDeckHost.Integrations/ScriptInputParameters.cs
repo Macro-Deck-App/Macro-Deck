@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using MacroDeck.Sdk.Scripts;
 
-namespace MacroDeckHost.Integrations.Scripts;
+namespace MacroDeckHost.Integrations;
 
 /// <summary>
 /// The call-site convention for script inputs: each value rides as an ordinary block parameter named

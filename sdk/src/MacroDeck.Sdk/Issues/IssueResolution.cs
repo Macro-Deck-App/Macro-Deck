@@ -22,10 +22,15 @@ public sealed class IssueResolution
 
 	public IssueResolutionFollowUp FollowUp { get; init; } = IssueResolutionFollowUp.None;
 
-	public static IssueResolution Ok(LocalizedText message = default,
+	public static IssueResolution Ok(
+		LocalizedText message = default,
 		IssueResolutionFollowUp followUp = IssueResolutionFollowUp.None)
-		=> new() { Success = true, Message = message, FollowUp = followUp };
+	{
+		return new IssueResolution { Success = true, Message = message, FollowUp = followUp };
+	}
 
 	public static IssueResolution Failed(LocalizedText message = default)
-		=> new() { Success = false, Message = message };
+	{
+		return new IssueResolution { Success = false, Message = message };
+	}
 }

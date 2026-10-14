@@ -63,7 +63,10 @@ public class WidgetPlacementValidationParityTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task CreateOutsideTheGrid_IsRefusedWithTheSameErrorAsTheEquivalentMove()
@@ -224,26 +227,35 @@ public class WidgetPlacementValidationParityTests
 		return Guid.Parse(response.Widget!.Id);
 	}
 
-	private CreateWidgetRequest CreateRequest(int x, int y, int width, int height) => new()
+	private CreateWidgetRequest CreateRequest(int x, int y, int width, int height)
 	{
-		FolderId = _folderId.ToString(),
-		Type = WidgetTypeIds.Clock,
-		PositionX = x,
-		PositionY = y,
-		Width = width,
-		Height = height
-	};
+		return new CreateWidgetRequest
+		{
+			FolderId = _folderId.ToString(),
+			Type = WidgetTypeIds.Clock,
+			PositionX = x,
+			PositionY = y,
+			Width = width,
+			Height = height
+		};
+	}
 
-	private UpdateWidgetRequest UpdateRequest(Guid widgetId, int x, int y, int width, int height) => new()
+	private UpdateWidgetRequest UpdateRequest(Guid widgetId, int x, int y, int width, int height)
 	{
-		Id = widgetId.ToString(),
-		FolderId = _folderId.ToString(),
-		Type = WidgetTypeIds.Clock,
-		PositionX = x,
-		PositionY = y,
-		Width = width,
-		Height = height
-	};
+		return new UpdateWidgetRequest
+		{
+			Id = widgetId.ToString(),
+			FolderId = _folderId.ToString(),
+			Type = WidgetTypeIds.Clock,
+			PositionX = x,
+			PositionY = y,
+			Width = width,
+			Height = height
+		};
+	}
 
-	private List<WidgetEntity> Widgets() => _cache.GetFolderById(_folderId)!.Widgets;
+	private List<WidgetEntity> Widgets()
+	{
+		return _cache.GetFolderById(_folderId)!.Widgets;
+	}
 }

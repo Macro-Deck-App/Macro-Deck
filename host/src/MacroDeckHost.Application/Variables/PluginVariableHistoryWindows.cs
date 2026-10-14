@@ -26,10 +26,14 @@ public sealed class PluginVariableHistoryWindows : IDisposable
 	}
 
 	public int OpenCount(string pluginId)
-		=> _windows.Count(pair => string.Equals(pair.Key.PluginId, pluginId, StringComparison.Ordinal));
+	{
+		return _windows.Count(pair => string.Equals(pair.Key.PluginId, pluginId, StringComparison.Ordinal));
+	}
 
 	public IReadOnlyList<double?>? Read(string pluginId, string windowId)
-		=> _windows.TryGetValue((pluginId, windowId), out var window) ? window.Values : null;
+	{
+		return _windows.TryGetValue((pluginId, windowId), out var window) ? window.Values : null;
+	}
 
 	public async Task CloseAsync(string pluginId, string windowId)
 	{
@@ -54,7 +58,8 @@ public sealed class PluginVariableHistoryWindows : IDisposable
 
 	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs args)
 	{
-		foreach (var key in _windows.Keys.Where(key => string.Equals(key.PluginId, args.PluginId, StringComparison.Ordinal)))
+		foreach (var key in _windows.Keys.Where(key
+			=> string.Equals(key.PluginId, args.PluginId, StringComparison.Ordinal)))
 		{
 			if (_windows.TryRemove(key, out var window))
 			{

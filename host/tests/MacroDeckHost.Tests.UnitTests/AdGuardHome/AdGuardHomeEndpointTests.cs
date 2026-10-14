@@ -12,12 +12,16 @@ internal sealed class AdGuardHomeEndpointTests
 	[TestCase("https://example.com/adguard/control/", "https://example.com/adguard/control/")]
 	[TestCase("http://admin:pw@adguard.lan?x=1#y", "http://adguard.lan/control/")]
 	public void Addresses_point_at_the_control_api(string input, string expected)
-		=> Assert.That(AdGuardHomeEndpoint.TryBuild(input)?.ToString(), Is.EqualTo(expected));
+	{
+		Assert.That(AdGuardHomeEndpoint.TryBuild(input)?.ToString(), Is.EqualTo(expected));
+	}
 
 	[TestCase("")]
 	[TestCase("   ")]
 	[TestCase("ftp://adguard.lan")]
 	[TestCase("http://")]
 	public void Invalid_addresses_are_rejected(string input)
-		=> Assert.That(AdGuardHomeEndpoint.TryBuild(input), Is.Null);
+	{
+		Assert.That(AdGuardHomeEndpoint.TryBuild(input), Is.Null);
+	}
 }

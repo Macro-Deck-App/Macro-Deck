@@ -6,7 +6,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Discord;
 
@@ -44,15 +43,18 @@ public sealed class DiscordConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			"credentials" => SubmitCredentials(input),
 			"authorize" => await AuthorizeAsync(cancellationToken).ConfigureAwait(false),
 			_ => ConfigFlowResult.Error(CredentialsStep(), AppStrings.Integrations.Discord.Config.UnknownStep())
 		};
+	}
 
 	private static ConfigFlowStep CredentialsStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "credentials",
 			Title = AppStrings.Integrations.Discord.Config.ConnectTitle(),
@@ -89,24 +91,27 @@ public sealed class DiscordConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Text(DiscordConfigKeys.ClientId,
-					label: AppStrings.Integrations.Discord.Config.ClientIdLabel(),
+					AppStrings.Integrations.Discord.Config.ClientIdLabel(),
 					placeholder: AppStrings.Integrations.Discord.Config.ClientIdPlaceholder(),
 					required: true),
 				ActionParameter.Secret(DiscordConfigKeys.ClientSecret,
-					label: AppStrings.Integrations.Discord.Config.ClientSecretLabel(),
-					description: AppStrings.Integrations.Discord.Config.ClientSecretDescription(),
-					required: true)
+					AppStrings.Integrations.Discord.Config.ClientSecretLabel(),
+					AppStrings.Integrations.Discord.Config.ClientSecretDescription(),
+					true)
 			]
 		};
+	}
 
 	private static ConfigFlowStep AuthorizeStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "authorize",
 			Title = AppStrings.Integrations.Discord.Config.AuthorizeTitle(),
 			Description = AppStrings.Integrations.Discord.Config.AuthorizeDescription(),
 			Fields = []
 		};
+	}
 
 	private ConfigFlowResult SubmitCredentials(IReadOnlyDictionary<string, object?> input)
 	{
@@ -183,7 +188,7 @@ public sealed class DiscordConfigFlow : IConfigFlow
 		catch (DiscordOAuthException ex)
 		{
 			return ConfigFlowResult.Error(AuthorizeStep(),
-				AppStrings.Integrations.Discord.Config.OAuthFailed(details: ex.Message));
+				AppStrings.Integrations.Discord.Config.OAuthFailed(ex.Message));
 		}
 		catch (HttpRequestException ex)
 		{
@@ -290,7 +295,7 @@ public sealed class DiscordConfigFlow : IConfigFlow
 
 		return exception.Code == 4000
 			? AppStrings.Integrations.Discord.Config.RejectedRequest()
-			: AppStrings.Integrations.Discord.Config.AuthorizationDeclined(details: exception.Message);
+			: AppStrings.Integrations.Discord.Config.AuthorizationDeclined(exception.Message);
 	}
 
 	private sealed record AuthorizeArgs(string ClientId, IReadOnlyList<string> Scopes);

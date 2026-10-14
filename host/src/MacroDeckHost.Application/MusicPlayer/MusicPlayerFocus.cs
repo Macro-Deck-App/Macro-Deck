@@ -4,8 +4,9 @@ public static class MusicPlayerFocus
 {
 	public static string? Resolve(IReadOnlyList<MusicPlayerInstanceDescriptor> instances, string? activeInstanceId)
 	{
-		if (activeInstanceId is not null &&
-			instances.Any(instance => string.Equals(instance.InstanceId, activeInstanceId, StringComparison.Ordinal)))
+		if (activeInstanceId is not null
+			&& instances.Any(instance
+				=> string.Equals(instance.InstanceId, activeInstanceId, StringComparison.Ordinal)))
 		{
 			return activeInstanceId;
 		}

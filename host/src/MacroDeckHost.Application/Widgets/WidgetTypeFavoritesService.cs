@@ -21,7 +21,10 @@ public interface IWidgetTypeFavoritesService
 {
 	Task<IReadOnlyList<string>> GetFavorites(CancellationToken cancellationToken = default);
 
-	Task<WidgetTypeFavoriteResult> SetFavorite(string widgetTypeId, bool favorite, CancellationToken cancellationToken = default);
+	Task<WidgetTypeFavoriteResult> SetFavorite(
+		string widgetTypeId,
+		bool favorite,
+		CancellationToken cancellationToken = default);
 }
 
 public sealed class WidgetTypeFavoritesService : IWidgetTypeFavoritesService, IDisposable
@@ -33,7 +36,8 @@ public sealed class WidgetTypeFavoritesService : IWidgetTypeFavoritesService, ID
 	private readonly IPublisher _publisher;
 	private readonly SemaphoreSlim _gate = new(1, 1);
 
-	public WidgetTypeFavoritesService(IServiceScopeFactory scopeFactory,
+	public WidgetTypeFavoritesService(
+		IServiceScopeFactory scopeFactory,
 		IWidgetTypeRegistry widgetTypes,
 		IPublisher publisher)
 	{
@@ -55,7 +59,8 @@ public sealed class WidgetTypeFavoritesService : IWidgetTypeFavoritesService, ID
 		}
 	}
 
-	public async Task<WidgetTypeFavoriteResult> SetFavorite(string widgetTypeId,
+	public async Task<WidgetTypeFavoriteResult> SetFavorite(
+		string widgetTypeId,
 		bool favorite,
 		CancellationToken cancellationToken = default)
 	{
@@ -110,7 +115,10 @@ public sealed class WidgetTypeFavoritesService : IWidgetTypeFavoritesService, ID
 		return new WidgetTypeFavoriteResult(WidgetTypeFavoriteOutcome.Updated, updated);
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
 	private async Task<List<string>> Read()
 	{
@@ -125,7 +133,10 @@ public sealed class WidgetTypeFavoritesService : IWidgetTypeFavoritesService, ID
 		try
 		{
 			var ids = JsonSerializer.Deserialize<List<string?>>(value) ?? [];
-			return [.. ids.OfType<string>().Where(id => id.Length > 0).Distinct(StringComparer.Ordinal).Take(MaxFavorites)];
+			return
+			[
+				.. ids.OfType<string>().Where(id => id.Length > 0).Distinct(StringComparer.Ordinal).Take(MaxFavorites)
+			];
 		}
 		catch (JsonException)
 		{

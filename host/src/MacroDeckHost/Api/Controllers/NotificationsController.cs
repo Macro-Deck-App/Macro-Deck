@@ -20,7 +20,8 @@ public class NotificationsController : ControllerBase
 	private readonly IUiTransportMessageHandler<MarkUserNotificationReadRequest, MarkUserNotificationReadResponse>
 		_markRead;
 
-	private readonly IUiTransportMessageHandler<MarkAllUserNotificationsReadRequest, MarkAllUserNotificationsReadResponse>
+	private readonly IUiTransportMessageHandler<MarkAllUserNotificationsReadRequest,
+			MarkAllUserNotificationsReadResponse>
 		_markAllRead;
 
 	public NotificationsController(
@@ -28,7 +29,8 @@ public class NotificationsController : ControllerBase
 		IUiTransportMessageHandler<DismissUserNotificationRequest, DismissUserNotificationResponse> dismiss,
 		IUiTransportMessageHandler<DismissAllUserNotificationsRequest, DismissAllUserNotificationsResponse> dismissAll,
 		IUiTransportMessageHandler<MarkUserNotificationReadRequest, MarkUserNotificationReadResponse> markRead,
-		IUiTransportMessageHandler<MarkAllUserNotificationsReadRequest, MarkAllUserNotificationsReadResponse> markAllRead)
+		IUiTransportMessageHandler<MarkAllUserNotificationsReadRequest, MarkAllUserNotificationsReadResponse>
+			markAllRead)
 	{
 		_markRead = markRead;
 		_markAllRead = markAllRead;
@@ -39,21 +41,31 @@ public class NotificationsController : ControllerBase
 
 	[HttpGet]
 	public Task<GetUserNotificationsResponse> GetNotifications(CancellationToken ct)
-		=> _getNotifications.Handle(new GetUserNotificationsRequest(), ct).AsTask();
+	{
+		return _getNotifications.Handle(new GetUserNotificationsRequest(), ct).AsTask();
+	}
 
 	[HttpDelete("{id}")]
 	public Task<DismissUserNotificationResponse> Dismiss(string id, CancellationToken ct)
-		=> _dismiss.Handle(new DismissUserNotificationRequest { Id = id }, ct).AsTask();
+	{
+		return _dismiss.Handle(new DismissUserNotificationRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpDelete]
 	public Task<DismissAllUserNotificationsResponse> DismissAll(CancellationToken ct)
-		=> _dismissAll.Handle(new DismissAllUserNotificationsRequest(), ct).AsTask();
+	{
+		return _dismissAll.Handle(new DismissAllUserNotificationsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("{id}/read")]
 	public Task<MarkUserNotificationReadResponse> MarkRead(string id, CancellationToken ct)
-		=> _markRead.Handle(new MarkUserNotificationReadRequest { Id = id }, ct).AsTask();
+	{
+		return _markRead.Handle(new MarkUserNotificationReadRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPut("read")]
 	public Task<MarkAllUserNotificationsReadResponse> MarkAllRead(CancellationToken ct)
-		=> _markAllRead.Handle(new MarkAllUserNotificationsReadRequest(), ct).AsTask();
+	{
+		return _markAllRead.Handle(new MarkAllUserNotificationsReadRequest(), ct).AsTask();
+	}
 }

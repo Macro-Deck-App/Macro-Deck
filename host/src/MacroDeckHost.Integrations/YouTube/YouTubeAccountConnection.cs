@@ -97,14 +97,24 @@ internal sealed class YouTubeAccountConnection : IDisposable
 	}
 
 	public void RememberBan(string liveChatId, string channelId, string banId)
-		=> _bans[(liveChatId, channelId)] = banId;
+	{
+		_bans[(liveChatId, channelId)] = banId;
+	}
 
 	public string? FindBan(string liveChatId, string channelId)
-		=> _bans.TryGetValue((liveChatId, channelId), out var banId) ? banId : null;
+	{
+		return _bans.TryGetValue((liveChatId, channelId), out var banId) ? banId : null;
+	}
 
-	public void ForgetBan(string liveChatId, string channelId) => _bans.TryRemove((liveChatId, channelId), out _);
+	public void ForgetBan(string liveChatId, string channelId)
+	{
+		_bans.TryRemove((liveChatId, channelId), out _);
+	}
 
-	public void PostChat(ChatEvent chatEvent) => _chatSink?.Post(chatEvent);
+	public void PostChat(ChatEvent chatEvent)
+	{
+		_chatSink?.Post(chatEvent);
+	}
 
 	public void Dispose()
 	{
@@ -128,7 +138,8 @@ internal sealed class YouTubeAccountConnection : IDisposable
 	}
 
 	internal YouTubeStatePoller CreateStatePoller()
-		=> new(Api,
+	{
+		return new YouTubeStatePoller(Api,
 			Budget,
 			Account,
 			Merge,
@@ -137,6 +148,7 @@ internal sealed class YouTubeAccountConnection : IDisposable
 			OnAuthorizationLost,
 			_logger,
 			_options);
+	}
 
 	internal void OnPolled(YouTubeAccountState state)
 	{
@@ -178,7 +190,8 @@ internal sealed class YouTubeAccountConnection : IDisposable
 	}
 
 	internal YouTubeChatPoller CreateChatPoller(string liveChatId)
-		=> new(Api,
+	{
+		return new YouTubeChatPoller(Api,
 			Budget,
 			liveChatId,
 			OnChatMessages,
@@ -186,6 +199,7 @@ internal sealed class YouTubeAccountConnection : IDisposable
 			OnAuthorizationLost,
 			_logger,
 			_options);
+	}
 
 	internal void OnChatMessages(IReadOnlyList<YouTubeChatMessage> messages, bool live)
 	{

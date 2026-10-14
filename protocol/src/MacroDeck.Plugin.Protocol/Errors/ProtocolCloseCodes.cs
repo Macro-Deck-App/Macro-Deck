@@ -27,6 +27,6 @@ public static class ProtocolCloseCodes
 	public static readonly IReadOnlyList<int> All =
 	[
 		QueueOverflow, SessionReplaced, ProtocolVersionUnsupported, SessionExpired, AuthenticationFailed,
-		SupervisorShutdown, RegistrationRejected,
+		SupervisorShutdown, RegistrationRejected
 	];
 }

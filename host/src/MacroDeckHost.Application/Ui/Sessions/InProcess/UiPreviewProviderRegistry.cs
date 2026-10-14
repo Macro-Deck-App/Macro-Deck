@@ -20,7 +20,10 @@ public sealed class UiPreviewProviderRegistry
 		_logger = logger;
 	}
 
-	public static string ProviderIdFor(string previewId, string principal) => $"{Prefix}{previewId}:{principal}";
+	public static string ProviderIdFor(string previewId, string principal)
+	{
+		return $"{Prefix}{previewId}:{principal}";
+	}
 
 	public IUiSessionProvider? Resolve(string providerId)
 	{

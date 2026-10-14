@@ -15,7 +15,8 @@ internal sealed class LifecycleConfigEntryBinding
 	private readonly VariableRegistry? _variables;
 	private readonly ConcurrentDictionary<Guid, Guid> _reservations;
 
-	public LifecycleConfigEntryBinding(string integrationId,
+	public LifecycleConfigEntryBinding(
+		string integrationId,
 		IConfigEntryLifecycle lifecycle,
 		VariableRegistry? variables,
 		ConcurrentDictionary<Guid, Guid> reservations)
@@ -71,9 +72,11 @@ internal sealed class LifecycleConfigEntryBinding
 			AppStrings.Errors.Config.VariableNamesUnavailable());
 	}
 
-	public async Task<IntegrationConfigEntryStatus> GetStatusAsync(ConfigEntryRecord entry,
+	public async Task<IntegrationConfigEntryStatus> GetStatusAsync(
+		ConfigEntryRecord entry,
 		CancellationToken cancellationToken)
-		=> await _lifecycle.GetEntryStatusAsync(ToStored(entry), cancellationToken).ConfigureAwait(false) switch
+	{
+		return await _lifecycle.GetEntryStatusAsync(ToStored(entry), cancellationToken).ConfigureAwait(false) switch
 		{
 			ConfigEntryStatus.Connecting => IntegrationConfigEntryStatus.Connecting,
 			ConfigEntryStatus.Connected => IntegrationConfigEntryStatus.Connected,
@@ -82,18 +85,27 @@ internal sealed class LifecycleConfigEntryBinding
 			ConfigEntryStatus.NeedsReconfiguration => IntegrationConfigEntryStatus.NeedsReconfiguration,
 			_ => IntegrationConfigEntryStatus.Ready
 		};
+	}
 
 	public Task<bool> IsUsableAsync(ConfigEntryRecord entry, CancellationToken cancellationToken)
-		=> _lifecycle.IsEntryUsableAsync(ToStored(entry), cancellationToken);
+	{
+		return _lifecycle.IsEntryUsableAsync(ToStored(entry), cancellationToken);
+	}
 
-	public Task<bool> ReloadAsync(CancellationToken cancellationToken) => _lifecycle.ReloadEntriesAsync(cancellationToken);
+	public Task<bool> ReloadAsync(CancellationToken cancellationToken)
+	{
+		return _lifecycle.ReloadEntriesAsync(cancellationToken);
+	}
 
-	public Task SynchronizeAsync(IReadOnlyList<ConfigEntryRecord> entries,
+	public Task SynchronizeAsync(
+		IReadOnlyList<ConfigEntryRecord> entries,
 		IVariableApi? variables,
 		CancellationToken cancellationToken)
-		=> variables is null
+	{
+		return variables is null
 			? _lifecycle.SynchronizeEntriesAsync([.. entries.Select(ToStored)], cancellationToken)
 			: _lifecycle.SynchronizeEntriesAsync([.. entries.Select(ToStored)], variables, cancellationToken);
+	}
 
 	public async Task ReleasePreparationAsync(Guid entryId, CancellationToken cancellationToken)
 	{
@@ -101,7 +113,8 @@ internal sealed class LifecycleConfigEntryBinding
 		await _lifecycle.ReleasePreparationAsync(entryId, cancellationToken).ConfigureAwait(false);
 	}
 
-	private bool TryReserve(Guid entryId,
+	private bool TryReserve(
+		Guid entryId,
 		IReadOnlyList<VariableDefinition> variables,
 		out IReadOnlyList<string> conflicts)
 	{
@@ -139,5 +152,8 @@ internal sealed class LifecycleConfigEntryBinding
 	}
 
 	private static StoredConfigEntry ToStored(ConfigEntryRecord entry)
-		=> new() { Id = entry.Id, Title = entry.Title, CreatedAt = entry.CreatedAt, Values = entry.Values };
+	{
+		return new StoredConfigEntry
+			{ Id = entry.Id, Title = entry.Title, CreatedAt = entry.CreatedAt, Values = entry.Values };
+	}
 }

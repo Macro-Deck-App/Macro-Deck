@@ -15,9 +15,15 @@ internal readonly struct HttpMessageBuildResult
 
 	public HttpFailureKind? Failure { get; }
 
-	public static HttpMessageBuildResult Success(HttpRequestMessage message) => new(message, null);
+	public static HttpMessageBuildResult Success(HttpRequestMessage message)
+	{
+		return new HttpMessageBuildResult(message, null);
+	}
 
-	public static HttpMessageBuildResult Failed(HttpFailureKind failure) => new(null, failure);
+	public static HttpMessageBuildResult Failed(HttpFailureKind failure)
+	{
+		return new HttpMessageBuildResult(null, failure);
+	}
 }
 
 internal static class HttpRequestFactory

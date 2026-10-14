@@ -33,7 +33,10 @@ public class PluginHostBuilderIconTests
 	private PluginManifestFixture? _fixture;
 
 	[TearDown]
-	public void TearDown() => _fixture?.Dispose();
+	public void TearDown()
+	{
+		_fixture?.Dispose();
+	}
 
 	[Test]
 	public void An_icon_of_an_unsupported_type_is_a_build_problem()

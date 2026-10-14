@@ -9,7 +9,8 @@ namespace MacroDeckHost.Application.Notifications;
 public static class NotificationWireMapper
 {
 	public static NotificationOptions ToOptions(NotificationsShowArguments arguments)
-		=> new()
+	{
+		return new NotificationOptions
 		{
 			Title = arguments.Title,
 			Message = arguments.Message,
@@ -30,16 +31,19 @@ public static class NotificationWireMapper
 			{
 				null or NotificationsWire.TargetKind.All => NotificationTarget.All,
 				NotificationsWire.TargetKind.AdminUi => NotificationTarget.AdminUi,
-				NotificationsWire.TargetKind.Devices => NotificationTarget.Devices([.. arguments.TargetDeviceIds ?? []]),
+				NotificationsWire.TargetKind.Devices =>
+					NotificationTarget.Devices([.. arguments.TargetDeviceIds ?? []]),
 				_ => throw Invalid("The target kind is not known.")
 			},
 			Actions = ToActions(arguments.Actions) ?? [],
 			Content = ToContent(arguments.Content),
 			Progress = ToProgress(arguments.Progress)
 		};
+	}
 
 	public static NotificationUpdate ToUpdate(NotificationsUpdateArguments arguments)
-		=> new()
+	{
+		return new NotificationUpdate
 		{
 			Title = arguments.Title,
 			Message = arguments.Message,
@@ -48,43 +52,57 @@ public static class NotificationWireMapper
 			Actions = ToActions(arguments.Actions),
 			Content = ToContent(arguments.Content)
 		};
+	}
 
-	public static string ReasonToWire(NotificationCloseReason reason) => reason switch
+	public static string ReasonToWire(NotificationCloseReason reason)
 	{
-		NotificationCloseReason.Action => NotificationsWire.CloseReason.Action,
-		NotificationCloseReason.Timeout => NotificationsWire.CloseReason.Timeout,
-		NotificationCloseReason.Programmatic => NotificationsWire.CloseReason.Programmatic,
-		NotificationCloseReason.OwnerGone => NotificationsWire.CloseReason.OwnerGone,
-		NotificationCloseReason.HostUnavailable => NotificationsWire.CloseReason.HostUnavailable,
-		_ => NotificationsWire.CloseReason.Dismissed
-	};
+		return reason switch
+		{
+			NotificationCloseReason.Action => NotificationsWire.CloseReason.Action,
+			NotificationCloseReason.Timeout => NotificationsWire.CloseReason.Timeout,
+			NotificationCloseReason.Programmatic => NotificationsWire.CloseReason.Programmatic,
+			NotificationCloseReason.OwnerGone => NotificationsWire.CloseReason.OwnerGone,
+			NotificationCloseReason.HostUnavailable => NotificationsWire.CloseReason.HostUnavailable,
+			_ => NotificationsWire.CloseReason.Dismissed
+		};
+	}
 
-	private static NotificationSeverity? ParseSeverity(string? severity) => severity switch
+	private static NotificationSeverity? ParseSeverity(string? severity)
 	{
-		NotificationsWire.Severity.Success => NotificationSeverity.Success,
-		NotificationsWire.Severity.Warning => NotificationSeverity.Warning,
-		NotificationsWire.Severity.Error => NotificationSeverity.Error,
-		NotificationsWire.Severity.Info => NotificationSeverity.Info,
-		_ => null
-	};
+		return severity switch
+		{
+			NotificationsWire.Severity.Success => NotificationSeverity.Success,
+			NotificationsWire.Severity.Warning => NotificationSeverity.Warning,
+			NotificationsWire.Severity.Error => NotificationSeverity.Error,
+			NotificationsWire.Severity.Info => NotificationSeverity.Info,
+			_ => null
+		};
+	}
 
 	private static IReadOnlyList<NotificationAction>? ToActions(IReadOnlyList<NotificationsActionDto>? actions)
-		=> actions is null
+	{
+		return actions is null
 			? null
-			: [.. actions.Select(action => new NotificationAction
-			{
-				Id = action.Id,
-				Label = action.Label,
-				Style = action.Style switch
+			:
+			[
+				.. actions.Select(action => new NotificationAction
 				{
-					NotificationsWire.ActionStyle.Primary => NotificationActionStyle.Primary,
-					NotificationsWire.ActionStyle.Danger => NotificationActionStyle.Danger,
-					_ => NotificationActionStyle.Default
-				}
-			})];
+					Id = action.Id,
+					Label = action.Label,
+					Style = action.Style switch
+					{
+						NotificationsWire.ActionStyle.Primary => NotificationActionStyle.Primary,
+						NotificationsWire.ActionStyle.Danger => NotificationActionStyle.Danger,
+						_ => NotificationActionStyle.Default
+					}
+				})
+			];
+	}
 
 	private static NotificationProgress? ToProgress(NotificationsProgressDto? progress)
-		=> progress is null ? null : new NotificationProgress(progress.Processed, progress.Total);
+	{
+		return progress is null ? null : new NotificationProgress(progress.Processed, progress.Total);
+	}
 
 	private static UiNode? ToContent(JsonElement? content)
 	{
@@ -109,5 +127,8 @@ public static class NotificationWireMapper
 		}
 	}
 
-	private static NotificationException Invalid(string message) => new(NotificationErrorCode.Invalid, message);
+	private static NotificationException Invalid(string message)
+	{
+		return new NotificationException(NotificationErrorCode.Invalid, message);
+	}
 }

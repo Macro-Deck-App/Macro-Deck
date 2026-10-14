@@ -16,7 +16,10 @@ public sealed class MacroDeckLocalizationRemovedAttribute : Attribute
 {
 	/// <summary>Creates the marker.</summary>
 	/// <param name="guidance">What to use instead, shown verbatim in the diagnostic.</param>
-	public MacroDeckLocalizationRemovedAttribute(string guidance) => Guidance = guidance;
+	public MacroDeckLocalizationRemovedAttribute(string guidance)
+	{
+		Guidance = guidance;
+	}
 
 	/// <summary>What to use instead.</summary>
 	public string Guidance { get; }

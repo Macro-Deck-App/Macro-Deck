@@ -42,7 +42,8 @@ internal sealed class HttpFailureMessagesTests
 	[TestCase(HttpFailureKind.TlsRejected, ActionErrorCodes.NotConnected)]
 	[TestCase(HttpFailureKind.FileMissing, ActionErrorCodes.NotFound)]
 	[TestCase(HttpFailureKind.FileUnreadable, ActionErrorCodes.ProviderError)]
-	public void The_failure_kind_table_maps_each_kind_to_its_documented_code(HttpFailureKind failure,
+	public void The_failure_kind_table_maps_each_kind_to_its_documented_code(
+		HttpFailureKind failure,
 		string expectedCode)
 	{
 		var (code, _) = HttpFailureMessages.ForFailure(failure);

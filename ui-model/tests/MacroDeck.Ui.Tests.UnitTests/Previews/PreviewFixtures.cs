@@ -11,14 +11,19 @@ namespace MacroDeck.Ui.Tests.UnitTests.Previews;
 internal static class PreviewFixtures
 {
 	private static UiConfigStack Showing(string state)
-		=> new()
+	{
+		return new UiConfigStack
 			{ Key = "root", Children = [new UiHeading { Key = "state", Text = state }] };
+	}
 
 	internal static class SpotifyConfigViewPreviews
 	{
 		internal static int Invocations { get; private set; }
 
-		internal static void ResetInvocations() => Invocations = 0;
+		internal static void ResetInvocations()
+		{
+			Invocations = 0;
+		}
 
 		[UiPreview("Default")]
 		internal static UiElement Default()
@@ -40,32 +45,50 @@ internal static class PreviewFixtures
 	internal static class WeatherDetailsViewPreviews
 	{
 		[UiPreview("Long text")]
-		internal static UiElement LongText() => Showing("Long text");
+		internal static UiElement LongText()
+		{
+			return Showing("Long text");
+		}
 	}
 
 	internal static class ExplicitlyNamed
 	{
 		[UiPreview("Default", View = "SpotifyConfigView")]
-		internal static UiElement Default() => Showing("Explicit");
+		internal static UiElement Default()
+		{
+			return Showing("Explicit");
+		}
 	}
 
 	internal sealed class MixedPreviews
 	{
 		[UiPreview("Default")]
-		internal static UiElement Healthy() => Showing("Healthy");
+		internal static UiElement Healthy()
+		{
+			return Showing("Healthy");
+		}
 
 		// Deliberately an instance method: the contract requires static, and this is the member that
 		// proves a non-static one is rejected rather than bound.
 #pragma warning disable CA1822
 		[UiPreview("Instance")]
-		internal UiElement Instance() => Showing("Instance");
+		internal UiElement Instance()
+		{
+			return Showing("Instance");
+		}
 #pragma warning restore CA1822
 
 		[UiPreview("Parameterized")]
-		internal static UiElement Parameterized(string state) => Showing(state);
+		internal static UiElement Parameterized(string state)
+		{
+			return Showing(state);
+		}
 
 		[UiPreview("Wrong return")]
-		internal static int WrongReturn() => 0;
+		internal static int WrongReturn()
+		{
+			return 0;
+		}
 	}
 
 	internal static class OwnedResourcePreviews
@@ -88,21 +111,27 @@ internal static class PreviewFixtures
 
 		[UiPreview("Returns a view")]
 		internal static UiView ReturnsAView()
-			=> new(new UiSurface { Kind = UiSurfaceKinds.DeveloperPreview, SessionMode = UiSessionModes.Exclusive },
+		{
+			return new UiView(new UiSurface
+					{ Kind = UiSurfaceKinds.DeveloperPreview, SessionMode = UiSessionModes.Exclusive },
 				new UiConfigStack
 				{
 					Key = "root",
 					Children =
 					[
-						new UiStringInput { Key = "shared", Binding = Bind.ReadOnly(UiValue.From(() => Shared.Value)) },
-					],
+						new UiStringInput { Key = "shared", Binding = Bind.ReadOnly(UiValue.From(() => Shared.Value)) }
+					]
 				});
+		}
 	}
 
 	internal sealed class SpyResource : IDisposable
 	{
 		public bool Disposed { get; private set; }
 
-		public void Dispose() => Disposed = true;
+		public void Dispose()
+		{
+			Disposed = true;
+		}
 	}
 }

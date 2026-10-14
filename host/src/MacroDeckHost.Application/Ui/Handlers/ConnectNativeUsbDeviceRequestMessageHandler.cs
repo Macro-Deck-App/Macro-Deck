@@ -7,7 +7,8 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 public class ConnectNativeUsbDeviceRequestMessageHandler(INativeUsbManager manager)
 	: IUiTransportMessageHandler<ConnectNativeUsbDeviceRequest, ConnectNativeUsbDeviceResponse>
 {
-	public async ValueTask<ConnectNativeUsbDeviceResponse> Handle(ConnectNativeUsbDeviceRequest request,
+	public async ValueTask<ConnectNativeUsbDeviceResponse> Handle(
+		ConnectNativeUsbDeviceRequest request,
 		CancellationToken cancellationToken)
 	{
 		var result = await manager.PickAsync(request.Id ?? string.Empty, cancellationToken);

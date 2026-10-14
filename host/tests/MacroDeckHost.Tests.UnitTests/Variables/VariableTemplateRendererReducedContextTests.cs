@@ -41,7 +41,7 @@ public class VariableTemplateRendererReducedContextTests
 		"{% capture c %}{{ vars.a }}{% endcapture %}{{ c }}",
 		"{% for t in vars.tags | split: \",\" %}{{ t }}{% endfor %}",
 		"{{ event.x }}",
-		"{{ vars.a ",
+		"{{ vars.a "
 	];
 
 	private static VariableEntity Var(
@@ -49,17 +49,20 @@ public class VariableTemplateRendererReducedContextTests
 		string value,
 		VariableType type = VariableType.Text,
 		VariableScope scope = VariableScope.Global,
-		string? scopeRefId = null) => new()
+		string? scopeRefId = null)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = scope,
-		ScopeRefId = scopeRefId,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value,
-		UpdatedAt = DateTime.UtcNow,
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = scope,
+			ScopeRefId = scopeRefId,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value,
+			UpdatedAt = DateTime.UtcNow
+		};
+	}
 
 	private static VariableRegistry Registry(params VariableEntity[] variables)
 	{
@@ -136,8 +139,10 @@ public class VariableTemplateRendererReducedContextTests
 		var registry = Registry(live);
 		var renderer = new VariableTemplateRenderer(registry);
 
-		string Render() =>
-			renderer.Render("{{ vars.a }}|{{ vars.a.unit }}|{{ vars.a.room }}", VariableScope.Global, null);
+		string Render()
+		{
+			return renderer.Render("{{ vars.a }}|{{ vars.a.unit }}|{{ vars.a.room }}", VariableScope.Global, null);
+		}
 
 		Assert.That(Render(), Is.EqualTo("one||"));
 
@@ -243,5 +248,7 @@ public class VariableTemplateRendererReducedContextTests
 	}
 
 	private static Template Parse(string template)
-		=> Template.ParseLiquid(template, null, new ParserOptions { LiquidFunctionsToScriban = true });
+	{
+		return Template.ParseLiquid(template, null, new ParserOptions { LiquidFunctionsToScriban = true });
+	}
 }

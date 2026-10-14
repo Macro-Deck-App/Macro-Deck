@@ -21,7 +21,8 @@ public sealed class WeatherWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IWidgetSampleTextResolver _sampleText;
 	private readonly ILogger _logger;
 
-	public WeatherWidgetUiProvider(IWeatherRegistry registry,
+	public WeatherWidgetUiProvider(
+		IWeatherRegistry registry,
 		IUiResourceStore resources,
 		IWeatherStateNotifier notifier,
 		IWidgetSampleTextResolver sampleText,
@@ -43,7 +44,7 @@ public sealed class WeatherWidgetUiProvider : IBuiltInWidgetUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -117,5 +118,7 @@ public sealed class WeatherWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static JsonElement DataElement(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	}
 }

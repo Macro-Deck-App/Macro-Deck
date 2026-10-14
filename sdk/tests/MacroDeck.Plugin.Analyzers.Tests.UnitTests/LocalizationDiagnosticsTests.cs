@@ -24,19 +24,18 @@ public class LocalizationDiagnosticsTests
 		yield return Case("A resource set with nothing wrong with it",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Connect", "Connect") +
-					"\n" +
-					Entry("ConnectedAs", "Connected as {userName}")),
-				[GermanFileName] = Resx(Entry("Connect", "Verbinden") +
-					"\n" +
-					Entry("ConnectedAs", "Verbunden als {userName}")),
+				[DefaultFileName]
+					= Resx(Entry("Connect", "Connect") + "\n" + Entry("ConnectedAs", "Connected as {userName}")),
+				[GermanFileName] = Resx(Entry("Connect", "Verbinden")
+					+ "\n"
+					+ Entry("ConnectedAs", "Verbunden als {userName}"))
 			});
 
 		yield return Case("A key translated but absent from the default language",
 			new Dictionary<string, string>
 			{
 				[DefaultFileName] = Resx(Entry("Connect", "Connect")),
-				[GermanFileName] = Resx(Entry("Connect", "Verbinden") + "\n" + Entry("Extra", "Zusatz")),
+				[GermanFileName] = Resx(Entry("Connect", "Verbinden") + "\n" + Entry("Extra", "Zusatz"))
 			},
 			"MDLOC001");
 
@@ -44,14 +43,14 @@ public class LocalizationDiagnosticsTests
 			new Dictionary<string, string>
 			{
 				[DefaultFileName] = Resx(Entry("Connect", "Connect") + "\n" + Entry("Later", "Later")),
-				[GermanFileName] = Resx(Entry("Connect", "Verbinden")),
+				[GermanFileName] = Resx(Entry("Connect", "Verbinden"))
 			});
 
 		yield return Case("A translation naming a placeholder the default language does not have",
 			new Dictionary<string, string>
 			{
 				[DefaultFileName] = Resx(Entry("ConnectedAs", "Connected as {userName}")),
-				[GermanFileName] = Resx(Entry("ConnectedAs", "Verbunden als {name}")),
+				[GermanFileName] = Resx(Entry("ConnectedAs", "Verbunden als {name}"))
 			},
 			"MDLOC002");
 
@@ -59,7 +58,7 @@ public class LocalizationDiagnosticsTests
 			new Dictionary<string, string>
 			{
 				[DefaultFileName] = Resx(Entry("Range", "{minimum} to {maximum}")),
-				[GermanFileName] = Resx(Entry("Range", "{maximum} ab {minimum}")),
+				[GermanFileName] = Resx(Entry("Range", "{maximum} ab {minimum}"))
 			});
 
 		// The case a count comparison passes and a set comparison catches: two placeholders either side,
@@ -68,14 +67,14 @@ public class LocalizationDiagnosticsTests
 			new Dictionary<string, string>
 			{
 				[DefaultFileName] = Resx(Entry("Pair", "{a} and {b}")),
-				[GermanFileName] = Resx(Entry("Pair", "{a} und {a}")),
+				[GermanFileName] = Resx(Entry("Pair", "{a} und {a}"))
 			},
 			"MDLOC002");
 
 		yield return Case("The same key declared twice in one file",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Connect", "Connect") + "\n" + Entry("Connect", "Connect again")),
+				[DefaultFileName] = Resx(Entry("Connect", "Connect") + "\n" + Entry("Connect", "Connect again"))
 			},
 			"MDLOC003");
 
@@ -83,54 +82,54 @@ public class LocalizationDiagnosticsTests
 			new Dictionary<string, string>
 			{
 				[DefaultFileName] = Resx(Entry("Connect", "Connect")),
-				[GermanFileName] = Resx(Entry("Connect", "Verbinden")),
+				[GermanFileName] = Resx(Entry("Connect", "Verbinden"))
 			});
 
 		yield return Case("A parameter declared as a type the compiler cannot emit",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("DeviceCount", "{count} devices found", "[count:flibble]")),
+				[DefaultFileName] = Resx(Entry("DeviceCount", "{count} devices found", "[count:flibble]"))
 			},
 			"MDLOC004");
 
 		yield return Case("A parameter declared for a placeholder the template does not use",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("DeviceCount", "{count} devices found", "[total:int]")),
+				[DefaultFileName] = Resx(Entry("DeviceCount", "{count} devices found", "[total:int]"))
 			},
 			"MDLOC004");
 
 		yield return Case("A parameter declared as each supported type",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("A", "{v}", "[v:string]") +
-					"\n" +
-					Entry("B", "{v}", "[v:int]") +
-					"\n" +
-					Entry("C", "{v}", "[v:long]") +
-					"\n" +
-					Entry("D", "{v}", "[v:double]") +
-					"\n" +
-					Entry("E", "{v}", "[v:bool]")),
+				[DefaultFileName] = Resx(Entry("A", "{v}", "[v:string]")
+					+ "\n"
+					+ Entry("B", "{v}", "[v:int]")
+					+ "\n"
+					+ Entry("C", "{v}", "[v:long]")
+					+ "\n"
+					+ Entry("D", "{v}", "[v:double]")
+					+ "\n"
+					+ Entry("E", "{v}", "[v:bool]"))
 			});
 
 		yield return Case("A resource file whose culture suffix is not a culture name",
 			new Dictionary<string, string>
 			{
 				[DefaultFileName] = Resx(Entry("Connect", "Connect")),
-				["Strings.de_DE.resx"] = Resx(Entry("Connect", "Verbinden")),
+				["Strings.de_DE.resx"] = Resx(Entry("Connect", "Verbinden"))
 			},
 			"MDLOC005");
 
 		yield return Case("A plural family with both its forms",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Icons.One", "{count} icon", "[plural]") +
-					"\n" +
-					Entry("Icons.Other", "{count} icons", "[plural]")),
-				[GermanFileName] = Resx(Entry("Icons.One", "{count} Symbol", "[plural]") +
-					"\n" +
-					Entry("Icons.Other", "{count} Symbole", "[plural]")),
+				[DefaultFileName] = Resx(Entry("Icons.One", "{count} icon", "[plural]")
+					+ "\n"
+					+ Entry("Icons.Other", "{count} icons", "[plural]")),
+				[GermanFileName] = Resx(Entry("Icons.One", "{count} Symbol", "[plural]")
+					+ "\n"
+					+ Entry("Icons.Other", "{count} Symbole", "[plural]"))
 			});
 
 		// The form a family cannot do without: every count other than one resolves through Other, so a
@@ -138,14 +137,14 @@ public class LocalizationDiagnosticsTests
 		yield return Case("A plural family missing its Other form",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Icons.One", "{count} icon", "[plural]")),
+				[DefaultFileName] = Resx(Entry("Icons.One", "{count} icon", "[plural]"))
 			},
 			"MDLOC007");
 
 		yield return Case("A plural entry whose key does not end in a form",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Icons.Several", "{count} icons", "[plural]")),
+				[DefaultFileName] = Resx(Entry("Icons.Several", "{count} icons", "[plural]"))
 			},
 			"MDLOC007");
 
@@ -154,9 +153,8 @@ public class LocalizationDiagnosticsTests
 		yield return Case("A plural family whose base key is also an ordinary key",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Icons", "Icons") +
-					"\n" +
-					Entry("Icons.Other", "{count} icons", "[plural]")),
+				[DefaultFileName]
+					= Resx(Entry("Icons", "Icons") + "\n" + Entry("Icons.Other", "{count} icons", "[plural]"))
 			},
 			"MDLOC007",
 			"MDLOC008");
@@ -166,9 +164,9 @@ public class LocalizationDiagnosticsTests
 		yield return Case("Keys ending in a form name without the plural declaration",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Chosen.One", "The chosen one") +
-					"\n" +
-					Entry("Chosen.Other", "Someone else")),
+				[DefaultFileName] = Resx(Entry("Chosen.One", "The chosen one")
+					+ "\n"
+					+ Entry("Chosen.Other", "Someone else"))
 			});
 
 		// A singular that does not print the count still needs it passed, so the caller cannot know which
@@ -176,23 +174,23 @@ public class LocalizationDiagnosticsTests
 		yield return Case("A plural form that leaves the count out of its text",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Icons.One", "one icon", "[plural]") +
-					"\n" +
-					Entry("Icons.Other", "{count} icons", "[plural]")),
-				[GermanFileName] = Resx(Entry("Icons.One", "ein Symbol", "[plural]") +
-					"\n" +
-					Entry("Icons.Other", "{count} Symbole", "[plural]")),
+				[DefaultFileName] = Resx(Entry("Icons.One", "one icon", "[plural]")
+					+ "\n"
+					+ Entry("Icons.Other", "{count} icons", "[plural]")),
+				[GermanFileName] = Resx(Entry("Icons.One", "ein Symbol", "[plural]")
+					+ "\n"
+					+ Entry("Icons.Other", "{count} Symbole", "[plural]"))
 			});
 
 		yield return Case("A plural form naming a placeholder the family does not have",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Icons.One", "{count} icon", "[plural]") +
-					"\n" +
-					Entry("Icons.Other", "{count} icons", "[plural]")),
-				[GermanFileName] = Resx(Entry("Icons.One", "{count} Symbol", "[plural]") +
-					"\n" +
-					Entry("Icons.Other", "{total} Symbole", "[plural]")),
+				[DefaultFileName] = Resx(Entry("Icons.One", "{count} icon", "[plural]")
+					+ "\n"
+					+ Entry("Icons.Other", "{count} icons", "[plural]")),
+				[GermanFileName] = Resx(Entry("Icons.One", "{count} Symbol", "[plural]")
+					+ "\n"
+					+ Entry("Icons.Other", "{total} Symbole", "[plural]"))
 			},
 			"MDLOC002");
 
@@ -201,18 +199,14 @@ public class LocalizationDiagnosticsTests
 		yield return Case("A key that is also the group other keys nest under",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Filters", "Filters") +
-					"\n" +
-					Entry("Filters.Date", "Date")),
+				[DefaultFileName] = Resx(Entry("Filters", "Filters") + "\n" + Entry("Filters.Date", "Date"))
 			},
 			"MDLOC008");
 
 		yield return Case("A group that is not itself a key",
 			new Dictionary<string, string>
 			{
-				[DefaultFileName] = Resx(Entry("Filters.Date", "Date") +
-					"\n" +
-					Entry("Filters.Size", "Size")),
+				[DefaultFileName] = Resx(Entry("Filters.Date", "Date") + "\n" + Entry("Filters.Size", "Size"))
 			});
 
 		// .NET manufactures a CultureInfo for anything vaguely well-formed under ICU, so the check is on
@@ -222,7 +216,7 @@ public class LocalizationDiagnosticsTests
 			{
 				[DefaultFileName] = Resx(Entry("Connect", "Connect")),
 				["Strings.pt-BR.resx"] = Resx(Entry("Connect", "Conectar")),
-				["Strings.zh-Hant-TW.resx"] = Resx(Entry("Connect", "連線")),
+				["Strings.zh-Hant-TW.resx"] = Resx(Entry("Connect", "連線"))
 			});
 	}
 
@@ -253,7 +247,7 @@ public class LocalizationDiagnosticsTests
 	{
 		var run = Run(new Dictionary<string, string>
 		{
-			[DefaultFileName] = Resx(Entry("Connect", "Connect") + "\n" + Entry("Connect", "Connect again")),
+			[DefaultFileName] = Resx(Entry("Connect", "Connect") + "\n" + Entry("Connect", "Connect again"))
 		});
 
 		var location = run.Diagnostics.Single().Location;
@@ -268,5 +262,7 @@ public class LocalizationDiagnosticsTests
 	}
 
 	private static TestCaseData Case(string name, Dictionary<string, string> files, params string[] expectedIds)
-		=> new TestCaseData(files, expectedIds).SetName($"{{m}}: {name}");
+	{
+		return new TestCaseData(files, expectedIds).SetName($"{{m}}: {name}");
+	}
 }

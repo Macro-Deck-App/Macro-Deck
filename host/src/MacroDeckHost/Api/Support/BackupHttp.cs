@@ -11,7 +11,8 @@ public static class BackupHttp
 {
 	public const long MaxUploadBytes = 4L << 30;
 
-	public static async Task<Result<string, BackupError>> StageUpload(IFormFile? file,
+	public static async Task<Result<string, BackupError>> StageUpload(
+		IFormFile? file,
 		IMacroDeckPaths paths,
 		CancellationToken cancellationToken)
 	{
@@ -97,12 +98,16 @@ public static class BackupHttp
 	}
 
 	public static TransportError ToTransportError(BackupError error, string? message)
-		=> BackupDtoMapper.ToTransportError(error, message);
+	{
+		return BackupDtoMapper.ToTransportError(error, message);
+	}
 
 	private static BackupError MapPathError(PortabilityError error)
-		=> error switch
+	{
+		return error switch
 		{
 			PortabilityError.NotFound => BackupError.NotFound,
 			_ => BackupError.ValidationError
 		};
+	}
 }

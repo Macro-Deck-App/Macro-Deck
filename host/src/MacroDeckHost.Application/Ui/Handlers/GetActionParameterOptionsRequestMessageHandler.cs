@@ -64,16 +64,16 @@ public class GetActionParameterOptionsRequestMessageHandler
 		if (action is null)
 		{
 			return ErrorResponse("ACTION_NOT_FOUND",
-				AppStrings.Errors.Actions.ActionNotFound(integrationId: request.IntegrationId,
-					actionId: request.ActionId));
+				AppStrings.Errors.Actions.ActionNotFound(request.IntegrationId,
+					request.ActionId));
 		}
 
 		var parameter = FindParameter(action.Parameters, request.ParameterName);
 		if (parameter is null)
 		{
 			return ErrorResponse("PARAMETER_NOT_FOUND",
-				AppStrings.Errors.Actions.ParameterNotFoundOnAction(parameterName: request.ParameterName,
-					actionId: request.ActionId));
+				AppStrings.Errors.Actions.ParameterNotFoundOnAction(request.ParameterName,
+					request.ActionId));
 		}
 
 		using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -85,7 +85,7 @@ public class GetActionParameterOptionsRequestMessageHandler
 			if (result is null)
 			{
 				return ErrorResponse("NO_OPTIONS_PROVIDER",
-					AppStrings.Errors.Actions.NoDynamicOptionsProvider(parameterName: request.ParameterName));
+					AppStrings.Errors.Actions.NoDynamicOptionsProvider(request.ParameterName));
 			}
 
 			if (!result.Error.IsEmpty)
@@ -98,7 +98,7 @@ public class GetActionParameterOptionsRequestMessageHandler
 		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
 			return ErrorResponse("OPTIONS_TIMEOUT",
-				AppStrings.Errors.Actions.OptionsProviderTimeout(parameterName: request.ParameterName));
+				AppStrings.Errors.Actions.OptionsProviderTimeout(request.ParameterName));
 		}
 		catch (Exception ex)
 		{
@@ -118,7 +118,7 @@ public class GetActionParameterOptionsRequestMessageHandler
 		if (!_hostOptionsSources.TryGetValue(request.OptionsSourceId!, out var source))
 		{
 			return ErrorResponse("OPTIONS_SOURCE_NOT_FOUND",
-				AppStrings.Errors.Actions.OptionsSourceNotFound(optionsSourceId: request.OptionsSourceId));
+				AppStrings.Errors.Actions.OptionsSourceNotFound(request.OptionsSourceId));
 		}
 
 		using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -132,7 +132,7 @@ public class GetActionParameterOptionsRequestMessageHandler
 		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
 			return ErrorResponse("OPTIONS_TIMEOUT",
-				AppStrings.Errors.Actions.OptionsSourceTimeout(optionsSourceId: request.OptionsSourceId));
+				AppStrings.Errors.Actions.OptionsSourceTimeout(request.OptionsSourceId));
 		}
 		catch (Exception ex)
 		{
@@ -160,9 +160,10 @@ public class GetActionParameterOptionsRequestMessageHandler
 		return new DynamicOptionsResult
 		{
 			Options = result.Options
-				.Where(option => option.Metadata is not null &&
-					option.Metadata.TryGetValue("type", out var type) &&
-					allowed.Contains(type))
+				.Where(option
+					=> option.Metadata is not null
+					&& option.Metadata.TryGetValue("type", out var type)
+					&& allowed.Contains(type))
 				.ToList(),
 			AllowsCustomValue = result.AllowsCustomValue,
 			CacheSeconds = result.CacheSeconds
@@ -176,7 +177,7 @@ public class GetActionParameterOptionsRequestMessageHandler
 		var descriptor = _eventRegistry.Find(request.EventId!);
 		if (descriptor is null)
 		{
-			return ErrorResponse("EVENT_NOT_FOUND", AppStrings.Errors.Events.NotFoundWithId(eventId: request.EventId));
+			return ErrorResponse("EVENT_NOT_FOUND", AppStrings.Errors.Events.NotFoundWithId(request.EventId));
 		}
 
 		// Condition authoring resolves options for a *payload* parameter, and an event may declare the
@@ -193,8 +194,8 @@ public class GetActionParameterOptionsRequestMessageHandler
 		if (parameter is null)
 		{
 			return ErrorResponse("PARAMETER_NOT_FOUND",
-				AppStrings.Errors.Actions.ParameterNotFoundOnEvent(parameterName: request.ParameterName,
-					eventId: request.EventId));
+				AppStrings.Errors.Actions.ParameterNotFoundOnEvent(request.ParameterName,
+					request.EventId));
 		}
 
 		using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -226,7 +227,7 @@ public class GetActionParameterOptionsRequestMessageHandler
 			else
 			{
 				return ErrorResponse("NO_OPTIONS_PROVIDER",
-					AppStrings.Errors.Actions.NoDynamicOptionsProvider(parameterName: request.ParameterName));
+					AppStrings.Errors.Actions.NoDynamicOptionsProvider(request.ParameterName));
 			}
 
 			if (!result.Error.IsEmpty)
@@ -239,7 +240,7 @@ public class GetActionParameterOptionsRequestMessageHandler
 		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
 			return ErrorResponse("OPTIONS_TIMEOUT",
-				AppStrings.Errors.Actions.OptionsProviderTimeout(parameterName: request.ParameterName));
+				AppStrings.Errors.Actions.OptionsProviderTimeout(request.ParameterName));
 		}
 		catch (Exception ex)
 		{
@@ -273,10 +274,13 @@ public class GetActionParameterOptionsRequestMessageHandler
 	}
 
 	private static string LocalEventId(string qualifiedEventId)
-		=> QualifiedId.TryParse(qualifiedEventId, out var id) ? id.LocalId : qualifiedEventId;
+	{
+		return QualifiedId.TryParse(qualifiedEventId, out var id) ? id.LocalId : qualifiedEventId;
+	}
 
 	private static GetActionParameterOptionsResponse Map(DynamicOptionsResult result)
-		=> new()
+	{
+		return new GetActionParameterOptionsResponse
 		{
 			Options = result.Options
 				.Select(o => new ActionParameterOptionDto
@@ -289,6 +293,7 @@ public class GetActionParameterOptionsRequestMessageHandler
 			AllowsCustomValue = result.AllowsCustomValue,
 			CacheSeconds = result.CacheSeconds
 		};
+	}
 
 	private async Task<DynamicOptionsResult?> ResolveOptions(
 		IActionDefinition action,

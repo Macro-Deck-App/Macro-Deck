@@ -32,7 +32,10 @@ internal sealed class ProcessTableMacOsTests
 		_started.Clear();
 	}
 
-	private static ProcessTable CreateProcessTable() => new(Serilog.Core.Logger.None);
+	private static ProcessTable CreateProcessTable()
+	{
+		return new ProcessTable(Serilog.Core.Logger.None);
+	}
 
 	private IPluginProcess StartStub(params string[] arguments)
 	{

@@ -6,8 +6,8 @@ namespace MacroDeckHost.Integrations.Keyboard.Actions;
 internal static class KeyboardTargetParameters
 {
 	private static readonly ActionParameter _targetProcess = ActionParameter.Autocomplete("targetProcess",
-		label: AppStrings.Integrations.Keyboard.Config.TargetProcessLabel(),
-		description: AppStrings.Integrations.Keyboard.Config.TargetProcessDescription(),
+		AppStrings.Integrations.Keyboard.Config.TargetProcessLabel(),
+		AppStrings.Integrations.Keyboard.Config.TargetProcessDescription(),
 		optionsSourceId: "system.processes",
 		placeholder: AppStrings.Integrations.Keyboard.Config.TargetProcessPlaceholder());
 
@@ -15,7 +15,6 @@ internal static class KeyboardTargetParameters
 	[
 		_targetProcess,
 		ActionParameter.Choice("targetMode",
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -33,16 +32,15 @@ internal static class KeyboardTargetParameters
 					Label = AppStrings.Integrations.Keyboard.Config.TargetModeBackgroundOption()
 				}
 			],
-			label: AppStrings.Integrations.Keyboard.Config.TargetModeLabel(),
-			description: AppStrings.Integrations.Keyboard.Config.TargetModeDescription(),
-			defaultValue: "focused")
+			AppStrings.Integrations.Keyboard.Config.TargetModeLabel(),
+			AppStrings.Integrations.Keyboard.Config.TargetModeDescription(),
+			"focused")
 	];
 
 	public static readonly IReadOnlyList<ActionParameter> Hold =
 	[
 		_targetProcess,
 		ActionParameter.Choice("targetMode",
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -55,8 +53,8 @@ internal static class KeyboardTargetParameters
 					Label = AppStrings.Integrations.Keyboard.Config.TargetModeBackgroundOption()
 				}
 			],
-			label: AppStrings.Integrations.Keyboard.Config.TargetModeLabel(),
-			description: AppStrings.Integrations.Keyboard.Config.HoldTargetModeDescription(),
-			defaultValue: "focused")
+			AppStrings.Integrations.Keyboard.Config.TargetModeLabel(),
+			AppStrings.Integrations.Keyboard.Config.HoldTargetModeDescription(),
+			"focused")
 	];
 }

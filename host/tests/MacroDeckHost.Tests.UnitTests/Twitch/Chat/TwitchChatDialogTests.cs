@@ -1,6 +1,5 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Limits;
-using MacroDeck.Sdk;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
@@ -42,7 +41,8 @@ internal sealed class TwitchChatDialogTests
 		_widgetId = Guid.NewGuid();
 		StoreWidget("""{"account":""}""");
 
-		_provider = Provider(TwitchStreamPlatform.Platform, new FakeTwitchChatImages(),
+		_provider = Provider(TwitchStreamPlatform.Platform,
+			new FakeTwitchChatImages(),
 			() => _moderatorAvailable ? _moderator : null);
 
 		_hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
@@ -52,7 +52,10 @@ internal sealed class TwitchChatDialogTests
 	}
 
 	[TearDown]
-	public void TearDown() => _hub.Dispose();
+	public void TearDown()
+	{
+		_hub.Dispose();
+	}
 
 	[Test]
 	public async Task Pressing_a_placed_widget_opens_the_chat_dialog_on_the_pressing_client()
@@ -87,7 +90,7 @@ internal sealed class TwitchChatDialogTests
 	public async Task The_editor_preview_and_the_picker_sample_are_not_pressable()
 	{
 		await using var preview = await OpenAsync(WidgetSurface(UiSurfaceKinds.Preview));
-		await using var sample = await OpenAsync(WidgetSurface(UiSurfaceKinds.Preview, sample: true));
+		await using var sample = await OpenAsync(WidgetSurface(UiSurfaceKinds.Preview, true));
 
 		Assert.Multiple(() =>
 		{
@@ -99,20 +102,22 @@ internal sealed class TwitchChatDialogTests
 	[Test]
 	public async Task The_dialog_follows_the_end_of_the_chat_and_falls_back_to_newest_first()
 	{
-		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m2") with
-		{
-			Fragments = [new ChatFragment(ChatFragmentKind.Text, "second")],
-		}));
+		_hub.Post(new ChatMessageReceived(Streamer,
+			TwitchChatHubTests.Message("m2") with
+			{
+				Fragments = [new ChatFragment(ChatFragmentKind.Text, "second")]
+			}));
 		_hub.Tick();
 
 		await using var dialog = await OpenDialogAsync();
-		var list = Flatten(dialog.BuildTree().Root, includeFallback: false).Single(node => node.Type == UiComponents.List);
+		var list = Flatten(dialog.BuildTree().Root, false).Single(node => node.Type == UiComponents.List);
 		var fallbackTexts = Texts(list.Fallback!);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(list.RequiredComponentVersion, Is.EqualTo(3));
-			Assert.That(list.Properties[UiComponentProperties.Anchor].GetString(), Is.EqualTo(UiComponentListAnchors.End));
+			Assert.That(list.Properties[UiComponentProperties.Anchor].GetString(),
+				Is.EqualTo(UiComponentListAnchors.End));
 			Assert.That(Texts(list), Has.Count.EqualTo(2));
 			Assert.That(Texts(list)[1], Does.Contain("second"));
 			Assert.That(fallbackTexts[0], Does.Contain("second"));
@@ -137,7 +142,8 @@ internal sealed class TwitchChatDialogTests
 
 		SelectMessage(dialog);
 		PressButton(dialog, "Timeout10Minutes");
-		await WaitForAsync(() => Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.TimedOut")));
+		await WaitForAsync(()
+			=> Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.TimedOut")));
 
 		Assert.That(_moderator.Requests,
 			Is.EqualTo(new[] { (Streamer, ChatModerationRequest.Timeout("42", 600)) }));
@@ -168,23 +174,26 @@ internal sealed class TwitchChatDialogTests
 	[Test]
 	public async Task Another_message_cannot_be_picked_while_an_action_is_still_running()
 	{
-		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m2", chatterId: "43") with
-		{
-			Fragments = [new ChatFragment(ChatFragmentKind.Text, "second")],
-		}));
+		_hub.Post(new ChatMessageReceived(Streamer,
+			TwitchChatHubTests.Message("m2", "43") with
+			{
+				Fragments = [new ChatFragment(ChatFragmentKind.Text, "second")]
+			}));
 		_hub.Tick();
-		var release = new TaskCompletionSource<ChatModerationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+		var release = new TaskCompletionSource<ChatModerationResult>(TaskCreationOptions
+			.RunContinuationsAsynchronously);
 		_moderator.Pending = release.Task;
 		await using var dialog = await OpenDialogAsync();
 
 		SelectMessage(dialog);
 		PressButton(dialog, "DeleteMessage");
 		await WaitForAsync(() => _moderator.Requests.Count == 1);
-		SelectMessage(dialog, index: 1);
+		SelectMessage(dialog, 1);
 		release.SetResult(ChatModerationResult.Succeeded);
-		await WaitForAsync(() => Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.Deleted")));
+		await WaitForAsync(()
+			=> Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.Deleted")));
 
-		var selected = Flatten(dialog.BuildTree().Root, includeFallback: false)
+		var selected = Flatten(dialog.BuildTree().Root, false)
 			.Single(node => node.Id.EndsWith("selected", StringComparison.Ordinal));
 
 		Assert.Multiple(() =>
@@ -197,9 +206,10 @@ internal sealed class TwitchChatDialogTests
 	[Test]
 	public async Task Closing_during_an_action_does_not_let_its_result_land_on_another_message()
 	{
-		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m2", chatterId: "43")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m2", "43")));
 		_hub.Tick();
-		var release = new TaskCompletionSource<ChatModerationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+		var release = new TaskCompletionSource<ChatModerationResult>(TaskCreationOptions
+			.RunContinuationsAsynchronously);
 		_moderator.Pending = release.Task;
 		await using var dialog = await OpenDialogAsync();
 
@@ -207,13 +217,14 @@ internal sealed class TwitchChatDialogTests
 		PressButton(dialog, "DeleteMessage");
 		await WaitForAsync(() => _moderator.Requests.Count == 1);
 		PressButton(dialog, "Close");
-		SelectMessage(dialog, index: 1);
-		var reselectedWhileBusy = Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.DeleteMessage"));
+		SelectMessage(dialog, 1);
+		var reselectedWhileBusy
+			= Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.DeleteMessage"));
 
 		release.SetResult(ChatModerationResult.Succeeded);
 		await WaitForAsync(() =>
 		{
-			SelectMessage(dialog, index: 1);
+			SelectMessage(dialog, 1);
 			return Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.DeleteMessage"));
 		});
 
@@ -304,17 +315,18 @@ internal sealed class TwitchChatDialogTests
 	[Test]
 	public async Task The_channels_own_messages_and_shared_chat_messages_offer_no_actions()
 	{
-		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("own", chatterId: Streamer)));
-		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("shared") with
-		{
-			SourceChannelId = "777", SourceChannelName = "PartnerChannel",
-		}));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("own", Streamer)));
+		_hub.Post(new ChatMessageReceived(Streamer,
+			TwitchChatHubTests.Message("shared") with
+			{
+				SourceChannelId = "777", SourceChannelName = "PartnerChannel"
+			}));
 		_hub.Tick();
 		await using var dialog = await OpenDialogAsync();
 
-		SelectMessage(dialog, index: 1);
+		SelectMessage(dialog, 1);
 		var own = Texts(dialog.BuildTree().Root);
-		SelectMessage(dialog, index: 2);
+		SelectMessage(dialog, 2);
 		var shared = Texts(dialog.BuildTree().Root);
 
 		Assert.Multiple(() =>
@@ -354,7 +366,8 @@ internal sealed class TwitchChatDialogTests
 
 		SelectMessage(dialog);
 		PressButton(dialog, "DeleteMessage");
-		await WaitForAsync(() => Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.Deleted")));
+		await WaitForAsync(()
+			=> Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.Deleted")));
 
 		Assert.Multiple(() =>
 		{
@@ -419,12 +432,14 @@ internal sealed class TwitchChatDialogTests
 		_hub.Tick();
 
 		await using var dialog = (await provider.CreateSessionAsync(
-			new UiSessionRequest { Surface = DialogSurface(), UiModelVersion = 1 }, CancellationToken.None))!;
+			new UiSessionRequest { Surface = DialogSurface(), UiModelVersion = 1 },
+			CancellationToken.None))!;
 		var root = dialog.BuildTree().Root;
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(root).Length, Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
+			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(root).Length,
+				Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
 			Assert.That(Flatten(root).Count(), Is.LessThanOrEqualTo(ProtocolLimits.MaxUiNodesPerTree));
 		});
 	}
@@ -454,9 +469,10 @@ internal sealed class TwitchChatDialogTests
 				Press(widget, widgetRoot, Client);
 				SelectMessage(dialog);
 
-				var close = Flatten(dialog.BuildTree().Root, includeFallback: false)
-					.LastOrDefault(node => node.Type == UiComponents.Button &&
-						Texts(node).Any(text => text.Contains(".Close\"", StringComparison.Ordinal)));
+				var close = Flatten(dialog.BuildTree().Root, false)
+					.LastOrDefault(node
+						=> node.Type == UiComponents.Button
+						&& Texts(node).Any(text => text.Contains(".Close\"", StringComparison.Ordinal)));
 
 				if (close is not null)
 				{
@@ -469,7 +485,8 @@ internal sealed class TwitchChatDialogTests
 		await stop.CancelAsync();
 
 		Assert.That(finished, Is.SameAs(presses), "a press never returned while the chat was updating");
-		Assert.That(await Task.WhenAny(feed, Task.Delay(TimeSpan.FromSeconds(20))), Is.SameAs(feed),
+		Assert.That(await Task.WhenAny(feed, Task.Delay(TimeSpan.FromSeconds(20))),
+			Is.SameAs(feed),
 			"the chat stopped updating while presses arrived");
 		await presses;
 		await dialog.DisposeAsync();
@@ -477,15 +494,22 @@ internal sealed class TwitchChatDialogTests
 	}
 
 	private async Task<IUiSession> OpenAsync(UiSurface surface)
-		=> (await _provider.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
+	{
+		return (await _provider.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
 			CancellationToken.None))!;
+	}
 
-	private Task<IUiSession> OpenDialogAsync() => OpenAsync(DialogSurface());
+	private Task<IUiSession> OpenDialogAsync()
+	{
+		return OpenAsync(DialogSurface());
+	}
 
-	private StreamWidgetsUiProvider Provider(StreamPlatform platform,
+	private StreamWidgetsUiProvider Provider(
+		StreamPlatform platform,
 		IStreamChatImages? images,
 		Func<IStreamChatModerator?> moderator)
-		=> new(platform,
+	{
+		return new StreamWidgetsUiProvider(platform,
 			_hub,
 			images,
 			new StreamStatsSource((_, _) => null),
@@ -494,32 +518,39 @@ internal sealed class TwitchChatDialogTests
 			moderator,
 			TimeProvider.System,
 			Logger.None);
+	}
 
 	private void StoreWidget(string json)
-		=> _context.OwnWidgets.Store(_widgetId, TwitchStreamPlatform.Platform.ChatWidgetTypeId, json);
+	{
+		_context.OwnWidgets.Store(_widgetId, TwitchStreamPlatform.Platform.ChatWidgetTypeId, json);
+	}
 
 	private UiSurface DialogSurface()
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Dialog,
 			SessionMode = UiSessionModes.Exclusive,
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiDialogSurfaceAttributes.ModalId] = JsonSerializer.SerializeToElement("modal-1"),
-				[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.DialogViewId),
+				[UiDialogSurfaceAttributes.ViewId]
+					= JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.DialogViewId),
 				[UiDialogSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new Dictionary<string, string>
 				{
-					["account"] = Streamer, ["widgetId"] = _widgetId.ToString(),
-				}),
-			},
+					["account"] = Streamer, ["widgetId"] = _widgetId.ToString()
+				})
+			}
 		};
+	}
 
 	private UiSurface WidgetSurface(string kind, bool sample = false)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" }),
+			[UiWidgetSurfaceAttributes.WidgetType]
+				= JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" })
 		};
 
 		if (kind == UiSurfaceKinds.Widget)
@@ -551,13 +582,13 @@ internal sealed class TwitchChatDialogTests
 
 	private static void SelectMessage(IUiSession session, int index = 0)
 	{
-		var list = Flatten(session.BuildTree().Root, includeFallback: false).Single(node => node.Type == UiComponents.List);
+		var list = Flatten(session.BuildTree().Root, false).Single(node => node.Type == UiComponents.List);
 		session.Dispatch(new UiEvent { NodeId = Pressable(list)[index].Id, Name = UiComponentEvents.Press });
 	}
 
 	private static void PressButton(IUiSession session, string key)
 	{
-		var button = Flatten(session.BuildTree().Root, includeFallback: false)
+		var button = Flatten(session.BuildTree().Root, false)
 			.Where(node => node.Type == UiComponents.Button)
 			.Last(node => Texts(node).Any(text => text.Contains("." + key + "\"", StringComparison.Ordinal)));
 
@@ -576,8 +607,15 @@ internal sealed class TwitchChatDialogTests
 	}
 
 	private static List<UiNode> Pressable(UiNode root)
-		=> [.. Flatten(root).Where(node => node.Properties.TryGetValue(UiComponentProperties.Events, out var events) &&
-			events.EnumerateArray().Any(item => item.GetRawText().Contains(UiComponentEvents.Press, StringComparison.Ordinal)))];
+	{
+		return
+		[
+			.. Flatten(root)
+				.Where(node => node.Properties.TryGetValue(UiComponentProperties.Events, out var events)
+					&& events.EnumerateArray()
+						.Any(item => item.GetRawText().Contains(UiComponentEvents.Press, StringComparison.Ordinal)))
+		];
+	}
 
 	private static IEnumerable<UiNode> Flatten(UiNode node, bool includeFallback = true)
 	{
@@ -598,9 +636,14 @@ internal sealed class TwitchChatDialogTests
 	}
 
 	private static List<string> Texts(UiNode root)
-		=> [.. Flatten(root, includeFallback: false)
-			.Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
-			.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())];
+	{
+		return
+		[
+			.. Flatten(root, false)
+				.Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
+				.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())
+		];
+	}
 
 	private sealed class RecordingModerator : IStreamChatModerator
 	{

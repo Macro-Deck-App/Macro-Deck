@@ -32,9 +32,9 @@ public static class HostVersion
 		}
 
 		var identifiers = parsedVersion.PreReleaseIdentifiers;
-		return identifiers.Count == 2 &&
-			identifiers[0].Equals("beta", StringComparison.Ordinal) &&
-			IsPositiveNumericIdentifier(identifiers[1]);
+		return identifiers.Count == 2
+			&& identifiers[0].Equals("beta", StringComparison.Ordinal)
+			&& IsPositiveNumericIdentifier(identifiers[1]);
 	}
 
 	private static bool IsPositiveNumericIdentifier(string value)
@@ -46,7 +46,8 @@ public static class HostVersion
 	{
 		var assembly = Assembly.GetEntryAssembly() ?? typeof(HostVersion).Assembly;
 		var informational = assembly
-			.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+			.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+			?
 			.InformationalVersion;
 
 		return Parse(informational);

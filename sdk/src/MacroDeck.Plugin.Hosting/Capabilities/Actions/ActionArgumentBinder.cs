@@ -48,15 +48,18 @@ internal static class ActionArgumentBinder
 	}
 
 	private static object? Convert(JsonElement value, ActionParameterType? type)
-		=> type switch
+	{
+		return type switch
 		{
 			ActionParameterType.Number or ActionParameterType.Duration => AsNumber(value),
 			ActionParameterType.Boolean => AsBoolean(value),
 			_ => AsDeclaredShape(value)
 		};
+	}
 
 	private static object? AsNumber(JsonElement value)
-		=> value.ValueKind switch
+	{
+		return value.ValueKind switch
 		{
 			JsonValueKind.Number when value.TryGetDouble(out var number) => number,
 			JsonValueKind.String when double.TryParse(value.GetString(),
@@ -65,15 +68,18 @@ internal static class ActionArgumentBinder
 				out var parsed) => parsed,
 			_ => AsDeclaredShape(value)
 		};
+	}
 
 	private static object? AsBoolean(JsonElement value)
-		=> value.ValueKind switch
+	{
+		return value.ValueKind switch
 		{
 			JsonValueKind.True => true,
 			JsonValueKind.False => false,
 			JsonValueKind.String when bool.TryParse(value.GetString(), out var parsed) => parsed,
 			_ => AsDeclaredShape(value)
 		};
+	}
 
 	/// <summary>
 	/// The value as the JSON says it is. Objects and arrays stay <see cref="JsonElement" />: they are
@@ -81,7 +87,8 @@ internal static class ActionArgumentBinder
 	/// structure the action wants.
 	/// </summary>
 	private static object? AsDeclaredShape(JsonElement value)
-		=> value.ValueKind switch
+	{
+		return value.ValueKind switch
 		{
 			JsonValueKind.String => value.GetString(),
 			JsonValueKind.Number when value.TryGetInt64(out var integer) => integer,
@@ -91,4 +98,5 @@ internal static class ActionArgumentBinder
 			JsonValueKind.Null or JsonValueKind.Undefined => null,
 			_ => value.Clone()
 		};
+	}
 }

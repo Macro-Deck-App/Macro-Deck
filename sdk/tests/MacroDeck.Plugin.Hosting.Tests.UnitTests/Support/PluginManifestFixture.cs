@@ -10,11 +10,17 @@ internal sealed class PluginManifestFixture : IDisposable
 {
 	public string ContentRoot { get; } = Directory.CreateTempSubdirectory("macro-deck-plugin-manifest-tests").FullName;
 
-	public PluginManifestFixture(string manifestJson) => File.WriteAllText(ManifestPath, manifestJson);
+	public PluginManifestFixture(string manifestJson)
+	{
+		File.WriteAllText(ManifestPath, manifestJson);
+	}
 
 	public string ManifestPath => Path.Combine(ContentRoot, PluginManifestFileReader.FileName);
 
-	public PluginHostBuilder CreateBuilder() => MacroDeckPlugin.CreatePlugin(["--contentRoot", ContentRoot]);
+	public PluginHostBuilder CreateBuilder()
+	{
+		return MacroDeckPlugin.CreatePlugin(["--contentRoot", ContentRoot]);
+	}
 
 	public void WriteFile(string relativePath, byte[] content)
 	{
@@ -27,7 +33,7 @@ internal sealed class PluginManifestFixture : IDisposable
 	{
 		if (Directory.Exists(ContentRoot))
 		{
-			Directory.Delete(ContentRoot, recursive: true);
+			Directory.Delete(ContentRoot, true);
 		}
 	}
 }

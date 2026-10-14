@@ -16,7 +16,9 @@ internal static class Glob
 		}
 
 		var fixedPart = normalized[..firstWildcard];
-		var rootRelative = fixedPart.Contains('/', StringComparison.Ordinal) ? fixedPart[..fixedPart.LastIndexOf('/')] : "";
+		var rootRelative = fixedPart.Contains('/', StringComparison.Ordinal)
+			? fixedPart[..fixedPart.LastIndexOf('/')]
+			: "";
 		var root = Path.Combine(baseDirectory, rootRelative);
 		if (!Directory.Exists(root))
 		{

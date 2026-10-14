@@ -9,17 +9,24 @@ namespace MacroDeckHost.Tests.UnitTests.TestSupport;
 /// </summary>
 internal sealed class NullUiInteractions : IUiInteractions, IUiInteractionsFactory
 {
-	public IUiInteractions ForIntegration(string integrationId) => this;
+	public IUiInteractions ForIntegration(string integrationId)
+	{
+		return this;
+	}
 
 	public Task<bool> ShowModalAsync(
 		string? originClientId,
 		ModalDefinition modal,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(false);
+	{
+		return Task.FromResult(false);
+	}
 
 	public Task<ModalResult<T>> ShowModalAsync<T>(
 		string? originClientId,
 		ModalDefinition modal,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(ModalResult.FromCancellation<T>());
+	{
+		return Task.FromResult(ModalResult.FromCancellation<T>());
+	}
 }

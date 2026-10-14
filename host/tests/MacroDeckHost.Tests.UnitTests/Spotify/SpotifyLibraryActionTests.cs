@@ -58,7 +58,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		await ExecuteAsync(ToggleLikedAction(player), mode: "add");
+		await ExecuteAsync(ToggleLikedAction(player), "add");
 
 		var write = http.Requests.Single(IsLibraryWriteRequest);
 		Assert.Multiple(() =>
@@ -80,7 +80,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		await ExecuteAsync(ToggleLikedAction(player), mode: "remove");
+		await ExecuteAsync(ToggleLikedAction(player), "remove");
 
 		var write = http.Requests.Single(IsLibraryWriteRequest);
 		Assert.Multiple(() =>
@@ -105,7 +105,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		await ExecuteAsync(ToggleLikedAction(player), mode: "toggle");
+		await ExecuteAsync(ToggleLikedAction(player), "toggle");
 
 		var write = http.Requests.Single(IsLibraryWriteRequest);
 		Assert.Multiple(() =>
@@ -123,7 +123,7 @@ internal sealed class SpotifyLibraryActionTests
 		await player.GetStateAsync();
 		Assert.That(player.CurrentItem, Is.Null, "test setup: expected no current item");
 
-		await ExecuteAsync(ToggleLikedAction(player), mode: "add");
+		await ExecuteAsync(ToggleLikedAction(player), "add");
 
 		Assert.That(http.Requests.Any(IsLibraryWriteRequest), Is.False);
 	}
@@ -139,7 +139,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		await ExecuteAsync(ToggleLikedAction(player), mode: "add");
+		await ExecuteAsync(ToggleLikedAction(player), "add");
 
 		var write = http.Requests.Single(IsLibraryWriteRequest);
 		Assert.That(Uris(write), Is.EqualTo("spotify:episode:episode-1"));
@@ -156,7 +156,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		await ExecuteAsync(PlaylistMembershipAction(player), mode: "add", playlist: "pl-1");
+		await ExecuteAsync(PlaylistMembershipAction(player), "add", "pl-1");
 
 		var write = http.Requests.Single(IsPlaylistItemsRequest);
 		Assert.Multiple(() =>
@@ -178,7 +178,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		await ExecuteAsync(PlaylistMembershipAction(player), mode: "remove", playlist: "pl-1");
+		await ExecuteAsync(PlaylistMembershipAction(player), "remove", "pl-1");
 
 		var write = http.Requests.Single(IsPlaylistItemsRequest);
 		Assert.Multiple(() =>
@@ -197,7 +197,7 @@ internal sealed class SpotifyLibraryActionTests
 		await player.GetStateAsync();
 		Assert.That(player.CurrentItem, Is.Null, "test setup: expected no current item");
 
-		await ExecuteAsync(PlaylistMembershipAction(player), mode: "add", playlist: "pl-1");
+		await ExecuteAsync(PlaylistMembershipAction(player), "add", "pl-1");
 
 		Assert.That(http.Requests.Any(IsPlaylistItemsRequest), Is.False);
 	}
@@ -215,7 +215,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		await ExecuteAsync(PlaylistMembershipAction(player), mode: "add", playlist: playlistValue);
+		await ExecuteAsync(PlaylistMembershipAction(player), "add", playlistValue);
 
 		var write = http.Requests.Single(IsPlaylistItemsRequest);
 		Assert.That(write.Endpoint.ToString(), Is.EqualTo("playlists/pl-1/items"));
@@ -289,7 +289,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		await ExecuteAsync(PlaylistMembershipAction(player), mode: "add", playlist: playlistValue);
+		await ExecuteAsync(PlaylistMembershipAction(player), "add", playlistValue);
 
 		Assert.That(http.Requests.Any(IsPlaylistItemsRequest), Is.False);
 	}
@@ -353,7 +353,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		var snapshot = await State(PlaylistMembershipAction(player), playlist: "pl-1");
+		var snapshot = await State(PlaylistMembershipAction(player), "pl-1");
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("in-playlist"));
 	}
@@ -369,7 +369,7 @@ internal sealed class SpotifyLibraryActionTests
 		};
 		var player = await PlayingPlayerAsync(http);
 
-		var snapshot = await State(PlaylistMembershipAction(player), playlist: "pl-1");
+		var snapshot = await State(PlaylistMembershipAction(player), "pl-1");
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("not-in-playlist"));
 	}
@@ -386,9 +386,9 @@ internal sealed class SpotifyLibraryActionTests
 		var player = await PlayingPlayerAsync(http);
 		var action = PlaylistMembershipAction(player);
 
-		await State(action, playlist: "pl-1");
-		await State(action, playlist: "pl-1");
-		await State(action, playlist: "pl-1");
+		await State(action, "pl-1");
+		await State(action, "pl-1");
+		await State(action, "pl-1");
 
 		Assert.That(http.Requests.Count(IsPlaylistItemsRequest), Is.EqualTo(1));
 	}
@@ -437,12 +437,16 @@ internal sealed class SpotifyLibraryActionTests
 	}
 
 	private static IActionDefinition ToggleLikedAction(SpotifyMusicPlayer player)
-		=> SpotifyLibraryActions.All(_ => player, () => [new MusicPlayerInstance("entry-1", "Spotify")])
+	{
+		return SpotifyLibraryActions.All(_ => player, () => [new MusicPlayerInstance("entry-1", "Spotify")])
 			.Single(a => a.Id == "toggle-liked");
+	}
 
 	private static IActionDefinition PlaylistMembershipAction(SpotifyMusicPlayer player)
-		=> SpotifyLibraryActions.All(_ => player, () => [new MusicPlayerInstance("entry-1", "Spotify")])
+	{
+		return SpotifyLibraryActions.All(_ => player, () => [new MusicPlayerInstance("entry-1", "Spotify")])
 			.Single(a => a.Id == "playlist-membership");
+	}
 
 	private static Task<ActionResult> ExecuteAsync(IActionDefinition action, string mode, string? playlist = null)
 	{
@@ -465,25 +469,35 @@ internal sealed class SpotifyLibraryActionTests
 	}
 
 	private static bool IsLibraryWriteRequest(IRequest request)
-		=> request.Endpoint.ToString() == "me/library";
+	{
+		return request.Endpoint.ToString() == "me/library";
+	}
 
 	private static bool IsLibraryCheckRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("library/contains", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("library/contains", StringComparison.Ordinal);
+	}
 
 	private static bool IsPlaylistItemsRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("playlists/", StringComparison.Ordinal) &&
-			request.Endpoint.ToString().Contains("/items", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("playlists/", StringComparison.Ordinal)
+			&& request.Endpoint.ToString().Contains("/items", StringComparison.Ordinal);
+	}
 
 	private static bool IsPlaylistsCatalogRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("me/playlists", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("me/playlists", StringComparison.Ordinal);
+	}
 
 	private static Response Json(HttpStatusCode statusCode, string body)
-		=> new(new Dictionary<string, string>())
+	{
+		return new Response(new Dictionary<string, string>())
 		{
 			StatusCode = statusCode,
 			ContentType = "application/json",
 			Body = body
 		};
+	}
 
 	private static SpotifyMusicPlayer CreatePlayer(StubSpotifyHttpClient http)
 	{

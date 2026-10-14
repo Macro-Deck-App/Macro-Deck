@@ -17,7 +17,8 @@ public sealed class UiTimeReferenceJsonConverter : JsonConverter<UiTimeReference
 	private const string ZoneProperty = "zone";
 
 	/// <inheritdoc />
-	public override UiTimeReference? Read(ref Utf8JsonReader reader,
+	public override UiTimeReference? Read(
+		ref Utf8JsonReader reader,
 		Type typeToConvert,
 		JsonSerializerOptions options)
 	{
@@ -33,8 +34,7 @@ public sealed class UiTimeReferenceJsonConverter : JsonConverter<UiTimeReference
 
 		using var document = JsonDocument.ParseValue(ref reader);
 
-		if (!document.RootElement.TryGetProperty(Marker, out var marker) ||
-			marker.ValueKind != JsonValueKind.Object)
+		if (!document.RootElement.TryGetProperty(Marker, out var marker) || marker.ValueKind != JsonValueKind.Object)
 		{
 			throw new JsonException($"A time reference must carry an object '{Marker}' member.");
 		}

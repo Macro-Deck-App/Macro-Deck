@@ -273,7 +273,9 @@ internal sealed class SteamConfigFlowTests
 	}
 
 	private Task<ConfigFlowResult> Submit(Dictionary<string, object?> input)
-		=> _flow.SubmitAsync("settings", input, new FakeEntryContext(null), CancellationToken.None);
+	{
+		return _flow.SubmitAsync("settings", input, new FakeEntryContext(null), CancellationToken.None);
+	}
 
 	private sealed class FakeClient : ISteamWebApiClient
 	{
@@ -293,16 +295,22 @@ internal sealed class SteamConfigFlowTests
 			Order.Add("summary:" + steamId);
 			return Failure is { } failure
 				? throw new SteamWebApiException(failure)
-				: Task.FromResult(KnownIds.Contains(steamId) ? new SteamPlayerSummary(steamId, "Ann", 1, null, null) : null);
+				: Task.FromResult(KnownIds.Contains(steamId)
+					? new SteamPlayerSummary(steamId, "Ann", 1, null, null)
+					: null);
 		}
 
 		public Task<IReadOnlyList<SteamPlayerSummary>> GetPlayerSummariesAsync(
 			IReadOnlyList<string> steamIds,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<string>?> GetFriendIdsAsync(string steamId, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken)
 		{
@@ -313,7 +321,11 @@ internal sealed class SteamConfigFlowTests
 				: Task.FromResult(Vanity.GetValueOrDefault(vanityName));
 		}
 
-		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<SteamOwnedGame>?>(null);
+		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(
+			string steamId,
+			CancellationToken cancellationToken)
+		{
+			return Task.FromResult<IReadOnlyList<SteamOwnedGame>?>(null);
+		}
 	}
 }

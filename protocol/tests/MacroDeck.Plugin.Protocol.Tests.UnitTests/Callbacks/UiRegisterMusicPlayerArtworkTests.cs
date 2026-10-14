@@ -10,8 +10,7 @@ public class UiRegisterMusicPlayerArtworkTests
 	[Test]
 	public void A_request_names_the_resource_the_player_instance_and_the_artwork()
 	{
-		var json = JsonSerializer.Serialize(
-			new UiRegisterMusicPlayerArtworkArguments
+		var json = JsonSerializer.Serialize(new UiRegisterMusicPlayerArtworkArguments
 			{
 				Name = "cover", InstanceId = "net.example.jukebox::default", ArtworkId = "cover-1"
 			},
@@ -24,15 +23,15 @@ public class UiRegisterMusicPlayerArtworkTests
 	[Test]
 	public void A_request_for_a_size_carries_it()
 	{
-		var json = JsonSerializer.Serialize(
-			new UiRegisterMusicPlayerArtworkArguments
+		var json = JsonSerializer.Serialize(new UiRegisterMusicPlayerArtworkArguments
 			{
 				Name = "cover", InstanceId = "net.example.jukebox::default", ArtworkId = "cover-1", MaxSize = 256
 			},
 			PluginProtocolJson.Options);
 
 		Assert.That(json,
-			Is.EqualTo("""{"name":"cover","instanceId":"net.example.jukebox::default","artworkId":"cover-1","maxSize":256}"""));
+			Is.EqualTo(
+				"""{"name":"cover","instanceId":"net.example.jukebox::default","artworkId":"cover-1","maxSize":256}"""));
 	}
 
 	[Test]

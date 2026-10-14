@@ -18,7 +18,8 @@ namespace MacroDeck.Plugin.Hosting.Endpoints;
 internal sealed class ReservedPathStartupFilter : IStartupFilter
 {
 	public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-		=> app =>
+	{
+		return app =>
 		{
 			app.Use(async (context, following) =>
 			{
@@ -35,7 +36,10 @@ internal sealed class ReservedPathStartupFilter : IStartupFilter
 
 			next(app);
 		};
+	}
 
 	private static bool IsSdkEndpoint(string? path)
-		=> ReservedPaths.All.Any(route => string.Equals(route, path, StringComparison.OrdinalIgnoreCase));
+	{
+		return ReservedPaths.All.Any(route => string.Equals(route, path, StringComparison.OrdinalIgnoreCase));
+	}
 }

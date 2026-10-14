@@ -33,26 +33,33 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 	private const string UnitId = "entity/sensor.office_temperature/unit_of_measurement";
 	private const string CustomTagId = "tag/MY_CUSTOM_FIELD";
 
-	private static IReadOnlyList<DeclaredCapability> NoDeclarations() => [];
+	private static IReadOnlyList<DeclaredCapability> NoDeclarations()
+	{
+		return [];
+	}
 
 	private static VariablesCapabilityHandler Handler(IPluginIntegration provider)
-		=> new([provider],
+	{
+		return new VariablesCapabilityHandler([provider],
 			TestMetadata.Default,
 			new VariableSubscriptions(Serilog.Log.Logger),
 			Serilog.Core.Logger.None);
+	}
 
 	private static VariableDefinition OnDemand(string id, string name, VariableType type)
-		=> new()
+	{
+		return new VariableDefinition
 		{
 			Id = id, Name = name, Type = type, Materialization = VariableMaterialization.OnDemand
 		};
+	}
 
 	[Test]
 	public async Task Describe_reaches_the_snapshot()
 	{
 		var provider = new TestVariableCatalogIntegration("Home Assistant",
-			supportsPush: true,
-			supportsSearch: true);
+			true,
+			true);
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
 			[]);
@@ -341,7 +348,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 			new ScreenSaverRegistry(Mediator),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			variableSubscriptions: hostSubscriptions,
@@ -365,25 +372,28 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 		// Simulated directly against the plugin's own host invoker rather than through IVariableSink, so
 		// this proves the *host's* defense specifically: even a push that never went through the
 		// plugin-side sink's own filtering must still be policed on arrival.
-		await CreatePluginHostInvoker().InvokeAsync(HostApis.VariableValues,
-			HostOperations.VariableValues.Value,
-			new VariableValuesValueArguments
-			{
-				Values =
-				[
-					new VariableIdValueDto
-					{
-						Id = "A",
-						Reading = new VariableReadingDto { Value = new VariableValueDto { Kind = "text", Text = "a" } }
-					},
-					new VariableIdValueDto
-					{
-						Id = "C",
-						Reading = new VariableReadingDto { Value = new VariableValueDto { Kind = "text", Text = "c" } }
-					}
-				]
-			},
-			CancellationToken.None);
+		await CreatePluginHostInvoker()
+			.InvokeAsync(HostApis.VariableValues,
+				HostOperations.VariableValues.Value,
+				new VariableValuesValueArguments
+				{
+					Values =
+					[
+						new VariableIdValueDto
+						{
+							Id = "A",
+							Reading = new VariableReadingDto
+								{ Value = new VariableValueDto { Kind = "text", Text = "a" } }
+						},
+						new VariableIdValueDto
+						{
+							Id = "C",
+							Reading = new VariableReadingDto
+								{ Value = new VariableValueDto { Kind = "text", Text = "c" } }
+						}
+					]
+				},
+				CancellationToken.None);
 
 		var drained = channel.DrainAvailable();
 

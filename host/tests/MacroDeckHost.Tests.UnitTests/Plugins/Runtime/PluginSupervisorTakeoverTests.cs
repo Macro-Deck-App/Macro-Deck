@@ -36,7 +36,7 @@ internal sealed class PluginSupervisorTakeoverTests
 	public void SetUp()
 	{
 		_time = new ManualTimeProvider();
-		_manifestReader = new FakePluginManifestReader { Default = ManifestWithShutdown(gracefulTimeoutSeconds: 10) };
+		_manifestReader = new FakePluginManifestReader { Default = ManifestWithShutdown(10) };
 		_catalog = new FakePluginInstallationCatalog();
 		_catalog.Plugins.Add(Installed());
 		_stateStore = new FakePluginRuntimeStateStore();
@@ -63,7 +63,7 @@ internal sealed class PluginSupervisorTakeoverTests
 	[Test]
 	public async Task A_suspend_returns_while_a_slow_plugin_is_still_in_its_graceful_wait()
 	{
-		_manifestReader.Default = ManifestWithShutdown(gracefulTimeoutSeconds: 60);
+		_manifestReader.Default = ManifestWithShutdown(60);
 		var supervisor = CreateSupervisor();
 		var process = await StartRunning(supervisor);
 		var managedConnection = await AttachSession(PluginSessionOrigin.Managed);
@@ -262,12 +262,14 @@ internal sealed class PluginSupervisorTakeoverTests
 		});
 
 		var connection = new FakePluginConnection();
-		_sessionRegistry.TryAttach(sessionId, connection, instanceId: null);
+		_sessionRegistry.TryAttach(sessionId, connection, null);
 		return connection;
 	}
 
 	private static PluginRuntimeSnapshot Snapshot(PluginSupervisor supervisor)
-		=> supervisor.Snapshot().Single(snapshot => snapshot.PluginId == PluginId);
+	{
+		return supervisor.Snapshot().Single(snapshot => snapshot.PluginId == PluginId);
+	}
 
 	private static async Task WaitUntil(Func<bool> condition)
 	{
@@ -313,7 +315,8 @@ internal sealed class PluginSupervisorTakeoverTests
 	}
 
 	private static PluginManifestReadResult ManifestWithShutdown(int gracefulTimeoutSeconds)
-		=> PluginManifestReadResult.Ok(new PluginManifest
+	{
+		return PluginManifestReadResult.Ok(new PluginManifest
 		{
 			ManifestVersion = 1,
 			Id = PluginId,
@@ -325,6 +328,7 @@ internal sealed class PluginSupervisorTakeoverTests
 			},
 			Shutdown = new PluginShutdownSettings { GracefulTimeoutSeconds = gracefulTimeoutSeconds }
 		});
+	}
 
 	private static InstalledPlugin Installed()
 	{
@@ -349,7 +353,8 @@ internal sealed class PluginSupervisorTakeoverTests
 	{
 		public TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		public async Task<PluginTrustResult> EvaluateInstalledAsync(string versionDirectory,
+		public async Task<PluginTrustResult> EvaluateInstalledAsync(
+			string versionDirectory,
 			PluginRevocationCheck revocationCheck,
 			CancellationToken cancellationToken = default)
 		{

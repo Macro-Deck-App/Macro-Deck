@@ -25,11 +25,15 @@ public static partial class UiResourceRules
 	/// True when <paramref name="name" /> is an ASCII letter or digit followed by up to 63 more letters,
 	/// digits, hyphens or underscores. Never throws, including on <c>null</c>.
 	/// </summary>
-	public static bool IsValidName(string? name) => name is not null && NamePattern().IsMatch(name);
+	public static bool IsValidName(string? name)
+	{
+		return name is not null && NamePattern().IsMatch(name);
+	}
 
 	/// <summary>True when <paramref name="mediaType" /> is one of <see cref="SupportedMediaTypes" />,
 	/// compared case-insensitively.</summary>
 	public static bool IsSupportedMediaType(string? mediaType)
-		=> mediaType is not null &&
-			SupportedMediaTypes.Contains(mediaType, StringComparer.OrdinalIgnoreCase);
+	{
+		return mediaType is not null && SupportedMediaTypes.Contains(mediaType, StringComparer.OrdinalIgnoreCase);
+	}
 }

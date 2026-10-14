@@ -37,8 +37,6 @@
       <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Windows" />
       <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.MacOS" />
       <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Linux" />
-      <InternalsVisibleTo Include="MacroDeckHost" />
-      <InternalsVisibleTo Include="MacroDeckHost.Infrastructure" />
     </ItemGroup>
 
 </Project>

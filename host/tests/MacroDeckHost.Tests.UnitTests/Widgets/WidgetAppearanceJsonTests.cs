@@ -437,7 +437,8 @@ public class WidgetAppearanceJsonTests
 	[Test]
 	public void ClearingOrEmptyingTheIconAppearance_ReturnsToAutomaticAndKeepsTheIcon()
 	{
-		const string pinned = """{"mode":"momentary","icon":{"type":"icon-pack","reference":"i","appearance":"motion=static"}}""";
+		const string pinned
+			= """{"mode":"momentary","icon":{"type":"icon-pack","reference":"i","appearance":"motion=static"}}""";
 		var cleared = Parse(pinned);
 		var emptied = Parse(pinned);
 
@@ -531,12 +532,15 @@ public class WidgetAppearanceJsonTests
 	{
 		var data = Parse("""{"border":{"style":"static"}}""");
 
-		var changed = WidgetAppearanceJson.Apply(data, type,
-			new WidgetAppearancePatch { BackgroundColor = color }, _offOnly);
+		var changed = WidgetAppearanceJson.Apply(data,
+			type,
+			new WidgetAppearancePatch { BackgroundColor = color },
+			_offOnly);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(WidgetAppearanceJson.SupportedProperties(type), Does.Contain(WidgetAppearanceProperty.BackgroundColor));
+			Assert.That(WidgetAppearanceJson.SupportedProperties(type),
+				Does.Contain(WidgetAppearanceProperty.BackgroundColor));
 			Assert.That(changed, Is.True);
 			Assert.That(PaintedBackground(type, data), Is.EqualTo(color));
 			Assert.That(data["border"]!["style"]!.GetValue<string>(), Is.EqualTo("static"));
@@ -744,36 +748,50 @@ public class WidgetAppearanceJsonTests
 		});
 	}
 
-	private static IReadOnlyCollection<string> ToStateIds(WidgetStateSelector selector) => selector switch
+	private static IReadOnlyCollection<string> ToStateIds(WidgetStateSelector selector)
 	{
-		WidgetStateSelector.On => ["on"],
-		WidgetStateSelector.Off => ["off"],
-		WidgetStateSelector.Both => [WidgetStates.All],
-		_ => [WidgetStates.Current]
-	};
+		return selector switch
+		{
+			WidgetStateSelector.On => ["on"],
+			WidgetStateSelector.Off => ["off"],
+			WidgetStateSelector.Both => [WidgetStates.All],
+			_ => [WidgetStates.Current]
+		};
+	}
 #pragma warning restore CS0618
 
-	private static JsonObject Parse(string json) => WidgetAppearanceJson.ParseDataBag(json);
+	private static JsonObject Parse(string json)
+	{
+		return WidgetAppearanceJson.ParseDataBag(json);
+	}
 
-	private static JsonElement Element(JsonObject data) => JsonSerializer.SerializeToElement(data);
+	private static JsonElement Element(JsonObject data)
+	{
+		return JsonSerializer.SerializeToElement(data);
+	}
 
 	/// <summary>Looks up a state's appearance object by id in the current array shape.</summary>
 	private static JsonObject? Appearance(JsonObject data, string stateId)
-		=> data["states"]!.AsArray()
+	{
+		return data["states"]!.AsArray()
 			.OfType<JsonObject>()
 			.FirstOrDefault(entry => entry["id"]!.GetValue<string>() == stateId)?["appearance"]
 			?.AsObject();
+	}
 
 	private static string? PaintedBackground(string type, JsonObject data)
-		=> type switch
+	{
+		return type switch
 		{
 			WidgetTypeIds.Clock => ClockWidgetData.Parse(Element(data)).BackgroundColor,
 			WidgetTypeIds.Weather => WeatherWidgetData.Parse(Element(data)).BackgroundColor,
 			WidgetTypeIds.HistoryGraph => HistoryGraphWidgetData.Parse(Element(data)).BackgroundColor,
 			WidgetTypeIds.MusicPlayer => MusicPlayerWidgetData.Parse(Element(data)).BackgroundColor,
-			WidgetTypeIds.Countdown or WidgetTypeIds.Stopwatch => TimerWidgetSettings.Parse(Element(data)).BackgroundColor,
+			WidgetTypeIds.Countdown or WidgetTypeIds.Stopwatch => TimerWidgetSettings.Parse(Element(data))
+				.BackgroundColor,
 			WidgetTypeIds.Gauges => GaugesWidgetData.Parse(Element(data)).BackgroundColor,
 			WidgetTypeIds.Battery => BatteryWidgetData.Parse(Element(data)).BackgroundColor,
-			_ => throw new ArgumentOutOfRangeException(nameof(type)),
+			_ => throw new ArgumentOutOfRangeException(nameof(type))
 		};
+	}
 }

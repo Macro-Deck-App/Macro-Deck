@@ -6,21 +6,27 @@ namespace MacroDeckHost.Application.Scripts;
 
 public static class ScriptInputSdkMapper
 {
-	public static SdkScriptInput ToSdk(ScriptInput input) => new()
+	public static SdkScriptInput ToSdk(ScriptInput input)
 	{
-		Name = input.Name,
-		Type = ToSdk(input.Type),
-		Label = input.Label,
-		Description = input.Description,
-		Required = input.Required,
-		DefaultValue = input.DefaultValue
-	};
+		return new SdkScriptInput
+		{
+			Name = input.Name,
+			Type = ToSdk(input.Type),
+			Label = input.Label,
+			Description = input.Description,
+			Required = input.Required,
+			DefaultValue = input.DefaultValue
+		};
+	}
 
-	private static SdkScriptInputType ToSdk(ScriptInputType type) => type switch
+	private static SdkScriptInputType ToSdk(ScriptInputType type)
 	{
-		ScriptInputType.Numeric => SdkScriptInputType.Numeric,
-		ScriptInputType.Boolean => SdkScriptInputType.Boolean,
-		ScriptInputType.Color => SdkScriptInputType.Color,
-		_ => SdkScriptInputType.Text
-	};
+		return type switch
+		{
+			ScriptInputType.Numeric => SdkScriptInputType.Numeric,
+			ScriptInputType.Boolean => SdkScriptInputType.Boolean,
+			ScriptInputType.Color => SdkScriptInputType.Color,
+			_ => SdkScriptInputType.Text
+		};
+	}
 }

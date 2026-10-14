@@ -16,10 +16,13 @@ public class NewCommandWizardTests
 		_output = Path.Combine(Directory.CreateTempSubdirectory("macrodeck-cli-tests-").FullName, "SpotifyController");
 	}
 
-	private static FakePluginScaffoldGenerator NewGenerator() => new()
+	private static FakePluginScaffoldGenerator NewGenerator()
 	{
-		OnCreate = ScaffoldFixtures.WriteTemplateProject
-	};
+		return new FakePluginScaffoldGenerator
+		{
+			OnCreate = ScaffoldFixtures.WriteTemplateProject
+		};
+	}
 
 	// d1
 	[Test]
@@ -52,14 +55,14 @@ public class NewCommandWizardTests
 		var (_, _, flagExitCode) = await CliRunner.Run(flagGenerator, flagArgs);
 		Assert.That(flagExitCode, Is.EqualTo(ExitCode.Success));
 
-		var wizardManifest = NormalizeJson(File.ReadAllText(Path.Combine(_output, "manifest.json")));
-		var flagManifest = NormalizeJson(File.ReadAllText(Path.Combine(flagOutput, "manifest.json")));
+		var wizardManifest = NormalizeJson(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
+		var flagManifest = NormalizeJson(await File.ReadAllTextAsync(Path.Combine(flagOutput, "manifest.json")));
 		Assert.That(wizardManifest, Is.EqualTo(flagManifest));
 
 		var wizardBuildConfig = NormalizeJson(
-			File.ReadAllText(Path.Combine(_output, PluginScaffoldDefaults.BuildConfigFileName)));
+			await File.ReadAllTextAsync(Path.Combine(_output, PluginScaffoldDefaults.BuildConfigFileName)));
 		var flagBuildConfig = NormalizeJson(
-			File.ReadAllText(Path.Combine(flagOutput, PluginScaffoldDefaults.BuildConfigFileName)));
+			await File.ReadAllTextAsync(Path.Combine(flagOutput, PluginScaffoldDefaults.BuildConfigFileName)));
 		Assert.That(wizardBuildConfig, Is.EqualTo(flagBuildConfig));
 	}
 
@@ -89,7 +92,7 @@ public class NewCommandWizardTests
 
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
-		using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 		Assert.That(manifest.RootElement.GetProperty("id").GetString(), Is.EqualTo("com.example.spotify-controller"));
 	}
 
@@ -119,7 +122,7 @@ public class NewCommandWizardTests
 			Assert.That(error, Does.Contain("invalid-plugin-id"));
 		});
 
-		using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 		Assert.That(manifest.RootElement.GetProperty("id").GetString(), Is.EqualTo("com.example.spotify"));
 	}
 
@@ -144,7 +147,7 @@ public class NewCommandWizardTests
 		var (_, _, exitCode) = await CliRunner.RunInteractive(script, generator, "new");
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
-		using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 		Assert.Multiple(() =>
 		{
 			Assert.That(manifest.RootElement.GetProperty("name").GetString(), Is.EqualTo("Spotify Controller"));
@@ -198,7 +201,7 @@ public class NewCommandWizardTests
 		var (_, _, exitCode) = await CliRunner.RunInteractive(script, generator, "new");
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
-		using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 		var keys = manifest.RootElement.GetProperty("entrypoints").EnumerateObject().Select(p => p.Name).ToList();
 		Assert.That(keys, Is.EquivalentTo(new List<string> { "osx-arm64", "linux-x64" }));
 	}
@@ -227,7 +230,7 @@ public class NewCommandWizardTests
 			Assert.That(error, Does.Contain("unknown-platform"));
 		});
 
-		using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 		var keys = manifest.RootElement.GetProperty("entrypoints").EnumerateObject().Select(p => p.Name).ToList();
 		Assert.That(keys, Is.EquivalentTo(new List<string> { "osx-arm64" }));
 	}
@@ -240,7 +243,7 @@ public class NewCommandWizardTests
 		var (_, _, exitCode) = await CliRunner.RunInteractive(script, generator, "new");
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
-		using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var manifest = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 		var keys = manifest.RootElement.GetProperty("entrypoints").EnumerateObject().Select(p => p.Name).ToList();
 		Assert.That(keys, Is.EquivalentTo(new List<string> { "win-x64", "osx-arm64", "linux-x64" }));
 	}
@@ -282,7 +285,7 @@ public class NewCommandWizardTests
 
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
-		using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var document = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 		var root = document.RootElement;
 		var entrypointKeys = root.GetProperty("entrypoints").EnumerateObject().Select(p => p.Name).ToList();
 
@@ -318,7 +321,7 @@ public class NewCommandWizardTests
 		var (output, _, exitCode) = await CliRunner.RunInteractive(script, NewGenerator(), "new");
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
-		using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var document = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 
 		Assert.Multiple(() =>
 		{
@@ -340,7 +343,7 @@ public class NewCommandWizardTests
 		var (_, _, exitCode) = await CliRunner.Run(NewGenerator(), args);
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
-		using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var document = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 
 		Assert.Multiple(() =>
 		{
@@ -362,7 +365,7 @@ public class NewCommandWizardTests
 		var (_, _, exitCode) = await CliRunner.Run(NewGenerator(), args);
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
-		using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(_output, "manifest.json")));
+		using var document = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")));
 
 		Assert.Multiple(() =>
 		{
@@ -376,10 +379,10 @@ public class NewCommandWizardTests
 	public async Task Cancelling_the_token_while_awaiting_input_leaves_nothing_behind()
 	{
 		using var cancellation = new CancellationTokenSource();
-		cancellation.Cancel();
+		await cancellation.CancelAsync();
 
 		var lines = new Queue<string>(["Spotify Controller"]);
-		var prompt = new CliPromptReader(isInteractive: true, readLine: () => lines.Count > 0 ? lines.Dequeue() : null);
+		var prompt = new CliPromptReader(true, () => lines.Count > 0 ? lines.Dequeue() : null);
 
 		var output = new StringWriter();
 		var error = new StringWriter();

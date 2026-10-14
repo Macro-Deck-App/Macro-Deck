@@ -74,12 +74,14 @@ internal sealed record UiResponsiveCondition(
 	[property: JsonPropertyOrder(5)] double? MaxAspect)
 {
 	internal static UiResponsiveCondition Of(UiResponsiveVariant variant)
-		=> new(variant.MinWidth,
+	{
+		return new UiResponsiveCondition(variant.MinWidth,
 			variant.MaxWidth,
 			variant.MinHeight,
 			variant.MaxHeight,
 			variant.MinAspect,
 			variant.MaxAspect);
+	}
 }
 
 /// <summary>
@@ -225,38 +227,50 @@ public static class UiResponsiveSelection
 
 		var aspect = width is not null && height is not null ? width / height : null;
 
-		return Min(condition, "minWidth", width) &&
-			Max(condition, "maxWidth", width) &&
-			Min(condition, "minHeight", height) &&
-			Max(condition, "maxHeight", height) &&
-			Min(condition, "minAspect", aspect) &&
-			Max(condition, "maxAspect", aspect);
+		return Min(condition, "minWidth", width)
+			&& Max(condition, "maxWidth", width)
+			&& Min(condition, "minHeight", height)
+			&& Max(condition, "maxHeight", height)
+			&& Min(condition, "minAspect", aspect)
+			&& Max(condition, "maxAspect", aspect);
 	}
 
 	private static bool Min(JsonElement condition, string name, double? value)
-		=> Bound(condition, name) is not { } bound || (value is { } v && v >= bound - Tolerance);
+	{
+		return Bound(condition, name) is not { } bound || value is { } v && v >= bound - Tolerance;
+	}
 
 	private static bool Max(JsonElement condition, string name, double? value)
-		=> Bound(condition, name) is not { } bound || (value is { } v && v < bound - Tolerance);
+	{
+		return Bound(condition, name) is not { } bound || value is { } v && v < bound - Tolerance;
+	}
 
 	private static double? Bound(JsonElement condition, string name)
-		=> condition.TryGetProperty(name, out var member) &&
-			member.ValueKind == JsonValueKind.Number &&
-			member.TryGetDouble(out var bound) &&
-			double.IsFinite(bound)
+	{
+		return condition.TryGetProperty(name, out var member)
+			&& member.ValueKind == JsonValueKind.Number
+			&& member.TryGetDouble(out var bound)
+			&& double.IsFinite(bound)
 				? bound
 				: null;
+	}
 
 	private static double? Known(double? extent)
-		=> extent is { } value && double.IsFinite(value) && value > 0 ? value : null;
+	{
+		return extent is { } value && double.IsFinite(value) && value > 0 ? value : null;
+	}
 
 	internal static double? Extent(double? value, string name)
-		=> value is null || (double.IsFinite(value.Value) && value.Value >= 0)
+	{
+		return value is null || double.IsFinite(value.Value) && value.Value >= 0
 			? value
 			: throw new ArgumentOutOfRangeException(name, value, "A width or height must be finite and not negative.");
+	}
 
 	internal static double? Aspect(double? value, string name)
-		=> value is null || (double.IsFinite(value.Value) && value.Value > 0)
+	{
+		return value is null || double.IsFinite(value.Value) && value.Value > 0
 			? value
 			: throw new ArgumentOutOfRangeException(name, value, "An aspect must be a finite number above zero.");
+	}
 }

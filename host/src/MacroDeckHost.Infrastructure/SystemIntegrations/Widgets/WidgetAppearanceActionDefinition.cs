@@ -3,7 +3,6 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Widgets;
-using MacroDeckHost.Integrations;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -54,11 +53,16 @@ internal sealed class WidgetAppearanceActionDefinition : IDynamicOptionsActionDe
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
 	public IActionExecutor CreateExecutor()
-		=> new Executor(_property, _widgets, _buildPatch, _buildClears, _onApplyFailed);
+	{
+		return new Executor(_property, _widgets, _buildPatch, _buildClears, _onApplyFailed);
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(WidgetActionParameters.ResolveStateOptions(_widgets(), context));
+	{
+		return Task.FromResult(WidgetActionParameters.ResolveStateOptions(_widgets(), context));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -141,7 +145,7 @@ internal sealed class WidgetAppearanceActionDefinition : IDynamicOptionsActionDe
 			if (target is null)
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.Widgets.Errors.WidgetNotFound(widgetId: widgetId));
+					AppStrings.Integrations.Widgets.Errors.WidgetNotFound(widgetId));
 			}
 
 			// Unchanged on a supported property is a repeat run with nothing to change, not a failure.

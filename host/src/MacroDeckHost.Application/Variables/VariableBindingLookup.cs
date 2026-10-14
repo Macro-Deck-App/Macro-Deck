@@ -19,7 +19,9 @@ public sealed class VariableBindingLookup
 
 	/// <summary>How many of an integration's catalog resources are bound right now.</summary>
 	public int CountFor(string integrationId)
-		=> _bindingStore.Load().Count(b => string.Equals(b.IntegrationId, integrationId, StringComparison.Ordinal));
+	{
+		return _bindingStore.Load().Count(b => string.Equals(b.IntegrationId, integrationId, StringComparison.Ordinal));
+	}
 
 	public VariableBinding? FindByVariableId(Guid variableId)
 	{
@@ -31,7 +33,7 @@ public sealed class VariableBindingLookup
 
 		return _bindingStore.Load()
 			.FirstOrDefault(b =>
-				string.Equals(b.IntegrationId, entity.OwnerIntegrationId, StringComparison.Ordinal) &&
-				string.Equals(b.LocalResourceId, entity.DefinitionId, StringComparison.Ordinal));
+				string.Equals(b.IntegrationId, entity.OwnerIntegrationId, StringComparison.Ordinal)
+				&& string.Equals(b.LocalResourceId, entity.DefinitionId, StringComparison.Ordinal));
 	}
 }

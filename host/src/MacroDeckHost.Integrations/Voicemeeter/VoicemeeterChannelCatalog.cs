@@ -20,7 +20,9 @@ internal sealed record VoicemeeterChannelCatalog
 	public IReadOnlyList<string> BusAssignments { get; init; } = [];
 
 	public IReadOnlyList<VoicemeeterChannelOption> For(VoicemeeterChannelKind kind)
-		=> kind == VoicemeeterChannelKind.Strip ? Strips : Buses;
+	{
+		return kind == VoicemeeterChannelKind.Strip ? Strips : Buses;
+	}
 
 	public static VoicemeeterChannelCatalog FromState(VoicemeeterState state)
 	{
@@ -39,14 +41,17 @@ internal sealed record VoicemeeterChannelCatalog
 		};
 	}
 
-	private static VoicemeeterChannelCatalog FromLayout(VoicemeeterLayout layout) => new()
+	private static VoicemeeterChannelCatalog FromLayout(VoicemeeterLayout layout)
 	{
-		Strips = Enumerable.Range(0, layout.Strips)
-			.Select(index => new VoicemeeterChannelOption(index, $"Strip {index}"))
-			.ToList(),
-		Buses = Enumerable.Range(0, layout.Buses)
-			.Select(index => new VoicemeeterChannelOption(index, $"Bus {layout.BusAssignmentName(index)}"))
-			.ToList(),
-		BusAssignments = layout.BusAssignmentNames()
-	};
+		return new VoicemeeterChannelCatalog
+		{
+			Strips = Enumerable.Range(0, layout.Strips)
+				.Select(index => new VoicemeeterChannelOption(index, $"Strip {index}"))
+				.ToList(),
+			Buses = Enumerable.Range(0, layout.Buses)
+				.Select(index => new VoicemeeterChannelOption(index, $"Bus {layout.BusAssignmentName(index)}"))
+				.ToList(),
+			BusAssignments = layout.BusAssignmentNames()
+		};
+	}
 }

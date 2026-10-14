@@ -17,16 +17,17 @@ public class LinkFrameTests
 	[Test]
 	public void Hello_carries_the_magic_the_version_the_epoch_and_the_echo()
 	{
-		var frame = LinkFrame.Hello(ack: true, epoch: 0x11223344, echo: 0x55667788).Encode();
+		var frame = LinkFrame.Hello(true, 0x11223344, 0x55667788).Encode();
 
-		Assert.That(frame, Is.EqualTo(new byte[]
-		{
-			0, 1, 0, 0, 0, 0, 0, 13,
-			(byte)'M', (byte)'D', (byte)'L', (byte)'K',
-			1,
-			0x11, 0x22, 0x33, 0x44,
-			0x55, 0x66, 0x77, 0x88
-		}));
+		Assert.That(frame,
+			Is.EqualTo(new byte[]
+			{
+				0, 1, 0, 0, 0, 0, 0, 13,
+				(byte)'M', (byte)'D', (byte)'L', (byte)'K',
+				1,
+				0x11, 0x22, 0x33, 0x44,
+				0x55, 0x66, 0x77, 0x88
+			}));
 	}
 
 	[Test]
@@ -44,16 +45,16 @@ public class LinkFrameTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(LinkFrame.Hello(ack: true, epoch: 0x01020304, echo: 0xA0B0C0D0).Encode(), Is.EqualTo(pinned));
+			Assert.That(LinkFrame.Hello(true, 0x01020304, 0xA0B0C0D0).Encode(), Is.EqualTo(pinned));
 			Assert.That(LinkHello.Parse(output.Single().Frame),
-				Is.EqualTo(new LinkHello(Ack: true, MaxVersion: 1, Epoch: 0x01020304, Echo: 0xA0B0C0D0)));
+				Is.EqualTo(new LinkHello(true, 1, 0x01020304, 0xA0B0C0D0)));
 		});
 	}
 
 	[Test]
 	public void A_longer_hello_from_a_later_version_is_found_while_seeking_and_its_extra_bytes_are_ignored()
 	{
-		var hello = LinkFrame.Hello(false, 5, 0, maxVersion: 2).Encode();
+		var hello = LinkFrame.Hello(false, 5, 0, 2).Encode();
 		var longer = new byte[hello.Length + 3];
 		hello.CopyTo(longer, 0);
 		longer[7] = 16;
@@ -64,7 +65,8 @@ public class LinkFrameTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(output.Select(item => item.Frame.Type), Is.EqualTo(new[] { LinkFrameType.Hello, LinkFrameType.Open }));
+			Assert.That(output.Select(item => item.Frame.Type),
+				Is.EqualTo(new[] { LinkFrameType.Hello, LinkFrameType.Open }));
 			Assert.That(LinkHello.Parse(output[0].Frame), Is.EqualTo(new LinkHello(false, 2, 5, 0)));
 		});
 	}
@@ -74,7 +76,8 @@ public class LinkFrameTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(LinkFrame.Window(7, 262144).Encode(), Is.EqualTo(new byte[] { 4, 0, 0, 7, 0, 0, 0, 4, 0, 4, 0, 0 }));
+			Assert.That(LinkFrame.Window(7, 262144).Encode(),
+				Is.EqualTo(new byte[] { 4, 0, 0, 7, 0, 0, 0, 4, 0, 4, 0, 0 }));
 			Assert.That(LinkFrame.Open(7).Encode(), Is.EqualTo(new byte[] { 1, 0, 0, 7, 0, 0, 0, 0 }));
 			Assert.That(LinkFrame.Close(7).Encode(), Is.EqualTo(new byte[] { 3, 0, 0, 7, 0, 0, 0, 0 }));
 			Assert.That(LinkFrame.Bye().Encode(), Is.EqualTo(new byte[] { 5, 0, 0, 0, 0, 0, 0, 0 }));
@@ -87,7 +90,8 @@ public class LinkFrameTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(LinkFrame.Data(1, new byte[16376]).Encode(), Has.Length.EqualTo(16384));
-			Assert.That(() => LinkFrame.Data(1, new byte[16377]).Encode(), Throws.TypeOf<ArgumentOutOfRangeException>());
+			Assert.That(() => LinkFrame.Data(1, new byte[16377]).Encode(),
+				Throws.TypeOf<ArgumentOutOfRangeException>());
 		});
 	}
 
@@ -98,7 +102,8 @@ public class LinkFrameTests
 	[TestCase(16320, 16321)]
 	[TestCase(16384, 16384)]
 	[TestCase(100, 100)]
-	public void A_usb_transfer_gets_one_filler_byte_only_when_it_would_end_on_a_full_packet(int frameLength,
+	public void A_usb_transfer_gets_one_filler_byte_only_when_it_would_end_on_a_full_packet(
+		int frameLength,
 		int transferLength)
 	{
 		var transfer = LinkProtocol.ForUsbTransfer(new byte[frameLength]);
@@ -130,7 +135,8 @@ public class LinkFrameTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(output.Select(item => item.Frame.Type), Is.EqualTo(new[] { LinkFrameType.Hello, LinkFrameType.Data }));
+			Assert.That(output.Select(item => item.Frame.Type),
+				Is.EqualTo(new[] { LinkFrameType.Hello, LinkFrameType.Data }));
 			Assert.That(output.Any(item => item.Resync), Is.False);
 			Assert.That(output[1].Frame.Payload.ToArray(), Is.EqualTo("abc"u8.ToArray()));
 		});
@@ -141,7 +147,8 @@ public class LinkFrameTests
 	{
 		var reader = new LinkFrameReader();
 		var output = new List<LinkInbound>();
-		var bytes = LinkFrame.Hello(false, 1, 0).Encode()
+		var bytes = LinkFrame.Hello(false, 1, 0)
+			.Encode()
 			.Append((byte)0xFF)
 			.Concat(LinkFrame.Open(2).Encode())
 			.Append((byte)0xFF)

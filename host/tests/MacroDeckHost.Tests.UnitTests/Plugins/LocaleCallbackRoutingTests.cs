@@ -43,7 +43,7 @@ internal sealed class LocaleCallbackRoutingTests
 		services.AddSingleton<IAppPreferenceService>(new FakeLocalizationPreferences
 		{
 			Culture = "en-US",
-			TimeFormat = AppPreferenceService.TimeFormat24h
+			TimeFormat = AppPreferenceService.TimeFormat24H
 		});
 		services.AddSingleton<ISystemHourCycleReader>(new SystemTimePatternHourCycleReader(() => "h:mm tt"));
 		services.AddScoped<TimeFormatResolver>();
@@ -68,14 +68,17 @@ internal sealed class LocaleCallbackRoutingTests
 	}
 
 	private static Task<HostCallbackResult> InvokeAsync(PluginCallbackRouter router)
-		=> router.RouteAsync("com.example.locale",
+	{
+		return router.RouteAsync("com.example.locale",
 			"session-1",
 			Guid.CreateVersion7().ToString(),
 			new HostInvokePayload { Api = HostApis.Locale, Operation = HostOperations.Locale.TimeOfDayFormat },
 			CancellationToken.None);
+	}
 
 	private static PluginCallbackRouter Router(ILocaleApi? locale)
-		=> new(new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
+	{
+		return new PluginCallbackRouter(new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
 			null!,
 			new ServiceCollection().BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
 			null!,
@@ -93,14 +96,17 @@ internal sealed class LocaleCallbackRoutingTests
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			null!,
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new FakeHostLockState(),
 			Serilog.Core.Logger.None,
 			locale: locale);
+	}
 
 	private sealed class FixedLocale(TimeOfDayFormat format) : ILocaleApi
 	{
 		public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(format);
+		{
+			return Task.FromResult(format);
+		}
 	}
 }

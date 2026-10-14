@@ -20,7 +20,7 @@ public class RunPluginIdTests
 		try
 		{
 			var peek = ManifestPeek.Read(directory);
-			var resolved = RunSession.ResolveManagedPluginId(explicitId: null, peek.Id, useStub: true);
+			var resolved = RunSession.ResolveManagedPluginId(null, peek.Id, true);
 
 			// Compared against the fixture's own constant - never a value read back through the code under
 			// test - so this can only pass if the manifest's id genuinely made it through unaltered.
@@ -28,7 +28,7 @@ public class RunPluginIdTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -40,21 +40,21 @@ public class RunPluginIdTests
 		try
 		{
 			var peek = ManifestPeek.Read(directory);
-			var resolved = RunSession.ResolveManagedPluginId("com.explicit.override", peek.Id, useStub: true);
+			var resolved = RunSession.ResolveManagedPluginId("com.explicit.override", peek.Id, true);
 
 			Assert.That(resolved, Is.EqualTo("com.explicit.override"));
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
 	[Test]
 	public void Without_a_manifest_a_development_id_is_still_generated()
 	{
-		var first = RunSession.ResolveManagedPluginId(explicitId: null, manifestId: null, useStub: true);
-		var second = RunSession.ResolveManagedPluginId(explicitId: null, manifestId: null, useStub: true);
+		var first = RunSession.ResolveManagedPluginId(null, null, true);
+		var second = RunSession.ResolveManagedPluginId(null, null, true);
 
 		Assert.Multiple(() =>
 		{
@@ -92,9 +92,9 @@ public class RunPluginIdTests
 		}
 		finally
 		{
-			Directory.Delete(lowDirectory, recursive: true);
-			Directory.Delete(highDirectory, recursive: true);
-			Directory.Delete(inRangeDirectory, recursive: true);
+			Directory.Delete(lowDirectory, true);
+			Directory.Delete(highDirectory, true);
+			Directory.Delete(inRangeDirectory, true);
 		}
 	}
 }

@@ -193,7 +193,8 @@ internal sealed class InProcessUiSessionTests : UiSessionFixture
 		Assert.That(delivered.Payload, Is.EqualTo(UiCanonicalJson.SerializeToUtf8Bytes(patch)));
 	}
 
-	private async Task AssertFaultedAsync(string sessionId,
+	private async Task AssertFaultedAsync(
+		string sessionId,
 		string connectionId,
 		StubUiSession session,
 		string providerText)

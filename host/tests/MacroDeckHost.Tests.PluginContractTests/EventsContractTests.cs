@@ -21,18 +21,22 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class EventsContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Events,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static EventDefinition SceneChanged()
-		=> new()
+	{
+		return new EventDefinition
 		{
 			Id = "scene-changed", Name = "Scene changed", ConfigurationParameters = [ActionParameter.Text("scene")]
 		};
+	}
 
 	[Test]
 	public async Task Declare_registers_an_adapter_that_passes_the_capability_validator()
@@ -53,12 +57,14 @@ internal sealed class EventsContractTests : CapabilityContractFixture
 	}
 
 	private static EventDefinition EntityChanged()
-		=> new()
+	{
+		return new EventDefinition
 		{
 			Id = "entity-changed",
 			Name = "Entity changed",
 			PayloadParameters = [ActionParameter.DynamicChoice("entityId")]
 		};
+	}
 
 	[Test]
 	public async Task A_condition_resolves_a_payload_parameter_through_the_events_capability()
@@ -259,23 +265,30 @@ internal sealed class EventsContractTests : CapabilityContractFixture
 		params EventDefinition[] events)
 		: TestEventIntegration(providerName, events), IDynamicEventOptionsProvider
 	{
-		public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+		public Task<DynamicOptionsResult> GetEventOptionsAsync(
+			EventOptionsContext context,
 			CancellationToken cancellationToken)
-			=> pending;
+		{
+			return pending;
+		}
 	}
 
 	private sealed class ThrowingDynamicEventIntegration(string providerName, params EventDefinition[] events)
 		: TestEventIntegration(providerName, events), IDynamicEventOptionsProvider
 	{
-		public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+		public Task<DynamicOptionsResult> GetEventOptionsAsync(
+			EventOptionsContext context,
 			CancellationToken cancellationToken)
-			=> throw new InvalidOperationException("boom: token=abc123");
+		{
+			throw new InvalidOperationException("boom: token=abc123");
+		}
 	}
 
 	private sealed class NeverRepliesDynamicEventIntegration(string providerName, params EventDefinition[] events)
 		: TestEventIntegration(providerName, events), IDynamicEventOptionsProvider
 	{
-		public async Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+		public async Task<DynamicOptionsResult> GetEventOptionsAsync(
+			EventOptionsContext context,
 			CancellationToken cancellationToken)
 		{
 			await Task.Delay(Timeout.Infinite, cancellationToken);

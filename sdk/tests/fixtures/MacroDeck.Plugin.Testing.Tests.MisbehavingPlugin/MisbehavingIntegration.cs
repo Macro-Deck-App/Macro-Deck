@@ -78,12 +78,16 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 	}
 
 	public IWeatherStation? GetStation(string instanceId)
-		=> instanceId is "primary" or "a::b" ? new Station() : null;
+	{
+		return instanceId is "primary" or "a::b" ? new Station() : null;
+	}
 
 	private sealed class Station : IWeatherStation
 	{
-		public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct) =>
-			Task.FromResult(WeatherSnapshot.Unavailable());
+		public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
+		{
+			return Task.FromResult(WeatherSnapshot.Unavailable());
+		}
 	}
 
 	// ----- IVariableProvider: exercises duplicate ids and a lying write capability. The well-behaved
@@ -141,7 +145,9 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 			: Variables;
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(VariableReading.Of("marker"));
+	{
+		return ValueTask.FromResult(VariableReading.Of("marker"));
+	}
 
 	/// <summary>
 	/// The violation itself: <see cref="Variables" /> told every client this variable may be written, and
@@ -151,7 +157,9 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(VariableWriteResult.NotWritable());
+	{
+		return ValueTask.FromResult(VariableWriteResult.NotWritable());
+	}
 
 	/// <summary>
 	/// The action this fixture declares unconditionally. Its parameter list balloons past
@@ -172,7 +180,10 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-		public IActionExecutor CreateExecutor() => new Executor(behaviors);
+		public IActionExecutor CreateExecutor()
+		{
+			return new Executor(behaviors);
+		}
 
 		private sealed class Executor(IReadOnlySet<string> behaviors) : IActionExecutor
 		{
@@ -214,7 +225,10 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-		public IActionExecutor CreateExecutor() => new Executor(behaviors, logger);
+		public IActionExecutor CreateExecutor()
+		{
+			return new Executor(behaviors, logger);
+		}
 
 		private sealed class Executor(IReadOnlySet<string> behaviors, ILogger logger)
 			: IActionExecutor
@@ -258,7 +272,10 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-		public IActionExecutor CreateExecutor() => new Executor();
+		public IActionExecutor CreateExecutor()
+		{
+			return new Executor();
+		}
 
 		public Task<ActionStateSnapshot?> GetActionStateAsync(
 			IReadOnlyDictionary<string, object?> parameters,
@@ -289,7 +306,10 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 
 		private sealed class Executor : IActionExecutor
 		{
-			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context) => ActionResult.SucceededTask;
+			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
+			{
+				return ActionResult.SucceededTask;
+			}
 		}
 	}
 
@@ -316,7 +336,10 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-		public IActionExecutor CreateExecutor() => new Executor();
+		public IActionExecutor CreateExecutor()
+		{
+			return new Executor();
+		}
 
 		public Task<ActionIconSnapshot?> GetActionIconAsync(
 			IReadOnlyDictionary<string, object?> parameters,
@@ -349,7 +372,10 @@ internal sealed class MisbehavingIntegration : IPluginIntegration, IWeatherProvi
 
 		private sealed class Executor : IActionExecutor
 		{
-			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context) => ActionResult.SucceededTask;
+			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
+			{
+				return ActionResult.SucceededTask;
+			}
 		}
 	}
 }

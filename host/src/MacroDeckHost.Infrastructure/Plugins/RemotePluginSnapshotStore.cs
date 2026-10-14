@@ -55,11 +55,16 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 	}
 
 	public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
-		=> _byPluginId.TryGetValue(pluginId, out var snapshot)
+	{
+		return _byPluginId.TryGetValue(pluginId, out var snapshot)
 			? snapshot
 			: RemotePluginCapabilitySnapshot.Empty(pluginId);
+	}
 
-	public bool Has(string pluginId) => _byPluginId.ContainsKey(pluginId);
+	public bool Has(string pluginId)
+	{
+		return _byPluginId.ContainsKey(pluginId);
+	}
 
 	public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
 	{
@@ -193,9 +198,9 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			[.. (legacy.DeclaredVariables ?? []).Select(ToDefinition)],
 			legacy.VariablesDependOnConfiguration,
 			acceptedKinds.Contains(LegacyDynamicVariablesKind, StringComparer.Ordinal),
-			SupportsPush: false,
-			SupportsSearch: false,
-			CatalogName: null);
+			false,
+			false,
+			null);
 	}
 
 	// A definition whose type this host does not know is dropped, never thrown over: the reader's job is
@@ -212,8 +217,8 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			var definition = VariableCatalogMapper.TryToDomain(dto);
 			if (definition is null)
 			{
-				_logger.Warning("Dropping cached variable '{Variable}' of plugin '{PluginId}': its persisted type " +
-					"'{Type}' is not a variable type this host knows",
+				_logger.Warning("Dropping cached variable '{Variable}' of plugin '{PluginId}': its persisted type "
+					+ "'{Type}' is not a variable type this host knows",
 					dto.Id ?? dto.Name ?? "<unnamed>",
 					pluginId,
 					dto.Type);
@@ -227,7 +232,8 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 	}
 
 	private static VariableDefinitionDto ToDefinition(LegacyVariableDescriptor legacy)
-		=> new()
+	{
+		return new VariableDefinitionDto
 		{
 			Id = legacy.DefinitionId,
 			Name = legacy.Name,
@@ -239,9 +245,11 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			ConfigurationKey = legacy.ConfigurationKey,
 			ConfigurationName = legacy.ConfigurationName
 		};
+	}
 
 	private static PersistedSnapshot ToPersisted(RemotePluginCapabilitySnapshot snapshot)
-		=> new()
+	{
+		return new PersistedSnapshot
 		{
 			Version = CurrentVersion,
 			Actions = ActionCatalogMapper.ToDto(snapshot.Actions),
@@ -302,6 +310,7 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 				Profiles = [.. snapshot.Profiles.Select(VirtualProfileCatalogMapper.ToDto)]
 			}
 		};
+	}
 
 	private sealed record PersistedVariables(
 		IReadOnlyList<VariableDefinitionDto> Eager,

@@ -14,8 +14,8 @@ internal static partial class MacOsIoRegParser
 	public static double? ParseDeviceUtilization(string output)
 	{
 		var match = DeviceUtilizationRegex().Match(output);
-		if (!match.Success ||
-			!double.TryParse(match.Groups[1].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var value))
+		if (!match.Success
+			|| !double.TryParse(match.Groups[1].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var value))
 		{
 			return null;
 		}

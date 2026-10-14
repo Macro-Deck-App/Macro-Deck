@@ -56,7 +56,8 @@ public class GaugesWidgetSessionTests
 	public async Task A_change_to_a_variable_named_in_a_gauge_name_updates_that_name()
 	{
 		SetText("label_text", "before");
-		await using var session = await Open(new { id = "a", variable = "cpu_metric", max = 100, name = "{{ vars.label_text }}" });
+		await using var session = await Open(new
+			{ id = "a", variable = "cpu_metric", max = 100, name = "{{ vars.label_text }}" });
 		session.DrainPatches();
 
 		SetText("label_text", "after");
@@ -67,7 +68,10 @@ public class GaugesWidgetSessionTests
 			Assert.That(session.DrainPatches(), Is.Not.Empty);
 			Assert.That(Walk(session.BuildTree().Root)
 					.Where(node => node.Type == UiComponents.Text)
-					.Select(node => node.Properties.TryGetValue(UiComponentProperties.Text, out var text) ? text.ToString() : null),
+					.Select(node
+						=> node.Properties.TryGetValue(UiComponentProperties.Text, out var text)
+							? text.ToString()
+							: null),
 				Has.Some.Contains("after"));
 		});
 	}
@@ -98,7 +102,10 @@ public class GaugesWidgetSessionTests
 	}
 
 	private Task<IUiSession> Open()
-		=> Open(new { id = "a", variable = "cpu_metric", max = 100 }, new { id = "b", variable = "ram_metric", max = 100 });
+	{
+		return Open(new { id = "a", variable = "cpu_metric", max = 100 },
+			new { id = "b", variable = "ram_metric", max = 100 });
+	}
 
 	private async Task<IUiSession> Open(params object[] gauges)
 	{
@@ -113,9 +120,9 @@ public class GaugesWidgetSessionTests
 					SessionMode = UiSessionModes.Shared,
 					Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 					{
-						[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
-					},
-				},
+						[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data)
+					}
+				}
 			},
 			CancellationToken.None);
 
@@ -135,7 +142,7 @@ public class GaugesWidgetSessionTests
 			Classification = VariableClassification.User,
 			Value = value.ToString(CultureInfo.InvariantCulture),
 			DecimalPlaces = 0,
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		});
 	}
 
@@ -151,19 +158,25 @@ public class GaugesWidgetSessionTests
 			Type = VariableType.Text,
 			Classification = VariableClassification.User,
 			Value = value,
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		});
 	}
 
 	private static Dictionary<string, double> Levels(UiNode root)
-		=> Walk(root)
+	{
+		return Walk(root)
 			.Where(node => node.Type == UiComponents.Gauge && !node.Id.Contains("_fallback", StringComparison.Ordinal))
 			.GroupBy(node => node.Id.Contains(".g0.", StringComparison.Ordinal) ? "a" : "b")
 			.ToDictionary(group => group.Key,
-				group => group.Select(node => node.Properties[UiComponentProperties.Level].GetDouble()).Distinct().Single());
+				group => group.Select(node => node.Properties[UiComponentProperties.Level].GetDouble())
+					.Distinct()
+					.Single());
+	}
 
 	private static IEnumerable<UiNode> Walk(UiNode node)
-		=> new[] { node }
+	{
+		return new[] { node }
 			.Concat(node.Children.SelectMany(Walk))
 			.Concat(node.Fallback is null ? [] : Walk(node.Fallback));
+	}
 }

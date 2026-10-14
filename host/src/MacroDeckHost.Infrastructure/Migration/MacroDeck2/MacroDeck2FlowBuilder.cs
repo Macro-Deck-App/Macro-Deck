@@ -35,8 +35,8 @@ internal static class MacroDeck2FlowBuilder
 	{
 		var flows = new JsonArray();
 
-		await AddFlow(flows, WidgetTriggerTypes.ShortPress, button.Actions, translate, disabled: false);
-		await AddFlow(flows, WidgetTriggerTypes.LongPress, button.ActionsLongPress, translate, disabled: false);
+		await AddFlow(flows, WidgetTriggerTypes.ShortPress, button.Actions, translate, false);
+		await AddFlow(flows, WidgetTriggerTypes.LongPress, button.ActionsLongPress, translate, false);
 
 		// Both release lists want the one trigger Macro Deck 3 has for a release, and two flows may never
 		// share a trigger type - findFlowForTrigger takes the first match and the second would never run.
@@ -100,12 +100,14 @@ internal static class MacroDeck2FlowBuilder
 	}
 
 	private static JsonObject Flow(string triggerType, JsonArray children)
-		=> new()
+	{
+		return new JsonObject
 		{
 			["triggerId"] = JsonValue.Create(NewId()),
 			["triggerType"] = JsonValue.Create(triggerType),
 			["children"] = children
 		};
+	}
 
 	/// <summary>
 	/// A block for an action no migrator claimed. It is deliberately left enabled: a disabled block is
@@ -144,7 +146,8 @@ internal static class MacroDeck2FlowBuilder
 	}
 
 	private static JsonObject Block(string integrationId, string actionId, string label, JsonArray parameters)
-		=> new()
+	{
+		return new JsonObject
 		{
 			["id"] = JsonValue.Create(NewId()),
 			["type"] = JsonValue.Create("action"),
@@ -155,14 +158,20 @@ internal static class MacroDeck2FlowBuilder
 			["actionId"] = JsonValue.Create(actionId),
 			["parameters"] = parameters
 		};
+	}
 
 	private static JsonObject Parameter(string name, string type, string value)
-		=> new()
+	{
+		return new JsonObject
 		{
 			["name"] = JsonValue.Create(name),
 			["type"] = JsonValue.Create(type),
 			["value"] = JsonValue.Create(value)
 		};
+	}
 
-	private static string NewId() => Guid.NewGuid().ToString("N")[..12];
+	private static string NewId()
+	{
+		return Guid.NewGuid().ToString("N")[..12];
+	}
 }

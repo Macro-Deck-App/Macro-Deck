@@ -88,10 +88,14 @@ internal sealed class FakeQWebChannelClient : IQWebChannelClient
 	}
 
 	public void RaiseSignal(string objectName, string signal, params JsonElement[] args)
-		=> SignalReceived?.Invoke(this, new QWebChannelSignalMessage(objectName, signal, args));
+	{
+		SignalReceived?.Invoke(this, new QWebChannelSignalMessage(objectName, signal, args));
+	}
 
 	public void RaisePropertyUpdate(string objectName, IReadOnlyDictionary<string, JsonElement> properties)
-		=> PropertyUpdated?.Invoke(this, new QWebChannelPropertyUpdate(objectName, properties));
+	{
+		PropertyUpdated?.Invoke(this, new QWebChannelPropertyUpdate(objectName, properties));
+	}
 
 	public void Drop(string reason = "dropped")
 	{

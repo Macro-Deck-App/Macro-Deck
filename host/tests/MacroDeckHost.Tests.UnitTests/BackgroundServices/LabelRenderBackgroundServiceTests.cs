@@ -115,11 +115,16 @@ internal sealed class LabelRenderBackgroundServiceTests
 		public Dictionary<(Guid WidgetId, string State), string> TextByState { get; } = [];
 
 		public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
-			=> Task.FromResult(TextByState.TryGetValue((widgetId, state), out var text) ? text : null);
+		{
+			return Task.FromResult(TextByState.TryGetValue((widgetId, state), out var text) ? text : null);
+		}
 
-		public Task<string?> ResolvePreview(LabelImagePreviewRequest request,
+		public Task<string?> ResolvePreview(
+			LabelImagePreviewRequest request,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RecordingTransport : IUiTransport
@@ -128,17 +133,25 @@ internal sealed class LabelRenderBackgroundServiceTests
 
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
@@ -154,7 +167,7 @@ internal sealed class LabelRenderBackgroundServiceTests
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 		public CancellationToken ApplicationStopping { get; } = CancellationToken.None;
 		public CancellationToken ApplicationStopped { get; } = CancellationToken.None;
 

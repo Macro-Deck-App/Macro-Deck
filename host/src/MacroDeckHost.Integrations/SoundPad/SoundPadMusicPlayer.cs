@@ -88,7 +88,9 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 		}
 	}
 
-	private async Task<T> OptionalAsync<T>(Func<ISoundPadClient, Task<T>> read, T fallback,
+	private async Task<T> OptionalAsync<T>(
+		Func<ISoundPadClient, Task<T>> read,
+		T fallback,
 		CancellationToken cancellationToken)
 	{
 		try
@@ -102,7 +104,9 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 	}
 
 	public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId, CancellationToken cancellationToken = default)
-		=> Task.FromResult<MusicPlayerArtwork?>(null);
+	{
+		return Task.FromResult<MusicPlayerArtwork?>(null);
+	}
 
 	public async Task PlayAsync(CancellationToken cancellationToken = default)
 	{
@@ -137,43 +141,72 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 	}
 
 	public Task NextAsync(CancellationToken cancellationToken = default)
-		=> CommandChangingSound(c => c.PlayNextSoundAsync(), cancellationToken);
+	{
+		return CommandChangingSound(c => c.PlayNextSoundAsync(), cancellationToken);
+	}
 
 	public Task PreviousAsync(CancellationToken cancellationToken = default)
-		=> CommandChangingSound(c => c.PlayPreviousSoundAsync(), cancellationToken);
+	{
+		return CommandChangingSound(c => c.PlayPreviousSoundAsync(), cancellationToken);
+	}
 
 	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
-		=> Command(c => c.SeekAsync((long)Math.Max(0, position.TotalMilliseconds)), cancellationToken);
+	{
+		return Command(c => c.SeekAsync((long)Math.Max(0, position.TotalMilliseconds)), cancellationToken);
+	}
 
 	public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-		=> Command(c => c.SetVolumeAsync(Math.Clamp(volumePercent, 0, 100)), cancellationToken);
+	{
+		return Command(c => c.SetVolumeAsync(Math.Clamp(volumePercent, 0, 100)), cancellationToken);
+	}
 
-	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task StopAsync(CancellationToken cancellationToken = default)
-		=> Command(c => c.StopSoundAsync(), cancellationToken);
+	{
+		return Command(c => c.StopSoundAsync(), cancellationToken);
+	}
 
 	public Task ToggleMuteAsync(CancellationToken cancellationToken = default)
-		=> Command(c => c.ToggleMuteAsync(), cancellationToken);
+	{
+		return Command(c => c.ToggleMuteAsync(), cancellationToken);
+	}
 
 	public Task StartRecordingAsync(SoundPadRecordingSource source, CancellationToken cancellationToken = default)
-		=> Command(c => c.StartRecordingAsync(source), cancellationToken);
+	{
+		return Command(c => c.StartRecordingAsync(source), cancellationToken);
+	}
 
 	public Task StopRecordingAsync(CancellationToken cancellationToken = default)
-		=> Command(c => c.StopRecordingAsync(), cancellationToken);
+	{
+		return Command(c => c.StopRecordingAsync(), cancellationToken);
+	}
 
-	public Task PlayRandomSoundAsync(int? categoryIndex, bool speakers, bool microphone,
+	public Task PlayRandomSoundAsync(
+		int? categoryIndex,
+		bool speakers,
+		bool microphone,
 		CancellationToken cancellationToken = default)
-		=> CommandChangingSound(c => c.PlayRandomSoundAsync(categoryIndex, speakers, microphone), cancellationToken);
+	{
+		return CommandChangingSound(c => c.PlayRandomSoundAsync(categoryIndex, speakers, microphone),
+			cancellationToken);
+	}
 
 	public Task<IReadOnlyList<SoundPadCategory>> GetCategoriesAsync(CancellationToken cancellationToken)
-		=> _connection.RunAsync(c => c.GetCategoriesAsync(),
+	{
+		return _connection.RunAsync(c => c.GetCategoriesAsync(),
 			cancellationToken,
-			connectOnDemand: true,
+			true,
 			SoundPadConnection.ListTimeout);
+	}
 
 	public async Task<IReadOnlyList<MusicPlayerCatalogItem>> GetCatalogAsync(
 		string instanceId,
@@ -190,9 +223,10 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 		var term = filter?.Trim();
 
 		return sounds
-			.Where(sound => string.IsNullOrEmpty(term) ||
-				sound.Title.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
-				sound.Artist?.Contains(term, StringComparison.CurrentCultureIgnoreCase) == true)
+			.Where(sound
+				=> string.IsNullOrEmpty(term)
+				|| sound.Title.Contains(term, StringComparison.CurrentCultureIgnoreCase)
+				|| sound.Artist?.Contains(term, StringComparison.CurrentCultureIgnoreCase) == true)
 			.Select(sound => new MusicPlayerCatalogItem(ItemId(sound),
 				DisplayTitle(sound),
 				MusicPlayerCatalogItemKind.Track,
@@ -230,7 +264,9 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 	}
 
 	internal static string ItemId(SoundPadSound sound)
-		=> sound.Path ?? sound.Index.ToString(CultureInfo.InvariantCulture);
+	{
+		return sound.Path ?? sound.Index.ToString(CultureInfo.InvariantCulture);
+	}
 
 	private static string DisplayTitle(SoundPadSound sound)
 	{
@@ -257,17 +293,20 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 			string.Equals(sound.Path, trimmed, StringComparison.OrdinalIgnoreCase));
 	}
 
-	private async Task<SoundPadSound?> CurrentSoundAsync(SoundPadPlayStatus status, long positionMs,
-		long durationMs, CancellationToken cancellationToken)
+	private async Task<SoundPadSound?> CurrentSoundAsync(
+		SoundPadPlayStatus status,
+		long positionMs,
+		long durationMs,
+		CancellationToken cancellationToken)
 	{
 		SoundPadSound? started;
 		bool resolve;
 		lock (_gate)
 		{
-			var newPlayback = status != SoundPadPlayStatus.Stopped &&
-				(_lastStatus == SoundPadPlayStatus.Stopped ||
-					durationMs != _lastDurationMs ||
-					positionMs < _lastPositionMs);
+			var newPlayback = status != SoundPadPlayStatus.Stopped
+				&& (_lastStatus == SoundPadPlayStatus.Stopped
+					|| durationMs != _lastDurationMs
+					|| positionMs < _lastPositionMs);
 			_lastStatus = status;
 			_lastDurationMs = durationMs;
 			_lastPositionMs = positionMs;
@@ -291,8 +330,10 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 			return _current;
 		}
 
-		var current = started is { Title.Length: > 0 } ? started : await MostRecentlyPlayedAsync(started,
-			cancellationToken);
+		var current = started is { Title.Length: > 0 }
+			? started
+			: await MostRecentlyPlayedAsync(started,
+				cancellationToken);
 		lock (_gate)
 		{
 			_current = current;
@@ -301,7 +342,8 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 		return current;
 	}
 
-	private async Task<SoundPadSound?> MostRecentlyPlayedAsync(SoundPadSound? started,
+	private async Task<SoundPadSound?> MostRecentlyPlayedAsync(
+		SoundPadSound? started,
 		CancellationToken cancellationToken)
 	{
 		var sounds = await SoundsAsync(cancellationToken);
@@ -315,18 +357,25 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 	}
 
 	private Task<IReadOnlyList<SoundPadSound>> SoundsAsync(CancellationToken cancellationToken)
-		=> _connection.RunAsync(c => c.GetSoundsAsync(),
+	{
+		return _connection.RunAsync(c => c.GetSoundsAsync(),
 			cancellationToken,
-			connectOnDemand: true,
+			true,
 			SoundPadConnection.ListTimeout);
+	}
 
 	private Task<SoundPadPlayStatus> StatusAsync(CancellationToken cancellationToken)
-		=> _connection.RunAsync(c => c.GetPlayStatusAsync(), cancellationToken, connectOnDemand: true);
+	{
+		return _connection.RunAsync(c => c.GetPlayStatusAsync(), cancellationToken, true);
+	}
 
 	private async Task PlayAgainAsync(CancellationToken cancellationToken)
-		=> await CommandChangingSound(c => c.PlayCurrentSoundAgainAsync(), cancellationToken);
+	{
+		await CommandChangingSound(c => c.PlayCurrentSoundAgainAsync(), cancellationToken);
+	}
 
-	private async Task CommandChangingSound(Func<ISoundPadClient, Task> command,
+	private async Task CommandChangingSound(
+		Func<ISoundPadClient, Task> command,
 		CancellationToken cancellationToken)
 	{
 		await Command(command, cancellationToken);
@@ -337,7 +386,9 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 	}
 
 	private Task Command(Func<ISoundPadClient, Task> command, CancellationToken cancellationToken)
-		=> _connection.RunAsync(command, cancellationToken, connectOnDemand: true);
+	{
+		return _connection.RunAsync(command, cancellationToken, true);
+	}
 
 	private MusicPlayerState Unavailable()
 	{
@@ -355,7 +406,12 @@ internal sealed class SoundPadMusicPlayer : ICatalogMusicPlayer
 	}
 
 	private bool NoteReadFailure()
-		=> _readFailures.RecordFailure("read failed").Kind == FailureEpisodeSignalKind.Onset;
+	{
+		return _readFailures.RecordFailure("read failed").Kind == FailureEpisodeSignalKind.Onset;
+	}
 
-	private void NoteReadRecovered() => _readFailures.RecordSuccess();
+	private void NoteReadRecovered()
+	{
+		_readFailures.RecordSuccess();
+	}
 }

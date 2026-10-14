@@ -67,9 +67,14 @@ internal sealed class FakeIntegrationHostIssueStore : IIntegrationHostIssueStore
 	}
 
 	public IReadOnlyList<IntegrationIssue> IssuesFor(string integrationId)
-		=> _issues.TryGetValue(integrationId, out var issue) ? [issue] : [];
+	{
+		return _issues.TryGetValue(integrationId, out var issue) ? [issue] : [];
+	}
 
-	public bool Has(string integrationId) => _issues.ContainsKey(integrationId);
+	public bool Has(string integrationId)
+	{
+		return _issues.ContainsKey(integrationId);
+	}
 }
 
 internal sealed class FakeIntegrationLifecycle : IIntegrationLifecycle
@@ -85,7 +90,9 @@ internal sealed class FakeIntegrationLifecycle : IIntegrationLifecycle
 	}
 
 	public Task ShutdownAsync(string integrationId, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class ThreadRecordingIntegrationRegistry : IIntegrationRegistry
@@ -99,7 +106,8 @@ internal sealed class ThreadRecordingIntegrationRegistry : IIntegrationRegistry
 	private readonly List<IIntegration> _integrations = [];
 	private readonly HashSet<string> _disabled;
 
-	public ThreadRecordingIntegrationRegistry(IEnumerable<IIntegration>? integrations = null,
+	public ThreadRecordingIntegrationRegistry(
+		IEnumerable<IIntegration>? integrations = null,
 		IEnumerable<string>? disabled = null)
 	{
 		_integrations = (integrations ?? []).ToList();
@@ -125,13 +133,25 @@ internal sealed class ThreadRecordingIntegrationRegistry : IIntegrationRegistry
 
 	public IReadOnlyList<IIntegration> Integrations => _integrations;
 
-	public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+	public IActionDefinition? FindAction(string integrationId, string actionId)
+	{
+		return null;
+	}
 
-	public IActionDefinition? FindAction(QualifiedId id) => null;
+	public IActionDefinition? FindAction(QualifiedId id)
+	{
+		return null;
+	}
 
-	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
+	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+	{
+		return [];
+	}
 
-	public bool IsEnabled(string integrationId) => !_disabled.Contains(integrationId);
+	public bool IsEnabled(string integrationId)
+	{
+		return !_disabled.Contains(integrationId);
+	}
 
 	public void SetEnabled(string integrationId, bool enabled)
 	{
@@ -145,7 +165,10 @@ internal sealed class ThreadRecordingIntegrationRegistry : IIntegrationRegistry
 		}
 	}
 
-	public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+	public IntegrationOrigin GetOrigin(string integrationId)
+	{
+		return IntegrationOrigin.BuiltIn;
+	}
 
 	public Task<IntegrationRegistrationResult> RegisterAsync(
 		IIntegration integration,
@@ -158,7 +181,10 @@ internal sealed class ThreadRecordingIntegrationRegistry : IIntegrationRegistry
 		return Task.FromResult(IntegrationRegistrationResult.Success);
 	}
 
-	public Task<bool> UnregisterAsync(string integrationId) => Task.FromResult(false);
+	public Task<bool> UnregisterAsync(string integrationId)
+	{
+		return Task.FromResult(false);
+	}
 }
 
 internal sealed class CountingUserNotificationStore : IUserNotificationStore
@@ -167,7 +193,10 @@ internal sealed class CountingUserNotificationStore : IUserNotificationStore
 
 	public int Capacity => 1000;
 
-	public int CallCount(string dedupeKey) => _callsByDedupeKey.GetValueOrDefault(dedupeKey);
+	public int CallCount(string dedupeKey)
+	{
+		return _callsByDedupeKey.GetValueOrDefault(dedupeKey);
+	}
 
 	public UserNotification? Raise(UserNotificationDraft draft)
 	{
@@ -179,25 +208,55 @@ internal sealed class CountingUserNotificationStore : IUserNotificationStore
 		return null;
 	}
 
-	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft) => Raise(draft);
+	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft)
+	{
+		return Raise(draft);
+	}
 
-	public IReadOnlyList<UserNotification> Snapshot() => [];
+	public IReadOnlyList<UserNotification> Snapshot()
+	{
+		return [];
+	}
 
-	public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress) => false;
+	public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress)
+	{
+		return false;
+	}
 
-	public bool DismissByKey(string dedupeKey) => false;
+	public bool DismissByKey(string dedupeKey)
+	{
+		return false;
+	}
 
-	public bool Dismiss(string id) => false;
+	public bool Dismiss(string id)
+	{
+		return false;
+	}
 
-	public bool Retire(string dedupeKey) => false;
+	public bool Retire(string dedupeKey)
+	{
+		return false;
+	}
 
-	public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+	public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
+	{
+		return null;
+	}
 
-	public bool MarkRead(string id) => false;
+	public bool MarkRead(string id)
+	{
+		return false;
+	}
 
-	public bool MarkAllRead() => false;
+	public bool MarkAllRead()
+	{
+		return false;
+	}
 
-	public bool DismissAll() => false;
+	public bool DismissAll()
+	{
+		return false;
+	}
 
 	public event Action? Changed
 	{
@@ -210,7 +269,10 @@ internal sealed class FakeIntegrationConfigStore : IIntegrationConfigStore
 {
 	private readonly Dictionary<string, int> _counts = new(StringComparer.Ordinal);
 
-	public void SetConfiguredCount(string integrationId, int count) => _counts[integrationId] = count;
+	public void SetConfiguredCount(string integrationId, int count)
+	{
+		_counts[integrationId] = count;
+	}
 
 	public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
 	{
@@ -221,18 +283,30 @@ internal sealed class FakeIntegrationConfigStore : IIntegrationConfigStore
 		return Task.FromResult(entries);
 	}
 
-	public Task<ConfigEntryRecord?> Find(Guid entryId) => Task.FromResult<ConfigEntryRecord?>(null);
+	public Task<ConfigEntryRecord?> Find(Guid entryId)
+	{
+		return Task.FromResult<ConfigEntryRecord?>(null);
+	}
 
 	public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task Delete(Guid entryId) => throw new NotSupportedException();
+	public Task Delete(Guid entryId)
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
@@ -259,9 +333,15 @@ internal sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
 
 	public IReadOnlyList<IIntegration> Integrations => _integrations;
 
-	public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+	public IActionDefinition? FindAction(string integrationId, string actionId)
+	{
+		return null;
+	}
 
-	public IActionDefinition? FindAction(QualifiedId id) => null;
+	public IActionDefinition? FindAction(QualifiedId id)
+	{
+		return null;
+	}
 
 	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
 	{
@@ -289,7 +369,10 @@ internal sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
 		return descriptors;
 	}
 
-	public bool IsEnabled(string integrationId) => !_disabled.Contains(integrationId);
+	public bool IsEnabled(string integrationId)
+	{
+		return !_disabled.Contains(integrationId);
+	}
 
 	public void SetEnabled(string integrationId, bool enabled)
 	{
@@ -304,7 +387,9 @@ internal sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
 	}
 
 	public IntegrationOrigin GetOrigin(string integrationId)
-		=> _plugins.Contains(integrationId) ? IntegrationOrigin.Plugin : IntegrationOrigin.BuiltIn;
+	{
+		return _plugins.Contains(integrationId) ? IntegrationOrigin.Plugin : IntegrationOrigin.BuiltIn;
+	}
 
 	public Task<IntegrationRegistrationResult> RegisterAsync(
 		IIntegration integration,
@@ -331,13 +416,15 @@ internal sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
 internal static class StubIntegration
 {
 	public static IIntegration Create(string id, string? name = null, bool configFlow = false, bool system = false)
-		=> (configFlow, system) switch
+	{
+		return (configFlow, system) switch
 		{
 			(false, false) => new PlainIntegration(id, name ?? id),
 			(true, false) => new ConfigurableIntegration(id, name ?? id),
 			(false, true) => new SystemIntegration(id, name ?? id),
 			(true, true) => new ConfigurableSystemIntegration(id, name ?? id)
 		};
+	}
 
 	private abstract class IntegrationBase : IIntegration
 	{
@@ -353,9 +440,15 @@ internal static class StubIntegration
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool IsInitialized => true;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class PlainIntegration : IntegrationBase
@@ -373,7 +466,10 @@ internal static class StubIntegration
 		{
 		}
 
-		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class SystemIntegration : IntegrationBase, ISystemIntegration
@@ -395,7 +491,10 @@ internal static class StubIntegration
 
 		public bool IsActive => true;
 
-		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 	}
 }
 
@@ -423,13 +522,17 @@ internal class FakeVariableProviderIntegration : IIntegration, IVariableProvider
 	public bool VariablesDependOnConfiguration { get; set; }
 
 	public virtual ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(VariableReading.Unavailable);
+	{
+		return ValueTask.FromResult(VariableReading.Unavailable);
+	}
 
 	public virtual ValueTask<VariableWriteResult> SetValueAsync(
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(VariableWriteResult.NotWritable());
+	{
+		return ValueTask.FromResult(VariableWriteResult.NotWritable());
+	}
 
 	public virtual Task InitializeAsync(IIntegrationContext context)
 	{
@@ -449,7 +552,10 @@ internal sealed class FakeConfigurableVariableProviderIntegration : FakeVariable
 {
 	public bool RequiresConfiguration { get; init; } = true;
 
-	public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+	public IConfigFlow CreateConfigFlow()
+	{
+		throw new NotSupportedException();
+	}
 }
 
 /// <summary>A provider that records every write dispatched to it and answers with whatever a test set,
@@ -488,12 +594,22 @@ internal sealed class FakeProfileProviderIntegration : IIntegration, IProfilePro
 
 	public List<(string FolderId, string WidgetId, WidgetInteraction Interaction)> Interactions { get; } = new();
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
+
 	public bool IsInitialized => true;
 
-	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => _profiles;
+	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+	{
+		return _profiles;
+	}
 
 	public Task HandleWidgetInteractionAsync(
 		string profileId,
@@ -514,9 +630,15 @@ internal sealed class FakeEventOnlyIntegration : IIntegration, IEventProvider
 	public IReadOnlyList<IActionDefinition> Actions => [];
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName => Id;
 	public IReadOnlyList<EventDefinition> EventDefinitions => [];
@@ -530,13 +652,27 @@ internal sealed class FakeMusicPlayerOnlyIntegration : IIntegration, IMusicPlaye
 	public IReadOnlyList<IActionDefinition> Actions => [];
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName => Id;
-	public IReadOnlyList<MusicPlayerInstance> GetInstances() => [];
-	public IMusicPlayer? GetPlayer(string instanceId) => null;
+
+	public IReadOnlyList<MusicPlayerInstance> GetInstances()
+	{
+		return [];
+	}
+
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return null;
+	}
 }
 
 internal sealed class FakeWeatherOnlyIntegration : IIntegration, IWeatherProvider
@@ -547,13 +683,27 @@ internal sealed class FakeWeatherOnlyIntegration : IIntegration, IWeatherProvide
 	public IReadOnlyList<IActionDefinition> Actions => [];
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName => Id;
-	public IReadOnlyList<WeatherStationInstance> GetInstances() => [];
-	public IWeatherStation? GetStation(string instanceId) => null;
+
+	public IReadOnlyList<WeatherStationInstance> GetInstances()
+	{
+		return [];
+	}
+
+	public IWeatherStation? GetStation(string instanceId)
+	{
+		return null;
+	}
 }
 
 /// <summary>Declares one migration, which is what makes the capability worth showing at all - an
@@ -566,9 +716,15 @@ internal sealed class FakeMigrationOnlyIntegration : IIntegration, IMigrationPro
 	public IReadOnlyList<IActionDefinition> Actions => [];
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; init; } = [new FakeIntegrationMigration()];
 }
@@ -582,12 +738,16 @@ internal sealed class FakeIntegrationMigration : IIntegrationMigration
 	public IReadOnlyList<string> ClaimedSettingsSources => ["some_plugin"];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult<ActionMigrationResult?>(null);
+	{
+		return Task.FromResult<ActionMigrationResult?>(null);
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<IReadOnlyList<MigratedConfiguration>>([]);
+	{
+		return Task.FromResult<IReadOnlyList<MigratedConfiguration>>([]);
+	}
 }
 
 internal sealed class FakeHiddenCapabilitiesIntegration :
@@ -607,46 +767,78 @@ internal sealed class FakeHiddenCapabilitiesIntegration :
 	public IReadOnlyList<IActionDefinition> Actions => [];
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName => Id;
 	public IReadOnlyList<EventDefinition> EventDefinitions => [];
 
-	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(
+		EventOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(new DynamicOptionsResult { Options = [] });
+	{
+		return Task.FromResult(new DynamicOptionsResult { Options = [] });
+	}
 
-	public IReadOnlyList<MusicPlayerInstance> GetInstances() => [];
-	public IMusicPlayer? GetPlayer(string instanceId) => null;
+	public IReadOnlyList<MusicPlayerInstance> GetInstances()
+	{
+		return [];
+	}
+
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return null;
+	}
 
 	public Task<IReadOnlyList<MusicPlayerCatalogItem>> GetCatalogAsync(
 		string instanceId,
 		MusicPlayerCatalogItemKind kind,
 		string? filter,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<IReadOnlyList<MusicPlayerCatalogItem>>([]);
+	{
+		return Task.FromResult<IReadOnlyList<MusicPlayerCatalogItem>>([]);
+	}
 
 	public Task<IReadOnlyList<MusicPlayerDevice>> GetDevicesAsync(CancellationToken cancellationToken)
-		=> Task.FromResult<IReadOnlyList<MusicPlayerDevice>>([]);
+	{
+		return Task.FromResult<IReadOnlyList<MusicPlayerDevice>>([]);
+	}
 
 	public Task TransferPlaybackAsync(string deviceId, bool startPlayback, CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public string IconMimeType => "image/png";
 
-	public byte[] GetIcon() => [];
+	public byte[] GetIcon()
+	{
+		return [];
+	}
 
-	public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+	public IConfigFlow CreateConfigFlow()
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<IntegrationIssue>>([
+	{
+		return Task.FromResult<IReadOnlyList<IntegrationIssue>>([
 			new IntegrationIssue { Id = "problem", Title = "A problem" }
 		]);
+	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class FakeStateProviderActionIntegration : IIntegration
@@ -660,9 +852,15 @@ internal sealed class FakeStateProviderActionIntegration : IIntegration
 
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	private sealed class StateProvidingActionDefinition : IActionDefinition, IStateProviderActionDefinition
 	{
@@ -671,13 +869,19 @@ internal sealed class FakeStateProviderActionIntegration : IIntegration
 		public LocalizedText Description => "Toggles something";
 		public IReadOnlyList<ActionParameter> Parameters => [];
 
-		public IActionExecutor CreateExecutor() => new CapturingActionDefinition().CreateExecutor();
+		public IActionExecutor CreateExecutor()
+		{
+			return new CapturingActionDefinition().CreateExecutor();
+		}
 
 		public Task<ActionStateSnapshot?> GetActionStateAsync(
 			IReadOnlyDictionary<string, object?> parameters,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<ActionStateSnapshot?>(new ActionStateSnapshot([new ActionStateDefinition("on", "On")],
+		{
+			return Task.FromResult<ActionStateSnapshot?>(new ActionStateSnapshot(
+				[new ActionStateDefinition("on", "On")],
 				"on"));
+		}
 	}
 }
 
@@ -692,9 +896,15 @@ internal sealed class FakeIconProviderActionIntegration : IIntegration
 
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	private sealed class IconProvidingActionDefinition : IActionDefinition, IIconProviderActionDefinition
 	{
@@ -703,12 +913,18 @@ internal sealed class FakeIconProviderActionIntegration : IIntegration
 		public LocalizedText Description => "Shows something";
 		public IReadOnlyList<ActionParameter> Parameters => [];
 
-		public IActionExecutor CreateExecutor() => new CapturingActionDefinition().CreateExecutor();
+		public IActionExecutor CreateExecutor()
+		{
+			return new CapturingActionDefinition().CreateExecutor();
+		}
 
 		public Task<ActionIconSnapshot?> GetActionIconAsync(
 			IReadOnlyDictionary<string, object?> parameters,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<ActionIconSnapshot?>(new ActionIconSnapshot { Version = "v1", MediaType = "image/png" });
+		{
+			return Task.FromResult<ActionIconSnapshot?>(new ActionIconSnapshot
+				{ Version = "v1", MediaType = "image/png" });
+		}
 	}
 }
 
@@ -721,9 +937,15 @@ internal sealed class FakeConfigurableMusicPlayerIntegration : IIntegration, IVa
 	public IReadOnlyList<IActionDefinition> Actions { get; init; } = [new CapturingActionDefinition { Id = "a1" }];
 	public bool IsInitialized { get; set; }
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public IReadOnlyList<VariableDefinition> Variables => [];
 
@@ -733,14 +955,27 @@ internal sealed class FakeConfigurableMusicPlayerIntegration : IIntegration, IVa
 		VariableDefinition.Eager("v2", MacroDeck.Sdk.Variables.VariableType.Text)
 	];
 
-	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default) =>
-		ValueTask.FromResult(VariableReading.Unavailable);
+	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
+	{
+		return ValueTask.FromResult(VariableReading.Unavailable);
+	}
 
 	public string ProviderName => Id;
-	public IReadOnlyList<MusicPlayerInstance> GetInstances() => [];
-	public IMusicPlayer? GetPlayer(string instanceId) => null;
 
-	public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+	public IReadOnlyList<MusicPlayerInstance> GetInstances()
+	{
+		return [];
+	}
+
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return null;
+	}
+
+	public IConfigFlow CreateConfigFlow()
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class FakeThrowingProviderCatalogsIntegration :
@@ -764,7 +999,10 @@ internal sealed class FakeThrowingProviderCatalogsIntegration :
 		return Task.CompletedTask;
 	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName => Id;
 
@@ -773,17 +1011,36 @@ internal sealed class FakeThrowingProviderCatalogsIntegration :
 	public IReadOnlyList<VariableDefinition> Variables => throw new InvalidOperationException();
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> throw new InvalidOperationException();
+	{
+		throw new InvalidOperationException();
+	}
 
 	public IReadOnlyList<EventDefinition> EventDefinitions => throw new InvalidOperationException();
 
-	public IReadOnlyList<MusicPlayerInstance> GetInstances() => throw new InvalidOperationException();
-	public IMusicPlayer? GetPlayer(string instanceId) => throw new InvalidOperationException();
+	public IReadOnlyList<MusicPlayerInstance> GetInstances()
+	{
+		throw new InvalidOperationException();
+	}
 
-	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances() => throw new InvalidOperationException();
-	public IWeatherStation? GetStation(string instanceId) => throw new InvalidOperationException();
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		throw new InvalidOperationException();
+	}
 
-	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => throw new InvalidOperationException();
+	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances()
+	{
+		throw new InvalidOperationException();
+	}
+
+	public IWeatherStation? GetStation(string instanceId)
+	{
+		throw new InvalidOperationException();
+	}
+
+	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+	{
+		throw new InvalidOperationException();
+	}
 }
 
 internal sealed class FakeOrderIntegrationA : IMusicPlayerProvider, IVariableProvider, IEventProvider, IIntegration
@@ -794,19 +1051,34 @@ internal sealed class FakeOrderIntegrationA : IMusicPlayerProvider, IVariablePro
 	public IReadOnlyList<IActionDefinition> Actions => [new CapturingActionDefinition { Id = "a1" }];
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName => Id;
 	public IReadOnlyList<EventDefinition> EventDefinitions => [];
 	public IReadOnlyList<VariableDefinition> Variables => [];
 
-	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default) =>
-		ValueTask.FromResult(VariableReading.Unavailable);
+	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
+	{
+		return ValueTask.FromResult(VariableReading.Unavailable);
+	}
 
-	public IReadOnlyList<MusicPlayerInstance> GetInstances() => [];
-	public IMusicPlayer? GetPlayer(string instanceId) => null;
+	public IReadOnlyList<MusicPlayerInstance> GetInstances()
+	{
+		return [];
+	}
+
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return null;
+	}
 }
 
 internal sealed class FakeOrderIntegrationB : IProfileProvider, IWeatherProvider, IVariableProvider, IEventProvider,
@@ -818,20 +1090,39 @@ internal sealed class FakeOrderIntegrationB : IProfileProvider, IWeatherProvider
 	public IReadOnlyList<IActionDefinition> Actions => [];
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName => Id;
 	public IReadOnlyList<EventDefinition> EventDefinitions => [];
 	public IReadOnlyList<VariableDefinition> Variables => [];
 
-	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default) =>
-		ValueTask.FromResult(VariableReading.Unavailable);
+	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
+	{
+		return ValueTask.FromResult(VariableReading.Unavailable);
+	}
 
-	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances() => [];
-	public IWeatherStation? GetStation(string instanceId) => null;
-	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => [];
+	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances()
+	{
+		return [];
+	}
+
+	public IWeatherStation? GetStation(string instanceId)
+	{
+		return null;
+	}
+
+	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+	{
+		return [];
+	}
 }
 
 internal sealed class FakeOrderIntegrationC : IVariableProvider, IProfileProvider, IWeatherProvider, IIntegration
@@ -842,119 +1133,206 @@ internal sealed class FakeOrderIntegrationC : IVariableProvider, IProfileProvide
 	public IReadOnlyList<IActionDefinition> Actions => [new CapturingActionDefinition { Id = "a1" }];
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public IReadOnlyList<VariableDefinition> Variables => [];
 
-	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default) =>
-		ValueTask.FromResult(VariableReading.Unavailable);
+	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
+	{
+		return ValueTask.FromResult(VariableReading.Unavailable);
+	}
 
 	public string ProviderName => Id;
-	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances() => [];
-	public IWeatherStation? GetStation(string instanceId) => null;
-	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => [];
+
+	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances()
+	{
+		return [];
+	}
+
+	public IWeatherStation? GetStation(string instanceId)
+	{
+		return null;
+	}
+
+	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+	{
+		return [];
+	}
 }
 
 internal sealed class FakeDeckNavigator : IDeckNavigator
 {
-	public Task ChangeFolderAsync(string folderId,
+	public Task ChangeFolderAsync(
+		string folderId,
 		string? originClientId = null,
-		CancellationToken cancellationToken = default) => Task.CompletedTask;
+		CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ChangeProfileAsync(string profileId,
+	public Task ChangeProfileAsync(
+		string profileId,
 		string? originClientId = null,
-		CancellationToken cancellationToken = default) => Task.CompletedTask;
+		CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
-	public IReadOnlyList<DeckFolder> GetFolders() => [];
+	public IReadOnlyList<DeckFolder> GetFolders()
+	{
+		return [];
+	}
 
-	public IReadOnlyList<DeckProfile> GetProfiles() => [];
+	public IReadOnlyList<DeckProfile> GetProfiles()
+	{
+		return [];
+	}
 }
 
 internal sealed class FakeScriptApi : IScriptApi
 {
 	public IReadOnlyList<Script> Scripts { get; set; } = [];
 
-	public IReadOnlyList<Script> GetScripts() => Scripts;
+	public IReadOnlyList<Script> GetScripts()
+	{
+		return Scripts;
+	}
 
-	public Task<ActionResult> RunAsync(string scriptId,
+	public Task<ActionResult> RunAsync(
+		string scriptId,
 		IReadOnlyDictionary<string, object?>? inputs = null,
 		string? originClientId = null,
 		string? ownerWidgetId = null,
-		CancellationToken cancellationToken = default) => ActionResult.SucceededTask;
+		CancellationToken cancellationToken = default)
+	{
+		return ActionResult.SucceededTask;
+	}
 }
 
 internal sealed class FakeWidgetApi : IWidgetApi
 {
-	public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+	public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+	{
+		return [];
+	}
 
-	public bool Exists(string widgetId) => false;
+	public bool Exists(string widgetId)
+	{
+		return false;
+	}
 
 	public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-		=> Task.FromResult(false);
+	{
+		return Task.FromResult(false);
+	}
 
 	public Task<WidgetStateWriteResult> SetStateAsync(
 		string widgetId,
 		string stateId,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	{
+		return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	}
 
-	public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+	public Task<WidgetStateWriteResult> AdvanceStateAsync(
+		string widgetId,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	{
+		return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	}
 }
 
 internal sealed class FakeUserVariableApi : IUserVariableApi
 {
-	public Task<UserVariableWriteResult> ApplyAsync(string name,
+	public Task<UserVariableWriteResult> ApplyAsync(
+		string name,
 		string? ownerWidgetId,
 		UserVariableOperation operation,
 		string? value,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(UserVariableWriteResult.Applied());
+	{
+		return Task.FromResult(UserVariableWriteResult.Applied());
+	}
 }
 
 internal sealed class ThrowingVariableService : IVariableService
 {
-	public Task<IReadOnlyList<VariableEntity>> GetAll() => throw new NotSupportedException();
+	public Task<IReadOnlyList<VariableEntity>> GetAll()
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<VariableEntity?> GetById(Guid id) => throw new NotSupportedException();
+	public Task<VariableEntity?> GetById(Guid id)
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableEntity, VariableError>> CreateUserVariable(string name,
+	public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
+		string name,
 		VariableScope scope,
 		string? scopeRefId,
 		DomainVariableType type,
 		object? initialValue,
 		int? decimalPlaces,
 		VariableFileSource? fileSource = null,
-		VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+		VariableTemplateSource? templateSource = null)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+	public Task<Result<VariableEntity, VariableError>> SetValue(
+		Guid id,
 		object? value,
-		CancellationToken cancellationToken = default) => throw new NotSupportedException();
+		CancellationToken cancellationToken = default)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
+	public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
+		Guid id,
 		string? name,
 		int? decimalPlaces,
 		VariableFileSource? fileSource = null,
-		VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+		VariableTemplateSource? templateSource = null)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+	public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(string integrationId,
+	public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
+		string integrationId,
 		string name,
 		VariableScope scope,
 		string? scopeRefId,
@@ -964,42 +1342,71 @@ internal sealed class ThrowingVariableService : IVariableService
 		string? definitionId = null,
 		VariableDeclaration? declaration = null,
 		VariableUpdateMode updateMode = VariableUpdateMode.Polled,
-		bool publishedByHost = false) => throw new NotSupportedException();
+		bool publishedByHost = false)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+	public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+		string integrationId,
 		string resourceId,
 		string name,
 		Domain.Enums.VariableType type,
 		int? decimalPlaces,
-		VariableDeclaration? declaration = null) =>
+		VariableDeclaration? declaration = null)
+	{
 		throw new NotSupportedException();
+	}
 
-	public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId) =>
-		Task.FromResult<VariableEntity?>(null);
+	public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId)
+	{
+		return Task.FromResult<VariableEntity?>(null);
+	}
 
-	public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(string integrationId,
+	public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
+		string integrationId,
 		Guid id,
 		object? value,
-		VariableBounds? bounds = null) => throw new NotSupportedException();
+		VariableBounds? bounds = null)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableError>> SetIntegrationVariableAvailability(string integrationId,
+	public Task<Result<VariableError>> SetIntegrationVariableAvailability(
+		string integrationId,
 		Guid id,
-		bool available) => throw new NotSupportedException();
+		bool available)
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId) => throw new NotSupportedException();
+	public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task UpsertWidgetVariable(VariableScope scope,
+	public Task UpsertWidgetVariable(
+		VariableScope scope,
 		string scopeRefId,
 		string name,
 		DomainVariableType type,
-		object? value) => throw new NotSupportedException();
+		object? value)
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 }

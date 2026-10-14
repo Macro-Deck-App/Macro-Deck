@@ -9,10 +9,10 @@ internal static class MacOsCoreFoundation
 {
 	private const string CoreFoundation = MacOsAccessibility.CoreFoundation;
 
-	private const int CFNumberSInt32Type = 3; // kCFNumberSInt32Type
-	private const int CFNumberSInt64Type = 4;
+	private const int CfNumberSInt32Type = 3; // kCFNumberSInt32Type
+	private const int CfNumberSInt64Type = 4;
 
-	public static bool TryReadCFBool(IntPtr dictionary, IntPtr key, out bool value)
+	public static bool TryReadCfBool(IntPtr dictionary, IntPtr key, out bool value)
 	{
 		value = false;
 		var boxed = CFDictionaryGetValue(dictionary, key);
@@ -25,29 +25,29 @@ internal static class MacOsCoreFoundation
 		return true;
 	}
 
-	public static bool TryReadCFInt(IntPtr dictionary, IntPtr key, out int value)
+	public static bool TryReadCfInt(IntPtr dictionary, IntPtr key, out int value)
 	{
 		value = 0;
 		var number = CFDictionaryGetValue(dictionary, key);
-		return number != IntPtr.Zero && CFNumberGetValue(number, CFNumberSInt32Type, out value);
+		return number != IntPtr.Zero && CFNumberGetValue(number, CfNumberSInt32Type, out value);
 	}
 
-	public static bool TryReadCFLong(IntPtr dictionary, IntPtr key, out long value)
+	public static bool TryReadCfLong(IntPtr dictionary, IntPtr key, out long value)
 	{
 		value = 0;
 		var number = CFDictionaryGetValue(dictionary, key);
-		return number != IntPtr.Zero && CFNumberGetValue(number, CFNumberSInt64Type, out value);
+		return number != IntPtr.Zero && CFNumberGetValue(number, CfNumberSInt64Type, out value);
 	}
 
-	private const uint CFStringEncodingUtf8 = 0x08000100;
+	private const uint CfStringEncodingUtf8 = 0x08000100;
 
-	public static IntPtr CreateCFString(string value)
+	public static IntPtr CreateCfString(string value)
 	{
 		var bytes = MacOsAccessibility.Utf8(value);
-		return CFStringCreateWithCString(IntPtr.Zero, bytes, CFStringEncodingUtf8);
+		return CFStringCreateWithCString(IntPtr.Zero, bytes, CfStringEncodingUtf8);
 	}
 
-	public static string? ReadCFString(IntPtr value)
+	public static string? ReadCfString(IntPtr value)
 	{
 		if (value == IntPtr.Zero)
 		{
@@ -55,7 +55,7 @@ internal static class MacOsCoreFoundation
 		}
 
 		var buffer = new byte[(int)CFStringGetLength(value) * 4 + 1];
-		if (!CFStringGetCString(value, buffer, buffer.Length, CFStringEncodingUtf8))
+		if (!CFStringGetCString(value, buffer, buffer.Length, CfStringEncodingUtf8))
 		{
 			return null;
 		}
@@ -63,7 +63,10 @@ internal static class MacOsCoreFoundation
 		return Encoding.UTF8.GetString(buffer, 0, Array.IndexOf(buffer, (byte)0));
 	}
 
-	public static bool IsCFString(IntPtr value) => CFGetTypeID(value) == CFStringGetTypeID();
+	public static bool IsCfString(IntPtr value)
+	{
+		return CFGetTypeID(value) == CFStringGetTypeID();
+	}
 
 	[DllImport(CoreFoundation)]
 	public static extern void CFRelease(IntPtr handle);

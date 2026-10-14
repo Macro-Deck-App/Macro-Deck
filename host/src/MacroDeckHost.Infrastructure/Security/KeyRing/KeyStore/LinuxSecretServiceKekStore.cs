@@ -171,5 +171,8 @@ public sealed class LinuxSecretServiceKekStore : IKekStore
 
 	// The Secret Service collection is shared with every other application, so the service name has to
 	// be part of the attribute rather than a separate field libsecret does not index on.
-	private static string Account(KekStoreIdentity identity) => $"{identity.Service}:{identity.Account}";
+	private static string Account(KekStoreIdentity identity)
+	{
+		return $"{identity.Service}:{identity.Account}";
+	}
 }

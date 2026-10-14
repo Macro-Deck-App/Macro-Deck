@@ -48,7 +48,9 @@ public static class ColorSource
 	}
 
 	private static bool SameColor(string left, string right)
-		=> string.Equals(RgbaColor.Canonicalize(left) ?? left.Trim(),
+	{
+		return string.Equals(RgbaColor.Canonicalize(left) ?? left.Trim(),
 			RgbaColor.Canonicalize(right) ?? right.Trim(),
 			StringComparison.OrdinalIgnoreCase);
+	}
 }

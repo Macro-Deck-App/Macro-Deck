@@ -8,9 +8,15 @@ public static class PluginIconReferences
 
 	public const string ResourceOwnerId = "app.macro-deck.plugin-icon";
 
-	public static string SourceId(string pluginId, string key) => $"{pluginId}/{key}";
+	public static string SourceId(string pluginId, string key)
+	{
+		return $"{pluginId}/{key}";
+	}
 
-	public static string SourceIdPrefix(string pluginId) => pluginId + "/";
+	public static string SourceIdPrefix(string pluginId)
+	{
+		return pluginId + "/";
+	}
 
 	public static string? KeyOf(string pluginId, string? sourceId)
 	{
@@ -38,10 +44,14 @@ public static class PluginIconReferences
 	public const string AppearanceSuffix = ".a";
 
 	public static string ResourceId(Guid iconId, bool hasAppearances = false)
-		=> hasAppearances ? $"{ResourceOwnerId}.{iconId:D}{AppearanceSuffix}" : $"{ResourceOwnerId}.{iconId:D}";
+	{
+		return hasAppearances ? $"{ResourceOwnerId}.{iconId:D}{AppearanceSuffix}" : $"{ResourceOwnerId}.{iconId:D}";
+	}
 
 	public static bool TryParseResourceId(string? resourceId, out Guid iconId)
-		=> TryParseResourceId(resourceId, out iconId, out _);
+	{
+		return TryParseResourceId(resourceId, out iconId, out _);
+	}
 
 	public static bool TryParseResourceId(string? resourceId, out Guid iconId, out bool appearanceAware)
 	{

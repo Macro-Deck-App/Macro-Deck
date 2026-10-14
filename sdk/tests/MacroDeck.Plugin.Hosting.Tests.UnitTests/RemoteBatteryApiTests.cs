@@ -23,7 +23,10 @@ public class RemoteBatteryApiTests
 	}
 
 	[TearDown]
-	public void TearDown() => _api.Dispose();
+	public void TearDown()
+	{
+		_api.Dispose();
+	}
 
 	[Test]
 	public void Before_the_first_push_there_are_no_devices()
@@ -42,7 +45,7 @@ public class RemoteBatteryApiTests
 		_api.Changed += (_, args) => raised.Enqueue(args);
 
 		Push(1, [Snapshot("adb", "pixel", 64), Snapshot("com.example.buds", "left", 20)]);
-		Push(2, [Snapshot("adb", "pixel", 63)], removedIds: ["com.example.buds:left"]);
+		Push(2, [Snapshot("adb", "pixel", 63)], ["com.example.buds:left"]);
 		await WaitForAsync(() => raised.Count == 2);
 
 		var pixel = _api.Find("adb:pixel");
@@ -52,7 +55,8 @@ public class RemoteBatteryApiTests
 			Assert.That(pixel!.LevelPercent, Is.EqualTo(63));
 			Assert.That(pixel.ProviderId, Is.EqualTo("adb"));
 			Assert.That(pixel.LocalId, Is.EqualTo("pixel"));
-			Assert.That(raised.Select(args => args.RemovedIds), Is.EqualTo(new[] { Array.Empty<string>(), ["com.example.buds:left"] }));
+			Assert.That(raised.Select(args => args.RemovedIds),
+				Is.EqualTo(new[] { Array.Empty<string>(), ["com.example.buds:left"] }));
 		});
 	}
 
@@ -114,7 +118,8 @@ public class RemoteBatteryApiTests
 		cache.ColorsChanged += () => raised++;
 		cache.BatteriesChanged += () => raised++;
 
-		Assert.DoesNotThrow(() => cache.Apply(StatePush("some-future-api", new { revision = 1, devices = new[] { new { id = "x" } } })));
+		Assert.DoesNotThrow(()
+			=> cache.Apply(StatePush("some-future-api", new { revision = 1, devices = new[] { new { id = "x" } } })));
 		Assert.Multiple(() =>
 		{
 			Assert.That(raised, Is.Zero);
@@ -123,7 +128,8 @@ public class RemoteBatteryApiTests
 	}
 
 	private static BatteryDeviceSnapshotDto Snapshot(string provider, string localId, int level)
-		=> new()
+	{
+		return new BatteryDeviceSnapshotDto
 		{
 			Id = $"{provider}:{localId}",
 			LocalId = localId,
@@ -136,13 +142,20 @@ public class RemoteBatteryApiTests
 			IsConnected = true,
 			UpdatedAt = DateTimeOffset.UnixEpoch
 		};
+	}
 
-	private void Push(long revision, IReadOnlyList<BatteryDeviceSnapshotDto> devices, IReadOnlyList<string>? removedIds = null)
-		=> _cache.Apply(StatePush(HostApis.Batteries,
+	private void Push(
+		long revision,
+		IReadOnlyList<BatteryDeviceSnapshotDto> devices,
+		IReadOnlyList<string>? removedIds = null)
+	{
+		_cache.Apply(StatePush(HostApis.Batteries,
 			new BatteryStateDto { Revision = revision, Devices = devices, RemovedIds = removedIds ?? [] }));
+	}
 
 	private static ProtocolEnvelope StatePush(string api, object data)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
@@ -152,6 +165,7 @@ public class RemoteBatteryApiTests
 				},
 				PluginProtocolJson.Options)
 		};
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{

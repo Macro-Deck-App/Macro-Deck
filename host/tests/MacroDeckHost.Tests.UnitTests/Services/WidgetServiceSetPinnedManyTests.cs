@@ -43,7 +43,10 @@ public class WidgetServiceSetPinnedManyTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task PinningSeveralWidgetsThatFitInEveryReachedFolder_PinsAllOfThem()
@@ -184,23 +187,29 @@ public class WidgetServiceSetPinnedManyTests
 		});
 	}
 
-	private FolderEntity Folder(Guid id, string name) => new()
+	private FolderEntity Folder(Guid id, string name)
 	{
-		Id = id,
-		ProfileId = _profileId,
-		Name = name,
-		Order = 0,
-		Rows = 4,
-		Columns = 4
-	};
+		return new FolderEntity
+		{
+			Id = id,
+			ProfileId = _profileId,
+			Name = name,
+			Order = 0,
+			Rows = 4,
+			Columns = 4
+		};
+	}
 
-	private static WidgetEntity Widget(int x, int y) => new()
+	private static WidgetEntity Widget(int x, int y)
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 }

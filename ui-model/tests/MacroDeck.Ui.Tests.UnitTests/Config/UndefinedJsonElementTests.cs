@@ -11,19 +11,23 @@ namespace MacroDeck.Ui.Tests.UnitTests.Config;
 public class UndefinedJsonElementTests
 {
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiWidgetConfiguration ConfigurationWith(UiState<JsonElement> flows)
-		=> new()
+	{
+		return new UiWidgetConfiguration
 		{
 			Key = "root",
 			Properties = new UiWidgetProperties { Key = "properties", Children = [] },
 			Editor = new UiWidgetEditor
 			{
 				Key = "editor",
-				Children = [new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows) }],
-			},
+				Children = [new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows) }]
+			}
 		};
+	}
 
 	[Test]
 	public void An_undefined_element_fails_the_build_naming_the_node_and_property()

@@ -16,13 +16,23 @@ public class CalendarWidgetVariableTests
 	public async Task SetUp()
 	{
 		_harness = new CalendarWidgetAutomationHarness()
-			.With(Event("review", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), "team", "Review",
-				"https://meet.example.com/review") with { Location = "Room 4" });
+			.With(Event("review",
+					Noon.AddMinutes(30),
+					TimeSpan.FromMinutes(30),
+					"team",
+					"Review",
+					"https://meet.example.com/review") with
+				{
+					Location = "Room 4"
+				});
 		await _harness.Cache.SyncAsync(CancellationToken.None);
 	}
 
 	[TearDown]
-	public async Task TearDown() => await _harness.DisposeAsync();
+	public async Task TearDown()
+	{
+		await _harness.DisposeAsync();
+	}
 
 	[Test]
 	public async Task A_placed_widget_publishes_the_event_it_shows()
@@ -115,7 +125,8 @@ public class CalendarWidgetVariableTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(asAgenda, Is.EqualTo("Review"), "the agenda lists the running event first");
-			Assert.That(_harness.Variable(widget, Writer.Title), Is.EqualTo("Tomorrow"),
+			Assert.That(_harness.Variable(widget, Writer.Title),
+				Is.EqualTo("Tomorrow"),
 				"the next event layout set to show the next event skips the running one");
 		});
 	}

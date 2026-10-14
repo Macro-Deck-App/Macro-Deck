@@ -19,7 +19,8 @@ public class IconService : IIconService
 	private readonly IMediator _mediator;
 	private readonly IIconPackOwnerRegistry _ownerRegistry;
 
-	public IconService(IIconPackCache iconPackCache,
+	public IconService(
+		IIconPackCache iconPackCache,
 		IIconStorage storage,
 		IIconImageFallbackStore fallbackStore,
 		IIconVariantDeriver variantDeriver,
@@ -113,7 +114,8 @@ public class IconService : IIconService
 			await _iconPackCache.RemoveIcons(packGroup.Key, removed.Select(i => i.Id).ToList());
 			await _iconPackCache.ForgetSourceRevision(packGroup.Key);
 			ReleaseFiles(removed);
-			foreach (var icon in packGroup.Where(i => i.AppearanceOfId is not { } parentId || !requested.Contains(parentId)))
+			foreach (var icon in packGroup.Where(i
+				=> i.AppearanceOfId is not { } parentId || !requested.Contains(parentId)))
 			{
 				await PublishRemoved(icon);
 			}
@@ -145,7 +147,8 @@ public class IconService : IIconService
 		}
 	}
 
-	public async Task<Result<IconImageResult, IconError>> GetImage(Guid iconId,
+	public async Task<Result<IconImageResult, IconError>> GetImage(
+		Guid iconId,
 		int? size,
 		bool acceptWebp,
 		bool staticFrame,
@@ -201,7 +204,7 @@ public class IconService : IIconService
 			}
 		}
 
-		if (!acceptWebp || (staticFrame && icon.IsAnimated))
+		if (!acceptWebp || staticFrame && icon.IsAnimated)
 		{
 			var fallback = await _fallbackStore.GetOrCreate(icon, variant, staticFrame, cancellationToken, storageName);
 			if (fallback is not null)
@@ -231,8 +234,12 @@ public class IconService : IIconService
 	}
 
 	private bool IsPackReadOnly(Guid packId)
-		=> _iconPackCache.GetPackById(packId) is { } pack && _ownerRegistry.IsReadOnly(pack);
+	{
+		return _iconPackCache.GetPackById(packId) is { } pack && _ownerRegistry.IsReadOnly(pack);
+	}
 
 	private static string IconEtagIdentity(IconEntity icon)
-		=> icon.MasterContentHash ?? icon.SourceContentHash ?? icon.Id.ToString("N");
+	{
+		return icon.MasterContentHash ?? icon.SourceContentHash ?? icon.Id.ToString("N");
+	}
 }

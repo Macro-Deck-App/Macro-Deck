@@ -128,8 +128,8 @@ public class ClockWidgetViewTests
 		var host = Render(new { });
 
 		Assert.That(Rendered(host)
-				.Count(node => node.Type == UiMacroDeckComponents.DynamicText &&
-					node.Text("format") == UiTimeFormats.Time),
+				.Count(node => node.Type == UiMacroDeckComponents.DynamicText
+					&& node.Text("format") == UiTimeFormats.Time),
 			Is.EqualTo(1),
 			"Composing a time out of several runs breaks wherever a language orders them differently.");
 	}
@@ -200,7 +200,7 @@ public class ClockWidgetViewTests
 	{
 		var frozen = new[]
 		{
-			UiComponents.Stack, UiComponents.Text, UiComponents.Image, UiComponents.RangeBar,
+			UiComponents.Stack, UiComponents.Text, UiComponents.Image, UiComponents.RangeBar
 		};
 
 		Assert.Multiple(() =>
@@ -211,8 +211,8 @@ public class ClockWidgetViewTests
 					Render(new
 					{
 						hourCycle = "12h", leadingZero = false, dateFormat = "iso",
-						timeZone = "Europe/Berlin", showOffset = true,
-					}),
+						timeZone = "Europe/Berlin", showOffset = true
+					})
 				})
 			{
 				foreach (var node in Walk(host.Root).Where(node => !frozen.Contains(node.Type, StringComparer.Ordinal)))
@@ -307,7 +307,7 @@ public class ClockWidgetViewTests
 		var digital = Render(new
 		{
 			backgroundColor = "#101c2c", textColor = "#7fd4ff", timeZone = "Europe/Berlin",
-			showOffset = true,
+			showOffset = true
 		});
 		var analog = Render(new { style = "analog", textColor = "#7fd4ff" });
 
@@ -401,14 +401,21 @@ public class ClockWidgetViewTests
 	// Rendered nodes only: a fallback subtree is what an older reader draws instead, so counting it here
 	// would report a face the configured style deliberately does not show.
 	private static UiTestNode? Find(UiTestHost host, string format)
-		=> Rendered(host).SingleOrDefault(node => node.Type == UiMacroDeckComponents.DynamicText &&
-			node.Text("format") == format);
+	{
+		return Rendered(host)
+			.SingleOrDefault(node => node.Type == UiMacroDeckComponents.DynamicText && node.Text("format") == format);
+	}
 
 	private static UiTestNode Single(UiTestHost host, string format)
-		=> Rendered(host).Single(node => node.Type == UiMacroDeckComponents.DynamicText &&
-			node.Text("format") == format);
+	{
+		return Rendered(host)
+			.Single(node => node.Type == UiMacroDeckComponents.DynamicText && node.Text("format") == format);
+	}
 
-	private static IEnumerable<UiTestNode> Rendered(UiTestHost host) => WalkRendered(host.Root);
+	private static IEnumerable<UiTestNode> Rendered(UiTestHost host)
+	{
+		return WalkRendered(host.Root);
+	}
 
 	private static IEnumerable<UiTestNode> WalkRendered(UiTestNode node)
 	{

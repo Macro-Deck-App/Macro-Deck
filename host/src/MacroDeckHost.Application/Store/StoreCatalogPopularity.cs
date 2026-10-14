@@ -15,7 +15,8 @@ public sealed class StoreCatalogPopularity
 		_reviews = reviews;
 	}
 
-	public async Task<Result<StoreCatalogPage, StoreCatalogError>> Query(StoreCatalogQuery query,
+	public async Task<Result<StoreCatalogPage, StoreCatalogError>> Query(
+		StoreCatalogQuery query,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(query);
@@ -41,7 +42,8 @@ public sealed class StoreCatalogPopularity
 			}
 		}
 
-		var installs = await StoreInstallCounts.Fetch(_reviews, matches.Select(item => item.Entry.Id), cancellationToken);
+		var installs
+			= await StoreInstallCounts.Fetch(_reviews, matches.Select(item => item.Entry.Id), cancellationToken);
 		var ordered = installs is null
 			? matches
 			: matches.OrderByDescending(item => installs.GetValueOrDefault(item.Entry.Id)).ToList();

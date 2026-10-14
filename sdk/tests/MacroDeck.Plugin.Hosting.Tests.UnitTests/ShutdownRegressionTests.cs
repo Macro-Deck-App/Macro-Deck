@@ -123,7 +123,8 @@ public class ShutdownRegressionTests
 	{
 		using var video = new VideoStreamFixture();
 		var provider = new TestVideoProvider();
-		var integration = new TestVideoIntegration { OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
+		var integration = new TestVideoIntegration
+			{ OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
 		var lifecycle = new IntegrationLifecycleHostedService([integration],
 			TestMetadata.Default,
 			new ConfigOnlyContext(new RemoteIntegrationConfig(video.Invoker)),
@@ -138,7 +139,7 @@ public class ShutdownRegressionTests
 			new HostStateCache(new PluginConnectionState()),
 			Serilog.Core.Logger.None);
 		await lifecycle.StartAsync(CancellationToken.None);
-		video.State.RaiseConnected(resumed: false);
+		video.State.RaiseConnected(false);
 		await VideoStreamFixture.WaitForAsync(() => video.Registry.Snapshot().Count == 1);
 		await video.OpenAsync("s1");
 
@@ -149,7 +150,8 @@ public class ShutdownRegressionTests
 		Assert.DoesNotThrowAsync(async () => await stop.WaitAsync(_smallestGracefulBudget));
 		Assert.Multiple(() =>
 		{
-			Assert.That(provider.Closes, Is.EqualTo(new[] { ("s1", Sdk.VideoStreams.VideoStreamSessionReason.ProviderRemoved) }));
+			Assert.That(provider.Closes,
+				Is.EqualTo(new[] { ("s1", Sdk.VideoStreams.VideoStreamSessionReason.ProviderRemoved) }));
 			Assert.That(integration.ShutdownCount, Is.EqualTo(1));
 		});
 	}

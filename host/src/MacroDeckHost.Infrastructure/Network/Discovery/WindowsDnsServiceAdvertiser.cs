@@ -15,12 +15,12 @@ internal sealed class WindowsDnsServiceAdvertiser
 	private const uint QueryRequestVersion1 = 1;
 	private const uint RequestPending = 9506;
 
-	private static readonly TimeSpan DeregisterTimeout = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _deregisterTimeout = TimeSpan.FromSeconds(2);
 
-	private static readonly Lazy<bool> Loadable = new(() =>
-		OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763) &&
-		NativeLibrary.TryLoad(Library, out var handle) &&
-		NativeLibrary.TryGetExport(handle, "DnsServiceRegister", out _));
+	private static readonly Lazy<bool> _loadable = new(() =>
+		OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763)
+		&& NativeLibrary.TryLoad(Library, out var handle)
+		&& NativeLibrary.TryGetExport(handle, "DnsServiceRegister", out _));
 
 	private readonly ILogger _logger = Log.ForContext<WindowsDnsServiceAdvertiser>();
 	private readonly ConcurrentDictionary<nint, bool> _failed = new();
@@ -36,7 +36,7 @@ internal sealed class WindowsDnsServiceAdvertiser
 		_complete = OnComplete;
 	}
 
-	public override bool IsAvailable => Loadable.Value;
+	public override bool IsAvailable => _loadable.Value;
 
 	protected override Registration Register(ServiceAdvertisement service, AdvertisedInterface target)
 	{
@@ -88,13 +88,13 @@ internal sealed class WindowsDnsServiceAdvertiser
 	{
 		// Windows may use the request and instance until each matching callback runs, so a callback that
 		// never arrives leaks them on purpose rather than freeing them under the service.
-		if (!registration.Registered.Task.Wait(DeregisterTimeout))
+		if (!registration.Registered.Task.Wait(_deregisterTimeout))
 		{
 			_abandoned[registration.Context] = true;
 			if (!registration.Registered.Task.IsCompleted || !_abandoned.TryRemove(registration.Context, out _))
 			{
-				_logger.Warning("Windows has not confirmed a network discovery registration yet; it is withdrawn " +
-					"as soon as it does");
+				_logger.Warning("Windows has not confirmed a network discovery registration yet; it is withdrawn "
+					+ "as soon as it does");
 				return;
 			}
 		}
@@ -108,7 +108,7 @@ internal sealed class WindowsDnsServiceAdvertiser
 
 		_deregistering[registration.Context] = registration;
 		var status = DnsServiceDeRegister(registration.Request, IntPtr.Zero);
-		if (status == RequestPending && !registration.Deregistered.Task.Wait(DeregisterTimeout))
+		if (status == RequestPending && !registration.Deregistered.Task.Wait(_deregisterTimeout))
 		{
 			_logger.Warning("Windows did not confirm withdrawing a network discovery registration in time");
 			return;
@@ -119,7 +119,10 @@ internal sealed class WindowsDnsServiceAdvertiser
 		Marshal.FreeHGlobal(registration.Request);
 	}
 
-	protected override bool IsAlive(Registration registration) => !_failed.ContainsKey(registration.Context);
+	protected override bool IsAlive(Registration registration)
+	{
+		return !_failed.ContainsKey(registration.Context);
+	}
 
 	private void LogRejection(uint status)
 	{
@@ -129,8 +132,8 @@ internal sealed class WindowsDnsServiceAdvertiser
 			return;
 		}
 
-		_logger.Warning("Windows rejected a network discovery registration with status {Status}; it is retried " +
-			"at the next check",
+		_logger.Warning("Windows rejected a network discovery registration with status {Status}; it is retried "
+			+ "at the next check",
 			status);
 	}
 
@@ -174,7 +177,8 @@ internal sealed class WindowsDnsServiceAdvertiser
 	}
 
 	[DllImport(Library, CharSet = CharSet.Unicode)]
-	private static extern IntPtr DnsServiceConstructInstance(string serviceName,
+	private static extern IntPtr DnsServiceConstructInstance(
+		string serviceName,
 		string hostName,
 		ref uint ipv4,
 		IntPtr ipv6,

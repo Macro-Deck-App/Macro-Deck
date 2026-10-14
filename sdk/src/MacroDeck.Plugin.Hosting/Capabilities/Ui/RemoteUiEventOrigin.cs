@@ -42,9 +42,12 @@ internal sealed class RemoteUiEventOrigin(
 	}
 
 	public async Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
-		=> await OpenAsync(modal, awaitResult: false, cancellationToken).ConfigureAwait(false) is not null;
+	{
+		return await OpenAsync(modal, false, cancellationToken).ConfigureAwait(false) is not null;
+	}
 
-	public async Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal,
+	public async Task<ModalResult<T>> ShowModalAsync<T>(
+		ModalDefinition modal,
 		CancellationToken cancellationToken = default)
 	{
 		if (modalResults is null)
@@ -52,7 +55,7 @@ internal sealed class RemoteUiEventOrigin(
 			return ModalResult.FromCancellation<T>();
 		}
 
-		var modalId = await OpenAsync(modal, awaitResult: true, cancellationToken).ConfigureAwait(false);
+		var modalId = await OpenAsync(modal, true, cancellationToken).ConfigureAwait(false);
 		if (modalId is null)
 		{
 			return ModalResult.FromCancellation<T>();
@@ -101,7 +104,10 @@ internal sealed class RemoteUiEventOrigin(
 		return opened is { Opened: true, ModalId.Length: > 0 } ? opened.ModalId : null;
 	}
 
-	private async Task<JsonElement?> InvokeAsync(string operation, object arguments, CancellationToken cancellationToken)
+	private async Task<JsonElement?> InvokeAsync(
+		string operation,
+		object arguments,
+		CancellationToken cancellationToken)
 	{
 		try
 		{

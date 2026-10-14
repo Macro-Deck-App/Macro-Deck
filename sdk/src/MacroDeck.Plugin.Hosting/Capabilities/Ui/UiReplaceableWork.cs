@@ -47,9 +47,13 @@ internal sealed class UiReplaceableWork<TItem>
 		}
 	}
 
-	public void Complete() => _items.Writer.TryComplete();
+	public void Complete()
+	{
+		_items.Writer.TryComplete();
+	}
 
-	public async IAsyncEnumerable<TItem> ReadAllAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<TItem> ReadAllAsync(
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		await foreach (var slot in _items.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
 		{

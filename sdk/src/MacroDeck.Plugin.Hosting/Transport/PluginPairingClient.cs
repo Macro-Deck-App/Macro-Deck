@@ -47,10 +47,10 @@ internal sealed class PluginPairingClient(IHttpClientFactory httpClientFactory)
 			// not a rejected request. Fatal regardless of what NotFound would otherwise imply, because a
 			// host that has never heard of pairing will answer the exact same way on every retry.
 			throw new PluginRegistrationException(
-				"This host does not support interactive pairing. Use the headless enrollment fallback " +
-				"described in the plugin authentication guide instead.",
+				"This host does not support interactive pairing. Use the headless enrollment fallback "
+				+ "described in the plugin authentication guide instead.",
 				response.StatusCode,
-				fatal: true);
+				true);
 		}
 
 		if (response.StatusCode == HttpStatusCode.Forbidden)
@@ -60,8 +60,8 @@ internal sealed class PluginPairingClient(IHttpClientFactory httpClientFactory)
 
 		await ProtocolHttpHelpers.ThrowIfAlreadyRegisteredAsync(response,
 			pluginId,
-			$"The host already has a plugin registered as '{pluginId}' and cannot pair it again. Remove " +
-			"that registration in Macro Deck, or restore this plugin's stored credentials.",
+			$"The host already has a plugin registered as '{pluginId}' and cannot pair it again. Remove "
+			+ "that registration in Macro Deck, or restore this plugin's stored credentials.",
 			cancellationToken);
 
 		await ProtocolHttpHelpers.EnsureSuccessAsync(response, "start pairing", cancellationToken);
@@ -117,10 +117,13 @@ internal sealed class PluginPairingClient(IHttpClientFactory httpClientFactory)
 	private static PluginRegistrationException DeveloperModeDisabled(HttpStatusCode statusCode)
 		// A bare 403 tells a developer nothing; naming the setting and where to flip it is the whole
 		// point of catching this separately instead of letting EnsureSuccessAsync's generic message through.
-		=> new("Interactive pairing needs Developer Mode enabled on the host. Enable it in the Macro Deck " +
-			"desktop app's settings.",
+	{
+		return new PluginRegistrationException(
+			"Interactive pairing needs Developer Mode enabled on the host. Enable it in the Macro Deck "
+			+ "desktop app's settings.",
 			statusCode,
-			fatal: true);
+			true);
+	}
 
 	private HttpClient Create()
 	{

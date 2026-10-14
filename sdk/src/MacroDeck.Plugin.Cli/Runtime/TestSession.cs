@@ -83,7 +83,8 @@ internal static class TestSession
 		}
 	}
 
-	private static async Task<ConformanceSubject> ResolveSubjectAsync(CliConsole console,
+	private static async Task<ConformanceSubject> ResolveSubjectAsync(
+		CliConsole console,
 		TestOptions options,
 		CancellationToken cancellationToken)
 	{
@@ -101,7 +102,8 @@ internal static class TestSession
 		return ConformanceSubject.Executable(spec);
 	}
 
-	private static bool TryParseCategories(CliConsole console,
+	private static bool TryParseCategories(
+		CliConsole console,
 		IReadOnlyList<string> tokens,
 		out List<ConformanceCategory> categories)
 	{
@@ -112,9 +114,9 @@ internal static class TestSession
 			if (!ConformanceCategoryTokens.TryParse(token, out var category))
 			{
 				console.WriteError("unknown-category",
-					$"'{token}' is not a known category. Expected one of: " +
-					string.Join(", ", ConformanceCategoryTokens.Tokens) +
-					".");
+					$"'{token}' is not a known category. Expected one of: "
+					+ string.Join(", ", ConformanceCategoryTokens.Tokens)
+					+ ".");
 				return false;
 			}
 
@@ -166,7 +168,8 @@ internal static class TestSession
 		return ExitCode.Success;
 	}
 
-	private static void WriteReport(CliConsole console,
+	private static void WriteReport(
+		CliConsole console,
 		ConformanceReportFormat format,
 		string? outputPath,
 		ConformanceReport report)

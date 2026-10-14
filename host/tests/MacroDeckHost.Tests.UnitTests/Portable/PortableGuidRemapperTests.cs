@@ -61,7 +61,8 @@ public class PortableGuidRemapperTests
 
 	[Test]
 	public void Remap_WithNullData_ReturnsNull()
-		=> Assert.That(
-			PortableGuidRemapper.Remap(null, new Dictionary<Guid, Guid> { [Guid.NewGuid()] = Guid.NewGuid() }),
+	{
+		Assert.That(PortableGuidRemapper.Remap(null, new Dictionary<Guid, Guid> { [Guid.NewGuid()] = Guid.NewGuid() }),
 			Is.Null);
+	}
 }

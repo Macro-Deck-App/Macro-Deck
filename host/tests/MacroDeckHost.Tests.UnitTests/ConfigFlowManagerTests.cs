@@ -470,7 +470,9 @@ public class ConfigFlowManagerTests
 
 	[Test]
 	public async Task AbandonAsync_is_a_no_op_for_an_unknown_flow()
-		=> await _manager.AbandonAsync(Guid.NewGuid(), CancellationToken.None);
+	{
+		await _manager.AbandonAsync(Guid.NewGuid(), CancellationToken.None);
+	}
 
 	private Guid SeedExistingEntry()
 	{
@@ -566,7 +568,8 @@ public class ConfigFlowManagerTests
 		services.AddSingleton<IIntegrationConfigStore>(_store);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 		var registry = new IntegrationRegistry(scopeFactory,
-			new Companion.CompanionHarness.MemoryStateStore(new Dictionary<string, bool> { ["com.example.no-entry"] = false }),
+			new Companion.CompanionHarness.MemoryStateStore(new Dictionary<string, bool>
+				{ ["com.example.no-entry"] = false }),
 			_logger);
 		Assert.That(await registry.RegisterAsync(new NoEntryConfigFlowIntegration()),
 			Is.EqualTo(IntegrationRegistrationResult.Success));
@@ -620,36 +623,58 @@ public class ConfigFlowManagerTests
 		public string Version => "1.0.0";
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
-		public IConfigFlow CreateConfigFlow() => new NoEntryConfigFlow();
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+		public IConfigFlow CreateConfigFlow()
+		{
+			return new NoEntryConfigFlow();
+		}
+
 		public bool IsInitialized => true;
 	}
 
 	private sealed class NoEntryConfigFlow : IConfigFlow
 	{
 		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
+		{
+			return Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
 			{
 				StepId = "name", Fields = [ActionParameter.Text("name")]
 			}));
+		}
 
 		public Task<ConfigFlowResult> SubmitAsync(
 			string stepId,
 			IReadOnlyDictionary<string, object?> input,
 			IConfigFlowContext context,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.CompleteWithoutEntry());
+		{
+			return Task.FromResult(ConfigFlowResult.CompleteWithoutEntry());
+		}
 	}
 
 	private static Dictionary<string, JsonElement> Values(params (string Key, JsonElement Value)[] pairs)
-		=> pairs.ToDictionary(p => p.Key, p => p.Value);
+	{
+		return pairs.ToDictionary(p => p.Key, p => p.Value);
+	}
 
 	private static JsonElement SecretRef(Guid id)
-		=> JsonSerializer.SerializeToElement(new Dictionary<string, string> { ["$secret"] = id.ToString() });
+	{
+		return JsonSerializer.SerializeToElement(new Dictionary<string, string> { ["$secret"] = id.ToString() });
+	}
 
 	private static JsonElement JsonValue(string value)
-		=> JsonSerializer.SerializeToElement(value);
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private sealed class ConfigFlowIntegration : IIntegration, IConfigFlowProvider
 	{
@@ -660,9 +685,21 @@ public class ConfigFlowManagerTests
 		public string Version => "1.0.0";
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
-		public IConfigFlow CreateConfigFlow() => Flow;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+		public IConfigFlow CreateConfigFlow()
+		{
+			return Flow;
+		}
+
 		public bool IsInitialized => true;
 
 		public bool AllowsMultipleConfigurations { get; set; } = true;
@@ -701,10 +738,14 @@ public class ConfigFlowManagerTests
 		}
 
 		private static ConfigFlowStep ConnectionStep()
-			=> new() { StepId = "connection", Fields = [ActionParameter.Password("apiKey")] };
+		{
+			return new ConfigFlowStep { StepId = "connection", Fields = [ActionParameter.Password("apiKey")] };
+		}
 
 		private static ConfigFlowStep WorkspaceStep()
-			=> new() { StepId = "workspace", Fields = [ActionParameter.Text("name")] };
+		{
+			return new ConfigFlowStep { StepId = "workspace", Fields = [ActionParameter.Text("name")] };
+		}
 
 		public ValueTask DisposeAsync()
 		{
@@ -720,36 +761,56 @@ public class ConfigFlowManagerTests
 		public string Version => "1.0.0";
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
-		public IConfigFlow CreateConfigFlow() => new BranchingConfigFlow();
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+		public IConfigFlow CreateConfigFlow()
+		{
+			return new BranchingConfigFlow();
+		}
+
 		public bool IsInitialized => true;
 	}
 
 	private sealed class BranchingConfigFlow : IConfigFlow
 	{
 		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.Step(BrandStep()));
+		{
+			return Task.FromResult(ConfigFlowResult.Step(BrandStep()));
+		}
 
 		public Task<ConfigFlowResult> SubmitAsync(
 			string stepId,
 			IReadOnlyDictionary<string, object?> input,
 			IConfigFlowContext context,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(stepId switch
+		{
+			return Task.FromResult(stepId switch
 			{
 				"brand" => (input.GetValueOrDefault("brand") as string) switch
 				{
-					"a" => ConfigFlowResult.Step(new ConfigFlowStep { StepId = "a", Fields = [ActionParameter.Password("aKey")] }),
-					"b" => ConfigFlowResult.Step(new ConfigFlowStep { StepId = "b", Fields = [ActionParameter.Text("bName")] }),
+					"a" => ConfigFlowResult.Step(new ConfigFlowStep
+						{ StepId = "a", Fields = [ActionParameter.Password("aKey")] }),
+					"b" => ConfigFlowResult.Step(new ConfigFlowStep
+						{ StepId = "b", Fields = [ActionParameter.Text("bName")] }),
 					_ => ConfigFlowResult.Error(BrandStep(), "Unknown brand")
 				},
 				"a" or "b" => ConfigFlowResult.Step(new ConfigFlowStep { StepId = "confirm", Fields = [] }),
 				_ => ConfigFlowResult.Complete("Branch")
 			});
+		}
 
 		private static ConfigFlowStep BrandStep()
-			=> new() { StepId = "brand", Fields = [ActionParameter.Text("brand")] };
+		{
+			return new ConfigFlowStep { StepId = "brand", Fields = [ActionParameter.Text("brand")] };
+		}
 	}
 
 	private sealed class OAuthConfigFlowIntegration : IIntegration, IConfigFlowProvider
@@ -759,23 +820,39 @@ public class ConfigFlowManagerTests
 		public string Version => "1.0.0";
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
-		public IConfigFlow CreateConfigFlow() => new OAuthTouchingConfigFlow();
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+		public IConfigFlow CreateConfigFlow()
+		{
+			return new OAuthTouchingConfigFlow();
+		}
+
 		public bool IsInitialized => true;
 	}
 
 	private sealed class OAuthTouchingConfigFlow : IConfigFlow
 	{
 		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep { StepId = "connect", Fields = [] }));
+		{
+			return Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep { StepId = "connect", Fields = [] }));
+		}
 
 		public Task<ConfigFlowResult> SubmitAsync(
 			string stepId,
 			IReadOnlyDictionary<string, object?> input,
 			IConfigFlowContext context,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.External(context.OAuth.RedirectUri, "resume"));
+		{
+			return Task.FromResult(ConfigFlowResult.External(context.OAuth.RedirectUri, "resume"));
+		}
 	}
 
 	private sealed class AdvancedSecretConfigFlowIntegration : IIntegration, IConfigFlowProvider
@@ -785,28 +862,44 @@ public class ConfigFlowManagerTests
 		public string Version => "1.0.0";
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
-		public IConfigFlow CreateConfigFlow() => new AdvancedSecretConfigFlow();
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+		public IConfigFlow CreateConfigFlow()
+		{
+			return new AdvancedSecretConfigFlow();
+		}
+
 		public bool IsInitialized => true;
 	}
 
 	private sealed class AdvancedSecretConfigFlow : IConfigFlow
 	{
 		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
+		{
+			return Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
 			{
 				StepId = "connection",
 				Fields = [ActionParameter.Text("name")],
-				AdvancedFields = [ActionParameter.Secret("ownClientSecret", label: "Own client secret")]
+				AdvancedFields = [ActionParameter.Secret("ownClientSecret", "Own client secret")]
 			}));
+		}
 
 		public Task<ConfigFlowResult> SubmitAsync(
 			string stepId,
 			IReadOnlyDictionary<string, object?> input,
 			IConfigFlowContext context,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.Complete("Prod"));
+		{
+			return Task.FromResult(ConfigFlowResult.Complete("Prod"));
+		}
 	}
 
 	private sealed class FakeConfigFlowStore : IIntegrationConfigStore
@@ -818,13 +911,17 @@ public class ConfigFlowManagerTests
 		public List<ConfigEntryRecord> Replaced { get; } = [];
 
 		public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Existing
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Existing
 				.Where(e => e.IntegrationId == integrationId)
 				.Select(e => new ConfigEntrySummary(e.Id, e.IntegrationId, e.Title, e.CreatedAt))
 				.ToList());
+		}
 
 		public Task<ConfigEntryRecord?> Find(Guid entryId)
-			=> Task.FromResult(Existing.FirstOrDefault(e => e.Id == entryId));
+		{
+			return Task.FromResult(Existing.FirstOrDefault(e => e.Id == entryId));
+		}
 
 		public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
 		{
@@ -836,7 +933,9 @@ public class ConfigFlowManagerTests
 		}
 
 		public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
 		{
@@ -852,7 +951,10 @@ public class ConfigFlowManagerTests
 			return Task.FromResult(true);
 		}
 
-		public Task Delete(Guid entryId) => Task.CompletedTask;
+		public Task Delete(Guid entryId)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeOAuthCallbackCoordinator : IOAuthCallbackCoordinator
@@ -862,17 +964,28 @@ public class ConfigFlowManagerTests
 		public string RedirectUri => $"http://127.0.0.1:{BuildConfig.PublicPort}/api/integrations/oauth/callback";
 
 		public OAuthRegistration Register(Guid flowId)
-			=> new(RedirectUri, flowId.ToString("N"));
+		{
+			return new OAuthRegistration(RedirectUri, flowId.ToString("N"));
+		}
 
-		public string? GetCode(string state) => null;
+		public string? GetCode(string state)
+		{
+			return null;
+		}
 
-		public Task<bool> HandleCallbackAsync(string state,
+		public Task<bool> HandleCallbackAsync(
+			string state,
 			string? code,
 			string? error,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(true);
+		{
+			return Task.FromResult(true);
+		}
 
-		public void Release(string state) => Released.Add(state);
+		public void Release(string state)
+		{
+			Released.Add(state);
+		}
 	}
 
 	private sealed class FakeIntegrationLifecycle : IIntegrationLifecycle

@@ -8,12 +8,14 @@ using MacroDeck.Sdk.Calendar;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A33_CalendarTestClientTests
+public class A33CalendarTestClientTests
 {
 	private static readonly DateTimeOffset _start = new(2026, 10, 5, 9, 0, 0, TimeSpan.FromHours(2));
 
 	private static void Configure(PluginHostBuilder builder)
-		=> builder.RegisterIntegration(_ => new CalendarIntegration());
+	{
+		builder.RegisterIntegration(_ => new CalendarIntegration());
+	}
 
 	[Test]
 	public async Task The_harness_and_the_wire_answer_every_calendar_read_alike()
@@ -35,7 +37,8 @@ public class A33_CalendarTestClientTests
 
 		await AssertSameOutcome(harness.Calendar.DescribeAsync(), session.Calendar.DescribeAsync());
 		await AssertSameOutcome(harness.Calendar.GetAccountsAsync(), session.Calendar.GetAccountsAsync());
-		await AssertSameOutcome(harness.Calendar.GetCalendarsAsync(new CalendarAccountArguments { AccountId = "alice" }),
+		await AssertSameOutcome(
+			harness.Calendar.GetCalendarsAsync(new CalendarAccountArguments { AccountId = "alice" }),
 			session.Calendar.GetCalendarsAsync(new CalendarAccountArguments { AccountId = "alice" }));
 		await AssertSameOutcome(Task.FromResult(harnessEvents), session.Calendar.GetEventsAsync(events));
 		await AssertSameOutcome(harness.Calendar.GetEventAsync(details), session.Calendar.GetEventAsync(details));
@@ -73,29 +76,47 @@ public class A33_CalendarTestClientTests
 
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public IReadOnlyList<CalendarAccount> GetAccounts()
-			=> [new CalendarAccount { Id = "alice", DisplayName = "alice@example.com" }];
+		{
+			return
+			[
+				new CalendarAccount
+					{ Id = "alice", DisplayName = "alice@example.com" }
+			];
+		}
 
 		public Task<IReadOnlyList<CalendarInfo>> GetCalendarsAsync(
 			string accountId,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<CalendarInfo>>([new CalendarInfo { Id = "primary", Name = "Alice" }]);
+		{
+			return Task.FromResult<IReadOnlyList<CalendarInfo>>([new CalendarInfo { Id = "primary", Name = "Alice" }]);
+		}
 
 		public Task<IReadOnlyList<CalendarEvent>> GetEventsAsync(
 			string accountId,
 			CalendarEventQuery query,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<CalendarEvent>>([_standup]);
+		{
+			return Task.FromResult<IReadOnlyList<CalendarEvent>>([_standup]);
+		}
 
 		public Task<CalendarEvent?> GetEventAsync(
 			string accountId,
 			string calendarId,
 			string eventId,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<CalendarEvent?>(eventId == _standup.Id ? _standup : null);
+		{
+			return Task.FromResult<CalendarEvent?>(eventId == _standup.Id ? _standup : null);
+		}
 	}
 }

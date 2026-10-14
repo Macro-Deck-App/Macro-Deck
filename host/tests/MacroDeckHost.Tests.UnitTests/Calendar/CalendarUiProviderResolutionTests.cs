@@ -27,12 +27,14 @@ internal sealed class CalendarUiProviderResolutionTests : UiSessionFixture
 		await _harness.SyncAsync();
 
 		var registry = TestWidgetTypeProviders.Registry();
-		await new WidgetTypeProviderHost(registry, TimeProvider.System, Serilog.Core.Logger.None).StartAsync(new CalendarIntegration());
+		await new WidgetTypeProviderHost(registry, TimeProvider.System, Serilog.Core.Logger.None).StartAsync(
+			new CalendarIntegration());
 
 		Assert.That(registry.TryResolve(CalendarWidgetTypes.QualifiedId, out var calendar), Is.True);
 		Assert.Multiple(() =>
 		{
-			Assert.That(registry.All.Where(entry => entry.ProviderId == calendar.ProviderId).Select(entry => entry.WidgetTypeId),
+			Assert.That(registry.All.Where(entry => entry.ProviderId == calendar.ProviderId)
+					.Select(entry => entry.WidgetTypeId),
 				Is.EqualTo(new[] { CalendarWidgetTypes.QualifiedId }),
 				"one calendar widget type, whose layout is a setting");
 			Assert.That(calendar.IsBuiltIn, Is.False, "a built-in type would be served by a synthetic provider id");
@@ -57,8 +59,7 @@ internal sealed class CalendarUiProviderResolutionTests : UiSessionFixture
 	{
 		var agenda = await OpenTreeAsync(CalendarWidgetHarness.WidgetSurface(CalendarWidgetTypes.QualifiedId,
 			CalendarWidgetHarness.WithLayout(CalendarWidgetTypes.LayoutAgenda, new { days = 2 })));
-		var nextEvent = await OpenTreeAsync(CalendarWidgetHarness.WidgetSurface(
-			CalendarWidgetTypes.QualifiedId,
+		var nextEvent = await OpenTreeAsync(CalendarWidgetHarness.WidgetSurface(CalendarWidgetTypes.QualifiedId,
 			CalendarWidgetHarness.WithLayout(CalendarWidgetTypes.LayoutNextEvent, new { })));
 
 		Assert.Multiple(() =>
@@ -72,10 +73,11 @@ internal sealed class CalendarUiProviderResolutionTests : UiSessionFixture
 	public async Task The_picker_sample_opens_for_both_layouts()
 	{
 		var agenda = await OpenTreeAsync(CalendarWidgetHarness.WidgetSurface(CalendarWidgetTypes.QualifiedId,
-			new { }, sample: true));
-		var nextEvent = await OpenTreeAsync(CalendarWidgetHarness.WidgetSurface(
-			CalendarWidgetTypes.QualifiedId,
-			CalendarWidgetHarness.WithLayout(CalendarWidgetTypes.LayoutNextEvent, new { }), sample: true));
+			new { },
+			true));
+		var nextEvent = await OpenTreeAsync(CalendarWidgetHarness.WidgetSurface(CalendarWidgetTypes.QualifiedId,
+			CalendarWidgetHarness.WithLayout(CalendarWidgetTypes.LayoutNextEvent, new { }),
+			true));
 
 		Assert.Multiple(() =>
 		{

@@ -52,32 +52,33 @@ internal static class JellyfinSessionsView
 				{
 					Key = "noServerGate",
 					Condition = () => state.Value.Status == JellyfinSessionsStatus.NoServer,
-					Content = () => Notice(state, "noServer", Strings.NoServer()),
+					Content = () => Notice(state, "noServer", Strings.NoServer())
 				},
 				new UiWhen
 				{
 					Key = "notConnectedGate",
 					Condition = () => state.Value.Status == JellyfinSessionsStatus.NotConnected,
-					Content = () => Notice(state, "notConnected", Strings.NotConnected()),
+					Content = () => Notice(state, "notConnected", Strings.NotConnected())
 				},
 				new UiWhen
 				{
 					Key = "idleGate",
 					Condition = () => state.Value is { Status: JellyfinSessionsStatus.Ready, Count: 0 },
-					Content = () => Notice(state, "idle", Strings.NothingPlaying()),
+					Content = () => Notice(state, "idle", Strings.NothingPlaying())
 				},
 				new UiWhen
 				{
 					Key = "playingGate",
 					Condition = () => state.Value is { Status: JellyfinSessionsStatus.Ready, Count: > 0 },
-					Content = () => Layout(state),
-				},
-			],
+					Content = () => Layout(state)
+				}
+			]
 		};
 	}
 
 	private static UiResponsive Layout(UiState<JellyfinSessionsState> state)
-		=> new()
+	{
+		return new UiResponsive
 		{
 			Key = "layout",
 			Fill = true,
@@ -85,13 +86,15 @@ internal static class JellyfinSessionsView
 			Variants =
 			[
 				new UiResponsiveVariant { MinWidth = 1.5, MinHeight = 1.5, Content = Large(state) },
-				new UiResponsiveVariant { MinHeight = 1.5, Content = List(state, TallRows, withArtwork: false) },
-				new UiResponsiveVariant { MinWidth = 1.5, Content = Medium(state) },
-			],
+				new UiResponsiveVariant { MinHeight = 1.5, Content = List(state, TallRows, false) },
+				new UiResponsiveVariant { MinWidth = 1.5, Content = Medium(state) }
+			]
 		};
+	}
 
 	private static UiStack Small(UiState<JellyfinSessionsState> state)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "small",
 			Direction = UiComponentDirections.Vertical,
@@ -103,7 +106,7 @@ internal static class JellyfinSessionsView
 					Key = "top",
 					Direction = UiComponentDirections.Horizontal,
 					Justify = UiComponentJustify.SpaceBetween,
-					Children = [LeadArtwork(state, "artwork", _smallArtwork), Corner(state)],
+					Children = [LeadArtwork(state, "artwork", _smallArtwork), Corner(state)]
 				},
 				new UiStack
 				{
@@ -111,18 +114,26 @@ internal static class JellyfinSessionsView
 					Direction = UiComponentDirections.Vertical,
 					Children =
 					[
-						LeadText(state, "title", row => row.Title, _title, primary: true),
-						LeadText(state, "subtitle", row => row.Subtitle ?? row.Detail, _subtitle, primary: false),
-					],
-				},
-			],
+						LeadText(state, "title", row => row.Title, _title, true),
+						LeadText(state, "subtitle", row => row.Subtitle ?? row.Detail, _subtitle, false)
+					]
+				}
+			]
 		};
+	}
 
 	private static UiStack Medium(UiState<JellyfinSessionsState> state)
-		=> SideBySide(state, "medium", _title, _subtitle);
+	{
+		return SideBySide(state, "medium", _title, _subtitle);
+	}
 
-	private static UiStack SideBySide(UiState<JellyfinSessionsState> state, string key, UiLength title, UiLength subtitle)
-		=> new()
+	private static UiStack SideBySide(
+		UiState<JellyfinSessionsState> state,
+		string key,
+		UiLength title,
+		UiLength subtitle)
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Horizontal,
@@ -143,7 +154,7 @@ internal static class JellyfinSessionsView
 							Key = "head",
 							Direction = UiComponentDirections.Horizontal,
 							Justify = UiComponentJustify.End,
-							Children = [Corner(state)],
+							Children = [Corner(state)]
 						},
 						new UiStack
 						{
@@ -158,22 +169,27 @@ internal static class JellyfinSessionsView
 									Direction = UiComponentDirections.Vertical,
 									Children =
 									[
-										LeadText(state, "title", row => row.Title, title, primary: true, lines: 2),
-										LeadText(state, "subtitle", row => row.Subtitle ?? string.Empty, subtitle,
-											primary: false),
-										LeadText(state, "detail", row => row.Detail, _detail, primary: false),
-									],
+										LeadText(state, "title", row => row.Title, title, true, 2),
+										LeadText(state,
+											"subtitle",
+											row => row.Subtitle ?? string.Empty,
+											subtitle,
+											false),
+										LeadText(state, "detail", row => row.Detail, _detail, false)
+									]
 								},
-								LeadProgress(state),
-							],
-						},
-					],
-				},
-			],
+								LeadProgress(state)
+							]
+						}
+					]
+				}
+			]
 		};
+	}
 
 	private static UiStack Large(UiState<JellyfinSessionsState> state)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "large",
 			Direction = UiComponentDirections.Vertical,
@@ -183,22 +199,26 @@ internal static class JellyfinSessionsView
 				{
 					Key = "heroGate",
 					Condition = () => state.Value.Count == 1,
-					Content = () => Hero(state),
+					Content = () => Hero(state)
 				},
 				new UiWhen
 				{
 					Key = "listGate",
 					Condition = () => state.Value.Count > 1,
-					Content = () => List(state, ListRows, withArtwork: true),
-				},
-			],
+					Content = () => List(state, ListRows, true)
+				}
+			]
 		};
+	}
 
 	private static UiStack Hero(UiState<JellyfinSessionsState> state)
-		=> SideBySide(state, "hero", _heroTitle, _title);
+	{
+		return SideBySide(state, "hero", _heroTitle, _title);
+	}
 
 	private static UiStack List(UiState<JellyfinSessionsState> state, int rows, bool withArtwork)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = withArtwork ? "list" : "tallList",
 			Direction = UiComponentDirections.Vertical,
@@ -217,28 +237,29 @@ internal static class JellyfinSessionsView
 						new UiTextRun
 						{
 							Key = "count",
-							Text = UiText.FromLocalized(() => Strings.ActiveSessions(count: state.Value.Count)),
+							Text = UiText.FromLocalized(() => Strings.ActiveSessions(state.Value.Count)),
 							Size = _headingText,
 							Weight = UiComponentTextWeights.SemiBold,
 							Role = UiComponentTextRoles.Secondary,
 							MaxLines = 1,
-							Fill = true,
-						},
-					],
+							Fill = true
+						}
+					]
 				},
 				new UiRepeat<JellyfinSessionRow>
 				{
 					Key = "rows",
 					Items = UiValue.From<IReadOnlyList<JellyfinSessionRow>>(() => [.. state.Value.Rows.Take(rows)]),
 					KeySelector = row => row.Key,
-					Template = (row, _) => Row(row, withArtwork),
-				},
-			],
+					Template = (row, _) => Row(row, withArtwork)
+				}
+			]
 		};
+	}
 
 	private static UiStack Row(JellyfinSessionRow row, bool withArtwork)
 	{
-		UiElement lead = withArtwork
+		var lead = withArtwork
 			? Artwork("thumb", row.Artwork, row.IsAudio, row.IsPaused, _thumb)
 			: new UiIcon
 			{
@@ -246,7 +267,7 @@ internal static class JellyfinSessionsView
 				Icon = row.IsPaused ? UiIcons.Pause : UiIcons.Play,
 				Size = _detail,
 				MainSize = _detail,
-				Role = UiComponentTextRoles.Secondary,
+				Role = UiComponentTextRoles.Secondary
 			};
 
 		return new UiStack
@@ -266,20 +287,23 @@ internal static class JellyfinSessionsView
 					Fill = true,
 					Children =
 					[
-						Text("title", row.Title, _title, primary: true),
+						Text("title", row.Title, _title, true),
 						Text("detail",
-							withArtwork && !string.IsNullOrEmpty(row.Subtitle) ? $"{row.Subtitle} · {row.Detail}" : row.Detail,
+							withArtwork && !string.IsNullOrEmpty(row.Subtitle)
+								? $"{row.Subtitle} · {row.Detail}"
+								: row.Detail,
 							_detail,
-							primary: false),
-						Progress("progress", UiValue.Of(row.Progress)),
-					],
-				},
-			],
+							false),
+						Progress("progress", UiValue.Of(row.Progress))
+					]
+				}
+			]
 		};
 	}
 
 	private static UiStack Notice(UiState<JellyfinSessionsState> state, string key, LocalizedText text)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
@@ -298,13 +322,15 @@ internal static class JellyfinSessionsView
 					Role = UiComponentTextRoles.Secondary,
 					Align = UiComponentAlignments.Center,
 					Wrap = true,
-					MaxLines = 3,
-				},
-			],
+					MaxLines = 3
+				}
+			]
 		};
+	}
 
 	private static UiStack Corner(UiState<JellyfinSessionsState> state)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "corner",
 			Direction = UiComponentDirections.Vertical,
@@ -320,24 +346,28 @@ internal static class JellyfinSessionsView
 					Size = _badgeText,
 					Weight = UiComponentTextWeights.SemiBold,
 					Role = UiComponentTextRoles.Secondary,
-					MaxLines = 1,
-				},
-			],
+					MaxLines = 1
+				}
+			]
 		};
+	}
 
 	private static UiImage Glyph(UiState<JellyfinSessionsState> state)
-		=> new()
+	{
+		return new UiImage
 		{
 			Key = "glyph",
 			Size = _glyph,
 			MainSize = _glyph,
 			Source = UiValue.Optional(() => state.Value.Glyph is { } glyph
 				? UiValue.Of(glyph)
-				: UiValue.None<UiResource>()),
+				: UiValue.None<UiResource>())
 		};
+	}
 
 	private static UiStack LeadArtwork(UiState<JellyfinSessionsState> state, string key, UiLength size)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key + "Box",
 			MainSize = size,
@@ -355,20 +385,22 @@ internal static class JellyfinSessionsView
 						Brightness = UiValue.From(() => state.Value.Lead?.IsPaused == true ? 0.6 : 1d),
 						Source = UiValue.Optional(() => state.Value.Lead?.Artwork is { } artwork
 							? UiValue.Of(artwork)
-							: UiValue.None<UiResource>()),
-					},
+							: UiValue.None<UiResource>())
+					}
 				},
 				new UiWhen
 				{
 					Key = "placeholderGate",
 					Condition = () => state.Value.Lead is { Artwork: null },
-					Content = () => Placeholder(key + "Placeholder", state.Value.Lead?.IsAudio == true, size),
-				},
-			],
+					Content = () => Placeholder(key + "Placeholder", state.Value.Lead?.IsAudio == true, size)
+				}
+			]
 		};
+	}
 
 	private static UiElement Artwork(string key, UiResource? artwork, bool isAudio, bool isPaused, UiLength size)
-		=> artwork is { } resource
+	{
+		return artwork is { } resource
 			? new UiImage
 			{
 				Key = key,
@@ -376,12 +408,14 @@ internal static class JellyfinSessionsView
 				MainSize = size,
 				Transition = UiComponentImageTransitions.Crossfade,
 				Brightness = isPaused ? 0.6 : 1,
-				Source = resource,
+				Source = resource
 			}
 			: Placeholder(key, isAudio, size);
+	}
 
 	private static UiStack Placeholder(string key, bool isAudio, UiLength size)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			MainSize = size,
@@ -395,10 +429,11 @@ internal static class JellyfinSessionsView
 					Key = "icon",
 					Icon = isAudio ? UiIcons.MusicNote : UiIcons.Play,
 					Size = UiLength.OfBasis(size.Basis * 0.3),
-					Role = UiComponentTextRoles.Secondary,
-				},
-			],
+					Role = UiComponentTextRoles.Secondary
+				}
+			]
 		};
+	}
 
 	private static UiTextRun LeadText(
 		UiState<JellyfinSessionsState> state,
@@ -407,7 +442,8 @@ internal static class JellyfinSessionsView
 		UiLength size,
 		bool primary,
 		int lines = 1)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = UiText.From(() => state.Value.Lead is { } lead ? select(lead) : string.Empty),
@@ -415,25 +451,31 @@ internal static class JellyfinSessionsView
 			Weight = primary ? UiComponentTextWeights.SemiBold : UiValue.None<string>(),
 			Role = primary ? UiComponentTextRoles.Primary : UiComponentTextRoles.Secondary,
 			Wrap = lines > 1,
-			MaxLines = lines,
+			MaxLines = lines
 		};
+	}
 
 	private static UiTextRun Text(string key, string text, UiLength size, bool primary)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
 			Size = size,
 			Weight = primary ? UiComponentTextWeights.SemiBold : UiValue.None<string>(),
 			Role = primary ? UiComponentTextRoles.Primary : UiComponentTextRoles.Secondary,
-			MaxLines = 1,
+			MaxLines = 1
 		};
+	}
 
 	private static UiRangeBar LeadProgress(UiState<JellyfinSessionsState> state)
-		=> Progress("progress", UiValue.From(() => state.Value.Lead?.Progress ?? 0));
+	{
+		return Progress("progress", UiValue.From(() => state.Value.Lead?.Progress ?? 0));
+	}
 
 	private static UiRangeBar Progress(string key, UiValue<double> end)
-		=> new()
+	{
+		return new UiRangeBar
 		{
 			Key = key,
 			MainSize = ProgressThickness,
@@ -441,6 +483,7 @@ internal static class JellyfinSessionsView
 			Start = 0d,
 			End = end,
 			StartColor = ProgressStart,
-			EndColor = ProgressEnd,
+			EndColor = ProgressEnd
 		};
+	}
 }

@@ -37,7 +37,9 @@ internal sealed class MacroDeck2Archive : IDisposable
 	public string Root { get; }
 
 	public static bool IsArchive(string path)
-		=> Path.GetExtension(path).Equals(".zip", StringComparison.OrdinalIgnoreCase);
+	{
+		return Path.GetExtension(path).Equals(".zip", StringComparison.OrdinalIgnoreCase);
+	}
 
 	/// <summary>
 	/// Unpacks <paramref name="archivePath" />, or returns null when it is not readable as a Macro Deck 2
@@ -74,7 +76,7 @@ internal sealed class MacroDeck2Archive : IDisposable
 
 				var destination = Path.Combine(root, relative);
 				Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-				entry.ExtractToFile(destination, overwrite: true);
+				entry.ExtractToFile(destination, true);
 			}
 
 			return new MacroDeck2Paths(root).LooksLikeMacroDeck2() ? archive : Fail(archive);
@@ -94,7 +96,7 @@ internal sealed class MacroDeck2Archive : IDisposable
 		{
 			if (Directory.Exists(Root))
 			{
-				Directory.Delete(Root, recursive: true);
+				Directory.Delete(Root, true);
 			}
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -130,9 +132,9 @@ internal sealed class MacroDeck2Archive : IDisposable
 			return null;
 		}
 
-		if (normalized.StartsWith('/') ||
-			normalized.Contains(':', StringComparison.Ordinal) ||
-			normalized.Split('/').Any(segment => segment is "." or ".."))
+		if (normalized.StartsWith('/')
+			|| normalized.Contains(':', StringComparison.Ordinal)
+			|| normalized.Split('/').Any(segment => segment is "." or ".."))
 		{
 			return null;
 		}
@@ -161,8 +163,8 @@ internal sealed class MacroDeck2Archive : IDisposable
 		var prefix = string.Empty;
 		while (true)
 		{
-			if (names.Any(name => name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) &&
-				IsWanted(name[prefix.Length..])))
+			if (names.Any(name
+				=> name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && IsWanted(name[prefix.Length..])))
 			{
 				return prefix;
 			}
@@ -188,8 +190,10 @@ internal sealed class MacroDeck2Archive : IDisposable
 	}
 
 	private static bool IsWanted(string relative)
-		=> _files.Contains(relative, StringComparer.OrdinalIgnoreCase) ||
-			_directories.Any(directory => relative.StartsWith(directory, StringComparison.OrdinalIgnoreCase));
+	{
+		return _files.Contains(relative, StringComparer.OrdinalIgnoreCase)
+			|| _directories.Any(directory => relative.StartsWith(directory, StringComparison.OrdinalIgnoreCase));
+	}
 
 	private static MacroDeck2Archive? Fail(MacroDeck2Archive archive)
 	{

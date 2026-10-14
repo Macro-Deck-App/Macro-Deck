@@ -6,7 +6,6 @@ using System.Text.Json;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Delegation.Protocol;
 
@@ -39,7 +38,8 @@ internal sealed class DelegateClient : IDelegateClient
 		await EnsureIsMacroDeckAsync(response, cancellationToken);
 	}
 
-	public async Task<DelegateLoginResult> LoginAsync(Uri baseUrl,
+	public async Task<DelegateLoginResult> LoginAsync(
+		Uri baseUrl,
 		string username,
 		string password,
 		CancellationToken cancellationToken)
@@ -59,7 +59,8 @@ internal sealed class DelegateClient : IDelegateClient
 		return new DelegateLoginResult(dto.AccessToken, TimeSpan.FromSeconds(dto.ExpiresInSeconds));
 	}
 
-	public async Task<DelegateConnectionInfo> GetConnectionInfoAsync(Uri baseUrl,
+	public async Task<DelegateConnectionInfo> GetConnectionInfoAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken)
 	{
@@ -74,7 +75,8 @@ internal sealed class DelegateClient : IDelegateClient
 		return new DelegateConnectionInfo(dto.InstanceName);
 	}
 
-	public async Task<IReadOnlyList<DelegateScriptSummary>> GetScriptsAsync(Uri baseUrl,
+	public async Task<IReadOnlyList<DelegateScriptSummary>> GetScriptsAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken)
 	{
@@ -94,8 +96,8 @@ internal sealed class DelegateClient : IDelegateClient
 				var name = item.TryGetProperty("name", out var nameProperty) ? nameProperty.GetString() : null;
 				if (!string.IsNullOrEmpty(id))
 				{
-					var runsOnWidget = item.TryGetProperty("runsOnWidget", out var runsOnWidgetProperty) &&
-						runsOnWidgetProperty.ValueKind == JsonValueKind.True;
+					var runsOnWidget = item.TryGetProperty("runsOnWidget", out var runsOnWidgetProperty)
+						&& runsOnWidgetProperty.ValueKind == JsonValueKind.True;
 					scripts.Add(new DelegateScriptSummary(id,
 						string.IsNullOrEmpty(name) ? id : name,
 						ReadInputs(item),
@@ -107,7 +109,8 @@ internal sealed class DelegateClient : IDelegateClient
 		return scripts;
 	}
 
-	public async Task<DelegateRunResult> RunScriptAsync(Uri baseUrl,
+	public async Task<DelegateRunResult> RunScriptAsync(
+		Uri baseUrl,
 		string token,
 		string scriptId,
 		string? clientId,
@@ -150,7 +153,8 @@ internal sealed class DelegateClient : IDelegateClient
 		throw new DelegateServerErrorException();
 	}
 
-	public async Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(Uri baseUrl,
+	public async Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken)
 	{
@@ -159,8 +163,9 @@ internal sealed class DelegateClient : IDelegateClient
 
 		// A host from before variable sharing has no such route: it answers 404, 405 or, through the
 		// web UI's catch-all route, 200 with an HTML page.
-		if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.MethodNotAllowed ||
-			(response.IsSuccessStatusCode && response.Content.Headers.ContentType?.MediaType is not "application/json"))
+		if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.MethodNotAllowed
+			|| response.IsSuccessStatusCode
+			&& response.Content.Headers.ContentType?.MediaType is not "application/json")
 		{
 			throw new DelegateSharingUnsupportedException();
 		}
@@ -202,7 +207,8 @@ internal sealed class DelegateClient : IDelegateClient
 		return variables;
 	}
 
-	public async Task<DelegateWriteResult> SetSharedVariableAsync(Uri baseUrl,
+	public async Task<DelegateWriteResult> SetSharedVariableAsync(
+		Uri baseUrl,
 		string token,
 		string name,
 		string? value,
@@ -221,14 +227,17 @@ internal sealed class DelegateClient : IDelegateClient
 		return new DelegateWriteResult(dto.Success, dto.Success ? null : dto.Error?.Code);
 	}
 
-	private static VariableType? TypeFromWire(string? wire) => wire switch
+	private static VariableType? TypeFromWire(string? wire)
 	{
-		"text" => VariableType.Text,
-		"numeric" => VariableType.Numeric,
-		"boolean" => VariableType.Boolean,
-		"color" => VariableType.Color,
-		_ => null
-	};
+		return wire switch
+		{
+			"text" => VariableType.Text,
+			"numeric" => VariableType.Numeric,
+			"boolean" => VariableType.Boolean,
+			"color" => VariableType.Color,
+			_ => null
+		};
+	}
 
 	private static List<ScriptInput> ReadInputs(JsonElement script)
 	{
@@ -338,12 +347,13 @@ internal sealed class DelegateClient : IDelegateClient
 
 	private static HttpClient CreateClient()
 	{
-		return IntegrationHttp.CreateClient(Timeout.InfiniteTimeSpan, handler =>
-		{
-			handler.ConnectTimeout = TimeSpan.FromSeconds(10);
-			handler.PooledConnectionLifetime = TimeSpan.FromMinutes(5);
-			handler.UseCookies = false;
-		});
+		return IntegrationHttp.CreateClient(Timeout.InfiniteTimeSpan,
+			handler =>
+			{
+				handler.ConnectTimeout = TimeSpan.FromSeconds(10);
+				handler.PooledConnectionLifetime = TimeSpan.FromMinutes(5);
+				handler.UseCookies = false;
+			});
 	}
 
 	public void Dispose()

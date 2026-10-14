@@ -31,7 +31,8 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 		_timeProvider = timeProvider ?? TimeProvider.System;
 	}
 
-	public IReadOnlyList<MessageRegistrationRejection> Replace(string participantId,
+	public IReadOnlyList<MessageRegistrationRejection> Replace(
+		string participantId,
 		string registrationKey,
 		IMessageParticipant participant,
 		MessageRegistrations registrations)
@@ -46,8 +47,8 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 
 		lock (_lock)
 		{
-			if (_participants.TryGetValue(participantId, out var existing) &&
-				!string.Equals(existing.RegistrationKey, registrationKey, StringComparison.Ordinal))
+			if (_participants.TryGetValue(participantId, out var existing)
+				&& !string.Equals(existing.RegistrationKey, registrationKey, StringComparison.Ordinal))
 			{
 				ReleaseClaims(existing);
 				_participants.Remove(participantId);
@@ -58,7 +59,8 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 			var state = existing ?? new Participant(participantId, registrationKey, this);
 			state.Endpoint = participant;
 
-			state.Patterns = [.. Accept(ChannelMessageKind.Event, registrations.Events, MessageTopic.IsValidPattern, rejected)];
+			state.Patterns =
+				[.. Accept(ChannelMessageKind.Event, registrations.Events, MessageTopic.IsValidPattern, rejected)];
 
 			ReleaseClaims(state);
 			state.Commands = Claim(state,
@@ -80,8 +82,7 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 
 		foreach (var rejection in rejected.Where(rejection => rejection.Owner is not null))
 		{
-			_logger.Information(
-				"{ParticipantId} cannot handle {Kind} topic {Topic}: {Owner} already handles it",
+			_logger.Information("{ParticipantId} cannot handle {Kind} topic {Topic}: {Owner} already handles it",
 				participantId,
 				rejection.Kind,
 				rejection.Topic,
@@ -97,8 +98,8 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 
 		lock (_lock)
 		{
-			if (!_participants.TryGetValue(participantId, out removed) ||
-				!string.Equals(removed.RegistrationKey, registrationKey, StringComparison.Ordinal))
+			if (!_participants.TryGetValue(participantId, out removed)
+				|| !string.Equals(removed.RegistrationKey, registrationKey, StringComparison.Ordinal))
 			{
 				return;
 			}
@@ -134,12 +135,14 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 		}
 	}
 
-	public async Task SendAsync(string senderId,
+	public async Task SendAsync(
+		string senderId,
 		string topic,
 		JsonElement? payload,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
-		=> await DeliverToOwnerAsync(senderId,
+	{
+		await DeliverToOwnerAsync(senderId,
 				topic,
 				payload,
 				timeout,
@@ -151,19 +154,23 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 				},
 				cancellationToken)
 			.ConfigureAwait(false);
+	}
 
-	public Task<JsonElement?> RequestAsync(string senderId,
+	public Task<JsonElement?> RequestAsync(
+		string senderId,
 		string topic,
 		JsonElement? payload,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
-		=> DeliverToOwnerAsync(senderId,
+	{
+		return DeliverToOwnerAsync(senderId,
 			topic,
 			payload,
 			timeout,
 			_requestOwners,
 			(endpoint, message, token) => endpoint.HandleRequestAsync(message, timeout, token),
 			cancellationToken);
+	}
 
 	public void Dispose()
 	{
@@ -183,7 +190,8 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 		}
 	}
 
-	private async Task<JsonElement?> DeliverToOwnerAsync(string senderId,
+	private async Task<JsonElement?> DeliverToOwnerAsync(
+		string senderId,
 		string topic,
 		JsonElement? payload,
 		TimeSpan timeout,
@@ -241,7 +249,8 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 		}
 	}
 
-	private static IEnumerable<string> Accept(ChannelMessageKind kind,
+	private static IEnumerable<string> Accept(
+		ChannelMessageKind kind,
 		IReadOnlyList<string> entries,
 		Func<string?, bool> isValid,
 		List<MessageRegistrationRejection> rejected)
@@ -254,12 +263,16 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 			}
 			else
 			{
-				rejected.Add(new MessageRegistrationRejection(kind, entry, ProtocolErrorReasons.MessagingInvalidTopic, null));
+				rejected.Add(new MessageRegistrationRejection(kind,
+					entry,
+					ProtocolErrorReasons.MessagingInvalidTopic,
+					null));
 			}
 		}
 	}
 
-	private static string[] Claim(Participant state,
+	private static string[] Claim(
+		Participant state,
 		ChannelMessageKind kind,
 		IEnumerable<string> topics,
 		Dictionary<string, Participant> owners,
@@ -310,10 +323,13 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 	{
 		if (!MessageTopic.IsValidTopic(topic))
 		{
-			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic, topic, $"'{topic}' is not a valid topic.");
+			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic,
+				topic,
+				$"'{topic}' is not a valid topic.");
 		}
 
-		if (payload is { } element && Encoding.UTF8.GetByteCount(element.GetRawText()) > MessagingLimits.MaxPayloadBytes)
+		if (payload is { } element
+			&& Encoding.UTF8.GetByteCount(element.GetRawText()) > MessagingLimits.MaxPayloadBytes)
 		{
 			throw new MessageChannelException(MessageChannelErrorCode.PayloadTooLarge,
 				topic,
@@ -322,17 +338,25 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 	}
 
 	private MessageDelivery NewMessage(string senderId, string topic, JsonElement? payload)
-		=> new(topic, senderId, Guid.CreateVersion7().ToString(), _timeProvider.GetUtcNow(), payload?.Clone());
+	{
+		return new MessageDelivery(topic,
+			senderId,
+			Guid.CreateVersion7().ToString(),
+			_timeProvider.GetUtcNow(),
+			payload?.Clone());
+	}
 
 	private sealed class Participant : IDisposable
 	{
 		private readonly MessageBroker _broker;
+
 		private readonly Channel<MessageDelivery> _events = Channel.CreateBounded<MessageDelivery>(
 			new BoundedChannelOptions(EventQueueCapacity)
 			{
 				SingleReader = true,
 				FullMode = BoundedChannelFullMode.DropWrite
 			});
+
 		private readonly CancellationTokenSource _stopping = new();
 		private readonly Lock _dropLock = new();
 
@@ -381,7 +405,10 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 			return false;
 		}
 
-		public void LeaveHandler() => Interlocked.Decrement(ref _handlersInFlight);
+		public void LeaveHandler()
+		{
+			Interlocked.Decrement(ref _handlersInFlight);
+		}
 
 		public void Dispose()
 		{
@@ -411,8 +438,8 @@ public sealed class MessageBroker : IMessageBroker, IDisposable
 					{
 						await Endpoint.DeliverEventAsync(message, _stopping.Token).ConfigureAwait(false);
 					}
-					catch (Exception exception) when (exception is not OutOfMemoryException &&
-						!_stopping.IsCancellationRequested)
+					catch (Exception exception) when (exception is not OutOfMemoryException
+						&& !_stopping.IsCancellationRequested)
 					{
 						_broker._logger.Debug(exception,
 							"Delivering event {Topic} to {ParticipantId} failed",

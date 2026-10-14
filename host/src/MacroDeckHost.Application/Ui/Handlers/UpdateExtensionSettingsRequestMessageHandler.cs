@@ -11,7 +11,8 @@ public class UpdateExtensionSettingsRequestMessageHandler
 	private readonly IAppPreferenceService _service;
 	private readonly IStoreUpdateDetector _updateDetector;
 
-	public UpdateExtensionSettingsRequestMessageHandler(IAppPreferenceService service,
+	public UpdateExtensionSettingsRequestMessageHandler(
+		IAppPreferenceService service,
 		IStoreUpdateDetector updateDetector)
 	{
 		_service = service;

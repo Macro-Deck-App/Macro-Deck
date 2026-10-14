@@ -8,7 +8,6 @@ using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.YouTube;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -76,9 +75,12 @@ internal sealed class YouTubeIntegrationTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(types.Select(type => type.Id), Is.EqualTo(new[] { "chat", "stats" }));
-			Assert.That(types[0].DefaultData, Is.EqualTo(YouTubeStreamPlatform.Platform.ChatWidgetDescriptor().DefaultData));
-			Assert.That(types[1].DefaultData, Is.EqualTo(YouTubeStreamPlatform.Platform.StatsWidgetDescriptor().DefaultData));
-			Assert.That(types[1].DataSchema, Is.EqualTo(YouTubeStreamPlatform.Platform.StatsWidgetDescriptor().DataSchema));
+			Assert.That(types[0].DefaultData,
+				Is.EqualTo(YouTubeStreamPlatform.Platform.ChatWidgetDescriptor().DefaultData));
+			Assert.That(types[1].DefaultData,
+				Is.EqualTo(YouTubeStreamPlatform.Platform.StatsWidgetDescriptor().DefaultData));
+			Assert.That(types[1].DataSchema,
+				Is.EqualTo(YouTubeStreamPlatform.Platform.StatsWidgetDescriptor().DataSchema));
 			Assert.That(TestLocalization.Resolve(types[0].Name), Is.EqualTo("YouTube Chat"));
 		});
 	}
@@ -87,12 +89,13 @@ internal sealed class YouTubeIntegrationTests
 	public async Task Variables_are_declared_per_channel_and_read_from_its_state()
 	{
 		using var integration = await ConnectedAsync();
-		integration.AccountManager.Connections[0].Merge(state => state with
-		{
-			IsLive = true,
-			LikeCount = 12,
-			ViewerCount = null
-		});
+		integration.AccountManager.Connections[0]
+			.Merge(state => state with
+			{
+				IsLive = true,
+				LikeCount = 12,
+				ViewerCount = null
+			});
 
 		var likes = await integration.ReadAsync("youtube-mychannel-like-count");
 		var viewers = await integration.ReadAsync("youtube-mychannel-viewer-count");
@@ -100,9 +103,11 @@ internal sealed class YouTubeIntegrationTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(integration.DeclaredVariables, Is.EqualTo(YouTubeVariables.Declare("mychannel",
-				integration.DeclaredVariables[0].Configuration)));
-			Assert.That(integration.DeclaredVariables[0].Configuration?.Name.Literal, Is.EqualTo("My Channel (@mychannel)"));
+			Assert.That(integration.DeclaredVariables,
+				Is.EqualTo(YouTubeVariables.Declare("mychannel",
+					integration.DeclaredVariables[0].Configuration)));
+			Assert.That(integration.DeclaredVariables[0].Configuration?.Name.Literal,
+				Is.EqualTo("My Channel (@mychannel)"));
 			Assert.That(likes.Value, Is.EqualTo(12));
 			Assert.That(viewers, Is.EqualTo(VariableReading.Unavailable));
 			Assert.That(unknown, Is.EqualTo(VariableReading.Unavailable));
@@ -171,7 +176,9 @@ internal sealed class YouTubeIntegrationTests
 	}
 
 	private static EventOptionsContext Options(string parameterName)
-		=> new() { EventId = "super-chat", ParameterName = parameterName };
+	{
+		return new EventOptionsContext { EventId = "super-chat", ParameterName = parameterName };
+	}
 
 	private sealed class Context(RecordingIntegrationConfig config) : IIntegrationContext
 	{

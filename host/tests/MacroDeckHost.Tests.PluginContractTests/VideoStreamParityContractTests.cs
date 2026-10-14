@@ -55,12 +55,14 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 	];
 
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.VideoStreamProvider,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static async Task<IReadOnlyList<string>> WalkAsync(
 		VideoStreamProviderRegistry providers,
@@ -83,7 +85,8 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		log.Add(cameras.Log.Single());
 		log.Add(Describe(published.Changes(first)[0]));
 
-		await context.UpdateSessionAsync(first, VideoStreamSessionState.Reconnecting,
+		await context.UpdateSessionAsync(first,
+			VideoStreamSessionState.Reconnecting,
 			reason: VideoStreamSessionReason.SourceLost);
 		await WaitForAsync(() => published.Changes(first).Count == 2, "the provider's update never arrived");
 		log.Add(Describe(published.Changes(first)[1]));
@@ -102,10 +105,13 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		log.Add(tokens.Count == 1 ? "token stable" : "token changed: " + string.Join(",", tokens));
 
 		broker.CloseSession("ui-1", first);
-		await WaitForAsync(() => cameras.Log.Count == 4 && published.Closed(first) is not null, "the close never completed");
+		await WaitForAsync(() => cameras.Log.Count == 4 && published.Closed(first) is not null,
+			"the close never completed");
 		log.Add(cameras.Log.Last());
 		log.Add("closed " + published.Closed(first)!.Reason);
-		log.Add(relay.Acquire(tokens[0], out _) == VideoStreamRelayAcquisition.NotFound ? "token revoked" : "token alive");
+		log.Add(relay.Acquire(tokens[0], out _) == VideoStreamRelayAcquisition.NotFound
+			? "token revoked"
+			: "token alive");
 
 		var second = broker.OpenSession("ui-1", Back, "main", ["hls", "mjpeg"]).SessionId;
 		await WaitForAsync(() => published.Changes(second).Count == 1, "the second session never became active");
@@ -243,7 +249,7 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			videoStreamProviders: providers,
@@ -251,32 +257,52 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 	}
 
 	private static string Catalog(VideoStreamProviderRegistry providers)
-		=> string.Join(" ",
+	{
+		return string.Join(" ",
 			providers.GetProviders()
 				.Select(entry => $"{entry.ProviderId}[{string.Join(",", entry.Streams.Select(stream => stream.Id))}]"));
+	}
 
 	private static string Describe(VideoStreamSessionChangedNotification changed)
-		=> $"rev{changed.Revision} {changed.State} {changed.Reason} {changed.Description?.Transport} " +
-			changed.Description?.Url[(VideoStreamRelay.PathPrefix.Length + TokenOf(changed.Description.Url).Length)..];
+	{
+		return $"rev{changed.Revision} {changed.State} {changed.Reason} {changed.Description?.Transport} "
+			+ changed.Description?.Url[(VideoStreamRelay.PathPrefix.Length
+				+ TokenOf(changed.Description.Url).Length)..];
+	}
 
 	private static string TokenOf(string relayUrl)
-		=> relayUrl[VideoStreamRelay.PathPrefix.Length..].Split('/')[0];
+	{
+		return relayUrl[VideoStreamRelay.PathPrefix.Length..].Split('/')[0];
+	}
 
 	private sealed class ConcurrentPublisher : IPublisher
 	{
 		private readonly ConcurrentQueue<object> _published = new();
 
 		public IReadOnlyList<VideoStreamSessionChangedNotification> Changes(string sessionId)
-			=> [.. _published.OfType<VideoStreamSessionChangedNotification>().Where(changed => changed.SessionId == sessionId)];
+		{
+			return
+			[
+				.. _published.OfType<VideoStreamSessionChangedNotification>()
+					.Where(changed => changed.SessionId == sessionId)
+			];
+		}
 
 		public bool AnyUrlContains(string text)
-			=> _published.OfType<VideoStreamSessionChangedNotification>()
+		{
+			return _published.OfType<VideoStreamSessionChangedNotification>()
 				.Any(changed => changed.Description?.Url.Contains(text, StringComparison.OrdinalIgnoreCase) == true);
+		}
 
 		public VideoStreamSessionClosedNotification? Closed(string sessionId)
-			=> _published.OfType<VideoStreamSessionClosedNotification>().SingleOrDefault(closed => closed.SessionId == sessionId);
+		{
+			return _published.OfType<VideoStreamSessionClosedNotification>()
+				.SingleOrDefault(closed => closed.SessionId == sessionId);
+		}
 
-		public ValueTask Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
+		public ValueTask Publish<TNotification>(
+			TNotification notification,
+			CancellationToken cancellationToken = default)
 			where TNotification : INotification
 		{
 			_published.Enqueue(notification!);
@@ -306,12 +332,20 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InitializeAsync(IVideoStreamProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class Camera(string id, IReadOnlyList<string> streams, ConcurrentQueue<string> log)
@@ -322,15 +356,17 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		public LocalizedText Name => LocalizedText.FromLiteral("Camera " + Id);
 
 		public Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<VideoStreamDescriptor>>(
-			[
+		{
+			return Task.FromResult<IReadOnlyList<VideoStreamDescriptor>>([
 				.. streams.Select(stream => new VideoStreamDescriptor(stream,
 					LocalizedText.FromLiteral(stream),
 					Width: 1920,
 					Height: 1080))
 			]);
+		}
 
-		public Task<VideoStreamSessionDescription> OpenAsync(VideoStreamOpenRequest request,
+		public Task<VideoStreamSessionDescription> OpenAsync(
+			VideoStreamOpenRequest request,
 			CancellationToken cancellationToken)
 		{
 			log.Enqueue($"{Id} opened {request.StreamId} accepting {string.Join(",", request.AcceptedTransports)}");

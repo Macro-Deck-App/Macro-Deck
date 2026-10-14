@@ -12,7 +12,10 @@ public class CalendarEventCacheTests
 	private FakeTimeProvider _time = null!;
 
 	[SetUp]
-	public void SetUp() => _time = new FakeTimeProvider { Now = Noon };
+	public void SetUp()
+	{
+		_time = new FakeTimeProvider { Now = Noon };
+	}
 
 	[Test]
 	public async Task The_cache_holds_the_events_from_yesterday_to_a_week_ahead_and_nothing_else()

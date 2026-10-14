@@ -60,18 +60,33 @@ public sealed record PublicEndpointSet
 			? new PublicEndpoint(https, true)
 			: null;
 
-	public bool IsPublicPort(int port) => port == HttpPort || port == HttpsPort;
+	public bool IsPublicPort(int port)
+	{
+		return port == HttpPort || port == HttpsPort;
+	}
 
 	public static PublicEndpointSet HttpOnly(int publicPort)
-		=> new(publicPort, PublicTlsMode.Disabled, publicPort, null);
+	{
+		return new PublicEndpointSet(publicPort, PublicTlsMode.Disabled, publicPort, null);
+	}
 
 	public static PublicEndpointSet HttpsReplacingHttp(int publicPort)
-		=> new(publicPort, PublicTlsMode.Replace, null, publicPort);
+	{
+		return new PublicEndpointSet(publicPort, PublicTlsMode.Replace, null, publicPort);
+	}
 
 	public static PublicEndpointSet HttpAndHttps(int publicPort, int httpsPort)
-		=> new(publicPort, PublicTlsMode.Additional, publicPort, httpsPort);
+	{
+		return new PublicEndpointSet(publicPort, PublicTlsMode.Additional, publicPort, httpsPort);
+	}
 
-	public PublicEndpointSet WithoutHttp() => new(PublicPort, TlsMode, null, HttpsPort);
+	public PublicEndpointSet WithoutHttp()
+	{
+		return new PublicEndpointSet(PublicPort, TlsMode, null, HttpsPort);
+	}
 
-	public PublicEndpointSet WithoutHttps() => new(PublicPort, TlsMode, HttpPort, null);
+	public PublicEndpointSet WithoutHttps()
+	{
+		return new PublicEndpointSet(PublicPort, TlsMode, HttpPort, null);
+	}
 }

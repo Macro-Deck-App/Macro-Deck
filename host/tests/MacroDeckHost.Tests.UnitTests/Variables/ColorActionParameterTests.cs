@@ -101,17 +101,17 @@ public class ColorActionParameterTests
 	private async Task Run(string actionId, string value)
 	{
 		var flows = $$"""
-			{ "flows": [
-			  {
-			    "triggerId": "t1", "triggerType": "onShortPress",
-			    "children": [
-			      { "id": "b1", "type": "action", "blockType": "integration.{{actionId}}",
-			        "integrationId": "integration", "actionId": "{{actionId}}",
-			        "parameters": [{ "name": "color", "type": "color", "value": "{{value}}" }] }
-			    ]
-			  }
-			] }
-			""";
+					  { "flows": [
+					    {
+					      "triggerId": "t1", "triggerType": "onShortPress",
+					      "children": [
+					        { "id": "b1", "type": "action", "blockType": "integration.{{actionId}}",
+					          "integrationId": "integration", "actionId": "{{actionId}}",
+					          "parameters": [{ "name": "color", "type": "color", "value": "{{value}}" }] }
+					      ]
+					    }
+					  ] }
+					  """;
 
 		var result = await _executor.ExecuteAsync(new FlowExecutionRequest
 			{
@@ -126,14 +126,16 @@ public class ColorActionParameterTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)

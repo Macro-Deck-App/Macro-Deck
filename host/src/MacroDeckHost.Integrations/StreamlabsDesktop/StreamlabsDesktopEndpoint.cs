@@ -13,7 +13,13 @@ internal sealed record StreamlabsDesktopEndpoint(string Host, int Port)
 	public string DisplayAddress => string.Create(CultureInfo.InvariantCulture, $"{Host}:{Port}");
 
 	public static StreamlabsDesktopEndpoint Create(string? host, int? port)
-		=> new(string.IsNullOrWhiteSpace(host) ? DefaultHost : host.Trim(), port ?? DefaultPort);
+	{
+		return new StreamlabsDesktopEndpoint(string.IsNullOrWhiteSpace(host) ? DefaultHost : host.Trim(),
+			port ?? DefaultPort);
+	}
 
-	public Uri WebSocketUri() => new(string.Create(CultureInfo.InvariantCulture, $"ws://{Host}:{Port}{Path}"));
+	public Uri WebSocketUri()
+	{
+		return new Uri(string.Create(CultureInfo.InvariantCulture, $"ws://{Host}:{Port}{Path}"));
+	}
 }

@@ -10,7 +10,10 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 {
 	private readonly IMacroDeckPaths _paths;
 
-	public BackupSnapshotSource(IMacroDeckPaths paths) => _paths = paths;
+	public BackupSnapshotSource(IMacroDeckPaths paths)
+	{
+		_paths = paths;
+	}
 
 	public BackupSnapshotPlan Plan()
 	{
@@ -125,12 +128,16 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 	// of the staged copy - the archive writer, which asks for FileShare.Read - then hits a sharing
 	// violation, and the staging directory cannot be deleted either.
 	private static string Unpooled(string databasePath)
-		=> new SqliteConnectionStringBuilder { DataSource = databasePath, Pooling = false }.ToString();
+	{
+		return new SqliteConnectionStringBuilder { DataSource = databasePath, Pooling = false }.ToString();
+	}
 
 	// A .tmp is a write the source host had not published yet. Startup recovery republishes anything
 	// recoverable, so anything still named .tmp here is a write this installation never validated and
 	// must not be carried into another one. Quarantined copies are damaged by definition.
 	private static bool IsUnwantedSidecar(string relativePath)
-		=> relativePath.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase) ||
-			relativePath.Contains(".corrupt-", StringComparison.OrdinalIgnoreCase);
+	{
+		return relativePath.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase)
+			|| relativePath.Contains(".corrupt-", StringComparison.OrdinalIgnoreCase);
+	}
 }

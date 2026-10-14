@@ -23,28 +23,34 @@ internal sealed class SetLayerVisibilityActionDefinition : IDynamicOptionsAction
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(MeldActionParameters.Layer,
-			label: AppStrings.Integrations.Meld.Parameters.Layer(),
+			AppStrings.Integrations.Meld.Parameters.Layer(),
 			required: true),
 		ActionParameter.Choice(MeldActionParameters.Mode,
-			options: MeldActionParameters.LayerVisibilityModes,
-			label: AppStrings.Integrations.Meld.Parameters.Mode(),
+			MeldActionParameters.LayerVisibilityModes,
+			AppStrings.Integrations.Meld.Parameters.Mode(),
 			defaultValue: MeldActionParameters.ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MeldActionStates.Snapshot(_resolver(),
+	{
+		return Task.FromResult(MeldActionStates.Snapshot(_resolver(),
 			parameters.GetValueOrDefault(MeldActionParameters.Layer),
 			ActionStates.Visibility,
 			session => session.LayersById,
 			session => session.LayersById.Values,
 			layer => layer.Name,
 			(_, layer) => layer.Visible));
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		var session = _resolver()?.State.Session ?? MeldSession.Empty;
@@ -80,8 +86,8 @@ internal sealed class SetLayerVisibilityActionDefinition : IDynamicOptionsAction
 				return resolveError!;
 			}
 
-			var mode = context.Parameters.GetValueOrDefault(MeldActionParameters.Mode) as string ??
-				MeldActionParameters.ModeToggle;
+			var mode = context.Parameters.GetValueOrDefault(MeldActionParameters.Mode) as string
+				?? MeldActionParameters.ModeToggle;
 			bool? desired = mode switch
 			{
 				"show" => true,

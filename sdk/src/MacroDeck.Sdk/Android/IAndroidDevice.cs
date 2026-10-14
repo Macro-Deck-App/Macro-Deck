@@ -69,59 +69,78 @@ public interface IAndroidDevice
 
 	/// <summary>Presses <paramref name="key" /> once.</summary>
 	Task SendKeyAsync(AndroidKey key, CancellationToken cancellationToken = default)
-		=> Unsupported(nameof(SendKeyAsync));
+	{
+		return Unsupported(nameof(SendKeyAsync));
+	}
 
 	/// <summary>Taps the screen at <paramref name="x" />, <paramref name="y" /> in screen pixels from the top left.</summary>
 	/// <exception cref="AndroidDeviceException"><see cref="AndroidDeviceErrorCode.InvalidArgument" /> for a negative
 	/// coordinate.</exception>
 	Task TapAsync(int x, int y, CancellationToken cancellationToken = default)
-		=> Unsupported(nameof(TapAsync));
+	{
+		return Unsupported(nameof(TapAsync));
+	}
 
 	/// <summary>Swipes from one point to another in screen pixels over <paramref name="duration" />.</summary>
 	/// <exception cref="AndroidDeviceException"><see cref="AndroidDeviceErrorCode.InvalidArgument" /> for a negative
 	/// coordinate or duration, or a duration Android does not accept.</exception>
-	Task SwipeAsync(int fromX,
+	Task SwipeAsync(
+		int fromX,
 		int fromY,
 		int toX,
 		int toY,
 		TimeSpan duration,
 		CancellationToken cancellationToken = default)
-		=> Unsupported(nameof(SwipeAsync));
+	{
+		return Unsupported(nameof(SwipeAsync));
+	}
 
 	/// <summary>Types <paramref name="text" /> into the focused field, as if typed on the keyboard.</summary>
 	/// <exception cref="AndroidDeviceException"><see cref="AndroidDeviceErrorCode.InvalidArgument" /> for empty text or
 	/// characters Android's text input cannot type.</exception>
 	Task InputTextAsync(string text, CancellationToken cancellationToken = default)
-		=> Unsupported(nameof(InputTextAsync));
+	{
+		return Unsupported(nameof(InputTextAsync));
+	}
 
 	/// <summary>Starts the app's launcher activity, or brings the app to the front when it is running.</summary>
 	/// <exception cref="AndroidDeviceException"><see cref="AndroidDeviceErrorCode.InvalidArgument" /> for a malformed
 	/// package name.</exception>
 	Task StartAppAsync(string packageName, CancellationToken cancellationToken = default)
-		=> Unsupported(nameof(StartAppAsync));
+	{
+		return Unsupported(nameof(StartAppAsync));
+	}
 
 	/// <summary>Stops the app and everything it runs, like Force stop in the app's settings.</summary>
 	/// <exception cref="AndroidDeviceException"><see cref="AndroidDeviceErrorCode.InvalidArgument" /> for a malformed
 	/// package name.</exception>
 	Task ForceStopAppAsync(string packageName, CancellationToken cancellationToken = default)
-		=> Unsupported(nameof(ForceStopAppAsync));
+	{
+		return Unsupported(nameof(ForceStopAppAsync));
+	}
 
 	/// <summary>Opens <paramref name="uri" /> with the app the device picks for it, a browser for a web link.</summary>
 	/// <exception cref="AndroidDeviceException"><see cref="AndroidDeviceErrorCode.InvalidArgument" /> for a URI Macro Deck
 	/// does not pass on.</exception>
 	Task OpenUriAsync(string uri, CancellationToken cancellationToken = default)
-		=> Unsupported(nameof(OpenUriAsync));
+	{
+		return Unsupported(nameof(OpenUriAsync));
+	}
 
 	/// <summary>Restarts the device. It disconnects, and reappears once it is back.</summary>
 	Task RebootAsync(AndroidRebootMode mode = AndroidRebootMode.Normal, CancellationToken cancellationToken = default)
-		=> Unsupported(nameof(RebootAsync));
+	{
+		return Unsupported(nameof(RebootAsync));
+	}
 
 	/// <summary>Captures the screen as it is now.</summary>
 	/// <returns>The PNG file's bytes.</returns>
 	/// <exception cref="AndroidDeviceException"><see cref="AndroidDeviceErrorCode.CommandFailed" /> also when a plugin
 	/// would receive more than 8 MiB.</exception>
 	Task<byte[]> CaptureScreenshotAsync(CancellationToken cancellationToken = default)
-		=> Task.FromException<byte[]>(UnsupportedException(nameof(CaptureScreenshotAsync)));
+	{
+		return Task.FromException<byte[]>(UnsupportedException(nameof(CaptureScreenshotAsync)));
+	}
 
 	/// <summary>
 	/// The screen state and foreground app, at most a few seconds old: Macro Deck reads them in the background
@@ -133,10 +152,18 @@ public interface IAndroidDevice
 	/// that predates this member.
 	/// </returns>
 	Task<AndroidDeviceStatus?> GetStatusAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<AndroidDeviceStatus?>(null);
+	{
+		return Task.FromResult<AndroidDeviceStatus?>(null);
+	}
 
-	private static Task Unsupported(string operation) => Task.FromException(UnsupportedException(operation));
+	private static Task Unsupported(string operation)
+	{
+		return Task.FromException(UnsupportedException(operation));
+	}
 
 	private static AndroidDeviceException UnsupportedException(string operation)
-		=> new(AndroidDeviceErrorCode.Unsupported, $"This Macro Deck does not offer {operation}.");
+	{
+		return new AndroidDeviceException(AndroidDeviceErrorCode.Unsupported,
+			$"This Macro Deck does not offer {operation}.");
+	}
 }

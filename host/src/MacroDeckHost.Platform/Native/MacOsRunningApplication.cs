@@ -63,9 +63,9 @@ internal static class MacOsRunningApplication
 		try
 		{
 			var pid = (int)objc_msgSend_intRet(app, sel_registerName(Utf8("processIdentifier")));
-			var bundleId = ReadNSString(app, "bundleIdentifier");
+			var bundleId = ReadNsString(app, "bundleIdentifier");
 			var url = objc_msgSend_noArgs(app, sel_registerName(Utf8("executableURL")));
-			var path = url == IntPtr.Zero ? null : ReadNSString(url, "path");
+			var path = url == IntPtr.Zero ? null : ReadNsString(url, "path");
 			return new MacOsRunningApplicationInfo(pid, bundleId, path);
 		}
 		catch
@@ -78,7 +78,7 @@ internal static class MacOsRunningApplication
 		}
 	}
 
-	private static string? ReadNSString(IntPtr receiver, string selectorName)
+	private static string? ReadNsString(IntPtr receiver, string selectorName)
 	{
 		var value = objc_msgSend_noArgs(receiver, sel_registerName(Utf8(selectorName)));
 		if (value == IntPtr.Zero)
@@ -90,7 +90,10 @@ internal static class MacOsRunningApplication
 		return utf8 == IntPtr.Zero ? null : Marshal.PtrToStringUTF8(utf8);
 	}
 
-	private static byte[] Utf8(string value) => MacOsAccessibility.Utf8(value);
+	private static byte[] Utf8(string value)
+	{
+		return MacOsAccessibility.Utf8(value);
+	}
 
 	[DllImport(LibObjC)]
 	private static extern IntPtr objc_getClass(byte[] name);

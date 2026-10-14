@@ -9,5 +9,8 @@ namespace MacroDeck.Plugin.Hosting.Transport;
 /// </summary>
 internal static class PairingProgress
 {
-	public static void Write(string message) => Console.Error.WriteLine(message);
+	public static void Write(string message)
+	{
+		Console.Error.WriteLine(message);
+	}
 }

@@ -17,7 +17,8 @@ public sealed class PluginPairingRequestStore : IPluginPairingRequestStore
 		_options = options;
 	}
 
-	public PluginPairingCreateResult Create(string pluginId,
+	public PluginPairingCreateResult Create(
+		string pluginId,
 		string displayName,
 		string codeChallenge,
 		PluginPairingClientInfo? client,
@@ -32,8 +33,8 @@ public sealed class PluginPairingRequestStore : IPluginPairingRequestStore
 		{
 			PruneStaleEntries(now);
 
-			if (_records.Values.Any(record => IsLive(record, now) &&
-				string.Equals(record.PluginId, pluginId, StringComparison.Ordinal)))
+			if (_records.Values.Any(record
+				=> IsLive(record, now) && string.Equals(record.PluginId, pluginId, StringComparison.Ordinal)))
 			{
 				// A pending request is never superseded or replaced, even by the same plugin id: letting
 				// a fresh create silently cancel or swap a request the user can already see would let any
@@ -95,8 +96,7 @@ public sealed class PluginPairingRequestStore : IPluginPairingRequestStore
 		{
 			PruneStaleEntries(now);
 
-			if (!_records.TryGetValue(requestId, out var record) ||
-				record.State != PluginPairingRequestState.Pending)
+			if (!_records.TryGetValue(requestId, out var record) || record.State != PluginPairingRequestState.Pending)
 			{
 				return false;
 			}
@@ -117,8 +117,7 @@ public sealed class PluginPairingRequestStore : IPluginPairingRequestStore
 		{
 			PruneStaleEntries(now);
 
-			if (!_records.TryGetValue(requestId, out var record) ||
-				record.State != PluginPairingRequestState.Pending)
+			if (!_records.TryGetValue(requestId, out var record) || record.State != PluginPairingRequestState.Pending)
 			{
 				return false;
 			}
@@ -176,8 +175,7 @@ public sealed class PluginPairingRequestStore : IPluginPairingRequestStore
 	{
 		lock (_lock)
 		{
-			if (!_records.TryGetValue(requestId, out var record) ||
-				record.State != PluginPairingRequestState.Redeeming)
+			if (!_records.TryGetValue(requestId, out var record) || record.State != PluginPairingRequestState.Redeeming)
 			{
 				return;
 			}
@@ -211,9 +209,11 @@ public sealed class PluginPairingRequestStore : IPluginPairingRequestStore
 	}
 
 	private static bool IsLive(PluginPairingRequestRecord record, DateTimeOffset now)
-		=> now < record.ExpiresAt &&
-			record.State
+	{
+		return now < record.ExpiresAt
+			&& record.State
 				is PluginPairingRequestState.Pending
 				or PluginPairingRequestState.Approved
 				or PluginPairingRequestState.Redeeming;
+	}
 }

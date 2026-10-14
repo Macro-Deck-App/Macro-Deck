@@ -83,7 +83,7 @@ public static class MessageTypes
 		AssetBegin, AssetChunk, AssetCommit, AssetAck,
 		HostAssetBegin, HostAssetChunk, HostAssetCommit, HostAssetAck,
 		FlowPause, FlowResume,
-		ProtocolError,
+		ProtocolError
 	];
 
 	private static readonly HashSet<string> _knownTypes = new(All, StringComparer.Ordinal);
@@ -93,10 +93,16 @@ public static class MessageTypes
 	// Correlation.CorrelationRules handles that case instead.
 	private static readonly HashSet<string> _replyTypes = new(StringComparer.Ordinal)
 	{
-		CapabilityResult, CapabilityDeclareAck, AssetAck, HostResult, HostAssetAck,
+		CapabilityResult, CapabilityDeclareAck, AssetAck, HostResult, HostAssetAck
 	};
 
-	public static bool IsKnown(string? messageType) => messageType is not null && _knownTypes.Contains(messageType);
+	public static bool IsKnown(string? messageType)
+	{
+		return messageType is not null && _knownTypes.Contains(messageType);
+	}
 
-	public static bool RequiresCorrelation(string messageType) => _replyTypes.Contains(messageType);
+	public static bool RequiresCorrelation(string messageType)
+	{
+		return _replyTypes.Contains(messageType);
+	}
 }

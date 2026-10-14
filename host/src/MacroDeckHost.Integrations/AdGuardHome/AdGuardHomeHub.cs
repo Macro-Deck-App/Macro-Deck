@@ -40,9 +40,11 @@ internal sealed class AdGuardHomeHub : IAdGuardHomeInstances
 	}
 
 	public AdGuardHomeSnapshot? Find(string? entryId)
-		=> string.IsNullOrEmpty(entryId)
+	{
+		return string.IsNullOrEmpty(entryId)
 			? null
 			: Instances.FirstOrDefault(instance => string.Equals(instance.EntryId, entryId, StringComparison.Ordinal));
+	}
 
 	public Task<AdGuardHomeCommandOutcome> ExecuteAsync(
 		string entryId,
@@ -106,7 +108,10 @@ internal sealed class AdGuardHomeHub : IAdGuardHomeInstances
 		Changed?.Invoke(this, EventArgs.Empty);
 	}
 
-	public void Announce() => Changed?.Invoke(this, EventArgs.Empty);
+	public void Announce()
+	{
+		Changed?.Invoke(this, EventArgs.Empty);
+	}
 
 	public void UseExecutor(AdGuardHomeCommandExecutor? executor)
 	{

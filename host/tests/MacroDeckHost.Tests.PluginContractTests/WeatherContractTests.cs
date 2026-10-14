@@ -21,12 +21,14 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class WeatherContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Weather,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	[Test]
 	public async Task Declare_registers_an_adapter_that_passes_the_capability_validator()
@@ -137,8 +139,10 @@ internal sealed class WeatherContractTests : CapabilityContractFixture
 			Is.EquivalentTo(new[] { "berlin", "vienna" }));
 
 		IWeatherProvider CurrentWeatherProvider()
-			=> (IWeatherProvider)IntegrationRegistry.Integrations
+		{
+			return (IWeatherProvider)IntegrationRegistry.Integrations
 				.Single(candidate => string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
+		}
 	}
 
 	[Test]
@@ -293,20 +297,34 @@ internal sealed class WeatherContractTests : CapabilityContractFixture
 	{
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public string ProviderName { get; } = providerName;
 
-		public IReadOnlyList<WeatherStationInstance> GetInstances() => [new("berlin", "Berlin")];
+		public IReadOnlyList<WeatherStationInstance> GetInstances()
+		{
+			return [new WeatherStationInstance("berlin", "Berlin")];
+		}
 
-		public IWeatherStation? GetStation(string instanceId) => new ThrowingStation();
+		public IWeatherStation? GetStation(string instanceId)
+		{
+			return new ThrowingStation();
+		}
 
 		private sealed class ThrowingStation : IWeatherStation
 		{
 			public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
-				=> throw new InvalidOperationException("boom: token=abc123");
+			{
+				throw new InvalidOperationException("boom: token=abc123");
+			}
 		}
 	}
 }

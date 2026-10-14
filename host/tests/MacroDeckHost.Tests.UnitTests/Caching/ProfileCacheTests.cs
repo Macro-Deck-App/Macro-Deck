@@ -12,7 +12,9 @@ namespace MacroDeckHost.Tests.UnitTests.Caching;
 public class ProfileCacheTests
 {
 	private static ProfileCache NewCache(InMemoryProfileStore store)
-		=> new(store, new LoggerConfiguration().CreateLogger());
+	{
+		return new ProfileCache(store, new LoggerConfiguration().CreateLogger());
+	}
 
 	[Test]
 	public async Task InitializeCache_LoadsProfilesAndFolders()
@@ -56,8 +58,7 @@ public class ProfileCacheTests
 	{
 		var kept = Guid.NewGuid();
 		var deleted = Guid.NewGuid();
-		var store = new InMemoryProfileStore(
-			new ProfileFile { Id = kept, Name = "Kept", Order = 1 },
+		var store = new InMemoryProfileStore(new ProfileFile { Id = kept, Name = "Kept", Order = 1 },
 			new ProfileFile { Id = deleted, Name = "Deleted", Order = 0 });
 		var cache = NewCache(store);
 		await cache.InitializeCache();
@@ -111,7 +112,8 @@ public class ProfileCacheTests
 		{
 			Assert.That(cache.GetFoldersByProfileId(profileId).Single(folder => folder.Id == oldestRootId).IsDefault,
 				Is.True);
-			Assert.That(cache.GetFoldersByProfileId(profileId).Where(folder => folder.Id != oldestRootId)
+			Assert.That(cache.GetFoldersByProfileId(profileId)
+					.Where(folder => folder.Id != oldestRootId)
 					.All(folder => !folder.IsDefault),
 				Is.True);
 			Assert.That(store.Get(profileId)!.Folders.Single(folder => folder.Id == oldestRootId).IsDefault, Is.True);
@@ -319,7 +321,7 @@ public class ProfileCacheTests
 		await cache.InitializeCache();
 		var profileId = Guid.NewGuid();
 		await cache.AddOrUpdate(new ProfileEntity { Id = profileId, Name = "P" });
-		var root = await AddFolder(cache, profileId, "Root", null, isDefault: true);
+		var root = await AddFolder(cache, profileId, "Root", null, true);
 		var child = await AddFolder(cache, profileId, "Child", root.Id);
 		var survivor = await AddFolder(cache, profileId, "Survivor", null);
 		var savesBefore = store.SaveCount;
@@ -348,7 +350,7 @@ public class ProfileCacheTests
 		await cache.InitializeCache();
 		var profileId = Guid.NewGuid();
 		await cache.AddOrUpdate(new ProfileEntity { Id = profileId, Name = "P" });
-		var root = await AddFolder(cache, profileId, "Root", null, isDefault: true);
+		var root = await AddFolder(cache, profileId, "Root", null, true);
 		await AddFolder(cache, profileId, "Survivor", null);
 
 		var lateChild = await AddFolder(cache, profileId, "LateChild", root.Id);
@@ -373,8 +375,8 @@ public class ProfileCacheTests
 			profileId,
 			"Root",
 			null,
-			isDefault: true,
-			createdAt: new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+			true,
+			new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
 		var replacement = await AddFolder(cache,
 			profileId,
 			"Replacement",
@@ -422,7 +424,7 @@ public class ProfileCacheTests
 		await cache.InitializeCache();
 		var profileId = Guid.NewGuid();
 		await cache.AddOrUpdate(new ProfileEntity { Id = profileId, Name = "P" });
-		var root = await AddFolder(cache, profileId, "Root", null, isDefault: true);
+		var root = await AddFolder(cache, profileId, "Root", null, true);
 		var child = await AddFolder(cache, profileId, "Child", root.Id);
 
 		var removal = await cache.RemoveFolderSubtree(root.Id);
@@ -447,7 +449,7 @@ public class ProfileCacheTests
 		await cache.InitializeCache();
 		var profileId = Guid.NewGuid();
 		await cache.AddOrUpdate(new ProfileEntity { Id = profileId, Name = "P" });
-		var root = await AddFolder(cache, profileId, "Root", null, isDefault: true);
+		var root = await AddFolder(cache, profileId, "Root", null, true);
 		var orphan = await AddFolder(cache, profileId, "Orphan", Guid.NewGuid());
 
 		var removal = await cache.RemoveFolderSubtree(root.Id);
@@ -472,7 +474,7 @@ public class ProfileCacheTests
 		await cache.InitializeCache();
 		var profileId = Guid.NewGuid();
 		await cache.AddOrUpdate(new ProfileEntity { Id = profileId, Name = "P" });
-		var root = await AddFolder(cache, profileId, "Root", null, isDefault: true);
+		var root = await AddFolder(cache, profileId, "Root", null, true);
 		var child = await AddFolder(cache, profileId, "Child", root.Id);
 		var survivor = await AddFolder(cache, profileId, "Survivor", null);
 		store.FailSaves = true;
@@ -531,7 +533,8 @@ public class ProfileCacheTests
 		cache.Dispose();
 	}
 
-	private static async Task<FolderEntity> AddFolder(ProfileCache cache,
+	private static async Task<FolderEntity> AddFolder(
+		ProfileCache cache,
 		Guid profileId,
 		string name,
 		Guid? parentId,

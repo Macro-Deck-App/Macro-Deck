@@ -8,7 +8,10 @@ public static class HostEndpoints
 
 	public static int? PublicHttpsPort => ResolvedPublicEndpoints.Value.HttpsPort;
 
-	public static bool IsPublicPort(int port) => ResolvedPublicEndpoints.Value.IsPublicPort(port);
+	public static bool IsPublicPort(int port)
+	{
+		return ResolvedPublicEndpoints.Value.IsPublicPort(port);
+	}
 
 	public static bool TryGetLoopbackPort(out int port)
 	{

@@ -215,9 +215,11 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 			services.AddSingleton<IHostHttp>(context.Http);
 			services.AddSingleton<IDesktopNotifier>(context.DesktopNotifications);
 			if (services.LastOrDefault(descriptor => descriptor.ServiceType == typeof(ICompanionDeviceApi)) is not
-				{ } registeredCompanion ||
-				(registeredCompanion.ImplementationType ?? registeredCompanion.ImplementationFactory?.Method.DeclaringType)
-				?.Assembly == typeof(PluginHostBuilder).Assembly)
+					{ } registeredCompanion
+				|| (registeredCompanion.ImplementationType
+					?? registeredCompanion.ImplementationFactory?.Method.DeclaringType)
+				?.Assembly
+				== typeof(PluginHostBuilder).Assembly)
 			{
 				context.CompanionDevices.SetAccess(CompanionDeviceAccess.Unsupported);
 				services.AddSingleton<ICompanionDeviceApi>(context.CompanionDevices);
@@ -226,7 +228,8 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 			// A plugin that registers its own manager keeps it, as on a real host. Otherwise the context's fake
 			// serves both, starting Unsupported as the harness always reported until a test grants access.
 			if (services.LastOrDefault(descriptor => descriptor.ServiceType == typeof(IAndroidDeviceManager)) is not
-				{ } registered || registered.ImplementationType?.Assembly == typeof(PluginHostBuilder).Assembly)
+					{ } registered
+				|| registered.ImplementationType?.Assembly == typeof(PluginHostBuilder).Assembly)
 			{
 				context.AndroidDevices.SetAccess(AndroidDeviceAccess.Unsupported);
 				services.AddSingleton<IAndroidDeviceManager>(context.AndroidDevices);
@@ -341,9 +344,9 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 		// Mirrors VariablesCapabilityHandler.SubscribeAsync's own bookkeeping so Context.VariableValues
 		// (the fake IVariableSink) drops a push the same way the real sink would - see
 		// FakeVariableSink.PublishAsync.
-		if (string.Equals(kind, CapabilityKinds.Variables, StringComparison.Ordinal) &&
-			string.Equals(operation, CapabilityOperations.Variables.Subscribe, StringComparison.Ordinal) &&
-			arguments is VariableSubscribeArguments subscribeArguments)
+		if (string.Equals(kind, CapabilityKinds.Variables, StringComparison.Ordinal)
+			&& string.Equals(operation, CapabilityOperations.Variables.Subscribe, StringComparison.Ordinal)
+			&& arguments is VariableSubscribeArguments subscribeArguments)
 		{
 			Context.VariableValues.SetSubscribed(subscribeArguments.Ids);
 		}
@@ -367,14 +370,14 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 		}
 
 		var now = DateTimeOffset.UtcNow;
-		var deadline = options?.Deadline ??
-			(options?.Timeout is { } configuredTimeout ? now + configuredTimeout : null);
+		var deadline = options?.Deadline
+			?? (options?.Timeout is { } configuredTimeout ? now + configuredTimeout : null);
 
 		await using var scope = Services.CreateAsyncScope();
 
 		using var timeoutSource = new CancellationTokenSource();
 		using var linked
-			= CancellationTokenSource.CreateLinkedTokenSource(options?.CancellationToken ?? default,
+			= CancellationTokenSource.CreateLinkedTokenSource(options?.CancellationToken ?? CancellationToken.None,
 				timeoutSource.Token);
 
 		if (deadline is { } effectiveDeadline)
@@ -403,8 +406,8 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 		{
 			result = await handler.InvokeAsync(invocation, linked.Token).ConfigureAwait(false);
 		}
-		catch (OperationCanceledException) when (timeoutSource.IsCancellationRequested &&
-			!(options?.CancellationToken.IsCancellationRequested ?? false))
+		catch (OperationCanceledException) when (timeoutSource.IsCancellationRequested
+			&& !(options?.CancellationToken.IsCancellationRequested ?? false))
 		{
 			return CapabilityInvocationOutcome.Failure(correlationId,
 				new ProtocolError

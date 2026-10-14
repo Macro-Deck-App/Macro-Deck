@@ -63,15 +63,25 @@ public sealed class SoundPadIntegration
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new SoundPadMacroDeck2Migration()];
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new SoundPadConfigFlow(_clientFactory, () => _connection);
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new SoundPadConfigFlow(_clientFactory, () => _connection);
+	}
 
 	public IReadOnlyList<MusicPlayerInstance> GetInstances()
-		=> _player is null ? [] : [new MusicPlayerInstance(InstanceId, DisplayName)];
+	{
+		return _player is null ? [] : [new MusicPlayerInstance(InstanceId, DisplayName)];
+	}
 
 	public IMusicPlayer? GetPlayer(string instanceId)
-		=> string.Equals(instanceId, InstanceId, StringComparison.Ordinal) ? _player : null;
+	{
+		return string.Equals(instanceId, InstanceId, StringComparison.Ordinal) ? _player : null;
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -100,7 +110,10 @@ public sealed class SoundPadIntegration
 		return Task.CompletedTask;
 	}
 
-	public void Dispose() => Stop();
+	public void Dispose()
+	{
+		Stop();
+	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -151,7 +164,9 @@ public sealed class SoundPadIntegration
 	}
 
 	private IMusicPlayer? ResolvePlayer(string? instanceId)
-		=> string.IsNullOrEmpty(instanceId) ? _player : GetPlayer(instanceId);
+	{
+		return string.IsNullOrEmpty(instanceId) ? _player : GetPlayer(instanceId);
+	}
 
 	private void Stop()
 	{
@@ -166,7 +181,10 @@ public sealed class SoundPadIntegration
 		connection?.Dispose();
 	}
 
-	private static int? Seconds(TimeSpan? value) => value is { } span ? (int)span.TotalSeconds : null;
+	private static int? Seconds(TimeSpan? value)
+	{
+		return value is { } span ? (int)span.TotalSeconds : null;
+	}
 
 	private static byte[] LoadIcon()
 	{

@@ -47,13 +47,20 @@ internal sealed class DeviceInteractionTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	private static DeviceInteraction Interaction(DeviceInteractionKind kind, string widgetId)
-		=> new() { Kind = kind, Target = new DeviceInteractionTarget { WidgetId = widgetId } };
+	{
+		return new DeviceInteraction { Kind = kind, Target = new DeviceInteractionTarget { WidgetId = widgetId } };
+	}
 
 	private Task<DeviceInteractionOutcome> SubmitAsync(DeviceInteractionKind kind, string widgetId = ButtonId)
-		=> _fixture.Service.SubmitInteractionAsync(_deviceId, Interaction(kind, widgetId));
+	{
+		return _fixture.Service.SubmitInteractionAsync(_deviceId, Interaction(kind, widgetId));
+	}
 
 	private async Task AdvanceAsync(int milliseconds)
 	{
@@ -118,7 +125,7 @@ internal sealed class DeviceInteractionTests
 		await SubmitAsync(DeviceInteractionKind.Press);
 		await AdvanceAsync(200);
 
-		await _fixture.Service.SetPresenceAsync(_deviceId, online: false);
+		await _fixture.Service.SetPresenceAsync(_deviceId, false);
 		var atOffline = _fixture.Triggers.TriggerTypes;
 
 		await AdvanceAsync(5000);
@@ -279,7 +286,9 @@ internal sealed class DeviceInteractionTests
 			1,
 			isPinned: true,
 			pinScope: PinScope.Profile));
-		await _fixture.MutateAsync(() => { });
+		await _fixture.MutateAsync(() =>
+		{
+		});
 
 		var outcome = await SubmitAsync(DeviceInteractionKind.Press, "pinned");
 

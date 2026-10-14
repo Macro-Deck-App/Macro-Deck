@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Infrastructure.Caching;
@@ -14,10 +15,16 @@ public class PinScopePersistenceTests
 	private PinScopeFixture _fixture = null!;
 
 	[SetUp]
-	public void SetUp() => _fixture = new PinScopeFixture();
+	public void SetUp()
+	{
+		_fixture = new PinScopeFixture();
+	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task E1_MigrationGuard_AWidgetWithNoStoredScope_LoadsAsProfileWide()
@@ -116,13 +123,16 @@ public class PinScopePersistenceTests
 		return (cache, folderCache, widgetService);
 	}
 
-	private static Domain.Entities.WidgetEntity Widget(int x, int y) => new()
+	private static WidgetEntity Widget(int x, int y)
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 }

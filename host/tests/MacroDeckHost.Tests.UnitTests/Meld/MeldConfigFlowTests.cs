@@ -219,11 +219,13 @@ internal sealed class MeldConfigFlowTests
 	}
 
 	private static Dictionary<string, object?> Input(string? host = null, int? port = null)
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
 		{
 			["host"] = host,
 			["port"] = port
 		};
+	}
 
 	private sealed class FakeConfigFlowContext : IConfigFlowContext
 	{

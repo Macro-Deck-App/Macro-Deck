@@ -8,7 +8,9 @@ public class QualifiedIdTests
 	[TestCase("app.macro-deck.spotify")]
 	[TestCase("com.suchbyte.test-plugin")]
 	public void Reverse_domain_owner_ids_are_valid_packages(string ownerId)
-		=> Assert.That(MacroDeckId.IsValidOwnerId(ownerId, OwnerIdKind.Package), Is.True);
+	{
+		Assert.That(MacroDeckId.IsValidOwnerId(ownerId, OwnerIdKind.Package), Is.True);
+	}
 
 	[TestCase("time")]
 	[TestCase("macro-deck")]
@@ -42,7 +44,9 @@ public class QualifiedIdTests
 	[TestCase("track-changed")]
 	[TestCase("play")]
 	public void Kebab_case_local_ids_are_valid_declared_ids(string localId)
-		=> Assert.That(MacroDeckId.IsValidLocalId(localId, LocalIdKind.Declared), Is.True);
+	{
+		Assert.That(MacroDeckId.IsValidLocalId(localId, LocalIdKind.Declared), Is.True);
+	}
 
 	[Test]
 	public void A_guid_is_invalid_as_declared_but_valid_as_resource()
@@ -61,7 +65,9 @@ public class QualifiedIdTests
 	[TestCase("set volume")]
 	[TestCase("")]
 	public void Malformed_local_ids_are_invalid_as_declared(string localId)
-		=> Assert.That(MacroDeckId.IsValidLocalId(localId, LocalIdKind.Declared), Is.False);
+	{
+		Assert.That(MacroDeckId.IsValidLocalId(localId, LocalIdKind.Declared), Is.False);
+	}
 
 	[Test]
 	public void A_local_id_containing_the_separator_is_invalid_as_either_kind()
@@ -121,7 +127,9 @@ public class QualifiedIdTests
 	[TestCase(null)]
 	[TestCase("")]
 	public void TryParse_rejects_a_nested_missing_or_bare_id(string? value)
-		=> Assert.That(QualifiedId.TryParse(value, out _), Is.False);
+	{
+		Assert.That(QualifiedId.TryParse(value, out _), Is.False);
+	}
 
 	[TestCase("a.b::c::d")]
 	[TestCase("::x")]
@@ -131,7 +139,9 @@ public class QualifiedIdTests
 	[TestCase("")]
 	[TestCase("app.macro-deck.obs::scene-changed")]
 	public void IsQualified_agrees_with_TryParse(string? value)
-		=> Assert.That(QualifiedId.IsQualified(value), Is.EqualTo(QualifiedId.TryParse(value, out _)));
+	{
+		Assert.That(QualifiedId.IsQualified(value), Is.EqualTo(QualifiedId.TryParse(value, out _)));
+	}
 
 	/// <summary>
 	/// Regression: the patterns were anchored with <c>^</c>/<c>$</c>, and in .NET <c>$</c> also matches
@@ -141,12 +151,16 @@ public class QualifiedIdTests
 	[TestCase("play\n")]
 	[TestCase("play\r\n")]
 	public void A_declared_id_with_a_trailing_newline_is_rejected(string localId)
-		=> Assert.That(MacroDeckId.IsValidLocalId(localId, LocalIdKind.Declared), Is.False);
+	{
+		Assert.That(MacroDeckId.IsValidLocalId(localId, LocalIdKind.Declared), Is.False);
+	}
 
 	[TestCase("app.macro-deck.spotify\n")]
 	[TestCase("time\n")]
 	public void An_owner_id_with_a_trailing_newline_is_rejected(string ownerId)
-		=> Assert.That(MacroDeckId.IsValidOwnerId(ownerId), Is.False);
+	{
+		Assert.That(MacroDeckId.IsValidOwnerId(ownerId), Is.False);
+	}
 
 	[Test]
 	public void Ids_built_from_the_same_parts_are_equal_and_share_a_hash_code()

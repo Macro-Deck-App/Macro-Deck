@@ -37,7 +37,10 @@ public class ModalRefusalLoggingTests
 	}
 
 	[TearDown]
-	public void TearDown() => _logger.Dispose();
+	public void TearDown()
+	{
+		_logger.Dispose();
+	}
 
 	[Test]
 	public void OpeningAModalTheProviderCannotServe_LogsTheModalIntegrationViewAndCode()
@@ -49,10 +52,11 @@ public class ModalRefusalLoggingTests
 
 		Assert.That(response.Accepted, Is.False);
 		var logged = Rendered(LogEventLevel.Warning);
-		Assert.That(logged, Has.Some.Contains(modalId)
-			.And.Some.Contains(IntegrationId)
-			.And.Some.Contains(ViewId)
-			.And.Some.Contains(response.Code));
+		Assert.That(logged,
+			Has.Some.Contains(modalId)
+				.And.Some.Contains(IntegrationId)
+				.And.Some.Contains(ViewId)
+				.And.Some.Contains(response.Code));
 	}
 
 	[Test]
@@ -78,7 +82,8 @@ public class ModalRefusalLoggingTests
 		var response = opener.Open(new OpenModalUiSessionRequest { ModalId = modalId }, Principal);
 
 		Assert.That(response.Code, Is.EqualTo(UiSessionErrorCodes.SessionNotFound));
-		Assert.That(response.Message, Is.EqualTo(opener.Open(new OpenModalUiSessionRequest { ModalId = "gone" }, Principal).Message));
+		Assert.That(response.Message,
+			Is.EqualTo(opener.Open(new OpenModalUiSessionRequest { ModalId = "gone" }, Principal).Message));
 		Assert.That(Rendered(LogEventLevel.Information), Has.Some.Contains(IntegrationId).And.Some.Contains(ViewId));
 	}
 
@@ -91,13 +96,14 @@ public class ModalRefusalLoggingTests
 		_coordinator.BindSession(modalId, "session-1");
 		var watcher = Watcher();
 
-		watcher.OnSessionEnded(null, Ended("session-1", "PROVIDER_TIMEOUT", retryable: true));
+		watcher.OnSessionEnded(null, Ended("session-1", "PROVIDER_TIMEOUT", true));
 
 		Assert.That((await waiting).Cancelled, Is.True);
-		Assert.That(Rendered(LogEventLevel.Information), Has.Some.Contains(modalId)
-			.And.Some.Contains(IntegrationId)
-			.And.Some.Contains(ViewId)
-			.And.Some.Contains("PROVIDER_TIMEOUT"));
+		Assert.That(Rendered(LogEventLevel.Information),
+			Has.Some.Contains(modalId)
+				.And.Some.Contains(IntegrationId)
+				.And.Some.Contains(ViewId)
+				.And.Some.Contains("PROVIDER_TIMEOUT"));
 	}
 
 	[Test]
@@ -107,7 +113,7 @@ public class ModalRefusalLoggingTests
 		_coordinator.TryClaim(modalId, Principal, out _);
 		_coordinator.BindSession(modalId, "session-1");
 
-		Watcher().OnSessionEnded(null, Ended("session-1", code: null, retryable: false, UiSessionEndReason.Closed));
+		Watcher().OnSessionEnded(null, Ended("session-1", null, false, UiSessionEndReason.Closed));
 
 		Assert.That(_events.Where(e => e.Level >= LogEventLevel.Information), Is.Empty);
 	}
@@ -119,7 +125,7 @@ public class ModalRefusalLoggingTests
 		_coordinator.TryClaim(modalId, Principal, out _);
 		_coordinator.BindSession(modalId, "session-1");
 
-		Watcher().OnSessionEnded(null, Ended("session-2", "PROVIDER_TIMEOUT", retryable: true));
+		Watcher().OnSessionEnded(null, Ended("session-2", "PROVIDER_TIMEOUT", true));
 
 		Assert.That(_events, Is.Empty);
 	}
@@ -130,7 +136,9 @@ public class ModalRefusalLoggingTests
 		var interactions = new UiInteractions(_coordinator, new RecordingUiTransport(), IntegrationId, _logger);
 		using var withdraw = new CancellationTokenSource();
 
-		var asking = interactions.ShowModalAsync<int>(ClientId, new ModalDefinition { ViewId = ViewId }, withdraw.Token);
+		var asking = interactions.ShowModalAsync<int>(ClientId,
+			new ModalDefinition { ViewId = ViewId },
+			withdraw.Token);
 		await withdraw.CancelAsync();
 
 		Assert.That((await asking).Cancelled, Is.True);
@@ -146,20 +154,27 @@ public class ModalRefusalLoggingTests
 		var modalId = ((UiModalOpenedEvent)transport.GroupMessages.Single().Message).ModalId;
 		_coordinator.TryClaim(modalId, Principal, out _);
 
-		_coordinator.Settle(modalId, Principal, cancelled: true, value: null);
+		_coordinator.Settle(modalId, Principal, true, null);
 
 		Assert.That((await asking).Cancelled, Is.True);
 		Assert.That(_events, Is.Empty);
 	}
 
 	private ModalSessionWatcher Watcher()
-		=> new(new StartedLifetime(), new UiSessionRegistry(TimeProvider.System), _coordinator, _logger);
+	{
+		return new ModalSessionWatcher(new StartedLifetime(),
+			new UiSessionRegistry(TimeProvider.System),
+			_coordinator,
+			_logger);
+	}
 
-	private static UiSessionEndedEventArgs Ended(string sessionId,
+	private static UiSessionEndedEventArgs Ended(
+		string sessionId,
 		string? code,
 		bool retryable,
 		UiSessionEndReason reason = UiSessionEndReason.Invalidated)
-		=> new()
+	{
+		return new UiSessionEndedEventArgs
 		{
 			Session = new UiSessionSnapshot
 			{
@@ -176,9 +191,12 @@ public class ModalRefusalLoggingTests
 			Code = code,
 			Retryable = retryable
 		};
+	}
 
 	private List<string> Rendered(LogEventLevel level)
-		=> _events.Where(e => e.Level == level).Select(e => e.RenderMessage(CultureInfo.InvariantCulture)).ToList();
+	{
+		return _events.Where(e => e.Level == level).Select(e => e.RenderMessage(CultureInfo.InvariantCulture)).ToList();
+	}
 
 	private sealed class StartedLifetime : IHostApplicationLifetime
 	{

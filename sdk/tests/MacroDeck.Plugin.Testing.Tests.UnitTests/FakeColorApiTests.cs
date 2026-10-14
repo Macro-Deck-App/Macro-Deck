@@ -14,17 +14,18 @@ public class FakeColorApiTests
 		var received = new List<string?>();
 		await colors.Set("{{ vars.primary | color }}", "#3366ff");
 
-		var watch = await colors.WatchAsync("{{ vars.primary | color }}", (color, _) =>
-		{
-			received.Add(color);
-			return Task.CompletedTask;
-		});
+		var watch = await colors.WatchAsync("{{ vars.primary | color }}",
+			(color, _) =>
+			{
+				received.Add(color);
+				return Task.CompletedTask;
+			});
 		await colors.Set("{{ vars.primary | color }}", "#3366ff");
 		await colors.Set("{{ vars.primary | color }}", "#ff0000");
 		await watch.DisposeAsync();
 		await colors.Set("{{ vars.primary | color }}", "#00ff00");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(received, Is.EqualTo(_delivered));
 			Assert.That(await colors.ResolveAsync("{{ vars.other | color }}"), Is.Null);

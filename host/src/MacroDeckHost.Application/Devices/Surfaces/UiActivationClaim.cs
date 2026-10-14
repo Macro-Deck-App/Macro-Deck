@@ -20,13 +20,13 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 
 	public static (string Name, object? Payload)? EventFor(JsonElement node, string triggerType)
 	{
-		if (string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.Ordinal) &&
-			ChangeFor(node) is { } change)
+		if (string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.Ordinal)
+			&& ChangeFor(node) is { } change)
 		{
 			return (UiComponentEvents.Change, change);
 		}
 
-		string? name = triggerType switch
+		var name = triggerType switch
 		{
 			WidgetTriggerTypes.ShortPress => UiComponentEvents.Press,
 			WidgetTriggerTypes.LongPress => UiComponentEvents.LongPress,
@@ -51,12 +51,12 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 			return null;
 		}
 
-		if (Declares(node, UiComponentEvents.Press) ||
-			Declares(node, UiComponentEvents.LongPress) ||
-			Declares(node, UiComponentEvents.PressStart) ||
-			Declares(node, UiComponentEvents.PressEnd) ||
-			Declares(node, UiComponentEvents.Adjust) ||
-			Declares(node, UiComponentEvents.Change))
+		if (Declares(node, UiComponentEvents.Press)
+			|| Declares(node, UiComponentEvents.LongPress)
+			|| Declares(node, UiComponentEvents.PressStart)
+			|| Declares(node, UiComponentEvents.PressEnd)
+			|| Declares(node, UiComponentEvents.Adjust)
+			|| Declares(node, UiComponentEvents.Change))
 		{
 			return node;
 		}
@@ -73,9 +73,9 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 
 		if (IsType(node, UiComponents.Responsive))
 		{
-			var variants = node.TryGetProperty("properties", out var responsiveProperties) &&
-				responsiveProperties.ValueKind == JsonValueKind.Object &&
-				responsiveProperties.TryGetProperty(UiComponentProperties.Variants, out var declared)
+			var variants = node.TryGetProperty("properties", out var responsiveProperties)
+				&& responsiveProperties.ValueKind == JsonValueKind.Object
+				&& responsiveProperties.TryGetProperty(UiComponentProperties.Variants, out var declared)
 					? declared
 					: default;
 			var index = UiResponsiveSelection.SelectChild(variants, children.GetArrayLength(), widthCells, heightCells);
@@ -96,7 +96,9 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 	}
 
 	private static bool IsType(JsonElement node, string type)
-		=> node.TryGetProperty("type", out var value) && value.ValueEquals(type);
+	{
+		return node.TryGetProperty("type", out var value) && value.ValueEquals(type);
+	}
 
 	private static bool PassesWholeBox(JsonElement node)
 	{
@@ -110,10 +112,10 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 			return false;
 		}
 
-		return !node.TryGetProperty("properties", out var properties) ||
-			properties.ValueKind != JsonValueKind.Object ||
-			(!properties.TryGetProperty(UiComponentProperties.Padding, out _) &&
-				!properties.TryGetProperty(UiComponentProperties.Frame, out _));
+		return !node.TryGetProperty("properties", out var properties)
+			|| properties.ValueKind != JsonValueKind.Object
+			|| !properties.TryGetProperty(UiComponentProperties.Padding, out _)
+			&& !properties.TryGetProperty(UiComponentProperties.Frame, out _);
 	}
 
 	private static object? ChangeFor(JsonElement node)
@@ -142,9 +144,9 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 			return null;
 		}
 
-		var current = Property(node, UiComponentProperties.Selected) is { ValueKind: JsonValueKind.Number } selected &&
-			selected.GetDouble() is var value and >= 0 &&
-			value < count
+		var current = Property(node, UiComponentProperties.Selected) is { ValueKind: JsonValueKind.Number } selected
+			&& selected.GetDouble() is var value and >= 0
+			&& value < count
 				? (int)Math.Floor(value)
 				: -1;
 
@@ -152,9 +154,11 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 	}
 
 	private static bool IsDisabledRegion(JsonElement node)
-		=> Property(node, UiComponentProperties.Modifiers) is { ValueKind: JsonValueKind.Object } modifiers &&
-			modifiers.TryGetProperty(UiComponentModifiers.Disabled, out var disabled) &&
-			disabled.ValueKind == JsonValueKind.True;
+	{
+		return Property(node, UiComponentProperties.Modifiers) is { ValueKind: JsonValueKind.Object } modifiers
+			&& modifiers.TryGetProperty(UiComponentModifiers.Disabled, out var disabled)
+			&& disabled.ValueKind == JsonValueKind.True;
+	}
 
 	private static bool Declares(JsonElement node, string eventName)
 	{
@@ -175,9 +179,11 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 	}
 
 	private static JsonElement? Property(JsonElement node, string key)
-		=> node.TryGetProperty("properties", out var properties) &&
-			properties.ValueKind == JsonValueKind.Object &&
-			properties.TryGetProperty(key, out var value)
+	{
+		return node.TryGetProperty("properties", out var properties)
+			&& properties.ValueKind == JsonValueKind.Object
+			&& properties.TryGetProperty(key, out var value)
 				? value
 				: null;
+	}
 }

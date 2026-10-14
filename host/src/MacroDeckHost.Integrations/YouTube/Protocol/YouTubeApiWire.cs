@@ -360,37 +360,56 @@ internal sealed class YouTubeIdWire
 }
 
 internal sealed record YouTubeChatMessageInsertWire(
-	[property: JsonPropertyName("snippet")] YouTubeChatMessageInsertSnippetWire Snippet);
+	[property: JsonPropertyName("snippet")]
+	YouTubeChatMessageInsertSnippetWire Snippet);
 
 internal sealed record YouTubeChatMessageInsertSnippetWire(
-	[property: JsonPropertyName("liveChatId")] string LiveChatId,
+	[property: JsonPropertyName("liveChatId")]
+	string LiveChatId,
 	[property: JsonPropertyName("type")] string Type,
-	[property: JsonPropertyName("textMessageDetails")] YouTubeTextMessageInsertWire TextMessageDetails);
+	[property: JsonPropertyName("textMessageDetails")]
+	YouTubeTextMessageInsertWire TextMessageDetails);
 
-internal sealed record YouTubeTextMessageInsertWire([property: JsonPropertyName("messageText")] string MessageText);
+internal sealed record YouTubeTextMessageInsertWire(
+	[property: JsonPropertyName("messageText")]
+	string MessageText);
 
-internal sealed record YouTubeBanInsertWire([property: JsonPropertyName("snippet")] YouTubeBanInsertSnippetWire Snippet);
+internal sealed record YouTubeBanInsertWire(
+	[property: JsonPropertyName("snippet")]
+	YouTubeBanInsertSnippetWire Snippet);
 
 internal sealed record YouTubeBanInsertSnippetWire(
-	[property: JsonPropertyName("liveChatId")] string LiveChatId,
+	[property: JsonPropertyName("liveChatId")]
+	string LiveChatId,
 	[property: JsonPropertyName("type")] string Type,
-	[property: JsonPropertyName("banDurationSeconds")] long? BanDurationSeconds,
-	[property: JsonPropertyName("bannedUserDetails")] YouTubeBannedUserInsertWire BannedUserDetails);
+	[property: JsonPropertyName("banDurationSeconds")]
+	long? BanDurationSeconds,
+	[property: JsonPropertyName("bannedUserDetails")]
+	YouTubeBannedUserInsertWire BannedUserDetails);
 
-internal sealed record YouTubeBannedUserInsertWire([property: JsonPropertyName("channelId")] string ChannelId);
+internal sealed record YouTubeBannedUserInsertWire(
+	[property: JsonPropertyName("channelId")]
+	string ChannelId);
 
 internal sealed record YouTubeVideoUpdateWire(
 	[property: JsonPropertyName("id")] string Id,
-	[property: JsonPropertyName("snippet")] YouTubeVideoUpdateSnippetWire Snippet);
+	[property: JsonPropertyName("snippet")]
+	YouTubeVideoUpdateSnippetWire Snippet);
 
 internal sealed record YouTubeVideoUpdateSnippetWire(
 	[property: JsonPropertyName("title")] string Title,
-	[property: JsonPropertyName("categoryId")] string CategoryId,
-	[property: JsonPropertyName("description")] string Description,
+	[property: JsonPropertyName("categoryId")]
+	string CategoryId,
+	[property: JsonPropertyName("description")]
+	string Description,
 	[property: JsonPropertyName("tags")] IReadOnlyList<string> Tags,
-	[property: JsonPropertyName("defaultLanguage")] string? DefaultLanguage,
-	[property: JsonPropertyName("defaultAudioLanguage")] string? DefaultAudioLanguage);
+	[property: JsonPropertyName("defaultLanguage")]
+	string? DefaultLanguage,
+	[property: JsonPropertyName("defaultAudioLanguage")]
+	string? DefaultAudioLanguage);
 
 internal sealed record YouTubeCuepointWire(
-	[property: JsonPropertyName("cueType")] string CueType,
-	[property: JsonPropertyName("durationSecs")] int DurationSecs);
+	[property: JsonPropertyName("cueType")]
+	string CueType,
+	[property: JsonPropertyName("durationSecs")]
+	int DurationSecs);

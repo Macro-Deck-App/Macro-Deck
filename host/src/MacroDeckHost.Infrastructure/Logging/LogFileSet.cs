@@ -15,10 +15,12 @@ public sealed class LogFileSet
 	public LogFileKind Stream { get; }
 
 	public string PathFor(string stamp)
-		=> Path.Combine(_directory,
+	{
+		return Path.Combine(_directory,
 			Stream == LogFileKind.Bootstrapper
 				? BootstrapperLogParser.FileName(stamp)
 				: HostLogParser.FileName(stamp));
+	}
 
 	public List<string> Stamps()
 	{
@@ -70,7 +72,7 @@ public sealed class LogFileSet
 				"yyyyMMdd",
 				System.Globalization.CultureInfo.InvariantCulture,
 				System.Globalization.DateTimeStyles.None,
-				out var date) &&
-			BootstrapperLogParser.TryParseHeader(line, date, out parsed);
+				out var date)
+			&& BootstrapperLogParser.TryParseHeader(line, date, out parsed);
 	}
 }

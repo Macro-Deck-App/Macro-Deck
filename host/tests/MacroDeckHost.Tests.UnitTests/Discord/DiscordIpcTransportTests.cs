@@ -40,7 +40,7 @@ internal sealed class DiscordIpcTransportTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -68,7 +68,7 @@ internal sealed class DiscordIpcTransportTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 

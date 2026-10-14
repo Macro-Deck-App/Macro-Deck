@@ -7,11 +7,20 @@ public sealed class DeviceEnrollmentStore : IDeviceEnrollmentStore
 {
 	private readonly ConcurrentDictionary<string, DateTime> _tokens = new(StringComparer.Ordinal);
 
-	public void Add(string tokenHash, DateTime expiresAt) => _tokens[tokenHash] = expiresAt;
+	public void Add(string tokenHash, DateTime expiresAt)
+	{
+		_tokens[tokenHash] = expiresAt;
+	}
 
-	public bool TryConsume(string tokenHash, out DateTime expiresAt) => _tokens.TryRemove(tokenHash, out expiresAt);
+	public bool TryConsume(string tokenHash, out DateTime expiresAt)
+	{
+		return _tokens.TryRemove(tokenHash, out expiresAt);
+	}
 
-	public void Clear() => _tokens.Clear();
+	public void Clear()
+	{
+		_tokens.Clear();
+	}
 
 	public void PurgeExpired(DateTime now)
 	{

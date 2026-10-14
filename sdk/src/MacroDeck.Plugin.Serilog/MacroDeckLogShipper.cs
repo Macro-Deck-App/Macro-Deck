@@ -131,7 +131,10 @@ internal sealed class MacroDeckLogShipper : IHostedService, IDisposable
 		}
 	}
 
-	public void Dispose() => _stopping?.Dispose();
+	public void Dispose()
+	{
+		_stopping?.Dispose();
+	}
 
 	private async Task RunAsync(CancellationToken cancellationToken)
 	{
@@ -203,10 +206,12 @@ internal sealed class MacroDeckLogShipper : IHostedService, IDisposable
 	}
 
 	private static void ObserveQuietly(Task task)
-		=> _ = task.ContinueWith(static t => _ = t.Exception,
+	{
+		_ = task.ContinueWith(static t => _ = t.Exception,
 			CancellationToken.None,
 			TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted,
 			TaskScheduler.Default);
+	}
 
 	/// <summary>Drains whatever is queued and ships it, splitting as needed. Returns false if any part
 	/// of what was drained failed to send, which drives the caller's backoff.</summary>
@@ -316,7 +321,8 @@ internal sealed class MacroDeckLogShipper : IHostedService, IDisposable
 	}
 
 	private static ProtocolEnvelope BuildEnvelope(IReadOnlyList<LogEventDto> events, int dropped)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.LogPublish,
 			Id = Guid.CreateVersion7().ToString(),
@@ -324,6 +330,7 @@ internal sealed class MacroDeckLogShipper : IHostedService, IDisposable
 				new LogPublishPayload { Events = events, Dropped = dropped > 0 ? dropped : null },
 				PluginProtocolJson.Options)
 		};
+	}
 
 	private static TimeSpan NextBackoff(TimeSpan current)
 	{

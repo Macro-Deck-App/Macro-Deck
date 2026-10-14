@@ -10,9 +10,12 @@ public sealed class StartConnectSignInRequestMessageHandler
 	private readonly IConnectSessionService _sessionService;
 
 	public StartConnectSignInRequestMessageHandler(IConnectSessionService sessionService)
-		=> _sessionService = sessionService;
+	{
+		_sessionService = sessionService;
+	}
 
-	public async ValueTask<StartConnectSignInResponse> Handle(StartConnectSignInRequest request,
+	public async ValueTask<StartConnectSignInResponse> Handle(
+		StartConnectSignInRequest request,
 		CancellationToken cancellationToken)
 	{
 		var start = await _sessionService.StartSignIn(cancellationToken);

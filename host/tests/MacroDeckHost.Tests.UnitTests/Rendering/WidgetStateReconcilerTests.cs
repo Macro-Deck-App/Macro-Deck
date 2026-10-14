@@ -18,18 +18,23 @@ namespace MacroDeckHost.Tests.UnitTests.Rendering;
 [TestFixture]
 public class WidgetStateReconcilerTests
 {
-	private static WidgetEntity BoundButton(Guid id) => new()
+	private static WidgetEntity BoundButton(Guid id)
 	{
-		Id = id,
-		FolderId = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		Data = "{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}]," +
-			"\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"on\",\"when\":{\"kind\":\"compare\"," +
-			"\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}],\"fallbackStateId\":\"off\"}}"
-	};
+		return new WidgetEntity
+		{
+			Id = id,
+			FolderId = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			Data
+				= "{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}],"
+				+ "\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"on\",\"when\":{\"kind\":\"compare\","
+				+ "\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}],\"fallbackStateId\":\"off\"}}"
+		};
+	}
 
 	private static (WidgetStateReconciler Reconciler, RecordingFlowExecutor Flow, RecordingVariableService Vars,
-		WidgetDerivedStateStore Store, RecordingStatePublisher Publisher) Build(WidgetEntity widget,
+		WidgetDerivedStateStore Store, RecordingStatePublisher Publisher) Build(
+			WidgetEntity widget,
 			params string?[] resolvedStateIds)
 	{
 		var store = new WidgetDerivedStateStore();
@@ -212,10 +217,10 @@ public class WidgetStateReconcilerTests
 	public async Task MappingConditionReferencingVarsState_SettlesInsteadOfOscillating()
 	{
 		const string data =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"pending\",\"label\":\"Pending\"},{\"id\":\"active\",\"label\":\"Active\"}]," +
-			"\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"active\"," +
-			"\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"state\"},\"operator\":\"!=\",\"right\":\"\"}}]," +
-			"\"fallbackStateId\":\"pending\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"pending\",\"label\":\"Pending\"},{\"id\":\"active\",\"label\":\"Active\"}],"
+			+ "\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"active\","
+			+ "\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"state\"},\"operator\":\"!=\",\"right\":\"\"}}],"
+			+ "\"fallbackStateId\":\"pending\"}}";
 		var widget = new WidgetEntity
 		{
 			Id = Guid.NewGuid(), FolderId = Guid.NewGuid(), Type = WidgetTypeIds.ActionButton, Data = data
@@ -363,7 +368,8 @@ public class WidgetStateReconcilerTests
 
 		public Func<Task>? OnPublishing { get; set; }
 
-		public async Task PublishIfChanged(Guid widgetId,
+		public async Task PublishIfChanged(
+			Guid widgetId,
 			WidgetStateReconciliation result,
 			CancellationToken cancellationToken = default)
 		{
@@ -384,17 +390,26 @@ public class WidgetStateReconcilerTests
 		private readonly Queue<WidgetStateResolution?> _values;
 
 		public QueuedStateService(params string?[] stateIds)
-			=> _values = new Queue<WidgetStateResolution?>(stateIds.Select(ToResolution));
+		{
+			_values = new Queue<WidgetStateResolution?>(stateIds.Select(ToResolution));
+		}
 
 		public Task<WidgetStateResolution?> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-			=> Task.FromResult(_values.Count > 0 ? _values.Dequeue() : null);
+		{
+			return Task.FromResult(_values.Count > 0 ? _values.Dequeue() : null);
+		}
 
-		public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
+		public TimeSpan? GetProviderPollInterval(Guid widgetId)
+		{
+			return null;
+		}
 
 		private static WidgetStateResolution? ToResolution(string? stateId)
-			=> stateId is null
+		{
+			return stateId is null
 				? null
 				: new WidgetStateResolution(stateId, stateId == "on" ? "On" : "Off", [], false);
+		}
 	}
 
 	private sealed class MutableOptimisticStateService : IWidgetStateService
@@ -429,46 +444,70 @@ public class WidgetStateReconcilerTests
 			});
 		}
 
-		public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
+		public TimeSpan? GetProviderPollInterval(Guid widgetId)
+		{
+			return null;
+		}
 	}
 
 	private sealed class NotSupportedWidgetService : IWidgetService
 	{
-		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget) => throw new NotSupportedException();
+		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
 			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RecordingFlowExecutor : IFlowExecutor
@@ -479,7 +518,8 @@ public class WidgetStateReconcilerTests
 
 		public Func<Task>? OnExecuting { get; set; }
 
-		public async Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request,
+		public async Task<FlowExecutionResult> ExecuteAsync(
+			FlowExecutionRequest request,
 			CancellationToken cancellationToken)
 		{
 			Triggers.Add(request.Trigger.Value);
@@ -520,17 +560,30 @@ public class WidgetStateReconcilerTests
 			return Task.CompletedTask;
 		}
 
-		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name) => Task.CompletedTask;
+		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<IReadOnlyList<VariableEntity>> GetAll() => throw new NotSupportedException();
+		public Task<IReadOnlyList<VariableEntity>> GetAll()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetById(Guid id) => throw new NotSupportedException();
+		public Task<VariableEntity?> GetById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
 			string name,
@@ -540,20 +593,33 @@ public class WidgetStateReconcilerTests
 			object? initialValue,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+			VariableTemplateSource? templateSource = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+		public Task<Result<VariableEntity, VariableError>> SetValue(
+			Guid id,
 			object? value,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 			Guid id,
 			string? name,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+			VariableTemplateSource? templateSource = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+		public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
 			string integrationId,
@@ -566,42 +632,66 @@ public class WidgetStateReconcilerTests
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
 			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
-			bool publishedByHost = false) => throw new NotSupportedException();
+			bool publishedByHost = false)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+			string integrationId,
 			string resourceId,
 			string name,
 			VariableType type,
 			int? decimalPlaces,
-			VariableDeclaration? declaration = null) =>
+			VariableDeclaration? declaration = null)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId) =>
-			Task.FromResult<VariableEntity?>(null);
+		public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId)
+		{
+			return Task.FromResult<VariableEntity?>(null);
+		}
 
 		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
 			string integrationId,
 			Guid id,
 			object? value,
-			VariableBounds? bounds = null) => throw new NotSupportedException();
+			VariableBounds? bounds = null)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> SetIntegrationVariableAvailability(
 			string integrationId,
 			Guid id,
-			bool available) => throw new NotSupportedException();
+			bool available)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId) => throw new NotSupportedException();
+		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -617,18 +707,45 @@ public class WidgetStateReconcilerTests
 			_folder = new FolderEntity { Name = "f", Order = 0, Widgets = widgets.ToList() };
 		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task InitializeCache() => Task.CompletedTask;
-		public FolderEntity? GetFolderById(Guid id) => _folder;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return _folder;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

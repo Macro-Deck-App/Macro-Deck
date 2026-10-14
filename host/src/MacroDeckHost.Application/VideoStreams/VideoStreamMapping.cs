@@ -5,7 +5,8 @@ namespace MacroDeckHost.Application.VideoStreams;
 public static class VideoStreamMapping
 {
 	public static VideoStreamError ToBrokerError(VideoStreamErrorCode code)
-		=> code switch
+	{
+		return code switch
 		{
 			VideoStreamErrorCode.UnknownProvider => VideoStreamError.UnknownProvider,
 			VideoStreamErrorCode.UnknownStream => VideoStreamError.UnknownStream,
@@ -17,4 +18,5 @@ public static class VideoStreamMapping
 			VideoStreamErrorCode.Unsupported => VideoStreamError.ProviderUnavailable,
 			_ => VideoStreamError.Failed
 		};
+	}
 }

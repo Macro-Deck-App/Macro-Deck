@@ -12,9 +12,13 @@ public sealed class BackupOperationProgressNotificationHandler
 {
 	private readonly IUiTransport _uiTransport;
 
-	public BackupOperationProgressNotificationHandler(IUiTransport uiTransport) => _uiTransport = uiTransport;
+	public BackupOperationProgressNotificationHandler(IUiTransport uiTransport)
+	{
+		_uiTransport = uiTransport;
+	}
 
-	public async ValueTask Handle(BackupOperationProgressNotification notification,
+	public async ValueTask Handle(
+		BackupOperationProgressNotification notification,
 		CancellationToken cancellationToken)
 	{
 		var status = notification.Status;
@@ -42,12 +46,17 @@ public sealed class BackupListChangedNotificationHandler : INotificationHandler<
 {
 	private readonly IUiTransport _uiTransport;
 
-	public BackupListChangedNotificationHandler(IUiTransport uiTransport) => _uiTransport = uiTransport;
+	public BackupListChangedNotificationHandler(IUiTransport uiTransport)
+	{
+		_uiTransport = uiTransport;
+	}
 
 	public ValueTask Handle(BackupListChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new BackupListChangedEvent { Reason = notification.Reason },
 			cancellationToken));
+	}
 }
 
 public sealed class BackupRecoveryKeyStateChangedNotificationHandler
@@ -55,11 +64,16 @@ public sealed class BackupRecoveryKeyStateChangedNotificationHandler
 {
 	private readonly IUiTransport _uiTransport;
 
-	public BackupRecoveryKeyStateChangedNotificationHandler(IUiTransport uiTransport) => _uiTransport = uiTransport;
+	public BackupRecoveryKeyStateChangedNotificationHandler(IUiTransport uiTransport)
+	{
+		_uiTransport = uiTransport;
+	}
 
-	public ValueTask Handle(BackupRecoveryKeyStateChangedNotification notification,
+	public ValueTask Handle(
+		BackupRecoveryKeyStateChangedNotification notification,
 		CancellationToken cancellationToken)
-		=> new(_uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new BackupRecoveryKeyStateChangedEvent
 			{
 				State = notification.State.Availability.ToString(),
@@ -67,16 +81,21 @@ public sealed class BackupRecoveryKeyStateChangedNotificationHandler
 				ExportedAt = notification.State.ExportedAt
 			},
 			cancellationToken));
+	}
 }
 
 public sealed class RestorePendingChangedNotificationHandler : INotificationHandler<RestorePendingChangedNotification>
 {
 	private readonly IUiTransport _uiTransport;
 
-	public RestorePendingChangedNotificationHandler(IUiTransport uiTransport) => _uiTransport = uiTransport;
+	public RestorePendingChangedNotificationHandler(IUiTransport uiTransport)
+	{
+		_uiTransport = uiTransport;
+	}
 
 	public ValueTask Handle(RestorePendingChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new RestorePendingEvent
 			{
 				Pending = notification.Pending is not null,
@@ -86,4 +105,5 @@ public sealed class RestorePendingChangedNotificationHandler : INotificationHand
 				Components = BackupDtoMapper.ToNames(notification.Pending?.Components ?? [])
 			},
 			cancellationToken));
+	}
 }

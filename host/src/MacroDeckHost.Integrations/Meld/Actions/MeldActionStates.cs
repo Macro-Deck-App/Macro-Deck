@@ -34,8 +34,9 @@ internal static class MeldActionStates
 		}
 
 		var session = connection.State.Session;
-		var target = byId(session).GetValueOrDefault(value) ??
-			all(session).FirstOrDefault(item => string.Equals(nameOf(item), value, StringComparison.OrdinalIgnoreCase));
+		var target = byId(session).GetValueOrDefault(value)
+			?? all(session)
+				.FirstOrDefault(item => string.Equals(nameOf(item), value, StringComparison.OrdinalIgnoreCase));
 
 		return ActionStates.Snapshot(states, target is null ? null : read(connection, target));
 	}

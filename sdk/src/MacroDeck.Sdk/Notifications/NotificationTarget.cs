@@ -16,5 +16,7 @@ public sealed record NotificationTarget
 	public IReadOnlyList<Guid> DeviceIds { get; init; } = [];
 
 	public static NotificationTarget Devices(params Guid[] deviceIds)
-		=> new() { Kind = NotificationTargetKind.Devices, DeviceIds = deviceIds };
+	{
+		return new NotificationTarget { Kind = NotificationTargetKind.Devices, DeviceIds = deviceIds };
+	}
 }

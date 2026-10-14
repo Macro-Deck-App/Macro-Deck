@@ -39,13 +39,15 @@ namespace MacroDeckHost.Plugins;
 public static class PluginWebSocketEndpointExtensions
 {
 	public static IEndpointConventionBuilder MapPluginWebSocket(this IEndpointRouteBuilder endpoints)
-		=> endpoints.Map(ProtocolConstants.WebSocketPath,
+	{
+		return endpoints.Map(ProtocolConstants.WebSocketPath,
 				async context =>
 				{
 					var handler = context.RequestServices.GetRequiredService<PluginWebSocketEndpoint>();
 					await handler.HandleAsync(context);
 				})
 			.AllowAnonymous();
+	}
 }
 
 public sealed class PluginWebSocketEndpoint
@@ -301,8 +303,8 @@ public sealed class PluginWebSocketEndpoint
 
 		if (SessionResumeRules.IsResumeAttempt(hello.ResumeSessionId))
 		{
-			if (!string.Equals(hello.ResumeSessionId, sessionId, StringComparison.Ordinal) ||
-				!_sessionRegistry.TryResume(pluginId, hello.ResumeSessionId, _timeProvider.GetUtcNow(), out _))
+			if (!string.Equals(hello.ResumeSessionId, sessionId, StringComparison.Ordinal)
+				|| !_sessionRegistry.TryResume(pluginId, hello.ResumeSessionId, _timeProvider.GetUtcNow(), out _))
 			{
 				await SendProtocolErrorAsync(connection,
 					ProtocolErrorCodes.SessionNotResumable,
@@ -349,14 +351,16 @@ public sealed class PluginWebSocketEndpoint
 		await registration;
 	}
 
-	private async Task RegisterAndPushStateAsync(string pluginId,
+	private async Task RegisterAndPushStateAsync(
+		string pluginId,
 		string sessionId,
 		IPluginConnection connection,
 		CancellationToken cancellationToken)
 	{
 		try
 		{
-			if (await _registrar.RegisterAsync(pluginId, sessionId, connection, cancellationToken).ConfigureAwait(false))
+			if (await _registrar.RegisterAsync(pluginId, sessionId, connection, cancellationToken)
+				.ConfigureAwait(false))
 			{
 				await _statePusher.PushAllAsync(pluginId, cancellationToken).ConfigureAwait(false);
 			}
@@ -463,11 +467,11 @@ public sealed class PluginWebSocketEndpoint
 						break;
 
 					case MessageTypes.FlowPause:
-						_sessionRegistry.SetPaused(sessionId, paused: true);
+						_sessionRegistry.SetPaused(sessionId, true);
 						break;
 
 					case MessageTypes.FlowResume:
-						_sessionRegistry.SetPaused(sessionId, paused: false);
+						_sessionRegistry.SetPaused(sessionId, false);
 						break;
 
 					case MessageTypes.ProtocolError:
@@ -574,9 +578,9 @@ public sealed class PluginWebSocketEndpoint
 		}
 
 		var outcome = CorrelationRules.Resolve(envelope.Type,
-			hasCorrelationId: envelope.CorrelationId is not null,
-			isKnownCorrelation: false,
-			wasTimedOut: false);
+			envelope.CorrelationId is not null,
+			false,
+			false);
 
 		switch (outcome)
 		{
@@ -693,7 +697,8 @@ public sealed class PluginWebSocketEndpoint
 		}
 	}
 
-	internal async Task HandleStateUpdateAsync(string pluginId,
+	internal async Task HandleStateUpdateAsync(
+		string pluginId,
 		ProtocolEnvelope envelope,
 		CancellationToken cancellationToken)
 	{
@@ -893,7 +898,7 @@ public sealed class PluginWebSocketEndpoint
 		}
 		catch (JsonException)
 		{
-			return default;
+			return null;
 		}
 	}
 
@@ -926,15 +931,15 @@ public sealed class PluginWebSocketEndpoint
 			return;
 		}
 
-		if (_companionInvokes is not null &&
-			string.Equals(payload.Api, HostApis.CompanionDevices, StringComparison.Ordinal))
+		if (_companionInvokes is not null
+			&& string.Equals(payload.Api, HostApis.CompanionDevices, StringComparison.Ordinal))
 		{
 			await _companionInvokes.StartAsync(connection, pluginId, envelope.Id, payload, cancellationToken);
 			return;
 		}
 
-		if (_desktopNotificationInvokes is not null &&
-			string.Equals(payload.Api, HostApis.DesktopNotifications, StringComparison.Ordinal))
+		if (_desktopNotificationInvokes is not null
+			&& string.Equals(payload.Api, HostApis.DesktopNotifications, StringComparison.Ordinal))
 		{
 			await _desktopNotificationInvokes.StartAsync(connection, pluginId, envelope.Id, payload, cancellationToken);
 			return;
@@ -946,9 +951,9 @@ public sealed class PluginWebSocketEndpoint
 			return;
 		}
 
-		if ((string.Equals(payload.Api, HostApis.Ui, StringComparison.Ordinal) &&
-				string.Equals(payload.Operation, HostOperations.Ui.RegisterMusicPlayerArtwork, StringComparison.Ordinal)) ||
-			string.Equals(payload.Api, HostApis.MusicPlayers, StringComparison.Ordinal))
+		if (string.Equals(payload.Api, HostApis.Ui, StringComparison.Ordinal)
+			&& string.Equals(payload.Operation, HostOperations.Ui.RegisterMusicPlayerArtwork, StringComparison.Ordinal)
+			|| string.Equals(payload.Api, HostApis.MusicPlayers, StringComparison.Ordinal))
 		{
 			await StartArtworkInvokeAsync(connection, pluginId, sessionId, envelope, payload, cancellationToken);
 			return;
@@ -964,11 +969,13 @@ public sealed class PluginWebSocketEndpoint
 		await SendHostResultAsync(connection, envelope.Id, result, cancellationToken);
 	}
 
-	private static Task SendHostResultAsync(IPluginConnection connection,
+	private static Task SendHostResultAsync(
+		IPluginConnection connection,
 		string correlationId,
 		HostCallbackResult result,
 		CancellationToken cancellationToken)
-		=> connection.Send(new ProtocolEnvelope
+	{
+		return connection.Send(new ProtocolEnvelope
 			{
 				Type = MessageTypes.HostResult,
 				Id = NewId(),
@@ -980,10 +987,12 @@ public sealed class PluginWebSocketEndpoint
 					: null
 			},
 			cancellationToken);
+	}
 
 	// Off the session's dispatch loop: the lookup can wait on another plugin's player, possibly this same plugin,
 	// and the loop must stay free to serve that plugin's own callbacks meanwhile.
-	private async Task StartArtworkInvokeAsync(IPluginConnection connection,
+	private async Task StartArtworkInvokeAsync(
+		IPluginConnection connection,
 		string pluginId,
 		string sessionId,
 		ProtocolEnvelope envelope,
@@ -1002,7 +1011,7 @@ public sealed class PluginWebSocketEndpoint
 				envelope.Id,
 				HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 					$"This plugin is already waiting on {MaxArtworkInvokesPerPlugin} music player artwork lookups.",
-					retryable: true),
+					true),
 				connectionToken);
 			return;
 		}
@@ -1010,7 +1019,8 @@ public sealed class PluginWebSocketEndpoint
 		_ = RunArtworkInvokeAsync(connection, pluginId, sessionId, envelope.Id, payload, connectionToken);
 	}
 
-	private async Task RunArtworkInvokeAsync(IPluginConnection connection,
+	private async Task RunArtworkInvokeAsync(
+		IPluginConnection connection,
 		string pluginId,
 		string sessionId,
 		string correlationId,
@@ -1057,7 +1067,9 @@ public sealed class PluginWebSocketEndpoint
 	}
 
 	private void LeaveArtworkInvoke(string pluginId)
-		=> _artworkInvokesInFlight.AddOrUpdate(pluginId, 0, (_, count) => Math.Max(0, count - 1));
+	{
+		_artworkInvokesInFlight.AddOrUpdate(pluginId, 0, (_, count) => Math.Max(0, count - 1));
+	}
 
 	private async Task ProcessLogQueueAsync(
 		PluginWebSocketConnection connection,
@@ -1192,8 +1204,8 @@ public sealed class PluginWebSocketEndpoint
 	{
 		var depth = Volatile.Read(ref dispatch.Depth);
 
-		if (depth >= ProtocolLimits.QueueHighWatermark &&
-			Interlocked.CompareExchange(ref dispatch.PauseRequested, 1, 0) == 0)
+		if (depth >= ProtocolLimits.QueueHighWatermark
+			&& Interlocked.CompareExchange(ref dispatch.PauseRequested, 1, 0) == 0)
 		{
 			await connection.Send(new ProtocolEnvelope
 				{
@@ -1205,8 +1217,8 @@ public sealed class PluginWebSocketEndpoint
 				},
 				cancellationToken);
 		}
-		else if (depth <= ProtocolLimits.QueueLowWatermark &&
-			Interlocked.CompareExchange(ref dispatch.PauseRequested, 0, 1) == 1)
+		else if (depth <= ProtocolLimits.QueueLowWatermark
+			&& Interlocked.CompareExchange(ref dispatch.PauseRequested, 0, 1) == 1)
 		{
 			await connection.Send(new ProtocolEnvelope
 				{
@@ -1275,7 +1287,9 @@ public sealed class PluginWebSocketEndpoint
 	}
 
 	private static async Task CloseNormallyAsync(WebSocket socket, string reason, CancellationToken cancellationToken)
-		=> await CloseAsync(socket, (int)WebSocketCloseStatus.NormalClosure, reason, cancellationToken);
+	{
+		await CloseAsync(socket, (int)WebSocketCloseStatus.NormalClosure, reason, cancellationToken);
+	}
 
 	private static async Task CloseGracefullyAsync(WebSocket socket, CancellationToken cancellationToken)
 	{
@@ -1285,7 +1299,8 @@ public sealed class PluginWebSocketEndpoint
 		await CloseAsync(socket, (int)WebSocketCloseStatus.NormalClosure, "Goodbye.", budget.Token);
 	}
 
-	private static async Task CloseAsync(WebSocket socket,
+	private static async Task CloseAsync(
+		WebSocket socket,
 		int closeCode,
 		string reason,
 		CancellationToken cancellationToken)
@@ -1325,7 +1340,10 @@ public sealed class PluginWebSocketEndpoint
 		}
 	}
 
-	private static async Task CloseWithPendingReceiveAsync(WebSocket socket, string reason, Task<byte[]?> pendingReceive)
+	private static async Task CloseWithPendingReceiveAsync(
+		WebSocket socket,
+		string reason,
+		Task<byte[]?> pendingReceive)
 	{
 		using var budget = new CancellationTokenSource(ProtocolTimeouts.GracefulClose);
 		try
@@ -1357,11 +1375,13 @@ public sealed class PluginWebSocketEndpoint
 	}
 
 	private static async Task<byte[]?> ReceiveMessageAsync(WebSocket socket, CancellationToken cancellationToken)
-		=> await WebSocketMessageIO.ReceiveAsync(socket,
+	{
+		return await WebSocketMessageIo.ReceiveAsync(socket,
 			ProtocolLimits.MaxMessageBytes,
-			requireText: false,
-			rejectOversized: false,
+			false,
+			false,
 			cancellationToken);
+	}
 
 	private static string ThrottleKey(HttpContext context)
 	{
@@ -1374,7 +1394,8 @@ public sealed class PluginWebSocketEndpoint
 			try
 			{
 				var sessionId = new JsonWebTokenHandler().ReadJsonWebToken(rawToken)
-					.GetClaim(PluginClaimTypes.SessionId).Value;
+					.GetClaim(PluginClaimTypes.SessionId)
+					.Value;
 				if (!string.IsNullOrEmpty(sessionId))
 				{
 					return $"plugin-ws|{sessionId}";
@@ -1398,7 +1419,10 @@ public sealed class PluginWebSocketEndpoint
 			context.RequestAborted);
 	}
 
-	private static string NewId() => Guid.CreateVersion7().ToString();
+	private static string NewId()
+	{
+		return Guid.CreateVersion7().ToString();
+	}
 
 	private static async Task Quietly(Task task)
 	{

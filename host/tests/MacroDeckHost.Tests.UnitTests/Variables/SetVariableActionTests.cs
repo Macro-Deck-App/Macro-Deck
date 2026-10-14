@@ -28,7 +28,7 @@ public class SetVariableActionTests
 				["operation"] = "add",
 				["value"] = "2"
 			},
-			ownerWidgetId: "widget-1");
+			"widget-1");
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 		Assert.That(_api.Calls, Has.Count.EqualTo(1));
@@ -118,11 +118,13 @@ public class SetVariableActionTests
 	}
 
 	private Task<ActionResult> Execute(IReadOnlyDictionary<string, object> parameters, string? ownerWidgetId = null)
-		=> _executor.ExecuteAsync(new ActionExecutionContext
+	{
+		return _executor.ExecuteAsync(new ActionExecutionContext
 		{
 			Parameters = parameters,
 			OwnerWidgetId = ownerWidgetId
 		});
+	}
 
 	private static void AssertFailed(ActionResult result, string expectedCode)
 	{

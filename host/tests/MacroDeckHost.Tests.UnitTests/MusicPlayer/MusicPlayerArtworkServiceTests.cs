@@ -25,7 +25,12 @@ public class MusicPlayerArtworkServiceTests
 	}
 
 	private MusicPlayerArtworkService CreateService(long maxCacheBytes = 16 * 1024 * 1024)
-		=> new(_registry, _processor, new LoggerConfiguration().CreateLogger(), maxCacheBytes);
+	{
+		return new MusicPlayerArtworkService(_registry,
+			_processor,
+			new LoggerConfiguration().CreateLogger(),
+			maxCacheBytes);
+	}
 
 	[Test]
 	public async Task A_failed_artwork_lookup_cannot_forge_a_log_line_through_the_artwork_id()
@@ -184,7 +189,7 @@ public class MusicPlayerArtworkServiceTests
 	[Test]
 	public async Task GetImage_OverByteBudget_EvictsLeastRecentlyUsed()
 	{
-		var service = CreateService(maxCacheBytes: 70);
+		var service = CreateService(70);
 
 		await service.GetImage(InstanceId, "art-a", null, CancellationToken.None);
 		await service.GetImage(InstanceId, "art-b", null, CancellationToken.None);
@@ -208,12 +213,20 @@ public class MusicPlayerArtworkServiceTests
 			_player = player;
 		}
 
-		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() => [];
+		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+		{
+			return [];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => instanceId == _instanceId ? _player : null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return instanceId == _instanceId ? _player : null;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-			=> GetPlayer(instanceId);
+		{
+			return GetPlayer(instanceId);
+		}
 
 		public IMusicPlayer? DefaultPlayer => _player;
 	}
@@ -231,7 +244,9 @@ public class MusicPlayerArtworkServiceTests
 		public bool ReturnNull { get; set; }
 
 		public Task<ProcessedArtworkResult?> Process(byte[] original, CancellationToken cancellationToken)
-			=> Task.FromResult(ReturnNull ? null : new ProcessedArtworkResult(Master, Variants));
+		{
+			return Task.FromResult(ReturnNull ? null : new ProcessedArtworkResult(Master, Variants));
+		}
 	}
 
 	private sealed class FakePlayer : IMusicPlayer
@@ -244,7 +259,8 @@ public class MusicPlayerArtworkServiceTests
 
 		public Task? Gate { get; set; }
 
-		public async Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+		public async Task<MusicPlayerArtwork?> GetArtworkAsync(
+			string artworkId,
 			CancellationToken cancellationToken = default)
 		{
 			ArtworkCalls++;
@@ -262,26 +278,53 @@ public class MusicPlayerArtworkServiceTests
 		}
 
 		public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(new MusicPlayerState { IsConnected = true });
+		{
+			return Task.FromResult(new MusicPlayerState { IsConnected = true });
+		}
 
-		public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PlayAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

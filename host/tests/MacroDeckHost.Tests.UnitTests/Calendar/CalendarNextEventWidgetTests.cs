@@ -1,8 +1,6 @@
-using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Calendar;
-using MacroDeckHost.Widgets.Calendar;
 using static MacroDeckHost.Tests.UnitTests.Calendar.CalendarTesting;
 using static MacroDeckHost.Tests.UnitTests.Calendar.CalendarTree;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Calendar;
@@ -15,7 +13,10 @@ public class CalendarNextEventWidgetTests
 	private CalendarWidgetHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new CalendarWidgetHarness();
+	public void SetUp()
+	{
+		_harness = new CalendarWidgetHarness();
+	}
 
 	[Test]
 	public async Task The_countdown_names_hours_and_minutes_from_the_catalog()
@@ -24,8 +25,8 @@ public class CalendarNextEventWidgetTests
 		await _harness.SyncAsync();
 
 		await using var session = await Open();
-		var expected = Strings.NextEvent.StartsIn(duration: Strings.Countdown.Pair(first: Strings.Countdown.Hours(1),
-			second: Strings.Countdown.Minutes(43)));
+		var expected = Strings.NextEvent.StartsIn(Strings.Countdown.Pair(Strings.Countdown.Hours(1),
+			Strings.Countdown.Minutes(43)));
 
 		Assert.Multiple(() =>
 		{
@@ -50,10 +51,10 @@ public class CalendarNextEventWidgetTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(far, Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(duration: Strings.Countdown.Days(6)))));
-			Assert.That(When(closer), Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(duration: Strings.Countdown.Pair(
-				first: Strings.Countdown.Days(1),
-				second: Strings.Countdown.Hours(23))))));
+			Assert.That(far, Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(Strings.Countdown.Days(6)))));
+			Assert.That(When(closer),
+				Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(Strings.Countdown.Pair(Strings.Countdown.Days(1),
+					Strings.Countdown.Hours(23))))));
 		});
 	}
 
@@ -74,10 +75,10 @@ public class CalendarNextEventWidgetTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(fiveMinutes, Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(duration: Strings.Countdown.Minutes(5)))));
-			Assert.That(fourMinutes, Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(duration: Strings.Countdown.Minutes(4)))));
+			Assert.That(fiveMinutes, Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(Strings.Countdown.Minutes(5)))));
+			Assert.That(fourMinutes, Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(Strings.Countdown.Minutes(4)))));
 			Assert.That(underAMinute,
-				Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(duration: Strings.Countdown.UnderMinute()))));
+				Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(Strings.Countdown.UnderMinute()))));
 			Assert.That(started, Is.EqualTo(Resolve(Strings.NextEvent.Now())));
 		});
 	}
@@ -98,7 +99,7 @@ public class CalendarNextEventWidgetTests
 		{
 			Assert.That(during, Is.EqualTo(("Running", Resolve(Strings.NextEvent.Now()))));
 			Assert.That(after,
-				Is.EqualTo(("Later", Resolve(Strings.NextEvent.StartsIn(duration: Strings.Countdown.Minutes(10))))));
+				Is.EqualTo(("Later", Resolve(Strings.NextEvent.StartsIn(Strings.Countdown.Minutes(10))))));
 		});
 	}
 
@@ -115,15 +116,20 @@ public class CalendarNextEventWidgetTests
 		{
 			Assert.That(Title(session), Is.EqualTo("Later"));
 			Assert.That(When(session),
-				Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(duration: Strings.Countdown.Minutes(30)))));
+				Is.EqualTo(Resolve(Strings.NextEvent.StartsIn(Strings.Countdown.Minutes(30)))));
 		});
 	}
 
 	[Test]
 	public async Task All_day_events_are_skipped_unless_turned_on()
 	{
-		_harness.With(Event("holiday", new DateTimeOffset(Noon.Date, TimeSpan.Zero), TimeSpan.FromDays(1),
-				title: "Holiday") with { IsAllDay = true })
+		_harness.With(Event("holiday",
+					new DateTimeOffset(Noon.Date, TimeSpan.Zero),
+					TimeSpan.FromDays(1),
+					title: "Holiday") with
+				{
+					IsAllDay = true
+				})
 			.With(Event("later", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), title: "Later"));
 		await _harness.SyncAsync();
 
@@ -143,7 +149,7 @@ public class CalendarNextEventWidgetTests
 	{
 		_harness.With(Event("planning", Noon.AddHours(2), TimeSpan.FromHours(1), title: "Planning") with
 		{
-			Location = "Room 4",
+			Location = "Room 4"
 		});
 		await _harness.SyncAsync();
 
@@ -152,7 +158,7 @@ public class CalendarNextEventWidgetTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(texts, Does.Contain(Resolve(Strings.TimeRange(start: "14:00", end: "15:00"))));
+			Assert.That(texts, Does.Contain(Resolve(Strings.TimeRange("14:00", "15:00"))));
 			Assert.That(texts, Does.Contain("Room 4"));
 		});
 	}
@@ -180,7 +186,7 @@ public class CalendarNextEventWidgetTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Texts(dated.BuildTree().Root)[0],
-				Is.EqualTo(Resolve(Strings.DateLine(weekday: "THURSDAY", day: "1"))),
+				Is.EqualTo(Resolve(Strings.DateLine("THURSDAY", "1"))),
 				"the date comes first");
 			Assert.That(line.Properties[UiComponentProperties.Color].GetString(), Is.EqualTo("#ff3b30"));
 			Assert.That(Title(dated), Is.EqualTo("Planning"));
@@ -211,11 +217,17 @@ public class CalendarNextEventWidgetTests
 	}
 
 	private Task<IUiSession> Open(object? data = null)
-		=> _harness.OpenWidgetAsync(CalendarWidgetTypes.LayoutNextEvent, data ?? new { });
+	{
+		return _harness.OpenWidgetAsync(CalendarWidgetTypes.LayoutNextEvent, data ?? new { });
+	}
 
 	private static string? Title(IUiSession session)
-		=> Find(session.BuildTree().Root, "title") is { } node ? Text(node) : null;
+	{
+		return Find(session.BuildTree().Root, "title") is { } node ? Text(node) : null;
+	}
 
 	private static string? When(IUiSession session, string culture = "en")
-		=> Find(session.BuildTree().Root, "when") is { } node ? Text(node, culture) : null;
+	{
+		return Find(session.BuildTree().Root, "when") is { } node ? Text(node, culture) : null;
+	}
 }

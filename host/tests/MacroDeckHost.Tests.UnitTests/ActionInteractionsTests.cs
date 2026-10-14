@@ -20,7 +20,12 @@ internal sealed class ActionInteractionsTests
 		RecordingUiTransport transport,
 		RecordingModalCoordinator coordinator,
 		IMusicPlayerRegistry? registry = null)
-		=> new(transport, coordinator, registry ?? new SinglePlayerRegistry(null), Serilog.Log.Logger);
+	{
+		return new ActionInteractions(transport,
+			coordinator,
+			registry ?? new SinglePlayerRegistry(null),
+			Serilog.Log.Logger);
+	}
 
 	private static async Task<bool> Settles(Func<bool> condition)
 	{
@@ -92,7 +97,7 @@ internal sealed class ActionInteractionsTests
 		var coordinator = new RecordingModalCoordinator();
 		var interactions = Build(transport, coordinator);
 
-		interactions.RequestDevicePicker("client-abc", "inst-1", startPlayback: true, "Pick a device");
+		interactions.RequestDevicePicker("client-abc", "inst-1", true, "Pick a device");
 
 		Assert.That(await Settles(() => transport.GroupMessages.Count > 0), Is.True);
 
@@ -123,7 +128,7 @@ internal sealed class ActionInteractionsTests
 		var coordinator = new RecordingModalCoordinator();
 		var interactions = Build(transport, coordinator);
 
-		interactions.RequestDevicePicker("client-abc", "inst-1", startPlayback: true);
+		interactions.RequestDevicePicker("client-abc", "inst-1", true);
 
 		Assert.That(await Settles(() => coordinator.Registered.Count > 0), Is.True);
 		Assert.That(coordinator.Registered.Single().Modal.Data!.Keys, Is.EquivalentTo(new[] { "instanceId" }));
@@ -136,8 +141,8 @@ internal sealed class ActionInteractionsTests
 		var coordinator = new RecordingModalCoordinator();
 		var interactions = Build(transport, coordinator);
 
-		interactions.RequestDevicePicker(null, "inst-1", startPlayback: true);
-		interactions.RequestDevicePicker("client", "", startPlayback: true);
+		interactions.RequestDevicePicker(null, "inst-1", true);
+		interactions.RequestDevicePicker("client", "", true);
 
 		await Task.Delay(50).ConfigureAwait(false);
 		Assert.Multiple(() =>
@@ -169,7 +174,7 @@ internal sealed class ActionInteractionsTests
 		var coordinator = new RecordingModalCoordinator { Answer = "  device-9  " };
 		var interactions = Build(new RecordingUiTransport(), coordinator, new SinglePlayerRegistry(player));
 
-		interactions.RequestDevicePicker("client-abc", "inst-1", startPlayback: false);
+		interactions.RequestDevicePicker("client-abc", "inst-1", false);
 
 		Assert.That(await Settles(() => player.Transferred is not null), Is.True);
 		Assert.That(player.Transferred!.Value.DeviceId, Is.EqualTo("device-9"));
@@ -185,7 +190,7 @@ internal sealed class ActionInteractionsTests
 		var coordinator = new RecordingModalCoordinator();
 		var interactions = Build(transport, coordinator, new SinglePlayerRegistry(player));
 
-		interactions.RequestDevicePicker("client-abc", "inst-1", startPlayback: true);
+		interactions.RequestDevicePicker("client-abc", "inst-1", true);
 
 		Assert.That(await Settles(() => transport.GroupMessages.Count > 0), Is.True);
 		await Task.Delay(50).ConfigureAwait(false);
@@ -199,7 +204,7 @@ internal sealed class ActionInteractionsTests
 		var coordinator = new RecordingModalCoordinator { Answer = "device-9" };
 		var interactions = Build(transport, coordinator, new SinglePlayerRegistry(new FakeMusicPlayer()));
 
-		interactions.RequestDevicePicker("client-abc", "inst-1", startPlayback: true);
+		interactions.RequestDevicePicker("client-abc", "inst-1", true);
 
 		Assert.That(await Settles(() => transport.GroupMessages.Count > 0), Is.True);
 		await Task.Delay(50).ConfigureAwait(false);
@@ -216,7 +221,7 @@ internal sealed class ActionInteractionsTests
 		var coordinator = new RecordingModalCoordinator { Answer = "device-9" };
 		var interactions = Build(transport, coordinator, new SinglePlayerRegistry(player));
 
-		interactions.RequestDevicePicker("client-abc", "inst-1", startPlayback: true);
+		interactions.RequestDevicePicker("client-abc", "inst-1", true);
 
 		Assert.That(await Settles(() => transport.GroupMessages.Count > 0), Is.True);
 		await Task.Delay(50).ConfigureAwait(false);
@@ -241,10 +246,14 @@ internal sealed class RecordingUiTransport : IUiTransport
 	public bool FailConnectionSends { get; set; }
 
 	public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public List<(string ConnectionId, object Message)> ConnectionMessages { get; } = new();
 
@@ -299,9 +308,11 @@ internal sealed class RecordingModalCoordinator : IModalInteractionCoordinator
 	}
 
 	public Task<ModalResult<JsonElement>> AwaitAsync(string modalId, CancellationToken cancellationToken)
-		=> Task.FromResult(Answer is null
+	{
+		return Task.FromResult(Answer is null
 			? ModalResult.FromCancellation<JsonElement>()
 			: ModalResult.FromValue(JsonSerializer.SerializeToElement(Answer)));
+	}
 
 	public bool TryClaim(string modalId, string principal, out PendingModal modal)
 	{
@@ -310,25 +321,40 @@ internal sealed class RecordingModalCoordinator : IModalInteractionCoordinator
 		return false;
 	}
 
-	public PendingModal? Find(string modalId) => null;
+	public PendingModal? Find(string modalId)
+	{
+		return null;
+	}
 
 	public void BindSession(string modalId, string sessionId)
 	{
 	}
 
-	public string? SessionFor(string modalId) => null;
+	public string? SessionFor(string modalId)
+	{
+		return null;
+	}
 
-	public bool Settle(string modalId, string principal, bool cancelled, JsonElement? value) => false;
+	public bool Settle(string modalId, string principal, bool cancelled, JsonElement? value)
+	{
+		return false;
+	}
 
 	public void CancelInternal(string modalId)
 	{
 	}
 
-	public IReadOnlyList<PendingModal> CancelForSession(string sessionId) => [];
+	public IReadOnlyList<PendingModal> CancelForSession(string sessionId)
+	{
+		return [];
+	}
 
 	public void CancelForClient(string clientId)
 	{
 	}
 
-	public IReadOnlyList<PendingModal> SweepExpired() => [];
+	public IReadOnlyList<PendingModal> SweepExpired()
+	{
+		return [];
+	}
 }

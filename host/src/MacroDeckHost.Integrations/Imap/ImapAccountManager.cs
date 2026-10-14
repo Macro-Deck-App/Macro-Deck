@@ -15,7 +15,11 @@ internal sealed class ImapAccountManager : IDisposable
 	private volatile IReadOnlyList<ImapAccountConnection> _connections = [];
 	private volatile IReadOnlyList<EmailInbox> _inboxes = [];
 
-	public ImapAccountManager(IImapSessionFactory factory, ImapConnectionTimings timings, TimeProvider time, ILogger logger)
+	public ImapAccountManager(
+		IImapSessionFactory factory,
+		ImapConnectionTimings timings,
+		TimeProvider time,
+		ILogger logger)
 	{
 		_factory = factory;
 		_timings = timings;
@@ -30,7 +34,10 @@ internal sealed class ImapAccountManager : IDisposable
 	public IReadOnlyList<EmailInbox> Inboxes => _inboxes;
 
 	public ImapAccountConnection? Resolve(string inboxId)
-		=> _connections.FirstOrDefault(connection => string.Equals(connection.InboxId, inboxId, StringComparison.Ordinal));
+	{
+		return _connections.FirstOrDefault(connection
+			=> string.Equals(connection.InboxId, inboxId, StringComparison.Ordinal));
+	}
 
 	public async Task ReloadAsync(IIntegrationConfig config, CancellationToken cancellationToken = default)
 	{
@@ -44,9 +51,10 @@ internal sealed class ImapAccountManager : IDisposable
 
 			foreach (var account in desired)
 			{
-				var existing = previous.FirstOrDefault(connection => connection.EntryId == account.EntryId &&
-					connection.Settings == account.Settings &&
-					connection.Status != EmailInboxStatus.Error);
+				var existing = previous.FirstOrDefault(connection
+					=> connection.EntryId == account.EntryId
+					&& connection.Settings == account.Settings
+					&& connection.Status != EmailInboxStatus.Error);
 				if (existing is not null)
 				{
 					existing.Title = account.Title;
@@ -107,7 +115,10 @@ internal sealed class ImapAccountManager : IDisposable
 		}
 	}
 
-	public void Dispose() => _reloadGate.Dispose();
+	public void Dispose()
+	{
+		_reloadGate.Dispose();
+	}
 
 	private async Task StopAsync(ImapAccountConnection connection)
 	{
@@ -136,7 +147,10 @@ internal sealed class ImapAccountManager : IDisposable
 	}
 
 	private static EmailInbox ToInbox(ImapAccountConnection connection)
-		=> new() { Id = connection.InboxId, DisplayName = connection.Title, Address = connection.Settings.Address };
+	{
+		return new EmailInbox
+			{ Id = connection.InboxId, DisplayName = connection.Title, Address = connection.Settings.Address };
+	}
 
 	private async Task<IReadOnlyList<ImapAccount>> ReadAccountsAsync(
 		IIntegrationConfig config,
@@ -180,10 +194,10 @@ internal sealed class ImapAccountManager : IDisposable
 		var port = ImapAccountSettings.ParsePort(await config
 			.GetStringAsync(entryId, ImapConfigKeys.Port, cancellationToken)
 			.ConfigureAwait(false));
-		if (string.IsNullOrWhiteSpace(host) ||
-			string.IsNullOrWhiteSpace(username) ||
-			string.IsNullOrEmpty(password) ||
-			port is not (>= 1 and <= 65535))
+		if (string.IsNullOrWhiteSpace(host)
+			|| string.IsNullOrWhiteSpace(username)
+			|| string.IsNullOrEmpty(password)
+			|| port is not (>= 1 and <= 65535))
 		{
 			return null;
 		}

@@ -43,8 +43,8 @@ public sealed class PluginProcessLauncher : IPluginProcessLauncher
 
 		try
 		{
-			var process = Process.Start(startInfo) ??
-				throw new InvalidOperationException($"Process.Start returned null for '{request.ExecutablePath}'.");
+			var process = Process.Start(startInfo)
+				?? throw new InvalidOperationException($"Process.Start returned null for '{request.ExecutablePath}'.");
 			// Nothing may run between Process.Start and the assign: the plugin is already executing, and
 			// .NET has no CREATE_SUSPENDED, so this window is as small as it can be made.
 			var assigned = !job.IsActive || job.TryAssign(process.Id);
@@ -68,12 +68,13 @@ public sealed class PluginProcessLauncher : IPluginProcessLauncher
 		}
 	}
 
-	private static void ScrubAndSetEnvironment(ProcessStartInfo startInfo,
+	private static void ScrubAndSetEnvironment(
+		ProcessStartInfo startInfo,
 		IReadOnlyDictionary<string, string?> environment)
 	{
 		var keysToRemove = startInfo.Environment.Keys
-			.Where(key => key.StartsWith(ScrubPrefix, StringComparison.Ordinal) ||
-				_scrubExactNames.Contains(key, StringComparer.OrdinalIgnoreCase))
+			.Where(key => key.StartsWith(ScrubPrefix, StringComparison.Ordinal)
+				|| _scrubExactNames.Contains(key, StringComparer.OrdinalIgnoreCase))
 			.ToList();
 
 		foreach (var key in keysToRemove)

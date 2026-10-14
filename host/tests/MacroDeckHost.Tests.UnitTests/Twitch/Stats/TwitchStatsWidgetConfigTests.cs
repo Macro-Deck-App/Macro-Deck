@@ -34,7 +34,7 @@ internal sealed class TwitchStatsWidgetConfigTests
 			("liveRow", AppStrings.Integrations.StreamStats.Widget.StyleLiveRow(), "Live status row (3x1)"),
 			("valueGraph", AppStrings.Integrations.StreamStats.Widget.StyleValueGraph(),
 				"Single value with graph (2x2)"),
-			("value", AppStrings.Integrations.StreamStats.Widget.StyleValue(), "Single value (1x1)"),
+			("value", AppStrings.Integrations.StreamStats.Widget.StyleValue(), "Single value (1x1)")
 		};
 
 		Assert.Multiple(() =>
@@ -56,7 +56,8 @@ internal sealed class TwitchStatsWidgetConfigTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.ById(StreamStatsWidgetType.StyleKey).Text(UiConfigProperties.Value), Is.EqualTo("overview"));
+			Assert.That(host.ById(StreamStatsWidgetType.StyleKey).Text(UiConfigProperties.Value),
+				Is.EqualTo("overview"));
 			Assert.That(Strings(host.ById(StreamStatsWidgetType.TilesKey).Property(UiConfigProperties.Value)),
 				Is.EqualTo(new[] { "viewers", "chatters", "followers" }));
 		});
@@ -76,19 +77,22 @@ internal sealed class TwitchStatsWidgetConfigTests
 			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.MetricKey), Is.EqualTo(metric));
 			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.TilesKey), Is.EqualTo(tiles));
 			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.DetailsKey), Is.EqualTo(details));
-			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.ThumbnailKey), Is.EqualTo(details));
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.ThumbnailKey),
+				Is.EqualTo(details));
 		});
 	}
 
 	[Test]
 	public void Tiles_and_details_are_orderable_lists()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			var host = Render(new { account = "" });
 
 			Assert.That(host.ById(StreamStatsWidgetType.TilesKey).Flag(UiConfigProperties.Reorderable), Is.True);
 			Assert.That(host.ById(StreamStatsWidgetType.DetailsKey).Flag(UiConfigProperties.Reorderable), Is.True);
 		});
+	}
 
 	[Test]
 	public async Task The_default_data_and_every_edit_validate_against_the_widget_schema()
@@ -118,7 +122,7 @@ internal sealed class TwitchStatsWidgetConfigTests
 			["metric"] = host.ById(StreamStatsWidgetType.MetricKey).Text(UiConfigProperties.Value),
 			["tiles"] = host.ById(StreamStatsWidgetType.TilesKey).Property(UiConfigProperties.Value),
 			["details"] = host.ById(StreamStatsWidgetType.DetailsKey).Property(UiConfigProperties.Value),
-			["showThumbnail"] = host.ById(StreamStatsWidgetType.ThumbnailKey).Flag(UiConfigProperties.Value),
+			["showThumbnail"] = host.ById(StreamStatsWidgetType.ThumbnailKey).Flag(UiConfigProperties.Value)
 		});
 
 		Assert.Multiple(() =>
@@ -132,10 +136,14 @@ internal sealed class TwitchStatsWidgetConfigTests
 	}
 
 	private static UiTestHost Render(object data)
-		=> UiTestHost.Render(StreamStatsWidgetConfigView.Build(TwitchStreamPlatform.Platform,
+	{
+		return UiTestHost.Render(StreamStatsWidgetConfigView.Build(TwitchStreamPlatform.Platform,
 			data is JsonElement element ? element : JsonSerializer.SerializeToElement(data),
 			[new StreamStatsAccount("111", "Streamer", "twitch_streamer_")]));
+	}
 
 	private static string[] Strings(JsonElement? list)
-		=> [.. list!.Value.EnumerateArray().Select(item => item.GetString()!)];
+	{
+		return [.. list!.Value.EnumerateArray().Select(item => item.GetString()!)];
+	}
 }

@@ -36,8 +36,8 @@ internal static class WidgetStateWireCompatibility
 		var stateIds = selector switch
 		{
 			WidgetStateSelector.Both => [WidgetStates.All],
-			WidgetStateSelector.On => ResolveNamedOrPositional(targetStates, "on", fallbackIndex: 1),
-			WidgetStateSelector.Off => ResolveNamedOrPositional(targetStates, "off", fallbackIndex: 0),
+			WidgetStateSelector.On => ResolveNamedOrPositional(targetStates, "on", 1),
+			WidgetStateSelector.Off => ResolveNamedOrPositional(targetStates, "off", 0),
 			_ => [WidgetStates.Current]
 		};
 
@@ -55,28 +55,33 @@ internal static class WidgetStateWireCompatibility
 	/// <summary>Builds the domain request for a v2 <c>apply</c> call - <see cref="WidgetsApplyArgumentsV2.StateIds" />
 	/// passes straight through, no legacy selector involved.</summary>
 	public static WidgetAppearanceRequest ToApplyRequest(WidgetsApplyArgumentsV2 arguments)
-		=> new()
+	{
+		return new WidgetAppearanceRequest
 		{
 			WidgetId = arguments.WidgetId,
 			Patch = ToPatch(arguments.Patch),
 			StateIds = [.. arguments.StateIds],
 			ClearProperties = ToClearProperties(arguments.ClearProperties)
 		};
+	}
 
 	/// <summary>The <c>host.state</c> push payload for <paramref name="widgets" />, in whichever wire
 	/// shape <paramref name="negotiatedVersion" /> uses. Null (no session yet) is treated as v1,
 	/// defensively - the older, narrower shape a plugin the host has not finished negotiating with can be
 	/// assumed to still understand.</summary>
 	public static object ToWirePayload(IReadOnlyList<WidgetTargetInfo> widgets, int? negotiatedVersion)
-		=> negotiatedVersion is >= 2
+	{
+		return negotiatedVersion is >= 2
 			? (object)widgets.Select(ToV2).ToList()
 			: widgets.Select(ToV1).ToList();
+	}
 
 	/// <summary>v1 target shape: <c>hasOnOffStates</c> collapsed from the real state count, <c>states</c>
 	/// and <c>currentStateId</c> omitted - <see cref="WidgetTargetInfoDtoV1" /> has no properties for
 	/// them.</summary>
 	private static WidgetTargetInfoDtoV1 ToV1(WidgetTargetInfo info)
-		=> new()
+	{
+		return new WidgetTargetInfoDtoV1
 		{
 			Id = info.Id,
 			Label = info.Label,
@@ -85,9 +90,11 @@ internal static class WidgetStateWireCompatibility
 			HasOnOffStates = info.States.Count > 1,
 			AppearanceProperties = [.. info.AppearanceProperties.Select(property => (int)property)]
 		};
+	}
 
 	private static WidgetTargetInfoDtoV2 ToV2(WidgetTargetInfo info)
-		=> new()
+	{
+		return new WidgetTargetInfoDtoV2
 		{
 			Id = info.Id,
 			Label = info.Label,
@@ -97,9 +104,11 @@ internal static class WidgetStateWireCompatibility
 			CurrentStateId = info.CurrentStateId,
 			AppearanceProperties = [.. info.AppearanceProperties.Select(property => (int)property)]
 		};
+	}
 
 	private static WidgetAppearancePatch ToPatch(WidgetAppearancePatchDto dto)
-		=> new()
+	{
+		return new WidgetAppearancePatch
 		{
 			Label = dto.Label,
 			BackgroundColor = dto.BackgroundColor,
@@ -120,9 +129,12 @@ internal static class WidgetStateWireCompatibility
 			AccentColor = dto.AccentColor,
 			IconAppearance = dto.IconAppearance
 		};
+	}
 
 	private static IReadOnlyCollection<WidgetAppearanceProperty> ToClearProperties(IReadOnlyCollection<int> wire)
-		=> [.. wire.Select(property => (WidgetAppearanceProperty)property)];
+	{
+		return [.. wire.Select(property => (WidgetAppearanceProperty)property)];
+	}
 
 	private static IReadOnlyCollection<string> ResolveNamedOrPositional(
 		IReadOnlyList<WidgetStateInfo> states,

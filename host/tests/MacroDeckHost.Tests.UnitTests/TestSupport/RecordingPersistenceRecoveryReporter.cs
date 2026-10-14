@@ -8,7 +8,13 @@ internal sealed class RecordingPersistenceRecoveryReporter : IPersistenceRecover
 
 	public List<PersistenceLoss> Losses { get; } = [];
 
-	public void ReportRecovered(PersistenceRecovery recovery) => Recoveries.Add(recovery);
+	public void ReportRecovered(PersistenceRecovery recovery)
+	{
+		Recoveries.Add(recovery);
+	}
 
-	public void ReportUnrecoverable(PersistenceLoss loss) => Losses.Add(loss);
+	public void ReportUnrecoverable(PersistenceLoss loss)
+	{
+		Losses.Add(loss);
+	}
 }

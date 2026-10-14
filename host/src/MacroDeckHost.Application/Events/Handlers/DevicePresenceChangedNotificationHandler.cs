@@ -13,5 +13,8 @@ public sealed class DevicePresenceChangedNotificationHandler : INotificationHand
 	}
 
 	public ValueTask Handle(DevicePresenceChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_coordinator.OnDevicePresenceChanged(notification.DeviceId, notification.Online, cancellationToken));
+	{
+		return new ValueTask(
+			_coordinator.OnDevicePresenceChanged(notification.DeviceId, notification.Online, cancellationToken));
+	}
 }

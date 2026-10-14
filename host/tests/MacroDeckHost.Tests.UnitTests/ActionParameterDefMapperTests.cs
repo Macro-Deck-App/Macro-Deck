@@ -34,7 +34,7 @@ internal sealed class ActionParameterDefMapperTests
 	public void A_child_parameters_condition_survives_the_mapping()
 	{
 		var mapped = ActionParameterDefMapper.Map(SdkActionParameter.Object("group",
-			children: [SdkActionParameter.Text("inner").OnlyWhen("mode", "advanced")]));
+			[SdkActionParameter.Text("inner").OnlyWhen("mode", "advanced")]));
 
 		Assert.That(mapped.Children![0].VisibleWhen!.ParameterName, Is.EqualTo("mode"));
 	}

@@ -37,7 +37,7 @@ internal class AdGuardHomeAction : IDynamicOptionsActionDefinition
 		_command = command;
 		Parameters =
 		[
-			ActionParameter.DynamicChoice(InstanceParameter, label: Params.Instance(), required: true),
+			ActionParameter.DynamicChoice(InstanceParameter, Params.Instance(), required: true),
 			.. parameters ?? []
 		];
 	}
@@ -50,12 +50,16 @@ internal class AdGuardHomeAction : IDynamicOptionsActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(new DynamicOptionsResult
+	{
+		return Task.FromResult(new DynamicOptionsResult
 		{
 			Options =
 			[
@@ -67,17 +71,22 @@ internal class AdGuardHomeAction : IDynamicOptionsActionDefinition
 			],
 			CacheSeconds = 0
 		});
+	}
 
 	protected AdGuardHomeSnapshot? SnapshotFor(IReadOnlyDictionary<string, object?> parameters)
-		=> parameters.GetValueOrDefault(InstanceParameter) is string entryId
+	{
+		return parameters.GetValueOrDefault(InstanceParameter) is string entryId
 			? _target.Snapshots.FirstOrDefault(snapshot => snapshot.EntryId == entryId)
 			: null;
+	}
 
 	public static ActionResult ToResult(AdGuardHomeCommandOutcome outcome)
-		=> outcome switch
+	{
+		return outcome switch
 		{
 			AdGuardHomeCommandOutcome.Succeeded => ActionResult.Success(),
-			AdGuardHomeCommandOutcome.NotFound => ActionResult.Failed(ActionErrorCodes.NotFound, Errors.InstanceNotFound()),
+			AdGuardHomeCommandOutcome.NotFound => ActionResult.Failed(ActionErrorCodes.NotFound,
+				Errors.InstanceNotFound()),
 			AdGuardHomeCommandOutcome.Unauthorized => ActionResult.Failed(ActionErrorCodes.ProviderRejected,
 				Errors.Unauthorized()),
 			AdGuardHomeCommandOutcome.Timeout => ActionResult.Failed(ActionErrorCodes.Timeout, Errors.Timeout()),
@@ -89,6 +98,7 @@ internal class AdGuardHomeAction : IDynamicOptionsActionDefinition
 				Errors.Unreachable()),
 			_ => ActionResult.Failed(ActionErrorCodes.ProviderError, Errors.CommandFailed())
 		};
+	}
 
 	private sealed class Executor(AdGuardHomeAction action) : IActionExecutor
 	{

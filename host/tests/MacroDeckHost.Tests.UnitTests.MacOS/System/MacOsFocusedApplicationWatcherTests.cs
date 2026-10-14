@@ -37,7 +37,7 @@ public class MacOsFocusedApplicationWatcherTests
 		// Give the subscription-time seed (and any immediate activation) a chance to arrive before
 		// cancelling.
 		await Task.Delay(TimeSpan.FromMilliseconds(200));
-		cts.Cancel();
+		await cts.CancelAsync();
 
 		Exception? unexpected = null;
 		try
@@ -67,7 +67,7 @@ public class MacOsFocusedApplicationWatcherTests
 			});
 		}
 
-		TestContext.Out.WriteLine($"Focus events observed before cancellation: {items.Count}");
+		await TestContext.Out.WriteLineAsync($"Focus events observed before cancellation: {items.Count}");
 	}
 
 	[Test]

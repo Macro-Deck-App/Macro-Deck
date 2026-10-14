@@ -39,13 +39,12 @@ internal sealed class SceneItemCommandActionDefinition : IDynamicOptionsActionDe
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(StreamlabsActionValues.SceneParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
 			required: true),
 		ActionParameter.DynamicChoice(StreamlabsActionValues.SourceParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.SourceLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.SourceLabel(),
 			required: true),
 		ActionParameter.Choice(CommandParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -80,22 +79,27 @@ internal sealed class SceneItemCommandActionDefinition : IDynamicOptionsActionDe
 					Value = CommandRotate, Label = AppStrings.Integrations.StreamlabsDesktop.Params.RotateLabel()
 				}
 			],
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.TransformActionLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.TransformActionLabel(),
 			defaultValue: "fit-to-screen"),
 		ActionParameter.Number(DegreesParameter,
-				label: AppStrings.Integrations.StreamlabsDesktop.Params.DegreesLabel(),
+				AppStrings.Integrations.StreamlabsDesktop.Params.DegreesLabel(),
 				min: -360,
 				max: 360,
 				defaultValue: 90)
 			.OnlyWhen(CommandParameter, CommandRotate)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> StreamlabsActionValues.SceneOrSourceOptionsAsync(_resolver(), context);
+	{
+		return StreamlabsActionValues.SceneOrSourceOptionsAsync(_resolver(), context);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -113,8 +117,8 @@ internal sealed class SceneItemCommandActionDefinition : IDynamicOptionsActionDe
 				return StreamlabsActionResults.NotConnected;
 			}
 
-			if (StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SceneParameter) is not { } scene ||
-				StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SourceParameter) is not { } source)
+			if (StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SceneParameter) is not { } scene
+				|| StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SourceParameter) is not { } source)
 			{
 				return StreamlabsActionResults.MissingParameter(AppStrings.Integrations.StreamlabsDesktop.Errors
 					.NoSceneOrSourceSelected());
@@ -124,7 +128,7 @@ internal sealed class SceneItemCommandActionDefinition : IDynamicOptionsActionDe
 			if (!_methods.TryGetValue(command, out var method))
 			{
 				return StreamlabsActionResults.MissingParameter(
-					AppStrings.Integrations.StreamlabsDesktop.Errors.NotASceneItemAction(command: command));
+					AppStrings.Integrations.StreamlabsDesktop.Errors.NotASceneItemAction(command));
 			}
 
 			double? degrees = null;

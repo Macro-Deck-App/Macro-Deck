@@ -1,5 +1,4 @@
 using MacroDeck.Ui.Components;
-using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Surfaces;
 
 namespace MacroDeck.Ui.Testing.Tests.UnitTests.Host;
@@ -18,8 +17,8 @@ public class UiTestHostFirstFitTests
 				Children =
 				[
 					new UiStack { Key = "inline", Children = [new UiTextRun { Key = "name", Text = "Mouse" }] },
-					new UiStack { Key = "stacked", Children = [new UiTextRun { Key = "name", Text = "Mouse" }] },
-				],
+					new UiStack { Key = "stacked", Children = [new UiTextRun { Key = "name", Text = "Mouse" }] }
+				]
 			},
 			new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared });
 

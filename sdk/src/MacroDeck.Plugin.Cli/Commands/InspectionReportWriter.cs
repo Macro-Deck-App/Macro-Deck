@@ -124,7 +124,8 @@ internal static class InspectionReportWriter
 		}
 	}
 
-	private static void WriteRelationships(CliConsole console,
+	private static void WriteRelationships(
+		CliConsole console,
 		string label,
 		IReadOnlyList<InspectedRelationship> relationships)
 	{

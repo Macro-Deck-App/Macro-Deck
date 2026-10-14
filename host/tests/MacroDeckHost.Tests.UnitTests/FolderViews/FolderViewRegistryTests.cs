@@ -14,7 +14,10 @@ public class FolderViewRegistryTests
 	private FolderViewRegistry _registry = null!;
 
 	[SetUp]
-	public void SetUp() => _registry = new FolderViewRegistry(new RecordingMediator());
+	public void SetUp()
+	{
+		_registry = new FolderViewRegistry(new RecordingMediator());
+	}
 
 	[Test]
 	public async Task Register_QualifiesTheViewIdWithTheOwner()
@@ -27,12 +30,16 @@ public class FolderViewRegistryTests
 
 	[Test]
 	public void Register_RejectsAnEmptyOwnerId()
-		=> Assert.That(() => _registry.Register(string.Empty, Dashboard("dashboard")), Throws.ArgumentException);
+	{
+		Assert.That(() => _registry.Register(string.Empty, Dashboard("dashboard")), Throws.ArgumentException);
+	}
 
 	[Test]
 	public void Register_RejectsAnEmptyName()
-		=> Assert.That(() => _registry.Register("com.example.home", new FolderViewDescriptor("dashboard", default)),
+	{
+		Assert.That(() => _registry.Register("com.example.home", new FolderViewDescriptor("dashboard", default)),
 			Throws.ArgumentException);
+	}
 
 	[Test]
 	public async Task TwoProviders_OfferingTheSameLocalName_ResolveIndependently()
@@ -50,7 +57,7 @@ public class FolderViewRegistryTests
 	public async Task Register_UnderAKnownLocalId_ReplacesRatherThanDuplicates()
 	{
 		await _registry.Register("com.example.home", Dashboard("dashboard"));
-		await _registry.Register("com.example.home", Dashboard("dashboard", hasConfiguration: true));
+		await _registry.Register("com.example.home", Dashboard("dashboard", true));
 
 		Assert.That(_registry.GetAll().Count(entry => entry.FolderViewId == "com.example.home::dashboard"),
 			Is.EqualTo(1));
@@ -72,8 +79,10 @@ public class FolderViewRegistryTests
 
 	[Test]
 	public void TheBuiltInGrid_IsAlwaysOnOffer()
-		=> Assert.That(_registry.GetAll().Select(entry => entry.FolderViewId),
+	{
+		Assert.That(_registry.GetAll().Select(entry => entry.FolderViewId),
 			Does.Contain(BuiltInFolderViews.WidgetGrid));
+	}
 
 	[Test]
 	public async Task TheBuiltInGrid_CannotBeWithdrawnByAProvider()
@@ -91,7 +100,9 @@ public class FolderViewRegistryTests
 	/// </summary>
 	[Test]
 	public void TheBuiltInGrid_DoesNotResolveToAProvider()
-		=> Assert.That(_registry.TryResolve(BuiltInFolderViews.WidgetGrid, out _), Is.False);
+	{
+		Assert.That(_registry.TryResolve(BuiltInFolderViews.WidgetGrid, out _), Is.False);
+	}
 
 	[Test]
 	public void IsWidgetGrid_ReadsAnAbsentIdAsTheGrid()
@@ -103,5 +114,7 @@ public class FolderViewRegistryTests
 	}
 
 	private static FolderViewDescriptor Dashboard(string id, bool hasConfiguration = false)
-		=> new(id, LocalizedText.FromLiteral("Dashboard"), HasConfiguration: hasConfiguration);
+	{
+		return new FolderViewDescriptor(id, LocalizedText.FromLiteral("Dashboard"), HasConfiguration: hasConfiguration);
+	}
 }

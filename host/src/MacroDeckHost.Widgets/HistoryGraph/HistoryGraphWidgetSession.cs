@@ -25,7 +25,8 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 	private readonly HashSet<string> _watched;
 	private readonly Lock _refreshSync = new();
 
-	public HistoryGraphWidgetSession(UiView view,
+	public HistoryGraphWidgetSession(
+		UiView view,
 		UiState<HistoryGraphViewState> state,
 		HistoryGraphViewStateResolver resolver,
 		IVariableHistoryWindow window,
@@ -65,11 +66,20 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	internal void FollowAccentColor(IWidgetRenderSignals signals, string widgetId, UiState<string?> accent)
 	{
@@ -115,7 +125,10 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 		return ValueTask.CompletedTask;
 	}
 
-	private void OnSampled(object? sender, EventArgs args) => Refresh();
+	private void OnSampled(object? sender, EventArgs args)
+	{
+		Refresh();
+	}
 
 	private void OnVariableChanged(object? sender, VariableChangedEventArgs args)
 	{

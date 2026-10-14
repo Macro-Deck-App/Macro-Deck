@@ -16,7 +16,8 @@ internal sealed class RecordingIntegrationConfig : IIntegrationConfig
 
 	public Func<string, Task>? BeforeSecretWrite { get; init; }
 
-	public Guid AddEntry(string title,
+	public Guid AddEntry(
+		string title,
 		IReadOnlyDictionary<string, string?> values,
 		IReadOnlyDictionary<string, string>? secrets = null)
 	{
@@ -37,7 +38,9 @@ internal sealed class RecordingIntegrationConfig : IIntegrationConfig
 	}
 
 	public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(Entries.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(Entries.ToList());
+	}
 
 	public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
 	{
@@ -66,7 +69,8 @@ internal sealed class RecordingIntegrationConfig : IIntegrationConfig
 		return Task.CompletedTask;
 	}
 
-	public async Task SetSecretAsync(Guid entryId,
+	public async Task SetSecretAsync(
+		Guid entryId,
 		string key,
 		string value,
 		CancellationToken cancellationToken = default)

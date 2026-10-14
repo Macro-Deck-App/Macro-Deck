@@ -46,17 +46,16 @@ internal static class AdGuardHomeWidgetConfigView
 						Binding = Bind.To(instance),
 						SupportsReset = true,
 						DefaultValue = string.Empty,
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
-							.. instances.Select(candidate => UiOption.Of(candidate.EntryId, candidate.Title)),
-						]),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							.. instances.Select(candidate => UiOption.Of(candidate.EntryId, candidate.Title))
+						])
 					},
 					new UiStringInput
 					{
 						Key = AdGuardHomeWidgetType.DisplayNameKey,
 						Label = Strings.Config.DisplayName(),
 						Placeholder = Strings.Config.DisplayNamePlaceholder(),
-						Binding = Bind.To(displayName),
+						Binding = Bind.To(displayName)
 					},
 					new UiChoiceInput
 					{
@@ -64,12 +63,11 @@ internal static class AdGuardHomeWidgetConfigView
 						Label = Strings.Config.View(),
 						Description = Strings.Config.ViewDescription(),
 						Binding = Bind.To(view),
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of(AdGuardHomeWidgetType.ControlView, Strings.Config.ViewControl()),
 							UiOption.Of(AdGuardHomeWidgetType.StatisticsView, Strings.Config.ViewStatistics()),
-							UiOption.Of(AdGuardHomeWidgetType.OverviewView, Strings.Config.ViewOverview()),
-						]),
+							UiOption.Of(AdGuardHomeWidgetType.OverviewView, Strings.Config.ViewOverview())
+						])
 					},
 					new UiMultiSelectInput
 					{
@@ -78,19 +76,18 @@ internal static class AdGuardHomeWidgetConfigView
 						Description = Strings.Config.DurationsDescription(),
 						Binding = Bind.To(durations),
 						Reorderable = true,
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							.. AdGuardHomeWidgetType.DurationIds.Select(id => UiOption.Of(id,
 								id == AdGuardHomeWidgetType.IndefiniteDuration
 									? Strings.DisableIndefinitely()
-									: AdGuardHomeDurationText.Label(id))),
+									: AdGuardHomeDurationText.Label(id)))
 						]),
 						VisibleWhen = new UiVisibleWhen
 						{
 							ParameterName = AdGuardHomeWidgetType.ViewKey,
 							Values = _withControls,
-							SiblingValue = () => view.Value,
-						},
+							SiblingValue = () => view.Value
+						}
 					},
 					new UiMultiSelectInput
 					{
@@ -99,35 +96,35 @@ internal static class AdGuardHomeWidgetConfigView
 						Description = Strings.Config.StatisticsDescription(),
 						Binding = Bind.To(statistics),
 						Reorderable = true,
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							.. AdGuardHomeWidgetType.Statistics.Select(id =>
-								UiOption.Of(id, AdGuardHomeWidgetView.StatisticLabel(id))),
+								UiOption.Of(id, AdGuardHomeWidgetView.StatisticLabel(id)))
 						]),
 						VisibleWhen = new UiVisibleWhen
 						{
 							ParameterName = AdGuardHomeWidgetType.ViewKey,
 							Values = _withStatistics,
-							SiblingValue = () => view.Value,
-						},
+							SiblingValue = () => view.Value
+						}
 					},
 					new UiBooleanInput
 					{
 						Key = AdGuardHomeWidgetType.ShowVersionKey,
 						Label = Strings.Config.ShowVersion(),
-						Binding = Bind.To(showVersion),
+						Binding = Bind.To(showVersion)
 					},
 					new UiBooleanInput
 					{
 						Key = AdGuardHomeWidgetType.ShowStatusKey,
 						Label = Strings.Config.ShowStatus(),
-						Binding = Bind.To(showStatus),
+						Binding = Bind.To(showStatus)
 					},
 					UiWidgetAppearance.Section(data,
-						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |
-						UiWidgetAppearanceFields.TransparentBackground),
-				],
-			},
+						UiWidgetAppearanceFields.Border
+						| UiWidgetAppearanceFields.BackgroundColor
+						| UiWidgetAppearanceFields.TransparentBackground)
+				]
+			}
 		};
 	}
 }

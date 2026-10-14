@@ -1,6 +1,5 @@
 using System.Text.Json;
 using MacroDeck.Localization;
-using MacroDeck.Sdk.VideoStreams;
 using MacroDeckHost.Application.Ui.Transport.Messages.VideoStreams;
 using MacroDeckHost.Localization;
 
@@ -10,10 +9,13 @@ public static class VideoStreamUiMapping
 {
 	public static string WireName<T>(T value)
 		where T : struct, Enum
-		=> JsonNamingPolicy.SnakeCaseLower.ConvertName(value.ToString());
+	{
+		return JsonNamingPolicy.SnakeCaseLower.ConvertName(value.ToString());
+	}
 
 	public static LocalizedText ErrorText(VideoStreamError error)
-		=> error switch
+	{
+		return error switch
 		{
 			VideoStreamError.Busy => AppStrings.Errors.VideoStream.Busy(),
 			VideoStreamError.UnknownProvider => AppStrings.Errors.VideoStream.UnknownProvider(),
@@ -25,9 +27,11 @@ public static class VideoStreamUiMapping
 			VideoStreamError.ProviderUnavailable => AppStrings.Errors.VideoStream.ProviderUnavailable(),
 			_ => AppStrings.Errors.VideoStream.Failed()
 		};
+	}
 
 	public static GetVideoStreamsResponse ToResponse(IReadOnlyList<VideoStreamProviderEntry> providers)
-		=> new()
+	{
+		return new GetVideoStreamsResponse
 		{
 			Providers =
 			[
@@ -52,9 +56,12 @@ public static class VideoStreamUiMapping
 				})
 			]
 		};
+	}
 
 	public static VideoStreamDescriptionMessage? ToMessage(VideoStreamRelayDescription? description)
-		=> description is null
+	{
+		return description is null
 			? null
 			: new VideoStreamDescriptionMessage { Transport = description.Transport, Url = description.Url };
+	}
 }

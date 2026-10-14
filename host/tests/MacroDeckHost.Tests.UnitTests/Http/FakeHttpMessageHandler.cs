@@ -24,7 +24,10 @@ internal sealed class FakeHttpMessageHandler : HttpMessageHandler
 		_neverAnswers = neverAnswers;
 	}
 
-	public static FakeHttpMessageHandler NeverAnswers() => new(neverAnswers: true);
+	public static FakeHttpMessageHandler NeverAnswers()
+	{
+		return new FakeHttpMessageHandler(neverAnswers: true);
+	}
 
 	protected override async Task<HttpResponseMessage> SendAsync(
 		HttpRequestMessage request,

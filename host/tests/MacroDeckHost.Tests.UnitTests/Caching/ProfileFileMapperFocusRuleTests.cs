@@ -111,11 +111,15 @@ public class ProfileFileMapperFocusRuleTests
 	}
 
 	private static FolderEntity NewFolder()
-		=> new()
+	{
+		return new FolderEntity
 		{
 			Id = Guid.NewGuid(), ProfileId = Guid.NewGuid(), Name = "Folder", Order = 0, Rows = 3, Columns = 5
 		};
+	}
 
 	private static ProfileFolder NewProfileFolder()
-		=> new() { Id = Guid.NewGuid(), Name = "Folder", Order = 0, Rows = 3, Columns = 5 };
+	{
+		return new ProfileFolder { Id = Guid.NewGuid(), Name = "Folder", Order = 0, Rows = 3, Columns = 5 };
+	}
 }

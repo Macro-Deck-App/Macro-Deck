@@ -1,4 +1,3 @@
-using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store;
@@ -33,7 +32,8 @@ public class StoreController : ControllerBase
 	private readonly StoreSimilarPackages _similar;
 	private readonly IStoreLinkResolver _linkResolver;
 
-	public StoreController(IStoreCatalogQueryService catalogQuery,
+	public StoreController(
+		IStoreCatalogQueryService catalogQuery,
 		IStoreRegistryRefresher refresher,
 		IStoreInstallCoordinator installCoordinator,
 		IStoreOperationTracker operationTracker,
@@ -69,13 +69,15 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpGet("status")]
-	public async Task<GetStoreStatusResponse> GetStatus() =>
-		new()
+	public async Task<GetStoreStatusResponse> GetStatus()
+	{
+		return new GetStoreStatusResponse
 		{
 			Registry = StoreRegistryStatusBodyFactory.Create(_refresher.Status),
 			DeveloperMode = (await _preferences.GetDeveloper()).Enabled,
 			RefreshRun = StoreRegistryRefreshRunBodyFactory.Create(_refreshTracker.Current)
 		};
+	}
 
 	[HttpPost("registry/refresh")]
 	public async Task<RefreshStoreRegistryResponse> RefreshRegistry(CancellationToken ct)
@@ -90,7 +92,8 @@ public class StoreController : ControllerBase
 				? null
 				: new TransportError
 				{
-					Code = StoreRegistryRefreshRunBodyFactory.ErrorCode(result.Error ?? RegistryRefreshError.NetworkFailure),
+					Code = StoreRegistryRefreshRunBodyFactory.ErrorCode(result.Error
+						?? RegistryRefreshError.NetworkFailure),
 					Message = result.ErrorMessage ?? "The registry could not be refreshed."
 				},
 			RefreshRun = StoreRegistryRefreshRunBodyFactory.Create(_refreshTracker.Current)
@@ -98,7 +101,8 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpGet("catalog")]
-	public async Task<GetStoreCatalogResponse> GetCatalog([FromQuery] StoreExtensionKind? kind,
+	public async Task<GetStoreCatalogResponse> GetCatalog(
+		[FromQuery] StoreExtensionKind? kind,
 		[FromQuery] string? search,
 		[FromQuery] StoreCatalogSection? section,
 		[FromQuery] int skip = 0,
@@ -137,9 +141,11 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpGet("categories")]
-	public GetStoreCategoriesResponse GetCategories([FromQuery] StoreExtensionKind[]? kinds = null,
-		[FromQuery] bool supportedOnly = false) =>
-		new()
+	public GetStoreCategoriesResponse GetCategories(
+		[FromQuery] StoreExtensionKind[]? kinds = null,
+		[FromQuery] bool supportedOnly = false)
+	{
+		return new GetStoreCategoriesResponse
 		{
 			Categories = _catalogQuery.Categories(kinds, supportedOnly)
 				.Select(entry => new StoreCategoryBody
@@ -150,6 +156,7 @@ public class StoreController : ControllerBase
 				})
 				.ToList()
 		};
+	}
 
 	[HttpGet("catalog/{kind}/{id}")]
 	public GetStoreExtensionResponse GetExtension(StoreExtensionKind kind, string id)
@@ -191,7 +198,8 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpGet("catalog/{kind}/{id}/similar")]
-	public async Task<GetStoreSimilarResponse> GetSimilar(StoreExtensionKind kind,
+	public async Task<GetStoreSimilarResponse> GetSimilar(
+		StoreExtensionKind kind,
 		string id,
 		[FromQuery] int take = StoreSimilarPackages.DefaultTake,
 		CancellationToken ct = default)
@@ -213,8 +221,11 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpGet("updates")]
-	public GetStoreUpdatesResponse GetUpdates() =>
-		new() { Updates = _updateState.Current.Select(StoreAvailableUpdateBodyFactory.Create).ToList() };
+	public GetStoreUpdatesResponse GetUpdates()
+	{
+		return new GetStoreUpdatesResponse
+			{ Updates = _updateState.Current.Select(StoreAvailableUpdateBodyFactory.Create).ToList() };
+	}
 
 	[HttpPost("updates/check")]
 	public GetStoreUpdatesResponse CheckUpdates()
@@ -225,17 +236,22 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpPost("updates/install")]
-	public GetStoreOperationsResponse InstallUpdates() =>
-		new()
+	public GetStoreOperationsResponse InstallUpdates()
+	{
+		return new GetStoreOperationsResponse
 		{
 			Operations = _updateInstaller.Install(_updateState.Current)
 				.Select(StoreOperationBodyFactory.Create)
 				.ToList()
 		};
+	}
 
 	[HttpGet("operations")]
-	public GetStoreOperationsResponse GetOperations() =>
-		new() { Operations = _operationTracker.Snapshot().Select(StoreOperationBodyFactory.Create).ToList() };
+	public GetStoreOperationsResponse GetOperations()
+	{
+		return new GetStoreOperationsResponse
+			{ Operations = _operationTracker.Snapshot().Select(StoreOperationBodyFactory.Create).ToList() };
+	}
 
 	[HttpPost("install")]
 	public StoreOperationActionResponse Install(InstallStoreExtensionRequest body)
@@ -256,7 +272,8 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpPost("uninstall")]
-	public async Task<UninstallStoreExtensionResponse> Uninstall(UninstallStoreExtensionRequest body,
+	public async Task<UninstallStoreExtensionResponse> Uninstall(
+		UninstallStoreExtensionRequest body,
 		CancellationToken ct)
 	{
 		var result = await _uninstallService.Uninstall(body.Kind, body.Id, ct);
@@ -301,32 +318,41 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpDelete("operations/{id}")]
-	public StoreOperationActionResponse Dismiss(Guid id) =>
-		_installCoordinator.Dismiss(id)
+	public StoreOperationActionResponse Dismiss(Guid id)
+	{
+		return _installCoordinator.Dismiss(id)
 			? new StoreOperationActionResponse { Success = true }
 			: Failure("not_found", "The operation could not be dismissed.");
+	}
 
 	[HttpGet("media/{kind}/{id}/icon")]
-	public Task<IActionResult> GetIcon(StoreExtensionKind kind,
+	public Task<IActionResult> GetIcon(
+		StoreExtensionKind kind,
 		string id,
 		CancellationToken ct,
-		[FromQuery] string? v = null) =>
-		ServeMedia(kind, id, screenshotIndex: null, v, ct);
+		[FromQuery] string? v = null)
+	{
+		return ServeMedia(kind, id, null, v, ct);
+	}
 
 	[HttpGet("media/{kind}/{id}/screenshots/{index}")]
-	public Task<IActionResult> GetScreenshot(StoreExtensionKind kind,
+	public Task<IActionResult> GetScreenshot(
+		StoreExtensionKind kind,
 		string id,
 		int index,
 		CancellationToken ct,
-		[FromQuery] string? v = null) =>
-		ServeMedia(kind, id, index, v, ct);
+		[FromQuery] string? v = null)
+	{
+		return ServeMedia(kind, id, index, v, ct);
+	}
 
 	// Only an asset the verified catalog entry itself declares (icon, or a screenshot at a declared
 	// index) is ever served, fetched through the artifact downloader (https-only, digest-checked) and
 	// never from a client-supplied URL. The content type is decided by sniffing the downloaded bytes
 	// against a fixed set of image signatures, never by trusting a declared or client-supplied string,
 	// so the response header cannot be steered by registry data.
-	private async Task<IActionResult> ServeMedia(StoreExtensionKind kind,
+	private async Task<IActionResult> ServeMedia(
+		StoreExtensionKind kind,
 		string id,
 		int? screenshotIndex,
 		string? version,
@@ -372,8 +398,8 @@ public class StoreController : ControllerBase
 					digest,
 					asset.Size,
 					operationId,
-					downloadMetadata: null,
-					progress: null,
+					null,
+					null,
 					ct);
 				if (!download.Success)
 				{
@@ -381,7 +407,7 @@ public class StoreController : ControllerBase
 				}
 
 				Directory.CreateDirectory(_paths.StoreMediaDirectory);
-				System.IO.File.Copy(download.FilePath!, cachePath, overwrite: true);
+				System.IO.File.Copy(download.FilePath!, cachePath, true);
 				bytes = await System.IO.File.ReadAllBytesAsync(cachePath, ct);
 			}
 			finally
@@ -405,8 +431,8 @@ public class StoreController : ControllerBase
 			: "no-cache";
 		return File(bytes,
 			contentType,
-			lastModified: null,
-			entityTag: new Microsoft.Net.Http.Headers.EntityTagHeaderValue($"\"{digest}\""));
+			null,
+			new Microsoft.Net.Http.Headers.EntityTagHeaderValue($"\"{digest}\""));
 	}
 
 	private void DeleteStagingDirectory(Guid operationId)
@@ -416,7 +442,7 @@ public class StoreController : ControllerBase
 		{
 			if (Directory.Exists(directory))
 			{
-				Directory.Delete(directory, recursive: true);
+				Directory.Delete(directory, true);
 			}
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -441,15 +467,15 @@ public class StoreController : ControllerBase
 			return "image/gif";
 		}
 
-		if (bytes.Length >= 12 &&
-			bytes[0] == 'R' &&
-			bytes[1] == 'I' &&
-			bytes[2] == 'F' &&
-			bytes[3] == 'F' &&
-			bytes[8] == 'W' &&
-			bytes[9] == 'E' &&
-			bytes[10] == 'B' &&
-			bytes[11] == 'P')
+		if (bytes.Length >= 12
+			&& bytes[0] == 'R'
+			&& bytes[1] == 'I'
+			&& bytes[2] == 'F'
+			&& bytes[3] == 'F'
+			&& bytes[8] == 'W'
+			&& bytes[9] == 'E'
+			&& bytes[10] == 'B'
+			&& bytes[11] == 'P')
 		{
 			return "image/webp";
 		}
@@ -470,90 +496,96 @@ public class StoreController : ControllerBase
 		}
 
 		head = head[index..];
-		return head.StartsWith("<svg", StringComparison.OrdinalIgnoreCase) ||
-			(head.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase) &&
-				head.Contains("<svg", StringComparison.OrdinalIgnoreCase));
+		return head.StartsWith("<svg", StringComparison.OrdinalIgnoreCase)
+			|| head.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase)
+			&& head.Contains("<svg", StringComparison.OrdinalIgnoreCase);
 	}
 
-	private StoreCatalogItemBody ToItemBody(StoreCatalogItem item) => new()
+	private StoreCatalogItemBody ToItemBody(StoreCatalogItem item)
 	{
-		Kind = item.Entry.Kind,
-		Id = item.Entry.Id,
-		Name = item.Entry.Name,
-		Description = item.Entry.Description,
-		Publisher = item.Entry.Publisher,
-		LatestVersion = item.Entry.LatestVersion,
-		CreatedAt = item.Entry.CreatedAt,
-		UpdatedAt = item.Entry.UpdatedAt,
-		InstallState = item.InstallState,
-		InstalledVersion = item.InstalledVersion,
-		InstalledTestBuild = item.InstalledTestBuild,
-		UnsupportedReason = item.UnsupportedReason,
-		Withdrawal = WithdrawalBody(item.Withdrawal),
-		InstalledVersionWithdrawal = WithdrawalBody(item.InstalledVersionRemoval),
-		SigningRevoked = item.SigningRevoked,
-		Trust = item.Trust,
-		HasIcon = item.Entry.LatestRelease.Icon is not null,
-		IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
-		PreviewScreenshotSha256 = PreviewScreenshotSha256(item.Entry),
-		ActiveOperationId = _operationTracker.FindLive(item.Entry.Kind, item.Entry.Id)?.Id
-	};
+		return new StoreCatalogItemBody
+		{
+			Kind = item.Entry.Kind,
+			Id = item.Entry.Id,
+			Name = item.Entry.Name,
+			Description = item.Entry.Description,
+			Publisher = item.Entry.Publisher,
+			LatestVersion = item.Entry.LatestVersion,
+			CreatedAt = item.Entry.CreatedAt,
+			UpdatedAt = item.Entry.UpdatedAt,
+			InstallState = item.InstallState,
+			InstalledVersion = item.InstalledVersion,
+			InstalledTestBuild = item.InstalledTestBuild,
+			UnsupportedReason = item.UnsupportedReason,
+			Withdrawal = WithdrawalBody(item.Withdrawal),
+			InstalledVersionWithdrawal = WithdrawalBody(item.InstalledVersionRemoval),
+			SigningRevoked = item.SigningRevoked,
+			Trust = item.Trust,
+			HasIcon = item.Entry.LatestRelease.Icon is not null,
+			IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
+			PreviewScreenshotSha256 = PreviewScreenshotSha256(item.Entry),
+			ActiveOperationId = _operationTracker.FindLive(item.Entry.Kind, item.Entry.Id)?.Id
+		};
+	}
 
-	private StoreExtensionDetailBody ToDetailBody(StoreCatalogItem item) => new()
+	private StoreExtensionDetailBody ToDetailBody(StoreCatalogItem item)
 	{
-		Kind = item.Entry.Kind,
-		Id = item.Entry.Id,
-		Name = item.Entry.Name,
-		Description = item.Entry.Description,
-		Publisher = item.Entry.Publisher,
-		LatestVersion = item.Entry.LatestVersion,
-		CreatedAt = item.Entry.CreatedAt,
-		UpdatedAt = item.Entry.UpdatedAt,
-		InstallState = item.InstallState,
-		InstalledVersion = item.InstalledVersion,
-		InstalledTestBuild = item.InstalledTestBuild,
-		UnsupportedReason = item.UnsupportedReason,
-		Withdrawal = WithdrawalBody(item.Withdrawal),
-		InstalledVersionWithdrawal = WithdrawalBody(item.InstalledVersionRemoval),
-		SigningRevoked = item.SigningRevoked,
-		Trust = item.Trust,
-		HasIcon = item.Entry.LatestRelease.Icon is not null,
-		IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
-		PreviewScreenshotSha256 = PreviewScreenshotSha256(item.Entry),
-		ActiveOperationId = _operationTracker.FindLive(item.Entry.Kind, item.Entry.Id)?.Id,
-		LongDescription = item.Entry.LongDescription,
-		Changelog = item.Entry.Changelog,
-		Repository = item.Entry.Repository,
-		Homepage = item.Entry.Homepage,
-		License = item.Entry.License,
-		AdditionalLinks = item.Entry.AdditionalLinks
-			.Select(link => new StoreExtensionLinkBody { Type = link.Type, Url = link.Url, Label = link.Label })
-			.ToList(),
-		DownloadSize = item.Entry.LatestRelease.Size,
-		SupportedOperatingSystems = SupportedOperatingSystems(item.Entry.SupportedRids),
-		Languages = [.. item.Entry.Languages],
-		Tags = [.. item.Entry.Tags],
-		Ai = item.Entry.Ai is { } ai
-			? new StoreAiDeclarationBody
-			{
-				Interaction = ai.Interaction,
-				GeneratedContent = ai.GeneratedContent,
-				GeneratedAssets = ai.GeneratedAssets,
-				Services = [.. ai.Services ?? []]
-			}
-			: null,
-		Screenshots = item.Entry.LatestRelease.Screenshots
-			.Select((asset, index) => new StoreScreenshotBody
-			{
-				Index = index,
-				Caption = asset.Caption,
-				Sha256 = asset.Sha256.ToLowerInvariant()
-			})
-			.ToList(),
-		History = item.Entry.History
-			.Select(entry => HistoryBody(item, entry))
-			.ToList()
-	};
+		return new StoreExtensionDetailBody
+		{
+			Kind = item.Entry.Kind,
+			Id = item.Entry.Id,
+			Name = item.Entry.Name,
+			Description = item.Entry.Description,
+			Publisher = item.Entry.Publisher,
+			LatestVersion = item.Entry.LatestVersion,
+			CreatedAt = item.Entry.CreatedAt,
+			UpdatedAt = item.Entry.UpdatedAt,
+			InstallState = item.InstallState,
+			InstalledVersion = item.InstalledVersion,
+			InstalledTestBuild = item.InstalledTestBuild,
+			UnsupportedReason = item.UnsupportedReason,
+			Withdrawal = WithdrawalBody(item.Withdrawal),
+			InstalledVersionWithdrawal = WithdrawalBody(item.InstalledVersionRemoval),
+			SigningRevoked = item.SigningRevoked,
+			Trust = item.Trust,
+			HasIcon = item.Entry.LatestRelease.Icon is not null,
+			IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
+			PreviewScreenshotSha256 = PreviewScreenshotSha256(item.Entry),
+			ActiveOperationId = _operationTracker.FindLive(item.Entry.Kind, item.Entry.Id)?.Id,
+			LongDescription = item.Entry.LongDescription,
+			Changelog = item.Entry.Changelog,
+			Repository = item.Entry.Repository,
+			Homepage = item.Entry.Homepage,
+			License = item.Entry.License,
+			AdditionalLinks = item.Entry.AdditionalLinks
+				.Select(link => new StoreExtensionLinkBody { Type = link.Type, Url = link.Url, Label = link.Label })
+				.ToList(),
+			DownloadSize = item.Entry.LatestRelease.Size,
+			SupportedOperatingSystems = SupportedOperatingSystems(item.Entry.SupportedRids),
+			Languages = [.. item.Entry.Languages],
+			Tags = [.. item.Entry.Tags],
+			Ai = item.Entry.Ai is { } ai
+				? new StoreAiDeclarationBody
+				{
+					Interaction = ai.Interaction,
+					GeneratedContent = ai.GeneratedContent,
+					GeneratedAssets = ai.GeneratedAssets,
+					Services = [.. ai.Services ?? []]
+				}
+				: null,
+			Screenshots = item.Entry.LatestRelease.Screenshots
+				.Select((asset, index) => new StoreScreenshotBody
+				{
+					Index = index,
+					Caption = asset.Caption,
+					Sha256 = asset.Sha256.ToLowerInvariant()
+				})
+				.ToList(),
+			History = item.Entry.History
+				.Select(entry => HistoryBody(item, entry))
+				.ToList()
+		};
+	}
 
 	private static StoreVersionHistoryBody HistoryBody(StoreCatalogItem item, StoreVersionHistoryEntry entry)
 	{
@@ -575,19 +607,26 @@ public class StoreController : ControllerBase
 		};
 	}
 
-	private static StoreVersionWithdrawalBody? WithdrawalBody(StoreRemovedPackage? removal) =>
-		removal is null ? null : new StoreVersionWithdrawalBody { Reason = removal.Reason, Replacement = removal.Replacement };
+	private static StoreVersionWithdrawalBody? WithdrawalBody(StoreRemovedPackage? removal)
+	{
+		return removal is null
+			? null
+			: new StoreVersionWithdrawalBody { Reason = removal.Reason, Replacement = removal.Replacement };
+	}
 
-	private static string? PreviewScreenshotSha256(StoreCatalogEntry entry) =>
-		entry.LatestRelease.Screenshots.Count > 0
+	private static string? PreviewScreenshotSha256(StoreCatalogEntry entry)
+	{
+		return entry.LatestRelease.Screenshots.Count > 0
 			? entry.LatestRelease.Screenshots[0].Sha256.ToLowerInvariant()
 			: null;
+	}
 
 	// A package without a runtime identifier list is portable, which is the common case for icon packs
 	// and templates. Architectures are collapsed to their operating system: the store answers "does this
 	// run on my machine", and the installer is what enforces the exact runtime identifier.
-	private static List<string> SupportedOperatingSystems(IReadOnlyList<string> supportedRids) =>
-		supportedRids
+	private static List<string> SupportedOperatingSystems(IReadOnlyList<string> supportedRids)
+	{
+		return supportedRids
 			.Select(rid => rid.Split('-')[0] switch
 			{
 				"win" => "Windows",
@@ -600,15 +639,22 @@ public class StoreController : ControllerBase
 			.Distinct(StringComparer.Ordinal)
 			.Order(StringComparer.Ordinal)
 			.ToList();
+	}
 
-	private static StoreOperationActionResponse Failure(string code, string message) =>
-		new() { Success = false, Error = new TransportError { Code = code, Message = message } };
-
-	private static string ToErrorCode(StoreCatalogError error) => error switch
+	private static StoreOperationActionResponse Failure(string code, string message)
 	{
-		StoreCatalogError.RegistryUnavailable => "registry_unavailable",
-		StoreCatalogError.StoreDisabled => "store_disabled",
-		StoreCatalogError.NotFound => "not_found",
-		_ => "failed"
-	};
+		return new StoreOperationActionResponse
+			{ Success = false, Error = new TransportError { Code = code, Message = message } };
+	}
+
+	private static string ToErrorCode(StoreCatalogError error)
+	{
+		return error switch
+		{
+			StoreCatalogError.RegistryUnavailable => "registry_unavailable",
+			StoreCatalogError.StoreDisabled => "store_disabled",
+			StoreCatalogError.NotFound => "not_found",
+			_ => "failed"
+		};
+	}
 }

@@ -47,39 +47,38 @@ public static class DeviceLayoutConstraintResolver
 		{
 			var (rows, columns) = distinctPairs[0];
 			var representative = fixedEntries[0];
-			return new DeviceGridConstraint(RowsLocked: true,
-				ColumnsLocked: true,
-				Rows: rows,
-				Columns: columns,
-				MinRows: rows,
-				MaxRows: rows,
-				MinColumns: columns,
-				MaxColumns: columns,
-				LayoutId: representative.Device.LayoutReference,
-				LayoutName: representative.Layout.Name,
-				DeviceName: representative.Device.Name,
-				HasConflict: false,
-				ConflictingDeviceNames: [],
-				WidgetSpacingHonoured: Honoured(representative.Layout).Spacing,
-				CornerRadiusHonoured: Honoured(representative.Layout).CornerRadius,
-				CustomFolderViewsSupported: Honoured(representative.Layout).CustomFolderViews);
+			return new DeviceGridConstraint(true,
+				true,
+				rows,
+				columns,
+				rows,
+				rows,
+				columns,
+				columns,
+				representative.Device.LayoutReference,
+				representative.Layout.Name,
+				representative.Device.Name,
+				false,
+				[],
+				Honoured(representative.Layout).Spacing,
+				Honoured(representative.Layout).CornerRadius,
+				Honoured(representative.Layout).CustomFolderViews);
 		}
 
 		if (distinctPairs.Count > 1)
 		{
-			return new DeviceGridConstraint(RowsLocked: false,
-				ColumnsLocked: false,
-				Rows: 0,
-				Columns: 0,
-				MinRows: 1,
-				MaxRows: int.MaxValue,
-				MinColumns: 1,
-				MaxColumns: int.MaxValue,
-				LayoutId: null,
-				LayoutName: null,
-				DeviceName: null,
-				HasConflict: true,
-				ConflictingDeviceNames:
+			return new DeviceGridConstraint(false,
+				false,
+				0,
+				0,
+				1,
+				int.MaxValue,
+				1,
+				int.MaxValue,
+				null,
+				null,
+				null,
+				true,
 				[
 					.. fixedEntries.Select(entry => entry.Device.Name).Distinct(StringComparer.Ordinal)
 				]);
@@ -104,22 +103,22 @@ public static class DeviceLayoutConstraintResolver
 
 		var single = resolved[0];
 		var singleGrid = single.Grid;
-		return new DeviceGridConstraint(RowsLocked: singleGrid.RowsLocked,
-			ColumnsLocked: singleGrid.ColumnsLocked,
-			Rows: singleGrid.Rows,
-			Columns: singleGrid.Columns,
-			MinRows: singleGrid.RowsLocked ? singleGrid.Rows : singleGrid.MinRows,
-			MaxRows: singleGrid.RowsLocked ? singleGrid.Rows : singleGrid.MaxRows,
-			MinColumns: singleGrid.ColumnsLocked ? singleGrid.Columns : singleGrid.MinColumns,
-			MaxColumns: singleGrid.ColumnsLocked ? singleGrid.Columns : singleGrid.MaxColumns,
-			LayoutId: single.Device.LayoutReference,
-			LayoutName: single.Layout.Name,
-			DeviceName: single.Device.Name,
-			HasConflict: false,
-			ConflictingDeviceNames: [],
-			WidgetSpacingHonoured: Honoured(single.Layout).Spacing,
-			CornerRadiusHonoured: Honoured(single.Layout).CornerRadius,
-			CustomFolderViewsSupported: Honoured(single.Layout).CustomFolderViews);
+		return new DeviceGridConstraint(singleGrid.RowsLocked,
+			singleGrid.ColumnsLocked,
+			singleGrid.Rows,
+			singleGrid.Columns,
+			singleGrid.RowsLocked ? singleGrid.Rows : singleGrid.MinRows,
+			singleGrid.RowsLocked ? singleGrid.Rows : singleGrid.MaxRows,
+			singleGrid.ColumnsLocked ? singleGrid.Columns : singleGrid.MinColumns,
+			singleGrid.ColumnsLocked ? singleGrid.Columns : singleGrid.MaxColumns,
+			single.Device.LayoutReference,
+			single.Layout.Name,
+			single.Device.Name,
+			false,
+			[],
+			Honoured(single.Layout).Spacing,
+			Honoured(single.Layout).CornerRadius,
+			Honoured(single.Layout).CustomFolderViews);
 	}
 
 	/// <summary>Whether a candidate grid edit is allowed under <paramref name="constraint" />. Only the
@@ -181,8 +180,10 @@ public static class DeviceLayoutConstraintResolver
 	/// columns alone.
 	/// </summary>
 	public static bool ExceedsLockedLayout(this DeviceGridConstraint constraint, int currentRows, int currentColumns)
-		=> !constraint.HasConflict &&
-			constraint.RowsLocked &&
-			constraint.ColumnsLocked &&
-			(currentRows > constraint.Rows || currentColumns > constraint.Columns);
+	{
+		return !constraint.HasConflict
+			&& constraint.RowsLocked
+			&& constraint.ColumnsLocked
+			&& (currentRows > constraint.Rows || currentColumns > constraint.Columns);
+	}
 }

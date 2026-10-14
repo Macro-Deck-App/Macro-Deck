@@ -75,8 +75,8 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 				continue;
 			}
 
-			if (!context.TryResolveEventParameter(payload.Name, out var actual) ||
-				!Holds(payload.Type, actual, configured.Operator, expected.Value))
+			if (!context.TryResolveEventParameter(payload.Name, out var actual)
+				|| !Holds(payload.Type, actual, configured.Operator, expected.Value))
 			{
 				return false;
 			}
@@ -90,23 +90,30 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 		return _evaluator.EvaluateExpression(filter, context);
 	}
 
-	private static bool IsUnset(object? value) => value switch
+	private static bool IsUnset(object? value)
 	{
-		null => true,
-		string text => text.Length == 0,
-		_ => false
-	};
+		return value switch
+		{
+			null => true,
+			string text => text.Length == 0,
+			_ => false
+		};
+	}
 
 	private static bool Holds(object? actual, string @operator, object? expected)
-		=> ActionConditionEvaluator.EvaluateOperator(actual, @operator, expected);
+	{
+		return ActionConditionEvaluator.EvaluateOperator(actual, @operator, expected);
+	}
 
 	private static bool Holds(ActionParameterType type, object? actual, string @operator, object? expected)
-		=> type is ActionParameterType.KeyboardCombo or ActionParameterType.Hotkey &&
-			@operator is "==" or "!=" &&
-			TryReadCombo(actual, out var actualCombo) &&
-			TryReadCombo(expected, out var expectedCombo)
+	{
+		return type is ActionParameterType.KeyboardCombo or ActionParameterType.Hotkey
+			&& @operator is "==" or "!="
+			&& TryReadCombo(actual, out var actualCombo)
+			&& TryReadCombo(expected, out var expectedCombo)
 				? actualCombo == expectedCombo == (@operator == "==")
 				: Holds(actual, @operator, expected);
+	}
 
 	private static bool TryReadCombo(object? value, out (string Key, string Modifiers) combo)
 	{
@@ -218,8 +225,8 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 				continue;
 			}
 
-			if (!TryReadLiteral(configured.Value, out var expected) ||
-				!occurrence.Parameters.TryGetValue(name, out var actual))
+			if (!TryReadLiteral(configured.Value, out var expected)
+				|| !occurrence.Parameters.TryGetValue(name, out var actual))
 			{
 				continue;
 			}

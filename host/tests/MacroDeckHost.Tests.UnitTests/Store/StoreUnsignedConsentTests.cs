@@ -111,7 +111,11 @@ internal sealed class StoreUnsignedConsentTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 
-		var catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
+		var catalogQuery = new StoreCatalogQueryService(_catalog,
+			_pluginCatalog,
+			installations,
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+			new InstalledPluginSigners());
 		_coordinator = new StoreInstallCoordinator(catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),
@@ -143,16 +147,20 @@ internal sealed class StoreUnsignedConsentTests
 	}
 
 	private Task<string> TrustedArtifact(string version = "1.0.0")
-		=> SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
 			PluginId,
 			version,
 			fileName: $"trusted-{version}-{Guid.NewGuid():N}.macroDeckPlugin");
+	}
 
 	private string UnsignedArtifact(string version = "1.0.0")
-		=> new PluginArtifactBuilder()
-			.WithManifest(ManifestJson.Build(version, PluginId, extraBlocks: null))
+	{
+		return new PluginArtifactBuilder()
+			.WithManifest(ManifestJson.Build(version, PluginId, null))
 			.WithFile(ManifestJson.EntrypointExecutable, "binary")
 			.WriteTo(_sourceDirectory, $"unsigned-{version}-{Guid.NewGuid():N}.macroDeckPlugin");
+	}
 
 	/// <summary>A signed package whose certificate cannot be read at all: verdict Malformed.</summary>
 	private async Task<string> MalformedArtifact(string version = "1.0.0")
@@ -202,13 +210,15 @@ internal sealed class StoreUnsignedConsentTests
 
 	private async Task<StoreOperation> InstallFromStore(bool allowUnsigned)
 	{
-		var operation = _coordinator.Install(StoreExtensionKind.Plugin, PluginId, version: null, allowUnsigned);
+		var operation = _coordinator.Install(StoreExtensionKind.Plugin, PluginId, null, allowUnsigned);
 		await _executor.Execute(operation.Id);
 		return _tracker.Find(operation.Id)!;
 	}
 
 	private bool PluginTreeExists()
-		=> Directory.Exists(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, PluginId));
+	{
+		return Directory.Exists(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, PluginId));
+	}
 
 	[Test]
 	public async Task An_unsigned_store_plugin_installs_with_consent_in_developer_mode_and_is_recorded_as_unsigned()
@@ -216,7 +226,7 @@ internal sealed class StoreUnsignedConsentTests
 		_preferences.DeveloperMode = true;
 		await PublishAndServe(UnsignedArtifact());
 
-		var result = await InstallFromStore(allowUnsigned: true);
+		var result = await InstallFromStore(true);
 
 		var record = await _trustRecords.GetVersion(PluginId, "1.0.0");
 		Assert.Multiple(() =>
@@ -232,7 +242,7 @@ internal sealed class StoreUnsignedConsentTests
 		_preferences.DeveloperMode = true;
 		await PublishAndServe(UnsignedArtifact());
 
-		var result = await InstallFromStore(allowUnsigned: false);
+		var result = await InstallFromStore(false);
 
 		Assert.Multiple(() =>
 		{
@@ -248,7 +258,7 @@ internal sealed class StoreUnsignedConsentTests
 		_preferences.DeveloperMode = false;
 		await PublishAndServe(UnsignedArtifact());
 
-		var result = await InstallFromStore(allowUnsigned: true);
+		var result = await InstallFromStore(true);
 
 		Assert.Multiple(() =>
 		{
@@ -279,7 +289,7 @@ internal sealed class StoreUnsignedConsentTests
 			_preferences.DeveloperMode = true;
 			await PublishAndServe(artifact);
 
-			var result = await InstallFromStore(allowUnsigned: true);
+			var result = await InstallFromStore(true);
 
 			if (result.State != StoreOperationState.Failed)
 			{
@@ -310,7 +320,7 @@ internal sealed class StoreUnsignedConsentTests
 		_preferences.DeveloperMode = true;
 		await PublishAndServe(UnsignedArtifact("1.1.0"), "1.1.0");
 
-		var result = await InstallFromStore(allowUnsigned: true);
+		var result = await InstallFromStore(true);
 
 		Assert.Multiple(() =>
 		{

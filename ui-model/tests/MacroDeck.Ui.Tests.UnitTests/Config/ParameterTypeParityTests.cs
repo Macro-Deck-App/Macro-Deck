@@ -26,7 +26,7 @@ namespace MacroDeck.Ui.Tests.UnitTests.Config;
 [TestFixture]
 public class ParameterTypeParityTests
 {
-	private const string _mappingPath =
+	private const string MappingPath =
 		"ui/angular/projects/desktop-ui/src/app/domain/action-parameter-mapping.util.ts";
 
 	[Test]
@@ -59,7 +59,7 @@ public class ParameterTypeParityTests
 	/// deliberately share a name for a legacy wire spelling.</summary>
 	private static HashSet<string> ReadControlNames()
 	{
-		var path = Path.Combine(FindRepositoryRoot(), _mappingPath);
+		var path = Path.Combine(FindRepositoryRoot(), MappingPath);
 
 		Assert.That(File.Exists(path), Is.True, $"Could not find the editor's parameter mapping at '{path}'.");
 
@@ -98,7 +98,7 @@ public class ParameterTypeParityTests
 		}
 
 		throw new DirectoryNotFoundException(
-			"Could not locate the repository root by walking up from AppContext.BaseDirectory " +
-			$"('{AppContext.BaseDirectory}').");
+			"Could not locate the repository root by walking up from AppContext.BaseDirectory "
+			+ $"('{AppContext.BaseDirectory}').");
 	}
 }

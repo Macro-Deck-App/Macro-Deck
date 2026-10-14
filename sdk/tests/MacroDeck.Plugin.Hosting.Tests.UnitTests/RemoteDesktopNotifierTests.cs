@@ -22,7 +22,10 @@ public class RemoteDesktopNotifierTests
 	}
 
 	[TearDown]
-	public void TearDown() => _invoker.Dispose();
+	public void TearDown()
+	{
+		_invoker.Dispose();
+	}
 
 	[Test]
 	public async Task On_a_host_that_never_reports_desktop_notifications_they_are_unsupported_and_nothing_is_sent()
@@ -42,7 +45,7 @@ public class RemoteDesktopNotifierTests
 	public async Task Once_the_host_reports_support_a_notification_goes_to_the_desktop_notifications_api()
 	{
 		var notifier = new RemoteDesktopNotifier(_invoker, _cache, Serilog.Core.Logger.None);
-		Push(supported: true);
+		Push(true);
 
 		await notifier.ShowAsync("Build finished", "All green");
 
@@ -59,7 +62,7 @@ public class RemoteDesktopNotifierTests
 	public async Task A_host_that_reports_no_support_is_not_asked()
 	{
 		var notifier = new RemoteDesktopNotifier(_invoker, _cache, Serilog.Core.Logger.None);
-		Push(supported: false);
+		Push(false);
 
 		await notifier.ShowAsync("Hello", "World");
 
@@ -79,7 +82,7 @@ public class RemoteDesktopNotifierTests
 			new FailingHostInvoker(new ProtocolError { Code = code, Message = "no", Retryable = false }),
 			_cache,
 			Serilog.Core.Logger.None);
-		Push(supported: true);
+		Push(true);
 
 		Assert.DoesNotThrowAsync(() => notifier.ShowAsync("Hello", "World"));
 	}
@@ -88,14 +91,15 @@ public class RemoteDesktopNotifierTests
 	public void A_cancelled_call_throws()
 	{
 		var notifier = new RemoteDesktopNotifier(_invoker, _cache, Serilog.Core.Logger.None);
-		Push(supported: true);
+		Push(true);
 
 		Assert.ThrowsAsync<OperationCanceledException>(() =>
-			notifier.ShowAsync("Hello", "World", new CancellationToken(canceled: true)));
+			notifier.ShowAsync("Hello", "World", new CancellationToken(true)));
 	}
 
 	private void Push(bool supported)
-		=> _cache.Apply(new ProtocolEnvelope
+	{
+		_cache.Apply(new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
@@ -107,15 +111,22 @@ public class RemoteDesktopNotifierTests
 				},
 				PluginProtocolJson.Options)
 		});
+	}
 
 	private sealed class FailingHostInvoker(ProtocolError error) : IHostInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> Task.FromException<JsonElement?>(HostInvocationException.From(error));
+		{
+			return Task.FromException<JsonElement?>(HostInvocationException.From(error));
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

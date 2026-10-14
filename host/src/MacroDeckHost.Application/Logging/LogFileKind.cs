@@ -9,7 +9,9 @@ public enum LogFileKind
 public static class LogFileKindExtensions
 {
 	public static char Tag(this LogFileKind stream)
-		=> stream == LogFileKind.Bootstrapper ? 'b' : 'h';
+	{
+		return stream == LogFileKind.Bootstrapper ? 'b' : 'h';
+	}
 
 	public static bool TryFromTag(char tag, out LogFileKind stream)
 	{

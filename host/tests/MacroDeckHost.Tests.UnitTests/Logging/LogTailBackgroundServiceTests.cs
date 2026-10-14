@@ -30,7 +30,10 @@ public class LogTailBackgroundServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public async Task Nothing_Is_Read_Or_Sent_Without_Subscribers()
@@ -267,7 +270,10 @@ public class LogTailBackgroundServiceTests
 		});
 	}
 
-	private void Subscribe(LogCursor anchor) => _subscriptions.Set(Connection, LogQuery.All, anchor);
+	private void Subscribe(LogCursor anchor)
+	{
+		_subscriptions.Set(Connection, LogQuery.All, anchor);
+	}
 
 	private async Task Tick()
 	{
@@ -277,28 +283,38 @@ public class LogTailBackgroundServiceTests
 	}
 
 	private IEnumerable<string> Delivered(string connectionId = Connection)
-		=> _transport.Sent
+	{
+		return _transport.Sent
 			.Where(sent => sent.Group == LogStreamGroups.For(connectionId))
 			.SelectMany(sent => sent.Entries)
 			.Select(entry => entry.Message);
+	}
 
 	private sealed class RecordingTransport : IUiTransport
 	{
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public List<(string Group, List<LogEntry> Entries, List<LogSourceSummary> Sources)> Sent { get; } = [];
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class

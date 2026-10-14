@@ -15,19 +15,22 @@ internal sealed class ReadyOnlyAfterSessionCheck() : ConformanceCheckBase("MDC07
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var gate = PluginSessionGate.Held();
 
 		await using var host = await MacroDeckTestHost
-			.StartAsync(new MacroDeckTestHostOptions { SessionCreation = gate }).ConfigureAwait(false);
+			.StartAsync(new MacroDeckTestHostOptions { SessionCreation = gate })
+			.ConfigureAwait(false);
 		var handle = await context.Subject.StartAsync(host, cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		try
 		{
 			var before = await ConformanceCheckSupport
-				.WaitForHealthAsync(handle.Plugin, r => r.Live, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+				.WaitForHealthAsync(handle.Plugin, r => r.Live, TimeSpan.FromSeconds(15))
+				.ConfigureAwait(false);
 
 			if (!before.Live)
 			{
@@ -73,7 +76,8 @@ internal sealed class InfoAndDiagnosticsAgreeWithHostCheck() : ConformanceCheckB
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var report = await context.Plugin.ProbeHealthAsync().ConfigureAwait(false);
@@ -121,7 +125,8 @@ internal sealed class UnknownReservedRouteIs404Check() : ConformanceCheckBase("M
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		using var client = new HttpClient();
@@ -151,7 +156,8 @@ internal sealed class ListensWhereTheLauncherExpectsCheck() : ConformanceCheckBa
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var report = await context.Plugin.ProbeHealthAsync().ConfigureAwait(false);

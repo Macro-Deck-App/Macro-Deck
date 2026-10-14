@@ -63,12 +63,14 @@ public sealed class StreamStatsSource : IStreamStatsSource
 	}
 
 	internal static string? Format(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			null => null,
 			bool flag => flag ? "true" : "false",
 			string text => text,
 			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-			_ => value.ToString(),
+			_ => value.ToString()
 		};
+	}
 }

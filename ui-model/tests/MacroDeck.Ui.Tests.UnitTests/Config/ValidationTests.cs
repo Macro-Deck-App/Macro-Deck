@@ -19,10 +19,14 @@ namespace MacroDeck.Ui.Tests.UnitTests.Config;
 public class ValidationTests
 {
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiValidation Field(string type, object? value)
-		=> new() { Type = type, Name = "field", Label = "Field", Value = value };
+	{
+		return new UiValidation { Type = type, Name = "field", Label = "Field", Value = value };
+	}
 
 	[Test]
 	public void A_required_field_is_empty_when_it_has_no_value_or_only_whitespace()
@@ -148,12 +152,12 @@ public class ValidationTests
 		{
 			Required = true,
 			MaxLength = 2,
-			Rules = [UiValidationRule.Require("Custom failure.", () => false)],
+			Rules = [UiValidationRule.Require("Custom failure.", () => false)]
 		};
 
 		var ruleOnly = Field(UiConfigPrimitives.String, "abc") with
 		{
-			Rules = [UiValidationRule.Require("Custom failure.", () => false)],
+			Rules = [UiValidationRule.Require("Custom failure.", () => false)]
 		};
 
 		Assert.Multiple(() =>
@@ -186,10 +190,10 @@ public class ValidationTests
 							ParameterName = "mode",
 							// Case-insensitive by contract, so a picked option value and a hand-typed one agree.
 							Values = ["ADVANCED"],
-							SiblingValue = () => mode.Value,
-						}),
-					},
-				],
+							SiblingValue = () => mode.Value
+						})
+					}
+				]
 			});
 
 		var hidden = FindById(view.Tree.Root, "token")!;
@@ -242,8 +246,8 @@ public class ValidationTests
 				Children =
 				[
 					new UiStringInput { Key = "free", Binding = Bind.To(text) },
-					new UiStringInput { Key = "constrained", Required = true, Binding = Bind.ReadOnly(UiValue.Of("")) },
-				],
+					new UiStringInput { Key = "constrained", Required = true, Binding = Bind.ReadOnly(UiValue.Of("")) }
+				]
 			});
 
 		var free = FindById(view.Tree.Root, "free")!;

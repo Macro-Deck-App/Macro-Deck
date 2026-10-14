@@ -11,7 +11,8 @@ public sealed class InProcessPlugin : PluginUnderTest
 	private readonly TempStateDirectory? _ownedStateDirectory;
 	private readonly PluginTestManifest? _ownedManifest;
 
-	internal InProcessPlugin(PluginApplication application,
+	internal InProcessPlugin(
+		PluginApplication application,
 		TempStateDirectory? ownedStateDirectory,
 		PluginTestManifest? ownedManifest = null)
 	{

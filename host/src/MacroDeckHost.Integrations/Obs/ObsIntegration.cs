@@ -45,7 +45,8 @@ public sealed partial class ObsIntegration
 	{
 	}
 
-	internal ObsIntegration(Func<Guid, IObsClient> clientFactory,
+	internal ObsIntegration(
+		Func<Guid, IObsClient> clientFactory,
 		TimeSpan? pollInterval = null,
 		Func<int>? suffixFactory = null)
 	{
@@ -91,9 +92,15 @@ public sealed partial class ObsIntegration
 
 	internal IReadOnlyList<ObsRuntime> Runtimes => RuntimeSnapshot();
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new ObsConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new ObsConfigFlow();
+	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new ObsMacroDeck2Migration()];
 
@@ -108,7 +115,9 @@ public sealed partial class ObsIntegration
 	public ValueTask<VariableCatalogPage> DiscoverAsync(
 		VariableCatalogQuery query,
 		CancellationToken cancellationToken = default)
-		=> _dynamicVariables.DiscoverAsync(query, cancellationToken);
+	{
+		return _dynamicVariables.DiscoverAsync(query, cancellationToken);
+	}
 
 	public async ValueTask<VariableDefinition?> ResolveAsync(
 		string localId,
@@ -118,7 +127,10 @@ public sealed partial class ObsIntegration
 		return eager ?? await _dynamicVariables.ResolveAsync(localId, cancellationToken).ConfigureAwait(false);
 	}
 
-	private void RequestVariableRefresh() => _ = _variableAccessor.Current?.RequestRefreshAsync();
+	private void RequestVariableRefresh()
+	{
+		_ = _variableAccessor.Current?.RequestRefreshAsync();
+	}
 
 	private void RequestDefinitionRefresh(Guid runtimeId, IReadOnlyList<ObsTargetChange> changes)
 	{
@@ -187,7 +199,9 @@ public sealed partial class ObsIntegration
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> _dynamicVariables.SetValueAsync(localId, value, cancellationToken);
+	{
+		return _dynamicVariables.SetValueAsync(localId, value, cancellationToken);
+	}
 
 	public async Task<DynamicOptionsResult> GetEventOptionsAsync(
 		EventOptionsContext context,
@@ -199,10 +213,11 @@ public sealed partial class ObsIntegration
 			return new DynamicOptionsResult
 			{
 				Options = runtimes.Select(runtime => new ActionParameterOption
-				{
-					Value = runtime.Id.ToString("D"),
-					Label = runtime.Title
-				}).ToList(),
+					{
+						Value = runtime.Id.ToString("D"),
+						Label = runtime.Title
+					})
+					.ToList(),
 				CacheSeconds = 0
 			};
 		}
@@ -286,14 +301,17 @@ public sealed partial class ObsIntegration
 		return runtime is not null;
 	}
 
-	private IReadOnlyList<ObsRuntime> RuntimeSnapshot() => Volatile.Read(ref _runtimes);
+	private IReadOnlyList<ObsRuntime> RuntimeSnapshot()
+	{
+		return Volatile.Read(ref _runtimes);
+	}
 
 	private static ObsConnection? ResolveEventConnection(
 		IReadOnlyDictionary<string, object?> parameters,
 		IReadOnlyList<ObsRuntime> runtimes)
 	{
-		if (parameters.GetValueOrDefault(ObsTargetResolver.ConfigurationParameter) is not string text ||
-			!Guid.TryParseExact(text, "D", out var id))
+		if (parameters.GetValueOrDefault(ObsTargetResolver.ConfigurationParameter) is not string text
+			|| !Guid.TryParseExact(text, "D", out var id))
 		{
 			return null;
 		}
@@ -312,17 +330,17 @@ public sealed partial class ObsIntegration
 			var schema = await config.GetStringAsync(entry.Id, ObsConfigurationMetadata.SchemaKey, cancellationToken);
 			var identityJson =
 				await config.GetStringAsync(entry.Id, ObsConfigurationMetadata.VariableIdentityKey, cancellationToken);
-			if (!string.Equals(schema, ObsConfigurationMetadata.SchemaVersion, StringComparison.Ordinal) ||
-				!ObsConfigurationMetadata.TryParseIdentity(identityJson, out var identity))
+			if (!string.Equals(schema, ObsConfigurationMetadata.SchemaVersion, StringComparison.Ordinal)
+				|| !ConfigurationIdentityJson.TryParse(identityJson, out var identity))
 			{
 				continue;
 			}
 
 			var host = await config.GetStringAsync(entry.Id, ObsConfigKeys.Host, cancellationToken);
 			var portRaw = await config.GetStringAsync(entry.Id, ObsConfigKeys.Port, cancellationToken);
-			if (string.IsNullOrWhiteSpace(host) ||
-				!int.TryParse(portRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port) ||
-				port is < 1 or > 65535)
+			if (string.IsNullOrWhiteSpace(host)
+				|| !int.TryParse(portRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port)
+				|| port is < 1 or > 65535)
 			{
 				_logger.Warning("OBS config entry {EntryId} is incomplete; skipping", entry.Id);
 				continue;
@@ -352,6 +370,6 @@ public sealed partial class ObsIntegration
 	private sealed record DesiredRuntime(
 		Guid Id,
 		string Title,
-		ObsConfigurationIdentity Identity,
+		ConfigurationIdentity Identity,
 		ObsConfigurationSettings Settings);
 }

@@ -4,10 +4,12 @@ using MacroDeck.Sdk.Decks;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A27_DeckNavigatorFakeTests
+public class A27DeckNavigatorFakeTests
 {
 	private static DeckClient Client(string clientId, string folderId)
-		=> new() { ClientId = clientId, ProfileId = "p1", FolderId = folderId };
+	{
+		return new DeckClient { ClientId = clientId, ProfileId = "p1", FolderId = folderId };
+	}
 
 	[Test]
 	public void Seeded_clients_are_listed_without_raising_ClientChanged()

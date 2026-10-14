@@ -18,7 +18,8 @@ internal sealed class RecordingApplicationFocusCoordinator : IApplicationFocusCo
 		return Task.CompletedTask;
 	}
 
-	public Task OnFolderReported(Guid deviceId,
+	public Task OnFolderReported(
+		Guid deviceId,
 		Guid folderId,
 		string? navigationToken,
 		bool isResync,

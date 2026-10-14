@@ -5,7 +5,8 @@ public static class WakeOnLanPlanner
 	private const int MacAddressBytes = 6;
 
 	public static IReadOnlyList<string> MacAddresses(IReadOnlyList<NetworkInterfaceSnapshot> interfaces)
-		=> interfaces
+	{
+		return interfaces
 			.Where(ServiceAdvertisementPlanner.IsLanInterface)
 			.Where(nic => nic.Ipv4Addresses.Any(ServiceAdvertisementPlanner.IsLanAddress))
 			.OrderBy(nic => nic.Index)
@@ -13,6 +14,7 @@ public static class WakeOnLanPlanner
 			.OfType<string>()
 			.Distinct()
 			.ToList();
+	}
 
 	private static string? ToMacAddress(string physicalAddress)
 	{

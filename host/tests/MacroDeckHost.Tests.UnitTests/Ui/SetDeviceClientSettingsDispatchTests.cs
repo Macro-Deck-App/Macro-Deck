@@ -77,7 +77,7 @@ public class SetDeviceClientSettingsDispatchTests
 	[Test]
 	public async Task A_device_shows_its_settings_button_again()
 	{
-		var device = await SeedDevice(DeviceClientType.WebClient, settingsButtonHidden: true);
+		var device = await SeedDevice(DeviceClientType.WebClient, true);
 		using var dispatcher = DispatcherFor(DeviceClaim(device.Id));
 
 		var response = await Dispatch(dispatcher, new { settingsButtonHidden = false });
@@ -92,7 +92,7 @@ public class SetDeviceClientSettingsDispatchTests
 	[Test]
 	public async Task A_request_without_a_setting_changes_nothing()
 	{
-		var device = await SeedDevice(DeviceClientType.WebClient, settingsButtonHidden: true);
+		var device = await SeedDevice(DeviceClientType.WebClient, true);
 		using var dispatcher = DispatcherFor(DeviceClaim(device.Id));
 
 		var response = await Dispatch(dispatcher, null);
@@ -168,9 +168,13 @@ public class SetDeviceClientSettingsDispatchTests
 		return device;
 	}
 
-	private static Claim DeviceClaim(Guid deviceId) => new(AuthDefaults.DeviceClaim, deviceId.ToString());
+	private static Claim DeviceClaim(Guid deviceId)
+	{
+		return new Claim(AuthDefaults.DeviceClaim, deviceId.ToString());
+	}
 
-	private static async Task<SetDeviceClientSettingsResponse> Dispatch(UiWebSocketDispatcher dispatcher,
+	private static async Task<SetDeviceClientSettingsResponse> Dispatch(
+		UiWebSocketDispatcher dispatcher,
 		object? argument)
 	{
 		var response = await dispatcher.DispatchAsync("SetDeviceClientSettings",
@@ -180,49 +184,53 @@ public class SetDeviceClientSettingsDispatchTests
 	}
 
 	private UiWebSocketDispatcher DispatcherFor(params Claim[] claims)
-		=> new(connectionId: "connection-1",
-			principal: new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
-			abort: static () => { },
-			labelText: null!,
-			subscriptions: null!,
-			widgetState: null!,
-			widgetStateSubscriptions: null!,
-			variableInterest: null!,
-			variableBroadcaster: null!,
-			getMusicPlayerInstances: null!,
-			getMusicPlayerState: null!,
-			getWeatherInstances: null!,
-			getFolderViews: null!,
-			getScreenSavers: null!,
-			getDeviceScreenSaver: null!,
-			getDeviceClientSettings: null!,
-			setDeviceClientSettings: _handler,
-			screenSaverUiSessions: null!,
-			getWeatherState: null!,
-			getVariableCatalogProviders: null!,
-			discoverCatalogVariables: null!,
-			resolveCatalogVariable: null!,
-			reportFolderChanged: null!,
-			listUiPreviews: null!,
-			logSubscriptions: null!,
-			logFileReader: null!,
-			deviceConnections: null!,
-			musicPlayerClientSync: null!,
-			uiSessions: null!,
-			configUiSessions: null!,
-			widgetUiSessions: null!,
-			uiPreviewSessions: null!,
-			folderUiSessions: null!,
-			modalUiSessions: null!,
-			lifetime: null!,
-			transport: null!,
-			webSocketTransport: null!,
-			companions: null!,
-			licenses: null!,
-			accessTokenCutoff: new AccessTokenCutoff(),
-			deviceSessionGuard: new DeviceSessionGuard(),
-			videoStreams: null!,
-			videoStreamProviders: null!,
-			notifications: new NullNotificationManager(),
-			connectionCancellation: CancellationToken.None);
+	{
+		return new UiWebSocketDispatcher("connection-1",
+			new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
+			static () =>
+			{
+			},
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			_handler,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			new AccessTokenCutoff(),
+			new DeviceSessionGuard(),
+			null!,
+			null!,
+			new NullNotificationManager(),
+			CancellationToken.None);
+	}
 }

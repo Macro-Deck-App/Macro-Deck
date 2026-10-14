@@ -33,10 +33,14 @@ public class PluginSessionServiceTests
 	}
 
 	private static PluginSessionIdentity Identity(string pluginId = "com.example.plugin")
-		=> new() { PluginId = pluginId, DisplayName = "Example", Origin = PluginSessionOrigin.Managed };
+	{
+		return new PluginSessionIdentity
+			{ PluginId = pluginId, DisplayName = "Example", Origin = PluginSessionOrigin.Managed };
+	}
 
 	private static PluginSessionRequest Request(IReadOnlyList<DeclaredCapability>? capabilities = null)
-		=> new()
+	{
+		return new PluginSessionRequest
 		{
 			RequestedVersion = new ProtocolVersionRange
 			{
@@ -45,14 +49,17 @@ public class PluginSessionServiceTests
 			},
 			Capabilities = capabilities ?? []
 		};
+	}
 
 	private static DeclaredCapability Declared(string kind, string localId, int minimum = 1, int maximum = 1)
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = kind,
 			LocalId = localId,
 			VersionRange = new CapabilityVersionRange { Minimum = minimum, Maximum = maximum }
 		};
+	}
 
 	[Test]
 	public async Task Several_Capabilities_Of_One_Kind_Negotiate_Once()
@@ -79,8 +86,8 @@ public class PluginSessionServiceTests
 	public async Task A_Kind_Is_Negotiated_Against_The_Intersection_Of_Its_Ranges()
 	{
 		var request = Request([
-			Declared(CapabilityKinds.Actions, "old", minimum: 1, maximum: 1),
-			Declared(CapabilityKinds.Actions, "new", minimum: 2, maximum: 2)
+			Declared(CapabilityKinds.Actions, "old", 1, 1),
+			Declared(CapabilityKinds.Actions, "new", 2, 2)
 		]);
 
 		var result = await _service.Create(Identity(), request);
@@ -370,7 +377,9 @@ public class PluginSessionServiceTests
 	private static PluginSdkUsage Sdk(
 		string version = "1.0.0",
 		IReadOnlyList<string>? deprecatedApis = null)
-		=> new() { SdkVersion = version, DeprecatedApis = deprecatedApis };
+	{
+		return new PluginSdkUsage { SdkVersion = version, DeprecatedApis = deprecatedApis };
+	}
 
 	[Test]
 	public async Task The_session_response_carries_a_compatibility_report()
@@ -429,7 +438,7 @@ public class PluginSessionServiceTests
 	{
 		var request = Request() with
 		{
-			Sdk = Sdk(version: new string('9', ProtocolLimits.MaxSdkVersionLength + 1))
+			Sdk = Sdk(new string('9', ProtocolLimits.MaxSdkVersionLength + 1))
 		};
 
 		var result = await _service.Create(Identity(), request);

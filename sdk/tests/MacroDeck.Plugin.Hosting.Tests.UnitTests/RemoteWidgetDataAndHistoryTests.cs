@@ -21,12 +21,14 @@ public class RemoteWidgetDataAndHistoryTests
 				{
 					WidgetId = "w1",
 					WidgetTypeId = "com.example::chat",
-					Data = JsonSerializer.SerializeToElement(new { allowModeration = false }),
+					Data = JsonSerializer.SerializeToElement(new { allowModeration = false })
 				},
-				PluginProtocolJson.Options),
+				PluginProtocolJson.Options)
 		};
 
-		var data = await new RemoteWidgetApi(host, new PluginConnectionState(), new HostStateCache(new PluginConnectionState()))
+		var data = await new RemoteWidgetApi(host,
+				new PluginConnectionState(),
+				new HostStateCache(new PluginConnectionState()))
 			.GetWidgetDataAsync("w1");
 
 		Assert.Multiple(() =>
@@ -42,7 +44,9 @@ public class RemoteWidgetDataAndHistoryTests
 	{
 		var host = new ScriptedHost { Failure = Unsupported() };
 
-		var data = await new RemoteWidgetApi(host, new PluginConnectionState(), new HostStateCache(new PluginConnectionState()))
+		var data = await new RemoteWidgetApi(host,
+				new PluginConnectionState(),
+				new HostStateCache(new PluginConnectionState()))
 			.GetWidgetDataAsync("w1");
 
 		Assert.That(data, Is.Null);
@@ -61,8 +65,8 @@ public class RemoteWidgetDataAndHistoryTests
 				HostOperations.Variables.HistoryRead => JsonSerializer.SerializeToElement(
 					new VariablesHistoryReadResult { Values = [1, null, 3] },
 					PluginProtocolJson.Options),
-				_ => null,
-			},
+				_ => null
+			}
 		};
 
 		var window = await new RemoteVariableApi(host).OpenHistoryAsync("viewer_count", 40);
@@ -110,7 +114,9 @@ public class RemoteWidgetDataAndHistoryTests
 	}
 
 	private static HostInvocationException Unsupported()
-		=> HostInvocationException.CreateNonRetryable(ProtocolErrorCodes.CapabilityUnsupported, "no");
+	{
+		return HostInvocationException.CreateNonRetryable(ProtocolErrorCodes.CapabilityUnsupported, "no");
+	}
 
 	private sealed class ScriptedHost : IHostInvoker
 	{
@@ -132,7 +138,8 @@ public class RemoteWidgetDataAndHistoryTests
 			}
 		}
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -147,6 +154,9 @@ public class RemoteWidgetDataAndHistoryTests
 				: Task.FromResult(Answer(api, operation));
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

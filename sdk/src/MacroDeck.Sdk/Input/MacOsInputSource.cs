@@ -85,8 +85,16 @@ internal static class MacOsInputSource
 		for (ushort keyCode = 0; keyCode < KeyCodeCount; keyCode++)
 		{
 			uint deadKeyState = 0;
-			var status = UCKeyTranslate(layout, keyCode, KeyActionDown, 0, keyboardType, TranslateNoDeadKeys,
-				ref deadKeyState, (nuint)buffer.Length, out var length, buffer);
+			var status = UCKeyTranslate(layout,
+				keyCode,
+				KeyActionDown,
+				0,
+				keyboardType,
+				TranslateNoDeadKeys,
+				ref deadKeyState,
+				(nuint)buffer.Length,
+				out var length,
+				buffer);
 			characters[keyCode] = status == 0 && length > 0 ? new string(buffer, 0, (int)length) : null;
 		}
 
@@ -94,9 +102,12 @@ internal static class MacOsInputSource
 	}
 
 	private static IntPtr ReadGlobal(string library, string symbol)
-		=> NativeLibrary.TryLoad(library, out var handle) && NativeLibrary.TryGetExport(handle, symbol, out var address)
-			? Marshal.ReadIntPtr(address)
-			: IntPtr.Zero;
+	{
+		return NativeLibrary.TryLoad(library, out var handle)
+			&& NativeLibrary.TryGetExport(handle, symbol, out var address)
+				? Marshal.ReadIntPtr(address)
+				: IntPtr.Zero;
+	}
 
 	[DllImport(Carbon)]
 	private static extern IntPtr TISCopyCurrentKeyboardLayoutInputSource();

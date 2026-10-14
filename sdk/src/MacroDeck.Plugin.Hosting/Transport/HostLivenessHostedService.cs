@@ -14,7 +14,7 @@ internal sealed class HostLivenessHostedService(
 	TimeProvider timeProvider,
 	ILogger logger) : BackgroundService
 {
-	private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan _pollInterval = TimeSpan.FromSeconds(5);
 
 	private readonly ILogger _logger = logger.ForContext<HostLivenessHostedService>();
 
@@ -33,7 +33,7 @@ internal sealed class HostLivenessHostedService(
 			return;
 		}
 
-		using var timer = new PeriodicTimer(PollInterval, timeProvider);
+		using var timer = new PeriodicTimer(_pollInterval, timeProvider);
 
 		while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
 		{

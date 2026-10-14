@@ -50,7 +50,10 @@ internal sealed class MusicPlayerPollNudgeTests
 		await nudge.Due.WaitAsync(TimeSpan.FromSeconds(5));
 	}
 
-	private static FakeRegistry RegistryWith(IIntegration integration) => new(integration);
+	private static FakeRegistry RegistryWith(IIntegration integration)
+	{
+		return new FakeRegistry(integration);
+	}
 
 	private sealed class FakeRegistry : IIntegrationRegistry
 	{
@@ -60,31 +63,54 @@ internal sealed class MusicPlayerPollNudgeTests
 			remove { }
 		}
 
-		public FakeRegistry(IIntegration integration) => Integrations = [integration];
+		public FakeRegistry(IIntegration integration)
+		{
+			Integrations = [integration];
+		}
 
 		public IReadOnlyList<IIntegration> Integrations { get; }
 
-		public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+		public IActionDefinition? FindAction(string integrationId, string actionId)
+		{
+			return null;
+		}
 
-		public IActionDefinition? FindAction(QualifiedId id) => null;
+		public IActionDefinition? FindAction(QualifiedId id)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
+		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+		{
+			return [];
+		}
 
-		public bool IsEnabled(string integrationId) => true;
+		public bool IsEnabled(string integrationId)
+		{
+			return true;
+		}
 
 		public void SetEnabled(string integrationId, bool enabled)
 		{
 		}
 
-		public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+		public IntegrationOrigin GetOrigin(string integrationId)
+		{
+			return IntegrationOrigin.BuiltIn;
+		}
 
 		public Task<IntegrationRegistrationResult> RegisterAsync(
 			IIntegration integration,
 			IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 			IntegrationMetadata? metadata = null)
-			=> Task.FromResult(IntegrationRegistrationResult.Success);
+		{
+			return Task.FromResult(IntegrationRegistrationResult.Success);
+		}
 
-		public Task<bool> UnregisterAsync(string integrationId) => Task.FromResult(false);
+		public Task<bool> UnregisterAsync(string integrationId)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class FakeMusicIntegration : IIntegration, IMusicPlayerProvider
@@ -96,12 +122,24 @@ internal sealed class MusicPlayerPollNudgeTests
 		public bool IsInitialized => true;
 		public string ProviderName => "Music";
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<MusicPlayerInstance> GetInstances() => [];
+		public IReadOnlyList<MusicPlayerInstance> GetInstances()
+		{
+			return [];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 	}
 }

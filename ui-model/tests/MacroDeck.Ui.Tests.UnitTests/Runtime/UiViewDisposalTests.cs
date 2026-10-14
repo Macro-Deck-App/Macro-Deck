@@ -14,14 +14,18 @@ namespace MacroDeck.Ui.Tests.UnitTests.Runtime;
 public class UiViewDisposalTests
 {
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiFlow Reading(Func<string> value)
-		=> new()
+	{
+		return new UiFlow
 		{
 			Key = "setup",
-			Children = [new UiStringInput { Key = "shown", Binding = Bind.ReadOnly(UiValue.From(value)) }],
+			Children = [new UiStringInput { Key = "shown", Binding = Bind.ReadOnly(UiValue.From(value)) }]
 		};
+	}
 
 	private static void CollectGarbage()
 	{
@@ -90,9 +94,9 @@ public class UiViewDisposalTests
 					new UiStep
 					{
 						Key = "step",
-						Events = [UiEventHandler.On(UiConfigEvents.Submit, () => shared.Value = "submitted")],
-					},
-				],
+						Events = [UiEventHandler.On(UiConfigEvents.Submit, () => shared.Value = "submitted")]
+					}
+				]
 			});
 		var tree = view.Tree;
 
@@ -136,10 +140,10 @@ public class UiViewDisposalTests
 									closerState.Value = "closing";
 									target.Value!.Dispose();
 									target.Value = null;
-								}),
-						],
-					},
-				],
+								})
+						]
+					}
+				]
 			});
 
 		return (closer, target, released);
@@ -337,11 +341,13 @@ public class UiViewDisposalTests
 	}
 
 	private static UiFlow Gated(UiState<bool> visible, Func<UiElement> content)
-		=> new()
+	{
+		return new UiFlow
 		{
 			Key = "setup",
-			Children = [new UiWhen { Key = "gate", Condition = () => visible.Value, Content = content }],
+			Children = [new UiWhen { Key = "gate", Condition = () => visible.Value, Content = content }]
 		};
+	}
 
 	[Test]
 	public void Content_reading_a_long_lived_state_that_is_hidden_and_shown_again_still_updates()
@@ -402,7 +408,8 @@ public class UiViewDisposalTests
 					var fresh = new UiState<string>("fresh");
 					created.Add(new WeakReference(fresh));
 
-					return new UiStringInput { Key = "shown", Binding = Bind.ReadOnly(UiValue.From(() => fresh.Value)) };
+					return new UiStringInput
+						{ Key = "shown", Binding = Bind.ReadOnly(UiValue.From(() => fresh.Value)) };
 				}));
 
 		for (var round = 0; round < 10; round++)

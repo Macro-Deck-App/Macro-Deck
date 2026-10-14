@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
@@ -66,7 +67,9 @@ internal sealed class TwitchStatsWidgetTests
 
 	[Test]
 	public void Uptime_reads_as_hours_minutes_seconds()
-		=> Assert.That(StreamStatsResolver.Uptime("8066"), Is.EqualTo("02:14:26"));
+	{
+		Assert.That(StreamStatsResolver.Uptime("8066"), Is.EqualTo("02:14:26"));
+	}
 
 	[Test]
 	public async Task Widget_data_without_a_style_shows_the_default_overview()
@@ -105,7 +108,8 @@ internal sealed class TwitchStatsWidgetTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Flatten(root).Any(node => node.Type == UiComponents.Responsive), Is.False,
+			Assert.That(Flatten(root).Any(node => node.Type == UiComponents.Responsive),
+				Is.False,
 				"the content must not switch with the box size");
 
 			foreach (var value in shown)
@@ -173,7 +177,7 @@ internal sealed class TwitchStatsWidgetTests
 		{
 			account = "",
 			style = "statsRow",
-			tiles = new[] { "subscribers", "bits", "viewers" },
+			tiles = new[] { "subscribers", "bits", "viewers" }
 		});
 		var texts = Texts(session.BuildTree().Root);
 
@@ -221,7 +225,7 @@ internal sealed class TwitchStatsWidgetTests
 		{
 			account = "",
 			style = "statsRow",
-			tiles = new[] { "viewers", "chatters", "followers", "subscribers" },
+			tiles = new[] { "viewers", "chatters", "followers", "subscribers" }
 		});
 		var texts = Texts(session.BuildTree().Root);
 
@@ -242,7 +246,8 @@ internal sealed class TwitchStatsWidgetTests
 		SetLive();
 		await using var session = await OpenAsync();
 
-		Assert.That(_thumbnails.Tracked[^1], Is.EqualTo((UserId, "https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer-440x248.jpg")));
+		Assert.That(_thumbnails.Tracked[^1],
+			Is.EqualTo((UserId, "https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer-440x248.jpg")));
 
 		Set("is_live", false);
 		_time.Advance(StreamStatsWidgetSession.RefreshInterval);
@@ -266,7 +271,7 @@ internal sealed class TwitchStatsWidgetTests
 	public async Task A_sample_needs_no_account_and_no_variables()
 	{
 		await using var session = (await _provider.CreateSessionAsync(
-			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Preview, sample: true), UiModelVersion = 1 },
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Preview, true), UiModelVersion = 1 },
 			CancellationToken.None))!;
 
 		Assert.That(Texts(session.BuildTree().Root), Has.Some.Contains("Cyberpunk 2077"));
@@ -313,14 +318,19 @@ internal sealed class TwitchStatsWidgetTests
 		SetLive();
 
 		await using var session = await OpenAsync();
-		var logo = Flatten(session.BuildTree().Root).First(node => node.Type == UiComponents.Image &&
-			node.Properties.ContainsKey(UiComponentProperties.Source));
+		var logo = Flatten(session.BuildTree().Root)
+			.First(node => node.Type == UiComponents.Image
+				&& node.Properties.ContainsKey(UiComponentProperties.Source));
 		var resourceId = logo.Properties[UiComponentProperties.Source].GetProperty("resourceId").GetString()!;
 
-		Assert.That(_context.Store.TryGet(resourceId, out var content) && content.MediaType == "image/svg+xml", Is.True);
+		Assert.That(_context.Store.TryGet(resourceId, out var content) && content.MediaType == "image/svg+xml",
+			Is.True);
 	}
 
-	private void Connect() => _accounts.SetAccounts([new StreamStatsAccount(UserId, "Streamer", $"twitch_{Key}_")]);
+	private void Connect()
+	{
+		_accounts.SetAccounts([new StreamStatsAccount(UserId, "Streamer", $"twitch_{Key}_")]);
+	}
 
 	private void SetLive()
 	{
@@ -335,7 +345,10 @@ internal sealed class TwitchStatsWidgetTests
 		Set("stream_thumbnail_url", "https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer-440x248.jpg");
 	}
 
-	private void Set(string name, object? value) => _state[name] = value;
+	private void Set(string name, object? value)
+	{
+		_state[name] = value;
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{
@@ -349,16 +362,19 @@ internal sealed class TwitchStatsWidgetTests
 	}
 
 	private async Task<IUiSession> OpenAsync(object? data = null)
-		=> (await _provider.CreateSessionAsync(
-			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Widget, data: data), UiModelVersion = 1 },
+	{
+		return (await _provider.CreateSessionAsync(new UiSessionRequest
+				{ Surface = Surface(UiSurfaceKinds.Widget, data: data), UiModelVersion = 1 },
 			CancellationToken.None))!;
+	}
 
 	private static UiSurface Surface(string kind, bool sample = false, object? data = null)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.StatsWidgetTypeId),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" }),
+			[UiWidgetSurfaceAttributes.WidgetType]
+				= JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.StatsWidgetTypeId),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" })
 		};
 
 		if (sample)
@@ -380,16 +396,29 @@ internal sealed class TwitchStatsWidgetTests
 	}
 
 	private static List<string> Texts(UiNode root)
-		=> [.. Flatten(root).Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
-			.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())];
+	{
+		return
+		[
+			.. Flatten(root)
+				.Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
+				.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())
+		];
+	}
 
 	private sealed class CultureScope : IDisposable
 	{
-		private readonly global::System.Globalization.CultureInfo _previous = global::System.Globalization.CultureInfo.CurrentCulture;
+		private readonly CultureInfo _previous
+			= CultureInfo.CurrentCulture;
 
-		public CultureScope(string name) => global::System.Globalization.CultureInfo.CurrentCulture = new(name);
+		public CultureScope(string name)
+		{
+			CultureInfo.CurrentCulture = new CultureInfo(name);
+		}
 
-		public void Dispose() => global::System.Globalization.CultureInfo.CurrentCulture = _previous;
+		public void Dispose()
+		{
+			CultureInfo.CurrentCulture = _previous;
+		}
 	}
 
 	private sealed class FakeThumbnails : IStreamThumbnails
@@ -402,8 +431,14 @@ internal sealed class TwitchStatsWidgetTests
 			remove { }
 		}
 
-		public MacroDeck.Ui.Model.Resources.UiResource? Find(string userId) => null;
+		public MacroDeck.Ui.Model.Resources.UiResource? Find(string userId)
+		{
+			return null;
+		}
 
-		public void Track(string userId, string? url) => Tracked.Add((userId, url));
+		public void Track(string userId, string? url)
+		{
+			Tracked.Add((userId, url));
+		}
 	}
 }

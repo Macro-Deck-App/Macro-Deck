@@ -104,39 +104,57 @@ public class BackupsController : ControllerBase
 
 	[HttpGet]
 	public Task<GetBackupsResponse> GetAll(CancellationToken ct)
-		=> _getBackups.Handle(new GetBackupsRequest(), ct).AsTask();
+	{
+		return _getBackups.Handle(new GetBackupsRequest(), ct).AsTask();
+	}
 
 	[HttpPost]
 	public Task<CreateBackupResponse> Create(CreateBackupRequest body, CancellationToken ct)
-		=> _createBackup.Handle(body, ct).AsTask();
+	{
+		return _createBackup.Handle(body, ct).AsTask();
+	}
 
 	[HttpDelete("{backupId:guid}")]
 	public Task<DeleteBackupResponse> Delete(Guid backupId, CancellationToken ct)
-		=> _deleteBackup.Handle(new DeleteBackupRequest { BackupId = backupId }, ct).AsTask();
+	{
+		return _deleteBackup.Handle(new DeleteBackupRequest { BackupId = backupId }, ct).AsTask();
+	}
 
 	[HttpGet("settings")]
 	public Task<GetBackupSettingsResponse> GetSettings(CancellationToken ct)
-		=> _getSettings.Handle(new GetBackupSettingsRequest(), ct).AsTask();
+	{
+		return _getSettings.Handle(new GetBackupSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPatch("settings")]
 	public Task<UpdateBackupSettingsResponse> UpdateSettings(UpdateBackupSettingsRequest body, CancellationToken ct)
-		=> _updateSettings.Handle(body, ct).AsTask();
+	{
+		return _updateSettings.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("recovery-key")]
 	public Task<GetBackupRecoveryKeyStateResponse> GetRecoveryKeyState(CancellationToken ct)
-		=> _getRecoveryKeyState.Handle(new GetBackupRecoveryKeyStateRequest(), ct).AsTask();
+	{
+		return _getRecoveryKeyState.Handle(new GetBackupRecoveryKeyStateRequest(), ct).AsTask();
+	}
 
 	[HttpPost("recovery-key")]
 	public Task<BackupRecoveryKeyResponse> CreateRecoveryKey(CancellationToken ct)
-		=> _createRecoveryKey.Handle(new CreateBackupRecoveryKeyRequest(), ct).AsTask();
+	{
+		return _createRecoveryKey.Handle(new CreateBackupRecoveryKeyRequest(), ct).AsTask();
+	}
 
 	[HttpPost("recovery-key/acknowledge")]
 	public Task<BackupRecoveryKeyResponse> AcknowledgeRecoveryKey(CancellationToken ct)
-		=> _acknowledgeRecoveryKey.Handle(new AcknowledgeBackupRecoveryKeyRequest(), ct).AsTask();
+	{
+		return _acknowledgeRecoveryKey.Handle(new AcknowledgeBackupRecoveryKeyRequest(), ct).AsTask();
+	}
 
 	[HttpGet("status")]
 	public Task<GetBackupStatusResponse> GetStatus(CancellationToken ct)
-		=> _getStatus.Handle(new GetBackupStatusRequest(), ct).AsTask();
+	{
+		return _getStatus.Handle(new GetBackupStatusRequest(), ct).AsTask();
+	}
 
 	[HttpGet("{backupId:guid}/download")]
 	public async Task<IActionResult> Download(Guid backupId, CancellationToken ct)
@@ -175,7 +193,8 @@ public class BackupsController : ControllerBase
 	[HttpPost("inspect")]
 	[RequestSizeLimit(BackupHttp.MaxUploadBytes)]
 	[RequestFormLimits(MultipartBodyLengthLimit = BackupHttp.MaxUploadBytes)]
-	public async Task<IActionResult> InspectUpload([FromForm] IFormFile? file,
+	public async Task<IActionResult> InspectUpload(
+		[FromForm] IFormFile? file,
 		[FromForm] string? recoveryKey,
 		CancellationToken ct)
 	{
@@ -339,7 +358,8 @@ public class BackupsController : ControllerBase
 	}
 
 	[HttpPost("recovery-key/regenerate")]
-	public async Task<IActionResult> RegenerateRecoveryKey(RegenerateBackupRecoveryKeyRequest body,
+	public async Task<IActionResult> RegenerateRecoveryKey(
+		RegenerateBackupRecoveryKeyRequest body,
 		CancellationToken ct)
 	{
 		if (!LoopbackConnection.IsTrusted(HttpContext))
@@ -351,7 +371,8 @@ public class BackupsController : ControllerBase
 	}
 
 	[HttpPost("before-host-update")]
-	public async Task<IActionResult> TriggerBeforeHostUpdate(TriggerBeforeHostUpdateBackupRequest body,
+	public async Task<IActionResult> TriggerBeforeHostUpdate(
+		TriggerBeforeHostUpdateBackupRequest body,
 		CancellationToken ct)
 	{
 		if (!LoopbackConnection.IsTrusted(HttpContext))

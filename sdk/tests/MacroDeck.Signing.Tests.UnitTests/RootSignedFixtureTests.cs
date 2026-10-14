@@ -7,11 +7,15 @@ namespace MacroDeck.Signing.Tests.UnitTests;
 [TestFixture]
 internal sealed class RootSignedFixtureTests
 {
-	private static string FixturePath(params string[] parts) =>
-		Path.Combine([AppContext.BaseDirectory, "signing-vectors", "v1-chain", .. parts]);
+	private static string FixturePath(params string[] parts)
+	{
+		return Path.Combine([AppContext.BaseDirectory, "signing-vectors", "v1-chain", .. parts]);
+	}
 
-	private static byte[] FixtureRoot() =>
-		Convert.FromBase64String(File.ReadAllText(FixturePath("root.public")).Trim());
+	private static byte[] FixtureRoot()
+	{
+		return Convert.FromBase64String(File.ReadAllText(FixturePath("root.public")).Trim());
+	}
 
 	[Test]
 	public async Task A_plugin_signed_before_issuer_certificates_existed_still_verifies()

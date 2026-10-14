@@ -25,12 +25,14 @@ public static class EmptyCellStyleText
 	}
 
 	public static string? Format(EmptyCellStyle? style)
-		=> style switch
+	{
+		return style switch
 		{
 			EmptyCellStyle.Visible => Visible,
 			EmptyCellStyle.Transparent => Transparent,
 			_ => null
 		};
+	}
 
 	public static bool TryParseUpdate(string value, out EmptyCellStyle? style)
 	{

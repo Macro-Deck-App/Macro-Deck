@@ -214,7 +214,7 @@ internal sealed class RemoteDeviceSession : IDeviceSession
 			// A session the host has already forgotten, or a connection that is gone, still ends here.
 		}
 
-		RaiseClosed(reason: null);
+		RaiseClosed(null);
 	}
 
 	public void Apply(DeviceSurfaceDto surface)

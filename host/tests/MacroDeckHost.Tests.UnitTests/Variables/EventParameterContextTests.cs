@@ -8,15 +8,18 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class EventParameterContextTests
 {
-	private static VariableEntity Var(string name, VariableType type, string value) => new()
+	private static VariableEntity Var(string name, VariableType type, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
 	private static (ActionConditionEvaluator Evaluator, VariableContext Context) Build(
 		IReadOnlyDictionary<string, object?>? eventParameters,
@@ -82,7 +85,7 @@ public class EventParameterContextTests
 	[Test]
 	public void Event_reference_on_a_run_without_an_occurrence_resolves_to_null()
 	{
-		Assert.That(Resolve("""{"$event":"sceneName"}""", eventParameters: null), Is.Null);
+		Assert.That(Resolve("""{"$event":"sceneName"}""", null), Is.Null);
 	}
 
 	[Test]
@@ -121,7 +124,7 @@ public class EventParameterContextTests
 	[Test]
 	public void Event_template_on_a_run_without_an_occurrence_renders_empty()
 	{
-		var (evaluator, context) = Build(eventParameters: null);
+		var (evaluator, context) = Build(null);
 
 		Assert.That(evaluator.RenderTemplateString("Now: {{ event.sceneName }}", context), Is.EqualTo("Now: "));
 	}
@@ -138,7 +141,7 @@ public class EventParameterContextTests
 	[Test]
 	public void WithEvent_does_not_mutate_the_source_context()
 	{
-		var (evaluator, baseContext) = Build(eventParameters: null);
+		var (evaluator, baseContext) = Build(null);
 
 		var first = baseContext.WithEvent(new Dictionary<string, object?>(StringComparer.Ordinal)
 			{ ["sceneName"] = "One" });
@@ -156,7 +159,7 @@ public class EventParameterContextTests
 	[Test]
 	public void WithEvent_keeps_the_variable_snapshot()
 	{
-		var (evaluator, baseContext) = Build(eventParameters: null, Var("scene", VariableType.Text, "Live"));
+		var (evaluator, baseContext) = Build(null, Var("scene", VariableType.Text, "Live"));
 
 		var withEvent = baseContext.WithEvent(new Dictionary<string, object?>(StringComparer.Ordinal)
 			{ ["sceneName"] = "Break" });

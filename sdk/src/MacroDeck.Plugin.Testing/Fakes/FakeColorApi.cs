@@ -30,11 +30,17 @@ public sealed class FakeColorApi : IColorApi
 	}
 
 	/// <inheritdoc />
-	public Task<string?> ResolveAsync(string value, string? widgetId = null, CancellationToken cancellationToken = default)
-		=> Task.FromResult(Resolve(value, widgetId));
+	public Task<string?> ResolveAsync(
+		string value,
+		string? widgetId = null,
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(Resolve(value, widgetId));
+	}
 
 	/// <inheritdoc />
-	public async Task<IAsyncDisposable> WatchAsync(string value,
+	public async Task<IAsyncDisposable> WatchAsync(
+		string value,
 		Func<string?, CancellationToken, Task> onChanged,
 		string? widgetId = null,
 		CancellationToken cancellationToken = default)
@@ -48,9 +54,14 @@ public sealed class FakeColorApi : IColorApi
 	}
 
 	private string? Resolve(string value, string? widgetId)
-		=> _seeded.TryGetValue((value, widgetId), out var color) ? color : LocalColorApi.Resolve(value);
+	{
+		return _seeded.TryGetValue((value, widgetId), out var color) ? color : LocalColorApi.Resolve(value);
+	}
 
-	private sealed class Watch(FakeColorApi owner, string value, string? widgetId,
+	private sealed class Watch(
+		FakeColorApi owner,
+		string value,
+		string? widgetId,
 		Func<string?, CancellationToken, Task> onChanged) : IAsyncDisposable
 	{
 		private bool _delivered;

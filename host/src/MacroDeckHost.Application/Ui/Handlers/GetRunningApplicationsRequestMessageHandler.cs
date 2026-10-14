@@ -15,7 +15,8 @@ public class GetRunningApplicationsRequestMessageHandler
 		_catalog = catalog;
 	}
 
-	public async ValueTask<GetRunningApplicationsResponse> Handle(GetRunningApplicationsRequest request,
+	public async ValueTask<GetRunningApplicationsResponse> Handle(
+		GetRunningApplicationsRequest request,
 		CancellationToken cancellationToken)
 	{
 		var applications = await _catalog.GetAsync(request.Filter, cancellationToken);

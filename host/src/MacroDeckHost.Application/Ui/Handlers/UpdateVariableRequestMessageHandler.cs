@@ -19,7 +19,8 @@ public class UpdateVariableRequestMessageHandler
 	private readonly SharedVariables _sharedVariables;
 	private readonly VariableOwnerNames _ownerNames;
 
-	public UpdateVariableRequestMessageHandler(IVariableService service,
+	public UpdateVariableRequestMessageHandler(
+		IVariableService service,
 		IHostLockState lockState,
 		VariableRegistry registry,
 		SharedVariables sharedVariables,
@@ -72,10 +73,10 @@ public class UpdateVariableRequestMessageHandler
 
 		// Definition first: a rename the user asked for in the same request must survive a value write that
 		// is only applied by the owner and reported back later.
-		if (request.Name is not null ||
-			request.DecimalPlaces is not null ||
-			request.FileSource is not null ||
-			request.TemplateSource is not null)
+		if (request.Name is not null
+			|| request.DecimalPlaces is not null
+			|| request.FileSource is not null
+			|| request.TemplateSource is not null)
 		{
 			var definition = await _service.UpdateUserVariable(id,
 				request.Name,
@@ -105,7 +106,9 @@ public class UpdateVariableRequestMessageHandler
 		return new UpdateVariableResponse
 		{
 			Success = true,
-			Variable = VariableDtoMapper.ToDto(current, _registry.IsAvailable(current.Id), null,
+			Variable = VariableDtoMapper.ToDto(current,
+				_registry.IsAvailable(current.Id),
+				null,
 				_sharedVariables.IsShared(current))
 		};
 	}
@@ -114,9 +117,11 @@ public class UpdateVariableRequestMessageHandler
 		VariableError error,
 		string? message,
 		string? ownerIntegrationId)
-		=> new()
+	{
+		return new UpdateVariableResponse
 		{
 			Success = false,
 			Error = await VariableDtoMapper.ToWriteError(error, message, ownerIntegrationId, _ownerNames)
 		};
+	}
 }

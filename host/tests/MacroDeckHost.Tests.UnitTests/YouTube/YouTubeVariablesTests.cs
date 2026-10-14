@@ -46,12 +46,16 @@ internal sealed class YouTubeVariablesTests
 	[TestCase("youtube_my_channel_is_live", "my_channel", "is_live")]
 	[TestCase("youtube_chuc123_stream_thumbnail_url", "chuc123", "stream_thumbnail_url")]
 	public void A_variable_name_splits_back_into_channel_key_and_name(string variable, string key, string name)
-		=> Assert.That(YouTubeVariables.Split(variable), Is.EqualTo((key, name)));
+	{
+		Assert.That(YouTubeVariables.Split(variable), Is.EqualTo((key, name)));
+	}
 
 	[TestCase("twitch_streamer_viewer_count")]
 	[TestCase("youtube_streamer_unknown")]
 	public void Foreign_or_unknown_names_do_not_split(string variable)
-		=> Assert.That(YouTubeVariables.Split(variable), Is.Null);
+	{
+		Assert.That(YouTubeVariables.Split(variable), Is.Null);
+	}
 
 	[Test]
 	public void Live_only_numbers_read_nothing_while_offline()
@@ -87,9 +91,13 @@ internal sealed class YouTubeVariablesTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(YouTubeVariables.Read(account, YouTubeAccountState.Unknown, "display_name", YouTubeTestSupport.Now),
+			Assert.That(YouTubeVariables.Read(account,
+					YouTubeAccountState.Unknown,
+					"display_name",
+					YouTubeTestSupport.Now),
 				Is.EqualTo("Stored title"));
-			Assert.That(YouTubeVariables.Read(account, new YouTubeAccountState { ChannelTitle = "Renamed" },
+			Assert.That(YouTubeVariables.Read(account,
+					new YouTubeAccountState { ChannelTitle = "Renamed" },
 					"display_name",
 					YouTubeTestSupport.Now),
 				Is.EqualTo("Renamed"));

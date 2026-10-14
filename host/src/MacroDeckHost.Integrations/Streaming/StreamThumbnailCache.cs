@@ -1,6 +1,5 @@
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Integrations.Http;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Integrations.Streaming;
@@ -173,15 +172,19 @@ public sealed class StreamThumbnailCache : IStreamThumbnails, IDisposable
 	}
 
 	internal static bool IsAllowed(StreamThumbnailRule rule, string? url)
-		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
-			uri.Scheme == Uri.UriSchemeHttps &&
-			uri.IsDefaultPort &&
-			string.IsNullOrEmpty(uri.UserInfo) &&
-			string.Equals(uri.Host, rule.AllowedHost, StringComparison.OrdinalIgnoreCase) &&
-			uri.AbsolutePath.StartsWith(rule.AllowedPathPrefix, StringComparison.Ordinal);
+	{
+		return Uri.TryCreate(url, UriKind.Absolute, out var uri)
+			&& uri.Scheme == Uri.UriSchemeHttps
+			&& uri.IsDefaultPort
+			&& string.IsNullOrEmpty(uri.UserInfo)
+			&& string.Equals(uri.Host, rule.AllowedHost, StringComparison.OrdinalIgnoreCase)
+			&& uri.AbsolutePath.StartsWith(rule.AllowedPathPrefix, StringComparison.Ordinal);
+	}
 
 	internal static bool IsJpeg(byte[] bytes)
-		=> bytes.Length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
+	{
+		return bytes.Length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
+	}
 
 	private void Drop(string accountId)
 	{
@@ -230,7 +233,7 @@ public sealed class StreamThumbnailCache : IStreamThumbnails, IDisposable
 				InFlight = false,
 				FetchedAt = _timeProvider.GetUtcNow(),
 				Resource = resource ?? entry.Resource,
-				ResourceName = name,
+				ResourceName = name
 			};
 		}
 
@@ -240,7 +243,8 @@ public sealed class StreamThumbnailCache : IStreamThumbnails, IDisposable
 		}
 	}
 
-	private async Task<UiResource?> RegisterAsync(IUiResourceRegistry registry,
+	private async Task<UiResource?> RegisterAsync(
+		IUiResourceRegistry registry,
 		string name,
 		byte[] bytes,
 		CancellationToken cancellationToken)
@@ -280,9 +284,11 @@ public sealed class StreamThumbnailCache : IStreamThumbnails, IDisposable
 	}
 
 	internal static string ResourceName(string accountId)
-		=> ("thumbnail-" + accountId).Length <= StreamChatImage.MaxResourceNameLength
+	{
+		return ("thumbnail-" + accountId).Length <= StreamChatImage.MaxResourceNameLength
 			? "thumbnail-" + accountId
 			: "thumbnail-" + StreamChatImage.ShortHash(accountId);
+	}
 
 	private async Task<byte[]?> DownloadAsync(Uri uri, CancellationToken cancellationToken)
 	{
@@ -316,8 +322,8 @@ public sealed class StreamThumbnailCache : IStreamThumbnails, IDisposable
 				return buffer.ToArray();
 			}
 		}
-		catch (Exception exception) when (exception is HttpRequestException or IOException ||
-			(exception is TaskCanceledException && !cancellationToken.IsCancellationRequested))
+		catch (Exception exception) when (exception is HttpRequestException or IOException
+			|| exception is TaskCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Debug(exception, "A stream thumbnail for {Platform} could not be fetched", _platform.OwnerId);
 			return null;

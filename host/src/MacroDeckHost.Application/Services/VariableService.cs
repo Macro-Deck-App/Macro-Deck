@@ -49,15 +49,25 @@ public class VariableService : IVariableService
 		_logger = logger;
 	}
 
-	public Task<IReadOnlyList<VariableEntity>> GetAll() => Task.FromResult(_registry.GetAll());
+	public Task<IReadOnlyList<VariableEntity>> GetAll()
+	{
+		return Task.FromResult(_registry.GetAll());
+	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-		=> Task.FromResult(_registry.GetByScope(scope, scopeRefId));
+	{
+		return Task.FromResult(_registry.GetByScope(scope, scopeRefId));
+	}
 
-	public Task<VariableEntity?> GetById(Guid id) => Task.FromResult(_registry.GetById(id));
+	public Task<VariableEntity?> GetById(Guid id)
+	{
+		return Task.FromResult(_registry.GetById(id));
+	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-		=> Task.FromResult(_registry.GetByOwnerIntegration(integrationId));
+	{
+		return Task.FromResult(_registry.GetByOwnerIntegration(integrationId));
+	}
 
 	public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
 	{
@@ -87,7 +97,8 @@ public class VariableService : IVariableService
 		int? decimalPlaces,
 		VariableFileSource? fileSource = null,
 		VariableTemplateSource? templateSource = null)
-		=> CreateInternal(name,
+	{
+		return CreateInternal(name,
 			scope,
 			scopeRefId,
 			type,
@@ -97,6 +108,7 @@ public class VariableService : IVariableService
 			null,
 			fileSource: fileSource,
 			templateSource: templateSource);
+	}
 
 	public async Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 		Guid id,
@@ -128,8 +140,9 @@ public class VariableService : IVariableService
 			return await UpdateTemplate(entity, name, decimalPlaces, templateSource);
 		}
 
-		if (entity.TemplateSource is not null && name is not null &&
-			_templates.WouldCloseCycle(entity, CanonicalName(name), entity.TemplateSource.Template))
+		if (entity.TemplateSource is not null
+			&& name is not null
+			&& _templates.WouldCloseCycle(entity, CanonicalName(name), entity.TemplateSource.Template))
 		{
 			return Result.Fail<VariableEntity, VariableError>(VariableError.CircularTemplate,
 				"The template would read the renamed variable itself");
@@ -238,7 +251,9 @@ public class VariableService : IVariableService
 	}
 
 	private static string CanonicalName(string name)
-		=> VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
+	{
+		return VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
+	}
 
 	public async Task<Result<VariableEntity, VariableError>> SetValue(
 		Guid id,
@@ -308,8 +323,8 @@ public class VariableService : IVariableService
 		if (provider is null)
 		{
 			_logger.Information(
-				"Refused a write to variable '{Variable}': integration '{IntegrationId}' is not currently available " +
-				"(not registered, disabled, not initialized or not offering variables)",
+				"Refused a write to variable '{Variable}': integration '{IntegrationId}' is not currently available "
+				+ "(not registered, disabled, not initialized or not offering variables)",
 				entity.Name,
 				ownerIntegrationId);
 			return Result.Fail<VariableEntity, VariableError>(VariableError.OwnerUnavailable,
@@ -352,21 +367,28 @@ public class VariableService : IVariableService
 	}
 
 	private static VariableFileSource? NormalizeFileSource(VariableFileSource source)
-		=> VariableFileText.IsValidPath(source.Path)
+	{
+		return VariableFileText.IsValidPath(source.Path)
 			? source with { Path = Path.GetFullPath(source.Path) }
 			: null;
+	}
 
-	private static VariableError ErrorOf(VariableWriteStatus status) => status switch
+	private static VariableError ErrorOf(VariableWriteStatus status)
 	{
-		VariableWriteStatus.NotWritable => VariableError.NotWritable,
-		VariableWriteStatus.NotFound => VariableError.NotFound,
-		VariableWriteStatus.Unavailable => VariableError.OwnerUnavailable,
-		VariableWriteStatus.InvalidValue => VariableError.InvalidValue,
-		_ => VariableError.WriteFailed
-	};
+		return status switch
+		{
+			VariableWriteStatus.NotWritable => VariableError.NotWritable,
+			VariableWriteStatus.NotFound => VariableError.NotFound,
+			VariableWriteStatus.Unavailable => VariableError.OwnerUnavailable,
+			VariableWriteStatus.InvalidValue => VariableError.InvalidValue,
+			_ => VariableError.WriteFailed
+		};
+	}
 
 	private static bool IsNonFinite(object? value)
-		=> (value is double d && !double.IsFinite(d)) || (value is float f && !float.IsFinite(f));
+	{
+		return value is double d && !double.IsFinite(d) || value is float f && !float.IsFinite(f);
+	}
 
 	public async Task<Result<VariableError>> DeleteUserVariable(Guid id)
 	{
@@ -410,8 +432,7 @@ public class VariableService : IVariableService
 		var canonicalName = VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
 		var resolvedDefinitionId = definitionId ?? MacroDeck.Sdk.Variables.VariableDefinitionId.FromName(canonicalName);
 
-		if (resolvedDefinitionId is not null &&
-			!MacroDeckId.IsValidLocalId(resolvedDefinitionId, LocalIdKind.Declared))
+		if (resolvedDefinitionId is not null && !MacroDeckId.IsValidLocalId(resolvedDefinitionId, LocalIdKind.Declared))
 		{
 			return Result.Fail<VariableEntity, VariableError>(VariableError.InvalidName,
 				$"Variable definition id '{resolvedDefinitionId}' must be lowercase and hyphen-separated");
@@ -507,25 +528,25 @@ public class VariableService : IVariableService
 		string canonicalName,
 		VariableDeclaration? declaration)
 	{
-		if (definitionId is null ||
-			!QualifiedId.TryCreate(integrationId, definitionId, localIdKind, out var qualified) ||
-			_registry.FindByDefinition(qualified) is not { } existing)
+		if (definitionId is null
+			|| !QualifiedId.TryCreate(integrationId, definitionId, localIdKind, out var qualified)
+			|| _registry.FindByDefinition(qualified) is not { } existing)
 		{
 			return null;
 		}
 
-		var sameIdentity = existing.Classification == VariableClassification.Integration &&
-			string.Equals(existing.OwnerIntegrationId, integrationId, StringComparison.Ordinal) &&
-			existing.Scope == scope &&
-			existing.ScopeRefId == scopeRefId &&
-			existing.Type == type &&
-			string.Equals(existing.DefinitionId, definitionId, StringComparison.Ordinal);
+		var sameIdentity = existing.Classification == VariableClassification.Integration
+			&& string.Equals(existing.OwnerIntegrationId, integrationId, StringComparison.Ordinal)
+			&& existing.Scope == scope
+			&& existing.ScopeRefId == scopeRefId
+			&& existing.Type == type
+			&& string.Equals(existing.DefinitionId, definitionId, StringComparison.Ordinal);
 
 		if (!sameIdentity)
 		{
 			return Result.Fail<VariableEntity, VariableError>(VariableError.AlreadyExists,
-				$"Integration '{integrationId}' already declares definition id '{definitionId}' " +
-				$"for variable '{existing.Name}'. Definition ids must be unique within an integration.");
+				$"Integration '{integrationId}' already declares definition id '{definitionId}' "
+				+ $"for variable '{existing.Name}'. Definition ids must be unique within an integration.");
 		}
 
 		// A configuration can be renamed and a provider can revise a unit or a write capability without the
@@ -560,7 +581,9 @@ public class VariableService : IVariableService
 	}
 
 	public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId)
-		=> Task.FromResult(_registry.FindByDefinition(definitionId));
+	{
+		return Task.FromResult(_registry.FindByDefinition(definitionId));
+	}
 
 	public async Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
 		string integrationId,
@@ -574,8 +597,8 @@ public class VariableService : IVariableService
 			return Result.Fail<VariableEntity, VariableError>(VariableError.NotFound, "Variable not found");
 		}
 
-		if (entity.Classification != VariableClassification.Integration ||
-			!string.Equals(entity.OwnerIntegrationId, integrationId, StringComparison.Ordinal))
+		if (entity.Classification != VariableClassification.Integration
+			|| !string.Equals(entity.OwnerIntegrationId, integrationId, StringComparison.Ordinal))
 		{
 			return Result.Fail<VariableEntity, VariableError>(VariableError.NotOwnedByIntegration,
 				"Variable is not owned by the calling integration");
@@ -584,7 +607,8 @@ public class VariableService : IVariableService
 		return await ApplyUpdate(entity, null, value, null, bounds);
 	}
 
-	public async Task<Result<VariableError>> SetIntegrationVariableAvailability(string integrationId,
+	public async Task<Result<VariableError>> SetIntegrationVariableAvailability(
+		string integrationId,
 		Guid id,
 		bool available)
 	{
@@ -594,8 +618,8 @@ public class VariableService : IVariableService
 			return Result.Fail(VariableError.NotFound, "Variable not found");
 		}
 
-		if (entity.Classification != VariableClassification.Integration ||
-			!string.Equals(entity.OwnerIntegrationId, integrationId, StringComparison.Ordinal))
+		if (entity.Classification != VariableClassification.Integration
+			|| !string.Equals(entity.OwnerIntegrationId, integrationId, StringComparison.Ordinal))
 		{
 			return Result.Fail(VariableError.NotOwnedByIntegration, "Variable is not owned by the calling integration");
 		}
@@ -619,8 +643,8 @@ public class VariableService : IVariableService
 			return Result.Fail(VariableError.NotFound, "Variable not found");
 		}
 
-		if (entity.Classification != VariableClassification.Integration ||
-			!string.Equals(entity.OwnerIntegrationId, integrationId, StringComparison.Ordinal))
+		if (entity.Classification != VariableClassification.Integration
+			|| !string.Equals(entity.OwnerIntegrationId, integrationId, StringComparison.Ordinal))
 		{
 			return Result.Fail(VariableError.NotOwnedByIntegration, "Variable is not owned by the calling integration");
 		}
@@ -847,8 +871,8 @@ public class VariableService : IVariableService
 			if (canonical != entity.Name)
 			{
 				var collision = _registry.FindByName(entity.Scope, entity.ScopeRefId, canonical);
-				if ((collision is not null && collision.Id != entity.Id) ||
-					!_registry.Rename(entity.Id, canonical, DateTime.UtcNow))
+				if (collision is not null && collision.Id != entity.Id
+					|| !_registry.Rename(entity.Id, canonical, DateTime.UtcNow))
 				{
 					return Result.Fail<VariableEntity, VariableError>(VariableError.AlreadyExists,
 						$"A variable named '{canonical}' already exists in this scope");
@@ -858,9 +882,9 @@ public class VariableService : IVariableService
 			}
 		}
 
-		if (decimalPlaces.HasValue &&
-			entity.Type == VariableType.Numeric &&
-			entity.DecimalPlaces != decimalPlaces.Value)
+		if (decimalPlaces.HasValue
+			&& entity.Type == VariableType.Numeric
+			&& entity.DecimalPlaces != decimalPlaces.Value)
 		{
 			if (decimalPlaces.Value is < 0 or > 28)
 			{
@@ -889,8 +913,7 @@ public class VariableService : IVariableService
 
 		// A null VariableBounds means "not supplied": an unavailable reading must leave a range that is
 		// still correct alone rather than collapsing a slider to zero width for the duration of a blip.
-		if (bounds is not null &&
-			(entity.Min != bounds.Min || entity.Max != bounds.Max || entity.Step != bounds.Step))
+		if (bounds is not null && (entity.Min != bounds.Min || entity.Max != bounds.Max || entity.Step != bounds.Step))
 		{
 			entity.Min = bounds.Min;
 			entity.Max = bounds.Max;
@@ -931,13 +954,19 @@ public class VariableService : IVariableService
 	}
 
 	private static bool IsInvalidColor(VariableType type, object? value)
-		=> type == VariableType.Color && value is not null && !RgbaColor.TryParse(value.ToString(), out _);
+	{
+		return type == VariableType.Color && value is not null && !RgbaColor.TryParse(value.ToString(), out _);
+	}
 
 	private static Result<VariableEntity, VariableError> InvalidColor(object? value)
-		=> Result.Fail<VariableEntity, VariableError>(VariableError.InvalidValue, $"'{value}' is not a color.");
+	{
+		return Result.Fail<VariableEntity, VariableError>(VariableError.InvalidValue, $"'{value}' is not a color.");
+	}
 
 	private void PersistUserVariables()
-		=> _userStore.Save(_registry.GetAll().Where(v => v.Classification == VariableClassification.User));
+	{
+		_userStore.Save(_registry.GetAll().Where(v => v.Classification == VariableClassification.User));
+	}
 
 	private static VariableEntity NewEntity(
 		string name,
@@ -951,7 +980,8 @@ public class VariableService : IVariableService
 		string? definitionId = null,
 		VariableDeclaration? declaration = null,
 		VariableUpdateMode updateMode = VariableUpdateMode.Polled)
-		=> new()
+	{
+		return new VariableEntity
 		{
 			Id = Guid.CreateVersion7(),
 			Name = name,
@@ -973,6 +1003,7 @@ public class VariableService : IVariableService
 			CreatedAt = DateTime.UtcNow,
 			UpdatedAt = DateTime.UtcNow
 		};
+	}
 
 	// Static attributes and the write capability are re-applied on every re-registration, so a provider
 	// that revises them does not have to wait for the variable to be removed and created again.
@@ -982,13 +1013,13 @@ public class VariableService : IVariableService
 		// decimalPlaces argument, and letting a declaration without one blank that would lose it.
 		var declaredPrecision = declaration?.DecimalPlaces ?? entity.DecimalPlaces;
 
-		var changed = !Equals(entity.Presentation, declaration?.Presentation) ||
-			entity.DecimalPlaces != declaredPrecision ||
-			!string.Equals(entity.Unit, declaration?.Unit, StringComparison.Ordinal) ||
-			!string.Equals(entity.SemanticKind, declaration?.SemanticKind, StringComparison.Ordinal) ||
-			entity.IsShareable != (declaration?.IsShareable ?? true) ||
-			!AttributesEqual(entity.Attributes, declaration?.Attributes) ||
-			!Equals(entity.Write, declaration?.Write);
+		var changed = !Equals(entity.Presentation, declaration?.Presentation)
+			|| entity.DecimalPlaces != declaredPrecision
+			|| !string.Equals(entity.Unit, declaration?.Unit, StringComparison.Ordinal)
+			|| !string.Equals(entity.SemanticKind, declaration?.SemanticKind, StringComparison.Ordinal)
+			|| entity.IsShareable != (declaration?.IsShareable ?? true)
+			|| !AttributesEqual(entity.Attributes, declaration?.Attributes)
+			|| !Equals(entity.Write, declaration?.Write);
 
 		entity.Presentation = declaration?.Presentation;
 		entity.DecimalPlaces = declaredPrecision;
@@ -1017,8 +1048,8 @@ public class VariableService : IVariableService
 
 		foreach (var entry in left)
 		{
-			if (!right.TryGetValue(entry.Key, out var other) ||
-				!string.Equals(entry.Value, other, StringComparison.Ordinal))
+			if (!right.TryGetValue(entry.Key, out var other)
+				|| !string.Equals(entry.Value, other, StringComparison.Ordinal))
 			{
 				return false;
 			}

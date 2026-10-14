@@ -34,23 +34,37 @@ public sealed class UnsupportedCompanionDeviceApi : ICompanionDeviceApi
 		remove { }
 	}
 
-	public CompanionDevice? FindDevice(Guid deviceId) => null;
+	public CompanionDevice? FindDevice(Guid deviceId)
+	{
+		return null;
+	}
 
 	public Task<bool> WaitForDeviceAsync(Guid deviceId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(false);
+	{
+		return Task.FromResult(false);
+	}
 
-	public Task<bool> SendAsync(Guid deviceId,
+	public Task<bool> SendAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(false);
+	{
+		return Task.FromResult(false);
+	}
 
-	public Task<CompanionDeviceCommandResult> RequestAsync(Guid deviceId,
+	public Task<CompanionDeviceCommandResult> RequestAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.NotConnected));
+	{
+		return Task.FromResult(CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.NotConnected));
+	}
 
-	public Task<CompanionScreenshotResult> CaptureScreenshotAsync(Guid deviceId,
+	public Task<CompanionScreenshotResult> CaptureScreenshotAsync(
+		Guid deviceId,
 		CompanionScreenshotMode mode,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(CompanionScreenshotResult.Failed(CompanionDeviceFailure.NotConnected));
+	{
+		return Task.FromResult(CompanionScreenshotResult.Failed(CompanionDeviceFailure.NotConnected));
+	}
 }

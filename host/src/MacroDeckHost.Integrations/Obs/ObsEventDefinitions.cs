@@ -50,7 +50,7 @@ internal static class ObsEventDefinitions
 			PayloadParameters =
 			[
 				ConfigurationPayload(),
-				ActionParameter.Text("path", label: AppStrings.Integrations.Obs.Events.PathLabel())
+				ActionParameter.Text("path", AppStrings.Integrations.Obs.Events.PathLabel())
 			]
 		},
 		PathEvent(ObsEventIds.RecordFileChanged,
@@ -76,7 +76,7 @@ internal static class ObsEventDefinitions
 			PayloadParameters =
 			[
 				ConfigurationPayload(),
-				ActionParameter.Toggle("enabled", label: MacroDeckStrings.Common.Enabled())
+				ActionParameter.Toggle("enabled", MacroDeckStrings.Common.Enabled())
 			]
 		},
 		new()
@@ -89,14 +89,14 @@ internal static class ObsEventDefinitions
 			[
 				ConfigurationParameter(),
 				ActionParameter.DynamicChoice("inputName",
-					label: AppStrings.Integrations.Obs.Params.Input(),
-					description: AppStrings.Integrations.Obs.Events.InputMuteConfigDescription())
+					AppStrings.Integrations.Obs.Params.Input(),
+					AppStrings.Integrations.Obs.Events.InputMuteConfigDescription())
 			],
 			PayloadParameters =
 			[
 				ConfigurationPayload(),
-				ActionParameter.DynamicChoice("inputName", label: AppStrings.Integrations.Obs.Params.Input()),
-				ActionParameter.Toggle("muted", label: AppStrings.Integrations.Obs.Events.MutedLabel())
+				ActionParameter.DynamicChoice("inputName", AppStrings.Integrations.Obs.Params.Input()),
+				ActionParameter.Toggle("muted", AppStrings.Integrations.Obs.Events.MutedLabel())
 			]
 		},
 		InputActivity(ObsEventIds.InputBecameActive,
@@ -121,16 +121,16 @@ internal static class ObsEventDefinitions
 			[
 				ConfigurationParameter(),
 				ActionParameter.Text(ObsCustomEvent.EventNameKey,
-					label: AppStrings.Integrations.Obs.Events.EventNameLabel(),
-					description: AppStrings.Integrations.Obs.Events.CustomEventNameConfigDescription())
+					AppStrings.Integrations.Obs.Events.EventNameLabel(),
+					AppStrings.Integrations.Obs.Events.CustomEventNameConfigDescription())
 			],
 			PayloadParameters =
 			[
 				ConfigurationPayload(),
 				ActionParameter.Text(ObsCustomEvent.EventNameKey,
-					label: AppStrings.Integrations.Obs.Events.EventNameLabel()),
+					AppStrings.Integrations.Obs.Events.EventNameLabel()),
 				ActionParameter.Text(ObsCustomEvent.DataKey,
-					label: AppStrings.Integrations.Obs.Events.EventDataLabel())
+					AppStrings.Integrations.Obs.Events.EventDataLabel())
 			]
 		},
 		Simple(ObsEventIds.Connected,
@@ -141,81 +141,98 @@ internal static class ObsEventDefinitions
 			AppStrings.Integrations.Obs.Events.ConnectionCategory())
 	];
 
-	private static EventDefinition SceneEvent(string id, LocalizedText name, LocalizedText description) => new()
+	private static EventDefinition SceneEvent(string id, LocalizedText name, LocalizedText description)
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = AppStrings.Integrations.Obs.Events.ScenesCategory(),
-		ConfigurationParameters =
-		[
-			ConfigurationParameter(),
-			ActionParameter.DynamicChoice("sceneName",
-				label: AppStrings.Integrations.Obs.Params.Scene(),
-				description: AppStrings.Integrations.Obs.Events.SceneConfigDescription())
-		],
-		PayloadParameters =
-		[
-			ConfigurationPayload(),
-			ActionParameter.DynamicChoice("sceneName", label: AppStrings.Integrations.Obs.Params.Scene()),
-			ActionParameter.DynamicChoice("previousSceneName",
-				label: AppStrings.Integrations.Obs.Events.PreviousSceneLabel())
-		]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = AppStrings.Integrations.Obs.Events.ScenesCategory(),
+			ConfigurationParameters =
+			[
+				ConfigurationParameter(),
+				ActionParameter.DynamicChoice("sceneName",
+					AppStrings.Integrations.Obs.Params.Scene(),
+					AppStrings.Integrations.Obs.Events.SceneConfigDescription())
+			],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.DynamicChoice("sceneName", AppStrings.Integrations.Obs.Params.Scene()),
+				ActionParameter.DynamicChoice("previousSceneName",
+					AppStrings.Integrations.Obs.Events.PreviousSceneLabel())
+			]
+		};
+	}
 
-	private static EventDefinition PathEvent(string id,
+	private static EventDefinition PathEvent(
+		string id,
 		LocalizedText name,
 		LocalizedText description,
-		LocalizedText category) => new()
+		LocalizedText category)
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = category,
-		ConfigurationParameters = [ConfigurationParameter()],
-		PayloadParameters =
-		[
-			ConfigurationPayload(),
-			ActionParameter.Text("path", label: AppStrings.Integrations.Obs.Events.PathLabel())
-		]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = category,
+			ConfigurationParameters = [ConfigurationParameter()],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.Text("path", AppStrings.Integrations.Obs.Events.PathLabel())
+			]
+		};
+	}
 
-	private static EventDefinition InputActivity(string id, LocalizedText name, LocalizedText description) => new()
+	private static EventDefinition InputActivity(string id, LocalizedText name, LocalizedText description)
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = AppStrings.Integrations.Obs.Events.InputsCategory(),
-		ConfigurationParameters =
-		[
-			ConfigurationParameter(),
-			ActionParameter.DynamicChoice("inputName",
-				label: AppStrings.Integrations.Obs.Params.Input(),
-				description: AppStrings.Integrations.Obs.Events.InputActivityConfigDescription())
-		],
-		PayloadParameters =
-		[
-			ConfigurationPayload(),
-			ActionParameter.DynamicChoice("inputName", label: AppStrings.Integrations.Obs.Params.Input())
-		]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = AppStrings.Integrations.Obs.Events.InputsCategory(),
+			ConfigurationParameters =
+			[
+				ConfigurationParameter(),
+				ActionParameter.DynamicChoice("inputName",
+					AppStrings.Integrations.Obs.Params.Input(),
+					AppStrings.Integrations.Obs.Events.InputActivityConfigDescription())
+			],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.DynamicChoice("inputName", AppStrings.Integrations.Obs.Params.Input())
+			]
+		};
+	}
 
-	private static EventDefinition Simple(string id, LocalizedText name, LocalizedText category) => new()
+	private static EventDefinition Simple(string id, LocalizedText name, LocalizedText category)
 	{
-		Id = id,
-		Name = name,
-		Category = category,
-		ConfigurationParameters = [ConfigurationParameter()],
-		PayloadParameters = [ConfigurationPayload()]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Category = category,
+			ConfigurationParameters = [ConfigurationParameter()],
+			PayloadParameters = [ConfigurationPayload()]
+		};
+	}
 
 	private static ActionParameter ConfigurationParameter()
-		=> ActionParameter.DynamicChoice(ObsTargetResolver.ConfigurationParameter,
-			label: AppStrings.Integrations.Obs.Params.Configuration(),
+	{
+		return ActionParameter.DynamicChoice(ObsTargetResolver.ConfigurationParameter,
+			AppStrings.Integrations.Obs.Params.Configuration(),
 			required: true);
+	}
 
 	private static ActionParameter ConfigurationPayload()
-		=> ActionParameter.DynamicChoice(ObsTargetResolver.ConfigurationParameter,
-			label: AppStrings.Integrations.Obs.Params.Configuration(),
+	{
+		return ActionParameter.DynamicChoice(ObsTargetResolver.ConfigurationParameter,
+			AppStrings.Integrations.Obs.Params.Configuration(),
 			required: true);
+	}
 }

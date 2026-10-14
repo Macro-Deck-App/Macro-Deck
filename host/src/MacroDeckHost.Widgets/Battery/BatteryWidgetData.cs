@@ -81,17 +81,17 @@ public sealed record BatteryWidgetData
 			ChargingColor = ReadBool(data, ChargingColorKey) ?? true,
 			Thresholds = WidgetThresholds.ReadStored(data),
 			Color = WidgetColor.Normalize(ReadString(data, ColorKey)),
-			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
+			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor"))
 		};
 	}
 
 	internal static IReadOnlyList<BatteryDeviceReference> ReadSelection(JsonElement data)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty(SelectionKey, out var selection) ||
-			selection.ValueKind != JsonValueKind.Object ||
-			!selection.TryGetProperty(SelectionDevicesKey, out var devices) ||
-			devices.ValueKind != JsonValueKind.Array)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty(SelectionKey, out var selection)
+			|| selection.ValueKind != JsonValueKind.Object
+			|| !selection.TryGetProperty(SelectionDevicesKey, out var devices)
+			|| devices.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -111,22 +111,28 @@ public sealed record BatteryWidgetData
 	}
 
 	private static string? ReadString(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+			? value.GetString()
+			: null;
+	}
 
 	private static bool? ReadBool(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
 			? value.GetBoolean()
 			: null;
+	}
 }
 
 public sealed record BatteryDeviceReference(string Id, string? Name, string Kind)
 {
 	public static BatteryDeviceReference? Read(JsonElement element)
 	{
-		if (element.ValueKind != JsonValueKind.Object ||
-			!element.TryGetProperty("id", out var id) ||
-			id.ValueKind != JsonValueKind.String ||
-			id.GetString() is not { Length: > 0 } value)
+		if (element.ValueKind != JsonValueKind.Object
+			|| !element.TryGetProperty("id", out var id)
+			|| id.ValueKind != JsonValueKind.String
+			|| id.GetString() is not { Length: > 0 } value)
 		{
 			return null;
 		}
@@ -138,7 +144,9 @@ public sealed record BatteryDeviceReference(string Id, string? Name, string Kind
 			? storedKind.GetString()
 			: null;
 
-		return new BatteryDeviceReference(value, name is { Length: > 0 } ? name : null, BatteryDeviceKinds.Normalize(kind));
+		return new BatteryDeviceReference(value,
+			name is { Length: > 0 } ? name : null,
+			BatteryDeviceKinds.Normalize(kind));
 	}
 
 	public static BatteryDeviceReference Of(BatteryDeviceSnapshot device)

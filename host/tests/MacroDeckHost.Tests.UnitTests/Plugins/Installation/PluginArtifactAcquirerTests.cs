@@ -26,7 +26,10 @@ internal sealed class PluginArtifactAcquirerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	private static PluginArtifactAcquirer CreateAcquirer()
 	{
@@ -42,7 +45,10 @@ internal sealed class PluginArtifactAcquirerTests
 		return path;
 	}
 
-	private static string Sha256Of(byte[] content) => "sha256:" + Convert.ToHexStringLower(SHA256.HashData(content));
+	private static string Sha256Of(byte[] content)
+	{
+		return "sha256:" + Convert.ToHexStringLower(SHA256.HashData(content));
+	}
 
 
 	[Test]
@@ -174,14 +180,18 @@ internal sealed class PluginArtifactAcquirerTests
 		});
 	}
 
-	private const string StoreAssetUrl = "https://store-assets.macro-deck.app/plugins/com.acme.p/1.0.0/p.macroDeckPlugin";
+	private const string StoreAssetUrl
+		= "https://store-assets.macro-deck.app/plugins/com.acme.p/1.0.0/p.macroDeckPlugin";
 
-	private static StoreDownloadMetadata Metadata(StoreDownloadOperation operation, string? currentVersion = null) => new()
+	private static StoreDownloadMetadata Metadata(StoreDownloadOperation operation, string? currentVersion = null)
 	{
-		Operation = operation,
-		OperationId = Guid.NewGuid(),
-		CurrentVersion = currentVersion
-	};
+		return new StoreDownloadMetadata
+		{
+			Operation = operation,
+			OperationId = Guid.NewGuid(),
+			CurrentVersion = currentVersion
+		};
+	}
 
 	[Test]
 	public async Task A_manually_supplied_url_on_the_store_asset_host_is_downloaded_without_store_metadata()
@@ -220,13 +230,13 @@ internal sealed class PluginArtifactAcquirerTests
 	[Test]
 	public async Task Concurrent_store_downloads_on_one_shared_client_each_carry_only_their_own_metadata()
 	{
-		using var http = new RecordingHttpClientFactory(shareClient: true) { Body = "bytes"u8.ToArray(), HoldUntilInFlight = 2 };
+		using var http = new RecordingHttpClientFactory(true) { Body = "bytes"u8.ToArray(), HoldUntilInFlight = 2 };
 		var acquirer = new PluginArtifactAcquirer(http, PluginInstallerOptions.Default, Serilog.Core.Logger.None);
 		var install = Metadata(StoreDownloadOperation.Install);
 		var update = Metadata(StoreDownloadOperation.Update, "1.2.0");
 
-		var results = await Task.WhenAll(
-			acquirer.Acquire(PluginArtifactSource.FromUrl(new Uri(StoreAssetUrl)) with { DownloadMetadata = install },
+		var results = await Task.WhenAll(acquirer.Acquire(
+				PluginArtifactSource.FromUrl(new Uri(StoreAssetUrl)) with { DownloadMetadata = install },
 				Path.Combine(_stagingDirectory, "a")),
 			acquirer.Acquire(PluginArtifactSource.FromUrl(new Uri(StoreAssetUrl)) with { DownloadMetadata = update },
 				Path.Combine(_stagingDirectory, "b")));
@@ -235,17 +245,21 @@ internal sealed class PluginArtifactAcquirerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(results.Select(result => result.Success), Is.All.True);
-			Assert.That(byId.Keys, Is.EquivalentTo(new[] { install.OperationId.ToString("D"), update.OperationId.ToString("D") }));
+			Assert.That(byId.Keys,
+				Is.EquivalentTo(new[] { install.OperationId.ToString("D"), update.OperationId.ToString("D") }));
 			Assert.That(byId[install.OperationId.ToString("D")].Header("X-MacroDeck-Operation"), Is.EqualTo("install"));
 			Assert.That(byId[install.OperationId.ToString("D")].Header("X-MacroDeck-Current-Version"), Is.Null);
 			Assert.That(byId[update.OperationId.ToString("D")].Header("X-MacroDeck-Operation"), Is.EqualTo("update"));
-			Assert.That(byId[update.OperationId.ToString("D")].Header("X-MacroDeck-Current-Version"), Is.EqualTo("1.2.0"));
+			Assert.That(byId[update.OperationId.ToString("D")].Header("X-MacroDeck-Current-Version"),
+				Is.EqualTo("1.2.0"));
 		});
 	}
 
 	private sealed class NoHttpClientFactory : IHttpClientFactory
 	{
 		public HttpClient CreateClient(string name)
-			=> throw new InvalidOperationException("A unit test must not reach the network.");
+		{
+			throw new InvalidOperationException("A unit test must not reach the network.");
+		}
 	}
 }

@@ -8,7 +8,10 @@ internal sealed class InMemoryPluginAssetCache : IPluginAssetCache
 	private readonly ConcurrentDictionary<string, (byte[] Bytes, string MimeType)>
 		_byHash = new(StringComparer.Ordinal);
 
-	public void Write(string contentHash, string mimeType, byte[] bytes) => _byHash[contentHash] = (bytes, mimeType);
+	public void Write(string contentHash, string mimeType, byte[] bytes)
+	{
+		_byHash[contentHash] = (bytes, mimeType);
+	}
 
 	public bool TryRead(string contentHash, out byte[] bytes, out string mimeType)
 	{

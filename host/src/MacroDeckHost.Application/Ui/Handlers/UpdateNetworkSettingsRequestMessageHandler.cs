@@ -21,7 +21,8 @@ public class UpdateNetworkSettingsRequestMessageHandler
 	private readonly IDiscoveryAdvertisementRefresher _discovery;
 	private readonly IServiceScopeFactory _scopeFactory;
 
-	public UpdateNetworkSettingsRequestMessageHandler(IAppPreferenceService preferences,
+	public UpdateNetworkSettingsRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IApplicationRestartService restart,
 		IHostListenerState listenerState,
 		INetworkRestartNotifier restartNotifier,
@@ -63,11 +64,11 @@ public class UpdateNetworkSettingsRequestMessageHandler
 				await ActiveLocalization.Resolve(_scopeFactory, error));
 		}
 
-		var unchanged = request.PublicPort == current.PublicPort &&
-			effectiveTlsEnabled == current.TlsEnabled &&
-			effectiveTlsMode == current.TlsMode &&
-			effectiveTlsHttpsPort == current.TlsHttpsPort &&
-			(request.DiscoveryEnabled is null || request.DiscoveryEnabled == current.DiscoveryEnabled);
+		var unchanged = request.PublicPort == current.PublicPort
+			&& effectiveTlsEnabled == current.TlsEnabled
+			&& effectiveTlsMode == current.TlsMode
+			&& effectiveTlsHttpsPort == current.TlsHttpsPort
+			&& (request.DiscoveryEnabled is null || request.DiscoveryEnabled == current.DiscoveryEnabled);
 
 		// Discovery is passed through unresolved: SetNetwork resolves an omitted value from its own fresh
 		// read, so a TLS-only save racing a discovery save cannot write back the stale value read above.
@@ -89,7 +90,8 @@ public class UpdateNetworkSettingsRequestMessageHandler
 		return NetworkSettingsResponseFactory.Create(updated, _restart.Availability, true, null);
 	}
 
-	private LocalizedText? Reject(int publicPort,
+	private LocalizedText? Reject(
+		int publicPort,
 		NetworkSettings current,
 		bool effectiveTlsEnabled,
 		PublicTlsMode effectiveTlsMode,
@@ -97,8 +99,8 @@ public class UpdateNetworkSettingsRequestMessageHandler
 	{
 		if (!PublicPortSelector.IsConfigurable(publicPort))
 		{
-			return AppStrings.Settings.Network.PortRangeHint(minimum: PublicPortSelector.MinimumConfigurablePort,
-				maximum: PublicPortSelector.MaximumConfigurablePort);
+			return AppStrings.Settings.Network.PortRangeHint(PublicPortSelector.MinimumConfigurablePort,
+				PublicPortSelector.MaximumConfigurablePort);
 		}
 
 		if (publicPort == _listenerState.LoopbackPort)
@@ -122,8 +124,8 @@ public class UpdateNetworkSettingsRequestMessageHandler
 
 		if (!PublicPortSelector.IsConfigurable(effectiveTlsHttpsPort))
 		{
-			return AppStrings.Settings.Network.Tls.PortRangeHint(minimum: PublicPortSelector.MinimumConfigurablePort,
-				maximum: PublicPortSelector.MaximumConfigurablePort);
+			return AppStrings.Settings.Network.Tls.PortRangeHint(PublicPortSelector.MinimumConfigurablePort,
+				PublicPortSelector.MaximumConfigurablePort);
 		}
 
 		if (effectiveTlsHttpsPort == publicPort)

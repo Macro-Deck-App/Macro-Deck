@@ -37,7 +37,8 @@ public sealed class IncludedIconPackSync : IIncludedIconPackSync
 	private readonly IncludedIconPackSyncOptions _options;
 	private readonly ILogger _logger;
 
-	public IncludedIconPackSync(IIncludedIconAssets assets,
+	public IncludedIconPackSync(
+		IIncludedIconAssets assets,
 		IIconPackCache iconPackCache,
 		IIconStorage storage,
 		IIconProcessor processor,
@@ -66,8 +67,9 @@ public sealed class IncludedIconPackSync : IIncludedIconPackSync
 		var assets = _assets.Load();
 		var revision = Revision(assets);
 		var pack = _iconPackCache.GetPackById(IncludedIconPack.PackId);
-		if (pack is not null && string.Equals(pack.SourceRevision, revision, StringComparison.Ordinal) &&
-			assets.All(IsCurrent))
+		if (pack is not null
+			&& string.Equals(pack.SourceRevision, revision, StringComparison.Ordinal)
+			&& assets.All(IsCurrent))
 		{
 			return;
 		}
@@ -116,8 +118,7 @@ public sealed class IncludedIconPackSync : IIncludedIconPackSync
 
 		await Announce(pack, created, cancellationToken);
 
-		_logger.Information(
-			"Synced the included icon pack in {ElapsedMs} ms: {Written} icons written, {Failed} failed",
+		_logger.Information("Synced the included icon pack in {ElapsedMs} ms: {Written} icons written, {Failed} failed",
 			stopwatch.ElapsedMilliseconds,
 			written,
 			failed);
@@ -126,10 +127,12 @@ public sealed class IncludedIconPackSync : IIncludedIconPackSync
 	private bool IsCurrent(IncludedIconAsset asset)
 	{
 		var id = IncludedIconPack.IconId(asset.Name);
-		return _iconPackCache.GetIconById(id) is { ProcessingState: IconProcessingState.Ready } icon &&
-			icon.PackId == IncludedIconPack.PackId &&
-			string.Equals(icon.SourceContentHash, SourceContentHash.Compute(asset.Content).Value, StringComparison.Ordinal) &&
-			_storage.ListVariants(IncludedIconPack.PackId, id).Contains(IconVariants.Master);
+		return _iconPackCache.GetIconById(id) is { ProcessingState: IconProcessingState.Ready } icon
+			&& icon.PackId == IncludedIconPack.PackId
+			&& string.Equals(icon.SourceContentHash,
+				SourceContentHash.Compute(asset.Content).Value,
+				StringComparison.Ordinal)
+			&& _storage.ListVariants(IncludedIconPack.PackId, id).Contains(IconVariants.Master);
 	}
 
 	private async Task<bool> TryWriteIcon(IncludedIconAsset asset, DateTime now, CancellationToken cancellationToken)
@@ -139,7 +142,7 @@ public sealed class IncludedIconPackSync : IIncludedIconPackSync
 		try
 		{
 			ProcessedIconResult processed;
-			await using (var content = new MemoryStream(asset.Content, writable: false))
+			await using (var content = new MemoryStream(asset.Content, false))
 			{
 				var result = await _processor.Process(content, fileName, cancellationToken);
 				if (!result.Success)
@@ -171,13 +174,14 @@ public sealed class IncludedIconPackSync : IIncludedIconPackSync
 				cancellationToken);
 
 			var existing = _iconPackCache.GetIconById(id);
-			var icon = existing ?? new IconEntity
-			{
-				Id = id,
-				PackId = IncludedIconPack.PackId,
-				Name = asset.Name,
-				CreatedAt = now
-			};
+			var icon = existing
+				?? new IconEntity
+				{
+					Id = id,
+					PackId = IncludedIconPack.PackId,
+					Name = asset.Name,
+					CreatedAt = now
+				};
 			icon.Name = asset.Name;
 			icon.Width = processed.Width;
 			icon.Height = processed.Height;
@@ -210,7 +214,8 @@ public sealed class IncludedIconPackSync : IIncludedIconPackSync
 		}
 	}
 
-	private async Task<bool> RemoveDroppedIcons(IReadOnlyList<IncludedIconAsset> assets,
+	private async Task<bool> RemoveDroppedIcons(
+		IReadOnlyList<IncludedIconAsset> assets,
 		CancellationToken cancellationToken)
 	{
 		var expected = assets.Select(asset => IncludedIconPack.IconId(asset.Name)).ToHashSet();

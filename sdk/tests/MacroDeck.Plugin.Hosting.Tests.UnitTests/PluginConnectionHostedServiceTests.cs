@@ -59,6 +59,6 @@ public class PluginConnectionHostedServiceTests
 	{
 		var request = PluginConnectionHostedService.BuildSessionRequest([], _metadata, null);
 
-		Assert.That(request.HostApiFeatures, Does.Contain(MacroDeck.Plugin.Protocol.Callbacks.HostApiFeatures.ScriptInputColor));
+		Assert.That(request.HostApiFeatures, Does.Contain(Protocol.Callbacks.HostApiFeatures.ScriptInputColor));
 	}
 }

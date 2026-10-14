@@ -65,7 +65,7 @@ public class UpdateVariableHandlerTests
 			Assert.That(response.Success, Is.False);
 			Assert.That(response.Error!.Code, Is.EqualTo(nameof(VariableError.OwnerUnavailable)));
 			Assert.That(response.Error.Message.Localized?.Key,
-				Is.EqualTo(AppStrings.Errors.Variables.OwnerUnavailable(integration: "Volume Mixer").Key));
+				Is.EqualTo(AppStrings.Errors.Variables.OwnerUnavailable("Volume Mixer").Key));
 			Assert.That(TestLocalization.Resolve(response.Error.Message),
 				Is.EqualTo("Volume Mixer is not available right now"));
 		});

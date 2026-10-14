@@ -19,28 +19,37 @@ public class ProtocolLimitsTests
 
 	[Test]
 	public void Max_asset_chunk_bytes_is_smaller_than_max_message_bytes()
-		=> Assert.That(ProtocolLimits.MaxAssetChunkBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
+	{
+		Assert.That(ProtocolLimits.MaxAssetChunkBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
+	}
 
 	[Test]
 	public void A_calendar_reply_fits_one_message_with_room_for_its_envelope()
-		=> Assert.That(ProtocolLimits.MaxCalendarReplyBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
+	{
+		Assert.That(ProtocolLimits.MaxCalendarReplyBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
+	}
 
 	[Test]
 	public void An_email_inbox_reply_fits_one_message_with_room_for_its_envelope()
-		=> Assert.That(ProtocolLimits.MaxEmailInboxReplyBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
+	{
+		Assert.That(ProtocolLimits.MaxEmailInboxReplyBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
+	}
 
 	[Test]
 	public void An_email_inbox_reply_at_every_field_cap_fits_its_byte_budget()
 	{
-		var perMessage = ProtocolLimits.MaxEmailSubjectLength + ProtocolLimits.MaxEmailPreviewLength +
-			2 * ProtocolLimits.MaxEmailSenderLength;
+		var perMessage = ProtocolLimits.MaxEmailSubjectLength
+			+ ProtocolLimits.MaxEmailPreviewLength
+			+ 2 * ProtocolLimits.MaxEmailSenderLength;
 
 		Assert.That(ProtocolLimits.MaxEmailMessages * perMessage, Is.LessThan(ProtocolLimits.MaxEmailInboxReplyBytes));
 	}
 
 	[Test]
 	public void Max_json_depth_matches_the_serializers_configured_max_depth()
-		=> Assert.That(PluginProtocolJson.Options.MaxDepth, Is.EqualTo(ProtocolLimits.MaxJsonDepth));
+	{
+		Assert.That(PluginProtocolJson.Options.MaxDepth, Is.EqualTo(ProtocolLimits.MaxJsonDepth));
+	}
 
 	[Test]
 	public void All_timeouts_are_positive()
@@ -60,12 +69,16 @@ public class ProtocolLimitsTests
 
 	[Test]
 	public void Keep_alive_timeout_is_at_least_three_keep_alive_intervals()
-		=> Assert.That(ProtocolTimeouts.KeepAliveTimeout,
+	{
+		Assert.That(ProtocolTimeouts.KeepAliveTimeout,
 			Is.GreaterThanOrEqualTo(ProtocolTimeouts.KeepAliveInterval * 3));
+	}
 
 	[Test]
 	public void Close_codes_are_unique()
-		=> Assert.That(ProtocolCloseCodes.All, Is.Unique);
+	{
+		Assert.That(ProtocolCloseCodes.All, Is.Unique);
+	}
 
 	[Test]
 	public void Application_close_codes_fall_within_the_reserved_4000_to_4999_range()
@@ -83,9 +96,13 @@ public class ProtocolLimitsTests
 
 	[Test]
 	public void Queue_overflow_is_the_one_close_code_reserved_from_the_rfc6455_range_not_the_application_range()
-		=> Assert.That(ProtocolCloseCodes.QueueOverflow, Is.EqualTo(1013));
+	{
+		Assert.That(ProtocolCloseCodes.QueueOverflow, Is.EqualTo(1013));
+	}
 
 	[Test]
 	public void Supervisor_shutdown_is_a_declared_close_code()
-		=> Assert.That(ProtocolCloseCodes.All, Does.Contain(ProtocolCloseCodes.SupervisorShutdown));
+	{
+		Assert.That(ProtocolCloseCodes.All, Does.Contain(ProtocolCloseCodes.SupervisorShutdown));
+	}
 }

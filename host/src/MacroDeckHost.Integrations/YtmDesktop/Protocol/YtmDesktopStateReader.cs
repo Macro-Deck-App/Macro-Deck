@@ -8,9 +8,9 @@ internal static class YtmDesktopStateReader
 	{
 		var player = ReadPlayer(root);
 
-		var video = root.ValueKind == JsonValueKind.Object &&
-			root.TryGetProperty("video", out var videoElement) &&
-			videoElement.ValueKind == JsonValueKind.Object
+		var video = root.ValueKind == JsonValueKind.Object
+			&& root.TryGetProperty("video", out var videoElement)
+			&& videoElement.ValueKind == JsonValueKind.Object
 				? ReadVideo(videoElement)
 				: null;
 
@@ -19,15 +19,15 @@ internal static class YtmDesktopStateReader
 
 	private static YtmPlayerInfo ReadPlayer(JsonElement root)
 	{
-		if (root.ValueKind != JsonValueKind.Object ||
-			!root.TryGetProperty("player", out var player) ||
-			player.ValueKind != JsonValueKind.Object)
+		if (root.ValueKind != JsonValueKind.Object
+			|| !root.TryGetProperty("player", out var player)
+			|| player.ValueKind != JsonValueKind.Object)
 		{
 			return new YtmPlayerInfo(YtmTrackState.Unknown, 0, 0, null, false, null);
 		}
 
-		var queue = player.TryGetProperty("queue", out var queueElement) &&
-			queueElement.ValueKind == JsonValueKind.Object
+		var queue = player.TryGetProperty("queue", out var queueElement)
+			&& queueElement.ValueKind == JsonValueKind.Object
 				? ReadQueue(queueElement)
 				: null;
 
@@ -40,15 +40,17 @@ internal static class YtmDesktopStateReader
 	}
 
 	private static YtmQueueInfo ReadQueue(JsonElement queue)
-		=> new(ReadEnum(queue, "repeatMode", YtmRepeatMode.Unknown),
+	{
+		return new YtmQueueInfo(ReadEnum(queue, "repeatMode", YtmRepeatMode.Unknown),
 			ReadInt(queue, "selectedItemIndex") ?? 0,
 			ReadQueueItems(queue));
+	}
 
 	private static List<YtmQueueItem> ReadQueueItems(JsonElement queue)
 	{
-		if (queue.ValueKind != JsonValueKind.Object ||
-			!queue.TryGetProperty("items", out var items) ||
-			items.ValueKind != JsonValueKind.Array)
+		if (queue.ValueKind != JsonValueKind.Object
+			|| !queue.TryGetProperty("items", out var items)
+			|| items.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -78,7 +80,8 @@ internal static class YtmDesktopStateReader
 	}
 
 	private static YtmVideoInfo ReadVideo(JsonElement video)
-		=> new(ReadString(video, "id") ?? string.Empty,
+	{
+		return new YtmVideoInfo(ReadString(video, "id") ?? string.Empty,
 			ReadString(video, "title") ?? string.Empty,
 			ReadString(video, "author"),
 			ReadString(video, "channelId"),
@@ -90,12 +93,13 @@ internal static class YtmDesktopStateReader
 			ReadBool(video, "isLive"),
 			ReadNullableEnum(video, "videoType", YtmVideoType.Unknown),
 			ReadBool(video, "metadataFilled"));
+	}
 
 	private static List<YtmThumbnail> ReadThumbnails(JsonElement parent)
 	{
-		if (parent.ValueKind != JsonValueKind.Object ||
-			!parent.TryGetProperty("thumbnails", out var thumbnails) ||
-			thumbnails.ValueKind != JsonValueKind.Array)
+		if (parent.ValueKind != JsonValueKind.Object
+			|| !parent.TryGetProperty("thumbnails", out var thumbnails)
+			|| thumbnails.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -115,27 +119,33 @@ internal static class YtmDesktopStateReader
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private static int? ReadInt(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var number)
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var number)
 				? number
 				: null;
+	}
 
 	private static double? ReadDouble(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number)
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
 				? number
 				: null;
+	}
 
 	private static bool? ReadBool(JsonElement element, string property)
 	{
@@ -154,9 +164,11 @@ internal static class YtmDesktopStateReader
 
 	private static TEnum ReadEnum<TEnum>(JsonElement element, string property, TEnum fallback)
 		where TEnum : struct, Enum
-		=> ReadInt(element, property) is { } value && Enum.IsDefined(typeof(TEnum), value)
+	{
+		return ReadInt(element, property) is { } value && Enum.IsDefined(typeof(TEnum), value)
 			? (TEnum)(object)value
 			: fallback;
+	}
 
 	private static TEnum? ReadNullableEnum<TEnum>(JsonElement element, string property, TEnum unknown)
 		where TEnum : struct, Enum

@@ -273,11 +273,11 @@ public class VariableEventIssueDtoSerializationTests
 	{
 		var candidateTypes = typeof(VariableDefinitionDto).Assembly.GetTypes()
 			.Where(type =>
-				type.IsPublic &&
-				type.Namespace is not null &&
-				(type.Namespace == typeof(VariableDefinitionDto).Namespace ||
-					type.Namespace == typeof(EventDescriptorDto).Namespace ||
-					type.Namespace == typeof(IntegrationIssueDescriptorDto).Namespace));
+				type.IsPublic
+				&& type.Namespace is not null
+				&& (type.Namespace == typeof(VariableDefinitionDto).Namespace
+					|| type.Namespace == typeof(EventDescriptorDto).Namespace
+					|| type.Namespace == typeof(IntegrationIssueDescriptorDto).Namespace));
 
 		Assert.Multiple(() =>
 		{

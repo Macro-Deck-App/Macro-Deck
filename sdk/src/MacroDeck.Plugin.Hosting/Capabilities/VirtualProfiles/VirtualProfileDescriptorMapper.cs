@@ -7,7 +7,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.VirtualProfiles;
 internal static class VirtualProfileDescriptorMapper
 {
 	public static ProfileLayoutDto ToDto(ProfileLayout layout)
-		=> new()
+	{
+		return new ProfileLayoutDto
 		{
 			Kind = layout.Kind.ToString(),
 			Rows = layout.Rows,
@@ -15,9 +16,11 @@ internal static class VirtualProfileDescriptorMapper
 			RowsLocked = layout.RowsLocked,
 			ColumnsLocked = layout.ColumnsLocked
 		};
+	}
 
 	public static VirtualWidgetDescriptorDto ToDto(VirtualWidgetDescriptor widget)
-		=> new()
+	{
+		return new VirtualWidgetDescriptorDto
 		{
 			Id = widget.Id,
 			Type = widget.Type,
@@ -27,9 +30,11 @@ internal static class VirtualProfileDescriptorMapper
 			Height = widget.Height,
 			Data = widget.Data
 		};
+	}
 
 	public static VirtualFolderDescriptorDto ToDto(VirtualFolderDescriptor folder)
-		=> new()
+	{
+		return new VirtualFolderDescriptorDto
 		{
 			Id = folder.Id,
 			Name = folder.Name,
@@ -37,13 +42,16 @@ internal static class VirtualProfileDescriptorMapper
 			ParentId = folder.ParentId,
 			Order = folder.Order
 		};
+	}
 
 	public static VirtualProfileDescriptorDto ToDto(VirtualProfileDescriptor profile)
-		=> new()
+	{
+		return new VirtualProfileDescriptorDto
 		{
 			Id = profile.Id,
 			Name = profile.Name,
 			Layout = ToDto(profile.Layout),
 			Folders = [.. profile.Folders.Select(ToDto)]
 		};
+	}
 }

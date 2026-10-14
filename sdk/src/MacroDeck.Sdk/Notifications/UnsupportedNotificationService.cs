@@ -4,14 +4,22 @@ internal sealed class UnsupportedNotificationService : INotificationService
 {
 	public static readonly UnsupportedNotificationService Instance = new();
 
-	public Task<INotificationHandle> ShowAsync(NotificationOptions options,
+	public Task<INotificationHandle> ShowAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default)
-		=> Task.FromException<INotificationHandle>(Unsupported());
+	{
+		return Task.FromException<INotificationHandle>(Unsupported());
+	}
 
-	public Task<NotificationResult> ShowForResultAsync(NotificationOptions options,
+	public Task<NotificationResult> ShowForResultAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default)
-		=> Task.FromException<NotificationResult>(Unsupported());
+	{
+		return Task.FromException<NotificationResult>(Unsupported());
+	}
 
 	private static NotificationException Unsupported()
-		=> new(NotificationErrorCode.Unsupported, "This context cannot show notifications.");
+	{
+		return new NotificationException(NotificationErrorCode.Unsupported, "This context cannot show notifications.");
+	}
 }

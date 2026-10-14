@@ -25,11 +25,14 @@ internal sealed class SceneCollectionActionDefinition : IDynamicOptionsActionDef
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(SceneCollectionParameter,
-			label: AppStrings.Integrations.Obs.Params.SceneCollection(),
+			AppStrings.Integrations.Obs.Params.SceneCollection(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -83,8 +86,8 @@ internal sealed class SceneCollectionActionDefinition : IDynamicOptionsActionDef
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(SceneCollectionParameter) is not string sceneCollection ||
-				string.IsNullOrWhiteSpace(sceneCollection))
+			if (context.Parameters.GetValueOrDefault(SceneCollectionParameter) is not string sceneCollection
+				|| string.IsNullOrWhiteSpace(sceneCollection))
 			{
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Obs.Errors.NoSceneCollectionSelected());
@@ -96,15 +99,18 @@ internal sealed class SceneCollectionActionDefinition : IDynamicOptionsActionDef
 				: ObsCommandResults.ToActionResult(result);
 		}
 
-		private static ActionResult Rejected(ObsCommandResult result, string sceneCollection) => result.Code switch
+		private static ActionResult Rejected(ObsCommandResult result, string sceneCollection)
 		{
-			ObsRequestException.ResourceNotFound => ActionResult.Failed(ActionErrorCodes.NotFound,
-				AppStrings.Integrations.Obs.Errors.SceneCollectionNotFound(sceneCollection)),
-			ObsRequestException.NotReady => ActionResult.Failed(ActionErrorCodes.Unavailable,
-				AppStrings.Integrations.Obs.Errors.SceneCollectionLoading()),
-			ObsRequestException.TimedOut => ActionResult.Failed(ActionErrorCodes.Timeout,
-				AppStrings.Integrations.Obs.Errors.SceneCollectionSlowToLoad()),
-			_ => ObsCommandResults.ToActionResult(result)
-		};
+			return result.Code switch
+			{
+				ObsRequestException.ResourceNotFound => ActionResult.Failed(ActionErrorCodes.NotFound,
+					AppStrings.Integrations.Obs.Errors.SceneCollectionNotFound(sceneCollection)),
+				ObsRequestException.NotReady => ActionResult.Failed(ActionErrorCodes.Unavailable,
+					AppStrings.Integrations.Obs.Errors.SceneCollectionLoading()),
+				ObsRequestException.TimedOut => ActionResult.Failed(ActionErrorCodes.Timeout,
+					AppStrings.Integrations.Obs.Errors.SceneCollectionSlowToLoad()),
+				_ => ObsCommandResults.ToActionResult(result)
+			};
+		}
 	}
 }

@@ -53,13 +53,13 @@ public sealed class StoreOperationUserNotificationHandler : INotificationHandler
 				Severity = UserNotificationSeverity.Info,
 				Kind = UserNotificationKind.Update,
 				Title = _localization.Resolve(isDowngrade
-							? AppStrings.Notifications.StoreExtensionDowngraded(name: operation.DisplayName)
+							? AppStrings.Notifications.StoreExtensionDowngraded(operation.DisplayName)
 							: isUpdate
-								? AppStrings.Notifications.StoreExtensionUpdated(name: operation.DisplayName)
-								: AppStrings.Notifications.StoreExtensionInstalled(name: operation.DisplayName),
-						culture) ??
-					operation.DisplayName,
-				Message = _localization.Resolve(AppStrings.Notifications.StoreVersionReady(version: operation.Version),
+								? AppStrings.Notifications.StoreExtensionUpdated(operation.DisplayName)
+								: AppStrings.Notifications.StoreExtensionInstalled(operation.DisplayName),
+						culture)
+					?? operation.DisplayName,
+				Message = _localization.Resolve(AppStrings.Notifications.StoreVersionReady(operation.Version),
 					culture),
 				Action = new UserNotificationAction(UserNotificationActionKind.OpenExtensionStore, operation.PackageId),
 				DedupeKey = dedupeKey
@@ -69,12 +69,12 @@ public sealed class StoreOperationUserNotificationHandler : INotificationHandler
 				Severity = UserNotificationSeverity.Error,
 				Kind = UserNotificationKind.Error,
 				Title = _localization.Resolve(isDowngrade
-							? AppStrings.Notifications.StoreExtensionDowngradeFailed(name: operation.DisplayName)
+							? AppStrings.Notifications.StoreExtensionDowngradeFailed(operation.DisplayName)
 							: isUpdate
-								? AppStrings.Notifications.StoreExtensionUpdateFailed(name: operation.DisplayName)
-								: AppStrings.Notifications.StoreExtensionInstallFailed(name: operation.DisplayName),
-						culture) ??
-					operation.DisplayName,
+								? AppStrings.Notifications.StoreExtensionUpdateFailed(operation.DisplayName)
+								: AppStrings.Notifications.StoreExtensionInstallFailed(operation.DisplayName),
+						culture)
+					?? operation.DisplayName,
 				Message = FailureHeadline(operation.Error) is { } headline
 					? _localization.Resolve(headline, culture)
 					: operation.ErrorMessage,
@@ -87,14 +87,19 @@ public sealed class StoreOperationUserNotificationHandler : INotificationHandler
 		_store.Raise(draft);
 	}
 
-	private static LocalizedString? FailureHeadline(StoreOperationError? error) => error switch
+	private static LocalizedString? FailureHeadline(StoreOperationError? error)
 	{
-		StoreOperationError.RequiresNewerMacroDeck => AppStrings.Store.Error.RequiresNewerMacroDeck(),
-		StoreOperationError.Incompatible => AppStrings.Store.Error.Incompatible(),
-		StoreOperationError.VersionNotFound => AppStrings.Store.Error.VersionNotFound(),
-		_ => null
-	};
+		return error switch
+		{
+			StoreOperationError.RequiresNewerMacroDeck => AppStrings.Store.Error.RequiresNewerMacroDeck(),
+			StoreOperationError.Incompatible => AppStrings.Store.Error.Incompatible(),
+			StoreOperationError.VersionNotFound => AppStrings.Store.Error.VersionNotFound(),
+			_ => null
+		};
+	}
 
-	private static string DedupeKey(StoreOperation operation) =>
-		$"store-operation:{operation.ExtensionKind}:{operation.PackageId.ToLowerInvariant()}";
+	private static string DedupeKey(StoreOperation operation)
+	{
+		return $"store-operation:{operation.ExtensionKind}:{operation.PackageId.ToLowerInvariant()}";
+	}
 }

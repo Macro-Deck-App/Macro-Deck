@@ -7,8 +7,12 @@ namespace MacroDeck.Plugin.Protocol.Envelope;
 public static class ProtocolEnvelopeWriter
 {
 	public static byte[] WriteToUtf8Bytes(ProtocolEnvelope envelope)
-		=> JsonSerializer.SerializeToUtf8Bytes(envelope, PluginProtocolJson.Options);
+	{
+		return JsonSerializer.SerializeToUtf8Bytes(envelope, PluginProtocolJson.Options);
+	}
 
 	public static string WriteToString(ProtocolEnvelope envelope)
-		=> JsonSerializer.Serialize(envelope, PluginProtocolJson.Options);
+	{
+		return JsonSerializer.Serialize(envelope, PluginProtocolJson.Options);
+	}
 }

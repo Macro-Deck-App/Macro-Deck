@@ -36,12 +36,15 @@ public sealed class EmailInboxOptionsSource : IHostOptionsSource
 				var provider = _localization.Resolve(inbox.ProviderName, culture) ?? string.Empty;
 				var label = string.IsNullOrEmpty(provider)
 					? inbox.DisplayName
-					: _localization.Resolve(AppStrings.Events.Email.InboxOption(inbox: inbox.DisplayName,
-						provider: provider), culture) ?? inbox.DisplayName;
+					: _localization.Resolve(AppStrings.Events.Email.InboxOption(inbox.DisplayName,
+							provider),
+						culture)
+					?? inbox.DisplayName;
 				return new ActionParameterOption { Value = inbox.Ref, Label = label };
 			})
-			.Where(option => filter is null ||
-				(option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
+			.Where(option
+				=> filter is null
+				|| (option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
 			.OrderBy(option => option.Label.Literal, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 

@@ -29,8 +29,41 @@ env:
   BUILD_CHANNEL: Production
 
 jobs:
+  # A pull request runs only the jobs whose inputs it changed (ci/scripts/ci-scope.mjs maps paths to
+  # jobs); main and manual runs run everything. A skipped job counts as passed for a required check.
+  changes:
+    name: Change scope
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    outputs:
+      dotnet: ${{ steps.scope.outputs.dotnet }}
+      ui: ${{ steps.scope.outputs.ui }}
+      bootstrapper: ${{ steps.scope.outputs.bootstrapper }}
+      installer: ${{ steps.scope.outputs.installer }}
+      notices: ${{ steps.scope.outputs.notices }}
+      e2e: ${{ steps.scope.outputs.e2e }}
+    steps:
+      # A pull request checks out its merge commit, whose first parent is the base it is tested against.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Classify changed paths
+        id: scope
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            node ci/scripts/ci-scope.mjs HEAD^1 HEAD --github-output "$GITHUB_OUTPUT"
+          else
+            node ci/scripts/ci-scope.mjs --all --github-output "$GITHUB_OUTPUT"
+          fi
+
   host:
     name: Host build & tests
+    needs: changes
+    if: needs.changes.outputs.dotnet == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -115,6 +148,8 @@ jobs:
   # longest test assembly, so running it in parallel shortens CI without weakening either gate.
   conformance-tests:
     name: SDK conformance tests
+    needs: changes
+    if: needs.changes.outputs.dotnet == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -152,6 +187,8 @@ jobs:
   # machine than the one that ships the product.
   platform-tests:
     name: Host tests (${{ matrix.name }})
+    needs: changes
+    if: needs.changes.outputs.dotnet == 'true'
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -192,6 +229,8 @@ jobs:
 
   ui:
     name: UI tests & build (Linux)
+    needs: changes
+    if: needs.changes.outputs.ui == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -319,6 +358,8 @@ jobs:
 
   third-party-notices:
     name: Third-party notices & license policy
+    needs: changes
+    if: needs.changes.outputs.notices == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -400,6 +441,8 @@ jobs:
 
   bootstrapper:
     name: Bootstrapper build & tests
+    needs: changes
+    if: needs.changes.outputs.bootstrapper == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -443,6 +486,8 @@ jobs:
   # such as the native file picker would reach a release build unbuilt (issue #864).
   bootstrapper-windows:
     name: Bootstrapper build & tests (Windows)
+    needs: changes
+    if: needs.changes.outputs.bootstrapper == 'true'
     runs-on: blacksmith-2vcpu-windows-2025
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -477,6 +522,8 @@ jobs:
 
   installer-hooks:
     name: Installer hooks & firewall rule (Windows)
+    needs: changes
+    if: needs.changes.outputs.installer == 'true'
     runs-on: blacksmith-2vcpu-windows-2025
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -527,4 +574,6 @@ jobs:
   # thing rather than of this workflow's wiring.
   e2e:
     name: E2E
+    needs: changes
+    if: needs.changes.outputs.e2e == 'true'
     uses: ./.github/workflows/e2e-run.yml

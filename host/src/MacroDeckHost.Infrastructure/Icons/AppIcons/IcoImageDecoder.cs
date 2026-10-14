@@ -16,9 +16,9 @@ internal static class IcoImageDecoder
 			return false;
 		}
 
-		return BinaryPrimitives.ReadUInt16LittleEndian(bytes) == 0 &&
-			BinaryPrimitives.ReadUInt16LittleEndian(bytes[2..]) == IcoResourceType &&
-			BinaryPrimitives.ReadUInt16LittleEndian(bytes[4..]) > 0;
+		return BinaryPrimitives.ReadUInt16LittleEndian(bytes) == 0
+			&& BinaryPrimitives.ReadUInt16LittleEndian(bytes[2..]) == IcoResourceType
+			&& BinaryPrimitives.ReadUInt16LittleEndian(bytes[4..]) > 0;
 	}
 
 	public static byte[]? TryDecodeToPng(byte[] bytes)

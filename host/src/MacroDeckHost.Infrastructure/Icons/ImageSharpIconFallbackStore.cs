@@ -26,7 +26,8 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 		_logger = logger;
 	}
 
-	public async Task<FallbackIconImage?> GetOrCreate(IconEntity icon,
+	public async Task<FallbackIconImage?> GetOrCreate(
+		IconEntity icon,
 		string variant,
 		bool staticFrame,
 		CancellationToken cancellationToken,
@@ -73,7 +74,8 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 		foreach (var path in Directory.EnumerateFiles(directory, $"{icon.Id:N}-*"))
 		{
 			var name = Path.GetFileName(path);
-			if (name.StartsWith(identity + "-", StringComparison.Ordinal) || name.EndsWith(".tmp", StringComparison.Ordinal))
+			if (name.StartsWith(identity + "-", StringComparison.Ordinal)
+				|| name.EndsWith(".tmp", StringComparison.Ordinal))
 			{
 				continue;
 			}
@@ -89,14 +91,15 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 		}
 	}
 
-	private async Task<bool> Transcode(IconEntity icon,
+	private async Task<bool> Transcode(
+		IconEntity icon,
 		string variant,
 		bool animated,
 		string cachePath,
 		CancellationToken cancellationToken)
 	{
-		var source = _storage.OpenVariant(icon.PackId, icon.Id, variant) ??
-			_storage.OpenVariant(icon.PackId, icon.Id, IconVariants.Master);
+		var source = _storage.OpenVariant(icon.PackId, icon.Id, variant)
+			?? _storage.OpenVariant(icon.PackId, icon.Id, IconVariants.Master);
 		if (source is null)
 		{
 			return false;
@@ -125,7 +128,7 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 				}
 			}
 
-			File.Move(tempPath, cachePath, overwrite: true);
+			File.Move(tempPath, cachePath, true);
 			return true;
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
@@ -157,12 +160,14 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 	}
 
 	private static FileStream OpenRead(string path)
-		=> new(path,
+	{
+		return new FileStream(path,
 			FileMode.Open,
 			FileAccess.Read,
 			FileShare.Read,
-			bufferSize: 64 * 1024,
+			64 * 1024,
 			FileOptions.Asynchronous | FileOptions.SequentialScan);
+	}
 
 	public void Dispose()
 	{

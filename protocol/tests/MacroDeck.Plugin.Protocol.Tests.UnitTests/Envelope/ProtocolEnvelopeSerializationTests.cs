@@ -24,7 +24,7 @@ public class ProtocolEnvelopeSerializationTests
 			SentAt = DateTimeOffset.UtcNow,
 			ProtocolVersion = 1,
 			DeadlineMs = 1000,
-			IdempotencyKey = "key",
+			IdempotencyKey = "key"
 		};
 
 		var json = ProtocolEnvelopeWriter.WriteToString(envelope);
@@ -103,7 +103,7 @@ public class ProtocolEnvelopeSerializationTests
 			ProtocolVersion = 1,
 			DeadlineMs = 5000,
 			IdempotencyKey = "idem-1",
-			Payload = payloadDocument.RootElement.Clone(),
+			Payload = payloadDocument.RootElement.Clone()
 		};
 
 		var json = ProtocolEnvelopeWriter.WriteToString(original);
@@ -135,7 +135,7 @@ public class ProtocolEnvelopeSerializationTests
 		{
 			Code = ProtocolErrorCodes.InternalError,
 			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.InternalError),
-			Retryable = false,
+			Retryable = false
 		};
 		var envelope = new ProtocolEnvelope { Type = MessageTypes.ProtocolError, Id = SampleId, Error = error };
 
@@ -156,7 +156,7 @@ public class ProtocolEnvelopeSerializationTests
 	{
 		var input = BuildDeeplyNestedPayload(ProtocolLimits.MaxJsonDepth + 16);
 
-		ProtocolReadResult result = default!;
+		ProtocolReadResult result = null!;
 		Assert.DoesNotThrow(() => result = ProtocolEnvelopeReader.Read(input));
 
 		Assert.Multiple(() =>

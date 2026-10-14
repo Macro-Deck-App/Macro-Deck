@@ -14,7 +14,8 @@ public class CancelIconImportBatchRequestMessageHandler
 		_iconImportService = iconImportService;
 	}
 
-	public async ValueTask<CancelIconImportBatchResponse> Handle(CancelIconImportBatchRequest request,
+	public async ValueTask<CancelIconImportBatchResponse> Handle(
+		CancelIconImportBatchRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(request.BatchId, out var batchId))

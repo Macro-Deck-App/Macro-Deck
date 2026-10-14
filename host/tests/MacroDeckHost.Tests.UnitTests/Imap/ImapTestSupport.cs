@@ -10,7 +10,12 @@ using MacroDeckHost.Integrations.Imap;
 
 namespace MacroDeckHost.Tests.UnitTests.Imap;
 
-internal sealed record FakeMail(uint Uid, string Subject, bool Seen, DateTimeOffset ReceivedAt, string Sender = "Sam Sender");
+internal sealed record FakeMail(
+	uint Uid,
+	string Subject,
+	bool Seen,
+	DateTimeOffset ReceivedAt,
+	string Sender = "Sam Sender");
 
 internal sealed class FakeImapServer : IImapSessionFactory
 {
@@ -161,21 +166,26 @@ internal sealed class FakeImapSession(FakeImapServer server) : IImapSession
 	public Task<IReadOnlyList<uint>> SearchUnreadAsync(CancellationToken cancellationToken)
 	{
 		ThrowIfDropped();
-		return Task.FromResult<IReadOnlyList<uint>>([.. server.Mails.Where(mail => !mail.Seen).Select(mail => mail.Uid)]);
+		return Task.FromResult<IReadOnlyList<uint>>(
+			[.. server.Mails.Where(mail => !mail.Seen).Select(mail => mail.Uid)]);
 	}
 
 	public Task<IReadOnlyList<ImapMessageSummary>> FetchLatestAsync(int count, CancellationToken cancellationToken)
 	{
 		ThrowIfDropped();
-		return Task.FromResult<IReadOnlyList<ImapMessageSummary>>(
-			[.. server.Mails.OrderByDescending(mail => mail.Uid).Take(count).Select(Summary)]);
+		return Task.FromResult<IReadOnlyList<ImapMessageSummary>>([
+			.. server.Mails.OrderByDescending(mail => mail.Uid).Take(count).Select(Summary)
+		]);
 	}
 
-	public Task<IReadOnlyList<ImapMessageSummary>> FetchAsync(IReadOnlyList<uint> uids, CancellationToken cancellationToken)
+	public Task<IReadOnlyList<ImapMessageSummary>> FetchAsync(
+		IReadOnlyList<uint> uids,
+		CancellationToken cancellationToken)
 	{
 		ThrowIfDropped();
-		return Task.FromResult<IReadOnlyList<ImapMessageSummary>>(
-			[.. server.Mails.Where(mail => uids.Contains(mail.Uid)).Select(Summary)]);
+		return Task.FromResult<IReadOnlyList<ImapMessageSummary>>([
+			.. server.Mails.Where(mail => uids.Contains(mail.Uid)).Select(Summary)
+		]);
 	}
 
 	public async Task IdleAsync(CancellationToken doneToken, CancellationToken cancellationToken)
@@ -204,9 +214,15 @@ internal sealed class FakeImapSession(FakeImapServer server) : IImapSession
 		return ValueTask.CompletedTask;
 	}
 
-	internal void RaiseMailboxChanged() => MailboxChanged?.Invoke(this, EventArgs.Empty);
+	internal void RaiseMailboxChanged()
+	{
+		MailboxChanged?.Invoke(this, EventArgs.Empty);
+	}
 
-	internal void Drop() => _dropped.TrySetResult();
+	internal void Drop()
+	{
+		_dropped.TrySetResult();
+	}
 
 	private void ThrowIfDropped()
 	{
@@ -217,13 +233,15 @@ internal sealed class FakeImapSession(FakeImapServer server) : IImapSession
 	}
 
 	private static ImapMessageSummary Summary(FakeMail mail)
-		=> new(mail.Uid,
+	{
+		return new ImapMessageSummary(mail.Uid,
 			mail.Sender,
 			"sam@example.com",
 			mail.Subject,
 			$"Preview of {mail.Subject}",
 			mail.ReceivedAt,
 			mail.Seen);
+	}
 }
 
 internal sealed class ImapTestContext : IIntegrationContext
@@ -240,13 +258,15 @@ internal sealed class ImapTestContext : IIntegrationContext
 	public IEventPublisher Events => throw new NotSupportedException();
 	public MacroDeck.Sdk.Notifications.IUserNotifier Notifications => throw new NotSupportedException();
 
-	public Guid AddAccount(string title,
+	public Guid AddAccount(
+		string title,
 		string host = "imap.example.com",
 		string username = "alex@example.com",
 		string password = "secret",
 		string port = "993",
 		string folder = "INBOX")
-		=> ConfigStore.AddEntry(title,
+	{
+		return ConfigStore.AddEntry(title,
 			new Dictionary<string, string?>
 			{
 				[ImapConfigKeys.Host] = host,
@@ -256,6 +276,7 @@ internal sealed class ImapTestContext : IIntegrationContext
 				[ImapConfigKeys.Folder] = folder
 			},
 			new Dictionary<string, string> { [ImapConfigKeys.Password] = password });
+	}
 }
 
 internal sealed class ImapTestConfig : IIntegrationConfig
@@ -265,7 +286,9 @@ internal sealed class ImapTestConfig : IIntegrationConfig
 	private readonly ConcurrentDictionary<(Guid EntryId, string Key), string?> _strings = new();
 	private readonly ConcurrentDictionary<(Guid EntryId, string Key), string> _secrets = new();
 
-	public Guid AddEntry(string title, IReadOnlyDictionary<string, string?> values,
+	public Guid AddEntry(
+		string title,
+		IReadOnlyDictionary<string, string?> values,
 		IReadOnlyDictionary<string, string> secrets)
 	{
 		var entryId = Guid.NewGuid();
@@ -304,10 +327,14 @@ internal sealed class ImapTestConfig : IIntegrationConfig
 	}
 
 	public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken cancellationToken = default)
 	{

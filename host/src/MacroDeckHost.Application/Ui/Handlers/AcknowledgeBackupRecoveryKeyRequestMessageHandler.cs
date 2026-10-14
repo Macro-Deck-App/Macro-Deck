@@ -10,7 +10,9 @@ public sealed class AcknowledgeBackupRecoveryKeyRequestMessageHandler
 	private readonly IBackupRecoveryKeyService _recoveryKeyService;
 
 	public AcknowledgeBackupRecoveryKeyRequestMessageHandler(IBackupRecoveryKeyService recoveryKeyService)
-		=> _recoveryKeyService = recoveryKeyService;
+	{
+		_recoveryKeyService = recoveryKeyService;
+	}
 
 	public async ValueTask<BackupRecoveryKeyResponse> Handle(
 		AcknowledgeBackupRecoveryKeyRequest request,

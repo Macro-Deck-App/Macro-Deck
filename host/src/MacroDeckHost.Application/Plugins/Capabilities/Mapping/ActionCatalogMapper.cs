@@ -6,7 +6,8 @@ namespace MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 public static class ActionCatalogMapper
 {
 	public static RemoteActionDescriptor ToDomain(ActionDescriptorDto dto)
-		=> new(dto.LocalId,
+	{
+		return new RemoteActionDescriptor(dto.LocalId,
 			dto.Name,
 			dto.Description,
 			[.. dto.Parameters.Select(ActionParameterMapper.ToDomain)],
@@ -16,12 +17,16 @@ public static class ActionCatalogMapper
 			dto.ConfiguresWithUiTree,
 			dto.ProvidesIcon,
 			dto.Role);
+	}
 
 	public static IReadOnlyList<RemoteActionDescriptor> ToDomain(ActionCatalogPayload payload)
-		=> [.. payload.Actions.Select(ToDomain)];
+	{
+		return [.. payload.Actions.Select(ToDomain)];
+	}
 
 	public static ActionDescriptorDto ToDto(RemoteActionDescriptor descriptor)
-		=> new()
+	{
+		return new ActionDescriptorDto
 		{
 			LocalId = descriptor.LocalId,
 			Name = descriptor.Name,
@@ -34,7 +39,10 @@ public static class ActionCatalogMapper
 			ProvidesIcon = descriptor.ProvidesIcon,
 			Role = descriptor.Role
 		};
+	}
 
 	public static ActionCatalogPayload ToDto(IReadOnlyList<RemoteActionDescriptor> descriptors)
-		=> new() { Actions = [.. descriptors.Select(ToDto)] };
+	{
+		return new ActionCatalogPayload { Actions = [.. descriptors.Select(ToDto)] };
+	}
 }

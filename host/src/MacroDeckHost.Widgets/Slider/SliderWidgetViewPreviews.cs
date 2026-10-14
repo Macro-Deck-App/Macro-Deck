@@ -8,35 +8,41 @@ internal static class SliderWidgetViewPreviews
 {
 	[UiPreview("Horizontal", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement Horizontal()
-		=> SliderWidgetView.Build(new SliderWidgetData
+	{
+		return SliderWidgetView.Build(new SliderWidgetData
 			{
 				Label = "Brightness",
 				ShowLabel = true,
 				ShowValue = true,
-				ValueVariable = "brightness",
+				ValueVariable = "brightness"
 			},
 			new UiState<SliderWidgetReadout>(new SliderWidgetReadout(true, 0, 100, 1, 65, Unit: "%")),
-			icon: null,
-			sliderEvents: []);
+			null,
+			[]);
+	}
 
 	[UiPreview("Vertical", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement Vertical()
-		=> SliderWidgetView.Build(new SliderWidgetData
+	{
+		return SliderWidgetView.Build(new SliderWidgetData
 			{
 				Label = "Volume",
 				IsVertical = true,
 				ShowLabel = true,
 				ShowValue = true,
-				ValueVariable = "volume",
+				ValueVariable = "volume"
 			},
 			new UiState<SliderWidgetReadout>(new SliderWidgetReadout(true, 0, 100, 5, 40)),
-			icon: null,
-			sliderEvents: []);
+			null,
+			[]);
+	}
 
 	[UiPreview("Unbound", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement Unbound()
-		=> SliderWidgetView.Build(new SliderWidgetData { Label = "Unbound", ShowLabel = true, ShowValue = false },
+	{
+		return SliderWidgetView.Build(new SliderWidgetData { Label = "Unbound", ShowLabel = true, ShowValue = false },
 			new UiState<SliderWidgetReadout>(SliderWidgetReadout.Empty),
-			icon: null,
-			sliderEvents: []);
+			null,
+			[]);
+	}
 }

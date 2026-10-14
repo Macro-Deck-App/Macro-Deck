@@ -17,7 +17,8 @@ public interface IActionInteractions
 	/// </summary>
 	/// <param name="originClientId">The client that triggered the action (the picker is shown there).</param>
 	/// <param name="instanceId">The globally-unique music player instance id the pick applies to.</param>
-	void RequestItemPicker(string? originClientId,
+	void RequestItemPicker(
+		string? originClientId,
 		string instanceId,
 		MusicPlayerCatalogItemKind kind,
 		string? prompt = null);
@@ -35,7 +36,8 @@ public interface IActionInteractions
 	/// already returned by the time the user answers, so this is the only way the reply learns whether
 	/// it is a "Play on Device" or a "Transfer Playback" pick.
 	/// </param>
-	void RequestDevicePicker(string? originClientId,
+	void RequestDevicePicker(
+		string? originClientId,
 		string instanceId,
 		bool startPlayback,
 		string? prompt = null);

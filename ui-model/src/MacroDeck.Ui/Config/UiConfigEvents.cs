@@ -69,6 +69,6 @@ public static class UiConfigEvents
 	/// remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
-		Change, Submit, Cancel, Back, Activate, Expand, Collapse, Open, Filter, Reload, Add, Remove, Provide,
+		Change, Submit, Cancel, Back, Activate, Expand, Collapse, Open, Filter, Reload, Add, Remove, Provide
 	];
 }

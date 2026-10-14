@@ -7,7 +7,8 @@ namespace MacroDeck.Plugin.Packaging.Manifest;
 // explicit "no AI": either case degrades the whole declaration to "not declared" instead of throwing.
 internal sealed class PackageAiDeclarationConverter : JsonConverter<PackageAiDeclaration?>
 {
-	public override PackageAiDeclaration? Read(ref Utf8JsonReader reader,
+	public override PackageAiDeclaration? Read(
+		ref Utf8JsonReader reader,
 		Type typeToConvert,
 		JsonSerializerOptions options)
 	{
@@ -18,10 +19,10 @@ internal sealed class PackageAiDeclarationConverter : JsonConverter<PackageAiDec
 			return null;
 		}
 
-		if (!TryFlag(root, "interaction", out var interaction) ||
-			!TryFlag(root, "generatedContent", out var generatedContent) ||
-			!TryFlag(root, "generatedAssets", out var generatedAssets) ||
-			!TryServices(root, out var services))
+		if (!TryFlag(root, "interaction", out var interaction)
+			|| !TryFlag(root, "generatedContent", out var generatedContent)
+			|| !TryFlag(root, "generatedAssets", out var generatedAssets)
+			|| !TryServices(root, out var services))
 		{
 			return null;
 		}
@@ -98,9 +99,9 @@ internal sealed class PackageAiDeclarationConverter : JsonConverter<PackageAiDec
 		foreach (var entry in value.EnumerateArray())
 		{
 			var service = entry.ValueKind == JsonValueKind.String ? entry.GetString()?.Trim() : null;
-			if (string.IsNullOrEmpty(service) ||
-				service.Length > PackageAiDeclaration.MaxServiceLength ||
-				kept.Contains(service, StringComparer.OrdinalIgnoreCase))
+			if (string.IsNullOrEmpty(service)
+				|| service.Length > PackageAiDeclaration.MaxServiceLength
+				|| kept.Contains(service, StringComparer.OrdinalIgnoreCase))
 			{
 				continue;
 			}

@@ -98,11 +98,11 @@ public sealed class SystemIntegration
 	private VariableHandle? _focusedAppBundleIdHandle;
 
 	private readonly IReadOnlyList<VariableDefinition> _fixedVariables;
-	private readonly global::System.Threading.Lock _refreshLock = new();
+	private readonly Lock _refreshLock = new();
 	private volatile AudioState _audio;
 	private volatile IReadOnlyList<string?> _diskSlots = [];
 	private volatile IReadOnlyList<VariableDefinition> _variables;
-	private readonly global::System.Threading.Lock _audioSaveLock = new();
+	private readonly Lock _audioSaveLock = new();
 	private Task _audioSaveChain = Task.CompletedTask;
 	private IIntegrationStorage _storage = UnavailableIntegrationStorage.Instance;
 	private bool _persistAudioDevices;
@@ -171,129 +171,137 @@ public sealed class SystemIntegration
 
 	public string IconMimeType => "image/svg+xml";
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new WindowsUtilsMacroDeck2Migration()];
 
 	public IReadOnlyList<VariableDefinition> Variables => _variables;
 
-	private static IReadOnlyList<VariableDefinition> BuildVariables(int gpuCount) =>
-	[
-		VariableDefinition.Eager("system_volume_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.Volume(),
-				Unit = PercentUnit,
-				SemanticKind = VariableSemanticKinds.Percentage,
-				Write = new VariableWriteCapability()
-			},
-		VariableDefinition.Eager("system_muted", VariableType.Boolean, refreshInterval: TimeSpan.FromSeconds(2))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.Muted(),
-				Write = new VariableWriteCapability()
-			},
-		VariableDefinition.Eager("system_input_volume_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.InputVolume(),
-				Unit = PercentUnit,
-				SemanticKind = VariableSemanticKinds.Percentage,
-				Write = new VariableWriteCapability()
-			},
-		VariableDefinition.Eager("system_input_muted", VariableType.Boolean, refreshInterval: TimeSpan.FromSeconds(2))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.InputMuted(),
-				Write = new VariableWriteCapability()
-			},
-		VariableDefinition.Eager("system_cpu_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.CpuUsage(),
-				Unit = PercentUnit,
-				SemanticKind = VariableSemanticKinds.Percentage
-			},
-		VariableDefinition.Eager("system_ram_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.RamUsage(),
-				Unit = PercentUnit,
-				SemanticKind = VariableSemanticKinds.Percentage
-			},
-		// Already scaled to gigabytes, so the kind stays none: the bytes formatter would divide it by 1024
-		// a second time and report a gigabyte of RAM as a megabyte.
-		VariableDefinition.Eager("system_ram_used_gb", VariableType.Numeric, 1, TimeSpan.FromSeconds(2))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.RamUsedGb(),
-				Unit = GigabyteUnit,
-				SemanticKind = VariableSemanticKinds.None
-			},
-		VariableDefinition.Eager("system_ram_total_gb", VariableType.Numeric, 1, TimeSpan.FromSeconds(30))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.RamTotalGb(),
-				Unit = GigabyteUnit,
-				SemanticKind = VariableSemanticKinds.None
-			},
-		VariableDefinition.Eager("system_cpu_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.CpuName()
-			},
-		VariableDefinition.Eager("system_pc_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.PcName()
-			},
-		VariableDefinition.Eager("system_os", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.OperatingSystem()
-			},
-		VariableDefinition.Eager("system_date", VariableType.Text, refreshInterval: TimeSpan.FromSeconds(10))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.Date()
-			},
-		VariableDefinition.Eager("system_time", VariableType.Text, refreshInterval: TimeSpan.FromSeconds(1))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.Time()
-			},
-		VariableDefinition.Eager("system_datetime", VariableType.Text, refreshInterval: TimeSpan.FromSeconds(1))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.DateTime()
-			},
-		VariableDefinition.Eager("system_timestamp_unix", VariableType.Numeric, 0, TimeSpan.FromSeconds(1))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.UnixTimestamp()
-			},
-		VariableDefinition.Eager("system_day_of_week", VariableType.Text, refreshInterval: TimeSpan.FromSeconds(10))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.DayOfWeek()
-			},
-		VariableDefinition.Eager("system_hour", VariableType.Numeric, 0, TimeSpan.FromSeconds(1))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.Hour()
-			},
-		VariableDefinition.Eager("system_minute", VariableType.Numeric, 0, TimeSpan.FromSeconds(1))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.Minute()
-			},
-		VariableDefinition.Eager("system_locked", VariableType.Boolean, refreshInterval: TimeSpan.FromSeconds(1))
-			with
-			{
-				DisplayName = AppStrings.Integrations.System.Variables.Locked()
-			},
-		.. Enumerable.Range(0, Math.Min(gpuCount, MaxIndexedGpus)).SelectMany(IndexedGpuVariables)
-	];
+	private static IReadOnlyList<VariableDefinition> BuildVariables(int gpuCount)
+	{
+		return
+		[
+			VariableDefinition.Eager("system_volume_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.Volume(),
+					Unit = PercentUnit,
+					SemanticKind = VariableSemanticKinds.Percentage,
+					Write = new VariableWriteCapability()
+				},
+			VariableDefinition.Eager("system_muted", VariableType.Boolean, refreshInterval: TimeSpan.FromSeconds(2))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.Muted(),
+					Write = new VariableWriteCapability()
+				},
+			VariableDefinition.Eager("system_input_volume_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.InputVolume(),
+					Unit = PercentUnit,
+					SemanticKind = VariableSemanticKinds.Percentage,
+					Write = new VariableWriteCapability()
+				},
+			VariableDefinition.Eager("system_input_muted",
+					VariableType.Boolean,
+					refreshInterval: TimeSpan.FromSeconds(2))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.InputMuted(),
+					Write = new VariableWriteCapability()
+				},
+			VariableDefinition.Eager("system_cpu_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.CpuUsage(),
+					Unit = PercentUnit,
+					SemanticKind = VariableSemanticKinds.Percentage
+				},
+			VariableDefinition.Eager("system_ram_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.RamUsage(),
+					Unit = PercentUnit,
+					SemanticKind = VariableSemanticKinds.Percentage
+				},
+			// Already scaled to gigabytes, so the kind stays none: the bytes formatter would divide it by 1024
+			// a second time and report a gigabyte of RAM as a megabyte.
+			VariableDefinition.Eager("system_ram_used_gb", VariableType.Numeric, 1, TimeSpan.FromSeconds(2))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.RamUsedGb(),
+					Unit = GigabyteUnit,
+					SemanticKind = VariableSemanticKinds.None
+				},
+			VariableDefinition.Eager("system_ram_total_gb", VariableType.Numeric, 1, TimeSpan.FromSeconds(30))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.RamTotalGb(),
+					Unit = GigabyteUnit,
+					SemanticKind = VariableSemanticKinds.None
+				},
+			VariableDefinition.Eager("system_cpu_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.CpuName()
+				},
+			VariableDefinition.Eager("system_pc_name", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.PcName()
+				},
+			VariableDefinition.Eager("system_os", VariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.OperatingSystem()
+				},
+			VariableDefinition.Eager("system_date", VariableType.Text, refreshInterval: TimeSpan.FromSeconds(10))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.Date()
+				},
+			VariableDefinition.Eager("system_time", VariableType.Text, refreshInterval: TimeSpan.FromSeconds(1))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.Time()
+				},
+			VariableDefinition.Eager("system_datetime", VariableType.Text, refreshInterval: TimeSpan.FromSeconds(1))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.DateTime()
+				},
+			VariableDefinition.Eager("system_timestamp_unix", VariableType.Numeric, 0, TimeSpan.FromSeconds(1))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.UnixTimestamp()
+				},
+			VariableDefinition.Eager("system_day_of_week", VariableType.Text, refreshInterval: TimeSpan.FromSeconds(10))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.DayOfWeek()
+				},
+			VariableDefinition.Eager("system_hour", VariableType.Numeric, 0, TimeSpan.FromSeconds(1))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.Hour()
+				},
+			VariableDefinition.Eager("system_minute", VariableType.Numeric, 0, TimeSpan.FromSeconds(1))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.Minute()
+				},
+			VariableDefinition.Eager("system_locked", VariableType.Boolean, refreshInterval: TimeSpan.FromSeconds(1))
+				with
+				{
+					DisplayName = AppStrings.Integrations.System.Variables.Locked()
+				},
+			.. Enumerable.Range(0, Math.Min(gpuCount, MaxIndexedGpus)).SelectMany(IndexedGpuVariables)
+		];
+	}
 
 	private static IEnumerable<VariableDefinition> IndexedGpuVariables(int index)
 	{
@@ -304,7 +312,7 @@ public sealed class SystemIntegration
 				TimeSpan.FromSeconds(3))
 			with
 			{
-				DisplayName = AppStrings.Integrations.System.Variables.GpuUsageIndexed(index: label),
+				DisplayName = AppStrings.Integrations.System.Variables.GpuUsageIndexed(label),
 				Unit = PercentUnit,
 				SemanticKind = VariableSemanticKinds.Percentage
 			};
@@ -313,7 +321,7 @@ public sealed class SystemIntegration
 				refreshInterval: TimeSpan.FromMinutes(5))
 			with
 			{
-				DisplayName = AppStrings.Integrations.System.Variables.GpuNameIndexed(index: label)
+				DisplayName = AppStrings.Integrations.System.Variables.GpuNameIndexed(label)
 			};
 	}
 
@@ -354,7 +362,7 @@ public sealed class SystemIntegration
 		await LoadKnownAudioDevicesAsync(context.Storage);
 		// IsInitialized is always true, so the poller may already have registered the fixed list; the
 		// first refresh always republishes so the stored devices are declared too.
-		await RefreshAudioDevicesAsync(republish: true, CancellationToken.None);
+		await RefreshAudioDevicesAsync(true, CancellationToken.None);
 		await RefreshDisksAsync(CancellationToken.None);
 
 		var cancellation = new CancellationTokenSource();
@@ -423,19 +431,28 @@ public sealed class SystemIntegration
 		}
 	}
 
-	internal void UseVariables(IVariableApi variables) => _variableAccessor.Current = variables;
+	internal void UseVariables(IVariableApi variables)
+	{
+		_variableAccessor.Current = variables;
+	}
 
-	internal Task RefreshAudioDevicesAsync() => RefreshAudioDevicesAsync(republish: false, CancellationToken.None);
+	internal Task RefreshAudioDevicesAsync()
+	{
+		return RefreshAudioDevicesAsync(false, CancellationToken.None);
+	}
 
-	internal Task RefreshDisksAsync() => RefreshDisksAsync(CancellationToken.None);
+	internal Task RefreshDisksAsync()
+	{
+		return RefreshDisksAsync(CancellationToken.None);
+	}
 
 	private void OnVolumeChanged()
 	{
 		List<string> ids = [VolumePercentId, MutedId];
 
 		var audio = _audio;
-		if (audio.DefaultOutputId is { } defaultOutput &&
-			audio.Known.FirstOrDefault(device =>
+		if (audio.DefaultOutputId is { } defaultOutput
+			&& audio.Known.FirstOrDefault(device =>
 				device.Flow == AudioDeviceVariables.OutputFlow && device.DeviceId == defaultOutput) is { } known)
 		{
 			ids.Add(AudioDeviceVariables.VolumeId(known));
@@ -453,7 +470,10 @@ public sealed class SystemIntegration
 		}
 	}
 
-	private void NotifyDeclarationsChanged() => _ = _variableAccessor.Current?.NotifyDeclarationsChangedAsync();
+	private void NotifyDeclarationsChanged()
+	{
+		_ = _variableAccessor.Current?.NotifyDeclarationsChangedAsync();
+	}
 
 	private async Task LoadKnownAudioDevicesAsync(IIntegrationStorage storage)
 	{
@@ -560,7 +580,9 @@ public sealed class SystemIntegration
 		IReadOnlyList<KnownAudioDevice> known,
 		HashSet<string> present,
 		string? defaultOutput)
-		=> new(known, present, defaultOutput);
+	{
+		return new AudioState(known, present, defaultOutput);
+	}
 
 	private async Task RefreshDisksAsync(CancellationToken cancellationToken)
 	{
@@ -610,12 +632,14 @@ public sealed class SystemIntegration
 	// Disks come before audio devices so that a remembered-device list loaded over its cap is what the
 	// host trims at the eager variable limit, never a disk.
 	private void ComposeVariables()
-		=> _variables =
+	{
+		_variables =
 		[
 			.. _fixedVariables,
 			.. Enumerable.Range(0, _diskSlots.Count).SelectMany(DiskVariables.Declare),
 			.. _audio.Known.SelectMany(AudioDeviceVariables.Declare)
 		];
+	}
 
 	private async Task RunDiscoveryLoopAsync(CancellationToken cancellationToken)
 	{
@@ -624,7 +648,7 @@ public sealed class SystemIntegration
 			while (true)
 			{
 				await Task.Delay(_discoveryInterval, cancellationToken);
-				await RefreshAudioDevicesAsync(republish: false, cancellationToken);
+				await RefreshAudioDevicesAsync(false, cancellationToken);
 				await RefreshDisksAsync(cancellationToken);
 			}
 		}
@@ -670,7 +694,9 @@ public sealed class SystemIntegration
 	}
 
 	private static string PresenceKey(AudioFlow flow, string deviceId)
-		=> $"{AudioDeviceVariables.FlowName(flow)}:{deviceId}";
+	{
+		return $"{AudioDeviceVariables.FlowName(flow)}:{deviceId}";
+	}
 
 	private sealed record AudioState(
 		IReadOnlyList<KnownAudioDevice> Known,
@@ -712,7 +738,9 @@ public sealed class SystemIntegration
 	}
 
 	private static async Task<VariableHandle> ResolveHandleAsync(IVariableApi api, VariableDefinition declaration)
-		=> await api.GetByNameAsync(declaration.Name!) ?? await api.CreateAsync(declaration);
+	{
+		return await api.GetByNameAsync(declaration.Name!) ?? await api.CreateAsync(declaration);
+	}
 
 	public async ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -753,7 +781,10 @@ public sealed class SystemIntegration
 		};
 	}
 
-	private async ValueTask<VariableReading> ReadDiskAsync(int index, string statistic, CancellationToken cancellationToken)
+	private async ValueTask<VariableReading> ReadDiskAsync(
+		int index,
+		string statistic,
+		CancellationToken cancellationToken)
 	{
 		var slots = _diskSlots;
 		if (index >= slots.Count || slots[index] is not { } mountPoint)
@@ -767,10 +798,14 @@ public sealed class SystemIntegration
 			: VariableReading.Unavailable;
 	}
 
-	private async ValueTask<VariableReading> ReadVolumePercentAsync(AudioTarget target, CancellationToken cancellationToken)
-		=> await _volume.GetVolumeAsync(target, cancellationToken) is { } volume
+	private async ValueTask<VariableReading> ReadVolumePercentAsync(
+		AudioTarget target,
+		CancellationToken cancellationToken)
+	{
+		return await _volume.GetVolumeAsync(target, cancellationToken) is { } volume
 			? VariableReading.Of((int)Math.Round(volume * 100), MinVolumePercent, MaxVolumePercent, 1)
 			: VariableReading.Unavailable;
+	}
 
 	private async ValueTask<VariableReading> ReadAudioDeviceAsync(
 		AudioFlow flow,
@@ -806,9 +841,9 @@ public sealed class SystemIntegration
 	private static int? IndexedGpuNumber(string localId, string suffix)
 	{
 		const string prefix = "system-gpu-";
-		if (localId.Length <= prefix.Length + suffix.Length ||
-			!localId.StartsWith(prefix, StringComparison.Ordinal) ||
-			!localId.EndsWith(suffix, StringComparison.Ordinal))
+		if (localId.Length <= prefix.Length + suffix.Length
+			|| !localId.StartsWith(prefix, StringComparison.Ordinal)
+			|| !localId.EndsWith(suffix, StringComparison.Ordinal))
 		{
 			return null;
 		}
@@ -973,18 +1008,29 @@ public sealed class SystemIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Issues.CannotResolveAutomatically()));
+	{
+		return Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Issues.CannotResolveAutomatically()));
+	}
 
-	private static string Now(string format) => DateTime.Now.ToString(format, CultureInfo.InvariantCulture);
+	private static string Now(string format)
+	{
+		return DateTime.Now.ToString(format, CultureInfo.InvariantCulture);
+	}
 
 	private static int? RoundPercent(double? value)
-		=> value is { } percent ? (int)Math.Round(percent) : null;
+	{
+		return value is { } percent ? (int)Math.Round(percent) : null;
+	}
 
 	private static int? RamUsagePercent(MemoryInfo? memory)
-		=> memory is { TotalBytes: > 0 } info ? (int)Math.Round(info.UsedBytes * 100.0 / info.TotalBytes) : null;
+	{
+		return memory is { TotalBytes: > 0 } info ? (int)Math.Round(info.UsedBytes * 100.0 / info.TotalBytes) : null;
+	}
 
 	private static double? ToGigabytes(long? bytes)
-		=> bytes is { } value ? Math.Round(value / BytesPerGigabyte, 1) : null;
+	{
+		return bytes is { } value ? Math.Round(value / BytesPerGigabyte, 1) : null;
+	}
 
 	private static byte[] LoadIcon()
 	{

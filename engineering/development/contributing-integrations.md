@@ -27,7 +27,7 @@ New integrations must be implemented inside the `MacroDeckHost.Integrations` pro
 `ProjectReferenceTests` in `host/tests/MacroDeckHost.Tests.UnitTests/Architecture` fails the build if another Macro Deck project is referenced. See [`MacroDeckHost.Integrations.csproj`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/MacroDeckHost.Integrations.csproj). Two other project settings matter for integration authors:
 
 - `*.svg` and `*.png` files are compiled in as `EmbeddedResource`. Brand icons are loaded from the assembly at runtime rather than from disk (see Step 5).
-- `InternalsVisibleTo` is granted to the four unit test projects (`MacroDeckHost.Tests.UnitTests` and its `.Windows`, `.MacOS`, `.Linux` variants), so internal helpers can be tested directly, and to `MacroDeckHost` and `MacroDeckHost.Infrastructure`, which discover and host the integrations.
+- `InternalsVisibleTo` is granted to the four unit test projects (`MacroDeckHost.Tests.UnitTests` and its `.Windows`, `.MacOS`, `.Linux` variants), so internal helpers can be tested directly. No host project gets it: apart from the public types of system integration folders, the host reaches the integrations only through the public `IntegrationDiscovery`.
 
 ### The platform library
 
@@ -35,11 +35,17 @@ New integrations must be implemented inside the `MacroDeckHost.Integrations` pro
 
 One process fact does not survive extraction: on macOS some watchers rely on the host pumping the main run loop (`MacOsMainRunLoop`). Out of process nothing pumps it, and the watchers fall back to polling.
 
+The platform library declares no static the host could write and an integration read. `PlatformStateTests` fails on any static field that is not a constant or a `readonly` field of a stateless type (primitives, strings, enums, delegates, loggers, locks, immutable value types, arrays of those, classes without instance fields). The few process facts it keeps, such as the run loop flag above, the macOS accessibility prompt claim and per-process id counters, are on the test's allow-list. The test cannot see writes into a `readonly` lookup array, so keep those tables private and never write to them.
+
 ### System integrations that need host services
 
 An `ISystemIntegration` is a host feature, exempt from the extractability rule. One that needs host services (Calendar, Email, Layouts, Migration, Variables, Widgets) lives in `host/src/MacroDeckHost.Infrastructure/SystemIntegrations/<Name>/`, not in `MacroDeckHost.Integrations`. `BuiltInIntegrations` in that folder lists both assemblies, and the startup service discovers integrations through it.
 
-Put your integration in its own folder, for example `host/src/MacroDeckHost.Integrations/MyThing/`, and keep all of its types (actions, config flow, clients) inside that folder.
+Put your integration in its own folder, for example `host/src/MacroDeckHost.Integrations/MyThing/`, and keep all of its types (actions, config flow, clients) inside that folder. A folder may use only its own types, the `MacroDeckHost.Integrations` root namespace and the shared folders, never another integration's folder: each integration has to stay extractable on its own.
+
+- The root namespace holds helpers several integrations share, such as `IntegrationHttp`, `ConfigurationIdentity` and `ScriptInputParameters`. Root code uses no integration folder. Host code uses none of it either, except the discovery entry point `IntegrationDiscovery`. Some root helpers keep state (`IntegrationHttp` holds the host's HTTP API once an integration hands it over), so do not treat the root as stateless.
+- A shared folder is a deliberately reviewed library that declares no integration, today `Ui` and `Streaming`. It is listed by name in `IntegrationBoundaryTests`; adding one is a reviewed decision, not a way around the folder rule. A shared folder uses no integration folder.
+- When two integrations need the same code, move it to the root namespace or a shared folder instead of reaching into the other integration.
 
 ---
 
@@ -251,9 +257,10 @@ More on the test setup and commands is in [building and testing](https://github.
 
 ## Architectural rules recap
 
-Every integration contribution has to satisfy these constraints, all enforced by review:
+Every integration contribution has to satisfy these constraints. Review enforces all of them, and the architecture tests in `host/tests/MacroDeckHost.Tests.UnitTests/Architecture` enforce placement and isolation:
 
 - Location. New integrations live in `MacroDeckHost.Integrations`, in their own folder, including their widget and dialog UI. Do not add integration logic to the host, application, infrastructure, or widgets projects.
+- Placement and isolation, tested. `ProjectReferenceTests` keeps `MacroDeckHost.Integrations` off the host projects. `IntegrationBoundaryTests` checks that only an `ISystemIntegration` lives outside `MacroDeckHost.Integrations`, that an integration uses no host type and no other integration's folder, and that host code uses neither a specific integration's types or ids nor the shared root helpers. `PlatformStateTests` keeps shared static state out of the platform library. The baseline `IntegrationBoundary.baseline` lists known exceptions and may only shrink. The checks follow type references in signatures and IL, so they miss what the compiler copies into the using code (constants, enum values, attribute arguments) and loading a host assembly or type by name through reflection (`Assembly.Load`, `Type.GetType`). Review has to catch those; never load host types by name from an integration.
 - No bypassing SDK abstractions. Talk to the host only through `IIntegrationContext` (variables, config, deck, notifications, Companion devices) and the SDK provider interfaces. Do not reach into host internals or persistence directly. If the SDK lacks something, it gains it for plugins too; the integration has to stay extractable into an out-of-process plugin ([ADR 0107](../decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md)).
 - Cross-platform. Macro Deck 3 runs on Linux, Windows, and macOS. Guard any OS-specific code (paths, process APIs, native calls) behind a platform check and use `Path.Combine` rather than hardcoded separators. The `System` integration's per-OS parsers and their tests are the reference for this.
 - Resource-conscious. The host is a long-lived background process. Prefer event-driven work over busy-polling, justify any timer interval, and dispose every timer, subscription, and background loop in `ShutdownAsync`. `WeatherIntegration` is the model: a single long-interval `PeriodicTimer` driven loop, a `CancellationTokenSource` that is cancelled and awaited on shutdown, and `IDisposable` cleanup.

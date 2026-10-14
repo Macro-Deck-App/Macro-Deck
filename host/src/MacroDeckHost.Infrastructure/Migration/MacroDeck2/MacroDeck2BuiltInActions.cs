@@ -24,7 +24,8 @@ internal static class MacroDeck2BuiltInActions
 		string typeName,
 		MacroDeck2Action action,
 		MacroDeck2ProfileContext context)
-		=> typeName switch
+	{
+		return typeName switch
 		{
 			"SuchByte.MacroDeck.Folders.Plugin.FolderSwitcher" => ChangeFolder(action, context),
 			"SuchByte.MacroDeck.Folders.Plugin.GoToParentFolder"
@@ -41,6 +42,7 @@ internal static class MacroDeck2BuiltInActions
 			"SuchByte.MacroDeck.Variables.Plugin.ChangeVariableValueAction" => ChangeVariable(action),
 			_ => null
 		};
+	}
 
 	/// <summary>
 	/// The folder switcher stores a bare Macro Deck 2 folder id rather than JSON, and that id has to become
@@ -65,24 +67,30 @@ internal static class MacroDeck2BuiltInActions
 	/// than approximate: a Macro Deck 2 profile has precisely one root.
 	/// </summary>
 	private static ActionMigrationResult? GoToRoot(MacroDeck2Action action, MacroDeck2ProfileContext context)
-		=> context.RootFolderId is not { } rootId
+	{
+		return context.RootFolderId is not { } rootId
 			? null
 			: new ActionMigrationResult(DeckIntegrationId,
 				"change-folder",
 				action.Name ?? "Go to root folder",
 				Parameters(("folderId", JsonString(rootId.ToString()))));
+	}
 
 	private static ActionMigrationResult SetState(MacroDeck2Action action, string state)
-		=> new(WidgetIntegrationId,
+	{
+		return new ActionMigrationResult(WidgetIntegrationId,
 			"set-state",
 			action.Name ?? $"Set state {state}",
 			Parameters(("widget", JsonString(WidgetTargets.Self)), ("state", JsonString(state))));
+	}
 
 	private static ActionMigrationResult ToggleState(MacroDeck2Action action)
-		=> new(WidgetIntegrationId,
+	{
+		return new ActionMigrationResult(WidgetIntegrationId,
 			"toggle-state",
 			action.Name ?? "Toggle state",
 			Parameters(("widget", JsonString(WidgetTargets.Self))));
+	}
 
 	private static ActionMigrationResult? SetBackgroundColor(MacroDeck2Action action)
 	{
@@ -166,12 +174,19 @@ internal static class MacroDeck2BuiltInActions
 	}
 
 	private static string? ReadString(JsonElement config, string name)
-		=> config.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return config.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
-	private static JsonElement JsonString(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonString(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

@@ -41,18 +41,25 @@ public sealed class PluginCompanionDeviceAccessPolicy(
 
 	private readonly PluginPermissionDeclarations _declarations =
 		new(PluginPermissions.HostCompanionDevices, sessionRegistry, installationCatalog, manifestReader);
+
 	private readonly SemaphoreSlim _gate = new(1, 1);
 	private volatile StrongBox<bool>? _allowPlugins;
 
 	public event Action? Changed;
 
-	public async Task<PluginCompanionDeviceAccess> EvaluateAsync(string pluginId,
+	public async Task<PluginCompanionDeviceAccess> EvaluateAsync(
+		string pluginId,
 		CancellationToken cancellationToken = default)
-		=> await GetAllowPluginsAsync(cancellationToken) && _declarations.IsGrantable(pluginId)
+	{
+		return await GetAllowPluginsAsync(cancellationToken) && _declarations.IsGrantable(pluginId)
 			? PluginCompanionDeviceAccess.Available
 			: PluginCompanionDeviceAccess.NotAllowed;
+	}
 
-	public bool CanBeGranted(string pluginId) => _declarations.IsGrantable(pluginId);
+	public bool CanBeGranted(string pluginId)
+	{
+		return _declarations.IsGrantable(pluginId);
+	}
 
 	public async Task<bool> GetAllowPluginsAsync(CancellationToken cancellationToken = default)
 	{

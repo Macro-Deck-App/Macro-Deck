@@ -45,7 +45,7 @@ public class IconPackExportServiceTests
 	public async Task Export_CarriesTheManifestAndOnlyEachIconsMaster_EvenWhenSizeVariantsExistLocally()
 	{
 		var pack = await _harness.CreatePack("My Pack");
-		var icon = await AddReadyIcon(pack, "star", sizes: [128, 256, 512]);
+		var icon = await AddReadyIcon(pack, "star", [128, 256, 512]);
 
 		await using var archive = await ExportToArchive(pack.Id);
 		var manifest = ReadManifest(archive);
@@ -69,10 +69,10 @@ public class IconPackExportServiceTests
 		pack.SourceId = "com.example.logos/logos";
 		pack.SourceRevision = "sha256:" + new string('a', 64);
 		await _harness.Cache.AddOrUpdatePack(pack);
-		await AddReadyIcon(pack, "spotify", sizes: []);
+		await AddReadyIcon(pack, "spotify", []);
 
 		await using var archive = await ExportToArchive(pack.Id);
-		await using var stream = archive.GetEntry("pack.json")!.Open();
+		await using var stream = await archive.GetEntry("pack.json")!.OpenAsync();
 		using var document = await JsonDocument.ParseAsync(stream);
 		var olderReader = document.RootElement.Deserialize<OlderPackManifest>(_manifestOptions);
 
@@ -98,10 +98,10 @@ public class IconPackExportServiceTests
 	[Test]
 	public async Task Export_ScrubsDefaultReadOnlySourceIdAndBatchIds()
 	{
-		var pack = await _harness.CreatePack("Default Pack", isDefault: true);
+		var pack = await _harness.CreatePack("Default Pack", true);
 		pack.SourceId = "import:someorigin";
 		await _harness.Cache.AddOrUpdatePack(pack);
-		var icon = await AddReadyIcon(pack, "a", sizes: [], importBatchId: Guid.NewGuid());
+		var icon = await AddReadyIcon(pack, "a", [], Guid.NewGuid());
 
 		await using var archive = await ExportToArchive(pack.Id);
 		var manifest = ReadManifest(archive);
@@ -119,7 +119,7 @@ public class IconPackExportServiceTests
 	public async Task Export_ExcludesIconsThatAreNotReady()
 	{
 		var pack = await _harness.CreatePack();
-		await AddReadyIcon(pack, "ready", sizes: []);
+		await AddReadyIcon(pack, "ready", []);
 		await _harness.Cache.AddIcons(pack.Id,
 		[
 			new IconEntity
@@ -142,7 +142,7 @@ public class IconPackExportServiceTests
 	public async Task Export_DeclaresEveryEntryWithItsRealDigestAndSize()
 	{
 		var pack = await _harness.CreatePack("My Pack");
-		var icon = await AddReadyIcon(pack, "star", sizes: [128]);
+		var icon = await AddReadyIcon(pack, "star", [128]);
 
 		await using var archive = await ExportToArchive(pack.Id);
 		var manifest = ReadManifest(archive);
@@ -155,9 +155,9 @@ public class IconPackExportServiceTests
 		{
 			var entry = archive.GetEntry(file.Path);
 			Assert.That(entry, Is.Not.Null);
-			using var stream = entry!.Open();
+			using var stream = await entry!.OpenAsync();
 			using var buffer = new MemoryStream();
-			stream.CopyTo(buffer);
+			await stream.CopyToAsync(buffer);
 			var bytes = buffer.ToArray();
 
 			Assert.That(file.Size, Is.EqualTo(bytes.Length));
@@ -169,7 +169,7 @@ public class IconPackExportServiceTests
 	public async Task Export_DeclaredFilesExcludeTheManifestItself()
 	{
 		var pack = await _harness.CreatePack("My Pack");
-		await AddReadyIcon(pack, "star", sizes: []);
+		await AddReadyIcon(pack, "star", []);
 
 		await using var archive = await ExportToArchive(pack.Id);
 		var manifest = ReadManifest(archive);
@@ -181,8 +181,8 @@ public class IconPackExportServiceTests
 	public async Task Export_TwiceForIdenticalContent_ProducesAnIdenticallyOrderedDeclaredList()
 	{
 		var pack = await _harness.CreatePack("My Pack");
-		await AddReadyIcon(pack, "a", sizes: [128, 256]);
-		await AddReadyIcon(pack, "b", sizes: [16]);
+		await AddReadyIcon(pack, "a", [128, 256]);
+		await AddReadyIcon(pack, "b", [16]);
 
 		await using var first = await ExportToArchive(pack.Id);
 		await using var second = await ExportToArchive(pack.Id);
@@ -226,7 +226,8 @@ public class IconPackExportServiceTests
 	public async Task Export_PackWhoseIconsAndManifestFillTheUnsignedEntryBound_Exports()
 	{
 		var pack = await _harness.CreatePack("Full");
-		await _harness.Cache.AddIcons(pack.Id, IconsWithSizeVariants(pack, IconPackArchiveLimits.MaxUnsignedEntries - 1));
+		await _harness.Cache.AddIcons(pack.Id,
+			IconsWithSizeVariants(pack, IconPackArchiveLimits.MaxUnsignedEntries - 1));
 		using var destination = new MemoryStream();
 
 		var result = await _service.Export(pack.Id, destination, CancellationToken.None);
@@ -256,7 +257,8 @@ public class IconPackExportServiceTests
 	}
 
 	private static List<IconEntity> IconsWithSizeVariants(IconPackEntity pack, int count)
-		=> Enumerable.Range(0, count)
+	{
+		return Enumerable.Range(0, count)
 			.Select(index => new IconEntity
 			{
 				Id = Guid.CreateVersion7(),
@@ -268,6 +270,7 @@ public class IconPackExportServiceTests
 				CreatedAt = DateTime.UtcNow
 			})
 			.ToList();
+	}
 
 	[Test]
 	public async Task Export_PackJsonAboveTheUnsignedManifestBound_IsRefusedAndWritesNothing()
@@ -275,7 +278,7 @@ public class IconPackExportServiceTests
 		var pack = await _harness.CreatePack("Wordy");
 		pack.Description = new string('\u00e4', IconPackArchiveLimits.MaxUnsignedManifestBytes / 6 + 1);
 		await _harness.Cache.AddOrUpdatePack(pack);
-		await AddReadyIcon(pack, "star", sizes: [128]);
+		await AddReadyIcon(pack, "star", [128]);
 		using var destination = new MemoryStream();
 
 		var result = await _service.Export(pack.Id, destination, CancellationToken.None);
@@ -292,7 +295,7 @@ public class IconPackExportServiceTests
 	public async Task Export_LeavesNoStagingFileBehind()
 	{
 		var pack = await _harness.CreatePack("Small");
-		await AddReadyIcon(pack, "star", sizes: [128]);
+		await AddReadyIcon(pack, "star", [128]);
 
 		await using var archive = await ExportToArchive(pack.Id);
 
@@ -302,14 +305,15 @@ public class IconPackExportServiceTests
 	[Test]
 	public async Task Export_SweepsStagingFilesAnEarlierExportAbandoned()
 	{
-		var directory = Directory.CreateDirectory(Path.Combine(_harness.Paths.IconStagingDirectory, "_export")).FullName;
+		var directory = Directory.CreateDirectory(Path.Combine(_harness.Paths.IconStagingDirectory, "_export"))
+			.FullName;
 		var abandoned = Path.Combine(directory, "abandoned.tmp");
 		var recent = Path.Combine(directory, "recent.tmp");
 		await File.WriteAllBytesAsync(abandoned, [1]);
 		await File.WriteAllBytesAsync(recent, [1]);
 		File.SetLastWriteTimeUtc(abandoned, DateTime.UtcNow.AddDays(-2));
 		var pack = await _harness.CreatePack("Small");
-		await AddReadyIcon(pack, "star", sizes: []);
+		await AddReadyIcon(pack, "star", []);
 
 		await using var archive = await ExportToArchive(pack.Id);
 
@@ -322,7 +326,8 @@ public class IconPackExportServiceTests
 		return Directory.Exists(directory) ? Directory.GetFiles(directory) : [];
 	}
 
-	private async Task<IconEntity> AddReadyIcon(IconPackEntity pack,
+	private async Task<IconEntity> AddReadyIcon(
+		IconPackEntity pack,
 		string name,
 		int[] sizes,
 		Guid? importBatchId = null)

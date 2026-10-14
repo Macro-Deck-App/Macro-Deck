@@ -43,7 +43,10 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 
 	public string Name => SourceDisplayName;
 
-	public string? TryDetectDefaultPath() => MacroDeck2Paths.TryDetectDefaultPath();
+	public string? TryDetectDefaultPath()
+	{
+		return MacroDeck2Paths.TryDetectDefaultPath();
+	}
 
 	public bool Recognizes(string path)
 	{
@@ -240,7 +243,9 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 		}
 
 		string ResolveVariable(string name)
-			=> variableNames.TryGetValue(name, out var mapped) ? mapped : name;
+		{
+			return variableNames.TryGetValue(name, out var mapped) ? mapped : name;
+		}
 
 		var translator = new MacroDeck2ButtonTranslator(ResolveIcon, ResolveVariable);
 
@@ -322,8 +327,8 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 			{
 				Id = folderIds[folder.FolderId],
 				Name = folder.IsRoot ? "Root" : folder.DisplayName,
-				ParentId = parents.TryGetValue(folder.FolderId, out var parent) &&
-					folderIds.TryGetValue(parent, out var parentId)
+				ParentId = parents.TryGetValue(folder.FolderId, out var parent)
+					&& folderIds.TryGetValue(parent, out var parentId)
 						? parentId
 						: null,
 				Order = order,
@@ -341,17 +346,17 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 
 			foreach (var button in folder.ActionButtons)
 			{
-				if (button.PositionX < 0 ||
-					button.PositionY < 0 ||
-					button.PositionX >= columns ||
-					button.PositionY >= rows)
+				if (button.PositionX < 0
+					|| button.PositionY < 0
+					|| button.PositionX >= columns
+					|| button.PositionY >= rows)
 				{
 					plan.Warnings.Add(new MigrationWarning(MigrationWarningKind.SkippedWidget,
 						folder.DisplayName,
-						AppStrings.Migration.Warning.ButtonOutsideGrid(column: button.PositionX,
-							row: button.PositionY,
-							columns: columns,
-							rows: rows)));
+						AppStrings.Migration.Warning.ButtonOutsideGrid(button.PositionX,
+							button.PositionY,
+							columns,
+							rows)));
 					continue;
 				}
 
@@ -494,7 +499,7 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 			{
 				plan.Warnings.Add(new MigrationWarning(MigrationWarningKind.DuplicateSourceFile,
 					plugin.Key,
-					AppStrings.Migration.Warning.DuplicateSettingsFile(name: claimed[integrationId])));
+					AppStrings.Migration.Warning.DuplicateSettingsFile(claimed[integrationId])));
 				continue;
 			}
 
@@ -503,9 +508,10 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 
 		// A plugin whose values stayed shut is reported per plugin rather than per run: with a mixed folder
 		// the run as a whole succeeded, and only the affected integrations are left unconfigured.
-		foreach (var plugin in data.Plugins.Where(plugin => plugin.HadEncryptedValues &&
-			plugin.Credentials.Count == 0 &&
-			_migrators.FindBySettingsSource(MigrationSource.MacroDeck2, plugin.Key) is not null))
+		foreach (var plugin in data.Plugins.Where(plugin
+			=> plugin.HadEncryptedValues
+			&& plugin.Credentials.Count == 0
+			&& _migrators.FindBySettingsSource(MigrationSource.MacroDeck2, plugin.Key) is not null))
 		{
 			plan.Warnings.Add(new MigrationWarning(MigrationWarningKind.SkippedCredentials,
 				plugin.Key,
@@ -527,10 +533,12 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 	/// verbatim, 40 would arrive close to twice as round as it ever looked.
 	/// </summary>
 	private static int? BorderRadius(int buttonRadius)
-		=> buttonRadius > 0
+	{
+		return buttonRadius > 0
 			? Math.Max(1,
 				(int)Math.Round(buttonRadius / 100.0 / 2 * ReferenceCellSize, MidpointRounding.AwayFromZero))
 			: null;
+	}
 
 	private static Dictionary<string, string> BuildVariableNames(MacroDeck2Paths paths, MigrationPlan plan)
 	{

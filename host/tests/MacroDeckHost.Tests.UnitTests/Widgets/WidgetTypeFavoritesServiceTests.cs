@@ -41,10 +41,17 @@ public class WidgetTypeFavoritesServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _services.Dispose();
+	public void TearDown()
+	{
+		_services.Dispose();
+	}
 
 	private WidgetTypeFavoritesService CreateService()
-		=> new(_services.GetRequiredService<IServiceScopeFactory>(), _registry, _publisher);
+	{
+		return new WidgetTypeFavoritesService(_services.GetRequiredService<IServiceScopeFactory>(),
+			_registry,
+			_publisher);
+	}
 
 	[Test]
 	public async Task A_starred_type_is_remembered_across_a_host_restart()
@@ -137,8 +144,8 @@ public class WidgetTypeFavoritesServiceTests
 			JsonSerializer.Serialize(full);
 		var handler = new SetWidgetTypeFavoriteRequestMessageHandler(CreateService());
 
-		var response = await handler.Handle(
-			new SetWidgetTypeFavoriteRequest { WidgetTypeId = WidgetTypeIds.Clock, Favorite = true },
+		var response = await handler.Handle(new SetWidgetTypeFavoriteRequest
+				{ WidgetTypeId = WidgetTypeIds.Clock, Favorite = true },
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -181,9 +188,11 @@ public class WidgetTypeFavoritesServiceTests
 		public ConcurrentDictionary<string, string> Values { get; } = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(Values.TryGetValue(key, out var value)
+		{
+			return Task.FromResult(Values.TryGetValue(key, out var value)
 				? new AppPreferenceEntity { Key = key, Value = value }
 				: null);
+		}
 
 		public Task SetValue(string key, string value)
 		{

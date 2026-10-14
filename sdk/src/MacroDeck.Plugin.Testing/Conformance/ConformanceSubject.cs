@@ -90,7 +90,9 @@ public abstract class ConformanceSubject : IAsyncDisposable
 		MacroDeckTestHost host,
 		string? stateDirectory = null,
 		CancellationToken cancellationToken = default)
-		=> StartAsync(host, stateDirectory, credentials: null, cancellationToken);
+	{
+		return StartAsync(host, stateDirectory, null, cancellationToken);
+	}
 
 	/// <summary>
 	/// Starts one fresh instance of this subject against <paramref name="host" />, authenticating with
@@ -200,7 +202,10 @@ public abstract class ConformanceSubject : IAsyncDisposable
 			return new ConformanceSubjectHandle { Plugin = plugin };
 		}
 
-		public override ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public override ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 
 	private sealed class ArtifactConformanceSubject(string macroDeckPluginPath) : ConformanceSubject
@@ -231,7 +236,7 @@ public abstract class ConformanceSubject : IAsyncDisposable
 			{
 				try
 				{
-					Directory.Delete(directory, recursive: true);
+					Directory.Delete(directory, true);
 				}
 				catch (IOException)
 				{

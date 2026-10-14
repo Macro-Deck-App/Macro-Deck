@@ -32,14 +32,23 @@ internal sealed class CliConsole
 
 	public bool NoColor => !_color;
 
-	public void WriteLine(string message = "") => _output.WriteLine(message);
+	public void WriteLine(string message = "")
+	{
+		_output.WriteLine(message);
+	}
 
 	/// <summary>Writes without a trailing newline - for a wizard prompt that expects the answer on the same
 	/// line. Ungated by <c>--verbosity</c>, like <see cref="WriteError" />: a prompt is part of the
 	/// interaction itself, never narration that could be silenced.</summary>
-	public void Write(string message) => _output.Write(message);
+	public void Write(string message)
+	{
+		_output.Write(message);
+	}
 
-	public void WriteErrorLine(string message) => _error.WriteLine(message);
+	public void WriteErrorLine(string message)
+	{
+		_error.WriteLine(message);
+	}
 
 	/// <summary>Writes the unified <c>error &lt;code&gt;: &lt;message&gt;</c> diagnostic shape. Not gated by
 	/// <c>--verbosity</c> - unlike <see cref="Trace" /> and <see cref="Info" />, a diagnostic is the
@@ -58,8 +67,10 @@ internal sealed class CliConsole
 
 	/// <summary>Writes the unified <c>warning &lt;code&gt;: &lt;message&gt;</c> diagnostic shape. Not gated
 	/// by <c>--verbosity</c> - see <see cref="WriteError" />. Written to stderr for the same reason.</summary>
-	public void WriteWarning(string code, string message) =>
+	public void WriteWarning(string code, string message)
+	{
 		_error.WriteLine(Colorize($"warning {code}: {message}", CliColor.Yellow));
+	}
 
 	/// <summary>Written only at <see cref="Cli.Verbosity.Diagnostic" /> - a command's own narration of what
 	/// it is doing, never required to interpret the result.</summary>
@@ -80,5 +91,8 @@ internal sealed class CliConsole
 		}
 	}
 
-	public string Colorize(string text, CliColor color) => _color ? $"[{(int)color}m{text}[0m" : text;
+	public string Colorize(string text, CliColor color)
+	{
+		return _color ? $"[{(int)color}m{text}[0m" : text;
+	}
 }

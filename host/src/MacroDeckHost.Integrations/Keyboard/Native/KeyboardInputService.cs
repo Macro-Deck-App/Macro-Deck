@@ -33,7 +33,9 @@ public sealed class KeyboardInputService : IKeyboardInputService
 	private Emitter GlobalEmitter => new(_provider.KeyDown, _provider.KeyUp, _provider.TypeUnicode);
 
 	public Task RequestPermissionAsync(CancellationToken cancellationToken = default)
-		=> Task.Run(_provider.RequestPermission, cancellationToken);
+	{
+		return Task.Run(_provider.RequestPermission, cancellationToken);
+	}
 
 	public Task PressComboAsync(
 		KeyModifier modifiers,
@@ -140,7 +142,7 @@ public sealed class KeyboardInputService : IKeyboardInputService
 	{
 		if (!target.HasProcess)
 		{
-			return KeyboardSessionResult.Opened(new Session(this, GlobalEmitter, window: null, focus: null));
+			return KeyboardSessionResult.Opened(new Session(this, GlobalEmitter, null, null));
 		}
 
 		switch (target.Mode)
@@ -155,7 +157,7 @@ public sealed class KeyboardInputService : IKeyboardInputService
 
 				var foreground = _provider.GetForegroundProcessName();
 				return KeyboardProcessName.Matches(foreground, target.ProcessName)
-					? KeyboardSessionResult.Opened(new Session(this, GlobalEmitter, window: null, focus: null))
+					? KeyboardSessionResult.Opened(new Session(this, GlobalEmitter, null, null))
 					: KeyboardSessionResult.Unavailable(KeyboardSessionUnavailableReason.NotFocused);
 			}
 
@@ -203,7 +205,7 @@ public sealed class KeyboardInputService : IKeyboardInputService
 				}
 
 				var emitter = new Emitter(window.KeyDown, window.KeyUp, window.TypeUnicode);
-				return KeyboardSessionResult.Opened(new Session(this, emitter, window, focus: null));
+				return KeyboardSessionResult.Opened(new Session(this, emitter, window, null));
 			}
 
 			default:
@@ -419,14 +421,17 @@ public sealed class KeyboardInputService : IKeyboardInputService
 	}
 
 	private void WarnUnsupported(KeyboardTarget target, string mode)
-		=> _logger.Warning(
-			"Keyboard target mode '{Mode}' is not supported on {Platform}; skipping keystroke to {Process}",
+	{
+		_logger.Warning("Keyboard target mode '{Mode}' is not supported on {Platform}; skipping keystroke to {Process}",
 			mode,
 			_provider.PlatformName,
 			target.ProcessName);
+	}
 
 	private void DebugUnresolved(KeyboardTarget target)
-		=> _logger.Debug("No window found for keyboard target process {Process}; skipping", target.ProcessName);
+	{
+		_logger.Debug("No window found for keyboard target process {Process}; skipping", target.ProcessName);
+	}
 
 	private void EnsureSupported()
 	{
@@ -514,10 +519,14 @@ public sealed class KeyboardInputService : IKeyboardInputService
 			int repeat = 1,
 			int repeatDelayMs = 0,
 			CancellationToken cancellationToken = default)
-			=> _owner.RunPressComboAsync(_emitter, modifiers, key, repeat, repeatDelayMs, cancellationToken);
+		{
+			return _owner.RunPressComboAsync(_emitter, modifiers, key, repeat, repeatDelayMs, cancellationToken);
+		}
 
 		public Task TypeTextAsync(string text, CancellationToken cancellationToken = default)
-			=> _owner.RunTypeTextAsync(_emitter, text, cancellationToken);
+		{
+			return _owner.RunTypeTextAsync(_emitter, text, cancellationToken);
+		}
 
 		public Task KeyDownAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
 		{

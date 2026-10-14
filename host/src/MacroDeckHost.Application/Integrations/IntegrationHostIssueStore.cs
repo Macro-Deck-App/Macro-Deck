@@ -38,7 +38,7 @@ public sealed class IntegrationHostIssueStore : IIntegrationHostIssueStore
 		{
 			Id = IntegrationHostIssueIds.Startup,
 			Title = AppStrings.Integrations.Issues.StartupFailedTitle(),
-			Description = AppStrings.Errors.Integrations.StartupFailed(details: details),
+			Description = AppStrings.Errors.Integrations.StartupFailed(details),
 			Severity = IntegrationIssueSeverity.Error,
 			ActionLabel = AppStrings.Integrations.Issues.StartupRetry()
 		};
@@ -67,7 +67,12 @@ public sealed class IntegrationHostIssueStore : IIntegrationHostIssueStore
 	}
 
 	public IReadOnlyList<IntegrationIssue> IssuesFor(string integrationId)
-		=> _issues.TryGetValue(integrationId, out var issue) ? [issue] : [];
+	{
+		return _issues.TryGetValue(integrationId, out var issue) ? [issue] : [];
+	}
 
-	public bool Has(string integrationId) => _issues.ContainsKey(integrationId);
+	public bool Has(string integrationId)
+	{
+		return _issues.ContainsKey(integrationId);
+	}
 }

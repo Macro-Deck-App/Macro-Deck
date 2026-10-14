@@ -16,7 +16,10 @@ public class GitHubStarPromptController : ControllerBase
 	}
 
 	[HttpGet]
-	public Task<GetGitHubStarPromptResponse> Get() => _prompt.GetPrompt();
+	public Task<GetGitHubStarPromptResponse> Get()
+	{
+		return _prompt.GetPrompt();
+	}
 
 	[HttpPost("shown")]
 	public async Task<IActionResult> MarkShown(CancellationToken ct)

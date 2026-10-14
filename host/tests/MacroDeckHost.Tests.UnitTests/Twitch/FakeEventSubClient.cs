@@ -41,9 +41,15 @@ internal sealed class FakeEventSubClient : ITwitchEventSubClient
 		return Task.CompletedTask;
 	}
 
-	public void Dispose() => Disposed = true;
+	public void Dispose()
+	{
+		Disposed = true;
+	}
 
-	public void Raise(TwitchEventSubMessage message) => MessageReceived?.Invoke(this, message);
+	public void Raise(TwitchEventSubMessage message)
+	{
+		MessageReceived?.Invoke(this, message);
+	}
 
 	public void Drop(string? reason = "closed")
 	{
@@ -56,36 +62,47 @@ internal sealed class FakeEventSubClient : ITwitchEventSubClient
 		string subscriptionType,
 		string eventJson = "{}",
 		DateTimeOffset? timestamp = null)
-		=> new(messageId,
+	{
+		return new TwitchEventSubMessage(messageId,
 			TwitchEventSubMessageTypes.Notification,
 			timestamp ?? DateTimeOffset.UtcNow,
 			subscriptionType,
 			"1",
 			Payload("{\"event\":" + eventJson + "}"));
+	}
 
 	public static TwitchEventSubMessage Reconnect(string url)
-		=> new("reconnect-1",
+	{
+		return new TwitchEventSubMessage("reconnect-1",
 			TwitchEventSubMessageTypes.Reconnect,
 			DateTimeOffset.UtcNow,
 			null,
 			null,
 			Payload("{\"session\":{\"id\":\"session-2\",\"reconnect_url\":\"" + url + "\"}}"));
+	}
 
 	public static TwitchEventSubMessage Revocation(string subscriptionType, string status)
-		=> new("revocation-1",
+	{
+		return new TwitchEventSubMessage("revocation-1",
 			TwitchEventSubMessageTypes.Revocation,
 			DateTimeOffset.UtcNow,
 			subscriptionType,
 			"1",
 			Payload("{\"subscription\":{\"type\":\"" + subscriptionType + "\",\"status\":\"" + status + "\"}}"));
+	}
 
 	public static TwitchEventSubMessage Keepalive()
-		=> new("keepalive-1",
+	{
+		return new TwitchEventSubMessage("keepalive-1",
 			TwitchEventSubMessageTypes.Keepalive,
 			DateTimeOffset.UtcNow,
 			null,
 			null,
 			Payload("{}"));
+	}
 
-	private static JsonElement Payload(string json) => JsonDocument.Parse(json).RootElement.Clone();
+	private static JsonElement Payload(string json)
+	{
+		return JsonDocument.Parse(json).RootElement.Clone();
+	}
 }

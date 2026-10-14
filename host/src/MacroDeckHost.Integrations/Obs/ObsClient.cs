@@ -15,13 +15,13 @@ internal sealed class ObsClient : IObsClient
 
 	// Every category a handler below needs and nothing else. The library default is All, which also
 	// carries SceneItems, MediaInputs, Vendors and Canvases traffic nothing here reads.
-	internal const EventSubscription BaseSubscriptions = EventSubscription.General |
-		EventSubscription.Config |
-		EventSubscription.Scenes |
-		EventSubscription.Inputs |
-		EventSubscription.Filters |
-		EventSubscription.Outputs |
-		EventSubscription.Ui;
+	internal const EventSubscription BaseSubscriptions = EventSubscription.General
+		| EventSubscription.Config
+		| EventSubscription.Scenes
+		| EventSubscription.Inputs
+		| EventSubscription.Filters
+		| EventSubscription.Outputs
+		| EventSubscription.Ui;
 
 	private readonly OBSWebsocket _obs = new();
 	private int _activityHandlersAttached;
@@ -94,7 +94,10 @@ internal sealed class ObsClient : IObsClient
 
 	public bool IsConnected => _obs.IsConnected;
 
-	public void Connect(string url, string? password) => _ = ConnectCoreAsync(url, password);
+	public void Connect(string url, string? password)
+	{
+		_ = ConnectCoreAsync(url, password);
+	}
 
 	public void Disconnect()
 	{
@@ -154,7 +157,10 @@ internal sealed class ObsClient : IObsClient
 
 		if (status.StudioModeActive)
 		{
-			status = status with { PreviewScene = ReadStatus(() => _obs.GetCurrentPreviewScene(), status.PreviewScene) };
+			status = status with
+			{
+				PreviewScene = ReadStatus(() => _obs.GetCurrentPreviewScene(), status.PreviewScene)
+			};
 		}
 
 		var stats = ReadStatus(() => _obs.GetStats(), null);
@@ -191,7 +197,9 @@ internal sealed class ObsClient : IObsClient
 	}
 
 	public IReadOnlyList<string> GetGroupNames()
-		=> Try(() => _obs.GetGroupList(), null) ?? [];
+	{
+		return Try(() => _obs.GetGroupList(), null) ?? [];
+	}
 
 	public IReadOnlyList<string> GetGroupItemNames(string groupName)
 	{
@@ -210,7 +218,9 @@ internal sealed class ObsClient : IObsClient
 	}
 
 	public IReadOnlyList<string> GetSourceNames()
-		=> GetSceneNames().Concat(GetInputNames()).Distinct(StringComparer.Ordinal).ToList();
+	{
+		return GetSceneNames().Concat(GetInputNames()).Distinct(StringComparer.Ordinal).ToList();
+	}
 
 	public IReadOnlyList<string> GetSourceFilterNames(string sourceName)
 	{
@@ -225,75 +235,153 @@ internal sealed class ObsClient : IObsClient
 	}
 
 	public IReadOnlyList<string> GetSceneCollectionNames()
-		=> Try(() => _obs.GetSceneCollectionList(), null) ?? [];
+	{
+		return Try(() => _obs.GetSceneCollectionList(), null) ?? [];
+	}
 
 	public IReadOnlyList<string> GetOutputNames()
 	{
-		var response = TranslateOutputErrors("GetOutputList", string.Empty,
+		var response = TranslateOutputErrors("GetOutputList",
+			string.Empty,
 			() => _obs.SendRequest("GetOutputList", new JObject()));
 		return response?["outputs"] is JArray outputs
-			? outputs.Select(o => o.Value<string>("outputName")).OfType<string>().Distinct(StringComparer.Ordinal).ToList()
+			? outputs.Select(o => o.Value<string>("outputName"))
+				.OfType<string>()
+				.Distinct(StringComparer.Ordinal)
+				.ToList()
 			: [];
 	}
 
-	public void SetCurrentScene(string sceneName) => _obs.SetCurrentProgramScene(sceneName);
+	public void SetCurrentScene(string sceneName)
+	{
+		_obs.SetCurrentProgramScene(sceneName);
+	}
 
-	public void SetPreviewScene(string sceneName) => _obs.SetCurrentPreviewScene(sceneName);
+	public void SetPreviewScene(string sceneName)
+	{
+		_obs.SetCurrentPreviewScene(sceneName);
+	}
 
-	public void SetCurrentProfile(string profileName) => _obs.SetCurrentProfile(profileName);
+	public void SetCurrentProfile(string profileName)
+	{
+		_obs.SetCurrentProfile(profileName);
+	}
 
 	public void SetCurrentSceneCollection(string sceneCollectionName)
-		=> Request(() => _obs.SetCurrentSceneCollection(sceneCollectionName));
+	{
+		Request(() => _obs.SetCurrentSceneCollection(sceneCollectionName));
+	}
 
-	public void StartRecord() => _obs.StartRecord();
+	public void StartRecord()
+	{
+		_obs.StartRecord();
+	}
 
-	public void StopRecord() => _obs.StopRecord();
+	public void StopRecord()
+	{
+		_obs.StopRecord();
+	}
 
-	public void ToggleRecord() => _obs.ToggleRecord();
+	public void ToggleRecord()
+	{
+		_obs.ToggleRecord();
+	}
 
-	public void ToggleRecordPause() => _obs.ToggleRecordPause();
+	public void ToggleRecordPause()
+	{
+		_obs.ToggleRecordPause();
+	}
 
-	public void StartStream() => _obs.StartStream();
+	public void StartStream()
+	{
+		_obs.StartStream();
+	}
 
-	public void StopStream() => _obs.StopStream();
+	public void StopStream()
+	{
+		_obs.StopStream();
+	}
 
-	public void ToggleStream() => _obs.ToggleStream();
+	public void ToggleStream()
+	{
+		_obs.ToggleStream();
+	}
 
-	public void StartVirtualCam() => _obs.StartVirtualCam();
+	public void StartVirtualCam()
+	{
+		_obs.StartVirtualCam();
+	}
 
-	public void StopVirtualCam() => _obs.StopVirtualCam();
+	public void StopVirtualCam()
+	{
+		_obs.StopVirtualCam();
+	}
 
-	public void ToggleVirtualCam() => _obs.ToggleVirtualCam();
+	public void ToggleVirtualCam()
+	{
+		_obs.ToggleVirtualCam();
+	}
 
-	public void StartReplayBuffer() => _obs.StartReplayBuffer();
+	public void StartReplayBuffer()
+	{
+		_obs.StartReplayBuffer();
+	}
 
-	public void StopReplayBuffer() => _obs.StopReplayBuffer();
+	public void StopReplayBuffer()
+	{
+		_obs.StopReplayBuffer();
+	}
 
-	public void ToggleReplayBuffer() => _obs.ToggleReplayBuffer();
+	public void ToggleReplayBuffer()
+	{
+		_obs.ToggleReplayBuffer();
+	}
 
-	public void SaveReplayBuffer() => _obs.SaveReplayBuffer();
+	public void SaveReplayBuffer()
+	{
+		_obs.SaveReplayBuffer();
+	}
 
-	public void SplitRecordFile() => Request(_obs.SplitRecordFile);
+	public void SplitRecordFile()
+	{
+		Request(_obs.SplitRecordFile);
+	}
 
-	public void CreateRecordChapter(string? chapterName) => Request(() => _obs.SendRequest("CreateRecordChapter",
-		string.IsNullOrWhiteSpace(chapterName) ? null : new JObject { ["chapterName"] = chapterName }));
+	public void CreateRecordChapter(string? chapterName)
+	{
+		Request(() => _obs.SendRequest("CreateRecordChapter",
+			string.IsNullOrWhiteSpace(chapterName) ? null : new JObject { ["chapterName"] = chapterName }));
+	}
 
-	public void SetRecordDirectory(string directory) => Request(() => _obs.SetRecordDirectory(directory));
+	public void SetRecordDirectory(string directory)
+	{
+		Request(() => _obs.SetRecordDirectory(directory));
+	}
 
 	public void StartOutput(string outputName)
-		=> TranslateOutputErrors("StartOutput", outputName, () => _obs.StartOutput(outputName));
+	{
+		TranslateOutputErrors("StartOutput", outputName, () => _obs.StartOutput(outputName));
+	}
 
 	public void StopOutput(string outputName)
-		=> TranslateOutputErrors("StopOutput", outputName, () => _obs.StopOutput(outputName));
+	{
+		TranslateOutputErrors("StopOutput", outputName, () => _obs.StopOutput(outputName));
+	}
 
 	public void ToggleOutput(string outputName)
-		=> TranslateOutputErrors("ToggleOutput", outputName, () => _obs.ToggleOutput(outputName));
+	{
+		TranslateOutputErrors("ToggleOutput", outputName, () => _obs.ToggleOutput(outputName));
+	}
 
 	public bool GetOutputActive(string outputName)
-		=> TranslateOutputErrors("GetOutputStatus", outputName, () => _obs.GetOutputStatus(outputName).IsActive);
+	{
+		return TranslateOutputErrors("GetOutputStatus", outputName, () => _obs.GetOutputStatus(outputName).IsActive);
+	}
 
 	public bool GetSourceVisible(string sceneName, string sourceName)
-		=> _obs.GetSceneItemEnabled(sceneName, _obs.GetSceneItemId(sceneName, sourceName, 0));
+	{
+		return _obs.GetSceneItemEnabled(sceneName, _obs.GetSceneItemId(sceneName, sourceName, 0));
+	}
 
 	public void SetSourceVisible(string sceneName, string sourceName, bool visible)
 	{
@@ -308,22 +396,40 @@ internal sealed class ObsClient : IObsClient
 		_obs.SetSceneItemEnabled(sceneName, itemId, !enabled);
 	}
 
-	public bool GetInputMuted(string inputName) => _obs.GetInputMute(inputName);
+	public bool GetInputMuted(string inputName)
+	{
+		return _obs.GetInputMute(inputName);
+	}
 
-	public void SetInputMute(string inputName, bool muted) => _obs.SetInputMute(inputName, muted);
+	public void SetInputMute(string inputName, bool muted)
+	{
+		_obs.SetInputMute(inputName, muted);
+	}
 
-	public void ToggleInputMute(string inputName) => _obs.ToggleInputMute(inputName);
+	public void ToggleInputMute(string inputName)
+	{
+		_obs.ToggleInputMute(inputName);
+	}
 
-	public float GetInputVolume(string inputName) => _obs.GetInputVolume(inputName).VolumeMul;
+	public float GetInputVolume(string inputName)
+	{
+		return _obs.GetInputVolume(inputName).VolumeMul;
+	}
 
 	public void SetInputVolume(string inputName, float volumeMultiplier)
-		=> _obs.SetInputVolume(inputName, volumeMultiplier, false);
+	{
+		_obs.SetInputVolume(inputName, volumeMultiplier, false);
+	}
 
 	public bool GetSourceFilterEnabled(string sourceName, string filterName)
-		=> _obs.GetSourceFilter(sourceName, filterName).IsEnabled;
+	{
+		return _obs.GetSourceFilter(sourceName, filterName).IsEnabled;
+	}
 
 	public void SetSourceFilterEnabled(string sourceName, string filterName, bool enabled)
-		=> _obs.SetSourceFilterEnabled(sourceName, filterName, enabled);
+	{
+		_obs.SetSourceFilterEnabled(sourceName, filterName, enabled);
+	}
 
 	public void ToggleSourceFilterEnabled(string sourceName, string filterName)
 	{
@@ -331,14 +437,22 @@ internal sealed class ObsClient : IObsClient
 		_obs.SetSourceFilterEnabled(sourceName, filterName, !enabled);
 	}
 
-	public void SetStudioMode(bool enabled) => _obs.SetStudioModeEnabled(enabled);
+	public void SetStudioMode(bool enabled)
+	{
+		_obs.SetStudioModeEnabled(enabled);
+	}
 
-	public string GetInputAudioMonitorType(string inputName) => _obs.GetInputAudioMonitorType(inputName);
+	public string GetInputAudioMonitorType(string inputName)
+	{
+		return _obs.GetInputAudioMonitorType(inputName);
+	}
 
 	// obs-websocket reports the offset in nanoseconds; every value OBS itself produces is a whole
 	// millisecond in nanoseconds, so plain integer division is exact and keeps a negative offset negative.
 	public int GetInputAudioSyncOffsetMilliseconds(string inputName)
-		=> _obs.GetInputAudioSyncOffset(inputName) / 1_000_000;
+	{
+		return _obs.GetInputAudioSyncOffset(inputName) / 1_000_000;
+	}
 
 	public ObsAudioTracks GetInputAudioTracks(string inputName)
 	{
@@ -363,13 +477,20 @@ internal sealed class ObsClient : IObsClient
 	// project takes on. Returning its raw text instead of the JObject keeps Newtonsoft entirely out of
 	// this project's surface; callers parse it with System.Text.Json like every other JSON this project
 	// handles.
-	public string GetInputSettings(string inputName) => _obs.GetInputSettings(inputName).Settings.ToString();
+	public string GetInputSettings(string inputName)
+	{
+		return _obs.GetInputSettings(inputName).Settings.ToString();
+	}
 
 	public string GetInputDefaultSettings(string inputName)
-		=> _obs.GetInputDefaultSettings(_obs.GetInputSettings(inputName).InputKind).ToString();
+	{
+		return _obs.GetInputDefaultSettings(_obs.GetInputSettings(inputName).InputKind).ToString();
+	}
 
 	public void SetInputSettings(string inputName, string settingsJson)
-		=> Request(() => _obs.SetInputSettings(inputName, ParseSettings(settingsJson), overlay: true));
+	{
+		Request(() => _obs.SetInputSettings(inputName, ParseSettings(settingsJson), true));
+	}
 
 	// Newtonsoft turns ISO-8601 looking strings into dates by default and writes them back reformatted,
 	// so text a user sends to a text source would not arrive verbatim.
@@ -438,12 +559,20 @@ internal sealed class ObsClient : IObsClient
 		}
 	}
 
-	private void OnConnected(object? sender, EventArgs e) => Connected?.Invoke(this, EventArgs.Empty);
+	private void OnConnected(object? sender, EventArgs e)
+	{
+		Connected?.Invoke(this, EventArgs.Empty);
+	}
 
 	private void OnDisconnected(object? sender, ObsDisconnectionInfo e)
-		=> Disconnected?.Invoke(this, e.DisconnectReason);
+	{
+		Disconnected?.Invoke(this, e.DisconnectReason);
+	}
 
-	private void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
+	private void RaiseStateChanged()
+	{
+		StateChanged?.Invoke(this, EventArgs.Empty);
+	}
 
 	private static void Request(Action request)
 	{
@@ -476,11 +605,15 @@ internal sealed class ObsClient : IObsClient
 	}
 
 	private static void TranslateOutputErrors(string request, string outputName, Action call)
-		=> TranslateOutputErrors(request, outputName, () =>
-		{
-			call();
-			return true;
-		});
+	{
+		TranslateOutputErrors(request,
+			outputName,
+			() =>
+			{
+				call();
+				return true;
+			});
+	}
 
 	// obs-websocket answers 207 to every request while OBS starts or loads a scene collection. A status
 	// pieced together from those fallbacks would read as everything stopped, so the whole read is abandoned.

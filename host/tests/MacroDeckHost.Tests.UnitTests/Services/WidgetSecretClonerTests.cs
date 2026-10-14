@@ -89,10 +89,15 @@ public class WidgetSecretClonerTests
 		Assert.That(await _cloner.CloneReferencedSecrets(data), Is.EqualTo(data));
 	}
 
-	private static Guid SingleSecretId(string data) => AllSecretIds(data).Single();
+	private static Guid SingleSecretId(string data)
+	{
+		return AllSecretIds(data).Single();
+	}
 
 	private static List<Guid> AllSecretIds(string data)
-		=> Regex.Matches(data, "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
+	{
+		return Regex.Matches(data, "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 			.Select(m => Guid.Parse(m.Value))
 			.ToList();
+	}
 }

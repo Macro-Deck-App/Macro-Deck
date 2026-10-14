@@ -15,7 +15,8 @@ internal static class PluginMerger
 	private static readonly JsonSerializerOptions _manifestWriteOptions =
 		new(PluginManifestJson.Options) { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
-	public static async Task<PluginMergeResult> MergeAsync(IReadOnlyList<string> artifactPaths,
+	public static async Task<PluginMergeResult> MergeAsync(
+		IReadOnlyList<string> artifactPaths,
 		string outputDirectory,
 		bool force,
 		string? stagingRoot = null,
@@ -51,15 +52,15 @@ internal static class PluginMerger
 				if (part.Manifest.Id != first.Manifest.Id || part.Manifest.Version != first.Manifest.Version)
 				{
 					return PluginMergeResult.Fail(PluginMergeFailureReason.IdentityMismatch,
-						$"'{Display(first)}' is {first.Manifest.Id} {first.Manifest.Version}, but '{Display(part)}' " +
-						$"is {part.Manifest.Id} {part.Manifest.Version}. Only builds of the same plugin version merge.");
+						$"'{Display(first)}' is {first.Manifest.Id} {first.Manifest.Version}, but '{Display(part)}' "
+						+ $"is {part.Manifest.Id} {part.Manifest.Version}. Only builds of the same plugin version merge.");
 				}
 
 				if (!ComparableManifest(part.Manifest).AsSpan().SequenceEqual(ComparableManifest(first.Manifest)))
 				{
 					return PluginMergeResult.Fail(PluginMergeFailureReason.ManifestMismatch,
-						$"The manifests of '{Display(first)}' and '{Display(part)}' differ in more than their " +
-						"entrypoints. Build every runtime identifier from the same commit.");
+						$"The manifests of '{Display(first)}' and '{Display(part)}' differ in more than their "
+						+ "entrypoints. Build every runtime identifier from the same commit.");
 				}
 			}
 
@@ -92,8 +93,8 @@ internal static class PluginMerger
 					if (existing.Digest.Path != digest.Path || existing.Digest.Sha256 != digest.Sha256)
 					{
 						return PluginMergeResult.Fail(PluginMergeFailureReason.FileConflict,
-							$"'{digest.Path}' differs between '{Display(existing.Part)}' and '{Display(part)}'. " +
-							"Files outside a runtime identifier's own directory must be identical in every build.");
+							$"'{digest.Path}' differs between '{Display(existing.Part)}' and '{Display(part)}'. "
+							+ "Files outside a runtime identifier's own directory must be identical in every build.");
 					}
 				}
 			}
@@ -151,7 +152,8 @@ internal static class PluginMerger
 		}
 	}
 
-	private static async Task<(MergePart? Part, PluginMergeResult? Failure)> ReadAsync(string artifactPath,
+	private static async Task<(MergePart? Part, PluginMergeResult? Failure)> ReadAsync(
+		string artifactPath,
 		string directory,
 		CancellationToken cancellationToken)
 	{
@@ -187,26 +189,31 @@ internal static class PluginMerger
 		// Per-runtime packages travel between CI jobs, so their bytes are checked against their own manifest.
 		if (manifest.Files is not { } declared)
 		{
-			return (null, PluginMergeResult.Rejected(artifactPath, PluginInstallError.HashMismatch,
+			return (null, PluginMergeResult.Rejected(artifactPath,
+				PluginInstallError.HashMismatch,
 				"The manifest lists no files, so the package contents cannot be verified."));
 		}
 
 		var extracted = extraction.ExtractedFiles
-			.Where(path => !string.Equals(path, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase))
+			.Where(path => !string.Equals(path,
+				PluginArtifactFiles.ManifestFileName,
+				StringComparison.OrdinalIgnoreCase))
 			.ToHashSet(StringComparer.Ordinal);
 
 		foreach (var digest in declared)
 		{
 			if (!extracted.Remove(digest.Path) || Sha256(part.FilePath(digest.Path)) != digest.Sha256)
 			{
-				return (null, PluginMergeResult.Rejected(artifactPath, PluginInstallError.HashMismatch,
+				return (null, PluginMergeResult.Rejected(artifactPath,
+					PluginInstallError.HashMismatch,
 					$"'{digest.Path}' is missing or does not match the manifest."));
 			}
 		}
 
 		if (extracted.Count > 0)
 		{
-			return (null, PluginMergeResult.Rejected(artifactPath, PluginInstallError.HashMismatch,
+			return (null, PluginMergeResult.Rejected(artifactPath,
+				PluginInstallError.HashMismatch,
 				$"'{extracted.Order(StringComparer.Ordinal).First()}' is not listed in the manifest."));
 		}
 
@@ -214,9 +221,11 @@ internal static class PluginMerger
 	}
 
 	private static byte[] ComparableManifest(PluginManifest manifest)
-		=> JsonSerializer.SerializeToUtf8Bytes(
+	{
+		return JsonSerializer.SerializeToUtf8Bytes(
 			manifest with { Files = null, Signature = null, Entrypoints = new Dictionary<string, PluginEntrypoint>() },
 			_manifestWriteOptions);
+	}
 
 	private static string Sha256(string path)
 	{
@@ -224,11 +233,16 @@ internal static class PluginMerger
 		return "sha256:" + Convert.ToHexStringLower(SHA256.HashData(stream));
 	}
 
-	private static string Display(MergePart part) => CliText.DisplayPath(part.ArtifactPath);
+	private static string Display(MergePart part)
+	{
+		return CliText.DisplayPath(part.ArtifactPath);
+	}
 
 	private sealed record MergePart(string ArtifactPath, string Directory, PluginManifest Manifest)
 	{
 		public string FilePath(string relativePath)
-			=> Path.Combine(Directory, relativePath.Replace('/', Path.DirectorySeparatorChar));
+		{
+			return Path.Combine(Directory, relativePath.Replace('/', Path.DirectorySeparatorChar));
+		}
 	}
 }

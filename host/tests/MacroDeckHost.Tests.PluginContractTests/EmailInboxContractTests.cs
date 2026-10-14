@@ -1,6 +1,5 @@
 using MacroDeck.Plugin.Hosting.Capabilities.EmailInbox;
 using MacroDeck.Plugin.Protocol.Capabilities;
-using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeck.Sdk;
@@ -18,18 +17,21 @@ internal sealed class EmailInboxContractTests : CapabilityContractFixture
 	private static readonly DateTimeOffset _noon = new(2026, 10, 5, 12, 0, 0, TimeSpan.Zero);
 
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.EmailInbox,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private async Task<IEmailInboxProvider> ConnectAsync(TestEmailInboxIntegration mail)
-		=> (IEmailInboxProvider)await ConnectAsync(
-			[new EmailInboxCapabilityHandler([mail], TestMetadata.Default)],
+	{
+		return (IEmailInboxProvider)await ConnectAsync([new EmailInboxCapabilityHandler([mail], TestMetadata.Default)],
 			[Provider()],
 			[CapabilityKinds.EmailInbox]);
+	}
 
 	[Test]
 	public async Task A_plugin_inbox_provider_surfaces_its_inboxes_through_the_host_integration()
@@ -53,27 +55,35 @@ internal sealed class EmailInboxContractTests : CapabilityContractFixture
 	[Test]
 	public async Task A_snapshot_round_trips_to_the_sdk_types()
 	{
-		var mail = new TestEmailInboxIntegration("Example Mail", "work");
-		mail.Snapshots["work"] = new EmailInboxSnapshot
+		var mail = new TestEmailInboxIntegration("Example Mail", "work")
 		{
-			Status = EmailInboxStatus.Error,
-			StatusMessage = "Sign-in failed.",
-			UnreadCount = 1,
-			TotalCount = 7,
-			SyncedAt = _noon,
-			Messages =
-			[
-				new EmailMessage
+			Snapshots =
+			{
+				["work"] = new EmailInboxSnapshot
 				{
-					Id = "2", SenderName = "Alice", SenderAddress = "alice@example.com", Subject = "Hello",
-					Preview = "Hi there", ReceivedAt = _noon.AddMinutes(-1)
-				},
-				new EmailMessage { Id = "1", Subject = "Older", ReceivedAt = _noon.AddMinutes(-5), IsRead = true }
-			]
+					Status = EmailInboxStatus.Error,
+					StatusMessage = "Sign-in failed.",
+					UnreadCount = 1,
+					TotalCount = 7,
+					SyncedAt = _noon,
+					Messages =
+					[
+						new EmailMessage
+						{
+							Id = "2", SenderName = "Alice", SenderAddress = "alice@example.com", Subject = "Hello",
+							Preview = "Hi there", ReceivedAt = _noon.AddMinutes(-1)
+						},
+						new EmailMessage
+							{ Id = "1", Subject = "Older", ReceivedAt = _noon.AddMinutes(-5), IsRead = true }
+					]
+				}
+			}
 		};
 		var provider = await ConnectAsync(mail);
 
-		var all = await provider.GetSnapshotAsync("work", new EmailMessageQuery { MaxMessages = 5 }, CancellationToken.None);
+		var all = await provider.GetSnapshotAsync("work",
+			new EmailMessageQuery { MaxMessages = 5 },
+			CancellationToken.None);
 		var unread = await provider.GetSnapshotAsync("work",
 			new EmailMessageQuery { MaxMessages = 5, UnreadOnly = true },
 			CancellationToken.None);
@@ -107,14 +117,19 @@ internal sealed class EmailInboxContractTests : CapabilityContractFixture
 	[Test]
 	public async Task A_plugin_inbox_reaches_the_host_registry_and_cache()
 	{
-		var mail = new TestEmailInboxIntegration("Example Mail", "work");
-		mail.Snapshots["work"] = new EmailInboxSnapshot
+		var mail = new TestEmailInboxIntegration("Example Mail", "work")
 		{
-			Status = EmailInboxStatus.Connected,
-			UnreadCount = 1,
-			TotalCount = 1,
-			SyncedAt = _noon,
-			Messages = [new EmailMessage { Id = "1", Subject = "Hello", ReceivedAt = _noon }]
+			Snapshots =
+			{
+				["work"] = new EmailInboxSnapshot
+				{
+					Status = EmailInboxStatus.Connected,
+					UnreadCount = 1,
+					TotalCount = 1,
+					SyncedAt = _noon,
+					Messages = [new EmailMessage { Id = "1", Subject = "Hello", ReceivedAt = _noon }]
+				}
+			}
 		};
 		await ConnectAsync(mail);
 
@@ -136,10 +151,15 @@ internal sealed class EmailInboxContractTests : CapabilityContractFixture
 	[Test]
 	public async Task A_disconnected_plugin_leaves_its_inbox_disconnected_after_the_retry()
 	{
-		var mail = new TestEmailInboxIntegration("Example Mail", "work");
-		mail.Snapshots["work"] = new EmailInboxSnapshot
+		var mail = new TestEmailInboxIntegration("Example Mail", "work")
 		{
-			Status = EmailInboxStatus.Connected, UnreadCount = 0, TotalCount = 0, SyncedAt = _noon
+			Snapshots =
+			{
+				["work"] = new EmailInboxSnapshot
+				{
+					Status = EmailInboxStatus.Connected, UnreadCount = 0, TotalCount = 0, SyncedAt = _noon
+				}
+			}
 		};
 		await ConnectAsync(mail);
 		using var signal = new EmailSyncSignal();
@@ -174,8 +194,10 @@ internal sealed class EmailInboxContractTests : CapabilityContractFixture
 			"The host's snapshot was never refreshed after state.update.");
 
 		IEmailInboxProvider CurrentProvider()
-			=> (IEmailInboxProvider)IntegrationRegistry.Integrations
+		{
+			return (IEmailInboxProvider)IntegrationRegistry.Integrations
 				.Single(candidate => string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
+		}
 	}
 
 	[Test]
@@ -200,7 +222,10 @@ internal sealed class EmailInboxContractTests : CapabilityContractFixture
 		});
 
 		IIntegration Current()
-			=> IntegrationRegistry.Integrations.Single(candidate => string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
+		{
+			return IntegrationRegistry.Integrations.Single(candidate
+				=> string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
+		}
 	}
 
 	private sealed class InMemoryKeys : IEmailInboxKeyStore

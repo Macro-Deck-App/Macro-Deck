@@ -37,20 +37,33 @@ public readonly record struct LocalizedText
 
 	/// <summary>Wraps literal text that is already in its final form.</summary>
 	public static LocalizedText FromLiteral(string? literal)
-		=> literal is null ? default : new LocalizedText(literal, null);
+	{
+		return literal is null ? default : new LocalizedText(literal, null);
+	}
 
 	/// <summary>Wraps a reference to be resolved in the reader's culture. A default reference with no key is absent.</summary>
 	public static LocalizedText FromLocalized(LocalizedString localized)
-		=> string.IsNullOrWhiteSpace(localized.Key.Scope) || string.IsNullOrWhiteSpace(localized.Key.Name)
+	{
+		return string.IsNullOrWhiteSpace(localized.Key.Scope) || string.IsNullOrWhiteSpace(localized.Key.Name)
 			? default
 			: new LocalizedText(null, localized);
+	}
 
 	/// <summary>Converts literal text.</summary>
-	public static implicit operator LocalizedText(string? literal) => FromLiteral(literal);
+	public static implicit operator LocalizedText(string? literal)
+	{
+		return FromLiteral(literal);
+	}
 
 	/// <summary>Converts a localized reference.</summary>
-	public static implicit operator LocalizedText(LocalizedString localized) => FromLocalized(localized);
+	public static implicit operator LocalizedText(LocalizedString localized)
+	{
+		return FromLocalized(localized);
+	}
 
 	/// <summary>Renders the literal, or the key - for diagnostics only, never for display.</summary>
-	public override string ToString() => Literal ?? Localized?.ToString() ?? string.Empty;
+	public override string ToString()
+	{
+		return Literal ?? Localized?.ToString() ?? string.Empty;
+	}
 }

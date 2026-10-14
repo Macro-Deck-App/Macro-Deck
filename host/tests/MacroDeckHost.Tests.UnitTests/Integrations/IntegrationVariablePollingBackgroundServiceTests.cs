@@ -261,12 +261,16 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 		IntegrationVariablePollingBackgroundService service,
 		CountingVariableProviderIntegration integration,
 		string? because = null)
-		=> DispatchUntilRead(service, because, integration);
+	{
+		return DispatchUntilRead(service, because, integration);
+	}
 
 	private static async Task DispatchUntilRead(
 		IntegrationVariablePollingBackgroundService service,
 		params CountingVariableProviderIntegration[] integrations)
-		=> await DispatchUntilRead(service, null, integrations);
+	{
+		await DispatchUntilRead(service, null, integrations);
+	}
 
 	private static async Task DispatchUntilRead(
 		IntegrationVariablePollingBackgroundService service,
@@ -288,7 +292,8 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 	}
 
 	private static CountingVariableProviderIntegration CountingIntegration(string id)
-		=> new()
+	{
+		return new CountingVariableProviderIntegration
 		{
 			Id = id,
 			IsInitialized = true,
@@ -297,6 +302,7 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 				VariableDefinition.Eager("first", SdkVariableType.Text, refreshInterval: TimeSpan.FromMinutes(5))
 			]
 		};
+	}
 
 	private sealed class CountingVariableProviderIntegration : FakeVariableProviderIntegration
 	{
@@ -305,7 +311,10 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 
 		public int ReadCount => Volatile.Read(ref _readCount);
 
-		public int ReadsOf(string localId) => _readsById.TryGetValue(localId, out var reads) ? reads : 0;
+		public int ReadsOf(string localId)
+		{
+			return _readsById.TryGetValue(localId, out var reads) ? reads : 0;
+		}
 
 		public override ValueTask<VariableReading> ReadAsync(
 			string localId,
@@ -345,7 +354,9 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 		public Dictionary<string, VariablePresentation?> PresentationByName { get; } = new(StringComparer.Ordinal);
 
 		public List<string> RegisteredNames(string integrationId)
-			=> _registeredByIntegration.TryGetValue(integrationId, out var names) ? names : [];
+		{
+			return _registeredByIntegration.TryGetValue(integrationId, out var names) ? names : [];
+		}
 
 		public VariableEntity SeedDynamic(string integrationId, string name)
 		{
@@ -407,22 +418,37 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 			Guid id,
 			object? value,
 			VariableBounds? bounds = null)
-			=> throw new NotSupportedException("Not exercised by these tests.");
+		{
+			throw new NotSupportedException("Not exercised by these tests.");
+		}
 
-		public Task<Result<VariableError>> SetIntegrationVariableAvailability(string integrationId,
+		public Task<Result<VariableError>> SetIntegrationVariableAvailability(
+			string integrationId,
 			Guid id,
 			bool available)
-			=> Task.FromResult(Result.Ok<VariableError>());
+		{
+			return Task.FromResult(Result.Ok<VariableError>());
+		}
 
-		public Task<IReadOnlyList<VariableEntity>> GetAll() => throw new NotSupportedException();
+		public Task<IReadOnlyList<VariableEntity>> GetAll()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetById(Guid id) => throw new NotSupportedException();
+		public Task<VariableEntity?> GetById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
 			string name,
@@ -433,11 +459,17 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
 			VariableTemplateSource? templateSource = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+		public Task<Result<VariableEntity, VariableError>> SetValue(
+			Guid id,
 			object? value,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 			Guid id,
@@ -445,19 +477,30 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
 			VariableTemplateSource? templateSource = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+		public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+			string integrationId,
 			string resourceId,
 			string name,
 			VariableType type,
 			int? decimalPlaces,
-			VariableDeclaration? declaration = null) =>
+			VariableDeclaration? declaration = null)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId) => throw new NotSupportedException();
+		public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
 		{
@@ -466,21 +509,31 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-			=> Task.FromResult<IReadOnlyList<VariableEntity>>(_existing
+		{
+			return Task.FromResult<IReadOnlyList<VariableEntity>>(_existing
 				.Where(variable => variable.OwnerIntegrationId == integrationId)
 				.ToList());
+		}
 
-		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId) => throw new NotSupportedException();
+		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task UpsertWidgetVariable(VariableScope scope,
+		public Task UpsertWidgetVariable(
+			VariableScope scope,
 			string scopeRefId,
 			string name,
 			VariableType type,
 			object? value)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
@@ -500,7 +553,10 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 		{
 		}
 
-		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken) => Task.FromResult(false);
+		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class
@@ -510,29 +566,56 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 		{
 		}
 
-		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken) => Task.FromResult(false);
+		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class NoOpVariableSubscriptionCoordinator : IVariableSubscriptionCoordinator
 	{
-		public Task ReconcileAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task ReconcileAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public bool IsSubscribed(string integrationId, string localResourceId) => false;
+		public bool IsSubscribed(string integrationId, string localResourceId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class NoOpWidgetVariableIndex : IWidgetVariableIndex
 	{
-		public IReadOnlyList<Guid> FindLabelReferences(string variableName) => [];
+		public IReadOnlyList<Guid> FindLabelReferences(string variableName)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName) => [];
+		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null) => [];
+		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null) => [];
+		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
 
-		public bool LabelReferences(Guid widgetId, string variableName) => false;
+		public bool LabelReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
-		public bool StateMappingReferences(Guid widgetId, string variableName) => false;
+		public bool StateMappingReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
 		public void Rebuild()
 		{

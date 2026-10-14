@@ -11,7 +11,8 @@ public enum WidgetIconRenditionStatus
 	TooLarge
 }
 
-public sealed record WidgetIconRendition(WidgetIconRenditionStatus Status,
+public sealed record WidgetIconRendition(
+	WidgetIconRenditionStatus Status,
 	byte[]? Content = null,
 	string? MediaType = null,
 	bool Stable = true);
@@ -21,20 +22,31 @@ public static class WidgetIconRenditions
 	public const int DefaultSize = 256;
 
 	public static int Bucket(int requestedSize)
-		=> IconVariants.TargetSizes.Where(size => size >= requestedSize).DefaultIfEmpty(IconVariants.TargetSizes.Max()).Min();
+	{
+		return IconVariants.TargetSizes.Where(size => size >= requestedSize)
+			.DefaultIfEmpty(IconVariants.TargetSizes.Max())
+			.Min();
+	}
 
-	public static Task<WidgetIconRendition> ProduceAsync(IWidgetIconSource source,
+	public static Task<WidgetIconRendition> ProduceAsync(
+		IWidgetIconSource source,
 		string reference,
 		CancellationToken cancellationToken)
-		=> ProduceAsync(source, reference, DefaultSize, cancellationToken);
+	{
+		return ProduceAsync(source, reference, DefaultSize, cancellationToken);
+	}
 
-	public static Task<WidgetIconRendition> ProduceAsync(IWidgetIconSource source,
+	public static Task<WidgetIconRendition> ProduceAsync(
+		IWidgetIconSource source,
 		string reference,
 		int size,
 		CancellationToken cancellationToken)
-		=> ProduceAsync(source, reference, size, ProtocolLimits.MaxUiResourceBytes, cancellationToken);
+	{
+		return ProduceAsync(source, reference, size, ProtocolLimits.MaxUiResourceBytes, cancellationToken);
+	}
 
-	public static async Task<WidgetIconRendition> ProduceAsync(IWidgetIconSource source,
+	public static async Task<WidgetIconRendition> ProduceAsync(
+		IWidgetIconSource source,
 		string reference,
 		int size,
 		int maxBytes,
@@ -45,7 +57,7 @@ public static class WidgetIconRenditions
 		foreach (var (candidate, staticFrame) in Candidates(Bucket(size)))
 		{
 			var image = await source
-				.GetImageAsync(reference, candidate, acceptWebp: false, staticFrame, cancellationToken)
+				.GetImageAsync(reference, candidate, false, staticFrame, cancellationToken)
 				.ConfigureAwait(false);
 
 			if (image is null)
@@ -67,7 +79,10 @@ public static class WidgetIconRenditions
 
 			if (content.Length <= maxBytes)
 			{
-				return new WidgetIconRendition(WidgetIconRenditionStatus.Rendered, content, image.MediaType, image.Stable);
+				return new WidgetIconRendition(WidgetIconRenditionStatus.Rendered,
+					content,
+					image.MediaType,
+					image.Stable);
 			}
 		}
 

@@ -12,7 +12,7 @@ using MacroDeck.Sdk.Weather;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A37_WeatherProviderFakeTests
+public class A37WeatherProviderFakeTests
 {
 	[Test]
 	public async Task The_fake_counts_every_snapshot_notice()
@@ -64,26 +64,40 @@ public class A37_WeatherProviderFakeTests
 	}
 
 	private static IEnumerable<ProtocolEnvelope> WeatherResults(MacroDeckTestHost host)
-		=> host.Messages.OfType(MessageTypes.HostInvoke)
-			.Where(message => message.Envelope.Payload?.Deserialize<HostInvokePayload>(PluginProtocolJson.Options)?.Api ==
-				HostApis.Weather)
+	{
+		return host.Messages.OfType(MessageTypes.HostInvoke)
+			.Where(message => message.Envelope.Payload?.Deserialize<HostInvokePayload>(PluginProtocolJson.Options)?.Api
+				== HostApis.Weather)
 			.SelectMany(invoke => host.Messages.WithCorrelationId(invoke.Envelope.Id))
 			.Where(message => message.Envelope.Type == MessageTypes.HostResult)
 			.Select(message => message.Envelope);
+	}
 
 	private class NotifyingIntegration : IPluginIntegration
 	{
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => context.WeatherProvider.NotifySnapshotsChangedAsync();
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return context.WeatherProvider.NotifySnapshotsChangedAsync();
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class StationIntegration : NotifyingIntegration, IWeatherProvider
 	{
-		public IReadOnlyList<WeatherStationInstance> GetInstances() => [];
+		public IReadOnlyList<WeatherStationInstance> GetInstances()
+		{
+			return [];
+		}
 
-		public IWeatherStation? GetStation(string instanceId) => null;
+		public IWeatherStation? GetStation(string instanceId)
+		{
+			return null;
+		}
 	}
 }

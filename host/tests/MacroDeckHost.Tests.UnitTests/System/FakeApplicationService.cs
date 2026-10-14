@@ -37,9 +37,15 @@ internal sealed class FakeApplicationService : IApplicationService
 		return Task.CompletedTask;
 	}
 
-	public void OpenFile(string path) => OpenedFiles.Add(path);
+	public void OpenFile(string path)
+	{
+		OpenedFiles.Add(path);
+	}
 
-	public void OpenWebsite(string url) => OpenedWebsites.Add(url);
+	public void OpenWebsite(string url)
+	{
+		OpenedWebsites.Add(url);
+	}
 
 	public void OpenUri(string uri)
 	{
@@ -63,5 +69,8 @@ internal sealed class FakeApplicationService : IApplicationService
 		OpenedFolders.Add(path);
 	}
 
-	public void Kill(string processName, bool graceful) => Kills.Add((processName, graceful));
+	public void Kill(string processName, bool graceful)
+	{
+		Kills.Add((processName, graceful));
+	}
 }

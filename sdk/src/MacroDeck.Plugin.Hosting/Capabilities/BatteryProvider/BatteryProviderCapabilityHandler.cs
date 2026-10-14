@@ -19,7 +19,8 @@ internal sealed class BatteryProviderCapabilityHandler(
 	public string Kind => CapabilityKinds.BatteryProvider;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -29,6 +30,7 @@ internal sealed class BatteryProviderCapabilityHandler(
 					VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -36,13 +38,15 @@ internal sealed class BatteryProviderCapabilityHandler(
 	{
 		ArgumentNullException.ThrowIfNull(invocation);
 
-		if (string.Equals(invocation.Operation, CapabilityOperations.BatteryProvider.Describe, StringComparison.Ordinal))
+		if (string.Equals(invocation.Operation,
+			CapabilityOperations.BatteryProvider.Describe,
+			StringComparison.Ordinal))
 		{
 			return Task.FromResult(CapabilityInvocationResult.Ok(new BatteryProviderDescribePayload
 			{
 				ProviderName = _providers.Select(provider => provider.ProviderName)
-						.FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-					metadata.Name
+						.FirstOrDefault(name => !string.IsNullOrEmpty(name))
+					?? metadata.Name
 			}));
 		}
 

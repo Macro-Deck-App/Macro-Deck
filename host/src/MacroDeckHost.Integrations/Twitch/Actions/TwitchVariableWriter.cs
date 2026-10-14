@@ -16,5 +16,7 @@ internal static class TwitchVariableWriter
 		string? ownerWidgetId,
 		VariableType type,
 		object value)
-		=> ActionVariableTarget.WriteAsync(userVariables, api, variableName, ownerWidgetId, type, value, _logger);
+	{
+		return ActionVariableTarget.WriteAsync(userVariables, api, variableName, ownerWidgetId, type, value, _logger);
+	}
 }

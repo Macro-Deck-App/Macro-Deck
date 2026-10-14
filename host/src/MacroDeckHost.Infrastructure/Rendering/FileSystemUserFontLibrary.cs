@@ -16,7 +16,10 @@ public sealed class FileSystemUserFontLibrary : IUserFontLibrary, IDisposable
 		_directory = paths.FontsDirectory;
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
 	public IReadOnlyList<UserFont> List()
 	{
@@ -40,7 +43,8 @@ public sealed class FileSystemUserFontLibrary : IUserFontLibrary, IDisposable
 			.ToList();
 	}
 
-	public async Task<IReadOnlyList<UserFontImportResult>> Import(IReadOnlyList<UserFontUpload> uploads,
+	public async Task<IReadOnlyList<UserFontImportResult>> Import(
+		IReadOnlyList<UserFontUpload> uploads,
 		CancellationToken cancellationToken)
 	{
 		await _gate.WaitAsync(cancellationToken);
@@ -150,7 +154,8 @@ public sealed class FileSystemUserFontLibrary : IUserFontLibrary, IDisposable
 		}
 	}
 
-	private (UserFontImportStatus Status, string? FontId) Store(UserFontUpload upload,
+	private (UserFontImportStatus Status, string? FontId) Store(
+		UserFontUpload upload,
 		HashSet<string> installedFamilies,
 		HashSet<string> listedHashes,
 		HashSet<string> userKeys)
@@ -196,13 +201,14 @@ public sealed class FileSystemUserFontLibrary : IUserFontLibrary, IDisposable
 		try
 		{
 			File.WriteAllBytes(temporary, upload.Bytes);
-			File.Move(temporary, target, overwrite: true);
+			File.Move(temporary, target, true);
 		}
 		catch
 		{
 			File.Delete(temporary);
 			throw;
 		}
+
 		return (UserFontImportStatus.Imported, fontId);
 	}
 
@@ -268,15 +274,23 @@ public sealed class FileSystemUserFontLibrary : IUserFontLibrary, IDisposable
 			ContentHash.Compute(bytes));
 	}
 
-	private static string FormatOf(string path) => Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
-
-	private static string KeyOf(string family, int weight, int width, string slant) =>
-		$"{family.ToUpperInvariant()}|{weight}|{width}|{slant}";
-
-	private static string SlantName(SkiaSharp.SKFontStyleSlant slant) => slant switch
+	private static string FormatOf(string path)
 	{
-		SkiaSharp.SKFontStyleSlant.Italic => FontFaceIdentity.ItalicSlant,
-		SkiaSharp.SKFontStyleSlant.Oblique => FontFaceIdentity.ObliqueSlant,
-		_ => FontFaceIdentity.UprightSlant
-	};
+		return Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
+	}
+
+	private static string KeyOf(string family, int weight, int width, string slant)
+	{
+		return $"{family.ToUpperInvariant()}|{weight}|{width}|{slant}";
+	}
+
+	private static string SlantName(SkiaSharp.SKFontStyleSlant slant)
+	{
+		return slant switch
+		{
+			SkiaSharp.SKFontStyleSlant.Italic => FontFaceIdentity.ItalicSlant,
+			SkiaSharp.SKFontStyleSlant.Oblique => FontFaceIdentity.ObliqueSlant,
+			_ => FontFaceIdentity.UprightSlant
+		};
+	}
 }

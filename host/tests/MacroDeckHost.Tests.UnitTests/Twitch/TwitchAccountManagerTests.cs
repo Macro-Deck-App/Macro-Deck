@@ -134,8 +134,8 @@ internal sealed class TwitchAccountManagerTests
 	[Test]
 	public async Task The_account_picker_offers_every_account_by_user_id()
 	{
-		AddAccount("111", "streamer", displayName: "ストリーマー");
-		AddAccount("222", "botaccount", displayName: "BotAccount");
+		AddAccount("111", "streamer", "ストリーマー");
+		AddAccount("222", "botaccount", "BotAccount");
 
 		await _manager.ReloadAsync(_config);
 
@@ -170,7 +170,7 @@ internal sealed class TwitchAccountManagerTests
 		var manager = new TwitchAccountManager(() => new RejectingOAuthClient(),
 			SilentLogger(),
 			(_, _) => new FakeTwitchHelixClient());
-		AddAccount("111", "streamer", displayName: "Streamer", expiresAt: DateTimeOffset.UtcNow.AddMinutes(-1));
+		AddAccount("111", "streamer", "Streamer", expiresAt: DateTimeOffset.UtcNow.AddMinutes(-1));
 
 		await manager.ReloadAsync(_config);
 		Assert.ThrowsAsync<TwitchOAuthRejectedException>(() =>
@@ -193,7 +193,7 @@ internal sealed class TwitchAccountManagerTests
 	{
 		var withoutChatters = string.Join(' ',
 			TwitchScopes.All.Where(scope => scope != TwitchScopes.ModeratorReadChatters));
-		AddAccount("111", "streamer", displayName: "Streamer", scopes: withoutChatters);
+		AddAccount("111", "streamer", "Streamer", scopes: withoutChatters);
 		AddAccount("222", "botaccount");
 
 		await _manager.ReloadAsync(_config);
@@ -243,7 +243,10 @@ internal sealed class TwitchAccountManagerTests
 			});
 	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 
 	private sealed class RejectingOAuthClient : ITwitchOAuthClient
 	{
@@ -251,23 +254,31 @@ internal sealed class TwitchAccountManagerTests
 			string clientId,
 			string scopes,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<TwitchTokenPollResult> PollTokenAsync(
 			string clientId,
 			string scopes,
 			string deviceCode,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<TwitchTokens> RefreshAsync(
 			string clientId,
 			string refreshToken,
 			CancellationToken cancellationToken)
-			=> Task.FromException<TwitchTokens>(new TwitchOAuthRejectedException("Invalid refresh token"));
+		{
+			return Task.FromException<TwitchTokens>(new TwitchOAuthRejectedException("Invalid refresh token"));
+		}
 
 		public Task<TwitchTokenIdentity> ValidateAsync(string accessToken, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public void Dispose()
 		{

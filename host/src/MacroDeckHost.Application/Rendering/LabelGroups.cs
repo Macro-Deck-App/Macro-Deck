@@ -3,7 +3,9 @@ namespace MacroDeckHost.Application.Rendering;
 public static class LabelGroups
 {
 	public static string For(string widgetId, string state)
-		=> $"label:{widgetId}:{Normalize(state)}";
+	{
+		return $"label:{widgetId}:{Normalize(state)}";
+	}
 
 	/// <summary>
 	/// Sanitizes a client-supplied state id so it is safe to use as both a realtime group name and a
@@ -26,7 +28,7 @@ public static class LabelGroups
 				break;
 			}
 
-			if (c is (>= 'a' and <= 'z') or (>= '0' and <= '9') or '_' or '-')
+			if (c is >= 'a' and <= 'z' or >= '0' and <= '9' or '_' or '-')
 			{
 				filtered.Append(c);
 			}

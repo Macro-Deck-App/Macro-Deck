@@ -208,7 +208,10 @@ internal sealed class RemoteBatteryProviderContext : IBatteryProviderContext, ID
 		{
 			try
 			{
-				await _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Batteries, operation, arguments, cancellationToken)
+				await _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Batteries,
+						operation,
+						arguments,
+						cancellationToken)
 					.ConfigureAwait(false);
 				return true;
 			}
@@ -217,13 +220,14 @@ internal sealed class RemoteBatteryProviderContext : IBatteryProviderContext, ID
 				_unsupportedOn = connection;
 				if (Interlocked.Exchange(ref _unsupportedLogged, 1) == 0)
 				{
-					_logger.Information("This Macro Deck does not support battery providers, so published battery devices are not shown");
+					_logger.Information(
+						"This Macro Deck does not support battery providers, so published battery devices are not shown");
 				}
 
 				return true;
 			}
-			catch (HostInvocationException exception) when (attempt == 0 &&
-				IsCode(exception, ProtocolErrorCodes.RateLimited))
+			catch (HostInvocationException exception) when (attempt == 0
+				&& IsCode(exception, ProtocolErrorCodes.RateLimited))
 			{
 				await Task.Delay(RateLimitRetryDelay, cancellationToken).ConfigureAwait(false);
 			}
@@ -235,5 +239,7 @@ internal sealed class RemoteBatteryProviderContext : IBatteryProviderContext, ID
 	}
 
 	private static bool IsCode(HostInvocationException exception, string code)
-		=> string.Equals(exception.Code, code, StringComparison.Ordinal);
+	{
+		return string.Equals(exception.Code, code, StringComparison.Ordinal);
+	}
 }

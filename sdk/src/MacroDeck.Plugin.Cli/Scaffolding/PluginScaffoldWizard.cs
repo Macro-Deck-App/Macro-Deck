@@ -38,8 +38,7 @@ internal sealed class PluginScaffoldWizard
 		if (missingRequired.Count > 0)
 		{
 			return PluginWizardOutcome.Invalid(new CliDiagnostic("missing-required-option",
-				$"--{string.Join(" and --", missingRequired)} must be supplied when running " +
-				"non-interactively."));
+				$"--{string.Join(" and --", missingRequired)} must be supplied when running " + "non-interactively."));
 		}
 
 		var description = ResolveDescription(inputs, interactive, cancellationToken);
@@ -113,13 +112,14 @@ internal sealed class PluginScaffoldWizard
 		_console.Write("Create plugin? [Y/n]: ");
 		var confirmation = ReadLineOrThrow(cancellationToken).Trim();
 
-		return string.Equals(confirmation, "n", StringComparison.OrdinalIgnoreCase) ||
-			string.Equals(confirmation, "no", StringComparison.OrdinalIgnoreCase)
+		return string.Equals(confirmation, "n", StringComparison.OrdinalIgnoreCase)
+			|| string.Equals(confirmation, "no", StringComparison.OrdinalIgnoreCase)
 				? PluginWizardOutcome.Decline()
 				: PluginWizardOutcome.Accept(request);
 	}
 
-	private string ResolveName(PluginScaffoldInputs inputs,
+	private string ResolveName(
+		PluginScaffoldInputs inputs,
 		bool interactive,
 		List<string> missingRequired,
 		CancellationToken cancellationToken)
@@ -138,7 +138,8 @@ internal sealed class PluginScaffoldWizard
 		return string.Empty;
 	}
 
-	private (string Id, CliDiagnostic? Error) ResolveId(PluginScaffoldInputs inputs,
+	private (string Id, CliDiagnostic? Error) ResolveId(
+		PluginScaffoldInputs inputs,
 		string name,
 		bool interactive,
 		List<string> missingRequired,
@@ -174,7 +175,8 @@ internal sealed class PluginScaffoldWizard
 		return (string.Empty, null);
 	}
 
-	private string ResolvePublisher(PluginScaffoldInputs inputs,
+	private string ResolvePublisher(
+		PluginScaffoldInputs inputs,
 		bool interactive,
 		List<string> missingRequired,
 		CancellationToken cancellationToken)
@@ -193,7 +195,8 @@ internal sealed class PluginScaffoldWizard
 		return string.Empty;
 	}
 
-	private string? ResolveDescription(PluginScaffoldInputs inputs,
+	private string? ResolveDescription(
+		PluginScaffoldInputs inputs,
 		bool interactive,
 		CancellationToken cancellationToken)
 	{
@@ -207,7 +210,8 @@ internal sealed class PluginScaffoldWizard
 			: null;
 	}
 
-	private (string? Value, CliDiagnostic? Error) ResolveUrl(string? suppliedValue,
+	private (string? Value, CliDiagnostic? Error) ResolveUrl(
+		string? suppliedValue,
 		string fieldName,
 		string label,
 		bool interactive,
@@ -247,7 +251,8 @@ internal sealed class PluginScaffoldWizard
 			: PluginScaffoldDefaults.License;
 	}
 
-	private (string ProjectName, CliDiagnostic? Error) ResolveProjectName(PluginScaffoldInputs inputs,
+	private (string ProjectName, CliDiagnostic? Error) ResolveProjectName(
+		PluginScaffoldInputs inputs,
 		string name,
 		bool interactive,
 		CancellationToken cancellationToken)
@@ -310,7 +315,8 @@ internal sealed class PluginScaffoldWizard
 		return (PluginScaffoldDefaults.DefaultPlatforms, null, false);
 	}
 
-	private string ResolveOutput(PluginScaffoldInputs inputs,
+	private string ResolveOutput(
+		PluginScaffoldInputs inputs,
 		string projectName,
 		bool interactive,
 		CancellationToken cancellationToken)
@@ -337,7 +343,9 @@ internal sealed class PluginScaffoldWizard
 	}
 
 	private void WritePrompt(string label, string? defaultValue)
-		=> _console.Write(string.IsNullOrEmpty(defaultValue) ? $"{label}: " : $"{label} [{defaultValue}]: ");
+	{
+		_console.Write(string.IsNullOrEmpty(defaultValue) ? $"{label}: " : $"{label} [{defaultValue}]: ");
+	}
 
 	private string ReadLineOrThrow(CancellationToken cancellationToken)
 	{
@@ -374,7 +382,8 @@ internal sealed class PluginScaffoldWizard
 		}
 	}
 
-	private string PromptWithValidation(string label,
+	private string PromptWithValidation(
+		string label,
 		string? defaultValue,
 		Func<string, CliDiagnostic?> validate,
 		CancellationToken cancellationToken)
@@ -400,7 +409,8 @@ internal sealed class PluginScaffoldWizard
 		return trimmed.Length == 0 ? defaultValue : trimmed;
 	}
 
-	private string? PromptOptionalWithValidation(string label,
+	private string? PromptOptionalWithValidation(
+		string label,
 		string? defaultValue,
 		Func<string, CliDiagnostic?> validate,
 		CancellationToken cancellationToken)
@@ -475,7 +485,8 @@ internal sealed class PluginScaffoldWizard
 		}
 	}
 
-	private static List<string>? PromptPlatformsChecked(IAnsiConsole ansiConsole,
+	private static List<string>? PromptPlatformsChecked(
+		IAnsiConsole ansiConsole,
 		CancellationToken cancellationToken)
 	{
 		var prompt = new MultiSelectionPrompt<string>()

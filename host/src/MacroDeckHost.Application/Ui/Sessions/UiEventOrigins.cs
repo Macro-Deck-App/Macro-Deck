@@ -22,12 +22,17 @@ public sealed class UiEventOrigins
 	}
 
 	public IUiEventOrigin Create(string providerId, string sessionId, string? clientId, string eventName)
-		=> new InProcessUiEventOrigin(this, providerId, sessionId, clientId, eventName);
+	{
+		return new InProcessUiEventOrigin(this, providerId, sessionId, clientId, eventName);
+	}
 
 	public bool IsClientAttached(string providerId, string sessionId, string? clientId)
-		=> !string.IsNullOrEmpty(clientId) && _tracker.IsClientAttached(providerId, sessionId, clientId);
+	{
+		return !string.IsNullOrEmpty(clientId) && _tracker.IsClientAttached(providerId, sessionId, clientId);
+	}
 
-	public async Task<bool> ReportFailureAsync(string providerId,
+	public async Task<bool> ReportFailureAsync(
+		string providerId,
 		string sessionId,
 		string? clientId,
 		string? eventName,
@@ -58,7 +63,9 @@ public sealed class UiEventOrigins
 		public string? ClientId { get; } = string.IsNullOrEmpty(clientId) ? null : clientId;
 
 		public Task<bool> ReportFailureAsync(LocalizedText message, CancellationToken cancellationToken = default)
-			=> owner.ReportFailureAsync(providerId, sessionId, ClientId, eventName, message, cancellationToken);
+		{
+			return owner.ReportFailureAsync(providerId, sessionId, ClientId, eventName, message, cancellationToken);
+		}
 
 		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
 		{
@@ -69,7 +76,8 @@ public sealed class UiEventOrigins
 				: Task.FromResult(false);
 		}
 
-		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal,
+		public Task<ModalResult<T>> ShowModalAsync<T>(
+			ModalDefinition modal,
 			CancellationToken cancellationToken = default)
 		{
 			ArgumentNullException.ThrowIfNull(modal);

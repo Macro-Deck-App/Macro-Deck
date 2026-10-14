@@ -68,7 +68,7 @@ public class BatteryProviderHostingTests
 			connectionState);
 
 		await service.StartAsync(CancellationToken.None);
-		connectionState.RaiseConnected(resumed: false);
+		connectionState.RaiseConnected(false);
 		await WaitForAsync(() => integration.BatteryContext is not null);
 		var wasInitializedFirst = integration.IsInitialized;
 		await service.StopAsync(CancellationToken.None);
@@ -84,7 +84,8 @@ public class BatteryProviderHostingTests
 	}
 
 	[Test]
-	public async Task Changed_handlers_subscribed_through_the_context_are_released_when_the_integration_is_initialized_again()
+	public async Task
+		Changed_handlers_subscribed_through_the_context_are_released_when_the_integration_is_initialized_again()
 	{
 		var connectionState = new PluginConnectionState();
 		var stateCache = new HostStateCache(new PluginConnectionState());
@@ -96,7 +97,7 @@ public class BatteryProviderHostingTests
 			connectionState,
 			stateCache);
 		await service.StartAsync(CancellationToken.None);
-		connectionState.RaiseConnected(resumed: false);
+		connectionState.RaiseConnected(false);
 		await WaitForAsync(() => integration.IsInitialized);
 		api.Lifecycle.Changed += (_, _) => Interlocked.Increment(ref calls);
 
@@ -104,7 +105,8 @@ public class BatteryProviderHostingTests
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
-			Payload = FakePluginSocket.Payload(new Protocol.Callbacks.HostStatePayload { Api = Protocol.Callbacks.HostApis.Config })
+			Payload = FakePluginSocket.Payload(new Protocol.Callbacks.HostStatePayload
+				{ Api = Protocol.Callbacks.HostApis.Config })
 		});
 		await WaitForAsync(() => integration.ShutdownCount == 1 && integration.IsInitialized);
 		stateCache.Apply(new ProtocolEnvelope
@@ -132,36 +134,40 @@ public class BatteryProviderHostingTests
 			.Build();
 		var context = plugin.Services.GetRequiredService<IIntegrationContext>();
 
-		plugin.Services.GetRequiredService<HostStateCache>().Apply(new ProtocolEnvelope
-		{
-			Type = MessageTypes.HostState,
-			Id = Guid.NewGuid().ToString(),
-			Payload = FakePluginSocket.Payload(new Protocol.Callbacks.HostStatePayload
+		plugin.Services.GetRequiredService<HostStateCache>()
+			.Apply(new ProtocolEnvelope
 			{
-				Api = Protocol.Callbacks.HostApis.Batteries,
-				Data = JsonSerializer.SerializeToElement(new Protocol.Callbacks.BatteryStateDto
-					{
-						Revision = 1,
-						Devices =
-						[
-							new Protocol.Callbacks.BatteryDeviceSnapshotDto
-							{
-								Id = "adb:pixel", LocalId = "pixel", ProviderId = "adb", Name = "Pixel", LevelPercent = 77
-							}
-						]
-					},
-					PluginProtocolJson.Options)
-			})
-		});
+				Type = MessageTypes.HostState,
+				Id = Guid.NewGuid().ToString(),
+				Payload = FakePluginSocket.Payload(new Protocol.Callbacks.HostStatePayload
+				{
+					Api = Protocol.Callbacks.HostApis.Batteries,
+					Data = JsonSerializer.SerializeToElement(new Protocol.Callbacks.BatteryStateDto
+						{
+							Revision = 1,
+							Devices =
+							[
+								new Protocol.Callbacks.BatteryDeviceSnapshotDto
+								{
+									Id = "adb:pixel", LocalId = "pixel", ProviderId = "adb", Name = "Pixel",
+									LevelPercent = 77
+								}
+							]
+						},
+						PluginProtocolJson.Options)
+				})
+			});
 
 		Assert.That(context.Batteries.Find("adb:pixel")?.LevelPercent, Is.EqualTo(77));
 	}
 
-	private static IntegrationLifecycleHostedService Lifecycle(IPluginIntegration integration,
+	private static IntegrationLifecycleHostedService Lifecycle(
+		IPluginIntegration integration,
 		IServiceProvider services,
 		PluginConnectionState connectionState,
 		HostStateCache? stateCache = null)
-		=> new([integration],
+	{
+		return new IntegrationLifecycleHostedService([integration],
 			TestMetadata.Default,
 			new FakeIntegrationContext(),
 			new FakeDeviceProviderContext(),
@@ -174,14 +180,17 @@ public class BatteryProviderHostingTests
 			connectionState,
 			stateCache ?? new HostStateCache(new PluginConnectionState()),
 			Serilog.Core.Logger.None);
+	}
 
 	private static IReadOnlyList<string> DeclaredKinds(PluginApplication application)
-		=>
+	{
+		return
 		[
 			.. application.Services.GetServices<ICapabilityHandler>()
 				.SelectMany(handler => handler.DeclareCapabilities())
 				.Select(capability => capability.Kind)
 		];
+	}
 
 	private static async Task<string> DescribeAsync(BatteryProviderCapabilityHandler handler)
 	{
@@ -214,9 +223,18 @@ public class BatteryProviderHostingTests
 
 	private sealed class ThrowingHostInvoker : IHostInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string api, string operation, object? arguments, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		public Task<JsonElement?> InvokeAsync(
+			string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

@@ -23,7 +23,9 @@ public class TriggerScheduleTests
 	}
 
 	private static DateTimeOffset? Next(EventSubscription subscription, DateTimeOffset after)
-		=> TriggerSchedule.TryCreate(subscription)?.NextOccurrence(after, _berlin);
+	{
+		return TriggerSchedule.TryCreate(subscription)?.NextOccurrence(after, _berlin);
+	}
 
 	[Test]
 	public void An_interval_schedules_from_the_given_moment()

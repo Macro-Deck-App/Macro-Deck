@@ -18,7 +18,9 @@ internal sealed class ObsInputSettingsTests
 	}
 
 	private static IActionDefinition Action(ObsConnection connection)
-		=> ObsActions.Create(() => connection, new VariableApiAccessor()).Single(a => a.Id == ActionId);
+	{
+		return ObsActions.Create(() => connection, new VariableApiAccessor()).Single(a => a.Id == ActionId);
+	}
 
 	private static Task<ActionResult> RunAsync(ObsConnection connection, string? input, string? setting, object? value)
 	{
@@ -49,7 +51,9 @@ internal sealed class ObsInputSettingsTests
 	}
 
 	private static bool SentAnything(FakeObsClient client)
-		=> client.Calls.Any(c => c.StartsWith("SetInputSettings:", StringComparison.Ordinal));
+	{
+		return client.Calls.Any(c => c.StartsWith("SetInputSettings:", StringComparison.Ordinal));
+	}
 
 	[Test]
 	public async Task Text_of_a_text_source_reaches_obs_verbatim_and_alone()
@@ -64,7 +68,8 @@ internal sealed class ObsInputSettingsTests
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(JsonNode.DeepEquals(Sent(client, "Title"),
-				JsonNode.Parse("""{"text":"Now live: 2026-10-06T12:00:00.000Z"}""")), Is.True);
+					JsonNode.Parse("""{"text":"Now live: 2026-10-06T12:00:00.000Z"}""")),
+				Is.True);
 		});
 	}
 
@@ -73,7 +78,8 @@ internal sealed class ObsInputSettingsTests
 	[TestCase("""{"opacity":50}""", "1e2", """{"opacity":100}""")]
 	[TestCase("""{"looping":false}""", "TRUE", """{"looping":true}""")]
 	[TestCase("""{"label":"7"}""", "42", """{"label":"42"}""")]
-	[TestCase("""{"font":{"face":"Arial"}}""", """{"face":"Comic Sans","size":40}""",
+	[TestCase("""{"font":{"face":"Arial"}}""",
+		"""{"face":"Comic Sans","size":40}""",
 		"""{"font":{"face":"Comic Sans","size":40}}""")]
 	public async Task Value_takes_the_type_of_the_current_setting(string current, string value, string expected)
 	{
@@ -122,7 +128,8 @@ internal sealed class ObsInputSettingsTests
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(JsonNode.DeepEquals(Sent(client, "Browser"),
-				JsonNode.Parse("""{"url":"https://example.com/?a=1"}""")), Is.True);
+					JsonNode.Parse("""{"url":"https://example.com/?a=1"}""")),
+				Is.True);
 		});
 	}
 
@@ -274,7 +281,7 @@ internal sealed class ObsInputSettingsTests
 	[Test]
 	public async Task Offline_obs_fails_with_not_connected_and_nothing_is_sent()
 	{
-		var (connection, client) = Create(connected: false);
+		var (connection, client) = Create(false);
 		using var _ = connection;
 
 		var result = await RunAsync(connection, "Title", "text", "x");
@@ -299,7 +306,8 @@ internal sealed class ObsInputSettingsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.ProviderRejected));
-			Assert.That(result.ErrorMessage.Localized?.Arguments["message"]?.ToString(), Is.EqualTo("Invalid settings"));
+			Assert.That(result.ErrorMessage.Localized?.Arguments["message"]?.ToString(),
+				Is.EqualTo("Invalid settings"));
 		});
 	}
 
@@ -331,7 +339,7 @@ internal sealed class ObsInputSettingsTests
 			return result.Options.Select(o => o.Value);
 		}
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await OptionsAsync("Title", null), Is.EqualTo(new[] { "font", "opacity", "outline", "text" }));
 			Assert.That(await OptionsAsync("Title", "OU"), Is.EqualTo(new[] { "outline" }));
@@ -347,6 +355,7 @@ internal sealed class ObsInputSettingsTests
 		var parsed = ObsClient.ParseSettings(json);
 
 		Assert.That(JsonNode.DeepEquals(JsonNode.Parse(parsed.ToString(Newtonsoft.Json.Formatting.None)),
-			JsonNode.Parse(json)), Is.True);
+				JsonNode.Parse(json)),
+			Is.True);
 	}
 }

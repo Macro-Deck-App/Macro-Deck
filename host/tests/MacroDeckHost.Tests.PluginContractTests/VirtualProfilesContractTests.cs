@@ -21,18 +21,22 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class VirtualProfilesContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.VirtualProfiles,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static VirtualProfileDescriptor CarThing()
-		=> new("car-thing",
+	{
+		return new VirtualProfileDescriptor("car-thing",
 			"Car Thing",
 			ProfileLayout.Grid(2, 4),
 			[new VirtualFolderDescriptor("main", "Main", [new VirtualWidgetDescriptor("play", "ActionButton", 0, 0)])]);
+	}
 
 	[Test]
 	public async Task Declare_registers_an_adapter_that_passes_the_capability_validator()
@@ -219,19 +223,31 @@ internal sealed class VirtualProfilesContractTests : CapabilityContractFixture
 	{
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public string ProviderName { get; } = providerName;
 
-		public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => profiles;
+		public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+		{
+			return profiles;
+		}
 
-		public async Task HandleWidgetInteractionAsync(string profileId,
+		public async Task HandleWidgetInteractionAsync(
+			string profileId,
 			string folderId,
 			string widgetId,
 			WidgetInteraction interaction)
-			=> await Task.Delay(Timeout.Infinite, CancellationToken.None);
+		{
+			await Task.Delay(Timeout.Infinite, CancellationToken.None);
+		}
 	}
 
 	private sealed class ThrowingProfileIntegration(
@@ -241,18 +257,30 @@ internal sealed class VirtualProfilesContractTests : CapabilityContractFixture
 	{
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public string ProviderName { get; } = providerName;
 
-		public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => profiles;
+		public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+		{
+			return profiles;
+		}
 
-		public Task HandleWidgetInteractionAsync(string profileId,
+		public Task HandleWidgetInteractionAsync(
+			string profileId,
 			string folderId,
 			string widgetId,
 			WidgetInteraction interaction)
-			=> throw new InvalidOperationException("boom: token=abc123");
+		{
+			throw new InvalidOperationException("boom: token=abc123");
+		}
 	}
 }

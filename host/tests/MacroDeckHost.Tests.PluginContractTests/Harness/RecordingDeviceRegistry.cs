@@ -18,10 +18,14 @@ internal sealed class RecordingDeviceRegistry : IPluginDeviceRegistry
 	public IReadOnlyDictionary<(string Provider, string Device), DeviceDescriptor> Devices => _devices;
 
 	public bool IsOnline(string providerId, string deviceId)
-		=> _online.TryGetValue((providerId, deviceId), out var online) && online;
+	{
+		return _online.TryGetValue((providerId, deviceId), out var online) && online;
+	}
 
 	public string? AssignedIdOf(string providerId, string deviceId)
-		=> _ids.GetValueOrDefault((providerId, deviceId));
+	{
+		return _ids.GetValueOrDefault((providerId, deviceId));
+	}
 
 	public Task<DeviceRegistration> RegisterAsync(
 		string providerId,

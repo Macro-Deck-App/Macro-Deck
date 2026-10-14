@@ -49,7 +49,7 @@ public sealed class UiTestHost
 		UiConfigProperties.Label,
 		UiConfigProperties.Title,
 		UiConfigProperties.Description,
-		UiConfigProperties.ValidationMessage,
+		UiConfigProperties.ValidationMessage
 	];
 
 	private readonly Dictionary<string, UiTestNode> _byId = new(StringComparer.Ordinal);
@@ -76,7 +76,9 @@ public sealed class UiTestHost
 	/// <summary>Renders <paramref name="root" /> on a configuration surface in an exclusive session - the
 	/// ordinary case for a plugin's configuration flow.</summary>
 	public static UiTestHost Render(UiElement root)
-		=> Render(root, new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive });
+	{
+		return Render(root, new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive });
+	}
 
 	/// <summary>Renders <paramref name="root" /> on <paramref name="surface" />.</summary>
 	public static UiTestHost Render(UiElement root, UiSurface surface)
@@ -145,8 +147,8 @@ public sealed class UiTestHost
 			if (_patches.Count == 0)
 			{
 				throw new UiTestAssertionException(
-					$"No patch has been produced since the last ClearPatches; the view is at revision " +
-					$"{_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}.");
+					$"No patch has been produced since the last ClearPatches; the view is at revision "
+					+ $"{_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}.");
 			}
 
 			return _patches[^1];
@@ -188,7 +190,10 @@ public sealed class UiTestHost
 
 		var faults = new List<UiHandlerFaultEventArgs>();
 
-		void OnFaulted(object? sender, UiHandlerFaultEventArgs args) => faults.Add(args);
+		void OnFaulted(object? sender, UiHandlerFaultEventArgs args)
+		{
+			faults.Add(args);
+		}
 
 		using var cancellation = new CancellationTokenSource(budget);
 
@@ -200,12 +205,12 @@ public sealed class UiTestHost
 		}
 		catch (OperationCanceledException exception)
 		{
-			throw new UiTestTimeoutException("The view had not settled after " +
-				$"{budget.TotalMilliseconds.ToString("0.###", CultureInfo.InvariantCulture)} ms: " +
-				$"{_view.PendingWorkCount.ToString(CultureInfo.InvariantCulture)} piece(s) of asynchronous work " +
-				"registered on it - an event handler or a load started at or before revision " +
-				$"{_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)} - never completed. Complete the " +
-				"work the test owns, or raise the settle budget if the work is genuinely that slow.",
+			throw new UiTestTimeoutException("The view had not settled after "
+				+ $"{budget.TotalMilliseconds.ToString("0.###", CultureInfo.InvariantCulture)} ms: "
+				+ $"{_view.PendingWorkCount.ToString(CultureInfo.InvariantCulture)} piece(s) of asynchronous work "
+				+ "registered on it - an event handler or a load started at or before revision "
+				+ $"{_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)} - never completed. Complete the "
+				+ "work the test owns, or raise the settle budget if the work is genuinely that slow.",
 				exception);
 		}
 		finally
@@ -220,8 +225,8 @@ public sealed class UiTestHost
 			var first = faults[0];
 
 			throw new UiTestAssertionException(
-				$"The '{first.EventName}' handler on '{first.NodeId}' faulted while settling: " +
-				$"{first.Exception.GetType().Name}: {first.Exception.Message}",
+				$"The '{first.EventName}' handler on '{first.NodeId}' faulted while settling: "
+				+ $"{first.Exception.GetType().Name}: {first.Exception.Message}",
 				first.Exception);
 		}
 	}
@@ -256,8 +261,8 @@ public sealed class UiTestHost
 			return node;
 		}
 
-		throw new UiTestAssertionException($"No node with id '{id}' is in the tree at revision " +
-			$"{_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}. {DescribeNearMisses(id)}");
+		throw new UiTestAssertionException($"No node with id '{id}' is in the tree at revision "
+			+ $"{_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}. {DescribeNearMisses(id)}");
 	}
 
 	/// <summary>The node with <paramref name="id" />, or <c>null</c> - the probing counterpart of
@@ -309,9 +314,9 @@ public sealed class UiTestHost
 			? "none"
 			: string.Join(", ", matches.Select(node => node.Id));
 
-		throw new UiTestAssertionException($"Expected exactly one node of type '{type}' in the tree at revision " +
-			$"{_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}, found " +
-			$"{matches.Count.ToString(CultureInfo.InvariantCulture)}: {found}.");
+		throw new UiTestAssertionException($"Expected exactly one node of type '{type}' in the tree at revision "
+			+ $"{_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}, found "
+			+ $"{matches.Count.ToString(CultureInfo.InvariantCulture)}: {found}.");
 	}
 
 	/// <summary>
@@ -355,14 +360,23 @@ public sealed class UiTestHost
 
 	/// <summary>The tree as indented, diffable plain text - see <see cref="UiTreeText" /> for the
 	/// grammar.</summary>
-	public string Describe() => UiTreeText.Render(Tree);
+	public string Describe()
+	{
+		return UiTreeText.Render(Tree);
+	}
 
 	/// <summary>The patches since the last <see cref="ClearPatches" /> as indented plain text - see
 	/// <see cref="UiPatchText" /> for the grammar.</summary>
-	public string DescribePatches() => UiPatchText.Render(Patches);
+	public string DescribePatches()
+	{
+		return UiPatchText.Render(Patches);
+	}
 
 	/// <summary>The tree in canonical JSON - the exact bytes a renderer would receive.</summary>
-	public string ToCanonicalJson() => UiCanonicalJson.Serialize(Tree);
+	public string ToCanonicalJson()
+	{
+		return UiCanonicalJson.Serialize(Tree);
+	}
 
 	/// <summary>Dispatches an event on behalf of <see cref="UiTestNode.Raise" />, verifying the patches it
 	/// produced before returning.</summary>
@@ -375,7 +389,7 @@ public sealed class UiTestHost
 			NodeId = nodeId,
 			Name = name,
 			Data = data is null ? null : UiCanonicalJson.ToElement(data),
-			Revision = _appliedTree.Revision,
+			Revision = _appliedTree.Revision
 		});
 
 		Sync();
@@ -400,10 +414,10 @@ public sealed class UiTestHost
 
 			if (!result.IsApplied)
 			{
-				throw new UiTestAssertionException("The view produced a patch it could not apply itself. The patch " +
-					$"{patch.FromRevision.ToString(CultureInfo.InvariantCulture)}->" +
-					$"{patch.ToRevision.ToString(CultureInfo.InvariantCulture)} was rejected: " +
-					$"{result.RejectionReason}\n{UiPatchText.Render([patch])}");
+				throw new UiTestAssertionException("The view produced a patch it could not apply itself. The patch "
+					+ $"{patch.FromRevision.ToString(CultureInfo.InvariantCulture)}->"
+					+ $"{patch.ToRevision.ToString(CultureInfo.InvariantCulture)} was rejected: "
+					+ $"{result.RejectionReason}\n{UiPatchText.Render([patch])}");
 			}
 
 			_appliedTree = result.Tree;
@@ -416,9 +430,9 @@ public sealed class UiTestHost
 		if (!string.Equals(applied, produced, StringComparison.Ordinal))
 		{
 			throw new UiTestAssertionException(
-				"Applying the view's own patches did not reproduce the view's own tree, so the patch stream and " +
-				$"the producer disagree at revision {_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}." +
-				$"\napplied:  {applied}\nproduced: {produced}");
+				"Applying the view's own patches did not reproduce the view's own tree, so the patch stream and "
+				+ $"the producer disagree at revision {_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}."
+				+ $"\napplied:  {applied}\nproduced: {produced}");
 		}
 
 		_root = null;
@@ -437,7 +451,7 @@ public sealed class UiTestHost
 		_byId.Clear();
 		_documentOrder.Clear();
 		_drawn.Clear();
-		_root = BuildNode(_appliedTree.Root, parent: null, parentPath: null, drawn: true, _widthCells, _heightCells);
+		_root = BuildNode(_appliedTree.Root, null, null, true, _widthCells, _heightCells);
 	}
 
 	private UiTestNode BuildNode(
@@ -460,8 +474,7 @@ public sealed class UiTestHost
 
 		var responsive = string.Equals(node.Type, UiComponents.Responsive, StringComparison.Ordinal);
 		var chosen = responsive
-			? UiResponsiveSelection.SelectChild(
-				node.Properties.GetValueOrDefault(UiComponentProperties.Variants),
+			? UiResponsiveSelection.SelectChild(node.Properties.GetValueOrDefault(UiComponentProperties.Variants),
 				node.Children.Count,
 				widthCells,
 				heightCells)
@@ -500,11 +513,13 @@ public sealed class UiTestHost
 	}
 
 	private static bool PassesWholeBox(UiNode node)
-		=> string.Equals(node.Type, UiComponents.Layer, StringComparison.Ordinal) ||
-			string.Equals(node.Type, UiComponents.Transform, StringComparison.Ordinal) ||
-			(string.Equals(node.Type, UiComponents.Modifier, StringComparison.Ordinal) &&
-				!node.Properties.ContainsKey(UiComponentProperties.Padding) &&
-				!node.Properties.ContainsKey(UiComponentProperties.Frame));
+	{
+		return string.Equals(node.Type, UiComponents.Layer, StringComparison.Ordinal)
+			|| string.Equals(node.Type, UiComponents.Transform, StringComparison.Ordinal)
+			|| string.Equals(node.Type, UiComponents.Modifier, StringComparison.Ordinal)
+			&& !node.Properties.ContainsKey(UiComponentProperties.Padding)
+			&& !node.Properties.ContainsKey(UiComponentProperties.Frame);
+	}
 
 	/// <summary>The ids worth mentioning when <paramref name="id" /> was not found: the ones that contain it or
 	/// are contained by it, and otherwise whatever the tree does have.</summary>
@@ -514,8 +529,8 @@ public sealed class UiTestHost
 
 		foreach (var node in _documentOrder)
 		{
-			if (node.Id.Contains(id, StringComparison.OrdinalIgnoreCase) ||
-				id.Contains(node.Id, StringComparison.OrdinalIgnoreCase))
+			if (node.Id.Contains(id, StringComparison.OrdinalIgnoreCase)
+				|| id.Contains(node.Id, StringComparison.OrdinalIgnoreCase))
 			{
 				candidates.Add(node.Id);
 			}
@@ -535,7 +550,7 @@ public sealed class UiTestHost
 
 		return candidates.Count <= shown
 			? $"The tree has {string.Join(", ", candidates)}."
-			: $"The tree has {string.Join(", ", candidates.Take(shown))} and " +
-			$"{(candidates.Count - shown).ToString(CultureInfo.InvariantCulture)} more.";
+			: $"The tree has {string.Join(", ", candidates.Take(shown))} and "
+			+ $"{(candidates.Count - shown).ToString(CultureInfo.InvariantCulture)} more.";
 	}
 }

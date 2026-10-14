@@ -25,7 +25,7 @@ public class IconImportUserNotificationHandlerTests
 		cache.AddPack(_packId, "My Pack");
 		var handler = CreateHandler(store, cache);
 
-		await handler.Handle(Notification(Batch(state), processed: 1, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(Batch(state), 1, 0), CancellationToken.None);
 
 		var notifications = store.Snapshot();
 		Assert.Multiple(() =>
@@ -44,12 +44,12 @@ public class IconImportUserNotificationHandlerTests
 		var handler = CreateHandler(store, new FakeIconPackCache());
 		var batch = Batch(IconImportBatchState.Processing);
 
-		await handler.Handle(Notification(batch, processed: 1, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 1, 0), CancellationToken.None);
 		var announced = store.Snapshot()[0];
 
 		for (var processed = 2; processed <= 20; processed++)
 		{
-			await handler.Handle(Notification(batch, processed, failed: 0), CancellationToken.None);
+			await handler.Handle(Notification(batch, processed, 0), CancellationToken.None);
 		}
 
 		var notifications = store.Snapshot();
@@ -70,12 +70,12 @@ public class IconImportUserNotificationHandlerTests
 		var handler = CreateHandler(store, cache);
 		var batch = Batch(IconImportBatchState.Processing);
 
-		await handler.Handle(Notification(batch, processed: 3, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 3, 0), CancellationToken.None);
 		var completed = Batch(IconImportBatchState.Completed);
 		completed.Id = batch.Id;
-		await handler.Handle(Notification(completed, processed: 7, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(completed, 7, 0), CancellationToken.None);
 
-		await handler.Handle(Notification(batch, processed: 6, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 6, 0), CancellationToken.None);
 
 		Assert.That(store.Snapshot(), Is.Empty, "a straggling tick re-announced a finished import");
 	}
@@ -89,11 +89,11 @@ public class IconImportUserNotificationHandlerTests
 		var handler = CreateHandler(store, cache);
 		var batch = Batch(IconImportBatchState.Processing);
 
-		await handler.Handle(Notification(batch, processed: 3, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 3, 0), CancellationToken.None);
 		Assert.That(store.Snapshot(), Has.Count.EqualTo(1), "the running import announces itself");
 
 		batch.State = IconImportBatchState.Completed;
-		await handler.Handle(Notification(batch, processed: 7, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 7, 0), CancellationToken.None);
 
 		Assert.That(store.Snapshot(), Is.Empty);
 	}
@@ -109,7 +109,7 @@ public class IconImportUserNotificationHandlerTests
 		var batch = Batch(IconImportBatchState.Completed);
 		batch.Skipped = 3;
 
-		await handler.Handle(Notification(batch, processed: 0, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 0, 0), CancellationToken.None);
 
 		var notifications = store.Snapshot();
 		Assert.Multiple(() =>
@@ -131,16 +131,17 @@ public class IconImportUserNotificationHandlerTests
 
 		var skippedOne = Batch(IconImportBatchState.Completed);
 		skippedOne.Skipped = 1;
-		await handler.Handle(Notification(skippedOne, processed: 0, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(skippedOne, 0, 0), CancellationToken.None);
 
 		var importing = Batch(IconImportBatchState.Processing);
-		await handler.Handle(Notification(importing, processed: 1, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(importing, 1, 0), CancellationToken.None);
 
 		var notifications = store.Snapshot();
 		Assert.Multiple(() =>
 		{
 			Assert.That(notifications.Select(n => n.Title),
-				Is.EquivalentTo(new[] { "Nichts in Mein Paket zu importieren", "Symbole werden in Mein Paket importiert" }));
+				Is.EquivalentTo(new[]
+					{ "Nichts in Mein Paket zu importieren", "Symbole werden in Mein Paket importiert" }));
 			Assert.That(notifications.Select(n => n.Message),
 				Does.Contain("1 Datei war schon in diesem Paket und wurde übersprungen."));
 		});
@@ -154,7 +155,7 @@ public class IconImportUserNotificationHandlerTests
 		cache.AddPack(_packId, "My Pack");
 		var handler = CreateHandler(store, cache);
 
-		await handler.Handle(Notification(Batch(IconImportBatchState.Completed), processed: 0, failed: 0),
+		await handler.Handle(Notification(Batch(IconImportBatchState.Completed), 0, 0),
 			CancellationToken.None);
 
 		var notifications = store.Snapshot();
@@ -175,7 +176,7 @@ public class IconImportUserNotificationHandlerTests
 		var batch = Batch(IconImportBatchState.Completed);
 		batch.Skipped = 3;
 
-		await handler.Handle(Notification(batch, processed: 5, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 5, 0), CancellationToken.None);
 
 		Assert.That(store.Snapshot(), Is.Empty);
 	}
@@ -191,7 +192,7 @@ public class IconImportUserNotificationHandlerTests
 		var batch = Batch(IconImportBatchState.Completed);
 		batch.Error = "Failed to extract icons.zip: corrupt archive";
 
-		await handler.Handle(Notification(batch, processed: 5, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 5, 0), CancellationToken.None);
 
 		var notifications = store.Snapshot();
 		Assert.Multiple(() =>
@@ -208,7 +209,7 @@ public class IconImportUserNotificationHandlerTests
 		var store = new UserNotificationStore();
 		var handler = CreateHandler(store, new FakeIconPackCache());
 
-		await handler.Handle(Notification(Batch(IconImportBatchState.CompletedWithErrors), processed: 3, failed: 2),
+		await handler.Handle(Notification(Batch(IconImportBatchState.CompletedWithErrors), 3, 2),
 			CancellationToken.None);
 
 		var notifications = store.Snapshot();
@@ -229,7 +230,7 @@ public class IconImportUserNotificationHandlerTests
 		var batch = Batch(IconImportBatchState.Failed);
 		batch.Error = "Destination pack no longer exists";
 
-		await handler.Handle(Notification(batch, processed: 0, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 0, 0), CancellationToken.None);
 
 		var notifications = store.Snapshot();
 		Assert.Multiple(() =>
@@ -249,9 +250,9 @@ public class IconImportUserNotificationHandlerTests
 		var handler = CreateHandler(store, cache);
 		var batch = Batch(IconImportBatchState.Processing);
 
-		await handler.Handle(Notification(batch, processed: 2, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 2, 0), CancellationToken.None);
 		batch.State = IconImportBatchState.Cancelled;
-		await handler.Handle(Notification(batch, processed: 4, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 4, 0), CancellationToken.None);
 
 		Assert.That(store.Snapshot(), Is.Empty);
 	}
@@ -267,7 +268,7 @@ public class IconImportUserNotificationHandlerTests
 		var batch = Batch(state);
 		batch.Silent = true;
 
-		await handler.Handle(Notification(batch, processed: 1, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 1, 0), CancellationToken.None);
 
 		Assert.That(store.Snapshot(), Is.Empty);
 	}
@@ -282,7 +283,7 @@ public class IconImportUserNotificationHandlerTests
 		batch.Silent = true;
 		batch.Error = "Unsupported image";
 
-		await handler.Handle(Notification(batch, processed: 0, failed: 1), CancellationToken.None);
+		await handler.Handle(Notification(batch, 0, 1), CancellationToken.None);
 
 		var notifications = store.Snapshot();
 		Assert.Multiple(() =>
@@ -302,11 +303,11 @@ public class IconImportUserNotificationHandlerTests
 		var handler = CreateHandler(store, cache);
 		var batch = Batch(IconImportBatchState.Processing);
 
-		await handler.Handle(Notification(batch, processed: 1, failed: 0), CancellationToken.None);
+		await handler.Handle(Notification(batch, 1, 0), CancellationToken.None);
 		Assert.That(store.Snapshot()[0].CancelKey, Is.EqualTo(batch.Id.ToString()));
 
 		batch.State = IconImportBatchState.CompletedWithErrors;
-		await handler.Handle(Notification(batch, processed: 3, failed: 1), CancellationToken.None);
+		await handler.Handle(Notification(batch, 3, 1), CancellationToken.None);
 		Assert.That(store.Snapshot()[0].CancelKey, Is.Null, "a terminal entry carries no cancel handle");
 	}
 
@@ -319,16 +320,22 @@ public class IconImportUserNotificationHandlerTests
 
 		batch.State = IconImportBatchState.Failed;
 		batch.Error = "boom";
-		await handler.Handle(Notification(batch, processed: 0, failed: 1), CancellationToken.None);
-		await handler.Handle(Notification(batch, processed: 0, failed: 1), CancellationToken.None);
+		await handler.Handle(Notification(batch, 0, 1), CancellationToken.None);
+		await handler.Handle(Notification(batch, 0, 1), CancellationToken.None);
 
 		Assert.That(store.Snapshot(), Has.Count.EqualTo(1));
 	}
 
 	private static IconImportUserNotificationHandler CreateHandler(UserNotificationStore store, FakeIconPackCache cache)
-		=> new(store, cache, TestLocalization.ScopeFactory, TestLocalization.Resolver);
+	{
+		return new IconImportUserNotificationHandler(store,
+			cache,
+			TestLocalization.ScopeFactory,
+			TestLocalization.Resolver);
+	}
 
-	private static IconImportUserNotificationHandler CreateHandler(UserNotificationStore store,
+	private static IconImportUserNotificationHandler CreateHandler(
+		UserNotificationStore store,
 		FakeIconPackCache cache,
 		string culture)
 	{
@@ -341,62 +348,129 @@ public class IconImportUserNotificationHandlerTests
 			TestLocalization.Resolver);
 	}
 
-	private static IconImportBatchEntity Batch(IconImportBatchState state) => new()
+	private static IconImportBatchEntity Batch(IconImportBatchState state)
 	{
-		Id = Guid.NewGuid(),
-		PackId = _packId,
-		State = state,
-		SourceName = "icons.zip"
-	};
+		return new IconImportBatchEntity
+		{
+			Id = Guid.NewGuid(),
+			PackId = _packId,
+			State = state,
+			SourceName = "icons.zip"
+		};
+	}
 
 	private static IconImportProgressNotification Notification(IconImportBatchEntity batch, int processed, int failed)
-		=> new(batch, processed + failed, processed, failed);
+	{
+		return new IconImportProgressNotification(batch, processed + failed, processed, failed);
+	}
 
 	private sealed class FakeIconPackCache : IIconPackCache
 	{
 		private readonly Dictionary<Guid, IconPackEntity> _packs = new();
 
-		public void AddPack(Guid id, string name) => _packs[id] = new IconPackEntity { Id = id, Name = name };
+		public void AddPack(Guid id, string name)
+		{
+			_packs[id] = new IconPackEntity { Id = id, Name = name };
+		}
 
-		public Task InitializeCache() => throw new NotSupportedException();
+		public Task InitializeCache()
+		{
+			throw new NotSupportedException();
+		}
 
-		public IconPackEntity? GetPackById(Guid id) => _packs.GetValueOrDefault(id);
+		public IconPackEntity? GetPackById(Guid id)
+		{
+			return _packs.GetValueOrDefault(id);
+		}
 
-		public List<IconPackEntity> GetAllPacks() => throw new NotSupportedException();
+		public List<IconPackEntity> GetAllPacks()
+		{
+			throw new NotSupportedException();
+		}
 
-		public IconPackEntity? GetDefaultPack() => throw new NotSupportedException();
+		public IconPackEntity? GetDefaultPack()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdatePack(IconPackEntity pack) => throw new NotSupportedException();
+		public Task AddOrUpdatePack(IconPackEntity pack)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task RemovePack(Guid id) => throw new NotSupportedException();
+		public Task RemovePack(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public IconEntity? GetIconById(Guid iconId) => throw new NotSupportedException();
+		public IconEntity? GetIconById(Guid iconId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId) => [];
+		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId)
+		{
+			return [];
+		}
 
-		public List<IconEntity> GetIconsByPackId(Guid packId) => throw new NotSupportedException();
+		public List<IconEntity> GetIconsByPackId(Guid packId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public List<IconEntity> GetIconsByBatchId(Guid batchId) => throw new NotSupportedException();
+		public List<IconEntity> GetIconsByBatchId(Guid batchId)
+		{
+			throw new NotSupportedException();
+		}
 
 		public List<IconEntity> GetIconsByState(params IconProcessingState[] states)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public int GetIconCount(Guid packId) => throw new NotSupportedException();
+		public int GetIconCount(Guid packId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null) => null;
+		public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null)
+		{
+			return null;
+		}
 
-		public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null) => null;
+		public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null)
+		{
+			return null;
+		}
 
-		public List<IconEntity> GetIconsMissingMasterContentHash() => [];
+		public List<IconEntity> GetIconsMissingMasterContentHash()
+		{
+			return [];
+		}
 
-		public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons) => throw new NotSupportedException();
+		public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task UpdateIcon(IconEntity icon) => throw new NotSupportedException();
+		public Task UpdateIcon(IconEntity icon)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task RemoveIcon(Guid iconId) => throw new NotSupportedException();
+		public Task RemoveIcon(Guid iconId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds) => throw new NotSupportedException();
+		public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task FlushPendingWrites() => throw new NotSupportedException();
+		public Task FlushPendingWrites()
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

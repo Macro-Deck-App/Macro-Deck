@@ -26,10 +26,12 @@ internal sealed class ExactlyOneReplyPerInvocationCheck() : ConformanceCheckBase
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
-		var declared = context.Session!.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging).ToList();
+		var declared = context.Session!.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging)
+			.ToList();
 
 		if (declared.Count == 0)
 		{
@@ -67,7 +69,8 @@ internal sealed class DeadlineProducesTimeoutCheck() : ConformanceCheckBase("MDC
 	ConformanceRequirement.Recommended,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		foreach (var localId in ConformanceCheckSupport.DeclaredActionLocalIds(context))
@@ -87,8 +90,8 @@ internal sealed class DeadlineProducesTimeoutCheck() : ConformanceCheckBase("MDC
 					$"Invoking the declared action '{localId}' with a 300 ms deadline produced no reply within 3 s; the plugin appears to have hung.");
 			}
 
-			if (outcome.Succeeded ||
-				!string.Equals(outcome.Error?.Code, ProtocolErrorCodes.Timeout, StringComparison.Ordinal))
+			if (outcome.Succeeded
+				|| !string.Equals(outcome.Error?.Code, ProtocolErrorCodes.Timeout, StringComparison.Ordinal))
 			{
 				// Too fast (or failed for an unrelated reason) to say anything about deadline enforcement -
 				// try the next declared action.
@@ -117,7 +120,8 @@ internal sealed class CancelForUnknownOrAnsweredCorrelationIsNoOpCheck() : Confo
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var unknownId = Guid.CreateVersion7().ToString();
@@ -136,7 +140,8 @@ internal sealed class CancelForUnknownOrAnsweredCorrelationIsNoOpCheck() : Confo
 				$"{unknownReplies} message(s) from the plugin were recorded for the unknown correlation id.");
 		}
 
-		var declared = context.Session.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging).ToList();
+		var declared = context.Session.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging)
+			.ToList();
 
 		if (declared.Count == 0)
 		{
@@ -183,7 +188,8 @@ internal sealed class CancelInFlightProducesOneCancelledReplyCheck() : Conforman
 	ConformanceRequirement.Recommended,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		foreach (var localId in ConformanceCheckSupport.DeclaredActionLocalIds(context))
@@ -198,7 +204,7 @@ internal sealed class CancelInFlightProducesOneCancelledReplyCheck() : Conforman
 			{
 				await Wait.UntilAsync(() => context.Host.Messages.OfType(MessageTypes.CapabilityInvoke).Count > before,
 						TimeSpan.FromSeconds(2),
-						because: "the invoke was never sent")
+						"the invoke was never sent")
 					.ConfigureAwait(false);
 			}
 			catch (PluginTestTimeoutException)
@@ -221,8 +227,8 @@ internal sealed class CancelInFlightProducesOneCancelledReplyCheck() : Conforman
 				continue;
 			}
 
-			if (outcome.Succeeded ||
-				!string.Equals(outcome.Error?.Code, ProtocolErrorCodes.Cancelled, StringComparison.Ordinal))
+			if (outcome.Succeeded
+				|| !string.Equals(outcome.Error?.Code, ProtocolErrorCodes.Cancelled, StringComparison.Ordinal))
 			{
 				// Completed on its own (too fast) or failed for an unrelated reason - try the next action.
 				continue;
@@ -252,10 +258,12 @@ internal sealed class ConcurrencyBoundIsHonestCheck() : ConformanceCheckBase("MD
 {
 	private const int BurstMargin = 8;
 
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
-		var declared = context.Session!.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging).ToList();
+		var declared = context.Session!.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging)
+			.ToList();
 
 		if (declared.Count == 0)
 		{

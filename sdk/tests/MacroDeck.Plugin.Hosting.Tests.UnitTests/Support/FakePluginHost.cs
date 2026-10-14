@@ -47,7 +47,10 @@ internal sealed class FakePluginHost : IAsyncDisposable
 	private int _pairingSequence;
 	private readonly ConcurrentDictionary<string, PairingState> _pairingRequests = new(StringComparer.Ordinal);
 
-	private FakePluginHost(WebApplication application) => _application = application;
+	private FakePluginHost(WebApplication application)
+	{
+		_application = application;
+	}
 
 	/// <summary>One request the host received, at the HTTP level - every endpoint, not only pairing, so
 	/// a test can assert on what was and was not sent.</summary>
@@ -177,13 +180,19 @@ internal sealed class FakePluginHost : IAsyncDisposable
 		DropCurrentConnection();
 	}
 
-	public static string SessionToken(int session) => $"session-token-{session}";
+	public static string SessionToken(int session)
+	{
+		return $"session-token-{session}";
+	}
 
 	/// <summary>
 	/// Kills the socket the plugin is currently on, the way a network blip does: aborted rather than
 	/// closed, so the plugin sees a dropped connection and not a goodbye it should stop resuming after.
 	/// </summary>
-	public void DropCurrentConnection() => Volatile.Read(ref _current)?.Abort();
+	public void DropCurrentConnection()
+	{
+		Volatile.Read(ref _current)?.Abort();
+	}
 
 	/// <summary>Closes the socket the plugin is on with a protocol close code, the way the host does.</summary>
 	public async Task CloseCurrentConnectionAsync(int closeCode, string reason)
@@ -217,14 +226,20 @@ internal sealed class FakePluginHost : IAsyncDisposable
 	}
 
 	/// <summary>The socket the plugin connected on, once it has.</summary>
-	public Task<WebSocket> ConnectedAsync() => _connected.Task;
+	public Task<WebSocket> ConnectedAsync()
+	{
+		return _connected.Task;
+	}
 
 	/// <summary>
 	/// Completes once the host has finished answering <c>session.hello</c>. Waiting for the hello
 	/// itself is not enough: the welcome is sent after it is published, so a test that sends
 	/// immediately would race the welcome on the same socket.
 	/// </summary>
-	public Task WelcomedAsync() => _welcomed.Task.WaitAsync(TimeSpan.FromSeconds(10));
+	public Task WelcomedAsync()
+	{
+		return _welcomed.Task.WaitAsync(TimeSpan.FromSeconds(10));
+	}
 
 	/// <summary>
 	/// Sends one envelope to the plugin. Serialized, because a WebSocket permits one outstanding send
@@ -238,7 +253,7 @@ internal sealed class FakePluginHost : IAsyncDisposable
 		{
 			await socket.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(envelope),
 				WebSocketMessageType.Text,
-				endOfMessage: true,
+				true,
 				CancellationToken.None);
 		}
 		finally
@@ -271,7 +286,8 @@ internal sealed class FakePluginHost : IAsyncDisposable
 	}
 
 	private IResult AlreadyRegistered()
-		=> Results.Json(new ProtocolError
+	{
+		return Results.Json(new ProtocolError
 			{
 				Code = ProtocolErrorCodes.PluginAlreadyRegistered,
 				Message = ProtocolErrorMessages.For(ProtocolErrorCodes.PluginAlreadyRegistered),
@@ -282,6 +298,7 @@ internal sealed class FakePluginHost : IAsyncDisposable
 			},
 			PluginProtocolJson.Options,
 			statusCode: StatusCodes.Status409Conflict);
+	}
 
 	private void MapEndpoints(WebApplication application)
 	{
@@ -399,9 +416,9 @@ internal sealed class FakePluginHost : IAsyncDisposable
 					return Results.Unauthorized();
 				}
 
-				var approved = !PairingRejected &&
-					PairingApproveAfterPolls is { } threshold &&
-					Volatile.Read(ref pairing.PollCount) >= threshold;
+				var approved = !PairingRejected
+					&& PairingApproveAfterPolls is { } threshold
+					&& Volatile.Read(ref pairing.PollCount) >= threshold;
 
 				if (!approved)
 				{
@@ -455,15 +472,15 @@ internal sealed class FakePluginHost : IAsyncDisposable
 			async (HttpContext context) =>
 			{
 				if (string.IsNullOrEmpty(
-						context.Request.Headers[PluginAuthDefaults.PluginIdHeaderName].FirstOrDefault()) ||
-					string.IsNullOrEmpty(context.Request.Headers[PluginAuthDefaults.PluginSecretHeaderName]
+						context.Request.Headers[PluginAuthDefaults.PluginIdHeaderName].FirstOrDefault())
+					|| string.IsNullOrEmpty(context.Request.Headers[PluginAuthDefaults.PluginSecretHeaderName]
 						.FirstOrDefault()))
 				{
 					return Results.Unauthorized();
 				}
 
-				if (RejectedSecrets.ContainsKey(
-						context.Request.Headers[PluginAuthDefaults.PluginSecretHeaderName].FirstOrDefault()!))
+				if (RejectedSecrets.ContainsKey(context.Request.Headers[PluginAuthDefaults.PluginSecretHeaderName]
+					.FirstOrDefault()!))
 				{
 					return Results.Unauthorized();
 				}
@@ -518,6 +535,7 @@ internal sealed class FakePluginHost : IAsyncDisposable
 				{
 					return Results.Unauthorized();
 				}
+
 				SecretSentOnUpgrade = context.Request.Headers.ContainsKey(PluginAuthDefaults.PluginSecretHeaderName);
 
 				using var socket
@@ -541,7 +559,9 @@ internal sealed class FakePluginHost : IAsyncDisposable
 	}
 
 	private static string Base64Url(byte[] bytes)
-		=> Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	}
 
 	private async Task ReadAsync(WebSocket socket)
 	{

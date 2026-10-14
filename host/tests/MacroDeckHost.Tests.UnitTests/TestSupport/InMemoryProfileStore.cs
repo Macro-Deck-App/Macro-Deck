@@ -22,7 +22,10 @@ internal sealed class InMemoryProfileStore : IProfileStore
 
 	public int UnreadableCount { get; set; }
 
-	public ProfileLoadResult LoadAll() => new(_files.Values.ToList(), UnreadableCount);
+	public ProfileLoadResult LoadAll()
+	{
+		return new ProfileLoadResult(_files.Values.ToList(), UnreadableCount);
+	}
 
 	public bool Save(ProfileFile profile)
 	{
@@ -42,5 +45,8 @@ internal sealed class InMemoryProfileStore : IProfileStore
 		DeleteCount++;
 	}
 
-	public ProfileFile? Get(Guid id) => _files.TryGetValue(id, out var file) ? file : null;
+	public ProfileFile? Get(Guid id)
+	{
+		return _files.TryGetValue(id, out var file) ? file : null;
+	}
 }

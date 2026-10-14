@@ -17,7 +17,9 @@ public sealed class WidgetTypeFavoritesChangedNotificationHandler
 	public async ValueTask Handle(
 		WidgetTypeFavoritesChangedNotification notification,
 		CancellationToken cancellationToken)
-		=> await _uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		await _uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new WidgetTypeFavoritesChangedEvent { TypeIds = notification.TypeIds },
 			cancellationToken);
+	}
 }

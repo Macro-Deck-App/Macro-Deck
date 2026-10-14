@@ -8,10 +8,11 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// host does, so a plugin author's green test against it is not lying about what a real host would do.
 /// </summary>
 [TestFixture]
-public class A24_LayoutProviderFakeTests
+public class A24LayoutProviderFakeTests
 {
 	private static LayoutDescriptor Layout(string id, int rows, int columns)
-		=> new(id,
+	{
+		return new LayoutDescriptor(id,
 			"Test Layout",
 			[
 				new LayoutRegion
@@ -19,6 +20,7 @@ public class A24_LayoutProviderFakeTests
 					Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = rows, Columns = columns }
 				}
 			]);
+	}
 
 	[Test]
 	public async Task Registering_the_same_local_id_again_replaces_rather_than_duplicates()

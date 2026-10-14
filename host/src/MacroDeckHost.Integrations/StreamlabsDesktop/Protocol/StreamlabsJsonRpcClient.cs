@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 
@@ -371,8 +370,8 @@ internal sealed class StreamlabsJsonRpcClient : IStreamlabsClient
 			if (frame.IsRejected)
 			{
 				waiting.TrySetException(new StreamlabsRpcException(
-					StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(frame.Data, "message")) ??
-					"Streamlabs Desktop rejected the request."));
+					StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(frame.Data, "message"))
+					?? "Streamlabs Desktop rejected the request."));
 			}
 			else
 			{
@@ -398,7 +397,7 @@ internal sealed class StreamlabsJsonRpcClient : IStreamlabsClient
 		await _sendLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 		try
 		{
-			await socket.SendAsync(bytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken)
+			await socket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken)
 				.ConfigureAwait(false);
 		}
 		finally

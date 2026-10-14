@@ -20,7 +20,8 @@ internal static class SignedPluginArtifacts
 {
 	private static readonly PluginManifestReader _manifestReader = new();
 
-	public static async Task<string> CreateSignedAsync(string directory,
+	public static async Task<string> CreateSignedAsync(
+		string directory,
 		string id,
 		string version,
 		string content = "binary",
@@ -59,8 +60,8 @@ internal static class SignedPluginArtifacts
 		// needs to build - the point is for verification to fail later, inside the host under test, not
 		// here while assembling the fixture.
 		var certificate
-			= JsonSerializer.Deserialize<SigningCertificate>(issued.CertificateBytes, SigningJson.Options) ??
-			throw new InvalidOperationException("Could not deserialize the issued test certificate.");
+			= JsonSerializer.Deserialize<SigningCertificate>(issued.CertificateBytes, SigningJson.Options)
+			?? throw new InvalidOperationException("Could not deserialize the issued test certificate.");
 
 		var materialResult = SigningMaterial.Create(issued.PrivateKey, certificate);
 		if (!materialResult.Success)

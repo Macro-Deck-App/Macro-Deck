@@ -7,16 +7,23 @@ public readonly record struct LogCursor(LogReadPosition Host, LogReadPosition Bo
 	public static LogCursor None => new(LogReadPosition.None, LogReadPosition.None);
 
 	public LogReadPosition For(LogFileKind stream)
-		=> stream == LogFileKind.Bootstrapper ? Bootstrapper : Host;
+	{
+		return stream == LogFileKind.Bootstrapper ? Bootstrapper : Host;
+	}
 
 	public LogCursor With(LogFileKind stream, LogReadPosition position)
-		=> stream == LogFileKind.Bootstrapper
+	{
+		return stream == LogFileKind.Bootstrapper
 			? this with { Bootstrapper = position }
 			: this with { Host = position };
+	}
 
 	public bool IsExhausted => !Host.HasFile && !Bootstrapper.HasFile;
 
-	public string Encode() => $"{Version}|h{Host.Encode()}|b{Bootstrapper.Encode()}";
+	public string Encode()
+	{
+		return $"{Version}|h{Host.Encode()}|b{Bootstrapper.Encode()}";
+	}
 
 	public static bool TryParse(string? value, out LogCursor cursor)
 	{
@@ -37,9 +44,9 @@ public readonly record struct LogCursor(LogReadPosition Host, LogReadPosition Bo
 
 		foreach (var part in parts.AsSpan(1))
 		{
-			if (part.Length == 0 ||
-				!LogFileKindExtensions.TryFromTag(part[0], out var stream) ||
-				!LogReadPosition.TryParse(part[1..], out var position))
+			if (part.Length == 0
+				|| !LogFileKindExtensions.TryFromTag(part[0], out var stream)
+				|| !LogReadPosition.TryParse(part[1..], out var position))
 			{
 				return false;
 			}

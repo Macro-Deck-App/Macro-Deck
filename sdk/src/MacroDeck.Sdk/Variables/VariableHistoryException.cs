@@ -22,8 +22,14 @@ public enum VariableHistoryErrorCode
 /// <summary>Thrown by <see cref="IVariableApi.OpenHistoryAsync" /> when no window could be opened.</summary>
 public sealed class VariableHistoryException : Exception
 {
-	public VariableHistoryException(VariableHistoryErrorCode errorCode, string message, Exception? innerException = null)
-		: base(message, innerException) => ErrorCode = errorCode;
+	public VariableHistoryException(
+		VariableHistoryErrorCode errorCode,
+		string message,
+		Exception? innerException = null)
+		: base(message, innerException)
+	{
+		ErrorCode = errorCode;
+	}
 
 	public VariableHistoryException()
 	{

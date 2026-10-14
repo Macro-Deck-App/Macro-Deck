@@ -236,5 +236,7 @@ internal sealed class HttpRequestBuilderTests
 	}
 
 	private static Dictionary<string, object> Parameters(params (string Name, object Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

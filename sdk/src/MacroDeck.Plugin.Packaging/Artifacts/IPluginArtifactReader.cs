@@ -17,7 +17,8 @@ public sealed record PluginArtifactInspectionResult
 
 	public string? ErrorMessage { get; init; }
 
-	public static PluginArtifactInspectionResult Ok(PluginManifest manifest,
+	public static PluginArtifactInspectionResult Ok(
+		PluginManifest manifest,
 		int entryCount,
 		long totalUncompressedBytes)
 	{
@@ -51,7 +52,8 @@ public sealed record PluginArtifactExtractResult
 
 	public string? ErrorMessage { get; init; }
 
-	public static PluginArtifactExtractResult Ok(IReadOnlyList<string> extractedFiles,
+	public static PluginArtifactExtractResult Ok(
+		IReadOnlyList<string> extractedFiles,
 		long totalUncompressedBytes)
 	{
 		return new PluginArtifactExtractResult
@@ -76,12 +78,14 @@ public interface IPluginArtifactReader
 {
 	/// <summary>Opens the archive, enforces the structural limits and parses the manifest. Writes nothing.
 	/// </summary>
-	Task<PluginArtifactInspectionResult> Inspect(string artifactPath,
+	Task<PluginArtifactInspectionResult> Inspect(
+		string artifactPath,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>Extracts every entry into <paramref name="targetDirectory"/>, applying
 	/// <see cref="PluginArtifactEntryPolicy"/> and the byte caps to each one.</summary>
-	Task<PluginArtifactExtractResult> ExtractTo(string artifactPath,
+	Task<PluginArtifactExtractResult> ExtractTo(
+		string artifactPath,
 		string targetDirectory,
 		CancellationToken cancellationToken = default);
 }

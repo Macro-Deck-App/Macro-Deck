@@ -51,7 +51,10 @@ internal static class JellyfinVariables
 
 	public static IReadOnlyList<string> DeviceSlotNames { get; } = [.. _deviceSlots.Select(slot => slot.Name)];
 
-	public static bool IsWritable(string slot) => _deviceSlots.Any(candidate => candidate.Name == slot && candidate.Write is not null);
+	public static bool IsWritable(string slot)
+	{
+		return _deviceSlots.Any(candidate => candidate.Name == slot && candidate.Write is not null);
+	}
 
 	public static IReadOnlyList<string> ServerSlotNames { get; } = [.. _serverSlots.Select(slot => slot.Name)];
 
@@ -67,21 +70,27 @@ internal static class JellyfinVariables
 	];
 
 	public static VariableDefinition Total()
-		=> VariableDefinition.Eager(TotalActiveSessionsName, VariableType.Numeric, 0, _refresh) with
+	{
+		return VariableDefinition.Eager(TotalActiveSessionsName, VariableType.Numeric, 0, _refresh) with
 		{
 			Id = TotalActiveSessionsId,
 			DisplayName = Strings.TotalActiveSessions()
 		};
+	}
 
-	public static IReadOnlyList<VariableDefinition> DeclareServer(string serverKey, Guid? entryId,
+	public static IReadOnlyList<VariableDefinition> DeclareServer(
+		string serverKey,
+		Guid? entryId,
 		LocalizedText title)
-		=> _serverSlots.Select(slot => Define($"jellyfin_{serverKey}_{slot.Name}",
+	{
+		return _serverSlots.Select(slot => Define($"jellyfin_{serverKey}_{slot.Name}",
 				slot,
 				entryId is { } id ? $"{ServerPrefix}{id:N}-{Dashed(slot.Name)}" : null,
 				ServerDisplayName(slot.Name),
 				entryId,
 				title))
 			.ToList();
+	}
 
 	public static IReadOnlyList<VariableDefinition> DeclareDevice(
 		string serverKey,
@@ -89,7 +98,8 @@ internal static class JellyfinVariables
 		Guid? entryId,
 		string? deviceLocalId,
 		LocalizedText title)
-		=> _deviceSlots.Select(slot => Define(DeviceVariableName(serverKey, deviceKey, slot.Name),
+	{
+		return _deviceSlots.Select(slot => Define(DeviceVariableName(serverKey, deviceKey, slot.Name),
 				slot,
 				entryId is { } id && deviceLocalId is not null
 					? $"{DevicePrefix}{id:N}-{deviceLocalId}-{Dashed(slot.Name)}"
@@ -98,11 +108,17 @@ internal static class JellyfinVariables
 				entryId,
 				title))
 			.ToList();
+	}
 
 	public static string DeviceVariableName(string serverKey, string deviceKey, string slot)
-		=> $"jellyfin_{serverKey}_{deviceKey}_{slot}";
+	{
+		return $"jellyfin_{serverKey}_{deviceKey}_{slot}";
+	}
 
-	public static string ServerVariableName(string serverKey, string slot) => $"jellyfin_{serverKey}_{slot}";
+	public static string ServerVariableName(string serverKey, string slot)
+	{
+		return $"jellyfin_{serverKey}_{slot}";
+	}
 
 	public static bool TryGetEntryId(string? definitionId, out Guid entryId)
 	{
@@ -114,9 +130,9 @@ internal static class JellyfinVariables
 
 		var prefix = definitionId.StartsWith(ServerPrefix, StringComparison.Ordinal) ? ServerPrefix :
 			definitionId.StartsWith(DevicePrefix, StringComparison.Ordinal) ? DevicePrefix : null;
-		return prefix is not null &&
-			definitionId.Length > prefix.Length + 32 &&
-			Guid.TryParseExact(definitionId.AsSpan(prefix.Length, 32), "N", out entryId);
+		return prefix is not null
+			&& definitionId.Length > prefix.Length + 32
+			&& Guid.TryParseExact(definitionId.AsSpan(prefix.Length, 32), "N", out entryId);
 	}
 
 	public static VariableTarget Parse(string localId)
@@ -152,15 +168,21 @@ internal static class JellyfinVariables
 			: VariableTarget.None;
 	}
 
-	public static object? ReadServer(JellyfinServerState state, string slot) => slot switch
+	public static object? ReadServer(JellyfinServerState state, string slot)
 	{
-		"is_connected" => state.IsConnected,
-		"active_sessions" => state.IsConnected ? state.ActiveSessions.Count : 0,
-		_ => null
-	};
+		return slot switch
+		{
+			"is_connected" => state.IsConnected,
+			"active_sessions" => state.IsConnected ? state.ActiveSessions.Count : 0,
+			_ => null
+		};
+	}
 
 	// Session end writes typed empties rather than null: a null report leaves the previous value in place.
-	public static object? ReadDevice(JellyfinSession? session, JellyfinKnownDevice device, string slot,
+	public static object? ReadDevice(
+		JellyfinSession? session,
+		JellyfinKnownDevice device,
+		string slot,
 		DateTimeOffset now)
 	{
 		var item = session?.NowPlaying;
@@ -186,9 +208,15 @@ internal static class JellyfinVariables
 		};
 	}
 
-	private static VariableDefinition Define(string name, Slot slot, string? id, LocalizedText displayName,
-		Guid? entryId, LocalizedText title)
-		=> VariableDefinition.Eager(name, slot.Type, slot.DecimalPlaces, _refresh) with
+	private static VariableDefinition Define(
+		string name,
+		Slot slot,
+		string? id,
+		LocalizedText displayName,
+		Guid? entryId,
+		LocalizedText title)
+	{
+		return VariableDefinition.Eager(name, slot.Type, slot.DecimalPlaces, _refresh) with
 		{
 			Id = id,
 			DisplayName = displayName,
@@ -196,38 +224,51 @@ internal static class JellyfinVariables
 			Write = slot.Write,
 			Configuration = entryId is { } configId ? new VariableConfiguration(configId.ToString("N"), title) : null
 		};
+	}
 
-	private static LocalizedText ServerDisplayName(string slot) => slot switch
+	private static LocalizedText ServerDisplayName(string slot)
 	{
-		"is_connected" => MacroDeckStrings.Connection.Connected(),
-		"active_sessions" => Strings.ActiveSessions(),
-		_ => default
-	};
+		return slot switch
+		{
+			"is_connected" => MacroDeckStrings.Connection.Connected(),
+			"active_sessions" => Strings.ActiveSessions(),
+			_ => default
+		};
+	}
 
-	private static LocalizedText DeviceDisplayName(string slot) => slot switch
+	private static LocalizedText DeviceDisplayName(string slot)
 	{
-		"is_active" => Strings.IsActive(),
-		"is_playing" => Strings.IsPlaying(),
-		"is_paused" => Strings.IsPaused(),
-		"title" => Strings.Title(),
-		"series" => Strings.Series(),
-		"album" => Strings.Album(),
-		"media_type" => Strings.MediaType(),
-		"progress_percent" => Strings.ProgressPercent(),
-		"position" => Strings.Position(),
-		"duration" => Strings.Duration(),
-		"user" => Strings.User(),
-		"client" => Strings.Client(),
-		"device" => Strings.Device(),
-		"is_transcoding" => Strings.IsTranscoding(),
-		"volume" => Strings.Volume(),
-		"is_muted" => Strings.IsMuted(),
-		_ => default
-	};
+		return slot switch
+		{
+			"is_active" => Strings.IsActive(),
+			"is_playing" => Strings.IsPlaying(),
+			"is_paused" => Strings.IsPaused(),
+			"title" => Strings.Title(),
+			"series" => Strings.Series(),
+			"album" => Strings.Album(),
+			"media_type" => Strings.MediaType(),
+			"progress_percent" => Strings.ProgressPercent(),
+			"position" => Strings.Position(),
+			"duration" => Strings.Duration(),
+			"user" => Strings.User(),
+			"client" => Strings.Client(),
+			"device" => Strings.Device(),
+			"is_transcoding" => Strings.IsTranscoding(),
+			"volume" => Strings.Volume(),
+			"is_muted" => Strings.IsMuted(),
+			_ => default
+		};
+	}
 
-	private static string Dashed(string slot) => slot.Replace('_', '-');
+	private static string Dashed(string slot)
+	{
+		return slot.Replace('_', '-');
+	}
 
-	private static string Undashed(string slot) => slot.Replace('-', '_');
+	private static string Undashed(string slot)
+	{
+		return slot.Replace('-', '_');
+	}
 
 	private sealed record Slot(
 		string Name,

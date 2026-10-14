@@ -15,7 +15,10 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 	private readonly ILogger _logger;
 	private readonly Lock _lock = new();
 	private readonly List<Subscription> _subscriptions = [];
-	private readonly Dictionary<string, Func<ChannelMessage, CancellationToken, Task>> _commands = new(StringComparer.Ordinal);
+
+	private readonly Dictionary<string, Func<ChannelMessage, CancellationToken, Task>> _commands
+		= new(StringComparer.Ordinal);
+
 	private readonly Dictionary<string, Func<ChannelMessage, CancellationToken, Task<JsonElement?>>> _requests
 		= new(StringComparer.Ordinal);
 
@@ -36,7 +39,8 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 		return Task.CompletedTask;
 	}
 
-	public Task SendAsync(string topic,
+	public Task SendAsync(
+		string topic,
 		JsonElement? payload = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
@@ -45,7 +49,8 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 		return _broker.SendAsync(_integrationId, topic, payload, ValidTimeout(timeout), cancellationToken);
 	}
 
-	public Task<JsonElement?> RequestAsync(string topic,
+	public Task<JsonElement?> RequestAsync(
+		string topic,
 		JsonElement? payload = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
@@ -54,7 +59,8 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 		return _broker.RequestAsync(_integrationId, topic, payload, ValidTimeout(timeout), cancellationToken);
 	}
 
-	public Task<IAsyncDisposable> SubscribeAsync(string topicPattern,
+	public Task<IAsyncDisposable> SubscribeAsync(
+		string topicPattern,
 		Func<ChannelMessage, CancellationToken, Task> handler,
 		CancellationToken cancellationToken = default)
 	{
@@ -72,22 +78,31 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 		return Task.FromResult<IAsyncDisposable>(new Registration(this, () => _subscriptions.Remove(subscription)));
 	}
 
-	public Task<IAsyncDisposable> HandleCommandsAsync(string topic,
+	public Task<IAsyncDisposable> HandleCommandsAsync(
+		string topic,
 		Func<ChannelMessage, CancellationToken, Task> handler,
 		CancellationToken cancellationToken = default)
-		=> Claim(_commands, ChannelMessageKind.Command, topic, handler);
+	{
+		return Claim(_commands, ChannelMessageKind.Command, topic, handler);
+	}
 
-	public Task<IAsyncDisposable> HandleRequestsAsync(string topic,
+	public Task<IAsyncDisposable> HandleRequestsAsync(
+		string topic,
 		Func<ChannelMessage, CancellationToken, Task<JsonElement?>> handler,
 		CancellationToken cancellationToken = default)
-		=> Claim(_requests, ChannelMessageKind.Request, topic, handler);
+	{
+		return Claim(_requests, ChannelMessageKind.Request, topic, handler);
+	}
 
 	public async Task DeliverEventAsync(MessageDelivery message, CancellationToken cancellationToken)
 	{
 		Subscription[] matching;
 		lock (_lock)
 		{
-			matching = [.. _subscriptions.Where(subscription => MessageTopic.Matches(subscription.Pattern, message.Topic))];
+			matching =
+			[
+				.. _subscriptions.Where(subscription => MessageTopic.Matches(subscription.Pattern, message.Topic))
+			];
 		}
 
 		var received = ToChannelMessage(ChannelMessageKind.Event, message);
@@ -131,7 +146,8 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 			.ConfigureAwait(false);
 	}
 
-	public Task<JsonElement?> HandleRequestAsync(MessageDelivery message,
+	public Task<JsonElement?> HandleRequestAsync(
+		MessageDelivery message,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
 	{
@@ -161,7 +177,8 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 		return ValueTask.CompletedTask;
 	}
 
-	private Task<IAsyncDisposable> Claim<THandler>(Dictionary<string, THandler> handlers,
+	private Task<IAsyncDisposable> Claim<THandler>(
+		Dictionary<string, THandler> handlers,
 		ChannelMessageKind kind,
 		string topic,
 		THandler handler)
@@ -194,8 +211,8 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 			this,
 			CurrentRegistrations());
 
-		var own = rejected.FirstOrDefault(rejection => rejection.Kind == kind &&
-			string.Equals(rejection.Topic, topic, StringComparison.Ordinal));
+		var own = rejected.FirstOrDefault(rejection
+			=> rejection.Kind == kind && string.Equals(rejection.Topic, topic, StringComparison.Ordinal));
 		if (own is null)
 		{
 			return;
@@ -212,7 +229,9 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 				topic,
 				$"'{topic}' is already handled by {own.Owner}.",
 				own.Owner)
-			: new MessageChannelException(MessageChannelErrorCode.InvalidTopic, topic, $"'{topic}' is not a valid topic.");
+			: new MessageChannelException(MessageChannelErrorCode.InvalidTopic,
+				topic,
+				$"'{topic}' is not a valid topic.");
 	}
 
 	private void Unregister(Action remove)
@@ -233,15 +252,19 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 	}
 
 	private MessageRegistrations CurrentRegistrations()
-		=> new([.. _subscriptions.Select(subscription => subscription.Pattern)], [.. _commands.Keys], [.. _requests.Keys]);
+	{
+		return new MessageRegistrations([.. _subscriptions.Select(subscription => subscription.Pattern)],
+			[.. _commands.Keys],
+			[.. _requests.Keys]);
+	}
 
 	private async Task<JsonElement?> RunHandlerAsync(string topic, Func<Task<JsonElement?>> run)
 	{
 		try
 		{
 			var reply = await Task.Run(run).ConfigureAwait(false);
-			if (reply is { } element &&
-				Encoding.UTF8.GetByteCount(element.GetRawText()) > MessagingLimits.MaxPayloadBytes)
+			if (reply is { } element
+				&& Encoding.UTF8.GetByteCount(element.GetRawText()) > MessagingLimits.MaxPayloadBytes)
 			{
 				throw new MessageChannelException(MessageChannelErrorCode.PayloadTooLarge,
 					topic,
@@ -278,10 +301,13 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 	}
 
 	private static MessageChannelException NoHandler(string topic)
-		=> new(MessageChannelErrorCode.NoHandler, topic, $"Nothing handles '{topic}'.");
+	{
+		return new MessageChannelException(MessageChannelErrorCode.NoHandler, topic, $"Nothing handles '{topic}'.");
+	}
 
 	private static ChannelMessage ToChannelMessage(ChannelMessageKind kind, MessageDelivery message)
-		=> new()
+	{
+		return new ChannelMessage
 		{
 			Kind = kind,
 			Topic = message.Topic,
@@ -290,6 +316,7 @@ public sealed class InProcessMessageChannel : IMessageChannel, IMessageParticipa
 			SentAt = message.SentAt,
 			Payload = message.Payload
 		};
+	}
 
 	private sealed record Subscription(string Pattern, Func<ChannelMessage, CancellationToken, Task> Handler);
 

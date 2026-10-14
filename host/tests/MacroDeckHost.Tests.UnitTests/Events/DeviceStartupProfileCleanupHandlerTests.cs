@@ -30,7 +30,10 @@ public class DeviceStartupProfileCleanupHandlerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _provider.Dispose();
+	public void TearDown()
+	{
+		_provider.Dispose();
+	}
 
 	[Test]
 	public async Task Handle_ProfileDeleted_ClearsAssignmentsForThatProfile()
@@ -53,41 +56,78 @@ public class DeviceStartupProfileCleanupHandlerTests
 		}
 
 		public Task<DeviceRegistrationResult> RegisterOrReuse(DeviceRegistration registration, DateTime now)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task PurgeStale(DateTime now) => throw new NotSupportedException();
+		public Task PurgeStale(DateTime now)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<IReadOnlyList<Device>> GetAll() => throw new NotSupportedException();
+		public Task<IReadOnlyList<Device>> GetAll()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Device> ToDto(DeviceEntity device) => throw new NotSupportedException();
+		public Task<Device> ToDto(DeviceEntity device)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<DeviceEntity, DeviceError>> Rename(Guid id, string name)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<DeviceError>> LogoutDevice(Guid id) => throw new NotSupportedException();
+		public Task<Result<DeviceError>> LogoutDevice(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task EndAllSessions() => throw new NotSupportedException();
+		public Task EndAllSessions()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<DeviceError>> RemoveDevice(Guid id) => throw new NotSupportedException();
+		public Task<Result<DeviceError>> RemoveDevice(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<DeviceEntity, DeviceError>> SetStartupProfile(Guid id, string? profileId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<DeviceError>> ShowScreenSaver(Guid id) => throw new NotSupportedException();
+		public Task<Result<DeviceError>> ShowScreenSaver(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<DeviceEntity, DeviceError>> SetScreenSaver(Guid id,
+		public Task<Result<DeviceEntity, DeviceError>> SetScreenSaver(
+			Guid id,
 			bool enabled,
 			int idleSeconds,
 			string? screenSaverId,
 			string? configuration)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<DeviceEntity, DeviceError>> SetSettingsButtonHidden(Guid id, bool hidden)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<string?> ResolveStartupProfileId(Guid deviceId) => throw new NotSupportedException();
+		public Task<string?> ResolveStartupProfileId(Guid deviceId)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<DeviceError>> OpenProfileOnDevice(Guid id, string profileId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

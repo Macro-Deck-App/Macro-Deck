@@ -129,13 +129,19 @@ public static class BackupComponentGroups
 	public static IReadOnlyList<BackupComponentGroup> AllIds => [.. All.Select(definition => definition.Id)];
 
 	public static BackupComponentGroupDefinition Definition(BackupComponentGroup id)
-		=> All.First(definition => definition.Id == id);
+	{
+		return All.First(definition => definition.Id == id);
+	}
 
 	public static bool IsExcluded(string relativePath)
-		=> ExcludedPrefixes.Any(prefix => relativePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+	{
+		return ExcludedPrefixes.Any(prefix => relativePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+	}
 
 	public static bool IsRestorablePreferenceKey(string key)
-		=> !PreferenceKeyDenyPrefixes.Any(prefix => key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+	{
+		return !PreferenceKeyDenyPrefixes.Any(prefix => key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+	}
 
 	public static BackupComponentGroup? Owner(string relativePath)
 	{
@@ -151,21 +157,32 @@ public static class BackupComponentGroups
 	}
 
 	private static bool Matches(BackupPathRule rule, string relativePath)
-		=> rule.Kind switch
+	{
+		return rule.Kind switch
 		{
 			BackupPathRuleKind.Directory => relativePath.StartsWith(rule.Value + "/",
 				StringComparison.OrdinalIgnoreCase),
 			// A durable JSON document can be published as its own .bak sidecar, so the sidecar belongs to
 			// whichever group owns the document itself.
-			BackupPathRuleKind.File => relativePath.Equals(rule.Value, StringComparison.OrdinalIgnoreCase) ||
-				relativePath.Equals(rule.Value + ".bak", StringComparison.OrdinalIgnoreCase),
+			BackupPathRuleKind.File => relativePath.Equals(rule.Value, StringComparison.OrdinalIgnoreCase)
+				|| relativePath.Equals(rule.Value + ".bak", StringComparison.OrdinalIgnoreCase),
 			BackupPathRuleKind.Prefix => relativePath.StartsWith(rule.Value, StringComparison.OrdinalIgnoreCase),
 			_ => false
 		};
+	}
 
-	private static BackupPathRule Dir(string value) => new(value, BackupPathRuleKind.Directory);
+	private static BackupPathRule Dir(string value)
+	{
+		return new BackupPathRule(value, BackupPathRuleKind.Directory);
+	}
 
-	private static BackupPathRule File(string value) => new(value, BackupPathRuleKind.File);
+	private static BackupPathRule File(string value)
+	{
+		return new BackupPathRule(value, BackupPathRuleKind.File);
+	}
 
-	private static BackupPathRule Prefix(string value) => new(value, BackupPathRuleKind.Prefix);
+	private static BackupPathRule Prefix(string value)
+	{
+		return new BackupPathRule(value, BackupPathRuleKind.Prefix);
+	}
 }

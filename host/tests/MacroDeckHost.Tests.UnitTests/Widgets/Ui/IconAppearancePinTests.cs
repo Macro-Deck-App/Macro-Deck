@@ -48,13 +48,16 @@ internal sealed class IconAppearancePinTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public void The_appearance_choice_is_offered_only_for_an_icon_that_has_appearances()
 	{
-		var withAppearances = RenderButton(new { icon = Icon(_lamp, appearance: null) });
-		var plain = RenderButton(new { icon = Icon(_plain, appearance: null) });
+		var withAppearances = RenderButton(new { icon = Icon(_lamp, null) });
+		var plain = RenderButton(new { icon = Icon(_plain, null) });
 
 		var options = withAppearances.ById("icon.appearance").Property(UiConfigProperties.Options)!.Value
 			.EnumerateArray()
@@ -64,7 +67,8 @@ internal sealed class IconAppearancePinTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(options, Is.EqualTo(new[] { "automatic", "default", "colorScheme=dark" }));
-			Assert.That(withAppearances.ById("icon.appearance").Text(UiConfigProperties.Value), Is.EqualTo("automatic"));
+			Assert.That(withAppearances.ById("icon.appearance").Text(UiConfigProperties.Value),
+				Is.EqualTo("automatic"));
 			Assert.That(plain.FindById("icon.appearance"), Is.Null);
 		});
 	}
@@ -116,9 +120,9 @@ internal sealed class IconAppearancePinTests
 			stateMode = true,
 			states = new object[]
 			{
-				new { id = "off", label = "Off", appearance = new { icon = Icon(_lamp, appearance: null) } },
-				new { id = "on", label = "On", appearance = new { } },
-			},
+				new { id = "off", label = "Off", appearance = new { icon = Icon(_lamp, null) } },
+				new { id = "on", label = "On", appearance = new { } }
+			}
 		});
 		host.ById("activeStateId").Change("off");
 
@@ -139,7 +143,7 @@ internal sealed class IconAppearancePinTests
 		var host = UiTestHost.Render(SliderWidgetConfigView.Build(
 			JsonSerializer.SerializeToElement(new { label = "Volume", icon = Icon(_lamp, "colorScheme=dark") }),
 			new VariableRegistry(),
-			icons: _harness.Cache));
+			_harness.Cache));
 
 		host.ById("label").Change("Master");
 		var afterLabel = StoredIcon(host);
@@ -173,8 +177,11 @@ internal sealed class IconAppearancePinTests
 	}
 
 	private static WidgetIconReference StoredIcon(UiTestHost host)
-		=> WidgetIconReference.Read(JsonNode.Parse(host.ById("icon").Property(UiConfigProperties.Value)!.Value.GetRawText()),
+	{
+		return WidgetIconReference.Read(
+			JsonNode.Parse(host.ById("icon").Property(UiConfigProperties.Value)!.Value.GetRawText()),
 			null)!.Value;
+	}
 
 	private static Dictionary<string, string> Icon(IconEntity icon, string? appearance)
 	{
@@ -210,8 +217,14 @@ internal sealed class IconAppearancePinTests
 
 	private sealed class NoFonts : MacroDeckHost.Application.Rendering.IFontCatalog
 	{
-		public IReadOnlyList<MacroDeckHost.Application.Rendering.FontFaceInfo> GetFaces() => [];
+		public IReadOnlyList<MacroDeckHost.Application.Rendering.FontFaceInfo> GetFaces()
+		{
+			return [];
+		}
 
-		public byte[]? GetFaceFile(string faceId) => null;
+		public byte[]? GetFaceFile(string faceId)
+		{
+			return null;
+		}
 	}
 }

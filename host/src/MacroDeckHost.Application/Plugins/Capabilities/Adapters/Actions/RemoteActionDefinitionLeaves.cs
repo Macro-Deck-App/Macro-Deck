@@ -17,9 +17,12 @@ internal sealed class RemoteActionDefinitionWithDynamicOptions(
 	RemoteActionDescriptor descriptor)
 	: RemoteActionDefinition(invoker, pluginId, descriptor), IDynamicOptionsActionDefinition
 {
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> GetDynamicOptionsCoreAsync(context, cancellationToken);
+	{
+		return GetDynamicOptionsCoreAsync(context, cancellationToken);
+	}
 }
 
 internal sealed class RemoteActionDefinitionWithState(
@@ -31,7 +34,9 @@ internal sealed class RemoteActionDefinitionWithState(
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> GetActionStateCoreAsync(parameters, cancellationToken);
+	{
+		return GetActionStateCoreAsync(parameters, cancellationToken);
+	}
 }
 
 internal sealed class RemoteActionDefinitionWithDynamicOptionsAndState(
@@ -41,12 +46,17 @@ internal sealed class RemoteActionDefinitionWithDynamicOptionsAndState(
 	: RemoteActionDefinition(invoker, pluginId, descriptor), IDynamicOptionsActionDefinition,
 		IStateProviderActionDefinition
 {
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> GetDynamicOptionsCoreAsync(context, cancellationToken);
+	{
+		return GetDynamicOptionsCoreAsync(context, cancellationToken);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> GetActionStateCoreAsync(parameters, cancellationToken);
+	{
+		return GetActionStateCoreAsync(parameters, cancellationToken);
+	}
 }

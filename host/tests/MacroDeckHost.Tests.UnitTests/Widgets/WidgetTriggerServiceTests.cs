@@ -14,11 +14,16 @@ public class WidgetTriggerServiceTests
 	private static readonly Guid _widgetId = Guid.NewGuid();
 
 	private static WidgetEntity Widget(string data = "{}")
-		=> new() { Id = _widgetId, FolderId = Guid.NewGuid(), Type = WidgetTypeIds.ActionButton, Data = data };
+	{
+		return new WidgetEntity
+			{ Id = _widgetId, FolderId = Guid.NewGuid(), Type = WidgetTypeIds.ActionButton, Data = data };
+	}
 
 	/// <summary>A state-mode button stepping through its states on a press, which is the default.</summary>
 	private static WidgetEntity CyclingWidget()
-		=> Widget("""{"stateMode":true,"states":[{"id":"a"},{"id":"b"}]}""");
+	{
+		return Widget("""{"stateMode":true,"states":[{"id":"a"},{"id":"b"}]}""");
+	}
 
 	private static WidgetTriggerService CreateService(
 		RecordingCoordinator coordinator,
@@ -46,7 +51,7 @@ public class WidgetTriggerServiceTests
 		await service.ExecuteAsync(CyclingWidget(),
 			WidgetTriggerTypes.ShortPress,
 			"client-1",
-			originDeviceId: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(order, Is.EqualTo(_advanceThenFlow));
@@ -66,7 +71,7 @@ public class WidgetTriggerServiceTests
 			Widget("""{"stateMode":true,"cycleStatesOnPress":false,"states":[{"id":"a"},{"id":"b"}]}"""),
 			WidgetTriggerTypes.ShortPress,
 			"client-1",
-			originDeviceId: null,
+			null,
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -87,7 +92,7 @@ public class WidgetTriggerServiceTests
 		await service.ExecuteAsync(Widget("""{"mode":"toggle"}"""),
 			WidgetTriggerTypes.ShortPress,
 			"client-1",
-			originDeviceId: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(stateService.AdvanceCalls, Is.EqualTo(1));
@@ -104,7 +109,7 @@ public class WidgetTriggerServiceTests
 		await service.ExecuteAsync(CyclingWidget(),
 			WidgetTriggerTypes.LongPress,
 			"client-1",
-			originDeviceId: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(stateService.AdvanceCalls, Is.Zero);
@@ -121,7 +126,7 @@ public class WidgetTriggerServiceTests
 		await service.ExecuteAsync(CyclingWidget(),
 			WidgetTriggerTypes.ShortPress,
 			"client-1",
-			originDeviceId: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(coordinator.Runs, Is.EqualTo(1));
@@ -143,7 +148,7 @@ public class WidgetTriggerServiceTests
 		await service.ExecuteAsync(CyclingWidget(),
 			WidgetTriggerTypes.ShortPress,
 			"client-1",
-			originDeviceId: null,
+			null,
 			cts.Token);
 
 		Assert.That(stateService.AdvanceCalls, Is.EqualTo(1));
@@ -161,7 +166,7 @@ public class WidgetTriggerServiceTests
 		await service.ExecuteAsync(widget,
 			WidgetTriggerTypes.ShortPress,
 			"client-42",
-			originDeviceId: null,
+			null,
 			CancellationToken.None);
 
 		var request = coordinator.LastRequest!;
@@ -187,7 +192,7 @@ public class WidgetTriggerServiceTests
 		await service.ExecuteAsync(Widget(),
 			WidgetTriggerTypes.ShortPress,
 			"client-1",
-			originDeviceId: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(coordinator.LastBound, Is.EqualTo(TimeSpan.FromSeconds(5)));
@@ -201,10 +206,13 @@ public class WidgetTriggerServiceTests
 
 		public Action? OnAdvance { get; set; }
 
-		public Task<WidgetStateWriteResult> SetAsync(Guid widgetId,
+		public Task<WidgetStateWriteResult> SetAsync(
+			Guid widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
 		public Task<WidgetStateWriteResult> AdvanceAsync(Guid widgetId, CancellationToken cancellationToken = default)
 		{
@@ -223,16 +231,26 @@ public class WidgetTriggerServiceTests
 	private const string DefaultSource = "{\"flows\":[]}";
 
 	private static WidgetEntity WeatherWidget()
-		=> new() { Id = _widgetId, FolderId = Guid.NewGuid(), Type = WidgetTypeIds.Weather, Data = "{}" };
+	{
+		return new WidgetEntity
+			{ Id = _widgetId, FolderId = Guid.NewGuid(), Type = WidgetTypeIds.Weather, Data = "{}" };
+	}
 
 	[Test]
 	public async Task A_short_press_from_a_client_runs_the_widgets_default_when_there_is_one()
 	{
 		var coordinator = new RecordingCoordinator();
-		var service = CreateService(coordinator, new RecordingStateService(), out var services, new FixedDefault(DefaultSource));
+		var service = CreateService(coordinator,
+			new RecordingStateService(),
+			out var services,
+			new FixedDefault(DefaultSource));
 		using var _ = services;
 
-		await service.ExecuteAsync(WeatherWidget(), WidgetTriggerTypes.ShortPress, "client-1", null, CancellationToken.None);
+		await service.ExecuteAsync(WeatherWidget(),
+			WidgetTriggerTypes.ShortPress,
+			"client-1",
+			null,
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -251,7 +269,11 @@ public class WidgetTriggerServiceTests
 		using var _ = services;
 		var deviceId = Guid.NewGuid();
 
-		await service.ExecuteAsync(WeatherWidget(), WidgetTriggerTypes.ShortPress, null, deviceId, CancellationToken.None);
+		await service.ExecuteAsync(WeatherWidget(),
+			WidgetTriggerTypes.ShortPress,
+			null,
+			deviceId,
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -265,7 +287,10 @@ public class WidgetTriggerServiceTests
 	public async Task A_long_press_never_runs_the_widgets_default()
 	{
 		var coordinator = new RecordingCoordinator();
-		var service = CreateService(coordinator, new RecordingStateService(), out var services, new FixedDefault(DefaultSource));
+		var service = CreateService(coordinator,
+			new RecordingStateService(),
+			out var services,
+			new FixedDefault(DefaultSource));
 		using var _ = services;
 		var widget = WeatherWidget();
 
@@ -284,7 +309,10 @@ public class WidgetTriggerServiceTests
 			return source;
 		}
 
-		public bool RunsOnDevices(string widgetType) => false;
+		public bool RunsOnDevices(string widgetType)
+		{
+			return false;
+		}
 	}
 
 	private sealed class RecordingCoordinator : IActionExecutionCoordinator
@@ -293,7 +321,9 @@ public class WidgetTriggerServiceTests
 			Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> run,
 			TimeSpan bound,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public int Runs { get; private set; }
 

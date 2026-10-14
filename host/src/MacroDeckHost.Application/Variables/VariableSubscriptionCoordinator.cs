@@ -236,8 +236,8 @@ public sealed class VariableSubscriptionCoordinator : IVariableSubscriptionCoord
 	{
 		lock (_lock)
 		{
-			if (_attached.TryGetValue(integrationId, out var attachedProvider) &&
-				ReferenceEquals(attachedProvider, provider))
+			if (_attached.TryGetValue(integrationId, out var attachedProvider)
+				&& ReferenceEquals(attachedProvider, provider))
 			{
 				return;
 			}

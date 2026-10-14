@@ -19,7 +19,7 @@ public class CliConsoleTests
 	{
 		var output = new StringWriter();
 		var error = new StringWriter();
-		var console = new CliConsole(Verbosity.Normal, noColor: true, output, error);
+		var console = new CliConsole(Verbosity.Normal, true, output, error);
 
 		console.WriteError("something-wrong", "Something went wrong.");
 
@@ -35,7 +35,7 @@ public class CliConsoleTests
 	{
 		var output = new StringWriter();
 		var error = new StringWriter();
-		var console = new CliConsole(Verbosity.Normal, noColor: true, output, error);
+		var console = new CliConsole(Verbosity.Normal, true, output, error);
 
 		console.WriteWarning("something-off", "Something is worth a second look.");
 
@@ -51,7 +51,7 @@ public class CliConsoleTests
 	{
 		var output = new StringWriter();
 		var error = new StringWriter();
-		var console = new CliConsole(Verbosity.Quiet, noColor: true, output, error);
+		var console = new CliConsole(Verbosity.Quiet, true, output, error);
 
 		console.WriteError("still-reported", "Quiet never silences the result.");
 		console.WriteWarning("still-reported-too", "Neither does this.");
@@ -70,7 +70,7 @@ public class CliConsoleTests
 	{
 		var output = new StringWriter();
 		var error = new StringWriter();
-		var console = new CliConsole(Verbosity.Normal, noColor: true, output, error);
+		var console = new CliConsole(Verbosity.Normal, true, output, error);
 
 		console.WriteError("plain-text", "No escape codes here.");
 		console.WriteWarning("plain-text-too", "None here either.");

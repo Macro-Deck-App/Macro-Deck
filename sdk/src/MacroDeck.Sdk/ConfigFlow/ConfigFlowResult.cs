@@ -50,26 +50,32 @@ public sealed class ConfigFlowResult
 
 	/// <summary>Show the next (or first) step.</summary>
 	public static ConfigFlowResult Step(ConfigFlowStep step)
-		=> new(ConfigFlowResultKind.Step) { NextStep = step };
+	{
+		return new ConfigFlowResult(ConfigFlowResultKind.Step) { NextStep = step };
+	}
 
 	/// <summary>Re-display <paramref name="step"/> with validation errors.</summary>
 	public static ConfigFlowResult Error(
 		ConfigFlowStep step,
 		LocalizedText message = default,
 		IReadOnlyDictionary<string, LocalizedText>? fieldErrors = null)
-		=> new(ConfigFlowResultKind.Error)
+	{
+		return new ConfigFlowResult(ConfigFlowResultKind.Error)
 		{
 			NextStep = step,
 			ErrorMessage = message,
 			FieldErrors = fieldErrors
 		};
+	}
 
 	/// <summary>
 	/// Hand the user off to an external authorization URL (e.g. an OAuth consent page). The host
 	/// opens it, waits for the redirect callback, then auto-submits <paramref name="resumeStepId"/>.
 	/// </summary>
 	public static ConfigFlowResult External(string url, string resumeStepId)
-		=> new(ConfigFlowResultKind.External) { ExternalUrl = url, ResumeStepId = resumeStepId };
+	{
+		return new ConfigFlowResult(ConfigFlowResultKind.External) { ExternalUrl = url, ResumeStepId = resumeStepId };
+	}
 
 	/// <summary>
 	/// Finish the flow; the host persists the collected form values plus any extra
@@ -78,7 +84,9 @@ public sealed class ConfigFlowResult
 	public static ConfigFlowResult Complete(
 		string title,
 		IReadOnlyDictionary<string, ConfigFlowValue>? values = null)
-		=> new(ConfigFlowResultKind.Complete) { EntryTitle = title, Values = values };
+	{
+		return new ConfigFlowResult(ConfigFlowResultKind.Complete) { EntryTitle = title, Values = values };
+	}
 
 	/// <summary>
 	/// Finish the flow without storing anything: the dialog closes, no config entry is created or changed and
@@ -89,5 +97,7 @@ public sealed class ConfigFlowResult
 	/// <remarks>A Macro Deck that predates it treats the result like <see cref="Complete" /> without a title:
 	/// it stores an entry from the collected values under the integration's name.</remarks>
 	public static ConfigFlowResult CompleteWithoutEntry()
-		=> new(ConfigFlowResultKind.Complete) { StoresEntry = false };
+	{
+		return new ConfigFlowResult(ConfigFlowResultKind.Complete) { StoresEntry = false };
+	}
 }

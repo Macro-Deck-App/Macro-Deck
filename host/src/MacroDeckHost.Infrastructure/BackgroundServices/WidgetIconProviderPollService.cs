@@ -173,8 +173,8 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 				interval = IdlePollInterval;
 			}
 
-			if (_lastPolledAt.TryGetValue(widget.Id, out var lastPolledAt) &&
-				now < lastPolledAt + interval - _tickJitterTolerance)
+			if (_lastPolledAt.TryGetValue(widget.Id, out var lastPolledAt)
+				&& now < lastPolledAt + interval - _tickJitterTolerance)
 			{
 				continue;
 			}
@@ -193,8 +193,10 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 	}
 
 	private static TimeSpan Clamp(TimeSpan requested)
-		=> requested < MinPollInterval ? MinPollInterval :
+	{
+		return requested < MinPollInterval ? MinPollInterval :
 			requested > MaxPollInterval ? MaxPollInterval : requested;
+	}
 
 	private void SeedExistingButtons()
 	{

@@ -27,9 +27,12 @@ public static class EventIds
 	public const string ServerStopped = "server-stopped";
 
 	public static string Qualify(string eventId)
-		=> QualifiedId.Create(CoreEventProvider.ProviderIdValue,
-			eventId,
-			OwnerIdKind.HostProvider,
-			LocalIdKind.Declared,
-			"Event").ToString();
+	{
+		return QualifiedId.Create(CoreEventProvider.ProviderIdValue,
+				eventId,
+				OwnerIdKind.HostProvider,
+				LocalIdKind.Declared,
+				"Event")
+			.ToString();
+	}
 }

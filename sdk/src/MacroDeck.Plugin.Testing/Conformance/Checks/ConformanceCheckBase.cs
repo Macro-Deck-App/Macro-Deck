@@ -33,6 +33,7 @@ internal abstract class ConformanceCheckBase : IConformanceCheck
 
 	public IReadOnlyList<ConformancePrecondition> Requires { get; }
 
-	public abstract Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public abstract Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken);
 }

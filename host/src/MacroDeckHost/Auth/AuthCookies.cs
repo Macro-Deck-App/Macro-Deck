@@ -16,13 +16,19 @@ public static class AuthCookies
 	/// host name. Falls back to the socket's own port when there is no Host header to read.
 	/// </summary>
 	public static int ListenerPort(HttpContext context)
-		=> context.Request.Host.Port ?? context.Connection.LocalPort;
+	{
+		return context.Request.Host.Port ?? context.Connection.LocalPort;
+	}
 
 	public static string? ReadAccessToken(HttpContext context)
-		=> Read(context, AuthDefaults.AccessCookieFor(ListenerPort(context)), AuthDefaults.AccessCookie);
+	{
+		return Read(context, AuthDefaults.AccessCookieFor(ListenerPort(context)), AuthDefaults.AccessCookie);
+	}
 
 	public static string? ReadRefreshToken(HttpContext context)
-		=> Read(context, AuthDefaults.RefreshCookieFor(ListenerPort(context)), AuthDefaults.RefreshCookie);
+	{
+		return Read(context, AuthDefaults.RefreshCookieFor(ListenerPort(context)), AuthDefaults.RefreshCookie);
+	}
 
 	// The unsuffixed name is what installations wrote before the cookies were named per listener. Read
 	// as a fallback so an upgrade does not end every session that is currently signed in; the next sign-in

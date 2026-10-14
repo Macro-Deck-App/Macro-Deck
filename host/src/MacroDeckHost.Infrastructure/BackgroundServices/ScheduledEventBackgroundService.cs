@@ -143,7 +143,9 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 	}
 
 	private static TimeSpan Clamp(TimeSpan sleep)
-		=> sleep < TimeSpan.Zero ? TimeSpan.Zero : sleep > _maximumSleep ? _maximumSleep : sleep;
+	{
+		return sleep < TimeSpan.Zero ? TimeSpan.Zero : sleep > _maximumSleep ? _maximumSleep : sleep;
+	}
 
 	private void OnIndexChanged()
 	{

@@ -28,7 +28,8 @@ public sealed class IconAppearancesOptionsSource : IHostOptionsSource
 			{
 				foreach (var appearance in _icons.GetAppearances(icon.Id))
 				{
-					var key = IconAppearanceTraits.ToKey(appearance.AppearanceTraits ?? new Dictionary<string, string>());
+					var key = IconAppearanceTraits.ToKey(
+						appearance.AppearanceTraits ?? new Dictionary<string, string>());
 					if (IconAppearanceTraits.TryGetVariantName(key, out var name))
 					{
 						variants[key] = name;

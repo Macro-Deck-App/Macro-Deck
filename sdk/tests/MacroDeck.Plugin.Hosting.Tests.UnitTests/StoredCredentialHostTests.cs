@@ -1,6 +1,5 @@
 using MacroDeck.Plugin.Hosting.Credentials;
 using MacroDeck.Plugin.Hosting.Tests.UnitTests.Support;
-using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Auth;
 using MacroDeck.Plugin.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +15,7 @@ public class StoredCredentialHostTests
 {
 	private const string MovedHostUrl = "http://127.0.0.1:1";
 
-	private static readonly string StoredSecret = new('s', PluginAuthDefaults.MinPluginSecretLength);
+	private static readonly string _storedSecret = new('s', PluginAuthDefaults.MinPluginSecretLength);
 
 	private FakePluginHost _host = null!;
 	private string _stateDirectory = string.Empty;
@@ -43,7 +42,7 @@ public class StoredCredentialHostTests
 	public async Task TearDown()
 	{
 		await _host.DisposeAsync();
-		Directory.Delete(_stateDirectory, recursive: true);
+		Directory.Delete(_stateDirectory, true);
 		_manifest.Dispose();
 	}
 
@@ -76,7 +75,8 @@ public class StoredCredentialHostTests
 		await using var plugin = Builder().Build();
 		await plugin.StartAsync();
 
-		await Wait.UntilAsync(() => _logs.Warnings().Any(message => message.Contains("socket", StringComparison.Ordinal)),
+		await Wait.UntilAsync(()
+				=> _logs.Warnings().Any(message => message.Contains("socket", StringComparison.Ordinal)),
 			TimeSpan.FromSeconds(10));
 
 		Assert.That(_logs.Warnings(),
@@ -90,16 +90,19 @@ public class StoredCredentialHostTests
 		builder.Configuration["MacroDeck:Plugin:HostUrl"] = _host.Url;
 		builder.Configuration["MacroDeck:Plugin:StateDirectory"] = _stateDirectory;
 		builder.Configuration["MacroDeck:Plugin:PairingEnabled"] = "false";
-		builder.Services.AddSingleton<ILogger>(new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Sink(_logs)
+		builder.Services.AddSingleton<ILogger>(new LoggerConfiguration().MinimumLevel.Debug()
+			.WriteTo.Sink(_logs)
 			.CreateLogger());
 
 		return builder;
 	}
 
 	private Task StoreCredentialIssuedByAsync(string hostUrl)
-		=> new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _stateDirectory }),
+	{
+		return new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _stateDirectory }),
 			new PluginMetadata { Id = "com.example.test", Name = "Test Plugin", Version = "1.0.0" },
-			Serilog.Core.Logger.None).SaveAsync(new PluginCredentials("com.example.test", hostUrl, StoredSecret));
+			Logger.None).SaveAsync(new PluginCredentials("com.example.test", hostUrl, _storedSecret));
+	}
 
 	private sealed class CollectingSink : ILogEventSink
 	{
@@ -118,7 +121,11 @@ public class StoredCredentialHostTests
 		{
 			lock (_gate)
 			{
-				return [.. _events.Where(e => e.Level == LogEventLevel.Warning).Select(e => e.RenderMessage(System.Globalization.CultureInfo.InvariantCulture))];
+				return
+				[
+					.. _events.Where(e => e.Level == LogEventLevel.Warning)
+						.Select(e => e.RenderMessage(System.Globalization.CultureInfo.InvariantCulture))
+				];
 			}
 		}
 	}

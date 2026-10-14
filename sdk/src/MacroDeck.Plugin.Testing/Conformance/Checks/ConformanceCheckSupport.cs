@@ -14,7 +14,8 @@ internal static class ConformanceCheckSupport
 {
 	/// <summary>The local ids of every declared <c>actions</c> capability, in declaration order.</summary>
 	public static IReadOnlyList<string> DeclaredActionLocalIds(ConformanceContext context)
-		=> context.Session is null
+	{
+		return context.Session is null
 			? []
 			:
 			[
@@ -22,6 +23,7 @@ internal static class ConformanceCheckSupport
 						string.Equals(capability.Kind, CapabilityKinds.Actions, StringComparison.Ordinal))
 					.Select(capability => capability.LocalId)
 			];
+	}
 
 	/// <summary>
 	/// The wire operation name for "describe" under <paramref name="kind" /> - every one of the ten
@@ -30,49 +32,59 @@ internal static class ConformanceCheckSupport
 	/// future kind that named its own describe operation differently would not silently break this. Null
 	/// for a kind this list does not (yet) know.
 	/// </summary>
-	public static string? DescribeOperationFor(string kind) => kind switch
+	public static string? DescribeOperationFor(string kind)
 	{
-		_ when string.Equals(kind, CapabilityKinds.Actions, StringComparison.Ordinal) => CapabilityOperations.Actions
-			.Describe,
-		_ when string.Equals(kind, CapabilityKinds.Variables, StringComparison.Ordinal) => CapabilityOperations
-			.Variables.Describe,
-		_ when string.Equals(kind, CapabilityKinds.Events, StringComparison.Ordinal) => CapabilityOperations.Events
-			.Describe,
-		_ when string.Equals(kind, CapabilityKinds.Icons, StringComparison.Ordinal) => CapabilityOperations.Icons
-			.Describe,
-		_ when string.Equals(kind, CapabilityKinds.ConfigFlow, StringComparison.Ordinal) => CapabilityOperations
-			.ConfigFlow.Describe,
-		_ when string.Equals(kind, CapabilityKinds.MusicPlayer, StringComparison.Ordinal) => CapabilityOperations
-			.MusicPlayer.Describe,
-		_ when string.Equals(kind, CapabilityKinds.Weather, StringComparison.Ordinal) => CapabilityOperations.Weather
-			.Describe,
-		_ when string.Equals(kind, CapabilityKinds.VirtualProfiles, StringComparison.Ordinal) => CapabilityOperations
-			.VirtualProfiles.Describe,
-		_ when string.Equals(kind, CapabilityKinds.Issues, StringComparison.Ordinal) => CapabilityOperations.Issues
-			.Describe,
-		_ when string.Equals(kind, CapabilityKinds.Ui, StringComparison.Ordinal) => CapabilityOperations.Ui.Describe,
-		_ when string.Equals(kind, CapabilityKinds.WidgetTypeProvider, StringComparison.Ordinal) =>
-			CapabilityOperations.WidgetTypeProvider.Describe,
-		_ when string.Equals(kind, CapabilityKinds.ScreenSaverProvider, StringComparison.Ordinal) =>
-			CapabilityOperations.ScreenSaverProvider.Describe,
-		_ when string.Equals(kind, CapabilityKinds.VideoStreamProvider, StringComparison.Ordinal) =>
-			CapabilityOperations.VideoStreamProvider.Describe,
-		_ when string.Equals(kind, CapabilityKinds.Calendar, StringComparison.Ordinal) => CapabilityOperations.Calendar
-			.Describe,
-		_ when string.Equals(kind, CapabilityKinds.ConfigEntries, StringComparison.Ordinal) =>
-			CapabilityOperations.ConfigEntries.Describe,
-		_ when string.Equals(kind, CapabilityKinds.EmailInbox, StringComparison.Ordinal) =>
-			CapabilityOperations.EmailInbox.Describe,
-		_ when string.Equals(kind, CapabilityKinds.CompanionDeviceEntries, StringComparison.Ordinal) =>
-			CapabilityOperations.CompanionDeviceEntries.Describe,
-		_ => null
-	};
+		return kind switch
+		{
+			_ when string.Equals(kind, CapabilityKinds.Actions, StringComparison.Ordinal) => CapabilityOperations
+				.Actions
+				.Describe,
+			_ when string.Equals(kind, CapabilityKinds.Variables, StringComparison.Ordinal) => CapabilityOperations
+				.Variables.Describe,
+			_ when string.Equals(kind, CapabilityKinds.Events, StringComparison.Ordinal) => CapabilityOperations.Events
+				.Describe,
+			_ when string.Equals(kind, CapabilityKinds.Icons, StringComparison.Ordinal) => CapabilityOperations.Icons
+				.Describe,
+			_ when string.Equals(kind, CapabilityKinds.ConfigFlow, StringComparison.Ordinal) => CapabilityOperations
+				.ConfigFlow.Describe,
+			_ when string.Equals(kind, CapabilityKinds.MusicPlayer, StringComparison.Ordinal) => CapabilityOperations
+				.MusicPlayer.Describe,
+			_ when string.Equals(kind, CapabilityKinds.Weather, StringComparison.Ordinal) => CapabilityOperations
+				.Weather
+				.Describe,
+			_ when string.Equals(kind, CapabilityKinds.VirtualProfiles, StringComparison.Ordinal) =>
+				CapabilityOperations
+					.VirtualProfiles.Describe,
+			_ when string.Equals(kind, CapabilityKinds.Issues, StringComparison.Ordinal) => CapabilityOperations.Issues
+				.Describe,
+			_ when string.Equals(kind, CapabilityKinds.Ui, StringComparison.Ordinal) =>
+				CapabilityOperations.Ui.Describe,
+			_ when string.Equals(kind, CapabilityKinds.WidgetTypeProvider, StringComparison.Ordinal) =>
+				CapabilityOperations.WidgetTypeProvider.Describe,
+			_ when string.Equals(kind, CapabilityKinds.ScreenSaverProvider, StringComparison.Ordinal) =>
+				CapabilityOperations.ScreenSaverProvider.Describe,
+			_ when string.Equals(kind, CapabilityKinds.VideoStreamProvider, StringComparison.Ordinal) =>
+				CapabilityOperations.VideoStreamProvider.Describe,
+			_ when string.Equals(kind, CapabilityKinds.Calendar, StringComparison.Ordinal) => CapabilityOperations
+				.Calendar
+				.Describe,
+			_ when string.Equals(kind, CapabilityKinds.ConfigEntries, StringComparison.Ordinal) =>
+				CapabilityOperations.ConfigEntries.Describe,
+			_ when string.Equals(kind, CapabilityKinds.EmailInbox, StringComparison.Ordinal) =>
+				CapabilityOperations.EmailInbox.Describe,
+			_ when string.Equals(kind, CapabilityKinds.CompanionDeviceEntries, StringComparison.Ordinal) =>
+				CapabilityOperations.CompanionDeviceEntries.Describe,
+			_ => null
+		};
+	}
 
 	/// <summary>Whether the subject declared any capability of <paramref name="kind" />.</summary>
 	public static bool Declares(ConformanceContext context, string kind)
-		=> context.Session is not null &&
-			context.Session.Declared.Any(capability =>
+	{
+		return context.Session is not null
+			&& context.Session.Declared.Any(capability =>
 				string.Equals(capability.Kind, kind, StringComparison.Ordinal));
+	}
 
 	/// <summary>
 	/// Invokes an action, treating <paramref name="options" />'s own <see cref="CapabilityInvokeOptions.CancellationToken" />
@@ -114,9 +126,11 @@ internal static class ConformanceCheckSupport
 
 	/// <summary>How many <c>capability.result</c> messages carry <paramref name="correlationId" />.</summary>
 	public static int ReplyCount(MacroDeckTestHost host, string correlationId)
-		=> host.Messages.WithCorrelationId(correlationId)
+	{
+		return host.Messages.WithCorrelationId(correlationId)
 			.Count(message =>
 				string.Equals(message.Envelope.Type, MessageTypes.CapabilityResult, StringComparison.Ordinal));
+	}
 
 	/// <summary>
 	/// How many messages the plugin itself sent (as opposed to the host) carrying <paramref name="correlationId" />,
@@ -126,12 +140,16 @@ internal static class ConformanceCheckSupport
 	/// the host itself just sent, in particular).
 	/// </summary>
 	public static int MessagesFromPluginWithCorrelationId(MacroDeckTestHost host, string correlationId)
-		=> host.Messages.WithCorrelationId(correlationId)
+	{
+		return host.Messages.WithCorrelationId(correlationId)
 			.Count(message => message.Direction == ProtocolMessageDirection.FromPlugin);
+	}
 
 	/// <summary>Shorthand for building one <see cref="ConformanceObservation" />.</summary>
 	public static ConformanceObservation Observe(string label, object? detail)
-		=> new() { Label = label, Detail = detail?.ToString() ?? "(none)" };
+	{
+		return new ConformanceObservation { Label = label, Detail = detail?.ToString() ?? "(none)" };
+	}
 
 	/// <summary>
 	/// Awaits <paramref name="operation" />, and while it is still pending, repeatedly advances

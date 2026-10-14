@@ -18,10 +18,10 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 	private const string IssuePath = "api/v1/companion-licenses";
 	private const string RevocationsPath = "api/v1/companion-licenses/revocations";
 
-	private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(30);
-	private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+	private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(30);
+	private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
 
-	private static readonly HashSet<string> RetryableRefusals =
+	private static readonly HashSet<string> _retryableRefusals =
 		new(StringComparer.Ordinal) { "purchase-not-found", "purchase-not-completed" };
 
 	private readonly HttpClient _http;
@@ -35,7 +35,7 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 	}
 
 	internal PlatformLicenseClient(HttpMessageHandler handler, StorePlatformOptions options, ILogger logger)
-		: this(new HttpClient(handler, disposeHandler: false), true, options, logger)
+		: this(new HttpClient(handler, false), true, options, logger)
 	{
 	}
 
@@ -48,11 +48,18 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 	}
 
 	public static bool IsSupported(CompanionLicenseProof proof)
-		=> proof.ProductId == CompanionLicenseTokens.Product &&
-			(proof.Platform is CompanionLicenseSources.GooglePlay or CompanionLicenseSources.AppStore ||
-				proof is { Platform: CompanionLicenseSources.AppStoreLegacy, LegacyKind: CompanionLicenseSources.AppTransactionKind });
+	{
+		return proof.ProductId == CompanionLicenseTokens.Product
+			&& (proof.Platform is CompanionLicenseSources.GooglePlay or CompanionLicenseSources.AppStore
+				|| proof is
+				{
+					Platform: CompanionLicenseSources.AppStoreLegacy,
+					LegacyKind: CompanionLicenseSources.AppTransactionKind
+				});
+	}
 
-	public async Task<PlatformLicenseIssueResult> IssueCompanionLicenseAsync(CompanionLicenseProof proof,
+	public async Task<PlatformLicenseIssueResult> IssueCompanionLicenseAsync(
+		CompanionLicenseProof proof,
 		CancellationToken cancellationToken)
 	{
 		if (!IsSupported(proof))
@@ -70,14 +77,15 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 					proof.TransactionId,
 					proof.SignedPayload,
 					proof.Platform == CompanionLicenseSources.AppStoreLegacy ? proof.LegacyKind : null),
-				options: Json)
+				options: _json)
 		};
 
 		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		timeout.CancelAfter(RequestTimeout);
+		timeout.CancelAfter(_requestTimeout);
 		try
 		{
-			using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+			using var response
+				= await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
 			var result = await InterpretIssueAsync(response, timeout.Token);
 			_logger.Information("The Macro Deck Platform answered a Companion license request with {Status}: {Result}",
 				(int)response.StatusCode,
@@ -86,7 +94,8 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 		}
 		catch (Exception ex) when (IsTransient(ex, cancellationToken))
 		{
-			_logger.Warning("Requesting a Companion license from the Macro Deck Platform failed: {Error}", ex.GetType().Name);
+			_logger.Warning("Requesting a Companion license from the Macro Deck Platform failed: {Error}",
+				ex.GetType().Name);
 			return new PlatformLicenseIssueResult.Retry(null, false);
 		}
 	}
@@ -94,7 +103,7 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 	public async Task<IReadOnlyList<string>?> GetRevokedLicenseIdsAsync(CancellationToken cancellationToken)
 	{
 		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		timeout.CancelAfter(RequestTimeout);
+		timeout.CancelAfter(_requestTimeout);
 		try
 		{
 			using var response = await _http.GetAsync(new Uri(_baseUrl, RevocationsPath),
@@ -107,7 +116,7 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 				return null;
 			}
 
-			var body = await response.Content.ReadFromJsonAsync<RevocationList>(Json, timeout.Token);
+			var body = await response.Content.ReadFromJsonAsync<RevocationList>(_json, timeout.Token);
 			if (body?.RevokedLicenseIds is not { } ids)
 			{
 				return null;
@@ -139,14 +148,15 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 		}
 	}
 
-	private static async Task<PlatformLicenseIssueResult> InterpretIssueAsync(HttpResponseMessage response,
+	private static async Task<PlatformLicenseIssueResult> InterpretIssueAsync(
+		HttpResponseMessage response,
 		CancellationToken cancellationToken)
 	{
 		var retryAfter = RetryAfter(response);
 		switch (response.StatusCode)
 		{
 			case HttpStatusCode.OK:
-				var issued = await response.Content.ReadFromJsonAsync<IssueResponse>(Json, cancellationToken);
+				var issued = await response.Content.ReadFromJsonAsync<IssueResponse>(_json, cancellationToken);
 				return string.IsNullOrWhiteSpace(issued?.License)
 					? new PlatformLicenseIssueResult.Retry(retryAfter, false)
 					: new PlatformLicenseIssueResult.Issued(issued.License);
@@ -161,11 +171,13 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 					: new PlatformLicenseIssueResult.Retry(retryAfter, false, forbidden);
 			case HttpStatusCode.UnprocessableEntity:
 				var code = await CodeAsync(response, cancellationToken);
-				return code is not null && RetryableRefusals.Contains(code)
+				return code is not null && _retryableRefusals.Contains(code)
 					? new PlatformLicenseIssueResult.Retry(retryAfter, true, code)
 					: new PlatformLicenseIssueResult.Refused(code ?? "purchase-refused");
 			default:
-				return new PlatformLicenseIssueResult.Retry(retryAfter, false, await CodeAsync(response, cancellationToken));
+				return new PlatformLicenseIssueResult.Retry(retryAfter,
+					false,
+					await CodeAsync(response, cancellationToken));
 		}
 	}
 
@@ -173,13 +185,14 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 	{
 		try
 		{
-			using var problem = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(cancellationToken),
+			using var problem = await JsonDocument.ParseAsync(
+				await response.Content.ReadAsStreamAsync(cancellationToken),
 				cancellationToken: cancellationToken);
-			return problem.RootElement.ValueKind == JsonValueKind.Object &&
-				problem.RootElement.TryGetProperty("code", out var code) &&
-				code.ValueKind == JsonValueKind.String &&
-				code.GetString() is { } value &&
-				ProblemCode().IsMatch(value)
+			return problem.RootElement.ValueKind == JsonValueKind.Object
+				&& problem.RootElement.TryGetProperty("code", out var code)
+				&& code.ValueKind == JsonValueKind.String
+				&& code.GetString() is { } value
+				&& ProblemCode().IsMatch(value)
 					? value
 					: null;
 		}
@@ -205,17 +218,21 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 	}
 
 	private static bool IsTransient(Exception ex, CancellationToken cancellationToken)
-		=> ex is HttpRequestException or IOException or JsonException or NotSupportedException ||
-			ex is OperationCanceledException && !cancellationToken.IsCancellationRequested;
+	{
+		return ex is HttpRequestException or IOException or JsonException or NotSupportedException
+			|| ex is OperationCanceledException && !cancellationToken.IsCancellationRequested;
+	}
 
 	private static string Describe(PlatformLicenseIssueResult result)
-		=> result switch
+	{
+		return result switch
 		{
 			PlatformLicenseIssueResult.Issued => "issued",
 			PlatformLicenseIssueResult.Refused refused => $"refused ({refused.Code})",
 			PlatformLicenseIssueResult.Retry { PurchasePending: true } => "purchase pending, retrying",
 			_ => "retrying"
 		};
+	}
 
 	[GeneratedRegex("^[0-9a-f]{32}$")]
 	private static partial Regex LicenseId();
@@ -231,7 +248,8 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 		string? PackageName,
 		string? TransactionId,
 		string? SignedPayload,
-		[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? LegacyKind);
+		[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+		string? LegacyKind);
 
 	private sealed record IssueResponse(string? License);
 

@@ -30,11 +30,15 @@ public class RemoteAndroidDeviceManagerTests
 		_manager.AccessChanged += (_, _) => _events.Add("access");
 		_manager.DeviceConnected += (_, e) => _events.Add($"connected:{e.Device.Serial}");
 		_manager.DeviceDisconnected += (_, e) => _events.Add($"disconnected:{e.Device.Serial}");
-		_manager.DeviceStateChanged += (_, e) => _events.Add($"state:{e.Device.Serial}:{e.PreviousState}->{e.Device.State}");
+		_manager.DeviceStateChanged += (_, e)
+			=> _events.Add($"state:{e.Device.Serial}:{e.PreviousState}->{e.Device.State}");
 	}
 
 	[TearDown]
-	public void TearDown() => _invoker.Dispose();
+	public void TearDown()
+	{
+		_invoker.Dispose();
+	}
 
 	[Test]
 	public void Before_the_host_reports_anything_access_is_unsupported_and_no_device_is_listed()
@@ -49,7 +53,10 @@ public class RemoteAndroidDeviceManagerTests
 	[Test]
 	public void A_push_lists_the_devices_with_their_info_and_state_and_reports_each_as_connected()
 	{
-		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Online, "Pixel 8"), Device("B2", AdbDeviceStates.Unauthorized));
+		Push(1,
+			AdbAccessStates.Available,
+			Device("A1", AdbDeviceStates.Online, "Pixel 8"),
+			Device("B2", AdbDeviceStates.Unauthorized));
 
 		var pixel = _manager.FindDevice("A1")!;
 		Assert.Multiple(() =>
@@ -162,7 +169,10 @@ public class RemoteAndroidDeviceManagerTests
 			}
 		};
 
-		Assert.DoesNotThrow(() => Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Online), Device("B2", AdbDeviceStates.Online)));
+		Assert.DoesNotThrow(() => Push(1,
+			AdbAccessStates.Available,
+			Device("A1", AdbDeviceStates.Online),
+			Device("B2", AdbDeviceStates.Online)));
 		Assert.That(_events, Does.Contain("connected:B2"));
 	}
 
@@ -170,14 +180,16 @@ public class RemoteAndroidDeviceManagerTests
 	public async Task A_shell_call_sends_the_adb_shell_operation_for_this_device_and_returns_the_result()
 	{
 		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Online));
-		_invoker.NextResult = Json(new AdbShellResultDto { ExitCode = 3, StandardOutput = "out", StandardError = "err", Truncated = true });
+		_invoker.NextResult = Json(new AdbShellResultDto
+			{ ExitCode = 3, StandardOutput = "out", StandardError = "err", Truncated = true });
 
 		var result = await _manager.FindDevice("A1")!.ExecuteShellAsync("getprop ro.build.version.sdk");
 
 		var arguments = (AdbShellArguments)_invoker.LastArguments!;
 		Assert.Multiple(() =>
 		{
-			Assert.That((_invoker.LastApi, _invoker.LastOperation), Is.EqualTo((HostApis.Adb, HostOperations.Adb.Shell)));
+			Assert.That((_invoker.LastApi, _invoker.LastOperation),
+				Is.EqualTo((HostApis.Adb, HostOperations.Adb.Shell)));
 			Assert.That((arguments.Serial, arguments.Command), Is.EqualTo(("A1", "getprop ro.build.version.sdk")));
 			Assert.That(result, Is.EqualTo(new AndroidShellResult(3, "out", "err", true)));
 		});
@@ -194,10 +206,12 @@ public class RemoteAndroidDeviceManagerTests
 
 		var battery = await _manager.FindDevice("A1")!.GetBatteryStateAsync();
 
-		Assert.That(battery, Is.EqualTo(new AndroidBatteryState
-		{
-			Level = 87, IsCharging = true, Status = AndroidBatteryStatus.Full, Health = AndroidBatteryHealth.Overheat
-		}));
+		Assert.That(battery,
+			Is.EqualTo(new AndroidBatteryState
+			{
+				Level = 87, IsCharging = true, Status = AndroidBatteryStatus.Full,
+				Health = AndroidBatteryHealth.Overheat
+			}));
 	}
 
 	[Test]
@@ -208,7 +222,8 @@ public class RemoteAndroidDeviceManagerTests
 
 		var battery = await _manager.FindDevice("A1")!.GetBatteryStateAsync();
 
-		Assert.That((battery.Status, battery.Health), Is.EqualTo((AndroidBatteryStatus.Unknown, AndroidBatteryHealth.Unknown)));
+		Assert.That((battery.Status, battery.Health),
+			Is.EqualTo((AndroidBatteryStatus.Unknown, AndroidBatteryHealth.Unknown)));
 	}
 
 	private static IEnumerable<TestCaseData> Operations()
@@ -217,15 +232,19 @@ public class RemoteAndroidDeviceManagerTests
 		yield return Case(HostOperations.Adb.Pull, device => device.PullFileAsync("/sdcard/a.txt", @"C:\data\a.txt"));
 		yield return Case(HostOperations.Adb.Install, device => device.InstallApkAsync(@"C:\data\app.apk"));
 		yield return Case(HostOperations.Adb.Uninstall, device => device.UninstallPackageAsync("com.example.app"));
-		yield return Case(HostOperations.Adb.PackageInstalled, device => device.IsPackageInstalledAsync("com.example.app"),
+		yield return Case(HostOperations.Adb.PackageInstalled,
+			device => device.IsPackageInstalledAsync("com.example.app"),
 			new AdbPackageInstalledDto { Installed = true });
 	}
 
 	private static TestCaseData Case(string operation, Func<IAndroidDevice, Task> exercise, object? result = null)
-		=> new TestCaseData(operation, exercise, result).SetName($"{{m}}({operation})");
+	{
+		return new TestCaseData(operation, exercise, result).SetName($"{{m}}({operation})");
+	}
 
 	[TestCaseSource(nameof(Operations))]
-	public async Task Every_device_operation_sends_its_declared_adb_operation(string operation,
+	public async Task Every_device_operation_sends_its_declared_adb_operation(
+		string operation,
 		Func<IAndroidDevice, Task> exercise,
 		object? result)
 	{
@@ -241,22 +260,43 @@ public class RemoteAndroidDeviceManagerTests
 	{
 		yield return new TestCaseData(ProtocolErrorCodes.AdbNotEnabled, null, AndroidDeviceErrorCode.AdbNotEnabled);
 		yield return new TestCaseData(ProtocolErrorCodes.AdbNotAllowed, null, AndroidDeviceErrorCode.AdbNotAllowed);
-		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed, ProtocolErrorReasons.AdbDeviceOffline, AndroidDeviceErrorCode.DeviceOffline);
-		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed, ProtocolErrorReasons.AdbDeviceNotFound, AndroidDeviceErrorCode.DeviceNotFound);
-		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed, ProtocolErrorReasons.AdbDeviceUnauthorized, AndroidDeviceErrorCode.DeviceUnauthorized);
-		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed, ProtocolErrorReasons.AdbExecutableNotFound, AndroidDeviceErrorCode.AdbUnavailable);
-		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed, ProtocolErrorReasons.AdbCommandFailed, AndroidDeviceErrorCode.CommandFailed);
-		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed, ProtocolErrorReasons.AdbInvalidArgument, AndroidDeviceErrorCode.InvalidArgument);
-		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed, "a_reason_from_the_future", AndroidDeviceErrorCode.Unknown);
-		yield return new TestCaseData(ProtocolErrorCodes.CapabilityUnavailable, ProtocolErrorReasons.HostLocked, AndroidDeviceErrorCode.HostLocked);
-		yield return new TestCaseData(ProtocolErrorCodes.CapabilityUnavailable, null, AndroidDeviceErrorCode.HostUnavailable);
-		yield return new TestCaseData(ProtocolErrorCodes.CapabilityUnsupported, null, AndroidDeviceErrorCode.Unsupported);
+		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed,
+			ProtocolErrorReasons.AdbDeviceOffline,
+			AndroidDeviceErrorCode.DeviceOffline);
+		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed,
+			ProtocolErrorReasons.AdbDeviceNotFound,
+			AndroidDeviceErrorCode.DeviceNotFound);
+		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed,
+			ProtocolErrorReasons.AdbDeviceUnauthorized,
+			AndroidDeviceErrorCode.DeviceUnauthorized);
+		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed,
+			ProtocolErrorReasons.AdbExecutableNotFound,
+			AndroidDeviceErrorCode.AdbUnavailable);
+		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed,
+			ProtocolErrorReasons.AdbCommandFailed,
+			AndroidDeviceErrorCode.CommandFailed);
+		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed,
+			ProtocolErrorReasons.AdbInvalidArgument,
+			AndroidDeviceErrorCode.InvalidArgument);
+		yield return new TestCaseData(ProtocolErrorCodes.AdbFailed,
+			"a_reason_from_the_future",
+			AndroidDeviceErrorCode.Unknown);
+		yield return new TestCaseData(ProtocolErrorCodes.CapabilityUnavailable,
+			ProtocolErrorReasons.HostLocked,
+			AndroidDeviceErrorCode.HostLocked);
+		yield return new TestCaseData(ProtocolErrorCodes.CapabilityUnavailable,
+			null,
+			AndroidDeviceErrorCode.HostUnavailable);
+		yield return new TestCaseData(ProtocolErrorCodes.CapabilityUnsupported,
+			null,
+			AndroidDeviceErrorCode.Unsupported);
 		yield return new TestCaseData(ProtocolErrorCodes.RateLimited, null, AndroidDeviceErrorCode.RateLimited);
 		yield return new TestCaseData(ProtocolErrorCodes.Timeout, null, AndroidDeviceErrorCode.Timeout);
 	}
 
 	[TestCaseSource(nameof(Failures))]
-	public void A_host_error_surfaces_as_an_AndroidDeviceException_with_a_distinct_code(string code,
+	public void A_host_error_surfaces_as_an_AndroidDeviceException_with_a_distinct_code(
+		string code,
 		string? reason,
 		AndroidDeviceErrorCode expected)
 	{
@@ -277,10 +317,11 @@ public class RemoteAndroidDeviceManagerTests
 	[Test]
 	public void A_cancelled_host_call_surfaces_as_cancellation_not_as_a_device_error()
 	{
-		var device = new RemoteAndroidDevice("A1", new FailingHostInvoker(new ProtocolError
-		{
-			Code = ProtocolErrorCodes.Cancelled, Message = "cancelled", Retryable = false
-		}));
+		var device = new RemoteAndroidDevice("A1",
+			new FailingHostInvoker(new ProtocolError
+			{
+				Code = ProtocolErrorCodes.Cancelled, Message = "cancelled", Retryable = false
+			}));
 
 		Assert.That(() => device.InstallApkAsync(@"C:\app.apk"), Throws.InstanceOf<OperationCanceledException>());
 	}
@@ -296,7 +337,8 @@ public class RemoteAndroidDeviceManagerTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That((_invoker.LastApi, _invoker.LastOperation), Is.EqualTo((HostApis.Adb, HostOperations.Adb.Connect)));
+			Assert.That((_invoker.LastApi, _invoker.LastOperation),
+				Is.EqualTo((HostApis.Adb, HostOperations.Adb.Connect)));
 			Assert.That(((AdbConnectArguments)_invoker.LastArguments!).Address, Is.EqualTo("192.168.1.20:5555"));
 			Assert.That(_manager.FindDevice("192.168.1.20:5555"), Is.SameAs(connected));
 			Assert.That(connected.State, Is.EqualTo(AndroidDeviceState.Online));
@@ -323,29 +365,41 @@ public class RemoteAndroidDeviceManagerTests
 
 	private static IEnumerable<TestCaseData> TypedOperations()
 	{
-		yield return Typed(HostOperations.Adb.Key, device => device.SendKeyAsync(AndroidKey.VolumeUp),
+		yield return Typed(HostOperations.Adb.Key,
+			device => device.SendKeyAsync(AndroidKey.VolumeUp),
 			new AdbKeyArguments { Serial = "A1", Key = AdbKeys.VolumeUp });
-		yield return Typed(HostOperations.Adb.Tap, device => device.TapAsync(10, 20),
+		yield return Typed(HostOperations.Adb.Tap,
+			device => device.TapAsync(10, 20),
 			new AdbTapArguments { Serial = "A1", X = 10, Y = 20 });
-		yield return Typed(HostOperations.Adb.Swipe, device => device.SwipeAsync(1, 2, 3, 4, TimeSpan.FromMilliseconds(250)),
-			new AdbSwipeArguments { Serial = "A1", FromX = 1, FromY = 2, ToX = 3, ToY = 4, DurationMilliseconds = 250 });
-		yield return Typed(HostOperations.Adb.InputText, device => device.InputTextAsync("hello"),
+		yield return Typed(HostOperations.Adb.Swipe,
+			device => device.SwipeAsync(1, 2, 3, 4, TimeSpan.FromMilliseconds(250)),
+			new AdbSwipeArguments
+				{ Serial = "A1", FromX = 1, FromY = 2, ToX = 3, ToY = 4, DurationMilliseconds = 250 });
+		yield return Typed(HostOperations.Adb.InputText,
+			device => device.InputTextAsync("hello"),
 			new AdbTextArguments { Serial = "A1", Text = "hello" });
-		yield return Typed(HostOperations.Adb.StartApp, device => device.StartAppAsync("com.example.app"),
+		yield return Typed(HostOperations.Adb.StartApp,
+			device => device.StartAppAsync("com.example.app"),
 			new AdbPackageArguments { Serial = "A1", PackageName = "com.example.app" });
-		yield return Typed(HostOperations.Adb.ForceStopApp, device => device.ForceStopAppAsync("com.example.app"),
+		yield return Typed(HostOperations.Adb.ForceStopApp,
+			device => device.ForceStopAppAsync("com.example.app"),
 			new AdbPackageArguments { Serial = "A1", PackageName = "com.example.app" });
-		yield return Typed(HostOperations.Adb.OpenUri, device => device.OpenUriAsync("https://example.com"),
+		yield return Typed(HostOperations.Adb.OpenUri,
+			device => device.OpenUriAsync("https://example.com"),
 			new AdbUriArguments { Serial = "A1", Uri = "https://example.com" });
-		yield return Typed(HostOperations.Adb.Reboot, device => device.RebootAsync(AndroidRebootMode.Bootloader),
+		yield return Typed(HostOperations.Adb.Reboot,
+			device => device.RebootAsync(AndroidRebootMode.Bootloader),
 			new AdbRebootArguments { Serial = "A1", Mode = AdbRebootModes.Bootloader });
 	}
 
 	private static TestCaseData Typed(string operation, Func<IAndroidDevice, Task> exercise, object arguments)
-		=> new TestCaseData(operation, exercise, arguments).SetName($"{{m}}({operation})");
+	{
+		return new TestCaseData(operation, exercise, arguments).SetName($"{{m}}({operation})");
+	}
 
 	[TestCaseSource(nameof(TypedOperations))]
-	public async Task Every_typed_operation_sends_its_adb_operation_and_arguments(string operation,
+	public async Task Every_typed_operation_sends_its_adb_operation_and_arguments(
+		string operation,
 		Func<IAndroidDevice, Task> exercise,
 		object arguments)
 	{
@@ -363,10 +417,11 @@ public class RemoteAndroidDeviceManagerTests
 	[Test]
 	public void A_typed_operation_against_a_host_that_predates_it_is_unsupported()
 	{
-		var device = new RemoteAndroidDevice("A1", new FailingHostInvoker(new ProtocolError
-		{
-			Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "no operation 'key'", Retryable = false
-		}));
+		var device = new RemoteAndroidDevice("A1",
+			new FailingHostInvoker(new ProtocolError
+			{
+				Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "no operation 'key'", Retryable = false
+			}));
 
 		var exception = Assert.ThrowsAsync<AndroidDeviceException>(() => device.SendKeyAsync(AndroidKey.Home));
 
@@ -380,25 +435,29 @@ public class RemoteAndroidDeviceManagerTests
 		var device = _manager.FindDevice("A1")!;
 
 		var before = await device.GetStatusAsync();
-		_invoker.NextResult = Json(new AdbDeviceStatusDto { ScreenOn = true, Locked = false, ForegroundPackage = "com.example.app" });
+		_invoker.NextResult = Json(new AdbDeviceStatusDto
+			{ ScreenOn = true, Locked = false, ForegroundPackage = "com.example.app" });
 		var after = await device.GetStatusAsync();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That((_invoker.LastApi, _invoker.LastOperation), Is.EqualTo((HostApis.Adb, HostOperations.Adb.Status)));
+			Assert.That((_invoker.LastApi, _invoker.LastOperation),
+				Is.EqualTo((HostApis.Adb, HostOperations.Adb.Status)));
 			Assert.That(before, Is.Null);
 			Assert.That(after,
-				Is.EqualTo(new AndroidDeviceStatus { IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" }));
+				Is.EqualTo(new AndroidDeviceStatus
+					{ IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" }));
 		});
 	}
 
 	[Test]
 	public async Task The_status_from_a_host_that_predates_it_is_null()
 	{
-		var device = new RemoteAndroidDevice("A1", new FailingHostInvoker(new ProtocolError
-		{
-			Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "no operation 'status'", Retryable = false
-		}));
+		var device = new RemoteAndroidDevice("A1",
+			new FailingHostInvoker(new ProtocolError
+			{
+				Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "no operation 'status'", Retryable = false
+			}));
 
 		Assert.That(await device.GetStatusAsync(), Is.Null);
 	}
@@ -431,7 +490,9 @@ public class RemoteAndroidDeviceManagerTests
 		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Unauthorized));
 		_events.Clear();
 
-		Push(2, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Unauthorized) with { LacksUsbPermission = true });
+		Push(2,
+			AdbAccessStates.Available,
+			Device("A1", AdbDeviceStates.Unauthorized) with { LacksUsbPermission = true });
 
 		var device = _manager.FindDevice("A1")!;
 		Assert.Multiple(() =>
@@ -445,10 +506,15 @@ public class RemoteAndroidDeviceManagerTests
 	[Test]
 	public void An_offline_device_carries_the_mode_the_host_reports_and_a_mode_change_is_reported()
 	{
-		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Offline), Device("B2", AdbDeviceStates.Offline) with { Mode = "warp" });
+		Push(1,
+			AdbAccessStates.Available,
+			Device("A1", AdbDeviceStates.Offline),
+			Device("B2", AdbDeviceStates.Offline) with { Mode = "warp" });
 		_events.Clear();
 
-		Push(2, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Offline) with { Mode = AdbDeviceModes.Recovery },
+		Push(2,
+			AdbAccessStates.Available,
+			Device("A1", AdbDeviceStates.Offline) with { Mode = AdbDeviceModes.Recovery },
 			Device("B2", AdbDeviceStates.Offline) with { Mode = "warp" });
 
 		Assert.Multiple(() =>
@@ -524,7 +590,8 @@ public class RemoteAndroidDeviceManagerTests
 	}
 
 	private void Push(long revision, string access, params AdbDeviceStateDto[] devices)
-		=> _cache.Apply(new ProtocolEnvelope
+	{
+		_cache.Apply(new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
@@ -539,9 +606,11 @@ public class RemoteAndroidDeviceManagerTests
 				},
 				PluginProtocolJson.Options)
 		});
+	}
 
 	private static AdbDeviceStateDto Device(string serial, string state, string? model = null)
-		=> new()
+	{
+		return new AdbDeviceStateDto
 		{
 			Serial = serial,
 			State = state,
@@ -549,18 +618,28 @@ public class RemoteAndroidDeviceManagerTests
 			Manufacturer = model is null ? null : "Google",
 			Product = model is null ? null : "shiba"
 		};
+	}
 
-	private static JsonElement Json(object value) => JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	private static JsonElement Json(object value)
+	{
+		return JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	}
 
 	private sealed class FailingHostInvoker(ProtocolError error) : IHostInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> Task.FromException<JsonElement?>(HostInvocationException.From(error));
+		{
+			return Task.FromException<JsonElement?>(HostInvocationException.From(error));
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed class ScriptedHostAssets : IPluginHostAssetReceiver
@@ -568,9 +647,14 @@ public class RemoteAndroidDeviceManagerTests
 		public Dictionary<string, HostAssetTransfer> Transfers { get; } = new(StringComparer.Ordinal);
 
 		public Task<HostAssetTransfer> AwaitAsync(string transferId, CancellationToken cancellationToken)
-			=> Task.FromResult(Transfers[transferId]);
+		{
+			return Task.FromResult(Transfers[transferId]);
+		}
 
-		public ProtocolEnvelope Handle(ProtocolEnvelope envelope) => throw new NotSupportedException();
+		public ProtocolEnvelope Handle(ProtocolEnvelope envelope)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void Reset()
 		{

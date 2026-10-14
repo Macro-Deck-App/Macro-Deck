@@ -67,7 +67,8 @@ internal static class AdbDeviceListParser
 	}
 
 	private static AdbDeviceState ParseState(string token)
-		=> token switch
+	{
+		return token switch
 		{
 			"device" => AdbDeviceState.Device,
 			"unauthorized" => AdbDeviceState.Unauthorized,
@@ -78,6 +79,7 @@ internal static class AdbDeviceListParser
 			"sideload" => AdbDeviceState.Sideload,
 			_ => AdbDeviceState.Unknown
 		};
+	}
 
 	private static (string? Model, string? Product, string? TransportId) ParseMetadata(string metadata)
 	{

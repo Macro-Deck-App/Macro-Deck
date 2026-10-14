@@ -20,10 +20,10 @@ public sealed class WindowsMouseInputProvider : IMouseInputProvider
 	private const uint MouseEventFRightUp = 0x0010;
 	private const uint MouseEventFMiddleDown = 0x0020;
 	private const uint MouseEventFMiddleUp = 0x0040;
-	private const uint MouseEventFXDown = 0x0080;
-	private const uint MouseEventFXUp = 0x0100;
+	private const uint MouseEventFxDown = 0x0080;
+	private const uint MouseEventFxUp = 0x0100;
 	private const uint MouseEventFWheel = 0x0800;
-	private const uint MouseEventFHWheel = 0x1000;
+	private const uint MouseEventFhWheel = 0x1000;
 	private const uint MouseEventFMoveNoCoalesce = 0x2000;
 	private const uint MouseEventFVirtualDesk = 0x4000;
 	private const uint MouseEventFAbsolute = 0x8000;
@@ -103,7 +103,9 @@ public sealed class WindowsMouseInputProvider : IMouseInputProvider
 	}
 
 	public void ButtonUp(MouseButton button)
-		=> Send([MouseEvent(UpFlag(button), mouseData: XData(button))]);
+	{
+		Send([MouseEvent(UpFlag(button), mouseData: XData(button))]);
+	}
 
 	public void Click(MouseButton button, int clickCount, MousePoint? position)
 	{
@@ -135,7 +137,7 @@ public sealed class WindowsMouseInputProvider : IMouseInputProvider
 
 	public void Scroll(ScrollAxis axis, int notches)
 	{
-		var flags = axis == ScrollAxis.Horizontal ? MouseEventFHWheel : MouseEventFWheel;
+		var flags = axis == ScrollAxis.Horizontal ? MouseEventFhWheel : MouseEventFWheel;
 
 		Send([MouseEvent(flags, mouseData: unchecked((uint)(notches * WheelDelta)))]);
 	}
@@ -159,7 +161,8 @@ public sealed class WindowsMouseInputProvider : IMouseInputProvider
 	}
 
 	private static Input MouseEvent(uint flags, int dx = 0, int dy = 0, uint mouseData = 0)
-		=> new()
+	{
+		return new Input
 		{
 			type = InputMouse,
 			union = new InputUnion
@@ -175,31 +178,44 @@ public sealed class WindowsMouseInputProvider : IMouseInputProvider
 				}
 			}
 		};
+	}
 
-	private static void Send(IReadOnlyCollection<Input> inputs) => Win32Input.Send(inputs);
-
-	private static uint DownFlag(MouseButton button) => button switch
+	private static void Send(IReadOnlyCollection<Input> inputs)
 	{
-		MouseButton.Right => MouseEventFRightDown,
-		MouseButton.Middle => MouseEventFMiddleDown,
-		MouseButton.Back or MouseButton.Forward => MouseEventFXDown,
-		_ => MouseEventFLeftDown
-	};
+		Win32Input.Send(inputs);
+	}
 
-	private static uint UpFlag(MouseButton button) => button switch
+	private static uint DownFlag(MouseButton button)
 	{
-		MouseButton.Right => MouseEventFRightUp,
-		MouseButton.Middle => MouseEventFMiddleUp,
-		MouseButton.Back or MouseButton.Forward => MouseEventFXUp,
-		_ => MouseEventFLeftUp
-	};
+		return button switch
+		{
+			MouseButton.Right => MouseEventFRightDown,
+			MouseButton.Middle => MouseEventFMiddleDown,
+			MouseButton.Back or MouseButton.Forward => MouseEventFxDown,
+			_ => MouseEventFLeftDown
+		};
+	}
 
-	private static uint XData(MouseButton button) => button switch
+	private static uint UpFlag(MouseButton button)
 	{
-		MouseButton.Back => XButton1,
-		MouseButton.Forward => XButton2,
-		_ => 0
-	};
+		return button switch
+		{
+			MouseButton.Right => MouseEventFRightUp,
+			MouseButton.Middle => MouseEventFMiddleUp,
+			MouseButton.Back or MouseButton.Forward => MouseEventFxUp,
+			_ => MouseEventFLeftUp
+		};
+	}
+
+	private static uint XData(MouseButton button)
+	{
+		return button switch
+		{
+			MouseButton.Back => XButton1,
+			MouseButton.Forward => XButton2,
+			_ => 0
+		};
+	}
 
 	[DllImport("user32.dll")]
 	private static extern int GetSystemMetrics(int nIndex);

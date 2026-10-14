@@ -14,7 +14,8 @@ public class DiscoverCatalogVariablesRequestMessageHandler
 	private readonly VariableCatalogProviders _providers;
 	private readonly VariableRegistry _registry;
 
-	public DiscoverCatalogVariablesRequestMessageHandler(VariableCatalogProviders providers,
+	public DiscoverCatalogVariablesRequestMessageHandler(
+		VariableCatalogProviders providers,
 		VariableRegistry registry)
 	{
 		_providers = providers;
@@ -47,7 +48,7 @@ public class DiscoverCatalogVariablesRequestMessageHandler
 			// matches, so a provider that cannot search is never offered a search box at all.
 			Search = provider.SupportsSearch ? request.Search : null,
 			ContinuationToken = request.Cursor,
-			PageSize = limit,
+			PageSize = limit
 		};
 
 		var page = await provider.DiscoverAsync(query, cancellationToken).ConfigureAwait(false);
@@ -56,7 +57,7 @@ public class DiscoverCatalogVariablesRequestMessageHandler
 		{
 			NextCursor = page.ContinuationToken,
 			HasMore = page.ContinuationToken is not null,
-			Available = true,
+			Available = true
 		};
 
 		foreach (var definition in page.Items)
@@ -98,7 +99,7 @@ public class DiscoverCatalogVariablesRequestMessageHandler
 			SuggestedName = definition.Name,
 			BoundVariableId = boundVariableId?.ToString(),
 			DecimalPlaces = definition.DecimalPlaces,
-			CanWrite = definition.CanWrite,
+			CanWrite = definition.CanWrite
 		};
 	}
 }

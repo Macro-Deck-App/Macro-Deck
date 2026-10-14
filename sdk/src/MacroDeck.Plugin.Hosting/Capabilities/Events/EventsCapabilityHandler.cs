@@ -31,7 +31,8 @@ internal sealed class EventsCapabilityHandler(IEnumerable<IPluginIntegration> in
 	public string Kind => CapabilityKinds.Events;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -40,6 +41,7 @@ internal sealed class EventsCapabilityHandler(IEnumerable<IPluginIntegration> in
 					Kind = CapabilityKinds.Events, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -74,8 +76,8 @@ internal sealed class EventsCapabilityHandler(IEnumerable<IPluginIntegration> in
 	{
 		var payload = new EventCatalogPayload
 		{
-			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-				metadata.Name,
+			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+				?? metadata.Name,
 			Events = [.. _providers.SelectMany(p => p.EventDefinitions).Select(EventDescriptorMapper.ToDto)],
 			HasDynamicEventOptions = integrations.OfType<IDynamicEventOptionsProvider>().Any()
 		};
@@ -83,7 +85,8 @@ internal sealed class EventsCapabilityHandler(IEnumerable<IPluginIntegration> in
 		return CapabilityInvocationResult.Ok(payload);
 	}
 
-	private async Task<CapabilityInvocationResult> GetOptionsAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> GetOptionsAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<EventOptionsArguments>(PluginProtocolJson.Options);
@@ -133,5 +136,7 @@ internal sealed class EventsCapabilityHandler(IEnumerable<IPluginIntegration> in
 	}
 
 	private static JsonElement? SerializeParameters(IReadOnlyDictionary<string, JsonElement> parameters)
-		=> JsonSerializer.SerializeToElement(parameters, PluginProtocolJson.Options);
+	{
+		return JsonSerializer.SerializeToElement(parameters, PluginProtocolJson.Options);
+	}
 }

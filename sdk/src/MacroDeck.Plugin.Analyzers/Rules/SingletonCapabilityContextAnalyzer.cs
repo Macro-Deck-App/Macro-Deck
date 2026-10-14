@@ -50,8 +50,8 @@ public sealed class SingletonCapabilityContextAnalyzer : DiagnosticAnalyzer
 						macroDeckExtensionsType,
 						pluginHostBuilderType);
 
-					if (implementation is null ||
-						!AllPublicConstructorsTakeContext(implementation, contextType, out var offendingParameter))
+					if (implementation is null
+						|| !AllPublicConstructorsTakeContext(implementation, contextType, out var offendingParameter))
 					{
 						return;
 					}
@@ -86,10 +86,10 @@ public sealed class SingletonCapabilityContextAnalyzer : DiagnosticAnalyzer
 		INamedTypeSymbol? macroDeckExtensionsType,
 		INamedTypeSymbol? pluginHostBuilderType)
 	{
-		var isAddSingleton = method.Name == "AddSingleton" &&
-			SymbolEqualityComparer.Default.Equals(method.ContainingType, addExtensionsType);
-		var isTryAddSingleton = method.Name == "TryAddSingleton" &&
-			SymbolEqualityComparer.Default.Equals(method.ContainingType, tryAddExtensionsType);
+		var isAddSingleton = method.Name == "AddSingleton"
+			&& SymbolEqualityComparer.Default.Equals(method.ContainingType, addExtensionsType);
+		var isTryAddSingleton = method.Name == "TryAddSingleton"
+			&& SymbolEqualityComparer.Default.Equals(method.ContainingType, tryAddExtensionsType);
 
 		if (isAddSingleton || isTryAddSingleton)
 		{
@@ -101,18 +101,18 @@ public sealed class SingletonCapabilityContextAnalyzer : DiagnosticAnalyzer
 			};
 		}
 
-		if (macroDeckExtensionsType is not null &&
-			SymbolEqualityComparer.Default.Equals(method.ContainingType, macroDeckExtensionsType) &&
-			method.Name is "AddMacroDeckIntegration" or "AddMacroDeckCapabilityHandler" &&
-			method.TypeArguments.Length >= 1)
+		if (macroDeckExtensionsType is not null
+			&& SymbolEqualityComparer.Default.Equals(method.ContainingType, macroDeckExtensionsType)
+			&& method.Name is "AddMacroDeckIntegration" or "AddMacroDeckCapabilityHandler"
+			&& method.TypeArguments.Length >= 1)
 		{
 			return method.TypeArguments[0] as INamedTypeSymbol;
 		}
 
-		if (pluginHostBuilderType is not null &&
-			SymbolEqualityComparer.Default.Equals(method.ContainingType, pluginHostBuilderType) &&
-			method.Name is "RegisterIntegration" or "RegisterCapabilityHandler" &&
-			method.TypeArguments.Length >= 1)
+		if (pluginHostBuilderType is not null
+			&& SymbolEqualityComparer.Default.Equals(method.ContainingType, pluginHostBuilderType)
+			&& method.Name is "RegisterIntegration" or "RegisterCapabilityHandler"
+			&& method.TypeArguments.Length >= 1)
 		{
 			return method.TypeArguments[0] as INamedTypeSymbol;
 		}

@@ -14,9 +14,11 @@ public class GetIntegrationsRequestMessageHandlerTests
 	private static GetIntegrationsRequestMessageHandler CreateHandler(
 		ConfigurableIntegrationRegistry registry,
 		FakeIntegrationConfigStore configStore)
-		=> new(registry,
+	{
+		return new GetIntegrationsRequestMessageHandler(registry,
 			configStore,
 			new IntegrationIssueService(registry, new FakeIntegrationHostIssueStore(), new FakeIntegrationLifecycle()));
+	}
 
 	[Test]
 	public async Task An_unconfigured_integration_reports_its_declared_variable_count_not_zero()
@@ -32,7 +34,7 @@ public class GetIntegrationsRequestMessageHandlerTests
 				VariableDefinition.Eager("v2", VariableType.Text)
 			]
 		};
-		var registry = new ConfigurableIntegrationRegistry([integration], disabled: [integration.Id]);
+		var registry = new ConfigurableIntegrationRegistry([integration], [integration.Id]);
 		var configStore = new FakeIntegrationConfigStore();
 		configStore.SetConfiguredCount(integration.Id, 0);
 		var handler = CreateHandler(registry, configStore);
@@ -138,10 +140,12 @@ public class GetIntegrationsRequestMessageHandlerTests
 			new FakeIntegrationConfigStore());
 
 		var before = (await handler.Handle(new GetIntegrationsRequest(), CancellationToken.None))
-			.Integrations.Single().IconVersion;
+			.Integrations.Single()
+			.IconVersion;
 		integration.Icon = [7, 7, 7];
 		var after = (await handler.Handle(new GetIntegrationsRequest(), CancellationToken.None))
-			.Integrations.Single().IconVersion;
+			.Integrations.Single()
+			.IconVersion;
 
 		Assert.Multiple(() =>
 		{
@@ -178,9 +182,19 @@ public class GetIntegrationsRequestMessageHandlerTests
 
 		public string IconMimeType => "image/png";
 
-		public byte[] GetIcon() => Icon;
+		public byte[] GetIcon()
+		{
+			return Icon;
+		}
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

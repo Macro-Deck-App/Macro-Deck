@@ -14,7 +14,8 @@ public class JwtAccessTokenIssuer : IAccessTokenIssuer
 	private readonly AccessTokenCutoff _cutoff;
 	private readonly DeviceSessionGuard _deviceSessions;
 
-	public JwtAccessTokenIssuer(ISigningKeyProvider signingKeyProvider,
+	public JwtAccessTokenIssuer(
+		ISigningKeyProvider signingKeyProvider,
 		TimeProvider timeProvider,
 		AccessTokenCutoff cutoff,
 		DeviceSessionGuard deviceSessions)

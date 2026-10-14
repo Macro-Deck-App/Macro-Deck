@@ -33,8 +33,10 @@ public class MacroDeckIntegrationAttributeTests
 
 	[Test]
 	public void The_current_platform_is_one_of_the_three()
-		=> Assert.That(MacroDeckIntegrationAttribute.Current,
-			Is.AnyOf(MacroDeckPlatform.Windows, MacroDeckPlatform.MacOS, MacroDeckPlatform.Linux));
+	{
+		Assert.That(MacroDeckIntegrationAttribute.Current,
+			Is.AnyOf(MacroDeckPlatform.Windows, MacroDeckPlatform.MacOs, MacroDeckPlatform.Linux));
+	}
 
 	[Test]
 	public void An_integration_named_for_this_platform_runs_here()
@@ -68,6 +70,6 @@ public class MacroDeckIntegrationAttributeTests
 		};
 
 		Assert.That(windowsAndLinux.RunsHere(),
-			Is.EqualTo(MacroDeckIntegrationAttribute.Current != MacroDeckPlatform.MacOS));
+			Is.EqualTo(MacroDeckIntegrationAttribute.Current != MacroDeckPlatform.MacOs));
 	}
 }

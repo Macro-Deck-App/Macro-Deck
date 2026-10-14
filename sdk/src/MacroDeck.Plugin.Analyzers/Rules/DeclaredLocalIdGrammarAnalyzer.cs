@@ -35,15 +35,15 @@ public sealed class DeclaredLocalIdGrammarAnalyzer : DiagnosticAnalyzer
 
 			if (actionDefinitionType is not null && actionIdProperty is not null)
 			{
-				startContext.RegisterSyntaxNodeAction(
-					nodeContext => AnalyzeActionIdProperty(nodeContext, actionIdProperty),
+				startContext.RegisterSyntaxNodeAction(nodeContext
+						=> AnalyzeActionIdProperty(nodeContext, actionIdProperty),
 					SyntaxKind.PropertyDeclaration);
 			}
 
 			if (declaredCapabilityType is not null)
 			{
-				startContext.RegisterOperationAction(
-					operationContext => AnalyzeDeclaredCapabilityCreation(operationContext, declaredCapabilityType),
+				startContext.RegisterOperationAction(operationContext
+						=> AnalyzeDeclaredCapabilityCreation(operationContext, declaredCapabilityType),
 					OperationKind.ObjectCreation);
 			}
 		});

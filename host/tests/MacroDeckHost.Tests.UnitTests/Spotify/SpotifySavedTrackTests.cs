@@ -248,19 +248,25 @@ internal sealed class SpotifySavedTrackTests
 	}
 
 	private static bool IsPlaybackRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("me/player", StringComparison.Ordinal) &&
-			!request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("me/player", StringComparison.Ordinal)
+			&& !request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+	}
 
 	private static bool IsCheckRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("contains", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("contains", StringComparison.Ordinal);
+	}
 
 	private static Response Json(HttpStatusCode statusCode, string body)
-		=> new(new Dictionary<string, string>())
+	{
+		return new Response(new Dictionary<string, string>())
 		{
 			StatusCode = statusCode,
 			ContentType = "application/json",
 			Body = body
 		};
+	}
 
 	private static SpotifyMusicPlayer CreatePlayer(StubSpotifyHttpClient http, TimeProvider? timeProvider = null)
 	{

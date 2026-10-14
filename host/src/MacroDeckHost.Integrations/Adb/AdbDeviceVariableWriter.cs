@@ -32,8 +32,7 @@ internal static class AdbDeviceVariableWriter
 
 			var connectedName = NameFor(key, "connected");
 
-			if (change.Kind != AdbDeviceChangeKind.Authorized &&
-				await variables.GetByNameAsync(connectedName) is null)
+			if (change.Kind != AdbDeviceChangeKind.Authorized && await variables.GetByNameAsync(connectedName) is null)
 			{
 				return;
 			}
@@ -103,7 +102,10 @@ internal static class AdbDeviceVariableWriter
 		}
 	}
 
-	private static string NameFor(string key, string suffix) => $"adb_device_{key}_{suffix}";
+	private static string NameFor(string key, string suffix)
+	{
+		return $"adb_device_{key}_{suffix}";
+	}
 
 	private static async Task ClearAsync(IVariableApi variables, string key)
 	{
@@ -131,8 +133,8 @@ internal static class AdbDeviceVariableWriter
 		object? value,
 		int? decimalPlaces)
 	{
-		var handle = await variables.GetByNameAsync(name) ??
-			await variables.CreateAsync(name, type, value, decimalPlaces);
+		var handle = await variables.GetByNameAsync(name)
+			?? await variables.CreateAsync(name, type, value, decimalPlaces);
 		await variables.SetValueAsync(handle.Id, value);
 	}
 }

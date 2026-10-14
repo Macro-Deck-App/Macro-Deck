@@ -26,7 +26,8 @@ internal sealed class DeclaredKindsAreKnownCheck() : ConformanceCheckBase("MDC03
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		foreach (var capability in context.Session!.Declared)
@@ -52,7 +53,8 @@ internal sealed class VersionRangesAreValidAndAcceptedCheck() : ConformanceCheck
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		foreach (var capability in context.Session!.Declared)
@@ -112,13 +114,14 @@ internal sealed class ProviderShapedKindsDeclareOneCapabilityCheck() : Conforman
 	/// </summary>
 	private const string IconsLocalId = "icon";
 
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		foreach (var group in context.Session!.Declared.GroupBy(capability => capability.Kind, StringComparer.Ordinal))
 		{
-			var isItemShaped = string.Equals(group.Key, CapabilityKinds.Actions, StringComparison.Ordinal) ||
-				string.Equals(group.Key, CapabilityKinds.Variables, StringComparison.Ordinal);
+			var isItemShaped = string.Equals(group.Key, CapabilityKinds.Actions, StringComparison.Ordinal)
+				|| string.Equals(group.Key, CapabilityKinds.Variables, StringComparison.Ordinal);
 
 			if (isItemShaped)
 			{
@@ -150,7 +153,8 @@ internal sealed class DeclaredCapabilityCountIsWithinLimitCheck() : ConformanceC
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var count = context.Session!.Declared.Count;
@@ -174,7 +178,8 @@ internal sealed class DescribeResultsRespectMessageSizeCheck() : ConformanceChec
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.Session!.Declared.All(capability =>
@@ -251,7 +256,8 @@ internal sealed class UiDescribeResultIsWellFormedCheck() : ConformanceCheckBase
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (!ConformanceCheckSupport.Declares(context, CapabilityKinds.Ui))
@@ -303,7 +309,8 @@ internal sealed class UiDeclaredSessionModesAreNonEmptyCheck() : ConformanceChec
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (!ConformanceCheckSupport.Declares(context, CapabilityKinds.Ui))
@@ -356,7 +363,8 @@ internal sealed class UiDescribeResultRespectsMessageSizeCheck() : ConformanceCh
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (!ConformanceCheckSupport.Declares(context, CapabilityKinds.Ui))
@@ -385,8 +393,8 @@ internal sealed class UiDescribeResultRespectsMessageSizeCheck() : ConformanceCh
 
 		if (bytes > ProtocolLimits.MaxMessageBytes)
 		{
-			return ConformanceCheckResult.Fail("The ui/describe reply's envelope stays within MaxMessageBytes " +
-				$"({ProtocolLimits.MaxMessageBytes} bytes).",
+			return ConformanceCheckResult.Fail("The ui/describe reply's envelope stays within MaxMessageBytes "
+				+ $"({ProtocolLimits.MaxMessageBytes} bytes).",
 				$"The recorded envelope is {bytes} bytes.");
 		}
 
@@ -419,7 +427,8 @@ internal sealed class ActionStateSnapshotsAreWellFormedCheck() : ConformanceChec
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var (localIds, setupFailure) = await ActionStateProbe.StateProviderLocalIdsAsync(context).ConfigureAwait(false);
@@ -450,8 +459,8 @@ internal sealed class ActionStateSnapshotsAreWellFormedCheck() : ConformanceChec
 			if (result.States.Count == 0)
 			{
 				return ConformanceCheckResult.Fail(
-					"A present snapshot's States is never empty - a provider with nothing to report returns " +
-					"null instead.",
+					"A present snapshot's States is never empty - a provider with nothing to report returns "
+					+ "null instead.",
 					$"'{localId}' returned a present snapshot with an empty States list.");
 			}
 
@@ -504,7 +513,8 @@ internal sealed class ActionStateIdsAreValidDeclaredIdsCheck() : ConformanceChec
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var (localIds, setupFailure) = await ActionStateProbe.StateProviderLocalIdsAsync(context).ConfigureAwait(false);
@@ -535,9 +545,9 @@ internal sealed class ActionStateIdsAreValidDeclaredIdsCheck() : ConformanceChec
 				if (!MacroDeckId.TryValidateLocalId(state.Id, LocalIdKind.Declared, out var error))
 				{
 					return ConformanceCheckResult.Fail(
-						"Every state id passes MacroDeckId.TryValidateLocalId(_, LocalIdKind.Declared) - the " +
-						"same grammar every other declared local id is held to, because a state id is " +
-						"persisted in a user's profile once a button adopts it.",
+						"Every state id passes MacroDeckId.TryValidateLocalId(_, LocalIdKind.Declared) - the "
+						+ "same grammar every other declared local id is held to, because a state id is "
+						+ "persisted in a user's profile once a button adopts it.",
 						$"'{localId}' returned the state id '{state.Id}', which failed validation: {error}");
 				}
 
@@ -575,7 +585,8 @@ internal sealed class VariableCatalogDiscoverPageIsWellFormedCheck() : Conforman
 {
 	private static readonly IReadOnlyList<string> _knownTypes = Enum.GetNames<VariableType>();
 
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var (catalog, unavailable) = await VariableCatalogProbe.ResolveAsync(context).ConfigureAwait(false);
@@ -623,8 +634,8 @@ internal sealed class VariableCatalogDiscoverPageIsWellFormedCheck() : Conforman
 
 		if (page.Items.Count > ProtocolLimits.MaxVariableCatalogPageSize)
 		{
-			return ConformanceCheckResult.Fail("A discover page carries at most MaxVariableCatalogPageSize " +
-				$"({ProtocolLimits.MaxVariableCatalogPageSize}) items.",
+			return ConformanceCheckResult.Fail("A discover page carries at most MaxVariableCatalogPageSize "
+				+ $"({ProtocolLimits.MaxVariableCatalogPageSize}) items.",
 				$"The page carried {page.Items.Count} items.");
 		}
 
@@ -639,23 +650,23 @@ internal sealed class VariableCatalogDiscoverPageIsWellFormedCheck() : Conforman
 			if (item.Id is not { Length: > 0 } id)
 			{
 				return ConformanceCheckResult.Fail(
-					"Every discover item carries its own resource id - a catalog resource is addressed by " +
-					"an id, never by a name the host would have to derive.",
+					"Every discover item carries its own resource id - a catalog resource is addressed by "
+					+ "an id, never by a name the host would have to derive.",
 					$"An item named '{item.Name}' carried no id.");
 			}
 
 			if (id.Contains("::", StringComparison.Ordinal))
 			{
 				return ConformanceCheckResult.Fail(
-					"No item id contains the '::' owner-qualifier separator - a resource id is never " +
-					"allowed to smuggle another owner's namespace.",
+					"No item id contains the '::' owner-qualifier separator - a resource id is never "
+					+ "allowed to smuggle another owner's namespace.",
 					$"Item id '{id}' contains '::'.");
 			}
 
 			if (id.Length > MacroDeckId.MaxResourceLocalIdLength)
 			{
-				return ConformanceCheckResult.Fail("Every item id is at most MacroDeckId.MaxResourceLocalIdLength " +
-					$"({MacroDeckId.MaxResourceLocalIdLength}) characters.",
+				return ConformanceCheckResult.Fail("Every item id is at most MacroDeckId.MaxResourceLocalIdLength "
+					+ $"({MacroDeckId.MaxResourceLocalIdLength}) characters.",
 					$"Item id '{id}' is {id.Length} characters.");
 			}
 		}
@@ -690,7 +701,8 @@ internal sealed class ActionIconSnapshotsAreWellFormedCheck() : ConformanceCheck
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var (localIds, setupFailure) = await ActionIconProbe.IconProviderLocalIdsAsync(context).ConfigureAwait(false);
@@ -724,8 +736,8 @@ internal sealed class ActionIconSnapshotsAreWellFormedCheck() : ConformanceCheck
 				{
 					return ConformanceCheckResult.Fail(
 						"A snapshot with NoIcon set names no Reference and carries an empty Version.",
-						$"'{localId}' returned NoIcon with Reference " +
-						$"'{result.Reference?.Type}:{result.Reference?.Reference}' and Version '{result.Version}'.");
+						$"'{localId}' returned NoIcon with Reference "
+						+ $"'{result.Reference?.Type}:{result.Reference?.Reference}' and Version '{result.Version}'.");
 				}
 			}
 			else
@@ -736,8 +748,8 @@ internal sealed class ActionIconSnapshotsAreWellFormedCheck() : ConformanceCheck
 						$"'{localId}' returned an empty Version without setting NoIcon.");
 				}
 
-				if (result.Reference is { } reference &&
-					(string.IsNullOrEmpty(reference.Type) || string.IsNullOrEmpty(reference.Reference)))
+				if (result.Reference is { } reference
+					&& (string.IsNullOrEmpty(reference.Type) || string.IsNullOrEmpty(reference.Reference)))
 				{
 					return ConformanceCheckResult.Fail(
 						"A snapshot's Reference, when present, carries a non-empty Type and Reference.",
@@ -769,7 +781,8 @@ internal sealed class ActionIconContentIsAnswerableCheck() : ConformanceCheckBas
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var (localIds, setupFailure) = await ActionIconProbe.IconProviderLocalIdsAsync(context).ConfigureAwait(false);
@@ -823,9 +836,9 @@ internal sealed class ActionIconContentIsAnswerableCheck() : ConformanceCheckBas
 				continue;
 			}
 
-			if (string.IsNullOrEmpty(content.ContentHash) ||
-				content.MediaType is not { Length: > 0 } mediaType ||
-				!mediaType.StartsWith("image/", StringComparison.Ordinal))
+			if (string.IsNullOrEmpty(content.ContentHash)
+				|| content.MediaType is not { Length: > 0 } mediaType
+				|| !mediaType.StartsWith("image/", StringComparison.Ordinal))
 			{
 				return ConformanceCheckResult.Fail(
 					"A present icon.content result carries a non-empty ContentHash and an image/* MediaType.",
@@ -881,8 +894,8 @@ internal static class DescribeProbe
 		{
 			return (null,
 				ConformanceCheckResult.Fail(
-					$"{kind}/describe replies promptly, with a reply whose envelope stays within " +
-					$"MaxMessageBytes ({ProtocolLimits.MaxMessageBytes} bytes).",
+					$"{kind}/describe replies promptly, with a reply whose envelope stays within "
+					+ $"MaxMessageBytes ({ProtocolLimits.MaxMessageBytes} bytes).",
 					NoReplyObserved));
 		}
 
@@ -1134,8 +1147,8 @@ internal static class ActionIconProbe
 				? (null, null)
 				: (null,
 					ConformanceCheckResult.Fail(
-						$"The '{localId}' action's icon.content operation succeeds, or fails specifically with " +
-						"AssetTooLarge.",
+						$"The '{localId}' action's icon.content operation succeeds, or fails specifically with "
+						+ "AssetTooLarge.",
 						$"icon.content failed: {outcome.Error?.Code} - {outcome.Error?.Message}"));
 		}
 
@@ -1169,8 +1182,9 @@ internal static class VariableCatalogProbe
 		var catalog = await ProbeUndeclaredAsync(context).ConfigureAwait(false);
 
 		return catalog is { Variables.Count: 0, DeclaredVariables.Count: 0, SupportsCatalog: false } or null
-			? (null, ConformanceCheckResult.Skip(
-				"This subject neither declares the variables capability nor describes any variables or a catalog."))
+			? (null,
+				ConformanceCheckResult.Skip(
+					"This subject neither declares the variables capability nor describes any variables or a catalog."))
 			: (catalog, null);
 	}
 
@@ -1235,10 +1249,14 @@ internal static class VariableCatalogProbe
 	/// <summary>The local id a definition is addressed by, or null for one that resolves to none - a
 	/// template name carrying no id of its own.</summary>
 	public static string? LocalIdOf(VariableDefinitionDto definition)
-		=> definition.Id ?? VariableDefinitionId.FromName(definition.Name);
+	{
+		return definition.Id ?? VariableDefinitionId.FromName(definition.Name);
+	}
 
 	public static bool IsEager(VariableDefinitionDto definition)
-		=> !string.Equals(definition.Materialization, VariableMaterializations.OnDemand, StringComparison.Ordinal);
+	{
+		return !string.Equals(definition.Materialization, VariableMaterializations.OnDemand, StringComparison.Ordinal);
+	}
 }
 
 /// <summary>
@@ -1259,7 +1277,8 @@ internal sealed class WritableVariablesAcceptWritesCheck() : ConformanceCheckBas
 
 	private const string NotWritable = nameof(VariableWriteStatus.NotWritable);
 
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var (catalog, unavailable) = await VariableCatalogProbe.ResolveAsync(context).ConfigureAwait(false);
@@ -1303,13 +1322,13 @@ internal sealed class WritableVariablesAcceptWritesCheck() : ConformanceCheckBas
 				return failure;
 			}
 
-			if (string.Equals(result!.Status, NotWritable, StringComparison.Ordinal) ||
-				string.Equals(result.Status, NotFound, StringComparison.Ordinal))
+			if (string.Equals(result!.Status, NotWritable, StringComparison.Ordinal)
+				|| string.Equals(result.Status, NotFound, StringComparison.Ordinal))
 			{
 				return ConformanceCheckResult.Fail(
-					"A variable whose definition carries a write capability answers set with a status other " +
-					$"than {NotWritable} or {NotFound} - a client decides whether to offer a control from the " +
-					"declaration alone.",
+					"A variable whose definition carries a write capability answers set with a status other "
+					+ $"than {NotWritable} or {NotFound} - a client decides whether to offer a control from the "
+					+ "declaration alone.",
 					$"'{localId}' declares write and answered '{result.Status}'.");
 			}
 
@@ -1372,8 +1391,8 @@ internal sealed class WritableVariablesAcceptWritesCheck() : ConformanceCheckBas
 		{
 			return (null,
 				ConformanceCheckResult.Fail(
-					$"variables/set for '{localId}' succeeds as an invocation - a refused write is a status, " +
-					"not a failed operation.",
+					$"variables/set for '{localId}' succeeds as an invocation - a refused write is a status, "
+					+ "not a failed operation.",
 					$"set failed: {outcome.Error?.Code} - {outcome.Error?.Message}"));
 		}
 
@@ -1407,7 +1426,8 @@ internal sealed class EagerVariableSetIsWithinLimitCheck() : ConformanceCheckBas
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var (catalog, unavailable) = await VariableCatalogProbe.ResolveAsync(context).ConfigureAwait(false);
@@ -1423,8 +1443,8 @@ internal sealed class EagerVariableSetIsWithinLimitCheck() : ConformanceCheckBas
 
 		return largest > VariableLimits.MaxEagerVariablesPerProvider
 			? ConformanceCheckResult.Fail(
-				"An eager variable list carries at most VariableLimits.MaxEagerVariablesPerProvider " +
-				$"({VariableLimits.MaxEagerVariablesPerProvider}) entries.",
+				"An eager variable list carries at most VariableLimits.MaxEagerVariablesPerProvider "
+				+ $"({VariableLimits.MaxEagerVariablesPerProvider}) entries.",
 				$"describe reported {provided} provided and {declared} declared eager variables.")
 			: ConformanceCheckResult.Pass([
 				ConformanceCheckSupport.Observe("eager variables provided", provided),

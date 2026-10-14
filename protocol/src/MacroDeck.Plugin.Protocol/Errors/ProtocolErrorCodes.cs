@@ -101,6 +101,6 @@ public static class ProtocolErrorCodes
 		Timeout, Cancelled, CorrelationUnknown, DuplicateIdempotencyKey, InternalError,
 		AdbNotEnabled, AdbNotAllowed, AdbFailed, UiResourceQuotaExceeded,
 		PluginIconNotFound, IconPackInvalid, IconPackSyncNotAllowed, IconNotFound, CompanionDevicesNotAllowed,
-		DesktopNotificationsNotAllowed,
+		DesktopNotificationsNotAllowed
 	];
 }

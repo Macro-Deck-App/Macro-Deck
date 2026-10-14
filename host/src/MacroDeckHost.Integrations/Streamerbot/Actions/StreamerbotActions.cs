@@ -6,11 +6,14 @@ internal static class StreamerbotActions
 {
 	public static IReadOnlyList<IActionDefinition> Create(
 		Func<StreamerbotConnection?> resolver,
-		StreamerbotVariableAccessor variables) =>
-	[
-		new DoActionActionDefinition(resolver),
-		new ExecuteCodeTriggerActionDefinition(resolver),
-		new SendChatMessageActionDefinition(resolver),
-		new GetGlobalVariableActionDefinition(resolver, variables)
-	];
+		StreamerbotVariableAccessor variables)
+	{
+		return
+		[
+			new DoActionActionDefinition(resolver),
+			new ExecuteCodeTriggerActionDefinition(resolver),
+			new SendChatMessageActionDefinition(resolver),
+			new GetGlobalVariableActionDefinition(resolver, variables)
+		];
+	}
 }

@@ -19,10 +19,13 @@ internal sealed class FixedMusicPlayerApi : IMusicPlayerApi
 	}
 
 	public Task<string?> GetAlbumColorAsync(string instanceId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(Colors.GetValueOrDefault(instanceId));
+	{
+		return Task.FromResult(Colors.GetValueOrDefault(instanceId));
+	}
 
 	public static IIntegrationContext ContextWith(IMusicPlayerApi musicPlayers)
-		=> new IntegrationContext(null!,
+	{
+		return new IntegrationContext(null!,
 			null!,
 			null!,
 			null!,
@@ -34,4 +37,5 @@ internal sealed class FixedMusicPlayerApi : IMusicPlayerApi
 			null!,
 			null!,
 			musicPlayers: musicPlayers);
+	}
 }

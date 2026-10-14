@@ -1,6 +1,5 @@
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeckHost.Integrations.Jellyfin;
-using MacroDeckHost.Integrations.Jellyfin.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Jellyfin;
 
@@ -12,7 +11,10 @@ internal sealed class JellyfinConfigFlowTests
 	{
 		var flow = new JellyfinConfigFlow(_ => new FakeJellyfinClient { RejectCredentials = true });
 
-		var result = await flow.SubmitAsync("connection", Input(apiKey: "wrong"), new NewEntry(), CancellationToken.None);
+		var result = await flow.SubmitAsync("connection",
+			Input(apiKey: "wrong"),
+			new NewEntry(),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -35,7 +37,7 @@ internal sealed class JellyfinConfigFlowTests
 	public async Task Signing_in_stores_the_issued_token_and_never_the_password()
 	{
 		var flow = new JellyfinConfigFlow(_ => new FakeJellyfinClient { IssuedToken = "token-1" });
-		var input = Input(method: JellyfinConfigKeys.AuthLogin, username: "alex", password: "hunter2");
+		var input = Input(JellyfinConfigKeys.AuthLogin, username: "alex", password: "hunter2");
 
 		var result = await flow.SubmitAsync("connection", input, new NewEntry(), CancellationToken.None);
 
@@ -57,7 +59,7 @@ internal sealed class JellyfinConfigFlowTests
 	{
 		var client = new FakeJellyfinClient();
 		var flow = new JellyfinConfigFlow(_ => client);
-		var input = Input(method: JellyfinConfigKeys.AuthLogin, username: "alex", password: string.Empty);
+		var input = Input(JellyfinConfigKeys.AuthLogin, username: "alex", password: string.Empty);
 		input[JellyfinConfigKeys.AccessToken] = "stored-token";
 		input[JellyfinConfigKeys.DeviceId] = "stored-device";
 
@@ -85,7 +87,8 @@ internal sealed class JellyfinConfigFlowTests
 		string? apiKey = null,
 		string? username = null,
 		string? password = null)
-		=> new()
+	{
+		return new Dictionary<string, object?>
 		{
 			[JellyfinConfigKeys.ConfigurationName] = "Home",
 			[JellyfinConfigKeys.Url] = "http://jellyfin.local:8096",
@@ -94,6 +97,7 @@ internal sealed class JellyfinConfigFlowTests
 			[JellyfinConfigKeys.Username] = username,
 			[JellyfinConfigKeys.Password] = password
 		};
+	}
 
 	private sealed class NewEntry : IConfigFlowContext
 	{

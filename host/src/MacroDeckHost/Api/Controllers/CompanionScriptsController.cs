@@ -82,8 +82,8 @@ public sealed class CompanionScriptsController : ControllerBase
 
 		var inputs = body.Inputs;
 		var clientId = body.ClientId;
-		var dispatch = await _coordinator.RunBoundedAsync(
-			(services, token) => services.GetRequiredService<IScriptRunner>().RunAsync(scriptId, clientId, token, inputs: inputs),
+		var dispatch = await _coordinator.RunBoundedAsync((services, token)
+				=> services.GetRequiredService<IScriptRunner>().RunAsync(scriptId, clientId, token, inputs: inputs),
 			RunBound,
 			ct);
 
@@ -102,5 +102,7 @@ public sealed class CompanionScriptsController : ControllerBase
 	}
 
 	private static RunCompanionScriptResponse Failed(TransportError error)
-		=> new() { Success = false, Status = ActionExecutionStatus.Failed, Error = error };
+	{
+		return new RunCompanionScriptResponse { Success = false, Status = ActionExecutionStatus.Failed, Error = error };
+	}
 }

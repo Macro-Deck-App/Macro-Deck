@@ -86,12 +86,19 @@ public sealed class AdbIntegration
 	string IBatteryProvider.ProviderName => string.Empty;
 
 	Task IBatteryProvider.InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken)
-		=> _batteries.InitializeAsync(context, cancellationToken);
+	{
+		return _batteries.InitializeAsync(context, cancellationToken);
+	}
 
 	Task IBatteryProvider.ShutdownAsync(CancellationToken cancellationToken)
-		=> _batteries.ShutdownAsync(cancellationToken);
+	{
+		return _batteries.ShutdownAsync(cancellationToken);
+	}
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
 	public Task InitializeAsync(IIntegrationContext context)
 	{
@@ -131,7 +138,9 @@ public sealed class AdbIntegration
 	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> AdbVariables.ReadAsync(_androidDevices, _tracker, localId, cancellationToken);
+	{
+		return AdbVariables.ReadAsync(_androidDevices, _tracker, localId, cancellationToken);
+	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
 	{
@@ -183,7 +192,7 @@ public sealed class AdbIntegration
 			issues.Add(new IntegrationIssue
 			{
 				Id = $"{UnauthorizedIssuePrefix}{device.Serial}",
-				Title = AppStrings.Integrations.Adb.Issues.UnauthorizedTitle(device: device.Info.Model ?? device.Serial),
+				Title = AppStrings.Integrations.Adb.Issues.UnauthorizedTitle(device.Info.Model ?? device.Serial),
 				Description = device.LacksUsbPermission
 					? AppStrings.Integrations.Adb.Issues.NoPermissionsDescription()
 					: AppStrings.Integrations.Adb.Issues.UnauthorizedDescription(),
@@ -195,7 +204,9 @@ public sealed class AdbIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Issues.CannotResolveAutomatically()));
+	{
+		return Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Issues.CannotResolveAutomatically()));
+	}
 
 	private void OnDeviceChanged(object? sender, AdbDeviceChange change)
 	{

@@ -41,17 +41,20 @@ public class ActionButtonWidgetUiProviderTests
 	// IWidgetTriggerService's contract, dispatches "onShortPress" - see ActionButtonWidgetSessionTests'
 	// identical constant for the same reasoning.
 	private const string TwoStateData =
-		"{\"stateMode\":true,\"activeStateId\":\"a\",\"states\":[" +
-		"{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}}," +
-		"{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"On\",\"backgroundColor\":\"#222222\"}}]," +
-		"\"flows\":\"[]\"}";
+		"{\"stateMode\":true,\"activeStateId\":\"a\",\"states\":["
+		+ "{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}},"
+		+ "{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"On\",\"backgroundColor\":\"#222222\"}}],"
+		+ "\"flows\":\"[]\"}";
 
 	/// <summary>Long enough that a fake, entirely synchronous trigger/transport chain has finished its
 	/// registered pending work, short enough that this stays quick. The provider hands back a plain
 	/// <see cref="IUiSession" />, with no view or host exposed to await idleness through directly - the
 	/// same reason <c>UiSessionFixture.SettleAsync</c> in the broker-level composition-root tests waits
 	/// this way instead.</summary>
-	private static Task SettleAsync() => Task.Delay(TimeSpan.FromMilliseconds(200));
+	private static Task SettleAsync()
+	{
+		return Task.Delay(TimeSpan.FromMilliseconds(200));
+	}
 
 	[Test]
 	public async Task A_state_mode_off_button_serves_a_resolved_label_on_the_widget_surface()
@@ -173,7 +176,7 @@ public class ActionButtonWidgetUiProviderTests
 		// this has nothing to find and must not matter - see the ThrowingFolderCache test below for the
 		// stronger version of the same claim.
 		var provider = Provider(new StubFolderCache(), trigger);
-		var session = await provider.CreateSessionAsync(Request(UiSurfaceKinds.Preview, widgetId: null, TwoStateData),
+		var session = await provider.CreateSessionAsync(Request(UiSurfaceKinds.Preview, null, TwoStateData),
 			CancellationToken.None);
 
 		Assert.That(session, Is.Not.Null);
@@ -251,10 +254,10 @@ public class ActionButtonWidgetUiProviderTests
 		// What the widget picker asks for (issue #758): an empty draft, because nothing has been
 		// configured at the moment somebody is choosing a widget type. Without the sample it would draw a
 		// blank tile, which says nothing about what an Action Button looks like.
-		var request = Request(UiSurfaceKinds.Preview, widgetId: null, "{}");
+		var request = Request(UiSurfaceKinds.Preview, null, "{}");
 		var attributes = new Dictionary<string, JsonElement>(request.Surface.Attributes, StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.Sample] = JsonSerializer.SerializeToElement(true),
+			[UiWidgetSurfaceAttributes.Sample] = JsonSerializer.SerializeToElement(true)
 		};
 
 		var provider = Provider(new StubFolderCache(), new RecordingTriggerService());
@@ -263,8 +266,8 @@ public class ActionButtonWidgetUiProviderTests
 				UiModelVersion = request.UiModelVersion,
 				Surface = new UiSurface
 				{
-					Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared, Attributes = attributes,
-				},
+					Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared, Attributes = attributes
+				}
 			},
 			CancellationToken.None);
 
@@ -313,7 +316,7 @@ public class ActionButtonWidgetUiProviderTests
 		// A widget that has never been saved has no id to scope by, and the widget picker's sample has no
 		// widget at all: both must keep opening and rendering exactly as they did.
 		var provider = Provider(new StubFolderCache(), new RecordingTriggerService(), variables: variables);
-		var session = await provider.CreateSessionAsync(PreviewRequest(TemplateLabelData, variableScopeWidgetId: null),
+		var session = await provider.CreateSessionAsync(PreviewRequest(TemplateLabelData, null),
 			CancellationToken.None);
 
 		Assert.That(session, Is.Not.Null);
@@ -391,7 +394,8 @@ public class ActionButtonWidgetUiProviderTests
 	}
 
 	private static UiSessionRequest ConfigRequest(Guid widgetId, string widgetData)
-		=> new()
+	{
+		return new UiSessionRequest
 		{
 			UiModelVersion = 1,
 			Surface = new UiSurface
@@ -405,27 +409,33 @@ public class ActionButtonWidgetUiProviderTests
 					[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString()),
 					[UiConfigSurfaceAttributes.WidgetType]
 						= JsonSerializer.SerializeToElement(WidgetTypeIds.ActionButton),
-					[UiConfigSurfaceAttributes.WidgetData] = JsonDocument.Parse(widgetData).RootElement.Clone(),
-				},
-			},
+					[UiConfigSurfaceAttributes.WidgetData] = JsonDocument.Parse(widgetData).RootElement.Clone()
+				}
+			}
 		};
+	}
 
-	private static VariableEntity WidgetVariable(Guid widgetId, string name, string value) => new()
+	private static VariableEntity WidgetVariable(Guid widgetId, string name, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Widget,
-		ScopeRefId = widgetId.ToString(),
-		Type = VariableType.Text,
-		Classification = VariableClassification.User,
-		Value = value,
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Widget,
+			ScopeRefId = widgetId.ToString(),
+			Type = VariableType.Text,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
 	private static string? LabelText(IUiSession session)
-		=> FindById(session.BuildTree().Root, "actionButton.labelRow.labelBox.label") is { } label &&
-			label.Properties.TryGetValue("text", out var text)
+	{
+		return FindById(session.BuildTree().Root, "actionButton.labelRow.labelBox.label") is { } label
+			&& label.Properties.TryGetValue("text", out var text)
 				? text.ToString()
 				: null;
+	}
 
 	private static ActionButtonWidgetUiProvider Provider(
 		MacroDeckHost.Application.Caching.IFolderCache folderCache,
@@ -465,19 +475,20 @@ public class ActionButtonWidgetUiProviderTests
 			new FakeIntegrationRegistry(),
 			new FakeFontCatalog(),
 			new ActionProviderProbe(new FakeIntegrationRegistry(),
-				new MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions.RemoteIconProviderActionRegistry(null!,
+				new MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions.RemoteIconProviderActionRegistry(
+					null!,
 					null!,
 					null!),
 				TimeProvider.System,
 				Serilog.Core.Logger.None),
 			TestLocalization.Resolver,
 			TimeProvider.System,
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
+			new StubIconPackCache());
 	}
 
 	private static UiSessionRequest PreviewRequest(string data, string? variableScopeWidgetId)
 	{
-		var request = Request(UiSurfaceKinds.Preview, widgetId: null, data);
+		var request = Request(UiSurfaceKinds.Preview, null, data);
 
 		if (variableScopeWidgetId is null)
 		{
@@ -487,7 +498,7 @@ public class ActionButtonWidgetUiProviderTests
 		var attributes = new Dictionary<string, JsonElement>(request.Surface.Attributes, StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.VariableScopeWidgetId]
-				= JsonSerializer.SerializeToElement(variableScopeWidgetId),
+				= JsonSerializer.SerializeToElement(variableScopeWidgetId)
 		};
 
 		return new UiSessionRequest
@@ -495,8 +506,8 @@ public class ActionButtonWidgetUiProviderTests
 			UiModelVersion = request.UiModelVersion,
 			Surface = new UiSurface
 			{
-				Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared, Attributes = attributes,
-			},
+				Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared, Attributes = attributes
+			}
 		};
 	}
 
@@ -505,7 +516,7 @@ public class ActionButtonWidgetUiProviderTests
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement("ActionButton"),
-			[UiWidgetSurfaceAttributes.Data] = JsonDocument.Parse(data).RootElement.Clone(),
+			[UiWidgetSurfaceAttributes.Data] = JsonDocument.Parse(data).RootElement.Clone()
 		};
 
 		if (widgetId is { } id)
@@ -517,7 +528,7 @@ public class ActionButtonWidgetUiProviderTests
 		{
 			UiModelVersion = 1,
 			Surface = new UiSurface
-				{ Kind = surfaceKind, SessionMode = UiSessionModes.Shared, Attributes = attributes },
+				{ Kind = surfaceKind, SessionMode = UiSessionModes.Shared, Attributes = attributes }
 		};
 	}
 
@@ -560,40 +571,62 @@ public class ActionButtonWidgetUiProviderTests
 	{
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeFontCatalog : IFontCatalog
 	{
-		public IReadOnlyList<FontFaceInfo> GetFaces() => [];
+		public IReadOnlyList<FontFaceInfo> GetFaces()
+		{
+			return [];
+		}
 
-		public byte[]? GetFaceFile(string faceId) => null;
+		public byte[]? GetFaceFile(string faceId)
+		{
+			return null;
+		}
 	}
 
 	private sealed class FakeWidgetIconResources : IWidgetIconResources
 	{
-		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
-			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(
+			WidgetIconReference? reference,
+			WidgetIconLimit limit,
 			CancellationToken cancellationToken)
-			=> ResolveAsync(reference, cancellationToken);
+		{
+			return ResolveAsync(reference, cancellationToken);
+		}
 
-		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
+		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(
+			WidgetIconReference? reference,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<MacroDeck.Ui.Model.Resources.UiResource?>(null);
+		{
+			return Task.FromResult<MacroDeck.Ui.Model.Resources.UiResource?>(null);
+		}
 
 		public void Evict(Guid iconId)
 		{
@@ -602,25 +635,38 @@ public class ActionButtonWidgetUiProviderTests
 
 	private sealed class FakeWidgetIconService : IWidgetIconService
 	{
-		public Task<WidgetIconResolution> Resolve(Guid widgetId,
-			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+		public Task<WidgetIconResolution> Resolve(
+			Guid widgetId,
+			WidgetIconLimit limit,
 			CancellationToken cancellationToken = default)
-			=> Resolve(widgetId, cancellationToken);
+		{
+			return Resolve(widgetId, cancellationToken);
+		}
 
 		public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetIconResolution.Inactive);
+		{
+			return Task.FromResult(WidgetIconResolution.Inactive);
+		}
 
-		public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
+		public TimeSpan? GetProviderPollInterval(Guid widgetId)
+		{
+			return null;
+		}
 	}
 
 	private sealed class FakeLabelTextService : ILabelTextService
 	{
 		public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>("resolved-label");
+		{
+			return Task.FromResult<string?>("resolved-label");
+		}
 
-		public Task<string?> ResolvePreview(LabelImagePreviewRequest request,
+		public Task<string?> ResolvePreview(
+			LabelImagePreviewRequest request,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(request.Label);
+		{
+			return Task.FromResult<string?>(request.Label);
+		}
 	}
 
 	/// <summary>Proves the Preview path skips widget lookup entirely, rather than merely tolerating an
@@ -628,41 +674,84 @@ public class ActionButtonWidgetUiProviderTests
 	private sealed class ThrowingFolderCache : MacroDeckHost.Application.Caching.IFolderCache
 	{
 		public List<FolderEntity> GetAllFolders()
-			=> throw new InvalidOperationException(
+		{
+			throw new InvalidOperationException(
 				"A Preview session must never query the folder cache - it has no stored widget to look up.");
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => throw new NotSupportedException();
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task InitializeCache() => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => throw new NotSupportedException();
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => throw new NotSupportedException();
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdate(FolderEntity folder) => throw new NotSupportedException();
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => throw new NotSupportedException();
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> throw new NotSupportedException();
-
-		public void AddWidget(Guid folderId, WidgetEntity widget) => throw new NotSupportedException();
-
-		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets) => throw new NotSupportedException();
-
-		public void UpdateWidget(Guid folderId, WidgetEntity widget) => throw new NotSupportedException();
-
-		public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets) =>
+		{
 			throw new NotSupportedException();
+		}
+
+		public void AddWidget(Guid folderId, WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
+
+		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+		{
+			throw new NotSupportedException();
+		}
+
+		public void UpdateWidget(Guid folderId, WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
+
+		public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void UpdateWidgetPositions(Guid folderId, IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public void RemoveWidget(Guid folderId, Guid widgetId) => throw new NotSupportedException();
+		public void RemoveWidget(Guid folderId, Guid widgetId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds) => throw new NotSupportedException();
+		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void ReplaceWidgets(Guid folderId, IReadOnlyList<Guid> removeIds, IReadOnlyList<WidgetEntity> addWidgets)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

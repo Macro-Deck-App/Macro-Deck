@@ -50,23 +50,23 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	// - refuse rather than advance while a provider or mapping is authoritative - is exercised for real
 	// through the handler that every client presses through.
 	private const string ThreeStatesOnFirst =
-		"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}," +
-		"{\"id\":\"c\",\"label\":\"C\"}],\"activeStateId\":\"a\"}";
+		"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"},"
+		+ "{\"id\":\"c\",\"label\":\"C\"}],\"activeStateId\":\"a\"}";
 
 	private const string ThreeStatesOnLast =
-		"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}," +
-		"{\"id\":\"c\",\"label\":\"C\"}],\"activeStateId\":\"c\"}";
+		"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"},"
+		+ "{\"id\":\"c\",\"label\":\"C\"}],\"activeStateId\":\"c\"}";
 
 	private const string ThreeStatesWithMapping =
-		"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}," +
-		"{\"id\":\"c\",\"label\":\"C\"}],\"activeStateId\":\"a\",\"stateMapping\":{\"rules\":[{\"id\":\"r1\"," +
-		"\"stateId\":\"b\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\"," +
-		"\"right\":90}}],\"fallbackStateId\":\"a\"}}";
+		"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"},"
+		+ "{\"id\":\"c\",\"label\":\"C\"}],\"activeStateId\":\"a\",\"stateMapping\":{\"rules\":[{\"id\":\"r1\","
+		+ "\"stateId\":\"b\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\","
+		+ "\"right\":90}}],\"fallbackStateId\":\"a\"}}";
 
 	private const string ThreeStatesWithProvider =
-		"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}," +
-		"{\"id\":\"c\",\"label\":\"C\"}],\"activeStateId\":\"a\",\"stateProvider\":{\"blockId\":\"blk-1\"," +
-		"\"integrationId\":\"i\",\"actionId\":\"a\",\"states\":[{\"id\":\"a\",\"label\":\"A\"}]}}";
+		"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"},"
+		+ "{\"id\":\"c\",\"label\":\"C\"}],\"activeStateId\":\"a\",\"stateProvider\":{\"blockId\":\"blk-1\","
+		+ "\"integrationId\":\"i\",\"actionId\":\"a\",\"states\":[{\"id\":\"a\",\"label\":\"A\"}]}}";
 
 	[Test]
 	public async Task A_short_press_advances_a_state_mode_button_to_the_next_state()
@@ -74,7 +74,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		var folders = new FakeFolderCache(ActionButtonWidget());
 		var (handler, widgets, _) = CreateStateHandler(folders, ThreeStatesOnFirst);
 
-		var response = await handler.Handle(Request(triggerType: WidgetTriggerTypes.ShortPress),
+		var response = await handler.Handle(Request(WidgetTriggerTypes.ShortPress),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -90,7 +90,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		var folders = new FakeFolderCache(ActionButtonWidget());
 		var (handler, widgets, _) = CreateStateHandler(folders, ThreeStatesOnLast);
 
-		var response = await handler.Handle(Request(triggerType: WidgetTriggerTypes.ShortPress),
+		var response = await handler.Handle(Request(WidgetTriggerTypes.ShortPress),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -109,7 +109,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 				"\"stateMode\":true,\"cycleStatesOnPress\":false,",
 				StringComparison.Ordinal));
 
-		var response = await handler.Handle(Request(triggerType: WidgetTriggerTypes.ShortPress),
+		var response = await handler.Handle(Request(WidgetTriggerTypes.ShortPress),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -125,7 +125,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		var folders = new FakeFolderCache(ActionButtonWidget());
 		var (handler, widgets, _) = CreateStateHandler(folders, ThreeStatesWithMapping);
 
-		var response = await handler.Handle(Request(triggerType: WidgetTriggerTypes.ShortPress),
+		var response = await handler.Handle(Request(WidgetTriggerTypes.ShortPress),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -141,7 +141,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		var folders = new FakeFolderCache(ActionButtonWidget());
 		var (handler, widgets, _) = CreateStateHandler(folders, ThreeStatesWithProvider);
 
-		var response = await handler.Handle(Request(triggerType: WidgetTriggerTypes.ShortPress),
+		var response = await handler.Handle(Request(WidgetTriggerTypes.ShortPress),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -157,7 +157,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		var folders = new FakeFolderCache(ActionButtonWidget());
 		var (handler, widgets, _) = CreateStateHandler(folders, ThreeStatesOnFirst);
 
-		var response = await handler.Handle(Request(triggerType: "onLongPress"), CancellationToken.None);
+		var response = await handler.Handle(Request("onLongPress"), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -172,7 +172,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		var folders = new FakeFolderCache(ActionButtonWidget());
 		var (handler, widgets, _) = CreateStateHandler(folders, "{}");
 
-		var response = await handler.Handle(Request(triggerType: WidgetTriggerTypes.ShortPress),
+		var response = await handler.Handle(Request(WidgetTriggerTypes.ShortPress),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -198,7 +198,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 
 		var handler = CreateHandler(folders, coordinator, stateService);
 
-		await handler.Handle(Request(triggerType: WidgetTriggerTypes.ShortPress), CancellationToken.None);
+		await handler.Handle(Request(WidgetTriggerTypes.ShortPress), CancellationToken.None);
 
 		Assert.That(observedAtDispatch,
 			Is.EqualTo("b"),
@@ -212,7 +212,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	{
 		var triggers = CreateTriggerService(coordinator, stateService);
 
-		return new(folders,
+		return new ExecuteActionButtonTriggerRequestMessageHandler(folders,
 			_profiles,
 			_lockState,
 			triggers,
@@ -228,7 +228,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	{
 		var triggers = CreateTriggerService(coordinator, stateService);
 
-		return new(folders,
+		return new ExecuteActionButtonTriggerRequestMessageHandler(folders,
 			new FakeProfileRegistry(),
 			new FakeHostLockState(),
 			triggers,
@@ -309,7 +309,10 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _coordinator.Dispose();
+	public void TearDown()
+	{
+		_coordinator.Dispose();
+	}
 
 	private const string ProviderWidgetData =
 		"{\"flows\":[{\"triggerId\":\"t1\",\"triggerType\":\"onShortPress\",\"children\":[]}]}";
@@ -354,20 +357,24 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	}
 
 	private static WidgetEntity ActionButtonWidget(string type = WidgetTypeIds.ActionButton)
-		=> new() { Id = _widgetId, FolderId = _folderId, Type = type, Data = "{}" };
+	{
+		return new WidgetEntity { Id = _widgetId, FolderId = _folderId, Type = type, Data = "{}" };
+	}
 
 	private static ExecuteActionButtonTriggerRequest Request(
 		string triggerType = "onShortPress",
 		string? widgetId = null,
 		string? folderId = null,
 		string? clientId = "client-1")
-		=> new()
+	{
+		return new ExecuteActionButtonTriggerRequest
 		{
 			TriggerType = triggerType,
 			WidgetId = widgetId ?? _widgetId.ToString(),
 			FolderId = folderId ?? _folderId.ToString(),
 			ClientId = clientId
 		};
+	}
 
 	[Test]
 	public async Task A_client_supplied_device_origin_never_reaches_the_flow()
@@ -399,7 +406,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[Test]
 	public async Task Empty_trigger_type_is_rejected()
 	{
-		var response = await _handler.Handle(Request(triggerType: ""), CancellationToken.None);
+		var response = await _handler.Handle(Request(""), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -459,7 +466,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[Test]
 	public async Task An_onEvent_trigger_type_is_rejected()
 	{
-		var response = await _handler.Handle(Request(triggerType: WidgetTriggerTypes.Event), CancellationToken.None);
+		var response = await _handler.Handle(Request(WidgetTriggerTypes.Event), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -534,7 +541,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	{
 		// An old or non-Angular client never opens a UI session and only ever calls this handler - the
 		// same request shape a current client's ActionButtonWidgetSession never has to make.
-		var response = await _handler.Handle(Request(triggerType: WidgetTriggerTypes.ShortPress),
+		var response = await _handler.Handle(Request(WidgetTriggerTypes.ShortPress),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -562,7 +569,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[Test]
 	public async Task A_press_on_a_provider_widget_whose_type_supports_flows_runs_its_flow()
 	{
-		var handler = await CreateHandlerForProviderType(supportsFlows: true);
+		var handler = await CreateHandlerForProviderType(true);
 
 		var response = await handler.Handle(Request(), CancellationToken.None);
 
@@ -577,7 +584,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[Test]
 	public async Task A_press_on_a_provider_widget_whose_type_does_not_support_flows_runs_nothing()
 	{
-		var handler = await CreateHandlerForProviderType(supportsFlows: false);
+		var handler = await CreateHandlerForProviderType(false);
 
 		var response = await handler.Handle(Request(), CancellationToken.None);
 
@@ -592,7 +599,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[Test]
 	public async Task A_short_press_on_a_provider_widget_without_flows_runs_the_types_default_action()
 	{
-		var handler = await CreateHandlerForProviderType(supportsFlows: false,
+		var handler = await CreateHandlerForProviderType(false,
 			new WidgetDefaultAction("open"),
 			new CapturingActionDefinition { Id = "open" });
 
@@ -609,7 +616,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[Test]
 	public async Task A_short_press_from_a_hardware_deck_runs_a_provider_types_default_action_too()
 	{
-		var handler = await CreateHandlerForProviderType(supportsFlows: false,
+		var handler = await CreateHandlerForProviderType(false,
 			new WidgetDefaultAction("open"),
 			new CapturingActionDefinition { Id = "open" });
 		var request = Request();
@@ -627,11 +634,11 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[Test]
 	public async Task A_long_press_on_a_provider_widget_without_flows_ignores_the_types_default_action()
 	{
-		var handler = await CreateHandlerForProviderType(supportsFlows: false,
+		var handler = await CreateHandlerForProviderType(false,
 			new WidgetDefaultAction("open"),
 			new CapturingActionDefinition { Id = "open" });
 
-		var response = await handler.Handle(Request(triggerType: WidgetTriggerTypes.LongPress), CancellationToken.None);
+		var response = await handler.Handle(Request(WidgetTriggerTypes.LongPress), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -704,7 +711,9 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		private readonly FolderEntity _folder;
 
 		public FakeFolderCache(params WidgetEntity[] widgets)
-			=> _folder = new FolderEntity { Id = _folderId, Name = "f", Order = 0, Widgets = widgets.ToList() };
+		{
+			_folder = new FolderEntity { Id = _folderId, Name = "f", Order = 0, Widgets = widgets.ToList() };
+		}
 
 		public void SetWidgetData(Guid widgetId, string data)
 		{
@@ -712,16 +721,45 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			widget.Data = data;
 		}
 
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
+
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -762,9 +800,20 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 
 		public int Routed { get; private set; }
 
-		public IReadOnlyList<Profile> GetProfiles() => [];
-		public IReadOnlyList<Folder> GetFoldersForProfile(string profileId) => [];
-		public bool IsVirtual(string profileId) => Virtual;
+		public IReadOnlyList<Profile> GetProfiles()
+		{
+			return [];
+		}
+
+		public IReadOnlyList<Folder> GetFoldersForProfile(string profileId)
+		{
+			return [];
+		}
+
+		public bool IsVirtual(string profileId)
+		{
+			return Virtual;
+		}
 
 		public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
 		{
@@ -779,7 +828,9 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> run,
 			TimeSpan bound,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public FakeUiTransport Transport { get; } = new();
 
@@ -793,7 +844,10 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 
 		public FlowExecutionRequest? LastRequest { get; private set; }
 
-		public void Dispose() => Transport.Dispose();
+		public void Dispose()
+		{
+			Transport.Dispose();
+		}
 
 		public Task<ActionExecutionDispatch> RunBoundedAsync(
 			FlowExecutionRequest request,
@@ -803,8 +857,8 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			Runs++;
 			LastRequest = request;
 			OnRun?.Invoke();
-			var result = InlineResult ??
-				new FlowExecutionResult
+			var result = InlineResult
+				?? new FlowExecutionResult
 				{
 					ExecutionId = request.ExecutionId,
 					Status = FlowExecutionStatus.Succeeded,
@@ -832,23 +886,34 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	{
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		private readonly SemaphoreSlim _signal = new(0);
 
 		public List<(string Group, object Message)> Sent { get; } = [];
 
-		public void Dispose() => _signal.Dispose();
+		public void Dispose()
+		{
+			_signal.Dispose();
+		}
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
@@ -874,13 +939,18 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 
 	private sealed class NoOpActionButtonStateService : IActionButtonStateService
 	{
-		public Task<WidgetStateWriteResult> SetAsync(Guid widgetId,
+		public Task<WidgetStateWriteResult> SetAsync(
+			Guid widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
 		public Task<WidgetStateWriteResult> AdvanceAsync(Guid widgetId, CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 	}
 
 	private sealed class RecordingWidgetService : IWidgetService
@@ -893,46 +963,65 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			return Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
 		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
 			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RecordingVariableService : IVariableService
 	{
 		public List<(string Name, object? Value)> Upserts { get; } = [];
 
-		public Task UpsertWidgetVariable(VariableScope scope,
+		public Task UpsertWidgetVariable(
+			VariableScope scope,
 			string scopeRefId,
 			string name,
 			VariableType type,
@@ -942,17 +1031,30 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			return Task.CompletedTask;
 		}
 
-		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name) => Task.CompletedTask;
+		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<IReadOnlyList<VariableEntity>> GetAll() => throw new NotSupportedException();
+		public Task<IReadOnlyList<VariableEntity>> GetAll()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetById(Guid id) => throw new NotSupportedException();
+		public Task<VariableEntity?> GetById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
 			string name,
@@ -962,20 +1064,33 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			object? initialValue,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+			VariableTemplateSource? templateSource = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+		public Task<Result<VariableEntity, VariableError>> SetValue(
+			Guid id,
 			object? value,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 			Guid id,
 			string? name,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+			VariableTemplateSource? templateSource = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+		public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
 			string integrationId,
@@ -988,47 +1103,70 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
 			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
-			bool publishedByHost = false) => throw new NotSupportedException();
+			bool publishedByHost = false)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+			string integrationId,
 			string resourceId,
 			string name,
 			VariableType type,
 			int? decimalPlaces,
-			VariableDeclaration? declaration = null) =>
+			VariableDeclaration? declaration = null)
+		{
 			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> GetByDefinition(MacroDeck.Sdk.Identity.QualifiedId definitionId)
-			=> Task.FromResult<VariableEntity?>(null);
+		{
+			return Task.FromResult<VariableEntity?>(null);
+		}
 
 		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
 			string integrationId,
 			Guid id,
 			object? value,
-			VariableBounds? bounds = null) => throw new NotSupportedException();
+			VariableBounds? bounds = null)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> SetIntegrationVariableAvailability(
 			string integrationId,
 			Guid id,
-			bool available) => throw new NotSupportedException();
+			bool available)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId) => throw new NotSupportedException();
+		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class NoOpFlowExecutor : IFlowExecutor
 	{
 		public Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult(new FlowExecutionResult
+		{
+			return Task.FromResult(new FlowExecutionResult
 			{
 				ExecutionId = request.ExecutionId,
 				Status = FlowExecutionStatus.Succeeded,
 				MatchedFlows = 0
 			});
+		}
 	}
 }

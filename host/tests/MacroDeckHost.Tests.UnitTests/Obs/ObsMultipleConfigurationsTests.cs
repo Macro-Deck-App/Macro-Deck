@@ -26,7 +26,8 @@ internal sealed class ObsMultipleConfigurationsTests
 {
 	private static readonly string[] _actionIds =
 	[
-		"set-scene", "set-preview-scene", "set-profile", "set-scene-collection", "start-recording", "stop-recording", "toggle-recording",
+		"set-scene", "set-preview-scene", "set-profile", "set-scene-collection", "start-recording", "stop-recording",
+		"toggle-recording",
 		"toggle-pause-recording", "start-streaming", "stop-streaming", "toggle-streaming",
 		"start-virtual-camera", "stop-virtual-camera", "toggle-virtual-camera", "start-replay-buffer",
 		"stop-replay-buffer", "toggle-replay-buffer", "save-replay-buffer", "split-record-file",
@@ -113,8 +114,9 @@ internal sealed class ObsMultipleConfigurationsTests
 
 		var bResult = await toggle.CreateExecutor().ExecuteAsync(Context(bId));
 		var aResult = await toggle.CreateExecutor().ExecuteAsync(Context(aId));
-		var missingResult = await toggle.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-			{ Parameters = new Dictionary<string, object>() });
+		var missingResult = await toggle.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+				{ Parameters = new Dictionary<string, object>() });
 		var unknownResult = await toggle.CreateExecutor().ExecuteAsync(Context(Guid.NewGuid()));
 		var sceneAction = (IDynamicOptionsActionDefinition)actions.Single(action => action.Id == "set-scene");
 		var bOptions = await sceneAction.GetDynamicOptionsAsync(new DynamicOptionsContext
@@ -146,6 +148,23 @@ internal sealed class ObsMultipleConfigurationsTests
 	}
 
 	[Test]
+	public void Stored_configuration_identities_and_keys_keep_their_persisted_shape()
+	{
+		const string stored = """{"SourceTitle":"OBS","Key":"obs"}""";
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ConfigurationIdentityJson.Serialize(new ConfigurationIdentity("OBS", "obs")),
+				Is.EqualTo(stored));
+			Assert.That(ConfigurationIdentityJson.TryParse(stored, out var identity), Is.True);
+			Assert.That(identity, Is.EqualTo(new ConfigurationIdentity("OBS", "obs")));
+			Assert.That(ObsConfigurationMetadata.SchemaKey, Is.EqualTo("obsConfigurationSchema"));
+			Assert.That(ObsConfigurationMetadata.SchemaVersion, Is.EqualTo("multiple-v1"));
+			Assert.That(ObsConfigurationMetadata.VariableIdentityKey, Is.EqualTo("obsVariableIdentity"));
+		});
+	}
+
+	[Test]
 	public void Variable_identities_are_collision_safe_and_definitions_survive_rename()
 	{
 		var main = ConfigurationIdentityAllocator.Allocate("Main OBS",
@@ -158,7 +177,7 @@ internal sealed class ObsMultipleConfigurationsTests
 		var renamed = ConfigurationIdentityAllocator.Allocate("Home!",
 			new HashSet<string>(),
 			main,
-			suffixFactory: () => 1357)!;
+			() => 1357)!;
 		var entryId = Guid.NewGuid();
 		var before = ObsVariables.Declare(main, entryId);
 		var after = ObsVariables.Declare(renamed, entryId);
@@ -186,7 +205,7 @@ internal sealed class ObsMultipleConfigurationsTests
 
 		var result = await coordinator.DeleteAsync(ObsIntegration.IntegrationId,
 			Guid.NewGuid(),
-			confirmed: false,
+			false,
 			CancellationToken.None);
 
 		Assert.That(result.Success, Is.False);
@@ -256,9 +275,11 @@ internal sealed class ObsMultipleConfigurationsTests
 
 		var variables = await harness.Variables.GetByOwnerIntegration(ObsIntegration.IntegrationId);
 		var aVariables = variables.Where(variable =>
-			ObsVariables.TryGetConfigurationEntryId(variable.DefinitionId, out var entryId) && entryId == a).ToList();
+				ObsVariables.TryGetConfigurationEntryId(variable.DefinitionId, out var entryId) && entryId == a)
+			.ToList();
 		var bVariables = variables.Where(variable =>
-			ObsVariables.TryGetConfigurationEntryId(variable.DefinitionId, out var entryId) && entryId == b).ToList();
+				ObsVariables.TryGetConfigurationEntryId(variable.DefinitionId, out var entryId) && entryId == b)
+			.ToList();
 
 		Assert.Multiple(() =>
 		{
@@ -297,12 +318,12 @@ internal sealed class ObsMultipleConfigurationsTests
 
 		var first = await harness.Coordinator.DeleteAsync(ObsIntegration.IntegrationId,
 			a,
-			confirmed: true,
+			true,
 			CancellationToken.None);
 		var afterFirst = await harness.Variables.GetByOwnerIntegration(ObsIntegration.IntegrationId);
 		var second = await harness.Coordinator.DeleteAsync(ObsIntegration.IntegrationId,
 			b,
-			confirmed: true,
+			true,
 			CancellationToken.None);
 		var afterSecond = await harness.Variables.GetByOwnerIntegration(ObsIntegration.IntegrationId);
 
@@ -338,7 +359,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			CancellationToken.None);
 		var stored = await harness.Store.Find(entryId);
 		var identityJson = stored!.Values[ObsConfigurationMetadata.VariableIdentityKey].GetString();
-		var parsed = ObsConfigurationMetadata.TryParseIdentity(identityJson, out var identity);
+		var parsed = ConfigurationIdentityJson.TryParse(identityJson, out var identity);
 		var variables = await harness.Variables.GetByOwnerIntegration(ObsIntegration.IntegrationId);
 
 		Assert.Multiple(() =>
@@ -348,8 +369,8 @@ internal sealed class ObsMultipleConfigurationsTests
 			Assert.That(stored.Values[ObsConfigKeys.ConfigurationName].GetString(), Is.EqualTo("Studio"));
 			Assert.That(identity.Key, Is.EqualTo("studio_1234"));
 			Assert.That(variables, Has.Count.EqualTo(24));
-			Assert.That(
-				variables.All(variable => variable.Name.StartsWith("obs_studio_1234_", StringComparison.Ordinal)),
+			Assert.That(variables.All(variable
+					=> variable.Name.StartsWith("obs_studio_1234_", StringComparison.Ordinal)),
 				Is.True);
 		});
 	}
@@ -425,28 +446,36 @@ internal sealed class ObsMultipleConfigurationsTests
 	}
 
 	private static ObsRuntime Runtime(Guid id, string title, string key, ObsConnection connection)
-		=> new(id,
+	{
+		return new ObsRuntime(id,
 			title,
-			new ObsConfigurationIdentity(title, key),
+			new ConfigurationIdentity(title, key),
 			new ObsConfigurationSettings(title.ToLowerInvariant(), 4455, null),
 			connection);
+	}
 
 	private static ActionExecutionContext Context(Guid configurationId)
-		=> new()
+	{
+		return new ActionExecutionContext
 		{
 			Parameters = new Dictionary<string, object>
 				{ [ObsTargetResolver.ConfigurationParameter] = configurationId.ToString("D") }
 		};
+	}
 
 	private static ObsStatus ConnectedStatus(string scene)
-		=> new() { CurrentScene = scene };
+	{
+		return new ObsStatus { CurrentScene = scene };
+	}
 
 	private sealed class RecordingEventPublisher : IEventPublisher
 	{
 		public List<string> Events { get; } = [];
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Events.Add(eventId);
+		{
+			Events.Add(eventId);
+		}
 	}
 
 	private sealed class MutationHarness
@@ -491,9 +520,11 @@ internal sealed class ObsMultipleConfigurationsTests
 		public IntegrationConfigMutationCoordinator Coordinator { get; }
 
 		public Task SynchronizeAsync()
-			=> Integration.SynchronizeEntriesAsync([.. Store.Entries.Select(Stored)],
+		{
+			return Integration.SynchronizeEntriesAsync([.. Store.Entries.Select(Stored)],
 				new IntegrationVariableApi(ObsIntegration.IntegrationId, Variables),
 				CancellationToken.None);
+		}
 
 		public Guid AddEntry(string title, string key)
 		{
@@ -504,10 +535,14 @@ internal sealed class ObsMultipleConfigurationsTests
 	}
 
 	private static StoredConfigEntry Stored(ConfigEntryRecord entry)
-		=> new() { Id = entry.Id, Title = entry.Title, CreatedAt = entry.CreatedAt, Values = entry.Values };
+	{
+		return new StoredConfigEntry
+			{ Id = entry.Id, Title = entry.Title, CreatedAt = entry.CreatedAt, Values = entry.Values };
+	}
 
 	private static ConfigEntryRecord ConfigurationRecord(Guid id, string title, string key)
-		=> new(id,
+	{
+		return new ConfigEntryRecord(id,
 			ObsIntegration.IntegrationId,
 			title,
 			DateTime.UtcNow,
@@ -516,21 +551,26 @@ internal sealed class ObsMultipleConfigurationsTests
 				[ObsConfigurationMetadata.SchemaKey]
 					= JsonSerializer.SerializeToElement(ObsConfigurationMetadata.SchemaVersion),
 				[ObsConfigurationMetadata.VariableIdentityKey] = JsonSerializer.SerializeToElement(
-					ObsConfigurationMetadata.SerializeIdentity(new ObsConfigurationIdentity(title, key)))
+					ConfigurationIdentityJson.Serialize(new ConfigurationIdentity(title, key)))
 			});
+	}
 
 	private sealed class MemoryConfigStore : IIntegrationConfigStore
 	{
 		public List<ConfigEntryRecord> Entries { get; } = [];
 
 		public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
 				.Where(entry => entry.IntegrationId == integrationId)
 				.Select(entry => new ConfigEntrySummary(entry.Id, entry.IntegrationId, entry.Title, entry.CreatedAt))
 				.ToList());
+		}
 
 		public Task<ConfigEntryRecord?> Find(Guid entryId)
-			=> Task.FromResult(Entries.FirstOrDefault(entry => entry.Id == entryId));
+		{
+			return Task.FromResult(Entries.FirstOrDefault(entry => entry.Id == entryId));
+		}
 
 		public Task<Guid> Create(
 			string integrationId,
@@ -558,7 +598,9 @@ internal sealed class ObsMultipleConfigurationsTests
 		}
 
 		public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-			=> Replace(entryId, Entries.First(entry => entry.Id == entryId).Title, values);
+		{
+			return Replace(entryId, Entries.First(entry => entry.Id == entryId).Title, values);
+		}
 
 		public Task<bool> Replace(
 			Guid entryId,
@@ -584,7 +626,10 @@ internal sealed class ObsMultipleConfigurationsTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -594,9 +639,13 @@ internal sealed class ObsMultipleConfigurationsTests
 	private sealed class RecordingLifecycle : IIntegrationLifecycle
 	{
 		public Task ReinitializeAsync(string integrationId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task ShutdownAsync(string integrationId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

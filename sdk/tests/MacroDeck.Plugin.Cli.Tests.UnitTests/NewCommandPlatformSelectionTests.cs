@@ -9,41 +9,57 @@ namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 [TestFixture]
 public class NewCommandPlatformSelectionTests
 {
-	private static FakePluginScaffoldGenerator NewGenerator() => new()
+	private static FakePluginScaffoldGenerator NewGenerator()
 	{
-		OnCreate = ScaffoldFixtures.WriteTemplateProject
-	};
+		return new FakePluginScaffoldGenerator
+		{
+			OnCreate = ScaffoldFixtures.WriteTemplateProject
+		};
+	}
 
-	private static string NewOutput() =>
-		Path.Combine(Directory.CreateTempSubdirectory("macrodeck-cli-tests-").FullName, "SpotifyController");
+	private static string NewOutput()
+	{
+		return Path.Combine(Directory.CreateTempSubdirectory("macrodeck-cli-tests-").FullName, "SpotifyController");
+	}
 
 	/// <summary>Every non-platform, non-output value supplied as a flag, so the wizard's line-based prompts
 	/// never fire and the checkbox prompt is the first thing standing between the flags and the output
 	/// directory prompt.</summary>
-	private static string[] ArgsUpToPlatforms(params string[] extra) =>
-	[
-		"new",
-		"--name", "Spotify Controller",
-		"--id", "com.example.spotify",
-		"--publisher", "Example Publisher",
-		"--description", "A test plugin.",
-		"--repository", "https://github.com/example/spotify",
-		"--homepage", "https://github.com/example/spotify",
-		"--license", "MIT",
-		.. extra
-	];
+	private static string[] ArgsUpToPlatforms(params string[] extra)
+	{
+		return
+		[
+			"new",
+			"--name", "Spotify Controller",
+			"--id", "com.example.spotify",
+			"--publisher", "Example Publisher",
+			"--description", "A test plugin.",
+			"--repository", "https://github.com/example/spotify",
+			"--homepage", "https://github.com/example/spotify",
+			"--license", "MIT",
+			.. extra
+		];
+	}
 
-	private static JsonDocument ReadManifest(string output) =>
-		JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "manifest.json")));
+	private static JsonDocument ReadManifest(string output)
+	{
+		return JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "manifest.json")));
+	}
 
-	private static JsonDocument ReadBuildConfig(string output) =>
-		JsonDocument.Parse(File.ReadAllText(Path.Combine(output, PluginScaffoldDefaults.BuildConfigFileName)));
+	private static JsonDocument ReadBuildConfig(string output)
+	{
+		return JsonDocument.Parse(File.ReadAllText(Path.Combine(output, PluginScaffoldDefaults.BuildConfigFileName)));
+	}
 
-	private static List<string> EntrypointKeys(JsonDocument manifest) =>
-		manifest.RootElement.GetProperty("entrypoints").EnumerateObject().Select(p => p.Name).ToList();
+	private static List<string> EntrypointKeys(JsonDocument manifest)
+	{
+		return manifest.RootElement.GetProperty("entrypoints").EnumerateObject().Select(p => p.Name).ToList();
+	}
 
-	private static List<string> TargetKeys(JsonDocument buildConfig) =>
-		buildConfig.RootElement.GetProperty("targets").EnumerateObject().Select(p => p.Name).ToList();
+	private static List<string> TargetKeys(JsonDocument buildConfig)
+	{
+		return buildConfig.RootElement.GetProperty("targets").EnumerateObject().Select(p => p.Name).ToList();
+	}
 
 	[Test]
 	public async Task Offers_only_the_three_supported_platforms()

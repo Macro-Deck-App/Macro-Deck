@@ -42,7 +42,9 @@ internal sealed class YouTubeChatPollerTests
 			"chat-1",
 			_connection.OnChatMessages,
 			() => _ended++,
-			() => { },
+			() =>
+			{
+			},
 			YouTubeTestSupport.Silent,
 			YouTubeTestSupport.ManualOptions(_clock));
 	}
@@ -105,11 +107,13 @@ internal sealed class YouTubeChatPollerTests
 	[Test]
 	public async Task The_first_page_fills_the_chat_history_without_firing_events()
 	{
-		_api.ChatPages.Enqueue(new YouTubeChatPage("p2", 1000, null,
-		[
-			YouTubeTestSupport.Text("old-1", "hello"),
-			SuperChat("old-2")
-		]));
+		_api.ChatPages.Enqueue(new YouTubeChatPage("p2",
+			1000,
+			null,
+			[
+				YouTubeTestSupport.Text("old-1", "hello"),
+				SuperChat("old-2")
+			]));
 		_api.ChatPages.Enqueue(new YouTubeChatPage("p3", 1000, null, [SuperChat("new-1")]));
 
 		await _poller.NextStepAsync(CancellationToken.None);
@@ -142,8 +146,16 @@ internal sealed class YouTubeChatPollerTests
 	[Test]
 	public async Task A_chat_ended_message_ends_the_chat()
 	{
-		_api.ChatPages.Enqueue(new YouTubeChatPage("p2", 1000, null,
-			[new YouTubeChatMessage("end", YouTubeChatMessageTypes.ChatEnded, null, null, YouTubeTestSupport.Author())]));
+		_api.ChatPages.Enqueue(new YouTubeChatPage("p2",
+			1000,
+			null,
+			[
+				new YouTubeChatMessage("end",
+					YouTubeChatMessageTypes.ChatEnded,
+					null,
+					null,
+					YouTubeTestSupport.Author())
+			]));
 
 		await _poller.NextStepAsync(CancellationToken.None);
 
@@ -200,9 +212,14 @@ internal sealed class YouTubeChatPollerTests
 	}
 
 	private static YouTubeChatMessage SuperChat(string id)
-		=> new(id, YouTubeChatMessageTypes.SuperChat, YouTubeTestSupport.Now, "Great stream!",
+	{
+		return new YouTubeChatMessage(id,
+			YouTubeChatMessageTypes.SuperChat,
+			YouTubeTestSupport.Now,
+			"Great stream!",
 			YouTubeTestSupport.Author("UCfan", "Fan"))
 		{
 			SuperChat = new YouTubeSuperChat(5_000_000, "USD", "$5.00", "Great stream!", 2)
 		};
+	}
 }

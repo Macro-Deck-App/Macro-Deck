@@ -18,7 +18,10 @@ public sealed class KeyRingMigrator
 
 	private readonly ILogger _logger;
 
-	public KeyRingMigrator(ILogger logger) => _logger = logger.ForContext<KeyRingMigrator>();
+	public KeyRingMigrator(ILogger logger)
+	{
+		_logger = logger.ForContext<KeyRingMigrator>();
+	}
 
 	/// <summary>
 	/// Every file is rewritten and verified in memory before any of them is replaced on disk, so a file
@@ -83,7 +86,7 @@ public sealed class KeyRingMigrator
 		{
 			var temp = path + TempSuffix;
 			document.Save(temp, SaveOptions.DisableFormatting);
-			File.Move(temp, path, overwrite: true);
+			File.Move(temp, path, true);
 		}
 
 		if (staged.Count > 0)
@@ -147,7 +150,10 @@ public sealed class KeyRingMigrator
 	}
 
 	[SupportedOSPlatform("windows")]
-	private static void UnwrapDpapiCore(XDocument document) => Unwrap(document, new DpapiXmlDecryptor());
+	private static void UnwrapDpapiCore(XDocument document)
+	{
+		Unwrap(document, new DpapiXmlDecryptor());
+	}
 
 	// Whitespace differs between a parsed file and a freshly built element tree, and says nothing about
 	// whether the secrets survived.

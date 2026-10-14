@@ -13,7 +13,6 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YtmDesktop;
 
@@ -73,15 +72,25 @@ public sealed class YtmDesktopIntegration
 
 	public bool AllowsMultipleConfigurations => false;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new YtmDesktopConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new YtmDesktopConfigFlow();
+	}
 
 	public IReadOnlyList<MusicPlayerInstance> GetInstances()
-		=> _entryId is { } entryId ? [new MusicPlayerInstance(entryId, "YouTube Music Desktop App")] : [];
+	{
+		return _entryId is { } entryId ? [new MusicPlayerInstance(entryId, "YouTube Music Desktop App")] : [];
+	}
 
 	public IMusicPlayer? GetPlayer(string instanceId)
-		=> string.Equals(instanceId, _entryId, StringComparison.Ordinal) ? _player : null;
+	{
+		return string.Equals(instanceId, _entryId, StringComparison.Ordinal) ? _player : null;
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -90,9 +99,15 @@ public sealed class YtmDesktopIntegration
 		IsInitialized = true;
 	}
 
-	public Task ShutdownAsync() => DisconnectAsync();
+	public Task ShutdownAsync()
+	{
+		return DisconnectAsync();
+	}
 
-	public void Dispose() => Disconnect();
+	public void Dispose()
+	{
+		Disconnect();
+	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -189,16 +204,20 @@ public sealed class YtmDesktopIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId == AuthorizationIssueId
+	{
+		return Task.FromResult(issueId == AuthorizationIssueId
 			? IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow)
 			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	private IMusicPlayer? ResolvePlayer(string? instanceId)
-		=> _entryId is null
+	{
+		return _entryId is null
 			? null
 			: string.IsNullOrEmpty(instanceId)
 				? _player
 				: GetPlayer(instanceId);
+	}
 
 	private string? ArtworkUrl(string? artworkId)
 	{
@@ -207,10 +226,10 @@ public sealed class YtmDesktopIntegration
 			return null;
 		}
 
-		return ArtworkBaseUrl +
-			Uri.EscapeDataString(artworkId) +
-			"?instanceId=" +
-			Uri.EscapeDataString($"{Id}::{entryId}");
+		return ArtworkBaseUrl
+			+ Uri.EscapeDataString(artworkId)
+			+ "?instanceId="
+			+ Uri.EscapeDataString($"{Id}::{entryId}");
 	}
 
 	private static int? Progress(MusicPlayerState state)
@@ -224,7 +243,8 @@ public sealed class YtmDesktopIntegration
 	}
 
 	private static string? MediaType(YtmVideoType? videoType)
-		=> videoType switch
+	{
+		return videoType switch
 		{
 			YtmVideoType.Audio => "audio",
 			YtmVideoType.Video => "video",
@@ -232,6 +252,7 @@ public sealed class YtmDesktopIntegration
 			YtmVideoType.Podcast => "podcast",
 			_ => null
 		};
+	}
 
 	private async Task DisconnectAsync()
 	{

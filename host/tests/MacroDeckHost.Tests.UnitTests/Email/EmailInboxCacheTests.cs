@@ -23,7 +23,8 @@ public class EmailInboxCacheTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(inboxes.Select(state => state.Ref),
-				Is.EqualTo(new[] { "com.example.mail::home", "app.imap::work" }), "ordered by name");
+				Is.EqualTo(new[] { "com.example.mail::home", "app.imap::work" }),
+				"ordered by name");
 			Assert.That(work.Slug, Is.EqualTo("work"));
 			Assert.That(work.Status, Is.EqualTo(EmailInboxStatus.Connected));
 			Assert.That((work.UnreadCount, work.TotalCount), Is.EqualTo((1, 40)));
@@ -39,7 +40,7 @@ public class EmailInboxCacheTests
 	public async Task Unread_mail_older_than_the_newest_messages_is_read_with_an_unread_only_query()
 	{
 		var messages = Enumerable.Range(1, 30)
-			.Select(minute => Message("m" + minute, minute, isRead: minute > 1))
+			.Select(minute => Message("m" + minute, minute, minute > 1))
 			.ToList();
 		var imap = new FakeEmailIntegration("app.imap").WithInbox("work");
 		imap.Set("work", Snapshot(EmailInboxStatus.Connected, 1, messages));
@@ -182,10 +183,11 @@ public class EmailInboxCacheTests
 	public async Task Existing_mail_behind_a_connecting_first_read_is_not_published_as_received()
 	{
 		var plugin = new FakeEmailIntegration("com.example.mail").WithInbox("work");
-		plugin.Set("work", new EmailInboxSnapshot
-		{
-			Status = EmailInboxStatus.Connecting, UnreadCount = 0, TotalCount = 0, SyncedAt = default
-		});
+		plugin.Set("work",
+			new EmailInboxSnapshot
+			{
+				Status = EmailInboxStatus.Connecting, UnreadCount = 0, TotalCount = 0, SyncedAt = default
+			});
 		using var world = new EmailWorld(plugin);
 		await world.SyncAllAsync();
 

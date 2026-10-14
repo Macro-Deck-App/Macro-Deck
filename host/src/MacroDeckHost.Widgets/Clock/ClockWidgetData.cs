@@ -54,7 +54,7 @@ public sealed record ClockWidgetData
 			{
 				"12h" => ClockHourCycle.TwelveHour,
 				"24h" => ClockHourCycle.TwentyFourHour,
-				_ => ClockHourCycle.Auto,
+				_ => ClockHourCycle.Auto
 			},
 			LeadingZero = ReadBool(data, "leadingZero") ?? true,
 			DateFormat = ReadString(data, "dateFormat") switch
@@ -63,30 +63,36 @@ public sealed record ClockWidgetData
 				"month-first" => ClockDateFormat.MonthFirst,
 				"iso" => ClockDateFormat.Iso,
 				"long" => ClockDateFormat.Written,
-				_ => ClockDateFormat.Default,
+				_ => ClockDateFormat.Default
 			},
 			DatePosition = ReadString(data, "datePosition") switch
 			{
 				"above" => ClockDatePosition.Above,
 				"left" => ClockDatePosition.Left,
 				"right" => ClockDatePosition.Right,
-				_ => ClockDatePosition.Below,
-			},
+				_ => ClockDatePosition.Below
+			}
 		};
 	}
 
 	private static string? Trimmed(string? value)
-		=> string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	}
 
 	private static string? ReadString(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool? ReadBool(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
 			? value.GetBoolean()
 			: null;
+	}
 }
 
 /// <summary>Which face the time is drawn on. <see cref="Auto" /> leaves the choice to the reader's
@@ -95,7 +101,7 @@ public enum ClockHourCycle
 {
 	Auto,
 	TwelveHour,
-	TwentyFourHour,
+	TwentyFourHour
 }
 
 /// <summary>How the date line is written. <see cref="Default" /> is the reader's own short date.</summary>
@@ -105,7 +111,7 @@ public enum ClockDateFormat
 	DayFirst,
 	MonthFirst,
 	Iso,
-	Written,
+	Written
 }
 
 /// <summary>Where the date line sits relative to the time.</summary>
@@ -114,5 +120,5 @@ public enum ClockDatePosition
 	Below,
 	Above,
 	Left,
-	Right,
+	Right
 }

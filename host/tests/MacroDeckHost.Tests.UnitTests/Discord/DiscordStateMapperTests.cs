@@ -131,7 +131,7 @@ internal sealed class DiscordStateMapperTests
 				 	]
 				 }
 				 """),
-			guildName: "My Server");
+			"My Server");
 
 		Assert.Multiple(() =>
 		{

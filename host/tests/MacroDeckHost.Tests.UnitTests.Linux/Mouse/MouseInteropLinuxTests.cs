@@ -9,7 +9,10 @@ public class MouseInteropLinuxTests
 	private static bool HasDisplay
 		=> !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DISPLAY"));
 
-	private static IMouseInputProvider Provider() => MouseInputProviderFactory.Create();
+	private static IMouseInputProvider Provider()
+	{
+		return MouseInputProviderFactory.Create();
+	}
 
 	[Test]
 	public void The_factory_never_throws_even_without_a_display()
@@ -56,8 +59,8 @@ public class MouseInteropLinuxTests
 
 		var wayland = string.Equals(Environment.GetEnvironmentVariable("XDG_SESSION_TYPE"),
 				"wayland",
-				StringComparison.OrdinalIgnoreCase) ||
-			!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"));
+				StringComparison.OrdinalIgnoreCase)
+			|| !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"));
 
 		TestContext.Out.WriteLine($"Wayland session: {wayland}, degraded: {provider.IsDegraded}");
 

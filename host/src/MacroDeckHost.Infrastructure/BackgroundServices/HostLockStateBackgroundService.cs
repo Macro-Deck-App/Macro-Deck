@@ -62,11 +62,13 @@ public sealed class HostLockStateBackgroundService : HostReadyBackgroundService
 	// IAppPreferenceService is scoped and this is a singleton hosted service, so the preference is
 	// read through a fresh scope per tick rather than captured in the constructor.
 	private static Func<Task<LockScreenSettings>> ReadThroughScope(IServiceScopeFactory scopeFactory)
-		=> async () =>
+	{
+		return async () =>
 		{
 			await using var scope = scopeFactory.CreateAsyncScope();
 			return await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetLockScreen();
 		};
+	}
 
 	protected override async Task ExecuteWhenReady(CancellationToken stoppingToken)
 	{
@@ -106,7 +108,10 @@ public sealed class HostLockStateBackgroundService : HostReadyBackgroundService
 		}
 	}
 
-	internal Task Tick(CancellationToken cancellationToken) => Apply(_reader.IsLocked, cancellationToken);
+	internal Task Tick(CancellationToken cancellationToken)
+	{
+		return Apply(_reader.IsLocked, cancellationToken);
+	}
 
 	// The watcher loop returns immediately when unsupported: enumerating a watcher that can never yield
 	// would still be correct, but skipping WatchAsync entirely avoids depending on that for platforms

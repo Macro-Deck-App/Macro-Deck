@@ -1,5 +1,6 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
-using MacroDeck.Ui.Dsl;
 
 internal static partial class Scenes
 {
@@ -10,7 +11,7 @@ internal static partial class Scenes
 			{
 				Key = "tile",
 				Padding = TilePadding,
-				Children = [new UiIcon { Key = "state", Fill = true, Icon = UiIcons.Play, Size = 0.4 }],
+				Children = [new UiIcon { Key = "state", Fill = true, Icon = UiIcons.Play, Size = 0.4 }]
 			});
 	}
 }

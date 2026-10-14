@@ -62,34 +62,44 @@ public sealed class StreamPlatform
 		=> $$"""{"account":"","style":"{{StreamStatsWidgetType.DefaultStyle}}","metric":"{{Stats.DefaultMetric}}","tiles":{{Json(Stats.DefaultTiles)}},"details":{{Json(Stats.DetailIds)}},"showThumbnail":true}""";
 
 	public string StatsDataSchema
-		=> """{"type":"object","properties":{"account":{"type":"string"},"style":{"type":"string","enum":""" +
-			Json(StreamStatsWidgetType.Styles) +
-			"""},"metric":{"type":"string","enum":""" + Json(Stats.MetricIds) +
-			"""},"tiles":{"type":"array","items":{"type":"string","enum":""" + Json(Stats.MetricIds) +
-			"""}},"details":{"type":"array","items":{"type":"string","enum":""" + Json(Stats.DetailIds) +
-			"""}},"showThumbnail":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}""";
+		=> """{"type":"object","properties":{"account":{"type":"string"},"style":{"type":"string","enum":"""
+			+ Json(StreamStatsWidgetType.Styles)
+			+ """},"metric":{"type":"string","enum":"""
+			+ Json(Stats.MetricIds)
+			+ """},"tiles":{"type":"array","items":{"type":"string","enum":"""
+			+ Json(Stats.MetricIds)
+			+ """}},"details":{"type":"array","items":{"type":"string","enum":"""
+			+ Json(Stats.DetailIds)
+			+ """}},"showThumbnail":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}""";
 
 	public WidgetTypeDescriptor ChatWidgetDescriptor()
-		=> new(StreamChatWidgetType.LocalId,
+	{
+		return new WidgetTypeDescriptor(StreamChatWidgetType.LocalId,
 			Chat.Name(),
 			Chat.Description(),
-			DefaultData: ChatDefaultData,
-			DataSchema: ChatDataSchema,
-			HasConfiguration: true)
+			ChatDefaultData,
+			ChatDataSchema,
+			true)
 		{
-			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
+			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor]
 		};
+	}
 
 	public WidgetTypeDescriptor StatsWidgetDescriptor()
-		=> new(StreamStatsWidgetType.LocalId,
+	{
+		return new WidgetTypeDescriptor(StreamStatsWidgetType.LocalId,
 			Stats.Name(),
 			Stats.Description(),
-			DefaultData: StatsDefaultData,
-			DataSchema: StatsDataSchema,
-			HasConfiguration: true)
+			StatsDefaultData,
+			StatsDataSchema,
+			true)
 		{
-			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
+			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor]
 		};
+	}
 
-	private static string Json(IReadOnlyList<string> values) => JsonSerializer.Serialize(values);
+	private static string Json(IReadOnlyList<string> values)
+	{
+		return JsonSerializer.Serialize(values);
+	}
 }

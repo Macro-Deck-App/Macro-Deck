@@ -22,7 +22,7 @@ public sealed class RenameConfigEntryRequestMessageHandler
 	{
 		if (!Guid.TryParse(request.EntryId, out var entryId))
 		{
-			return Error("INVALID_ID", AppStrings.Errors.Config.InvalidEntryId(id: request.EntryId));
+			return Error("INVALID_ID", AppStrings.Errors.Config.InvalidEntryId(request.EntryId));
 		}
 
 		if (string.IsNullOrWhiteSpace(request.Title))
@@ -39,5 +39,7 @@ public sealed class RenameConfigEntryRequestMessageHandler
 	}
 
 	private static RenameConfigEntryResponse Error(string code, MacroDeck.Localization.LocalizedText message)
-		=> new() { Error = new TransportError { Code = code, Message = message } };
+	{
+		return new RenameConfigEntryResponse { Error = new TransportError { Code = code, Message = message } };
+	}
 }

@@ -18,7 +18,7 @@ public class EmailInboxWidgetConfigTests
 	private static readonly string[] _listOnly =
 	[
 		EmailWidgetTypes.UnreadOnlyKey, EmailWidgetTypes.MaxMessagesKey, EmailWidgetTypes.ShowSenderKey,
-		EmailWidgetTypes.ShowSubjectKey, EmailWidgetTypes.ShowPreviewKey, EmailWidgetTypes.ShowTimestampKey,
+		EmailWidgetTypes.ShowSubjectKey, EmailWidgetTypes.ShowPreviewKey, EmailWidgetTypes.ShowTimestampKey
 	];
 
 	private EmailInboxWidgetHarness _harness = null!;
@@ -31,7 +31,10 @@ public class EmailInboxWidgetConfigTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task The_configuration_starts_from_the_registered_defaults()
@@ -45,12 +48,16 @@ public class EmailInboxWidgetConfigTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.ById(EmailWidgetTypes.ModeKey).Text(UiConfigProperties.Value), Is.EqualTo(EmailWidgetTypes.ModeCount));
+			Assert.That(host.ById(EmailWidgetTypes.ModeKey).Text(UiConfigProperties.Value),
+				Is.EqualTo(EmailWidgetTypes.ModeCount));
 			Assert.That(host.ById(EmailWidgetTypes.ModeKey).Property(UiConfigProperties.Options)!.Value
-					.EnumerateArray().Select(option => option.GetProperty("value").GetString()),
+					.EnumerateArray()
+					.Select(option => option.GetProperty("value").GetString()),
 				Is.EqualTo(new[] { EmailWidgetTypes.ModeCount, EmailWidgetTypes.ModeList }));
-			Assert.That(host.ById(EmailWidgetTypes.InboxesKey).Property(UiConfigProperties.Value)!.Value.GetArrayLength(),
-				Is.Zero, "no selection means every inbox");
+			Assert.That(
+				host.ById(EmailWidgetTypes.InboxesKey).Property(UiConfigProperties.Value)!.Value.GetArrayLength(),
+				Is.Zero,
+				"no selection means every inbox");
 			Assert.That(host.ById(EmailWidgetTypes.MaxMessagesKey).Number(UiConfigProperties.Value), Is.EqualTo(5));
 			Assert.That(host.ById(EmailWidgetTypes.MaxMessagesKey).Number(UiConfigProperties.Min), Is.EqualTo(1));
 			Assert.That(host.ById(EmailWidgetTypes.MaxMessagesKey).Number(UiConfigProperties.Max), Is.EqualTo(10));
@@ -92,9 +99,10 @@ public class EmailInboxWidgetConfigTests
 			Assert.That(options.Select(option => option.GetProperty("value").GetString()),
 				Is.EquivalentTo(new[] { EmailInboxWidgetHarness.WorkRef, EmailInboxWidgetHarness.HomeRef }));
 			Assert.That(Resolve(work.GetProperty("label").Deserialize<LocalizedText>()),
-				Is.EqualTo(Resolve(MacroDeckHost.Localization.AppStrings.Events.Email.InboxOption(inbox: "Work",
-					provider: "IMAP"))));
-			Assert.That(inboxes.Property(UiConfigProperties.Value)!.Value.EnumerateArray().Select(item => item.GetString()),
+				Is.EqualTo(Resolve(Localization.AppStrings.Events.Email.InboxOption("Work",
+					"IMAP"))));
+			Assert.That(inboxes.Property(UiConfigProperties.Value)!.Value.EnumerateArray()
+					.Select(item => item.GetString()),
 				Is.EqualTo(new[] { EmailInboxWidgetHarness.HomeRef }));
 		});
 	}
@@ -121,9 +129,11 @@ public class EmailInboxWidgetConfigTests
 			Assert.That(schemas.TryGet(EmailWidgetTypes.QualifiedId, out var schema), Is.True);
 			Assert.That(WidgetDataSchema.Validate(schema!, edited), Is.Empty);
 			Assert.That(edited.GetProperty(EmailWidgetTypes.MaxMessagesKey).GetDouble(), Is.EqualTo(8));
-			Assert.That(WidgetDataSchema.Validate(schema!, Data(new { mode = "grid" })), Is.Not.Empty,
+			Assert.That(WidgetDataSchema.Validate(schema!, Data(new { mode = "grid" })),
+				Is.Not.Empty,
 				"an unknown mode is refused");
-			Assert.That(WidgetDataSchema.Validate(schema!, Data(new { maxMessages = 11 })), Is.Not.Empty,
+			Assert.That(WidgetDataSchema.Validate(schema!, Data(new { maxMessages = 11 })),
+				Is.Not.Empty,
 				"the list shows at most ten emails");
 		});
 	}
@@ -135,33 +145,46 @@ public class EmailInboxWidgetConfigTests
 		return host;
 	}
 
-	private static bool? Flag(UiTestHost host, string key) => host.ById(key).Flag(UiConfigProperties.Value);
+	private static bool? Flag(UiTestHost host, string key)
+	{
+		return host.ById(key).Flag(UiConfigProperties.Value);
+	}
 
 	private static Dictionary<string, bool> Visibility(UiTestHost host)
-		=> _listOnly.ToDictionary(key => key, key =>
-		{
-			if (host.ById(key).Property(UiConfigProperties.VisibleWhen) is not { ValueKind: JsonValueKind.Object } rule)
+	{
+		return _listOnly.ToDictionary(key => key,
+			key =>
 			{
-				return true;
-			}
+				if (host.ById(key).Property(UiConfigProperties.VisibleWhen) is not
+					{ ValueKind: JsonValueKind.Object } rule)
+				{
+					return true;
+				}
 
-			var sibling = host.ById(rule.GetProperty("parameterName").GetString()!).Text(UiConfigProperties.Value);
-			return rule.GetProperty("values").EnumerateArray().Any(value => value.GetString() == sibling);
-		});
+				var sibling = host.ById(rule.GetProperty("parameterName").GetString()!).Text(UiConfigProperties.Value);
+				return rule.GetProperty("values").EnumerateArray().Any(value => value.GetString() == sibling);
+			});
+	}
 
 	private static JsonElement Compose(UiTestHost host, string flows)
-		=> JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+	{
+		return JsonSerializer.SerializeToElement(new Dictionary<string, object?>
 		{
 			[EmailWidgetTypes.InboxesKey] = host.ById(EmailWidgetTypes.InboxesKey).Property(UiConfigProperties.Value),
 			[EmailWidgetTypes.ModeKey] = host.ById(EmailWidgetTypes.ModeKey).Text(UiConfigProperties.Value),
 			[EmailWidgetTypes.UnreadOnlyKey] = Flag(host, EmailWidgetTypes.UnreadOnlyKey),
-			[EmailWidgetTypes.MaxMessagesKey] = host.ById(EmailWidgetTypes.MaxMessagesKey).Number(UiConfigProperties.Value),
+			[EmailWidgetTypes.MaxMessagesKey]
+				= host.ById(EmailWidgetTypes.MaxMessagesKey).Number(UiConfigProperties.Value),
 			[EmailWidgetTypes.ShowSenderKey] = Flag(host, EmailWidgetTypes.ShowSenderKey),
 			[EmailWidgetTypes.ShowSubjectKey] = Flag(host, EmailWidgetTypes.ShowSubjectKey),
 			[EmailWidgetTypes.ShowPreviewKey] = Flag(host, EmailWidgetTypes.ShowPreviewKey),
 			[EmailWidgetTypes.ShowTimestampKey] = Flag(host, EmailWidgetTypes.ShowTimestampKey),
-			["flows"] = JsonDocument.Parse(flows).RootElement.Clone(),
+			["flows"] = JsonDocument.Parse(flows).RootElement.Clone()
 		});
+	}
 
-	private static JsonElement Data(object value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement Data(object value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 }

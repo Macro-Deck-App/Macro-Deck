@@ -1,5 +1,3 @@
-using MacroDeckHost.Integrations.Http;
-
 namespace MacroDeckHost.Integrations.YtmDesktop.Protocol;
 
 internal static class YtmDesktopHttpClients

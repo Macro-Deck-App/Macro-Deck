@@ -13,7 +13,15 @@ internal sealed class FakeIntegration : IIntegration
 	public string Version => "1.0.0";
 	public IReadOnlyList<IActionDefinition> Actions { get; init; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
+
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
+
 	public bool IsInitialized => true;
 }

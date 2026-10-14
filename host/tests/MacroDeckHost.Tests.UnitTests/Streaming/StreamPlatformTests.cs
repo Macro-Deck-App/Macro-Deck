@@ -29,13 +29,17 @@ internal sealed class StreamPlatformTests
 			Assert.That(twitch.ChatWidgetTypeId, Is.EqualTo("app.macro-deck.twitch::chat"));
 			Assert.That(twitch.StatsWidgetTypeId, Is.EqualTo("app.macro-deck.twitch::stats"));
 			Assert.That(twitch.DialogViewId, Is.EqualTo("twitch-chat"));
-			Assert.That(twitch.ChatWidgetDescriptor().DefaultData, Is.EqualTo("""{"account":"","allowModeration":true}"""));
-			Assert.That(twitch.ChatWidgetDescriptor().DataSchema, Is.EqualTo(
-				"""{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"},"textSize":{"type":["number","null"],"minimum":25,"maximum":300,"description":"Chat text size in percent, 100 when unset"},"messageColor":{"type":["string","null"],"description":"#rrggbb for the chat message text, the theme text colour when unset"},"nameColor":{"type":["string","null"],"description":"#rrggbb for every chatter name, each chatter's own colour when unset"}}}"""));
-			Assert.That(twitch.StatsWidgetDescriptor().DefaultData, Is.EqualTo(
-				"""{"account":"","style":"overview","metric":"viewers","tiles":["viewers","chatters","followers"],"details":["title","category","uptime"],"showThumbnail":true}"""));
-			Assert.That(twitch.StatsWidgetDescriptor().DataSchema, Is.EqualTo(
-				"""{"type":"object","properties":{"account":{"type":"string"},"style":{"type":"string","enum":["overview","statsRow","liveRow","valueGraph","value"]},"metric":{"type":"string","enum":["viewers","chatters","followers","subscribers"]},"tiles":{"type":"array","items":{"type":"string","enum":["viewers","chatters","followers","subscribers"]}},"details":{"type":"array","items":{"type":"string","enum":["title","category","uptime"]}},"showThumbnail":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}"""));
+			Assert.That(twitch.ChatWidgetDescriptor().DefaultData,
+				Is.EqualTo("""{"account":"","allowModeration":true}"""));
+			Assert.That(twitch.ChatWidgetDescriptor().DataSchema,
+				Is.EqualTo(
+					"""{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"},"textSize":{"type":["number","null"],"minimum":25,"maximum":300,"description":"Chat text size in percent, 100 when unset"},"messageColor":{"type":["string","null"],"description":"#rrggbb for the chat message text, the theme text colour when unset"},"nameColor":{"type":["string","null"],"description":"#rrggbb for every chatter name, each chatter's own colour when unset"}}}"""));
+			Assert.That(twitch.StatsWidgetDescriptor().DefaultData,
+				Is.EqualTo(
+					"""{"account":"","style":"overview","metric":"viewers","tiles":["viewers","chatters","followers"],"details":["title","category","uptime"],"showThumbnail":true}"""));
+			Assert.That(twitch.StatsWidgetDescriptor().DataSchema,
+				Is.EqualTo(
+					"""{"type":"object","properties":{"account":{"type":"string"},"style":{"type":"string","enum":["overview","statsRow","liveRow","valueGraph","value"]},"metric":{"type":"string","enum":["viewers","chatters","followers","subscribers"]},"tiles":{"type":"array","items":{"type":"string","enum":["viewers","chatters","followers","subscribers"]}},"details":{"type":"array","items":{"type":"string","enum":["title","category","uptime"]}},"showThumbnail":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}"""));
 		});
 	}
 
@@ -119,7 +123,8 @@ internal sealed class StreamPlatformTests
 		twitchStats.SetAccounts([new StreamStatsAccount("111", "Twitch streamer", "twitch_streamer_")]);
 		otherChat.SetAccounts([new ChatAccount("222", "Other streamer")]);
 		otherStats.SetAccounts([new StreamStatsAccount("222", "Other streamer", "other_streamer_")]);
-		var provider = StreamPlatformTestSupport.Provider(StreamPlatformTestSupport.TestPlatform, otherChat,
+		var provider = StreamPlatformTestSupport.Provider(StreamPlatformTestSupport.TestPlatform,
+			otherChat,
 			stats: otherStats);
 
 		await using var chat = await OpenAsync(provider,
@@ -140,9 +145,11 @@ internal sealed class StreamPlatformTests
 		using var chat = new StreamChatHub(TimeProvider.System, Logger.None);
 		var provider = StreamPlatformTestSupport.Provider(StreamPlatformTestSupport.TestPlatform, chat);
 
-		var chatWidget = await provider.CreateSessionAsync(Request(WidgetSurface(TwitchStreamPlatform.Platform.ChatWidgetTypeId)),
+		var chatWidget = await provider.CreateSessionAsync(
+			Request(WidgetSurface(TwitchStreamPlatform.Platform.ChatWidgetTypeId)),
 			CancellationToken.None);
-		var statsConfig = await provider.CreateSessionAsync(Request(ConfigSurface(TwitchStreamPlatform.Platform.StatsWidgetTypeId)),
+		var statsConfig = await provider.CreateSessionAsync(
+			Request(ConfigSurface(TwitchStreamPlatform.Platform.StatsWidgetTypeId)),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -159,17 +166,20 @@ internal sealed class StreamPlatformTests
 		hub.SetAccounts([new ChatAccount("111", "First"), new ChatAccount("222", "Second")]);
 		hub.Post(new ChatConnectionChanged("111", true));
 		hub.Post(new ChatConnectionChanged("222", true));
-		hub.Post(new ChatMessageReceived("111", TwitchChatHubTests.Message("first") with
-		{
-			Fragments = [new ChatFragment(ChatFragmentKind.Text, "from the first channel")],
-		}));
-		hub.Post(new ChatMessageReceived("222", TwitchChatHubTests.Message("second") with
-		{
-			Fragments = [new ChatFragment(ChatFragmentKind.Text, "from the second channel")],
-		}));
+		hub.Post(new ChatMessageReceived("111",
+			TwitchChatHubTests.Message("first") with
+			{
+				Fragments = [new ChatFragment(ChatFragmentKind.Text, "from the first channel")]
+			}));
+		hub.Post(new ChatMessageReceived("222",
+			TwitchChatHubTests.Message("second") with
+			{
+				Fragments = [new ChatFragment(ChatFragmentKind.Text, "from the second channel")]
+			}));
 		hub.Tick();
 
-		await using var session = await OpenAsync(StreamPlatformTestSupport.Provider(TwitchStreamPlatform.Platform, hub),
+		await using var session = await OpenAsync(
+			StreamPlatformTestSupport.Provider(TwitchStreamPlatform.Platform, hub),
 			WidgetSurface("app.macro-deck.twitch::chat"));
 		var texts = Texts(session.BuildTree().Root);
 
@@ -181,12 +191,18 @@ internal sealed class StreamPlatformTests
 	}
 
 	private static async Task<IUiSession> OpenAsync(StreamWidgetsUiProvider provider, UiSurface surface)
-		=> (await provider.CreateSessionAsync(Request(surface), CancellationToken.None))!;
+	{
+		return (await provider.CreateSessionAsync(Request(surface), CancellationToken.None))!;
+	}
 
-	private static UiSessionRequest Request(UiSurface surface) => new() { Surface = surface, UiModelVersion = 1 };
+	private static UiSessionRequest Request(UiSurface surface)
+	{
+		return new UiSessionRequest { Surface = surface, UiModelVersion = 1 };
+	}
 
 	private static UiSurface ConfigSurface(string widgetType)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
@@ -195,31 +211,36 @@ internal sealed class StreamPlatformTests
 				[UiConfigSurfaceAttributes.EntryPoint] =
 					JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "" }),
-			},
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "" })
+			}
 		};
+	}
 
 	private static UiSurface WidgetSurface(string widgetType)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Preview,
 			SessionMode = UiSessionModes.Shared,
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" }),
-			},
+				[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" })
+			}
 		};
+	}
 
 	private static string[] AccountOptions(IUiSession session)
 	{
-		var account = Flatten(session.BuildTree().Root).First(node =>
-			node.Id == StreamChatWidgetType.AccountKey && node.Properties.ContainsKey(UiConfigProperties.Options));
+		var account = Flatten(session.BuildTree().Root)
+			.First(node =>
+				node.Id == StreamChatWidgetType.AccountKey && node.Properties.ContainsKey(UiConfigProperties.Options));
 
 		return
 		[
-			.. account.Properties[UiConfigProperties.Options].EnumerateArray()
-				.Select(option => option.GetProperty("value").GetString()!),
+			.. account.Properties[UiConfigProperties.Options]
+				.EnumerateArray()
+				.Select(option => option.GetProperty("value").GetString()!)
 		];
 	}
 
@@ -234,6 +255,12 @@ internal sealed class StreamPlatformTests
 	}
 
 	private static List<string> Texts(UiNode root)
-		=> [.. Flatten(root).Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
-			.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())];
+	{
+		return
+		[
+			.. Flatten(root)
+				.Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
+				.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())
+		];
+	}
 }

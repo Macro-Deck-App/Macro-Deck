@@ -54,13 +54,16 @@ public class ProfileServiceGridTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Update_ShrinkingDefaultRowsBelowAnInheritingFoldersWidgets_FailsAndNamesTheFolder_AppliesNothing()
 	{
 		var folder = await CreateFolder("Games"); // fully inherited grid (3 x 5)
-		_cache.AddWidget(folder.Id, Widget(x: 0, y: 2)); // needs 3 rows - fits exactly at the default
+		_cache.AddWidget(folder.Id, Widget(0, 2)); // needs 3 rows - fits exactly at the default
 
 		var result = await _profileService.Update(_profileId, "Renamed", null, 2, null, null, null, null);
 
@@ -81,7 +84,7 @@ public class ProfileServiceGridTests
 		await _folderService.Update(home.Id, null, null, null, 3, 5, null, null, null, null);
 		var games = await CreateFolder("Games");
 		await _folderService.Update(games.Id, null, null, null, 5, null, null, null, null, null);
-		_cache.AddWidget(games.Id, Widget(x: 0, y: 2));
+		_cache.AddWidget(games.Id, Widget(0, 2));
 
 		var result = await _profileService.Update(_profileId, null, null, 2, null, null, null, null);
 
@@ -193,7 +196,15 @@ public class ProfileServiceGridTests
 	{
 		await _profileService.Update(_profileId, null, null, null, null, null, null, null, defaultWidgetShadows: false);
 
-		var result = await _profileService.Update(_profileId, null, null, null, null, null, null, null, defaultWidgetShadows: null);
+		var result = await _profileService.Update(_profileId,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			defaultWidgetShadows: null);
 
 		Assert.That(result.Success, Is.True);
 		Assert.That(result.Data!.DefaultWidgetShadows, Is.False);
@@ -203,7 +214,15 @@ public class ProfileServiceGridTests
 	[TestCase(true)]
 	public async Task Update_StoresAnExplicitDefaultWidgetShadowsValue(bool shadows)
 	{
-		var result = await _profileService.Update(_profileId, null, null, null, null, null, null, null, defaultWidgetShadows: shadows);
+		var result = await _profileService.Update(_profileId,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			defaultWidgetShadows: shadows);
 
 		Assert.That(result.Success, Is.True);
 		Assert.That(result.Data!.DefaultWidgetShadows, Is.EqualTo(shadows));
@@ -245,9 +264,9 @@ public class ProfileServiceGridTests
 		var main = _cache.GetFoldersByProfileId(_profileId).Single(); // seeded start folder, fully inherited
 		var games = await CreateFolder("Games", main.Id); // child of Main - inside the pin's subtree
 		var away = await CreateFolder("Away"); // a separate root - outside the pin's subtree
-		_cache.AddWidget(away.Id, Widget(x: 0, y: 0)); // needs 1 row - unrelated to the pin
+		_cache.AddWidget(away.Id, Widget(0, 0)); // needs 1 row - unrelated to the pin
 
-		var z = Widget(x: 0, y: 2); // needs 3 rows - exactly today's default
+		var z = Widget(0, 2); // needs 3 rows - exactly today's default
 		_cache.AddWidget(main.Id, z);
 		var pinned = await _widgetService.SetPinned(main.Id, z.Id, true, PinScope.Subtree);
 		Assert.That(pinned.Success, Is.True);
@@ -272,15 +291,20 @@ public class ProfileServiceGridTests
 	}
 
 	private async Task<FolderEntity> CreateFolder(string name, Guid? parentId = null)
-		=> (await _folderService.Create(_profileId, name, parentId)).Data!;
-
-	private static WidgetEntity Widget(int x, int y) => new()
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return (await _folderService.Create(_profileId, name, parentId)).Data!;
+	}
+
+	private static WidgetEntity Widget(int x, int y)
+	{
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 }

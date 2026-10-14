@@ -82,5 +82,8 @@ public sealed class VariableUpdateChannel : IDisposable
 		return drained;
 	}
 
-	public void Dispose() => _signal.Dispose();
+	public void Dispose()
+	{
+		_signal.Dispose();
+	}
 }

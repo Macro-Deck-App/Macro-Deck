@@ -36,8 +36,8 @@ public class MacroDeckDataRootResolverTests
 	{
 		var overrideDir = Path.Combine(Path.GetTempPath(), "custom-data-root");
 		var environment = CreateEnvironment(DataRootPlatform.Linux,
-			packagedMarkerExists: true,
-			environmentVariables: new Dictionary<string, string>
+			true,
+			new Dictionary<string, string>
 			{
 				[MacroDeckDataRootResolver.DataDirEnvironmentVariable] = overrideDir
 			});
@@ -49,8 +49,8 @@ public class MacroDeckDataRootResolverTests
 	public void Resolve_uses_base_directory_when_portable_flag_is_set()
 	{
 		var environment = CreateEnvironment(DataRootPlatform.Windows,
-			packagedMarkerExists: true,
-			environmentVariables: new Dictionary<string, string>
+			true,
+			new Dictionary<string, string>
 			{
 				[MacroDeckDataRootResolver.PortableEnvironmentVariable] = "1"
 			});
@@ -71,8 +71,8 @@ public class MacroDeckDataRootResolverTests
 	{
 		var appData = Path.Combine(Path.GetTempPath(), "roaming");
 		var environment = CreateEnvironment(DataRootPlatform.Windows,
-			packagedMarkerExists: true,
-			environmentVariables: new Dictionary<string, string> { ["APPDATA"] = appData });
+			true,
+			new Dictionary<string, string> { ["APPDATA"] = appData });
 
 		Assert.That(MacroDeckDataRootResolver.Resolve(environment),
 			Is.EqualTo(ChannelDefault(Path.Combine(appData, "MacroDeck"))));
@@ -81,7 +81,7 @@ public class MacroDeckDataRootResolverTests
 	[Test]
 	public void Resolve_falls_back_to_home_appdata_on_windows_without_appdata_variable()
 	{
-		var environment = CreateEnvironment(DataRootPlatform.Windows, packagedMarkerExists: true);
+		var environment = CreateEnvironment(DataRootPlatform.Windows, true);
 
 		Assert.That(MacroDeckDataRootResolver.Resolve(environment),
 			Is.EqualTo(ChannelDefault(Path.Combine(_homeDirectory, "AppData", "Roaming", "MacroDeck"))));
@@ -90,7 +90,7 @@ public class MacroDeckDataRootResolverTests
 	[Test]
 	public void Resolve_uses_application_support_on_macos_when_packaged()
 	{
-		var environment = CreateEnvironment(DataRootPlatform.MacOs, packagedMarkerExists: true);
+		var environment = CreateEnvironment(DataRootPlatform.MacOs, true);
 
 		Assert.That(MacroDeckDataRootResolver.Resolve(environment),
 			Is.EqualTo(ChannelDefault(Path.Combine(_homeDirectory, "Library", "Application Support", "MacroDeck"))));
@@ -101,8 +101,8 @@ public class MacroDeckDataRootResolverTests
 	{
 		var xdgDataHome = Path.Combine(Path.GetTempPath(), "xdg-data");
 		var environment = CreateEnvironment(DataRootPlatform.Linux,
-			packagedMarkerExists: true,
-			environmentVariables: new Dictionary<string, string> { ["XDG_DATA_HOME"] = xdgDataHome });
+			true,
+			new Dictionary<string, string> { ["XDG_DATA_HOME"] = xdgDataHome });
 
 		Assert.That(MacroDeckDataRootResolver.Resolve(environment),
 			Is.EqualTo(ChannelDefault(Path.Combine(xdgDataHome, "MacroDeck"))));
@@ -111,7 +111,7 @@ public class MacroDeckDataRootResolverTests
 	[Test]
 	public void Resolve_falls_back_to_local_share_on_linux_without_xdg_variable()
 	{
-		var environment = CreateEnvironment(DataRootPlatform.Linux, packagedMarkerExists: true);
+		var environment = CreateEnvironment(DataRootPlatform.Linux, true);
 
 		Assert.That(MacroDeckDataRootResolver.Resolve(environment),
 			Is.EqualTo(ChannelDefault(Path.Combine(_homeDirectory, ".local", "share", "MacroDeck"))));
@@ -122,8 +122,8 @@ public class MacroDeckDataRootResolverTests
 	{
 		var overrideDir = Path.Combine(Path.GetTempPath(), "custom-data-root");
 		var environment = CreateEnvironment(DataRootPlatform.Linux,
-			packagedMarkerExists: true,
-			environmentVariables: new Dictionary<string, string>
+			true,
+			new Dictionary<string, string>
 			{
 				[MacroDeckDataRootResolver.DataDirEnvironmentVariable] = overrideDir,
 				[MacroDeckDataRootResolver.PortableEnvironmentVariable] = "1"

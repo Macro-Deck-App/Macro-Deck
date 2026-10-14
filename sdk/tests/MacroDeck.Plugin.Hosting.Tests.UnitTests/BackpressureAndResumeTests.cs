@@ -19,25 +19,35 @@ public class BackpressureAndResumeTests
 	private FakePluginSocket _socket = null!;
 
 	[SetUp]
-	public void SetUp() => _socket = new FakePluginSocket();
+	public void SetUp()
+	{
+		_socket = new FakePluginSocket();
+	}
 
 	[TearDown]
-	public async Task TearDown() => await _socket.DisposeAsync();
-
-	private static ProtocolEnvelope Invoke(int index) => new()
+	public async Task TearDown()
 	{
-		Type = MessageTypes.CapabilityInvoke,
-		Id = $"invoke-{index}",
-		Payload = FakePluginSocket.Payload(new CapabilityInvokePayload
+		await _socket.DisposeAsync();
+	}
+
+	private static ProtocolEnvelope Invoke(int index)
+	{
+		return new ProtocolEnvelope
 		{
-			Kind = "actions",
-			LocalId = "one",
-			Operation = "execute"
-		})
-	};
+			Type = MessageTypes.CapabilityInvoke,
+			Id = $"invoke-{index}",
+			Payload = FakePluginSocket.Payload(new CapabilityInvokePayload
+			{
+				Kind = "actions",
+				LocalId = "one",
+				Operation = "execute"
+			})
+		};
+	}
 
 	private void Welcome()
-		=> _socket.Push(new ProtocolEnvelope
+	{
+		_socket.Push(new ProtocolEnvelope
 		{
 			Type = MessageTypes.SessionWelcome,
 			Id = "welcome",
@@ -47,6 +57,7 @@ public class BackpressureAndResumeTests
 				Resumed = false
 			})
 		});
+	}
 
 	[Test]
 	public async Task Overflowing_the_inbound_queue_reports_it_and_closes_with_1013()

@@ -30,7 +30,7 @@ public class InProcessUiSessionProviderOriginTests
 			{
 				SessionId = "s1",
 				Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-				UiModelVersion = 1,
+				UiModelVersion = 1
 			},
 			CancellationToken.None);
 
@@ -58,7 +58,7 @@ public class InProcessUiSessionProviderOriginTests
 			{
 				SessionId = "s1",
 				Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-				UiModelVersion = 1,
+				UiModelVersion = 1
 			},
 			CancellationToken.None);
 
@@ -77,21 +77,30 @@ public class InProcessUiSessionProviderOriginTests
 	{
 		private readonly IUiSession _session;
 
-		public FakeUiProvider(IUiSession session) => _session = session;
+		public FakeUiProvider(IUiSession session)
+		{
+			_session = session;
+		}
 
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } = [];
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(_session);
+		{
+			return Task.FromResult<IUiSession?>(_session);
+		}
 	}
 
 	private sealed class FakeUiSessionSink : IUiSessionSink
 	{
 		public UiSessionIngestResult PublishSnapshot(string providerId, string sessionId, UiRawJson tree)
-			=> UiSessionIngestResult.Accept();
+		{
+			return UiSessionIngestResult.Accept();
+		}
 
 		public UiSessionIngestResult PublishPatch(string providerId, string sessionId, UiRawJson patch)
-			=> UiSessionIngestResult.Accept();
+		{
+			return UiSessionIngestResult.Accept();
+		}
 
 		public void PublishFault(string providerId, string sessionId, string code, string? message)
 		{
@@ -114,16 +123,25 @@ public class InProcessUiSessionProviderOriginTests
 		public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 #pragma warning restore CS0067
 
-		public UiTree BuildTree() => new()
+		public UiTree BuildTree()
 		{
-			Root = new UiNode { Id = "root", Type = "stack" },
-			Revision = 0,
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-		};
+			return new UiTree
+			{
+				Root = new UiNode { Id = "root", Type = "stack" },
+				Revision = 0,
+				Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared }
+			};
+		}
 
-		public IReadOnlyList<UiPatch> DrainPatches() => [];
+		public IReadOnlyList<UiPatch> DrainPatches()
+		{
+			return [];
+		}
 
-		public void Dispatch(UiEvent uiEvent) => Dispatch(uiEvent, null);
+		public void Dispatch(UiEvent uiEvent)
+		{
+			Dispatch(uiEvent, null);
+		}
 
 		public void Dispatch(UiEvent uiEvent, string? originClientId)
 		{
@@ -131,7 +149,10 @@ public class InProcessUiSessionProviderOriginTests
 			Received.Release();
 		}
 
-		public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 
 	private sealed class PlainRecordingSession : IUiSession
@@ -146,14 +167,20 @@ public class InProcessUiSessionProviderOriginTests
 		public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 #pragma warning restore CS0067
 
-		public UiTree BuildTree() => new()
+		public UiTree BuildTree()
 		{
-			Root = new UiNode { Id = "root", Type = "stack" },
-			Revision = 0,
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-		};
+			return new UiTree
+			{
+				Root = new UiNode { Id = "root", Type = "stack" },
+				Revision = 0,
+				Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared }
+			};
+		}
 
-		public IReadOnlyList<UiPatch> DrainPatches() => [];
+		public IReadOnlyList<UiPatch> DrainPatches()
+		{
+			return [];
+		}
 
 		public void Dispatch(UiEvent uiEvent)
 		{
@@ -161,6 +188,9 @@ public class InProcessUiSessionProviderOriginTests
 			Received.Release();
 		}
 
-		public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 }

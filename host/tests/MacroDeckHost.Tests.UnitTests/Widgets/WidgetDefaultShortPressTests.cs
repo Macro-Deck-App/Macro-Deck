@@ -42,10 +42,15 @@ public class WidgetDefaultShortPressTests
 	}
 
 	[TearDown]
-	public void TearDown() => _weather.Dispose();
+	public void TearDown()
+	{
+		_weather.Dispose();
+	}
 
 	private static WidgetEntity Widget(string type, string data)
-		=> new() { Id = Guid.NewGuid(), FolderId = Guid.NewGuid(), Type = type, Data = data };
+	{
+		return new WidgetEntity { Id = Guid.NewGuid(), FolderId = Guid.NewGuid(), Type = type, Data = data };
+	}
 
 	private static JsonElement SingleBlock(string? source)
 	{
@@ -80,17 +85,20 @@ public class WidgetDefaultShortPressTests
 	}
 
 	private static string? ParameterValue(JsonElement block, string name)
-		=> block.GetProperty("parameters")
+	{
+		return block.GetProperty("parameters")
 			.EnumerateArray()
 			.First(parameter => parameter.GetProperty("name").GetString() == name)
 			.GetProperty("value")
 			.GetString();
+	}
 
 	[Test]
 	public void A_weather_widget_without_a_short_press_action_opens_the_details_of_its_own_station()
 	{
 		var block = SingleBlock(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather,
-			$$"""{"instanceId":"{{Station}}"}"""), fromDevice: false));
+				$$"""{"instanceId":"{{Station}}"}"""),
+			false));
 
 		Assert.Multiple(() =>
 		{
@@ -103,11 +111,11 @@ public class WidgetDefaultShortPressTests
 	[Test]
 	public void A_plugin_station_opens_the_details_action_its_own_provider_declares()
 	{
-		RooftopPlugin(declaresDetails: true);
+		RooftopPlugin(true);
 
 		var widget = Widget(WidgetTypeIds.Weather, WithStation("{}", PluginStation));
 
-		var block = SingleBlock(_defaults.FlowsSourceFor(widget, fromDevice: false));
+		var block = SingleBlock(_defaults.FlowsSourceFor(widget, false));
 
 		Assert.Multiple(() =>
 		{
@@ -120,22 +128,24 @@ public class WidgetDefaultShortPressTests
 	[Test]
 	public void A_plugin_station_whose_provider_declares_no_details_action_has_no_default_press()
 	{
-		RooftopPlugin(declaresDetails: false);
+		RooftopPlugin(false);
 
 		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation("{}", PluginStation)),
-			fromDevice: false), Is.Null);
+				false),
+			Is.Null);
 	}
 
 	[Test]
 	public void A_weather_widget_without_a_station_opens_the_details_of_the_station_it_shows()
 	{
-		RooftopPlugin(declaresDetails: true);
+		RooftopPlugin(true);
 
-		var block = SingleBlock(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, "{}"), fromDevice: false));
+		var block = SingleBlock(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, "{}"), false));
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(block.GetProperty("integrationId").GetString(), Is.EqualTo(WeatherPluginId),
+			Assert.That(block.GetProperty("integrationId").GetString(),
+				Is.EqualTo(WeatherPluginId),
 				"the widget shows the first station of all providers, which is the plugin's here");
 			Assert.That(ParameterValue(block, "station"), Is.EqualTo(PluginStation));
 		});
@@ -143,31 +153,36 @@ public class WidgetDefaultShortPressTests
 
 	[Test]
 	public void A_weather_widget_without_any_station_to_show_has_no_default_press()
-		=> Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, "{}"), fromDevice: false), Is.Null);
+	{
+		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, "{}"), false), Is.Null);
+	}
 
 	[Test]
 	public void A_short_press_action_the_user_configured_wins_over_the_default()
 	{
 		var data = """{"flows":[{"triggerType":"onShortPress","children":[{"type":"action"}]}]}""";
 
-		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation(data)), fromDevice: false),
+		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation(data)), false),
 			Is.Null);
 	}
 
 	[TestCase("""{"flows":[{"triggerType":"onShortPress","children":[]}]}""")]
 	[TestCase("""{"flows":[{"triggerType":"onShortPress","children":[{"type":"action","disabled":true}]}]}""")]
 	[TestCase("""{"flows":"[{\"triggerType\":\"onLongPress\",\"children\":[{\"type\":\"action\"}]}]"}""")]
-	[TestCase("""{"flows":[{"triggerType":"onShortPress","children":[]},{"triggerType":"onShortPress","children":[{"type":"action"}]}]}""")]
+	[TestCase(
+		"""{"flows":[{"triggerType":"onShortPress","children":[]},{"triggerType":"onShortPress","children":[{"type":"action"}]}]}""")]
 	public void A_short_press_flow_that_would_run_nothing_leaves_the_default_in_place(string data)
-		=> Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation(data)), fromDevice: false),
+	{
+		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation(data)), false),
 			Is.Not.Null);
+	}
 
 	[Test]
 	public void Nothing_runs_while_the_integration_behind_the_default_is_disabled()
 	{
 		_integrations.SetEnabled(WeatherIntegrationId, false);
 
-		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation("{}")), fromDevice: false),
+		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation("{}")), false),
 			Is.Null);
 	}
 
@@ -176,7 +191,7 @@ public class WidgetDefaultShortPressTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation("{}")), fromDevice: true),
+			Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation("{}")), true),
 				Is.Null);
 			Assert.That(_defaults.RunsOnDevices(WidgetTypeIds.Weather), Is.False);
 		});
@@ -189,7 +204,9 @@ public class WidgetDefaultShortPressTests
 	[TestCase(WidgetTypeIds.Stopwatch)]
 	[TestCase(WidgetTypeIds.Slider)]
 	public void A_built_in_type_without_a_default_runs_nothing_extra(string type)
-		=> Assert.That(_defaults.FlowsSourceFor(Widget(type, "{}"), fromDevice: false), Is.Null);
+	{
+		Assert.That(_defaults.FlowsSourceFor(Widget(type, "{}"), false), Is.Null);
+	}
 
 	[Test]
 	public async Task A_provider_type_runs_its_own_declared_action_with_its_parameters()
@@ -207,12 +224,14 @@ public class WidgetDefaultShortPressTests
 			});
 
 		var block = SingleBlock(_defaults.FlowsSourceFor(Widget(registration.WidgetTypeId,
-			"""{"flows":[{"triggerType":"onShortPress","children":[{"type":"action"}]}]}"""), fromDevice: true));
+				"""{"flows":[{"triggerType":"onShortPress","children":[{"type":"action"}]}]}"""),
+			true));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_defaults.RunsOnDevices(registration.WidgetTypeId), Is.True);
-			Assert.That(block.GetProperty("integrationId").GetString(), Is.EqualTo(PluginId),
+			Assert.That(block.GetProperty("integrationId").GetString(),
+				Is.EqualTo(PluginId),
 				"a type without SupportsFlows has no user flow to win over its default");
 			Assert.That(ParameterValue(block, "room"), Is.EqualTo("kitchen"));
 		});
@@ -228,6 +247,6 @@ public class WidgetDefaultShortPressTests
 				DefaultShortPressAction = new WidgetDefaultAction("missing")
 			});
 
-		Assert.That(_defaults.FlowsSourceFor(Widget(registration.WidgetTypeId, "{}"), fromDevice: false), Is.Null);
+		Assert.That(_defaults.FlowsSourceFor(Widget(registration.WidgetTypeId, "{}"), false), Is.Null);
 	}
 }

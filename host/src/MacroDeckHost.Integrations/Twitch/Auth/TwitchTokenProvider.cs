@@ -46,7 +46,9 @@ internal sealed class TwitchTokenProvider : IDisposable
 	}
 
 	public Task<string> ForceRefreshAsync(CancellationToken cancellationToken)
-		=> RefreshAsync(_tokens, cancellationToken);
+	{
+		return RefreshAsync(_tokens, cancellationToken);
+	}
 
 	public async Task<TwitchTokenIdentity> ValidateAsync(CancellationToken cancellationToken)
 	{
@@ -76,7 +78,10 @@ internal sealed class TwitchTokenProvider : IDisposable
 
 	// The connection's async stop drains users of the semaphore. Synchronous disposal only prevents
 	// new refreshes; disposing the semaphore itself can race an in-flight finally/release.
-	public void Dispose() => Interlocked.Exchange(ref _stopping, 1);
+	public void Dispose()
+	{
+		Interlocked.Exchange(ref _stopping, 1);
+	}
 
 	private async Task<string> RefreshAsync(TwitchTokens observed, CancellationToken cancellationToken)
 	{
@@ -139,5 +144,7 @@ internal sealed class TwitchTokenProvider : IDisposable
 	}
 
 	private static bool IsExpiring(TwitchTokens tokens)
-		=> tokens.ExpiresAt - DateTimeOffset.UtcNow <= _refreshMargin;
+	{
+		return tokens.ExpiresAt - DateTimeOffset.UtcNow <= _refreshMargin;
+	}
 }

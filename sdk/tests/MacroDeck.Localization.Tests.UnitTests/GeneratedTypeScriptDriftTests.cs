@@ -30,11 +30,11 @@ public class GeneratedTypeScriptDriftTests
 		new("AppStrings",
 			"app-strings.ts",
 			"macrodeck.app",
-			["host", "src", "MacroDeckHost.Localization", "Localization"]),
+			["host", "src", "MacroDeckHost.Localization", "Localization"])
 	];
 
 	/// <summary>The keys the bootstrapper renders itself; everything else stays the host's to resolve.</summary>
-	private const string _bootstrapperKeyPrefix = "Bootstrapper.";
+	private const string BootstrapperKeyPrefix = "Bootstrapper.";
 
 	/// <summary>
 	/// The key namespaces a deck client paints itself. Everything else the host serves, so a client that
@@ -57,7 +57,7 @@ public class GeneratedTypeScriptDriftTests
 		"Settings.Network.Tls.",
 		"Ui.List.",
 		"Ui.Modal.",
-		"WebClient.",
+		"WebClient."
 	];
 
 	[TestCaseSource(nameof(_catalogs))]
@@ -86,8 +86,8 @@ public class GeneratedTypeScriptDriftTests
 
 		Assert.That(actual,
 			Is.EqualTo(expected),
-			"the checked-in TypeScript keys no longer match the .resx resources they are generated from. " +
-			"Regenerate with MACRODECK_UPDATE_GENERATED=1 dotnet test sdk/tests/MacroDeck.Localization.Tests.UnitTests");
+			"the checked-in TypeScript keys no longer match the .resx resources they are generated from. "
+			+ "Regenerate with MACRODECK_UPDATE_GENERATED=1 dotnet test sdk/tests/MacroDeck.Localization.Tests.UnitTests");
 	}
 
 	/// <summary>
@@ -98,7 +98,7 @@ public class GeneratedTypeScriptDriftTests
 	public void The_checked_in_Rust_module_matches_a_fresh_generation()
 	{
 		var catalog = _catalogs[1];
-		var expected = LocalizationRustEmitter.Emit(_bootstrapperKeyPrefix, CompileResources(catalog));
+		var expected = LocalizationRustEmitter.Emit(BootstrapperKeyPrefix, CompileResources(catalog));
 		var path = RepositoryFile("ui", "bootstrapper", "src", "localization", "generated.rs");
 
 		if (Environment.GetEnvironmentVariable("MACRODECK_UPDATE_GENERATED") == "1")
@@ -114,8 +114,8 @@ public class GeneratedTypeScriptDriftTests
 
 		Assert.That(actual,
 			Is.EqualTo(expected),
-			"the checked-in Rust catalog no longer matches the .resx resources it is generated from. " +
-			"Regenerate with MACRODECK_UPDATE_GENERATED=1 dotnet test sdk/tests/MacroDeck.Localization.Tests.UnitTests");
+			"the checked-in Rust catalog no longer matches the .resx resources it is generated from. "
+			+ "Regenerate with MACRODECK_UPDATE_GENERATED=1 dotnet test sdk/tests/MacroDeck.Localization.Tests.UnitTests");
 	}
 
 	/// <summary>
@@ -147,8 +147,8 @@ public class GeneratedTypeScriptDriftTests
 
 		Assert.That(actual,
 			Is.EqualTo(expected),
-			"the checked-in web client catalog no longer matches the .resx resources it is generated from. " +
-			"Regenerate with MACRODECK_UPDATE_GENERATED=1 dotnet test sdk/tests/MacroDeck.Localization.Tests.UnitTests");
+			"the checked-in web client catalog no longer matches the .resx resources it is generated from. "
+			+ "Regenerate with MACRODECK_UPDATE_GENERATED=1 dotnet test sdk/tests/MacroDeck.Localization.Tests.UnitTests");
 	}
 
 	/// <summary>
@@ -178,18 +178,22 @@ public class GeneratedTypeScriptDriftTests
 	}
 
 	private static string GenerateWebClientSlice()
-		=> LocalizationTypeScriptEmitter.Emit("ClientAppStrings",
+	{
+		return LocalizationTypeScriptEmitter.Emit("ClientAppStrings",
 			CompileResources(_catalogs[1]),
 			_webClientKeyPrefixes);
+	}
 
 	/// <summary>The default-language lines of an emitted module, each <c>'scope:key': 'text',</c>.</summary>
 	private static List<string> DefaultEntries(string module)
-		=> module.Split('\n')
+	{
+		return module.Split('\n')
 			.Select(line => line.Trim())
-			.Where(line => line.StartsWith("'macrodeck.app:", StringComparison.Ordinal) &&
-				line.EndsWith("',", StringComparison.Ordinal) &&
-				line.Contains("': '", StringComparison.Ordinal))
+			.Where(line => line.StartsWith("'macrodeck.app:", StringComparison.Ordinal)
+				&& line.EndsWith("',", StringComparison.Ordinal)
+				&& line.Contains("': '", StringComparison.Ordinal))
 			.ToList();
+	}
 
 	[TestCaseSource(nameof(_catalogs))]
 	public void Every_catalog_key_appears_in_both_generated_APIs(Catalog catalog)
@@ -209,15 +213,18 @@ public class GeneratedTypeScriptDriftTests
 	}
 
 	private static string Generate(Catalog catalog)
-		=> LocalizationTypeScriptEmitter.Emit(catalog.ConstName, CompileResources(catalog));
+	{
+		return LocalizationTypeScriptEmitter.Emit(catalog.ConstName, CompileResources(catalog));
+	}
 
 	private static LocalizationCompilationResult CompileResources(Catalog catalog)
 	{
 		var directory = RepositoryFile(catalog.Directory);
 		var set = new LocalizationResourceSet(catalog.Scope, "Strings");
 
-		foreach (var path in Directory.EnumerateFiles(directory, "*.resx").OrderBy(path => path,
-			StringComparer.Ordinal))
+		foreach (var path in Directory.EnumerateFiles(directory, "*.resx")
+			.OrderBy(path => path,
+				StringComparer.Ordinal))
 		{
 			var fileName = Path.GetFileName(path);
 
@@ -239,7 +246,10 @@ public class GeneratedTypeScriptDriftTests
 	/// <summary>One catalog's identity: what it is called in TypeScript and where its resources live.</summary>
 	public sealed record Catalog(string ConstName, string FileName, string Scope, string[] Directory)
 	{
-		public override string ToString() => Scope;
+		public override string ToString()
+		{
+			return Scope;
+		}
 	}
 
 	/// <summary>Fails loudly rather than letting a missing repository pass the drift check vacuously.</summary>

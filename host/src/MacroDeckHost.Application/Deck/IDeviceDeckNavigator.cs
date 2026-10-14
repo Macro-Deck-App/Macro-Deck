@@ -2,7 +2,8 @@ namespace MacroDeckHost.Application.Deck;
 
 public interface IDeviceDeckNavigator
 {
-	Task<bool> ChangeFolderOnDeviceAsync(Guid deviceId,
+	Task<bool> ChangeFolderOnDeviceAsync(
+		Guid deviceId,
 		Guid folderId,
 		Guid navigationToken,
 		CancellationToken cancellationToken);

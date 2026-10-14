@@ -246,9 +246,15 @@ internal sealed class IntegrationRegistryRegistrationTests
 	{
 		private Dictionary<string, bool> _states = new();
 
-		public IReadOnlyDictionary<string, bool> Load() => _states;
+		public IReadOnlyDictionary<string, bool> Load()
+		{
+			return _states;
+		}
 
-		public void Save(IReadOnlyDictionary<string, bool> states) => _states = new Dictionary<string, bool>(states);
+		public void Save(IReadOnlyDictionary<string, bool> states)
+		{
+			_states = new Dictionary<string, bool>(states);
+		}
 	}
 
 	private sealed class FakeIntegration : IIntegration
@@ -259,9 +265,15 @@ internal sealed class IntegrationRegistryRegistrationTests
 		public IReadOnlyList<IActionDefinition> Actions { get; init; } = [];
 		public bool IsInitialized => true;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class StubAction : IActionDefinition
@@ -278,6 +290,9 @@ internal sealed class IntegrationRegistryRegistrationTests
 		public IReadOnlyList<ActionParameter> Parameters => [];
 		public MacroDeckPlatform Platforms { get; }
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

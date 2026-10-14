@@ -11,10 +11,16 @@ public class PluginMergeTests
 	private string _work = null!;
 
 	[SetUp]
-	public void SetUp() => _work = Directory.CreateTempSubdirectory("macrodeck-plugin-merge-tests-").FullName;
+	public void SetUp()
+	{
+		_work = Directory.CreateTempSubdirectory("macrodeck-plugin-merge-tests-").FullName;
+	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_work, recursive: true);
+	public void TearDown()
+	{
+		Directory.Delete(_work, true);
+	}
 
 	[Test]
 	public async Task Packages_built_per_runtime_identifier_merge_into_the_package_a_full_build_produces()
@@ -24,7 +30,7 @@ public class PluginMergeTests
 
 		try
 		{
-			var full = await BuildAsync(project, rids, rid: null, Path.Combine(_work, "full"));
+			var full = await BuildAsync(project, rids, null, Path.Combine(_work, "full"));
 			var parts = new List<string>();
 
 			foreach (var rid in rids)
@@ -33,7 +39,9 @@ public class PluginMergeTests
 			}
 
 			var result = await CliRunner.Run(["merge", .. parts, "--output", Path.Combine(_work, "merged")]);
-			var merged = Path.Combine(_work, "merged", $"{BuildFixtures.PluginId}-{BuildFixtures.Version}.macroDeckPlugin");
+			var merged = Path.Combine(_work,
+				"merged",
+				$"{BuildFixtures.PluginId}-{BuildFixtures.Version}.macroDeckPlugin");
 			var inspection = await ArtifactReaders.ArtifactReader.Inspect(merged);
 
 			Assert.Multiple(() =>
@@ -46,7 +54,7 @@ public class PluginMergeTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -67,7 +75,7 @@ public class PluginMergeTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -89,7 +97,7 @@ public class PluginMergeTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -113,7 +121,7 @@ public class PluginMergeTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -128,11 +136,11 @@ public class PluginMergeTests
 			var first = await BuildAsync(project, rids, rids[0], Path.Combine(_work, "a"));
 			var second = await BuildAsync(project, rids, rids[1], Path.Combine(_work, "b"));
 
-			using (var archive = ZipFile.Open(second, ZipArchiveMode.Update))
+			using (var archive = await ZipFile.OpenAsync(second, ZipArchiveMode.Update))
 			{
 				var entryName = BuildFixtures.EntrypointPath(rids[1]);
 				archive.GetEntry(entryName)!.Delete();
-				await using var writer = new StreamWriter(archive.CreateEntry(entryName).Open());
+				await using var writer = new StreamWriter(await archive.CreateEntry(entryName).OpenAsync());
 				await writer.WriteAsync("replaced after the build");
 			}
 
@@ -142,7 +150,7 @@ public class PluginMergeTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -166,7 +174,7 @@ public class PluginMergeTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -195,7 +203,7 @@ public class PluginMergeTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -205,22 +213,23 @@ public class PluginMergeTests
 		{
 			Assert.That(result.ExitCode, Is.EqualTo(ExitCode.SubjectInvalid), result.Error);
 			Assert.That(result.Error, Does.Contain($"error {code}:"));
-			Assert.That(Directory.Exists(Path.Combine(_work, "merged")) &&
-				Directory.EnumerateFiles(Path.Combine(_work, "merged")).Any(), Is.False);
+			Assert.That(Directory.Exists(Path.Combine(_work, "merged"))
+				&& Directory.EnumerateFiles(Path.Combine(_work, "merged")).Any(),
+				Is.False);
 		});
 	}
 
 	private async Task<string> BuildAsync(string project, IReadOnlyList<string> rids, string? rid, string output)
 	{
 		var result = await PluginBuilder.BuildAsync(new PluginBuildRequest
-		{
-			SourceDirectory = project,
-			ManifestPath = Path.Combine(project, "manifest.json"),
-			BuildConfigPath = Path.Combine(project, "macrodeck-build.json"),
-			Rid = rid,
-			OutputDirectory = output,
-			StagingRoot = _work
-		},
+			{
+				SourceDirectory = project,
+				ManifestPath = Path.Combine(project, "manifest.json"),
+				BuildConfigPath = Path.Combine(project, "macrodeck-build.json"),
+				Rid = rid,
+				OutputDirectory = output,
+				StagingRoot = _work
+			},
 			new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) });
 
 		Assert.That(result.Success, Is.True, result.FailureMessage);

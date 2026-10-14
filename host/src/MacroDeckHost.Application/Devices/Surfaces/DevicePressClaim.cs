@@ -26,14 +26,16 @@ public sealed class DevicePressClaim : IAsyncDisposable
 		Absorbed = absorbed;
 	}
 
-	public static DevicePressClaim None => new(null, null, null, null, absorbed: false);
+	public static DevicePressClaim None => new(null, null, null, null, false);
 
 	public bool Absorbed { get; }
 
 	public bool TakesPress => Absorbed || _claimant is not null;
 
 	public static DevicePressClaim Absorbing(IUiSessionBroker? broker, string? sessionId)
-		=> new(broker, sessionId, null, null, absorbed: true);
+	{
+		return new DevicePressClaim(broker, sessionId, null, null, true);
+	}
 
 	public static DevicePressClaim From(
 		IUiSessionBroker broker,
@@ -43,8 +45,8 @@ public sealed class DevicePressClaim : IAsyncDisposable
 		double? heightCells = null)
 	{
 		var claim = UiActivationClaim.Of(tree.RootElement, widthCells, heightCells);
-		if (claim.Claimant is { } node &&
-			(!node.TryGetProperty("id", out var id) || id.ValueKind != JsonValueKind.String))
+		if (claim.Claimant is { } node
+			&& (!node.TryGetProperty("id", out var id) || id.ValueKind != JsonValueKind.String))
 		{
 			tree.Dispose();
 			return Absorbing(broker, sessionId);
@@ -63,12 +65,12 @@ public sealed class DevicePressClaim : IAsyncDisposable
 
 	private void DispatchLocked(string triggerType)
 	{
-		if (_disposed ||
-			_claimant is not { } node ||
-			_tree is null ||
-			_broker is null ||
-			_sessionId is null ||
-			UiActivationClaim.EventFor(node, triggerType) is not { } uiEvent)
+		if (_disposed
+			|| _claimant is not { } node
+			|| _tree is null
+			|| _broker is null
+			|| _sessionId is null
+			|| UiActivationClaim.EventFor(node, triggerType) is not { } uiEvent)
 		{
 			return;
 		}
@@ -81,8 +83,8 @@ public sealed class DevicePressClaim : IAsyncDisposable
 				Data = uiEvent.Payload is null
 					? default
 					: new UiRawJson(JsonSerializer.SerializeToUtf8Bytes(uiEvent.Payload)),
-				Revision = _tree.RootElement.TryGetProperty("revision", out var revision) &&
-					revision.TryGetInt32(out var value)
+				Revision = _tree.RootElement.TryGetProperty("revision", out var revision)
+					&& revision.TryGetInt32(out var value)
 						? value
 						: null
 			});

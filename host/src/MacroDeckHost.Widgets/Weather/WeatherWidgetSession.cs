@@ -15,7 +15,8 @@ internal sealed class WeatherWidgetSession : IUiSession
 	private readonly UiAsyncState<WeatherStatePayload> _state;
 	private readonly string? _configuredInstanceId;
 
-	public WeatherWidgetSession(UiView view,
+	public WeatherWidgetSession(
+		UiView view,
 		IWeatherStateNotifier notifier,
 		UiAsyncState<WeatherStatePayload> state,
 		string? configuredInstanceId)
@@ -38,11 +39,20 @@ internal sealed class WeatherWidgetSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -53,8 +63,8 @@ internal sealed class WeatherWidgetSession : IUiSession
 
 	private void OnWeatherStateChanged(object? sender, WeatherStateChangedEventArgs args)
 	{
-		if (_configuredInstanceId is not null &&
-			!string.Equals(_configuredInstanceId, args.InstanceId, StringComparison.Ordinal))
+		if (_configuredInstanceId is not null
+			&& !string.Equals(_configuredInstanceId, args.InstanceId, StringComparison.Ordinal))
 		{
 			return;
 		}

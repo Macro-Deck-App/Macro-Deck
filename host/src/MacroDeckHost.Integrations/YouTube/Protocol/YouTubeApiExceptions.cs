@@ -60,9 +60,9 @@ internal sealed class YouTubeApiException : Exception
 			using var document = JsonDocument.Parse(body);
 			var root = document.RootElement;
 
-			if (root.ValueKind is not JsonValueKind.Object ||
-				!root.TryGetProperty("error", out var error) ||
-				error.ValueKind is not JsonValueKind.Object)
+			if (root.ValueKind is not JsonValueKind.Object
+				|| !root.TryGetProperty("error", out var error)
+				|| error.ValueKind is not JsonValueKind.Object)
 			{
 				return (null, null);
 			}
@@ -84,11 +84,13 @@ internal sealed class YouTubeApiException : Exception
 	}
 
 	private static string? ReadString(JsonElement element, string name)
-		=> element.ValueKind is JsonValueKind.Object &&
-			element.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.String
+	{
+		return element.ValueKind is JsonValueKind.Object
+			&& element.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 }
 
 internal sealed class YouTubeTransientException : Exception

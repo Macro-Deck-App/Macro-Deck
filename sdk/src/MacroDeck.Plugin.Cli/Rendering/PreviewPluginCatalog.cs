@@ -37,8 +37,9 @@ internal static class PreviewPluginCatalog
 		string locale)
 	{
 		var describeOutcome = await session.InvokeAsync(CapabilityKinds.Localization,
-			ProviderCapabilityId.LocalId,
-			CapabilityOperations.Localization.Describe).ConfigureAwait(false);
+				ProviderCapabilityId.LocalId,
+				CapabilityOperations.Localization.Describe)
+			.ConfigureAwait(false);
 
 		if (describeOutcome.DataAs<LocalizationDescribeResult>() is not { } describe || !describeOutcome.Succeeded)
 		{
@@ -62,13 +63,15 @@ internal static class PreviewPluginCatalog
 		foreach (var culture in chain)
 		{
 			var outcome = await session.InvokeAsync(CapabilityKinds.Localization,
-				ProviderCapabilityId.LocalId,
-				CapabilityOperations.Localization.Catalog,
-				new LocalizationCatalogArguments { Culture = culture }).ConfigureAwait(false);
+					ProviderCapabilityId.LocalId,
+					CapabilityOperations.Localization.Catalog,
+					new LocalizationCatalogArguments { Culture = culture })
+				.ConfigureAwait(false);
 
 			if (outcome.DataAs<LocalizationCatalogResult>() is not { } catalog || !outcome.Succeeded)
 			{
-				return Unavailable(console, outcome.Error?.Message ?? $"the plugin did not serve the culture '{culture}'");
+				return Unavailable(console,
+					outcome.Error?.Message ?? $"the plugin did not serve the culture '{culture}'");
 			}
 
 			if (catalog.Entries.Count > ProtocolLimits.MaxLocalizationEntries)

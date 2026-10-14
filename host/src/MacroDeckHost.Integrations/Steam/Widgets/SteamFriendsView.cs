@@ -25,26 +25,32 @@ internal static class SteamFriendsView
 
 		var ink = SteamInk.For(backgroundColor);
 
-		return SteamStyle.Root(Root, backgroundColor, new UiStack
-		{
-			Key = "content",
-			Direction = UiComponentDirections.Vertical,
-			Fill = true,
-			Children =
-			[
-				Gate(state, ink, cornerRadius, "unavailable", SteamWidgetStatus.Unavailable, Strings.Unavailable()),
-				Gate(state, ink, cornerRadius, "needsWebApi", SteamWidgetStatus.NeedsWebApi, Strings.NeedsWebApi()),
-				Gate(state, ink, cornerRadius, "accountUnavailable", SteamWidgetStatus.AccountUnavailable,
-					Strings.AccountUnavailable()),
-				Gate(state, ink, cornerRadius, "private", SteamWidgetStatus.Private, Strings.FriendsPrivate()),
-				new UiWhen
-				{
-					Key = "readyGate",
-					Condition = () => state.Value.Status == SteamWidgetStatus.Ready,
-					Content = () => Layout(state, ink, cornerRadius),
-				},
-			],
-		});
+		return SteamStyle.Root(Root,
+			backgroundColor,
+			new UiStack
+			{
+				Key = "content",
+				Direction = UiComponentDirections.Vertical,
+				Fill = true,
+				Children =
+				[
+					Gate(state, ink, cornerRadius, "unavailable", SteamWidgetStatus.Unavailable, Strings.Unavailable()),
+					Gate(state, ink, cornerRadius, "needsWebApi", SteamWidgetStatus.NeedsWebApi, Strings.NeedsWebApi()),
+					Gate(state,
+						ink,
+						cornerRadius,
+						"accountUnavailable",
+						SteamWidgetStatus.AccountUnavailable,
+						Strings.AccountUnavailable()),
+					Gate(state, ink, cornerRadius, "private", SteamWidgetStatus.Private, Strings.FriendsPrivate()),
+					new UiWhen
+					{
+						Key = "readyGate",
+						Condition = () => state.Value.Status == SteamWidgetStatus.Ready,
+						Content = () => Layout(state, ink, cornerRadius)
+					}
+				]
+			});
 	}
 
 	private static UiWhen Gate(
@@ -54,19 +60,23 @@ internal static class SteamFriendsView
 		string key,
 		SteamWidgetStatus status,
 		LocalizedText text)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = key + "Gate",
 			Condition = () => state.Value.Status == status,
-			Content = () => SteamStyle.Notice(key, text, () => state.Value.Glyph, ink, cornerRadius),
+			Content = () => SteamStyle.Notice(key, text, () => state.Value.Glyph, ink, cornerRadius)
 		};
+	}
 
 	private static UiResponsive Layout(UiState<SteamFriendsWidgetState> state, SteamInk ink, int cornerRadius)
-		=> new()
+	{
+		return new UiResponsive
 		{
 			Key = "layout",
 			Fill = true,
-			Default = SteamStyle.Padded("small", cornerRadius,
+			Default = SteamStyle.Padded("small",
+				cornerRadius,
 				Eyebrow(state, ink),
 				Spacer(),
 				Summary(state, ink)),
@@ -76,12 +86,12 @@ internal static class SteamFriendsView
 				{
 					MinWidth = 1.5,
 					MinHeight = 1.5,
-					Content = SteamStyle.Padded("large", cornerRadius, Header(state, ink), List(state, ink, "rows", 5)),
+					Content = SteamStyle.Padded("large", cornerRadius, Header(state, ink), List(state, ink, "rows", 5))
 				},
 				new UiResponsiveVariant
 				{
 					MinHeight = 1.5,
-					Content = SteamStyle.Padded("tall", cornerRadius, Header(state, ink), List(state, ink, "rows", 4)),
+					Content = SteamStyle.Padded("tall", cornerRadius, Header(state, ink), List(state, ink, "rows", 4))
 				},
 				new UiResponsiveVariant
 				{
@@ -99,7 +109,7 @@ internal static class SteamFriendsView
 								Key = "summaryColumn",
 								Direction = UiComponentDirections.Vertical,
 								MainSize = UiLength.OfBasis(0.75),
-								Children = [Eyebrow(state, ink), Spacer(), Summary(state, ink)],
+								Children = [Eyebrow(state, ink), Spacer(), Summary(state, ink)]
 							},
 							new UiStack
 							{
@@ -107,19 +117,23 @@ internal static class SteamFriendsView
 								Direction = UiComponentDirections.Vertical,
 								Justify = UiComponentJustify.Center,
 								Fill = true,
-								Children = [List(state, ink, "rows", 2)],
-							},
-						],
-					},
-				},
-			],
+								Children = [List(state, ink, "rows", 2)]
+							}
+						]
+					}
+				}
+			]
 		};
+	}
 
 	private static UiStack Eyebrow(UiState<SteamFriendsWidgetState> state, SteamInk ink)
-		=> SteamStyle.EyebrowRow("eyebrow", Strings.Eyebrow.Friends(), () => state.Value.Glyph, ink);
+	{
+		return SteamStyle.EyebrowRow("eyebrow", Strings.Eyebrow.Friends(), () => state.Value.Glyph, ink);
+	}
 
 	private static UiStack Header(UiState<SteamFriendsWidgetState> state, SteamInk ink)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "header",
 			Direction = UiComponentDirections.Horizontal,
@@ -128,31 +142,46 @@ internal static class SteamFriendsView
 			Children =
 			[
 				Eyebrow(state, ink),
-				SteamStyle.Text("count", UiText.FromLocalized(() => Strings.FriendsOnline(count: state.Value.Online)),
-					SteamStyle.Caption, ink, SteamTone.Secondary, UiComponentTextWeights.Medium),
-			],
+				SteamStyle.Text("count",
+					UiText.FromLocalized(() => Strings.FriendsOnline(state.Value.Online)),
+					SteamStyle.Caption,
+					ink,
+					SteamTone.Secondary,
+					UiComponentTextWeights.Medium)
+			]
 		};
+	}
 
 	private static UiStack Summary(UiState<SteamFriendsWidgetState> state, SteamInk ink)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "summary",
 			Direction = UiComponentDirections.Vertical,
 			Children =
 			[
-				SteamStyle.Text("online", UiText.From(() => state.Value.Online.ToString(CultureInfo.InvariantCulture)),
-					SteamStyle.Numeral, ink, weight: UiComponentTextWeights.Bold),
-				SteamStyle.Text("onlineLabel", Strings.Persona.Online(), SteamStyle.Body, ink, SteamTone.Secondary,
+				SteamStyle.Text("online",
+					UiText.From(() => state.Value.Online.ToString(CultureInfo.InvariantCulture)),
+					SteamStyle.Numeral,
+					ink,
+					weight: UiComponentTextWeights.Bold),
+				SteamStyle.Text("onlineLabel",
+					Strings.Persona.Online(),
+					SteamStyle.Body,
+					ink,
+					SteamTone.Secondary,
 					UiComponentTextWeights.Medium),
 				SteamStyle.StatusLabel("playing",
-					UiText.FromLocalized(() => Strings.FriendsPlaying(count: state.Value.InGame)),
+					UiText.FromLocalized(() => Strings.FriendsPlaying(state.Value.InGame)),
 					UiValue.From(() => state.Value.InGame > 0 ? SteamStyle.InGame : SteamStyle.Offline),
-					SteamStyle.Caption),
-			],
+					SteamStyle.Caption)
+			]
 		};
+	}
 
 	private static UiStack List(UiState<SteamFriendsWidgetState> state, SteamInk ink, string key, int count)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
@@ -163,21 +192,26 @@ internal static class SteamFriendsView
 				{
 					Key = "emptyGate",
 					Condition = () => state.Value.Rows.Count == 0,
-					Content = () => SteamStyle.Text("empty", Strings.NoFriendsOnline(), SteamStyle.Body, ink,
-						SteamTone.Secondary),
+					Content = () => SteamStyle.Text("empty",
+						Strings.NoFriendsOnline(),
+						SteamStyle.Body,
+						ink,
+						SteamTone.Secondary)
 				},
 				new UiRepeat<SteamFriendRow>
 				{
 					Key = "friends",
 					Items = UiValue.From(() => state.Value.Take(count)),
 					KeySelector = row => row.Key,
-					Template = (row, _) => Row(row, ink),
-				},
-			],
+					Template = (row, _) => Row(row, ink)
+				}
+			]
 		};
+	}
 
 	private static UiStack Row(SteamFriendRow row, SteamInk ink)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = row.Key,
 			Direction = UiComponentDirections.Horizontal,
@@ -214,17 +248,19 @@ internal static class SteamFriendsView
 									Color = row.StatusColor == SteamStyle.InGame
 										? UiValue.Of(SteamStyle.InGame)
 										: ink.Color(SteamTone.Secondary),
-									MaxLines = 1,
-								},
-							],
-						},
-					],
-				},
-			],
+									MaxLines = 1
+								}
+							]
+						}
+					]
+				}
+			]
 		};
+	}
 
 	private static UiModifier Avatar(SteamFriendRow row)
-		=> new()
+	{
+		return new UiModifier
 		{
 			Key = "avatar",
 			Clip = UiComponentClips.Circle,
@@ -246,11 +282,15 @@ internal static class SteamFriendsView
 							Size = UiLength.Capped(0.1, 12),
 							Weight = UiComponentTextWeights.SemiBold,
 							Color = SteamStyle.TextPrimary,
-							Align = UiComponentAlignments.Center,
-						},
-					],
-				},
+							Align = UiComponentAlignments.Center
+						}
+					]
+				}
 		};
+	}
 
-	private static UiStack Spacer() => new() { Key = "spacer", Fill = true };
+	private static UiStack Spacer()
+	{
+		return new UiStack { Key = "spacer", Fill = true };
+	}
 }

@@ -33,8 +33,8 @@ public sealed class DeckClientTracker
 		var device = deviceId?.ToString("D");
 		lock (_sync)
 		{
-			var replacedOther = device is not null &&
-				RemoveWhereLocked(client => client.DeviceId == device && client.ClientId != clientId);
+			var replacedOther = device is not null
+				&& RemoveWhereLocked(client => client.DeviceId == device && client.ClientId != clientId);
 
 			_clients.TryGetValue(clientId, out var before);
 			var moved = before is null || before.ProfileId != profileId || before.FolderId != folderId;

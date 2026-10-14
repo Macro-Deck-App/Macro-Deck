@@ -9,7 +9,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// A1 - an action invocation reports the plugin's real outcome, never a fabricated one.
 /// </summary>
 [TestFixture]
-public class A1_ActionOutcomeTests
+public class A1ActionOutcomeTests
 {
 	[Test]
 	public async Task Succeed_accept_and_fail_all_report_the_plugins_real_outcome()

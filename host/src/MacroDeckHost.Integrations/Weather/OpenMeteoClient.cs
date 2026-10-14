@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using MacroDeck.Sdk.Weather;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Weather;
 
@@ -37,14 +36,14 @@ internal sealed class OpenMeteoClient : IOpenMeteoClient
 		var windUnit = fahrenheit ? "mph" : "kmh";
 		var precipitationUnit = fahrenheit ? "inch" : "mm";
 
-		var url = $"{ForecastUrl}?latitude={lat}&longitude={lon}" +
-			"&current=temperature_2m,apparent_temperature,weather_code,is_day," +
-			"wind_speed_10m,wind_direction_10m,relative_humidity_2m,precipitation" +
-			"&hourly=temperature_2m,weather_code,precipitation_probability" +
-			$"&forecast_hours={ForecastHours}" +
-			"&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset" +
-			$"&timezone=auto&forecast_days={ForecastDays}&temperature_unit={temperatureUnit}" +
-			$"&wind_speed_unit={windUnit}&precipitation_unit={precipitationUnit}";
+		var url = $"{ForecastUrl}?latitude={lat}&longitude={lon}"
+			+ "&current=temperature_2m,apparent_temperature,weather_code,is_day,"
+			+ "wind_speed_10m,wind_direction_10m,relative_humidity_2m,precipitation"
+			+ "&hourly=temperature_2m,weather_code,precipitation_probability"
+			+ $"&forecast_hours={ForecastHours}"
+			+ "&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset"
+			+ $"&timezone=auto&forecast_days={ForecastDays}&temperature_unit={temperatureUnit}"
+			+ $"&wind_speed_unit={windUnit}&precipitation_unit={precipitationUnit}";
 
 		return await _http.GetFromJsonAsync<OpenMeteoForecastResponse>(url, _jsonOptions, cancellationToken);
 	}

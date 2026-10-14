@@ -48,7 +48,7 @@ public class PluginManifestJsonTests
 							}
 							""";
 
-		var result = _reader.ReadFromJson(json, versionDirectory: null, PluginId, Version);
+		var result = _reader.ReadFromJson(json, null, PluginId, Version);
 
 		Assert.That(result.Success, Is.True, result.ErrorMessage);
 		Assert.That(result.Manifest!.Id, Is.EqualTo(PluginId));
@@ -71,7 +71,7 @@ public class PluginManifestJsonTests
 							}
 							""";
 
-		var result = _reader.ReadFromJson(json, versionDirectory: null, PluginId, Version);
+		var result = _reader.ReadFromJson(json, null, PluginId, Version);
 
 		Assert.That(result.Success, Is.True, result.ErrorMessage);
 		Assert.That(result.Manifest!.Id, Is.EqualTo(PluginId));
@@ -99,7 +99,7 @@ public class PluginManifestJsonTests
 							}
 							""";
 
-		var result = _reader.ReadFromJson(json, versionDirectory: null, PluginId, Version);
+		var result = _reader.ReadFromJson(json, null, PluginId, Version);
 
 		Assert.That(result.Success, Is.True, result.ErrorMessage);
 		Assert.That(result.Manifest!.Entrypoints["linux-x64"].Runtime!.Kind,
@@ -127,7 +127,7 @@ public class PluginManifestJsonTests
 							}
 							""";
 
-		var result = _reader.ReadFromJson(json, versionDirectory: null, PluginId, Version);
+		var result = _reader.ReadFromJson(json, null, PluginId, Version);
 
 		Assert.That(result.Success, Is.False);
 		Assert.That(result.Error, Is.EqualTo(PluginManifestError.Malformed));

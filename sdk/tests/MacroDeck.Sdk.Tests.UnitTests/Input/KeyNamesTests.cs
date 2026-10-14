@@ -79,7 +79,9 @@ public class KeyNamesTests
 	[TestCase("")]
 	[TestCase(null)]
 	public void A_name_that_means_no_modifier_does_not_resolve(string? name)
-		=> Assert.That(KeyNames.TryParseModifier(name, out _), Is.False);
+	{
+		Assert.That(KeyNames.TryParseModifier(name, out _), Is.False);
+	}
 
 	[TestCase(KeyCode.A, "A")]
 	[TestCase(KeyCode.Z, "Z")]
@@ -99,7 +101,9 @@ public class KeyNamesTests
 	[TestCase(KeyCode.AudioVolumeMute, "AudioVolumeMute")]
 	[TestCase(KeyCode.None, "")]
 	public void The_name_of_a_key_is_the_one_the_combo_editor_stores(KeyCode key, string expected)
-		=> Assert.That(KeyNames.ToName(key), Is.EqualTo(expected));
+	{
+		Assert.That(KeyNames.ToName(key), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void Every_key_resolves_again_from_its_own_name()
@@ -132,25 +136,39 @@ public class KeyNamesTests
 	[TestCase(KeyCode.CapsLock)]
 	[TestCase(KeyCode.None)]
 	public void Another_key_stands_for_no_modifier(KeyCode key)
-		=> Assert.That(KeyNames.TryGetModifier(key, out _), Is.False);
+	{
+		Assert.That(KeyNames.TryGetModifier(key, out _), Is.False);
+	}
 
 	[Test]
 	public void Held_modifiers_are_named_in_the_order_the_editor_stores_them()
-		=> Assert.That(Names(KeyModifier.Meta | KeyModifier.Alt | KeyModifier.Shift | KeyModifier.Control), Is.EqualTo("Ctrl,Shift,Alt,Meta"));
+	{
+		Assert.That(Names(KeyModifier.Meta | KeyModifier.Alt | KeyModifier.Shift | KeyModifier.Control),
+			Is.EqualTo("Ctrl,Shift,Alt,Meta"));
+	}
 
 	[Test]
 	public void A_modifier_held_only_on_the_right_is_named_with_its_side()
-		=> Assert.That(Names(KeyModifier.RightControl | KeyModifier.RightShift), Is.EqualTo("RightCtrl,RightShift"));
+	{
+		Assert.That(Names(KeyModifier.RightControl | KeyModifier.RightShift), Is.EqualTo("RightCtrl,RightShift"));
+	}
 
 	[Test]
 	public void A_modifier_held_on_both_sides_is_named_like_the_editor_names_it()
-		=> Assert.That(Names(KeyModifier.Control | KeyModifier.RightControl), Is.EqualTo("Ctrl"));
+	{
+		Assert.That(Names(KeyModifier.Control | KeyModifier.RightControl), Is.EqualTo("Ctrl"));
+	}
 
 	[Test]
 	public void No_held_modifier_has_no_names()
-		=> Assert.That(KeyNames.ToModifierNames(KeyModifier.None), Is.Empty);
+	{
+		Assert.That(KeyNames.ToModifierNames(KeyModifier.None), Is.Empty);
+	}
 
-	private static string Names(KeyModifier modifiers) => string.Join(',', KeyNames.ToModifierNames(modifiers));
+	private static string Names(KeyModifier modifiers)
+	{
+		return string.Join(',', KeyNames.ToModifierNames(modifiers));
+	}
 
 	[Test]
 	public void The_names_of_held_modifiers_resolve_again_to_the_same_modifiers()
@@ -158,7 +176,8 @@ public class KeyNamesTests
 		var held = KeyModifier.Control | KeyModifier.RightShift | KeyModifier.Meta;
 
 		var resolved = KeyNames.ToModifierNames(held)
-			.Aggregate(KeyModifier.None, (all, name) => KeyNames.TryParseModifier(name, out var modifier) ? all | modifier : all);
+			.Aggregate(KeyModifier.None,
+				(all, name) => KeyNames.TryParseModifier(name, out var modifier) ? all | modifier : all);
 
 		Assert.That(resolved, Is.EqualTo(held));
 	}

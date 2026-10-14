@@ -4,7 +4,6 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Sessions;
-using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Tests.UnitTests.Auth;
@@ -105,7 +104,8 @@ internal sealed class ScreenSaverUiSessionTests
 			Assert.That(session.Surface.Attributes[UiScreenSaverSurfaceAttributes.ScreenSaverId].GetString(),
 				Is.EqualTo(_screenSaverId));
 			Assert.That(session.Surface.Attributes[UiScreenSaverSurfaceAttributes.Configuration]
-					.GetProperty("album").GetString(),
+					.GetProperty("album")
+					.GetString(),
 				Is.EqualTo("holiday"));
 		});
 	}
@@ -179,31 +179,47 @@ internal sealed class ScreenSaverUiSessionTests
 	{
 		private readonly HashSet<string> _providerIds;
 
-		public AcceptingProviderResolver(params string[] providerIds) => _providerIds = [.. providerIds];
+		public AcceptingProviderResolver(params string[] providerIds)
+		{
+			_providerIds = [.. providerIds];
+		}
 
 		public IUiSessionProvider? Resolve(string providerId)
-			=> _providerIds.Contains(providerId) ? new AcceptingProvider(providerId) : null;
+		{
+			return _providerIds.Contains(providerId) ? new AcceptingProvider(providerId) : null;
+		}
 	}
 
 	private sealed class AcceptingProvider : IUiSessionProvider
 	{
-		public AcceptingProvider(string providerId) => ProviderId = providerId;
+		public AcceptingProvider(string providerId)
+		{
+			ProviderId = providerId;
+		}
 
 		public string ProviderId { get; }
 
 		public Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command, CancellationToken cancellationToken)
-			=> Task.FromResult(UiSessionOpenOutcome.Accept(command.UiModelVersion));
+		{
+			return Task.FromResult(UiSessionOpenOutcome.Accept(command.UiModelVersion));
+		}
 
 		public Task CloseAsync(string sessionId, string reason, CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RequestSnapshotAsync(string sessionId, CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task DispatchEventAsync(
 			string sessionId,
 			UiSessionEventCommand command,
 			CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

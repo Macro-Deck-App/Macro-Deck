@@ -19,7 +19,8 @@ public class ActionParameterAlphaWireTests
 	[Test]
 	public void A_parameter_from_an_older_plugin_reads_as_not_allowing_alpha()
 	{
-		var dto = JsonSerializer.Deserialize<ActionParameterDto>("""{"name":"color","type":"Color","supportsReset":true}""",
+		var dto = JsonSerializer.Deserialize<ActionParameterDto>(
+			"""{"name":"color","type":"Color","supportsReset":true}""",
 			PluginProtocolJson.Options)!;
 
 		Assert.That(dto.AllowAlpha, Is.Null);
@@ -28,7 +29,8 @@ public class ActionParameterAlphaWireTests
 	[Test]
 	public void A_parameter_that_allows_alpha_round_trips()
 	{
-		var json = JsonSerializer.Serialize(new ActionParameterDto { Name = "color", Type = "Color", AllowAlpha = true },
+		var json = JsonSerializer.Serialize(
+			new ActionParameterDto { Name = "color", Type = "Color", AllowAlpha = true },
 			PluginProtocolJson.Options);
 
 		Assert.Multiple(() =>

@@ -32,7 +32,8 @@ public class RequestOutcomeMiddlewareTests
 	[TestCase(500, LogEventLevel.Warning)]
 	[TestCase(503, LogEventLevel.Warning)]
 	public async Task Failed_Request_Outcomes_Are_Logged_At_The_Information_Minimum(
-		int status, LogEventLevel expected)
+		int status,
+		LogEventLevel expected)
 	{
 		var events = await Run(status, LogEventLevel.Information);
 
@@ -55,9 +56,14 @@ public class RequestOutcomeMiddlewareTests
 			.CreateLogger();
 		var middleware = new RequestOutcomeMiddleware(_ => throw new InvalidOperationException("boom"), logger);
 
-		var httpContext = new DefaultHttpContext();
-		httpContext.Request.Method = "GET";
-		httpContext.Request.Path = "/api/thing";
+		var httpContext = new DefaultHttpContext
+		{
+			Request =
+			{
+				Method = "GET",
+				Path = "/api/thing"
+			}
+		};
 
 		Assert.ThrowsAsync<InvalidOperationException>(() => middleware.Invoke(httpContext));
 
@@ -95,9 +101,14 @@ public class RequestOutcomeMiddlewareTests
 			},
 			logger);
 
-		var httpContext = new DefaultHttpContext();
-		httpContext.Request.Method = "GET";
-		httpContext.Request.Path = path;
+		var httpContext = new DefaultHttpContext
+		{
+			Request =
+			{
+				Method = "GET",
+				Path = path
+			}
+		};
 
 		await middleware.Invoke(httpContext);
 
@@ -108,6 +119,9 @@ public class RequestOutcomeMiddlewareTests
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 }

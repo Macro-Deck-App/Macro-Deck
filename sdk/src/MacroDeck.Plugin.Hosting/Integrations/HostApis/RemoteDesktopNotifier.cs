@@ -11,8 +11,8 @@ internal sealed class RemoteDesktopNotifier(IHostInvoker invoker, HostStateCache
 	private readonly ILogger _logger = logger.ForContext<RemoteDesktopNotifier>();
 
 	public bool IsSupported
-		=> stateCache.Get<DesktopNotificationsStateDto>(Protocol.Callbacks.HostApis.DesktopNotifications)?.Supported ==
-			true;
+		=> stateCache.Get<DesktopNotificationsStateDto>(Protocol.Callbacks.HostApis.DesktopNotifications)?.Supported
+			== true;
 
 	public async Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
 	{

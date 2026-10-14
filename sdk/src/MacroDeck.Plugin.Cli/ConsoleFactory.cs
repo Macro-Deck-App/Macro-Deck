@@ -10,8 +10,10 @@ internal static class ConsoleFactory
 	/// <see cref="Console.Out" />/<see cref="Console.Error" />, so a real run is unaffected - but a host that
 	/// supplied its own writers (<c>CliEntryPoint.RunAsync</c>, and tests through it) sees a command's output
 	/// instead of it escaping to the process console.</summary>
-	public static CliConsole From(ParseResult parseResult) =>
-		From(parseResult, parseResult.InvocationConfiguration.Output, parseResult.InvocationConfiguration.Error);
+	public static CliConsole From(ParseResult parseResult)
+	{
+		return From(parseResult, parseResult.InvocationConfiguration.Output, parseResult.InvocationConfiguration.Error);
+	}
 
 	/// <summary>As <see cref="From(ParseResult)" />, but writing to <paramref name="output" /> and
 	/// <paramref name="error" /> instead of the real console - what <c>CliEntryPoint.RunAsync</c> uses for
@@ -23,7 +25,7 @@ internal static class ConsoleFactory
 		// parse error must not depend on that parse having succeeded - '--verbosity bogus' would otherwise
 		// take down the process with the raw stack trace this tool exists to avoid.
 		var verbosity = TryGetValue(parseResult, GlobalOptions.VerbosityOption, Verbosity.Normal);
-		var noColor = TryGetValue(parseResult, GlobalOptions.NoColorOption, defaultValue: false);
+		var noColor = TryGetValue(parseResult, GlobalOptions.NoColorOption, false);
 		return new CliConsole(verbosity, noColor, output, error);
 	}
 

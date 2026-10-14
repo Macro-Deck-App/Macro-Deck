@@ -4,7 +4,7 @@ namespace MacroDeckHost.Integrations.Delegation;
 
 internal sealed class DelegateSession : IDisposable
 {
-	private static readonly TimeSpan RenewMargin = TimeSpan.FromSeconds(60);
+	private static readonly TimeSpan _renewMargin = TimeSpan.FromSeconds(60);
 
 	private readonly IDelegateClient _client;
 	private readonly Uri _baseUrl;
@@ -72,7 +72,7 @@ internal sealed class DelegateSession : IDisposable
 
 	private bool TryGetCachedToken(out string token)
 	{
-		if (_token is { } value && _time.GetUtcNow() < _expiresAt - RenewMargin)
+		if (_token is { } value && _time.GetUtcNow() < _expiresAt - _renewMargin)
 		{
 			token = value;
 			return true;
@@ -120,5 +120,8 @@ internal sealed class DelegateSession : IDisposable
 		return _token;
 	}
 
-	public void Dispose() => _lock.Dispose();
+	public void Dispose()
+	{
+		_lock.Dispose();
+	}
 }

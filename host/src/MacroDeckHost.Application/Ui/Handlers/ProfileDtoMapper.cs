@@ -9,10 +9,14 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 public static class ProfileDtoMapper
 {
 	public static Profile MapJsonProfile(ProfileEntity entity, IColorReferenceResolver? colors = null)
-		=> MapJsonProfile(entity, constraint: null, colors);
+	{
+		return MapJsonProfile(entity, null, colors);
+	}
 
 	public static ProfilePlacement MapToPlacement(ProfileEntity entity)
-		=> new() { Id = entity.Id.ToString(), Order = entity.Order };
+	{
+		return new ProfilePlacement { Id = entity.Id.ToString(), Order = entity.Order };
+	}
 
 	public static Profile MapJsonProfile(
 		ProfileEntity entity,
@@ -49,7 +53,8 @@ public static class ProfileDtoMapper
 	}
 
 	private static ProfileLayoutConstraint? MapConstraint(DeviceGridConstraint? constraint)
-		=> constraint is null
+	{
+		return constraint is null
 			? null
 			: new ProfileLayoutConstraint
 			{
@@ -68,6 +73,7 @@ public static class ProfileDtoMapper
 				CornerRadiusHonoured = constraint.CornerRadiusHonoured,
 				CustomFolderViewsSupported = constraint.CustomFolderViewsSupported
 			};
+	}
 
 	private static ProfileLayoutCompatibility? MapCompatibility(
 		DeviceGridConstraint? constraint,

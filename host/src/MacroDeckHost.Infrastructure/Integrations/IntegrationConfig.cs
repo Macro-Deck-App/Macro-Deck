@@ -54,7 +54,8 @@ public class IntegrationConfig : IIntegrationConfig
 		return await secretService.Resolve(secretId);
 	}
 
-	public async Task SetStringAsync(Guid entryId,
+	public async Task SetStringAsync(
+		Guid entryId,
 		string key,
 		string? value,
 		CancellationToken cancellationToken = default)
@@ -70,7 +71,8 @@ public class IntegrationConfig : IIntegrationConfig
 		await store.UpdateValues(entryId, values);
 	}
 
-	public async Task SetSecretAsync(Guid entryId,
+	public async Task SetSecretAsync(
+		Guid entryId,
 		string key,
 		string value,
 		CancellationToken cancellationToken = default)
@@ -100,7 +102,10 @@ public class IntegrationConfig : IIntegrationConfig
 	}
 
 	private InvalidOperationException MissingEntry(Guid entryId, string key)
-		=> new($"Config entry {entryId} for integration {_integrationId} no longer exists; '{key}' was not stored.");
+	{
+		return new InvalidOperationException(
+			$"Config entry {entryId} for integration {_integrationId} no longer exists; '{key}' was not stored.");
+	}
 
 	private async Task<ConfigEntryRecord?> GetOwnedEntry(Guid entryId)
 	{
@@ -116,9 +121,11 @@ public class IntegrationConfig : IIntegrationConfig
 	// enumerate would be readable and writable, including another integration's secret. Mirrors
 	// IntegrationVariableApi's NotOwnedByIntegration rule for the equivalent variable-store boundary.
 	private ConfigEntryRecord? OwnedOrNull(ConfigEntryRecord? record)
-		=> record is not null && string.Equals(record.IntegrationId, _integrationId, StringComparison.Ordinal)
+	{
+		return record is not null && string.Equals(record.IntegrationId, _integrationId, StringComparison.Ordinal)
 			? record
 			: null;
+	}
 
 	private static bool TryGetValue(ConfigEntryRecord? record, string key, out JsonElement element)
 	{

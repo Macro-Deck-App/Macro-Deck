@@ -33,9 +33,15 @@ public sealed class KekEscrowStore
 		_timeProvider = timeProvider;
 	}
 
-	public static string PathFor(string keysDirectory) => Path.Combine(keysDirectory, FileName);
+	public static string PathFor(string keysDirectory)
+	{
+		return Path.Combine(keysDirectory, FileName);
+	}
 
-	public static bool Exists(string keysDirectory) => File.Exists(PathFor(keysDirectory));
+	public static bool Exists(string keysDirectory)
+	{
+		return File.Exists(PathFor(keysDirectory));
+	}
 
 	public KekEscrowDocument? Read(string keysDirectory)
 	{
@@ -197,5 +203,7 @@ public sealed class KekEscrowStore
 	// Binds a wrap to the key it recovers and the recovery key it claims to be under, so a wrap cannot
 	// be moved between escrow files or relabelled to survive a prune.
 	private static byte[] AssociatedData(int version, string kekId, string recoveryKeyId)
-		=> Encoding.UTF8.GetBytes($"{version}:{kekId}:{recoveryKeyId}");
+	{
+		return Encoding.UTF8.GetBytes($"{version}:{kekId}:{recoveryKeyId}");
+	}
 }

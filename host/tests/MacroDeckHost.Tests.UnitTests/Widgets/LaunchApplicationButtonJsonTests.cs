@@ -59,9 +59,9 @@ public class LaunchApplicationButtonJsonTests
 			new ParameterCatalogueAction(parameters),
 			new Dictionary<string, string>(),
 			"Label",
-			iconId: null,
+			null,
 			TestLocalization.Resolver,
-			culture: null);
+			null);
 
 		using var document = JsonDocument.Parse(data);
 		using var flows = JsonDocument.Parse(document.RootElement.GetProperty("flows").GetString()!);
@@ -93,6 +93,9 @@ public class LaunchApplicationButtonJsonTests
 		public LocalizedText Description => "Every parameter type at once";
 		public IReadOnlyList<ActionParameter> Parameters { get; }
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

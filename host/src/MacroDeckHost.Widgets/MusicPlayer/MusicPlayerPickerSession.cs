@@ -97,7 +97,7 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 				MusicPlayerWidgetIcons.EnsureRegistered(resources),
 				[
 					UiEventHandler.On(UiComponentEvents.Adjust, OnTyped),
-					UiEventHandler.On(UiComponentEvents.Change, OnTyped),
+					UiEventHandler.On(UiComponentEvents.Change, OnTyped)
 				],
 				[UiEventHandler.On(UiComponentEvents.Reveal, OnRevealed)]));
 
@@ -105,7 +105,7 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 		_view.HandlerFaulted += (_, fault)
 			=> Faulted?.Invoke(this, new UiSessionFaultedEventArgs(fault.Exception.Message, fault.Exception));
 
-		Reload(string.Empty, immediate: true);
+		Reload(string.Empty, true);
 	}
 
 	public event EventHandler? Changed;
@@ -195,7 +195,7 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 		// that no longer exist.
 		_window.Value = MusicPlayerPickerView.InitialWindow;
 		_revealAnchor = -1;
-		Reload(filter, immediate: false);
+		Reload(filter, false);
 	}
 
 	private void OnRevealed(UiEventData data)
@@ -437,7 +437,9 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 	}
 
 	private string? PendingArtworkId(MusicPlayerCatalogItem item)
-		=> item.ArtworkId is { Length: > 0 } artworkId && !_coverRequested.Contains(artworkId) ? artworkId : null;
+	{
+		return item.ArtworkId is { Length: > 0 } artworkId && !_coverRequested.Contains(artworkId) ? artworkId : null;
+	}
 
 	private void SchedulePublish()
 	{
@@ -484,7 +486,7 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 				OwnerId = MusicPlayerWidgetIcons.OwnerId,
 				Name = $"pick.{Slug(artworkId)}",
 				MediaType = image.ContentType,
-				Content = image.Content,
+				Content = image.Content
 			});
 		}
 		catch (OperationCanceledException)

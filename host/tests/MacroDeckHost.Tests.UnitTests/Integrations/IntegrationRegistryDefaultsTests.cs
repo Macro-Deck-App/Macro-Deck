@@ -108,9 +108,15 @@ internal sealed class IntegrationRegistryDefaultsTests
 	{
 		private Dictionary<string, bool> _states = new();
 
-		public IReadOnlyDictionary<string, bool> Load() => _states;
+		public IReadOnlyDictionary<string, bool> Load()
+		{
+			return _states;
+		}
 
-		public void Save(IReadOnlyDictionary<string, bool> states) => _states = new Dictionary<string, bool>(states);
+		public void Save(IReadOnlyDictionary<string, bool> states)
+		{
+			_states = new Dictionary<string, bool>(states);
+		}
 	}
 
 	[MacroDeckIntegration]
@@ -124,9 +130,15 @@ internal sealed class IntegrationRegistryDefaultsTests
 		public bool IsInitialized => true;
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	[MacroDeckIntegration(EnabledByDefault = false)]
@@ -140,9 +152,15 @@ internal sealed class IntegrationRegistryDefaultsTests
 		public bool IsInitialized => true;
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	[MacroDeckIntegration]
@@ -156,11 +174,20 @@ internal sealed class IntegrationRegistryDefaultsTests
 		public bool IsInitialized => true;
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	[MacroDeckIntegration]
@@ -175,11 +202,20 @@ internal sealed class IntegrationRegistryDefaultsTests
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool RequiresConfiguration => false;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	[MacroDeckIntegration(EnabledByDefault = false)]
@@ -194,11 +230,20 @@ internal sealed class IntegrationRegistryDefaultsTests
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool RequiresConfiguration => false;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RemotePluginIntegration : IIntegration
@@ -211,9 +256,15 @@ internal sealed class IntegrationRegistryDefaultsTests
 		public bool IsInitialized => true;
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class RemoteConfiguredPluginIntegration : IIntegration, IConfigFlowProvider
@@ -226,10 +277,19 @@ internal sealed class IntegrationRegistryDefaultsTests
 		public bool IsInitialized => true;
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

@@ -43,7 +43,8 @@ public class StagedRestoreRecoveryKeyPointerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Preference(AppPreferenceService.BackupRecoveryKeySecretIdKey), Is.EqualTo(ArchiveSecretId));
-			Assert.That(Preference(AppPreferenceService.BackupRecoveryKeyExportedAtKey), Is.EqualTo("archive-exported"));
+			Assert.That(Preference(AppPreferenceService.BackupRecoveryKeyExportedAtKey),
+				Is.EqualTo("archive-exported"));
 			Assert.That(Preference("theme"), Is.EqualTo("local"), "app settings were not part of this restore");
 			Assert.That(Preference("telemetry.installationId"), Is.EqualTo("local"));
 		});
@@ -96,11 +97,13 @@ public class StagedRestoreRecoveryKeyPointerTests
 			Execute(connection, "DELETE FROM secret;");
 			Execute(connection, $"INSERT INTO secret VALUES ('{LocalSecretId}', 0, 'local-key', 'x', 'x');");
 		}
+
 		SetArchivePointer(LocalSecretId);
 
 		Apply(["secret", "app_preference"]);
 
-		Assert.That(Preference(AppPreferenceService.BackupRecoveryKeyExportedAtKey), Is.EqualTo("local-exported"),
+		Assert.That(Preference(AppPreferenceService.BackupRecoveryKeyExportedAtKey),
+			Is.EqualTo("local-exported"),
 			"the key did not change, so neither did whether the user has saved it");
 	}
 
@@ -123,7 +126,7 @@ public class StagedRestoreRecoveryKeyPointerTests
 		};
 
 		File.WriteAllText(Path.Combine(_paths.RestoreStagingDirectory, PendingRestoreDocument.FileName),
-			JsonSerializer.Serialize(document, Json));
+			JsonSerializer.Serialize(document, _json));
 
 		Assert.That(StagedRestoreApplier.ApplyPending(_paths), Is.EqualTo(StagedRestoreOutcome.Applied));
 	}
@@ -194,6 +197,6 @@ public class StagedRestoreRecoveryKeyPointerTests
 		command.ExecuteNonQuery();
 	}
 
-	private static readonly JsonSerializerOptions Json =
+	private static readonly JsonSerializerOptions _json =
 		new(JsonSerializerDefaults.Web) { Converters = { new JsonStringEnumConverter() } };
 }

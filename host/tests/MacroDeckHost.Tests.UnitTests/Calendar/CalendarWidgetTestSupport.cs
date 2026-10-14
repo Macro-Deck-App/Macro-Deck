@@ -10,7 +10,6 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Calendar;
 using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
-using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -58,7 +57,9 @@ internal sealed class CalendarWidgetHarness
 	public CalendarUiProvider Provider { get; }
 
 	public static string CalendarKey(string calendarId = "main", string account = "alice")
-		=> CalendarKeys.Calendar("app.google::" + account, calendarId);
+	{
+		return CalendarKeys.Calendar("app.google::" + account, calendarId);
+	}
 
 	public CalendarWidgetHarness With(CalendarEvent calendarEvent, string account = "alice")
 	{
@@ -66,21 +67,27 @@ internal sealed class CalendarWidgetHarness
 		return this;
 	}
 
-	public Task SyncAsync() => Cache.SyncAsync(CancellationToken.None);
+	public Task SyncAsync()
+	{
+		return Cache.SyncAsync(CancellationToken.None);
+	}
 
 	public async Task<IUiSession> OpenWidgetAsync(string layout, object data, bool sample = false)
-		=> (await Provider.CreateSessionAsync(
-			new UiSessionRequest
+	{
+		return (await Provider.CreateSessionAsync(new UiSessionRequest
 			{
 				Surface = WidgetSurface(CalendarWidgetTypes.QualifiedId, WithLayout(layout, data), sample),
-				UiModelVersion = 1,
+				UiModelVersion = 1
 			},
 			CancellationToken.None))!;
+	}
 
 	public async Task<IUiSession> OpenConfigAsync(object data)
-		=> (await Provider.CreateSessionAsync(
-			new UiSessionRequest { Surface = ConfigSurface(CalendarWidgetTypes.QualifiedId, data), UiModelVersion = 1 },
+	{
+		return (await Provider.CreateSessionAsync(new UiSessionRequest
+				{ Surface = ConfigSurface(CalendarWidgetTypes.QualifiedId, data), UiModelVersion = 1 },
 			CancellationToken.None))!;
+	}
 
 	public static JsonElement WithLayout(string layout, object data)
 	{
@@ -91,24 +98,30 @@ internal sealed class CalendarWidgetHarness
 	}
 
 	public static string WithLayout(string layout, string data)
-		=> WithLayout(layout, (object)JsonDocument.Parse(data).RootElement).GetRawText();
+	{
+		return WithLayout(layout, (object)JsonDocument.Parse(data).RootElement).GetRawText();
+	}
 
 	public async Task<IUiSession> OpenDialogAsync(string calendarKey, string eventId)
-		=> (await Provider.CreateSessionAsync(
+	{
+		return (await Provider.CreateSessionAsync(
 			new UiSessionRequest { Surface = DialogSurface(calendarKey, eventId), UiModelVersion = 1 },
 			CancellationToken.None))!;
+	}
 
 	public async Task<IUiSession> OpenAgendaDialogAsync(Guid widgetId)
-		=> (await Provider.CreateSessionAsync(
+	{
+		return (await Provider.CreateSessionAsync(
 			new UiSessionRequest { Surface = AgendaDialogSurface(widgetId), UiModelVersion = 1 },
 			CancellationToken.None))!;
+	}
 
 	public static UiSurface WidgetSurface(string widgetType, object data, bool sample = false)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data)
 		};
 
 		if (sample)
@@ -117,19 +130,21 @@ internal sealed class CalendarWidgetHarness
 		}
 		else
 		{
-			attributes[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString());
+			attributes[UiWidgetSurfaceAttributes.WidgetId]
+				= JsonSerializer.SerializeToElement(Guid.NewGuid().ToString());
 		}
 
 		return new UiSurface
 		{
 			Kind = sample ? UiSurfaceKinds.Preview : UiSurfaceKinds.Widget,
 			SessionMode = UiSessionModes.Shared,
-			Attributes = attributes,
+			Attributes = attributes
 		};
 	}
 
 	public static UiSurface DialogSurface(string calendarKey, string eventId)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Dialog,
 			SessionMode = UiSessionModes.Exclusive,
@@ -140,40 +155,47 @@ internal sealed class CalendarWidgetHarness
 				[UiDialogSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new Dictionary<string, string>
 				{
 					[CalendarUiProvider.DialogCalendarKey] = calendarKey,
-					[CalendarUiProvider.DialogEventKey] = eventId,
-				}),
-			},
+					[CalendarUiProvider.DialogEventKey] = eventId
+				})
+			}
 		};
+	}
 
 	public static UiSurface AgendaDialogSurface(Guid widgetId)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Dialog,
 			SessionMode = UiSessionModes.Exclusive,
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiDialogSurfaceAttributes.ModalId] = JsonSerializer.SerializeToElement("modal-1"),
-				[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(CalendarUiProvider.AgendaDialogViewId),
+				[UiDialogSurfaceAttributes.ViewId]
+					= JsonSerializer.SerializeToElement(CalendarUiProvider.AgendaDialogViewId),
 				[UiDialogSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new Dictionary<string, string>
 				{
-					[CalendarUiProvider.AgendaDialogWidgetKey] = widgetId.ToString(),
-				}),
-			},
+					[CalendarUiProvider.AgendaDialogWidgetKey] = widgetId.ToString()
+				})
+			}
 		};
+	}
 
 	public static UiSurface ConfigSurface(string widgetType, object data)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
-				[UiConfigSurfaceAttributes.EntryPoint] = JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
+				[UiConfigSurfaceAttributes.EntryPoint]
+					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(data),
-			},
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(data)
+			}
 		};
+	}
 
 	public static IServiceScopeFactory ScopeFactory(FakeLocalizationPreferences? preferences = null)
 	{
@@ -186,14 +208,19 @@ internal sealed class CalendarWidgetHarness
 
 	private sealed class TwentyFourHourClock : ISystemHourCycleReader
 	{
-		public string? Read() => HourCycles.H23;
+		public string? Read()
+		{
+			return HourCycles.H23;
+		}
 	}
 }
 
 internal static class CalendarFolders
 {
 	public static WidgetEntity AddCalendar(this MutableFolderCache folders, string layout, string data)
-		=> folders.Add(CalendarWidgetTypes.QualifiedId, CalendarWidgetHarness.WithLayout(layout, data));
+	{
+		return folders.Add(CalendarWidgetTypes.QualifiedId, CalendarWidgetHarness.WithLayout(layout, data));
+	}
 }
 
 internal static class CalendarTree
@@ -209,15 +236,22 @@ internal static class CalendarTree
 	}
 
 	public static UiNode? Find(UiNode root, string key)
-		=> Flatten(root).FirstOrDefault(node => node.Id == key || node.Id.EndsWith("." + key, StringComparison.Ordinal));
+	{
+		return Flatten(root)
+			.FirstOrDefault(node => node.Id == key || node.Id.EndsWith("." + key, StringComparison.Ordinal));
+	}
 
 	public static UiNode Get(UiNode root, string key)
-		=> Find(root, key) ?? throw new AssertionException($"No node keyed '{key}' is in the tree.");
+	{
+		return Find(root, key) ?? throw new AssertionException($"No node keyed '{key}' is in the tree.");
+	}
 
 	public static string? Text(UiNode node, string culture = "en")
-		=> node.Properties.TryGetValue(UiComponentProperties.Text, out var text)
+	{
+		return node.Properties.TryGetValue(UiComponentProperties.Text, out var text)
 			? TestLocalization.Resolve(Read(text), culture)
 			: null;
+	}
 
 	// The converter reads arguments back as plain values only, so a reference nested in another one is
 	// rebuilt here the way the clients read it.
@@ -242,7 +276,7 @@ internal static class CalendarTree
 					JsonValueKind.Number => argument.Value.GetDouble(),
 					JsonValueKind.True => true,
 					JsonValueKind.False => false,
-					_ => null,
+					_ => null
 				};
 			}
 		}
@@ -253,16 +287,26 @@ internal static class CalendarTree
 	}
 
 	public static List<string> Texts(UiNode root, string culture = "en")
-		=> [.. Flatten(root).Select(node => Text(node, culture)).OfType<string>()];
+	{
+		return [.. Flatten(root).Select(node => Text(node, culture)).OfType<string>()];
+	}
 
-	public static string Resolve(LocalizedText text, string culture = "en") => TestLocalization.Resolve(text, culture)!;
+	public static string Resolve(LocalizedText text, string culture = "en")
+	{
+		return TestLocalization.Resolve(text, culture)!;
+	}
 
 	public static bool IsPressable(UiNode node)
-		=> node.Properties.TryGetValue(UiComponentProperties.Events, out var events) &&
-			events.EnumerateArray().Any(item => item.GetRawText().Contains(UiComponentEvents.Press, StringComparison.Ordinal));
+	{
+		return node.Properties.TryGetValue(UiComponentProperties.Events, out var events)
+			&& events.EnumerateArray()
+				.Any(item => item.GetRawText().Contains(UiComponentEvents.Press, StringComparison.Ordinal));
+	}
 
 	public static void Press(IUiSession session, UiNode node)
-		=> session.Dispatch(new UiEvent { NodeId = node.Id, Name = UiComponentEvents.Press });
+	{
+		session.Dispatch(new UiEvent { NodeId = node.Id, Name = UiComponentEvents.Press });
+	}
 
 	public static async Task WaitForAsync(Func<bool> condition, string failure)
 	{

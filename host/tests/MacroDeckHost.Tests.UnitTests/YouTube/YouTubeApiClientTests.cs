@@ -185,7 +185,8 @@ internal sealed class YouTubeApiClientTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Query(_handler.RequestedUris[0])["part"], Is.EqualTo("snippet,statistics,liveStreamingDetails"));
+			Assert.That(Query(_handler.RequestedUris[0])["part"],
+				Is.EqualTo("snippet,statistics,liveStreamingDetails"));
 			Assert.That(video!.LikeCount, Is.EqualTo(9007199254740993L));
 			Assert.That(video.ConcurrentViewers, Is.EqualTo(42));
 			Assert.That(video.ActiveLiveChatId, Is.EqualTo("KicKGFVDYWJj"));
@@ -328,7 +329,8 @@ internal sealed class YouTubeApiClientTests
 	[Test]
 	public void A_token_refused_after_the_refresh_is_not_retried_again()
 	{
-		const string unauthorized = """{"error":{"code":401,"message":"Invalid Credentials","status":"UNAUTHENTICATED"}}""";
+		const string unauthorized
+			= """{"error":{"code":401,"message":"Invalid Credentials","status":"UNAUTHENTICATED"}}""";
 		_handler.Enqueue(HttpStatusCode.Unauthorized, unauthorized).Enqueue(HttpStatusCode.Unauthorized, unauthorized);
 
 		var error = Assert.ThrowsAsync<YouTubeApiException>(() =>
@@ -567,7 +569,9 @@ internal sealed class YouTubeApiClientTests
 		_handler.Enqueue(HttpStatusCode.OK,
 			"""{"kind":"youtube#liveBroadcast","id":"b1","status":{"lifeCycleStatus":"liveStarting","privacyStatus":"public"}}""");
 
-		var status = await _client.TransitionBroadcastAsync("b1", YouTubeBroadcastTransition.Live, CancellationToken.None);
+		var status = await _client.TransitionBroadcastAsync("b1",
+			YouTubeBroadcastTransition.Live,
+			CancellationToken.None);
 
 		var query = Query(_handler.RequestedUris[0]);
 		Assert.Multiple(() =>
@@ -618,12 +622,14 @@ internal sealed class YouTubeApiClientTests
 	}
 
 	private static Dictionary<string, string> Query(Uri uri)
-		=> uri.Query.TrimStart('?')
+	{
+		return uri.Query.TrimStart('?')
 			.Split('&', StringSplitOptions.RemoveEmptyEntries)
 			.Select(pair => pair.Split('=', 2))
 			.ToDictionary(pair => Uri.UnescapeDataString(pair[0]),
 				pair => Uri.UnescapeDataString(pair.Length > 1 ? pair[1] : string.Empty),
 				StringComparer.Ordinal);
+	}
 
 	private const string ChatPageBody =
 		"""

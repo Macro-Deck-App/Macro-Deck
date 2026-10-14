@@ -43,7 +43,10 @@ internal static partial class WebClientTargets
 	/// Ids become route templates and file paths, so the character set is closed rather than merely
 	/// sanitised: nothing here may introduce a path segment, a traversal or a route parameter.
 	/// </summary>
-	internal static bool IsValidId(string id) => IdRegex().IsMatch(id);
+	internal static bool IsValidId(string id)
+	{
+		return IdRegex().IsMatch(id);
+	}
 
 	[GeneratedRegex("^[a-z0-9][a-z0-9-]{0,31}$")]
 	private static partial Regex IdRegex();

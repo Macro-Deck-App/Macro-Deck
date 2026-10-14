@@ -237,10 +237,10 @@ internal sealed class WebNowPlayingServer : IDisposable
 		var headers = await ReadRequestHeadersAsync(stream, cancellationToken);
 		var key = headers?.GetValueOrDefault("Sec-WebSocket-Key");
 
-		if (headers is null ||
-			string.IsNullOrWhiteSpace(key) ||
-			!string.Equals(headers.GetValueOrDefault("Upgrade"), "websocket", StringComparison.OrdinalIgnoreCase) ||
-			!IsAllowedOrigin(headers.GetValueOrDefault("Origin")))
+		if (headers is null
+			|| string.IsNullOrWhiteSpace(key)
+			|| !string.Equals(headers.GetValueOrDefault("Upgrade"), "websocket", StringComparison.OrdinalIgnoreCase)
+			|| !IsAllowedOrigin(headers.GetValueOrDefault("Origin")))
 		{
 			await stream.WriteAsync(
 				"HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"u8.ToArray(),
@@ -249,8 +249,8 @@ internal sealed class WebNowPlayingServer : IDisposable
 		}
 
 		var accept = Convert.ToBase64String(SHA1.HashData(Encoding.ASCII.GetBytes(key.Trim() + WebSocketAcceptGuid)));
-		var response = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n" +
-			$"Sec-WebSocket-Accept: {accept}\r\n\r\n";
+		var response = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+			+ $"Sec-WebSocket-Accept: {accept}\r\n\r\n";
 		await stream.WriteAsync(Encoding.ASCII.GetBytes(response), cancellationToken);
 		return true;
 	}
@@ -258,9 +258,11 @@ internal sealed class WebNowPlayingServer : IDisposable
 	// A web page can open a socket to a loopback port too; only the extension's own origins, or a local
 	// process that sends none, may feed players in and receive playback commands.
 	private static bool IsAllowedOrigin(string? origin)
-		=> origin is null ||
-			(Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
-				_extensionSchemes.Contains(uri.Scheme, StringComparer.OrdinalIgnoreCase));
+	{
+		return origin is null
+			|| Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+			&& _extensionSchemes.Contains(uri.Scheme, StringComparer.OrdinalIgnoreCase);
+	}
 
 	private static async Task<Dictionary<string, string>?> ReadRequestHeadersAsync(
 		NetworkStream stream,

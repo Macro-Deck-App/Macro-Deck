@@ -16,7 +16,9 @@ public class LockScreenSettingsHandlersTests
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -35,7 +37,12 @@ public class LockScreenSettingsHandlersTests
 	}
 
 	private static AppPreferenceService CreateService()
-		=> new(new FakeAppPreferenceRepository(), new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+	{
+		return new AppPreferenceService(new FakeAppPreferenceRepository(),
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
+	}
 
 	[Test]
 	public async Task Default_is_disabled()

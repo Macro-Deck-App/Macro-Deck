@@ -10,7 +10,7 @@ internal static class MacOsWindows
 	private const string CoreFoundation = MacOsAccessibility.CoreFoundation;
 
 	private const uint WindowListOptionOnScreenOnly = 1; // kCGWindowListOptionOnScreenOnly
-	private const int CFNumberSInt32Type = 3; // kCFNumberSInt32Type
+	private const int CfNumberSInt32Type = 3; // kCFNumberSInt32Type
 
 	public static int? GetForegroundOwnerPid()
 	{
@@ -33,12 +33,12 @@ internal static class MacOsWindows
 			for (nint i = 0; i < count; i++)
 			{
 				var window = CFArrayGetValueAtIndex(windows, i);
-				if (window == IntPtr.Zero || !TryReadCFInt(window, layerKey, out var layer) || layer != 0)
+				if (window == IntPtr.Zero || !TryReadCfInt(window, layerKey, out var layer) || layer != 0)
 				{
 					continue;
 				}
 
-				if (TryReadCFInt(window, pidKey, out var pid))
+				if (TryReadCfInt(window, pidKey, out var pid))
 				{
 					return pid;
 				}
@@ -52,11 +52,11 @@ internal static class MacOsWindows
 		return null;
 	}
 
-	public static bool TryReadCFInt(IntPtr dictionary, IntPtr key, out int value)
+	public static bool TryReadCfInt(IntPtr dictionary, IntPtr key, out int value)
 	{
 		value = 0;
 		var number = CFDictionaryGetValue(dictionary, key);
-		return number != IntPtr.Zero && CFNumberGetValue(number, CFNumberSInt32Type, out value);
+		return number != IntPtr.Zero && CFNumberGetValue(number, CfNumberSInt32Type, out value);
 	}
 
 	[DllImport(ApplicationServices)]

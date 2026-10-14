@@ -22,7 +22,10 @@ internal sealed class FakeLinkSession : INativeLinkSession
 		EverLinked = true;
 	}
 
-	public void End() => _ended.TrySetResult();
+	public void End()
+	{
+		_ended.TrySetResult();
+	}
 
 	public bool StopRequested { get; private set; }
 
@@ -40,10 +43,15 @@ internal sealed class FakeLinkSession : INativeLinkSession
 
 internal sealed class FakePipe : IUsbBulkPipe
 {
-	public UsbTransferResult Read(byte[] buffer, int timeoutMilliseconds) => new(UsbTransferStatus.TimedOut, 0);
+	public UsbTransferResult Read(byte[] buffer, int timeoutMilliseconds)
+	{
+		return new UsbTransferResult(UsbTransferStatus.TimedOut, 0);
+	}
 
 	public UsbTransferResult Write(byte[] buffer, int offset, int count, int timeoutMilliseconds)
-		=> new(UsbTransferStatus.Completed, count);
+	{
+		return new UsbTransferResult(UsbTransferStatus.Completed, count);
+	}
 
 	public void Dispose()
 	{
@@ -80,7 +88,8 @@ internal sealed class FakeUsb : IUsbHost, IUsbDeviceList
 
 	public IReadOnlyList<UsbDeviceInfo> Devices => Attached.Select(entry => entry.Device).ToList();
 
-	public void Plug(ushort productId,
+	public void Plug(
+		ushort productId,
 		IReadOnlyList<UsbInterfaceInfo> interfaces,
 		string? product = "Example Phone",
 		string? serial = "EXAMPLE0001",
@@ -97,10 +106,18 @@ internal sealed class FakeUsb : IUsbHost, IUsbDeviceList
 	}
 
 	public void SwitchToAccessoryMode(UsbPlugKey? plug = null, string? serial = "EXAMPLE0001")
-		=> Plug(0x2D01, [new UsbInterfaceInfo(0, 0xFF, 0xFF, 0x00, 0)], serial: serial,
-			vendorId: AccessoryProtocol.GoogleVendorId, plug: plug);
+	{
+		Plug(0x2D01,
+			[new UsbInterfaceInfo(0, 0xFF, 0xFF, 0x00, 0)],
+			serial: serial,
+			vendorId: AccessoryProtocol.GoogleVendorId,
+			plug: plug);
+	}
 
-	public void Unplug() => Attached.Clear();
+	public void Unplug()
+	{
+		Attached.Clear();
+	}
 
 	public IUsbDeviceList Enumerate()
 	{
@@ -109,7 +126,9 @@ internal sealed class FakeUsb : IUsbHost, IUsbDeviceList
 	}
 
 	public IReadOnlyList<UsbInterfaceInfo>? ReadInterfaces(UsbDeviceInfo device)
-		=> Attached.Single(entry => entry.Device == device).Interfaces;
+	{
+		return Attached.Single(entry => entry.Device == device).Interfaces;
+	}
 
 	public UsbDeviceStrings? ReadStrings(UsbDeviceInfo device, IReadOnlyCollection<byte> interfaceNameIndexes)
 	{
@@ -126,7 +145,10 @@ internal sealed class FakeUsb : IUsbHost, IUsbDeviceList
 		return SwitchOutcome;
 	}
 
-	public IUsbBulkPipe? OpenAccessory(UsbDeviceInfo device) => new FakePipe();
+	public IUsbBulkPipe? OpenAccessory(UsbDeviceInfo device)
+	{
+		return new FakePipe();
+	}
 
 	public void Dispose()
 	{

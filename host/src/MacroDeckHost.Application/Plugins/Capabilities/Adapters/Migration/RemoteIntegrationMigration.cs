@@ -110,15 +110,17 @@ internal sealed class RemoteIntegrationMigration : IIntegrationMigration
 					configuration.Secrets.ToDictionary(pair => pair.Key,
 						pair => new MigratedSecret(pair.Value.Value, ParseKind(pair.Value.Kind)),
 						StringComparer.Ordinal)))
-				.ToList() ??
-			[];
+				.ToList()
+			?? [];
 	}
 
 	/// <summary>An unrecognised kind is treated as the stricter one, which is never shown back to anyone.</summary>
 	private static MigratedSecretKind ParseKind(string kind)
-		=> string.Equals(kind, nameof(MigratedSecretKind.Password), StringComparison.OrdinalIgnoreCase)
+	{
+		return string.Equals(kind, nameof(MigratedSecretKind.Password), StringComparison.OrdinalIgnoreCase)
 			? MigratedSecretKind.Password
 			: MigratedSecretKind.Secret;
+	}
 
 	private async Task<TResult?> Invoke<TResult>(
 		string operation,

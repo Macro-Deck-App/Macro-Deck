@@ -2,7 +2,6 @@ using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
-using MacroDeckHost.Application.Services;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Tests.UnitTests.Adb;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -26,9 +25,15 @@ public class HostStatePusherWidgetTypeTests
 	{
 		_registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		_connection = new FakePluginConnection();
-		_pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
-			new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
-			new FakeAdbManager(), new FixedAdbAccessPolicy(PluginAdbAccess.Available), Serilog.Core.Logger.None);
+		_pusher = new HostStatePusher(_registry,
+			new FakeDeckNavigator(),
+			new FakeScriptApi(),
+			new FakeWidgetApi(),
+			new StubEventBindingTracker(),
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			new FakeAdbManager(),
+			new FixedAdbAccessPolicy(PluginAdbAccess.Available),
+			Serilog.Core.Logger.None);
 
 		await _registry.Create(new PluginSessionRecord
 		{
@@ -46,7 +51,10 @@ public class HostStatePusherWidgetTypeTests
 	}
 
 	[TearDown]
-	public void TearDown() => _pusher.Dispose();
+	public void TearDown()
+	{
+		_pusher.Dispose();
+	}
 
 	[Test]
 	public async Task A_widget_type_change_pushes_the_widget_list_again()

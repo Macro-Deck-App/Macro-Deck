@@ -36,42 +36,60 @@ public sealed class WidgetUiProviderRegistry
 		_unavailable = unavailable;
 	}
 
-	public static string ProviderIdFor(Guid widgetId, string principal) => $"widget:{widgetId:N}:{principal}";
+	public static string ProviderIdFor(Guid widgetId, string principal)
+	{
+		return $"widget:{widgetId:N}:{principal}";
+	}
 
 	public static string GhostProviderIdFor(Guid widgetId, string principal)
-		=> $"widget:{widgetId:N}:{principal}:ghost";
+	{
+		return $"widget:{widgetId:N}:{principal}:ghost";
+	}
 
 	/// <summary>A widget's configuration editor's own id. <paramref name="widgetId" /> is part of it for
 	/// the same reason a draft preview's id carries <c>variableScopeWidgetId</c>: a session is reused per
 	/// provider id, so two editors open on two different widgets of the same type would otherwise share
 	/// one session and each would be handed whichever widget's editor opened first.</summary>
-	public static string ConfigProviderIdFor(Guid widgetId, string principal) =>
-		$"widget-config:{widgetId:N}:{principal}";
+	public static string ConfigProviderIdFor(Guid widgetId, string principal)
+	{
+		return $"widget-config:{widgetId:N}:{principal}";
+	}
 
 	/// <summary>A draft preview's own id. <paramref name="variableScopeWidgetId" /> is part of it for the
 	/// same reason <see cref="SamplePreviewProviderIdFor" /> is a separate prefix: a session is reused per
 	/// provider id, so two editors previewing different widgets of the same type would otherwise share one
 	/// session and resolve their variables against whichever scope opened first.</summary>
 	public static string PreviewProviderIdFor(string widgetType, string principal, Guid? variableScopeWidgetId = null)
-		=> variableScopeWidgetId is { } scope
+	{
+		return variableScopeWidgetId is { } scope
 			? $"widget-preview:{widgetType}:{principal}:{scope:N}"
 			: $"widget-preview:{widgetType}:{principal}";
+	}
 
 	/// <summary>A sample preview's own id. Separate from <see cref="PreviewProviderIdFor" /> because a
 	/// session is reused per provider id: the picker's sample and an editor's draft preview of the same
 	/// type would otherwise be handed each other's tree.</summary>
 	public static string SamplePreviewProviderIdFor(string widgetType, string principal)
-		=> $"widget-preview-sample:{widgetType}:{principal}";
+	{
+		return $"widget-preview-sample:{widgetType}:{principal}";
+	}
 
 	// Principal-free: a hardware press opens under a fresh principal every time, and a per-principal id
 	// would leave one cached adapter behind per press.
 	public static string UnavailableProviderIdFor(Guid widgetId, bool ghost)
-		=> ghost ? $"{UnavailablePrefix}ghost:{widgetId:N}" : $"{UnavailablePrefix}live:{widgetId:N}";
+	{
+		return ghost ? $"{UnavailablePrefix}ghost:{widgetId:N}" : $"{UnavailablePrefix}live:{widgetId:N}";
+	}
 
-	public static string UnavailableConfigProviderIdFor(Guid widgetId) => $"{UnavailablePrefix}config:{widgetId:N}";
+	public static string UnavailableConfigProviderIdFor(Guid widgetId)
+	{
+		return $"{UnavailablePrefix}config:{widgetId:N}";
+	}
 
-	public static string UnavailablePreviewProviderIdFor(string widgetType) =>
-		$"{UnavailablePrefix}preview:{widgetType}";
+	public static string UnavailablePreviewProviderIdFor(string widgetType)
+	{
+		return $"{UnavailablePrefix}preview:{widgetType}";
+	}
 
 	public IUiSessionProvider? Resolve(string providerId)
 	{
@@ -119,16 +137,16 @@ public sealed class WidgetUiProviderRegistry
 		var configPrefix = ConfigPrefix + widgetId.ToString("N") + ":";
 		string[] placeholders =
 		[
-			UnavailableProviderIdFor(widgetId, ghost: false),
-			UnavailableProviderIdFor(widgetId, ghost: true),
+			UnavailableProviderIdFor(widgetId, false),
+			UnavailableProviderIdFor(widgetId, true),
 			UnavailableConfigProviderIdFor(widgetId)
 		];
 
 		foreach (var key in _adapters.Keys)
 		{
-			if (!key.StartsWith(liveOrGhostPrefix, StringComparison.Ordinal) &&
-				!key.StartsWith(configPrefix, StringComparison.Ordinal) &&
-				!placeholders.Contains(key, StringComparer.Ordinal))
+			if (!key.StartsWith(liveOrGhostPrefix, StringComparison.Ordinal)
+				&& !key.StartsWith(configPrefix, StringComparison.Ordinal)
+				&& !placeholders.Contains(key, StringComparer.Ordinal))
 			{
 				continue;
 			}
@@ -160,15 +178,19 @@ public sealed class WidgetUiProviderRegistry
 	}
 
 	private InProcessUiSessionProvider Adapter(string providerId, IUiProvider provider)
-		=> _adapters.GetOrAdd(providerId,
+	{
+		return _adapters.GetOrAdd(providerId,
 			static (id, state) => new InProcessUiSessionProvider(id, state.Provider, state.Sink(), state.Logger),
 			(Provider: provider, Sink: _sink, Logger: _logger));
+	}
 
 	private string? FindWidgetType(Guid widgetId)
-		=> _folderCache.GetAllFolders()
+	{
+		return _folderCache.GetAllFolders()
 			.SelectMany(folder => folder.Widgets)
 			.FirstOrDefault(widget => widget.Id == widgetId)
 			?.Type;
+	}
 
 	private static bool TryParseLive(string providerId, out Guid widgetId)
 	{

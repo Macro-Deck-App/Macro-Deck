@@ -20,8 +20,8 @@ public static class LoopbackSecret
 	private const string ProofLabel = "macro-deck-loopback-proof:";
 
 	private static byte[]? _secret;
-	private static readonly Dictionary<string, DateTimeOffset> RedeemedCodes = new(StringComparer.Ordinal);
-	private static readonly object RedeemedGate = new();
+	private static readonly Dictionary<string, DateTimeOffset> _redeemedCodes = new(StringComparer.Ordinal);
+	private static readonly object _redeemedGate = new();
 
 	public static void Set(string hex)
 	{
@@ -56,7 +56,10 @@ public static class LoopbackSecret
 		}
 	}
 
-	public static string Generate() => Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretLength));
+	public static string Generate()
+	{
+		return Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretLength));
+	}
 
 	public static bool MatchesHeader(string? value)
 	{
@@ -91,37 +94,47 @@ public static class LoopbackSecret
 	{
 		var secret = Volatile.Read(ref _secret);
 		var parts = code?.Split('.');
-		if (secret is null || parts is not { Length: 3 } ||
-			!long.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var expirySeconds) ||
-			!IsNonce(parts[1]))
+		if (secret is null
+			|| parts is not { Length: 3 }
+			|| !long.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var expirySeconds)
+			|| !IsNonce(parts[1]))
 		{
 			return false;
 		}
 
-		var expiry = DateTimeOffset.FromUnixTimeSeconds(Math.Min(expirySeconds, DateTimeOffset.MaxValue.ToUnixTimeSeconds()));
-		if (expiry <= now || expiry > now + CodeLifetime + TimeSpan.FromSeconds(5) ||
-			!FixedTimeEquals(Mac(secret, $"{CodeLabel}{parts[0]}.{parts[1]}"), parts[2]))
+		var expiry = DateTimeOffset.FromUnixTimeSeconds(Math.Min(expirySeconds,
+			DateTimeOffset.MaxValue.ToUnixTimeSeconds()));
+		if (expiry <= now
+			|| expiry > now + CodeLifetime + TimeSpan.FromSeconds(5)
+			|| !FixedTimeEquals(Mac(secret, $"{CodeLabel}{parts[0]}.{parts[1]}"), parts[2]))
 		{
 			return false;
 		}
 
-		lock (RedeemedGate)
+		lock (_redeemedGate)
 		{
-			foreach (var spent in RedeemedCodes.Where(pair => pair.Value <= now).Select(pair => pair.Key).ToArray())
+			foreach (var spent in _redeemedCodes.Where(pair => pair.Value <= now).Select(pair => pair.Key).ToArray())
 			{
-				RedeemedCodes.Remove(spent);
+				_redeemedCodes.Remove(spent);
 			}
 
-			return RedeemedCodes.TryAdd(parts[1], expiry);
+			return _redeemedCodes.TryAdd(parts[1], expiry);
 		}
 	}
 
 	public static bool IsNonce(string? value)
-		=> value is { Length: NonceHexLength } && value.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');
+	{
+		return value is { Length: NonceHexLength } && value.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');
+	}
 
 	private static string Mac(byte[] secret, string message)
-		=> Convert.ToHexStringLower(HMACSHA256.HashData(secret, Encoding.UTF8.GetBytes(message)));
+	{
+		return Convert.ToHexStringLower(HMACSHA256.HashData(secret, Encoding.UTF8.GetBytes(message)));
+	}
 
 	private static bool FixedTimeEquals(string expected, string presented)
-		=> CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(expected), Encoding.ASCII.GetBytes(presented));
+	{
+		return CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(expected),
+			Encoding.ASCII.GetBytes(presented));
+	}
 }

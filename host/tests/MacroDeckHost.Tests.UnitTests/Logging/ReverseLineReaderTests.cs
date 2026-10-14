@@ -16,7 +16,10 @@ public class ReverseLineReaderTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void Lines_Come_Back_Newest_First_With_Their_Offsets()
@@ -90,7 +93,7 @@ public class ReverseLineReaderTests
 	public void A_Byte_Order_Mark_Is_Stripped_From_The_First_Line()
 	{
 		var path = Path.Combine(_paths.LogsDirectory, "bom.log");
-		File.WriteAllText(path, "first\nsecond\n", new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+		File.WriteAllText(path, "first\nsecond\n", new UTF8Encoding(true));
 
 		var lines = ReverseLineReader.Read(path, long.MaxValue).ToList();
 

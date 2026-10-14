@@ -24,7 +24,7 @@ public class LogPublishDtoSerializationTests
 					MessageTemplate = "Volume set to {Volume}",
 					RenderedMessage = "Volume set to 42",
 					SourceContext = "AudioPlugin.VolumeHandler",
-					Properties = new Dictionary<string, string> { ["Volume"] = "42" },
+					Properties = new Dictionary<string, string> { ["Volume"] = "42" }
 				},
 				new LogEventDto
 				{
@@ -40,12 +40,12 @@ public class LogPublishDtoSerializationTests
 						Inner = new LogExceptionDto
 						{
 							Type = "System.Net.Sockets.SocketException",
-							Message = "Connection refused",
-						},
-					},
-				},
+							Message = "Connection refused"
+						}
+					}
+				}
 			],
-			Dropped = 3,
+			Dropped = 3
 		};
 
 		var json = JsonSerializer.Serialize(payload, PluginProtocolJson.Options);
@@ -92,9 +92,9 @@ public class LogPublishDtoSerializationTests
 					Timestamp = DateTimeOffset.UtcNow,
 					Level = LogLevels.Warning,
 					MessageTemplate = "template",
-					RenderedMessage = "rendered",
-				},
-			],
+					RenderedMessage = "rendered"
+				}
+			]
 		};
 
 		var json = JsonSerializer.Serialize(payload, PluginProtocolJson.Options);
@@ -115,10 +115,10 @@ public class LogPublishDtoSerializationTests
 					Level = LogLevels.Information,
 					MessageTemplate = "template",
 					RenderedMessage = "rendered",
-					SourceContext = "Some.Context",
-				},
+					SourceContext = "Some.Context"
+				}
 			],
-			Dropped = 1,
+			Dropped = 1
 		};
 
 		var json = JsonSerializer.Serialize(payload, PluginProtocolJson.Options);

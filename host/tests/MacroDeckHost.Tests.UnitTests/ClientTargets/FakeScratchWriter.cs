@@ -16,5 +16,8 @@ internal sealed class FakeScratchWriter : IFileSystemScratchWriter
 		return Task.FromResult(PathToReturn);
 	}
 
-	public void Delete(string path) => DeletedPaths.Add(path);
+	public void Delete(string path)
+	{
+		DeletedPaths.Add(path);
+	}
 }

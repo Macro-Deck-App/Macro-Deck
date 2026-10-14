@@ -23,7 +23,7 @@ internal sealed record StreamStatsWidgetOptions
 		{
 			Metric = platform.Stats.DefaultMetric,
 			Tiles = platform.Stats.DefaultTiles,
-			Details = platform.Stats.DetailIds,
+			Details = platform.Stats.DetailIds
 		};
 	}
 }
@@ -31,9 +31,11 @@ internal sealed record StreamStatsWidgetOptions
 internal static class StreamStatsWidgetSettings
 {
 	public static string? Account(JsonElement data)
-		=> StreamWidgetJson.ReadString(data, StreamStatsWidgetType.AccountKey) is { Length: > 0 } account
+	{
+		return StreamWidgetJson.ReadString(data, StreamStatsWidgetType.AccountKey) is { Length: > 0 } account
 			? account
 			: null;
+	}
 
 	public static StreamStatsWidgetOptions Options(StreamPlatform platform, JsonElement data)
 	{
@@ -47,18 +49,21 @@ internal static class StreamStatsWidgetSettings
 			Metric = stats.NormalizeMetric(StreamWidgetJson.ReadString(data, StreamStatsWidgetType.MetricKey)),
 			Tiles = ReadList(data, StreamStatsWidgetType.TilesKey, stats.MetricIds) ?? stats.DefaultTiles,
 			Details = ReadList(data, StreamStatsWidgetType.DetailsKey, stats.DetailIds) ?? stats.DetailIds,
-			ShowThumbnail = StreamWidgetJson.ReadBool(data, StreamStatsWidgetType.ThumbnailKey) ?? true,
+			ShowThumbnail = StreamWidgetJson.ReadBool(data, StreamStatsWidgetType.ThumbnailKey) ?? true
 		};
 	}
 
 	public static string? BackgroundColor(JsonElement data)
-		=> WidgetBackgroundColor.Normalize(StreamWidgetJson.ReadString(data, StreamStatsWidgetType.BackgroundColorKey));
+	{
+		return WidgetBackgroundColor.Normalize(StreamWidgetJson.ReadString(data,
+			StreamStatsWidgetType.BackgroundColorKey));
+	}
 
 	private static IReadOnlyList<string>? ReadList(JsonElement data, string name, IReadOnlyList<string> known)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty(name, out var list) ||
-			list.ValueKind != JsonValueKind.Array)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty(name, out var list)
+			|| list.ValueKind != JsonValueKind.Array)
 		{
 			return null;
 		}
@@ -69,7 +74,7 @@ internal static class StreamStatsWidgetSettings
 				.Where(item => item.ValueKind == JsonValueKind.String)
 				.Select(item => item.GetString()!)
 				.Where(id => known.Contains(id, StringComparer.Ordinal))
-				.Distinct(StringComparer.Ordinal),
+				.Distinct(StringComparer.Ordinal)
 		];
 	}
 }

@@ -28,7 +28,7 @@ public class MacOsNativeKeysRoundTripTests
 				var isLetter = key is >= KeyCode.A and <= KeyCode.Z;
 				if (isLetter || !letterCodes.Contains(code))
 				{
-					Assert.That(NativeKeys.FromMacOS(code), Is.EqualTo(key), key.ToString());
+					Assert.That(NativeKeys.FromMacOs(code), Is.EqualTo(key), key.ToString());
 				}
 			}
 		});
@@ -36,6 +36,10 @@ public class MacOsNativeKeysRoundTripTests
 
 	[Test]
 	public void The_keys_the_host_cannot_press_on_a_mac_are_none()
-		=> Assert.That(Enum.GetValues<KeyCode>().Where(key => key is >= KeyCode.F21 and <= KeyCode.F24)
-			.Select(key => MacOsKeyboardInputProvider.TryGetKeyCode(new MacOsKeyboardLayout(), key, out _)), Has.None.True);
+	{
+		Assert.That(Enum.GetValues<KeyCode>()
+				.Where(key => key is >= KeyCode.F21 and <= KeyCode.F24)
+				.Select(key => MacOsKeyboardInputProvider.TryGetKeyCode(new MacOsKeyboardLayout(), key, out _)),
+			Has.None.True);
+	}
 }

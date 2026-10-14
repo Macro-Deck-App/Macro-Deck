@@ -17,7 +17,8 @@ public class GetFolderFocusRulesRequestMessageHandler
 		_deviceRepository = deviceRepository;
 	}
 
-	public async ValueTask<GetFolderFocusRulesResponse> Handle(GetFolderFocusRulesRequest request,
+	public async ValueTask<GetFolderFocusRulesResponse> Handle(
+		GetFolderFocusRulesRequest request,
 		CancellationToken cancellationToken)
 	{
 		var folders = _folderCache.GetAllFolders();

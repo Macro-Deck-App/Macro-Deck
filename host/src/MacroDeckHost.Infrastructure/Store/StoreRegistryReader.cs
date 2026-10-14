@@ -21,7 +21,8 @@ public sealed class StoreRegistryReader
 		_logger = logger.ForContext<StoreRegistryReader>();
 	}
 
-	public StoreCatalogSnapshot? Read(string registryRoot,
+	public StoreCatalogSnapshot? Read(
+		string registryRoot,
 		long sequence,
 		DateTimeOffset? generatedAt,
 		DateTimeOffset? signedAt,
@@ -43,9 +44,9 @@ public sealed class StoreRegistryReader
 		}
 
 		var entries = new List<StoreCatalogEntry>();
-		if (!Collect(registryRoot, "plugins", index.Plugins, StoreExtensionKind.Plugin, entries) ||
-			!Collect(registryRoot, "icon-packs", index.IconPacks, StoreExtensionKind.IconPack, entries) ||
-			!Collect(registryRoot,
+		if (!Collect(registryRoot, "plugins", index.Plugins, StoreExtensionKind.Plugin, entries)
+			|| !Collect(registryRoot, "icon-packs", index.IconPacks, StoreExtensionKind.IconPack, entries)
+			|| !Collect(registryRoot,
 				"templates/profiles",
 				index.Templates.Profiles,
 				StoreExtensionKind.ProfileTemplate,
@@ -152,17 +153,21 @@ public sealed class StoreRegistryReader
 		}
 	}
 
-	public static string DirectorySegment(StoreExtensionKind kind) => kind switch
+	public static string DirectorySegment(StoreExtensionKind kind)
 	{
-		StoreExtensionKind.Plugin => "plugins",
-		StoreExtensionKind.IconPack => "icon-packs",
-		StoreExtensionKind.ProfileTemplate => "templates/profiles",
-		_ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
-	};
+		return kind switch
+		{
+			StoreExtensionKind.Plugin => "plugins",
+			StoreExtensionKind.IconPack => "icon-packs",
+			StoreExtensionKind.ProfileTemplate => "templates/profiles",
+			_ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+		};
+	}
 
 	// An index entry the verified tree does not describe means the signed snapshot is internally
 	// inconsistent, so the whole refresh is refused rather than silently serving a partial catalog.
-	private bool Collect(string registryRoot,
+	private bool Collect(
+		string registryRoot,
 		string segment,
 		IReadOnlyList<string> ids,
 		StoreExtensionKind kind,
@@ -204,13 +209,15 @@ public sealed class StoreRegistryReader
 				Description = package.Description,
 				Publisher = package.Publisher,
 				Repository = package.Repository,
-				Homepage = Uri.TryCreate(package.Homepage, UriKind.Absolute, out var homepage) && StoreHttp.IsHttps(homepage)
-					? package.Homepage
-					: null,
+				Homepage = Uri.TryCreate(package.Homepage, UriKind.Absolute, out var homepage)
+					&& StoreHttp.IsHttps(homepage)
+						? package.Homepage
+						: null,
 				License = package.License,
 				AdditionalLinks = package.AdditionalLinks is { } additionalLinks
 					? PluginManifestLinks.Displayable(additionalLinks)
-						.Select(link => new StoreExtensionLink { Type = link.Type!, Url = link.Url!, Label = link.Label })
+						.Select(link => new StoreExtensionLink
+							{ Type = link.Type!, Url = link.Url!, Label = link.Label })
 						.ToList()
 					: [],
 				CreatedAt = package.CreatedAt,
@@ -278,10 +285,10 @@ public sealed class StoreRegistryReader
 
 	private static StoreReleaseManifest? ToRelease(string version, RegistryReleaseDocument? release)
 	{
-		if (release is null ||
-			!Uri.TryCreate(release.Url, UriKind.Absolute, out var artifactUrl) ||
-			!StoreHttp.IsHttps(artifactUrl) ||
-			string.IsNullOrWhiteSpace(release.Sha256))
+		if (release is null
+			|| !Uri.TryCreate(release.Url, UriKind.Absolute, out var artifactUrl)
+			|| !StoreHttp.IsHttps(artifactUrl)
+			|| string.IsNullOrWhiteSpace(release.Sha256))
 		{
 			return null;
 		}
@@ -298,17 +305,17 @@ public sealed class StoreRegistryReader
 					.Select(ToAsset)
 					.Where(asset => asset is not null)
 					.Select(asset => asset!)
-					.ToList() ??
-				[]
+					.ToList()
+				?? []
 		};
 	}
 
 	private static StoreMediaAsset? ToAsset(RegistryMediaAsset? asset)
 	{
-		if (asset is null ||
-			!Uri.TryCreate(asset.Url, UriKind.Absolute, out var url) ||
-			!StoreHttp.IsHttps(url) ||
-			string.IsNullOrWhiteSpace(asset.Sha256))
+		if (asset is null
+			|| !Uri.TryCreate(asset.Url, UriKind.Absolute, out var url)
+			|| !StoreHttp.IsHttps(url)
+			|| string.IsNullOrWhiteSpace(asset.Sha256))
 		{
 			return null;
 		}

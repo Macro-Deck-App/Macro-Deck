@@ -14,7 +14,8 @@ public class GetActionsRequestMessageHandler
 	private readonly IIntegrationRegistry _integrationRegistry;
 	private readonly IRemotePluginSnapshotStore _snapshots;
 
-	public GetActionsRequestMessageHandler(IIntegrationRegistry integrationRegistry,
+	public GetActionsRequestMessageHandler(
+		IIntegrationRegistry integrationRegistry,
 		IRemotePluginSnapshotStore snapshots)
 	{
 		_integrationRegistry = integrationRegistry;

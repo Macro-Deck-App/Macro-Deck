@@ -58,7 +58,7 @@ public class PluginDesktopNotificationAccessTests
 	[Test]
 	public async Task A_self_registered_session_may_show_them_without_a_declaration()
 	{
-		var world = await World.ConnectAsync(PluginSessionOrigin.SelfRegistered, permissions: null);
+		var world = await World.ConnectAsync(PluginSessionOrigin.SelfRegistered, null);
 
 		var result = await world.ShowAsync("Hello", "World");
 
@@ -70,7 +70,7 @@ public class PluginDesktopNotificationAccessTests
 	{
 		var world = await World.ConnectAsync(PluginSessionOrigin.Managed,
 			[PluginPermissions.HostDesktopNotifications],
-			supported: false);
+			false);
 
 		await world.Pusher.PushAllAsync(PluginId);
 
@@ -105,10 +105,11 @@ public class PluginDesktopNotificationAccessTests
 		var world = await World.ConnectAsync(PluginSessionOrigin.Managed, [PluginPermissions.HostDesktopNotifications]);
 
 		var result = await world.Callbacks.ExecuteAsync(new HostInvokePayload
-		{
-			Api = HostApis.DesktopNotifications,
-			Operation = HostOperations.DesktopNotifications.Show
-		}, CancellationToken.None);
+			{
+				Api = HostApis.DesktopNotifications,
+				Operation = HostOperations.DesktopNotifications.Show
+			},
+			CancellationToken.None);
 
 		Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
 	}
@@ -122,7 +123,8 @@ public class PluginDesktopNotificationAccessTests
 
 	private sealed class World
 	{
-		private World(IReadOnlyList<string>? permissions,
+		private World(
+			IReadOnlyList<string>? permissions,
 			bool supported,
 			IDesktopNotifier? notifier,
 			IShellNotificationBridge? shell)
@@ -132,9 +134,15 @@ public class PluginDesktopNotificationAccessTests
 				new SingleInstalledPlugin(permissions),
 				new FixedManifestReader(permissions));
 			Callbacks = new PluginDesktopNotificationCallbacks(notifier ?? Desktop, policy);
-			Pusher = new HostStatePusher(Sessions, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
-				new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
-				new FakeAdbManager(), new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled), Serilog.Core.Logger.None,
+			Pusher = new HostStatePusher(Sessions,
+				new FakeDeckNavigator(),
+				new FakeScriptApi(),
+				new FakeWidgetApi(),
+				new StubEventBindingTracker(),
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+				new FakeAdbManager(),
+				new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled),
+				Serilog.Core.Logger.None,
 				desktopNotifications: Callbacks,
 				shellNotifications: shell);
 		}
@@ -149,7 +157,8 @@ public class PluginDesktopNotificationAccessTests
 
 		public HostStatePusher Pusher { get; }
 
-		public static async Task<World> ConnectAsync(PluginSessionOrigin origin,
+		public static async Task<World> ConnectAsync(
+			PluginSessionOrigin origin,
 			IReadOnlyList<string>? permissions,
 			bool supported = true,
 			IDesktopNotifier? notifier = null,
@@ -196,13 +205,15 @@ public class PluginDesktopNotificationAccessTests
 		}
 
 		public List<bool> PushedSupport()
-			=> Connection.Sent.ToList()
+		{
+			return Connection.Sent.ToList()
 				.Where(envelope => envelope.Type == MessageTypes.HostState)
 				.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 				.Where(payload => payload.Api == HostApis.DesktopNotifications)
 				.Select(payload => payload.Data!.Value
 					.Deserialize<DesktopNotificationsStateDto>(PluginProtocolJson.Options)!.Supported)
 				.ToList();
+		}
 	}
 
 	private sealed class RecordingDesktopNotifier(bool supported) : IDesktopNotifier
@@ -223,18 +234,24 @@ public class PluginDesktopNotificationAccessTests
 		public bool IsSupported => false;
 
 		public Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class SingleInstalledPlugin(IReadOnlyList<string>? permissions) : IPluginInstallationCatalog
 	{
-		public IReadOnlyList<InstalledPlugin> Discover() => [];
+		public IReadOnlyList<InstalledPlugin> Discover()
+		{
+			return [];
+		}
 
 		public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 		{
 			version = permissions is null
 				? null
-				: new InstalledPluginVersion { Version = "1.0.0", VersionDirectory = "v", ManifestPath = "v/manifest.json" };
+				: new InstalledPluginVersion
+					{ Version = "1.0.0", VersionDirectory = "v", ManifestPath = "v/manifest.json" };
 			return version is not null;
 		}
 
@@ -246,7 +263,8 @@ public class PluginDesktopNotificationAccessTests
 	private sealed class FixedManifestReader(IReadOnlyList<string>? permissions) : IPluginManifestReader
 	{
 		public PluginManifestReadResult Read(string manifestPath, string expectedPluginId, string expectedVersion)
-			=> PluginManifestReadResult.Ok(new PluginManifest
+		{
+			return PluginManifestReadResult.Ok(new PluginManifest
 			{
 				ManifestVersion = 1,
 				Id = expectedPluginId,
@@ -255,11 +273,15 @@ public class PluginDesktopNotificationAccessTests
 				Entrypoints = new Dictionary<string, PluginEntrypoint>(),
 				Permissions = permissions
 			});
+		}
 
-		public PluginManifestReadResult ReadFromJson(string json,
+		public PluginManifestReadResult ReadFromJson(
+			string json,
 			string? versionDirectory,
 			string expectedPluginId,
 			string expectedVersion)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

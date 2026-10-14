@@ -46,7 +46,10 @@ public class EmptyCellStyleServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task A_new_profile_and_its_start_folder_leave_empty_cells_unset()
@@ -185,8 +188,22 @@ public class EmptyCellStyleServiceTests
 	}
 
 	private Task<Result<FolderEntity, FolderError>> UpdateFolder(string value)
-		=> _folderService.Update(_folderId, null, null, null, null, null, null, null, null, null, emptyCellStyle: value);
+	{
+		return _folderService.Update(_folderId,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			emptyCellStyle: value);
+	}
 
 	private Task<Result<ProfileEntity, ProfileError>> UpdateProfile(string? value)
-		=> _profileService.Update(_profileId, null, null, null, null, null, null, null, value);
+	{
+		return _profileService.Update(_profileId, null, null, null, null, null, null, null, value);
+	}
 }

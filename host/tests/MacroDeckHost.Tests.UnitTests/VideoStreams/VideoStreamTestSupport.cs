@@ -28,11 +28,20 @@ internal sealed class VideoStreamIntegrations : IIntegrationRegistry
 
 	public event EventHandler<IntegrationAvailabilityChangedEventArgs>? AvailabilityChanged;
 
-	public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+	public IActionDefinition? FindAction(string integrationId, string actionId)
+	{
+		return null;
+	}
 
-	public IActionDefinition? FindAction(QualifiedId id) => null;
+	public IActionDefinition? FindAction(QualifiedId id)
+	{
+		return null;
+	}
 
-	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
+	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+	{
+		return [];
+	}
 
 	public bool IsEnabled(string integrationId)
 	{
@@ -60,14 +69,23 @@ internal sealed class VideoStreamIntegrations : IIntegrationRegistry
 			new IntegrationAvailabilityChangedEventArgs { IntegrationId = integrationId, IsAvailable = enabled });
 	}
 
-	public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+	public IntegrationOrigin GetOrigin(string integrationId)
+	{
+		return IntegrationOrigin.BuiltIn;
+	}
 
-	public Task<IntegrationRegistrationResult> RegisterAsync(IIntegration integration,
+	public Task<IntegrationRegistrationResult> RegisterAsync(
+		IIntegration integration,
 		IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 		IntegrationMetadata? metadata = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<bool> UnregisterAsync(string integrationId) => Task.FromResult(false);
+	public Task<bool> UnregisterAsync(string integrationId)
+	{
+		return Task.FromResult(false);
+	}
 }
 
 internal sealed class RecordingPublisher : IPublisher
@@ -76,10 +94,14 @@ internal sealed class RecordingPublisher : IPublisher
 
 	public IReadOnlyList<object> Published => [.. _published];
 
-	public IReadOnlyList<T> Of<T>() => [.. _published.OfType<T>()];
+	public IReadOnlyList<T> Of<T>()
+	{
+		return [.. _published.OfType<T>()];
+	}
 
 	public IReadOnlyList<object> ForSession(string sessionId)
-		=>
+	{
+		return
 		[
 			.. _published.Where(notification => notification switch
 			{
@@ -88,6 +110,7 @@ internal sealed class RecordingPublisher : IPublisher
 				_ => false
 			})
 		];
+	}
 
 	public ValueTask Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
 		where TNotification : INotification
@@ -123,14 +146,17 @@ internal sealed class ScriptedVideoProvider(string id, params string[] streamIds
 	public ConcurrentQueue<string> Resumes { get; } = new();
 
 	public Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(CancellationToken cancellationToken)
-		=> Task.FromResult<IReadOnlyList<VideoStreamDescriptor>>([.. Streams]);
+	{
+		return Task.FromResult<IReadOnlyList<VideoStreamDescriptor>>([.. Streams]);
+	}
 
-	public Task<VideoStreamSessionDescription> OpenAsync(VideoStreamOpenRequest request,
+	public Task<VideoStreamSessionDescription> OpenAsync(
+		VideoStreamOpenRequest request,
 		CancellationToken cancellationToken)
 	{
 		Opens.Enqueue(request);
-		return OnOpen?.Invoke(request, cancellationToken) ??
-			Task.FromResult(VideoStreamSessionDescription.Hls("https://camera.local/" + request.StreamId));
+		return OnOpen?.Invoke(request, cancellationToken)
+			?? Task.FromResult(VideoStreamSessionDescription.Hls("https://camera.local/" + request.StreamId));
 	}
 
 	public Task SuspendAsync(string sessionId, CancellationToken cancellationToken)
@@ -169,11 +195,13 @@ internal sealed class ScriptedVideoPlugin : IPluginCapabilityInvoker
 	public int MaxInFlight => Volatile.Read(ref _maxInFlight);
 
 	public IReadOnlyList<T> ArgumentsOf<T>(string operation)
-		=>
+	{
+		return
 		[
 			.. Calls.Where(call => call.Operation == operation)
 				.Select(call => call.Arguments.Deserialize<T>(PluginProtocolJson.Options)!)
 		];
+	}
 
 	public void AddProvider(string id, string registrationId, params string[] streamIds)
 	{
@@ -191,7 +219,8 @@ internal sealed class ScriptedVideoPlugin : IPluginCapabilityInvoker
 		];
 	}
 
-	public async Task<JsonElement?> InvokeAsync(string pluginId,
+	public async Task<JsonElement?> InvokeAsync(
+		string pluginId,
 		CapabilityInvokeRequest request,
 		CancellationToken cancellationToken)
 	{
@@ -201,14 +230,16 @@ internal sealed class ScriptedVideoPlugin : IPluginCapabilityInvoker
 
 		var now = Interlocked.Increment(ref _inFlight);
 		int max;
-		while (now > (max = Volatile.Read(ref _maxInFlight)) &&
-			Interlocked.CompareExchange(ref _maxInFlight, now, max) != max)
+		while (now > (max = Volatile.Read(ref _maxInFlight))
+			&& Interlocked.CompareExchange(ref _maxInFlight, now, max) != max)
 		{
 		}
 
 		try
 		{
-			var result = Handler is null ? Default(request.Operation, arguments) : await Handler(request.Operation, arguments);
+			var result = Handler is null
+				? Default(request.Operation, arguments)
+				: await Handler(request.Operation, arguments);
 			return result is null ? null : JsonSerializer.SerializeToElement(result, PluginProtocolJson.Options);
 		}
 		finally
@@ -218,7 +249,8 @@ internal sealed class ScriptedVideoPlugin : IPluginCapabilityInvoker
 	}
 
 	public object? Default(string operation, JsonElement arguments)
-		=> operation switch
+	{
+		return operation switch
 		{
 			CapabilityOperations.VideoStreamProvider.Describe => new VideoStreamProviderDescribePayload
 			{
@@ -227,12 +259,15 @@ internal sealed class ScriptedVideoPlugin : IPluginCapabilityInvoker
 			CapabilityOperations.VideoStreamProvider.Streams => new VideoStreamProviderStreamsResult
 			{
 				Streams = Streams.GetValueOrDefault(
-					arguments.Deserialize<VideoStreamProviderStreamsArguments>(PluginProtocolJson.Options)!.ProviderId) ?? []
+						arguments.Deserialize<VideoStreamProviderStreamsArguments>(PluginProtocolJson.Options)!
+							.ProviderId)
+					?? []
 			},
 			CapabilityOperations.VideoStreamProvider.SessionOpen => OpenResult(arguments),
 			CapabilityOperations.VideoStreamProvider.SessionResume => new VideoStreamSessionResumeResult(),
 			_ => null
 		};
+	}
 
 	public VideoStreamSessionOpenResult OpenResult(JsonElement arguments)
 	{
@@ -245,18 +280,26 @@ internal sealed class ScriptedVideoPlugin : IPluginCapabilityInvoker
 	}
 
 	public static RemoteCapabilityException Error(string code)
-		=> (RemoteCapabilityException)RemoteCapabilityException.From(new ProtocolError
+	{
+		return (RemoteCapabilityException)RemoteCapabilityException.From(new ProtocolError
 		{
 			Code = code, Message = code, Retryable = true
 		});
+	}
 
-	public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+	public bool TryComplete(string pluginId, ProtocolEnvelope result)
+	{
+		return false;
+	}
 
 	public void AbortAll(string pluginId, ProtocolError reason)
 	{
 	}
 
-	public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+	public bool IsLiveActionExecute(string pluginId, string correlationId)
+	{
+		return false;
+	}
 }
 
 internal sealed class VideoStreamPluginConnection : IPluginConnection
@@ -266,10 +309,14 @@ internal sealed class VideoStreamPluginConnection : IPluginConnection
 	public Func<ProtocolEnvelope, Task>? OnSend { get; set; }
 
 	public Task Send(ProtocolEnvelope envelope, CancellationToken cancellationToken = default)
-		=> OnSend?.Invoke(envelope) ?? Task.CompletedTask;
+	{
+		return OnSend?.Invoke(envelope) ?? Task.CompletedTask;
+	}
 
 	public Task Close(int closeCode, string reason, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class VideoStreamWorld : IDisposable
@@ -278,7 +325,8 @@ internal sealed class VideoStreamWorld : IDisposable
 
 	public const string PluginId = "com.example.cameras";
 
-	public VideoStreamWorld(Func<PluginSessionRegistry, IPluginCapabilityInvoker>? invoker = null,
+	public VideoStreamWorld(
+		Func<PluginSessionRegistry, IPluginCapabilityInvoker>? invoker = null,
 		TimeProvider? time = null,
 		TimeSpan? inProcessTimeout = null)
 	{
@@ -325,10 +373,14 @@ internal sealed class VideoStreamWorld : IDisposable
 	public VideoStreamPluginSessions Sessions { get; }
 
 	public IntegrationVideoStreamProviderContext Context(string integrationId = BuiltIn)
-		=> new(integrationId, Registry, Broker);
+	{
+		return new IntegrationVideoStreamProviderContext(integrationId, Registry, Broker);
+	}
 
 	public VideoStreamOpenTicket Open(string providerId, string streamId, string connectionId = "ui-1")
-		=> Broker.OpenSession(connectionId, providerId, streamId, ["hls", "mjpeg"]);
+	{
+		return Broker.OpenSession(connectionId, providerId, streamId, ["hls", "mjpeg"]);
+	}
 
 	public async Task<(string SessionId, VideoStreamPluginConnection Connection)> ConnectPluginAsync(
 		string pluginId = PluginId)
@@ -382,11 +434,16 @@ internal sealed class VideoStreamWorld : IDisposable
 	}
 
 	public Task WaitForClosedAsync(string sessionId)
-		=> WaitForAsync(() => Publisher.Of<VideoStreamSessionClosedNotification>().Any(closed => closed.SessionId == sessionId),
+	{
+		return WaitForAsync(()
+				=> Publisher.Of<VideoStreamSessionClosedNotification>().Any(closed => closed.SessionId == sessionId),
 			$"session {sessionId} never closed");
+	}
 
 	public Task WaitForActiveAsync(string sessionId)
-		=> WaitForAsync(() => Publisher.Of<VideoStreamSessionChangedNotification>()
+	{
+		return WaitForAsync(() => Publisher.Of<VideoStreamSessionChangedNotification>()
 				.Any(changed => changed.SessionId == sessionId && changed.State == VideoStreamSessionState.Active),
 			$"session {sessionId} never became active");
+	}
 }

@@ -43,7 +43,10 @@ internal sealed class IconAssetPublisherHostedService(
 		return Task.CompletedTask;
 	}
 
-	private void OnConnected(object? sender, PluginConnectedEventArgs e) => _ = PublishAsync();
+	private void OnConnected(object? sender, PluginConnectedEventArgs e)
+	{
+		_ = PublishAsync();
+	}
 
 	private async Task PublishAsync()
 	{

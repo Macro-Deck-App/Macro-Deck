@@ -109,11 +109,20 @@ internal sealed class CalendarAgendaDialogSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -131,7 +140,10 @@ internal sealed class CalendarAgendaDialogSession : IUiSession
 		return ValueTask.CompletedTask;
 	}
 
-	private void OnWidgetsChanged(object? sender, EventArgs e) => Refresh();
+	private void OnWidgetsChanged(object? sender, EventArgs e)
+	{
+		Refresh();
+	}
 
 	private void Open(CalendarEventSummary calendarEvent)
 	{
@@ -210,7 +222,7 @@ internal sealed class CalendarAgendaDialogSession : IUiSession
 		var settings = CalendarAgendaSettings.Parse(CalendarWidgetData.Parse(widget.Data)) with
 		{
 			ShowTime = true,
-			ShowLocation = true,
+			ShowLocation = true
 		};
 		var (days, nextRefresh) = CalendarAgenda.DaysAhead(snapshot, now, settings, _format, int.MaxValue);
 		var (shown, hidden) = Limit(days);
@@ -242,12 +254,14 @@ internal sealed class CalendarAgendaDialogSession : IUiSession
 	}
 
 	private static CalendarAgendaRow Fit(CalendarAgendaRow row)
-		=> row with
+	{
+		return row with
 		{
 			Title = CalendarFormat.Title(CalendarDialogText.Title(row.Event.Title)),
 			Location = CalendarDialogText.Location(row.Location),
-			Calendar = row.Calendar is null ? null : CalendarDialogText.Title(row.Calendar),
+			Calendar = row.Calendar is null ? null : CalendarDialogText.Title(row.Calendar)
 		};
+	}
 }
 
 internal static class CalendarAgendaDialogView
@@ -287,32 +301,35 @@ internal static class CalendarAgendaDialogView
 					Key = "widgetMissingGate",
 					Condition = () => state.Value.IsMissing,
 					Content = () => Notice("widgetMissing",
-						AppStrings.Integrations.Calendar.Actions.ShowDetails.WidgetMissing()),
+						AppStrings.Integrations.Calendar.Actions.ShowDetails.WidgetMissing())
 				},
 				new UiWhen
 				{
 					Key = "noCalendarsGate",
 					Condition = () => !state.Value.IsMissing && state.Value.HasNoCalendars,
-					Content = () => Notice("noCalendars", Strings.NoCalendars()),
+					Content = () => Notice("noCalendars", Strings.NoCalendars())
 				},
 				new UiWhen
 				{
 					Key = "listGate",
 					Condition = () => !state.Value.IsMissing && !state.Value.HasNoCalendars && selected.Value is null,
-					Content = () => List(state, actions),
+					Content = () => List(state, actions)
 				},
 				new UiWhen
 				{
 					Key = "detailsGate",
-					Condition = () => !state.Value.IsMissing && !state.Value.HasNoCalendars && selected.Value is not null,
-					Content = () => Details(selected, feedback, format, actions),
-				},
-			],
+					Condition = () => !state.Value.IsMissing
+						&& !state.Value.HasNoCalendars
+						&& selected.Value is not null,
+					Content = () => Details(selected, feedback, format, actions)
+				}
+			]
 		};
 	}
 
 	private static UiList List(UiState<CalendarAgendaDialogState> state, CalendarAgendaDialogActions actions)
-		=> new()
+	{
+		return new UiList
 		{
 			Key = "agenda",
 			Fill = true,
@@ -323,7 +340,7 @@ internal static class CalendarAgendaDialogView
 				{
 					Key = "emptyGate",
 					Condition = () => !state.Value.HasEvents,
-					Content = () => Notice("empty", Strings.NoEvents()),
+					Content = () => Notice("empty", Strings.NoEvents())
 				},
 				new UiRepeat<CalendarAgendaDay>
 				{
@@ -331,7 +348,7 @@ internal static class CalendarAgendaDialogView
 					Items = UiValue.From<IReadOnlyList<CalendarAgendaDay>>(() =>
 						state.Value.HasEvents ? [.. state.Value.Days.Where(day => day.Rows.Count > 0)] : []),
 					KeySelector = day => day.Key,
-					Template = (day, _) => Day(day, actions),
+					Template = (day, _) => Day(day, actions)
 				},
 				new UiWhen
 				{
@@ -344,11 +361,12 @@ internal static class CalendarAgendaDialogView
 						Size = _smallText,
 						Role = UiComponentTextRoles.Secondary,
 						Align = UiComponentAlignments.Center,
-						Wrap = true,
-					},
-				},
-			],
+						Wrap = true
+					}
+				}
+			]
 		};
+	}
 
 	private static UiStack Day(CalendarAgendaDay day, CalendarAgendaDialogActions actions)
 	{
@@ -361,8 +379,8 @@ internal static class CalendarAgendaDialogView
 				Size = _smallText,
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Muted,
-				MaxLines = 1,
-			},
+				MaxLines = 1
+			}
 		};
 
 		children.AddRange(day.Rows.Select(row => Row(row, actions)));
@@ -372,7 +390,7 @@ internal static class CalendarAgendaDialogView
 			Key = day.Key,
 			Direction = UiComponentDirections.Vertical,
 			Gap = _gap,
-			Children = children,
+			Children = children
 		};
 	}
 
@@ -389,7 +407,7 @@ internal static class CalendarAgendaDialogView
 				Size = _smallText,
 				Weight = UiComponentTextWeights.Medium,
 				Role = UiComponentTextRoles.Secondary,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -411,8 +429,8 @@ internal static class CalendarAgendaDialogView
 				Text = row.Title,
 				Size = _text,
 				Wrap = true,
-				MaxLines = 2,
-			},
+				MaxLines = 2
+			}
 		};
 
 		if (details.Count > 0)
@@ -422,7 +440,7 @@ internal static class CalendarAgendaDialogView
 				Key = "details",
 				Direction = UiComponentDirections.Horizontal,
 				Gap = _gap,
-				Children = details,
+				Children = details
 			});
 		}
 
@@ -440,14 +458,14 @@ internal static class CalendarAgendaDialogView
 				{
 					Key = "bar",
 					MainSize = _bar,
-					Background = row.Color ?? CalendarWidgetParts.DefaultBarColor,
+					Background = row.Color ?? CalendarWidgetParts.DefaultBarColor
 				},
 				new UiStack
 				{
 					Key = "text",
 					Direction = UiComponentDirections.Vertical,
 					Fill = true,
-					Children = text,
+					Children = text
 				},
 				new UiIcon
 				{
@@ -455,9 +473,9 @@ internal static class CalendarAgendaDialogView
 					Icon = UiIcons.ChevronRight,
 					Size = _icon,
 					MainSize = _icon,
-					Role = UiComponentTextRoles.Secondary,
-				},
-			],
+					Role = UiComponentTextRoles.Secondary
+				}
+			]
 		};
 	}
 
@@ -466,7 +484,8 @@ internal static class CalendarAgendaDialogView
 		UiState<LocalizedText> feedback,
 		CalendarFormat format,
 		CalendarAgendaDialogActions actions)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "details",
 			Direction = UiComponentDirections.Vertical,
@@ -501,9 +520,9 @@ internal static class CalendarAgendaDialogView
 									Text = MacroDeckStrings.Common.Back(),
 									Size = _text,
 									Weight = UiComponentTextWeights.Medium,
-									MaxLines = 1,
-								},
-							],
+									MaxLines = 1
+								}
+							]
 						},
 						new UiTextRun
 						{
@@ -515,16 +534,18 @@ internal static class CalendarAgendaDialogView
 							Weight = UiComponentTextWeights.SemiBold,
 							Wrap = true,
 							MaxLines = 2,
-							Fill = true,
-						},
-					],
+							Fill = true
+						}
+					]
 				},
-				.. CalendarEventDialogView.Body(actions.Selected(), feedback, format, actions.Join),
-			],
+				.. CalendarEventDialogView.Body(actions.Selected(), feedback, format, actions.Join)
+			]
 		};
+	}
 
 	private static UiTextRun Notice(string key, LocalizedText text)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
@@ -532,16 +553,19 @@ internal static class CalendarAgendaDialogView
 			Role = UiComponentTextRoles.Secondary,
 			Align = UiComponentAlignments.Center,
 			Wrap = true,
-			Fill = true,
+			Fill = true
 		};
+	}
 
 	private static UiTextRun Detail(string key, string text)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
 			Size = _smallText,
 			Role = UiComponentTextRoles.Secondary,
-			MaxLines = 1,
+			MaxLines = 1
 		};
+	}
 }

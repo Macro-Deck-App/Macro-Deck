@@ -98,10 +98,15 @@ public class ConnectZitadelTests
 			ConnectIdTokenReader.Read(idToken, null, TimeProvider.System));
 	}
 
-	private static ConnectIdentityClient Client(StubHandler handler) => new(handler);
+	private static ConnectIdentityClient Client(StubHandler handler)
+	{
+		return new ConnectIdentityClient(handler);
+	}
 
 	private static string Error(string error, string description)
-		=> $$"""{"error":"{{error}}","error_description":"{{description}}"}""";
+	{
+		return $$"""{"error":"{{error}}","error_description":"{{description}}"}""";
+	}
 
 	private sealed class StubHandler : HttpMessageHandler
 	{

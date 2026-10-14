@@ -9,14 +9,17 @@ namespace MacroDeckHost.Tests.PluginContractTests.Harness;
 internal static class PluginTestSession
 {
 	public static PluginSession Create(string sessionId, int negotiatedVersion, DateTimeOffset openedAt)
-		=> new(sessionId,
+	{
+		return new PluginSession(sessionId,
 			"session-token",
 			negotiatedVersion,
 			ProtocolDescriptorFactory.CreateLimitsDescriptor(),
 			ProtocolDescriptorFactory.CreateTimeoutsDescriptor(),
 			openedAt);
+	}
 
-	public static CapabilityDispatcher Dispatcher(IEnumerable<ICapabilityHandler> handlers,
+	public static CapabilityDispatcher Dispatcher(
+		IEnumerable<ICapabilityHandler> handlers,
 		PluginConnectionState state,
 		TimeProvider timeProvider,
 		IHostInvoker? hostInvoker = null,
@@ -32,8 +35,8 @@ internal static class PluginTestSession
 		// handler directly with an IHostInvoker (UiCapabilityHandler is the one so far) passes that same
 		// instance here, so a call routed through DI and one built into the handler complete off the
 		// same pending-correlation table instead of two invokers racing each other.
-		services.AddSingleton(hostInvoker ??
-			new HostInvoker(state,
+		services.AddSingleton(hostInvoker
+			?? new HostInvoker(state,
 				timeProvider,
 				Serilog.Core.Logger.None));
 
@@ -41,8 +44,8 @@ internal static class PluginTestSession
 		// resolves IPluginAssetUploader from the invocation's own scope rather than its constructor, so a
 		// caller that wants an upload to actually reach the fixture's asset receiver passes the same
 		// instance CapabilityContractFixture.UploadAssetAsync uses.
-		services.AddSingleton(assetUploader ??
-			new PluginAssetUploader(state,
+		services.AddSingleton(assetUploader
+			?? new PluginAssetUploader(state,
 				timeProvider,
 				Serilog.Core.Logger.None));
 		services.AddSingleton<ILogger>(Serilog.Core.Logger.None);

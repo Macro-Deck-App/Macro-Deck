@@ -16,7 +16,7 @@ public class ProfileDtoMapperTests
 	[Test]
 	public void NoConstraint_ProducesNoConstraintOrCompatibility()
 	{
-		var dto = ProfileDtoMapper.MapJsonProfile(Profile(rows: 4, columns: 4));
+		var dto = ProfileDtoMapper.MapJsonProfile(Profile(4, 4));
 
 		Assert.Multiple(() =>
 		{
@@ -30,7 +30,7 @@ public class ProfileDtoMapperTests
 	[TestCase(true)]
 	public void TheProfileWidgetShadowsSettingReachesTheWire(bool? shadows)
 	{
-		var entity = Profile(rows: 4, columns: 4);
+		var entity = Profile(4, 4);
 		entity.DefaultWidgetShadows = shadows;
 
 		var dto = ProfileDtoMapper.MapJsonProfile(entity);
@@ -41,8 +41,8 @@ public class ProfileDtoMapperTests
 	[Test]
 	public void ACurrentGridLargerThanALockedLayout_IsReportedAsExceedsLayout_WithoutResizingTheDto()
 	{
-		var entity = Profile(rows: 6, columns: 6);
-		var constraint = FixedConstraint(rows: 4, columns: 4, deviceName: "Deck A");
+		var entity = Profile(6, 6);
+		var constraint = FixedConstraint(4, 4, "Deck A");
 
 		var dto = ProfileDtoMapper.MapJsonProfile(entity, constraint);
 
@@ -60,7 +60,7 @@ public class ProfileDtoMapperTests
 	[Test]
 	public void AConflictingConstraint_IsReportedAsConflictingDevices_NamingEveryConflictingDevice()
 	{
-		var entity = Profile(rows: 4, columns: 4);
+		var entity = Profile(4, 4);
 		var constraint = ConflictConstraint(["Deck A", "Deck B", "Deck C"]);
 
 		var dto = ProfileDtoMapper.MapJsonProfile(entity, constraint);
@@ -76,8 +76,8 @@ public class ProfileDtoMapperTests
 	[Test]
 	public void ARealProfileWithADeviceConstraint_StillReportsUnlockedTopLevelFlags()
 	{
-		var entity = Profile(rows: 4, columns: 4);
-		var constraint = FixedConstraint(rows: 4, columns: 4, deviceName: "Deck A");
+		var entity = Profile(4, 4);
+		var constraint = FixedConstraint(4, 4, "Deck A");
 
 		var dto = ProfileDtoMapper.MapJsonProfile(entity, constraint);
 
@@ -95,7 +95,7 @@ public class ProfileDtoMapperTests
 	[Test]
 	public void TheNoConstraintOverload_StillProducesNoConstraintOrCompatibility()
 	{
-		var dto = ProfileDtoMapper.MapJsonProfile(Profile(rows: 4, columns: 4));
+		var dto = ProfileDtoMapper.MapJsonProfile(Profile(4, 4));
 
 		Assert.Multiple(() =>
 		{
@@ -107,7 +107,8 @@ public class ProfileDtoMapperTests
 	}
 
 	private static ProfileEntity Profile(int rows, int columns)
-		=> new()
+	{
+		return new ProfileEntity
 		{
 			Id = Guid.NewGuid(),
 			Name = "Profile",
@@ -115,34 +116,39 @@ public class ProfileDtoMapperTests
 			DefaultRows = rows,
 			DefaultColumns = columns
 		};
+	}
 
 	private static DeviceGridConstraint FixedConstraint(int rows, int columns, string deviceName)
-		=> new(RowsLocked: true,
-			ColumnsLocked: true,
-			Rows: rows,
-			Columns: columns,
-			MinRows: rows,
-			MaxRows: rows,
-			MinColumns: columns,
-			MaxColumns: columns,
-			LayoutId: "owner::layout",
-			LayoutName: "Fixed Grid",
-			DeviceName: deviceName,
-			HasConflict: false,
-			ConflictingDeviceNames: []);
+	{
+		return new DeviceGridConstraint(true,
+			true,
+			rows,
+			columns,
+			rows,
+			rows,
+			columns,
+			columns,
+			"owner::layout",
+			"Fixed Grid",
+			deviceName,
+			false,
+			[]);
+	}
 
 	private static DeviceGridConstraint ConflictConstraint(IReadOnlyList<string> deviceNames)
-		=> new(RowsLocked: false,
-			ColumnsLocked: false,
-			Rows: 0,
-			Columns: 0,
-			MinRows: 1,
-			MaxRows: int.MaxValue,
-			MinColumns: 1,
-			MaxColumns: int.MaxValue,
-			LayoutId: null,
-			LayoutName: null,
-			DeviceName: null,
-			HasConflict: true,
-			ConflictingDeviceNames: deviceNames);
+	{
+		return new DeviceGridConstraint(false,
+			false,
+			0,
+			0,
+			1,
+			int.MaxValue,
+			1,
+			int.MaxValue,
+			null,
+			null,
+			null,
+			true,
+			deviceNames);
+	}
 }

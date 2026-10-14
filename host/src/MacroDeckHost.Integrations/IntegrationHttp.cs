@@ -1,7 +1,7 @@
 using System.Net.WebSockets;
 using MacroDeck.Sdk.Http;
 
-namespace MacroDeckHost.Integrations.Http;
+namespace MacroDeckHost.Integrations;
 
 internal static class IntegrationHttp
 {
@@ -32,13 +32,18 @@ internal static class IntegrationHttp
 		Action<SocketsHttpHandler>? configure = null,
 		IHostHttp? source = null)
 	{
-		var client = new HttpClient(CreateHandler(configure, source), disposeHandler: true);
+		var client = new HttpClient(CreateHandler(configure, source), true);
 		if (timeout is { } value)
 		{
 			client.Timeout = value;
 		}
 
 		return client;
+	}
+
+	internal static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler, TimeSpan timeout)
+	{
+		return new HttpClient(handler, disposeHandler) { Timeout = timeout };
 	}
 
 	internal static ClientWebSocket CreateWebSocket(IHostHttp? source = null)
@@ -62,7 +67,8 @@ internal static class IntegrationHttp
 
 	private sealed class UserAgentHandler(IHostHttp source, HttpMessageHandler inner) : DelegatingHandler(inner)
 	{
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			if (request.Headers.UserAgent.Count == 0)

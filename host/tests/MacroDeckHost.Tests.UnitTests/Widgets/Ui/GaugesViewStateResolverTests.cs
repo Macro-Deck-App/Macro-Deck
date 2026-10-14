@@ -35,7 +35,7 @@ public class GaugesViewStateResolverTests
 	[TestCase(20d)]
 	public void A_maximum_that_is_absent_zero_or_not_above_the_minimum_uses_the_variables_own_maximum(double? max)
 	{
-		var face = Resolve(30, new GaugeConfig { Id = "g", Variable = Metric, Min = 20, Max = max }, declaredMax: 40);
+		var face = Resolve(30, new GaugeConfig { Id = "g", Variable = Metric, Min = 20, Max = max }, 40);
 
 		Assert.That(face.Level, Is.EqualTo(0.5).Within(0.0001));
 	}
@@ -43,7 +43,7 @@ public class GaugesViewStateResolverTests
 	[Test]
 	public void Without_any_usable_maximum_the_ring_spans_a_hundred_above_the_minimum()
 	{
-		var face = Resolve(60, new GaugeConfig { Id = "g", Variable = Metric, Min = 10 }, declaredMax: 5);
+		var face = Resolve(60, new GaugeConfig { Id = "g", Variable = Metric, Min = 10 }, 5);
 
 		Assert.That(face.Level, Is.EqualTo(0.5).Within(0.0001));
 	}
@@ -92,7 +92,8 @@ public class GaugesViewStateResolverTests
 	[TestCase(GaugeConfig.WarnAbove, 89, 90, false)]
 	[TestCase(GaugeConfig.WarnBelow, 20, 20, true)]
 	[TestCase(GaugeConfig.WarnBelow, 21, 20, false)]
-	public void Crossing_the_threshold_turns_the_ring_the_warning_colour(string when,
+	public void Crossing_the_threshold_turns_the_ring_the_warning_colour(
+		string when,
 		double value,
 		double threshold,
 		bool warns)
@@ -106,7 +107,8 @@ public class GaugesViewStateResolverTests
 	[TestCase(GaugeConfig.WarnBelow, 0, true)]
 	[TestCase(GaugeConfig.WarnBelow, 1, false)]
 	[TestCase(GaugeConfig.WarnAbove, 0, true)]
-	public void A_direction_without_a_stored_threshold_warns_at_the_zero_the_editor_shows(string when,
+	public void A_direction_without_a_stored_threshold_warns_at_the_zero_the_editor_shows(
+		string when,
 		double value,
 		bool warns)
 	{
@@ -135,17 +137,23 @@ public class GaugesViewStateResolverTests
 			Type = VariableType.Text,
 			Classification = VariableClassification.User,
 			Value = "M3 Max",
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		});
 		var resolver = new GaugesViewStateResolver(registry);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(resolver.Resolve(new GaugeConfig { Id = "g", Variable = Metric, Name = "CPU {{ vars.cpu_name }}" }).Name,
+			Assert.That(resolver.Resolve(new GaugeConfig
+						{ Id = "g", Variable = Metric, Name = "CPU {{ vars.cpu_name }}" })
+					.Name,
 				Is.EqualTo("CPU M3 Max"));
-			Assert.That(resolver.Resolve(new GaugeConfig { Id = "g", Variable = Metric, Name = "CPU" }).Name, Is.EqualTo("CPU"));
-			Assert.That(resolver.Resolve(new GaugeConfig { Id = "g", Variable = "missing", Name = "{{ vars.cpu_name }}" }).Name,
-				Is.EqualTo("M3 Max"), "the name renders even while the gauge has no reading");
+			Assert.That(resolver.Resolve(new GaugeConfig { Id = "g", Variable = Metric, Name = "CPU" }).Name,
+				Is.EqualTo("CPU"));
+			Assert.That(resolver.Resolve(new GaugeConfig
+						{ Id = "g", Variable = "missing", Name = "{{ vars.cpu_name }}" })
+					.Name,
+				Is.EqualTo("M3 Max"),
+				"the name renders even while the gauge has no reading");
 		});
 	}
 
@@ -162,14 +170,18 @@ public class GaugesViewStateResolverTests
 		Assert.That(face.Level, Is.EqualTo(0.8).Within(0.0001));
 	}
 
-	private static GaugeFace Resolve(double value,
+	private static GaugeFace Resolve(
+		double value,
 		GaugeConfig gauge,
 		double? declaredMax = null,
 		int? decimals = 0,
 		string? unit = null)
-		=> new GaugesViewStateResolver(Registry(value, declaredMax, decimals, unit)).Resolve(gauge);
+	{
+		return new GaugesViewStateResolver(Registry(value, declaredMax, decimals, unit)).Resolve(gauge);
+	}
 
-	private static VariableRegistry Registry(double value,
+	private static VariableRegistry Registry(
+		double value,
 		double? declaredMax = null,
 		int? decimals = 0,
 		string? unit = null)
@@ -180,13 +192,15 @@ public class GaugesViewStateResolverTests
 		return registry;
 	}
 
-	private static VariableEntity Variable(double value,
+	private static VariableEntity Variable(
+		double value,
 		VariableScope scope,
 		string? scopeRefId,
 		double? declaredMax = null,
 		int? decimals = 0,
 		string? unit = null)
-		=> new()
+	{
+		return new VariableEntity
 		{
 			Id = Guid.NewGuid(),
 			Name = Metric,
@@ -198,6 +212,7 @@ public class GaugesViewStateResolverTests
 			DecimalPlaces = decimals,
 			Unit = unit,
 			Max = declaredMax,
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		};
+	}
 }

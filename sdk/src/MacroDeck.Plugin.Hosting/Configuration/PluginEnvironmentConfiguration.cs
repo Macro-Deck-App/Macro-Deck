@@ -68,11 +68,15 @@ public static class PluginEnvironmentConfiguration
 internal sealed class PluginEnvironmentConfigurationSource : IConfigurationSource
 {
 	public IConfigurationProvider Build(IConfigurationBuilder builder)
-		=> new PluginEnvironmentConfigurationProvider();
+	{
+		return new PluginEnvironmentConfigurationProvider();
+	}
 }
 
 internal sealed class PluginEnvironmentConfigurationProvider : ConfigurationProvider
 {
 	public override void Load()
-		=> Data = PluginEnvironmentConfiguration.Read(Environment.GetEnvironmentVariable);
+	{
+		Data = PluginEnvironmentConfiguration.Read(Environment.GetEnvironmentVariable);
+	}
 }

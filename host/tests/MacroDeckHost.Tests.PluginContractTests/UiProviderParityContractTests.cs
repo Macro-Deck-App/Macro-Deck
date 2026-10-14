@@ -33,18 +33,27 @@ internal sealed class UiProviderParityContractTests : UiContractFixture
 	private const string InProcessProviderId = "com.example.inprocess";
 
 	private static UiSurface Surface(string kind)
-		=> new() { Kind = kind, SessionMode = Mode(kind) };
+	{
+		return new UiSurface { Kind = kind, SessionMode = Mode(kind) };
+	}
 
 	/// <summary>The mode each kind is actually opened with, so a run is not parity against a surface no
 	/// opener ever produces - a shared session admits a second client where an exclusive one refuses it,
 	/// which is precisely the sort of difference this suite exists to catch.</summary>
 	private static string Mode(string kind)
-		=> kind is UiSurfaceKinds.Widget or UiSurfaceKinds.Preview or UiSurfaceKinds.Folder or UiSurfaceKinds.ScreenSaver
+	{
+		return kind is UiSurfaceKinds.Widget
+			or UiSurfaceKinds.Preview
+			or UiSurfaceKinds.Folder
+			or UiSurfaceKinds.ScreenSaver
 			? UiSessionModes.Shared
 			: UiSessionModes.Exclusive;
+	}
 
 	private static UiTree Tree(string kind)
-		=> new() { Revision = 1, Surface = Surface(kind), Root = new UiNode { Id = "root", Type = "panel" } };
+	{
+		return new UiTree { Revision = 1, Surface = Surface(kind), Root = new UiNode { Id = "root", Type = "panel" } };
+	}
 
 	private static readonly UiPatch _patch = new()
 	{
@@ -246,7 +255,8 @@ internal sealed class UiProviderParityContractTests : UiContractFixture
 	}
 
 	private static UiSendEventRequest EventRequest(string sessionId)
-		=> new()
+	{
+		return new UiSendEventRequest
 		{
 			SessionId = sessionId,
 			NodeId = "field.apiKey",
@@ -254,8 +264,11 @@ internal sealed class UiProviderParityContractTests : UiContractFixture
 			Data = new UiRawJson(_eventData),
 			Revision = 1
 		};
+	}
 
 	private static byte[] PayloadOf<T>(RecordingUiTransport transport)
 		where T : class
-		=> transport.For("c1").Single(recorded => recorded.Message is T).Payload!;
+	{
+		return transport.For("c1").Single(recorded => recorded.Message is T).Payload!;
+	}
 }

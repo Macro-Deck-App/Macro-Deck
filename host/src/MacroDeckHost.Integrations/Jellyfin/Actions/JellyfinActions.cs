@@ -22,7 +22,8 @@ internal static class JellyfinActions
 	public static IReadOnlyList<IActionDefinition> Create(
 		JellyfinPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=>
+	{
+		return
 		[
 			new JellyfinPlayerActionDefinition(resolver,
 				getInstances,
@@ -72,10 +73,10 @@ internal static class JellyfinActions
 				Strings.DisplayMessageName(),
 				Strings.DisplayMessageDescription(),
 				[
-					ActionParameter.Text("header", label: Params.MessageHeader()),
-					ActionParameter.Text("text", label: Params.MessageText(), required: true),
+					ActionParameter.Text("header", Params.MessageHeader()),
+					ActionParameter.Text("text", Params.MessageText(), required: true),
 					ActionParameter.Number("timeoutSeconds",
-						label: Params.MessageTimeout(),
+						Params.MessageTimeout(),
 						min: 1,
 						max: 600,
 						defaultValue: 5)
@@ -89,7 +90,7 @@ internal static class JellyfinActions
 				"play-media",
 				Strings.PlayMediaName(),
 				Strings.PlayMediaDescription(),
-				[ActionParameter.Autocomplete(ItemParameter, label: Params.Item(), required: true)],
+				[ActionParameter.Autocomplete(ItemParameter, Params.Item(), required: true)],
 				(player, values, ct) =>
 				{
 					var (mediaType, itemId) = SplitItem(Text(values, ItemParameter));
@@ -97,10 +98,14 @@ internal static class JellyfinActions
 						? throw new JellyfinCommandException(ActionErrorCodes.InvalidParameter, Strings.ChooseItem())
 						: player.PlayItemAsync(itemId, mediaType, ct);
 				},
-				searchItems: SearchItemsAsync)
+				SearchItemsAsync)
 		];
+	}
 
-	internal static string ItemValue(string mediaType, string itemId) => $"{mediaType}|{itemId}";
+	internal static string ItemValue(string mediaType, string itemId)
+	{
+		return $"{mediaType}|{itemId}";
+	}
 
 	internal static (string? MediaType, string ItemId) SplitItem(string? value)
 	{
@@ -146,7 +151,8 @@ internal static class JellyfinActions
 				.. items.Where(item => !string.IsNullOrEmpty(item.Id))
 					.Select(item => new ActionParameterOption
 					{
-						Value = ItemValue(_audioTypes.Contains(item.Type ?? string.Empty) ? "Audio" : "Video", item.Id!),
+						Value = ItemValue(_audioTypes.Contains(item.Type ?? string.Empty) ? "Audio" : "Video",
+							item.Id!),
 						Label = Label(item)
 					})
 			],
@@ -156,12 +162,15 @@ internal static class JellyfinActions
 
 	private static string Label(Protocol.JellyfinItemDto item)
 	{
-		var context = item.SeriesName ?? item.AlbumArtist ?? item.ProductionYear?.ToString(CultureInfo.InvariantCulture);
+		var context = item.SeriesName
+			?? item.AlbumArtist ?? item.ProductionYear?.ToString(CultureInfo.InvariantCulture);
 		return string.IsNullOrEmpty(context) ? item.Name ?? string.Empty : $"{item.Name} · {context}";
 	}
 
 	private static ActionParameter SecondsParameter(double defaultValue)
-		=> ActionParameter.Number("seconds", label: Params.Seconds(), min: 1, max: 3600, defaultValue: defaultValue);
+	{
+		return ActionParameter.Number("seconds", Params.Seconds(), min: 1, max: 3600, defaultValue: defaultValue);
+	}
 
 	private static double Seconds(IReadOnlyDictionary<string, object> values, double fallback, string name = "seconds")
 	{
@@ -178,12 +187,15 @@ internal static class JellyfinActions
 	}
 
 	private static string? Text(IReadOnlyDictionary<string, object> values, string name)
-		=> values.GetValueOrDefault(name)?.ToString() is { Length: > 0 } text ? text : null;
+	{
+		return values.GetValueOrDefault(name)?.ToString() is { Length: > 0 } text ? text : null;
+	}
 }
 
 internal class JellyfinPlayerActionDefinition : IDynamicOptionsActionDefinition
 {
-	private static readonly ILogger _logger = IntegrationLog.For<JellyfinPlayerActionDefinition>(JellyfinIntegration.IntegrationId);
+	private static readonly ILogger _logger
+		= IntegrationLog.For<JellyfinPlayerActionDefinition>(JellyfinIntegration.IntegrationId);
 
 	private readonly JellyfinPlayerResolver _resolver;
 	private readonly Func<IReadOnlyList<MusicPlayerInstance>> _getInstances;
@@ -210,8 +222,8 @@ internal class JellyfinPlayerActionDefinition : IDynamicOptionsActionDefinition
 		Parameters =
 		[
 			ActionParameter.DynamicChoice(MusicPlayerActions.InstanceParameterName,
-				label: Params.Player(),
-				description: Params.PlayerDescription(),
+				Params.Player(),
+				Params.PlayerDescription(),
 				placeholder: Params.ActiveSession()),
 			.. parameters
 		];
@@ -225,7 +237,10 @@ internal class JellyfinPlayerActionDefinition : IDynamicOptionsActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -237,8 +252,9 @@ internal class JellyfinPlayerActionDefinition : IDynamicOptionsActionDefinition
 			{
 				Options =
 				[
-					.. _getInstances().Select(instance => new ActionParameterOption
-						{ Value = instance.Id, Label = instance.DisplayName })
+					.. _getInstances()
+						.Select(instance => new ActionParameterOption
+							{ Value = instance.Id, Label = instance.DisplayName })
 				],
 				CacheSeconds = 2
 			});
@@ -246,7 +262,8 @@ internal class JellyfinPlayerActionDefinition : IDynamicOptionsActionDefinition
 
 		if (context.ParameterName == JellyfinActions.ItemParameter && _searchItems is not null)
 		{
-			var instance = context.CurrentParameters.GetValueOrDefault(MusicPlayerActions.InstanceParameterName)?.ToString();
+			var instance = context.CurrentParameters.GetValueOrDefault(MusicPlayerActions.InstanceParameterName)
+				?.ToString();
 			return _searchItems(_resolver(instance), context.Filter, cancellationToken);
 		}
 
@@ -254,7 +271,9 @@ internal class JellyfinPlayerActionDefinition : IDynamicOptionsActionDefinition
 	}
 
 	protected JellyfinMusicPlayer? Resolve(IReadOnlyDictionary<string, object?> parameters)
-		=> _resolver(parameters.GetValueOrDefault(MusicPlayerActions.InstanceParameterName)?.ToString());
+	{
+		return _resolver(parameters.GetValueOrDefault(MusicPlayerActions.InstanceParameterName)?.ToString());
+	}
 
 	private sealed class Executor(JellyfinPlayerActionDefinition definition) : IActionExecutor
 	{
@@ -299,5 +318,7 @@ internal sealed class JellyfinStatePlayerActionDefinition(
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<ActionStateSnapshot?>(state(Resolve(parameters)));
+	{
+		return Task.FromResult<ActionStateSnapshot?>(state(Resolve(parameters)));
+	}
 }

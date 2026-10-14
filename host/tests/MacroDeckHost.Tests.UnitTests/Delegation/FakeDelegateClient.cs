@@ -46,7 +46,8 @@ internal sealed class FakeDelegateClient : IDelegateClient
 		return config.Reachable ? Task.CompletedTask : Task.FromException(new DelegateUnreachableException());
 	}
 
-	public Task<DelegateLoginResult> LoginAsync(Uri baseUrl,
+	public Task<DelegateLoginResult> LoginAsync(
+		Uri baseUrl,
 		string username,
 		string password,
 		CancellationToken cancellationToken)
@@ -59,8 +60,8 @@ internal sealed class FakeDelegateClient : IDelegateClient
 			return Task.FromException<DelegateLoginResult>(ex);
 		}
 
-		if (!string.Equals(username, config.Username, StringComparison.Ordinal) ||
-			!string.Equals(password, config.Password, StringComparison.Ordinal))
+		if (!string.Equals(username, config.Username, StringComparison.Ordinal)
+			|| !string.Equals(password, config.Password, StringComparison.Ordinal))
 		{
 			return Task.FromException<DelegateLoginResult>(new DelegateUnauthorizedException());
 		}
@@ -69,7 +70,8 @@ internal sealed class FakeDelegateClient : IDelegateClient
 			TimeSpan.FromSeconds(config.TokenExpiresInSeconds)));
 	}
 
-	public Task<DelegateConnectionInfo> GetConnectionInfoAsync(Uri baseUrl,
+	public Task<DelegateConnectionInfo> GetConnectionInfoAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken)
 	{
@@ -80,7 +82,8 @@ internal sealed class FakeDelegateClient : IDelegateClient
 			: Task.FromResult(new DelegateConnectionInfo(config.InstanceName));
 	}
 
-	public Task<IReadOnlyList<DelegateScriptSummary>> GetScriptsAsync(Uri baseUrl,
+	public Task<IReadOnlyList<DelegateScriptSummary>> GetScriptsAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken)
 	{
@@ -100,7 +103,8 @@ internal sealed class FakeDelegateClient : IDelegateClient
 		return Task.FromResult(scripts);
 	}
 
-	public async Task<DelegateRunResult> RunScriptAsync(Uri baseUrl,
+	public async Task<DelegateRunResult> RunScriptAsync(
+		Uri baseUrl,
 		string token,
 		string scriptId,
 		string? clientId,
@@ -130,7 +134,8 @@ internal sealed class FakeDelegateClient : IDelegateClient
 		return config.RunHandler?.Invoke(scriptId) ?? new DelegateRunResult(true, null, "Succeeded");
 	}
 
-	public Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(Uri baseUrl,
+	public Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken)
 	{
@@ -154,7 +159,8 @@ internal sealed class FakeDelegateClient : IDelegateClient
 		}
 	}
 
-	public Task<DelegateWriteResult> SetSharedVariableAsync(Uri baseUrl,
+	public Task<DelegateWriteResult> SetSharedVariableAsync(
+		Uri baseUrl,
 		string token,
 		string name,
 		string? value,

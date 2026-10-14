@@ -23,28 +23,34 @@ internal sealed class SetTrackMonitoringActionDefinition : IDynamicOptionsAction
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(MeldActionParameters.Track,
-			label: AppStrings.Integrations.Meld.Parameters.Track(),
+			AppStrings.Integrations.Meld.Parameters.Track(),
 			required: true),
 		ActionParameter.Choice(MeldActionParameters.Mode,
-			options: MeldActionParameters.TrackMonitoringModes,
-			label: AppStrings.Integrations.Meld.Parameters.Mode(),
+			MeldActionParameters.TrackMonitoringModes,
+			AppStrings.Integrations.Meld.Parameters.Mode(),
 			defaultValue: MeldActionParameters.ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MeldActionStates.Snapshot(_resolver(),
+	{
+		return Task.FromResult(MeldActionStates.Snapshot(_resolver(),
 			parameters.GetValueOrDefault(MeldActionParameters.Track),
 			ActionStates.Monitoring,
 			session => session.TracksById,
 			session => session.Tracks,
 			track => track.Name,
 			(_, track) => track.Monitoring));
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		var session = _resolver()?.State.Session ?? MeldSession.Empty;
@@ -80,8 +86,8 @@ internal sealed class SetTrackMonitoringActionDefinition : IDynamicOptionsAction
 				return resolveError!;
 			}
 
-			var mode = context.Parameters.GetValueOrDefault(MeldActionParameters.Mode) as string ??
-				MeldActionParameters.ModeToggle;
+			var mode = context.Parameters.GetValueOrDefault(MeldActionParameters.Mode) as string
+				?? MeldActionParameters.ModeToggle;
 			bool? desired = mode switch
 			{
 				"on" => true,

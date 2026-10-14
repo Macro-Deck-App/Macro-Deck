@@ -179,12 +179,13 @@ public sealed class CalendarWidgetVariableWriter
 			(Running, VariableType.Boolean, shown.IsRunningAt(now)),
 			(Location, VariableType.Text, shown.Location ?? string.Empty),
 			(MeetingUrl, VariableType.Text, shown.MeetingUrl ?? string.Empty),
-			(Calendar, VariableType.Text, shown.CalendarName),
+			(Calendar, VariableType.Text, shown.CalendarName)
 		];
 
 		foreach (var (name, type, value) in values)
 		{
-			await variables.UpsertWidgetVariable(VariableScope.Widget, scopeRefId, name, type, value).ConfigureAwait(false);
+			await variables.UpsertWidgetVariable(VariableScope.Widget, scopeRefId, name, type, value)
+				.ConfigureAwait(false);
 		}
 	}
 
@@ -200,11 +201,15 @@ public sealed class CalendarWidgetVariableWriter
 	}
 
 	private List<WidgetEntity> CalendarWidgets()
-		=> _folders.GetAllFolders()
+	{
+		return _folders.GetAllFolders()
 			.SelectMany(folder => folder.Widgets)
 			.Where(widget => CalendarWidgetTypes.IsCalendarWidget(widget.Type))
 			.ToList();
+	}
 
 	private bool Exists(Guid widgetId)
-		=> _folders.GetAllFolders().Any(folder => folder.Widgets.Any(widget => widget.Id == widgetId));
+	{
+		return _folders.GetAllFolders().Any(folder => folder.Widgets.Any(widget => widget.Id == widgetId));
+	}
 }

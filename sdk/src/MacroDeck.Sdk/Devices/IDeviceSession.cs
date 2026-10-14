@@ -86,5 +86,7 @@ public interface IDeviceSession : IAsyncDisposable
 		string widgetId,
 		string? knownETag = null,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult<DeviceWidgetIconImage?>(null);
+	{
+		return Task.FromResult<DeviceWidgetIconImage?>(null);
+	}
 }

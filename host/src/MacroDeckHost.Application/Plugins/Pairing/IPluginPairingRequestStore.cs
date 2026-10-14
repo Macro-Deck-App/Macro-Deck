@@ -18,10 +18,14 @@ public sealed record PluginPairingCreateResult
 	public PluginPairingRequestRecord? Record { get; init; }
 
 	public static PluginPairingCreateResult Success(PluginPairingRequestRecord record)
-		=> new() { Succeeded = true, Record = record };
+	{
+		return new PluginPairingCreateResult { Succeeded = true, Record = record };
+	}
 
 	public static PluginPairingCreateResult Fail(PluginPairingCreateFailure failure)
-		=> new() { Succeeded = false, Failure = failure };
+	{
+		return new PluginPairingCreateResult { Succeeded = false, Failure = failure };
+	}
 }
 
 public enum PluginPairingRedeemFailure
@@ -42,10 +46,14 @@ public sealed record PluginPairingRedeemResult
 	public PluginPairingRequestRecord? Record { get; init; }
 
 	public static PluginPairingRedeemResult Success(PluginPairingRequestRecord record)
-		=> new() { Succeeded = true, Record = record };
+	{
+		return new PluginPairingRedeemResult { Succeeded = true, Record = record };
+	}
 
 	public static PluginPairingRedeemResult Fail(PluginPairingRedeemFailure failure)
-		=> new() { Succeeded = false, Failure = failure };
+	{
+		return new PluginPairingRedeemResult { Succeeded = false, Failure = failure };
+	}
 }
 
 /// <summary>
@@ -54,7 +62,8 @@ public sealed record PluginPairingRedeemResult
 /// </summary>
 public interface IPluginPairingRequestStore
 {
-	PluginPairingCreateResult Create(string pluginId,
+	PluginPairingCreateResult Create(
+		string pluginId,
 		string displayName,
 		string codeChallenge,
 		PluginPairingClientInfo? client,

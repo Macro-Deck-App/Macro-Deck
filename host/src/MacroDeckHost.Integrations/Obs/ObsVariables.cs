@@ -39,56 +39,66 @@ internal static class ObsVariables
 
 	// The definition id embeds the entry guid ("N" format) as the re-registration identity for upgrades;
 	// the VariableConfiguration key below reuses the same "N" format so it lines up with that guid.
-	public static IReadOnlyList<VariableDefinition> Declare(string key,
+	public static IReadOnlyList<VariableDefinition> Declare(
+		string key,
 		Guid? entryId,
 		LocalizedText configurationName = default)
-		=> _slots.Select(slot => VariableDefinition.Eager($"obs_{key}_{slot.Name}",
-				slot.Type,
-				slot.DecimalPlaces,
-				slot.RefreshInterval) with
-			{
-				DisplayName = DisplayNameFor(slot.Name),
-				Id = entryId is { } id
-					? $"entry-{id:N}-{slot.Name.Replace('_', '-')}"
-					: null,
-				Configuration = entryId is { } configId
-					? new VariableConfiguration(configId.ToString("N"), configurationName)
-					: null
-			}).ToList();
-
-	private static LocalizedText DisplayNameFor(string slot) => slot switch
 	{
-		"is_connected" => MacroDeckStrings.Connection.Connected(),
-		"current_scene" => AppStrings.Integrations.Obs.Variables.CurrentScene(),
-		"preview_scene" => AppStrings.Integrations.Obs.Variables.PreviewScene(),
-		"is_recording" => AppStrings.Integrations.Obs.Variables.IsRecording(),
-		"recording_paused" => AppStrings.Integrations.Obs.Variables.RecordingPaused(),
-		"recording_timecode" => AppStrings.Integrations.Obs.Variables.RecordingTimecode(),
-		"is_streaming" => AppStrings.Integrations.Obs.Variables.IsStreaming(),
-		"streaming_timecode" => AppStrings.Integrations.Obs.Variables.StreamingTimecode(),
-		"virtual_camera_active" => AppStrings.Integrations.Obs.Variables.VirtualCameraActive(),
-		"replay_buffer_active" => AppStrings.Integrations.Obs.Variables.ReplayBufferActive(),
-		"studio_mode_active" => AppStrings.Integrations.Obs.Variables.StudioModeActive(),
-		"fps" => AppStrings.Integrations.Obs.Variables.Fps(),
-		"max_fps" => AppStrings.Integrations.Obs.Variables.MaxFps(),
-		"cpu_usage" => AppStrings.Integrations.Obs.Variables.CpuUsage(),
-		"streaming_bitrate" => AppStrings.Integrations.Obs.Variables.StreamingBitrate(),
-		"recording_bitrate" => AppStrings.Integrations.Obs.Variables.RecordingBitrate(),
-		"dropped_frames" => AppStrings.Integrations.Obs.Variables.DroppedFrames(),
-		"dropped_frames_percent" => AppStrings.Integrations.Obs.Variables.DroppedFramesPercent(),
-		"skipped_frames" => AppStrings.Integrations.Obs.Variables.SkippedFrames(),
-		"skipped_frames_percent" => AppStrings.Integrations.Obs.Variables.SkippedFramesPercent(),
-		"current_profile" => AppStrings.Integrations.Obs.Variables.CurrentProfile(),
-		"last_recording_file" => AppStrings.Integrations.Obs.Variables.LastRecordingFile(),
-		"last_screenshot" => AppStrings.Integrations.Obs.Variables.LastScreenshot(),
-		"current_scene_collection" => AppStrings.Integrations.Obs.Variables.CurrentSceneCollection(),
-		_ => default
-	};
+		return _slots.Select(slot => VariableDefinition.Eager($"obs_{key}_{slot.Name}",
+					slot.Type,
+					slot.DecimalPlaces,
+					slot.RefreshInterval) with
+				{
+					DisplayName = DisplayNameFor(slot.Name),
+					Id = entryId is { } id
+						? $"entry-{id:N}-{slot.Name.Replace('_', '-')}"
+						: null,
+					Configuration = entryId is { } configId
+						? new VariableConfiguration(configId.ToString("N"), configurationName)
+						: null
+				})
+			.ToList();
+	}
+
+	private static LocalizedText DisplayNameFor(string slot)
+	{
+		return slot switch
+		{
+			"is_connected" => MacroDeckStrings.Connection.Connected(),
+			"current_scene" => AppStrings.Integrations.Obs.Variables.CurrentScene(),
+			"preview_scene" => AppStrings.Integrations.Obs.Variables.PreviewScene(),
+			"is_recording" => AppStrings.Integrations.Obs.Variables.IsRecording(),
+			"recording_paused" => AppStrings.Integrations.Obs.Variables.RecordingPaused(),
+			"recording_timecode" => AppStrings.Integrations.Obs.Variables.RecordingTimecode(),
+			"is_streaming" => AppStrings.Integrations.Obs.Variables.IsStreaming(),
+			"streaming_timecode" => AppStrings.Integrations.Obs.Variables.StreamingTimecode(),
+			"virtual_camera_active" => AppStrings.Integrations.Obs.Variables.VirtualCameraActive(),
+			"replay_buffer_active" => AppStrings.Integrations.Obs.Variables.ReplayBufferActive(),
+			"studio_mode_active" => AppStrings.Integrations.Obs.Variables.StudioModeActive(),
+			"fps" => AppStrings.Integrations.Obs.Variables.Fps(),
+			"max_fps" => AppStrings.Integrations.Obs.Variables.MaxFps(),
+			"cpu_usage" => AppStrings.Integrations.Obs.Variables.CpuUsage(),
+			"streaming_bitrate" => AppStrings.Integrations.Obs.Variables.StreamingBitrate(),
+			"recording_bitrate" => AppStrings.Integrations.Obs.Variables.RecordingBitrate(),
+			"dropped_frames" => AppStrings.Integrations.Obs.Variables.DroppedFrames(),
+			"dropped_frames_percent" => AppStrings.Integrations.Obs.Variables.DroppedFramesPercent(),
+			"skipped_frames" => AppStrings.Integrations.Obs.Variables.SkippedFrames(),
+			"skipped_frames_percent" => AppStrings.Integrations.Obs.Variables.SkippedFramesPercent(),
+			"current_profile" => AppStrings.Integrations.Obs.Variables.CurrentProfile(),
+			"last_recording_file" => AppStrings.Integrations.Obs.Variables.LastRecordingFile(),
+			"last_screenshot" => AppStrings.Integrations.Obs.Variables.LastScreenshot(),
+			"current_scene_collection" => AppStrings.Integrations.Obs.Variables.CurrentSceneCollection(),
+			_ => default
+		};
+	}
 
 	public static bool TryGetConfigurationEntryId(string? definitionId, out Guid entryId)
-		=> TryParseDefinitionId(definitionId, out entryId, out _);
+	{
+		return TryParseDefinitionId(definitionId, out entryId, out _);
+	}
 
-	public static bool TrySplit(string definitionId,
+	public static bool TrySplit(
+		string definitionId,
 		IReadOnlyList<ObsRuntime> runtimes,
 		out ObsRuntime runtime,
 		out string slot)
@@ -116,11 +126,11 @@ internal static class ObsVariables
 	{
 		entryId = Guid.Empty;
 		slot = string.Empty;
-		if (definitionId is null ||
-			!definitionId.StartsWith("entry-", StringComparison.Ordinal) ||
-			definitionId.Length <= 39 ||
-			definitionId[38] != '-' ||
-			!Guid.TryParseExact(definitionId.AsSpan(6, 32), "N", out entryId))
+		if (definitionId is null
+			|| !definitionId.StartsWith("entry-", StringComparison.Ordinal)
+			|| definitionId.Length <= 39
+			|| definitionId[38] != '-'
+			|| !Guid.TryParseExact(definitionId.AsSpan(6, 32), "N", out entryId))
 		{
 			return false;
 		}
@@ -135,41 +145,47 @@ internal static class ObsVariables
 		return true;
 	}
 
-	public static object? Read(ObsConnection connection, string slot) => slot switch
+	public static object? Read(ObsConnection connection, string slot)
 	{
-		"last_recording_file" => connection.LastRecordingFilePath,
-		"last_screenshot" => connection.LastScreenshotPath,
-		_ => Read(connection.State, slot)
-	};
+		return slot switch
+		{
+			"last_recording_file" => connection.LastRecordingFilePath,
+			"last_screenshot" => connection.LastScreenshotPath,
+			_ => Read(connection.State, slot)
+		};
+	}
 
-	public static object? Read(ObsState state, string slot) => slot switch
+	public static object? Read(ObsState state, string slot)
 	{
-		"is_connected" => state.IsConnected,
-		"current_scene" => state.CurrentScene,
-		"preview_scene" => state.PreviewScene,
-		"current_profile" => state.CurrentProfile,
-		"current_scene_collection" => state.CurrentSceneCollection,
-		"is_recording" => state.IsRecording,
-		"recording_paused" => state.RecordingPaused,
-		"recording_timecode" => state.RecordingTimecode,
-		"is_streaming" => state.IsStreaming,
-		"streaming_timecode" => state.StreamingTimecode,
-		"virtual_camera_active" => state.VirtualCamActive,
-		"replay_buffer_active" => state.ReplayBufferActive,
-		"studio_mode_active" => state.StudioModeActive,
-		"fps" => state.IsConnected ? (int)Math.Round(state.Fps) : null,
-		"max_fps" => state.IsConnected ? Math.Round(state.MaxFps, 2) : null,
-		"cpu_usage" => state.IsConnected ? Math.Round(state.CpuUsage, 1) : null,
-		"streaming_bitrate" => state.IsConnected ? (int)Math.Round(state.StreamingBitrateKbps) : null,
-		"recording_bitrate" => state.IsConnected ? (int)Math.Round(state.RecordingBitrateKbps) : null,
-		"dropped_frames" => state.IsConnected ? state.DroppedFrames : null,
-		"dropped_frames_percent" => state.IsConnected ? Math.Round(state.DroppedFramesPercent, 1) : null,
-		"skipped_frames" => state.IsConnected ? state.EncoderSkippedFrames : null,
-		"skipped_frames_percent" => state.IsConnected
-			? Math.Round(state.EncoderSkippedFramesPercent, 1)
-			: null,
-		_ => null
-	};
+		return slot switch
+		{
+			"is_connected" => state.IsConnected,
+			"current_scene" => state.CurrentScene,
+			"preview_scene" => state.PreviewScene,
+			"current_profile" => state.CurrentProfile,
+			"current_scene_collection" => state.CurrentSceneCollection,
+			"is_recording" => state.IsRecording,
+			"recording_paused" => state.RecordingPaused,
+			"recording_timecode" => state.RecordingTimecode,
+			"is_streaming" => state.IsStreaming,
+			"streaming_timecode" => state.StreamingTimecode,
+			"virtual_camera_active" => state.VirtualCamActive,
+			"replay_buffer_active" => state.ReplayBufferActive,
+			"studio_mode_active" => state.StudioModeActive,
+			"fps" => state.IsConnected ? (int)Math.Round(state.Fps) : null,
+			"max_fps" => state.IsConnected ? Math.Round(state.MaxFps, 2) : null,
+			"cpu_usage" => state.IsConnected ? Math.Round(state.CpuUsage, 1) : null,
+			"streaming_bitrate" => state.IsConnected ? (int)Math.Round(state.StreamingBitrateKbps) : null,
+			"recording_bitrate" => state.IsConnected ? (int)Math.Round(state.RecordingBitrateKbps) : null,
+			"dropped_frames" => state.IsConnected ? state.DroppedFrames : null,
+			"dropped_frames_percent" => state.IsConnected ? Math.Round(state.DroppedFramesPercent, 1) : null,
+			"skipped_frames" => state.IsConnected ? state.EncoderSkippedFrames : null,
+			"skipped_frames_percent" => state.IsConnected
+				? Math.Round(state.EncoderSkippedFramesPercent, 1)
+				: null,
+			_ => null
+		};
+	}
 
 	private sealed record Slot(string Name, VariableType Type, int? DecimalPlaces, TimeSpan RefreshInterval);
 }

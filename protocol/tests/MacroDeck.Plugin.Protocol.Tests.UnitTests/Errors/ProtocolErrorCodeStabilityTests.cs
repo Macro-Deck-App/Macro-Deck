@@ -44,7 +44,7 @@ public class ProtocolErrorCodeStabilityTests
 		"TIMEOUT",
 		"UI_RESOURCE_QUOTA_EXCEEDED",
 		"UNAUTHENTICATED",
-		"UNKNOWN_MESSAGE_TYPE",
+		"UNKNOWN_MESSAGE_TYPE"
 	];
 
 	[Test]
@@ -71,5 +71,7 @@ public class ProtocolErrorCodeStabilityTests
 
 	[Test]
 	public void There_are_no_duplicate_codes()
-		=> Assert.That(ProtocolErrorCodes.All, Is.Unique);
+	{
+		Assert.That(ProtocolErrorCodes.All, Is.Unique);
+	}
 }

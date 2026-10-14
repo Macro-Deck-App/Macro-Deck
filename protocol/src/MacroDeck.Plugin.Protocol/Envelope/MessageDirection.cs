@@ -5,5 +5,5 @@ public enum MessageDirection
 {
 	PluginToHost,
 	HostToPlugin,
-	Bidirectional,
+	Bidirectional
 }

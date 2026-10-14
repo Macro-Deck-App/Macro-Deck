@@ -22,28 +22,34 @@ internal sealed class SetTrackMuteActionDefinition : IDynamicOptionsActionDefini
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(MeldActionParameters.Track,
-			label: AppStrings.Integrations.Meld.Parameters.Track(),
+			AppStrings.Integrations.Meld.Parameters.Track(),
 			required: true),
 		ActionParameter.Choice(MeldActionParameters.Mode,
-			options: MeldActionParameters.TrackMuteModes,
-			label: AppStrings.Integrations.Meld.Parameters.Mode(),
+			MeldActionParameters.TrackMuteModes,
+			AppStrings.Integrations.Meld.Parameters.Mode(),
 			defaultValue: MeldActionParameters.ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MeldActionStates.Snapshot(_resolver(),
+	{
+		return Task.FromResult(MeldActionStates.Snapshot(_resolver(),
 			parameters.GetValueOrDefault(MeldActionParameters.Track),
 			ActionStates.Mute,
 			session => session.TracksById,
 			session => session.Tracks,
 			track => track.Name,
 			MeldTargetResolver.CurrentMuted));
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		var session = _resolver()?.State.Session ?? MeldSession.Empty;
@@ -79,8 +85,8 @@ internal sealed class SetTrackMuteActionDefinition : IDynamicOptionsActionDefini
 				return resolveError!;
 			}
 
-			var mode = context.Parameters.GetValueOrDefault(MeldActionParameters.Mode) as string ??
-				MeldActionParameters.ModeToggle;
+			var mode = context.Parameters.GetValueOrDefault(MeldActionParameters.Mode) as string
+				?? MeldActionParameters.ModeToggle;
 			bool? desired = mode switch
 			{
 				"mute" => true,

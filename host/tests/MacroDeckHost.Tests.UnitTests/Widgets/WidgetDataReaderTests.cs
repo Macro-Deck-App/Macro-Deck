@@ -70,7 +70,7 @@ internal sealed class WidgetDataReaderTests
 		var api = new IntegrationWidgetApi(Owner, new WidgetApi(null!), new NoIconInvalidator(), _reader);
 		var withoutReader = new IntegrationWidgetApi(Owner, new WidgetApi(null!), new NoIconInvalidator());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await api.GetWidgetDataAsync(own.Id.ToString()), Is.Not.Null);
 			Assert.That(await api.GetWidgetDataAsync(foreign.Id.ToString()), Is.Null);

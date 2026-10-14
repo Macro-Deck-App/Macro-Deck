@@ -29,9 +29,9 @@ public static class PortablePackageDigest
 	{
 		ArgumentNullException.ThrowIfNull(manifest);
 
-		if (manifest["kind"] is not JsonValue kindValue ||
-			!kindValue.TryGetValue<string>(out var kind) ||
-			kind.Length == 0)
+		if (manifest["kind"] is not JsonValue kindValue
+			|| !kindValue.TryGetValue<string>(out var kind)
+			|| kind.Length == 0)
 		{
 			return PackageDigestResult.Fail(SigningError.ManifestMalformed, "The manifest has no non-empty 'kind'.");
 		}
@@ -56,14 +56,14 @@ public static class PortablePackageDigest
 				"The manifest has no non-empty 'formatVersion'.");
 		}
 
-		var appVersion = manifest["appVersion"] is JsonValue appVersionValue &&
-			appVersionValue.TryGetValue<string>(out var appVersionText)
+		var appVersion = manifest["appVersion"] is JsonValue appVersionValue
+			&& appVersionValue.TryGetValue<string>(out var appVersionText)
 				? appVersionText
 				: string.Empty;
 
-		var includesSecrets = manifest["includesSecrets"] is JsonValue includesSecretsValue &&
-			includesSecretsValue.TryGetValue<bool>(out var includesSecretsFlag) &&
-			includesSecretsFlag;
+		var includesSecrets = manifest["includesSecrets"] is JsonValue includesSecretsValue
+			&& includesSecretsValue.TryGetValue<bool>(out var includesSecretsFlag)
+			&& includesSecretsFlag;
 
 		if (!DeclaredPackageFiles.TryParse(manifest, out var files, out var filesError))
 		{
@@ -79,9 +79,13 @@ public static class PortablePackageDigest
 
 		foreach (var file in files.OrderBy(entry => entry.Path, StringComparer.Ordinal))
 		{
-			builder.Append("f\t").Append(file.Path).Append('\t')
-				.Append(file.Sha256).Append('\t')
-				.Append(file.Size).Append('\n');
+			builder.Append("f\t")
+				.Append(file.Path)
+				.Append('\t')
+				.Append(file.Sha256)
+				.Append('\t')
+				.Append(file.Size)
+				.Append('\n');
 		}
 
 		return PackageDigestResult.Ok(Encoding.UTF8.GetBytes(builder.ToString()));

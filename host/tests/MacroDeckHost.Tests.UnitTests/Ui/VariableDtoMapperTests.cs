@@ -20,7 +20,8 @@ public class VariableDtoMapperTests
 				Classification = VariableClassification.User
 			},
 			true,
-			null, shared: false);
+			null,
+			false);
 
 		Assert.Multiple(() =>
 		{
@@ -59,7 +60,8 @@ public class VariableDtoMapperTests
 				Presentation = new VariablePresentation(displayName, null, default)
 			},
 			true,
-			null, shared: false);
+			null,
+			false);
 
 		Assert.That(dto.DisplayName, Is.EqualTo(displayName));
 	}
@@ -75,7 +77,8 @@ public class VariableDtoMapperTests
 				Classification = VariableClassification.Integration
 			},
 			true,
-			null, shared: false);
+			null,
+			false);
 
 		Assert.Multiple(() =>
 		{
@@ -99,7 +102,8 @@ public class VariableDtoMapperTests
 				Presentation = new VariablePresentation(default, "mac", LocalizedText.FromLiteral("Mac"))
 			},
 			true,
-			null, shared: false);
+			null,
+			false);
 
 		var withoutConfiguration = VariableDtoMapper.ToDto(new VariableEntity
 			{
@@ -109,7 +113,8 @@ public class VariableDtoMapperTests
 				Classification = VariableClassification.Integration
 			},
 			true,
-			null, shared: false);
+			null,
+			false);
 
 		Assert.Multiple(() =>
 		{
@@ -134,19 +139,20 @@ public class VariableDtoMapperTests
 			Type = VariableType.Text,
 			Classification = VariableClassification.Integration,
 			OwnerIntegrationId = "home-assistant",
-			DefinitionId = "light.kitchen",
+			DefinitionId = "light.kitchen"
 		};
 
-		var bound = VariableDtoMapper.ToDto(entity, available: true, dynamicResourceId: "light.kitchen", shared: false);
+		var bound = VariableDtoMapper.ToDto(entity, true, "light.kitchen", false);
 		var ordinary = VariableDtoMapper.ToDto(new VariableEntity
 			{
 				Name = "greeting",
 				Scope = VariableScope.Global,
 				Type = VariableType.Text,
-				Classification = VariableClassification.User,
+				Classification = VariableClassification.User
 			},
 			true,
-			null, shared: false);
+			null,
+			false);
 
 		Assert.Multiple(() =>
 		{

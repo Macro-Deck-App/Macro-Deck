@@ -57,13 +57,25 @@ internal sealed class StreamChatWidgetSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => Deliver(uiEvent, null);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		Deliver(uiEvent, null);
+	}
 
-	public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin) => Deliver(uiEvent, origin);
+	public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin)
+	{
+		Deliver(uiEvent, origin);
+	}
 
 	public StreamChatDialogRequest? DialogRequest()
 	{
@@ -119,8 +131,8 @@ internal sealed class StreamChatWidgetSession : IUiSession
 	{
 		lock (_sync)
 		{
-			var elsewhere = changedAccountId is not null &&
-				!string.Equals(changedAccountId, _shownAccountId, StringComparison.Ordinal);
+			var elsewhere = changedAccountId is not null
+				&& !string.Equals(changedAccountId, _shownAccountId, StringComparison.Ordinal);
 
 			if (_disposed || elsewhere)
 			{

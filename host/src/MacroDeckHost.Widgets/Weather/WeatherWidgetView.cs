@@ -29,48 +29,54 @@ internal static class WeatherWidgetView
 			Padding = WidgetSafeArea.For(cornerRadius),
 			Background = config.BackgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
 			Children = config.IsCompact
-				? [
+				?
+				[
 					new UiWhen
 					{
 						Key = "availableGate",
 						Condition = () => state.Value.IsAvailable,
-						Content = () => BuildCompact(state, config, icons),
+						Content = () => BuildCompact(state, config, icons)
 					},
 					new UiWhen
 					{
 						Key = "unavailableGate",
 						Condition = () => !state.Value.IsAvailable,
-						Content = () => BuildUnavailable(state, config),
-					},
+						Content = () => BuildUnavailable(state, config)
+					}
 				]
-				: [
+				:
+				[
 					new UiWhen
 					{
 						Key = "availableGate",
 						Condition = () => state.Value.IsAvailable,
-						Content = () => BuildCurrent(state, config, icons),
+						Content = () => BuildCurrent(state, config, icons)
 					},
 					new UiWhen
 					{
 						Key = "forecastGate",
 						Condition = () => HasForecastRows(state.Value, config),
-						Content = () => BuildForecastStack(state, config, icons),
+						Content = () => BuildForecastStack(state, config, icons)
 					},
 					new UiWhen
 					{
 						Key = "unavailableGate",
 						Condition = () => !state.Value.IsAvailable,
-						Content = () => BuildUnavailable(state, config),
-					},
-				],
+						Content = () => BuildUnavailable(state, config)
+					}
+				]
 		};
 	}
 
 	private static bool HasForecastRows(WeatherStatePayload payload, WeatherWidgetData config)
-		=> config.ShowForecast && payload.Days.Count > 0;
+	{
+		return config.ShowForecast && payload.Days.Count > 0;
+	}
 
 	private static bool HasLocationLine(WeatherStatePayload payload, WeatherWidgetData config)
-		=> config.ShowLocation && !string.IsNullOrEmpty(payload.LocationName);
+	{
+		return config.ShowLocation && !string.IsNullOrEmpty(payload.LocationName);
+	}
 
 	private static UiStack BuildCurrent(
 		UiAsyncState<WeatherStatePayload> state,
@@ -112,8 +118,8 @@ internal static class WeatherWidgetView
 								Source = UiValue.Optional(()
 									=> ResolveIcon(config.AnimateIcon ? icons.Animated : icons.Still,
 										state.Value.Condition,
-										state.Value.IsDay)),
-							},
+										state.Value.IsDay))
+							}
 						},
 						new UiWhen
 						{
@@ -126,10 +132,10 @@ internal static class WeatherWidgetView
 								Weight = UiComponentTextWeights.Bold,
 								Role = UiComponentTextRoles.Primary,
 								Align = UiComponentAlignments.End,
-								Text = UiText.FromLocalized(() => TemperatureText(state.Value.Temperature)),
-							},
-						},
-					],
+								Text = UiText.FromLocalized(() => TemperatureText(state.Value.Temperature))
+							}
+						}
+					]
 				},
 				new UiWhen
 				{
@@ -153,8 +159,8 @@ internal static class WeatherWidgetView
 									MinSize = 0.078,
 									Weight = UiComponentTextWeights.SemiBold,
 									Role = UiComponentTextRoles.Primary,
-									Text = UiText.FromLocalized(() => ConditionText(state.Value.Condition)),
-								},
+									Text = UiText.FromLocalized(() => ConditionText(state.Value.Condition))
+								}
 							},
 							new UiWhen
 							{
@@ -167,13 +173,13 @@ internal static class WeatherWidgetView
 									MinSize = 0.05,
 									Weight = UiComponentTextWeights.Medium,
 									Role = UiComponentTextRoles.Secondary,
-									Text = UiText.From(() => state.Value.LocationName),
-								},
-							},
-						],
-					},
-				},
-			],
+									Text = UiText.From(() => state.Value.LocationName)
+								}
+							}
+						]
+					}
+				}
+			]
 		};
 	}
 
@@ -181,7 +187,8 @@ internal static class WeatherWidgetView
 		UiAsyncState<WeatherStatePayload> state,
 		WeatherWidgetData config,
 		WeatherIconResources icons)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "compact",
 			Fill = true,
@@ -208,8 +215,8 @@ internal static class WeatherWidgetView
 								MinSize = 0.06,
 								Weight = UiComponentTextWeights.SemiBold,
 								Role = UiComponentTextRoles.Primary,
-								Text = UiText.From(() => state.Value.LocationName),
-							},
+								Text = UiText.From(() => state.Value.LocationName)
+							}
 						},
 						new UiWhen
 						{
@@ -221,10 +228,10 @@ internal static class WeatherWidgetView
 								Size = 0.3,
 								Weight = UiComponentTextWeights.Regular,
 								Role = UiComponentTextRoles.Primary,
-								Text = UiText.FromLocalized(() => TemperatureText(state.Value.Temperature)),
-							},
-						},
-					],
+								Text = UiText.FromLocalized(() => TemperatureText(state.Value.Temperature))
+							}
+						}
+					]
 				},
 				new UiStack
 				{
@@ -252,10 +259,10 @@ internal static class WeatherWidgetView
 										Source = UiValue.Optional(()
 											=> ResolveIcon(config.AnimateIcon ? icons.Animated : icons.Still,
 												state.Value.Condition,
-												state.Value.IsDay)),
-									},
-								],
-							},
+												state.Value.IsDay))
+									}
+								]
+							}
 						},
 						new UiWhen
 						{
@@ -268,8 +275,8 @@ internal static class WeatherWidgetView
 								MinSize = 0.055,
 								Weight = UiComponentTextWeights.SemiBold,
 								Role = UiComponentTextRoles.Primary,
-								Text = UiText.FromLocalized(() => ConditionText(state.Value.Condition)),
-							},
+								Text = UiText.FromLocalized(() => ConditionText(state.Value.Condition))
+							}
 						},
 						new UiWhen
 						{
@@ -282,13 +289,14 @@ internal static class WeatherWidgetView
 								MinSize = 0.05,
 								Weight = UiComponentTextWeights.Medium,
 								Role = UiComponentTextRoles.Primary,
-								Text = UiText.Optional(() => HighLowText(state.Value)),
-							},
-						},
-					],
-				},
-			],
+								Text = UiText.Optional(() => HighLowText(state.Value))
+							}
+						}
+					]
+				}
+			]
 		};
+	}
 
 	internal static (int High, int Low)? TodayRange(WeatherStatePayload payload)
 	{
@@ -308,9 +316,11 @@ internal static class WeatherWidgetView
 	}
 
 	private static UiText HighLowText(WeatherStatePayload payload)
-		=> TodayRange(payload) is var (high, low)
+	{
+		return TodayRange(payload) is var (high, low)
 			? AppStrings.Widgets.Weather.HighLow(high, low)
 			: UiText.None();
+	}
 
 	private static UiStack BuildForecastStack(
 		UiAsyncState<WeatherStatePayload> state,
@@ -335,8 +345,8 @@ internal static class WeatherWidgetView
 					{
 						var payload = state.Value;
 
-						if (!ReferenceEquals(payload.Days, lastRawDays) ||
-							!string.Equals(payload.Unit, lastUnit, StringComparison.Ordinal))
+						if (!ReferenceEquals(payload.Days, lastRawDays)
+							|| !string.Equals(payload.Unit, lastUnit, StringComparison.Ordinal))
 						{
 							lastRawDays = payload.Days;
 							lastUnit = payload.Unit;
@@ -346,9 +356,9 @@ internal static class WeatherWidgetView
 						return lastRows!;
 					}),
 					KeySelector = row => row.ItemKey,
-					Template = (row, _) => BuildForecastRow(row, state, icons),
-				},
-			],
+					Template = (row, _) => BuildForecastRow(row, state, icons)
+				}
+			]
 		};
 	}
 
@@ -358,7 +368,7 @@ internal static class WeatherWidgetView
 		WeatherIconResources icons)
 	{
 		var day = row.Day;
-		var iconName = WeatherWidgetIcons.IconName(day.Condition, isDay: true);
+		var iconName = WeatherWidgetIcons.IconName(day.Condition, true);
 		var (start, end) = RangeBarSpan(day.Min, day.Max, row.WeekMin, row.Span);
 
 		return new UiStack
@@ -384,7 +394,7 @@ internal static class WeatherWidgetView
 							Size = UiSize.FromBasis(0.06, 0.5),
 							Weight = UiComponentTextWeights.Medium,
 							Role = UiComponentTextRoles.Primary,
-							Text = TryWeekdayText(day.Date, out var weekday) ? weekday : UiText.None(),
+							Text = TryWeekdayText(day.Date, out var weekday) ? weekday : UiText.None()
 						},
 						new UiImage
 						{
@@ -393,9 +403,9 @@ internal static class WeatherWidgetView
 							Size = UiSize.FromBasis(0.09, 0.8),
 							Source = icons.Still.TryGetValue(iconName, out var rowIcon)
 								? UiValue.Of(rowIcon)
-								: UiValue.None<UiResource>(),
-						},
-					],
+								: UiValue.None<UiResource>()
+						}
+					]
 				},
 				new UiTextRun
 				{
@@ -404,7 +414,7 @@ internal static class WeatherWidgetView
 					Size = UiSize.FromBasis(0.06, 0.5),
 					Role = UiComponentTextRoles.Muted,
 					Align = UiComponentAlignments.End,
-					Text = TemperatureText(day.Min),
+					Text = TemperatureText(day.Min)
 				},
 				new UiRangeBar
 				{
@@ -418,7 +428,7 @@ internal static class WeatherWidgetView
 					Marker = row.Index == 0
 						? UiValue.Optional(() =>
 							AsMarkerValue(MarkerFraction(state.Value.Temperature, row.WeekMin, row.Span)))
-						: UiValue.None<double>(),
+						: UiValue.None<double>()
 				},
 				new UiTextRun
 				{
@@ -428,14 +438,15 @@ internal static class WeatherWidgetView
 					Weight = UiComponentTextWeights.Medium,
 					Role = UiComponentTextRoles.Primary,
 					Align = UiComponentAlignments.End,
-					Text = TemperatureText(day.Max),
-				},
-			],
+					Text = TemperatureText(day.Max)
+				}
+			]
 		};
 	}
 
 	private static UiStack BuildUnavailable(UiAsyncState<WeatherStatePayload> state, WeatherWidgetData config)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "state",
 			Fill = true,
@@ -452,7 +463,7 @@ internal static class WeatherWidgetView
 					Weight = UiComponentTextWeights.SemiBold,
 					Role = UiComponentTextRoles.Secondary,
 					Align = UiComponentAlignments.Center,
-					Text = UiText.Optional(() => TitleText(state.Value, config)),
+					Text = UiText.Optional(() => TitleText(state.Value, config))
 				},
 				new UiTextRun
 				{
@@ -461,10 +472,11 @@ internal static class WeatherWidgetView
 					Role = UiComponentTextRoles.Muted,
 					Align = UiComponentAlignments.Center,
 					MaxLines = 2,
-					Text = UiText.FromLocalized(() => HintText(state.Value)),
-				},
-			],
+					Text = UiText.FromLocalized(() => HintText(state.Value))
+				}
+			]
 		};
+	}
 
 	private static UiText TitleText(WeatherStatePayload payload, WeatherWidgetData config)
 	{
@@ -492,15 +504,20 @@ internal static class WeatherWidgetView
 			: AppStrings.Widgets.Weather.PickLocationHint();
 	}
 
-	private static UiValue<UiResource> ResolveIcon(IReadOnlyDictionary<string, UiResource> icons,
+	private static UiValue<UiResource> ResolveIcon(
+		IReadOnlyDictionary<string, UiResource> icons,
 		string slug,
 		bool isDay)
-		=> icons.TryGetValue(WeatherWidgetIcons.IconName(slug, isDay), out var resource)
+	{
+		return icons.TryGetValue(WeatherWidgetIcons.IconName(slug, isDay), out var resource)
 			? UiValue.Of(resource)
 			: UiValue.None<UiResource>();
+	}
 
 	private static UiValue<double> AsMarkerValue(double? marker)
-		=> marker is { } value ? UiValue.Of(value) : UiValue.None<double>();
+	{
+		return marker is { } value ? UiValue.Of(value) : UiValue.None<double>();
+	}
 
 	internal static double? MarkerFraction(double? temperature, double weekMin, double span)
 	{
@@ -522,27 +539,32 @@ internal static class WeatherWidgetView
 	}
 
 	private static LocalizedString TemperatureText(double? value)
-		=> value is null || double.IsNaN(value.Value) || double.IsInfinity(value.Value)
+	{
+		return value is null || double.IsNaN(value.Value) || double.IsInfinity(value.Value)
 			? AppStrings.Widgets.Weather.TemperatureUnknown()
 			: AppStrings.Widgets.Weather.TemperatureValue((int)Math.Round(value.Value));
+	}
 
-	private static LocalizedString ConditionText(string slug) => slug switch
+	private static LocalizedString ConditionText(string slug)
 	{
-		"clear" => AppStrings.Widgets.Weather.Condition.Clear(),
-		"mainly-clear" => AppStrings.Widgets.Weather.Condition.MainlyClear(),
-		"partly-cloudy" => AppStrings.Widgets.Weather.Condition.PartlyCloudy(),
-		"overcast" => AppStrings.Widgets.Weather.Condition.Overcast(),
-		"fog" => AppStrings.Widgets.Weather.Condition.Fog(),
-		"drizzle" => AppStrings.Widgets.Weather.Condition.Drizzle(),
-		"rain" => AppStrings.Widgets.Weather.Condition.Rain(),
-		"freezing-rain" => AppStrings.Widgets.Weather.Condition.FreezingRain(),
-		"snow" => AppStrings.Widgets.Weather.Condition.Snow(),
-		"snow-grains" => AppStrings.Widgets.Weather.Condition.SnowGrains(),
-		"rain-showers" => AppStrings.Widgets.Weather.Condition.RainShowers(),
-		"snow-showers" => AppStrings.Widgets.Weather.Condition.SnowShowers(),
-		"thunderstorm" => AppStrings.Widgets.Weather.Condition.Thunderstorm(),
-		_ => AppStrings.Widgets.Weather.Condition.Unknown(),
-	};
+		return slug switch
+		{
+			"clear" => AppStrings.Widgets.Weather.Condition.Clear(),
+			"mainly-clear" => AppStrings.Widgets.Weather.Condition.MainlyClear(),
+			"partly-cloudy" => AppStrings.Widgets.Weather.Condition.PartlyCloudy(),
+			"overcast" => AppStrings.Widgets.Weather.Condition.Overcast(),
+			"fog" => AppStrings.Widgets.Weather.Condition.Fog(),
+			"drizzle" => AppStrings.Widgets.Weather.Condition.Drizzle(),
+			"rain" => AppStrings.Widgets.Weather.Condition.Rain(),
+			"freezing-rain" => AppStrings.Widgets.Weather.Condition.FreezingRain(),
+			"snow" => AppStrings.Widgets.Weather.Condition.Snow(),
+			"snow-grains" => AppStrings.Widgets.Weather.Condition.SnowGrains(),
+			"rain-showers" => AppStrings.Widgets.Weather.Condition.RainShowers(),
+			"snow-showers" => AppStrings.Widgets.Weather.Condition.SnowShowers(),
+			"thunderstorm" => AppStrings.Widgets.Weather.Condition.Thunderstorm(),
+			_ => AppStrings.Widgets.Weather.Condition.Unknown()
+		};
+	}
 
 	private static bool TryWeekdayText(string isoDate, out LocalizedString text)
 	{
@@ -560,7 +582,7 @@ internal static class WeatherWidgetView
 				DayOfWeek.Thursday => AppStrings.Widgets.Weather.Weekday.Thu(),
 				DayOfWeek.Friday => AppStrings.Widgets.Weather.Weekday.Fri(),
 				DayOfWeek.Saturday => AppStrings.Widgets.Weather.Weekday.Sat(),
-				_ => AppStrings.Widgets.Weather.Weekday.Sun(),
+				_ => AppStrings.Widgets.Weather.Weekday.Sun()
 			};
 
 			return true;
@@ -586,7 +608,7 @@ internal static class WeatherWidgetView
 
 	private static string HslToHex(double hue, double saturation, double lightness)
 	{
-		var h = ((hue % 360) + 360) % 360;
+		var h = (hue % 360 + 360) % 360;
 		var chroma = (1 - Math.Abs(2 * lightness - 1)) * saturation;
 		var x = chroma * (1 - Math.Abs(h / 60 % 2 - 1));
 		var m = lightness - chroma / 2;
@@ -598,7 +620,7 @@ internal static class WeatherWidgetView
 			< 180 => (0.0, chroma, x),
 			< 240 => (0.0, x, chroma),
 			< 300 => (x, 0.0, chroma),
-			_ => (chroma, 0.0, x),
+			_ => (chroma, 0.0, x)
 		};
 
 		var r = (byte)Math.Round((r1 + m) * 255, MidpointRounding.AwayFromZero);

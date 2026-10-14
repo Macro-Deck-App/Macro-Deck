@@ -19,7 +19,7 @@ internal static class ClockScreenSaverView
 			Justify = ScreenSaverDrift.Justify(position),
 			Align = ScreenSaverDrift.Align(position),
 			Padding = 0.06,
-			Children = [ClockWidgetView.Build(config.ToClock(), 0)],
+			Children = [ClockWidgetView.Build(config.ToClock(), 0)]
 		};
 	}
 }

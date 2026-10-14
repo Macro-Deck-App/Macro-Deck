@@ -13,13 +13,16 @@ public sealed class LocalBackupStorageProvider : IBackupStorageProvider
 
 	private readonly IMacroDeckPaths _paths;
 
-	public LocalBackupStorageProvider(IMacroDeckPaths paths) => _paths = paths;
+	public LocalBackupStorageProvider(IMacroDeckPaths paths)
+	{
+		_paths = paths;
+	}
 
 	public string ProviderId => Id;
 
 	public string DisplayName => "This computer";
 
-	public BackupStorageCapabilities Capabilities => new(IsRemote: false, SupportsDelete: true, MaxObjectBytes: null);
+	public BackupStorageCapabilities Capabilities => new(false, true, null);
 
 	public ValueTask<BackupStorageAvailability> GetAvailability(CancellationToken cancellationToken = default)
 	{
@@ -70,7 +73,8 @@ public sealed class LocalBackupStorageProvider : IBackupStorageProvider
 		return Task.FromResult(Result.Ok<Stream, BackupError>(stream));
 	}
 
-	public async Task<Result<BackupStorageObject, BackupError>> Write(BackupStorageWriteRequest request,
+	public async Task<Result<BackupStorageObject, BackupError>> Write(
+		BackupStorageWriteRequest request,
 		CancellationToken cancellationToken = default)
 	{
 		Directory.CreateDirectory(_paths.BackupsDirectory);
@@ -82,7 +86,7 @@ public sealed class LocalBackupStorageProvider : IBackupStorageProvider
 		{
 			if (CanAdoptStagedFile(request, finalPath))
 			{
-				File.Move(request.StagedFilePath!, incompletePath, overwrite: true);
+				File.Move(request.StagedFilePath!, incompletePath, true);
 			}
 			else
 			{
@@ -92,10 +96,10 @@ public sealed class LocalBackupStorageProvider : IBackupStorageProvider
 					FileShare.None);
 				await request.WriteContent(destination, cancellationToken);
 				await destination.FlushAsync(cancellationToken);
-				destination.Flush(flushToDisk: true);
+				destination.Flush(true);
 			}
 
-			File.Move(incompletePath, finalPath, overwrite: true);
+			File.Move(incompletePath, finalPath, true);
 			var info = new FileInfo(finalPath);
 			request.Progress?.Report(new BackupTransferProgress(info.Length, info.Length));
 
@@ -133,20 +137,22 @@ public sealed class LocalBackupStorageProvider : IBackupStorageProvider
 	}
 
 	private static bool CanAdoptStagedFile(BackupStorageWriteRequest request, string finalPath)
-		=> request.StagedFilePath is not null &&
-			File.Exists(request.StagedFilePath) &&
-			string.Equals(Path.GetPathRoot(Path.GetFullPath(request.StagedFilePath)),
+	{
+		return request.StagedFilePath is not null
+			&& File.Exists(request.StagedFilePath)
+			&& string.Equals(Path.GetPathRoot(Path.GetFullPath(request.StagedFilePath)),
 				Path.GetPathRoot(Path.GetFullPath(finalPath)),
 				StringComparison.OrdinalIgnoreCase);
+	}
 
 	private bool TryResolve(string storageId, out string path)
 	{
 		path = string.Empty;
 
-		if (string.IsNullOrWhiteSpace(storageId) ||
-			storageId.Contains('/') ||
-			storageId.Contains('\\') ||
-			!storageId.EndsWith(BackupFileNames.Extension, StringComparison.OrdinalIgnoreCase))
+		if (string.IsNullOrWhiteSpace(storageId)
+			|| storageId.Contains('/')
+			|| storageId.Contains('\\')
+			|| !storageId.EndsWith(BackupFileNames.Extension, StringComparison.OrdinalIgnoreCase))
 		{
 			return false;
 		}

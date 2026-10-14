@@ -143,7 +143,9 @@ public sealed class PluginHostBuilder
 	/// </summary>
 	public PluginHostBuilder RegisterIntegration<TIntegration>()
 		where TIntegration : class, IPluginIntegration
-		=> ConfigureServices((_, services) => services.AddMacroDeckIntegration<TIntegration>());
+	{
+		return ConfigureServices((_, services) => services.AddMacroDeckIntegration<TIntegration>());
+	}
 
 	/// <summary>
 	/// Registers an integration built by <paramref name="factory" />, for when construction is not just
@@ -163,7 +165,9 @@ public sealed class PluginHostBuilder
 	/// </summary>
 	public PluginHostBuilder RegisterCapabilityHandler<THandler>()
 		where THandler : class, ICapabilityHandler
-		=> ConfigureServices((_, services) => services.AddMacroDeckCapabilityHandler<THandler>());
+	{
+		return ConfigureServices((_, services) => services.AddMacroDeckCapabilityHandler<THandler>());
+	}
 
 	/// <summary>Registers services. Callbacks run in the order they were added.</summary>
 	public PluginHostBuilder ConfigureServices(Action<PluginHostBuilderContext, IServiceCollection> configure)
@@ -196,7 +200,10 @@ public sealed class PluginHostBuilder
 
 		// Built once, lazily, and shared by both callbacks: a startup class that held state between
 		// its two methods would otherwise silently get two instances.
-		IPluginStartup Resolve(PluginHostBuilderContext context) => startup ??= CreateStartup<TStartup>(context);
+		IPluginStartup Resolve(PluginHostBuilderContext context)
+		{
+			return startup ??= CreateStartup<TStartup>(context);
+		}
 
 		ConfigureServices((context, services) => Resolve(context).ConfigureServices(services));
 		Configure((context, app) => Resolve(context).Configure(app));
@@ -299,14 +306,14 @@ public sealed class PluginHostBuilder
 			return new PluginMetadata { Id = string.Empty, Name = string.Empty, Version = string.Empty };
 		}
 
-		if (manifest.ManifestVersion is not { } manifestVersion ||
-			manifestVersion != PluginManifestFileReader.SupportedManifestVersion)
+		if (manifest.ManifestVersion is not { } manifestVersion
+			|| manifestVersion != PluginManifestFileReader.SupportedManifestVersion)
 		{
 			var declared = manifest.ManifestVersion is { } value
 				? value.ToString(System.Globalization.CultureInfo.InvariantCulture)
 				: "(none)";
-			problems.Add($"The manifest declares manifestVersion {declared}; " +
-				$"only {PluginManifestFileReader.SupportedManifestVersion} is understood.");
+			problems.Add($"The manifest declares manifestVersion {declared}; "
+				+ $"only {PluginManifestFileReader.SupportedManifestVersion} is understood.");
 		}
 
 		var configuredId = Configuration[$"{PluginHostOptions.SectionName}:Id"];
@@ -317,8 +324,8 @@ public sealed class PluginHostBuilder
 
 			// A packaging or launch mismatch the host would reject anyway - resolving it silently here
 			// would leave the host and the Store disagreeing about which plugin is actually running.
-			if (!string.IsNullOrWhiteSpace(configuredId) &&
-				!string.Equals(configuredId, manifest.Id, StringComparison.Ordinal))
+			if (!string.IsNullOrWhiteSpace(configuredId)
+				&& !string.Equals(configuredId, manifest.Id, StringComparison.Ordinal))
 			{
 				problems.Add($"The manifest declares id '{manifest.Id}', but configuration says '{configuredId}'.");
 			}
@@ -331,8 +338,8 @@ public sealed class PluginHostBuilder
 		if (string.IsNullOrWhiteSpace(id))
 		{
 			problems.Add(
-				$"The manifest at '{Path.Combine(Environment.ContentRootPath, PluginManifestFileReader.FileName)}' " +
-				"declares no id. Set \"id\" in manifest.json.");
+				$"The manifest at '{Path.Combine(Environment.ContentRootPath, PluginManifestFileReader.FileName)}' "
+				+ "declares no id. Set \"id\" in manifest.json.");
 		}
 		else if (!MacroDeckId.TryValidateOwnerId(id, OwnerIdKind.Package, out var idError))
 		{
@@ -342,8 +349,8 @@ public sealed class PluginHostBuilder
 		if (string.IsNullOrWhiteSpace(manifest.Name))
 		{
 			problems.Add(
-				$"The manifest at '{Path.Combine(Environment.ContentRootPath, PluginManifestFileReader.FileName)}' " +
-				"declares no name. Set \"name\" in manifest.json.");
+				$"The manifest at '{Path.Combine(Environment.ContentRootPath, PluginManifestFileReader.FileName)}' "
+				+ "declares no name. Set \"name\" in manifest.json.");
 		}
 		else
 		{
@@ -354,8 +361,8 @@ public sealed class PluginHostBuilder
 			// the handshake has to happen here, at build time, instead of on every connection attempt.
 			if (manifest.Name.Length > ProtocolLimits.MaxDeclaredNameLength)
 			{
-				problems.Add($"The manifest's name is {manifest.Name.Length} characters long; " +
-					$"at most {ProtocolLimits.MaxDeclaredNameLength} are allowed.");
+				problems.Add($"The manifest's name is {manifest.Name.Length} characters long; "
+					+ $"at most {ProtocolLimits.MaxDeclaredNameLength} are allowed.");
 			}
 
 			if (manifest.Name.Any(char.IsControl))
@@ -367,8 +374,8 @@ public sealed class PluginHostBuilder
 		if (string.IsNullOrWhiteSpace(manifest.Version))
 		{
 			problems.Add(
-				$"The manifest at '{Path.Combine(Environment.ContentRootPath, PluginManifestFileReader.FileName)}' " +
-				"declares no version. Set \"version\" in manifest.json.");
+				$"The manifest at '{Path.Combine(Environment.ContentRootPath, PluginManifestFileReader.FileName)}' "
+				+ "declares no version. Set \"version\" in manifest.json.");
 		}
 
 		// Declared at all, not merely non-empty: "icon": "" is a shape violation the host rejects, so
@@ -513,7 +520,8 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<RemoteHostHttp>();
 		Services.TryAddSingleton<IHostHttp>(provider => provider.GetRequiredService<RemoteHostHttp>());
 		Services.TryAddSingleton<RemoteCompanionDeviceApi>();
-		Services.TryAddSingleton<ICompanionDeviceApi>(provider => provider.GetRequiredService<RemoteCompanionDeviceApi>());
+		Services.TryAddSingleton<ICompanionDeviceApi>(provider
+			=> provider.GetRequiredService<RemoteCompanionDeviceApi>());
 		Services.TryAddSingleton<RemoteDesktopNotifier>();
 		Services.TryAddSingleton<IDesktopNotifier>(provider => provider.GetRequiredService<RemoteDesktopNotifier>());
 		Services.TryAddSingleton<IIntegrationStorage>(provider => PluginIntegrationStorage.Create(
@@ -530,10 +538,10 @@ public sealed class PluginHostBuilder
 
 		Services.TryAddScoped<CapabilityInvocationContextHolder>();
 		Services.TryAddScoped<ICapabilityInvocationContext>(provider
-			=> provider.GetRequiredService<CapabilityInvocationContextHolder>().Current ??
-			throw new InvalidOperationException(
-				"There is no capability invocation in this scope. ICapabilityInvocationContext can only " +
-				"be resolved inside a capability handler's invocation."));
+			=> provider.GetRequiredService<CapabilityInvocationContextHolder>().Current
+			?? throw new InvalidOperationException(
+				"There is no capability invocation in this scope. ICapabilityInvocationContext can only "
+				+ "be resolved inside a capability handler's invocation."));
 
 		Services.AddSingleton<IStartupFilter, ReservedPathStartupFilter>();
 
@@ -607,7 +615,8 @@ public sealed class PluginHostBuilder
 		}
 
 		return PluginCapabilityValidator
-			.Validate(metadata.Id, [.. catalog.Declare().Where(capability => capability.Kind != CapabilityKinds.Messaging)])
+			.Validate(metadata.Id,
+				[.. catalog.Declare().Where(capability => capability.Kind != CapabilityKinds.Messaging)])
 			.Select(conflict => conflict.ToString());
 	}
 

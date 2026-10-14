@@ -21,7 +21,7 @@ public class ApplicationPathResolverTests
 	{
 		try
 		{
-			Directory.Delete(_root, recursive: true);
+			Directory.Delete(_root, true);
 		}
 		catch (IOException)
 		{

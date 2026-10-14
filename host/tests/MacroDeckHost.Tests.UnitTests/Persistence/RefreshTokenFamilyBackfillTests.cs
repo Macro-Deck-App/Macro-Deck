@@ -9,10 +9,13 @@ public class RefreshTokenFamilyBackfillTests
 	private string _path = null!;
 
 	[SetUp]
-	public void SetUp() => _path = Path.Combine(Path.GetTempPath(),
-		"macro-deck-tests",
-		Guid.NewGuid().ToString("N"),
-		"database.db");
+	public void SetUp()
+	{
+		_path = Path.Combine(Path.GetTempPath(),
+			"macro-deck-tests",
+			Guid.NewGuid().ToString("N"),
+			"database.db");
+	}
 
 	[TearDown]
 	public void TearDown()
@@ -28,8 +31,7 @@ public class RefreshTokenFamilyBackfillTests
 	[Test]
 	public void Every_token_of_an_existing_chain_ends_up_in_one_family()
 	{
-		Seed(
-			("a1", "a2"),
+		Seed(("a1", "a2"),
 			("a2", "a3"),
 			("a3", null),
 			("b1", null),

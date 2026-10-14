@@ -16,7 +16,8 @@ internal static class GaugesWidgetView
 	private static readonly UiSize _titleSize = UiSize.Capped(0.11, 13);
 	private static readonly UiSize _gap = UiSize.Capped(0.02, 3);
 
-	public static UiElement Build(GaugesWidgetData config,
+	public static UiElement Build(
+		GaugesWidgetData config,
 		IReadOnlyList<UiState<GaugeFace>> faces,
 		IReadOnlyDictionary<string, UiResource>? icons = null,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius)
@@ -42,7 +43,7 @@ internal static class GaugesWidgetView
 				Size = _titleSize,
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Primary,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -63,14 +64,15 @@ internal static class GaugesWidgetView
 			Gap = _gap,
 			Padding = WidgetSafeArea.For(cornerRadius),
 			Background = config.BackgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
-			Children = children,
+			Children = children
 		};
 
 		return content;
 	}
 
 	private static UiStack EmptyHint()
-		=> new UiStack
+	{
+		return new UiStack
 		{
 			Key = "emptyHint",
 			Fill = true,
@@ -85,12 +87,14 @@ internal static class GaugesWidgetView
 					Size = UiSize.Capped(0.09, 11),
 					Role = UiComponentTextRoles.Muted,
 					Align = UiComponentAlignments.Center,
-					Wrap = true,
-				},
-			],
+					Wrap = true
+				}
+			]
 		};
+	}
 
-	private static UiResponsive Responsive(IReadOnlyList<GaugesLayoutSegment> segments,
+	private static UiResponsive Responsive(
+		IReadOnlyList<GaugesLayoutSegment> segments,
 		GaugesWidgetData config,
 		IReadOnlyList<GaugeConfig> gauges,
 		IReadOnlyList<UiState<GaugeFace>> faces,
@@ -104,7 +108,7 @@ internal static class GaugesWidgetView
 			{
 				MinAspect = segment.MinAspect,
 				MaxAspect = segment.MaxAspect,
-				Content = Layout(segment, config, gauges, faces, icons),
+				Content = Layout(segment, config, gauges, faces, icons)
 			})
 			.ToList();
 
@@ -113,11 +117,12 @@ internal static class GaugesWidgetView
 			Key = "layout",
 			Fill = true,
 			Default = Layout(main, config, gauges, faces, icons),
-			Variants = others,
+			Variants = others
 		};
 	}
 
-	private static UiGrid Layout(GaugesLayoutSegment segment,
+	private static UiGrid Layout(
+		GaugesLayoutSegment segment,
 		GaugesWidgetData config,
 		IReadOnlyList<GaugeConfig> gauges,
 		IReadOnlyList<UiState<GaugeFace>> faces,
@@ -134,11 +139,12 @@ internal static class GaugesWidgetView
 			Gap = UiSize.FromBasis(0.12 * scale),
 			Children = gauges
 				.Select((gauge, index) => Cell($"g{index}", scale, config, gauge, faces[index], icons))
-				.ToList(),
+				.ToList()
 		};
 	}
 
-	private static UiStack Cell(string key,
+	private static UiStack Cell(
+		string key,
 		double scale,
 		GaugesWidgetData config,
 		GaugeConfig gauge,
@@ -151,7 +157,7 @@ internal static class GaugesWidgetView
 			{
 				Key = "dial",
 				Fill = true,
-				Children = [Ring(scale, config, face), Centre(scale, gauge, icons)],
+				Children = [Ring(scale, config, face), Centre(scale, gauge, icons)]
 			},
 			new UiStack
 			{
@@ -169,7 +175,7 @@ internal static class GaugesWidgetView
 						Size = TextSize(0.25 * scale, null, 17),
 						Weight = UiComponentTextWeights.SemiBold,
 						Role = UiComponentTextRoles.Primary,
-						MaxLines = 1,
+						MaxLines = 1
 					},
 					new UiWhen
 					{
@@ -182,11 +188,11 @@ internal static class GaugesWidgetView
 							Size = TextSize(0.17 * scale, null, 12),
 							Weight = UiComponentTextWeights.SemiBold,
 							Role = UiComponentTextRoles.Secondary,
-							MaxLines = 1,
-						},
-					},
-				],
-			},
+							MaxLines = 1
+						}
+					}
+				]
+			}
 		};
 
 		children.Add(new UiWhen
@@ -200,8 +206,8 @@ internal static class GaugesWidgetView
 				Size = TextSize(0.2 * scale, 0.3, 12),
 				Role = UiComponentTextRoles.Muted,
 				Align = UiComponentAlignments.Center,
-				MaxLines = 1,
-			},
+				MaxLines = 1
+			}
 		});
 
 		return new UiStack
@@ -210,12 +216,13 @@ internal static class GaugesWidgetView
 			Direction = UiComponentDirections.Vertical,
 			Justify = UiComponentJustify.Center,
 			Align = UiComponentAlignments.Center,
-			Children = children,
+			Children = children
 		};
 	}
 
 	private static UiGauge Ring(double scale, GaugesWidgetData config, UiState<GaugeFace> face)
-		=> new()
+	{
+		return new UiGauge
 		{
 			Key = "ring",
 			Fill = true,
@@ -231,16 +238,18 @@ internal static class GaugesWidgetView
 				Key = "ringFallback",
 				Thickness = UiSize.FromBasis(0.05 * scale),
 				Start = 0d,
-				End = UiValue.From(() => face.Value.Level),
-			},
+				End = UiValue.From(() => face.Value.Level)
+			}
 		};
+	}
 
-	private static UiStack Centre(double scale,
+	private static UiStack Centre(
+		double scale,
 		GaugeConfig gauge,
 		IReadOnlyDictionary<string, UiResource> icons)
 	{
 		// Horizontal, so the clamp below measures the ring's height rather than the cell's width.
-		var size = UiSize.FromBasis(0.36 * scale, maxOfCross: 0.36);
+		var size = UiSize.FromBasis(0.36 * scale, 0.36);
 
 		UiElement? glyph = null;
 
@@ -248,7 +257,8 @@ internal static class GaugesWidgetView
 		{
 			// Only a button recolours artwork; without events it draws and takes no input.
 			glyph = gauge.IconColor is { } tint
-				? new UiButton { Key = "icon", Source = resource, Tint = tint, MainSize = size, Background = "transparent" }
+				? new UiButton
+					{ Key = "icon", Source = resource, Tint = tint, MainSize = size, Background = "transparent" }
 				: new UiImage { Key = "icon", Source = resource, Size = size };
 		}
 
@@ -258,10 +268,12 @@ internal static class GaugesWidgetView
 			Direction = UiComponentDirections.Horizontal,
 			Justify = UiComponentJustify.Center,
 			Align = UiComponentAlignments.Center,
-			Children = glyph is null ? [] : [glyph],
+			Children = glyph is null ? [] : [glyph]
 		};
 	}
 
 	private static UiSize TextSize(double basis, double? maxOfCross, double cap)
-		=> UiSize.Of(new UiLength { Basis = basis, MaxOfCross = maxOfCross, MaxOfCell = cap / UiLength.Cell });
+	{
+		return UiSize.Of(new UiLength { Basis = basis, MaxOfCross = maxOfCross, MaxOfCell = cap / UiLength.Cell });
+	}
 }

@@ -10,23 +10,30 @@ public sealed class DeviceProviderTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal DeviceProviderTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal DeviceProviderTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>What this provider declares about itself.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.DeviceProvider.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>The devices the provider currently offers.</summary>
 	public Task<CapabilityInvocationOutcome> GetDevicesAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.DeviceProvider.Devices,
 			null,
 			options);
+	}
 
 	/// <summary>
 	/// Offers the provider a device session, the way the host does once a registered device is ready to
@@ -41,7 +48,8 @@ public sealed class DeviceProviderTestClient
 		string deviceId,
 		string providerDeviceId,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.DeviceProvider.SessionOpen,
 			new DeviceSessionOpenArguments
@@ -49,6 +57,7 @@ public sealed class DeviceProviderTestClient
 				SessionId = sessionId, DeviceId = deviceId, ProviderDeviceId = providerDeviceId
 			},
 			options);
+	}
 
 	/// <summary>Pushes one surface to an open session. A surface for an unknown session is a no-op, not a
 	/// failure - the two ends have already diverged and the surface is stale by definition.</summary>
@@ -56,11 +65,13 @@ public sealed class DeviceProviderTestClient
 		string sessionId,
 		DeviceSurfaceDto surface,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.DeviceProvider.SessionSurface,
 			new DeviceSessionSurfaceArguments { SessionId = sessionId, Surface = surface },
 			options);
+	}
 
 	/// <summary>Closes an open session, so the provider sees the same <c>Closed</c> event a real host
 	/// would raise on it.</summary>
@@ -68,9 +79,11 @@ public sealed class DeviceProviderTestClient
 		string sessionId,
 		string? reason = null,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.DeviceProvider.SessionClose,
 			new DeviceSessionCloseArguments { SessionId = sessionId, Reason = reason },
 			options);
+	}
 }

@@ -17,7 +17,9 @@ public class VariableNamesTests
 	[TestCase("vars.abc", false)]
 	[TestCase("abc\n", false)]
 	public void A_canonical_name_is_lowercase_ascii_starting_with_a_letter(string? name, bool valid)
-		=> Assert.That(VariableNames.IsValid(name), Is.EqualTo(valid));
+	{
+		Assert.That(VariableNames.IsValid(name), Is.EqualTo(valid));
+	}
 
 	[TestCase("Gaming PC", "gaming_pc")]
 	[TestCase("vars.Stream Title", "stream_title")]
@@ -28,11 +30,15 @@ public class VariableNamesTests
 	[TestCase("   ", "")]
 	[TestCase(null, "")]
 	public void Sanitizing_turns_text_into_a_canonical_name(string? input, string expected)
-		=> Assert.That(VariableNames.Sanitize(input), Is.EqualTo(expected));
+	{
+		Assert.That(VariableNames.Sanitize(input), Is.EqualTo(expected));
+	}
 
 	[TestCase("Gaming PC")]
 	[TestCase("Café")]
 	[TestCase("2nd Monitor")]
 	public void A_sanitized_name_is_valid(string input)
-		=> Assert.That(VariableNames.IsValid(VariableNames.Sanitize(input)), Is.True);
+	{
+		Assert.That(VariableNames.IsValid(VariableNames.Sanitize(input)), Is.True);
+	}
 }

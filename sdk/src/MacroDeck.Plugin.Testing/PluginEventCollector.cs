@@ -24,8 +24,11 @@ public sealed class PluginEventCollector
 		return Wait.UntilAsync(() =>
 				Published.Any(published => string.Equals(published.EventId, eventId, StringComparison.Ordinal)),
 			timeout,
-			because: $"event '{eventId}' was never published");
+			$"event '{eventId}' was never published");
 	}
 
-	internal void Record(PublishedEvent publishedEvent) => _published.Enqueue(publishedEvent);
+	internal void Record(PublishedEvent publishedEvent)
+	{
+		_published.Enqueue(publishedEvent);
+	}
 }

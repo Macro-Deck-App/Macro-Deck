@@ -40,7 +40,9 @@ public sealed class OAuthCallbackCoordinator : IOAuthCallbackCoordinator
 	}
 
 	public string? GetCode(string state)
-		=> _pending.TryGetValue(state, out var pending) ? pending.Code : null;
+	{
+		return _pending.TryGetValue(state, out var pending) ? pending.Code : null;
+	}
 
 	public async Task<bool> HandleCallbackAsync(
 		string state,

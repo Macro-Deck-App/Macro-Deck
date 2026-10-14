@@ -9,6 +9,7 @@ public static class BuiltInScreenSavers
 	public const string NowPlaying = ProviderId + "::now-playing";
 
 	public static bool IsBuiltIn(string? screenSaverId)
-		=> screenSaverId is not null &&
-			screenSaverId.StartsWith(ProviderId + "::", StringComparison.Ordinal);
+	{
+		return screenSaverId is not null && screenSaverId.StartsWith(ProviderId + "::", StringComparison.Ordinal);
+	}
 }

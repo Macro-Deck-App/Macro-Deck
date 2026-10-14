@@ -119,9 +119,15 @@ internal sealed class AdbBatteryProvider : IDisposable
 		devices.AccessChanged -= OnAccessChanged;
 	}
 
-	private void OnDevicesChanged(object? sender, AndroidDeviceEventArgs e) => _ = ReconcileAsync();
+	private void OnDevicesChanged(object? sender, AndroidDeviceEventArgs e)
+	{
+		_ = ReconcileAsync();
+	}
 
-	private void OnAccessChanged(object? sender, EventArgs e) => _ = ReconcileAsync();
+	private void OnAccessChanged(object? sender, EventArgs e)
+	{
+		_ = ReconcileAsync();
+	}
 
 	private async Task ReconcileAsync()
 	{
@@ -200,7 +206,10 @@ internal sealed class AdbBatteryProvider : IDisposable
 		await PublishChangedAsync(context, batch);
 	}
 
-	private async Task<BatteryDevice> ReadAsync(string stableId, IAndroidDevice device, CancellationToken cancellationToken)
+	private async Task<BatteryDevice> ReadAsync(
+		string stableId,
+		IAndroidDevice device,
+		CancellationToken cancellationToken)
 	{
 		var battery = await TryReadBatteryAsync(device, cancellationToken);
 		_publishedById.TryGetValue(stableId, out var previous);
@@ -211,13 +220,16 @@ internal sealed class AdbBatteryProvider : IDisposable
 			Name = NameOf(device.Info),
 			Kind = await KindOfAsync(stableId, device, cancellationToken),
 			LevelPercent = battery?.Level ?? previous?.LevelPercent,
-			ChargeState = battery is null ? previous?.ChargeState ?? BatteryChargeState.Unknown : MapChargeState(battery.Status),
+			ChargeState = battery is null
+				? previous?.ChargeState ?? BatteryChargeState.Unknown
+				: MapChargeState(battery.Status),
 			Health = battery is null ? previous?.Health ?? BatteryHealth.Unknown : MapHealth(battery.Health),
 			IsConnected = true
 		};
 	}
 
-	private static async Task<AndroidBatteryState?> TryReadBatteryAsync(IAndroidDevice device,
+	private static async Task<AndroidBatteryState?> TryReadBatteryAsync(
+		IAndroidDevice device,
 		CancellationToken cancellationToken)
 	{
 		try
@@ -277,8 +289,10 @@ internal sealed class AdbBatteryProvider : IDisposable
 	}
 
 	private static bool IsTablet(string buildCharacteristics)
-		=> buildCharacteristics.Split(',', StringSplitOptions.TrimEntries)
+	{
+		return buildCharacteristics.Split(',', StringSplitOptions.TrimEntries)
 			.Contains("tablet", StringComparer.OrdinalIgnoreCase);
+	}
 
 	private static string NameOf(AndroidDeviceInfo info)
 	{
@@ -293,23 +307,29 @@ internal sealed class AdbBatteryProvider : IDisposable
 		return name.Length > BatteryLimits.MaxNameLength ? name[..BatteryLimits.MaxNameLength] : name;
 	}
 
-	private static BatteryChargeState MapChargeState(AndroidBatteryStatus status) => status switch
+	private static BatteryChargeState MapChargeState(AndroidBatteryStatus status)
 	{
-		AndroidBatteryStatus.Charging => BatteryChargeState.Charging,
-		AndroidBatteryStatus.Discharging => BatteryChargeState.Discharging,
-		AndroidBatteryStatus.NotCharging => BatteryChargeState.NotCharging,
-		AndroidBatteryStatus.Full => BatteryChargeState.Full,
-		_ => BatteryChargeState.Unknown
-	};
+		return status switch
+		{
+			AndroidBatteryStatus.Charging => BatteryChargeState.Charging,
+			AndroidBatteryStatus.Discharging => BatteryChargeState.Discharging,
+			AndroidBatteryStatus.NotCharging => BatteryChargeState.NotCharging,
+			AndroidBatteryStatus.Full => BatteryChargeState.Full,
+			_ => BatteryChargeState.Unknown
+		};
+	}
 
-	private static BatteryHealth MapHealth(AndroidBatteryHealth health) => health switch
+	private static BatteryHealth MapHealth(AndroidBatteryHealth health)
 	{
-		AndroidBatteryHealth.Good => BatteryHealth.Good,
-		AndroidBatteryHealth.Overheat => BatteryHealth.Overheat,
-		AndroidBatteryHealth.Dead => BatteryHealth.Dead,
-		AndroidBatteryHealth.OverVoltage => BatteryHealth.OverVoltage,
-		AndroidBatteryHealth.Cold => BatteryHealth.Cold,
-		AndroidBatteryHealth.Failure => BatteryHealth.Failure,
-		_ => BatteryHealth.Unknown
-	};
+		return health switch
+		{
+			AndroidBatteryHealth.Good => BatteryHealth.Good,
+			AndroidBatteryHealth.Overheat => BatteryHealth.Overheat,
+			AndroidBatteryHealth.Dead => BatteryHealth.Dead,
+			AndroidBatteryHealth.OverVoltage => BatteryHealth.OverVoltage,
+			AndroidBatteryHealth.Cold => BatteryHealth.Cold,
+			AndroidBatteryHealth.Failure => BatteryHealth.Failure,
+			_ => BatteryHealth.Unknown
+		};
+	}
 }

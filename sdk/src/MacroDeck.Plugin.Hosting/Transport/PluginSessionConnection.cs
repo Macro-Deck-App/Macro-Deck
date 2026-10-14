@@ -104,8 +104,8 @@ internal sealed class PluginSessionConnection(
 
 			using var loops = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-			var send = SendLoopAsync(_outbound.Reader, exemptWhilePaused: false, loops.Token);
-			var sendExempt = SendLoopAsync(_exemptOutbound.Reader, exemptWhilePaused: true, loops.Token);
+			var send = SendLoopAsync(_outbound.Reader, false, loops.Token);
+			var sendExempt = SendLoopAsync(_exemptOutbound.Reader, true, loops.Token);
 			var process = ProcessLoopAsync(loops.Token);
 			var keepAlive = KeepAliveLoopAsync(loops.Token);
 
@@ -150,7 +150,9 @@ internal sealed class PluginSessionConnection(
 	/// wait for the pause that result would lift.
 	/// </summary>
 	public ValueTask SendAsync(ProtocolEnvelope envelope, CancellationToken cancellationToken)
-		=> QueueFor(envelope.Type).Writer.WriteAsync(Stamp(envelope), cancellationToken);
+	{
+		return QueueFor(envelope.Type).Writer.WriteAsync(Stamp(envelope), cancellationToken);
+	}
 
 	/// <summary>
 	/// Says goodbye and waits for the socket to close, bounded by the protocol's graceful-close budget.
@@ -422,9 +424,9 @@ internal sealed class PluginSessionConnection(
 		}
 
 		var outcome = CorrelationRules.Resolve(envelope.Type,
-			hasCorrelationId: envelope.CorrelationId is not null,
-			isKnownCorrelation: false,
-			wasTimedOut: false);
+			envelope.CorrelationId is not null,
+			false,
+			false);
 
 		return outcome switch
 		{
@@ -542,8 +544,8 @@ internal sealed class PluginSessionConnection(
 		{
 			// Silence is measured against every inbound frame, not just pongs: a host that is
 			// answering invocations is demonstrably alive whether or not it replies to a ping.
-			var silence = timeProvider.GetUtcNow() -
-				new DateTimeOffset(Volatile.Read(ref _lastInboundTicks), TimeSpan.Zero);
+			var silence = timeProvider.GetUtcNow()
+				- new DateTimeOffset(Volatile.Read(ref _lastInboundTicks), TimeSpan.Zero);
 
 			if (silence > session.Timeouts.KeepAliveTimeout)
 			{
@@ -603,8 +605,8 @@ internal sealed class PluginSessionConnection(
 				},
 				cancellationToken);
 		}
-		else if (depth <= session.Limits.QueueLowWatermark &&
-			Interlocked.CompareExchange(ref _pauseRequested, 0, 1) == 1)
+		else if (depth <= session.Limits.QueueLowWatermark
+			&& Interlocked.CompareExchange(ref _pauseRequested, 0, 1) == 1)
 		{
 			await SendDirectAsync(new ProtocolEnvelope
 				{
@@ -658,7 +660,7 @@ internal sealed class PluginSessionConnection(
 			// ManualTimeProvider must not thereby also disable the one guard against a send that never
 			// returns at all.
 			var sendTask = socket.SendAsync(bytes, cancellationToken);
-			var timeoutTask = Task.Delay(session.Timeouts.DefaultRequest, cancellationToken: CancellationToken.None);
+			var timeoutTask = Task.Delay(session.Timeouts.DefaultRequest, CancellationToken.None);
 
 			if (ReferenceEquals(await Task.WhenAny(sendTask, timeoutTask).ConfigureAwait(false), timeoutTask))
 			{
@@ -679,30 +681,39 @@ internal sealed class PluginSessionConnection(
 	/// so its eventual fault (the abort above will make it throw) never surfaces as an unobserved task
 	/// exception.</summary>
 	private static void ObserveAbandonedSend(Task task)
-		=> _ = task.ContinueWith(static t => _ = t.Exception,
+	{
+		_ = task.ContinueWith(static t => _ = t.Exception,
 			CancellationToken.None,
 			TaskContinuationOptions.ExecuteSynchronously,
 			TaskScheduler.Default);
+	}
 
 	private Channel<ProtocolEnvelope> QueueFor(string messageType)
-		=> ProtocolBackpressure.IsExemptWhilePaused(messageType) ? _exemptOutbound : _outbound;
+	{
+		return ProtocolBackpressure.IsExemptWhilePaused(messageType) ? _exemptOutbound : _outbound;
+	}
 
 	private static Channel<ProtocolEnvelope> OutboundQueue(PluginSession session)
-		=> Channel.CreateBounded<ProtocolEnvelope>(new BoundedChannelOptions(session.Limits.MaxOutboundQueueDepth)
+	{
+		return Channel.CreateBounded<ProtocolEnvelope>(new BoundedChannelOptions(session.Limits.MaxOutboundQueueDepth)
 		{
 			FullMode = BoundedChannelFullMode.Wait,
 			SingleReader = true
 		});
+	}
 
 	private ProtocolEnvelope Stamp(ProtocolEnvelope envelope)
-		=> envelope with
+	{
+		return envelope with
 		{
 			SentAt = envelope.SentAt ?? timeProvider.GetUtcNow(),
 			ProtocolVersion = envelope.ProtocolVersion ?? session.NegotiatedVersion
 		};
+	}
 
 	private static ProtocolEnvelope ProtocolErrorEnvelope(string code, string? correlationId)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.ProtocolError,
 			Id = NewId(),
@@ -714,6 +725,7 @@ internal sealed class PluginSessionConnection(
 				Retryable = false
 			}
 		};
+	}
 
 	/// <summary>
 	/// Reads the close code and decides whether another attempt is worth making. The codes the
@@ -746,12 +758,20 @@ internal sealed class PluginSessionConnection(
 		};
 	}
 
-	private void Touch() => Volatile.Write(ref _lastInboundTicks, timeProvider.GetUtcNow().UtcTicks);
+	private void Touch()
+	{
+		Volatile.Write(ref _lastInboundTicks, timeProvider.GetUtcNow().UtcTicks);
+	}
 
-	private static string NewId() => Guid.CreateVersion7().ToString();
+	private static string NewId()
+	{
+		return Guid.CreateVersion7().ToString();
+	}
 
 	private static JsonElement Serialize<T>(T value)
-		=> JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	{
+		return JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	}
 
 	private static T? Deserialize<T>(JsonElement? payload)
 	{

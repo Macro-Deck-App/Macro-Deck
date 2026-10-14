@@ -24,7 +24,8 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 	private readonly TimeProvider _time;
 	private readonly ILogger _logger;
 
-	public NotificationManager(UserNotificationStore inbox,
+	public NotificationManager(
+		UserNotificationStore inbox,
 		ILocalizationResolver localization,
 		IServiceScopeFactory scopeFactory,
 		TimeProvider time,
@@ -47,30 +48,63 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		remove => _inbox.Changed -= value;
 	}
 
-	public UserNotification? Raise(UserNotificationDraft draft) => _inbox.Raise(draft);
+	public UserNotification? Raise(UserNotificationDraft draft)
+	{
+		return _inbox.Raise(draft);
+	}
 
-	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft) => _inbox.RaiseIfAbsent(draft);
+	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft)
+	{
+		return _inbox.RaiseIfAbsent(draft);
+	}
 
-	public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => _inbox.RaiseIfPresent(draft);
+	public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
+	{
+		return _inbox.RaiseIfPresent(draft);
+	}
 
-	public IReadOnlyList<UserNotification> Snapshot() => _inbox.Snapshot();
+	public IReadOnlyList<UserNotification> Snapshot()
+	{
+		return _inbox.Snapshot();
+	}
 
 	public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress)
-		=> _inbox.UpdateProgress(dedupeKey, progress);
+	{
+		return _inbox.UpdateProgress(dedupeKey, progress);
+	}
 
-	public bool Dismiss(string id) => _inbox.Dismiss(id);
+	public bool Dismiss(string id)
+	{
+		return _inbox.Dismiss(id);
+	}
 
-	public bool DismissByKey(string dedupeKey) => _inbox.DismissByKey(dedupeKey);
+	public bool DismissByKey(string dedupeKey)
+	{
+		return _inbox.DismissByKey(dedupeKey);
+	}
 
-	public bool Retire(string dedupeKey) => _inbox.Retire(dedupeKey);
+	public bool Retire(string dedupeKey)
+	{
+		return _inbox.Retire(dedupeKey);
+	}
 
-	public bool DismissAll() => _inbox.DismissAll();
+	public bool DismissAll()
+	{
+		return _inbox.DismissAll();
+	}
 
-	public bool MarkRead(string id) => _inbox.MarkRead(id);
+	public bool MarkRead(string id)
+	{
+		return _inbox.MarkRead(id);
+	}
 
-	public bool MarkAllRead() => _inbox.MarkAllRead();
+	public bool MarkAllRead()
+	{
+		return _inbox.MarkAllRead();
+	}
 
-	public async Task<NotificationShowOutcome> ShowAsync(NotificationOwner owner,
+	public async Task<NotificationShowOutcome> ShowAsync(
+		NotificationOwner owner,
 		NotificationOptions options,
 		CancellationToken cancellationToken = default)
 	{
@@ -85,8 +119,11 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		{
 			var now = _time.GetUtcNow();
 
-			if (!Bucket(_createBuckets, owner.Id, NotificationLimits.CreatesPerMinutePerOwner,
-				NotificationLimits.CreatesPerMinutePerOwner / 60.0).TryConsume(now))
+			if (!Bucket(_createBuckets,
+					owner.Id,
+					NotificationLimits.CreatesPerMinutePerOwner,
+					NotificationLimits.CreatesPerMinutePerOwner / 60.0)
+				.TryConsume(now))
 			{
 				throw new NotificationException(NotificationErrorCode.LimitExceeded,
 					"This owner is showing notifications too quickly.");
@@ -106,11 +143,11 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 					CreatedAt = now,
 					Lifetime = lifetime,
 					ExpiresAt = now + lifetime,
-					Completion = new TaskCompletionSource<NotificationResult>(
-						TaskCreationOptions.RunContinuationsAsynchronously)
+					Completion = new TaskCompletionSource<NotificationResult>(TaskCreationOptions
+						.RunContinuationsAsynchronously)
 				};
 
-				RaiseInbox(entry, culture, progressOnly: false);
+				RaiseInbox(entry, culture, false);
 				var done = new NotificationResult { CloseReason = NotificationCloseReason.Programmatic };
 				entry.Completion.TrySetResult(done);
 				Publish(new NotificationEvent(NotificationEventKind.Closed, View(entry), done));
@@ -127,7 +164,8 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 				CreatedAt = now,
 				Lifetime = lifetime,
 				ExpiresAt = now + lifetime,
-				Completion = new TaskCompletionSource<NotificationResult>(TaskCreationOptions.RunContinuationsAsynchronously)
+				Completion = new TaskCompletionSource<NotificationResult>(TaskCreationOptions
+					.RunContinuationsAsynchronously)
 			};
 
 			_popups[id] = popup;
@@ -138,7 +176,7 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 
 			if (options.Inbox)
 			{
-				RaiseInbox(popup, culture, progressOnly: false);
+				RaiseInbox(popup, culture, false);
 			}
 
 			Publish(new NotificationEvent(NotificationEventKind.Shown, View(popup)));
@@ -147,7 +185,8 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		}
 	}
 
-	public async Task UpdateAsync(NotificationOwner owner,
+	public async Task UpdateAsync(
+		NotificationOwner owner,
 		Guid id,
 		NotificationUpdate update,
 		CancellationToken cancellationToken = default)
@@ -162,8 +201,11 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		{
 			var popup = Owned(owner, id);
 
-			if (!Bucket(_updateBuckets, owner.Id, NotificationLimits.UpdatesPerSecondPerOwner,
-				NotificationLimits.UpdatesPerSecondPerOwner).TryConsume(_time.GetUtcNow()))
+			if (!Bucket(_updateBuckets,
+					owner.Id,
+					NotificationLimits.UpdatesPerSecondPerOwner,
+					NotificationLimits.UpdatesPerSecondPerOwner)
+				.TryConsume(_time.GetUtcNow()))
 			{
 				throw new NotificationException(NotificationErrorCode.LimitExceeded,
 					"This owner is updating notifications too quickly.");
@@ -210,8 +252,12 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 				contentChanged = true;
 			}
 
-			var progressOnly = update.Title is null && update.Message is null && update.Severity is null &&
-				update.Actions is null && !contentChanged && update.Progress is not null;
+			var progressOnly = update.Title is null
+				&& update.Message is null
+				&& update.Severity is null
+				&& update.Actions is null
+				&& !contentChanged
+				&& update.Progress is not null;
 
 			if (update.Progress is { } progress)
 			{
@@ -233,7 +279,7 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 
 			if (options.Inbox)
 			{
-				RaiseInbox(popup, culture, progressOnly, replaceOnly: true);
+				RaiseInbox(popup, culture, progressOnly, true);
 			}
 
 			Publish(new NotificationEvent(NotificationEventKind.Updated, View(popup)));
@@ -261,7 +307,8 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		CloseInternal(id, NotificationCloseReason.Programmatic, null);
 	}
 
-	public NotificationRespondOutcome Respond(NotificationPrincipal principal,
+	public NotificationRespondOutcome Respond(
+		NotificationPrincipal principal,
 		Guid id,
 		string? actionId,
 		IReadOnlyDictionary<string, JsonElement>? values)
@@ -305,8 +352,8 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 				}
 
 				Dictionary<string, JsonElement> accepted = [];
-				if (popup.Content is { } info &&
-					!NotificationContent.TryValidateValues(info.Fields, values, out accepted, out var error))
+				if (popup.Content is { } info
+					&& !NotificationContent.TryValidateValues(info.Fields, values, out accepted, out var error))
 				{
 					return new NotificationRespondOutcome(NotificationRespondStatus.Invalid, error);
 				}
@@ -354,7 +401,11 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		List<Guid> ids;
 		lock (_lock)
 		{
-			ids = [.. _popups.Values.Where(p => string.Equals(p.Owner.Id, ownerId, StringComparison.Ordinal)).Select(p => p.Id)];
+			ids =
+			[
+				.. _popups.Values.Where(p => string.Equals(p.Owner.Id, ownerId, StringComparison.Ordinal))
+					.Select(p => p.Id)
+			];
 		}
 
 		return ids.Count(id => CloseInternal(id, reason, null));
@@ -389,7 +440,7 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 			if (popup.Options.Inbox && popup.Options.Progress is not null)
 			{
 				popup.Options = popup.Options with { Progress = null };
-				RaiseInbox(popup, null, progressOnly: false, replaceOnly: true);
+				RaiseInbox(popup, null, false, true);
 			}
 
 			popup.Completion.TrySetResult(result);
@@ -426,15 +477,20 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 	}
 
 	private static bool SameOwner(NotificationOwner a, NotificationOwner b)
-		=> a.Category == b.Category && string.Equals(a.Id, b.Id, StringComparison.Ordinal);
-
-	private static bool Targets(NotificationTarget target, NotificationPrincipal principal) => target.Kind switch
 	{
-		NotificationTargetKind.All => principal.IsAdmin || principal.DeviceId is not null,
-		NotificationTargetKind.AdminUi => principal.IsAdmin,
-		NotificationTargetKind.Devices => principal.DeviceId is { } device && target.DeviceIds.Contains(device),
-		_ => false
-	};
+		return a.Category == b.Category && string.Equals(a.Id, b.Id, StringComparison.Ordinal);
+	}
+
+	private static bool Targets(NotificationTarget target, NotificationPrincipal principal)
+	{
+		return target.Kind switch
+		{
+			NotificationTargetKind.All => principal.IsAdmin || principal.DeviceId is not null,
+			NotificationTargetKind.AdminUi => principal.IsAdmin,
+			NotificationTargetKind.Devices => principal.DeviceId is { } device && target.DeviceIds.Contains(device),
+			_ => false
+		};
+	}
 
 	private ActiveNotification View(Popup popup)
 	{
@@ -462,9 +518,10 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 
 	private static TimeSpan Lifetime(NotificationOptions options)
 	{
-		var requested = options.Duration ?? (options.Popup == NotificationPopup.Toast
-			? NotificationLimits.DefaultToastDuration
-			: NotificationLimits.MaxLifetime);
+		var requested = options.Duration
+			?? (options.Popup == NotificationPopup.Toast
+				? NotificationLimits.DefaultToastDuration
+				: NotificationLimits.MaxLifetime);
 
 		return requested < NotificationLimits.MinDuration ? NotificationLimits.MinDuration
 			: requested > NotificationLimits.MaxLifetime ? NotificationLimits.MaxLifetime
@@ -489,8 +546,8 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 			}
 		}
 
-		if (replacing is null && (_popups.Count >= NotificationLimits.MaxActive ||
-			ownerCount >= NotificationLimits.MaxActivePerOwner))
+		if (replacing is null
+			&& (_popups.Count >= NotificationLimits.MaxActive || ownerCount >= NotificationLimits.MaxActivePerOwner))
 		{
 			throw new NotificationException(NotificationErrorCode.LimitExceeded,
 				"Too many notifications are open.");
@@ -501,9 +558,9 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 			? NotificationLimits.ContentBudgetGlobalBytes
 			: NotificationLimits.ContentBudgetGlobalBytes - NotificationLimits.ContentBudgetSystemReserveBytes;
 
-		if (additionalContentBytes > 0 &&
-			(ownerBytes + additionalContentBytes > NotificationLimits.ContentBudgetPerOwnerBytes ||
-				totalBytes + additionalContentBytes > globalBudget))
+		if (additionalContentBytes > 0
+			&& (ownerBytes + additionalContentBytes > NotificationLimits.ContentBudgetPerOwnerBytes
+				|| totalBytes + additionalContentBytes > globalBudget))
 		{
 			throw new NotificationException(NotificationErrorCode.LimitExceeded,
 				"The open notifications carry too much content.");
@@ -563,8 +620,10 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 
 	private static void EnsureClosable(NotificationOptions options)
 	{
-		if (options.Popup == NotificationPopup.Dialog && options.Actions.Count == 0 && !options.Dismissible &&
-			options.Duration is null)
+		if (options.Popup == NotificationPopup.Dialog
+			&& options.Actions.Count == 0
+			&& !options.Dismissible
+			&& options.Duration is null)
 		{
 			throw Invalid("A dialog needs an action, a way to dismiss it or a duration.");
 		}
@@ -578,7 +637,10 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		}
 	}
 
-	private static DateTimeOffset Min(DateTimeOffset a, DateTimeOffset b) => a < b ? a : b;
+	private static DateTimeOffset Min(DateTimeOffset a, DateTimeOffset b)
+	{
+		return a < b ? a : b;
+	}
 
 	private static void ValidateTitle(LocalizedText title)
 	{
@@ -612,8 +674,9 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		var seen = new HashSet<string>(StringComparer.Ordinal);
 		foreach (var action in actions)
 		{
-			if (string.IsNullOrWhiteSpace(action.Id) || action.Id.Length > NotificationLimits.MaxActionIdLength ||
-				!seen.Add(action.Id))
+			if (string.IsNullOrWhiteSpace(action.Id)
+				|| action.Id.Length > NotificationLimits.MaxActionIdLength
+				|| !seen.Add(action.Id))
 			{
 				throw Invalid("Action ids must be unique, not empty and short.");
 			}
@@ -645,8 +708,9 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		var options = popup.Options;
 		var key = $"popup:{popup.Id}";
 
-		if (progressOnly && options.Progress is { } progress &&
-			_inbox.UpdateProgress(key, new UserNotificationProgress(progress.Processed, progress.Total)))
+		if (progressOnly
+			&& options.Progress is { } progress
+			&& _inbox.UpdateProgress(key, new UserNotificationProgress(progress.Processed, progress.Total)))
 		{
 			return;
 		}
@@ -713,7 +777,10 @@ public sealed class NotificationManager : INotificationManager, IUserNotificatio
 		return bucket;
 	}
 
-	private static NotificationException Invalid(string message) => new(NotificationErrorCode.Invalid, message);
+	private static NotificationException Invalid(string message)
+	{
+		return new NotificationException(NotificationErrorCode.Invalid, message);
+	}
 
 	private sealed class Popup
 	{

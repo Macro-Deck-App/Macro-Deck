@@ -12,7 +12,13 @@ public readonly record struct TriggerSelector
 
 	public bool ByTriggerId { get; }
 
-	public static TriggerSelector ByType(string triggerType) => new(triggerType, false);
+	public static TriggerSelector ByType(string triggerType)
+	{
+		return new TriggerSelector(triggerType, false);
+	}
 
-	public static TriggerSelector ById(string triggerId) => new(triggerId, true);
+	public static TriggerSelector ById(string triggerId)
+	{
+		return new TriggerSelector(triggerId, true);
+	}
 }

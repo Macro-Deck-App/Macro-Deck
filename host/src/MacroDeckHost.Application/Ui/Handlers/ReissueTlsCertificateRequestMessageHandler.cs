@@ -15,7 +15,8 @@ public class ReissueTlsCertificateRequestMessageHandler
 	private readonly PublicTlsBootstrapper _bootstrapper;
 	private readonly INetworkRestartNotifier _restartNotifier;
 
-	public ReissueTlsCertificateRequestMessageHandler(IAppPreferenceService preferences,
+	public ReissueTlsCertificateRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IApplicationRestartService restart,
 		PublicTlsBootstrapper bootstrapper,
 		INetworkRestartNotifier restartNotifier)

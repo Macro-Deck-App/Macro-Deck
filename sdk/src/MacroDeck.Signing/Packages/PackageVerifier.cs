@@ -21,7 +21,8 @@ public static class PackageVerifier
 	/// <summary>Verifies <paramref name="packagePath"/>. <paramref name="rootPublicKey"/> defaults to
 	/// <see cref="MacroDeckRootKey"/> when omitted. <paramref name="manifestReader"/> is only consulted for
 	/// a <see cref="SignablePackageFormat.Plugin"/> archive.</summary>
-	public static async Task<PackageVerifyResult> VerifyAsync(string packagePath,
+	public static async Task<PackageVerifyResult> VerifyAsync(
+		string packagePath,
 		IPluginManifestReader manifestReader,
 		ReadOnlyMemory<byte>? rootPublicKey = null,
 		CancellationToken cancellationToken = default)
@@ -55,7 +56,8 @@ public static class PackageVerifier
 	/// running the identical checks as <see cref="VerifyAsync"/> over files on disk rather than archive
 	/// entries, so an installed package can be re-verified without keeping the archive it came from.
 	/// <paramref name="format"/> is explicit because there is no file extension to resolve it from.</summary>
-	public static async Task<PackageVerifyResult> VerifyExtractedAsync(string rootDirectory,
+	public static async Task<PackageVerifyResult> VerifyExtractedAsync(
+		string rootDirectory,
 		SignablePackageFormat format,
 		IPluginManifestReader manifestReader,
 		ReadOnlyMemory<byte>? rootPublicKey = null,
@@ -80,7 +82,8 @@ public static class PackageVerifier
 		}
 	}
 
-	private static async Task<PackageVerifyResult> VerifyCoreAsync(IPackageEntrySource source,
+	private static async Task<PackageVerifyResult> VerifyCoreAsync(
+		IPackageEntrySource source,
 		SignablePackageFormat format,
 		IPluginManifestReader manifestReader,
 		ReadOnlyMemory<byte>? rootPublicKey,
@@ -113,7 +116,8 @@ public static class PackageVerifier
 			string? manifestJson;
 			await using (var manifestStream = await source.OpenAsync(manifestEntry, cancellationToken))
 			{
-				manifestJson = await PackageManifestEntry.ReadBoundedAsync(manifestStream, maxManifestBytes, cancellationToken);
+				manifestJson
+					= await PackageManifestEntry.ReadBoundedAsync(manifestStream, maxManifestBytes, cancellationToken);
 			}
 
 			if (manifestJson is null)
@@ -125,8 +129,8 @@ public static class PackageVerifier
 			JsonObject manifestNode;
 			try
 			{
-				manifestNode = JsonNode.Parse(manifestJson) as JsonObject ??
-					throw new JsonException("The manifest document must contain a JSON object.");
+				manifestNode = JsonNode.Parse(manifestJson) as JsonObject
+					?? throw new JsonException("The manifest document must contain a JSON object.");
 			}
 			catch (JsonException ex)
 			{
@@ -163,8 +167,8 @@ public static class PackageVerifier
 			if (certificateEntry is null || certificateSignatureEntry is null)
 			{
 				return PackageVerifyResult.Fail(SigningError.CertificateUnreadable,
-					$"The package carries no root '{PluginArtifactFiles.CertificateFileName}' / " +
-					$"'{PluginArtifactFiles.CertificateSignatureFileName}'.");
+					$"The package carries no root '{PluginArtifactFiles.CertificateFileName}' / "
+					+ $"'{PluginArtifactFiles.CertificateSignatureFileName}'.");
 			}
 
 			var certificateBytes = await ReadEntryAsync(source, certificateEntry, cancellationToken);
@@ -177,8 +181,8 @@ public static class PackageVerifier
 			if (issuerEntry is null != issuerSignatureEntry is null)
 			{
 				return PackageVerifyResult.Fail(SigningError.CertificateIssuerMissing,
-					$"The package carries only one of '{PluginArtifactFiles.IssuerCertificateFileName}' / " +
-					$"'{PluginArtifactFiles.IssuerCertificateSignatureFileName}'.");
+					$"The package carries only one of '{PluginArtifactFiles.IssuerCertificateFileName}' / "
+					+ $"'{PluginArtifactFiles.IssuerCertificateSignatureFileName}'.");
 			}
 
 			var issuerBytes = issuerEntry is null ? null : await ReadEntryAsync(source, issuerEntry, cancellationToken);
@@ -244,7 +248,8 @@ public static class PackageVerifier
 		}
 	}
 
-	private static async Task<byte[]> ReadEntryAsync(IPackageEntrySource source,
+	private static async Task<byte[]> ReadEntryAsync(
+		IPackageEntrySource source,
 		PackageEntry entry,
 		CancellationToken cancellationToken)
 	{
@@ -273,9 +278,13 @@ public sealed record PackageVerifyResult
 
 	public string? Message { get; init; }
 
-	public static PackageVerifyResult Ok(SignablePackageFormat format, string certificateId) =>
-		new() { Success = true, Format = format, CertificateId = certificateId };
+	public static PackageVerifyResult Ok(SignablePackageFormat format, string certificateId)
+	{
+		return new PackageVerifyResult { Success = true, Format = format, CertificateId = certificateId };
+	}
 
-	public static PackageVerifyResult Fail(SigningError error, string message) =>
-		new() { Success = false, Error = error, Message = message };
+	public static PackageVerifyResult Fail(SigningError error, string message)
+	{
+		return new PackageVerifyResult { Success = false, Error = error, Message = message };
+	}
 }

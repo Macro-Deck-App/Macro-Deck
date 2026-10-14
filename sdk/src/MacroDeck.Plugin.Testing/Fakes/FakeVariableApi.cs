@@ -155,7 +155,8 @@ public sealed class FakeVariableApi : IVariableApi
 	}
 
 	/// <inheritdoc />
-	public Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+	public Task RequestDefinitionRefreshAsync(
+		IReadOnlyCollection<string> definitionIds,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(definitionIds);
@@ -190,14 +191,17 @@ public sealed class FakeVariableApi : IVariableApi
 	/// Deck, it creates no variables later.
 	/// </summary>
 	/// <exception cref="ArgumentException">A name or resource id is invalid; nothing was recorded.</exception>
-	public Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(IReadOnlyCollection<VariableBindingRequest> requests,
+	public Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(
+		IReadOnlyCollection<VariableBindingRequest> requests,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(requests);
 		cancellationToken.ThrowIfCancellationRequested();
 		foreach (var request in requests)
 		{
-			if (request is null || string.IsNullOrWhiteSpace(request.LocalResourceId) || !VariableNames.IsValid(request.Name))
+			if (request is null
+				|| string.IsNullOrWhiteSpace(request.LocalResourceId)
+				|| !VariableNames.IsValid(request.Name))
 			{
 				throw new ArgumentException($"'{request?.Name}' is not a valid binding.", nameof(requests));
 			}
@@ -275,7 +279,8 @@ public sealed class FakeVariableApi : IVariableApi
 	/// Opens a window on the samples recorded with <see cref="RecordSample" /> for <paramref name="name" />,
 	/// keeping the last <paramref name="capacity" /> of them. Every name counts as the integration's own here.
 	/// </summary>
-	public Task<IVariableHistoryWindow> OpenHistoryAsync(string name,
+	public Task<IVariableHistoryWindow> OpenHistoryAsync(
+		string name,
 		int capacity,
 		CancellationToken cancellationToken = default)
 	{
@@ -350,7 +355,10 @@ public sealed class FakeVariableApi : IVariableApi
 
 		public event EventHandler? Changed;
 
-		public void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
+		public void RaiseChanged()
+		{
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
 
 		public ValueTask DisposeAsync()
 		{

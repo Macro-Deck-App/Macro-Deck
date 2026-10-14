@@ -21,7 +21,7 @@ public class ShowNotificationActionTests
 	[Test]
 	public async Task A_toast_with_a_timeout_is_shown_with_what_the_parameters_say()
 	{
-		var result = await Execute(new()
+		var result = await Execute(new Dictionary<string, object>
 		{
 			["title"] = "Backup finished",
 			["message"] = "12 files",
@@ -49,11 +49,12 @@ public class ShowNotificationActionTests
 	[TestCase("dialog", NotificationPopup.Dialog, false)]
 	[TestCase("dialog-inbox", NotificationPopup.Dialog, true)]
 	[TestCase("inbox", NotificationPopup.None, true)]
-	public async Task The_presentation_choice_maps_to_a_popup_and_an_inbox_entry(string presentation,
+	public async Task The_presentation_choice_maps_to_a_popup_and_an_inbox_entry(
+		string presentation,
 		NotificationPopup popup,
 		bool inbox)
 	{
-		await Execute(new() { ["title"] = "Hello", ["presentation"] = presentation });
+		await Execute(new Dictionary<string, object> { ["title"] = "Hello", ["presentation"] = presentation });
 
 		var shown = _service.Shown.Single();
 		Assert.Multiple(() =>
@@ -66,7 +67,7 @@ public class ShowNotificationActionTests
 	[Test]
 	public async Task A_dialog_without_a_timeout_gets_an_ok_button_so_it_can_always_be_closed()
 	{
-		await Execute(new() { ["title"] = "Read this", ["presentation"] = "dialog" });
+		await Execute(new Dictionary<string, object> { ["title"] = "Read this", ["presentation"] = "dialog" });
 
 		var shown = _service.Shown.Single();
 		Assert.That(shown.Actions.Select(a => a.Id), Is.EqualTo(new[] { "ok" }));
@@ -77,7 +78,8 @@ public class ShowNotificationActionTests
 	{
 		_service.NeverCompletes = true;
 
-		var result = await Execute(new() { ["title"] = "Read this", ["presentation"] = "dialog" })
+		var result = await Execute(new Dictionary<string, object>
+				{ ["title"] = "Read this", ["presentation"] = "dialog" })
 			.WaitAsync(TimeSpan.FromSeconds(5));
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
@@ -88,7 +90,7 @@ public class ShowNotificationActionTests
 	{
 		_accessor.Current = null;
 
-		var result = await Execute(new() { ["title"] = "Hello" });
+		var result = await Execute(new Dictionary<string, object> { ["title"] = "Hello" });
 
 		Assert.Multiple(() =>
 		{
@@ -103,7 +105,7 @@ public class ShowNotificationActionTests
 	{
 		_service.Refuse = true;
 
-		var result = await Execute(new() { ["title"] = "Hello" });
+		var result = await Execute(new Dictionary<string, object> { ["title"] = "Hello" });
 
 		Assert.Multiple(() =>
 		{
@@ -115,7 +117,7 @@ public class ShowNotificationActionTests
 	[Test]
 	public async Task Fails_without_a_title()
 	{
-		var result = await Execute(new() { ["title"] = "   " });
+		var result = await Execute(new Dictionary<string, object> { ["title"] = "   " });
 
 		Assert.Multiple(() =>
 		{
@@ -126,7 +128,9 @@ public class ShowNotificationActionTests
 	}
 
 	private Task<ActionResult> Execute(Dictionary<string, object> parameters)
-		=> _action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	{
+		return _action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	}
 
 	private sealed class CapturingNotificationService : INotificationService
 	{
@@ -138,7 +142,8 @@ public class ShowNotificationActionTests
 
 		public IReadOnlyList<NotificationOptions> Shown => _shown;
 
-		public Task<INotificationHandle> ShowAsync(NotificationOptions options,
+		public Task<INotificationHandle> ShowAsync(
+			NotificationOptions options,
 			CancellationToken cancellationToken = default)
 		{
 			if (Refuse)
@@ -151,9 +156,12 @@ public class ShowNotificationActionTests
 			return Task.FromResult<INotificationHandle>(new Handle(NeverCompletes));
 		}
 
-		public Task<NotificationResult> ShowForResultAsync(NotificationOptions options,
+		public Task<NotificationResult> ShowForResultAsync(
+			NotificationOptions options,
 			CancellationToken cancellationToken = default)
-			=> throw new InvalidOperationException("The action must not wait for an answer.");
+		{
+			throw new InvalidOperationException("The action must not wait for an answer.");
+		}
 
 		private sealed class Handle(bool neverCompletes) : INotificationHandle
 		{
@@ -164,9 +172,14 @@ public class ShowNotificationActionTests
 				: Task.FromResult(new NotificationResult { CloseReason = NotificationCloseReason.Dismissed });
 
 			public Task UpdateAsync(NotificationUpdate update, CancellationToken cancellationToken = default)
-				=> Task.CompletedTask;
+			{
+				return Task.CompletedTask;
+			}
 
-			public Task DismissAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+			public Task DismissAsync(CancellationToken cancellationToken = default)
+			{
+				return Task.CompletedTask;
+			}
 		}
 	}
 }

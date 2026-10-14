@@ -23,12 +23,16 @@ public static partial class IconAppearanceTraits
 	public const int MaxAppearancesPerIcon = 8;
 
 	public static bool IsValid(IReadOnlyDictionary<string, string>? traits)
-		=> traits is { Count: >= 1 and <= MaxTraits } &&
-			traits.All(pair => TokenRegex().IsMatch(pair.Key) && TokenRegex().IsMatch(pair.Value));
+	{
+		return traits is { Count: >= 1 and <= MaxTraits }
+			&& traits.All(pair => TokenRegex().IsMatch(pair.Key) && TokenRegex().IsMatch(pair.Value));
+	}
 
 	public static string ToKey(IReadOnlyDictionary<string, string> traits)
-		=> string.Join(';',
+	{
+		return string.Join(';',
 			traits.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => $"{pair.Key}={pair.Value}"));
+	}
 
 	public static bool TryParse(string? canonicalKey, out IReadOnlyDictionary<string, string> traits)
 	{
@@ -60,8 +64,10 @@ public static partial class IconAppearanceTraits
 	public static bool TryGetVariantName(string? canonicalKey, out string name)
 	{
 		name = string.Empty;
-		if (canonicalKey is null || !canonicalKey.StartsWith(Variant + "=", StringComparison.Ordinal) ||
-			!TryParse(canonicalKey, out var traits) || traits.Count != 1)
+		if (canonicalKey is null
+			|| !canonicalKey.StartsWith(Variant + "=", StringComparison.Ordinal)
+			|| !TryParse(canonicalKey, out var traits)
+			|| traits.Count != 1)
 		{
 			return false;
 		}
@@ -73,8 +79,9 @@ public static partial class IconAppearanceTraits
 	public static string Humanize(string token)
 	{
 		var words = WordBoundaryRegex().Split(token);
-		var text = string.Join(' ', words.Select((word, index) =>
-			index > 0 && word.Length > 1 && word.All(char.IsUpper) ? word : word.ToLowerInvariant()));
+		var text = string.Join(' ',
+			words.Select((word, index) =>
+				index > 0 && word.Length > 1 && word.All(char.IsUpper) ? word : word.ToLowerInvariant()));
 		return text.Length == 0 ? text : char.ToUpperInvariant(text[0]) + text[1..];
 	}
 

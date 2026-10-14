@@ -23,5 +23,7 @@ internal static class ConformanceCategoryTokens
 	public static IReadOnlyCollection<string> Tokens => (IReadOnlyCollection<string>)_byToken.Keys;
 
 	public static bool TryParse(string token, out ConformanceCategory category)
-		=> _byToken.TryGetValue(token, out category);
+	{
+		return _byToken.TryGetValue(token, out category);
+	}
 }

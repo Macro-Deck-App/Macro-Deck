@@ -21,7 +21,8 @@ public interface IBackupOperationGate
 
 	Result<IBackupOperationLease, BackupError> TryAcquire(BackupOperationKind kind, BackupTrigger trigger);
 
-	Task<Result<IBackupOperationLease, BackupError>> Acquire(BackupOperationKind kind,
+	Task<Result<IBackupOperationLease, BackupError>> Acquire(
+		BackupOperationKind kind,
 		BackupTrigger trigger,
 		TimeSpan timeout,
 		CancellationToken cancellationToken = default);

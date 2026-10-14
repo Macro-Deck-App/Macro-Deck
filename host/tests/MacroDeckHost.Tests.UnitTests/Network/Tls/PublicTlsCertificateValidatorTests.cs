@@ -94,9 +94,9 @@ public class PublicTlsCertificateValidatorTests
 	{
 		var (certificatePem, _, _) = GenerateSelfSignedPem("CN=encrypted-key.test");
 		const string encryptedKeyPem =
-			"-----BEGIN ENCRYPTED PRIVATE KEY-----\n" +
-			"MIIFDDBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIAAAAAAAAAAACAggA\n" +
-			"-----END ENCRYPTED PRIVATE KEY-----\n";
+			"-----BEGIN ENCRYPTED PRIVATE KEY-----\n"
+			+ "MIIFDDBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIAAAAAAAAAAACAggA\n"
+			+ "-----END ENCRYPTED PRIVATE KEY-----\n";
 
 		var result = PublicTlsCertificateValidator.Validate(certificatePem,
 			encryptedKeyPem,
@@ -106,8 +106,10 @@ public class PublicTlsCertificateValidatorTests
 		{
 			Assert.That(result.Valid, Is.False);
 			Assert.That(TestLocalization.Resolve(result.Error),
-				Does.Contain("passphrase").IgnoreCase
-					.Or.Contain("encrypted").IgnoreCase);
+				Does.Contain("passphrase")
+					.IgnoreCase
+					.Or.Contain("encrypted")
+					.IgnoreCase);
 		});
 	}
 
@@ -117,9 +119,9 @@ public class PublicTlsCertificateValidatorTests
 		var (certificatePem, privateKeyPem, _) = GenerateSelfSignedPem("CN=confidentiality.test");
 		var (_, mismatchedKeyPem, _) = GenerateSelfSignedPem("CN=confidentiality-other.test");
 		const string encryptedKeyPem =
-			"-----BEGIN ENCRYPTED PRIVATE KEY-----\n" +
-			"MIIFDDBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIAAAAAAAAAAACAggA\n" +
-			"-----END ENCRYPTED PRIVATE KEY-----\n";
+			"-----BEGIN ENCRYPTED PRIVATE KEY-----\n"
+			+ "MIIFDDBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIAAAAAAAAAAACAggA\n"
+			+ "-----END ENCRYPTED PRIVATE KEY-----\n";
 
 		PublicTlsValidationResult[] results =
 		[

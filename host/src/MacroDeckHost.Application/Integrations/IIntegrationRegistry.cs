@@ -38,11 +38,20 @@ public interface IIntegrationRegistry
 
 	Task<bool> UnregisterAsync(string integrationId);
 
-	bool IsExplicitlyDisabled(string integrationId) => false;
+	bool IsExplicitlyDisabled(string integrationId)
+	{
+		return false;
+	}
 
-	long DisabledVersion(string integrationId) => 0;
+	long DisabledVersion(string integrationId)
+	{
+		return 0;
+	}
 
-	bool ClearDisabledChoice(string integrationId) => false;
+	bool ClearDisabledChoice(string integrationId)
+	{
+		return false;
+	}
 
 	void ClearEnabledChoice(string integrationId)
 	{

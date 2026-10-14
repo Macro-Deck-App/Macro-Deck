@@ -34,7 +34,10 @@ public class BackupStagingLockTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public async Task LeavesTheStagedDatabaseReadableAndRemovableAfterTheSnapshot()
@@ -47,7 +50,7 @@ public class BackupStagingLockTests
 
 		Assert.DoesNotThrow(() => File.OpenRead(copy).Dispose(),
 			"the archive writer opens the staged copy exactly this way");
-		Assert.DoesNotThrow(() => Directory.Delete(_staging, recursive: true));
+		Assert.DoesNotThrow(() => Directory.Delete(_staging, true));
 	}
 
 	[Test]

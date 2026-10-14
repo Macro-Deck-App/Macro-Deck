@@ -48,7 +48,13 @@ internal sealed class RemoteEventPublisher : IEventPublisher
 	}
 
 	public IReadOnlyList<EventBinding> GetBindings()
-		=> [.. _stateCache.GetList<EventBindingDto>(Protocol.Callbacks.HostApis.EventBindings).Select(dto => dto.ToBinding())];
+	{
+		return
+		[
+			.. _stateCache.GetList<EventBindingDto>(Protocol.Callbacks.HostApis.EventBindings)
+				.Select(dto => dto.ToBinding())
+		];
+	}
 
 	public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
 	{
@@ -80,7 +86,8 @@ internal sealed class RemoteEventPublisher : IEventPublisher
 		_ = PublishBestEffortAsync(connection, envelope, eventId);
 	}
 
-	private async Task PublishBestEffortAsync(PluginSessionConnection connection,
+	private async Task PublishBestEffortAsync(
+		PluginSessionConnection connection,
 		ProtocolEnvelope envelope,
 		string eventId)
 	{

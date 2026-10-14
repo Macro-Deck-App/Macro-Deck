@@ -123,14 +123,14 @@ public sealed record UiValidation
 			return false;
 		}
 
-		if (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
-			!string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+		if (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
+			&& !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;
 		}
 
-		return value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-			value.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+		return value.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+			|| value.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
 	}
 
 	/// <summary>Whether <paramref name="value" /> is a dotted-quad IPv4 address or a colon-bearing
@@ -171,7 +171,7 @@ public sealed record UiValidation
 			null => true,
 			string text => text.Trim().Length == 0,
 			double number => double.IsNaN(number),
-			_ => false,
+			_ => false
 		};
 	}
 
@@ -209,8 +209,8 @@ public sealed record UiValidation
 	/// hotkey means nothing, and the existing editor checks them for exactly these two.</summary>
 	private UiValidationOutcome? BoundFailure(LocalizedText caption, double number)
 	{
-		if (!string.Equals(Type, UiConfigPrimitives.Number, StringComparison.Ordinal) &&
-			!string.Equals(Type, UiConfigPrimitives.Duration, StringComparison.Ordinal))
+		if (!string.Equals(Type, UiConfigPrimitives.Number, StringComparison.Ordinal)
+			&& !string.Equals(Type, UiConfigPrimitives.Duration, StringComparison.Ordinal))
 		{
 			return null;
 		}

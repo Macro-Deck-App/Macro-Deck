@@ -22,16 +22,15 @@ public sealed record StorePlatformOptions
 	// to https or to this machine.
 	public static StorePlatformOptions Resolve(BuildChannel channel, string? overrideUrl)
 	{
-		if (channel != BuildChannel.Development ||
-			string.IsNullOrWhiteSpace(overrideUrl) ||
-			!Uri.TryCreate(overrideUrl.Trim(), UriKind.Absolute, out var uri) ||
-			uri.UserInfo.Length > 0)
+		if (channel != BuildChannel.Development
+			|| string.IsNullOrWhiteSpace(overrideUrl)
+			|| !Uri.TryCreate(overrideUrl.Trim(), UriKind.Absolute, out var uri)
+			|| uri.UserInfo.Length > 0)
 		{
 			return Default;
 		}
 
-		var allowed = uri.Scheme == Uri.UriSchemeHttps ||
-			(uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback);
+		var allowed = uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback;
 		if (!allowed)
 		{
 			return Default;

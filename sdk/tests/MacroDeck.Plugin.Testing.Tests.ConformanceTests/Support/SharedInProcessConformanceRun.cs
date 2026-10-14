@@ -43,9 +43,9 @@ internal static class SharedInProcessConformanceRun
 			// PluginIdAndVersionComeFromTheSubject and ReusabilityTests' cross-subject-kind comparison
 			// meaningful: the in-process, executable and artifact reports all describe the same plugin.
 			_subject = ConformanceSubject.InProcess(builder => WellBehavedPluginComposition.Configure(builder),
-				new PluginTestManifest(id: "app.macro-deck.well-behaved-test-plugin",
-					name: "Well-Behaved Test Plugin",
-					version: "1.0.0"));
+				new PluginTestManifest("app.macro-deck.well-behaved-test-plugin",
+					"Well-Behaved Test Plugin",
+					"1.0.0"));
 			_report = await new ConformanceRunner().RunAsync(_subject).ConfigureAwait(false);
 			return _report;
 		}

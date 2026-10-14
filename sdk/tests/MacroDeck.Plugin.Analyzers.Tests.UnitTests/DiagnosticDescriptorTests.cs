@@ -25,10 +25,12 @@ public class DiagnosticDescriptorTests
 	/// someone remembers to extend this list too.
 	/// </summary>
 	private static IEnumerable<DiagnosticDescriptor> AllDescriptors()
-		=> typeof(DiagnosticDescriptors)
+	{
+		return typeof(DiagnosticDescriptors)
 			.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
 			.Where(field => field.FieldType == typeof(DiagnosticDescriptor))
 			.Select(field => (DiagnosticDescriptor)field.GetValue(null)!);
+	}
 
 	[Test]
 	public void At_least_thirteen_descriptors_are_declared()

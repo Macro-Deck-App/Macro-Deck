@@ -27,7 +27,8 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _concurrencyByPlugin = new(StringComparer.Ordinal);
 
-	public PluginCapabilityInvoker(IPluginSessionRegistry sessionRegistry,
+	public PluginCapabilityInvoker(
+		IPluginSessionRegistry sessionRegistry,
 		TimeProvider timeProvider,
 		ILogger logger)
 	{
@@ -38,7 +39,8 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 		_sessionRegistry.SessionEnded += OnSessionEnded;
 	}
 
-	public async Task<JsonElement?> InvokeAsync(string pluginId,
+	public async Task<JsonElement?> InvokeAsync(
+		string pluginId,
 		CapabilityInvokeRequest request,
 		CancellationToken cancellationToken)
 	{
@@ -179,10 +181,12 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 	}
 
 	public bool IsLiveActionExecute(string pluginId, string correlationId)
-		=> _pending.TryGetValue(correlationId, out var pending) &&
-			string.Equals(pending.PluginId, pluginId, StringComparison.Ordinal) &&
-			string.Equals(pending.Kind, CapabilityKinds.Actions, StringComparison.Ordinal) &&
-			string.Equals(pending.Operation, CapabilityOperations.Actions.Execute, StringComparison.Ordinal);
+	{
+		return _pending.TryGetValue(correlationId, out var pending)
+			&& string.Equals(pending.PluginId, pluginId, StringComparison.Ordinal)
+			&& string.Equals(pending.Kind, CapabilityKinds.Actions, StringComparison.Ordinal)
+			&& string.Equals(pending.Operation, CapabilityOperations.Actions.Execute, StringComparison.Ordinal);
+	}
 
 	public void Dispose()
 	{
@@ -195,10 +199,13 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 	}
 
 	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e)
-		=> AbortAll(e.PluginId, SessionEndedError(e.Reason));
+	{
+		AbortAll(e.PluginId, SessionEndedError(e.Reason));
+	}
 
 	private static ProtocolError SessionEndedError(PluginSessionEndReason reason)
-		=> new()
+	{
+		return new ProtocolError
 		{
 			Code = ProtocolErrorCodes.CapabilityUnavailable,
 			Message = reason == PluginSessionEndReason.Detached
@@ -206,6 +213,7 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 				: "The plugin's session ended before it replied.",
 			Retryable = true
 		};
+	}
 
 	private async Task<JsonElement?> AwaitResultAsync(
 		string pluginId,
@@ -215,8 +223,8 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 		CancellationToken cancellationToken)
 	{
 		var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-		using var registration = cancellationToken.Register(
-			static state => ((TaskCompletionSource)state!).TrySetResult(),
+		using var registration = cancellationToken.Register(static state
+				=> ((TaskCompletionSource)state!).TrySetResult(),
 			cancelled);
 
 		var timeoutTask = Task.Delay(budget, _timeProvider, CancellationToken.None);
@@ -278,7 +286,8 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 	}
 
 	private void ObserveAbandonedSend(Task<bool> sendTask, string pluginId, string correlationId)
-		=> _ = sendTask.ContinueWith(task =>
+	{
+		_ = sendTask.ContinueWith(task =>
 			{
 				if (task.IsFaulted)
 				{
@@ -288,6 +297,7 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 			CancellationToken.None,
 			TaskContinuationOptions.ExecuteSynchronously,
 			TaskScheduler.Default);
+	}
 
 	private async Task SendCancelBestEffortAsync(string pluginId, string correlationId)
 	{
@@ -313,12 +323,14 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 	}
 
 	private static JsonElement? SerializeArguments(object? arguments)
-		=> arguments switch
+	{
+		return arguments switch
 		{
 			null => null,
 			JsonElement element => element,
 			_ => JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options)
 		};
+	}
 
 	private static JsonElement? ToResult(ProtocolEnvelope envelope)
 	{

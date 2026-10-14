@@ -7,16 +7,24 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Weather;
 internal static class WeatherDescriptorMapper
 {
 	public static WeatherStationInstanceDto ToDto(WeatherStationInstance instance)
-		=> new() { Id = instance.Id, DisplayName = instance.DisplayName };
+	{
+		return new WeatherStationInstanceDto { Id = instance.Id, DisplayName = instance.DisplayName };
+	}
 
 	public static WeatherDetailsActionDto ToDto(WeatherDetailsAction action)
-		=> new() { ActionId = action.ActionId, StationParameter = action.StationParameter };
+	{
+		return new WeatherDetailsActionDto { ActionId = action.ActionId, StationParameter = action.StationParameter };
+	}
 
 	public static WeatherForecastDayDto ToDto(WeatherForecastDay day)
-		=> new() { Date = day.Date, Condition = day.Condition.ToString(), Min = day.Min, Max = day.Max };
+	{
+		return new WeatherForecastDayDto
+			{ Date = day.Date, Condition = day.Condition.ToString(), Min = day.Min, Max = day.Max };
+	}
 
 	public static WeatherSnapshotDto ToDto(WeatherSnapshot snapshot)
-		=> new()
+	{
+		return new WeatherSnapshotDto
 		{
 			IsAvailable = snapshot.IsAvailable,
 			LocationName = snapshot.LocationName,
@@ -34,6 +42,7 @@ internal static class WeatherDescriptorMapper
 			Sunrise = snapshot.Sunrise,
 			Sunset = snapshot.Sunset
 		};
+	}
 
 	public static WeatherHourDto ToDto(WeatherHour hour)
 	{

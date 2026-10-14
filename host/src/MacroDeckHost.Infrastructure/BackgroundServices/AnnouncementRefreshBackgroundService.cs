@@ -14,7 +14,8 @@ public sealed class AnnouncementRefreshBackgroundService : HostReadyBackgroundSe
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
-	public AnnouncementRefreshBackgroundService(IHostApplicationLifetime lifetime,
+	public AnnouncementRefreshBackgroundService(
+		IHostApplicationLifetime lifetime,
 		IAnnouncementService announcements,
 		TimeProvider timeProvider,
 		ILogger logger)
@@ -53,5 +54,7 @@ public sealed class AnnouncementRefreshBackgroundService : HostReadyBackgroundSe
 	}
 
 	private static TimeSpan Jitter(TimeSpan maximum)
-		=> TimeSpan.FromMilliseconds(Random.Shared.NextInt64((long)maximum.TotalMilliseconds));
+	{
+		return TimeSpan.FromMilliseconds(Random.Shared.NextInt64((long)maximum.TotalMilliseconds));
+	}
 }

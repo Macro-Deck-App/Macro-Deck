@@ -6,15 +6,18 @@ namespace MacroDeck.Plugin.Analyzers.Tests.UnitTests;
 [TestFixture]
 public class UnsupportedManifestIconExtensionAnalyzerTests
 {
-	private static string ManifestWithIcon(string iconPath) => $$"""
-																 {
-																   "manifestVersion": 1,
-																   "id": "com.example.my-plugin",
-																   "name": "My Plugin",
-																   "version": "1.0.0",
-																   "icon": "{{iconPath}}"
-																 }
-																 """;
+	private static string ManifestWithIcon(string iconPath)
+	{
+		return $$"""
+				 {
+				   "manifestVersion": 1,
+				   "id": "com.example.my-plugin",
+				   "name": "My Plugin",
+				   "version": "1.0.0",
+				   "icon": "{{iconPath}}"
+				 }
+				 """;
+	}
 
 	[Test]
 	public async Task Fires_on_an_unsupported_extension()

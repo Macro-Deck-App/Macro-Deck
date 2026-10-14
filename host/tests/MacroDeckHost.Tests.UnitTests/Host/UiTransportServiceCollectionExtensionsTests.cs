@@ -13,11 +13,13 @@ public class UiTransportServiceCollectionExtensionsTests
 	private sealed class StubFlowExecutor : IFlowExecutor
 	{
 		public Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult(new FlowExecutionResult
+		{
+			return Task.FromResult(new FlowExecutionResult
 			{
 				ExecutionId = request.ExecutionId,
 				Status = FlowExecutionStatus.Succeeded
 			});
+		}
 	}
 
 	[Test]
@@ -28,8 +30,8 @@ public class UiTransportServiceCollectionExtensionsTests
 		services.AddUiTransport(typeof(GetVersionRequestMessageHandler).Assembly);
 
 		var handlerDescriptors = services
-			.Where(d => d.ServiceType.IsGenericType &&
-				d.ServiceType.GetGenericTypeDefinition() == typeof(IUiTransportMessageHandler<,>))
+			.Where(d => d.ServiceType.IsGenericType
+				&& d.ServiceType.GetGenericTypeDefinition() == typeof(IUiTransportMessageHandler<,>))
 			.ToList();
 
 		Assert.That(handlerDescriptors, Is.Not.Empty);
@@ -79,8 +81,8 @@ public class UiTransportServiceCollectionExtensionsTests
 		services.AddUiTransport();
 
 		var handlerDescriptors = services
-			.Where(d => d.ServiceType.IsGenericType &&
-				d.ServiceType.GetGenericTypeDefinition() == typeof(IUiTransportMessageHandler<,>))
+			.Where(d => d.ServiceType.IsGenericType
+				&& d.ServiceType.GetGenericTypeDefinition() == typeof(IUiTransportMessageHandler<,>))
 			.ToList();
 
 		Assert.That(handlerDescriptors, Is.Empty);

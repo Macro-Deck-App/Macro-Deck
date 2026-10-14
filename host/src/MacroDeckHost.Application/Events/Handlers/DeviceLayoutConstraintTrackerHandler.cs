@@ -21,17 +21,27 @@ public sealed class DeviceLayoutConstraintTrackerHandler :
 	}
 
 	public ValueTask Handle(DeviceChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_tracker.RefreshAsync(cancellationToken));
+	{
+		return new ValueTask(_tracker.RefreshAsync(cancellationToken));
+	}
 
 	public ValueTask Handle(DeviceRemovedNotification notification, CancellationToken cancellationToken)
-		=> new(_tracker.RefreshAsync(cancellationToken));
+	{
+		return new ValueTask(_tracker.RefreshAsync(cancellationToken));
+	}
 
 	public ValueTask Handle(DeviceUnregisteredNotification notification, CancellationToken cancellationToken)
-		=> new(_tracker.RefreshAsync(cancellationToken));
+	{
+		return new ValueTask(_tracker.RefreshAsync(cancellationToken));
+	}
 
 	public ValueTask Handle(DevicePresenceChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_tracker.RefreshAsync(cancellationToken));
+	{
+		return new ValueTask(_tracker.RefreshAsync(cancellationToken));
+	}
 
 	public ValueTask Handle(LayoutCatalogChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_tracker.RefreshAsync(cancellationToken));
+	{
+		return new ValueTask(_tracker.RefreshAsync(cancellationToken));
+	}
 }

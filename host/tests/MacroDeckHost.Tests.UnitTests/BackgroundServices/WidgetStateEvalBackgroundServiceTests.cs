@@ -53,7 +53,10 @@ internal sealed class WidgetStateEvalBackgroundServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _service.Dispose();
+	public void TearDown()
+	{
+		_service.Dispose();
+	}
 
 	[Test]
 	public void ButtonPolledWhileHidden_IsPolledOnTheNextTickOnceSomethingDisplaysIt()
@@ -161,19 +164,47 @@ internal sealed class WidgetStateEvalBackgroundServiceTests
 		public TimeSpan? Interval { get; set; }
 
 		public Task<WidgetStateResolution?> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-			=> Task.FromResult<WidgetStateResolution?>(null);
+		{
+			return Task.FromResult<WidgetStateResolution?>(null);
+		}
 
-		public TimeSpan? GetProviderPollInterval(Guid widgetId) => Interval;
+		public TimeSpan? GetProviderPollInterval(Guid widgetId)
+		{
+			return Interval;
+		}
 	}
 
 	private sealed class NoOpWidgetVariableIndex : IWidgetVariableIndex
 	{
-		public IReadOnlyList<Guid> FindLabelReferences(string variableName) => [];
-		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName) => [];
-		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null) => [];
-		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null) => [];
-		public bool LabelReferences(Guid widgetId, string variableName) => false;
-		public bool StateMappingReferences(Guid widgetId, string variableName) => false;
+		public IReadOnlyList<Guid> FindLabelReferences(string variableName)
+		{
+			return [];
+		}
+
+		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName)
+		{
+			return [];
+		}
+
+		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
+
+		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
+
+		public bool LabelReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
+
+		public bool StateMappingReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
 		public void Rebuild()
 		{
@@ -190,7 +221,7 @@ internal sealed class WidgetStateEvalBackgroundServiceTests
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 		public CancellationToken ApplicationStopping => CancellationToken.None;
 		public CancellationToken ApplicationStopped => CancellationToken.None;
 

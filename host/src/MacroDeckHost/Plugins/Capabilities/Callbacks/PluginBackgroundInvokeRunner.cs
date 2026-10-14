@@ -16,19 +16,25 @@ public abstract class PluginBackgroundInvokeRunner(IPluginCallbackRouter router,
 	public const int MaxInFlightPerPlugin = 4;
 
 	private readonly ConcurrentDictionary<string, int> _inFlightByPlugin = new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<(IPluginConnection Connection, string CorrelationId), CancellationTokenSource> _running
-		= new();
+
+	private readonly ConcurrentDictionary<(IPluginConnection Connection, string CorrelationId), CancellationTokenSource>
+		_running
+			= new();
+
 	private readonly ILogger _logger = logger;
 
-	protected abstract Task<HostCallbackResult?> AdmitAsync(string pluginId,
+	protected abstract Task<HostCallbackResult?> AdmitAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken);
 
-	protected abstract Task<HostCallbackResult> ExecuteAsync(string pluginId,
+	protected abstract Task<HostCallbackResult> ExecuteAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken);
 
-	public async Task StartAsync(IPluginConnection connection,
+	public async Task StartAsync(
+		IPluginConnection connection,
 		string pluginId,
 		string correlationId,
 		HostInvokePayload payload,
@@ -58,7 +64,7 @@ public abstract class PluginBackgroundInvokeRunner(IPluginCallbackRouter router,
 				correlationId,
 				HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 					$"This plugin is already running {MaxInFlightPerPlugin} {callsName} calls.",
-					retryable: true),
+					true),
 				connectionToken);
 			return;
 		}
@@ -92,7 +98,8 @@ public abstract class PluginBackgroundInvokeRunner(IPluginCallbackRouter router,
 		}
 	}
 
-	private async Task RunAsync(IPluginConnection connection,
+	private async Task RunAsync(
+		IPluginConnection connection,
 		string pluginId,
 		string correlationId,
 		HostInvokePayload payload,
@@ -153,16 +160,24 @@ public abstract class PluginBackgroundInvokeRunner(IPluginCallbackRouter router,
 		}
 	}
 
-	private void Leave(string pluginId) => _inFlightByPlugin.AddOrUpdate(pluginId, 0, (_, current) => Math.Max(0, current - 1));
+	private void Leave(string pluginId)
+	{
+		_inFlightByPlugin.AddOrUpdate(pluginId, 0, (_, current) => Math.Max(0, current - 1));
+	}
 
 	private static HostCallbackResult Cancelled()
-		=> HostCallbackResult.Fail(ProtocolErrorCodes.Cancelled, ProtocolErrorMessages.For(ProtocolErrorCodes.Cancelled));
+	{
+		return HostCallbackResult.Fail(ProtocolErrorCodes.Cancelled,
+			ProtocolErrorMessages.For(ProtocolErrorCodes.Cancelled));
+	}
 
-	private static Task SendAsync(IPluginConnection connection,
+	private static Task SendAsync(
+		IPluginConnection connection,
 		string correlationId,
 		HostCallbackResult result,
 		CancellationToken cancellationToken)
-		=> connection.Send(new ProtocolEnvelope
+	{
+		return connection.Send(new ProtocolEnvelope
 			{
 				Type = MessageTypes.HostResult,
 				Id = Guid.CreateVersion7().ToString(),
@@ -174,4 +189,5 @@ public abstract class PluginBackgroundInvokeRunner(IPluginCallbackRouter router,
 					: null
 			},
 			cancellationToken);
+	}
 }

@@ -14,7 +14,7 @@ public class WindowsApplicationLauncherTests
 	{
 		var attempts = new List<ProcessStartInfo>();
 
-		WindowsApplicationLauncher.Start(AliasPath, null, null, runAsAdmin: false, Record(attempts));
+		WindowsApplicationLauncher.Start(AliasPath, null, null, false, Record(attempts));
 
 		Assert.That(attempts, Has.Count.EqualTo(1));
 		Assert.That(attempts[0].UseShellExecute, Is.True);
@@ -26,7 +26,7 @@ public class WindowsApplicationLauncherTests
 	{
 		var attempts = new List<ProcessStartInfo>();
 
-		WindowsApplicationLauncher.Start(AliasPath, null, null, runAsAdmin: true, Record(attempts));
+		WindowsApplicationLauncher.Start(AliasPath, null, null, true, Record(attempts));
 
 		Assert.That(attempts, Has.Count.EqualTo(1));
 		Assert.That(attempts[0].Verb, Is.EqualTo("runas"));
@@ -38,7 +38,7 @@ public class WindowsApplicationLauncherTests
 		var attempts = new List<ProcessStartInfo>();
 		var start = FailFirstWith(new Win32Exception(ErrorCantAccessFile), attempts);
 
-		WindowsApplicationLauncher.Start(AliasPath, "--minimized", @"C:\work", runAsAdmin: false, start);
+		WindowsApplicationLauncher.Start(AliasPath, "--minimized", @"C:\work", false, start);
 
 		Assert.That(attempts, Has.Count.EqualTo(2));
 		Assert.That(attempts[1].UseShellExecute, Is.False);
@@ -54,7 +54,7 @@ public class WindowsApplicationLauncherTests
 		var start = FailFirstWith(new Win32Exception(5), attempts);
 
 		Assert.Throws<Win32Exception>(()
-			=> WindowsApplicationLauncher.Start(AliasPath, null, null, runAsAdmin: false, start));
+			=> WindowsApplicationLauncher.Start(AliasPath, null, null, false, start));
 		Assert.That(attempts, Has.Count.EqualTo(1));
 	}
 
@@ -65,21 +65,24 @@ public class WindowsApplicationLauncherTests
 		var start = FailFirstWith(new Win32Exception(ErrorCantAccessFile), attempts);
 
 		Assert.Throws<Win32Exception>(()
-			=> WindowsApplicationLauncher.Start(AliasPath, null, null, runAsAdmin: true, start));
+			=> WindowsApplicationLauncher.Start(AliasPath, null, null, true, start));
 		Assert.That(attempts, Has.Count.EqualTo(1));
 	}
 
 	private static Func<ProcessStartInfo, Process?> Record(List<ProcessStartInfo> attempts)
-		=> startInfo =>
+	{
+		return startInfo =>
 		{
 			attempts.Add(startInfo);
 			return null;
 		};
+	}
 
 	private static Func<ProcessStartInfo, Process?> FailFirstWith(
 		Exception exception,
 		List<ProcessStartInfo> attempts)
-		=> startInfo =>
+	{
+		return startInfo =>
 		{
 			attempts.Add(startInfo);
 			if (attempts.Count == 1)
@@ -89,4 +92,5 @@ public class WindowsApplicationLauncherTests
 
 			return null;
 		};
+	}
 }

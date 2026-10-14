@@ -22,7 +22,10 @@ internal sealed class GoogleCalendarAccountTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Each_connected_account_is_offered_under_its_entry()
@@ -38,7 +41,7 @@ internal sealed class GoogleCalendarAccountTests
 	[Test]
 	public async Task A_token_close_to_expiry_is_refreshed_before_the_read_and_kept()
 	{
-		var entry = _harness.AddAccount(Email, expiresIn: TimeSpan.FromMinutes(4));
+		var entry = _harness.AddAccount(Email, TimeSpan.FromMinutes(4));
 		_harness.Server.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.TokenPath,
 			HttpStatusCode.OK,
 			"""{"access_token":"access-1","expires_in":3600,"token_type":"Bearer"}""");
@@ -53,9 +56,11 @@ internal sealed class GoogleCalendarAccountTests
 			Assert.That(refresh["refresh_token"], Is.EqualTo("refresh-0"));
 			Assert.That(refresh["client_id"], Is.EqualTo("client-id"));
 			Assert.That(refresh["client_secret"], Is.EqualTo("client-secret"));
-			Assert.That(_harness.Server.To("/calendar/").Select(r => r.Authorization), Is.All.EqualTo("Bearer access-1"));
+			Assert.That(_harness.Server.To("/calendar/").Select(r => r.Authorization),
+				Is.All.EqualTo("Bearer access-1"));
 			Assert.That(_harness.Config.Secrets[(entry, GoogleCalendarConfigKeys.AccessToken)], Is.EqualTo("access-1"));
-			Assert.That(_harness.Config.Secrets[(entry, GoogleCalendarConfigKeys.RefreshToken)], Is.EqualTo("refresh-0"));
+			Assert.That(_harness.Config.Secrets[(entry, GoogleCalendarConfigKeys.RefreshToken)],
+				Is.EqualTo("refresh-0"));
 			Assert.That(DateTimeOffset.Parse(_harness.Config.Strings[(entry, GoogleCalendarConfigKeys.ExpiresAt)]!,
 					CultureInfo.InvariantCulture),
 				Is.EqualTo(_harness.Time.Now.AddHours(1)));
@@ -65,7 +70,7 @@ internal sealed class GoogleCalendarAccountTests
 	[Test]
 	public async Task A_token_with_time_left_is_used_as_it_is()
 	{
-		var entry = _harness.AddAccount(Email, expiresIn: TimeSpan.FromMinutes(10));
+		var entry = _harness.AddAccount(Email, TimeSpan.FromMinutes(10));
 		await _harness.StartAsync();
 
 		await ReadAsync(entry);
@@ -73,14 +78,15 @@ internal sealed class GoogleCalendarAccountTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_harness.Server.To(GoogleCalendarHarness.TokenPath), Is.Empty);
-			Assert.That(_harness.Server.To("/calendar/").Select(r => r.Authorization), Is.All.EqualTo("Bearer access-0"));
+			Assert.That(_harness.Server.To("/calendar/").Select(r => r.Authorization),
+				Is.All.EqualTo("Bearer access-0"));
 		});
 	}
 
 	[Test]
 	public async Task A_refresh_token_google_rotates_is_stored()
 	{
-		var entry = _harness.AddAccount(Email, expiresIn: TimeSpan.Zero);
+		var entry = _harness.AddAccount(Email, TimeSpan.Zero);
 		_harness.Server.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.TokenPath,
 			HttpStatusCode.OK,
 			"""{"access_token":"access-1","refresh_token":"refresh-1","expires_in":3600}""");
@@ -96,7 +102,8 @@ internal sealed class GoogleCalendarAccountTests
 	{
 		var entry = _harness.AddAccount(Email);
 		_harness.Server
-			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.EventsPath(Email) && r.Authorization == "Bearer access-0",
+			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.EventsPath(Email)
+					&& r.Authorization == "Bearer access-0",
 				HttpStatusCode.Unauthorized,
 				"{}")
 			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.TokenPath,
@@ -111,7 +118,7 @@ internal sealed class GoogleCalendarAccountTests
 	[Test]
 	public async Task A_revoked_sign_in_fails_reads_and_raises_an_issue_that_reconnects_the_account()
 	{
-		var entry = _harness.AddAccount(Email, expiresIn: TimeSpan.FromMinutes(1));
+		var entry = _harness.AddAccount(Email, TimeSpan.FromMinutes(1));
 		_harness.Server.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.TokenPath,
 			HttpStatusCode.BadRequest,
 			"""{"error":"invalid_grant","error_description":"Token has been expired or revoked."}""");
@@ -129,7 +136,8 @@ internal sealed class GoogleCalendarAccountTests
 			Assert.That(resolution.Success, Is.True);
 			Assert.That(resolution.FollowUp, Is.EqualTo(IssueResolutionFollowUp.StartConfigFlow));
 			Assert.That(async () => await ReadAsync(entry), Throws.Exception, "it stays unusable until reconnected");
-			Assert.That(_harness.Server.To(GoogleCalendarHarness.TokenPath), Has.Count.EqualTo(1),
+			Assert.That(_harness.Server.To(GoogleCalendarHarness.TokenPath),
+				Has.Count.EqualTo(1),
 				"a revoked refresh token is not tried again");
 		});
 	}
@@ -137,7 +145,7 @@ internal sealed class GoogleCalendarAccountTests
 	[Test]
 	public async Task A_google_outage_while_refreshing_is_no_reason_to_reconnect()
 	{
-		var entry = _harness.AddAccount(Email, expiresIn: TimeSpan.Zero);
+		var entry = _harness.AddAccount(Email, TimeSpan.Zero);
 		_harness.Server.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.TokenPath,
 			HttpStatusCode.ServiceUnavailable,
 			"{}");
@@ -160,7 +168,8 @@ internal sealed class GoogleCalendarAccountTests
 		var issue = (await _harness.Integration.GetIssuesAsync()).Single();
 		Assert.Multiple(() =>
 		{
-			Assert.That(_harness.Integration.GetAccounts().Select(a => a.Id), Is.EqualTo(new[] { newer.ToString("D") }));
+			Assert.That(_harness.Integration.GetAccounts().Select(a => a.Id),
+				Is.EqualTo(new[] { newer.ToString("D") }));
 			Assert.That(issue.Severity, Is.EqualTo(IntegrationIssueSeverity.Warning));
 			Assert.That(TestLocalization.Resolve(issue.Title), Does.Contain("twice"));
 			Assert.That(TestLocalization.Resolve(issue.Description), Does.Contain("Old connection"));
@@ -170,7 +179,8 @@ internal sealed class GoogleCalendarAccountTests
 	}
 
 	private Task<IReadOnlyList<CalendarEvent>> ReadAsync(Guid entry)
-		=> _harness.Integration.GetEventsAsync(entry.ToString("D"),
+	{
+		return _harness.Integration.GetEventsAsync(entry.ToString("D"),
 			new CalendarEventQuery
 			{
 				From = _harness.Time.Now,
@@ -178,4 +188,5 @@ internal sealed class GoogleCalendarAccountTests
 				CalendarIds = [Email]
 			},
 			CancellationToken.None);
+	}
 }

@@ -13,16 +13,20 @@ internal static class SpotifyLibraryActions
 	public static IReadOnlyList<IActionDefinition> All(
 		MusicPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=>
+	{
+		return
 		[
 			ToggleLiked(resolver, getInstances),
 			new SpotifyPlaylistMembershipActionDefinition(resolver, getInstances)
 		];
+	}
 
 	private static SpotifyLikedActionDefinition ToggleLiked(
 		MusicPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=> new(resolver, getInstances);
+	{
+		return new SpotifyLikedActionDefinition(resolver, getInstances);
+	}
 
 	// The SDK hands every music-player command an IMusicPlayer, not a SpotifyMusicPlayer, so the
 	// SinusBot no-op here is deliberate rather than accidental.
@@ -31,26 +35,35 @@ internal static class SpotifyLibraryActions
 		IReadOnlyDictionary<string, object> values,
 		IActionInteractions? _,
 		CancellationToken cancellationToken)
-		=> player is SpotifyMusicPlayer spotify
+	{
+		return player is SpotifyMusicPlayer spotify
 			? spotify.ToggleLikedAsync(GetString(values, "mode") ?? "toggle", cancellationToken)
 			: Task.CompletedTask;
+	}
 
 	private static ActionParameter ModeChoice(params string[] values)
-		=> ActionParameter.Choice("mode",
-			options: values.Select(v => new ActionParameterOption { Value = v, Label = ModeLabel(v) }).ToList(),
-			label: AppStrings.Integrations.Spotify.Actions.ModeLabel(),
-			defaultValue: values[0]);
-
-	private static LocalizedText ModeLabel(string value) => value switch
 	{
-		"toggle" => AppStrings.Integrations.Spotify.Actions.ModeToggle(),
-		"add" => AppStrings.Integrations.Spotify.Actions.ModeAdd(),
-		"remove" => AppStrings.Integrations.Spotify.Actions.ModeRemove(),
-		_ => value
-	};
+		return ActionParameter.Choice("mode",
+			values.Select(v => new ActionParameterOption { Value = v, Label = ModeLabel(v) }).ToList(),
+			AppStrings.Integrations.Spotify.Actions.ModeLabel(),
+			defaultValue: values[0]);
+	}
+
+	private static LocalizedText ModeLabel(string value)
+	{
+		return value switch
+		{
+			"toggle" => AppStrings.Integrations.Spotify.Actions.ModeToggle(),
+			"add" => AppStrings.Integrations.Spotify.Actions.ModeAdd(),
+			"remove" => AppStrings.Integrations.Spotify.Actions.ModeRemove(),
+			_ => value
+		};
+	}
 
 	private static string? GetString(IReadOnlyDictionary<string, object> values, string name)
-		=> values.TryGetValue(name, out var value) ? value.ToString() : null;
+	{
+		return values.TryGetValue(name, out var value) ? value.ToString() : null;
+	}
 
 	private static readonly ActionStateDefinition _unavailableState =
 		new("unavailable", MacroDeckStrings.States.Unavailable())
@@ -144,8 +157,8 @@ internal static class SpotifyLibraryActions
 				AppStrings.Integrations.Spotify.Actions.PlaylistMembershipDescription(),
 				[
 					ActionParameter.Autocomplete(PlaylistParameterName,
-						label: AppStrings.Integrations.Spotify.Actions.PlaylistLabel(),
-						description: AppStrings.Integrations.Spotify.Actions.PlaylistDescription(),
+						AppStrings.Integrations.Spotify.Actions.PlaylistLabel(),
+						AppStrings.Integrations.Spotify.Actions.PlaylistDescription(),
 						placeholder: AppStrings.Integrations.Spotify.Actions.PlaylistPlaceholder(),
 						required: true),
 					ModeChoice("add", "remove")
@@ -191,8 +204,8 @@ internal static class SpotifyLibraryActions
 				return null;
 			}
 
-			if (parameters.GetValueOrDefault(PlaylistParameterName)?.ToString() is not { } playlist ||
-				string.IsNullOrWhiteSpace(playlist))
+			if (parameters.GetValueOrDefault(PlaylistParameterName)?.ToString() is not { } playlist
+				|| string.IsNullOrWhiteSpace(playlist))
 			{
 				return null;
 			}

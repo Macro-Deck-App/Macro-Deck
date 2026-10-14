@@ -10,33 +10,45 @@ namespace MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 public static class EmailInboxMapper
 {
 	public static EmailInbox ToDomain(EmailInboxDto dto)
-		=> new()
+	{
+		return new EmailInbox
 		{
 			Id = dto.Id,
 			DisplayName = EmailText.Clip(dto.DisplayName, ProtocolLimits.MaxEmailSenderLength),
 			Address = EmailText.ClipOptional(dto.Address, ProtocolLimits.MaxEmailSenderLength)
 		};
+	}
 
 	public static EmailInboxDto ToDto(EmailInbox inbox)
-		=> new() { Id = inbox.Id, DisplayName = inbox.DisplayName, Address = inbox.Address };
+	{
+		return new EmailInboxDto { Id = inbox.Id, DisplayName = inbox.DisplayName, Address = inbox.Address };
+	}
 
 	public static IReadOnlyList<EmailInbox> ToDomain(IEnumerable<EmailInboxDto> inboxes)
-		=> [.. inboxes.Take(ProtocolLimits.MaxEmailInboxes).Select(ToDomain)];
+	{
+		return [.. inboxes.Take(ProtocolLimits.MaxEmailInboxes).Select(ToDomain)];
+	}
 
 	public static EmailInboxSnapshot ToDomain(EmailInboxSnapshotResult result, int maxMessages)
-		=> new()
+	{
+		return new EmailInboxSnapshot
 		{
 			Status = ToStatus(result.Status),
 			StatusMessage = EmailText.ClipOptional(result.StatusMessage, ProtocolLimits.MaxEmailSubjectLength),
 			UnreadCount = Math.Max(0, result.UnreadCount),
 			TotalCount = Math.Max(0, result.TotalCount),
-			Messages = [.. result.Messages.Take(Math.Clamp(maxMessages, 1, ProtocolLimits.MaxEmailMessages))
-				.Select(ToDomain)],
+			Messages =
+			[
+				.. result.Messages.Take(Math.Clamp(maxMessages, 1, ProtocolLimits.MaxEmailMessages))
+					.Select(ToDomain)
+			],
 			SyncedAt = result.SyncedAt
 		};
+	}
 
 	private static EmailMessage ToDomain(EmailMessageDto dto)
-		=> new()
+	{
+		return new EmailMessage
 		{
 			Id = dto.Id,
 			SenderName = EmailText.ClipOptional(dto.SenderName, ProtocolLimits.MaxEmailSenderLength),
@@ -46,14 +58,18 @@ public static class EmailInboxMapper
 			ReceivedAt = dto.ReceivedAt,
 			IsRead = dto.IsRead
 		};
+	}
 
 	// Matched by name rather than through Enum.TryParse, which also accepts "3" and a comma list. A status
 	// this build has no name for reads as Disconnected, as the protocol documents.
-	private static EmailInboxStatus ToStatus(string? status) => status switch
+	private static EmailInboxStatus ToStatus(string? status)
 	{
-		nameof(EmailInboxStatus.Connecting) => EmailInboxStatus.Connecting,
-		nameof(EmailInboxStatus.Connected) => EmailInboxStatus.Connected,
-		nameof(EmailInboxStatus.Error) => EmailInboxStatus.Error,
-		_ => EmailInboxStatus.Disconnected
-	};
+		return status switch
+		{
+			nameof(EmailInboxStatus.Connecting) => EmailInboxStatus.Connecting,
+			nameof(EmailInboxStatus.Connected) => EmailInboxStatus.Connected,
+			nameof(EmailInboxStatus.Error) => EmailInboxStatus.Error,
+			_ => EmailInboxStatus.Disconnected
+		};
+	}
 }

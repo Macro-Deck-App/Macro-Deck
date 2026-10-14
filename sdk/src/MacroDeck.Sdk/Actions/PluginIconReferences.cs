@@ -24,8 +24,10 @@ internal static class PluginIconReferences
 	}
 
 	private static bool IsValidKey(string? key)
-		=> key is { Length: > 0 and <= MaxKeyLength } &&
-			key.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-') &&
-			key[0] != '-' &&
-			key[^1] != '-';
+	{
+		return key is { Length: > 0 and <= MaxKeyLength }
+			&& key.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-')
+			&& key[0] != '-'
+			&& key[^1] != '-';
+	}
 }

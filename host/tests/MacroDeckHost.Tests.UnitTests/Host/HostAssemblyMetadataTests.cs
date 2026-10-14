@@ -7,26 +7,26 @@ namespace MacroDeckHost.Tests.UnitTests.Host;
 // reads as "Macro Deck Host" instead of the raw "MacroDeckHost" assembly name.
 public class HostAssemblyMetadataTests
 {
-	private static readonly Assembly HostAssembly = typeof(Startup).Assembly;
+	private static readonly Assembly _hostAssembly = typeof(Startup).Assembly;
 
 	[Test]
 	public void Assembly_title_is_the_friendly_host_name()
 	{
-		var title = HostAssembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title;
+		var title = _hostAssembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title;
 		Assert.That(title, Is.EqualTo("Macro Deck Host"));
 	}
 
 	[Test]
 	public void Assembly_product_is_the_friendly_host_name()
 	{
-		var product = HostAssembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product;
+		var product = _hostAssembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product;
 		Assert.That(product, Is.EqualTo("Macro Deck Host"));
 	}
 
 	[Test]
 	public void Assembly_company_matches_the_bootstrapper_publisher()
 	{
-		var company = HostAssembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
+		var company = _hostAssembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
 		Assert.That(company, Is.EqualTo("Manuel Mayer"));
 	}
 }

@@ -46,14 +46,18 @@ internal sealed class RemoteDeviceProviderContext(IHostInvoker invoker) : IDevic
 		string deviceId,
 		DevicePresence presence,
 		CancellationToken cancellationToken = default)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.Devices,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.Devices,
 			HostOperations.Devices.Presence,
 			new DevicesPresenceArguments { DeviceId = deviceId, Presence = presence.ToString() },
 			cancellationToken);
+	}
 
 	public Task UnregisterDeviceAsync(string deviceId, CancellationToken cancellationToken = default)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.Devices,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.Devices,
 			HostOperations.Devices.Unregister,
 			new DevicesUnregisterArguments { DeviceId = deviceId },
 			cancellationToken);
+	}
 }

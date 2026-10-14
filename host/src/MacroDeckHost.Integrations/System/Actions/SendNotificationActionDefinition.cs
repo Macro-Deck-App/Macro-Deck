@@ -20,14 +20,17 @@ internal sealed class SendNotificationActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Text("title",
-			label: AppStrings.Integrations.System.Actions.SendNotification.TitleLabel(),
+			AppStrings.Integrations.System.Actions.SendNotification.TitleLabel(),
 			required: true),
 		ActionParameter.Text("message",
-			label: AppStrings.Integrations.System.Actions.SendNotification.MessageLabel(),
+			AppStrings.Integrations.System.Actions.SendNotification.MessageLabel(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_notifications);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_notifications);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

@@ -1,7 +1,6 @@
 using System.Net;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.YouTube;
-using MacroDeckHost.Integrations.YouTube.Protocol;
 using MacroDeckHost.Tests.UnitTests.Twitch;
 
 namespace MacroDeckHost.Tests.UnitTests.YouTube;
@@ -30,12 +29,17 @@ internal sealed class YouTubeChatModeratorTests
 	}
 
 	[TearDown]
-	public void TearDown() => _accounts.Dispose();
+	public void TearDown()
+	{
+		_accounts.Dispose();
+	}
 
 	[Test]
 	public async Task Nothing_is_moderated_while_the_channel_has_no_live_chat()
 	{
-		var result = await _moderator.ModerateAsync(ChannelId, ChatModerationRequest.Delete("m1"), CancellationToken.None);
+		var result = await _moderator.ModerateAsync(ChannelId,
+			ChatModerationRequest.Delete("m1"),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -49,7 +53,8 @@ internal sealed class YouTubeChatModeratorTests
 	{
 		GoLive();
 
-		var result = await _moderator.ModerateAsync(string.Empty, ChatModerationRequest.Delete("m1"),
+		var result = await _moderator.ModerateAsync(string.Empty,
+			ChatModerationRequest.Delete("m1"),
 			CancellationToken.None);
 
 		Assert.That(result, Is.EqualTo(ChatModerationResult.AccountUnavailable));
@@ -60,7 +65,9 @@ internal sealed class YouTubeChatModeratorTests
 	{
 		GoLive();
 
-		var result = await _moderator.ModerateAsync(ChannelId, ChatModerationRequest.Delete("m1"), CancellationToken.None);
+		var result = await _moderator.ModerateAsync(ChannelId,
+			ChatModerationRequest.Delete("m1"),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -75,7 +82,8 @@ internal sealed class YouTubeChatModeratorTests
 	{
 		GoLive();
 
-		var result = await _moderator.ModerateAsync(ChannelId, ChatModerationRequest.Timeout("UCtroll", 600),
+		var result = await _moderator.ModerateAsync(ChannelId,
+			ChatModerationRequest.Timeout("UCtroll", 600),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -91,9 +99,11 @@ internal sealed class YouTubeChatModeratorTests
 		GoLive();
 		_api.NextBanId = "ban-42";
 
-		var banned = await _moderator.ModerateAsync(ChannelId, ChatModerationRequest.Ban("UCtroll"),
+		var banned = await _moderator.ModerateAsync(ChannelId,
+			ChatModerationRequest.Ban("UCtroll"),
 			CancellationToken.None);
-		var unbanned = await _moderator.ModerateAsync(ChannelId, ChatModerationRequest.Unban("UCtroll"),
+		var unbanned = await _moderator.ModerateAsync(ChannelId,
+			ChatModerationRequest.Unban("UCtroll"),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -110,7 +120,8 @@ internal sealed class YouTubeChatModeratorTests
 	{
 		GoLive();
 
-		var result = await _moderator.ModerateAsync(ChannelId, ChatModerationRequest.Unban("UCstranger"),
+		var result = await _moderator.ModerateAsync(ChannelId,
+			ChatModerationRequest.Unban("UCstranger"),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -131,7 +142,8 @@ internal sealed class YouTubeChatModeratorTests
 		GoLive();
 		_api.Failures["ban"] = YouTubeTestSupport.ApiError(reason);
 
-		var result = await _moderator.ModerateAsync(ChannelId, ChatModerationRequest.Ban("UCowner"),
+		var result = await _moderator.ModerateAsync(ChannelId,
+			ChatModerationRequest.Ban("UCowner"),
 			CancellationToken.None);
 
 		Assert.That(result, Is.EqualTo(expected));
@@ -143,15 +155,19 @@ internal sealed class YouTubeChatModeratorTests
 		GoLive();
 		_api.Failures["delete"] = YouTubeTestSupport.ApiError("authError", HttpStatusCode.Unauthorized);
 
-		var result = await _moderator.ModerateAsync(ChannelId, ChatModerationRequest.Delete("m1"), CancellationToken.None);
+		var result = await _moderator.ModerateAsync(ChannelId,
+			ChatModerationRequest.Delete("m1"),
+			CancellationToken.None);
 
 		Assert.That(result, Is.EqualTo(ChatModerationResult.MissingScope));
 	}
 
 	private void GoLive()
-		=> _accounts.Resolve(ChannelId)!.OnPolled(YouTubeAccountState.Unknown with
+	{
+		_accounts.Resolve(ChannelId)!.OnPolled(YouTubeAccountState.Unknown with
 		{
 			IsLive = true,
 			LiveChatId = "chat-1"
 		});
+	}
 }

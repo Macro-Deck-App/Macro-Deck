@@ -74,7 +74,7 @@ public class PluginDeveloperModeGateTests
 					services.RemoveAllKeyed<Application.Auth.LoginThrottle>("plugin");
 					services.AddKeyedSingleton<Application.Auth.LoginThrottle>("plugin",
 						(sp, _) => new Application.Auth.LoginThrottle(sp.GetRequiredService<TimeProvider>(),
-							freeAttempts: ThrottleFreeAttempts));
+							ThrottleFreeAttempts));
 				});
 			})
 			.StartAsync();
@@ -83,13 +83,13 @@ public class PluginDeveloperModeGateTests
 
 		var setup = await Send(HttpMethod.Post,
 			"/api/auth/setup",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { username = "admin", password = "password123" });
 		Assert.That(setup.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
 
 		var login = await Send(HttpMethod.Post,
 			"/api/auth/login",
-			shape: FakeConnectionShape.PublicLan,
+			FakeConnectionShape.PublicLan,
 			body: new { username = "admin", password = "password123", scope = "admin" });
 		Assert.That(login.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		_adminToken = (await ReadJson(login)).GetProperty("accessToken").GetString()!;
@@ -118,7 +118,7 @@ public class PluginDeveloperModeGateTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -174,12 +174,12 @@ public class PluginDeveloperModeGateTests
 		{
 			Assert.That(accepted.StatusCode,
 				Is.EqualTo(HttpStatusCode.Created),
-				"the enrolment bucket is shared by every plugin, so a plugin retrying against a " +
-				"switched-off host must not be able to lock the others out");
+				"the enrolment bucket is shared by every plugin, so a plugin retrying against a "
+				+ "switched-off host must not be able to lock the others out");
 			Assert.That(guessed,
 				Is.EqualTo(HttpStatusCode.TooManyRequests),
-				"the same number of wrong-credential attempts does lock the bucket - without this the " +
-				"assertion above would pass even if the loop never reached the limit");
+				"the same number of wrong-credential attempts does lock the bucket - without this the "
+				+ "assertion above would pass even if the loop never reached the limit");
 		});
 	}
 
@@ -211,12 +211,12 @@ public class PluginDeveloperModeGateTests
 		{
 			Assert.That(accepted.StatusCode,
 				Is.EqualTo(HttpStatusCode.Created),
-				"a reconnect loop that ran while the switch was off must not have locked the plugin out " +
-				"of the session it is entitled to once the switch is back on");
+				"a reconnect loop that ran while the switch was off must not have locked the plugin out "
+				+ "of the session it is entitled to once the switch is back on");
 			Assert.That(guessed,
 				Is.EqualTo(HttpStatusCode.TooManyRequests),
-				"the same number of wrong-secret attempts does lock the bucket - without this the " +
-				"assertion above would pass even if the loop never reached the limit");
+				"the same number of wrong-secret attempts does lock the bucket - without this the "
+				+ "assertion above would pass even if the loop never reached the limit");
 		});
 	}
 
@@ -286,8 +286,8 @@ public class PluginDeveloperModeGateTests
 
 		var sessions = await ListSessionsAsync();
 		var liveDeveloperSessions = sessions
-			.Where(session => PluginIdOf(session) == developerPluginId &&
-				session.GetProperty("state").GetString() != "dropped")
+			.Where(session => PluginIdOf(session) == developerPluginId
+				&& session.GetProperty("state").GetString() != "dropped")
 			.ToList();
 		var managedSession = sessions.Single(session => PluginIdOf(session) == managedPluginId);
 		var developerRegistrations = await RegistrationsOfAsync(token.Id);
@@ -342,8 +342,8 @@ public class PluginDeveloperModeGateTests
 
 		var closed = await Send(HttpMethod.Delete,
 			$"/api/plugins/sessions/{sessionId}",
-			shape: FakeConnectionShape.Loopback,
-			bearerToken: sessionToken);
+			FakeConnectionShape.Loopback,
+			sessionToken);
 
 		Assert.That(closed.StatusCode,
 			Is.EqualTo(HttpStatusCode.NoContent),
@@ -430,19 +430,27 @@ public class PluginDeveloperModeGateTests
 	}
 
 	private List<DeveloperSettingsChangedEvent> DeveloperSettingsEvents()
-		=> _uiTransport.Broadcasts.OfType<DeveloperSettingsChangedEvent>().ToList();
+	{
+		return _uiTransport.Broadcasts.OfType<DeveloperSettingsChangedEvent>().ToList();
+	}
 
-	private static string PluginIdOf(JsonElement session) => session.GetProperty("pluginId").GetString()!;
+	private static string PluginIdOf(JsonElement session)
+	{
+		return session.GetProperty("pluginId").GetString()!;
+	}
 
-	private static string NewPluginId() => $"com.example.d{Guid.NewGuid():N}";
+	private static string NewPluginId()
+	{
+		return $"com.example.d{Guid.NewGuid():N}";
+	}
 
 	private async Task SetDeveloperMode(bool enabled)
 	{
 		var response = await Send(HttpMethod.Put,
 			"/api/settings/developer",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken,
-			body: new { enabled });
+			FakeConnectionShape.PublicLan,
+			_adminToken,
+			new { enabled });
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 	}
 
@@ -450,9 +458,9 @@ public class PluginDeveloperModeGateTests
 	{
 		var response = await Send(HttpMethod.Post,
 			"/api/plugin-tokens",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken,
-			body: new { name = $"token-{Guid.NewGuid():N}", expiresInDays = (int?)null });
+			FakeConnectionShape.PublicLan,
+			_adminToken,
+			new { name = $"token-{Guid.NewGuid():N}", expiresInDays = (int?)null });
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
 		var json = await ReadJson(response);
 
@@ -463,31 +471,39 @@ public class PluginDeveloperModeGateTests
 	{
 		var response = await Send(HttpMethod.Get,
 			"/api/plugin-tokens",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken);
+			FakeConnectionShape.PublicLan,
+			_adminToken);
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-		return (await ReadJson(response)).GetProperty("tokens").EnumerateArray()
+		return (await ReadJson(response)).GetProperty("tokens")
+			.EnumerateArray()
 			.Single(token => token.GetProperty("id").GetGuid() == id);
 	}
 
 	private async Task<IReadOnlyList<string>> RegistrationsOfAsync(Guid tokenId)
-		=> (await ReadTokenAsync(tokenId)).GetProperty("registrations").EnumerateArray()
+	{
+		return (await ReadTokenAsync(tokenId)).GetProperty("registrations")
+			.EnumerateArray()
 			.Select(registration => registration.GetProperty("pluginId").GetString()!)
 			.ToList();
+	}
 
 	private async Task<DateTime> RegistrationCreatedAtAsync(Guid tokenId, string pluginId)
-		=> (await ReadTokenAsync(tokenId)).GetProperty("registrations").EnumerateArray()
+	{
+		return (await ReadTokenAsync(tokenId)).GetProperty("registrations")
+			.EnumerateArray()
 			.Single(registration => registration.GetProperty("pluginId").GetString() == pluginId)
 			.GetProperty("createdAt")
 			.GetDateTime();
+	}
 
 	private async Task<IReadOnlyList<string>> ListPairedRegistrationsAsync()
 	{
 		var response = await Send(HttpMethod.Get, "/api/plugin-pairing/registrations", FakeConnectionShape.Loopback);
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-		return (await ReadJson(response)).GetProperty("registrations").EnumerateArray()
+		return (await ReadJson(response)).GetProperty("registrations")
+			.EnumerateArray()
 			.Select(registration => registration.GetProperty("pluginId").GetString()!)
 			.ToList();
 	}
@@ -496,20 +512,22 @@ public class PluginDeveloperModeGateTests
 	{
 		var response = await Send(HttpMethod.Get,
 			"/api/plugin-sessions",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken);
+			FakeConnectionShape.PublicLan,
+			_adminToken);
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 		return (await ReadJson(response)).GetProperty("sessions").EnumerateArray().ToList();
 	}
 
 	private Task<HttpResponseMessage> EnrollAsync(string pluginId, string enrollmentToken)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			"/api/plugins/registration",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { pluginId, displayName = "Example Plugin" },
 			extraHeaders: new Dictionary<string, string>
 				{ [PluginAuthDefaults.EnrollmentTokenHeaderName] = enrollmentToken });
+	}
 
 	private async Task<string> EnrollAndReadSecretAsync(string pluginId, string enrollmentToken)
 	{
@@ -528,7 +546,7 @@ public class PluginDeveloperModeGateTests
 
 		var created = await Send(HttpMethod.Post,
 			"/api/plugins/pairing",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new
 			{
 				pluginId, displayName = "Paired Plugin", codeChallenge = challenge, codeChallengeMethod = "S256"
@@ -538,13 +556,13 @@ public class PluginDeveloperModeGateTests
 
 		var approve = await Send(HttpMethod.Post,
 			$"/api/plugin-pairing/requests/{requestId}/approve",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { replaceExistingRegistration = false });
 		Assert.That(approve.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 		var redemption = await Send(HttpMethod.Post,
 			$"/api/plugins/pairing/{requestId}/redemption",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { codeVerifier = verifier });
 		Assert.That(redemption.StatusCode, Is.EqualTo(HttpStatusCode.Created));
 
@@ -552,9 +570,10 @@ public class PluginDeveloperModeGateTests
 	}
 
 	private Task<HttpResponseMessage> CreateSessionAsync(string pluginId, string secret)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			"/api/plugins/sessions",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new
 			{
 				requestedVersion = new { minimum = 1, maximum = 1 }, capabilities = Array.Empty<object>()
@@ -563,9 +582,12 @@ public class PluginDeveloperModeGateTests
 			{
 				[PluginAuthDefaults.PluginIdHeaderName] = pluginId, [PluginAuthDefaults.PluginSecretHeaderName] = secret
 			});
+	}
 
 	private async Task<WebSocket> ConnectAsync(string pluginId, string secret)
-		=> (await ConnectWithSessionAsync(pluginId, secret)).Socket;
+	{
+		return (await ConnectWithSessionAsync(pluginId, secret)).Socket;
+	}
 
 	private async Task<(WebSocket Socket, string SessionId, string SessionToken)> ConnectWithSessionAsync(
 		string pluginId,
@@ -708,5 +730,7 @@ public class PluginDeveloperModeGateTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 }

@@ -37,7 +37,7 @@ public static class VideoStreamLimits
 
 		foreach (var c in transport)
 		{
-			if (c is not ((>= 'a' and <= 'z') or (>= '0' and <= '9') or '.' or '+' or '-'))
+			if (c is not (>= 'a' and <= 'z' or >= '0' and <= '9' or '.' or '+' or '-'))
 			{
 				return false;
 			}
@@ -49,7 +49,7 @@ public static class VideoStreamLimits
 	/// <summary>A stream id: 1 to <see cref="MaxStreamIdLength" /> characters, none of them a control
 	/// character. Spaces are allowed, since stream ids are often names from the source.</summary>
 	public static bool IsValidStreamId(string? streamId)
-		=> !string.IsNullOrEmpty(streamId) &&
-			streamId.Length <= MaxStreamIdLength &&
-			!streamId.Any(char.IsControl);
+	{
+		return !string.IsNullOrEmpty(streamId) && streamId.Length <= MaxStreamIdLength && !streamId.Any(char.IsControl);
+	}
 }

@@ -62,60 +62,79 @@ public class DevicesController : ControllerBase
 
 	[HttpGet]
 	public Task<GetDevicesResponse> GetAll(CancellationToken ct)
-		=> _getDevices.Handle(new GetDevicesRequest(), ct).AsTask();
+	{
+		return _getDevices.Handle(new GetDevicesRequest(), ct).AsTask();
+	}
 
 	[HttpPatch("{id:guid}/name")]
 	public Task<RenameDeviceResponse> Rename(Guid id, RenameDeviceBody body, CancellationToken ct)
-		=> _renameDevice.Handle(new RenameDeviceRequest { Id = id, Name = body.Name }, ct).AsTask();
+	{
+		return _renameDevice.Handle(new RenameDeviceRequest { Id = id, Name = body.Name }, ct).AsTask();
+	}
 
 	[HttpPatch("{id:guid}/startup-profile")]
 	public Task<SetDeviceStartupProfileResponse> SetStartupProfile(
 		Guid id,
 		SetDeviceStartupProfileBody body,
 		CancellationToken ct)
-		=> _setStartupProfile.Handle(new SetDeviceStartupProfileRequest { Id = id, ProfileId = body.ProfileId }, ct)
+	{
+		return _setStartupProfile.Handle(new SetDeviceStartupProfileRequest { Id = id, ProfileId = body.ProfileId }, ct)
 			.AsTask();
+	}
 
 	[HttpPatch("{id:guid}/screensaver")]
 	public Task<SetDeviceScreenSaverResponse> SetScreenSaver(
 		Guid id,
 		SetDeviceScreenSaverBody body,
 		CancellationToken ct)
-		=> _setScreenSaver.Handle(new SetDeviceScreenSaverRequest
-			{
-				Id = id,
-				Enabled = body.Enabled,
-				IdleSeconds = body.IdleSeconds,
-				ScreenSaverId = body.ScreenSaverId,
-				Configuration = body.Configuration
-			},
-			ct).AsTask();
+	{
+		return _setScreenSaver.Handle(new SetDeviceScreenSaverRequest
+				{
+					Id = id,
+					Enabled = body.Enabled,
+					IdleSeconds = body.IdleSeconds,
+					ScreenSaverId = body.ScreenSaverId,
+					Configuration = body.Configuration
+				},
+				ct)
+			.AsTask();
+	}
 
 	[HttpPost("{id:guid}/screensaver/show")]
 	public Task<ShowDeviceScreenSaverResponse> ShowScreenSaver(Guid id, CancellationToken ct)
-		=> _showScreenSaver.Handle(new ShowDeviceScreenSaverRequest { Id = id }, ct).AsTask();
+	{
+		return _showScreenSaver.Handle(new ShowDeviceScreenSaverRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPatch("{id:guid}/settings-button")]
 	public Task<SetDeviceSettingsButtonResponse> SetSettingsButton(
 		Guid id,
 		SetDeviceSettingsButtonBody body,
 		CancellationToken ct)
-		=> _setSettingsButton.Handle(new SetDeviceSettingsButtonRequest { Id = id, Hidden = body.Hidden }, ct)
+	{
+		return _setSettingsButton.Handle(new SetDeviceSettingsButtonRequest { Id = id, Hidden = body.Hidden }, ct)
 			.AsTask();
+	}
 
 	[HttpPost("{id:guid}/open-profile")]
 	public Task<OpenProfileOnDeviceResponse> OpenProfileOnDevice(
 		Guid id,
 		OpenProfileOnDeviceBody body,
 		CancellationToken ct)
-		=> _openProfileOnDevice.Handle(new OpenProfileOnDeviceRequest { Id = id, ProfileId = body.ProfileId }, ct)
+	{
+		return _openProfileOnDevice.Handle(new OpenProfileOnDeviceRequest { Id = id, ProfileId = body.ProfileId }, ct)
 			.AsTask();
+	}
 
 	[HttpPost("{id:guid}/logout")]
 	public Task<LogoutDeviceResponse> Logout(Guid id, CancellationToken ct)
-		=> _logoutDevice.Handle(new LogoutDeviceRequest { Id = id }, ct).AsTask();
+	{
+		return _logoutDevice.Handle(new LogoutDeviceRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpDelete("{id:guid}")]
 	public Task<RemoveDeviceResponse> Remove(Guid id, CancellationToken ct)
-		=> _removeDevice.Handle(new RemoveDeviceRequest { Id = id }, ct).AsTask();
+	{
+		return _removeDevice.Handle(new RemoveDeviceRequest { Id = id }, ct).AsTask();
+	}
 }

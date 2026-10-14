@@ -98,7 +98,7 @@ public class ConnectApiPolicyTests
 
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -111,7 +111,7 @@ public class ConnectApiPolicyTests
 
 		foreach (var route in _mutations)
 		{
-			mutations.Add(await Send(HttpMethod.Post, $"/api/connect/{route}", body: new { }));
+			mutations.Add(await Send(HttpMethod.Post, $"/api/connect/{route}", new { }));
 		}
 
 		Assert.Multiple(() =>
@@ -161,7 +161,7 @@ public class ConnectApiPolicyTests
 
 		foreach (var route in _mutations)
 		{
-			remote.Add(await Send(HttpMethod.Post, $"/api/connect/{route}", new { }, bearerToken: _adminToken));
+			remote.Add(await Send(HttpMethod.Post, $"/api/connect/{route}", new { }, _adminToken));
 			loopback.Add(await Send(HttpMethod.Post, $"/api/connect/{route}", new { }, loopback: true));
 		}
 
@@ -191,7 +191,7 @@ public class ConnectApiPolicyTests
 		var json = await ReadJson(await Send(HttpMethod.Post,
 			"/api/connect/signin/start",
 			new { },
-			bearerToken: _adminToken));
+			_adminToken));
 
 		Assert.Multiple(() =>
 		{
@@ -254,12 +254,14 @@ public class ConnectApiPolicyTests
 	}
 
 	private static ConnectSessionSnapshot SignedIn(string? pictureUrl)
-		=> new(ConnectAccountStatus.SignedIn,
+	{
+		return new ConnectSessionSnapshot(ConnectAccountStatus.SignedIn,
 			ConnectConnectivity.Ok,
 			new ConnectAccount("sub-1", "Ada Lovelace", pictureUrl, null, []),
 			null,
 			null,
 			null);
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -307,7 +309,9 @@ public class ConnectApiPolicyTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private sealed class StubAvatarHandler : HttpMessageHandler
 	{

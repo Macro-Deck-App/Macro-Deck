@@ -94,5 +94,7 @@ public static class EmailInboxKeys
 	}
 
 	private static string Truncate(string slug, int length)
-		=> slug.Length <= length ? slug : slug[..length].TrimEnd('_');
+	{
+		return slug.Length <= length ? slug : slug[..length].TrimEnd('_');
+	}
 }

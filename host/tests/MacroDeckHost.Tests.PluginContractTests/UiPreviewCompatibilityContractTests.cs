@@ -66,7 +66,10 @@ internal sealed class UiPreviewCompatibilityContractTests : Harness.CapabilityCo
 	{
 		public string Kind => CapabilityKinds.Ui;
 
-		public IReadOnlyList<DeclaredCapability> DeclareCapabilities() => [];
+		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
+		{
+			return [];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,

@@ -16,13 +16,19 @@ internal sealed class SinglePlayerRegistry : IMusicPlayerRegistry
 	}
 
 	public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
-		=> [new(_instanceId, "test", "Test", "Test", false)];
+	{
+		return [new MusicPlayerInstanceDescriptor(_instanceId, "test", "Test", "Test", false)];
+	}
 
 	public IMusicPlayer? GetPlayer(string instanceId)
-		=> string.Equals(instanceId, _instanceId, StringComparison.Ordinal) ? _player : null;
+	{
+		return string.Equals(instanceId, _instanceId, StringComparison.Ordinal) ? _player : null;
+	}
 
 	public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-		=> GetPlayer(instanceId);
+	{
+		return GetPlayer(instanceId);
+	}
 
 	public IMusicPlayer? DefaultPlayer => _player;
 }
@@ -30,30 +36,59 @@ internal sealed class SinglePlayerRegistry : IMusicPlayerRegistry
 internal class FakeMusicPlayer : IMusicPlayer
 {
 	public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(MusicPlayerState.Disconnected);
+	{
+		return Task.FromResult(MusicPlayerState.Disconnected);
+	}
 
 	public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId, CancellationToken cancellationToken = default)
-		=> Task.FromResult<MusicPlayerArtwork?>(null);
+	{
+		return Task.FromResult<MusicPlayerArtwork?>(null);
+	}
 
-	public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task PlayAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task PauseAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task NextAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task PreviousAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }
 
 /// <summary>A player that can list devices and switch between them.</summary>

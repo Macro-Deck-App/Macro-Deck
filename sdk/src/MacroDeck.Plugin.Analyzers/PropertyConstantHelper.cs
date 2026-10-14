@@ -44,8 +44,8 @@ internal static class PropertyConstantHelper
 			return getterArrow.Expression;
 		}
 
-		if (getter.Body is { Statements.Count: 1 } block &&
-			block.Statements[0] is ReturnStatementSyntax { Expression: { } returned })
+		if (getter.Body is { Statements.Count: 1 } block
+			&& block.Statements[0] is ReturnStatementSyntax { Expression: { } returned })
 		{
 			return returned;
 		}

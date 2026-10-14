@@ -16,19 +16,30 @@ public class CompanionAppController : ControllerBase
 	}
 
 	[HttpGet]
-	public Task<CompanionAppStatus> Get(CancellationToken ct) => _companionApp.GetStatusAsync(ct);
+	public Task<CompanionAppStatus> Get(CancellationToken ct)
+	{
+		return _companionApp.GetStatusAsync(ct);
+	}
 
 	[HttpPut]
 	public Task<CompanionAppStatus> Update([FromBody] UpdateCompanionAppSettingsRequest request, CancellationToken ct)
-		=> _companionApp.SetAutoUpdateAsync(request.AutoUpdate, ct);
+	{
+		return _companionApp.SetAutoUpdateAsync(request.AutoUpdate, ct);
+	}
 
 	[HttpPut("plugin-access")]
-	public Task<CompanionAppStatus> UpdatePluginAccess([FromBody] UpdateCompanionAppPluginAccessRequest request,
+	public Task<CompanionAppStatus> UpdatePluginAccess(
+		[FromBody] UpdateCompanionAppPluginAccessRequest request,
 		CancellationToken ct)
-		=> _companionApp.SetAllowPluginsAsync(request.AllowPlugins, ct);
+	{
+		return _companionApp.SetAllowPluginsAsync(request.AllowPlugins, ct);
+	}
 
 	[HttpPost("check")]
-	public Task<CompanionAppStatus> Check(CancellationToken ct) => _companionApp.CheckNowAsync(ct);
+	public Task<CompanionAppStatus> Check(CancellationToken ct)
+	{
+		return _companionApp.CheckNowAsync(ct);
+	}
 
 	[HttpGet("apk")]
 	public async Task<IActionResult> DownloadApk(CancellationToken ct)
@@ -39,11 +50,14 @@ public class CompanionAppController : ControllerBase
 			return StatusCode(StatusCodes.Status502BadGateway, new { error });
 		}
 
-		return PhysicalFile(path, "application/vnd.android.package-archive", $"macro-deck-companion-{release.Version}.apk");
+		return PhysicalFile(path,
+			"application/vnd.android.package-archive",
+			$"macro-deck-companion-{release.Version}.apk");
 	}
 
 	[HttpPost("install")]
-	public async Task<ActionResult<InstallCompanionAppResponse>> Install([FromBody] InstallCompanionAppRequest request,
+	public async Task<ActionResult<InstallCompanionAppResponse>> Install(
+		[FromBody] InstallCompanionAppRequest request,
 		CancellationToken ct)
 	{
 		if (string.IsNullOrWhiteSpace(request.Serial))

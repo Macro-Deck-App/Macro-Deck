@@ -17,7 +17,7 @@ internal sealed class YtmDesktopRealtimeClientTests
 	{
 		_pair = await WebSocketPair.CreateAsync();
 		_client = new YtmDesktopRealtimeClient((_, _) => Task.FromResult(_pair.Client),
-			handshakeTimeout: TimeSpan.FromMilliseconds(500));
+			TimeSpan.FromMilliseconds(500));
 	}
 
 	[TearDown]
@@ -197,7 +197,7 @@ internal sealed class YtmDesktopRealtimeClientTests
 	public async Task The_watchdog_disconnects_when_no_ping_arrives_within_the_servers_own_interval()
 	{
 		var connecting = _client.ConnectAsync(_uri, "tok", CancellationToken.None);
-		await _pair.SendAsync(OpenFrame(pingIntervalMs: 20, pingTimeoutMs: 20));
+		await _pair.SendAsync(OpenFrame(20, 20));
 		await _pair.ReceiveAsync();
 		await _pair.SendAsync("""40/api/v1/realtime,{"sid":"s1"}""");
 		await connecting;

@@ -29,7 +29,9 @@ public sealed class ObsConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ConnectionStep(context)));
+	{
+		return Task.FromResult(ConfigFlowResult.Step(ConnectionStep(context)));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,
@@ -50,8 +52,8 @@ public sealed class ObsConfigFlow : IConfigFlow
 		CancellationToken cancellationToken)
 	{
 		var entryTitle = (context as IConfigFlowEntryContext)?.EntryTitle;
-		var configurationName = entryTitle ??
-			(input.GetValueOrDefault(ObsConfigKeys.ConfigurationName) as string ?? string.Empty).Trim();
+		var configurationName = entryTitle
+			?? (input.GetValueOrDefault(ObsConfigKeys.ConfigurationName) as string ?? string.Empty).Trim();
 		var host = (input.GetValueOrDefault(ObsConfigKeys.Host) as string ?? string.Empty).Trim();
 		var password = input.GetValueOrDefault(ObsConfigKeys.Password) as string ?? string.Empty;
 		var port = ParsePort(input.GetValueOrDefault(ObsConfigKeys.Port));
@@ -82,7 +84,7 @@ public sealed class ObsConfigFlow : IConfigFlow
 		if (error is not null)
 		{
 			return ConfigFlowResult.Error(ConnectionStep(context),
-				AppStrings.Integrations.Obs.Config.ConnectionFailed(host: host, port: port ?? 0, details: error.Value));
+				AppStrings.Integrations.Obs.Config.ConnectionFailed(host, port ?? 0, error.Value));
 		}
 
 		var values = new Dictionary<string, ConfigFlowValue>
@@ -99,19 +101,25 @@ public sealed class ObsConfigFlow : IConfigFlow
 		return ConfigFlowResult.Complete(configurationName, values);
 	}
 
-	private async Task<LocalizedText?> TestConnectionAsync(string url,
+	private async Task<LocalizedText?> TestConnectionAsync(
+		string url,
 		string? password,
 		CancellationToken cancellationToken)
 	{
 		var client = _clientFactory();
 		var completion = new TaskCompletionSource<LocalizedText?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		void OnConnected(object? sender, EventArgs e) => completion.TrySetResult(null);
+		void OnConnected(object? sender, EventArgs e)
+		{
+			completion.TrySetResult(null);
+		}
 
 		void OnDisconnected(object? sender, string? reason)
-			=> completion.TrySetResult(reason is { Length: > 0 }
+		{
+			completion.TrySetResult(reason is { Length: > 0 }
 				? reason
 				: AppStrings.Integrations.Obs.Config.ConnectionRefused());
+		}
 
 		client.Connected += OnConnected;
 		client.Disconnected += OnDisconnected;
@@ -138,7 +146,7 @@ public sealed class ObsConfigFlow : IConfigFlow
 		catch (Exception ex)
 		{
 			_logger.Warning(ex, "OBS connection test failed for {Url}", url);
-			return AppStrings.Integrations.Obs.Config.ConnectionTestFailed(details: ex.Message);
+			return AppStrings.Integrations.Obs.Config.ConnectionTestFailed(ex.Message);
 		}
 		finally
 		{
@@ -149,7 +157,8 @@ public sealed class ObsConfigFlow : IConfigFlow
 	}
 
 	private static int? ParsePort(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			null => DefaultPort,
 			int i => i,
@@ -159,9 +168,11 @@ public sealed class ObsConfigFlow : IConfigFlow
 			string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) => parsed,
 			_ => null
 		};
+	}
 
 	private static ConfigFlowStep ConnectionStep(IConfigFlowContext context)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "connection",
 			Title = AppStrings.Integrations.Obs.Config.ConnectTitle(),
@@ -180,6 +191,7 @@ public sealed class ObsConfigFlow : IConfigFlow
 			],
 			Fields = ConfigurationFields(context)
 		};
+	}
 
 	private static List<ActionParameter> ConfigurationFields(IConfigFlowContext context)
 	{
@@ -187,26 +199,26 @@ public sealed class ObsConfigFlow : IConfigFlow
 		if ((context as IConfigFlowEntryContext)?.EntryTitle is null)
 		{
 			fields.Add(ActionParameter.Text(ObsConfigKeys.ConfigurationName,
-				label: AppStrings.Integrations.Detail.ConfigurationNameLabel(),
+				AppStrings.Integrations.Detail.ConfigurationNameLabel(),
 				placeholder: AppStrings.Integrations.Detail.ConfigurationNamePlaceholder(),
 				required: true));
 		}
 
 		fields.AddRange([
 			ActionParameter.Text(ObsConfigKeys.Host,
-				label: AppStrings.Integrations.Obs.Config.HostLabel(),
+				AppStrings.Integrations.Obs.Config.HostLabel(),
 				placeholder: DefaultHost,
 				defaultValue: DefaultHost,
 				required: true),
 			ActionParameter.Number(ObsConfigKeys.Port,
-				label: AppStrings.Integrations.Obs.Config.PortLabel(),
+				AppStrings.Integrations.Obs.Config.PortLabel(),
 				min: 1,
 				max: 65535,
 				defaultValue: DefaultPort,
 				required: true),
 			ActionParameter.Secret(ObsConfigKeys.Password,
-				label: AppStrings.Integrations.Obs.Config.PasswordLabel(),
-				description: AppStrings.Integrations.Obs.Config.PasswordDescription())
+				AppStrings.Integrations.Obs.Config.PasswordLabel(),
+				AppStrings.Integrations.Obs.Config.PasswordDescription())
 		]);
 		return fields;
 	}

@@ -5,7 +5,6 @@ using MacroDeck.Plugin.Protocol.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Serialization;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Capabilities.ScreenSaverProvider;
@@ -43,6 +42,7 @@ using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Sdk.VideoStreams;
+using MacroDeckHost.Application.HostLocking;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins;
 
@@ -86,7 +86,8 @@ public class PluginCallbackRouterTests
 		services.AddSingleton<IVariableService>(variableService);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
-		return new PluginCallbackRouter(sessionRegistry ?? new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
+		return new PluginCallbackRouter(
+			sessionRegistry ?? new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
 			invoker,
 			scopeFactory,
 			new FakeNotificationStore(),
@@ -140,36 +141,43 @@ public class PluginCallbackRouterTests
 		FakePluginDeviceRegistry? deviceRegistry = null,
 		ScreenSaverRegistry? screenSavers = null,
 		WidgetTypeRegistry? widgetTypes = null)
-		=> Router(_variableService,
+	{
+		return Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, throttleCapacity, refillPerSecond: 100),
+			new HostCallbackThrottle(_time, throttleCapacity, 100),
 			lockState,
 			scriptApi,
 			deviceRegistry,
 			screenSavers,
 			widgetTypes);
+	}
 
 	// ---- ui resources ---------------------------------------------------------------------------
 
-	private PluginCallbackRouter UiResourceRouter(RecordingUiResources resources,
+	private PluginCallbackRouter UiResourceRouter(
+		RecordingUiResources resources,
 		int sharedCapacity = 100,
 		int resourceCapacity = 100)
-		=> Router(_variableService,
+	{
+		return Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, sharedCapacity, refillPerSecond: 0),
+			new HostCallbackThrottle(_time, sharedCapacity, 0),
 			uiResources: resources,
-			uiResourceThrottle: new UiResourceCallbackThrottle(_time, resourceCapacity, refillPerSecond: 0));
+			uiResourceThrottle: new UiResourceCallbackThrottle(_time, resourceCapacity, 0));
+	}
 
 	private static HostInvokePayload RegisterResource(string name = "photo")
-		=> new()
+	{
+		return new HostInvokePayload
 		{
 			Api = HostApis.Ui,
 			Operation = HostOperations.Ui.RegisterResource,
 			Arguments = Arg(new UiRegisterResourceArguments
 				{ Name = name, ContentHash = "sha256:abc", MediaType = "image/png" })
 		};
+	}
 
 	[Test]
 	public async Task A_resource_registration_is_made_for_the_calling_plugins_session_and_answers_the_handle()
@@ -221,7 +229,7 @@ public class PluginCallbackRouterTests
 	[Test]
 	public async Task Resource_registrations_do_not_spend_the_plugins_shared_callback_budget()
 	{
-		var router = UiResourceRouter(new RecordingUiResources(), sharedCapacity: 1);
+		var router = UiResourceRouter(new RecordingUiResources(), 1);
 
 		for (var index = 0; index < 20; index++)
 		{
@@ -233,10 +241,11 @@ public class PluginCallbackRouterTests
 			Assert.That(result.Error, Is.Null);
 		}
 
-		Assert.That(router.Admit("plugin.a", new HostInvokePayload
-			{
-				Api = HostApis.Variables, Operation = HostOperations.Variables.List
-			}),
+		Assert.That(router.Admit("plugin.a",
+				new HostInvokePayload
+				{
+					Api = HostApis.Variables, Operation = HostOperations.Variables.List
+				}),
 			Is.Null);
 	}
 
@@ -259,7 +268,7 @@ public class PluginCallbackRouterTests
 	[Test]
 	public async Task A_burst_of_ui_patches_is_still_not_throttled()
 	{
-		var router = UiResourceRouter(new RecordingUiResources(), sharedCapacity: 1, resourceCapacity: 1);
+		var router = UiResourceRouter(new RecordingUiResources(), 1, 1);
 
 		for (var index = 0; index < 100; index++)
 		{
@@ -302,43 +311,54 @@ public class PluginCallbackRouterTests
 		});
 	}
 
-	private PluginCallbackRouter ArtworkRouter(RecordingUiResources resources,
+	private PluginCallbackRouter ArtworkRouter(
+		RecordingUiResources resources,
 		FakeMusicPlayerArtworkService? artwork,
 		int artworkCapacity = 100)
-		=> Router(_variableService,
+	{
+		return Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, 1, refillPerSecond: 0),
+			new HostCallbackThrottle(_time, 1, 0),
 			uiResources: resources,
-			uiResourceThrottle: new UiResourceCallbackThrottle(_time, 100, refillPerSecond: 0),
+			uiResourceThrottle: new UiResourceCallbackThrottle(_time, 100, 0),
 			musicPlayerArtwork: artwork,
-			musicPlayerArtworkThrottle: new MusicPlayerArtworkCallbackThrottle(_time, artworkCapacity, refillPerSecond: 0));
+			musicPlayerArtworkThrottle: new MusicPlayerArtworkCallbackThrottle(_time, artworkCapacity, 0));
+	}
 
-	private PluginCallbackRouter TimeoutArtworkRouter(RecordingUiResources resources, IMusicPlayerArtworkService artwork)
-		=> Router(_variableService,
+	private PluginCallbackRouter TimeoutArtworkRouter(
+		RecordingUiResources resources,
+		IMusicPlayerArtworkService artwork)
+	{
+		return Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, 1, refillPerSecond: 0),
+			new HostCallbackThrottle(_time, 1, 0),
 			uiResources: resources,
 			musicPlayerArtwork: artwork,
 			musicPlayerArtworkTimeout: TimeSpan.FromMilliseconds(50));
+	}
 
-	private static HostInvokePayload RegisterArtwork(string name = "cover",
+	private static HostInvokePayload RegisterArtwork(
+		string name = "cover",
 		string instanceId = "net.example.jukebox::default",
 		string artworkId = "cover-1",
 		int? maxSize = null)
-		=> new()
+	{
+		return new HostInvokePayload
 		{
 			Api = HostApis.Ui,
 			Operation = HostOperations.Ui.RegisterMusicPlayerArtwork,
 			Arguments = Arg(new UiRegisterMusicPlayerArtworkArguments
 				{ Name = name, InstanceId = instanceId, ArtworkId = artworkId, MaxSize = maxSize })
 		};
+	}
 
 	[Test]
 	public async Task Artwork_asked_for_at_a_size_is_looked_up_at_that_size()
 	{
-		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1, 2], "image/webp", "\"e\"") };
+		var artwork = new FakeMusicPlayerArtworkService
+			{ Image = new ArtworkImageResult([1, 2], "image/webp", "\"e\"") };
 		var router = ArtworkRouter(new RecordingUiResources(), artwork);
 
 		var result = await router.RouteAsync("plugin.a",
@@ -378,7 +398,8 @@ public class PluginCallbackRouterTests
 	public async Task Artwork_of_another_plugins_player_is_registered_for_the_calling_plugins_session()
 	{
 		var resources = new RecordingUiResources();
-		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1, 2, 3], "image/webp", "\"e\"") };
+		var artwork = new FakeMusicPlayerArtworkService
+			{ Image = new ArtworkImageResult([1, 2, 3], "image/webp", "\"e\"") };
 		var router = ArtworkRouter(resources, artwork);
 
 		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
@@ -387,7 +408,8 @@ public class PluginCallbackRouterTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Error, Is.Null);
-			Assert.That(artwork.Requests, Is.EqualTo(new[] { ("net.example.jukebox::default", "cover-1", (int?)null) }));
+			Assert.That(artwork.Requests,
+				Is.EqualTo(new[] { ("net.example.jukebox::default", "cover-1", (int?)null) }));
 			Assert.That(resources.ContentCalls, Has.Count.EqualTo(1));
 			Assert.That(resources.ContentCalls[0].PluginId, Is.EqualTo("plugin.a"));
 			Assert.That(resources.ContentCalls[0].SessionId, Is.EqualTo("session-1"));
@@ -420,9 +442,12 @@ public class PluginCallbackRouterTests
 	[TestCase(PluginUiResourceOutcome.TooLarge, ProtocolErrorCodes.AssetTooLarge)]
 	[TestCase(PluginUiResourceOutcome.UnsupportedMediaType, ProtocolErrorCodes.InvalidPayload)]
 	[TestCase(PluginUiResourceOutcome.SessionNotCurrent, ProtocolErrorCodes.SessionNotFound)]
-	public async Task Artwork_that_cannot_be_registered_answers_its_protocol_error(PluginUiResourceOutcome outcome, string code)
+	public async Task Artwork_that_cannot_be_registered_answers_its_protocol_error(
+		PluginUiResourceOutcome outcome,
+		string code)
 	{
-		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/svg+xml", "\"e\"") };
+		var artwork = new FakeMusicPlayerArtworkService
+			{ Image = new ArtworkImageResult([1], "image/svg+xml", "\"e\"") };
 		var router = ArtworkRouter(new RecordingUiResources { Outcome = outcome }, artwork);
 
 		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
@@ -433,8 +458,10 @@ public class PluginCallbackRouterTests
 	[Test]
 	public async Task Artwork_of_an_unsupported_type_is_refused_as_permanent_and_names_the_type()
 	{
-		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/svg+xml", "\"e\"") };
-		var router = ArtworkRouter(new RecordingUiResources { Outcome = PluginUiResourceOutcome.UnsupportedMediaType }, artwork);
+		var artwork = new FakeMusicPlayerArtworkService
+			{ Image = new ArtworkImageResult([1], "image/svg+xml", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources { Outcome = PluginUiResourceOutcome.UnsupportedMediaType },
+			artwork);
 
 		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
 
@@ -448,7 +475,8 @@ public class PluginCallbackRouterTests
 	[TestCase("not a name!", "net.example.jukebox::default", "cover-1")]
 	[TestCase("cover", "", "cover-1")]
 	[TestCase("cover", "net.example.jukebox::default", "")]
-	public async Task An_invalid_artwork_request_is_refused_before_the_host_looks_anything_up(string name,
+	public async Task An_invalid_artwork_request_is_refused_before_the_host_looks_anything_up(
+		string name,
 		string instanceId,
 		string artworkId)
 	{
@@ -491,7 +519,7 @@ public class PluginCallbackRouterTests
 	public async Task Artwork_requests_beyond_their_own_budget_are_rate_limited_before_reaching_the_player()
 	{
 		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/png", "\"e\"") };
-		var router = ArtworkRouter(new RecordingUiResources(), artwork, artworkCapacity: 2);
+		var router = ArtworkRouter(new RecordingUiResources(), artwork, 2);
 
 		await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
 		await router.RouteAsync("plugin.a", "session-1", "c2", RegisterArtwork(), CancellationToken.None);
@@ -516,10 +544,11 @@ public class PluginCallbackRouterTests
 			await router.RouteAsync("plugin.a", "session-1", "c" + index, RegisterArtwork(), CancellationToken.None);
 		}
 
-		Assert.That(router.Admit("plugin.a", new HostInvokePayload
-			{
-				Api = HostApis.Variables, Operation = HostOperations.Variables.List
-			}),
+		Assert.That(router.Admit("plugin.a",
+				new HostInvokePayload
+				{
+					Api = HostApis.Variables, Operation = HostOperations.Variables.List
+				}),
 			Is.Null);
 	}
 
@@ -559,9 +588,13 @@ public class PluginCallbackRouterTests
 
 	private sealed class NeverAnsweringArtworkService : IMusicPlayerArtworkService
 	{
-		public string GetETag(string artworkId, int? size) => "\"" + artworkId + "\"";
+		public string GetETag(string artworkId, int? size)
+		{
+			return "\"" + artworkId + "\"";
+		}
 
-		public async Task<ArtworkImageResult?> GetImage(string instanceId,
+		public async Task<ArtworkImageResult?> GetImage(
+			string instanceId,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
@@ -571,17 +604,20 @@ public class PluginCallbackRouterTests
 			return null;
 		}
 
-		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		public Task<ArtworkImageResult?> GetImage(
+			MusicPlayerVariant variant,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	[Test]
 	public async Task A_host_without_an_artwork_service_answers_the_operation_as_unsupported()
 	{
-		var router = ArtworkRouter(new RecordingUiResources(), artwork: null);
+		var router = ArtworkRouter(new RecordingUiResources(), null);
 
 		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
 
@@ -610,9 +646,13 @@ public class PluginCallbackRouterTests
 
 		public List<(string InstanceId, string ArtworkId, int? Size)> Requests { get; } = [];
 
-		public string GetETag(string artworkId, int? size) => "\"" + artworkId + "\"";
+		public string GetETag(string artworkId, int? size)
+		{
+			return "\"" + artworkId + "\"";
+		}
 
-		public Task<ArtworkImageResult?> GetImage(string instanceId,
+		public Task<ArtworkImageResult?> GetImage(
+			string instanceId,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
@@ -622,11 +662,14 @@ public class PluginCallbackRouterTests
 			return Task.FromResult(Image);
 		}
 
-		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		public Task<ArtworkImageResult?> GetImage(
+			MusicPlayerVariant variant,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RecordingUiResources : IPluginUiResources
@@ -637,7 +680,8 @@ public class PluginCallbackRouterTests
 
 		public PluginUiResourceOutcome Outcome { get; init; } = PluginUiResourceOutcome.Registered;
 
-		public PluginUiResourceResult Register(string pluginId,
+		public PluginUiResourceResult Register(
+			string pluginId,
 			string sessionId,
 			string name,
 			string contentHash,
@@ -646,16 +690,22 @@ public class PluginCallbackRouterTests
 			Calls.Add((pluginId, sessionId, name));
 
 			return Outcome == PluginUiResourceOutcome.Registered
-				? new PluginUiResourceResult(Outcome, new MacroDeck.Ui.Model.Resources.UiResource
-				{
-					ResourceId = "plugin-x." + name, ContentHash = contentHash, MediaType = mediaType, ByteLength = 3
-				})
+				? new PluginUiResourceResult(Outcome,
+					new MacroDeck.Ui.Model.Resources.UiResource
+					{
+						ResourceId = "plugin-x." + name, ContentHash = contentHash, MediaType = mediaType,
+						ByteLength = 3
+					})
 				: new PluginUiResourceResult(Outcome);
 		}
 
-		public List<(string PluginId, string SessionId, string Name, byte[] Content, string MediaType)> ContentCalls { get; } = [];
+		public List<(string PluginId, string SessionId, string Name, byte[] Content, string MediaType)> ContentCalls
+		{
+			get;
+		} = [];
 
-		public PluginUiResourceResult RegisterContent(string pluginId,
+		public PluginUiResourceResult RegisterContent(
+			string pluginId,
 			string sessionId,
 			string name,
 			byte[] content,
@@ -664,10 +714,12 @@ public class PluginCallbackRouterTests
 			ContentCalls.Add((pluginId, sessionId, name, content, mediaType));
 
 			return Outcome == PluginUiResourceOutcome.Registered
-				? new PluginUiResourceResult(Outcome, new MacroDeck.Ui.Model.Resources.UiResource
-				{
-					ResourceId = "plugin-x." + name, ContentHash = "sha256:art", MediaType = mediaType, ByteLength = content.Length
-				})
+				? new PluginUiResourceResult(Outcome,
+					new MacroDeck.Ui.Model.Resources.UiResource
+					{
+						ResourceId = "plugin-x." + name, ContentHash = "sha256:art", MediaType = mediaType,
+						ByteLength = content.Length
+					})
 				: new PluginUiResourceResult(Outcome);
 		}
 
@@ -721,7 +773,8 @@ public class PluginCallbackRouterTests
 				Operation = HostOperations.ScreenSavers.Register,
 				Arguments = Arg(new ScreenSaversRegisterArguments
 				{
-					ScreenSaver = new ScreenSaverDescriptorDto { Id = "photos", Name = LocalizedText.FromLiteral("Photos") }
+					ScreenSaver = new ScreenSaverDescriptorDto
+						{ Id = "photos", Name = LocalizedText.FromLiteral("Photos") }
 				})
 			},
 			CancellationToken.None);
@@ -824,7 +877,7 @@ public class PluginCallbackRouterTests
 				Api = HostApis.WidgetTypes,
 				Operation = HostOperations.WidgetTypes.Register,
 				Arguments = JsonDocument.Parse(
-					"""{"widgetType":{"id":"panel","name":"Panel","defaultShortPressAction":{"actionId":""}}}""")
+						"""{"widgetType":{"id":"panel","name":"Panel","defaultShortPressAction":{"actionId":""}}}""")
 					.RootElement.Clone()
 			},
 			CancellationToken.None);
@@ -1014,7 +1067,8 @@ public class PluginCallbackRouterTests
 			{
 				Api = HostApis.Widgets,
 				Operation = HostOperations.Widgets.GetData,
-				Arguments = JsonSerializer.SerializeToElement(new WidgetsGetDataArguments { WidgetId = Guid.NewGuid().ToString() },
+				Arguments = JsonSerializer.SerializeToElement(
+					new WidgetsGetDataArguments { WidgetId = Guid.NewGuid().ToString() },
 					PluginProtocolJson.Options)
 			},
 			CancellationToken.None);
@@ -1048,7 +1102,7 @@ public class PluginCallbackRouterTests
 		var router = Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, capacity: 100, refillPerSecond: 0),
+			new HostCallbackThrottle(_time, 100, 0),
 			sessionRegistry: sessions,
 			variableHistory: windows,
 			variableHistoryReadThrottle: new VariableHistoryReadThrottle(_time));
@@ -1056,7 +1110,7 @@ public class PluginCallbackRouterTests
 		[
 			windows.Open("plugin.a", "viewer_count", 10),
 			windows.Open("plugin.a", "follower_count", 10),
-			windows.Open("plugin.a", "subscriber_count", 10),
+			windows.Open("plugin.a", "subscriber_count", 10)
 		];
 
 		var paced = new List<HostCallbackResult>();
@@ -1088,16 +1142,19 @@ public class PluginCallbackRouterTests
 	}
 
 	private static Task<HostCallbackResult> ReadHistoryAsync(PluginCallbackRouter router, string windowId)
-		=> router.RouteAsync("plugin.a",
+	{
+		return router.RouteAsync("plugin.a",
 			"read",
 			new HostInvokePayload
 			{
 				Api = HostApis.Variables,
 				Operation = HostOperations.Variables.HistoryRead,
-				Arguments = JsonSerializer.SerializeToElement(new VariablesHistoryWindowArguments { WindowId = windowId },
+				Arguments = JsonSerializer.SerializeToElement(
+					new VariablesHistoryWindowArguments { WindowId = windowId },
 					PluginProtocolJson.Options)
 			},
 			CancellationToken.None);
+	}
 
 	[Test]
 	public async Task An_unknown_api_is_capability_unsupported()
@@ -1132,7 +1189,7 @@ public class PluginCallbackRouterTests
 		var router = Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, capacity: 1, refillPerSecond: 0));
+			new HostCallbackThrottle(_time, 1, 0));
 
 		var first = await router.RouteAsync("plugin.a",
 			"c1",
@@ -1154,21 +1211,25 @@ public class PluginCallbackRouterTests
 	// ---- video streams -------------------------------------------------------------------------
 
 	private PluginCallbackRouter VideoRouter(VideoStreamWorld world, int sharedCapacity = 100, int videoCapacity = 100)
-		=> Router(_variableService,
+	{
+		return Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, sharedCapacity, refillPerSecond: 0),
+			new HostCallbackThrottle(_time, sharedCapacity, 0),
 			videoStreamProviders: world.Registry,
 			videoStreamSessions: world.Broker,
-			videoStreamThrottle: new VideoStreamCallbackThrottle(_time, videoCapacity, refillPerSecond: 0));
+			videoStreamThrottle: new VideoStreamCallbackThrottle(_time, videoCapacity, 0));
+	}
 
 	private static HostInvokePayload Video(string operation, object? arguments = null)
-		=> new()
+	{
+		return new HostInvokePayload
 		{
 			Api = HostApis.VideoStreams,
 			Operation = operation,
 			Arguments = arguments is null ? null : Arg(arguments)
 		};
+	}
 
 	private static async Task<string> OpenPluginSessionAsync(VideoStreamWorld world, string pluginId)
 	{
@@ -1183,11 +1244,20 @@ public class PluginCallbackRouterTests
 	public async Task Video_stream_callbacks_are_charged_to_their_own_bucket_and_leave_the_shared_one_alone()
 	{
 		using var world = new VideoStreamWorld();
-		var router = VideoRouter(world, sharedCapacity: 1, videoCapacity: 2);
+		var router = VideoRouter(world, 1, 2);
 
-		var first = await router.RouteAsync("plugin.a", "c1", Video(HostOperations.VideoStreams.ProvidersChanged), CancellationToken.None);
-		var second = await router.RouteAsync("plugin.a", "c2", Video(HostOperations.VideoStreams.ProvidersChanged), CancellationToken.None);
-		var third = await router.RouteAsync("plugin.a", "c3", Video(HostOperations.VideoStreams.ProvidersChanged), CancellationToken.None);
+		var first = await router.RouteAsync("plugin.a",
+			"c1",
+			Video(HostOperations.VideoStreams.ProvidersChanged),
+			CancellationToken.None);
+		var second = await router.RouteAsync("plugin.a",
+			"c2",
+			Video(HostOperations.VideoStreams.ProvidersChanged),
+			CancellationToken.None);
+		var third = await router.RouteAsync("plugin.a",
+			"c3",
+			Video(HostOperations.VideoStreams.ProvidersChanged),
+			CancellationToken.None);
 		var shared = await router.RouteAsync("plugin.a",
 			"c4",
 			new HostInvokePayload { Api = HostApis.Variables, Operation = HostOperations.Variables.List },
@@ -1217,7 +1287,8 @@ public class PluginCallbackRouterTests
 			"c1",
 			Video(HostOperations.VideoStreams.ProvidersChanged),
 			CancellationToken.None);
-		await VideoStreamWorld.WaitForAsync(() => world.Registry.GetProviders().Count == 1, "the providers were never read");
+		await VideoStreamWorld.WaitForAsync(() => world.Registry.GetProviders().Count == 1,
+			"the providers were never read");
 
 		Assert.Multiple(() =>
 		{
@@ -1253,8 +1324,10 @@ public class PluginCallbackRouterTests
 		{
 			Assert.That(new[] { update.Error, close.Error }, Is.All.Null);
 			Assert.That(world.Publisher.Of<VideoStreamSessionChangedNotification>()[^1],
-				Has.Property(nameof(VideoStreamSessionChangedNotification.State)).EqualTo(VideoStreamSessionState.Reconnecting)
-					.And.Property(nameof(VideoStreamSessionChangedNotification.Reason)).EqualTo(VideoStreamSessionReason.SourceLost));
+				Has.Property(nameof(VideoStreamSessionChangedNotification.State))
+					.EqualTo(VideoStreamSessionState.Reconnecting)
+					.And.Property(nameof(VideoStreamSessionChangedNotification.Reason))
+					.EqualTo(VideoStreamSessionReason.SourceLost));
 			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Single().Reason,
 				Is.EqualTo(VideoStreamSessionReason.SourceLost));
 		});
@@ -1274,7 +1347,8 @@ public class PluginCallbackRouterTests
 				{
 					SessionId = sessionId,
 					State = "Active",
-					Description = new VideoStreamSessionDescriptionDto { Transport = "hls", Url = "ftp://camera.local/live" }
+					Description = new VideoStreamSessionDescriptionDto
+						{ Transport = "hls", Url = "ftp://camera.local/live" }
 				}),
 			CancellationToken.None);
 		await Task.Delay(50);
@@ -1301,7 +1375,8 @@ public class PluginCallbackRouterTests
 			CancellationToken.None);
 		var close = await router.RouteAsync("plugin.b",
 			"c2",
-			Video(HostOperations.VideoStreams.SessionClose, new VideoStreamsSessionCloseArguments { SessionId = sessionId }),
+			Video(HostOperations.VideoStreams.SessionClose,
+				new VideoStreamsSessionCloseArguments { SessionId = sessionId }),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -1606,22 +1681,26 @@ public class PluginCallbackRouterTests
 
 	private const string IconPluginId = "com.example.logos";
 
-	private PluginCallbackRouter IconPackRouter(IconPacks.PluginIconPackTestHost host,
+	private PluginCallbackRouter IconPackRouter(
+		IconPacks.PluginIconPackTestHost host,
 		PluginIconPackUploads? uploads = null,
 		IUiSessionSink? uiSessions = null)
-		=> Router(_variableService,
+	{
+		return Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, 100, refillPerSecond: 100),
+			new HostCallbackThrottle(_time, 100, 100),
 			sessionRegistry: host.Sessions,
 			uiSessions: uiSessions,
 			iconPackSync: host.Sync,
 			iconPackUploads: uploads ?? new PluginIconPackUploads(new PluginAssetReceiverStub(), host.Sessions),
 			pluginIconResources: host.UiResources,
 			pluginIconResolver: host.Resolver);
+	}
 
 	private static Task CreateSession(IconPacks.PluginIconPackTestHost host, PluginSessionOrigin origin)
-		=> host.Sessions.Create(new PluginSessionRecord
+	{
+		return host.Sessions.Create(new PluginSessionRecord
 		{
 			SessionId = "session-1",
 			PluginId = IconPluginId,
@@ -1633,9 +1712,11 @@ public class PluginCallbackRouterTests
 			State = PluginSessionState.Connected,
 			CreatedAt = DateTimeOffset.UtcNow
 		});
+	}
 
 	private static HostInvokePayload SyncBundled(string key, byte[] archive)
-		=> new()
+	{
+		return new HostInvokePayload
 		{
 			Api = HostApis.IconPacks,
 			Operation = HostOperations.IconPacks.SyncBundled,
@@ -1652,6 +1733,7 @@ public class PluginCallbackRouterTests
 				]
 			})
 		};
+	}
 
 	[Test]
 	public async Task Syncing_bundled_packs_is_refused_for_a_session_the_host_launched_itself()
@@ -1683,14 +1765,31 @@ public class PluginCallbackRouterTests
 		var archive = await host.BuildArchive("Logos", ("spotify", "green"));
 		var hash = MacroDeck.Plugin.Protocol.Assets.AssetContentHash.Compute(archive);
 
-		var first = await router.RouteAsync(IconPluginId, "session-1", "c1", SyncBundled("logos", archive), CancellationToken.None);
-		receiver.Begin(IconPluginId, "a1", MacroDeck.Plugin.Protocol.Assets.AssetKinds.IconPack, "application/zip", archive.Length, hash);
+		var first = await router.RouteAsync(IconPluginId,
+			"session-1",
+			"c1",
+			SyncBundled("logos", archive),
+			CancellationToken.None);
+		receiver.Begin(IconPluginId,
+			"a1",
+			MacroDeck.Plugin.Protocol.Assets.AssetKinds.IconPack,
+			"application/zip",
+			archive.Length,
+			hash);
 		receiver.Chunk(IconPluginId, "a1", 0, archive);
 		receiver.Commit(IconPluginId, "a1");
-		var second = await router.RouteAsync(IconPluginId, "session-1", "c2", SyncBundled("logos", archive), CancellationToken.None);
+		var second = await router.RouteAsync(IconPluginId,
+			"session-1",
+			"c2",
+			SyncBundled("logos", archive),
+			CancellationToken.None);
 
-		var askedFor = first.Data?.Deserialize<MacroDeck.Plugin.Protocol.Callbacks.IconPacks.IconPackSyncResult>(PluginProtocolJson.Options);
-		var synced = second.Data?.Deserialize<MacroDeck.Plugin.Protocol.Callbacks.IconPacks.IconPackSyncResult>(PluginProtocolJson.Options);
+		var askedFor
+			= first.Data?.Deserialize<MacroDeck.Plugin.Protocol.Callbacks.IconPacks.IconPackSyncResult>(
+				PluginProtocolJson.Options);
+		var synced
+			= second.Data?.Deserialize<MacroDeck.Plugin.Protocol.Callbacks.IconPacks.IconPackSyncResult>(
+				PluginProtocolJson.Options);
 		Assert.Multiple(() =>
 		{
 			Assert.That(askedFor?.UploadRequired, Is.EqualTo(new[] { hash }));
@@ -1710,7 +1809,12 @@ public class PluginCallbackRouterTests
 		var archive = await host.BuildArchive("Logos", ("spotify", "green"));
 		var hash = MacroDeck.Plugin.Protocol.Assets.AssetContentHash.Compute(archive);
 
-		receiver.Begin(IconPluginId, "a1", MacroDeck.Plugin.Protocol.Assets.AssetKinds.IconPack, "application/zip", archive.Length, hash);
+		receiver.Begin(IconPluginId,
+			"a1",
+			MacroDeck.Plugin.Protocol.Assets.AssetKinds.IconPack,
+			"application/zip",
+			archive.Length,
+			hash);
 		receiver.Chunk(IconPluginId, "a1", 0, archive);
 		receiver.Commit(IconPluginId, "a1");
 
@@ -1724,12 +1828,16 @@ public class PluginCallbackRouterTests
 		await host.SyncDevelopment(IconPluginId, ("logos", await host.BuildArchive("Logos", ("spotify", "green"))));
 		var router = IconPackRouter(host);
 
-		HostInvokePayload Get(string name) => new()
+		HostInvokePayload Get(string name)
 		{
-			Api = HostApis.IconPacks,
-			Operation = HostOperations.IconPacks.GetIconResource,
-			Arguments = Arg(new MacroDeck.Plugin.Protocol.Callbacks.IconPacks.GetIconResourceArguments { Key = "logos", Name = name })
-		};
+			return new HostInvokePayload
+			{
+				Api = HostApis.IconPacks,
+				Operation = HostOperations.IconPacks.GetIconResource,
+				Arguments = Arg(new MacroDeck.Plugin.Protocol.Callbacks.IconPacks.GetIconResourceArguments
+					{ Key = "logos", Name = name })
+			};
+		}
 
 		var found = await router.RouteAsync(IconPluginId, "session-1", "c1", Get("spotify"), CancellationToken.None);
 		var missing = await router.RouteAsync(IconPluginId, "session-1", "c2", Get("tidal"), CancellationToken.None);
@@ -1747,19 +1855,31 @@ public class PluginCallbackRouterTests
 	public async Task A_plugin_asks_for_any_installed_icon_by_id_and_an_unknown_id_is_not_found()
 	{
 		using var host = new IconPacks.PluginIconPackTestHost();
-		await host.SyncDevelopment("com.example.other", ("logos", await host.BuildArchive("Logos", ("spotify", "green"))));
+		await host.SyncDevelopment("com.example.other",
+			("logos", await host.BuildArchive("Logos", ("spotify", "green"))));
 		var foreignIconId = host.Icon(host.PluginPack("com.example.other", "logos")!, "spotify").Id;
 		var router = IconPackRouter(host);
 
-		HostInvokePayload Get(Guid iconId) => new()
+		HostInvokePayload Get(Guid iconId)
 		{
-			Api = HostApis.IconPacks,
-			Operation = HostOperations.IconPacks.GetIcon,
-			Arguments = Arg(new MacroDeck.Plugin.Protocol.Callbacks.IconPacks.GetIconArguments { IconId = iconId })
-		};
+			return new HostInvokePayload
+			{
+				Api = HostApis.IconPacks,
+				Operation = HostOperations.IconPacks.GetIcon,
+				Arguments = Arg(new MacroDeck.Plugin.Protocol.Callbacks.IconPacks.GetIconArguments { IconId = iconId })
+			};
+		}
 
-		var found = await router.RouteAsync(IconPluginId, "session-1", "c1", Get(foreignIconId), CancellationToken.None);
-		var missing = await router.RouteAsync(IconPluginId, "session-1", "c2", Get(Guid.NewGuid()), CancellationToken.None);
+		var found = await router.RouteAsync(IconPluginId,
+			"session-1",
+			"c1",
+			Get(foreignIconId),
+			CancellationToken.None);
+		var missing = await router.RouteAsync(IconPluginId,
+			"session-1",
+			"c2",
+			Get(Guid.NewGuid()),
+			CancellationToken.None);
 
 		var handle = found.Data?.Deserialize<UiResourceHandleDto>(PluginProtocolJson.Options);
 		Assert.Multiple(() =>
@@ -1778,7 +1898,8 @@ public class PluginCallbackRouterTests
 		var spotifyId = host.Icon(host.PluginPack(IconPluginId, "logos")!, "spotify").Id;
 		var sink = new CapturingUiSessionSink();
 		var router = IconPackRouter(host, uiSessions: sink);
-		using var tree = JsonDocument.Parse("""{"type":"image","source":{"type":"plugin-icon","reference":"logos/spotify"}}""");
+		using var tree
+			= JsonDocument.Parse("""{"type":"image","source":{"type":"plugin-icon","reference":"logos/spotify"}}""");
 
 		await router.RouteAsync(IconPluginId,
 			"session-1",
@@ -1810,7 +1931,9 @@ public class PluginCallbackRouterTests
 		}
 
 		public UiSessionIngestResult PublishPatch(string providerId, string sessionId, UiRawJson patch)
-			=> UiSessionIngestResult.Accept();
+		{
+			return UiSessionIngestResult.Accept();
+		}
 
 		public void PublishFault(string providerId, string sessionId, string code, string? message)
 		{
@@ -1829,20 +1952,30 @@ public class PluginCallbackRouterTests
 			remove { }
 		}
 
-		public MacroDeckHost.Application.Plugins.Assets.AssetOperationResult Begin(string pluginId,
+		public MacroDeckHost.Application.Plugins.Assets.AssetOperationResult Begin(
+			string pluginId,
 			string assetId,
 			string kind,
 			string mimeType,
 			int totalBytes,
-			string contentHash) => throw new NotSupportedException();
+			string contentHash)
+		{
+			throw new NotSupportedException();
+		}
 
-		public MacroDeckHost.Application.Plugins.Assets.AssetOperationResult Chunk(string pluginId,
+		public MacroDeckHost.Application.Plugins.Assets.AssetOperationResult Chunk(
+			string pluginId,
 			string assetId,
 			int index,
-			ReadOnlySpan<byte> data) => throw new NotSupportedException();
+			ReadOnlySpan<byte> data)
+		{
+			throw new NotSupportedException();
+		}
 
 		public MacroDeckHost.Application.Plugins.Assets.AssetOperationResult Commit(string pluginId, string assetId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public void DropSession(string pluginId)
 		{
@@ -1850,7 +1983,9 @@ public class PluginCallbackRouterTests
 	}
 
 	private static JsonElement Arg<T>(T value)
-		=> JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	{
+		return JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	}
 
 	private sealed class FakeHostLockState : IHostLockState
 	{
@@ -1863,19 +1998,27 @@ public class PluginCallbackRouterTests
 	{
 		public HashSet<(string PluginId, string CorrelationId)> LiveExecuteCorrelations { get; } = [];
 
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
 		public bool IsLiveActionExecute(string pluginId, string correlationId)
-			=> LiveExecuteCorrelations.Contains((pluginId, correlationId));
+		{
+			return LiveExecuteCorrelations.Contains((pluginId, correlationId));
+		}
 	}
 
 	private sealed class FakeActionInteractions : IActionInteractions
@@ -1885,13 +2028,17 @@ public class PluginCallbackRouterTests
 			get;
 		} = [];
 
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
-			=> ItemPickerRequests.Add((originClientId, instanceId, kind));
+		{
+			ItemPickerRequests.Add((originClientId, instanceId, kind));
+		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)
@@ -1903,27 +2050,60 @@ public class PluginCallbackRouterTests
 	{
 		public int Capacity => 100;
 
-		public UserNotification? Raise(UserNotificationDraft draft) => null;
+		public UserNotification? Raise(UserNotificationDraft draft)
+		{
+			return null;
+		}
 
-		public UserNotification? RaiseIfAbsent(UserNotificationDraft draft) => null;
+		public UserNotification? RaiseIfAbsent(UserNotificationDraft draft)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<UserNotification> Snapshot() => [];
+		public IReadOnlyList<UserNotification> Snapshot()
+		{
+			return [];
+		}
 
-		public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress) => false;
+		public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress)
+		{
+			return false;
+		}
 
-		public bool DismissByKey(string dedupeKey) => false;
+		public bool DismissByKey(string dedupeKey)
+		{
+			return false;
+		}
 
-		public bool Dismiss(string id) => false;
+		public bool Dismiss(string id)
+		{
+			return false;
+		}
 
-		public bool Retire(string dedupeKey) => false;
+		public bool Retire(string dedupeKey)
+		{
+			return false;
+		}
 
-		public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+		public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
+		{
+			return null;
+		}
 
-		public bool MarkRead(string id) => false;
+		public bool MarkRead(string id)
+		{
+			return false;
+		}
 
-		public bool MarkAllRead() => false;
+		public bool MarkAllRead()
+		{
+			return false;
+		}
 
-		public bool DismissAll() => false;
+		public bool DismissAll()
+		{
+			return false;
+		}
 
 		public event Action? Changed
 		{
@@ -1934,23 +2114,41 @@ public class PluginCallbackRouterTests
 
 	private sealed class FakeDeckNavigator : IDeckNavigator
 	{
-		public Task ChangeFolderAsync(string folderId,
+		public Task ChangeFolderAsync(
+			string folderId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ChangeProfileAsync(string profileId,
+		public Task ChangeProfileAsync(
+			string profileId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<DeckFolder> GetFolders() => [];
+		public IReadOnlyList<DeckFolder> GetFolders()
+		{
+			return [];
+		}
 
-		public IReadOnlyList<DeckProfile> GetProfiles() => [];
+		public IReadOnlyList<DeckProfile> GetProfiles()
+		{
+			return [];
+		}
 	}
 
 	private sealed class FakeScriptApi : IScriptApi
@@ -1958,9 +2156,13 @@ public class PluginCallbackRouterTests
 		public List<(string ScriptId, IReadOnlyDictionary<string, object?>? Inputs, string? OriginClientId, string?
 			OwnerWidgetId)> Runs { get; } = [];
 
-		public IReadOnlyList<Script> GetScripts() => [];
+		public IReadOnlyList<Script> GetScripts()
+		{
+			return [];
+		}
 
-		public Task<ActionResult> RunAsync(string scriptId,
+		public Task<ActionResult> RunAsync(
+			string scriptId,
 			IReadOnlyDictionary<string, object?>? inputs = null,
 			string? originClientId = null,
 			string? ownerWidgetId = null,
@@ -1973,60 +2175,91 @@ public class PluginCallbackRouterTests
 
 	private sealed class FakeWidgetApi : IWidgetApi
 	{
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return [];
+		}
 
-		public bool Exists(string widgetId) => false;
+		public bool Exists(string widgetId)
+		{
+			return false;
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task<WidgetStateWriteResult> SetStateAsync(
 			string widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
-		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+		public Task<WidgetStateWriteResult> AdvanceStateAsync(
+			string widgetId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 	}
 
 	private sealed class FakeWidgetIconInvalidator : IWidgetIconInvalidator
 	{
 		public List<(string IntegrationId, string ActionId)> Invalidations { get; } = [];
 
-		public void Invalidate(string integrationId, string actionId) => Invalidations.Add((integrationId, actionId));
+		public void Invalidate(string integrationId, string actionId)
+		{
+			Invalidations.Add((integrationId, actionId));
+		}
 	}
 
 	private sealed class FakeUserVariableApi : IUserVariableApi
 	{
-		public Task<UserVariableWriteResult> ApplyAsync(string name,
+		public Task<UserVariableWriteResult> ApplyAsync(
+			string name,
 			string? ownerWidgetId,
 			UserVariableOperation operation,
 			string? value,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(UserVariableWriteResult.Applied());
+		{
+			return Task.FromResult(UserVariableWriteResult.Applied());
+		}
 	}
 
 	private sealed class FakeVariableService : IVariableService
 	{
 		private readonly Dictionary<Guid, VariableEntity> _byId = [];
 
-		public string? ValueOf(Guid id) => _byId.TryGetValue(id, out var entity) ? entity.Value : null;
+		public string? ValueOf(Guid id)
+		{
+			return _byId.TryGetValue(id, out var entity) ? entity.Value : null;
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetAll()
-			=> Task.FromResult<IReadOnlyList<VariableEntity>>([.. _byId.Values]);
+		{
+			return Task.FromResult<IReadOnlyList<VariableEntity>>([.. _byId.Values]);
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> GetById(Guid id)
-			=> Task.FromResult(_byId.GetValueOrDefault(id));
+		{
+			return Task.FromResult(_byId.GetValueOrDefault(id));
+		}
 
 		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
-			=> Task.FromResult(_byId.Values.FirstOrDefault(entity => entity.Name == name));
+		{
+			return Task.FromResult(_byId.Values.FirstOrDefault(entity => entity.Name == name));
+		}
 
-		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(string name,
+		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
+			string name,
 			VariableScope scope,
 			string? scopeRefId,
 			DomainVariableType type,
@@ -2034,20 +2267,32 @@ public class PluginCallbackRouterTests
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
 			VariableTemplateSource? templateSource = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+		public Task<Result<VariableEntity, VariableError>> SetValue(
+			Guid id,
 			object? value,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
+		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
+			Guid id,
 			string? name,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
 			VariableTemplateSource? templateSource = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+		public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
 			string integrationId,
@@ -2083,18 +2328,24 @@ public class PluginCallbackRouterTests
 			return Task.FromResult(Result.Ok<VariableEntity, VariableError>(entity));
 		}
 
-		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+			string integrationId,
 			string resourceId,
 			string name,
 			Domain.Enums.VariableType type,
 			int? decimalPlaces,
-			VariableDeclaration? declaration = null) =>
+			VariableDeclaration? declaration = null)
+		{
 			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> GetByDefinition(MacroDeck.Sdk.Identity.QualifiedId definitionId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
+			string integrationId,
 			Guid id,
 			object? value,
 			VariableBounds? bounds = null)
@@ -2113,10 +2364,13 @@ public class PluginCallbackRouterTests
 			return Task.FromResult(Result.Ok<VariableEntity, VariableError>(entity));
 		}
 
-		public Task<Result<VariableError>> SetIntegrationVariableAvailability(string integrationId,
+		public Task<Result<VariableError>> SetIntegrationVariableAvailability(
+			string integrationId,
 			Guid id,
 			bool available)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
 		{
@@ -2135,20 +2389,31 @@ public class PluginCallbackRouterTests
 		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-			=> Task.FromResult<IReadOnlyList<VariableEntity>>([
+		{
+			return Task.FromResult<IReadOnlyList<VariableEntity>>([
 				.. _byId.Values.Where(entity => entity.OwnerIntegrationId == integrationId)
 			]);
+		}
 
-		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId) => throw new NotSupportedException();
+		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task UpsertWidgetVariable(VariableScope scope,
+		public Task UpsertWidgetVariable(
+			VariableScope scope,
 			string scopeRefId,
 			string name,
 			DomainVariableType type,
-			object? value) => throw new NotSupportedException();
+			object? value)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private (PluginCallbackRouter Router, NotificationManager Manager) NotificationRouter()
@@ -2162,12 +2427,15 @@ public class PluginCallbackRouterTests
 		return (Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, 100, refillPerSecond: 100),
+			new HostCallbackThrottle(_time, 100, 100),
 			notificationManager: manager), manager);
 	}
 
 	private static HostInvokePayload Notification(string operation, object arguments)
-		=> new() { Api = HostApis.Notifications, Operation = operation, Arguments = Arg(arguments) };
+	{
+		return new HostInvokePayload
+			{ Api = HostApis.Notifications, Operation = operation, Arguments = Arg(arguments) };
+	}
 
 	[Test]
 	public async Task A_plugin_shows_a_notification_as_itself_whatever_the_payload_claims()
@@ -2317,7 +2585,7 @@ public class PluginCallbackRouterTests
 		var router = Router(_variableService,
 			_actionInteractions,
 			_invoker,
-			new HostCallbackThrottle(_time, 100, refillPerSecond: 100));
+			new HostCallbackThrottle(_time, 100, 100));
 
 		var result = await router.RouteAsync("plugin.a",
 			"c1",
@@ -2331,10 +2599,14 @@ public class PluginCallbackRouterTests
 internal sealed class NoOpUiSessionSink : IUiSessionSink
 {
 	public UiSessionIngestResult PublishSnapshot(string providerId, string sessionId, UiRawJson tree)
-		=> UiSessionIngestResult.Accept();
+	{
+		return UiSessionIngestResult.Accept();
+	}
 
 	public UiSessionIngestResult PublishPatch(string providerId, string sessionId, UiRawJson patch)
-		=> UiSessionIngestResult.Accept();
+	{
+		return UiSessionIngestResult.Accept();
+	}
 
 	public void PublishFault(string providerId, string sessionId, string code, string? message)
 	{

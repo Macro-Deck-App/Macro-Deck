@@ -26,7 +26,7 @@ public sealed class HostCallbackThrottle
 			var elapsedSeconds = (now - bucket.LastRefillAt).TotalSeconds;
 			if (elapsedSeconds > 0)
 			{
-				bucket.Tokens = Math.Min(_capacity, bucket.Tokens + (elapsedSeconds * _refillPerSecond));
+				bucket.Tokens = Math.Min(_capacity, bucket.Tokens + elapsedSeconds * _refillPerSecond);
 				bucket.LastRefillAt = now;
 			}
 

@@ -55,7 +55,8 @@ public sealed class PluginIconPackUploads : IPluginIconPackUploads, IDisposable
 				return;
 			}
 
-			foreach (var hash in uploads.Keys.Where(hash => !contentHashes.Contains(hash, StringComparer.Ordinal)).ToList())
+			foreach (var hash in uploads.Keys.Where(hash => !contentHashes.Contains(hash, StringComparer.Ordinal))
+				.ToList())
 			{
 				uploads.Remove(hash);
 			}
@@ -93,10 +94,15 @@ public sealed class PluginIconPackUploads : IPluginIconPackUploads, IDisposable
 	}
 
 	private bool HasDevelopmentSession(string pluginId)
-		=> _sessions.Snapshot()
-			.Any(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal) &&
-				session.State == PluginSessionState.Connected &&
-				session.Origin == PluginSessionOrigin.SelfRegistered);
+	{
+		return _sessions.Snapshot()
+			.Any(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal)
+				&& session.State == PluginSessionState.Connected
+				&& session.Origin == PluginSessionOrigin.SelfRegistered);
+	}
 
-	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e) => Release(e.PluginId);
+	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e)
+	{
+		Release(e.PluginId);
+	}
 }

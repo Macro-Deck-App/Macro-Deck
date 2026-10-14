@@ -46,7 +46,8 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 		return Result.Ok<string, PortabilityError>(fileName);
 	}
 
-	public async Task<Result<byte[], PortabilityError>> Export(Guid profileId,
+	public async Task<Result<byte[], PortabilityError>> Export(
+		Guid profileId,
 		PortableExportOptions options,
 		CancellationToken cancellationToken)
 	{
@@ -90,7 +91,8 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 		return Result.Ok<byte[], PortabilityError>(bytes);
 	}
 
-	public async Task<Result<ProfileEntity, PortabilityError>> Import(byte[] archiveBytes,
+	public async Task<Result<ProfileEntity, PortabilityError>> Import(
+		byte[] archiveBytes,
 		string? password,
 		CancellationToken cancellationToken)
 	{
@@ -111,7 +113,8 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 		return await ImportContent(content, outcome.Icons, outcome.Fonts, cancellationToken);
 	}
 
-	public async Task<Result<ProfileEntity, PortabilityError>> ImportContent(PortableContent content,
+	public async Task<Result<ProfileEntity, PortabilityError>> ImportContent(
+		PortableContent content,
 		IReadOnlyList<PortableIconFile> iconFiles,
 		IReadOnlyList<PortableFontFile> fontFiles,
 		CancellationToken cancellationToken)
@@ -166,7 +169,8 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 		return idMap;
 	}
 
-	private (ProfileEntity Profile, List<FolderEntity> Folders) BuildEntities(ProfileFile source,
+	private (ProfileEntity Profile, List<FolderEntity> Folders) BuildEntities(
+		ProfileFile source,
 		IReadOnlyDictionary<Guid, Guid> assetIdMap,
 		IReadOnlyDictionary<Guid, Guid> mintedIds)
 	{
@@ -240,7 +244,8 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 		return (profile, folders);
 	}
 
-	private static Guid? SelectImportedStartFolder(IReadOnlyCollection<ProfileFolder> folders,
+	private static Guid? SelectImportedStartFolder(
+		IReadOnlyCollection<ProfileFolder> folders,
 		bool hasCompleteSourceChronology)
 	{
 		var roots = folders.Where(folder => folder.ParentId is null).ToList();

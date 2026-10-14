@@ -27,7 +27,8 @@ internal sealed class IssuesCapabilityHandler(IEnumerable<IPluginIntegration> in
 	public string Kind => CapabilityKinds.Issues;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -36,6 +37,7 @@ internal sealed class IssuesCapabilityHandler(IEnumerable<IPluginIntegration> in
 					Kind = CapabilityKinds.Issues, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -79,7 +81,8 @@ internal sealed class IssuesCapabilityHandler(IEnumerable<IPluginIntegration> in
 		return CapabilityInvocationResult.Ok(new IssueListResult { Issues = all });
 	}
 
-	private async Task<CapabilityInvocationResult> ResolveAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> ResolveAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<IssueResolveArguments>(PluginProtocolJson.Options);

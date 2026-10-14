@@ -45,7 +45,7 @@ internal sealed class RemoteVariableSubscriptionsTests
 
 		Assert.That(subscribedCount,
 			Is.EqualTo(ProtocolLimits.MaxVariableSubscriptions),
-			"the host's own bookkeeping must clamp to the same limit the plugin-side SDK enforces, or the " +
-			"two sides disagree about what is actually subscribed");
+			"the host's own bookkeeping must clamp to the same limit the plugin-side SDK enforces, or the "
+			+ "two sides disagree about what is actually subscribed");
 	}
 }

@@ -25,7 +25,7 @@ public class LottieIconProcessingTests
 	[Test]
 	public async Task Process_LottieJson_ProducesAnimatedWebp()
 	{
-		var bytes = Encoding.UTF8.GetBytes(BuildLottie(durationFrames: 30));
+		var bytes = Encoding.UTF8.GetBytes(BuildLottie(30));
 
 		var result = await _processor.Process(new MemoryStream(bytes), "spinner.json", CancellationToken.None);
 
@@ -53,7 +53,7 @@ public class LottieIconProcessingTests
 	[Test]
 	public async Task Process_Lottie_KeepsFrameDelaysAndLoopsInEveryRendition()
 	{
-		var bytes = Encoding.UTF8.GetBytes(BuildLottie(durationFrames: 30));
+		var bytes = Encoding.UTF8.GetBytes(BuildLottie(30));
 
 		var result = await _processor.Process(new MemoryStream(bytes), "spinner.json", CancellationToken.None);
 
@@ -78,7 +78,7 @@ public class LottieIconProcessingTests
 	[Test]
 	public async Task Process_Lottie_RendersTheAnimatedContent()
 	{
-		var bytes = Encoding.UTF8.GetBytes(BuildLottie(durationFrames: 30));
+		var bytes = Encoding.UTF8.GetBytes(BuildLottie(30));
 
 		var result = await _processor.Process(new MemoryStream(bytes), "spinner.json", CancellationToken.None);
 
@@ -98,7 +98,7 @@ public class LottieIconProcessingTests
 	[Test]
 	public async Task Process_DotLottieArchive_ProducesAnimatedWebp()
 	{
-		var bytes = BuildDotLottie(BuildLottie(durationFrames: 15));
+		var bytes = BuildDotLottie(BuildLottie(15));
 
 		var result = await _processor.Process(new MemoryStream(bytes), "spinner.lottie", CancellationToken.None);
 
@@ -114,8 +114,8 @@ public class LottieIconProcessingTests
 	[Test]
 	public async Task Process_LottieWithByteOrderMark_ProducesAnimatedWebp()
 	{
-		var bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true)
-			.GetBytes(BuildLottie(durationFrames: 15));
+		var bytes = new UTF8Encoding(true)
+			.GetBytes(BuildLottie(15));
 
 		var result = await _processor.Process(new MemoryStream(bytes), "bom.json", CancellationToken.None);
 
@@ -148,7 +148,7 @@ public class LottieIconProcessingTests
 	[Test]
 	public async Task Process_SingleFrameLottie_IsNotAnimated()
 	{
-		var bytes = Encoding.UTF8.GetBytes(BuildLottie(durationFrames: 1));
+		var bytes = Encoding.UTF8.GetBytes(BuildLottie(1));
 
 		var result = await _processor.Process(new MemoryStream(bytes), "still.json", CancellationToken.None);
 
@@ -163,7 +163,7 @@ public class LottieIconProcessingTests
 	[Test]
 	public void LooksLikeLottie_DoesNotClaimOrdinaryArchives()
 	{
-		var zip = BuildDotLottie(BuildLottie(durationFrames: 5));
+		var zip = BuildDotLottie(BuildLottie(5));
 
 		Assert.Multiple(() =>
 		{
@@ -190,7 +190,7 @@ public class LottieIconProcessingTests
 	[Test]
 	public async Task Process_LottieLongerThanTheFrameBudget_Fails()
 	{
-		var bytes = Encoding.UTF8.GetBytes(BuildLottie(durationFrames: 600));
+		var bytes = Encoding.UTF8.GetBytes(BuildLottie(600));
 
 		var result = await _processor.Process(new MemoryStream(bytes), "long.json", CancellationToken.None);
 
@@ -205,7 +205,7 @@ public class LottieIconProcessingTests
 	[Test]
 	public async Task Process_LottieAuthoredAt60Fps_IsSampledAtThirty()
 	{
-		var bytes = Encoding.UTF8.GetBytes(BuildLottie(durationFrames: 120, frameRate: 60));
+		var bytes = Encoding.UTF8.GetBytes(BuildLottie(120, 60));
 
 		var result = await _processor.Process(new MemoryStream(bytes), "fast.json", CancellationToken.None);
 
@@ -215,53 +215,57 @@ public class LottieIconProcessingTests
 	}
 
 	private static string BuildLottie(int durationFrames, int frameRate = 30)
-		=> $$"""
-			 {
-			 	"v": "5.7.4", "fr": {{frameRate}}, "ip": 0, "op": {{durationFrames}}, "w": 200, "h": 200,
-			 	"nm": "test", "ddd": 0, "assets": [],
-			 	"layers": [{
-			 		"ddd": 0, "ind": 1, "ty": 4, "nm": "square", "sr": 1, "ao": 0, "bm": 0,
-			 		"ip": 0, "op": {{durationFrames}}, "st": 0,
-			 		"ks": {
-			 			"o": { "a": 0, "k": 100 },
-			 			"r": { "a": 0, "k": 0 },
-			 			"p": { "a": 1, "k": [
-			 				{ "t": 0, "s": [25, 100, 0], "e": [175, 100, 0],
-			 				  "i": { "x": [1], "y": [1] }, "o": { "x": [0], "y": [0] } },
-			 				{ "t": {{durationFrames}}, "s": [175, 100, 0] }
-			 			] },
-			 			"a": { "a": 0, "k": [0, 0, 0] },
-			 			"s": { "a": 0, "k": [100, 100, 100] }
-			 		},
-			 		"shapes": [{ "ty": "gr", "nm": "group", "it": [
-			 			{ "ty": "rc", "d": 1, "s": { "a": 0, "k": [40, 40] },
-			 			  "p": { "a": 0, "k": [0, 0] }, "r": { "a": 0, "k": 0 } },
-			 			{ "ty": "fl", "c": { "a": 0, "k": [1, 0, 0, 1] }, "o": { "a": 0, "k": 100 }, "r": 1 },
-			 			{ "ty": "tr", "p": { "a": 0, "k": [0, 0] }, "a": { "a": 0, "k": [0, 0] },
-			 			  "s": { "a": 0, "k": [100, 100] }, "r": { "a": 0, "k": 0 }, "o": { "a": 0, "k": 100 } }
-			 		] }]
-			 	}]
-			 }
-			 """;
+	{
+		return $$"""
+				 {
+				 	"v": "5.7.4", "fr": {{frameRate}}, "ip": 0, "op": {{durationFrames}}, "w": 200, "h": 200,
+				 	"nm": "test", "ddd": 0, "assets": [],
+				 	"layers": [{
+				 		"ddd": 0, "ind": 1, "ty": 4, "nm": "square", "sr": 1, "ao": 0, "bm": 0,
+				 		"ip": 0, "op": {{durationFrames}}, "st": 0,
+				 		"ks": {
+				 			"o": { "a": 0, "k": 100 },
+				 			"r": { "a": 0, "k": 0 },
+				 			"p": { "a": 1, "k": [
+				 				{ "t": 0, "s": [25, 100, 0], "e": [175, 100, 0],
+				 				  "i": { "x": [1], "y": [1] }, "o": { "x": [0], "y": [0] } },
+				 				{ "t": {{durationFrames}}, "s": [175, 100, 0] }
+				 			] },
+				 			"a": { "a": 0, "k": [0, 0, 0] },
+				 			"s": { "a": 0, "k": [100, 100, 100] }
+				 		},
+				 		"shapes": [{ "ty": "gr", "nm": "group", "it": [
+				 			{ "ty": "rc", "d": 1, "s": { "a": 0, "k": [40, 40] },
+				 			  "p": { "a": 0, "k": [0, 0] }, "r": { "a": 0, "k": 0 } },
+				 			{ "ty": "fl", "c": { "a": 0, "k": [1, 0, 0, 1] }, "o": { "a": 0, "k": 100 }, "r": 1 },
+				 			{ "ty": "tr", "p": { "a": 0, "k": [0, 0] }, "a": { "a": 0, "k": [0, 0] },
+				 			  "s": { "a": 0, "k": [100, 100] }, "r": { "a": 0, "k": 0 }, "o": { "a": 0, "k": 100 } }
+				 		] }]
+				 	}]
+				 }
+				 """;
+	}
 
 	private static string BuildImageLayerLottie()
-		=> """
-		   {
-		   	"v": "5.7.4", "fr": 30, "ip": 0, "op": 15, "w": 200, "h": 200, "nm": "asset", "ddd": 0,
-		   	"assets": [{ "id": "image_0", "w": 40, "h": 40, "u": "images/", "p": "img_0.png", "e": 0 }],
-		   	"layers": [{
-		   		"ddd": 0, "ind": 1, "ty": 2, "nm": "logo", "refId": "image_0", "sr": 1, "ao": 0, "bm": 0,
-		   		"ip": 0, "op": 15, "st": 0,
-		   		"ks": {
-		   			"o": { "a": 0, "k": 100 },
-		   			"r": { "a": 0, "k": 0 },
-		   			"p": { "a": 0, "k": [100, 100, 0] },
-		   			"a": { "a": 0, "k": [20, 20, 0] },
-		   			"s": { "a": 0, "k": [500, 500, 100] }
-		   		}
-		   	}]
-		   }
-		   """;
+	{
+		return """
+			   {
+			   	"v": "5.7.4", "fr": 30, "ip": 0, "op": 15, "w": 200, "h": 200, "nm": "asset", "ddd": 0,
+			   	"assets": [{ "id": "image_0", "w": 40, "h": 40, "u": "images/", "p": "img_0.png", "e": 0 }],
+			   	"layers": [{
+			   		"ddd": 0, "ind": 1, "ty": 2, "nm": "logo", "refId": "image_0", "sr": 1, "ao": 0, "bm": 0,
+			   		"ip": 0, "op": 15, "st": 0,
+			   		"ks": {
+			   			"o": { "a": 0, "k": 100 },
+			   			"r": { "a": 0, "k": 0 },
+			   			"p": { "a": 0, "k": [100, 100, 0] },
+			   			"a": { "a": 0, "k": [20, 20, 0] },
+			   			"s": { "a": 0, "k": [500, 500, 100] }
+			   		}
+			   	}]
+			   }
+			   """;
+	}
 
 	private static byte[] CreateSolidPng(int width, int height, Rgba32 color)
 	{
@@ -274,7 +278,7 @@ public class LottieIconProcessingTests
 	private static byte[] BuildDotLottie(string animationJson, params (string Name, byte[] Content)[] assets)
 	{
 		using var buffer = new MemoryStream();
-		using (var archive = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+		using (var archive = new ZipArchive(buffer, ZipArchiveMode.Create, true))
 		{
 			WriteEntry(archive,
 				"manifest.json",

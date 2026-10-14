@@ -40,11 +40,11 @@ public class PluginPackReporterTests
 
 			var output = new StringWriter();
 			var error = new StringWriter();
-			var console = new CliConsole(Verbosity.Normal, noColor: true, output, error);
+			var console = new CliConsole(Verbosity.Normal, true, output, error);
 
 			var result = PluginPackResult.Fail(reason, "Something about this pack went wrong.");
 
-			var exitCode = await PluginPackReporter.ReportAsync(console, result, showDigest: false);
+			var exitCode = await PluginPackReporter.ReportAsync(console, result, false);
 
 			Assert.Multiple(() =>
 			{

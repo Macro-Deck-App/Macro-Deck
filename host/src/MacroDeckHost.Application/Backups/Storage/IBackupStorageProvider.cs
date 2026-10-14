@@ -46,7 +46,8 @@ public interface IBackupStorageProvider
 
 	Task<Result<Stream, BackupError>> OpenRead(string storageId, CancellationToken cancellationToken = default);
 
-	Task<Result<BackupStorageObject, BackupError>> Write(BackupStorageWriteRequest request,
+	Task<Result<BackupStorageObject, BackupError>> Write(
+		BackupStorageWriteRequest request,
 		CancellationToken cancellationToken = default);
 
 	Task<Result<BackupError>> Delete(string storageId, CancellationToken cancellationToken = default);

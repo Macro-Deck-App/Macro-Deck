@@ -23,7 +23,7 @@ internal sealed class IntegrationBatteryProviderContext : IBatteryProviderContex
 
 	public Task PublishAsync(IReadOnlyList<BatteryDevice> devices, CancellationToken cancellationToken = default)
 	{
-		_registry.Publish(_integrationId, sessionId: null, devices);
+		_registry.Publish(_integrationId, null, devices);
 		return Task.CompletedTask;
 	}
 

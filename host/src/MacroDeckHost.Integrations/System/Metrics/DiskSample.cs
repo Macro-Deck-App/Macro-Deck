@@ -17,7 +17,11 @@ public sealed record DiskActivity(
 	double? ReadActivePercent,
 	double? WriteActivePercent);
 
-internal readonly record struct DiskCounters(ulong ReadBytes, ulong WriteBytes, TimeSpan? ReadTime, TimeSpan? WriteTime);
+internal readonly record struct DiskCounters(
+	ulong ReadBytes,
+	ulong WriteBytes,
+	TimeSpan? ReadTime,
+	TimeSpan? WriteTime);
 
 internal sealed record DiskReading(
 	string MountPoint,

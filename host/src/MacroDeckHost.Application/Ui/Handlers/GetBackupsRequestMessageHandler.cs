@@ -15,7 +15,8 @@ public sealed class GetBackupsRequestMessageHandler : IUiTransportMessageHandler
 	private readonly IRestoreService _restoreService;
 	private readonly IApplicationRestartService _restartService;
 
-	public GetBackupsRequestMessageHandler(IBackupService backupService,
+	public GetBackupsRequestMessageHandler(
+		IBackupService backupService,
 		IBackupStorageRegistry storageRegistry,
 		IAppPreferenceService preferences,
 		IRestoreService restoreService,
@@ -54,8 +55,12 @@ public sealed class GetBackupsRequestMessageHandler : IUiTransportMessageHandler
 	}
 
 	private BackupSummary ToSummary(BackupDescriptor descriptor)
-		=> BackupDtoMapper.ToSummary(descriptor, DisplayName(descriptor.ProviderId));
+	{
+		return BackupDtoMapper.ToSummary(descriptor, DisplayName(descriptor.ProviderId));
+	}
 
 	private string DisplayName(string providerId)
-		=> _storageRegistry.Find(providerId)?.DisplayName ?? providerId;
+	{
+		return _storageRegistry.Find(providerId)?.DisplayName ?? providerId;
+	}
 }

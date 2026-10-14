@@ -30,7 +30,7 @@ public class UiConfigVocabularyTests
 		"string", "number", "boolean", "choice", "password", "secret", "dynamic-choice", "autocomplete",
 		"multiselect", "color", "file", "folder", "hotkey", "duration", "datetime", "json", "code", "keyvalue",
 		"object", "array", "ipaddress", "url", "icon", "image", "keyboard-sequence", "keyboard-combo",
-		"widget-target",
+		"widget-target"
 	];
 
 	/// <summary>The eight high-level controls, which name editors the application already ships rather than a
@@ -38,20 +38,20 @@ public class UiConfigVocabularyTests
 	private static readonly string[] _expectedMacroDeckInputs =
 	[
 		"actions-list-editor", "action-picker", "variable-picker", "device-picker", "integration-picker",
-		"icon-display", "state-mapping-editor", "thresholds",
+		"icon-display", "state-mapping-editor", "thresholds"
 	];
 
 	/// <summary>The seventeen chrome names, in the order this package declares them.</summary>
 	private static readonly string[] _expectedChrome =
 	[
 		"flow", "step", "stack", "tabs", "tab", "heading", "prose", "instructions", "instruction",
-		"copy-value", "link", "advanced-section", "divider", "banner", "validation-message", "busy", "button",
+		"copy-value", "link", "advanced-section", "divider", "banner", "validation-message", "busy", "button"
 	];
 
 	/// <summary>The three regions of a widget's configuration surface, which follow the chrome.</summary>
 	private static readonly string[] _expectedWidgetChrome =
 	[
-		"widget-configuration", "widget-properties", "widget-editor",
+		"widget-configuration", "widget-properties", "widget-editor"
 	];
 
 	private static readonly string[] _expectedLaterChrome = ["status", "menu", "dialog"];
@@ -59,7 +59,7 @@ public class UiConfigVocabularyTests
 	private static readonly string[] _expectedEvents =
 	[
 		"change", "submit", "cancel", "back", "activate", "expand", "collapse", "open", "filter", "reload",
-		"add", "remove", "provide",
+		"add", "remove", "provide"
 	];
 
 	/// <summary>Regularised spellings a reasonable person would reach for and this vocabulary must not
@@ -75,7 +75,9 @@ public class UiConfigVocabularyTests
 	private static readonly string[] _forbiddenEvents = ["click", "input", "blur", "focus"];
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	[Test]
 	public void The_configuration_primitive_set_is_the_control_names_the_mapping_produces_then_macro_decks_own()
@@ -91,8 +93,8 @@ public class UiConfigVocabularyTests
 		{
 			Assert.That(UiConfigPrimitives.WellKnown,
 				Is.EqualTo(expected).AsCollection,
-				"the primitive vocabulary is the 27 control names, then the 8 high-level controls, then the " +
-				"17 chrome names, then the 3 widget configuration regions, then later chrome, in order");
+				"the primitive vocabulary is the 27 control names, then the 8 high-level controls, then the "
+				+ "17 chrome names, then the 3 widget configuration regions, then later chrome, in order");
 			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(58));
 			Assert.That(UiConfigPrimitives.WellKnown.Distinct(StringComparer.Ordinal).Count(),
 				Is.EqualTo(58));
@@ -216,7 +218,13 @@ public class UiConfigVocabularyTests
 				Key = "apply",
 				Label = "Apply preset",
 				Icon = "plus",
-				Events = [UiEventHandler.On(UiConfigEvents.Activate, () => { })],
+				Events =
+				[
+					UiEventHandler.On(UiConfigEvents.Activate,
+						() =>
+						{
+						})
+				]
 			});
 
 		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Button);
@@ -232,8 +240,11 @@ public class UiConfigVocabularyTests
 			new UiActionsListEditor
 			{
 				Key = "flows",
-				Binding = Bind.Custom(() => JsonSerializer.SerializeToElement(Array.Empty<object>()), _ => { }),
-				CanRun = true,
+				Binding = Bind.Custom(() => JsonSerializer.SerializeToElement(Array.Empty<object>()),
+					_ =>
+					{
+					}),
+				CanRun = true
 			});
 
 		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.ActionsListEditor);
@@ -241,7 +252,8 @@ public class UiConfigVocabularyTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(node.Properties.Keys,
-				Is.EquivalentTo(new[] { UiConfigProperties.Events, UiConfigProperties.Value, UiConfigProperties.CanRun }));
+				Is.EquivalentTo(
+					new[] { UiConfigProperties.Events, UiConfigProperties.Value, UiConfigProperties.CanRun }));
 			Assert.That(node.Properties[UiConfigProperties.Events].EnumerateArray().Select(e => e.GetString()),
 				Is.EqualTo(new[] { UiConfigEvents.Change }).AsCollection);
 		});
@@ -257,7 +269,13 @@ public class UiConfigVocabularyTests
 				OffersStateProvider = true,
 				OffersIconProvider = false,
 				StateProviderBlockId = "b1",
-				Events = [UiEventHandler.On(UiConfigEvents.Provide, () => { })],
+				Events =
+				[
+					UiEventHandler.On(UiConfigEvents.Provide,
+						() =>
+						{
+						})
+				]
 			});
 
 		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.ActionsListEditor);
@@ -310,10 +328,12 @@ public class UiConfigVocabularyTests
 	public void A_dynamic_choice_emits_the_searchable_flag_only_when_authored()
 	{
 		var plain = Walk(UiViewBuilder.Build(ConfigSurface(),
-				Configure(WithOptions(new UiDynamicChoiceInput { Key = "counter" }))).Root)
+					Configure(WithOptions(new UiDynamicChoiceInput { Key = "counter" })))
+				.Root)
 			.Single(n => n.Type == UiConfigPrimitives.DynamicChoice);
 		var searchable = Walk(UiViewBuilder.Build(ConfigSurface(),
-				Configure(WithOptions(new UiDynamicChoiceInput { Key = "counter", Searchable = true }))).Root)
+					Configure(WithOptions(new UiDynamicChoiceInput { Key = "counter", Searchable = true })))
+				.Root)
 			.Single(n => n.Type == UiConfigPrimitives.DynamicChoice);
 
 		Assert.Multiple(() =>
@@ -330,14 +350,21 @@ public class UiConfigVocabularyTests
 	/// from a state would make this fixture depend on a load's timing.
 	/// </summary>
 	private static UiFlow BuildEveryPrimitive()
-		=> new()
+	{
+		return new UiFlow
 		{
 			Key = "setup",
 			Title = "Setup",
 			StepId = "credentials",
 			State = "step",
 			CanSubmit = true,
-			Events = [UiEventHandler.On(UiConfigEvents.Submit, () => { })],
+			Events =
+			[
+				UiEventHandler.On(UiConfigEvents.Submit,
+					() =>
+					{
+					})
+			],
 			Children =
 			[
 				new UiStep
@@ -355,14 +382,14 @@ public class UiConfigVocabularyTests
 							Min = 1,
 							Max = 10,
 							Step = 0.5,
-							ShowSlider = true,
+							ShowSlider = true
 						}),
 						Configure(new UiBooleanInput
 						{
 							Key = "toggle",
 							Segmented = true,
 							FalseLabel = "Off",
-							TrueLabel = "On",
+							TrueLabel = "On"
 						}),
 						Configure(WithOptions(new UiChoiceInput
 							{ Key = "choice", Segmented = true, HideLabel = true })),
@@ -376,7 +403,8 @@ public class UiConfigVocabularyTests
 						Configure(
 							WithOptions(new UiMultiSelectInput { Key = "orderedMultiSelect", Reorderable = true })),
 						Configure(new UiColorInput { Key = "color" }),
-						Configure(new UiColorInput { Key = "background", AllowTransparent = true, AllowVariables = true }),
+						Configure(new UiColorInput
+							{ Key = "background", AllowTransparent = true, AllowVariables = true }),
 						Configure(new UiFileInput
 							{ Key = "file", FileExtensions = UiValue.Of<IReadOnlyList<string>>(["txt"]) }),
 						Configure(new UiFolderInput { Key = "folder" }),
@@ -404,7 +432,7 @@ public class UiConfigVocabularyTests
 							OffersStateProvider = true,
 							OffersIconProvider = true,
 							StateProviderBlockId = "state-block",
-							IconProviderBlockId = "icon-block",
+							IconProviderBlockId = "icon-block"
 						}),
 						Configure(new UiActionPickerInput
 							{ Key = "action", IntegrationId = "com.example.demo" }),
@@ -412,7 +440,7 @@ public class UiConfigVocabularyTests
 						{
 							Key = "variable",
 							VariableTypes = UiValue.Of<IReadOnlyList<string>>(["number"]),
-							WritableOnly = true,
+							WritableOnly = true
 						}),
 						Configure(new UiDevicePickerInput { Key = "device" }),
 						Configure(new UiIntegrationPickerInput
@@ -423,12 +451,12 @@ public class UiConfigVocabularyTests
 							Icon = new UiIconReference("icon-pack", "logo"),
 							AspectRatio = 1.5,
 							Background = "#101010",
-							Tint = "#ef4444",
+							Tint = "#ef4444"
 						}),
 						Configure(new UiStateMappingEditorInput
 						{
 							Key = "stateMapping",
-							States = UiValue.Of<IReadOnlyList<UiOption>>([UiOption.Of("off", "Off")]),
+							States = UiValue.Of<IReadOnlyList<UiOption>>([UiOption.Of("off", "Off")])
 						}),
 						Configure(new UiThresholdsInput
 						{
@@ -440,29 +468,29 @@ public class UiConfigVocabularyTests
 							FixedCount = true,
 							FixedColors = true,
 							MaxCount = 6,
-							AllowVariables = true,
+							AllowVariables = true
 						}),
 						new UiTabs
 						{
 							Key = "tabs",
-							Children = [new UiTab { Key = "tab", Label = "Tab" }],
+							Children = [new UiTab { Key = "tab", Label = "Tab" }]
 						},
 						new UiWidgetConfiguration
 						{
 							Key = "configuration",
 							Properties = new UiWidgetProperties { Key = "properties" },
-							Editor = new UiWidgetEditor { Key = "editor" },
+							Editor = new UiWidgetEditor { Key = "editor" }
 						},
 						new UiConfigStack
 						{
-							Key = "row", Direction = "horizontal", Wrap = false, RowWeight = 1,
+							Key = "row", Direction = "horizontal", Wrap = false, RowWeight = 1
 						},
 						new UiHeading { Key = "heading", Text = "Configuration" },
 						new UiProse { Key = "prose", Text = "Some explanation." },
 						new UiInstructions
 						{
 							Key = "steps",
-							Children = [new UiInstruction { Key = "first", Text = "Open the portal:" }],
+							Children = [new UiInstruction { Key = "first", Text = "Open the portal:" }]
 						},
 						new UiCopyValue { Key = "redirect", Label = "Redirect URI", Value = "https://localhost" },
 						new UiLink { Key = "docs", Label = "Docs", Url = "https://example.com" },
@@ -471,7 +499,7 @@ public class UiConfigVocabularyTests
 							Key = "advanced",
 							Label = "Advanced configuration",
 							DefaultExpanded = true,
-							ClearOnCollapse = true,
+							ClearOnCollapse = true
 						},
 						new UiDivider { Key = "rule" },
 						new UiBanner { Key = "notice", Severity = "warning", Text = "Careful." },
@@ -484,14 +512,14 @@ public class UiConfigVocabularyTests
 							Icon = "zap",
 							Label = "Provided by",
 							Value = "Mute",
-							Children = [new UiConfigButton { Key = "stop", Label = "Stop", Icon = "x" }],
+							Children = [new UiConfigButton { Key = "stop", Label = "Stop", Icon = "x" }]
 						},
 						new UiConfigDialog
 						{
 							Key = "dialog",
 							Title = "Stop?",
 							Text = "Your states come back.",
-							Children = [new UiConfigButton { Key = "dialog-stop", Label = "Stop" }],
+							Children = [new UiConfigButton { Key = "dialog-stop", Label = "Stop" }]
 						},
 						new UiConfigMenu
 						{
@@ -509,20 +537,22 @@ public class UiConfigVocabularyTests
 									ConfirmLabel = "Save",
 									ConfirmDanger = false,
 									PromptValue = "Old",
-									Placeholder = "Name",
-								},
-							],
-						},
-					],
-				},
-			],
+									Placeholder = "Name"
+								}
+							]
+						}
+					]
+				}
+			]
 		};
+	}
 
 	/// <summary>Populates the sixteen shared input properties, so the union covers every one of them. Dispatched
 	/// on the value type rather than on each of the twenty-seven records, because the shared properties are
 	/// shared.</summary>
 	private static UiElement Configure(UiElement input)
-		=> input switch
+	{
+		return input switch
 		{
 			UiInput<string> typed => Shared(typed, "value"),
 			UiInput<double> typed => Shared(typed, 1d),
@@ -533,14 +563,16 @@ public class UiConfigVocabularyTests
 			UiInput<IReadOnlyDictionary<string, string>> typed => Shared(typed,
 				UiValue.Of<IReadOnlyDictionary<string, string>>(new Dictionary<string, string> { ["a"] = "b" })),
 			UiInput<UiIconDisplay> typed => Shared(typed,
-				new UiIconDisplay(Fit: "cover", Zoom: 150, OffsetX: 5, OffsetY: -5, Opacity: 80)),
+				new UiIconDisplay("cover", 150, 5, -5, 80)),
 			UiInput<UiThresholds> typed => Shared(typed,
 				new UiThresholds([new UiThresholdBand("low", "#34c759"), new UiThresholdBand("high", "#ff3b30", 80)])),
-			_ => throw new InvalidOperationException($"Unhandled input value type on '{input.Key}'."),
+			_ => throw new InvalidOperationException($"Unhandled input value type on '{input.Key}'.")
 		};
+	}
 
 	private static UiInput<TValue> Shared<TValue>(UiInput<TValue> input, UiValue<TValue> sample)
-		=> input with
+	{
+		return input with
 		{
 			Binding = Bind.ReadOnly(sample),
 			Label = "Label",
@@ -558,20 +590,30 @@ public class UiConfigVocabularyTests
 			Invalid = true,
 			ValidationMessage = "Not acceptable.",
 			ValidationRules = [UiValidationRule.Require("Never satisfied.", () => false)],
-			Events = [UiEventHandler.On(UiConfigEvents.Change, () => { })],
+			Events =
+			[
+				UiEventHandler.On(UiConfigEvents.Change,
+					() =>
+					{
+					})
+			]
 		};
+	}
 
 	/// <summary>Populates the eight option properties.</summary>
 	private static UiElement WithOptions(UiElement input)
-		=> input switch
+	{
+		return input switch
 		{
 			UiOptionsInput<string> typed => Options(typed),
 			UiOptionsInput<IReadOnlyList<string>> typed => Options(typed),
-			_ => throw new InvalidOperationException($"'{input.Key}' is not an option-bearing input."),
+			_ => throw new InvalidOperationException($"'{input.Key}' is not an option-bearing input.")
 		};
+	}
 
 	private static UiOptionsInput<TValue> Options<TValue>(UiOptionsInput<TValue> input)
-		=> input with
+	{
+		return input with
 		{
 			Options = UiValue.Of<IReadOnlyList<UiOption>>([UiOption.Of("a", "A") with { Icon = "align-left" }]),
 			OptionsSourceId = "source",
@@ -580,8 +622,9 @@ public class UiConfigVocabularyTests
 			Loading = true,
 			Error = "Could not load.",
 			CacheSeconds = 30,
-			FilterDebounceMilliseconds = 250,
+			FilterDebounceMilliseconds = 250
 		};
+	}
 
 	private static IEnumerable<UiNode> Walk(UiNode node)
 	{

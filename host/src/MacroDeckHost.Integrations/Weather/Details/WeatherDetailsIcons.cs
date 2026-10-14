@@ -19,21 +19,27 @@ internal sealed record WeatherDetailsIcons(
 		"clear-day", "clear-night", "cloudy", "cloudy-1-day", "cloudy-1-night", "cloudy-2-day",
 		"cloudy-2-night", "fog-day", "fog-night", "rain-and-sleet-mix", "rainy-1-day", "rainy-1-night",
 		"rainy-2-day", "rainy-2-night", "rainy-3-day", "rainy-3-night", "snowy-1-day", "snowy-1-night",
-		"snowy-2-day", "snowy-2-night", "snowy-3-day", "snowy-3-night", "thunderstorms",
+		"snowy-2-day", "snowy-2-night", "snowy-3-day", "snowy-3-night", "thunderstorms"
 	];
 
 	private static readonly string[] _stillNames =
 	[
 		"clear-day", "cloudy", "cloudy-1-day", "cloudy-2-day", "fog-day", "rain-and-sleet-mix", "rainy-1-day",
-		"rainy-2-day", "rainy-3-day", "snowy-1-day", "snowy-2-day", "snowy-3-day", "thunderstorms",
+		"rainy-2-day", "rainy-3-day", "snowy-1-day", "snowy-2-day", "snowy-3-day", "thunderstorms"
 	];
 
 	public UiResource? AnimatedFor(string condition, bool isDay)
-		=> Animated.GetValueOrDefault(IconName(condition, isDay));
+	{
+		return Animated.GetValueOrDefault(IconName(condition, isDay));
+	}
 
-	public UiResource? StillFor(string condition) => Still.GetValueOrDefault(IconName(condition, isDay: true));
+	public UiResource? StillFor(string condition)
+	{
+		return Still.GetValueOrDefault(IconName(condition, true));
+	}
 
-	public static async Task<WeatherDetailsIcons> ResolveAsync(IUiResourceRegistry? resources,
+	public static async Task<WeatherDetailsIcons> ResolveAsync(
+		IUiResourceRegistry? resources,
 		CancellationToken cancellationToken)
 	{
 		if (resources is null)
@@ -43,7 +49,8 @@ internal sealed record WeatherDetailsIcons(
 
 		var animated = await ResolveFolderAsync(resources, AnimatedFolder, _animatedNames, cancellationToken)
 			.ConfigureAwait(false);
-		var still = await ResolveFolderAsync(resources, StillFolder, _stillNames, cancellationToken).ConfigureAwait(false);
+		var still = await ResolveFolderAsync(resources, StillFolder, _stillNames, cancellationToken)
+			.ConfigureAwait(false);
 
 		return new WeatherDetailsIcons(animated, still);
 	}
@@ -67,11 +74,12 @@ internal sealed record WeatherDetailsIcons(
 			"snow" => $"snowy-2-{suffix}",
 			"snow-showers" => $"snowy-3-{suffix}",
 			"thunderstorm" => "thunderstorms",
-			_ => "cloudy",
+			_ => "cloudy"
 		};
 	}
 
-	private static async Task<IReadOnlyDictionary<string, UiResource>> ResolveFolderAsync(IUiResourceRegistry resources,
+	private static async Task<IReadOnlyDictionary<string, UiResource>> ResolveFolderAsync(
+		IUiResourceRegistry resources,
 		string folder,
 		IEnumerable<string> names,
 		CancellationToken cancellationToken)

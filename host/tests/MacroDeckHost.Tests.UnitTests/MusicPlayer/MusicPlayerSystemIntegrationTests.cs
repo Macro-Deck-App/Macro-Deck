@@ -63,7 +63,10 @@ internal sealed class MusicPlayerSystemIntegrationTests
 
 	private sealed class StateStore(Dictionary<string, bool> states) : IIntegrationStateStore
 	{
-		public IReadOnlyDictionary<string, bool> Load() => states;
+		public IReadOnlyDictionary<string, bool> Load()
+		{
+			return states;
+		}
 
 		public void Save(IReadOnlyDictionary<string, bool> updated)
 		{

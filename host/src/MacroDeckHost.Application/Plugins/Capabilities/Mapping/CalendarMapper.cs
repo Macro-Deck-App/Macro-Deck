@@ -10,26 +10,33 @@ namespace MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 public static class CalendarMapper
 {
 	public static CalendarAccount ToDomain(CalendarAccountDto dto)
-		=> new()
+	{
+		return new CalendarAccount
 		{
 			Id = dto.Id,
 			DisplayName = CalendarText.Clip(dto.DisplayName, ProtocolLimits.MaxCalendarTitleLength)
 		};
+	}
 
 	public static CalendarAccountDto ToDto(CalendarAccount account)
-		=> new() { Id = account.Id, DisplayName = account.DisplayName };
+	{
+		return new CalendarAccountDto { Id = account.Id, DisplayName = account.DisplayName };
+	}
 
 	public static CalendarInfo ToDomain(CalendarInfoDto dto)
-		=> new()
+	{
+		return new CalendarInfo
 		{
 			Id = dto.Id,
 			Name = CalendarText.Clip(dto.Name, ProtocolLimits.MaxCalendarTitleLength),
 			Color = dto.Color,
 			IsPrimary = dto.IsPrimary
 		};
+	}
 
 	public static CalendarEvent ToDomain(CalendarEventSummaryDto dto)
-		=> new()
+	{
+		return new CalendarEvent
 		{
 			Id = dto.Id,
 			CalendarId = dto.CalendarId,
@@ -40,9 +47,11 @@ public static class CalendarMapper
 			Location = CalendarText.ClipOptional(dto.Location, ProtocolLimits.MaxCalendarLocationLength),
 			MeetingUrl = MeetingUrl(dto.MeetingUrl)
 		};
+	}
 
 	public static CalendarEvent ToDomain(CalendarEventDto dto)
-		=> new()
+	{
+		return new CalendarEvent
 		{
 			Id = dto.Id,
 			CalendarId = dto.CalendarId,
@@ -55,26 +64,34 @@ public static class CalendarMapper
 			MeetingUrl = MeetingUrl(dto.MeetingUrl),
 			Participants = [.. dto.Participants.Take(ProtocolLimits.MaxCalendarParticipants).Select(ToDomain)]
 		};
+	}
 
 	private static CalendarParticipant ToDomain(CalendarParticipantDto dto)
-		=> new()
+	{
+		return new CalendarParticipant
 		{
 			Name = CalendarText.ClipOptional(dto.Name, ProtocolLimits.MaxCalendarTitleLength),
 			Email = CalendarText.ClipOptional(dto.Email, ProtocolLimits.MaxCalendarTitleLength),
 			IsOrganizer = dto.IsOrganizer,
 			Response = ToResponseStatus(dto.Response)
 		};
+	}
 
 	// Matched by name rather than through Enum.TryParse, which also accepts "3" and a comma list.
-	private static CalendarResponseStatus ToResponseStatus(string? response) => response switch
+	private static CalendarResponseStatus ToResponseStatus(string? response)
 	{
-		nameof(CalendarResponseStatus.NeedsAction) => CalendarResponseStatus.NeedsAction,
-		nameof(CalendarResponseStatus.Accepted) => CalendarResponseStatus.Accepted,
-		nameof(CalendarResponseStatus.Declined) => CalendarResponseStatus.Declined,
-		nameof(CalendarResponseStatus.Tentative) => CalendarResponseStatus.Tentative,
-		_ => CalendarResponseStatus.Unknown
-	};
+		return response switch
+		{
+			nameof(CalendarResponseStatus.NeedsAction) => CalendarResponseStatus.NeedsAction,
+			nameof(CalendarResponseStatus.Accepted) => CalendarResponseStatus.Accepted,
+			nameof(CalendarResponseStatus.Declined) => CalendarResponseStatus.Declined,
+			nameof(CalendarResponseStatus.Tentative) => CalendarResponseStatus.Tentative,
+			_ => CalendarResponseStatus.Unknown
+		};
+	}
 
 	private static string? MeetingUrl(string? url)
-		=> url is { Length: > 0 and <= ProtocolLimits.MaxCalendarMeetingUrlLength } ? url : null;
+	{
+		return url is { Length: > 0 and <= ProtocolLimits.MaxCalendarMeetingUrlLength } ? url : null;
+	}
 }

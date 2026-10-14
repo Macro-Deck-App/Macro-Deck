@@ -26,9 +26,9 @@ internal static class AdGuardHomeEndpoint
 			value = "http://" + value;
 		}
 
-		if (!Uri.TryCreate(value, UriKind.Absolute, out var parsed) ||
-			string.IsNullOrEmpty(parsed.Host) ||
-			parsed.Scheme is not ("http" or "https"))
+		if (!Uri.TryCreate(value, UriKind.Absolute, out var parsed)
+			|| string.IsNullOrEmpty(parsed.Host)
+			|| parsed.Scheme is not ("http" or "https"))
 		{
 			return null;
 		}
@@ -39,7 +39,10 @@ internal static class AdGuardHomeEndpoint
 			path = path[..^ControlSegment.Length];
 		}
 
-		return new UriBuilder(parsed.Scheme, parsed.Host, parsed.IsDefaultPort ? -1 : parsed.Port, path + ControlSegment + "/")
+		return new UriBuilder(parsed.Scheme,
+				parsed.Host,
+				parsed.IsDefaultPort ? -1 : parsed.Port,
+				path + ControlSegment + "/")
 			.Uri;
 	}
 }

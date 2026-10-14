@@ -100,13 +100,12 @@ internal sealed class MusicPlayerRegistryTests
 	[Test]
 	public void An_instance_offers_only_the_options_a_widget_can_show()
 	{
-		var registry = Registry(new OptionsMusicIntegration(
-		[
+		var registry = Registry(new OptionsMusicIntegration([
 			ActionParameter.Number("cycleSeconds", "Cycle every", defaultValue: 10),
 			ActionParameter.Text("bad.name", "Dotted"),
 			ActionParameter.Color("tint", "Tint"),
 			ActionParameter.Toggle("cycleSeconds", "Duplicate"),
-			ActionParameter.DynamicChoice("app", "App"),
+			ActionParameter.DynamicChoice("app", "App")
 		]));
 
 		var options = registry.GetInstances().Single().Options;
@@ -132,7 +131,10 @@ internal sealed class MusicPlayerRegistryTests
 	}
 
 	private static MusicPlayerRegistry Registry(IIntegration integration)
-		=> new(new FakeIntegrationRegistry(integration), new LoggerConfiguration().CreateLogger());
+	{
+		return new MusicPlayerRegistry(new FakeIntegrationRegistry(integration),
+			new LoggerConfiguration().CreateLogger());
+	}
 
 	private sealed class FakeIntegrationRegistry : IIntegrationRegistry
 	{
@@ -142,68 +144,124 @@ internal sealed class MusicPlayerRegistryTests
 			remove { }
 		}
 
-		public FakeIntegrationRegistry(IIntegration integration) => Integrations = [integration];
+		public FakeIntegrationRegistry(IIntegration integration)
+		{
+			Integrations = [integration];
+		}
 
 		public IReadOnlyList<IIntegration> Integrations { get; }
 
-		public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+		public IActionDefinition? FindAction(string integrationId, string actionId)
+		{
+			return null;
+		}
 
-		public IActionDefinition? FindAction(QualifiedId id) => null;
+		public IActionDefinition? FindAction(QualifiedId id)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
+		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+		{
+			return [];
+		}
 
-		public bool IsEnabled(string integrationId) => true;
+		public bool IsEnabled(string integrationId)
+		{
+			return true;
+		}
 
 		public void SetEnabled(string integrationId, bool enabled)
 		{
 		}
 
-		public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+		public IntegrationOrigin GetOrigin(string integrationId)
+		{
+			return IntegrationOrigin.BuiltIn;
+		}
 
 		public Task<IntegrationRegistrationResult> RegisterAsync(
 			IIntegration integration,
 			IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 			IntegrationMetadata? metadata = null)
-			=> Task.FromResult(IntegrationRegistrationResult.Success);
+		{
+			return Task.FromResult(IntegrationRegistrationResult.Success);
+		}
 
-		public Task<bool> UnregisterAsync(string integrationId) => Task.FromResult(false);
+		public Task<bool> UnregisterAsync(string integrationId)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class FakePlayer : IMusicPlayer
 	{
 		public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(MusicPlayerState.Disconnected);
+		{
+			return Task.FromResult(MusicPlayerState.Disconnected);
+		}
 
-		public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+		public Task<MusicPlayerArtwork?> GetArtworkAsync(
+			string artworkId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<MusicPlayerArtwork?>(null);
+		{
+			return Task.FromResult<MusicPlayerArtwork?>(null);
+		}
 
-		public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PlayAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class SingleConfigMusicIntegration : IIntegration, IMusicPlayerProvider, IConfigFlowProvider
 	{
 		private readonly string _localId;
 
-		public SingleConfigMusicIntegration(string localId) => _localId = localId;
+		public SingleConfigMusicIntegration(string localId)
+		{
+			_localId = localId;
+		}
 
 		public FakePlayer Player { get; } = new();
 
@@ -215,15 +273,30 @@ internal sealed class MusicPlayerRegistryTests
 		public string ProviderName => "Single";
 		public bool AllowsMultipleConfigurations => false;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 
-		public IReadOnlyList<MusicPlayerInstance> GetInstances() => [new(_localId, "Account")];
+		public IReadOnlyList<MusicPlayerInstance> GetInstances()
+		{
+			return [new MusicPlayerInstance(_localId, "Account")];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => instanceId == _localId ? Player : null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return instanceId == _localId ? Player : null;
+		}
 	}
 
 	private sealed class OptionsMusicIntegration(IReadOnlyList<ActionParameter> options)
@@ -239,13 +312,25 @@ internal sealed class MusicPlayerRegistryTests
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool IsInitialized => true;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<MusicPlayerInstance> GetInstances() => [new("any", "Any app") { Options = options }];
+		public IReadOnlyList<MusicPlayerInstance> GetInstances()
+		{
+			return [new MusicPlayerInstance("any", "Any app") { Options = options }];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(MusicPlayerOptionsRequest request)
 		{
@@ -259,7 +344,10 @@ internal sealed class MusicPlayerRegistryTests
 	{
 		private readonly string[] _localIds;
 
-		public MultiConfigMusicIntegration(params string[] localIds) => _localIds = localIds;
+		public MultiConfigMusicIntegration(params string[] localIds)
+		{
+			_localIds = localIds;
+		}
 
 		public string Id => "music.multi";
 		public LocalizedText Name => "Multi";
@@ -267,13 +355,24 @@ internal sealed class MusicPlayerRegistryTests
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool IsInitialized => true;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public IReadOnlyList<MusicPlayerInstance> GetInstances()
-			=> _localIds.Select(id => new MusicPlayerInstance(id, id)).ToList();
+		{
+			return _localIds.Select(id => new MusicPlayerInstance(id, id)).ToList();
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 	}
 }

@@ -21,13 +21,20 @@ public class VariablesCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(string localId, string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Variables,
 			LocalId = localId,
@@ -38,18 +45,23 @@ public class VariablesCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private static VariablesCapabilityHandler Handler(params IPluginIntegration[] integrations)
-		=> new(integrations,
+	{
+		return new VariablesCapabilityHandler(integrations,
 			TestMetadata.Default,
 			new VariableSubscriptions(Serilog.Log.Logger),
 			Serilog.Core.Logger.None);
+	}
 
 	private static VariableDefinition Numeric(string name, string? id = null)
-		=> new()
+	{
+		return new VariableDefinition
 		{
 			Id = id, Name = name, Type = VariableType.Numeric, Materialization = VariableMaterialization.Eager
 		};
+	}
 
 	[Test]
 	public void Every_declared_variable_is_declared_by_its_definition_id()
@@ -72,16 +84,15 @@ public class VariablesCapabilityHandlerTests
 	[Test]
 	public void A_template_declared_variable_with_no_definition_id_is_not_declared_as_its_own_capability()
 	{
-		var integration = new TestVariableIntegration(variables: [],
-			declaredVariables:
-			[
-				new VariableDefinition
-				{
-					Name = VariableNameTemplate.Placeholder("account"),
-					Type = VariableType.Text,
-					Materialization = VariableMaterialization.Eager
-				}
-			]);
+		var integration = new TestVariableIntegration([],
+		[
+			new VariableDefinition
+			{
+				Name = VariableNameTemplate.Placeholder("account"),
+				Type = VariableType.Text,
+				Materialization = VariableMaterialization.Eager
+			}
+		]);
 
 		Assert.That(Handler(integration).DeclareCapabilities(), Is.Empty);
 	}
@@ -120,7 +131,7 @@ public class VariablesCapabilityHandlerTests
 	[Test]
 	public async Task Describe_lists_both_declared_and_eager_variables()
 	{
-		var integration = new TestVariableIntegration(variables: [Numeric("cpu_temp", "cpu-temp")],
+		var integration = new TestVariableIntegration([Numeric("cpu_temp", "cpu-temp")],
 			dependsOnConfiguration: true);
 
 		var handler = Handler(integration);
@@ -171,7 +182,7 @@ public class VariablesCapabilityHandlerTests
 	[Test]
 	public async Task Get_resolves_by_definition_id_and_reads_by_the_same_id()
 	{
-		var integration = new TestVariableIntegration(variables: [Numeric("cpu_temp", "cpu-temp")],
+		var integration = new TestVariableIntegration([Numeric("cpu_temp", "cpu-temp")],
 			read: _ => VariableReading.Of(42.5));
 
 		var handler = Handler(integration);
@@ -192,7 +203,7 @@ public class VariablesCapabilityHandlerTests
 	[Test]
 	public async Task Get_carries_the_volatile_attributes_of_the_reading()
 	{
-		var integration = new TestVariableIntegration(variables: [Numeric("position", "position")],
+		var integration = new TestVariableIntegration([Numeric("position", "position")],
 			read: _ => VariableReading.Of(187d, 0, 245, 1));
 
 		var result = await Handler(integration).InvokeAsync(Invocation("position", "get"), CancellationToken.None);
@@ -209,7 +220,7 @@ public class VariablesCapabilityHandlerTests
 	[Test]
 	public async Task Get_of_a_null_value_answers_unavailable_not_a_failure()
 	{
-		var integration = new TestVariableIntegration(variables: [Numeric("cpu_temp", "cpu-temp")],
+		var integration = new TestVariableIntegration([Numeric("cpu_temp", "cpu-temp")],
 			read: _ => VariableReading.Of(null));
 
 		var handler = Handler(integration);
@@ -254,10 +265,11 @@ public class VariablesCapabilityHandlerTests
 			}
 		]);
 
-		var result = await Handler(integration).InvokeAsync(Invocation("gain",
-				CapabilityOperations.Variables.Set,
-				new VariableSetArguments { Value = new VariableValueDto { Kind = "number", Number = 62.5 } }),
-			CancellationToken.None);
+		var result = await Handler(integration)
+			.InvokeAsync(Invocation("gain",
+					CapabilityOperations.Variables.Set,
+					new VariableSetArguments { Value = new VariableValueDto { Kind = "number", Number = 62.5 } }),
+				CancellationToken.None);
 
 		var written = result.Data!.Value.Deserialize<VariableSetResult>(PluginProtocolJson.Options);
 
@@ -277,10 +289,11 @@ public class VariablesCapabilityHandlerTests
 	{
 		var integration = new TestVariableIntegration([Numeric("cpu_temp", "cpu-temp")]);
 
-		var result = await Handler(integration).InvokeAsync(Invocation("cpu-temp",
-				CapabilityOperations.Variables.Set,
-				new VariableSetArguments { Value = new VariableValueDto { Kind = "number", Number = 1 } }),
-			CancellationToken.None);
+		var result = await Handler(integration)
+			.InvokeAsync(Invocation("cpu-temp",
+					CapabilityOperations.Variables.Set,
+					new VariableSetArguments { Value = new VariableValueDto { Kind = "number", Number = 1 } }),
+				CancellationToken.None);
 
 		var written = result.Data!.Value.Deserialize<VariableSetResult>(PluginProtocolJson.Options);
 

@@ -32,8 +32,14 @@ public static class BatteryDeviceKinds
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 
-	public static bool IsKnown(string? kind) => kind is not null && _known.Contains(kind);
+	public static bool IsKnown(string? kind)
+	{
+		return kind is not null && _known.Contains(kind);
+	}
 
 	/// <summary>Returns <paramref name="kind" /> when it is one of <see cref="All" />, otherwise <see cref="Other" />.</summary>
-	public static string Normalize(string? kind) => IsKnown(kind) ? kind! : Other;
+	public static string Normalize(string? kind)
+	{
+		return IsKnown(kind) ? kind! : Other;
+	}
 }

@@ -94,7 +94,8 @@ public static class Program
 			if (loopbackSecret.Generated)
 			{
 				var secretFile = LoopbackSecretSource.Write(paths.ConfigDirectory, loopbackSecret.Secret);
-				Log.Information("No loopback secret was handed over; generated one for local tools in {File}", secretFile);
+				Log.Information("No loopback secret was handed over; generated one for local tools in {File}",
+					secretFile);
 			}
 
 			// The only safe point to swap the data root: nothing has opened the database, the Data Protection
@@ -118,8 +119,8 @@ public static class Program
 				Environment.GetEnvironmentVariable(BuildConfig.PublicPortEnvironmentVariable),
 				configuredPort,
 				loopbackPort);
-			var refusedPort = selection.Source == PublicPortSource.Default &&
-				int.TryParse(configuredPort, out var parsedConfiguredPort)
+			var refusedPort = selection.Source == PublicPortSource.Default
+				&& int.TryParse(configuredPort, out var parsedConfiguredPort)
 					? parsedConfiguredPort
 					: (int?)null;
 			if (!string.IsNullOrWhiteSpace(configuredPort) && selection.Source != PublicPortSource.Preference)
@@ -186,8 +187,8 @@ public static class Program
 			// always binds, so two checkouts or two CI jobs on one machine would otherwise contend for the
 			// single default port.
 			var configuredHttpsPort =
-				Environment.GetEnvironmentVariable(BuildConfig.PublicHttpsPortEnvironmentVariable) ??
-				preferences.GetValueOrDefault(AppPreferenceService.TlsHttpsPortKey);
+				Environment.GetEnvironmentVariable(BuildConfig.PublicHttpsPortEnvironmentVariable)
+				?? preferences.GetValueOrDefault(AppPreferenceService.TlsHttpsPortKey);
 			var tls = PublicTlsSelector.Resolve(preferences.GetValueOrDefault(AppPreferenceService.TlsEnabledKey),
 				preferences.GetValueOrDefault(AppPreferenceService.TlsModeKey),
 				configuredHttpsPort,
@@ -196,8 +197,8 @@ public static class Program
 				loopbackPort);
 			if (tls.Rejection != PublicTlsRejection.None)
 			{
-				Log.Warning("The stored HTTPS configuration was not applied ({Rejection}); " +
-					"review it in Settings > Network",
+				Log.Warning("The stored HTTPS configuration was not applied ({Rejection}); "
+					+ "review it in Settings > Network",
 					tls.Rejection);
 			}
 
@@ -261,7 +262,8 @@ public static class Program
 
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
 			Infrastructure.SystemIntegrations.Variables.VariablesIntegration.HostVariableReader
-				= (name, ownerWidgetId, _) => Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, ownerWidgetId);
+				= (name, ownerWidgetId, _)
+					=> Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, ownerWidgetId);
 
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to
 			// survive the graceful shutdown RunAsync performs.
@@ -286,7 +288,8 @@ public static class Program
 		}
 	}
 
-	private static KeyRingProtectionPlan ResolveKeyRingProtection(MacroDeckPaths paths,
+	private static KeyRingProtectionPlan ResolveKeyRingProtection(
+		MacroDeckPaths paths,
 		IReadOnlyDictionary<string, string> preferences)
 	{
 		var store = KekStoreFactory.Create();
@@ -326,8 +329,8 @@ public static class Program
 			Log.Error("The key ring is locked ({Reason}). Stored secrets stay untouched until it is unlocked",
 				plan.LockReason);
 		}
-		else if (plan.Mode == KeyRingProtectionMode.Unprotected &&
-			plan.UnprotectedReason != KeyRingUnprotectedReason.None)
+		else if (plan.Mode == KeyRingProtectionMode.Unprotected
+			&& plan.UnprotectedReason != KeyRingUnprotectedReason.None)
 		{
 			Log.Information("The key ring is not protected by the operating system keystore ({Reason})",
 				plan.UnprotectedReason);

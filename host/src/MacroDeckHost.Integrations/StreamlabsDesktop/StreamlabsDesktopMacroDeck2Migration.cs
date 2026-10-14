@@ -24,42 +24,53 @@ internal sealed class StreamlabsDesktopMacroDeck2Migration : IIntegrationMigrati
 		=> AppStrings.Migration.Warning.StreamlabsDesktop.SceneSourceMatchedByName();
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
-
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		ActionNamespace + "SwitchSceneAction" => SwitchScene(action),
-		ActionNamespace + "SetAudioSourceMuteAction" => SetAudioMute(action),
-		ActionNamespace + "SetAudioSourceVolumeAction" => SetAudioVolume(action),
-		ActionNamespace + "SetRecordingStateAction"
-			=> SetState(action, "start-recording", "stop-recording", "toggle-recording", "Set Recording State"),
-		ActionNamespace + "SetStreamingStateAction"
-			=> SetState(action, "start-streaming", "stop-streaming", "toggle-streaming", "Set Streaming State"),
-		ActionNamespace + "SetReplayBufferStateAction"
-			=> SetState(action,
-				"start-replay-buffer",
-				"stop-replay-buffer",
-				"toggle-replay-buffer",
-				"Set Replay Buffer State"),
-		ActionNamespace + "SaveReplayAction" => new ActionMigrationResult(StreamlabsDesktopIntegration.IntegrationId,
-			"save-replay",
-			action.DisplayName ?? "Save Replay",
-			Parameters()),
-		ActionNamespace + "SetSceneItemSettingsAction" => SetSceneItemVisibility(action),
-		_ => null
-	};
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
+
+	private static ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			ActionNamespace + "SwitchSceneAction" => SwitchScene(action),
+			ActionNamespace + "SetAudioSourceMuteAction" => SetAudioMute(action),
+			ActionNamespace + "SetAudioSourceVolumeAction" => SetAudioVolume(action),
+			ActionNamespace + "SetRecordingStateAction"
+				=> SetState(action, "start-recording", "stop-recording", "toggle-recording", "Set Recording State"),
+			ActionNamespace + "SetStreamingStateAction"
+				=> SetState(action, "start-streaming", "stop-streaming", "toggle-streaming", "Set Streaming State"),
+			ActionNamespace + "SetReplayBufferStateAction"
+				=> SetState(action,
+					"start-replay-buffer",
+					"stop-replay-buffer",
+					"toggle-replay-buffer",
+					"Set Replay Buffer State"),
+			ActionNamespace + "SaveReplayAction" => new ActionMigrationResult(
+				StreamlabsDesktopIntegration.IntegrationId,
+				"save-replay",
+				action.DisplayName ?? "Save Replay",
+				Parameters()),
+			ActionNamespace + "SetSceneItemSettingsAction" => SetSceneItemVisibility(action),
+			_ => null
+		};
+	}
 
 	/// <summary>
 	/// Nothing is worth carrying over: the plugin's only stored value is a "client_secret" credential that
 	/// <c>Client.cs</c> never reads (the pipe connection it makes is unauthenticated), and the plugin
 	/// declares <c>CanConfigure =&gt; false</c>, so no shipped build could even open the dialog that wrote it.
 	/// </summary>
-	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings) => [];
+	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings)
+	{
+		return [];
+	}
 
 	/// <summary>
 	/// The scene id Macro Deck 2 stored is local to Streamlabs OBS and cannot resolve in Streamlabs Desktop,
@@ -120,11 +131,11 @@ internal sealed class StreamlabsDesktopMacroDeck2Migration : IIntegrationMigrati
 		const string prefix = "Set ";
 		var suffix = $" to {percent}%";
 		var summary = action.ConfigurationSummary;
-		if (summary is null ||
-			summary.Length < prefix.Length + suffix.Length ||
-			!summary.StartsWith(prefix, StringComparison.Ordinal) ||
-			!summary.EndsWith(suffix, StringComparison.Ordinal) ||
-			summary[prefix.Length..^suffix.Length] is not { Length: > 0 } sourceName)
+		if (summary is null
+			|| summary.Length < prefix.Length + suffix.Length
+			|| !summary.StartsWith(prefix, StringComparison.Ordinal)
+			|| !summary.EndsWith(suffix, StringComparison.Ordinal)
+			|| summary[prefix.Length..^suffix.Length] is not { Length: > 0 } sourceName)
 		{
 			return null;
 		}
@@ -173,9 +184,9 @@ internal sealed class StreamlabsDesktopMacroDeck2Migration : IIntegrationMigrati
 	/// </summary>
 	private static ActionMigrationResult? SetSceneItemVisibility(ForeignAction action)
 	{
-		if (!TryParse(action.Configuration, out var config) ||
-			!config.TryGetProperty("Settings", out var settings) ||
-			settings.ValueKind != JsonValueKind.Object)
+		if (!TryParse(action.Configuration, out var config)
+			|| !config.TryGetProperty("Settings", out var settings)
+			|| settings.ValueKind != JsonValueKind.Object)
 		{
 			return null;
 		}
@@ -200,9 +211,9 @@ internal sealed class StreamlabsDesktopMacroDeck2Migration : IIntegrationMigrati
 		}
 
 		var warnings = new List<LocalizedText> { SceneOrSourceNameWarning };
-		if (ReadInt(settings, "Locked") is > 0 ||
-			ReadInt(settings, "RecordingVisible") is > 0 ||
-			ReadInt(settings, "StreamVisible") is > 0)
+		if (ReadInt(settings, "Locked") is > 0
+			|| ReadInt(settings, "RecordingVisible") is > 0
+			|| ReadInt(settings, "StreamVisible") is > 0)
 		{
 			warnings.Add(AppStrings.Migration.Warning.StreamlabsDesktop.SceneItemExtrasNotMigrated());
 		}
@@ -277,23 +288,35 @@ internal sealed class StreamlabsDesktopMacroDeck2Migration : IIntegrationMigrati
 	}
 
 	private static int? ReadInt(JsonElement config, string name)
-		=> config.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var number)
+	{
+		return config.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var number)
 				? number
 				: null;
+	}
 
 	private static double? ReadDouble(JsonElement config, string name)
-		=> config.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number)
+	{
+		return config.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
 				? number
 				: null;
+	}
 
-	private static JsonElement JsonString(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonString(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
-	private static JsonElement JsonNumber(int value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonNumber(int value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

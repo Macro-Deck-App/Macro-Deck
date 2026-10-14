@@ -24,8 +24,8 @@ public sealed class EmailIntegrationStateChangedHandler : INotificationHandler<I
 		var integrationId = notification.IntegrationId;
 		_registry.ReconcileSubscriptions();
 
-		if (_registry.IsEmailIntegration(integrationId) ||
-			_cache.Snapshot.Inboxes.Any(state => state.Inbox.IntegrationId == integrationId))
+		if (_registry.IsEmailIntegration(integrationId)
+			|| _cache.Snapshot.Inboxes.Any(state => state.Inbox.IntegrationId == integrationId))
 		{
 			_signal.Request(integrationId, null);
 		}

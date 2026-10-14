@@ -26,16 +26,16 @@ namespace MacroDeck.Sdk.Deprecation;
 /// <c>docs/src/content/docs/policies/deprecations.md</c>.
 /// </para>
 /// </summary>
-[AttributeUsage(AttributeTargets.Class |
-	AttributeTargets.Interface |
-	AttributeTargets.Struct |
-	AttributeTargets.Enum |
-	AttributeTargets.Delegate |
-	AttributeTargets.Method |
-	AttributeTargets.Constructor |
-	AttributeTargets.Property |
-	AttributeTargets.Event |
-	AttributeTargets.Field,
+[AttributeUsage(AttributeTargets.Class
+	| AttributeTargets.Interface
+	| AttributeTargets.Struct
+	| AttributeTargets.Enum
+	| AttributeTargets.Delegate
+	| AttributeTargets.Method
+	| AttributeTargets.Constructor
+	| AttributeTargets.Property
+	| AttributeTargets.Event
+	| AttributeTargets.Field,
 	Inherited = false)]
 public sealed class MacroDeckDeprecatedAttribute : Attribute
 {

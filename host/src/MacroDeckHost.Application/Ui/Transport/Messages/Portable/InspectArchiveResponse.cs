@@ -56,7 +56,8 @@ public sealed class InspectArchiveResponse
 	public ArchiveSummary? Archive { get; set; }
 
 	public static InspectArchiveResponse From(PortableArchiveInfo info)
-		=> new()
+	{
+		return new InspectArchiveResponse
 		{
 			Success = true,
 			Archive = new ArchiveSummary
@@ -86,4 +87,5 @@ public sealed class InspectArchiveResponse
 					.ToList()
 			}
 		};
+	}
 }

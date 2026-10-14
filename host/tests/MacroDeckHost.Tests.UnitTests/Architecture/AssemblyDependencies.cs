@@ -5,8 +5,11 @@ namespace MacroDeckHost.Tests.UnitTests.Architecture;
 
 internal static class AssemblyDependencies
 {
-	private const BindingFlags DeclaredMembers = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
-		BindingFlags.Static | BindingFlags.DeclaredOnly;
+	private const BindingFlags DeclaredMembers = BindingFlags.Public
+		| BindingFlags.NonPublic
+		| BindingFlags.Instance
+		| BindingFlags.Static
+		| BindingFlags.DeclaredOnly;
 
 	private static readonly Dictionary<short, OpCode> _opCodes = typeof(OpCodes)
 		.GetFields(BindingFlags.Public | BindingFlags.Static)
@@ -55,7 +58,9 @@ internal static class AssemblyDependencies
 			Add(found, property.PropertyType);
 		}
 
-		foreach (var method in type.GetMethods(DeclaredMembers).Cast<MethodBase>().Concat(type.GetConstructors(DeclaredMembers)))
+		foreach (var method in type.GetMethods(DeclaredMembers)
+			.Cast<MethodBase>()
+			.Concat(type.GetConstructors(DeclaredMembers)))
 		{
 			if (method is MethodInfo info)
 			{
@@ -85,7 +90,9 @@ internal static class AssemblyDependencies
 			}
 		}
 
-		foreach (var method in type.GetMethods(DeclaredMembers).Cast<MethodBase>().Concat(type.GetConstructors(DeclaredMembers)))
+		foreach (var method in type.GetMethods(DeclaredMembers)
+			.Cast<MethodBase>()
+			.Concat(type.GetConstructors(DeclaredMembers)))
 		{
 			ScanBody(method, null, found);
 		}
@@ -118,7 +125,9 @@ internal static class AssemblyDependencies
 			}
 		}
 
-		var typeArguments = method.DeclaringType is { IsGenericType: true } declaring ? declaring.GetGenericArguments() : null;
+		var typeArguments = method.DeclaringType is { IsGenericType: true } declaring
+			? declaring.GetGenericArguments()
+			: null;
 		var methodArguments = method.IsGenericMethod ? method.GetGenericArguments() : null;
 		var position = 0;
 
@@ -160,10 +169,17 @@ internal static class AssemblyDependencies
 
 					position += 4;
 					break;
-				case OperandType.InlineField or OperandType.InlineMethod or OperandType.InlineTok or OperandType.InlineType:
+				case OperandType.InlineField
+					or OperandType.InlineMethod
+					or OperandType.InlineTok
+					or OperandType.InlineType:
 					if (types is not null)
 					{
-						AddMember(types, method.Module, BitConverter.ToInt32(il, position), typeArguments, methodArguments);
+						AddMember(types,
+							method.Module,
+							BitConverter.ToInt32(il, position),
+							typeArguments,
+							methodArguments);
 					}
 
 					position += 4;
@@ -175,15 +191,23 @@ internal static class AssemblyDependencies
 		}
 	}
 
-	private static void AddMember(HashSet<Type> found, Module module, int token, Type[]? typeArguments, Type[]? methodArguments)
+	private static void AddMember(
+		HashSet<Type> found,
+		Module module,
+		int token,
+		Type[]? typeArguments,
+		Type[]? methodArguments)
 	{
 		MemberInfo? member;
 		try
 		{
 			member = module.ResolveMember(token, typeArguments, methodArguments);
 		}
-		catch (Exception exception) when (exception is ArgumentException or BadImageFormatException or TypeLoadException or
-			FileNotFoundException or MissingMemberException)
+		catch (Exception exception) when (exception is ArgumentException
+			or BadImageFormatException
+			or TypeLoadException
+			or FileNotFoundException
+			or MissingMemberException)
 		{
 			return;
 		}

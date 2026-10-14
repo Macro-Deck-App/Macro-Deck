@@ -53,7 +53,10 @@ public class FolderServiceDeviceLockTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task AChildFolder_CannotOverrideItsOwnGrid_PastTheDevicesFixedLayout()
@@ -113,7 +116,8 @@ public class FolderServiceDeviceLockTests
 	}
 
 	private static LayoutDescriptor FixedGrid(int rows, int columns)
-		=> new("grid",
+	{
+		return new LayoutDescriptor("grid",
 			"Deck",
 			[
 				new LayoutRegion
@@ -121,4 +125,5 @@ public class FolderServiceDeviceLockTests
 					Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = rows, Columns = columns }
 				}
 			]);
+	}
 }

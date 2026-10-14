@@ -29,18 +29,22 @@ internal sealed class YouTubeActionsTests
 	}
 
 	[TearDown]
-	public void TearDown() => _accounts.Dispose();
+	public void TearDown()
+	{
+		_accounts.Dispose();
+	}
 
 	[Test]
 	public void The_actions_are_offered_with_a_channel_picker()
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(_actions.Select(action => action.Id), Is.EqualTo(new[]
-			{
-				"send-chat-message", "set-title", "set-description", "set-tags", "start-ad-break", "go-live",
-				"end-stream"
-			}));
+			Assert.That(_actions.Select(action => action.Id),
+				Is.EqualTo(new[]
+				{
+					"send-chat-message", "set-title", "set-description", "set-tags", "start-ad-break", "go-live",
+					"end-stream"
+				}));
 			Assert.That(_actions.Select(action => action.Parameters[0].Name), Is.All.EqualTo("account"));
 		});
 	}
@@ -110,9 +114,11 @@ internal sealed class YouTubeActionsTests
 	[Test]
 	public async Task Without_a_live_broadcast_the_next_scheduled_one_is_changed()
 	{
-		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("later", YouTubeLifeCycleStatus.Ready,
+		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("later",
+			YouTubeLifeCycleStatus.Ready,
 			scheduledStart: YouTubeTestSupport.Now.AddDays(2)));
-		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("sooner", YouTubeLifeCycleStatus.Created,
+		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("sooner",
+			YouTubeLifeCycleStatus.Created,
 			scheduledStart: YouTubeTestSupport.Now.AddDays(1)));
 		_api.Videos["sooner"] = YouTubeTestSupport.Video("sooner");
 		_api.Videos["later"] = YouTubeTestSupport.Video("later");
@@ -187,11 +193,14 @@ internal sealed class YouTubeActionsTests
 	[Test]
 	public async Task Going_live_starts_the_first_ready_scheduled_broadcast()
 	{
-		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("created", YouTubeLifeCycleStatus.Created,
+		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("created",
+			YouTubeLifeCycleStatus.Created,
 			scheduledStart: YouTubeTestSupport.Now.AddMinutes(5)));
-		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("ready-later", YouTubeLifeCycleStatus.Ready,
+		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("ready-later",
+			YouTubeLifeCycleStatus.Ready,
 			scheduledStart: YouTubeTestSupport.Now.AddHours(3)));
-		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("ready", YouTubeLifeCycleStatus.Ready,
+		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("ready",
+			YouTubeLifeCycleStatus.Ready,
 			scheduledStart: YouTubeTestSupport.Now.AddHours(1)));
 
 		var result = await Run("go-live");
@@ -340,9 +349,11 @@ internal sealed class YouTubeActionsTests
 	public async Task Going_live_with_a_monitor_stream_runs_the_testing_phase_first()
 	{
 		await UseImmediateDelaysAsync();
-		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("monitored", YouTubeLifeCycleStatus.Ready,
+		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("monitored",
+			YouTubeLifeCycleStatus.Ready,
 			enableMonitorStream: true));
-		_api.Active.Add(YouTubeTestSupport.Broadcast("monitored", YouTubeLifeCycleStatus.Testing,
+		_api.Active.Add(YouTubeTestSupport.Broadcast("monitored",
+			YouTubeLifeCycleStatus.Testing,
 			enableMonitorStream: true));
 
 		var result = await Run("go-live");
@@ -350,11 +361,12 @@ internal sealed class YouTubeActionsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(_api.Transitions, Is.EqualTo(new[]
-			{
-				("monitored", YouTubeBroadcastTransition.Testing),
-				("monitored", YouTubeBroadcastTransition.Live)
-			}));
+			Assert.That(_api.Transitions,
+				Is.EqualTo(new[]
+				{
+					("monitored", YouTubeBroadcastTransition.Testing),
+					("monitored", YouTubeBroadcastTransition.Live)
+				}));
 		});
 	}
 
@@ -362,13 +374,15 @@ internal sealed class YouTubeActionsTests
 	public async Task Going_live_finds_the_testing_phase_when_youtube_still_lists_the_broadcast_as_upcoming()
 	{
 		await UseImmediateDelaysAsync();
-		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("monitored", YouTubeLifeCycleStatus.Ready,
+		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("monitored",
+			YouTubeLifeCycleStatus.Ready,
 			enableMonitorStream: true));
 		_api.Transitioned = (id, status) =>
 		{
 			if (status == YouTubeBroadcastTransition.Testing)
 			{
-				_api.Upcoming[0] = YouTubeTestSupport.Broadcast(id, YouTubeLifeCycleStatus.Testing,
+				_api.Upcoming[0] = YouTubeTestSupport.Broadcast(id,
+					YouTubeLifeCycleStatus.Testing,
 					enableMonitorStream: true);
 			}
 		};
@@ -386,7 +400,8 @@ internal sealed class YouTubeActionsTests
 	public async Task Going_live_stops_and_explains_when_the_testing_phase_does_not_start()
 	{
 		await UseImmediateDelaysAsync();
-		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("monitored", YouTubeLifeCycleStatus.Ready,
+		_api.Upcoming.Add(YouTubeTestSupport.Broadcast("monitored",
+			YouTubeLifeCycleStatus.Ready,
 			enableMonitorStream: true));
 
 		var result = await Run("go-live");
@@ -410,10 +425,12 @@ internal sealed class YouTubeActionsTests
 	}
 
 	private Task<ActionResult> Run(string id, params (string Name, object Value)[] parameters)
-		=> _actions.Single(action => action.Id == id)
+	{
+		return _actions.Single(action => action.Id == id)
 			.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext
 			{
 				Parameters = parameters.ToDictionary(p => p.Name, p => p.Value, StringComparer.Ordinal)
 			});
+	}
 }

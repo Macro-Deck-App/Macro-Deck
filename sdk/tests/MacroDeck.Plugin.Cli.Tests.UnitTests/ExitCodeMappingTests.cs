@@ -93,13 +93,13 @@ public class ExitCodeMappingTests
 	[Test]
 	public void A_conformant_report_exits_success()
 	{
-		Assert.That(ConformanceReportExitCode.For(MinimalReport(conformant: true)), Is.EqualTo(ExitCode.Success));
+		Assert.That(ConformanceReportExitCode.For(MinimalReport(true)), Is.EqualTo(ExitCode.Success));
 	}
 
 	[Test]
 	public void A_non_conformant_report_exits_subject_invalid()
 	{
-		Assert.That(ConformanceReportExitCode.For(MinimalReport(conformant: false)),
+		Assert.That(ConformanceReportExitCode.For(MinimalReport(false)),
 			Is.EqualTo(ExitCode.SubjectInvalid));
 	}
 

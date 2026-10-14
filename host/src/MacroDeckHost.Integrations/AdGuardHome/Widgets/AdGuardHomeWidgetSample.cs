@@ -1,4 +1,3 @@
-
 namespace MacroDeckHost.Integrations.AdGuardHome.Widgets;
 
 internal static class AdGuardHomeWidgetSample
@@ -10,7 +9,7 @@ internal static class AdGuardHomeWidgetSample
 			ProtectionEnabled = true,
 			DnsRunning = true,
 			Version = "v0.107.57",
-			Statistics = new AdGuardHomeStatistics(48213, 7934, 12, 31, 4, 8.4),
+			Statistics = new AdGuardHomeStatistics(48213, 7934, 12, 31, 4, 8.4)
 		};
 
 		return AdGuardHomeViewStateResolver.Resolve(options, snapshot, now);

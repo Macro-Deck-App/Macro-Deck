@@ -59,7 +59,7 @@ internal sealed class SpotifyConfigStub : IIntegrationConfig
 			await BeforeGetEntries();
 		}
 
-		return [new(EntryId, "Spotify")];
+		return [new ConfigEntrySnapshot(EntryId, "Spotify")];
 	}
 
 	public Task<string?> GetStringAsync(

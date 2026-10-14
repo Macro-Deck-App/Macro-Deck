@@ -25,7 +25,9 @@ public sealed class AdbDeviceCallPolicy(IHostLockState lockState)
 	};
 
 	public bool IsRefusedWhileLocked(string operation)
-		=> lockState.IsLocked && _refusedWhileLocked.Contains(operation);
+	{
+		return lockState.IsLocked && _refusedWhileLocked.Contains(operation);
+	}
 
 	public static AdbShellResultDto FitToBudget(AdbShellOutput output)
 	{

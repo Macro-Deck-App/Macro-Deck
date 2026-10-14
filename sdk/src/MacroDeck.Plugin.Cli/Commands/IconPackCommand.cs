@@ -71,15 +71,16 @@ internal static class IconPackCommand
 
 			if (outcome.MovedFrom is { } movedFrom)
 			{
-				console.Info($"Moved '{movedFrom}' to '{outcome.TargetPath}'. Pass --copy to keep the original in place.");
+				console.Info(
+					$"Moved '{movedFrom}' to '{outcome.TargetPath}'. Pass --copy to keep the original in place.");
 			}
 			else if (outcome.Placement == BundledIconPackPlacement.Copied)
 			{
 				console.Info($"Copied the pack to '{outcome.TargetPath}'.");
 			}
 
-			console.Info((outcome.Replaced ? "Replaced" : "Added") +
-				$" icon pack '{outcome.PackName}' ({outcome.IconCount} icon(s)) under the key '{outcome.Key}'.");
+			console.Info((outcome.Replaced ? "Replaced" : "Added")
+				+ $" icon pack '{outcome.PackName}' ({outcome.IconCount} icon(s)) under the key '{outcome.Key}'.");
 			return ExitCode.Success;
 		});
 
@@ -172,8 +173,8 @@ internal static class IconPackCommand
 
 			console.Info(outcome.FileDeleted
 				? $"Removed icon pack '{outcome.Key}' and deleted '{outcome.TargetPath}'."
-				: $"Removed icon pack '{outcome.Key}'. '{outcome.TargetPath}' was not deleted, because it is not a " +
-				"file inside the project.");
+				: $"Removed icon pack '{outcome.Key}'. '{outcome.TargetPath}' was not deleted, because it is not a "
+				+ "file inside the project.");
 			return ExitCode.Success;
 		});
 
@@ -196,18 +197,23 @@ internal static class IconPackCommand
 	}
 
 	private static (Option<string> Source, Option<string?> Manifest) CreateProjectOptions()
-		=> (new Option<string>("--source")
+	{
+		return (new Option<string>("--source")
 			{
 				Description = "The plugin project directory. Pack paths are relative to it.",
 				DefaultValueFactory = _ => "."
 			},
-			new Option<string?>("--manifest") { Description = "Path to manifest.json. Defaults to <source>/manifest.json." });
+			new Option<string?>("--manifest")
+				{ Description = "Path to manifest.json. Defaults to <source>/manifest.json." });
+	}
 
-	private static (string Source, string ManifestPath) ResolveProject(ParseResult parseResult,
+	private static (string Source, string ManifestPath) ResolveProject(
+		ParseResult parseResult,
 		Option<string> sourceOption,
 		Option<string?> manifestOption)
 	{
 		var source = parseResult.GetValue(sourceOption) ?? ".";
-		return (source, parseResult.GetValue(manifestOption) ?? Path.Combine(source, PluginArtifactFiles.ManifestFileName));
+		return (source,
+			parseResult.GetValue(manifestOption) ?? Path.Combine(source, PluginArtifactFiles.ManifestFileName));
 	}
 }

@@ -66,17 +66,20 @@ public interface IKeyRingProtectionService
 	/// Wraps the key ring if it is not wrapped yet, and always leaves a wrap the supplied recovery key
 	/// can open. Safe to call repeatedly; a ring already protected under the same key is left alone.
 	/// </summary>
-	Task<Result<KeyRingProtectionError>> EnsureProtected(ReadOnlyMemory<byte> recoveryKey,
+	Task<Result<KeyRingProtectionError>> EnsureProtected(
+		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Adds a wrap without disturbing the ones already there, so a regenerated recovery key cannot
 	/// strand an installation before its replacement has been written down.
 	/// </summary>
-	Task<Result<KeyRingProtectionError>> AddEscrowWrap(ReadOnlyMemory<byte> recoveryKey,
+	Task<Result<KeyRingProtectionError>> AddEscrowWrap(
+		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default);
 
-	Task<Result<KeyRingProtectionError>> PruneEscrowWrapsExcept(ReadOnlyMemory<byte> recoveryKey,
+	Task<Result<KeyRingProtectionError>> PruneEscrowWrapsExcept(
+		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>
@@ -84,7 +87,8 @@ public interface IKeyRingProtectionService
 	/// back in the keystore. Deliberately independent of the database: the secrets there are exactly
 	/// what is unreadable when this is needed.
 	/// </summary>
-	Task<Result<KeyRingProtectionError>> Unlock(ReadOnlyMemory<byte> recoveryKey,
+	Task<Result<KeyRingProtectionError>> Unlock(
+		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>

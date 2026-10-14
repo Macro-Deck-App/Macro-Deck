@@ -60,7 +60,8 @@ public sealed class PluginManifestReader : IPluginManifestReader
 		return ReadFromJson(json, fileInfo.DirectoryName, expectedPluginId, expectedVersion);
 	}
 
-	public PluginManifestReadResult ReadFromJson(string json,
+	public PluginManifestReadResult ReadFromJson(
+		string json,
 		string? versionDirectory,
 		string expectedPluginId,
 		string expectedVersion)
@@ -69,9 +70,9 @@ public sealed class PluginManifestReader : IPluginManifestReader
 		try
 		{
 			using var probe = JsonDocument.Parse(json);
-			if (!TryGetPropertyCaseInsensitive(probe.RootElement, "manifestVersion", out var versionElement) ||
-				versionElement.ValueKind != JsonValueKind.Number ||
-				!versionElement.TryGetInt32(out manifestVersion))
+			if (!TryGetPropertyCaseInsensitive(probe.RootElement, "manifestVersion", out var versionElement)
+				|| versionElement.ValueKind != JsonValueKind.Number
+				|| !versionElement.TryGetInt32(out manifestVersion))
 			{
 				return PluginManifestReadResult.Fail(PluginManifestError.Malformed,
 					"Manifest has no numeric 'manifestVersion' property.");
@@ -85,8 +86,8 @@ public sealed class PluginManifestReader : IPluginManifestReader
 		if (manifestVersion != PluginManifest.SupportedManifestVersion)
 		{
 			return PluginManifestReadResult.Fail(PluginManifestError.UnsupportedManifestVersion,
-				$"Manifest version {manifestVersion} is not supported; only " +
-				$"{PluginManifest.SupportedManifestVersion} is understood.");
+				$"Manifest version {manifestVersion} is not supported; only "
+				+ $"{PluginManifest.SupportedManifestVersion} is understood.");
 		}
 
 		PluginManifest? manifest;
@@ -116,8 +117,8 @@ public sealed class PluginManifestReader : IPluginManifestReader
 				$"Manifest id '{manifest.Id}' does not match its directory '{expectedPluginId}'.");
 		}
 
-		if (!IsLegalPathSegment(manifest.Version) ||
-			!string.Equals(manifest.Version, expectedVersion, StringComparison.Ordinal))
+		if (!IsLegalPathSegment(manifest.Version)
+			|| !string.Equals(manifest.Version, expectedVersion, StringComparison.Ordinal))
 		{
 			return PluginManifestReadResult.Fail(PluginManifestError.VersionMismatch,
 				$"Manifest version '{manifest.Version}' does not match its directory '{expectedVersion}'.");
@@ -156,9 +157,9 @@ public sealed class PluginManifestReader : IPluginManifestReader
 			// Only the entrypoint(s) this host could actually launch need to exist on disk - a manifest
 			// legitimately ships entrypoints for platforms it was not built for on this machine. There is
 			// nothing to check against until a version directory exists on disk.
-			if (resolvedPath is not null &&
-				PluginRuntimeIdentifiers.CandidatesFor(PluginRuntimeIdentifiers.Current).Contains(rid) &&
-				!File.Exists(resolvedPath))
+			if (resolvedPath is not null
+				&& PluginRuntimeIdentifiers.CandidatesFor(PluginRuntimeIdentifiers.Current).Contains(rid)
+				&& !File.Exists(resolvedPath))
 			{
 				return PluginManifestReadResult.Fail(PluginManifestError.EntrypointMissing,
 					$"Entrypoint '{rid}' resolves to '{resolvedPath}', which does not exist.");
@@ -234,8 +235,8 @@ public sealed class PluginManifestReader : IPluginManifestReader
 			if (HasForbiddenScriptExtension(entrypoint.Executable))
 			{
 				return PluginManifestReadResult.Fail(PluginManifestError.InvalidEntrypointRuntime,
-					$"Entrypoint '{rid}' executable '{entrypoint.Executable}' looks like a script, which " +
-					"the artifact format forbids.");
+					$"Entrypoint '{rid}' executable '{entrypoint.Executable}' looks like a script, which "
+					+ "the artifact format forbids.");
 			}
 
 			// An absent runtime block means self-contained, so the self-contained rules below have to
@@ -248,8 +249,8 @@ public sealed class PluginManifestReader : IPluginManifestReader
 				if (!IsValidDotnetMajorMinor(runtime.DotnetVersion))
 				{
 					return PluginManifestReadResult.Fail(PluginManifestError.InvalidEntrypointRuntime,
-						$"Entrypoint '{rid}' has an invalid Runtime.DotnetVersion '{runtime.DotnetVersion}'; " +
-						"expected 'major.minor'.");
+						$"Entrypoint '{rid}' has an invalid Runtime.DotnetVersion '{runtime.DotnetVersion}'; "
+						+ "expected 'major.minor'.");
 				}
 
 				if (!entrypoint.Executable.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
@@ -351,8 +352,8 @@ public sealed class PluginManifestReader : IPluginManifestReader
 				$"Compatibility.MacroDeck '{compatibility.MacroDeck}' is not a valid version range.");
 		}
 
-		if (compatibility.Protocol is { } protocolRange &&
-			(protocolRange.Minimum < 1 || protocolRange.Maximum < protocolRange.Minimum))
+		if (compatibility.Protocol is { } protocolRange
+			&& (protocolRange.Minimum < 1 || protocolRange.Maximum < protocolRange.Minimum))
 		{
 			return PluginManifestReadResult.Fail(PluginManifestError.InvalidCompatibility,
 				$"Compatibility.Protocol range [{protocolRange.Minimum}, {protocolRange.Maximum}] is invalid.");
@@ -410,7 +411,8 @@ public sealed class PluginManifestReader : IPluginManifestReader
 		return null;
 	}
 
-	private static PluginManifestReadResult? ValidateRelationship(string ownPluginId,
+	private static PluginManifestReadResult? ValidateRelationship(
+		string ownPluginId,
 		PluginDependency relationship,
 		string kind)
 	{
@@ -489,17 +491,17 @@ public sealed class PluginManifestReader : IPluginManifestReader
 			if (pack is null || !PluginBundledIconPacks.IsValidKey(pack.Key))
 			{
 				return PluginManifestReadResult.Fail(PluginManifestError.InvalidBundledIconPack,
-					$"Bundled icon pack key '{pack?.Key}' must be lowercase letters, digits and inner hyphens, " +
-					$"at most {PluginBundledIconPacks.MaxKeyLength} characters.");
+					$"Bundled icon pack key '{pack?.Key}' must be lowercase letters, digits and inner hyphens, "
+					+ $"at most {PluginBundledIconPacks.MaxKeyLength} characters.");
 			}
 
-			if (pack.Path is null ||
-				!IsSafeRelativeForwardSlashPath(pack.Path) ||
-				!pack.Path.EndsWith(PluginBundledIconPacks.FileExtension, StringComparison.OrdinalIgnoreCase))
+			if (pack.Path is null
+				|| !IsSafeRelativeForwardSlashPath(pack.Path)
+				|| !pack.Path.EndsWith(PluginBundledIconPacks.FileExtension, StringComparison.OrdinalIgnoreCase))
 			{
 				return PluginManifestReadResult.Fail(PluginManifestError.InvalidBundledIconPack,
-					$"Bundled icon pack '{pack.Key}' path '{pack.Path}' must be a safe relative path ending in " +
-					$"{PluginBundledIconPacks.FileExtension}.");
+					$"Bundled icon pack '{pack.Key}' path '{pack.Path}' must be a safe relative path ending in "
+					+ $"{PluginBundledIconPacks.FileExtension}.");
 			}
 
 			if (!seenKeys.Add(pack.Key))
@@ -644,9 +646,9 @@ public sealed class PluginManifestReader : IPluginManifestReader
 			return null;
 		}
 
-		if (string.IsNullOrWhiteSpace(signature.Algorithm) ||
-			string.IsNullOrWhiteSpace(signature.KeyId) ||
-			string.IsNullOrWhiteSpace(signature.Value))
+		if (string.IsNullOrWhiteSpace(signature.Algorithm)
+			|| string.IsNullOrWhiteSpace(signature.KeyId)
+			|| string.IsNullOrWhiteSpace(signature.Value))
 		{
 			return PluginManifestReadResult.Fail(PluginManifestError.InvalidSignature,
 				"Signature.Algorithm, Signature.KeyId and Signature.Value must not be empty.");
@@ -712,7 +714,8 @@ public sealed class PluginManifestReader : IPluginManifestReader
 
 	/// <summary>Relative, no <c>..</c> segments, no absolute/rooted path, resolves to a path that stays
 	/// inside <paramref name="versionDirectory"/>.</summary>
-	private static bool TryResolveWithinVersionDirectory(string versionDirectory,
+	private static bool TryResolveWithinVersionDirectory(
+		string versionDirectory,
 		string executable,
 		out string resolvedPath)
 	{
@@ -740,8 +743,10 @@ public sealed class PluginManifestReader : IPluginManifestReader
 	}
 
 	private static bool HasForbiddenScriptExtension(string executable)
-		=> _forbiddenScriptExtensions.Any(extension =>
+	{
+		return _forbiddenScriptExtensions.Any(extension =>
 			executable.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
+	}
 
 	/// <summary><c>major.minor</c> where both parts are non-negative integers, e.g. <c>"10.0"</c>.</summary>
 	private static bool IsValidDotnetMajorMinor(string? value)
@@ -752,9 +757,9 @@ public sealed class PluginManifestReader : IPluginManifestReader
 		}
 
 		var parts = value.Split('.');
-		return parts.Length == 2 &&
-			int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out _) &&
-			int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out _);
+		return parts.Length == 2
+			&& int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out _)
+			&& int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out _);
 	}
 
 	private static bool IsValidBase64(string value)
@@ -770,9 +775,9 @@ public sealed class PluginManifestReader : IPluginManifestReader
 			return false;
 		}
 
-		return segment.IndexOfAny(Path.GetInvalidFileNameChars()) < 0 &&
-			!segment.Contains('/') &&
-			!segment.Contains('\\');
+		return segment.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
+			&& !segment.Contains('/')
+			&& !segment.Contains('\\');
 	}
 
 	private static bool TryGetPropertyCaseInsensitive(JsonElement element, string name, out JsonElement value)

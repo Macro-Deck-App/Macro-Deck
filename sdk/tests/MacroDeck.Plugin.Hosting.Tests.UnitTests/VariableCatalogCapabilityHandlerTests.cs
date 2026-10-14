@@ -23,16 +23,23 @@ public class VariableCatalogCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(
 		string operation,
 		object? arguments = null,
 		string localId = "provider")
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Variables,
 			LocalId = localId,
@@ -43,12 +50,15 @@ public class VariableCatalogCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private static VariablesCapabilityHandler Handler(params IPluginIntegration[] integrations)
-		=> new(integrations,
+	{
+		return new VariablesCapabilityHandler(integrations,
 			TestMetadata.Default,
 			new VariableSubscriptions(Serilog.Log.Logger),
 			Serilog.Core.Logger.None);
+	}
 
 	[Test]
 	public void An_integration_that_is_not_a_variable_provider_declares_no_capability()
@@ -81,8 +91,10 @@ public class VariableCatalogCapabilityHandlerTests
 	/// </summary>
 	[Test]
 	public void A_second_catalog_provider_is_rejected_at_construction()
-		=> Assert.That(() => Handler(new FakeCatalogProvider(), new FakeCatalogProvider()),
+	{
+		Assert.That(() => Handler(new FakeCatalogProvider(), new FakeCatalogProvider()),
 			Throws.InstanceOf<InvalidOperationException>());
+	}
 
 	/// <summary>
 	/// Security invariant: a provider must not be able to smuggle another owner's namespace, or a
@@ -326,7 +338,10 @@ public class VariableCatalogCapabilityHandlerTests
 	}
 
 	private static VariableDefinition Item(string id)
-		=> new() { Id = id, Name = id, Type = VariableType.Text, Materialization = VariableMaterialization.OnDemand };
+	{
+		return new VariableDefinition
+			{ Id = id, Name = id, Type = VariableType.Text, Materialization = VariableMaterialization.OnDemand };
+	}
 
 	private static T Deserialize<T>(CapabilityInvocationResult result)
 	{
@@ -338,9 +353,15 @@ public class VariableCatalogCapabilityHandlerTests
 	{
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class PlainIntegration : BaseIntegration;
@@ -362,7 +383,9 @@ public class VariableCatalogCapabilityHandlerTests
 		public bool SupportsCatalog => true;
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 
 		public ValueTask<VariableCatalogPage> DiscoverAsync(
 			VariableCatalogQuery query,
@@ -375,7 +398,9 @@ public class VariableCatalogCapabilityHandlerTests
 		public ValueTask<VariableDefinition?> ResolveAsync(
 			string localId,
 			CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult<VariableDefinition?>(null);
+		{
+			return ValueTask.FromResult<VariableDefinition?>(null);
+		}
 
 		public ValueTask<IReadOnlyList<VariableValue>> SubscribeAsync(
 			IReadOnlyCollection<string> localIds,
@@ -396,15 +421,19 @@ public class VariableCatalogCapabilityHandlerTests
 		public bool SupportsCatalog => true;
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 
 		public ValueTask<VariableCatalogPage> DiscoverAsync(
 			VariableCatalogQuery query,
 			CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(new VariableCatalogPage
+		{
+			return ValueTask.FromResult(new VariableCatalogPage
 			{
 				Items = [VariableDefinition.OnDemand("only", VariableType.Text)]
 			});
+		}
 	}
 
 	/// <summary>Implements only the two members without a default, so the catalog half stays off.</summary>
@@ -414,6 +443,8 @@ public class VariableCatalogCapabilityHandlerTests
 			[VariableDefinition.Eager("cpu_temp", VariableType.Numeric)];
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 	}
 }

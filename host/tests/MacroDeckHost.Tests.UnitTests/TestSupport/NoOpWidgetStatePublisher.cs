@@ -4,8 +4,11 @@ namespace MacroDeckHost.Tests.UnitTests.TestSupport;
 
 public sealed class NoOpWidgetStatePublisher : IWidgetStatePublisher
 {
-	public Task PublishIfChanged(Guid widgetId,
+	public Task PublishIfChanged(
+		Guid widgetId,
 		WidgetStateReconciliation result,
 		CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }

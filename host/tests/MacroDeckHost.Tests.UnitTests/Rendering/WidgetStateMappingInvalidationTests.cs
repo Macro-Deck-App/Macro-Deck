@@ -14,38 +14,44 @@ namespace MacroDeckHost.Tests.UnitTests.Rendering;
 public class WidgetStateMappingInvalidationTests
 {
 	private const string BoundOnCpu =
-		"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}]," +
-		"\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"on\",\"when\":{\"kind\":\"compare\",\"id\":\"c\"," +
-		"\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}],\"fallbackStateId\":\"off\"}}";
+		"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}],"
+		+ "\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"on\",\"when\":{\"kind\":\"compare\",\"id\":\"c\","
+		+ "\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}],\"fallbackStateId\":\"off\"}}";
 
 	private const string BoundOnLocal =
-		"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}]," +
-		"\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"on\",\"when\":{\"kind\":\"compare\",\"id\":\"c\"," +
-		"\"left\":{\"$var\":\"local\"},\"operator\":\"==\",\"right\":true}}],\"fallbackStateId\":\"off\"}}";
+		"{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}],"
+		+ "\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"on\",\"when\":{\"kind\":\"compare\",\"id\":\"c\","
+		+ "\"left\":{\"$var\":\"local\"},\"operator\":\"==\",\"right\":true}}],\"fallbackStateId\":\"off\"}}";
 
 	// Legacy, pre-#612 shape - data that has not been re-saved since the upgrade still carries
 	// stateBinding rather than stateMapping. WidgetVariableReferenceParser has to keep invalidating it
 	// without waiting for a save to migrate it (WidgetVariableReferenceParser.LegacyStateBindingKey).
 	private const string LegacyBoundOnCpu =
-		"{\"mode\":\"toggle\",\"stateBinding\":{\"kind\":\"compare\",\"id\":\"c\"," +
-		"\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}";
+		"{\"mode\":\"toggle\",\"stateBinding\":{\"kind\":\"compare\",\"id\":\"c\","
+		+ "\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}";
 
-	private static WidgetEntity Button(Guid id, string? data) => new()
+	private static WidgetEntity Button(Guid id, string? data)
 	{
-		Id = id,
-		FolderId = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		Data = data
-	};
+		return new WidgetEntity
+		{
+			Id = id,
+			FolderId = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			Data = data
+		};
+	}
 
-	private static VariableEntity Variable(string name, VariableScope scope, string? scopeRefId = null) => new()
+	private static VariableEntity Variable(string name, VariableScope scope, string? scopeRefId = null)
 	{
-		Name = name,
-		Scope = scope,
-		ScopeRefId = scopeRefId,
-		Type = VariableType.Numeric,
-		Classification = VariableClassification.User
-	};
+		return new VariableEntity
+		{
+			Name = name,
+			Scope = scope,
+			ScopeRefId = scopeRefId,
+			Type = VariableType.Numeric,
+			Classification = VariableClassification.User
+		};
+	}
 
 	private static WidgetVariableIndex IndexOver(params WidgetEntity[] widgets)
 	{
@@ -118,12 +124,12 @@ public class WidgetStateMappingInvalidationTests
 	public async Task AButtonsOwnStateVariable_DoesNotReEnqueueIt(string variableName)
 	{
 		var selfReferencing = Button(Guid.NewGuid(),
-			"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}]," +
-			"\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"b\",\"when\":{\"kind\":\"compare\",\"id\":\"c\"," +
-			"\"left\":{\"$var\":\"" +
-			variableName +
-			"\"},\"operator\":\"==\",\"right\":\"a\"}}]," +
-			"\"fallbackStateId\":\"a\"}}");
+			"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}],"
+			+ "\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"b\",\"when\":{\"kind\":\"compare\",\"id\":\"c\","
+			+ "\"left\":{\"$var\":\""
+			+ variableName
+			+ "\"},\"operator\":\"==\",\"right\":\"a\"}}],"
+			+ "\"fallbackStateId\":\"a\"}}");
 		var queue = new WidgetStateEvalChannel();
 		var handler = new VariableValueChangedStateMappingHandler(IndexOver(selfReferencing), queue);
 
@@ -157,18 +163,45 @@ public class WidgetStateMappingInvalidationTests
 			_folder = new FolderEntity { Name = "f", Order = 0, Widgets = widgets.ToList() };
 		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task InitializeCache() => Task.CompletedTask;
-		public FolderEntity? GetFolderById(Guid id) => _folder;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return _folder;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

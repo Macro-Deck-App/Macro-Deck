@@ -14,7 +14,7 @@ internal sealed class MusicPlayerActionsTests
 	public async Task VolumeUp_RaisesVolumeByStepAndClampsToHundred()
 	{
 		var player = new FakeMusicPlayer { Volume = 95 };
-		var actions = MusicPlayerActions.Common(_ => player, () => [new("p1", "Player")]);
+		var actions = MusicPlayerActions.Common(_ => player, () => [new MusicPlayerInstance("p1", "Player")]);
 
 		await ExecuteAsync(actions, "volume-up");
 
@@ -25,7 +25,7 @@ internal sealed class MusicPlayerActionsTests
 	public async Task VolumeDown_LowersVolumeByStepAndClampsToZero()
 	{
 		var player = new FakeMusicPlayer { Volume = 5 };
-		var actions = MusicPlayerActions.Common(_ => player, () => [new("p1", "Player")]);
+		var actions = MusicPlayerActions.Common(_ => player, () => [new MusicPlayerInstance("p1", "Player")]);
 
 		await ExecuteAsync(actions, "volume-down");
 
@@ -36,7 +36,7 @@ internal sealed class MusicPlayerActionsTests
 	public async Task VolumeUp_AppliesStepWithinRange()
 	{
 		var player = new FakeMusicPlayer { Volume = 40 };
-		var actions = MusicPlayerActions.Common(_ => player, () => [new("p1", "Player")]);
+		var actions = MusicPlayerActions.Common(_ => player, () => [new MusicPlayerInstance("p1", "Player")]);
 
 		await ExecuteAsync(actions, "volume-up");
 
@@ -98,9 +98,11 @@ internal sealed class MusicPlayerActionsTests
 	private static readonly string[] _shuffleStateIds = ["off", "on", "unavailable"];
 
 	private static IStateProviderActionDefinition Provider(IMusicPlayer player, string actionId)
-		=> (IStateProviderActionDefinition)MusicPlayerActions
+	{
+		return (IStateProviderActionDefinition)MusicPlayerActions
 			.Common(_ => player, () => [new MusicPlayerInstance("p1", "Player")])
 			.Single(action => action.Id == actionId);
+	}
 
 	[TestCase(PlaybackState.Playing, "paused")]
 	[TestCase(PlaybackState.Paused, "playing")]
@@ -110,7 +112,7 @@ internal sealed class MusicPlayerActionsTests
 		string expectedStateId)
 	{
 		var player = new FakeMusicPlayer { PlaybackState = playbackState };
-		var actions = MusicPlayerActions.Common(_ => player, () => [new("p1", "Player")]);
+		var actions = MusicPlayerActions.Common(_ => player, () => [new MusicPlayerInstance("p1", "Player")]);
 
 		var result = await ExecuteAsync(actions, "toggle-play-pause");
 
@@ -122,7 +124,7 @@ internal sealed class MusicPlayerActionsTests
 	{
 		var player = new FakeMusicPlayer { PlaybackState = PlaybackState.Playing };
 		var action = new MusicPlayerStateActionDefinition(_ => player,
-			() => [new("p1", "Player")],
+			() => [new MusicPlayerInstance("p1", "Player")],
 			"custom-state",
 			"Custom State",
 			"Custom provider state action",
@@ -142,7 +144,7 @@ internal sealed class MusicPlayerActionsTests
 	{
 		var player = new FakeMusicPlayer();
 		var actions = MusicPlayerActions.Common(_ => player,
-			() => [new("a", "Alpha"), new("b", "Beta")]);
+			() => [new MusicPlayerInstance("a", "Alpha"), new MusicPlayerInstance("b", "Beta")]);
 
 		var action = actions.Single(a => a.Id == "play");
 		var result = await ((IDynamicOptionsActionDefinition)action).GetDynamicOptionsAsync(new DynamicOptionsContext
@@ -163,7 +165,7 @@ internal sealed class MusicPlayerActionsTests
 	public async Task InstanceParameter_PlaceholderNamesTheEmptyOption()
 	{
 		var player = new FakeMusicPlayer();
-		var actions = MusicPlayerActions.Common(_ => player, () => [new("a", "Alpha")]);
+		var actions = MusicPlayerActions.Common(_ => player, () => [new MusicPlayerInstance("a", "Alpha")]);
 
 		var action = actions.Single(a => a.Id == "play");
 		var instance = action.Parameters.Single(p => p.Name == MusicPlayerActions.InstanceParameterName);
@@ -181,7 +183,8 @@ internal sealed class MusicPlayerActionsTests
 	public async Task PlayTrack_WithFixedItem_CallsPlayItem()
 	{
 		var player = new FakeCatalogMusicPlayer();
-		var actions = new[] { MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+			{ MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")]) };
 
 		var result = await ExecuteAsync(actions, "play-track", "track", "spotify:track:abc");
 
@@ -199,13 +202,14 @@ internal sealed class MusicPlayerActionsTests
 	{
 		var player = new FakeMusicPlayer();
 		var interactions = new RecordingInteractions();
-		var actions = new[] { MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+			{ MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")]) };
 
 		var result = await ExecuteAsync(actions,
 			"play-track",
 			"track",
 			"spotify:track:abc",
-			interactions: interactions);
+			interactions);
 
 		Assert.Multiple(() =>
 		{
@@ -222,9 +226,10 @@ internal sealed class MusicPlayerActionsTests
 	{
 		var player = new FakeMusicPlayer();
 		var interactions = new RecordingInteractions();
-		var actions = new[] { MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+			{ MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")]) };
 
-		var result = await ExecuteAsync(actions, "play-track", "track", "", interactions: interactions);
+		var result = await ExecuteAsync(actions, "play-track", "track", "", interactions);
 
 		Assert.Multiple(() =>
 		{
@@ -240,9 +245,10 @@ internal sealed class MusicPlayerActionsTests
 	{
 		var player = new FakeCatalogMusicPlayer();
 		var interactions = new RecordingInteractions();
-		var actions = new[] { MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+			{ MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")]) };
 
-		var result = await ExecuteAsync(actions, "play-track", "track", "", interactions: interactions);
+		var result = await ExecuteAsync(actions, "play-track", "track", "", interactions);
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Accepted));
 		Assert.That(TestLocalization.Resolve(result.Message), Is.EqualTo("Waiting for an item to be picked."));
@@ -259,11 +265,12 @@ internal sealed class MusicPlayerActionsTests
 	public async Task PlayTrack_WithEmptyItem_AndNoInteractions_StillReportsAccepted()
 	{
 		var player = new FakeCatalogMusicPlayer();
-		var actions = new[] { MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+			{ MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")]) };
 
 		ActionResult? result = null;
 		Assert.DoesNotThrowAsync(async () =>
-			result = await ExecuteAsync(actions, "play-track", "track", "", interactions: null));
+			result = await ExecuteAsync(actions, "play-track", "track", "", null));
 
 		Assert.That(player.PlayedItem, Is.Null);
 		Assert.That(result!.Status, Is.EqualTo(ActionResultStatus.Accepted));
@@ -287,7 +294,7 @@ internal sealed class MusicPlayerActionsTests
 	public void ACancelledCommand_PropagatesRatherThanReportingProviderError()
 	{
 		var player = new FakeMusicPlayer { ThrowOnPlay = new OperationCanceledException() };
-		var actions = MusicPlayerActions.Common(_ => player, () => [new("p1", "Player")]);
+		var actions = MusicPlayerActions.Common(_ => player, () => [new MusicPlayerInstance("p1", "Player")]);
 
 		Assert.ThrowsAsync<OperationCanceledException>(async () => await ExecuteAsync(actions, "play"));
 	}
@@ -296,7 +303,8 @@ internal sealed class MusicPlayerActionsTests
 	public void ACancelledItemPlay_PropagatesRatherThanReportingProviderError()
 	{
 		var player = new FakeCatalogMusicPlayer { ThrowOnPlayItem = new OperationCanceledException() };
-		var actions = new[] { MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+			{ MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")]) };
 
 		Assert.ThrowsAsync<OperationCanceledException>(async () =>
 			await ExecuteAsync(actions, "play-track", "track", "spotify:track:abc"));
@@ -306,7 +314,10 @@ internal sealed class MusicPlayerActionsTests
 	public async Task PlayOnDevice_WithFixedDevice_TransfersWithStartPlaybackTrue()
 	{
 		var player = new FakeDeviceMusicPlayer();
-		var actions = new[] { MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+		{
+			MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")])
+		};
 
 		await ExecuteAsync(actions, "play-on-device", MusicPlayerActions.DeviceParameterName, "device-1");
 
@@ -318,7 +329,11 @@ internal sealed class MusicPlayerActionsTests
 	{
 		var player = new FakeDeviceMusicPlayer();
 		var actions = new[]
-			{ MusicPlayerActions.TransferPlayback("app.test", _ => player, () => [new("p1", "Player")]) };
+		{
+			MusicPlayerActions.TransferPlayback("app.test",
+				_ => player,
+				() => [new MusicPlayerInstance("p1", "Player")])
+		};
 
 		await ExecuteAsync(actions, "transfer-playback", MusicPlayerActions.DeviceParameterName, "device-1");
 
@@ -330,13 +345,16 @@ internal sealed class MusicPlayerActionsTests
 	{
 		var player = new FakeDeviceMusicPlayer();
 		var interactions = new RecordingInteractions();
-		var actions = new[] { MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+		{
+			MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")])
+		};
 
 		await ExecuteAsync(actions,
 			"play-on-device",
 			MusicPlayerActions.DeviceParameterName,
 			"",
-			interactions: interactions);
+			interactions);
 
 		Assert.That(player.Transferred, Is.Null);
 		Assert.That(interactions.DevicePicks, Has.Count.EqualTo(1));
@@ -353,13 +371,17 @@ internal sealed class MusicPlayerActionsTests
 		var player = new FakeDeviceMusicPlayer();
 		var interactions = new RecordingInteractions();
 		var actions = new[]
-			{ MusicPlayerActions.TransferPlayback("app.test", _ => player, () => [new("p1", "Player")]) };
+		{
+			MusicPlayerActions.TransferPlayback("app.test",
+				_ => player,
+				() => [new MusicPlayerInstance("p1", "Player")])
+		};
 
 		await ExecuteAsync(actions,
 			"transfer-playback",
 			MusicPlayerActions.DeviceParameterName,
 			"",
-			interactions: interactions);
+			interactions);
 
 		Assert.That(player.Transferred, Is.Null);
 		Assert.That(interactions.DevicePicks, Has.Count.EqualTo(1));
@@ -374,13 +396,16 @@ internal sealed class MusicPlayerActionsTests
 	public async Task PlayOnDevice_WithEmptyDevice_AndNoInteractions_IsAcceptedWithoutTransferring()
 	{
 		var player = new FakeDeviceMusicPlayer();
-		var actions = new[] { MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+		{
+			MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")])
+		};
 
 		var result = await ExecuteAsync(actions,
 			"play-on-device",
 			MusicPlayerActions.DeviceParameterName,
 			"",
-			interactions: null);
+			null);
 
 		Assert.That(player.Transferred, Is.Null);
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Accepted));
@@ -390,7 +415,10 @@ internal sealed class MusicPlayerActionsTests
 	public async Task PlayOnDevice_OnPlayerWithoutDeviceCapability_FailsWithUnavailable()
 	{
 		var player = new FakeMusicPlayer();
-		var actions = new[] { MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+		{
+			MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")])
+		};
 
 		var result = await ExecuteAsync(actions,
 			"play-on-device",
@@ -411,7 +439,8 @@ internal sealed class MusicPlayerActionsTests
 		{
 			Catalog = [new MusicPlayerCatalogItem("t1", "Track One", MusicPlayerCatalogItemKind.Track)]
 		};
-		var actions = new[] { MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+			{ MusicPlayerActions.PlayTrack("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")]) };
 		var action = actions.Single(a => a.Id == "play-track");
 
 		var result = await ((IDynamicOptionsActionDefinition)action).GetDynamicOptionsAsync(new DynamicOptionsContext
@@ -442,7 +471,10 @@ internal sealed class MusicPlayerActionsTests
 				new MusicPlayerDevice("d3", "Desktop", "Computer")
 			]
 		};
-		var actions = new[] { MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+		{
+			MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")])
+		};
 		var action = actions.Single(a => a.Id == "play-on-device");
 
 		var result = await ((IDynamicOptionsActionDefinition)action).GetDynamicOptionsAsync(new DynamicOptionsContext
@@ -467,7 +499,10 @@ internal sealed class MusicPlayerActionsTests
 	public async Task DeviceDynamicOptions_DegradesToEmptyWithCustomValue_WhenProviderThrows()
 	{
 		var player = new FakeDeviceMusicPlayer { ThrowOnGetDevices = new InvalidOperationException("boom") };
-		var actions = new[] { MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new("p1", "Player")]) };
+		var actions = new[]
+		{
+			MusicPlayerActions.PlayOnDevice("app.test", _ => player, () => [new MusicPlayerInstance("p1", "Player")])
+		};
 		var action = actions.Single(a => a.Id == "play-on-device");
 
 		var result = await ((IDynamicOptionsActionDefinition)action).GetDynamicOptionsAsync(new DynamicOptionsContext
@@ -512,17 +547,23 @@ internal sealed class MusicPlayerActionsTests
 
 		public List<(string InstanceId, bool StartPlayback)> DevicePicks { get; } = new();
 
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
-			=> Picks.Add((instanceId, kind));
+		{
+			Picks.Add((instanceId, kind));
+		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)
-			=> DevicePicks.Add((instanceId, startPlayback));
+		{
+			DevicePicks.Add((instanceId, startPlayback));
+		}
 	}
 
 	/// <summary>
@@ -551,7 +592,8 @@ internal sealed class MusicPlayerActionsTests
 		}
 
 		public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(new MusicPlayerState
+		{
+			return Task.FromResult(new MusicPlayerState
 			{
 				IsConnected = Connected,
 				VolumePercent = Volume,
@@ -559,10 +601,14 @@ internal sealed class MusicPlayerActionsTests
 				ShuffleEnabled = Shuffle,
 				RepeatMode = Repeat
 			});
+		}
 
-		public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+		public Task<MusicPlayerArtwork?> GetArtworkAsync(
+			string artworkId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<MusicPlayerArtwork?>(null);
+		{
+			return Task.FromResult<MusicPlayerArtwork?>(null);
+		}
 
 		public Task PlayAsync(CancellationToken cancellationToken = default)
 		{
@@ -574,15 +620,30 @@ internal sealed class MusicPlayerActionsTests
 			return Task.CompletedTask;
 		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
 		{
@@ -590,10 +651,15 @@ internal sealed class MusicPlayerActionsTests
 			return Task.CompletedTask;
 		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default) =>
-			Task.CompletedTask;
+		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeCatalogMusicPlayer : ICatalogMusicPlayer
@@ -605,13 +671,21 @@ internal sealed class MusicPlayerActionsTests
 		public Exception? ThrowOnPlayItem { get; set; }
 
 		public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(new MusicPlayerState { IsConnected = true, VolumePercent = Volume });
+		{
+			return Task.FromResult(new MusicPlayerState { IsConnected = true, VolumePercent = Volume });
+		}
 
-		public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+		public Task<MusicPlayerArtwork?> GetArtworkAsync(
+			string artworkId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<MusicPlayerArtwork?>(null);
+		{
+			return Task.FromResult<MusicPlayerArtwork?>(null);
+		}
 
-		public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PlayAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task PlayItemAsync(MusicPlayerCatalogItem item, CancellationToken cancellationToken = default)
 		{
@@ -624,30 +698,54 @@ internal sealed class MusicPlayerActionsTests
 			return Task.CompletedTask;
 		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default) =>
-			Task.CompletedTask;
+		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default) =>
-			Task.CompletedTask;
+		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IReadOnlyList<MusicPlayerCatalogItem>> GetCatalogAsync(
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? filter,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<MusicPlayerCatalogItem>>([]);
+		{
+			return Task.FromResult<IReadOnlyList<MusicPlayerCatalogItem>>([]);
+		}
 	}
 
 	private sealed class FakeBrowseOnlyMusicPlayer : FakeMusicPlayer, IMusicPlayerCatalogProvider
@@ -659,7 +757,9 @@ internal sealed class MusicPlayerActionsTests
 			MusicPlayerCatalogItemKind kind,
 			string? filter,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(Catalog);
+		{
+			return Task.FromResult(Catalog);
+		}
 	}
 
 	private sealed class FakeDeviceMusicPlayer : FakeMusicPlayer, IMusicPlayerDeviceProvider

@@ -48,6 +48,9 @@ public class ConfigureJwtBearerOptionsTests
 	{
 		private readonly byte[] _key = RandomNumberGenerator.GetBytes(32);
 
-		public byte[] GetKey() => _key;
+		public byte[] GetKey()
+		{
+			return _key;
+		}
 	}
 }

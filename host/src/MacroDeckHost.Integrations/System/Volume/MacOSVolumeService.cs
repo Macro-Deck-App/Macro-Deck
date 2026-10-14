@@ -84,20 +84,30 @@ internal sealed class MacOsVolumeService : IVolumeService
 	}
 
 	public Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<AudioDevice>>(ListDevices());
+	{
+		return Task.FromResult<IReadOnlyList<AudioDevice>>(ListDevices());
+	}
 
 	public Task<float?> GetVolumeAsync(AudioTarget target, CancellationToken cancellationToken = default)
-		=> Task.FromResult(Resolve(target) is { } device ? ReadVolume(device, Scope(target.Flow)) : null);
+	{
+		return Task.FromResult(Resolve(target) is { } device ? ReadVolume(device, Scope(target.Flow)) : null);
+	}
 
 	public Task<bool> SetVolumeAsync(AudioTarget target, float level, CancellationToken cancellationToken = default)
-		=> Task.FromResult(Resolve(target) is { } device &&
-			WriteVolume(device, Scope(target.Flow), Math.Clamp(level, 0f, 1f)));
+	{
+		return Task.FromResult(Resolve(target) is { } device
+			&& WriteVolume(device, Scope(target.Flow), Math.Clamp(level, 0f, 1f)));
+	}
 
 	public Task<bool?> GetMuteAsync(AudioTarget target, CancellationToken cancellationToken = default)
-		=> Task.FromResult(Resolve(target) is { } device ? ReadMute(device, Scope(target.Flow)) : null);
+	{
+		return Task.FromResult(Resolve(target) is { } device ? ReadMute(device, Scope(target.Flow)) : null);
+	}
 
 	public Task<bool> SetMuteAsync(AudioTarget target, bool mute, CancellationToken cancellationToken = default)
-		=> Task.FromResult(Resolve(target) is { } device && TryWriteMute(device, Scope(target.Flow), mute));
+	{
+		return Task.FromResult(Resolve(target) is { } device && TryWriteMute(device, Scope(target.Flow), mute));
+	}
 
 	private void Arm()
 	{
@@ -170,7 +180,7 @@ internal sealed class MacOsVolumeService : IVolumeService
 			// Moving the listeners locks the gate, and a CoreAudio callback must never block on it.
 			if (objectId == SystemObject)
 			{
-				ThreadPool.QueueUserWorkItem(static s => s.Retarget(), service, preferLocal: false);
+				ThreadPool.QueueUserWorkItem(static s => s.Retarget(), service, false);
 			}
 
 			service._changed?.Invoke();
@@ -231,7 +241,10 @@ internal sealed class MacOsVolumeService : IVolumeService
 		return null;
 	}
 
-	private static uint Scope(AudioFlow flow) => flow == AudioFlow.Output ? OutputScope : InputScope;
+	private static uint Scope(AudioFlow flow)
+	{
+		return flow == AudioFlow.Output ? OutputScope : InputScope;
+	}
 
 	private static uint[] ReadDeviceIds()
 	{
@@ -257,8 +270,8 @@ internal sealed class MacOsVolumeService : IVolumeService
 	{
 		var address = new AudioObjectPropertyAddress(selector, GlobalScope, MainElement);
 		var size = (uint)IntPtr.Size;
-		if (AudioObjectGetPropertyData(device, ref address, 0, IntPtr.Zero, ref size, out IntPtr text) != 0 ||
-			text == IntPtr.Zero)
+		if (AudioObjectGetPropertyData(device, ref address, 0, IntPtr.Zero, ref size, out IntPtr text) != 0
+			|| text == IntPtr.Zero)
 		{
 			return null;
 		}
@@ -267,7 +280,7 @@ internal sealed class MacOsVolumeService : IVolumeService
 		{
 			var length = CFStringGetLength(text);
 			var buffer = new char[length];
-			CFStringGetCharacters(text, new CFRange(0, length), buffer);
+			CFStringGetCharacters(text, new CfRange(0, length), buffer);
 			return new string(buffer);
 		}
 		finally
@@ -373,12 +386,16 @@ internal sealed class MacOsVolumeService : IVolumeService
 	}
 
 	private static bool HasProperty(uint device, ref AudioObjectPropertyAddress address)
-		=> AudioObjectHasProperty(device, ref address) != 0;
+	{
+		return AudioObjectHasProperty(device, ref address) != 0;
+	}
 
 	private static bool IsSettable(uint device, ref AudioObjectPropertyAddress address)
-		=> HasProperty(device, ref address) &&
-			AudioObjectIsPropertySettable(device, ref address, out var settable) == 0 &&
-			settable != 0;
+	{
+		return HasProperty(device, ref address)
+			&& AudioObjectIsPropertySettable(device, ref address, out var settable) == 0
+			&& settable != 0;
+	}
 
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 	private delegate int PropertyListener(uint objectId, uint addressCount, IntPtr addresses, IntPtr clientData);
@@ -472,18 +489,18 @@ internal sealed class MacOsVolumeService : IVolumeService
 	private static extern nint CFStringGetLength(IntPtr text);
 
 	[DllImport(CoreFoundationLibrary, CharSet = CharSet.Unicode)]
-	private static extern void CFStringGetCharacters(IntPtr text, CFRange range, [Out] char[] buffer);
+	private static extern void CFStringGetCharacters(IntPtr text, CfRange range, [Out] char[] buffer);
 
 	[DllImport(CoreFoundationLibrary)]
 	private static extern void CFRelease(IntPtr value);
 
 	[StructLayout(LayoutKind.Sequential)]
-	private readonly struct CFRange
+	private readonly struct CfRange
 	{
 		public readonly nint Location;
 		public readonly nint Length;
 
-		public CFRange(nint location, nint length)
+		public CfRange(nint location, nint length)
 		{
 			Location = location;
 			Length = length;

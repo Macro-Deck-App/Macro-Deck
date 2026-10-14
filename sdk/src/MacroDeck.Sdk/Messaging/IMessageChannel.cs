@@ -34,7 +34,8 @@ public interface IMessageChannel
 	/// <exception cref="MessageChannelException">
 	/// No handler, the handler is unavailable, failed or timed out, or any failure of <see cref="PublishAsync" />.
 	/// </exception>
-	Task SendAsync(string topic,
+	Task SendAsync(
+		string topic,
 		JsonElement? payload = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default);
@@ -43,7 +44,8 @@ public interface IMessageChannel
 	/// <param name="timeout">How long to wait for the reply: at most 30 seconds, which is also the default.</param>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="timeout" /> is not positive or exceeds 30 seconds.</exception>
 	/// <exception cref="MessageChannelException">The same failures as <see cref="SendAsync" />.</exception>
-	Task<JsonElement?> RequestAsync(string topic,
+	Task<JsonElement?> RequestAsync(
+		string topic,
 		JsonElement? payload = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default);
@@ -53,7 +55,8 @@ public interface IMessageChannel
 	/// A handler that throws is logged; it does not affect other subscriptions or the publisher.
 	/// </summary>
 	/// <exception cref="MessageChannelException">The pattern is invalid or the channel is unsupported.</exception>
-	Task<IAsyncDisposable> SubscribeAsync(string topicPattern,
+	Task<IAsyncDisposable> SubscribeAsync(
+		string topicPattern,
 		Func<ChannelMessage, CancellationToken, Task> handler,
 		CancellationToken cancellationToken = default);
 
@@ -64,7 +67,8 @@ public interface IMessageChannel
 	/// <exception cref="MessageChannelException">
 	/// The topic is invalid, already handled by another participant, or the channel is unsupported.
 	/// </exception>
-	Task<IAsyncDisposable> HandleCommandsAsync(string topic,
+	Task<IAsyncDisposable> HandleCommandsAsync(
+		string topic,
 		Func<ChannelMessage, CancellationToken, Task> handler,
 		CancellationToken cancellationToken = default);
 
@@ -74,7 +78,8 @@ public interface IMessageChannel
 	/// <see cref="MessageChannelErrorCode.HandlerFailed" />.
 	/// </summary>
 	/// <exception cref="MessageChannelException">The same failures as <see cref="HandleCommandsAsync" />.</exception>
-	Task<IAsyncDisposable> HandleRequestsAsync(string topic,
+	Task<IAsyncDisposable> HandleRequestsAsync(
+		string topic,
 		Func<ChannelMessage, CancellationToken, Task<JsonElement?>> handler,
 		CancellationToken cancellationToken = default);
 }

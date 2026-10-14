@@ -9,7 +9,10 @@ public sealed class ProcessTable : IProcessTable
 {
 	private readonly ILogger _logger;
 
-	public ProcessTable(ILogger logger) => _logger = logger.ForContext<ProcessTable>();
+	public ProcessTable(ILogger logger)
+	{
+		_logger = logger.ForContext<ProcessTable>();
+	}
 
 	public RunningProcess? TryGet(int processId)
 	{

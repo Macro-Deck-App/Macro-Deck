@@ -43,8 +43,8 @@ internal static class Win32Input
 
 		Interlocked.Exchange(ref _lastBlockedReportTicks, now);
 		Log.ForContext(typeof(Win32Input))
-			.Warning("Windows blocked {Blocked} of {Total} injected input event(s) (error {Error}); " +
-				"the foreground application may be running elevated",
+			.Warning("Windows blocked {Blocked} of {Total} injected input event(s) (error {Error}); "
+				+ "the foreground application may be running elevated",
 				blocked,
 				total,
 				error);

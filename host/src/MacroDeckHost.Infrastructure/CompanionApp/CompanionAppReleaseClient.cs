@@ -19,9 +19,9 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 
 	public static readonly Uri ManifestUrl = new($"https://{ReleaseHost}/companion/android/latest.json");
 
-	private static readonly TimeSpan ManifestTimeout = TimeSpan.FromSeconds(30);
-	private static readonly TimeSpan DownloadTimeout = TimeSpan.FromMinutes(5);
-	private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+	private static readonly TimeSpan _manifestTimeout = TimeSpan.FromSeconds(30);
+	private static readonly TimeSpan _downloadTimeout = TimeSpan.FromMinutes(5);
+	private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -34,7 +34,7 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 	}
 
 	internal CompanionAppReleaseClient(HttpMessageHandler handler, string pinnedCertificate, ILogger logger)
-		: this(new HttpClient(handler, disposeHandler: false), true, pinnedCertificate, logger)
+		: this(new HttpClient(handler, false), true, pinnedCertificate, logger)
 	{
 	}
 
@@ -49,7 +49,7 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 	public async Task<CompanionAppRelease?> GetLatestAsync(CancellationToken cancellationToken)
 	{
 		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		timeout.CancelAfter(ManifestTimeout);
+		timeout.CancelAfter(_manifestTimeout);
 		Manifest? manifest;
 		try
 		{
@@ -60,10 +60,10 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 				return null;
 			}
 
-			manifest = await response.Content.ReadFromJsonAsync<Manifest>(Json, timeout.Token);
+			manifest = await response.Content.ReadFromJsonAsync<Manifest>(_json, timeout.Token);
 		}
-		catch (Exception ex) when (ex is HttpRequestException or JsonException or NotSupportedException ||
-			(ex is OperationCanceledException && !cancellationToken.IsCancellationRequested))
+		catch (Exception ex) when (ex is HttpRequestException or JsonException or NotSupportedException
+			|| ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning(ex, "Could not read the Companion app release manifest");
 			return null;
@@ -78,7 +78,8 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 		return release;
 	}
 
-	public async Task<CompanionApkDownloadOutcome> DownloadAsync(CompanionAppRelease release,
+	public async Task<CompanionApkDownloadOutcome> DownloadAsync(
+		CompanionAppRelease release,
 		string destinationPath,
 		CancellationToken cancellationToken)
 	{
@@ -93,7 +94,8 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 
 			if (!string.Equals(digest, release.Sha256, StringComparison.OrdinalIgnoreCase))
 			{
-				_logger.Warning("The Companion app APK {Version} does not match the manifest's SHA-256", release.Version);
+				_logger.Warning("The Companion app APK {Version} does not match the manifest's SHA-256",
+					release.Version);
 				return CompanionApkDownloadOutcome.VerificationFailed;
 			}
 
@@ -107,11 +109,12 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 
 			if (signers.Count == 0 || jarSigners is null || !signers.Concat(jarSigners).All(IsPinned))
 			{
-				_logger.Warning("The Companion app APK {Version} is not signed with the expected certificate", release.Version);
+				_logger.Warning("The Companion app APK {Version} is not signed with the expected certificate",
+					release.Version);
 				return CompanionApkDownloadOutcome.VerificationFailed;
 			}
 
-			File.Move(partialPath, destinationPath, overwrite: true);
+			File.Move(partialPath, destinationPath, true);
 			return CompanionApkDownloadOutcome.Downloaded;
 		}
 		finally
@@ -121,7 +124,9 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 	}
 
 	private bool IsPinned(string certificate)
-		=> string.Equals(certificate, _pinnedCertificate, StringComparison.OrdinalIgnoreCase);
+	{
+		return string.Equals(certificate, _pinnedCertificate, StringComparison.OrdinalIgnoreCase);
+	}
 
 	public void Dispose()
 	{
@@ -133,16 +138,16 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 
 	internal static CompanionAppRelease? Validate(Manifest? manifest)
 	{
-		if (manifest is null ||
-			string.IsNullOrWhiteSpace(manifest.Version) ||
-			!VersionRegex().IsMatch(manifest.Version) ||
-			manifest.VersionCode <= 0 ||
-			manifest.Sha256 is null ||
-			!Sha256Regex().IsMatch(manifest.Sha256) ||
-			!Uri.TryCreate(manifest.Url, UriKind.Absolute, out var url) ||
-			url.Scheme != Uri.UriSchemeHttps ||
-			!string.Equals(url.Host, ReleaseHost, StringComparison.OrdinalIgnoreCase) ||
-			!url.IsDefaultPort)
+		if (manifest is null
+			|| string.IsNullOrWhiteSpace(manifest.Version)
+			|| !VersionRegex().IsMatch(manifest.Version)
+			|| manifest.VersionCode <= 0
+			|| manifest.Sha256 is null
+			|| !Sha256Regex().IsMatch(manifest.Sha256)
+			|| !Uri.TryCreate(manifest.Url, UriKind.Absolute, out var url)
+			|| url.Scheme != Uri.UriSchemeHttps
+			|| !string.Equals(url.Host, ReleaseHost, StringComparison.OrdinalIgnoreCase)
+			|| !url.IsDefaultPort)
 		{
 			return null;
 		}
@@ -157,7 +162,7 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 	private async Task<string?> DownloadToAsync(Uri url, string path, CancellationToken cancellationToken)
 	{
 		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		timeout.CancelAfter(DownloadTimeout);
+		timeout.CancelAfter(_downloadTimeout);
 		try
 		{
 			using var response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
@@ -190,8 +195,8 @@ public sealed partial class CompanionAppReleaseClient : ICompanionAppReleaseClie
 
 			return Convert.ToHexStringLower(hash.GetHashAndReset());
 		}
-		catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException ||
-			(ex is OperationCanceledException && !cancellationToken.IsCancellationRequested))
+		catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException
+			|| ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning(ex, "Could not download the Companion app APK");
 			return null;

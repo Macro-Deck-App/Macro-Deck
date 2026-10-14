@@ -29,7 +29,8 @@ public enum PluginArtifactEntryRejection
 /// <summary>The outcome of judging one archive entry.</summary>
 public readonly record struct PluginArtifactEntryDecision
 {
-	private PluginArtifactEntryDecision(bool allowed,
+	private PluginArtifactEntryDecision(
+		bool allowed,
 		string? resolvedPath,
 		PluginArtifactEntryRejection? rejection,
 		string? message)
@@ -108,8 +109,8 @@ public static class PluginArtifactEntryPolicy
 		if (entryFullName.Length > PluginArtifactLimits.MaxPathLength)
 		{
 			return PluginArtifactEntryDecision.Reject(PluginArtifactEntryRejection.PathTooLong,
-				$"The archive entry '{entryFullName}' exceeds the " +
-				$"{PluginArtifactLimits.MaxPathLength}-character path limit.");
+				$"The archive entry '{entryFullName}' exceeds the "
+				+ $"{PluginArtifactLimits.MaxPathLength}-character path limit.");
 		}
 
 		// Normalised so an entry written with the other OS's separator is judged identically here - a
@@ -120,9 +121,9 @@ public static class PluginArtifactEntryPolicy
 
 		// ':' is an ordinary filename character on Unix, so Path.IsPathRooted would not catch "C:\evil"
 		// there. Checked explicitly so the guard does not depend on which OS it runs on.
-		var hasWindowsDriveLetter = normalized.Length >= 2 &&
-			normalized[1] == ':' &&
-			normalized[0] is (>= 'A' and <= 'Z') or (>= 'a' and <= 'z');
+		var hasWindowsDriveLetter = normalized.Length >= 2
+			&& normalized[1] == ':'
+			&& normalized[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
 
 		if (hasWindowsDriveLetter || Path.IsPathRooted(normalized))
 		{
@@ -140,8 +141,8 @@ public static class PluginArtifactEntryPolicy
 		if (segments.Length > PluginArtifactLimits.MaxPathDepth)
 		{
 			return PluginArtifactEntryDecision.Reject(PluginArtifactEntryRejection.PathTooLong,
-				$"The archive entry '{entryFullName}' is deeper than " +
-				$"{PluginArtifactLimits.MaxPathDepth} segments.");
+				$"The archive entry '{entryFullName}' is deeper than "
+				+ $"{PluginArtifactLimits.MaxPathDepth} segments.");
 		}
 
 		foreach (var segment in segments)
@@ -193,7 +194,7 @@ public static class PluginArtifactEntryPolicy
 	/// </summary>
 	public static bool IsUnsafeFileType(int externalAttributes)
 	{
-		var unixMode = (externalAttributes >> 16) & 0xFFFF;
+		var unixMode = externalAttributes >> 16 & 0xFFFF;
 		var fileType = unixMode & UnixFileTypeMask;
 
 		return fileType is not 0 and not UnixRegularFile and not UnixDirectory;

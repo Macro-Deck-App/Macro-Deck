@@ -50,5 +50,8 @@ public interface IWidgetTypeProvider
 	/// The widget types this provider currently offers. The host reads this to recover its catalog after a
 	/// reconnect; a provider that keeps no catalog of its own may return an empty list.
 	/// </summary>
-	IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes() => [];
+	IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
+	{
+		return [];
+	}
 }

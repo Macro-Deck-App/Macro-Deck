@@ -58,6 +58,13 @@ public static partial class ActionButtonStateJson
 			NormalizeStatesArray(data);
 		}
 
+		// Safe to drop: while a provider is set the manual mapping is kept in manualStateBackup
+		// and this copy is never read.
+		if (data["stateProvider"] is JsonObject)
+		{
+			data.Remove("stateMapping");
+		}
+
 		PruneDegenerateMapping(data);
 		ActionButtonIconJson.Normalize(data);
 
@@ -86,11 +93,11 @@ public static partial class ActionButtonStateJson
 			return;
 		}
 
-		var hasUsableRule = rulesNode is JsonArray rules &&
-			rules.OfType<JsonObject>()
-				.Any(rule => rule["stateId"] is JsonValue stateId &&
-					stateId.TryGetValue<string>(out var id) &&
-					!string.IsNullOrEmpty(id));
+		var hasUsableRule = rulesNode is JsonArray rules
+			&& rules.OfType<JsonObject>()
+				.Any(rule => rule["stateId"] is JsonValue stateId
+					&& stateId.TryGetValue<string>(out var id)
+					&& !string.IsNullOrEmpty(id));
 
 		if (!hasUsableRule)
 		{
@@ -114,9 +121,9 @@ public static partial class ActionButtonStateJson
 				continue;
 			}
 
-			var candidate = stateObject["id"] is JsonValue idValue &&
-				idValue.TryGetValue<string>(out var raw) &&
-				IsValidId(raw)
+			var candidate = stateObject["id"] is JsonValue idValue
+				&& idValue.TryGetValue<string>(out var raw)
+				&& IsValidId(raw)
 					? raw
 					: null;
 			var id = candidate is not null && seenIds.Add(candidate) ? candidate : GenerateUniqueId(seenIds);
@@ -129,11 +136,16 @@ public static partial class ActionButtonStateJson
 		data["states"] = normalized;
 	}
 
-	public static bool IsValidId(string id) => !string.IsNullOrEmpty(id) && StateIdPattern().IsMatch(id);
+	public static bool IsValidId(string id)
+	{
+		return !string.IsNullOrEmpty(id) && StateIdPattern().IsMatch(id);
+	}
 
 	/// <summary>Sets the active state unconditionally - callers must already have checked no provider or mapping is authoritative.</summary>
-	public static void SetActiveState(JsonObject data, string stateId) =>
+	public static void SetActiveState(JsonObject data, string stateId)
+	{
 		data["activeStateId"] = JsonValue.Create(stateId);
+	}
 
 	/// <summary>Advances to the next state in <c>states</c> order, wrapping past the last. Returns the new id, or null if there are no states.</summary>
 	public static string? AdvanceState(JsonObject data)
@@ -157,8 +169,8 @@ public static partial class ActionButtonStateJson
 			return null;
 		}
 
-		var current = data["activeStateId"] is JsonValue currentValue &&
-			currentValue.TryGetValue<string>(out var currentId)
+		var current = data["activeStateId"] is JsonValue currentValue
+			&& currentValue.TryGetValue<string>(out var currentId)
 				? currentId
 				: null;
 		var next = NextStateId(ids, current);
@@ -263,8 +275,8 @@ public static partial class ActionButtonStateJson
 			});
 		}
 
-		var statesChanged = data["states"] is not JsonArray existingStates ||
-			!JsonNode.DeepEquals(existingStates, adopted);
+		var statesChanged = data["states"] is not JsonArray existingStates
+			|| !JsonNode.DeepEquals(existingStates, adopted);
 		data["states"] = adopted;
 
 		var changed = statesChanged;
@@ -280,8 +292,8 @@ public static partial class ActionButtonStateJson
 				});
 			}
 
-			changed |= providerObject["states"] is not JsonArray existingCache ||
-				!JsonNode.DeepEquals(existingCache, cache);
+			changed |= providerObject["states"] is not JsonArray existingCache
+				|| !JsonNode.DeepEquals(existingCache, cache);
 			providerObject["states"] = cache;
 		}
 
@@ -392,10 +404,10 @@ public static partial class ActionButtonStateJson
 
 		foreach (var node in states)
 		{
-			if (node is JsonObject entry &&
-				entry["id"] is JsonValue idValue &&
-				idValue.TryGetValue<string>(out var stateId) &&
-				string.Equals(stateId, fallbackStateId, StringComparison.Ordinal))
+			if (node is JsonObject entry
+				&& entry["id"] is JsonValue idValue
+				&& idValue.TryGetValue<string>(out var stateId)
+				&& string.Equals(stateId, fallbackStateId, StringComparison.Ordinal))
 			{
 				return true;
 			}

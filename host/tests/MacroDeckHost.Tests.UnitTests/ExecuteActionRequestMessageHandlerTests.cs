@@ -149,7 +149,7 @@ public class ExecuteActionRequestMessageHandlerTests
 	public async Task Disabled_integration_is_rejected()
 	{
 		var action = new CapturingActionDefinition { Id = "capture" };
-		_registry.Add(new FakeIntegration { Id = "integration", Actions = [action] }, enabled: false);
+		_registry.Add(new FakeIntegration { Id = "integration", Actions = [action] }, false);
 
 		var response = await _handler.Handle(
 			new ExecuteActionRequest { IntegrationId = "integration", ActionId = "capture" },
@@ -229,7 +229,9 @@ public class ExecuteActionRequestMessageHandlerTests
 	}
 
 	private static Dictionary<string, JsonElement> Params(string json)
-		=> JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)!;
+	{
+		return JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)!;
+	}
 
 	private sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
 	{
@@ -254,11 +256,16 @@ public class ExecuteActionRequestMessageHandlerTests
 		}
 
 		public IActionDefinition? FindAction(string integrationId, string actionId)
-			=> _integrations.TryGetValue(integrationId, out var integration)
+		{
+			return _integrations.TryGetValue(integrationId, out var integration)
 				? integration.Actions.FirstOrDefault(a => a.Id == actionId && a.RunsHere())
 				: null;
+		}
 
-		public IActionDefinition? FindAction(QualifiedId id) => FindAction(id.OwnerId, id.LocalId);
+		public IActionDefinition? FindAction(QualifiedId id)
+		{
+			return FindAction(id.OwnerId, id.LocalId);
+		}
 
 		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
 		{
@@ -287,7 +294,9 @@ public class ExecuteActionRequestMessageHandlerTests
 		}
 
 		public bool IsEnabled(string integrationId)
-			=> _integrations.ContainsKey(integrationId) && !_disabled.Contains(integrationId);
+		{
+			return _integrations.ContainsKey(integrationId) && !_disabled.Contains(integrationId);
+		}
 
 		public void SetEnabled(string integrationId, bool enabled)
 		{
@@ -301,7 +310,10 @@ public class ExecuteActionRequestMessageHandlerTests
 			}
 		}
 
-		public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+		public IntegrationOrigin GetOrigin(string integrationId)
+		{
+			return IntegrationOrigin.BuiltIn;
+		}
 
 		public Task<bool> UnregisterAsync(string integrationId)
 		{
@@ -327,12 +339,17 @@ public class ExecuteActionRequestMessageHandlerTests
 		public LocalizedText Description => string.Empty;
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-		public IActionExecutor CreateExecutor() => new Executor();
+		public IActionExecutor CreateExecutor()
+		{
+			return new Executor();
+		}
 
 		private sealed class Executor : IActionExecutor
 		{
 			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
-				=> throw new InvalidOperationException("boom");
+			{
+				throw new InvalidOperationException("boom");
+			}
 		}
 	}
 

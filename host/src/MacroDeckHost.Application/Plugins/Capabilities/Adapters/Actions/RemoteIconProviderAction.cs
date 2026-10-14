@@ -20,7 +20,8 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 	private readonly IPluginAssetCache _assetCache;
 	private readonly IPluginIconResolver? _pluginIcons;
 
-	public RemoteIconProviderAction(string pluginId,
+	public RemoteIconProviderAction(
+		string pluginId,
 		string localId,
 		IPluginCapabilityInvoker invoker,
 		IPluginAssetCache assetCache,
@@ -42,8 +43,9 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 		CancellationToken cancellationToken)
 	{
 		var data = await InvokeAsync(CapabilityOperations.Actions.Icon,
-			new ActionExecuteArguments { Parameters = ToWireParameters(parameters) },
-			cancellationToken).ConfigureAwait(false);
+				new ActionExecuteArguments { Parameters = ToWireParameters(parameters) },
+				cancellationToken)
+			.ConfigureAwait(false);
 
 		var result = data?.Deserialize<ActionIconResult>(PluginProtocolJson.Options);
 
@@ -58,7 +60,7 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 			Version = result.Version,
 			Reference = translated,
 			MediaType = result.MediaType,
-			NoIcon = result.NoIcon || (result.Reference is not null && translated is null)
+			NoIcon = result.NoIcon || result.Reference is not null && translated is null
 		};
 	}
 
@@ -68,8 +70,9 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 		CancellationToken cancellationToken)
 	{
 		var data = await InvokeAsync(CapabilityOperations.Actions.IconContent,
-			new ActionIconContentArguments { Parameters = ToWireParameters(parameters), Version = version },
-			cancellationToken).ConfigureAwait(false);
+				new ActionIconContentArguments { Parameters = ToWireParameters(parameters), Version = version },
+				cancellationToken)
+			.ConfigureAwait(false);
 
 		var result = data?.Deserialize<ActionIconContentResult>(PluginProtocolJson.Options);
 		if (result is not { HasValue: true })
@@ -77,9 +80,9 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 			return null;
 		}
 
-		return result.ContentHash is { } contentHash &&
-			AssetContentHash.IsValid(contentHash) &&
-			_assetCache.TryRead(contentHash, out var bytes, out var mimeType)
+		return result.ContentHash is { } contentHash
+			&& AssetContentHash.IsValid(contentHash)
+			&& _assetCache.TryRead(contentHash, out var bytes, out var mimeType)
 				? new ActionIconContent(bytes, mimeType)
 				: null;
 	}
@@ -97,12 +100,14 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 	}
 
 	private Task<JsonElement?> InvokeAsync(string operation, object arguments, CancellationToken cancellationToken)
-		=> _invoker.InvokeAsync(PluginId,
+	{
+		return _invoker.InvokeAsync(PluginId,
 			new CapabilityInvokeRequest
 			{
 				Kind = CapabilityKinds.Actions, LocalId = LocalId, Operation = operation, Arguments = arguments
 			},
 			cancellationToken);
+	}
 
 	private static Dictionary<string, JsonElement> ToWireParameters(
 		IReadOnlyDictionary<string, object?> parameters)

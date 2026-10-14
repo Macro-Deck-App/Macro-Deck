@@ -48,13 +48,13 @@ public class LockedHostGateTests
 		_paths.EnsureDirectoriesExist();
 		DatabaseMigrationHelper.MigrateDatabase(_paths);
 
-		File.WriteAllText(Path.Combine(_paths.KeysDirectory, "auth-signing.key"), "original");
+		await File.WriteAllTextAsync(Path.Combine(_paths.KeysDirectory, "auth-signing.key"), "original");
 
 		KeyRingStartupState.Set(LockedPlan(),
 			new KeyRingKekHolder(),
 			new FakeKekStore(),
 			new KekStoreIdentity("Macro Deck Tests", "key-ring-kek"),
-			portable: false,
+			false,
 			Path.Combine(_dataDir, "scratch-keys"));
 		Directory.CreateDirectory(KeyRingStartupState.ScratchKeysDirectory!);
 
@@ -84,13 +84,13 @@ public class LockedHostGateTests
 			new KeyRingKekHolder(),
 			new NullKekStore("reset"),
 			new KekStoreIdentity("Macro Deck", "key-ring-kek"),
-			portable: false,
+			false,
 			null);
 
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -241,7 +241,8 @@ public class LockedHostGateTests
 	}
 
 	private static KeyRingProtectionPlan LockedPlan()
-		=> new(KeyRingProtectionMode.Locked,
+	{
+		return new KeyRingProtectionPlan(KeyRingProtectionMode.Locked,
 			KeyRingLockReason.KeystoreEntryMissing,
 			KeyRingUnprotectedReason.None,
 			KeyRingBackend.MacOsKeychain,
@@ -250,9 +251,11 @@ public class LockedHostGateTests
 			null,
 			"deadbeef",
 			false);
+	}
 
 	private static KeyRingProtectionPlan UnlockedPlan()
-		=> new(KeyRingProtectionMode.Unprotected,
+	{
+		return new KeyRingProtectionPlan(KeyRingProtectionMode.Unprotected,
 			KeyRingLockReason.None,
 			KeyRingUnprotectedReason.None,
 			KeyRingBackend.None,
@@ -261,6 +264,7 @@ public class LockedHostGateTests
 			null,
 			null,
 			false);
+	}
 
 	private sealed record LockedStatus(bool Locked, string LockReason);
 }

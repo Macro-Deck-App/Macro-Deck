@@ -146,7 +146,10 @@ public class AutostartServiceTests
 
 		public bool IsSupported => true;
 
-		public AutostartRegistration? Read() => Stored;
+		public AutostartRegistration? Read()
+		{
+			return Stored;
+		}
 
 		public void Write(AutostartRegistration registration)
 		{
@@ -158,7 +161,10 @@ public class AutostartServiceTests
 			Stored = registration;
 		}
 
-		public void Remove() => Stored = null;
+		public void Remove()
+		{
+			Stored = null;
+		}
 	}
 
 	private static string ExistingExecutable()

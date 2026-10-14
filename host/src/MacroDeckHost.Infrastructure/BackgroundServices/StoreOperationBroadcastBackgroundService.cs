@@ -62,5 +62,8 @@ public sealed class StoreOperationBroadcastBackgroundService : BackgroundService
 		}
 	}
 
-	private void OnChanged(StoreOperation operation) => _channel.Writer.TryWrite(operation);
+	private void OnChanged(StoreOperation operation)
+	{
+		_channel.Writer.TryWrite(operation);
+	}
 }

@@ -6,7 +6,7 @@ using MacroDeck.Sdk.MusicPlayer;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A40_MusicPlayerFakeTests
+public class A40MusicPlayerFakeTests
 {
 	private static readonly string[] _seededPlayerNames = ["Spotify (alice)"];
 
@@ -16,7 +16,8 @@ public class A40_MusicPlayerFakeTests
 		var integration = new RecordingIntegration();
 		await using var harness = PluginTestHarness.Create(builder => builder.RegisterIntegration(_ => integration));
 		harness.Context.MusicPlayers.Set([
-			new MusicPlayerInstanceSnapshot { Id = "spotify::alice", ProviderId = "spotify", DisplayName = "Spotify (alice)" }
+			new MusicPlayerInstanceSnapshot
+				{ Id = "spotify::alice", ProviderId = "spotify", DisplayName = "Spotify (alice)" }
 		]);
 		harness.Context.MusicPlayers.SetAlbumColor("spotify::alice", "#102030");
 
@@ -33,7 +34,9 @@ public class A40_MusicPlayerFakeTests
 
 	[Test]
 	public async Task A_player_the_test_gave_no_colour_has_none()
-		=> Assert.That(await new FakeMusicPlayerApi().GetAlbumColorAsync("spotify::alice"), Is.Null);
+	{
+		Assert.That(await new FakeMusicPlayerApi().GetAlbumColorAsync("spotify::alice"), Is.Null);
+	}
 
 	private sealed class RecordingIntegration : IPluginIntegration
 	{
@@ -52,6 +55,9 @@ public class A40_MusicPlayerFakeTests
 			context.MusicPlayers.InstancesChanged += (_, _) => Changes++;
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

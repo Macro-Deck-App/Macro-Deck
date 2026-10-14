@@ -4,7 +4,7 @@ namespace MacroDeckHost.Integrations.Spotify;
 
 internal sealed class SpotifyOAuthClient : ISpotifyOAuthClient
 {
-	private static readonly SpotifyRequestLimiter _limiter = new(ceilingPerSecond: 0.2, burst: 3);
+	private static readonly SpotifyRequestLimiter _limiter = new(0.2, 3);
 
 	private static readonly OAuthClient _oauth = new(SpotifyClientConfig.CreateDefault()
 		.WithHTTPClient(new SpotifyThrottledHttpClient(
@@ -45,8 +45,8 @@ internal sealed class SpotifyOAuthClient : ISpotifyOAuthClient
 		{
 			throw new SpotifyAuthRejectedException("Spotify rejected the refresh token.", ex);
 		}
-		catch (APIException ex) when (ex.Response is { } failed &&
-			MusicPlayerTransientFailure.IsTransientStatusCode((int)failed.StatusCode))
+		catch (APIException ex) when (ex.Response is { } failed
+			&& MusicPlayerTransientFailure.IsTransientStatusCode((int)failed.StatusCode))
 		{
 			throw new SpotifyAuthTransientException($"Spotify's token endpoint answered {(int)ex.Response.StatusCode}.",
 				ex);

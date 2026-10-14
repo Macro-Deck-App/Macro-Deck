@@ -14,7 +14,7 @@ internal static class ObsSceneItemOptions
 			.Concat(groups.Select(group => new ActionParameterOption
 			{
 				Value = group,
-				Label = AppStrings.Integrations.Obs.Params.GroupOption(name: group)
+				Label = AppStrings.Integrations.Obs.Params.GroupOption(group)
 			}))
 			.ToList();
 	}

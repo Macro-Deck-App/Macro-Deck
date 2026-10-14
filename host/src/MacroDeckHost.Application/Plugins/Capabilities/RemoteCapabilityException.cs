@@ -9,10 +9,11 @@ public sealed class RemoteCapabilityException : Exception
 		ProtocolErrorCodes.Timeout,
 		ProtocolErrorCodes.RateLimited,
 		ProtocolErrorCodes.QueueOverflow,
-		ProtocolErrorCodes.CapabilityUnavailable,
+		ProtocolErrorCodes.CapabilityUnavailable
 	};
 
-	private RemoteCapabilityException(string code,
+	private RemoteCapabilityException(
+		string code,
 		string message,
 		bool retryable,
 		IReadOnlyDictionary<string, string>? details)
@@ -43,8 +44,12 @@ public sealed class RemoteCapabilityException : Exception
 	}
 
 	public static RemoteCapabilityException CreateRetryable(string code, string message)
-		=> new(code, message, retryable: true, details: null);
+	{
+		return new RemoteCapabilityException(code, message, true, null);
+	}
 
 	public static RemoteCapabilityException CreateNonRetryable(string code, string message)
-		=> new(code, message, retryable: false, details: null);
+	{
+		return new RemoteCapabilityException(code, message, false, null);
+	}
 }

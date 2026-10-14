@@ -176,9 +176,10 @@ public class PluginBuilderTests
 			Assert.Multiple(() =>
 			{
 				Assert.That(result.Success, Is.True, result.FailureMessage);
-				Assert.That(entries.Where(entry => entry.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
-						entry.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) ||
-						entry.EndsWith(".resx", StringComparison.OrdinalIgnoreCase)),
+				Assert.That(entries.Where(entry
+						=> entry.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
+						|| entry.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
+						|| entry.EndsWith(".resx", StringComparison.OrdinalIgnoreCase)),
 					Is.Empty);
 				Assert.That(entries, Does.Not.Contain("Properties/launchSettings.json"));
 				Assert.That(entries, Does.Contain("assets/icon.png"));
@@ -393,7 +394,7 @@ public class PluginBuilderTests
 				OnRun = (_, _, _) => BuildFixtures.WriteBuildOutput(project, selected)
 			};
 
-			var result = await BuildAsync(project, runner, rid: selected);
+			var result = await BuildAsync(project, runner, selected);
 
 			var manifest = ReadPackagedManifest(result.Pack!.OutputPath!);
 
@@ -426,7 +427,7 @@ public class PluginBuilderTests
 		{
 			var runner = new FakePluginBuildRunner();
 
-			var result = await BuildAsync(project, runner, rid: "totally-made-up-rid");
+			var result = await BuildAsync(project, runner, "totally-made-up-rid");
 
 			Assert.Multiple(() =>
 			{
@@ -639,11 +640,11 @@ public class PluginBuilderTests
 		{
 			var manifest = JsonNode.Parse(BuildFixtures.ManifestJson(rids))!;
 			manifest["additionalLinks"] = JsonNode.Parse("""
-				[
-				  { "type": "documentation", "url": "https://docs.example.com" },
-				  { "type": "support", "url": "https://docs.example.com" }
-				]
-				""");
+														 [
+														   { "type": "documentation", "url": "https://docs.example.com" },
+														   { "type": "support", "url": "https://docs.example.com" }
+														 ]
+														 """);
 			await File.WriteAllTextAsync(Path.Combine(project, "manifest.json"), manifest.ToJsonString());
 
 			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
@@ -847,7 +848,7 @@ public class PluginBuilderTests
 
 			var first = await BuildAsync(project, runner, output: artifacts);
 			await File.WriteAllTextAsync(Path.Combine(artifacts, "SHA256SUMS"), "checksums");
-			var second = await BuildAsync(project, runner, rid: rids[0], output: artifacts);
+			var second = await BuildAsync(project, runner, rids[0], output: artifacts);
 
 			Assert.That(first.Success && second.Success, Is.True, first.FailureMessage ?? second.FailureMessage);
 
@@ -888,7 +889,8 @@ public class PluginBuilderTests
 			var result = await BuildAsync(project, runner);
 			var entries = ArtifactEntries(result.Pack!.OutputPath!);
 			using var packaged = ReadPackagedManifest(result.Pack.OutputPath!);
-			var files = packaged.RootElement.GetProperty("files").EnumerateArray()
+			var files = packaged.RootElement.GetProperty("files")
+				.EnumerateArray()
 				.Select(file => file.GetProperty("path").GetString())
 				.ToList();
 
@@ -935,7 +937,8 @@ public class PluginBuilderTests
 		}
 	}
 
-	private Task<PluginBuildResult> BuildAsync(string project,
+	private Task<PluginBuildResult> BuildAsync(
+		string project,
 		IPluginBuildRunner runner,
 		string? rid = null,
 		bool force = false,
@@ -970,13 +973,15 @@ public class PluginBuilderTests
 	}
 
 	private static JsonDocument ReadPackagedManifest(string artifactPath)
-		=> JsonDocument.Parse(ReadArtifactEntry(artifactPath, "manifest.json"));
+	{
+		return JsonDocument.Parse(ReadArtifactEntry(artifactPath, "manifest.json"));
+	}
 
 	private static void Delete(string directory)
 	{
 		if (Directory.Exists(directory))
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 }

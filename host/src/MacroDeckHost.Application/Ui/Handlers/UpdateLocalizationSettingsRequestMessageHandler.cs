@@ -15,7 +15,8 @@ public class UpdateLocalizationSettingsRequestMessageHandler
 	private readonly IRemotePluginIntegrationRegistrar _registrar;
 	private readonly IMediator _mediator;
 
-	public UpdateLocalizationSettingsRequestMessageHandler(IAppPreferenceService preferences,
+	public UpdateLocalizationSettingsRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IRemotePluginIntegrationRegistrar registrar,
 		IMediator mediator)
 	{
@@ -49,8 +50,8 @@ public class UpdateLocalizationSettingsRequestMessageHandler
 
 		if (request.TimeFormat is not null
 			and not (AppPreferenceService.TimeFormatSystem
-			or AppPreferenceService.TimeFormat12h
-			or AppPreferenceService.TimeFormat24h))
+			or AppPreferenceService.TimeFormat12H
+			or AppPreferenceService.TimeFormat24H))
 		{
 			var current = await _preferences.GetLocalization();
 			return new UpdateLocalizationSettingsResponse

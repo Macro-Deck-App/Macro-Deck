@@ -25,7 +25,8 @@ internal sealed class LayoutProviderCapabilityHandler(
 	public string Kind => CapabilityKinds.LayoutProvider;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -35,6 +36,7 @@ internal sealed class LayoutProviderCapabilityHandler(
 					VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -50,8 +52,8 @@ internal sealed class LayoutProviderCapabilityHandler(
 			return Task.FromResult(CapabilityInvocationResult.Ok(new LayoutProviderDescribePayload
 			{
 				ProviderName = _providers.Select(provider => provider.ProviderName)
-						.FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-					metadata.Name,
+						.FirstOrDefault(name => !string.IsNullOrEmpty(name))
+					?? metadata.Name,
 				Layouts = Layouts()
 			}));
 		}
@@ -73,5 +75,7 @@ internal sealed class LayoutProviderCapabilityHandler(
 	}
 
 	private IReadOnlyList<LayoutDescriptorDto> Layouts()
-		=> [.. _providers.SelectMany(provider => provider.GetLayouts()).Select(LayoutDescriptorMapper.ToDto)];
+	{
+		return [.. _providers.SelectMany(provider => provider.GetLayouts()).Select(LayoutDescriptorMapper.ToDto)];
+	}
 }

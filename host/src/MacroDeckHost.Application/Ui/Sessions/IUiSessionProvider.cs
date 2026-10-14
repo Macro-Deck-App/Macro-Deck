@@ -44,10 +44,14 @@ public sealed record UiSessionOpenOutcome
 	public string? RejectionMessage { get; init; }
 
 	public static UiSessionOpenOutcome Accept(int negotiatedVersion)
-		=> new() { Accepted = true, NegotiatedUiModelVersion = negotiatedVersion };
+	{
+		return new UiSessionOpenOutcome { Accepted = true, NegotiatedUiModelVersion = negotiatedVersion };
+	}
 
 	public static UiSessionOpenOutcome Reject(string code, string? message = null)
-		=> new() { Accepted = false, RejectionCode = code, RejectionMessage = message };
+	{
+		return new UiSessionOpenOutcome { Accepted = false, RejectionCode = code, RejectionMessage = message };
+	}
 }
 
 public sealed record UiSessionEventCommand

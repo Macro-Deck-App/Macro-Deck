@@ -30,7 +30,10 @@ internal sealed class YouTubeChatMappingTests
 	}
 
 	[TearDown]
-	public void TearDown() => _connection.Dispose();
+	public void TearDown()
+	{
+		_connection.Dispose();
+	}
 
 	[Test]
 	public void A_text_message_is_a_chat_line_by_its_author_in_a_default_colour_and_fires_no_event()
@@ -54,7 +57,10 @@ internal sealed class YouTubeChatMappingTests
 	[Test]
 	public void A_super_chat_shows_its_amount_and_fires_super_chat()
 	{
-		Receive(new YouTubeChatMessage("sc1", YouTubeChatMessageTypes.SuperChat, null, "Love it",
+		Receive(new YouTubeChatMessage("sc1",
+			YouTubeChatMessageTypes.SuperChat,
+			null,
+			"Love it",
 			YouTubeTestSupport.Author("UCfan", "Fan"))
 		{
 			SuperChat = new YouTubeSuperChat(5_000_000, "USD", "$5.00", "Love it", 2)
@@ -81,7 +87,10 @@ internal sealed class YouTubeChatMappingTests
 	[Test]
 	public void A_super_sticker_shows_its_amount_and_fires_super_sticker()
 	{
-		Receive(new YouTubeChatMessage("st1", YouTubeChatMessageTypes.SuperSticker, null, null,
+		Receive(new YouTubeChatMessage("st1",
+			YouTubeChatMessageTypes.SuperSticker,
+			null,
+			null,
 			YouTubeTestSupport.Author("UCfan", "Fan"))
 		{
 			SuperSticker = new YouTubeSuperSticker(2_000_000, "EUR", "€2.00", 1, "sticker-1", "Party parrot")
@@ -100,10 +109,13 @@ internal sealed class YouTubeChatMappingTests
 	[Test]
 	public void A_new_member_is_a_chat_line_and_fires_new_member()
 	{
-		Receive(new YouTubeChatMessage("n1", YouTubeChatMessageTypes.NewSponsor, null, "Welcome to Gold!",
+		Receive(new YouTubeChatMessage("n1",
+			YouTubeChatMessageTypes.NewSponsor,
+			null,
+			"Welcome to Gold!",
 			YouTubeTestSupport.Author("UCnew", "Newbie"))
 		{
-			NewSponsor = new YouTubeNewSponsor("Gold", IsUpgrade: true)
+			NewSponsor = new YouTubeNewSponsor("Gold", true)
 		});
 
 		var payload = _events.Single(YouTubeEventIds.NewMember);
@@ -119,7 +131,10 @@ internal sealed class YouTubeChatMappingTests
 	[Test]
 	public void A_member_milestone_is_a_chat_line_and_fires_member_milestone()
 	{
-		Receive(new YouTubeChatMessage("ms1", YouTubeChatMessageTypes.MemberMilestone, null, "12 months!",
+		Receive(new YouTubeChatMessage("ms1",
+			YouTubeChatMessageTypes.MemberMilestone,
+			null,
+			"12 months!",
 			YouTubeTestSupport.Author())
 		{
 			MemberMilestone = new YouTubeMemberMilestone("12 months!", 12, "Gold")
@@ -138,8 +153,11 @@ internal sealed class YouTubeChatMappingTests
 	[Test]
 	public void Gifted_memberships_are_a_chat_line_and_fire_membership_gift()
 	{
-		Receive(new YouTubeChatMessage("g1", YouTubeChatMessageTypes.MembershipGifting, null,
-			"Gifted 5 memberships", YouTubeTestSupport.Author("UCgifter", "Gifter"))
+		Receive(new YouTubeChatMessage("g1",
+			YouTubeChatMessageTypes.MembershipGifting,
+			null,
+			"Gifted 5 memberships",
+			YouTubeTestSupport.Author("UCgifter", "Gifter"))
 		{
 			MembershipGifting = new YouTubeMembershipGifting(5, "Gold")
 		});
@@ -156,7 +174,11 @@ internal sealed class YouTubeChatMappingTests
 	[Test]
 	public void A_banned_user_clears_their_messages()
 	{
-		Receive(new YouTubeChatMessage("b1", YouTubeChatMessageTypes.UserBanned, null, null, YouTubeTestSupport.Author())
+		Receive(new YouTubeChatMessage("b1",
+			YouTubeChatMessageTypes.UserBanned,
+			null,
+			null,
+			YouTubeTestSupport.Author())
 		{
 			UserBanned = new YouTubeUserBanned("UCtroll", "Troll", "permanent", null)
 		});
@@ -183,7 +205,8 @@ internal sealed class YouTubeChatMappingTests
 	[Test]
 	public void A_tombstone_removes_the_message_it_replaces()
 	{
-		Receive(new YouTubeChatMessage("m1", YouTubeChatMessageTypes.Tombstone, null, null, YouTubeTestSupport.Author()));
+		Receive(
+			new YouTubeChatMessage("m1", YouTubeChatMessageTypes.Tombstone, null, null, YouTubeTestSupport.Author()));
 
 		Assert.That(_sink.Posted, Is.EqualTo(new ChatEvent[] { new ChatMessageDeleted(ChannelId, "m1") }));
 	}
@@ -204,7 +227,13 @@ internal sealed class YouTubeChatMappingTests
 		});
 	}
 
-	private void Receive(YouTubeChatMessage message) => _connection.OnChatMessages([message], true);
+	private void Receive(YouTubeChatMessage message)
+	{
+		_connection.OnChatMessages([message], true);
+	}
 
-	private ChatMessage Line() => _sink.Posted.OfType<ChatMessageReceived>().Single().Message;
+	private ChatMessage Line()
+	{
+		return _sink.Posted.OfType<ChatMessageReceived>().Single().Message;
+	}
 }

@@ -18,7 +18,8 @@ public class GetNativeUsbSettingsResponse
 
 	public IReadOnlyList<NativeUsbRememberedDeviceDto> RememberedDevices { get; set; } = [];
 
-	internal T Fill<T>(NativeUsbStatus status) where T : GetNativeUsbSettingsResponse
+	internal T Fill<T>(NativeUsbStatus status)
+		where T : GetNativeUsbSettingsResponse
 	{
 		Enabled = status.Enabled;
 		AndroidAvailable = status.AndroidAvailable;

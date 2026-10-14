@@ -13,7 +13,9 @@ public class WeatherHandlersTests
 	private static readonly ILogger _logger = Log.Logger;
 
 	private static WeatherRegistry BuildRegistry(params IIntegration[] integrations)
-		=> new(new ConfigurableIntegrationRegistry(integrations), _logger);
+	{
+		return new WeatherRegistry(new ConfigurableIntegrationRegistry(integrations), _logger);
+	}
 
 	[Test]
 	public async Task GetWeatherInstances_MapsDescriptors()

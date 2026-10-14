@@ -49,7 +49,7 @@ public class SetVariableValueHandlerTests
 	[Test]
 	public async Task A_provider_variable_that_declares_no_write_is_refused_in_words_a_person_can_read()
 	{
-		var (handler, provider, id) = Build(write: null);
+		var (handler, provider, id) = Build(null);
 
 		var response = await handler.Handle(new SetVariableValueRequest { Id = id.ToString(), Value = "42" },
 			CancellationToken.None);
@@ -195,7 +195,7 @@ public class SetVariableValueHandlerTests
 			Assert.That(response.Success, Is.False);
 			Assert.That(response.Error!.Code, Is.EqualTo(nameof(VariableError.OwnerUnavailable)));
 			Assert.That(response.Error.Message.Localized?.Key,
-				Is.EqualTo(AppStrings.Errors.Variables.OwnerUnavailable(integration: integration).Key));
+				Is.EqualTo(AppStrings.Errors.Variables.OwnerUnavailable(integration).Key));
 			Assert.That(TestLocalization.Resolve(response.Error.Message),
 				Is.EqualTo($"{integration} is not available right now"));
 		});
@@ -254,7 +254,10 @@ public class SetVariableValueHandlerTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{

@@ -56,7 +56,10 @@ public class WidgetServiceVariableTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Create_WithSourceWidgetId_CopiesUserVariables_AndLeavesTheSourcesIntact()
@@ -177,19 +180,25 @@ public class WidgetServiceVariableTests
 		});
 	}
 
-	private static WidgetEntity Widget(int x, int y) => new()
+	private static WidgetEntity Widget(int x, int y)
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -205,7 +214,8 @@ public class WidgetServiceVariableTests
 
 		public List<object> Published { get; } = new();
 
-		public async ValueTask Publish<TNotification>(TNotification notification,
+		public async ValueTask Publish<TNotification>(
+			TNotification notification,
 			CancellationToken cancellationToken = default)
 			where TNotification : INotification
 		{
@@ -229,37 +239,56 @@ public class WidgetServiceVariableTests
 			return default;
 		}
 
-		public ValueTask<TResponse> Send<TResponse>(IRequest<TResponse> request,
+		public ValueTask<TResponse> Send<TResponse>(
+			IRequest<TResponse> request,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public ValueTask<TResponse> Send<TResponse>(ICommand<TResponse> command,
+		public ValueTask<TResponse> Send<TResponse>(
+			ICommand<TResponse> command,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public ValueTask<TResponse> Send<TResponse>(IQuery<TResponse> query,
+		public ValueTask<TResponse> Send<TResponse>(
+			IQuery<TResponse> query,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public ValueTask<object?> Send(object message, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 			IStreamRequest<TResponse> request,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 			IStreamCommand<TResponse> command,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 			IStreamQuery<TResponse> query,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

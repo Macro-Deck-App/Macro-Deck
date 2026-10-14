@@ -7,7 +7,7 @@ public class PowerCommandResolverTests
 	[Test]
 	public void MacOs_resolves_sleep_to_pmset_sleepnow()
 	{
-		var (fileName, arguments) = MacOsPowerCommandResolver.Resolve(PowerOperation.Sleep, force: false);
+		var (fileName, arguments) = MacOsPowerCommandResolver.Resolve(PowerOperation.Sleep, false);
 		string[] expectedArguments = ["sleepnow"];
 
 		Assert.Multiple(() =>
@@ -54,7 +54,7 @@ public class PowerCommandResolverTests
 	[Test]
 	public void Linux_resolves_lock_to_loginctl_when_available()
 	{
-		var (fileName, arguments) = LinuxPowerCommandResolver.ResolveLock(hasLoginctl: true);
+		var (fileName, arguments) = LinuxPowerCommandResolver.ResolveLock(true);
 		string[] expectedArguments = ["lock-session"];
 
 		Assert.Multiple(() =>
@@ -67,7 +67,7 @@ public class PowerCommandResolverTests
 	[Test]
 	public void Linux_resolves_lock_to_xdg_screensaver_fallback()
 	{
-		var (fileName, arguments) = LinuxPowerCommandResolver.ResolveLock(hasLoginctl: false);
+		var (fileName, arguments) = LinuxPowerCommandResolver.ResolveLock(false);
 		string[] expectedArguments = ["lock"];
 
 		Assert.Multiple(() =>
@@ -83,7 +83,7 @@ public class PowerCommandResolverTests
 	[TestCase(PowerOperation.ShutDown, "poweroff")]
 	public void Linux_resolves_verb_via_systemctl_when_available(PowerOperation operation, string verb)
 	{
-		var (fileName, arguments) = LinuxPowerCommandResolver.Resolve(operation, force: false, useSystemctl: true);
+		var (fileName, arguments) = LinuxPowerCommandResolver.Resolve(operation, false, true);
 		var expectedArguments = new[] { verb };
 
 		Assert.Multiple(() =>
@@ -99,7 +99,7 @@ public class PowerCommandResolverTests
 	[TestCase(PowerOperation.ShutDown, "poweroff")]
 	public void Linux_falls_back_to_loginctl_when_systemctl_unavailable(PowerOperation operation, string verb)
 	{
-		var (fileName, arguments) = LinuxPowerCommandResolver.Resolve(operation, force: false, useSystemctl: false);
+		var (fileName, arguments) = LinuxPowerCommandResolver.Resolve(operation, false, false);
 		var expectedArguments = new[] { verb };
 
 		Assert.Multiple(() =>
@@ -113,7 +113,7 @@ public class PowerCommandResolverTests
 	[TestCase(PowerOperation.ShutDown, "poweroff")]
 	public void Linux_force_appends_ignore_inhibitors_flag_never_force(PowerOperation operation, string verb)
 	{
-		var (_, arguments) = LinuxPowerCommandResolver.Resolve(operation, force: true, useSystemctl: true);
+		var (_, arguments) = LinuxPowerCommandResolver.Resolve(operation, true, true);
 		var expectedArguments = new[] { verb, "-i" };
 
 		Assert.Multiple(() =>
@@ -127,6 +127,6 @@ public class PowerCommandResolverTests
 	public void Linux_resolve_throws_for_lock()
 	{
 		Assert.Throws<NotSupportedException>(() =>
-			LinuxPowerCommandResolver.Resolve(PowerOperation.Lock, force: false, useSystemctl: true));
+			LinuxPowerCommandResolver.Resolve(PowerOperation.Lock, false, true));
 	}
 }

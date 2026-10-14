@@ -211,5 +211,7 @@ internal sealed class UiSessionRelayTests : UiSessionFixture
 	}
 
 	private static UiSendEventRequest Event(string sessionId)
-		=> new() { SessionId = sessionId, NodeId = "root", Name = "click" };
+	{
+		return new UiSendEventRequest { SessionId = sessionId, NodeId = "root", Name = "click" };
+	}
 }

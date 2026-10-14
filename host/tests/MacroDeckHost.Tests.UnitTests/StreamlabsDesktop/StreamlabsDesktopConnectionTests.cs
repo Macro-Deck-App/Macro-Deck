@@ -12,7 +12,10 @@ public class StreamlabsDesktopConnectionTests
 	private RecordingPublisher _publisher = null!;
 
 	[SetUp]
-	public void SetUp() => _publisher = new RecordingPublisher();
+	public void SetUp()
+	{
+		_publisher = new RecordingPublisher();
+	}
 
 	[TearDown]
 	public void TearDown()
@@ -44,7 +47,7 @@ public class StreamlabsDesktopConnectionTests
 	[Test]
 	public async Task Seeding_FillsTheSnapshot()
 	{
-		var client = StreamlabsJson.Seeded(streaming: "live", recording: "recording", studioMode: true);
+		var client = StreamlabsJson.Seeded("live", "recording", studioMode: true);
 		var connection = await StartAsync(client);
 
 		var state = connection.State;
@@ -127,7 +130,7 @@ public class StreamlabsDesktopConnectionTests
 	[Test]
 	public async Task Disconnecting_ResetsTheStateAndReportsIt()
 	{
-		var client = StreamlabsJson.Seeded(streaming: "live");
+		var client = StreamlabsJson.Seeded("live");
 		var connection = await StartAsync(client);
 
 		client.RaiseDisconnected();
@@ -197,7 +200,7 @@ public class StreamlabsDesktopConnectionTests
 		bool start,
 		bool expectToggle)
 	{
-		var client = StreamlabsJson.Seeded(streaming: status);
+		var client = StreamlabsJson.Seeded(status);
 		var connection = await StartAsync(client);
 		client.Calls.Clear();
 
@@ -245,7 +248,7 @@ public class StreamlabsDesktopConnectionTests
 	[Test]
 	public async Task ADoublePressOnStartStreaming_TogglesOnce()
 	{
-		var client = StreamlabsJson.Seeded(streaming: "offline");
+		var client = StreamlabsJson.Seeded("offline");
 		var connection = await StartAsync(client);
 		client.Calls.Clear();
 
@@ -332,8 +335,8 @@ public class StreamlabsDesktopConnectionTests
 		var connection = await StartAsync(client);
 		await connection.SetSceneItemVisibleAsync(StreamlabsJson.SceneName, StreamlabsJson.CameraSourceName, null);
 
-		Assert.That(
-			client.Calls.Count(call => call.Contains(StreamlabsServices.SetVisibility, StringComparison.Ordinal)),
+		Assert.That(client.Calls.Count(call
+				=> call.Contains(StreamlabsServices.SetVisibility, StringComparison.Ordinal)),
 			Is.EqualTo(2));
 	}
 
@@ -403,7 +406,7 @@ public class StreamlabsDesktopConnectionTests
 			ConnectFailure = new StreamlabsAuthenticationException("nope")
 		});
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await connection.SetSceneAsync("Gameplay")).Status,
 				Is.EqualTo(StreamlabsCommandStatus.NotConnected));
@@ -460,7 +463,7 @@ public class StreamlabsDesktopConnectionTests
 	{
 		var client = StreamlabsJson.Seeded();
 		client.Responses[$"{StreamlabsJson.MicResource}.{StreamlabsServices.GetModel}"] =
-			StreamlabsJson.AudioSource(muted: true);
+			StreamlabsJson.AudioSource(true);
 
 		var connection = await StartAsync(client);
 		await connection.GetAudioSourceNamesAsync();
@@ -488,9 +491,11 @@ public class StreamlabsDesktopConnectionTests
 	}
 
 	private static void RaiseStreaming(FakeStreamlabsClient client, string status)
-		=> client.RaiseEvent(
+	{
+		client.RaiseEvent(
 			StreamlabsServices.SubscriptionId(StreamlabsServices.Streaming, StreamlabsServices.StreamingStatusChange),
 			$"\"{status}\"");
+	}
 
 	[Test]
 	public async Task Connecting_asks_for_an_eager_variable_refresh()

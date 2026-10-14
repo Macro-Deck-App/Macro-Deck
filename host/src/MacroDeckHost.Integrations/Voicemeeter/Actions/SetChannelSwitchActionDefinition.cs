@@ -44,13 +44,13 @@ internal sealed class SetChannelSwitchActionDefinition : IDynamicOptionsActionDe
 		[
 			target.Picker(),
 			ActionParameter.Choice(VoicemeeterActionValues.SwitchParameter,
-				options: switches,
-				label: AppStrings.Integrations.Voicemeeter.Actions.SetSwitch.SwitchLabel(),
+				switches,
+				AppStrings.Integrations.Voicemeeter.Actions.SetSwitch.SwitchLabel(),
 				defaultValue: VoicemeeterParameters.Mono,
 				required: true),
 			ActionParameter.Choice(VoicemeeterActionValues.ModeParameter,
-				options: VoicemeeterActionValues.SwitchModeOptions,
-				label: AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
+				VoicemeeterActionValues.SwitchModeOptions,
+				AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
 				defaultValue: "toggle")
 		];
 	}
@@ -67,7 +67,10 @@ internal sealed class SetChannelSwitchActionDefinition : IDynamicOptionsActionDe
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(_target, _resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_target, _resolver);
+	}
 
 	// Only Mono and Solo are part of the polled channel snapshot; EQ and Sel are written but never read
 	// back, so a button following one of those is told "unavailable" rather than shown a guess.
@@ -76,8 +79,8 @@ internal sealed class SetChannelSwitchActionDefinition : IDynamicOptionsActionDe
 		CancellationToken cancellationToken)
 	{
 		var index = VoicemeeterActionValues.ReadChannelIndex(parameters.GetValueOrDefault(_target.ParameterName));
-		if (index is null ||
-			parameters.GetValueOrDefault(VoicemeeterActionValues.SwitchParameter)?.ToString()
+		if (index is null
+			|| parameters.GetValueOrDefault(VoicemeeterActionValues.SwitchParameter)?.ToString()
 				is not { Length: > 0 } name)
 		{
 			return Task.FromResult<ActionStateSnapshot?>(null);
@@ -136,7 +139,7 @@ internal sealed class SetChannelSwitchActionDefinition : IDynamicOptionsActionDe
 			{
 				_logger.Warning("Voicemeeter switch action skipped: no {Target} selected", _target.Title);
 				return Task.FromResult(ActionResult.Failed(ActionErrorCodes.InvalidParameter,
-					AppStrings.Integrations.Voicemeeter.Errors.NoTargetSelected(target: _target.NounText)));
+					AppStrings.Integrations.Voicemeeter.Errors.NoTargetSelected(_target.NounText)));
 			}
 
 			if (name is null)

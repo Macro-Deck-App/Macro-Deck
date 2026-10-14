@@ -9,7 +9,7 @@ public class WindowsVolumeInteropTests
 	// everywhere; only its metadata is inspected, no COM object is activated.
 	private static readonly Type _windowsVolumeService = typeof(IVolumeService).Assembly.GetType(
 		"MacroDeckHost.Integrations.System.Volume.WindowsVolumeService",
-		throwOnError: true)!;
+		true)!;
 
 	[Test]
 	public void Every_com_method_hands_its_hresult_back_to_the_caller()
@@ -29,7 +29,7 @@ public class WindowsVolumeInteropTests
 
 		Assert.That(throwingMethods,
 			Is.Empty,
-			"Without [PreserveSig] the runtime throws a COMException before the caller can inspect the " +
-			"HRESULT, so a missing default audio endpoint (0x80070490) cannot be handled gracefully.");
+			"Without [PreserveSig] the runtime throws a COMException before the caller can inspect the "
+			+ "HRESULT, so a missing default audio endpoint (0x80070490) cannot be handled gracefully.");
 	}
 }

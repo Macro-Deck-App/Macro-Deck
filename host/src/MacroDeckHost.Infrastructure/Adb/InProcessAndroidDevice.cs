@@ -15,7 +15,8 @@ internal sealed class InProcessAndroidDevice : IAndroidDevice
 	private bool _lacksUsbPermission;
 	private AndroidDeviceMode _mode;
 
-	public InProcessAndroidDevice(string serial,
+	public InProcessAndroidDevice(
+		string serial,
 		InProcessAndroidDeviceManager manager,
 		IAdbDeviceOperations operations,
 		IAdbManager adbManager)
@@ -72,18 +73,22 @@ internal sealed class InProcessAndroidDevice : IAndroidDevice
 		}
 	}
 
-	public async Task<AndroidShellResult> ExecuteShellAsync(string command, CancellationToken cancellationToken = default)
+	public async Task<AndroidShellResult> ExecuteShellAsync(
+		string command,
+		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(command);
 		_manager.ThrowIfLocked(HostOperations.Adb.Shell);
-		var output = InProcessAndroidDeviceManager.Unwrap(await _operations.RunShellAsync(Serial, command, cancellationToken));
+		var output = InProcessAndroidDeviceManager.Unwrap(
+			await _operations.RunShellAsync(Serial, command, cancellationToken));
 		var fitted = AdbDeviceCallPolicy.FitToBudget(output);
 		return new AndroidShellResult(fitted.ExitCode, fitted.StandardOutput, fitted.StandardError, fitted.Truncated);
 	}
 
 	public async Task<AndroidBatteryState> GetBatteryStateAsync(CancellationToken cancellationToken = default)
 	{
-		var reading = InProcessAndroidDeviceManager.Unwrap(await _operations.GetBatteryAsync(Serial, cancellationToken));
+		var reading = InProcessAndroidDeviceManager.Unwrap(
+			await _operations.GetBatteryAsync(Serial, cancellationToken));
 		return new AndroidBatteryState
 		{
 			Level = reading.Level,
@@ -112,13 +117,19 @@ internal sealed class InProcessAndroidDevice : IAndroidDevice
 	public async Task PushFileAsync(string localPath, string remotePath, CancellationToken cancellationToken = default)
 	{
 		_manager.ThrowIfLocked(HostOperations.Adb.Push);
-		InProcessAndroidDeviceManager.Unwrap(await _operations.PushFileAsync(Serial, localPath, remotePath, cancellationToken));
+		InProcessAndroidDeviceManager.Unwrap(await _operations.PushFileAsync(Serial,
+			localPath,
+			remotePath,
+			cancellationToken));
 	}
 
 	public async Task PullFileAsync(string remotePath, string localPath, CancellationToken cancellationToken = default)
 	{
 		_manager.ThrowIfLocked(HostOperations.Adb.Pull);
-		InProcessAndroidDeviceManager.Unwrap(await _operations.PullFileAsync(Serial, remotePath, localPath, cancellationToken));
+		InProcessAndroidDeviceManager.Unwrap(await _operations.PullFileAsync(Serial,
+			remotePath,
+			localPath,
+			cancellationToken));
 	}
 
 	public async Task InstallApkAsync(string apkPath, CancellationToken cancellationToken = default)
@@ -130,27 +141,38 @@ internal sealed class InProcessAndroidDevice : IAndroidDevice
 	public async Task UninstallPackageAsync(string packageName, CancellationToken cancellationToken = default)
 	{
 		_manager.ThrowIfLocked(HostOperations.Adb.Uninstall);
-		InProcessAndroidDeviceManager.Unwrap(await _operations.UninstallPackageAsync(Serial, packageName, cancellationToken));
+		InProcessAndroidDeviceManager.Unwrap(
+			await _operations.UninstallPackageAsync(Serial, packageName, cancellationToken));
 	}
 
 	public async Task<bool> IsPackageInstalledAsync(string packageName, CancellationToken cancellationToken = default)
-		=> InProcessAndroidDeviceManager.Unwrap(await _operations.IsPackageInstalledAsync(Serial,
+	{
+		return InProcessAndroidDeviceManager.Unwrap(await _operations.IsPackageInstalledAsync(Serial,
 			packageName,
 			cancellationToken));
+	}
 
 	public async Task SendKeyAsync(AndroidKey key, CancellationToken cancellationToken = default)
-		=> await RunAsync(new AdbKeyEventCommand(Serial, ToAdbKey(key)), cancellationToken);
+	{
+		await RunAsync(new AdbKeyEventCommand(Serial, ToAdbKey(key)), cancellationToken);
+	}
 
 	public Task TapAsync(int x, int y, CancellationToken cancellationToken = default)
-		=> RunAsync(new AdbTapCommand(Serial, x, y), cancellationToken);
+	{
+		return RunAsync(new AdbTapCommand(Serial, x, y), cancellationToken);
+	}
 
-	public Task SwipeAsync(int fromX,
+	public Task SwipeAsync(
+		int fromX,
 		int fromY,
 		int toX,
 		int toY,
 		TimeSpan duration,
 		CancellationToken cancellationToken = default)
-		=> RunAsync(new AdbSwipeCommand(Serial, fromX, fromY, toX, toY, ToMilliseconds(duration)), cancellationToken);
+	{
+		return RunAsync(new AdbSwipeCommand(Serial, fromX, fromY, toX, toY, ToMilliseconds(duration)),
+			cancellationToken);
+	}
 
 	public Task InputTextAsync(string text, CancellationToken cancellationToken = default)
 	{
@@ -176,12 +198,18 @@ internal sealed class InProcessAndroidDevice : IAndroidDevice
 		return RunAsync(new AdbOpenUriCommand(Serial, uri), cancellationToken);
 	}
 
-	public async Task RebootAsync(AndroidRebootMode mode = AndroidRebootMode.Normal,
+	public async Task RebootAsync(
+		AndroidRebootMode mode = AndroidRebootMode.Normal,
 		CancellationToken cancellationToken = default)
-		=> await RunAsync(new AdbRebootCommand(Serial, ToAdbRebootMode(mode)), cancellationToken);
+	{
+		await RunAsync(new AdbRebootCommand(Serial, ToAdbRebootMode(mode)), cancellationToken);
+	}
 
 	public async Task<byte[]> CaptureScreenshotAsync(CancellationToken cancellationToken = default)
-		=> InProcessAndroidDeviceManager.Unwrap(await _adbManager.CaptureScreenshotAsync(Serial, cancellationToken));
+	{
+		return InProcessAndroidDeviceManager.Unwrap(
+			await _adbManager.CaptureScreenshotAsync(Serial, cancellationToken));
+	}
 
 	public async Task<AndroidDeviceStatus?> GetStatusAsync(CancellationToken cancellationToken = default)
 	{
@@ -196,7 +224,8 @@ internal sealed class InProcessAndroidDevice : IAndroidDevice
 			};
 	}
 
-	internal void Update(AndroidDeviceInfo info,
+	internal void Update(
+		AndroidDeviceInfo info,
 		AndroidDeviceState state,
 		bool lacksUsbPermission,
 		AndroidDeviceMode mode)
@@ -211,41 +240,52 @@ internal sealed class InProcessAndroidDevice : IAndroidDevice
 	}
 
 	internal static int ToMilliseconds(TimeSpan duration)
-		=> (int)Math.Clamp(Math.Round(duration.TotalMilliseconds), int.MinValue, int.MaxValue);
-
-	internal static AdbKey ToAdbKey(AndroidKey key) => key switch
 	{
-		AndroidKey.Home => AdbKey.Home,
-		AndroidKey.Back => AdbKey.Back,
-		AndroidKey.Enter => AdbKey.Enter,
-		AndroidKey.Menu => AdbKey.Menu,
-		AndroidKey.Search => AdbKey.Search,
-		AndroidKey.VolumeUp => AdbKey.VolumeUp,
-		AndroidKey.VolumeDown => AdbKey.VolumeDown,
-		AndroidKey.VolumeMute => AdbKey.VolumeMute,
-		AndroidKey.MediaPlayPause => AdbKey.MediaPlayPause,
-		AndroidKey.MediaNext => AdbKey.MediaNext,
-		AndroidKey.MediaPrevious => AdbKey.MediaPrevious,
-		AndroidKey.Power => AdbKey.Power,
-		AndroidKey.Sleep => AdbKey.Sleep,
-		AndroidKey.Wakeup => AdbKey.Wakeup,
-		AndroidKey.AppSwitch => AdbKey.AppSwitch,
-		AndroidKey.DpadUp => AdbKey.DpadUp,
-		AndroidKey.DpadDown => AdbKey.DpadDown,
-		AndroidKey.DpadLeft => AdbKey.DpadLeft,
-		AndroidKey.DpadRight => AdbKey.DpadRight,
-		AndroidKey.DpadCenter => AdbKey.DpadCenter,
-		_ => throw new AndroidDeviceException(AndroidDeviceErrorCode.InvalidArgument, $"Unknown key {key}.")
-	};
+		return (int)Math.Clamp(Math.Round(duration.TotalMilliseconds), int.MinValue, int.MaxValue);
+	}
 
-	internal static AdbRebootMode ToAdbRebootMode(AndroidRebootMode mode) => mode switch
+	internal static AdbKey ToAdbKey(AndroidKey key)
 	{
-		AndroidRebootMode.Normal => AdbRebootMode.Normal,
-		AndroidRebootMode.Recovery => AdbRebootMode.Recovery,
-		AndroidRebootMode.Bootloader => AdbRebootMode.Bootloader,
-		_ => throw new AndroidDeviceException(AndroidDeviceErrorCode.InvalidArgument, $"Unknown reboot mode {mode}.")
-	};
+		return key switch
+		{
+			AndroidKey.Home => AdbKey.Home,
+			AndroidKey.Back => AdbKey.Back,
+			AndroidKey.Enter => AdbKey.Enter,
+			AndroidKey.Menu => AdbKey.Menu,
+			AndroidKey.Search => AdbKey.Search,
+			AndroidKey.VolumeUp => AdbKey.VolumeUp,
+			AndroidKey.VolumeDown => AdbKey.VolumeDown,
+			AndroidKey.VolumeMute => AdbKey.VolumeMute,
+			AndroidKey.MediaPlayPause => AdbKey.MediaPlayPause,
+			AndroidKey.MediaNext => AdbKey.MediaNext,
+			AndroidKey.MediaPrevious => AdbKey.MediaPrevious,
+			AndroidKey.Power => AdbKey.Power,
+			AndroidKey.Sleep => AdbKey.Sleep,
+			AndroidKey.Wakeup => AdbKey.Wakeup,
+			AndroidKey.AppSwitch => AdbKey.AppSwitch,
+			AndroidKey.DpadUp => AdbKey.DpadUp,
+			AndroidKey.DpadDown => AdbKey.DpadDown,
+			AndroidKey.DpadLeft => AdbKey.DpadLeft,
+			AndroidKey.DpadRight => AdbKey.DpadRight,
+			AndroidKey.DpadCenter => AdbKey.DpadCenter,
+			_ => throw new AndroidDeviceException(AndroidDeviceErrorCode.InvalidArgument, $"Unknown key {key}.")
+		};
+	}
+
+	internal static AdbRebootMode ToAdbRebootMode(AndroidRebootMode mode)
+	{
+		return mode switch
+		{
+			AndroidRebootMode.Normal => AdbRebootMode.Normal,
+			AndroidRebootMode.Recovery => AdbRebootMode.Recovery,
+			AndroidRebootMode.Bootloader => AdbRebootMode.Bootloader,
+			_ => throw new AndroidDeviceException(AndroidDeviceErrorCode.InvalidArgument,
+				$"Unknown reboot mode {mode}.")
+		};
+	}
 
 	private async Task RunAsync(AdbCommand command, CancellationToken cancellationToken)
-		=> InProcessAndroidDeviceManager.Unwrap(await _adbManager.ExecuteAsync(command, cancellationToken));
+	{
+		InProcessAndroidDeviceManager.Unwrap(await _adbManager.ExecuteAsync(command, cancellationToken));
+	}
 }

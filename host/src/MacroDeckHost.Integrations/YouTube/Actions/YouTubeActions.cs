@@ -14,7 +14,7 @@ internal static class YouTubeActions
 	internal const int MaxDescriptionBytes = 5000;
 	internal const int MaxTagsLength = 500;
 	private const int TestingChecks = 30;
-	private static readonly TimeSpan TestingCheckInterval = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _testingCheckInterval = TimeSpan.FromSeconds(2);
 
 	public static IReadOnlyList<IActionDefinition> Create(Func<YouTubeAccountManager> accounts)
 	{
@@ -24,7 +24,9 @@ internal static class YouTubeActions
 			LocalizedText description,
 			IReadOnlyList<ActionParameter> parameters,
 			Func<YouTubeActionScope, Task<ActionResult>> execute)
-			=> new(accounts, id, name, description, parameters, execute);
+		{
+			return new YouTubeActionDefinition(accounts, id, name, description, parameters, execute);
+		}
 
 		return
 		[
@@ -33,8 +35,8 @@ internal static class YouTubeActions
 				Strings.SendChatMessage.Description(),
 				[
 					ActionParameter.MultilineText("message",
-						label: Strings.SendChatMessage.MessageLabel(),
-						description: Strings.SendChatMessage.MessageDescription(),
+						Strings.SendChatMessage.MessageLabel(),
+						Strings.SendChatMessage.MessageDescription(),
 						required: true,
 						maxLength: MaxChatMessageLength)
 				],
@@ -45,7 +47,7 @@ internal static class YouTubeActions
 				Strings.SetTitle.Description(),
 				[
 					ActionParameter.Text("title",
-						label: Strings.SetTitle.TitleLabel(),
+						Strings.SetTitle.TitleLabel(),
 						required: true,
 						maxLength: MaxTitleLength)
 				],
@@ -54,7 +56,7 @@ internal static class YouTubeActions
 			Action("set-description",
 				Strings.SetDescription.Name(),
 				Strings.SetDescription.Description(),
-				[ActionParameter.MultilineText("description", label: Strings.SetDescription.DescriptionLabel())],
+				[ActionParameter.MultilineText("description", Strings.SetDescription.DescriptionLabel())],
 				scope => UpdateSnippetAsync(scope,
 					ValidateDescription,
 					(snippet, description) => snippet with { Description = description })),
@@ -64,8 +66,8 @@ internal static class YouTubeActions
 				Strings.SetTags.Description(),
 				[
 					ActionParameter.MultilineText("tags",
-						label: Strings.SetTags.TagsLabel(),
-						description: Strings.SetTags.TagsDescription())
+						Strings.SetTags.TagsLabel(),
+						Strings.SetTags.TagsDescription())
 				],
 				scope => UpdateSnippetAsync(scope,
 					ValidateTags,
@@ -77,13 +79,17 @@ internal static class YouTubeActions
 				[
 					ActionParameter.Choice("duration",
 						[
-							new ActionParameterOption { Value = "30", Label = Strings.StartAdBreak.Duration30Seconds() },
-							new ActionParameterOption { Value = "60", Label = Strings.StartAdBreak.Duration60Seconds() },
-							new ActionParameterOption { Value = "90", Label = Strings.StartAdBreak.Duration90Seconds() },
-							new ActionParameterOption { Value = "120", Label = Strings.StartAdBreak.Duration2Minutes() },
+							new ActionParameterOption
+								{ Value = "30", Label = Strings.StartAdBreak.Duration30Seconds() },
+							new ActionParameterOption
+								{ Value = "60", Label = Strings.StartAdBreak.Duration60Seconds() },
+							new ActionParameterOption
+								{ Value = "90", Label = Strings.StartAdBreak.Duration90Seconds() },
+							new ActionParameterOption
+								{ Value = "120", Label = Strings.StartAdBreak.Duration2Minutes() },
 							new ActionParameterOption { Value = "180", Label = Strings.StartAdBreak.Duration3Minutes() }
 						],
-						label: Strings.StartAdBreak.DurationLabel(),
+						Strings.StartAdBreak.DurationLabel(),
 						defaultValue: "60",
 						required: true)
 				],
@@ -115,9 +121,9 @@ internal static class YouTubeActions
 			return Invalid(Errors.MessageTooLong());
 		}
 
-		var liveChatId = scope.Connection.ActiveLiveChatId ??
-			(scope.Connection.State is { IsLive: true, LiveChatId: { } known } ? known : null) ??
-			(await FindLiveAsync(scope))?.LiveChatId;
+		var liveChatId = scope.Connection.ActiveLiveChatId
+			?? (scope.Connection.State is { IsLive: true, LiveChatId: { } known } ? known : null)
+			?? (await FindLiveAsync(scope))?.LiveChatId;
 
 		if (liveChatId is null)
 		{
@@ -139,13 +145,14 @@ internal static class YouTubeActions
 			return error;
 		}
 
-		if (await FindTargetBroadcastAsync(scope) is not { } broadcast ||
-			await scope.Api.GetVideoAsync(broadcast.Id, scope.CancellationToken) is not { } video)
+		if (await FindTargetBroadcastAsync(scope) is not { } broadcast
+			|| await scope.Api.GetVideoAsync(broadcast.Id, scope.CancellationToken) is not { } video)
 		{
 			return ActionResult.Failed(ActionErrorCodes.NotFound, Errors.NoBroadcast());
 		}
 
-		await scope.Api.UpdateVideoSnippetAsync(video.Id, apply(video.Snippet, value ?? string.Empty),
+		await scope.Api.UpdateVideoSnippetAsync(video.Id,
+			apply(video.Snippet, value ?? string.Empty),
 			scope.CancellationToken);
 
 		return ActionResult.Success();
@@ -212,10 +219,10 @@ internal static class YouTubeActions
 	{
 		for (var attempt = 0; attempt < TestingChecks; attempt++)
 		{
-			await scope.Options.Delay(TestingCheckInterval, scope.CancellationToken);
+			await scope.Options.Delay(_testingCheckInterval, scope.CancellationToken);
 
-			var status = await StatusOfAsync(scope, broadcastId, YouTubeBroadcastStatus.Active) ??
-				await StatusOfAsync(scope, broadcastId, YouTubeBroadcastStatus.Upcoming);
+			var status = await StatusOfAsync(scope, broadcastId, YouTubeBroadcastStatus.Active)
+				?? await StatusOfAsync(scope, broadcastId, YouTubeBroadcastStatus.Upcoming);
 
 			if (status is YouTubeLifeCycleStatus.Testing or YouTubeLifeCycleStatus.Live)
 			{
@@ -227,13 +234,18 @@ internal static class YouTubeActions
 	}
 
 	private static async Task<string?> StatusOfAsync(YouTubeActionScope scope, string broadcastId, string listed)
-		=> (await scope.Api.ListBroadcastsAsync(listed, scope.CancellationToken))
-			.FirstOrDefault(broadcast => broadcast.Id == broadcastId)?.LifeCycleStatus;
+	{
+		return (await scope.Api.ListBroadcastsAsync(listed, scope.CancellationToken))
+			.FirstOrDefault(broadcast => broadcast.Id == broadcastId)
+			?.LifeCycleStatus;
+	}
 
 	private static async Task<ActionResult> EndStreamAsync(YouTubeActionScope scope)
-		=> await FindLiveAsync(scope) is { } live
+	{
+		return await FindLiveAsync(scope) is { } live
 			? await TransitionAsync(scope, live.Id, YouTubeBroadcastTransition.Complete)
 			: ActionResult.Failed(ActionErrorCodes.NotFound, Errors.NotLive());
+	}
 
 	private static async Task<ActionResult> TransitionAsync(YouTubeActionScope scope, string broadcastId, string status)
 	{
@@ -249,8 +261,10 @@ internal static class YouTubeActions
 	}
 
 	private static async Task<YouTubeBroadcast?> FindLiveAsync(YouTubeActionScope scope)
-		=> (await scope.Api.ListBroadcastsAsync(YouTubeBroadcastStatus.Active, scope.CancellationToken))
+	{
+		return (await scope.Api.ListBroadcastsAsync(YouTubeBroadcastStatus.Active, scope.CancellationToken))
 			.FirstOrDefault(IsLive);
+	}
 
 	private static async Task<YouTubeBroadcast?> FindTargetBroadcastAsync(YouTubeActionScope scope)
 	{
@@ -266,16 +280,24 @@ internal static class YouTubeActions
 	}
 
 	private static IEnumerable<YouTubeBroadcast> Ordered(IReadOnlyList<YouTubeBroadcast> broadcasts)
-		=> broadcasts.OrderBy(broadcast => broadcast.ScheduledStartTime ?? DateTimeOffset.MaxValue);
+	{
+		return broadcasts.OrderBy(broadcast => broadcast.ScheduledStartTime ?? DateTimeOffset.MaxValue);
+	}
 
 	private static bool IsLive(YouTubeBroadcast broadcast)
-		=> string.Equals(broadcast.LifeCycleStatus, YouTubeLifeCycleStatus.Live, StringComparison.Ordinal);
+	{
+		return string.Equals(broadcast.LifeCycleStatus, YouTubeLifeCycleStatus.Live, StringComparison.Ordinal);
+	}
 
 	private static bool IsStartable(YouTubeBroadcast broadcast)
-		=> broadcast.LifeCycleStatus is YouTubeLifeCycleStatus.Ready or YouTubeLifeCycleStatus.Testing;
+	{
+		return broadcast.LifeCycleStatus is YouTubeLifeCycleStatus.Ready or YouTubeLifeCycleStatus.Testing;
+	}
 
 	private static bool IsFinished(YouTubeBroadcast broadcast)
-		=> broadcast.LifeCycleStatus is YouTubeLifeCycleStatus.Complete or YouTubeLifeCycleStatus.Revoked;
+	{
+		return broadcast.LifeCycleStatus is YouTubeLifeCycleStatus.Complete or YouTubeLifeCycleStatus.Revoked;
+	}
 
 	private static (string? Value, ActionResult? Error) ValidateTitle(YouTubeActionScope scope)
 	{
@@ -311,12 +333,18 @@ internal static class YouTubeActions
 
 	// YouTube counts the commas between tags and the quotes it adds around a tag that contains a space.
 	internal static int TagsLength(IReadOnlyList<string> tags)
-		=> tags.Sum(tag => tag.Length + (tag.Contains(' ', StringComparison.Ordinal) ? 2 : 0)) +
-			Math.Max(0, tags.Count - 1);
+	{
+		return tags.Sum(tag => tag.Length + (tag.Contains(' ', StringComparison.Ordinal) ? 2 : 0))
+			+ Math.Max(0, tags.Count - 1);
+	}
 
 	private static bool ContainsAngleBrackets(string value)
-		=> value.Contains('<', StringComparison.Ordinal) || value.Contains('>', StringComparison.Ordinal);
+	{
+		return value.Contains('<', StringComparison.Ordinal) || value.Contains('>', StringComparison.Ordinal);
+	}
 
 	private static ActionResult Invalid(LocalizedText message)
-		=> ActionResult.Failed(ActionErrorCodes.InvalidParameter, message);
+	{
+		return ActionResult.Failed(ActionErrorCodes.InvalidParameter, message);
+	}
 }

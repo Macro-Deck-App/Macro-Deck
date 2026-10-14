@@ -33,16 +33,23 @@ internal class ObsAction : IDynamicOptionsActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [ObsTargetResolver.Parameter()];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _command);
+	}
 
 	/// <summary>The connection this instance's configuration names, or null while it is incomplete.</summary>
 	protected ObsConnection? ConnectionFor(IReadOnlyDictionary<string, object?> parameters)
-		=> _resolver.ForOptions(parameters);
+	{
+		return _resolver.ForOptions(parameters);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(_resolver.ConfigurationOptions());
+	{
+		return Task.FromResult(_resolver.ConfigurationOptions());
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

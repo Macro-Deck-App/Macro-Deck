@@ -14,7 +14,8 @@ public sealed class StoreTestService : IStoreTestService
 	private readonly IStoreInstallCoordinator _coordinator;
 	private readonly IStoreCatalogQueryService _catalogQuery;
 
-	public StoreTestService(IStorePlatformClient platform,
+	public StoreTestService(
+		IStorePlatformClient platform,
 		IPluginInstallationCatalog plugins,
 		IStoreTestInstallationStore testInstallations,
 		IStoreOperationTracker tracker,
@@ -43,7 +44,8 @@ public sealed class StoreTestService : IStoreTestService
 			.. (result.Value ?? []).Select(test =>
 			{
 				var installedVersion = installed
-					.FirstOrDefault(plugin => string.Equals(plugin.PluginId, test.PackageId, StringComparison.OrdinalIgnoreCase))
+					.FirstOrDefault(plugin
+						=> string.Equals(plugin.PluginId, test.PackageId, StringComparison.OrdinalIgnoreCase))
 					?.ActiveVersion?.Version;
 				var record = _testInstallations.Find(test.PackageId);
 				var catalog = _catalogQuery.Find(StoreExtensionKind.Plugin, test.PackageId);
@@ -53,13 +55,13 @@ public sealed class StoreTestService : IStoreTestService
 					Test = test,
 					InstalledVersion = installedVersion,
 					// A record whose version is no longer the active one was replaced by a store install or removed.
-					InstalledTestBuildId = record is not null &&
-						string.Equals(record.Version, installedVersion, StringComparison.Ordinal)
+					InstalledTestBuildId = record is not null
+						&& string.Equals(record.Version, installedVersion, StringComparison.Ordinal)
 							? record.BuildId
 							: null,
-					StoreVersion = catalog.Success &&
-						catalog.Data!.InstallState is not StoreInstallState.Unsupported &&
-						catalog.Data.Withdrawal is null
+					StoreVersion = catalog.Success
+						&& catalog.Data!.InstallState is not StoreInstallState.Unsupported
+						&& catalog.Data.Withdrawal is null
 							? catalog.Data.Entry.LatestVersion
 							: null,
 					ActiveOperationId = _tracker.FindLive(StoreExtensionKind.Plugin, test.PackageId)?.Id,
@@ -70,7 +72,8 @@ public sealed class StoreTestService : IStoreTestService
 		]);
 	}
 
-	public async Task<StoreTestInstallResult> Install(string packageId,
+	public async Task<StoreTestInstallResult> Install(
+		string packageId,
 		Guid buildId,
 		bool consent,
 		CancellationToken cancellationToken = default)

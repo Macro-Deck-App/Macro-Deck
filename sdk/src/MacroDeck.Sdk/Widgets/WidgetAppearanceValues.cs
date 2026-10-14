@@ -14,5 +14,7 @@ public static class WidgetAppearanceValues
 	public const string Reset = "$reset";
 
 	public static bool IsReset(string? value)
-		=> string.Equals(value?.Trim(), Reset, StringComparison.OrdinalIgnoreCase);
+	{
+		return string.Equals(value?.Trim(), Reset, StringComparison.OrdinalIgnoreCase);
+	}
 }
