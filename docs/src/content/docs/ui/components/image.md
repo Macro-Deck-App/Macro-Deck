@@ -34,7 +34,7 @@ A plugin registers its own images with `IIntegrationContext.UiResources`; see
 Transition = UiComponentImageTransitions.Crossfade,
 ```
 
-Without `Transition`, a new `Source` simply replaces the old image.
+Without `Transition`, a new `Source` replaces the old image without a fade, as soon as it can be drawn.
 
 ## Dimming artwork
 
@@ -76,7 +76,7 @@ should not take up space either.
 |---|---|---|---|
 | `Source` (`source`) | `UiResource` handle | Nothing is drawn | The resource to draw. |
 | `Size` (`size`) | `UiSize` length | Left to the reader | The edge of the square box the image is fitted into, preserving aspect ratio and never cropped. |
-| `Transition` (`transition`) | `UiComponentImageTransitions`: `crossfade` | The new image replaces the old at once | How a change of `Source` is drawn. |
+| `Transition` (`transition`) | `UiComponentImageTransitions`: `crossfade` | The new image replaces the old without a fade | How a change of `Source` is drawn. |
 | `Opacity` (`opacity`) | `0..1` | Fully opaque | How opaque the image is drawn. |
 | `Brightness` (`brightness`) | `0..2` | `1` | A multiplier of the image's own luminance. |
 | `Saturation` (`saturation`) | `0..2` | `1` | A multiplier of the image's own saturation; `0` is greyscale. |
@@ -107,6 +107,9 @@ An image is `size` on both axes, fitted into a square box. Along its parent stac
   220 ms on an ease-out curve, from fully transparent at scale 1.02 about its centre to fully opaque at
   scale 1.
 - Artwork that fails to decode replaces the outgoing artwork at once, with no fade.
+- Without `crossfade`, a new `source` that arrives together with new `opacity`, `brightness`, `saturation` or
+  `tint` values keeps the outgoing image drawn with its own values until the incoming image can be drawn, then
+  switches the image and its values in the same frame. A new value for an unchanged `source` applies at once.
 - `brightness` is normative: multiply each channel by the value, before `saturation` and before
   compositing at `opacity`, and clamp each channel rather than wrapping it.
 - `saturation` is normative: `out = luma + saturation * (channel - luma)`, with
