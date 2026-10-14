@@ -100,7 +100,8 @@ public class PluginCompanionDeviceAccessTests
 		preferences.Values[PluginCompanionDeviceAccessPolicy.AllowPluginsKey] = "true";
 		var services = new ServiceCollection();
 		services.AddSingleton<IAppPreferenceRepository>(preferences);
-		services.AddSingleton<IPluginSessionRegistry>(new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None));
+		services.AddSingleton<IPluginSessionRegistry>(new PluginSessionRegistry(TimeProvider.System,
+			Serilog.Core.Logger.None));
 		services.AddSingleton<IPluginInstallationCatalog>(new SingleInstalledPlugin([]));
 		services.AddSingleton<IPluginManifestReader>(new FixedManifestReader([]));
 		services.AddSingleton<IPluginCompanionDeviceAccessPolicy, PluginCompanionDeviceAccessPolicy>();
