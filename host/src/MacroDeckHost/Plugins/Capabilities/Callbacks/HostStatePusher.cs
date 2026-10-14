@@ -10,6 +10,7 @@ using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Triggers;
+using MacroDeckHost.Infrastructure.Notifications.Shell;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Decks;
@@ -36,7 +37,8 @@ public sealed class HostStatePusher(
 	IPluginCompanionDeviceAccessPolicy? companionAccess = null,
 	IMusicPlayerRegistry? musicPlayers = null,
 	IMusicPlayerStateNotifier? musicPlayerNotifier = null,
-	PluginDesktopNotificationCallbacks? desktopNotifications = null) :
+	PluginDesktopNotificationCallbacks? desktopNotifications = null,
+	IShellNotificationBridge? shellNotifications = null) :
 	INotificationHandler<FolderCreatedNotification>,
 	INotificationHandler<FolderUpdatedNotification>,
 	INotificationHandler<FolderDeletedNotification>,
@@ -74,6 +76,8 @@ public sealed class HostStatePusher(
 	private readonly Lock _musicPlayersGate = new();
 	private long _musicPlayersRevision;
 	private IReadOnlyList<MusicPlayerInstanceStateDto>? _musicPlayersBroadcast;
+	private readonly SemaphoreSlim _desktopNotificationsPush = new(1, 1);
+	private readonly Dictionary<string, bool> _desktopNotificationsPushed = new(StringComparer.Ordinal);
 
 	public void Dispose()
 	{
@@ -83,8 +87,14 @@ public sealed class HostStatePusher(
 		_batteriesPush.Dispose();
 		_companionPush.Dispose();
 		_musicPlayersPush.Dispose();
+		_desktopNotificationsPush.Dispose();
 		if (Volatile.Read(ref _subscribedToBindings) == 1)
 		{
+			if (shellNotifications is not null)
+			{
+				shellNotifications.AttachmentChanged -= OnShellAttachmentChanged;
+			}
+
 			if (musicPlayerNotifier is not null)
 			{
 				musicPlayerNotifier.InstancesChanged -= OnMusicPlayersChanged;
@@ -144,6 +154,11 @@ public sealed class HostStatePusher(
 			{
 				musicPlayerNotifier.InstancesChanged += OnMusicPlayersChanged;
 			}
+
+			if (shellNotifications is not null)
+			{
+				shellNotifications.AttachmentChanged += OnShellAttachmentChanged;
+			}
 		}
 
 		return Task.WhenAll(PushDeckAsync(pluginId, cancellationToken),
@@ -155,7 +170,7 @@ public sealed class HostStatePusher(
 			PushHttpAsync(pluginId, cancellationToken),
 			PushCompanionDevicesAsync(pluginId, always: true, cancellationToken),
 			PushMusicPlayersAsync(pluginId, cancellationToken),
-			PushDesktopNotificationsAsync(pluginId, cancellationToken));
+			PushDesktopNotificationsAsync(pluginId, always: true, cancellationToken));
 	}
 
 	public ValueTask Handle(AdbSettingsChangedNotification notification, CancellationToken cancellationToken)
@@ -658,18 +673,59 @@ public sealed class HostStatePusher(
 			? []
 			: [.. MusicPlayerInstanceSnapshots.From(musicPlayers.GetInstances()).Select(MusicPlayerWire.ToDto)];
 
+	// Where the platform cannot show notifications, support depends on the desktop shell being attached.
+	private void OnShellAttachmentChanged() => _ = BroadcastDesktopNotificationsAsync();
+
+	private async Task BroadcastDesktopNotificationsAsync()
+	{
+		try
+		{
+			var pluginIds = sessionRegistry.Snapshot()
+				.Where(session => session.State == PluginSessionState.Connected)
+				.Select(session => session.PluginId)
+				.Distinct(StringComparer.Ordinal)
+				.ToList();
+
+			foreach (var pluginId in pluginIds)
+			{
+				await PushDesktopNotificationsAsync(pluginId, always: false, CancellationToken.None);
+			}
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push desktop notification support to plugins");
+		}
+	}
+
+	// Serialized so a push read before a shell change never lands after the one read after it.
 	// Task.Run: the first support check probes the platform, which can block for seconds on Linux.
-	private async Task<bool> PushDesktopNotificationsAsync(string pluginId, CancellationToken cancellationToken)
+	private async Task<bool> PushDesktopNotificationsAsync(string pluginId, bool always, CancellationToken cancellationToken)
 	{
 		if (desktopNotifications is null)
 		{
 			return false;
 		}
 
-		var supported = await Task.Run(() => desktopNotifications.IsSupportedFor(pluginId), cancellationToken);
-		return await sessionRegistry.SendToPlugin(pluginId,
-			BuildEnvelope(HostApis.DesktopNotifications, new DesktopNotificationsStateDto { Supported = supported }),
-			cancellationToken);
+		await _desktopNotificationsPush.WaitAsync(cancellationToken);
+		try
+		{
+			var supported = await Task.Run(() => desktopNotifications.IsSupportedFor(pluginId), cancellationToken);
+			if (!always &&
+				_desktopNotificationsPushed.TryGetValue(pluginId, out var pushed) &&
+				pushed == supported)
+			{
+				return false;
+			}
+
+			_desktopNotificationsPushed[pluginId] = supported;
+			return await sessionRegistry.SendToPlugin(pluginId,
+				BuildEnvelope(HostApis.DesktopNotifications, new DesktopNotificationsStateDto { Supported = supported }),
+				cancellationToken);
+		}
+		finally
+		{
+			_desktopNotificationsPush.Release();
+		}
 	}
 
 	private Task<bool> PushHttpAsync(string pluginId, CancellationToken cancellationToken)

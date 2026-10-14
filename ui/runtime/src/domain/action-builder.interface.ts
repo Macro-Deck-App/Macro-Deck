@@ -266,6 +266,7 @@ export interface ActionBlockDefinition {
   categoryId?: string;
   integrationId?: string;
   actionId?: string;
+  role?: string;
   descriptiveUiSchema?: string;
   blockShape?: 'hat' | 'stack' | 'c-block' | 'cap';
   parameters?: Omit<ActionBlockParameter, 'value'>[];

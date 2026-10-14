@@ -77,6 +77,12 @@ export class ActionFlowStore {
     this.iconProviderRequestSubject.next(request);
   }
 
+  actionRole(integrationId: string | undefined, actionId: string | undefined): string | undefined {
+    if (!integrationId || !actionId) return undefined;
+    return this.availableBlocks().find(block =>
+      block.integrationId === integrationId && block.actionId === actionId)?.role;
+  }
+
   providesWidgetIcon(integrationId: string | undefined, actionId: string | undefined): boolean {
     if (!integrationId || !actionId) return false;
     return this.availableBlocks().some(block =>

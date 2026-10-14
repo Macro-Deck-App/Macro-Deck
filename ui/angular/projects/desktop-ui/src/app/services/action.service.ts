@@ -12,6 +12,7 @@ export interface ActionDefinitionModel {
   description: string;
   parameters: ActionParameterDef[];
   descriptiveUiSchema?: string;
+  role?: string;
   isStateProviderAction?: boolean;
   isIconProviderAction?: boolean;
   supportsConfigUi?: boolean;
@@ -81,6 +82,7 @@ export class ActionService {
         actionId: action.id,
         blockShape: 'stack' as const,
         descriptiveUiSchema: action.descriptiveUiSchema,
+        role: action.role,
         providesButtonState: action.isStateProviderAction,
         providesWidgetIcon: action.isIconProviderAction,
         parameters: action.parameters.map(p => this.mapParameter(p))
@@ -96,6 +98,7 @@ export class ActionService {
       name: resolveLocalizedText(action.name, this.localization),
       description: resolveLocalizedText(action.description, this.localization),
       descriptiveUiSchema: action.descriptiveUiSchema ?? undefined,
+      role: action.role ?? undefined,
       parameters: action.parameters || [],
       isStateProviderAction: action.isStateProviderAction ?? false,
       isIconProviderAction: action.isIconProviderAction ?? false,

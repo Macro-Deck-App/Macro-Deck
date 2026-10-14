@@ -185,12 +185,13 @@ export {
   type ProfileLayoutConstraint,
 } from './domain/profile.interface';
 export {
-  isRunScriptWidgetTargetParam,
+  isRunScriptActionRole,
   isScriptInputParam,
   normalizeScriptInputs,
   parseScriptInputsMetadata,
+  RUN_REMOTE_SCRIPT_ACTION_ROLE,
+  RUN_SCRIPT_ACTION_ROLE,
   RUN_SCRIPT_WIDGET_PARAM,
-  SCRIPT_CALL_SITES,
   SCRIPT_INPUT_PARAM_PREFIX,
   SCRIPT_INPUTS_METADATA_KEY,
   SCRIPT_RUNS_ON_WIDGET_METADATA_KEY,

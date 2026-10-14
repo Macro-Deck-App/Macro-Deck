@@ -16,6 +16,8 @@ internal sealed class RunRemoteScriptActionDefinition : IDynamicOptionsActionDef
 
 	public string Id => "run-remote-script";
 
+	public string? Role => ActionRoles.RunRemoteScript;
+
 	public LocalizedText Name => AppStrings.Integrations.Delegation.Actions.RunRemoteScriptName();
 
 	public LocalizedText Description => AppStrings.Integrations.Delegation.Actions.RunRemoteScriptDescription();

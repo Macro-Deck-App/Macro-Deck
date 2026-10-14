@@ -82,6 +82,7 @@ export interface ActionDefinition {
   description: LocalizedText;
   parameters: ActionParameterDef[];
   descriptiveUiSchema?: string;
+  role?: string;
   isStateProviderAction?: boolean;
   isIconProviderAction?: boolean;
   supportsConfigUi?: boolean;

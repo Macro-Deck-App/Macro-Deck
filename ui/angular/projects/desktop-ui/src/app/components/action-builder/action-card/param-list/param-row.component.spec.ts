@@ -832,7 +832,9 @@ describe('ParamRowComponent widget-target option fetch', () => {
 
   function setUp(param: ActionBlockParameter, block?: ActionBlock): void {
     const store = jasmine.createSpyObj<ActionFlowStore>(
-      'ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
+      'ActionFlowStore', ['actionRole', 'updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
+    store.actionRole.and.callFake((integrationId, actionId) =>
+      integrationId === 'example.scripts' ? actionId : undefined);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
 
@@ -861,10 +863,10 @@ describe('ParamRowComponent widget-target option fetch', () => {
       {
         id: 'block-1',
         type: 'action',
-        blockType: 'app.macro-deck.scripts.run-script',
+        blockType: 'example.scripts.run-script',
         label: 'Run Script',
         color: 'var(--color-accent)',
-        integrationId: 'app.macro-deck.scripts',
+        integrationId: 'example.scripts',
         actionId: 'run-script',
         parameters: [],
       },
@@ -886,10 +888,10 @@ describe('ParamRowComponent widget-target option fetch', () => {
       {
         id: 'block-1',
         type: 'action',
-        blockType: 'app.macro-deck.delegate.run-remote-script',
+        blockType: 'example.scripts.run-remote-script',
         label: 'Run Remote Script',
         color: 'var(--color-accent)',
-        integrationId: 'app.macro-deck.delegate',
+        integrationId: 'example.scripts',
         actionId: 'run-remote-script',
         parameters: [],
       },

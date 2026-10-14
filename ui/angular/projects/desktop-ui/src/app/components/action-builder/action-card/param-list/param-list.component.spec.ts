@@ -72,6 +72,7 @@ describe('ParamListComponent state row', () => {
         {
           provide: ActionFlowStore,
           useValue: {
+            actionRole: () => undefined,
             previewScopeRefId: () => ownerId,
             hasOwnerWidget: () => !!ownerId,
             previewScopeHasOnOffStates: () => draftHasOnOffStates,
@@ -318,6 +319,7 @@ describe('ParamListComponent conditional rows', () => {
         {
           provide: ActionFlowStore,
           useValue: {
+            actionRole: () => undefined,
             previewScopeRefId: () => undefined,
             hasOwnerWidget: () => false,
             previewScopeHasOnOffStates: () => undefined,
@@ -382,6 +384,7 @@ describe('ParamListComponent config tree', () => {
         {
           provide: ActionFlowStore,
           useValue: {
+            actionRole: () => undefined,
             previewScope: () => 'widget',
             previewScopeRefId: () => undefined,
             hasOwnerWidget: () => false,
@@ -435,7 +438,7 @@ describe('ParamListComponent config tree', () => {
 
 describe('ParamListComponent node event forwarding', () => {
   let fixture: ComponentFixture<ParamListComponent>;
-  let store: { updateParam: jasmine.Spy };
+  let store: { actionRole: () => string | undefined; updateParam: jasmine.Spy };
 
   function block(): ActionBlock {
     return {
@@ -491,7 +494,7 @@ describe('ParamListComponent node event forwarding', () => {
   }
 
   beforeEach(async () => {
-    store = { updateParam: jasmine.createSpy('updateParam') };
+    store = { actionRole: () => undefined, updateParam: jasmine.createSpy('updateParam') };
 
     await TestBed.configureTestingModule({
       imports: [ParamListComponent],

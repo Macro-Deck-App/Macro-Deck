@@ -33,6 +33,12 @@ public class RunScriptActionDefinitionTests
 	}
 
 	[Test]
+	public void Declares_the_run_script_role_so_the_editor_offers_script_inputs()
+	{
+		Assert.That(_action.Role, Is.EqualTo(ActionRoles.RunScript));
+	}
+
+	[Test]
 	public async Task Input_parameters_are_collected_and_forwarded_to_the_script()
 	{
 		_scripts.Seed(new SdkScript { Id = "s1", Name = "Alpha" });

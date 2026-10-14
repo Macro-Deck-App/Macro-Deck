@@ -8,7 +8,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { ActionBlock, ActionBlockParameter, AppStrings, ParameterValue, SCRIPT_CALL_SITES, ScriptInput, defaultParameterValue, isScriptInputParam, parseScriptInputsMetadata, resolveLocalizedText, scriptInputDefaultValue, scriptInputParamName, scriptInputParameter } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, AppStrings, ParameterValue, ScriptInput, defaultParameterValue, isRunScriptActionRole, isScriptInputParam, parseScriptInputsMetadata, resolveLocalizedText, scriptInputDefaultValue, scriptInputParamName, scriptInputParameter } from '@macro-deck/runtime';
 import { LocalizationService, VariableService } from '@shared';
 import { DEFAULT_TRIGGER_TYPE } from '../../action-builder/default-action-defs';
 import { ActionFlowStore } from '../../action-builder/services/action-flow.store';
@@ -132,7 +132,7 @@ export class ActionTesterComponent {
       const scriptId = this.selectedScriptId();
 
       untracked(() => {
-        if (!action || SCRIPT_CALL_SITES[action.integrationId ?? ''] !== action.id) {
+        if (!action || !isRunScriptActionRole(action.role)) {
           this.applyInputs(++this.request, []);
           return;
         }

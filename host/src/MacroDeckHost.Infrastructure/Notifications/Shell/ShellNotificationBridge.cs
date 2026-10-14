@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace MacroDeckHost.Infrastructure.Notifications.Shell;
 
-public sealed class ShellNotificationBridge : IShellNotificationBridge
+public sealed class ShellNotificationBridge : IShellNotificationBridge, IDisposable
 {
 	public static readonly TimeSpan AttachmentWindow = TimeSpan.FromSeconds(30);
 
@@ -25,14 +25,24 @@ public sealed class ShellNotificationBridge : IShellNotificationBridge
 
 	private readonly ConcurrentDictionary<long, PendingNotification> _pending = new();
 
+	private readonly ITimer _detach;
+	private readonly Lock _attachment = new();
+
 	private long _nextId;
 	private long _lastPollTicks = long.MinValue;
 	private int _waiting;
+	private bool _reportedAttached;
 
 	public ShellNotificationBridge(TimeProvider time)
 	{
 		_time = time;
+		_detach = time.CreateTimer(_ => OnAttachmentWindowElapsed(), null, Timeout.InfiniteTimeSpan,
+			Timeout.InfiniteTimeSpan);
 	}
+
+	public event Action? AttachmentChanged;
+
+	public void Dispose() => _detach.Dispose();
 
 	public bool IsAttached
 	{
@@ -94,7 +104,19 @@ public sealed class ShellNotificationBridge : IShellNotificationBridge
 
 		try
 		{
-			Interlocked.Exchange(ref _lastPollTicks, _time.GetUtcNow().UtcTicks);
+			bool attached;
+			lock (_attachment)
+			{
+				Interlocked.Exchange(ref _lastPollTicks, _time.GetUtcNow().UtcTicks);
+				_detach.Change(AttachmentWindow, Timeout.InfiniteTimeSpan);
+				attached = !_reportedAttached;
+				_reportedAttached = true;
+			}
+
+			if (attached)
+			{
+				AttachmentChanged?.Invoke();
+			}
 
 			var notifications = new List<ShellNotification>();
 			try
@@ -122,6 +144,28 @@ public sealed class ShellNotificationBridge : IShellNotificationBridge
 		{
 			Interlocked.Exchange(ref _waiting, 0);
 		}
+	}
+
+	private void OnAttachmentWindowElapsed()
+	{
+		lock (_attachment)
+		{
+			var remaining = AttachmentWindow.Ticks - (_time.GetUtcNow().UtcTicks - Interlocked.Read(ref _lastPollTicks));
+			if (remaining > 0)
+			{
+				_detach.Change(TimeSpan.FromTicks(remaining), Timeout.InfiniteTimeSpan);
+				return;
+			}
+
+			if (!_reportedAttached)
+			{
+				return;
+			}
+
+			_reportedAttached = false;
+		}
+
+		AttachmentChanged?.Invoke();
 	}
 
 	// A notification whose dispatcher already gave up has been shown by the platform fallback by now,

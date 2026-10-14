@@ -17,6 +17,9 @@ public class ShellNotificationBridgeTests
 		_bridge = new ShellNotificationBridge(_time);
 	}
 
+	[TearDown]
+	public void TearDown() => _bridge.Dispose();
+
 	[Test]
 	public async Task Without_a_shell_the_caller_is_told_so_before_any_time_passes()
 	{
@@ -40,6 +43,23 @@ public class ShellNotificationBridgeTests
 
 		Assert.That(_bridge.IsAttached, Is.False);
 		Assert.That(await _bridge.TryDispatchAsync("Title", "Message"), Is.False);
+	}
+
+	[Test]
+	public async Task Attaching_and_lapsing_are_each_reported_once_while_a_steady_shell_reports_nothing()
+	{
+		var seen = new List<bool>();
+		_bridge.AttachmentChanged += () => seen.Add(_bridge.IsAttached);
+
+		await Attach();
+		_time.Advance(ShellNotificationBridge.AttachmentWindow - TimeSpan.FromSeconds(1));
+		await Attach();
+		_time.Advance(ShellNotificationBridge.AttachmentWindow - TimeSpan.FromSeconds(1));
+		Assert.That(seen, Is.EqualTo(new[] { true }));
+
+		_time.Advance(TimeSpan.FromSeconds(1));
+
+		Assert.That(seen, Is.EqualTo(new[] { true, false }));
 	}
 
 	[Test]

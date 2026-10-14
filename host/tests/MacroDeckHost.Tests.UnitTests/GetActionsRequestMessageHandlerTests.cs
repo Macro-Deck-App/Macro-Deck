@@ -39,6 +39,32 @@ public class GetActionsRequestMessageHandlerTests
 		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
 	}
 
+	private sealed class ScriptActionDefinition : IActionDefinition
+	{
+		public string Id => "run";
+		public LocalizedText Name => "Run";
+		public LocalizedText Description => "Runs a script";
+		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
+		public string? Role => ActionRoles.RunScript;
+		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+	}
+
+	[Test]
+	public async Task Carries_each_action_role_to_the_client()
+	{
+		var registry = new FakeIntegrationRegistry();
+		registry.Add(new FakeIntegration { Actions = [new ScriptActionDefinition(), new RichActionDefinition()] });
+		var handler = new GetActionsRequestMessageHandler(registry, new EmptyRemotePluginSnapshotStore());
+
+		var response = await handler.Handle(new GetActionsRequest(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Actions.Single(action => action.Id == "run").Role, Is.EqualTo("run-script"));
+			Assert.That(response.Actions.Single(action => action.Id == "rich").Role, Is.Null);
+		});
+	}
+
 	[Test]
 	public async Task Maps_all_parameter_metadata()
 	{

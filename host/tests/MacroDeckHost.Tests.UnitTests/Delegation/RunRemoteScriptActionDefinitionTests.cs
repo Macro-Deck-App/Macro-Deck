@@ -36,6 +36,12 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 	}
 
 	[Test]
+	public void Declares_the_run_remote_script_role_so_the_editor_offers_script_inputs()
+	{
+		Assert.That(_action.Role, Is.EqualTo(ActionRoles.RunRemoteScript));
+	}
+
+	[Test]
 	public async Task A_successful_run_posts_exactly_one_request_for_the_selected_script()
 	{
 		var baseUrl = await AddReachableRemote("inst-1", "PC-A");

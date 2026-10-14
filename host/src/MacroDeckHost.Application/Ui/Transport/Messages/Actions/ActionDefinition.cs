@@ -15,6 +15,7 @@ public class ActionDefinition
 
 	public List<ActionParameterDef> Parameters { get; set; } = new();
 	public string? DescriptiveUiSchema { get; set; }
+	public string? Role { get; set; }
 
 	/// <summary>Whether this action's configured instance can drive a button's state (issue #612).</summary>
 	public bool IsStateProviderAction { get; set; }

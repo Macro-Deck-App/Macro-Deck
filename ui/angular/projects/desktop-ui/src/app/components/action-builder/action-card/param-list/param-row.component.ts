@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ActionBlock, ActionBlockParameter, AppStrings, ComparisonOperator, EventDefinition, HotkeyValue, KEYBOARD_INTEGRATION_ID, KeyboardComboValue, KeyboardSequenceValue, ParameterValue, SecretReference, WIDGET_APPEARANCE_RESET, WIDGET_INTEGRATION_ID, WidgetIconRef, defaultParameterValue, iconPackRef, iconPackReferenceOf, isEventFilterParameter, isEventReference, isHotkeyValue, isRunScriptWidgetTargetParam, isSecretReference, isStateOperator, isVariableReference, variableTokenText } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, AppStrings, ComparisonOperator, EventDefinition, HotkeyValue, KEYBOARD_INTEGRATION_ID, KeyboardComboValue, KeyboardSequenceValue, ParameterValue, RUN_SCRIPT_WIDGET_PARAM, SecretReference, WIDGET_APPEARANCE_RESET, WIDGET_INTEGRATION_ID, WidgetIconRef, defaultParameterValue, iconPackRef, iconPackReferenceOf, isEventFilterParameter, isEventReference, isHotkeyValue, isRunScriptActionRole, isSecretReference, isStateOperator, isVariableReference, variableTokenText } from '@macro-deck/runtime';
 import { ButtonComponent, CheckboxComponent, InputComponent, LocalizationService, OverlayPanelComponent, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import type { SecretKind, VariableType } from '@macro-deck/runtime';
 import { normalizeHttpsUrl } from '../../../../domain/url-input.util';
@@ -490,6 +490,11 @@ export class ParamRowComponent implements OnInit, OnChanges {
     this.fetchDynamicOptions(filter, false);
   }
 
+  private isRunScriptWidgetRow(): boolean {
+    return this.param.name === RUN_SCRIPT_WIDGET_PARAM
+      && isRunScriptActionRole(this.store.actionRole(this.block?.integrationId, this.block?.actionId));
+  }
+
   reloadDynamicOptions(): void {
     this.fetchDynamicOptions(undefined, true);
   }
@@ -546,7 +551,7 @@ export class ParamRowComponent implements OnInit, OnChanges {
     // cannot tell the two apart). The one exception is the Run Script call site's synthesized
     // `widget` row: `run-script`/`run-remote-script` own the block but declare no such parameter
     // themselves, so it has to go by source id like a standalone row with no block at all.
-    const hasOwningAction = !isRunScriptWidgetTargetParam(this.param.name, this.block)
+    const hasOwningAction = !this.isRunScriptWidgetRow()
       && !!this.block?.integrationId && !!this.block.actionId;
     const bySourceId = !hasOwningAction && !!this.param.optionsSourceId;
 
