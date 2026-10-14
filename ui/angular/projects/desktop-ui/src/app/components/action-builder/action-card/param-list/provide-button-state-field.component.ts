@@ -43,7 +43,6 @@ import { ActionFlowStore } from '../../services/action-flow.store';
       border: none;
       border-radius: var(--radius-sm);
       color: var(--color-text-muted);
-      cursor: pointer;
       flex-shrink: 0;
       transition: background-color var(--transition-fast), color var(--transition-fast);
     }

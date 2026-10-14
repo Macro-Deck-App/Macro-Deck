@@ -16,7 +16,6 @@
   padding: 11px;
   border: 0;
   border-radius: 50%;
-  cursor: pointer;
   background: rgba(0, 0, 0, 0.45);
   color: var(--color-text-secondary);
   opacity: 0.55;
@@ -71,7 +70,6 @@
   padding: 11px;
   border: 0;
   border-radius: 50%;
-  cursor: pointer;
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
 }

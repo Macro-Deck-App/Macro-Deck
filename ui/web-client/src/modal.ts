@@ -63,7 +63,7 @@ export class ModalHost {
     header.appendChild(close);
 
     this.content = document.createElement('div');
-    this.content.className = 'wc-modal-content';
+    this.content.className = 'wc-modal-content widget-dialog-content';
     dialog.appendChild(this.content);
 
     this.backdrop.addEventListener('pointerdown', event => {

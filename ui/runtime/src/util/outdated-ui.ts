@@ -78,7 +78,7 @@ const STYLES = {
   lastStep: ['margin:0'],
   button: [
     'display:inline-block', 'min-height:44px', 'padding:10px 24px', 'border:0', 'border-radius:6px',
-    'font:inherit', 'font-weight:600', 'cursor:pointer',
+    'font:inherit', 'font-weight:600',
     'background:#2196f3', 'background:var(--color-accent,#2196f3)',
     'color:#ffffff', 'color:var(--color-on-accent,#ffffff)',
   ],

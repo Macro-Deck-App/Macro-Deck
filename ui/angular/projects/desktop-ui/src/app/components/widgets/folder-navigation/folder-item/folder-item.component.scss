@@ -5,7 +5,7 @@
   padding: 8px;
   padding-inline-end: 12px;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: default;
   user-select: none;
   color: var(--color-text-secondary);
   transition: all var(--transition-fast);
@@ -75,7 +75,6 @@
   border: none;
   background: none;
   color: inherit;
-  cursor: pointer;
   padding: 0;
   border-radius: 4px;
   flex-shrink: 0;

@@ -186,7 +186,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  cursor: pointer;
+  cursor: default;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -212,7 +212,6 @@
   color: var(--color-text-secondary);
   font-size: var(--text-base);
   text-align: start;
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 
   .icon {

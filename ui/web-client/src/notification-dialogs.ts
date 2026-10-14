@@ -92,7 +92,7 @@ export class NotificationDialogs {
     this.message = element('p', 'wc-notification-message');
     body.appendChild(this.message);
 
-    this.content = element('div', 'wc-notification-content');
+    this.content = element('div', 'wc-notification-content widget-dialog-content');
     body.appendChild(this.content);
 
     this.progress = element('div', 'wc-notification-progress');

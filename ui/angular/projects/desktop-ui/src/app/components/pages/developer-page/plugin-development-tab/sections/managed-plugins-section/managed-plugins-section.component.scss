@@ -247,7 +247,6 @@
   color: var(--color-text-secondary);
   font-size: var(--text-base);
   text-align: start;
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -289,7 +288,10 @@
   padding: 0;
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
-  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
 }
 
 .managed-plugins-output-toggle .icon {

@@ -118,7 +118,6 @@
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
-  cursor: pointer;
   transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 
   &:hover {
@@ -199,7 +198,7 @@
   gap: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
-  cursor: pointer;
+  cursor: default;
 
   input {
     accent-color: var(--color-accent);

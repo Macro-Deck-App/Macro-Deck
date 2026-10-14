@@ -91,7 +91,6 @@
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   white-space: nowrap;
-  cursor: pointer;
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast),
@@ -183,7 +182,6 @@
   font-family: inherit;
   font-size: var(--text-md);
   font-weight: var(--font-semibold);
-  cursor: pointer;
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
@@ -213,7 +211,6 @@
   font-family: inherit;
   font-size: var(--text-md);
   font-weight: var(--font-medium);
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -300,7 +297,6 @@
   font-size: var(--text-base);
   font-weight: var(--font-medium);
   white-space: nowrap;
-  cursor: pointer;
   transition:
     background-color var(--transition-fast),
     color var(--transition-fast);
@@ -360,7 +356,6 @@
   font-family: inherit;
   font-size: var(--text-base);
   text-align: start;
-  cursor: pointer;
 
   &:hover {
     background-color: var(--color-bg-hover);
@@ -424,7 +419,6 @@
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
-  cursor: pointer;
   transition:
     background-color var(--transition-fast),
     color var(--transition-fast);

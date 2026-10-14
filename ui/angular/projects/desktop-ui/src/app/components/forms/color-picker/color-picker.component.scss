@@ -34,7 +34,6 @@
 	padding: 0;
 	border-radius: var(--radius-sm);
 	background: none;
-	cursor: pointer;
 
 	&:focus-visible {
 		outline: none;
@@ -72,7 +71,6 @@
 	border: 2px solid transparent;
 	border-radius: var(--radius-sm);
 	background: var(--cp-fill);
-	cursor: pointer;
 	transition:
 		box-shadow var(--transition-fast),
 		border-color var(--transition-fast);
@@ -156,7 +154,6 @@
 	border-radius: 50%;
 	background: var(--color-bg-secondary);
 	color: var(--color-text-secondary);
-	cursor: pointer;
 
 	.icon {
 		width: 0.625rem;
@@ -277,7 +274,6 @@
 	border-radius: var(--radius-md);
 	background: none;
 	color: var(--color-text-secondary);
-	cursor: pointer;
 	transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
@@ -433,7 +429,6 @@
 	border-radius: var(--radius-md);
 	background-color: var(--color-bg-primary);
 	color: var(--color-text-secondary);
-	cursor: pointer;
 	transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
 }
 

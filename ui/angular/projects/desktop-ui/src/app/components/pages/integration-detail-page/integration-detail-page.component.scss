@@ -165,9 +165,12 @@
   gap: 0.25rem;
   background: none;
   border: none;
-  cursor: pointer;
   font-size: var(--text-sm);
   color: var(--color-danger);
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .config-entry-summary,
@@ -193,9 +196,12 @@
 .config-entry-action {
   background: none;
   border: none;
-  cursor: pointer;
   font-size: var(--text-sm);
   color: var(--color-accent);
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .detail-placeholder,

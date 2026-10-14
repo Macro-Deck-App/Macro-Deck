@@ -210,7 +210,8 @@ task_test_desktop_ui() {
 		"$NPM" run test:proxy &&
 		"$NPM" run test:dialog-box &&
 		"$NPM" run test:boundaries &&
-		"$NPM" run test:stacking)
+		"$NPM" run test:stacking &&
+		"$NPM" run test:cursors)
 }
 
 task_build_ui() {

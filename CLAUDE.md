@@ -146,6 +146,21 @@ license tool fails otherwise (see [third-party notices](engineering/development/
 Published `ui.icon` names keep their meaning: an icon may be redrawn in this style, never replaced by a
 different concept ([ADR 0084](engineering/decisions/0084-built-in-icon-names-are-a-versioned-public-vocabulary.md)).
 
+## Cursors
+
+The UI follows native desktop conventions: the arrow on everything that looks like a control (buttons,
+icon buttons, checkboxes, switches, tabs, menu and list rows, chips, sliders), the hand only on links,
+clickable cards and tiles, and clickable content that does not look like a control. Drag handles use
+`grab` and `grabbing`, text inputs `text`, disabled controls keep `not-allowed`.
+
+A `button`, `input` or `select` already has the arrow, so declare nothing. On any other element
+(`div`, `span`, `a`, `label`, `summary`) write `cursor: default`, otherwise it shows the I-beam over
+text or the anchor's hand. A deck key tile or press-claiming node keeps the hand; a value control
+(slider, dial, toggle, segmented) and a button inside dialog content do not.
+
+`cursors.test.mjs` in `ui/angular` fails on any `cursor: pointer` that is not on its allowlist; adding
+a link or card means adding its line there.
+
 ## Code comments
 
 Internal implementation code normally carries no comments and no XML documentation. Comment only for

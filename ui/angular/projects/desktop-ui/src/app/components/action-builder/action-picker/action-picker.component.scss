@@ -31,7 +31,6 @@
   font-size: var(--text-md);
   font-family: inherit;
   text-align: start;
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -109,7 +108,6 @@
   color: var(--color-text-primary);
   font-family: inherit;
   text-align: start;
-  cursor: pointer;
   /* Clips the type rail to the rounded corner - and, because a non-visible overflow zeroes a flex
      item's automatic minimum size, forces the explicit flex-shrink below. Without it every row in
      this scrolling column collapses to a fraction of its content. */

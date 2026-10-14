@@ -58,7 +58,6 @@ export interface StateMappingValue {
       color: var(--color-text-primary);
       font-size: var(--text-sm);
       text-align: start;
-      cursor: pointer;
 
       &:hover {
         background-color: var(--color-bg-hover);

@@ -166,7 +166,6 @@ body,
   color: var(--color-text-muted);
   font-size: var(--text-xl);
   line-height: 1;
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -292,7 +291,6 @@ body,
      ellipsis rather than spill over the border. */
   white-space: nowrap;
   overflow: hidden;
-  cursor: pointer;
   transition:
     background-color var(--transition-fast),
     color var(--transition-fast),
@@ -416,7 +414,7 @@ body,
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
-  cursor: pointer;
+  cursor: default;
 }
 
 .wc-checkbox-box {
@@ -424,7 +422,6 @@ body,
   width: 0.8125rem;
   height: 0.8125rem;
   accent-color: var(--color-accent);
-  cursor: pointer;
 }
 
 .wc-checkbox-box:disabled {
@@ -444,7 +441,7 @@ body,
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  cursor: pointer;
+  cursor: default;
   user-select: none;
   /* The checkbox covers the whole switch, so iOS would otherwise flash its tap highlight across
      the switch and its label on every tap, including one the switch ignores. */
@@ -476,7 +473,6 @@ body,
   height: 100%;
   margin: 0;
   opacity: 0;
-  cursor: pointer;
 }
 
 .wc-toggle-track {
@@ -562,7 +558,6 @@ body,
   font-size: var(--text-base);
   font-weight: var(--font-medium);
   white-space: nowrap;
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -709,7 +704,6 @@ body,
   border: none;
   background: none;
   color: inherit;
-  cursor: pointer;
   opacity: 0.7;
 }
 
@@ -798,7 +792,6 @@ body,
   border: none;
   background: none;
   color: inherit;
-  cursor: pointer;
   opacity: 0.6;
 }
 
@@ -1013,7 +1006,6 @@ body,
   border-radius: var(--radius-sm);
   background: none;
   color: var(--color-text-muted);
-  cursor: pointer;
 }
 
 .wc-notification-close:hover {
@@ -1273,7 +1265,6 @@ body,
   color: var(--color-text-primary);
   font: inherit;
   padding: var(--space-2) var(--space-3);
-  cursor: pointer;
 }
 
 .wc-folder-view-content {

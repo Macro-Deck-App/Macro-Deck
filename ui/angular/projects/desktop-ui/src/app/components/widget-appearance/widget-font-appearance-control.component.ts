@@ -65,7 +65,7 @@ export interface WidgetFontAppearanceChange {
     .font-size { flex: 0 1 4.5rem; } .font-input { width: 100%; }
     .font-segments { gap: var(--space-2); } .font-align, .font-position { flex: 1 1 7.3125rem; }
     .font-button-group { display: flex; padding: 2px; gap: 2px; background: var(--color-bg-primary); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-    .font-toggle { flex: 1 1 0; min-width: 0; height: 1.4375rem; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: transparent; color: var(--color-text-secondary); border: none; border-radius: var(--radius-sm); font-size: var(--text-sm); cursor: pointer; transition: background-color var(--transition-fast), color var(--transition-fast); }
+    .font-toggle { flex: 1 1 0; min-width: 0; height: 1.4375rem; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: transparent; color: var(--color-text-secondary); border: none; border-radius: var(--radius-sm); font-size: var(--text-sm); transition: background-color var(--transition-fast), color var(--transition-fast); }
     .font-toggle:hover:not(:disabled):not(.active) { background: var(--color-bg-hover); color: var(--color-text-primary); }
     .font-toggle .icon { background-color: currentColor; } .font-toggle.active { background: var(--color-accent); color: #fff; }
   `,

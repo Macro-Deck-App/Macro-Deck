@@ -75,7 +75,6 @@
   color: var(--color-text-primary);
   font-family: var(--font-mono);
   font-size: var(--text-sm);
-  cursor: pointer;
   transition: border-color var(--transition-fast);
 }
 
@@ -128,7 +127,6 @@
   border-radius: var(--radius-sm);
   color: var(--color-text-primary);
   font-size: var(--text-sm);
-  cursor: pointer;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 

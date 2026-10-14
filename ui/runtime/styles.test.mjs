@@ -508,3 +508,23 @@ test('an outlined label draws the same legibility shadow inside its filter as th
   assert.ok(mirrored, 'text-outline.ts declares no LEGIBILITY_SHADOW');
   assert.deepEqual(mirrored.slice(1).map(Number), shadow.slice(1).map(Number));
 });
+
+test('a pressable tile shows the hand while a value control or a dialog button shows the arrow', () => {
+  const renderer = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8');
+  const tile = renderer.match(/\n\.widget-pressable \{([^}]*)\}/);
+  assert.ok(tile, 'renderer.css declares no .widget-pressable rule');
+  assert.match(tile[1], /cursor:\s*pointer\b/);
+
+  const controls = [...renderer.matchAll(/\n([^{}]*\.widget-slider\.widget-pressable[^{}]*)\{([^}]*)\}/g)][0];
+  assert.ok(controls, 'renderer.css declares no rule for pressable value controls');
+  for (const selector of [
+    '.widget-slider.widget-pressable',
+    '.widget-dial.widget-pressable',
+    '.widget-toggle.widget-pressable',
+    '.widget-segmented.widget-pressable',
+    '.widget-dialog-content .widget-button.widget-pressable',
+  ]) {
+    assert.ok(controls[1].includes(selector), `${selector} has to take the arrow`);
+  }
+  assert.match(controls[2], /cursor:\s*default\b/);
+});
