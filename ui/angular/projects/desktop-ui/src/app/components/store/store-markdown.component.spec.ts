@@ -94,4 +94,41 @@ describe('StoreMarkdownComponent', () => {
   it('keeps the start number of an ordered list', () => {
     expect(render('3. third\n4. fourth').querySelector('ol')?.getAttribute('start')).toBe('3');
   });
+
+  describe('tables in a column that breaks long words anywhere', () => {
+    function renderNarrow(markdown: string): HTMLElement {
+      const element = render(markdown);
+      Object.assign(element.style, { display: 'block', width: '360px', overflowWrap: 'anywhere' });
+      return element;
+    }
+
+    function lineCount(node: Node): number {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      return new Set(Array.from(range.getClientRects()).map(rect => Math.round(rect.top))).size;
+    }
+
+    it('keeps every word of a short column on one line, as GitHub does', () => {
+      const element = renderNarrow([
+        '| Kind | Id | Notes |',
+        '| --- | --- | --- |',
+        '| Action | `select-window` | Pin or unpin the current window, switch to the next one, or pin a workspace. |',
+        '| Variables | `vscode_workspace`, `vscode_active_file`, `vscode_language` | About the default window, the one buttons set to Active window control. |',
+      ].join('\n'));
+
+      const kinds = Array.from(element.querySelectorAll('tr > :first-child'));
+      expect(kinds.map(cell => cell.textContent?.trim())).toEqual(['Kind', 'Action', 'Variables']);
+      kinds.forEach(cell => expect(lineCount(cell)).withContext(cell.textContent!).toBe(1));
+    });
+
+    it('scrolls a table with an unbreakable value instead of splitting it', () => {
+      const id = 'vscode_bridge_status_of_the_currently_pinned_workspace_window';
+      const element = renderNarrow(`| Variable | Notes |\n| --- | --- |\n| ${id} | Bridge state |`);
+
+      const scroller = element.querySelector('.md-table-scroll')!;
+      expect(lineCount(element.querySelector('td')!)).toBe(1);
+      expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
+      expect(element.getBoundingClientRect().width).toBe(360);
+    });
+  });
 });
