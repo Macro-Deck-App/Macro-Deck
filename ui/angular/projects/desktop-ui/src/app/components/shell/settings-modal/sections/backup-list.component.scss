@@ -34,7 +34,6 @@
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  cursor: pointer;
   border: 1px solid transparent;
 }
 
@@ -66,7 +65,10 @@
   background: transparent;
   color: var(--color-text-primary);
   font-size: var(--text-sm);
-  cursor: pointer;
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+  }
 }
 
 .bl-empty {
@@ -175,7 +177,7 @@
   height: var(--control-height-compact);
   color: var(--color-text-secondary);
   border-radius: var(--radius-sm);
-  cursor: pointer;
+  cursor: default;
 }
 
 .bl-dots-btn:hover {
@@ -200,7 +202,6 @@
   color: var(--color-text-secondary);
   font-size: var(--text-base);
   text-align: start;
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 

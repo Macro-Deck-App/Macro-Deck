@@ -30,7 +30,6 @@
   border-radius: 50%;
   background-color: var(--color-bg-tertiary);
   color: var(--color-text-primary);
-  cursor: pointer;
 
   &:hover:not(:disabled) {
     background-color: var(--color-bg-hover);

@@ -216,13 +216,12 @@
   color: var(--color-text-secondary);
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
-  cursor: pointer;
+  cursor: default;
 
   input {
     flex: none;
     // Nudged onto the first line's baseline; the checkbox is shorter than the line box.
     margin-top: 0.2em;
-    cursor: pointer;
   }
 
   &:has(input:disabled) {

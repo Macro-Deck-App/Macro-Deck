@@ -56,7 +56,6 @@
   border: none;
   background: transparent;
   border-radius: var(--radius-sm);
-  cursor: pointer;
 
   .icon {
     background-color: var(--color-text-muted);
@@ -136,7 +135,6 @@
   color: var(--color-text-secondary);
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
-  cursor: pointer;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 
   &:hover {

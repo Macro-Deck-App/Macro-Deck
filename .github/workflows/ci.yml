@@ -272,6 +272,10 @@ jobs:
         working-directory: ui/angular
         run: npm run test:stacking
 
+      - name: Cursor conventions
+        working-directory: ui/angular
+        run: npm run test:cursors
+
       - name: Release feed script tests
         run: node --test ci/scripts/*.test.mjs
 

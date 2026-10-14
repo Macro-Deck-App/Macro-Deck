@@ -91,7 +91,7 @@ interface DraftSource {
               <p class="nd-error" role="alert">{{ appStrings.Feedback.Notification.Rejected | translate }}</p>
             }
             @if (content(); as tree) {
-              <div #content class="nd-content">
+              <div #content class="nd-content widget-dialog-content">
                 <shared-ui-widget-tree [root]="tree" [box]="box()" (nodeEvent)="onTreeEvent($event)" />
               </div>
             }

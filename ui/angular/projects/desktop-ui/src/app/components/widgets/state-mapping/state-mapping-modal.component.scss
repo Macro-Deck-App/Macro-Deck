@@ -50,7 +50,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  cursor: pointer;
 
   &:hover:not(:disabled) {
     color: var(--color-text-primary);
@@ -95,7 +94,6 @@
   border: none;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
-  cursor: pointer;
 
   &:hover {
     color: var(--color-danger, #ef4444);
@@ -113,7 +111,6 @@
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
-  cursor: pointer;
 
   &:hover {
     color: var(--color-text-primary);

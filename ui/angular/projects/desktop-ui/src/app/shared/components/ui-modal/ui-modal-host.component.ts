@@ -47,7 +47,7 @@ function findNode(root: UiNode | null, nodeId: string): UiNode | null {
         [style.--modal-height]="'36rem'"
         [flush]="true"
         (close)="cancel()">
-        <div #content class="ui-modal-content">
+        <div #content class="ui-modal-content widget-dialog-content">
           @if (problem(); as problem) {
             <div class="ui-modal-unavailable" role="status">
               <span class="icon icon-alert-triangle icon-lg" aria-hidden="true"></span>

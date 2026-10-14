@@ -127,6 +127,14 @@
   cursor: pointer;
 }
 
+.widget-slider.widget-pressable,
+.widget-dial.widget-pressable,
+.widget-toggle.widget-pressable,
+.widget-segmented.widget-pressable,
+.widget-dialog-content .widget-button.widget-pressable {
+  cursor: default;
+}
+
 /* A text node over artwork has to stay legible against it, at any depth of nesting. */
 .widget-button .widget-text {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -847,7 +855,6 @@
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
   white-space: nowrap;
-  cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 

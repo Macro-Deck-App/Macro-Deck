@@ -93,7 +93,6 @@
   // After the mixin, which sets --text-base: the chips stay deliberately smaller than
   // the control text while sharing the row's height.
   font-size: var(--text-xs);
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast),
     border-color var(--transition-fast);
 

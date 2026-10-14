@@ -130,7 +130,6 @@
   background-color: var(--color-bg-tertiary);
   border-radius: var(--radius-sm);
   appearance: none;
-  cursor: pointer;
 
   &::-webkit-slider-thumb {
     appearance: none;
@@ -138,7 +137,6 @@
     height: 0.8125rem;
     background-color: var(--color-accent);
     border-radius: 50%;
-    cursor: pointer;
     transition: transform var(--transition-fast);
   }
 
@@ -152,7 +150,6 @@
     background-color: var(--color-accent);
     border: none;
     border-radius: 50%;
-    cursor: pointer;
   }
 }
 
@@ -232,13 +229,13 @@
   }
 }
 
-/// Clickable list-row baseline: hover highlight and pointer affordance.
+/// Clickable list-row baseline: hover highlight.
 /// Selected/active styling stays with the caller.
 @mixin interactive-row {
   display: flex;
   align-items: center;
   border-radius: var(--radius-md);
-  cursor: pointer;
+  cursor: default;
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
 
   &:hover {
@@ -327,7 +324,6 @@
     border: none;
     border-radius: 0.125rem;
     color: var(--color-text-muted);
-    cursor: pointer;
     opacity: 0;
     transition: opacity var(--transition-fast), color var(--transition-fast);
   }

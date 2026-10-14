@@ -106,7 +106,6 @@ shared-condition-builder {
   border: none;
   border-radius: 0.125rem;
   color: var(--color-text-muted);
-  cursor: pointer;
   opacity: 0;
   transition: opacity var(--transition-fast), color var(--transition-fast);
 }
@@ -138,7 +137,6 @@ shared-condition-builder {
   font-family: inherit;
   font-size: inherit;
   font-weight: var(--font-medium);
-  cursor: pointer;
   transition: color var(--transition-fast), text-decoration-color var(--transition-fast),
               background-color var(--transition-fast);
   // Sized down from the default caret - this trigger sits at the row's small type scale, not a
@@ -184,7 +182,6 @@ shared-condition-builder {
   color: var(--color-text-primary);
   font-family: inherit;
   font-size: var(--text-base);
-  cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
@@ -227,7 +224,6 @@ shared-condition-builder {
   font-weight: var(--font-semibold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  cursor: pointer;
   transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
@@ -286,7 +282,6 @@ shared-condition-builder {
   border: none;
   border-radius: 0.1875rem;
   color: var(--color-text-muted);
-  cursor: pointer;
   opacity: 0;
   transition: opacity var(--transition-fast), color var(--transition-fast),
               background-color var(--transition-fast);

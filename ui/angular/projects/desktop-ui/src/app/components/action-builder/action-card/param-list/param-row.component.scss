@@ -53,7 +53,6 @@
   font-family: inherit;
   font-size: var(--text-xs);
   font-weight: var(--font-medium);
-  cursor: pointer;
   transition: color var(--transition-fast), text-decoration-color var(--transition-fast),
               background-color var(--transition-fast);
   // Sized down from the default caret - this trigger sits at the label's small type scale, not a
@@ -99,7 +98,6 @@
   color: var(--color-text-primary);
   font-family: inherit;
   font-size: var(--text-base);
-  cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 

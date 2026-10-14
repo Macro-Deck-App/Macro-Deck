@@ -62,7 +62,6 @@
   border-radius: var(--radius-sm);
   background: none;
   color: var(--color-text-muted);
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 
   &:hover {
@@ -89,7 +88,6 @@
   color: inherit;
   font: inherit;
   text-align: start;
-  cursor: pointer;
   transition: background-color var(--transition-fast);
 
   &:hover {
@@ -192,7 +190,6 @@
   border-radius: var(--radius-sm);
   background: none;
   color: var(--color-text-muted);
-  cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 
   &:hover {
