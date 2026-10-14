@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Persistence.Repositories;
@@ -26,11 +27,15 @@ public interface IPluginCompanionDeviceAccessPolicy
 }
 
 // ADR 0110: off by default, and an installed plugin must also declare host:companion-devices.
+[SuppressMessage("Design",
+	"CA1001:Types that own disposable fields should be disposable",
+	Justification = "A process-lifetime singleton the container disposes at shutdown while a read can still be in " +
+		"flight; a disposed gate would fault that read from its finally block. The gate holds no unmanaged resource.")]
 public sealed class PluginCompanionDeviceAccessPolicy(
 	IPluginSessionRegistry sessionRegistry,
 	IPluginInstallationCatalog installationCatalog,
 	IPluginManifestReader manifestReader,
-	IServiceScopeFactory scopeFactory) : IPluginCompanionDeviceAccessPolicy, IDisposable
+	IServiceScopeFactory scopeFactory) : IPluginCompanionDeviceAccessPolicy
 {
 	public const string AllowPluginsKey = "companion.allowPlugins";
 
@@ -74,8 +79,6 @@ public sealed class PluginCompanionDeviceAccessPolicy(
 			_gate.Release();
 		}
 	}
-
-	public void Dispose() => _gate.Dispose();
 
 	public async Task SetAllowPluginsAsync(bool allow, CancellationToken cancellationToken = default)
 	{
