@@ -14,7 +14,6 @@ using MacroDeckHost.Localization;
 using Serilog;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Http;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Spotify;
 

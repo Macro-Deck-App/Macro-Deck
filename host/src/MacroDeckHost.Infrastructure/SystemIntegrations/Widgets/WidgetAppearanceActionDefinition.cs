@@ -3,7 +3,6 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Widgets;
-using MacroDeckHost.Integrations;
 using MacroDeckHost.Localization;
 using Serilog;
 

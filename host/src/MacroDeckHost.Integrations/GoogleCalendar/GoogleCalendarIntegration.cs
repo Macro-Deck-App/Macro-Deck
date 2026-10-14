@@ -8,7 +8,6 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.GoogleCalendar;
 

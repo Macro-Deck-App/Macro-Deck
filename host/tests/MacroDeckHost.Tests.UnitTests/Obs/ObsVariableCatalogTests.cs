@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Obs;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;
@@ -641,7 +642,7 @@ internal sealed class ObsVariableCatalogTests
 	private static ObsRuntime CreateRuntime(FakeObsClient client, string title = "OBS", Guid? id = null)
 		=> new(id ?? Guid.NewGuid(),
 			title,
-			new ObsConfigurationIdentity(title, "key"),
+			new ConfigurationIdentity(title, "key"),
 			new ObsConfigurationSettings("localhost", 4455, null),
 			new ObsConnection(client, "ws://localhost:4455", null));
 

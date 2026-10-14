@@ -313,7 +313,7 @@ public sealed partial class ObsIntegration
 			var identityJson =
 				await config.GetStringAsync(entry.Id, ObsConfigurationMetadata.VariableIdentityKey, cancellationToken);
 			if (!string.Equals(schema, ObsConfigurationMetadata.SchemaVersion, StringComparison.Ordinal) ||
-				!ObsConfigurationMetadata.TryParseIdentity(identityJson, out var identity))
+				!ConfigurationIdentityJson.TryParse(identityJson, out var identity))
 			{
 				continue;
 			}
@@ -352,6 +352,6 @@ public sealed partial class ObsIntegration
 	private sealed record DesiredRuntime(
 		Guid Id,
 		string Title,
-		ObsConfigurationIdentity Identity,
+		ConfigurationIdentity Identity,
 		ObsConfigurationSettings Settings);
 }

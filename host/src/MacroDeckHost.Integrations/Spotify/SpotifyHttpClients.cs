@@ -1,4 +1,3 @@
-using MacroDeckHost.Integrations.Http;
 using SpotifyAPI.Web.Http;
 
 namespace MacroDeckHost.Integrations.Spotify;

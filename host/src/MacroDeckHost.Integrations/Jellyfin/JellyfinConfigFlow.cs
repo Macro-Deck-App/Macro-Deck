@@ -6,7 +6,6 @@ using MacroDeckHost.Integrations.Jellyfin.Protocol;
 using MacroDeckHost.Localization;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Jellyfin.Config;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Jellyfin;
 

@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using MacroDeck.Sdk.Weather;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Weather;
 

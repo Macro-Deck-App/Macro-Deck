@@ -6,7 +6,6 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Integrations.Companion.Actions;
-using MacroDeckHost.Integrations.Obs;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Companion;
@@ -165,7 +164,7 @@ public sealed partial class CompanionIntegration
 					CompanionConfigurationMetadata.VariableIdentityKey,
 					cancellationToken);
 				if (string.Equals(schema, CompanionConfigurationMetadata.SchemaVersion, StringComparison.Ordinal) &&
-					ObsConfigurationMetadata.TryParseIdentity(identityJson, out var identity))
+					ConfigurationIdentityJson.TryParse(identityJson, out var identity))
 				{
 					runtimes.Add(new CompanionRuntime(entry.Id, entry.Title, identity));
 				}

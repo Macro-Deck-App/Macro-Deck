@@ -13,7 +13,6 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YtmDesktop;
 

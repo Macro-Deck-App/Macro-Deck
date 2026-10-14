@@ -50,7 +50,7 @@ public class ScriptInputFlowTests
 	// The capture block inside a widget-enabled script's own flow - it declares no "marker" value of its
 	// own; the assertion is on CapturingActionDefinition.CapturedOwnerWidgetId, i.e. whichever widget
 	// FlowExecutionRequest.OwnerWidgetId carried into this run - exactly the value a real widget-targeting
-	// block would resolve "$self" through, via the existing WidgetActionParameters.TargetOf.
+	// block would resolve "$self" through, via the widget actions' own target resolution.
 	private const string TargetFlow =
 		"""
 		[

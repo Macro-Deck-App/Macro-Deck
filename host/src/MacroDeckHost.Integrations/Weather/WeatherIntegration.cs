@@ -10,7 +10,6 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
 using MacroDeckHost.Integrations.Weather.Details;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Weather;
 

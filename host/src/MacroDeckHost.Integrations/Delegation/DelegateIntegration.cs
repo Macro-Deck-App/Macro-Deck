@@ -8,7 +8,6 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Delegation;
 

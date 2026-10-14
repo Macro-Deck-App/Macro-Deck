@@ -5,7 +5,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Config;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;
 

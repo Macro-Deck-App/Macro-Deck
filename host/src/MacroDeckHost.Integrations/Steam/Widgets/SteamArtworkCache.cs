@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Integrations.Http;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;

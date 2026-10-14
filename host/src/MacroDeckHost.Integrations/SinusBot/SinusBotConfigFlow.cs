@@ -4,7 +4,6 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using Serilog;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.SinusBot;
 

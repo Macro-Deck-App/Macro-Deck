@@ -78,7 +78,7 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 				continue;
 			}
 
-			var identity = new ObsConfigurationIdentity(title, key);
+			var identity = new ConfigurationIdentity(title, key);
 
 			occupiedKeys.Add(identity.Key);
 
@@ -87,7 +87,7 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 				[ObsConfigKeys.Host] = JsonString(host),
 				[ObsConfigKeys.Port] = JsonString(port.ToString(CultureInfo.InvariantCulture)),
 				[ObsConfigurationMetadata.VariableIdentityKey] =
-					JsonString(ObsConfigurationMetadata.SerializeIdentity(identity)),
+					JsonString(ConfigurationIdentityJson.Serialize(identity)),
 				[ObsConfigurationMetadata.SchemaKey] = JsonString(ObsConfigurationMetadata.SchemaVersion)
 			};
 

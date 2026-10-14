@@ -12,7 +12,6 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Localization;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Streamerbot;
 

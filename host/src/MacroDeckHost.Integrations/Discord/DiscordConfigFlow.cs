@@ -6,7 +6,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Discord;
 

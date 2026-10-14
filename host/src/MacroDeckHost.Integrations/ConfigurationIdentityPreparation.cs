@@ -1,14 +1,13 @@
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Integrations.Obs;
 
 namespace MacroDeckHost.Integrations;
 
 internal static class ConfigurationIdentityPreparation
 {
 	public static string? ChooseKey(ConfigEntryPreparation preparation,
-		Func<StoredConfigEntry, ObsConfigurationIdentity?> readIdentity,
+		Func<StoredConfigEntry, ConfigurationIdentity?> readIdentity,
 		Func<string, IReadOnlyList<VariableDefinition>> declare,
 		Func<int>? suffixFactory)
 	{
@@ -23,7 +22,7 @@ internal static class ConfigurationIdentityPreparation
 
 		var occupied = preparation.Siblings
 			.Select(readIdentity)
-			.OfType<ObsConfigurationIdentity>()
+			.OfType<ConfigurationIdentity>()
 			.Select(identity => identity.Key)
 			.ToHashSet(StringComparer.Ordinal);
 		for (var attempt = 0; attempt < ConfigurationIdentityAllocator.MaximumAttempts; attempt++)
@@ -48,9 +47,9 @@ internal static class ConfigurationIdentityPreparation
 		return null;
 	}
 
-	public static ObsConfigurationIdentity? ReadIdentity(StoredConfigEntry entry, string identityKey)
+	public static ConfigurationIdentity? ReadIdentity(StoredConfigEntry entry, string identityKey)
 		=> entry.Values.TryGetValue(identityKey, out var identity) &&
-			ObsConfigurationMetadata.TryParseIdentity(ReadString(identity), out var parsed)
+			ConfigurationIdentityJson.TryParse(ReadString(identity), out var parsed)
 				? parsed
 				: null;
 
@@ -59,7 +58,7 @@ internal static class ConfigurationIdentityPreparation
 			string.Equals(ReadString(schema), schemaVersion, StringComparison.Ordinal);
 
 	public static async Task SynchronizeAsync(IVariableApi variables,
-		IReadOnlyList<(StoredConfigEntry Entry, ObsConfigurationIdentity Identity)> usable,
+		IReadOnlyList<(StoredConfigEntry Entry, ConfigurationIdentity Identity)> usable,
 		Func<string?, Guid?> entryIdOf,
 		Func<string, Guid, string, IReadOnlyList<VariableDefinition>> declare,
 		CancellationToken cancellationToken)

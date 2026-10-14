@@ -1,7 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Integrations.Obs;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Companion;
 
 namespace MacroDeckHost.Integrations.Companion;
@@ -25,7 +24,7 @@ public sealed partial class CompanionIntegration
 		var values = new Dictionary<string, JsonElement>(preparation.Values, StringComparer.Ordinal)
 		{
 			[CompanionConfigurationMetadata.VariableIdentityKey] = JsonSerializer.SerializeToElement(
-				ObsConfigurationMetadata.SerializeIdentity(new ObsConfigurationIdentity(preparation.Title, key))),
+				ConfigurationIdentityJson.Serialize(new ConfigurationIdentity(preparation.Title, key))),
 			[CompanionConfigurationMetadata.SchemaKey] =
 				JsonSerializer.SerializeToElement(CompanionConfigurationMetadata.SchemaVersion)
 		};
@@ -92,6 +91,6 @@ public sealed partial class CompanionIntegration
 				CompanionConfigurationMetadata.SchemaVersion) &&
 			ReadIdentity(entry) is not null;
 
-	private static ObsConfigurationIdentity? ReadIdentity(StoredConfigEntry entry)
+	private static ConfigurationIdentity? ReadIdentity(StoredConfigEntry entry)
 		=> ConfigurationIdentityPreparation.ReadIdentity(entry, CompanionConfigurationMetadata.VariableIdentityKey);
 }

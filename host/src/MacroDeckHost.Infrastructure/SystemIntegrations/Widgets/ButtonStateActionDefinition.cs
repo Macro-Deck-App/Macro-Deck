@@ -1,7 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Integrations;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Infrastructure.SystemIntegrations.Widgets;

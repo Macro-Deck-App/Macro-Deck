@@ -14,7 +14,6 @@ using MacroDeckHost.Integrations.YouTube.Actions;
 using MacroDeckHost.Integrations.YouTube.Auth;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YouTube;
 

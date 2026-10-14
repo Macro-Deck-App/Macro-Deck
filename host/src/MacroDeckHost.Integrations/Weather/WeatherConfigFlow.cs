@@ -6,7 +6,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Weather;
 using Serilog;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Weather;
 

@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 

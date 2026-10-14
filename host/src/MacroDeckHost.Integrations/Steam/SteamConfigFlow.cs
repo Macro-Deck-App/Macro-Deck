@@ -6,7 +6,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Config;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Steam;
 
