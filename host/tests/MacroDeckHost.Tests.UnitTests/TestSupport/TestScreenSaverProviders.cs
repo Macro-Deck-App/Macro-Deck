@@ -9,10 +9,15 @@ namespace MacroDeckHost.Tests.UnitTests.TestSupport;
 
 internal static class TestScreenSaverProviders
 {
-	public static IScreenSaverRegistry Registry() => new ScreenSaverRegistry(new RecordingMediator());
+	public static IScreenSaverRegistry Registry()
+	{
+		return new ScreenSaverRegistry(new RecordingMediator());
+	}
 
 	public static ScreenSaverRegistry RegistryWithBuiltInClock()
-		=> new(new RecordingMediator(), [new BuiltInClock()]);
+	{
+		return new ScreenSaverRegistry(new RecordingMediator(), [new BuiltInClock()]);
+	}
 
 	internal sealed class BuiltInClock : IScreenSaverProvider, IBuiltInIntegrationUiProvider
 	{
@@ -21,17 +26,25 @@ internal static class TestScreenSaverProviders
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces => [];
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(null);
+		{
+			return Task.FromResult<IUiSession?>(null);
+		}
 
 		public Task InitializeAsync(IScreenSaverProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public IReadOnlyList<ScreenSaverDescriptor> GetScreenSavers()
-			=> [new ScreenSaverDescriptor("clock", LocalizedText.FromLiteral("Clock"))];
+		{
+			return [new ScreenSaverDescriptor("clock", LocalizedText.FromLiteral("Clock"))];
+		}
 	}
 
-	public static ScreenSaverProviderHost Host() =>
-		new(Registry(), TimeProvider.System, Serilog.Core.Logger.None);
+	public static ScreenSaverProviderHost Host()
+	{
+		return new ScreenSaverProviderHost(Registry(), TimeProvider.System, Serilog.Core.Logger.None);
+	}
 
 	public static (IScreenSaverRegistry Registry, string ScreenSaverId) WithScreenSaver(
 		string ownerId = "com.example.home",

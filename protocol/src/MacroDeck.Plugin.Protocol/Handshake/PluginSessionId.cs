@@ -13,5 +13,8 @@ public static partial class PluginSessionId
 		RegexOptions.CultureInvariant)]
 	private static partial Regex Pattern();
 
-	public static bool IsValid(string? sessionId) => sessionId is not null && Pattern().IsMatch(sessionId);
+	public static bool IsValid(string? sessionId)
+	{
+		return sessionId is not null && Pattern().IsMatch(sessionId);
+	}
 }

@@ -51,23 +51,26 @@ internal sealed class WeatherCallbackRoutingTests
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			null!,
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new FakeHostLockState(),
 			Serilog.Core.Logger.None,
 			weatherTrigger: _trigger);
 	}
 
 	[TearDown]
-	public void TearDown() => _trigger.Dispose();
+	public void TearDown()
+	{
+		_trigger.Dispose();
+	}
 
 	[Test]
 	public async Task A_weather_provider_reporting_changed_snapshots_makes_the_host_read_the_stations_now()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 
 		var result = await NotifyAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Error, Is.Null);
 			Assert.That(await _trigger.WaitAsync(TimeSpan.Zero, CancellationToken.None), Is.True);
@@ -77,11 +80,11 @@ internal sealed class WeatherCallbackRoutingTests
 	[Test]
 	public async Task A_plugin_without_the_weather_capability_is_refused_and_wakes_nothing()
 	{
-		await OpenSessionAsync(declared: false);
+		await OpenSessionAsync(false);
 
 		var result = await NotifyAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnavailable));
 			Assert.That(await _trigger.WaitAsync(TimeSpan.Zero, CancellationToken.None), Is.False);
@@ -111,9 +114,11 @@ internal sealed class WeatherCallbackRoutingTests
 	}
 
 	private Task<HostCallbackResult> NotifyAsync()
-		=> _router.RouteAsync(PluginId,
+	{
+		return _router.RouteAsync(PluginId,
 			SessionId,
 			Guid.CreateVersion7().ToString(),
 			new HostInvokePayload { Api = HostApis.Weather, Operation = HostOperations.Weather.SnapshotsChanged },
 			CancellationToken.None);
+	}
 }

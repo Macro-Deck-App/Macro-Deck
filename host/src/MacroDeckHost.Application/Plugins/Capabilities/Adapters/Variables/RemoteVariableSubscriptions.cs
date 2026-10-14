@@ -31,8 +31,8 @@ public sealed class RemoteVariableSubscriptions
 	{
 		if (ids.Count > ProtocolLimits.MaxVariableSubscriptions)
 		{
-			_logger.Warning("Plugin '{PluginId}' was asked to watch {Requested} variable ids, more than the " +
-				"{Max} a single plugin may watch at once; the excess ids were dropped",
+			_logger.Warning("Plugin '{PluginId}' was asked to watch {Requested} variable ids, more than the "
+				+ "{Max} a single plugin may watch at once; the excess ids were dropped",
 				pluginId,
 				ids.Count,
 				ProtocolLimits.MaxVariableSubscriptions);
@@ -45,5 +45,7 @@ public sealed class RemoteVariableSubscriptions
 	/// <summary>Whether <paramref name="localResourceId"/> is part of the working set most recently
 	/// declared to <paramref name="pluginId"/>'s provider.</summary>
 	public bool IsSubscribed(string pluginId, string localResourceId)
-		=> _byPlugin.TryGetValue(pluginId, out var ids) && ids.Contains(localResourceId);
+	{
+		return _byPlugin.TryGetValue(pluginId, out var ids) && ids.Contains(localResourceId);
+	}
 }

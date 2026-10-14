@@ -21,7 +21,9 @@ internal sealed class ObsActionsTests
 	private static readonly string[] _expectedSourceNameOptions = ["Gameplay", "Webcam", "Mic/Aux"];
 
 	private static ActionExecutionContext Context(Dictionary<string, object> parameters)
-		=> new() { Parameters = parameters };
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
 	private static (ObsConnection Connection, FakeObsClient Client) ConnectedConnection()
 	{
@@ -36,10 +38,11 @@ internal sealed class ObsActionsTests
 		var (connection, client) = ConnectedConnection();
 		using (connection)
 		{
-			var action = new SceneActionDefinition("set-scene", "Set Scene", "", preview: false, () => connection);
+			var action = new SceneActionDefinition("set-scene", "Set Scene", "", false, () => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-				{ [SceneActionDefinition.SceneParameter] = "Gameplay" }));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+					{ [SceneActionDefinition.SceneParameter] = "Gameplay" }));
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetCurrentScene:Gameplay"));
@@ -52,7 +55,7 @@ internal sealed class ObsActionsTests
 		client.SceneNames = ["Intro", "Gameplay", "Outro"];
 		using (connection)
 		{
-			var action = new SceneActionDefinition("set-scene", "Set Scene", "", preview: false, () => connection);
+			var action = new SceneActionDefinition("set-scene", "Set Scene", "", false, () => connection);
 
 			var result = await action.GetDynamicOptionsAsync(new DynamicOptionsContext
 				{
@@ -75,8 +78,9 @@ internal sealed class ObsActionsTests
 			var action = ObsActions.Create(() => connection, new VariableApiAccessor())
 				.Single(a => a.Id == "set-profile");
 
-			result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-				{ [ProfileActionDefinition.ProfileParameter] = "Streaming" }));
+			result = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+					{ [ProfileActionDefinition.ProfileParameter] = "Streaming" }));
 		}
 
 		Assert.Multiple(() =>
@@ -204,7 +208,7 @@ internal sealed class ObsActionsTests
 				Assert.That(result.Options.Select(o => o.Value), Is.EqualTo(new[] { "Intro", "Gameplay", "Overlay" }));
 				Assert.That(result.Options[0].Label, Is.EqualTo((LocalizedText)"Intro"));
 				Assert.That(result.Options[2].Label,
-					Is.EqualTo((LocalizedText)AppStrings.Integrations.Obs.Params.GroupOption(name: "Overlay")));
+					Is.EqualTo((LocalizedText)AppStrings.Integrations.Obs.Params.GroupOption("Overlay")));
 			});
 		}
 	}
@@ -243,7 +247,7 @@ internal sealed class ObsActionsTests
 		client.Groups["Overlay"] = ["Alert"];
 		using (connection)
 		{
-			var action = new SceneActionDefinition("set-scene", "Set Scene", "", preview: false, () => connection);
+			var action = new SceneActionDefinition("set-scene", "Set Scene", "", false, () => connection);
 
 			var result = await action.GetDynamicOptionsAsync(new DynamicOptionsContext
 				{
@@ -265,12 +269,13 @@ internal sealed class ObsActionsTests
 		{
 			var action = new SourceVisibilityActionDefinition(() => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[SourceVisibilityActionDefinition.SceneParameter] = "Overlay",
-				[SourceVisibilityActionDefinition.SourceParameter] = "Alert",
-				[SourceVisibilityActionDefinition.ModeParameter] = "show"
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[SourceVisibilityActionDefinition.SceneParameter] = "Overlay",
+					[SourceVisibilityActionDefinition.SourceParameter] = "Alert",
+					[SourceVisibilityActionDefinition.ModeParameter] = "show"
+				}));
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetSourceVisible:Overlay:Alert:True"));
@@ -284,12 +289,13 @@ internal sealed class ObsActionsTests
 		{
 			var action = new SourceVisibilityActionDefinition(() => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[SourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
-				[SourceVisibilityActionDefinition.SourceParameter] = "Webcam",
-				[SourceVisibilityActionDefinition.ModeParameter] = "hide"
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[SourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
+					[SourceVisibilityActionDefinition.SourceParameter] = "Webcam",
+					[SourceVisibilityActionDefinition.ModeParameter] = "hide"
+				}));
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetSourceVisible:Gameplay:Webcam:False"));
@@ -303,10 +309,11 @@ internal sealed class ObsActionsTests
 		{
 			var action = new MuteInputActionDefinition(() => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[MuteInputActionDefinition.InputParameter] = "Mic/Aux"
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[MuteInputActionDefinition.InputParameter] = "Mic/Aux"
+				}));
 		}
 
 		Assert.That(client.Calls, Does.Contain("ToggleInputMute:Mic/Aux"));
@@ -320,12 +327,13 @@ internal sealed class ObsActionsTests
 		{
 			var action = new SetInputVolumeActionDefinition(() => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[SetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
-				[SetInputVolumeActionDefinition.ModeParameter] = "set",
-				[SetInputVolumeActionDefinition.VolumeParameter] = 50
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[SetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
+					[SetInputVolumeActionDefinition.ModeParameter] = "set",
+					[SetInputVolumeActionDefinition.VolumeParameter] = 50
+				}));
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetInputVolume:Mic/Aux:0.5"));
@@ -340,12 +348,13 @@ internal sealed class ObsActionsTests
 		{
 			var action = new SetInputVolumeActionDefinition(() => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[SetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
-				[SetInputVolumeActionDefinition.ModeParameter] = "increase",
-				[SetInputVolumeActionDefinition.VolumeParameter] = 10
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[SetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
+					[SetInputVolumeActionDefinition.ModeParameter] = "increase",
+					[SetInputVolumeActionDefinition.VolumeParameter] = 10
+				}));
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetInputVolume:Mic/Aux:0.6"));
@@ -360,12 +369,13 @@ internal sealed class ObsActionsTests
 		{
 			var action = new SetInputVolumeActionDefinition(() => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[SetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
-				[SetInputVolumeActionDefinition.ModeParameter] = "decrease",
-				[SetInputVolumeActionDefinition.VolumeParameter] = 20
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[SetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
+					[SetInputVolumeActionDefinition.ModeParameter] = "decrease",
+					[SetInputVolumeActionDefinition.VolumeParameter] = 20
+				}));
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetInputVolume:Mic/Aux:0"));
@@ -378,7 +388,10 @@ internal sealed class ObsActionsTests
 			.ExecuteAsync(Context(parameters));
 	}
 
-	private static double Decibels(float multiplier) => 20 * Math.Log10(multiplier);
+	private static double Decibels(float multiplier)
+	{
+		return 20 * Math.Log10(multiplier);
+	}
 
 	[Test]
 	public async Task SetInputVolume_DecreaseDecibels_MovesTheSameNumberOfDecibelsEveryPress()
@@ -390,11 +403,12 @@ internal sealed class ObsActionsTests
 		{
 			for (var press = 0; press < 10; press++)
 			{
-				await RunVolumeAction(connection, new Dictionary<string, object>
-				{
-					[SetInputVolumeActionDefinition.ModeParameter] = "decrease-db",
-					[SetInputVolumeActionDefinition.DecibelStepParameter] = 5
-				});
+				await RunVolumeAction(connection,
+					new Dictionary<string, object>
+					{
+						[SetInputVolumeActionDefinition.ModeParameter] = "decrease-db",
+						[SetInputVolumeActionDefinition.DecibelStepParameter] = 5
+					});
 				levels.Add(Decibels(client.InputVolumes["Mic/Aux"]));
 			}
 		}
@@ -409,11 +423,12 @@ internal sealed class ObsActionsTests
 		client.InputVolumes["Mic/Aux"] = (float)Math.Pow(10, -99d / 20);
 		using (connection)
 		{
-			await RunVolumeAction(connection, new Dictionary<string, object>
-			{
-				[SetInputVolumeActionDefinition.ModeParameter] = "decrease-db",
-				[SetInputVolumeActionDefinition.DecibelStepParameter] = 5
-			});
+			await RunVolumeAction(connection,
+				new Dictionary<string, object>
+				{
+					[SetInputVolumeActionDefinition.ModeParameter] = "decrease-db",
+					[SetInputVolumeActionDefinition.DecibelStepParameter] = 5
+				});
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetInputVolume:Mic/Aux:0"));
@@ -426,11 +441,12 @@ internal sealed class ObsActionsTests
 		client.InputVolumes["Mic/Aux"] = 0.9f;
 		using (connection)
 		{
-			await RunVolumeAction(connection, new Dictionary<string, object>
-			{
-				[SetInputVolumeActionDefinition.ModeParameter] = "increase-db",
-				[SetInputVolumeActionDefinition.DecibelStepParameter] = 6
-			});
+			await RunVolumeAction(connection,
+				new Dictionary<string, object>
+				{
+					[SetInputVolumeActionDefinition.ModeParameter] = "increase-db",
+					[SetInputVolumeActionDefinition.DecibelStepParameter] = 6
+				});
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetInputVolume:Mic/Aux:1"));
@@ -442,11 +458,12 @@ internal sealed class ObsActionsTests
 		var (connection, client) = ConnectedConnection();
 		using (connection)
 		{
-			await RunVolumeAction(connection, new Dictionary<string, object>
-			{
-				[SetInputVolumeActionDefinition.ModeParameter] = "set-db",
-				[SetInputVolumeActionDefinition.DecibelsParameter] = -20
-			});
+			await RunVolumeAction(connection,
+				new Dictionary<string, object>
+				{
+					[SetInputVolumeActionDefinition.ModeParameter] = "set-db",
+					[SetInputVolumeActionDefinition.DecibelsParameter] = -20
+				});
 		}
 
 		Assert.That(client.InputVolumes["Mic/Aux"], Is.EqualTo(0.1f).Within(0.0001f));
@@ -460,12 +477,14 @@ internal sealed class ObsActionsTests
 		double afterSet;
 		using (connection)
 		{
-			await RunVolumeAction(connection, new Dictionary<string, object>
-				{ [SetInputVolumeActionDefinition.ModeParameter] = "set-db" });
+			await RunVolumeAction(connection,
+				new Dictionary<string, object>
+					{ [SetInputVolumeActionDefinition.ModeParameter] = "set-db" });
 			afterSet = Decibels(client.InputVolumes["Mic/Aux"]);
 			client.InputVolumes["Mic/Aux"] = 0.5f;
-			await RunVolumeAction(connection, new Dictionary<string, object>
-				{ [SetInputVolumeActionDefinition.ModeParameter] = "decrease-db" });
+			await RunVolumeAction(connection,
+				new Dictionary<string, object>
+					{ [SetInputVolumeActionDefinition.ModeParameter] = "decrease-db" });
 		}
 
 		Assert.Multiple(() =>
@@ -502,12 +521,13 @@ internal sealed class ObsActionsTests
 		{
 			var action = new SetSourceFilterActionDefinition(() => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[SetSourceFilterActionDefinition.SourceParameter] = "Webcam",
-				[SetSourceFilterActionDefinition.FilterParameter] = "Blur",
-				[SetSourceFilterActionDefinition.ModeParameter] = "enable"
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[SetSourceFilterActionDefinition.SourceParameter] = "Webcam",
+					[SetSourceFilterActionDefinition.FilterParameter] = "Blur",
+					[SetSourceFilterActionDefinition.ModeParameter] = "enable"
+				}));
 		}
 
 		Assert.That(client.Calls, Does.Contain("SetSourceFilterEnabled:Webcam:Blur:True"));
@@ -521,11 +541,12 @@ internal sealed class ObsActionsTests
 		{
 			var action = new SetSourceFilterActionDefinition(() => connection);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[SetSourceFilterActionDefinition.SourceParameter] = "Webcam",
-				[SetSourceFilterActionDefinition.FilterParameter] = "Blur"
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[SetSourceFilterActionDefinition.SourceParameter] = "Webcam",
+					[SetSourceFilterActionDefinition.FilterParameter] = "Blur"
+				}));
 		}
 
 		Assert.That(client.Calls, Does.Contain("ToggleSourceFilterEnabled:Webcam:Blur"));
@@ -589,15 +610,16 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetInputVolumeActionDefinition(() => connection, accessor);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
-				[GetInputVolumeActionDefinition.VariableParameter] = "mic_volume"
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
+					[GetInputVolumeActionDefinition.VariableParameter] = "mic_volume"
+				}));
 		}
 
 		var variable = await targets.Find("mic_volume");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(variable, Is.Not.Null);
 			Assert.That(await targets.ValueOf("mic_volume"), Is.EqualTo(50m));
@@ -620,16 +642,17 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetSourceFilterStateActionDefinition(() => connection, accessor);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetSourceFilterStateActionDefinition.SourceParameter] = "Webcam",
-				[GetSourceFilterStateActionDefinition.FilterParameter] = "Blur",
-				[GetSourceFilterStateActionDefinition.VariableParameter] = "blur_enabled"
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetSourceFilterStateActionDefinition.SourceParameter] = "Webcam",
+					[GetSourceFilterStateActionDefinition.FilterParameter] = "Blur",
+					[GetSourceFilterStateActionDefinition.VariableParameter] = "blur_enabled"
+				}));
 		}
 
 		var variable = await targets.Find("blur_enabled");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(variable, Is.Not.Null);
 			Assert.That(await targets.ValueOf("blur_enabled"), Is.EqualTo(true));
@@ -639,9 +662,15 @@ internal sealed class ObsActionsTests
 
 	private sealed class ThrowingVariableApi : IVariableApi
 	{
-		public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => Task.FromResult<IReadOnlyList<VariableHandle>>([]);
+		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+		{
+			return Task.FromResult<IReadOnlyList<VariableHandle>>([]);
+		}
 
-		public Task<VariableHandle?> GetByNameAsync(string name) => Task.FromResult<VariableHandle?>(null);
+		public Task<VariableHandle?> GetByNameAsync(string name)
+		{
+			return Task.FromResult<VariableHandle?>(null);
+		}
 
 		public Task<VariableHandle> CreateAsync(
 			string name,
@@ -649,11 +678,19 @@ internal sealed class ObsActionsTests
 			object? initialValue = null,
 			int? decimalPlaces = null,
 			string? definitionId = null)
-			=> throw new InvalidOperationException("variable store unavailable");
+		{
+			throw new InvalidOperationException("variable store unavailable");
+		}
 
-		public Task SetValueAsync(Guid variableId, object? value) => Task.CompletedTask;
+		public Task SetValueAsync(Guid variableId, object? value)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task DeleteAsync(Guid variableId) => Task.CompletedTask;
+		public Task DeleteAsync(Guid variableId)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private static Dictionary<string, object?> SliderParameters(string? input, string mode)
@@ -716,11 +753,12 @@ internal sealed class ObsActionsTests
 		using (mutedConnection)
 		{
 			var action = new GetInputMuteActionDefinition(() => mutedConnection, accessor);
-			mutedResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
-				[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
-			}));
+			mutedResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
+					[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
+				}));
 		}
 
 		var (unmutedConnection, unmutedClient) = ConnectedConnection();
@@ -729,15 +767,16 @@ internal sealed class ObsActionsTests
 		using (unmutedConnection)
 		{
 			var action = new GetInputMuteActionDefinition(() => unmutedConnection, accessor);
-			unmutedResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
-				[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
-			}));
+			unmutedResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
+					[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
+				}));
 		}
 
 		var all = await targets.Service.GetAll();
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(mutedResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(unmutedResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
@@ -768,11 +807,12 @@ internal sealed class ObsActionsTests
 		using (connection)
 		{
 			var deletedAction = new GetInputMuteActionDefinition(() => connection, accessor);
-			deletedResult = await deletedAction.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.InputParameter] = "Ghost Mic",
-				[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
-			}));
+			deletedResult = await deletedAction.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Ghost Mic",
+					[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
+				}));
 		}
 
 		var handle = await variables.GetByNameAsync("obs_mic_muted");
@@ -799,16 +839,18 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetInputMuteActionDefinition(() => connection, accessor);
 
-			var noInputResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
-			}));
+			var noInputResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
+				}));
 
-			var blankVariableResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
-				[GetInputMuteActionDefinition.VariableParameter] = "   "
-			}));
+			var blankVariableResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
+					[GetInputMuteActionDefinition.VariableParameter] = "   "
+				}));
 
 			Assert.Multiple(() =>
 			{
@@ -833,11 +875,12 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetInputMuteActionDefinition(() => connection, accessor);
 
-			var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
-				[GetInputMuteActionDefinition.VariableParameter] = "collide"
-			}));
+			var result = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
+					[GetInputMuteActionDefinition.VariableParameter] = "collide"
+				}));
 
 			var handle = await variables.GetByNameAsync("collide");
 
@@ -867,11 +910,12 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetInputVolumeActionDefinition(() => connection, accessor);
 
-			var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
-				[GetInputVolumeActionDefinition.VariableParameter] = "mic_volume"
-			}));
+			var result = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputVolumeActionDefinition.InputParameter] = "Mic/Aux",
+					[GetInputVolumeActionDefinition.VariableParameter] = "mic_volume"
+				}));
 
 			Assert.Multiple(() =>
 			{
@@ -891,11 +935,12 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetInputMuteActionDefinition(() => connection, accessor);
 
-			var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
-				[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
-			}));
+			var result = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
+					[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
+				}));
 
 			Assert.Multiple(() =>
 			{
@@ -944,21 +989,23 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetSourceVisibilityActionDefinition(() => connection, accessor);
 
-			var chattingResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetSourceVisibilityActionDefinition.SceneParameter] = "Just Chatting",
-				[GetSourceVisibilityActionDefinition.SourceParameter] = "Webcam",
-				[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible"
-			}));
+			var chattingResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetSourceVisibilityActionDefinition.SceneParameter] = "Just Chatting",
+					[GetSourceVisibilityActionDefinition.SourceParameter] = "Webcam",
+					[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible"
+				}));
 
-			var gameplayResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetSourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
-				[GetSourceVisibilityActionDefinition.SourceParameter] = "Webcam",
-				[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible_gameplay"
-			}));
+			var gameplayResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetSourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
+					[GetSourceVisibilityActionDefinition.SourceParameter] = "Webcam",
+					[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible_gameplay"
+				}));
 
-			Assert.Multiple(async () =>
+			await Assert.MultipleAsync(async () =>
 			{
 				Assert.That(chattingResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 				Assert.That(gameplayResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
@@ -986,20 +1033,22 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetInputMuteActionDefinition(() => connection, accessor);
 
-			var firstResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
-				[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
-			}));
+			var firstResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
+					[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
+				}));
 
 			// The OBS boundary changes state well within the cache's TTL.
 			client.MutedInputs["Mic Aux"] = false;
 
-			var secondResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
-				[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
-			}));
+			var secondResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Mic Aux",
+					[GetInputMuteActionDefinition.VariableParameter] = "obs_mic_muted"
+				}));
 
 			var value = await targets.ValueOf("obs_mic_muted");
 			Assert.Multiple(() =>
@@ -1028,22 +1077,24 @@ internal sealed class ObsActionsTests
 		{
 			var action = new GetSourceVisibilityActionDefinition(() => connection, accessor);
 
-			var firstResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetSourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
-				[GetSourceVisibilityActionDefinition.SourceParameter] = "Webcam",
-				[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible"
-			}));
+			var firstResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetSourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
+					[GetSourceVisibilityActionDefinition.SourceParameter] = "Webcam",
+					[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible"
+				}));
 
 			// The OBS boundary changes state well within the cache's TTL.
 			client.VisibleSources["Gameplay:Webcam"] = false;
 
-			var secondResult = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				[GetSourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
-				[GetSourceVisibilityActionDefinition.SourceParameter] = "Webcam",
-				[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible"
-			}));
+			var secondResult = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					[GetSourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
+					[GetSourceVisibilityActionDefinition.SourceParameter] = "Webcam",
+					[GetSourceVisibilityActionDefinition.VariableParameter] = "cam_visible"
+				}));
 
 			var value = await targets.ValueOf("cam_visible");
 			Assert.Multiple(() =>

@@ -31,5 +31,7 @@ public sealed class UiInteractionsFactory : IUiInteractionsFactory
 	}
 
 	public IUiInteractions ForIntegration(string integrationId)
-		=> new UiInteractions(_coordinator, _transport, integrationId, _logger);
+	{
+		return new UiInteractions(_coordinator, _transport, integrationId, _logger);
+	}
 }

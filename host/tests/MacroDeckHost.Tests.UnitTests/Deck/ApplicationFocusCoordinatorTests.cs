@@ -35,7 +35,7 @@ public class ApplicationFocusCoordinatorTests
 		await _profileCache.InitializeCache();
 		_folderCache = new FolderCache(_profileCache);
 		_time = new ManualTimeProvider();
-		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
+		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new DeckClientTracker(Logger.None));
 		_navigator = new RecordingDeviceDeckNavigator();
 		_logSink = new RecordingLogSink();
 		_providerPresence = new ProviderDevicePresenceTracker();
@@ -50,7 +50,10 @@ public class ApplicationFocusCoordinatorTests
 	}
 
 	[TearDown]
-	public void TearDown() => _profileCache.Dispose();
+	public void TearDown()
+	{
+		_profileCache.Dispose();
+	}
 
 	[Test]
 	public async Task OnFocusChanged_MatchingRule_NavigatesOnlyTheTargetDeviceWithTheRuleFolder()
@@ -90,7 +93,7 @@ public class ApplicationFocusCoordinatorTests
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
 		var baseline = await AddFolder("Baseline", 0);
-		await AddFolderWithRule("Rule", deviceA, "notepad", returnOnFocusLoss: true, order: 1);
+		await AddFolderWithRule("Rule", deviceA, "notepad", true, 1);
 		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
 
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None);
@@ -106,7 +109,7 @@ public class ApplicationFocusCoordinatorTests
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
 		var baseline = await AddFolder("Baseline", 0);
-		await AddFolderWithRule("Rule", deviceA, "notepad", returnOnFocusLoss: false, order: 1);
+		await AddFolderWithRule("Rule", deviceA, "notepad", false, 1);
 		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
 
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None);
@@ -123,8 +126,8 @@ public class ApplicationFocusCoordinatorTests
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
 		var baseline = await AddFolder("Baseline", 0);
-		var folderX = await AddFolderWithRule("X", deviceA, "appX", returnOnFocusLoss: true, order: 1);
-		var folderY = await AddFolderWithRule("Y", deviceA, "appY", returnOnFocusLoss: true, order: 2);
+		var folderX = await AddFolderWithRule("X", deviceA, "appX", true, 1);
+		var folderY = await AddFolderWithRule("Y", deviceA, "appY", true, 2);
 		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
 
 		await _coordinator.OnFocusChanged(App("appX"), CancellationToken.None);
@@ -172,7 +175,7 @@ public class ApplicationFocusCoordinatorTests
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
 		var baseline = await AddFolder("Baseline", 0);
-		await AddFolderWithRule("Rule", deviceA, "notepad", returnOnFocusLoss: true, order: 1);
+		await AddFolderWithRule("Rule", deviceA, "notepad", true, 1);
 		var elsewhere = await AddFolder("Elsewhere", 2);
 		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
 
@@ -191,7 +194,7 @@ public class ApplicationFocusCoordinatorTests
 	{
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
-		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", returnOnFocusLoss: true);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", true);
 		var elsewhere = await AddFolder("Elsewhere", 1);
 
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None); // rule folder now shown
@@ -210,7 +213,7 @@ public class ApplicationFocusCoordinatorTests
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
 		var baseline = await AddFolder("Baseline", 0);
-		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", returnOnFocusLoss: true, order: 1);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", true, 1);
 		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
 
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None);
@@ -236,7 +239,7 @@ public class ApplicationFocusCoordinatorTests
 		await _coordinator.OnFolderReported(deviceA,
 			priorFolder.Id,
 			null,
-			isResync: true,
+			true,
 			CancellationToken.None);
 
 		Assert.That(_navigator.Calls, Has.Count.EqualTo(1));
@@ -250,7 +253,7 @@ public class ApplicationFocusCoordinatorTests
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
 		var baseline = await AddFolder("Baseline", 0);
-		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", returnOnFocusLoss: true, order: 1);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", true, 1);
 		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
 
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None);
@@ -258,7 +261,7 @@ public class ApplicationFocusCoordinatorTests
 
 		// A reconnect resync with no token, reporting the folder the chain already owns - the
 		// client genuinely still shows it, so this must not be mistaken for manual navigation.
-		await _coordinator.OnFolderReported(deviceA, ruleFolder.Id, null, isResync: true, CancellationToken.None);
+		await _coordinator.OnFolderReported(deviceA, ruleFolder.Id, null, true, CancellationToken.None);
 
 		Assert.That(_navigator.Calls, Has.Count.EqualTo(1), "no redundant push when already showing the rule folder");
 
@@ -277,14 +280,14 @@ public class ApplicationFocusCoordinatorTests
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
 		var baseline = await AddFolder("Baseline", 0);
-		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", returnOnFocusLoss: true, order: 1);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", true, 1);
 		var elsewhere = await AddFolder("Elsewhere", 2);
 		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
 
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None);
 		Assert.That(_navigator.Calls, Has.Count.EqualTo(1));
 
-		await _coordinator.OnFolderReported(deviceA, elsewhere.Id, null, isResync: true, CancellationToken.None);
+		await _coordinator.OnFolderReported(deviceA, elsewhere.Id, null, true, CancellationToken.None);
 
 		Assert.That(_navigator.Calls, Has.Count.EqualTo(2));
 		Assert.That(_navigator.Calls[1].FolderId, Is.EqualTo(ruleFolder.Id));
@@ -301,13 +304,13 @@ public class ApplicationFocusCoordinatorTests
 	public async Task OnDevicePresenceChanged_Online_WithMatchingCurrentApp_NavigatesAndUnknownBaselineRestoresNothing()
 	{
 		var deviceA = Guid.NewGuid();
-		var folder = await AddFolderWithRule("F", deviceA, "notepad", returnOnFocusLoss: true);
+		var folder = await AddFolderWithRule("F", deviceA, "notepad", true);
 
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None);
 		Assert.That(_navigator.Calls, Is.Empty);
 
 		MarkOnline(deviceA);
-		await _coordinator.OnDevicePresenceChanged(deviceA, online: true, CancellationToken.None);
+		await _coordinator.OnDevicePresenceChanged(deviceA, true, CancellationToken.None);
 
 		Assert.That(_navigator.Calls, Has.Count.EqualTo(1));
 		Assert.That(_navigator.Calls[0].FolderId, Is.EqualTo(folder.Id));
@@ -334,7 +337,7 @@ public class ApplicationFocusCoordinatorTests
 		var deviceA = Guid.NewGuid();
 		MarkOnline(deviceA);
 		var baseline = await AddFolder("Baseline", 0);
-		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", returnOnFocusLoss: true, order: 1);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "notepad", true, 1);
 		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None);
 		Assert.That(_navigator.Calls, Has.Count.EqualTo(1));
@@ -377,7 +380,7 @@ public class ApplicationFocusCoordinatorTests
 
 		// Deliberately no MarkOnline: a provider device holds no WebSocket connection of its own, and
 		// counting connections alone would leave every one of them permanently unfocusable.
-		_providerPresence.Set(deviceA, online: true);
+		_providerPresence.Set(deviceA, true);
 		var folder = await AddFolderWithRule("F", deviceA, "notepad");
 
 		await _coordinator.OnFocusChanged(App("notepad"), CancellationToken.None);
@@ -400,7 +403,11 @@ public class ApplicationFocusCoordinatorTests
 	private void MarkOnline(Guid deviceId)
 	{
 		var connectionId = $"conn-{++_connectionCounter}";
-		_tracker.Attach(connectionId, deviceId, () => { });
+		_tracker.Attach(connectionId,
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register(connectionId, connectionId);
 	}
 
@@ -420,7 +427,8 @@ public class ApplicationFocusCoordinatorTests
 		return folder;
 	}
 
-	private async Task<FolderEntity> AddFolderWithRule(string name,
+	private async Task<FolderEntity> AddFolderWithRule(
+		string name,
 		Guid deviceId,
 		string identity,
 		bool returnOnFocusLoss = false,
@@ -431,14 +439,16 @@ public class ApplicationFocusCoordinatorTests
 		return folder;
 	}
 
-	private static FolderEntity RuleFolder(Guid profileId,
+	private static FolderEntity RuleFolder(
+		Guid profileId,
 		Guid folderId,
 		string name,
 		int order,
 		Guid deviceId,
 		string identity,
 		bool returnOnFocusLoss = false)
-		=> new()
+	{
+		return new FolderEntity
 		{
 			Id = folderId,
 			ProfileId = profileId,
@@ -459,16 +469,21 @@ public class ApplicationFocusCoordinatorTests
 				}
 			]
 		};
+	}
 
 	private static int _pidCounter = 1000;
 
-	private static FocusedApplication App(string processName) => new(++_pidCounter, null, processName, null);
+	private static FocusedApplication App(string processName)
+	{
+		return new FocusedApplication(++_pidCounter, null, processName, null);
+	}
 
 	private sealed class RecordingDeviceDeckNavigator : IDeviceDeckNavigator
 	{
 		public List<(Guid DeviceId, Guid FolderId, Guid Token)> Calls { get; } = [];
 
-		public Task<bool> ChangeFolderOnDeviceAsync(Guid deviceId,
+		public Task<bool> ChangeFolderOnDeviceAsync(
+			Guid deviceId,
 			Guid folderId,
 			Guid navigationToken,
 			CancellationToken cancellationToken)
@@ -477,16 +492,22 @@ public class ApplicationFocusCoordinatorTests
 			return Task.FromResult(true);
 		}
 
-		public Task<bool> ChangeProfileOnDeviceAsync(Guid deviceId,
+		public Task<bool> ChangeProfileOnDeviceAsync(
+			Guid deviceId,
 			string profileId,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RecordingLogSink : ILogEventSink
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 }

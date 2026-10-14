@@ -1,6 +1,5 @@
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Ui.Transport;
@@ -10,6 +9,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Profiles;
+using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
@@ -146,9 +146,10 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 
 		// Clients send every unclaimed press of a provider's tile here, so one whose type did not opt in to
 		// flows and has no default to run is nothing to do rather than an error the user cannot act on.
-		if (isProviderType && !entry.Descriptor.SupportsFlows &&
-			!(WidgetTriggerService.IsShortPress(request.TriggerType) &&
-				_defaultShortPress.FlowsSourceFor(widget, request.OriginDeviceId is not null) is not null))
+		if (isProviderType
+			&& !entry.Descriptor.SupportsFlows
+			&& !(WidgetTriggerService.IsShortPress(request.TriggerType)
+				&& _defaultShortPress.FlowsSourceFor(widget, request.OriginDeviceId is not null) is not null))
 		{
 			return new ExecuteActionButtonTriggerResponse
 			{
@@ -156,13 +157,14 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 			};
 		}
 
-		if (!isProviderType && widget.Type is not (WidgetTypeIds.ActionButton
-			or WidgetTypeIds.MusicPlayer
-			or WidgetTypeIds.Weather
-			or WidgetTypeIds.HistoryGraph
-			or WidgetTypeIds.Clock
-			or WidgetTypeIds.Gauges
-			or WidgetTypeIds.Battery))
+		if (!isProviderType
+			&& widget.Type is not (WidgetTypeIds.ActionButton
+				or WidgetTypeIds.MusicPlayer
+				or WidgetTypeIds.Weather
+				or WidgetTypeIds.HistoryGraph
+				or WidgetTypeIds.Clock
+				or WidgetTypeIds.Gauges
+				or WidgetTypeIds.Battery))
 		{
 			return new ExecuteActionButtonTriggerResponse
 			{
@@ -199,7 +201,8 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 		};
 	}
 
-	private async Task<ExecuteActionButtonTriggerResponse> HandleTimerPressAsync(Guid widgetId,
+	private async Task<ExecuteActionButtonTriggerResponse> HandleTimerPressAsync(
+		Guid widgetId,
 		ExecuteActionButtonTriggerRequest request)
 	{
 		TimerGesture? gesture = null;
@@ -213,8 +216,8 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 			gesture = TimerGesture.LongPress;
 		}
 
-		if (gesture is { } pressed &&
-			!await _timers.HandleGestureAsync(widgetId, pressed, request.ClientId, request.OriginDeviceId)
+		if (gesture is { } pressed
+			&& !await _timers.HandleGestureAsync(widgetId, pressed, request.ClientId, request.OriginDeviceId)
 				.ConfigureAwait(false))
 		{
 			return new ExecuteActionButtonTriggerResponse

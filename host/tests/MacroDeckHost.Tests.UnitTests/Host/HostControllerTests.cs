@@ -31,7 +31,9 @@ public class HostControllerTests
 		public CancellationToken ApplicationStopped => CancellationToken.None;
 
 		public void StopApplication()
-			=> StopRequested = true;
+		{
+			StopRequested = true;
+		}
 	}
 
 	private readonly List<TestPaths> _createdPaths = [];
@@ -47,7 +49,8 @@ public class HostControllerTests
 		_createdPaths.Clear();
 	}
 
-	private HostController CreateController(FakeLifetime lifetime,
+	private HostController CreateController(
+		FakeLifetime lifetime,
 		int localPort,
 		IPAddress? remoteAddress,
 		IUserNotificationStore? userNotificationStore = null,
@@ -59,10 +62,16 @@ public class HostControllerTests
 	{
 		var httpContext = new DefaultHttpContext
 		{
-			Connection = { LocalPort = localPort, RemoteIpAddress = remoteAddress }
+			Connection = { LocalPort = localPort, RemoteIpAddress = remoteAddress },
+			Request =
+			{
+				Host = new HostString("127.0.0.1", localPort),
+				Headers =
+				{
+					[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret
+				}
+			}
 		};
-		httpContext.Request.Host = new HostString("127.0.0.1", localPort);
-		httpContext.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
 
 		var store = userNotificationStore ?? new UserNotificationStore();
 		var restart = new ApplicationRestartService(lifetime, shellExecutable, TimeSpan.Zero);
@@ -93,8 +102,10 @@ public class HostControllerTests
 	public async Task Installation_integrity_on_public_port_returns_not_found_and_raises_nothing()
 	{
 		var store = new UserNotificationStore();
-		var controller = CreateController(new FakeLifetime(), HostEndpoints.PublicPort, IPAddress.Loopback,
-			userNotificationStore: store);
+		var controller = CreateController(new FakeLifetime(),
+			HostEndpoints.PublicPort,
+			IPAddress.Loopback,
+			store);
 
 		var result = await controller.InstallationIntegrity(
 			new ReportInstallationIntegrityRequest { Status = "damaged", InstallKind = "windows" },
@@ -173,7 +184,9 @@ public class HostControllerTests
 	{
 		var lifetime = new FakeLifetime();
 		var sessionEnd = new UserSessionEnd();
-		var controller = CreateController(lifetime, TestListenerPorts.Loopback, IPAddress.Loopback,
+		var controller = CreateController(lifetime,
+			TestListenerPorts.Loopback,
+			IPAddress.Loopback,
 			sessionEnd: sessionEnd);
 
 		var result = controller.Shutdown("session-end");
@@ -192,7 +205,9 @@ public class HostControllerTests
 	public void Shutdown_for_any_other_reason_leaves_the_user_session_running(string? reason)
 	{
 		var sessionEnd = new UserSessionEnd();
-		var controller = CreateController(new FakeLifetime(), TestListenerPorts.Loopback, IPAddress.Loopback,
+		var controller = CreateController(new FakeLifetime(),
+			TestListenerPorts.Loopback,
+			IPAddress.Loopback,
 			sessionEnd: sessionEnd);
 
 		controller.Shutdown(reason);
@@ -204,7 +219,9 @@ public class HostControllerTests
 	public void An_untrusted_session_end_request_records_nothing()
 	{
 		var sessionEnd = new UserSessionEnd();
-		var controller = CreateController(new FakeLifetime(), HostEndpoints.PublicPort, IPAddress.Loopback,
+		var controller = CreateController(new FakeLifetime(),
+			HostEndpoints.PublicPort,
+			IPAddress.Loopback,
 			sessionEnd: sessionEnd);
 
 		controller.Shutdown("session-end");
@@ -552,7 +569,7 @@ public class HostControllerTests
 		await Attach(bridge);
 
 		var dispatch = bridge.TryDispatchAsync("A plugin wants to pair", "Example Plugin");
-		var polled = ((await controller.ShellNotifications(CancellationToken.None)) as OkObjectResult)?.Value
+		var polled = (await controller.ShellNotifications(CancellationToken.None) as OkObjectResult)?.Value
 			as ShellNotificationsResponse;
 
 		Assert.That(polled, Is.Not.Null);

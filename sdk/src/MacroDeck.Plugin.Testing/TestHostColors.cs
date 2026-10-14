@@ -26,7 +26,9 @@ public sealed class TestHostColors
 
 	/// <summary>The watches <paramref name="pluginId" /> last synced; empty when it watches none.</summary>
 	public IReadOnlyList<ColorWatchDto> WatchesOf(string pluginId)
-		=> _tables.TryGetValue(pluginId, out var table) ? table : [];
+	{
+		return _tables.TryGetValue(pluginId, out var table) ? table : [];
+	}
 
 	/// <summary>Makes <paramref name="value" /> resolve to <paramref name="color" /> and pushes the new table
 	/// to every hosted plugin watching it.</summary>
@@ -50,11 +52,12 @@ public sealed class TestHostColors
 			var arguments = payload.Arguments?.Deserialize<ColorsResolveArguments>(PluginProtocolJson.Options);
 			return arguments is null
 				? HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload, "This operation requires arguments.")
-				: HostInvokeOutcome.Ok(new ColorsResolveResult { Color = Resolve(arguments.Value, arguments.WidgetId) });
+				: HostInvokeOutcome.Ok(new ColorsResolveResult
+					{ Color = Resolve(arguments.Value, arguments.WidgetId) });
 		}
 
-		var table = payload.Arguments?.Deserialize<ColorsWatchesArguments>(PluginProtocolJson.Options) ??
-			new ColorsWatchesArguments();
+		var table = payload.Arguments?.Deserialize<ColorsWatchesArguments>(PluginProtocolJson.Options)
+			?? new ColorsWatchesArguments();
 		if (table.Watches.Count > ProtocolLimits.MaxColorWatches)
 		{
 			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload,
@@ -75,7 +78,9 @@ public sealed class TestHostColors
 	}
 
 	private string? Resolve(string value, string? widgetId)
-		=> _seeded.TryGetValue((value, widgetId), out var color) ? color : LocalColorApi.Resolve(value);
+	{
+		return _seeded.TryGetValue((value, widgetId), out var color) ? color : LocalColorApi.Resolve(value);
+	}
 
 	private async Task PushAsync(string pluginId)
 	{
@@ -87,11 +92,14 @@ public sealed class TestHostColors
 		var state = new ColorWatchStateDto
 		{
 			Revision = Interlocked.Increment(ref _revision),
-			Values = [.. table.Select(watch => new ColorWatchValueDto
-			{
-				WatchId = watch.WatchId,
-				Color = Resolve(watch.Value, watch.WidgetId)
-			})]
+			Values =
+			[
+				.. table.Select(watch => new ColorWatchValueDto
+				{
+					WatchId = watch.WatchId,
+					Color = Resolve(watch.Value, watch.WidgetId)
+				})
+			]
 		};
 
 		await send(pluginId,

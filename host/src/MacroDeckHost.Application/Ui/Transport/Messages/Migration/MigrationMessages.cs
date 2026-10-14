@@ -95,7 +95,8 @@ public sealed class MigrationSummary
 	public List<MigrationWarningDto> Warnings { get; set; } = [];
 
 	public static MigrationSummary From(MigrationPlan plan)
-		=> new()
+	{
+		return new MigrationSummary
 		{
 			SourceId = plan.SourceId,
 			SourceName = plan.SourceName,
@@ -132,6 +133,7 @@ public sealed class MigrationSummary
 				})
 				.ToList()
 		};
+	}
 }
 
 public sealed class MigrationPreviewResponse

@@ -17,8 +17,12 @@ public sealed class PluginTrustBaseline : IPluginTrustBaseline
 	}
 
 	public async Task<bool> Exists(CancellationToken cancellationToken = default)
-		=> (await _repository.GetByKey(EstablishedAtKey)) is not null;
+	{
+		return await _repository.GetByKey(EstablishedAtKey) is not null;
+	}
 
 	public Task Establish(CancellationToken cancellationToken = default)
-		=> _repository.SetValue(EstablishedAtKey, _timeProvider.GetUtcNow().UtcDateTime.ToString("O"));
+	{
+		return _repository.SetValue(EstablishedAtKey, _timeProvider.GetUtcNow().UtcDateTime.ToString("O"));
+	}
 }

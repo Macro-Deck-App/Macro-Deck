@@ -15,7 +15,7 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class UserVariableWriterFileTests
 {
-	private static readonly string FilePath = Path.Combine(Path.GetTempPath(), "macro-deck-writer", "value.txt");
+	private static readonly string _filePath = Path.Combine(Path.GetTempPath(), "macro-deck-writer", "value.txt");
 
 	private FakeVariableFileSystem _files = null!;
 	private FileVariableSynchronizer _synchronizer = null!;
@@ -29,7 +29,8 @@ public class UserVariableWriterFileTests
 		var registry = new VariableRegistry();
 		var mediator = new RecordingMediator();
 		_files = new FakeVariableFileSystem();
-		_synchronizer = new FileVariableSynchronizer(registry, mediator, _files, Logger.None, TimeSpan.Zero, TimeSpan.Zero);
+		_synchronizer
+			= new FileVariableSynchronizer(registry, mediator, _files, Logger.None, TimeSpan.Zero, TimeSpan.Zero);
 		_service = TestVariableServices.Create(registry, new NullStore(), mediator, files: _synchronizer);
 		_provider = new ServiceCollection()
 			.AddScoped<IVariableService>(_ => _service)
@@ -60,13 +61,13 @@ public class UserVariableWriterFileTests
 	[Test]
 	public async Task Set_on_a_read_only_file_variable_is_not_editable_with_a_readable_message()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
-		await CreateFileVariable(allowWriteBack: false);
+		_files.SetFile(_filePath, "1", false);
+		await CreateFileVariable(false);
 
 		var result = await _writer.ApplyAsync("level", null, UserVariableOperation.Set, "2");
 		await _synchronizer.WhenIdleAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(UserVariableWriteStatus.NotEditable));
 			Assert.That(result.Message,
@@ -79,8 +80,8 @@ public class UserVariableWriterFileTests
 	[Test]
 	public async Task Add_on_a_write_back_file_variable_is_applied_and_written_to_the_file()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
-		await CreateFileVariable(allowWriteBack: true);
+		_files.SetFile(_filePath, "1", false);
+		await CreateFileVariable(true);
 
 		var result = await _writer.ApplyAsync("level", null, UserVariableOperation.Add, "2");
 		await _synchronizer.WhenIdleAsync();
@@ -88,22 +89,27 @@ public class UserVariableWriterFileTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Status, Is.EqualTo(UserVariableWriteStatus.Applied));
-			Assert.That(_files.Content(FilePath), Is.EqualTo("3"));
+			Assert.That(_files.Content(_filePath), Is.EqualTo("3"));
 		});
 	}
 
 	private async Task CreateFileVariable(bool allowWriteBack)
-		=> await _service.CreateUserVariable("level",
+	{
+		await _service.CreateUserVariable("level",
 			VariableScope.Global,
 			null,
 			DomainVariableType.Numeric,
 			null,
 			null,
-			new VariableFileSource(FilePath, allowWriteBack));
+			new VariableFileSource(_filePath, allowWriteBack));
+	}
 
 	private sealed class NullStore : MacroDeckHost.Application.Persistence.IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{

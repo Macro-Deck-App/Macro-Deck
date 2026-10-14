@@ -47,8 +47,8 @@ internal sealed class StreamerbotActionsTests
 		{
 			Assert.That(StreamerbotActionValues.ReadBool(parameters, "toggle"), Is.True);
 			Assert.That(StreamerbotActionValues.ReadBool(parameters, "text"), Is.True);
-			Assert.That(StreamerbotActionValues.ReadBool(parameters, "blank", fallback: true), Is.True);
-			Assert.That(StreamerbotActionValues.ReadBool(parameters, "missing", fallback: true), Is.True);
+			Assert.That(StreamerbotActionValues.ReadBool(parameters, "blank", true), Is.True);
+			Assert.That(StreamerbotActionValues.ReadBool(parameters, "missing", true), Is.True);
 		});
 	}
 
@@ -188,5 +188,7 @@ internal sealed class StreamerbotActionsTests
 	}
 
 	private static Dictionary<string, object> Parameters(params (string Name, object Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

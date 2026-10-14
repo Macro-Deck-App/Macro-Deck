@@ -11,7 +11,8 @@ public sealed record PluginRevocationResult(PluginRevocationStatus Status, strin
 
 public interface IPluginRevocationSource
 {
-	Task<PluginRevocationResult> CheckAsync(string certificateId,
+	Task<PluginRevocationResult> CheckAsync(
+		string certificateId,
 		string? issuerCertificateId,
 		CancellationToken cancellationToken = default);
 }

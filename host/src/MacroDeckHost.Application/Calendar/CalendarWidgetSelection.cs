@@ -5,8 +5,10 @@ namespace MacroDeckHost.Application.Calendar;
 public sealed record CalendarWidgetEventFilter(IReadOnlyList<string> Calendars, bool ShowAllDay, TimeSpan LeadTime)
 {
 	public bool Accepts(CalendarEventSummary calendarEvent)
-		=> (ShowAllDay || !calendarEvent.IsAllDay) &&
-			(Calendars.Count == 0 || Calendars.Contains(calendarEvent.CalendarKey));
+	{
+		return (ShowAllDay || !calendarEvent.IsAllDay)
+			&& (Calendars.Count == 0 || Calendars.Contains(calendarEvent.CalendarKey));
+	}
 }
 
 public static class CalendarWidgetSelection
@@ -14,13 +16,13 @@ public static class CalendarWidgetSelection
 	private static readonly string[] _pressTriggers =
 	[
 		WidgetTriggerTypes.ShortPress, WidgetTriggerTypes.LongPress, WidgetTriggerTypes.DoublePress,
-		WidgetTriggerTypes.TouchStart, WidgetTriggerTypes.TouchEnd,
+		WidgetTriggerTypes.TouchStart, WidgetTriggerTypes.TouchEnd
 	];
 
 	public static IReadOnlyList<string> OwnTriggers { get; } =
 	[
 		WidgetTriggerTypes.CalendarEventStartsSoon, WidgetTriggerTypes.CalendarEventStarted,
-		WidgetTriggerTypes.CalendarEventEnded,
+		WidgetTriggerTypes.CalendarEventEnded
 	];
 
 	public static IReadOnlyList<string> FlowTriggers { get; } = [.. _pressTriggers, .. OwnTriggers];
@@ -53,9 +55,11 @@ public static class CalendarWidgetSelection
 		ArgumentNullException.ThrowIfNull(settings);
 
 		return snapshot.Events.FirstOrDefault(calendarEvent =>
-			(settings.ShowAllDay || !calendarEvent.IsAllDay) &&
-			(settings.Calendars.Count == 0 || settings.Calendars.Contains(calendarEvent.CalendarKey)) &&
-			(settings.SkipRunning ? calendarEvent.Start > now : calendarEvent.Overlaps(now, DateTimeOffset.MaxValue)));
+			(settings.ShowAllDay || !calendarEvent.IsAllDay)
+			&& (settings.Calendars.Count == 0 || settings.Calendars.Contains(calendarEvent.CalendarKey))
+			&& (settings.SkipRunning
+				? calendarEvent.Start > now
+				: calendarEvent.Overlaps(now, DateTimeOffset.MaxValue)));
 	}
 
 	public static CalendarEventSummary? AgendaEvent(

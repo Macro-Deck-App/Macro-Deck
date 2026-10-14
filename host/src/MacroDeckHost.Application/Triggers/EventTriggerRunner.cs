@@ -69,8 +69,8 @@ public sealed class EventTriggerRunner : IEventTriggerRunner
 
 		if (result.Status != FlowExecutionStatus.Succeeded)
 		{
-			_logger.Warning("Event trigger {TriggerId} on {Owner} for {EventId} finished as {Status} " +
-				"(execution {ExecutionId}): {ErrorCode} {ErrorMessage}",
+			_logger.Warning("Event trigger {TriggerId} on {Owner} for {EventId} finished as {Status} "
+				+ "(execution {ExecutionId}): {ErrorCode} {ErrorMessage}",
 				subscription.TriggerId,
 				subscription.Owner,
 				occurrence.EventId,
@@ -85,12 +85,15 @@ public sealed class EventTriggerRunner : IEventTriggerRunner
 		return result;
 	}
 
-	private static FlowExecutionResult NotRun() => new()
+	private static FlowExecutionResult NotRun()
 	{
-		ExecutionId = Guid.NewGuid(),
-		Status = FlowExecutionStatus.Succeeded,
-		MatchedFlows = 0
-	};
+		return new FlowExecutionResult
+		{
+			ExecutionId = Guid.NewGuid(),
+			Status = FlowExecutionStatus.Succeeded,
+			MatchedFlows = 0
+		};
+	}
 
 	private async Task<bool> ShouldRun(
 		EventSubscription subscription,

@@ -22,7 +22,9 @@ public class UiAsyncStateTests
 	private static readonly string[] _expectedOptionValues = ["a"];
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiNode? FindById(UiNode node, string id)
 	{
@@ -68,9 +70,9 @@ public class UiAsyncStateTests
 					new UiStringInput
 					{
 						Key = "loaded",
-						Binding = Bind.ReadOnly(UiValue.From(() => state.Value)),
-					},
-				],
+						Binding = Bind.ReadOnly(UiValue.From(() => state.Value))
+					}
+				]
 			});
 
 		view.DrainPatches();
@@ -433,9 +435,9 @@ public class UiAsyncStateTests
 					new UiNumberInput
 					{
 						Key = "loadedNumber",
-						Binding = Bind.ReadOnly(UiValue.From(() => (double)state!.Value)),
-					},
-				],
+						Binding = Bind.ReadOnly(UiValue.From(() => (double)state!.Value))
+					}
+				]
 			});
 
 		view.DrainPatches();
@@ -476,20 +478,23 @@ public class UiAsyncStateTests
 	/// <summary>A view whose one node reads the async state's value, so a load landing is observable as a
 	/// patch and a tree rather than only as a property on the state.</summary>
 	private static UiView LoadedValueView(UiAsyncState<string> state)
-		=> new(ConfigSurface(),
+	{
+		return new UiView(ConfigSurface(),
 			new UiFlow
 			{
 				Key = "setup",
 				Children =
 				[
-					new UiStringInput { Key = "loaded", Binding = Bind.ReadOnly(UiValue.From(() => state.Value)) },
-				],
+					new UiStringInput { Key = "loaded", Binding = Bind.ReadOnly(UiValue.From(() => state.Value)) }
+				]
 			});
+	}
 
 	/// <summary>A flow whose busy node exists while the options load and whose banner exists while the load has
 	/// failed, so both transitions are observable as structure rather than as a property.</summary>
 	private static UiFlow BuildOptionFlow(UiOptionsState options)
-		=> new()
+	{
+		return new UiFlow
 		{
 			Key = "setup",
 			Children =
@@ -498,7 +503,7 @@ public class UiAsyncStateTests
 				{
 					Key = "loadingGate",
 					Condition = () => options.IsLoading,
-					Content = () => new UiBusy { Key = "busy", Text = "Loading options..." },
+					Content = () => new UiBusy { Key = "busy", Text = "Loading options..." }
 				},
 				new UiWhen
 				{
@@ -508,10 +513,11 @@ public class UiAsyncStateTests
 					{
 						Key = "banner",
 						Severity = "error",
-						Text = UiValue.From(() => options.Error ?? string.Empty),
-					},
+						Text = UiValue.From(() => options.Error ?? string.Empty)
+					}
 				},
-				new UiDynamicChoiceInput { Key = "mode", OptionsState = options },
-			],
+				new UiDynamicChoiceInput { Key = "mode", OptionsState = options }
+			]
 		};
+	}
 }

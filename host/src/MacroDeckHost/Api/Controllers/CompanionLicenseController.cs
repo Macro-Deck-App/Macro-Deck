@@ -17,9 +17,14 @@ public class CompanionLicenseController : ControllerBase
 	}
 
 	[HttpGet]
-	public Task<CompanionLicenseStatus> Get(CancellationToken ct) => _licenses.GetStatusAsync(ct);
+	public Task<CompanionLicenseStatus> Get(CancellationToken ct)
+	{
+		return _licenses.GetStatusAsync(ct);
+	}
 
 	[HttpPost("promo-code")]
 	public Task<PromoCodeRedemptionResult> RedeemPromoCode(RedeemPromoCodeRequest body, CancellationToken ct)
-		=> _licenses.RedeemPromoCodeAsync(body.Code, ct);
+	{
+		return _licenses.RedeemPromoCodeAsync(body.Code, ct);
+	}
 }

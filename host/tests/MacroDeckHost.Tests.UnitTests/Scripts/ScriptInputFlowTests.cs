@@ -28,10 +28,10 @@ public class ScriptInputFlowTests
 	private static readonly string[] _liveThenStartingSoon = ["Live", "Starting Soon"];
 	private static readonly string[] _ran = ["ran"];
 
-	private static readonly Guid WInvoker = Guid.Parse("00000000-0000-0000-0000-00000000aaaa");
-	private static readonly Guid WOther = Guid.Parse("00000000-0000-0000-0000-00000000bbbb");
-	private static readonly Guid W1 = Guid.Parse("00000000-0000-0000-0000-000000000001");
-	private static readonly Guid W2 = Guid.Parse("00000000-0000-0000-0000-000000000002");
+	private static readonly Guid _wInvoker = Guid.Parse("00000000-0000-0000-0000-00000000aaaa");
+	private static readonly Guid _wOther = Guid.Parse("00000000-0000-0000-0000-00000000bbbb");
+	private static readonly Guid _w1 = Guid.Parse("00000000-0000-0000-0000-000000000001");
+	private static readonly Guid _w2 = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
 	private const string ChannelFlow =
 		"""
@@ -117,13 +117,16 @@ public class ScriptInputFlowTests
 		await _scripts.InitializeCache();
 		_runner = new ScriptRunner(_scripts,
 			_flowExecutor,
-			new FakeWidgetAppearanceService(WInvoker.ToString(), WOther.ToString(), W1.ToString(), W2.ToString()),
+			new FakeWidgetAppearanceService(_wInvoker.ToString(), _wOther.ToString(), _w1.ToString(), _w2.ToString()),
 			new LoggerConfiguration().CreateLogger());
 		_api = new DirectScriptApi(_runner, _scripts);
 	}
 
 	[TearDown]
-	public void TearDown() => _scripts.Dispose();
+	public void TearDown()
+	{
+		_scripts.Dispose();
+	}
 
 	[Test]
 	public async Task A_supplied_input_is_what_the_running_script_reads_as_vars_name()
@@ -184,7 +187,7 @@ public class ScriptInputFlowTests
 	[Test]
 	public async Task Self_is_resolved_from_the_owner_widget_at_the_run_script_call_site()
 	{
-		var script = await Store(TargetFlow, runsOnWidget: true);
+		var script = await Store(TargetFlow, true);
 
 		var outerFlow = RunScriptFlow(script.Id);
 		var result = await _flowExecutor.ExecuteAsync(new FlowExecutionRequest
@@ -192,7 +195,7 @@ public class ScriptInputFlowTests
 				FlowsSource = outerFlow,
 				Trigger = TriggerSelector.ByType("onShortPress"),
 				Scope = VariableScope.Global,
-				OwnerWidgetId = WInvoker
+				OwnerWidgetId = _wInvoker
 			},
 			CancellationToken.None);
 
@@ -203,7 +206,7 @@ public class ScriptInputFlowTests
 			// out WOther being touched - a separate `Has.None.EqualTo(...)` on either would be
 			// unfalsifiable, since nothing in this test could ever put them in `_markers` in the first
 			// place.
-			Assert.That(_markers, Is.EqualTo(new[] { WInvoker.ToString() }));
+			Assert.That(_markers, Is.EqualTo(new[] { _wInvoker.ToString() }));
 		});
 	}
 
@@ -213,10 +216,10 @@ public class ScriptInputFlowTests
 	[Test]
 	public async Task A_toggle_off_scripts_nested_call_does_not_inherit_a_widget()
 	{
-		var inner = await Store(SideEffectFlow, runsOnWidget: true);
+		var inner = await Store(SideEffectFlow, true);
 		var outer = await Store(RunScriptFlowArray(inner.Id));
 
-		var result = await _runner.RunAsync(outer.Id, null, CancellationToken.None, 0, null, WInvoker.ToString());
+		var result = await _runner.RunAsync(outer.Id, null, CancellationToken.None, 0, null, _wInvoker.ToString());
 
 		Assert.Multiple(() =>
 		{
@@ -230,15 +233,15 @@ public class ScriptInputFlowTests
 	[Test]
 	public async Task A_toggle_on_scripts_nested_call_receives_its_own_widget()
 	{
-		var inner = await Store(TargetFlow, runsOnWidget: true);
-		var outer = await Store(RunScriptFlowArray(inner.Id), runsOnWidget: true);
+		var inner = await Store(TargetFlow, true);
+		var outer = await Store(RunScriptFlowArray(inner.Id), true);
 
-		var result = await _runner.RunAsync(outer.Id, null, CancellationToken.None, 0, null, WInvoker.ToString());
+		var result = await _runner.RunAsync(outer.Id, null, CancellationToken.None, 0, null, _wInvoker.ToString());
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Status, Is.EqualTo(FlowExecutionStatus.Succeeded));
-			Assert.That(_markers, Is.EqualTo(new[] { WInvoker.ToString() }));
+			Assert.That(_markers, Is.EqualTo(new[] { _wInvoker.ToString() }));
 		});
 	}
 
@@ -247,16 +250,16 @@ public class ScriptInputFlowTests
 	[Test]
 	public async Task The_same_script_run_for_two_widgets_each_affects_only_its_own_widget()
 	{
-		var script = await Store(TargetFlow, runsOnWidget: true);
+		var script = await Store(TargetFlow, true);
 
-		var result1 = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, null, W1.ToString());
-		var result2 = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, null, W2.ToString());
+		var result1 = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, null, _w1.ToString());
+		var result2 = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, null, _w2.ToString());
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result1.Status, Is.EqualTo(FlowExecutionStatus.Succeeded));
 			Assert.That(result2.Status, Is.EqualTo(FlowExecutionStatus.Succeeded));
-			Assert.That(_markers, Is.EqualTo(new[] { W1.ToString(), W2.ToString() }));
+			Assert.That(_markers, Is.EqualTo(new[] { _w1.ToString(), _w2.ToString() }));
 		});
 	}
 
@@ -264,7 +267,7 @@ public class ScriptInputFlowTests
 	[Test]
 	public async Task A_widget_enabled_script_with_no_owner_widget_fails_with_script_widget_required()
 	{
-		var script = await Store(SideEffectFlow, runsOnWidget: true);
+		var script = await Store(SideEffectFlow, true);
 
 		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None);
 
@@ -284,7 +287,7 @@ public class ScriptInputFlowTests
 	[TestCase("widget-that-does-not-exist")]
 	public async Task A_bad_owner_widget_value_fails_with_script_widget_required(string value)
 	{
-		var script = await Store(SideEffectFlow, runsOnWidget: true);
+		var script = await Store(SideEffectFlow, true);
 
 		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, null, value);
 
@@ -301,9 +304,9 @@ public class ScriptInputFlowTests
 	[Test]
 	public async Task A_toggle_off_script_runs_with_no_owner_widget_even_when_one_is_supplied()
 	{
-		var script = await Store(TargetFlow, runsOnWidget: false);
+		var script = await Store(TargetFlow, false);
 
-		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, null, WInvoker.ToString());
+		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, null, _wInvoker.ToString());
 
 		Assert.Multiple(() =>
 		{
@@ -313,36 +316,47 @@ public class ScriptInputFlowTests
 	}
 
 	private static string RunScriptFlow(Guid scriptId)
-		=> $$"""
-			 { "flows": {{RunScriptFlowArray(scriptId, "onShortPress")}} }
-			 """;
+	{
+		return $$"""
+				 { "flows": {{RunScriptFlowArray(scriptId, "onShortPress")}} }
+				 """;
+	}
 
 	// The bare-array shape ScriptEntity.Flows itself expects (see ChannelFlow/TargetFlow/SideEffectFlow) -
 	// used when this Run Script block is the body of a script rather than a widget's own flow.
 	private static string RunScriptFlowArray(Guid scriptId, string triggerType = "onRun")
-		=> $$"""
-			 [
-			   {
-			     "triggerId": "t1", "triggerType": "{{triggerType}}",
-			     "children": [
-			       { "id": "b1", "type": "action", "blockType": "scripts.run-script",
-			         "integrationId": "scripts", "actionId": "run-script",
-			         "parameters": [
-			           { "name": "scriptId", "type": "string", "value": "{{scriptId}}" },
-			           { "name": "widget", "type": "string", "value": "$self" }
-			         ] }
-			     ]
-			   }
-			 ]
-			 """;
+	{
+		return $$"""
+				 [
+				   {
+				     "triggerId": "t1", "triggerType": "{{triggerType}}",
+				     "children": [
+				       { "id": "b1", "type": "action", "blockType": "scripts.run-script",
+				         "integrationId": "scripts", "actionId": "run-script",
+				         "parameters": [
+				           { "name": "scriptId", "type": "string", "value": "{{scriptId}}" },
+				           { "name": "widget", "type": "string", "value": "$self" }
+				         ] }
+				     ]
+				   }
+				 ]
+				 """;
+	}
 
-	private static ScriptInput Input(string name) => new() { Name = name, Type = ScriptInputType.Text };
+	private static ScriptInput Input(string name)
+	{
+		return new ScriptInput { Name = name, Type = ScriptInputType.Text };
+	}
 
 	private static Dictionary<string, object?> Supplied(params (string Name, object? Value)[] values)
-		=> values.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal);
+	}
 
 	private Task<ScriptEntity> Store(string flows, bool runsOnWidget = false)
-		=> Store(flows, [], runsOnWidget);
+	{
+		return Store(flows, [], runsOnWidget);
+	}
 
 	private async Task<ScriptEntity> Store(string flows, ScriptInput[] inputs, bool runsOnWidget = false)
 	{
@@ -362,14 +376,16 @@ public class ScriptInputFlowTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)
@@ -392,7 +408,8 @@ public class ScriptInputFlowTests
 		}
 
 		public IReadOnlyList<SdkScript> GetScripts()
-			=> _scripts.GetAll()
+		{
+			return _scripts.GetAll()
 				.Select(script => new SdkScript
 				{
 					Id = script.Id.ToString(),
@@ -402,6 +419,7 @@ public class ScriptInputFlowTests
 					RunsOnWidget = script.RunsOnWidget
 				})
 				.ToList();
+		}
 
 		public async Task<ActionResult> RunAsync(
 			string scriptId,

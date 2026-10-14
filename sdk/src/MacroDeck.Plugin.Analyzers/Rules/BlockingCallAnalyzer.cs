@@ -62,9 +62,9 @@ public sealed class BlockingCallAnalyzer : DiagnosticAnalyzer
 						var property = propertyReference.Property;
 						var containingType = property.ContainingType?.OriginalDefinition;
 
-						if (property.Name != "Result" ||
-							(!SymbolEqualityComparer.Default.Equals(containingType, taskOfTType) &&
-								!SymbolEqualityComparer.Default.Equals(containingType, valueTaskOfTType)))
+						if (property.Name != "Result"
+							|| !SymbolEqualityComparer.Default.Equals(containingType, taskOfTType)
+							&& !SymbolEqualityComparer.Default.Equals(containingType, valueTaskOfTType))
 						{
 							return;
 						}
@@ -78,16 +78,16 @@ public sealed class BlockingCallAnalyzer : DiagnosticAnalyzer
 						var invocation = (IInvocationOperation)operationContext.Operation;
 						var method = invocation.TargetMethod;
 
-						if (method.Name == "Wait" &&
-							taskType is not null &&
-							invocation.Instance?.Type.IsOrDerivesFrom(taskType) == true)
+						if (method.Name == "Wait"
+							&& taskType is not null
+							&& invocation.Instance?.Type.IsOrDerivesFrom(taskType) == true)
 						{
 							Report(operationContext, ".Wait()", contractName, invocation.Syntax.GetLocation());
 							return;
 						}
 
-						if (method.Name == "GetResult" &&
-							invocation.Instance is IInvocationOperation { TargetMethod.Name: "GetAwaiter" })
+						if (method.Name == "GetResult"
+							&& invocation.Instance is IInvocationOperation { TargetMethod.Name: "GetAwaiter" })
 						{
 							Report(operationContext,
 								".GetAwaiter().GetResult()",
@@ -96,8 +96,8 @@ public sealed class BlockingCallAnalyzer : DiagnosticAnalyzer
 							return;
 						}
 
-						if (method.Name == "Sleep" &&
-							SymbolEqualityComparer.Default.Equals(method.ContainingType, threadType))
+						if (method.Name == "Sleep"
+							&& SymbolEqualityComparer.Default.Equals(method.ContainingType, threadType))
 						{
 							Report(operationContext, "Thread.Sleep", contractName, invocation.Syntax.GetLocation());
 						}
@@ -108,10 +108,12 @@ public sealed class BlockingCallAnalyzer : DiagnosticAnalyzer
 	}
 
 	private static void Report(OperationAnalysisContext context, string pattern, string contractName, Location location)
-		=> context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.BlockingCall,
+	{
+		context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.BlockingCall,
 			location,
 			pattern,
 			contractName));
+	}
 
 	private static string? DescribeImplementedContract(
 		ITypeSymbol? type,

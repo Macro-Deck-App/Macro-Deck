@@ -26,7 +26,7 @@ namespace MacroDeckHost.Tests.UnitTests.Security.KeyRing;
 [NonParallelizable]
 public class KeyRingWrapTriggerTests
 {
-	private static readonly KekStoreIdentity Identity = new("Macro Deck Tests", "key-ring-kek");
+	private static readonly KekStoreIdentity _identity = new("Macro Deck Tests", "key-ring-kek");
 
 	private string _dataDir = null!;
 	private string? _previousDataDir;
@@ -52,15 +52,15 @@ public class KeyRingWrapTriggerTests
 
 		var plan = KeyRingProtectionPlanner.Resolve(_paths.KeysDirectory,
 			_store,
-			Identity,
-			recoveryKeyExported: false,
-			portable: false);
+			_identity,
+			false,
+			false);
 		_keyRing = new KeyRingProtectionService(_paths,
 			_store,
-			Identity,
+			_identity,
 			new KeyRingKekHolder(),
 			plan,
-			portable: false,
+			false,
 			TimeProvider.System,
 			Log.Logger);
 
@@ -89,7 +89,7 @@ public class KeyRingWrapTriggerTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -193,7 +193,7 @@ public class KeyRingWrapTriggerTests
 		var recovery = Recovery();
 		await recovery.EnsureCreated();
 		await recovery.Export();
-		var escrowBefore = File.ReadAllBytes(KekEscrowStore.PathFor(_paths.KeysDirectory));
+		var escrowBefore = await File.ReadAllBytesAsync(KekEscrowStore.PathFor(_paths.KeysDirectory));
 		_store.Forget();
 		using var restarted = Restart();
 
@@ -241,7 +241,7 @@ public class KeyRingWrapTriggerTests
 		await recovery.Export();
 
 		var stray = Path.Combine(_paths.KeysDirectory, "key-99999999-9999-9999-9999-999999999999.xml");
-		File.WriteAllText(stray, await File.ReadAllTextAsync(StrayTemplate()));
+		await File.WriteAllTextAsync(stray, await File.ReadAllTextAsync(StrayTemplate()));
 		Assert.That(KeyRingFileInspector.InspectFile(stray).Protection,
 			Is.EqualTo(KeyRingFileProtection.Plaintext),
 			"the fixture did not actually produce a readable key file");
@@ -273,18 +273,20 @@ public class KeyRingWrapTriggerTests
 
 	/// <summary>Rebuilds the service from the key ring as it is on disk, as the next launch would.</summary>
 	private KeyRingProtectionService Restart()
-		=> new(_paths,
+	{
+		return new KeyRingProtectionService(_paths,
 			_store,
-			Identity,
+			_identity,
 			new KeyRingKekHolder(),
 			KeyRingProtectionPlanner.Resolve(_paths.KeysDirectory,
 				_store,
-				Identity,
-				recoveryKeyExported: true,
-				portable: false),
-			portable: false,
+				_identity,
+				true,
+				false),
+			false,
 			TimeProvider.System,
 			Log.Logger);
+	}
 
 	private static byte[] Parse(string? exported)
 	{
@@ -294,5 +296,7 @@ public class KeyRingWrapTriggerTests
 	}
 
 	private IBackupRecoveryKeyService Recovery()
-		=> _provider.CreateScope().ServiceProvider.GetRequiredService<IBackupRecoveryKeyService>();
+	{
+		return _provider.CreateScope().ServiceProvider.GetRequiredService<IBackupRecoveryKeyService>();
+	}
 }

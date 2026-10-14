@@ -36,10 +36,10 @@ public class UiCapabilityHandlerTests
 	// "toRevision", a duplicate "a" member, "z" before "a", the envelope members in reverse order, an
 	// unmapped "x-vendor" member and a 39-digit integer.
 	private const string AdversarialPatch =
-		"{\"operations\":[{\"op\":\"set-properties\",\"nodeId\":\"field.apiKey\",\"properties\":" +
-		"{\"z\":1.0,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\"," +
-		"\"n\":100000000000000000000000000000000000001}}],  " +
-		"\"toRevision\":2,\"fromRevision\":1,\"x-vendor\":{\"keep\":true}}";
+		"{\"operations\":[{\"op\":\"set-properties\",\"nodeId\":\"field.apiKey\",\"properties\":"
+		+ "{\"z\":1.0,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\","
+		+ "\"n\":100000000000000000000000000000000000001}}],  "
+		+ "\"toRevision\":2,\"fromRevision\":1,\"x-vendor\":{\"keep\":true}}";
 
 	[Test]
 	public async Task A_patch_a_provider_authored_reaches_the_host_as_the_exact_bytes_it_produced()
@@ -203,7 +203,7 @@ public class UiCapabilityHandlerTests
 			new PluginConfigFlowSessions(TimeProvider.System),
 			new ModalResultStore());
 
-		var result = await handler.InvokeAsync(Invocation(CapabilityOperations.Ui.Describe, arguments: null),
+		var result = await handler.InvokeAsync(Invocation(CapabilityOperations.Ui.Describe, null),
 			CancellationToken.None);
 
 		var described = result.Data!.Value.Deserialize<UiDescribePayload>(PluginProtocolJson.Options)!;
@@ -274,7 +274,8 @@ public class UiCapabilityHandlerTests
 	}
 
 	private static Task<CapabilityInvocationResult> OpenAsync(UiCapabilityHandler handler, string sessionId)
-		=> handler.InvokeAsync(Invocation(CapabilityOperations.Ui.SessionOpen,
+	{
+		return handler.InvokeAsync(Invocation(CapabilityOperations.Ui.SessionOpen,
 				new UiSessionOpenArguments
 				{
 					SessionId = sessionId,
@@ -283,9 +284,11 @@ public class UiCapabilityHandlerTests
 					UiModelVersion = 1
 				}),
 			CancellationToken.None);
+	}
 
 	private static CapabilityInvocation Invocation(string operation, object? arguments)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Ui,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -296,12 +299,15 @@ public class UiCapabilityHandlerTests
 			CorrelationId = "c1",
 			Services = new EmptyServiceProvider()
 		};
+	}
 
 	private static Dictionary<string, JsonElement> Properties()
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			["title"] = JsonSerializer.SerializeToElement("x")
 		};
+	}
 
 	private static async Task SwallowAsync(Task task)
 	{
@@ -329,7 +335,7 @@ public class UiCapabilityHandlerTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
 			hostInvoker,
-			hostStateCache: null);
+			null);
 
 		state.ActiveConnection = connection;
 
@@ -345,25 +351,37 @@ public class UiCapabilityHandlerTests
 
 	private sealed class EmptyServiceProvider : IServiceProvider
 	{
-		public object? GetService(Type serviceType) => null;
+		public object? GetService(Type serviceType)
+		{
+			return null;
+		}
 	}
 
 	private sealed class NoOpHostInvoker : IHostInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<JsonElement?>(null);
+		{
+			return Task.FromResult<JsonElement?>(null);
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed class FakeUiIntegration : IPluginIntegration, IUiProvider
 	{
 		private readonly FakeUiSession _session;
 
-		public FakeUiIntegration(FakeUiSession session) => _session = session;
+		public FakeUiIntegration(FakeUiSession session)
+		{
+			_session = session;
+		}
 
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
@@ -373,12 +391,20 @@ public class UiCapabilityHandlerTests
 				{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 		];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(_session);
+		{
+			return Task.FromResult<IUiSession?>(_session);
+		}
 	}
 
 	private sealed class FakeUiSession : IUiSession
@@ -401,7 +427,10 @@ public class UiCapabilityHandlerTests
 
 		public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-		public UiTree BuildTree() => Tree;
+		public UiTree BuildTree()
+		{
+			return Tree;
+		}
 
 		public IReadOnlyList<UiPatch> DrainPatches()
 		{
@@ -431,7 +460,10 @@ public class UiCapabilityHandlerTests
 			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
-		public void Fault() => Faulted?.Invoke(this, new UiSessionFaultedEventArgs("gone"));
+		public void Fault()
+		{
+			Faulted?.Invoke(this, new UiSessionFaultedEventArgs("gone"));
+		}
 
 		public ValueTask DisposeAsync()
 		{

@@ -105,15 +105,24 @@ public class LinkTeardownTests
 		});
 	}
 
-	private sealed class CollectingSink : Serilog.Core.ILogEventSink
+	private sealed class CollectingSink : ILogEventSink
 	{
 		public List<Serilog.Events.LogEvent> Events { get; } = [];
 
-		public void Emit(Serilog.Events.LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(Serilog.Events.LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 
 	private static NativeLinkSession StartSession(FakeLinkCarrier carrier)
-		=> new(carrier, "usb:TEARDOWN", new LoopbackTestDialer(), TimeProvider.System, Logger.None);
+	{
+		return new NativeLinkSession(carrier,
+			"usb:TEARDOWN",
+			new LoopbackTestDialer(),
+			TimeProvider.System,
+			Logger.None);
+	}
 
 	private static async Task LinkAsync(FakeLinkCarrier carrier, NativeLinkSession session)
 	{
@@ -125,6 +134,7 @@ public class LinkTeardownTests
 	private static async Task<IReadOnlyList<Exception>> CollectUnobservedAsync(Func<Task> scenario)
 	{
 		var unobserved = new ConcurrentQueue<Exception>();
+
 		void Record(object? sender, UnobservedTaskExceptionEventArgs args)
 		{
 			if (args.Exception.Flatten().InnerExceptions.Any(IsLinkTeardown))
@@ -152,11 +162,17 @@ public class LinkTeardownTests
 	}
 
 	[MethodImpl(MethodImplOptions.NoInlining)]
-	private static Task RunDetachedAsync(Func<Task> scenario) => scenario();
+	private static Task RunDetachedAsync(Func<Task> scenario)
+	{
+		return scenario();
+	}
 
 	private static bool IsLinkTeardown(Exception exception)
-		=> exception is LinkLostException or ObjectDisposedException or TimeoutException ||
-			exception.StackTrace?.Contains("MacroDeckHost.Infrastructure.Usb.Native", StringComparison.Ordinal) == true;
+	{
+		return exception is LinkLostException or ObjectDisposedException or TimeoutException
+			|| exception.StackTrace?.Contains("MacroDeckHost.Infrastructure.Usb.Native", StringComparison.Ordinal)
+			== true;
+	}
 
 	private sealed class FailingPipe : IUsbBulkPipe
 	{

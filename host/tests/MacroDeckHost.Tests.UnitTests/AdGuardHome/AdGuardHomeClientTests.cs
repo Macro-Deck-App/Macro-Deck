@@ -41,7 +41,8 @@ internal sealed class AdGuardHomeClientTests
 	{
 		var handler = new RoutingHandler { ["GET /control/status"] = (status, "nope") };
 
-		var exception = Assert.ThrowsAsync<AdGuardHomeException>(() => Client(handler).GetStatusAsync(CancellationToken.None));
+		var exception
+			= Assert.ThrowsAsync<AdGuardHomeException>(() => Client(handler).GetStatusAsync(CancellationToken.None));
 
 		Assert.That(exception!.Failure, Is.EqualTo(expected));
 	}
@@ -53,7 +54,8 @@ internal sealed class AdGuardHomeClientTests
 	{
 		var handler = new RoutingHandler { ["GET /control/status"] = (HttpStatusCode.OK, body) };
 
-		var exception = Assert.ThrowsAsync<AdGuardHomeException>(() => Client(handler).GetStatusAsync(CancellationToken.None));
+		var exception
+			= Assert.ThrowsAsync<AdGuardHomeException>(() => Client(handler).GetStatusAsync(CancellationToken.None));
 
 		Assert.That(exception!.Failure, Is.EqualTo(AdGuardHomeConnection.Incompatible));
 	}
@@ -89,7 +91,8 @@ internal sealed class AdGuardHomeClientTests
 	{
 		var handler = new RoutingHandler
 		{
-			["GET /control/status"] = (HttpStatusCode.OK, """{"protection_enabled":false,"running":true,"version":"v0.106"}""")
+			["GET /control/status"] = (HttpStatusCode.OK,
+				"""{"protection_enabled":false,"running":true,"version":"v0.106"}""")
 		};
 
 		var status = await Client(handler).GetStatusAsync(CancellationToken.None);
@@ -111,8 +114,11 @@ internal sealed class AdGuardHomeClientTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(handler.Requests.Single().Body, Is.EqualTo("""{"enabled":false,"duration":3600000}"""));
-			Assert.That(handler.ContentLengths.Single(), Is.Not.Null, "a server without chunked uploads still reads the body");
-			Assert.That(handler.ContentTypes.Single(), Is.EqualTo("application/json"),
+			Assert.That(handler.ContentLengths.Single(),
+				Is.Not.Null,
+				"a server without chunked uploads still reads the body");
+			Assert.That(handler.ContentTypes.Single(),
+				Is.EqualTo("application/json"),
 				"AdGuard Home answers 415 to any other content type");
 		});
 	}
@@ -130,7 +136,8 @@ internal sealed class AdGuardHomeClientTests
 	[Test]
 	public async Task Refreshing_filters_updates_block_and_allow_lists()
 	{
-		var handler = new RoutingHandler { ["POST /control/filtering/refresh"] = (HttpStatusCode.OK, """{"updated":1}""") };
+		var handler = new RoutingHandler
+			{ ["POST /control/filtering/refresh"] = (HttpStatusCode.OK, """{"updated":1}""") };
 
 		await Client(handler).RefreshFiltersAsync(CancellationToken.None);
 
@@ -153,8 +160,11 @@ internal sealed class AdGuardHomeClientTests
 	public async Task A_reverse_proxy_path_is_kept()
 	{
 		var handler = new RoutingHandler { ["GET /adguard/control/status"] = (HttpStatusCode.OK, StatusJson) };
-		var client = new AdGuardHomeClient(
-			new AdGuardHomeConnectionSettings(AdGuardHomeEndpoint.TryBuild("https://host/adguard/")!, null, null, false),
+		var client = new AdGuardHomeClient(new AdGuardHomeConnectionSettings(
+				AdGuardHomeEndpoint.TryBuild("https://host/adguard/")!,
+				null,
+				null,
+				false),
 			new HttpClient(handler),
 			TimeSpan.FromSeconds(5));
 
@@ -164,12 +174,23 @@ internal sealed class AdGuardHomeClientTests
 	}
 
 	private static AdGuardHomeConnectionSettings Settings(string? username = null, string? password = null)
-		=> new(AdGuardHomeEndpoint.TryBuild("http://adguard.local:3000")!, username, password, false);
+	{
+		return new AdGuardHomeConnectionSettings(AdGuardHomeEndpoint.TryBuild("http://adguard.local:3000")!,
+			username,
+			password,
+			false);
+	}
 
-	private static AdGuardHomeClient Client(HttpMessageHandler handler, string? username = null, string? password = null)
-		=> new(Settings(username, password), new HttpClient(handler), TimeSpan.FromSeconds(5));
+	private static AdGuardHomeClient Client(
+		HttpMessageHandler handler,
+		string? username = null,
+		string? password = null)
+	{
+		return new AdGuardHomeClient(Settings(username, password), new HttpClient(handler), TimeSpan.FromSeconds(5));
+	}
 
-	private sealed class RoutingHandler : HttpMessageHandler, IEnumerable<KeyValuePair<string, (HttpStatusCode, string)>>
+	private sealed class RoutingHandler : HttpMessageHandler,
+		IEnumerable<KeyValuePair<string, (HttpStatusCode, string)>>
 	{
 		private readonly Dictionary<string, (HttpStatusCode Status, string Body)> _routes = new(StringComparer.Ordinal);
 
@@ -188,11 +209,18 @@ internal sealed class AdGuardHomeClientTests
 		}
 
 		public IEnumerator<KeyValuePair<string, (HttpStatusCode, string)>> GetEnumerator()
-			=> _routes.Select(pair => new KeyValuePair<string, (HttpStatusCode, string)>(pair.Key, pair.Value)).GetEnumerator();
+		{
+			return _routes.Select(pair => new KeyValuePair<string, (HttpStatusCode, string)>(pair.Key, pair.Value))
+				.GetEnumerator();
+		}
 
-		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override async Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			if (NeverAnswers)
@@ -205,9 +233,10 @@ internal sealed class AdGuardHomeClientTests
 			var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
 			Requests.Add((request.RequestUri!.AbsolutePath, request.Headers.Authorization?.ToString(), body));
 
-			var (status, text) = _routes.TryGetValue($"{request.Method} {request.RequestUri.AbsolutePath}", out var route)
-				? route
-				: (HttpStatusCode.NotFound, "not found");
+			var (status, text)
+				= _routes.TryGetValue($"{request.Method} {request.RequestUri.AbsolutePath}", out var route)
+					? route
+					: (HttpStatusCode.NotFound, "not found");
 			return new HttpResponseMessage(status) { Content = new StringContent(text) };
 		}
 	}

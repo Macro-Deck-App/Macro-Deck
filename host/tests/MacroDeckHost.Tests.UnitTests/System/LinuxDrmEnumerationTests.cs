@@ -7,16 +7,22 @@ public class LinuxDrmEnumerationTests
 	private string _root = string.Empty;
 
 	[SetUp]
-	public void SetUp() => _root = Directory.CreateTempSubdirectory("macrodeck-drm").FullName;
+	public void SetUp()
+	{
+		_root = Directory.CreateTempSubdirectory("macrodeck-drm").FullName;
+	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_root, recursive: true);
+	public void TearDown()
+	{
+		Directory.Delete(_root, true);
+	}
 
 	[Test]
 	public void Every_card_with_a_busy_percent_node_is_its_own_gpu()
 	{
-		Card("card0", busy: true);
-		Card("card1", busy: true);
+		Card("card0", true);
+		Card("card1", true);
 
 		Assert.That(LinuxDrmEnumerator.FindAmdGpuBusyPercentPaths(_root), Has.Count.EqualTo(2));
 	}
@@ -24,9 +30,9 @@ public class LinuxDrmEnumerationTests
 	[Test]
 	public void Connector_directories_are_not_gpus()
 	{
-		Card("card0", busy: true);
-		Card("card0-DP-1", busy: true);
-		Card("card0-HDMI-A-1", busy: true);
+		Card("card0", true);
+		Card("card0-DP-1", true);
+		Card("card0-HDMI-A-1", true);
 
 		Assert.That(LinuxDrmEnumerator.FindAmdGpuBusyPercentPaths(_root), Has.Count.EqualTo(1));
 	}
@@ -34,7 +40,7 @@ public class LinuxDrmEnumerationTests
 	[Test]
 	public void A_card_without_a_busy_percent_node_is_not_counted()
 	{
-		Card("card0", busy: false);
+		Card("card0", false);
 
 		Assert.That(LinuxDrmEnumerator.FindAmdGpuBusyPercentPaths(_root), Is.Empty);
 	}

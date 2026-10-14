@@ -92,7 +92,10 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		return profile;
 	}
 
-	public List<ProfileEntity> GetAll() => _profiles.Values.ToList();
+	public List<ProfileEntity> GetAll()
+	{
+		return _profiles.Values.ToList();
+	}
 
 	public async Task AddOrUpdate(ProfileEntity profile)
 	{
@@ -185,21 +188,28 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		return folder;
 	}
 
-	public List<FolderEntity> GetAllFolders() => _folders.Values.ToList();
+	public List<FolderEntity> GetAllFolders()
+	{
+		return _folders.Values.ToList();
+	}
 
 	public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
-		=> _folders.Values
+	{
+		return _folders.Values
 			.Where(f => f.ParentId == parentId)
 			.OrderBy(f => f.Order)
 			.ThenBy(f => f.Id)
 			.ToList();
+	}
 
 	public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
-		=> _folders.Values
+	{
+		return _folders.Values
 			.Where(f => f.ProfileId == profileId)
 			.OrderBy(f => f.Order)
 			.ThenBy(f => f.Id)
 			.ToList();
+	}
 
 	public async Task AddOrUpdateFolder(FolderEntity folder)
 	{
@@ -553,8 +563,14 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 	{
 		public static readonly NullFontCatalog Instance = new();
 
-		public IReadOnlyList<FontFaceInfo> GetFaces() => [];
+		public IReadOnlyList<FontFaceInfo> GetFaces()
+		{
+			return [];
+		}
 
-		public byte[]? GetFaceFile(string faceId) => null;
+		public byte[]? GetFaceFile(string faceId)
+		{
+			return null;
+		}
 	}
 }

@@ -59,7 +59,9 @@ internal static class HomeAssistantOptions
 	}
 
 	public static DynamicOptionsResult Domains(HomeAssistantConnection? connection, string? filter)
-		=> Values((connection?.Catalog ?? HomeAssistantCatalog.Empty).Domains, filter);
+	{
+		return Values((connection?.Catalog ?? HomeAssistantCatalog.Empty).Domains, filter);
+	}
 
 	public static DynamicOptionsResult Services(HomeAssistantConnection? connection, string? filter, string? domain)
 	{
@@ -124,14 +126,18 @@ internal static class HomeAssistantOptions
 		HomeAssistantConnection? connection,
 		string? filter,
 		string? entityId)
-		=> Values(connection?.Entity(entityId)?.AttributeNames() ?? [], filter);
+	{
+		return Values(connection?.Entity(entityId)?.AttributeNames() ?? [], filter);
+	}
 
 	public static DynamicOptionsResult AttributeValues(
 		HomeAssistantConnection? connection,
 		string? filter,
 		string? entityId,
 		string attribute)
-		=> Values(connection?.Entity(entityId)?.ReadStringList(attribute) ?? [], filter);
+	{
+		return Values(connection?.Entity(entityId)?.ReadStringList(attribute) ?? [], filter);
+	}
 
 	public static DynamicOptionsResult EventTypes(HomeAssistantConnection? connection, string? filter)
 	{
@@ -159,15 +165,19 @@ internal static class HomeAssistantOptions
 	}
 
 	private static DynamicOptionsResult Result(IReadOnlyList<ActionParameterOption> options)
-		=> new()
+	{
+		return new DynamicOptionsResult
 		{
 			Options = options,
 			AllowsCustomValue = true,
 			CacheSeconds = CacheSeconds
 		};
+	}
 
 	private static bool Matches(string value, string? label, string? filter)
-		=> filter is not { Length: > 0 } ||
-			value.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
-			label?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
+	{
+		return filter is not { Length: > 0 }
+			|| value.Contains(filter, StringComparison.OrdinalIgnoreCase)
+			|| label?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
+	}
 }

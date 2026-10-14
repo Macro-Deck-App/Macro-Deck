@@ -4,7 +4,8 @@ namespace MacroDeckHost.Application.Icons;
 
 public interface IIconStorage
 {
-	Task<SourceContentHash> StageOriginal(Guid batchId,
+	Task<SourceContentHash> StageOriginal(
+		Guid batchId,
 		Guid iconId,
 		string originalFileName,
 		Stream content,
@@ -18,19 +19,22 @@ public interface IIconStorage
 
 	IReadOnlyList<string> GetStagedArchivePaths(Guid batchId);
 
-	Task WriteVariant(Guid packId,
+	Task WriteVariant(
+		Guid packId,
 		Guid iconId,
 		string variant,
 		ReadOnlyMemory<byte> webpData,
 		CancellationToken cancellationToken);
 
-	Task<string> WriteVariant(Guid packId,
+	Task<string> WriteVariant(
+		Guid packId,
 		Guid iconId,
 		string variant,
 		Stream content,
 		CancellationToken cancellationToken);
 
-	Task<bool> WriteVariantIfIconExists(Guid packId,
+	Task<bool> WriteVariantIfIconExists(
+		Guid packId,
 		Guid iconId,
 		string variant,
 		ReadOnlyMemory<byte> webpData,

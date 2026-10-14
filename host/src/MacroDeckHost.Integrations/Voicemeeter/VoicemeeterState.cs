@@ -19,12 +19,17 @@ internal sealed record VoicemeeterChannel(
 	bool Solo,
 	IReadOnlyDictionary<string, bool> Assignments)
 {
-	public string DefaultName(VoicemeeterLayout layout) => Kind == VoicemeeterChannelKind.Strip
-		? $"Strip {Index}"
-		: $"Bus {layout.BusAssignmentName(Index) ?? (Index + 1).ToString(CultureInfo.InvariantCulture)}";
+	public string DefaultName(VoicemeeterLayout layout)
+	{
+		return Kind == VoicemeeterChannelKind.Strip
+			? $"Strip {Index}"
+			: $"Bus {layout.BusAssignmentName(Index) ?? (Index + 1).ToString(CultureInfo.InvariantCulture)}";
+	}
 
 	public string DisplayName(VoicemeeterLayout layout)
-		=> string.IsNullOrWhiteSpace(Label) ? DefaultName(layout) : Label;
+	{
+		return string.IsNullOrWhiteSpace(Label) ? DefaultName(layout) : Label;
+	}
 }
 
 internal sealed record VoicemeeterState
@@ -47,11 +52,17 @@ internal sealed record VoicemeeterState
 	public VoicemeeterLayout Layout => VoicemeeterLayout.For(Edition);
 
 	public VoicemeeterChannel? Strip(int index)
-		=> index >= 0 && index < Strips.Count ? Strips[index] : null;
+	{
+		return index >= 0 && index < Strips.Count ? Strips[index] : null;
+	}
 
 	public VoicemeeterChannel? Bus(int index)
-		=> index >= 0 && index < Buses.Count ? Buses[index] : null;
+	{
+		return index >= 0 && index < Buses.Count ? Buses[index] : null;
+	}
 
 	public VoicemeeterChannel? Channel(VoicemeeterChannelKind kind, int index)
-		=> kind == VoicemeeterChannelKind.Strip ? Strip(index) : Bus(index);
+	{
+		return kind == VoicemeeterChannelKind.Strip ? Strip(index) : Bus(index);
+	}
 }

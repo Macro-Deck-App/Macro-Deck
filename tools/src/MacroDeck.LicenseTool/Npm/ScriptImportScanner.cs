@@ -9,15 +9,15 @@ internal static class ScriptImportScanner
 		Identifier,
 		String,
 		Punctuator,
-		Other,
+		Other
 	}
 
 	private readonly record struct Token(TokenKind Kind, string Text);
 
-	private static readonly HashSet<string> RegexPrecedingKeywords = new(StringComparer.Ordinal)
+	private static readonly HashSet<string> _regexPrecedingKeywords = new(StringComparer.Ordinal)
 	{
 		"return", "typeof", "case", "do", "else", "in", "of", "new", "delete", "void", "throw", "instanceof", "yield",
-		"await",
+		"await"
 	};
 
 	public static IReadOnlyList<string> Scan(string source)
@@ -27,7 +27,7 @@ internal static class ScriptImportScanner
 		for (var index = 0; index < tokens.Count; index++)
 		{
 			var token = tokens[index];
-			if (token.Kind != TokenKind.Identifier || (index > 0 && tokens[index - 1].Text == "."))
+			if (token.Kind != TokenKind.Identifier || index > 0 && tokens[index - 1].Text == ".")
 			{
 				continue;
 			}
@@ -37,7 +37,7 @@ internal static class ScriptImportScanner
 				"import" => ReadImport(tokens, index),
 				"export" => ReadExport(tokens, index),
 				"require" => ReadCall(tokens, index),
-				_ => null,
+				_ => null
 			};
 			if (specifier is not null)
 			{
@@ -66,8 +66,10 @@ internal static class ScriptImportScanner
 			return next.Value.Text;
 		}
 
-		if (next.Value.Text == "type" && At(tokens, index + 2) is { } afterType
-			&& afterType.Text is not ("from" or ",") && afterType.Kind != TokenKind.String)
+		if (next.Value.Text == "type"
+			&& At(tokens, index + 2) is { } afterType
+			&& afterType.Text is not ("from" or ",")
+			&& afterType.Kind != TokenKind.String)
 		{
 			return null;
 		}
@@ -102,9 +104,10 @@ internal static class ScriptImportScanner
 			}
 			else if (tokens[position].Text == "}" && --depth == 0)
 			{
-				return At(tokens, position + 1) is { Text: "from" } && At(tokens, position + 2) is { Kind: TokenKind.String } target
-					? target.Text
-					: null;
+				return At(tokens, position + 1) is { Text: "from" }
+					&& At(tokens, position + 2) is { Kind: TokenKind.String } target
+						? target.Text
+						: null;
 			}
 		}
 
@@ -116,12 +119,13 @@ internal static class ScriptImportScanner
 		for (var position = start; position < tokens.Count && position < start + 400; position++)
 		{
 			var token = tokens[position];
-			if (token.Text is ";" || (token.Kind == TokenKind.Identifier && token.Text is "import" or "export"))
+			if (token.Text is ";" || token.Kind == TokenKind.Identifier && token.Text is "import" or "export")
 			{
 				return null;
 			}
 
-			if (token.Kind == TokenKind.Identifier && token.Text == "from"
+			if (token.Kind == TokenKind.Identifier
+				&& token.Text == "from"
 				&& At(tokens, position + 1) is { Kind: TokenKind.String } target)
 			{
 				return target.Text;
@@ -131,20 +135,25 @@ internal static class ScriptImportScanner
 		return null;
 	}
 
-	private static string? ReadCall(List<Token> tokens, int index) =>
-		At(tokens, index + 1) is { Text: "(" }
-		&& At(tokens, index + 2) is { Kind: TokenKind.String } argument
-		&& At(tokens, index + 3) is { Text: ")" or "," }
-			? argument.Text
-			: null;
+	private static string? ReadCall(List<Token> tokens, int index)
+	{
+		return At(tokens, index + 1) is { Text: "(" }
+			&& At(tokens, index + 2) is { Kind: TokenKind.String } argument
+			&& At(tokens, index + 3) is { Text: ")" or "," }
+				? argument.Text
+				: null;
+	}
 
-	private static Token? At(List<Token> tokens, int index) => index < tokens.Count ? tokens[index] : null;
+	private static Token? At(List<Token> tokens, int index)
+	{
+		return index < tokens.Count ? tokens[index] : null;
+	}
 
 	private static List<Token> Tokenize(string source)
 	{
 		var tokens = new List<Token>();
 		var index = 0;
-		Lex(source, ref index, tokens, stopAtBrace: false);
+		Lex(source, ref index, tokens, false);
 		return tokens;
 	}
 
@@ -236,9 +245,9 @@ internal static class ScriptImportScanner
 		var previous = tokens[^1];
 		return previous.Kind switch
 		{
-			TokenKind.Identifier => RegexPrecedingKeywords.Contains(previous.Text),
+			TokenKind.Identifier => _regexPrecedingKeywords.Contains(previous.Text),
 			TokenKind.String or TokenKind.Other => false,
-			_ => previous.Text is not (")" or "]"),
+			_ => previous.Text is not (")" or "]")
 		};
 	}
 
@@ -273,7 +282,7 @@ internal static class ScriptImportScanner
 			else if (source[index] == '$' && Peek(source, index + 1) == '{')
 			{
 				index += 2;
-				Lex(source, ref index, [], stopAtBrace: true);
+				Lex(source, ref index, [], true);
 			}
 			else
 			{
@@ -320,5 +329,8 @@ internal static class ScriptImportScanner
 		}
 	}
 
-	private static char Peek(string source, int index) => index < source.Length ? source[index] : '\0';
+	private static char Peek(string source, int index)
+	{
+		return index < source.Length ? source[index] : '\0';
+	}
 }

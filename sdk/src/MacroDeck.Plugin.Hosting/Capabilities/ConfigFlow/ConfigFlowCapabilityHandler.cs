@@ -45,7 +45,8 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 	private readonly PluginConfigFlowSessions _sessions;
 	private readonly IHostHttp _http;
 
-	public ConfigFlowCapabilityHandler(IEnumerable<IPluginIntegration> integrations,
+	public ConfigFlowCapabilityHandler(
+		IEnumerable<IPluginIntegration> integrations,
 		PluginConfigFlowSessions sessions,
 		IHostHttp? http = null)
 	{
@@ -57,7 +58,8 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 	public string Kind => CapabilityKinds.ConfigFlow;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _provider is null
+	{
+		return _provider is null
 			? []
 			:
 			[
@@ -66,6 +68,7 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 					Kind = CapabilityKinds.ConfigFlow, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -81,8 +84,8 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 			return Task.FromResult(Describe());
 		}
 
-		if (_provider is null ||
-			!string.Equals(invocation.LocalId, ProviderCapabilityId.LocalId, StringComparison.Ordinal))
+		if (_provider is null
+			|| !string.Equals(invocation.LocalId, ProviderCapabilityId.LocalId, StringComparison.Ordinal))
 		{
 			return Task.FromResult(CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
 				$"No config flow provider '{invocation.LocalId}' is registered in this plugin."));
@@ -99,14 +102,17 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 	}
 
 	private CapabilityInvocationResult Describe()
-		=> CapabilityInvocationResult.Ok(new ConfigFlowDescribePayload
+	{
+		return CapabilityInvocationResult.Ok(new ConfigFlowDescribePayload
 		{
 			AllowsMultipleConfigurations = _provider?.AllowsMultipleConfigurations ?? true,
 			ServesConfigUiTree = _provider is IUiConfigFlowProvider { ServesConfigUiTree: true },
 			RequiresConfiguration = _provider?.RequiresConfiguration ?? true
 		});
+	}
 
-	private async Task<CapabilityInvocationResult> FlowStartAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> FlowStartAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<FlowStartArguments>(PluginProtocolJson.Options);
@@ -131,7 +137,8 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 		return CapabilityInvocationResult.Ok(ConfigFlowDescriptorMapper.ToDto(result));
 	}
 
-	private async Task<CapabilityInvocationResult> FlowSubmitAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> FlowSubmitAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<FlowSubmitArguments>(PluginProtocolJson.Options);
@@ -214,7 +221,8 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 	}
 
 	private static object? ToClrValue(JsonElement element)
-		=> element.ValueKind switch
+	{
+		return element.ValueKind switch
 		{
 			JsonValueKind.String => element.GetString(),
 			JsonValueKind.Number => element.TryGetInt64(out var integer) ? integer : element.GetDouble(),
@@ -223,6 +231,7 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 			JsonValueKind.Null or JsonValueKind.Undefined => null,
 			_ => element.Clone()
 		};
+	}
 
 	private sealed class RemoteConfigFlowContext : IConfigFlowEntryContext, IOAuthSession
 	{

@@ -81,8 +81,10 @@ public class LogLevelStateTests
 	[Test]
 	public void An_override_registered_after_a_change_starts_clamped()
 	{
-		var state = new LogLevelState(LogEntryLevel.Debug);
-		state.Minimum = LogEntryLevel.Error;
+		var state = new LogLevelState(LogEntryLevel.Debug)
+		{
+			Minimum = LogEntryLevel.Error
+		};
 
 		var registered = state.RegisterOverride(LogEventLevel.Information);
 
@@ -92,9 +94,10 @@ public class LogLevelStateTests
 	[Test]
 	public void The_minimum_reads_back_what_was_set()
 	{
-		var state = new LogLevelState(LogEntryLevel.Information);
-
-		state.Minimum = LogEntryLevel.Fatal;
+		var state = new LogLevelState(LogEntryLevel.Information)
+		{
+			Minimum = LogEntryLevel.Fatal
+		};
 
 		Assert.Multiple(() =>
 		{
@@ -176,13 +179,18 @@ public class LogLevelStateTests
 		return configuration.WriteTo.Sink(_sink).CreateLogger();
 	}
 
-	private string[] Messages() => _sink.Messages.ToArray();
+	private string[] Messages()
+	{
+		return _sink.Messages.ToArray();
+	}
 
 	private sealed class CollectingSink : ILogEventSink
 	{
 		public List<string> Messages { get; } = [];
 
 		public void Emit(LogEvent logEvent)
-			=> Messages.Add(logEvent.RenderMessage(CultureInfo.InvariantCulture));
+		{
+			Messages.Add(logEvent.RenderMessage(CultureInfo.InvariantCulture));
+		}
 	}
 }

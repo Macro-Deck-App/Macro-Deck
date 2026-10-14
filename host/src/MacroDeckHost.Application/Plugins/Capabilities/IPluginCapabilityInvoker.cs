@@ -6,7 +6,8 @@ namespace MacroDeckHost.Application.Plugins.Capabilities;
 
 public interface IPluginCapabilityInvoker
 {
-	Task<JsonElement?> InvokeAsync(string pluginId,
+	Task<JsonElement?> InvokeAsync(
+		string pluginId,
 		CapabilityInvokeRequest request,
 		CancellationToken cancellationToken);
 

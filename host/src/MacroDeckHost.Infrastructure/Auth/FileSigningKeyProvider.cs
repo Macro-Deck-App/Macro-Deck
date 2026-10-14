@@ -24,7 +24,10 @@ public class FileSigningKeyProvider : ISigningKeyProvider
 		_key = new Lazy<byte[]>(LoadOrCreateKey, LazyThreadSafetyMode.ExecutionAndPublication);
 	}
 
-	public byte[] GetKey() => _key.Value;
+	public byte[] GetKey()
+	{
+		return _key.Value;
+	}
 
 	private byte[] LoadOrCreateKey()
 	{

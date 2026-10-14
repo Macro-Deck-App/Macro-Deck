@@ -31,7 +31,7 @@ public class MusicPlayerWidgetSessionTests
 	{
 		await using var fixture = new SessionFixture();
 
-		fixture.Harness.Record(Playing(positionMs: 1_000, trackName: "Nannou"));
+		fixture.Harness.Record(Playing(1_000, "Nannou"));
 		await fixture.PublishAndSettleAsync();
 
 		var patches = fixture.Session.DrainPatches();
@@ -50,7 +50,7 @@ public class MusicPlayerWidgetSessionTests
 	{
 		await using var fixture = new SessionFixture();
 
-		fixture.Harness.Record(Playing(positionMs: 1_000, trackName: "Nannou"));
+		fixture.Harness.Record(Playing(1_000, "Nannou"));
 		fixture.Notifier.PublishInstancesChanged();
 		await fixture.Session.WaitForRefreshAsync();
 
@@ -65,7 +65,7 @@ public class MusicPlayerWidgetSessionTests
 		// The whole point of the reference: the reader is already showing the right second, so the poll
 		// two seconds later has nothing to say.
 		fixture.Harness.Advance(TimeSpan.FromSeconds(2));
-		fixture.Harness.Record(Playing(positionMs: 44_000));
+		fixture.Harness.Record(Playing(44_000));
 		await fixture.PublishAndSettleAsync();
 
 		Assert.That(fixture.Session.DrainPatches(), Is.Empty);
@@ -77,7 +77,7 @@ public class MusicPlayerWidgetSessionTests
 		var fixture = new SessionFixture();
 		await fixture.DisposeAsync();
 
-		fixture.Harness.Record(Playing(positionMs: 1_000, trackName: "Nannou"));
+		fixture.Harness.Record(Playing(1_000, "Nannou"));
 		await fixture.PublishAndSettleAsync();
 
 		Assert.That(fixture.Session.DrainPatches(), Is.Empty);
@@ -94,7 +94,7 @@ public class MusicPlayerWidgetSessionTests
 		{
 			Id = Guid.Parse(WidgetId),
 			Type = WidgetTypeIds.MusicPlayer,
-			Data = """{"coverStyle":"full"}""",
+			Data = """{"coverStyle":"full"}"""
 		});
 		await fixture.Session.WaitForRefreshAsync();
 
@@ -126,7 +126,7 @@ public class MusicPlayerWidgetSessionTests
 			{
 				for (var index = 0; index < iterations; index++)
 				{
-					fixture.Harness.Record(Playing(positionMs: 1_000 + index, trackName: racedTrack));
+					fixture.Harness.Record(Playing(1_000 + index, racedTrack));
 					fixture.Notifier.Publish(MusicPlayerTestHarness.InstanceId, new MusicPlayerStatePayload());
 				}
 			},
@@ -162,7 +162,7 @@ public class MusicPlayerWidgetSessionTests
 		});
 
 		// The deterministic tail: one further refresh, single-threaded, still costs exactly one patch.
-		fixture.Harness.Record(Playing(positionMs: 5_000, trackName: tailTrack));
+		fixture.Harness.Record(Playing(5_000, tailTrack));
 		await fixture.PublishAndSettleAsync();
 
 		var tail = fixture.Session.DrainPatches();
@@ -214,7 +214,8 @@ public class MusicPlayerWidgetSessionTests
 	}
 
 	private static MusicPlayerStatePayload Playing(long positionMs, string trackName = "Windowlicker")
-		=> new()
+	{
+		return new MusicPlayerStatePayload
 		{
 			InstanceId = MusicPlayerTestHarness.InstanceId,
 			IsConnected = true,
@@ -223,8 +224,9 @@ public class MusicPlayerWidgetSessionTests
 			TrackName = trackName,
 			ArtistName = "Aphex Twin",
 			PositionMs = positionMs,
-			DurationMs = 215_000,
+			DurationMs = 215_000
 		};
+	}
 
 	private const string WidgetId = "3f2b7c10-0000-0000-0000-000000000001";
 
@@ -233,7 +235,7 @@ public class MusicPlayerWidgetSessionTests
 		public SessionFixture()
 		{
 			Harness = new MusicPlayerTestHarness();
-			Harness.Record(Playing(positionMs: 42_000));
+			Harness.Record(Playing(42_000));
 
 			var config = new MusicPlayerWidgetData();
 			var initial = Harness.ResolveAsync(config: config).GetAwaiter().GetResult();
@@ -272,6 +274,9 @@ public class MusicPlayerWidgetSessionTests
 			await Session.WaitForRefreshAsync();
 		}
 
-		public ValueTask DisposeAsync() => Session.DisposeAsync();
+		public ValueTask DisposeAsync()
+		{
+			return Session.DisposeAsync();
+		}
 	}
 }

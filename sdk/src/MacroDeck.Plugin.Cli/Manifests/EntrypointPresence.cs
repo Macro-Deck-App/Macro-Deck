@@ -33,7 +33,8 @@ internal static class EntrypointPresence
 	/// comparer choice lives in one place.</param>
 	/// <param name="subjectNoun">What <paramref name="presentEntryNames" /> represents in the message -
 	/// <c>"artifact"</c>, <c>"source tree"</c> or <c>"directory"</c>.</param>
-	public static IReadOnlyList<CliDiagnostic> Missing(PluginManifest manifest,
+	public static IReadOnlyList<CliDiagnostic> Missing(
+		PluginManifest manifest,
 		IReadOnlySet<string> presentEntryNames,
 		string subjectNoun)
 	{
@@ -41,8 +42,8 @@ internal static class EntrypointPresence
 			.Where(pair => !presentEntryNames.Contains(Normalize(pair.Value.Executable)))
 			.OrderBy(pair => pair.Key, StringComparer.Ordinal)
 			.Select(pair => new CliDiagnostic("entrypoint-not-packed",
-				$"Entrypoint '{pair.Key}' declares '{pair.Value.Executable}', which is not in the {subjectNoun}." +
-				FoundInstead(pair.Value.Executable, presentEntryNames)))
+				$"Entrypoint '{pair.Key}' declares '{pair.Value.Executable}', which is not in the {subjectNoun}."
+				+ FoundInstead(pair.Value.Executable, presentEntryNames)))
 			.ToList();
 	}
 
@@ -51,7 +52,8 @@ internal static class EntrypointPresence
 	/// not only the current host's - the whole point being that <c>PluginManifestReader</c> deliberately
 	/// only ever existence-checks the current runtime identifier's own entrypoint, leaving a foreign RID's
 	/// binary unverified everywhere else.</summary>
-	public static IReadOnlyList<ManifestProblem> MissingProblems(PluginManifest manifest,
+	public static IReadOnlyList<ManifestProblem> MissingProblems(
+		PluginManifest manifest,
 		IReadOnlySet<string> presentEntryNames)
 	{
 		return manifest.Entrypoints
@@ -61,8 +63,8 @@ internal static class EntrypointPresence
 			{
 				Severity = ManifestProblemSeverity.Error,
 				Code = "entrypoint-not-packed",
-				Message = $"Entrypoint '{pair.Key}' declares '{pair.Value.Executable}', which is not in the artifact." +
-					FoundInstead(pair.Value.Executable, presentEntryNames),
+				Message = $"Entrypoint '{pair.Key}' declares '{pair.Value.Executable}', which is not in the artifact."
+					+ FoundInstead(pair.Value.Executable, presentEntryNames),
 				Pointer = $"/entrypoints/{EscapePointerSegment(pair.Key)}/executable",
 				Level = PluginManifestValidationLevel.Package
 			})
@@ -78,8 +80,8 @@ internal static class EntrypointPresence
 		var extension = Path.GetExtension(declared);
 
 		var candidates = presentEntryNames
-			.Where(name => DirectoryOf(name).Equals(directory, StringComparison.OrdinalIgnoreCase) &&
-				Path.GetExtension(name).Equals(extension, StringComparison.OrdinalIgnoreCase))
+			.Where(name => DirectoryOf(name).Equals(directory, StringComparison.OrdinalIgnoreCase)
+				&& Path.GetExtension(name).Equals(extension, StringComparison.OrdinalIgnoreCase))
 			.Order(StringComparer.Ordinal)
 			.ToList();
 
@@ -100,6 +102,8 @@ internal static class EntrypointPresence
 		return separator < 0 ? string.Empty : normalizedPath[..separator];
 	}
 
-	private static string EscapePointerSegment(string segment) =>
-		segment.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+	private static string EscapePointerSegment(string segment)
+	{
+		return segment.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+	}
 }

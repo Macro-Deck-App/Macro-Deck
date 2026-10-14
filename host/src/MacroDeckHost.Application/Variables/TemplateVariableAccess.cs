@@ -13,7 +13,7 @@ internal static class TemplateVariableAccess
 		"append", "capitalize", "downcase", "lstrip", "prepend", "remove", "remove_first", "replace",
 		"replace_first", "rstrip", "strip", "strip_newlines", "truncate", "truncatewords", "upcase", "abs", "ceil",
 		"divided_by", "floor", "minus", "modulo", "plus", "round", "times", "escape", "escape_once",
-		"newline_to_br", "strip_html", "default", "size",
+		"newline_to_br", "strip_html", "default", "size"
 	];
 
 	private static readonly HashSet<string> _bareCallees =
@@ -72,8 +72,8 @@ internal static class TemplateVariableAccess
 	{
 		var current = node;
 
-		while (current is ScriptMemberExpression { Target: var target, Member: ScriptVariable } member &&
-			!IsVars(target))
+		while (current is ScriptMemberExpression { Target: var target, Member: ScriptVariable } member
+			&& !IsVars(target))
 		{
 			current = member.Target;
 		}
@@ -94,16 +94,20 @@ internal static class TemplateVariableAccess
 	}
 
 	private static bool IsVars(ScriptExpression? expression)
-		=> expression is ScriptVariableGlobal { Name: VarsName };
+	{
+		return expression is ScriptVariableGlobal { Name: VarsName };
+	}
 
 	private static bool IsPureCallee(ScriptExpression? callee)
-		=> callee switch
+	{
+		return callee switch
 		{
 			ScriptVariableGlobal global => _bareCallees.Contains(global.Name),
 			ScriptMemberExpression { Target: ScriptVariableGlobal target, Member: ScriptVariable member }
 				=> _memberCallees.Contains((target.Name, member.Name)),
-			_ => false,
+			_ => false
 		};
+	}
 
 	private static HashSet<(string Target, string Member)> BuildMemberCallees()
 	{
@@ -111,9 +115,9 @@ internal static class TemplateVariableAccess
 
 		foreach (var filter in _pureFilters)
 		{
-			if (LiquidBuiltinsFunctions.TryLiquidToScriban(filter, out var target, out var member) &&
-				target is not null &&
-				member is not null)
+			if (LiquidBuiltinsFunctions.TryLiquidToScriban(filter, out var target, out var member)
+				&& target is not null
+				&& member is not null)
 			{
 				callees.Add((target, member));
 			}

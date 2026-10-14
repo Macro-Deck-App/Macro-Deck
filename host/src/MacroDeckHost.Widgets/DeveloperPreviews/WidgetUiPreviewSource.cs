@@ -32,7 +32,7 @@ public sealed class WidgetUiPreviewSource : IUiPreviewSource
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
 	[
 		new()
-			{ Kind = UiSurfaceKinds.DeveloperPreview, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.DeveloperPreview, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public IReadOnlyList<UiPreviewDescriptor> Previews =>
@@ -42,25 +42,25 @@ public sealed class WidgetUiPreviewSource : IUiPreviewSource
 			Id = registration.Declaration.Id,
 			View = registration.Declaration.View,
 			Scenario = registration.Declaration.Scenario,
-			Profile = registration.Declaration.Profile,
-		}),
+			Profile = registration.Declaration.Profile
+		})
 	];
 
 	public IReadOnlyList<UiPreviewSkipped> Skipped =>
 	[
 		.. _scan.Value.Diagnostics.Select(diagnostic => new UiPreviewSkipped
 		{
-			Member = diagnostic.Member, Reason = diagnostic.Reason,
-		}),
+			Member = diagnostic.Member, Reason = diagnostic.Reason
+		})
 	];
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		if (request.Surface.Kind != UiSurfaceKinds.DeveloperPreview ||
-			!request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var idElement) ||
-			idElement.ValueKind != JsonValueKind.String)
+		if (request.Surface.Kind != UiSurfaceKinds.DeveloperPreview
+			|| !request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var idElement)
+			|| idElement.ValueKind != JsonValueKind.String)
 		{
 			return Task.FromResult<IUiSession?>(null);
 		}

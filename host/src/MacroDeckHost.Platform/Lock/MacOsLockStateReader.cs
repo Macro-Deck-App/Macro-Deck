@@ -29,7 +29,7 @@ public sealed class MacOsLockStateReader : ILockStateReader
 
 			try
 			{
-				var key = MacOsCoreFoundation.CreateCFString(ScreenIsLockedKey);
+				var key = MacOsCoreFoundation.CreateCfString(ScreenIsLockedKey);
 				if (key == IntPtr.Zero)
 				{
 					return null;
@@ -40,7 +40,7 @@ public sealed class MacOsLockStateReader : ILockStateReader
 					// The key is only present while the screen is locked. A session dictionary that
 					// answers without it means unlocked - reporting "unknown" here would leave the
 					// last locked value standing forever and block every action until a restart.
-					return MacOsCoreFoundation.TryReadCFBool(session, key, out var locked) && locked;
+					return MacOsCoreFoundation.TryReadCfBool(session, key, out var locked) && locked;
 				}
 				finally
 				{

@@ -196,14 +196,18 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	{
 		lock (_registrationGate)
 		{
-			if (_stateUpdatesDuringRegistration.TryGetValue(pluginId, out var current) && ReferenceEquals(current, pending))
+			if (_stateUpdatesDuringRegistration.TryGetValue(pluginId, out var current)
+				&& ReferenceEquals(current, pending))
 			{
 				_stateUpdatesDuringRegistration.Remove(pluginId);
 			}
 		}
 	}
 
-	private async Task ReplayStateUpdatesAsync(string pluginId, HashSet<string> pending, CancellationToken cancellationToken)
+	private async Task ReplayStateUpdatesAsync(
+		string pluginId,
+		HashSet<string> pending,
+		CancellationToken cancellationToken)
 	{
 		while (true)
 		{
@@ -212,8 +216,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			{
 				if (pending.Count == 0)
 				{
-					if (_stateUpdatesDuringRegistration.TryGetValue(pluginId, out var current) &&
-						ReferenceEquals(current, pending))
+					if (_stateUpdatesDuringRegistration.TryGetValue(pluginId, out var current)
+						&& ReferenceEquals(current, pending))
 					{
 						_stateUpdatesDuringRegistration.Remove(pluginId);
 					}
@@ -252,15 +256,15 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 
 		var snapshot = result.Snapshot;
 		// Re-registering replays the integration's connected event, so an unchanged inbox list is not applied.
-		if (string.Equals(kind, CapabilityKinds.EmailInbox, StringComparison.Ordinal) &&
-			!EmailInboxesChanged(result.Previous, snapshot))
+		if (string.Equals(kind, CapabilityKinds.EmailInbox, StringComparison.Ordinal)
+			&& !EmailInboxesChanged(result.Previous, snapshot))
 		{
 			return;
 		}
 
-		if (string.Equals(kind, CapabilityKinds.Variables, StringComparison.Ordinal) &&
-			AcceptsUndeclaredVariables(pluginId, snapshot) &&
-			CurrentSessionId(pluginId) is { } sessionId)
+		if (string.Equals(kind, CapabilityKinds.Variables, StringComparison.Ordinal)
+			&& AcceptsUndeclaredVariables(pluginId, snapshot)
+			&& CurrentSessionId(pluginId) is { } sessionId)
 		{
 			// Kept per session: a resume or capability.declare re-registers from the negotiated kinds, and
 			// the SDK sends no second announcement after a resume.
@@ -275,16 +279,18 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	private static bool EmailInboxesChanged(
 		RemotePluginCapabilitySnapshot? previous,
 		RemotePluginCapabilitySnapshot current)
-		=> previous is null ||
-			!string.Equals(previous.EmailInboxProviderName, current.EmailInboxProviderName, StringComparison.Ordinal) ||
-			!previous.EmailInboxes.SequenceEqual(current.EmailInboxes);
+	{
+		return previous is null
+			|| !string.Equals(previous.EmailInboxProviderName, current.EmailInboxProviderName, StringComparison.Ordinal)
+			|| !previous.EmailInboxes.SequenceEqual(current.EmailInboxes);
+	}
 
 	// The SDK declares variables per eager item, so a provider that is empty at hello never negotiated the
 	// kind; a describe that answered with variables proves it serves it. Accepted without a negotiated version.
 	private bool AcceptsUndeclaredVariables(string pluginId, RemotePluginCapabilitySnapshot snapshot)
 	{
-		if (snapshot.AcceptedKinds.Contains(CapabilityKinds.Variables, StringComparer.Ordinal) ||
-			snapshot is { Variables.Count: 0, DeclaredVariables.Count: 0, SupportsVariableCatalog: false })
+		if (snapshot.AcceptedKinds.Contains(CapabilityKinds.Variables, StringComparer.Ordinal)
+			|| snapshot is { Variables.Count: 0, DeclaredVariables.Count: 0, SupportsVariableCatalog: false })
 		{
 			return false;
 		}
@@ -298,7 +304,9 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		RemotePluginCapabilitySnapshot snapshot,
 		IReadOnlySet<string> answered)
 	{
-		if (sessionId is null || !answered.Contains(CapabilityKinds.Variables) || !AcceptsUndeclaredVariables(pluginId, snapshot))
+		if (sessionId is null
+			|| !answered.Contains(CapabilityKinds.Variables)
+			|| !AcceptsUndeclaredVariables(pluginId, snapshot))
 		{
 			return snapshot;
 		}
@@ -308,19 +316,25 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	}
 
 	private static bool NeverDeclaredVariables(PluginSessionCapabilities session)
-		=> !session.Capabilities.ContainsKey(CapabilityKinds.Variables) &&
-			session.DeclaredCapabilities.All(capability =>
+	{
+		return !session.Capabilities.ContainsKey(CapabilityKinds.Variables)
+			&& session.DeclaredCapabilities.All(capability =>
 				!string.Equals(capability.Kind, CapabilityKinds.Variables, StringComparison.Ordinal));
+	}
 
 	private string? CurrentSessionId(string pluginId)
-		=> _sessionRegistry.Snapshot()
+	{
+		return _sessionRegistry.Snapshot()
 			.FirstOrDefault(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal))
 			?.SessionId;
+	}
 
 	private bool AcceptedVariablesInCurrentSession(string pluginId, PluginSessionCapabilities session)
-		=> _undeclaredVariablesSessions.TryGetValue(pluginId, out var acceptedIn) &&
-			NeverDeclaredVariables(session) &&
-			string.Equals(acceptedIn, CurrentSessionId(pluginId), StringComparison.Ordinal);
+	{
+		return _undeclaredVariablesSessions.TryGetValue(pluginId, out var acceptedIn)
+			&& NeverDeclaredVariables(session)
+			&& string.Equals(acceptedIn, CurrentSessionId(pluginId), StringComparison.Ordinal);
+	}
 
 	private async Task<bool> RegisterCoreAsync(string pluginId, CancellationToken cancellationToken)
 	{
@@ -345,9 +359,10 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		if (conflicts.Count > 0)
 		{
 			await RejectAsync(pluginId,
-				DisplayNameOf(pluginId),
-				IntegrationRegistrationResult.Invalid(conflicts),
-				cancellationToken).ConfigureAwait(false);
+					DisplayNameOf(pluginId),
+					IntegrationRegistrationResult.Invalid(conflicts),
+					cancellationToken)
+				.ConfigureAwait(false);
 			return false;
 		}
 
@@ -359,13 +374,15 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 				acceptedKinds,
 				cancellationToken,
 				probeVariables ? [CapabilityKinds.Variables] : null,
-				probeVariables ? (snapshot, answered) => AcceptProbedVariables(pluginId, sessionId, snapshot, answered) : null)
+				probeVariables
+					? (snapshot, answered) => AcceptProbedVariables(pluginId, sessionId, snapshot, answered)
+					: null)
 			.ConfigureAwait(false);
 
 		if (refreshResult.TimedOutProbes.Count > 0)
 		{
-			_logger.Information("Plugin '{PluginId}' did not answer a describe of {Kinds} within {Timeout}; " +
-				"its variables stay unavailable until it registers again",
+			_logger.Information("Plugin '{PluginId}' did not answer a describe of {Kinds} within {Timeout}; "
+				+ "its variables stay unavailable until it registers again",
 				pluginId,
 				refreshResult.TimedOutProbes,
 				RemotePluginSnapshotRefresher.ProbeTimeout);
@@ -397,14 +414,15 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			_invoker,
 			_connectionState,
 			_assetCache,
-			hasIcon: snapshot.IconBytes.Length > 0,
-			hasConfigFlow: acceptedKinds.Contains(CapabilityKinds.ConfigFlow),
-			hasDynamicEventOptions: refreshResult.Snapshot.HasDynamicEventOptions);
+			snapshot.IconBytes.Length > 0,
+			acceptedKinds.Contains(CapabilityKinds.ConfigFlow),
+			refreshResult.Snapshot.HasDynamicEventOptions);
 		adapter.VariableSubscriptions = _variableSubscriptions;
 
 		var registration = await _integrationRegistry.RegisterAsync(adapter,
-			IntegrationOrigin.Plugin,
-			IntegrationMetadata.Default).ConfigureAwait(false);
+				IntegrationOrigin.Plugin,
+				IntegrationMetadata.Default)
+			.ConfigureAwait(false);
 
 		if (!registration.Registered)
 		{
@@ -458,7 +476,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		return true;
 	}
 
-	public async Task<bool> RegisterAsync(string pluginId,
+	public async Task<bool> RegisterAsync(
+		string pluginId,
 		string sessionId,
 		IPluginConnection connection,
 		CancellationToken cancellationToken = default)
@@ -468,10 +487,10 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			return false;
 		}
 
-		if (_videoStreamProviders is not null &&
-			_sessionRegistry.GetCapabilities(pluginId)?.Capabilities is { } capabilities &&
-			capabilities.TryGetValue(CapabilityKinds.VideoStreamProvider, out var negotiated) &&
-			negotiated.Accepted)
+		if (_videoStreamProviders is not null
+			&& _sessionRegistry.GetCapabilities(pluginId)?.Capabilities is { } capabilities
+			&& capabilities.TryGetValue(CapabilityKinds.VideoStreamProvider, out var negotiated)
+			&& negotiated.Accepted)
 		{
 			try
 			{
@@ -502,7 +521,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		await _folderViewRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 		await _screenSaverRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 		await _layoutRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
-		_videoStreamSessions?.CloseOwner(pluginId, VideoStreamSessionReason.ProviderRemoved, notifyProvider: true);
+		_videoStreamSessions?.CloseOwner(pluginId, VideoStreamSessionReason.ProviderRemoved, true);
 		_videoStreamProviders?.RemoveOwner(pluginId);
 		_notificationManager?.CloseOwner(pluginId);
 
@@ -531,12 +550,14 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			var result = await bindings.RemoveIntegrationAsync(pluginId, cancellationToken).ConfigureAwait(false);
 			if (!result.Success)
 			{
-				_logger.Warning("Removed the variables of uninstalled plugin '{PluginId}' but not all of its bindings: {Error}",
+				_logger.Warning(
+					"Removed the variables of uninstalled plugin '{PluginId}' but not all of its bindings: {Error}",
 					loggedId,
 					result.ErrorMessage);
 			}
 		}
-		catch (Exception exception) when (exception is not OutOfMemoryException && !cancellationToken.IsCancellationRequested)
+		catch (Exception exception) when (exception is not OutOfMemoryException
+			&& !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Error(exception, "Failed to remove the variables of uninstalled plugin '{PluginId}'", loggedId);
 		}
@@ -813,8 +834,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 
 			if (!string.Equals(describe.Scope, scope, StringComparison.Ordinal))
 			{
-				_logger.Warning("Rejected the localization catalog declared by plugin '{PluginId}': it claimed scope " +
-					"'{ClaimedScope}' instead of its own '{OwnScope}'",
+				_logger.Warning("Rejected the localization catalog declared by plugin '{PluginId}': it claimed scope "
+					+ "'{ClaimedScope}' instead of its own '{OwnScope}'",
 					pluginId,
 					describe.Scope,
 					scope);
@@ -824,8 +845,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			if (describe.Cultures.Count == 0 || describe.Cultures.Count > ProtocolLimits.MaxLocalizationCultures)
 			{
 				_logger.Warning(
-					"Rejected the localization catalog declared by plugin '{PluginId}': it declared {Count} " +
-					"cultures, the limit is {Limit}",
+					"Rejected the localization catalog declared by plugin '{PluginId}': it declared {Count} "
+					+ "cultures, the limit is {Limit}",
 					pluginId,
 					describe.Cultures.Count,
 					ProtocolLimits.MaxLocalizationCultures);
@@ -862,8 +883,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 
 				if (!TryValidateCatalogEntries(catalogResult, out var invalidReason))
 				{
-					_logger.Warning("Rejected the localization catalog declared by plugin '{PluginId}' for culture " +
-						"'{Culture}': {Reason}",
+					_logger.Warning("Rejected the localization catalog declared by plugin '{PluginId}' for culture "
+						+ "'{Culture}': {Reason}",
 						pluginId,
 						culture,
 						invalidReason);
@@ -912,8 +933,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 
 			if (entry.Value.Length > ProtocolLimits.MaxLocalizationValueLength)
 			{
-				reason = $"the value for key '{entry.Key}' exceeds {ProtocolLimits.MaxLocalizationValueLength} " +
-					"characters";
+				reason = $"the value for key '{entry.Key}' exceeds {ProtocolLimits.MaxLocalizationValueLength} "
+					+ "characters";
 				return false;
 			}
 		}
@@ -958,14 +979,15 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			_invoker,
 			_connectionState,
 			_assetCache,
-			hasIcon: current is IIntegrationIconProvider,
-			hasConfigFlow: current is IConfigFlowProvider,
-			hasDynamicEventOptions: current is IDynamicEventOptionsProvider);
+			current is IIntegrationIconProvider,
+			current is IConfigFlowProvider,
+			current is IDynamicEventOptionsProvider);
 		adapter.VariableSubscriptions = _variableSubscriptions;
 
 		var registration = await _integrationRegistry.RegisterAsync(adapter,
-			IntegrationOrigin.Plugin,
-			IntegrationMetadata.Default).ConfigureAwait(false);
+				IntegrationOrigin.Plugin,
+				IntegrationMetadata.Default)
+			.ConfigureAwait(false);
 
 		if (registration.Registered)
 		{
@@ -982,8 +1004,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			return snapshot;
 		}
 
-		if (string.Equals(snapshot.IconContentHash, snapshot.IconBytesContentHash, StringComparison.Ordinal) &&
-			snapshot.IconBytes.Length > 0)
+		if (string.Equals(snapshot.IconContentHash, snapshot.IconBytesContentHash, StringComparison.Ordinal)
+			&& snapshot.IconBytes.Length > 0)
 		{
 			return snapshot;
 		}
@@ -1005,7 +1027,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		return updated;
 	}
 
-	private async Task<byte[]?> WaitForIconAsync(string pluginId,
+	private async Task<byte[]?> WaitForIconAsync(
+		string pluginId,
 		string contentHash,
 		CancellationToken cancellationToken)
 	{
@@ -1079,14 +1102,15 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			_invoker,
 			_connectionState,
 			_assetCache,
-			hasIcon: true,
-			hasConfigFlow: current is IConfigFlowProvider,
-			hasDynamicEventOptions: current is IDynamicEventOptionsProvider);
+			true,
+			current is IConfigFlowProvider,
+			current is IDynamicEventOptionsProvider);
 		adapter.VariableSubscriptions = _variableSubscriptions;
 
 		var registration = await _integrationRegistry.RegisterAsync(adapter,
-			IntegrationOrigin.Plugin,
-			IntegrationMetadata.Default).ConfigureAwait(false);
+				IntegrationOrigin.Plugin,
+				IntegrationMetadata.Default)
+			.ConfigureAwait(false);
 
 		if (registration.Registered)
 		{
@@ -1110,11 +1134,13 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		}
 	}
 
-	public async Task RegisterInstalledDetachedAsync(string pluginId,
+	public async Task RegisterInstalledDetachedAsync(
+		string pluginId,
 		CancellationToken cancellationToken = default)
 	{
-		if (_sessionRegistry.Snapshot().Any(session =>
-			string.Equals(session.PluginId, pluginId, StringComparison.Ordinal)))
+		if (_sessionRegistry.Snapshot()
+			.Any(session =>
+				string.Equals(session.PluginId, pluginId, StringComparison.Ordinal)))
 		{
 			return;
 		}
@@ -1144,8 +1170,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
-			if (_integrationRegistry.GetOrigin(integration.Id) != IntegrationOrigin.Plugin ||
-				present.Contains(integration.Id))
+			if (_integrationRegistry.GetOrigin(integration.Id) != IntegrationOrigin.Plugin
+				|| present.Contains(integration.Id))
 			{
 				continue;
 			}
@@ -1165,24 +1191,30 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	}
 
 	private bool HasSession(string pluginId)
-		=> _sessionRegistry.Snapshot()
+	{
+		return _sessionRegistry.Snapshot()
 			.Any(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
+	}
 
 	private bool HasSessionOtherThan(string pluginId, string sessionId)
-		=> _sessionRegistry.Snapshot()
-			.Any(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal) &&
-				!string.Equals(session.SessionId, sessionId, StringComparison.Ordinal));
+	{
+		return _sessionRegistry.Snapshot()
+			.Any(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal)
+				&& !string.Equals(session.SessionId, sessionId, StringComparison.Ordinal));
+	}
 
 	private IEnumerable<InstalledPlugin> InstalledPlugins()
-		=> _installationCatalog.Discover().Where(plugin => plugin.Versions.Count > 0);
+	{
+		return _installationCatalog.Discover().Where(plugin => plugin.Versions.Count > 0);
+	}
 
 	private async Task<bool> RegisterDetachedAsync(InstalledPlugin installed)
 	{
 		var snapshot = _snapshotStore.GetSnapshot(installed.PluginId);
-		var displayName = PluginDisplayNameResolver.Resolve(session: null,
+		var displayName = PluginDisplayNameResolver.Resolve(null,
 			ManifestNameOf(installed),
 			installed.PluginId);
-		var version = PluginVersionResolver.Resolve(installed.ActiveVersion?.Version, declaredSessionVersion: null);
+		var version = PluginVersionResolver.Resolve(installed.ActiveVersion?.Version, null);
 
 		var adapter = RemotePluginIntegrationFactory.Create(installed.PluginId,
 			displayName,
@@ -1191,15 +1223,16 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			_invoker,
 			_connectionState,
 			_assetCache,
-			hasIcon: string.Equals(snapshot.IconContentHash, snapshot.IconBytesContentHash, StringComparison.Ordinal) &&
-			snapshot.IconBytes.Length > 0,
-			hasConfigFlow: snapshot.AcceptedKinds.Contains(CapabilityKinds.ConfigFlow),
-			hasDynamicEventOptions: snapshot.HasDynamicEventOptions);
+			string.Equals(snapshot.IconContentHash, snapshot.IconBytesContentHash, StringComparison.Ordinal)
+			&& snapshot.IconBytes.Length > 0,
+			snapshot.AcceptedKinds.Contains(CapabilityKinds.ConfigFlow),
+			snapshot.HasDynamicEventOptions);
 		adapter.VariableSubscriptions = _variableSubscriptions;
 
 		var registration = await _integrationRegistry.RegisterAsync(adapter,
-			IntegrationOrigin.Plugin,
-			IntegrationMetadata.Default).ConfigureAwait(false);
+				IntegrationOrigin.Plugin,
+				IntegrationMetadata.Default)
+			.ConfigureAwait(false);
 
 		if (!registration.Registered)
 		{
@@ -1324,7 +1357,9 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	}
 
 	private static string CapabilityTypeName(string kind)
-		=> kind.Length == 0 ? kind : char.ToUpperInvariant(kind[0]) + kind[1..];
+	{
+		return kind.Length == 0 ? kind : char.ToUpperInvariant(kind[0]) + kind[1..];
+	}
 
 	private async Task RejectAsync(
 		string pluginId,
@@ -1355,8 +1390,9 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			.ConfigureAwait(false);
 
 		await _sessionRegistry.TerminateForPlugin(pluginId,
-			ProtocolCloseCodes.RegistrationRejected,
-			"Registration rejected.").ConfigureAwait(false);
+				ProtocolCloseCodes.RegistrationRejected,
+				"Registration rejected.")
+			.ConfigureAwait(false);
 	}
 
 	private async Task PublishStateChangedAsync(string pluginId, CancellationToken cancellationToken)
@@ -1390,14 +1426,14 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 
 		if (session is not null)
 		{
-			return PluginDisplayNameResolver.Resolve(session, manifestName: null, pluginId);
+			return PluginDisplayNameResolver.Resolve(session, null, pluginId);
 		}
 
 		var installed = _installationCatalog.Discover()
 			.FirstOrDefault(candidate => string.Equals(candidate.PluginId, pluginId, StringComparison.Ordinal));
 
-		return PluginDisplayNameResolver.Resolve(session: null,
-			manifestName: installed is not null ? ManifestNameOf(installed) : null,
+		return PluginDisplayNameResolver.Resolve(null,
+			installed is not null ? ManifestNameOf(installed) : null,
 			pluginId);
 	}
 
@@ -1411,8 +1447,10 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	}
 
 	private PluginSessionSnapshot? SessionSnapshotFor(string pluginId)
-		=> _sessionRegistry.Snapshot()
+	{
+		return _sessionRegistry.Snapshot()
 			.FirstOrDefault(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
+	}
 
 	private string? ManifestNameOf(InstalledPlugin installed)
 	{

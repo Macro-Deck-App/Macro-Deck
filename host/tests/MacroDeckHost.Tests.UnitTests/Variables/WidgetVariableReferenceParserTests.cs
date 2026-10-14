@@ -24,8 +24,8 @@ public class WidgetVariableReferenceParserTests
 	[Test]
 	public void TypedReferenceInStateBinding_isFound()
 	{
-		var data = "{\"mode\":\"toggle\",\"stateBinding\":{\"kind\":\"compare\"," +
-			"\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}";
+		var data = "{\"mode\":\"toggle\",\"stateBinding\":{\"kind\":\"compare\","
+			+ "\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}}";
 
 		var references = WidgetVariableReferenceParser.Parse(data);
 
@@ -40,8 +40,8 @@ public class WidgetVariableReferenceParserTests
 	[Test]
 	public void LiquidOperandInStateBinding_isFound()
 	{
-		var data = "{\"stateBinding\":{\"kind\":\"compare\"," +
-			"\"left\":\"{{ vars.mode }}\",\"operator\":\"==\",\"right\":\"on\"}}";
+		var data = "{\"stateBinding\":{\"kind\":\"compare\","
+			+ "\"left\":\"{{ vars.mode }}\",\"operator\":\"==\",\"right\":\"on\"}}";
 
 		var references = WidgetVariableReferenceParser.Parse(data);
 
@@ -52,8 +52,8 @@ public class WidgetVariableReferenceParserTests
 	public void EscapedNestedFlowJson_isFound()
 	{
 		var data
-			= "{\"flows\":\"[{\\\"blocks\\\":[{\\\"parameters\\\":{\\\"value\\\":{\\\"$var\\\":\\\"cpu\\\"}}}]}]\"," +
-			"\"stateBinding\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"}}}";
+			= "{\"flows\":\"[{\\\"blocks\\\":[{\\\"parameters\\\":{\\\"value\\\":{\\\"$var\\\":\\\"cpu\\\"}}}]}]\","
+			+ "\"stateBinding\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"}}}";
 
 		var references = WidgetVariableReferenceParser.Parse(data);
 
@@ -77,8 +77,8 @@ public class WidgetVariableReferenceParserTests
 	{
 		// "Set Variable" naming a target is not a binding operand: the binding does not read it, so a
 		// change to it must not queue a re-evaluation.
-		var data = "{\"stateBinding\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"}}," +
-			"\"flows\":\"[{\\\"action\\\":\\\"set-variable\\\",\\\"target\\\":\\\"counter\\\"}]\"}";
+		var data = "{\"stateBinding\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"}},"
+			+ "\"flows\":\"[{\\\"action\\\":\\\"set-variable\\\",\\\"target\\\":\\\"counter\\\"}]\"}";
 
 		var references = WidgetVariableReferenceParser.Parse(data);
 

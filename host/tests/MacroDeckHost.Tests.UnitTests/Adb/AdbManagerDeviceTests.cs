@@ -180,12 +180,18 @@ public class AdbManagerDeviceTests
 		});
 	}
 
-	private static bool IsDevicesList(IReadOnlyList<string> argv) =>
-		argv.Count == 2 && argv[0] == "devices" && argv[1] == "-l";
+	private static bool IsDevicesList(IReadOnlyList<string> argv)
+	{
+		return argv.Count == 2 && argv[0] == "devices" && argv[1] == "-l";
+	}
 
 	private static string DeviceLine(string serial, string state, string model = "Pixel", string product = "product")
-		=> $"{serial} {state} product:{product} model:{model} transport_id:1";
+	{
+		return $"{serial} {state} product:{product} model:{model} transport_id:1";
+	}
 
 	private static string DevicesOutput(params string[] lines)
-		=> "List of devices attached\n" + string.Join('\n', lines) + "\n";
+	{
+		return "List of devices attached\n" + string.Join('\n', lines) + "\n";
+	}
 }

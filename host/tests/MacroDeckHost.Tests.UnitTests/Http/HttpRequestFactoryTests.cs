@@ -63,7 +63,7 @@ internal sealed class HttpRequestFactoryTests
 		var headers = new Dictionary<string, string>(StringComparer.Ordinal)
 			{ ["Authorization"] = "Bearer user-typed" };
 
-		var result = HttpRequestFactory.CreateMessage(Spec(headers: headers, auth: new HttpAuthBearer("real-token")));
+		var result = HttpRequestFactory.CreateMessage(Spec(headers, new HttpAuthBearer("real-token")));
 
 		using var message = result.Message!;
 		Assert.Multiple(() =>
@@ -78,7 +78,7 @@ internal sealed class HttpRequestFactoryTests
 	{
 		var headers = new Dictionary<string, string>(StringComparer.Ordinal) { ["Content-Type"] = "text/custom" };
 
-		var result = HttpRequestFactory.CreateMessage(Spec(headers: headers, body: new HttpBodyJson("{}", null)));
+		var result = HttpRequestFactory.CreateMessage(Spec(headers, body: new HttpBodyJson("{}", null)));
 
 		using var message = result.Message!;
 		var contentTypeValues = message.Content!.Headers.GetValues("Content-Type").ToList();
@@ -95,7 +95,7 @@ internal sealed class HttpRequestFactoryTests
 		var headers = new Dictionary<string, string>(StringComparer.Ordinal) { ["Content-Type"] = "text/plain" };
 
 		HttpMessageBuildResult result = default;
-		Assert.DoesNotThrow(() => result = HttpRequestFactory.CreateMessage(Spec(headers: headers)));
+		Assert.DoesNotThrow(() => result = HttpRequestFactory.CreateMessage(Spec(headers)));
 
 		using var message = result.Message!;
 		Assert.That(message.Content, Is.Null);
@@ -176,7 +176,8 @@ internal sealed class HttpRequestFactoryTests
 		IReadOnlyDictionary<string, string>? headers = null,
 		HttpAuth? auth = null,
 		HttpBody? body = null)
-		=> new("GET",
+	{
+		return new HttpRequestSpec("GET",
 			new Uri("https://example.invalid/path"),
 			headers ?? _noHeaders,
 			auth ?? HttpAuth.None,
@@ -185,4 +186,5 @@ internal sealed class HttpRequestFactoryTests
 			true,
 			true,
 			262_144);
+	}
 }

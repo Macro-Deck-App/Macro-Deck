@@ -1,6 +1,5 @@
 using System.Text;
 using MacroDeck.Sdk.Devices;
-using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.Ui.Sessions;
 
 namespace MacroDeckHost.Tests.UnitTests.Devices.Surfaces;
@@ -11,11 +10,11 @@ internal sealed class DeviceTileFirstFitClaimTests
 	private const string TileId = "battery-tile";
 
 	private const string FirstFitTree = """
-		{"id":"group","type":"ui.first-fit","properties":{},"children":[
-			{"id":"group.inline","type":"ui.text","properties":{"text":"Mouse"}},
-			{"id":"group.stacked","type":"ui.stack","children":[
-				{"id":"group.stacked.refresh","type":"ui.button","properties":{"events":["press"]}}]}]}
-		""";
+										{"id":"group","type":"ui.first-fit","properties":{},"children":[
+											{"id":"group.inline","type":"ui.text","properties":{"text":"Mouse"}},
+											{"id":"group.stacked","type":"ui.stack","children":[
+												{"id":"group.stacked.refresh","type":"ui.button","properties":{"events":["press"]}}]}]}
+										""";
 
 	private static readonly string[] _control = ["group.stacked.refresh"];
 
@@ -35,7 +34,10 @@ internal sealed class DeviceTileFirstFitClaimTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task A_press_goes_to_a_control_in_any_layout_because_the_host_cannot_know_which_one_fits()
@@ -53,7 +55,8 @@ internal sealed class DeviceTileFirstFitClaimTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_fixture.Triggers.TriggerTypes, Is.Empty);
-			Assert.That(_fixture.UiBroker.HostEvents.Select(sent => sent.Command.NodeId).Distinct(), Is.EqualTo(_control));
+			Assert.That(_fixture.UiBroker.HostEvents.Select(sent => sent.Command.NodeId).Distinct(),
+				Is.EqualTo(_control));
 		});
 	}
 }

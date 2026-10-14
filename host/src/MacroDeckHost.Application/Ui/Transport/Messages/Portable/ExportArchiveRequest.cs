@@ -11,10 +11,12 @@ public abstract class ExportArchiveRequest
 	public string? Password { get; set; }
 
 	public virtual PortableExportOptions ToOptions()
-		=> new()
+	{
+		return new PortableExportOptions
 		{
 			IncludeIcons = IncludeIcons,
 			IncludeSecrets = IncludeSecrets,
 			Password = Password
 		};
+	}
 }

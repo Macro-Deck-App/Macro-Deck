@@ -97,7 +97,8 @@ public class PluginInstallationController : ControllerBase
 	private readonly IPluginTrustRecordRepository _trustRecords;
 	private readonly IStoreUpdateDetector _updateDetector;
 
-	public PluginInstallationController(IPluginInstaller installer,
+	public PluginInstallationController(
+		IPluginInstaller installer,
 		IPluginInstallationCatalog catalog,
 		IPluginManifestReader manifestReader,
 		IPluginArtifactCache cache,
@@ -141,7 +142,8 @@ public class PluginInstallationController : ControllerBase
 	[HttpPost("install")]
 	[RequestSizeLimit(PluginArtifactLimits.MaxArchiveBytes)]
 	[RequestFormLimits(MultipartBodyLengthLimit = PluginArtifactLimits.MaxArchiveBytes)]
-	public async Task<PluginInstallActionResponse> Install([FromForm] IFormFile? file,
+	public async Task<PluginInstallActionResponse> Install(
+		[FromForm] IFormFile? file,
 		CancellationToken ct,
 		[FromQuery] bool force = false,
 		[FromQuery] bool allowUnsigned = false)
@@ -158,7 +160,8 @@ public class PluginInstallationController : ControllerBase
 	}
 
 	[HttpPost("inspect-path")]
-	public async Task<PluginInstallActionResponse> InspectPath(InstallPluginPathRequest body,
+	public async Task<PluginInstallActionResponse> InspectPath(
+		InstallPluginPathRequest body,
 		CancellationToken ct)
 	{
 		var refusal = PortabilityHttp.RefuseUnlessDesktop(HttpContext);
@@ -171,7 +174,8 @@ public class PluginInstallationController : ControllerBase
 	}
 
 	[HttpPost("install-path")]
-	public async Task<PluginInstallActionResponse> InstallFromPath(InstallPluginPathRequest body,
+	public async Task<PluginInstallActionResponse> InstallFromPath(
+		InstallPluginPathRequest body,
 		CancellationToken ct)
 	{
 		var refusal = PortabilityHttp.RefuseUnlessDesktop(HttpContext);
@@ -186,7 +190,8 @@ public class PluginInstallationController : ControllerBase
 	}
 
 	[HttpPost("install-url")]
-	public async Task<PluginInstallActionResponse> InstallFromUrl(InstallPluginUrlRequest body,
+	public async Task<PluginInstallActionResponse> InstallFromUrl(
+		InstallPluginUrlRequest body,
 		CancellationToken ct)
 	{
 		if (!Uri.TryCreate(body.Url, UriKind.Absolute, out var url))
@@ -205,7 +210,8 @@ public class PluginInstallationController : ControllerBase
 	}
 
 	[HttpPost("{pluginId}/activate")]
-	public async Task<PluginInstallActionResponse> Activate(string pluginId,
+	public async Task<PluginInstallActionResponse> Activate(
+		string pluginId,
 		ActivatePluginVersionRequest body,
 		CancellationToken ct)
 	{
@@ -213,7 +219,8 @@ public class PluginInstallationController : ControllerBase
 	}
 
 	[HttpDelete("{pluginId}")]
-	public async Task<PluginInstallActionResponse> Uninstall(string pluginId,
+	public async Task<PluginInstallActionResponse> Uninstall(
+		string pluginId,
 		CancellationToken ct,
 		[FromQuery] bool keepData = true,
 		[FromQuery] bool force = false)
@@ -282,9 +289,10 @@ public class PluginInstallationController : ControllerBase
 	private static PluginInstallActionResponse ToResponse(PluginInstallResult result)
 	{
 		var warnings = result.Warnings.Select(warning => new PluginInstallWarningBody(warning.Code,
-			ToWireSeverity(warning.Severity),
-			warning.Message,
-			warning.SubjectId)).ToList();
+				ToWireSeverity(warning.Severity),
+				warning.Message,
+				warning.SubjectId))
+			.ToList();
 
 		var error = result.Success
 			? null
@@ -328,66 +336,78 @@ public class PluginInstallationController : ControllerBase
 				: null);
 	}
 
-	private static string ToWireSeverity(PluginInstallWarningSeverity severity) => severity switch
+	private static string ToWireSeverity(PluginInstallWarningSeverity severity)
 	{
-		PluginInstallWarningSeverity.Blocking => "blocking",
-		_ => "advisory"
-	};
+		return severity switch
+		{
+			PluginInstallWarningSeverity.Blocking => "blocking",
+			_ => "advisory"
+		};
+	}
 
 	// The four-value summary a client can branch on without knowing every fine-grained verdict. Only
 	// Trusted is ever "valid" - every other verdict, including one this build does not yet know the name
 	// of (a future enum member reaching here through a cast), lands in "invalid" or "unverified", never
 	// silently in "valid".
-	internal static string ToSignatureVerdict(PluginTrustVerdict verdict) => verdict switch
+	internal static string ToSignatureVerdict(PluginTrustVerdict verdict)
 	{
-		PluginTrustVerdict.Trusted => "valid",
-		PluginTrustVerdict.Unsigned => "not_signed",
-		PluginTrustVerdict.RevocationUnavailable => "unverified",
-		PluginTrustVerdict.VerificationUnavailable => "unverified",
-		_ => "invalid"
-	};
+		return verdict switch
+		{
+			PluginTrustVerdict.Trusted => "valid",
+			PluginTrustVerdict.Unsigned => "not_signed",
+			PluginTrustVerdict.RevocationUnavailable => "unverified",
+			PluginTrustVerdict.VerificationUnavailable => "unverified",
+			_ => "invalid"
+		};
+	}
 
-	internal static string ToTrustCategory(PluginTrustVerdict verdict) => verdict switch
+	internal static string ToTrustCategory(PluginTrustVerdict verdict)
 	{
-		PluginTrustVerdict.Unsigned => "unsigned",
-		PluginTrustVerdict.Trusted => "trusted",
-		PluginTrustVerdict.Malformed => "malformed",
-		PluginTrustVerdict.SignatureInvalid => "signature_invalid",
-		PluginTrustVerdict.ContentMismatch => "content_mismatch",
-		PluginTrustVerdict.UntrustedRoot => "untrusted_root",
-		PluginTrustVerdict.WrongCertificatePurpose => "wrong_certificate_purpose",
-		PluginTrustVerdict.CertificateNotValidAtSignature => "certificate_not_valid_at_signature",
-		PluginTrustVerdict.Revoked => "revoked",
-		PluginTrustVerdict.RevocationUnavailable => "revocation_unavailable",
-		PluginTrustVerdict.VerificationUnavailable => "verification_unavailable",
-		_ => "unknown"
-	};
+		return verdict switch
+		{
+			PluginTrustVerdict.Unsigned => "unsigned",
+			PluginTrustVerdict.Trusted => "trusted",
+			PluginTrustVerdict.Malformed => "malformed",
+			PluginTrustVerdict.SignatureInvalid => "signature_invalid",
+			PluginTrustVerdict.ContentMismatch => "content_mismatch",
+			PluginTrustVerdict.UntrustedRoot => "untrusted_root",
+			PluginTrustVerdict.WrongCertificatePurpose => "wrong_certificate_purpose",
+			PluginTrustVerdict.CertificateNotValidAtSignature => "certificate_not_valid_at_signature",
+			PluginTrustVerdict.Revoked => "revoked",
+			PluginTrustVerdict.RevocationUnavailable => "revocation_unavailable",
+			PluginTrustVerdict.VerificationUnavailable => "verification_unavailable",
+			_ => "unknown"
+		};
+	}
 
-	internal static string ToErrorCode(PluginInstallError error) => error switch
+	internal static string ToErrorCode(PluginInstallError error)
 	{
-		PluginInstallError.ArtifactNotFound => "artifact_not_found",
-		PluginInstallError.ArtifactTooLarge => "artifact_too_large",
-		PluginInstallError.InvalidArchive => "invalid_archive",
-		PluginInstallError.UnsafeEntry => "unsafe_entry",
-		PluginInstallError.ArtifactLimitExceeded => "artifact_limit_exceeded",
-		PluginInstallError.ManifestMissing => "manifest_missing",
-		PluginInstallError.ManifestInvalid => "manifest_invalid",
-		PluginInstallError.IdMismatch => "id_mismatch",
-		PluginInstallError.Incompatible => "incompatible",
-		PluginInstallError.HashMismatch => "hash_mismatch",
-		PluginInstallError.SignatureInvalid => "signature_invalid",
-		PluginInstallError.AlreadyInstalled => "already_installed",
-		PluginInstallError.StagingFailed => "staging_failed",
-		PluginInstallError.ActivationFailed => "activation_failed",
-		PluginInstallError.HealthValidationFailed => "health_validation_failed",
-		PluginInstallError.DependencyInUse => "dependency_in_use",
-		PluginInstallError.NotInstalled => "not_installed",
-		PluginInstallError.Cancelled => "cancelled",
-		PluginInstallError.SignatureUntrusted => "signature_untrusted",
-		PluginInstallError.SignatureRevoked => "signature_revoked",
-		PluginInstallError.SignatureUnverifiable => "signature_unverifiable",
-		PluginInstallError.UnsignedNotPermitted => "unsigned_not_permitted",
-		PluginInstallError.TrustDowngrade => "trust_downgrade",
-		_ => "failed"
-	};
+		return error switch
+		{
+			PluginInstallError.ArtifactNotFound => "artifact_not_found",
+			PluginInstallError.ArtifactTooLarge => "artifact_too_large",
+			PluginInstallError.InvalidArchive => "invalid_archive",
+			PluginInstallError.UnsafeEntry => "unsafe_entry",
+			PluginInstallError.ArtifactLimitExceeded => "artifact_limit_exceeded",
+			PluginInstallError.ManifestMissing => "manifest_missing",
+			PluginInstallError.ManifestInvalid => "manifest_invalid",
+			PluginInstallError.IdMismatch => "id_mismatch",
+			PluginInstallError.Incompatible => "incompatible",
+			PluginInstallError.HashMismatch => "hash_mismatch",
+			PluginInstallError.SignatureInvalid => "signature_invalid",
+			PluginInstallError.AlreadyInstalled => "already_installed",
+			PluginInstallError.StagingFailed => "staging_failed",
+			PluginInstallError.ActivationFailed => "activation_failed",
+			PluginInstallError.HealthValidationFailed => "health_validation_failed",
+			PluginInstallError.DependencyInUse => "dependency_in_use",
+			PluginInstallError.NotInstalled => "not_installed",
+			PluginInstallError.Cancelled => "cancelled",
+			PluginInstallError.SignatureUntrusted => "signature_untrusted",
+			PluginInstallError.SignatureRevoked => "signature_revoked",
+			PluginInstallError.SignatureUnverifiable => "signature_unverifiable",
+			PluginInstallError.UnsignedNotPermitted => "unsigned_not_permitted",
+			PluginInstallError.TrustDowngrade => "trust_downgrade",
+			_ => "failed"
+		};
+	}
 }

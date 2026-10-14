@@ -19,7 +19,12 @@ public static class HlsPlaylistRewriter
 		return start.Length >= Signature.Length && start[..Signature.Length].SequenceEqual("#EXTM3U"u8);
 	}
 
-	public static bool TryRewrite(string playlist, string token, Uri pinnedOrigin, Uri playlistUrl, out string rewritten)
+	public static bool TryRewrite(
+		string playlist,
+		string token,
+		Uri pinnedOrigin,
+		Uri playlistUrl,
+		out string rewritten)
 	{
 		ArgumentNullException.ThrowIfNull(playlist);
 		ArgumentException.ThrowIfNullOrEmpty(token);
@@ -76,7 +81,12 @@ public static class HlsPlaylistRewriter
 		return true;
 	}
 
-	private static bool TryRewriteLine(string line, string token, Uri pinnedOrigin, Uri playlistUrl, StringBuilder output)
+	private static bool TryRewriteLine(
+		string line,
+		string token,
+		Uri pinnedOrigin,
+		Uri playlistUrl,
+		StringBuilder output)
 	{
 		var trimmed = line.Trim();
 		if (trimmed.Length == 0)
@@ -97,8 +107,8 @@ public static class HlsPlaylistRewriter
 		}
 
 		// An EXTINF title is free text that a player never treats as a URI.
-		if (!trimmed.StartsWith("#EXT", StringComparison.Ordinal) ||
-			trimmed.StartsWith("#EXTINF", StringComparison.Ordinal))
+		if (!trimmed.StartsWith("#EXT", StringComparison.Ordinal)
+			|| trimmed.StartsWith("#EXTINF", StringComparison.Ordinal))
 		{
 			output.Append(line);
 			return true;
@@ -107,7 +117,12 @@ public static class HlsPlaylistRewriter
 		return TryRewriteTag(line, token, pinnedOrigin, playlistUrl, output);
 	}
 
-	private static bool TryRewriteTag(string line, string token, Uri pinnedOrigin, Uri playlistUrl, StringBuilder output)
+	private static bool TryRewriteTag(
+		string line,
+		string token,
+		Uri pinnedOrigin,
+		Uri playlistUrl,
+		StringBuilder output)
 	{
 		var colon = line.IndexOf(':', StringComparison.Ordinal);
 		if (colon < 0)
@@ -211,7 +226,12 @@ public static class HlsPlaylistRewriter
 		return true;
 	}
 
-	private static bool TryRewriteUri(string reference, string token, Uri pinnedOrigin, Uri playlistUrl, out string result)
+	private static bool TryRewriteUri(
+		string reference,
+		string token,
+		Uri pinnedOrigin,
+		Uri playlistUrl,
+		out string result)
 	{
 		result = reference;
 		if (reference.Length == 0 || !Uri.TryCreate(playlistUrl, reference, out var resolved))
@@ -221,20 +241,22 @@ public static class HlsPlaylistRewriter
 
 		if (resolved.Scheme != Uri.UriSchemeHttp && resolved.Scheme != Uri.UriSchemeHttps)
 		{
-			return resolved.Scheme is "data" or "skd" &&
-				reference.StartsWith(resolved.Scheme + ":", StringComparison.OrdinalIgnoreCase) &&
-				!reference.Any(char.IsControl) &&
-				!reference.Contains(' ', StringComparison.Ordinal);
+			return resolved.Scheme is "data" or "skd"
+				&& reference.StartsWith(resolved.Scheme + ":", StringComparison.OrdinalIgnoreCase)
+				&& !reference.Any(char.IsControl)
+				&& !reference.Contains(' ', StringComparison.Ordinal);
 		}
 
-		if (resolved.Scheme != pinnedOrigin.Scheme ||
-			resolved.Port != pinnedOrigin.Port ||
-			!string.Equals(resolved.Host, pinnedOrigin.Host, StringComparison.OrdinalIgnoreCase))
+		if (resolved.Scheme != pinnedOrigin.Scheme
+			|| resolved.Port != pinnedOrigin.Port
+			|| !string.Equals(resolved.Host, pinnedOrigin.Host, StringComparison.OrdinalIgnoreCase))
 		{
 			return false;
 		}
 
-		result = VideoStreamRelay.PathPrefix + token + resolved.GetComponents(UriComponents.PathAndQuery, UriFormat.UriEscaped);
+		result = VideoStreamRelay.PathPrefix
+			+ token
+			+ resolved.GetComponents(UriComponents.PathAndQuery, UriFormat.UriEscaped);
 		return true;
 	}
 }

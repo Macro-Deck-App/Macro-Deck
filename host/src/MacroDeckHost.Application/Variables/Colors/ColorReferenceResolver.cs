@@ -11,7 +11,9 @@ public interface IColorReferenceResolver
 {
 	string Resolve(string value, VariableScope scope = VariableScope.Global, string? scopeRefId = null);
 
-	RgbaColor? ResolveColor(ColorReference reference, VariableScope scope = VariableScope.Global,
+	RgbaColor? ResolveColor(
+		ColorReference reference,
+		VariableScope scope = VariableScope.Global,
 		string? scopeRefId = null);
 
 	string? ResolveData(string? json, Guid? widgetId);
@@ -29,11 +31,15 @@ public sealed class ColorReferenceResolver : IColorReferenceResolver
 	}
 
 	public string Resolve(string value, VariableScope scope = VariableScope.Global, string? scopeRefId = null)
-		=> ColorReference.TryParse(value, out var reference)
+	{
+		return ColorReference.TryParse(value, out var reference)
 			? ResolveColor(reference, scope, scopeRefId)?.ToString() ?? string.Empty
 			: value;
+	}
 
-	public RgbaColor? ResolveColor(ColorReference reference, VariableScope scope = VariableScope.Global,
+	public RgbaColor? ResolveColor(
+		ColorReference reference,
+		VariableScope scope = VariableScope.Global,
 		string? scopeRefId = null)
 	{
 		if (ColorOf(reference.Variable, scope, scopeRefId) is not { } color)
@@ -91,8 +97,8 @@ public sealed class ColorReferenceResolver : IColorReferenceResolver
 
 	public JsonElement ResolveData(JsonElement data, Guid? widgetId)
 	{
-		if (data.ValueKind is not (JsonValueKind.Object or JsonValueKind.Array) ||
-			!ColorReference.MightBeReference(data.GetRawText()))
+		if (data.ValueKind is not (JsonValueKind.Object or JsonValueKind.Array)
+			|| !ColorReference.MightBeReference(data.GetRawText()))
 		{
 			return data;
 		}
@@ -103,7 +109,10 @@ public sealed class ColorReferenceResolver : IColorReferenceResolver
 			: data;
 	}
 
-	private static VariableScope ScopeOf(Guid? widgetId) => widgetId is null ? VariableScope.Global : VariableScope.Widget;
+	private static VariableScope ScopeOf(Guid? widgetId)
+	{
+		return widgetId is null ? VariableScope.Global : VariableScope.Widget;
+	}
 
 	private bool Rewrite(JsonNode node, VariableScope scope, string? scopeRefId)
 	{
@@ -134,8 +143,8 @@ public sealed class ColorReferenceResolver : IColorReferenceResolver
 	{
 		if (child is JsonValue value)
 		{
-			if (value.GetValueKind() != JsonValueKind.String ||
-				!ColorReference.TryParse(value.GetValue<string>(), out var reference))
+			if (value.GetValueKind() != JsonValueKind.String
+				|| !ColorReference.TryParse(value.GetValue<string>(), out var reference))
 			{
 				return false;
 			}
@@ -148,23 +157,27 @@ public sealed class ColorReferenceResolver : IColorReferenceResolver
 	}
 
 	private RgbaColor? MixTarget(ColorStep step, VariableScope scope, string? scopeRefId)
-		=> step.MixColor ?? (step.MixVariable is { } name ? ColorOf(name, scope, scopeRefId) : null);
+	{
+		return step.MixColor ?? (step.MixVariable is { } name ? ColorOf(name, scope, scopeRefId) : null);
+	}
 
 	private RgbaColor? ColorOf(string name, VariableScope scope, string? scopeRefId)
 	{
 		var entity = Find(name, scope, scopeRefId);
-		return entity is { Type: VariableType.Color } &&
-			_registry.IsAvailable(entity.Id) &&
-			RgbaColor.TryParse(entity.Value, out var color)
+		return entity is { Type: VariableType.Color }
+			&& _registry.IsAvailable(entity.Id)
+			&& RgbaColor.TryParse(entity.Value, out var color)
 				? color
 				: null;
 	}
 
 	private VariableEntity? Find(string name, VariableScope scope, string? scopeRefId)
-		=> (scope != VariableScope.Global && !string.IsNullOrEmpty(scopeRefId)
+	{
+		return (scope != VariableScope.Global && !string.IsNullOrEmpty(scopeRefId)
 				? _registry.FindByName(scope, scopeRefId, name)
-				: null) ??
-			_registry.FindByName(VariableScope.Global, null, name);
+				: null)
+			?? _registry.FindByName(VariableScope.Global, null, name);
+	}
 }
 
 public static class ColorReferenceResolverExtensions

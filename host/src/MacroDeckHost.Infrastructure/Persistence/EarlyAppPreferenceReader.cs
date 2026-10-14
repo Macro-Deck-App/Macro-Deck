@@ -6,13 +6,20 @@ namespace MacroDeckHost.Infrastructure.Persistence;
 
 public static class EarlyAppPreferenceReader
 {
-	public static string? TryRead(IMacroDeckPaths paths, string key) => TryRead(paths.DatabasePath, key);
+	public static string? TryRead(IMacroDeckPaths paths, string key)
+	{
+		return TryRead(paths.DatabasePath, key);
+	}
 
 	public static string? TryRead(string databasePath, string key)
-		=> TryReadMany(databasePath, key).GetValueOrDefault(key);
+	{
+		return TryReadMany(databasePath, key).GetValueOrDefault(key);
+	}
 
 	public static IReadOnlyDictionary<string, string> TryReadMany(IMacroDeckPaths paths, params string[] keys)
-		=> TryReadMany(paths.DatabasePath, keys);
+	{
+		return TryReadMany(paths.DatabasePath, keys);
+	}
 
 	/// <summary>
 	/// Reads a preference, writing the supplied value first when the row does not exist yet. Used where
@@ -44,8 +51,8 @@ public static class EarlyAppPreferenceReader
 			using var command = connection.CreateCommand();
 			var now = DateTime.UtcNow.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
 			command.CommandText =
-				"INSERT INTO app_preference (ap_key, ap_value, ap_created_at, ap_updated_at) " +
-				"VALUES ($key, $value, $now, $now) ON CONFLICT (ap_key) DO NOTHING";
+				"INSERT INTO app_preference (ap_key, ap_value, ap_created_at, ap_updated_at) "
+				+ "VALUES ($key, $value, $now, $now) ON CONFLICT (ap_key) DO NOTHING";
 			command.Parameters.AddWithValue("$key", key);
 			command.Parameters.AddWithValue("$value", value);
 			command.Parameters.AddWithValue("$now", now);

@@ -5,7 +5,8 @@ namespace MacroDeckHost.Api.Support;
 
 public static class ArchivePathReader
 {
-	public static async Task<Result<byte[], PortabilityError>> Read(string? path,
+	public static async Task<Result<byte[], PortabilityError>> Read(
+		string? path,
 		IReadOnlyCollection<string> allowedExtensions,
 		long maxBytes,
 		CancellationToken cancellationToken)
@@ -26,7 +27,8 @@ public static class ArchivePathReader
 		}
 	}
 
-	public static Result<Stream, PortabilityError> OpenRead(string? path,
+	public static Result<Stream, PortabilityError> OpenRead(
+		string? path,
 		IReadOnlyCollection<string> allowedExtensions,
 		long maxBytes)
 	{
@@ -46,7 +48,8 @@ public static class ArchivePathReader
 		}
 	}
 
-	public static async Task<Result<byte[], PortabilityError>> ReadUpload(IFormFile? file,
+	public static async Task<Result<byte[], PortabilityError>> ReadUpload(
+		IFormFile? file,
 		CancellationToken cancellationToken)
 	{
 		if (file is null || file.Length == 0)
@@ -59,7 +62,8 @@ public static class ArchivePathReader
 		return Result.Ok<byte[], PortabilityError>(memory.ToArray());
 	}
 
-	public static Result<PortabilityError> Validate(string? path,
+	public static Result<PortabilityError> Validate(
+		string? path,
 		IReadOnlyCollection<string> allowedExtensions,
 		long maxBytes)
 	{

@@ -14,10 +14,12 @@ namespace MacroDeckHost.Ui;
 public static class UiWebSocketEndpointExtensions
 {
 	public static IEndpointConventionBuilder MapUiWebSocket(this IEndpointRouteBuilder endpoints)
-		=> endpoints.Map(UiWebSocketProtocol.Path,
+	{
+		return endpoints.Map(UiWebSocketProtocol.Path,
 				static context =>
 					context.RequestServices.GetRequiredService<UiWebSocketEndpoint>().HandleAsync(context))
 			.AllowAnonymous();
+	}
 }
 
 public sealed class UiWebSocketEndpoint(
@@ -32,14 +34,14 @@ public sealed class UiWebSocketEndpoint(
 	// Reported to the client when an outbound envelope will not fit the protocol's size limit.
 	internal const string OversizedCode = "message_too_large";
 
-	private static readonly TimeSpan SendDeadline = TimeSpan.FromSeconds(30);
-	private static readonly TimeSpan GracefulClose = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan _sendDeadline = TimeSpan.FromSeconds(30);
+	private static readonly TimeSpan _gracefulClose = TimeSpan.FromSeconds(5);
 	private static readonly ILogger _logger = Log.ForContext<UiWebSocketEndpoint>();
 
 	public async Task HandleAsync(HttpContext context)
 	{
-		if (!context.WebSockets.IsWebSocketRequest ||
-			!tickets.TryRedeem(context, context.Request.Query["ticket"], out var principal))
+		if (!context.WebSockets.IsWebSocketRequest
+			|| !tickets.TryRedeem(context, context.Request.Query["ticket"], out var principal))
 		{
 			context.Response.StatusCode = StatusCodes.Status400BadRequest;
 			return;
@@ -56,7 +58,10 @@ public sealed class UiWebSocketEndpoint(
 		await RunConnectionAsync(socket, principal, context.RequestAborted);
 	}
 
-	internal async Task RunConnectionAsync(WebSocket socket, ClaimsPrincipal principal, CancellationToken requestAborted)
+	internal async Task RunConnectionAsync(
+		WebSocket socket,
+		ClaimsPrincipal principal,
+		CancellationToken requestAborted)
 	{
 		using var cancellation
 			= CancellationTokenSource.CreateLinkedTokenSource(requestAborted, connections.ShutdownToken);
@@ -105,9 +110,9 @@ public sealed class UiWebSocketEndpoint(
 				return;
 			}
 
-			if (hello is not { Kind: "hello", ProtocolVersion: UiWebSocketProtocol.Version } ||
-				!ValidId(hello.Id) ||
-				!ValidId(hello.CorrelationId))
+			if (hello is not { Kind: "hello", ProtocolVersion: UiWebSocketProtocol.Version }
+				|| !ValidId(hello.Id)
+				|| !ValidId(hello.CorrelationId))
 			{
 				await CloseAsync(socket, WebSocketCloseStatus.PolicyViolation, "Invalid hello", CancellationToken.None);
 				return;
@@ -142,9 +147,9 @@ public sealed class UiWebSocketEndpoint(
 					break;
 				}
 
-				if (envelope.ProtocolVersion != UiWebSocketProtocol.Version ||
-					!ValidId(envelope.Id) ||
-					!ValidId(envelope.CorrelationId))
+				if (envelope.ProtocolVersion != UiWebSocketProtocol.Version
+					|| !ValidId(envelope.Id)
+					|| !ValidId(envelope.CorrelationId))
 				{
 					await CloseAsync(socket,
 						WebSocketCloseStatus.PolicyViolation,
@@ -232,7 +237,7 @@ public sealed class UiWebSocketEndpoint(
 				Cancel(request);
 			}
 
-			cancellation.Cancel();
+			await cancellation.CancelAsync();
 			await IgnoreFailures(Task.WhenAll(operations.Values));
 			if (dispatcherStarted && dispatcher is not null)
 			{
@@ -247,7 +252,8 @@ public sealed class UiWebSocketEndpoint(
 		}
 	}
 
-	private static bool TryStartDispatch(string operationId,
+	private static bool TryStartDispatch(
+		string operationId,
 		UiWebSocketDispatcher dispatcher,
 		UiWebSocketEnvelope request,
 		bool respond,
@@ -284,7 +290,8 @@ public sealed class UiWebSocketEndpoint(
 		return true;
 	}
 
-	private static async Task DispatchAsync(UiWebSocketDispatcher dispatcher,
+	private static async Task DispatchAsync(
+		UiWebSocketDispatcher dispatcher,
 		string operationId,
 		UiWebSocketEnvelope request,
 		bool respond,
@@ -329,17 +336,23 @@ public sealed class UiWebSocketEndpoint(
 	}
 
 	private static UiWebSocketEnvelope Error(UiWebSocketEnvelope request, string code, LocalizedText? message = null)
-		=> new(UiWebSocketProtocol.Version,
+	{
+		return new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
 			"error",
 			request.Type,
 			null,
 			request.Id,
 			null,
 			new UiWebSocketError(code, message));
+	}
 
-	private static bool ValidId(string? value) => value is null or { Length: <= 128 };
+	private static bool ValidId(string? value)
+	{
+		return value is null or { Length: <= 128 };
+	}
 
-	internal static async Task WriteAsync(WebSocket socket,
+	internal static async Task WriteAsync(
+		WebSocket socket,
 		ChannelReader<UiWebSocketEnvelope> reader,
 		CancellationTokenSource cancellation,
 		TimeProvider timeProvider)
@@ -356,11 +369,11 @@ public sealed class UiWebSocketEndpoint(
 						continue;
 					}
 
-					cancellation.Cancel();
+					await cancellation.CancelAsync();
 					return;
 				}
 
-				await WebSocketMessageIO.SendTextAsync(socket, bytes, SendDeadline, timeProvider, cancellation.Token);
+				await WebSocketMessageIo.SendTextAsync(socket, bytes, _sendDeadline, timeProvider, cancellation.Token);
 			}
 		}
 		catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
@@ -368,14 +381,15 @@ public sealed class UiWebSocketEndpoint(
 		}
 		catch
 		{
-			cancellation.Cancel();
+			await cancellation.CancelAsync();
 			socket.Abort();
 		}
 	}
 
 	// Reports an envelope too large to send and says whether the session may continue. This used to abort
 	// the socket silently, leaving a client waiting forever for a message it was never told was dropped.
-	private static async Task<bool> ReportOversized(WebSocket socket,
+	private static async Task<bool> ReportOversized(
+		WebSocket socket,
 		UiWebSocketEnvelope envelope,
 		int size,
 		TimeProvider timeProvider,
@@ -405,7 +419,7 @@ public sealed class UiWebSocketEndpoint(
 			var bytes = JsonSerializer.SerializeToUtf8Bytes(error, UiWebSocketProtocol.Json);
 			if (bytes.Length <= UiWebSocketProtocol.MaxMessageBytes)
 			{
-				await WebSocketMessageIO.SendTextAsync(socket, bytes, SendDeadline, timeProvider, cancellation.Token);
+				await WebSocketMessageIo.SendTextAsync(socket, bytes, _sendDeadline, timeProvider, cancellation.Token);
 				return true;
 			}
 		}
@@ -414,7 +428,8 @@ public sealed class UiWebSocketEndpoint(
 		return false;
 	}
 
-	private async Task HeartbeatAsync(WebSocket socket,
+	private async Task HeartbeatAsync(
+		WebSocket socket,
 		ChannelWriter<UiWebSocketEnvelope> writer,
 		Func<DateTimeOffset> lastInbound,
 		CancellationTokenSource cancellation)
@@ -424,7 +439,7 @@ public sealed class UiWebSocketEndpoint(
 		{
 			if (timeProvider.GetUtcNow() - lastInbound() >= TimeSpan.FromSeconds(60))
 			{
-				cancellation.Cancel();
+				await cancellation.CancelAsync();
 				socket.Abort();
 				return;
 			}
@@ -437,7 +452,7 @@ public sealed class UiWebSocketEndpoint(
 				null,
 				null)))
 			{
-				cancellation.Cancel();
+				await cancellation.CancelAsync();
 				socket.Abort();
 				return;
 			}
@@ -446,27 +461,28 @@ public sealed class UiWebSocketEndpoint(
 
 	private static async Task<UiWebSocketEnvelope?> ReceiveAsync(WebSocket socket, CancellationToken cancellationToken)
 	{
-		var bytes = await WebSocketMessageIO.ReceiveAsync(socket,
+		var bytes = await WebSocketMessageIo.ReceiveAsync(socket,
 			UiWebSocketProtocol.MaxMessageBytes,
-			requireText: true,
-			rejectOversized: true,
+			true,
+			true,
 			cancellationToken);
 		if (bytes is null)
 		{
 			return null;
 		}
 
-		return JsonSerializer.Deserialize<UiWebSocketEnvelope>(bytes, UiWebSocketProtocol.Json) ??
-			throw new JsonException();
+		return JsonSerializer.Deserialize<UiWebSocketEnvelope>(bytes, UiWebSocketProtocol.Json)
+			?? throw new JsonException();
 	}
 
-	private static async Task CloseAsync(WebSocket socket,
+	private static async Task CloseAsync(
+		WebSocket socket,
 		WebSocketCloseStatus status,
 		string reason,
 		CancellationToken cancellationToken)
 	{
 		using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		deadline.CancelAfter(SendDeadline);
+		deadline.CancelAfter(_sendDeadline);
 		try
 		{
 			if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
@@ -486,7 +502,7 @@ public sealed class UiWebSocketEndpoint(
 			return;
 		}
 
-		using var budget = new CancellationTokenSource(GracefulClose);
+		using var budget = new CancellationTokenSource(_gracefulClose);
 		await CloseAsync(socket,
 			socket.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
 			socket.CloseStatusDescription ?? string.Empty,

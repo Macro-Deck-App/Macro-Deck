@@ -79,7 +79,10 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 		await worker.WaitAsync(cancellationToken);
 	}
 
-	private void OnChanged(object? sender, BatteryDevicesChangedEventArgs args) => Request(args.RemovedIds);
+	private void OnChanged(object? sender, BatteryDevicesChangedEventArgs args)
+	{
+		Request(args.RemovedIds);
+	}
 
 	// One writer at a time: changes that arrive while it writes are coalesced into its next pass, and
 	// removed ids accumulate so none is lost to the coalescing.
@@ -169,7 +172,8 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 		}
 	}
 
-	private async Task<int> SyncOwnerAsync(IVariableService variables,
+	private async Task<int> SyncOwnerAsync(
+		IVariableService variables,
 		string owner,
 		IReadOnlyList<BatteryDeviceSnapshot> devices,
 		IReadOnlyList<string> removedIds)
@@ -231,7 +235,7 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 			LevelSuffix,
 			VariableType.Numeric,
 			0,
-			AppStrings.Integrations.Batteries.Variables.Level(device: name),
+			AppStrings.Integrations.Batteries.Variables.Level(name),
 			device.LevelPercent);
 		await UpsertAsync(variables,
 			owner,
@@ -239,7 +243,7 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 			ChargingSuffix,
 			VariableType.Boolean,
 			null,
-			AppStrings.Integrations.Batteries.Variables.Charging(device: name),
+			AppStrings.Integrations.Batteries.Variables.Charging(name),
 			connected && device.ChargeState == BatteryChargeState.Charging);
 		await UpsertAsync(variables,
 			owner,
@@ -247,7 +251,7 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 			ConnectedSuffix,
 			VariableType.Boolean,
 			null,
-			AppStrings.Integrations.Batteries.Variables.Connected(device: name),
+			AppStrings.Integrations.Batteries.Variables.Connected(name),
 			connected);
 		await UpsertAsync(variables,
 			owner,
@@ -255,7 +259,7 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 			StateSuffix,
 			VariableType.Text,
 			null,
-			AppStrings.Integrations.Batteries.Variables.State(device: name),
+			AppStrings.Integrations.Batteries.Variables.State(name),
 			connected ? ChargeStateOf(device.ChargeState) : DisconnectedState);
 		await UpsertAsync(variables,
 			owner,
@@ -263,7 +267,7 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 			TimeRemainingSuffix,
 			VariableType.Numeric,
 			0,
-			AppStrings.Integrations.Batteries.Variables.TimeRemaining(device: name),
+			AppStrings.Integrations.Batteries.Variables.TimeRemaining(name),
 			connected ? WholeMinutes(device.TimeRemaining) : 0);
 		await UpsertAsync(variables,
 			owner,
@@ -271,7 +275,7 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 			TimeToFullSuffix,
 			VariableType.Numeric,
 			0,
-			AppStrings.Integrations.Batteries.Variables.TimeToFull(device: name),
+			AppStrings.Integrations.Batteries.Variables.TimeToFull(name),
 			connected ? WholeMinutes(device.TimeToFull) : 0);
 		await UpsertAsync(variables,
 			owner,
@@ -279,11 +283,12 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 			HealthSuffix,
 			VariableType.Text,
 			null,
-			AppStrings.Integrations.Batteries.Variables.Health(device: name),
+			AppStrings.Integrations.Batteries.Variables.Health(name),
 			HealthOf(device.Health));
 	}
 
-	private async Task UpsertAsync(IVariableService variables,
+	private async Task UpsertAsync(
+		IVariableService variables,
 		string owner,
 		Group group,
 		string suffix,
@@ -383,39 +388,52 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 	}
 
 	private static string HashOf(string qualifiedId)
-		=> Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(qualifiedId)))[..HashLength];
-
-	private static string ChargeStateOf(BatteryChargeState state) => state switch
 	{
-		BatteryChargeState.Discharging => BatteryChargeStates.Discharging,
-		BatteryChargeState.Charging => BatteryChargeStates.Charging,
-		BatteryChargeState.Full => BatteryChargeStates.Full,
-		BatteryChargeState.NotCharging => BatteryChargeStates.NotCharging,
-		_ => BatteryChargeStates.Unknown
-	};
+		return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(qualifiedId)))[..HashLength];
+	}
 
-	private static string HealthOf(BatteryHealth health) => health switch
+	private static string ChargeStateOf(BatteryChargeState state)
 	{
-		BatteryHealth.Good => BatteryHealthStates.Good,
-		BatteryHealth.Overheat => BatteryHealthStates.Overheat,
-		BatteryHealth.Dead => BatteryHealthStates.Dead,
-		BatteryHealth.OverVoltage => BatteryHealthStates.OverVoltage,
-		BatteryHealth.Cold => BatteryHealthStates.Cold,
-		BatteryHealth.Failure => BatteryHealthStates.Failure,
-		_ => BatteryHealthStates.Unknown
-	};
+		return state switch
+		{
+			BatteryChargeState.Discharging => BatteryChargeStates.Discharging,
+			BatteryChargeState.Charging => BatteryChargeStates.Charging,
+			BatteryChargeState.Full => BatteryChargeStates.Full,
+			BatteryChargeState.NotCharging => BatteryChargeStates.NotCharging,
+			_ => BatteryChargeStates.Unknown
+		};
+	}
+
+	private static string HealthOf(BatteryHealth health)
+	{
+		return health switch
+		{
+			BatteryHealth.Good => BatteryHealthStates.Good,
+			BatteryHealth.Overheat => BatteryHealthStates.Overheat,
+			BatteryHealth.Dead => BatteryHealthStates.Dead,
+			BatteryHealth.OverVoltage => BatteryHealthStates.OverVoltage,
+			BatteryHealth.Cold => BatteryHealthStates.Cold,
+			BatteryHealth.Failure => BatteryHealthStates.Failure,
+			_ => BatteryHealthStates.Unknown
+		};
+	}
 
 	private static int WholeMinutes(TimeSpan? span)
-		=> span is { } value && value > TimeSpan.Zero
+	{
+		return span is { } value && value > TimeSpan.Zero
 			? (int)Math.Min(int.MaxValue, Math.Ceiling(value.TotalMinutes))
 			: 0;
+	}
 
-	private static object DefaultOf(VariableType type) => type switch
+	private static object DefaultOf(VariableType type)
 	{
-		VariableType.Numeric => 0,
-		VariableType.Boolean => false,
-		_ => string.Empty
-	};
+		return type switch
+		{
+			VariableType.Numeric => 0,
+			VariableType.Boolean => false,
+			_ => string.Empty
+		};
+	}
 
 	private static string Slug(string name)
 	{
@@ -423,7 +441,7 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 		foreach (var character in name)
 		{
 			var mapped = char.IsAsciiLetterOrDigit(character) ? char.ToLowerInvariant(character) : '_';
-			if (mapped != '_' || (builder.Length > 0 && builder[^1] != '_'))
+			if (mapped != '_' || builder.Length > 0 && builder[^1] != '_')
 			{
 				builder.Append(mapped);
 			}
@@ -438,7 +456,8 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 		return slug.Length == 0 ? FallbackSlug : slug;
 	}
 
-	[GeneratedRegex("^(?<stem>battery_(?:[a-z0-9_]*_)?(?<hash>[0-9a-f]{8}))_(?<suffix>level|charging|connected|state|time_remaining_minutes|time_to_full_minutes|health)$")]
+	[GeneratedRegex(
+		"^(?<stem>battery_(?:[a-z0-9_]*_)?(?<hash>[0-9a-f]{8}))_(?<suffix>level|charging|connected|state|time_remaining_minutes|time_to_full_minutes|health)$")]
 	private static partial Regex VariableNameRegex();
 
 	private sealed class Group(string stem)

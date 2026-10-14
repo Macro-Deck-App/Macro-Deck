@@ -11,7 +11,11 @@ public class ConfigEntryRetryAndSynchronizeCompatibilityTests
 	{
 		var lifecycle = new SynchronizesWithoutVariables();
 		IConfigEntryLifecycle asInterface = lifecycle;
-		IReadOnlyList<StoredConfigEntry> entries = [new StoredConfigEntry { Id = Guid.NewGuid(), Title = "Home" }];
+		IReadOnlyList<StoredConfigEntry> entries =
+		[
+			new()
+				{ Id = Guid.NewGuid(), Title = "Home" }
+		];
 
 		await asInterface.SynchronizeEntriesAsync(entries, new NoVariables(), CancellationToken.None);
 
@@ -25,7 +29,7 @@ public class ConfigEntryRetryAndSynchronizeCompatibilityTests
 		IConfigEntryLifecycle asInterface = lifecycle;
 		IReadOnlyList<StoredConfigEntry> entries = [];
 
-		await asInterface.SynchronizeEntriesAsync(entries, default);
+		await asInterface.SynchronizeEntriesAsync(entries, CancellationToken.None);
 		await asInterface.SynchronizeEntriesAsync(entries);
 
 		Assert.That(lifecycle.Synchronized, Has.Count.EqualTo(2));
@@ -71,7 +75,8 @@ public class ConfigEntryRetryAndSynchronizeCompatibilityTests
 	{
 		public List<IReadOnlyList<StoredConfigEntry>> Synchronized { get; } = [];
 
-		public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+		public Task SynchronizeEntriesAsync(
+			IReadOnlyList<StoredConfigEntry> entries,
 			CancellationToken cancellationToken = default)
 		{
 			Synchronized.Add(entries);
@@ -81,19 +86,34 @@ public class ConfigEntryRetryAndSynchronizeCompatibilityTests
 
 	private sealed class NoVariables : IVariableApi
 	{
-		public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => throw new NotSupportedException();
+		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableHandle?> GetByNameAsync(string name) => throw new NotSupportedException();
+		public Task<VariableHandle?> GetByNameAsync(string name)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableHandle> CreateAsync(string name,
+		public Task<VariableHandle> CreateAsync(
+			string name,
 			VariableType type,
 			object? initialValue = null,
 			int? decimalPlaces = null,
 			string? definitionId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task SetValueAsync(Guid variableId, object? value) => throw new NotSupportedException();
+		public Task SetValueAsync(Guid variableId, object? value)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task DeleteAsync(Guid variableId) => throw new NotSupportedException();
+		public Task DeleteAsync(Guid variableId)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

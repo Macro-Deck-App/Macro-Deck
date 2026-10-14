@@ -84,8 +84,8 @@ internal static class PortableExecutableIconReader
 			return null;
 		}
 
-		var payload = TryExtractFromGroup(stream, layout, resourceBase, resourceSize, types, icons) ??
-			TryExtractLargestIcon(stream, layout, resourceBase, resourceSize, icons);
+		var payload = TryExtractFromGroup(stream, layout, resourceBase, resourceSize, types, icons)
+			?? TryExtractLargestIcon(stream, layout, resourceBase, resourceSize, icons);
 		if (payload is null)
 		{
 			return null;
@@ -132,7 +132,7 @@ internal static class PortableExecutableIconReader
 		Span<byte> sectionHeader = stackalloc byte[SectionHeaderSize];
 		for (var i = 0; i < sectionCount; i++)
 		{
-			if (!TryReadAt(stream, sectionTableOffset + ((long)i * SectionHeaderSize), sectionHeader))
+			if (!TryReadAt(stream, sectionTableOffset + (long)i * SectionHeaderSize, sectionHeader))
 			{
 				return null;
 			}
@@ -146,7 +146,8 @@ internal static class PortableExecutableIconReader
 		return new PeLayout(sections, rva, size);
 	}
 
-	private static bool TryReadResourceDirectoryEntry(Stream stream,
+	private static bool TryReadResourceDirectoryEntry(
+		Stream stream,
 		long optionalHeaderOffset,
 		ushort optionalHeaderSize,
 		out uint rva,
@@ -156,7 +157,7 @@ internal static class PortableExecutableIconReader
 		size = 0;
 
 		const int prefixSize
-			= Pe32PlusDataDirectoriesOffset + ((ResourceDataDirectoryIndex + 1) * DataDirectoryEntrySize);
+			= Pe32PlusDataDirectoriesOffset + (ResourceDataDirectoryIndex + 1) * DataDirectoryEntrySize;
 		Span<byte> buffer = stackalloc byte[prefixSize];
 		var wanted = Math.Min(prefixSize, (int)optionalHeaderSize);
 		if (wanted < sizeof(ushort))
@@ -174,7 +175,7 @@ internal static class PortableExecutableIconReader
 		{
 			Pe32Magic => Pe32DataDirectoriesOffset,
 			Pe32PlusMagic => Pe32PlusDataDirectoriesOffset,
-			_ => -1,
+			_ => -1
 		};
 
 		if (directoriesOffset < 0)
@@ -183,7 +184,7 @@ internal static class PortableExecutableIconReader
 		}
 
 		var countOffset = directoriesOffset - sizeof(uint);
-		var entryOffset = directoriesOffset + (ResourceDataDirectoryIndex * DataDirectoryEntrySize);
+		var entryOffset = directoriesOffset + ResourceDataDirectoryIndex * DataDirectoryEntrySize;
 		if (entryOffset + DataDirectoryEntrySize > prefix.Length)
 		{
 			return false;
@@ -226,7 +227,8 @@ internal static class PortableExecutableIconReader
 		return false;
 	}
 
-	private static List<ResourceEntry>? TryReadDirectory(Stream stream,
+	private static List<ResourceEntry>? TryReadDirectory(
+		Stream stream,
 		long resourceBase,
 		long resourceSize,
 		uint directoryOffset)
@@ -323,7 +325,8 @@ internal static class PortableExecutableIconReader
 		return best ?? (languages.Count is 0 ? null : languages[0]);
 	}
 
-	private static bool TryResolveLeaf(Stream stream,
+	private static bool TryResolveLeaf(
+		Stream stream,
 		PeLayout layout,
 		long resourceBase,
 		long resourceSize,
@@ -370,8 +373,8 @@ internal static class PortableExecutableIconReader
 			return false;
 		}
 
-		if (!TryResolveRva(layout, payloadRva, out var payloadOffset, out var availableBytes) ||
-			availableBytes < payloadSize)
+		if (!TryResolveRva(layout, payloadRva, out var payloadOffset, out var availableBytes)
+			|| availableBytes < payloadSize)
 		{
 			return false;
 		}
@@ -381,7 +384,8 @@ internal static class PortableExecutableIconReader
 		return true;
 	}
 
-	private static byte[]? TryExtractFromGroup(Stream stream,
+	private static byte[]? TryExtractFromGroup(
+		Stream stream,
 		PeLayout layout,
 		long resourceBase,
 		long resourceSize,
@@ -423,7 +427,8 @@ internal static class PortableExecutableIconReader
 		return null;
 	}
 
-	private static byte[]? TryReadBestGroupMember(Stream stream,
+	private static byte[]? TryReadBestGroupMember(
+		Stream stream,
 		PeLayout layout,
 		long resourceBase,
 		long resourceSize,
@@ -479,7 +484,7 @@ internal static class PortableExecutableIconReader
 		count = (ushort)Math.Min((int)count, MaxGroupEntries);
 		for (var i = 0; i < count; i++)
 		{
-			var entryOffset = GroupHeaderSize + (i * GroupEntrySize);
+			var entryOffset = GroupHeaderSize + i * GroupEntrySize;
 			if (entryOffset + GroupEntrySize > groupBytes.Length)
 			{
 				break;
@@ -495,7 +500,8 @@ internal static class PortableExecutableIconReader
 		return entries;
 	}
 
-	private static byte[]? TryExtractLargestIcon(Stream stream,
+	private static byte[]? TryExtractLargestIcon(
+		Stream stream,
 		PeLayout layout,
 		long resourceBase,
 		long resourceSize,
@@ -519,7 +525,7 @@ internal static class PortableExecutableIconReader
 			}
 
 			var area = (long)width * height;
-			if (area < bestArea || (area == bestArea && bitCount <= bestBitCount))
+			if (area < bestArea || area == bestArea && bitCount <= bestBitCount)
 			{
 				continue;
 			}
@@ -533,7 +539,8 @@ internal static class PortableExecutableIconReader
 		return bestOffset < 0 ? null : TryReadBytes(stream, bestOffset, bestSize);
 	}
 
-	private static bool TryMeasurePayload(Stream stream,
+	private static bool TryMeasurePayload(
+		Stream stream,
 		long offset,
 		uint size,
 		out int width,
@@ -638,14 +645,24 @@ internal static class PortableExecutableIconReader
 	}
 
 	private static bool StartsWithPngSignature(ReadOnlySpan<byte> payload)
-		=> payload.Length >= PngSignature.Length && payload[..PngSignature.Length].SequenceEqual(PngSignature);
+	{
+		return payload.Length >= PngSignature.Length && payload[..PngSignature.Length].SequenceEqual(PngSignature);
+	}
 
-	private static int DimensionOf(byte value) => value is 0 ? 256 : value;
+	private static int DimensionOf(byte value)
+	{
+		return value is 0 ? 256 : value;
+	}
 
-	private static byte SizeByteOf(int dimension) => dimension >= 256 ? (byte)0 : (byte)dimension;
+	private static byte SizeByteOf(int dimension)
+	{
+		return dimension >= 256 ? (byte)0 : (byte)dimension;
+	}
 
 	private static bool IsPlausible(int width, int height)
-		=> width > 0 && height > 0 && width <= MaxIconDimension && height <= MaxIconDimension;
+	{
+		return width > 0 && height > 0 && width <= MaxIconDimension && height <= MaxIconDimension;
+	}
 
 	private sealed record PeLayout(Section[] Sections, uint ResourceRva, uint ResourceSize);
 

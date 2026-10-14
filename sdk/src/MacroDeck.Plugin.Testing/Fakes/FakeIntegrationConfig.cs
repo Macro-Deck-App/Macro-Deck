@@ -79,7 +79,9 @@ public sealed class FakeIntegrationConfig : IIntegrationConfig
 
 	/// <inheritdoc />
 	public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(Entries);
+	{
+		return Task.FromResult(Entries);
+	}
 
 	/// <summary>
 	/// Reads a plain value. Returns <c>null</c> for an unknown entry, an unknown key, or a key that only
@@ -172,7 +174,9 @@ public sealed class FakeIntegrationConfig : IIntegrationConfig
 	}
 
 	private static InvalidOperationException MissingEntry(Guid entryId, string key)
-		=> new($"Config entry {entryId} does not exist; '{key}' was not stored.");
+	{
+		return new InvalidOperationException($"Config entry {entryId} does not exist; '{key}' was not stored.");
+	}
 
 	// Mutable so a Set*Async can write in place under _gate without a second dictionary lookup.
 	private sealed class Entry(string title)

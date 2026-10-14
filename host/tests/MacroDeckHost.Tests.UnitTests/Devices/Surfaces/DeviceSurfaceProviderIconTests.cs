@@ -18,10 +18,16 @@ internal sealed class DeviceSurfaceProviderIconTests
 	private DeviceSurfaceFixture _fixture = null!;
 
 	[SetUp]
-	public void SetUp() => _fixture = new DeviceSurfaceFixture();
+	public void SetUp()
+	{
+		_fixture = new DeviceSurfaceFixture();
+	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	/// <summary>Scenario 27 - the compatibility floor: a legacy profile with no active icon provider still
 	/// reaches a pre-feature device provider exactly as it always has.</summary>

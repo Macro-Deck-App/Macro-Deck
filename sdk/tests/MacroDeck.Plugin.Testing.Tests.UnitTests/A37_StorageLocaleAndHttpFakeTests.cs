@@ -8,7 +8,7 @@ using MacroDeck.Sdk.Storage;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A37_StorageLocaleAndHttpFakeTests
+public class A37StorageLocaleAndHttpFakeTests
 {
 	[Test]
 	public async Task A_seeded_damaged_key_reads_as_unreadable_until_it_is_written()
@@ -40,7 +40,9 @@ public class A37_StorageLocaleAndHttpFakeTests
 
 	[Test]
 	public void The_fake_refuses_the_keys_macro_deck_refuses()
-		=> Assert.ThrowsAsync<ArgumentException>(() => new FakeIntegrationStorage().WriteAsync("../escape", "{}"));
+	{
+		Assert.ThrowsAsync<ArgumentException>(() => new FakeIntegrationStorage().WriteAsync("../escape", "{}"));
+	}
 
 	[Test]
 	public async Task An_integration_under_the_harness_uses_the_contexts_storage_locale_and_user_agent()
@@ -48,7 +50,8 @@ public class A37_StorageLocaleAndHttpFakeTests
 		var integration = new RecordingIntegration();
 		await using var harness = PluginTestHarness.Create(builder => builder.RegisterIntegration(_ => integration));
 		harness.Context.Storage.Set("greeting.txt", "hello");
-		harness.Context.Locale.TimeOfDayFormat = new TimeOfDayFormat(CultureInfo.GetCultureInfo("en-US"), HourCycles.H12);
+		harness.Context.Locale.TimeOfDayFormat
+			= new TimeOfDayFormat(CultureInfo.GetCultureInfo("en-US"), HourCycles.H12);
 		harness.Context.Http.UserAgent = "Test/1.0";
 
 		await harness.InitializeIntegrationsAsync();
@@ -80,6 +83,9 @@ public class A37_StorageLocaleAndHttpFakeTests
 			UserAgent = context.Http.UserAgent;
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

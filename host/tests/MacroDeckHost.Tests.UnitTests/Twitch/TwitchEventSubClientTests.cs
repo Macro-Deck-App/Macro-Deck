@@ -31,7 +31,7 @@ internal sealed class TwitchEventSubClientTests
 	public async Task The_welcome_carries_the_session_id_and_the_keepalive()
 	{
 		var connect = _client.ConnectAsync(_endpoint, CancellationToken.None);
-		await _pair.SendAsync(Welcome("session-42", keepalive: 10));
+		await _pair.SendAsync(Welcome("session-42", 10));
 
 		var welcome = await connect;
 
@@ -136,7 +136,7 @@ internal sealed class TwitchEventSubClientTests
 		var oversized = new string('x', TwitchEventSubClient.MaxMessageBytes + 1024);
 		await _pair.Server.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(oversized)),
 			WebSocketMessageType.Text,
-			endOfMessage: true,
+			true,
 			CancellationToken.None);
 
 		var reason = await disconnected.Task.WaitAsync(TimeSpan.FromSeconds(5));
@@ -163,12 +163,13 @@ internal sealed class TwitchEventSubClientTests
 	private async Task ConnectAsync()
 	{
 		var connect = _client.ConnectAsync(_endpoint, CancellationToken.None);
-		await _pair.SendAsync(Welcome("session-1", keepalive: 30));
+		await _pair.SendAsync(Welcome("session-1", 30));
 		await connect;
 	}
 
 	private static string Welcome(string sessionId, int keepalive)
-		=> JsonSerializer.Serialize(new
+	{
+		return JsonSerializer.Serialize(new
 		{
 			metadata = new
 			{
@@ -186,11 +187,14 @@ internal sealed class TwitchEventSubClientTests
 				}
 			}
 		});
+	}
 
 	private static string Notification(string messageId, string type, string version, string payload)
-		=> $$"""
-			 {"metadata":{"message_id":"{{messageId}}","message_type":"notification",
-			  "message_timestamp":"2026-07-30T12:00:00Z","subscription_type":"{{type}}",
-			  "subscription_version":"{{version}}"},"payload":{{payload}}}
-			 """;
+	{
+		return $$"""
+				 {"metadata":{"message_id":"{{messageId}}","message_type":"notification",
+				  "message_timestamp":"2026-07-30T12:00:00Z","subscription_type":"{{type}}",
+				  "subscription_version":"{{version}}"},"payload":{{payload}}}
+				 """;
+	}
 }

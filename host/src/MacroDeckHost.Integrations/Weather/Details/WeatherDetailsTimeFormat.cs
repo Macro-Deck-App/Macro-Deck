@@ -79,10 +79,13 @@ internal sealed record WeatherDetailsTimeFormat(CultureInfo Culture, bool Twelve
 	}
 
 	private static string? Read(UiSurface surface, string key)
-		=> surface.Attributes.TryGetValue(key, out var value) && value.ValueKind == JsonValueKind.String &&
-			value.GetString() is { Length: > 0 } text
+	{
+		return surface.Attributes.TryGetValue(key, out var value)
+			&& value.ValueKind == JsonValueKind.String
+			&& value.GetString() is { Length: > 0 } text
 				? text
 				: null;
+	}
 
 	private static bool TryCulture(string name, out CultureInfo culture)
 	{

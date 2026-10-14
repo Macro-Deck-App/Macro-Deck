@@ -11,7 +11,7 @@ namespace MacroDeckHost.Application.Services;
 
 public class WidgetService : IWidgetService
 {
-	private static readonly IReadOnlySet<Guid> EmptyRemovedIds = new HashSet<Guid>();
+	private static readonly IReadOnlySet<Guid> _emptyRemovedIds = new HashSet<Guid>();
 
 	private readonly IFolderCache _folderCache;
 	private readonly IProfileCache _profileCache;
@@ -76,7 +76,7 @@ public class WidgetService : IWidgetService
 				"The position is occupied by a pinned widget");
 		}
 
-		if (WidgetLayoutValidation.HasOverlap(folder, foreignPinned, [], [placement], EmptyRemovedIds))
+		if (WidgetLayoutValidation.HasOverlap(folder, foreignPinned, [], [placement], _emptyRemovedIds))
 		{
 			return Result.Fail<WidgetEntity, WidgetError>(WidgetError.PositionOccupied,
 				"Placements overlap the final layout");
@@ -141,7 +141,7 @@ public class WidgetService : IWidgetService
 				var foreignPinned = PinnedWidgetLayout
 					.PinnedWidgetsOutside(folder, profileFolders)
 					.ToList();
-				if (WidgetLayoutValidation.HasOverlap(folder, foreignPinned, [placement], [], EmptyRemovedIds))
+				if (WidgetLayoutValidation.HasOverlap(folder, foreignPinned, [placement], [], _emptyRemovedIds))
 				{
 					return Result.Fail<WidgetEntity, WidgetError>(WidgetError.PositionOccupied,
 						"Placements overlap the final layout");
@@ -152,9 +152,9 @@ public class WidgetService : IWidgetService
 		// Only ever claimed unchanged from two distinct snapshots: a caller that loaded the stored entity,
 		// mutated it and handed the same instance back would otherwise be comparing the new data with
 		// itself, and a real reconfiguration would look like a move.
-		var dataChanged = existing is null ||
-			ReferenceEquals(existing, widget) ||
-			!string.Equals(existing.Data, widget.Data, StringComparison.Ordinal);
+		var dataChanged = existing is null
+			|| ReferenceEquals(existing, widget)
+			|| !string.Equals(existing.Data, widget.Data, StringComparison.Ordinal);
 
 		_folderCache.UpdateWidget(widget.FolderId, widget);
 
@@ -212,7 +212,7 @@ public class WidgetService : IWidgetService
 			.PinnedWidgetsOutside(folder, profileFolders)
 			.ToList();
 
-		if (WidgetLayoutValidation.HasOverlap(folder, foreignPinned, placements, [], EmptyRemovedIds))
+		if (WidgetLayoutValidation.HasOverlap(folder, foreignPinned, placements, [], _emptyRemovedIds))
 		{
 			return Result.Fail<List<WidgetEntity>, WidgetError>(WidgetError.PositionOccupied,
 				"Placements overlap the final layout");
@@ -303,7 +303,7 @@ public class WidgetService : IWidgetService
 		widget.PinScope = resultingScope;
 		_folderCache.UpdateWidget(folderId, widget);
 
-		await _mediator.Publish(new WidgetUpdatedNotification(widget, DataChanged: false));
+		await _mediator.Publish(new WidgetUpdatedNotification(widget, false));
 
 		return Result.Ok<WidgetEntity, WidgetError>(widget);
 	}
@@ -388,7 +388,7 @@ public class WidgetService : IWidgetService
 			.PinnedWidgetsOutside(folder, profileFolders)
 			.ToList();
 
-		var removedIds = replaceIds.Count == 0 ? EmptyRemovedIds : replaceIds.ToHashSet();
+		var removedIds = replaceIds.Count == 0 ? _emptyRemovedIds : replaceIds.ToHashSet();
 
 		if (WidgetLayoutValidation.HasOverlap(folder, foreignPinned, [], addedPlacements, removedIds))
 		{
@@ -597,9 +597,6 @@ public class WidgetService : IWidgetService
 
 	private static bool SameRect(WidgetEntity a, WidgetEntity b)
 	{
-		return a.PositionX == b.PositionX &&
-			a.PositionY == b.PositionY &&
-			a.Width == b.Width &&
-			a.Height == b.Height;
+		return a.PositionX == b.PositionX && a.PositionY == b.PositionY && a.Width == b.Width && a.Height == b.Height;
 	}
 }

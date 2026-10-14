@@ -7,7 +7,10 @@ namespace MacroDeckHost.Tests.UnitTests.Keyboard;
 
 public class KeyDownActionDefinitionTests
 {
-	private static Dictionary<string, object> HoldParameters(string key, string targetProcess = "", string targetMode = "")
+	private static Dictionary<string, object> HoldParameters(
+		string key,
+		string targetProcess = "",
+		string targetMode = "")
 	{
 		var parameters = new Dictionary<string, object>
 		{
@@ -24,8 +27,10 @@ public class KeyDownActionDefinitionTests
 	}
 
 	private static Task<ActionResult> RunAsync(FakeKeyboardInputService input, Dictionary<string, object> parameters)
-		=> new KeyDownActionDefinition(input, new KeyboardLayoutService()).CreateExecutor()
+	{
+		return new KeyDownActionDefinition(input, new KeyboardLayoutService()).CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	}
 
 	[Test]
 	public async Task Holds_the_key_in_the_configured_background_target()
@@ -55,7 +60,8 @@ public class KeyDownActionDefinitionTests
 	[Test]
 	public async Task An_only_when_focused_target_that_is_not_focused_is_a_legitimate_no_op()
 	{
-		var input = new FakeKeyboardInputService { HoldUnavailableReason = KeyboardSessionUnavailableReason.NotFocused };
+		var input = new FakeKeyboardInputService
+			{ HoldUnavailableReason = KeyboardSessionUnavailableReason.NotFocused };
 
 		var result = await RunAsync(input, HoldParameters("W", "code", "focused"));
 
@@ -82,7 +88,8 @@ public class KeyDownActionDefinitionTests
 	[Test]
 	public async Task An_empty_key_succeeds_without_looking_for_the_target()
 	{
-		var input = new FakeKeyboardInputService { HoldUnavailableReason = KeyboardSessionUnavailableReason.TargetNotFound };
+		var input = new FakeKeyboardInputService
+			{ HoldUnavailableReason = KeyboardSessionUnavailableReason.TargetNotFound };
 
 		var result = await RunAsync(input, HoldParameters("", "code", "background"));
 

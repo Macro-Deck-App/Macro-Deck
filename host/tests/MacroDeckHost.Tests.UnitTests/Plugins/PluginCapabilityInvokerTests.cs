@@ -27,12 +27,18 @@ public class PluginCapabilityInvokerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _invoker.Dispose();
+	public void TearDown()
+	{
+		_invoker.Dispose();
+	}
 
-	private static CapabilityInvokeRequest Request(string kind = "actions",
+	private static CapabilityInvokeRequest Request(
+		string kind = "actions",
 		string localId = "toggle",
 		string operation = "execute")
-		=> new() { Kind = kind, LocalId = localId, Operation = operation };
+	{
+		return new CapabilityInvokeRequest { Kind = kind, LocalId = localId, Operation = operation };
+	}
 
 	private async Task<FakePluginConnection> AttachAsync(string pluginId)
 	{
@@ -56,7 +62,8 @@ public class PluginCapabilityInvokerTests
 	}
 
 	private static ProtocolEnvelope SuccessResult(string correlationId, JsonElement? data = null)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.CapabilityResult,
 			Id = Guid.CreateVersion7().ToString(),
@@ -64,15 +71,18 @@ public class PluginCapabilityInvokerTests
 			Payload = JsonSerializer.SerializeToElement(new CapabilityResultPayload { Data = data },
 				PluginProtocolJson.Options)
 		};
+	}
 
 	private static ProtocolEnvelope ErrorResult(string correlationId, string code, bool retryable = false)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.CapabilityResult,
 			Id = Guid.CreateVersion7().ToString(),
 			CorrelationId = correlationId,
 			Error = new ProtocolError { Code = code, Message = "Test.", Retryable = retryable }
 		};
+	}
 
 	[Test]
 	public async Task A_successful_round_trip_returns_the_result_payload()

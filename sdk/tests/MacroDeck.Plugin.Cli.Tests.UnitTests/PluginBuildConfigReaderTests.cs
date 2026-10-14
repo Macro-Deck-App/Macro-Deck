@@ -17,10 +17,16 @@ public class PluginBuildConfigReaderTests
 	private string _project = null!;
 
 	[SetUp]
-	public void SetUp() => _project = Directory.CreateTempSubdirectory("macrodeck-build-config-tests-").FullName;
+	public void SetUp()
+	{
+		_project = Directory.CreateTempSubdirectory("macrodeck-build-config-tests-").FullName;
+	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_project, recursive: true);
+	public void TearDown()
+	{
+		Directory.Delete(_project, true);
+	}
 
 	[Test]
 	public void A_configuration_new_writes_today_reads_back_with_every_target_intact()

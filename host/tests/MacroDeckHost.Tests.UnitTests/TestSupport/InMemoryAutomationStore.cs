@@ -18,7 +18,10 @@ internal sealed class InMemoryAutomationStore : IAutomationStore
 	public int SaveCount { get; private set; }
 	public int DeleteCount { get; private set; }
 
-	public IReadOnlyList<AutomationFile> LoadAll() => _files.Values.ToList();
+	public IReadOnlyList<AutomationFile> LoadAll()
+	{
+		return _files.Values.ToList();
+	}
 
 	public void Save(AutomationFile automation)
 	{
@@ -32,5 +35,8 @@ internal sealed class InMemoryAutomationStore : IAutomationStore
 		DeleteCount++;
 	}
 
-	public AutomationFile? Get(Guid id) => _files.GetValueOrDefault(id);
+	public AutomationFile? Get(Guid id)
+	{
+		return _files.GetValueOrDefault(id);
+	}
 }

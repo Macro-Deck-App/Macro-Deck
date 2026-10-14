@@ -9,7 +9,10 @@ public sealed class UpdateBackupSettingsRequestMessageHandler
 {
 	private readonly IAppPreferenceService _preferences;
 
-	public UpdateBackupSettingsRequestMessageHandler(IAppPreferenceService preferences) => _preferences = preferences;
+	public UpdateBackupSettingsRequestMessageHandler(IAppPreferenceService preferences)
+	{
+		_preferences = preferences;
+	}
 
 	public async ValueTask<UpdateBackupSettingsResponse> Handle(
 		UpdateBackupSettingsRequest request,

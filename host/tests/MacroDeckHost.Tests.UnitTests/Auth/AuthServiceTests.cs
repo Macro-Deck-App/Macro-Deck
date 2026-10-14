@@ -49,7 +49,9 @@ public class AuthServiceTests
 		_readiness = new StartupReadiness();
 		_readiness.MarkCachesReady();
 		_readiness.MarkVariablesReady();
-		_connections = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
+		_connections = new DeviceConnectionTracker(new RecordingEventBus(),
+			_time,
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_cutoff = new AccessTokenCutoff();
 		_epoch = new RefreshServingEpoch();
 		_lastRotation = new FakeLastServedRotation();
@@ -58,7 +60,8 @@ public class AuthServiceTests
 	}
 
 	private void BuildService()
-		=> _service = new AuthService(_users,
+	{
+		_service = new AuthService(_users,
 			_tokens,
 			new FakePasswordHasher(),
 			new FakeAccessTokenIssuer(_time),
@@ -83,6 +86,7 @@ public class AuthServiceTests
 			_preferences,
 			_time,
 			NullLogger<AuthService>.Instance);
+	}
 
 	[Test]
 	public async Task Setup_creates_the_single_user()
@@ -931,17 +935,22 @@ public class AuthServiceTests
 	}
 
 	private static ClaimsPrincipal TokenIssuedAt(DateTime issuedAt, Guid deviceId)
-		=> new(new ClaimsIdentity(
-		[
+	{
+		return new ClaimsPrincipal(new ClaimsIdentity([
 			new Claim(AuthDefaults.DeviceClaim, deviceId.ToString()),
 			new Claim(AccessTokenIssuedAt.Claim,
 				AccessTokenIssuedAt.UnixSeconds(issuedAt).ToString(CultureInfo.InvariantCulture))
 		]));
+	}
 
 	private Domain.Entities.RefreshTokenEntity TokenRow(string rawToken)
-		=> _tokens.Tokens.Single(t => t.TokenHash == TokenHasher.Hash(rawToken));
+	{
+		return _tokens.Tokens.Single(t => t.TokenHash == TokenHasher.Hash(rawToken));
+	}
 
 	private static string WrongCode(string code, int offset)
-		=> ((int.Parse(code, CultureInfo.InvariantCulture) + offset) % 1_000_000)
+	{
+		return ((int.Parse(code, CultureInfo.InvariantCulture) + offset) % 1_000_000)
 			.ToString("D6", CultureInfo.InvariantCulture);
+	}
 }

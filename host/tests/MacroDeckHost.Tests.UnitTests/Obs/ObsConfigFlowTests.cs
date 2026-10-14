@@ -14,13 +14,15 @@ internal sealed class ObsConfigFlowTests
 		string? host = "127.0.0.1",
 		object? port = null,
 		string? password = "secret")
-		=> new()
+	{
+		return new Dictionary<string, object?>
 		{
 			[ObsConfigKeys.ConfigurationName] = configurationName,
 			[ObsConfigKeys.Host] = host,
 			[ObsConfigKeys.Port] = port ?? 4455,
 			[ObsConfigKeys.Password] = password
 		};
+	}
 
 	[Test]
 	public async Task StartNewConfiguration_ShowsNameAndConnectionFieldsInOneStep()
@@ -61,7 +63,7 @@ internal sealed class ObsConfigFlowTests
 		var flow = new ObsConfigFlow(() => new FakeObsClient { ConnectRaisesConnected = true });
 
 		var result = await flow.SubmitAsync("connection",
-			ConnectionInput(configurationName: ""),
+			ConnectionInput(""),
 			_context,
 			CancellationToken.None);
 

@@ -54,10 +54,15 @@ public sealed record PluginManifestReadResult
 
 	public string? ErrorMessage { get; init; }
 
-	public static PluginManifestReadResult Ok(PluginManifest manifest) => new() { Success = true, Manifest = manifest };
+	public static PluginManifestReadResult Ok(PluginManifest manifest)
+	{
+		return new PluginManifestReadResult { Success = true, Manifest = manifest };
+	}
 
 	public static PluginManifestReadResult Fail(PluginManifestError error, string message)
-		=> new() { Success = false, Error = error, ErrorMessage = message };
+	{
+		return new PluginManifestReadResult { Success = false, Error = error, ErrorMessage = message };
+	}
 }
 
 /// <summary>
@@ -85,7 +90,8 @@ public interface IPluginManifestReader
 	/// entrypoint against a real root and checking that its file exists are both skipped.</param>
 	/// <param name="expectedPluginId">Must equal the manifest's <see cref="PluginManifest.Id"/>.</param>
 	/// <param name="expectedVersion">Must equal the manifest's <see cref="PluginManifest.Version"/>.</param>
-	PluginManifestReadResult ReadFromJson(string json,
+	PluginManifestReadResult ReadFromJson(
+		string json,
 		string? versionDirectory,
 		string expectedPluginId,
 		string expectedVersion);

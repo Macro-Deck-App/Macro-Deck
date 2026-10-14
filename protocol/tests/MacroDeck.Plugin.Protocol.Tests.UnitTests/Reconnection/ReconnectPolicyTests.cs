@@ -23,7 +23,9 @@ public class ReconnectPolicyTests
 
 	[Test]
 	public void Delay_saturates_at_the_max_delay()
-		=> Assert.That(ReconnectPolicy.DelayFor(20, 1.0), Is.EqualTo(ReconnectPolicy.MaxDelay));
+	{
+		Assert.That(ReconnectPolicy.DelayFor(20, 1.0), Is.EqualTo(ReconnectPolicy.MaxDelay));
+	}
 
 	[Test]
 	public void Jitter_sample_of_one_reproduces_the_unjittered_ceiling()
@@ -38,7 +40,9 @@ public class ReconnectPolicyTests
 
 	[Test]
 	public void Jitter_sample_of_zero_yields_zero_delay()
-		=> Assert.That(ReconnectPolicy.DelayFor(1, 0.0), Is.EqualTo(TimeSpan.Zero));
+	{
+		Assert.That(ReconnectPolicy.DelayFor(1, 0.0), Is.EqualTo(TimeSpan.Zero));
+	}
 
 	[Test]
 	public void Delay_is_never_negative_across_a_wide_range_of_attempts_and_jitter_samples()
@@ -59,12 +63,16 @@ public class ReconnectPolicyTests
 	[TestCase(0)]
 	[TestCase(-1)]
 	public void An_attempt_below_one_throws(int attempt)
-		=> Assert.Throws<ArgumentOutOfRangeException>(() => ReconnectPolicy.DelayFor(attempt, 0.5));
+	{
+		Assert.Throws<ArgumentOutOfRangeException>(() => ReconnectPolicy.DelayFor(attempt, 0.5));
+	}
 
 	[TestCase(-0.1)]
 	[TestCase(1.1)]
 	public void A_jitter_sample_outside_zero_to_one_throws(double jitterSample)
-		=> Assert.Throws<ArgumentOutOfRangeException>(() => ReconnectPolicy.DelayFor(1, jitterSample));
+	{
+		Assert.Throws<ArgumentOutOfRangeException>(() => ReconnectPolicy.DelayFor(1, jitterSample));
+	}
 
 	[Test]
 	public void Initial_delay_is_one_second_and_max_delay_is_thirty_seconds()

@@ -76,7 +76,8 @@ internal sealed class JellyfinClientTests
 		using var pair = await WebSocketPair.CreateAsync();
 		Uri? connectedTo = null;
 		string? authorization = null;
-		var client = new JellyfinClient(new JellyfinServerSettings(new Uri("https://media.local/jellyfin"), "secret-key", "device-1"),
+		var client = new JellyfinClient(
+			new JellyfinServerSettings(new Uri("https://media.local/jellyfin"), "secret-key", "device-1"),
 			new HttpClient(new RecordingHandler("[]")),
 			(uri, header, _) =>
 			{
@@ -119,9 +120,12 @@ internal sealed class JellyfinClientTests
 		var client = new JellyfinClient(new JellyfinServerSettings(new Uri("http://media.local"), "key", "device-1"),
 			new HttpClient(new RecordingHandler("[]")),
 			(_, _, _) => Task.FromResult(pair.Client),
-			subscriptionTimeout: TimeSpan.FromMilliseconds(200));
+			TimeSpan.FromMilliseconds(200));
 
-		var run = client.RunSessionSocketAsync(_ => { }, CancellationToken.None);
+		var run = client.RunSessionSocketAsync(_ =>
+			{
+			},
+			CancellationToken.None);
 		await pair.ReceiveAsync();
 		await pair.SendAsync("""{"MessageType":"ForceKeepAlive","Data":60}""");
 
@@ -129,17 +133,24 @@ internal sealed class JellyfinClientTests
 	}
 
 	private static JellyfinClient Client(RecordingHandler handler, string baseUrl = "http://media.local:8096")
-		=> new(new JellyfinServerSettings(new Uri(baseUrl), "secret-key", "device-1"),
+	{
+		return new JellyfinClient(new JellyfinServerSettings(new Uri(baseUrl), "secret-key", "device-1"),
 			new HttpClient(handler),
 			(_, _, _) => Task.FromException<WebSocket>(new WebSocketException("no socket")));
+	}
 
-	private sealed record RecordedRequest(Uri Uri, string? Authorization, IReadOnlyList<string> HeaderNames, string? Body);
+	private sealed record RecordedRequest(
+		Uri Uri,
+		string? Authorization,
+		IReadOnlyList<string> HeaderNames,
+		string? Body);
 
 	private sealed class RecordingHandler(string body, HttpStatusCode status = HttpStatusCode.OK) : HttpMessageHandler
 	{
 		public List<RecordedRequest> Requests { get; } = [];
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override async Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			var content = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);

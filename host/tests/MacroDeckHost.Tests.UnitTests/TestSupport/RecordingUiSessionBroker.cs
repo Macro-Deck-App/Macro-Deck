@@ -16,19 +16,28 @@ internal sealed class RecordingUiSessionBroker : IUiSessionBroker
 		return UiSessionOpenTicket.Rejected("not_supported", "not supported in this fake");
 	}
 
-	public Task<UiSessionOpenTicket> OpenAsync(string providerId,
+	public Task<UiSessionOpenTicket> OpenAsync(
+		string providerId,
 		UiSurface surface,
 		string ownerPrincipal,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(Open(providerId, surface, ownerPrincipal));
+	{
+		return Task.FromResult(Open(providerId, surface, ownerPrincipal));
+	}
 
 	public List<Guid> InvalidatedWidgets { get; } = [];
 
 	public List<Guid> ClosedWidgets { get; } = [];
 
-	public void InvalidateWidgetSessions(Guid widgetId) => InvalidatedWidgets.Add(widgetId);
+	public void InvalidateWidgetSessions(Guid widgetId)
+	{
+		InvalidatedWidgets.Add(widgetId);
+	}
 
-	public void CloseWidgetSessions(Guid widgetId, string reason) => ClosedWidgets.Add(widgetId);
+	public void CloseWidgetSessions(Guid widgetId, string reason)
+	{
+		ClosedWidgets.Add(widgetId);
+	}
 
 	public UiRawJson? Tree { get; set; }
 
@@ -66,10 +75,16 @@ internal sealed class RecordingUiSessionBroker : IUiSessionBroker
 		return Task.CompletedTask;
 	}
 
-	public bool CloseOwned(string? sessionId, string principal, string reason) => false;
+	public bool CloseOwned(string? sessionId, string principal, string reason)
+	{
+		return false;
+	}
 
 	public UiAttachSessionResponse Attach(string? sessionId, string connectionId, string principal)
-		=> new() { Accepted = false, SessionId = string.Empty, Code = "not_supported", Message = null };
+	{
+		return new UiAttachSessionResponse
+			{ Accepted = false, SessionId = string.Empty, Code = "not_supported", Message = null };
+	}
 
 	public void Detach(string? sessionId, string connectionId)
 	{
@@ -79,20 +94,27 @@ internal sealed class RecordingUiSessionBroker : IUiSessionBroker
 	{
 	}
 
-	public UiSendEventResponse SendEvent(UiSendEventRequest request,
+	public UiSendEventResponse SendEvent(
+		UiSendEventRequest request,
 		string connectionId,
 		string? actingClientId = null)
-		=> new() { Accepted = false, Code = "not_supported", Message = null };
+	{
+		return new UiSendEventResponse { Accepted = false, Code = "not_supported", Message = null };
+	}
 
 	public void SweepDraining()
 	{
 	}
 
 	public UiSessionIngestResult PublishSnapshot(string providerId, string sessionId, UiRawJson tree)
-		=> new() { Accepted = false, Code = "not_supported", Message = null };
+	{
+		return new UiSessionIngestResult { Accepted = false, Code = "not_supported", Message = null };
+	}
 
 	public UiSessionIngestResult PublishPatch(string providerId, string sessionId, UiRawJson patch)
-		=> new() { Accepted = false, Code = "not_supported", Message = null };
+	{
+		return new UiSessionIngestResult { Accepted = false, Code = "not_supported", Message = null };
+	}
 
 	public void PublishFault(string providerId, string sessionId, string code, string? message)
 	{

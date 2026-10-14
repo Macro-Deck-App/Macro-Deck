@@ -34,7 +34,8 @@ public sealed class BackupService : IBackupService
 	private readonly TimeProvider _time;
 	private readonly DurableJsonFile _importedStore;
 
-	public BackupService(IBackupOperationGate gate,
+	public BackupService(
+		IBackupOperationGate gate,
 		IBackupProgressReporter progress,
 		IBackupSnapshotSource snapshotSource,
 		IBackupArchiveWriter archiveWriter,
@@ -63,7 +64,8 @@ public sealed class BackupService : IBackupService
 			logger.ForContext<BackupService>());
 	}
 
-	public async Task<Result<BackupDescriptor, BackupError>> Create(CreateBackupRequest request,
+	public async Task<Result<BackupDescriptor, BackupError>> Create(
+		CreateBackupRequest request,
 		CancellationToken cancellationToken = default)
 	{
 		var leaseResult = await AcquireCreateLease(request.Trigger, cancellationToken);
@@ -116,7 +118,7 @@ public sealed class BackupService : IBackupService
 				BackupOperationStage.CreatingSnapshot,
 				request.Trigger,
 				backupId,
-				totalBytes: plan.TotalBytes);
+				plan.TotalBytes);
 
 			var databaseCopyPath = Path.Combine(stagingDirectory, "database.db");
 			await _snapshotSource.CopyDatabase(databaseCopyPath, cancellationToken);
@@ -133,12 +135,12 @@ public sealed class BackupService : IBackupService
 				BackupOperationStage.Encrypting,
 				request.Trigger,
 				backupId,
-				totalBytes: plan.TotalBytes);
+				plan.TotalBytes);
 			ReportStatus(operationId,
 				BackupOperationStage.Saving,
 				request.Trigger,
 				backupId,
-				totalBytes: plan.TotalBytes);
+				plan.TotalBytes);
 
 			var archivePath = Path.Combine(stagingDirectory, "archive" + BackupFileNames.Extension);
 			await using (var archiveStream
@@ -154,7 +156,7 @@ public sealed class BackupService : IBackupService
 				BackupOperationStage.Validating,
 				request.Trigger,
 				backupId,
-				totalBytes: plan.TotalBytes);
+				plan.TotalBytes);
 
 			var validationPath = Path.Combine(stagingDirectory, "validation.tmp");
 
@@ -202,8 +204,8 @@ public sealed class BackupService : IBackupService
 				manifest.Encryption.Version,
 				writeResult.Data.SizeBytes,
 				provider.Capabilities.IsRemote,
-				DecryptableLocally: true,
-				Imported: false,
+				true,
+				false,
 				manifest.Note,
 				[.. manifest.Components]);
 
@@ -211,7 +213,7 @@ public sealed class BackupService : IBackupService
 				BackupOperationStage.Completed,
 				request.Trigger,
 				backupId,
-				totalBytes: plan.TotalBytes);
+				plan.TotalBytes);
 
 			await PublishListChanged("created", cancellationToken);
 			await _retention.Apply(cancellationToken);
@@ -243,7 +245,8 @@ public sealed class BackupService : IBackupService
 		return Result.Ok<IReadOnlyList<BackupDescriptor>, BackupError>(backups);
 	}
 
-	public async Task<Result<BackupInspection, BackupError>> Inspect(BackupSourceRef source,
+	public async Task<Result<BackupInspection, BackupError>> Inspect(
+		BackupSourceRef source,
 		string? recoveryKey,
 		CancellationToken cancellationToken = default)
 	{
@@ -274,8 +277,8 @@ public sealed class BackupService : IBackupService
 			var resolved = await recoveryKeyService.Resolve(cancellationToken);
 			var localKey = resolved.Success ? resolved.Data : null;
 			var localKeyId = localKey is not null ? BackupKeyDerivation.DeriveKeyId(localKey) : null;
-			var recoveryKeyRequired = localKeyId is null ||
-				!string.Equals(manifest.RecoveryKeyId, localKeyId, StringComparison.Ordinal);
+			var recoveryKeyRequired = localKeyId is null
+				|| !string.Equals(manifest.RecoveryKeyId, localKeyId, StringComparison.Ordinal);
 
 			byte[]? effectiveKey = null;
 			var keySupplied = !string.IsNullOrWhiteSpace(recoveryKey);
@@ -318,8 +321,8 @@ public sealed class BackupService : IBackupService
 				manifest.Encryption.Version,
 				stream.Length,
 				provider?.Capabilities.IsRemote ?? false,
-				DecryptableLocally: !recoveryKeyRequired,
-				Imported: false,
+				!recoveryKeyRequired,
+				false,
 				manifest.Note,
 				[.. manifest.Components]);
 
@@ -329,7 +332,8 @@ public sealed class BackupService : IBackupService
 		}
 	}
 
-	public async Task<Result<BackupDescriptor, BackupError>> Import(BackupSourceRef source,
+	public async Task<Result<BackupDescriptor, BackupError>> Import(
+		BackupSourceRef source,
 		CancellationToken cancellationToken = default)
 	{
 		var opened = await OpenSource(source, cancellationToken);
@@ -392,9 +396,8 @@ public sealed class BackupService : IBackupService
 				manifest.Encryption.Version,
 				writeResult.Data.SizeBytes,
 				provider.Capabilities.IsRemote,
-				DecryptableLocally: localKeyId is not null &&
-				string.Equals(manifest.RecoveryKeyId, localKeyId, StringComparison.Ordinal),
-				Imported: true,
+				localKeyId is not null && string.Equals(manifest.RecoveryKeyId, localKeyId, StringComparison.Ordinal),
+				true,
 				manifest.Note,
 				[.. manifest.Components]);
 
@@ -404,7 +407,8 @@ public sealed class BackupService : IBackupService
 		}
 	}
 
-	public async Task<Result<BackupExportHandle, BackupError>> OpenExport(Guid backupId,
+	public async Task<Result<BackupExportHandle, BackupError>> OpenExport(
+		Guid backupId,
 		CancellationToken cancellationToken = default)
 	{
 		var descriptor = await _catalog.Find(backupId, cancellationToken);
@@ -459,7 +463,8 @@ public sealed class BackupService : IBackupService
 		return Result.Ok<BackupError>();
 	}
 
-	private async Task<Result<IBackupOperationLease, BackupError>> AcquireCreateLease(BackupTrigger trigger,
+	private async Task<Result<IBackupOperationLease, BackupError>> AcquireCreateLease(
+		BackupTrigger trigger,
 		CancellationToken cancellationToken)
 	{
 		// The two triggers that block something destructive wait up to a minute for the lease; every
@@ -470,7 +475,8 @@ public sealed class BackupService : IBackupService
 			: _gate.TryAcquire(BackupOperationKind.Create, trigger);
 	}
 
-	private Result<BackupDescriptor, BackupError> Fail(Guid operationId,
+	private Result<BackupDescriptor, BackupError> Fail(
+		Guid operationId,
 		BackupTrigger trigger,
 		Guid backupId,
 		BackupError error,
@@ -485,14 +491,16 @@ public sealed class BackupService : IBackupService
 		return Result.Fail<BackupDescriptor, BackupError>(error, errorMessage);
 	}
 
-	private void ReportStatus(Guid operationId,
+	private void ReportStatus(
+		Guid operationId,
 		BackupOperationStage stage,
 		BackupTrigger trigger,
 		Guid? backupId,
 		long? totalBytes = null,
 		BackupError? error = null,
 		string? errorMessage = null)
-		=> _progress.Report(new BackupOperationStatus(operationId,
+	{
+		_progress.Report(new BackupOperationStatus(operationId,
 			BackupOperationKind.Create,
 			stage,
 			trigger,
@@ -503,8 +511,10 @@ public sealed class BackupService : IBackupService
 			error,
 			errorMessage,
 			_time.GetUtcNow()));
+	}
 
-	private async Task<Result<ResolvedSource, BackupError>> OpenSource(BackupSourceRef source,
+	private async Task<Result<ResolvedSource, BackupError>> OpenSource(
+		BackupSourceRef source,
 		CancellationToken cancellationToken)
 	{
 		if (!string.IsNullOrWhiteSpace(source.FilePath))
@@ -547,7 +557,8 @@ public sealed class BackupService : IBackupService
 			"A backup source must specify a file path or a provider and storage id.");
 	}
 
-	private async Task<IReadOnlyList<BackupComponentGroupInfo>> ReadComponentsFromPayload(Stream archive,
+	private async Task<IReadOnlyList<BackupComponentGroupInfo>> ReadComponentsFromPayload(
+		Stream archive,
 		byte[] key,
 		BackupArchiveManifest manifest,
 		CancellationToken cancellationToken)
@@ -598,8 +609,7 @@ public sealed class BackupService : IBackupService
 	private void MarkImported(Guid backupId)
 	{
 		var path = ImportedBackupRegistry.ResolvePath(_paths);
-		var document = _importedStore.Read<ImportedBackupsDocument>(path, repair: false) ??
-			new ImportedBackupsDocument();
+		var document = _importedStore.Read<ImportedBackupsDocument>(path, false) ?? new ImportedBackupsDocument();
 		if (document.BackupIds.Contains(backupId))
 		{
 			return;
@@ -616,13 +626,15 @@ public sealed class BackupService : IBackupService
 		await publisher.Publish(new BackupListChangedNotification(reason), cancellationToken);
 	}
 
-	private static BackupArchiveManifest BuildManifest(Guid backupId,
+	private static BackupArchiveManifest BuildManifest(
+		Guid backupId,
 		CreateBackupRequest request,
 		Guid installationId,
 		ReadOnlyMemory<byte> recoveryKey,
 		string schemaVersion,
 		DateTimeOffset createdAt)
-		=> new()
+	{
+		return new BackupArchiveManifest
 		{
 			BackupId = backupId,
 			MacroDeckVersion = HostVersion.Current,
@@ -635,16 +647,20 @@ public sealed class BackupService : IBackupService
 			DatabaseSchemaVersion = schemaVersion,
 			Components = [.. BackupComponentGroups.AllIds]
 		};
+	}
 
 	private static IReadOnlyList<BackupComponentGroupInfo> DeclaredComponents(BackupArchiveManifest manifest)
-		=>
+	{
+		return
 		[
 			.. manifest.Components.Select(id =>
 				new BackupComponentGroupInfo(id, 0, 0, BackupComponentGroups.Definition(id).Requires))
 		];
+	}
 
 	private static BackupError MapCryptoError(BackupDecryptResult result)
-		=> result switch
+	{
+		return result switch
 		{
 			BackupDecryptResult.WrongKey => BackupError.RecoveryKeyInvalid,
 			BackupDecryptResult.Corrupt or BackupDecryptResult.Truncated => BackupError.IntegrityFailure,
@@ -652,6 +668,7 @@ public sealed class BackupService : IBackupService
 			BackupDecryptResult.TooLarge => BackupError.TooLarge,
 			_ => BackupError.InvalidArchive
 		};
+	}
 
 	private static void TryDeleteFile(string path)
 	{
@@ -673,7 +690,7 @@ public sealed class BackupService : IBackupService
 		{
 			if (Directory.Exists(path))
 			{
-				Directory.Delete(path, recursive: true);
+				Directory.Delete(path, true);
 			}
 		}
 		catch (Exception e) when (e is IOException or UnauthorizedAccessException)

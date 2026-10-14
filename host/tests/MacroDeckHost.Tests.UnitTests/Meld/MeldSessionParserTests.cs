@@ -146,7 +146,7 @@ internal sealed class MeldSessionParserTests
 			}}
 			""";
 
-		MeldSession session = default!;
+		MeldSession session = null!;
 		Assert.DoesNotThrow(() => session = Parse(json));
 
 		Assert.Multiple(() =>

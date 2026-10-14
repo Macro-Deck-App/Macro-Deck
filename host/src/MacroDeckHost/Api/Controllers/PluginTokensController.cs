@@ -70,30 +70,31 @@ public class PluginTokensController : ControllerBase
 			.ToHashSet(StringComparer.Ordinal);
 
 		var body = tokens.Select(token =>
-		{
-			var tokenRegistrations = registrations
-				.Where(registration => registration.AccessTokenId == token.Id)
-				.Select(registration => new PluginRegistrationSummaryBody(registration.PluginId,
-					registration.DisplayName,
-					registration.CreatedAt,
-					registration.LastSeenAt,
-					registration.RevokedAt,
-					liveSessionPluginIds.Contains(registration.PluginId)))
-				.ToList();
+			{
+				var tokenRegistrations = registrations
+					.Where(registration => registration.AccessTokenId == token.Id)
+					.Select(registration => new PluginRegistrationSummaryBody(registration.PluginId,
+						registration.DisplayName,
+						registration.CreatedAt,
+						registration.LastSeenAt,
+						registration.RevokedAt,
+						liveSessionPluginIds.Contains(registration.PluginId)))
+					.ToList();
 
-			var activeSessionCount = tokenRegistrations
-				.Count(registration => liveSessionPluginIds.Contains(registration.PluginId));
+				var activeSessionCount = tokenRegistrations
+					.Count(registration => liveSessionPluginIds.Contains(registration.PluginId));
 
-			return new PluginAccessTokenBody(token.Id,
-				token.Name,
-				token.Scopes,
-				token.CreatedAt,
-				token.ExpiresAt,
-				token.LastUsedAt,
-				token.RevokedAt,
-				tokenRegistrations,
-				activeSessionCount);
-		}).ToList();
+				return new PluginAccessTokenBody(token.Id,
+					token.Name,
+					token.Scopes,
+					token.CreatedAt,
+					token.ExpiresAt,
+					token.LastUsedAt,
+					token.RevokedAt,
+					tokenRegistrations,
+					activeSessionCount);
+			})
+			.ToList();
 
 		return new GetPluginTokensResponse(body);
 	}

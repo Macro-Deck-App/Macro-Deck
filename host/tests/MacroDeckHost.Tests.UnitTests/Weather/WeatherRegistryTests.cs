@@ -11,7 +11,10 @@ public class WeatherRegistryTests
 	private static WeatherRegistry BuildRegistry(
 		IEnumerable<IIntegration> integrations,
 		IEnumerable<string>? disabled = null)
-		=> new(new ConfigurableIntegrationRegistry(integrations, disabled), new LoggerConfiguration().CreateLogger());
+	{
+		return new WeatherRegistry(new ConfigurableIntegrationRegistry(integrations, disabled),
+			new LoggerConfiguration().CreateLogger());
+	}
 
 	[Test]
 	public void GetInstances_PrefixesIdsWithIntegrationId()
@@ -35,7 +38,7 @@ public class WeatherRegistryTests
 	[Test]
 	public void GetInstances_FallsBackToTheIntegrationNameWhenTheProviderStatesNoName()
 	{
-		var integration = new FakeWeatherProviderIntegration("app.weather", providerName: string.Empty, "berlin");
+		var integration = new FakeWeatherProviderIntegration("app.weather", string.Empty, "berlin");
 		var registry = BuildRegistry([integration]);
 
 		Assert.That(registry.GetInstances()[0].ProviderName, Is.EqualTo(integration.Name));
@@ -45,7 +48,7 @@ public class WeatherRegistryTests
 	public void GetInstances_ExcludesDisabledProviders()
 	{
 		var integration = new FakeWeatherProviderIntegration("app.weather", "Open-Meteo", "berlin");
-		var registry = BuildRegistry([integration], disabled: ["app.weather"]);
+		var registry = BuildRegistry([integration], ["app.weather"]);
 
 		Assert.That(registry.GetInstances(), Is.Empty);
 	}

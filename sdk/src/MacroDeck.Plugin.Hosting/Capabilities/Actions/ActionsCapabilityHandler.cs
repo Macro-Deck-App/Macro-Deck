@@ -38,7 +38,8 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 	public string Kind => CapabilityKinds.Actions;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=>
+	{
+		return
 		[
 			.. _integrations
 				.SelectMany(integration => integration.Actions)
@@ -51,6 +52,7 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 					DisplayName = PluginText.ToLiteral(action.Name)
 				})
 		];
+	}
 
 	public async Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -91,7 +93,8 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 		return CapabilityInvocationResult.Ok(payload);
 	}
 
-	private async Task<CapabilityInvocationResult> ExecuteAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> ExecuteAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var definition = Find(invocation.LocalId);
@@ -136,7 +139,8 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 		return MapExecuteResult(result);
 	}
 
-	private async Task<CapabilityInvocationResult> GetOptionsAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> GetOptionsAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		if (Find(invocation.LocalId) is not IDynamicOptionsActionDefinition definition)
@@ -170,7 +174,8 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 		});
 	}
 
-	private async Task<CapabilityInvocationResult> GetActionStateAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> GetActionStateAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		if (Find(invocation.LocalId) is not IStateProviderActionDefinition definition)
@@ -212,7 +217,8 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 			});
 	}
 
-	private async Task<CapabilityInvocationResult> GetActionIconAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> GetActionIconAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		if (Find(invocation.LocalId) is not IIconProviderActionDefinition definition)
@@ -248,7 +254,8 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 	/// over-threshold path: reject an oversized icon outright, otherwise upload it through the
 	/// <c>asset.*</c> pipeline and reply with the content hash the host now holds.
 	/// </summary>
-	private async Task<CapabilityInvocationResult> GetActionIconContentAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> GetActionIconContentAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		if (Find(invocation.LocalId) is not IIconProviderActionDefinition definition)
@@ -299,13 +306,16 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 	}
 
 	private IActionDefinition? Find(string localId)
-		=> _integrations
+	{
+		return _integrations
 			.SelectMany(integration => integration.Actions)
 			.Where(action => action.RunsHere())
 			.FirstOrDefault(action => string.Equals(action.Id, localId, StringComparison.Ordinal));
+	}
 
 	private static ActionDescriptorDto ToDto(IActionDefinition action)
-		=> new()
+	{
+		return new ActionDescriptorDto
 		{
 			LocalId = action.Id,
 			Name = PluginText.ToWire(action.Name),
@@ -318,16 +328,22 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 			ProvidesIcon = action is IIconProviderActionDefinition,
 			Role = action.Role
 		};
+	}
 
 	private static ActionParameterOptionDto ToDto(ActionParameterOption option)
-		=> new() { Value = option.Value, Label = PluginText.ToWireOrNull(option.Label), Metadata = option.Metadata };
+	{
+		return new ActionParameterOptionDto
+			{ Value = option.Value, Label = PluginText.ToWireOrNull(option.Label), Metadata = option.Metadata };
+	}
 
 	/// <summary>Reconstructs a <see cref="JsonElement" /> object from a wire dictionary, so the shared
 	/// <see cref="ActionArgumentBinder" /> can bind it exactly as it binds an <c>execute</c> payload.</summary>
 	private static JsonElement? SerializeParameters(IReadOnlyDictionary<string, JsonElement>? parameters)
-		=> parameters is null
+	{
+		return parameters is null
 			? null
 			: JsonSerializer.SerializeToElement(parameters, PluginProtocolJson.Options);
+	}
 
 	private static Dictionary<string, object?> ToObjectDictionary(
 		IReadOnlyDictionary<string, JsonElement> parameters,

@@ -20,16 +20,19 @@ internal static class TwitchActionValues
 	}
 
 	public static bool ReadBool(IReadOnlyDictionary<string, object> parameters, string name, bool fallback = false)
-		=> parameters.GetValueOrDefault(name) switch
+	{
+		return parameters.GetValueOrDefault(name) switch
 		{
 			null => fallback,
 			bool b => b,
 			string s when bool.TryParse(s, out var parsed) => parsed,
 			_ => fallback
 		};
+	}
 
 	public static int? ReadInt(IReadOnlyDictionary<string, object> parameters, string name)
-		=> parameters.GetValueOrDefault(name) switch
+	{
+		return parameters.GetValueOrDefault(name) switch
 		{
 			null => null,
 			int i => i,
@@ -42,16 +45,21 @@ internal static class TwitchActionValues
 				out var parsed) => parsed,
 			_ => null
 		};
+	}
 
 	public static IReadOnlyList<string> ReadLines(IReadOnlyDictionary<string, object> parameters, string name)
-		=> ReadText(parameters, name)
-				?.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ??
-			[];
+	{
+		return ReadText(parameters, name)
+				?.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+			?? [];
+	}
 
 	public static IReadOnlyList<string> ReadList(IReadOnlyDictionary<string, object> parameters, string name)
-		=> ReadText(parameters, name)
-				?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ??
-			[];
+	{
+		return ReadText(parameters, name)
+				?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+			?? [];
+	}
 
 	public static string? ReadLogin(IReadOnlyDictionary<string, object> parameters, string name)
 	{

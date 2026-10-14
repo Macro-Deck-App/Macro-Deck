@@ -24,7 +24,7 @@ public class UserVariableWriterOwnerUnavailableTests
 	[Test]
 	public async Task A_disabled_owner_is_named_by_its_display_name()
 	{
-		using var harness = await Harness.Create(new WritableProvider(), disabled: true);
+		using var harness = await Harness.Create(new WritableProvider(), true);
 
 		var result = await harness.Set("gain", "5");
 
@@ -32,14 +32,14 @@ public class UserVariableWriterOwnerUnavailableTests
 		{
 			Assert.That(result.Status, Is.EqualTo(UserVariableWriteStatus.Unavailable));
 			Assert.That(result.Message,
-				Is.EqualTo(TestLocalization.Resolve(AppStrings.Errors.Variables.OwnerUnavailable(integration: OwnerName))));
+				Is.EqualTo(TestLocalization.Resolve(AppStrings.Errors.Variables.OwnerUnavailable(OwnerName))));
 		});
 	}
 
 	[Test]
 	public async Task The_message_follows_the_active_language()
 	{
-		using var harness = await Harness.Create(new WritableProvider(), disabled: true, culture: "de");
+		using var harness = await Harness.Create(new WritableProvider(), true, "de");
 
 		var result = await harness.Set("gain", "5");
 
@@ -49,7 +49,7 @@ public class UserVariableWriterOwnerUnavailableTests
 	[Test]
 	public async Task An_owner_that_is_no_longer_registered_is_named_by_its_id()
 	{
-		using var harness = await Harness.Create(provider: null);
+		using var harness = await Harness.Create(null);
 
 		var result = await harness.Set("gain", "5");
 
@@ -57,7 +57,7 @@ public class UserVariableWriterOwnerUnavailableTests
 		{
 			Assert.That(result.Status, Is.EqualTo(UserVariableWriteStatus.Unavailable));
 			Assert.That(result.Message,
-				Is.EqualTo(TestLocalization.Resolve(AppStrings.Errors.Variables.OwnerUnavailable(integration: OwnerId))));
+				Is.EqualTo(TestLocalization.Resolve(AppStrings.Errors.Variables.OwnerUnavailable(OwnerId))));
 		});
 	}
 
@@ -73,7 +73,7 @@ public class UserVariableWriterOwnerUnavailableTests
 		{
 			Assert.That(result.Status, Is.EqualTo(UserVariableWriteStatus.Unavailable));
 			Assert.That(result.Message,
-				Is.EqualTo(TestLocalization.Resolve(AppStrings.Errors.Variables.OwnerUnavailable(integration: OwnerName))));
+				Is.EqualTo(TestLocalization.Resolve(AppStrings.Errors.Variables.OwnerUnavailable(OwnerName))));
 		});
 	}
 
@@ -88,10 +88,13 @@ public class UserVariableWriterOwnerUnavailableTests
 			_writer = new UserVariableWriter(services.GetRequiredService<IServiceScopeFactory>());
 		}
 
-		public static async Task<Harness> Create(WritableProvider? provider, bool disabled = false, string culture = "en")
+		public static async Task<Harness> Create(
+			WritableProvider? provider,
+			bool disabled = false,
+			string culture = "en")
 		{
 			var integrations = new ConfigurableIntegrationRegistry(provider is null ? [] : [provider],
-				disabled: disabled ? [OwnerId] : null);
+				disabled ? [OwnerId] : null);
 			var variables = TestVariableServices.Create(new VariableRegistry(),
 				new NullUserVariableStore(),
 				new RecordingMediator(),
@@ -118,7 +121,9 @@ public class UserVariableWriterOwnerUnavailableTests
 		}
 
 		public Task<UserVariableWriteResult> Set(string name, string value)
-			=> _writer.ApplyAsync(name, null, UserVariableOperation.Set, value);
+		{
+			return _writer.ApplyAsync(name, null, UserVariableOperation.Set, value);
+		}
 
 		public void Dispose()
 		{
@@ -150,16 +155,26 @@ public class UserVariableWriterOwnerUnavailableTests
 		];
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 
 		public ValueTask<VariableWriteResult> SetValueAsync(
 			string localId,
 			object? value,
 			CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(Answer);
+		{
+			return ValueTask.FromResult(Answer);
+		}
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

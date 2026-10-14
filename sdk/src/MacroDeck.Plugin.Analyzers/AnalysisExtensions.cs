@@ -29,7 +29,10 @@ internal static class AnalysisExtensions
 
 	/// <summary>Whether <paramref name="type" /> is <paramref name="other" /> itself or implements it.</summary>
 	public static bool IsOrImplements(this ITypeSymbol? type, INamedTypeSymbol? other)
-		=> other is not null && (SymbolEqualityComparer.Default.Equals(type, other) || type.ImplementsInterface(other));
+	{
+		return other is not null
+			&& (SymbolEqualityComparer.Default.Equals(type, other) || type.ImplementsInterface(other));
+	}
 
 	/// <summary>Whether any type in <paramref name="type" />'s base-class chain (itself included) is
 	/// <paramref name="baseType" />.</summary>
@@ -56,16 +59,22 @@ internal static class AnalysisExtensions
 	/// <c>null</c> when <paramref name="type" /> does not implement that interface at all.
 	/// </summary>
 	public static IMethodSymbol? FindImplementation(this ITypeSymbol type, IMethodSymbol? interfaceMethod)
-		=> interfaceMethod is null ? null : type.FindImplementationForInterfaceMember(interfaceMethod) as IMethodSymbol;
+	{
+		return interfaceMethod is null
+			? null
+			: type.FindImplementationForInterfaceMember(interfaceMethod) as IMethodSymbol;
+	}
 
 	/// <summary>
 	/// The property <paramref name="type" /> runs for <paramref name="interfaceProperty" />, or
 	/// <c>null</c> when <paramref name="type" /> does not implement that interface at all.
 	/// </summary>
 	public static IPropertySymbol? FindImplementation(this ITypeSymbol type, IPropertySymbol? interfaceProperty)
-		=> interfaceProperty is null
+	{
+		return interfaceProperty is null
 			? null
 			: type.FindImplementationForInterfaceMember(interfaceProperty) as IPropertySymbol;
+	}
 
 	/// <summary>
 	/// The receiver of <paramref name="invocation" /> - the <c>endpoints</c> in

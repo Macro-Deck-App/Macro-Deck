@@ -21,7 +21,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// SupervisorShutdown (4004) instead of reconnecting.
 /// </summary>
 [TestFixture]
-public class A41_CloseHandshakeTests
+public class A41CloseHandshakeTests
 {
 	[Test]
 	public async Task A_peer_still_sending_after_a_4004_close_completes_the_close_handshake()
@@ -37,12 +37,14 @@ public class A41_CloseHandshakeTests
 		do
 		{
 			received = await socket.ReceiveAsync(buffer, CancellationToken.None);
-		}
-		while (received.MessageType != WebSocketMessageType.Close);
+		} while (received.MessageType != WebSocketMessageType.Close);
 
 		for (var i = 0; i < 10; i++)
 		{
-			await socket.SendAsync(Envelope(MessageTypes.SessionPing), WebSocketMessageType.Text, true, CancellationToken.None);
+			await socket.SendAsync(Envelope(MessageTypes.SessionPing),
+				WebSocketMessageType.Text,
+				true,
+				CancellationToken.None);
 			await Task.Delay(TimeSpan.FromMilliseconds(30));
 		}
 
@@ -111,7 +113,9 @@ public class A41_CloseHandshakeTests
 	// An in-process subject's host keeps serving after StopApplication, so a faulted connection is the
 	// stop signal there; an out-of-process one goes away entirely.
 	private static bool StoppedOnTheClose(PluginHealthReport health)
-		=> !health.Live || health.Status == "Faulted";
+	{
+		return !health.Live || health.Status == "Faulted";
+	}
 
 	private static async Task<ClientWebSocket> ConnectRawSessionAsync(MacroDeckTestHost host)
 	{
@@ -148,15 +152,20 @@ public class A41_CloseHandshakeTests
 	}
 
 	private static byte[] Hello(string sessionId)
-		=> ProtocolEnvelopeWriter.WriteToUtf8Bytes(new ProtocolEnvelope
+	{
+		return ProtocolEnvelopeWriter.WriteToUtf8Bytes(new ProtocolEnvelope
 		{
 			Type = MessageTypes.SessionHello,
 			Id = Guid.NewGuid().ToString(),
-			Payload = JsonSerializer.SerializeToElement(
-				new SessionHelloPayload { ProtocolVersion = ProtocolVersions.Supported.Max(), SessionId = sessionId },
+			Payload = JsonSerializer.SerializeToElement(new SessionHelloPayload
+					{ ProtocolVersion = ProtocolVersions.Supported.Max(), SessionId = sessionId },
 				PluginProtocolJson.Options)
 		});
+	}
 
 	private static byte[] Envelope(string type)
-		=> ProtocolEnvelopeWriter.WriteToUtf8Bytes(new ProtocolEnvelope { Type = type, Id = Guid.NewGuid().ToString() });
+	{
+		return ProtocolEnvelopeWriter.WriteToUtf8Bytes(new ProtocolEnvelope
+			{ Type = type, Id = Guid.NewGuid().ToString() });
+	}
 }

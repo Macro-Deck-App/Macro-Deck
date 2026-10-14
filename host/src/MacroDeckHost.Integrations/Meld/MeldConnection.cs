@@ -84,7 +84,10 @@ internal sealed class MeldConnection : IDisposable
 		_ = Task.Run(() => PumpAsync(_cts.Token), CancellationToken.None);
 	}
 
-	public bool TryGetGain(string trackId, out MeldGain gain) => _gains.TryGetValue(trackId, out gain);
+	public bool TryGetGain(string trackId, out MeldGain gain)
+	{
+		return _gains.TryGetValue(trackId, out gain);
+	}
 
 	public async Task<ActionResult> ShowSceneAsync(string sceneId, CancellationToken cancellationToken = default)
 	{
@@ -169,8 +172,8 @@ internal sealed class MeldConnection : IDisposable
 		await client
 			.InvokeAsync(MeldObjects.Object, MeldObjects.ToggleLayer, [layer.SceneId, layerId], cancellationToken)
 			.ConfigureAwait(false);
-		return await ConfirmAsync(
-				s => s.Session.LayersById.TryGetValue(layerId, out var updated) && updated.Visible == desired,
+		return await ConfirmAsync(s
+					=> s.Session.LayersById.TryGetValue(layerId, out var updated) && updated.Visible == desired,
 				cancellationToken)
 			.ConfigureAwait(false);
 	}
@@ -203,8 +206,8 @@ internal sealed class MeldConnection : IDisposable
 				[effect.SceneId, effect.LayerId, effectId],
 				cancellationToken)
 			.ConfigureAwait(false);
-		return await ConfirmAsync(
-				s => s.Session.EffectsById.TryGetValue(effectId, out var updated) && updated.Enabled == desired,
+		return await ConfirmAsync(s
+					=> s.Session.EffectsById.TryGetValue(effectId, out var updated) && updated.Enabled == desired,
 				cancellationToken)
 			.ConfigureAwait(false);
 	}
@@ -317,8 +320,8 @@ internal sealed class MeldConnection : IDisposable
 
 		await client.InvokeAsync(MeldObjects.Object, MeldObjects.SetGain, [trackId, gain01], cancellationToken)
 			.ConfigureAwait(false);
-		return await ConfirmAsync(
-				_ => _gains.TryGetValue(trackId, out var gain) && Math.Abs(gain.Gain - gain01) < 0.001,
+		return await ConfirmAsync(_
+					=> _gains.TryGetValue(trackId, out var gain) && Math.Abs(gain.Gain - gain01) < 0.001,
 				cancellationToken)
 			.ConfigureAwait(false);
 	}
@@ -371,14 +374,21 @@ internal sealed class MeldConnection : IDisposable
 		_cts.Dispose();
 	}
 
-	private (MeldState State, IQWebChannelClient? Client) Snapshot() => (_state, _client);
+	private (MeldState State, IQWebChannelClient? Client) Snapshot()
+	{
+		return (_state, _client);
+	}
 
 	private static ActionResult NotConnected()
-		=> ActionResult.Failed(ActionErrorCodes.NotConnected, AppStrings.Integrations.Meld.Errors.NotConnected());
+	{
+		return ActionResult.Failed(ActionErrorCodes.NotConnected, AppStrings.Integrations.Meld.Errors.NotConnected());
+	}
 
 	private static ActionResult NotFound(LocalizedText kindNoun, string id)
-		=> ActionResult.Failed(ActionErrorCodes.NotFound,
-			AppStrings.Integrations.Meld.Errors.TargetNoLongerInSession(kind: kindNoun, id: id));
+	{
+		return ActionResult.Failed(ActionErrorCodes.NotFound,
+			AppStrings.Integrations.Meld.Errors.TargetNoLongerInSession(kindNoun, id));
+	}
 
 	private bool CurrentMuted(string trackId, MeldState state)
 	{
@@ -438,7 +448,10 @@ internal sealed class MeldConnection : IDisposable
 		var client = _clientFactory();
 		var closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		void OnDisconnected(object? sender, string? reason) => closed.TrySetResult();
+		void OnDisconnected(object? sender, string? reason)
+		{
+			closed.TrySetResult();
+		}
 
 		client.PropertyUpdated += OnPropertyUpdated;
 		client.SignalReceived += OnSignalReceived;
@@ -578,9 +591,9 @@ internal sealed class MeldConnection : IDisposable
 
 	private void OnSignalReceived(object? sender, QWebChannelSignalMessage message)
 	{
-		if (!string.Equals(message.Object, MeldObjects.Object, StringComparison.Ordinal) ||
-			!string.Equals(message.Signal, MeldObjects.GainUpdatedSignal, StringComparison.Ordinal) ||
-			message.Args.Count < 3)
+		if (!string.Equals(message.Object, MeldObjects.Object, StringComparison.Ordinal)
+			|| !string.Equals(message.Signal, MeldObjects.GainUpdatedSignal, StringComparison.Ordinal)
+			|| message.Args.Count < 3)
 		{
 			return;
 		}
@@ -762,8 +775,8 @@ internal sealed class MeldConnection : IDisposable
 			return version;
 		}
 
-		if (element.ValueKind == JsonValueKind.String &&
-			int.TryParse(element.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
+		if (element.ValueKind == JsonValueKind.String
+			&& int.TryParse(element.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
 		{
 			return parsed;
 		}
@@ -772,13 +785,17 @@ internal sealed class MeldConnection : IDisposable
 	}
 
 	private static bool ReadBool(IReadOnlyDictionary<string, JsonElement> properties, string name)
-		=> properties.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.True;
+	{
+		return properties.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.True;
+	}
 
 	private static bool ReadBoolValue(JsonElement element, bool fallback)
-		=> element.ValueKind switch
+	{
+		return element.ValueKind switch
 		{
 			JsonValueKind.True => true,
 			JsonValueKind.False => false,
 			_ => fallback
 		};
+	}
 }

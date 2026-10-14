@@ -13,14 +13,17 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// the same six invocations against each produce the same outcome.
 /// </summary>
 [TestFixture]
-public class A9_HarnessParityTests
+public class A9HarnessParityTests
 {
-	private static Action<PluginHostBuilder> Configure(string id) => builder => builder
-		.RegisterIntegration(_ => new TestIntegration(id)
-			.WithAction(new DelegateAction("succeed", _ => Task.FromResult(ActionResult.Success())))
-			.WithAction(new DelegateAction("fail",
-				_ => Task.FromResult(ActionResult.Failed(ActionErrorCodes.ProviderError, "provider refused"))))
-			.WithVariable(VariableDefinition.Eager("temperature", VariableType.Numeric), () => 21.5));
+	private static Action<PluginHostBuilder> Configure(string id)
+	{
+		return builder => builder
+			.RegisterIntegration(_ => new TestIntegration(id)
+				.WithAction(new DelegateAction("succeed", _ => Task.FromResult(ActionResult.Success())))
+				.WithAction(new DelegateAction("fail",
+					_ => Task.FromResult(ActionResult.Failed(ActionErrorCodes.ProviderError, "provider refused"))))
+				.WithVariable(VariableDefinition.Eager("temperature", VariableType.Numeric), () => 21.5));
+	}
 
 	[Test]
 	public async Task The_harness_and_the_wire_produce_identical_outcomes_for_the_same_plugin()
@@ -59,7 +62,9 @@ public class A9_HarnessParityTests
 	}
 
 	private static IReadOnlyCollection<(string Kind, string LocalId)> NamesOf(IEnumerable<DeclaredCapability> declared)
-		=> [.. declared.Select(capability => (capability.Kind, capability.LocalId))];
+	{
+		return [.. declared.Select(capability => (capability.Kind, capability.LocalId))];
+	}
 
 	private static async Task AssertSameOutcome(
 		Func<Task<CapabilityInvocationOutcome>> viaHarness,

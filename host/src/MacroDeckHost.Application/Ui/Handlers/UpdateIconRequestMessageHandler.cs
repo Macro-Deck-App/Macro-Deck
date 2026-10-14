@@ -19,7 +19,8 @@ public class UpdateIconRequestMessageHandler : IUiTransportMessageHandler<Update
 		_iconPackCache = iconPackCache;
 	}
 
-	public async ValueTask<UpdateIconResponse> Handle(UpdateIconRequest request,
+	public async ValueTask<UpdateIconResponse> Handle(
+		UpdateIconRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(request.Id, out var iconId))

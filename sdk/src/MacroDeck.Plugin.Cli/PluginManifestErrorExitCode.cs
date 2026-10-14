@@ -11,33 +11,36 @@ namespace MacroDeck.Plugin.Cli;
 /// </summary>
 internal static class PluginManifestErrorExitCode
 {
-	public static int For(PluginManifestError error) => error switch
+	public static int For(PluginManifestError error)
 	{
-		// No manifest.json at the given path - could not be read at all.
-		PluginManifestError.NotFound => ExitCode.InputUnreadable,
+		return error switch
+		{
+			// No manifest.json at the given path - could not be read at all.
+			PluginManifestError.NotFound => ExitCode.InputUnreadable,
 
-		// Every other case is a manifest that was read successfully and found wanting.
-		PluginManifestError.Malformed => ExitCode.SubjectInvalid,
-		PluginManifestError.UnsupportedManifestVersion => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidPluginId => ExitCode.SubjectInvalid,
-		PluginManifestError.IdMismatch => ExitCode.SubjectInvalid,
-		PluginManifestError.VersionMismatch => ExitCode.SubjectInvalid,
-		PluginManifestError.NoEntrypoints => ExitCode.SubjectInvalid,
-		PluginManifestError.EntrypointOutsideVersionDirectory => ExitCode.SubjectInvalid,
-		PluginManifestError.EntrypointMissing => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidSettings => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidCompatibility => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidDependency => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidEntrypointRuntime => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidSignature => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidFileDigest => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidPermission => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidPublisher => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidName => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidLanguage => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidIcon => ExitCode.SubjectInvalid,
-		PluginManifestError.InvalidBundledIconPack => ExitCode.SubjectInvalid,
+			// Every other case is a manifest that was read successfully and found wanting.
+			PluginManifestError.Malformed => ExitCode.SubjectInvalid,
+			PluginManifestError.UnsupportedManifestVersion => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidPluginId => ExitCode.SubjectInvalid,
+			PluginManifestError.IdMismatch => ExitCode.SubjectInvalid,
+			PluginManifestError.VersionMismatch => ExitCode.SubjectInvalid,
+			PluginManifestError.NoEntrypoints => ExitCode.SubjectInvalid,
+			PluginManifestError.EntrypointOutsideVersionDirectory => ExitCode.SubjectInvalid,
+			PluginManifestError.EntrypointMissing => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidSettings => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidCompatibility => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidDependency => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidEntrypointRuntime => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidSignature => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidFileDigest => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidPermission => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidPublisher => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidName => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidLanguage => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidIcon => ExitCode.SubjectInvalid,
+			PluginManifestError.InvalidBundledIconPack => ExitCode.SubjectInvalid,
 
-		_ => ExitCode.InternalError
-	};
+			_ => ExitCode.InternalError
+		};
+	}
 }

@@ -9,7 +9,9 @@ public sealed class CalendarTriggerScheduler : IDisposable
 {
 	private static readonly TimeSpan _maximumSleep = TimeSpan.FromHours(1);
 
-	private static readonly string _startsSoonId = CalendarEventProvider.Qualify(CalendarEventProvider.StartsSoonEventId);
+	private static readonly string _startsSoonId
+		= CalendarEventProvider.Qualify(CalendarEventProvider.StartsSoonEventId);
+
 	private static readonly string _startedId = CalendarEventProvider.Qualify(CalendarEventProvider.StartedEventId);
 	private static readonly string _endedId = CalendarEventProvider.Qualify(CalendarEventProvider.EndedEventId);
 
@@ -96,13 +98,14 @@ public sealed class CalendarTriggerScheduler : IDisposable
 		try
 		{
 			await using var scope = _scopeFactory.CreateAsyncScope();
-			var parameters = await CalendarPayloads.BuildAsync(scope.ServiceProvider, firing.Event).ConfigureAwait(false);
+			var parameters = await CalendarPayloads.BuildAsync(scope.ServiceProvider, firing.Event)
+				.ConfigureAwait(false);
 
 			var eventId = firing.Target.Kind switch
 			{
 				CalendarFiringKind.Started => _startedId,
 				CalendarFiringKind.Ended => _endedId,
-				_ => _startsSoonId,
+				_ => _startsSoonId
 			};
 
 			if (firing.Target.Context is not EventSubscription subscription)
@@ -112,8 +115,8 @@ public sealed class CalendarTriggerScheduler : IDisposable
 			}
 
 			var contexts = scope.ServiceProvider.GetRequiredService<IEventTriggerContextResolver>();
-			if (contexts.ResolveSource(subscription.Owner) is not { } source ||
-				!await contexts.MatchesAsync(subscription, source, eventId, parameters).ConfigureAwait(false))
+			if (contexts.ResolveSource(subscription.Owner) is not { } source
+				|| !await contexts.MatchesAsync(subscription, source, eventId, parameters).ConfigureAwait(false))
 			{
 				return;
 			}
@@ -129,5 +132,8 @@ public sealed class CalendarTriggerScheduler : IDisposable
 		}
 	}
 
-	public void Dispose() => _runLock.Dispose();
+	public void Dispose()
+	{
+		_runLock.Dispose();
+	}
 }

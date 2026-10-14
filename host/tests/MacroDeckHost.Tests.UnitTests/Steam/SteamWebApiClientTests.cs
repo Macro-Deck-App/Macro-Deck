@@ -14,8 +14,8 @@ internal sealed class SteamWebApiClientTests
 	public async Task Player_summary_maps_state_and_current_game()
 	{
 		var handler = new StubHandler(_ => Json("""
-			{"response":{"players":[{"steamid":"76561198000000001","personaname":"Ann","personastate":1,"gameid":"730","gameextrainfo":"Counter-Strike 2"}]}}
-			"""));
+												{"response":{"players":[{"steamid":"76561198000000001","personaname":"Ann","personastate":1,"gameid":"730","gameextrainfo":"Counter-Strike 2"}]}}
+												"""));
 
 		var summary = await Client(handler).GetPlayerSummaryAsync(SteamId, CancellationToken.None);
 
@@ -32,8 +32,8 @@ internal sealed class SteamWebApiClientTests
 	public async Task A_player_summary_carries_the_medium_avatar()
 	{
 		var handler = new StubHandler(_ => Json("""
-			{"response":{"players":[{"steamid":"76561198000000001","personaname":"Ann","personastate":1,"avatar":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426.jpg","avatarmedium":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_medium.jpg","avatarfull":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg"}]}}
-			"""));
+												{"response":{"players":[{"steamid":"76561198000000001","personaname":"Ann","personastate":1,"avatar":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426.jpg","avatarmedium":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_medium.jpg","avatarfull":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg"}]}}
+												"""));
 
 		var summary = await Client(handler).GetPlayerSummaryAsync(SteamId, CancellationToken.None);
 
@@ -45,16 +45,17 @@ internal sealed class SteamWebApiClientTests
 	public async Task Owned_games_carry_their_playtime_and_when_they_were_last_played()
 	{
 		var handler = new StubHandler(_ => Json("""
-			{"response":{"game_count":2,"games":[{"appid":730,"name":"Counter-Strike 2","playtime_forever":6000,"playtime_2weeks":90,"rtime_last_played":1700000000},{"appid":220,"name":"Half-Life 2","playtime_forever":0,"rtime_last_played":0}]}}
-			"""));
+												{"response":{"game_count":2,"games":[{"appid":730,"name":"Counter-Strike 2","playtime_forever":6000,"playtime_2weeks":90,"rtime_last_played":1700000000},{"appid":220,"name":"Half-Life 2","playtime_forever":0,"rtime_last_played":0}]}}
+												"""));
 
 		var games = await Client(handler).GetOwnedGamesAsync(SteamId, CancellationToken.None);
 
-		Assert.That(games, Is.EqualTo(new[]
-		{
-			new SteamOwnedGame(730, "Counter-Strike 2", 6000, 90, DateTimeOffset.FromUnixTimeSeconds(1700000000)),
-			new SteamOwnedGame(220, "Half-Life 2", 0, 0, null)
-		}));
+		Assert.That(games,
+			Is.EqualTo(new[]
+			{
+				new SteamOwnedGame(730, "Counter-Strike 2", 6000, 90, DateTimeOffset.FromUnixTimeSeconds(1700000000)),
+				new SteamOwnedGame(220, "Half-Life 2", 0, 0, null)
+			}));
 		Assert.That(handler.Requests.Single().Uri.AbsoluteUri, Does.Contain("IPlayerService/GetOwnedGames/v1/"));
 	}
 
@@ -77,8 +78,8 @@ internal sealed class SteamWebApiClientTests
 	public async Task A_player_who_hides_the_game_has_no_game()
 	{
 		var handler = new StubHandler(_ => Json("""
-			{"response":{"players":[{"steamid":"76561198000000001","personaname":"Ann","personastate":1}]}}
-			"""));
+												{"response":{"players":[{"steamid":"76561198000000001","personaname":"Ann","personastate":1}]}}
+												"""));
 
 		var summary = await Client(handler).GetPlayerSummaryAsync(SteamId, CancellationToken.None);
 
@@ -179,12 +180,15 @@ internal sealed class SteamWebApiClientTests
 	public async Task More_than_one_hundred_friends_are_looked_up_in_batches_of_at_most_one_hundred()
 	{
 		var handler = new StubHandler(_ => Json("""{"response":{"players":[]}}"""));
-		var ids = Enumerable.Range(0, 250).Select(i => (76561198000000000 + i).ToString(global::System.Globalization.CultureInfo.InvariantCulture)).ToList();
+		var ids = Enumerable.Range(0, 250)
+			.Select(i => (76561198000000000 + i).ToString(global::System.Globalization.CultureInfo.InvariantCulture))
+			.ToList();
 
 		await Client(handler).GetPlayerSummariesAsync(ids, CancellationToken.None);
 
 		var batches = handler.Requests
-			.Select(request => request.Uri.Query.Split('&').Single(part => part.StartsWith("steamids=", StringComparison.Ordinal)))
+			.Select(request => request.Uri.Query.Split('&')
+				.Single(part => part.StartsWith("steamids=", StringComparison.Ordinal)))
 			.Select(part => part["steamids=".Length..].Split(',').Length)
 			.ToList();
 		Assert.That(batches, Is.EqualTo(new[] { 100, 100, 50 }));
@@ -211,8 +215,8 @@ internal sealed class SteamWebApiClientTests
 	public async Task Friend_ids_are_returned()
 	{
 		var handler = new StubHandler(_ => Json("""
-			{"friendslist":{"friends":[{"steamid":"1","relationship":"friend"},{"steamid":"2","relationship":"friend"}]}}
-			"""));
+												{"friendslist":{"friends":[{"steamid":"1","relationship":"friend"},{"steamid":"2","relationship":"friend"}]}}
+												"""));
 
 		Assert.That(await Client(handler).GetFriendIdsAsync(SteamId, CancellationToken.None),
 			Is.EqualTo(new[] { "1", "2" }));
@@ -234,16 +238,23 @@ internal sealed class SteamWebApiClientTests
 		Assert.That(await Client(handler).ResolveVanityUrlAsync("nobody", CancellationToken.None), Is.Null);
 	}
 
-	private static SteamWebApiClient Client(StubHandler handler) => new(Key, new HttpClient(handler));
+	private static SteamWebApiClient Client(StubHandler handler)
+	{
+		return new SteamWebApiClient(Key, new HttpClient(handler));
+	}
 
 	private static HttpResponseMessage Json(string body)
-		=> new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+	{
+		return new HttpResponseMessage(HttpStatusCode.OK)
+			{ Content = new StringContent(body, Encoding.UTF8, "application/json") };
+	}
 
 	private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> respond) : HttpMessageHandler
 	{
 		public List<(Uri Uri, string Headers)> Requests { get; } = [];
 
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			Requests.Add((request.RequestUri!, request.Headers.ToString()));

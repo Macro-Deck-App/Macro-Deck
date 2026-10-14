@@ -8,10 +8,16 @@ public class TimerWidgetLifecycleTests
 	private TimerWidgetHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new TimerWidgetHarness();
+	public void SetUp()
+	{
+		_harness = new TimerWidgetHarness();
+	}
 
 	[TearDown]
-	public async Task TearDown() => await _harness.DisposeAsync();
+	public async Task TearDown()
+	{
+		await _harness.DisposeAsync();
+	}
 
 	[Test]
 	public async Task A_new_stopwatch_has_its_variables_as_soon_as_it_is_placed()
@@ -35,7 +41,8 @@ public class TimerWidgetLifecycleTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_harness.Variable(countdown, TimerWidgetVariableWriter.CountdownRemainingSeconds), Is.EqualTo("60"));
+			Assert.That(_harness.Variable(countdown, TimerWidgetVariableWriter.CountdownRemainingSeconds),
+				Is.EqualTo("60"));
 			Assert.That(_harness.Variable(stopwatch, TimerWidgetVariableWriter.StopwatchRunning), Is.EqualTo("false"));
 		});
 	}
@@ -43,7 +50,7 @@ public class TimerWidgetLifecycleTests
 	[Test]
 	public async Task A_deleted_countdown_stops_ticking_and_never_brings_its_variables_back()
 	{
-		var widget = await _harness.AddCountdownAsync(seconds: 3);
+		var widget = await _harness.AddCountdownAsync(3);
 		await _harness.PressAsync(widget);
 		var lateWrite = _harness.Store.Get(widget.Id)! with { Version = long.MaxValue };
 
@@ -64,7 +71,7 @@ public class TimerWidgetLifecycleTests
 	[Test]
 	public async Task Turning_a_countdown_into_a_stopwatch_swaps_its_variables()
 	{
-		var widget = await _harness.AddCountdownAsync(seconds: 3);
+		var widget = await _harness.AddCountdownAsync(3);
 
 		widget.Type = WidgetTypeIds.Stopwatch;
 		await _harness.Coordinator.SyncAsync(widget);
@@ -79,7 +86,7 @@ public class TimerWidgetLifecycleTests
 	[Test]
 	public async Task A_countdown_in_a_deleted_profile_is_dropped_with_its_variables_and_never_finishes()
 	{
-		var widget = await _harness.AddCountdownAsync(seconds: 3);
+		var widget = await _harness.AddCountdownAsync(3);
 		await _harness.PressAsync(widget);
 
 		_harness.Folders.Remove(widget);

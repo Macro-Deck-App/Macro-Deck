@@ -46,20 +46,32 @@ public sealed class ActionResult
 	/// </summary>
 	public string? ExpectedStateId { get; init; }
 
-	public static ActionResult Success() => _success;
+	public static ActionResult Success()
+	{
+		return _success;
+	}
 
 	public static ActionResult Success(string expectedStateId)
-		=> new() { Status = ActionResultStatus.Succeeded, ExpectedStateId = expectedStateId };
+	{
+		return new ActionResult { Status = ActionResultStatus.Succeeded, ExpectedStateId = expectedStateId };
+	}
 
 	/// <summary>Cached completed task, so a synchronous executor stays a single statement.</summary>
 	public static Task<ActionResult> SucceededTask { get; } = Task.FromResult(_success);
 
 	public static ActionResult Accepted(LocalizedText message = default)
-		=> new() { Status = ActionResultStatus.Accepted, Message = message };
+	{
+		return new ActionResult { Status = ActionResultStatus.Accepted, Message = message };
+	}
 
 	public static ActionResult Accepted(LocalizedText message, string expectedStateId)
-		=> new() { Status = ActionResultStatus.Accepted, Message = message, ExpectedStateId = expectedStateId };
+	{
+		return new ActionResult
+			{ Status = ActionResultStatus.Accepted, Message = message, ExpectedStateId = expectedStateId };
+	}
 
 	public static ActionResult Failed(string code, LocalizedText message)
-		=> new() { Status = ActionResultStatus.Failed, ErrorCode = code, ErrorMessage = message };
+	{
+		return new ActionResult { Status = ActionResultStatus.Failed, ErrorCode = code, ErrorMessage = message };
+	}
 }

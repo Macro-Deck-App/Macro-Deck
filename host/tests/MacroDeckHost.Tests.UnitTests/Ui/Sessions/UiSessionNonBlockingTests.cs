@@ -37,7 +37,7 @@ internal sealed class UiSessionNonBlockingTests : UiSessionFixture
 
 		// A healthy provider is unaffected by the stuck one - the clock has not moved, so a shared
 		// deadline would have starved this one too.
-		var healthy = AddProvider("com.example.other", treeRevision: 7);
+		var healthy = AddProvider("com.example.other", 7);
 		var healthySessionId = await OpenAsync(healthy);
 		var healthyAttach = Attach(healthySessionId, "c2");
 		await WaitForAsync(() => MessagesFor<UiSessionTreeUpdatedEvent>("c2").Count == 1,

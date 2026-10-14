@@ -29,7 +29,7 @@ public class KekEscrowStoreTests
 		var root = Directory.GetParent(_keysDirectory)!.FullName;
 		if (Directory.Exists(root))
 		{
-			Directory.Delete(root, recursive: true);
+			Directory.Delete(root, true);
 		}
 	}
 

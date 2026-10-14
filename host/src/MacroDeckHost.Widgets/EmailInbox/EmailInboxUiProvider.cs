@@ -50,7 +50,7 @@ public sealed class EmailInboxUiProvider : IBuiltInIntegrationUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -67,16 +67,16 @@ public sealed class EmailInboxUiProvider : IBuiltInIntegrationUiProvider
 				: null;
 		}
 
-		if (surface.Kind is not (UiSurfaceKinds.Widget or UiSurfaceKinds.Preview) ||
-			!surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.WidgetType, out var type) ||
-			type.ValueKind != JsonValueKind.String ||
-			type.GetString() != EmailWidgetTypes.QualifiedId)
+		if (surface.Kind is not (UiSurfaceKinds.Widget or UiSurfaceKinds.Preview)
+			|| !surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.WidgetType, out var type)
+			|| type.ValueKind != JsonValueKind.String
+			|| type.GetString() != EmailWidgetTypes.QualifiedId)
 		{
 			return null;
 		}
 
-		var data = surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var element) &&
-			element.ValueKind == JsonValueKind.Object
+		var data = surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var element)
+			&& element.ValueKind == JsonValueKind.Object
 				? element
 				: default;
 		var settings = EmailInboxWidgetSettings.Parse(data);
@@ -89,8 +89,8 @@ public sealed class EmailInboxUiProvider : IBuiltInIntegrationUiProvider
 			var now = _time.GetUtcNow();
 			var sample = await EmailInboxWidgetSample.BuildAsync(_text, now).ConfigureAwait(false);
 			var sampleSettings = settings with { Inboxes = [] };
-			var state = new UiState<EmailInboxWidgetState>(
-				EmailInboxWidget.Compute(sample, now, sampleSettings, format).State);
+			var state = new UiState<EmailInboxWidgetState>(EmailInboxWidget.Compute(sample, now, sampleSettings, format)
+				.State);
 
 			return new StaticWidgetUiSession(new UiView(surface,
 				EmailInboxWidgetView.Build(state, sampleSettings, icon, radius)));
@@ -106,7 +106,10 @@ public sealed class EmailInboxUiProvider : IBuiltInIntegrationUiProvider
 	}
 
 	private async Task<EmailInboxFormat> FormatAsync()
-		=> new(await TimeFormatResolver.ResolveAsync(_scopeFactory).ConfigureAwait(false), _timeZone);
+	{
+		return new EmailInboxFormat(await TimeFormatResolver.ResolveAsync(_scopeFactory).ConfigureAwait(false),
+			_timeZone);
+	}
 
 	private async Task<EmailInboxFormat?> TryFormatAsync()
 	{

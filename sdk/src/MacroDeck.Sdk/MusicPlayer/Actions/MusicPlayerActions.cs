@@ -90,7 +90,7 @@ public static class MusicPlayerActions
 				"set-volume",
 				"Set Volume",
 				"Sets the playback volume (0–100%)",
-				[ActionParameter.Slider("volume", 0, 100, label: "Volume", step: 1, defaultValue: 50)],
+				[ActionParameter.Slider("volume", 0, 100, "Volume", step: 1, defaultValue: 50)],
 				(p, values, _, ct) => p.SetVolumeAsync(GetInt(values, "volume", 50), ct)),
 			Command(resolver,
 				getInstances,
@@ -111,7 +111,7 @@ public static class MusicPlayerActions
 				"Jumps to a position in the current track (seconds)",
 				[
 					ActionParameter.Number("positionSeconds",
-						label: "Position (seconds)",
+						"Position (seconds)",
 						min: 0,
 						defaultValue: 0,
 						required: true)
@@ -133,13 +133,12 @@ public static class MusicPlayerActions
 				"Sets the repeat mode (off, track or context)",
 				[
 					ActionParameter.Choice("mode",
-						options:
 						[
 							new ActionParameterOption { Value = "off", Label = "Off" },
 							new ActionParameterOption { Value = "track", Label = "Repeat Track" },
 							new ActionParameterOption { Value = "context", Label = "Repeat Album/Playlist" }
 						],
-						label: "Mode",
+						"Mode",
 						defaultValue: "off",
 						required: true)
 				],
@@ -156,7 +155,8 @@ public static class MusicPlayerActions
 		string integrationId,
 		MusicPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=> new MusicPlayerItemActionDefinition(integrationId,
+	{
+		return new MusicPlayerItemActionDefinition(integrationId,
 			resolver,
 			getInstances,
 			"play-track",
@@ -165,6 +165,7 @@ public static class MusicPlayerActions
 			MusicPlayerCatalogItemKind.Track,
 			"track",
 			"Track");
+	}
 
 	/// <summary>
 	/// Play a specific playlist. With no playlist selected, the triggering client is asked to pick one
@@ -174,7 +175,8 @@ public static class MusicPlayerActions
 		string integrationId,
 		MusicPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=> new MusicPlayerItemActionDefinition(integrationId,
+	{
+		return new MusicPlayerItemActionDefinition(integrationId,
 			resolver,
 			getInstances,
 			"play-playlist",
@@ -183,6 +185,7 @@ public static class MusicPlayerActions
 			MusicPlayerCatalogItemKind.Playlist,
 			"playlist",
 			"Playlist");
+	}
 
 	/// <summary>
 	/// Transfers playback to a specific device and starts it. With no device selected, the triggering
@@ -192,13 +195,15 @@ public static class MusicPlayerActions
 		string integrationId,
 		MusicPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=> new MusicPlayerDeviceActionDefinition(integrationId,
+	{
+		return new MusicPlayerDeviceActionDefinition(integrationId,
 			resolver,
 			getInstances,
 			"play-on-device",
 			"Play on Device",
 			"Starts playback on a specific device. Leave empty to pick a device at run time.",
-			startPlayback: true);
+			true);
+	}
 
 	/// <summary>
 	/// Transfers playback to a specific device, keeping its current play/pause state. With no device
@@ -208,13 +213,15 @@ public static class MusicPlayerActions
 		string integrationId,
 		MusicPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=> new MusicPlayerDeviceActionDefinition(integrationId,
+	{
+		return new MusicPlayerDeviceActionDefinition(integrationId,
 			resolver,
 			getInstances,
 			"transfer-playback",
 			"Transfer Playback",
 			"Moves playback to a specific device, keeping it playing or paused. Leave empty to pick one at run time.",
-			startPlayback: false);
+			false);
+	}
 
 	/// <summary>Volume change applied by the volume-up / volume-down actions, in percent.</summary>
 	private const int VolumeStep = 10;
@@ -226,7 +233,9 @@ public static class MusicPlayerActions
 		string name,
 		string description,
 		MusicPlayerCommand command)
-		=> new(resolver, getInstances, id, name, description, [], command);
+	{
+		return new MusicPlayerActionDefinition(resolver, getInstances, id, name, description, [], command);
+	}
 
 	private static MusicPlayerActionDefinition Command(
 		MusicPlayerResolver resolver,
@@ -236,7 +245,9 @@ public static class MusicPlayerActions
 		string description,
 		IReadOnlyList<ActionParameter> extra,
 		MusicPlayerCommand command)
-		=> new(resolver, getInstances, id, name, description, extra, command);
+	{
+		return new MusicPlayerActionDefinition(resolver, getInstances, id, name, description, extra, command);
+	}
 
 	private static MusicPlayerStateActionDefinition State(
 		MusicPlayerResolver resolver,
@@ -247,7 +258,17 @@ public static class MusicPlayerActions
 		MusicPlayerCommand command,
 		Func<MusicPlayerState?, ActionStateSnapshot> stateMapper,
 		Func<MusicPlayerState, string?> expectedStateMapper)
-		=> new(resolver, getInstances, id, name, description, [], command, stateMapper, expectedStateMapper);
+	{
+		return new MusicPlayerStateActionDefinition(resolver,
+			getInstances,
+			id,
+			name,
+			description,
+			[],
+			command,
+			stateMapper,
+			expectedStateMapper);
+	}
 
 	private static MusicPlayerStateActionDefinition State(
 		MusicPlayerResolver resolver,
@@ -258,7 +279,17 @@ public static class MusicPlayerActions
 		IReadOnlyList<ActionParameter> extra,
 		MusicPlayerCommand command,
 		Func<MusicPlayerState?, ActionStateSnapshot> stateMapper)
-		=> new(resolver, getInstances, id, name, description, extra, command, stateMapper, expectedStateMapper: null);
+	{
+		return new MusicPlayerStateActionDefinition(resolver,
+			getInstances,
+			id,
+			name,
+			description,
+			extra,
+			command,
+			stateMapper,
+			null);
+	}
 
 	private static readonly ActionStateDefinition _unavailableState =
 		new("unavailable", MacroDeckStrings.States.Unavailable())
@@ -297,7 +328,9 @@ public static class MusicPlayerActions
 	}
 
 	private static string PlayPauseExpectedState(MusicPlayerState state)
-		=> state.PlaybackState == PlaybackState.Playing ? "paused" : "playing";
+	{
+		return state.PlaybackState == PlaybackState.Playing ? "paused" : "playing";
+	}
 
 	private static readonly IReadOnlyList<ActionStateDefinition> _shuffleStates =
 	[
@@ -332,10 +365,14 @@ public static class MusicPlayerActions
 	// A disconnected player still has a known state set, so both mappers answer with the full set and
 	// only the active id changes - the same shape PlayPauseState uses.
 	private static ActionStateSnapshot ShuffleState(MusicPlayerState? state)
-		=> new(_shuffleStates, Reachable(state) ? state!.ShuffleEnabled ? "on" : "off" : "unavailable");
+	{
+		return new ActionStateSnapshot(_shuffleStates,
+			Reachable(state) ? state!.ShuffleEnabled ? "on" : "off" : "unavailable");
+	}
 
 	private static ActionStateSnapshot RepeatState(MusicPlayerState? state)
-		=> new(_repeatStates,
+	{
+		return new ActionStateSnapshot(_repeatStates,
 			!Reachable(state)
 				? "unavailable"
 				: state!.RepeatMode switch
@@ -344,8 +381,12 @@ public static class MusicPlayerActions
 					RepeatMode.Context => "context",
 					_ => "off"
 				});
+	}
 
-	private static bool Reachable(MusicPlayerState? state) => state is { IsConnected: true, IsUnavailable: false };
+	private static bool Reachable(MusicPlayerState? state)
+	{
+		return state is { IsConnected: true, IsUnavailable: false };
+	}
 
 	private static async Task AdjustVolume(IMusicPlayer player, int delta, CancellationToken ct)
 	{
@@ -372,21 +413,27 @@ public static class MusicPlayerActions
 	}
 
 	private static ActionParameter ModeChoice(params string[] values)
-		=> ActionParameter.Choice("mode",
-			options: values.Select(v => new ActionParameterOption
-			{
-				Value = v,
-				Label = char.ToUpperInvariant(v[0]) + v[1..]
-			}).ToList(),
-			label: "Mode",
-			defaultValue: values[0]);
-
-	private static RepeatMode ParseRepeat(string? mode) => mode switch
 	{
-		"track" => RepeatMode.Track,
-		"context" => RepeatMode.Context,
-		_ => RepeatMode.Off
-	};
+		return ActionParameter.Choice("mode",
+			values.Select(v => new ActionParameterOption
+				{
+					Value = v,
+					Label = char.ToUpperInvariant(v[0]) + v[1..]
+				})
+				.ToList(),
+			"Mode",
+			defaultValue: values[0]);
+	}
+
+	private static RepeatMode ParseRepeat(string? mode)
+	{
+		return mode switch
+		{
+			"track" => RepeatMode.Track,
+			"context" => RepeatMode.Context,
+			_ => RepeatMode.Off
+		};
+	}
 
 	internal static int GetInt(IReadOnlyDictionary<string, object> values, string name, int fallback)
 	{
@@ -408,5 +455,7 @@ public static class MusicPlayerActions
 	}
 
 	internal static string? GetString(IReadOnlyDictionary<string, object> values, string name)
-		=> values.TryGetValue(name, out var value) ? value.ToString() : null;
+	{
+		return values.TryGetValue(name, out var value) ? value.ToString() : null;
+	}
 }

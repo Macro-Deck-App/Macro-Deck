@@ -161,7 +161,10 @@ public interface IPluginSessionRegistry
 	/// without threading the session record itself through callers that only need this one field.</summary>
 	int? GetNegotiatedVersion(string pluginId);
 
-	bool HasHostApiFeature(string pluginId, string feature) => false;
+	bool HasHostApiFeature(string pluginId, string feature)
+	{
+		return false;
+	}
 
 	IReadOnlyDictionary<string, CapabilityNegotiationResult>? UpdateDeclaredCapabilities(
 		string pluginId,
@@ -202,8 +205,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 
 		lock (_gate)
 		{
-			if (_sessionIdByPluginId.TryGetValue(record.PluginId, out var oldSessionId) &&
-				_bySessionId.TryGetValue(oldSessionId, out replaced))
+			if (_sessionIdByPluginId.TryGetValue(record.PluginId, out var oldSessionId)
+				&& _bySessionId.TryGetValue(oldSessionId, out replaced))
 			{
 				_bySessionId.Remove(oldSessionId);
 				_recordsBySessionId.TryRemove(oldSessionId, out _);
@@ -285,8 +288,7 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 	{
 		lock (_gate)
 		{
-			if (_bySessionId.TryGetValue(sessionId, out var record) &&
-				ReferenceEquals(record.Connection, connection))
+			if (_bySessionId.TryGetValue(sessionId, out var record) && ReferenceEquals(record.Connection, connection))
 			{
 				record.NonResumable = true;
 				record.State = PluginSessionState.Dropped;
@@ -296,7 +298,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 		}
 	}
 
-	public bool TryResume(string pluginId,
+	public bool TryResume(
+		string pluginId,
 		string? resumeSessionId,
 		DateTimeOffset at,
 		out PluginSessionRecord? record)
@@ -322,8 +325,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 			}
 
 			var sessionExists = existing.State == PluginSessionState.Dropped && !existing.NonResumable;
-			var withinWindow = existing.DroppedAt is { } droppedAt &&
-				at - droppedAt <= ProtocolTimeouts.SessionResumeWindow;
+			var withinWindow = existing.DroppedAt is { } droppedAt
+				&& at - droppedAt <= ProtocolTimeouts.SessionResumeWindow;
 
 			if (!SessionResumeRules.CanResume(resumeSessionId, sessionExists, withinWindow))
 			{
@@ -354,7 +357,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 		}
 	}
 
-	public async Task<bool> SendToPlugin(string pluginId,
+	public async Task<bool> SendToPlugin(
+		string pluginId,
 		ProtocolEnvelope envelope,
 		CancellationToken cancellationToken = default)
 	{
@@ -362,8 +366,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 
 		lock (_gate)
 		{
-			record = _sessionIdByPluginId.TryGetValue(pluginId, out var sessionId) &&
-				_bySessionId.TryGetValue(sessionId, out var found)
+			record = _sessionIdByPluginId.TryGetValue(pluginId, out var sessionId)
+				&& _bySessionId.TryGetValue(sessionId, out var found)
 					? found
 					: null;
 		}
@@ -420,8 +424,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 	{
 		lock (_gate)
 		{
-			if (!_sessionIdByPluginId.TryGetValue(pluginId, out var sessionId) ||
-				!_bySessionId.TryGetValue(sessionId, out var record))
+			if (!_sessionIdByPluginId.TryGetValue(pluginId, out var sessionId)
+				|| !_bySessionId.TryGetValue(sessionId, out var record))
 			{
 				return null;
 			}
@@ -437,8 +441,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 	{
 		lock (_gate)
 		{
-			return _sessionIdByPluginId.TryGetValue(pluginId, out var sessionId) &&
-				_bySessionId.TryGetValue(sessionId, out var record)
+			return _sessionIdByPluginId.TryGetValue(pluginId, out var sessionId)
+				&& _bySessionId.TryGetValue(sessionId, out var record)
 					? record.NegotiatedVersion
 					: null;
 		}
@@ -448,9 +452,9 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 	{
 		lock (_gate)
 		{
-			return _sessionIdByPluginId.TryGetValue(pluginId, out var sessionId) &&
-				_bySessionId.TryGetValue(sessionId, out var record) &&
-				record.HostApiFeatures.Contains(feature, StringComparer.Ordinal);
+			return _sessionIdByPluginId.TryGetValue(pluginId, out var sessionId)
+				&& _bySessionId.TryGetValue(sessionId, out var record)
+				&& record.HostApiFeatures.Contains(feature, StringComparer.Ordinal);
 		}
 	}
 
@@ -460,8 +464,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 	{
 		lock (_gate)
 		{
-			if (!_sessionIdByPluginId.TryGetValue(pluginId, out var sessionId) ||
-				!_bySessionId.TryGetValue(sessionId, out var record))
+			if (!_sessionIdByPluginId.TryGetValue(pluginId, out var sessionId)
+				|| !_bySessionId.TryGetValue(sessionId, out var record))
 			{
 				return null;
 			}
@@ -480,21 +484,27 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 	{
 		lock (_gate)
 		{
-			return _bySessionId.TryGetValue(sessionId, out var record) &&
-				ReferenceEquals(record.Connection, connection);
+			return _bySessionId.TryGetValue(sessionId, out var record)
+				&& ReferenceEquals(record.Connection, connection);
 		}
 	}
 
 	public Task<bool> Terminate(string sessionId, int closeCode, string reason)
-		=> TerminateCore(record => record.SessionId == sessionId, closeCode, reason);
+	{
+		return TerminateCore(record => record.SessionId == sessionId, closeCode, reason);
+	}
 
 	public Task<bool> TerminateForPlugin(string pluginId, int closeCode, string reason)
-		=> TerminateCore(record => record.PluginId == pluginId, closeCode, reason);
+	{
+		return TerminateCore(record => record.PluginId == pluginId, closeCode, reason);
+	}
 
 	public Task<bool> TerminateManagedForPlugin(string pluginId, int closeCode, string reason)
-		=> TerminateCore(record => record.PluginId == pluginId && record.Origin == PluginSessionOrigin.Managed,
+	{
+		return TerminateCore(record => record.PluginId == pluginId && record.Origin == PluginSessionOrigin.Managed,
 			closeCode,
 			reason);
+	}
 
 	public IReadOnlyList<PluginSessionSnapshot> Snapshot()
 	{
@@ -503,27 +513,30 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 		lock (_gate)
 		{
 			return _bySessionId.Values.Select(record =>
-			{
-				var lastInboundTicks = Volatile.Read(ref record.LastInboundTicks);
-
-				return new PluginSessionSnapshot
 				{
-					SessionId = record.SessionId,
-					PluginId = record.PluginId,
-					DisplayName = record.DisplayName,
-					AccessTokenId = record.AccessTokenId,
-					Origin = record.Origin,
-					InstanceId = record.InstanceId,
-					State = record.State,
-					NegotiatedVersion = record.NegotiatedVersion,
-					DeclaredVersion = record.DeclaredVersion,
-					DeclaredName = record.DeclaredName,
-					CreatedAt = record.CreatedAt,
-					ConnectedAt = record.ConnectedAt,
-					DroppedAt = record.DroppedAt,
-					LastInboundAt = lastInboundTicks == 0 ? null : new DateTimeOffset(lastInboundTicks, TimeSpan.Zero)
-				};
-			}).ToList();
+					var lastInboundTicks = Volatile.Read(ref record.LastInboundTicks);
+
+					return new PluginSessionSnapshot
+					{
+						SessionId = record.SessionId,
+						PluginId = record.PluginId,
+						DisplayName = record.DisplayName,
+						AccessTokenId = record.AccessTokenId,
+						Origin = record.Origin,
+						InstanceId = record.InstanceId,
+						State = record.State,
+						NegotiatedVersion = record.NegotiatedVersion,
+						DeclaredVersion = record.DeclaredVersion,
+						DeclaredName = record.DeclaredName,
+						CreatedAt = record.CreatedAt,
+						ConnectedAt = record.ConnectedAt,
+						DroppedAt = record.DroppedAt,
+						LastInboundAt = lastInboundTicks == 0
+							? null
+							: new DateTimeOffset(lastInboundTicks, TimeSpan.Zero)
+					};
+				})
+				.ToList();
 		}
 	}
 
@@ -615,11 +628,14 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 		}
 	}
 
-	private static bool IsStale(PluginSessionRecord record, DateTimeOffset now) => record.State switch
+	private static bool IsStale(PluginSessionRecord record, DateTimeOffset now)
 	{
-		PluginSessionState.Dropped =>
-			record.DroppedAt is { } droppedAt && now - droppedAt > ProtocolTimeouts.SessionResumeWindow,
-		PluginSessionState.Awaiting => now - record.CreatedAt > _awaitingSessionLifetime,
-		_ => false
-	};
+		return record.State switch
+		{
+			PluginSessionState.Dropped =>
+				record.DroppedAt is { } droppedAt && now - droppedAt > ProtocolTimeouts.SessionResumeWindow,
+			PluginSessionState.Awaiting => now - record.CreatedAt > _awaitingSessionLifetime,
+			_ => false
+		};
+	}
 }

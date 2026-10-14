@@ -54,63 +54,79 @@ public class FlowExecutorSwitchTests
 			_logger);
 	}
 
-	private static VariableEntity Var(string name, VariableType type, string value) => new()
+	private static VariableEntity Var(string name, VariableType type, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
-	private static string Block(string actionId) =>
-		$$"""
-		  { "id": "b-{{actionId}}", "type": "action", "blockType": "integration.{{actionId}}",
-		    "integrationId": "integration", "actionId": "{{actionId}}", "parameters": [] }
-		  """;
+	private static string Block(string actionId)
+	{
+		return $$"""
+				 { "id": "b-{{actionId}}", "type": "action", "blockType": "integration.{{actionId}}",
+				   "integrationId": "integration", "actionId": "{{actionId}}", "parameters": [] }
+				 """;
+	}
 
-	private static string Case(string value, string actionId) =>
-		$$"""{ "id": "c-{{actionId}}-{{Guid.NewGuid()}}", "kind": "case", "value": {{value}}, "children": [ {{Block(actionId)}} ] }""";
+	private static string Case(string value, string actionId)
+	{
+		return
+			$$"""{ "id": "c-{{actionId}}-{{Guid.NewGuid()}}", "kind": "case", "value": {{value}}, "children": [ {{Block(actionId)}} ] }""";
+	}
 
-	private static string Default() =>
-		$$"""{ "id": "br-else", "kind": "else", "children": [ {{Block("fallback")}} ] }""";
+	private static string Default()
+	{
+		return $$"""{ "id": "br-else", "kind": "else", "children": [ {{Block("fallback")}} ] }""";
+	}
 
-	private static string SwitchFlow(string subject, string type, params string[] branches) =>
-		$$"""
-		  {
-		    "flows": [
-		      {
-		        "triggerId": "t1", "triggerType": "onShortPress",
-		        "children": [
-		          {
-		            "id": "sw", "type": "{{type}}", "blockType": "switch",
-		            "subject": {{subject}},
-		            "branches": [ {{string.Join(",", branches)}} ]
-		          }
-		        ]
-		      }
-		    ]
-		  }
-		  """;
+	private static string SwitchFlow(string subject, string type, params string[] branches)
+	{
+		return $$"""
+				 {
+				   "flows": [
+				     {
+				       "triggerId": "t1", "triggerType": "onShortPress",
+				       "children": [
+				         {
+				           "id": "sw", "type": "{{type}}", "blockType": "switch",
+				           "subject": {{subject}},
+				           "branches": [ {{string.Join(",", branches)}} ]
+				         }
+				       ]
+				     }
+				   ]
+				 }
+				 """;
+	}
 
 	private async Task<FlowExecutionResult> Run(string widgetData)
-		=> await _executor.ExecuteAsync(new FlowExecutionRequest
+	{
+		return await _executor.ExecuteAsync(new FlowExecutionRequest
 			{
 				FlowsSource = widgetData,
 				Trigger = TriggerSelector.ByType("onShortPress"),
 				Scope = VariableScope.Global
 			},
 			CancellationToken.None);
+	}
 
 	private void AssertOnlyRan(CapturingActionDefinition expected)
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			foreach (var action in new[] { _none, _all, _one, _default })
 			{
 				Assert.That(action.ExecuteCount, Is.EqualTo(ReferenceEquals(action, expected) ? 1 : 0), action.Id);
 			}
 		});
+	}
 
 	[Test]
 	public async Task Repeat_mode_variable_runs_the_case_that_matches_it()
@@ -151,7 +167,11 @@ public class FlowExecutorSwitchTests
 	[Test]
 	public async Task No_matching_case_runs_the_default()
 	{
-		await Run(SwitchFlow("""{ "$var": "repeat" }""", "switch", Case("\"none\"", "none"), Case("\"one\"", "one"), Default()));
+		await Run(SwitchFlow("""{ "$var": "repeat" }""",
+			"switch",
+			Case("\"none\"", "none"),
+			Case("\"one\"", "one"),
+			Default()));
 
 		AssertOnlyRan(_default);
 	}
@@ -172,7 +192,11 @@ public class FlowExecutorSwitchTests
 	[Test]
 	public async Task First_of_several_matching_cases_runs_and_the_rest_do_not()
 	{
-		await Run(SwitchFlow("""{ "$var": "repeat" }""", "switch", Case("\"all\"", "all"), Case("\"all\"", "one"), Default()));
+		await Run(SwitchFlow("""{ "$var": "repeat" }""",
+			"switch",
+			Case("\"all\"", "all"),
+			Case("\"all\"", "one"),
+			Default()));
 
 		AssertOnlyRan(_all);
 	}
@@ -220,7 +244,10 @@ public class FlowExecutorSwitchTests
 	[Test]
 	public async Task Unknown_block_type_fails_loudly_instead_of_running_a_branch()
 	{
-		var result = await Run(SwitchFlow("""{ "$var": "repeat" }""", "switch-from-the-future", Case("\"all\"", "all"), Default()));
+		var result = await Run(SwitchFlow("""{ "$var": "repeat" }""",
+			"switch-from-the-future",
+			Case("\"all\"", "all"),
+			Default()));
 
 		Assert.Multiple(() =>
 		{
@@ -232,14 +259,16 @@ public class FlowExecutorSwitchTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)

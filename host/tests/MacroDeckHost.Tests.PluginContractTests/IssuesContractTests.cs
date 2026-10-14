@@ -16,18 +16,25 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class IssuesContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Issues,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static IntegrationIssue NotConnected()
-		=> new() { Id = "not-connected", Title = "Not connected", Severity = IntegrationIssueSeverity.Error };
+	{
+		return new IntegrationIssue
+			{ Id = "not-connected", Title = "Not connected", Severity = IntegrationIssueSeverity.Error };
+	}
 
 	private static Task<IReadOnlyList<IntegrationIssue>> OneIssue(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<IntegrationIssue>>([NotConnected()]);
+	{
+		return Task.FromResult<IReadOnlyList<IntegrationIssue>>([NotConnected()]);
+	}
 
 	[Test]
 	public async Task Declare_registers_an_adapter_that_passes_the_capability_validator()
@@ -180,7 +187,8 @@ internal sealed class IssuesContractTests : CapabilityContractFixture
 		return [];
 	}
 
-	private static async Task<IssueResolution> NeverRepliesWithResolution(string issueId,
+	private static async Task<IssueResolution> NeverRepliesWithResolution(
+		string issueId,
 		CancellationToken cancellationToken)
 	{
 		await Task.Delay(Timeout.Infinite, cancellationToken);

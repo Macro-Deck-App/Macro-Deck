@@ -34,11 +34,16 @@ public readonly record struct LocalizationKey
 	public string Name { get; }
 
 	/// <summary>Creates a key in Macro Deck's own catalog.</summary>
-	public static LocalizationKey MacroDeck(string name) => new(LocalizationScope.MacroDeck, name);
+	public static LocalizationKey MacroDeck(string name)
+	{
+		return new LocalizationKey(LocalizationScope.MacroDeck, name);
+	}
 
 	/// <summary>Creates a key in <paramref name="pluginId" />'s catalog.</summary>
 	public static LocalizationKey Plugin(string pluginId, string name)
-		=> new(LocalizationScope.ForPlugin(pluginId), name);
+	{
+		return new LocalizationKey(LocalizationScope.ForPlugin(pluginId), name);
+	}
 
 	/// <summary>Parses the <c>scope:Name</c> form produced by <see cref="ToString" />.</summary>
 	/// <remarks>A plugin scope contains a colon of its own, so the name is taken after the <b>last</b>
@@ -69,5 +74,8 @@ public readonly record struct LocalizationKey
 	}
 
 	/// <summary>Renders the key as <c>scope:Name</c>.</summary>
-	public override string ToString() => $"{Scope}:{Name}";
+	public override string ToString()
+	{
+		return $"{Scope}:{Name}";
+	}
 }

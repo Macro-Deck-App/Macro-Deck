@@ -37,7 +37,10 @@ internal sealed class IconAppearanceMergeTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Merging_an_icon_moves_every_use_to_the_target_and_takes_it_out_of_the_pack_listing()
@@ -60,11 +63,14 @@ internal sealed class IconAppearanceMergeTests
 			Assert.That(result.Data!.MergedIconId, Is.EqualTo(source.Id));
 			Assert.That(rewritten, Does.Contain(target.Id.ToString()).And.Not.Contain(source.Id.ToString()));
 			Assert.That(_automations.GetById(automation.Id)!.Flows, Does.Contain(target.Id.ToString()));
-			Assert.That(_harness.Icons.Cache.GetIconsByPackId(pack.Id).Select(i => i.Id), Is.EqualTo(new[] { target.Id }));
+			Assert.That(_harness.Icons.Cache.GetIconsByPackId(pack.Id).Select(i => i.Id),
+				Is.EqualTo(new[] { target.Id }));
 			Assert.That(_harness.Icons.Cache.GetIconCount(pack.Id), Is.EqualTo(countBefore - 1));
 			Assert.That(_harness.Icons.Cache.GetAppearances(target.Id).Single().Id, Is.EqualTo(source.Id));
-			Assert.That(_transport.Broadcasts.OfType<IconDeletedEvent>().Single().IconId, Is.EqualTo(source.Id.ToString()));
-			Assert.That(stillServed, Is.EqualTo(PortabilityTestHarness.MasterBytesFor("lamp-dark")),
+			Assert.That(_transport.Broadcasts.OfType<IconDeletedEvent>().Single().IconId,
+				Is.EqualTo(source.Id.ToString()));
+			Assert.That(stillServed,
+				Is.EqualTo(PortabilityTestHarness.MasterBytesFor("lamp-dark")),
 				"a handle a plugin or device already holds for the merged icon keeps drawing it");
 			Assert.That(_harness.Icons.Mediator.Published.OfType<IconUpdatedNotification>().Single().Icon.Id,
 				Is.EqualTo(target.Id));
@@ -84,7 +90,8 @@ internal sealed class IconAppearanceMergeTests
 		var foreign = await _harness.AddReadyIcon(other.Id, "foreign", [128]);
 		var withAppearance = await _harness.AddReadyIcon(pack.Id, "busy", [128]);
 		var owned = await _harness.AddReadyIcon(pack.Id, "owned", [128]);
-		Assert.That((await _service.Merge(withAppearance.Id, owned.Id, "motion=static", CancellationToken.None)).Success,
+		Assert.That(
+			(await _service.Merge(withAppearance.Id, owned.Id, "motion=static", CancellationToken.None)).Success,
 			Is.True);
 
 		var fromOtherPack = await _service.Merge(target.Id, foreign.Id, "colorScheme=dark", CancellationToken.None);

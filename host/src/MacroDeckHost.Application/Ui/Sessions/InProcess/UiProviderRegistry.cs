@@ -17,7 +17,8 @@ public sealed class UiProviderRegistry : IDisposable
 	private readonly ConcurrentDictionary<string, InProcessUiSessionProvider> _adapters =
 		new(StringComparer.Ordinal);
 
-	public UiProviderRegistry(IIntegrationRegistry integrations,
+	public UiProviderRegistry(
+		IIntegrationRegistry integrations,
 		Func<IUiSessionSink> sink,
 		ILogger logger,
 		Func<UiEventOrigins?>? origins = null)
@@ -38,9 +39,9 @@ public sealed class UiProviderRegistry : IDisposable
 		// would match here as well as in the remote registry and the resolver would have two candidates
 		// for one provider id. A plugin has no UiView and no synchronous BuildTree - it is served by
 		// RemoteUiSessionProvider or not at all.
-		if (integration is not IUiProvider provider ||
-			integration is RemotePluginIntegration ||
-			!_integrations.IsEnabled(providerId))
+		if (integration is not IUiProvider provider
+			|| integration is RemotePluginIntegration
+			|| !_integrations.IsEnabled(providerId))
 		{
 			return null;
 		}
@@ -50,8 +51,8 @@ public sealed class UiProviderRegistry : IDisposable
 				state.Provider,
 				state.Sink(),
 				state.Logger,
-				gatedByHostLock: !state.IsSystem,
-				origins: state.Origins),
+				!state.IsSystem,
+				state.Origins),
 			(Provider: provider,
 				Sink: _sink,
 				Logger: _logger,
@@ -73,7 +74,9 @@ public sealed class UiProviderRegistry : IDisposable
 	// integration re-instantiates it, so an entry that outlived the availability change would keep
 	// serving sessions from the object the host has already thrown away.
 	private void OnAvailabilityChanged(object? sender, IntegrationAvailabilityChangedEventArgs e)
-		=> Evict(e.IntegrationId);
+	{
+		Evict(e.IntegrationId);
+	}
 
 	private void Evict(string integrationId)
 	{

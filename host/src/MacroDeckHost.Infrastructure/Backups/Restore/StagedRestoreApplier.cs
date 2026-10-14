@@ -129,7 +129,8 @@ public static class StagedRestoreApplier
 		return document.DatabasePath is null || File.Exists(document.DatabasePath);
 	}
 
-	private static void ApplyFiles(IMacroDeckPaths paths,
+	private static void ApplyFiles(
+		IMacroDeckPaths paths,
 		PendingRestoreDocument document,
 		List<RestoreJournalEntry> journal,
 		string journalPath)
@@ -145,7 +146,7 @@ public static class StagedRestoreApplier
 			var aside = Path.Combine(rollbackRoot, ToNativePath(relative));
 
 			Directory.CreateDirectory(Path.GetDirectoryName(aside)!);
-			File.Move(current, aside, overwrite: true);
+			File.Move(current, aside, true);
 			entry.MovedAside = true;
 			journal.Add(entry);
 			WriteJournal(journalPath, journal);
@@ -157,7 +158,7 @@ public static class StagedRestoreApplier
 			var target = Path.Combine(paths.DataRootDirectory, ToNativePath(file.RelativePath));
 
 			Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-			File.Move(staged, target, overwrite: true);
+			File.Move(staged, target, true);
 
 			var entry = journal.FirstOrDefault(candidate => candidate.RelativePath == file.RelativePath);
 			if (entry is null)
@@ -240,7 +241,8 @@ public static class StagedRestoreApplier
 		return " WHERE " + string.Join(" AND ", conditions);
 	}
 
-	private static void AdoptArchiveRecoveryKeyPointer(SqliteConnection connection,
+	private static void AdoptArchiveRecoveryKeyPointer(
+		SqliteConnection connection,
 		SqliteTransaction transaction,
 		(string Pointer, string Value)? localRecoveryKey)
 	{
@@ -261,16 +263,19 @@ public static class StagedRestoreApplier
 	}
 
 	private static bool Same((string Pointer, string Value)? archive, (string Pointer, string Value)? local)
-		=> local is not null &&
-			string.Equals(archive!.Value.Pointer, local.Value.Pointer, StringComparison.OrdinalIgnoreCase) &&
-			string.Equals(archive.Value.Value, local.Value.Value, StringComparison.Ordinal);
+	{
+		return local is not null
+			&& string.Equals(archive!.Value.Pointer, local.Value.Pointer, StringComparison.OrdinalIgnoreCase)
+			&& string.Equals(archive.Value.Value, local.Value.Value, StringComparison.Ordinal);
+	}
 
-	private static (string Pointer, string Value)? RecoveryKeySecret(SqliteConnection connection,
+	private static (string Pointer, string Value)? RecoveryKeySecret(
+		SqliteConnection connection,
 		SqliteTransaction transaction,
 		string schema)
 	{
-		if (ColumnsOf(connection, schema, "app_preference").Count == 0 ||
-			ColumnsOf(connection, schema, "secret").Count == 0)
+		if (ColumnsOf(connection, schema, "app_preference").Count == 0
+			|| ColumnsOf(connection, schema, "secret").Count == 0)
 		{
 			return null;
 		}
@@ -278,8 +283,8 @@ public static class StagedRestoreApplier
 		using var command = connection.CreateCommand();
 		command.Transaction = transaction;
 		command.CommandText =
-			$"SELECT p.ap_value, s.s_encrypted_value FROM {schema}.app_preference p JOIN {schema}.secret s " +
-			"ON lower(s.s_id) = lower(p.ap_value) WHERE p.ap_key = $pointer;";
+			$"SELECT p.ap_value, s.s_encrypted_value FROM {schema}.app_preference p JOIN {schema}.secret s "
+			+ "ON lower(s.s_id) = lower(p.ap_value) WHERE p.ap_key = $pointer;";
 		command.Parameters.AddWithValue("$pointer", AppPreferenceService.BackupRecoveryKeySecretIdKey);
 
 		using var reader = command.ExecuteReader();
@@ -317,7 +322,8 @@ public static class StagedRestoreApplier
 		return columns;
 	}
 
-	private static IEnumerable<string> CurrentFilesOwnedBy(IMacroDeckPaths paths,
+	private static IEnumerable<string> CurrentFilesOwnedBy(
+		IMacroDeckPaths paths,
 		HashSet<Domain.Enums.BackupComponentGroup> selected,
 		PendingRestoreDocument document)
 	{
@@ -336,8 +342,8 @@ public static class StagedRestoreApplier
 				continue;
 			}
 
-			if (BackupComponentGroups.KeptWhenMissingFromArchive.Contains(relative, StringComparer.OrdinalIgnoreCase) &&
-				!archived.Contains(relative))
+			if (BackupComponentGroups.KeptWhenMissingFromArchive.Contains(relative, StringComparer.OrdinalIgnoreCase)
+				&& !archived.Contains(relative))
 			{
 				continue;
 			}
@@ -350,7 +356,8 @@ public static class StagedRestoreApplier
 		}
 	}
 
-	private static void RollBack(IMacroDeckPaths paths,
+	private static void RollBack(
+		IMacroDeckPaths paths,
 		PendingRestoreDocument document,
 		List<RestoreJournalEntry> journal)
 	{
@@ -372,7 +379,7 @@ public static class StagedRestoreApplier
 				if (File.Exists(aside))
 				{
 					Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-					File.Move(aside, target, overwrite: true);
+					File.Move(aside, target, true);
 				}
 			}
 			catch (IOException e)
@@ -390,9 +397,9 @@ public static class StagedRestoreApplier
 
 			if (document is not null && Directory.Exists(document.StagingDirectory))
 			{
-				var failed = document.StagingDirectory +
-					".failed-" +
-					DateTime.UtcNow.ToString("yyyyMMddTHHmmssZ", System.Globalization.CultureInfo.InvariantCulture);
+				var failed = document.StagingDirectory
+					+ ".failed-"
+					+ DateTime.UtcNow.ToString("yyyyMMddTHHmmssZ", System.Globalization.CultureInfo.InvariantCulture);
 				Directory.Move(document.StagingDirectory, failed);
 			}
 		}
@@ -408,7 +415,7 @@ public static class StagedRestoreApplier
 	{
 		using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
 		JsonSerializer.Serialize(stream, journal, PersistenceJsonOptions.Default);
-		stream.Flush(flushToDisk: true);
+		stream.Flush(true);
 	}
 
 	private static void Execute(SqliteConnection connection, string sql, SqliteTransaction? transaction = null)
@@ -427,7 +434,9 @@ public static class StagedRestoreApplier
 	}
 
 	private static string ToNativePath(string relativePath)
-		=> relativePath.Replace('/', Path.DirectorySeparatorChar);
+	{
+		return relativePath.Replace('/', Path.DirectorySeparatorChar);
+	}
 
 	private static void TryDeleteDirectory(string path)
 	{
@@ -435,7 +444,7 @@ public static class StagedRestoreApplier
 		{
 			if (Directory.Exists(path))
 			{
-				Directory.Delete(path, recursive: true);
+				Directory.Delete(path, true);
 			}
 		}
 		catch (IOException)

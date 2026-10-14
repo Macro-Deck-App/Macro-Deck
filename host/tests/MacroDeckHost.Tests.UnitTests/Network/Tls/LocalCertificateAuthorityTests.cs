@@ -10,7 +10,7 @@ public class LocalCertificateAuthorityTests
 {
 	private const string ServerAuthenticationOid = "1.3.6.1.5.5.7.3.1";
 
-	private static readonly DateTimeOffset Now = new(2026, 3, 1, 12, 0, 0, TimeSpan.Zero);
+	private static readonly DateTimeOffset _now = new(2026, 3, 1, 12, 0, 0, TimeSpan.Zero);
 
 	[Test]
 	public void The_Authority_Can_Sign_Certificates_But_Cannot_Create_Further_Authorities()
@@ -55,11 +55,11 @@ public class LocalCertificateAuthorityTests
 	public void The_Host_Certificate_Names_Every_Address_A_Client_Can_Reach_The_Host_On()
 	{
 		IPAddress[] addresses = [IPAddress.Parse("192.168.1.42"), IPAddress.Parse("10.0.0.7")];
-		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", Now);
+		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", _now);
 		var host = LocalCertificateAuthority.IssueHostCertificate(authority,
 			addresses,
 			["deck-pc", "deck-pc.local"],
-			Now);
+			_now);
 		using var hostCertificate = X509Certificate2.CreateFromPem(host.CertificatePem);
 
 		var names = LocalCertificateAuthority.ReadSubjectAlternativeNames(hostCertificate);
@@ -83,17 +83,17 @@ public class LocalCertificateAuthorityTests
 	[Test]
 	public void Reissuing_The_Host_Certificate_Keeps_The_Same_Authority()
 	{
-		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", Now);
+		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", _now);
 		using var authorityCertificate = X509Certificate2.CreateFromPem(authority.CertificatePem);
 
 		var first = LocalCertificateAuthority.IssueHostCertificate(authority,
 			[IPAddress.Parse("192.168.1.42")],
 			[],
-			Now);
+			_now);
 		var second = LocalCertificateAuthority.IssueHostCertificate(authority,
 			[IPAddress.Parse("192.168.1.99")],
 			[],
-			Now.AddDays(200));
+			_now.AddDays(200));
 
 		using var firstCertificate = X509Certificate2.CreateFromPem(first.CertificatePem);
 		using var secondCertificate = X509Certificate2.CreateFromPem(second.CertificatePem);
@@ -124,7 +124,7 @@ public class LocalCertificateAuthorityTests
 	[Test]
 	public void An_Expired_Host_Certificate_Is_Still_Recognised_As_Issued_By_The_Authority()
 	{
-		var longAgo = Now.AddYears(-3);
+		var longAgo = _now.AddYears(-3);
 		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", longAgo);
 		var host = LocalCertificateAuthority.IssueHostCertificate(authority, [], [], longAgo);
 
@@ -141,9 +141,9 @@ public class LocalCertificateAuthorityTests
 	[Test]
 	public void A_Certificate_From_Another_Authority_Is_Not_Recognised()
 	{
-		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", Now);
-		var otherAuthority = LocalCertificateAuthority.CreateAuthority("someone-else", Now);
-		var host = LocalCertificateAuthority.IssueHostCertificate(otherAuthority, [], [], Now);
+		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", _now);
+		var otherAuthority = LocalCertificateAuthority.CreateAuthority("someone-else", _now);
+		var host = LocalCertificateAuthority.IssueHostCertificate(otherAuthority, [], [], _now);
 
 		using var authorityCertificate = X509Certificate2.CreateFromPem(authority.CertificatePem);
 		using var hostCertificate = X509Certificate2.CreateFromPem(host.CertificatePem);
@@ -154,11 +154,11 @@ public class LocalCertificateAuthorityTests
 	[Test]
 	public void An_Address_The_Certificate_Does_Not_Name_Is_Reported_As_Uncovered()
 	{
-		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", Now);
+		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", _now);
 		var host = LocalCertificateAuthority.IssueHostCertificate(authority,
 			[IPAddress.Parse("192.168.1.42")],
 			[],
-			Now);
+			_now);
 		using var hostCertificate = X509Certificate2.CreateFromPem(host.CertificatePem);
 
 		var uncovered = LocalCertificateAuthority.FindUncoveredAddresses(hostCertificate,
@@ -168,16 +168,19 @@ public class LocalCertificateAuthorityTests
 	}
 
 	private static X509Certificate2 LoadAuthority()
-		=> X509Certificate2.CreateFromPem(LocalCertificateAuthority.CreateAuthority("deck-pc", Now).CertificatePem);
+	{
+		return X509Certificate2.CreateFromPem(LocalCertificateAuthority.CreateAuthority("deck-pc", _now)
+			.CertificatePem);
+	}
 
 	private static (X509Certificate2 Authority, X509Certificate2 AuthorityCertificate, X509Certificate2 Host)
 		IssueChain()
 	{
-		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", Now);
+		var authority = LocalCertificateAuthority.CreateAuthority("deck-pc", _now);
 		var host = LocalCertificateAuthority.IssueHostCertificate(authority,
 			[IPAddress.Parse("192.168.1.42")],
 			[],
-			Now);
+			_now);
 
 		return (X509Certificate2.CreateFromPem(authority.CertificatePem),
 			X509Certificate2.CreateFromPem(authority.CertificatePem),

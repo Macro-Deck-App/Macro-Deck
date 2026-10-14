@@ -17,7 +17,7 @@ public class LogLevelStabilityTests
 		"information",
 		"warning",
 		"error",
-		"fatal",
+		"fatal"
 	];
 
 	[Test]
@@ -40,5 +40,7 @@ public class LogLevelStabilityTests
 
 	[Test]
 	public void No_duplicate_levels()
-		=> Assert.That(LogLevels.All, Is.Unique);
+	{
+		Assert.That(LogLevels.All, Is.Unique);
+	}
 }

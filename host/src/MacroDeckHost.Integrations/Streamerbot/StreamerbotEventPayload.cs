@@ -33,7 +33,7 @@ internal static class StreamerbotEventPayload
 	public static IReadOnlyDictionary<string, object?> Build(string source, string type, JsonElement data)
 	{
 		var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
-		Flatten(data, prefix: null, depth: 0, parameters);
+		Flatten(data, null, 0, parameters);
 
 		Normalise(parameters, "user", _userKeys);
 		Normalise(parameters, "message", _messageKeys);
@@ -73,15 +73,18 @@ internal static class StreamerbotEventPayload
 		}
 	}
 
-	private static object? ToPrimitive(JsonElement value) => value.ValueKind switch
+	private static object? ToPrimitive(JsonElement value)
 	{
-		JsonValueKind.String => value.GetString(),
-		JsonValueKind.True => true,
-		JsonValueKind.False => false,
-		JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
-		JsonValueKind.Object or JsonValueKind.Array => value.GetRawText(),
-		_ => null
-	};
+		return value.ValueKind switch
+		{
+			JsonValueKind.String => value.GetString(),
+			JsonValueKind.True => true,
+			JsonValueKind.False => false,
+			JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
+			JsonValueKind.Object or JsonValueKind.Array => value.GetRawText(),
+			_ => null
+		};
+	}
 
 	private static void Normalise(Dictionary<string, object?> parameters, string name, string[] candidates)
 	{
@@ -101,7 +104,12 @@ internal static class StreamerbotEventPayload
 	}
 
 	private static bool HasValue(Dictionary<string, object?> parameters, string name)
-		=> parameters.TryGetValue(name, out var value) && value is not null and not "";
+	{
+		return parameters.TryGetValue(name, out var value) && value is not null and not "";
+	}
 
-	private static bool IsReserved(string name) => Array.IndexOf(_reservedKeys, name) >= 0;
+	private static bool IsReserved(string name)
+	{
+		return Array.IndexOf(_reservedKeys, name) >= 0;
+	}
 }

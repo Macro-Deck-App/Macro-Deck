@@ -29,22 +29,22 @@ internal static class ClockScreenSaverConfigView
 					Options = UiValue.Of<IReadOnlyList<UiOption>>([
 						UiOption.Of("auto", AppStrings.Widgets.Clock.HourCycleAuto()),
 						UiOption.Of("12h", "12"),
-						UiOption.Of("24h", "24"),
-					]),
+						UiOption.Of("24h", "24")
+					])
 				},
 				new UiBooleanInput
 				{
 					Key = "showDate",
 					Label = AppStrings.Widgets.Clock.Date(),
-					Binding = Bind.To(showDate),
+					Binding = Bind.To(showDate)
 				},
 				new UiBooleanInput
 				{
 					Key = "showSeconds",
 					Label = AppStrings.Widgets.Clock.Seconds(),
-					Binding = Bind.To(showSeconds),
-				},
-			],
+					Binding = Bind.To(showSeconds)
+				}
+			]
 		};
 	}
 }

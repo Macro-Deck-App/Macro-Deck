@@ -17,14 +17,17 @@ namespace MacroDeckHost.Tests.UnitTests.Ui;
 [TestFixture]
 public class VariableCatalogHandlersTests
 {
-	private static VariableDefinition Item(string id, bool bindable = true) => new()
+	private static VariableDefinition Item(string id, bool bindable = true)
 	{
-		Id = id,
-		Name = id,
-		Type = SdkVariableType.Text,
-		Materialization = MacroDeck.Sdk.Variables.VariableMaterialization.OnDemand,
-		IsBindable = bindable,
-	};
+		return new VariableDefinition
+		{
+			Id = id,
+			Name = id,
+			Type = SdkVariableType.Text,
+			Materialization = MacroDeck.Sdk.Variables.VariableMaterialization.OnDemand,
+			IsBindable = bindable
+		};
+	}
 
 	[Test]
 	public async Task Discovery_pages_through_a_large_provider()
@@ -74,7 +77,7 @@ public class VariableCatalogHandlersTests
 			SupportsSearch = true,
 			DiscoverHandler = query => query.Search == "kitchen"
 				? new VariableCatalogPage { Items = [Item("special-only-via-search")] }
-				: new VariableCatalogPage { Items = [Item("root-item")] },
+				: new VariableCatalogPage { Items = [Item("root-item")] }
 		};
 		var registry = new ConfigurableIntegrationRegistry([provider]);
 		var handler = new DiscoverCatalogVariablesRequestMessageHandler(new VariableCatalogProviders(registry),
@@ -169,7 +172,7 @@ public class VariableCatalogHandlersTests
 		var provider = new FakeVariableProviderIntegration
 		{
 			Id = integrationId,
-			AllItems = [Item("light.kitchen"), Item("light.bedroom")],
+			AllItems = [Item("light.kitchen"), Item("light.bedroom")]
 		};
 		var registry = new ConfigurableIntegrationRegistry([provider]);
 		var variableRegistry = new VariableRegistry();
@@ -182,7 +185,7 @@ public class VariableCatalogHandlersTests
 			Type = VariableType.Text,
 			Classification = VariableClassification.Integration,
 			OwnerIntegrationId = integrationId,
-			DefinitionId = "light.kitchen",
+			DefinitionId = "light.kitchen"
 		});
 
 		var handler = new DiscoverCatalogVariablesRequestMessageHandler(new VariableCatalogProviders(registry),
@@ -207,7 +210,7 @@ public class VariableCatalogHandlersTests
 		var bindings = new FakeVariableBindingService
 		{
 			OnBind = (_, _, _, _) => Result.Fail<VariableEntity, VariableBindingError>(VariableBindingError.NotBindable,
-				"'group.kitchen' is not bindable"),
+				"'group.kitchen' is not bindable")
 		};
 		var handler = new BindCatalogVariableRequestMessageHandler(bindings,
 			InMemorySharedVariableStore.For(new VariableRegistry()));
@@ -234,7 +237,7 @@ public class VariableCatalogHandlersTests
 
 		await handler.Handle(new DiscoverCatalogVariablesRequest
 			{
-				IntegrationId = provider.Id, Limit = ProtocolLimits.MaxVariableCatalogPageSize + 1000,
+				IntegrationId = provider.Id, Limit = ProtocolLimits.MaxVariableCatalogPageSize + 1000
 			},
 			CancellationToken.None);
 

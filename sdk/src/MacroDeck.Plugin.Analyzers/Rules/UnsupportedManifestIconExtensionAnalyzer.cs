@@ -73,7 +73,7 @@ public sealed class UnsupportedManifestIconExtensionAnalyzer : DiagnosticAnalyze
 
 		context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.UnsupportedManifestIconExtension,
 			location,
-			$"manifest.json declares icon '{icon.Value}', whose extension has no known media type. " +
-			$"Supported extensions are: {supported}."));
+			$"manifest.json declares icon '{icon.Value}', whose extension has no known media type. "
+			+ $"Supported extensions are: {supported}."));
 	}
 }

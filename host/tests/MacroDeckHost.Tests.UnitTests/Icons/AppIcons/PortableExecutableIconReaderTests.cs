@@ -244,7 +244,8 @@ public class PortableExecutableIconReaderTests
 		return result!;
 	}
 
-	private static byte[] BuildPortableExecutable(bool pe32Plus,
+	private static byte[] BuildPortableExecutable(
+		bool pe32Plus,
 		IReadOnlyList<GroupMember>? group,
 		IReadOnlyList<IconResource> icons,
 		uint iconTypeId = RtIcon)
@@ -270,7 +271,7 @@ public class PortableExecutableIconReaderTests
 		BinaryPrimitives.WriteUInt16LittleEndian(image.AsSpan(optionalHeader), magic);
 		var directoriesOffset = pe32Plus ? 112 : 96;
 		BinaryPrimitives.WriteUInt32LittleEndian(image.AsSpan(optionalHeader + directoriesOffset - 4), 16);
-		var resourceDirectory = optionalHeader + directoriesOffset + (2 * 8);
+		var resourceDirectory = optionalHeader + directoriesOffset + 2 * 8;
 		BinaryPrimitives.WriteUInt32LittleEndian(image.AsSpan(resourceDirectory), ResourceRva);
 		BinaryPrimitives.WriteUInt32LittleEndian(image.AsSpan(resourceDirectory + 4), (uint)resources.Length);
 
@@ -285,7 +286,8 @@ public class PortableExecutableIconReaderTests
 		return image;
 	}
 
-	private static byte[] BuildResourceBlob(IReadOnlyList<GroupMember>? group,
+	private static byte[] BuildResourceBlob(
+		IReadOnlyList<GroupMember>? group,
 		IReadOnlyList<IconResource> icons,
 		uint iconTypeId)
 	{
@@ -341,7 +343,7 @@ public class PortableExecutableIconReaderTests
 		for (var i = 0; i < icons.Count; i++)
 		{
 			WriteEntry(blob,
-				iconTypeOffset + DirectoryHeaderSize + (i * DirectoryEntrySize),
+				iconTypeOffset + DirectoryHeaderSize + i * DirectoryEntrySize,
 				icons[i].Id,
 				iconLanguageOffsets[i],
 				true);
@@ -364,7 +366,9 @@ public class PortableExecutableIconReaderTests
 	}
 
 	private static void WriteDirectoryHeader(byte[] blob, int offset, int idEntryCount)
-		=> BinaryPrimitives.WriteUInt16LittleEndian(blob.AsSpan(offset + 14), (ushort)idEntryCount);
+	{
+		BinaryPrimitives.WriteUInt16LittleEndian(blob.AsSpan(offset + 14), (ushort)idEntryCount);
+	}
 
 	private static void WriteEntry(byte[] blob, int offset, uint id, int target, bool isDirectory)
 	{
@@ -387,12 +391,12 @@ public class PortableExecutableIconReaderTests
 
 	private static byte[] BuildGroupDirectory(IReadOnlyList<GroupMember> members)
 	{
-		var bytes = new byte[GroupHeaderSize + (members.Count * GroupEntrySize)];
+		var bytes = new byte[GroupHeaderSize + members.Count * GroupEntrySize];
 		BinaryPrimitives.WriteUInt16LittleEndian(bytes.AsSpan(2), 1);
 		BinaryPrimitives.WriteUInt16LittleEndian(bytes.AsSpan(4), (ushort)members.Count);
 		for (var i = 0; i < members.Count; i++)
 		{
-			var offset = GroupHeaderSize + (i * GroupEntrySize);
+			var offset = GroupHeaderSize + i * GroupEntrySize;
 			bytes[offset] = members[i].Width;
 			bytes[offset + 1] = members[i].Height;
 			BinaryPrimitives.WriteUInt16LittleEndian(bytes.AsSpan(offset + 4), 1);
@@ -405,9 +409,9 @@ public class PortableExecutableIconReaderTests
 
 	private static byte[] BuildIconDib(int width, int height, byte fill)
 	{
-		var maskStride = ((width + 31) / 32) * 4;
+		var maskStride = (width + 31) / 32 * 4;
 		var pixels = width * height * 4;
-		var bytes = new byte[DibHeaderSize + pixels + (height * maskStride)];
+		var bytes = new byte[DibHeaderSize + pixels + height * maskStride];
 		BinaryPrimitives.WriteUInt32LittleEndian(bytes.AsSpan(0), DibHeaderSize);
 		BinaryPrimitives.WriteInt32LittleEndian(bytes.AsSpan(4), width);
 		BinaryPrimitives.WriteInt32LittleEndian(bytes.AsSpan(8), height * 2);
@@ -438,9 +442,15 @@ public class PortableExecutableIconReaderTests
 		return bytes;
 	}
 
-	private static int DirectorySize(int entryCount) => DirectoryHeaderSize + (entryCount * DirectoryEntrySize);
+	private static int DirectorySize(int entryCount)
+	{
+		return DirectoryHeaderSize + entryCount * DirectoryEntrySize;
+	}
 
-	private static int Align(int size) => (size + 3) & ~3;
+	private static int Align(int size)
+	{
+		return size + 3 & ~3;
+	}
 
 	private sealed record IconResource(uint Id, byte[] Payload);
 

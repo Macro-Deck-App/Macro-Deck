@@ -39,7 +39,10 @@ internal sealed class TwitchChatWidgetViewTests
 	}
 
 	[TearDown]
-	public void TearDown() => _hub.Dispose();
+	public void TearDown()
+	{
+		_hub.Dispose();
+	}
 
 	[Test]
 	public async Task Without_a_connection_the_widget_says_it_is_not_connected()
@@ -121,7 +124,7 @@ internal sealed class TwitchChatWidgetViewTests
 			_hub.Post(new ChatMessageReceived(Streamer,
 				TwitchChatHubTests.Message("m" + index) with
 				{
-					Fragments = [new ChatFragment(ChatFragmentKind.Text, new string('x', 400))],
+					Fragments = [new ChatFragment(ChatFragmentKind.Text, new string('x', 400))]
 				}));
 		}
 
@@ -141,7 +144,8 @@ internal sealed class TwitchChatWidgetViewTests
 		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
 		_hub.Tick();
 
-		await using var session = await OpenAsync(new { account = "", messageColor = "#FFCC00", nameColor = "#00ff00" });
+		await using var session
+			= await OpenAsync(new { account = "", messageColor = "#FFCC00", nameColor = "#00ff00" });
 
 		var root = session.BuildTree().Root;
 		var line = MessageNodes(root).Single();
@@ -188,12 +192,12 @@ internal sealed class TwitchChatWidgetViewTests
 	[Test]
 	public async Task The_sample_preview_follows_the_chat_colours()
 	{
-		await using var sample = await _provider.CreateSessionAsync(
-			new UiSessionRequest
+		await using var sample = await _provider.CreateSessionAsync(new UiSessionRequest
 			{
-				Surface = Surface(UiSurfaceKinds.Preview, sample: true,
-					data: new { account = "", messageColor = "#ffcc00", nameColor = "#00ff00" }),
-				UiModelVersion = 1,
+				Surface = Surface(UiSurfaceKinds.Preview,
+					true,
+					new { account = "", messageColor = "#ffcc00", nameColor = "#00ff00" }),
+				UiModelVersion = 1
 			},
 			CancellationToken.None);
 
@@ -204,8 +208,10 @@ internal sealed class TwitchChatWidgetViewTests
 			Assert.That(lines, Has.Count.EqualTo(3));
 			Assert.That(lines.Select(line => line.Properties[UiComponentProperties.Color].GetString()),
 				Is.All.EqualTo("#ffcc00"));
-			Assert.That(lines.Select(line => line.Properties[UiComponentProperties.Spans][0].GetProperty("color")
-				.GetString()), Is.All.EqualTo("#00ff00"));
+			Assert.That(lines.Select(line => line.Properties[UiComponentProperties.Spans][0]
+					.GetProperty("color")
+					.GetString()),
+				Is.All.EqualTo("#00ff00"));
 		});
 	}
 
@@ -213,13 +219,12 @@ internal sealed class TwitchChatWidgetViewTests
 	public async Task The_sample_preview_follows_the_font_size()
 	{
 		await using var plain = await _provider.CreateSessionAsync(
-			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Preview, sample: true), UiModelVersion = 1 },
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Preview, true), UiModelVersion = 1 },
 			CancellationToken.None);
-		await using var large = await _provider.CreateSessionAsync(
-			new UiSessionRequest
+		await using var large = await _provider.CreateSessionAsync(new UiSessionRequest
 			{
-				Surface = Surface(UiSurfaceKinds.Preview, sample: true, data: new { account = "", textSize = 200 }),
-				UiModelVersion = 1,
+				Surface = Surface(UiSurfaceKinds.Preview, true, new { account = "", textSize = 200 }),
+				UiModelVersion = 1
 			},
 			CancellationToken.None);
 
@@ -381,26 +386,33 @@ internal sealed class TwitchChatWidgetViewTests
 	public async Task The_picker_sample_is_written_in_the_language_the_surface_names()
 	{
 		await using var english = (await _provider.CreateSessionAsync(
-			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Preview, sample: true), UiModelVersion = 1 },
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Preview, true), UiModelVersion = 1 },
 			CancellationToken.None))!;
-		await using var german = (await _provider.CreateSessionAsync(
-			new UiSessionRequest
+		await using var german = (await _provider.CreateSessionAsync(new UiSessionRequest
 			{
-				Surface = Surface(UiSurfaceKinds.Preview, sample: true, culture: "de"), UiModelVersion = 1
+				Surface = Surface(UiSurfaceKinds.Preview, true, culture: "de"), UiModelVersion = 1
 			},
 			CancellationToken.None))!;
 
-		var englishText = MessageNodes(english.BuildTree().Root).First().Properties[UiComponentProperties.Text]
+		var englishText = MessageNodes(english.BuildTree().Root)
+			.First()
+			.Properties[UiComponentProperties.Text]
 			.GetString();
-		var germanText = MessageNodes(german.BuildTree().Root).First().Properties[UiComponentProperties.Text]
+		var germanText = MessageNodes(german.BuildTree().Root)
+			.First()
+			.Properties[UiComponentProperties.Text]
 			.GetString();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(englishText, Does.Contain(TestLocalization.Resolve(
-				MacroDeckHost.Localization.AppStrings.Integrations.StreamChat.Widget.SampleMessage1(), "en")));
-			Assert.That(germanText, Does.Contain(TestLocalization.Resolve(
-				MacroDeckHost.Localization.AppStrings.Integrations.StreamChat.Widget.SampleMessage1(), "de")));
+			Assert.That(englishText,
+				Does.Contain(TestLocalization.Resolve(
+					Localization.AppStrings.Integrations.StreamChat.Widget.SampleMessage1(),
+					"en")));
+			Assert.That(germanText,
+				Does.Contain(TestLocalization.Resolve(
+					Localization.AppStrings.Integrations.StreamChat.Widget.SampleMessage1(),
+					"de")));
 			Assert.That(germanText, Is.Not.EqualTo(englishText));
 		});
 	}
@@ -408,7 +420,7 @@ internal sealed class TwitchChatWidgetViewTests
 	[Test]
 	public async Task The_picker_sample_shows_example_lines_without_reading_chat()
 	{
-		var surface = Surface(UiSurfaceKinds.Preview, sample: true);
+		var surface = Surface(UiSurfaceKinds.Preview, true);
 
 		var request = new UiSessionRequest { Surface = surface, UiModelVersion = 1 };
 		await using var session = (await _provider.CreateSessionAsync(request, CancellationToken.None))!;
@@ -450,7 +462,8 @@ internal sealed class TwitchChatWidgetViewTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Texts(root), Has.Some.Contains("Integrations.StreamChat.Widget.Title").And.Contains("Streamer"));
+			Assert.That(Texts(root),
+				Has.Some.Contains("Integrations.StreamChat.Widget.Title").And.Contains("Streamer"));
 			Assert.That(_store.TryGet(resourceId, out _), Is.True);
 		});
 	}
@@ -463,18 +476,22 @@ internal sealed class TwitchChatWidgetViewTests
 		_images.Resolve(StreamChatImage.Badge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"));
 		await using var session = await OpenAsync();
 
-		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1") with
-		{
-			Badges =
-			[
-				new ChatBadge("broadcaster", "1", "https://static-cdn.jtvnw.net/badges/v1/b/2"),
-				new ChatBadge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"),
-			],
-		}));
+		_hub.Post(new ChatMessageReceived(Streamer,
+			TwitchChatHubTests.Message("m1") with
+			{
+				Badges =
+				[
+					new ChatBadge("broadcaster", "1", "https://static-cdn.jtvnw.net/badges/v1/b/2"),
+					new ChatBadge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2")
+				]
+			}));
 		_hub.Tick();
 
-		var spans = MessageNodes(session.BuildTree().Root).Single()
-			.Properties[UiComponentProperties.Spans].EnumerateArray().ToList();
+		var spans = MessageNodes(session.BuildTree().Root)
+			.Single()
+			.Properties[UiComponentProperties.Spans]
+			.EnumerateArray()
+			.ToList();
 
 		Assert.Multiple(() =>
 		{
@@ -494,9 +511,11 @@ internal sealed class TwitchChatWidgetViewTests
 	}
 
 	private async Task<IUiSession> OpenAsync(object? data = null)
-		=> (await _provider.CreateSessionAsync(
-			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Widget, data: data), UiModelVersion = 1 },
+	{
+		return (await _provider.CreateSessionAsync(new UiSessionRequest
+				{ Surface = Surface(UiSurfaceKinds.Widget, data: data), UiModelVersion = 1 },
 			CancellationToken.None))!;
+	}
 
 	private static UiSurface Surface(string kind, bool sample = false, object? data = null, string? culture = null)
 	{
@@ -504,7 +523,7 @@ internal sealed class TwitchChatWidgetViewTests
 		{
 			[UiWidgetSurfaceAttributes.WidgetType]
 				= JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" }),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" })
 		};
 
 		if (sample)
@@ -521,14 +540,18 @@ internal sealed class TwitchChatWidgetViewTests
 	}
 
 	private static IEnumerable<UiNode> MessageNodes(UiNode root)
-		=> Flatten(root, includeFallback: false)
+	{
+		return Flatten(root, false)
 			.Where(node => node.Type == UiComponents.Text && node.Properties.ContainsKey(UiComponentProperties.Spans));
+	}
 
 	private static IEnumerable<UiNode> FallbackNodes(UiNode root)
-		=> Flatten(root, includeFallback: false)
+	{
+		return Flatten(root, false)
 			.Where(node => node.Fallback is not null)
 			.SelectMany(node => Flatten(node.Fallback!))
 			.Where(node => node.Type == UiComponents.Text);
+	}
 
 	private static IEnumerable<UiNode> Flatten(UiNode node, bool includeFallback = true)
 	{
@@ -549,11 +572,21 @@ internal sealed class TwitchChatWidgetViewTests
 	}
 
 	private static double TextSize(IUiSession session)
-		=> Flatten(session.BuildTree().Root)
+	{
+		return Flatten(session.BuildTree().Root)
 			.First(node => node.Type == UiComponents.Text && node.Properties.ContainsKey(UiComponentProperties.Size))
-			.Properties[UiComponentProperties.Size].GetProperty("basis").GetDouble();
+			.Properties[UiComponentProperties.Size]
+			.GetProperty("basis")
+			.GetDouble();
+	}
 
 	private static List<string> Texts(UiNode root)
-		=> [.. Flatten(root).Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
-			.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())];
+	{
+		return
+		[
+			.. Flatten(root)
+				.Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
+				.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())
+		];
+	}
 }

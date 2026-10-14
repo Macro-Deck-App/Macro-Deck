@@ -13,7 +13,8 @@ public class ActionParameterSearchableMappingTests
 	[Test]
 	public void A_choice_from_a_plugin_that_predates_search_is_not_searchable()
 	{
-		var parameter = ActionParameterMapper.ToDomain(new ActionParameterDto { Name = "counter", Type = "DynamicChoice" });
+		var parameter = ActionParameterMapper.ToDomain(new ActionParameterDto
+			{ Name = "counter", Type = "DynamicChoice" });
 
 		Assert.That(parameter.Searchable, Is.False);
 	}

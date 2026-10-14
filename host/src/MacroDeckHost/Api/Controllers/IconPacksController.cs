@@ -57,11 +57,15 @@ public class IconPacksController : ControllerBase
 
 	[HttpGet]
 	public Task<GetIconPacksResponse> GetAll(CancellationToken ct)
-		=> _getIconPacks.Handle(new GetIconPacksRequest(), ct).AsTask();
+	{
+		return _getIconPacks.Handle(new GetIconPacksRequest(), ct).AsTask();
+	}
 
 	[HttpPost]
 	public Task<CreateIconPackResponse> Create(CreateIconPackRequest body, CancellationToken ct)
-		=> _createIconPack.Handle(body, ct).AsTask();
+	{
+		return _createIconPack.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut("{id}")]
 	public Task<UpdateIconPackResponse> Update(string id, UpdateIconPackRequest body, CancellationToken ct)
@@ -72,7 +76,9 @@ public class IconPacksController : ControllerBase
 
 	[HttpDelete("{id}")]
 	public Task<DeleteIconPackResponse> Delete(string id, CancellationToken ct)
-		=> _deleteIconPack.Handle(new DeleteIconPackRequest { Id = id }, ct).AsTask();
+	{
+		return _deleteIconPack.Handle(new DeleteIconPackRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost("import")]
 	[DisableFormValueModelBinding]
@@ -115,7 +121,7 @@ public class IconPacksController : ControllerBase
 			return InvalidRequest(AppStrings.Errors.Common.MultipartBodyRequired());
 		}
 
-		var result = await _iconImportService.Import(packId, sourceName: null, files, ct);
+		var result = await _iconImportService.Import(packId, null, files, ct);
 		return IconMapper.ToImportResponse(result, _batchTracker);
 	}
 
@@ -163,7 +169,8 @@ public class IconPacksController : ControllerBase
 	}
 
 	[HttpPost("restore-from-path")]
-	public async Task<ImportIconPacksResponse> RestoreFromPath(RestoreIconPackFromPathRequest body,
+	public async Task<ImportIconPacksResponse> RestoreFromPath(
+		RestoreIconPackFromPathRequest body,
 		CancellationToken ct)
 	{
 		var refusal = PortabilityHttp.RefuseUnlessDesktop(HttpContext);
@@ -203,7 +210,8 @@ public class IconPacksController : ControllerBase
 	}
 
 	private static ImportIconsResponse InvalidRequest(MacroDeck.Localization.LocalizedText message)
-		=> new()
+	{
+		return new ImportIconsResponse
 		{
 			Success = false,
 			Error = new TransportError
@@ -212,4 +220,5 @@ public class IconPacksController : ControllerBase
 				Message = message
 			}
 		};
+	}
 }

@@ -8,7 +8,8 @@ namespace MacroDeck.Plugin.Cli.Packing;
 /// <c>Commands/PackCommand.cs</c> so the mapping is directly callable from tests.</summary>
 internal static class PluginPackReporter
 {
-	public static async Task<int> ReportAsync(CliConsole console,
+	public static async Task<int> ReportAsync(
+		CliConsole console,
 		PluginPackResult result,
 		bool showDigest,
 		CancellationToken cancellationToken = default)
@@ -28,8 +29,8 @@ internal static class PluginPackReporter
 			console.Info($"Created output directory '{CliText.DisplayPath(createdOutputDirectory)}'.");
 		}
 
-		console.Info($"Packed {result.PluginId} {result.Version} -> {result.OutputPath} " +
-			$"({result.EntryCount} entries, {result.TotalUncompressedBytes} bytes uncompressed).");
+		console.Info($"Packed {result.PluginId} {result.Version} -> {result.OutputPath} "
+			+ $"({result.EntryCount} entries, {result.TotalUncompressedBytes} bytes uncompressed).");
 
 		if (showDigest)
 		{
@@ -41,8 +42,8 @@ internal static class PluginPackReporter
 
 			if (inspection.Success && inspection.Manifest is { } manifest)
 			{
-				console.WriteLine("Digest to sign (base64): " +
-					Convert.ToBase64String(PluginArtifactDigest.Compute(manifest)));
+				console.WriteLine("Digest to sign (base64): "
+					+ Convert.ToBase64String(PluginArtifactDigest.Compute(manifest)));
 			}
 		}
 

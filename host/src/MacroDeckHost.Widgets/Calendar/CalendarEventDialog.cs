@@ -31,13 +31,20 @@ internal static class CalendarDialogText
 {
 	private const int MaxDescriptionBytes = 24 * 1024;
 
-	public static string Title(string text) => CalendarText.ClipToJsonBytes(text, ProtocolLimits.MaxCalendarTitleLength);
+	public static string Title(string text)
+	{
+		return CalendarText.ClipToJsonBytes(text, ProtocolLimits.MaxCalendarTitleLength);
+	}
 
 	public static string? Location(string? text)
-		=> text is null ? null : CalendarText.ClipToJsonBytes(text, ProtocolLimits.MaxCalendarLocationLength);
+	{
+		return text is null ? null : CalendarText.ClipToJsonBytes(text, ProtocolLimits.MaxCalendarLocationLength);
+	}
 
 	public static string? Description(string? text)
-		=> text is null ? null : CalendarText.ClipToJsonBytes(text, MaxDescriptionBytes);
+	{
+		return text is null ? null : CalendarText.ClipToJsonBytes(text, MaxDescriptionBytes);
+	}
 }
 
 internal sealed record CalendarDialogParticipant(string Key, string Name, LocalizedText Response, bool IsOrganizer);
@@ -80,11 +87,20 @@ internal sealed class CalendarEventDialogSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -182,7 +198,7 @@ internal static class CalendarEventDialogView
 			Direction = UiComponentDirections.Vertical,
 			Padding = 0.04,
 			Gap = _gap,
-			Children = Body(content, feedback, format, join),
+			Children = Body(content, feedback, format, join)
 		};
 	}
 
@@ -191,7 +207,8 @@ internal static class CalendarEventDialogView
 		UiState<LocalizedText> feedback,
 		CalendarFormat format,
 		Action join)
-		=>
+	{
+		return
 		[
 			new UiWhen
 			{
@@ -205,23 +222,25 @@ internal static class CalendarEventDialogView
 					Role = UiComponentTextRoles.Secondary,
 					Align = UiComponentAlignments.Center,
 					Wrap = true,
-					Fill = true,
-				},
+					Fill = true
+				}
 			},
 			new UiWhen
 			{
 				Key = "eventGate",
 				Condition = () => content.Value.Summary is not null,
-				Content = () => Event(content, feedback, format, join),
-			},
+				Content = () => Event(content, feedback, format, join)
+			}
 		];
+	}
 
 	private static UiList Event(
 		UiAsyncState<CalendarDialogContent> content,
 		UiState<LocalizedText> feedback,
 		CalendarFormat format,
 		Action join)
-		=> new()
+	{
+		return new UiList
 		{
 			Key = "event",
 			Fill = true,
@@ -230,7 +249,8 @@ internal static class CalendarEventDialogView
 			[
 				IconLine("when",
 					UiIcons.ClockType,
-					UiText.Optional(() => content.Value.Summary is { } summary ? format.DetailsRange(summary) : default)),
+					UiText.Optional(()
+						=> content.Value.Summary is { } summary ? format.DetailsRange(summary) : default)),
 				new UiStack
 				{
 					Key = "source",
@@ -245,20 +265,20 @@ internal static class CalendarEventDialogView
 							MainSize = _icon,
 							Background = UiValue.From(() => content.Value.Summary is { } summary
 								? CalendarWidgetStates.Color(summary) ?? CalendarWidgetParts.DefaultBarColor
-								: CalendarWidgetParts.DefaultBarColor),
+								: CalendarWidgetParts.DefaultBarColor)
 						},
 						new UiTextRun
 						{
 							Key = "text",
 							Text = UiText.Optional(() => content.Value.Summary is { } summary
 								? Source(summary)
-								: default(LocalizedText)),
+								: default),
 							Size = _smallText,
 							Role = UiComponentTextRoles.Secondary,
 							Wrap = true,
-							Fill = true,
-						},
-					],
+							Fill = true
+						}
+					]
 				},
 				new UiWhen
 				{
@@ -266,13 +286,13 @@ internal static class CalendarEventDialogView
 					Condition = () => content.Value.Summary?.Location is not null,
 					Content = () => IconLine("location",
 						UiIcons.Pin,
-						UiText.From(() => CalendarDialogText.Location(content.Value.Summary?.Location))),
+						UiText.From(() => CalendarDialogText.Location(content.Value.Summary?.Location)))
 				},
 				new UiWhen
 				{
 					Key = "joinGate",
 					Condition = () => content.Value.Summary?.MeetingUrl is not null,
-					Content = () => Join(content, join),
+					Content = () => Join(content, join)
 				},
 				new UiWhen
 				{
@@ -283,8 +303,8 @@ internal static class CalendarEventDialogView
 						Key = "feedback",
 						Text = UiText.Optional(() => feedback.Value),
 						Size = _text,
-						Wrap = true,
-					},
+						Wrap = true
+					}
 				},
 				new UiWhen
 				{
@@ -303,10 +323,10 @@ internal static class CalendarEventDialogView
 								Key = "text",
 								Text = UiText.From(() => content.Value.Description),
 								Size = _text,
-								Wrap = true,
-							},
-						],
-					},
+								Wrap = true
+							}
+						]
+					}
 				},
 				new UiWhen
 				{
@@ -325,16 +345,18 @@ internal static class CalendarEventDialogView
 								Key = "people",
 								Items = UiValue.From(() => Participants(content.Value)),
 								KeySelector = participant => participant.Key,
-								Template = (participant, _) => Participant(participant),
-							},
-						],
-					},
-				},
-			],
+								Template = (participant, _) => Participant(participant)
+							}
+						]
+					}
+				}
+			]
 		};
+	}
 
 	private static UiStack Join(UiAsyncState<CalendarDialogContent> content, Action join)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "join",
 			Direction = UiComponentDirections.Horizontal,
@@ -361,9 +383,9 @@ internal static class CalendarEventDialogView
 							Text = Strings.Details.JoinMeeting(),
 							Size = _text,
 							Weight = UiComponentTextWeights.Medium,
-							MaxLines = 1,
-						},
-					],
+							MaxLines = 1
+						}
+					]
 				},
 				new UiTextRun
 				{
@@ -372,10 +394,11 @@ internal static class CalendarEventDialogView
 					Size = _smallText,
 					Role = UiComponentTextRoles.Secondary,
 					MaxLines = 1,
-					Fill = true,
-				},
-			],
+					Fill = true
+				}
+			]
 		};
+	}
 
 	private static UiStack Participant(CalendarDialogParticipant participant)
 	{
@@ -389,7 +412,7 @@ internal static class CalendarEventDialogView
 				Text = Strings.Details.Organizer(),
 				Size = _smallText,
 				Role = UiComponentTextRoles.Secondary,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -401,13 +424,13 @@ internal static class CalendarEventDialogView
 				Text = participant.Response,
 				Size = _smallText,
 				Role = UiComponentTextRoles.Secondary,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
 		var lines = new List<UiElement>
 		{
-			new UiTextRun { Key = "name", Text = participant.Name, Size = _text, MaxLines = 1 },
+			new UiTextRun { Key = "name", Text = participant.Name, Size = _text, MaxLines = 1 }
 		};
 
 		if (status.Count > 0)
@@ -417,7 +440,7 @@ internal static class CalendarEventDialogView
 				Key = "status",
 				Direction = UiComponentDirections.Horizontal,
 				Gap = _gap,
-				Children = status,
+				Children = status
 			});
 		}
 
@@ -431,28 +454,32 @@ internal static class CalendarEventDialogView
 			[
 				new UiIcon
 				{
-					Key = "icon", Icon = UiIcons.User, Size = _icon, MainSize = _icon, Role = UiComponentTextRoles.Secondary,
+					Key = "icon", Icon = UiIcons.User, Size = _icon, MainSize = _icon,
+					Role = UiComponentTextRoles.Secondary
 				},
 				new UiStack
 				{
 					Key = "lines",
 					Direction = UiComponentDirections.Vertical,
 					Fill = true,
-					Children = lines,
-				},
-			],
+					Children = lines
+				}
+			]
 		};
 	}
 
 	private static LocalizedText Source(CalendarEventSummary summary)
-		=> string.Equals(summary.CalendarName, summary.AccountName, StringComparison.OrdinalIgnoreCase)
-			? Strings.Config.AccountProvider(account: summary.AccountName, provider: summary.ProviderName)
-			: Strings.Details.Source(calendar: summary.CalendarName,
-				account: summary.AccountName,
-				provider: summary.ProviderName);
+	{
+		return string.Equals(summary.CalendarName, summary.AccountName, StringComparison.OrdinalIgnoreCase)
+			? Strings.Config.AccountProvider(summary.AccountName, summary.ProviderName)
+			: Strings.Details.Source(summary.CalendarName,
+				summary.AccountName,
+				summary.ProviderName);
+	}
 
 	private static UiStack IconLine(string key, string icon, UiText text)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Horizontal,
@@ -462,46 +489,61 @@ internal static class CalendarEventDialogView
 			[
 				new UiIcon
 				{
-					Key = "icon", Icon = icon, Size = _icon, MainSize = _icon, Role = UiComponentTextRoles.Secondary,
+					Key = "icon", Icon = icon, Size = _icon, MainSize = _icon, Role = UiComponentTextRoles.Secondary
 				},
-				new UiTextRun { Key = "text", Text = text, Size = _text, Wrap = true, Fill = true },
-			],
+				new UiTextRun { Key = "text", Text = text, Size = _text, Wrap = true, Fill = true }
+			]
 		};
+	}
 
 	private static UiTextRun Heading(string key, LocalizedString text)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
 			Size = _smallText,
 			Weight = UiComponentTextWeights.SemiBold,
-			Role = UiComponentTextRoles.Muted,
+			Role = UiComponentTextRoles.Muted
 		};
+	}
 
 	private static IReadOnlyList<CalendarDialogParticipant> Participants(CalendarDialogContent content)
-		=> [.. content.Participants
-			.Select((participant, index) => (participant, index, name: Name(participant)))
-			.Where(entry => entry.name is not null)
-			.Select(entry => new CalendarDialogParticipant("p" + entry.index.ToString(System.Globalization.CultureInfo.InvariantCulture),
-				entry.name!,
-				Response(entry.participant.Response),
-				entry.participant.IsOrganizer))];
+	{
+		return
+		[
+			.. content.Participants
+				.Select((participant, index) => (participant, index, name: Name(participant)))
+				.Where(entry => entry.name is not null)
+				.Select(entry => new CalendarDialogParticipant(
+					"p" + entry.index.ToString(System.Globalization.CultureInfo.InvariantCulture),
+					entry.name!,
+					Response(entry.participant.Response),
+					entry.participant.IsOrganizer))
+		];
+	}
 
 	private static string? Name(CalendarParticipant participant)
-		=> !string.IsNullOrWhiteSpace(participant.Name) ? CalendarDialogText.Title(participant.Name.Trim())
+	{
+		return !string.IsNullOrWhiteSpace(participant.Name) ? CalendarDialogText.Title(participant.Name.Trim())
 			: !string.IsNullOrWhiteSpace(participant.Email) ? CalendarDialogText.Title(participant.Email.Trim())
 			: null;
+	}
 
 	private static LocalizedText Response(CalendarResponseStatus response)
-		=> response switch
+	{
+		return response switch
 		{
 			CalendarResponseStatus.Accepted => Strings.Details.ResponseAccepted(),
 			CalendarResponseStatus.Declined => Strings.Details.ResponseDeclined(),
 			CalendarResponseStatus.Tentative => Strings.Details.ResponseTentative(),
 			CalendarResponseStatus.NeedsAction => Strings.Details.ResponseNeedsAction(),
-			_ => default,
+			_ => default
 		};
+	}
 
 	private static string? HostOf(string? url)
-		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.Host : null;
+	{
+		return Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.Host : null;
+	}
 }

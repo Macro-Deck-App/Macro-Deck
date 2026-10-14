@@ -32,11 +32,13 @@ public interface IRestoreService
 {
 	PendingRestoreInfo? Pending { get; }
 
-	Task<Result<PreparedRestore, BackupError>> Prepare(PrepareRestoreRequest request,
+	Task<Result<PreparedRestore, BackupError>> Prepare(
+		PrepareRestoreRequest request,
 		bool proceedWithoutSafetyBackup = false,
 		CancellationToken cancellationToken = default);
 
-	Task<Result<CommitRestoreResult, BackupError>> Commit(Guid restoreId,
+	Task<Result<CommitRestoreResult, BackupError>> Commit(
+		Guid restoreId,
 		CancellationToken cancellationToken = default);
 
 	Task<Result<BackupError>> Cancel(Guid restoreId, CancellationToken cancellationToken = default);
@@ -55,11 +57,13 @@ public sealed record PreUpdateBackupOutcome(bool Success, bool Skipped, string? 
 
 public interface IPreUpdateBackupCoordinator : IRestoreLock
 {
-	Task<PreUpdateBackupOutcome> EnsureBeforePluginUpdate(string pluginId,
+	Task<PreUpdateBackupOutcome> EnsureBeforePluginUpdate(
+		string pluginId,
 		string? batchId,
 		Action? starting = null,
 		CancellationToken cancellationToken = default);
 
-	Task<PreUpdateBackupOutcome> CreateBeforeHostUpdate(string? version,
+	Task<PreUpdateBackupOutcome> CreateBeforeHostUpdate(
+		string? version,
 		CancellationToken cancellationToken = default);
 }

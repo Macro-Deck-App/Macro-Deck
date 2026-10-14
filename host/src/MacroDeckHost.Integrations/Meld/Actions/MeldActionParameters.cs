@@ -69,13 +69,17 @@ internal static class MeldActionParameters
 			{ Value = OrientationVertical, Label = AppStrings.Integrations.Meld.Options.Vertical() }
 	];
 
-	public static double? ReadNumber(object? raw) => raw switch
+	public static double? ReadNumber(object? raw)
 	{
-		double d => d,
-		float f => f,
-		int i => i,
-		long l => l,
-		string s when double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) => parsed,
-		_ => null
-	};
+		return raw switch
+		{
+			double d => d,
+			float f => f,
+			int i => i,
+			long l => l,
+			string s when double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) =>
+				parsed,
+			_ => null
+		};
+	}
 }

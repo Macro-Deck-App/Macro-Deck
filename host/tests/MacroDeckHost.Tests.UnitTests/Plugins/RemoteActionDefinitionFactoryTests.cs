@@ -16,13 +16,15 @@ public class RemoteActionDefinitionFactoryTests
 	private static readonly IPluginCapabilityInvoker _invoker = new ThrowingInvoker();
 
 	private static RemoteActionDescriptor Descriptor(bool dynamicOptions, bool state)
-		=> new("action-id",
+	{
+		return new RemoteActionDescriptor("action-id",
 			"Action",
 			string.Empty,
 			[],
 			null,
 			dynamicOptions,
 			state);
+	}
 
 	[TestCase(false, false)]
 	[TestCase(true, false)]
@@ -53,18 +55,26 @@ public class RemoteActionDefinitionFactoryTests
 
 	private sealed class ThrowingInvoker : IPluginCapabilityInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException("Not exercised by the presence-matrix tests.");
+		{
+			throw new NotSupportedException("Not exercised by the presence-matrix tests.");
+		}
 
 		public bool TryComplete(string pluginId, MacroDeck.Plugin.Protocol.Envelope.ProtocolEnvelope result)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public void AbortAll(string pluginId, MacroDeck.Plugin.Protocol.Errors.ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 }

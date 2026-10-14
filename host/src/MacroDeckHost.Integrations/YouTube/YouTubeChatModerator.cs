@@ -30,8 +30,8 @@ internal sealed class YouTubeChatModerator : IStreamChatModerator
 		ArgumentNullException.ThrowIfNull(request);
 
 		// Resolve treats an empty id as the first account; moderation must never act on a guessed account.
-		if (string.IsNullOrEmpty(accountId) ||
-			_accounts().Resolve(accountId) is not { ActiveLiveChatId: { } liveChatId } connection)
+		if (string.IsNullOrEmpty(accountId)
+			|| _accounts().Resolve(accountId) is not { ActiveLiveChatId: { } liveChatId } connection)
 		{
 			return ChatModerationResult.AccountUnavailable;
 		}
@@ -45,7 +45,9 @@ internal sealed class YouTubeChatModerator : IStreamChatModerator
 					connection.PostChat(new ChatMessageDeleted(connection.Account.ChannelId, messageId));
 					break;
 				case { Kind: ChatModerationKind.Timeout, AuthorId: { Length: > 0 } chatterId, DurationSeconds: > 0 }:
-					await connection.Api.InsertBanAsync(liveChatId, chatterId, request.DurationSeconds,
+					await connection.Api.InsertBanAsync(liveChatId,
+						chatterId,
+						request.DurationSeconds,
 						cancellationToken);
 					break;
 				case { Kind: ChatModerationKind.Ban, AuthorId: { Length: > 0 } chatterId }:
@@ -79,8 +81,8 @@ internal sealed class YouTubeChatModerator : IStreamChatModerator
 
 			return ChatModerationResult.NotPermitted;
 		}
-		catch (YouTubeApiException exception) when (exception.IsUnauthorized ||
-			exception.Reason is "insufficientPermissions")
+		catch (YouTubeApiException exception) when (exception.IsUnauthorized
+			|| exception.Reason is "insufficientPermissions")
 		{
 			_logger.Warning("YouTube did not grant the permission for {Kind} on {Channel}",
 				request.Kind,
@@ -90,12 +92,15 @@ internal sealed class YouTubeChatModerator : IStreamChatModerator
 		}
 		catch (YouTubeApiException exception) when (exception.Reason is { } reason && _refusedReasons.Contains(reason))
 		{
-			_logger.Warning(exception, "YouTube refused {Kind} on {Channel}", request.Kind, connection.Account.ChannelId);
+			_logger.Warning(exception,
+				"YouTube refused {Kind} on {Channel}",
+				request.Kind,
+				connection.Account.ChannelId);
 
 			return ChatModerationResult.Refused;
 		}
-		catch (Exception exception) when (exception is not OperationCanceledException ||
-			!cancellationToken.IsCancellationRequested)
+		catch (Exception exception) when (exception is not OperationCanceledException
+			|| !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning(exception, "YouTube chat moderation {Kind} failed", request.Kind);
 

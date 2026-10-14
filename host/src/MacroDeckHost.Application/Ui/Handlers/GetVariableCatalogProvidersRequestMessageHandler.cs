@@ -15,7 +15,8 @@ public class GetVariableCatalogProvidersRequestMessageHandler
 	private readonly VariableBindingLookup _bindings;
 	private readonly StartupReadiness _readiness;
 
-	public GetVariableCatalogProvidersRequestMessageHandler(VariableCatalogProviders providers,
+	public GetVariableCatalogProvidersRequestMessageHandler(
+		VariableCatalogProviders providers,
 		IIntegrationRegistry integrations,
 		VariableBindingLookup bindings,
 		StartupReadiness readiness)
@@ -53,7 +54,7 @@ public class GetVariableCatalogProvidersRequestMessageHandler
 				// host is the only side that knows how much of it has been bound already.
 				UnboundCount = provider.CatalogEntryCount is { } total
 					? Math.Max(0, total - _bindings.CountFor(integrationId))
-					: null,
+					: null
 			});
 		}
 

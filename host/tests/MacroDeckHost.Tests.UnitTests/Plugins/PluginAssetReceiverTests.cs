@@ -41,7 +41,7 @@ public class PluginAssetReceiverTests
 	[Test]
 	public void A_chunk_over_the_chunk_size_limit_is_rejected()
 	{
-		Begin("a1", totalBytes: ProtocolLimits.MaxAssetChunkBytes + 1);
+		Begin("a1", ProtocolLimits.MaxAssetChunkBytes + 1);
 
 		var oversizedChunk = new byte[ProtocolLimits.MaxAssetChunkBytes + 1];
 		var result = _receiver.Chunk(PluginId, "a1", 0, oversizedChunk);
@@ -56,7 +56,7 @@ public class PluginAssetReceiverTests
 	[Test]
 	public void Actual_bytes_exceeding_the_declared_total_are_rejected()
 	{
-		Begin("a1", totalBytes: 4);
+		Begin("a1", 4);
 
 		var result = _receiver.Chunk(PluginId, "a1", 0, new byte[8]);
 
@@ -70,7 +70,7 @@ public class PluginAssetReceiverTests
 	[Test]
 	public void An_out_of_order_chunk_index_is_rejected()
 	{
-		Begin("a1", totalBytes: 20);
+		Begin("a1", 20);
 		_receiver.Chunk(PluginId, "a1", 0, new byte[10]);
 
 		var result = _receiver.Chunk(PluginId, "a1", 2, new byte[10]);
@@ -85,7 +85,7 @@ public class PluginAssetReceiverTests
 	[Test]
 	public void A_duplicate_chunk_index_is_rejected()
 	{
-		Begin("a1", totalBytes: 20);
+		Begin("a1", 20);
 		_receiver.Chunk(PluginId, "a1", 0, new byte[10]);
 
 		var result = _receiver.Chunk(PluginId, "a1", 0, new byte[10]);
@@ -102,8 +102,8 @@ public class PluginAssetReceiverTests
 	{
 		var bytes = new byte[] { 1, 2, 3, 4 };
 		Begin("a1",
-			totalBytes: bytes.Length,
-			contentHash: "sha256:0000000000000000000000000000000000000000000000000000000000000000");
+			bytes.Length,
+			"sha256:0000000000000000000000000000000000000000000000000000000000000000");
 		_receiver.Chunk(PluginId, "a1", 0, bytes);
 
 		var result = _receiver.Commit(PluginId, "a1");
@@ -145,11 +145,11 @@ public class PluginAssetReceiverTests
 	{
 		for (var i = 0; i < PluginAssetReceiver.MaxInFlightTransfersPerPlugin; i++)
 		{
-			var begun = Begin($"a{i}", totalBytes: 1);
+			var begun = Begin($"a{i}", 1);
 			Assert.That(begun.Accepted, Is.True, $"setup begin {i} should have been accepted");
 		}
 
-		var result = Begin("one-too-many", totalBytes: 1);
+		var result = Begin("one-too-many", 1);
 
 		Assert.Multiple(() =>
 		{
@@ -165,10 +165,10 @@ public class PluginAssetReceiverTests
 		// (PluginAssetReceiver.MaxBufferedBytesPerPlugin is deliberately smaller than
 		// MaxInFlightTransfersPerPlugin * MaxAssetBytes - see its remarks), so a third of any size
 		// overflows it well before the in-flight-transfer-count bound would ever apply.
-		Begin("a1", totalBytes: ProtocolLimits.MaxAssetBytes);
-		Begin("a2", totalBytes: ProtocolLimits.MaxAssetBytes);
+		Begin("a1", ProtocolLimits.MaxAssetBytes);
+		Begin("a2", ProtocolLimits.MaxAssetBytes);
 
-		var result = Begin("a3", totalBytes: 1);
+		var result = Begin("a3", 1);
 
 		Assert.Multiple(() =>
 		{
@@ -180,14 +180,14 @@ public class PluginAssetReceiverTests
 	[Test]
 	public void Dropping_a_session_frees_its_incomplete_transfers_and_their_buffered_bytes()
 	{
-		Begin("a1", totalBytes: ProtocolLimits.MaxAssetBytes);
-		Begin("a2", totalBytes: ProtocolLimits.MaxAssetBytes);
+		Begin("a1", ProtocolLimits.MaxAssetBytes);
+		Begin("a2", ProtocolLimits.MaxAssetBytes);
 
-		Assert.That(Begin("a3", totalBytes: 1).Accepted, Is.False);
+		Assert.That(Begin("a3", 1).Accepted, Is.False);
 
 		_receiver.DropSession(PluginId);
 
-		var result = Begin("a4", totalBytes: ProtocolLimits.MaxAssetBytes);
+		var result = Begin("a4", ProtocolLimits.MaxAssetBytes);
 
 		Assert.That(result.Accepted, Is.True);
 	}
@@ -195,7 +195,7 @@ public class PluginAssetReceiverTests
 	[Test]
 	public void Dropping_a_session_makes_its_asset_ids_unknown_again()
 	{
-		Begin("a1", totalBytes: 10);
+		Begin("a1", 10);
 		_receiver.DropSession(PluginId);
 
 		var result = _receiver.Commit(PluginId, "a1");
@@ -213,7 +213,7 @@ public class PluginAssetReceiverTests
 		AssetCommittedEventArgs? raised = null;
 		_receiver.AssetCommitted += (_, e) => raised = e;
 
-		Begin("a1", totalBytes: bytes.Length, contentHash: contentHash, kind: AssetKinds.Icon, mimeType: "image/png");
+		Begin("a1", bytes.Length, contentHash, AssetKinds.Icon, "image/png");
 
 		var offset = 0;
 		var index = 0;
@@ -246,7 +246,8 @@ public class PluginAssetReceiverTests
 	[TestCase("text/html", 3, "INVALID_PAYLOAD")]
 	[TestCase("image/png", 0, "INVALID_PAYLOAD")]
 	[TestCase("image/png", ProtocolLimits.MaxUiResourceBytes + 1, "ASSET_TOO_LARGE")]
-	public void A_ui_resource_that_could_never_be_registered_is_rejected_at_begin(string mimeType,
+	public void A_ui_resource_that_could_never_be_registered_is_rejected_at_begin(
+		string mimeType,
 		int totalBytes,
 		string expectedCode)
 	{
@@ -292,10 +293,12 @@ public class PluginAssetReceiverTests
 		string? contentHash = null,
 		string kind = AssetKinds.Icon,
 		string mimeType = "image/png")
-		=> _receiver.Begin(PluginId,
+	{
+		return _receiver.Begin(PluginId,
 			assetId,
 			kind,
 			mimeType,
 			totalBytes,
 			contentHash ?? AssetContentHash.Compute(new byte[totalBytes]));
+	}
 }

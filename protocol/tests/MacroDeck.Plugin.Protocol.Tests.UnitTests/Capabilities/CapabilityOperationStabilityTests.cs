@@ -24,7 +24,7 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.MusicPlayer] =
 			[
 				"describe", "instances", "state", "artwork", "play", "play-item", "pause", "toggle", "next",
-				"previous", "seek", "volume", "shuffle", "repeat", "catalog", "devices", "transfer",
+				"previous", "seek", "volume", "shuffle", "repeat", "catalog", "devices", "transfer"
 			],
 			[CapabilityKinds.Weather] = ["describe", "instances", "snapshot"],
 			[CapabilityKinds.VirtualProfiles] = ["describe", "profiles", "widget-interaction"],
@@ -32,7 +32,7 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.Ui] =
 			[
 				"describe", "session.open", "session.close", "session.snapshot", "session.event",
-				"modal.result", "notification.result",
+				"modal.result", "notification.result"
 			],
 			[CapabilityKinds.Localization] = ["describe", "catalog"],
 			[CapabilityKinds.DeviceProvider] =
@@ -45,14 +45,14 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.VideoStreamProvider] =
 			[
 				"describe", "streams", "session.open", "session.suspend", "session.resume",
-				"session.close",
+				"session.close"
 			],
 			[CapabilityKinds.Calendar] = ["describe", "accounts", "calendars", "events", "event"],
 			[CapabilityKinds.ConfigEntries] =
 				["describe", "prepare", "status", "usable", "reload", "synchronize", "release"],
 			[CapabilityKinds.BatteryProvider] = ["describe"],
 			[CapabilityKinds.EmailInbox] = ["describe", "inboxes", "snapshot"],
-			[CapabilityKinds.CompanionDeviceEntries] = ["describe"],
+			[CapabilityKinds.CompanionDeviceEntries] = ["describe"]
 		};
 
 	[Test]
@@ -75,15 +75,21 @@ public class CapabilityOperationStabilityTests
 
 	[TestCaseSource(nameof(_kindsAndOperations))]
 	public void Is_known_is_true_for_every_documented_pair(string kind, string operation)
-		=> Assert.That(CapabilityOperations.IsKnown(kind, operation), Is.True);
+	{
+		Assert.That(CapabilityOperations.IsKnown(kind, operation), Is.True);
+	}
 
 	[Test]
 	public void Is_known_is_false_for_an_unknown_operation()
-		=> Assert.That(CapabilityOperations.IsKnown(CapabilityKinds.Actions, "not-a-real-operation"), Is.False);
+	{
+		Assert.That(CapabilityOperations.IsKnown(CapabilityKinds.Actions, "not-a-real-operation"), Is.False);
+	}
 
 	[Test]
 	public void Is_known_is_false_for_an_unknown_kind()
-		=> Assert.That(CapabilityOperations.IsKnown("not-a-real-kind", "describe"), Is.False);
+	{
+		Assert.That(CapabilityOperations.IsKnown("not-a-real-kind", "describe"), Is.False);
+	}
 
 	[Test]
 	public void No_duplicate_operations_within_a_kind()
@@ -98,5 +104,7 @@ public class CapabilityOperationStabilityTests
 	}
 
 	private static IEnumerable<TestCaseData> _kindsAndOperations()
-		=> _expected.SelectMany(pair => pair.Value.Select(operation => new TestCaseData(pair.Key, operation)));
+	{
+		return _expected.SelectMany(pair => pair.Value.Select(operation => new TestCaseData(pair.Key, operation)));
+	}
 }

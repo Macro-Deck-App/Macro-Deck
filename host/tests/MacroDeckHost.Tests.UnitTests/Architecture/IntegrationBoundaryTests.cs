@@ -17,7 +17,7 @@ internal sealed class IntegrationBoundaryTests
 		"MacroDeckHost.Domain",
 		"MacroDeckHost.Infrastructure",
 		"MacroDeckHost.Widgets",
-		"MacroDeckHost",
+		"MacroDeckHost"
 	];
 
 	private static readonly string[] _sharedFolders = ["Streaming", "Ui"];
@@ -32,7 +32,8 @@ internal sealed class IntegrationBoundaryTests
 			.Where(type => !typeof(ISystemIntegration).IsAssignableFrom(type))
 			.Select(type => type.FullName);
 
-		Assert.That(misplaced, Is.Empty,
+		Assert.That(misplaced,
+			Is.Empty,
 			"A built-in integration that is not an ISystemIntegration belongs in MacroDeckHost.Integrations (ADR 0107).");
 	}
 
@@ -57,7 +58,8 @@ internal sealed class IntegrationBoundaryTests
 				.Where(folder => folder != entry.Source && !_sharedFolders.Contains(folder))
 				.Select(folder => $"folder {entry.Source} uses {folder}"));
 
-		AssertMatchesBaseline("folder ", actual,
+		AssertMatchesBaseline("folder ",
+			actual,
 			"New coupling between built-in integrations. Each one must stay extractable on its own: move shared code to the "
 			+ "Integrations root namespace or a shared folder (ADR 0107):");
 	}
@@ -73,7 +75,8 @@ internal sealed class IntegrationBoundaryTests
 			.Where(entry => entry.Folder is null || !systemFolders.Contains(entry.Folder))
 			.SelectMany(entry => AssemblyDependencies.ReferencedTypes(entry.Type)
 				.Where(used => hostAssemblies.Contains(used.Assembly))
-				.Select(used => $"integration {entry.Folder ?? "(shared)"} uses {AssemblyDependencies.Outermost(used).FullName}"));
+				.Select(used
+					=> $"integration {entry.Folder ?? "(shared)"} uses {AssemblyDependencies.Outermost(used).FullName}"));
 
 		AssertMatchesBaseline("integration ", actual);
 	}
@@ -101,7 +104,8 @@ internal sealed class IntegrationBoundaryTests
 
 		var actual = HostTypes()
 			.SelectMany(type => AssemblyDependencies.StringLiterals(type)
-				.SelectMany(literal => ids.Where(id => literal == id || literal.StartsWith(id + "::", StringComparison.Ordinal)))
+				.SelectMany(literal
+					=> ids.Where(id => literal == id || literal.StartsWith(id + "::", StringComparison.Ordinal)))
 				.Select(id => $"names {AssemblyDependencies.Outermost(type).FullName} {id}"));
 
 		AssertMatchesBaseline("names ", actual);
@@ -121,7 +125,9 @@ internal sealed class IntegrationBoundaryTests
 	}
 
 	private static IEnumerable<Type> HostTypes()
-		=> _hostAssemblies.Select(Assembly.Load).SelectMany(AssemblyDependencies.TypesOf);
+	{
+		return _hostAssemblies.Select(Assembly.Load).SelectMany(AssemblyDependencies.TypesOf);
+	}
 
 	private static string? FolderOf(Type type)
 	{
@@ -135,53 +141,73 @@ internal sealed class IntegrationBoundaryTests
 	}
 
 	private static bool IsRoot(Type type)
-		=> AssemblyDependencies.Outermost(type).Namespace == IntegrationsNamespace;
+	{
+		return AssemblyDependencies.Outermost(type).Namespace == IntegrationsNamespace;
+	}
 
 	private static bool IsIntegration(Type type)
-		=> type is { IsClass: true, IsAbstract: false } &&
-			type.GetCustomAttribute<MacroDeckIntegrationAttribute>() is not null &&
-			typeof(IIntegration).IsAssignableFrom(type);
+	{
+		return type is { IsClass: true, IsAbstract: false }
+			&& type.GetCustomAttribute<MacroDeckIntegrationAttribute>() is not null
+			&& typeof(IIntegration).IsAssignableFrom(type);
+	}
 
 	private static IEnumerable<Type> IntegrationTypes()
-		=> AssemblyDependencies.TypesOf(_integrations).Where(IsIntegration);
+	{
+		return AssemblyDependencies.TypesOf(_integrations).Where(IsIntegration);
+	}
 
 	private static HashSet<string> SystemIntegrationFolders()
-		=> IntegrationTypes()
+	{
+		return IntegrationTypes()
 			.Where(type => typeof(ISystemIntegration).IsAssignableFrom(type))
 			.Select(FolderOf)
 			.OfType<string>()
 			.ToHashSet(StringComparer.Ordinal);
+	}
 
 	private static List<string> NonSystemIntegrationIds()
-		=> IntegrationTypes()
+	{
+		return IntegrationTypes()
 			.Where(type => !typeof(ISystemIntegration).IsAssignableFrom(type))
 			.Select(type => ((IIntegration)Activator.CreateInstance(type)!).Id)
 			.Distinct(StringComparer.Ordinal)
 			.ToList();
+	}
 
-	private static void AssertMatchesBaseline(string prefix, IEnumerable<string> actual,
-		string addedMessage = "New coupling between the host and a specific built-in integration. Use the SDK instead (ADR 0107):")
+	private static void AssertMatchesBaseline(
+		string prefix,
+		IEnumerable<string> actual,
+		string addedMessage
+			= "New coupling between the host and a specific built-in integration. Use the SDK instead (ADR 0107):")
 	{
 		var found = actual.ToHashSet(StringComparer.Ordinal);
-		var baseline = Baseline().Where(line => line.StartsWith(prefix, StringComparison.Ordinal)).ToHashSet(StringComparer.Ordinal);
+		var baseline = Baseline()
+			.Where(line => line.StartsWith(prefix, StringComparison.Ordinal))
+			.ToHashSet(StringComparer.Ordinal);
 
 		var added = found.Except(baseline).Order(StringComparer.Ordinal).ToList();
 		var resolved = baseline.Except(found).Order(StringComparer.Ordinal).ToList();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(added, Is.Empty,
+			Assert.That(added,
+				Is.Empty,
 				addedMessage
-				+ Environment.NewLine + string.Join(Environment.NewLine, added));
-			Assert.That(resolved, Is.Empty,
+				+ Environment.NewLine
+				+ string.Join(Environment.NewLine, added));
+			Assert.That(resolved,
+				Is.Empty,
 				"These baseline entries no longer occur. Remove them from IntegrationBoundary.baseline:"
-				+ Environment.NewLine + string.Join(Environment.NewLine, resolved));
+				+ Environment.NewLine
+				+ string.Join(Environment.NewLine, resolved));
 		});
 	}
 
 	private static List<string> Baseline()
 	{
-		using var stream = typeof(IntegrationBoundaryTests).Assembly.GetManifestResourceStream("IntegrationBoundary.baseline")!;
+		using var stream
+			= typeof(IntegrationBoundaryTests).Assembly.GetManifestResourceStream("IntegrationBoundary.baseline")!;
 		using var reader = new StreamReader(stream);
 		return reader.ReadToEnd()
 			.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)

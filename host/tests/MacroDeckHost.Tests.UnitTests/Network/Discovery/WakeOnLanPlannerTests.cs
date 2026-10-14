@@ -7,20 +7,23 @@ namespace MacroDeckHost.Tests.UnitTests.Network.Discovery;
 [TestFixture]
 internal sealed class WakeOnLanPlannerTests
 {
-	private static NetworkInterfaceSnapshot Nic(int index,
+	private static NetworkInterfaceSnapshot Nic(
+		int index,
 		string name,
 		string mac,
 		NetworkInterfaceType type = NetworkInterfaceType.Ethernet,
 		bool up = true,
 		string description = "Ethernet",
 		params string[] addresses)
-		=> new(index,
+	{
+		return new NetworkInterfaceSnapshot(index,
 			name,
 			description,
 			type,
 			up,
 			(addresses.Length == 0 ? ["192.168.20.13"] : addresses).Select(IPAddress.Parse).ToList(),
 			mac);
+	}
 
 	[Test]
 	public void Every_lan_card_the_host_is_reachable_on_is_named_in_colon_form_in_interface_order()

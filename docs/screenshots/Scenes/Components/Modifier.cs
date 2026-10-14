@@ -1,40 +1,67 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 
 internal static partial class Scenes
 {
 	private static UiGradient Linear(double angle, string from, string to)
-		=> UiGradient.Linear(angle, Stop(0, from), Stop(1, to));
+	{
+		return UiGradient.Linear(angle, Stop(0, from), Stop(1, to));
+	}
 
 	private static UiGradient Radial(string from, string to)
-		=> UiGradient.Radial(0.5, 0.5, Stop(0, from), Stop(1, to));
+	{
+		return UiGradient.Radial(0.5, 0.5, Stop(0, from), Stop(1, to));
+	}
 
-	private static UiGradientStop Stop(double offset, string color) => new() { Offset = offset, Color = color };
+	private static UiGradientStop Stop(double offset, string color)
+	{
+		return new UiGradientStop { Offset = offset, Color = color };
+	}
 
 	private static UiMask FadeDown()
-		=> UiMask.Linear(180, new UiMaskStop { Offset = 0.4, Opacity = 1 }, new UiMaskStop { Offset = 1, Opacity = 0 });
-
-	private static UiSize Hairline(double units) => UiSize.Capped(units / UiLength.Cell, units);
-
-	private static UiButton Art(string key) => new()
 	{
-		Key = key,
-		Source = Cover("modifier-cover", "#2b6cee", "#7a3cf0"),
-		Fit = UiComponentImageFits.Cover,
-		Corner = UiComponentButtonCorners.Tile,
-	};
+		return UiMask.Linear(180,
+			new UiMaskStop { Offset = 0.4, Opacity = 1 },
+			new UiMaskStop { Offset = 1, Opacity = 0 });
+	}
+
+	private static UiSize Hairline(double units)
+	{
+		return UiSize.Capped(units / UiLength.Cell, units);
+	}
+
+	private static UiButton Art(string key)
+	{
+		return new UiButton
+		{
+			Key = key,
+			Source = Cover("modifier-cover", "#2b6cee", "#7a3cf0"),
+			Fit = UiComponentImageFits.Cover,
+			Corner = UiComponentButtonCorners.Tile
+		};
+	}
 
 	private static UiStack Swatch(Func<UiElement, UiModifier> modifier)
-		=> Centered("tile", modifier(new UiImage { Key = "swatch", Source = Icon("music-note"), Size = 0.6 }));
-
-	private static UiModifier Framed(string key, UiFrame frame) => new()
 	{
-		Key = key,
-		Frame = frame,
-		Child = Art(key + "Art"),
-	};
+		return Centered("tile", modifier(new UiImage { Key = "swatch", Source = Icon("music-note"), Size = 0.6 }));
+	}
 
-	private static UiModifier Framed(string key, UiFrame frame, string clip) => Framed(key, frame) with { Clip = clip };
+	private static UiModifier Framed(string key, UiFrame frame)
+	{
+		return new UiModifier
+		{
+			Key = key,
+			Frame = frame,
+			Child = Art(key + "Art")
+		};
+	}
+
+	private static UiModifier Framed(string key, UiFrame frame, string clip)
+	{
+		return Framed(key, frame) with { Clip = clip };
+	}
 
 	private static IEnumerable<Scene> ModifierScenes()
 	{
@@ -74,7 +101,7 @@ internal static partial class Scenes
 					Radius = 0.1,
 					BorderWidth = Hairline(3),
 					BorderColor = "#ff9500",
-					BorderLine = line,
+					BorderLine = line
 				}));
 		}
 
@@ -90,9 +117,9 @@ internal static partial class Scenes
 						Key = "mod5",
 						BorderWidth = Hairline(4),
 						BorderColor = "#ffffff",
-						Child = Art("cover") with { Fill = true, Corner = default },
-					},
-				],
+						Child = Art("cover") with { Fill = true, Corner = default }
+					}
+				]
 			});
 
 		yield return Tile("modifier-disabled",
@@ -107,13 +134,19 @@ internal static partial class Scenes
 					Background = "#c62f2f",
 					Source = Svg("mic-off", MicOff),
 					Fit = UiComponentImageFits.Cover,
-					Events = [UiEventHandler.On(UiComponentEvents.Press, () => { })],
+					Events =
+					[
+						UiEventHandler.On(UiComponentEvents.Press,
+							() =>
+							{
+							})
+					],
 					Children =
 					[
 						new UiTextRun
 							{ Key = "label", Text = "Mute", Size = 0.14, Align = UiComponentAlignments.Center }
-					],
-				},
+					]
+				}
 			});
 
 		yield return Tile("modifier-padding",
@@ -123,7 +156,7 @@ internal static partial class Scenes
 				Background = Linear(135, "#2b6cee", "#7a3cf0"),
 				Padding = 0.2,
 				Child = new UiImage { Key = "icon", Source = Icon("music-note") },
-				Fallback = new UiImage { Key = "iconPlain", Source = Icon("music-note") },
+				Fallback = new UiImage { Key = "iconPlain", Source = Icon("music-note") }
 			});
 
 		yield return Tile("modifier-opacity",

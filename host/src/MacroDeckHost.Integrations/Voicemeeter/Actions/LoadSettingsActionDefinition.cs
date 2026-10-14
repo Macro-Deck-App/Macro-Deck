@@ -26,13 +26,16 @@ internal sealed class LoadSettingsActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.File(FileParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.LoadSettings.FileLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.LoadSettings.FileDescription(),
-			fileExtensions: ["xml"],
-			required: true)
+			AppStrings.Integrations.Voicemeeter.Actions.LoadSettings.FileLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.LoadSettings.FileDescription(),
+			["xml"],
+			true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

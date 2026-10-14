@@ -100,5 +100,7 @@ internal sealed class MacroDeckLogFallbackFile
 	}
 
 	private static string FormatLine(LogEventDto dto)
-		=> $"{dto.Timestamp:O} [{dto.Level}] {dto.RenderedMessage}";
+	{
+		return $"{dto.Timestamp:O} [{dto.Level}] {dto.RenderedMessage}";
+	}
 }

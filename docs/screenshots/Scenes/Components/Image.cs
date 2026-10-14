@@ -1,5 +1,6 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
-using MacroDeck.Ui.Dsl;
 
 internal static partial class Scenes
 {
@@ -20,7 +21,7 @@ internal static partial class Scenes
 						Key = "icon",
 						Source = Icon("sun", "#ffcc00"),
 						Size = 0.16,
-						Transition = UiComponentImageTransitions.Crossfade,
+						Transition = UiComponentImageTransitions.Crossfade
 					},
 					new UiTextRun
 					{
@@ -31,8 +32,8 @@ internal static partial class Scenes
 					{
 						Key = "condition", Text = "Sunny", Size = 0.08, Role = UiComponentTextRoles.Secondary,
 						Align = UiComponentAlignments.Center
-					},
-				],
+					}
+				]
 			});
 
 		var cover = Cover("cover-dim", "#ff5e3a", "#5b2bee");
@@ -48,8 +49,8 @@ internal static partial class Scenes
 				Children =
 				[
 					new UiImage { Key = "playing", Source = cover, Size = 0.7 },
-					new UiImage { Key = "paused", Source = cover, Size = 0.7, Brightness = 0.6, Saturation = 0.55 },
-				],
+					new UiImage { Key = "paused", Source = cover, Size = 0.7, Brightness = 0.6, Saturation = 0.55 }
+				]
 			},
 			2);
 	}

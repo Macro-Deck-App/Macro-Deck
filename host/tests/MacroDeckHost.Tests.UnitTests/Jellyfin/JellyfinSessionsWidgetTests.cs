@@ -30,7 +30,8 @@ internal sealed partial class JellyfinSessionsWidgetTests
 		_client = new FakeJellyfinClient();
 		_integration = new JellyfinIntegration(_ => _client, timings: FastTimings);
 		_store = new UiResourceStore();
-		var players = new MusicPlayerRegistry(new ConfigurableIntegrationRegistry([_integration]), Serilog.Core.Logger.None);
+		var players = new MusicPlayerRegistry(new ConfigurableIntegrationRegistry([_integration]),
+			Serilog.Core.Logger.None);
 		var artwork = new MusicPlayerArtworkService(players, new VariantProcessor(), Serilog.Core.Logger.None);
 		_context = new JellyfinTestContext
 		{
@@ -42,17 +43,21 @@ internal sealed partial class JellyfinSessionsWidgetTests
 	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+	}
 
 	[Test]
 	public async Task The_cover_of_what_plays_is_registered_through_the_music_player_registry_at_256_pixels()
 	{
 		_context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("tv", "Living Room TV", item: Movie())];
+		_client.Sessions = [Session("tv", "Living Room TV", Movie())];
 		await _integration.InitializeAsync(_context);
 
 		await using var session = (await OpenAsync())!;
-		await CalendarTree.WaitForAsync(() => CoverResourceId(session) is not null, "the cover never reached the widget");
+		await CalendarTree.WaitForAsync(() => CoverResourceId(session) is not null,
+			"the cover never reached the widget");
 
 		Assert.Multiple(() =>
 		{
@@ -65,10 +70,11 @@ internal sealed partial class JellyfinSessionsWidgetTests
 	public async Task A_cover_no_longer_shown_is_removed_from_the_integrations_resources()
 	{
 		_context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("tv", "Living Room TV", item: Movie())];
+		_client.Sessions = [Session("tv", "Living Room TV", Movie())];
 		await _integration.InitializeAsync(_context);
 		await using var session = (await OpenAsync())!;
-		await CalendarTree.WaitForAsync(() => CoverResourceId(session) is not null, "the cover never reached the widget");
+		await CalendarTree.WaitForAsync(() => CoverResourceId(session) is not null,
+			"the cover never reached the widget");
 		var cover = CoverResourceId(session)!;
 
 		_client.Sessions = [Session("tv", "Living Room TV")];
@@ -104,7 +110,9 @@ internal sealed partial class JellyfinSessionsWidgetTests
 
 	[Test]
 	public void Without_a_server_the_widget_asks_for_one()
-		=> Assert.That(JellyfinSessionsState.Compute([], null).Status, Is.EqualTo(JellyfinSessionsStatus.NoServer));
+	{
+		Assert.That(JellyfinSessionsState.Compute([], null).Status, Is.EqualTo(JellyfinSessionsStatus.NoServer));
+	}
 
 	[Test]
 	public void An_unreachable_server_is_not_shown_as_idle()
@@ -119,11 +127,13 @@ internal sealed partial class JellyfinSessionsWidgetTests
 	{
 		JellyfinServerSummary[] servers =
 		[
-			new("a", "Home", true,
-			[
-				Summary("1", "Sintel", JellyfinSessionPlayback.Paused),
-				Summary("2", "Big Buck Bunny", JellyfinSessionPlayback.Playing)
-			]),
+			new("a",
+				"Home",
+				true,
+				[
+					Summary("1", "Sintel", JellyfinSessionPlayback.Paused),
+					Summary("2", "Big Buck Bunny", JellyfinSessionPlayback.Playing)
+				]),
 			new("b", "Cabin", true, [Summary("3", "Elephants Dream", JellyfinSessionPlayback.Playing)])
 		];
 
@@ -159,11 +169,13 @@ internal sealed partial class JellyfinSessionsWidgetTests
 		foreach (var state in states)
 		{
 			Assert.DoesNotThrow(() =>
-			{
-				using var view = new UiView(new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-					JellyfinSessionsView.Build(new UiState<JellyfinSessionsState>(state)));
-				_ = view.Tree;
-			}, state.Status.ToString());
+				{
+					using var view = new UiView(new UiSurface
+							{ Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
+						JellyfinSessionsView.Build(new UiState<JellyfinSessionsState>(state)));
+					_ = view.Tree;
+				},
+				state.Status.ToString());
 		}
 	}
 
@@ -174,9 +186,11 @@ internal sealed partial class JellyfinSessionsWidgetTests
 
 		Assert.DoesNotThrow(() =>
 		{
-			using var empty = new UiView(new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			using var empty = new UiView(new UiSurface
+					{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
 				JellyfinSessionsUiProvider.BuildConfig(data, []));
-			using var listed = new UiView(new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			using var listed = new UiView(new UiSurface
+					{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
 				JellyfinSessionsUiProvider.BuildConfig(data, [new JellyfinServerSummary("a", "Home", true, [])]));
 			_ = empty.Tree;
 			_ = listed.Tree;
@@ -184,7 +198,8 @@ internal sealed partial class JellyfinSessionsWidgetTests
 	}
 
 	private Task<IUiSession?> OpenAsync()
-		=> _integration.CreateSessionAsync(new UiSessionRequest
+	{
+		return _integration.CreateSessionAsync(new UiSessionRequest
 			{
 				Surface = new UiSurface
 				{
@@ -192,31 +207,42 @@ internal sealed partial class JellyfinSessionsWidgetTests
 					SessionMode = UiSessionModes.Shared,
 					Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 					{
-						[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
+						[UiWidgetSurfaceAttributes.WidgetId]
+							= JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 						[UiWidgetSurfaceAttributes.WidgetType] =
 							JsonSerializer.SerializeToElement(JellyfinWidgetTypes.SessionsQualifiedId),
-						[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { server = "" }),
+						[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { server = "" })
 					}
 				},
 				UiModelVersion = 1
 			},
 			CancellationToken.None);
+	}
 
-	private static string Json(IUiSession session) => JsonSerializer.Serialize(session.BuildTree().Root);
+	private static string Json(IUiSession session)
+	{
+		return JsonSerializer.Serialize(session.BuildTree().Root);
+	}
 
 	private static string? CoverResourceId(IUiSession session)
-		=> CoverPattern().Match(Json(session)) is { Success: true } match ? match.Value : null;
+	{
+		return CoverPattern().Match(Json(session)) is { Success: true } match ? match.Value : null;
+	}
 
 	[GeneratedRegex(@"app\.macro-deck\.jellyfin\.sessions-[0-9a-f]{32}-[0-9a-f]{16}")]
 	private static partial Regex CoverPattern();
 
 	private static JellyfinSessionSummary Summary(string key, string title, JellyfinSessionPlayback playback)
-		=> new(key, "alex", "TV", "Jellyfin Web", title, null, playback, 50);
+	{
+		return new JellyfinSessionSummary(key, "alex", "TV", "Jellyfin Web", title, null, playback, 50);
+	}
 
 	private sealed class VariantProcessor : IArtworkProcessor
 	{
 		public Task<ProcessedArtworkResult?> Process(byte[] original, CancellationToken cancellationToken)
-			=> Task.FromResult<ProcessedArtworkResult?>(new ProcessedArtworkResult([9, 9, 9, 9],
+		{
+			return Task.FromResult<ProcessedArtworkResult?>(new ProcessedArtworkResult([9, 9, 9, 9],
 				new Dictionary<int, byte[]> { [128] = [1], [256] = _cover256 }));
+		}
 	}
 }

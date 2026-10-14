@@ -53,7 +53,10 @@ public class WidgetServiceUpdateDataChangedTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task ReportsAConfigurationChange()
@@ -99,29 +102,37 @@ public class WidgetServiceUpdateDataChangedTests
 	}
 
 	private WidgetUpdatedNotification Published()
-		=> _mediator.Published.OfType<WidgetUpdatedNotification>().Single();
-
-	private WidgetEntity Widget(string data) => new()
 	{
-		Id = Guid.NewGuid(),
-		FolderId = _folderId,
-		Type = WidgetTypeIds.Slider,
-		PositionX = 0,
-		PositionY = 0,
-		Width = 1,
-		Height = 1,
-		Data = data
-	};
+		return _mediator.Published.OfType<WidgetUpdatedNotification>().Single();
+	}
 
-	private static WidgetEntity Copy(WidgetEntity source, string? data) => new()
+	private WidgetEntity Widget(string data)
 	{
-		Id = source.Id,
-		FolderId = source.FolderId,
-		Type = source.Type,
-		PositionX = source.PositionX,
-		PositionY = source.PositionY,
-		Width = source.Width,
-		Height = source.Height,
-		Data = data
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			FolderId = _folderId,
+			Type = WidgetTypeIds.Slider,
+			PositionX = 0,
+			PositionY = 0,
+			Width = 1,
+			Height = 1,
+			Data = data
+		};
+	}
+
+	private static WidgetEntity Copy(WidgetEntity source, string? data)
+	{
+		return new WidgetEntity
+		{
+			Id = source.Id,
+			FolderId = source.FolderId,
+			Type = source.Type,
+			PositionX = source.PositionX,
+			PositionY = source.PositionY,
+			Width = source.Width,
+			Height = source.Height,
+			Data = data
+		};
+	}
 }

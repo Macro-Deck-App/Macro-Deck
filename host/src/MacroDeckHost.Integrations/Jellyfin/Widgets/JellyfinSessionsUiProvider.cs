@@ -25,7 +25,8 @@ internal sealed class JellyfinSessionsUiProvider : IUiProvider
 	private readonly Func<IUiResourceRegistry?> _resources;
 	private readonly TimeProvider _time;
 
-	public JellyfinSessionsUiProvider(IJellyfinSessionSource source,
+	public JellyfinSessionsUiProvider(
+		IJellyfinSessionSource source,
 		Func<IUiResourceRegistry?> resources,
 		TimeProvider time)
 	{
@@ -38,7 +39,7 @@ internal sealed class JellyfinSessionsUiProvider : IUiProvider
 	[
 		new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 		new() { Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
-		new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+		new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -49,7 +50,8 @@ internal sealed class JellyfinSessionsUiProvider : IUiProvider
 
 		if (UiWidgetSurface.IsConfigurationFor(surface, JellyfinWidgetTypes.SessionsQualifiedId))
 		{
-			return new UiViewSession(new UiView(surface, BuildConfig(UiWidgetSurface.Data(surface), _source.GetServers())));
+			return new UiViewSession(new UiView(surface,
+				BuildConfig(UiWidgetSurface.Data(surface), _source.GetServers())));
 		}
 
 		if (!UiWidgetSurface.IsFor(surface, JellyfinWidgetTypes.SessionsQualifiedId))
@@ -101,20 +103,21 @@ internal sealed class JellyfinSessionsUiProvider : IUiProvider
 						Binding = Bind.To(server),
 						SupportsReset = true,
 						DefaultValue = string.Empty,
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
-							.. servers.Select(candidate => UiOption.Of(candidate.ServerId, candidate.Title)),
-						]),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							.. servers.Select(candidate => UiOption.Of(candidate.ServerId, candidate.Title))
+						])
 					},
 					UiWidgetAppearance.Section(data,
-						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |
-						UiWidgetAppearanceFields.TransparentBackground),
-				],
-			},
+						UiWidgetAppearanceFields.Border
+						| UiWidgetAppearanceFields.BackgroundColor
+						| UiWidgetAppearanceFields.TransparentBackground)
+				]
+			}
 		};
 	}
 
-	internal static async Task<UiResource?> GlyphAsync(IUiResourceRegistry? resources,
+	internal static async Task<UiResource?> GlyphAsync(
+		IUiResourceRegistry? resources,
 		CancellationToken cancellationToken)
 	{
 		if (resources is null)
@@ -186,11 +189,20 @@ internal sealed class JellyfinSessionsWidgetSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -213,13 +225,18 @@ internal sealed class JellyfinSessionsWidgetSession : IUiSession
 		return ValueTask.CompletedTask;
 	}
 
-	private void OnSessionsChanged(object? sender, EventArgs e) => Refresh();
+	private void OnSessionsChanged(object? sender, EventArgs e)
+	{
+		Refresh();
+	}
 
 	private JellyfinSessionsState Compute()
-		=> JellyfinSessionsState.Compute(_source.GetServers(),
+	{
+		return JellyfinSessionsState.Compute(_source.GetServers(),
 			_serverId,
 			reference => _artworkHandles.GetValueOrDefault(reference),
 			_glyph);
+	}
 
 	private void Refresh()
 	{
@@ -234,9 +251,9 @@ internal sealed class JellyfinSessionsWidgetSession : IUiSession
 
 			next = Compute();
 			stale = ReleaseUnused(next);
-			if (next.Status != _state.Value.Status ||
-				next.Glyph != _state.Value.Glyph ||
-				!next.Rows.SequenceEqual(_state.Value.Rows))
+			if (next.Status != _state.Value.Status
+				|| next.Glyph != _state.Value.Glyph
+				|| !next.Rows.SequenceEqual(_state.Value.Rows))
 			{
 				using (_view.Batch())
 				{
@@ -325,8 +342,10 @@ internal sealed class JellyfinSessionsWidgetSession : IUiSession
 		{
 			lock (_sync)
 			{
-				if (_disposed || _artwork.ContainsKey(reference) || _unavailable.Contains(reference) ||
-					!_loading.Add(reference))
+				if (_disposed
+					|| _artwork.ContainsKey(reference)
+					|| _unavailable.Contains(reference)
+					|| !_loading.Add(reference))
 				{
 					continue;
 				}
@@ -342,7 +361,11 @@ internal sealed class JellyfinSessionsWidgetSession : IUiSession
 		try
 		{
 			var handle = await registry
-				.RegisterMusicPlayerArtworkAsync(name, reference.InstanceId, reference.ArtworkId, ArtworkSize, _cts.Token)
+				.RegisterMusicPlayerArtworkAsync(name,
+					reference.InstanceId,
+					reference.ArtworkId,
+					ArtworkSize,
+					_cts.Token)
 				.ConfigureAwait(false);
 			if (handle is null)
 			{

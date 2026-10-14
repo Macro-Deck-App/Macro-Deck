@@ -86,7 +86,9 @@ public static class KeyRingFileInspector
 	}
 
 	public static bool RequiresEncryption(XElement element)
-		=> string.Equals((string?)element.Attribute(KeyRingXmlNames.RequiresEncryptionAttribute),
+	{
+		return string.Equals((string?)element.Attribute(KeyRingXmlNames.RequiresEncryptionAttribute),
 			"true",
 			StringComparison.OrdinalIgnoreCase);
+	}
 }

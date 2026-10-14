@@ -93,14 +93,12 @@ internal static class YouTubeEventDefinitions
 			Strings.AnyName(),
 			Strings.AnyDescription(),
 			Strings.AdvancedCategory(),
-			configuration:
 			[
 				ActionParameter.DynamicChoice("type",
-					label: Strings.EventType(),
-					description: Strings.EventTypeDescription(),
+					Strings.EventType(),
+					Strings.EventTypeDescription(),
 					placeholder: Strings.AnyEventPlaceholder())
 			],
-			payload:
 			[
 				Selectable("type", Strings.EventType()),
 				.. Author(),
@@ -120,7 +118,8 @@ internal static class YouTubeEventDefinitions
 		LocalizedText category,
 		IReadOnlyList<ActionParameter>? configuration = null,
 		IReadOnlyList<ActionParameter>? payload = null)
-		=> new()
+	{
+		return new EventDefinition
 		{
 			Id = id,
 			Name = name,
@@ -129,28 +128,45 @@ internal static class YouTubeEventDefinitions
 			ConfigurationParameters = [Account(), .. configuration ?? []],
 			PayloadParameters = [.. AccountPayload(), .. payload ?? []]
 		};
+	}
 
 	private static ActionParameter Account()
-		=> ActionParameter.DynamicChoice("account",
-			label: Strings.Channel(),
-			description: Strings.ChannelDescription(),
+	{
+		return ActionParameter.DynamicChoice("account",
+			Strings.Channel(),
+			Strings.ChannelDescription(),
 			placeholder: Strings.FirstChannelPlaceholder());
+	}
 
 	private static ActionParameter[] AccountPayload()
-		=> [Selectable("account", Strings.ChannelId()), Text("accountName", Strings.Channel())];
+	{
+		return [Selectable("account", Strings.ChannelId()), Text("accountName", Strings.Channel())];
+	}
 
 	private static ActionParameter[] Author()
-		=> [Text("authorChannelId", Strings.AuthorChannelId()), Text("authorName", Strings.AuthorName())];
+	{
+		return [Text("authorChannelId", Strings.AuthorChannelId()), Text("authorName", Strings.AuthorName())];
+	}
 
-	private static ActionParameter Text(string name, LocalizedText label) => ActionParameter.Text(name, label: label);
+	private static ActionParameter Text(string name, LocalizedText label)
+	{
+		return ActionParameter.Text(name, label);
+	}
 
 	// Payload values the integration can list: the same options its matching filter offers, so a
 	// condition on one is authored by picking a name while the stored value stays the raw id.
 	private static ActionParameter Selectable(string name, LocalizedText label)
-		=> ActionParameter.DynamicChoice(name, label: label);
+	{
+		return ActionParameter.DynamicChoice(name, label);
+	}
 
 	private static ActionParameter Number(string name, LocalizedText label)
-		=> ActionParameter.Number(name, label: label);
+	{
+		return ActionParameter.Number(name, label);
+	}
 
-	private static ActionParameter Bool(string name, LocalizedText label) => ActionParameter.Toggle(name, label: label);
+	private static ActionParameter Bool(string name, LocalizedText label)
+	{
+		return ActionParameter.Toggle(name, label);
+	}
 }

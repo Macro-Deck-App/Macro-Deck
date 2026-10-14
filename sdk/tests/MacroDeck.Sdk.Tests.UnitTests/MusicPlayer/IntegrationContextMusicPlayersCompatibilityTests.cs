@@ -20,7 +20,7 @@ public class IntegrationContextMusicPlayersCompatibilityTests
 
 		context.MusicPlayers.InstancesChanged += (_, _) => raised = true;
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(context.MusicPlayers.Instances, Is.Empty);
 			Assert.That(await context.MusicPlayers.GetAlbumColorAsync("spotify::default"), Is.Null);
@@ -30,7 +30,10 @@ public class IntegrationContextMusicPlayersCompatibilityTests
 
 	[Test]
 	public void The_unsupported_api_still_rejects_an_empty_instance_id()
-		=> Assert.ThrowsAsync<ArgumentException>(() => UnsupportedMusicPlayerApi.Instance.GetAlbumColorAsync(string.Empty));
+	{
+		Assert.ThrowsAsync<ArgumentException>(()
+			=> UnsupportedMusicPlayerApi.Instance.GetAlbumColorAsync(string.Empty));
+	}
 
 	[Test]
 	public void A_snapshot_written_with_the_original_members_still_builds()

@@ -105,10 +105,10 @@ internal sealed class MeldVariableCatalog
 	public ValueTask<VariableReading> ReadAsync(string id, CancellationToken cancellationToken = default)
 	{
 		var connection = _connection();
-		if (Parse(id) is not { Leaf: { } leaf } parsed ||
-			connection is null ||
-			!connection.State.IsConnected ||
-			!connection.State.Session.TracksById.TryGetValue(parsed.TrackId, out var track))
+		if (Parse(id) is not { Leaf: { } leaf } parsed
+			|| connection is null
+			|| !connection.State.IsConnected
+			|| !connection.State.Session.TracksById.TryGetValue(parsed.TrackId, out var track))
 		{
 			return ValueTask.FromResult(VariableReading.Unavailable);
 		}
@@ -192,7 +192,8 @@ internal sealed class MeldVariableCatalog
 	}
 
 	private static VariableDefinition TrackContainer(string trackId, string? name)
-		=> VariableDefinition.OnDemand(TrackId(trackId), VariableType.Text) with
+	{
+		return VariableDefinition.OnDemand(TrackId(trackId), VariableType.Text) with
 		{
 			Name = SuggestedName(trackId, name, null),
 			DisplayName = name is { Length: > 0 }
@@ -201,9 +202,11 @@ internal sealed class MeldVariableCatalog
 			IsContainer = true,
 			IsBindable = false
 		};
+	}
 
 	private static VariableDefinition GainDefinition(string trackId, string? name)
-		=> VariableDefinition.OnDemand(LeafId(trackId, GainLeaf), VariableType.Numeric) with
+	{
+		return VariableDefinition.OnDemand(LeafId(trackId, GainLeaf), VariableType.Numeric) with
 		{
 			Name = SuggestedName(trackId, name, GainLeaf),
 			DisplayName = AppStrings.Integrations.Meld.VariableCatalog.Gain(),
@@ -214,28 +217,39 @@ internal sealed class MeldVariableCatalog
 			SemanticKind = VariableSemanticKinds.Percentage,
 			Write = new VariableWriteCapability()
 		};
+	}
 
 	private static VariableDefinition MutedDefinition(string trackId, string? name)
-		=> VariableDefinition.OnDemand(LeafId(trackId, MutedLeaf), VariableType.Boolean) with
+	{
+		return VariableDefinition.OnDemand(LeafId(trackId, MutedLeaf), VariableType.Boolean) with
 		{
 			Name = SuggestedName(trackId, name, MutedLeaf),
 			DisplayName = AppStrings.Integrations.Meld.VariableCatalog.Muted(),
 			ParentId = TrackId(trackId),
 			RefreshInterval = _refreshInterval
 		};
+	}
 
 	private static VariableDefinition MonitoringDefinition(string trackId, string? name)
-		=> VariableDefinition.OnDemand(LeafId(trackId, MonitoringLeaf), VariableType.Boolean) with
+	{
+		return VariableDefinition.OnDemand(LeafId(trackId, MonitoringLeaf), VariableType.Boolean) with
 		{
 			Name = SuggestedName(trackId, name, MonitoringLeaf),
 			DisplayName = AppStrings.Integrations.Meld.VariableCatalog.Monitoring(),
 			ParentId = TrackId(trackId),
 			RefreshInterval = _refreshInterval
 		};
+	}
 
-	private static string TrackId(string trackId) => $"{TrackSegment}/{CatalogResourceIds.Encode(trackId)}";
+	private static string TrackId(string trackId)
+	{
+		return $"{TrackSegment}/{CatalogResourceIds.Encode(trackId)}";
+	}
 
-	private static string LeafId(string trackId, string leaf) => $"{TrackId(trackId)}/{leaf}";
+	private static string LeafId(string trackId, string leaf)
+	{
+		return $"{TrackId(trackId)}/{leaf}";
+	}
 
 	private static string SuggestedName(string trackId, string? name, string? leaf)
 	{
@@ -257,10 +271,10 @@ internal sealed class MeldVariableCatalog
 	private static ParsedId? Parse(string id)
 	{
 		var segments = id.Split('/');
-		if (segments.Length is not (2 or 3) ||
-			segments[0] != TrackSegment ||
-			!CatalogResourceIds.TryDecode(segments[1], out var trackId) ||
-			trackId.Length == 0)
+		if (segments.Length is not (2 or 3)
+			|| segments[0] != TrackSegment
+			|| !CatalogResourceIds.TryDecode(segments[1], out var trackId)
+			|| trackId.Length == 0)
 		{
 			return null;
 		}

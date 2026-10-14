@@ -12,7 +12,8 @@ public class GetSharedVariablesRequestMessageHandler
 	private readonly VariableRegistry _registry;
 	private readonly StartupReadiness _readiness;
 
-	public GetSharedVariablesRequestMessageHandler(SharedVariables sharedVariables,
+	public GetSharedVariablesRequestMessageHandler(
+		SharedVariables sharedVariables,
 		VariableRegistry registry,
 		StartupReadiness readiness)
 	{

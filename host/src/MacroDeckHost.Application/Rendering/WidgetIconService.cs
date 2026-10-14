@@ -40,9 +40,12 @@ public sealed class WidgetIconService : IWidgetIconService
 	}
 
 	public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-		=> Resolve(widgetId, WidgetIconLimit.Host, cancellationToken);
+	{
+		return Resolve(widgetId, WidgetIconLimit.Host, cancellationToken);
+	}
 
-	public async Task<WidgetIconResolution> Resolve(Guid widgetId,
+	public async Task<WidgetIconResolution> Resolve(
+		Guid widgetId,
 		WidgetIconLimit limit,
 		CancellationToken cancellationToken = default)
 	{
@@ -165,9 +168,9 @@ public sealed class WidgetIconService : IWidgetIconService
 	/// </summary>
 	private ResolvedProvider? FindProviderAction(WidgetEntity widget, ActionButtonIconProvider provider)
 	{
-		if (!ActionFlowJson.TryFindBlock(ActionFlowJson.ParseFlows(widget.Data), provider.BlockId, out var block) ||
-			block is null ||
-			block.Disabled)
+		if (!ActionFlowJson.TryFindBlock(ActionFlowJson.ParseFlows(widget.Data), provider.BlockId, out var block)
+			|| block is null
+			|| block.Disabled)
 		{
 			return null;
 		}

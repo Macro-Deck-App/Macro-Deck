@@ -16,18 +16,26 @@ internal static class WidgetConfigSurfaces
 	/// <paramref name="widgetType" />. A provider declines - returns <c>null</c>, not an error - for anything
 	/// else, including a <c>widget-config</c> surface naming a different widget type.</summary>
 	public static bool IsFor(UiSurface surface, string widgetType)
-		=> UiWidgetSurface.IsConfigurationFor(surface, widgetType);
+	{
+		return UiWidgetSurface.IsConfigurationFor(surface, widgetType);
+	}
 
 	/// <summary>The widget's stored configuration, seeded from <see cref="UiConfigSurfaceAttributes.WidgetData" />.
 	/// Absent or non-object data reads as an empty object, exactly as the entry point that opened this session
 	/// already promises.</summary>
-	public static JsonElement Data(UiSurface surface) => UiWidgetSurface.Data(surface);
+	public static JsonElement Data(UiSurface surface)
+	{
+		return UiWidgetSurface.Data(surface);
+	}
 
 	/// <summary>The widget being configured, so a provider can resolve something about the live instance -
 	/// its currently rendered state, say - rather than only the draft data travelling on the surface. Null
 	/// only when the attribute is missing or malformed, which <see cref="IsFor" /> already rules out for a
 	/// genuine <c>widget-config</c> entry point.</summary>
-	public static Guid? WidgetId(UiSurface surface) => UiWidgetSurface.WidgetId(surface);
+	public static Guid? WidgetId(UiSurface surface)
+	{
+		return UiWidgetSurface.WidgetId(surface);
+	}
 
 	/// <summary>
 	/// The widget's width divided by its height, for a control that previews the widget and has to frame it
@@ -45,10 +53,12 @@ internal static class WidgetConfigSurfaces
 	}
 
 	private static int ReadPositiveInt(UiSurface surface, string attribute)
-		=> surface.Attributes.TryGetValue(attribute, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var number) &&
-			number > 0
+	{
+		return surface.Attributes.TryGetValue(attribute, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var number)
+			&& number > 0
 				? number
 				: 1;
+	}
 }

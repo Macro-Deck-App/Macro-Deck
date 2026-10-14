@@ -91,7 +91,8 @@ internal sealed class StoreDownloadMetadataTests
 		var catalogQuery = new StoreCatalogQueryService(_catalog,
 			_installedPlugins,
 			_installations,
-			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+			new InstalledPluginSigners());
 		_coordinator = new StoreInstallCoordinator(catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),
@@ -123,14 +124,19 @@ internal sealed class StoreDownloadMetadataTests
 		_http.Dispose();
 	}
 
-	private void Publish(StoreExtensionKind kind, string id, string latestVersion, string artifactUrl) =>
+	private void Publish(StoreExtensionKind kind, string id, string latestVersion, string artifactUrl)
+	{
 		Publish(Entry(kind, id, latestVersion, artifactUrl));
+	}
 
-	private void Publish(params StoreCatalogEntry[] entries) =>
+	private void Publish(params StoreCatalogEntry[] entries)
+	{
 		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = entries });
+	}
 
-	private StoreCatalogEntry Entry(StoreExtensionKind kind, string id, string latestVersion, string artifactUrl) =>
-		new()
+	private StoreCatalogEntry Entry(StoreExtensionKind kind, string id, string latestVersion, string artifactUrl)
+	{
+		return new StoreCatalogEntry
 		{
 			Kind = kind,
 			Id = id,
@@ -144,8 +150,10 @@ internal sealed class StoreDownloadMetadataTests
 				Size = _http.Body.LongLength
 			}
 		};
+	}
 
-	private void InstalledOutsideTheStore(string pluginId, string version) =>
+	private void InstalledOutsideTheStore(string pluginId, string version)
+	{
 		_installedPlugins.Plugins.Add(new InstalledPlugin
 		{
 			PluginId = pluginId,
@@ -158,8 +166,10 @@ internal sealed class StoreDownloadMetadataTests
 				ManifestPath = "/plugins/" + pluginId + "/" + version + "/manifest.json"
 			}
 		});
+	}
 
-	private void RecordedByTheStore(StoreExtensionKind kind, string id, string version) =>
+	private void RecordedByTheStore(StoreExtensionKind kind, string id, string version)
+	{
 		_installations.Save(new StoreInstallationRecord
 		{
 			Origin = StoreRegistryOptions.Default.BaseUrl.ToString(),
@@ -172,6 +182,7 @@ internal sealed class StoreDownloadMetadataTests
 			InstalledAt = DateTimeOffset.UnixEpoch,
 			TargetIds = [Guid.NewGuid()]
 		});
+	}
 
 	private async Task<StoreOperation> Run(StoreOperation operation)
 	{
@@ -180,9 +191,13 @@ internal sealed class StoreDownloadMetadataTests
 	}
 
 	[Test]
-	public async Task A_first_store_install_of_a_plugin_sends_install_and_a_worker_valid_operation_id_without_a_version()
+	public async Task
+		A_first_store_install_of_a_plugin_sends_install_and_a_worker_valid_operation_id_without_a_version()
 	{
-		Publish(StoreExtensionKind.Plugin, PluginId, "1.3.0", $"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
+		Publish(StoreExtensionKind.Plugin,
+			PluginId,
+			"1.3.0",
+			$"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
 
 		var operation = await Run(_coordinator.Install(StoreExtensionKind.Plugin, PluginId));
 
@@ -200,7 +215,10 @@ internal sealed class StoreDownloadMetadataTests
 	public async Task Updating_a_plugin_installed_outside_the_store_sends_update_with_its_active_version()
 	{
 		InstalledOutsideTheStore(PluginId, "1.2.0");
-		Publish(StoreExtensionKind.Plugin, PluginId, "1.3.0", $"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
+		Publish(StoreExtensionKind.Plugin,
+			PluginId,
+			"1.3.0",
+			$"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
 
 		await Run(_coordinator.Install(StoreExtensionKind.Plugin, PluginId));
 
@@ -216,7 +234,10 @@ internal sealed class StoreDownloadMetadataTests
 	public async Task Reinstalling_the_installed_plugin_version_sends_repair_with_that_version()
 	{
 		InstalledOutsideTheStore(PluginId, "1.3.0");
-		Publish(StoreExtensionKind.Plugin, PluginId, "1.3.0", $"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
+		Publish(StoreExtensionKind.Plugin,
+			PluginId,
+			"1.3.0",
+			$"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
 
 		await Run(_coordinator.Install(StoreExtensionKind.Plugin, PluginId));
 
@@ -229,10 +250,14 @@ internal sealed class StoreDownloadMetadataTests
 	}
 
 	[Test]
-	public async Task An_icon_pack_update_downloaded_through_the_artifact_downloader_sends_update_with_the_recorded_version()
+	public async Task
+		An_icon_pack_update_downloaded_through_the_artifact_downloader_sends_update_with_the_recorded_version()
 	{
 		RecordedByTheStore(StoreExtensionKind.IconPack, IconPackId, "1.2.0");
-		Publish(StoreExtensionKind.IconPack, IconPackId, "1.3.0", $"{StoreAssets}/icon-packs/{IconPackId}/1.3.0/i.macroDeckIconPack");
+		Publish(StoreExtensionKind.IconPack,
+			IconPackId,
+			"1.3.0",
+			$"{StoreAssets}/icon-packs/{IconPackId}/1.3.0/i.macroDeckIconPack");
 
 		var operation = await Run(_coordinator.Install(StoreExtensionKind.IconPack, IconPackId));
 
@@ -242,7 +267,8 @@ internal sealed class StoreDownloadMetadataTests
 			Assert.That(request.Header("X-MacroDeck-Operation"), Is.EqualTo("update"));
 			Assert.That(request.Header("X-MacroDeck-Current-Version"), Is.EqualTo("1.2.0"));
 			Assert.That(request.Header("X-MacroDeck-Operation-Id"), Is.EqualTo(operation.Id.ToString("D")));
-			Assert.That(operation.Error, Is.EqualTo(StoreOperationError.ChecksumMismatch),
+			Assert.That(operation.Error,
+				Is.EqualTo(StoreOperationError.ChecksumMismatch),
 				"digest verification still applies to a download that carries metadata");
 		});
 	}
@@ -269,7 +295,10 @@ internal sealed class StoreDownloadMetadataTests
 	[Test]
 	public async Task Retrying_a_failed_install_and_then_the_failed_retry_keeps_the_first_operations_id()
 	{
-		Publish(StoreExtensionKind.Plugin, PluginId, "1.3.0", $"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
+		Publish(StoreExtensionKind.Plugin,
+			PluginId,
+			"1.3.0",
+			$"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
 
 		var first = await Run(_coordinator.Install(StoreExtensionKind.Plugin, PluginId));
 		var retry = await Run(_coordinator.Retry(first.Id)!);
@@ -289,7 +318,10 @@ internal sealed class StoreDownloadMetadataTests
 	[Test]
 	public async Task Retrying_an_operation_restored_from_an_older_host_uses_that_operations_own_id()
 	{
-		Publish(StoreExtensionKind.Plugin, PluginId, "1.3.0", $"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
+		Publish(StoreExtensionKind.Plugin,
+			PluginId,
+			"1.3.0",
+			$"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
 		var restored = new StoreOperation
 		{
 			Id = Guid.CreateVersion7(),
@@ -310,7 +342,10 @@ internal sealed class StoreDownloadMetadataTests
 	[Test]
 	public async Task A_new_install_started_after_a_finished_one_gets_a_new_operation_id()
 	{
-		Publish(StoreExtensionKind.Plugin, PluginId, "1.3.0", $"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
+		Publish(StoreExtensionKind.Plugin,
+			PluginId,
+			"1.3.0",
+			$"{StoreAssets}/plugins/{PluginId}/1.3.0/p.macroDeckPlugin");
 
 		var first = await Run(_coordinator.Install(StoreExtensionKind.Plugin, PluginId));
 		var second = await Run(_coordinator.Install(StoreExtensionKind.Plugin, PluginId));
@@ -326,7 +361,8 @@ internal sealed class StoreDownloadMetadataTests
 	[TestCase("https://cdn.example/plugins/p.macroDeckPlugin")]
 	[TestCase("https://store-assets.macro-deck.app.evil.example/plugins/p.macroDeckPlugin")]
 	[TestCase("https://sub.store-assets.macro-deck.app/plugins/p.macroDeckPlugin")]
-	public async Task A_store_package_hosted_anywhere_but_the_store_asset_host_is_downloaded_without_metadata(string url)
+	public async Task A_store_package_hosted_anywhere_but_the_store_asset_host_is_downloaded_without_metadata(
+		string url)
 	{
 		Publish(Entry(StoreExtensionKind.Plugin, PluginId, "1.3.0", url),
 			Entry(StoreExtensionKind.IconPack, IconPackId, "1.3.0", url + ".macroDeckIconPack"));

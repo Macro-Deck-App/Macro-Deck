@@ -21,10 +21,15 @@ internal static class HostDiscovery
 
 	public const string DevelopmentPortFileName = "macro-deck-host-development.port";
 
-	public static IReadOnlyList<string> ProbedPaths(string directory) =>
-		[Path.Combine(directory, ProductionPortFileName), Path.Combine(directory, DevelopmentPortFileName)];
+	public static IReadOnlyList<string> ProbedPaths(string directory)
+	{
+		return [Path.Combine(directory, ProductionPortFileName), Path.Combine(directory, DevelopmentPortFileName)];
+	}
 
-	public static DiscoveredHost? Discover() => Discover(Path.GetTempPath());
+	public static DiscoveredHost? Discover()
+	{
+		return Discover(Path.GetTempPath());
+	}
 
 	internal static DiscoveredHost? Discover(string directory)
 	{
@@ -68,8 +73,8 @@ internal static class HostDiscovery
 			return false;
 		}
 
-		return int.TryParse(content.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out port) &&
-			port is > 0 and <= ushort.MaxValue;
+		return int.TryParse(content.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out port)
+			&& port is > 0 and <= ushort.MaxValue;
 	}
 }
 

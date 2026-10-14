@@ -12,7 +12,8 @@ public class BatteryWidgetViewTests
 	[Test]
 	public void One_device_draws_a_full_ring_at_its_level_around_the_device_glyph()
 	{
-		var host = Render(new BatteryWidgetData(), FakeBatteries.Device("p", "Pixel", 42, BatteryDeviceKinds.Headphones));
+		var host = Render(new BatteryWidgetData(),
+			FakeBatteries.Device("p", "Pixel", 42, BatteryDeviceKinds.Headphones));
 		var ring = Drawn(host, UiComponents.Gauge).First();
 		var glyph = Drawn(host, UiComponents.Icon).First(node => node.Id.EndsWith(".glyph", StringComparison.Ordinal));
 
@@ -23,7 +24,8 @@ public class BatteryWidgetViewTests
 			Assert.That(ring.Number(UiComponentProperties.EndAngle), Is.EqualTo(360));
 			Assert.That(glyph.Text(UiComponentProperties.Icon), Is.EqualTo(UiIcons.DeviceHeadphones));
 			Assert.That(glyph.RequiredComponentVersion, Is.EqualTo(UiIcons.VersionOf(UiIcons.DeviceHeadphones)));
-			Assert.That(UiIcons.VersionOf(glyph.Fallback!.Text(UiComponentProperties.Icon)!), Is.EqualTo(1),
+			Assert.That(UiIcons.VersionOf(glyph.Fallback!.Text(UiComponentProperties.Icon)!),
+				Is.EqualTo(1),
 				"a reader of the first icon group must still get a glyph");
 			Assert.That(host.ByText("42"), Is.Not.Empty);
 		});
@@ -61,8 +63,9 @@ public class BatteryWidgetViewTests
 			Assert.That(square.Type, Is.EqualTo(UiComponents.Grid));
 			Assert.That(square.Number(UiComponentProperties.Columns), Is.EqualTo(2));
 			Assert.That(square.Number(UiComponentProperties.Rows), Is.EqualTo(2));
-			Assert.That(layout.Children.Any(child => child.Id.EndsWith("tall-rows", StringComparison.Ordinal) &&
-					child.Children.Count(row => row.Type == UiComponents.Stack) == 4),
+			Assert.That(layout.Children.Any(child
+					=> child.Id.EndsWith("tall-rows", StringComparison.Ordinal)
+					&& child.Children.Count(row => row.Type == UiComponents.Stack) == 4),
 				Is.True);
 		});
 	}
@@ -79,7 +82,8 @@ public class BatteryWidgetViewTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(host.ByType(UiComponents.Gauge), Is.Empty);
-			Assert.That(bars.Select(bar => bar!.Number(UiComponentProperties.End)), Is.EqualTo(new double?[] { 0.1, 0.75 }));
+			Assert.That(bars.Select(bar => bar!.Number(UiComponentProperties.End)),
+				Is.EqualTo(new double?[] { 0.1, 0.75 }));
 			Assert.That(bars.Select(bar => bar!.Text(UiComponentProperties.StartColor)),
 				Is.EqualTo(new[] { "#ff3b30", "#34c759" }));
 		});
@@ -107,7 +111,8 @@ public class BatteryWidgetViewTests
 		{
 			Assert.That(host.ByText(BatteryWidgetView.UnknownLevel), Is.Not.Empty);
 			Assert.That(host.ByText("%"), Is.Empty);
-			Assert.That(Drawn(host, UiComponents.Gauge).All(ring => ring.Number(UiComponentProperties.Level) == 0), Is.True);
+			Assert.That(Drawn(host, UiComponents.Gauge).All(ring => ring.Number(UiComponentProperties.Level) == 0),
+				Is.True);
 		});
 	}
 
@@ -119,7 +124,7 @@ public class BatteryWidgetViewTests
 				new BatteryViewStateResolver(new FakeBatteries()).Resolve(new BatteryWidgetData
 				{
 					Mode = BatteryWidgetData.ModeOne,
-					Device = new BatteryDeviceReference("adb:x", "Old phone", BatteryDeviceKinds.Phone),
+					Device = new BatteryDeviceReference("adb:x", "Old phone", BatteryDeviceKinds.Phone)
 				})),
 			new BatteryWidgetData()));
 
@@ -148,7 +153,8 @@ public class BatteryWidgetViewTests
 	public void Eight_devices_stay_far_inside_the_tree_limits()
 	{
 		var devices = Enumerable.Range(0, 8)
-			.Select(index => FakeBatteries.Device($"d{index}", $"Device {index}", index * 10, state: BatteryChargeState.Charging))
+			.Select(index
+				=> FakeBatteries.Device($"d{index}", $"Device {index}", index * 10, state: BatteryChargeState.Charging))
 			.ToArray();
 
 		Assert.Multiple(() =>
@@ -187,22 +193,39 @@ public class BatteryWidgetViewTests
 	}
 
 	private static IEnumerable<UiTestNode> Drawn(UiTestHost host, string type)
-		=> host.ByType(type).Where(node => !node.Id.Contains("_fallback", StringComparison.Ordinal));
+	{
+		return host.ByType(type).Where(node => !node.Id.Contains("_fallback", StringComparison.Ordinal));
+	}
 
 	private static IEnumerable<UiTestNode> Bolts(UiTestHost host)
-		=> host.ByType(UiComponents.Icon).Where(node => node.Text(UiComponentProperties.Icon) == UiIcons.Zap &&
-			node.Id.EndsWith(".bolt", StringComparison.Ordinal));
+	{
+		return host.ByType(UiComponents.Icon)
+			.Where(node => node.Text(UiComponentProperties.Icon) == UiIcons.Zap
+				&& node.Id.EndsWith(".bolt", StringComparison.Ordinal));
+	}
 
 	private static UiTestNode? Find(UiTestNode node, string type)
-		=> node.Type == type ? node : node.Children.Select(child => Find(child, type)).FirstOrDefault(found => found is not null);
+	{
+		return node.Type == type
+			? node
+			: node.Children.Select(child => Find(child, type)).FirstOrDefault(found => found is not null);
+	}
 
 	private static string Texts(UiTestHost host)
-		=> string.Join('\n', Walk(host.Root).Select(node => node.Property(UiComponentProperties.Text)?.ToString() ?? string.Empty));
+	{
+		return string.Join('\n',
+			Walk(host.Root).Select(node => node.Property(UiComponentProperties.Text)?.ToString() ?? string.Empty));
+	}
 
 	private static IEnumerable<UiTestNode> Walk(UiTestNode node)
-		=> new[] { node }
+	{
+		return new[] { node }
 			.Concat(node.Children.SelectMany(Walk))
 			.Concat(node.Fallback is null ? [] : Walk(node.Fallback));
+	}
 
-	private static int Count(UiTestNode node) => Walk(node).Count();
+	private static int Count(UiTestNode node)
+	{
+		return Walk(node).Count();
+	}
 }

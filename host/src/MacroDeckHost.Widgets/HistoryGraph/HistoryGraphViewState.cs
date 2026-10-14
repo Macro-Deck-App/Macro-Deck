@@ -33,13 +33,18 @@ internal sealed record HistoryGraphViewState
 	public string? Color { get; init; }
 
 	public bool Equals(HistoryGraphViewState? other)
-		=> other is not null &&
-			string.Equals(Value, other.Value, StringComparison.Ordinal) &&
-			Unit.Equals(other.Unit) &&
-			Digits.Equals(other.Digits) &&
-			string.Equals(Subtitle, other.Subtitle, StringComparison.Ordinal) &&
-			Points.SequenceEqual(other.Points) &&
-			string.Equals(Color, other.Color, StringComparison.Ordinal);
+	{
+		return other is not null
+			&& string.Equals(Value, other.Value, StringComparison.Ordinal)
+			&& Unit.Equals(other.Unit)
+			&& Digits.Equals(other.Digits)
+			&& string.Equals(Subtitle, other.Subtitle, StringComparison.Ordinal)
+			&& Points.SequenceEqual(other.Points)
+			&& string.Equals(Color, other.Color, StringComparison.Ordinal);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(Value, Unit, Digits, Subtitle, Points.Count, Color);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(Value, Unit, Digits, Subtitle, Points.Count, Color);
+	}
 }

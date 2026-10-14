@@ -150,21 +150,30 @@ public class UiPreviewCatalogTests
 	}
 
 	private static List<UiPreviewRegistration> Scan(params string[] fixtures)
-		=> UiPreviewCatalog.Scan(typeof(PreviewFixtures).Assembly)
+	{
+		return UiPreviewCatalog.Scan(typeof(PreviewFixtures).Assembly)
 			.Registrations
 			.Where(preview => fixtures.Any(fixture => DeclaredIn(preview.Declaration.Id, fixture)))
 			.ToList();
+	}
 
 	private static UiPreviewRegistration Single(string fixture, string scenario)
-		=> Scan(fixture).Single(preview =>
-			string.Equals(preview.Declaration.Scenario, scenario, StringComparison.Ordinal));
+	{
+		return Scan(fixture)
+			.Single(preview =>
+				string.Equals(preview.Declaration.Scenario, scenario, StringComparison.Ordinal));
+	}
 
 	private static bool DeclaredIn(string id, string fixture)
-		=> id.Contains($"+{fixture}.", StringComparison.Ordinal);
+	{
+		return id.Contains($"+{fixture}.", StringComparison.Ordinal);
+	}
 
 	private static List<string> ScenariosOf(IEnumerable<UiPreviewRegistration> found, string view)
-		=> found.Where(preview => string.Equals(preview.Declaration.View, view, StringComparison.Ordinal))
+	{
+		return found.Where(preview => string.Equals(preview.Declaration.View, view, StringComparison.Ordinal))
 			.Select(preview => preview.Declaration.Scenario)
 			.Order(StringComparer.Ordinal)
 			.ToList();
+	}
 }

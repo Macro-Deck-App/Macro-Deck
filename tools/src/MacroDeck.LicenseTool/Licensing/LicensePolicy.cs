@@ -2,7 +2,10 @@ namespace MacroDeck.LicenseTool.Licensing;
 
 internal sealed record SelectedLicense(string Id, string? Exception)
 {
-	public override string ToString() => Exception is null ? Id : $"{Id} WITH {Exception}";
+	public override string ToString()
+	{
+		return Exception is null ? Id : $"{Id} WITH {Exception}";
+	}
 }
 
 internal sealed class LicensePolicy(IReadOnlyList<string> allowedLicenses, IReadOnlyList<string> allowedExceptions)

@@ -30,7 +30,10 @@ public class MigrationServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	// The whole point of the preview is that the user decides before anything is written, so this asserts
 	// the absence of every side effect the apply path has.
@@ -38,12 +41,12 @@ public class MigrationServiceTests
 	public async Task Preview_WritesNothing()
 	{
 		_source.Plan = PlanWith(Profile("Deck"),
-			variables: [new MigratedVariable("counter", VariableType.Numeric, "1", null)]);
+			[new MigratedVariable("counter", VariableType.Numeric, "1", null)]);
 		_source.Plan.IntegrationConfigs.Add(Config());
 
 		var result = await _harness.Service.Preview(Request(), CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Success, Is.True);
 			Assert.That(_harness.Portability.ProfileCache.GetAll(), Is.Empty);
@@ -97,14 +100,14 @@ public class MigrationServiceTests
 	public async Task Apply_StoresCredentialsAsSecretsAndReferencesThemFromTheEntry()
 	{
 		_source.Plan = PlanWith(Profile("Deck"));
-		_source.Plan.IntegrationConfigs.Add(Config(secret: "hunter2"));
+		_source.Plan.IntegrationConfigs.Add(Config("hunter2"));
 
 		await _harness.Service.Apply(Request(), CancellationToken.None);
 
 		var entry = _harness.ConfigStore.Entries.Single();
 		var reference = entry.Values["password"];
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(SecretReferenceJson.TryGet(reference, out var secretId),
 				Is.True,
@@ -143,11 +146,10 @@ public class MigrationServiceTests
 	public async Task Apply_MigratesGlobalVariablesAndReportsOnesItCannotCreate()
 	{
 		_source.Plan = PlanWith(Profile("Deck"),
-			variables:
-			[
-				new MigratedVariable("counter", VariableType.Numeric, "7", null),
-				new MigratedVariable("counter", VariableType.Text, "again", null)
-			]);
+		[
+			new MigratedVariable("counter", VariableType.Numeric, "7", null),
+			new MigratedVariable("counter", VariableType.Text, "again", null)
+		]);
 
 		var result = await _harness.Service.Apply(Request(), CancellationToken.None);
 		var stored = await _harness.Portability.Variables.GetAll();
@@ -190,13 +192,12 @@ public class MigrationServiceTests
 			.WithIconPack("Powered Steel", "play")
 			.WithProfile("0",
 				"Backed up",
-				rows: 3,
-				columns: 5,
-				folders:
+				3,
+				5,
 				[
 					MacroDeck2Fixture.Folder("root",
 						"*Root*",
-						[MacroDeck2Fixture.Button(0, 0, iconOff: "Powered Steel.play", iconOn: "Powered Steel.play")])
+						[MacroDeck2Fixture.Button(0, 0, "Powered Steel.play", "Powered Steel.play")])
 				])
 			.Build();
 
@@ -240,8 +241,9 @@ public class MigrationServiceTests
 			new Serilog.LoggerConfiguration().CreateLogger()));
 
 		var before = Directory.GetDirectories(Path.Combine(Path.GetTempPath(), "macro-deck-migration"),
-			"*",
-			SearchOption.TopDirectoryOnly).Length;
+				"*",
+				SearchOption.TopDirectoryOnly)
+			.Length;
 
 		try
 		{
@@ -249,8 +251,9 @@ public class MigrationServiceTests
 				CancellationToken.None);
 
 			var after = Directory.GetDirectories(Path.Combine(Path.GetTempPath(), "macro-deck-migration"),
-				"*",
-				SearchOption.TopDirectoryOnly).Length;
+					"*",
+					SearchOption.TopDirectoryOnly)
+				.Length;
 
 			Assert.That(after, Is.EqualTo(before));
 		}
@@ -275,10 +278,15 @@ public class MigrationServiceTests
 
 	[Test]
 	public void GetSources_ReportsEverySourceAndWhereItFoundIt()
-		=> Assert.That(_harness.Service.GetSources().Single(),
+	{
+		Assert.That(_harness.Service.GetSources().Single(),
 			Is.EqualTo(new MigrationSourceDescriptor(SourceId, "Stub", "/detected")));
+	}
 
-	private static MigrationRequest Request() => new(SourceId, "/tmp/source", null, false);
+	private static MigrationRequest Request()
+	{
+		return new MigrationRequest(SourceId, "/tmp/source", null, false);
+	}
 
 	private static MigrationPlan PlanWith(PortableContent profile, IReadOnlyList<MigratedVariable>? variables = null)
 	{
@@ -289,15 +297,18 @@ public class MigrationServiceTests
 	}
 
 	private static MigratedConfiguration Config(string? secret = null)
-		=> new(IntegrationId,
+	{
+		return new MigratedConfiguration(IntegrationId,
 			"OBS",
 			new Dictionary<string, JsonElement> { ["host"] = JsonSerializer.SerializeToElement("127.0.0.1") },
 			secret is null
 				? new Dictionary<string, MigratedSecret>()
 				: new Dictionary<string, MigratedSecret> { ["password"] = new(secret, MigratedSecretKind.Password) });
+	}
 
 	private static PortableContent Profile(string name)
-		=> new()
+	{
+		return new PortableContent
 		{
 			Kind = PortableArchiveKind.Profile,
 			Profile = new ProfileFile
@@ -326,14 +337,24 @@ public class MigrationServiceTests
 				]
 			}
 		};
+	}
 
 	private sealed class NoMigrators : IMigrationActionRegistry
 	{
-		public IIntegrationMigration? FindByActionSource(MigrationSource source, string actionSource) => null;
+		public IIntegrationMigration? FindByActionSource(MigrationSource source, string actionSource)
+		{
+			return null;
+		}
 
-		public IIntegrationMigration? FindBySettingsSource(MigrationSource source, string settingsSource) => null;
+		public IIntegrationMigration? FindBySettingsSource(MigrationSource source, string settingsSource)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<MigrationSource> SupportedSources() => [];
+		public IReadOnlyList<MigrationSource> SupportedSources()
+		{
+			return [];
+		}
 	}
 
 	private sealed class StubMigrationSource : IMigrationSource
@@ -344,13 +365,21 @@ public class MigrationServiceTests
 
 		public string Name => "Stub";
 
-		public string? TryDetectDefaultPath() => "/detected";
+		public string? TryDetectDefaultPath()
+		{
+			return "/detected";
+		}
 
-		public bool Recognizes(string path) => true;
+		public bool Recognizes(string path)
+		{
+			return true;
+		}
 
 		public Task<Result<MigrationPlan, MigrationError>> Read(
 			MigrationRequest request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(Result.Ok<MigrationPlan, MigrationError>(Plan));
+		{
+			return Task.FromResult(Result.Ok<MigrationPlan, MigrationError>(Plan));
+		}
 	}
 }

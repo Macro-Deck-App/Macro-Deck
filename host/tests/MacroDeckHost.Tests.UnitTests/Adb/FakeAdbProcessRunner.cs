@@ -20,11 +20,15 @@ internal sealed class FakeAdbProcessRunner : IAdbProcessRunner
 
 	public Func<IReadOnlyList<string>, AdbProcessResult?>? Override { get; set; }
 
-	public void When(Func<IReadOnlyList<string>, bool> matches, AdbProcessResult result) =>
+	public void When(Func<IReadOnlyList<string>, bool> matches, AdbProcessResult result)
+	{
 		_scripts.Add((matches, _ => result));
+	}
 
 	public void When(Func<IReadOnlyList<string>, bool> matches, Func<IReadOnlyList<string>, AdbProcessResult> respond)
-		=> _scripts.Add((matches, respond));
+	{
+		_scripts.Add((matches, respond));
+	}
 
 	public Task<AdbProcessResult> RunAsync(
 		string executablePath,

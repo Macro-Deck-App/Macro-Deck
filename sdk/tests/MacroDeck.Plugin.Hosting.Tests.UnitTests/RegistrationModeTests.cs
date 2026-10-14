@@ -119,15 +119,22 @@ public class FilePluginCredentialStoreTests
 
 	[SetUp]
 	public void SetUp()
-		=> _directory = Directory.CreateTempSubdirectory("macro-deck-plugin-tests").FullName;
+	{
+		_directory = Directory.CreateTempSubdirectory("macro-deck-plugin-tests").FullName;
+	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_directory, recursive: true);
+	public void TearDown()
+	{
+		Directory.Delete(_directory, true);
+	}
 
 	private FilePluginCredentialStore Store()
-		=> new(Options.Create(new PluginHostOptions { StateDirectory = _directory }),
+	{
+		return new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _directory }),
 			new PluginMetadata { Id = "com.example.test", Name = "Test", Version = "1.0.0" },
 			Serilog.Core.Logger.None);
+	}
 
 	[Test]
 	public async Task Nothing_is_stored_before_the_plugin_has_registered()

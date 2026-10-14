@@ -6,14 +6,14 @@ internal enum BatteryFaceStatus
 {
 	Live,
 	NotConnected,
-	NotAvailable,
+	NotAvailable
 }
 
 internal enum BatteryViewHint
 {
 	None,
 	NoDevices,
-	PickDevice,
+	PickDevice
 }
 
 internal sealed record BatteryFace
@@ -54,7 +54,12 @@ internal sealed record BatteryViewState
 	public BatteryViewHint Hint { get; init; }
 
 	public bool Equals(BatteryViewState? other)
-		=> other is not null && Hint == other.Hint && Faces.SequenceEqual(other.Faces);
+	{
+		return other is not null && Hint == other.Hint && Faces.SequenceEqual(other.Faces);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(Hint, Faces.Count);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(Hint, Faces.Count);
+	}
 }

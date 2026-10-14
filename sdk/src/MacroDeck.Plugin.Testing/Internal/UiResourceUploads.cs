@@ -14,8 +14,9 @@ internal sealed class UiResourceUploads
 			_uploads.Remove(contentHash);
 			_uploads.Add(contentHash, (bytes, mediaType));
 
-			while (_uploads.Count > ProtocolLimits.MaxUiResourcesPerPlugin ||
-				_uploads.Values.Sum(upload => (long)upload.Bytes.Length) > ProtocolLimits.MaxUiResourceBytesPerPlugin)
+			while (_uploads.Count > ProtocolLimits.MaxUiResourcesPerPlugin
+				|| _uploads.Values.Sum(upload => (long)upload.Bytes.Length)
+				> ProtocolLimits.MaxUiResourceBytesPerPlugin)
 			{
 				_uploads.RemoveAt(0);
 			}

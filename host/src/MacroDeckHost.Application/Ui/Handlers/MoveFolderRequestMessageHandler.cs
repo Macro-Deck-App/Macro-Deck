@@ -31,7 +31,7 @@ public class MoveFolderRequestMessageHandler : IUiTransportMessageHandler<MoveFo
 			};
 		}
 
-		if (!Enum.TryParse<FolderMovePosition>(request.Position, ignoreCase: true, out var position))
+		if (!Enum.TryParse<FolderMovePosition>(request.Position, true, out var position))
 		{
 			return new MoveFolderResponse
 			{

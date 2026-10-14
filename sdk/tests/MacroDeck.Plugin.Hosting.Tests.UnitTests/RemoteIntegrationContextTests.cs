@@ -61,7 +61,10 @@ public class RemoteIntegrationContextTests
 	}
 
 	[TearDown]
-	public void TearDown() => _invoker.Dispose();
+	public void TearDown()
+	{
+		_invoker.Dispose();
+	}
 
 	// ---- regression: no member throws NotSupportedException any more -------------------------------
 
@@ -217,7 +220,8 @@ public class RemoteIntegrationContextTests
 	}
 
 	[TestCaseSource(nameof(ApiOperationCases))]
-	public async Task Each_proxy_sends_the_declared_Api_Operation_pair(string api,
+	public async Task Each_proxy_sends_the_declared_Api_Operation_pair(
+		string api,
 		string operation,
 		Func<IIntegrationContext, RecordingHostInvoker, Task> exercise)
 	{
@@ -243,7 +247,7 @@ public class RemoteIntegrationContextTests
 			Assert.That(_invoker.LastOperation, Is.EqualTo(HostOperations.ActionInteractions.RequestItemPicker));
 		});
 
-		interactions.RequestDevicePicker(null, "i1", startPlayback: false);
+		interactions.RequestDevicePicker(null, "i1", false);
 		await _invoker.WaitForCallAsync();
 		Assert.Multiple(() =>
 		{
@@ -331,7 +335,7 @@ public class RemoteIntegrationContextTests
 	public async Task ScreenSaver_registrations_send_the_declared_Api_Operation_pair()
 	{
 		var screenSavers = new RemoteScreenSaverProviderContext(_invoker, Serilog.Core.Logger.None);
-		var descriptor = new MacroDeck.Sdk.ScreenSavers.ScreenSaverDescriptor("clock", LocalizedText.FromLiteral("Clock"));
+		var descriptor = new Sdk.ScreenSavers.ScreenSaverDescriptor("clock", LocalizedText.FromLiteral("Clock"));
 
 		var expected = new (Func<Task> Call, string Operation)[]
 		{
@@ -354,8 +358,7 @@ public class RemoteIntegrationContextTests
 	[Test]
 	public async Task VideoStream_calls_send_the_declared_Api_Operation_pair()
 	{
-		using var registry = new MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider.VideoStreamProviderRegistry(
-			_invoker,
+		using var registry = new Capabilities.VideoStreamProvider.VideoStreamProviderRegistry(_invoker,
 			new PluginConnectionState(),
 			Support.TestMetadata.Default,
 			TimeProvider.System,
@@ -368,7 +371,7 @@ public class RemoteIntegrationContextTests
 			(() => videoStreams.RegisterProviderAsync(new Support.TestVideoProvider()),
 				HostOperations.VideoStreams.ProvidersChanged),
 			(() => videoStreams.NotifyStreamsChangedAsync("cam"), HostOperations.VideoStreams.StreamsChanged),
-			(() => videoStreams.UpdateSessionAsync("s1", MacroDeck.Sdk.VideoStreams.VideoStreamSessionState.Active),
+			(() => videoStreams.UpdateSessionAsync("s1", Sdk.VideoStreams.VideoStreamSessionState.Active),
 				HostOperations.VideoStreams.SessionUpdate),
 			(() => videoStreams.CloseSessionAsync("s1"), HostOperations.VideoStreams.SessionClose)
 		};
@@ -428,7 +431,8 @@ public class RemoteIntegrationContextTests
 	{
 		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
 
-		await widgetTypes.RegisterWidgetTypeAsync(new WidgetTypeDescriptor("panel", LocalizedText.FromLiteral("Panel")));
+		await widgetTypes.RegisterWidgetTypeAsync(new WidgetTypeDescriptor("panel",
+			LocalizedText.FromLiteral("Panel")));
 
 		Assert.That(((WidgetTypesRegisterArguments)_invoker.LastArguments!).WidgetType.AppearanceProperties, Is.Null);
 	}
@@ -457,8 +461,8 @@ public class RemoteIntegrationContextTests
 	{
 		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
 
-		await widgetTypes.RegisterWidgetTypeAsync(
-			new WidgetTypeDescriptor("panel", LocalizedText.FromLiteral("Panel")) { SupportsFlows = true });
+		await widgetTypes.RegisterWidgetTypeAsync(new WidgetTypeDescriptor("panel", LocalizedText.FromLiteral("Panel"))
+			{ SupportsFlows = true });
 
 		Assert.That(((WidgetTypesRegisterArguments)_invoker.LastArguments!).WidgetType.SupportsFlows, Is.True);
 	}
@@ -472,7 +476,7 @@ public class RemoteIntegrationContextTests
 	{
 		var ui = new RemoteUiInteractions(_invoker, new ModalResultStore(), Serilog.Core.Logger.None, "correlation-1");
 
-		await ui.ShowModalAsync(originClientId: "client-1", new ModalDefinition { ViewId = "device-picker" });
+		await ui.ShowModalAsync("client-1", new ModalDefinition { ViewId = "device-picker" });
 
 		Assert.Multiple(() =>
 		{
@@ -612,10 +616,13 @@ public class RemoteIntegrationContextTests
 		Assert.That(declared, Is.SubsetOf(covered));
 	}
 
-	private static TestCaseData Case(string api,
+	private static TestCaseData Case(
+		string api,
 		string operation,
 		Func<IIntegrationContext, RecordingHostInvoker, Task> exercise)
-		=> new TestCaseData(api, operation, exercise).SetName($"{{m}}({api}.{operation})");
+	{
+		return new TestCaseData(api, operation, exercise).SetName($"{{m}}({api}.{operation})");
+	}
 
 	// ---- HostStateCache: empty/false before a push, pushed values after ----------------------------
 
@@ -646,8 +653,8 @@ public class RemoteIntegrationContextTests
 		stateCache.Apply(StatePush(HostApis.Deck,
 			new DeckStateDto
 			{
-				Folders = [new Sdk.Decks.DeckFolder { Id = "f1", Label = "Folder 1" }],
-				Profiles = [new Sdk.Decks.DeckProfile { Id = "p1", Label = "Profile 1" }]
+				Folders = [new DeckFolder { Id = "f1", Label = "Folder 1" }],
+				Profiles = [new DeckProfile { Id = "p1", Label = "Profile 1" }]
 			}));
 
 		Assert.Multiple(() =>
@@ -681,7 +688,7 @@ public class RemoteIntegrationContextTests
 		});
 
 		stateCache.Apply(StatePush(HostApis.Deck,
-			new DeckStateDto { Folders = [new Sdk.Decks.DeckFolder { Id = "f1", Label = "Folder 1" }] }));
+			new DeckStateDto { Folders = [new DeckFolder { Id = "f1", Label = "Folder 1" }] }));
 		stateCache.Apply(StatePush(HostApis.Scripts, new List<Script> { new() { Id = "s1", Name = "Script 1" } }));
 		stateCache.Apply(StatePush(HostApis.Widgets,
 			new List<WidgetTargetInfo>
@@ -714,13 +721,19 @@ public class RemoteIntegrationContextTests
 		object pushed = negotiatedVersion is >= 2
 			? new List<WidgetTargetInfoDtoV2>
 			{
-				new() { Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
-					AppearanceProperties = appearanceProperties }
+				new()
+				{
+					Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
+					AppearanceProperties = appearanceProperties
+				}
 			}
 			: new List<WidgetTargetInfoDtoV1>
 			{
-				new() { Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
-					AppearanceProperties = appearanceProperties }
+				new()
+				{
+					Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
+					AppearanceProperties = appearanceProperties
+				}
 			};
 
 		stateCache.Apply(StatePush(HostApis.Widgets, pushed));
@@ -738,14 +751,19 @@ public class RemoteIntegrationContextTests
 		stateCache.Apply(StatePush(HostApis.Widgets,
 			new List<WidgetTargetInfoDtoV2>
 			{
-				new() { Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
-					AppearanceProperties = [3, 9, 10] }
+				new()
+				{
+					Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
+					AppearanceProperties = [3, 9, 10]
+				}
 			}));
 
-		Assert.That(widgets.GetWidgets().Single().AppearanceProperties, Is.EqualTo(new[]
-		{
-			WidgetAppearanceProperty.Icon, WidgetAppearanceProperty.IconColor, WidgetAppearanceProperty.IconAppearance
-		}));
+		Assert.That(widgets.GetWidgets().Single().AppearanceProperties,
+			Is.EqualTo(new[]
+			{
+				WidgetAppearanceProperty.Icon, WidgetAppearanceProperty.IconColor,
+				WidgetAppearanceProperty.IconAppearance
+			}));
 	}
 
 	[Test]
@@ -761,7 +779,8 @@ public class RemoteIntegrationContextTests
 		var wire = JsonSerializer.SerializeToElement(_invoker.LastArguments, PluginProtocolJson.Options);
 		Assert.Multiple(() =>
 		{
-			Assert.That(wire.GetProperty("patch").GetProperty("iconAppearance").GetString(), Is.EqualTo("colorScheme=dark"));
+			Assert.That(wire.GetProperty("patch").GetProperty("iconAppearance").GetString(),
+				Is.EqualTo("colorScheme=dark"));
 			Assert.That(wire.GetProperty("clearProperties").EnumerateArray().Select(value => value.GetInt32()),
 				Is.EqualTo(new[] { 10 }));
 		});
@@ -769,7 +788,9 @@ public class RemoteIntegrationContextTests
 
 	[Test]
 	public void Event_bindings_are_empty_before_the_host_pushed_any()
-		=> Assert.That(_context.Events.GetBindings(), Is.Empty);
+	{
+		Assert.That(_context.Events.GetBindings(), Is.Empty);
+	}
 
 	[Test]
 	public async Task An_event_bindings_push_is_served_by_GetBindings_and_raises_BindingsChanged()
@@ -816,13 +837,16 @@ public class RemoteIntegrationContextTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(() => stateCache.Apply(StatePush("a-future-api", new[] { new { anything = 1 } })), Throws.Nothing);
-			Assert.That(stateCache.GetList<Script>(HostApis.Scripts).Select(script => script.Id), Is.EqualTo(new[] { "s1" }));
+			Assert.That(() => stateCache.Apply(StatePush("a-future-api", new[] { new { anything = 1 } })),
+				Throws.Nothing);
+			Assert.That(stateCache.GetList<Script>(HostApis.Scripts).Select(script => script.Id),
+				Is.EqualTo(new[] { "s1" }));
 		});
 	}
 
 	private static ProtocolEnvelope StatePush(string api, object? data)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
@@ -833,6 +857,7 @@ public class RemoteIntegrationContextTests
 				},
 				PluginProtocolJson.Options)
 		};
+	}
 
 	[Test]
 	public async Task Scripts_run_sends_the_supplied_inputs_in_the_host_invoke_payload()
@@ -877,7 +902,8 @@ public class RemoteIntegrationContextTests
 
 		public object? LastArguments { get; private set; }
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -891,13 +917,22 @@ public class RemoteIntegrationContextTests
 			return Task.FromResult(result);
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		/// <summary>Waits for a fire-and-forget call (Notify/Dismiss/the ActionInteractions members) to
 		/// actually reach <see cref="InvokeAsync" /> on its background task, without a sleep.</summary>
-		public Task WaitForCallAsync() => _called.WaitAsync(TimeSpan.FromSeconds(5));
+		public Task WaitForCallAsync()
+		{
+			return _called.WaitAsync(TimeSpan.FromSeconds(5));
+		}
 
-		public void Dispose() => _called.Dispose();
+		public void Dispose()
+		{
+			_called.Dispose();
+		}
 	}
 
 	private sealed record ClientWorld(
@@ -907,9 +942,14 @@ public class RemoteIntegrationContextTests
 		List<DeckClientChangedEventArgs> Changes)
 	{
 		public void Push(long revision, params DeckClientDto[] clients)
-			=> Cache.Apply(StatePush(HostApis.Deck, new DeckStateDto { Clients = clients, Revision = revision }));
+		{
+			Cache.Apply(StatePush(HostApis.Deck, new DeckStateDto { Clients = clients, Revision = revision }));
+		}
 
-		public void Push(DeckStateDto state) => Cache.Apply(StatePush(HostApis.Deck, state));
+		public void Push(DeckStateDto state)
+		{
+			Cache.Apply(StatePush(HostApis.Deck, state));
+		}
 	}
 
 	private ClientWorld NewClientWorld()
@@ -923,11 +963,15 @@ public class RemoteIntegrationContextTests
 	}
 
 	private static DeckClientDto Client(string clientId, string folderId, string profileId = "p1")
-		=> new() { ClientId = clientId, ProfileId = profileId, FolderId = folderId };
+	{
+		return new DeckClientDto { ClientId = clientId, ProfileId = profileId, FolderId = folderId };
+	}
 
 	[Test]
 	public void No_clients_are_listed_before_the_first_deck_push()
-		=> Assert.That(NewClientWorld().Deck.GetClients(), Is.Empty);
+	{
+		Assert.That(NewClientWorld().Deck.GetClients(), Is.Empty);
+	}
 
 	[Test]
 	public void A_deck_push_lists_its_clients_and_reports_each_as_newly_seen()
@@ -940,8 +984,10 @@ public class RemoteIntegrationContextTests
 		{
 			Assert.That(world.Deck.GetClients().Select(client => (client.ClientId, client.FolderId)),
 				Is.EquivalentTo(new[] { ("tab-1", "f1"), ("tab-2", "f2") }));
-			Assert.That(world.Changes.Select(change => change.Client.ClientId), Is.EquivalentTo(new[] { "tab-1", "tab-2" }));
-			Assert.That(world.Changes.All(change => change.PreviousFolderId is null && change.PreviousProfileId is null));
+			Assert.That(world.Changes.Select(change => change.Client.ClientId),
+				Is.EquivalentTo(new[] { "tab-1", "tab-2" }));
+			Assert.That(
+				world.Changes.All(change => change.PreviousFolderId is null && change.PreviousProfileId is null));
 		});
 	}
 
@@ -1031,7 +1077,7 @@ public class RemoteIntegrationContextTests
 		var world = NewClientWorld();
 		world.Push(5, Client("old-tab", "f1"));
 
-		world.State.RaiseConnected(resumed: false);
+		world.State.RaiseConnected(false);
 		var listedRightAfterConnect = world.Deck.GetClients();
 		world.Changes.Clear();
 		world.Push(new DeckStateDto
@@ -1056,7 +1102,7 @@ public class RemoteIntegrationContextTests
 		var world = NewClientWorld();
 		world.Push(5, Client("tab-1", "f1"));
 
-		world.State.RaiseConnected(resumed: true);
+		world.State.RaiseConnected(true);
 		world.Push(1, Client("tab-1", "f2"));
 
 		Assert.That(world.Deck.GetClients().Single().FolderId, Is.EqualTo("f1"));

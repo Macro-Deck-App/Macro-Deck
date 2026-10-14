@@ -18,8 +18,8 @@ internal static class ScaffoldManifestWriter
 
 	public static string BuildManifestJson(string existingJson, PluginScaffoldRequest request)
 	{
-		var root = JsonNode.Parse(existingJson)?.AsObject() ??
-			throw new InvalidOperationException("The generated manifest.json did not parse as a JSON object.");
+		var root = JsonNode.Parse(existingJson)?.AsObject()
+			?? throw new InvalidOperationException("The generated manifest.json did not parse as a JSON object.");
 
 		root["description"] = request.Description;
 		root["publisher"] = new JsonObject { ["name"] = request.Publisher };

@@ -11,9 +11,11 @@ public interface IMigrationService
 {
 	IReadOnlyList<MigrationSourceDescriptor> GetSources();
 
-	Task<Result<MigrationPlan, MigrationError>> Preview(MigrationRequest request,
+	Task<Result<MigrationPlan, MigrationError>> Preview(
+		MigrationRequest request,
 		CancellationToken cancellationToken);
 
-	Task<Result<MigrationOutcome, MigrationError>> Apply(MigrationRequest request,
+	Task<Result<MigrationOutcome, MigrationError>> Apply(
+		MigrationRequest request,
 		CancellationToken cancellationToken);
 }

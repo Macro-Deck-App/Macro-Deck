@@ -104,12 +104,16 @@ internal sealed class VoicemeeterLayoutTests
 	[TestCase(0, VoicemeeterEdition.None)]
 	[TestCase(9, VoicemeeterEdition.None)]
 	public void A_raw_type_maps_onto_an_edition(int rawType, VoicemeeterEdition expected)
-		=> Assert.That(VoicemeeterEditions.FromRawType(rawType), Is.EqualTo(expected));
+	{
+		Assert.That(VoicemeeterEditions.FromRawType(rawType), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void Launching_Potato_asks_for_the_build_matching_the_process()
-		=> Assert.That(VoicemeeterEditions.ToRunType(VoicemeeterEdition.Potato),
+	{
+		Assert.That(VoicemeeterEditions.ToRunType(VoicemeeterEdition.Potato),
 			Is.EqualTo(Environment.Is64BitProcess ? 6 : 3));
+	}
 
 	[Test]
 	public void Parameter_names_follow_the_remote_APIs_spelling()

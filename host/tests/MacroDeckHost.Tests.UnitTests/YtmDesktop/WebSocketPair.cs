@@ -16,14 +16,14 @@ internal sealed class WebSocketPair : IDisposable
 		_serverSocket = serverSocket;
 
 		Client = WebSocket.CreateFromStream(clientSocket.GetStream(),
-			isServer: false,
-			subProtocol: null,
-			keepAliveInterval: TimeSpan.FromMinutes(1));
+			false,
+			null,
+			TimeSpan.FromMinutes(1));
 
 		Server = WebSocket.CreateFromStream(serverSocket.GetStream(),
-			isServer: true,
-			subProtocol: null,
-			keepAliveInterval: TimeSpan.FromMinutes(1));
+			true,
+			null,
+			TimeSpan.FromMinutes(1));
 	}
 
 	public WebSocket Client { get; }
@@ -51,10 +51,12 @@ internal sealed class WebSocketPair : IDisposable
 	}
 
 	public Task SendAsync(string json)
-		=> Server.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
+	{
+		return Server.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
 			WebSocketMessageType.Text,
-			endOfMessage: true,
+			true,
 			CancellationToken.None);
+	}
 
 	public async Task<string> ReceiveAsync()
 	{

@@ -82,7 +82,7 @@ internal static class EmailInboxWidget
 			hasData,
 			aggregate.UnreadCount,
 			hasData ? format.Count(aggregate.UnreadCount) : NoData,
-			Strings.UnreadCount(count: aggregate.UnreadCount),
+			Strings.UnreadCount(aggregate.UnreadCount),
 			single is null ? Strings.AllInboxes() : single,
 			single,
 			problems == 0 ? default
@@ -95,7 +95,9 @@ internal static class EmailInboxWidget
 	}
 
 	private static LocalizedText Problem(EmailInboxState inbox)
-		=> string.IsNullOrWhiteSpace(inbox.StatusMessage) ? Strings.Disconnected() : inbox.StatusMessage;
+	{
+		return string.IsNullOrWhiteSpace(inbox.StatusMessage) ? Strings.Disconnected() : inbox.StatusMessage;
+	}
 
 	private static EmailInboxRow Row(
 		EmailInboxMessage entry,
@@ -104,7 +106,7 @@ internal static class EmailInboxWidget
 		DateTimeOffset now)
 	{
 		var message = entry.Message;
-		LocalizedText sender = message.SenderName ?? message.SenderAddress ?? (LocalizedText)Strings.UnknownSender();
+		var sender = message.SenderName ?? message.SenderAddress ?? (LocalizedText)Strings.UnknownSender();
 		LocalizedText subject = string.IsNullOrWhiteSpace(message.Subject) ? Strings.NoSubject() : message.Subject;
 
 		return new EmailInboxRow(KeyOf(entry),
@@ -116,10 +118,16 @@ internal static class EmailInboxWidget
 	}
 
 	private static string? SingleSpaced(string? text)
-		=> string.IsNullOrWhiteSpace(text)
+	{
+		return string.IsNullOrWhiteSpace(text)
 			? null
 			: string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+	}
 
 	private static string KeyOf(EmailInboxMessage entry)
-		=> "m" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(entry.Inbox.Ref + "\n" + entry.Message.Id)))[..24];
+	{
+		return "m"
+			+ Convert.ToHexStringLower(
+				SHA256.HashData(Encoding.UTF8.GetBytes(entry.Inbox.Ref + "\n" + entry.Message.Id)))[..24];
+	}
 }

@@ -34,7 +34,9 @@ internal sealed class RecordingEventPublisher : IEventPublisher
 	public List<(string EventId, IReadOnlyDictionary<string, object?>? Parameters)> Published { get; } = [];
 
 	public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-		=> Published.Add((eventId, parameters));
+	{
+		Published.Add((eventId, parameters));
+	}
 }
 
 internal sealed class FakeYtmDesktopIntegrationConfig : IIntegrationConfig
@@ -65,13 +67,19 @@ internal sealed class FakeYtmDesktopIntegrationConfig : IIntegrationConfig
 	}
 
 	public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+	}
 
 	public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken cancellationToken = default)
 	{

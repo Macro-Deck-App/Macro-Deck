@@ -8,8 +8,7 @@ public class AdbReverseListParserTests
 	public void Well_formed_lines_are_parsed_into_mappings()
 	{
 		const string output =
-			"R58M12ABCDE tcp:8193 tcp:8193\n" +
-			"R58M12ABCDE tcp:8194 tcp:8194\n";
+			"R58M12ABCDE tcp:8193 tcp:8193\n" + "R58M12ABCDE tcp:8194 tcp:8194\n";
 
 		var mappings = AdbReverseListParser.Parse(output);
 

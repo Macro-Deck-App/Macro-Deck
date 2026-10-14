@@ -11,7 +11,7 @@ internal static class DelegateSlug
 
 		foreach (var character in (machineName ?? string.Empty).ToLowerInvariant())
 		{
-			if (character is (>= 'a' and <= 'z') or (>= '0' and <= '9'))
+			if (character is >= 'a' and <= 'z' or >= '0' and <= '9')
 			{
 				builder.Append(character);
 				lastWasSeparator = false;

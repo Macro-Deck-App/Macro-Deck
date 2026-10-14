@@ -100,7 +100,9 @@ public class CalendarDtoSerializationTests
 
 	[Test]
 	public void An_event_reply_for_a_deleted_event_carries_no_event()
-		=> Assert.That(RoundTrip(new CalendarEventResult()).Event, Is.Null);
+	{
+		Assert.That(RoundTrip(new CalendarEventResult()).Event, Is.Null);
+	}
 
 	[Test]
 	public void A_participant_without_a_response_reads_as_unknown()

@@ -20,357 +20,628 @@ internal static class TwitchActions
 	{
 		public static class SetStreamInfo
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.SetStreamInfo.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetStreamInfo.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.SetStreamInfo.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetStreamInfo.Description();
+			}
 
-			public static LocalizedText TitleLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SetStreamInfo.TitleLabel();
+			public static LocalizedText TitleLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetStreamInfo.TitleLabel();
+			}
 
-			public static LocalizedText CategoryLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SetStreamInfo.CategoryLabel();
+			public static LocalizedText CategoryLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetStreamInfo.CategoryLabel();
+			}
 
-			public static LocalizedText CategoryDescription() =>
-				AppStrings.Integrations.Twitch.Actions.SetStreamInfo.CategoryDescription();
+			public static LocalizedText CategoryDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetStreamInfo.CategoryDescription();
+			}
 
-			public static LocalizedText TagsLabel() => AppStrings.Integrations.Twitch.Actions.SetStreamInfo.TagsLabel();
+			public static LocalizedText TagsLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetStreamInfo.TagsLabel();
+			}
 
-			public static LocalizedText TagsDescription() =>
-				AppStrings.Integrations.Twitch.Actions.SetStreamInfo.TagsDescription();
+			public static LocalizedText TagsDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetStreamInfo.TagsDescription();
+			}
 		}
 
 		public static class SendChatMessage
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.SendChatMessage.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendChatMessage.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.SendChatMessage.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendChatMessage.Description();
+			}
 
-			public static LocalizedText MessageLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SendChatMessage.MessageLabel();
+			public static LocalizedText MessageLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendChatMessage.MessageLabel();
+			}
 
-			public static LocalizedText MessageDescription() =>
-				AppStrings.Integrations.Twitch.Actions.SendChatMessage.MessageDescription();
+			public static LocalizedText MessageDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendChatMessage.MessageDescription();
+			}
 
-			public static LocalizedText ReplyToMessageIdLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SendChatMessage.ReplyToMessageIdLabel();
+			public static LocalizedText ReplyToMessageIdLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendChatMessage.ReplyToMessageIdLabel();
+			}
 
-			public static LocalizedText ReplyToMessageIdDescription() =>
-				AppStrings.Integrations.Twitch.Actions.SendChatMessage.ReplyToMessageIdDescription();
+			public static LocalizedText ReplyToMessageIdDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendChatMessage.ReplyToMessageIdDescription();
+			}
 		}
 
 		public static class SendAnnouncement
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.SendAnnouncement.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.SendAnnouncement.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.Description();
+			}
 
-			public static LocalizedText MessageLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SendAnnouncement.MessageLabel();
+			public static LocalizedText MessageLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.MessageLabel();
+			}
 
-			public static LocalizedText ColourLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourLabel();
+			public static LocalizedText ColourLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourLabel();
+			}
 
-			public static LocalizedText ColourChannelColour() =>
-				AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourChannelColour();
+			public static LocalizedText ColourChannelColour()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourChannelColour();
+			}
 
-			public static LocalizedText ColourBlue() =>
-				AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourBlue();
+			public static LocalizedText ColourBlue()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourBlue();
+			}
 
-			public static LocalizedText ColourGreen() =>
-				AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourGreen();
+			public static LocalizedText ColourGreen()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourGreen();
+			}
 
-			public static LocalizedText ColourOrange() =>
-				AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourOrange();
+			public static LocalizedText ColourOrange()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourOrange();
+			}
 
-			public static LocalizedText ColourPurple() =>
-				AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourPurple();
+			public static LocalizedText ColourPurple()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendAnnouncement.ColourPurple();
+			}
 		}
 
 		public static class SendShoutout
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.SendShoutout.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendShoutout.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.SendShoutout.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SendShoutout.Description();
+			}
 		}
 
 		public static class ClearChat
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.ClearChat.Name();
-			public static LocalizedText Description() => AppStrings.Integrations.Twitch.Actions.ClearChat.Description();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.ClearChat.Name();
+			}
+
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.ClearChat.Description();
+			}
 		}
 
 		public static class DeleteChatMessage
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.DeleteChatMessage.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.DeleteChatMessage.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.DeleteChatMessage.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.DeleteChatMessage.Description();
+			}
 
-			public static LocalizedText MessageIdLabel() =>
-				AppStrings.Integrations.Twitch.Actions.DeleteChatMessage.MessageIdLabel();
+			public static LocalizedText MessageIdLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.DeleteChatMessage.MessageIdLabel();
+			}
 		}
 
 		public static class SetChatMode
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.SetChatMode.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.SetChatMode.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.Description();
+			}
 
-			public static LocalizedText ModeLabel() => AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeLabel();
+			public static LocalizedText ModeLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeLabel();
+			}
 
-			public static LocalizedText ModeEmoteOnly() =>
-				AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeEmoteOnly();
+			public static LocalizedText ModeEmoteOnly()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeEmoteOnly();
+			}
 
-			public static LocalizedText ModeFollowersOnly() =>
-				AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeFollowersOnly();
+			public static LocalizedText ModeFollowersOnly()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeFollowersOnly();
+			}
 
-			public static LocalizedText ModeSlow() => AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeSlow();
+			public static LocalizedText ModeSlow()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeSlow();
+			}
 
-			public static LocalizedText ModeSubscribersOnly() =>
-				AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeSubscribersOnly();
+			public static LocalizedText ModeSubscribersOnly()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeSubscribersOnly();
+			}
 
-			public static LocalizedText ModeUniqueChat() =>
-				AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeUniqueChat();
+			public static LocalizedText ModeUniqueChat()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.ModeUniqueChat();
+			}
 
-			public static LocalizedText OnLabel() => AppStrings.Integrations.Twitch.Actions.SetChatMode.OnLabel();
+			public static LocalizedText OnLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.OnLabel();
+			}
 
-			public static LocalizedText ToggleLabel() => AppStrings.Integrations.Twitch.Actions.SetChatMode.ToggleLabel();
+			public static LocalizedText ToggleLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.ToggleLabel();
+			}
 
-			public static LocalizedText ToggleDescription() =>
-				AppStrings.Integrations.Twitch.Actions.SetChatMode.ToggleDescription();
+			public static LocalizedText ToggleDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.ToggleDescription();
+			}
 
-			public static LocalizedText DurationLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SetChatMode.DurationLabel();
+			public static LocalizedText DurationLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.DurationLabel();
+			}
 
-			public static LocalizedText DurationDescription() =>
-				AppStrings.Integrations.Twitch.Actions.SetChatMode.DurationDescription();
+			public static LocalizedText DurationDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetChatMode.DurationDescription();
+			}
 		}
 
 		public static class RunCommercial
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.RunCommercial.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.RunCommercial.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.Description();
+			}
 
-			public static LocalizedText LengthLabel() =>
-				AppStrings.Integrations.Twitch.Actions.RunCommercial.LengthLabel();
+			public static LocalizedText LengthLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.LengthLabel();
+			}
 
-			public static LocalizedText Length30Seconds() =>
-				AppStrings.Integrations.Twitch.Actions.RunCommercial.Length30Seconds();
+			public static LocalizedText Length30Seconds()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.Length30Seconds();
+			}
 
-			public static LocalizedText Length60Seconds() =>
-				AppStrings.Integrations.Twitch.Actions.RunCommercial.Length60Seconds();
+			public static LocalizedText Length60Seconds()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.Length60Seconds();
+			}
 
-			public static LocalizedText Length90Seconds() =>
-				AppStrings.Integrations.Twitch.Actions.RunCommercial.Length90Seconds();
+			public static LocalizedText Length90Seconds()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.Length90Seconds();
+			}
 
-			public static LocalizedText Length2Minutes() =>
-				AppStrings.Integrations.Twitch.Actions.RunCommercial.Length2Minutes();
+			public static LocalizedText Length2Minutes()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.Length2Minutes();
+			}
 
-			public static LocalizedText Length2Point5Minutes() =>
-				AppStrings.Integrations.Twitch.Actions.RunCommercial.Length2Point5Minutes();
+			public static LocalizedText Length2Point5Minutes()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.Length2Point5Minutes();
+			}
 
-			public static LocalizedText Length3Minutes() =>
-				AppStrings.Integrations.Twitch.Actions.RunCommercial.Length3Minutes();
+			public static LocalizedText Length3Minutes()
+			{
+				return AppStrings.Integrations.Twitch.Actions.RunCommercial.Length3Minutes();
+			}
 		}
 
 		public static class SnoozeAd
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.SnoozeAd.Name();
-			public static LocalizedText Description() => AppStrings.Integrations.Twitch.Actions.SnoozeAd.Description();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SnoozeAd.Name();
+			}
+
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SnoozeAd.Description();
+			}
 		}
 
 		public static class StartRaid
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.StartRaid.Name();
-			public static LocalizedText Description() => AppStrings.Integrations.Twitch.Actions.StartRaid.Description();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.StartRaid.Name();
+			}
+
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.StartRaid.Description();
+			}
 		}
 
 		public static class CancelRaid
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.CancelRaid.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CancelRaid.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.CancelRaid.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CancelRaid.Description();
+			}
 		}
 
 		public static class CreateClip
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.CreateClip.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateClip.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.CreateClip.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateClip.Description();
+			}
 
-			public static LocalizedText HasDelayLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreateClip.HasDelayLabel();
+			public static LocalizedText HasDelayLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateClip.HasDelayLabel();
+			}
 
-			public static LocalizedText HasDelayDescription() =>
-				AppStrings.Integrations.Twitch.Actions.CreateClip.HasDelayDescription();
+			public static LocalizedText HasDelayDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateClip.HasDelayDescription();
+			}
 
-			public static LocalizedText TargetVariableLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreateClip.TargetVariableLabel();
+			public static LocalizedText TargetVariableLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateClip.TargetVariableLabel();
+			}
 
-			public static LocalizedText TargetVariableDescription() =>
-				AppStrings.Integrations.Twitch.Actions.CreateClip.TargetVariableDescription();
+			public static LocalizedText TargetVariableDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateClip.TargetVariableDescription();
+			}
 		}
 
 		public static class CreateStreamMarker
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.CreateStreamMarker.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateStreamMarker.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.CreateStreamMarker.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateStreamMarker.Description();
+			}
 
-			public static LocalizedText DescriptionLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreateStreamMarker.DescriptionLabel();
+			public static LocalizedText DescriptionLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreateStreamMarker.DescriptionLabel();
+			}
 		}
 
 		public static class BanUser
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.BanUser.Name();
-			public static LocalizedText Description() => AppStrings.Integrations.Twitch.Actions.BanUser.Description();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.BanUser.Name();
+			}
 
-			public static LocalizedText DurationSecondsLabel() =>
-				AppStrings.Integrations.Twitch.Actions.BanUser.DurationSecondsLabel();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.BanUser.Description();
+			}
 
-			public static LocalizedText DurationSecondsDescription() =>
-				AppStrings.Integrations.Twitch.Actions.BanUser.DurationSecondsDescription();
+			public static LocalizedText DurationSecondsLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.BanUser.DurationSecondsLabel();
+			}
 
-			public static LocalizedText ReasonLabel() => AppStrings.Integrations.Twitch.Actions.BanUser.ReasonLabel();
+			public static LocalizedText DurationSecondsDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.BanUser.DurationSecondsDescription();
+			}
+
+			public static LocalizedText ReasonLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.BanUser.ReasonLabel();
+			}
 		}
 
 		public static class UnbanUser
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.UnbanUser.Name();
-			public static LocalizedText Description() => AppStrings.Integrations.Twitch.Actions.UnbanUser.Description();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.UnbanUser.Name();
+			}
+
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.UnbanUser.Description();
+			}
 		}
 
 		public static class CreatePoll
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.CreatePoll.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePoll.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePoll.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePoll.Description();
+			}
 
-			public static LocalizedText QuestionLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePoll.QuestionLabel();
+			public static LocalizedText QuestionLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePoll.QuestionLabel();
+			}
 
-			public static LocalizedText ChoicesLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePoll.ChoicesLabel();
+			public static LocalizedText ChoicesLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePoll.ChoicesLabel();
+			}
 
-			public static LocalizedText ChoicesDescription() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePoll.ChoicesDescription();
+			public static LocalizedText ChoicesDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePoll.ChoicesDescription();
+			}
 
-			public static LocalizedText DurationSecondsLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePoll.DurationSecondsLabel();
+			public static LocalizedText DurationSecondsLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePoll.DurationSecondsLabel();
+			}
 
-			public static LocalizedText ChannelPointsPerVoteLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePoll.ChannelPointsPerVoteLabel();
+			public static LocalizedText ChannelPointsPerVoteLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePoll.ChannelPointsPerVoteLabel();
+			}
 
-			public static LocalizedText ChannelPointsPerVoteDescription() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePoll.ChannelPointsPerVoteDescription();
+			public static LocalizedText ChannelPointsPerVoteDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePoll.ChannelPointsPerVoteDescription();
+			}
 		}
 
 		public static class EndPoll
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.EndPoll.Name();
-			public static LocalizedText Description() => AppStrings.Integrations.Twitch.Actions.EndPoll.Description();
-			public static LocalizedText ArchiveLabel() => AppStrings.Integrations.Twitch.Actions.EndPoll.ArchiveLabel();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPoll.Name();
+			}
 
-			public static LocalizedText ArchiveDescription() =>
-				AppStrings.Integrations.Twitch.Actions.EndPoll.ArchiveDescription();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPoll.Description();
+			}
+
+			public static LocalizedText ArchiveLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPoll.ArchiveLabel();
+			}
+
+			public static LocalizedText ArchiveDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPoll.ArchiveDescription();
+			}
 		}
 
 		public static class CreatePrediction
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.CreatePrediction.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePrediction.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePrediction.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePrediction.Description();
+			}
 
-			public static LocalizedText QuestionLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePrediction.QuestionLabel();
+			public static LocalizedText QuestionLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePrediction.QuestionLabel();
+			}
 
-			public static LocalizedText OutcomesLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePrediction.OutcomesLabel();
+			public static LocalizedText OutcomesLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePrediction.OutcomesLabel();
+			}
 
-			public static LocalizedText OutcomesDescription() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePrediction.OutcomesDescription();
+			public static LocalizedText OutcomesDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePrediction.OutcomesDescription();
+			}
 
-			public static LocalizedText WindowSecondsLabel() =>
-				AppStrings.Integrations.Twitch.Actions.CreatePrediction.WindowSecondsLabel();
+			public static LocalizedText WindowSecondsLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.CreatePrediction.WindowSecondsLabel();
+			}
 		}
 
 		public static class EndPrediction
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.EndPrediction.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPrediction.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.EndPrediction.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPrediction.Description();
+			}
 
-			public static LocalizedText OutcomeLabel() =>
-				AppStrings.Integrations.Twitch.Actions.EndPrediction.OutcomeLabel();
+			public static LocalizedText OutcomeLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPrediction.OutcomeLabel();
+			}
 
-			public static LocalizedText OutcomeResolve() =>
-				AppStrings.Integrations.Twitch.Actions.EndPrediction.OutcomeResolve();
+			public static LocalizedText OutcomeResolve()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPrediction.OutcomeResolve();
+			}
 
-			public static LocalizedText OutcomeLock() =>
-				AppStrings.Integrations.Twitch.Actions.EndPrediction.OutcomeLock();
+			public static LocalizedText OutcomeLock()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPrediction.OutcomeLock();
+			}
 
-			public static LocalizedText OutcomeCancelAndRefund() =>
-				AppStrings.Integrations.Twitch.Actions.EndPrediction.OutcomeCancelAndRefund();
+			public static LocalizedText OutcomeCancelAndRefund()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPrediction.OutcomeCancelAndRefund();
+			}
 
-			public static LocalizedText WinningOutcomeLabel() =>
-				AppStrings.Integrations.Twitch.Actions.EndPrediction.WinningOutcomeLabel();
+			public static LocalizedText WinningOutcomeLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPrediction.WinningOutcomeLabel();
+			}
 
-			public static LocalizedText WinningOutcomeDescription() =>
-				AppStrings.Integrations.Twitch.Actions.EndPrediction.WinningOutcomeDescription();
+			public static LocalizedText WinningOutcomeDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.EndPrediction.WinningOutcomeDescription();
+			}
 		}
 
 		public static class SetRedemptionStatus
 		{
-			public static LocalizedText Name() => AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.Name();
+			public static LocalizedText Name()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.Name();
+			}
 
-			public static LocalizedText Description() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.Description();
+			public static LocalizedText Description()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.Description();
+			}
 
-			public static LocalizedText RewardLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RewardLabel();
+			public static LocalizedText RewardLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RewardLabel();
+			}
 
-			public static LocalizedText RewardDescription() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RewardDescription();
+			public static LocalizedText RewardDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RewardDescription();
+			}
 
-			public static LocalizedText RewardPlaceholder() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RewardPlaceholder();
+			public static LocalizedText RewardPlaceholder()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RewardPlaceholder();
+			}
 
-			public static LocalizedText RedemptionIdLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RedemptionIdLabel();
+			public static LocalizedText RedemptionIdLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RedemptionIdLabel();
+			}
 
-			public static LocalizedText RedemptionIdDescription() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RedemptionIdDescription();
+			public static LocalizedText RedemptionIdDescription()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.RedemptionIdDescription();
+			}
 
-			public static LocalizedText ResultLabel() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.ResultLabel();
+			public static LocalizedText ResultLabel()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.ResultLabel();
+			}
 
-			public static LocalizedText ResultCompleted() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.ResultCompleted();
+			public static LocalizedText ResultCompleted()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.ResultCompleted();
+			}
 
-			public static LocalizedText ResultRefund() =>
-				AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.ResultRefund();
+			public static LocalizedText ResultRefund()
+			{
+				return AppStrings.Integrations.Twitch.Actions.SetRedemptionStatus.ResultRefund();
+			}
 		}
 
-		public static LocalizedText LoginChannelLabel() => AppStrings.Integrations.Twitch.Actions.LoginChannelLabel();
-		public static LocalizedText LoginUserLabel() => AppStrings.Integrations.Twitch.Actions.LoginUserLabel();
-		public static LocalizedText LoginDescription() => AppStrings.Integrations.Twitch.Actions.LoginDescription();
+		public static LocalizedText LoginChannelLabel()
+		{
+			return AppStrings.Integrations.Twitch.Actions.LoginChannelLabel();
+		}
 
-		public static LocalizedText EventMessageIdReferenceDescription() =>
-			AppStrings.Integrations.Twitch.Actions.EventMessageIdReferenceDescription();
+		public static LocalizedText LoginUserLabel()
+		{
+			return AppStrings.Integrations.Twitch.Actions.LoginUserLabel();
+		}
+
+		public static LocalizedText LoginDescription()
+		{
+			return AppStrings.Integrations.Twitch.Actions.LoginDescription();
+		}
+
+		public static LocalizedText EventMessageIdReferenceDescription()
+		{
+			return AppStrings.Integrations.Twitch.Actions.EventMessageIdReferenceDescription();
+		}
 	}
 
 	public static IReadOnlyList<IActionDefinition> Create(
@@ -388,7 +659,9 @@ internal static class TwitchActions
 			LocalizedText description,
 			IReadOnlyList<ActionParameter> parameters,
 			Func<TwitchActionScope, Task> execute)
-			=> new(accounts, variables, users, id, name, description, parameters, execute);
+		{
+			return new TwitchActionDefinition(accounts, variables, users, id, name, description, parameters, execute);
+		}
 
 		TwitchChatModeActionDefinition ChatMode(
 			string id,
@@ -396,7 +669,16 @@ internal static class TwitchActions
 			LocalizedText description,
 			IReadOnlyList<ActionParameter> parameters,
 			Func<TwitchActionScope, Task> execute)
-			=> new(accounts, variables, users, id, name, description, parameters, execute);
+		{
+			return new TwitchChatModeActionDefinition(accounts,
+				variables,
+				users,
+				id,
+				name,
+				description,
+				parameters,
+				execute);
+		}
 
 		TwitchActionDefinition ResultAction(
 			string id,
@@ -404,7 +686,9 @@ internal static class TwitchActions
 			LocalizedText description,
 			IReadOnlyList<ActionParameter> parameters,
 			Func<TwitchActionScope, Task<ActionResult>> execute)
-			=> new(accounts, variables, users, id, name, description, parameters, execute);
+		{
+			return new TwitchActionDefinition(accounts, variables, users, id, name, description, parameters, execute);
+		}
 
 		return
 		[
@@ -412,13 +696,13 @@ internal static class TwitchActions
 				Strings.SetStreamInfo.Name(),
 				Strings.SetStreamInfo.Description(),
 				[
-					ActionParameter.Text("title", label: Strings.SetStreamInfo.TitleLabel(), maxLength: 140),
+					ActionParameter.Text("title", Strings.SetStreamInfo.TitleLabel(), maxLength: 140),
 					ActionParameter.Text("category",
-						label: Strings.SetStreamInfo.CategoryLabel(),
-						description: Strings.SetStreamInfo.CategoryDescription()),
+						Strings.SetStreamInfo.CategoryLabel(),
+						Strings.SetStreamInfo.CategoryDescription()),
 					ActionParameter.Text("tags",
-						label: Strings.SetStreamInfo.TagsLabel(),
-						description: Strings.SetStreamInfo.TagsDescription())
+						Strings.SetStreamInfo.TagsLabel(),
+						Strings.SetStreamInfo.TagsDescription())
 				],
 				async scope =>
 				{
@@ -439,13 +723,13 @@ internal static class TwitchActions
 				Strings.SendChatMessage.Description(),
 				[
 					ActionParameter.MultilineText("message",
-						label: Strings.SendChatMessage.MessageLabel(),
-						description: Strings.SendChatMessage.MessageDescription(),
+						Strings.SendChatMessage.MessageLabel(),
+						Strings.SendChatMessage.MessageDescription(),
 						required: true,
 						maxLength: 500),
 					ActionParameter.Text("replyToMessageId",
-						label: Strings.SendChatMessage.ReplyToMessageIdLabel(),
-						description: Strings.SendChatMessage.ReplyToMessageIdDescription())
+						Strings.SendChatMessage.ReplyToMessageIdLabel(),
+						Strings.SendChatMessage.ReplyToMessageIdDescription())
 				],
 				async scope =>
 				{
@@ -466,7 +750,7 @@ internal static class TwitchActions
 				Strings.SendAnnouncement.Description(),
 				[
 					ActionParameter.MultilineText("message",
-						label: Strings.SendAnnouncement.MessageLabel(),
+						Strings.SendAnnouncement.MessageLabel(),
 						required: true,
 						maxLength: 500),
 					ActionParameter.Choice("color",
@@ -481,7 +765,7 @@ internal static class TwitchActions
 							new ActionParameterOption
 								{ Value = "purple", Label = Strings.SendAnnouncement.ColourPurple() }
 						],
-						label: Strings.SendAnnouncement.ColourLabel(),
+						Strings.SendAnnouncement.ColourLabel(),
 						defaultValue: "primary")
 				],
 				async scope =>
@@ -526,8 +810,8 @@ internal static class TwitchActions
 				Strings.DeleteChatMessage.Description(),
 				[
 					ActionParameter.Text("messageId",
-						label: Strings.DeleteChatMessage.MessageIdLabel(),
-						description: Strings.EventMessageIdReferenceDescription(),
+						Strings.DeleteChatMessage.MessageIdLabel(),
+						Strings.EventMessageIdReferenceDescription(),
 						required: true)
 				],
 				scope => scope.Helix.DeleteChatMessagesAsync(scope.UserId,
@@ -551,24 +835,24 @@ internal static class TwitchActions
 							new ActionParameterOption
 								{ Value = "unique-chat", Label = Strings.SetChatMode.ModeUniqueChat() }
 						],
-						label: Strings.SetChatMode.ModeLabel(),
+						Strings.SetChatMode.ModeLabel(),
 						defaultValue: "emote-only",
 						required: true),
 					ActionParameter.Toggle("toggle",
-						label: Strings.SetChatMode.ToggleLabel(),
-						description: Strings.SetChatMode.ToggleDescription(),
-						defaultValue: false),
-					ActionParameter.Toggle("enabled", label: Strings.SetChatMode.OnLabel(), defaultValue: true)
+						Strings.SetChatMode.ToggleLabel(),
+						Strings.SetChatMode.ToggleDescription(),
+						false),
+					ActionParameter.Toggle("enabled", Strings.SetChatMode.OnLabel(), defaultValue: true)
 						.OnlyWhen("toggle", "false", ""),
 					ActionParameter.Number("duration",
-						label: Strings.SetChatMode.DurationLabel(),
-						description: Strings.SetChatMode.DurationDescription(),
-						min: 0)
+						Strings.SetChatMode.DurationLabel(),
+						Strings.SetChatMode.DurationDescription(),
+						0)
 				],
 				async scope =>
 				{
 					var mode = ParseChatMode(TwitchActionValues.ReadText(scope.Parameters, "mode"));
-					var enabled = TwitchActionValues.ReadBool(scope.Parameters, "enabled", fallback: true);
+					var enabled = TwitchActionValues.ReadBool(scope.Parameters, "enabled", true);
 					if (TwitchActionValues.ReadBool(scope.Parameters, "toggle"))
 					{
 						var current = await scope.Helix.GetChatSettingsAsync(scope.UserId, scope.CancellationToken);
@@ -597,7 +881,7 @@ internal static class TwitchActions
 								{ Value = "150", Label = Strings.RunCommercial.Length2Point5Minutes() },
 							new ActionParameterOption { Value = "180", Label = Strings.RunCommercial.Length3Minutes() }
 						],
-						label: Strings.RunCommercial.LengthLabel(),
+						Strings.RunCommercial.LengthLabel(),
 						defaultValue: "60",
 						required: true)
 				],
@@ -636,11 +920,11 @@ internal static class TwitchActions
 				Strings.CreateClip.Description(),
 				[
 					ActionParameter.Toggle("hasDelay",
-						label: Strings.CreateClip.HasDelayLabel(),
-						description: Strings.CreateClip.HasDelayDescription()),
+						Strings.CreateClip.HasDelayLabel(),
+						Strings.CreateClip.HasDelayDescription()),
 					ActionParameter.Autocomplete("targetVariable",
-						label: Strings.CreateClip.TargetVariableLabel(),
-						description: Strings.CreateClip.TargetVariableDescription(),
+						Strings.CreateClip.TargetVariableLabel(),
+						Strings.CreateClip.TargetVariableDescription(),
 						optionsSourceId: HostOptionsSources.UserVariables)
 				],
 				async scope =>
@@ -710,7 +994,7 @@ internal static class TwitchActions
 				Strings.CreateStreamMarker.Description(),
 				[
 					ActionParameter.Text("description",
-						label: Strings.CreateStreamMarker.DescriptionLabel(),
+						Strings.CreateStreamMarker.DescriptionLabel(),
 						maxLength: 140)
 				],
 				scope => scope.Helix.CreateStreamMarkerAsync(scope.UserId,
@@ -723,11 +1007,11 @@ internal static class TwitchActions
 				[
 					Login("targetLogin", Strings.LoginUserLabel()),
 					ActionParameter.Number("durationSeconds",
-						label: Strings.BanUser.DurationSecondsLabel(),
-						description: Strings.BanUser.DurationSecondsDescription(),
-						min: 0,
-						max: 1209600),
-					ActionParameter.Text("reason", label: Strings.BanUser.ReasonLabel(), maxLength: 500)
+						Strings.BanUser.DurationSecondsLabel(),
+						Strings.BanUser.DurationSecondsDescription(),
+						0,
+						1209600),
+					ActionParameter.Text("reason", Strings.BanUser.ReasonLabel(), maxLength: 500)
 				],
 				async scope =>
 				{
@@ -763,22 +1047,22 @@ internal static class TwitchActions
 				Strings.CreatePoll.Description(),
 				[
 					ActionParameter.Text("title",
-						label: Strings.CreatePoll.QuestionLabel(),
+						Strings.CreatePoll.QuestionLabel(),
 						required: true,
 						maxLength: 60),
 					ActionParameter.MultilineText("choices",
-						label: Strings.CreatePoll.ChoicesLabel(),
-						description: Strings.CreatePoll.ChoicesDescription(),
+						Strings.CreatePoll.ChoicesLabel(),
+						Strings.CreatePoll.ChoicesDescription(),
 						required: true),
 					ActionParameter.Number("durationSeconds",
-						label: Strings.CreatePoll.DurationSecondsLabel(),
+						Strings.CreatePoll.DurationSecondsLabel(),
 						min: 15,
 						max: 1800,
 						defaultValue: 60),
 					ActionParameter.Number("channelPointsPerVote",
-						label: Strings.CreatePoll.ChannelPointsPerVoteLabel(),
-						description: Strings.CreatePoll.ChannelPointsPerVoteDescription(),
-						min: 0)
+						Strings.CreatePoll.ChannelPointsPerVoteLabel(),
+						Strings.CreatePoll.ChannelPointsPerVoteDescription(),
+						0)
 				],
 				scope =>
 				{
@@ -800,8 +1084,8 @@ internal static class TwitchActions
 				Strings.EndPoll.Description(),
 				[
 					ActionParameter.Toggle("archive",
-						label: Strings.EndPoll.ArchiveLabel(),
-						description: Strings.EndPoll.ArchiveDescription())
+						Strings.EndPoll.ArchiveLabel(),
+						Strings.EndPoll.ArchiveDescription())
 				],
 				async scope =>
 				{
@@ -821,15 +1105,15 @@ internal static class TwitchActions
 				Strings.CreatePrediction.Description(),
 				[
 					ActionParameter.Text("title",
-						label: Strings.CreatePrediction.QuestionLabel(),
+						Strings.CreatePrediction.QuestionLabel(),
 						required: true,
 						maxLength: 45),
 					ActionParameter.MultilineText("outcomes",
-						label: Strings.CreatePrediction.OutcomesLabel(),
-						description: Strings.CreatePrediction.OutcomesDescription(),
+						Strings.CreatePrediction.OutcomesLabel(),
+						Strings.CreatePrediction.OutcomesDescription(),
 						required: true),
 					ActionParameter.Number("windowSeconds",
-						label: Strings.CreatePrediction.WindowSecondsLabel(),
+						Strings.CreatePrediction.WindowSecondsLabel(),
 						min: 30,
 						max: 1800,
 						defaultValue: 120)
@@ -860,12 +1144,12 @@ internal static class TwitchActions
 							new ActionParameterOption
 								{ Value = "CANCELED", Label = Strings.EndPrediction.OutcomeCancelAndRefund() }
 						],
-						label: Strings.EndPrediction.OutcomeLabel(),
+						Strings.EndPrediction.OutcomeLabel(),
 						defaultValue: "RESOLVED",
 						required: true),
 					ActionParameter.Text("winningOutcome",
-						label: Strings.EndPrediction.WinningOutcomeLabel(),
-						description: Strings.EndPrediction.WinningOutcomeDescription())
+						Strings.EndPrediction.WinningOutcomeLabel(),
+						Strings.EndPrediction.WinningOutcomeDescription())
 				],
 				async scope =>
 				{
@@ -898,13 +1182,13 @@ internal static class TwitchActions
 				Strings.SetRedemptionStatus.Description(),
 				[
 					ActionParameter.DynamicChoice("rewardId",
-						label: Strings.SetRedemptionStatus.RewardLabel(),
-						description: Strings.SetRedemptionStatus.RewardDescription(),
+						Strings.SetRedemptionStatus.RewardLabel(),
+						Strings.SetRedemptionStatus.RewardDescription(),
 						placeholder: Strings.SetRedemptionStatus.RewardPlaceholder(),
 						required: true),
 					ActionParameter.Text("redemptionId",
-						label: Strings.SetRedemptionStatus.RedemptionIdLabel(),
-						description: Strings.SetRedemptionStatus.RedemptionIdDescription(),
+						Strings.SetRedemptionStatus.RedemptionIdLabel(),
+						Strings.SetRedemptionStatus.RedemptionIdDescription(),
 						required: true),
 					ActionParameter.Choice("status",
 						[
@@ -913,7 +1197,7 @@ internal static class TwitchActions
 							new ActionParameterOption
 								{ Value = "canceled", Label = Strings.SetRedemptionStatus.ResultRefund() }
 						],
-						label: Strings.SetRedemptionStatus.ResultLabel(),
+						Strings.SetRedemptionStatus.ResultLabel(),
 						defaultValue: "fulfilled",
 						required: true)
 				],
@@ -936,10 +1220,12 @@ internal static class TwitchActions
 	}
 
 	private static ActionParameter Login(string name, LocalizedText label)
-		=> ActionParameter.Text(name,
-			label: label,
-			description: Strings.LoginDescription(),
+	{
+		return ActionParameter.Text(name,
+			label,
+			Strings.LoginDescription(),
 			required: true);
+	}
 
 	private static async Task<string?> ResolveUserId(TwitchActionScope scope, string parameterName)
 	{
@@ -953,17 +1239,21 @@ internal static class TwitchActions
 	}
 
 	private static bool IsChatModeOn(TwitchChatSettings settings, TwitchChatMode mode)
-		=> mode switch
-		{
-			TwitchChatMode.FollowersOnly => settings.FollowersOnly,
-			TwitchChatMode.SlowMode => settings.SlowMode,
-			TwitchChatMode.SubscribersOnly => settings.SubscriberOnly,
-			TwitchChatMode.UniqueChat => settings.UniqueChat,
-			_ => settings.EmoteOnly
-		} == true;
+	{
+		return mode switch
+			{
+				TwitchChatMode.FollowersOnly => settings.FollowersOnly,
+				TwitchChatMode.SlowMode => settings.SlowMode,
+				TwitchChatMode.SubscribersOnly => settings.SubscriberOnly,
+				TwitchChatMode.UniqueChat => settings.UniqueChat,
+				_ => settings.EmoteOnly
+			}
+			== true;
+	}
 
 	private static TwitchChatMode ParseChatMode(string? mode)
-		=> mode switch
+	{
+		return mode switch
 		{
 			"followers-only" => TwitchChatMode.FollowersOnly,
 			"slow" => TwitchChatMode.SlowMode,
@@ -971,4 +1261,5 @@ internal static class TwitchActions
 			"unique-chat" => TwitchChatMode.UniqueChat,
 			_ => TwitchChatMode.EmoteOnly
 		};
+	}
 }

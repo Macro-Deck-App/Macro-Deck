@@ -3,7 +3,8 @@ namespace MacroDeckHost.Application.Portable;
 public static class PortableContentFactory
 {
 	public static PortableContent FromAssets(PortableArchiveKind kind, PortableAssetBundle assets)
-		=> new()
+	{
+		return new PortableContent
 		{
 			Kind = kind,
 			Icons = [.. assets.Icons],
@@ -12,4 +13,5 @@ public static class PortableContentFactory
 			Variables = [.. assets.Variables],
 			Fonts = [.. assets.Fonts]
 		};
+	}
 }

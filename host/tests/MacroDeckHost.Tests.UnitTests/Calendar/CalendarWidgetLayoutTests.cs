@@ -18,7 +18,10 @@ public class CalendarWidgetLayoutTests
 	[SetUp]
 	public async Task SetUp()
 	{
-		_harness = new CalendarWidgetHarness().With(Event("review", Noon.AddHours(1), TimeSpan.FromHours(1), title: "Review"));
+		_harness = new CalendarWidgetHarness().With(Event("review",
+			Noon.AddHours(1),
+			TimeSpan.FromHours(1),
+			title: "Review"));
 		await _harness.SyncAsync();
 	}
 
@@ -66,8 +69,13 @@ public class CalendarWidgetLayoutTests
 
 		for (var index = 0; index < 120; index++)
 		{
-			harness.With(Event("busy" + index, Noon.AddHours(index), TimeSpan.FromMinutes(45),
-				title: new string('x', 120)) with { Location = new string('y', 120) });
+			harness.With(Event("busy" + index,
+					Noon.AddHours(index),
+					TimeSpan.FromMinutes(45),
+					title: new string('x', 120)) with
+				{
+					Location = new string('y', 120)
+				});
 		}
 
 		await harness.SyncAsync();
@@ -78,7 +86,8 @@ public class CalendarWidgetLayoutTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length, Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
+			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length,
+				Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
 			Assert.That(Flatten(tree.Root).Count(), Is.LessThanOrEqualTo(ProtocolLimits.MaxUiNodesPerTree));
 		});
 	}
@@ -100,8 +109,11 @@ public class CalendarWidgetLayoutTests
 		var basis = Math.Min(Extent(columns), Extent(rows));
 		var inset = Math.Min(padding.Basis * basis, padding.MaxOfCell!.Value * UiLength.Cell);
 
-		return (Extent(cells) - (2 * inset)) / UiLength.Cell;
+		return (Extent(cells) - 2 * inset) / UiLength.Cell;
 	}
 
-	private static double Extent(int cells) => (cells * UiLength.Cell) + ((cells - 1) * GridDefaults.WidgetSpacing);
+	private static double Extent(int cells)
+	{
+		return cells * UiLength.Cell + (cells - 1) * GridDefaults.WidgetSpacing;
+	}
 }

@@ -33,12 +33,15 @@ public static class PluginCompatibilityEvaluator
 		};
 	}
 
-	public static string Classify(PluginCompatibilityEvaluation evaluation) => evaluation.Sdk switch
+	public static string Classify(PluginCompatibilityEvaluation evaluation)
 	{
-		{ DeprecatedApis: not null } => CompatibilityFindingSources.Confirmed,
-		not null => CompatibilityFindingSources.Inferred,
-		_ => CompatibilityFindingSources.Unknown
-	};
+		return evaluation.Sdk switch
+		{
+			{ DeprecatedApis: not null } => CompatibilityFindingSources.Confirmed,
+			not null => CompatibilityFindingSources.Inferred,
+			_ => CompatibilityFindingSources.Unknown
+		};
+	}
 
 	private static IEnumerable<CompatibilityFinding> NegotiationFindings(PluginCompatibilityEvaluation evaluation)
 	{
@@ -50,9 +53,9 @@ public static class PluginCompatibilityEvaluator
 				Source = CompatibilityFindingSources.Negotiated,
 				Severity = CompatibilitySeverities.Error,
 				Subject = ProtocolSubject,
-				Guidance = $"This plugin speaks no protocol version this Macro Deck supports " +
-					$"({ProtocolVersions.Minimum}-{ProtocolVersions.Current}). Update the plugin, or run a " +
-					"Macro Deck version it was built for."
+				Guidance = $"This plugin speaks no protocol version this Macro Deck supports "
+					+ $"({ProtocolVersions.Minimum}-{ProtocolVersions.Current}). Update the plugin, or run a "
+					+ "Macro Deck version it was built for."
 			};
 
 			yield break;
@@ -66,14 +69,15 @@ public static class PluginCompatibilityEvaluator
 				Source = CompatibilityFindingSources.Negotiated,
 				Severity = CompatibilitySeverities.Warning,
 				Subject = capability.Kind,
-				Guidance = $"This capability was not accepted, so the plugin runs without it. " +
-					$"{capability.RejectionReason ?? "No reason was given."} Updating the plugin usually " +
-					"resolves this."
+				Guidance = $"This capability was not accepted, so the plugin runs without it. "
+					+ $"{capability.RejectionReason ?? "No reason was given."} Updating the plugin usually "
+					+ "resolves this."
 			};
 		}
 	}
 
-	private static IEnumerable<CompatibilityFinding> DeprecationFindings(PluginCompatibilityEvaluation evaluation,
+	private static IEnumerable<CompatibilityFinding> DeprecationFindings(
+		PluginCompatibilityEvaluation evaluation,
 		string usageSource)
 	{
 		if (usageSource == CompatibilityFindingSources.Confirmed)
@@ -105,8 +109,8 @@ public static class PluginCompatibilityEvaluator
 				Source = CompatibilityFindingSources.Inferred,
 				Severity = CompatibilitySeverities.Info,
 				Subject = deprecation.DisplayName,
-				Guidance = $"This plugin was built against SDK {evaluation.Sdk!.SdkVersion} and may use " +
-					$"this API, which is deprecated. {deprecation.Guidance}",
+				Guidance = $"This plugin was built against SDK {evaluation.Sdk!.SdkVersion} and may use "
+					+ $"this API, which is deprecated. {deprecation.Guidance}",
 				DeprecatedIn = deprecation.DeprecatedIn,
 				RemovedIn = deprecation.RemovedIn,
 				Replacement = deprecation.Replacement,
@@ -115,32 +119,38 @@ public static class PluginCompatibilityEvaluator
 		}
 	}
 
-	private static CompatibilityFinding Confirmed(SdkDeprecation deprecation) => new()
+	private static CompatibilityFinding Confirmed(SdkDeprecation deprecation)
 	{
-		DiagnosticId = IsAtOrBelow(deprecation.RemovedIn, HostSdkVersion.Current)
-			? CompatibilityDiagnosticIds.RemovedApi
-			: CompatibilityDiagnosticIds.DeprecatedApi,
-		Source = CompatibilityFindingSources.Confirmed,
-		Severity = IsAtOrBelow(deprecation.RemovedIn, HostSdkVersion.Current)
-			? CompatibilitySeverities.Error
-			: CompatibilitySeverities.Warning,
-		Subject = deprecation.DisplayName,
-		Guidance = deprecation.Guidance,
-		DeprecatedIn = deprecation.DeprecatedIn,
-		RemovedIn = deprecation.RemovedIn,
-		Replacement = deprecation.Replacement,
-		MigrationUrl = deprecation.MigrationUrl
-	};
+		return new CompatibilityFinding
+		{
+			DiagnosticId = IsAtOrBelow(deprecation.RemovedIn, HostSdkVersion.Current)
+				? CompatibilityDiagnosticIds.RemovedApi
+				: CompatibilityDiagnosticIds.DeprecatedApi,
+			Source = CompatibilityFindingSources.Confirmed,
+			Severity = IsAtOrBelow(deprecation.RemovedIn, HostSdkVersion.Current)
+				? CompatibilitySeverities.Error
+				: CompatibilitySeverities.Warning,
+			Subject = deprecation.DisplayName,
+			Guidance = deprecation.Guidance,
+			DeprecatedIn = deprecation.DeprecatedIn,
+			RemovedIn = deprecation.RemovedIn,
+			Replacement = deprecation.Replacement,
+			MigrationUrl = deprecation.MigrationUrl
+		};
+	}
 
-	private static CompatibilityFinding UnknownApi(string apiId) => new()
+	private static CompatibilityFinding UnknownApi(string apiId)
 	{
-		DiagnosticId = CompatibilityDiagnosticIds.DeprecatedApi,
-		Source = CompatibilityFindingSources.Unknown,
-		Severity = CompatibilitySeverities.Info,
-		Subject = apiId,
-		Guidance = "This plugin reports using an API this Macro Deck version does not know about, which " +
-			"usually means it was built against a newer SDK. Updating Macro Deck will describe it."
-	};
+		return new CompatibilityFinding
+		{
+			DiagnosticId = CompatibilityDiagnosticIds.DeprecatedApi,
+			Source = CompatibilityFindingSources.Unknown,
+			Severity = CompatibilitySeverities.Info,
+			Subject = apiId,
+			Guidance = "This plugin reports using an API this Macro Deck version does not know about, which "
+				+ "usually means it was built against a newer SDK. Updating Macro Deck will describe it."
+		};
+	}
 
 	private static string State(PluginCompatibilityEvaluation evaluation, IReadOnlyList<CompatibilityFinding> findings)
 	{
@@ -157,8 +167,9 @@ public static class PluginCompatibilityEvaluator
 			candidates.Add(PluginCompatibilityStates.PartiallyIncompatible);
 		}
 
-		if (findings.Any(finding => finding.Source == CompatibilityFindingSources.Confirmed &&
-			finding.DiagnosticId == CompatibilityDiagnosticIds.RemovedApi))
+		if (findings.Any(finding
+			=> finding.Source == CompatibilityFindingSources.Confirmed
+			&& finding.DiagnosticId == CompatibilityDiagnosticIds.RemovedApi))
 		{
 			candidates.Add(PluginCompatibilityStates.UpdateRequired);
 		}
@@ -176,8 +187,12 @@ public static class PluginCompatibilityEvaluator
 	}
 
 	private static bool IsAtOrBelow(string? version, Version ceiling)
-		=> Version.TryParse(version, out var parsed) && parsed <= ceiling;
+	{
+		return Version.TryParse(version, out var parsed) && parsed <= ceiling;
+	}
 
 	private static bool IsAtOrBelow(string? version, string? ceiling)
-		=> Version.TryParse(ceiling, out var parsedCeiling) && IsAtOrBelow(version, parsedCeiling);
+	{
+		return Version.TryParse(ceiling, out var parsedCeiling) && IsAtOrBelow(version, parsedCeiling);
+	}
 }

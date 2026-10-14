@@ -18,9 +18,14 @@ public sealed record UiPatchOutcome
 	public string? RejectionReason { get; init; }
 
 	/// <summary>Builds an applicable outcome.</summary>
-	public static UiPatchOutcome Accept() => new() { IsApplicable = true };
+	public static UiPatchOutcome Accept()
+	{
+		return new UiPatchOutcome { IsApplicable = true };
+	}
 
 	/// <summary>Builds an inapplicable outcome carrying why.</summary>
 	public static UiPatchOutcome Reject(string reason)
-		=> new() { IsApplicable = false, RejectionReason = reason };
+	{
+		return new UiPatchOutcome { IsApplicable = false, RejectionReason = reason };
+	}
 }

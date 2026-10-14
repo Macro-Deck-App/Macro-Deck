@@ -34,8 +34,8 @@ internal static class MacroDeck2StringCipher
 
 	// A wrong key still clears PKCS7 roughly once every 256 values, and the plaintext that survives is
 	// random bytes, so the decode has to reject them rather than paper over them with U+FFFD.
-	private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false,
-		throwOnInvalidBytes: true);
+	private static readonly UTF8Encoding _strictUtf8 = new(false,
+		true);
 
 	/// <summary>
 	/// Decrypts one value, or returns null when it cannot be decrypted with this passphrase. A wrong key
@@ -73,7 +73,7 @@ internal static class MacroDeck2StringCipher
 			using var aes = Aes.Create();
 			aes.Key = DeriveKey(passPhrase, salt);
 
-			return StrictUtf8.GetString(aes.DecryptCbc(cipher, iv, PaddingMode.PKCS7));
+			return _strictUtf8.GetString(aes.DecryptCbc(cipher, iv, PaddingMode.PKCS7));
 		}
 		catch (CryptographicException)
 		{
@@ -104,6 +104,8 @@ internal static class MacroDeck2StringCipher
 
 #pragma warning disable CA5379 // SHA-1 is fixed by the on-disk format this reads; see the type remarks.
 	private static byte[] DeriveKey(string passPhrase, byte[] salt)
-		=> Rfc2898DeriveBytes.Pbkdf2(passPhrase, salt, DerivationIterations, HashAlgorithmName.SHA1, KeyBytes);
+	{
+		return Rfc2898DeriveBytes.Pbkdf2(passPhrase, salt, DerivationIterations, HashAlgorithmName.SHA1, KeyBytes);
+	}
 #pragma warning restore CA5379
 }

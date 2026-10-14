@@ -50,7 +50,9 @@ internal static class MacOsDiskInterop
 	}
 
 	private static string DefaultName(string mountPoint)
-		=> mountPoint == "/" ? mountPoint : Path.GetFileName(mountPoint.TrimEnd('/'));
+	{
+		return mountPoint == "/" ? mountPoint : Path.GetFileName(mountPoint.TrimEnd('/'));
+	}
 
 	private static List<(string MountPoint, string FileSystem, string Device)> ListBrowsableLocalVolumes()
 	{
@@ -68,7 +70,7 @@ internal static class MacOsDiskInterop
 			count = getfsstat(buffer, size, MntNoWait);
 			for (var index = 0; index < count; index++)
 			{
-				var entry = buffer + (index * StatFsSize);
+				var entry = buffer + index * StatFsSize;
 				var flags = (uint)Marshal.ReadInt32(entry, FlagsOffset);
 				if ((flags & MntLocal) == 0 || (flags & MntDontBrowse) != 0)
 				{
@@ -117,7 +119,7 @@ internal static class MacOsDiskInterop
 			return null;
 		}
 
-		var key = MacOsCoreFoundation.CreateCFString("NSURLVolumeNameKey");
+		var key = MacOsCoreFoundation.CreateCfString("NSURLVolumeNameKey");
 		try
 		{
 			if (!CFURLCopyResourcePropertyForKey(url, key, out var value, IntPtr.Zero) || value == IntPtr.Zero)
@@ -127,9 +129,10 @@ internal static class MacOsDiskInterop
 
 			try
 			{
-				return MacOsCoreFoundation.IsCFString(value) && MacOsCoreFoundation.ReadCFString(value) is { Length: > 0 } name
-					? name
-					: null;
+				return MacOsCoreFoundation.IsCfString(value)
+					&& MacOsCoreFoundation.ReadCfString(value) is { Length: > 0 } name
+						? name
+						: null;
 			}
 			finally
 			{
@@ -177,7 +180,7 @@ internal static class MacOsDiskInterop
 
 	private static DiskCounters? ReadStatistics(uint driver)
 	{
-		var statisticsKey = MacOsCoreFoundation.CreateCFString("Statistics");
+		var statisticsKey = MacOsCoreFoundation.CreateCfString("Statistics");
 		var statistics = IORegistryEntryCreateCFProperty(driver, statisticsKey, IntPtr.Zero, 0);
 		MacOsCoreFoundation.CFRelease(statisticsKey);
 		if (statistics == IntPtr.Zero)
@@ -207,10 +210,10 @@ internal static class MacOsDiskInterop
 
 	private static long? ReadLong(IntPtr dictionary, string name)
 	{
-		var key = MacOsCoreFoundation.CreateCFString(name);
+		var key = MacOsCoreFoundation.CreateCfString(name);
 		try
 		{
-			return MacOsCoreFoundation.TryReadCFLong(dictionary, key, out var value) && value >= 0 ? value : null;
+			return MacOsCoreFoundation.TryReadCfLong(dictionary, key, out var value) && value >= 0 ? value : null;
 		}
 		finally
 		{
@@ -219,7 +222,9 @@ internal static class MacOsDiskInterop
 	}
 
 	private static TimeSpan? Nanoseconds(long? value)
-		=> value is { } nanoseconds ? TimeSpan.FromTicks(nanoseconds / 100) : null;
+	{
+		return value is { } nanoseconds ? TimeSpan.FromTicks(nanoseconds / 100) : null;
+	}
 
 	private static string ReadCString(IntPtr pointer, int maxLength)
 	{
@@ -232,7 +237,11 @@ internal static class MacOsDiskInterop
 	[DllImport(LibSystem, SetLastError = true)]
 	private static extern int getfsstat(IntPtr buffer, int bufferSize, int flags);
 
-	[DllImport(LibSystem, SetLastError = true, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+	[DllImport(LibSystem,
+		SetLastError = true,
+		CharSet = CharSet.Ansi,
+		BestFitMapping = false,
+		ThrowOnUnmappableChar = true)]
 	private static extern int statfs([MarshalAs(UnmanagedType.LPUTF8Str)] string path, IntPtr buffer);
 
 	[DllImport(CoreFoundation)]
@@ -260,7 +269,11 @@ internal static class MacOsDiskInterop
 	private static extern bool IOObjectConformsTo(uint entry, string className);
 
 	[DllImport(IoKit)]
-	private static extern IntPtr IORegistryEntryCreateCFProperty(uint entry, IntPtr key, IntPtr allocator, uint options);
+	private static extern IntPtr IORegistryEntryCreateCFProperty(
+		uint entry,
+		IntPtr key,
+		IntPtr allocator,
+		uint options);
 
 	[DllImport(IoKit)]
 	private static extern int IOObjectRelease(uint entry);

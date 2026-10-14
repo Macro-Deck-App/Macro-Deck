@@ -17,5 +17,7 @@ public sealed class GetWidgetTypeFavoritesRequestMessageHandler
 	public async ValueTask<GetWidgetTypeFavoritesResponse> Handle(
 		GetWidgetTypeFavoritesRequest request,
 		CancellationToken cancellationToken)
-		=> new() { TypeIds = await _favorites.GetFavorites(cancellationToken) };
+	{
+		return new GetWidgetTypeFavoritesResponse { TypeIds = await _favorites.GetFavorites(cancellationToken) };
+	}
 }

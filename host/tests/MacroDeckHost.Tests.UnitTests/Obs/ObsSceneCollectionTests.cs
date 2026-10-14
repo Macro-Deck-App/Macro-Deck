@@ -11,10 +11,14 @@ internal sealed class ObsSceneCollectionTests
 	private static readonly string[] _expectedSceneCollections = ["Gaming", "Podcast"];
 
 	private static ActionExecutionContext Context(Dictionary<string, object>? parameters = null)
-		=> new() { Parameters = parameters ?? new Dictionary<string, object>() };
+	{
+		return new ActionExecutionContext { Parameters = parameters ?? new Dictionary<string, object>() };
+	}
 
 	private static Dictionary<string, object> Collection(string name)
-		=> new() { [SceneCollectionActionDefinition.SceneCollectionParameter] = name };
+	{
+		return new Dictionary<string, object> { [SceneCollectionActionDefinition.SceneCollectionParameter] = name };
+	}
 
 	private static (ObsConnection Connection, FakeObsClient Client, ObsRecordingTests.RecordingPublisher Publisher)
 		Create(bool connected = true, ObsStatus? status = null)
@@ -34,9 +38,15 @@ internal sealed class ObsSceneCollectionTests
 	}
 
 	private static IActionDefinition Action(ObsConnection connection)
-		=> ObsActions.Create(() => connection, new VariableApiAccessor()).Single(a => a.Id == "set-scene-collection");
+	{
+		return ObsActions.Create(() => connection, new VariableApiAccessor())
+			.Single(a => a.Id == "set-scene-collection");
+	}
 
-	private static ObsNotReadyException NotReady() => new(new InvalidOperationException("207 NotReady"));
+	private static ObsNotReadyException NotReady()
+	{
+		return new ObsNotReadyException(new InvalidOperationException("207 NotReady"));
+	}
 
 	[Test]
 	public async Task Switches_obs_to_the_chosen_scene_collection()
@@ -71,7 +81,7 @@ internal sealed class ObsSceneCollectionTests
 	[Test]
 	public async Task While_obs_is_offline_it_fails_with_not_connected_and_sends_nothing()
 	{
-		var (connection, client, _) = Create(connected: false);
+		var (connection, client, _) = Create(false);
 		using var _ = connection;
 
 		var result = await Action(connection).CreateExecutor().ExecuteAsync(Context(Collection("Podcast")));
@@ -83,10 +93,14 @@ internal sealed class ObsSceneCollectionTests
 		});
 	}
 
-	[TestCase(ObsRequestException.ResourceNotFound, "ErrorCode: 600", ActionErrorCodes.NotFound, "SceneCollectionNotFound")]
+	[TestCase(ObsRequestException.ResourceNotFound,
+		"ErrorCode: 600",
+		ActionErrorCodes.NotFound,
+		"SceneCollectionNotFound")]
 	[TestCase(ObsRequestException.NotReady, "ErrorCode: 207", ActionErrorCodes.Unavailable, "SceneCollectionLoading")]
 	[TestCase(ObsRequestException.TimedOut, "Request timed out", ActionErrorCodes.Timeout, "SceneCollectionSlowToLoad")]
-	public async Task A_refused_switch_says_why_in_the_users_language(int code,
+	public async Task A_refused_switch_says_why_in_the_users_language(
+		int code,
 		string obsMessage,
 		string errorCode,
 		string messageKey)
@@ -158,12 +172,13 @@ internal sealed class ObsSceneCollectionTests
 		var (connection, client, _) = Create(status: new ObsStatus { CurrentSceneCollection = "Gaming" });
 		using var _ = connection;
 		var provider = (IStateProviderActionDefinition)Action(connection);
-		var gaming = new Dictionary<string, object?> { [SceneCollectionActionDefinition.SceneCollectionParameter] = "Gaming" };
+		var gaming = new Dictionary<string, object?>
+			{ [SceneCollectionActionDefinition.SceneCollectionParameter] = "Gaming" };
 
-		var before = await provider.GetActionStateAsync(gaming, default);
+		var before = await provider.GetActionStateAsync(gaming, CancellationToken.None);
 		client.Status = new ObsStatus { CurrentSceneCollection = "Podcast" };
 		client.RaiseStateChanged();
-		var after = await provider.GetActionStateAsync(gaming, default);
+		var after = await provider.GetActionStateAsync(gaming, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -180,7 +195,7 @@ internal sealed class ObsSceneCollectionTests
 		using var _ = connection;
 
 		var snapshot = await ((IStateProviderActionDefinition)Action(connection))
-			.GetActionStateAsync(new Dictionary<string, object?>(), default);
+			.GetActionStateAsync(new Dictionary<string, object?>(), CancellationToken.None);
 
 		Assert.That(snapshot, Is.Null);
 	}
@@ -223,13 +238,14 @@ internal sealed class ObsSceneCollectionTests
 		using var connection = new ObsConnection(client,
 			"ws://localhost:4455",
 			null,
-			reconnectDelay: TimeSpan.FromMilliseconds(1),
+			TimeSpan.FromMilliseconds(1),
 			pollInterval: TimeSpan.FromMilliseconds(20));
 		connection.Start();
 		await WaitForAsync(() => connection.Status == ObsConnectionStatus.Connected);
 		var whileStarting = connection.State;
 
-		client.Status = new ObsStatus { IsRecording = true, RecordingTimecode = "00:00:05", CurrentSceneCollection = "Gaming" };
+		client.Status = new ObsStatus
+			{ IsRecording = true, RecordingTimecode = "00:00:05", CurrentSceneCollection = "Gaming" };
 		client.QueryStatusHandler = null;
 		await WaitForAsync(() => connection.State.IsConnected);
 

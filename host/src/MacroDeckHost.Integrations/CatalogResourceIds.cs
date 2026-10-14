@@ -48,15 +48,15 @@ internal static class CatalogResourceIds
 		{
 			if (encoded[i] == '%')
 			{
-				if (i + 2 >= encoded.Length ||
-					!TryHexDigit(encoded[i + 1], out var high) ||
-					!TryHexDigit(encoded[i + 2], out var low))
+				if (i + 2 >= encoded.Length
+					|| !TryHexDigit(encoded[i + 1], out var high)
+					|| !TryHexDigit(encoded[i + 2], out var low))
 				{
 					value = string.Empty;
 					return false;
 				}
 
-				bytes.Add((byte)((high << 4) | low));
+				bytes.Add((byte)(high << 4 | low));
 				i += 3;
 				continue;
 			}

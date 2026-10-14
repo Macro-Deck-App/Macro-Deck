@@ -1,7 +1,6 @@
 using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Locale;
-using MacroDeckHost.Application.Services;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.EmailInbox;
 
 namespace MacroDeckHost.Widgets.EmailInbox;
@@ -42,9 +41,11 @@ internal sealed class EmailInboxFormat
 	private CultureInfo Culture => _time.Culture;
 
 	public LocalizedText Count(int count)
-		=> count > MaxShownCount
-			? Strings.CountOverflow(number: MaxShownCount.ToString(Culture))
+	{
+		return count > MaxShownCount
+			? Strings.CountOverflow(MaxShownCount.ToString(Culture))
 			: count.ToString(Culture);
+	}
 
 	public EmailInboxTime Received(DateTimeOffset received, DateTimeOffset now)
 	{
@@ -74,18 +75,24 @@ internal sealed class EmailInboxFormat
 				Culture));
 	}
 
-	private static EmailInboxTime Formatted(string text) => new(text, Math.Max(MinDigits, DigitWidths(text)));
+	private static EmailInboxTime Formatted(string text)
+	{
+		return new EmailInboxTime(text, Math.Max(MinDigits, DigitWidths(text)));
+	}
 
 	// A digit-width estimate of the formatted text, so the time can reserve its room and never ellipsize.
 	private static double DigitWidths(string text)
-		=> DigitSlack + text.Sum(character => character switch
-		{
-			_ when char.IsDigit(character) => 1,
-			_ when char.IsWhiteSpace(character) || char.IsPunctuation(character) => 0.5,
-			>= WideScriptStart => 1.9,
-			_ when char.IsUpper(character) => 1.3,
-			_ => 1.05
-		});
+	{
+		return DigitSlack
+			+ text.Sum(character => character switch
+			{
+				_ when char.IsDigit(character) => 1,
+				_ when char.IsWhiteSpace(character) || char.IsPunctuation(character) => 0.5,
+				>= WideScriptStart => 1.9,
+				_ when char.IsUpper(character) => 1.3,
+				_ => 1.05
+			});
+	}
 
 	public DateTimeOffset NextMidnight(DateTimeOffset now)
 	{
@@ -95,5 +102,7 @@ internal sealed class EmailInboxFormat
 	}
 
 	private DateOnly LocalDate(DateTimeOffset instant)
-		=> DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, TimeZone).DateTime);
+	{
+		return DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, TimeZone).DateTime);
+	}
 }

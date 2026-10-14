@@ -12,7 +12,8 @@ public sealed record PluginTrustResult
 
 	public bool IsTrusted => Verdict == PluginTrustVerdict.Trusted;
 
-	public static PluginTrustResult Of(PluginTrustVerdict verdict,
+	public static PluginTrustResult Of(
+		PluginTrustVerdict verdict,
 		string? certificateId = null,
 		string? message = null,
 		PluginRevocationStatus revocation = PluginRevocationStatus.Unavailable)
@@ -33,7 +34,8 @@ public sealed record PluginTrustResult
 /// disagree about the signature; only admitting new bytes also consults revocation.</summary>
 public interface IPluginTrustEvaluator
 {
-	Task<PluginTrustResult> EvaluateInstalledAsync(string versionDirectory,
+	Task<PluginTrustResult> EvaluateInstalledAsync(
+		string versionDirectory,
 		PluginRevocationCheck revocationCheck,
 		CancellationToken cancellationToken = default);
 }

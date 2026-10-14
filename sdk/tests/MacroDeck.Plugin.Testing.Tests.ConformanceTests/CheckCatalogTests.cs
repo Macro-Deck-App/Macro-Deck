@@ -10,7 +10,9 @@ internal sealed class CheckCatalogTests
 
 	[Test]
 	public void CheckIdsAreUnique()
-		=> Assert.That(Checks.Select(check => check.Id), Is.Unique);
+	{
+		Assert.That(Checks.Select(check => check.Id), Is.Unique);
+	}
 
 	[Test]
 	public void EveryCheckHasANonEmptyTitle()

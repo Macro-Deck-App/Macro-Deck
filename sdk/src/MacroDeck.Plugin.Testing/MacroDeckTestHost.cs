@@ -64,7 +64,9 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 		_application = application;
 		_options = options;
 		Colors.Sender = (pluginId, envelope)
-			=> _liveByPluginId.TryGetValue(pluginId, out var connection) ? connection.SendAsync(envelope) : Task.CompletedTask;
+			=> _liveByPluginId.TryGetValue(pluginId, out var connection)
+				? connection.SendAsync(envelope)
+				: Task.CompletedTask;
 	}
 
 	/// <summary>The url a plugin under test should be pointed at.</summary>
@@ -170,7 +172,7 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 		var resolved = credentials ?? PluginTestCredentials.SelfRegistering;
 
 		var ownedManifest = manifest is null
-			? new PluginTestManifest(id: resolved.Mode == PluginRegistrationMode.Managed ? resolved.Id : null)
+			? new PluginTestManifest(resolved.Mode == PluginRegistrationMode.Managed ? resolved.Id : null)
 			: null;
 		(manifest ?? ownedManifest!).Apply(builder);
 
@@ -297,8 +299,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 			startInfo.Environment[name] = value;
 		}
 
-		var process = System.Diagnostics.Process.Start(startInfo) ??
-			throw new InvalidOperationException($"Failed to start '{spec.ExecutablePath}'.");
+		var process = System.Diagnostics.Process.Start(startInfo)
+			?? throw new InvalidOperationException($"Failed to start '{spec.ExecutablePath}'.");
 
 		var baseAddress = new Uri($"http://127.0.0.1:{port}");
 
@@ -371,23 +373,40 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	}
 
 	/// <summary>Sends an envelope to the current session's plugin.</summary>
-	public Task SendAsync(ProtocolEnvelope envelope) => CurrentConnection().SendAsync(envelope);
+	public Task SendAsync(ProtocolEnvelope envelope)
+	{
+		return CurrentConnection().SendAsync(envelope);
+	}
 
 	/// <summary>Sends raw text to the current session's plugin, bypassing envelope construction entirely.</summary>
-	public Task SendRawAsync(string rawJson) => CurrentConnection().SendRawAsync(rawJson);
+	public Task SendRawAsync(string rawJson)
+	{
+		return CurrentConnection().SendRawAsync(rawJson);
+	}
 
 	/// <summary>Closes the current session's socket from the host side with <paramref name="closeCode" />.</summary>
-	public Task DisconnectAsync(int closeCode) => DisconnectAsync(closeCode, CancellationToken.None);
+	public Task DisconnectAsync(int closeCode)
+	{
+		return DisconnectAsync(closeCode, CancellationToken.None);
+	}
 
 	/// <summary>Closes the current session's socket from the host side with <paramref name="closeCode" />.</summary>
 	public Task DisconnectAsync(int closeCode, CancellationToken cancellationToken)
-		=> CurrentConnection().CloseAsync(closeCode, "The test host closed the connection.", cancellationToken);
+	{
+		return CurrentConnection().CloseAsync(closeCode, "The test host closed the connection.", cancellationToken);
+	}
 
 	/// <summary>Tells the current session's plugin to hold back everything but pause-exempt traffic.</summary>
-	public Task PauseDrainingAsync() => CurrentConnection().PauseAsync();
+	public Task PauseDrainingAsync()
+	{
+		return CurrentConnection().PauseAsync();
+	}
 
 	/// <summary>Tells the current session's plugin to resume normal sending.</summary>
-	public Task ResumeDrainingAsync() => CurrentConnection().ResumeAsync();
+	public Task ResumeDrainingAsync()
+	{
+		return CurrentConnection().ResumeAsync();
+	}
 
 	/// <summary>
 	/// Sends an envelope to a specific plugin's own connection, identified by plugin id - unlike
@@ -396,12 +415,16 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	/// addresses its own plugin even when another one is also live.
 	/// </summary>
 	internal Task SendToPluginAsync(string pluginId, ProtocolEnvelope envelope)
-		=> ConnectionFor(pluginId).SendAsync(envelope);
+	{
+		return ConnectionFor(pluginId).SendAsync(envelope);
+	}
 
 	/// <summary>Closes a specific plugin's own connection, identified by plugin id - the plugin-scoped
 	/// counterpart of <see cref="DisconnectAsync(int, CancellationToken)" />. See <see cref="SendToPluginAsync" />.</summary>
 	internal Task DisconnectPluginAsync(string pluginId, int closeCode, CancellationToken cancellationToken)
-		=> ConnectionFor(pluginId).CloseAsync(closeCode, "The test host closed the connection.", cancellationToken);
+	{
+		return ConnectionFor(pluginId).CloseAsync(closeCode, "The test host closed the connection.", cancellationToken);
+	}
 
 	public async ValueTask DisposeAsync()
 	{
@@ -427,15 +450,19 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	}
 
 	private PluginConnection CurrentConnection()
-		=> _current ??
-			throw new InvalidOperationException(
+	{
+		return _current
+			?? throw new InvalidOperationException(
 				"No plugin session is currently connected. Call HostAsync/LaunchAsync and WaitForSessionAsync first.");
+	}
 
 	private PluginConnection ConnectionFor(string pluginId)
-		=> _liveByPluginId.TryGetValue(pluginId, out var connection)
+	{
+		return _liveByPluginId.TryGetValue(pluginId, out var connection)
 			? connection
 			: throw new InvalidOperationException(
 				$"No plugin session is currently connected for plugin id '{pluginId}'.");
+	}
 
 	private void MapEndpoints()
 	{
@@ -544,7 +571,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	private async Task<IResult> HandleRedeemPairingAsync(HttpContext context, string requestId)
 	{
 		var request = await context.Request
-			.ReadFromJsonAsync<PluginPairingRedemptionRequest>(PluginProtocolJson.Options).ConfigureAwait(false);
+			.ReadFromJsonAsync<PluginPairingRedemptionRequest>(PluginProtocolJson.Options)
+			.ConfigureAwait(false);
 
 		if (request is not null)
 		{
@@ -553,10 +581,10 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 
 		// Every failure - unknown request, not yet approved, already redeemed, wrong verifier - answers
 		// identically, by contract: a redemption attempt never learns which one happened.
-		if (request is null ||
-			!_pairingRequestsById.TryGetValue(requestId, out var pairing) ||
-			pairing.Redeemed ||
-			!string.Equals(pairing.Status, PluginPairingStatuses.Approved, StringComparison.Ordinal))
+		if (request is null
+			|| !_pairingRequestsById.TryGetValue(requestId, out var pairing)
+			|| pairing.Redeemed
+			|| !string.Equals(pairing.Status, PluginPairingStatuses.Approved, StringComparison.Ordinal))
 		{
 			return Results.Unauthorized();
 		}
@@ -694,8 +722,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 		}
 
 		var authorization = context.Request.Headers.Authorization.FirstOrDefault();
-		var token = authorization is { } value &&
-			value.StartsWith($"{PluginAuthDefaults.BearerScheme} ", StringComparison.Ordinal)
+		var token = authorization is { } value
+			&& value.StartsWith($"{PluginAuthDefaults.BearerScheme} ", StringComparison.Ordinal)
 				? value[(PluginAuthDefaults.BearerScheme.Length + 1)..]
 				: null;
 
@@ -805,7 +833,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	{
 		// Cancelling a pending receive aborts the socket, so the deadline races the receive instead and
 		// leaves the socket able to carry the protocol.error and the close the real host sends.
-		var receiving = WebSocketIo.ReceiveOneMessageAsync(socket, _options.Limits.MaxMessageBytes, CancellationToken.None);
+		var receiving
+			= WebSocketIo.ReceiveOneMessageAsync(socket, _options.Limits.MaxMessageBytes, CancellationToken.None);
 
 		using (var timer = new CancellationTokenSource())
 		{
@@ -864,11 +893,10 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 			return null;
 		}
 
-		var withinWindow = record.DroppedAt is { } droppedAt &&
-			DateTimeOffset.UtcNow - droppedAt <= _options.Timeouts.SessionResumeWindow;
+		var withinWindow = record.DroppedAt is { } droppedAt
+			&& DateTimeOffset.UtcNow - droppedAt <= _options.Timeouts.SessionResumeWindow;
 
-		var resumed = !record.Ended &&
-			SessionResumeRules.CanResume(hello.ResumeSessionId, sessionExists: true, withinWindow);
+		var resumed = !record.Ended && SessionResumeRules.CanResume(hello.ResumeSessionId, true, withinWindow);
 
 		var welcome = new ProtocolEnvelope
 		{
@@ -881,14 +909,15 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 		};
 
 		var bytes = ProtocolEnvelopeWriter.WriteToUtf8Bytes(welcome);
-		await socket.SendAsync(bytes, WebSocketMessageType.Text, endOfMessage: true, CancellationToken.None)
+		await socket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None)
 			.ConfigureAwait(false);
 		Messages.Record(ProtocolMessageDirection.ToPlugin, welcome);
 
 		return resumed;
 	}
 
-	private async Task RejectHandshakeAsync(WebSocket socket,
+	private async Task RejectHandshakeAsync(
+		WebSocket socket,
 		string? correlationId,
 		string reason,
 		Task<byte[]?>? pendingReceive = null)
@@ -910,7 +939,7 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 		{
 			await socket.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(error),
 					WebSocketMessageType.Text,
-					endOfMessage: true,
+					true,
 					CancellationToken.None)
 				.ConfigureAwait(false);
 			Messages.Record(ProtocolMessageDirection.ToPlugin, error);
@@ -943,7 +972,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 			}
 
 			Messages.RecordClose((int)WebSocketCloseStatus.NormalClosure);
-			await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, reason, budget.Token).ConfigureAwait(false);
+			await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, reason, budget.Token)
+				.ConfigureAwait(false);
 
 			if (pendingReceive is not null)
 			{
@@ -986,8 +1016,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 				await Task.Delay(TimeSpan.FromMilliseconds(200)).ConfigureAwait(false);
 
 				throw new PluginProcessExitedException(
-					$"The plugin process exited with code {plugin.ExitCode} before it started serving. " +
-					$"Standard error: {plugin.StandardError}",
+					$"The plugin process exited with code {plugin.ExitCode} before it started serving. "
+					+ $"Standard error: {plugin.StandardError}",
 					plugin);
 			}
 
@@ -1046,10 +1076,17 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	}
 
 	private static string GenerateSecret()
-		=> Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+			.TrimEnd('=')
+			.Replace('+', '-')
+			.Replace('/', '_');
+	}
 
 	private static string Base64Url(byte[] bytes)
-		=> Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	}
 
 	/// <summary>One pairing request this host is tracking, from creation to redemption or expiry.</summary>
 	private sealed class PairingRecord
@@ -1068,5 +1105,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	/// <summary>The <c>MacroDeck:Plugin:*</c> configuration key for <paramref name="property" />, matching
 	/// <see cref="PluginHostOptions" />'s own binding convention - never one of the <c>MACRO_DECK_PLUGIN_*</c>
 	/// environment variable names, which come from <see cref="PluginEnvironmentConfiguration.KeysByVariable" /> alone.</summary>
-	private static string ConfigKey(string property) => $"{PluginHostOptions.SectionName}:{property}";
+	private static string ConfigKey(string property)
+	{
+		return $"{PluginHostOptions.SectionName}:{property}";
+	}
 }

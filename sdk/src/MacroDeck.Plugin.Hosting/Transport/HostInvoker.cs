@@ -24,20 +24,27 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 	private readonly ConcurrentDictionary<string, TaskCompletionSource<ProtocolEnvelope>> _pending
 		= new(StringComparer.Ordinal);
 
-	public Task<JsonElement?> InvokeAsync(string api,
+	public Task<JsonElement?> InvokeAsync(
+		string api,
 		string operation,
 		object? arguments,
 		CancellationToken cancellationToken)
-		=> InvokeAsync(api, operation, arguments, ProtocolTimeouts.DefaultRequest, cancellationToken);
+	{
+		return InvokeAsync(api, operation, arguments, ProtocolTimeouts.DefaultRequest, cancellationToken);
+	}
 
-	public Task<JsonElement?> InvokeAsync(string api,
+	public Task<JsonElement?> InvokeAsync(
+		string api,
 		string operation,
 		object? arguments,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
-		=> InvokeAsync(api, operation, arguments, timeout, timeout, cancellationToken);
+	{
+		return InvokeAsync(api, operation, arguments, timeout, timeout, cancellationToken);
+	}
 
-	public async Task<JsonElement?> InvokeAsync(string api,
+	public async Task<JsonElement?> InvokeAsync(
+		string api,
 		string operation,
 		object? arguments,
 		TimeSpan deadline,
@@ -106,8 +113,8 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 		CancellationToken cancellationToken)
 	{
 		var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-		using var registration = cancellationToken.Register(
-			static state => ((TaskCompletionSource)state!).TrySetResult(),
+		using var registration = cancellationToken.Register(static state
+				=> ((TaskCompletionSource)state!).TrySetResult(),
 			cancelled);
 
 		var timeoutTask = Task.Delay(timeout, timeProvider, CancellationToken.None);
@@ -167,12 +174,14 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 	}
 
 	private static JsonElement? SerializeArguments(object? arguments)
-		=> arguments switch
+	{
+		return arguments switch
 		{
 			null => null,
 			JsonElement element => element,
 			_ => JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options)
 		};
+	}
 
 	private static JsonElement? ToResult(ProtocolEnvelope envelope)
 	{

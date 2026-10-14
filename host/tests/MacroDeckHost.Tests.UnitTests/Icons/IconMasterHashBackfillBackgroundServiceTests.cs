@@ -13,10 +13,16 @@ public class IconMasterHashBackfillBackgroundServiceTests
 	private IconTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new IconTestHarness();
+	public void SetUp()
+	{
+		_harness = new IconTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Backfill_HashesLegacyMastersAndIndexesThem()
@@ -53,7 +59,7 @@ public class IconMasterHashBackfillBackgroundServiceTests
 		await _harness.Cache.AddIcons(pack.Id, [orphan]);
 		var reachable = await AddLegacyIcon(pack.Id, "reachable", [1, 2, 3]);
 
-		await RunBackfill(until: () => reachable.MasterContentHash is not null);
+		await RunBackfill(() => reachable.MasterContentHash is not null);
 
 		Assert.Multiple(() =>
 		{
@@ -80,7 +86,7 @@ public class IconMasterHashBackfillBackgroundServiceTests
 			CancellationToken.None);
 		var legacy = await AddLegacyIcon(pack.Id, "legacy", [1, 2, 3]);
 
-		await RunBackfill(until: () => legacy.MasterContentHash is not null);
+		await RunBackfill(() => legacy.MasterContentHash is not null);
 
 		Assert.That(current.MasterContentHash, Is.EqualTo(recorded));
 	}
@@ -127,7 +133,7 @@ public class IconMasterHashBackfillBackgroundServiceTests
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 		public CancellationToken ApplicationStopping { get; } = CancellationToken.None;
 		public CancellationToken ApplicationStopped { get; } = CancellationToken.None;
 

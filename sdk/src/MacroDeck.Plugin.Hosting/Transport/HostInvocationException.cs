@@ -13,10 +13,11 @@ public sealed class HostInvocationException : Exception
 		ProtocolErrorCodes.Timeout,
 		ProtocolErrorCodes.RateLimited,
 		ProtocolErrorCodes.QueueOverflow,
-		ProtocolErrorCodes.CapabilityUnavailable,
+		ProtocolErrorCodes.CapabilityUnavailable
 	};
 
-	private HostInvocationException(string code,
+	private HostInvocationException(
+		string code,
 		string message,
 		bool retryable,
 		IReadOnlyDictionary<string, string>? details = null)
@@ -53,8 +54,12 @@ public sealed class HostInvocationException : Exception
 	}
 
 	public static HostInvocationException CreateRetryable(string code, string message)
-		=> new(code, message, retryable: true);
+	{
+		return new HostInvocationException(code, message, true);
+	}
 
 	public static HostInvocationException CreateNonRetryable(string code, string message)
-		=> new(code, message, retryable: false);
+	{
+		return new HostInvocationException(code, message, false);
+	}
 }

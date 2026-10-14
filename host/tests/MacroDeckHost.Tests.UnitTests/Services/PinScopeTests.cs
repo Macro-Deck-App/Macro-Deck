@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Domain.Common;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -12,10 +13,16 @@ public class PinScopeTests
 	private PinScopeFixture _fixture = null!;
 
 	[SetUp]
-	public void SetUp() => _fixture = new PinScopeFixture();
+	public void SetUp()
+	{
+		_fixture = new PinScopeFixture();
+	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 
 	[Test]
@@ -336,7 +343,7 @@ public class PinScopeTests
 		var pinned = await _fixture.WidgetService.SetPinned(_fixture.Main.Id, w.Id, true, PinScope.Subtree);
 		Assert.That(pinned.Success, Is.True);
 
-		var updated = new Domain.Entities.WidgetEntity
+		var updated = new WidgetEntity
 		{
 			Id = w.Id,
 			FolderId = _fixture.Main.Id,
@@ -405,13 +412,16 @@ public class PinScopeTests
 		});
 	}
 
-	private static Domain.Entities.WidgetEntity Widget(int x, int y) => new()
+	private static WidgetEntity Widget(int x, int y)
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 }

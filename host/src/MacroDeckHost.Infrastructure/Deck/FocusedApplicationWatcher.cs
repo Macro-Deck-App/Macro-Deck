@@ -48,5 +48,8 @@ public sealed class FocusedApplicationWatcher : IApplicationFocusWatcher, IDispo
 		}
 	}
 
-	public void Dispose() => _watcher.Dispose();
+	public void Dispose()
+	{
+		_watcher.Dispose();
+	}
 }

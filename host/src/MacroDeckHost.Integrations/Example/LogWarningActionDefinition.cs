@@ -22,7 +22,10 @@ public class LogWarningActionDefinition : IActionDefinition
 		}
 	];
 
-	public IActionExecutor CreateExecutor() => new LogWarningActionExecutor();
+	public IActionExecutor CreateExecutor()
+	{
+		return new LogWarningActionExecutor();
+	}
 
 	private sealed class LogWarningActionExecutor : IActionExecutor
 	{

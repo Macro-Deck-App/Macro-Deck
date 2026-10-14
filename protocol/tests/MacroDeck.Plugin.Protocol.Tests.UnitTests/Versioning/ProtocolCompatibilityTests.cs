@@ -62,7 +62,9 @@ public class ProtocolCompatibilityTests
 
 	[Test]
 	public void Supported_is_never_empty()
-		=> Assert.That(ProtocolVersions.Supported, Is.Not.Empty);
+	{
+		Assert.That(ProtocolVersions.Supported, Is.Not.Empty);
+	}
 
 	[Test]
 	public void A_message_may_omit_protocol_version()

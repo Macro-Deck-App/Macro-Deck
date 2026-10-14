@@ -21,7 +21,7 @@ internal sealed class WritableVariableOptionsSourceTests
 		registry.Upsert(Variable("counter", VariableClassification.User));
 		registry.Upsert(Variable("obs_desktop_audio_volume",
 			VariableClassification.Integration,
-			write: new VariableWriteCapability()));
+			new VariableWriteCapability()));
 		registry.Upsert(Variable("obs_mac_current_scene", VariableClassification.Integration));
 
 		var options = await new UserVariablesOptionsSource(registry).GetOptionsAsync(null, CancellationToken.None);
@@ -43,7 +43,8 @@ internal sealed class WritableVariableOptionsSourceTests
 		string name,
 		VariableClassification classification,
 		VariableWriteCapability? write = null)
-		=> new()
+	{
+		return new VariableEntity
 		{
 			Id = Guid.CreateVersion7(),
 			Name = name,
@@ -54,4 +55,5 @@ internal sealed class WritableVariableOptionsSourceTests
 			Write = write,
 			Value = string.Empty
 		};
+	}
 }

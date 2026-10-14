@@ -25,7 +25,9 @@ internal sealed class VideoStreamEndpointException : Exception
 	public VideoStreamErrorCode Code { get; }
 
 	public static VideoStreamEndpointException Skipped()
-		=> new(VideoStreamEndpointFailure.Skipped,
+	{
+		return new VideoStreamEndpointException(VideoStreamEndpointFailure.Skipped,
 			VideoStreamErrorCode.UnknownSession,
 			"The session ended before the call was sent.");
+	}
 }

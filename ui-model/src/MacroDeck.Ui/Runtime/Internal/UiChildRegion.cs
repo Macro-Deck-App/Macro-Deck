@@ -106,7 +106,10 @@ internal sealed class UiChildRegion
 	}
 
 	/// <summary>Adds one materialized node at the end of this region.</summary>
-	internal void AddNode(UiMaterializedNode node) => _entries.Add(new UiChildEntry(node, null));
+	internal void AddNode(UiMaterializedNode node)
+	{
+		_entries.Add(new UiChildEntry(node, null));
+	}
 
 	/// <summary>Opens a nested region for <paramref name="scope" /> at the end of this region and hands it to
 	/// the scope, which reconciles into it for the rest of its life.</summary>
@@ -122,7 +125,10 @@ internal sealed class UiChildRegion
 
 	/// <summary>Drops every entry, which a scope does before it materializes its new contents into itself.
 	/// </summary>
-	internal void Clear() => _entries.Clear();
+	internal void Clear()
+	{
+		_entries.Clear();
+	}
 
 	/// <summary>Releases every structural scope nested inside this region, leaving this region's own
 	/// <see cref="Scope" /> alone - a reconciling scope survives its own re-materialization, everything it

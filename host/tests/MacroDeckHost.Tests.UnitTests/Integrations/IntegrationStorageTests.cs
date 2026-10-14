@@ -34,11 +34,16 @@ internal sealed class IntegrationStorageTests
 
 	private IIntegrationStorage Storage => _provider.For(IntegrationId);
 
-	private static bool IsDocument(string content) => content.StartsWith("doc:", StringComparison.Ordinal);
+	private static bool IsDocument(string content)
+	{
+		return content.StartsWith("doc:", StringComparison.Ordinal);
+	}
 
 	[Test]
 	public async Task A_key_never_written_reads_as_missing()
-		=> Assert.That((await Storage.ReadAsync("devices.json")).Status, Is.EqualTo(IntegrationStorageReadStatus.Missing));
+	{
+		Assert.That((await Storage.ReadAsync("devices.json")).Status, Is.EqualTo(IntegrationStorageReadStatus.Missing));
+	}
 
 	[Test]
 	public async Task A_written_document_is_read_back_by_a_new_host_instance()
@@ -104,9 +109,10 @@ internal sealed class IntegrationStorageTests
 
 		await Storage.DeleteAsync("devices.json");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That((await Storage.ReadAsync("devices.json")).Status, Is.EqualTo(IntegrationStorageReadStatus.Missing));
+			Assert.That((await Storage.ReadAsync("devices.json")).Status,
+				Is.EqualTo(IntegrationStorageReadStatus.Missing));
 			Assert.That(Directory.EnumerateFiles(Folder), Is.Empty);
 		});
 	}
@@ -119,12 +125,14 @@ internal sealed class IntegrationStorageTests
 	[TestCase("devices.json.tmp")]
 	[TestCase("devices.json.bak")]
 	public void An_invalid_key_is_refused_for_every_operation(string key)
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.ThrowsAsync<ArgumentException>(() => Storage.ReadAsync(key));
 			Assert.ThrowsAsync<ArgumentException>(() => Storage.WriteAsync(key, "doc:x"));
 			Assert.ThrowsAsync<ArgumentException>(() => Storage.DeleteAsync(key));
 		});
+	}
 
 	[Test]
 	public async Task Storage_is_private_to_each_integration()
@@ -168,7 +176,8 @@ internal sealed class IntegrationStorageTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(read.Content, Is.EqualTo("doc:restored"));
-			Assert.That(fallback.Status, Is.EqualTo(IntegrationStorageReadStatus.Unreadable),
+			Assert.That(fallback.Status,
+				Is.EqualTo(IntegrationStorageReadStatus.Unreadable),
 				"the copies of the replaced document must not outlive the restore");
 		});
 	}
@@ -189,6 +198,8 @@ internal sealed class IntegrationStorageTests
 
 	[Test]
 	public void Integration_storage_travels_with_the_integrations_in_a_backup()
-		=> Assert.That(BackupComponentGroups.Owner($"data/integration-data/{IntegrationId}/devices.json"),
+	{
+		Assert.That(BackupComponentGroups.Owner($"data/integration-data/{IntegrationId}/devices.json"),
 			Is.EqualTo(BackupComponentGroup.Integrations));
+	}
 }

@@ -44,7 +44,7 @@ public class SteamGameProcessesTests
 
 		try
 		{
-			Directory.Delete(_root, recursive: true);
+			Directory.Delete(_root, true);
 		}
 		catch (IOException)
 		{
@@ -66,7 +66,9 @@ public class SteamGameProcessesTests
 		var target = found.Single();
 		Assert.Multiple(() =>
 		{
-			Assert.That(SteamGameProcesses.RequestClose(target), Is.False, "a process without a window has nothing to close");
+			Assert.That(SteamGameProcesses.RequestClose(target),
+				Is.False,
+				"a process without a window has nothing to close");
 			Assert.That(SteamGameProcesses.IsRunning(target), Is.True);
 		});
 

@@ -45,7 +45,8 @@ public sealed class BatteryRegistry : IBatteryRegistry, IDisposable
 					}
 
 					var providerName = _providerNames.GetValueOrDefault(ownerId) ?? string.Empty;
-					devices.AddRange(entries.Values.Select(entry => entry.Snapshot with { ProviderName = providerName }));
+					devices.AddRange(
+						entries.Values.Select(entry => entry.Snapshot with { ProviderName = providerName }));
 				}
 
 				devices.Sort((left, right) => string.CompareOrdinal(left.Id, right.Id));
@@ -69,9 +70,9 @@ public sealed class BatteryRegistry : IBatteryRegistry, IDisposable
 
 		lock (_gate)
 		{
-			if (IsHidden(ownerId) ||
-				!_owners.TryGetValue(ownerId, out var entries) ||
-				!entries.TryGetValue(localId, out var entry))
+			if (IsHidden(ownerId)
+				|| !_owners.TryGetValue(ownerId, out var entries)
+				|| !entries.TryGetValue(localId, out var entry))
 			{
 				return null;
 			}
@@ -298,7 +299,10 @@ public sealed class BatteryRegistry : IBatteryRegistry, IDisposable
 		}
 	}
 
-	private bool IsHidden(string ownerId) => _integrations?.IsExplicitlyDisabled(ownerId) == true;
+	private bool IsHidden(string ownerId)
+	{
+		return _integrations?.IsExplicitlyDisabled(ownerId) == true;
+	}
 
 	private void MarkDirty()
 	{
@@ -375,10 +379,14 @@ public sealed class BatteryRegistry : IBatteryRegistry, IDisposable
 		}
 	}
 
-	private static string Qualify(string ownerId, string localId) => $"{ownerId}:{localId}";
+	private static string Qualify(string ownerId, string localId)
+	{
+		return $"{ownerId}:{localId}";
+	}
 
 	private static BatteryDeviceSnapshot ToSnapshot(string ownerId, BatteryDevice device, DateTimeOffset now)
-		=> new()
+	{
+		return new BatteryDeviceSnapshot
 		{
 			Id = Qualify(ownerId, device.Id),
 			LocalId = device.Id,
@@ -393,6 +401,7 @@ public sealed class BatteryRegistry : IBatteryRegistry, IDisposable
 			Health = device.Health,
 			UpdatedAt = now
 		};
+	}
 
 	private sealed record Entry(BatteryDeviceSnapshot Snapshot, string? SessionId);
 }

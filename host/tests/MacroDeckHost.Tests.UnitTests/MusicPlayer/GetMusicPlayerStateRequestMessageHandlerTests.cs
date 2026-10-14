@@ -47,7 +47,7 @@ internal sealed class GetMusicPlayerStateRequestMessageHandlerTests
 	[Test]
 	public async Task Handle_WhenTheInstanceIsUnknown_AnswersDisconnected()
 	{
-		var handler = new GetMusicPlayerStateRequestMessageHandler(new StubRegistry(InstanceId, player: null),
+		var handler = new GetMusicPlayerStateRequestMessageHandler(new StubRegistry(InstanceId, null),
 			new MusicPlayerStateCache());
 
 		var response = await handler.Handle(new GetMusicPlayerStateRequest { InstanceId = "spotify::gone" },
@@ -121,19 +121,26 @@ internal sealed class GetMusicPlayerStateRequestMessageHandlerTests
 		}
 
 		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
-			=>
+		{
+			return
 			[
-				new(_instanceId, "spotify", "Spotify", "Spotify", false),
+				new MusicPlayerInstanceDescriptor(_instanceId, "spotify", "Spotify", "Spotify", false),
 				.. _secondInstanceId is null
 					? []
-					: new MusicPlayerInstanceDescriptor[] { new(_secondInstanceId, "sinusbot", "SinusBot", "SinusBot", false) },
+					: new MusicPlayerInstanceDescriptor[]
+						{ new(_secondInstanceId, "sinusbot", "SinusBot", "SinusBot", false) }
 			];
+		}
 
 		public IMusicPlayer? GetPlayer(string instanceId)
-			=> instanceId == _instanceId || instanceId == _secondInstanceId ? _player : null;
+		{
+			return instanceId == _instanceId || instanceId == _secondInstanceId ? _player : null;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-			=> GetPlayer(instanceId);
+		{
+			return GetPlayer(instanceId);
+		}
 
 		public IMusicPlayer? DefaultPlayer => _player;
 	}
@@ -152,26 +159,53 @@ internal sealed class GetMusicPlayerStateRequestMessageHandlerTests
 		public Task<MusicPlayerArtwork?> GetArtworkAsync(
 			string artworkId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<MusicPlayerArtwork?>(null);
+		{
+			return Task.FromResult<MusicPlayerArtwork?>(null);
+		}
 
-		public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PlayAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

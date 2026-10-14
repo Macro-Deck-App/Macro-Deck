@@ -31,13 +31,22 @@ public sealed record CapabilityInvocationOutcome
 
 	/// <summary>Deserializes <see cref="Data" /> as <typeparamref name="T" /> through the wire's own JSON
 	/// options, or returns <c>default</c> when there is no data.</summary>
-	public T? DataAs<T>() => Data is { } element ? element.Deserialize<T>(PluginProtocolJson.Options) : default;
+	public T? DataAs<T>()
+	{
+		return Data is { } element ? element.Deserialize<T>(PluginProtocolJson.Options) : default;
+	}
 
 	/// <summary>Builds a successful outcome.</summary>
 	internal static CapabilityInvocationOutcome Success(string correlationId, JsonElement? data, TimeSpan elapsed)
-		=> new() { Succeeded = true, Data = data, CorrelationId = correlationId, Elapsed = elapsed };
+	{
+		return new CapabilityInvocationOutcome
+			{ Succeeded = true, Data = data, CorrelationId = correlationId, Elapsed = elapsed };
+	}
 
 	/// <summary>Builds a failed outcome, carrying the plugin's error verbatim.</summary>
 	internal static CapabilityInvocationOutcome Failure(string correlationId, ProtocolError error, TimeSpan elapsed)
-		=> new() { Succeeded = false, Error = error, CorrelationId = correlationId, Elapsed = elapsed };
+	{
+		return new CapabilityInvocationOutcome
+			{ Succeeded = false, Error = error, CorrelationId = correlationId, Elapsed = elapsed };
+	}
 }

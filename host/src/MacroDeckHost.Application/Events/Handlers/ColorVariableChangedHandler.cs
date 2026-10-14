@@ -86,17 +86,23 @@ public sealed class ColorVariableChangedHandler :
 	}
 
 	public ValueTask Handle(VariableCreatedNotification notification, CancellationToken cancellationToken)
-		=> AffectsResolution(notification.Variable)
+	{
+		return AffectsResolution(notification.Variable)
 			? new ValueTask(RefreshAsync(notification.Variable, notification.Variable.Name, cancellationToken))
 			: ValueTask.CompletedTask;
+	}
 
 	public ValueTask Handle(VariableDeletedNotification notification, CancellationToken cancellationToken)
-		=> AffectsResolution(notification.Variable)
+	{
+		return AffectsResolution(notification.Variable)
 			? new ValueTask(RefreshAsync(notification.Variable, notification.Variable.Name, cancellationToken))
 			: ValueTask.CompletedTask;
+	}
 
 	private static bool AffectsResolution(VariableEntity variable)
-		=> variable.Type == VariableType.Color || variable.Scope == VariableScope.Widget;
+	{
+		return variable.Type == VariableType.Color || variable.Scope == VariableScope.Widget;
+	}
 
 	private async Task RefreshAsync(VariableEntity variable, string name, CancellationToken cancellationToken)
 	{
@@ -118,7 +124,7 @@ public sealed class ColorVariableChangedHandler :
 
 	private bool RefreshWidgets(VariableEntity variable, string name)
 	{
-		IReadOnlyList<Guid> widgetIds = variable.Scope == VariableScope.Widget
+		var widgetIds = variable.Scope == VariableScope.Widget
 			? Guid.TryParse(variable.ScopeRefId, out var ownerId) && _index.ColorReferences(ownerId, name)
 				? [ownerId]
 				: []
@@ -176,8 +182,8 @@ public sealed class ColorVariableChangedHandler :
 
 			changed = true;
 			var constraint = _layoutConstraints.Get(profile.Id.ToString());
-			await _uiTransport.Send(
-				new ProfileUpdatedEvent { Profile = ProfileDtoMapper.MapJsonProfile(profile, constraint, _colors) },
+			await _uiTransport.Send(new ProfileUpdatedEvent
+					{ Profile = ProfileDtoMapper.MapJsonProfile(profile, constraint, _colors) },
 				cancellationToken);
 		}
 

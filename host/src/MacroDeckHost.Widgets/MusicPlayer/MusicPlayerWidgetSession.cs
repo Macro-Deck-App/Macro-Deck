@@ -182,9 +182,15 @@ internal sealed class MusicPlayerWidgetSession : IUiSession
 	// depends on the whole list (an unset selection follows the first one, and a stale one falls back), so
 	// filtering here would need the resolution this refresh is what performs. A refresh that changes
 	// nothing re-evaluates a handful of cells and emits no patch at all.
-	private void OnStateChanged(object? sender, MusicPlayerStateChangedEventArgs args) => RequestRefresh();
+	private void OnStateChanged(object? sender, MusicPlayerStateChangedEventArgs args)
+	{
+		RequestRefresh();
+	}
 
-	private void OnInstancesChanged(object? sender, EventArgs args) => RequestRefresh();
+	private void OnInstancesChanged(object? sender, EventArgs args)
+	{
+		RequestRefresh();
+	}
 
 	/// <summary>
 	/// The widget's stored configuration was saved. A widget session is shared and long-lived, so

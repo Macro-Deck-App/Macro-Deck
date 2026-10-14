@@ -235,7 +235,9 @@ public class KeyboardSequenceExecutorTests
 	public async Task An_untargeted_release_step_releases_a_key_held_in_a_background_app()
 	{
 		var (service, _, target, executor) = BackgroundPlatform();
-		await service.KeyDownAsync(KeyModifier.None, KeyCode.W, new KeyboardTarget("code", KeyboardTargetMode.Background));
+		await service.KeyDownAsync(KeyModifier.None,
+			KeyCode.W,
+			new KeyboardTarget("code", KeyboardTargetMode.Background));
 
 		await executor.ExecuteAsync(new KeyboardSequence { Steps = [new KeyUpStep { Key = "W" }] });
 

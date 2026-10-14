@@ -13,7 +13,9 @@ public static class CalendarCountdown
 	}
 
 	public static LocalizedString StartsIn(TimeSpan remaining)
-		=> Strings.NextEvent.StartsIn(duration: Countdown(remaining));
+	{
+		return Strings.NextEvent.StartsIn(Countdown(remaining));
+	}
 
 	// Whole minutes round up, so an event exactly five minutes away reads "5 minutes" and the text
 	// only ever counts down at the instants NextChange names.
@@ -37,14 +39,14 @@ public static class CalendarCountdown
 		if (days > 0)
 		{
 			return hours > 0
-				? Strings.Countdown.Pair(first: Strings.Countdown.Days((int)days), second: Strings.Countdown.Hours((int)hours))
+				? Strings.Countdown.Pair(Strings.Countdown.Days((int)days), Strings.Countdown.Hours((int)hours))
 				: Strings.Countdown.Days((int)days);
 		}
 
 		if (hours > 0)
 		{
 			return rest > 0
-				? Strings.Countdown.Pair(first: Strings.Countdown.Hours((int)hours), second: Strings.Countdown.Minutes((int)rest))
+				? Strings.Countdown.Pair(Strings.Countdown.Hours((int)hours), Strings.Countdown.Minutes((int)rest))
 				: Strings.Countdown.Hours((int)hours);
 		}
 
@@ -52,7 +54,9 @@ public static class CalendarCountdown
 	}
 
 	public static long WholeMinutes(TimeSpan remaining)
-		=> remaining <= TimeSpan.Zero ? 0 : (long)Math.Ceiling(remaining.TotalMinutes);
+	{
+		return remaining <= TimeSpan.Zero ? 0 : (long)Math.Ceiling(remaining.TotalMinutes);
+	}
 
 	public static DateTimeOffset NextChange(DateTimeOffset start, DateTimeOffset now)
 	{
@@ -67,5 +71,7 @@ public static class CalendarCountdown
 	}
 
 	public static LocalizedText Title(string? title)
-		=> string.IsNullOrWhiteSpace(title) ? Strings.Untitled() : title;
+	{
+		return string.IsNullOrWhiteSpace(title) ? Strings.Untitled() : title;
+	}
 }

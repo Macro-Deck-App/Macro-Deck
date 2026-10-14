@@ -139,8 +139,8 @@ internal static class HttpResponseCapture
 			return true;
 		}
 
-		if (selector.StartsWith(HeaderPrefix, StringComparison.OrdinalIgnoreCase) &&
-			response.Headers.TryGetValue(selector[HeaderPrefix.Length..], out var headerValue))
+		if (selector.StartsWith(HeaderPrefix, StringComparison.OrdinalIgnoreCase)
+			&& response.Headers.TryGetValue(selector[HeaderPrefix.Length..], out var headerValue))
 		{
 			type = VariableType.Text;
 			value = headerValue;

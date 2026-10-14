@@ -19,7 +19,10 @@ public class GetLogsRequestMessageHandlerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public async Task It_Returns_The_Newest_Entries_Oldest_First()
@@ -137,9 +140,11 @@ public class GetLogsRequestMessageHandlerTests
 	}
 
 	private void WriteHost(params string[] messages)
-		=> TestLogFiles.WriteHost(_paths.LogsDirectory,
+	{
+		TestLogFiles.WriteHost(_paths.LogsDirectory,
 			TestLogFiles.Stamp,
 			messages.Select((message, index) => TestLogFiles.HostLine(message, index + 1)).ToArray());
+	}
 
 	private async Task<GetLogsResponse> Handle(GetLogsRequest request)
 	{

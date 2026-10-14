@@ -9,10 +9,16 @@ public class AdbOwnershipMarkerTests
 	private TestPaths _paths = null!;
 
 	[SetUp]
-	public void SetUp() => _paths = new TestPaths();
+	public void SetUp()
+	{
+		_paths = new TestPaths();
+	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void Write_then_Read_round_trips_the_state()

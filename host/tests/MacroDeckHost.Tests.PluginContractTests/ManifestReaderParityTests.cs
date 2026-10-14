@@ -9,14 +9,17 @@ internal sealed class ManifestReaderParityTests
 	private string _contentRoot = string.Empty;
 
 	[SetUp]
-	public void SetUp() => _contentRoot = Directory.CreateTempSubdirectory("macro-deck-manifest-parity").FullName;
+	public void SetUp()
+	{
+		_contentRoot = Directory.CreateTempSubdirectory("macro-deck-manifest-parity").FullName;
+	}
 
 	[TearDown]
 	public void TearDown()
 	{
 		if (Directory.Exists(_contentRoot))
 		{
-			Directory.Delete(_contentRoot, recursive: true);
+			Directory.Delete(_contentRoot, true);
 		}
 	}
 
@@ -172,8 +175,8 @@ internal sealed class ManifestReaderParityTests
 
 		var problems = new List<string>();
 		var sdkManifest = PluginManifestFileReader.Read(_contentRoot, problems);
-		var sdkIconIsSafe = sdkManifest?.Icon is { } sdkIcon &&
-			PluginManifestFileReader.IsSafeRelativeIconPath(sdkIcon);
+		var sdkIconIsSafe = sdkManifest?.Icon is { } sdkIcon
+			&& PluginManifestFileReader.IsSafeRelativeIconPath(sdkIcon);
 
 		Assert.Multiple(() =>
 		{

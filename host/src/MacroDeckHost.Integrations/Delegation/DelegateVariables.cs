@@ -9,7 +9,8 @@ internal static class DelegateVariables
 	public const string Suffix = "_connected";
 
 	public static VariableDefinition Declare(string variableKey, VariableConfiguration? configuration = null)
-		=> VariableDefinition.Eager($"{Prefix}{variableKey}{Suffix}",
+	{
+		return VariableDefinition.Eager($"{Prefix}{variableKey}{Suffix}",
 				VariableType.Boolean,
 				refreshInterval: TimeSpan.FromSeconds(5)) with
 			{
@@ -17,16 +18,20 @@ internal static class DelegateVariables
 				Configuration = configuration,
 				IsShareable = false
 			};
+	}
 
-	public static bool Read(DelegateRemote remote) => remote.IsReachable && !remote.CredentialsRejected;
+	public static bool Read(DelegateRemote remote)
+	{
+		return remote.IsReachable && !remote.CredentialsRejected;
+	}
 
 	public static string? KeyOfDefinitionId(string definitionId)
 	{
 		// A definition id is the canonical name with '_' swapped for '-', and a canonical variable name
 		// can never contain '-', so swapping the separator back recovers the name exactly.
 		var variableName = definitionId.Replace('-', '_');
-		if (!variableName.StartsWith(Prefix, StringComparison.Ordinal) ||
-			!variableName.EndsWith(Suffix, StringComparison.Ordinal))
+		if (!variableName.StartsWith(Prefix, StringComparison.Ordinal)
+			|| !variableName.EndsWith(Suffix, StringComparison.Ordinal))
 		{
 			return null;
 		}

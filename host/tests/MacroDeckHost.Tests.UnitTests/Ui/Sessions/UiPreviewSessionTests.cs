@@ -56,9 +56,12 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 	}
 
 	private string FindId(string view, string scenario)
-		=> _previewSource.Previews.First(preview =>
-			string.Equals(preview.View, view, StringComparison.Ordinal) &&
-			string.Equals(preview.Scenario, scenario, StringComparison.Ordinal)).Id;
+	{
+		return _previewSource.Previews.First(preview =>
+				string.Equals(preview.View, view, StringComparison.Ordinal)
+				&& string.Equals(preview.Scenario, scenario, StringComparison.Ordinal))
+			.Id;
+	}
 
 	private async Task<string> PressAndSettleAsync(string sessionId, string connectionId)
 	{
@@ -156,7 +159,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		MarkerScenarioView.Invocations = 0;
 		var previewId = FindId(nameof(MarkerScenarioView), "Default");
 
-		var ticket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, isAdmin: true);
+		var ticket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, true);
 		Assert.That(ticket.Accepted, Is.True, ticket.Message);
 		await ticket.Ready;
 
@@ -188,8 +191,8 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 				Events = [UiEventHandler.On(UiComponentEvents.Press, () => counter.Value++)],
 				Children =
 				[
-					new UiTextRun { Key = "label", Text = UiText.From(() => $"count:{counter.Value}") },
-				],
+					new UiTextRun { Key = "label", Text = UiText.From(() => $"count:{counter.Value}") }
+				]
 			};
 		}
 	}
@@ -201,7 +204,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		var previewId = FindId(nameof(RefreshScenarioView), "Default");
 		var request = new OpenUiPreviewSessionRequest { PreviewId = previewId };
 
-		var first = _opener.Open(request, DeviceA, isAdmin: true);
+		var first = _opener.Open(request, DeviceA, true);
 		await first.Ready;
 
 		// A preview session is exclusive, so reading the tree again means detaching first: one connection
@@ -212,7 +215,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		Broker.Detach(first.SessionId, "c1");
 		Assert.That(await TreeJsonAsync(first.SessionId, "c2"), Does.Contain("count:2"));
 
-		var second = _opener.Open(request, DeviceA, isAdmin: true);
+		var second = _opener.Open(request, DeviceA, true);
 		await second.Ready;
 
 		Assert.That(second.SessionId, Is.Not.EqualTo(first.SessionId), "Refresh reused the old session.");
@@ -233,7 +236,10 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 	{
 		public bool Disposed { get; private set; }
 
-		public void Dispose() => Disposed = true;
+		public void Dispose()
+		{
+			Disposed = true;
+		}
 	}
 
 	private static class DisposalPrimaryView
@@ -252,8 +258,11 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 	private static class DisposalOtherView
 	{
 		[UiPreview("Default")]
-		public static UiTextRun Default() => new()
-			{ Key = "marker", Text = UiText.Of("other") };
+		public static UiTextRun Default()
+		{
+			return new UiTextRun
+				{ Key = "marker", Text = UiText.Of("other") };
+		}
 	}
 
 	[Test]
@@ -263,12 +272,12 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		var primaryId = FindId(nameof(DisposalPrimaryView), "Default");
 		var otherId = FindId(nameof(DisposalOtherView), "Default");
 
-		var first = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = primaryId }, DeviceA, isAdmin: true);
+		var first = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = primaryId }, DeviceA, true);
 		await first.Ready;
 		var mock = DisposalPrimaryView.Created[0];
 
 		await Broker.CloseAsync(first.SessionId, "the panel selection changed", CancellationToken.None);
-		var second = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = otherId }, DeviceA, isAdmin: true);
+		var second = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = otherId }, DeviceA, true);
 		await second.Ready;
 
 		await WaitForAsync(() => mock.Disposed, "Switching previews never disposed the first scenario's mock.");
@@ -281,11 +290,11 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		var previewId = FindId(nameof(DisposalPrimaryView), "Default");
 		var request = new OpenUiPreviewSessionRequest { PreviewId = previewId };
 
-		var first = _opener.Open(request, DeviceA, isAdmin: true);
+		var first = _opener.Open(request, DeviceA, true);
 		await first.Ready;
 		var mock = DisposalPrimaryView.Created[0];
 
-		var second = _opener.Open(request, DeviceA, isAdmin: true);
+		var second = _opener.Open(request, DeviceA, true);
 		await second.Ready;
 
 		await WaitForAsync(() => mock.Disposed, "Refreshing never disposed the previous scenario's mock.");
@@ -297,7 +306,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		DisposalPrimaryView.Created = [];
 		var previewId = FindId(nameof(DisposalPrimaryView), "Default");
 
-		var ticket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, isAdmin: true);
+		var ticket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, true);
 		await ticket.Ready;
 		var mock = DisposalPrimaryView.Created[0];
 
@@ -312,7 +321,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 	{
 		var previewId = FindId(nameof(MarkerScenarioView), "Default");
 
-		var ticket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, isAdmin: true);
+		var ticket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, true);
 		await ticket.Ready;
 
 		await TreeJsonAsync(ticket.SessionId, "c1");
@@ -329,16 +338,24 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 	private static class FaultyView
 	{
 		[UiPreview("Default")]
-		public static UiTextRun Default() => new()
-			{ Key = "marker", Text = UiText.Of("ok") };
+		public static UiTextRun Default()
+		{
+			return new UiTextRun
+				{ Key = "marker", Text = UiText.Of("ok") };
+		}
 
 		[UiPreview("Boom")]
-		public static UiElement Boom() => throw new InvalidOperationException("boom");
+		public static UiElement Boom()
+		{
+			throw new InvalidOperationException("boom");
+		}
 
 		[UiPreview("Bad")]
-		public static UiTextRun Bad(string ignored) =>
-			new()
+		public static UiTextRun Bad(string ignored)
+		{
+			return new UiTextRun
 				{ Key = "marker", Text = UiText.Of(ignored) };
+		}
 	}
 
 	[Test]
@@ -354,12 +371,12 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		var defaultId = FindId(nameof(FaultyView), "Default");
 		var boomId = FindId(nameof(FaultyView), "Boom");
 
-		var opened = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = defaultId }, DeviceA, isAdmin: true);
+		var opened = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = defaultId }, DeviceA, true);
 		Assert.That(opened.Accepted, Is.True);
 		await opened.Ready;
 		await Broker.CloseAsync(opened.SessionId, "done", CancellationToken.None);
 
-		var boomTicket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = boomId }, DeviceA, isAdmin: true);
+		var boomTicket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = boomId }, DeviceA, true);
 		var boomReady = await boomTicket.Ready;
 		Assert.That(boomReady.Accepted, Is.False, "The throwing scenario should not have succeeded.");
 
@@ -370,7 +387,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 
 		var openedAgain = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = defaultId },
 			DeviceA,
-			isAdmin: true);
+			true);
 		Assert.That(openedAgain.Accepted, Is.True);
 		await openedAgain.Ready;
 	}
@@ -398,12 +415,18 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 			new()
 				{ Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive },
 			new()
-				{ Kind = UiSurfaceKinds.Folder, SessionMode = UiSessionModes.Exclusive },
+				{ Kind = UiSurfaceKinds.Folder, SessionMode = UiSessionModes.Exclusive }
 		];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
 		{
@@ -422,7 +445,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		var previewId = FindId(nameof(MarkerScenarioView), "Default");
 		var previewTicket = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId },
 			DeviceA,
-			isAdmin: true);
+			true);
 		Assert.That(previewTicket.Accepted, Is.True);
 		await previewTicket.Ready;
 
@@ -456,7 +479,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		AdminGatedView.Invocations = 0;
 		var previewId = FindId(nameof(AdminGatedView), "Default");
 
-		var rejected = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, isAdmin: false);
+		var rejected = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, false);
 
 		Assert.Multiple(() =>
 		{
@@ -465,7 +488,7 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 			Assert.That(AdminGatedView.Invocations, Is.Zero, "The scenario ran before the admin check.");
 		});
 
-		var accepted = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, isAdmin: true);
+		var accepted = _opener.Open(new OpenUiPreviewSessionRequest { PreviewId = previewId }, DeviceA, true);
 		Assert.That(accepted.Accepted, Is.True);
 		await accepted.Ready;
 		Assert.That(AdminGatedView.Invocations, Is.EqualTo(1));
@@ -488,16 +511,17 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 			DeviceA,
 			CancellationToken.None);
 		var request = new OpenUiPreviewSessionRequest { PreviewId = "plugin:Preview.Default" };
-		var firstPreview = opener.Open(request, DeviceA, isAdmin: true);
+		var firstPreview = opener.Open(request, DeviceA, true);
 		await firstPreview.Ready;
-		var secondPreview = opener.Open(request, DeviceA, isAdmin: true);
+		var secondPreview = opener.Open(request, DeviceA, true);
 		await secondPreview.Ready;
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(Registry.Find(widgetTicket.SessionId)?.State, Is.EqualTo(UiSessionState.Open));
-			Assert.That(Registry.Find(firstPreview.SessionId), Is.Null.Or.Property(nameof(UiSessionSnapshot.State))
-				.EqualTo(UiSessionState.Closed));
+			Assert.That(Registry.Find(firstPreview.SessionId),
+				Is.Null.Or.Property(nameof(UiSessionSnapshot.State))
+					.EqualTo(UiSessionState.Closed));
 			Assert.That(Registry.Find(secondPreview.SessionId)?.State, Is.EqualTo(UiSessionState.Open));
 		});
 	}
@@ -520,11 +544,11 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 
 		var first = opener.Open(new OpenUiPreviewSessionRequest { PreviewId = "plugin:Preview.Default" },
 			DeviceA,
-			isAdmin: true);
+			true);
 		await first.Ready;
 		var second = opener.Open(new OpenUiPreviewSessionRequest { PreviewId = "plugin:Preview.Offline" },
 			DeviceA,
-			isAdmin: true);
+			true);
 		await second.Ready;
 
 		Assert.Multiple(() =>
@@ -544,11 +568,16 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 			{
 				Id = "plugin:Preview.Default", View = "View", Scenario = "Default", Profile = UiPreviewProfiles.Widget
 			});
-		var opener = new UiPreviewSessionOpener([], Integrations, snapshots, Registry, Broker, new NoPluginConnections());
+		var opener = new UiPreviewSessionOpener([],
+			Integrations,
+			snapshots,
+			Registry,
+			Broker,
+			new NoPluginConnections());
 
 		var ticket = opener.Open(new OpenUiPreviewSessionRequest { PreviewId = "plugin:Preview.Default" },
 			DeviceA,
-			isAdmin: true);
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -569,21 +598,34 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		: IRemotePluginSnapshotStore
 	{
 		public RemotePluginCapabilitySnapshot GetSnapshot(string id)
-			=> RemotePluginCapabilitySnapshot.Empty(id) with { UiPreviews = id == pluginId ? previews : [] };
+		{
+			return RemotePluginCapabilitySnapshot.Empty(id) with { UiPreviews = id == pluginId ? previews : [] };
+		}
 
-		public bool Has(string id) => id == pluginId;
+		public bool Has(string id)
+		{
+			return id == pluginId;
+		}
 
 		public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class DelegatingResolver : IUiSessionProviderResolver
 	{
 		private readonly Func<string, IUiSessionProvider?> _resolve;
 
-		public DelegatingResolver(Func<string, IUiSessionProvider?> resolve) => _resolve = resolve;
+		public DelegatingResolver(Func<string, IUiSessionProvider?> resolve)
+		{
+			_resolve = resolve;
+		}
 
-		public IUiSessionProvider? Resolve(string providerId) => _resolve(providerId);
+		public IUiSessionProvider? Resolve(string providerId)
+		{
+			return _resolve(providerId);
+		}
 	}
 
 	/// <summary>A source scanning the test assembly itself, so this file's own <c>[UiPreview]</c>-attributed
@@ -594,7 +636,9 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		private readonly Lazy<UiPreviewScanResult> _scan;
 
 		public TestUiPreviewSource(Assembly assembly)
-			=> _scan = new Lazy<UiPreviewScanResult>(() => UiPreviewCatalog.Scan(assembly));
+		{
+			_scan = new Lazy<UiPreviewScanResult>(() => UiPreviewCatalog.Scan(assembly));
+		}
 
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
 		[
@@ -609,24 +653,24 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 				Id = registration.Declaration.Id,
 				View = registration.Declaration.View,
 				Scenario = registration.Declaration.Scenario,
-				Profile = registration.Declaration.Profile,
-			}),
+				Profile = registration.Declaration.Profile
+			})
 		];
 
 		public IReadOnlyList<UiPreviewSkipped> Skipped =>
 		[
 			.. _scan.Value.Diagnostics.Select(diagnostic => new UiPreviewSkipped
 			{
-				Member = diagnostic.Member, Reason = diagnostic.Reason,
-			}),
+				Member = diagnostic.Member, Reason = diagnostic.Reason
+			})
 		];
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
 		{
-			if (request.Surface.Kind != UiSurfaceKinds.DeveloperPreview ||
-				!request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId,
-					out var idElement) ||
-				idElement.ValueKind != JsonValueKind.String)
+			if (request.Surface.Kind != UiSurfaceKinds.DeveloperPreview
+				|| !request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId,
+					out var idElement)
+				|| idElement.ValueKind != JsonValueKind.String)
 			{
 				return Task.FromResult<IUiSession?>(null);
 			}

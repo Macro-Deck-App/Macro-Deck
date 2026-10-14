@@ -23,13 +23,17 @@ public class BatteryDeviceTests
 	[TestCase(0)]
 	[TestCase(100)]
 	public void Levels_at_the_bounds_are_accepted(int level)
-		=> Assert.That(new BatteryDevice { Id = "a", Name = "A", LevelPercent = level }.LevelPercent, Is.EqualTo(level));
+	{
+		Assert.That(new BatteryDevice { Id = "a", Name = "A", LevelPercent = level }.LevelPercent, Is.EqualTo(level));
+	}
 
 	[TestCase(-1)]
 	[TestCase(101)]
 	public void A_level_outside_0_to_100_is_refused(int level)
-		=> Assert.That(() => new BatteryDevice { Id = "a", Name = "A", LevelPercent = level },
+	{
+		Assert.That(() => new BatteryDevice { Id = "a", Name = "A", LevelPercent = level },
 			Throws.InstanceOf<ArgumentOutOfRangeException>());
+	}
 
 	[TestCase("")]
 	[TestCase("   ")]
@@ -51,14 +55,17 @@ public class BatteryDeviceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(() => new BatteryDevice { Id = tooLongId, Name = "A" }, Throws.InstanceOf<ArgumentException>());
-			Assert.That(() => new BatteryDevice { Id = "a", Name = tooLongName }, Throws.InstanceOf<ArgumentException>());
+			Assert.That(() => new BatteryDevice { Id = "a", Name = tooLongName },
+				Throws.InstanceOf<ArgumentException>());
 		});
 	}
 
 	[Test]
 	public void A_negative_time_estimate_is_refused()
-		=> Assert.That(() => new BatteryDevice { Id = "a", Name = "A", TimeRemaining = TimeSpan.FromSeconds(-1) },
+	{
+		Assert.That(() => new BatteryDevice { Id = "a", Name = "A", TimeRemaining = TimeSpan.FromSeconds(-1) },
 			Throws.InstanceOf<ArgumentOutOfRangeException>());
+	}
 
 	[Test]
 	public void A_kind_this_version_does_not_know_reads_as_other()

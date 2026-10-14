@@ -32,7 +32,7 @@ public sealed class SetColorPaletteEntryRequestMessageHandler
 			ColorPaletteOutcome.LimitReached => new TransportError
 			{
 				Code = LimitReachedCode,
-				Message = AppStrings.Errors.ColorPalette.Full(max: ColorPaletteService.MaxColors)
+				Message = AppStrings.Errors.ColorPalette.Full(ColorPaletteService.MaxColors)
 			},
 			_ => null
 		};

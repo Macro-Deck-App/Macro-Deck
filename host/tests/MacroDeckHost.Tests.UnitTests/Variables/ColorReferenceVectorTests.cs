@@ -22,17 +22,31 @@ public class ColorReferenceVectorTests
 	}
 
 	private static IEnumerable<TestCaseData> Cases(string section)
-		=> _fixture.GetProperty(section)
+	{
+		return _fixture.GetProperty(section)
 			.EnumerateArray()
 			.Select((vector, index) => new TestCaseData(vector).SetName($"{section}[{index}] {vector.GetRawText()}"));
+	}
 
-	private static IEnumerable<TestCaseData> ParseCases() => Cases("parse");
+	private static IEnumerable<TestCaseData> ParseCases()
+	{
+		return Cases("parse");
+	}
 
-	private static IEnumerable<TestCaseData> ModifierCases() => Cases("modifiers");
+	private static IEnumerable<TestCaseData> ModifierCases()
+	{
+		return Cases("modifiers");
+	}
 
-	private static IEnumerable<TestCaseData> ChainCases() => Cases("chains");
+	private static IEnumerable<TestCaseData> ChainCases()
+	{
+		return Cases("chains");
+	}
 
-	private static IEnumerable<TestCaseData> ReferenceCases() => Cases("references");
+	private static IEnumerable<TestCaseData> ReferenceCases()
+	{
+		return Cases("references");
+	}
 
 	[TestCaseSource(nameof(ParseCases))]
 	public void Parses_to_the_canonical_form(JsonElement vector)
@@ -102,17 +116,22 @@ public class ColorReferenceVectorTests
 	}
 
 	private static string Describe(ColorStep step)
-		=> step.Modifier == ColorModifier.Mix
+	{
+		return step.Modifier == ColorModifier.Mix
 			? string.Create(CultureInfo.InvariantCulture,
 				$"mix {step.MixVariable ?? step.MixColor?.ToString()} {step.Amount}")
 			: string.Create(CultureInfo.InvariantCulture, $"{OpName(step.Modifier)} {step.Amount}");
+	}
 
-	private static string OpName(ColorModifier modifier) => modifier switch
+	private static string OpName(ColorModifier modifier)
 	{
-		ColorModifier.IncreaseOpacity => "increase_opacity",
-		ColorModifier.ReduceOpacity => "reduce_opacity",
-		_ => modifier.ToString().ToLowerInvariant()
-	};
+		return modifier switch
+		{
+			ColorModifier.IncreaseOpacity => "increase_opacity",
+			ColorModifier.ReduceOpacity => "reduce_opacity",
+			_ => modifier.ToString().ToLowerInvariant()
+		};
+	}
 
 	private static string Describe(JsonElement step)
 	{

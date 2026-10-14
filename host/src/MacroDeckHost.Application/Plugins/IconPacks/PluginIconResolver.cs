@@ -25,20 +25,24 @@ public sealed class PluginIconResolver(IIconPackCache iconPackCache, IPluginBund
 
 		var sourceId = PluginIconReferences.SourceId(pluginId, key);
 		var pack = iconPackCache.GetAllPacks()
-			.Where(candidate => candidate.SourceType == IconPackSourceType.Plugin &&
-				string.Equals(candidate.SourceId, sourceId, StringComparison.Ordinal))
+			.Where(candidate => candidate.SourceType == IconPackSourceType.Plugin
+				&& string.Equals(candidate.SourceId, sourceId, StringComparison.Ordinal))
 			.OrderBy(candidate => candidate.CreatedAt)
 			.FirstOrDefault();
 
 		return pack is null
 			? null
 			: iconPackCache.GetIconsByPackId(pack.Id)
-				.Where(icon => icon.ProcessingState == IconProcessingState.Ready &&
-					string.Equals(icon.Name, name, StringComparison.OrdinalIgnoreCase))
+				.Where(icon => icon.ProcessingState == IconProcessingState.Ready
+					&& string.Equals(icon.Name, name, StringComparison.OrdinalIgnoreCase))
 				.OrderBy(icon => icon.CreatedAt)
 				.FirstOrDefault();
 	}
 
 	public IconEntity? Resolve(string pluginId, string? reference)
-		=> PluginIconReferences.TryParse(reference, out var key, out var name) ? Resolve(pluginId, key, name) : null;
+	{
+		return PluginIconReferences.TryParse(reference, out var key, out var name)
+			? Resolve(pluginId, key, name)
+			: null;
+	}
 }

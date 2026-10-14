@@ -26,5 +26,7 @@ internal sealed class SpotifyContextStub(IIntegrationConfig config) : IIntegrati
 internal sealed class FixedLocale(TimeOfDayFormat format) : ILocaleApi
 {
 	public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(format);
+	{
+		return Task.FromResult(format);
+	}
 }

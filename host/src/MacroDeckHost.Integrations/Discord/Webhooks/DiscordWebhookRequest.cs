@@ -47,11 +47,11 @@ internal sealed record DiscordWebhookEmbed
 	public DiscordWebhookEmbedFooter? Footer { get; init; }
 
 	[JsonIgnore]
-	public bool IsEmpty => string.IsNullOrWhiteSpace(Title) &&
-		string.IsNullOrWhiteSpace(Description) &&
-		Image is null &&
-		Thumbnail is null &&
-		Footer is null;
+	public bool IsEmpty => string.IsNullOrWhiteSpace(Title)
+		&& string.IsNullOrWhiteSpace(Description)
+		&& Image is null
+		&& Thumbnail is null
+		&& Footer is null;
 }
 
 internal sealed record DiscordWebhookEmbedImage

@@ -33,12 +33,17 @@ internal sealed class YouTubeChatLifecycleTests
 	}
 
 	[TearDown]
-	public void TearDown() => _connection.Dispose();
+	public void TearDown()
+	{
+		_connection.Dispose();
+	}
 
 	[Test]
 	public async Task Going_live_connects_the_chat_and_its_messages_reach_the_widget()
 	{
-		_api.ChatPages.Enqueue(new YouTubeChatPage("next", 5000, null,
+		_api.ChatPages.Enqueue(new YouTubeChatPage("next",
+			5000,
+			null,
 			[YouTubeTestSupport.Text("m1", "Hello stream")]));
 
 		_connection.OnPolled(Live("chat-1"));
@@ -87,10 +92,15 @@ internal sealed class YouTubeChatLifecycleTests
 		});
 	}
 
-	private int ChatCalls() => _api.Calls.Count(call => call.StartsWith("chat:", StringComparison.Ordinal));
+	private int ChatCalls()
+	{
+		return _api.Calls.Count(call => call.StartsWith("chat:", StringComparison.Ordinal));
+	}
 
 	private static YouTubeAccountState Live(string liveChatId)
-		=> YouTubeAccountState.Unknown with { IsLive = true, BroadcastId = "b1", LiveChatId = liveChatId };
+	{
+		return YouTubeAccountState.Unknown with { IsLive = true, BroadcastId = "b1", LiveChatId = liveChatId };
+	}
 
 	private static async Task WaitUntil(Func<bool> condition)
 	{

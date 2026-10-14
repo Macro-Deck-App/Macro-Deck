@@ -37,44 +37,67 @@ internal sealed class SinusBotClient : ISinusBotClient
 	}
 
 	public Task<IReadOnlyList<SinusBotInstance>> GetInstancesAsync(CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(async ct =>
+	{
+		return ExecuteWithReauthAsync(async ct =>
 				(IReadOnlyList<SinusBotInstance>)await GetAsync<List<SinusBotInstance>>($"{_apiBotUrl}/instances", ct),
 			cancellationToken);
+	}
 
 	public Task<SinusBotInstanceStatus> GetInstanceStatusAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => GetAsync<SinusBotInstanceStatus>(InstanceUrl(instanceId, "status"), ct),
+	{
+		return ExecuteWithReauthAsync(ct => GetAsync<SinusBotInstanceStatus>(InstanceUrl(instanceId, "status"), ct),
 			cancellationToken);
+	}
 
 	public Task<IReadOnlyList<SinusBotFile>> GetFilesAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(async ct =>
+	{
+		return ExecuteWithReauthAsync(async ct =>
 				(IReadOnlyList<SinusBotFile>)await GetAsync<List<SinusBotFile>>($"{_apiBotUrl}/files", ct),
 			cancellationToken);
+	}
 
-	public string GetThumbnailUrl(string instanceId, string thumbnailId) => $"{_baseUrl}/cache/{thumbnailId}";
+	public string GetThumbnailUrl(string instanceId, string thumbnailId)
+	{
+		return $"{_baseUrl}/cache/{thumbnailId}";
+	}
 
 	public Task PlayAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "play"), ct), cancellationToken);
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "play"), ct), cancellationToken);
+	}
 
 	public Task PauseAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "pause"), ct), cancellationToken);
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "pause"), ct), cancellationToken);
+	}
 
 	public Task StopAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "stop"), ct), cancellationToken);
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "stop"), ct), cancellationToken);
+	}
 
 	public Task PlayFileAsync(string instanceId, string fileId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(
-			ct => PostAsync(InstanceUrl(instanceId, $"play/byId/{Uri.EscapeDataString(fileId)}"), ct),
+	{
+		return ExecuteWithReauthAsync(ct
+				=> PostAsync(InstanceUrl(instanceId, $"play/byId/{Uri.EscapeDataString(fileId)}"), ct),
 			cancellationToken);
+	}
 
 	public Task NextAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "playNext"), ct), cancellationToken);
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "playNext"), ct), cancellationToken);
+	}
 
 	public Task PreviousAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "playPrevious"), ct), cancellationToken);
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "playPrevious"), ct), cancellationToken);
+	}
 
 	public Task SeekAsync(string instanceId, int seconds, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, $"seek/{Math.Max(0, seconds)}"), ct),
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, $"seek/{Math.Max(0, seconds)}"), ct),
 			cancellationToken);
+	}
 
 	public Task SetVolumeAsync(string instanceId, int volumePercent, CancellationToken cancellationToken)
 	{
@@ -84,18 +107,26 @@ internal sealed class SinusBotClient : ISinusBotClient
 	}
 
 	public Task IncreaseVolumeAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "volume/up"), ct), cancellationToken);
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "volume/up"), ct), cancellationToken);
+	}
 
 	public Task DecreaseVolumeAsync(string instanceId, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "volume/down"), ct), cancellationToken);
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, "volume/down"), ct), cancellationToken);
+	}
 
 	public Task SetShuffleAsync(string instanceId, bool enabled, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, $"shuffle/{(enabled ? "1" : "0")}"), ct),
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, $"shuffle/{(enabled ? "1" : "0")}"), ct),
 			cancellationToken);
+	}
 
 	public Task SetRepeatAsync(string instanceId, bool enabled, CancellationToken cancellationToken)
-		=> ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, $"repeat/{(enabled ? "1" : "0")}"), ct),
+	{
+		return ExecuteWithReauthAsync(ct => PostAsync(InstanceUrl(instanceId, $"repeat/{(enabled ? "1" : "0")}"), ct),
 			cancellationToken);
+	}
 
 	private async Task AuthenticateInternalAsync(CancellationToken cancellationToken)
 	{
@@ -125,8 +156,8 @@ internal sealed class SinusBotClient : ISinusBotClient
 				throw new SinusBotAuthException($"SinusBot login failed (HTTP {(int)response.StatusCode}).");
 			}
 
-			var login = await ReadJsonAsync<LoginResponse>(response, cancellationToken) ??
-				throw new SinusBotAuthException("SinusBot did not return a login response.");
+			var login = await ReadJsonAsync<LoginResponse>(response, cancellationToken)
+				?? throw new SinusBotAuthException("SinusBot did not return a login response.");
 
 			if (login.Success is false || string.IsNullOrWhiteSpace(login.Token))
 			{
@@ -163,8 +194,8 @@ internal sealed class SinusBotClient : ISinusBotClient
 		using var response = await _http.SendAsync(request, cancellationToken);
 		EnsureSuccess(response);
 
-		return await ReadJsonAsync<T>(response, cancellationToken) ??
-			throw new SinusBotApiException("SinusBot returned no data.");
+		return await ReadJsonAsync<T>(response, cancellationToken)
+			?? throw new SinusBotApiException("SinusBot returned no data.");
 	}
 
 	private async Task PostAsync(string url, CancellationToken cancellationToken)
@@ -194,7 +225,8 @@ internal sealed class SinusBotClient : ISinusBotClient
 		}
 	}
 
-	private async Task<T> ExecuteWithReauthAsync<T>(Func<CancellationToken, Task<T>> action,
+	private async Task<T> ExecuteWithReauthAsync<T>(
+		Func<CancellationToken, Task<T>> action,
 		CancellationToken cancellationToken)
 	{
 		try
@@ -222,9 +254,11 @@ internal sealed class SinusBotClient : ISinusBotClient
 	}
 
 	private bool IsReauthable(SinusBotApiException ex)
-		=> ex.StatusCode == HttpStatusCode.Unauthorized &&
-			!string.IsNullOrEmpty(_username) &&
-			!string.IsNullOrEmpty(_password);
+	{
+		return ex.StatusCode == HttpStatusCode.Unauthorized
+			&& !string.IsNullOrEmpty(_username)
+			&& !string.IsNullOrEmpty(_password);
+	}
 
 	private HttpRequestMessage CreateRequest(HttpMethod method, string url)
 	{
@@ -238,7 +272,9 @@ internal sealed class SinusBotClient : ISinusBotClient
 	}
 
 	private string InstanceUrl(string instanceId, string action)
-		=> $"{_apiBotUrl}/i/{Uri.EscapeDataString(instanceId)}/{action}";
+	{
+		return $"{_apiBotUrl}/i/{Uri.EscapeDataString(instanceId)}/{action}";
+	}
 
 	private static void EnsureSuccess(HttpResponseMessage response)
 	{

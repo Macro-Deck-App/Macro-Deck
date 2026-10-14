@@ -26,7 +26,8 @@ internal sealed class FolderViewProviderCapabilityHandler(
 	public string Kind => CapabilityKinds.FolderViewProvider;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -36,6 +37,7 @@ internal sealed class FolderViewProviderCapabilityHandler(
 					VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -51,8 +53,8 @@ internal sealed class FolderViewProviderCapabilityHandler(
 			return Task.FromResult(CapabilityInvocationResult.Ok(new FolderViewProviderDescribePayload
 			{
 				ProviderName = _providers.Select(provider => provider.ProviderName)
-						.FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-					metadata.Name,
+						.FirstOrDefault(name => !string.IsNullOrEmpty(name))
+					?? metadata.Name,
 				FolderViews = FolderViews()
 			}));
 		}
@@ -76,5 +78,10 @@ internal sealed class FolderViewProviderCapabilityHandler(
 	}
 
 	private IReadOnlyList<FolderViewDescriptorDto> FolderViews()
-		=> [.. _providers.SelectMany(provider => provider.GetFolderViews()).Select(FolderViewDescriptorMapper.ToDto)];
+	{
+		return
+		[
+			.. _providers.SelectMany(provider => provider.GetFolderViews()).Select(FolderViewDescriptorMapper.ToDto)
+		];
+	}
 }

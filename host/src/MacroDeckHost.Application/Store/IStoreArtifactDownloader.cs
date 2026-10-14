@@ -22,11 +22,15 @@ public sealed record StoreArtifactDownloadResult
 
 	public string? ErrorMessage { get; init; }
 
-	public static StoreArtifactDownloadResult Ok(string filePath, long size) =>
-		new() { Success = true, FilePath = filePath, Size = size };
+	public static StoreArtifactDownloadResult Ok(string filePath, long size)
+	{
+		return new StoreArtifactDownloadResult { Success = true, FilePath = filePath, Size = size };
+	}
 
-	public static StoreArtifactDownloadResult Fail(StoreArtifactDownloadError error, string message) =>
-		new() { Success = false, Error = error, ErrorMessage = message };
+	public static StoreArtifactDownloadResult Fail(StoreArtifactDownloadError error, string message)
+	{
+		return new StoreArtifactDownloadResult { Success = false, Error = error, ErrorMessage = message };
+	}
 }
 
 /// <summary>Downloads a store release artifact to a staging file, https-only, capped at
@@ -35,7 +39,8 @@ public sealed record StoreArtifactDownloadResult
 /// before the result is reported successful.</summary>
 public interface IStoreArtifactDownloader
 {
-	Task<StoreArtifactDownloadResult> Download(Uri artifactUrl,
+	Task<StoreArtifactDownloadResult> Download(
+		Uri artifactUrl,
 		string expectedSha256Hex,
 		long expectedSize,
 		Guid operationId,

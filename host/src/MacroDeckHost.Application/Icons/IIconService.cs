@@ -23,7 +23,8 @@ public interface IIconService
 	/// or GIF for an animated icon; <paramref name="staticFrame" /> asks for the first frame alone
 	/// instead, for a consumer that cannot carry the whole animation.
 	/// </summary>
-	Task<Result<IconImageResult, IconError>> GetImage(Guid iconId,
+	Task<Result<IconImageResult, IconError>> GetImage(
+		Guid iconId,
 		int? size,
 		bool acceptWebp,
 		bool staticFrame,

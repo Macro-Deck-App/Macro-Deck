@@ -8,33 +8,36 @@ internal static class HomeAssistantActions
 {
 	public static IReadOnlyList<IActionDefinition> Create(
 		Func<HomeAssistantConnection?> resolver,
-		HomeAssistantVariableAccessor variables) =>
-	[
-		new CallServiceActionDefinition(resolver),
-		new EntityPowerActionDefinition("turn-on",
-			AppStrings.Integrations.HomeAssistant.Actions.EntityPower.TurnOnName(),
-			AppStrings.Integrations.HomeAssistant.Actions.EntityPower.TurnOnDescription(),
-			"turn_on",
-			resolver),
-		new EntityPowerActionDefinition("turn-off",
-			AppStrings.Integrations.HomeAssistant.Actions.EntityPower.TurnOffName(),
-			AppStrings.Integrations.HomeAssistant.Actions.EntityPower.TurnOffDescription(),
-			"turn_off",
-			resolver),
-		new EntityPowerActionDefinition("toggle",
-			AppStrings.Integrations.HomeAssistant.Actions.EntityPower.ToggleName(),
-			AppStrings.Integrations.HomeAssistant.Actions.EntityPower.ToggleDescription(),
-			"toggle",
-			resolver),
-		new LightActionDefinition(resolver),
-		new CoverActionDefinition(resolver),
-		new MediaPlayerActionDefinition(resolver),
-		new ClimateActionDefinition(resolver),
-		new SceneActionDefinition(resolver),
-		new ScriptActionDefinition(resolver),
-		new AutomationActionDefinition(resolver),
-		new GetEntityStateActionDefinition(resolver, variables)
-	];
+		HomeAssistantVariableAccessor variables)
+	{
+		return
+		[
+			new CallServiceActionDefinition(resolver),
+			new EntityPowerActionDefinition("turn-on",
+				AppStrings.Integrations.HomeAssistant.Actions.EntityPower.TurnOnName(),
+				AppStrings.Integrations.HomeAssistant.Actions.EntityPower.TurnOnDescription(),
+				"turn_on",
+				resolver),
+			new EntityPowerActionDefinition("turn-off",
+				AppStrings.Integrations.HomeAssistant.Actions.EntityPower.TurnOffName(),
+				AppStrings.Integrations.HomeAssistant.Actions.EntityPower.TurnOffDescription(),
+				"turn_off",
+				resolver),
+			new EntityPowerActionDefinition("toggle",
+				AppStrings.Integrations.HomeAssistant.Actions.EntityPower.ToggleName(),
+				AppStrings.Integrations.HomeAssistant.Actions.EntityPower.ToggleDescription(),
+				"toggle",
+				resolver),
+			new LightActionDefinition(resolver),
+			new CoverActionDefinition(resolver),
+			new MediaPlayerActionDefinition(resolver),
+			new ClimateActionDefinition(resolver),
+			new SceneActionDefinition(resolver),
+			new ScriptActionDefinition(resolver),
+			new AutomationActionDefinition(resolver),
+			new GetEntityStateActionDefinition(resolver, variables)
+		];
+	}
 }
 
 internal static class HomeAssistantServiceCall
@@ -75,7 +78,7 @@ internal static class HomeAssistantServiceCall
 		if (connection.Entity(entityId) is null)
 		{
 			rejection = ActionResult.Failed(ActionErrorCodes.NotFound,
-				AppStrings.Integrations.HomeAssistant.Errors.EntityUnknown(entityId: entityId));
+				AppStrings.Integrations.HomeAssistant.Errors.EntityUnknown(entityId));
 			return false;
 		}
 
@@ -97,7 +100,7 @@ internal static class HomeAssistantServiceCall
 			if (connection.Entity(entityId) is null)
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.HomeAssistant.Errors.EntityUnknown(entityId: entityId));
+					AppStrings.Integrations.HomeAssistant.Errors.EntityUnknown(entityId));
 			}
 		}
 
@@ -105,7 +108,9 @@ internal static class HomeAssistantServiceCall
 	}
 
 	public static IReadOnlyDictionary<string, object?> Target(string entityId)
-		=> new Dictionary<string, object?>(StringComparer.Ordinal) { ["entity_id"] = entityId };
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal) { ["entity_id"] = entityId };
+	}
 
 	public static async Task<ActionResult> ExecuteAsync(
 		HomeAssistantConnection connection,

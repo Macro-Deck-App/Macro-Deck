@@ -32,7 +32,8 @@ internal static class ManifestValidator
 	/// directory is used as the version directory, so a declared entrypoint's existence is checked against
 	/// whatever binaries already sit next to the manifest - useful before packaging, when there is no
 	/// artifact yet to inspect.</summary>
-	public static async Task<ManifestValidationResult> ValidateManifestFileAsync(string manifestPath,
+	public static async Task<ManifestValidationResult> ValidateManifestFileAsync(
+		string manifestPath,
 		PluginManifestValidationLevel level = PluginManifestValidationLevel.Development,
 		CancellationToken cancellationToken = default)
 	{
@@ -146,8 +147,7 @@ internal static class ManifestValidator
 		// README) rather than something the manifest claims to be a complete inventory of - unlike a packed
 		// artifact, whose files[] the installer treats as exhaustive. Only "declared but wrong" is checked
 		// here; ValidateArtifactAsync below additionally checks "present but undeclared".
-		successProblems.AddRange(
-			EvaluateDeclaredFilesAgainstDisk(manifest, baseDirectory, checkForUndeclaredFiles: false));
+		successProblems.AddRange(EvaluateDeclaredFilesAgainstDisk(manifest, baseDirectory, false));
 		successProblems.AddRange(EvaluateBundledIconPacks(manifest, baseDirectory));
 
 		var looksLikeSourceTree = HasProjectFile(baseDirectory);
@@ -165,17 +165,21 @@ internal static class ManifestValidator
 	}
 
 	/// <summary>Validates <c>manifest.json</c> inside <paramref name="versionDirectory" />.</summary>
-	public static Task<ManifestValidationResult> ValidateDirectoryAsync(string versionDirectory,
+	public static Task<ManifestValidationResult> ValidateDirectoryAsync(
+		string versionDirectory,
 		PluginManifestValidationLevel level = PluginManifestValidationLevel.Development,
 		CancellationToken cancellationToken = default)
-		=> ValidateManifestFileAsync(Path.Combine(versionDirectory, PluginArtifactFiles.ManifestFileName),
+	{
+		return ValidateManifestFileAsync(Path.Combine(versionDirectory, PluginArtifactFiles.ManifestFileName),
 			level,
 			cancellationToken);
+	}
 
 	/// <summary>Validates a packed <c>.macroDeckPlugin</c> artifact through <see cref="IPluginArtifactReader" />.
 	/// Extracts to a temporary directory it always deletes, purely to check schema and declared file
 	/// digests against real bytes - never to install or keep anything.</summary>
-	public static async Task<ManifestValidationResult> ValidateArtifactAsync(string artifactPath,
+	public static async Task<ManifestValidationResult> ValidateArtifactAsync(
+		string artifactPath,
 		PluginManifestValidationLevel level = PluginManifestValidationLevel.Package,
 		CancellationToken cancellationToken = default)
 	{
@@ -229,7 +233,7 @@ internal static class ManifestValidator
 			// than re-walking the extracted directory a second time.
 			var declaredFileProblems = EvaluateDeclaredFilesAgainstDisk(manifest,
 				extractDirectory,
-				checkForUndeclaredFiles: true,
+				true,
 				out var presentEntryNames);
 			problems.AddRange(declaredFileProblems);
 			problems.AddRange(EvaluateBundledIconPacks(manifest, extractDirectory));
@@ -260,15 +264,16 @@ internal static class ManifestValidator
 	/// <summary>Builds the reader-failure problem, special-casing the two situations Task C/D of issue #556
 	/// call out: JSON that fails to even parse (named file, a real line/position) and an entrypoint that is
 	/// missing only because the directory being validated is a source tree rather than build output.</summary>
-	private static ManifestProblem DescribeReaderFailure(PluginManifestError error,
+	private static ManifestProblem DescribeReaderFailure(
+		PluginManifestError error,
 		string? readerMessage,
 		string manifestPath,
 		string baseDirectory,
 		string json)
 	{
-		if (error == PluginManifestError.Malformed &&
-			!TryParseJson(json, out _, out var jsonException) &&
-			jsonException is not null)
+		if (error == PluginManifestError.Malformed
+			&& !TryParseJson(json, out _, out var jsonException)
+			&& jsonException is not null)
 		{
 			return Problem(ManifestProblemSeverity.Error,
 				"malformed",
@@ -279,8 +284,8 @@ internal static class ManifestValidator
 		{
 			return Problem(ManifestProblemSeverity.Error,
 				"source-directory",
-				$"{readerMessage ?? "The manifest is invalid."} This looks like a source directory - " +
-				"validate the build output instead, e.g. bin/Release/net10.0.");
+				$"{readerMessage ?? "The manifest is invalid."} This looks like a source directory - "
+				+ "validate the build output instead, e.g. bin/Release/net10.0.");
 		}
 
 		return Problem(ManifestProblemSeverity.Error,
@@ -292,27 +297,30 @@ internal static class ManifestValidator
 	/// all - used only to decide which follow-on schema problems are genuine duplicates of the reader's own
 	/// finding. Only <c>Malformed</c> and <c>NotFound</c> are about the document as a whole, so only they map
 	/// to nothing.</summary>
-	private static string? ReaderErrorPointer(PluginManifestError error) => error switch
+	private static string? ReaderErrorPointer(PluginManifestError error)
 	{
-		PluginManifestError.UnsupportedManifestVersion => "/manifestVersion",
-		PluginManifestError.InvalidSettings => "/settings",
-		PluginManifestError.InvalidDependency => "/dependencies",
-		PluginManifestError.InvalidIcon => "/icon",
-		PluginManifestError.InvalidPluginId or PluginManifestError.IdMismatch => "/id",
-		PluginManifestError.VersionMismatch => "/version",
-		PluginManifestError.InvalidName => "/name",
-		PluginManifestError.NoEntrypoints
-			or PluginManifestError.EntrypointMissing
-			or PluginManifestError.EntrypointOutsideVersionDirectory
-			or PluginManifestError.InvalidEntrypointRuntime => "/entrypoints",
-		PluginManifestError.InvalidSignature => "/signature",
-		PluginManifestError.InvalidFileDigest => "/files",
-		PluginManifestError.InvalidPermission => "/permissions",
-		PluginManifestError.InvalidCompatibility => "/compatibility",
-		PluginManifestError.InvalidPublisher => "/publisher",
-		PluginManifestError.InvalidBundledIconPack => "/bundledIconPacks",
-		_ => null
-	};
+		return error switch
+		{
+			PluginManifestError.UnsupportedManifestVersion => "/manifestVersion",
+			PluginManifestError.InvalidSettings => "/settings",
+			PluginManifestError.InvalidDependency => "/dependencies",
+			PluginManifestError.InvalidIcon => "/icon",
+			PluginManifestError.InvalidPluginId or PluginManifestError.IdMismatch => "/id",
+			PluginManifestError.VersionMismatch => "/version",
+			PluginManifestError.InvalidName => "/name",
+			PluginManifestError.NoEntrypoints
+				or PluginManifestError.EntrypointMissing
+				or PluginManifestError.EntrypointOutsideVersionDirectory
+				or PluginManifestError.InvalidEntrypointRuntime => "/entrypoints",
+			PluginManifestError.InvalidSignature => "/signature",
+			PluginManifestError.InvalidFileDigest => "/files",
+			PluginManifestError.InvalidPermission => "/permissions",
+			PluginManifestError.InvalidCompatibility => "/compatibility",
+			PluginManifestError.InvalidPublisher => "/publisher",
+			PluginManifestError.InvalidBundledIconPack => "/bundledIconPacks",
+			_ => null
+		};
+	}
 
 	/// <summary><c>true</c> when <paramref name="directory" /> holds a project file - the signal that a
 	/// missing entrypoint means "this is the source tree, not the build output" rather than "the plugin is
@@ -325,9 +333,9 @@ internal static class ManifestValidator
 		{
 			using var document = JsonDocument.Parse(
 				File.ReadAllBytes(Path.Combine(directory, PluginArtifactFiles.CertificateFileName)));
-			return document.RootElement.ValueKind == JsonValueKind.Object &&
-				document.RootElement.TryGetProperty("issuer", out var issuer) &&
-				issuer.ValueKind != JsonValueKind.Null;
+			return document.RootElement.ValueKind == JsonValueKind.Object
+				&& document.RootElement.TryGetProperty("issuer", out var issuer)
+				&& issuer.ValueKind != JsonValueKind.Null;
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
 		{
@@ -339,9 +347,9 @@ internal static class ManifestValidator
 	{
 		try
 		{
-			return Directory.EnumerateFiles(directory, "*.csproj").Any() ||
-				Directory.EnumerateFiles(directory, "*.fsproj").Any() ||
-				Directory.EnumerateFiles(directory, "*.vbproj").Any();
+			return Directory.EnumerateFiles(directory, "*.csproj").Any()
+				|| Directory.EnumerateFiles(directory, "*.fsproj").Any()
+				|| Directory.EnumerateFiles(directory, "*.vbproj").Any();
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 		{
@@ -455,16 +463,20 @@ internal static class ManifestValidator
 		}
 	}
 
-	private static List<ManifestProblem> EvaluateDeclaredFilesAgainstDisk(PluginManifest manifest,
+	private static List<ManifestProblem> EvaluateDeclaredFilesAgainstDisk(
+		PluginManifest manifest,
 		string baseDirectory,
 		bool checkForUndeclaredFiles)
-		=> EvaluateDeclaredFilesAgainstDisk(manifest, baseDirectory, checkForUndeclaredFiles, out _);
+	{
+		return EvaluateDeclaredFilesAgainstDisk(manifest, baseDirectory, checkForUndeclaredFiles, out _);
+	}
 
 	/// <param name="presentEntryNames">The directory's own entry names, normalized and built during the same
 	/// walk the undeclared-file check below already does - empty unless <paramref name="checkForUndeclaredFiles" />
 	/// is true, since only <see cref="ValidateArtifactAsync" /> needs it and only that caller already pays
 	/// for the walk.</param>
-	private static List<ManifestProblem> EvaluateDeclaredFilesAgainstDisk(PluginManifest manifest,
+	private static List<ManifestProblem> EvaluateDeclaredFilesAgainstDisk(
+		PluginManifest manifest,
 		string baseDirectory,
 		bool checkForUndeclaredFiles,
 		out IReadOnlySet<string> presentEntryNames)
@@ -528,22 +540,22 @@ internal static class ManifestValidator
 			var relative = Path.GetRelativePath(baseDirectory, actualPath).Replace(Path.DirectorySeparatorChar, '/');
 			entryNames.Add(EntrypointPresence.Normalize(relative));
 
-			if (string.Equals(relative, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase) ||
-				(signed &&
-					(string.Equals(relative,
-							PluginArtifactFiles.CertificateFileName,
-							StringComparison.OrdinalIgnoreCase) ||
-						string.Equals(relative,
-							PluginArtifactFiles.CertificateSignatureFileName,
-							StringComparison.OrdinalIgnoreCase))) ||
-				(withIssuer &&
-					(string.Equals(relative,
-							PluginArtifactFiles.IssuerCertificateFileName,
-							StringComparison.OrdinalIgnoreCase) ||
-						string.Equals(relative,
-							PluginArtifactFiles.IssuerCertificateSignatureFileName,
-							StringComparison.OrdinalIgnoreCase))) ||
-				declaredPaths.Contains(relative))
+			if (string.Equals(relative, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase)
+				|| signed
+				&& (string.Equals(relative,
+						PluginArtifactFiles.CertificateFileName,
+						StringComparison.OrdinalIgnoreCase)
+					|| string.Equals(relative,
+						PluginArtifactFiles.CertificateSignatureFileName,
+						StringComparison.OrdinalIgnoreCase))
+				|| withIssuer
+				&& (string.Equals(relative,
+						PluginArtifactFiles.IssuerCertificateFileName,
+						StringComparison.OrdinalIgnoreCase)
+					|| string.Equals(relative,
+						PluginArtifactFiles.IssuerCertificateSignatureFileName,
+						StringComparison.OrdinalIgnoreCase))
+				|| declaredPaths.Contains(relative))
 			{
 				continue;
 			}
@@ -576,7 +588,8 @@ internal static class ManifestValidator
 	/// <summary>Package-level-and-up payload checks that the manifest reader deliberately never runs: every
 	/// declared entrypoint (every RID, not only the current host's - see <see cref="EntrypointPresence" />)
 	/// and a declared icon must both actually be present in the packaged content.</summary>
-	private static IEnumerable<ManifestProblem> EvaluatePayloadConsistency(PluginManifest manifest,
+	private static IEnumerable<ManifestProblem> EvaluatePayloadConsistency(
+		PluginManifest manifest,
 		IReadOnlySet<string> presentEntryNames)
 	{
 		foreach (var missing in EntrypointPresence.MissingProblems(manifest, presentEntryNames))
@@ -584,8 +597,8 @@ internal static class ManifestValidator
 			yield return missing;
 		}
 
-		if (!string.IsNullOrEmpty(manifest.Icon) &&
-			!presentEntryNames.Contains(EntrypointPresence.Normalize(manifest.Icon)))
+		if (!string.IsNullOrEmpty(manifest.Icon)
+			&& !presentEntryNames.Contains(EntrypointPresence.Normalize(manifest.Icon)))
 		{
 			yield return new ManifestProblem
 			{
@@ -627,8 +640,8 @@ internal static class ManifestValidator
 			{
 				yield return Problem(ManifestProblemSeverity.Warning,
 					"bundled-icon-pack-not-in-files",
-					$"Bundled icon pack '{pack.Key}' declares '{pack.Path}', which is not listed in 'files'. The host " +
-					"skips a pack the signed file list does not cover.",
+					$"Bundled icon pack '{pack.Key}' declares '{pack.Path}', which is not listed in 'files'. The host "
+					+ "skips a pack the signed file list does not cover.",
 					pointer);
 			}
 		}
@@ -636,7 +649,8 @@ internal static class ManifestValidator
 
 	/// <summary>Package-level-and-up: the same judgement <c>build</c> hard-fails on, reused here so
 	/// <c>validate</c> can never disagree with it about the same manifest - see <see cref="EntrypointLayout" />.</summary>
-	private static IEnumerable<ManifestProblem> EvaluateEntrypointLayout(PluginManifest manifest,
+	private static IEnumerable<ManifestProblem> EvaluateEntrypointLayout(
+		PluginManifest manifest,
 		PluginManifestValidationLevel level)
 	{
 		if (level < PluginManifestValidationLevel.Package || manifest.Entrypoints.Count == 0)
@@ -665,8 +679,10 @@ internal static class ManifestValidator
 		}
 	}
 
-	private static string EscapePointerSegment(string segment) =>
-		segment.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+	private static string EscapePointerSegment(string segment)
+	{
+		return segment.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+	}
 
 	private static (string Id, string Version) ProbeIdAndVersion(string json)
 	{
@@ -687,8 +703,8 @@ internal static class ManifestValidator
 	{
 		foreach (var property in element.EnumerateObject())
 		{
-			if (string.Equals(property.Name, name, StringComparison.OrdinalIgnoreCase) &&
-				property.Value.ValueKind == JsonValueKind.String)
+			if (string.Equals(property.Name, name, StringComparison.OrdinalIgnoreCase)
+				&& property.Value.ValueKind == JsonValueKind.String)
 			{
 				return property.Value.GetString();
 			}
@@ -703,7 +719,8 @@ internal static class ManifestValidator
 		return "sha256:" + Convert.ToHexStringLower(SHA256.HashData(stream));
 	}
 
-	private static ManifestValidationResult Build(PluginManifest manifest,
+	private static ManifestValidationResult Build(
+		PluginManifest manifest,
 		List<ManifestProblem> problems,
 		string subject,
 		PluginManifestValidationLevel level)
@@ -723,7 +740,8 @@ internal static class ManifestValidator
 		};
 	}
 
-	private static ManifestValidationResult Failure(int exitCode,
+	private static ManifestValidationResult Failure(
+		int exitCode,
 		string code,
 		string message,
 		string subject,
@@ -739,11 +757,14 @@ internal static class ManifestValidator
 		};
 	}
 
-	private static ManifestProblem Problem(ManifestProblemSeverity severity,
+	private static ManifestProblem Problem(
+		ManifestProblemSeverity severity,
 		string code,
 		string message,
 		string? pointer = null)
-		=> new() { Severity = severity, Code = code, Message = message, Pointer = pointer };
+	{
+		return new ManifestProblem { Severity = severity, Code = code, Message = message, Pointer = pointer };
+	}
 
 	private static void TryDeleteDirectory(string path)
 	{
@@ -751,7 +772,7 @@ internal static class ManifestValidator
 		{
 			if (Directory.Exists(path))
 			{
-				Directory.Delete(path, recursive: true);
+				Directory.Delete(path, true);
 			}
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

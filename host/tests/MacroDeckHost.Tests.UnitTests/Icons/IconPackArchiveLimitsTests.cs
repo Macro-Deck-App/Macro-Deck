@@ -40,7 +40,7 @@ public class IconPackArchiveLimitsTests
 		_harness.Dispose();
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -73,7 +73,7 @@ public class IconPackArchiveLimitsTests
 	[Test]
 	public async Task A_pack_json_above_the_manifest_bound_is_refused_on_import()
 	{
-		var archive = UnsignedPack(3, out _, description: new string('x', IconPackArchiveLimits.MaxManifestBytes));
+		var archive = UnsignedPack(3, out _, new string('x', IconPackArchiveLimits.MaxManifestBytes));
 
 		var result = await Restore(archive);
 
@@ -115,7 +115,11 @@ public class IconPackArchiveLimitsTests
 			CreatedAt = DateTime.UtcNow
 		};
 		await _harness.Cache.AddIcons(pack.Id, [icon]);
-		await _harness.Storage.WriteVariant(pack.Id, icon.Id, IconVariants.Master, new byte[] { 1, 2, 3 }, CancellationToken.None);
+		await _harness.Storage.WriteVariant(pack.Id,
+			icon.Id,
+			IconVariants.Master,
+			new byte[] { 1, 2, 3 },
+			CancellationToken.None);
 		var baseline = ManifestLength(await Export(pack.Id));
 		pack.Description = new string('ä', (IconPackArchiveLimits.MaxUnsignedManifestBytes - (int)baseline - 64) / 6);
 		await _harness.Cache.AddOrUpdatePack(pack);
@@ -129,15 +133,21 @@ public class IconPackArchiveLimitsTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(ManifestLength(exported), Is.GreaterThan(IconPackArchiveLimits.MaxUnsignedManifestBytes - 1024));
-			Assert.That(ManifestLength(File.ReadAllBytes(signed)), Is.LessThanOrEqualTo(IconPackArchiveLimits.MaxManifestBytes));
+			Assert.That(ManifestLength(exported),
+				Is.GreaterThan(IconPackArchiveLimits.MaxUnsignedManifestBytes - 1024));
+			Assert.That(ManifestLength(File.ReadAllBytes(signed)),
+				Is.LessThanOrEqualTo(IconPackArchiveLimits.MaxManifestBytes));
 			Assert.That(verified.Success, Is.True, verified.Message);
 			Assert.That(result.Success, Is.True, result.ErrorMessage);
 		});
 	}
 
 	private Task<MacroDeckHost.Domain.Common.Result<IconPackEntity, IconError>> Restore(byte[] archive)
-		=> _harness.RestoreService.RestoreAsNewPack("pack.macroDeckIconPack", new MemoryStream(archive), CancellationToken.None);
+	{
+		return _harness.RestoreService.RestoreAsNewPack("pack.macroDeckIconPack",
+			new MemoryStream(archive),
+			CancellationToken.None);
+	}
 
 	private async Task<byte[]> Export(Guid packId)
 	{
@@ -157,7 +167,8 @@ public class IconPackArchiveLimitsTests
 			issuer.CertificateSignatureBytes,
 			TestPki.Root.PublicKey,
 			SigningCertificateChain.PackageKeyUsage);
-		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate).Material!;
+		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate)
+			.Material!;
 		var output = Path.Combine(_directory, "signed-" + Path.GetFileName(package));
 
 		var result = await PackageSigner.SignAsync(package,
@@ -178,7 +189,8 @@ public class IconPackArchiveLimitsTests
 		iconId = Guid.CreateVersion7();
 		var contents = new List<(string Path, byte[] Content)> { ($"icons/{iconId}/master.webp", [1, 2, 3]) };
 		contents.AddRange(Enumerable.Range(0, entries - 2)
-			.Select(index => ($"extra/{index}.bin", Encoding.UTF8.GetBytes(index.ToString(CultureInfo.InvariantCulture)))));
+			.Select(index
+				=> ($"extra/{index}.bin", Encoding.UTF8.GetBytes(index.ToString(CultureInfo.InvariantCulture)))));
 		var manifest = new IconPackManifest
 		{
 			Id = Guid.CreateVersion7(),
@@ -196,7 +208,7 @@ public class IconPackArchiveLimitsTests
 		};
 
 		using var stream = new MemoryStream();
-		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			Write(zip, "pack.json", JsonSerializer.SerializeToUtf8Bytes(manifest, PersistenceJsonOptions.Default));
 			foreach (var (path, content) in contents)

@@ -39,5 +39,8 @@ public static class IntegrationStorageKeys
 		}
 	}
 
-	private static bool IsLeading(char character) => character is >= 'a' and <= 'z' or >= '0' and <= '9';
+	private static bool IsLeading(char character)
+	{
+		return character is >= 'a' and <= 'z' or >= '0' and <= '9';
+	}
 }

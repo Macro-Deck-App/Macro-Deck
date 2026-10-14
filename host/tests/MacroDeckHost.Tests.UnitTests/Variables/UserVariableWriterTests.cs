@@ -331,7 +331,7 @@ public class UserVariableWriterTests
 		var valid = await Apply("primary", UserVariableOperation.Set, "#FF000080");
 		var invalid = await Apply("primary", UserVariableOperation.Set, "blue-ish");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(valid.Status, Is.EqualTo(UserVariableWriteStatus.Applied));
 			Assert.That(invalid.Status, Is.EqualTo(UserVariableWriteStatus.InvalidValue));
@@ -364,13 +364,17 @@ public class UserVariableWriterTests
 	}
 
 	private Task<UserVariableWriteResult> Apply(string name, UserVariableOperation operation, string? value)
-		=> _writer.ApplyAsync(name, null, operation, value);
+	{
+		return _writer.ApplyAsync(name, null, operation, value);
+	}
 
 	private Task<Result<VariableEntity, VariableError>> CreateUserVariable(
 		string name,
 		DomainVariableType type,
 		object? value)
-		=> _service.CreateUserVariable(name, VariableScope.Global, null, type, value, null);
+	{
+		return _service.CreateUserVariable(name, VariableScope.Global, null, type, value, null);
+	}
 
 	private async Task<string> ValueOf(string name, string? widgetId = null)
 	{
@@ -382,7 +386,10 @@ public class UserVariableWriterTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -396,7 +403,7 @@ public class UserVariableWriterTests
 
 		var applied = await Apply("greeting", UserVariableOperation.Append, " there");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(created.Status, Is.EqualTo(UserVariableCreateStatus.Created));
 			Assert.That(applied.Status, Is.EqualTo(UserVariableWriteStatus.Applied));
@@ -409,7 +416,7 @@ public class UserVariableWriterTests
 	{
 		var created = await _writer.CreateAsync("count", WidgetId, SdkVariableType.Numeric, "1");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(created.Status, Is.EqualTo(UserVariableCreateStatus.Created));
 			Assert.That(await _service.Resolve("count", VariableScope.Widget, WidgetId), Is.Not.Null);
@@ -429,7 +436,7 @@ public class UserVariableWriterTests
 			SdkVariableType.Numeric,
 			"1");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(UserVariableCreateStatus.UnknownWidget));
 			Assert.That(await _service.GetAll(), Has.None.Matches<VariableEntity>(v => v.Name == "count"));
@@ -441,7 +448,7 @@ public class UserVariableWriterTests
 	{
 		var result = await _writer.CreateAsync("count", "not-a-widget-id", SdkVariableType.Numeric, "1");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(UserVariableCreateStatus.UnknownWidget));
 			Assert.That(await _service.GetAll(), Has.None.Matches<VariableEntity>(v => v.Name == "count"));
@@ -456,7 +463,7 @@ public class UserVariableWriterTests
 		var duplicate = await _writer.CreateAsync("greeting", null, SdkVariableType.Text, "x");
 		var shadow = await _writer.CreateAsync("greeting", WidgetId, SdkVariableType.Text, "x");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(duplicate.Status, Is.EqualTo(UserVariableCreateStatus.AlreadyExists));
 			Assert.That(await ValueOf("greeting"), Is.EqualTo("hello"));
@@ -469,7 +476,7 @@ public class UserVariableWriterTests
 	{
 		var result = await _writer.CreateAsync("count", null, SdkVariableType.Numeric, "many");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(UserVariableCreateStatus.InvalidValue));
 			Assert.That(await _service.GetAll(), Has.None.Matches<VariableEntity>(v => v.Name == "count"));
@@ -530,7 +537,7 @@ public class UserVariableWriterTests
 		var applied = await writer.ApplyAsync("gain", null, UserVariableOperation.Set, "5")
 			.WaitAsync(TimeSpan.FromSeconds(5));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(applied.Status, Is.EqualTo(UserVariableWriteStatus.Applied));
 			Assert.That(provider.Applied, Is.EqualTo(5m));
@@ -565,7 +572,9 @@ public class UserVariableWriterTests
 		];
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 
 		public async ValueTask<VariableWriteResult> SetValueAsync(
 			string localId,
@@ -594,13 +603,24 @@ public class UserVariableWriterTests
 	{
 		private readonly HashSet<string> _widgets;
 
-		public StubWidgetAppearanceService(params string[] widgetIds) => _widgets = [.. widgetIds];
+		public StubWidgetAppearanceService(params string[] widgetIds)
+		{
+			_widgets = [.. widgetIds];
+		}
 
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return [];
+		}
 
-		public bool Exists(string widgetId) => _widgets.Contains(widgetId);
+		public bool Exists(string widgetId)
+		{
+			return _widgets.Contains(widgetId);
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 	}
 }

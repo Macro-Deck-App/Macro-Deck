@@ -128,6 +128,8 @@ public class MacroDeckLogShipperTests
 	}
 
 	private static int TotalEventCount(FakeLogTransport transport)
-		=> transport.Sent.Sum(envelope
+	{
+		return transport.Sent.Sum(envelope
 			=> envelope.Payload!.Value.Deserialize<LogPublishPayload>(PluginProtocolJson.Options)!.Events.Count);
+	}
 }

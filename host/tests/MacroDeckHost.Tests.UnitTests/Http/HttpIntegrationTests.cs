@@ -129,8 +129,10 @@ internal sealed class HttpIntegrationTests
 	}
 
 	private ActionParameter SendRequestParameter(string name)
-		=> _integration.Actions
+	{
+		return _integration.Actions
 			.Single(action => action.Id == "send-request")
 			.Parameters
 			.Single(parameter => parameter.Name == name);
+	}
 }

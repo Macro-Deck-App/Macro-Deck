@@ -15,8 +15,8 @@ public static class PluginHostCompatibility
 	// Macro Deck would satisfy the range: the next releases, a far-future one, and every version it names.
 	public static PluginIncompatibility ClassifyMacroDeckRange(string? range, string? hostVersion)
 	{
-		if (!SemanticVersionRange.TryParse(range, out var parsedRange) ||
-			!SemanticVersion.TryParse(hostVersion, out var current))
+		if (!SemanticVersionRange.TryParse(range, out var parsedRange)
+			|| !SemanticVersion.TryParse(hostVersion, out var current))
 		{
 			return PluginIncompatibility.Unknown;
 		}

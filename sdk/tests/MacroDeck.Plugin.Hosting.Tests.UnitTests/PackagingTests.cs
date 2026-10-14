@@ -35,10 +35,14 @@ public class PackagingTests
 	}
 
 	private static XDocument Load(string relativePath)
-		=> XDocument.Load(Path.Combine(RepositoryRoot(), relativePath));
+	{
+		return XDocument.Load(Path.Combine(RepositoryRoot(), relativePath));
+	}
 
 	private static string? Property(XDocument project, string name)
-		=> project.Descendants(name).FirstOrDefault()?.Value;
+	{
+		return project.Descendants(name).FirstOrDefault()?.Value;
+	}
 
 	[Test]
 	public void Every_published_package_declares_an_id_matching_its_assembly_name()

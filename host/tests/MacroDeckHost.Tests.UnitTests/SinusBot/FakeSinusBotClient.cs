@@ -21,10 +21,14 @@ internal sealed class FakeSinusBotClient : ISinusBotClient
 	public List<(string Method, string InstanceId, object? Arg)> Calls { get; } = [];
 
 	public Task AuthenticateAsync(string username, string password, CancellationToken cancellationToken)
-		=> AuthException is not null ? Task.FromException(AuthException) : Task.CompletedTask;
+	{
+		return AuthException is not null ? Task.FromException(AuthException) : Task.CompletedTask;
+	}
 
 	public Task<IReadOnlyList<SinusBotInstance>> GetInstancesAsync(CancellationToken cancellationToken)
-		=> Task.FromResult(Instances);
+	{
+		return Task.FromResult(Instances);
+	}
 
 	public Task<SinusBotInstanceStatus> GetInstanceStatusAsync(string instanceId, CancellationToken cancellationToken)
 	{
@@ -64,38 +68,62 @@ internal sealed class FakeSinusBotClient : ISinusBotClient
 	}
 
 	public Task PlayAsync(string instanceId, CancellationToken cancellationToken)
-		=> Record("Play", instanceId, null);
+	{
+		return Record("Play", instanceId, null);
+	}
 
 	public Task PauseAsync(string instanceId, CancellationToken cancellationToken)
-		=> Record("Pause", instanceId, null);
+	{
+		return Record("Pause", instanceId, null);
+	}
 
 	public Task StopAsync(string instanceId, CancellationToken cancellationToken)
-		=> Record("Stop", instanceId, null);
+	{
+		return Record("Stop", instanceId, null);
+	}
 
 	public Task PlayFileAsync(string instanceId, string fileId, CancellationToken cancellationToken)
-		=> Record("PlayFile", instanceId, fileId);
+	{
+		return Record("PlayFile", instanceId, fileId);
+	}
 
 	public Task NextAsync(string instanceId, CancellationToken cancellationToken)
-		=> Record("Next", instanceId, null);
+	{
+		return Record("Next", instanceId, null);
+	}
 
 	public Task PreviousAsync(string instanceId, CancellationToken cancellationToken)
-		=> Record("Previous", instanceId, null);
+	{
+		return Record("Previous", instanceId, null);
+	}
 
 	public Task SeekAsync(string instanceId, int seconds, CancellationToken cancellationToken)
-		=> Record("Seek", instanceId, seconds);
+	{
+		return Record("Seek", instanceId, seconds);
+	}
 
 	public Task SetVolumeAsync(string instanceId, int volumePercent, CancellationToken cancellationToken)
-		=> Record("SetVolume", instanceId, volumePercent);
+	{
+		return Record("SetVolume", instanceId, volumePercent);
+	}
 
 	public Task IncreaseVolumeAsync(string instanceId, CancellationToken cancellationToken)
-		=> Record("IncreaseVolume", instanceId, null);
+	{
+		return Record("IncreaseVolume", instanceId, null);
+	}
 
 	public Task DecreaseVolumeAsync(string instanceId, CancellationToken cancellationToken)
-		=> Record("DecreaseVolume", instanceId, null);
+	{
+		return Record("DecreaseVolume", instanceId, null);
+	}
 
 	public Task SetShuffleAsync(string instanceId, bool enabled, CancellationToken cancellationToken)
-		=> Record("SetShuffle", instanceId, enabled);
+	{
+		return Record("SetShuffle", instanceId, enabled);
+	}
 
 	public Task SetRepeatAsync(string instanceId, bool enabled, CancellationToken cancellationToken)
-		=> Record("SetRepeat", instanceId, enabled);
+	{
+		return Record("SetRepeat", instanceId, enabled);
+	}
 }

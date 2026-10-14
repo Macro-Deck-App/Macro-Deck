@@ -25,7 +25,10 @@ internal sealed class PluginBundledIconPackReaderTests
 	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_root, recursive: true);
+	public void TearDown()
+	{
+		Directory.Delete(_root, true);
+	}
 
 	[Test]
 	public void Declared_bundled_packs_are_read_in_order_without_their_files_existing()
@@ -118,14 +121,14 @@ internal sealed class PluginBundledIconPackReaderTests
 	[Test]
 	public void The_signed_digest_of_a_manifest_does_not_depend_on_its_bundled_packs()
 	{
-		const string Files = """
+		const string files = """
 							 , "files": [
 							 	{ "path": "icon-packs/logos.macroDeckIconPack", "sha256": "sha256:aa00000000000000000000000000000000000000000000000000000000000000", "size": 3 }
 							 ]
 							 """;
 
-		var without = Read(null, Files);
-		var with = Read("""[ { "key": "logos", "path": "icon-packs/logos.macroDeckIconPack" } ]""", Files);
+		var without = Read(null, files);
+		var with = Read("""[ { "key": "logos", "path": "icon-packs/logos.macroDeckIconPack" } ]""", files);
 
 		Assert.Multiple(() =>
 		{
@@ -137,10 +140,14 @@ internal sealed class PluginBundledIconPackReaderTests
 	}
 
 	private static string Packs(int count)
-		=> "[" + string.Join(",",
-			Enumerable.Range(0, count)
-				.Select(index =>
-					$$"""{ "key": "pack-{{index}}", "path": "icon-packs/pack-{{index}}.macroDeckIconPack" }""")) + "]";
+	{
+		return "["
+			+ string.Join(",",
+				Enumerable.Range(0, count)
+					.Select(index =>
+						$$"""{ "key": "pack-{{index}}", "path": "icon-packs/pack-{{index}}.macroDeckIconPack" }"""))
+			+ "]";
+	}
 
 	private PluginManifestReadResult Read(string? bundledIconPacks, string extra = "")
 	{

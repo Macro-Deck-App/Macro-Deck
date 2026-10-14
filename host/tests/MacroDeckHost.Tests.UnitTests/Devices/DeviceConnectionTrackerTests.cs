@@ -22,7 +22,7 @@ public class DeviceConnectionTrackerTests
 	{
 		_bus = new RecordingEventBus();
 		_time = new ManualTimeProvider();
-		_tracker = new DeviceConnectionTracker(_bus, _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
+		_tracker = new DeviceConnectionTracker(_bus, _time, new DeckClientTracker(Serilog.Core.Logger.None));
 	}
 
 	private void AdvancePastLingerAndFlush()
@@ -120,9 +120,17 @@ public class DeviceConnectionTrackerTests
 	public void Two_connections_on_one_device_raise_one_connected()
 	{
 		var deviceId = Guid.NewGuid();
-		_tracker.Attach("conn-1", deviceId, () => { });
+		_tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
-		_tracker.Attach("conn-2", deviceId, () => { });
+		_tracker.Attach("conn-2",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-2", "tab-2");
 
 		Assert.That(_bus.Published.Count(o => o.EventId == "macro-deck::client-connected"), Is.EqualTo(1));
@@ -132,12 +140,20 @@ public class DeviceConnectionTrackerTests
 	public void A_reload_inside_the_linger_window_raises_neither_disconnect_nor_a_second_connected()
 	{
 		var deviceId = Guid.NewGuid();
-		_tracker.Attach("conn-1", deviceId, () => { });
+		_tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
 		_tracker.Remove("conn-1");
 
 		_time.Advance(TimeSpan.FromSeconds(1));
-		_tracker.Attach("conn-2", deviceId, () => { });
+		_tracker.Attach("conn-2",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-2", "tab-1");
 		_tracker.FlushPendingDisconnects(_time.Now.UtcDateTime);
 
@@ -148,7 +164,11 @@ public class DeviceConnectionTrackerTests
 	public void A_genuine_disconnect_raises_after_the_window()
 	{
 		var deviceId = Guid.NewGuid();
-		_tracker.Attach("conn-1", deviceId, () => { });
+		_tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
 		_tracker.Remove("conn-1");
 
@@ -163,7 +183,11 @@ public class DeviceConnectionTrackerTests
 	public void OnlineDeviceConnectionCounts_still_reports_a_device_inside_the_linger_window()
 	{
 		var deviceId = Guid.NewGuid();
-		_tracker.Attach("conn-1", deviceId, () => { });
+		_tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
 		_tracker.Remove("conn-1");
 
@@ -176,7 +200,11 @@ public class DeviceConnectionTrackerTests
 	public void OnlineDeviceConnectionCounts_drops_the_device_once_the_linger_window_lapses()
 	{
 		var deviceId = Guid.NewGuid();
-		_tracker.Attach("conn-1", deviceId, () => { });
+		_tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
 		_tracker.Remove("conn-1");
 
@@ -191,9 +219,17 @@ public class DeviceConnectionTrackerTests
 	public void OnlineDeviceConnectionCounts_reports_the_real_count_when_another_connection_is_still_live()
 	{
 		var deviceId = Guid.NewGuid();
-		_tracker.Attach("conn-1", deviceId, () => { });
+		_tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
-		_tracker.Attach("conn-2", deviceId, () => { });
+		_tracker.Attach("conn-2",
+			deviceId,
+			() =>
+			{
+			});
 		_tracker.Register("conn-2", "tab-2");
 		_tracker.Remove("conn-1");
 
@@ -205,7 +241,11 @@ public class DeviceConnectionTrackerTests
 	[Test]
 	public void Device_less_connections_key_on_client_id()
 	{
-		_tracker.Attach("conn-1", null, () => { });
+		_tracker.Attach("conn-1",
+			null,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "client-a");
 
 		Assert.Multiple(() =>
@@ -247,7 +287,11 @@ public class DeviceConnectionTrackerTests
 	public void Only_closing_every_connection_for_shutdown_cancels_the_shutdown_token()
 	{
 		var deviceId = Guid.NewGuid();
-		_tracker.Attach("conn-1", deviceId, () => { });
+		_tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 
 		_tracker.AbortDevice(deviceId);
 		var afterDeviceRevocation = _tracker.ShutdownToken.IsCancellationRequested;
@@ -265,7 +309,11 @@ public class DeviceConnectionTrackerTests
 	{
 		var deviceId = Guid.NewGuid();
 		_tracker.SetDeviceNames(new Dictionary<Guid, string> { [deviceId] = "Kitchen tablet" });
-		_tracker.Attach("conn-1", deviceId, () => { });
+		_tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 
 		_tracker.Register("conn-1", "tab-1");
 
@@ -286,7 +334,11 @@ public class DeviceConnectionTrackerTests
 		_tracker.SetDeviceNames(new Dictionary<Guid, string> { [other] = "Old device" });
 
 		_tracker.SetDeviceName(seeded, "Kitchen tablet");
-		_tracker.Attach("conn-1", seeded, () => { });
+		_tracker.Attach("conn-1",
+			seeded,
+			() =>
+			{
+			});
 		_tracker.Register("conn-1", "tab-1");
 
 		Assert.Multiple(() =>
@@ -333,7 +385,11 @@ public class DeviceConnectionTrackerTests
 		var deck = new DeckClientTracker(Serilog.Core.Logger.None);
 		var tracker = new DeviceConnectionTracker(_bus, _time, deck);
 		var deviceId = Guid.NewGuid();
-		tracker.Attach("conn-1", deviceId, () => { });
+		tracker.Attach("conn-1",
+			deviceId,
+			() =>
+			{
+			});
 		tracker.Register("conn-1", "launch-1");
 		deck.Publish(deck.Report("launch-2", deviceId, "p1", "f1"));
 

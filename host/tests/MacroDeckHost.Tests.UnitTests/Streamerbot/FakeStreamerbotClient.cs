@@ -83,7 +83,9 @@ internal sealed class FakeStreamerbotClient : IStreamerbotClient
 	}
 
 	public void RaiseEvent(string source, string type, string data = "{}")
-		=> EventReceived?.Invoke(this, new StreamerbotEventMessage(source, type, Parse(data)));
+	{
+		EventReceived?.Invoke(this, new StreamerbotEventMessage(source, type, Parse(data)));
+	}
 
 	public void Drop(string reason = "dropped")
 	{
@@ -96,7 +98,8 @@ internal sealed class FakeStreamerbotClient : IStreamerbotClient
 		lock (_lock)
 		{
 			return Requests.LastOrDefault(entry =>
-				string.Equals(entry.Request, request, StringComparison.Ordinal)).Payload;
+					string.Equals(entry.Request, request, StringComparison.Ordinal))
+				.Payload;
 		}
 	}
 

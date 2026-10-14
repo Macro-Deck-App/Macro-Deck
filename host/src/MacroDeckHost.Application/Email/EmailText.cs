@@ -19,5 +19,7 @@ public static class EmailText
 	}
 
 	public static string? ClipOptional(string? text, int maxLength)
-		=> string.IsNullOrWhiteSpace(text) ? null : Clip(text.Trim(), maxLength);
+	{
+		return string.IsNullOrWhiteSpace(text) ? null : Clip(text.Trim(), maxLength);
+	}
 }

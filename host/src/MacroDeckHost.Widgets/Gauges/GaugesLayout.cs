@@ -3,7 +3,9 @@ namespace MacroDeckHost.Widgets.Gauges;
 internal sealed record GaugesLayoutSegment(int Columns, int Rows, double? MinAspect, double? MaxAspect)
 {
 	public bool Contains(double aspect)
-		=> (MinAspect is not { } min || aspect >= min) && (MaxAspect is not { } max || aspect < max);
+	{
+		return (MinAspect is not { } min || aspect >= min) && (MaxAspect is not { } max || aspect < max);
+	}
 
 	// The host never learns the real tile, so sizes assume the deck tile shape this layout most likely fills.
 	public double RingScale
@@ -53,7 +55,7 @@ internal static class GaugesLayout
 		int? current = null;
 		double? start = null;
 
-		for (var step = 0; ; step++)
+		for (var step = 0;; step++)
 		{
 			var aspect = Math.Round(LowestAspect + step * AspectStep, 2);
 
@@ -83,7 +85,10 @@ internal static class GaugesLayout
 		return segments;
 	}
 
-	public static int RowsFor(int count, int columns) => (count + columns - 1) / columns;
+	public static int RowsFor(int count, int columns)
+	{
+		return (count + columns - 1) / columns;
+	}
 
 	private static int Best(int count, double aspect)
 	{

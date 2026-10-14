@@ -32,13 +32,18 @@ internal sealed class DeviceSurfaceWidgetIconFetchTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	private UiResource Register(string mediaType, byte[] content)
-		=> _fixture.Resources.Register(new UiResourceRegistration
+	{
+		return _fixture.Resources.Register(new UiResourceRegistration
 		{
 			OwnerId = "test", Name = _widgetId.ToString("N"), MediaType = mediaType, Content = content
 		});
+	}
 
 	[Test]
 	public async Task An_active_providers_bytes_are_delivered_with_their_content_type_and_version()

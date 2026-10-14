@@ -54,15 +54,16 @@ internal static class LinkProtocol
 
 	public static ReadOnlySpan<byte> HelloMagic => "MDLK"u8;
 
-	public static bool IsKnownType(byte type) => type <= (byte)LinkFrameType.Bye;
+	public static bool IsKnownType(byte type)
+	{
+		return type <= (byte)LinkFrameType.Bye;
+	}
 
 	// A frame whose length is a multiple of the packet size would end the USB transfer on a full packet,
 	// so one filler byte makes it end on a short packet instead of relying on a zero-length packet.
 	public static byte[] ForUsbTransfer(ReadOnlySpan<byte> frame)
 	{
-		var needsFiller = frame.Length > 0 &&
-			frame.Length < MaxFrameLength &&
-			frame.Length % UsbFillerPacketSize == 0;
+		var needsFiller = frame.Length > 0 && frame.Length < MaxFrameLength && frame.Length % UsbFillerPacketSize == 0;
 		var transfer = new byte[frame.Length + (needsFiller ? 1 : 0)];
 		frame.CopyTo(transfer);
 		if (needsFiller)
@@ -99,16 +100,26 @@ internal readonly record struct LinkFrame(LinkFrameType Type, byte Flags, ushort
 		payload[4] = maxVersion;
 		BinaryPrimitives.WriteUInt32BigEndian(payload.AsSpan(5), epoch);
 		BinaryPrimitives.WriteUInt32BigEndian(payload.AsSpan(9), echo);
-		return new LinkFrame(LinkFrameType.Hello, ack ? LinkProtocol.AckFlag : (byte)0, LinkProtocol.ControlStream,
+		return new LinkFrame(LinkFrameType.Hello,
+			ack ? LinkProtocol.AckFlag : (byte)0,
+			LinkProtocol.ControlStream,
 			payload);
 	}
 
-	public static LinkFrame Open(ushort stream) => new(LinkFrameType.Open, 0, stream, ReadOnlyMemory<byte>.Empty);
+	public static LinkFrame Open(ushort stream)
+	{
+		return new LinkFrame(LinkFrameType.Open, 0, stream, ReadOnlyMemory<byte>.Empty);
+	}
 
 	public static LinkFrame Data(ushort stream, ReadOnlyMemory<byte> payload)
-		=> new(LinkFrameType.Data, 0, stream, payload);
+	{
+		return new LinkFrame(LinkFrameType.Data, 0, stream, payload);
+	}
 
-	public static LinkFrame Close(ushort stream) => new(LinkFrameType.Close, 0, stream, ReadOnlyMemory<byte>.Empty);
+	public static LinkFrame Close(ushort stream)
+	{
+		return new LinkFrame(LinkFrameType.Close, 0, stream, ReadOnlyMemory<byte>.Empty);
+	}
 
 	public static LinkFrame Window(ushort stream, uint credit)
 	{
@@ -117,7 +128,10 @@ internal readonly record struct LinkFrame(LinkFrameType Type, byte Flags, ushort
 		return new LinkFrame(LinkFrameType.Window, 0, stream, payload);
 	}
 
-	public static LinkFrame Bye() => new(LinkFrameType.Bye, 0, LinkProtocol.ControlStream, ReadOnlyMemory<byte>.Empty);
+	public static LinkFrame Bye()
+	{
+		return new LinkFrame(LinkFrameType.Bye, 0, LinkProtocol.ControlStream, ReadOnlyMemory<byte>.Empty);
+	}
 
 	public uint Credit => BinaryPrimitives.ReadUInt32BigEndian(Payload.Span);
 }

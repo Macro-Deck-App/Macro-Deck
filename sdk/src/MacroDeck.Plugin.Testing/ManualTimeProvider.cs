@@ -30,7 +30,10 @@ public sealed class ManualTimeProvider : TimeProvider
 	private DateTimeOffset _now;
 
 	/// <summary>Creates a clock starting at <paramref name="now" />.</summary>
-	public ManualTimeProvider(DateTimeOffset now) => _now = now;
+	public ManualTimeProvider(DateTimeOffset now)
+	{
+		_now = now;
+	}
 
 	/// <summary>Creates a clock starting at <see cref="DateTimeOffset.UnixEpoch" />.</summary>
 	public ManualTimeProvider()

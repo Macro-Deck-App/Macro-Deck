@@ -11,19 +11,28 @@ internal static class PackageManifestEntry
 	/// one of the four formats that differs.</summary>
 	public const string IconPackManifestFileName = "pack.json";
 
-	public static string NameFor(SignablePackageFormat format) => format switch
+	public static string NameFor(SignablePackageFormat format)
 	{
-		SignablePackageFormat.IconPack => IconPackManifestFileName,
-		_ => PluginArtifactFiles.ManifestFileName
-	};
+		return format switch
+		{
+			SignablePackageFormat.IconPack => IconPackManifestFileName,
+			_ => PluginArtifactFiles.ManifestFileName
+		};
+	}
 
-	public static int MaxBytesFor(SignablePackageFormat format) => format switch
+	public static int MaxBytesFor(SignablePackageFormat format)
 	{
-		SignablePackageFormat.IconPack => IconPackArchiveLimits.MaxManifestBytes,
-		_ => PluginArtifactLimits.MaxManifestBytes
-	};
+		return format switch
+		{
+			SignablePackageFormat.IconPack => IconPackArchiveLimits.MaxManifestBytes,
+			_ => PluginArtifactLimits.MaxManifestBytes
+		};
+	}
 
-	public static async Task<string?> ReadBoundedAsync(Stream manifest, int maxBytes, CancellationToken cancellationToken)
+	public static async Task<string?> ReadBoundedAsync(
+		Stream manifest,
+		int maxBytes,
+		CancellationToken cancellationToken)
 	{
 		using var buffer = new MemoryStream();
 		var chunk = new byte[81_920];

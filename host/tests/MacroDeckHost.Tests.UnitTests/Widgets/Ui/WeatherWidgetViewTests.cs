@@ -105,7 +105,7 @@ public class WeatherWidgetViewTests
 			("2026-07-21", 0.4, 0.7),
 			("2026-07-22", 0.5, 0.7666667),
 			("2026-07-23", 0.5666667, 1.0),
-			("2026-07-24", 0.0, 0.1666667),
+			("2026-07-24", 0.0, 0.1666667)
 		};
 
 		Assert.Multiple(() =>
@@ -123,7 +123,7 @@ public class WeatherWidgetViewTests
 	[Test]
 	public void S4a_Equal_min_and_max_floors_the_bar_width_to_0_08()
 	{
-		var (start, end) = WeatherWidgetView.RangeBarSpan(min: 10, max: 10, weekMin: -2, span: 30);
+		var (start, end) = WeatherWidgetView.RangeBarSpan(10, 10, -2, 30);
 
 		Assert.Multiple(() =>
 		{
@@ -135,7 +135,7 @@ public class WeatherWidgetViewTests
 	[Test]
 	public void S4b_A_day_at_the_week_maximum_clamps_its_end_to_1()
 	{
-		var (start, end) = WeatherWidgetView.RangeBarSpan(min: 28, max: 40, weekMin: -2, span: 30);
+		var (start, end) = WeatherWidgetView.RangeBarSpan(28, 40, -2, 30);
 
 		Assert.Multiple(() =>
 		{
@@ -260,7 +260,7 @@ public class WeatherWidgetViewTests
 	private static readonly string[] _daySuffixedSlugs =
 	[
 		"clear", "mainly-clear", "partly-cloudy", "fog", "drizzle", "rain", "rain-showers", "snow-grains",
-		"snow", "snow-showers",
+		"snow", "snow-showers"
 	];
 
 	[Test]
@@ -268,20 +268,20 @@ public class WeatherWidgetViewTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(WeatherWidgetIcons.IconName("overcast", isDay: true), Is.EqualTo("cloudy"));
-			Assert.That(WeatherWidgetIcons.IconName("overcast", isDay: false), Is.EqualTo("cloudy"));
-			Assert.That(WeatherWidgetIcons.IconName("freezing-rain", isDay: true), Is.EqualTo("rain-and-sleet-mix"));
-			Assert.That(WeatherWidgetIcons.IconName("freezing-rain", isDay: false), Is.EqualTo("rain-and-sleet-mix"));
-			Assert.That(WeatherWidgetIcons.IconName("thunderstorm", isDay: true), Is.EqualTo("thunderstorms"));
-			Assert.That(WeatherWidgetIcons.IconName("thunderstorm", isDay: false), Is.EqualTo("thunderstorms"));
+			Assert.That(WeatherWidgetIcons.IconName("overcast", true), Is.EqualTo("cloudy"));
+			Assert.That(WeatherWidgetIcons.IconName("overcast", false), Is.EqualTo("cloudy"));
+			Assert.That(WeatherWidgetIcons.IconName("freezing-rain", true), Is.EqualTo("rain-and-sleet-mix"));
+			Assert.That(WeatherWidgetIcons.IconName("freezing-rain", false), Is.EqualTo("rain-and-sleet-mix"));
+			Assert.That(WeatherWidgetIcons.IconName("thunderstorm", true), Is.EqualTo("thunderstorms"));
+			Assert.That(WeatherWidgetIcons.IconName("thunderstorm", false), Is.EqualTo("thunderstorms"));
 
 			foreach (var slug in _daySuffixedSlugs)
 			{
-				Assert.That(WeatherWidgetIcons.IconName(slug, isDay: true), Does.EndWith("-day"));
-				Assert.That(WeatherWidgetIcons.IconName(slug, isDay: false), Does.EndWith("-night"));
+				Assert.That(WeatherWidgetIcons.IconName(slug, true), Does.EndWith("-day"));
+				Assert.That(WeatherWidgetIcons.IconName(slug, false), Does.EndWith("-night"));
 			}
 
-			Assert.That(WeatherWidgetIcons.IconName("not-a-real-slug", isDay: true), Is.EqualTo("cloudy"));
+			Assert.That(WeatherWidgetIcons.IconName("not-a-real-slug", true), Is.EqualTo("cloudy"));
 		});
 	}
 
@@ -368,8 +368,8 @@ public class WeatherWidgetViewTests
 			Assert.That(tree.Revision, Is.Zero);
 			Assert.That(patches,
 				Is.Empty,
-				"a cold open must already carry the cached data - filling it in asynchronously flashes on " +
-				"every deck page turn.");
+				"a cold open must already carry the cached data - filling it in asynchronously flashes on "
+				+ "every deck page turn.");
 			Assert.That(temp.Properties["text"].GetRawText(), Does.Contain("\"value\":23"));
 		});
 
@@ -379,7 +379,7 @@ public class WeatherWidgetViewTests
 	[Test]
 	public void S9_ShowIcon_false_drops_the_current_icon_but_keeps_forecast_row_icons()
 	{
-		var host = RenderState(Sample(), Config(showIcon: false));
+		var host = RenderState(Sample(), Config(false));
 
 		Assert.Multiple(() =>
 		{
@@ -494,7 +494,8 @@ public class WeatherWidgetViewTests
 	[Test]
 	public void A_transparent_background_is_carried_to_the_card()
 	{
-		var config = WeatherWidgetData.Parse(JsonSerializer.SerializeToElement(new { backgroundColor = "transparent" }));
+		var config = WeatherWidgetData.Parse(
+			JsonSerializer.SerializeToElement(new { backgroundColor = "transparent" }));
 
 		var host = RenderState(Sample(), config);
 
@@ -555,7 +556,7 @@ public class WeatherWidgetViewTests
 			Condition = initial.Condition,
 			IsDay = initial.IsDay,
 			Unit = initial.Unit,
-			Days = initial.Days,
+			Days = initial.Days
 		};
 		holder.State.Reload();
 
@@ -669,8 +670,8 @@ public class WeatherWidgetViewTests
 
 		Assert.That(english,
 			Is.Not.EqualTo(german),
-			"an implementation resolving per connection cannot produce identical bytes, so the same bytes " +
-			"must still decode differently per catalog.");
+			"an implementation resolving per connection cannot produce identical bytes, so the same bytes "
+			+ "must still decode differently per catalog.");
 
 		await session.DisposeAsync();
 	}
@@ -850,7 +851,9 @@ public class WeatherWidgetViewTests
 	}
 
 	private static string ResourceIdOf(UiNode node)
-		=> node.Properties["source"].GetProperty("resourceId").GetString()!;
+	{
+		return node.Properties["source"].GetProperty("resourceId").GetString()!;
+	}
 
 	private static List<string> CollectForecastIconIds(UiNode root)
 	{
@@ -858,8 +861,8 @@ public class WeatherWidgetViewTests
 
 		void Walk(UiNode node)
 		{
-			if (node.Id.StartsWith("weather.forecast.", StringComparison.Ordinal) &&
-				node.Id.EndsWith(".icon", StringComparison.Ordinal))
+			if (node.Id.StartsWith("weather.forecast.", StringComparison.Ordinal)
+				&& node.Id.EndsWith(".icon", StringComparison.Ordinal))
 			{
 				ids.Add(ResourceIdOf(node));
 			}
@@ -959,11 +962,14 @@ public class WeatherWidgetViewTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(RenderState(Sample(), Compact() with { ShowIcon = false })
-				.FindById("weather.compact.bottom.iconRow.icon"), Is.Null);
+					.FindById("weather.compact.bottom.iconRow.icon"),
+				Is.Null);
 			Assert.That(RenderState(Sample(), Compact() with { ShowCondition = false })
-				.FindById("weather.compact.bottom.condition"), Is.Null);
+					.FindById("weather.compact.bottom.condition"),
+				Is.Null);
 			Assert.That(RenderState(Sample(), Compact() with { ShowLocation = false })
-				.FindById("weather.compact.top.location"), Is.Null);
+					.FindById("weather.compact.top.location"),
+				Is.Null);
 
 			var noTemperature = RenderState(Sample(), Compact() with { ShowTemperature = false });
 			Assert.That(noTemperature.FindById("weather.compact.top.temp"), Is.Null);
@@ -1018,13 +1024,20 @@ public class WeatherWidgetViewTests
 
 	[Test]
 	public void A_stored_compact_style_is_parsed()
-		=> Assert.That(WeatherWidgetData.Parse(JsonSerializer.SerializeToElement(new { style = "compact" })).Style,
+	{
+		Assert.That(WeatherWidgetData.Parse(JsonSerializer.SerializeToElement(new { style = "compact" })).Style,
 			Is.EqualTo(WeatherWidgetData.StyleCompact));
+	}
 
 	private static string HighLowTextOf(UiTestHost host)
-		=> host.ById("weather.compact.bottom.highLow").Property("text")!.Value.GetRawText();
+	{
+		return host.ById("weather.compact.bottom.highLow").Property("text")!.Value.GetRawText();
+	}
 
-	private static WeatherWidgetData Compact() => new() { Style = WeatherWidgetData.StyleCompact };
+	private static WeatherWidgetData Compact()
+	{
+		return new WeatherWidgetData { Style = WeatherWidgetData.StyleCompact };
+	}
 
 	private static WeatherStatePayload SampleAt(double temperature)
 	{
@@ -1035,30 +1048,37 @@ public class WeatherWidgetViewTests
 	}
 
 	private static string TemperatureTextOf(UiTree tree)
-		=> FindById(tree.Root, "weather.current.head.temp")!.Properties["text"].GetRawText();
-
-	private static WeatherStatePayload Sample() => new()
 	{
-		IsAvailable = true,
-		StationExists = true,
-		InstanceId = "loc1",
-		LocationName = "Niederkassel, Germany",
-		Temperature = 23,
-		Condition = "partly-cloudy",
-		IsDay = true,
-		Unit = "celsius",
-		Days =
-		[
-			Day("2026-07-20", "partly-cloudy", 12, 24),
-			Day("2026-07-21", "rain", 10, 19),
-			Day("2026-07-22", "thunderstorm", 13, 21),
-			Day("2026-07-23", "clear", 15, 28),
-			Day("2026-07-24", "snow", -2, 3),
-		],
-	};
+		return FindById(tree.Root, "weather.current.head.temp")!.Properties["text"].GetRawText();
+	}
+
+	private static WeatherStatePayload Sample()
+	{
+		return new WeatherStatePayload
+		{
+			IsAvailable = true,
+			StationExists = true,
+			InstanceId = "loc1",
+			LocationName = "Niederkassel, Germany",
+			Temperature = 23,
+			Condition = "partly-cloudy",
+			IsDay = true,
+			Unit = "celsius",
+			Days =
+			[
+				Day("2026-07-20", "partly-cloudy", 12, 24),
+				Day("2026-07-21", "rain", 10, 19),
+				Day("2026-07-22", "thunderstorm", 13, 21),
+				Day("2026-07-23", "clear", 15, 28),
+				Day("2026-07-24", "snow", -2, 3)
+			]
+		};
+	}
 
 	private static WeatherForecastDayPayload Day(string date, string condition, double min, double max)
-		=> new() { Date = date, Condition = condition, Min = min, Max = max };
+	{
+		return new WeatherForecastDayPayload { Date = date, Condition = condition, Min = min, Max = max };
+	}
 
 	private static WeatherWidgetData Config(
 		bool showIcon = true,
@@ -1067,18 +1087,22 @@ public class WeatherWidgetViewTests
 		bool showLocation = true,
 		bool showForecast = true,
 		int forecastDays = 5)
-		=> new()
+	{
+		return new WeatherWidgetData
 		{
 			ShowIcon = showIcon,
 			ShowTemperature = showTemperature,
 			ShowCondition = showCondition,
 			ShowLocation = showLocation,
 			ShowForecast = showForecast,
-			ForecastDays = forecastDays,
+			ForecastDays = forecastDays
 		};
+	}
 
-	private static UiSurface WidgetSurface() =>
-		new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	private static UiSurface WidgetSurface()
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	}
 
 	private static UiTestHost RenderState(WeatherStatePayload payload, WeatherWidgetData? config = null)
 	{
@@ -1142,43 +1166,52 @@ public class WeatherWidgetViewTests
 		return node.Fallback is not null ? FindById(node.Fallback, id) : null;
 	}
 
-	private static Serilog.Core.Logger NoLogger() => new LoggerConfiguration().CreateLogger();
-
-	private static WeatherSnapshot SnapshotFrom(WeatherStatePayload payload) => new()
+	private static Serilog.Core.Logger NoLogger()
 	{
-		IsAvailable = payload.IsAvailable,
-		LocationName = payload.LocationName,
-		Temperature = payload.Temperature,
-		Condition = ConditionFromSlug(payload.Condition),
-		IsDay = payload.IsDay,
-		Unit = string.Equals(payload.Unit, "fahrenheit", StringComparison.OrdinalIgnoreCase)
-			? TemperatureUnit.Fahrenheit
-			: TemperatureUnit.Celsius,
-		Days = payload.Days
-			.Select(d => new WeatherForecastDay(DateOnly.ParseExact(d.Date, "yyyy-MM-dd"),
-				ConditionFromSlug(d.Condition),
-				d.Min,
-				d.Max))
-			.ToList(),
-	};
+		return new LoggerConfiguration().CreateLogger();
+	}
 
-	private static WeatherCondition ConditionFromSlug(string slug) => slug switch
+	private static WeatherSnapshot SnapshotFrom(WeatherStatePayload payload)
 	{
-		"clear" => WeatherCondition.Clear,
-		"mainly-clear" => WeatherCondition.MainlyClear,
-		"partly-cloudy" => WeatherCondition.PartlyCloudy,
-		"overcast" => WeatherCondition.Overcast,
-		"fog" => WeatherCondition.Fog,
-		"drizzle" => WeatherCondition.Drizzle,
-		"rain" => WeatherCondition.Rain,
-		"freezing-rain" => WeatherCondition.FreezingRain,
-		"snow" => WeatherCondition.Snow,
-		"snow-grains" => WeatherCondition.SnowGrains,
-		"rain-showers" => WeatherCondition.RainShowers,
-		"snow-showers" => WeatherCondition.SnowShowers,
-		"thunderstorm" => WeatherCondition.Thunderstorm,
-		_ => WeatherCondition.Unknown,
-	};
+		return new WeatherSnapshot
+		{
+			IsAvailable = payload.IsAvailable,
+			LocationName = payload.LocationName,
+			Temperature = payload.Temperature,
+			Condition = ConditionFromSlug(payload.Condition),
+			IsDay = payload.IsDay,
+			Unit = string.Equals(payload.Unit, "fahrenheit", StringComparison.OrdinalIgnoreCase)
+				? TemperatureUnit.Fahrenheit
+				: TemperatureUnit.Celsius,
+			Days = payload.Days
+				.Select(d => new WeatherForecastDay(DateOnly.ParseExact(d.Date, "yyyy-MM-dd"),
+					ConditionFromSlug(d.Condition),
+					d.Min,
+					d.Max))
+				.ToList()
+		};
+	}
+
+	private static WeatherCondition ConditionFromSlug(string slug)
+	{
+		return slug switch
+		{
+			"clear" => WeatherCondition.Clear,
+			"mainly-clear" => WeatherCondition.MainlyClear,
+			"partly-cloudy" => WeatherCondition.PartlyCloudy,
+			"overcast" => WeatherCondition.Overcast,
+			"fog" => WeatherCondition.Fog,
+			"drizzle" => WeatherCondition.Drizzle,
+			"rain" => WeatherCondition.Rain,
+			"freezing-rain" => WeatherCondition.FreezingRain,
+			"snow" => WeatherCondition.Snow,
+			"snow-grains" => WeatherCondition.SnowGrains,
+			"rain-showers" => WeatherCondition.RainShowers,
+			"snow-showers" => WeatherCondition.SnowShowers,
+			"thunderstorm" => WeatherCondition.Thunderstorm,
+			_ => WeatherCondition.Unknown
+		};
+	}
 
 	private static UiSessionRequest WidgetRequest(string? instanceId)
 	{
@@ -1197,9 +1230,9 @@ public class WeatherWidgetViewTests
 				{
 					[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement("w1"),
 					[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement("Weather"),
-					[UiWidgetSurfaceAttributes.Data] = data,
-				},
-			},
+					[UiWidgetSurfaceAttributes.Data] = data
+				}
+			}
 		};
 	}
 
@@ -1220,11 +1253,17 @@ public class WeatherWidgetViewTests
 	{
 		private WeatherSnapshot _snapshot;
 
-		public FakeStation(WeatherSnapshot snapshot) => _snapshot = snapshot;
+		public FakeStation(WeatherSnapshot snapshot)
+		{
+			_snapshot = snapshot;
+		}
 
 		public int FetchCount { get; private set; }
 
-		public void Update(WeatherSnapshot snapshot) => _snapshot = snapshot;
+		public void Update(WeatherSnapshot snapshot)
+		{
+			_snapshot = snapshot;
+		}
 
 		public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
 		{
@@ -1249,9 +1288,15 @@ public class WeatherWidgetViewTests
 				false));
 		}
 
-		public IReadOnlyList<WeatherStationDescriptor> GetInstances() => _instances;
+		public IReadOnlyList<WeatherStationDescriptor> GetInstances()
+		{
+			return _instances;
+		}
 
-		public IWeatherStation? GetStation(string instanceId) => _stations.GetValueOrDefault(instanceId);
+		public IWeatherStation? GetStation(string instanceId)
+		{
+			return _stations.GetValueOrDefault(instanceId);
+		}
 
 		public IWeatherStation? DefaultStation => _instances.Count > 0 ? _stations[_instances[0].InstanceId] : null;
 	}

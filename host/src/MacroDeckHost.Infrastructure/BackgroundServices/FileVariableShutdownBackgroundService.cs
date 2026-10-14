@@ -5,7 +5,7 @@ namespace MacroDeckHost.Infrastructure.BackgroundServices;
 
 public sealed class FileVariableShutdownBackgroundService : IHostedService
 {
-	private static readonly TimeSpan DrainTimeout = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _drainTimeout = TimeSpan.FromSeconds(2);
 
 	private readonly FileVariableSynchronizer _files;
 
@@ -14,11 +14,14 @@ public sealed class FileVariableShutdownBackgroundService : IHostedService
 		_files = files;
 	}
 
-	public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	public Task StartAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
 	public async Task StopAsync(CancellationToken cancellationToken)
 	{
-		await _files.DrainAsync(DrainTimeout);
+		await _files.DrainAsync(_drainTimeout);
 		_files.Dispose();
 	}
 }

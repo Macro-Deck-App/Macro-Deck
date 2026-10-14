@@ -85,8 +85,11 @@ internal sealed class DelegateRemoteManager : IDisposable
 	}
 
 	public IReadOnlyList<ActionParameterOption> InstanceOptions()
-		=> _remotes.Select(r => new ActionParameterOption { Value = r.Instance.InstanceId, Label = r.Instance.Label })
+	{
+		return _remotes.Select(r => new ActionParameterOption
+				{ Value = r.Instance.InstanceId, Label = r.Instance.Label })
 			.ToList();
+	}
 
 	public IReadOnlyList<IntegrationIssue> Issues()
 	{
@@ -100,11 +103,10 @@ internal sealed class DelegateRemoteManager : IDisposable
 				issues.Add(new IntegrationIssue
 				{
 					Id = CredentialsRejectedIssuePrefix + remote.Instance.InstanceId,
-					Title = AppStrings.Integrations.Delegation.Issues.CredentialsRejectedTitle(
-						label: remote.Instance.Label),
+					Title = AppStrings.Integrations.Delegation.Issues.CredentialsRejectedTitle(remote.Instance.Label),
 					Description
 						= AppStrings.Integrations.Delegation.Issues.CredentialsRejectedDescription(
-							label: remote.Instance.Label),
+							remote.Instance.Label),
 					Severity = IntegrationIssueSeverity.Error,
 					ActionLabel = AppStrings.Integrations.Delegation.Issues.SignInAgainAction()
 				});
@@ -114,10 +116,10 @@ internal sealed class DelegateRemoteManager : IDisposable
 				issues.Add(new IntegrationIssue
 				{
 					Id = UnreachableIssuePrefix + remote.Instance.InstanceId,
-					Title = AppStrings.Integrations.Delegation.Issues.UnreachableTitle(label: remote.Instance.Label),
+					Title = AppStrings.Integrations.Delegation.Issues.UnreachableTitle(remote.Instance.Label),
 					Description
 						= AppStrings.Integrations.Delegation.Issues
-							.UnreachableDescription(label: remote.Instance.Label),
+							.UnreachableDescription(remote.Instance.Label),
 					Severity = IntegrationIssueSeverity.Warning,
 					ActionLabel = AppStrings.Integrations.Delegation.Issues.OpenSetupAction()
 				});
@@ -128,7 +130,7 @@ internal sealed class DelegateRemoteManager : IDisposable
 				issues.Add(new IntegrationIssue
 				{
 					Id = SelfDelegationIssuePrefix + remote.Instance.InstanceId,
-					Title = AppStrings.Integrations.Delegation.Issues.SelfDelegationTitle(label: remote.Instance.Label),
+					Title = AppStrings.Integrations.Delegation.Issues.SelfDelegationTitle(remote.Instance.Label),
 					Description = AppStrings.Integrations.Delegation.Issues.SelfDelegationDescription(),
 					Severity = IntegrationIssueSeverity.Error,
 					ActionLabel = AppStrings.Integrations.Delegation.Issues.OpenSetupAction()
@@ -140,7 +142,7 @@ internal sealed class DelegateRemoteManager : IDisposable
 				issues.Add(new IntegrationIssue
 				{
 					Id = ThrottledIssuePrefix + remote.Instance.InstanceId,
-					Title = AppStrings.Integrations.Delegation.Issues.ThrottledTitle(label: remote.Instance.Label),
+					Title = AppStrings.Integrations.Delegation.Issues.ThrottledTitle(remote.Instance.Label),
 					Description = AppStrings.Integrations.Delegation.Issues.ThrottledDescription(),
 					Severity = IntegrationIssueSeverity.Warning
 				});
@@ -153,7 +155,7 @@ internal sealed class DelegateRemoteManager : IDisposable
 			{
 				Id = DuplicateIssuePrefix + stale.InstanceId,
 				Title = AppStrings.Integrations.Delegation.Issues.DuplicateTitle(),
-				Description = AppStrings.Integrations.Delegation.Issues.DuplicateDescription(title: stale.Title),
+				Description = AppStrings.Integrations.Delegation.Issues.DuplicateDescription(stale.Title),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
@@ -161,7 +163,10 @@ internal sealed class DelegateRemoteManager : IDisposable
 		return issues;
 	}
 
-	public async Task ShutdownAsync() => await StopAllAsync();
+	public async Task ShutdownAsync()
+	{
+		await StopAllAsync();
+	}
 
 	public void Dispose()
 	{
@@ -225,12 +230,12 @@ internal sealed class DelegateRemoteManager : IDisposable
 
 		var baseUrl = DelegateEndpoint.TryBuild(baseUrlRaw);
 
-		if (baseUrl is null ||
-			string.IsNullOrEmpty(username) ||
-			string.IsNullOrEmpty(password) ||
-			string.IsNullOrEmpty(instanceId) ||
-			string.IsNullOrEmpty(machineName) ||
-			string.IsNullOrEmpty(instanceKey))
+		if (baseUrl is null
+			|| string.IsNullOrEmpty(username)
+			|| string.IsNullOrEmpty(password)
+			|| string.IsNullOrEmpty(instanceId)
+			|| string.IsNullOrEmpty(machineName)
+			|| string.IsNullOrEmpty(instanceKey))
 		{
 			// One broken entry must not take the working ones with it, so it is skipped, not thrown on.
 			_logger.Warning("Macro Deck Delegate config entry {EntryId} is incomplete; skipping", entry.Id);
@@ -332,5 +337,8 @@ internal readonly record struct DelegateResolution(DelegateResolutionKind Kind, 
 
 	public static DelegateResolution NotFound { get; } = new(DelegateResolutionKind.NotFound, null);
 
-	public static DelegateResolution Found(DelegateRemote remote) => new(DelegateResolutionKind.Found, remote);
+	public static DelegateResolution Found(DelegateRemote remote)
+	{
+		return new DelegateResolution(DelegateResolutionKind.Found, remote);
+	}
 }

@@ -13,7 +13,7 @@ internal static class VoicemeeterActions
 		new("hide",
 			AppStrings.Integrations.Voicemeeter.Actions.RunCommand.Hide(),
 			VoicemeeterParameters.Command("Show"),
-			Argument: 0f),
+			0f),
 		new("restart",
 			AppStrings.Integrations.Voicemeeter.Actions.RunCommand.Restart(),
 			VoicemeeterParameters.Command("Restart")),
@@ -23,7 +23,7 @@ internal static class VoicemeeterActions
 		new("unlock",
 			AppStrings.Integrations.Voicemeeter.Actions.RunCommand.Unlock(),
 			VoicemeeterParameters.Command("Lock"),
-			Argument: 0f),
+			0f),
 		new("eject",
 			AppStrings.Integrations.Voicemeeter.Actions.RunCommand.Eject(),
 			VoicemeeterParameters.Command("Eject")),
@@ -62,35 +62,38 @@ internal static class VoicemeeterActions
 
 	public static IReadOnlyList<IActionDefinition> Create(
 		Func<VoicemeeterConnection?> resolver,
-		VoicemeeterVariableAccessor variables) =>
-	[
-		new SetChannelGainActionDefinition(VoicemeeterChannelTarget.Strip, resolver),
-		new SetChannelGainActionDefinition(VoicemeeterChannelTarget.Bus, resolver),
-		new SetChannelMuteActionDefinition(VoicemeeterChannelTarget.Strip, resolver),
-		new SetChannelMuteActionDefinition(VoicemeeterChannelTarget.Bus, resolver),
-		new SetStripRoutingActionDefinition(resolver),
-		new SetChannelSwitchActionDefinition(VoicemeeterChannelTarget.Strip, resolver),
-		new SetChannelSwitchActionDefinition(VoicemeeterChannelTarget.Bus, resolver),
+		VoicemeeterVariableAccessor variables)
+	{
+		return
+		[
+			new SetChannelGainActionDefinition(VoicemeeterChannelTarget.Strip, resolver),
+			new SetChannelGainActionDefinition(VoicemeeterChannelTarget.Bus, resolver),
+			new SetChannelMuteActionDefinition(VoicemeeterChannelTarget.Strip, resolver),
+			new SetChannelMuteActionDefinition(VoicemeeterChannelTarget.Bus, resolver),
+			new SetStripRoutingActionDefinition(resolver),
+			new SetChannelSwitchActionDefinition(VoicemeeterChannelTarget.Strip, resolver),
+			new SetChannelSwitchActionDefinition(VoicemeeterChannelTarget.Bus, resolver),
 
-		new SetMacroButtonActionDefinition(resolver),
+			new SetMacroButtonActionDefinition(resolver),
 
-		new VoicemeeterCommandActionDefinition("run-command",
-			AppStrings.Integrations.Voicemeeter.Actions.RunCommand.Name(),
-			AppStrings.Integrations.Voicemeeter.Actions.RunCommand.Description(),
-			AppStrings.Integrations.Voicemeeter.Actions.RunCommand.CommandLabel(),
-			_applicationCommands,
-			resolver),
-		new VoicemeeterCommandActionDefinition("control-recorder",
-			AppStrings.Integrations.Voicemeeter.Actions.ControlRecorder.Name(),
-			AppStrings.Integrations.Voicemeeter.Actions.ControlRecorder.Description(),
-			AppStrings.Integrations.Voicemeeter.Actions.ControlRecorder.TransportLabel(),
-			_recorderCommands,
-			resolver),
-		new LoadSettingsActionDefinition(resolver),
-		new RunVoicemeeterActionDefinition(resolver),
+			new VoicemeeterCommandActionDefinition("run-command",
+				AppStrings.Integrations.Voicemeeter.Actions.RunCommand.Name(),
+				AppStrings.Integrations.Voicemeeter.Actions.RunCommand.Description(),
+				AppStrings.Integrations.Voicemeeter.Actions.RunCommand.CommandLabel(),
+				_applicationCommands,
+				resolver),
+			new VoicemeeterCommandActionDefinition("control-recorder",
+				AppStrings.Integrations.Voicemeeter.Actions.ControlRecorder.Name(),
+				AppStrings.Integrations.Voicemeeter.Actions.ControlRecorder.Description(),
+				AppStrings.Integrations.Voicemeeter.Actions.ControlRecorder.TransportLabel(),
+				_recorderCommands,
+				resolver),
+			new LoadSettingsActionDefinition(resolver),
+			new RunVoicemeeterActionDefinition(resolver),
 
-		new SetParameterActionDefinition(resolver),
-		new RunScriptActionDefinition(resolver),
-		new GetParameterActionDefinition(resolver, variables)
-	];
+			new SetParameterActionDefinition(resolver),
+			new RunScriptActionDefinition(resolver),
+			new GetParameterActionDefinition(resolver, variables)
+		];
+	}
 }

@@ -12,7 +12,8 @@ internal sealed class DeviceDoubleTapTests
 	private const string ButtonId = "w1";
 	private const string PlainButtonId = "w2";
 
-	private static readonly string[] _doubleTap = ["onTouchStart", "onTouchEnd", "onTouchStart", "onTouchEnd", "onDoublePress"];
+	private static readonly string[] _doubleTap =
+		["onTouchStart", "onTouchEnd", "onTouchStart", "onTouchEnd", "onDoublePress"];
 
 	private static readonly string[] _heldTap = ["onTouchStart", "onTouchEnd"];
 
@@ -39,19 +40,25 @@ internal sealed class DeviceDoubleTapTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	private static Dictionary<string, object?> Flow(string triggerType, bool disabled = false, bool empty = false)
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
 		{
 			["triggerType"] = triggerType,
 			["children"] = empty
 				? Array.Empty<object>()
 				: new object[] { new Dictionary<string, object?> { ["id"] = "b1", ["disabled"] = disabled } }
 		};
+	}
 
 	private static Widget WithFlows(string id, int x, string type, params Dictionary<string, object?>[] flows)
-		=> new()
+	{
+		return new Widget
 		{
 			Id = id,
 			Type = type,
@@ -61,10 +68,13 @@ internal sealed class DeviceDoubleTapTests
 			Height = 1,
 			Data = JsonSerializer.Serialize(new Dictionary<string, object?> { ["flows"] = flows })
 		};
+	}
 
 	private Task<DeviceInteractionOutcome> SubmitAsync(DeviceInteractionKind kind, string widgetId = ButtonId)
-		=> _fixture.Service.SubmitInteractionAsync(_deviceId,
+	{
+		return _fixture.Service.SubmitInteractionAsync(_deviceId,
 			new DeviceInteraction { Kind = kind, Target = new DeviceInteractionTarget { WidgetId = widgetId } });
+	}
 
 	private async Task AdvanceAsync(int milliseconds)
 	{
@@ -186,14 +196,17 @@ internal sealed class DeviceDoubleTapTests
 	}
 
 	[Test]
-	public async Task A_widget_whose_only_press_flow_is_a_double_tap_offers_press_and_release_but_a_slider_or_plugin_widget_offers_nothing()
+	public async Task
+		A_widget_whose_only_press_flow_is_a_double_tap_offers_press_and_release_but_a_slider_or_plugin_widget_offers_nothing()
 	{
 		_fixture.Home.Widgets.AddRange([
 			WithFlows("double-only", 2, WidgetTypeIds.ActionButton, Flow("onDoublePress")),
 			WithFlows("slider", 3, WidgetTypeIds.Slider, Flow("onDoublePress")),
 			WithFlows("plugin", 4, "com.example.meter", Flow("onDoublePress"))
 		]);
-		await _fixture.MutateAsync(() => { });
+		await _fixture.MutateAsync(() =>
+		{
+		});
 
 		var widgets = _fixture.Provider.Latest(_deviceId).Widgets;
 

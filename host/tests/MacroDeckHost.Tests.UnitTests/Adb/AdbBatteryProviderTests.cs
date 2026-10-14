@@ -29,16 +29,23 @@ public class AdbBatteryProviderTests
 	}
 
 	[TearDown]
-	public void TearDown() => _provider.Dispose();
+	public void TearDown()
+	{
+		_provider.Dispose();
+	}
 
-	private static AndroidBatteryState Battery(int level, AndroidBatteryStatus status = AndroidBatteryStatus.Discharging)
-		=> new()
+	private static AndroidBatteryState Battery(
+		int level,
+		AndroidBatteryStatus status = AndroidBatteryStatus.Discharging)
+	{
+		return new AndroidBatteryState
 		{
 			Level = level,
 			IsCharging = status == AndroidBatteryStatus.Charging,
 			Status = status,
 			Health = AndroidBatteryHealth.Good
 		};
+	}
 
 	private static async Task WaitUntil(Func<bool> condition)
 	{
@@ -88,11 +95,11 @@ public class AdbBatteryProviderTests
 	public async Task Devices_already_attached_are_published_together_and_a_tablet_is_told_apart()
 	{
 		const string tabletId = "0000aaaa1111bbbb";
-		_devices.Attach(UsbSerial, StableId, raise: false);
-		var tablet = _devices.Attach("TABLET01", tabletId, raise: false);
+		_devices.Attach(UsbSerial, StableId, false);
+		var tablet = _devices.Attach("TABLET01", tabletId, false);
 		tablet.Characteristics = "nosdcard,tablet";
-		_devices.Attach("NEWPHONE", StableId + "0", raise: false).State = AndroidDeviceState.Unauthorized;
-		_devices.Attach("NOIDYET", null, raise: false);
+		_devices.Attach("NEWPHONE", StableId + "0", false).State = AndroidDeviceState.Unauthorized;
+		_devices.Attach("NOIDYET", null, false);
 
 		await _provider.InitializeAsync(_context, CancellationToken.None);
 
@@ -107,7 +114,7 @@ public class AdbBatteryProviderTests
 	[Test]
 	public async Task A_device_is_published_once_it_reports_a_stable_id()
 	{
-		var phone = _devices.Attach(UsbSerial, null, raise: false);
+		var phone = _devices.Attach(UsbSerial, null, false);
 		await _provider.InitializeAsync(_context, CancellationToken.None);
 		Assert.That(_context.Publishes, Is.Empty);
 
@@ -120,7 +127,7 @@ public class AdbBatteryProviderTests
 	[Test]
 	public async Task A_disconnected_phone_stays_published_as_not_connected()
 	{
-		_devices.Attach(UsbSerial, StableId, raise: false).Battery = Battery(64);
+		_devices.Attach(UsbSerial, StableId, false).Battery = Battery(64);
 		await _provider.InitializeAsync(_context, CancellationToken.None);
 
 		_devices.Detach(UsbSerial);
@@ -176,7 +183,7 @@ public class AdbBatteryProviderTests
 	[Test]
 	public async Task Turning_adb_off_shows_every_phone_as_not_connected()
 	{
-		_devices.Attach(UsbSerial, StableId, raise: false).Battery = Battery(42);
+		_devices.Attach(UsbSerial, StableId, false).Battery = Battery(42);
 		await _provider.InitializeAsync(_context, CancellationToken.None);
 
 		_devices.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
@@ -188,10 +195,10 @@ public class AdbBatteryProviderTests
 	[Test]
 	public async Task A_phone_that_vanishes_without_an_event_is_shown_as_not_connected_on_the_next_poll()
 	{
-		_devices.Attach(UsbSerial, StableId, raise: false);
+		_devices.Attach(UsbSerial, StableId, false);
 		await _provider.InitializeAsync(_context, CancellationToken.None);
 
-		_devices.Detach(UsbSerial, raise: false);
+		_devices.Detach(UsbSerial, false);
 		_time.Advance(AdbBatteryProvider.PollInterval);
 
 		await WaitUntil(() => _context.Latest(StableId)?.IsConnected == false);
@@ -200,7 +207,7 @@ public class AdbBatteryProviderTests
 	[Test]
 	public async Task A_refused_tablet_probe_publishes_a_phone_and_is_asked_again_on_the_next_poll()
 	{
-		var tablet = _devices.Attach(UsbSerial, StableId, raise: false);
+		var tablet = _devices.Attach(UsbSerial, StableId, false);
 		tablet.Characteristics = "tablet";
 		tablet.ShellFailure = AndroidDeviceErrorCode.HostLocked;
 		await _provider.InitializeAsync(_context, CancellationToken.None);
@@ -221,7 +228,7 @@ public class AdbBatteryProviderTests
 	[Test]
 	public async Task Polling_publishes_a_changed_level_every_fifteen_seconds()
 	{
-		var phone = _devices.Attach(UsbSerial, StableId, raise: false);
+		var phone = _devices.Attach(UsbSerial, StableId, false);
 		phone.Battery = Battery(90);
 		await _provider.InitializeAsync(_context, CancellationToken.None);
 
@@ -234,7 +241,7 @@ public class AdbBatteryProviderTests
 	[Test]
 	public async Task Shutdown_stops_polling_and_ignores_later_device_changes()
 	{
-		var phone = _devices.Attach(UsbSerial, StableId, raise: false);
+		var phone = _devices.Attach(UsbSerial, StableId, false);
 		await _provider.InitializeAsync(_context, CancellationToken.None);
 
 		await _provider.ShutdownAsync(CancellationToken.None);
@@ -264,8 +271,11 @@ public class AdbBatteryProviderTests
 	// Signatures, fields and the state machines of async methods, whose fields hold their locals and awaiters.
 	private static HashSet<Type> TypesReachedBy(Type root)
 	{
-		const BindingFlags all = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
-			BindingFlags.Static | BindingFlags.DeclaredOnly;
+		const BindingFlags all = BindingFlags.Public
+			| BindingFlags.NonPublic
+			| BindingFlags.Instance
+			| BindingFlags.Static
+			| BindingFlags.DeclaredOnly;
 		var seen = new HashSet<Type>();
 		var pending = new Stack<Type>([root]);
 		while (pending.TryPop(out var type))
@@ -275,12 +285,15 @@ public class AdbBatteryProviderTests
 				pending.Push(nested);
 			}
 
-			var referenced = type.GetFields(all).Select(field => field.FieldType)
-				.Concat(type.GetMethods(all).SelectMany(method => method.GetParameters()
-					.Select(parameter => parameter.ParameterType)
-					.Append(method.ReturnType)))
-				.Concat(type.GetConstructors(all).SelectMany(constructor => constructor.GetParameters()
-					.Select(parameter => parameter.ParameterType)));
+			var referenced = type.GetFields(all)
+				.Select(field => field.FieldType)
+				.Concat(type.GetMethods(all)
+					.SelectMany(method => method.GetParameters()
+						.Select(parameter => parameter.ParameterType)
+						.Append(method.ReturnType)))
+				.Concat(type.GetConstructors(all)
+					.SelectMany(constructor => constructor.GetParameters()
+						.Select(parameter => parameter.ParameterType)));
 			foreach (var reference in referenced.SelectMany(Flatten))
 			{
 				seen.Add(reference);
@@ -304,5 +317,7 @@ public class AdbBatteryProviderTests
 	}
 
 	private static bool IsNestedIn(Type type, Type outer)
-		=> type.DeclaringType is { } declaring && (declaring == outer || IsNestedIn(declaring, outer));
+	{
+		return type.DeclaringType is { } declaring && (declaring == outer || IsNestedIn(declaring, outer));
+	}
 }

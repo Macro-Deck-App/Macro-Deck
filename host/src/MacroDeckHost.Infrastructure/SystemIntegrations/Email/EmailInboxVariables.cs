@@ -44,9 +44,13 @@ internal sealed record EmailInboxVariableSet(
 	public bool IsCapped => Candidates > Declared.Count;
 
 	public bool SameDeclarationsAs(EmailInboxVariableSet other)
-		=> Declared.Count == other.Declared.Count &&
-			Declared.All(entry => other.Declared.TryGetValue(entry.Key, out var slug) && slug == entry.Value &&
-				Names.GetValueOrDefault(entry.Key) == other.Names.GetValueOrDefault(entry.Key));
+	{
+		return Declared.Count == other.Declared.Count
+			&& Declared.All(entry
+				=> other.Declared.TryGetValue(entry.Key, out var slug)
+				&& slug == entry.Value
+				&& Names.GetValueOrDefault(entry.Key) == other.Names.GetValueOrDefault(entry.Key));
+	}
 }
 
 internal static class EmailInboxVariables
@@ -64,7 +68,7 @@ internal static class EmailInboxVariables
 		(EmailVariableStat.LatestSender, "latest_sender"),
 		(EmailVariableStat.LatestSubject, "latest_subject"),
 		(EmailVariableStat.LatestReceivedAt, "latest_received_at"),
-		(EmailVariableStat.IsConnected, "is_connected"),
+		(EmailVariableStat.IsConnected, "is_connected")
 	];
 
 	public static IReadOnlyList<VariableDefinition> GlobalDefinitions { get; } =
@@ -78,14 +82,18 @@ internal static class EmailInboxVariables
 			with
 			{
 				DisplayName = VariableStrings.InboxCount()
-			},
+			}
 	];
 
 	public static string Name(string slug, EmailVariableStat stat)
-		=> $"email_{slug}_{_stats.Single(entry => entry.Stat == stat).Suffix}";
+	{
+		return $"email_{slug}_{_stats.Single(entry => entry.Stat == stat).Suffix}";
+	}
 
 	public static IEnumerable<string> DefinitionIds(string slug)
-		=> _stats.Select(entry => VariableDefinitionId.FromName(Name(slug, entry.Stat))).OfType<string>();
+	{
+		return _stats.Select(entry => VariableDefinitionId.FromName(Name(slug, entry.Stat))).OfType<string>();
+	}
 
 	public static EmailInboxVariableSet Compose(
 		EmailInboxesSnapshot snapshot,
@@ -205,12 +213,13 @@ internal static class EmailInboxVariables
 		{
 			EmailVariableStat.UnreadCount => VariableReading.Of(state.UnreadCount),
 			EmailVariableStat.TotalCount => VariableReading.Of(state.TotalCount),
-			EmailVariableStat.LatestSender => VariableReading.Of(latest?.SenderName ?? latest?.SenderAddress ?? string.Empty),
+			EmailVariableStat.LatestSender => VariableReading.Of(latest?.SenderName
+				?? latest?.SenderAddress ?? string.Empty),
 			EmailVariableStat.LatestSubject => VariableReading.Of(latest?.Subject ?? string.Empty),
 			EmailVariableStat.LatestReceivedAt => VariableReading.Of(latest is null
 				? string.Empty
 				: latest.ReceivedAt.UtcDateTime.ToString("O", CultureInfo.InvariantCulture)),
-			_ => VariableReading.Unavailable,
+			_ => VariableReading.Unavailable
 		};
 	}
 
@@ -223,39 +232,44 @@ internal static class EmailInboxVariables
 			EmailVariableStat.UnreadCount => VariableDefinition.Eager(name, VariableType.Numeric, 0, _refreshInterval)
 				with
 				{
-					DisplayName = VariableStrings.InboxUnreadCount(inbox: inbox)
+					DisplayName = VariableStrings.InboxUnreadCount(inbox)
 				},
 			EmailVariableStat.TotalCount => VariableDefinition.Eager(name, VariableType.Numeric, 0, _refreshInterval)
 				with
 				{
-					DisplayName = VariableStrings.InboxTotalCount(inbox: inbox)
+					DisplayName = VariableStrings.InboxTotalCount(inbox)
 				},
-			EmailVariableStat.LatestSender => VariableDefinition.Eager(name, VariableType.Text, refreshInterval: _refreshInterval)
+			EmailVariableStat.LatestSender => VariableDefinition.Eager(name,
+					VariableType.Text,
+					refreshInterval: _refreshInterval)
 				with
 				{
-					DisplayName = VariableStrings.InboxLatestSender(inbox: inbox)
+					DisplayName = VariableStrings.InboxLatestSender(inbox)
 				},
-			EmailVariableStat.LatestSubject => VariableDefinition.Eager(name, VariableType.Text, refreshInterval: _refreshInterval)
+			EmailVariableStat.LatestSubject => VariableDefinition.Eager(name,
+					VariableType.Text,
+					refreshInterval: _refreshInterval)
 				with
 				{
-					DisplayName = VariableStrings.InboxLatestSubject(inbox: inbox)
+					DisplayName = VariableStrings.InboxLatestSubject(inbox)
 				},
 			EmailVariableStat.LatestReceivedAt => VariableDefinition.Eager(name,
 					VariableType.Text,
 					refreshInterval: _refreshInterval)
 				with
 				{
-					DisplayName = VariableStrings.InboxLatestReceivedAt(inbox: inbox)
+					DisplayName = VariableStrings.InboxLatestReceivedAt(inbox)
 				},
 			_ => VariableDefinition.Eager(name, VariableType.Boolean, refreshInterval: _refreshInterval)
 				with
 				{
-					DisplayName = VariableStrings.InboxConnected(inbox: inbox)
-				},
+					DisplayName = VariableStrings.InboxConnected(inbox)
+				}
 		};
 	}
 
-	private static IEnumerable<(string Ref, string Slug)> Ordered(EmailInboxesSnapshot snapshot,
+	private static IEnumerable<(string Ref, string Slug)> Ordered(
+		EmailInboxesSnapshot snapshot,
 		IReadOnlyList<EmailInboxKey> keys)
 	{
 		var seen = new HashSet<string>(StringComparer.Ordinal);

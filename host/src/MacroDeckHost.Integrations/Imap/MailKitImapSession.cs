@@ -8,7 +8,10 @@ namespace MacroDeckHost.Integrations.Imap;
 
 internal sealed class MailKitImapSessionFactory : IImapSessionFactory
 {
-	public IImapSession Create() => new MailKitImapSession();
+	public IImapSession Create()
+	{
+		return new MailKitImapSession();
+	}
 }
 
 internal sealed class MailKitImapSession : IImapSession
@@ -16,11 +19,11 @@ internal sealed class MailKitImapSession : IImapSession
 	private static readonly TimeSpan _commandTimeout = TimeSpan.FromSeconds(30);
 	private static readonly TimeSpan _logoutTimeout = TimeSpan.FromSeconds(3);
 
-	private static readonly IFetchRequest _summaryRequest = new FetchRequest(MessageSummaryItems.UniqueId |
-		MessageSummaryItems.Envelope |
-		MessageSummaryItems.Flags |
-		MessageSummaryItems.InternalDate |
-		MessageSummaryItems.PreviewText);
+	private static readonly IFetchRequest _summaryRequest = new FetchRequest(MessageSummaryItems.UniqueId
+		| MessageSummaryItems.Envelope
+		| MessageSummaryItems.Flags
+		| MessageSummaryItems.InternalDate
+		| MessageSummaryItems.PreviewText);
 
 	// Never given a protocol logger: the transcript would contain the LOGIN password. Chain and host name
 	// are always validated; revocation is not, as .NET's own default, since an unreachable CRL rejects valid servers.
@@ -55,7 +58,9 @@ internal sealed class MailKitImapSession : IImapSession
 		IMailFolder folder;
 		try
 		{
-			folder = string.Equals(settings.Folder, ImapAccountSettings.DefaultFolder, StringComparison.OrdinalIgnoreCase)
+			folder = string.Equals(settings.Folder,
+				ImapAccountSettings.DefaultFolder,
+				StringComparison.OrdinalIgnoreCase)
 				? _client.Inbox
 				: await _client.GetFolderAsync(settings.Folder, cancellationToken).ConfigureAwait(false);
 			await folder.OpenAsync(FolderAccess.ReadOnly, cancellationToken).ConfigureAwait(false);
@@ -80,11 +85,14 @@ internal sealed class MailKitImapSession : IImapSession
 	public async Task<IReadOnlyList<uint>> SearchUnreadAsync(CancellationToken cancellationToken)
 	{
 		var folder = RequireFolder();
-		var uids = await RunAsync(() => folder.SearchAsync(SearchQuery.NotSeen, cancellationToken)).ConfigureAwait(false);
+		var uids = await RunAsync(() => folder.SearchAsync(SearchQuery.NotSeen, cancellationToken))
+			.ConfigureAwait(false);
 		return [.. uids.Select(uid => uid.Id)];
 	}
 
-	public async Task<IReadOnlyList<ImapMessageSummary>> FetchLatestAsync(int count, CancellationToken cancellationToken)
+	public async Task<IReadOnlyList<ImapMessageSummary>> FetchLatestAsync(
+		int count,
+		CancellationToken cancellationToken)
 	{
 		var folder = RequireFolder();
 		if (folder.Count == 0)
@@ -113,10 +121,14 @@ internal sealed class MailKitImapSession : IImapSession
 	}
 
 	public Task IdleAsync(CancellationToken doneToken, CancellationToken cancellationToken)
-		=> RunAsync(() => _client.IdleAsync(doneToken, cancellationToken));
+	{
+		return RunAsync(() => _client.IdleAsync(doneToken, cancellationToken));
+	}
 
 	public Task NoOpAsync(CancellationToken cancellationToken)
-		=> RunAsync(() => _client.NoOpAsync(cancellationToken));
+	{
+		return RunAsync(() => _client.NoOpAsync(cancellationToken));
+	}
 
 	public async ValueTask DisposeAsync()
 	{
@@ -174,12 +186,20 @@ internal sealed class MailKitImapSession : IImapSession
 			summary.Flags?.HasFlag(MessageFlags.Seen) == true);
 	}
 
-	private static string? Blank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
+	private static string? Blank(string? value)
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value;
+	}
 
 	private IMailFolder RequireFolder()
-		=> _folder ?? throw new ImapSessionException(ImapFailure.Unreachable, "The IMAP folder is not open.");
+	{
+		return _folder ?? throw new ImapSessionException(ImapFailure.Unreachable, "The IMAP folder is not open.");
+	}
 
-	private void OnMailboxChanged(object? sender, EventArgs e) => MailboxChanged?.Invoke(this, EventArgs.Empty);
+	private void OnMailboxChanged(object? sender, EventArgs e)
+	{
+		MailboxChanged?.Invoke(this, EventArgs.Empty);
+	}
 
 	// The flags of our own FETCH are not a change, and treating them as one would re-read forever.
 	private void OnFlagsChanged(object? sender, EventArgs e)
@@ -215,7 +235,8 @@ internal sealed class MailKitImapSession : IImapSession
 	}
 
 	private static ImapSessionException? Translate(Exception exception)
-		=> exception switch
+	{
+		return exception switch
 		{
 			OperationCanceledException => null,
 			ImapSessionException => null,
@@ -223,9 +244,16 @@ internal sealed class MailKitImapSession : IImapSession
 				exception.Message,
 				exception),
 			SslHandshakeException => new ImapSessionException(ImapFailure.Certificate, exception.Message, exception),
-			SocketException or IOException or TimeoutException or ProtocolException or ServiceNotConnectedException
-				or ServiceNotAuthenticatedException or ImapCommandException or InvalidOperationException
+			SocketException
+				or IOException
+				or TimeoutException
+				or ProtocolException
+				or ServiceNotConnectedException
+				or ServiceNotAuthenticatedException
+				or ImapCommandException
+				or InvalidOperationException
 				=> new ImapSessionException(ImapFailure.Unreachable, exception.Message, exception),
 			_ => null
 		};
+	}
 }

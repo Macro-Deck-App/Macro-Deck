@@ -85,7 +85,8 @@ public class SoundPadMusicPlayerTests
 			Sound(2, "Drumroll", lastPlayedOn: DateTime.UtcNow.AddMinutes(-5))
 		];
 
-		await _player.PlayItemAsync(new MusicPlayerCatalogItem(@"C:\Sounds\Drumroll.mp3", "Drumroll",
+		await _player.PlayItemAsync(new MusicPlayerCatalogItem(@"C:\Sounds\Drumroll.mp3",
+			"Drumroll",
 			MusicPlayerCatalogItemKind.Track));
 		_client.Status = SoundPadPlayStatus.Playing;
 		_client.DurationMs = 3000;
@@ -103,7 +104,8 @@ public class SoundPadMusicPlayerTests
 			Sound(1, "Airhorn", lastPlayedOn: DateTime.UtcNow),
 			Sound(2, "Drumroll", lastPlayedOn: DateTime.UtcNow.AddMinutes(-5))
 		];
-		await _player.PlayItemAsync(new MusicPlayerCatalogItem(@"C:\Sounds\Drumroll.mp3", "Drumroll",
+		await _player.PlayItemAsync(new MusicPlayerCatalogItem(@"C:\Sounds\Drumroll.mp3",
+			"Drumroll",
 			MusicPlayerCatalogItemKind.Track));
 		await _player.GetStateAsync();
 
@@ -220,12 +222,18 @@ public class SoundPadMusicPlayerTests
 	{
 		_client.Sounds = [Sound(1, "Airhorn"), Sound(2, "Drumroll", artist: "Band"), Sound(3, "Applause")];
 
-		var all = await _player.GetCatalogAsync(SoundPadIntegration.InstanceId, MusicPlayerCatalogItemKind.Track,
-			null, CancellationToken.None);
+		var all = await _player.GetCatalogAsync(SoundPadIntegration.InstanceId,
+			MusicPlayerCatalogItemKind.Track,
+			null,
+			CancellationToken.None);
 		var byTitle = await _player.GetCatalogAsync(SoundPadIntegration.InstanceId,
-			MusicPlayerCatalogItemKind.Track, "air", CancellationToken.None);
+			MusicPlayerCatalogItemKind.Track,
+			"air",
+			CancellationToken.None);
 		var byArtist = await _player.GetCatalogAsync(SoundPadIntegration.InstanceId,
-			MusicPlayerCatalogItemKind.Track, "band", CancellationToken.None);
+			MusicPlayerCatalogItemKind.Track,
+			"band",
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -242,15 +250,19 @@ public class SoundPadMusicPlayerTests
 		_client.Disconnect();
 
 		Assert.ThrowsAsync<SoundPadUnavailableException>(() => _player.GetCatalogAsync(SoundPadIntegration.InstanceId,
-			MusicPlayerCatalogItemKind.Track, null, CancellationToken.None));
+			MusicPlayerCatalogItemKind.Track,
+			null,
+			CancellationToken.None));
 	}
 
 	[Test]
 	public async Task PlayItem_AfterTheListWasReordered_PlaysTheSameSound()
 	{
 		_client.Sounds = [Sound(1, "Airhorn"), Sound(2, "Drumroll")];
-		var items = await _player.GetCatalogAsync(SoundPadIntegration.InstanceId, MusicPlayerCatalogItemKind.Track,
-			"drum", CancellationToken.None);
+		var items = await _player.GetCatalogAsync(SoundPadIntegration.InstanceId,
+			MusicPlayerCatalogItemKind.Track,
+			"drum",
+			CancellationToken.None);
 
 		_client.Sounds = [Sound(1, "New sound"), Sound(2, "Airhorn"), Sound(3, "Drumroll")];
 		await _player.PlayItemAsync(items.Single());

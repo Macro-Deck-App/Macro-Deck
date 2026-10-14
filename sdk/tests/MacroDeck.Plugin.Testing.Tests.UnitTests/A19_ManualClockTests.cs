@@ -12,7 +12,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// <see cref="Wait.UntilAsync" /> never lies about what happened.
 /// </summary>
 [TestFixture]
-public class A19_ManualClockTests
+public class A19ManualClockTests
 {
 	[Test]
 	public async Task ManualTimeProvider_drives_reconnect_scheduling_for_an_in_process_plugin()
@@ -36,7 +36,7 @@ public class A19_ManualClockTests
 
 		await Wait.UntilAsync(() => state.ReconnectAttempt > 0,
 			TimeSpan.FromSeconds(10),
-			because: "the plugin never reached its first reconnect attempt");
+			"the plugin never reached its first reconnect attempt");
 
 		var frozenAttempt = state.ReconnectAttempt;
 
@@ -57,7 +57,7 @@ public class A19_ManualClockTests
 			// Advance's attempt land inside the next iteration's window and read as two.
 			await Wait.UntilAsync(() => state.ReconnectAttempt > before,
 				TimeSpan.FromSeconds(10),
-				because: "advancing past the whole backoff never produced the next reconnect attempt");
+				"advancing past the whole backoff never produced the next reconnect attempt");
 
 			var afterAdvance = state.ReconnectAttempt;
 			await Task.Delay(TimeSpan.FromMilliseconds(300));
@@ -73,7 +73,7 @@ public class A19_ManualClockTests
 		Wait_UntilAsync_throws_PluginTestTimeoutException_naming_the_reason_when_the_condition_never_becomes_true()
 	{
 		var exception = Assert.ThrowsAsync<PluginTestTimeoutException>(async ()
-			=> await Wait.UntilAsync(() => false, TimeSpan.FromMilliseconds(150), because: "xyz"));
+			=> await Wait.UntilAsync(() => false, TimeSpan.FromMilliseconds(150), "xyz"));
 
 		Assert.That(exception!.Message, Does.Contain("xyz"));
 	}

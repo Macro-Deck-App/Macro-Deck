@@ -29,11 +29,13 @@ public static class BackupKeyDerivation
 	public static string DeriveKeyId(ReadOnlySpan<byte> recoveryKey)
 	{
 		Span<byte> id = stackalloc byte[KeyIdBytes];
-		HKDF.DeriveKey(HashAlgorithmName.SHA256, recoveryKey, id, salt: default, KeyIdInfo);
+		HKDF.DeriveKey(HashAlgorithmName.SHA256, recoveryKey, id, default, KeyIdInfo);
 
 		return Convert.ToHexStringLower(id);
 	}
 
 	public static void DeriveChecksum(ReadOnlySpan<byte> recoveryKey, Span<byte> destination)
-		=> BackupRecoveryKeyFormat.DeriveChecksum(recoveryKey, destination);
+	{
+		BackupRecoveryKeyFormat.DeriveChecksum(recoveryKey, destination);
+	}
 }

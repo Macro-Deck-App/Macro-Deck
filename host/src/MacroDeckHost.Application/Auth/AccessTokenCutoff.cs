@@ -10,7 +10,10 @@ public sealed class AccessTokenCutoff
 
 	private long _cutoffSeconds = Unset;
 
-	public void Set(DateTime utcNow) => Interlocked.Exchange(ref _cutoffSeconds, UnixSeconds(utcNow));
+	public void Set(DateTime utcNow)
+	{
+		Interlocked.Exchange(ref _cutoffSeconds, UnixSeconds(utcNow));
+	}
 
 	public DateTime IssuedAtFor(DateTime utcNow)
 	{
@@ -27,13 +30,16 @@ public sealed class AccessTokenCutoff
 	public bool Rejects(ClaimsPrincipal principal)
 	{
 		var cutoff = Interlocked.Read(ref _cutoffSeconds);
-		return cutoff != Unset &&
-			long.TryParse(principal.FindFirst(IssuedAtClaim)?.Value,
+		return cutoff != Unset
+			&& long.TryParse(principal.FindFirst(IssuedAtClaim)?.Value,
 				NumberStyles.Integer,
 				CultureInfo.InvariantCulture,
-				out var issuedAt) &&
-			issuedAt <= cutoff;
+				out var issuedAt)
+			&& issuedAt <= cutoff;
 	}
 
-	private static long UnixSeconds(DateTime utc) => (long)Math.Floor((utc - DateTime.UnixEpoch).TotalSeconds);
+	private static long UnixSeconds(DateTime utc)
+	{
+		return (long)Math.Floor((utc - DateTime.UnixEpoch).TotalSeconds);
+	}
 }

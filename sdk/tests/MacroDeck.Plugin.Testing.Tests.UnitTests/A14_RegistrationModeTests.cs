@@ -8,7 +8,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// across two starts against the same state directory.
 /// </summary>
 [TestFixture]
-public class A14_RegistrationModeTests
+public class A14RegistrationModeTests
 {
 	[Test]
 	public async Task Managed_mode_never_registers_and_writes_no_state_file()
@@ -40,8 +40,8 @@ public class A14_RegistrationModeTests
 		});
 
 		// Managed mode never persists credentials - no file should appear under the id it was told to use.
-		Assert.That(Directory.Exists(stateDirectory.Path) &&
-			Directory.EnumerateFileSystemEntries(stateDirectory.Path).Any(),
+		Assert.That(Directory.Exists(stateDirectory.Path)
+			&& Directory.EnumerateFileSystemEntries(stateDirectory.Path).Any(),
 			Is.False);
 	}
 
@@ -59,7 +59,7 @@ public class A14_RegistrationModeTests
 		// plugin's identity across both starts - CredentialFile.Read below looks the persisted secret up
 		// by this same id. One instance, reused for both builds: its content root is read-only once
 		// Build() has run, and the two builds never run concurrently.
-		using var manifest = new PluginTestManifest(id: pluginId);
+		using var manifest = new PluginTestManifest(pluginId);
 
 		PluginHostBuilder BuildFirstRun()
 		{

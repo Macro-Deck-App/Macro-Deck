@@ -17,5 +17,7 @@ public sealed class GetColorPaletteRequestMessageHandler
 	public async ValueTask<GetColorPaletteResponse> Handle(
 		GetColorPaletteRequest request,
 		CancellationToken cancellationToken)
-		=> new() { Colors = await _palette.GetColors(cancellationToken) };
+	{
+		return new GetColorPaletteResponse { Colors = await _palette.GetColors(cancellationToken) };
+	}
 }

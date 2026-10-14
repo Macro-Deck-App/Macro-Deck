@@ -56,7 +56,9 @@ internal sealed class GoogleCalendarAccountManager
 	public IReadOnlyList<CalendarAccount> CalendarAccounts => _calendarAccounts;
 
 	public GoogleCalendarAccount? Resolve(string accountId)
-		=> _accounts.FirstOrDefault(account => string.Equals(account.Id, accountId, StringComparison.Ordinal));
+	{
+		return _accounts.FirstOrDefault(account => string.Equals(account.Id, accountId, StringComparison.Ordinal));
+	}
 
 	public async Task ReloadAsync(IIntegrationConfig config, CancellationToken cancellationToken = default)
 	{
@@ -99,7 +101,7 @@ internal sealed class GoogleCalendarAccountManager
 			issues.Add(new IntegrationIssue
 			{
 				Id = SignInIssuePrefix + account.Id,
-				Title = AppStrings.Integrations.GoogleCalendar.Issues.SignInExpiredTitle(account: account.DisplayName),
+				Title = AppStrings.Integrations.GoogleCalendar.Issues.SignInExpiredTitle(account.DisplayName),
 				Description = AppStrings.Integrations.GoogleCalendar.Issues.SignInExpiredDescription(),
 				Severity = IntegrationIssueSeverity.Error,
 				ActionLabel = AppStrings.Integrations.Twitch.Issues.ReconnectAction()
@@ -112,8 +114,7 @@ internal sealed class GoogleCalendarAccountManager
 			{
 				Id = DuplicateIssuePrefix + stale.EntryId.ToString("D"),
 				Title = AppStrings.Integrations.GoogleCalendar.Issues.DuplicateAccountTitle(),
-				Description = AppStrings.Integrations.GoogleCalendar.Issues.DuplicateAccountDescription(
-					title: stale.Title),
+				Description = AppStrings.Integrations.GoogleCalendar.Issues.DuplicateAccountDescription(stale.Title),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
@@ -185,7 +186,8 @@ internal sealed class GoogleCalendarAccountManager
 			return null;
 		}
 
-		var accessToken = await config.GetSecretAsync(entry.Id, GoogleCalendarConfigKeys.AccessToken, cancellationToken);
+		var accessToken
+			= await config.GetSecretAsync(entry.Id, GoogleCalendarConfigKeys.AccessToken, cancellationToken);
 		var expiresAt = await config.GetStringAsync(entry.Id, GoogleCalendarConfigKeys.ExpiresAt, cancellationToken);
 		var email = await config.GetStringAsync(entry.Id, GoogleCalendarConfigKeys.Email, cancellationToken);
 		var connectedAt
@@ -199,14 +201,21 @@ internal sealed class GoogleCalendarAccountManager
 			ParseTimestamp(connectedAt) ?? DateTimeOffset.MinValue,
 			new GoogleTokens(accessToken ?? string.Empty,
 				refreshToken,
-				string.IsNullOrEmpty(accessToken) ? DateTimeOffset.MinValue : ParseTimestamp(expiresAt) ?? DateTimeOffset.MinValue),
+				string.IsNullOrEmpty(accessToken)
+					? DateTimeOffset.MinValue
+					: ParseTimestamp(expiresAt) ?? DateTimeOffset.MinValue),
 			order);
 	}
 
 	private static DateTimeOffset? ParseTimestamp(string? value)
-		=> DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
+	{
+		return DateTimeOffset.TryParse(value,
+			CultureInfo.InvariantCulture,
+			DateTimeStyles.RoundtripKind,
+			out var parsed)
 			? parsed
 			: null;
+	}
 
 	private sealed record Candidate(
 		Guid EntryId,

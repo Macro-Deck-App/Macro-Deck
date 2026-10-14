@@ -39,12 +39,14 @@ public static class ApplicationIdentityMatcher
 			_ => null
 		};
 
-		return candidate is not null &&
-			string.Equals(rule.ApplicationIdentity, candidate, StringComparison.OrdinalIgnoreCase);
+		return candidate is not null
+			&& string.Equals(rule.ApplicationIdentity, candidate, StringComparison.OrdinalIgnoreCase);
 	}
 
 	public static bool SameTarget(FolderFocusRule a, FolderFocusRule b)
-		=> a.DeviceId == b.DeviceId &&
-			a.IdentityKind == b.IdentityKind &&
-			string.Equals(a.ApplicationIdentity, b.ApplicationIdentity, StringComparison.OrdinalIgnoreCase);
+	{
+		return a.DeviceId == b.DeviceId
+			&& a.IdentityKind == b.IdentityKind
+			&& string.Equals(a.ApplicationIdentity, b.ApplicationIdentity, StringComparison.OrdinalIgnoreCase);
+	}
 }

@@ -15,7 +15,7 @@ public class RequestNoiseFloorTests
 	private const string RequestCategory = "Microsoft.AspNetCore.Hosting.Diagnostics";
 	private const string HttpClientCategory = "System.Net.Http.HttpClient";
 
-	private static readonly string[] RequestPipelineCategories =
+	private static readonly string[] _requestPipelineCategories =
 	[
 		"Microsoft.AspNetCore.Hosting.Diagnostics",
 		"Microsoft.AspNetCore.Routing.EndpointMiddleware",
@@ -36,7 +36,7 @@ public class RequestNoiseFloorTests
 	{
 		using var contentRoot = new PluginContentRoot();
 		var provider = new CapturingLoggerProvider();
-		using var plugin = BuildPlugin(contentRoot, provider, configure: null);
+		using var plugin = BuildPlugin(contentRoot, provider, null);
 
 		var logger = plugin.Services.GetRequiredService<ILoggerFactory>().CreateLogger(category);
 		logger.LogInformation("routine request line");
@@ -51,7 +51,7 @@ public class RequestNoiseFloorTests
 	{
 		using var contentRoot = new PluginContentRoot();
 		var provider = new CapturingLoggerProvider();
-		using var plugin = BuildPlugin(contentRoot, provider, configure: null);
+		using var plugin = BuildPlugin(contentRoot, provider, null);
 
 		var factory = plugin.Services.GetRequiredService<ILoggerFactory>();
 		factory.CreateLogger("Microsoft.Hosting.Lifetime").LogInformation("Application started");
@@ -67,11 +67,13 @@ public class RequestNoiseFloorTests
 	{
 		using var contentRoot = new PluginContentRoot();
 		var provider = new CapturingLoggerProvider();
-		using var plugin = BuildPlugin(contentRoot, provider,
+		using var plugin = BuildPlugin(contentRoot,
+			provider,
 			cfg => cfg.MinimumLevel.Override(RequestCategory, LogEventLevel.Information));
 
 		plugin.Services.GetRequiredService<ILoggerFactory>()
-			.CreateLogger(RequestCategory).LogInformation("Request finished");
+			.CreateLogger(RequestCategory)
+			.LogInformation("Request finished");
 
 		Assert.That(provider.Messages, Is.EqualTo(new[] { "Request finished" }));
 	}
@@ -84,7 +86,8 @@ public class RequestNoiseFloorTests
 		using var plugin = BuildPlugin(contentRoot, provider, cfg => cfg.MinimumLevel.Debug());
 
 		plugin.Services.GetRequiredService<ILoggerFactory>()
-			.CreateLogger(RequestCategory).LogInformation("Request finished");
+			.CreateLogger(RequestCategory)
+			.LogInformation("Request finished");
 
 		Assert.That(provider.Entries, Is.Empty);
 	}
@@ -92,7 +95,7 @@ public class RequestNoiseFloorTests
 	[Test]
 	public async Task A_successful_health_poll_over_the_real_pipeline_logs_no_request_lines()
 	{
-		var entries = await PollHealthTwiceAsync(configure: null);
+		var entries = await PollHealthTwiceAsync(null);
 
 		Assert.That(NoiseFrom(entries), Is.Empty);
 	}
@@ -105,19 +108,24 @@ public class RequestNoiseFloorTests
 			.MinimumLevel.Override(HttpClientCategory, LogEventLevel.Information));
 
 		var noise = NoiseFrom(entries);
-		Assert.That(noise, Has.Some.Matches<CapturedLogEntry>(entry =>
-			entry.Category.StartsWith(RequestCategory, StringComparison.Ordinal)
-			&& entry.Message.Contains("Request finished", StringComparison.Ordinal)
-			&& entry.Message.Contains("/_macrodeck/health", StringComparison.Ordinal)));
-		Assert.That(noise, Has.Some.Matches<CapturedLogEntry>(entry =>
-			entry.Category.StartsWith(HttpClientCategory, StringComparison.Ordinal)
-			&& entry.Message.Contains("/_macrodeck/health", StringComparison.Ordinal)));
+		Assert.That(noise,
+			Has.Some.Matches<CapturedLogEntry>(entry =>
+				entry.Category.StartsWith(RequestCategory, StringComparison.Ordinal)
+				&& entry.Message.Contains("Request finished", StringComparison.Ordinal)
+				&& entry.Message.Contains("/_macrodeck/health", StringComparison.Ordinal)));
+		Assert.That(noise,
+			Has.Some.Matches<CapturedLogEntry>(entry =>
+				entry.Category.StartsWith(HttpClientCategory, StringComparison.Ordinal)
+				&& entry.Message.Contains("/_macrodeck/health", StringComparison.Ordinal)));
 	}
 
-	private static List<CapturedLogEntry> NoiseFrom(IReadOnlyList<CapturedLogEntry> entries) =>
-		entries.Where(entry => entry.Level == LogLevel.Information
-			&& RequestPipelineCategories.Any(category => entry.Category.StartsWith(category, StringComparison.Ordinal)))
+	private static List<CapturedLogEntry> NoiseFrom(IReadOnlyList<CapturedLogEntry> entries)
+	{
+		return entries.Where(entry => entry.Level == LogLevel.Information
+				&& _requestPipelineCategories.Any(category
+					=> entry.Category.StartsWith(category, StringComparison.Ordinal)))
 			.ToList();
+	}
 
 	// Two requests on one keep-alive connection: the first request's closing lines are logged before
 	// the server reads the second, so both are in the capture once the second response is back.

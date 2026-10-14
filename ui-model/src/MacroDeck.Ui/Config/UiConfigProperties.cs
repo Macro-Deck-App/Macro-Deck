@@ -296,6 +296,6 @@ public static class UiConfigProperties
 		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
 		Reorderable, Searchable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
 		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent, AllowVariables, Unit,
-		FixedCount, FixedColors, MaxCount,
+		FixedCount, FixedColors, MaxCount
 	];
 }

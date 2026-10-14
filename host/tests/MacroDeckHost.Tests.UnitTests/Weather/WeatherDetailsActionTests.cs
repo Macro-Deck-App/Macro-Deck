@@ -59,5 +59,8 @@ public class WeatherDetailsActionTests
 	}
 
 	private static DynamicOptionsContext Context()
-		=> new() { ParameterName = LocationParameter, CurrentParameters = new Dictionary<string, object?>() };
+	{
+		return new DynamicOptionsContext
+			{ ParameterName = LocationParameter, CurrentParameters = new Dictionary<string, object?>() };
+	}
 }

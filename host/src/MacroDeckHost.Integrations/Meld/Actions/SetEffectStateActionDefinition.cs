@@ -22,28 +22,34 @@ internal sealed class SetEffectStateActionDefinition : IDynamicOptionsActionDefi
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(MeldActionParameters.Effect,
-			label: AppStrings.Integrations.Meld.Parameters.Effect(),
+			AppStrings.Integrations.Meld.Parameters.Effect(),
 			required: true),
 		ActionParameter.Choice(MeldActionParameters.Mode,
-			options: MeldActionParameters.EffectStateModes,
-			label: AppStrings.Integrations.Meld.Parameters.Mode(),
+			MeldActionParameters.EffectStateModes,
+			AppStrings.Integrations.Meld.Parameters.Mode(),
 			defaultValue: MeldActionParameters.ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MeldActionStates.Snapshot(_resolver(),
+	{
+		return Task.FromResult(MeldActionStates.Snapshot(_resolver(),
 			parameters.GetValueOrDefault(MeldActionParameters.Effect),
 			ActionStates.Enablement,
 			session => session.EffectsById,
 			session => session.EffectsById.Values,
 			effect => effect.Name,
 			(_, effect) => effect.Enabled));
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		var session = _resolver()?.State.Session ?? MeldSession.Empty;
@@ -79,8 +85,8 @@ internal sealed class SetEffectStateActionDefinition : IDynamicOptionsActionDefi
 				return resolveError!;
 			}
 
-			var mode = context.Parameters.GetValueOrDefault(MeldActionParameters.Mode) as string ??
-				MeldActionParameters.ModeToggle;
+			var mode = context.Parameters.GetValueOrDefault(MeldActionParameters.Mode) as string
+				?? MeldActionParameters.ModeToggle;
 			bool? desired = mode switch
 			{
 				"enable" => true,

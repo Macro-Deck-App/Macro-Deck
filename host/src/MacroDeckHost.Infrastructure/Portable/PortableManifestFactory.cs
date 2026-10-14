@@ -5,13 +5,15 @@ namespace MacroDeckHost.Infrastructure.Portable;
 
 internal static class PortableManifestFactory
 {
-	public static PortableArchiveManifest Create(PortableArchiveKind kind,
+	public static PortableArchiveManifest Create(
+		PortableArchiveKind kind,
 		PortableExportOptions options,
 		PortableContent content,
 		PortableAssetBundle assets,
 		string name,
 		int widgetCount)
-		=> new()
+	{
+		return new PortableArchiveManifest
 		{
 			FormatVersion = PortableArchiveManifest.CurrentFormatVersion,
 			Kind = kind,
@@ -31,4 +33,5 @@ internal static class PortableManifestFactory
 				Integrations = assets.Integrations.ToList()
 			}
 		};
+	}
 }

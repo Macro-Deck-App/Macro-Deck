@@ -34,9 +34,15 @@ internal sealed class TestVariableIntegration : IPluginIntegration, IVariablePro
 
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public IReadOnlyList<VariableDefinition> Variables { get; }
 
@@ -79,9 +85,15 @@ internal class TestEventIntegration : IPluginIntegration, IEventProvider
 
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; }
 
@@ -97,7 +109,8 @@ internal sealed class TestDynamicEventIntegration(string providerName, params Ev
 	/// <summary>The context the last call was handed, so a test can inspect what was bound.</summary>
 	public EventOptionsContext? LastContext { get; private set; }
 
-	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(
+		EventOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		LastContext = context;
@@ -112,7 +125,8 @@ internal sealed class TestIssueIntegration : IPluginIntegration, IIntegrationIss
 	private readonly Func<IReadOnlyList<IntegrationIssue>> _issues;
 	private readonly Func<string, IssueResolution>? _resolve;
 
-	public TestIssueIntegration(Func<IReadOnlyList<IntegrationIssue>> issues,
+	public TestIssueIntegration(
+		Func<IReadOnlyList<IntegrationIssue>> issues,
 		Func<string, IssueResolution>? resolve = null)
 	{
 		_issues = issues;
@@ -121,15 +135,23 @@ internal sealed class TestIssueIntegration : IPluginIntegration, IIntegrationIss
 
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	/// <summary>The last issue id a caller asked to resolve, so a test can inspect it.</summary>
 	public string? LastResolvedIssueId { get; private set; }
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(_issues());
+	{
+		return Task.FromResult(_issues());
+	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
 	{
@@ -148,11 +170,15 @@ internal class TestMusicPlayer : IMusicPlayer
 
 	public List<string> Calls { get; } = [];
 
-	public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default) =>
-		Task.FromResult(StateToReturn);
+	public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(StateToReturn);
+	}
 
 	public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(ArtworkToReturn);
+	{
+		return Task.FromResult(ArtworkToReturn);
+	}
 
 	public Task PlayAsync(CancellationToken cancellationToken = default)
 	{
@@ -224,7 +250,9 @@ internal sealed class TestMusicPlayerWithCatalog : TestMusicPlayer, ICatalogMusi
 		MusicPlayerCatalogItemKind kind,
 		string? filter,
 		CancellationToken cancellationToken)
-		=> ThrowOnCatalog is not null ? throw ThrowOnCatalog : Task.FromResult(ItemsToReturn);
+	{
+		return ThrowOnCatalog is not null ? throw ThrowOnCatalog : Task.FromResult(ItemsToReturn);
+	}
 
 	public MusicPlayerCatalogItem? PlayedItem { get; private set; }
 
@@ -248,7 +276,9 @@ internal sealed class TestMusicPlayerWithDevices : TestMusicPlayer, IMusicPlayer
 	public string? LastTransferDeviceId { get; private set; }
 
 	public Task<IReadOnlyList<MusicPlayerDevice>> GetDevicesAsync(CancellationToken cancellationToken)
-		=> ThrowOnDevices is not null ? throw ThrowOnDevices : Task.FromResult(DevicesToReturn);
+	{
+		return ThrowOnDevices is not null ? throw ThrowOnDevices : Task.FromResult(DevicesToReturn);
+	}
 
 	public Task TransferPlaybackAsync(string deviceId, bool startPlayback, CancellationToken cancellationToken)
 	{
@@ -297,7 +327,9 @@ internal sealed class TestMusicPlayerBrowseOnly : TestMusicPlayer, IMusicPlayerC
 		MusicPlayerCatalogItemKind kind,
 		string? filter,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(ItemsToReturn);
+	{
+		return Task.FromResult(ItemsToReturn);
+	}
 }
 
 /// <summary>An integration exposing whatever <see cref="IMusicPlayerProvider"/> shape a music-player
@@ -314,16 +346,27 @@ internal sealed class TestMusicPlayerIntegration : IPluginIntegration, IMusicPla
 
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; }
 
 	public IReadOnlyList<MusicPlayerInstance> GetInstances()
-		=> [.. _players.Keys.Select(id => new MusicPlayerInstance(id, id))];
+	{
+		return [.. _players.Keys.Select(id => new MusicPlayerInstance(id, id))];
+	}
 
-	public IMusicPlayer? GetPlayer(string instanceId) => _players.GetValueOrDefault(instanceId);
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return _players.GetValueOrDefault(instanceId);
+	}
 }
 
 /// <summary>A minimal <see cref="IWeatherStation"/> a weather handler test drives.</summary>
@@ -331,7 +374,10 @@ internal sealed class TestWeatherStation : IWeatherStation
 {
 	public WeatherSnapshot SnapshotToReturn { get; set; } = WeatherSnapshot.Unavailable();
 
-	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct) => Task.FromResult(SnapshotToReturn);
+	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
+	{
+		return Task.FromResult(SnapshotToReturn);
+	}
 }
 
 /// <summary>An integration exposing whatever <see cref="IWeatherProvider"/> shape a weather handler
@@ -348,16 +394,27 @@ internal sealed class TestWeatherIntegration : IPluginIntegration, IWeatherProvi
 
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; }
 
 	public IReadOnlyList<WeatherStationInstance> GetInstances()
-		=> [.. _stations.Keys.Select(id => new WeatherStationInstance(id, id))];
+	{
+		return [.. _stations.Keys.Select(id => new WeatherStationInstance(id, id))];
+	}
 
-	public IWeatherStation? GetStation(string instanceId) => _stations.GetValueOrDefault(instanceId);
+	public IWeatherStation? GetStation(string instanceId)
+	{
+		return _stations.GetValueOrDefault(instanceId);
+	}
 
 	public WeatherDetailsAction? DetailsAction { get; init; }
 }
@@ -376,9 +433,15 @@ internal sealed class TestProfileIntegration : IPluginIntegration, IProfileProvi
 
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; }
 
@@ -390,9 +453,13 @@ internal sealed class TestProfileIntegration : IPluginIntegration, IProfileProvi
 		private set;
 	}
 
-	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => _profiles;
+	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+	{
+		return _profiles;
+	}
 
-	public Task HandleWidgetInteractionAsync(string profileId,
+	public Task HandleWidgetInteractionAsync(
+		string profileId,
 		string folderId,
 		string widgetId,
 		WidgetInteraction interaction)
@@ -466,11 +533,20 @@ internal sealed class TestConfigFlowIntegration(Func<IConfigFlow> factory, bool 
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public bool AllowsMultipleConfigurations { get; } = allowsMultipleConfigurations;
 
-	public IConfigFlow CreateConfigFlow() => factory();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return factory();
+	}
 }

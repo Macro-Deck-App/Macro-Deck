@@ -15,10 +15,18 @@ public sealed class PreviewingIntegration(IUiSession configSession) : IPluginInt
 			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-		=> Task.FromResult<IUiSession?>(configSession);
+	{
+		return Task.FromResult<IUiSession?>(configSession);
+	}
 }

@@ -17,11 +17,13 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class VariablesContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Variable(string localId)
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Variables, LocalId = localId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	[Test]
 	public async Task Declare_registers_an_adapter_that_passes_the_capability_validator()
@@ -42,15 +44,15 @@ internal sealed class VariablesContractTests : CapabilityContractFixture
 	[Test]
 	public async Task Every_operation_round_trips_to_the_sdk_type_the_host_contract_requires()
 	{
-		var variable = VariableDefinition.Eager("cpu_temp", VariableType.Numeric, decimalPlaces: 1)
+		var variable = VariableDefinition.Eager("cpu_temp", VariableType.Numeric, 1)
 			with
 			{
 				Id = "cpu-temp"
 			};
 		var integration = await ConnectAsync([
 				Handler(new TestVariableIntegration([variable],
-					dependsOnConfiguration: true,
-					read: (_, _) => ValueTask.FromResult(VariableReading.Of(42.5))))
+					true,
+					(_, _) => ValueTask.FromResult(VariableReading.Of(42.5))))
 			],
 			[Variable("cpu-temp")],
 			[CapabilityKinds.Variables]);
@@ -168,10 +170,12 @@ internal sealed class VariablesContractTests : CapabilityContractFixture
 	}
 
 	private static VariablesCapabilityHandler Handler(IPluginIntegration provider)
-		=> new([provider],
+	{
+		return new VariablesCapabilityHandler([provider],
 			TestMetadata.Default,
 			new VariableSubscriptions(Serilog.Log.Logger),
 			Serilog.Core.Logger.None);
+	}
 
 	private static async ValueTask<VariableReading> NeverReplies(string localId, CancellationToken cancellationToken)
 	{

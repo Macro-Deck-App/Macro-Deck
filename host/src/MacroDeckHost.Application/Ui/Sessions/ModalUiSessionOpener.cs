@@ -26,7 +26,8 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 	private readonly ILogger _logger;
 	private readonly IHostUiCulture? _culture;
 
-	public ModalUiSessionOpener(IModalInteractionCoordinator coordinator,
+	public ModalUiSessionOpener(
+		IModalInteractionCoordinator coordinator,
 		IUiSessionBroker broker,
 		ILogger logger,
 		IHostUiCulture? culture = null)
@@ -49,8 +50,8 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 			if (_coordinator.Find(request.ModalId) is { } foreign)
 			{
 				_logger.Information(
-					"Refused to open modal {ModalId} of integration {IntegrationId} (view {ViewId}): {Code}, " +
-					"another client already claimed it",
+					"Refused to open modal {ModalId} of integration {IntegrationId} (view {ViewId}): {Code}, "
+					+ "another client already claimed it",
 					foreign.ModalId,
 					foreign.IntegrationId,
 					foreign.ViewId,
@@ -134,12 +135,11 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiDialogSurfaceAttributes.ModalId] = JsonSerializer.SerializeToElement(modal.ModalId),
-			[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(modal.ViewId)
+			[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(modal.ViewId),
+			[UiDialogSurfaceAttributes.Data] = modal.Data is null
+				? JsonDocument.Parse("{}").RootElement
+				: JsonSerializer.SerializeToElement(modal.Data)
 		};
-
-		attributes[UiDialogSurfaceAttributes.Data] = modal.Data is null
-			? JsonDocument.Parse("{}").RootElement
-			: JsonSerializer.SerializeToElement(modal.Data);
 
 		if (_culture?.Current is { Length: > 0 } culture)
 		{

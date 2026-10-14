@@ -16,12 +16,16 @@ public class PublicListenerUnavailableNotifierTests
 
 		public bool RestartRequested => false;
 
-		public Result<RestartError> Request(string reason) => Result.Ok<RestartError>();
+		public Result<RestartError> Request(string reason)
+		{
+			return Result.Ok<RestartError>();
+		}
 	}
 
 	private sealed record Fixture(UserNotificationStore Notifications, PublicListenerUnavailableNotifier Notifier);
 
-	private static Fixture CreateFixture(bool publicListenerAvailable,
+	private static Fixture CreateFixture(
+		bool publicListenerAvailable,
 		bool restartSupported = true,
 		bool overriddenByEnvironment = false,
 		PublicEndpointSet? endpoints = null,
@@ -31,8 +35,8 @@ public class PublicListenerUnavailableNotifierTests
 		{
 			PublicPort = 8193,
 			PublicPortOverriddenByEnvironment = overriddenByEnvironment,
-			PublicEndpoints = endpoints ??
-				(publicListenerAvailable
+			PublicEndpoints = endpoints
+				?? (publicListenerAvailable
 					? PublicEndpointSet.HttpOnly(8193)
 					: PublicEndpointSet.HttpOnly(8193).WithoutHttp())
 		};
@@ -54,12 +58,14 @@ public class PublicListenerUnavailableNotifierTests
 
 	/// <summary>HTTP came up on the public port, HTTPS did not - the state issue #851 reports.</summary>
 	private static PublicEndpointSet HttpsThatCouldNotBeOpened()
-		=> PublicEndpointSet.HttpAndHttps(8193, 8194).WithoutHttps();
+	{
+		return PublicEndpointSet.HttpAndHttps(8193, 8194).WithoutHttps();
+	}
 
 	[Test]
 	public async Task Nothing_is_raised_when_the_public_listener_opened_normally()
 	{
-		var fixture = CreateFixture(publicListenerAvailable: true);
+		var fixture = CreateFixture(true);
 
 		await fixture.Notifier.NotifyIfUnavailable();
 
@@ -69,7 +75,7 @@ public class PublicListenerUnavailableNotifierTests
 	[Test]
 	public async Task A_warning_with_a_restart_button_is_raised_when_the_listener_could_not_be_opened()
 	{
-		var fixture = CreateFixture(publicListenerAvailable: false);
+		var fixture = CreateFixture(false);
 
 		await fixture.Notifier.NotifyIfUnavailable();
 
@@ -85,7 +91,7 @@ public class PublicListenerUnavailableNotifierTests
 	[Test]
 	public async Task The_button_is_left_off_where_restarting_is_unsupported()
 	{
-		var fixture = CreateFixture(publicListenerAvailable: false, restartSupported: false);
+		var fixture = CreateFixture(false, false);
 
 		await fixture.Notifier.NotifyIfUnavailable();
 
@@ -95,7 +101,7 @@ public class PublicListenerUnavailableNotifierTests
 	[Test]
 	public async Task An_environment_override_still_warns_but_offers_no_restart()
 	{
-		var fixture = CreateFixture(publicListenerAvailable: false, overriddenByEnvironment: true);
+		var fixture = CreateFixture(false, overriddenByEnvironment: true);
 
 		await fixture.Notifier.NotifyIfUnavailable();
 
@@ -110,7 +116,7 @@ public class PublicListenerUnavailableNotifierTests
 	[Test]
 	public async Task Calling_twice_keeps_a_single_entry()
 	{
-		var fixture = CreateFixture(publicListenerAvailable: false);
+		var fixture = CreateFixture(false);
 
 		await fixture.Notifier.NotifyIfUnavailable();
 		await fixture.Notifier.NotifyIfUnavailable();
@@ -121,7 +127,7 @@ public class PublicListenerUnavailableNotifierTests
 	[Test]
 	public async Task An_https_listener_that_did_not_open_is_reported_while_http_still_serves()
 	{
-		var fixture = CreateFixture(publicListenerAvailable: true, endpoints: HttpsThatCouldNotBeOpened());
+		var fixture = CreateFixture(true, endpoints: HttpsThatCouldNotBeOpened());
 
 		await fixture.Notifier.NotifyIfUnavailable();
 
@@ -137,7 +143,7 @@ public class PublicListenerUnavailableNotifierTests
 	[Test]
 	public async Task The_notification_is_written_in_the_language_the_rest_of_the_interface_uses()
 	{
-		var fixture = CreateFixture(publicListenerAvailable: true,
+		var fixture = CreateFixture(true,
 			endpoints: HttpsThatCouldNotBeOpened(),
 			culture: "de");
 
@@ -154,7 +160,7 @@ public class PublicListenerUnavailableNotifierTests
 	[Test]
 	public async Task An_unreachable_host_reports_in_that_language_too()
 	{
-		var fixture = CreateFixture(publicListenerAvailable: false, culture: "de");
+		var fixture = CreateFixture(false, culture: "de");
 
 		await fixture.Notifier.NotifyIfUnavailable();
 

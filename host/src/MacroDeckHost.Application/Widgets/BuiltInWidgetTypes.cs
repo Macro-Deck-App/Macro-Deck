@@ -17,12 +17,15 @@ public static class BuiltInWidgetTypes
 	/// can never collide with one: a registered id is always <c>owner::local</c>, and no built-in id
 	/// carries the separator.</summary>
 	public static bool IsBuiltIn(string? widgetTypeId)
-		=> widgetTypeId is not null && WidgetTypeIds.BuiltIn.Contains(widgetTypeId, StringComparer.Ordinal);
+	{
+		return widgetTypeId is not null && WidgetTypeIds.BuiltIn.Contains(widgetTypeId, StringComparer.Ordinal);
+	}
 
 	/// <summary>The built-in descriptors, in the order the ids were introduced.</summary>
 	/// <param name="configurable">The ids whose in-process provider declares a <c>config</c> surface.</param>
 	public static IReadOnlyList<WidgetTypeDescriptor> All(IReadOnlySet<string> configurable)
-		=>
+	{
+		return
 		[
 			.. WidgetTypeIds.BuiltIn.Select(id => new WidgetTypeDescriptor(id,
 				NameOf(id),
@@ -31,58 +34,68 @@ public static class BuiltInWidgetTypes
 				// A built-in's schema is an embedded resource rather than a descriptor field. See
 				// WidgetDataSchemaProvider, which keeps serving those and reads a descriptor's schema only
 				// for a type it has no resource for.
-				DataSchema: null,
-				configurable.Contains(id))),
+				null,
+				configurable.Contains(id)))
 		];
+	}
 
-	private static LocalizedText NameOf(string id) => id switch
+	private static LocalizedText NameOf(string id)
 	{
-		WidgetTypeIds.ActionButton => AppStrings.WebClient.Widgets.ActionButton.Name(),
-		WidgetTypeIds.MusicPlayer => AppStrings.WebClient.Widgets.MusicPlayer.Name(),
-		WidgetTypeIds.Slider => AppStrings.WebClient.Widgets.Slider.Name(),
-		WidgetTypeIds.Weather => AppStrings.WebClient.Widgets.Weather.Name(),
-		WidgetTypeIds.HistoryGraph => AppStrings.WebClient.Widgets.HistoryGraph.Name(),
-		WidgetTypeIds.Clock => AppStrings.WebClient.Widgets.Clock.Name(),
-		WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Name(),
-		WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Name(),
-		WidgetTypeIds.Gauges => AppStrings.WebClient.Widgets.Gauges.Name(),
-		WidgetTypeIds.Battery => AppStrings.WebClient.Widgets.Battery.Name(),
-		_ => default,
-	};
+		return id switch
+		{
+			WidgetTypeIds.ActionButton => AppStrings.WebClient.Widgets.ActionButton.Name(),
+			WidgetTypeIds.MusicPlayer => AppStrings.WebClient.Widgets.MusicPlayer.Name(),
+			WidgetTypeIds.Slider => AppStrings.WebClient.Widgets.Slider.Name(),
+			WidgetTypeIds.Weather => AppStrings.WebClient.Widgets.Weather.Name(),
+			WidgetTypeIds.HistoryGraph => AppStrings.WebClient.Widgets.HistoryGraph.Name(),
+			WidgetTypeIds.Clock => AppStrings.WebClient.Widgets.Clock.Name(),
+			WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Name(),
+			WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Name(),
+			WidgetTypeIds.Gauges => AppStrings.WebClient.Widgets.Gauges.Name(),
+			WidgetTypeIds.Battery => AppStrings.WebClient.Widgets.Battery.Name(),
+			_ => default
+		};
+	}
 
-	private static LocalizedText DescriptionOf(string id) => id switch
+	private static LocalizedText DescriptionOf(string id)
 	{
-		WidgetTypeIds.ActionButton => AppStrings.WebClient.Widgets.ActionButton.Description(),
-		WidgetTypeIds.MusicPlayer => AppStrings.WebClient.Widgets.MusicPlayer.Description(),
-		WidgetTypeIds.Slider => AppStrings.WebClient.Widgets.Slider.Description(),
-		WidgetTypeIds.Weather => AppStrings.WebClient.Widgets.Weather.Description(),
-		WidgetTypeIds.HistoryGraph => AppStrings.WebClient.Widgets.HistoryGraph.Description(),
-		WidgetTypeIds.Clock => AppStrings.WebClient.Widgets.Clock.Description(),
-		WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Description(),
-		WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Description(),
-		WidgetTypeIds.Gauges => AppStrings.WebClient.Widgets.Gauges.Description(),
-		WidgetTypeIds.Battery => AppStrings.WebClient.Widgets.Battery.Description(),
-		_ => default,
-	};
+		return id switch
+		{
+			WidgetTypeIds.ActionButton => AppStrings.WebClient.Widgets.ActionButton.Description(),
+			WidgetTypeIds.MusicPlayer => AppStrings.WebClient.Widgets.MusicPlayer.Description(),
+			WidgetTypeIds.Slider => AppStrings.WebClient.Widgets.Slider.Description(),
+			WidgetTypeIds.Weather => AppStrings.WebClient.Widgets.Weather.Description(),
+			WidgetTypeIds.HistoryGraph => AppStrings.WebClient.Widgets.HistoryGraph.Description(),
+			WidgetTypeIds.Clock => AppStrings.WebClient.Widgets.Clock.Description(),
+			WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Description(),
+			WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Description(),
+			WidgetTypeIds.Gauges => AppStrings.WebClient.Widgets.Gauges.Description(),
+			WidgetTypeIds.Battery => AppStrings.WebClient.Widgets.Battery.Description(),
+			_ => default
+		};
+	}
 
 	// What a newly added widget starts with. These were the Angular widget registry's literals until the
 	// host became the one place a type's presentation is answered from; the strings among them are stored
 	// data the user then edits, not labels the app renders.
-	private static string DefaultDataOf(string id) => id switch
+	private static string DefaultDataOf(string id)
 	{
-		WidgetTypeIds.ActionButton => """{"label":""}""",
-		WidgetTypeIds.MusicPlayer => "{}",
-		WidgetTypeIds.Slider => """{"orientation":"horizontal","label":"Value"}""",
-		WidgetTypeIds.Weather =>
-			"""{"showIcon":true,"showTemperature":true,"showCondition":true,"showLocation":true,"showForecast":true,"forecastDays":5}""",
-		WidgetTypeIds.HistoryGraph =>
-			"""{"valueVariable":"system_cpu_usage_percent","title":"CPU Load","subtitle":"{{ vars.system_cpu_name }}","showSubtitle":true,"unit":"%","maxValue":100}""",
-		WidgetTypeIds.Clock => """{"style":"digital","showSeconds":true,"showDate":true}""",
-		WidgetTypeIds.Countdown => """{"mode":"fixed","durationHours":0,"durationMinutes":5,"durationSeconds":0}""",
-		WidgetTypeIds.Stopwatch => "{}",
-		WidgetTypeIds.Gauges =>
-			$$"""{"gauges":[{"id":"cpu","variable":"system_cpu_usage_percent","name":"CPU","icon":{"type":"icon-pack","reference":"{{IncludedIconPack.IconId(IncludedIconPack.Cpu)}}"},"max":100},{"id":"ram","variable":"system_ram_usage_percent","name":"RAM","icon":{"type":"icon-pack","reference":"{{IncludedIconPack.IconId(IncludedIconPack.MemoryStick)}}"},"max":100}]}""",
-		WidgetTypeIds.Battery => """{"mode":"all","style":"ring"}""",
-		_ => "{}",
-	};
+		return id switch
+		{
+			WidgetTypeIds.ActionButton => """{"label":""}""",
+			WidgetTypeIds.MusicPlayer => "{}",
+			WidgetTypeIds.Slider => """{"orientation":"horizontal","label":"Value"}""",
+			WidgetTypeIds.Weather =>
+				"""{"showIcon":true,"showTemperature":true,"showCondition":true,"showLocation":true,"showForecast":true,"forecastDays":5}""",
+			WidgetTypeIds.HistoryGraph =>
+				"""{"valueVariable":"system_cpu_usage_percent","title":"CPU Load","subtitle":"{{ vars.system_cpu_name }}","showSubtitle":true,"unit":"%","maxValue":100}""",
+			WidgetTypeIds.Clock => """{"style":"digital","showSeconds":true,"showDate":true}""",
+			WidgetTypeIds.Countdown => """{"mode":"fixed","durationHours":0,"durationMinutes":5,"durationSeconds":0}""",
+			WidgetTypeIds.Stopwatch => "{}",
+			WidgetTypeIds.Gauges =>
+				$$"""{"gauges":[{"id":"cpu","variable":"system_cpu_usage_percent","name":"CPU","icon":{"type":"icon-pack","reference":"{{IncludedIconPack.IconId(IncludedIconPack.Cpu)}}"},"max":100},{"id":"ram","variable":"system_ram_usage_percent","name":"RAM","icon":{"type":"icon-pack","reference":"{{IncludedIconPack.IconId(IncludedIconPack.MemoryStick)}}"},"max":100}]}""",
+			WidgetTypeIds.Battery => """{"mode":"all","style":"ring"}""",
+			_ => "{}"
+		};
+	}
 }

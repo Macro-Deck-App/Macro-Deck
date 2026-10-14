@@ -19,7 +19,9 @@ public class UnknownMemberToleranceTests
 {
 	[Test]
 	public void An_unknown_member_on_a_node_is_dropped_on_reserialize()
-		=> AssertDropped<UiNode>("""{"id":"x","type":"t","unknownField":42}""", "id", "type");
+	{
+		AssertDropped<UiNode>("""{"id":"x","type":"t","unknownField":42}""", "id", "type");
+	}
 
 	[Test]
 	public void An_unknown_member_on_a_tree_is_dropped_on_reserialize()
@@ -33,40 +35,54 @@ public class UnknownMemberToleranceTests
 
 	[Test]
 	public void An_unknown_member_on_a_surface_is_dropped_on_reserialize()
-		=> AssertDropped<UiSurface>("""{"kind":"config","sessionMode":"shared","unknownField":42}""",
+	{
+		AssertDropped<UiSurface>("""{"kind":"config","sessionMode":"shared","unknownField":42}""",
 			"kind",
 			"sessionMode");
+	}
 
 	[Test]
 	public void An_unknown_member_on_an_event_is_dropped_on_reserialize()
-		=> AssertDropped<UiEvent>("""{"nodeId":"x","name":"click","unknownField":42}""", "nodeId", "name");
+	{
+		AssertDropped<UiEvent>("""{"nodeId":"x","name":"click","unknownField":42}""", "nodeId", "name");
+	}
 
 	[Test]
 	public void An_unknown_member_on_a_patch_is_dropped_on_reserialize()
-		=> AssertDropped<UiPatch>(
+	{
+		AssertDropped<UiPatch>(
 			"""{"fromRevision":1,"toRevision":2,"operations":[{"op":"remove-node","nodeId":"x"}],"unknownField":42}""",
 			"fromRevision",
 			"toRevision",
 			"operations");
+	}
 
 	[Test]
 	public void An_unknown_member_on_a_patch_operation_is_dropped_on_reserialize()
-		=> AssertDropped<UiPatchOperation>("""{"op":"remove-node","nodeId":"x","unknownField":42}""", "op", "nodeId");
+	{
+		AssertDropped<UiPatchOperation>("""{"op":"remove-node","nodeId":"x","unknownField":42}""", "op", "nodeId");
+	}
 
 	[Test]
 	public void An_unknown_member_on_a_resource_is_dropped_on_reserialize()
-		=> AssertDropped<UiResource>("""{"resourceId":"icon-1","unknownField":42}""", "resourceId");
+	{
+		AssertDropped<UiResource>("""{"resourceId":"icon-1","unknownField":42}""", "resourceId");
+	}
 
 	[Test]
 	public void An_unknown_member_on_capabilities_is_dropped_on_reserialize()
-		=> AssertDropped<UiCapabilities>(
+	{
+		AssertDropped<UiCapabilities>(
 			"""{"uiProtocol":{"minimum":1,"maximum":1},"supportsAllComponents":true,"unknownField":42}""",
 			"uiProtocol",
 			"supportsAllComponents");
+	}
 
 	[Test]
 	public void An_unknown_member_on_a_version_range_is_dropped_on_reserialize()
-		=> AssertDropped<UiVersionRange>("""{"minimum":1,"maximum":2,"unknownField":42}""", "minimum", "maximum");
+	{
+		AssertDropped<UiVersionRange>("""{"minimum":1,"maximum":2,"unknownField":42}""", "minimum", "maximum");
+	}
 
 	private static void AssertDropped<T>(string jsonWithUnknownMember, params string[] expectedKeys)
 	{

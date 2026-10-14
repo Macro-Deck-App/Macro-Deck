@@ -17,23 +17,29 @@ public class PortableArchiveDeclarationTests
 	private PortabilityTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new PortabilityTestHarness();
+	public void SetUp()
+	{
+		_harness = new PortabilityTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Export_WithoutIcons_LeavesTheIconsOutOfTheArchive()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var icon = await _harness.AddReadyIcon(pack.Id, "star", sizes: [128]);
+		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128]);
 		var (source, _, _) = await _harness.SeedProfile($"{{\"iconId\":\"{icon.Id}\"}}");
 
 		var export = await _harness.ProfileService.Export(source.Id,
 			PortableExportOptions.Default with { IncludeIcons = false },
 			CancellationToken.None);
 
-		var read = PortableArchive.Read(export.Data!, password: null);
+		var read = PortableArchive.Read(export.Data!, null);
 		Assert.Multiple(() =>
 		{
 			Assert.That(read.Content!.Icons, Is.Empty);
@@ -46,7 +52,7 @@ public class PortableArchiveDeclarationTests
 	public async Task Export_WithIcons_IsStillTheDefault()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var icon = await _harness.AddReadyIcon(pack.Id, "star", sizes: [128]);
+		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128]);
 		var (source, _, _) = await _harness.SeedProfile($"{{\"iconId\":\"{icon.Id}\"}}");
 
 		var export = await _harness.ProfileService.Export(source.Id,
@@ -302,30 +308,49 @@ public class PortableArchiveDeclarationTests
 	}
 
 	private PortableArchiveInspector Inspector(StubConfigStore? store = null)
-		=> new(_harness.Integrations, store ?? new StubConfigStore());
+	{
+		return new PortableArchiveInspector(_harness.Integrations, store ?? new StubConfigStore());
+	}
 
 	private sealed class StubConfigStore : IIntegrationConfigStore
 	{
 		private readonly List<ConfigEntrySummary> _entries = [];
 
 		public void Add(string integrationId)
-			=> _entries.Add(new ConfigEntrySummary(Guid.NewGuid(), integrationId, "Entry", DateTime.UtcNow));
+		{
+			_entries.Add(new ConfigEntrySummary(Guid.NewGuid(), integrationId, "Entry", DateTime.UtcNow));
+		}
 
 		public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(_entries
-				.Where(entry => entry.IntegrationId == integrationId).ToList());
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(_entries
+				.Where(entry => entry.IntegrationId == integrationId)
+				.ToList());
+		}
 
-		public Task<ConfigEntryRecord?> Find(Guid entryId) => Task.FromResult<ConfigEntryRecord?>(null);
+		public Task<ConfigEntryRecord?> Find(Guid entryId)
+		{
+			return Task.FromResult<ConfigEntryRecord?>(null);
+		}
 
 		public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task Delete(Guid entryId) => throw new NotSupportedException();
+		public Task Delete(Guid entryId)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

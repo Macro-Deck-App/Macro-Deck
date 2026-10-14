@@ -7,10 +7,13 @@ public class ConnectCachedRolesCleanupTests
 	private string _path = null!;
 
 	[SetUp]
-	public void SetUp() => _path = Path.Combine(Path.GetTempPath(),
-		"macro-deck-tests",
-		Guid.NewGuid().ToString("N"),
-		"database.db");
+	public void SetUp()
+	{
+		_path = Path.Combine(Path.GetTempPath(),
+			"macro-deck-tests",
+			Guid.NewGuid().ToString("N"),
+			"database.db");
+	}
 
 	[TearDown]
 	public void TearDown()
@@ -32,7 +35,8 @@ public class ConnectCachedRolesCleanupTests
 
 		Migrate();
 
-		Assert.That(Keys(), Is.EquivalentTo(new[] { "connect.credentialSubject", "connect.credentialCachedDisplayName" }));
+		Assert.That(Keys(),
+			Is.EquivalentTo(new[] { "connect.credentialSubject", "connect.credentialCachedDisplayName" }));
 	}
 
 	private void Seed(params (string Key, string Value)[] preferences)

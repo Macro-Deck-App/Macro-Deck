@@ -2,7 +2,6 @@ using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
-using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Widgets;
@@ -72,26 +71,28 @@ internal static class AdGuardHomeWidgetView
 				{
 					Key = "unavailableGate",
 					Condition = () => !state.Value.Available,
-					Content = builder.Unavailable,
+					Content = builder.Unavailable
 				},
 				new UiWhen
 				{
 					Key = "availableGate",
 					Condition = () => state.Value.Available,
-					Content = builder.Body,
-				},
-			],
+					Content = builder.Body
+				}
+			]
 		};
 	}
 
 	internal static string ProtectionColor(AdGuardHomeProtection protection)
-		=> protection switch
+	{
+		return protection switch
 		{
 			AdGuardHomeProtection.Enabled => EnabledColor,
 			AdGuardHomeProtection.Paused => PausedColor,
 			AdGuardHomeProtection.Disabled => DisabledColor,
-			_ => UnknownColor,
+			_ => UnknownColor
 		};
+	}
 
 	private sealed class Builder(
 		UiState<AdGuardHomeViewState> state,
@@ -101,7 +102,7 @@ internal static class AdGuardHomeWidgetView
 	{
 		private readonly IReadOnlyList<string> _durations =
 		[
-			.. options.Durations.Where(id => AdGuardHomeWidgetType.Duration(id) is not null),
+			.. options.Durations.Where(id => AdGuardHomeWidgetType.Duration(id) is not null)
 		];
 
 		public UiStack Header()
@@ -117,9 +118,9 @@ internal static class AdGuardHomeWidgetView
 						Key = "logo",
 						Source = UiValue.Optional(() => Image(icons.Value.Logo)),
 						Size = _logo,
-						MainSize = _logo,
-					},
-				},
+						MainSize = _logo
+					}
+				}
 			};
 
 			children.Add(new UiStack
@@ -137,7 +138,7 @@ internal static class AdGuardHomeWidgetView
 						MinSize = _text,
 						Weight = UiComponentTextWeights.SemiBold,
 						Role = UiComponentTextRoles.Primary,
-						MaxLines = 1,
+						MaxLines = 1
 					},
 					new UiWhen
 					{
@@ -149,10 +150,10 @@ internal static class AdGuardHomeWidgetView
 							Text = UiText.From(() => state.Value.Version),
 							Size = _smallText,
 							Role = UiComponentTextRoles.Muted,
-							MaxLines = 1,
-						},
-					},
-				],
+							MaxLines = 1
+						}
+					}
+				]
 			});
 
 			if (options.ShowStatus)
@@ -166,12 +167,13 @@ internal static class AdGuardHomeWidgetView
 				Direction = UiComponentDirections.Horizontal,
 				Align = UiComponentAlignments.Center,
 				Gap = _gap,
-				Children = children,
+				Children = children
 			};
 		}
 
 		public UiStack Unavailable()
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = "unavailable",
 				Direction = UiComponentDirections.Vertical,
@@ -187,7 +189,7 @@ internal static class AdGuardHomeWidgetView
 						Icon = UiValue.From(() => state.Value.Connecting ? UiIcons.Refresh : UiIcons.AlertTriangle),
 						Size = _tileIcon,
 						MainSize = _tileIcon,
-						Role = UiComponentTextRoles.Muted,
+						Role = UiComponentTextRoles.Muted
 					},
 					new UiTextRun
 					{
@@ -197,92 +199,108 @@ internal static class AdGuardHomeWidgetView
 						MinSize = _smallText,
 						Role = UiComponentTextRoles.Secondary,
 						Align = UiComponentAlignments.Center,
-						MaxLines = 3,
-					},
-				],
+						MaxLines = 3
+					}
+				]
 			};
+		}
 
 		public UiResponsive Body()
-			=> options.View switch
+		{
+			return options.View switch
 			{
 				AdGuardHomeWidgetType.StatisticsView => Statistics(),
 				AdGuardHomeWidgetType.OverviewView => Overview(),
-				_ => Control(),
+				_ => Control()
 			};
+		}
 
 		private UiResponsive Control()
-			=> new()
+		{
+			return new UiResponsive
 			{
 				Key = "control",
 				Fill = true,
-				Default = ControlBody("small", buttonsPerRow: 2, rows: 1, shield: false),
+				Default = ControlBody("small", 2, 1, false),
 				Variants =
 				[
-					new UiResponsiveVariant { MinWidth = 1.5, MinHeight = 1.5, Content = ControlBody("large", 4, 2, true) },
-					new UiResponsiveVariant { MinWidth = 2.5, Content = ControlBody("wide", buttonsPerRow: 6, 1, true) },
-					new UiResponsiveVariant { MinWidth = 1.5, Content = ControlBody("medium", buttonsPerRow: 4, 1, false) },
-					new UiResponsiveVariant { MinHeight = 1.5, Content = ControlBody("tall", buttonsPerRow: 2, 2, true) },
-				],
+					new UiResponsiveVariant
+						{ MinWidth = 1.5, MinHeight = 1.5, Content = ControlBody("large", 4, 2, true) },
+					new UiResponsiveVariant
+						{ MinWidth = 2.5, Content = ControlBody("wide", 6, 1, true) },
+					new UiResponsiveVariant
+						{ MinWidth = 1.5, Content = ControlBody("medium", 4, 1, false) },
+					new UiResponsiveVariant
+						{ MinHeight = 1.5, Content = ControlBody("tall", 2, 2, true) }
+				]
 			};
+		}
 
 		private UiResponsive Statistics()
-			=> new()
+		{
+			return new UiResponsive
 			{
 				Key = "statistics",
 				Fill = true,
-				Default = CompactStatistics("small", maxRows: 2),
+				Default = CompactStatistics("small", 2),
 				Variants =
 				[
 					new UiResponsiveVariant { MinWidth = 2.5, MinHeight = 1.5, Content = Tiles("large", 8, 4) },
 					new UiResponsiveVariant { MinWidth = 1.5, MinHeight = 1.5, Content = Tiles("square", 4, 2) },
-					new UiResponsiveVariant { MinWidth = 2.5, Content = Tiles("wide", maxTiles: 6, columns: 6) },
-					new UiResponsiveVariant { MinWidth = 1.5, Content = Tiles("medium", maxTiles: 4, columns: 4) },
-					new UiResponsiveVariant { MinHeight = 1.5, Content = CompactStatistics("tall", maxRows: 5) },
-				],
+					new UiResponsiveVariant { MinWidth = 2.5, Content = Tiles("wide", 6, 6) },
+					new UiResponsiveVariant { MinWidth = 1.5, Content = Tiles("medium", 4, 4) },
+					new UiResponsiveVariant { MinHeight = 1.5, Content = CompactStatistics("tall", 5) }
+				]
 			};
+		}
 
 		private UiResponsive Overview()
-			=> new()
+		{
+			return new UiResponsive
 			{
 				Key = "overview",
 				Fill = true,
-				Default = ControlBody("small", buttonsPerRow: 2, rows: 1, shield: false),
+				Default = ControlBody("small", 2, 1, false),
 				Variants =
 				[
 					new UiResponsiveVariant
 					{
 						MinWidth = 2.5,
 						MinHeight = 1.5,
-						Content = Combined("large", buttonsPerRow: 4, maxTiles: 4, tileColumns: 4),
+						Content = Combined("large", 4, 4, 4)
 					},
 					new UiResponsiveVariant
 					{
 						MinWidth = 1.5,
 						MinHeight = 1.5,
-						Content = Combined("square", buttonsPerRow: 4, maxTiles: 4, tileColumns: 2),
+						Content = Combined("square", 4, 4, 2)
 					},
 					new UiResponsiveVariant { MinWidth = 1.5, Content = ControlBody("medium", 4, 1, false) },
-					new UiResponsiveVariant { MinHeight = 1.5, Content = ControlBody("tall", 2, 2, true) },
-				],
+					new UiResponsiveVariant { MinHeight = 1.5, Content = ControlBody("tall", 2, 2, true) }
+				]
 			};
+		}
 
 		private UiStack Combined(string key, int buttonsPerRow, int maxTiles, int tileColumns)
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = key,
 				Direction = UiComponentDirections.Vertical,
 				Gap = _gap,
 				Children =
 				[
-					ProtectionLine(shield: false),
+					ProtectionLine(false),
 					Failure(),
-					ButtonArea(buttonsPerRow, rows: 1),
-					Tiles("tiles", maxTiles, tileColumns, fill: true),
-				],
+					ButtonArea(buttonsPerRow, 1),
+					Tiles("tiles", maxTiles, tileColumns, true)
+				]
 			};
+		}
 
 		private UiStack ControlBody(string key, int buttonsPerRow, int rows, bool shield)
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = key,
 				Direction = UiComponentDirections.Vertical,
@@ -292,12 +310,14 @@ internal static class AdGuardHomeWidgetView
 					ProtectionLine(shield),
 					Failure(),
 					new UiStack { Key = "spacer", Fill = true },
-					ButtonArea(buttonsPerRow, rows),
-				],
+					ButtonArea(buttonsPerRow, rows)
+				]
 			};
+		}
 
 		private UiWhen Failure()
-			=> new()
+		{
+			return new UiWhen
 			{
 				Key = "failureGate",
 				Condition = () => state.Value.HasFailure,
@@ -307,12 +327,14 @@ internal static class AdGuardHomeWidgetView
 					Text = UiText.Optional(() => state.Value.Failure),
 					Size = _smallText,
 					Color = DisabledColor,
-					MaxLines = 2,
-				},
+					MaxLines = 2
+				}
 			};
+		}
 
 		private UiStack ButtonArea(int buttonsPerRow, int rows)
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = "buttons",
 				Direction = UiComponentDirections.Vertical,
@@ -322,22 +344,25 @@ internal static class AdGuardHomeWidgetView
 					new UiWhen
 					{
 						Key = "pauseGate",
-						Condition = () => state.Value.Protection == AdGuardHomeProtection.Enabled && _durations.Count > 0,
-						Content = () => PauseButtons(buttonsPerRow, rows),
+						Condition = () => state.Value.Protection == AdGuardHomeProtection.Enabled
+							&& _durations.Count > 0,
+						Content = () => PauseButtons(buttonsPerRow, rows)
 					},
 					new UiWhen
 					{
 						Key = "enableGate",
-						Condition = () => state.Value.Protection is AdGuardHomeProtection.Paused or
-							AdGuardHomeProtection.Disabled,
+						Condition = ()
+							=> state.Value.Protection is AdGuardHomeProtection.Paused or AdGuardHomeProtection.Disabled,
 						Content = () => ButtonRow("enableRow",
-							[Button("enable", Strings.EnableProtection(), EnableButtonColor, _ => commands.Enable())]),
-					},
-				],
+							[Button("enable", Strings.EnableProtection(), EnableButtonColor, _ => commands.Enable())])
+					}
+				]
 			};
+		}
 
 		private UiStack ProtectionLine(bool shield)
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = "protection",
 				Direction = UiComponentDirections.Horizontal,
@@ -352,7 +377,7 @@ internal static class AdGuardHomeWidgetView
 							? icons.Value.Protected
 							: icons.Value.Unprotected)),
 						Size = shield ? _shield : _text,
-						MainSize = shield ? _shield : _text,
+						MainSize = shield ? _shield : _text
 					},
 					new UiTextRun
 					{
@@ -362,10 +387,11 @@ internal static class AdGuardHomeWidgetView
 						MinSize = _smallText,
 						Weight = UiComponentTextWeights.Medium,
 						Color = UiValue.From(() => ProtectionColor(state.Value.Protection)),
-						MaxLines = 2,
-					},
-				],
+						MaxLines = 2
+					}
+				]
 			};
+		}
 
 		private UiStack PauseButtons(int buttonsPerRow, int rows)
 		{
@@ -377,37 +403,44 @@ internal static class AdGuardHomeWidgetView
 				Gap = _gap,
 				Children =
 				[
-					.. shown.Chunk(buttonsPerRow).Select((chunk, index) => ButtonRow("row" + index,
-					[
-						.. chunk.Select(id => Button("pause-" + id, ShortLabel(id), PauseButtonColor, _ => commands.Pause(id))),
-					])),
-				],
+					.. shown.Chunk(buttonsPerRow)
+						.Select((chunk, index) => ButtonRow("row" + index,
+						[
+							.. chunk.Select(id
+								=> Button("pause-" + id, ShortLabel(id), PauseButtonColor, _ => commands.Pause(id)))
+						]))
+				]
 			};
 		}
 
 		private static UiStack ButtonRow(string key, IReadOnlyList<UiElement> buttons)
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = key,
 				Direction = UiComponentDirections.Horizontal,
 				Gap = _gap,
 				MainSize = _buttonHeight,
-				Children = buttons,
+				Children = buttons
 			};
+		}
 
 		private static LocalizedText ShortLabel(string durationId)
-			=> AdGuardHomeWidgetType.Duration(durationId)?.Length is { } length
+		{
+			return AdGuardHomeWidgetType.Duration(durationId)?.Length is { } length
 				? length.TotalMinutes < 60
-					? Strings.ShortMinutes(count: ((int)length.TotalMinutes).ToString(CultureInfo.CurrentCulture))
-					: Strings.ShortHours(count: ((int)length.TotalHours).ToString(CultureInfo.CurrentCulture))
+					? Strings.ShortMinutes(((int)length.TotalMinutes).ToString(CultureInfo.CurrentCulture))
+					: Strings.ShortHours(((int)length.TotalHours).ToString(CultureInfo.CurrentCulture))
 				: Strings.Off();
+		}
 
 		private static UiButton Button(
 			string key,
 			LocalizedText label,
 			string background,
 			Func<UiEventData, UiEventOutcome> press)
-			=> new()
+		{
+			return new UiButton
 			{
 				Key = key,
 				Justify = UiComponentJustify.Center,
@@ -426,13 +459,15 @@ internal static class AdGuardHomeWidgetView
 						Weight = UiComponentTextWeights.Medium,
 						Color = ButtonTextColor,
 						Align = UiComponentAlignments.Center,
-						MaxLines = 1,
-					},
-				],
+						MaxLines = 1
+					}
+				]
 			};
+		}
 
 		private UiStack CompactStatistics(string key, int maxRows)
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = key,
 				Direction = UiComponentDirections.Vertical,
@@ -440,35 +475,37 @@ internal static class AdGuardHomeWidgetView
 				Gap = _gap,
 				Children =
 				[
-					.. options.Statistics.Take(maxRows).Select(statistic => new UiStack
-					{
-						Key = statistic,
-						Direction = UiComponentDirections.Horizontal,
-						Align = UiComponentAlignments.Center,
-						Gap = _gap,
-						Children =
-						[
-							new UiImage
-							{
-								Key = "icon",
-								Source = UiValue.Optional(() => Image(icons.Value.Statistic(statistic))),
-								Size = _tileIcon,
-								MainSize = _tileIcon,
-							},
-							new UiTextRun
-							{
-								Key = "value",
-								Text = UiText.From(() => state.Value.Value(statistic)),
-								Size = _text,
-								MinSize = _smallText,
-								Weight = UiComponentTextWeights.Bold,
-								Role = UiComponentTextRoles.Primary,
-								MaxLines = 1,
-							},
-						],
-					}),
-				],
+					.. options.Statistics.Take(maxRows)
+						.Select(statistic => new UiStack
+						{
+							Key = statistic,
+							Direction = UiComponentDirections.Horizontal,
+							Align = UiComponentAlignments.Center,
+							Gap = _gap,
+							Children =
+							[
+								new UiImage
+								{
+									Key = "icon",
+									Source = UiValue.Optional(() => Image(icons.Value.Statistic(statistic))),
+									Size = _tileIcon,
+									MainSize = _tileIcon
+								},
+								new UiTextRun
+								{
+									Key = "value",
+									Text = UiText.From(() => state.Value.Value(statistic)),
+									Size = _text,
+									MinSize = _smallText,
+									Weight = UiComponentTextWeights.Bold,
+									Role = UiComponentTextRoles.Primary,
+									MaxLines = 1
+								}
+							]
+						})
+				]
 			};
+		}
 
 		private UiGrid Tiles(string key, int maxTiles, int columns, bool fill = false)
 		{
@@ -478,13 +515,14 @@ internal static class AdGuardHomeWidgetView
 				Key = key,
 				Columns = Math.Max(1, Math.Min(columns, shown.Count)),
 				Gap = _gap,
-				Children = [.. shown.Select(Tile)],
+				Children = [.. shown.Select(Tile)]
 			};
 			return fill ? grid with { Fill = true } : grid;
 		}
 
 		private UiLayer Tile(string statistic)
-			=> new()
+		{
+			return new UiLayer
 			{
 				Key = statistic,
 				Fill = true,
@@ -499,8 +537,8 @@ internal static class AdGuardHomeWidgetView
 							Key = "shape",
 							Shape = UiComponentShapes.RoundedRectangle,
 							CornerRadius = _radius,
-							Color = TileTint,
-						},
+							Color = TileTint
+						}
 					},
 					new UiStack
 					{
@@ -517,7 +555,7 @@ internal static class AdGuardHomeWidgetView
 								Key = "icon",
 								Source = UiValue.Optional(() => Image(icons.Value.Statistic(statistic))),
 								Size = _tileIcon,
-								MainSize = _tileIcon,
+								MainSize = _tileIcon
 							},
 							new UiTextRun
 							{
@@ -528,7 +566,7 @@ internal static class AdGuardHomeWidgetView
 								Weight = UiComponentTextWeights.Bold,
 								Role = UiComponentTextRoles.Primary,
 								Align = UiComponentAlignments.Center,
-								MaxLines = 1,
+								MaxLines = 1
 							},
 							new UiTextRun
 							{
@@ -537,15 +575,17 @@ internal static class AdGuardHomeWidgetView
 								Size = _smallText,
 								Role = UiComponentTextRoles.Muted,
 								Align = UiComponentAlignments.Center,
-								MaxLines = 1,
-							},
-						],
-					},
-				],
+								MaxLines = 1
+							}
+						]
+					}
+				]
 			};
+		}
 
 		private UiModifier StatusDot()
-			=> new()
+		{
+			return new UiModifier
 			{
 				Key = "statusDot",
 				Frame = new UiFrame { Width = _smallText, Height = _smallText },
@@ -555,16 +595,20 @@ internal static class AdGuardHomeWidgetView
 					Shape = UiComponentShapes.Circle,
 					Color = UiValue.From(() => state.Value.Available
 						? ProtectionColor(state.Value.Protection)
-						: UnknownColor),
-				},
+						: UnknownColor)
+				}
 			};
+		}
 	}
 
 	private static UiValue<UiResource> Image(UiResource? resource)
-		=> resource is null ? UiValue.None<UiResource>() : resource;
+	{
+		return resource is null ? UiValue.None<UiResource>() : resource;
+	}
 
 	internal static LocalizedText StatisticLabel(string statistic)
-		=> statistic switch
+	{
+		return statistic switch
 		{
 			AdGuardHomeWidgetType.DnsQueriesStatistic => Strings.Statistics.DnsQueries(),
 			AdGuardHomeWidgetType.BlockedStatistic => Strings.Statistics.Blocked(),
@@ -572,6 +616,7 @@ internal static class AdGuardHomeWidgetView
 			AdGuardHomeWidgetType.AverageProcessingTimeStatistic => Strings.Statistics.AverageProcessingTime(),
 			AdGuardHomeWidgetType.SafeBrowsingStatistic => Strings.Statistics.SafeBrowsing(),
 			AdGuardHomeWidgetType.ParentalStatistic => Strings.Statistics.Parental(),
-			_ => Strings.Statistics.SafeSearch(),
+			_ => Strings.Statistics.SafeSearch()
 		};
+	}
 }

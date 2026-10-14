@@ -21,9 +21,9 @@ internal static class AdbEventDefinitions
 			PayloadParameters =
 			[
 				SerialPayload(),
-				ActionParameter.Text("model", label: AppStrings.Integrations.Adb.Params.ModelLabel()),
-				ActionParameter.Text("manufacturer", label: AppStrings.Integrations.Adb.Params.ManufacturerLabel()),
-				ActionParameter.Text("state", label: AppStrings.Integrations.Adb.Params.StateLabel())
+				ActionParameter.Text("model", AppStrings.Integrations.Adb.Params.ModelLabel()),
+				ActionParameter.Text("manufacturer", AppStrings.Integrations.Adb.Params.ManufacturerLabel()),
+				ActionParameter.Text("state", AppStrings.Integrations.Adb.Params.StateLabel())
 			]
 		},
 		new()
@@ -74,22 +74,28 @@ internal static class AdbEventDefinitions
 	];
 
 	private static ActionParameter SerialPayload()
-		=> ActionParameter.DynamicChoice("serial",
-			label: AppStrings.Integrations.Adb.Params.SerialLabel(),
+	{
+		return ActionParameter.DynamicChoice("serial",
+			AppStrings.Integrations.Adb.Params.SerialLabel(),
 			optionsSourceId: HostOptionsSources.AndroidDevices);
+	}
 
 	private static ActionParameter SerialFilter()
-		=> ActionParameter.DynamicChoice("serial",
-			label: AppStrings.Integrations.Adb.Params.DeviceLabel(),
-			description: AppStrings.Integrations.Adb.Events.SerialFilterDescription(),
-			optionsSourceId: HostOptionsSources.AndroidDevices,
-			placeholder: AppStrings.Integrations.Adb.Events.SerialFilterPlaceholder(),
-			required: false);
+	{
+		return ActionParameter.DynamicChoice("serial",
+			AppStrings.Integrations.Adb.Params.DeviceLabel(),
+			AppStrings.Integrations.Adb.Events.SerialFilterDescription(),
+			HostOptionsSources.AndroidDevices,
+			AppStrings.Integrations.Adb.Events.SerialFilterPlaceholder(),
+			false);
+	}
 
 	private static IReadOnlyList<ActionParameter> SerialAndModelPayload()
-		=>
+	{
+		return
 		[
 			SerialPayload(),
-			ActionParameter.Text("model", label: AppStrings.Integrations.Adb.Params.ModelLabel())
+			ActionParameter.Text("model", AppStrings.Integrations.Adb.Params.ModelLabel())
 		];
+	}
 }

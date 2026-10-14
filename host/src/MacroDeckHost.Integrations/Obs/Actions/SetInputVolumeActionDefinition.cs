@@ -47,10 +47,9 @@ internal sealed class SetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(InputParameter,
-			label: AppStrings.Integrations.Obs.Params.Input(),
+			AppStrings.Integrations.Obs.Params.Input(),
 			required: true),
 		ActionParameter.Choice(ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 					{ Value = ModeSet, Label = AppStrings.Integrations.Obs.Actions.SetInputVolume.ModeSet() },
@@ -74,32 +73,38 @@ internal sealed class SetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 					Label = AppStrings.Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels()
 				}
 			],
-			label: AppStrings.Integrations.Obs.Params.Mode(),
+			AppStrings.Integrations.Obs.Params.Mode(),
 			defaultValue: ModeSet),
 		ActionParameter.Slider(VolumeParameter,
-			min: 0,
-			max: 100,
-			label: AppStrings.Integrations.Obs.Actions.SetInputVolume.VolumeLabel(),
-			description: AppStrings.Integrations.Obs.Actions.SetInputVolume.VolumeDescription(),
-			step: 1,
-			defaultValue: 100).OnlyWhen(ModeParameter, ModeSet, ModeIncrease, ModeDecrease),
+				0,
+				100,
+				AppStrings.Integrations.Obs.Actions.SetInputVolume.VolumeLabel(),
+				AppStrings.Integrations.Obs.Actions.SetInputVolume.VolumeDescription(),
+				1,
+				100)
+			.OnlyWhen(ModeParameter, ModeSet, ModeIncrease, ModeDecrease),
 		ActionParameter.Slider(DecibelsParameter,
-			min: ObsVolumeScale.MinimumDecibels,
-			max: ObsVolumeScale.MaximumDecibels,
-			label: AppStrings.Integrations.Obs.Actions.SetInputVolume.DecibelsLabel(),
-			description: AppStrings.Integrations.Obs.Actions.SetInputVolume.DecibelsDescription(),
-			step: 1,
-			defaultValue: DefaultDecibels).OnlyWhen(ModeParameter, ModeSetDecibels),
+				ObsVolumeScale.MinimumDecibels,
+				ObsVolumeScale.MaximumDecibels,
+				AppStrings.Integrations.Obs.Actions.SetInputVolume.DecibelsLabel(),
+				AppStrings.Integrations.Obs.Actions.SetInputVolume.DecibelsDescription(),
+				1,
+				DefaultDecibels)
+			.OnlyWhen(ModeParameter, ModeSetDecibels),
 		ActionParameter.Slider(DecibelStepParameter,
-			min: 0,
-			max: 30,
-			label: AppStrings.Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel(),
-			description: AppStrings.Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription(),
-			step: 0.5,
-			defaultValue: DefaultDecibelStep).OnlyWhen(ModeParameter, ModeIncreaseDecibels, ModeDecreaseDecibels)
+				0,
+				30,
+				AppStrings.Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel(),
+				AppStrings.Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription(),
+				0.5,
+				DefaultDecibelStep)
+			.OnlyWhen(ModeParameter, ModeIncreaseDecibels, ModeDecreaseDecibels)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -139,8 +144,8 @@ internal sealed class SetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(InputParameter) is not string input ||
-				string.IsNullOrWhiteSpace(input))
+			if (context.Parameters.GetValueOrDefault(InputParameter) is not string input
+				|| string.IsNullOrWhiteSpace(input))
 			{
 				_logger.Warning("OBS volume action skipped: no input selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
@@ -149,8 +154,8 @@ internal sealed class SetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 
 			var volume = ReadVolume(context.Parameters.GetValueOrDefault(VolumeParameter));
 			var decibels = ReadNumber(context.Parameters.GetValueOrDefault(DecibelsParameter)) ?? DefaultDecibels;
-			var decibelStep = ReadNumber(context.Parameters.GetValueOrDefault(DecibelStepParameter)) ??
-				DefaultDecibelStep;
+			var decibelStep = ReadNumber(context.Parameters.GetValueOrDefault(DecibelStepParameter))
+				?? DefaultDecibelStep;
 			var mode = context.Parameters.GetValueOrDefault(ModeParameter) as string ?? ModeSet;
 			var succeeded = mode switch
 			{
@@ -168,17 +173,23 @@ internal sealed class SetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 					AppStrings.Integrations.Obs.Errors.NotConnected());
 		}
 
-		private static double ReadVolume(object? raw) => ReadNumber(raw) ?? 0d;
-
-		private static double? ReadNumber(object? raw) => raw switch
+		private static double ReadVolume(object? raw)
 		{
-			double d when double.IsFinite(d) => d,
-			float f when float.IsFinite(f) => f,
-			int i => i,
-			long l => l,
-			string s when double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) &&
-				double.IsFinite(parsed) => parsed,
-			_ => null
-		};
+			return ReadNumber(raw) ?? 0d;
+		}
+
+		private static double? ReadNumber(object? raw)
+		{
+			return raw switch
+			{
+				double d when double.IsFinite(d) => d,
+				float f when float.IsFinite(f) => f,
+				int i => i,
+				long l => l,
+				string s when double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+					&& double.IsFinite(parsed) => parsed,
+				_ => null
+			};
+		}
 	}
 }

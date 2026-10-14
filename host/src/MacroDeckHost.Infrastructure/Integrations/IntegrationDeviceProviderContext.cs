@@ -21,17 +21,25 @@ internal sealed class IntegrationDeviceProviderContext : IDeviceProviderContext
 	public Task<DeviceRegistration> RegisterDeviceAsync(
 		DeviceDescriptor device,
 		CancellationToken cancellationToken = default)
-		=> _registry.RegisterAsync(_integrationId, device, cancellationToken);
+	{
+		return _registry.RegisterAsync(_integrationId, device, cancellationToken);
+	}
 
 	public Task UpdateDeviceAsync(DeviceDescriptor device, CancellationToken cancellationToken = default)
-		=> _registry.UpdateAsync(_integrationId, device, cancellationToken);
+	{
+		return _registry.UpdateAsync(_integrationId, device, cancellationToken);
+	}
 
 	public Task SetDevicePresenceAsync(
 		string deviceId,
 		DevicePresence presence,
 		CancellationToken cancellationToken = default)
-		=> _registry.SetPresenceAsync(_integrationId, deviceId, presence, cancellationToken);
+	{
+		return _registry.SetPresenceAsync(_integrationId, deviceId, presence, cancellationToken);
+	}
 
 	public Task UnregisterDeviceAsync(string deviceId, CancellationToken cancellationToken = default)
-		=> _registry.UnregisterAsync(_integrationId, deviceId, cancellationToken);
+	{
+		return _registry.UnregisterAsync(_integrationId, deviceId, cancellationToken);
+	}
 }

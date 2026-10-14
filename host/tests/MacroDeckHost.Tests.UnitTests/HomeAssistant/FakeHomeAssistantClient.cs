@@ -95,7 +95,9 @@ internal sealed class FakeHomeAssistantClient : IHomeAssistantClient
 	}
 
 	public void RaiseEvent(string eventType, string data = "{}")
-		=> EventReceived?.Invoke(this, new HomeAssistantEventMessage(eventType, Parse(data)));
+	{
+		EventReceived?.Invoke(this, new HomeAssistantEventMessage(eventType, Parse(data)));
+	}
 
 	public void Drop(string reason = "dropped")
 	{

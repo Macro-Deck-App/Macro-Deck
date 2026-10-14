@@ -54,7 +54,8 @@ internal sealed class SpotifyApiLimitStore(IIntegrationConfig config, ILogger lo
 	}
 
 	internal void Clear(Guid entryId)
-		=> Write(entryId,
+	{
+		Write(entryId,
 			string.Empty,
 			async () =>
 			{
@@ -62,6 +63,7 @@ internal sealed class SpotifyApiLimitStore(IIntegrationConfig config, ILogger lo
 				await config.SetStringAsync(entryId, SpotifyConfigKeys.ApiLimitSince, null);
 				await config.SetStringAsync(entryId, SpotifyConfigKeys.ApiLimitKind, null);
 			});
+	}
 
 	internal Task FlushAsync()
 	{
@@ -103,8 +105,10 @@ internal sealed class SpotifyApiLimitStore(IIntegrationConfig config, ILogger lo
 	}
 
 	private static bool TryParse(string? value, out DateTimeOffset parsed)
-		=> DateTimeOffset.TryParse(value,
+	{
+		return DateTimeOffset.TryParse(value,
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.RoundtripKind,
 			out parsed);
+	}
 }

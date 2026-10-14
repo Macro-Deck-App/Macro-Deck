@@ -30,7 +30,10 @@ internal sealed class DeviceSurfacePushTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task Navigating_one_device_leaves_another_where_it_was_and_pushes_it_nothing()

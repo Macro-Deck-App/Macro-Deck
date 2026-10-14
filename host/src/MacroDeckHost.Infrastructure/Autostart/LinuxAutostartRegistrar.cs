@@ -21,7 +21,9 @@ public sealed class LinuxAutostartRegistrar : FileAutostartRegistrar
 	protected override string FileName => $"{AutostartEntryContent.DesktopEntryName}.desktop";
 
 	protected override string BuildContent(AutostartRegistration registration)
-		=> AutostartEntryContent.BuildDesktopEntry(registration);
+	{
+		return AutostartEntryContent.BuildDesktopEntry(registration);
+	}
 
 	protected override AutostartRegistration? ParseContent(string content)
 	{

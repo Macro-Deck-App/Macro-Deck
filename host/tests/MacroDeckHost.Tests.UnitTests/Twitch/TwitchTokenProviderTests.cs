@@ -261,9 +261,14 @@ internal sealed class TwitchTokenProviderTests
 	}
 
 	private TwitchTokenProvider Provider(ITwitchOAuthClient client, TwitchTokens tokens)
-		=> new(_entryId, "client-id", tokens, client, _persister, SilentLogger());
+	{
+		return new TwitchTokenProvider(_entryId, "client-id", tokens, client, _persister, SilentLogger());
+	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 
 	private sealed class RetryingOAuthClient : ITwitchOAuthClient
 	{
@@ -275,14 +280,18 @@ internal sealed class TwitchTokenProviderTests
 			string clientId,
 			string scopes,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<TwitchTokenPollResult> PollTokenAsync(
 			string clientId,
 			string scopes,
 			string deviceCode,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<TwitchTokens> RefreshAsync(
 			string clientId,

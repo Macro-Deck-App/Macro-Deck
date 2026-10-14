@@ -34,8 +34,8 @@ internal static class KeygenCommand
 			if (_reservedKeyNames.Contains(keyName, StringComparer.OrdinalIgnoreCase))
 			{
 				console.WriteError("reserved-key-name",
-					$"'{keyName}' is reserved for Macro Deck's own trust anchors and cannot be used as a creator " +
-					"key name.");
+					$"'{keyName}' is reserved for Macro Deck's own trust anchors and cannot be used as a creator "
+					+ "key name.");
 				return ExitCode.UsageError;
 			}
 
@@ -80,15 +80,15 @@ internal static class KeygenCommand
 			if (OperatingSystem.IsWindows())
 			{
 				console.WriteWarning("restrictive-file-mode-unavailable",
-					$"'{CliText.DisplayPath(privatePath)}' could not be created with a restrictive file mode on " +
-					"Windows; secure access to it yourself.");
+					$"'{CliText.DisplayPath(privatePath)}' could not be created with a restrictive file mode on "
+					+ "Windows; secure access to it yourself.");
 			}
 
 			console.Info($"Public key:  {CliText.DisplayPath(publicPath)}");
 			console.Info($"Private key: {CliText.DisplayPath(privatePath)}");
 			console.Info($"Public key (base64): {publicKeyBase64}");
-			console.Info("Submit the public key above to the Creator Portal for certificate issuance - this " +
-				"command does not issue certificates.");
+			console.Info("Submit the public key above to the Creator Portal for certificate issuance - this "
+				+ "command does not issue certificates.");
 
 			return ExitCode.Success;
 		});

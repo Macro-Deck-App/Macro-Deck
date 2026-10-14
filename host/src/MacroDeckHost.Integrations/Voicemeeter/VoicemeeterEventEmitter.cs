@@ -140,10 +140,12 @@ internal sealed class VoicemeeterEventEmitter
 	}
 
 	private void PublishConnected(VoicemeeterState state)
-		=> _publisher.Publish(VoicemeeterEventIds.Connected,
+	{
+		_publisher.Publish(VoicemeeterEventIds.Connected,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["edition"] = VoicemeeterEditions.DisplayName(state.Edition),
 				["version"] = state.Version ?? string.Empty
 			});
+	}
 }

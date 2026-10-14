@@ -84,5 +84,8 @@ public sealed class PluginApplication : IAsyncDisposable, IDisposable
 	/// Synchronous disposal, for a <c>using</c> in a context that has no <c>await</c>. Prefer
 	/// <see cref="DisposeAsync" />: shutting a plugin down is asynchronous work, and this blocks on it.
 	/// </summary>
-	public void Dispose() => DisposeAsync().AsTask().GetAwaiter().GetResult();
+	public void Dispose()
+	{
+		DisposeAsync().AsTask().GetAwaiter().GetResult();
+	}
 }

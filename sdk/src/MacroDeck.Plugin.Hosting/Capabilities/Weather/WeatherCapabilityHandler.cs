@@ -26,7 +26,8 @@ internal sealed class WeatherCapabilityHandler(IEnumerable<IPluginIntegration> i
 	public string Kind => CapabilityKinds.Weather;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -35,6 +36,7 @@ internal sealed class WeatherCapabilityHandler(IEnumerable<IPluginIntegration> i
 					Kind = CapabilityKinds.Weather, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -64,25 +66,33 @@ internal sealed class WeatherCapabilityHandler(IEnumerable<IPluginIntegration> i
 	}
 
 	private CapabilityInvocationResult Describe()
-		=> CapabilityInvocationResult.Ok(new WeatherDescribePayload
+	{
+		return CapabilityInvocationResult.Ok(new WeatherDescribePayload
 		{
-			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-				metadata.Name,
+			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+				?? metadata.Name,
 			Instances = BuildInstances(),
-			DetailsAction = _providers.Select(p => p.DetailsAction).OfType<WeatherDetailsAction>()
+			DetailsAction = _providers.Select(p => p.DetailsAction)
+				.OfType<WeatherDetailsAction>()
 				.Select(WeatherDescriptorMapper.ToDto)
 				.FirstOrDefault()
 		});
+	}
 
 	/// <summary>The <c>instances</c> operation - see <c>MusicPlayerInstancesResult</c>'s identical remarks.</summary>
 	private CapabilityInvocationResult Instances()
-		=> CapabilityInvocationResult.Ok(new WeatherInstancesResult { Instances = BuildInstances() });
+	{
+		return CapabilityInvocationResult.Ok(new WeatherInstancesResult { Instances = BuildInstances() });
+	}
 
 	/// <summary>Never re-sorted - see <c>MusicPlayerCapabilityHandler.BuildInstances</c>'s identical remarks.</summary>
 	private IReadOnlyList<WeatherStationInstanceDto> BuildInstances()
-		=> [.. _providers.SelectMany(provider => provider.GetInstances()).Select(WeatherDescriptorMapper.ToDto)];
+	{
+		return [.. _providers.SelectMany(provider => provider.GetInstances()).Select(WeatherDescriptorMapper.ToDto)];
+	}
 
-	private async Task<CapabilityInvocationResult> SnapshotAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> SnapshotAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<WeatherInstanceArguments>(PluginProtocolJson.Options);
@@ -95,8 +105,9 @@ internal sealed class WeatherCapabilityHandler(IEnumerable<IPluginIntegration> i
 		IWeatherStation? station = null;
 		foreach (var provider in _providers)
 		{
-			if (provider.GetInstances().Any(instance =>
-				string.Equals(instance.Id, arguments.InstanceId, StringComparison.Ordinal)))
+			if (provider.GetInstances()
+				.Any(instance =>
+					string.Equals(instance.Id, arguments.InstanceId, StringComparison.Ordinal)))
 			{
 				station = provider.GetStation(arguments.InstanceId);
 				break;

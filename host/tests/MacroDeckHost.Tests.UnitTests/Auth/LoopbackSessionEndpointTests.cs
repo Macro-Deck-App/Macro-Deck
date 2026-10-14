@@ -65,7 +65,7 @@ public class LoopbackSessionEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -134,7 +134,9 @@ public class LoopbackSessionEndpointTests
 	public async Task A_spent_expired_or_forged_code_redirects_to_the_app_without_a_cookie()
 	{
 		var code = NewCode();
-		await Send(HttpMethod.Get, $"/api/auth/loopback-session?code={code}", FakeConnectionShape.LoopbackWithoutCredential);
+		await Send(HttpMethod.Get,
+			$"/api/auth/loopback-session?code={code}",
+			FakeConnectionShape.LoopbackWithoutCredential);
 		var expired = TestListenerPorts.SessionCode(TestListenerPorts.LoopbackSecret,
 			DateTimeOffset.UtcNow - TimeSpan.FromMinutes(5),
 			NewNonce());
@@ -194,12 +196,18 @@ public class LoopbackSessionEndpointTests
 		});
 	}
 
-	private static string NewNonce() => Convert.ToHexStringLower(Guid.NewGuid().ToByteArray());
+	private static string NewNonce()
+	{
+		return Convert.ToHexStringLower(Guid.NewGuid().ToByteArray());
+	}
 
 	private static string NewCode()
-		=> TestListenerPorts.SessionCode(TestListenerPorts.LoopbackSecret, DateTimeOffset.UtcNow, NewNonce());
+	{
+		return TestListenerPorts.SessionCode(TestListenerPorts.LoopbackSecret, DateTimeOffset.UtcNow, NewNonce());
+	}
 
-	private async Task<HttpResponseMessage> Send(HttpMethod method,
+	private async Task<HttpResponseMessage> Send(
+		HttpMethod method,
 		string path,
 		FakeConnectionShape shape,
 		HttpContent? content = null,
@@ -216,5 +224,7 @@ public class LoopbackSessionEndpointTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 }

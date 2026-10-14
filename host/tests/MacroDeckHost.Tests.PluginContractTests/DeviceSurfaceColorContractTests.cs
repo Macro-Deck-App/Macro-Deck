@@ -28,12 +28,13 @@ public class DeviceSurfaceColorContractTests
 		profiles.GetProfiles().Single().DefaultBackgroundColor = "#10101080";
 		profiles.GetFoldersForProfile(ContractDeck.ProfileId)
 			.Single(folder => folder.Id == ContractDeck.FolderId)
-			.Widgets.Single().Data = JsonSerializer.Serialize(new Dictionary<string, object?>
-			{
-				["label"] = "Record",
-				["backgroundColor"] = "{{ vars.primary | color | color_opacity: 50 }}",
-				["labelColor"] = "#11223344"
-			});
+			.Widgets.Single()
+			.Data = JsonSerializer.Serialize(new Dictionary<string, object?>
+		{
+			["label"] = "Record",
+			["backgroundColor"] = "{{ vars.primary | color | color_opacity: 50 }}",
+			["labelColor"] = "#11223344"
+		});
 
 		var projection = await ContractDeck.Builder(profiles, new ColorReferenceResolver(variables))
 			.BuildAsync(ContractDeck.Device(Guid.NewGuid(), "integration.device", "SERIAL-1"),
@@ -58,11 +59,12 @@ public class DeviceSurfaceColorContractTests
 		var profiles = ContractDeck.Registry();
 		profiles.GetFoldersForProfile(ContractDeck.ProfileId)
 			.Single(folder => folder.Id == ContractDeck.FolderId)
-			.Widgets.Single().Data = JsonSerializer.Serialize(new Dictionary<string, object?>
-			{
-				["label"] = "Record",
-				["backgroundColor"] = "{{ vars.missing | color }}"
-			});
+			.Widgets.Single()
+			.Data = JsonSerializer.Serialize(new Dictionary<string, object?>
+		{
+			["label"] = "Record",
+			["backgroundColor"] = "{{ vars.missing | color }}"
+		});
 
 		var projection = await ContractDeck.Builder(profiles, new ColorReferenceResolver(new VariableRegistry()))
 			.BuildAsync(ContractDeck.Device(Guid.NewGuid(), "integration.device", "SERIAL-1"),
@@ -71,7 +73,8 @@ public class DeviceSurfaceColorContractTests
 				CancellationToken.None);
 
 		Assert.That(projection.Surface.Widgets.Single(widget => widget.Id == ContractDeck.WidgetId.ToString())
-			.Appearance!.BackgroundColor, Is.Null);
+				.Appearance!.BackgroundColor,
+			Is.Null);
 	}
 
 	[TestCase("rgb(1,2,3)")]
@@ -83,12 +86,13 @@ public class DeviceSurfaceColorContractTests
 		var profiles = ContractDeck.Registry();
 		profiles.GetFoldersForProfile(ContractDeck.ProfileId)
 			.Single(folder => folder.Id == ContractDeck.FolderId)
-			.Widgets.Single().Data = JsonSerializer.Serialize(new Dictionary<string, object?>
-			{
-				["label"] = "Record",
-				["backgroundColor"] = stored,
-				["labelColor"] = stored
-			});
+			.Widgets.Single()
+			.Data = JsonSerializer.Serialize(new Dictionary<string, object?>
+		{
+			["label"] = "Record",
+			["backgroundColor"] = stored,
+			["labelColor"] = stored
+		});
 
 		var projection = await ContractDeck.Builder(profiles, new ColorReferenceResolver(new VariableRegistry()))
 			.BuildAsync(ContractDeck.Device(Guid.NewGuid(), "integration.device", "SERIAL-1"),

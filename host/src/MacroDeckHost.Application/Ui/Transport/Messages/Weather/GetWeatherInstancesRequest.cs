@@ -18,7 +18,8 @@ public class WeatherInstanceDto
 	public bool HasIcon { get; set; }
 
 	public static WeatherInstanceDto From(WeatherStationDescriptor descriptor)
-		=> new()
+	{
+		return new WeatherInstanceDto
 		{
 			InstanceId = descriptor.InstanceId,
 			IntegrationId = descriptor.IntegrationId,
@@ -26,6 +27,7 @@ public class WeatherInstanceDto
 			DisplayName = descriptor.DisplayName,
 			HasIcon = descriptor.HasIcon
 		};
+	}
 }
 
 public class GetWeatherInstancesResponse

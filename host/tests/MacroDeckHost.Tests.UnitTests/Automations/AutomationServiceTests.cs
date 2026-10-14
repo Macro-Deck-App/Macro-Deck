@@ -30,7 +30,10 @@ public class AutomationServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Create_stores_an_enabled_automation_and_publishes_it()
@@ -91,7 +94,7 @@ public class AutomationServiceTests
 	{
 		var created = await _service.Create("Name", "Description", Flows);
 
-		var result = await _service.Update(created.Data!.Id, null, null, null, enabled: false);
+		var result = await _service.Update(created.Data!.Id, null, null, null, false);
 
 		Assert.Multiple(() =>
 		{

@@ -48,7 +48,9 @@ internal sealed class YtmDesktopVariablesTests
 		VariableType type,
 		int? decimalPlaces = null,
 		TimeSpan? refreshInterval = null)
-		=> VariableDefinition.Eager(name, type, decimalPlaces, refreshInterval);
+	{
+		return VariableDefinition.Eager(name, type, decimalPlaces, refreshInterval);
+	}
 
 	[Test]
 	public void The_catalogue_is_exactly_what_the_issue_asked_for()

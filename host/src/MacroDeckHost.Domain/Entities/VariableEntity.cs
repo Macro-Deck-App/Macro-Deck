@@ -74,10 +74,10 @@ public class VariableEntity : BaseEntity
 	// the first restart and turn every user variable read-only.
 	[JsonIgnore]
 	public bool CanWrite =>
-		(Classification == VariableClassification.User &&
-			FileSource is not { AllowWriteBack: false } &&
-			TemplateSource is null) ||
-		Write is not null;
+		Classification == VariableClassification.User
+		&& FileSource is not { AllowWriteBack: false }
+		&& TemplateSource is null
+		|| Write is not null;
 
 	[JsonIgnore]
 	public bool CommitOnRelease => Write?.CommitOnRelease == true;

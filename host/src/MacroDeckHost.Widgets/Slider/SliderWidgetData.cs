@@ -84,9 +84,10 @@ public sealed record SliderWidgetData
 			Max = ReadDouble(data, "max") ?? 100,
 			Step = ReadDouble(data, "step") ?? 1,
 			CustomStep = ReadBool(data, "customStep") ?? false,
-			HasDoublePressFlow = WidgetFlowsJson.HasRunnableFlow(WidgetConfigJson.ReadFlows(data), WidgetTriggerTypes.DoublePress),
+			HasDoublePressFlow
+				= WidgetFlowsJson.HasRunnableFlow(WidgetConfigJson.ReadFlows(data), WidgetTriggerTypes.DoublePress),
 			ThresholdsEnabled = WidgetThresholds.ReadEnabled(data),
-			Thresholds = WidgetThresholds.ReadStored(data),
+			Thresholds = WidgetThresholds.ReadStored(data)
 		};
 	}
 
@@ -99,23 +100,32 @@ public sealed record SliderWidgetData
 		return WidgetIconReference.Read(icon, Trimmed(ReadString(data, "iconId")));
 	}
 
-	private static string? Trimmed(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	private static string? Trimmed(string? value)
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	}
 
 	private static string? ReadString(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool? ReadBool(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
 			? value.GetBoolean()
 			: null;
+	}
 
 	private static double? ReadDouble(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number) &&
-			double.IsFinite(number)
+	{
+		return data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
+			&& double.IsFinite(number)
 				? number
 				: null;
+	}
 }

@@ -116,7 +116,9 @@ public readonly record struct UiRelayDecision
 	public int ToRevision { get; init; }
 
 	public static UiRelayDecision Of(UiRelayAction action, string? code = null, bool retryable = false)
-		=> new() { Action = action, Code = code, Retryable = retryable };
+	{
+		return new UiRelayDecision { Action = action, Code = code, Retryable = retryable };
+	}
 }
 
 // Deliberately holds no tree and no patch. A relay that cached the last tree would have to decide what
@@ -147,7 +149,8 @@ public sealed class UiSessionRegistry : IDisposable
 
 	public event EventHandler<UiSessionEndedEventArgs>? Ended;
 
-	public UiSessionCreateOutcome Create(string sessionId,
+	public UiSessionCreateOutcome Create(
+		string sessionId,
 		string providerId,
 		UiSurface surface,
 		string ownerPrincipal)
@@ -163,10 +166,10 @@ public sealed class UiSessionRegistry : IDisposable
 			Surface = surface,
 			SessionMode = NormalizeMode(surface.SessionMode),
 			OwnerPrincipal = ownerPrincipal,
-			CreatedAt = _timeProvider.GetUtcNow()
+			CreatedAt = _timeProvider.GetUtcNow(),
+			Tokens = ProtocolLimits.MaxUiUpdateBurst
 		};
 
-		record.Tokens = ProtocolLimits.MaxUiUpdateBurst;
 		record.LastRefillAt = record.CreatedAt;
 
 		// A widget or preview surface is counted against its own cap: those are per widget per viewer, so a
@@ -182,8 +185,8 @@ public sealed class UiSessionRegistry : IDisposable
 			var forProvider = 0;
 			foreach (var candidate in _bySessionId.Values)
 			{
-				if (string.Equals(candidate.ProviderId, providerId, StringComparison.Ordinal) &&
-					IsWidgetSurface(candidate.Surface.Kind) == isWidgetSurface)
+				if (string.Equals(candidate.ProviderId, providerId, StringComparison.Ordinal)
+					&& IsWidgetSurface(candidate.Surface.Kind) == isWidgetSurface)
 				{
 					forProvider++;
 				}
@@ -248,8 +251,8 @@ public sealed class UiSessionRegistry : IDisposable
 			{
 				// A session can end before its client attaches, and then the attach is the client's only
 				// way to learn why. Only the principal it belonged to is told.
-				return _unseenEnds.TryGetValue(sessionId!, out var end) &&
-					string.Equals(end.OwnerPrincipal, principal, StringComparison.Ordinal)
+				return _unseenEnds.TryGetValue(sessionId!, out var end)
+					&& string.Equals(end.OwnerPrincipal, principal, StringComparison.Ordinal)
 						? Rejected(end.Code, end.Message)
 						: Rejected(UiSessionErrorCodes.SessionNotFound, "There is no session with that id.");
 			}
@@ -303,8 +306,7 @@ public sealed class UiSessionRegistry : IDisposable
 
 		lock (_gate)
 		{
-			if (!_bySessionId.TryGetValue(sessionId!, out var record) ||
-				!record.Attachments.Remove(connectionId))
+			if (!_bySessionId.TryGetValue(sessionId!, out var record) || !record.Attachments.Remove(connectionId))
 			{
 				return new UiSessionDetachOutcome { Detached = false };
 			}
@@ -356,15 +358,17 @@ public sealed class UiSessionRegistry : IDisposable
 		lock (_gate)
 		{
 			return _bySessionId.Values
-				.Where(record => (includeConfiguration || !IsConfigSurface(record.Surface)) &&
-					string.Equals(WidgetIdOf(record.Surface), widgetId, StringComparison.Ordinal))
+				.Where(record => (includeConfiguration || !IsConfigSurface(record.Surface))
+					&& string.Equals(WidgetIdOf(record.Surface), widgetId, StringComparison.Ordinal))
 				.Select(Project)
 				.ToList();
 		}
 	}
 
 	private static bool IsConfigSurface(UiSurface surface)
-		=> string.Equals(surface.Kind, UiSurfaceKinds.Config, StringComparison.Ordinal);
+	{
+		return string.Equals(surface.Kind, UiSurfaceKinds.Config, StringComparison.Ordinal);
+	}
 
 	private static string? WidgetIdOf(UiSurface surface)
 	{
@@ -397,8 +401,8 @@ public sealed class UiSessionRegistry : IDisposable
 
 		lock (_gate)
 		{
-			return _bySessionId.TryGetValue(sessionId!, out var record) &&
-				record.Attachments.Contains(connectionId, StringComparer.Ordinal);
+			return _bySessionId.TryGetValue(sessionId!, out var record)
+				&& record.Attachments.Contains(connectionId, StringComparer.Ordinal);
 		}
 	}
 
@@ -475,7 +479,7 @@ public sealed class UiSessionRegistry : IDisposable
 				{
 					return UiRelayDecision.Of(UiRelayAction.Terminate,
 						UiSessionErrorCodes.RateLimited,
-						retryable: true);
+						true);
 				}
 
 				record.RateTripped = true;
@@ -600,17 +604,19 @@ public sealed class UiSessionRegistry : IDisposable
 		lock (_gate)
 		{
 			drained = _bySessionId.Values
-				.Where(record => record.State == UiSessionState.Draining &&
-					record.DetachedAt is { } detachedAt &&
-					now - detachedAt >= _drainGrace)
+				.Where(record
+					=> record.State == UiSessionState.Draining
+					&& record.DetachedAt is { } detachedAt
+					&& now - detachedAt >= _drainGrace)
 				.Select(record => record.SessionId)
 				.ToList();
 
 			unattached = _bySessionId.Values
-				.Where(record => !record.EverAttached &&
-					!record.HeldByHost &&
-					!IsTerminal(record) &&
-					now - record.CreatedAt >= _attachGrace)
+				.Where(record
+					=> !record.EverAttached
+					&& !record.HeldByHost
+					&& !IsTerminal(record)
+					&& now - record.CreatedAt >= _attachGrace)
 				.Select(record => record.SessionId)
 				.ToList();
 		}
@@ -640,24 +646,31 @@ public sealed class UiSessionRegistry : IDisposable
 	}
 
 	private static bool IsWidgetSurface(string? surfaceKind)
-		=> string.Equals(surfaceKind, UiSurfaceKinds.Widget, StringComparison.Ordinal) ||
-			string.Equals(surfaceKind, UiSurfaceKinds.Preview, StringComparison.Ordinal);
+	{
+		return string.Equals(surfaceKind, UiSurfaceKinds.Widget, StringComparison.Ordinal)
+			|| string.Equals(surfaceKind, UiSurfaceKinds.Preview, StringComparison.Ordinal);
+	}
 
 	private static string NormalizeMode(string sessionMode)
-		=> string.Equals(sessionMode, UiSessionModes.Shared, StringComparison.Ordinal)
+	{
+		return string.Equals(sessionMode, UiSessionModes.Shared, StringComparison.Ordinal)
 			? UiSessionModes.Shared
 			// Every other spelling, including an unrecognised one, is exclusive. The vocabulary is open
 			// by design, and guessing that an unknown mode means "shared" would fan one client's tree out
 			// to every other client attached to the same provider.
 			: UiSessionModes.Exclusive;
+	}
 
 	private static bool IsTerminal(UiSessionRecord record)
-		=> record.State is UiSessionState.Closed or UiSessionState.Invalidated;
+	{
+		return record.State is UiSessionState.Closed or UiSessionState.Invalidated;
+	}
 
 	private sealed record UnseenEnd(string OwnerPrincipal, string Code, string Message);
 
 	private static UiSessionAttachOutcome Rejected(string code, string message)
-		=> new()
+	{
+		return new UiSessionAttachOutcome
 		{
 			Accepted = false,
 			Code = code,
@@ -665,18 +678,22 @@ public sealed class UiSessionRegistry : IDisposable
 			SurfaceKind = string.Empty,
 			SessionMode = string.Empty
 		};
+	}
 
 	private static UiSessionAttachOutcome Accepted(UiSessionRecord record)
-		=> new()
+	{
+		return new UiSessionAttachOutcome
 		{
 			Accepted = true,
 			Revision = record.LastRelayedRevision,
 			SurfaceKind = record.Surface.Kind,
 			SessionMode = record.SessionMode
 		};
+	}
 
 	private static UiSessionSnapshot Project(UiSessionRecord record)
-		=> new()
+	{
+		return new UiSessionSnapshot
 		{
 			SessionId = record.SessionId,
 			ProviderId = record.ProviderId,
@@ -687,6 +704,7 @@ public sealed class UiSessionRegistry : IDisposable
 			Revision = record.LastRelayedRevision,
 			Attachments = [.. record.Attachments]
 		};
+	}
 
 	private static UiRelayDecision RequestResync(UiSessionRecord record, string code)
 	{
@@ -707,7 +725,7 @@ public sealed class UiSessionRegistry : IDisposable
 		if (elapsed > 0)
 		{
 			record.Tokens = Math.Min(ProtocolLimits.MaxUiUpdateBurst,
-				record.Tokens + (elapsed * ProtocolLimits.MaxUiUpdatesPerSecond));
+				record.Tokens + elapsed * ProtocolLimits.MaxUiUpdatesPerSecond);
 			record.LastRefillAt = now;
 		}
 
@@ -792,10 +810,10 @@ public sealed class UiSessionRegistry : IDisposable
 
 		lock (_gate)
 		{
-			if (!_bySessionId.TryGetValue(sessionId, out var record) ||
-				record.EverAttached ||
-				record.HeldByHost ||
-				IsTerminal(record))
+			if (!_bySessionId.TryGetValue(sessionId, out var record)
+				|| record.EverAttached
+				|| record.HeldByHost
+				|| IsTerminal(record))
 			{
 				return;
 			}
@@ -845,7 +863,10 @@ public sealed class UiSessionRegistry : IDisposable
 			_sessionId = sessionId;
 		}
 
-		public void Run() => _registry.CompleteUnattached(_sessionId);
+		public void Run()
+		{
+			_registry.CompleteUnattached(_sessionId);
+		}
 	}
 
 	private sealed class DrainCallback
@@ -859,7 +880,10 @@ public sealed class UiSessionRegistry : IDisposable
 			_sessionId = sessionId;
 		}
 
-		public void Run() => _registry.CompleteDrain(_sessionId);
+		public void Run()
+		{
+			_registry.CompleteDrain(_sessionId);
+		}
 	}
 
 	private sealed class UiSessionRecord

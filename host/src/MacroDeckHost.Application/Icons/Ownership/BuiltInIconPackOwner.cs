@@ -6,10 +6,18 @@ namespace MacroDeckHost.Application.Icons.Ownership;
 
 public sealed class BuiltInIconPackOwner : IIconPackOwner
 {
-	public bool Owns(IconPackEntity pack) => pack.Id == IncludedIconPack.PackId;
+	public bool Owns(IconPackEntity pack)
+	{
+		return pack.Id == IncludedIconPack.PackId;
+	}
 
 	public IconPackOwnerDescriptor Describe(IconPackEntity pack)
-		=> new(IconPackOwnerKind.BuiltIn, CanRemove: false, IsReadOnly: true);
+	{
+		return new IconPackOwnerDescriptor(IconPackOwnerKind.BuiltIn, false, true);
+	}
 
-	public Task Release(IconPackEntity pack) => Task.CompletedTask;
+	public Task Release(IconPackEntity pack)
+	{
+		return Task.CompletedTask;
+	}
 }

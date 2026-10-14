@@ -26,13 +26,16 @@ internal sealed class RunScriptActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.MultilineText(ScriptParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.RunScript.ScriptLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.RunScript.ScriptDescription(),
-			placeholder: "Strip[0].Mute = 1\nBus[0].Gain = -6.0",
+			AppStrings.Integrations.Voicemeeter.Actions.RunScript.ScriptLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.RunScript.ScriptDescription(),
+			"Strip[0].Mute = 1\nBus[0].Gain = -6.0",
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

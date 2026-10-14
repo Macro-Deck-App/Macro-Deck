@@ -36,9 +36,11 @@ public static class MessageTypeDirections
 			[MessageTypes.HostAssetAck] = MessageDirection.PluginToHost,
 			[MessageTypes.FlowPause] = MessageDirection.Bidirectional,
 			[MessageTypes.FlowResume] = MessageDirection.Bidirectional,
-			[MessageTypes.ProtocolError] = MessageDirection.Bidirectional,
+			[MessageTypes.ProtocolError] = MessageDirection.Bidirectional
 		};
 
 	public static bool TryGetDirection(string messageType, out MessageDirection direction)
-		=> _directions.TryGetValue(messageType, out direction);
+	{
+		return _directions.TryGetValue(messageType, out direction);
+	}
 }

@@ -13,7 +13,10 @@ internal sealed class VariablePollSchedule
 	// Brings the next read forward to the next tick. A write is only ever "applied by the owner", so the
 	// value the host shows still comes from a read - without this the control sits on the pre-write
 	// reading until the ordinary cadence comes round.
-	public void MarkDueNow() => _nextDue = DateTime.MinValue;
+	public void MarkDueNow()
+	{
+		_nextDue = DateTime.MinValue;
+	}
 
 	public bool IsDue(DateTime now)
 	{

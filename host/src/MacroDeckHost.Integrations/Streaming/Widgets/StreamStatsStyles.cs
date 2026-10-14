@@ -1,4 +1,3 @@
-
 namespace MacroDeckHost.Integrations.Streaming.Widgets;
 
 internal static class StreamStatsStyles
@@ -22,5 +21,7 @@ internal static class StreamStatsStyles
 	public static IReadOnlyList<string> WithDetails { get; } = [Overview];
 
 	public static string Normalize(string? style)
-		=> style is not null && All.Contains(style, StringComparer.Ordinal) ? style : Overview;
+	{
+		return style is not null && All.Contains(style, StringComparer.Ordinal) ? style : Overview;
+	}
 }

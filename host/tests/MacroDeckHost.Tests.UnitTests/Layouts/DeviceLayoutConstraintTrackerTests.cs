@@ -74,7 +74,8 @@ public class DeviceLayoutConstraintTrackerTests
 	}
 
 	private static DeviceEntity Device(string name, string startupProfileId, LayoutDescriptor layout)
-		=> new()
+	{
+		return new DeviceEntity
 		{
 			Id = Guid.NewGuid(),
 			SecretHash = string.Empty,
@@ -87,9 +88,11 @@ public class DeviceLayoutConstraintTrackerTests
 			CreatedAt = DateTime.UtcNow,
 			LastSeenAt = DateTime.UtcNow
 		};
+	}
 
 	private static LayoutDescriptor FixedGrid(int rows, int columns)
-		=> new("fixed",
+	{
+		return new LayoutDescriptor("fixed",
 			"Fixed Grid",
 			[
 				new LayoutRegion
@@ -97,4 +100,5 @@ public class DeviceLayoutConstraintTrackerTests
 					Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = rows, Columns = columns }
 				}
 			]);
+	}
 }

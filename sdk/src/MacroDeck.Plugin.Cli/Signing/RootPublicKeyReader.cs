@@ -34,6 +34,8 @@ internal static class RootPublicKeyReader
 		}
 	}
 
-	public static bool IsMacroDeckRoot(byte[] rootPublicKey) =>
-		CryptographicOperations.FixedTimeEquals(rootPublicKey, MacroDeckRootKey.PublicKey);
+	public static bool IsMacroDeckRoot(byte[] rootPublicKey)
+	{
+		return CryptographicOperations.FixedTimeEquals(rootPublicKey, MacroDeckRootKey.PublicKey);
+	}
 }

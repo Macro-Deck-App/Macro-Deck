@@ -17,7 +17,8 @@ public sealed record DerivedVariant(DerivedVariantOutcome Outcome, string? Stora
 
 public interface IIconVariantDeriver
 {
-	Task<DerivedVariant> GetOrCreate(IconEntity icon,
+	Task<DerivedVariant> GetOrCreate(
+		IconEntity icon,
 		string masterContentHash,
 		int size,
 		CancellationToken cancellationToken);

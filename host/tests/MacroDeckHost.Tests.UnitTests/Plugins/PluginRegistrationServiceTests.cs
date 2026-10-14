@@ -271,13 +271,13 @@ public class PluginRegistrationServiceTests
 
 		var refused = await _service.Register("com.example.installed",
 			"Example",
-			accessTokenId: null,
+			null,
 			PluginRegistrationOrigins.Pairing);
 		var allowed = await _service.Register("com.example.installed",
 			"Example",
-			accessTokenId: null,
+			null,
 			PluginRegistrationOrigins.Pairing,
-			allowInstalledId: true);
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -363,7 +363,7 @@ public class PluginRegistrationServiceTests
 	{
 		var registered = await _service.Register("com.example.plugin",
 			"Example",
-			accessTokenId: null,
+			null,
 			PluginRegistrationOrigins.Pairing);
 
 		var authenticated = await _service.Authenticate("com.example.plugin", registered.PluginSecret!);
@@ -380,7 +380,7 @@ public class PluginRegistrationServiceTests
 	{
 		var registered = await _service.Register("com.example.plugin",
 			"Example",
-			accessTokenId: null,
+			null,
 			PluginRegistrationOrigins.Pairing);
 
 		await _service.Revoke("com.example.plugin");
@@ -440,7 +440,7 @@ public class PluginRegistrationServiceTests
 			State = PluginSessionState.Connected,
 			CreatedAt = _time.GetUtcNow()
 		});
-		_sessionRegistry.TryAttach("session-1", connection, instanceId: null);
+		_sessionRegistry.TryAttach("session-1", connection, null);
 
 		await _service.ReplaceSecret("com.example.plugin",
 			"Example",

@@ -31,7 +31,8 @@ internal static class MouseActionValues
 	}
 
 	public static MouseButton ReadButton(IReadOnlyDictionary<string, object> parameters, string name = "button")
-		=> ReadString(parameters, name).Trim().ToLowerInvariant() switch
+	{
+		return ReadString(parameters, name).Trim().ToLowerInvariant() switch
 		{
 			"right" => MouseButton.Right,
 			"middle" => MouseButton.Middle,
@@ -39,6 +40,7 @@ internal static class MouseActionValues
 			"forward" => MouseButton.Forward,
 			_ => MouseButton.Left
 		};
+	}
 
 	public static MouseTarget ReadTarget(
 		IReadOnlyDictionary<string, object> parameters,
@@ -66,11 +68,13 @@ internal static class MouseActionValues
 	public static (ScrollAxis Axis, int Sign) ReadScrollDirection(
 		IReadOnlyDictionary<string, object> parameters,
 		string name = "direction")
-		=> ReadString(parameters, name).Trim().ToLowerInvariant() switch
+	{
+		return ReadString(parameters, name).Trim().ToLowerInvariant() switch
 		{
 			"up" => (ScrollAxis.Vertical, 1),
 			"left" => (ScrollAxis.Horizontal, -1),
 			"right" => (ScrollAxis.Horizontal, 1),
 			_ => (ScrollAxis.Vertical, -1)
 		};
+	}
 }

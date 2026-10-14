@@ -14,14 +14,16 @@ public interface IPluginRegistrationRepository
 
 	Task Create(PluginRegistrationEntity registration);
 
-	Task<bool> Reactivate(string pluginId,
+	Task<bool> Reactivate(
+		string pluginId,
 		string displayName,
 		string secretHash,
 		Guid? accessTokenId,
 		string origin,
 		DateTime at);
 
-	Task<bool> RotateSecret(string pluginId,
+	Task<bool> RotateSecret(
+		string pluginId,
 		string displayName,
 		string secretHash,
 		Guid? accessTokenId,

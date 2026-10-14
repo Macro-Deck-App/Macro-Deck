@@ -52,7 +52,8 @@ public class CapabilityDtoSerializationTests
 		var declaredJson = JsonSerializer.Serialize(declared, PluginProtocolJson.Options);
 		var undeclaredJson = JsonSerializer.Serialize(undeclared, PluginProtocolJson.Options);
 		var fromOlderPlugin = JsonSerializer.Deserialize<WidgetTypeDescriptorDto>(
-			"""{"id":"panel","name":"Panel","supportsFlows":true}""", PluginProtocolJson.Options);
+			"""{"id":"panel","name":"Panel","supportsFlows":true}""",
+			PluginProtocolJson.Options);
 
 		Assert.Multiple(() =>
 		{
@@ -80,7 +81,8 @@ public class CapabilityDtoSerializationTests
 		var undeclaredJson = JsonSerializer.Serialize(declared with { DefaultShortPressAction = null },
 			PluginProtocolJson.Options);
 		var fromOlderPlugin = JsonSerializer.Deserialize<WidgetTypeDescriptorDto>(
-			"""{"id":"panel","name":"Panel","supportsFlows":true}""", PluginProtocolJson.Options);
+			"""{"id":"panel","name":"Panel","supportsFlows":true}""",
+			PluginProtocolJson.Options);
 
 		Assert.Multiple(() =>
 		{
@@ -193,7 +195,7 @@ public class CapabilityDtoSerializationTests
 			Kind = AssetKinds.Icon,
 			MimeType = "image/png",
 			TotalBytes = 4096,
-			ContentHash = "sha256:abc",
+			ContentHash = "sha256:abc"
 		};
 
 		var json = JsonSerializer.Serialize(payload, PluginProtocolJson.Options);
@@ -284,11 +286,10 @@ public class CapabilityDtoSerializationTests
 
 		var candidateTypes = typeof(HostApis).Assembly.GetTypes()
 			.Where(type =>
-				type.IsPublic &&
-				type.Namespace is not null &&
-				roots.Any(root =>
-					type.Namespace == root ||
-					type.Namespace.StartsWith(root + ".", StringComparison.Ordinal)));
+				type.IsPublic
+				&& type.Namespace is not null
+				&& roots.Any(root =>
+					type.Namespace == root || type.Namespace.StartsWith(root + ".", StringComparison.Ordinal)));
 
 		Assert.Multiple(() =>
 		{
@@ -342,8 +343,8 @@ public class CapabilityDtoSerializationTests
 	[Test]
 	public void ConfigFlowDescribePayload_writes_an_optional_configuration_on_the_wire()
 	{
-		var json = JsonSerializer.Serialize(
-			new ConfigFlowDescribePayload { AllowsMultipleConfigurations = false, RequiresConfiguration = false },
+		var json = JsonSerializer.Serialize(new ConfigFlowDescribePayload
+				{ AllowsMultipleConfigurations = false, RequiresConfiguration = false },
 			PluginProtocolJson.Options);
 
 		Assert.Multiple(() =>
@@ -351,7 +352,8 @@ public class CapabilityDtoSerializationTests
 			Assert.That(JsonDocument.Parse(json).RootElement.GetProperty("requiresConfiguration").GetBoolean(),
 				Is.False);
 			Assert.That(JsonSerializer.Deserialize<ConfigFlowDescribePayload>(json, PluginProtocolJson.Options)!
-				.RequiresConfiguration, Is.False);
+					.RequiresConfiguration,
+				Is.False);
 		});
 	}
 

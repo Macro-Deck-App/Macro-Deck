@@ -68,22 +68,22 @@ public class PluginTokensEndpointTests
 
 		var setup = await Send(HttpMethod.Post,
 			"/api/auth/setup",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { username = "admin", password = "password123" });
 		Assert.That(setup.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
 
 		var login = await Send(HttpMethod.Post,
 			"/api/auth/login",
-			shape: FakeConnectionShape.PublicLan,
+			FakeConnectionShape.PublicLan,
 			body: new { username = "admin", password = "password123", scope = "admin" });
 		Assert.That(login.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		_adminToken = (await ReadJson(login)).GetProperty("accessToken").GetString()!;
 
 		var enableDeveloperMode = await Send(HttpMethod.Put,
 			"/api/settings/developer",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken,
-			body: new { enabled = true });
+			FakeConnectionShape.PublicLan,
+			_adminToken,
+			new { enabled = true });
 		Assert.That(enableDeveloperMode.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 	}
 
@@ -96,7 +96,7 @@ public class PluginTokensEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -150,8 +150,8 @@ public class PluginTokensEndpointTests
 		{
 			Assert.That(registrations.Select(registration => registration.PluginId),
 				Is.EqualTo(new[] { pairedPluginId }),
-				"a paired registration carries no token id, and must not be swept up with the rows that " +
-				$"belong to the removed token (gone: {enrolledPluginId})");
+				"a paired registration carries no token id, and must not be swept up with the rows that "
+				+ $"belong to the removed token (gone: {enrolledPluginId})");
 			Assert.That(registrations.Select(registration => registration.AccessTokenId),
 				Is.EqualTo(new Guid?[] { null }),
 				"the surviving row is the ambiguous kind - no token id, yet not a managed plugin");
@@ -229,9 +229,12 @@ public class PluginTokensEndpointTests
 	}
 
 	private static List<string> RegistrationIdsOf(JsonElement token)
-		=> token.GetProperty("registrations").EnumerateArray()
+	{
+		return token.GetProperty("registrations")
+			.EnumerateArray()
 			.Select(registration => registration.GetProperty("pluginId").GetString()!)
 			.ToList();
+	}
 
 	private async Task<IReadOnlyList<Domain.Entities.PluginRegistrationEntity>> ReadRegistrationRowsAsync()
 	{
@@ -244,8 +247,8 @@ public class PluginTokensEndpointTests
 	{
 		var response = await Send(HttpMethod.Get,
 			"/api/plugin-tokens",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken);
+			FakeConnectionShape.PublicLan,
+			_adminToken);
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 		return (await ReadJson(response)).GetProperty("tokens");
@@ -255,9 +258,9 @@ public class PluginTokensEndpointTests
 	{
 		var response = await Send(HttpMethod.Post,
 			"/api/plugin-tokens",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken,
-			body: new { name, expiresInDays = (int?)null });
+			FakeConnectionShape.PublicLan,
+			_adminToken,
+			new { name, expiresInDays = (int?)null });
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
 		var json = await ReadJson(response);
 
@@ -268,24 +271,26 @@ public class PluginTokensEndpointTests
 	{
 		var response = await Send(HttpMethod.Post,
 			$"/api/plugin-tokens/{id}/revoke",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken);
+			FakeConnectionShape.PublicLan,
+			_adminToken);
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		Assert.That((await ReadJson(response)).GetProperty("success").GetBoolean(), Is.True);
 	}
 
 	private Task<HttpResponseMessage> DeleteTokenAsync(Guid id)
-		=> Send(HttpMethod.Delete,
+	{
+		return Send(HttpMethod.Delete,
 			$"/api/plugin-tokens/{id}",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken);
+			FakeConnectionShape.PublicLan,
+			_adminToken);
+	}
 
 	private async Task<(string PluginId, string Secret)> EnrollAsync(string enrollmentToken)
 	{
 		var pluginId = $"com.example.t{Guid.NewGuid():N}";
 		var response = await Send(HttpMethod.Post,
 			"/api/plugins/registration",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { pluginId, displayName = "Example Plugin" },
 			extraHeaders: new Dictionary<string, string>
 				{ [PluginAuthDefaults.EnrollmentTokenHeaderName] = enrollmentToken });
@@ -303,7 +308,7 @@ public class PluginTokensEndpointTests
 
 		var created = await Send(HttpMethod.Post,
 			"/api/plugins/pairing",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new
 			{
 				pluginId, displayName = "Paired Plugin", codeChallenge = challenge, codeChallengeMethod = "S256"
@@ -313,13 +318,13 @@ public class PluginTokensEndpointTests
 
 		var approve = await Send(HttpMethod.Post,
 			$"/api/plugin-pairing/requests/{requestId}/approve",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { replaceExistingRegistration = false });
 		Assert.That(approve.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 		var redemption = await Send(HttpMethod.Post,
 			$"/api/plugins/pairing/{requestId}/redemption",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { codeVerifier = verifier });
 		Assert.That(redemption.StatusCode, Is.EqualTo(HttpStatusCode.Created));
 
@@ -331,15 +336,17 @@ public class PluginTokensEndpointTests
 		var response = await Send(HttpMethod.Get, "/api/plugin-pairing/registrations", FakeConnectionShape.Loopback);
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-		return (await ReadJson(response)).GetProperty("registrations").EnumerateArray()
+		return (await ReadJson(response)).GetProperty("registrations")
+			.EnumerateArray()
 			.Select(registration => registration.GetProperty("pluginId").GetString()!)
 			.ToList();
 	}
 
 	private Task<HttpResponseMessage> CreateSessionAsync(string pluginId, string secret)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			"/api/plugins/sessions",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new
 			{
 				requestedVersion = new { minimum = 1, maximum = 1 }, capabilities = Array.Empty<object>()
@@ -348,6 +355,7 @@ public class PluginTokensEndpointTests
 			{
 				[PluginAuthDefaults.PluginIdHeaderName] = pluginId, [PluginAuthDefaults.PluginSecretHeaderName] = secret
 			});
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -390,5 +398,7 @@ public class PluginTokensEndpointTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 }

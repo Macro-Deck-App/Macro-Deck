@@ -23,7 +23,8 @@ internal sealed class RemoteAndroidDeviceManager : IAndroidDeviceManager
 	private RemoteAndroidDevice? _defaultDevice;
 	private bool _adbUnavailable;
 
-	public RemoteAndroidDeviceManager(IHostInvoker invoker,
+	public RemoteAndroidDeviceManager(
+		IHostInvoker invoker,
 		HostStateCache stateCache,
 		ILogger logger,
 		IPluginHostAssetReceiver? assets = null)
@@ -163,7 +164,8 @@ internal sealed class RemoteAndroidDeviceManager : IAndroidDeviceManager
 				var previousLacksUsbPermission = device.LacksUsbPermission;
 				var previousMode = device.Mode;
 				var deviceState = ToState(dto.State);
-				device.Update(new AndroidDeviceInfo(dto.Model, dto.Manufacturer, dto.Product) { StableId = dto.StableId },
+				device.Update(new AndroidDeviceInfo(dto.Model, dto.Manufacturer, dto.Product)
+						{ StableId = dto.StableId },
 					deviceState,
 					deviceState == AndroidDeviceState.Unauthorized && dto.LacksUsbPermission == true,
 					deviceState == AndroidDeviceState.Offline ? ToMode(dto.Mode) : AndroidDeviceMode.Normal);
@@ -173,9 +175,9 @@ internal sealed class RemoteAndroidDeviceManager : IAndroidDeviceManager
 				{
 					changes.Add(new Change(ChangeKind.Connected, device, null));
 				}
-				else if (previousState != device.State ||
-					previousLacksUsbPermission != device.LacksUsbPermission ||
-					previousMode != device.Mode)
+				else if (previousState != device.State
+					|| previousLacksUsbPermission != device.LacksUsbPermission
+					|| previousMode != device.Mode)
 				{
 					changes.Add(new Change(ChangeKind.StateChanged, device, previousState));
 				}
@@ -183,9 +185,10 @@ internal sealed class RemoteAndroidDeviceManager : IAndroidDeviceManager
 
 			changes.AddRange(before.Values.Select(device => new Change(ChangeKind.Disconnected, device, null)));
 			_attached = current;
-			_defaultDevice = access == AndroidDeviceAccess.Available && !string.IsNullOrEmpty(state?.DefaultDeviceSerial)
-				? Known(state.DefaultDeviceSerial)
-				: null;
+			_defaultDevice = access == AndroidDeviceAccess.Available
+				&& !string.IsNullOrEmpty(state?.DefaultDeviceSerial)
+					? Known(state.DefaultDeviceSerial)
+					: null;
 		}
 
 		return changes;
@@ -229,25 +232,30 @@ internal sealed class RemoteAndroidDeviceManager : IAndroidDeviceManager
 	}
 
 	private static AndroidDeviceAccess ToAccess(string? access)
-		=> access switch
+	{
+		return access switch
 		{
 			AdbAccessStates.Available => AndroidDeviceAccess.Available,
 			AdbAccessStates.NotEnabled => AndroidDeviceAccess.AdbNotEnabled,
 			AdbAccessStates.NotAllowed => AndroidDeviceAccess.AdbNotAllowed,
 			_ => AndroidDeviceAccess.Unsupported
 		};
+	}
 
 	private static AndroidDeviceState ToState(string? state)
-		=> state switch
+	{
+		return state switch
 		{
 			AdbDeviceStates.Online => AndroidDeviceState.Online,
 			AdbDeviceStates.Connecting => AndroidDeviceState.Connecting,
 			AdbDeviceStates.Unauthorized => AndroidDeviceState.Unauthorized,
 			_ => AndroidDeviceState.Offline
 		};
+	}
 
 	private static AndroidDeviceMode ToMode(string? mode)
-		=> mode switch
+	{
+		return mode switch
 		{
 			null => AndroidDeviceMode.Normal,
 			AdbDeviceModes.Bootloader => AndroidDeviceMode.Bootloader,
@@ -255,6 +263,7 @@ internal sealed class RemoteAndroidDeviceManager : IAndroidDeviceManager
 			AdbDeviceModes.Sideload => AndroidDeviceMode.Sideload,
 			_ => AndroidDeviceMode.Unknown
 		};
+	}
 
 	private enum ChangeKind
 	{

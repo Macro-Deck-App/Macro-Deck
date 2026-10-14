@@ -22,10 +22,14 @@ internal sealed class RemoteMusicPlayerWithCatalog(
 		MusicPlayerCatalogItemKind kind,
 		string? filter,
 		CancellationToken cancellationToken)
-		=> GetCatalogCoreAsync(kind, filter, cancellationToken);
+	{
+		return GetCatalogCoreAsync(kind, filter, cancellationToken);
+	}
 
 	public Task PlayItemAsync(MusicPlayerCatalogItem item, CancellationToken cancellationToken = default)
-		=> PlayItemCoreAsync(item, cancellationToken);
+	{
+		return PlayItemCoreAsync(item, cancellationToken);
+	}
 }
 
 internal sealed class RemoteMusicPlayerWithDevices(
@@ -36,10 +40,14 @@ internal sealed class RemoteMusicPlayerWithDevices(
 	: RemoteMusicPlayer(pluginId, instanceId, invoker, assetCache), IMusicPlayerDeviceProvider
 {
 	public Task<IReadOnlyList<MusicPlayerDevice>> GetDevicesAsync(CancellationToken cancellationToken)
-		=> GetDevicesCoreAsync(cancellationToken);
+	{
+		return GetDevicesCoreAsync(cancellationToken);
+	}
 
 	public Task TransferPlaybackAsync(string deviceId, bool startPlayback, CancellationToken cancellationToken)
-		=> TransferPlaybackCoreAsync(deviceId, startPlayback, cancellationToken);
+	{
+		return TransferPlaybackCoreAsync(deviceId, startPlayback, cancellationToken);
+	}
 }
 
 internal sealed class RemoteMusicPlayerWithCatalogAndDevices(
@@ -55,14 +63,22 @@ internal sealed class RemoteMusicPlayerWithCatalogAndDevices(
 		MusicPlayerCatalogItemKind kind,
 		string? filter,
 		CancellationToken cancellationToken)
-		=> GetCatalogCoreAsync(kind, filter, cancellationToken);
+	{
+		return GetCatalogCoreAsync(kind, filter, cancellationToken);
+	}
 
 	public Task PlayItemAsync(MusicPlayerCatalogItem item, CancellationToken cancellationToken = default)
-		=> PlayItemCoreAsync(item, cancellationToken);
+	{
+		return PlayItemCoreAsync(item, cancellationToken);
+	}
 
 	public Task<IReadOnlyList<MusicPlayerDevice>> GetDevicesAsync(CancellationToken cancellationToken)
-		=> GetDevicesCoreAsync(cancellationToken);
+	{
+		return GetDevicesCoreAsync(cancellationToken);
+	}
 
 	public Task TransferPlaybackAsync(string deviceId, bool startPlayback, CancellationToken cancellationToken)
-		=> TransferPlaybackCoreAsync(deviceId, startPlayback, cancellationToken);
+	{
+		return TransferPlaybackCoreAsync(deviceId, startPlayback, cancellationToken);
+	}
 }

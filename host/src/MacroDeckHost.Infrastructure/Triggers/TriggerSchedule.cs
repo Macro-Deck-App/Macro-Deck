@@ -14,8 +14,7 @@ public abstract class TriggerSchedule
 
 	public static TriggerSchedule? TryCreate(EventSubscription subscription)
 	{
-		if (!QualifiedId.TryParse(subscription.EventId, out var id) ||
-			id.OwnerId != TimeEventProvider.ProviderIdValue)
+		if (!QualifiedId.TryParse(subscription.EventId, out var id) || id.OwnerId != TimeEventProvider.ProviderIdValue)
 		{
 			return null;
 		}
@@ -53,7 +52,10 @@ public abstract class TriggerSchedule
 	/// Builds a schedule from a plain cron expression, for callers that are not event subscriptions. Keeps
 	/// one Cronos-backed implementation, and therefore one daylight-saving behaviour, across the host.
 	/// </summary>
-	public static TriggerSchedule? FromCron(string? expression) => TryCreateCron(expression);
+	public static TriggerSchedule? FromCron(string? expression)
+	{
+		return TryCreateCron(expression);
+	}
 
 	private static CronSchedule? TryCreateCron(string? expression)
 	{
@@ -73,7 +75,9 @@ public abstract class TriggerSchedule
 	}
 
 	private static string? DailyExpression(EventSubscription subscription)
-		=> TryReadTimeOfDay(subscription, out var hour, out var minute) ? $"{minute} {hour} * * *" : null;
+	{
+		return TryReadTimeOfDay(subscription, out var hour, out var minute) ? $"{minute} {hour} * * *" : null;
+	}
 
 	private static string? WeeklyExpression(EventSubscription subscription)
 	{
@@ -103,8 +107,7 @@ public abstract class TriggerSchedule
 		minute = 0;
 
 		var value = ReadString(subscription, "time");
-		if (string.IsNullOrWhiteSpace(value) ||
-			!TimeOnly.TryParse(value, CultureInfo.InvariantCulture, out var parsed))
+		if (string.IsNullOrWhiteSpace(value) || !TimeOnly.TryParse(value, CultureInfo.InvariantCulture, out var parsed))
 		{
 			return false;
 		}
@@ -159,7 +162,9 @@ public abstract class TriggerSchedule
 		}
 
 		public override DateTimeOffset? NextOccurrence(DateTimeOffset after, TimeZoneInfo timeZone)
-			=> after + _interval;
+		{
+			return after + _interval;
+		}
 	}
 
 	private sealed class CronSchedule : TriggerSchedule
@@ -172,6 +177,8 @@ public abstract class TriggerSchedule
 		}
 
 		public override DateTimeOffset? NextOccurrence(DateTimeOffset after, TimeZoneInfo timeZone)
-			=> _expression.GetNextOccurrence(after, timeZone);
+		{
+			return _expression.GetNextOccurrence(after, timeZone);
+		}
 	}
 }

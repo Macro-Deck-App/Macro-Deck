@@ -26,7 +26,8 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 	private IReadOnlyList<CompanionDevice> _devices = [];
 	private Task _raising = Task.CompletedTask;
 
-	public RemoteCompanionDeviceApi(IHostInvoker invoker,
+	public RemoteCompanionDeviceApi(
+		IHostInvoker invoker,
 		HostStateCache stateCache,
 		ILogger logger,
 		IPluginHostAssetReceiver? assets = null)
@@ -77,7 +78,10 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 		}
 	}
 
-	public void Dispose() => _stateCache.CompanionDevicesChanged -= OnStateChanged;
+	public void Dispose()
+	{
+		_stateCache.CompanionDevicesChanged -= OnStateChanged;
+	}
 
 	public async Task<bool> WaitForDeviceAsync(Guid deviceId, CancellationToken cancellationToken = default)
 	{
@@ -104,7 +108,8 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 		return true;
 	}
 
-	public async Task<bool> SendAsync(Guid deviceId,
+	public async Task<bool> SendAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
 	{
@@ -121,7 +126,8 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 		return result?.Sent == true;
 	}
 
-	public async Task<CompanionDeviceCommandResult> RequestAsync(Guid deviceId,
+	public async Task<CompanionDeviceCommandResult> RequestAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
 	{
@@ -133,7 +139,8 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 
 		try
 		{
-			var result = await InvokeOrThrowAsync<CompanionDeviceRequestResultDto>(HostOperations.CompanionDevices.Request,
+			var result = await InvokeOrThrowAsync<CompanionDeviceRequestResultDto>(
+				HostOperations.CompanionDevices.Request,
 				CompanionDeviceWire.ToArguments(deviceId, command),
 				_requestTimeout,
 				cancellationToken);
@@ -147,7 +154,8 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 		}
 	}
 
-	public async Task<CompanionScreenshotResult> CaptureScreenshotAsync(Guid deviceId,
+	public async Task<CompanionScreenshotResult> CaptureScreenshotAsync(
+		Guid deviceId,
 		CompanionScreenshotMode mode,
 		CancellationToken cancellationToken = default)
 	{
@@ -203,7 +211,8 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 		}
 	}
 
-	private async Task<T?> InvokeAsync<T>(string operation,
+	private async Task<T?> InvokeAsync<T>(
+		string operation,
 		object arguments,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
@@ -220,7 +229,8 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 		}
 	}
 
-	private async Task<T?> InvokeOrThrowAsync<T>(string operation,
+	private async Task<T?> InvokeOrThrowAsync<T>(
+		string operation,
 		object arguments,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
@@ -242,19 +252,23 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 		}
 	}
 
-	private static CompanionDeviceFailure ToFailure(HostInvocationException exception) => exception.Code switch
+	private static CompanionDeviceFailure ToFailure(HostInvocationException exception)
 	{
-		ProtocolErrorCodes.CompanionDevicesNotAllowed => CompanionDeviceFailure.NotAllowed,
-		ProtocolErrorCodes.CapabilityUnsupported => CompanionDeviceFailure.NotConnected,
-		ProtocolErrorCodes.Timeout => CompanionDeviceFailure.TimedOut,
-		_ => CompanionDeviceFailure.Failed
-	};
+		return exception.Code switch
+		{
+			ProtocolErrorCodes.CompanionDevicesNotAllowed => CompanionDeviceFailure.NotAllowed,
+			ProtocolErrorCodes.CapabilityUnsupported => CompanionDeviceFailure.NotConnected,
+			ProtocolErrorCodes.Timeout => CompanionDeviceFailure.TimedOut,
+			_ => CompanionDeviceFailure.Failed
+		};
+	}
 
 	// The host answers ready before its next push reaches this plugin, so a caller reading FindDevice right after
 	// would otherwise still see nothing.
 	private async Task WaitForPushAsync(Guid deviceId, CancellationToken cancellationToken)
 	{
 		var arrived = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
 		void OnApplied()
 		{
 			if (FindDevice(deviceId) is not null)
@@ -344,10 +358,12 @@ internal sealed class RemoteCompanionDeviceApi : ICompanionDeviceApi, IDisposabl
 	}
 
 	private static bool SameState(CompanionDeviceState left, CompanionDeviceState right)
-		=> left with { Capabilities = right.Capabilities, RequestableCapabilities = right.RequestableCapabilities } ==
-			right &&
-			left.Capabilities.SetEquals(right.Capabilities) &&
-			left.RequestableCapabilities.SetEquals(right.RequestableCapabilities);
+	{
+		return left with { Capabilities = right.Capabilities, RequestableCapabilities = right.RequestableCapabilities }
+			== right
+			&& left.Capabilities.SetEquals(right.Capabilities)
+			&& left.RequestableCapabilities.SetEquals(right.RequestableCapabilities);
+	}
 
 	private void Raise(List<Change> changes)
 	{

@@ -23,14 +23,16 @@ public class UiViewPatchTests
 {
 	/// <summary>The wire key an input's value is carried under. The test's own literal, so a rename in the
 	/// DSL is a failure here rather than a silently agreed change.</summary>
-	private const string _valueKey = "value";
+	private const string ValueKey = "value";
 
-	private const string _deepInputId = "deepField";
+	private const string DeepInputId = "deepField";
 
 	private static readonly string[] _mixedBatchNodeIds = ["field0", "setup.advanced"];
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiNode? FindById(UiNode node, string id)
 	{
@@ -66,7 +68,9 @@ public class UiViewPatchTests
 	/// be expressed through the value itself, because a present null means "explicitly null" on the wire.
 	/// </summary>
 	private static UiValue<string> OptionalText(UiState<string?> state)
-		=> UiValue.Optional(() => state.Value is { } text ? UiValue.Of(text) : UiValue.None<string>());
+	{
+		return UiValue.Optional(() => state.Value is { } text ? UiValue.Of(text) : UiValue.None<string>());
+	}
 
 	/// <summary>
 	/// Counters the <b>test</b> owns, incremented by the closures the test hands the runtime. Nothing inside
@@ -79,9 +83,14 @@ public class UiViewPatchTests
 		private readonly Dictionary<string, int> _counts = new(StringComparer.Ordinal);
 
 		internal void Record(string name)
-			=> _counts[name] = _counts.TryGetValue(name, out var count) ? count + 1 : 1;
+		{
+			_counts[name] = _counts.TryGetValue(name, out var count) ? count + 1 : 1;
+		}
 
-		internal Dictionary<string, int> Snapshot() => new(_counts, StringComparer.Ordinal);
+		internal Dictionary<string, int> Snapshot()
+		{
+			return new Dictionary<string, int>(_counts, StringComparer.Ordinal);
+		}
 
 		internal Dictionary<string, int> DeltaSince(Dictionary<string, int> snapshot)
 		{
@@ -117,7 +126,7 @@ public class UiViewPatchTests
 
 		UiElement innermost = new UiStringInput
 		{
-			Key = _deepInputId,
+			Key = DeepInputId,
 
 			// Bind.To's read/write pair with the test's counter wrapped around the read: Bind.To itself
 			// cannot be counted, and what has to be measured is how often the runtime asks for this value.
@@ -127,7 +136,7 @@ public class UiViewPatchTests
 
 					return deepState.Value;
 				},
-				value => deepState.Value = value),
+				value => deepState.Value = value)
 		};
 
 		for (var level = depth - 1; level >= 0; level--)
@@ -143,8 +152,8 @@ public class UiViewPatchTests
 						probes.Record($"value:field{currentLevel}");
 
 						return $"v{currentLevel}";
-					})),
-				},
+					}))
+				}
 			};
 
 			if (currentLevel == 0)
@@ -170,9 +179,9 @@ public class UiViewPatchTests
 								probes.Record("value:gatedField");
 
 								return "gated";
-							})),
+							}))
 						};
-					},
+					}
 				});
 
 				children.Add(new UiArrayInput
@@ -202,11 +211,11 @@ public class UiViewPatchTests
 										probes.Record($"value:header:{item.Id}");
 
 										return item.Id;
-									})),
+									}))
 								};
-							},
-						},
-					],
+							}
+						}
+					]
 				});
 			}
 
@@ -241,7 +250,7 @@ public class UiViewPatchTests
 		{
 			Assert.That(operations, Has.Count.EqualTo(1), $"depth {change.Depth}");
 			Assert.That(operations[0].Op, Is.EqualTo(UiPatchOperations.SetProperties));
-			Assert.That(operations[0].NodeId, Is.EqualTo(_deepInputId));
+			Assert.That(operations[0].NodeId, Is.EqualTo(DeepInputId));
 			Assert.That(operations[0].Properties, Is.Not.Null);
 			Assert.That(operations[0].Properties!, Has.Count.EqualTo(1));
 			Assert.That(operations[0].RemovedProperties, Is.Null);
@@ -325,7 +334,7 @@ public class UiViewPatchTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(pathBefore, Has.Count.EqualTo(14));
-			Assert.That(pathBefore[^1].Id, Is.EqualTo(_deepInputId));
+			Assert.That(pathBefore[^1].Id, Is.EqualTo(DeepInputId));
 
 			for (var index = 0; index < pathBefore.Count; index++)
 			{
@@ -349,8 +358,8 @@ public class UiViewPatchTests
 				Children =
 				[
 					new UiStringInput { Key = "exact", Binding = Bind.To(exact) },
-					new UiStringInput { Key = "loose", Binding = Bind.To(caseInsensitive) },
-				],
+					new UiStringInput { Key = "loose", Binding = Bind.To(caseInsensitive) }
+				]
 			});
 
 		var changedCount = 0;
@@ -414,10 +423,10 @@ public class UiViewPatchTests
 										Template = (item, _) => new UiObjectInput
 										{
 											Key = item.Id,
-											Children = [new UiStringInput { Key = "name" }],
-										},
-									},
-								],
+											Children = [new UiStringInput { Key = "name" }]
+										}
+									}
+								]
 							},
 							new UiWhen
 							{
@@ -426,13 +435,13 @@ public class UiViewPatchTests
 								Content = () => new UiAdvancedSection
 								{
 									Key = "advanced",
-									Children = [new UiDurationInput { Key = "timeout" }],
-								},
-							},
-						],
+									Children = [new UiDurationInput { Key = "timeout" }]
+								}
+							}
+						]
 					},
-					new UiStep { Key = "verify" },
-				],
+					new UiStep { Key = "verify" }
+				]
 			});
 
 		var initialRevision = view.Revision;
@@ -457,15 +466,16 @@ public class UiViewPatchTests
 		// The four structural mutations compile to their own operations rather than to a coarse replace of the
 		// root; the minimality of each is scenarios 13-15's subject, but a root replace here would mean the
 		// script never exercises the reconciler at all.
-		Assert.That(AllOperations(patches).Where(operation =>
-				string.Equals(operation.Op, UiPatchOperations.ReplaceNode, StringComparison.Ordinal)),
+		Assert.That(AllOperations(patches)
+				.Where(operation =>
+					string.Equals(operation.Op, UiPatchOperations.ReplaceNode, StringComparison.Ordinal)),
 			Is.Empty);
 
 		Assert.That(AllOperations(patches).Select(operation => operation.Op).Distinct(),
 			Is.EquivalentTo(new[]
 			{
 				UiPatchOperations.SetProperties, UiPatchOperations.InsertNode, UiPatchOperations.MoveNode,
-				UiPatchOperations.RemoveNode,
+				UiPatchOperations.RemoveNode
 			}));
 
 		Assert.Multiple(() =>
@@ -507,10 +517,10 @@ public class UiViewPatchTests
 			new UiFlow
 			{
 				Key = "setup",
-				Children = [new UiStringInput { Key = "note", Binding = Bind.ReadOnly(OptionalText(note)) }],
+				Children = [new UiStringInput { Key = "note", Binding = Bind.ReadOnly(OptionalText(note)) }]
 			});
 
-		Assert.That(FindById(view.Tree.Root, "note")!.Properties.ContainsKey(_valueKey), Is.True);
+		Assert.That(FindById(view.Tree.Root, "note")!.Properties.ContainsKey(ValueKey), Is.True);
 
 		view.DrainPatches();
 		note.Value = null;
@@ -527,14 +537,14 @@ public class UiViewPatchTests
 		{
 			Assert.That(operation.Op, Is.EqualTo(UiPatchOperations.SetProperties));
 			Assert.That(operation.NodeId, Is.EqualTo("note"));
-			Assert.That(operation.RemovedProperties, Is.EqualTo(new[] { _valueKey }));
-			Assert.That(operation.Properties?.ContainsKey(_valueKey) ?? false, Is.False);
-			Assert.That(UiCanonicalJson.Serialize(operation), Does.Not.Contain($"\"{_valueKey}\":null"));
+			Assert.That(operation.RemovedProperties, Is.EqualTo(new[] { ValueKey }));
+			Assert.That(operation.Properties?.ContainsKey(ValueKey) ?? false, Is.False);
+			Assert.That(UiCanonicalJson.Serialize(operation), Does.Not.Contain($"\"{ValueKey}\":null"));
 			Assert.That(validation.IsApplicable, Is.True, validation.RejectionReason);
 
 			// The Testing fixtures fold the patch through UiTreeApplier; the view's own tree is the same claim from
 			// the producer's side - the key is gone, not present and null.
-			Assert.That(FindById(view.Tree.Root, "note")!.Properties.ContainsKey(_valueKey), Is.False);
+			Assert.That(FindById(view.Tree.Root, "note")!.Properties.ContainsKey(ValueKey), Is.False);
 		});
 	}
 
@@ -548,8 +558,8 @@ public class UiViewPatchTests
 				Children =
 				[
 					new UiStringInput { Key = "explicitNone", Binding = Bind.ReadOnly(UiValue.None<string>()) },
-					new UiStringInput { Key = "defaultValue", Binding = Bind.ReadOnly(default(UiValue<string>)) },
-				],
+					new UiStringInput { Key = "defaultValue", Binding = Bind.ReadOnly(default(UiValue<string>)) }
+				]
 			});
 
 		var explicitNone = FindById(view.Tree.Root, "explicitNone")!;
@@ -557,10 +567,10 @@ public class UiViewPatchTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(explicitNone.Properties.ContainsKey(_valueKey), Is.False);
-			Assert.That(defaultValue.Properties.ContainsKey(_valueKey), Is.False);
-			Assert.That(UiCanonicalJson.Serialize(explicitNone), Does.Not.Contain($"\"{_valueKey}\""));
-			Assert.That(UiCanonicalJson.Serialize(defaultValue), Does.Not.Contain($"\"{_valueKey}\""));
+			Assert.That(explicitNone.Properties.ContainsKey(ValueKey), Is.False);
+			Assert.That(defaultValue.Properties.ContainsKey(ValueKey), Is.False);
+			Assert.That(UiCanonicalJson.Serialize(explicitNone), Does.Not.Contain($"\"{ValueKey}\""));
+			Assert.That(UiCanonicalJson.Serialize(defaultValue), Does.Not.Contain($"\"{ValueKey}\""));
 			Assert.That(default(UiValue<string>).Equals(UiValue.None<string>()), Is.True);
 		});
 	}
@@ -571,7 +581,7 @@ public class UiViewPatchTests
 		var states = new[]
 		{
 			new UiState<string>("a0"), new UiState<string>("a1"), new UiState<string>("a2"),
-			new UiState<string>("a3"),
+			new UiState<string>("a3")
 		};
 
 		var view = BuildFourFieldView(states);
@@ -612,7 +622,7 @@ public class UiViewPatchTests
 		var unbatchedStates = new[]
 		{
 			new UiState<string>("a0"), new UiState<string>("a1"), new UiState<string>("a2"),
-			new UiState<string>("a3"),
+			new UiState<string>("a3")
 		};
 
 		var unbatchedView = BuildFourFieldView(unbatchedStates);
@@ -643,10 +653,10 @@ public class UiViewPatchTests
 						Content = () => new UiAdvancedSection
 						{
 							Key = "advanced",
-							Children = [new UiDurationInput { Key = "timeout" }],
-						},
-					},
-				],
+							Children = [new UiDurationInput { Key = "timeout" }]
+						}
+					}
+				]
 			});
 
 		var mixedChangedCount = 0;
@@ -663,8 +673,9 @@ public class UiViewPatchTests
 
 		Assert.That(mixedPatches, Has.Count.EqualTo(1));
 
-		var insert = mixedPatches[0].Operations.Single(operation =>
-			string.Equals(operation.Op, UiPatchOperations.InsertNode, StringComparison.Ordinal));
+		var insert = mixedPatches[0]
+			.Operations.Single(operation =>
+				string.Equals(operation.Op, UiPatchOperations.InsertNode, StringComparison.Ordinal));
 
 		Assert.Multiple(() =>
 		{
@@ -679,7 +690,7 @@ public class UiViewPatchTests
 				Is.EquivalentTo(_mixedBatchNodeIds));
 
 			Assert.That(FindById(mixedView.Tree.Root, "timeout"), Is.Not.Null);
-			Assert.That(FindById(mixedView.Tree.Root, "field0")!.Properties[_valueKey].GetString(),
+			Assert.That(FindById(mixedView.Tree.Root, "field0")!.Properties[ValueKey].GetString(),
 				Is.EqualTo("b0"));
 		});
 	}

@@ -40,7 +40,9 @@ internal sealed class VideoStreamRelayBrokerTests
 	}
 
 	private static string TokenOf(string relayUrl)
-		=> relayUrl[VideoStreamRelay.PathPrefix.Length..].Split('/')[0];
+	{
+		return relayUrl[VideoStreamRelay.PathPrefix.Length..].Split('/')[0];
+	}
 
 	private static async Task<(VideoStreamWorld World, string SessionId)> OpenBuiltInAsync()
 	{
@@ -52,34 +54,42 @@ internal sealed class VideoStreamRelayBrokerTests
 	}
 
 	private static Task WaitForStateAsync(VideoStreamWorld world, string sessionId, VideoStreamSessionState state)
-		=> VideoStreamWorld.WaitForAsync(() => world.Publisher.Of<VideoStreamSessionChangedNotification>()
+	{
+		return VideoStreamWorld.WaitForAsync(() => world.Publisher.Of<VideoStreamSessionChangedNotification>()
 				.Any(changed => changed.SessionId == sessionId && changed.State == state),
 			$"session {sessionId} never became {state}");
+	}
 
 	private static int Closes(VideoStreamWorld world)
-		=> world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose)
+	{
+		return world.Plugin
+			.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose)
 			.Count;
+	}
 
 	[Test]
-	public async Task The_consumer_only_hears_of_host_urls_across_open_update_suspend_and_resume_and_the_path_stays_the_same()
+	public async Task
+		The_consumer_only_hears_of_host_urls_across_open_update_suspend_and_resume_and_the_path_stays_the_same()
 	{
 		var (world, sessionId) = await OpenBuiltInAsync();
-		using var _w = world;
+		using var w = world;
 
-		await world.Context().UpdateSessionAsync(sessionId,
-			VideoStreamSessionState.Active,
-			VideoStreamSessionDescription.Mjpeg("http://camera.local:8080/stream.mjpg?channel=2"));
+		await world.Context()
+			.UpdateSessionAsync(sessionId,
+				VideoStreamSessionState.Active,
+				VideoStreamSessionDescription.Mjpeg("http://camera.local:8080/stream.mjpg?channel=2"));
 		world.Broker.SuspendSession("ui-1", sessionId);
 		await WaitForStateAsync(world, sessionId, VideoStreamSessionState.Suspended);
 		world.Broker.ResumeSession("ui-1", sessionId);
-		await VideoStreamWorld.WaitForAsync(
-			() => world.Publisher.Of<VideoStreamSessionChangedNotification>().Count == 4,
+		await VideoStreamWorld.WaitForAsync(()
+				=> world.Publisher.Of<VideoStreamSessionChangedNotification>().Count == 4,
 			"the resume never completed");
 
 		var changes = world.Publisher.Of<VideoStreamSessionChangedNotification>();
 		Assert.Multiple(() =>
 		{
-			Assert.That(changes.Select(change => change.Description!.Url), Has.All.StartWith(VideoStreamRelay.PathPrefix));
+			Assert.That(changes.Select(change => change.Description!.Url),
+				Has.All.StartWith(VideoStreamRelay.PathPrefix));
 			Assert.That(changes.Select(change => change.Description!.Url), Has.None.Contains(ProviderHost));
 			Assert.That(changes.Select(change => TokenOf(change.Description!.Url)).Distinct().Count(), Is.EqualTo(1));
 			Assert.That(changes.Select(change => change.Description!.Transport),
@@ -92,12 +102,13 @@ internal sealed class VideoStreamRelayBrokerTests
 	public async Task The_relay_serves_the_source_the_provider_last_named_under_the_token_the_consumer_holds()
 	{
 		var (world, sessionId) = await OpenBuiltInAsync();
-		using var _w = world;
+		using var w = world;
 		var token = TokenOf(world.Publisher.Of<VideoStreamSessionChangedNotification>().Single().Description!.Url);
 
-		await world.Context().UpdateSessionAsync(sessionId,
-			VideoStreamSessionState.Active,
-			VideoStreamSessionDescription.Mjpeg("http://camera.local:8080/stream.mjpg"));
+		await world.Context()
+			.UpdateSessionAsync(sessionId,
+				VideoStreamSessionState.Active,
+				VideoStreamSessionDescription.Mjpeg("http://camera.local:8080/stream.mjpg"));
 		var acquisition = world.Relay.Acquire(token, out var lease);
 		using var __ = lease;
 
@@ -113,7 +124,7 @@ internal sealed class VideoStreamRelayBrokerTests
 	public async Task Suspending_a_session_aborts_its_requests_and_resuming_it_serves_the_same_path_again()
 	{
 		var (world, sessionId) = await OpenBuiltInAsync();
-		using var _w = world;
+		using var w = world;
 		var token = TokenOf(world.Publisher.Of<VideoStreamSessionChangedNotification>().Single().Description!.Url);
 		Assert.That(world.Relay.Acquire(token, out var inFlight), Is.EqualTo(VideoStreamRelayAcquisition.Acquired));
 		using var __ = inFlight;
@@ -122,8 +133,8 @@ internal sealed class VideoStreamRelayBrokerTests
 		await WaitForStateAsync(world, sessionId, VideoStreamSessionState.Suspended);
 		var whileSuspended = world.Relay.Acquire(token, out _);
 		world.Broker.ResumeSession("ui-1", sessionId);
-		await VideoStreamWorld.WaitForAsync(
-			() => world.Publisher.Of<VideoStreamSessionChangedNotification>().Count == 3,
+		await VideoStreamWorld.WaitForAsync(()
+				=> world.Publisher.Of<VideoStreamSessionChangedNotification>().Count == 3,
 			"the resume never completed");
 		var afterResume = world.Relay.Acquire(token, out var resumed);
 		using var ___ = resumed;
@@ -156,8 +167,8 @@ internal sealed class VideoStreamRelayBrokerTests
 		var provider = new ScriptedVideoProvider("front", "main");
 		await world.Context().RegisterProviderAsync(provider);
 
-		var refused = Assert.Throws<VideoStreamBrokerException>(
-			() => world.Broker.OpenSession("ui-1", Front, "main", ["webrtc", "whep"]));
+		var refused = Assert.Throws<VideoStreamBrokerException>(()
+			=> world.Broker.OpenSession("ui-1", Front, "main", ["webrtc", "whep"]));
 		await Task.Delay(50);
 
 		Assert.Multiple(() =>
@@ -172,7 +183,7 @@ internal sealed class VideoStreamRelayBrokerTests
 	public async Task A_provider_update_to_active_on_a_suspended_session_serves_the_same_path_again()
 	{
 		var (world, sessionId) = await OpenBuiltInAsync();
-		using var _w = world;
+		using var w = world;
 		var token = TokenOf(world.Publisher.Of<VideoStreamSessionChangedNotification>().Single().Description!.Url);
 		world.Broker.SuspendSession("ui-1", sessionId);
 		await WaitForStateAsync(world, sessionId, VideoStreamSessionState.Suspended);
@@ -193,16 +204,17 @@ internal sealed class VideoStreamRelayBrokerTests
 	public async Task An_update_that_leaves_a_session_suspended_keeps_its_path_suspended_even_with_a_new_source()
 	{
 		var (world, sessionId) = await OpenBuiltInAsync();
-		using var _w = world;
+		using var w = world;
 		var token = TokenOf(world.Publisher.Of<VideoStreamSessionChangedNotification>().Single().Description!.Url);
 		world.Broker.SuspendSession("ui-1", sessionId);
 		await WaitForStateAsync(world, sessionId, VideoStreamSessionState.Suspended);
 
 		await world.Context().UpdateSessionAsync(sessionId, VideoStreamSessionState.Suspended);
 		var plain = world.Relay.Acquire(token, out _);
-		await world.Context().UpdateSessionAsync(sessionId,
-			VideoStreamSessionState.Suspended,
-			VideoStreamSessionDescription.Hls("https://camera.local/elsewhere"));
+		await world.Context()
+			.UpdateSessionAsync(sessionId,
+				VideoStreamSessionState.Suspended,
+				VideoStreamSessionDescription.Hls("https://camera.local/elsewhere"));
 		var withSource = world.Relay.Acquire(token, out _);
 
 		Assert.Multiple(() =>
@@ -285,7 +297,8 @@ internal sealed class VideoStreamRelayBrokerTests
 					? VideoStreamError.Failed
 					: VideoStreamError.TransportNotAccepted));
 			Assert.That(Closes(world), Is.EqualTo(1));
-			Assert.That(world.Publisher.Of<VideoStreamSessionChangedNotification>().Select(change => change.Description?.Url),
+			Assert.That(world.Publisher.Of<VideoStreamSessionChangedNotification>()
+					.Select(change => change.Description?.Url),
 				Has.None.Contains(ProviderHost));
 			if (token is not null)
 			{
@@ -306,7 +319,7 @@ internal sealed class VideoStreamRelayBrokerTests
 		await world.WaitForActiveAsync(sessionId);
 		var token = TokenOf(world.Publisher.Of<VideoStreamSessionChangedNotification>().Single().Description!.Url);
 		Assert.That(world.Relay.Acquire(token, out var inFlight), Is.EqualTo(VideoStreamRelayAcquisition.Acquired));
-		using var _i = inFlight;
+		using var i = inFlight;
 
 		switch (ending)
 		{

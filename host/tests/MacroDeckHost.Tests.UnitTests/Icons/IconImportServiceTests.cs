@@ -33,7 +33,7 @@ public class IconImportServiceTests
 	[Test]
 	public async Task Import_WithoutPackId_TargetsDefaultPack()
 	{
-		var defaultPack = await _harness.CreatePack("Imported Icons", isDefault: true);
+		var defaultPack = await _harness.CreatePack("Imported Icons", true);
 
 		var result = await _service.Import(null, null, Files(("logo.png", [1, 2])), CancellationToken.None);
 
@@ -163,7 +163,7 @@ public class IconImportServiceTests
 	[Test]
 	public async Task ImportSingle_WithoutPackId_ReturnsThePendingIconInTheDefaultPack()
 	{
-		var defaultPack = await _harness.CreatePack("Imported Icons", isDefault: true);
+		var defaultPack = await _harness.CreatePack("Imported Icons", true);
 
 		var result = await _service.ImportSingle(null,
 			new IconImportFile("Spotify.png", new MemoryStream([1, 2, 3])),
@@ -475,7 +475,7 @@ public class IconImportServiceTests
 	[Test]
 	public async Task ImportPacks_Archive_RegistersNewPacksBatchAndStagesIt()
 	{
-		await _harness.CreatePack("Imported Icons", isDefault: true);
+		await _harness.CreatePack("Imported Icons", true);
 		var zip = CreateZip(("icon.png", [1, 2]));
 
 		var result = await _service.ImportPacks(Files(("cool-pack.zip", zip)), CancellationToken.None);
@@ -612,7 +612,7 @@ public class IconImportServiceTests
 	[Test]
 	public async Task ImportSingle_WithoutPackId_ReusesAnIconFromAnyPack()
 	{
-		await _harness.CreatePack("Imported Icons", isDefault: true);
+		await _harness.CreatePack("Imported Icons", true);
 		var other = await _harness.CreatePack("Stream Deck", isReadOnly: true);
 		var existing = await _harness.AddReadyIcon(other.Id, "logo", [9, 9]);
 
@@ -878,11 +878,12 @@ public class IconImportServiceTests
 			Assert.That(names, Does.Not.Contain("readme"));
 			Assert.That(names, Does.Not.Contain("package"));
 			Assert.That(names, Does.Not.Contain("logo"));
-			Assert.That(_extractor.Requested.Any(p => p.EndsWith(".png", StringComparison.Ordinal) ||
-					p.EndsWith(".lottie", StringComparison.Ordinal) ||
-					p.EndsWith(".md", StringComparison.Ordinal) ||
-					p.EndsWith(".json", StringComparison.Ordinal) ||
-					p.EndsWith(".dll", StringComparison.Ordinal)),
+			Assert.That(_extractor.Requested.Any(p
+					=> p.EndsWith(".png", StringComparison.Ordinal)
+					|| p.EndsWith(".lottie", StringComparison.Ordinal)
+					|| p.EndsWith(".md", StringComparison.Ordinal)
+					|| p.EndsWith(".json", StringComparison.Ordinal)
+					|| p.EndsWith(".dll", StringComparison.Ordinal)),
 				Is.False);
 		});
 	}
@@ -1141,7 +1142,9 @@ public class IconImportServiceTests
 			Assert.That(dark.ProcessingState, Is.EqualTo(IconProcessingState.Pending));
 			Assert.That(dark.ImportBatchId, Is.EqualTo(result.Data!.Id));
 			Assert.That(result.Data!.Total, Is.EqualTo(1), "the user-facing count is icons, not their appearances");
-			Assert.That(_harness.Mediator.Published.OfType<IconsAddedNotification>().SelectMany(n => n.Icons).Select(i => i.Id),
+			Assert.That(_harness.Mediator.Published.OfType<IconsAddedNotification>()
+					.SelectMany(n => n.Icons)
+					.Select(i => i.Id),
 				Is.EqualTo(new[] { play.Id }));
 			Assert.That(DrainChannel().OfType<ProcessIconWorkItem>().Select(item => item.IconId),
 				Is.EquivalentTo(new[] { play.Id, dark.Id }));
@@ -1210,8 +1213,10 @@ public class IconImportServiceTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_harness.Cache.GetIconsByPackId(pack.Id).Select(icon => icon.Id), Is.EqualTo(new[] { existing.Id }));
-			Assert.That(_harness.Cache.GetAppearances(existing.Id).Select(a => IconAppearanceTraits.ToKey(a.AppearanceTraits!)),
+			Assert.That(_harness.Cache.GetIconsByPackId(pack.Id).Select(icon => icon.Id),
+				Is.EqualTo(new[] { existing.Id }));
+			Assert.That(_harness.Cache.GetAppearances(existing.Id)
+					.Select(a => IconAppearanceTraits.ToKey(a.AppearanceTraits!)),
 				Is.EqualTo(new[] { "colorScheme=dark", "colorScheme=light" }));
 			Assert.That(result.Data!.Skipped, Is.EqualTo(2), "the icon and the kind it already has are skipped");
 		});
@@ -1239,7 +1244,10 @@ public class IconImportServiceTests
 	{
 		private readonly MemoryStream _inner;
 
-		public ForwardOnlyStream(byte[] content) => _inner = new MemoryStream(content);
+		public ForwardOnlyStream(byte[] content)
+		{
+			_inner = new MemoryStream(content);
+		}
 
 		public override bool CanRead => true;
 
@@ -1255,19 +1263,35 @@ public class IconImportServiceTests
 			set => throw new NotSupportedException();
 		}
 
-		public override int Read(byte[] buffer, int offset, int count) => _inner.Read(buffer, offset, count);
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			return _inner.Read(buffer, offset, count);
+		}
 
 		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-			=> _inner.ReadAsync(buffer, offset, count, cancellationToken);
+		{
+			return _inner.ReadAsync(buffer, offset, count, cancellationToken);
+		}
 
 		public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
-			=> _inner.ReadAsync(buffer, cancellationToken);
+		{
+			return _inner.ReadAsync(buffer, cancellationToken);
+		}
 
-		public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			throw new NotSupportedException();
+		}
 
-		public override void SetLength(long value) => throw new NotSupportedException();
+		public override void SetLength(long value)
+		{
+			throw new NotSupportedException();
+		}
 
-		public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			throw new NotSupportedException();
+		}
 
 		public override void Flush()
 		{
@@ -1287,7 +1311,7 @@ public class IconImportServiceTests
 	private static byte[] CreateZip(params (string Name, byte[] Content)[] entries)
 	{
 		using var stream = new MemoryStream();
-		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			foreach (var (name, content) in entries)
 			{

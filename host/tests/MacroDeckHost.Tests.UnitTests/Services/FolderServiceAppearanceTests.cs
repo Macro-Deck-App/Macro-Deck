@@ -46,7 +46,10 @@ public class FolderServiceAppearanceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Update_SetsWidgetSpacingAndBorderRadius()
@@ -135,7 +138,7 @@ public class FolderServiceAppearanceTests
 	[Test]
 	public async Task Update_MinusOneClearsRowsAndColumnsBackToInherit()
 	{
-		var result = await Update(rows: -1, columns: -1);
+		var result = await Update(-1, -1);
 
 		Assert.That(result.Success, Is.True);
 		Assert.Multiple(() =>
@@ -148,7 +151,7 @@ public class FolderServiceAppearanceTests
 	[Test]
 	public async Task Duplicate_KeepsAnInheritedGrid()
 	{
-		await Update(rows: -1, columns: -1);
+		await Update(-1, -1);
 
 		var result = await _service.Duplicate(_folderId);
 
@@ -165,5 +168,16 @@ public class FolderServiceAppearanceTests
 		int? columns = null,
 		int? widgetSpacing = null,
 		int? widgetBorderRadius = null)
-		=> _service.Update(_folderId, null, null, null, rows, columns, null, widgetSpacing, widgetBorderRadius, null);
+	{
+		return _service.Update(_folderId,
+			null,
+			null,
+			null,
+			rows,
+			columns,
+			null,
+			widgetSpacing,
+			widgetBorderRadius,
+			null);
+	}
 }

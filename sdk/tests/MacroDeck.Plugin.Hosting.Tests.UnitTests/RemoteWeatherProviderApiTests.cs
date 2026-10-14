@@ -65,9 +65,13 @@ public class RemoteWeatherProviderApiTests
 			}
 		}
 
-		public void Release() => _released.TrySetResult();
+		public void Release()
+		{
+			_released.TrySetResult();
+		}
 
-		public async Task<JsonElement?> InvokeAsync(string api,
+		public async Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -86,7 +90,10 @@ public class RemoteWeatherProviderApiTests
 			return null;
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public async Task WaitForCallsAsync(int count)
 		{

@@ -44,7 +44,8 @@ public class SystemIntegrationAudioDeviceTests
 			new FakeSystemMetricsService(),
 			new FakePowerService(true));
 
-		await integration.InitializeAsync(new AudioTestContext(new SignalForwardingVariableApi(new RecordingVariableApi(),
+		await integration.InitializeAsync(new AudioTestContext(new SignalForwardingVariableApi(
+				new RecordingVariableApi(),
 				SystemIntegration.IntegrationId,
 				refresh,
 				invalidation),
@@ -54,7 +55,9 @@ public class SystemIntegrationAudioDeviceTests
 	}
 
 	private static string IdOf(SystemIntegration integration, string name)
-		=> integration.Variables.Single(variable => variable.Name == name).ResolvedId!;
+	{
+		return integration.Variables.Single(variable => variable.Name == name).ResolvedId!;
+	}
 
 	private static FakeVolumeService VolumeWith(params AudioDevice[] devices)
 	{
@@ -91,10 +94,15 @@ public class SystemIntegrationAudioDeviceTests
 		volume.Set(new AudioTarget(AudioFlow.Input, _microphone.Id), 0.8f, true);
 		var integration = await StartAsync(volume);
 
-		var speakers = await integration.ReadAsync(IdOf(integration, "system_audio_output_macbook_pro_speakers_volume_percent"));
-		var speakersMuted = await integration.ReadAsync(IdOf(integration, "system_audio_output_macbook_pro_speakers_muted"));
-		var microphone = await integration.ReadAsync(IdOf(integration, "system_audio_input_macbook_pro_microphone_volume_percent"));
-		var microphoneMuted = await integration.ReadAsync(IdOf(integration, "system_audio_input_macbook_pro_microphone_muted"));
+		var speakers
+			= await integration.ReadAsync(IdOf(integration, "system_audio_output_macbook_pro_speakers_volume_percent"));
+		var speakersMuted
+			= await integration.ReadAsync(IdOf(integration, "system_audio_output_macbook_pro_speakers_muted"));
+		var microphone
+			= await integration.ReadAsync(IdOf(integration,
+				"system_audio_input_macbook_pro_microphone_volume_percent"));
+		var microphoneMuted
+			= await integration.ReadAsync(IdOf(integration, "system_audio_input_macbook_pro_microphone_muted"));
 
 		Assert.Multiple(() =>
 		{
@@ -112,12 +120,14 @@ public class SystemIntegrationAudioDeviceTests
 		volume.Volume = 0.5f;
 		var integration = await StartAsync(volume);
 
-		var result = await integration.SetValueAsync(IdOf(integration, "system_audio_output_arctis_7_volume_percent"), 30);
+		var result = await integration.SetValueAsync(IdOf(integration, "system_audio_output_arctis_7_volume_percent"),
+			30);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Applied));
-			Assert.That(volume.VolumeOf(new AudioTarget(AudioFlow.Output, _headset.Id))!.Value, Is.EqualTo(0.3f).Within(0.0001));
+			Assert.That(volume.VolumeOf(new AudioTarget(AudioFlow.Output, _headset.Id))!.Value,
+				Is.EqualTo(0.3f).Within(0.0001));
 			Assert.That(volume.Volume, Is.EqualTo(0.5f));
 		});
 	}
@@ -128,10 +138,10 @@ public class SystemIntegrationAudioDeviceTests
 		var integration = await StartAsync(VolumeWith(_speakers, _microphone));
 
 		var mutes = integration.Variables
-			.Where(variable => variable.Name is "system_muted" or "system_input_muted" ||
-				variable.Name is { } name &&
-				name.StartsWith("system_audio_", StringComparison.Ordinal) &&
-				name.EndsWith("_muted", StringComparison.Ordinal))
+			.Where(variable => variable.Name is "system_muted" or "system_input_muted"
+				|| variable.Name is { } name
+				&& name.StartsWith("system_audio_", StringComparison.Ordinal)
+				&& name.EndsWith("_muted", StringComparison.Ordinal))
 			.ToList();
 
 		Assert.Multiple(() =>
@@ -246,7 +256,7 @@ public class SystemIntegrationAudioDeviceTests
 	[Test]
 	public async Task A_mute_write_without_volume_support_is_unavailable()
 	{
-		var integration = await StartAsync(new FakeVolumeService(supported: false));
+		var integration = await StartAsync(new FakeVolumeService(false));
 
 		var result = await integration.SetValueAsync("system-muted", true);
 
@@ -261,7 +271,7 @@ public class SystemIntegrationAudioDeviceTests
 		volume.Muted = true;
 		var integration = await StartAsync(volume);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await integration.ReadAsync("system-volume-percent")).Value, Is.EqualTo(60));
 			Assert.That((await integration.ReadAsync("system-muted")).Value, Is.EqualTo(true));
@@ -281,7 +291,8 @@ public class SystemIntegrationAudioDeviceTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(integration.Variables.Select(v => v.Name), Does.Contain("system_audio_output_old_speakers_volume_percent"));
+			Assert.That(integration.Variables.Select(v => v.Name),
+				Does.Contain("system_audio_output_old_speakers_volume_percent"));
 			Assert.That(invalidation.Count, Is.EqualTo(1));
 		});
 	}
@@ -298,7 +309,8 @@ public class SystemIntegrationAudioDeviceTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(integration.Variables.Select(v => v.Name), Does.Contain("system_audio_output_arctis_7_volume_percent"));
+			Assert.That(integration.Variables.Select(v => v.Name),
+				Does.Contain("system_audio_output_arctis_7_volume_percent"));
 			Assert.That(invalidation.Count, Is.EqualTo(2));
 		});
 	}
@@ -348,7 +360,7 @@ public class SystemIntegrationAudioDeviceTests
 
 		var restarted = await StartAsync(VolumeWith(_speakers), store);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(IdOf(restarted, "system_audio_output_arctis_7_volume_percent"), Is.EqualTo(id));
 			Assert.That((await restarted.ReadAsync(id)).Value, Is.Null);
@@ -364,7 +376,8 @@ public class SystemIntegrationAudioDeviceTests
 		volume.Devices[0] = _headset with { Name = "2- Arctis 7 (USB)" };
 		await integration.RefreshAudioDevicesAsync();
 
-		Assert.That(integration.Variables.Select(v => v.Name), Does.Contain("system_audio_output_arctis_7_volume_percent"));
+		Assert.That(integration.Variables.Select(v => v.Name),
+			Does.Contain("system_audio_output_arctis_7_volume_percent"));
 	}
 
 	[Test]
@@ -376,7 +389,9 @@ public class SystemIntegrationAudioDeviceTests
 		volume.Devices.Add(_headset with { Id = "second-headset-uid" });
 		await integration.RefreshAudioDevicesAsync();
 
-		var names = integration.Variables.Select(v => v.Name!).Where(n => n.EndsWith("_volume_percent", StringComparison.Ordinal)).ToList();
+		var names = integration.Variables.Select(v => v.Name!)
+			.Where(n => n.EndsWith("_volume_percent", StringComparison.Ordinal))
+			.ToList();
 		Assert.Multiple(() =>
 		{
 			Assert.That(names, Does.Contain("system_audio_output_arctis_7_volume_percent"));
@@ -394,7 +409,8 @@ public class SystemIntegrationAudioDeviceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(store.Saves, Is.Zero);
-			Assert.That(integration.Variables.Select(v => v.Name), Does.Contain("system_audio_output_macbook_pro_speakers_muted"));
+			Assert.That(integration.Variables.Select(v => v.Name),
+				Does.Contain("system_audio_output_macbook_pro_speakers_muted"));
 		});
 	}
 
@@ -436,7 +452,8 @@ public class SystemIntegrationAudioDeviceTests
 		{
 			Directory.CreateDirectory(paths.DataDirectory);
 			var legacyPath = Path.Combine(paths.DataDirectory, "system-audio-devices.json");
-			await File.WriteAllTextAsync(legacyPath, """
+			await File.WriteAllTextAsync(legacyPath,
+				"""
 				[
 				  {
 				    "flow": "output",
@@ -451,7 +468,9 @@ public class SystemIntegrationAudioDeviceTests
 
 			var integration = await StartAsync(VolumeWith(_speakers), storage.For(SystemIntegration.IntegrationId));
 
-			var stored = Path.Combine(paths.DataDirectory, "integration-data", SystemIntegration.IntegrationId,
+			var stored = Path.Combine(paths.DataDirectory,
+				"integration-data",
+				SystemIntegration.IntegrationId,
 				"system-audio-devices.json");
 			using var saved = JsonDocument.Parse(await File.ReadAllTextAsync(stored));
 			Assert.Multiple(() =>
@@ -460,7 +479,8 @@ public class SystemIntegrationAudioDeviceTests
 					Does.Contain("system_audio_output_old_speakers_volume_percent")
 						.And.Contain("system_audio_output_macbook_pro_speakers_volume_percent"));
 				Assert.That(File.Exists(legacyPath), Is.False);
-				Assert.That(saved.RootElement.EnumerateArray().Select(device => device.GetProperty("deviceId").GetString()),
+				Assert.That(saved.RootElement.EnumerateArray()
+						.Select(device => device.GetProperty("deviceId").GetString()),
 					Is.EqualTo(new[] { "old-uid", _speakers.Id }));
 				Assert.That(saved.RootElement[0].GetProperty("slug").GetString(), Is.EqualTo("old_speakers"));
 			});
@@ -481,7 +501,8 @@ public class SystemIntegrationAudioDeviceTests
 
 		public int Saves { get; private set; }
 
-		public Task<IntegrationStorageReadResult> ReadAsync(string key,
+		public Task<IntegrationStorageReadResult> ReadAsync(
+			string key,
 			Func<string, bool>? isValid = null,
 			CancellationToken cancellationToken = default)
 		{
@@ -520,9 +541,15 @@ public class SystemIntegrationAudioDeviceTests
 	{
 		public int Count { get; private set; }
 
-		public void MarkStale(string integrationId) => Count++;
+		public void MarkStale(string integrationId)
+		{
+			Count++;
+		}
 
-		public IReadOnlyCollection<string> DrainStale() => [];
+		public IReadOnlyCollection<string> DrainStale()
+		{
+			return [];
+		}
 	}
 
 	private sealed class AudioTestContext(IVariableApi variables, IIntegrationStorage storage) : IIntegrationContext

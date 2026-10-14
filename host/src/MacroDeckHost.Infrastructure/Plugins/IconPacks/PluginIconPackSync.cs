@@ -52,7 +52,8 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 	private volatile bool _readinessGaveUp;
 	private int _readinessFaultLogged;
 
-	public PluginIconPackSync(IPluginBundledIconPackDeclarations declarations,
+	public PluginIconPackSync(
+		IPluginBundledIconPackDeclarations declarations,
 		IIconPackCache iconPackCache,
 		IIconUsageScanner usageScanner,
 		IServiceScopeFactory scopeFactory,
@@ -107,14 +108,15 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 		}
 	}
 
-	public async Task<PluginIconPackSyncResult> SyncDevelopmentAsync(string pluginId,
+	public async Task<PluginIconPackSyncResult> SyncDevelopmentAsync(
+		string pluginId,
 		string sessionId,
 		string pluginName,
 		IReadOnlyList<DevelopmentIconPack> packs,
 		CancellationToken cancellationToken)
 	{
 		var invalid = packs
-			.Where(pack => !IsUsable(pluginId, pack.Key, () => new MemoryStream(pack.Content, writable: false)))
+			.Where(pack => !IsUsable(pluginId, pack.Key, () => new MemoryStream(pack.Content, false)))
 			.Select(pack => pack.Key)
 			.ToList();
 		if (invalid.Count > 0)
@@ -126,9 +128,15 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 		return await SyncAsync(pluginId, cancellationToken);
 	}
 
-	public void InstallationChanged(string pluginId) => _declarations.Invalidate(pluginId);
+	public void InstallationChanged(string pluginId)
+	{
+		_declarations.Invalidate(pluginId);
+	}
 
-	public void Dispose() => _sessions.SessionEnded -= OnSessionEnded;
+	public void Dispose()
+	{
+		_sessions.SessionEnded -= OnSessionEnded;
+	}
 
 	private async Task<PluginIconPackSyncResult> SyncLockedAsync(string pluginId, CancellationToken cancellationToken)
 	{
@@ -146,7 +154,11 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 		}
 
 		IReadOnlySet<Guid>? inUse = null;
-		IReadOnlySet<Guid> InUse() => inUse ??= _usageScanner.FindReferencedIconIds();
+
+		IReadOnlySet<Guid> InUse()
+		{
+			return inUse ??= _usageScanner.FindReferencedIconIds();
+		}
 
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var restore = scope.ServiceProvider.GetRequiredService<IIconPackRestoreService>();
@@ -195,7 +207,8 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 				continue;
 			}
 
-			var replaced = await restore.ReplaceFromSource(current.Id, fileName, content, stamp, InUse(), cancellationToken);
+			var replaced
+				= await restore.ReplaceFromSource(current.Id, fileName, content, stamp, InUse(), cancellationToken);
 			if (!replaced.Success)
 			{
 				_logger.Warning("Bundled icon pack {Key} of plugin {PluginId} could not be replaced: {Error}",
@@ -248,11 +261,13 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 	}
 
 	private List<IconPackEntity> StampedPacks(string pluginId)
-		=> _iconPackCache.GetAllPacks()
-			.Where(pack => pack.SourceType == IconPackSourceType.Plugin &&
-				PluginIconReferences.KeyOf(pluginId, pack.SourceId) is { Length: > 0 })
+	{
+		return _iconPackCache.GetAllPacks()
+			.Where(pack => pack.SourceType == IconPackSourceType.Plugin
+				&& PluginIconReferences.KeyOf(pluginId, pack.SourceId) is { Length: > 0 })
 			.OrderBy(pack => pack.CreatedAt)
 			.ToList();
+	}
 
 	private bool IsUsable(string pluginId, string key, Func<Stream> open)
 	{
@@ -273,8 +288,9 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 			_logger.Warning("Bundled icon pack {Key} of plugin {PluginId} is unusable: {Error}",
 				key,
 				pluginId,
-				read.Error ?? "duplicate or unusable icon names " +
-					string.Join(", ", read.Info!.DuplicateNames.Concat(read.Info.UnusableNames)));
+				read.Error
+				?? "duplicate or unusable icon names "
+				+ string.Join(", ", read.Info!.DuplicateNames.Concat(read.Info.UnusableNames)));
 			return false;
 		}
 
@@ -292,7 +308,8 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.General,
 			Title = _localization.Resolve(AppStrings.Notifications.PluginIconPackKept(), culture) ?? pack.Name,
-			Message = _localization.Resolve(AppStrings.Notifications.PluginIconPackKeptMessage(pack: pack.Name, plugin: pluginName),
+			Message = _localization.Resolve(
+				AppStrings.Notifications.PluginIconPackKeptMessage(pack: pack.Name, plugin: pluginName),
 				culture),
 			SourceId = pack.SourceId,
 			SourceName = pluginName,
@@ -301,7 +318,8 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 		});
 	}
 
-	private async Task PublishOwnershipChangesAsync(string pluginId,
+	private async Task PublishOwnershipChangesAsync(
+		string pluginId,
 		DeclaredIconPackSet? declaration,
 		HashSet<Guid> announced,
 		IMediator mediator,
@@ -312,7 +330,7 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 			var owned = declaration?.Declares(PluginIconReferences.KeyOf(pluginId, pack.SourceId)!) == true;
 			var known = _publishedOwnership.TryGetValue(pack.Id, out var previous);
 			_publishedOwnership[pack.Id] = owned;
-			if (announced.Contains(pack.Id) || (known && previous == owned))
+			if (announced.Contains(pack.Id) || known && previous == owned)
 			{
 				continue;
 			}
@@ -323,12 +341,14 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 	}
 
 	private string NameOf(string pluginId)
-		=> _pluginNames.TryGetValue(pluginId, out var name)
+	{
+		return _pluginNames.TryGetValue(pluginId, out var name)
 			? name
 			: _sessions.Snapshot()
-					.FirstOrDefault(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal))
-					?.DisplayName ??
-				pluginId;
+				.FirstOrDefault(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal))
+				?.DisplayName
+			?? pluginId;
+	}
 
 	private async Task<bool> WaitForReadinessAsync(string pluginId, CancellationToken cancellationToken)
 	{
@@ -368,7 +388,8 @@ public sealed class PluginIconPackSync : IPluginIconPackSync, IDisposable
 				return true;
 			}
 
-			_logger.Warning("Icon packs were not ready within {Bound}; bundled icon packs of {PluginId} sync once they are",
+			_logger.Warning(
+				"Icon packs were not ready within {Bound}; bundled icon packs of {PluginId} sync once they are",
 				_options.ReadinessBound,
 				pluginId);
 			return false;

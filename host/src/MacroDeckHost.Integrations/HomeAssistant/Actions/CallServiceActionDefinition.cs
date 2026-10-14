@@ -29,12 +29,12 @@ internal sealed class CallServiceActionDefinition : IDynamicOptionsActionDefinit
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(DomainParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.CallService.DomainLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.CallService.DomainDescription(),
+			AppStrings.Integrations.HomeAssistant.Actions.CallService.DomainLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.CallService.DomainDescription(),
 			required: true),
 		ActionParameter.Autocomplete(ServiceParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.CallService.ServiceLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.CallService.ServiceDescription(),
+			AppStrings.Integrations.HomeAssistant.Actions.CallService.ServiceLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.CallService.ServiceDescription(),
 			required: true),
 		ActionParameter.MultiSelect(EntitiesParameterName,
 			label: AppStrings.Integrations.HomeAssistant.Actions.CallService.EntitiesLabel(),
@@ -46,11 +46,14 @@ internal sealed class CallServiceActionDefinition : IDynamicOptionsActionDefinit
 			label: AppStrings.Integrations.HomeAssistant.Actions.CallService.DevicesLabel(),
 			description: AppStrings.Integrations.HomeAssistant.Actions.CallService.DevicesDescription()),
 		ActionParameter.Json(DataParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.CallService.DataLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.CallService.DataDescription())
+			AppStrings.Integrations.HomeAssistant.Actions.CallService.DataLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.CallService.DataDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,

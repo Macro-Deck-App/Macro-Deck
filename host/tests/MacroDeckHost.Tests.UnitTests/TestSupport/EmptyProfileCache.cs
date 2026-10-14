@@ -9,19 +9,38 @@ internal sealed class EmptyProfileCache : IProfileCache
 {
 	public bool HadUnreadableProfiles => false;
 
-	public ProfileEntity? GetById(Guid id) => null;
+	public ProfileEntity? GetById(Guid id)
+	{
+		return null;
+	}
 
-	public List<ProfileEntity> GetAll() => [];
+	public List<ProfileEntity> GetAll()
+	{
+		return [];
+	}
 
-	public Task InitializeCache() => Task.CompletedTask;
+	public Task InitializeCache()
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task AddOrUpdate(ProfileEntity profile) => Task.CompletedTask;
+	public Task AddOrUpdate(ProfileEntity profile)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task<IReadOnlyList<ProfileEntity>> ApplyOrders(IReadOnlyDictionary<Guid, int> orders)
-		=> Task.FromResult<IReadOnlyList<ProfileEntity>>([]);
+	{
+		return Task.FromResult<IReadOnlyList<ProfileEntity>>([]);
+	}
 
 	public Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task Remove(Guid id) => Task.CompletedTask;
+	public Task Remove(Guid id)
+	{
+		return Task.CompletedTask;
+	}
 }

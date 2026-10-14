@@ -14,11 +14,11 @@ internal sealed class DeviceTileResponsiveClaimTests
 	private const string WideTileId = "wide-tile";
 
 	private const string ResponsiveTree = """
-		{"id":"weather","type":"ui.responsive","properties":{"variants":[{"minWidth":1.5}]},"children":[
-			{"id":"weather.compact","type":"ui.text","properties":{"text":"21"}},
-			{"id":"weather.wide","type":"ui.stack","children":[
-				{"id":"weather.wide.refresh","type":"ui.button","properties":{"events":["press"]}}]}]}
-		""";
+										  {"id":"weather","type":"ui.responsive","properties":{"variants":[{"minWidth":1.5}]},"children":[
+										  	{"id":"weather.compact","type":"ui.text","properties":{"text":"21"}},
+										  	{"id":"weather.wide","type":"ui.stack","children":[
+										  		{"id":"weather.wide.refresh","type":"ui.button","properties":{"events":["press"]}}]}]}
+										  """;
 
 	private static readonly string[] _shortPressTriggers = ["onTouchStart", "onTouchEnd", "onShortPress"];
 	private static readonly string[] _wideControl = ["weather.wide.refresh"];
@@ -32,7 +32,7 @@ internal sealed class DeviceTileResponsiveClaimTests
 		_fixture = new DeviceSurfaceFixture();
 		var small = DeviceSurfaceFixture.Button(SmallTileId, 0, 0);
 		small.Type = "com.example.weather.tile";
-		var wide = DeviceSurfaceFixture.Button(WideTileId, 0, 1, width: 2);
+		var wide = DeviceSurfaceFixture.Button(WideTileId, 0, 1, 2);
 		wide.Type = "com.example.weather.tile";
 		_fixture.Home.Widgets.AddRange([small, wide]);
 		_deviceId = await _fixture.OpenDeviceAsync();
@@ -41,7 +41,10 @@ internal sealed class DeviceTileResponsiveClaimTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	private async Task PressAsync(string widgetId)
 	{
@@ -91,8 +94,10 @@ internal sealed class DeviceTileResponsiveClaimTests
 		}
 
 		var fixtures = Path.Combine(directory!.FullName, "ui-model", "fixtures", "component-profile");
-		using var tree = JsonDocument.Parse(File.ReadAllText(Path.Combine(fixtures, "conformance-responsive-tree.json")));
-		using var layout = JsonDocument.Parse(File.ReadAllText(Path.Combine(fixtures, "conformance-responsive-layout.json")));
+		using var tree
+			= JsonDocument.Parse(File.ReadAllText(Path.Combine(fixtures, "conformance-responsive-tree.json")));
+		using var layout
+			= JsonDocument.Parse(File.ReadAllText(Path.Combine(fixtures, "conformance-responsive-layout.json")));
 
 		Assert.Multiple(() =>
 		{
@@ -102,8 +107,7 @@ internal sealed class DeviceTileResponsiveClaimTests
 				if (@case.TryGetProperty("span", out var span))
 				{
 					var spacing = span.GetProperty("spacing").GetInt32();
-					Assert.That(
-						(DeviceInteractionRouter.SpanInCells(span.GetProperty("width").GetInt32(), spacing),
+					Assert.That((DeviceInteractionRouter.SpanInCells(span.GetProperty("width").GetInt32(), spacing),
 							DeviceInteractionRouter.SpanInCells(span.GetProperty("height").GetInt32(), spacing)),
 						Is.EqualTo((Cells(tile, "width"), Cells(tile, "height"))),
 						$"{@case.GetProperty("name").GetString()}: the host's box for the span");
@@ -120,7 +124,9 @@ internal sealed class DeviceTileResponsiveClaimTests
 	}
 
 	private static double? Cells(JsonElement tile, string side)
-		=> tile.ValueKind == JsonValueKind.Object && tile.GetProperty(side).ValueKind == JsonValueKind.Number
+	{
+		return tile.ValueKind == JsonValueKind.Object && tile.GetProperty(side).ValueKind == JsonValueKind.Number
 			? tile.GetProperty(side).GetDouble() / UiLength.Cell
 			: null;
+	}
 }

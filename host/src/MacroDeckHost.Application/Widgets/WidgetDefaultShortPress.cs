@@ -45,16 +45,18 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 	}
 
 	public bool RunsOnDevices(string widgetType)
-		=> _widgetTypes().TryResolve(widgetType, out var entry) &&
-			!entry.IsBuiltIn &&
-			entry.Descriptor.DefaultShortPressAction is not null;
+	{
+		return _widgetTypes().TryResolve(widgetType, out var entry)
+			&& !entry.IsBuiltIn
+			&& entry.Descriptor.DefaultShortPressAction is not null;
+	}
 
 	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice)
 	{
 		ArgumentNullException.ThrowIfNull(widget);
 
-		if (DeclaredDefaultOf(widget) is not (var integrationId, var declared, var supportsFlows, var needsScreen) ||
-			(fromDevice && needsScreen))
+		if (DeclaredDefaultOf(widget) is not var (integrationId, declared, supportsFlows, needsScreen)
+			|| fromDevice && needsScreen)
 		{
 			return null;
 		}
@@ -64,8 +66,8 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 			return null;
 		}
 
-		if (!_integrations.IsEnabled(integrationId) ||
-			_integrations.FindAction(integrationId, declared.ActionId) is not { } action)
+		if (!_integrations.IsEnabled(integrationId)
+			|| _integrations.FindAction(integrationId, declared.ActionId) is not { } action)
 		{
 			return null;
 		}
@@ -74,7 +76,7 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 			action,
 			declared.Parameters ?? new Dictionary<string, string>(),
 			_localization,
-			culture: null);
+			null);
 
 		return new JsonObject { ["flows"] = flows }.ToJsonString();
 	}
@@ -91,14 +93,14 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 		{
 			return new DeclaredDefault(CalendarWidgetTypes.OwnerId,
 				new WidgetDefaultAction(CalendarWidgetTypes.ShowDetailsActionId, null),
-				SupportsFlows: true,
-				NeedsScreen: true);
+				true,
+				true);
 		}
 
-		return _widgetTypes().TryResolve(widget.Type, out var entry) &&
-			!entry.IsBuiltIn &&
-			entry.Descriptor.DefaultShortPressAction is { } providerDefault
-				? new DeclaredDefault(entry.ProviderId, providerDefault, entry.Descriptor.SupportsFlows, NeedsScreen: false)
+		return _widgetTypes().TryResolve(widget.Type, out var entry)
+			&& !entry.IsBuiltIn
+			&& entry.Descriptor.DefaultShortPressAction is { } providerDefault
+				? new DeclaredDefault(entry.ProviderId, providerDefault, entry.Descriptor.SupportsFlows, false)
 				: null;
 	}
 
@@ -106,11 +108,13 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 	{
 		var stationId = ReadString(widget.Data, WeatherInstanceKey) is { Length: > 0 } stored
 			? stored
-			: _weather.GetInstances() is [var first, ..] ? first.InstanceId : null;
+			: _weather.GetInstances() is [var first, ..]
+				? first.InstanceId
+				: null;
 
-		if (stationId is null ||
-			!QualifiedId.TryParse(stationId, out var station) ||
-			ProviderOf(station.OwnerId) is not { DetailsAction: { } details })
+		if (stationId is null
+			|| !QualifiedId.TryParse(stationId, out var station)
+			|| ProviderOf(station.OwnerId) is not { DetailsAction: { } details })
 		{
 			return null;
 		}
@@ -118,13 +122,15 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 		return new DeclaredDefault(station.OwnerId,
 			new WidgetDefaultAction(details.ActionId,
 				new Dictionary<string, string> { [details.StationParameter] = stationId }),
-			SupportsFlows: true,
-			NeedsScreen: true);
+			true,
+			true);
 	}
 
 	private IWeatherProvider? ProviderOf(string integrationId)
-		=> _integrations.Integrations.FirstOrDefault(integration =>
+	{
+		return _integrations.Integrations.FirstOrDefault(integration =>
 			string.Equals(integration.Id, integrationId, StringComparison.Ordinal)) as IWeatherProvider;
+	}
 
 	private static string? ReadString(string? data, string key)
 	{
@@ -135,9 +141,9 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 
 		try
 		{
-			return JsonNode.Parse(data) is JsonObject root &&
-				root[key] is JsonValue value &&
-				value.TryGetValue<string>(out var text)
+			return JsonNode.Parse(data) is JsonObject root
+				&& root[key] is JsonValue value
+				&& value.TryGetValue<string>(out var text)
 					? text
 					: null;
 		}

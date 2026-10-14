@@ -7,7 +7,8 @@ namespace MacroDeck.Plugin.Cli.Scaffolding;
 /// toolchain-neutral <see cref="ProcessLaunchException" /> the process helper throws.</summary>
 internal static class DotnetProcess
 {
-	public static async Task<ProcessRunResult> RunAsync(IReadOnlyList<string> arguments,
+	public static async Task<ProcessRunResult> RunAsync(
+		IReadOnlyList<string> arguments,
 		CancellationToken cancellationToken)
 	{
 		try

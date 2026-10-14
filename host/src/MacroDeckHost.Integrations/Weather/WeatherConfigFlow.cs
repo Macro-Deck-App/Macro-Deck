@@ -66,7 +66,7 @@ internal sealed class WeatherConfigFlow : IConfigFlow
 				return ConfigFlowResult.Error(LocationStep(),
 					fieldErrors: new Dictionary<string, LocalizedText>
 					{
-						["query"] = AppStrings.Integrations.Weather.Config.NoLocationFound(query: query)
+						["query"] = AppStrings.Integrations.Weather.Config.NoLocationFound(query)
 					});
 			}
 
@@ -117,7 +117,8 @@ internal sealed class WeatherConfigFlow : IConfigFlow
 	}
 
 	private static ConfigFlowStep LocationStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "location",
 			Title = AppStrings.Integrations.Weather.Config.LocationStepTitle(),
@@ -133,21 +134,20 @@ internal sealed class WeatherConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Text("query",
-					label: AppStrings.Integrations.Weather.Config.CityLabel(),
+					AppStrings.Integrations.Weather.Config.CityLabel(),
 					placeholder: AppStrings.Integrations.Weather.Config.CityPlaceholder(),
 					description: AppStrings.Integrations.Weather.Config.CityDescription()),
 				ActionParameter.Number("latitude",
-					label: AppStrings.Integrations.Weather.Config.LatitudeLabel(),
-					description: AppStrings.Integrations.Weather.Config.OnlyWithoutCityDescription(),
-					min: -90,
-					max: 90),
+					AppStrings.Integrations.Weather.Config.LatitudeLabel(),
+					AppStrings.Integrations.Weather.Config.OnlyWithoutCityDescription(),
+					-90,
+					90),
 				ActionParameter.Number("longitude",
-					label: AppStrings.Integrations.Weather.Config.LongitudeLabel(),
-					description: AppStrings.Integrations.Weather.Config.OnlyWithoutCityDescription(),
-					min: -180,
-					max: 180),
+					AppStrings.Integrations.Weather.Config.LongitudeLabel(),
+					AppStrings.Integrations.Weather.Config.OnlyWithoutCityDescription(),
+					-180,
+					180),
 				ActionParameter.Choice("unit",
-					options:
 					[
 						new ActionParameterOption
 						{
@@ -158,11 +158,12 @@ internal sealed class WeatherConfigFlow : IConfigFlow
 							Value = "fahrenheit", Label = AppStrings.Integrations.Weather.Config.FahrenheitOption()
 						}
 					],
-					label: AppStrings.Integrations.Weather.Config.UnitLabel(),
+					AppStrings.Integrations.Weather.Config.UnitLabel(),
 					defaultValue: "celsius",
 					required: true)
 			]
 		};
+	}
 
 	private static string FormatLocationName(GeocodingResult result)
 	{
@@ -176,18 +177,23 @@ internal sealed class WeatherConfigFlow : IConfigFlow
 	}
 
 	private static string FormatCoordinates(double latitude, double longitude)
-		=> string.Format(CultureInfo.InvariantCulture,
+	{
+		return string.Format(CultureInfo.InvariantCulture,
 			"{0:0.##}, {1:0.##}",
 			latitude,
 			longitude);
+	}
 
 	private static TemperatureUnit ParseUnit(string? unit)
-		=> string.Equals(unit, "fahrenheit", StringComparison.OrdinalIgnoreCase)
+	{
+		return string.Equals(unit, "fahrenheit", StringComparison.OrdinalIgnoreCase)
 			? TemperatureUnit.Fahrenheit
 			: TemperatureUnit.Celsius;
+	}
 
 	private static double? ToDouble(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			null => null,
 			double d => d,
@@ -196,4 +202,5 @@ internal sealed class WeatherConfigFlow : IConfigFlow
 			string s when double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed) => parsed,
 			_ => null
 		};
+	}
 }

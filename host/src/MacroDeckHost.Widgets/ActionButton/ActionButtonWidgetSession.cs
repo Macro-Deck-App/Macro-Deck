@@ -118,7 +118,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 			[UiComponentEvents.LongPress] = WidgetTriggerTypes.LongPress,
 			[UiComponentEvents.PressStart] = WidgetTriggerTypes.TouchStart,
 			[UiComponentEvents.PressEnd] = WidgetTriggerTypes.TouchEnd,
-			[UiComponentEvents.DoublePress] = WidgetTriggerTypes.DoublePress,
+			[UiComponentEvents.DoublePress] = WidgetTriggerTypes.DoublePress
 		};
 
 	/// <param name="interactive">Whether this session accepts presses at all - true only for the Widget
@@ -292,7 +292,10 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		}
 	}
 
-	public void Dispatch(UiEvent uiEvent) => Dispatch(uiEvent, null);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		Dispatch(uiEvent, null);
+	}
 
 	public void Dispatch(UiEvent uiEvent, string? originClientId)
 	{
@@ -440,7 +443,8 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		return RunAndReportAsync(triggerType, originClientId, cancellationToken);
 	}
 
-	private async Task RunAndReportAsync(string triggerType,
+	private async Task RunAndReportAsync(
+		string triggerType,
 		string? originClientId,
 		CancellationToken cancellationToken)
 	{
@@ -458,7 +462,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		// No origin device: a press dispatched through a UI session comes from a deck client, which is
 		// identified by its client id. A device origin belongs to a plugin-provided device (ADR 0068).
 		var dispatch = await _triggerService
-			.ExecuteAsync(widget, triggerType, originClientId, originDeviceId: (Guid?)null, cancellationToken)
+			.ExecuteAsync(widget, triggerType, originClientId, (Guid?)null, cancellationToken)
 			.ConfigureAwait(false);
 
 		// dispatch.Result is null when the flow outran WidgetTriggerService's own bound and was detached -
@@ -668,7 +672,8 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 				return;
 			}
 
-			var stillReferenced = _configState.Peek().AllIconReferences()
+			var stillReferenced = _configState.Peek()
+				.AllIconReferences()
 				.Any(reference => IsIconPackMatch(reference, iconId));
 
 			var current = _iconResourcesState.Peek();
@@ -695,9 +700,11 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	}
 
 	private static bool IsIconPackMatch(WidgetIconReference reference, Guid iconId)
-		=> reference.Type == WidgetIconReference.IconPackType &&
-			Guid.TryParse(reference.Reference, out var parsed) &&
-			parsed == iconId;
+	{
+		return reference.Type == WidgetIconReference.IconPackType
+			&& Guid.TryParse(reference.Reference, out var parsed)
+			&& parsed == iconId;
+	}
 
 	/// <summary>
 	/// Kicks off resolving whatever icon ids <see cref="_configState" /> currently references but this
@@ -770,7 +777,9 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	private async Task ResolveMissingIconsAsync(CancellationToken cancellationToken)
 	{
 		var known = _iconResourcesState.Peek();
-		var missing = _configState.Peek().AllIconReferences().Where(reference => !known.ContainsKey(reference))
+		var missing = _configState.Peek()
+			.AllIconReferences()
+			.Where(reference => !known.ContainsKey(reference))
 			.ToArray();
 
 		if (missing.Length == 0)

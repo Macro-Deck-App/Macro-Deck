@@ -32,6 +32,6 @@ public enum ActionParameterType
 	Image = 23,
 	KeyboardSequence = 24,
 	KeyboardCombo = 25,
-	WidgetTarget = 26,
+	WidgetTarget = 26
 }
 #pragma warning restore CA1720

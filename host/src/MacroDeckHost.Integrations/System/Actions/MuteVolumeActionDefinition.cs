@@ -38,12 +38,17 @@ internal sealed class MuteVolumeActionDefinition : IDynamicOptionsActionDefiniti
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [AudioDeviceParameter.Create()];
 
-	public IActionExecutor CreateExecutor() => new Executor(_volume);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_volume);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
+	{
+		return AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
+	}
 
 	public async Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -52,10 +57,10 @@ internal sealed class MuteVolumeActionDefinition : IDynamicOptionsActionDefiniti
 		bool? muted;
 		try
 		{
-			muted = _volume.IsSupported &&
-				AudioDeviceParameter.TryRead(parameters.GetValueOrDefault(AudioDeviceParameter.Name), out var target)
-				? await _volume.GetMuteAsync(target, cancellationToken)
-				: null;
+			muted = _volume.IsSupported
+				&& AudioDeviceParameter.TryRead(parameters.GetValueOrDefault(AudioDeviceParameter.Name), out var target)
+					? await _volume.GetMuteAsync(target, cancellationToken)
+					: null;
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
@@ -84,9 +89,9 @@ internal sealed class MuteVolumeActionDefinition : IDynamicOptionsActionDefiniti
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
 			if (!AudioDeviceParameter.TryRead(context.Parameters.GetValueOrDefault(AudioDeviceParameter.Name),
-					out var target) ||
-				await _volume.GetMuteAsync(target, context.CancellationToken) is not { } muted ||
-				!await _volume.SetMuteAsync(target, !muted, context.CancellationToken))
+					out var target)
+				|| await _volume.GetMuteAsync(target, context.CancellationToken) is not { } muted
+				|| !await _volume.SetMuteAsync(target, !muted, context.CancellationToken))
 			{
 				return ActionResult.Failed(ActionErrorCodes.Unavailable,
 					AppStrings.Integrations.System.Errors.VolumeUnavailable());

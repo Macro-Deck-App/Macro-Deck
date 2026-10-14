@@ -18,7 +18,10 @@ internal sealed class ImapConfigFlowTests
 	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+	}
 
 	[Test]
 	public void The_inbox_id_is_derived_from_the_account_and_ignores_the_case_of_server_and_username()
@@ -44,7 +47,7 @@ internal sealed class ImapConfigFlowTests
 
 		context.ConfigStore.RemoveEntry(first);
 		await _integration.ReloadEntriesAsync();
-		context.AddAccount("Work again", host: "IMAP.example.com");
+		context.AddAccount("Work again", "IMAP.example.com");
 		await _integration.ReloadEntriesAsync();
 
 		Assert.That(_integration.GetInboxes().Single().Id, Is.EqualTo(before));
@@ -63,16 +66,17 @@ internal sealed class ImapConfigFlowTests
 				[ImapConfigKeys.Port] = 70000d
 			},
 			new TestFlowContext(),
-			default);
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
-			Assert.That(result.FieldErrors!.Keys, Is.EquivalentTo(new[]
-			{
-				ImapConfigKeys.ConfigurationName, ImapConfigKeys.Host, ImapConfigKeys.Port, ImapConfigKeys.Username,
-				ImapConfigKeys.Password
-			}));
+			Assert.That(result.FieldErrors!.Keys,
+				Is.EquivalentTo(new[]
+				{
+					ImapConfigKeys.ConfigurationName, ImapConfigKeys.Host, ImapConfigKeys.Port, ImapConfigKeys.Username,
+					ImapConfigKeys.Password
+				}));
 			Assert.That(_server.SessionsCreated, Is.Zero);
 		});
 	}
@@ -87,7 +91,7 @@ internal sealed class ImapConfigFlowTests
 		_server.MissingFolder = failure == nameof(FakeImapServer.MissingFolder);
 
 		var result = await _integration.CreateConfigFlow()
-			.SubmitAsync(ImapConfigFlow.StepId, ValidInput(), new TestFlowContext(), default);
+			.SubmitAsync(ImapConfigFlow.StepId, ValidInput(), new TestFlowContext(), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -103,7 +107,7 @@ internal sealed class ImapConfigFlowTests
 		_server.Unreachable = true;
 
 		var result = await _integration.CreateConfigFlow()
-			.SubmitAsync(ImapConfigFlow.StepId, ValidInput(), new TestFlowContext(), default);
+			.SubmitAsync(ImapConfigFlow.StepId, ValidInput(), new TestFlowContext(), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -121,7 +125,7 @@ internal sealed class ImapConfigFlowTests
 		input.Remove(ImapConfigKeys.Port);
 
 		var result = await _integration.CreateConfigFlow()
-			.SubmitAsync(ImapConfigFlow.StepId, input, new TestFlowContext(), default);
+			.SubmitAsync(ImapConfigFlow.StepId, input, new TestFlowContext(), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -191,7 +195,7 @@ internal sealed class ImapConfigFlowTests
 		input[ImapConfigKeys.Provider] = provider;
 
 		var result = await _integration.CreateConfigFlow()
-			.SubmitAsync(ImapConfigFlow.StepId, input, new TestFlowContext(), default);
+			.SubmitAsync(ImapConfigFlow.StepId, input, new TestFlowContext(), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -217,9 +221,9 @@ internal sealed class ImapConfigFlowTests
 		custom[ImapConfigKeys.Security] = ImapConfigKeys.SecuritySslTls;
 
 		var fromPreset = await _integration.CreateConfigFlow()
-			.SubmitAsync(ImapConfigFlow.StepId, preset, new TestFlowContext(), default);
+			.SubmitAsync(ImapConfigFlow.StepId, preset, new TestFlowContext(), CancellationToken.None);
 		var fromCustom = await _integration.CreateConfigFlow()
-			.SubmitAsync(ImapConfigFlow.StepId, custom, new TestFlowContext(), default);
+			.SubmitAsync(ImapConfigFlow.StepId, custom, new TestFlowContext(), CancellationToken.None);
 
 		Assert.That(ImapInboxId.FromValues(Stored(fromPreset)), Is.EqualTo(ImapInboxId.FromValues(Stored(fromCustom))));
 	}
@@ -236,7 +240,7 @@ internal sealed class ImapConfigFlowTests
 					[ImapConfigKeys.Port] = 70000d
 				},
 				new TestFlowContext(),
-				default);
+				CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -262,7 +266,7 @@ internal sealed class ImapConfigFlowTests
 		input[ImapConfigKeys.Security] = security;
 
 		var result = await _integration.CreateConfigFlow()
-			.SubmitAsync(ImapConfigFlow.StepId, input, new TestFlowContext(), default);
+			.SubmitAsync(ImapConfigFlow.StepId, input, new TestFlowContext(), CancellationToken.None);
 
 		Assert.That(result.Values![ImapConfigKeys.Provider].Value, Is.EqualTo(expectedProvider));
 	}
@@ -270,7 +274,7 @@ internal sealed class ImapConfigFlowTests
 	[Test]
 	public async Task The_server_fields_are_shown_only_for_a_custom_server()
 	{
-		var result = await _integration.CreateConfigFlow().StartAsync(new TestFlowContext(), default);
+		var result = await _integration.CreateConfigFlow().StartAsync(new TestFlowContext(), CancellationToken.None);
 		var fields = result.NextStep!.Fields.ToDictionary(field => field.Name);
 		var provider = fields[ImapConfigKeys.Provider];
 
@@ -278,15 +282,19 @@ internal sealed class ImapConfigFlowTests
 		{
 			Assert.That(result.NextStep.Fields[1].Name, Is.EqualTo(ImapConfigKeys.Provider));
 			Assert.That(provider.DefaultValue, Is.EqualTo(ImapConfigKeys.ProviderCustom));
-			Assert.That(provider.Options!.Select(option => option.Value), Is.EqualTo(new[]
-			{
-				ImapConfigKeys.ProviderCustom, "gmail", "icloud", "yahoo", "aol", "fastmail", "zoho", "zoho-eu", "gmx",
-				"web-de", "t-online", "ionos", "mailbox-org", "posteo"
-			}));
+			Assert.That(provider.Options!.Select(option => option.Value),
+				Is.EqualTo(new[]
+				{
+					ImapConfigKeys.ProviderCustom, "gmail", "icloud", "yahoo", "aol", "fastmail", "zoho", "zoho-eu",
+					"gmx",
+					"web-de", "t-online", "ionos", "mailbox-org", "posteo"
+				}));
 			foreach (var name in new[] { ImapConfigKeys.Host, ImapConfigKeys.Port, ImapConfigKeys.Security })
 			{
 				Assert.That(fields[name].VisibleWhen?.ParameterName, Is.EqualTo(ImapConfigKeys.Provider), name);
-				Assert.That(fields[name].VisibleWhen?.Values, Is.EqualTo(new[] { ImapConfigKeys.ProviderCustom }), name);
+				Assert.That(fields[name].VisibleWhen?.Values,
+					Is.EqualTo(new[] { ImapConfigKeys.ProviderCustom }),
+					name);
 			}
 
 			foreach (var name in new[]
@@ -300,10 +308,14 @@ internal sealed class ImapConfigFlowTests
 	}
 
 	private static Dictionary<string, JsonElement> Stored(ConfigFlowResult result)
-		=> result.Values!.ToDictionary(value => value.Key, value => JsonSerializer.SerializeToElement(value.Value.Value));
+	{
+		return result.Values!.ToDictionary(value => value.Key,
+			value => JsonSerializer.SerializeToElement(value.Value.Value));
+	}
 
 	private static Dictionary<string, object?> ValidInput()
-		=> new()
+	{
+		return new Dictionary<string, object?>
 		{
 			[ImapConfigKeys.ConfigurationName] = "Work",
 			[ImapConfigKeys.Provider] = ImapConfigKeys.ProviderCustom,
@@ -314,9 +326,11 @@ internal sealed class ImapConfigFlowTests
 			[ImapConfigKeys.Password] = "app-password",
 			[ImapConfigKeys.Folder] = "INBOX"
 		};
+	}
 
 	private static StoredConfigEntry StoredEntry(Guid id, string username)
-		=> new()
+	{
+		return new StoredConfigEntry
 		{
 			Id = id,
 			Title = "Work",
@@ -328,4 +342,5 @@ internal sealed class ImapConfigFlowTests
 				[ImapConfigKeys.Folder] = JsonSerializer.SerializeToElement("INBOX")
 			}
 		};
+	}
 }

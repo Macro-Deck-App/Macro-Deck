@@ -37,7 +37,7 @@ internal static class MacOsHourCycleReader
 
 	public static string? Read()
 	{
-		var anyApplication = MacOsCoreFoundation.CreateCFString("kCFPreferencesAnyApplication");
+		var anyApplication = MacOsCoreFoundation.CreateCfString("kCFPreferencesAnyApplication");
 		try
 		{
 			MacOsCoreFoundation.CFPreferencesAppSynchronize(anyApplication);
@@ -62,7 +62,7 @@ internal static class MacOsHourCycleReader
 
 	private static bool IsSet(string key, IntPtr application)
 	{
-		var name = MacOsCoreFoundation.CreateCFString(key);
+		var name = MacOsCoreFoundation.CreateCfString(key);
 		try
 		{
 			return MacOsCoreFoundation.CFPreferencesGetAppBooleanValue(name, application, IntPtr.Zero);
@@ -75,13 +75,13 @@ internal static class MacOsHourCycleReader
 
 	private static string? ShortTimePattern(IntPtr application)
 	{
-		var key = MacOsCoreFoundation.CreateCFString("AppleLocale");
+		var key = MacOsCoreFoundation.CreateCfString("AppleLocale");
 		var identifier = MacOsCoreFoundation.CFPreferencesCopyAppValue(key, application);
 		MacOsCoreFoundation.CFRelease(key);
 
 		// CFLocaleCopyCurrent is cached for the process, so the stored identifier is preferred to see a
 		// region change made while the host runs.
-		var locale = identifier != IntPtr.Zero && MacOsCoreFoundation.IsCFString(identifier)
+		var locale = identifier != IntPtr.Zero && MacOsCoreFoundation.IsCfString(identifier)
 			? MacOsCoreFoundation.CFLocaleCreate(IntPtr.Zero, identifier)
 			: MacOsCoreFoundation.CFLocaleCopyCurrent();
 		if (identifier != IntPtr.Zero)
@@ -103,7 +103,7 @@ internal static class MacOsHourCycleReader
 
 		try
 		{
-			return MacOsCoreFoundation.ReadCFString(MacOsCoreFoundation.CFDateFormatterGetFormat(formatter));
+			return MacOsCoreFoundation.ReadCfString(MacOsCoreFoundation.CFDateFormatterGetFormat(formatter));
 		}
 		finally
 		{
@@ -140,7 +140,10 @@ internal sealed class LinuxHourCycleReader
 	private long? _gnomeReadAtMs;
 	private string? _gnomePattern;
 
-	public string? Read() => CachedGnomeClockFormat() ?? LocalePattern();
+	public string? Read()
+	{
+		return CachedGnomeClockFormat() ?? LocalePattern();
+	}
 
 	private string? CachedGnomeClockFormat()
 	{
@@ -169,7 +172,7 @@ internal sealed class LinuxHourCycleReader
 
 		try
 		{
-			return CultureInfo.GetCultureInfo(name, predefinedOnly: true).DateTimeFormat.ShortTimePattern;
+			return CultureInfo.GetCultureInfo(name, true).DateTimeFormat.ShortTimePattern;
 		}
 		catch (CultureNotFoundException)
 		{
@@ -214,7 +217,7 @@ internal sealed class LinuxHourCycleReader
 			var output = process.StandardOutput.ReadToEndAsync();
 			if (!process.WaitForExit(_gsettingsTimeout))
 			{
-				process.Kill(entireProcessTree: true);
+				process.Kill(true);
 				return null;
 			}
 

@@ -13,9 +13,10 @@ namespace MacroDeckHost.Widgets.EmailInbox;
 
 internal static class EmailInboxWidgetConfigViews
 {
-	private const UiWidgetAppearanceFields _appearance = UiWidgetAppearanceFields.Border |
-		UiWidgetAppearanceFields.BackgroundColor | UiWidgetAppearanceFields.TransparentBackground |
-		UiWidgetAppearanceFields.ColorVariables;
+	private const UiWidgetAppearanceFields Appearance = UiWidgetAppearanceFields.Border
+		| UiWidgetAppearanceFields.BackgroundColor
+		| UiWidgetAppearanceFields.TransparentBackground
+		| UiWidgetAppearanceFields.ColorVariables;
 
 	public static UiElement Build(JsonElement data, IEmailInboxCache cache)
 	{
@@ -46,20 +47,21 @@ internal static class EmailInboxWidgetConfigViews
 					{
 						Key = EmailWidgetTypes.InboxesKey,
 						Label = Strings.Inboxes(),
-						Description = snapshot.Inboxes.Count == 0 ? Strings.NoInboxesHint() : Strings.InboxesDescription(),
+						Description = snapshot.Inboxes.Count == 0
+							? Strings.NoInboxesHint()
+							: Strings.InboxesDescription(),
 						Binding = Bind.To(inboxes),
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(InboxOptions(snapshot)),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>(InboxOptions(snapshot))
 					},
 					new UiChoiceInput
 					{
 						Key = EmailWidgetTypes.ModeKey,
 						Label = Strings.Mode(),
 						Binding = Bind.To(mode),
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of(EmailWidgetTypes.ModeCount, Strings.ModeCount()),
-							UiOption.Of(EmailWidgetTypes.ModeList, Strings.ModeList()),
-						]),
+							UiOption.Of(EmailWidgetTypes.ModeList, Strings.ModeList())
+						])
 					},
 					new UiHeading { Key = "display-heading", Text = AppStrings.Widgets.Editor.Display() },
 					new UiBooleanInput
@@ -67,7 +69,7 @@ internal static class EmailInboxWidgetConfigViews
 						Key = EmailWidgetTypes.UnreadOnlyKey,
 						Label = Strings.UnreadOnly(),
 						Binding = Bind.To(unreadOnly),
-						VisibleWhen = ForList(mode),
+						VisibleWhen = ForList(mode)
 					},
 					new UiNumberInput
 					{
@@ -78,40 +80,46 @@ internal static class EmailInboxWidgetConfigViews
 						Min = EmailWidgetTypes.MinMessages,
 						Max = EmailWidgetTypes.MaxMessages,
 						Step = 1,
-						VisibleWhen = ForList(mode),
+						VisibleWhen = ForList(mode)
 					},
 					Toggle(EmailWidgetTypes.ShowSenderKey, Strings.ShowSender(), showSender, mode),
 					Toggle(EmailWidgetTypes.ShowSubjectKey, Strings.ShowSubject(), showSubject, mode),
 					Toggle(EmailWidgetTypes.ShowPreviewKey, Strings.ShowPreview(), showPreview, mode),
 					Toggle(EmailWidgetTypes.ShowTimestampKey, Strings.ShowTimestamp(), showTimestamp, mode),
-					UiWidgetAppearance.Section(data, _appearance),
-				],
+					UiWidgetAppearance.Section(data, Appearance)
+				]
 			},
-			Editor = WidgetConfigFragments.FlowsEditor(flows),
+			Editor = WidgetConfigFragments.FlowsEditor(flows)
 		};
 	}
 
 	private static UiBooleanInput Toggle(string key, LocalizedText label, UiState<bool> value, UiState<string> mode)
-		=> new() { Key = key, Label = label, Binding = Bind.To(value), VisibleWhen = ForList(mode) };
+	{
+		return new UiBooleanInput { Key = key, Label = label, Binding = Bind.To(value), VisibleWhen = ForList(mode) };
+	}
 
 	private static UiVisibleWhen ForList(UiState<string> mode)
-		=> new()
+	{
+		return new UiVisibleWhen
 		{
 			ParameterName = EmailWidgetTypes.ModeKey,
 			Values = [EmailWidgetTypes.ModeList],
-			SiblingValue = () => mode.Value,
+			SiblingValue = () => mode.Value
 		};
+	}
 
 	private static List<UiOption> InboxOptions(EmailInboxesSnapshot snapshot)
-		=>
+	{
+		return
 		[
 			.. snapshot.Inboxes.Select(state => new UiOption
 			{
 				Value = state.Ref,
 				Label = state.Inbox.ProviderName.IsEmpty
 					? state.Inbox.DisplayName
-					: AppStrings.Events.Email.InboxOption(inbox: state.Inbox.DisplayName,
-						provider: state.Inbox.ProviderName),
-			}),
+					: AppStrings.Events.Email.InboxOption(state.Inbox.DisplayName,
+						state.Inbox.ProviderName)
+			})
 		];
+	}
 }

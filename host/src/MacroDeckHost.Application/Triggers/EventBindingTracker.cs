@@ -34,7 +34,9 @@ public sealed class EventBindingTracker : IEventBindingTracker, IDisposable
 	}
 
 	public IReadOnlyList<EventBindingDto> BindingsFor(string providerId)
-		=> [.. _index.FindByProvider(providerId).Select(ToDto)];
+	{
+		return [.. _index.FindByProvider(providerId).Select(ToDto)];
+	}
 
 	public IDisposable Subscribe(Func<string, IReadOnlyList<EventBindingDto>, Task> onChanged)
 	{
@@ -54,7 +56,10 @@ public sealed class EventBindingTracker : IEventBindingTracker, IDisposable
 		}
 	}
 
-	public void Dispose() => _index.Changed -= OnIndexChanged;
+	public void Dispose()
+	{
+		_index.Changed -= OnIndexChanged;
+	}
 
 	// Raised under the index's write lock, so nothing but the wake-up happens here.
 	private void OnIndexChanged()

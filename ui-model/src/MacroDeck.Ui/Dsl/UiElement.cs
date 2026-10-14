@@ -44,10 +44,10 @@ public abstract record UiElement
 
 		var names = DeclaredEvents;
 
-		properties.Set(_eventsProperty,
+		properties.Set(EventsProperty,
 			names.Count == 0 ? UiValue.None<IReadOnlyList<string>>() : UiValue.Of(names));
 
-		properties.Set(_rowWeightProperty, RowWeight);
+		properties.Set(RowWeightProperty, RowWeight);
 	}
 
 	/// <summary>Accepted event names in advertised order without duplicates.</summary>
@@ -74,8 +74,8 @@ public abstract record UiElement
 		}
 	}
 
-	private const string _eventsProperty = "events";
-	private const string _rowWeightProperty = "rowWeight";
+	private const string EventsProperty = "events";
+	private const string RowWeightProperty = "rowWeight";
 }
 
 /// <summary>An element that emits one childless node.</summary>

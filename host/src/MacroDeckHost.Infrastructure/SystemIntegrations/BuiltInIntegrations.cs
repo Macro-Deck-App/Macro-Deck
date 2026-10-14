@@ -10,9 +10,11 @@ public static class BuiltInIntegrations
 	public static IReadOnlyList<Assembly> Assemblies { get; } =
 	[
 		typeof(IntegrationDiscovery).Assembly,
-		typeof(BuiltInIntegrations).Assembly,
+		typeof(BuiltInIntegrations).Assembly
 	];
 
 	public static IReadOnlyList<IIntegration> Discover(ILogger logger)
-		=> IntegrationDiscovery.DiscoverIntegrations(Assemblies, logger);
+	{
+		return IntegrationDiscovery.DiscoverIntegrations(Assemblies, logger);
+	}
 }

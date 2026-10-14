@@ -26,7 +26,9 @@ public class VideoStreamWireDescriptionTests
 	];
 
 	private static VideoStreamSessionDescriptionDto Dto(string transport, string? url)
-		=> new() { Transport = transport, Url = url };
+	{
+		return new VideoStreamSessionDescriptionDto { Transport = transport, Url = url };
+	}
 
 	[Test]
 	public void A_description_the_sdk_builds_is_structurally_valid_and_round_trips()
@@ -53,14 +55,17 @@ public class VideoStreamWireDescriptionTests
 			var factoryAccepts = Accepts(() => VideoStreamSessionDescription.Hls(url));
 			var wireAccepts = VideoStreamWire.ValidateDescription(Dto("hls", url)) is null;
 
-			Assert.That(wireAccepts, Is.EqualTo(factoryAccepts), url.Length > 80 ? $"a url of {url.Length} characters" : url);
+			Assert.That(wireAccepts,
+				Is.EqualTo(factoryAccepts),
+				url.Length > 80 ? $"a url of {url.Length} characters" : url);
 		}
 	}
 
 	[Test]
 	public void The_wire_check_and_the_sdk_factory_agree_on_every_transport_token()
 	{
-		foreach (var transport in new[] { "hls", "x-dash+http.v2", "HLS", "", "h ls", new string('a', 32), new string('a', 33) })
+		foreach (var transport in new[]
+			{ "hls", "x-dash+http.v2", "HLS", "", "h ls", new string('a', 32), new string('a', 33) })
 		{
 			var factoryAccepts = Accepts(() => VideoStreamSessionDescription.FromUrl(transport, "http://127.0.0.1/a"));
 			var wireAccepts = VideoStreamWire.ValidateDescription(Dto(transport, "http://127.0.0.1/a")) is null;
@@ -72,7 +77,9 @@ public class VideoStreamWireDescriptionTests
 	[TestCase("hls")]
 	[TestCase("mjpeg")]
 	public void A_url_is_required_for_the_transports_that_play_from_one(string transport)
-		=> Assert.That(VideoStreamWire.ValidateDescription(Dto(transport, null)), Is.Not.Null);
+	{
+		Assert.That(VideoStreamWire.ValidateDescription(Dto(transport, null)), Is.Not.Null);
+	}
 
 	[Test]
 	public void Whether_the_host_plays_a_transport_is_not_decided_by_the_structural_check()
@@ -86,7 +93,9 @@ public class VideoStreamWireDescriptionTests
 
 	[Test]
 	public void A_missing_description_is_not_valid()
-		=> Assert.That(VideoStreamWire.ValidateDescription(null), Is.Not.Null);
+	{
+		Assert.That(VideoStreamWire.ValidateDescription(null), Is.Not.Null);
+	}
 
 	private static bool Accepts(Func<VideoStreamSessionDescription> create)
 	{

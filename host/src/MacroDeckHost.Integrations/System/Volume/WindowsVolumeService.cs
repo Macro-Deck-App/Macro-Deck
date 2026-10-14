@@ -83,30 +83,41 @@ internal sealed class WindowsVolumeService : IVolumeService
 	}
 
 	public Task<float?> GetVolumeAsync(AudioTarget target, CancellationToken cancellationToken = default)
-		=> Task.FromResult(WithEndpoint(target,
+	{
+		return Task.FromResult(WithEndpoint(target,
 			endpoint => Succeeded(endpoint.GetMasterVolumeLevelScalar(out var level))
 				? Math.Clamp(level, 0f, 1f)
 				: (float?)null));
+	}
 
 	public Task<bool> SetVolumeAsync(AudioTarget target, float level, CancellationToken cancellationToken = default)
-		=> Task.FromResult(WithEndpoint(target,
-			endpoint =>
-			{
-				var context = Guid.Empty;
-				return (bool?)Succeeded(endpoint.SetMasterVolumeLevelScalar(Math.Clamp(level, 0f, 1f), ref context));
-			}) ?? false);
+	{
+		return Task.FromResult(WithEndpoint(target,
+				endpoint =>
+				{
+					var context = Guid.Empty;
+					return (bool?)Succeeded(
+						endpoint.SetMasterVolumeLevelScalar(Math.Clamp(level, 0f, 1f), ref context));
+				})
+			?? false);
+	}
 
 	public Task<bool?> GetMuteAsync(AudioTarget target, CancellationToken cancellationToken = default)
-		=> Task.FromResult(WithEndpoint(target,
+	{
+		return Task.FromResult(WithEndpoint(target,
 			endpoint => Succeeded(endpoint.GetMute(out var mute)) ? mute : (bool?)null));
+	}
 
 	public Task<bool> SetMuteAsync(AudioTarget target, bool mute, CancellationToken cancellationToken = default)
-		=> Task.FromResult(WithEndpoint(target,
-			endpoint =>
-			{
-				var context = Guid.Empty;
-				return (bool?)Succeeded(endpoint.SetMute(mute, ref context));
-			}) ?? false);
+	{
+		return Task.FromResult(WithEndpoint(target,
+				endpoint =>
+				{
+					var context = Guid.Empty;
+					return (bool?)Succeeded(endpoint.SetMute(mute, ref context));
+				})
+			?? false);
+	}
 
 	private void Arm()
 	{
@@ -160,8 +171,7 @@ internal sealed class WindowsVolumeService : IVolumeService
 			Marshal.ThrowExceptionForHR(hr);
 			try
 			{
-				if (target.DeviceId is not null &&
-					(device.GetState(out var state) != 0 || state != DeviceStateActive))
+				if (target.DeviceId is not null && (device.GetState(out var state) != 0 || state != DeviceStateActive))
 				{
 					return null;
 				}
@@ -278,13 +288,22 @@ internal sealed class WindowsVolumeService : IVolumeService
 		}
 	}
 
-	private static IMMDeviceEnumerator CreateEnumerator() => (IMMDeviceEnumerator)(object)new MMDeviceEnumerator();
+	private static IMMDeviceEnumerator CreateEnumerator()
+	{
+		return (IMMDeviceEnumerator)(object)new MMDeviceEnumerator();
+	}
 
-	private static int DataFlow(AudioFlow flow) => flow == AudioFlow.Output ? RenderFlow : CaptureFlow;
+	private static int DataFlow(AudioFlow flow)
+	{
+		return flow == AudioFlow.Output ? RenderFlow : CaptureFlow;
+	}
 
 	// A stopped Windows Audio service answers with an unreachable RPC server, and an unplugged endpoint
 	// with not found or invalidated. None of them is a reason for a volume action to throw.
-	private static bool IsUnavailable(int hr) => hr is ErrorNotFound or RpcServerUnavailable or DeviceInvalidated;
+	private static bool IsUnavailable(int hr)
+	{
+		return hr is ErrorNotFound or RpcServerUnavailable or DeviceInvalidated;
+	}
 
 	private static bool Succeeded(int hr)
 	{

@@ -26,5 +26,7 @@ public sealed record DeviceInteractionResult
 
 	/// <summary>The host refused the interaction, naming a <see cref="DeviceSessionReasons" /> code.</summary>
 	public static DeviceInteractionResult Rejected(string reasonCode)
-		=> new() { Status = DeviceInteractionStatus.Rejected, ReasonCode = reasonCode };
+	{
+		return new DeviceInteractionResult { Status = DeviceInteractionStatus.Rejected, ReasonCode = reasonCode };
+	}
 }

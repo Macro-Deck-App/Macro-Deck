@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Net;
 using MacroDeck.Sdk.Locale;
-using MacroDeckHost.Application.Services;
 using MacroDeckHost.Integrations.Spotify;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Issues;
@@ -212,7 +211,7 @@ internal sealed class SpotifyApiLimitTests
 	{
 		var sink = new CollectingSink();
 		var http = new StubSpotifyHttpClient { Handler = _ => RateLimited(null) };
-		var player = CreatePlayer(http, logger: Collecting(sink), rateLimitPause: TimeSpan.Zero);
+		var player = CreatePlayer(http, Collecting(sink), rateLimitPause: TimeSpan.Zero);
 
 		await player.GetStateAsync();
 		await player.GetStateAsync();
@@ -220,8 +219,8 @@ internal sealed class SpotifyApiLimitTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(sink.Events.Count(e =>
-					e.Level == LogEventLevel.Warning &&
-					e.MessageTemplate.Text.Contains("temporarily closing other apps")),
+					e.Level == LogEventLevel.Warning
+					&& e.MessageTemplate.Text.Contains("temporarily closing other apps")),
 				Is.EqualTo(1));
 			Assert.That(sink.Events.Any(e =>
 					e.Level == LogEventLevel.Debug && e.MessageTemplate.Text.Contains("still limiting entry")),
@@ -238,7 +237,7 @@ internal sealed class SpotifyApiLimitTests
 		{
 			Handler = _ => limited ? RateLimited(null) : Json(HttpStatusCode.OK, PlayingTrackJson)
 		};
-		var player = CreatePlayer(http, logger: Collecting(sink), rateLimitPause: TimeSpan.Zero);
+		var player = CreatePlayer(http, Collecting(sink), rateLimitPause: TimeSpan.Zero);
 
 		await player.GetStateAsync();
 		limited = false;
@@ -483,7 +482,7 @@ internal sealed class SpotifyApiLimitTests
 		var oauth = new FakeSpotifyOAuthClient();
 		oauth.Results.Enqueue(FakeSpotifyOAuthClient.RateLimited(TimeSpan.FromMinutes(3)));
 		var http = new StubSpotifyHttpClient { Handler = _ => Json(HttpStatusCode.OK, PlayingTrackJson) };
-		var player = CreatePlayer(http, tokens: Tokens(oauth, expiresIn: TimeSpan.FromHours(-1)));
+		var player = CreatePlayer(http, tokens: Tokens(oauth, TimeSpan.FromHours(-1)));
 
 		await player.GetStateAsync();
 
@@ -537,8 +536,8 @@ internal sealed class SpotifyApiLimitTests
 
 		var rendered = string.Join('\n',
 			sink.Events.Select(logEvent =>
-				$"{logEvent.RenderMessage(global::System.Globalization.CultureInfo.InvariantCulture)} " +
-				$"{string.Join(' ', logEvent.Properties)}"));
+				$"{logEvent.RenderMessage(CultureInfo.InvariantCulture)} "
+				+ $"{string.Join(' ', logEvent.Properties)}"));
 		Assert.Multiple(() =>
 		{
 			Assert.That(sink.Events, Has.Some.Property("Level").EqualTo(LogEventLevel.Information));
@@ -573,13 +572,16 @@ internal sealed class SpotifyApiLimitTests
 	}
 
 	private static SpotifyClientConfig Config(IHTTPClient http, ISpotifyAccessTokenSource tokens)
-		=> SpotifyClientConfig.CreateDefault()
+	{
+		return SpotifyClientConfig.CreateDefault()
 			.WithAuthenticator(new SpotifyAccessTokenAuthenticator(tokens))
 			.WithHTTPClient(http)
 			.WithRetryHandler(new SpotifyRetryHandler());
+	}
 
 	private static SpotifyTokenManager Tokens(ISpotifyOAuthClient? oauth = null, TimeSpan? expiresIn = null)
-		=> new(Guid.NewGuid(),
+	{
+		return new SpotifyTokenManager(Guid.NewGuid(),
 			"client-id",
 			"client-secret",
 			SpotifyTokenSnapshot.FromStored("token",
@@ -591,9 +593,11 @@ internal sealed class SpotifyApiLimitTests
 			new LoggerConfiguration().CreateLogger(),
 			TimeSpan.FromSeconds(5),
 			TimeSpan.Zero);
+	}
 
 	private static Response RateLimited(string? retryAfter)
-		=> new(retryAfter is null
+	{
+		return new Response(retryAfter is null
 			? new Dictionary<string, string>()
 			: new Dictionary<string, string> { ["Retry-After"] = retryAfter })
 		{
@@ -601,26 +605,37 @@ internal sealed class SpotifyApiLimitTests
 			ContentType = "application/json",
 			Body = """{"error":{"status":429,"message":"rate limited"}}"""
 		};
+	}
 
 	private static Response Status(HttpStatusCode statusCode)
-		=> new(new Dictionary<string, string>()) { StatusCode = statusCode, ContentType = "application/json" };
+	{
+		return new Response(new Dictionary<string, string>())
+			{ StatusCode = statusCode, ContentType = "application/json" };
+	}
 
 	private static Response Json(HttpStatusCode statusCode, string body)
-		=> new(new Dictionary<string, string>())
+	{
+		return new Response(new Dictionary<string, string>())
 		{
 			StatusCode = statusCode,
 			ContentType = "application/json",
 			Body = body
 		};
+	}
 
 	private static Logger Collecting(CollectingSink sink)
-		=> new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
+	{
+		return new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
+	}
 
 	private sealed class CollectingSink : ILogEventSink
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 
 	private sealed class LimitedTransport : IHTTPClient
@@ -628,9 +643,11 @@ internal sealed class SpotifyApiLimitTests
 		public bool Quota { get; init; }
 
 		public Task<IResponse> DoRequest(IRequest request, CancellationToken cancel)
-			=> Task.FromResult<IResponse>(Quota
+		{
+			return Task.FromResult<IResponse>(Quota
 				? Json(HttpStatusCode.Forbidden, QuotaForbiddenBody)
 				: RateLimited("30"));
+		}
 
 		public void SetRequestTimeout(TimeSpan timeout)
 		{

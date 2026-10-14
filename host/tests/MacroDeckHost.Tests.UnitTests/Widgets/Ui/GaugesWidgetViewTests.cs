@@ -14,7 +14,8 @@ public class GaugesWidgetViewTests
 	{
 		var host = Render(Gauges(4));
 		var layout = host.SingleByType(UiComponents.Responsive);
-		var square = layout.Children.Single(child => child.Type == UiComponents.Grid && child.Number(UiComponentProperties.Columns) == 2);
+		var square = layout.Children.Single(child
+			=> child.Type == UiComponents.Grid && child.Number(UiComponentProperties.Columns) == 2);
 
 		Assert.That(square.Number(UiComponentProperties.Rows), Is.EqualTo(2));
 	}
@@ -92,7 +93,7 @@ public class GaugesWidgetViewTests
 			Title = "System",
 			Gauges = Enumerable.Range(0, 3)
 				.Select(_ => new GaugeConfig { Id = Guid.NewGuid().ToString("N"), Name = "n" })
-				.ToList(),
+				.ToList()
 		};
 
 		Assert.That(() => Render(config), Throws.Nothing);
@@ -117,7 +118,7 @@ public class GaugesWidgetViewTests
 	{
 		var tinted = Render(new GaugesWidgetData
 			{
-				Gauges = [new GaugeConfig { Id = "a", IconColor = "#34c759" }],
+				Gauges = [new GaugeConfig { Id = "a", IconColor = "#34c759" }]
 			},
 			new Dictionary<string, UiResource> { ["a"] = new() { ResourceId = "icon-a" } });
 		var button = tinted.SingleByType(UiComponents.Button);
@@ -126,9 +127,12 @@ public class GaugesWidgetViewTests
 		{
 			Assert.That(tinted.ByType(UiComponents.Image), Is.Empty);
 			Assert.That(button.Text(UiComponentProperties.Tint), Is.EqualTo("#34c759"));
-			Assert.That(button.Text(UiComponentProperties.Background), Is.EqualTo("transparent"),
+			Assert.That(button.Text(UiComponentProperties.Background),
+				Is.EqualTo("transparent"),
 				"an absent button background is the accent colour");
-			Assert.That(button.PropertyKeys, Does.Not.Contain("events"), "the tinted icon must not take the tile's press");
+			Assert.That(button.PropertyKeys,
+				Does.Not.Contain("events"),
+				"the tinted icon must not take the tile's press");
 		});
 	}
 
@@ -170,7 +174,7 @@ public class GaugesWidgetViewTests
 	{
 		var config = new GaugesWidgetData
 		{
-			Gauges = [new GaugeConfig { Id = "a", Name = "CPU" }, new GaugeConfig { Id = "b" }],
+			Gauges = [new GaugeConfig { Id = "a", Name = "CPU" }, new GaugeConfig { Id = "b" }]
 		};
 
 		var ids = Ids(Render(config).Root).ToList();
@@ -195,27 +199,34 @@ public class GaugesWidgetViewTests
 	}
 
 	private static GaugesWidgetData Gauges(int count)
-		=> new()
+	{
+		return new GaugesWidgetData
 		{
 			Gauges = Enumerable.Range(0, count)
 				.Select(index => new GaugeConfig
 					{ Id = $"g{index}", Name = $"Gauge {index}", Variable = "v" })
-				.ToList(),
+				.ToList()
 		};
+	}
 
 	private static UiTestHost Render(GaugesWidgetData config, IReadOnlyDictionary<string, UiResource>? icons = null)
 	{
-		var faces = config.Shown.Select(gauge => new UiState<GaugeFace>(GaugeFace.Empty with { Name = gauge.Name ?? string.Empty }))
+		var faces = config.Shown
+			.Select(gauge => new UiState<GaugeFace>(GaugeFace.Empty with { Name = gauge.Name ?? string.Empty }))
 			.ToList();
 
 		return UiTestHost.Render(GaugesWidgetView.Build(config, faces, icons));
 	}
 
 	private static IEnumerable<string> Ids(UiTestNode node)
-		=> new[] { node.Id }
+	{
+		return new[] { node.Id }
 			.Concat(node.Children.SelectMany(Ids))
 			.Concat(node.Fallback is { } fallback ? Ids(fallback) : []);
+	}
 
 	private static int Count(UiTestNode node)
-		=> 1 + node.Children.Sum(Count) + (node.Fallback is { } fallback ? Count(fallback) : 0);
+	{
+		return 1 + node.Children.Sum(Count) + (node.Fallback is { } fallback ? Count(fallback) : 0);
+	}
 }

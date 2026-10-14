@@ -37,13 +37,18 @@ internal sealed record PluginMergeResult
 	public PluginInstallError? ArtifactError { get; init; }
 
 	public static PluginMergeResult Packed(IReadOnlyList<string> mergedRids, PluginPackResult pack)
-		=> new() { Success = pack.Success, MergedRids = mergedRids, Pack = pack };
+	{
+		return new PluginMergeResult { Success = pack.Success, MergedRids = mergedRids, Pack = pack };
+	}
 
 	public static PluginMergeResult Fail(PluginMergeFailureReason reason, string message)
-		=> new() { Success = false, FailureReason = reason, FailureMessage = message };
+	{
+		return new PluginMergeResult { Success = false, FailureReason = reason, FailureMessage = message };
+	}
 
 	public static PluginMergeResult Rejected(string artifactPath, PluginInstallError error, string? message)
-		=> new()
+	{
+		return new PluginMergeResult
 		{
 			Success = false,
 			FailureReason = PluginMergeFailureReason.ArtifactRejected,
@@ -51,4 +56,5 @@ internal sealed record PluginMergeResult
 			ArtifactPath = artifactPath,
 			ArtifactError = error
 		};
+	}
 }

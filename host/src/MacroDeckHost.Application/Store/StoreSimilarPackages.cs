@@ -19,7 +19,8 @@ public sealed class StoreSimilarPackages
 		_reviews = reviews;
 	}
 
-	public async Task<Result<IReadOnlyList<StoreCatalogItem>, StoreCatalogError>> Find(StoreExtensionKind kind,
+	public async Task<Result<IReadOnlyList<StoreCatalogItem>, StoreCatalogError>> Find(
+		StoreExtensionKind kind,
 		string id,
 		int take = DefaultTake,
 		CancellationToken cancellationToken = default)
@@ -41,8 +42,8 @@ public sealed class StoreSimilarPackages
 		var origin = source.Data!.Entry;
 		var candidates = all.Data!
 			.Where(item => item.InstallState is StoreInstallState.NotInstalled)
-			.Where(item => !(item.Entry.Kind == origin.Kind &&
-				string.Equals(item.Entry.Id, origin.Id, StringComparison.OrdinalIgnoreCase)))
+			.Where(item => !(item.Entry.Kind == origin.Kind
+				&& string.Equals(item.Entry.Id, origin.Id, StringComparison.OrdinalIgnoreCase)))
 			.Select(item => new Candidate(item,
 				item.Entry.Tags.Count(tag => origin.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase)),
 				SamePublisher(origin, item.Entry),
@@ -52,7 +53,8 @@ public sealed class StoreSimilarPackages
 
 		var installs = candidates.Count == 0
 			? null
-			: await StoreInstallCounts.Fetch(_reviews, candidates.Select(candidate => candidate.Item.Entry.Id),
+			: await StoreInstallCounts.Fetch(_reviews,
+				candidates.Select(candidate => candidate.Item.Entry.Id),
 				cancellationToken);
 
 		IReadOnlyList<StoreCatalogItem> ordered = candidates
@@ -94,10 +96,12 @@ public sealed class StoreSimilarPackages
 		}
 	}
 
-	private static bool SamePublisher(StoreCatalogEntry origin, StoreCatalogEntry candidate) =>
-		!string.IsNullOrWhiteSpace(origin.Publisher) &&
-		!string.IsNullOrWhiteSpace(candidate.Publisher) &&
-		string.Equals(origin.Publisher.Trim(), candidate.Publisher.Trim(), StringComparison.OrdinalIgnoreCase);
+	private static bool SamePublisher(StoreCatalogEntry origin, StoreCatalogEntry candidate)
+	{
+		return !string.IsNullOrWhiteSpace(origin.Publisher)
+			&& !string.IsNullOrWhiteSpace(candidate.Publisher)
+			&& string.Equals(origin.Publisher.Trim(), candidate.Publisher.Trim(), StringComparison.OrdinalIgnoreCase);
+	}
 
 	private sealed record Candidate(StoreCatalogItem Item, int SharedTags, bool SamePublisher, bool SameKind);
 }

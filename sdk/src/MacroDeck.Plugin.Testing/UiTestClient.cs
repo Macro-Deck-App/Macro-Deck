@@ -28,11 +28,13 @@ public sealed class UiTestClient
 
 	/// <summary>What the plugin declares about its UI surfaces and previews.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Ui,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Ui,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.Ui.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>The previews the plugin declares. Empty for a plugin that declares none or predates previews.</summary>
 	/// <exception cref="InvalidOperationException">The plugin failed the describe call.</exception>
@@ -107,7 +109,8 @@ public sealed class UiTestClient
 			{
 				PreviewId = previewId,
 				Accepted = false,
-				FailureReason = result?.RejectionReason ?? opened.Error?.Message ?? "The plugin did not answer the open."
+				FailureReason = result?.RejectionReason
+					?? opened.Error?.Message ?? "The plugin did not answer the open."
 			};
 		}
 
@@ -159,6 +162,7 @@ public sealed class UiTestClient
 		ArgumentException.ThrowIfNullOrEmpty(resourceId);
 
 		return _connection.UiResources.Resources.Values
-			.FirstOrDefault(resource => string.Equals(resource.Handle.ResourceId, resourceId, StringComparison.Ordinal));
+			.FirstOrDefault(resource
+				=> string.Equals(resource.Handle.ResourceId, resourceId, StringComparison.Ordinal));
 	}
 }

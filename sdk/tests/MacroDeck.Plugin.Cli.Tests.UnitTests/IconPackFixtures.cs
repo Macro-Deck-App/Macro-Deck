@@ -6,7 +6,8 @@ namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 
 internal static class IconPackFixtures
 {
-	public static void Write(string path,
+	public static void Write(
+		string path,
 		string name,
 		IReadOnlyList<string> iconNames,
 		JsonObject? ai = null,
@@ -53,5 +54,7 @@ internal static class IconPackFixtures
 	}
 
 	public static JsonDocument ReadManifest(string projectDirectory)
-		=> JsonDocument.Parse(File.ReadAllText(Path.Combine(projectDirectory, "manifest.json")));
+	{
+		return JsonDocument.Parse(File.ReadAllText(Path.Combine(projectDirectory, "manifest.json")));
+	}
 }

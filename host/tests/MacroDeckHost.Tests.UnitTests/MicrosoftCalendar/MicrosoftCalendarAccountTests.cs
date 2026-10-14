@@ -22,7 +22,10 @@ internal sealed class MicrosoftCalendarAccountTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Several_accounts_are_offered_side_by_side_under_their_entries()
@@ -55,8 +58,10 @@ internal sealed class MicrosoftCalendarAccountTests
 			Assert.That(refresh, Does.Not.ContainKey("client_secret"), "a public client has no secret");
 			Assert.That(refresh["scope"].Split(' '), Does.Contain("offline_access"));
 			Assert.That(_harness.Server.To("/v1.0/").Select(r => r.Authorization), Is.All.EqualTo("Bearer access-1"));
-			Assert.That(_harness.Config.Secrets[(entry, MicrosoftCalendarConfigKeys.AccessToken)], Is.EqualTo("access-1"));
-			Assert.That(_harness.Config.Secrets[(entry, MicrosoftCalendarConfigKeys.RefreshToken)], Is.EqualTo("refresh-1"));
+			Assert.That(_harness.Config.Secrets[(entry, MicrosoftCalendarConfigKeys.AccessToken)],
+				Is.EqualTo("access-1"));
+			Assert.That(_harness.Config.Secrets[(entry, MicrosoftCalendarConfigKeys.RefreshToken)],
+				Is.EqualTo("refresh-1"));
 			Assert.That(_harness.Config.WriteOrder.IndexOf(MicrosoftCalendarConfigKeys.RefreshToken),
 				Is.LessThan(_harness.Config.WriteOrder.IndexOf(MicrosoftCalendarConfigKeys.AccessToken)),
 				"the rotated refresh token is stored first");
@@ -87,7 +92,8 @@ internal sealed class MicrosoftCalendarAccountTests
 	{
 		var entry = _harness.AddAccount(Email, expiresIn: TimeSpan.Zero);
 		_harness.Config.Strings[(entry, MicrosoftCalendarConfigKeys.ClientId)] = "";
-		_harness.Config.Strings[(entry, MicrosoftCalendarConfigKeys.SignInClientId)] = "99999999-8888-7777-6666-555555555555";
+		_harness.Config.Strings[(entry, MicrosoftCalendarConfigKeys.SignInClientId)]
+			= "99999999-8888-7777-6666-555555555555";
 		_harness.Config.Strings[(entry, MicrosoftCalendarConfigKeys.SignInTenant)] = "consumers";
 		_harness.Server.On(r => r.Uri.AbsolutePath == "/consumers/oauth2/v2.0/token",
 			HttpStatusCode.OK,
@@ -116,7 +122,8 @@ internal sealed class MicrosoftCalendarAccountTests
 	{
 		var entry = _harness.AddAccount(Email);
 		_harness.Server
-			.On(r => r.Uri.AbsolutePath == MicrosoftCalendarHarness.CalendarsPath && r.Authorization == "Bearer access-0",
+			.On(r => r.Uri.AbsolutePath == MicrosoftCalendarHarness.CalendarsPath
+					&& r.Authorization == "Bearer access-0",
 				HttpStatusCode.Unauthorized,
 				"""{"error":{"code":"InvalidAuthenticationToken","message":"Access token has expired."}}""")
 			.On(r => r.Uri.AbsolutePath == MicrosoftCalendarHarness.TokenPath,
@@ -152,7 +159,8 @@ internal sealed class MicrosoftCalendarAccountTests
 			Assert.That(TestLocalization.Resolve(issue.Title), Does.Contain(Email));
 			Assert.That(resolution.FollowUp, Is.EqualTo(IssueResolutionFollowUp.StartConfigFlow));
 			Assert.ThrowsAsync<MicrosoftOAuthRejectedException>(() => ReadAsync(entry));
-			Assert.That(_harness.Server.To(MicrosoftCalendarHarness.TokenPath), Has.Count.EqualTo(1),
+			Assert.That(_harness.Server.To(MicrosoftCalendarHarness.TokenPath),
+				Has.Count.EqualTo(1),
 				"a refused sign-in is not retried");
 		});
 	}
@@ -173,7 +181,9 @@ internal sealed class MicrosoftCalendarAccountTests
 	[Test]
 	public async Task The_newest_connection_of_an_account_wins_and_the_older_one_is_flagged()
 	{
-		_harness.AddAccount(Email, title: "Old connection", accountKey: "tid/oid",
+		_harness.AddAccount(Email,
+			title: "Old connection",
+			accountKey: "tid/oid",
 			connectedAt: _harness.Time.Now - TimeSpan.FromDays(3));
 		var newer = _harness.AddAccount(Email, title: "New connection", accountKey: "tid/oid");
 		await _harness.StartAsync();
@@ -182,7 +192,8 @@ internal sealed class MicrosoftCalendarAccountTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_harness.Integration.GetAccounts().Select(a => a.Id), Is.EqualTo(new[] { newer.ToString("D") }));
+			Assert.That(_harness.Integration.GetAccounts().Select(a => a.Id),
+				Is.EqualTo(new[] { newer.ToString("D") }));
 			Assert.That(issue.Severity, Is.EqualTo(IntegrationIssueSeverity.Warning));
 			Assert.That(TestLocalization.Resolve(issue.Description), Does.Contain("Old connection"));
 		});
@@ -190,15 +201,19 @@ internal sealed class MicrosoftCalendarAccountTests
 
 	[Test]
 	public void An_unknown_account_is_a_failure()
-		=> Assert.ThrowsAsync<InvalidOperationException>(() => _harness.Integration.GetCalendarsAsync("nope",
+	{
+		Assert.ThrowsAsync<InvalidOperationException>(() => _harness.Integration.GetCalendarsAsync("nope",
 			CancellationToken.None));
+	}
 
 	private Task<IReadOnlyList<CalendarEvent>> ReadAsync(Guid entry)
-		=> _harness.Integration.GetEventsAsync(entry.ToString("D"),
+	{
+		return _harness.Integration.GetEventsAsync(entry.ToString("D"),
 			new CalendarEventQuery
 			{
 				From = _harness.Time.Now,
 				To = _harness.Time.Now + TimeSpan.FromDays(1)
 			},
 			CancellationToken.None);
+	}
 }

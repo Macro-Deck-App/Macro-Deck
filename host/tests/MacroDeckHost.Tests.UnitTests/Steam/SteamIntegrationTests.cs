@@ -10,16 +10,12 @@ using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Steam;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.Integrations;
 using MacroDeckHost.Tests.UnitTests.System;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Integrations.Steam.Widgets;
-using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -40,13 +36,17 @@ internal sealed class SteamIntegrationTests
 		_folders = new SteamFolders();
 		var steam = _folders.Make("Steam");
 		SteamFolders.WriteManifest(steam, 730, "Counter-Strike 2");
-		_platform = new FakeSteamPlatform { Os = SteamOs.Windows, HomeDirectory = _folders.Root, RegistrySteamPath = steam };
+		_platform = new FakeSteamPlatform
+			{ Os = SteamOs.Windows, HomeDirectory = _folders.Root, RegistrySteamPath = steam };
 		_applications = new FakeApplicationService();
 		_clientKeys = [];
 	}
 
 	[TearDown]
-	public void TearDown() => _folders.Dispose();
+	public void TearDown()
+	{
+		_folders.Dispose();
+	}
 
 	[Test]
 	public void It_is_shipped_with_a_stable_id_and_is_found_by_discovery()
@@ -94,7 +94,9 @@ internal sealed class SteamIntegrationTests
 			Assert.That(integration.Snapshot.SteamFound, Is.True);
 			Assert.That(integration.Snapshot.Games, Has.Count.EqualTo(1));
 			Assert.That(integration.Snapshot.Accounts, Is.Empty);
-			Assert.That(integration.Variables, Is.Empty, "variables exist per configuration, so there are none without one");
+			Assert.That(integration.Variables,
+				Is.Empty,
+				"variables exist per configuration, so there are none without one");
 			Assert.That(_clientKeys, Is.Empty);
 		});
 
@@ -108,10 +110,11 @@ internal sealed class SteamIntegrationTests
 		SteamFolders.WriteManifest(extra, 220, "Half-Life 2");
 		var context = new FakeContext();
 		context.Add(new Dictionary<string, string?>
-		{
-			["steamId"] = "76561198000000001",
-			["libraryFolders"] = extra
-		}, secret: "KEY123");
+			{
+				["steamId"] = "76561198000000001",
+				["libraryFolders"] = extra
+			},
+			"KEY123");
 		var integration = Integration();
 
 		await integration.InitializeAsync(context);
@@ -130,11 +133,11 @@ internal sealed class SteamIntegrationTests
 	{
 		var context = new FakeContext();
 		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000001", ["variableKey"] = "main" },
-			secret: "KEY-A",
-			title: "Main");
+			"KEY-A",
+			"Main");
 		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000002", ["variableKey"] = "alt" },
-			secret: "KEY-B",
-			title: "Alt");
+			"KEY-B",
+			"Alt");
 		var integration = Integration();
 
 		await integration.InitializeAsync(context);
@@ -143,7 +146,8 @@ internal sealed class SteamIntegrationTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_clientKeys, Is.EquivalentTo(new[] { "KEY-A", "KEY-B" }));
-			Assert.That(integration.Snapshot.Accounts.Select(account => account.Title), Is.EqualTo(new[] { "Main", "Alt" }));
+			Assert.That(integration.Snapshot.Accounts.Select(account => account.Title),
+				Is.EqualTo(new[] { "Main", "Alt" }));
 			Assert.That(names, Does.Contain("steam_main_is_playing"));
 			Assert.That(names, Does.Not.Contain("steam_is_playing"), "there is no variable without an account name");
 			Assert.That(names, Does.Contain("steam_alt_current_game_name"));
@@ -158,21 +162,23 @@ internal sealed class SteamIntegrationTests
 	public async Task Two_accounts_whose_names_slug_alike_still_get_distinct_variable_keys()
 	{
 		var context = new FakeContext();
-		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000001" }, secret: "A", title: "Main");
-		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000002" }, secret: "B", title: "main");
+		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000001" }, "A", "Main");
+		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000002" }, "B", "main");
 		var integration = Integration();
 
 		await integration.InitializeAsync(context);
 
 		Assert.That(new[] { context.Stored(0, "variableKey"), context.Stored(1, "variableKey") },
-			Is.EqualTo(new[] { "main", "main_2" }), "the resolved keys are stored so they survive deleting a sibling");
+			Is.EqualTo(new[] { "main", "main_2" }),
+			"the resolved keys are stored so they survive deleting a sibling");
 
 		var prefixes = integration.Variables.Select(definition => definition.Name!)
 			.Where(name => name.EndsWith("_friends_online", StringComparison.Ordinal))
 			.ToList();
 		Assert.Multiple(() =>
 		{
-			Assert.That(prefixes, Is.EquivalentTo(new[] { "steam_main_friends_online", "steam_main_2_friends_online" }));
+			Assert.That(prefixes,
+				Is.EquivalentTo(new[] { "steam_main_friends_online", "steam_main_2_friends_online" }));
 		});
 
 		await integration.ShutdownAsync();
@@ -182,7 +188,7 @@ internal sealed class SteamIntegrationTests
 	public async Task A_rejected_key_and_a_private_friends_list_are_reported_as_issues()
 	{
 		var context = new FakeContext();
-		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000001" }, secret: "A", title: "Main");
+		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000001" }, "A", "Main");
 		var integration = Integration();
 		await integration.InitializeAsync(context);
 
@@ -200,8 +206,8 @@ internal sealed class SteamIntegrationTests
 	{
 		var context = new FakeContext();
 		context.Add(new Dictionary<string, string?> { ["steamId"] = "76561198000000001", ["variableKey"] = "pc" },
-			secret: null,
-			title: "My PC");
+			null,
+			"My PC");
 		var integration = Integration();
 
 		await integration.InitializeAsync(context);
@@ -279,7 +285,7 @@ internal sealed class SteamIntegrationTests
 		var integration = Integration();
 
 		var context = new FakeContext();
-		context.Add(new Dictionary<string, string?> { ["variableKey"] = "pc" }, secret: null, title: "My PC");
+		context.Add(new Dictionary<string, string?> { ["variableKey"] = "pc" }, null, "My PC");
 
 		await integration.InitializeAsync(context);
 
@@ -304,13 +310,15 @@ internal sealed class SteamIntegrationTests
 		var integration = Integration();
 		await integration.InitializeAsync(new FakeContext());
 
-		var outcome = await integration.ExecuteAsync(new SteamCommand(SteamCommandKind.CloseGame), CancellationToken.None);
+		var outcome = await integration.ExecuteAsync(new SteamCommand(SteamCommandKind.CloseGame),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(outcome, Is.EqualTo(SteamCommandOutcome.Succeeded));
 			Assert.That(_platform.ProcessQueries.Single(),
-				Is.EqualTo((730, (string?)Path.Combine(steam, "steamapps", "common", "Counter-Strike Global Offensive"))));
+				Is.EqualTo(
+					(730, (string?)Path.Combine(steam, "steamapps", "common", "Counter-Strike Global Offensive"))));
 			Assert.That(_platform.CloseRequests, Is.EqualTo(new[] { 42 }));
 			Assert.That(_applications.OpenedUris, Is.Empty, "closing goes to the game, not through a steam:// link");
 		});
@@ -345,20 +353,21 @@ internal sealed class SteamIntegrationTests
 		await integration.InitializeAsync(new FakeContext());
 
 		await using var session = (await integration.CreateSessionAsync(new UiSessionRequest
-		{
-			Surface = new UiSurface
 			{
-				Kind = UiSurfaceKinds.Widget,
-				SessionMode = UiSessionModes.Shared,
-				Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+				Surface = new UiSurface
 				{
-					[UiWidgetSurfaceAttributes.WidgetType] =
-						JsonSerializer.SerializeToElement(SteamWidgetType.CurrentlyPlayingQualifiedId),
-					[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { }),
+					Kind = UiSurfaceKinds.Widget,
+					SessionMode = UiSessionModes.Shared,
+					Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+					{
+						[UiWidgetSurfaceAttributes.WidgetType] =
+							JsonSerializer.SerializeToElement(SteamWidgetType.CurrentlyPlayingQualifiedId),
+						[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { })
+					}
 				},
+				UiModelVersion = 1
 			},
-			UiModelVersion = 1,
-		}, CancellationToken.None))!;
+			CancellationToken.None))!;
 
 		Assert.That(CalendarTree.Texts(session.BuildTree().Root), Does.Contain("Counter-Strike 2"));
 
@@ -374,20 +383,21 @@ internal sealed class SteamIntegrationTests
 		await integration.InitializeAsync(context);
 
 		await using var session = (await integration.CreateSessionAsync(new UiSessionRequest
-		{
-			Surface = new UiSurface
 			{
-				Kind = UiSurfaceKinds.Widget,
-				SessionMode = UiSessionModes.Shared,
-				Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+				Surface = new UiSurface
 				{
-					[UiWidgetSurfaceAttributes.WidgetType] =
-						JsonSerializer.SerializeToElement(SteamWidgetType.CurrentlyPlayingQualifiedId),
-					[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { }),
+					Kind = UiSurfaceKinds.Widget,
+					SessionMode = UiSessionModes.Shared,
+					Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+					{
+						[UiWidgetSurfaceAttributes.WidgetType] =
+							JsonSerializer.SerializeToElement(SteamWidgetType.CurrentlyPlayingQualifiedId),
+						[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { })
+					}
 				},
+				UiModelVersion = 1
 			},
-			UiModelVersion = 1,
-		}, CancellationToken.None))!;
+			CancellationToken.None))!;
 		var logo = await context.UiResources.GetPluginIconAsync("widget", "logo");
 
 		Assert.Multiple(() =>
@@ -407,13 +417,16 @@ internal sealed class SteamIntegrationTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(types.Select(type => type.Id), Is.EqualTo(new[] { "steam-currently-playing", "steam-game-launcher", "steam-friends", "steam-library" }));
+			Assert.That(types.Select(type => type.Id),
+				Is.EqualTo(new[]
+					{ "steam-currently-playing", "steam-game-launcher", "steam-friends", "steam-library" }));
 			Assert.That(types.All(type => type.DataSchema is not null && type.HasConfiguration), Is.True);
 		});
 	}
 
 	private SteamIntegration Integration()
-		=> new(_platform,
+	{
+		return new SteamIntegration(_platform,
 			key =>
 			{
 				_clientKeys.Add(key);
@@ -421,25 +434,38 @@ internal sealed class SteamIntegrationTests
 			},
 			_applications,
 			new FakeTimeProvider());
+	}
 
 	private sealed class UnusedClient : ISteamWebApiClient
 	{
 		public Task<SteamPlayerSummary?> GetPlayerSummaryAsync(string steamId, CancellationToken cancellationToken)
-			=> Task.FromResult<SteamPlayerSummary?>(null);
+		{
+			return Task.FromResult<SteamPlayerSummary?>(null);
+		}
 
 		public Task<IReadOnlyList<SteamPlayerSummary>> GetPlayerSummariesAsync(
 			IReadOnlyList<string> steamIds,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<SteamPlayerSummary>>([]);
+		{
+			return Task.FromResult<IReadOnlyList<SteamPlayerSummary>>([]);
+		}
 
 		public Task<IReadOnlyList<string>?> GetFriendIdsAsync(string steamId, CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<string>?>(null);
+		{
+			return Task.FromResult<IReadOnlyList<string>?>(null);
+		}
 
 		public Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 
-		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<SteamOwnedGame>?>([]);
+		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(
+			string steamId,
+			CancellationToken cancellationToken)
+		{
+			return Task.FromResult<IReadOnlyList<SteamOwnedGame>?>([]);
+		}
 	}
 
 	private sealed class FakeContext : IIntegrationContext, IIntegrationConfig
@@ -457,6 +483,7 @@ internal sealed class SteamIntegrationTests
 		public RecordingEventPublisher Published { get; } = new();
 		public IEventPublisher Events => Published;
 		public IUserNotifier Notifications => throw new NotSupportedException();
+
 		public IUiResourceRegistry UiResources { get; } =
 			new BuiltInUiResources(SteamWidgetType.OwnerId, new UiResourceStore(), typeof(SteamIntegration));
 
@@ -476,23 +503,42 @@ internal sealed class SteamIntegrationTests
 		}
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([.. _entries]);
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([.. _entries]);
+		}
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+		{
+			return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+		}
 
 		public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+		{
+			return Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+		}
 
-		public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken cancellationToken = default)
+		public Task SetStringAsync(
+			Guid entryId,
+			string key,
+			string? value,
+			CancellationToken cancellationToken = default)
 		{
 			_strings[(entryId, key)] = value;
 			return Task.CompletedTask;
 		}
 
-		public string? Stored(int index, string key) => _strings.GetValueOrDefault((_entries[index].Id, key));
+		public string? Stored(int index, string key)
+		{
+			return _strings.GetValueOrDefault((_entries[index].Id, key));
+		}
 
-		public Task SetSecretAsync(Guid entryId, string key, string value, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		public Task SetSecretAsync(
+			Guid entryId,
+			string key,
+			string value,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

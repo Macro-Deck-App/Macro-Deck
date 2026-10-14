@@ -11,29 +11,35 @@ namespace MacroDeckHost.Tests.UnitTests.Portable;
 [TestFixture]
 public class PortableArchiveTests
 {
-	private static PortableContent SampleContent() => new()
+	private static PortableContent SampleContent()
 	{
-		Kind = PortableArchiveKind.Profile,
-		Profile = new ProfileFile
+		return new PortableContent
 		{
-			Id = Guid.NewGuid(),
-			Name = "Sample",
-			Folders =
+			Kind = PortableArchiveKind.Profile,
+			Profile = new ProfileFile
+			{
+				Id = Guid.NewGuid(),
+				Name = "Sample",
+				Folders =
+				[
+					new ProfileFolder { Id = Guid.NewGuid(), Name = "Root" }
+				]
+			},
+			Icons =
 			[
-				new ProfileFolder { Id = Guid.NewGuid(), Name = "Root" }
+				new PortableIcon { Id = Guid.NewGuid(), Name = "star", AvailableSizes = [128] }
 			]
-		},
-		Icons =
-		[
-			new PortableIcon { Id = Guid.NewGuid(), Name = "star", AvailableSizes = [128] }
-		]
-	};
+		};
+	}
 
-	private static List<PortableIconFile> SampleIconFiles(PortableContent content) =>
-	[
-		new(content.Icons[0].Id, "master", [1, 2, 3]),
-		new(content.Icons[0].Id, "128", [4])
-	];
+	private static List<PortableIconFile> SampleIconFiles(PortableContent content)
+	{
+		return
+		[
+			new PortableIconFile(content.Icons[0].Id, "master", [1, 2, 3]),
+			new PortableIconFile(content.Icons[0].Id, "128", [4])
+		];
+	}
 
 	[Test]
 	public void Write_ThenRead_Plain_RoundTripsContentAndIcons()
@@ -41,8 +47,8 @@ public class PortableArchiveTests
 		var content = SampleContent();
 		var manifest = new PortableArchiveManifest { Kind = PortableArchiveKind.Profile };
 
-		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), password: null);
-		var outcome = PortableArchive.Read(bytes, password: null);
+		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), null);
+		var outcome = PortableArchive.Read(bytes, null);
 
 		Assert.Multiple(() =>
 		{
@@ -61,7 +67,7 @@ public class PortableArchiveTests
 		var content = SampleContent();
 		var manifest = new PortableArchiveManifest { Kind = PortableArchiveKind.Profile };
 
-		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), password: null);
+		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), null);
 		var declared = PortableArchive.ReadManifest(bytes)!.Files;
 
 		Assert.That(declared, Is.Not.Null);
@@ -93,11 +99,11 @@ public class PortableArchiveTests
 		var first = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: null);
+			null);
 		var second = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: null);
+			null);
 
 		var firstPaths = PortableArchive.ReadManifest(first)!.Files!.Select(f => f.Path).ToList();
 		var secondPaths = PortableArchive.ReadManifest(second)!.Files!.Select(f => f.Path).ToList();
@@ -117,7 +123,7 @@ public class PortableArchiveTests
 		var content = SampleContent();
 		var manifest = new PortableArchiveManifest { Kind = PortableArchiveKind.Profile };
 
-		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), password: "pw");
+		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), "pw");
 		var declared = PortableArchive.ReadManifest(bytes)!.Files;
 
 		Assert.That(declared, Is.Null);
@@ -133,14 +139,14 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
 		var tamperedManifest = JsonNode.Parse(ReadEntryText(bytes, "manifest.json"))!.AsObject();
 		tamperedManifest["appVersion"] = "9.9.9";
 		var tampered = ReplaceEntry(bytes, "manifest.json", Encoding.UTF8.GetBytes(tamperedManifest.ToJsonString()));
 
-		var tamperedOutcome = PortableArchive.Read(tampered, password: "pw");
-		var roundTrippedOutcome = PortableArchive.Read(bytes, password: "pw");
+		var tamperedOutcome = PortableArchive.Read(tampered, "pw");
+		var roundTrippedOutcome = PortableArchive.Read(bytes, "pw");
 
 		Assert.Multiple(() =>
 		{
@@ -157,11 +163,11 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: null);
+			null);
 
 		using var withCertificate = new MemoryStream();
 		using (var source = new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read))
-		using (var target = new ZipArchive(withCertificate, ZipArchiveMode.Create, leaveOpen: true))
+		using (var target = new ZipArchive(withCertificate, ZipArchiveMode.Create, true))
 		{
 			foreach (var entry in source.Entries)
 			{
@@ -182,7 +188,7 @@ public class PortableArchiveTests
 			}
 		}
 
-		var outcome = PortableArchive.Read(withCertificate.ToArray(), password: null);
+		var outcome = PortableArchive.Read(withCertificate.ToArray(), null);
 
 		Assert.Multiple(() =>
 		{
@@ -199,14 +205,14 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: null);
+			null);
 
 		var manifestText = ReadEntryText(bytes, "manifest.json");
 		var strippedManifest = JsonNode.Parse(manifestText)!.AsObject();
 		strippedManifest.Remove("files");
 		var legacy = ReplaceEntry(bytes, "manifest.json", Encoding.UTF8.GetBytes(strippedManifest.ToJsonString()));
 
-		var outcome = PortableArchive.Read(legacy, password: null);
+		var outcome = PortableArchive.Read(legacy, null);
 
 		Assert.Multiple(() =>
 		{
@@ -232,9 +238,9 @@ public class PortableArchiveTests
 		var content = SampleContent();
 		var manifest = new PortableArchiveManifest { Kind = PortableArchiveKind.Profile, FormatVersion = 1 };
 
-		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), password: null);
+		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), null);
 
-		Assert.That(PortableArchive.Read(bytes, password: null).Status, Is.EqualTo(PortableReadStatus.Success));
+		Assert.That(PortableArchive.Read(bytes, null).Status, Is.EqualTo(PortableReadStatus.Success));
 	}
 
 	[Test]
@@ -247,9 +253,9 @@ public class PortableArchiveTests
 			FormatVersion = PortableArchiveManifest.CurrentFormatVersion + 1
 		};
 
-		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), password: null);
+		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), null);
 
-		Assert.That(PortableArchive.Read(bytes, password: null).Status,
+		Assert.That(PortableArchive.Read(bytes, null).Status,
 			Is.EqualTo(PortableReadStatus.UnsupportedVersion));
 	}
 
@@ -259,7 +265,7 @@ public class PortableArchiveTests
 		var content = SampleContent();
 		var manifest = new PortableArchiveManifest { Kind = PortableArchiveKind.Profile, IncludesSecrets = true };
 
-		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), password: "pw");
+		var bytes = PortableArchive.Write(manifest, content, SampleIconFiles(content), "pw");
 		var readManifest = PortableArchive.ReadManifest(bytes);
 
 		Assert.Multiple(() =>
@@ -277,9 +283,9 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
-		var outcome = PortableArchive.Read(bytes, password: null);
+		var outcome = PortableArchive.Read(bytes, null);
 
 		Assert.That(outcome.Status, Is.EqualTo(PortableReadStatus.PasswordRequired));
 	}
@@ -291,9 +297,9 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
-		var outcome = PortableArchive.Read(bytes, password: "nope");
+		var outcome = PortableArchive.Read(bytes, "nope");
 
 		Assert.That(outcome.Status, Is.EqualTo(PortableReadStatus.WrongPassword));
 	}
@@ -305,9 +311,9 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
-		var outcome = PortableArchive.Read(bytes, password: "pw");
+		var outcome = PortableArchive.Read(bytes, "pw");
 
 		Assert.Multiple(() =>
 		{
@@ -319,8 +325,10 @@ public class PortableArchiveTests
 
 	[Test]
 	public void Read_Garbage_ReturnsInvalidArchive()
-		=> Assert.That(PortableArchive.Read([1, 2, 3, 4], password: null).Status,
+	{
+		Assert.That(PortableArchive.Read([1, 2, 3, 4], null).Status,
 			Is.EqualTo(PortableReadStatus.InvalidArchive));
+	}
 
 	[Test]
 	public void Write_Encrypted_ManifestCarriesParametersButNoVerifier()
@@ -329,7 +337,7 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
 		var json = ReadEntryText(bytes, "manifest.json");
 
@@ -350,7 +358,7 @@ public class PortableArchiveTests
 				{ Kind = PortableArchiveKind.Profile, IncludesSecrets = true },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
 		// Flipping the secrets flag must not go unnoticed: the manifest is the key wrap's associated data.
 		var tampered = ReplaceEntry(bytes,
@@ -358,7 +366,7 @@ public class PortableArchiveTests
 			Encoding.UTF8.GetBytes(ReadEntryText(bytes, "manifest.json")
 				.Replace("\"includesSecrets\": true", "\"includesSecrets\": false")));
 
-		var outcome = PortableArchive.Read(tampered, password: "pw");
+		var outcome = PortableArchive.Read(tampered, "pw");
 
 		Assert.That(outcome.Status, Is.EqualTo(PortableReadStatus.WrongPassword));
 	}
@@ -370,14 +378,14 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
 		var tampered = ReplaceEntry(bytes,
 			"manifest.json",
 			Encoding.UTF8.GetBytes(ReadEntryText(bytes, "manifest.json")
 				.Replace("\"iterations\": 600000", "\"iterations\": 100000")));
 
-		var outcome = PortableArchive.Read(tampered, password: "pw");
+		var outcome = PortableArchive.Read(tampered, "pw");
 
 		Assert.That(outcome.Status, Is.EqualTo(PortableReadStatus.WrongPassword));
 	}
@@ -389,14 +397,14 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
 		var tampered = ReplaceEntry(bytes,
 			"manifest.json",
 			Encoding.UTF8.GetBytes(ReadEntryText(bytes, "manifest.json")
 				.Replace("AES-256-GCM", "ChaCha20-Poly1305")));
 
-		var outcome = PortableArchive.Read(tampered, password: "pw");
+		var outcome = PortableArchive.Read(tampered, "pw");
 
 		Assert.That(outcome.Status, Is.EqualTo(PortableReadStatus.UnsupportedVersion));
 	}
@@ -408,11 +416,11 @@ public class PortableArchiveTests
 		var bytes = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Profile },
 			content,
 			SampleIconFiles(content),
-			password: "pw");
+			"pw");
 
 		var stripped = ReplaceEntry(bytes, "payload.enc", null);
 
-		Assert.That(PortableArchive.Read(stripped, password: "pw").Status,
+		Assert.That(PortableArchive.Read(stripped, "pw").Status,
 			Is.EqualTo(PortableReadStatus.InvalidArchive));
 	}
 
@@ -420,7 +428,7 @@ public class PortableArchiveTests
 	public void Read_WithOversizedContentEntry_ReturnsInvalidArchive()
 	{
 		using var buffer = new MemoryStream();
-		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
 		{
 			var manifest = zip.CreateEntry("manifest.json");
 			using (var stream = manifest.Open())
@@ -438,7 +446,7 @@ public class PortableArchiveTests
 			}
 		}
 
-		Assert.That(PortableArchive.Read(buffer.ToArray(), password: null).Status,
+		Assert.That(PortableArchive.Read(buffer.ToArray(), null).Status,
 			Is.EqualTo(PortableReadStatus.InvalidArchive));
 	}
 
@@ -454,7 +462,7 @@ public class PortableArchiveTests
 	{
 		using var source = new ZipArchive(new MemoryStream(archiveBytes), ZipArchiveMode.Read);
 		using var buffer = new MemoryStream();
-		using (var target = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+		using (var target = new ZipArchive(buffer, ZipArchiveMode.Create, true))
 		{
 			foreach (var entry in source.Entries)
 			{

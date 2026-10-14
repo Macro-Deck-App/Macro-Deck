@@ -69,7 +69,7 @@ public class HostStatePushTests
 		});
 
 		_connection = new RecordingPluginConnection();
-		Assert.That(registry.TryAttach("session-1", _connection, instanceId: null), Is.True);
+		Assert.That(registry.TryAttach("session-1", _connection, null), Is.True);
 		await _host.Services.GetRequiredService<HostStatePusher>().PushAllAsync("com.example.state");
 	}
 
@@ -81,12 +81,15 @@ public class HostStatePushTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
 	[SetUp]
-	public void SetUp() => _connection.Clear();
+	public void SetUp()
+	{
+		_connection.Clear();
+	}
 
 	private static IEnumerable<TestCaseData> StateChanges()
 	{
@@ -142,7 +145,9 @@ public class HostStatePushTests
 	}
 
 	private static string? FolderOf(DeckStateDto state)
-		=> state.Clients.SingleOrDefault(client => client.ClientId == "push-tab")?.FolderId;
+	{
+		return state.Clients.SingleOrDefault(client => client.ClientId == "push-tab")?.FolderId;
+	}
 
 	private async Task<DeckStateDto> LatestDeckStateAsync(Func<DeckStateDto, bool> reached)
 	{
@@ -165,19 +170,23 @@ public class HostStatePushTests
 	}
 
 	private List<DeckStateDto> DeckStates()
-		=> _connection.Sent
+	{
+		return _connection.Sent
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.Deck && payload.Data is not null)
 			.Select(payload => payload.Data!.Value.Deserialize<DeckStateDto>(PluginProtocolJson.Options)!)
 			.ToList();
+	}
 
 	private List<string> PushedApis()
-		=> _connection.Sent
+	{
+		return _connection.Sent
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value
 				.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!.Api)
 			.ToList();
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -195,7 +204,10 @@ public class HostStatePushTests
 
 		public IReadOnlyList<ProtocolEnvelope> Sent => _sent.ToList();
 
-		public void Clear() => _sent.Clear();
+		public void Clear()
+		{
+			_sent.Clear();
+		}
 
 		public Task Send(ProtocolEnvelope envelope, CancellationToken cancellationToken = default)
 		{
@@ -204,6 +216,8 @@ public class HostStatePushTests
 		}
 
 		public Task Close(int closeCode, string reason, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

@@ -13,7 +13,8 @@ public sealed class ProfileUpdatedNotificationHandler : INotificationHandler<Pro
 	private readonly DeviceLayoutConstraintTracker _layoutConstraints;
 	private readonly IColorReferenceResolver _colors;
 
-	public ProfileUpdatedNotificationHandler(IUiTransport uiTransport,
+	public ProfileUpdatedNotificationHandler(
+		IUiTransport uiTransport,
 		DeviceLayoutConstraintTracker layoutConstraints,
 		IColorReferenceResolver colors)
 	{

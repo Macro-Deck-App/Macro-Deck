@@ -7,7 +7,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
 internal static class DeviceDescriptorMapper
 {
 	public static DeviceDescriptorDto ToDto(DeviceDescriptor device)
-		=> new()
+	{
+		return new DeviceDescriptorDto
 		{
 			Id = device.Id,
 			Name = device.Name,
@@ -28,4 +29,5 @@ internal static class DeviceDescriptorMapper
 			Presence = device.Presence.ToString(),
 			Metadata = device.Metadata ?? new Dictionary<string, string>(StringComparer.Ordinal)
 		};
+	}
 }

@@ -24,7 +24,8 @@ internal static class BatteryWidgetView
 
 	private static readonly UiSize _gap = UiSize.Capped(0.02, 3);
 
-	public static UiElement Build(UiState<BatteryViewState> state,
+	public static UiElement Build(
+		UiState<BatteryViewState> state,
 		BatteryWidgetData config,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius)
 	{
@@ -45,40 +46,51 @@ internal static class BatteryWidgetView
 					Key = "content",
 					Items = UiValue.From(() => (IReadOnlyList<BatteryViewState>)[state.Value]),
 					KeySelector = ShapeOf,
-					Template = (view, _) => Content(view, config),
-				},
-			],
+					Template = (view, _) => Content(view, config)
+				}
+			]
 		};
 	}
 
-	internal static string IconOf(string kind) => kind switch
+	internal static string IconOf(string kind)
 	{
-		BatteryDeviceKinds.Phone => UiIcons.DevicePhone,
-		BatteryDeviceKinds.Tablet => UiIcons.DeviceTablet,
-		BatteryDeviceKinds.Laptop => UiIcons.DeviceLaptop,
-		BatteryDeviceKinds.Headphones => UiIcons.DeviceHeadphones,
-		BatteryDeviceKinds.Watch => UiIcons.DeviceWatch,
-		BatteryDeviceKinds.Controller => UiIcons.DeviceGamepad,
-		BatteryDeviceKinds.Mouse => UiIcons.DeviceMouse,
-		BatteryDeviceKinds.Keyboard => UiIcons.DeviceKeyboard,
-		BatteryDeviceKinds.Speaker => UiIcons.DeviceSpeaker,
-		_ => UiIcons.Battery,
-	};
+		return kind switch
+		{
+			BatteryDeviceKinds.Phone => UiIcons.DevicePhone,
+			BatteryDeviceKinds.Tablet => UiIcons.DeviceTablet,
+			BatteryDeviceKinds.Laptop => UiIcons.DeviceLaptop,
+			BatteryDeviceKinds.Headphones => UiIcons.DeviceHeadphones,
+			BatteryDeviceKinds.Watch => UiIcons.DeviceWatch,
+			BatteryDeviceKinds.Controller => UiIcons.DeviceGamepad,
+			BatteryDeviceKinds.Mouse => UiIcons.DeviceMouse,
+			BatteryDeviceKinds.Keyboard => UiIcons.DeviceKeyboard,
+			BatteryDeviceKinds.Speaker => UiIcons.DeviceSpeaker,
+			_ => UiIcons.Battery
+		};
+	}
 
-	internal static string FallbackIconOf(string kind) => kind switch
+	internal static string FallbackIconOf(string kind)
 	{
-		BatteryDeviceKinds.Phone or BatteryDeviceKinds.Watch => UiIcons.DevicePhone,
-		BatteryDeviceKinds.Tablet => UiIcons.DeviceTablet,
-		BatteryDeviceKinds.Laptop or BatteryDeviceKinds.Mouse or BatteryDeviceKinds.Keyboard or BatteryDeviceKinds.Controller
-			=> UiIcons.DeviceDesktop,
-		BatteryDeviceKinds.Headphones or BatteryDeviceKinds.Speaker => UiIcons.MusicNote,
-		_ => UiIcons.Zap,
-	};
+		return kind switch
+		{
+			BatteryDeviceKinds.Phone or BatteryDeviceKinds.Watch => UiIcons.DevicePhone,
+			BatteryDeviceKinds.Tablet => UiIcons.DeviceTablet,
+			BatteryDeviceKinds.Laptop
+				or BatteryDeviceKinds.Mouse
+				or BatteryDeviceKinds.Keyboard
+				or BatteryDeviceKinds.Controller
+				=> UiIcons.DeviceDesktop,
+			BatteryDeviceKinds.Headphones or BatteryDeviceKinds.Speaker => UiIcons.MusicNote,
+			_ => UiIcons.Zap
+		};
+	}
 
 	internal static string PercentOf(BatteryFace face)
-		=> face.Level is { } level && face.Status != BatteryFaceStatus.NotAvailable
+	{
+		return face.Level is { } level && face.Status != BatteryFaceStatus.NotAvailable
 			? level.ToString(CultureInfo.InvariantCulture)
 			: UnknownLevel;
+	}
 
 	internal static LocalizedText StateOf(BatteryFace face)
 	{
@@ -94,26 +106,31 @@ internal static class BatteryWidgetView
 		{
 			BatteryChargeState.Charging => face.MinutesToFull is { } toFull
 				? toFull >= 60
-					? AppStrings.Widgets.Battery.State.FullInHours(hours: Number(toFull / 60), minutes: Number(toFull % 60))
-					: AppStrings.Widgets.Battery.State.FullInMinutes(minutes: Number(toFull))
+					? AppStrings.Widgets.Battery.State.FullInHours(Number(toFull / 60), Number(toFull % 60))
+					: AppStrings.Widgets.Battery.State.FullInMinutes(Number(toFull))
 				: AppStrings.Widgets.Battery.State.Charging(),
 			BatteryChargeState.Full => AppStrings.Widgets.Battery.State.Full(),
 			BatteryChargeState.NotCharging => AppStrings.Widgets.Battery.State.NotCharging(),
 			BatteryChargeState.Discharging when face.MinutesRemaining is { } left => left >= 60
-				? AppStrings.Widgets.Battery.State.HoursLeft(hours: Number(left / 60), minutes: Number(left % 60))
-				: AppStrings.Widgets.Battery.State.MinutesLeft(minutes: Number(left)),
-			_ => default,
+				? AppStrings.Widgets.Battery.State.HoursLeft(Number(left / 60), Number(left % 60))
+				: AppStrings.Widgets.Battery.State.MinutesLeft(Number(left)),
+			_ => default
 		};
 	}
 
-	private static LocalizedText Number(int value) => LocalizedText.FromLiteral(value.ToString(CultureInfo.InvariantCulture));
+	private static LocalizedText Number(int value)
+	{
+		return LocalizedText.FromLiteral(value.ToString(CultureInfo.InvariantCulture));
+	}
 
 	private static string ShapeOf(BatteryViewState view)
-		=> view.Hint != BatteryViewHint.None
+	{
+		return view.Hint != BatteryViewHint.None
 			? "hint"
 			: view.Faces.Count == 1
 				? "single"
 				: $"multi{view.Faces.Count.ToString(CultureInfo.InvariantCulture)}";
+	}
 
 	private static UiElement Content(BatteryViewState view, BatteryWidgetData config)
 	{
@@ -133,7 +150,8 @@ internal static class BatteryWidgetView
 	}
 
 	private static UiStack Hint(LocalizedText text)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "hint",
 			Fill = true,
@@ -148,10 +166,11 @@ internal static class BatteryWidgetView
 					Size = UiSize.Capped(0.09, 11),
 					Role = UiComponentTextRoles.Muted,
 					Align = UiComponentAlignments.Center,
-					Wrap = true,
-				},
-			],
+					Wrap = true
+				}
+			]
 		};
+	}
 
 	private static UiResponsive SingleRing(BatteryFace face, BatteryWidgetData config)
 	{
@@ -165,8 +184,8 @@ internal static class BatteryWidgetView
 			Variants =
 			[
 				new UiResponsiveVariant { MinAspect = WideAspect, Content = SingleWide(face, config) },
-				new UiResponsiveVariant { MaxAspect = TallAspect, Content = SingleTall(face, config) },
-			],
+				new UiResponsiveVariant { MaxAspect = TallAspect, Content = SingleTall(face, config) }
+			]
 		};
 	}
 
@@ -186,13 +205,13 @@ internal static class BatteryWidgetView
 				{
 					Key = "dial",
 					MainSize = UiSize.FromBasis(1),
-					Children = [Ring(scale, face), Centre(scale, face)],
+					Children = [Ring(scale, face), Centre(scale, face)]
 				},
-				Details(face, config, nameSize: 0.17, valueSize: 0.36, stateSize: 0.15, align: UiComponentAlignments.Start) with
+				Details(face, config, 0.17, 0.36, 0.15, UiComponentAlignments.Start) with
 				{
-					Fill = true,
-				},
-			],
+					Fill = true
+				}
+			]
 		};
 	}
 
@@ -213,14 +232,15 @@ internal static class BatteryWidgetView
 				{
 					Key = "dial",
 					MainSize = UiSize.FromBasis(0.9),
-					Children = [Ring(scale, face), Centre(scale, face)],
+					Children = [Ring(scale, face), Centre(scale, face)]
 				},
-				Details(face, config, nameSize: 0.15, valueSize: 0.3, stateSize: 0.12, align: UiComponentAlignments.Center),
-			],
+				Details(face, config, 0.15, 0.3, 0.12, UiComponentAlignments.Center)
+			]
 		};
 	}
 
-	private static UiStack Details(BatteryFace face,
+	private static UiStack Details(
+		BatteryFace face,
 		BatteryWidgetData config,
 		double nameSize,
 		double valueSize,
@@ -239,7 +259,7 @@ internal static class BatteryWidgetView
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Primary,
 				Align = align,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -259,7 +279,7 @@ internal static class BatteryWidgetView
 				Size = TextSize(stateSize, null, 13),
 				Role = UiComponentTextRoles.Muted,
 				Align = align,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -270,13 +290,13 @@ internal static class BatteryWidgetView
 			Justify = UiComponentJustify.Center,
 			Align = align,
 			Gap = UiSize.FromBasis(0.03),
-			Children = children,
+			Children = children
 		};
 	}
 
 	private static UiStack SingleBar(BatteryFace face, BatteryWidgetData config)
 	{
-		var header = new List<UiElement> { Glyph(UiSize.FromBasis(0.2, maxOfCross: 1), face) };
+		var header = new List<UiElement> { Glyph(UiSize.FromBasis(0.2, 1), face) };
 
 		if (config.ShowName && face.Name.Length > 0)
 		{
@@ -288,7 +308,7 @@ internal static class BatteryWidgetView
 				Size = TextSize(0.15, null, 15),
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Primary,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -300,8 +320,8 @@ internal static class BatteryWidgetView
 				Direction = UiComponentDirections.Horizontal,
 				Align = UiComponentAlignments.Center,
 				Gap = UiSize.FromBasis(0.05),
-				Children = header,
-			},
+				Children = header
+			}
 		};
 
 		if (config.ShowPercentage)
@@ -321,7 +341,7 @@ internal static class BatteryWidgetView
 				Text = state,
 				Size = TextSize(0.12, null, 12),
 				Role = UiComponentTextRoles.Muted,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -332,7 +352,7 @@ internal static class BatteryWidgetView
 			Direction = UiComponentDirections.Vertical,
 			Justify = UiComponentJustify.Center,
 			Gap = UiSize.FromBasis(0.06),
-			Children = children,
+			Children = children
 		};
 	}
 
@@ -345,7 +365,7 @@ internal static class BatteryWidgetView
 
 		var variants = new List<UiResponsiveVariant>
 		{
-			new() { MaxAspect = TallAspect, Content = Rows("tall", 1, faces, config) },
+			new() { MaxAspect = TallAspect, Content = Rows("tall", 1, faces, config) }
 		};
 
 		if (faces.Count >= 3)
@@ -354,7 +374,7 @@ internal static class BatteryWidgetView
 			{
 				MinWidth = 2,
 				MinHeight = 2,
-				Content = Rows("large", 1, faces, config),
+				Content = Rows("large", 1, faces, config)
 			});
 		}
 
@@ -364,7 +384,7 @@ internal static class BatteryWidgetView
 			{
 				MinAspect = segment.MinAspect,
 				MaxAspect = segment.MaxAspect,
-				Content = Grid(segment, faces, config),
+				Content = Grid(segment, faces, config)
 			}));
 
 		return new UiResponsive
@@ -372,7 +392,7 @@ internal static class BatteryWidgetView
 			Key = "rings",
 			Fill = true,
 			Default = Grid(main, faces, config),
-			Variants = variants,
+			Variants = variants
 		};
 	}
 
@@ -386,7 +406,11 @@ internal static class BatteryWidgetView
 			Columns = segment.Columns,
 			Rows = segment.Rows,
 			Gap = UiSize.FromBasis(0.12 * scale),
-			Children = [.. faces.Select((face, index) => Cell($"d{index.ToString(CultureInfo.InvariantCulture)}", scale, face, config))],
+			Children =
+			[
+				.. faces.Select((face, index)
+					=> Cell($"d{index.ToString(CultureInfo.InvariantCulture)}", scale, face, config))
+			]
 		};
 	}
 
@@ -398,8 +422,8 @@ internal static class BatteryWidgetView
 			{
 				Key = "dial",
 				Fill = true,
-				Children = [Ring(scale, face), Centre(scale, face)],
-			},
+				Children = [Ring(scale, face), Centre(scale, face)]
+			}
 		};
 
 		if (config.ShowPercentage)
@@ -416,7 +440,7 @@ internal static class BatteryWidgetView
 				Size = TextSize(0.2 * scale, 0.3, 12),
 				Role = UiComponentTextRoles.Muted,
 				Align = UiComponentAlignments.Center,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -426,21 +450,23 @@ internal static class BatteryWidgetView
 			Direction = UiComponentDirections.Vertical,
 			Justify = UiComponentJustify.Center,
 			Align = UiComponentAlignments.Center,
-			Children = children,
+			Children = children
 		};
 	}
 
 	private static UiResponsive BarRows(IReadOnlyList<BatteryFace> faces, BatteryWidgetData config)
-		=> new()
+	{
+		return new UiResponsive
 		{
 			Key = "bars",
 			Fill = true,
 			Default = Rows("narrow", 1, faces, config),
 			Variants =
 			[
-				new UiResponsiveVariant { MinAspect = WideRowsAspect, Content = Rows("wide", 2, faces, config) },
-			],
+				new UiResponsiveVariant { MinAspect = WideRowsAspect, Content = Rows("wide", 2, faces, config) }
+			]
 		};
+	}
 
 	private static UiGrid Rows(string prefix, int columns, IReadOnlyList<BatteryFace> faces, BatteryWidgetData config)
 	{
@@ -452,7 +478,10 @@ internal static class BatteryWidgetView
 			Columns = columns,
 			Rows = rows,
 			Gap = UiSize.FromBasis(0.04),
-			Children = [.. faces.Select((face, index) => Row($"d{index.ToString(CultureInfo.InvariantCulture)}", face, config))],
+			Children =
+			[
+				.. faces.Select((face, index) => Row($"d{index.ToString(CultureInfo.InvariantCulture)}", face, config))
+			]
 		};
 	}
 
@@ -468,8 +497,8 @@ internal static class BatteryWidgetView
 				Size = TextSize(0.09, 0.32, 12),
 				Weight = UiComponentTextWeights.Medium,
 				Role = UiComponentTextRoles.Primary,
-				MaxLines = 1,
-			},
+				MaxLines = 1
+			}
 		};
 
 		if (face.Status == BatteryFaceStatus.Live)
@@ -490,7 +519,7 @@ internal static class BatteryWidgetView
 					Size = TextSize(0.09, 0.32, 12),
 					Weight = UiComponentTextWeights.SemiBold,
 					Role = UiComponentTextRoles.Primary,
-					MaxLines = 1,
+					MaxLines = 1
 				});
 			}
 
@@ -504,7 +533,7 @@ internal static class BatteryWidgetView
 					Justify = UiComponentJustify.End,
 					Align = UiComponentAlignments.Center,
 					Gap = UiSize.FromBasis(0.01),
-					Children = reading,
+					Children = reading
 				});
 			}
 		}
@@ -517,7 +546,7 @@ internal static class BatteryWidgetView
 			Gap = UiSize.FromBasis(0.04),
 			Children =
 			[
-				Glyph(UiSize.FromBasis(0.11, maxOfCross: 0.45), face),
+				Glyph(UiSize.FromBasis(0.11, 0.45), face),
 				new UiStack
 				{
 					Key = "line",
@@ -533,7 +562,7 @@ internal static class BatteryWidgetView
 							Direction = UiComponentDirections.Horizontal,
 							Align = UiComponentAlignments.Center,
 							Gap = UiSize.FromBasis(0.015),
-							Children = top,
+							Children = top
 						},
 						face.Status == BatteryFaceStatus.Live
 							? Bar(face, UiSize.FromBasis(0.04))
@@ -543,15 +572,16 @@ internal static class BatteryWidgetView
 								Text = StateOf(face),
 								Size = TextSize(0.08, 0.26, 10),
 								Role = UiComponentTextRoles.Muted,
-								MaxLines = 1,
-							},
-					],
-				},
-			],
+								MaxLines = 1
+							}
+					]
+				}
+			]
 		};
 	}
 
-	private static UiStack Reading(BatteryFace face,
+	private static UiStack Reading(
+		BatteryFace face,
 		BatteryWidgetData config,
 		double valueSize,
 		double unitSize,
@@ -572,7 +602,7 @@ internal static class BatteryWidgetView
 			Size = TextSize(valueSize, null, cap),
 			Weight = UiComponentTextWeights.SemiBold,
 			Role = face.IsMuted ? UiComponentTextRoles.Secondary : UiComponentTextRoles.Primary,
-			MaxLines = 1,
+			MaxLines = 1
 		});
 
 		if (face.Level is not null && face.Status != BatteryFaceStatus.NotAvailable)
@@ -584,7 +614,7 @@ internal static class BatteryWidgetView
 				Size = TextSize(unitSize, null, cap * 0.6),
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Secondary,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -595,12 +625,13 @@ internal static class BatteryWidgetView
 			Justify = justify == UiComponentAlignments.Start ? UiComponentJustify.Start : UiComponentJustify.Center,
 			Align = UiComponentAlignments.Baseline,
 			Gap = UiSize.FromBasis(0.01),
-			Children = children,
+			Children = children
 		};
 	}
 
 	private static UiIcon? Bolt(BatteryFace face, BatteryWidgetData config, UiSize size)
-		=> config.ShowChargingBadge && face.IsCharging
+	{
+		return config.ShowChargingBadge && face.IsCharging
 			? new UiIcon
 			{
 				Key = "bolt",
@@ -608,12 +639,14 @@ internal static class BatteryWidgetView
 				Size = size,
 				MainSize = size,
 				Color = face.Color is { } color ? UiValue.Of(color) : UiValue.None<string>(),
-				Role = UiComponentTextRoles.Primary,
+				Role = UiComponentTextRoles.Primary
 			}
 			: null;
+	}
 
 	private static UiGauge Ring(double scale, BatteryFace face)
-		=> new()
+	{
+		return new UiGauge
 		{
 			Key = "ring",
 			Fill = true,
@@ -627,19 +660,22 @@ internal static class BatteryWidgetView
 				Key = "ringFallback",
 				Thickness = UiSize.FromBasis(0.05 * scale),
 				Start = 0d,
-				End = face.Fill,
-			},
+				End = face.Fill
+			}
 		};
+	}
 
 	private static UiStack Centre(double scale, BatteryFace face)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "centre",
 			Direction = UiComponentDirections.Horizontal,
 			Justify = UiComponentJustify.Center,
 			Align = UiComponentAlignments.Center,
-			Children = [Glyph(UiSize.FromBasis(0.36 * scale, maxOfCross: 0.36), face)],
+			Children = [Glyph(UiSize.FromBasis(0.36 * scale, 0.36), face)]
 		};
+	}
 
 	private static UiIcon Glyph(UiSize size, BatteryFace face)
 	{
@@ -661,22 +697,26 @@ internal static class BatteryWidgetView
 				Icon = FallbackIconOf(face.Kind),
 				Size = size,
 				MainSize = size,
-				Role = role,
-			},
+				Role = role
+			}
 		};
 	}
 
 	private static UiRangeBar Bar(BatteryFace face, UiSize thickness)
-		=> new()
+	{
+		return new UiRangeBar
 		{
 			Key = "bar",
 			Thickness = thickness,
 			Start = 0d,
 			End = face.Fill,
 			StartColor = face.Color is { } start ? UiValue.Of(start) : UiValue.None<string>(),
-			EndColor = face.Color is { } end ? UiValue.Of(end) : UiValue.None<string>(),
+			EndColor = face.Color is { } end ? UiValue.Of(end) : UiValue.None<string>()
 		};
+	}
 
 	private static UiSize TextSize(double basis, double? maxOfCross, double cap)
-		=> UiSize.Of(new UiLength { Basis = basis, MaxOfCross = maxOfCross, MaxOfCell = cap / UiLength.Cell });
+	{
+		return UiSize.Of(new UiLength { Basis = basis, MaxOfCross = maxOfCross, MaxOfCell = cap / UiLength.Cell });
+	}
 }

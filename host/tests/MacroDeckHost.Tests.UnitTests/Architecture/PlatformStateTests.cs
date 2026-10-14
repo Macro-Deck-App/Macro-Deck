@@ -24,7 +24,7 @@ internal sealed class PlatformStateTests
 		"MacroDeckHost.Platform.Native.MacOsAccessibility._startupPromptClaimed",
 		"MacroDeckHost.Platform.Native.MacOsMainRunLoop._isPumping",
 		"MacroDeckHost.Platform.Native.Win32Input._lastBlockedReportTicks",
-		"MacroDeckHost.Platform.Notifications.WindowsNotificationService._nextId",
+		"MacroDeckHost.Platform.Notifications.WindowsNotificationService._nextId"
 	];
 
 	[Test]
@@ -42,19 +42,25 @@ internal sealed class PlatformStateTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(added, Is.Empty,
+			Assert.That(added,
+				Is.Empty,
 				"MacroDeckHost.Platform holds static state the host and integrations could share. Keep state in instances each "
 				+ "consumer creates, or add a process fact to the allow-list:"
-				+ Environment.NewLine + string.Join(Environment.NewLine, added));
-			Assert.That(resolved, Is.Empty,
+				+ Environment.NewLine
+				+ string.Join(Environment.NewLine, added));
+			Assert.That(resolved,
+				Is.Empty,
 				"These allow-list entries no longer occur. Remove them from PlatformStateTests:"
-				+ Environment.NewLine + string.Join(Environment.NewLine, resolved));
+				+ Environment.NewLine
+				+ string.Join(Environment.NewLine, resolved));
 		});
 	}
 
 	private static bool IsPlatformCode(Type type)
-		=> type.Namespace is { } ns &&
-			(ns == PlatformNamespace || ns.StartsWith(PlatformNamespace + ".", StringComparison.Ordinal));
+	{
+		return type.Namespace is { } ns
+			&& (ns == PlatformNamespace || ns.StartsWith(PlatformNamespace + ".", StringComparison.Ordinal));
+	}
 
 	private static bool IsCompilerGenerated(Type type)
 	{
@@ -71,8 +77,14 @@ internal sealed class PlatformStateTests
 
 	private static bool IsStateless(Type type, HashSet<Type> visiting)
 	{
-		if (type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(decimal) || type == typeof(Type) ||
-			type == typeof(Lock) || type == typeof(ILogger) || typeof(Delegate).IsAssignableFrom(type))
+		if (type.IsPrimitive
+			|| type.IsEnum
+			|| type == typeof(string)
+			|| type == typeof(decimal)
+			|| type == typeof(Type)
+			|| type == typeof(Lock)
+			|| type == typeof(ILogger)
+			|| typeof(Delegate).IsAssignableFrom(type))
 		{
 			return true;
 		}
@@ -88,7 +100,8 @@ internal sealed class PlatformStateTests
 		}
 
 		var fields = new List<FieldInfo>();
-		for (var current = type; current is not null && current != typeof(object) && current != typeof(ValueType);
+		for (var current = type;
+			current is not null && current != typeof(object) && current != typeof(ValueType);
 			current = current.BaseType)
 		{
 			fields.AddRange(current.GetFields(DeclaredInstanceFields));

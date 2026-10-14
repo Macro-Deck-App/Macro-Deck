@@ -48,7 +48,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		_logger = logger;
 	}
 
-	public async Task<Result<IconPackEntity, IconError>> RestoreAsNewPack(string fileName,
+	public async Task<Result<IconPackEntity, IconError>> RestoreAsNewPack(
+		string fileName,
 		Stream content,
 		CancellationToken cancellationToken,
 		IconPackSourceStamp? stamp = null)
@@ -86,7 +87,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			List<IconEntity> appearances;
 			try
 			{
-				(icons, appearances) = await CopyIcons(archive, manifest, pack.Id, importBatchId: null, cancellationToken);
+				(icons, appearances) = await CopyIcons(archive, manifest, pack.Id, null, cancellationToken);
 			}
 			catch (Exception ex) when (ex is not OperationCanceledException)
 			{
@@ -111,7 +112,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		}
 	}
 
-	public async Task<Result<IReadOnlyList<IconEntity>, IconError>> MergeIntoPack(Guid packId,
+	public async Task<Result<IReadOnlyList<IconEntity>, IconError>> MergeIntoPack(
+		Guid packId,
 		Guid importBatchId,
 		string fileName,
 		Stream content,
@@ -154,7 +156,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 
 			await _iconPackCache.AddIcons(packId, [.. icons, .. appearances]);
 			await _iconPackCache.ForgetSourceRevision(packId);
-			var aiAssets = IconPackAiDeclarations.Merge(pack.AiAssets, IconPackAiDeclarations.FromManifest(manifestResult.Data!.Ai));
+			var aiAssets = IconPackAiDeclarations.Merge(pack.AiAssets,
+				IconPackAiDeclarations.FromManifest(manifestResult.Data!.Ai));
 			if (icons.Count > 0 && aiAssets != pack.AiAssets)
 			{
 				pack.AiAssets = aiAssets;
@@ -177,7 +180,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		}
 	}
 
-	public async Task<Result<IconPackEntity, IconError>> UpgradePack(Guid packId,
+	public async Task<Result<IconPackEntity, IconError>> UpgradePack(
+		Guid packId,
 		string fileName,
 		Stream content,
 		CancellationToken cancellationToken)
@@ -230,8 +234,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				var existing = Correlate(installed, entry);
 				var previousVersion = existing is null ? null : VersionOf(existing);
 				var previousName = existing?.Name;
-				var icon = existing ??
-					new IconEntity
+				var icon = existing
+					?? new IconEntity
 					{
 						Id = Guid.CreateVersion7(),
 						PackId = packId,
@@ -264,7 +268,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				var appearances = await ApplyAppearances(mastersByIconId,
 					entry,
 					icon,
-					importBatchId: null,
+					null,
 					appearanceWrites,
 					cancellationToken);
 				if (existing is null)
@@ -284,7 +288,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			await CommitAppearanceWrites(packId, added, appearanceWrites, []);
 			if (added.Count > 0)
 			{
-				await _mediator.Publish(new IconsAddedNotification(BatchId: null, packId, added), cancellationToken);
+				await _mediator.Publish(new IconsAddedNotification(null, packId, added), cancellationToken);
 			}
 
 			foreach (var icon in changed)
@@ -322,7 +326,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		}
 	}
 
-	public async Task<Result<IconPackReplaceOutcome, IconError>> ReplaceFromSource(Guid packId,
+	public async Task<Result<IconPackReplaceOutcome, IconError>> ReplaceFromSource(
+		Guid packId,
 		string fileName,
 		Stream content,
 		IconPackSourceStamp stamp,
@@ -357,8 +362,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			foreach (var entry in manifest.Icons)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				if (!seenNames.Add(entry.Name) ||
-					!mastersByIconId.TryGetValue(entry.Id, out var masterEntry))
+				if (!seenNames.Add(entry.Name) || !mastersByIconId.TryGetValue(entry.Id, out var masterEntry))
 				{
 					continue;
 				}
@@ -366,9 +370,11 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				// Names are the identity; the archive id only finds an icon the user renamed since the same
 				// archive was applied, since every fresh export of a local pack mints new ids.
 				var existing = unmatched.FirstOrDefault(icon =>
-						string.Equals(icon.Name, entry.Name, StringComparison.OrdinalIgnoreCase)) ??
-					unmatched.FirstOrDefault(icon => icon.SourceIconId == entry.Id &&
-						!manifest.Icons.Any(other => string.Equals(other.Name, icon.Name, StringComparison.OrdinalIgnoreCase)));
+						string.Equals(icon.Name, entry.Name, StringComparison.OrdinalIgnoreCase))
+					?? unmatched.FirstOrDefault(icon
+						=> icon.SourceIconId == entry.Id
+						&& !manifest.Icons.Any(other
+							=> string.Equals(other.Name, icon.Name, StringComparison.OrdinalIgnoreCase)));
 				if (existing is not null)
 				{
 					unmatched.Remove(existing);
@@ -384,9 +390,9 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 					continue;
 				}
 
-				if (existing is not null &&
-					existing.ProcessingState == IconProcessingState.Ready &&
-					existing.MasterContentHash == incomingMaster)
+				if (existing is not null
+					&& existing.ProcessingState == IconProcessingState.Ready
+					&& existing.MasterContentHash == incomingMaster)
 				{
 					var previousVersion = VersionOf(existing);
 					var renamed = !string.Equals(existing.Name, entry.Name, StringComparison.Ordinal);
@@ -400,7 +406,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 					var keptAppearances = await ApplyAppearances(mastersByIconId,
 						entry,
 						existing,
-						importBatchId: null,
+						null,
 						appearanceWrites,
 						cancellationToken);
 					if (renamed || IconImageVersion.Of(existing, keptAppearances) != previousVersion)
@@ -411,8 +417,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 					continue;
 				}
 
-				var icon = existing ??
-					new IconEntity
+				var icon = existing
+					?? new IconEntity
 					{
 						Id = Guid.CreateVersion7(),
 						PackId = packId,
@@ -428,7 +434,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				}
 
 				ApplyEntry(icon, entry, master);
-				await ApplyAppearances(mastersByIconId, entry, icon, importBatchId: null, appearanceWrites, cancellationToken);
+				await ApplyAppearances(mastersByIconId, entry, icon, null, appearanceWrites, cancellationToken);
 				if (existing is null)
 				{
 					added.Add(icon);
@@ -476,8 +482,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				cancellationToken);
 
 			return Result.Ok<IconPackReplaceOutcome, IconError>(new IconPackReplaceOutcome(pack,
-				IconsChanged: added.Count > 0 || updated.Count > 0 || dropped.Count > 0,
-				KeptInUse: unmatched.Count - dropped.Count));
+				added.Count > 0 || updated.Count > 0 || dropped.Count > 0,
+				unmatched.Count - dropped.Count));
 		}
 		catch (InvalidDataException)
 		{
@@ -542,12 +548,13 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			? null
 			: installed.FirstOrDefault(icon => icon.SourceIconId is null && icon.DeclaredSourceContentHash == declared);
 
-		return byHash ??
-			installed.FirstOrDefault(icon =>
+		return byHash
+			?? installed.FirstOrDefault(icon =>
 				icon.SourceIconId is null && string.Equals(icon.Name, entry.Name, StringComparison.OrdinalIgnoreCase));
 	}
 
-	private async Task<string> WriteMaster(ZipArchiveEntry masterEntry,
+	private async Task<string> WriteMaster(
+		ZipArchiveEntry masterEntry,
 		Guid packId,
 		Guid iconId,
 		CancellationToken cancellationToken)
@@ -601,7 +608,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 
 		try
 		{
-			using var stream = new MemoryStream(manifestBytes, writable: false);
+			using var stream = new MemoryStream(manifestBytes, false);
 			var manifest = JsonSerializer.Deserialize<IconPackManifest>(stream, PersistenceJsonOptions.Default);
 			if (manifest is null)
 			{
@@ -638,7 +645,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		return buffer.ToArray();
 	}
 
-	private async Task<(List<IconEntity> Icons, List<IconEntity> Appearances)> CopyIcons(ZipArchive archive,
+	private async Task<(List<IconEntity> Icons, List<IconEntity> Appearances)> CopyIcons(
+		ZipArchive archive,
 		IconPackManifest manifest,
 		Guid targetPackId,
 		Guid? importBatchId,
@@ -692,7 +700,12 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 
 				icon.MasterContentHash = written;
 				icons.Add(icon);
-				await ApplyAppearances(mastersByIconId, entry, icon, importBatchId, appearanceWrites, cancellationToken);
+				await ApplyAppearances(mastersByIconId,
+					entry,
+					icon,
+					importBatchId,
+					appearanceWrites,
+					cancellationToken);
 			}
 		}
 		catch
@@ -708,7 +721,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		return (icons, appearanceWrites.Added);
 	}
 
-	private async Task CommitAppearanceWrites(Guid packId,
+	private async Task CommitAppearanceWrites(
+		Guid packId,
 		IReadOnlyList<IconEntity> addedIcons,
 		AppearanceWrites appearanceWrites,
 		IReadOnlyList<IconEntity> removedIcons)
@@ -732,9 +746,13 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		}
 	}
 
-	private string? VersionOf(IconEntity icon) => IconImageVersion.Of(icon, _iconPackCache.GetAppearances(icon.Id));
+	private string? VersionOf(IconEntity icon)
+	{
+		return IconImageVersion.Of(icon, _iconPackCache.GetAppearances(icon.Id));
+	}
 
-	private async Task<IReadOnlyList<IconEntity>> ApplyAppearances(Dictionary<Guid, ZipArchiveEntry> mastersByIconId,
+	private async Task<IReadOnlyList<IconEntity>> ApplyAppearances(
+		Dictionary<Guid, ZipArchiveEntry> mastersByIconId,
 		IconManifestEntry entry,
 		IconEntity parent,
 		Guid? importBatchId,
@@ -750,8 +768,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 				var key = IconAppearanceTraits.ToKey(traits);
-				var current = installed.FirstOrDefault(asset => asset.AppearanceTraits is { } existing &&
-					IconAppearanceTraits.ToKey(existing) == key);
+				var current = installed.FirstOrDefault(asset
+					=> asset.AppearanceTraits is { } existing && IconAppearanceTraits.ToKey(existing) == key);
 				if (!mastersByIconId.TryGetValue(appearanceEntry.Id, out var masterEntry))
 				{
 					KeepIfInstalled(current, kept);
@@ -766,20 +784,22 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				if (declared is not null && declared != incomingMaster)
 				{
 					KeepIfInstalled(current, kept);
-					_logger.Warning("Appearance {AppearanceId} of icon {IconId} fails its declared master hash; skipping",
+					_logger.Warning(
+						"Appearance {AppearanceId} of icon {IconId} fails its declared master hash; skipping",
 						appearanceEntry.Id,
 						entry.Id);
 					continue;
 				}
 
-				if (current is { ProcessingState: IconProcessingState.Ready } && current.MasterContentHash == incomingMaster)
+				if (current is { ProcessingState: IconProcessingState.Ready }
+					&& current.MasterContentHash == incomingMaster)
 				{
 					kept.Add(current.Id);
 					continue;
 				}
 
-				var asset = current ??
-					new IconEntity
+				var asset = current
+					?? new IconEntity
 					{
 						Id = Guid.CreateVersion7(),
 						PackId = parent.PackId,
@@ -879,10 +899,10 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		foreach (var entry in archive.Entries)
 		{
 			var segments = entry.FullName.Replace('\\', '/').Split('/');
-			if (segments.Length == 3 &&
-				segments[0].Equals("icons", StringComparison.OrdinalIgnoreCase) &&
-				Guid.TryParse(segments[1], out var iconId) &&
-				segments[2].Equals(IconVariants.Master + ".webp", StringComparison.OrdinalIgnoreCase))
+			if (segments.Length == 3
+				&& segments[0].Equals("icons", StringComparison.OrdinalIgnoreCase)
+				&& Guid.TryParse(segments[1], out var iconId)
+				&& segments[2].Equals(IconVariants.Master + ".webp", StringComparison.OrdinalIgnoreCase))
 			{
 				result[iconId] = entry;
 			}

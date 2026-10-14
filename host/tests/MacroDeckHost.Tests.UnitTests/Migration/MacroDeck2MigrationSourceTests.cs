@@ -32,7 +32,10 @@ public class MacroDeck2MigrationSourceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task Read_TranslatesEveryProfileAndParentsFoldersFromTheirChildren()
@@ -40,18 +43,17 @@ public class MacroDeck2MigrationSourceTests
 		_fixture.WithConfig()
 			.WithProfile("0",
 				"Profil 1",
-				rows: 3,
-				columns: 5,
-				folders:
+				3,
+				5,
 				[
 					MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(4, 1)], "sub"),
 					MacroDeck2Fixture.Folder("sub", "SinusBot", [MacroDeck2Fixture.Button(0, 0)])
 				])
 			.WithProfile("second",
 				"Profile 2",
-				rows: 2,
-				columns: 3,
-				folders: [MacroDeck2Fixture.Folder("second-root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
+				2,
+				3,
+				[MacroDeck2Fixture.Folder("second-root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
 			.Build();
 
 		var plan = await Read();
@@ -76,7 +78,8 @@ public class MacroDeck2MigrationSourceTests
 
 	[TestCase(16, 16, 16, 16)]
 	[TestCase(20, 24, 16, 16)]
-	public async Task Read_KeepsAGridUpTo16By16AndClampsALargerOne(int rows,
+	public async Task Read_KeepsAGridUpTo16By16AndClampsALargerOne(
+		int rows,
 		int columns,
 		int expectedRows,
 		int expectedColumns)
@@ -86,7 +89,7 @@ public class MacroDeck2MigrationSourceTests
 				"Big",
 				rows,
 				columns,
-				folders: [MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
+				[MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
 			.Build();
 
 		var profile = (await Read()).Profiles.Single().Profile!;
@@ -151,8 +154,8 @@ public class MacroDeck2MigrationSourceTests
 			0,
 			backColorOff: "35, 35, 35",
 			backColorOn: "Red",
-			labelOff: MacroDeck2Fixture.Label("Off", position: 0),
-			labelOn: MacroDeck2Fixture.Label("On", position: 1)));
+			labelOff: MacroDeck2Fixture.Label("Off", 0),
+			labelOn: MacroDeck2Fixture.Label("On", 1)));
 
 		var data = await SingleWidgetData();
 
@@ -172,8 +175,8 @@ public class MacroDeck2MigrationSourceTests
 			0,
 			backColorOff: "35, 35, 35",
 			backColorOn: "Red",
-			labelOff: MacroDeck2Fixture.Label("Off", position: 0),
-			labelOn: MacroDeck2Fixture.Label("On", position: 1),
+			labelOff: MacroDeck2Fixture.Label("Off", 0),
+			labelOn: MacroDeck2Fixture.Label("On", 1),
 			actions:
 			[
 				MacroDeck2Fixture.Action("SuchByte.MacroDeck.ActionButton.ActionButtonToggleStateAction, Macro Deck 2")
@@ -262,9 +265,8 @@ public class MacroDeck2MigrationSourceTests
 	{
 		_fixture.WithProfile("0",
 				"Profile",
-				rows: 3,
-				columns: 5,
-				folders:
+				3,
+				5,
 				[
 					MacroDeck2Fixture.Folder("root",
 						"*Root*",
@@ -324,9 +326,8 @@ public class MacroDeck2MigrationSourceTests
 	{
 		_fixture.WithProfile("0",
 				"Profile",
-				rows: 2,
-				columns: 2,
-				folders:
+				2,
+				2,
 				[
 					MacroDeck2Fixture.Folder("root",
 						"*Root*",
@@ -350,18 +351,17 @@ public class MacroDeck2MigrationSourceTests
 		_fixture.WithIconPack("Powered Steel", "play")
 			.WithProfile("0",
 				"Profile",
-				rows: 3,
-				columns: 5,
-				folders:
+				3,
+				5,
 				[
 					MacroDeck2Fixture.Folder("root",
 						"*Root*",
 						[
-							MacroDeck2Fixture.Button(0, 0, iconOff: "Powered Steel.play", iconOn: "Powered Steel.play"),
+							MacroDeck2Fixture.Button(0, 0, "Powered Steel.play", "Powered Steel.play"),
 							MacroDeck2Fixture.Button(1,
 								0,
-								iconOff: "My Icon Pack.missing",
-								iconOn: "My Icon Pack.missing")
+								"My Icon Pack.missing",
+								"My Icon Pack.missing")
 						])
 				])
 			.Build();
@@ -390,13 +390,12 @@ public class MacroDeck2MigrationSourceTests
 			.WithIconPack("Unused Pack", "nobody")
 			.WithProfile("0",
 				"Profile",
-				rows: 3,
-				columns: 5,
-				folders:
+				3,
+				5,
 				[
 					MacroDeck2Fixture.Folder("root",
 						"*Root*",
-						[MacroDeck2Fixture.Button(0, 0, iconOff: "Powered Steel.play", iconOn: "Powered Steel.play")])
+						[MacroDeck2Fixture.Button(0, 0, "Powered Steel.play", "Powered Steel.play")])
 				])
 			.Build();
 
@@ -435,9 +434,8 @@ public class MacroDeck2MigrationSourceTests
 		_fixture.WithVariable("Battery Level", "22", "User", "Integer")
 			.WithProfile("0",
 				"Profile",
-				rows: 3,
-				columns: 5,
-				folders:
+				3,
+				5,
 				[
 					MacroDeck2Fixture.Folder("root",
 						"*Root*",
@@ -471,7 +469,7 @@ public class MacroDeck2MigrationSourceTests
 	{
 		SeedCredentials();
 
-		var plan = await Read(machineKey: null);
+		var plan = await Read(null);
 
 		Assert.Multiple(() =>
 		{
@@ -485,7 +483,7 @@ public class MacroDeck2MigrationSourceTests
 	{
 		SeedCredentials();
 
-		var plan = await Read(machineKey: MachineKey);
+		var plan = await Read(MachineKey);
 
 		Assert.That(plan.CredentialStatus, Is.EqualTo(MigrationCredentialStatus.Decrypted));
 	}
@@ -495,7 +493,7 @@ public class MacroDeck2MigrationSourceTests
 	{
 		SeedCredentials();
 
-		var result = await ReadRaw(machineKey: null, decryptionKey: "11111111-1111-1111-1111-111111111111");
+		var result = await ReadRaw(null, "11111111-1111-1111-1111-111111111111");
 
 		Assert.Multiple(() =>
 		{
@@ -512,7 +510,7 @@ public class MacroDeck2MigrationSourceTests
 		SeedCredentials();
 		_migrators = new ClaimingRegistry("vendor_test plugin");
 
-		var plan = await Read(machineKey: MachineKey, skipDecryption: true);
+		var plan = await Read(MachineKey, true);
 
 		Assert.Multiple(() =>
 		{
@@ -534,13 +532,12 @@ public class MacroDeck2MigrationSourceTests
 			.WithIconPack("Powered Steel", "play")
 			.WithProfile("0",
 				"Profil 1",
-				rows: 3,
-				columns: 5,
-				folders:
+				3,
+				5,
 				[
 					MacroDeck2Fixture.Folder("root",
 						"*Root*",
-						[MacroDeck2Fixture.Button(0, 0, iconOff: "Powered Steel.play", iconOn: "Powered Steel.play")],
+						[MacroDeck2Fixture.Button(0, 0, "Powered Steel.play", "Powered Steel.play")],
 						"sub"),
 					MacroDeck2Fixture.Folder("sub", "SinusBot", [MacroDeck2Fixture.Button(1, 0)])
 				])
@@ -550,9 +547,9 @@ public class MacroDeck2MigrationSourceTests
 		var backup = _fixture.PackAsBackup();
 		try
 		{
-			var result = await CreateSource(MachineKey).Read(
-				new MigrationRequest(MacroDeck2MigrationSource.SourceId, backup, null, false),
-				CancellationToken.None);
+			var result = await CreateSource(MachineKey)
+				.Read(new MigrationRequest(MacroDeck2MigrationSource.SourceId, backup, null, false),
+					CancellationToken.None);
 
 			Assert.That(result.Success, Is.True, result.ErrorMessage);
 			var fromBackup = result.Data!;
@@ -585,9 +582,9 @@ public class MacroDeck2MigrationSourceTests
 
 		try
 		{
-			var result = await CreateSource(MachineKey).Read(
-				new MigrationRequest(MacroDeck2MigrationSource.SourceId, empty, null, false),
-				CancellationToken.None);
+			var result = await CreateSource(MachineKey)
+				.Read(new MigrationRequest(MacroDeck2MigrationSource.SourceId, empty, null, false),
+					CancellationToken.None);
 
 			Assert.Multiple(() =>
 			{
@@ -630,7 +627,7 @@ public class MacroDeck2MigrationSourceTests
 		Directory.CreateDirectory(empty);
 		try
 		{
-			var source = CreateSource(machineKey: null);
+			var source = CreateSource(null);
 			var result = await source.Read(new MigrationRequest(MacroDeck2MigrationSource.SourceId, empty, null, false),
 				CancellationToken.None);
 
@@ -642,7 +639,7 @@ public class MacroDeck2MigrationSourceTests
 		}
 		finally
 		{
-			Directory.Delete(empty, recursive: true);
+			Directory.Delete(empty, true);
 		}
 	}
 
@@ -659,29 +656,41 @@ public class MacroDeck2MigrationSourceTests
 	{
 		_fixture.WithProfile("0",
 				"Profile",
-				rows: 3,
-				columns: 5,
-				folders: [MacroDeck2Fixture.Folder("root", "*Root*", [button])])
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("root", "*Root*", [button])])
 			.Build();
 
 		await Task.CompletedTask;
 	}
 
-	private async Task<JsonObject> SingleWidgetData() => WidgetData((await Read()).Profiles.Single().Profile!);
+	private async Task<JsonObject> SingleWidgetData()
+	{
+		return WidgetData((await Read()).Profiles.Single().Profile!);
+	}
 
 	private static JsonObject WidgetData(ProfileFile profile)
-		=> JsonNode.Parse(profile.Folders.SelectMany(folder => folder.Widgets).First().Data!)!.AsObject();
+	{
+		return JsonNode.Parse(profile.Folders.SelectMany(folder => folder.Widgets).First().Data!)!.AsObject();
+	}
 
-	private static JsonArray Flows(JsonObject data) => JsonNode.Parse(data["flows"]!.GetValue<string>())!.AsArray();
+	private static JsonArray Flows(JsonObject data)
+	{
+		return JsonNode.Parse(data["flows"]!.GetValue<string>())!.AsArray();
+	}
 
 	private static bool Disabled(JsonNode? flow)
-		=> flow!["children"]!.AsArray().All(block => block!["disabled"]?.GetValue<bool>() == true);
+	{
+		return flow!["children"]!.AsArray().All(block => block!["disabled"]?.GetValue<bool>() == true);
+	}
 
 	private static string? Parameter(JsonNode block, string name)
-		=> block["parameters"]!.AsArray()
+	{
+		return block["parameters"]!.AsArray()
 			.FirstOrDefault(parameter => parameter!["name"]!.GetValue<string>() == name)
 			?["value"]
 			?.GetValue<string>();
+	}
 
 	private async Task<MigrationPlan> Read(string? machineKey = MachineKey, bool skipDecryption = false)
 	{
@@ -694,46 +703,81 @@ public class MacroDeck2MigrationSourceTests
 		string? machineKey,
 		string? decryptionKey = null,
 		bool skipDecryption = false)
-		=> await CreateSource(machineKey).Read(
-			new MigrationRequest(MacroDeck2MigrationSource.SourceId, _fixture.Root, decryptionKey, skipDecryption),
-			CancellationToken.None);
+	{
+		return await CreateSource(machineKey)
+			.Read(new MigrationRequest(MacroDeck2MigrationSource.SourceId,
+					_fixture.Root,
+					decryptionKey,
+					skipDecryption),
+				CancellationToken.None);
+	}
 
 	private MacroDeck2MigrationSource CreateSource(string? machineKey)
-		=> new(_migrators, new StubMachineKeyReader(machineKey), new LoggerConfiguration().CreateLogger());
+	{
+		return new MacroDeck2MigrationSource(_migrators,
+			new StubMachineKeyReader(machineKey),
+			new LoggerConfiguration().CreateLogger());
+	}
 
 	private sealed class StubMachineKeyReader : IMacroDeck2MachineKeyReader
 	{
 		private readonly string? _key;
 
-		public StubMachineKeyReader(string? key) => _key = key;
+		public StubMachineKeyReader(string? key)
+		{
+			_key = key;
+		}
 
-		public string? TryRead() => _key;
+		public string? TryRead()
+		{
+			return _key;
+		}
 	}
 
 	/// <summary>No integration claims anything, so only the built-in translations apply.</summary>
 	private sealed class NoMigratorRegistry : IMigrationActionRegistry
 	{
-		public IIntegrationMigration? FindByActionSource(MigrationSource source, string actionSource) => null;
+		public IIntegrationMigration? FindByActionSource(MigrationSource source, string actionSource)
+		{
+			return null;
+		}
 
-		public IIntegrationMigration? FindBySettingsSource(MigrationSource source, string settingsSource) => null;
+		public IIntegrationMigration? FindBySettingsSource(MigrationSource source, string settingsSource)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<MigrationSource> SupportedSources() => [];
+		public IReadOnlyList<MigrationSource> SupportedSources()
+		{
+			return [];
+		}
 	}
 
 	private sealed class ClaimingRegistry : IMigrationActionRegistry
 	{
 		private readonly string _settingsSource;
 
-		public ClaimingRegistry(string settingsSource) => _settingsSource = settingsSource;
+		public ClaimingRegistry(string settingsSource)
+		{
+			_settingsSource = settingsSource;
+		}
 
-		public IIntegrationMigration? FindByActionSource(MigrationSource source, string actionSource) => null;
+		public IIntegrationMigration? FindByActionSource(MigrationSource source, string actionSource)
+		{
+			return null;
+		}
 
 		public IIntegrationMigration? FindBySettingsSource(MigrationSource source, string settingsSource)
-			=> string.Equals(settingsSource, _settingsSource, StringComparison.OrdinalIgnoreCase)
+		{
+			return string.Equals(settingsSource, _settingsSource, StringComparison.OrdinalIgnoreCase)
 				? new Migration()
 				: null;
+		}
 
-		public IReadOnlyList<MigrationSource> SupportedSources() => [MigrationSource.MacroDeck2];
+		public IReadOnlyList<MigrationSource> SupportedSources()
+		{
+			return [MigrationSource.MacroDeck2];
+		}
 
 		private sealed class Migration : IIntegrationMigration
 		{
@@ -746,12 +790,16 @@ public class MacroDeck2MigrationSourceTests
 			public Task<ActionMigrationResult?> MigrateActionAsync(
 				ForeignAction action,
 				CancellationToken cancellationToken)
-				=> Task.FromResult<ActionMigrationResult?>(null);
+			{
+				return Task.FromResult<ActionMigrationResult?>(null);
+			}
 
 			public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 				ForeignPluginSettings settings,
 				CancellationToken cancellationToken)
-				=> Task.FromResult<IReadOnlyList<MigratedConfiguration>>([]);
+			{
+				return Task.FromResult<IReadOnlyList<MigratedConfiguration>>([]);
+			}
 		}
 	}
 }

@@ -6,12 +6,23 @@ namespace MacroDeckHost.Application.Plugins.IconPacks;
 
 public sealed class PluginIconPackOwner(IPluginBundledIconPackDeclarations declarations) : IIconPackOwner
 {
-	public bool Owns(IconPackEntity pack) => FindDeclaration(pack) is not null;
+	public bool Owns(IconPackEntity pack)
+	{
+		return FindDeclaration(pack) is not null;
+	}
 
 	public IconPackOwnerDescriptor Describe(IconPackEntity pack)
-		=> new(IconPackOwnerKind.Plugin, CanRemove: false, IsReadOnly: true, OwnerName: FindDeclaration(pack)?.PluginName);
+	{
+		return new IconPackOwnerDescriptor(IconPackOwnerKind.Plugin,
+			false,
+			true,
+			FindDeclaration(pack)?.PluginName);
+	}
 
-	public Task Release(IconPackEntity pack) => Task.CompletedTask;
+	public Task Release(IconPackEntity pack)
+	{
+		return Task.CompletedTask;
+	}
 
 	private DeclaredIconPackSet? FindDeclaration(IconPackEntity pack)
 	{

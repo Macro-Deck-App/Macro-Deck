@@ -5,7 +5,7 @@ using MacroDeck.Sdk.Events;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A27_EventBindingFakeTests
+public class A27EventBindingFakeTests
 {
 	[Test]
 	public void SetBindings_is_what_the_integration_reads_back_and_raises_BindingsChanged()

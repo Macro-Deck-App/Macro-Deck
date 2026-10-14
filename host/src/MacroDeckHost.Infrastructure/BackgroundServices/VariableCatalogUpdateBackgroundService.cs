@@ -135,7 +135,7 @@ public sealed class VariableCatalogUpdateBackgroundService : HostReadyBackground
 				await service.ReportIntegrationVariableValue(update.IntegrationId,
 					variable.Id,
 					string.Empty,
-					bounds: null);
+					null);
 			}
 			else
 			{
@@ -289,8 +289,14 @@ public sealed class VariableCatalogUpdateBackgroundService : HostReadyBackground
 
 		public VariablePollSchedule Schedule { get; }
 
-		public bool TryBeginRead() => Interlocked.CompareExchange(ref _reading, 1, 0) == 0;
+		public bool TryBeginRead()
+		{
+			return Interlocked.CompareExchange(ref _reading, 1, 0) == 0;
+		}
 
-		public void EndRead() => Interlocked.Exchange(ref _reading, 0);
+		public void EndRead()
+		{
+			Interlocked.Exchange(ref _reading, 0);
+		}
 	}
 }

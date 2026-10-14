@@ -177,7 +177,7 @@ public class UiPreviewHotReloadTests
 		var reload = HostInvokes([await socket.NextAsync(MessageTypes.HostInvoke)]).Single();
 		await handler.InvokeAsync(Close("config-1"), CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(reload.Operation, Is.EqualTo(HostOperations.Ui.Reload));
 			Assert.That(await OpenIntegrationConfigAsync(handler, "config-2", "flow-1"), Is.True);
@@ -204,20 +204,24 @@ public class UiPreviewHotReloadTests
 		await run;
 	}
 
-	private static UiCapabilityHandler CreateHandler(IHostInvoker hostInvoker,
+	private static UiCapabilityHandler CreateHandler(
+		IHostInvoker hostInvoker,
 		PluginConnectionState state,
 		ConfigSession configSession,
 		PluginConfigFlowSessions? flows = null)
-		=> new([new PreviewingIntegration(configSession)],
+	{
+		return new UiCapabilityHandler([new PreviewingIntegration(configSession)],
 			hostInvoker,
 			Serilog.Core.Logger.None,
 			flows ?? new PluginConfigFlowSessions(TimeProvider.System),
 			new ModalResultStore(),
 			new PluginCatalogNotifier(state, Serilog.Core.Logger.None));
+	}
 
 	private static async Task<UiSessionOpenResult> OpenPreviewAsync(UiCapabilityHandler handler, string sessionId)
 	{
-		var previewId = UiPreviewCatalog.Scan(typeof(HotReloadedViewPreviews).Assembly).Registrations
+		var previewId = UiPreviewCatalog.Scan(typeof(HotReloadedViewPreviews).Assembly)
+			.Registrations
 			.Single(registration => registration.Declaration.View == HotReloadedViewPreviews.View)
 			.Declaration.Id;
 
@@ -227,8 +231,8 @@ public class UiPreviewHotReloadTests
 				SurfaceKind = UiSurfaceKinds.DeveloperPreview,
 				SessionMode = UiSessionModes.Exclusive,
 				UiModelVersion = 1,
-				SurfaceAttributes = JsonSerializer.SerializeToElement(
-					new Dictionary<string, string> { [UiDeveloperPreviewSurfaceAttributes.PreviewId] = previewId })
+				SurfaceAttributes = JsonSerializer.SerializeToElement(new Dictionary<string, string>
+					{ [UiDeveloperPreviewSurfaceAttributes.PreviewId] = previewId })
 			}),
 			CancellationToken.None);
 
@@ -236,11 +240,16 @@ public class UiPreviewHotReloadTests
 	}
 
 	private static Task<CapabilityInvocationResult> OpenConfigAsync(UiCapabilityHandler handler, string sessionId)
-		=> OpenAsync(handler, sessionId, UiSurfaceKinds.Config);
+	{
+		return OpenAsync(handler, sessionId, UiSurfaceKinds.Config);
+	}
 
-	private static Task<CapabilityInvocationResult> OpenAsync(UiCapabilityHandler handler, string sessionId,
+	private static Task<CapabilityInvocationResult> OpenAsync(
+		UiCapabilityHandler handler,
+		string sessionId,
 		string surfaceKind)
-		=> handler.InvokeAsync(Invocation(new UiSessionOpenArguments
+	{
+		return handler.InvokeAsync(Invocation(new UiSessionOpenArguments
 			{
 				SessionId = sessionId,
 				SurfaceKind = surfaceKind,
@@ -248,8 +257,11 @@ public class UiPreviewHotReloadTests
 				UiModelVersion = 1
 			}),
 			CancellationToken.None);
+	}
 
-	private static async Task<bool> OpenIntegrationConfigAsync(UiCapabilityHandler handler, string sessionId,
+	private static async Task<bool> OpenIntegrationConfigAsync(
+		UiCapabilityHandler handler,
+		string sessionId,
 		string flowId)
 	{
 		var result = await handler.InvokeAsync(Invocation(new UiSessionOpenArguments
@@ -270,7 +282,8 @@ public class UiPreviewHotReloadTests
 	}
 
 	private static CapabilityInvocation Close(string sessionId)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Ui,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -280,17 +293,23 @@ public class UiPreviewHotReloadTests
 			CorrelationId = "c2",
 			Services = new EmptyServiceProvider()
 		};
+	}
 
 	private static List<HostInvokePayload> HostInvokes(IEnumerable<ProtocolEnvelope> envelopes)
-		=> envelopes.Where(envelope => envelope.Type == MessageTypes.HostInvoke)
+	{
+		return envelopes.Where(envelope => envelope.Type == MessageTypes.HostInvoke)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostInvokePayload>(PluginProtocolJson.Options)!)
 			.ToList();
+	}
 
 	private static string? SessionOf(HostInvokePayload invoke)
-		=> invoke.Arguments!.Value.GetProperty("sessionId").GetString();
+	{
+		return invoke.Arguments!.Value.GetProperty("sessionId").GetString();
+	}
 
 	private static CapabilityInvocation Invocation(UiSessionOpenArguments arguments)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Ui,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -299,6 +318,7 @@ public class UiPreviewHotReloadTests
 			CorrelationId = "c1",
 			Services = new EmptyServiceProvider()
 		};
+	}
 
 	private static async Task<List<ProtocolEnvelope>> CollectAsync(FakePluginSocket socket, int count)
 	{
@@ -333,7 +353,7 @@ public class UiPreviewHotReloadTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
 			hostInvoker,
-			hostStateCache: null);
+			null);
 
 		state.ActiveConnection = connection;
 
@@ -349,7 +369,10 @@ public class UiPreviewHotReloadTests
 
 	private sealed class EmptyServiceProvider : IServiceProvider
 	{
-		public object? GetService(Type serviceType) => null;
+		public object? GetService(Type serviceType)
+		{
+			return null;
+		}
 	}
 
 	private sealed class CountingUiConfigFlow : IUiConfigFlow
@@ -357,13 +380,18 @@ public class UiPreviewHotReloadTests
 		public int SessionsCreated { get; private set; }
 
 		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<ConfigFlowResult> SubmitAsync(string stepId,
+		public Task<ConfigFlowResult> SubmitAsync(
+			string stepId,
 			IReadOnlyDictionary<string, object?> input,
 			IConfigFlowContext context,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IUiSession?> CreateUiSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
 		{
@@ -386,19 +414,28 @@ public class UiPreviewHotReloadTests
 			remove { }
 		}
 
-		public UiTree BuildTree() => new()
+		public UiTree BuildTree()
 		{
-			Revision = 1,
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
-			Root = new UiNode { Id = "root", Type = "panel" }
-		};
+			return new UiTree
+			{
+				Revision = 1,
+				Surface = new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+				Root = new UiNode { Id = "root", Type = "panel" }
+			};
+		}
 
-		public IReadOnlyList<UiPatch> DrainPatches() => [];
+		public IReadOnlyList<UiPatch> DrainPatches()
+		{
+			return [];
+		}
 
 		public void Dispatch(UiEvent uiEvent)
 		{
 		}
 
-		public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 }

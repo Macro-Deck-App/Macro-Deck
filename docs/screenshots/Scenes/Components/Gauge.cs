@@ -1,14 +1,19 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 
 internal static partial class Scenes
 {
-	private static UiStack Padded(UiElement child) => new()
+	private static UiStack Padded(UiElement child)
 	{
-		Key = "tile",
-		Padding = TilePadding,
-		Children = [child],
-	};
+		return new UiStack
+		{
+			Key = "tile",
+			Padding = TilePadding,
+			Children = [child]
+		};
+	}
 
 	private static IEnumerable<Scene> GaugeScenes()
 	{
@@ -24,7 +29,7 @@ internal static partial class Scenes
 				StartAngle = 0,
 				EndAngle = 360,
 				Thickness = 0.1,
-				LevelColor = "#34c759",
+				LevelColor = "#34c759"
 			}));
 	}
 }

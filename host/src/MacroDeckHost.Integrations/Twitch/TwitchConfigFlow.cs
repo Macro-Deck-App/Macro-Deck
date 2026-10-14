@@ -156,7 +156,7 @@ public sealed class TwitchConfigFlow : IConfigFlow
 
 		return _deviceCode is null || result.Kind is not ConfigFlowResultKind.Step
 			? result
-			: ConfigFlowResult.Step(LinkStep(_deviceCode, expired: true));
+			: ConfigFlowResult.Step(LinkStep(_deviceCode, true));
 	}
 
 	private async Task<ConfigFlowResult> CompleteAsync(
@@ -201,16 +201,20 @@ public sealed class TwitchConfigFlow : IConfigFlow
 	private bool UsesOwnApplication
 		=> !string.Equals(_clientId, TwitchOAuthEndpoints.MacroDeckClientId, StringComparison.Ordinal);
 
-	private ITwitchOAuthClient CreateClient() => _clientFactory();
+	private ITwitchOAuthClient CreateClient()
+	{
+		return _clientFactory();
+	}
 
 	private ConfigFlowStep LinkStep(TwitchDeviceCode deviceCode, bool expired = false)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = LinkStepId,
 			Title = AppStrings.Integrations.Twitch.Config.LinkTitle(),
 			Description = expired
-				? AppStrings.Integrations.Twitch.Config.LinkDescriptionExpired(count: Minutes(deviceCode.ExpiresIn))
-				: AppStrings.Integrations.Twitch.Config.LinkDescription(count: Minutes(deviceCode.ExpiresIn)),
+				? AppStrings.Integrations.Twitch.Config.LinkDescriptionExpired(Minutes(deviceCode.ExpiresIn))
+				: AppStrings.Integrations.Twitch.Config.LinkDescription(Minutes(deviceCode.ExpiresIn)),
 			Instructions =
 			[
 				new ConfigFlowInstruction
@@ -241,9 +245,11 @@ public sealed class TwitchConfigFlow : IConfigFlow
 			Fields = [],
 			AdvancedFields = [ClientIdField()]
 		};
+	}
 
 	private ConfigFlowStep WaitingStep(TwitchDeviceCode deviceCode)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = LinkStepId,
 			Title = AppStrings.Integrations.Twitch.Config.WaitingTitle(),
@@ -277,9 +283,11 @@ public sealed class TwitchConfigFlow : IConfigFlow
 			Fields = [],
 			AdvancedFields = [ClientIdField()]
 		};
+	}
 
 	private ConfigFlowStep RetryStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = LinkStepId,
 			Title = AppStrings.Integrations.Twitch.Config.LinkTitle(),
@@ -295,12 +303,18 @@ public sealed class TwitchConfigFlow : IConfigFlow
 			Fields = [],
 			AdvancedFields = [ClientIdField()]
 		};
+	}
 
 	private ActionParameter ClientIdField()
-		=> ActionParameter.Text(TwitchConfigKeys.ClientId,
-			label: AppStrings.Integrations.Twitch.Config.ClientIdLabel(),
-			description: AppStrings.Integrations.Twitch.Config.ClientIdDescription(),
+	{
+		return ActionParameter.Text(TwitchConfigKeys.ClientId,
+			AppStrings.Integrations.Twitch.Config.ClientIdLabel(),
+			AppStrings.Integrations.Twitch.Config.ClientIdDescription(),
 			defaultValue: _enteredClientId);
+	}
 
-	private static int Minutes(TimeSpan span) => Math.Max(1, (int)Math.Round(span.TotalMinutes));
+	private static int Minutes(TimeSpan span)
+	{
+		return Math.Max(1, (int)Math.Round(span.TotalMinutes));
+	}
 }

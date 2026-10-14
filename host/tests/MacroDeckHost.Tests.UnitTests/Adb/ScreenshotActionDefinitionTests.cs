@@ -20,7 +20,7 @@ internal sealed class ScreenshotActionDefinitionTests
 	public void SetUp()
 	{
 		_devices = new ScriptedAndroidDevices();
-		_devices.Attach("DEFAULT", stableId: null);
+		_devices.Attach("DEFAULT", null);
 		_health = new AdbHealthTracker();
 		_targets = new ActionVariableTargets(AdbIntegration.IntegrationId);
 		_variables = new VariableApiAccessor
@@ -28,7 +28,10 @@ internal sealed class ScreenshotActionDefinitionTests
 			Current = _targets.IntegrationVariables,
 			UserVariables = _targets.UserVariables
 		};
-		_action = new ScreenshotActionDefinition(new AdbActionServices(() => _devices, () => null, _health, _variables));
+		_action = new ScreenshotActionDefinition(new AdbActionServices(() => _devices,
+			() => null,
+			_health,
+			_variables));
 		_folder = Path.Combine(Path.GetTempPath(), "adb-screenshot-tests-" + Guid.NewGuid().ToString("N"));
 	}
 
@@ -38,12 +41,14 @@ internal sealed class ScreenshotActionDefinitionTests
 		_targets.Dispose();
 		if (Directory.Exists(_folder))
 		{
-			Directory.Delete(_folder, recursive: true);
+			Directory.Delete(_folder, true);
 		}
 	}
 
-	private static ActionExecutionContext Context(Dictionary<string, object> parameters) =>
-		new() { Parameters = parameters };
+	private static ActionExecutionContext Context(Dictionary<string, object> parameters)
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
 	[Test]
 	public async Task Saves_the_capture_as_a_png_in_the_chosen_folder()
@@ -72,7 +77,7 @@ internal sealed class ScreenshotActionDefinitionTests
 	[Test]
 	public async Task Captures_the_chosen_device()
 	{
-		_devices.Attach("SERIAL1", stableId: null);
+		_devices.Attach("SERIAL1", null);
 
 		await _action.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["folder"] = _folder, ["device"] = "SERIAL1" }));
@@ -83,11 +88,12 @@ internal sealed class ScreenshotActionDefinitionTests
 	[Test]
 	public async Task Writes_the_full_saved_path_into_the_named_variable()
 	{
-		await _action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["folder"] = _folder,
-			["fileNameVariable"] = "screenshot_path"
-		}));
+		await _action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["folder"] = _folder,
+				["fileNameVariable"] = "screenshot_path"
+			}));
 
 		var value = await _targets.ValueOf("screenshot_path");
 

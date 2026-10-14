@@ -68,8 +68,10 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 	}
 
 	public async Task<SteamPlayerSummary?> GetPlayerSummaryAsync(string steamId, CancellationToken cancellationToken)
-		=> (await GetPlayerSummariesAsync([steamId], cancellationToken)).FirstOrDefault(player =>
+	{
+		return (await GetPlayerSummariesAsync([steamId], cancellationToken)).FirstOrDefault(player =>
 			string.Equals(player.SteamId, steamId, StringComparison.Ordinal));
+	}
 
 	public async Task<IReadOnlyList<SteamPlayerSummary>> GetPlayerSummariesAsync(
 		IReadOnlyList<string> steamIds,
@@ -79,8 +81,7 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 
 		foreach (var batch in steamIds.Chunk(MaximumBatch))
 		{
-			var response = await GetAsync<PlayerSummariesEnvelope>(
-				"ISteamUser/GetPlayerSummaries/v2/",
+			var response = await GetAsync<PlayerSummariesEnvelope>("ISteamUser/GetPlayerSummaries/v2/",
 				$"steamids={string.Join(',', batch)}",
 				cancellationToken);
 
@@ -101,8 +102,7 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 		FriendListEnvelope? response;
 		try
 		{
-			response = await GetAsync<FriendListEnvelope>(
-				"ISteamUser/GetFriendList/v1/",
+			response = await GetAsync<FriendListEnvelope>("ISteamUser/GetFriendList/v1/",
 				$"steamid={Uri.EscapeDataString(steamId)}&relationship=friend",
 				cancellationToken);
 		}
@@ -118,8 +118,7 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 
 	public async Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken)
 	{
-		var response = await GetAsync<VanityEnvelope>(
-			"ISteamUser/ResolveVanityURL/v1/",
+		var response = await GetAsync<VanityEnvelope>("ISteamUser/ResolveVanityURL/v1/",
 			$"vanityurl={Uri.EscapeDataString(vanityName)}",
 			cancellationToken);
 
@@ -130,8 +129,7 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 		string steamId,
 		CancellationToken cancellationToken)
 	{
-		var response = await GetAsync<OwnedGamesEnvelope>(
-			"IPlayerService/GetOwnedGames/v1/",
+		var response = await GetAsync<OwnedGamesEnvelope>("IPlayerService/GetOwnedGames/v1/",
 			$"steamid={Uri.EscapeDataString(steamId)}&include_appinfo=1&include_played_free_games=1",
 			cancellationToken);
 
@@ -144,8 +142,8 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 
 		return
 		[
-			.. (body.Games ?? []).Where(game => game.AppId > 0).Select(game => new SteamOwnedGame(
-				game.AppId,
+			.. (body.Games ?? []).Where(game => game.AppId > 0)
+			.Select(game => new SteamOwnedGame(game.AppId,
 				string.IsNullOrWhiteSpace(game.Name) ? game.AppId.ToString(CultureInfo.InvariantCulture) : game.Name,
 				Math.Max(0, game.PlaytimeForever),
 				Math.Max(0, game.Playtime2Weeks),
@@ -153,7 +151,10 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 		];
 	}
 
-	public void Dispose() => _http.Dispose();
+	public void Dispose()
+	{
+		_http.Dispose();
+	}
 
 	private async Task<T?> GetAsync<T>(string path, string query, CancellationToken cancellationToken)
 	{
@@ -178,9 +179,11 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 			var content = await response.Content.ReadAsStringAsync(cancellationToken);
 			return string.IsNullOrWhiteSpace(content) ? default : JsonSerializer.Deserialize<T>(content, _json);
 		}
-		catch (Exception exception) when (exception is HttpRequestException or JsonException or IOException
-			or InvalidOperationException ||
-			(exception is TaskCanceledException && !cancellationToken.IsCancellationRequested))
+		catch (Exception exception) when (exception is HttpRequestException
+				or JsonException
+				or IOException
+				or InvalidOperationException
+			|| exception is TaskCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			// The request URL carries the key, so the original exception is not chained or logged.
 			throw new SteamWebApiException(SteamWebFailure.Unavailable);
@@ -192,36 +195,50 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 	private sealed record PlayerSummariesBody(List<PlayerDto>? Players);
 
 	private sealed record PlayerDto(
-		[property: JsonPropertyName("steamid")] string? SteamId,
-		[property: JsonPropertyName("personaname")] string? PersonaName,
-		[property: JsonPropertyName("personastate")] int PersonaState,
+		[property: JsonPropertyName("steamid")]
+		string? SteamId,
+		[property: JsonPropertyName("personaname")]
+		string? PersonaName,
+		[property: JsonPropertyName("personastate")]
+		int PersonaState,
 		[property: JsonPropertyName("gameid")] string? GameId,
-		[property: JsonPropertyName("gameextrainfo")] string? GameExtraInfo,
-		[property: JsonPropertyName("avatarmedium")] string? AvatarMedium);
+		[property: JsonPropertyName("gameextrainfo")]
+		string? GameExtraInfo,
+		[property: JsonPropertyName("avatarmedium")]
+		string? AvatarMedium);
 
 	private sealed record FriendListEnvelope(
-		[property: JsonPropertyName("friendslist")] FriendListBody? FriendsList);
+		[property: JsonPropertyName("friendslist")]
+		FriendListBody? FriendsList);
 
 	private sealed record FriendListBody(List<FriendDto>? Friends);
 
-	private sealed record FriendDto([property: JsonPropertyName("steamid")] string? SteamId);
+	private sealed record FriendDto(
+		[property: JsonPropertyName("steamid")]
+		string? SteamId);
 
 	private sealed record OwnedGamesEnvelope(OwnedGamesBody? Response);
 
 	private sealed record OwnedGamesBody(
-		[property: JsonPropertyName("game_count")] int? GameCount,
+		[property: JsonPropertyName("game_count")]
+		int? GameCount,
 		[property: JsonPropertyName("games")] List<OwnedGameDto>? Games);
 
 	private sealed record OwnedGameDto(
 		[property: JsonPropertyName("appid")] int AppId,
 		[property: JsonPropertyName("name")] string? Name,
-		[property: JsonPropertyName("playtime_forever")] int PlaytimeForever,
-		[property: JsonPropertyName("playtime_2weeks")] int Playtime2Weeks,
-		[property: JsonPropertyName("rtime_last_played")] long LastPlayed);
+		[property: JsonPropertyName("playtime_forever")]
+		int PlaytimeForever,
+		[property: JsonPropertyName("playtime_2weeks")]
+		int Playtime2Weeks,
+		[property: JsonPropertyName("rtime_last_played")]
+		long LastPlayed);
 
 	private sealed record VanityEnvelope(VanityBody? Response);
 
 	private sealed record VanityBody(
-		[property: JsonPropertyName("steamid")] string? SteamId,
-		[property: JsonPropertyName("success")] int Success);
+		[property: JsonPropertyName("steamid")]
+		string? SteamId,
+		[property: JsonPropertyName("success")]
+		int Success);
 }

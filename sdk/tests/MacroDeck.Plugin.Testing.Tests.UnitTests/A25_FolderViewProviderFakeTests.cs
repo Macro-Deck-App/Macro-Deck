@@ -9,10 +9,12 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// host does, so a plugin author's green test against it is not lying about what a real host would do.
 /// </summary>
 [TestFixture]
-public class A25_FolderViewProviderFakeTests
+public class A25FolderViewProviderFakeTests
 {
 	private static FolderViewDescriptor View(string id, bool hasConfiguration = false)
-		=> new(id, LocalizedText.FromLiteral("Dashboard"), HasConfiguration: hasConfiguration);
+	{
+		return new FolderViewDescriptor(id, LocalizedText.FromLiteral("Dashboard"), HasConfiguration: hasConfiguration);
+	}
 
 	[Test]
 	public async Task Registering_the_same_local_id_again_replaces_rather_than_duplicates()
@@ -20,7 +22,7 @@ public class A25_FolderViewProviderFakeTests
 		var context = new FakeFolderViewProviderContext();
 
 		await context.RegisterFolderViewAsync(View("dashboard"));
-		await context.RegisterFolderViewAsync(View("dashboard", hasConfiguration: true));
+		await context.RegisterFolderViewAsync(View("dashboard", true));
 
 		Assert.Multiple(() =>
 		{
@@ -62,15 +64,19 @@ public class A25_FolderViewProviderFakeTests
 	[TestCase("default")]
 	[TestCase("something-new")]
 	public void An_unrecognised_navigation_mode_resolves_to_the_default(string? navigation)
-		=> Assert.That(new FolderViewDescriptor("dashboard", LocalizedText.FromLiteral("D"), Navigation: navigation)
+	{
+		Assert.That(new FolderViewDescriptor("dashboard", LocalizedText.FromLiteral("D"), Navigation: navigation)
 				.ResolvedNavigation,
 			Is.EqualTo(FolderViewNavigation.Default));
+	}
 
 	[Test]
 	public void Hidden_is_the_one_mode_that_suppresses_the_default()
-		=> Assert.That(new FolderViewDescriptor("dashboard", LocalizedText.FromLiteral("D"), Navigation: "hidden")
+	{
+		Assert.That(new FolderViewDescriptor("dashboard", LocalizedText.FromLiteral("D"), Navigation: "hidden")
 				.ResolvedNavigation,
 			Is.EqualTo(FolderViewNavigation.Hidden));
+	}
 
 	[Test]
 	public async Task Every_call_is_recorded_in_order()

@@ -33,8 +33,10 @@ internal sealed class RemoteLayoutProviderContext(IHostInvoker invoker) : ILayou
 	}
 
 	public Task UnregisterLayoutAsync(string layoutId, CancellationToken cancellationToken = default)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.Layouts,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.Layouts,
 			HostOperations.Layouts.Unregister,
 			new LayoutsUnregisterArguments { LayoutId = layoutId },
 			cancellationToken);
+	}
 }

@@ -14,7 +14,7 @@ public sealed class PlatformAnnouncementClient : IPlatformAnnouncementClient, ID
 
 	private const string LatestPath = "api/v1/public/announcements/latest";
 
-	private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+	private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -22,13 +22,16 @@ public sealed class PlatformAnnouncementClient : IPlatformAnnouncementClient, ID
 	private readonly TimeSpan _requestTimeout;
 	private readonly ILogger _logger;
 
-	public PlatformAnnouncementClient(IHttpClientFactory httpClientFactory, StorePlatformOptions options, ILogger logger)
+	public PlatformAnnouncementClient(
+		IHttpClientFactory httpClientFactory,
+		StorePlatformOptions options,
+		ILogger logger)
 		: this(httpClientFactory.CreateClient(HttpClientName), false, options, logger)
 	{
 	}
 
 	internal PlatformAnnouncementClient(HttpMessageHandler handler, StorePlatformOptions options, ILogger logger)
-		: this(new HttpClient(handler, disposeHandler: false), true, options, logger)
+		: this(new HttpClient(handler, false), true, options, logger)
 	{
 	}
 
@@ -56,11 +59,12 @@ public sealed class PlatformAnnouncementClient : IPlatformAnnouncementClient, ID
 
 			if (response.StatusCode != HttpStatusCode.OK)
 			{
-				_logger.Debug("The Macro Deck Platform answered the latest announcement with {Status}", (int)response.StatusCode);
+				_logger.Debug("The Macro Deck Platform answered the latest announcement with {Status}",
+					(int)response.StatusCode);
 				return new AnnouncementFetch.Failed();
 			}
 
-			var body = await response.Content.ReadFromJsonAsync<LatestResponse>(Json, timeout.Token);
+			var body = await response.Content.ReadFromJsonAsync<LatestResponse>(_json, timeout.Token);
 			return body is { Number: > 0, Title: { } title, Content: { } content, PublishedAt: { } publishedAt }
 				? new AnnouncementFetch.Published(new Announcement(body.Number,
 					title,

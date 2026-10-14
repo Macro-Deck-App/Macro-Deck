@@ -79,7 +79,8 @@ public sealed class RemoteDeviceSurfaceProvider : IDeviceSurfaceProvider
 	}
 
 	public Task PushAsync(string deviceId, DeviceSurface surface, CancellationToken cancellationToken)
-		=> _sessionIdsByDeviceId.TryGetValue(deviceId, out var sessionId)
+	{
+		return _sessionIdsByDeviceId.TryGetValue(deviceId, out var sessionId)
 			? InvokeAsync(CapabilityOperations.DeviceProvider.SessionSurface,
 				new DeviceSessionSurfaceArguments
 				{
@@ -87,6 +88,7 @@ public sealed class RemoteDeviceSurfaceProvider : IDeviceSurfaceProvider
 				},
 				cancellationToken)
 			: Task.CompletedTask;
+	}
 
 	public async Task CloseAsync(string deviceId, string? reason, CancellationToken cancellationToken)
 	{
@@ -110,7 +112,8 @@ public sealed class RemoteDeviceSurfaceProvider : IDeviceSurfaceProvider
 	}
 
 	private Task<JsonElement?> InvokeAsync(string operation, object arguments, CancellationToken cancellationToken)
-		=> _invoker.InvokeAsync(ProviderId,
+	{
+		return _invoker.InvokeAsync(ProviderId,
 			new CapabilityInvokeRequest
 			{
 				Kind = CapabilityKinds.DeviceProvider,
@@ -119,4 +122,5 @@ public sealed class RemoteDeviceSurfaceProvider : IDeviceSurfaceProvider
 				Arguments = arguments
 			},
 			cancellationToken);
+	}
 }

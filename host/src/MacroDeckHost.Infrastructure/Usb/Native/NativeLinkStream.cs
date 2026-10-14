@@ -8,8 +8,8 @@ internal sealed class NativeLinkStream : IDisposable
 	private readonly CancellationTokenSource _abort = new();
 	private readonly Lock _creditGate = new();
 
-	private readonly Channel<byte[]> _inbound = Channel.CreateUnbounded<byte[]>(
-		new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
+	private readonly Channel<byte[]> _inbound = Channel.CreateUnbounded<byte[]>(new UnboundedChannelOptions
+		{ SingleReader = true, SingleWriter = true });
 
 	private long _sendCredit = LinkProtocol.InitialWindow;
 	private TaskCompletionSource? _creditWaiter;
@@ -27,17 +27,21 @@ internal sealed class NativeLinkStream : IDisposable
 
 	public Task Completion { get; private set; } = Task.CompletedTask;
 
-	public void Start() => Completion = TaskObservation.Settle(Task.Run(async () =>
+	public void Start()
 	{
-		try
-		{
-			await RunAsync();
-		}
-		finally
-		{
-			Dispose();
-		}
-	}), _link.Logger);
+		Completion = TaskObservation.Settle(Task.Run(async () =>
+			{
+				try
+				{
+					await RunAsync();
+				}
+				finally
+				{
+					Dispose();
+				}
+			}),
+			_link.Logger);
+	}
 
 	public bool Receive(byte[] payload)
 	{
@@ -63,7 +67,10 @@ internal sealed class NativeLinkStream : IDisposable
 		waiter?.TrySetResult();
 	}
 
-	public void CloseFromPeer() => _inbound.Writer.TryComplete();
+	public void CloseFromPeer()
+	{
+		_inbound.Writer.TryComplete();
+	}
 
 	public uint TakeGrant()
 	{
@@ -83,7 +90,10 @@ internal sealed class NativeLinkStream : IDisposable
 		}
 	}
 
-	public void Dispose() => _abort.Dispose();
+	public void Dispose()
+	{
+		_abort.Dispose();
+	}
 
 	private async Task RunAsync()
 	{

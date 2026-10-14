@@ -25,22 +25,22 @@ public sealed class CoreEventProvider : IHostEventProvider
 			ConfigurationParameters =
 			[
 				ActionParameter.Autocomplete("variable",
-					label: AppStrings.Events.Common.VariableLabel(),
-					description: AppStrings.Events.Core.VariableChangedWatchDescription(),
+					AppStrings.Events.Common.VariableLabel(),
+					AppStrings.Events.Core.VariableChangedWatchDescription(),
 					optionsSourceId: VariableOptionsSourceIds.Variables,
 					required: true),
 				ActionParameter.Text("value",
-					label: AppStrings.Events.Core.ChangedToLabel(),
-					description: AppStrings.Events.Core.ChangedToDescription()),
+					AppStrings.Events.Core.ChangedToLabel(),
+					AppStrings.Events.Core.ChangedToDescription()),
 				ActionParameter.Text("previousValue",
-					label: AppStrings.Events.Core.ChangedFromLabel(),
-					description: AppStrings.Events.Core.ChangedFromDescription())
+					AppStrings.Events.Core.ChangedFromLabel(),
+					AppStrings.Events.Core.ChangedFromDescription())
 			],
 			PayloadParameters =
 			[
 				VariableNamePayload(),
-				ActionParameter.Text("value", label: AppStrings.Events.Core.NewValueLabel()),
-				ActionParameter.Text("previousValue", label: AppStrings.Events.Core.PreviousValueLabel())
+				ActionParameter.Text("value", AppStrings.Events.Core.NewValueLabel()),
+				ActionParameter.Text("previousValue", AppStrings.Events.Core.PreviousValueLabel())
 			]
 		},
 		new()
@@ -69,8 +69,8 @@ public sealed class CoreEventProvider : IHostEventProvider
 			PayloadParameters =
 			[
 				ProfilePayloadId(),
-				ActionParameter.Text("profileName", label: AppStrings.Events.Common.ProfileLabel()),
-				ActionParameter.Text("change", label: AppStrings.Events.Core.ChangeLabel())
+				ActionParameter.Text("profileName", AppStrings.Events.Common.ProfileLabel()),
+				ActionParameter.Text("change", AppStrings.Events.Core.ChangeLabel())
 			]
 		},
 		new()
@@ -83,10 +83,10 @@ public sealed class CoreEventProvider : IHostEventProvider
 			PayloadParameters =
 			[
 				FolderPayloadId(),
-				ActionParameter.Text("folderName", label: AppStrings.Events.Common.FolderLabel()),
+				ActionParameter.Text("folderName", AppStrings.Events.Common.FolderLabel()),
 				ProfilePayloadId(),
 				DevicePayloadId(),
-				ActionParameter.Text("clientId", label: AppStrings.Events.Common.ClientLabel())
+				ActionParameter.Text("clientId", AppStrings.Events.Common.ClientLabel())
 			]
 		},
 		new()
@@ -116,7 +116,7 @@ public sealed class CoreEventProvider : IHostEventProvider
 			PayloadParameters =
 			[
 				IntegrationPayloadId(),
-				ActionParameter.Text("integrationName", label: AppStrings.Events.Common.IntegrationLabel())
+				ActionParameter.Text("integrationName", AppStrings.Events.Common.IntegrationLabel())
 			]
 		},
 		new()
@@ -128,7 +128,7 @@ public sealed class CoreEventProvider : IHostEventProvider
 			PayloadParameters =
 			[
 				IntegrationPayloadId(),
-				ActionParameter.Text("integrationName", label: AppStrings.Events.Common.IntegrationLabel())
+				ActionParameter.Text("integrationName", AppStrings.Events.Common.IntegrationLabel())
 			]
 		},
 		new()
@@ -137,7 +137,7 @@ public sealed class CoreEventProvider : IHostEventProvider
 			Name = AppStrings.Events.Core.ServerStartedName(),
 			Description = AppStrings.Events.Core.ServerStartedDescription(),
 			Category = AppStrings.Events.Core.ApplicationCategory(),
-			PayloadParameters = [ActionParameter.Text("version", label: AppStrings.Events.Common.VersionLabel())]
+			PayloadParameters = [ActionParameter.Text("version", AppStrings.Events.Common.VersionLabel())]
 		},
 		new()
 		{
@@ -145,58 +145,75 @@ public sealed class CoreEventProvider : IHostEventProvider
 			Name = AppStrings.Events.Core.ServerStoppedName(),
 			Description = AppStrings.Events.Core.ServerStoppedDescription(),
 			Category = AppStrings.Events.Core.ApplicationCategory(),
-			PayloadParameters = [ActionParameter.Text("version", label: AppStrings.Events.Common.VersionLabel())]
+			PayloadParameters = [ActionParameter.Text("version", AppStrings.Events.Common.VersionLabel())]
 		}
 	];
 
-	private static IReadOnlyList<ActionParameter> ClientPresencePayload() =>
-	[
-		ActionParameter.Text("clientId", label: AppStrings.Events.Common.ClientLabel()),
-		DevicePayloadId(),
-		ActionParameter.Text("deviceName", label: AppStrings.Events.Common.DeviceLabel())
-	];
+	private static IReadOnlyList<ActionParameter> ClientPresencePayload()
+	{
+		return
+		[
+			ActionParameter.Text("clientId", AppStrings.Events.Common.ClientLabel()),
+			DevicePayloadId(),
+			ActionParameter.Text("deviceName", AppStrings.Events.Common.DeviceLabel())
+		];
+	}
 
 	// A payload id borrows the option source its matching filter uses, so a condition comparing
 	// against it is authored by picking a name while the stored value stays the stable id. Only the
 	// type and the source are shared: a filter also carries "leaving this empty means any", which a
 	// payload field - always populated by the occurrence - must not inherit.
 	private static ActionParameter DevicePayloadId()
-		=> ActionParameter.DynamicChoice("deviceId",
-			label: AppStrings.Events.Core.DeviceIdLabel(),
+	{
+		return ActionParameter.DynamicChoice("deviceId",
+			AppStrings.Events.Core.DeviceIdLabel(),
 			optionsSourceId: DeckOptionsSourceIds.Devices);
+	}
 
 	private static ActionParameter FolderPayloadId()
-		=> ActionParameter.DynamicChoice("folderId",
-			label: AppStrings.Events.Core.FolderIdLabel(),
+	{
+		return ActionParameter.DynamicChoice("folderId",
+			AppStrings.Events.Core.FolderIdLabel(),
 			optionsSourceId: DeckOptionsSourceIds.Folders);
+	}
 
 	private static ActionParameter IntegrationPayloadId()
-		=> ActionParameter.DynamicChoice("integrationId",
-			label: AppStrings.Events.Core.IntegrationIdLabel(),
+	{
+		return ActionParameter.DynamicChoice("integrationId",
+			AppStrings.Events.Core.IntegrationIdLabel(),
 			optionsSourceId: DeckOptionsSourceIds.Integrations);
+	}
 
 	private static ActionParameter ProfilePayloadId()
-		=> ActionParameter.DynamicChoice("profileId",
-			label: AppStrings.Events.Core.ProfileIdLabel(),
+	{
+		return ActionParameter.DynamicChoice("profileId",
+			AppStrings.Events.Core.ProfileIdLabel(),
 			optionsSourceId: DeckOptionsSourceIds.Profiles);
+	}
 
 	private static ActionParameter VariableNamePayload()
-		=> ActionParameter.Autocomplete("variable",
-			label: AppStrings.Events.Common.VariableLabel(),
+	{
+		return ActionParameter.Autocomplete("variable",
+			AppStrings.Events.Common.VariableLabel(),
 			optionsSourceId: VariableOptionsSourceIds.Variables);
+	}
 
 	private static ActionParameter DeviceFilter()
-		=> ActionParameter.DynamicChoice("deviceId",
-			label: AppStrings.Events.Common.DeviceLabel(),
-			description: AppStrings.Events.Common.DeviceFilterDescription(),
-			optionsSourceId: DeckOptionsSourceIds.Devices,
-			placeholder: AppStrings.Events.Common.AnyDevicePlaceholder());
+	{
+		return ActionParameter.DynamicChoice("deviceId",
+			AppStrings.Events.Common.DeviceLabel(),
+			AppStrings.Events.Common.DeviceFilterDescription(),
+			DeckOptionsSourceIds.Devices,
+			AppStrings.Events.Common.AnyDevicePlaceholder());
+	}
 
 	private static ActionParameter VariableNameFilter()
-		=> ActionParameter.Autocomplete("variable",
-			label: AppStrings.Events.Common.VariableLabel(),
-			description: AppStrings.Events.Common.VariableFilterDescription(),
+	{
+		return ActionParameter.Autocomplete("variable",
+			AppStrings.Events.Common.VariableLabel(),
+			AppStrings.Events.Common.VariableFilterDescription(),
 			optionsSourceId: VariableOptionsSourceIds.Variables);
+	}
 
 	// These all filter on an *id* with a friendly-name pick list rather than on a name typed by hand:
 	// a rename must not silently break a trigger, and the user must never see the raw id. Ids are
@@ -204,23 +221,29 @@ public sealed class CoreEventProvider : IHostEventProvider
 	// options only load when the list is opened and an empty field otherwise reads as "not configured
 	// yet" rather than "no filter".
 	private static ActionParameter ProfileFilter()
-		=> ActionParameter.DynamicChoice("profileId",
-			label: AppStrings.Events.Common.ProfileLabel(),
-			description: AppStrings.Events.Common.ProfileFilterDescription(),
-			optionsSourceId: DeckOptionsSourceIds.Profiles,
-			placeholder: AppStrings.Events.Common.AnyProfilePlaceholder());
+	{
+		return ActionParameter.DynamicChoice("profileId",
+			AppStrings.Events.Common.ProfileLabel(),
+			AppStrings.Events.Common.ProfileFilterDescription(),
+			DeckOptionsSourceIds.Profiles,
+			AppStrings.Events.Common.AnyProfilePlaceholder());
+	}
 
 	private static ActionParameter FolderFilter()
-		=> ActionParameter.DynamicChoice("folderId",
-			label: AppStrings.Events.Common.FolderLabel(),
-			description: AppStrings.Events.Common.FolderFilterDescription(),
-			optionsSourceId: DeckOptionsSourceIds.Folders,
-			placeholder: AppStrings.Events.Common.AnyFolderPlaceholder());
+	{
+		return ActionParameter.DynamicChoice("folderId",
+			AppStrings.Events.Common.FolderLabel(),
+			AppStrings.Events.Common.FolderFilterDescription(),
+			DeckOptionsSourceIds.Folders,
+			AppStrings.Events.Common.AnyFolderPlaceholder());
+	}
 
 	private static ActionParameter IntegrationFilter()
-		=> ActionParameter.DynamicChoice("integrationId",
-			label: AppStrings.Events.Common.IntegrationLabel(),
-			description: AppStrings.Events.Common.IntegrationFilterDescription(),
-			optionsSourceId: DeckOptionsSourceIds.Integrations,
-			placeholder: AppStrings.Events.Common.AnyIntegrationPlaceholder());
+	{
+		return ActionParameter.DynamicChoice("integrationId",
+			AppStrings.Events.Common.IntegrationLabel(),
+			AppStrings.Events.Common.IntegrationFilterDescription(),
+			DeckOptionsSourceIds.Integrations,
+			AppStrings.Events.Common.AnyIntegrationPlaceholder());
+	}
 }

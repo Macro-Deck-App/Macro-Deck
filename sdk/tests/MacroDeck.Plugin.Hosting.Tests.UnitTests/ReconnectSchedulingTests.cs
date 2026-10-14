@@ -50,7 +50,7 @@ public class ReconnectSchedulingTests
 	public async Task TearDown()
 	{
 		await _host.DisposeAsync();
-		Directory.Delete(_stateDirectory, recursive: true);
+		Directory.Delete(_stateDirectory, true);
 	}
 
 	[Test]
@@ -72,7 +72,7 @@ public class ReconnectSchedulingTests
 			Is.EqualTo(1),
 			"the first retry after a session is the first attempt");
 
-		await ReconnectAsync(time, state, connections: 2);
+		await ReconnectAsync(time, state, 2);
 
 		// A second blip, an arbitrary amount of healthy running later. The schedule must not remember
 		// the first one: the session that opened in between is what says the trouble is over.
@@ -81,8 +81,8 @@ public class ReconnectSchedulingTests
 
 		Assert.That(state.ReconnectAttempt,
 			Is.EqualTo(1),
-			"a healthy session resets the backoff, so this retry is scheduled at the initial delay and " +
-			"not further along the curve towards the 30 s cap");
+			"a healthy session resets the backoff, so this retry is scheduled at the initial delay and "
+			+ "not further along the curve towards the 30 s cap");
 	}
 
 	[Test]
@@ -122,11 +122,13 @@ public class ReconnectSchedulingTests
 	/// </para>
 	/// </summary>
 	private Task ReconnectAsync(ManualTimeProvider time, PluginConnectionState state, int connections)
-		=> Wait.UntilAsync(() =>
+	{
+		return Wait.UntilAsync(() =>
 		{
 			time.Advance(_clockStep);
 			return state.IsReady && _host.Connections == connections;
 		});
+	}
 
 	private PluginHostBuilder Builder(TimeProvider time)
 	{

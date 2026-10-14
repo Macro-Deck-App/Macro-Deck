@@ -97,7 +97,9 @@ public class MusicPlayerWidgetViewTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Node(host, "progress").Property("value")!.Value
-					.GetProperty("$progress").GetProperty("rate").GetDouble(),
+					.GetProperty("$progress")
+					.GetProperty("rate")
+					.GetDouble(),
 				Is.Zero,
 				"a paused timeline must stop advancing on the reader's own clock");
 			Assert.That(BadgeResourceId(host), Does.EndWith(".paused"));
@@ -217,7 +219,7 @@ public class MusicPlayerWidgetViewTests
 		{
 			IsLoading = false,
 			IsUnavailable = true,
-			StatusMessage = "Rate limited",
+			StatusMessage = "Rate limited"
 		});
 
 		Assert.Multiple(() =>
@@ -336,7 +338,7 @@ public class MusicPlayerWidgetViewTests
 				ShowTitle = false,
 				ShowArtist = false,
 				ShowAlbum = false,
-				ShowTimeline = false,
+				ShowTimeline = false
 			});
 
 		Assert.Multiple(() =>
@@ -362,7 +364,7 @@ public class MusicPlayerWidgetViewTests
 		state.Value = Playing() with
 		{
 			TrackName = "Nannou",
-			Position = UiProgressReference.Advancing(0, _anchor, 189_000),
+			Position = UiProgressReference.Advancing(0, _anchor, 189_000)
 		};
 
 		Assert.Multiple(() =>
@@ -419,7 +421,10 @@ public class MusicPlayerWidgetViewTests
 		var config = new UiState<MusicPlayerWidgetData>(new MusicPlayerWidgetData());
 		var host = UiTestHost.Render(MusicPlayerWidgetView.Build(state, config, Icons()), WidgetSurface());
 
-		string? Background(string key) => Node(host, key).Property("background")?.GetString();
+		string? Background(string key)
+		{
+			return Node(host, key).Property("background")?.GetString();
+		}
 
 		Assert.Multiple(() =>
 		{
@@ -459,7 +464,10 @@ public class MusicPlayerWidgetViewTests
 		var config = new UiState<MusicPlayerWidgetData>(FullCover());
 		var host = UiTestHost.Render(MusicPlayerWidgetView.Build(state, config, Icons()), WidgetSurface());
 
-		string? Background(string key) => Node(host, key).Property("background")?.GetString();
+		string? Background(string key)
+		{
+			return Node(host, key).Property("background")?.GetString();
+		}
 
 		Assert.That(Background("artworkLayer"), Is.EqualTo("#241832"));
 
@@ -477,7 +485,8 @@ public class MusicPlayerWidgetViewTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Background("musicPlayer"), Is.EqualTo("transparent"));
-			Assert.That(Background("artworkLayer"), Is.EqualTo("#241832"),
+			Assert.That(Background("artworkLayer"),
+				Is.EqualTo("#241832"),
 				"artwork drawn at reduced opacity still needs an opaque backdrop");
 		});
 
@@ -489,7 +498,8 @@ public class MusicPlayerWidgetViewTests
 	[Test]
 	public void The_stored_background_is_read_from_the_widget_data()
 	{
-		var parsed = MusicPlayerWidgetData.Parse(JsonSerializer.SerializeToElement(new { backgroundColor = " Transparent " }));
+		var parsed = MusicPlayerWidgetData.Parse(
+			JsonSerializer.SerializeToElement(new { backgroundColor = " Transparent " }));
 
 		Assert.That(parsed.BackgroundColor, Is.EqualTo("transparent"));
 	}
@@ -617,12 +627,12 @@ public class MusicPlayerWidgetViewTests
 	{
 		var shortBadge = Basis(Node(Render(Playing() with { Badge = "2/3" }), "badgeText"), "mainSize");
 		var eight = Basis(Node(Render(Playing() with { Badge = "12345678" }), "badgeText"), "mainSize");
-		var long_ = Basis(Node(Render(Playing() with { Badge = "Track 12 of 30" }), "badgeText"), "mainSize");
+		var @long = Basis(Node(Render(Playing() with { Badge = "Track 12 of 30" }), "badgeText"), "mainSize");
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(eight, Is.GreaterThan(shortBadge));
-			Assert.That(long_, Is.EqualTo(eight));
+			Assert.That(@long, Is.EqualTo(eight));
 		});
 	}
 
@@ -649,14 +659,15 @@ public class MusicPlayerWidgetViewTests
 			IsUnavailable = true,
 			Label = LocalizedText.FromLiteral("SinusBot"),
 			SourceName = "Kitchen",
-			Badge = "2/3",
+			Badge = "2/3"
 		});
 		var disconnected = Render(new MusicPlayerViewState
-		{
-			IsLoading = false,
-			SourceName = "Kitchen",
-			Badge = "2/3",
-		}, new MusicPlayerWidgetData { ShowHeader = false });
+			{
+				IsLoading = false,
+				SourceName = "Kitchen",
+				Badge = "2/3"
+			},
+			new MusicPlayerWidgetData { ShowHeader = false });
 
 		Assert.Multiple(() =>
 		{
@@ -700,7 +711,10 @@ public class MusicPlayerWidgetViewTests
 	[Test]
 	public void A_name_already_carrying_the_source_does_not_hide_it_once_the_name_itself_is_hidden()
 	{
-		var host = Render(Playing() with { Label = LocalizedText.FromLiteral("SinusBot (Kitchen)"), SourceName = "Kitchen" },
+		var host = Render(Playing() with
+			{
+				Label = LocalizedText.FromLiteral("SinusBot (Kitchen)"), SourceName = "Kitchen"
+			},
 			new MusicPlayerWidgetData { ShowHeader = false });
 
 		Assert.Multiple(() =>
@@ -716,7 +730,7 @@ public class MusicPlayerWidgetViewTests
 		var host = Render(Playing() with
 		{
 			Label = LocalizedText.FromLocalized(AppStrings.Widgets.Music.MusicPlayer()),
-			SourceName = "Music Player",
+			SourceName = "Music Player"
 		});
 
 		Assert.That(FindNode(host, "source"), Is.Not.Null);
@@ -736,13 +750,18 @@ public class MusicPlayerWidgetViewTests
 	}
 
 	private static double Basis(UiTestNode node, string key)
-		=> node.Property(key)!.Value.GetProperty("basis").GetDouble();
+	{
+		return node.Property(key)!.Value.GetProperty("basis").GetDouble();
+	}
 
 	private static MusicPlayerWidgetData FullCover()
-		=> new() { CoverStyle = MusicPlayerWidgetData.FullCoverStyle };
+	{
+		return new MusicPlayerWidgetData { CoverStyle = MusicPlayerWidgetData.FullCoverStyle };
+	}
 
 	private static MusicPlayerViewState Playing()
-		=> new()
+	{
+		return new MusicPlayerViewState
 		{
 			IsLoading = false,
 			IsConnected = true,
@@ -755,14 +774,19 @@ public class MusicPlayerWidgetViewTests
 			Artwork = new UiResource { ResourceId = "app.macro-deck.music-player.artwork.test" },
 			Accent = "#c9a6ff",
 			Background = "#241832",
-			Position = UiProgressReference.Advancing(42_000, _anchor, 215_000),
+			Position = UiProgressReference.Advancing(42_000, _anchor, 215_000)
 		};
+	}
 
 	private static UiProgressReference HaltedAt(long positionMs)
-		=> UiProgressReference.Halted(positionMs, _anchor, 215_000);
+	{
+		return UiProgressReference.Halted(positionMs, _anchor, 215_000);
+	}
 
 	private static string BadgeResourceId(UiTestHost host)
-		=> Node(host, "badge").Property("source")!.Value.GetProperty("resourceId").GetString()!;
+	{
+		return Node(host, "badge").Property("source")!.Value.GetProperty("resourceId").GetString()!;
+	}
 
 	/// <summary>
 	/// A node by the key its element declared, wherever the tree put it. Node ids are the whole path
@@ -770,21 +794,33 @@ public class MusicPlayerWidgetViewTests
 	/// also asserting where it sits - which is what would otherwise make every one of these tests fail on
 	/// a purely structural change.
 	/// </summary>
-	private static UiTestNode Node(UiTestHost host, string key) => FindNode(host, key)!;
+	private static UiTestNode Node(UiTestHost host, string key)
+	{
+		return FindNode(host, key)!;
+	}
 
 	private static UiTestNode? FindNode(UiTestHost host, string key)
-		=> Walk(host.Root).SingleOrDefault(node
-			=> string.Equals(node.Id, key, StringComparison.Ordinal) ||
-			node.Id.EndsWith($".{key}", StringComparison.Ordinal));
+	{
+		return Walk(host.Root)
+			.SingleOrDefault(node
+				=> string.Equals(node.Id, key, StringComparison.Ordinal)
+				|| node.Id.EndsWith($".{key}", StringComparison.Ordinal));
+	}
 
 	private static string PlaceholderResourceId(UiTestHost host)
-		=> Node(host, "coverPlaceholder").Property("source")!.Value.GetProperty("resourceId").GetString()!;
+	{
+		return Node(host, "coverPlaceholder").Property("source")!.Value.GetProperty("resourceId").GetString()!;
+	}
 
 	private static string? LocalizationKey(UiTestHost host, string nodeId)
-		=> Node(host, nodeId).Property("text")!.Value.GetProperty("$localized").GetProperty("key").GetString();
+	{
+		return Node(host, nodeId).Property("text")!.Value.GetProperty("$localized").GetProperty("key").GetString();
+	}
 
 	private static MusicPlayerIconResources Icons()
-		=> MusicPlayerWidgetIcons.EnsureRegistered(new UiResourceStore());
+	{
+		return MusicPlayerWidgetIcons.EnsureRegistered(new UiResourceStore());
+	}
 
 	private static UiTestHost Render(MusicPlayerViewState value, MusicPlayerWidgetData? config = null)
 	{
@@ -795,7 +831,9 @@ public class MusicPlayerWidgetViewTests
 	}
 
 	private static UiSurface WidgetSurface()
-		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	}
 
 	private static IEnumerable<UiTestNode> Walk(UiTestNode node)
 	{

@@ -40,11 +40,17 @@ internal sealed class SetButtonStateActionDefinition : IDynamicOptionsActionDefi
 	public LocalizedText Description => AppStrings.Integrations.Widgets.Actions.SetButtonStateDescription();
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new ButtonStateExecutor(_widgets, isSet: true);
+	public IActionExecutor CreateExecutor()
+	{
+		return new ButtonStateExecutor(_widgets, true);
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(ResolveStateOptions(_widgets(), context));
+	{
+		return Task.FromResult(ResolveStateOptions(_widgets(), context));
+	}
 
 	private static DynamicOptionsResult ResolveStateOptions(IWidgetApi? widgets, DynamicOptionsContext context)
 	{
@@ -81,7 +87,10 @@ internal sealed class CycleButtonStateActionDefinition : IActionDefinition
 	public LocalizedText Description => AppStrings.Integrations.Widgets.Actions.CycleButtonStateDescription();
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new ButtonStateExecutor(_widgets, isSet: false);
+	public IActionExecutor CreateExecutor()
+	{
+		return new ButtonStateExecutor(_widgets, false);
+	}
 }
 
 internal sealed class ButtonStateExecutor : IActionExecutor
@@ -121,23 +130,31 @@ internal sealed class ButtonStateExecutor : IActionExecutor
 	}
 
 	private static string ReadState(ActionExecutionContext context)
-		=> context.Parameters.TryGetValue("state", out var value) ? value.ToString() ?? string.Empty : string.Empty;
-
-	private static string MapErrorCode(WidgetStateWriteError? error) => error switch
 	{
-		WidgetStateWriteError.ProviderActive or WidgetStateWriteError.MappingActive =>
-			ActionErrorCodes.PermissionDenied,
-		WidgetStateWriteError.UnknownState => ActionErrorCodes.InvalidParameter,
-		_ => ActionErrorCodes.NotFound
-	};
+		return context.Parameters.TryGetValue("state", out var value) ? value.ToString() ?? string.Empty : string.Empty;
+	}
 
-	private static LocalizedText Describe(WidgetStateWriteError? error, string widgetId) => error switch
+	private static string MapErrorCode(WidgetStateWriteError? error)
 	{
-		WidgetStateWriteError.ProviderActive =>
-			AppStrings.Integrations.Widgets.Errors.StateControlledByProvider(),
-		WidgetStateWriteError.MappingActive =>
-			AppStrings.Integrations.Widgets.Errors.StateControlledByMapping(),
-		WidgetStateWriteError.UnknownState => AppStrings.Integrations.Widgets.Errors.UnknownState(),
-		_ => AppStrings.Integrations.Widgets.Errors.NotStateModeButton(widgetId: widgetId)
-	};
+		return error switch
+		{
+			WidgetStateWriteError.ProviderActive or WidgetStateWriteError.MappingActive =>
+				ActionErrorCodes.PermissionDenied,
+			WidgetStateWriteError.UnknownState => ActionErrorCodes.InvalidParameter,
+			_ => ActionErrorCodes.NotFound
+		};
+	}
+
+	private static LocalizedText Describe(WidgetStateWriteError? error, string widgetId)
+	{
+		return error switch
+		{
+			WidgetStateWriteError.ProviderActive =>
+				AppStrings.Integrations.Widgets.Errors.StateControlledByProvider(),
+			WidgetStateWriteError.MappingActive =>
+				AppStrings.Integrations.Widgets.Errors.StateControlledByMapping(),
+			WidgetStateWriteError.UnknownState => AppStrings.Integrations.Widgets.Errors.UnknownState(),
+			_ => AppStrings.Integrations.Widgets.Errors.NotStateModeButton(widgetId)
+		};
+	}
 }

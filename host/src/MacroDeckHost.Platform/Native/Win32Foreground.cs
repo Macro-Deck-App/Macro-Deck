@@ -19,7 +19,10 @@ internal static class Win32Foreground
 	// input queue with the current foreground thread via AttachThreadInput is what lifts that restriction
 	// for the duration of the call. It still fails against a higher-integrity (elevated) target, which is
 	// reported as a failure rather than silently ignored.
-	public static bool TryActivate(nint window) => TryActivate(window, ActivationTimeoutMs);
+	public static bool TryActivate(nint window)
+	{
+		return TryActivate(window, ActivationTimeoutMs);
+	}
 
 	/// <param name="verifyTimeoutMs">
 	/// How long to wait for the window to actually reach the foreground. Pass 0 to request activation
@@ -119,10 +122,14 @@ internal static class Win32Foreground
 	}
 
 	private static uint ThreadOf(nint window)
-		=> window == nint.Zero ? 0 : Win32Windows.GetWindowThreadProcessId(window, out _);
+	{
+		return window == nint.Zero ? 0 : Win32Windows.GetWindowThreadProcessId(window, out _);
+	}
 
 	private static bool TryAttach(uint currentThread, uint otherThread)
-		=> otherThread != 0 && otherThread != currentThread && AttachThreadInput(currentThread, otherThread, true);
+	{
+		return otherThread != 0 && otherThread != currentThread && AttachThreadInput(currentThread, otherThread, true);
+	}
 
 	private static void Detach(uint currentThread, uint otherThread, bool attached)
 	{
@@ -141,7 +148,9 @@ internal static class Win32Foreground
 	// fWinIni stays 0 so the user's persisted setting is never rewritten - the change lasts for this
 	// session only and is restored immediately.
 	private static void SetForegroundLockTimeout(uint timeout)
-		=> _ = SystemParametersInfoSet(SpiSetForegroundLockTimeout, 0, (nint)timeout, 0);
+	{
+		_ = SystemParametersInfoSet(SpiSetForegroundLockTimeout, 0, (nint)timeout, 0);
+	}
 
 	[DllImport("user32.dll")]
 	[return: MarshalAs(UnmanagedType.Bool)]

@@ -19,19 +19,19 @@ internal sealed class RemoteVideoStreamProviderContext(VideoStreamProviderRegist
 		{
 			supported = await registry.InvokeWithRetryAsync(HostOperations.VideoStreams.ProvidersChanged,
 					null,
-					ignoreUnknownSession: false,
+					false,
 					cancellationToken)
 				.ConfigureAwait(false);
 		}
 		catch
 		{
-			await registry.WithdrawAsync(registration, notifyHost: false).ConfigureAwait(false);
+			await registry.WithdrawAsync(registration, false).ConfigureAwait(false);
 			throw;
 		}
 
 		if (!supported)
 		{
-			await registry.WithdrawAsync(registration, notifyHost: false).ConfigureAwait(false);
+			await registry.WithdrawAsync(registration, false).ConfigureAwait(false);
 			return new VideoStreamProviderRegistration(string.Empty, string.Empty);
 		}
 
@@ -40,7 +40,9 @@ internal sealed class RemoteVideoStreamProviderContext(VideoStreamProviderRegist
 	}
 
 	public Task UnregisterProviderAsync(string providerId, CancellationToken cancellationToken = default)
-		=> registry.UnregisterAsync(providerId, cancellationToken);
+	{
+		return registry.UnregisterAsync(providerId, cancellationToken);
+	}
 
 	public async Task NotifyStreamsChangedAsync(string providerId, CancellationToken cancellationToken = default)
 	{
@@ -48,7 +50,7 @@ internal sealed class RemoteVideoStreamProviderContext(VideoStreamProviderRegist
 
 		await registry.InvokeWithRetryAsync(HostOperations.VideoStreams.StreamsChanged,
 				new VideoStreamsStreamsChangedArguments { ProviderId = providerId },
-				ignoreUnknownSession: false,
+				false,
 				cancellationToken)
 			.ConfigureAwait(false);
 	}
@@ -120,5 +122,7 @@ internal sealed class RemoteVideoStreamProviderContext(VideoStreamProviderRegist
 	}
 
 	private bool IsLive(string sessionId)
-		=> registry.Sessions.TryGet(sessionId, out var session) && session.Phase != VideoStreamSessionPhase.Closed;
+	{
+		return registry.Sessions.TryGet(sessionId, out var session) && session.Phase != VideoStreamSessionPhase.Closed;
+	}
 }

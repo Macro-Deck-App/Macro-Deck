@@ -135,8 +135,8 @@ internal sealed class HomeAssistantVariableCatalog
 		object? value,
 		CancellationToken cancellationToken = default)
 	{
-		if (ParseId(id) is not { Child: { } child } parsed ||
-			HomeAssistantControls.Find(parsed.EntityId, child) is not { } control)
+		if (ParseId(id) is not { Child: { } child } parsed
+			|| HomeAssistantControls.Find(parsed.EntityId, child) is not { } control)
 		{
 			return VariableWriteResult.NotWritable();
 		}
@@ -325,8 +325,8 @@ internal sealed class HomeAssistantVariableCatalog
 		var startIndex = 0;
 		if (query.ContinuationToken is { Length: > 0 } token)
 		{
-			while (startIndex < orderedEntityIds.Count &&
-				string.CompareOrdinal(orderedEntityIds[startIndex], token) <= 0)
+			while (startIndex < orderedEntityIds.Count
+				&& string.CompareOrdinal(orderedEntityIds[startIndex], token) <= 0)
 			{
 				startIndex++;
 			}
@@ -391,15 +391,15 @@ internal sealed class HomeAssistantVariableCatalog
 
 	private static bool Matches(HomeAssistantEntityState state, string search)
 	{
-		if (state.EntityId.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-			(state.FriendlyName is { Length: > 0 } name && name.Contains(search, StringComparison.OrdinalIgnoreCase)))
+		if (state.EntityId.Contains(search, StringComparison.OrdinalIgnoreCase)
+			|| state.FriendlyName is { Length: > 0 } name && name.Contains(search, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;
 		}
 
 		var variableName = SuggestedEntityName(state.EntityId);
-		return variableName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-			search.StartsWith(variableName + "_", StringComparison.OrdinalIgnoreCase);
+		return variableName.Contains(search, StringComparison.OrdinalIgnoreCase)
+			|| search.StartsWith(variableName + "_", StringComparison.OrdinalIgnoreCase);
 	}
 
 	private static ParsedId? ParseEntityIdTypedByUser(string id)
@@ -418,7 +418,8 @@ internal sealed class HomeAssistantVariableCatalog
 	}
 
 	private static VariableDefinition EntityContainer(HomeAssistantEntityState state)
-		=> VariableDefinition.OnDemand(EntityPrefix + state.EntityId, VariableType.Text) with
+	{
+		return VariableDefinition.OnDemand(EntityPrefix + state.EntityId, VariableType.Text) with
 		{
 			Name = SuggestedEntityName(state.EntityId),
 			DisplayName = state.EntityId,
@@ -426,31 +427,39 @@ internal sealed class HomeAssistantVariableCatalog
 			IsContainer = true,
 			IsBindable = false
 		};
+	}
 
 	private static VariableDefinition StateLeaf(HomeAssistantEntityState state)
-		=> VariableDefinition.OnDemand(EntityPrefix + state.EntityId + "/" + StateChild, InferStateType(state)) with
+	{
+		return VariableDefinition.OnDemand(EntityPrefix + state.EntityId + "/" + StateChild, InferStateType(state)) with
 		{
 			Name = SuggestedEntityName(state.EntityId),
 			DisplayName = StateChild,
 			ParentId = EntityPrefix + state.EntityId
 		};
+	}
 
 	private static VariableDefinition AttributesCompatLeaf(HomeAssistantEntityState state)
-		=> VariableDefinition.OnDemand(EntityPrefix + state.EntityId + "/" + AttributesChild, VariableType.Text) with
-		{
-			Name = SuggestedEntityName(state.EntityId) + "_" + AttributesChild,
-			DisplayName = AttributesChild,
-			ParentId = EntityPrefix + state.EntityId
-		};
+	{
+		return VariableDefinition.OnDemand(EntityPrefix + state.EntityId + "/" + AttributesChild, VariableType.Text)
+			with
+			{
+				Name = SuggestedEntityName(state.EntityId) + "_" + AttributesChild,
+				DisplayName = AttributesChild,
+				ParentId = EntityPrefix + state.EntityId
+			};
+	}
 
 	private static VariableDefinition AttributeLeaf(HomeAssistantEntityState state, string name)
-		=> VariableDefinition.OnDemand(EntityPrefix + state.EntityId + "/" + name, InferAttributeType(state, name))
+	{
+		return VariableDefinition.OnDemand(EntityPrefix + state.EntityId + "/" + name, InferAttributeType(state, name))
 			with
 			{
 				Name = SuggestedEntityName(state.EntityId) + "_" + Sanitize(name),
 				DisplayName = name,
 				ParentId = EntityPrefix + state.EntityId
 			};
+	}
 
 	private static VariableDefinition Leaf(HomeAssistantEntityState state, string child)
 	{
@@ -463,7 +472,8 @@ internal sealed class HomeAssistantVariableCatalog
 	}
 
 	private static VariableDefinition ControlLeaf(string entityId, HomeAssistantControl control)
-		=> VariableDefinition.OnDemand(EntityPrefix + entityId + "/" + control.Leaf, VariableType.Numeric) with
+	{
+		return VariableDefinition.OnDemand(EntityPrefix + entityId + "/" + control.Leaf, VariableType.Numeric) with
 		{
 			Name = control.Leaf == StateChild
 				? SuggestedEntityName(entityId)
@@ -475,6 +485,7 @@ internal sealed class HomeAssistantVariableCatalog
 			SemanticKind = control.SemanticKind,
 			Write = new VariableWriteCapability { CommitOnRelease = true }
 		};
+	}
 
 	private static VariableReading ReadingOf(HomeAssistantEntityState state, string child)
 	{
@@ -504,8 +515,8 @@ internal sealed class HomeAssistantVariableCatalog
 			return state.AttributesJson;
 		}
 
-		if (state.Attributes.ValueKind != JsonValueKind.Object ||
-			!state.Attributes.TryGetProperty(child, out var value))
+		if (state.Attributes.ValueKind != JsonValueKind.Object
+			|| !state.Attributes.TryGetProperty(child, out var value))
 		{
 			return null;
 		}
@@ -528,9 +539,9 @@ internal sealed class HomeAssistantVariableCatalog
 	// the type at bind time.
 	private static VariableType InferStateType(HomeAssistantEntityState state)
 	{
-		if (string.Equals(state.Domain, "sensor", StringComparison.Ordinal) &&
-			state.UnitOfMeasurement is { Length: > 0 } &&
-			double.TryParse(state.State, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+		if (string.Equals(state.Domain, "sensor", StringComparison.Ordinal)
+			&& state.UnitOfMeasurement is { Length: > 0 }
+			&& double.TryParse(state.State, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
 		{
 			return VariableType.Numeric;
 		}
@@ -553,7 +564,10 @@ internal sealed class HomeAssistantVariableCatalog
 		};
 	}
 
-	private static string SuggestedEntityName(string entityId) => "ha_" + Sanitize(entityId);
+	private static string SuggestedEntityName(string entityId)
+	{
+		return "ha_" + Sanitize(entityId);
+	}
 
 	private static string Sanitize(string value)
 	{

@@ -58,7 +58,8 @@ public class RemoteMusicPlayerApiTests
 	public async Task The_album_colour_is_what_the_host_answers()
 	{
 		var host = new AnsweringHost(new MusicPlayerAlbumColorResult { Color = "#102030" });
-		using var api = new RemoteMusicPlayerApi(new HostStateCache(new PluginConnectionState()), host,
+		using var api = new RemoteMusicPlayerApi(new HostStateCache(new PluginConnectionState()),
+			host,
 			Serilog.Core.Logger.None);
 
 		var color = await api.GetAlbumColorAsync("spotify::alice");
@@ -66,7 +67,8 @@ public class RemoteMusicPlayerApiTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(color, Is.EqualTo("#102030"));
-			Assert.That(host.Calls, Is.EqualTo(new[] { (HostApis.MusicPlayers, HostOperations.MusicPlayers.AlbumColor) }));
+			Assert.That(host.Calls,
+				Is.EqualTo(new[] { (HostApis.MusicPlayers, HostOperations.MusicPlayers.AlbumColor) }));
 			Assert.That(host.Arguments.Single().GetProperty("instanceId").GetString(), Is.EqualTo("spotify::alice"));
 		});
 	}
@@ -78,10 +80,11 @@ public class RemoteMusicPlayerApiTests
 		{
 			Failure = HostInvocationException.CreateNonRetryable(ProtocolErrorCodes.CapabilityUnsupported, "no")
 		};
-		using var api = new RemoteMusicPlayerApi(new HostStateCache(new PluginConnectionState()), host,
+		using var api = new RemoteMusicPlayerApi(new HostStateCache(new PluginConnectionState()),
+			host,
 			Serilog.Core.Logger.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(api.Instances, Is.Empty);
 			Assert.That(await api.GetAlbumColorAsync("spotify::alice"), Is.Null);
@@ -89,7 +92,8 @@ public class RemoteMusicPlayerApiTests
 	}
 
 	private static ProtocolEnvelope Push(long revision, params (string Id, string Name)[] players)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
@@ -113,6 +117,7 @@ public class RemoteMusicPlayerApiTests
 				},
 				PluginProtocolJson.Options)
 		};
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{
@@ -133,7 +138,11 @@ public class RemoteMusicPlayerApiTests
 
 		public Exception? Failure { get; init; }
 
-		public Task<JsonElement?> InvokeAsync(string api, string operation, object? arguments, CancellationToken cancellationToken)
+		public Task<JsonElement?> InvokeAsync(
+			string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
 		{
 			Calls.Add((api, operation));
 			Arguments.Add(JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options));
@@ -147,6 +156,9 @@ public class RemoteMusicPlayerApiTests
 				: JsonSerializer.SerializeToElement(answer, PluginProtocolJson.Options));
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

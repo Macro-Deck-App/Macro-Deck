@@ -27,7 +27,6 @@ internal sealed class SendRequestActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Choice(HttpRequestBuilder.MethodParameter,
-			options:
 			[
 				new ActionParameterOption { Value = "GET" },
 				new ActionParameterOption { Value = "POST" },
@@ -38,21 +37,20 @@ internal sealed class SendRequestActionDefinition : IActionDefinition
 				new ActionParameterOption { Value = "OPTIONS" },
 				new ActionParameterOption { Value = "QUERY" }
 			],
-			label: AppStrings.Integrations.Http.Actions.SendRequestMethodLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestMethodLabel(),
 			defaultValue: "GET"),
 		ActionParameter.Url(HttpRequestBuilder.UrlParameter,
-			label: AppStrings.Integrations.Http.Params.UrlLabel(),
+			AppStrings.Integrations.Http.Params.UrlLabel(),
 			required: true,
 			autoPrefixHttps: true),
 		ActionParameter.KeyValue(HttpRequestBuilder.QueryParameter,
-			label: AppStrings.Integrations.Http.Actions.SendRequestQueryLabel(),
-			description: AppStrings.Integrations.Http.Actions.SendRequestQueryDescription()),
+			AppStrings.Integrations.Http.Actions.SendRequestQueryLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestQueryDescription()),
 		ActionParameter.KeyValue(HttpRequestBuilder.HeadersParameter,
-			label: AppStrings.Integrations.Http.Params.HeadersLabel(),
-			description: AppStrings.Integrations.Http.Actions.SendRequestHeadersDescription()),
+			AppStrings.Integrations.Http.Params.HeadersLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestHeadersDescription()),
 		.. HttpAuthParameters.Declare(),
 		ActionParameter.Choice(HttpRequestBuilder.BodyTypeParameter,
-			options:
 			[
 				new ActionParameterOption { Value = "none" },
 				new ActionParameterOption { Value = "json" },
@@ -60,56 +58,59 @@ internal sealed class SendRequestActionDefinition : IActionDefinition
 				new ActionParameterOption { Value = "text" },
 				new ActionParameterOption { Value = "multipart" }
 			],
-			label: AppStrings.Integrations.Http.Actions.SendRequestBodyTypeLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestBodyTypeLabel(),
 			defaultValue: "none"),
 		ActionParameter.Json(HttpRequestBuilder.JsonBodyParameter,
-				label: AppStrings.Integrations.Http.Actions.SendRequestJsonBodyLabel())
+				AppStrings.Integrations.Http.Actions.SendRequestJsonBodyLabel())
 			.OnlyWhen(HttpRequestBuilder.BodyTypeParameter, "json"),
 		ActionParameter.KeyValue(HttpRequestBuilder.FormBodyParameter,
-				label: AppStrings.Integrations.Http.Actions.SendRequestFormFieldsLabel(),
-				description: AppStrings.Integrations.Http.Actions.SendRequestFormFieldsDescription())
+				AppStrings.Integrations.Http.Actions.SendRequestFormFieldsLabel(),
+				AppStrings.Integrations.Http.Actions.SendRequestFormFieldsDescription())
 			.OnlyWhen(HttpRequestBuilder.BodyTypeParameter, "form", "multipart"),
 		ActionParameter.MultilineText(HttpRequestBuilder.TextBodyParameter,
-				label: AppStrings.Integrations.Http.Actions.SendRequestTextBodyLabel())
+				AppStrings.Integrations.Http.Actions.SendRequestTextBodyLabel())
 			.OnlyWhen(HttpRequestBuilder.BodyTypeParameter, "text"),
 		ActionParameter.File(HttpRequestBuilder.FilePathParameter,
-				label: AppStrings.Integrations.Http.Actions.SendRequestFileToUploadLabel())
+				AppStrings.Integrations.Http.Actions.SendRequestFileToUploadLabel())
 			.OnlyWhen(HttpRequestBuilder.BodyTypeParameter, "multipart"),
 		ActionParameter.Text(HttpRequestBuilder.FileFieldNameParameter,
-				label: AppStrings.Integrations.Http.Actions.SendRequestFileFieldNameLabel(),
+				AppStrings.Integrations.Http.Actions.SendRequestFileFieldNameLabel(),
 				defaultValue: "file")
 			.OnlyWhen(HttpRequestBuilder.BodyTypeParameter, "multipart"),
 		ActionParameter.Text(HttpRequestBuilder.ContentTypeParameter,
-				label: AppStrings.Integrations.Http.Actions.SendRequestContentTypeLabel(),
-				description: AppStrings.Integrations.Http.Actions.SendRequestContentTypeDescription())
+				AppStrings.Integrations.Http.Actions.SendRequestContentTypeLabel(),
+				AppStrings.Integrations.Http.Actions.SendRequestContentTypeDescription())
 			.OnlyWhen(HttpRequestBuilder.BodyTypeParameter, "json", "form", "text"),
 		ActionParameter.Text(HttpRequestBuilder.ExpectedStatusParameter,
-			label: AppStrings.Integrations.Http.Actions.SendRequestExpectedStatusLabel(),
-			description: AppStrings.Integrations.Http.Actions.SendRequestExpectedStatusDescription(),
+			AppStrings.Integrations.Http.Actions.SendRequestExpectedStatusLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestExpectedStatusDescription(),
 			defaultValue: "2xx"),
 		ActionParameter.KeyValue(HttpRequestBuilder.CapturesParameter,
-			label: AppStrings.Integrations.Http.Actions.SendRequestCapturesLabel(),
-			description: AppStrings.Integrations.Http.Actions.SendRequestCapturesDescription()),
+			AppStrings.Integrations.Http.Actions.SendRequestCapturesLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestCapturesDescription()),
 		ActionParameter.Duration(HttpRequestBuilder.TimeoutParameter,
-			label: AppStrings.Integrations.Http.Actions.SendRequestTimeoutLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestTimeoutLabel(),
 			min: 1_000,
 			max: 300_000,
 			defaultMilliseconds: 30_000),
 		ActionParameter.Toggle(HttpRequestBuilder.FollowRedirectsParameter,
-			label: AppStrings.Integrations.Http.Actions.SendRequestFollowRedirectsLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestFollowRedirectsLabel(),
 			defaultValue: true),
 		ActionParameter.Toggle(HttpRequestBuilder.ValidateTlsParameter,
-			label: AppStrings.Integrations.Http.Actions.SendRequestValidateTlsLabel(),
-			description: AppStrings.Integrations.Http.Actions.SendRequestValidateTlsDescription(),
-			defaultValue: true),
+			AppStrings.Integrations.Http.Actions.SendRequestValidateTlsLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestValidateTlsDescription(),
+			true),
 		ActionParameter.Number(HttpRequestBuilder.MaxResponseBytesParameter,
-			label: AppStrings.Integrations.Http.Actions.SendRequestMaxResponseSizeLabel(),
+			AppStrings.Integrations.Http.Actions.SendRequestMaxResponseSizeLabel(),
 			min: 1_024,
 			max: 10_485_760,
 			defaultValue: 262_144)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_client, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_client, _variables);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

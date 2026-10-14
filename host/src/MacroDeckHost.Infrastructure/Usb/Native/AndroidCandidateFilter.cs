@@ -8,7 +8,8 @@ internal static class AndroidCandidateFilter
 {
 	private static readonly byte[] _deviceClasses = [0x00, 0xEF, 0xFF];
 
-	public static AndroidDescriptorVerdict? ClassifyDescriptors(UsbDeviceInfo device,
+	public static AndroidDescriptorVerdict? ClassifyDescriptors(
+		UsbDeviceInfo device,
 		IReadOnlyList<UsbInterfaceInfo> interfaces)
 	{
 		if (device.VendorId == AccessoryProtocol.AppleVendorId || !_deviceClasses.Contains(device.DeviceClass))
@@ -38,17 +39,25 @@ internal static class AndroidCandidateFilter
 	}
 
 	public static bool AcceptStrings(AndroidDescriptorVerdict verdict, UsbDeviceStrings strings)
-		=> !CarThingIdentity.ContainsMarker(strings.Product) &&
-			verdict.MtpNameIndexes.All(index =>
-				strings.InterfaceNames.TryGetValue(index, out var name) &&
-				string.Equals(name, "MTP", StringComparison.Ordinal));
+	{
+		return !CarThingIdentity.ContainsMarker(strings.Product)
+			&& verdict.MtpNameIndexes.All(index =>
+				strings.InterfaceNames.TryGetValue(index, out var name)
+				&& string.Equals(name, "MTP", StringComparison.Ordinal));
+	}
 
 	private static bool IsAdb(UsbInterfaceInfo usbInterface)
-		=> usbInterface is { Class: 0xFF, SubClass: 0x42, Protocol: 0x01 };
+	{
+		return usbInterface is { Class: 0xFF, SubClass: 0x42, Protocol: 0x01 };
+	}
 
 	private static bool IsStillImage(UsbInterfaceInfo usbInterface)
-		=> usbInterface is { Class: 0x06, SubClass: 0x01, Protocol: 0x01 };
+	{
+		return usbInterface is { Class: 0x06, SubClass: 0x01, Protocol: 0x01 };
+	}
 
 	private static bool IsVendorMtp(UsbInterfaceInfo usbInterface)
-		=> usbInterface is { Class: 0xFF, SubClass: 0xFF, Protocol: 0x00 };
+	{
+		return usbInterface is { Class: 0xFF, SubClass: 0xFF, Protocol: 0x00 };
+	}
 }

@@ -42,15 +42,22 @@ public sealed class EventSubscriptionIndex : IEventSubscriptionIndex
 
 	public event Action? Changed;
 
-	public bool HasSubscribers(string qualifiedEventId) => _snapshot.ByEventId.ContainsKey(qualifiedEventId);
+	public bool HasSubscribers(string qualifiedEventId)
+	{
+		return _snapshot.ByEventId.ContainsKey(qualifiedEventId);
+	}
 
 	public IReadOnlyList<EventSubscription> Find(string qualifiedEventId)
-		=> _snapshot.ByEventId.TryGetValue(qualifiedEventId, out var subscriptions) ? subscriptions : [];
+	{
+		return _snapshot.ByEventId.TryGetValue(qualifiedEventId, out var subscriptions) ? subscriptions : [];
+	}
 
 	public EventSubscription? Find(EventTarget target)
-		=> _snapshot.ByOwner.TryGetValue(target.Owner, out var subscriptions)
+	{
+		return _snapshot.ByOwner.TryGetValue(target.Owner, out var subscriptions)
 			? subscriptions.FirstOrDefault(s => s.TriggerId == target.TriggerId)
 			: null;
+	}
 
 	public IReadOnlyList<EventSubscription> FindByProvider(string providerId)
 	{

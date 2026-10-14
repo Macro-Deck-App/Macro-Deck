@@ -47,21 +47,22 @@ public class PluginSessionsAdminController : ControllerBase
 		var sessions = _sessionRegistry.Snapshot();
 
 		var body = sessions.Select(session =>
-		{
-			var connectedAt = session.ConnectedAt ?? session.CreatedAt;
-			var lastSeenAt = session.DroppedAt ?? session.ConnectedAt ?? session.CreatedAt;
+			{
+				var connectedAt = session.ConnectedAt ?? session.CreatedAt;
+				var lastSeenAt = session.DroppedAt ?? session.ConnectedAt ?? session.CreatedAt;
 
-			return new PluginSessionInfoBody(session.SessionId,
-				session.PluginId,
-				session.DisplayName,
-				session.InstanceId,
-				session.AccessTokenId,
-				ToWireOrigin(session.Origin),
-				session.NegotiatedVersion,
-				ToWireState(session.State),
-				connectedAt,
-				lastSeenAt);
-		}).ToList();
+				return new PluginSessionInfoBody(session.SessionId,
+					session.PluginId,
+					session.DisplayName,
+					session.InstanceId,
+					session.AccessTokenId,
+					ToWireOrigin(session.Origin),
+					session.NegotiatedVersion,
+					ToWireState(session.State),
+					connectedAt,
+					lastSeenAt);
+			})
+			.ToList();
 
 		return new GetPluginSessionsResponse(body);
 	}
@@ -83,16 +84,22 @@ public class PluginSessionsAdminController : ControllerBase
 
 	// TokenId cannot stand in for this: an interactively paired plugin has no owning token, so it and
 	// a host-launched plugin are both null there.
-	private static string ToWireOrigin(PluginSessionOrigin origin) => origin switch
+	private static string ToWireOrigin(PluginSessionOrigin origin)
 	{
-		PluginSessionOrigin.Managed => "managed",
-		_ => "self-registered"
-	};
+		return origin switch
+		{
+			PluginSessionOrigin.Managed => "managed",
+			_ => "self-registered"
+		};
+	}
 
-	private static string ToWireState(PluginSessionState state) => state switch
+	private static string ToWireState(PluginSessionState state)
 	{
-		PluginSessionState.Awaiting => "awaiting",
-		PluginSessionState.Connected => "connected",
-		_ => "dropped"
-	};
+		return state switch
+		{
+			PluginSessionState.Awaiting => "awaiting",
+			PluginSessionState.Connected => "connected",
+			_ => "dropped"
+		};
+	}
 }

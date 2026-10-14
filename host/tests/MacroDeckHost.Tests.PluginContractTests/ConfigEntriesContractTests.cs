@@ -15,15 +15,18 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.ConfigEntries,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static StoredConfigEntry Entry(bool withKey)
-		=> new()
+	{
+		return new StoredConfigEntry
 		{
 			Id = Guid.NewGuid(),
 			Title = "Home",
@@ -31,6 +34,7 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 				? new Dictionary<string, JsonElement> { ["key"] = JsonSerializer.SerializeToElement("home") }
 				: new Dictionary<string, JsonElement>()
 		};
+	}
 
 	[Test]
 	public async Task Every_member_round_trips_to_the_plugins_lifecycle()
@@ -49,18 +53,23 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 		{
 			EntryId = entryId, Title = " ", Values = new Dictionary<string, JsonElement>()
 		});
-		var status = await integration.GetEntryStatusAsync(Entry(withKey: true));
-		var usable = await integration.IsEntryUsableAsync(Entry(withKey: false));
+		var status = await integration.GetEntryStatusAsync(Entry(true));
+		var usable = await integration.IsEntryUsableAsync(Entry(false));
 		var reloaded = await integration.ReloadEntriesAsync();
-		await integration.SynchronizeEntriesAsync([Entry(withKey: true)]);
+		await integration.SynchronizeEntriesAsync([Entry(true)]);
 		await integration.ReleasePreparationAsync(entryId);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(prepared.Success, Is.True);
 			Assert.That(prepared.Values!["key"].GetString(), Is.EqualTo("home"));
-			Assert.That(prepared.ReservedVariables.Select(variable => (variable.Name, variable.ResolvedId, variable.Type)),
-				Is.EqualTo(new[] { ("server_home", VariableDefinition.Eager("server_home", VariableType.Text).ResolvedId, VariableType.Text) }));
+			Assert.That(
+				prepared.ReservedVariables.Select(variable => (variable.Name, variable.ResolvedId, variable.Type)),
+				Is.EqualTo(new[]
+				{
+					("server_home", VariableDefinition.Eager("server_home", VariableType.Text).ResolvedId,
+						VariableType.Text)
+				}));
 			Assert.That(refused.Success, Is.False);
 			Assert.That(refused.Error.Literal, Is.EqualTo("A title is required."));
 			Assert.That(status, Is.EqualTo(ConfigEntryStatus.Connected));
@@ -102,7 +111,7 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 			[Provider()],
 			[CapabilityKinds.ConfigEntries]);
 
-		await integration.SynchronizeEntriesAsync([Entry(withKey: true)], new NoVariables(), CancellationToken.None);
+		await integration.SynchronizeEntriesAsync([Entry(true)], new NoVariables(), CancellationToken.None);
 
 		Assert.That(plugin.Synchronized, Is.EqualTo(1));
 	}
@@ -116,7 +125,7 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 		{
 			EntryId = Guid.NewGuid(), Title = "Home", Values = new Dictionary<string, JsonElement>()
 		});
-		var status = await integration.GetEntryStatusAsync(Entry(withKey: false));
+		var status = await integration.GetEntryStatusAsync(Entry(false));
 		var reloaded = await integration.ReloadEntriesAsync();
 
 		Assert.Multiple(() =>
@@ -130,20 +139,35 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 
 	private sealed class NoVariables : IVariableApi
 	{
-		public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => throw new NotSupportedException();
+		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableHandle?> GetByNameAsync(string name) => throw new NotSupportedException();
+		public Task<VariableHandle?> GetByNameAsync(string name)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableHandle> CreateAsync(string name,
+		public Task<VariableHandle> CreateAsync(
+			string name,
 			VariableType type,
 			object? initialValue = null,
 			int? decimalPlaces = null,
 			string? definitionId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task SetValueAsync(Guid variableId, object? value) => throw new NotSupportedException();
+		public Task SetValueAsync(Guid variableId, object? value)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task DeleteAsync(Guid variableId) => throw new NotSupportedException();
+		public Task DeleteAsync(Guid variableId)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class ServersIntegration : IPluginIntegration, IConfigEntryLifecycle
@@ -158,34 +182,50 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 
 		public List<Guid> Released { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+		public Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+			ConfigEntryPreparation preparation,
 			CancellationToken cancellationToken = default)
 		{
 			Rejections.Add(preparation.RejectedVariableNames);
 			return Task.FromResult(string.IsNullOrWhiteSpace(preparation.Title)
 				? ConfigEntryPreparationResult.Refuse("A title is required.")
-				: ConfigEntryPreparationResult.Accept(
-					new Dictionary<string, JsonElement> { ["key"] = JsonSerializer.SerializeToElement("home") },
-					[VariableDefinition.Eager("server_home", VariableType.Text)]) with
-				{
-					RetryOnConflict = RetriesOnConflict
-				});
+				: ConfigEntryPreparationResult.Accept(new Dictionary<string, JsonElement>
+							{ ["key"] = JsonSerializer.SerializeToElement("home") },
+						[VariableDefinition.Eager("server_home", VariableType.Text)]) with
+					{
+						RetryOnConflict = RetriesOnConflict
+					});
 		}
 
-		public Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+		public Task<ConfigEntryStatus> GetEntryStatusAsync(
+			StoredConfigEntry entry,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(ConfigEntryStatus.Connected);
+		{
+			return Task.FromResult(ConfigEntryStatus.Connected);
+		}
 
 		public Task<bool> IsEntryUsableAsync(StoredConfigEntry entry, CancellationToken cancellationToken = default)
-			=> Task.FromResult(entry.Values.ContainsKey("key"));
+		{
+			return Task.FromResult(entry.Values.ContainsKey("key"));
+		}
 
-		public Task<bool> ReloadEntriesAsync(CancellationToken cancellationToken = default) => Task.FromResult(true);
+		public Task<bool> ReloadEntriesAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(true);
+		}
 
-		public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+		public Task SynchronizeEntriesAsync(
+			IReadOnlyList<StoredConfigEntry> entries,
 			CancellationToken cancellationToken = default)
 		{
 			Synchronized++;

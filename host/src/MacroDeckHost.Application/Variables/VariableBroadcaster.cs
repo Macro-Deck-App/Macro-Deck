@@ -52,7 +52,9 @@ public sealed class VariableBroadcaster
 
 			_lastKnownNames[entity.Id] = entity.Name;
 			var boundResourceId = _bindings.FindByVariableId(entity.Id)?.LocalResourceId;
-			evt.Upserted.Add(VariableDtoMapper.ToDto(entity, _registry.IsAvailable(entity.Id), boundResourceId,
+			evt.Upserted.Add(VariableDtoMapper.ToDto(entity,
+				_registry.IsAvailable(entity.Id),
+				boundResourceId,
 				_sharedVariables.IsShared(entity)));
 		}
 
@@ -81,7 +83,9 @@ public sealed class VariableBroadcaster
 
 			_lastKnownNames[id] = entity.Name;
 			var boundResourceId = _bindings.FindByVariableId(id)?.LocalResourceId;
-			upserted.Add(VariableDtoMapper.ToDto(entity, _registry.IsAvailable(id), boundResourceId,
+			upserted.Add(VariableDtoMapper.ToDto(entity,
+				_registry.IsAvailable(id),
+				boundResourceId,
 				_sharedVariables.IsShared(entity)));
 		}
 

@@ -48,7 +48,9 @@ public sealed class IntegrationEventPublisher : IEventPublisher
 	}
 
 	public IReadOnlyList<EventBinding> GetBindings()
-		=> _tracker is null ? [] : [.. _tracker.BindingsFor(_integrationId).Select(dto => dto.ToBinding())];
+	{
+		return _tracker is null ? [] : [.. _tracker.BindingsFor(_integrationId).Select(dto => dto.ToBinding())];
+	}
 
 	public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
 	{
@@ -77,7 +79,9 @@ public sealed class IntegrationEventPublisher : IEventPublisher
 		}
 		catch (Exception exception)
 		{
-			_logger.Warning(exception, "A BindingsChanged handler of integration {IntegrationId} threw", _integrationId);
+			_logger.Warning(exception,
+				"A BindingsChanged handler of integration {IntegrationId} threw",
+				_integrationId);
 		}
 	}
 

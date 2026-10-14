@@ -9,5 +9,7 @@ internal static class VariableBindingErrorMapper
 	// way VariableDtoMapper.ToError already does for VariableError - the wire message is the service's
 	// plain diagnostic text, and Code is what a client actually localizes for display.
 	public static TransportError ToTransportError(VariableBindingError error, string? message = null)
-		=> new() { Code = error.ToString(), Message = message ?? string.Empty };
+	{
+		return new TransportError { Code = error.ToString(), Message = message ?? string.Empty };
+	}
 }

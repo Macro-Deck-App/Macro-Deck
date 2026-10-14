@@ -30,9 +30,15 @@ public sealed class MigrationIntegration : IIntegration, ISystemIntegration
 	public bool IsActive => true;
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 }
 
 /// <summary>
@@ -54,14 +60,17 @@ internal sealed class UnsupportedMigratedActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Text(MigrationPlaceholder.SourceAppParameter,
-			label: AppStrings.Integrations.Migration.Actions.SourceAppLabel()),
+			AppStrings.Integrations.Migration.Actions.SourceAppLabel()),
 		ActionParameter.Text(MigrationPlaceholder.SourceActionParameter,
-			label: AppStrings.Integrations.Migration.Actions.SourceActionLabel()),
+			AppStrings.Integrations.Migration.Actions.SourceActionLabel()),
 		ActionParameter.Text(MigrationPlaceholder.SourceConfigurationParameter,
-			label: AppStrings.Integrations.Migration.Actions.SourceConfigurationLabel())
+			AppStrings.Integrations.Migration.Actions.SourceConfigurationLabel())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor();
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor();
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

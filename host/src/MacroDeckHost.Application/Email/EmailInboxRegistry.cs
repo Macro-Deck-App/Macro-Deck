@@ -37,15 +37,26 @@ public sealed class EmailInboxRegistry : IEmailInboxRegistry, IDisposable
 		_logger = logger.ForContext<EmailInboxRegistry>();
 	}
 
-	public IReadOnlyList<EmailInboxDescriptor> GetInboxes() => [.. Enumerate().Select(entry => entry.Inbox)];
+	public IReadOnlyList<EmailInboxDescriptor> GetInboxes()
+	{
+		return [.. Enumerate().Select(entry => entry.Inbox)];
+	}
 
-	public IReadOnlyList<ResolvedEmailInbox> ResolveAll() => [.. Enumerate()];
+	public IReadOnlyList<ResolvedEmailInbox> ResolveAll()
+	{
+		return [.. Enumerate()];
+	}
 
 	public ResolvedEmailInbox? Resolve(string inboxRef)
-		=> Enumerate().FirstOrDefault(entry => string.Equals(entry.Inbox.Ref, inboxRef, StringComparison.Ordinal));
+	{
+		return Enumerate().FirstOrDefault(entry => string.Equals(entry.Inbox.Ref, inboxRef, StringComparison.Ordinal));
+	}
 
 	public bool IsEmailIntegration(string integrationId)
-		=> Enumerate().Any(entry => string.Equals(entry.Inbox.IntegrationId, integrationId, StringComparison.Ordinal));
+	{
+		return Enumerate()
+			.Any(entry => string.Equals(entry.Inbox.IntegrationId, integrationId, StringComparison.Ordinal));
+	}
 
 	// Matched by instance, not by id: a plugin adapter or a re-registered integration is a new object
 	// under the same id, and an event on the old one would never fire again.
@@ -57,8 +68,8 @@ public sealed class EmailInboxRegistry : IEmailInboxRegistry, IDisposable
 		{
 			foreach (var (integrationId, subscription) in _subscriptions.ToList())
 			{
-				if (current.TryGetValue(integrationId, out var integration) &&
-					ReferenceEquals(integration, subscription.Provider))
+				if (current.TryGetValue(integrationId, out var integration)
+					&& ReferenceEquals(integration, subscription.Provider))
 				{
 					continue;
 				}
@@ -112,7 +123,9 @@ public sealed class EmailInboxRegistry : IEmailInboxRegistry, IDisposable
 			}
 			catch (Exception exception)
 			{
-				_logger.Warning(exception, "Integration {IntegrationId} failed to list its email inboxes", integration.Id);
+				_logger.Warning(exception,
+					"Integration {IntegrationId} failed to list its email inboxes",
+					integration.Id);
 				continue;
 			}
 
@@ -152,14 +165,17 @@ public sealed class EmailInboxRegistry : IEmailInboxRegistry, IDisposable
 			}
 		}
 
-		_logger.Warning("Integration {IntegrationId} announced an invalid or duplicate email inbox id {LocalId}; " +
-			"skipping it",
+		_logger.Warning("Integration {IntegrationId} announced an invalid or duplicate email inbox id {LocalId}; "
+			+ "skipping it",
 			integrationId,
 			localId);
 	}
 
-	private IEnumerable<IIntegration> EnabledProviders() => _integrations.Integrations
-		.Where(integration => integration is IEmailInboxProvider && _integrations.IsEnabled(integration.Id));
+	private IEnumerable<IIntegration> EnabledProviders()
+	{
+		return _integrations.Integrations
+			.Where(integration => integration is IEmailInboxProvider && _integrations.IsEnabled(integration.Id));
+	}
 
 	private sealed record Subscription(IEmailInboxProvider Provider, EventHandler<EmailInboxChangedEventArgs> Handler);
 }

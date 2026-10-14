@@ -27,7 +27,7 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 
 		var atLimit = Broker.PublishSnapshot(ProviderId,
 			sessionId,
-			new UiRawJson(UiPayloads.Tree(2, extraNodes: ProtocolLimits.MaxUiNodesPerTree - 1)));
+			new UiRawJson(UiPayloads.Tree(2, ProtocolLimits.MaxUiNodesPerTree - 1)));
 		await WaitForAsync(() => MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count == 2,
 			"A tree exactly at the node limit was not served.");
 
@@ -35,7 +35,7 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 
 		var overLimit = Broker.PublishSnapshot(ProviderId,
 			sessionId,
-			new UiRawJson(UiPayloads.Tree(3, extraNodes: ProtocolLimits.MaxUiNodesPerTree)));
+			new UiRawJson(UiPayloads.Tree(3, ProtocolLimits.MaxUiNodesPerTree)));
 		await WaitForAsync(() => MessagesFor<UiSessionInvalidatedEvent>("c1").Count == 1,
 			"An oversize tree left the session alive on a revision that can never advance.");
 		await SettleAsync();
@@ -75,11 +75,11 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 		var oneFallbackOver = Broker.PublishSnapshot(ProviderId,
 			sessionId,
 			new UiRawJson(UiPayloads.TreeWithRoot(3,
-				"{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[" +
-				children +
-				"],\"fallback\":" +
-				UiPayloads.Node("fb") +
-				"}")));
+				"{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":["
+				+ children
+				+ "],\"fallback\":"
+				+ UiPayloads.Node("fb")
+				+ "}")));
 
 		await SettleAsync();
 
@@ -322,7 +322,7 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 		// it could only ever be vacuous.
 		var atLimit = Broker.PublishSnapshot(ProviderId,
 			sessionId,
-			new UiRawJson(TreeWithResource(2, ProtocolLimits.MaxUiResourceBytes, inFallback: false)));
+			new UiRawJson(TreeWithResource(2, ProtocolLimits.MaxUiResourceBytes, false)));
 
 		await WaitForAsync(() => MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count == 2,
 			"A resource exactly at the declared limit was not served.");
@@ -535,11 +535,11 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 		// A resource is an object inside a node's properties. The same two member names meeting inside a
 		// surface attribute bag are ordinary provider JSON, and terminating a session over them would
 		// make an arbitrary key pair fatal.
-		var tree = "{\"revision\":2,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\"," +
-			"\"attributes\":{\"cache\":{\"resourceId\":\"r1\",\"byteLength\":" +
-			(ProtocolLimits.MaxUiResourceBytes + 1) +
-			"}}}," +
-			"\"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[]}}";
+		var tree = "{\"revision\":2,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\","
+			+ "\"attributes\":{\"cache\":{\"resourceId\":\"r1\",\"byteLength\":"
+			+ (ProtocolLimits.MaxUiResourceBytes + 1)
+			+ "}}},"
+			+ "\"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[]}}";
 
 		var accepted = Broker.PublishSnapshot(ProviderId, sessionId, new UiRawJson(Encoding.UTF8.GetBytes(tree)));
 
@@ -590,13 +590,16 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 	}
 
 	private static UiSurface WidgetConfigSurface()
-		=> Surface() with
+	{
+		return Surface() with
 		{
 			Attributes = new Dictionary<string, JsonElement>
 			{
-				[UiConfigSurfaceAttributes.EntryPoint] = JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig)
+				[UiConfigSurfaceAttributes.EntryPoint]
+					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig)
 			}
 		};
+	}
 
 	private static UiTree PaddedTree(int revision, int approximateBytes)
 	{

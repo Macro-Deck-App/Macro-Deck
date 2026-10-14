@@ -9,7 +9,7 @@ internal sealed record AccessoryReconnectPolicy(IReadOnlyList<TimeSpan> ReSwitch
 {
 	public static readonly AccessoryReconnectPolicy Default = new(
 		[TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(2)],
-		ReSwitchAfterBye: false);
+		false);
 }
 
 internal sealed record AccessoryPollContext(
@@ -32,7 +32,8 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 	private readonly Dictionary<UsbPlugKey, Plug> _plugs = [];
 	private readonly List<INativeLinkSession> _stopping = [];
 
-	public AccessoryCoordinator(IUsbHost usb,
+	public AccessoryCoordinator(
+		IUsbHost usb,
 		Func<IUsbBulkPipe, string, INativeLinkSession> startSession,
 		AccessoryReconnectPolicy policy,
 		IReadOnlyList<string> identification,
@@ -51,7 +52,10 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 
 	public IReadOnlyList<NativeUsbDevice> Devices { get; private set; } = [];
 
-	public bool IsNative(string serial) => _nativeSerials.Contains(serial);
+	public bool IsNative(string serial)
+	{
+		return _nativeSerials.Contains(serial);
+	}
 
 	public IReadOnlyList<RememberedUsbDevice> Poll(AccessoryPollContext context, DateTimeOffset now)
 	{
@@ -168,7 +172,8 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 		}
 	}
 
-	private void PollNormal(IUsbDeviceList list,
+	private void PollNormal(
+		IUsbDeviceList list,
 		Plug plug,
 		UsbDeviceInfo device,
 		AccessoryPollContext context,
@@ -217,7 +222,8 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 		}
 	}
 
-	private void PollAccessory(IUsbDeviceList list,
+	private void PollAccessory(
+		IUsbDeviceList list,
 		Plug plug,
 		UsbDeviceInfo device,
 		AccessoryPollContext context,
@@ -287,10 +293,10 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 		plug.Verdict = null;
 		plug.Strings = null;
 		plug.Serial = null;
-		if (list.ReadInterfaces(device) is not { } interfaces ||
-			AndroidCandidateFilter.ClassifyDescriptors(device, interfaces) is not { } verdict ||
-			list.ReadStrings(device, verdict.MtpNameIndexes) is not { } strings ||
-			!AndroidCandidateFilter.AcceptStrings(verdict, strings))
+		if (list.ReadInterfaces(device) is not { } interfaces
+			|| AndroidCandidateFilter.ClassifyDescriptors(device, interfaces) is not { } verdict
+			|| list.ReadStrings(device, verdict.MtpNameIndexes) is not { } strings
+			|| !AndroidCandidateFilter.AcceptStrings(verdict, strings))
 		{
 			return;
 		}
@@ -312,9 +318,9 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 			return true;
 		}
 
-		if (!plug.LinkedSinceSwitch ||
-			(plug.ByeAtLoss && !_policy.ReSwitchAfterBye) ||
-			plug.Switches - 1 >= _policy.ReSwitchDelays.Count)
+		if (!plug.LinkedSinceSwitch
+			|| plug.ByeAtLoss && !_policy.ReSwitchAfterBye
+			|| plug.Switches - 1 >= _policy.ReSwitchDelays.Count)
 		{
 			return false;
 		}
@@ -405,10 +411,13 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 	}
 
 	private static bool IsRemembered(Plug plug, AccessoryPollContext context)
-		=> plug.Serial is { } serial && context.RememberedSerials.Contains(serial);
+	{
+		return plug.Serial is { } serial && context.RememberedSerials.Contains(serial);
+	}
 
 	private NativeUsbDevice Describe(Plug plug, AccessoryPollContext context)
-		=> new(Id(plug),
+	{
+		return new NativeUsbDevice(Id(plug),
 			NativeUsbPlatform.Android,
 			plug.Serial,
 			plug.Strings?.Manufacturer,
@@ -417,6 +426,7 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 			plug.Picked,
 			IsRemembered(plug, context),
 			plug.KnownToAdb);
+	}
 
 	private NativeUsbDeviceState StateOf(Plug plug, AccessoryPollContext context)
 	{
@@ -449,7 +459,7 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 			return NativeUsbDeviceState.ServedByAdb;
 		}
 
-		if (plug.Blocked == SwitchBlock.Failed || (plug.Switches > 0 && !plug.LinkedSinceSwitch))
+		if (plug.Blocked == SwitchBlock.Failed || plug.Switches > 0 && !plug.LinkedSinceSwitch)
 		{
 			return NativeUsbDeviceState.Stopped;
 		}
@@ -469,7 +479,10 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 			: NativeUsbDeviceState.Available;
 	}
 
-	private static string Id(Plug plug) => "android-" + plug.Key;
+	private static string Id(Plug plug)
+	{
+		return "android-" + plug.Key;
+	}
 
 	private static string? DisplayName(UsbDeviceStrings? strings)
 	{
@@ -480,9 +493,10 @@ internal sealed class AccessoryCoordinator : INativeUsbSerials
 			return string.IsNullOrEmpty(manufacturer) ? null : manufacturer;
 		}
 
-		return string.IsNullOrEmpty(manufacturer) || product.StartsWith(manufacturer, StringComparison.OrdinalIgnoreCase)
-			? product
-			: $"{manufacturer} {product}";
+		return string.IsNullOrEmpty(manufacturer)
+			|| product.StartsWith(manufacturer, StringComparison.OrdinalIgnoreCase)
+				? product
+				: $"{manufacturer} {product}";
 	}
 
 	private enum SwitchBlock

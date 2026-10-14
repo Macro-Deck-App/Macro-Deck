@@ -15,13 +15,19 @@ public static class DesktopEntryParser
 	private const string NameKey = "Name";
 
 	public static bool IsDesktopEntry(string path)
-		=> Path.GetExtension(path).Equals(".desktop", StringComparison.OrdinalIgnoreCase);
+	{
+		return Path.GetExtension(path).Equals(".desktop", StringComparison.OrdinalIgnoreCase);
+	}
 
 	public static string? TryReadIconName(IEnumerable<string> lines)
-		=> TryReadValue(lines, IconKey);
+	{
+		return TryReadValue(lines, IconKey);
+	}
 
 	public static string? TryReadName(IEnumerable<string> lines)
-		=> TryReadValue(lines, NameKey);
+	{
+		return TryReadValue(lines, NameKey);
+	}
 
 	public static DesktopEntryCommand? TryReadCommand(IEnumerable<string> lines)
 	{
@@ -144,5 +150,7 @@ public static class DesktopEntryParser
 	}
 
 	private static string Quote(string token)
-		=> token.Contains(' ', StringComparison.Ordinal) ? $"\"{token}\"" : token;
+	{
+		return token.Contains(' ', StringComparison.Ordinal) ? $"\"{token}\"" : token;
+	}
 }

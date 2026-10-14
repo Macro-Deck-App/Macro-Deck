@@ -216,8 +216,8 @@ internal sealed class PluginConnectionHostedService(
 			=> version >= ProtocolVersions.Minimum && version <= ProtocolVersions.Current))
 		{
 			return ConnectionOutcome.Fail(
-				$"The host supports protocol versions {string.Join(", ", descriptor.SupportedVersions)}, " +
-				$"this plugin supports {ProtocolVersions.Minimum}-{ProtocolVersions.Current}.");
+				$"The host supports protocol versions {string.Join(", ", descriptor.SupportedVersions)}, "
+				+ $"this plugin supports {ProtocolVersions.Minimum}-{ProtocolVersions.Current}.");
 		}
 
 		var credentials = await ResolveCredentialsAsync(descriptor.Pairing, cancellationToken);
@@ -247,9 +247,10 @@ internal sealed class PluginConnectionHostedService(
 				{
 					_session = await OpenSessionAsync(credentials, cancellationToken);
 				}
-				catch (PluginRegistrationException exception) when (CanRePairAfterRejection(exception, descriptor.Pairing))
+				catch (PluginRegistrationException exception) when (CanRePairAfterRejection(exception,
+					descriptor.Pairing))
 				{
-					credentials = await ResolveCredentialsAsync(descriptor.Pairing, cancellationToken, ignoreStored: true);
+					credentials = await ResolveCredentialsAsync(descriptor.Pairing, cancellationToken, true);
 					_rePairedAfterRejection = true;
 					_session = await OpenSessionAsync(credentials, cancellationToken);
 				}
@@ -330,8 +331,8 @@ internal sealed class PluginConnectionHostedService(
 				return ConnectionOutcome.Retry("The session expired.", outcome.CloseCode);
 			}
 
-			if (outcome.CloseCode == ProtocolCloseCodes.AuthenticationFailed &&
-				++_authenticationFailures <= _options.MaxAuthenticationFailures)
+			if (outcome.CloseCode == ProtocolCloseCodes.AuthenticationFailed
+				&& ++_authenticationFailures <= _options.MaxAuthenticationFailures)
 			{
 				_session = null;
 				return ConnectionOutcome.Retry("The host rejected the session token.", outcome.CloseCode);
@@ -371,11 +372,11 @@ internal sealed class PluginConnectionHostedService(
 		CancellationToken cancellationToken)
 	{
 		var declared = catalog.Declare();
-		if (declared.Count > ProtocolLimits.MaxDeclaredCapabilities &&
-			declared.Any(capability => capability.Kind == CapabilityKinds.Messaging))
+		if (declared.Count > ProtocolLimits.MaxDeclaredCapabilities
+			&& declared.Any(capability => capability.Kind == CapabilityKinds.Messaging))
 		{
-			_logger.Warning("This plugin declares {Count} capabilities; with the message channel it would exceed " +
-				"the {Limit} the protocol allows, so it cannot use the channel",
+			_logger.Warning("This plugin declares {Count} capabilities; with the message channel it would exceed "
+				+ "the {Limit} the protocol allows, so it cannot use the channel",
 				declared.Count - 1,
 				ProtocolLimits.MaxDeclaredCapabilities);
 			declared = [.. declared.Where(capability => capability.Kind != CapabilityKinds.Messaging)];
@@ -415,41 +416,53 @@ internal sealed class PluginConnectionHostedService(
 	/// <summary>Extracted for direct unit testing - see <see cref="MacroDeck.Plugin.Hosting.Tests.UnitTests" />
 	/// PluginConnectionHostedServiceTests, since running the whole hosted service just to inspect one
 	/// outgoing request is out of proportion to what changes here.</summary>
-	internal static PluginSessionRequest BuildSessionRequest(IReadOnlyList<DeclaredCapability> declared,
+	internal static PluginSessionRequest BuildSessionRequest(
+		IReadOnlyList<DeclaredCapability> declared,
 		PluginMetadata metadata,
-		PluginSdkUsage? sdkUsage) => new()
+		PluginSdkUsage? sdkUsage)
 	{
-		RequestedVersion = new ProtocolVersionRange
+		return new PluginSessionRequest
 		{
-			Minimum = ProtocolVersions.Minimum,
-			Maximum = ProtocolVersions.Current
-		},
-		Capabilities = declared,
-		DeclaredName = metadata.Name,
-		DeclaredVersion = metadata.Version,
-		Sdk = sdkUsage,
-		HostApiFeatures = MacroDeck.Plugin.Protocol.Callbacks.HostApiFeatures.All
-	};
+			RequestedVersion = new ProtocolVersionRange
+			{
+				Minimum = ProtocolVersions.Minimum,
+				Maximum = ProtocolVersions.Current
+			},
+			Capabilities = declared,
+			DeclaredName = metadata.Name,
+			DeclaredVersion = metadata.Version,
+			Sdk = sdkUsage,
+			HostApiFeatures = Protocol.Callbacks.HostApiFeatures.All
+		};
+	}
 
 	private static bool SameHost(string left, string right)
-		=> Uri.TryCreate(left, UriKind.Absolute, out var leftUri) &&
-			Uri.TryCreate(right, UriKind.Absolute, out var rightUri)
-				? Uri.Compare(leftUri, rightUri, UriComponents.SchemeAndServer, UriFormat.Unescaped,
-					StringComparison.OrdinalIgnoreCase) == 0
+	{
+		return Uri.TryCreate(left, UriKind.Absolute, out var leftUri)
+			&& Uri.TryCreate(right, UriKind.Absolute, out var rightUri)
+				? Uri.Compare(leftUri,
+					rightUri,
+					UriComponents.SchemeAndServer,
+					UriFormat.Unescaped,
+					StringComparison.OrdinalIgnoreCase)
+				== 0
 				: string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+	}
 
 	private bool CanRePairAfterRejection(
 		PluginRegistrationException exception,
 		PluginPairingDescriptor? pairingDescriptor)
-		=> exception.StatusCode == HttpStatusCode.Unauthorized &&
-			_credentialsFromStore &&
-			!_everConnected &&
-			!_rePairedAfterRejection &&
-			registrationMode.Mode != PluginRegistrationMode.Managed &&
-			string.IsNullOrEmpty(_options.EnrollmentToken) &&
-			_options.PairingEnabled &&
-			credentialStore.CanSave &&
-			pairingDescriptor is { Supported: true };
+	{
+		return exception.StatusCode == HttpStatusCode.Unauthorized
+			&& _credentialsFromStore
+			&& !_everConnected
+			&& !_rePairedAfterRejection
+			&& registrationMode.Mode != PluginRegistrationMode.Managed
+			&& string.IsNullOrEmpty(_options.EnrollmentToken)
+			&& _options.PairingEnabled
+			&& credentialStore.CanSave
+			&& pairingDescriptor is { Supported: true };
+	}
 
 	private async Task<PluginCredentials> ResolveCredentialsAsync(
 		PluginPairingDescriptor? pairingDescriptor,
@@ -473,8 +486,8 @@ internal sealed class PluginConnectionHostedService(
 		if (registrationMode.Mode == PluginRegistrationMode.Managed)
 		{
 			throw new PluginRegistrationException(
-				"Managed mode expects the host to supply credentials, but MACRO_DECK_PLUGIN_ID and " +
-				"MACRO_DECK_PLUGIN_SECRET are not set.",
+				"Managed mode expects the host to supply credentials, but MACRO_DECK_PLUGIN_ID and "
+				+ "MACRO_DECK_PLUGIN_SECRET are not set.",
 				HttpStatusCode.Unauthorized);
 		}
 
@@ -522,10 +535,10 @@ internal sealed class PluginConnectionHostedService(
 			_logger.HeadlessEnrollmentHint();
 
 			throw Terminal(new PluginRegistrationException(
-				"This host does not support interactive pairing. Use the headless enrollment fallback " +
-				"described in the plugin authentication guide instead.",
+				"This host does not support interactive pairing. Use the headless enrollment fallback "
+				+ "described in the plugin authentication guide instead.",
 				HttpStatusCode.NotFound,
-				fatal: true));
+				true));
 		}
 
 		// Developer Mode is the one pairing refusal that is not terminal, and the only one this can be
@@ -539,15 +552,14 @@ internal sealed class PluginConnectionHostedService(
 		if (_pairingAttempt is null && pairingDescriptor.DeveloperModeEnabled == false)
 		{
 			_logger.PairingDeveloperModeDisabled();
-			PairingProgress.Write(
-				"Developer Mode is disabled in Macro Deck, so pairing is not possible yet. Enable it " +
-				"under Settings > Developer - this plugin keeps waiting and pairs as soon as you do.");
+			PairingProgress.Write("Developer Mode is disabled in Macro Deck, so pairing is not possible yet. Enable it "
+				+ "under Settings > Developer - this plugin keeps waiting and pairs as soon as you do.");
 
 			// Explicitly not fatal: a 403 is fatal by default, and here it is precisely not - the whole
 			// point is that the user can still turn Developer Mode on.
 			throw new PluginRegistrationException("Interactive pairing needs Developer Mode enabled on the host.",
 				HttpStatusCode.Forbidden,
-				fatal: false);
+				false);
 		}
 
 		try
@@ -658,7 +670,9 @@ internal sealed class PluginConnectionHostedService(
 	}
 
 	private static string Base64Url(byte[] bytes)
-		=> Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	}
 
 	/// <summary>State of an in-flight pairing request, kept across reconnect attempts so a transient
 	/// failure mid-poll resumes the same request instead of creating another one.</summary>
@@ -697,8 +711,8 @@ internal sealed class PluginConnectionHostedService(
 		}
 	}
 
-	private string InstanceId => _options.InstanceId ??
-		Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+	private string InstanceId => _options.InstanceId
+		?? Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
 	private void Fault(string reason)
 	{
@@ -710,8 +724,8 @@ internal sealed class PluginConnectionHostedService(
 		// that is up but permanently disconnected looks healthy while doing nothing. A self-hosted
 		// plugin defaults to staying up: it may be doing other work, and a loud log is the better
 		// outcome there.
-		var stop = _options.StopApplicationOnFatalProtocolError ??
-			registrationMode.Mode == PluginRegistrationMode.Managed;
+		var stop = _options.StopApplicationOnFatalProtocolError
+			?? registrationMode.Mode == PluginRegistrationMode.Managed;
 
 		if (stop)
 		{

@@ -86,19 +86,22 @@ internal static class KeyboardActionValues
 		};
 	}
 
-	public static ActionResult SessionUnavailableResult(KeyboardSessionUnavailableReason? reason) => reason switch
+	public static ActionResult SessionUnavailableResult(KeyboardSessionUnavailableReason? reason)
 	{
-		KeyboardSessionUnavailableReason.NotFocused => ActionResult.Success(),
-		KeyboardSessionUnavailableReason.TargetNotFound => ActionResult.Failed(ActionErrorCodes.NotFound,
-			AppStrings.Integrations.Keyboard.Errors.TargetApplicationNotFound()),
-		KeyboardSessionUnavailableReason.FocusFailed => ActionResult.Failed(ActionErrorCodes.PermissionDenied,
-			AppStrings.Integrations.Keyboard.Errors.TargetApplicationFocusFailed()),
-		KeyboardSessionUnavailableReason.BackgroundModifiersUnsupported => ActionResult.Failed(
-			ActionErrorCodes.Unavailable,
-			AppStrings.Integrations.Keyboard.Errors.BackgroundModifiersUnsupported()),
-		_ => ActionResult.Failed(ActionErrorCodes.Unavailable,
-			AppStrings.Integrations.Keyboard.Errors.TargetingModeNotSupported())
-	};
+		return reason switch
+		{
+			KeyboardSessionUnavailableReason.NotFocused => ActionResult.Success(),
+			KeyboardSessionUnavailableReason.TargetNotFound => ActionResult.Failed(ActionErrorCodes.NotFound,
+				AppStrings.Integrations.Keyboard.Errors.TargetApplicationNotFound()),
+			KeyboardSessionUnavailableReason.FocusFailed => ActionResult.Failed(ActionErrorCodes.PermissionDenied,
+				AppStrings.Integrations.Keyboard.Errors.TargetApplicationFocusFailed()),
+			KeyboardSessionUnavailableReason.BackgroundModifiersUnsupported => ActionResult.Failed(
+				ActionErrorCodes.Unavailable,
+				AppStrings.Integrations.Keyboard.Errors.BackgroundModifiersUnsupported()),
+			_ => ActionResult.Failed(ActionErrorCodes.Unavailable,
+				AppStrings.Integrations.Keyboard.Errors.TargetingModeNotSupported())
+		};
+	}
 
 	private static (IReadOnlyList<string>, string) FromDictionary(IDictionary<string, object?> dict)
 	{

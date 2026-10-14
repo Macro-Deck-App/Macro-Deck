@@ -14,27 +14,27 @@ public class RemovedLocalizationKeyTests
 {
 	private static readonly string[] _onlyMdloc006 = ["MDLOC006"];
 
-	private const string _callSite = """
-									 namespace TestPlugin
-									 {
-									 	internal static class CallSite
-									 	{
-									 		public static void Use()
-									 		{
-									 			var retired = Strings.Retired();
-									 			var current = Strings.Current();
-									 		}
-									 	}
-									 }
-									 """;
+	private const string CallSite = """
+									namespace TestPlugin
+									{
+										internal static class CallSite
+										{
+											public static void Use()
+											{
+												var retired = Strings.Retired();
+												var current = Strings.Current();
+											}
+										}
+									}
+									""";
 
 	private static string Generate(string retiredComment)
 	{
 		var run = Run(new Dictionary<string, string>
 		{
-			[DefaultFileName] = Resx(Entry("Retired", "Old wording", retiredComment) +
-				"\n" +
-				Entry("Current", "New wording")),
+			[DefaultFileName] = Resx(Entry("Retired", "Old wording", retiredComment)
+				+ "\n"
+				+ Entry("Current", "New wording"))
 		});
 
 		Assert.That(run.Ids, Is.Empty, "a retirement marker is not itself a defect");
@@ -49,7 +49,7 @@ public class RemovedLocalizationKeyTests
 		var generated = Generate("[removed:Use Common.Apply instead.]");
 
 		var diagnostics = await AnalyzeCallSiteAsync(generated,
-			_callSite,
+			CallSite,
 			new RemovedLocalizationKeyAnalyzer());
 
 		Assert.Multiple(() =>
@@ -68,7 +68,7 @@ public class RemovedLocalizationKeyTests
 		var generated = Generate("Just a translator note.");
 
 		var diagnostics = await AnalyzeCallSiteAsync(generated,
-			_callSite,
+			CallSite,
 			new RemovedLocalizationKeyAnalyzer());
 
 		Assert.That(diagnostics, Is.Empty);

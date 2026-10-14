@@ -41,7 +41,7 @@ public static class ReverseLineReader
 				if (lineEnd > i + 1)
 				{
 					yield return new LogFileLine(position + i + 1,
-						Decode(block, i + 1, lineEnd - i - 1, atFileStart: false));
+						Decode(block, i + 1, lineEnd - i - 1, false));
 				}
 
 				lineEnd = i;
@@ -59,12 +59,14 @@ public static class ReverseLineReader
 
 		if (carry.Length > 0)
 		{
-			yield return new LogFileLine(0, Decode(carry, 0, carry.Length, atFileStart: true));
+			yield return new LogFileLine(0, Decode(carry, 0, carry.Length, true));
 		}
 	}
 
 	public static FileStream OpenShared(string path)
-		=> new(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+	{
+		return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+	}
 
 	public static long EndOfLastCompleteLine(string path)
 	{

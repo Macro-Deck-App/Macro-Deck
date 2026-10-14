@@ -36,8 +36,8 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 		foreach (var iconPack in manifest.IconPacks ?? [])
 		{
 			warnings.Add(PluginInstallWarning.Advisory(PluginDependencyWarningCodes.IconPackUnresolved,
-				$"Icon pack '{iconPack.Id}' cannot be resolved yet; icon pack dependencies are recorded " +
-				"but not enforced.",
+				$"Icon pack '{iconPack.Id}' cannot be resolved yet; icon pack dependencies are recorded "
+				+ "but not enforced.",
 				iconPack.Id));
 		}
 
@@ -62,8 +62,8 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 
 		foreach (var installed in SafeDiscover())
 		{
-			if (installed.ActiveVersion is not { } active ||
-				string.Equals(installed.PluginId, pluginId, StringComparison.Ordinal))
+			if (installed.ActiveVersion is not { } active
+				|| string.Equals(installed.PluginId, pluginId, StringComparison.Ordinal))
 			{
 				continue;
 			}
@@ -75,8 +75,8 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 			}
 
 			var dependsHard = (manifest.Dependencies ?? [])
-				.Any(dependency => !dependency.Optional &&
-					string.Equals(dependency.Id, pluginId, StringComparison.Ordinal));
+				.Any(dependency
+					=> !dependency.Optional && string.Equals(dependency.Id, pluginId, StringComparison.Ordinal));
 
 			if (dependsHard)
 			{
@@ -87,7 +87,8 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 		return dependents;
 	}
 
-	private static void ResolveDependency(PluginDependency dependency,
+	private static void ResolveDependency(
+		PluginDependency dependency,
 		Dictionary<string, string> installed,
 		List<PluginInstallWarning> warnings)
 	{
@@ -108,13 +109,14 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 		{
 			warnings.Add(Warn(severity,
 				PluginDependencyWarningCodes.DependencyVersionUnsatisfied,
-				$"Plugin '{dependency.Id}' is installed at {activeVersion}, which does not satisfy " +
-				$"'{dependency.VersionRange}'.",
+				$"Plugin '{dependency.Id}' is installed at {activeVersion}, which does not satisfy "
+				+ $"'{dependency.VersionRange}'.",
 				dependency.Id));
 		}
 	}
 
-	private static void ResolveConflict(PluginDependency conflict,
+	private static void ResolveConflict(
+		PluginDependency conflict,
 		Dictionary<string, string> installed,
 		List<PluginInstallWarning> warnings)
 	{
@@ -140,12 +142,13 @@ public sealed class PluginDependencyResolver : IPluginDependencyResolver
 			return true;
 		}
 
-		return SemanticVersionRange.TryParse(versionRange, out var range) &&
-			SemanticVersion.TryParse(installedVersion, out var version) &&
-			range.Satisfies(version);
+		return SemanticVersionRange.TryParse(versionRange, out var range)
+			&& SemanticVersion.TryParse(installedVersion, out var version)
+			&& range.Satisfies(version);
 	}
 
-	private static PluginInstallWarning Warn(PluginInstallWarningSeverity severity,
+	private static PluginInstallWarning Warn(
+		PluginInstallWarningSeverity severity,
 		string code,
 		string message,
 		string subjectId)

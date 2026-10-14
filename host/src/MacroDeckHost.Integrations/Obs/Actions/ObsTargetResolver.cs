@@ -21,15 +21,21 @@ internal sealed class ObsTargetResolver
 		_legacyResolver = legacyResolver;
 	}
 
-	public static ObsTargetResolver Legacy(Func<ObsConnection?> resolver) => new(resolver);
+	public static ObsTargetResolver Legacy(Func<ObsConnection?> resolver)
+	{
+		return new ObsTargetResolver(resolver);
+	}
 
 	public static ActionParameter Parameter()
-		=> ActionParameter.DynamicChoice(ConfigurationParameter,
-			label: AppStrings.Integrations.Obs.Params.Configuration(),
+	{
+		return ActionParameter.DynamicChoice(ConfigurationParameter,
+			AppStrings.Integrations.Obs.Params.Configuration(),
 			required: true);
+	}
 
 	public DynamicOptionsResult ConfigurationOptions()
-		=> new()
+	{
+		return new DynamicOptionsResult
 		{
 			Options = _runtimes()
 				.Select(runtime => new ActionParameterOption
@@ -40,6 +46,7 @@ internal sealed class ObsTargetResolver
 				.ToList(),
 			CacheSeconds = 0
 		};
+	}
 
 	public ObsConnection? ForOptions(IReadOnlyDictionary<string, object?> parameters)
 	{
@@ -53,7 +60,8 @@ internal sealed class ObsTargetResolver
 			: null;
 	}
 
-	public bool TryResolve(IReadOnlyDictionary<string, object> parameters,
+	public bool TryResolve(
+		IReadOnlyDictionary<string, object> parameters,
 		out ObsConnection connection,
 		out ActionResult error)
 	{
@@ -70,9 +78,9 @@ internal sealed class ObsTargetResolver
 			return false;
 		}
 
-		if (!parameters.TryGetValue(ConfigurationParameter, out var raw) ||
-			raw is not string text ||
-			!Guid.TryParseExact(text, "D", out var id))
+		if (!parameters.TryGetValue(ConfigurationParameter, out var raw)
+			|| raw is not string text
+			|| !Guid.TryParseExact(text, "D", out var id))
 		{
 			connection = null!;
 			error = ActionResult.Failed(ActionErrorCodes.InvalidParameter,
@@ -103,11 +111,13 @@ internal sealed class ObsTargetResolver
 	private bool TryFind(IReadOnlyDictionary<string, object?> parameters, out ObsRuntime runtime)
 	{
 		runtime = null!;
-		return parameters.GetValueOrDefault(ConfigurationParameter) is string text &&
-			Guid.TryParseExact(text, "D", out var id) &&
-			(runtime = _runtimes().FirstOrDefault(item => item.Id == id)!) is not null;
+		return parameters.GetValueOrDefault(ConfigurationParameter) is string text
+			&& Guid.TryParseExact(text, "D", out var id)
+			&& (runtime = _runtimes().FirstOrDefault(item => item.Id == id)!) is not null;
 	}
 
 	private static ActionResult NotConnected()
-		=> ActionResult.Failed(ActionErrorCodes.NotConnected, AppStrings.Integrations.Obs.Errors.NotConnected());
+	{
+		return ActionResult.Failed(ActionErrorCodes.NotConnected, AppStrings.Integrations.Obs.Errors.NotConnected());
+	}
 }

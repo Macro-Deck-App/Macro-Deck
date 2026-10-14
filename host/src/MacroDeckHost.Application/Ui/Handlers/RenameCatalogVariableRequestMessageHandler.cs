@@ -11,7 +11,8 @@ public class RenameCatalogVariableRequestMessageHandler
 	private readonly VariableRegistry _registry;
 	private readonly SharedVariables _sharedVariables;
 
-	public RenameCatalogVariableRequestMessageHandler(IVariableBindingService bindings,
+	public RenameCatalogVariableRequestMessageHandler(
+		IVariableBindingService bindings,
 		VariableRegistry registry,
 		SharedVariables sharedVariables)
 	{
@@ -28,7 +29,7 @@ public class RenameCatalogVariableRequestMessageHandler
 		{
 			return new RenameCatalogVariableResponse
 			{
-				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.NotFound),
+				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.NotFound)
 			};
 		}
 
@@ -37,7 +38,7 @@ public class RenameCatalogVariableRequestMessageHandler
 		{
 			return new RenameCatalogVariableResponse
 			{
-				Error = VariableBindingErrorMapper.ToTransportError(result.Error!.Value, result.ErrorMessage),
+				Error = VariableBindingErrorMapper.ToTransportError(result.Error!.Value, result.ErrorMessage)
 			};
 		}
 
@@ -46,7 +47,7 @@ public class RenameCatalogVariableRequestMessageHandler
 		{
 			return new RenameCatalogVariableResponse
 			{
-				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.NotFound),
+				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.NotFound)
 			};
 		}
 
@@ -54,8 +55,10 @@ public class RenameCatalogVariableRequestMessageHandler
 
 		return new RenameCatalogVariableResponse
 		{
-			Variable = VariableDtoMapper.ToDto(entity, _registry.IsAvailable(id), dynamicResourceId,
-				_sharedVariables.IsShared(entity)),
+			Variable = VariableDtoMapper.ToDto(entity,
+				_registry.IsAvailable(id),
+				dynamicResourceId,
+				_sharedVariables.IsShared(entity))
 		};
 	}
 }

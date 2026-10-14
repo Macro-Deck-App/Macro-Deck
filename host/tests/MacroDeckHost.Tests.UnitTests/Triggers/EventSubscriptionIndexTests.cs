@@ -20,7 +20,9 @@ public class EventSubscriptionIndexTests
 	}
 
 	private static string WidgetData(params (string TriggerId, string ProviderId, string EventId)[] triggers)
-		=> JsonSerializer.Serialize(new { flows = AutomationFlows(triggers) });
+	{
+		return JsonSerializer.Serialize(new { flows = AutomationFlows(triggers) });
+	}
 
 	private static string AutomationFlows(params (string TriggerId, string ProviderId, string EventId)[] triggers)
 	{
@@ -236,7 +238,7 @@ public class EventSubscriptionIndexTests
 	[Test]
 	public void A_disabled_automation_contributes_no_subscriptions()
 	{
-		_automations.Add(AutomationFlows(("t1", "obs", "scene-changed")), enabled: false);
+		_automations.Add(AutomationFlows(("t1", "obs", "scene-changed")), false);
 
 		_index.Rebuild();
 
@@ -251,7 +253,7 @@ public class EventSubscriptionIndexTests
 		_index.Rebuild();
 		Assert.That(_index.HasSubscribers("obs::scene-changed"), Is.True);
 
-		_index.ReindexAutomation(automation.Id, flows, enabled: false);
+		_index.ReindexAutomation(automation.Id, flows, false);
 
 		Assert.That(_index.HasSubscribers("obs::scene-changed"), Is.False);
 	}
@@ -262,10 +264,10 @@ public class EventSubscriptionIndexTests
 		var automation = _automations.Add(null);
 		_index.Rebuild();
 
-		_index.ReindexAutomation(automation.Id, AutomationFlows(("t1", "obs", "scene-changed")), enabled: true);
+		_index.ReindexAutomation(automation.Id, AutomationFlows(("t1", "obs", "scene-changed")), true);
 		Assert.That(_index.HasSubscribers("obs::scene-changed"), Is.True);
 
-		_index.ReindexAutomation(automation.Id, "[]", enabled: true);
+		_index.ReindexAutomation(automation.Id, "[]", true);
 		Assert.That(_index.HasSubscribers("obs::scene-changed"), Is.False);
 	}
 
@@ -317,8 +319,8 @@ public class EventSubscriptionIndexTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.DoesNotThrow(() => _index.ReindexAutomation(id, "[ not json", enabled: true));
-			Assert.DoesNotThrow(() => _index.ReindexAutomation(id, "onEvent but not json", enabled: true));
+			Assert.DoesNotThrow(() => _index.ReindexAutomation(id, "[ not json", true));
+			Assert.DoesNotThrow(() => _index.ReindexAutomation(id, "onEvent but not json", true));
 		});
 	}
 }

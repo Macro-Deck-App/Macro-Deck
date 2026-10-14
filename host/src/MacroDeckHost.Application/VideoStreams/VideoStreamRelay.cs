@@ -23,7 +23,7 @@ public sealed class VideoStreamRelay : IVideoStreamRelay
 		ArgumentException.ThrowIfNullOrEmpty(sessionId);
 		ArgumentNullException.ThrowIfNull(upstream);
 		ArgumentException.ThrowIfNullOrEmpty(transport);
-		if (!upstream.IsAbsoluteUri || (upstream.Scheme != Uri.UriSchemeHttp && upstream.Scheme != Uri.UriSchemeHttps))
+		if (!upstream.IsAbsoluteUri || upstream.Scheme != Uri.UriSchemeHttp && upstream.Scheme != Uri.UriSchemeHttps)
 		{
 			throw new ArgumentException("The upstream must be an absolute http or https URL.", nameof(upstream));
 		}
@@ -40,8 +40,8 @@ public sealed class VideoStreamRelay : IVideoStreamRelay
 			}
 			else
 			{
-				if (!string.Equals(Origin(entry.Upstream), Origin(upstream), StringComparison.OrdinalIgnoreCase) ||
-					!string.Equals(entry.Transport, transport, StringComparison.Ordinal))
+				if (!string.Equals(Origin(entry.Upstream), Origin(upstream), StringComparison.OrdinalIgnoreCase)
+					|| !string.Equals(entry.Transport, transport, StringComparison.Ordinal))
 				{
 					superseded = entry.Abort;
 					entry.Abort = new CancellationTokenSource();
@@ -126,10 +126,16 @@ public sealed class VideoStreamRelay : IVideoStreamRelay
 		}
 	}
 
-	private static string Origin(Uri uri) => uri.GetLeftPart(UriPartial.Authority);
+	private static string Origin(Uri uri)
+	{
+		return uri.GetLeftPart(UriPartial.Authority);
+	}
 
 	// CancelAsync runs the callbacks off this thread, so a caller may hold its own lock.
-	private static void Cancel(CancellationTokenSource? source) => _ = source?.CancelAsync();
+	private static void Cancel(CancellationTokenSource? source)
+	{
+		_ = source?.CancelAsync();
+	}
 
 	private sealed class Entry(string token, Uri upstream, string transport)
 	{
@@ -165,5 +171,8 @@ public sealed class VideoStreamRelayLease : IDisposable
 
 	public CancellationToken Aborted { get; }
 
-	public void Dispose() => Interlocked.Exchange(ref _release, null)?.Invoke();
+	public void Dispose()
+	{
+		Interlocked.Exchange(ref _release, null)?.Invoke();
+	}
 }

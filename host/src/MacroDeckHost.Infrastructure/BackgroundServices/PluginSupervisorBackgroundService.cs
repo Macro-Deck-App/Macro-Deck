@@ -134,7 +134,10 @@ public sealed class PluginSupervisorBackgroundService : HostReadyBackgroundServi
 		}
 	}
 
-	private void OnStopping() => _stopAllTask ??= StopAllWithBudget();
+	private void OnStopping()
+	{
+		_stopAllTask ??= StopAllWithBudget();
+	}
 
 	public override async Task StopAsync(CancellationToken cancellationToken)
 	{
@@ -146,7 +149,7 @@ public sealed class PluginSupervisorBackgroundService : HostReadyBackgroundServi
 			await pending;
 		}
 
-		_stoppingRegistration.Dispose();
+		await _stoppingRegistration.DisposeAsync();
 	}
 
 	private async Task StopAllWithBudget()

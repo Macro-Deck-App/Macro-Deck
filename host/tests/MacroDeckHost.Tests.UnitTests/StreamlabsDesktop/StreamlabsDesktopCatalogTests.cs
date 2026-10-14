@@ -19,7 +19,10 @@ public class StreamlabsDesktopCatalogTests
 	}
 
 	[TearDown]
-	public void TearDown() => _client.Dispose();
+	public void TearDown()
+	{
+		_client.Dispose();
+	}
 
 	[Test]
 	public async Task ResolveSceneAsync_MapsANameToItsScene()
@@ -188,7 +191,7 @@ public class StreamlabsDesktopCatalogTests
 		await _catalog.ResolveSceneItemsAsync(StreamlabsJson.SceneName, StreamlabsJson.CameraSourceName);
 		_client.Calls.Clear();
 
-		_catalog.PatchItemVisibility(StreamlabsJson.SceneId, StreamlabsJson.CameraItemId, visible: false);
+		_catalog.PatchItemVisibility(StreamlabsJson.SceneId, StreamlabsJson.CameraItemId, false);
 		var items = await _catalog.ResolveSceneItemsAsync(StreamlabsJson.SceneName, StreamlabsJson.CameraSourceName);
 
 		Assert.Multiple(() =>
@@ -204,7 +207,7 @@ public class StreamlabsDesktopCatalogTests
 		await _catalog.ResolveAudioSourceAsync(StreamlabsJson.MicSourceName);
 		_client.Calls.Clear();
 
-		_catalog.PatchAudioMuted(StreamlabsJson.MicSourceId, muted: true);
+		_catalog.PatchAudioMuted(StreamlabsJson.MicSourceId, true);
 		var source = await _catalog.ResolveAudioSourceAsync(StreamlabsJson.MicSourceName);
 
 		Assert.Multiple(() =>
@@ -232,7 +235,7 @@ public class StreamlabsDesktopCatalogTests
 	{
 		var catalog = new StreamlabsDesktopCatalog(() => null);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await catalog.GetSceneNamesAsync(), Is.Empty);
 			Assert.That(await catalog.GetAudioSourceNamesAsync(), Is.Empty);

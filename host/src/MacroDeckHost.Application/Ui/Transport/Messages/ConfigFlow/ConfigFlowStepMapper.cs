@@ -10,7 +10,8 @@ namespace MacroDeckHost.Application.Ui.Transport.Messages.ConfigFlow;
 public static class ConfigFlowStepMapper
 {
 	public static ConfigFlowStepDto Map(SdkConfigFlowStep step)
-		=> new()
+	{
+		return new ConfigFlowStepDto
 		{
 			StepId = step.StepId,
 			Title = step.Title,
@@ -31,6 +32,7 @@ public static class ConfigFlowStepMapper
 			Fields = step.Fields.Select(MapField).ToList(),
 			AdvancedFields = step.AdvancedFields.Select(MapField).ToList()
 		};
+	}
 
 	/// <summary>
 	/// A config flow belongs to an integration, not to a widget, so there is no "this widget" for a

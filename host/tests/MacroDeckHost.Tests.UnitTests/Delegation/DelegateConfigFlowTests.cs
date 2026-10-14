@@ -22,7 +22,10 @@ internal sealed class DelegateConfigFlowTests
 	}
 
 	[TearDown]
-	public void TearDown() => _client.Dispose();
+	public void TearDown()
+	{
+		_client.Dispose();
+	}
 
 	[Test]
 	public async Task A_successful_setup_completes_with_the_remotes_machine_name_in_the_title()
@@ -206,7 +209,8 @@ internal sealed class DelegateConfigFlowTests
 	{
 		var result = await Submit("http://10.0.0.5:5000");
 
-		Assert.That(result.Values!.Keys, Does.Not.Contain(DelegateConfigKeys.ImportSharedVariables),
+		Assert.That(result.Values!.Keys,
+			Does.Not.Contain(DelegateConfigKeys.ImportSharedVariables),
 			"the stored value is the boolean the dialog submitted, which it shows again when editing");
 	}
 
@@ -232,14 +236,17 @@ internal sealed class DelegateConfigFlowTests
 		string baseUrl,
 		string username = "admin",
 		string password = "correct-password")
-		=> Submit(_flow, baseUrl, username, password);
+	{
+		return Submit(_flow, baseUrl, username, password);
+	}
 
 	private static Task<ConfigFlowResult> Submit(
 		DelegateConfigFlow flow,
 		string baseUrl,
 		string username = "admin",
 		string password = "correct-password")
-		=> flow.SubmitAsync("connection",
+	{
+		return flow.SubmitAsync("connection",
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[DelegateConfigKeys.BaseUrl] = baseUrl,
@@ -248,4 +255,5 @@ internal sealed class DelegateConfigFlowTests
 			},
 			null!,
 			CancellationToken.None);
+	}
 }

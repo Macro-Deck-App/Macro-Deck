@@ -8,7 +8,13 @@ internal sealed class TestConfigEntriesIntegration : IPluginIntegration, IConfig
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 }

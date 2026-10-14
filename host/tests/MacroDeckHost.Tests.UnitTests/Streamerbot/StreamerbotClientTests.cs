@@ -23,7 +23,7 @@ internal sealed class StreamerbotClientTests
 	{
 		_pair = await WebSocketPair.CreateAsync();
 		_client = new StreamerbotClient((_, _) => Task.FromResult(_pair.Client),
-			helloTimeout: TimeSpan.FromMilliseconds(300));
+			TimeSpan.FromMilliseconds(300));
 	}
 
 	[TearDown]

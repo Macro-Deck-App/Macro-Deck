@@ -107,9 +107,11 @@ public sealed class FolderViewRegistry : IFolderViewRegistry
 	// The grid is first and the rest sort by qualified id, so the picker's order does not depend on which
 	// integration happened to start first.
 	public IReadOnlyList<FolderViewCatalogEntry> GetAll()
-		=>
+	{
+		return
 		[
 			_widgetGrid,
-			.. _byQualifiedId.Values.OrderBy(candidate => candidate.FolderViewId, StringComparer.Ordinal),
+			.. _byQualifiedId.Values.OrderBy(candidate => candidate.FolderViewId, StringComparer.Ordinal)
 		];
+	}
 }

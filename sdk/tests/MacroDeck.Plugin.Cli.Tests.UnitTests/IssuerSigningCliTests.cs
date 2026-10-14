@@ -21,7 +21,7 @@ public class IssuerSigningCliTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -69,13 +69,16 @@ public class IssuerSigningCliTests
 		return (output, error, exitCode, signedPath);
 	}
 
-	private string[] IssuerArguments(TestPki.IssuedCertificate issuer) =>
-	[
-		"--issuer-certificate",
-		Write("issuer.json", issuer.CertificateBytes),
-		"--issuer-certificate-signature",
-		Write("issuer.sig", issuer.CertificateSignatureBytes)
-	];
+	private string[] IssuerArguments(TestPki.IssuedCertificate issuer)
+	{
+		return
+		[
+			"--issuer-certificate",
+			Write("issuer.json", issuer.CertificateBytes),
+			"--issuer-certificate-signature",
+			Write("issuer.sig", issuer.CertificateSignatureBytes)
+		];
+	}
 
 	[Test]
 	public async Task A_certificate_from_an_issuer_signs_and_verifies_naming_the_issuer()
@@ -112,7 +115,8 @@ public class IssuerSigningCliTests
 		PackageArchiveFixtures.RemoveEntry(signedPath, PluginArtifactFiles.IssuerCertificateFileName);
 		PackageArchiveFixtures.RemoveEntry(signedPath, PluginArtifactFiles.IssuerCertificateSignatureFileName);
 
-		var (output, _, exitCode) = await CliRunner.Run("verify", signedPath, "--root-public", RootPublicPath, "--no-color");
+		var (output, _, exitCode)
+			= await CliRunner.Run("verify", signedPath, "--root-public", RootPublicPath, "--no-color");
 
 		Assert.Multiple(() =>
 		{

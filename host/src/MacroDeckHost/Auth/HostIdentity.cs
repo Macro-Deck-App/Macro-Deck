@@ -14,7 +14,9 @@ public static class HostIdentityMessage
 	public const int MaxNonceBytes = 64;
 
 	public static byte[] Build(string publicKeyBase64, string endpoint, string nonceBase64)
-		=> Encoding.UTF8.GetBytes($"{DomainLine}\n{publicKeyBase64}\n{endpoint}\n{nonceBase64}");
+	{
+		return Encoding.UTF8.GetBytes($"{DomainLine}\n{publicKeyBase64}\n{endpoint}\n{nonceBase64}");
+	}
 
 	// Lower-case hex, IPv4-mapped addresses as IPv4, IPv6 bracketed without a zone id, then the port.
 	public static string CanonicalAuthority(IPAddress address, int port)
@@ -48,9 +50,9 @@ public static class HostIdentityMessage
 		}
 
 		var buffer = new byte[value.Length];
-		if (!Convert.TryFromBase64String(value, buffer, out var written) ||
-			written is < MinNonceBytes or > MaxNonceBytes ||
-			Convert.ToBase64String(buffer, 0, written) != value)
+		if (!Convert.TryFromBase64String(value, buffer, out var written)
+			|| written is < MinNonceBytes or > MaxNonceBytes
+			|| Convert.ToBase64String(buffer, 0, written) != value)
 		{
 			return false;
 		}
@@ -65,21 +67,28 @@ public static class HostIdentityRateLimit
 	public const int PerAddressLimit = 30;
 	public const int PerNetworkLimit = 300;
 	public static readonly TimeSpan Window = TimeSpan.FromSeconds(10);
-	private static readonly PathString ChallengePath = "/api/auth/identity";
+	private static readonly PathString _challengePath = "/api/auth/identity";
 
 	// Per address, plus a ceiling per IPv6 /64 against a caller rotating through its addresses; either refuses.
 	public static PartitionedRateLimiter<HttpContext> Create()
-		=> PartitionedRateLimiter.CreateChained(
-			PartitionedRateLimiter.Create<HttpContext, string>(context =>
+	{
+		return PartitionedRateLimiter.CreateChained(PartitionedRateLimiter.Create<HttpContext, string>(context =>
 				Partition(context, AddressKey(context), PerAddressLimit)),
 			PartitionedRateLimiter.Create<HttpContext, string>(context =>
 				Partition(context, NetworkKey(context), PerNetworkLimit)));
+	}
 
 	public static string AddressKey(HttpContext context)
-		=> BridgedConnectionStamp.DeviceKey(context) ?? AddressKey(context.Connection.RemoteIpAddress);
+	{
+		return BridgedConnectionStamp.DeviceKey(context) ?? AddressKey(context.Connection.RemoteIpAddress);
+	}
 
 	public static string? NetworkKey(HttpContext context)
-		=> BridgedConnectionStamp.DeviceKey(context) is null ? NetworkKey(context.Connection.RemoteIpAddress) : null;
+	{
+		return BridgedConnectionStamp.DeviceKey(context) is null
+			? NetworkKey(context.Connection.RemoteIpAddress)
+			: null;
+	}
 
 	public static string AddressKey(IPAddress? address)
 	{
@@ -97,13 +106,17 @@ public static class HostIdentityRateLimit
 	}
 
 	public static string? NetworkKey(IPAddress? address)
-		=> address is { AddressFamily: AddressFamily.InterNetworkV6, IsIPv4MappedToIPv6: false }
+	{
+		return address is { AddressFamily: AddressFamily.InterNetworkV6, IsIPv4MappedToIPv6: false }
 			? $"{Convert.ToHexString(address.GetAddressBytes(), 0, 8)}/64"
 			: null;
+	}
 
 	private static RateLimitPartition<string> Partition(HttpContext context, string? key, int permits)
-		=> key is null || !context.Request.Path.StartsWithSegments(ChallengePath)
+	{
+		return key is null || !context.Request.Path.StartsWithSegments(_challengePath)
 			? RateLimitPartition.GetNoLimiter(string.Empty)
 			: RateLimitPartition.GetFixedWindowLimiter(key,
 				_ => new FixedWindowRateLimiterOptions { PermitLimit = permits, Window = Window, QueueLimit = 0 });
+	}
 }

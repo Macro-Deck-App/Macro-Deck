@@ -36,9 +36,13 @@ internal static class TwitchVariables
 		"last_raider"
 	];
 
-	public static string AccountPrefix(string variableKey) => $"{Prefix}{variableKey}_";
+	public static string AccountPrefix(string variableKey)
+	{
+		return $"{Prefix}{variableKey}_";
+	}
 
-	public static IReadOnlyList<VariableDefinition> Declare(string variableKey,
+	public static IReadOnlyList<VariableDefinition> Declare(
+		string variableKey,
 		VariableConfiguration? configuration = null)
 	{
 		var prefix = AccountPrefix(variableKey);
@@ -150,8 +154,8 @@ internal static class TwitchVariables
 				},
 			VariableDefinition.Eager($"{prefix}followers_only_duration",
 					VariableType.Numeric,
-					decimalPlaces: 0,
-					refreshInterval: TimeSpan.FromSeconds(30))
+					0,
+					TimeSpan.FromSeconds(30))
 				with
 				{
 					DisplayName = AppStrings.Integrations.Twitch.Variables.FollowersOnlyDuration(),
@@ -223,7 +227,8 @@ internal static class TwitchVariables
 	}
 
 	public static object? Read(TwitchAccount account, TwitchAccountState state, string name)
-		=> name switch
+	{
+		return name switch
 		{
 			"is_connected" => state.IsConnected,
 			"is_live" => state.IsLive,
@@ -251,11 +256,14 @@ internal static class TwitchVariables
 			"last_raider" => state.LastRaider,
 			_ => null
 		};
+	}
 
 	// A definition id is the canonical name with '_' swapped for '-', and a canonical variable name can
 	// never contain '-', so swapping the separator back recovers the name exactly.
 	public static (string VariableKey, string Name)? SplitDefinitionId(string definitionId)
-		=> Split(definitionId.Replace('-', '_'));
+	{
+		return Split(definitionId.Replace('-', '_'));
+	}
 
 	public static (string VariableKey, string Name)? Split(string variableName)
 	{
@@ -278,7 +286,9 @@ internal static class TwitchVariables
 	}
 
 	private static int? Uptime(TwitchAccountState state)
-		=> state.IsLive == true && state.StreamStartedAt is { } started
+	{
+		return state.IsLive == true && state.StreamStartedAt is { } started
 			? (int)Math.Max(0, (DateTimeOffset.UtcNow - started).TotalSeconds)
 			: null;
+	}
 }

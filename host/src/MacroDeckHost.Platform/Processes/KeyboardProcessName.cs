@@ -6,8 +6,10 @@ namespace MacroDeckHost.Platform.Processes;
 internal static class KeyboardProcessName
 {
 	public static bool Matches(string? actual, string configured)
-		=> !string.IsNullOrWhiteSpace(actual) &&
-			string.Equals(Normalize(actual), Normalize(configured), StringComparison.OrdinalIgnoreCase);
+	{
+		return !string.IsNullOrWhiteSpace(actual)
+			&& string.Equals(Normalize(actual), Normalize(configured), StringComparison.OrdinalIgnoreCase);
+	}
 
 	public static string? ForPid(int pid)
 	{

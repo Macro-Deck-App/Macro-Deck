@@ -13,7 +13,13 @@ public sealed class WidgetDerivedStateStore
 		return previous;
 	}
 
-	public string? TryGet(Guid widgetId) => _states.TryGetValue(widgetId, out var value) ? value : null;
+	public string? TryGet(Guid widgetId)
+	{
+		return _states.TryGetValue(widgetId, out var value) ? value : null;
+	}
 
-	public void Remove(Guid widgetId) => _states.TryRemove(widgetId, out _);
+	public void Remove(Guid widgetId)
+	{
+		_states.TryRemove(widgetId, out _);
+	}
 }

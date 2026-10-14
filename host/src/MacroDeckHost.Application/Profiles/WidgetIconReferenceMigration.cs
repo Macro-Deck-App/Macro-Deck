@@ -51,7 +51,10 @@ public static class WidgetIconReferenceMigration
 		return true;
 	}
 
-	private static bool NormalizeSlider(JsonObject data) => WidgetIconReference.MigrateNode(data);
+	private static bool NormalizeSlider(JsonObject data)
+	{
+		return WidgetIconReference.MigrateNode(data);
+	}
 
 	private static bool NormalizeActionButton(JsonObject data)
 	{
@@ -71,8 +74,8 @@ public static class WidgetIconReferenceMigration
 			case JsonArray states:
 				foreach (var entry in states.OfType<JsonObject>())
 				{
-					changed |= entry["appearance"] is JsonObject appearance &&
-						WidgetIconReference.MigrateNode(appearance);
+					changed |= entry["appearance"] is JsonObject appearance
+						&& WidgetIconReference.MigrateNode(appearance);
 				}
 
 				break;

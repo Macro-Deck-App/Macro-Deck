@@ -13,7 +13,8 @@ public sealed class StoreRegistryRefreshBackgroundService : HostReadyBackgroundS
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
-	public StoreRegistryRefreshBackgroundService(IHostApplicationLifetime lifetime,
+	public StoreRegistryRefreshBackgroundService(
+		IHostApplicationLifetime lifetime,
 		IStoreRegistryRefresher refresher,
 		StoreRegistryOptions options,
 		TimeProvider timeProvider,

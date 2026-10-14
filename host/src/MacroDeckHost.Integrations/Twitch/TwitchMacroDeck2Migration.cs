@@ -15,7 +15,7 @@ internal sealed class TwitchMacroDeck2Migration : IIntegrationMigration
 {
 	public MigrationSource Source => MigrationSource.MacroDeck2;
 
-	private static readonly int[] AllowedCommercialLengths = [30, 60, 90, 120, 150, 180];
+	private static readonly int[] _allowedCommercialLengths = [30, 60, 90, 120, 150, 180];
 
 	// Twitch Plugin.csproj's AssemblyName, also the "dll" field of its ExtensionManifest.json minus the
 	// extension.
@@ -26,42 +26,54 @@ internal sealed class TwitchMacroDeck2Migration : IIntegrationMigration
 	public IReadOnlyList<string> ClaimedSettingsSources { get; } = ["macro deck_twitch plugin"];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
-
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		"SuchByte.TwitchPlugin.Actions.ClearChatAction" => Simple(action, "clear-chat", "Clear chat"),
-		"SuchByte.TwitchPlugin.Actions.MakeClipAction" => MigrateMakeClip(action),
-		"SuchByte.TwitchPlugin.Actions.PlayAdAction" => MigratePlayAd(action),
-		"SuchByte.TwitchPlugin.Actions.SendChatMessageAction" => MigrateSendChatMessage(action),
-		"SuchByte.TwitchPlugin.Actions.SetEmoteChatAction" => MigrateChatMode(action, "emote-only"),
-		"SuchByte.TwitchPlugin.Actions.SetFollowerChatAction" => MigrateFollowerChat(action),
-		"SuchByte.TwitchPlugin.Actions.SetSlowChatAction" => MigrateSlowChat(action),
-		"SuchByte.TwitchPlugin.Actions.SetSubscriberChatAction" => MigrateChatMode(action, "subscribers-only"),
-		"SuchByte.TwitchPlugin.Actions.SetTitleGameAction" => MigrateSetTitleGame(action),
-		"SuchByte.TwitchPlugin.Actions.StreamMarkerAction" => Simple(action,
-			"create-stream-marker",
-			"Create stream marker"),
-		_ => null
-	};
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
+
+	private static ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			"SuchByte.TwitchPlugin.Actions.ClearChatAction" => Simple(action, "clear-chat", "Clear chat"),
+			"SuchByte.TwitchPlugin.Actions.MakeClipAction" => MigrateMakeClip(action),
+			"SuchByte.TwitchPlugin.Actions.PlayAdAction" => MigratePlayAd(action),
+			"SuchByte.TwitchPlugin.Actions.SendChatMessageAction" => MigrateSendChatMessage(action),
+			"SuchByte.TwitchPlugin.Actions.SetEmoteChatAction" => MigrateChatMode(action, "emote-only"),
+			"SuchByte.TwitchPlugin.Actions.SetFollowerChatAction" => MigrateFollowerChat(action),
+			"SuchByte.TwitchPlugin.Actions.SetSlowChatAction" => MigrateSlowChat(action),
+			"SuchByte.TwitchPlugin.Actions.SetSubscriberChatAction" => MigrateChatMode(action, "subscribers-only"),
+			"SuchByte.TwitchPlugin.Actions.SetTitleGameAction" => MigrateSetTitleGame(action),
+			"SuchByte.TwitchPlugin.Actions.StreamMarkerAction" => Simple(action,
+				"create-stream-marker",
+				"Create stream marker"),
+			_ => null
+		};
+	}
 
 	// The plugin only ever stored a raw Twitch user access token, never a refresh token, an app client id
 	// or the token's expiry - TwitchConfigFlow's device-code flow and TwitchTokenManager's refresh both
 	// need those. Migrating the access token alone would read as a connected account until it expires
 	// (typically within hours) and then fail with no way to recover it, so nothing is migrated; the user
 	// reconnects Twitch through the normal config flow instead.
-	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings) => [];
+	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings)
+	{
+		return [];
+	}
 
 	private static ActionMigrationResult? MigrateMakeClip(ForeignAction action)
-		=> new(TwitchIntegration.IntegrationId,
+	{
+		return new ActionMigrationResult(TwitchIntegration.IntegrationId,
 			"create-clip",
 			action.DisplayName ?? "Create clip",
 			Parameters(("hasDelay", JsonSerializer.SerializeToElement(false))));
+	}
 
 	private static ActionMigrationResult? MigratePlayAd(ForeignAction action)
 	{
@@ -71,10 +83,10 @@ internal sealed class TwitchMacroDeck2Migration : IIntegrationMigration
 		}
 
 		var length = ReadInt(config, "Length") ?? 30;
-		var closest = AllowedCommercialLengths.OrderBy(candidate => Math.Abs(candidate - length)).First();
+		var closest = _allowedCommercialLengths.OrderBy(candidate => Math.Abs(candidate - length)).First();
 		IReadOnlyList<LocalizedText>? warnings = closest == length
 			? null
-			: [AppStrings.Migration.Warning.Twitch.CommercialLengthRounded(length: length, seconds: closest)];
+			: [AppStrings.Migration.Warning.Twitch.CommercialLengthRounded(length, closest)];
 
 		return new ActionMigrationResult(TwitchIntegration.IntegrationId,
 			"run-commercial",
@@ -207,7 +219,12 @@ internal sealed class TwitchMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static ActionMigrationResult Simple(ForeignAction action, string actionId, string label)
-		=> new(TwitchIntegration.IntegrationId, actionId, action.DisplayName ?? label, Parameters());
+	{
+		return new ActionMigrationResult(TwitchIntegration.IntegrationId,
+			actionId,
+			action.DisplayName ?? label,
+			Parameters());
+	}
 
 	private const string MethodOn = "On";
 	private const string MethodOff = "Off";
@@ -244,28 +261,37 @@ internal sealed class TwitchMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static string? ReadString(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool? ReadBool(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
-			? value.GetBoolean()
-			: null;
+	{
+		return TryGetProperty(config, name, out var value)
+			&& value.ValueKind is JsonValueKind.True or JsonValueKind.False
+				? value.GetBoolean()
+				: null;
+	}
 
 	private static int? ReadInt(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var number)
+	{
+		return TryGetProperty(config, name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var number)
 				? number
 				: null;
+	}
 
 	private static double? ReadDouble(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number)
+	{
+		return TryGetProperty(config, name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
 				? number
 				: null;
+	}
 
 	// System.Text.Json serializes an unattributed enum as its underlying integer, but the enum's own
 	// member names are accepted too since nothing proves a future plugin version couldn't switch to a
@@ -277,10 +303,10 @@ internal sealed class TwitchMacroDeck2Migration : IIntegrationMigration
 			return null;
 		}
 
-		if (value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var index) &&
-			index >= 0 &&
-			index < names.Length)
+		if (value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var index)
+			&& index >= 0
+			&& index < names.Length)
 		{
 			return index;
 		}
@@ -300,8 +326,13 @@ internal sealed class TwitchMacroDeck2Migration : IIntegrationMigration
 		return null;
 	}
 
-	private static JsonElement JsonString(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonString(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

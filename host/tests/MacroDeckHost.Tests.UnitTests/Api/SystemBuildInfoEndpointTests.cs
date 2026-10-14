@@ -59,7 +59,7 @@ public class SystemBuildInfoEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -105,7 +105,8 @@ public class SystemBuildInfoEndpointTests
 	private sealed class PublicListenerStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -115,5 +116,6 @@ public class SystemBuildInfoEndpointTests
 				});
 				next(app);
 			};
+		}
 	}
 }

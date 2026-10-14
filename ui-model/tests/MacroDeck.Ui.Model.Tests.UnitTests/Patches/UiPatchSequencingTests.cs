@@ -7,26 +7,33 @@ namespace MacroDeck.Ui.Model.Tests.UnitTests.Patches;
 [TestFixture]
 public class UiPatchSequencingTests
 {
-	private static UiPatch PatchFromTo(int from, int to) => new()
+	private static UiPatch PatchFromTo(int from, int to)
 	{
-		FromRevision = from,
-		ToRevision = to,
-		Operations =
-		[
-			new UiPatchOperation { Op = UiPatchOperations.SetProperties, NodeId = "x", RemovedProperties = ["a"] },
-		],
-	};
+		return new UiPatch
+		{
+			FromRevision = from,
+			ToRevision = to,
+			Operations =
+			[
+				new UiPatchOperation { Op = UiPatchOperations.SetProperties, NodeId = "x", RemovedProperties = ["a"] }
+			]
+		};
+	}
 
 	[TestCase(4, ExpectedResult = true)]
 	[TestCase(3, ExpectedResult = false)]
 	[TestCase(5, ExpectedResult = false)]
 	public bool A_patch_applies_only_when_the_current_revision_matches_from_revision(int currentRevision)
-		=> UiPatchSequencing.CheckRevisions(currentRevision, PatchFromTo(4, 5)).IsApplicable;
+	{
+		return UiPatchSequencing.CheckRevisions(currentRevision, PatchFromTo(4, 5)).IsApplicable;
+	}
 
 	[TestCase(4, 4)]
 	[TestCase(4, 3)]
 	public void A_patch_that_does_not_advance_the_revision_is_rejected(int from, int to)
-		=> Assert.That(UiPatchSequencing.CheckRevisions(4, PatchFromTo(from, to)).IsApplicable, Is.False);
+	{
+		Assert.That(UiPatchSequencing.CheckRevisions(4, PatchFromTo(from, to)).IsApplicable, Is.False);
+	}
 
 	[Test]
 	public void A_patch_with_no_operations_is_rejected()

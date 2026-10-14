@@ -33,5 +33,8 @@ public static class StreamStatsWidgetType
 	public static IReadOnlyList<string> Styles { get; } =
 		[OverviewStyle, StatsRowStyle, LiveRowStyle, ValueGraphStyle, ValueStyle];
 
-	public static string QualifiedId(string ownerId) => ownerId + "::" + LocalId;
+	public static string QualifiedId(string ownerId)
+	{
+		return ownerId + "::" + LocalId;
+	}
 }

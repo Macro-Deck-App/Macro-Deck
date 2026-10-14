@@ -33,7 +33,7 @@ public sealed class PluginTestCredentials
 	/// error, not something configuration silently overrides).
 	/// </summary>
 	public static PluginTestCredentials Managed
-		=> new(PluginRegistrationMode.Managed, GenerateOwnerId(), GenerateSecret(), enrollmentToken: null);
+		=> new(PluginRegistrationMode.Managed, GenerateOwnerId(), GenerateSecret(), null);
 
 	/// <summary>
 	/// <see cref="Managed" />, but with a caller-chosen id instead of a fresh one. What
@@ -44,7 +44,9 @@ public sealed class PluginTestCredentials
 	/// configuration says Y" build error a mismatched pair now produces.
 	/// </summary>
 	internal static PluginTestCredentials ManagedWithId(string id)
-		=> new(PluginRegistrationMode.Managed, id, GenerateSecret(), enrollmentToken: null);
+	{
+		return new PluginTestCredentials(PluginRegistrationMode.Managed, id, GenerateSecret(), null);
+	}
 
 	/// <summary>
 	/// As if a user had obtained a one-time enrollment token from the host: the plugin registers itself
@@ -52,7 +54,7 @@ public sealed class PluginTestCredentials
 	/// <c>manifest.json</c> declares.
 	/// </summary>
 	public static PluginTestCredentials SelfRegistering
-		=> new(PluginRegistrationMode.SelfRegistering, id: null, secret: null, GenerateEnrollmentToken());
+		=> new(PluginRegistrationMode.SelfRegistering, null, null, GenerateEnrollmentToken());
 
 	/// <summary>
 	/// As if a user had never obtained an enrollment token at all: the plugin has no stored credential
@@ -61,7 +63,7 @@ public sealed class PluginTestCredentials
 	/// instead. Identity comes from <c>manifest.json</c>, exactly as <see cref="SelfRegistering" />'s own does.
 	/// </summary>
 	public static PluginTestCredentials Pairing
-		=> new(PluginRegistrationMode.SelfRegistering, id: null, secret: null, enrollmentToken: null);
+		=> new(PluginRegistrationMode.SelfRegistering, null, null, null);
 
 	internal PluginRegistrationMode Mode { get; }
 
@@ -80,15 +82,23 @@ public sealed class PluginTestCredentials
 	/// <summary>A fresh, valid reverse-domain id. Shared with <see cref="PluginTestManifest" />'s own
 	/// default id generation, so a defaulted credential and a defaulted manifest are the same *shape* of
 	/// id even when they are not literally the same value.</summary>
-	internal static string GenerateOwnerId() => $"test.harness.p{Guid.NewGuid():N}";
+	internal static string GenerateOwnerId()
+	{
+		return $"test.harness.p{Guid.NewGuid():N}";
+	}
 
 	/// <summary>32 random bytes, base64url-encoded without padding - the same shape a real
 	/// registration issues, and at least <c>PluginAuthDefaults.MinPluginSecretLength</c> long.</summary>
 	private static string GenerateSecret()
-		=> Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+	{
+		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
 			.TrimEnd('=')
 			.Replace('+', '-')
 			.Replace('/', '_');
+	}
 
-	private static string GenerateEnrollmentToken() => $"test-enrollment-{Guid.NewGuid():N}";
+	private static string GenerateEnrollmentToken()
+	{
+		return $"test-enrollment-{Guid.NewGuid():N}";
+	}
 }

@@ -26,35 +26,53 @@ internal sealed class RecordingMediator : IMediator
 		return default;
 	}
 
-	public ValueTask<TResponse> Send<TResponse>(IRequest<TResponse> request,
+	public ValueTask<TResponse> Send<TResponse>(
+		IRequest<TResponse> request,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public ValueTask<TResponse> Send<TResponse>(ICommand<TResponse> command,
+	public ValueTask<TResponse> Send<TResponse>(
+		ICommand<TResponse> command,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public ValueTask<TResponse> Send<TResponse>(IQuery<TResponse> query, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public ValueTask<object?> Send(object message, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 		IStreamRequest<TResponse> request,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 		IStreamCommand<TResponse> command,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 		IStreamQuery<TResponse> query,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 }

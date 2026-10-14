@@ -6,7 +6,6 @@ using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
-using MacroDeckHost.Domain.Icons;
 using MacroDeckHost.Infrastructure.Persistence;
 
 namespace MacroDeckHost.Tests.UnitTests.Portable;
@@ -67,7 +66,8 @@ internal sealed class PortableIconAppearanceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(idMap[play.Id], Is.EqualTo(local.Id));
-			Assert.That(_target.Icons.Cache.GetAppearances(local.Id).Select(KeyOf), Is.EqualTo(new[] { "colorScheme=dark" }));
+			Assert.That(_target.Icons.Cache.GetAppearances(local.Id).Select(KeyOf),
+				Is.EqualTo(new[] { "colorScheme=dark" }));
 			Assert.That(_target.Icons.Mediator.Published.OfType<IconUpdatedNotification>().Select(n => n.Icon.Id),
 				Does.Contain(local.Id));
 		});
@@ -117,7 +117,8 @@ internal sealed class PortableIconAppearanceTests
 	{
 		var (play, dark) = await SourceIconWithDarkAppearance();
 		var bundle = await Collect(play);
-		var json = JsonNode.Parse(JsonSerializer.Serialize(Content(bundle), PersistenceJsonOptions.Default))!.AsObject();
+		var json = JsonNode.Parse(JsonSerializer.Serialize(Content(bundle), PersistenceJsonOptions.Default))!
+			.AsObject();
 		foreach (var icon in json["icons"]!.AsArray())
 		{
 			icon!.AsObject().Remove("appearances");
@@ -157,12 +158,16 @@ internal sealed class PortableIconAppearanceTests
 	}
 
 	private Task<PortableAssetBundle> Collect(IconEntity icon)
-		=> _source.AssetManager.Collect([new PortableWidgetSource(Guid.NewGuid(), $"{{\"icon\":\"{icon.Id}\"}}")],
+	{
+		return _source.AssetManager.Collect([new PortableWidgetSource(Guid.NewGuid(), $"{{\"icon\":\"{icon.Id}\"}}")],
 			PortableExportOptions.Default,
 			CancellationToken.None);
+	}
 
 	private static PortableContent Content(PortableAssetBundle bundle)
-		=> new() { Kind = PortableArchiveKind.Profile, Icons = bundle.Icons.ToList() };
+	{
+		return new PortableContent { Kind = PortableArchiveKind.Profile, Icons = bundle.Icons.ToList() };
+	}
 
 	private static byte[] MasterOf(PortabilityTestHarness harness, IconEntity icon)
 	{
@@ -172,7 +177,13 @@ internal sealed class PortableIconAppearanceTests
 		return buffer.ToArray();
 	}
 
-	private static string KeyOf(IconEntity appearance) => IconAppearanceTraits.ToKey(appearance.AppearanceTraits!);
+	private static string KeyOf(IconEntity appearance)
+	{
+		return IconAppearanceTraits.ToKey(appearance.AppearanceTraits!);
+	}
 
-	private static byte[] Bytes(string text) => Encoding.UTF8.GetBytes(text);
+	private static byte[] Bytes(string text)
+	{
+		return Encoding.UTF8.GetBytes(text);
+	}
 }

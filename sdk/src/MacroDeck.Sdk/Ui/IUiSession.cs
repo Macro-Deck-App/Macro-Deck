@@ -40,7 +40,10 @@ public interface IUiSession : IAsyncDisposable
 	/// the origin implements only that one. Never called concurrently for one session, so a session may
 	/// keep <paramref name="origin" /> in a field while its own handlers run and read it from there.
 	/// </summary>
-	void Dispatch(UiEvent uiEvent, IUiEventOrigin origin) => Dispatch(uiEvent);
+	void Dispatch(UiEvent uiEvent, IUiEventOrigin origin)
+	{
+		Dispatch(uiEvent);
+	}
 }
 
 /// <summary>Why a session can no longer be served.</summary>

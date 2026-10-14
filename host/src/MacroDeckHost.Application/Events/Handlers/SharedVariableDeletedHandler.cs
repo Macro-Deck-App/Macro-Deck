@@ -8,7 +8,10 @@ public sealed class SharedVariableDeletedHandler : INotificationHandler<Variable
 {
 	private readonly SharedVariables _sharedVariables;
 
-	public SharedVariableDeletedHandler(SharedVariables sharedVariables) => _sharedVariables = sharedVariables;
+	public SharedVariableDeletedHandler(SharedVariables sharedVariables)
+	{
+		_sharedVariables = sharedVariables;
+	}
 
 	public ValueTask Handle(VariableDeletedNotification notification, CancellationToken cancellationToken)
 	{

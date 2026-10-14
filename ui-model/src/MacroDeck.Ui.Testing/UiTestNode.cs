@@ -96,19 +96,25 @@ public sealed class UiTestNode
 
 	/// <summary>The value of <paramref name="key" /> when it is a JSON string, otherwise <c>null</c>.</summary>
 	public string? Text(string key)
-		=> Property(key) is { ValueKind: JsonValueKind.String } element ? element.GetString() : null;
+	{
+		return Property(key) is { ValueKind: JsonValueKind.String } element ? element.GetString() : null;
+	}
 
 	/// <summary>The value of <paramref name="key" /> when it is a JSON boolean, otherwise <c>null</c>.</summary>
 	public bool? Flag(string key)
-		=> Property(key) is { } element && element.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return Property(key) is { } element && element.ValueKind is JsonValueKind.True or JsonValueKind.False
 			? element.GetBoolean()
 			: null;
+	}
 
 	/// <summary>The value of <paramref name="key" /> when it is a JSON number, otherwise <c>null</c>.</summary>
 	public double? Number(string key)
-		=> Property(key) is { ValueKind: JsonValueKind.Number } element && element.TryGetDouble(out var value)
+	{
+		return Property(key) is { ValueKind: JsonValueKind.Number } element && element.TryGetDouble(out var value)
 			? value
 			: null;
+	}
 
 	/// <summary>
 	/// Raises <paramref name="name" /> on this node exactly as a renderer would: <paramref name="data" /> is
@@ -127,18 +133,33 @@ public sealed class UiTestNode
 
 	/// <summary>Raises <c>change</c> carrying <paramref name="value" /> - the event that writes through this
 	/// input's binding.</summary>
-	public UiDispatchResult Change(object? value) => Raise(UiConfigEvents.Change, value);
+	public UiDispatchResult Change(object? value)
+	{
+		return Raise(UiConfigEvents.Change, value);
+	}
 
 	/// <summary>Raises <c>activate</c> - what following a link is.</summary>
-	public UiDispatchResult Activate() => Raise(UiConfigEvents.Activate);
+	public UiDispatchResult Activate()
+	{
+		return Raise(UiConfigEvents.Activate);
+	}
 
 	/// <summary>Raises <c>submit</c> - what a step's or a flow's continue affordance is.</summary>
-	public UiDispatchResult Submit() => Raise(UiConfigEvents.Submit);
+	public UiDispatchResult Submit()
+	{
+		return Raise(UiConfigEvents.Submit);
+	}
 
 	/// <summary>The model node this wraps, so the host can render and compare without a second walk.</summary>
 	internal UiNode Node => _node;
 
-	internal void SetChildren(IReadOnlyList<UiTestNode> children) => _children = children;
+	internal void SetChildren(IReadOnlyList<UiTestNode> children)
+	{
+		_children = children;
+	}
 
-	internal void SetFallback(UiTestNode fallback) => Fallback = fallback;
+	internal void SetFallback(UiTestNode fallback)
+	{
+		Fallback = fallback;
+	}
 }

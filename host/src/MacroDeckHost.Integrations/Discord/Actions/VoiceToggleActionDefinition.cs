@@ -43,7 +43,10 @@ internal sealed class VoiceToggleActionDefinition : IActionDefinition, IStatePro
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(Id, _resolver, _read, _buildPatch);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(Id, _resolver, _read, _buildPatch);
+	}
 
 	// Discord pushes voice settings over RPC, so the connection's state is already current - the read is
 	// the same one the executor uses to decide what a "toggle" means.

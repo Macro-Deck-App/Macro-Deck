@@ -8,7 +8,10 @@ public sealed class WidgetsDeletedNotificationHandler : INotificationHandler<Wid
 {
 	private readonly IUiTransport _uiTransport;
 
-	public WidgetsDeletedNotificationHandler(IUiTransport uiTransport) => _uiTransport = uiTransport;
+	public WidgetsDeletedNotificationHandler(IUiTransport uiTransport)
+	{
+		_uiTransport = uiTransport;
+	}
 
 	public async ValueTask Handle(WidgetsDeletedNotification notification, CancellationToken cancellationToken)
 	{

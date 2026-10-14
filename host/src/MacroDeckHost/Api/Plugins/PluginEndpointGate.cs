@@ -20,7 +20,8 @@ public static class PluginEndpointGate
 		return false;
 	}
 
-	public static bool TryThrottle(LoginThrottle throttle,
+	public static bool TryThrottle(
+		LoginThrottle throttle,
 		string key,
 		HttpResponse response,
 		out IActionResult? rejection)

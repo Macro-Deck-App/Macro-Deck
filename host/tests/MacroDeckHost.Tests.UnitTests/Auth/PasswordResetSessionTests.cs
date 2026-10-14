@@ -69,14 +69,14 @@ public class PasswordResetSessionTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
 	[Test]
 	public async Task A_reset_ends_every_pre_reset_session_and_a_fresh_login_on_the_same_device_works()
 	{
-		var before = await Login("password123", deviceId: null, deviceSecret: null);
+		var before = await Login("password123", null, null);
 		var beforeBody = await ReadJson(before);
 		var oldToken = beforeBody.GetProperty("accessToken").GetString()!;
 		var deviceId = beforeBody.GetProperty("device").GetProperty("deviceId").GetString()!;
@@ -116,12 +116,12 @@ public class PasswordResetSessionTests
 	{
 		for (var attempt = 0; attempt < 8; attempt++)
 		{
-			await Login("forgotten-password", deviceId: null, deviceSecret: null);
+			await Login("forgotten-password", null, null);
 		}
 
-		var throttled = await Login("password123", deviceId: null, deviceSecret: null);
+		var throttled = await Login("password123", null, null);
 		await Send(HttpMethod.Post, "/api/auth/reset-password", new { newPassword = "newpassword1" }, loopback: true);
-		var afterReset = await Login("newpassword1", deviceId: null, deviceSecret: null);
+		var afterReset = await Login("newpassword1", null, null);
 
 		Assert.Multiple(() =>
 		{
@@ -131,7 +131,8 @@ public class PasswordResetSessionTests
 	}
 
 	private Task<HttpResponseMessage> Login(string password, string? deviceId, string? deviceSecret)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			"/api/auth/login",
 			new
 			{
@@ -150,6 +151,7 @@ public class PasswordResetSessionTests
 					appVersion = "test"
 				}
 			});
+	}
 
 	private async Task<HttpResponseMessage> MintTicket(string bearerToken)
 	{
@@ -195,10 +197,14 @@ public class PasswordResetSessionTests
 	}
 
 	private static string RefreshCookie(HttpResponseMessage response)
-		=> response.Headers.GetValues("Set-Cookie")
+	{
+		return response.Headers.GetValues("Set-Cookie")
 			.First(value => value.StartsWith(AuthDefaults.RefreshCookie + "_", StringComparison.Ordinal))
 			.Split(';')[0];
+	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 }

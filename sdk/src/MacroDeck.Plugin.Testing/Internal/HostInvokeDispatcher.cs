@@ -106,20 +106,25 @@ internal static class HostInvokeDispatcher
 					.ConfigureAwait(false),
 				HostApis.VideoStreams => await VideoStreamsAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
-				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
+				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId,
+					payload),
 				HostApis.Colors when colors is not null && pluginId is not null => colors.Dispatch(pluginId, payload),
 				HostApis.Batteries => await BatteriesAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Weather => await WeatherAsync(context, accepted, cancellationToken).ConfigureAwait(false),
 				HostApis.Locale => await LocaleAsync(context, cancellationToken).ConfigureAwait(false),
-				HostApis.MusicPlayers => await MusicPlayersAsync(context, payload, cancellationToken).ConfigureAwait(false),
+				HostApis.MusicPlayers => await MusicPlayersAsync(context, payload, cancellationToken)
+					.ConfigureAwait(false),
 				HostApis.DesktopNotifications => await DesktopNotificationsAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon
 					=> await IconAsync(context, payload, cancellationToken).ConfigureAwait(false),
-				HostApis.Ui when uiPreviews is { Attached: true } && payload.Operation is
-						HostOperations.Ui.Snapshot or HostOperations.Ui.Patch or HostOperations.Ui.Fault
+				HostApis.Ui when uiPreviews is { Attached: true }
+					&& payload.Operation is
+						HostOperations.Ui.Snapshot
+						or HostOperations.Ui.Patch
+						or HostOperations.Ui.Fault
 						or HostOperations.Ui.Reload
 					=> uiPreviews.Dispatch(payload),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.OriginReportFailure
@@ -128,8 +133,8 @@ internal static class HostInvokeDispatcher
 					=> HostInvokeOutcome.Ok(new UiOriginShowModalResult { Opened = false }),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
 					=> await MusicPlayerArtworkAsync(context, payload, cancellationToken).ConfigureAwait(false),
-				HostApis.Ui when uiResourceUploads is not null &&
-					payload.Operation is HostOperations.Ui.RegisterResource or HostOperations.Ui.RemoveResource
+				HostApis.Ui when uiResourceUploads is not null
+					&& payload.Operation is HostOperations.Ui.RegisterResource or HostOperations.Ui.RemoveResource
 					=> await UiResourcesAsync(context, payload, uiResourceUploads, cancellationToken)
 						.ConfigureAwait(false),
 				_ => HostInvokeOutcome.Failed(ProtocolErrorCodes.CapabilityUnsupported,
@@ -148,8 +153,7 @@ internal static class HostInvokeDispatcher
 		IReadOnlyList<CapabilityNegotiationResult>? accepted,
 		CancellationToken cancellationToken)
 	{
-		if (accepted is not null &&
-			!accepted.Any(result => result.Kind == CapabilityKinds.Weather && result.Accepted))
+		if (accepted is not null && !accepted.Any(result => result.Kind == CapabilityKinds.Weather && result.Accepted))
 		{
 			return HostInvokeOutcome.Failed(ProtocolErrorCodes.CapabilityUnavailable,
 				"Reporting changed weather snapshots requires the weather capability.");
@@ -159,14 +163,17 @@ internal static class HostInvokeDispatcher
 		return HostInvokeOutcome.Ok((JsonElement?)null);
 	}
 
-	private static async Task<HostInvokeOutcome> LocaleAsync(FakeIntegrationContext context,
+	private static async Task<HostInvokeOutcome> LocaleAsync(
+		FakeIntegrationContext context,
 		CancellationToken cancellationToken)
 	{
 		var format = await context.Locale.GetTimeOfDayFormatAsync(cancellationToken).ConfigureAwait(false);
-		return HostInvokeOutcome.Ok(new LocaleTimeOfDayFormatResult { Culture = format.Culture.Name, HourCycle = format.HourCycle });
+		return HostInvokeOutcome.Ok(new LocaleTimeOfDayFormatResult
+			{ Culture = format.Culture.Name, HourCycle = format.HourCycle });
 	}
 
-	private static async Task<HostInvokeOutcome> DesktopNotificationsAsync(FakeIntegrationContext context,
+	private static async Task<HostInvokeOutcome> DesktopNotificationsAsync(
+		FakeIntegrationContext context,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -176,7 +183,8 @@ internal static class HostInvokeDispatcher
 		return HostInvokeOutcome.Ok(null);
 	}
 
-	private static async Task<HostInvokeOutcome> MusicPlayersAsync(FakeIntegrationContext context,
+	private static async Task<HostInvokeOutcome> MusicPlayersAsync(
+		FakeIntegrationContext context,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -255,9 +263,9 @@ internal static class HostInvokeDispatcher
 
 			var arguments = Require<UiRegisterResourceArguments>(payload);
 
-			if (context.UiResources.Resources.TryGetValue(arguments.Name, out var existing) &&
-				string.Equals(existing.Handle.ContentHash, arguments.ContentHash, StringComparison.Ordinal) &&
-				string.Equals(existing.Handle.MediaType, arguments.MediaType, StringComparison.OrdinalIgnoreCase))
+			if (context.UiResources.Resources.TryGetValue(arguments.Name, out var existing)
+				&& string.Equals(existing.Handle.ContentHash, arguments.ContentHash, StringComparison.Ordinal)
+				&& string.Equals(existing.Handle.MediaType, arguments.MediaType, StringComparison.OrdinalIgnoreCase))
 			{
 				return HostInvokeOutcome.Ok(new UiRegisterResourceResult { Resource = ToDto(existing.Handle) });
 			}
@@ -323,7 +331,10 @@ internal static class HostInvokeDispatcher
 		try
 		{
 			var handle = await context.UiResources
-				.RegisterMusicPlayerArtworkAsync(arguments.Name, arguments.InstanceId, arguments.ArtworkId, cancellationToken)
+				.RegisterMusicPlayerArtworkAsync(arguments.Name,
+					arguments.InstanceId,
+					arguments.ArtworkId,
+					cancellationToken)
 				.ConfigureAwait(false);
 
 			return HostInvokeOutcome.Ok(new UiRegisterMusicPlayerArtworkResult
@@ -378,13 +389,15 @@ internal static class HostInvokeDispatcher
 	}
 
 	private static UiResourceHandleDto ToDto(UiResource handle)
-		=> new()
+	{
+		return new UiResourceHandleDto
 		{
 			ResourceId = handle.ResourceId,
 			ContentHash = handle.ContentHash!,
 			MediaType = handle.MediaType!,
-			ByteLength = (int)handle.ByteLength!,
+			ByteLength = (int)handle.ByteLength!
 		};
+	}
 
 	private static async Task<HostInvokeOutcome> DevicesAsync(
 		FakeIntegrationContext context,
@@ -435,7 +448,7 @@ internal static class HostInvokeDispatcher
 
 				var result = await session.SendInteractionAsync(new DeviceInteraction
 						{
-							Kind = Enum.TryParse<DeviceInteractionKind>(arguments.Kind, ignoreCase: true, out var kind)
+							Kind = Enum.TryParse<DeviceInteractionKind>(arguments.Kind, true, out var kind)
 								? kind
 								: DeviceInteractionKind.Unknown,
 							Target = new DeviceInteractionTarget
@@ -537,7 +550,14 @@ internal static class HostInvokeDispatcher
 	}
 
 	private static FolderViewDescriptor ToDescriptor(FolderViewDescriptorDto dto)
-		=> new(dto.Id, dto.Name, dto.Description, dto.Navigation, dto.HasConfiguration, dto.Metadata);
+	{
+		return new FolderViewDescriptor(dto.Id,
+			dto.Name,
+			dto.Description,
+			dto.Navigation,
+			dto.HasConfiguration,
+			dto.Metadata);
+	}
 
 	private static async Task<HostInvokeOutcome> ScreenSaversAsync(
 		FakeIntegrationContext context,
@@ -613,17 +633,28 @@ internal static class HostInvokeDispatcher
 	}
 
 	private static VideoStreamSessionDescription ToDescription(VideoStreamSessionDescriptionDto dto)
-		=> VideoStreamSessionDescription.FromUrl(dto.Transport,
+	{
+		return VideoStreamSessionDescription.FromUrl(dto.Transport,
 			dto.Url ?? throw new ArgumentException("The description has no url.", nameof(dto)));
+	}
 
 	private static T WireEnum<T>(string? value, T fallback)
 		where T : struct, Enum
-		=> value is not null && Enum.GetNames<T>().Contains(value, StringComparer.Ordinal)
+	{
+		return value is not null && Enum.GetNames<T>().Contains(value, StringComparer.Ordinal)
 			? Enum.Parse<T>(value)
 			: fallback;
+	}
 
 	private static ScreenSaverDescriptor ToDescriptor(ScreenSaverDescriptorDto dto)
-		=> new(dto.Id, dto.Name, dto.Description, dto.HasConfiguration, dto.Interactive, dto.Metadata);
+	{
+		return new ScreenSaverDescriptor(dto.Id,
+			dto.Name,
+			dto.Description,
+			dto.HasConfiguration,
+			dto.Interactive,
+			dto.Metadata);
+	}
 
 	private static async Task<HostInvokeOutcome> WidgetTypesAsync(
 		FakeIntegrationContext context,
@@ -652,7 +683,8 @@ internal static class HostInvokeDispatcher
 	}
 
 	private static WidgetTypeDescriptor ToDescriptor(WidgetTypeDescriptorDto dto)
-		=> new(dto.Id,
+	{
+		return new WidgetTypeDescriptor(dto.Id,
 			dto.Name,
 			dto.Description,
 			dto.DefaultData,
@@ -668,6 +700,7 @@ internal static class HostInvokeDispatcher
 				? new WidgetDefaultAction(action.ActionId, action.Parameters)
 				: null
 		};
+	}
 
 	private static async Task<HostInvokeOutcome> LayoutsAsync(
 		FakeIntegrationContext context,
@@ -693,16 +726,19 @@ internal static class HostInvokeDispatcher
 	}
 
 	private static LayoutDescriptor ToDescriptor(LayoutDescriptorDto dto)
-		=> new(dto.Id,
+	{
+		return new LayoutDescriptor(dto.Id,
 			dto.Name,
 			[.. dto.Regions.Select(ToRegion)],
 			dto.Capabilities is { } capabilities
 				? ToCapabilities(capabilities)
 				: null,
 			dto.Metadata);
+	}
 
 	private static LayoutRegion ToRegion(LayoutRegionDto dto)
-		=> new()
+	{
+		return new LayoutRegion
 		{
 			Id = dto.Id,
 			Kind = dto.Kind,
@@ -712,9 +748,11 @@ internal static class HostInvokeDispatcher
 			Visuals = dto.Visuals is { } visuals ? ToVisuals(visuals) : null,
 			Extra = dto.Extra
 		};
+	}
 
 	private static LayoutGrid ToGrid(LayoutGridDto dto)
-		=> new()
+	{
+		return new LayoutGrid
 		{
 			Rows = dto.Rows,
 			Columns = dto.Columns,
@@ -726,9 +764,11 @@ internal static class HostInvokeDispatcher
 			SupportsRuntimeResize = dto.SupportsRuntimeResize,
 			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null
 		};
+	}
 
 	private static LayoutVisualCapabilities ToVisuals(LayoutVisualCapabilitiesDto dto)
-		=> new()
+	{
+		return new LayoutVisualCapabilities
 		{
 			StaticIcons = dto.StaticIcons,
 			AnimatedIcons = dto.AnimatedIcons,
@@ -738,13 +778,19 @@ internal static class HostInvokeDispatcher
 			Transparency = dto.Transparency,
 			MaxUpdatesPerSecond = dto.MaxUpdatesPerSecond
 		};
+	}
 
 	private static LayoutCapabilities ToCapabilities(LayoutCapabilitiesDto dto)
-		=> new() { Visuals = dto.Visuals is { } visuals ? ToVisuals(visuals) : null, Extra = dto.Extra };
+	{
+		return new LayoutCapabilities
+			{ Visuals = dto.Visuals is { } visuals ? ToVisuals(visuals) : null, Extra = dto.Extra };
+	}
 
 	private static HostInvokeOutcome UnknownSession()
-		=> HostInvokeOutcome.Failed(ProtocolErrorCodes.SessionNotFound,
+	{
+		return HostInvokeOutcome.Failed(ProtocolErrorCodes.SessionNotFound,
 			"No open device session has that id.");
+	}
 
 	private static async Task<HostInvokeOutcome> VariableValuesAsync(
 		FakeIntegrationContext context,
@@ -768,22 +814,27 @@ internal static class HostInvokeDispatcher
 	}
 
 	private static VariableReading FromDto(VariableReadingDto reading)
-		=> new()
+	{
+		return new VariableReading
 		{
 			Value = FromDto(reading.Value), Min = reading.Min, Max = reading.Max, Step = reading.Step
 		};
+	}
 
 	private static object? FromDto(VariableValueDto value)
-		=> value.Kind switch
+	{
+		return value.Kind switch
 		{
 			"text" => value.Text,
 			"number" => value.Number,
 			"boolean" => value.Boolean,
 			_ => null
 		};
+	}
 
 	private static DeviceDescriptor ToDescriptor(DeviceDescriptorDto dto)
-		=> new(dto.Id,
+	{
+		return new DeviceDescriptor(dto.Id,
 			dto.Name,
 			dto.Model,
 			dto.Manufacturer,
@@ -801,13 +852,17 @@ internal static class HostInvokeDispatcher
 				: null,
 			ToPresence(dto.Presence),
 			dto.Metadata);
+	}
 
 	private static DevicePresence ToPresence(string? presence)
-		=> Enum.TryParse<DevicePresence>(presence, ignoreCase: true, out var parsed)
+	{
+		return Enum.TryParse<DevicePresence>(presence, true, out var parsed)
 			? parsed
 			: DevicePresence.Unknown;
+	}
 
-	private static async Task<HostInvokeOutcome> VariablesAsync(FakeIntegrationContext context,
+	private static async Task<HostInvokeOutcome> VariablesAsync(
+		FakeIntegrationContext context,
 		HostInvokePayload payload)
 	{
 		switch (payload.Operation)
@@ -895,7 +950,8 @@ internal static class HostInvokeDispatcher
 			case HostOperations.Variables.HistoryOpen:
 			{
 				var arguments = Require<VariablesHistoryOpenArguments>(payload);
-				var windowId = await context.Variables.OpenWireHistoryAsync(arguments.Name, Math.Max(1, arguments.Capacity))
+				var windowId = await context.Variables
+					.OpenWireHistoryAsync(arguments.Name, Math.Max(1, arguments.Capacity))
 					.ConfigureAwait(false);
 				return HostInvokeOutcome.Ok(new VariablesHistoryOpenResult { WindowId = windowId });
 			}
@@ -1104,7 +1160,8 @@ internal static class HostInvokeDispatcher
 		};
 
 	private static WidgetAppearanceRequest FromWire(WidgetsApplyArgumentsV2 v2)
-		=> new()
+	{
+		return new WidgetAppearanceRequest
 		{
 			WidgetId = v2.WidgetId,
 			Patch = ToPatch(v2.Patch),
@@ -1112,9 +1169,11 @@ internal static class HostInvokeDispatcher
 			ClearProperties =
 				[.. v2.ClearProperties.Select(property => (WidgetAppearanceProperty)property)]
 		};
+	}
 
 	private static WidgetAppearancePatch ToPatch(WidgetAppearancePatchDto dto)
-		=> new()
+	{
+		return new WidgetAppearancePatch
 		{
 			Label = dto.Label,
 			BackgroundColor = dto.BackgroundColor,
@@ -1135,8 +1194,10 @@ internal static class HostInvokeDispatcher
 			AccentColor = dto.AccentColor,
 			IconAppearance = dto.IconAppearance
 		};
+	}
 
-	private static async Task<HostInvokeOutcome> NotificationsAsync(FakeIntegrationContext context,
+	private static async Task<HostInvokeOutcome> NotificationsAsync(
+		FakeIntegrationContext context,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -1177,8 +1238,8 @@ internal static class HostInvokeDispatcher
 			default:
 			{
 				var arguments = Require<NotificationsCloseArguments>(payload);
-				context.NotificationService.Shown.FirstOrDefault(n => n.Id == arguments.Id)?.Close(
-					Sdk.Notifications.NotificationCloseReason.Programmatic);
+				context.NotificationService.Shown.FirstOrDefault(n => n.Id == arguments.Id)
+					?.Close(Sdk.Notifications.NotificationCloseReason.Programmatic);
 				break;
 			}
 		}
@@ -1214,9 +1275,11 @@ internal static class HostInvokeDispatcher
 
 	private static T? Optional<T>(HostInvokePayload payload)
 		where T : class
-		=> payload.Arguments is { ValueKind: JsonValueKind.Object } element
+	{
+		return payload.Arguments is { ValueKind: JsonValueKind.Object } element
 			? element.Deserialize<T>(PluginProtocolJson.Options)
 			: null;
+	}
 
 	private static T Require<T>(HostInvokePayload payload)
 	{
@@ -1225,8 +1288,8 @@ internal static class HostInvokeDispatcher
 			throw new InvalidOperationException($"'{payload.Api}/{payload.Operation}' requires arguments.");
 		}
 
-		return element.Deserialize<T>(PluginProtocolJson.Options) ??
-			throw new InvalidOperationException(
+		return element.Deserialize<T>(PluginProtocolJson.Options)
+			?? throw new InvalidOperationException(
 				$"'{payload.Api}/{payload.Operation}' arguments did not parse as {typeof(T).Name}.");
 	}
 }
@@ -1238,13 +1301,24 @@ internal readonly struct HostInvokeOutcome
 
 	public ProtocolError? Error { get; private init; }
 
-	public static HostInvokeOutcome Ok(JsonElement? data) => new() { Data = data };
+	public static HostInvokeOutcome Ok(JsonElement? data)
+	{
+		return new HostInvokeOutcome { Data = data };
+	}
 
 	public static HostInvokeOutcome Ok<T>(T value)
-		=> new() { Data = JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options) };
+	{
+		return new HostInvokeOutcome { Data = JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options) };
+	}
 
 	public static HostInvokeOutcome Failed(string code, string message)
-		=> new() { Error = new ProtocolError { Code = code, Message = message, Retryable = false } };
+	{
+		return new HostInvokeOutcome
+			{ Error = new ProtocolError { Code = code, Message = message, Retryable = false } };
+	}
 
-	public static HostInvokeOutcome Failed(ProtocolError error) => new() { Error = error };
+	public static HostInvokeOutcome Failed(ProtocolError error)
+	{
+		return new HostInvokeOutcome { Error = error };
+	}
 }

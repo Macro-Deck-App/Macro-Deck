@@ -63,7 +63,9 @@ public class ConfigFlowManager : IConfigFlowManager
 	}
 
 	public Task<ConfigFlowStartOutcome> StartAsync(string integrationId, CancellationToken cancellationToken)
-		=> StartAsync(integrationId, null, null, cancellationToken);
+	{
+		return StartAsync(integrationId, null, null, cancellationToken);
+	}
 
 	public async Task<ConfigFlowStartOutcome> StartAsync(
 		string integrationId,
@@ -83,8 +85,8 @@ public class ConfigFlowManager : IConfigFlowManager
 			await using var editScope = _scopeFactory.CreateAsyncScope();
 			var configStore = editScope.ServiceProvider.GetRequiredService<IIntegrationConfigStore>();
 			existingEntry = await configStore.Find(requestedEntryId);
-			if (existingEntry is null ||
-				!string.Equals(existingEntry.IntegrationId, integrationId, StringComparison.Ordinal))
+			if (existingEntry is null
+				|| !string.Equals(existingEntry.IntegrationId, integrationId, StringComparison.Ordinal))
 			{
 				return new ConfigFlowStartOutcome(true,
 					Guid.Empty,
@@ -211,7 +213,9 @@ public class ConfigFlowManager : IConfigFlowManager
 		string stepId,
 		IReadOnlyDictionary<string, JsonElement> values,
 		CancellationToken cancellationToken)
-		=> await SubmitAsync(flowId, stepId, values, [], null, cancellationToken);
+	{
+		return await SubmitAsync(flowId, stepId, values, [], null, cancellationToken);
+	}
 
 	public Task<ConfigFlowSubmitOutcome> SubmitAsync(
 		Guid flowId,
@@ -219,7 +223,9 @@ public class ConfigFlowManager : IConfigFlowManager
 		IReadOnlyDictionary<string, JsonElement> values,
 		IReadOnlyCollection<string> clearedSecretFields,
 		CancellationToken cancellationToken)
-		=> SubmitAsync(flowId, stepId, values, clearedSecretFields, null, cancellationToken);
+	{
+		return SubmitAsync(flowId, stepId, values, clearedSecretFields, null, cancellationToken);
+	}
 
 	public async Task<ConfigFlowSubmitOutcome> SubmitAsync(
 		Guid flowId,
@@ -264,9 +270,9 @@ public class ConfigFlowManager : IConfigFlowManager
 		{
 			if (active.SecretFields.Contains(key) && value.ValueKind == JsonValueKind.String)
 			{
-				if (string.IsNullOrEmpty(value.GetString()) &&
-					active.Values.TryGetValue(key, out var retained) &&
-					SecretReferenceJson.TryGet(retained, out _))
+				if (string.IsNullOrEmpty(value.GetString())
+					&& active.Values.TryGetValue(key, out var retained)
+					&& SecretReferenceJson.TryGet(retained, out _))
 				{
 					continue;
 				}
@@ -353,10 +359,10 @@ public class ConfigFlowManager : IConfigFlowManager
 
 				// The entry title is stored, so it is resolved once here rather than kept as a reference:
 				// stored state must not change shape, and a title the user can rename is theirs from then on.
-				var title = active.ExistingEntry?.Title ??
-					active.RequestedTitle ??
-					result.EntryTitle ??
-					await ActiveLocalization.Resolve(scope.ServiceProvider, active.IntegrationName);
+				var title = active.ExistingEntry?.Title
+					?? active.RequestedTitle
+					?? result.EntryTitle
+					?? await ActiveLocalization.Resolve(scope.ServiceProvider, active.IntegrationName);
 
 				Guid entryId;
 				var reused = active.ExistingEntry is not null;
@@ -506,9 +512,9 @@ public class ConfigFlowManager : IConfigFlowManager
 	{
 		foreach (var name in active.SecretFields)
 		{
-			if (!active.Values.TryGetValue(name, out var element) ||
-				SecretReferenceJson.TryGet(element, out _) ||
-				element.ValueKind != JsonValueKind.String)
+			if (!active.Values.TryGetValue(name, out var element)
+				|| SecretReferenceJson.TryGet(element, out _)
+				|| element.ValueKind != JsonValueKind.String)
 			{
 				continue;
 			}
@@ -541,10 +547,10 @@ public class ConfigFlowManager : IConfigFlowManager
 		{
 			if (value.IsSecret)
 			{
-				if (declaredSecretFields.Contains(key) &&
-					!replacedSecretFields.Contains(key) &&
-					target.TryGetValue(key, out var retained) &&
-					SecretReferenceJson.TryGet(retained, out _))
+				if (declaredSecretFields.Contains(key)
+					&& !replacedSecretFields.Contains(key)
+					&& target.TryGetValue(key, out var retained)
+					&& SecretReferenceJson.TryGet(retained, out _))
 				{
 					continue;
 				}
@@ -586,7 +592,8 @@ public class ConfigFlowManager : IConfigFlowManager
 	}
 
 	private static object? ToClrValue(JsonElement element)
-		=> element.ValueKind switch
+	{
+		return element.ValueKind switch
 		{
 			JsonValueKind.String => element.GetString(),
 			JsonValueKind.Number => element.TryGetInt64(out var l) ? l : element.GetDouble(),
@@ -595,6 +602,7 @@ public class ConfigFlowManager : IConfigFlowManager
 			JsonValueKind.Null or JsonValueKind.Undefined => null,
 			_ => element.GetRawText()
 		};
+	}
 
 	private sealed class ActiveFlow
 	{
@@ -651,9 +659,11 @@ public class ConfigFlowManager : IConfigFlowManager
 		HashSet<string> ReplacedSecretFields)
 	{
 		public static FlowSnapshot Capture(ActiveFlow active)
-			=> new(new Dictionary<string, JsonElement>(active.Values, StringComparer.Ordinal),
+		{
+			return new FlowSnapshot(new Dictionary<string, JsonElement>(active.Values, StringComparer.Ordinal),
 				new HashSet<string>(active.SecretFields, StringComparer.Ordinal),
 				new HashSet<string>(active.ReplacedSecretFields, StringComparer.Ordinal));
+		}
 
 		public void RestoreInto(ActiveFlow active)
 		{
@@ -671,8 +681,8 @@ public class ConfigFlowManager : IConfigFlowManager
 	}
 
 	private sealed class PublicListenerUnavailableException()
-		: Exception("The public network port could not be opened, so this OAuth login cannot complete. " +
-			"Choose a different port in Settings > Network and try again.");
+		: Exception("The public network port could not be opened, so this OAuth login cannot complete. "
+			+ "Choose a different port in Settings > Network and try again.");
 
 	private sealed class ConfigFlowContext : IConfigFlowEntryContext
 	{
@@ -681,7 +691,8 @@ public class ConfigFlowManager : IConfigFlowManager
 		private readonly bool _publicListenerAvailable;
 		private IOAuthSession? _oauth;
 
-		public ConfigFlowContext(IOAuthCallbackCoordinator coordinator,
+		public ConfigFlowContext(
+			IOAuthCallbackCoordinator coordinator,
 			OAuthRegistration registration,
 			bool publicListenerAvailable,
 			string? entryTitle,

@@ -40,7 +40,8 @@ public class IntegrationLifecycleHostedServiceTests
 		TestIntegration integration,
 		PluginConnectionState connectionState,
 		HostStateCache stateCache)
-		=> new([integration],
+	{
+		return new IntegrationLifecycleHostedService([integration],
 			TestMetadata.Default,
 			new NoOpIntegrationContext(),
 			new FakeDeviceProviderContext(),
@@ -53,6 +54,7 @@ public class IntegrationLifecycleHostedServiceTests
 			connectionState,
 			stateCache,
 			Serilog.Core.Logger.None);
+	}
 
 	[Test]
 	public async Task A_host_state_config_push_re_runs_InitializeAsync()
@@ -64,7 +66,7 @@ public class IntegrationLifecycleHostedServiceTests
 		var service = Service(integration, connectionState, stateCache);
 		await service.StartAsync(CancellationToken.None);
 
-		connectionState.RaiseConnected(resumed: false);
+		connectionState.RaiseConnected(false);
 		await WaitForAsync(() => integration.IsInitialized);
 		Assert.That(integration.ShutdownCount, Is.Zero);
 
@@ -92,7 +94,7 @@ public class IntegrationLifecycleHostedServiceTests
 		var service = Service(integration, connectionState, stateCache);
 		await service.StartAsync(CancellationToken.None);
 
-		connectionState.RaiseConnected(resumed: false);
+		connectionState.RaiseConnected(false);
 		await WaitForAsync(() => integration.IsInitialized);
 
 		stateCache.Apply(StatePush(HostApis.Scripts));
@@ -114,7 +116,7 @@ public class IntegrationLifecycleHostedServiceTests
 
 		var service = Service(integration, connectionState, stateCache);
 		await service.StartAsync(CancellationToken.None);
-		connectionState.RaiseConnected(resumed: false);
+		connectionState.RaiseConnected(false);
 		await WaitForAsync(() => integration.IsInitialized);
 
 		await service.StopAsync(CancellationToken.None);
@@ -126,15 +128,20 @@ public class IntegrationLifecycleHostedServiceTests
 		Assert.That(integration.ShutdownCount, Is.EqualTo(shutdownsAtStop));
 	}
 
-	private static ProtocolEnvelope ConfigPush() => StatePush(HostApis.Config);
+	private static ProtocolEnvelope ConfigPush()
+	{
+		return StatePush(HostApis.Config);
+	}
 
 	private static ProtocolEnvelope StatePush(string api)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
 			Payload = FakePluginSocket.Payload(new HostStatePayload { Api = api })
 		};
+	}
 
 	[Test]
 	public async Task A_device_provider_starts_with_the_integration_and_stops_before_it()
@@ -159,7 +166,7 @@ public class IntegrationLifecycleHostedServiceTests
 			Serilog.Core.Logger.None);
 
 		await service.StartAsync(CancellationToken.None);
-		connectionState.RaiseConnected(resumed: false);
+		connectionState.RaiseConnected(false);
 		await WaitForAsync(() => integration.DeviceContext is not null);
 
 		await service.StopAsync(CancellationToken.None);
@@ -198,7 +205,7 @@ public class IntegrationLifecycleHostedServiceTests
 			Serilog.Core.Logger.None);
 
 		await service.StartAsync(CancellationToken.None);
-		connectionState.RaiseConnected(resumed: false);
+		connectionState.RaiseConnected(false);
 		await WaitForAsync(() => integration.DeviceContext is not null);
 
 		await service.StopAsync(CancellationToken.None);
@@ -237,7 +244,10 @@ public class IntegrationLifecycleHostedServiceTests
 			return Task.CompletedTask;
 		}
 
-		public Task ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task ShutdownAsync(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	[Test]
@@ -265,7 +275,7 @@ public class IntegrationLifecycleHostedServiceTests
 			Serilog.Core.Logger.None);
 
 		await service.StartAsync(CancellationToken.None);
-		connectionState.RaiseConnected(resumed: false);
+		connectionState.RaiseConnected(false);
 		await WaitForAsync(() => integration.DeviceContext is not null);
 
 		Assert.Multiple(() =>
@@ -276,7 +286,8 @@ public class IntegrationLifecycleHostedServiceTests
 		});
 	}
 
-	private sealed class ScreenSaverAndDeviceProvidingIntegration : TestIntegration, IScreenSaverProvider, IDeviceProvider
+	private sealed class ScreenSaverAndDeviceProvidingIntegration : TestIntegration, IScreenSaverProvider,
+		IDeviceProvider
 	{
 		public ScreenSaverRegistration? Registration { get; private set; }
 
@@ -285,9 +296,11 @@ public class IntegrationLifecycleHostedServiceTests
 		async Task IScreenSaverProvider.InitializeAsync(
 			IScreenSaverProviderContext context,
 			CancellationToken cancellationToken)
-			=> Registration = await context.RegisterScreenSaverAsync(
+		{
+			Registration = await context.RegisterScreenSaverAsync(
 				new ScreenSaverDescriptor("clock", MacroDeck.Localization.LocalizedText.FromLiteral("Clock")),
 				cancellationToken);
+		}
 
 		public Task InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken = default)
 		{
@@ -295,19 +308,28 @@ public class IntegrationLifecycleHostedServiceTests
 			return Task.CompletedTask;
 		}
 
-		public Task ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task ShutdownAsync(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class UnsupportedApiHostInvoker : IHostInvoker
 	{
-		public Task<System.Text.Json.JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> throw HostInvocationException.CreateNonRetryable(ProtocolErrorCodes.CapabilityUnsupported,
+		{
+			throw HostInvocationException.CreateNonRetryable(ProtocolErrorCodes.CapabilityUnsupported,
 				$"'{api}' is not a host api this host knows.");
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed class DeviceProvidingIntegration : TestIntegration, IDeviceProvider
@@ -332,10 +354,12 @@ public class IntegrationLifecycleHostedServiceTests
 		}
 	}
 
-	private static IntegrationLifecycleHostedService VideoService(TestVideoIntegration integration,
+	private static IntegrationLifecycleHostedService VideoService(
+		TestVideoIntegration integration,
 		VideoStreamFixture video,
 		HostStateCache stateCache)
-		=> new([integration],
+	{
+		return new IntegrationLifecycleHostedService([integration],
 			TestMetadata.Default,
 			new NoOpIntegrationContext(),
 			new FakeDeviceProviderContext(),
@@ -348,10 +372,13 @@ public class IntegrationLifecycleHostedServiceTests
 			video.State,
 			stateCache,
 			Serilog.Core.Logger.None);
+	}
 
 	private static async Task<IReadOnlyList<VideoStreamProviderDto>> DescribeVideoAsync(VideoStreamFixture video)
-		=> (await video.InvokeAsync(CapabilityOperations.VideoStreamProvider.Describe)).Data!.Value
+	{
+		return (await video.InvokeAsync(CapabilityOperations.VideoStreamProvider.Describe)).Data!.Value
 			.Deserialize<VideoStreamProviderDescribePayload>(PluginProtocolJson.Options)!.Providers;
+	}
 
 	[Test]
 	public async Task A_video_stream_integration_starts_after_the_integration_itself()
@@ -361,7 +388,7 @@ public class IntegrationLifecycleHostedServiceTests
 		var service = VideoService(integration, video, new HostStateCache(new PluginConnectionState()));
 		await service.StartAsync(CancellationToken.None);
 
-		video.State.RaiseConnected(resumed: false);
+		video.State.RaiseConnected(false);
 		await WaitForAsync(() => integration.Context is not null);
 
 		Assert.That(integration.WasInitializedBeforeVideo, Is.True);
@@ -369,12 +396,14 @@ public class IntegrationLifecycleHostedServiceTests
 	}
 
 	[Test]
-	public async Task Reinitializing_withdraws_the_providers_and_closes_their_sessions_before_the_integration_shuts_down()
+	public async Task
+		Reinitializing_withdraws_the_providers_and_closes_their_sessions_before_the_integration_shuts_down()
 	{
 		using var video = new VideoStreamFixture();
 		var provider = new TestVideoProvider();
 		var shutdownsAtClose = new List<int>();
-		var integration = new TestVideoIntegration { OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
+		var integration = new TestVideoIntegration
+			{ OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
 		provider.OnClose = (_, _) =>
 		{
 			shutdownsAtClose.Add(integration.ShutdownCount);
@@ -383,7 +412,7 @@ public class IntegrationLifecycleHostedServiceTests
 		var stateCache = new HostStateCache(new PluginConnectionState());
 		var service = VideoService(integration, video, stateCache);
 		await service.StartAsync(CancellationToken.None);
-		video.State.RaiseConnected(resumed: false);
+		video.State.RaiseConnected(false);
 		await WaitForAsync(() => integration.Context is not null);
 		var firstRegistration = (await DescribeVideoAsync(video)).Single().RegistrationId;
 		await video.OpenAsync("s1");
@@ -408,10 +437,11 @@ public class IntegrationLifecycleHostedServiceTests
 	{
 		using var video = new VideoStreamFixture();
 		var provider = new TestVideoProvider();
-		var integration = new TestVideoIntegration { OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
+		var integration = new TestVideoIntegration
+			{ OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
 		var service = VideoService(integration, video, new HostStateCache(new PluginConnectionState()));
 		await service.StartAsync(CancellationToken.None);
-		video.State.RaiseConnected(resumed: false);
+		video.State.RaiseConnected(false);
 		await WaitForAsync(() => integration.Context is not null);
 		await video.OpenAsync("s1");
 
@@ -440,7 +470,7 @@ public class IntegrationLifecycleHostedServiceTests
 		var service = VideoService(integration, video, new HostStateCache(new PluginConnectionState()));
 		await service.StartAsync(CancellationToken.None);
 
-		video.State.RaiseConnected(resumed: false);
+		video.State.RaiseConnected(false);
 		await WaitForAsync(() => video.Invoker.Calls.Count == 2);
 		var providers = await DescribeVideoAsync(video);
 
@@ -497,12 +527,18 @@ public class IntegrationLifecycleHostedServiceTests
 	/// file, none of which registers a variable-catalog integration.</summary>
 	private sealed class NoOpHostInvoker : IHostInvoker
 	{
-		public Task<System.Text.Json.JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => throw new NotSupportedException();
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

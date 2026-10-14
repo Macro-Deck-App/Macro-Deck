@@ -8,16 +8,22 @@ internal readonly record struct FakeInvocation(string Resource, string Method, I
 {
 	public string Key => $"{Resource}.{Method}";
 
-	public override string ToString() => Args.Count == 0
-		? Key
-		: $"{Key}:{string.Join(',', Args.Select(Format))}";
-
-	private static string Format(object? argument) => argument switch
+	public override string ToString()
 	{
-		null => "null",
-		IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-		_ => argument.ToString() ?? "null"
-	};
+		return Args.Count == 0
+			? Key
+			: $"{Key}:{string.Join(',', Args.Select(Format))}";
+	}
+
+	private static string Format(object? argument)
+	{
+		return argument switch
+		{
+			null => "null",
+			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+			_ => argument.ToString() ?? "null"
+		};
+	}
 }
 
 internal sealed class FakeStreamlabsClient : IStreamlabsClient
@@ -92,10 +98,15 @@ internal sealed class FakeStreamlabsClient : IStreamlabsClient
 		return Task.CompletedTask;
 	}
 
-	public void Dispose() => Disposed = true;
+	public void Dispose()
+	{
+		Disposed = true;
+	}
 
 	public void RaiseEvent(string resourceId, string json)
-		=> EventReceived?.Invoke(this, new StreamlabsEvent(resourceId, Parse(json)));
+	{
+		EventReceived?.Invoke(this, new StreamlabsEvent(resourceId, Parse(json)));
+	}
 
 	public void RaiseDisconnected(string? reason = "closed")
 	{

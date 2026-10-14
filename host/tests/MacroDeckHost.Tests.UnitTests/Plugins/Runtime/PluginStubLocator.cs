@@ -4,8 +4,8 @@ internal static class PluginStubLocator
 {
 	public static string FindExecutable()
 	{
-		var repoRoot = FindRepoRoot(AppContext.BaseDirectory) ??
-			throw new InvalidOperationException(
+		var repoRoot = FindRepoRoot(AppContext.BaseDirectory)
+			?? throw new InvalidOperationException(
 				"Could not locate the repository root (no MacroDeck.slnx found above the test output directory).");
 
 		var configuration = AppContext.BaseDirectory.Contains("Debug", StringComparison.Ordinal) ? "Debug" : "Release";
@@ -32,8 +32,8 @@ internal static class PluginStubLocator
 		}
 
 		throw new InvalidOperationException(
-			$"MacroDeckHost.Tests.PluginStub was not found under '{fixtureBin}'. Build it first (it is part of " +
-			"MacroDeck.slnx).");
+			$"MacroDeckHost.Tests.PluginStub was not found under '{fixtureBin}'. Build it first (it is part of "
+			+ "MacroDeck.slnx).");
 	}
 
 	private static string? FindRepoRoot(string startDirectory)

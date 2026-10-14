@@ -20,7 +20,9 @@ public sealed class BackupCryptoException : Exception
 {
 	public BackupCryptoException(BackupDecryptResult result, string message)
 		: base(message)
-		=> Result = result;
+	{
+		Result = result;
+	}
 
 	public BackupDecryptResult Result { get; }
 }

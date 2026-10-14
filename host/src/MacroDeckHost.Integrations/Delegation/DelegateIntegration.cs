@@ -13,13 +13,14 @@ namespace MacroDeckHost.Integrations.Delegation;
 
 [MacroDeckIntegration]
 public sealed class DelegateIntegration
-	: IIntegration, IConfigFlowProvider, IVariableProvider, IIntegrationIconProvider, IIntegrationIssueProvider, IDisposable
+	: IIntegration, IConfigFlowProvider, IVariableProvider, IIntegrationIconProvider, IIntegrationIssueProvider,
+		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.delegate";
 
 	internal const string SharedImportIssuePrefix = "shared-import:";
 
-	private static readonly TimeSpan RegistrationGrace = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan _registrationGrace = TimeSpan.FromSeconds(5);
 
 	private static readonly ILogger _logger = IntegrationLog.For<DelegateIntegration>(IntegrationId);
 	private static readonly byte[] _icon = LoadIcon();
@@ -83,10 +84,15 @@ public sealed class DelegateIntegration
 
 	internal DelegateRemoteManager RemoteManager => _remotes;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
 	public IConfigFlow CreateConfigFlow()
-		=> new DelegateConfigFlow(() => new DelegateClient(), _config, TimeProvider.System);
+	{
+		return new DelegateConfigFlow(() => new DelegateClient(), _config, TimeProvider.System);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -131,11 +137,13 @@ public sealed class DelegateIntegration
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> _imports.Find(localId) is { } import
+	{
+		return _imports.Find(localId) is { } import
 			? await import.Remote.WriteSharedAsync(import.RemoteName,
 				DelegateSharedImports.Format(value),
 				cancellationToken)
 			: VariableWriteResult.NotWritable();
+	}
 
 	public async Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
 	{
@@ -148,7 +156,7 @@ public sealed class DelegateIntegration
 		foreach (var remote in _remotes.Remotes.Where(r => r.ImportsSharedVariables))
 		{
 			var names = imports.Skipped.GetValueOrDefault(remote.Instance.InstanceId, []).ToList();
-			if (owned is not null && DateTimeOffset.UtcNow - _importsBuiltAt > RegistrationGrace)
+			if (owned is not null && DateTimeOffset.UtcNow - _importsBuiltAt > _registrationGrace)
 			{
 				names.AddRange(imports.Imports
 					.Where(i => i.Remote == remote && !owned.Contains(i.Definition.Name!))
@@ -163,10 +171,10 @@ public sealed class DelegateIntegration
 			issues.Add(new IntegrationIssue
 			{
 				Id = SharedImportIssuePrefix + remote.Instance.InstanceId,
-				Title = AppStrings.Integrations.Delegation.Issues.SharedImportSkippedTitle(count: names.Count,
-					label: remote.Instance.Label),
+				Title = AppStrings.Integrations.Delegation.Issues.SharedImportSkippedTitle(names.Count,
+					remote.Instance.Label),
 				Description = AppStrings.Integrations.Delegation.Issues.SharedImportSkippedDescription(
-					names: string.Join(", ", names)),
+					string.Join(", ", names)),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
@@ -232,12 +240,14 @@ public sealed class DelegateIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(
-			issueId.StartsWith(DelegateRemoteManager.CredentialsRejectedIssuePrefix, StringComparison.Ordinal) ||
-			issueId.StartsWith(DelegateRemoteManager.UnreachableIssuePrefix, StringComparison.Ordinal) ||
-			issueId.StartsWith(DelegateRemoteManager.SelfDelegationIssuePrefix, StringComparison.Ordinal)
+	{
+		return Task.FromResult(
+			issueId.StartsWith(DelegateRemoteManager.CredentialsRejectedIssuePrefix, StringComparison.Ordinal)
+			|| issueId.StartsWith(DelegateRemoteManager.UnreachableIssuePrefix, StringComparison.Ordinal)
+			|| issueId.StartsWith(DelegateRemoteManager.SelfDelegationIssuePrefix, StringComparison.Ordinal)
 				? IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow)
 				: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	public void Dispose()
 	{

@@ -95,14 +95,24 @@ internal sealed class ObsClientTests
 			Assert.That(mask.HasFlag(EventSubscription.InputShowStateChanged), Is.True);
 			Assert.That(mask.HasFlag(EventSubscription.InputVolumeMeters), Is.False);
 			Assert.That(mask.HasFlag(EventSubscription.SceneItemTransformChanged), Is.False);
-			Assert.That(mask & (EventSubscription.Transitions | EventSubscription.SceneItems |
-				EventSubscription.MediaInputs | EventSubscription.Vendors | EventSubscription.Canvases),
+			Assert.That(mask
+				& (EventSubscription.Transitions
+					| EventSubscription.SceneItems
+					| EventSubscription.MediaInputs
+					| EventSubscription.Vendors
+					| EventSubscription.Canvases),
 				Is.EqualTo(EventSubscription.None));
 		});
 
-		var required = EventSubscription.General | EventSubscription.Config | EventSubscription.Scenes |
-			EventSubscription.Inputs | EventSubscription.Filters | EventSubscription.Outputs | EventSubscription.Ui;
-		Assert.That(mask & required, Is.EqualTo(required),
+		var required = EventSubscription.General
+			| EventSubscription.Config
+			| EventSubscription.Scenes
+			| EventSubscription.Inputs
+			| EventSubscription.Filters
+			| EventSubscription.Outputs
+			| EventSubscription.Ui;
+		Assert.That(mask & required,
+			Is.EqualTo(required),
 			"CustomEvent (General), profile (Config), scenes, mute and settings (Inputs), filters, outputs and studio mode (Ui)");
 	}
 
@@ -175,6 +185,9 @@ internal sealed class ObsClientTests
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 }

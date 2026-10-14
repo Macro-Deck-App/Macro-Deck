@@ -22,7 +22,7 @@ namespace MacroDeckHost.Tests.UnitTests.Api;
 [NonParallelizable]
 public class DeviceSetupEndpointTests
 {
-	private static readonly DateTimeOffset Now = new(2026, 3, 1, 12, 0, 0, TimeSpan.Zero);
+	private static readonly DateTimeOffset _now = new(2026, 3, 1, 12, 0, 0, TimeSpan.Zero);
 
 	private string _dataDir = null!;
 	private string? _previousDataDir;
@@ -43,7 +43,7 @@ public class DeviceSetupEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -52,7 +52,7 @@ public class DeviceSetupEndpointTests
 	[Test]
 	public async Task An_Unpaired_Device_Can_Download_The_Certificate_Authority()
 	{
-		using var host = await StartHost(new FakeCertificateStore(Now));
+		using var host = await StartHost(new FakeCertificateStore(_now));
 		using var client = host.GetTestClient();
 
 		var response = await client.GetAsync("/api/device-setup/certificate-authority.crt");
@@ -73,7 +73,7 @@ public class DeviceSetupEndpointTests
 	[Test]
 	public async Task The_Download_Carries_No_Private_Key_Material()
 	{
-		using var host = await StartHost(new FakeCertificateStore(Now));
+		using var host = await StartHost(new FakeCertificateStore(_now));
 		using var client = host.GetTestClient();
 
 		var body = await (await client.GetAsync("/api/device-setup/certificate-authority.crt"))
@@ -92,7 +92,7 @@ public class DeviceSetupEndpointTests
 	[Test]
 	public async Task The_Setup_State_Names_The_Addresses_The_Host_Certificate_Covers()
 	{
-		using var host = await StartHost(new FakeCertificateStore(Now));
+		using var host = await StartHost(new FakeCertificateStore(_now));
 		using var client = host.GetTestClient();
 
 		var response = await client.GetAsync("/api/device-setup");
@@ -118,7 +118,7 @@ public class DeviceSetupEndpointTests
 	[Test]
 	public async Task Nothing_Is_Offered_When_No_Authority_Exists()
 	{
-		using var host = await StartHost(new FakeCertificateStore(Now) { HasAuthority = false });
+		using var host = await StartHost(new FakeCertificateStore(_now) { HasAuthority = false });
 		using var client = host.GetTestClient();
 
 		var download = await client.GetAsync("/api/device-setup/certificate-authority.crt");
@@ -139,7 +139,7 @@ public class DeviceSetupEndpointTests
 	{
 		var events = new List<LogEvent>();
 		using var logger = new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(events.Add)).CreateLogger();
-		using var host = await StartHost(new FakeCertificateStore(Now), logger);
+		using var host = await StartHost(new FakeCertificateStore(_now), logger);
 		using var client = host.GetTestClient();
 		const string forged = "x\n2026-09-30 00:00:00.000 +00:00 [ERR] [Host] forged\u001b[31m";
 		var body = JsonSerializer.Serialize(new { stage = forged, userAgent = forged, url = forged, message = forged });
@@ -166,7 +166,7 @@ public class DeviceSetupEndpointTests
 	[Test]
 	public async Task The_Network_Settings_Endpoint_Still_Requires_An_Administrator()
 	{
-		using var host = await StartHost(new FakeCertificateStore(Now));
+		using var host = await StartHost(new FakeCertificateStore(_now));
 		using var client = host.GetTestClient();
 
 		var response = await client.GetAsync("/api/settings/network");
@@ -176,8 +176,9 @@ public class DeviceSetupEndpointTests
 		await host.StopAsync();
 	}
 
-	private static async Task<IHost> StartHost(IPublicTlsCertificateStore certificateStore,
-		Serilog.ILogger? logger = null)
+	private static async Task<IHost> StartHost(
+		IPublicTlsCertificateStore certificateStore,
+		ILogger? logger = null)
 	{
 		var listenerState = new FakeHostListenerState
 		{
@@ -230,17 +231,28 @@ public class DeviceSetupEndpointTests
 
 		public bool HasAuthority { get; init; } = true;
 
-		public PublicTlsCertificateInfo? ReadInfo() => null;
+		public PublicTlsCertificateInfo? ReadInfo()
+		{
+			return null;
+		}
 
-		public string? ReadCertificatePem() => _host.CertificatePem;
+		public string? ReadCertificatePem()
+		{
+			return _host.CertificatePem;
+		}
 
 		public PublicTlsCertificateResolution LoadServerCertificate()
-			=> new(null, PublicTlsFailure.NotConfigured);
+		{
+			return new PublicTlsCertificateResolution(null, PublicTlsFailure.NotConfigured);
+		}
 
-		public PublicTlsCertificateInfo Save(string certificatePem,
+		public PublicTlsCertificateInfo Save(
+			string certificatePem,
 			string privateKeyPem,
 			PublicTlsCertificateSource source)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public PublicTlsCertificateInfo? ReadAuthorityInfo()
 		{
@@ -257,12 +269,19 @@ public class DeviceSetupEndpointTests
 				PublicTlsCertificateSource.LocalCa);
 		}
 
-		public string? ReadAuthorityCertificatePem() => HasAuthority ? _authority.CertificatePem : null;
+		public string? ReadAuthorityCertificatePem()
+		{
+			return HasAuthority ? _authority.CertificatePem : null;
+		}
 
 		public PublicTlsAuthorityResolution LoadAuthority()
-			=> new(HasAuthority ? _authority : null, PublicTlsFailure.None);
+		{
+			return new PublicTlsAuthorityResolution(HasAuthority ? _authority : null, PublicTlsFailure.None);
+		}
 
 		public PublicTlsCertificateInfo SaveAuthority(string certificatePem, string privateKeyPem)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

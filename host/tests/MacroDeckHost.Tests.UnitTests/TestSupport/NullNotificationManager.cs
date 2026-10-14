@@ -12,30 +12,48 @@ internal sealed class NullNotificationManager : INotificationManager
 		remove { }
 	}
 
-	public Task<NotificationShowOutcome> ShowAsync(NotificationOwner owner,
+	public Task<NotificationShowOutcome> ShowAsync(
+		NotificationOwner owner,
 		NotificationOptions options,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task UpdateAsync(NotificationOwner owner,
+	public Task UpdateAsync(
+		NotificationOwner owner,
 		Guid id,
 		NotificationUpdate update,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public void Close(NotificationOwner owner, Guid id)
 	{
 	}
 
-	public NotificationRespondOutcome Respond(NotificationPrincipal principal,
+	public NotificationRespondOutcome Respond(
+		NotificationPrincipal principal,
 		Guid id,
 		string? actionId,
 		IReadOnlyDictionary<string, JsonElement>? values)
-		=> new(NotificationRespondStatus.NotFound);
+	{
+		return new NotificationRespondOutcome(NotificationRespondStatus.NotFound);
+	}
 
-	public IReadOnlyList<ActiveNotification> Snapshot(NotificationPrincipal principal) => [];
+	public IReadOnlyList<ActiveNotification> Snapshot(NotificationPrincipal principal)
+	{
+		return [];
+	}
 
-	public ActiveNotification? Find(Guid id) => null;
+	public ActiveNotification? Find(Guid id)
+	{
+		return null;
+	}
 
-	public int CloseOwner(string ownerId, NotificationCloseReason reason = NotificationCloseReason.OwnerGone) => 0;
+	public int CloseOwner(string ownerId, NotificationCloseReason reason = NotificationCloseReason.OwnerGone)
+	{
+		return 0;
+	}
 }

@@ -17,7 +17,10 @@ internal static class MacOsMainRunLoop
 
 	public static bool IsPumping => _isPumping;
 
-	public static void MarkPumping() => _isPumping = true;
+	public static void MarkPumping()
+	{
+		_isPumping = true;
+	}
 
 	[SupportedOSPlatform("macos")]
 	public static void PumpUntil(Task completion)
@@ -46,7 +49,8 @@ internal static class MacOsMainRunLoop
 	}
 
 	[DllImport(CoreFoundation)]
-	private static extern int CFRunLoopRunInMode(IntPtr mode,
+	private static extern int CFRunLoopRunInMode(
+		IntPtr mode,
 		double seconds,
 		[MarshalAs(UnmanagedType.I1)] bool returnAfterSourceHandled);
 }

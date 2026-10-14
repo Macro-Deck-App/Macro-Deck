@@ -102,9 +102,13 @@ public abstract record UiOptionsInput<T> : UiInput<T>
 	/// <summary>A value present only while the underlying hint is set, so an unset hint omits its key instead of
 	/// writing a JSON null the renderer would have to special-case.</summary>
 	private static UiValue<int> Hint(Func<int?> read)
-		=> UiValue.Optional(() => read() is { } value ? UiValue.Of(value) : UiValue.None<int>());
+	{
+		return UiValue.Optional(() => read() is { } value ? UiValue.Of(value) : UiValue.None<int>());
+	}
 
 	/// <summary>The string-valued counterpart of <see cref="Hint(Func{int?})" />.</summary>
 	private static UiValue<string> Hint(Func<string?> read)
-		=> UiValue.Optional(() => read() is { } value ? UiValue.Of(value) : UiValue.None<string>());
+	{
+		return UiValue.Optional(() => read() is { } value ? UiValue.Of(value) : UiValue.None<string>());
+	}
 }

@@ -87,13 +87,20 @@ public sealed class IntegrationInitializer
 	private readonly IDesktopNotifier? _desktopNotifications;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<string, InProcessMessageChannel> _messageChannels = new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers
+		= new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, InProcessMessageChannel> _messageChannels
+		= new(StringComparer.Ordinal);
+
 	private readonly IMessageBroker _messageBroker;
 	private readonly PluginColorWatches _colorWatches;
 	private readonly ConcurrentDictionary<string, InProcessColorApi> _colorApis = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, InProcessBatteryApi> _batteryApis = new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<string, InProcessMusicPlayerApi> _musicPlayerApis = new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, InProcessMusicPlayerApi> _musicPlayerApis
+		= new(StringComparer.Ordinal);
 
 	public IntegrationInitializer(
 		IServiceScopeFactory serviceScopeFactory,
@@ -186,7 +193,9 @@ public sealed class IntegrationInitializer
 	public IReadOnlySet<string> AttemptedIds => _attempted.Keys.ToHashSet(StringComparer.Ordinal);
 
 	public void BindGateways(IIntegration integration)
-		=> IntegrationGatewayBinder.Bind(integration, _calendarServices, _emailServices);
+	{
+		IntegrationGatewayBinder.Bind(integration, _calendarServices, _emailServices);
+	}
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
 		IIntegration integration,
@@ -220,8 +229,9 @@ public sealed class IntegrationInitializer
 			await RenewColorApiAsync(integration.Id),
 			_notificationManager is null
 				? UnavailableNotificationService.Instance
-				: new OwnedNotificationService(
-					new NotificationOwner(NotificationSourceCategory.BuiltInIntegration, integration.Id, integrationName),
+				: new OwnedNotificationService(new NotificationOwner(NotificationSourceCategory.BuiltInIntegration,
+						integration.Id,
+						integrationName),
 					_notificationManager),
 			UiResourcesFor(integration),
 			RenewBatteryApi(integration.Id),
@@ -350,10 +360,12 @@ public sealed class IntegrationInitializer
 	}
 
 	private BuiltInUiResources? UiResourcesFor(IIntegration integration)
-		=> _uiResourceStore is null
+	{
+		return _uiResourceStore is null
 			? null
 			: _uiResources.GetOrAdd(integration.Id,
 				id => new BuiltInUiResources(id, _uiResourceStore, integration.GetType(), _musicPlayerArtwork));
+	}
 
 	public async Task ReleaseAllMessagingAsync()
 	{
@@ -404,7 +416,8 @@ public sealed class IntegrationInitializer
 			return null;
 		}
 
-		var musicPlayers = new InProcessMusicPlayerApi(_musicPlayerRegistry, _albumColor, _musicPlayerNotifier, _logger);
+		var musicPlayers
+			= new InProcessMusicPlayerApi(_musicPlayerRegistry, _albumColor, _musicPlayerNotifier, _logger);
 		_musicPlayerApis[integrationId] = musicPlayers;
 		return musicPlayers;
 	}
@@ -418,7 +431,9 @@ public sealed class IntegrationInitializer
 	}
 
 	private void ObserveAbandoned(Task attempt, AsyncServiceScope scope, string integrationId)
-		=> _ = ContinueAbandoned(attempt, scope, integrationId);
+	{
+		_ = ContinueAbandoned(attempt, scope, integrationId);
+	}
 
 	private async Task ContinueAbandoned(Task attempt, AsyncServiceScope scope, string integrationId)
 	{

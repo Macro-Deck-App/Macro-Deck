@@ -8,19 +8,33 @@ namespace MacroDeck.Sdk.Devices;
 public sealed class DeviceSessionException : Exception
 {
 	public DeviceSessionException(string reasonCode, string message)
-		: base(message) => ReasonCode = reasonCode;
+		: base(message)
+	{
+		ReasonCode = reasonCode;
+	}
 
 	public DeviceSessionException(string reasonCode, string message, Exception innerException)
-		: base(message, innerException) => ReasonCode = reasonCode;
+		: base(message, innerException)
+	{
+		ReasonCode = reasonCode;
+	}
 
 	public DeviceSessionException()
-		=> ReasonCode = string.Empty;
+	{
+		ReasonCode = string.Empty;
+	}
 
 	public DeviceSessionException(string message)
-		: base(message) => ReasonCode = string.Empty;
+		: base(message)
+	{
+		ReasonCode = string.Empty;
+	}
 
 	public DeviceSessionException(string message, Exception innerException)
-		: base(message, innerException) => ReasonCode = string.Empty;
+		: base(message, innerException)
+	{
+		ReasonCode = string.Empty;
+	}
 
 	/// <summary>A <see cref="DeviceSessionReasons" /> code, empty when the cause has none.</summary>
 	public string ReasonCode { get; }

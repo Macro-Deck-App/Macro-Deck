@@ -104,7 +104,7 @@ public class BackupPayloadCryptoTests
 	private static byte[] Encrypt(byte[] key, byte[] plaintext)
 	{
 		using var destination = new MemoryStream();
-		using (var encryptor = BackupPayloadCrypto.CreateEncryptor(destination, key, _manifest, leaveOpen: true))
+		using (var encryptor = BackupPayloadCrypto.CreateEncryptor(destination, key, _manifest, true))
 		{
 			encryptor.Write(plaintext);
 		}
@@ -115,7 +115,7 @@ public class BackupPayloadCryptoTests
 	private static byte[] Decrypt(byte[] payload, byte[] key, byte[]? manifest = null)
 	{
 		using var source = new MemoryStream(payload);
-		using var decryptor = BackupPayloadCrypto.CreateDecryptor(source, key, manifest ?? _manifest, leaveOpen: true);
+		using var decryptor = BackupPayloadCrypto.CreateDecryptor(source, key, manifest ?? _manifest, true);
 		using var restored = new MemoryStream();
 		decryptor.CopyTo(restored);
 

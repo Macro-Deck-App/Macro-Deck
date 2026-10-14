@@ -41,8 +41,13 @@ internal sealed class CompanionWakeOnLanTests
 	[Test]
 	public async Task A_failed_send_is_logged_and_the_report_still_counts()
 	{
-		var harness = new CompanionHarness();
-		harness.Transport.FailConnectionSends = true;
+		var harness = new CompanionHarness
+		{
+			Transport =
+			{
+				FailConnectionSends = true
+			}
+		};
 		var device = harness.AddDevice("Pixel");
 
 		await harness.ReportAsync("connection-1", device);
@@ -51,8 +56,8 @@ internal sealed class CompanionWakeOnLanTests
 		{
 			Assert.That(harness.DeviceRegistry.TryGetState(device, out _), Is.True);
 			Assert.That(harness.Entries.Select(entry => entry.Id), Does.Contain(device));
-			Assert.That(harness.Sink.Events.Any(e => e.Level == LogEventLevel.Warning &&
-					e.Exception is InvalidOperationException),
+			Assert.That(harness.Sink.Events.Any(e
+					=> e.Level == LogEventLevel.Warning && e.Exception is InvalidOperationException),
 				Is.True);
 		});
 	}

@@ -65,18 +65,22 @@ public static class UiTreeApplier
 	}
 
 	private static UiApplyResult Reject(UiTree tree, string reason)
-		=> new() { IsApplied = false, RejectionReason = reason, Tree = tree };
+	{
+		return new UiApplyResult { IsApplied = false, RejectionReason = reason, Tree = tree };
+	}
 
 	private static (UiNode? Root, string? Reason) ApplyOperation(UiNode root, UiPatchOperation operation)
-		=> operation.Op switch
+	{
+		return operation.Op switch
 		{
 			UiPatchOperations.SetProperties => ApplySetProperties(root, operation),
 			UiPatchOperations.InsertNode => ApplyInsertNode(root, operation),
 			UiPatchOperations.RemoveNode => ApplyRemoveNode(root, operation),
 			UiPatchOperations.ReplaceNode => ApplyReplaceNode(root, operation),
 			UiPatchOperations.MoveNode => ApplyMoveNode(root, operation),
-			_ => (null, $"Unknown patch operation \"{operation.Op}\"."),
+			_ => (null, $"Unknown patch operation \"{operation.Op}\".")
 		};
+	}
 
 	private static (UiNode? Root, string? Reason) ApplySetProperties(UiNode root, UiPatchOperation operation)
 	{
@@ -125,7 +129,7 @@ public static class UiTreeApplier
 				$"Index {index} is out of bounds for parent \"{operation.ParentId}\" with {count} children.");
 		}
 
-		var duplicateId = FindDuplicateId(root, excludedId: null, operation.Node!);
+		var duplicateId = FindDuplicateId(root, null, operation.Node!);
 		if (duplicateId is not null)
 		{
 			return (null, $"\"{duplicateId}\" is already used by another node in the tree.");
@@ -158,8 +162,8 @@ public static class UiTreeApplier
 	{
 		var replacement = operation.Node!;
 
-		if (string.Equals(operation.NodeId, root.Id, StringComparison.Ordinal) &&
-			!string.Equals(replacement.Id, root.Id, StringComparison.Ordinal))
+		if (string.Equals(operation.NodeId, root.Id, StringComparison.Ordinal)
+			&& !string.Equals(replacement.Id, root.Id, StringComparison.Ordinal))
 		{
 			return (null, "replace-node on the root may not change the root's id.");
 		}

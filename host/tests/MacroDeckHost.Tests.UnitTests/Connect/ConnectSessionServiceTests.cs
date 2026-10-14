@@ -219,9 +219,9 @@ public class ConnectSessionServiceTests
 		harness.DelayHandler = (span, _) =>
 		{
 			var snapshot = harness.Service.Current;
-			if (snapshot.Status is not ConnectAccountStatus.SignedIn ||
-				snapshot.Connectivity is not ConnectConnectivity.Offline ||
-				harness.Store.ClearCount != 0)
+			if (snapshot.Status is not ConnectAccountStatus.SignedIn
+				|| snapshot.Connectivity is not ConnectConnectivity.Offline
+				|| harness.Store.ClearCount != 0)
 			{
 				breaches.Add($"{snapshot.Status}/{snapshot.Connectivity}/clears={harness.Store.ClearCount}");
 			}
@@ -458,8 +458,7 @@ public class ConnectSessionServiceTests
 
 		await harness.Service.StartSignIn();
 
-		await ConnectTestHarness.WaitUntil(
-			() => harness.Service.Current.SignInFailure == ConnectSignInFailure.Denied,
+		await ConnectTestHarness.WaitUntil(() => harness.Service.Current.SignInFailure == ConnectSignInFailure.Denied,
 			"the declined sign-in was never reported");
 	}
 

@@ -18,13 +18,20 @@ public class MusicPlayerCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(string localId, string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.MusicPlayer,
 			LocalId = localId,
@@ -35,6 +42,7 @@ public class MusicPlayerCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id()
@@ -55,9 +63,11 @@ public class MusicPlayerCapabilityHandlerTests
 
 	[Test]
 	public void No_provider_declares_nothing()
-		=> Assert.That(new MusicPlayerCapabilityHandler([], TestMetadata.Default, new FakeAssetUploader())
+	{
+		Assert.That(new MusicPlayerCapabilityHandler([], TestMetadata.Default, new FakeAssetUploader())
 				.DeclareCapabilities(),
 			Is.Empty);
+	}
 
 	[Test]
 	public async Task Describe_reports_the_provider_name_and_the_catalog_devices_flags_per_instance()
@@ -108,7 +118,8 @@ public class MusicPlayerCapabilityHandlerTests
 			Assert.That(payload.Instances.Select(i => i.HasDevices), Is.All.False);
 
 			var dtoProperties = typeof(MusicPlayerInstanceDto).GetProperties().Select(p => p.Name).ToArray();
-			Assert.That(dtoProperties, Is.EquivalentTo(new[] { "Id", "DisplayName", "HasCatalog", "HasDevices", "Options" }));
+			Assert.That(dtoProperties,
+				Is.EquivalentTo(new[] { "Id", "DisplayName", "HasCatalog", "HasDevices", "Options" }));
 		});
 	}
 

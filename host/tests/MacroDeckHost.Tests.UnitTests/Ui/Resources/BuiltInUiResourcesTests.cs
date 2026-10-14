@@ -16,10 +16,15 @@ public class BuiltInUiResourcesTests
 	private UiResourceStore _store = null!;
 
 	[SetUp]
-	public void SetUp() => _store = new UiResourceStore();
+	public void SetUp()
+	{
+		_store = new UiResourceStore();
+	}
 
 	private BuiltInUiResources Create(IMusicPlayerArtworkService? artwork = null)
-		=> new(IntegrationId, _store, typeof(BundledIconsIntegration), artwork);
+	{
+		return new BuiltInUiResources(IntegrationId, _store, typeof(BundledIconsIntegration), artwork);
+	}
 
 	[Test]
 	public async Task A_registered_image_is_served_under_the_integrations_own_id()
@@ -73,7 +78,8 @@ public class BuiltInUiResourcesTests
 			Assert.ThrowsAsync<ArgumentException>(() => resources.RegisterAsync("not a name", _png, "image/png"));
 			Assert.ThrowsAsync<ArgumentException>(() =>
 				resources.RegisterAsync("logo", "<svg/>"u8.ToArray(), "image/svg+xml"));
-			Assert.ThrowsAsync<ArgumentException>(() => resources.RegisterAsync("empty", Array.Empty<byte>(), "image/png"));
+			Assert.ThrowsAsync<ArgumentException>(()
+				=> resources.RegisterAsync("empty", Array.Empty<byte>(), "image/png"));
 		});
 	}
 
@@ -166,7 +172,8 @@ public class BuiltInUiResourcesTests
 
 		resources.Release();
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(() => resources.RegisterAsync("cover", _png, "image/png"));
+		var exception
+			= Assert.ThrowsAsync<UiResourceException>(() => resources.RegisterAsync("cover", _png, "image/png"));
 		Assert.Multiple(() =>
 		{
 			Assert.That(_store.TryGet(image.ResourceId, out _), Is.False);
@@ -180,7 +187,9 @@ public class BuiltInUiResourcesTests
 	{
 		var resources = Create(new StubArtwork(new ArtworkImageResult(_png, "image/png", "etag")));
 
-		var handle = await resources.RegisterMusicPlayerArtworkAsync("now-playing", "com.example.player::default", "a1");
+		var handle = await resources.RegisterMusicPlayerArtworkAsync("now-playing",
+			"com.example.player::default",
+			"a1");
 		var missing = await Create(new StubArtwork(null))
 			.RegisterMusicPlayerArtworkAsync("now-playing", "com.example.player::default", "gone");
 
@@ -224,9 +233,13 @@ public class BuiltInUiResourcesTests
 
 		public List<int?> Sizes { get; } = [];
 
-		public string GetETag(string artworkId, int? size) => "etag";
+		public string GetETag(string artworkId, int? size)
+		{
+			return "etag";
+		}
 
-		public Task<ArtworkImageResult?> GetImage(string instanceId,
+		public Task<ArtworkImageResult?> GetImage(
+			string instanceId,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
@@ -236,27 +249,39 @@ public class BuiltInUiResourcesTests
 				new ArtworkImageResult(new byte[size is null ? FullLength : CopyLength], "image/webp", "etag"));
 		}
 
-		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		public Task<ArtworkImageResult?> GetImage(
+			MusicPlayerVariant variant,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class StubArtwork(ArtworkImageResult? image) : IMusicPlayerArtworkService
 	{
-		public string GetETag(string artworkId, int? size) => "etag";
+		public string GetETag(string artworkId, int? size)
+		{
+			return "etag";
+		}
 
-		public Task<ArtworkImageResult?> GetImage(string instanceId,
+		public Task<ArtworkImageResult?> GetImage(
+			string instanceId,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(image);
+		{
+			return Task.FromResult(image);
+		}
 
-		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		public Task<ArtworkImageResult?> GetImage(
+			MusicPlayerVariant variant,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(image);
+		{
+			return Task.FromResult(image);
+		}
 	}
 }

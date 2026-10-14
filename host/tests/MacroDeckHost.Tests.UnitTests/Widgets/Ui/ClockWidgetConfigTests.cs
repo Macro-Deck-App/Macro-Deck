@@ -27,7 +27,7 @@ public class ClockWidgetConfigTests
 		showSeconds = true,
 		showDate = true,
 		border = new { style = "static", color = "#ff0000" },
-		flows = "[{\"trigger\":\"onShortPress\"}]",
+		flows = "[{\"trigger\":\"onShortPress\"}]"
 	};
 
 	[Test]
@@ -109,10 +109,13 @@ public class ClockWidgetConfigTests
 	}
 
 	private static UiTestHost Render(object data)
-		=> UiTestHost.Render(ClockWidgetConfigView.Build(JsonSerializer.SerializeToElement(data)));
+	{
+		return UiTestHost.Render(ClockWidgetConfigView.Build(JsonSerializer.SerializeToElement(data)));
+	}
 
 	private static UiSurface ConfigSurface(string widgetType, string widgetData)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
@@ -122,9 +125,10 @@ public class ClockWidgetConfigTests
 					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData),
-			},
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData)
+			}
 		};
+	}
 
 	/// <summary>Rebuilds the widget data object from the tree's current values, exactly as the client's
 	/// structural composition (<c>config-draft.util.ts</c>) would for a widget with only these keys -
@@ -134,7 +138,7 @@ public class ClockWidgetConfigTests
 		var border = new Dictionary<string, object?>
 		{
 			["style"] = host.ById("border.style").Text(UiConfigProperties.Value),
-			["color"] = host.ById("border.color").Text(UiConfigProperties.Value),
+			["color"] = host.ById("border.color").Text(UiConfigProperties.Value)
 		};
 
 		var data = new Dictionary<string, object?>
@@ -146,7 +150,7 @@ public class ClockWidgetConfigTests
 			["label"] = host.ById("label").Text(UiConfigProperties.Value),
 			["showSeconds"] = host.ById("showSeconds").Flag(UiConfigProperties.Value),
 			["showDate"] = host.ById("showDate").Flag(UiConfigProperties.Value),
-			["border"] = border,
+			["border"] = border
 		};
 
 		return JsonSerializer.SerializeToElement(data);

@@ -79,8 +79,8 @@ public sealed class DeprecationMetadataAnalyzer : DiagnosticAnalyzer
 
 		if (!HasObsoleteAttribute(symbol))
 		{
-			problems.Add("It carries no companion [Obsolete], so the compiler and every IDE stay silent " +
-				"about it.");
+			problems.Add("It carries no companion [Obsolete], so the compiler and every IDE stay silent "
+				+ "about it.");
 		}
 
 		if (string.IsNullOrWhiteSpace(metadata.Guidance))
@@ -90,8 +90,8 @@ public sealed class DeprecationMetadataAnalyzer : DiagnosticAnalyzer
 
 		if (DeprecationMetadata.IsNotAfter(metadata.RemovedIn, metadata.DeprecatedIn))
 		{
-			problems.Add($"RemovedIn ('{metadata.RemovedIn}') is not after DeprecatedIn " +
-				$"('{metadata.DeprecatedIn}'), which leaves no release to migrate on.");
+			problems.Add($"RemovedIn ('{metadata.RemovedIn}') is not after DeprecatedIn "
+				+ $"('{metadata.DeprecatedIn}'), which leaves no release to migrate on.");
 		}
 
 		return problems;

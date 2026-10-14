@@ -28,8 +28,8 @@ internal sealed class ScriptedCompanionDevices : ICompanionDeviceApi
 	public CompanionScreenshotResult ScreenshotResult { get; set; } =
 		CompanionScreenshotResult.Failed(CompanionDeviceFailure.Unavailable);
 
-	public int SubscriberCount => (DeviceReady?.GetInvocationList().Length ?? 0) +
-		(DeviceChanged?.GetInvocationList().Length ?? 0);
+	public int SubscriberCount => (DeviceReady?.GetInvocationList().Length ?? 0)
+		+ (DeviceChanged?.GetInvocationList().Length ?? 0);
 
 	public CompanionDevice Connect(Guid deviceId, CompanionDeviceState state)
 	{
@@ -54,12 +54,18 @@ internal sealed class ScriptedCompanionDevices : ICompanionDeviceApi
 		DeviceChanged?.Invoke(this, new CompanionDeviceEventArgs(deviceId, null));
 	}
 
-	public CompanionDevice? FindDevice(Guid deviceId) => _devices.FirstOrDefault(device => device.Id == deviceId);
+	public CompanionDevice? FindDevice(Guid deviceId)
+	{
+		return _devices.FirstOrDefault(device => device.Id == deviceId);
+	}
 
 	public Task<bool> WaitForDeviceAsync(Guid deviceId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(FindDevice(deviceId) is not null);
+	{
+		return Task.FromResult(FindDevice(deviceId) is not null);
+	}
 
-	public Task<bool> SendAsync(Guid deviceId,
+	public Task<bool> SendAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
 	{
@@ -67,7 +73,8 @@ internal sealed class ScriptedCompanionDevices : ICompanionDeviceApi
 		return Task.FromResult(FindDevice(deviceId) is not null);
 	}
 
-	public Task<CompanionDeviceCommandResult> RequestAsync(Guid deviceId,
+	public Task<CompanionDeviceCommandResult> RequestAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
 	{
@@ -75,7 +82,8 @@ internal sealed class ScriptedCompanionDevices : ICompanionDeviceApi
 		return Task.FromResult(RequestResult);
 	}
 
-	public Task<CompanionScreenshotResult> CaptureScreenshotAsync(Guid deviceId,
+	public Task<CompanionScreenshotResult> CaptureScreenshotAsync(
+		Guid deviceId,
 		CompanionScreenshotMode mode,
 		CancellationToken cancellationToken = default)
 	{

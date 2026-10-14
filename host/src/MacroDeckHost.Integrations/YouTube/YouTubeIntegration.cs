@@ -68,7 +68,10 @@ public sealed class YouTubeIntegration
 		Chat = new StreamChatHub(_time, _logger);
 		_pump = new StreamPump(Chat);
 		_stats = new StreamStatsSource(ReadStats);
-		_thumbnails = new StreamThumbnailCache(YouTubeStreamPlatform.Platform, () => _context?.UiResources, _time, _logger);
+		_thumbnails = new StreamThumbnailCache(YouTubeStreamPlatform.Platform,
+			() => _context?.UiResources,
+			_time,
+			_logger);
 		_ui = new StreamWidgetsUiProvider(YouTubeStreamPlatform.Platform,
 			Chat,
 			null,
@@ -125,12 +128,20 @@ public sealed class YouTubeIntegration
 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => _ui.Surfaces;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => _configFlowFactory();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return _configFlowFactory();
+	}
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-		=> _ui.CreateSessionAsync(request, cancellationToken);
+	{
+		return _ui.CreateSessionAsync(request, cancellationToken);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -165,13 +176,15 @@ public sealed class YouTubeIntegration
 	}
 
 	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
-		=> _accounts.Connections.Count == 0
+	{
+		return _accounts.Connections.Count == 0
 			? []
 			:
 			[
 				YouTubeStreamPlatform.Platform.ChatWidgetDescriptor(),
 				YouTubeStreamPlatform.Platform.StatsWidgetDescriptor()
 			];
+	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -210,13 +223,17 @@ public sealed class YouTubeIntegration
 	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(_accounts.Issues());
+	{
+		return Task.FromResult(_accounts.Issues());
+	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId.StartsWith(YouTubeAccountManager.TokenIssuePrefix, StringComparison.Ordinal)
+	{
+		return Task.FromResult(issueId.StartsWith(YouTubeAccountManager.TokenIssuePrefix, StringComparison.Ordinal)
 			? IssueResolution.Ok(AppStrings.Integrations.YouTube.Issues.ReconnectResolution(),
 				IssueResolutionFollowUp.StartConfigFlow)
 			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	public void Dispose()
 	{
@@ -240,7 +257,8 @@ public sealed class YouTubeIntegration
 	{
 		var assembly = typeof(YouTubeIntegration).Assembly;
 		using var stream = assembly.GetManifestResourceStream(
-			$"{typeof(YouTubeIntegration).Namespace}.Icons.{StreamWidgetsUiProvider.IconFolder}.{StreamWidgetsUiProvider.LogoIcon}.svg")!;
+				$"{typeof(YouTubeIntegration).Namespace}.Icons.{StreamWidgetsUiProvider.IconFolder}.{StreamWidgetsUiProvider.LogoIcon}.svg")
+			!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
 		return memory.ToArray();

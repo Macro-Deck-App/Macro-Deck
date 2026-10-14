@@ -32,7 +32,7 @@ internal sealed class PackageVerifierPluginTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -62,10 +62,13 @@ internal sealed class PackageVerifierPluginTests
 		return (outputPath, issued);
 	}
 
-	private static Task<PackageVerifyResult> VerifyAsync(string path,
+	private static Task<PackageVerifyResult> VerifyAsync(
+		string path,
 		(byte[] PrivateKey, byte[] PublicKey)? root = null,
-		CancellationToken cancellationToken = default) =>
-		PackageVerifier.VerifyAsync(path, _manifestReader, (root ?? TestPki.Root).PublicKey, cancellationToken);
+		CancellationToken cancellationToken = default)
+	{
+		return PackageVerifier.VerifyAsync(path, _manifestReader, (root ?? TestPki.Root).PublicKey, cancellationToken);
+	}
 
 	[Test]
 	public async Task A_validly_signed_plugin_verifies()
@@ -131,7 +134,10 @@ internal sealed class PackageVerifierPluginTests
 		var (path, _) = await CreateSignedArchiveAsync(files: files);
 
 		RewriteManifest(path,
-			manifest => { ((JsonObject)manifest["entrypoints"]!["linux-x64"]!)["executable"] = "other"; });
+			manifest =>
+			{
+				((JsonObject)manifest["entrypoints"]!["linux-x64"]!)["executable"] = "other";
+			});
 
 		var result = await VerifyAsync(path);
 
@@ -167,7 +173,11 @@ internal sealed class PackageVerifierPluginTests
 	{
 		var (path, _) = await CreateSignedArchiveAsync();
 
-		RewriteManifest(path, manifest => { manifest["permissions"] = new JsonArray("host:scripts"); });
+		RewriteManifest(path,
+			manifest =>
+			{
+				manifest["permissions"] = new JsonArray("host:scripts");
+			});
 
 		var result = await VerifyAsync(path);
 
@@ -210,7 +220,10 @@ internal sealed class PackageVerifierPluginTests
 		var otherCertificate = TestPki.IssueCertificate();
 
 		RewriteManifest(path,
-			manifest => { ((JsonObject)manifest["signature"]!)["keyId"] = otherCertificate.CertificateId; });
+			manifest =>
+			{
+				((JsonObject)manifest["signature"]!)["keyId"] = otherCertificate.CertificateId;
+			});
 
 		var result = await VerifyAsync(path);
 
@@ -303,7 +316,7 @@ internal sealed class PackageVerifierPluginTests
 
 		// signedAt after notAfter - a certificate whose window had already closed by the time the signature
 		// claims to have been made.
-		EmbedHandRolledSignature(packagePath, issued, signedAt: notAfter.AddDays(1));
+		EmbedHandRolledSignature(packagePath, issued, notAfter.AddDays(1));
 
 		var result = await VerifyAsync(packagePath);
 
@@ -329,7 +342,7 @@ internal sealed class PackageVerifierPluginTests
 		// DateTimeOffset.UtcNow - this is the converse of the expiry test above, and it is what pins
 		// validity being evaluated at signedAt rather than at verification time: switching the check to
 		// UtcNow would fail this artifact even though it was validly signed.
-		EmbedHandRolledSignature(packagePath, issued, signedAt: notBefore.AddDays(5));
+		EmbedHandRolledSignature(packagePath, issued, notBefore.AddDays(5));
 
 		var result = await VerifyAsync(packagePath);
 
@@ -363,7 +376,8 @@ internal sealed class PackageVerifierPluginTests
 	/// <summary>Signs the archive's current digest directly with <paramref name="issued" />'s key and embeds
 	/// the result - bypassing <see cref="PackageSigner" />, which would refuse a certificate like this one
 	/// before ever writing anything. Only for tests that need to reach verification's own certificate checks.</summary>
-	private static void EmbedHandRolledSignature(string archivePath,
+	private static void EmbedHandRolledSignature(
+		string archivePath,
 		TestPki.IssuedCertificate issued,
 		DateTimeOffset? signedAt = null)
 	{

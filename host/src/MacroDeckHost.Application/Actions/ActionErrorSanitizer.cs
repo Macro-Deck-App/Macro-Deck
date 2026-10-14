@@ -59,5 +59,7 @@ public static class ActionErrorSanitizer
 	/// destroy the reference outright.
 	/// </summary>
 	public static LocalizedText ClampMessage(LocalizedText message)
-		=> message.Literal is { } literal ? ClampMessage(literal) : message;
+	{
+		return message.Literal is { } literal ? ClampMessage(literal) : message;
+	}
 }

@@ -1,7 +1,6 @@
 using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Infrastructure.SystemIntegrations.Widgets;
-using MacroDeckHost.Integrations;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -12,8 +11,8 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets;
 [TestFixture]
 public class WidgetActionTargetTests
 {
-	private const string _selfWidget = "22222222-2222-2222-2222-222222222222";
-	private const string _otherWidget = "33333333-3333-3333-3333-333333333333";
+	private const string SelfWidget = "22222222-2222-2222-2222-222222222222";
+	private const string OtherWidget = "33333333-3333-3333-3333-333333333333";
 
 	private static readonly string[] _iconFramingNumbers = ["iconZoom", "iconOffsetX", "iconOffsetY", "iconOpacity"];
 
@@ -37,11 +36,11 @@ public class WidgetActionTargetTests
 				["widget"] = WidgetTargets.Self,
 				["label"] = "Live"
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_widgets.Applied.Single().WidgetId, Is.EqualTo(_selfWidget));
+			Assert.That(_widgets.Applied.Single().WidgetId, Is.EqualTo(SelfWidget));
 			Assert.That(_widgets.Applied.Single().Patch.Label, Is.EqualTo("Live"));
 		});
 	}
@@ -52,12 +51,12 @@ public class WidgetActionTargetTests
 		await Execute("set-label",
 			new Dictionary<string, object>
 			{
-				["widget"] = _otherWidget,
+				["widget"] = OtherWidget,
 				["label"] = "Live"
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
-		Assert.That(_widgets.Applied.Single().WidgetId, Is.EqualTo(_otherWidget));
+		Assert.That(_widgets.Applied.Single().WidgetId, Is.EqualTo(OtherWidget));
 	}
 
 	[Test]
@@ -69,7 +68,7 @@ public class WidgetActionTargetTests
 				["widget"] = WidgetTargets.Self,
 				["label"] = "Live"
 			},
-			ownerWidgetId: null);
+			null);
 
 		Assert.That(_widgets.Applied, Is.Empty);
 	}
@@ -79,9 +78,9 @@ public class WidgetActionTargetTests
 	{
 		await Execute("set-label",
 			new Dictionary<string, object> { ["label"] = "Live" },
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
-		Assert.That(_widgets.Applied.Single().WidgetId, Is.EqualTo(_selfWidget));
+		Assert.That(_widgets.Applied.Single().WidgetId, Is.EqualTo(SelfWidget));
 	}
 
 	[TestCase("current", WidgetStates.Current)]
@@ -93,11 +92,11 @@ public class WidgetActionTargetTests
 		await Execute("set-label",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["state"] = value,
 				["label"] = "x"
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		Assert.That(_widgets.Applied.Single().StateIds, Is.EqualTo(new[] { expectedStateId }));
 	}
@@ -108,11 +107,11 @@ public class WidgetActionTargetTests
 		await Execute("set-border",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["style"] = "blink",
 				["color"] = string.Empty
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var patch = _widgets.Applied.Single().Patch;
 		Assert.Multiple(() =>
@@ -128,10 +127,10 @@ public class WidgetActionTargetTests
 		await Execute("set-background-color",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["color"] = string.Empty
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -147,10 +146,10 @@ public class WidgetActionTargetTests
 		await Execute("set-background-color",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["color"] = WidgetAppearanceValues.Reset
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -166,10 +165,10 @@ public class WidgetActionTargetTests
 		await Execute("set-background-color",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["color"] = "#abcdef"
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -201,14 +200,14 @@ public class WidgetActionTargetTests
 		await Execute("set-icon-display",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["iconFit"] = string.Empty,
 				["iconZoom"] = string.Empty,
 				["iconOffsetX"] = string.Empty,
 				["iconOffsetY"] = string.Empty,
 				["iconOpacity"] = string.Empty
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -224,14 +223,14 @@ public class WidgetActionTargetTests
 		await Execute("set-icon-display",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["iconFit"] = "cover",
 				["iconZoom"] = 250d,
 				["iconOffsetX"] = string.Empty,
 				["iconOffsetY"] = -20d,
 				["iconOpacity"] = 0d
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var patch = _widgets.Applied.Single().Patch;
 		Assert.Multiple(() =>
@@ -250,12 +249,12 @@ public class WidgetActionTargetTests
 		await Execute("set-icon-display",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["iconFit"] = WidgetAppearanceValues.Reset,
 				["iconZoom"] = 250d,
 				["iconOpacity"] = 30d
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -280,10 +279,10 @@ public class WidgetActionTargetTests
 		await Execute("set-icon-color",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["color"] = "#ef4444"
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -299,10 +298,10 @@ public class WidgetActionTargetTests
 		await Execute("set-icon-color",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["color"] = WidgetAppearanceValues.Reset
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -320,10 +319,10 @@ public class WidgetActionTargetTests
 		await Execute("set-icon-appearance",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["iconAppearance"] = appearance
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -339,10 +338,10 @@ public class WidgetActionTargetTests
 		await Execute("set-icon-appearance",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["iconAppearance"] = WidgetAppearanceValues.Reset
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var request = _widgets.Applied.Single();
 		Assert.Multiple(() =>
@@ -363,8 +362,10 @@ public class WidgetActionTargetTests
 			Assert.That(parameter.Type, Is.EqualTo(ActionParameterType.DynamicChoice));
 			Assert.That(parameter.OptionsSourceId, Is.EqualTo(IconOptionsSourceIds.Appearances));
 			Assert.That(parameter.DefaultValue, Is.EqualTo(WidgetAppearanceValues.Reset));
-			Assert.That(parameter.Options!.Select(option => option.Value).First(), Is.EqualTo(WidgetAppearanceValues.Reset));
-			Assert.That(parameter.Options!.Select(option => option.Value), Does.Contain("colorScheme=dark;motion=static"));
+			Assert.That(parameter.Options!.Select(option => option.Value).First(),
+				Is.EqualTo(WidgetAppearanceValues.Reset));
+			Assert.That(parameter.Options!.Select(option => option.Value),
+				Does.Contain("colorScheme=dark;motion=static"));
 		});
 	}
 
@@ -372,12 +373,13 @@ public class WidgetActionTargetTests
 	public async Task NothingApplied_OnAnIconProviderButton_RefusesTheAppearanceLikeTheIcon()
 	{
 		await UseWidgets(new FakeOutcomeWidgetApi { ApplyResult = false });
-		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.IconAppearance,
-			hasActiveIconProvider: true));
+		_widgets.Targets.Add(Target(SelfWidget,
+			WidgetAppearanceProperty.IconAppearance,
+			true));
 
 		var result = await Execute("set-icon-appearance",
-			new Dictionary<string, object> { ["widget"] = _selfWidget, ["iconAppearance"] = "colorScheme=dark" },
-			ownerWidgetId: _selfWidget);
+			new Dictionary<string, object> { ["widget"] = SelfWidget, ["iconAppearance"] = "colorScheme=dark" },
+			SelfWidget);
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.PermissionDenied));
 	}
@@ -399,10 +401,10 @@ public class WidgetActionTargetTests
 		await Execute("set-label",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["label"] = string.Empty
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		Assert.That(_widgets.Applied.Single().Patch.Label, Is.Empty);
 	}
@@ -413,13 +415,13 @@ public class WidgetActionTargetTests
 		await Execute("set-font",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["fontFaceId"] = "inter-400-5-upright",
 				["fontSize"] = 22d,
 				["textAlign"] = string.Empty,
 				["labelPosition"] = string.Empty
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		var patch = _widgets.Applied.Single().Patch;
 		Assert.Multiple(() =>
@@ -478,10 +480,10 @@ public class WidgetActionTargetTests
 		await Execute("set-label",
 			new Dictionary<string, object>
 			{
-				["widget"] = _selfWidget,
+				["widget"] = SelfWidget,
 				["label"] = label
 			},
-			ownerWidgetId: _selfWidget);
+			SelfWidget);
 
 		Assert.That(_widgets.Applied.Single().Patch.Label, Is.EqualTo(label));
 	}
@@ -503,11 +505,11 @@ public class WidgetActionTargetTests
 	public async Task ARepeatRunWithNothingToChange_OnAWidgetThatHasTheProperty_Succeeds()
 	{
 		_widgets.ApplyResult = false;
-		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.AccentColor));
+		_widgets.Targets.Add(Target(SelfWidget, WidgetAppearanceProperty.AccentColor));
 
 		var result = await Execute("set-accent-color",
-			new Dictionary<string, object> { ["widget"] = _selfWidget, ["color"] = "#ef4444" },
-			ownerWidgetId: _selfWidget);
+			new Dictionary<string, object> { ["widget"] = SelfWidget, ["color"] = "#ef4444" },
+			SelfWidget);
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 	}
@@ -519,14 +521,14 @@ public class WidgetActionTargetTests
 	{
 		await UseWidgets(reportsOutcomes ? new FakeOutcomeWidgetApi() : new FakeWidgetApi());
 		_widgets.ApplyResult = false;
-		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.BackgroundColor));
+		_widgets.Targets.Add(Target(SelfWidget, WidgetAppearanceProperty.BackgroundColor));
 
 		var unsupported = await Execute("set-accent-color",
-			new Dictionary<string, object> { ["widget"] = _selfWidget, ["color"] = "#ef4444" },
-			ownerWidgetId: _selfWidget);
+			new Dictionary<string, object> { ["widget"] = SelfWidget, ["color"] = "#ef4444" },
+			SelfWidget);
 		var unknown = await Execute("set-accent-color",
-			new Dictionary<string, object> { ["widget"] = _otherWidget, ["color"] = "#ef4444" },
-			ownerWidgetId: _selfWidget);
+			new Dictionary<string, object> { ["widget"] = OtherWidget, ["color"] = "#ef4444" },
+			SelfWidget);
 
 		Assert.Multiple(() =>
 		{
@@ -545,11 +547,11 @@ public class WidgetActionTargetTests
 	{
 		var widgets = new FakeOutcomeWidgetApi { Outcome = outcome };
 		await UseWidgets(widgets);
-		widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.Label));
+		widgets.Targets.Add(Target(SelfWidget, WidgetAppearanceProperty.Label));
 
 		var result = await Execute("set-label",
-			new Dictionary<string, object> { ["widget"] = _selfWidget, ["label"] = "Photos" },
-			ownerWidgetId: _selfWidget);
+			new Dictionary<string, object> { ["widget"] = SelfWidget, ["label"] = "Photos" },
+			SelfWidget);
 
 		Assert.Multiple(() =>
 		{
@@ -562,11 +564,11 @@ public class WidgetActionTargetTests
 	public async Task NothingApplied_OnAnIconProviderButton_IsRefused_WhenTheApiReportsOutcomes()
 	{
 		await UseWidgets(new FakeOutcomeWidgetApi { ApplyResult = false });
-		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.Icon, hasActiveIconProvider: true));
+		_widgets.Targets.Add(Target(SelfWidget, WidgetAppearanceProperty.Icon, true));
 
 		var result = await Execute("set-icon",
-			new Dictionary<string, object> { ["widget"] = _selfWidget, ["iconId"] = "pack.icon" },
-			ownerWidgetId: _selfWidget);
+			new Dictionary<string, object> { ["widget"] = SelfWidget, ["iconId"] = "pack.icon" },
+			SelfWidget);
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.PermissionDenied));
 	}
@@ -582,11 +584,11 @@ public class WidgetActionTargetTests
 	public async Task NothingApplied_OnAnIconProviderButton_IsStillRefusedRatherThanReportedDone()
 	{
 		_widgets.ApplyResult = false;
-		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.Icon, hasActiveIconProvider: true));
+		_widgets.Targets.Add(Target(SelfWidget, WidgetAppearanceProperty.Icon, true));
 
 		var result = await Execute("set-icon",
-			new Dictionary<string, object> { ["widget"] = _selfWidget, ["iconId"] = "pack.icon" },
-			ownerWidgetId: _selfWidget);
+			new Dictionary<string, object> { ["widget"] = SelfWidget, ["iconId"] = "pack.icon" },
+			SelfWidget);
 
 		Assert.Multiple(() =>
 		{
@@ -595,10 +597,12 @@ public class WidgetActionTargetTests
 		});
 	}
 
-	private static WidgetTargetInfo Target(string widgetId,
+	private static WidgetTargetInfo Target(
+		string widgetId,
 		WidgetAppearanceProperty property,
 		bool hasActiveIconProvider = false)
-		=> new()
+	{
+		return new WidgetTargetInfo
 		{
 			Id = widgetId,
 			Label = "Target",
@@ -607,6 +611,7 @@ public class WidgetActionTargetTests
 			AppearanceProperties = [property],
 			HasActiveIconProvider = hasActiveIconProvider
 		};
+	}
 
 	private Task<ActionResult> Execute(string actionId, Dictionary<string, object> parameters, string? ownerWidgetId)
 	{
@@ -631,9 +636,15 @@ public class WidgetActionTargetTests
 
 		public List<WidgetTargetInfo> Targets { get; } = [];
 
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => Targets;
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return Targets;
+		}
 
-		public bool Exists(string widgetId) => true;
+		public bool Exists(string widgetId)
+		{
+			return true;
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
 		{
@@ -645,11 +656,16 @@ public class WidgetActionTargetTests
 			string widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
-		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+		public Task<WidgetStateWriteResult> AdvanceStateAsync(
+			string widgetId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 	}
 
 	private sealed class FakeOutcomeWidgetApi : FakeWidgetApi, IWidgetAppearanceOutcomeApi

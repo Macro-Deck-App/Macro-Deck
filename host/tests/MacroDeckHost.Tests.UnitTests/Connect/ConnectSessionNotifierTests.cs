@@ -81,7 +81,9 @@ public class ConnectSessionNotifierTests
 		public int Revalidations => Volatile.Read(ref _revalidations);
 
 		public Task<ConnectAvatar?> GetAvatar(CancellationToken cancellationToken = default)
-			=> Task.FromResult<ConnectAvatar?>(null);
+		{
+			return Task.FromResult<ConnectAvatar?>(null);
+		}
 
 		public Task Revalidate(CancellationToken cancellationToken = default)
 		{
@@ -89,6 +91,9 @@ public class ConnectSessionNotifierTests
 			return Failure is { } failure ? Task.FromException(failure) : Task.CompletedTask;
 		}
 
-		public void RaiseVersionChanged() => VersionChanged?.Invoke(this, EventArgs.Empty);
+		public void RaiseVersionChanged()
+		{
+			VersionChanged?.Invoke(this, EventArgs.Empty);
+		}
 	}
 }

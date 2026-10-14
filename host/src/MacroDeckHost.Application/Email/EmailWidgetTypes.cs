@@ -37,5 +37,8 @@ public static class EmailWidgetTypes
 
 	public const int MaxInboxesWithVariables = 40;
 
-	public static bool IsEmailInboxWidget(string? widgetType) => widgetType == QualifiedId;
+	public static bool IsEmailInboxWidget(string? widgetType)
+	{
+		return widgetType == QualifiedId;
+	}
 }

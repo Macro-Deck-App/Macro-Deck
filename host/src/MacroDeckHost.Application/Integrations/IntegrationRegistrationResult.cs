@@ -13,12 +13,16 @@ public sealed record IntegrationRegistrationResult(
 		= new(false, IntegrationRegistrationFailure.DuplicateIntegrationId);
 
 	public static IntegrationRegistrationResult Invalid(IReadOnlyList<CapabilityIdConflict> conflicts)
-		=> new(false, IntegrationRegistrationFailure.InvalidCapabilityIds, conflicts);
+	{
+		return new IntegrationRegistrationResult(false, IntegrationRegistrationFailure.InvalidCapabilityIds, conflicts);
+	}
 
 	public string Describe()
-		=> Conflicts is null or { Count: 0 }
+	{
+		return Conflicts is null or { Count: 0 }
 			? string.Empty
 			: string.Join(Environment.NewLine, Conflicts.Select(conflict => conflict.ToString()));
+	}
 }
 
 public enum IntegrationRegistrationFailure

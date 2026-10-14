@@ -33,15 +33,15 @@ internal static class SignCommand
 			{ Description = "Path to the base64-encoded private key.", Required = true };
 		var issuerCertificateOption = new Option<string?>("--issuer-certificate")
 		{
-			Description = "Path to the issuer certificate (issuer.json) that signed the signing certificate, when " +
-				"the certificate names one."
+			Description = "Path to the issuer certificate (issuer.json) that signed the signing certificate, when "
+				+ "the certificate names one."
 		};
 		var issuerCertificateSignatureOption = new Option<string?>("--issuer-certificate-signature")
 			{ Description = "Path to the root's signature over the issuer certificate (issuer.sig)." };
 		var rootPublicOption = new Option<string?>("--root-public")
 		{
-			Description = "Verify the certificate against this root public key instead of the pinned Macro Deck " +
-				"root. Not for production use."
+			Description = "Verify the certificate against this root public key instead of the pinned Macro Deck "
+				+ "root. Not for production use."
 		};
 
 		var command = new Command("sign", "Sign a plugin, icon pack, profile, folder or widget package.");
@@ -111,13 +111,14 @@ internal static class SignCommand
 				}
 
 				issuerCertificateSignatureBytes = await TryReadFileAsync(issuerCertificateSignaturePath,
-					cancellationToken).ConfigureAwait(false);
+						cancellationToken)
+					.ConfigureAwait(false);
 				if (issuerCertificateSignatureBytes is null)
 				{
 					return ReportFailure(console,
 						SigningError.CertificateUnreadable,
-						"No readable issuer certificate signature file at " +
-						$"'{CliText.DisplayPath(issuerCertificateSignaturePath)}'.");
+						"No readable issuer certificate signature file at "
+						+ $"'{CliText.DisplayPath(issuerCertificateSignaturePath)}'.");
 				}
 			}
 
@@ -129,16 +130,16 @@ internal static class SignCommand
 				if (rootPublicKeyOverride is null)
 				{
 					console.WriteError("root-public-key-unreadable",
-						$"'{CliText.DisplayPath(rootPublicPath)}' is not a readable base64-encoded Ed25519 public " +
-						"key.");
+						$"'{CliText.DisplayPath(rootPublicPath)}' is not a readable base64-encoded Ed25519 public "
+						+ "key.");
 					return ExitCode.InputUnreadable;
 				}
 
 				if (!RootPublicKeyReader.IsMacroDeckRoot(rootPublicKeyOverride))
 				{
 					console.WriteWarning("non-production-root",
-						"Verifying against --root-public instead of the pinned Macro Deck root; the signed " +
-						"artifact is not anchored to the Macro Deck root.");
+						"Verifying against --root-public instead of the pinned Macro Deck root; the signed "
+						+ "artifact is not anchored to the Macro Deck root.");
 				}
 			}
 
@@ -210,13 +211,13 @@ internal static class SignCommand
 			if (!verifyResult.Success)
 			{
 				console.WriteError("post-sign-verification-failed",
-					$"The signed artifact at '{CliText.DisplayPath(outputPath)}' did not verify " +
-					$"({SigningFailureCode.For(verifyResult.Error!.Value)}): {verifyResult.Message}");
+					$"The signed artifact at '{CliText.DisplayPath(outputPath)}' did not verify "
+					+ $"({SigningFailureCode.For(verifyResult.Error!.Value)}): {verifyResult.Message}");
 				return ExitCode.InternalError;
 			}
 
-			console.Info($"Signed {format} '{CliText.DisplayPath(packagePath)}' -> " +
-				$"'{CliText.DisplayPath(outputPath)}' with certificate {signResult.CertificateId}.");
+			console.Info($"Signed {format} '{CliText.DisplayPath(packagePath)}' -> "
+				+ $"'{CliText.DisplayPath(outputPath)}' with certificate {signResult.CertificateId}.");
 
 			return ExitCode.Success;
 		});
@@ -242,7 +243,8 @@ internal static class SignCommand
 		}
 	}
 
-	private static async Task<(byte[]? Bytes, SigningFailure? Failure)> TryReadPrivateKeyAsync(string path,
+	private static async Task<(byte[]? Bytes, SigningFailure? Failure)> TryReadPrivateKeyAsync(
+		string path,
 		CancellationToken cancellationToken)
 	{
 		// ReadBase64Async reports an unreadable file and a malformed one the same way, and the two are

@@ -17,9 +17,9 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 
 	private const int ToggleIndex = 2;
 
-	private static readonly string[] VisibilityMethodNames = ["Hide", "Show", "Toggle"];
-	private static readonly string[] AudioMethodNames = ["Mute", "Unmute", "Toggle"];
-	private static readonly string[] StateMethodNames = ["Start", "Stop", "Toggle"];
+	private static readonly string[] _visibilityMethodNames = ["Hide", "Show", "Toggle"];
+	private static readonly string[] _audioMethodNames = ["Mute", "Unmute", "Toggle"];
+	private static readonly string[] _stateMethodNames = ["Start", "Stop", "Toggle"];
 
 	// The plugin's assembly-qualified type name carries this exact string (Macro-Deck-OBS-WebSocket.csproj's
 	// AssemblyName, also the "dll" field of its ExtensionManifest.json minus the extension).
@@ -30,26 +30,33 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 	public IReadOnlyList<string> ClaimedSettingsSources { get; } = ["macro deck_obs-websocket plugin"];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings config,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<IReadOnlyList<MigratedConfiguration>>(MigrateConfiguration(config));
-
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		"SuchByte.OBSWebSocketPlugin.Actions.SetSceneAction" => MigrateSetScene(action),
-		"SuchByte.OBSWebSocketPlugin.Actions.SourceVisibilityAction" => MigrateSourceVisibility(action),
-		"SuchByte.OBSWebSocketPlugin.Actions.SetAudioMutedAction" => MigrateSetAudioMuted(action),
-		"SuchByte.OBSWebSocketPlugin.Actions.SetFilterStateAction" => MigrateSetFilterState(action),
-		"SuchByte.OBSWebSocketPlugin.Actions.SaveReplayBufferAction" => MigrateSaveReplayBuffer(action),
-		"SuchByte.OBSWebSocketPlugin.Actions.SetReplayBufferState" => MigrateGenericState(action, "replay-buffer"),
-		"SuchByte.OBSWebSocketPlugin.Actions.SetRecordingStateAction" => MigrateGenericState(action, "recording"),
-		"SuchByte.OBSWebSocketPlugin.Actions.SetStreamingStateAction" => MigrateGenericState(action, "streaming"),
-		"SuchByte.OBSWebSocketPlugin.Actions.SetVirtualCamAction" => MigrateGenericState(action, "virtual-camera"),
-		_ => null
-	};
+		return Task.FromResult<IReadOnlyList<MigratedConfiguration>>(MigrateConfiguration(config));
+	}
+
+	private static ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			"SuchByte.OBSWebSocketPlugin.Actions.SetSceneAction" => MigrateSetScene(action),
+			"SuchByte.OBSWebSocketPlugin.Actions.SourceVisibilityAction" => MigrateSourceVisibility(action),
+			"SuchByte.OBSWebSocketPlugin.Actions.SetAudioMutedAction" => MigrateSetAudioMuted(action),
+			"SuchByte.OBSWebSocketPlugin.Actions.SetFilterStateAction" => MigrateSetFilterState(action),
+			"SuchByte.OBSWebSocketPlugin.Actions.SaveReplayBufferAction" => MigrateSaveReplayBuffer(action),
+			"SuchByte.OBSWebSocketPlugin.Actions.SetReplayBufferState" => MigrateGenericState(action, "replay-buffer"),
+			"SuchByte.OBSWebSocketPlugin.Actions.SetRecordingStateAction" => MigrateGenericState(action, "recording"),
+			"SuchByte.OBSWebSocketPlugin.Actions.SetStreamingStateAction" => MigrateGenericState(action, "streaming"),
+			"SuchByte.OBSWebSocketPlugin.Actions.SetVirtualCamAction" => MigrateGenericState(action, "virtual-camera"),
+			_ => null
+		};
+	}
 
 	private static List<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings config)
 	{
@@ -138,7 +145,7 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 			return null;
 		}
 
-		var mode = (ReadEnumIndex(config, "Method", VisibilityMethodNames) ?? ToggleIndex) switch
+		var mode = (ReadEnumIndex(config, "Method", _visibilityMethodNames) ?? ToggleIndex) switch
 		{
 			0 => "hide",
 			1 => "show",
@@ -167,7 +174,7 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 			return null;
 		}
 
-		var mode = (ReadEnumIndex(config, "Method", AudioMethodNames) ?? ToggleIndex) switch
+		var mode = (ReadEnumIndex(config, "Method", _audioMethodNames) ?? ToggleIndex) switch
 		{
 			0 => "mute",
 			1 => "unmute",
@@ -201,7 +208,7 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 			return null;
 		}
 
-		var mode = (ReadEnumIndex(config, "Method", VisibilityMethodNames) ?? ToggleIndex) switch
+		var mode = (ReadEnumIndex(config, "Method", _visibilityMethodNames) ?? ToggleIndex) switch
 		{
 			0 => "disable",
 			1 => "enable",
@@ -237,7 +244,7 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 			return null;
 		}
 
-		var actionId = (ReadEnumIndex(config, "Method", StateMethodNames) ?? ToggleIndex) switch
+		var actionId = (ReadEnumIndex(config, "Method", _stateMethodNames) ?? ToggleIndex) switch
 		{
 			0 => $"start-{category}",
 			1 => $"stop-{category}",
@@ -251,30 +258,35 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 			ConnectionWarning(ReadString(config, "ConnectionName")));
 	}
 
-	private static string DefaultStateLabel(string actionId) => actionId switch
+	private static string DefaultStateLabel(string actionId)
 	{
-		"start-recording" => "Start OBS recording",
-		"stop-recording" => "Stop OBS recording",
-		"toggle-recording" => "Toggle OBS recording",
-		"start-streaming" => "Start OBS streaming",
-		"stop-streaming" => "Stop OBS streaming",
-		"toggle-streaming" => "Toggle OBS streaming",
-		"start-virtual-camera" => "Start OBS virtual camera",
-		"stop-virtual-camera" => "Stop OBS virtual camera",
-		"toggle-virtual-camera" => "Toggle OBS virtual camera",
-		"start-replay-buffer" => "Start OBS replay buffer",
-		"stop-replay-buffer" => "Stop OBS replay buffer",
-		"toggle-replay-buffer" => "Toggle OBS replay buffer",
-		_ => "OBS action"
-	};
+		return actionId switch
+		{
+			"start-recording" => "Start OBS recording",
+			"stop-recording" => "Stop OBS recording",
+			"toggle-recording" => "Toggle OBS recording",
+			"start-streaming" => "Start OBS streaming",
+			"stop-streaming" => "Stop OBS streaming",
+			"toggle-streaming" => "Toggle OBS streaming",
+			"start-virtual-camera" => "Start OBS virtual camera",
+			"stop-virtual-camera" => "Stop OBS virtual camera",
+			"toggle-virtual-camera" => "Toggle OBS virtual camera",
+			"start-replay-buffer" => "Start OBS replay buffer",
+			"stop-replay-buffer" => "Stop OBS replay buffer",
+			"toggle-replay-buffer" => "Toggle OBS replay buffer",
+			_ => "OBS action"
+		};
+	}
 
 	private static IReadOnlyList<LocalizedText> ConnectionWarning(string? connectionName)
-		=>
+	{
+		return
 		[
 			string.IsNullOrWhiteSpace(connectionName)
 				? AppStrings.Migration.Warning.Obs.DefaultConnectionNotMigrated()
-				: AppStrings.Migration.Warning.Obs.NamedConnectionNotMigrated(name: connectionName)
+				: AppStrings.Migration.Warning.Obs.NamedConnectionNotMigrated(connectionName)
 		];
+	}
 
 	private static bool TryParseHost(string raw, out string host, out int port)
 	{
@@ -292,8 +304,10 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static string? ReadCredential(IReadOnlyDictionary<string, string> credentials, string name)
-		=> credentials.FirstOrDefault(pair => string.Equals(pair.Key, name, StringComparison.OrdinalIgnoreCase))
+	{
+		return credentials.FirstOrDefault(pair => string.Equals(pair.Key, name, StringComparison.OrdinalIgnoreCase))
 			.Value;
+	}
 
 	private static bool TryParseConfig(string? configuration, out JsonElement config)
 	{
@@ -326,9 +340,11 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static string? ReadString(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	// Newtonsoft.Json serializes an unattributed enum as its underlying integer by default, but a value
 	// typed either way is accepted here since nothing in this plugin's source proves which one Macro Deck 2
@@ -340,10 +356,10 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 			return null;
 		}
 
-		if (value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var index) &&
-			index >= 0 &&
-			index < names.Length)
+		if (value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var index)
+			&& index >= 0
+			&& index < names.Length)
 		{
 			return index;
 		}
@@ -363,8 +379,13 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 		return null;
 	}
 
-	private static JsonElement JsonString(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonString(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

@@ -87,7 +87,10 @@ public sealed class ProfileRegistry : IProfileRegistry
 			.ToList();
 	}
 
-	public bool IsVirtual(string profileId) => QualifiedId.IsQualified(profileId);
+	public bool IsVirtual(string profileId)
+	{
+		return QualifiedId.IsQualified(profileId);
+	}
 
 	public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
 	{
@@ -206,7 +209,8 @@ public sealed class ProfileRegistry : IProfileRegistry
 		string profileId,
 		VirtualProfileDescriptor descriptor,
 		int order)
-		=> new()
+	{
+		return new TransportProfile
 		{
 			Id = profileId,
 			Name = descriptor.Name,
@@ -227,6 +231,7 @@ public sealed class ProfileRegistry : IProfileRegistry
 			DefaultWidgetSpacing = null,
 			DefaultWidgetBorderRadius = null
 		};
+	}
 
 	private static bool TryResolveVirtual(string id, out string integrationId, out string localId)
 	{
@@ -258,6 +263,9 @@ public sealed class ProfileRegistry : IProfileRegistry
 		return false;
 	}
 
-	private IEnumerable<IIntegration> EnabledProviders() => _integrations.Integrations
-		.Where(integration => integration is IProfileProvider && _integrations.IsEnabled(integration.Id));
+	private IEnumerable<IIntegration> EnabledProviders()
+	{
+		return _integrations.Integrations
+			.Where(integration => integration is IProfileProvider && _integrations.IsEnabled(integration.Id));
+	}
 }

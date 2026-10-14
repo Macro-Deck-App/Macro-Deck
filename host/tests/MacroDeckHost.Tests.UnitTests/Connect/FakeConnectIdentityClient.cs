@@ -18,7 +18,10 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 	private int _revokes;
 	private int _minted;
 
-	public FakeConnectIdentityClient(TimeProvider time) => _time = time;
+	public FakeConnectIdentityClient(TimeProvider time)
+	{
+		_time = time;
+	}
 
 	public string Subject { get; set; } = "connect-subject";
 
@@ -218,26 +221,40 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 	}
 
 	public static Func<ConnectTokenResponse> Unreachable()
-		=> () => throw new ConnectAuthTransientException("Macro Deck Connect could not be reached.",
+	{
+		return () => throw new ConnectAuthTransientException("Macro Deck Connect could not be reached.",
 			new HttpRequestException("connection refused"));
+	}
 
 	public static Func<ConnectTokenResponse> ServerError(int status)
-		=> () => throw new ConnectAuthTransientException($"Macro Deck Connect answered {status}.");
+	{
+		return () => throw new ConnectAuthTransientException($"Macro Deck Connect answered {status}.");
+	}
 
 	public static Func<ConnectTokenResponse> MalformedBody()
-		=> () => throw new ConnectAuthTransientException("Macro Deck Connect returned an unreadable token response.");
+	{
+		return () => throw new ConnectAuthTransientException(
+			"Macro Deck Connect returned an unreadable token response.");
+	}
 
 	public static Func<ConnectTokenResponse> InvalidGrant()
-		=> () => throw new ConnectAuthRejectedException("Macro Deck Connect rejected the credential: invalid_grant.");
+	{
+		return () => throw new ConnectAuthRejectedException(
+			"Macro Deck Connect rejected the credential: invalid_grant.");
+	}
 
 	public static Func<ConnectTokenResponse> Suspended()
-		=> () => throw new ConnectAccountSuspendedException("This account has been suspended.");
+	{
+		return () => throw new ConnectAccountSuspendedException("This account has been suspended.");
+	}
 
 	public static Func<ConnectTokenResponse> RateLimited(TimeSpan retryAfter)
-		=> () => throw new ConnectAuthTransientException("Macro Deck Connect is rate-limiting the token endpoint.")
+	{
+		return () => throw new ConnectAuthTransientException("Macro Deck Connect is rate-limiting the token endpoint.")
 		{
 			IsRateLimit = true, RetryAfter = retryAfter
 		};
+	}
 
 	public ConnectCredential SeedCredential(DateTimeOffset issuedAt)
 	{
@@ -287,7 +304,10 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 
 	private sealed class Issued
 	{
-		public Issued(DateTimeOffset expiresAt) => ExpiresAt = expiresAt;
+		public Issued(DateTimeOffset expiresAt)
+		{
+			ExpiresAt = expiresAt;
+		}
 
 		public DateTimeOffset ExpiresAt { get; }
 

@@ -33,15 +33,17 @@ internal sealed class RemoteUiInteractions(
 		string? originClientId,
 		ModalDefinition modal,
 		CancellationToken cancellationToken = default)
-		=> await OpenAsync(originClientId, modal, awaitResult: false, cancellationToken).ConfigureAwait(false)
+	{
+		return await OpenAsync(originClientId, modal, false, cancellationToken).ConfigureAwait(false)
 			is not null;
+	}
 
 	public async Task<ModalResult<T>> ShowModalAsync<T>(
 		string? originClientId,
 		ModalDefinition modal,
 		CancellationToken cancellationToken = default)
 	{
-		var modalId = await OpenAsync(originClientId, modal, awaitResult: true, cancellationToken)
+		var modalId = await OpenAsync(originClientId, modal, true, cancellationToken)
 			.ConfigureAwait(false);
 		if (modalId is null)
 		{

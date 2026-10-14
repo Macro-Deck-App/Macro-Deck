@@ -22,14 +22,15 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
 [TestFixture]
 public class WidgetColorThresholdsTests
 {
-	private const string _green = "#34c759";
-	private const string _yellow = "#ffcc00";
-	private const string _orange = "#ff9500";
-	private const string _red = "#ff3b30";
+	private const string Green = "#34c759";
+	private const string Yellow = "#ffcc00";
+	private const string Orange = "#ff9500";
+	private const string Red = "#ff3b30";
 
 	private static readonly object _twoBands = new
 	{
-		bands = new object[] { new { id = "cool", color = "#0000ff" }, new { id = "hot", color = "#ff0000", from = 40 } },
+		bands = new object[]
+			{ new { id = "cool", color = "#0000ff" }, new { id = "hot", color = "#ff0000", from = 40 } }
 	};
 
 	private static readonly UiSurface _widgetSurface
@@ -44,57 +45,78 @@ public class WidgetColorThresholdsTests
 		return host.ById("slider.track").Text("levelColor");
 	}
 
-	[TestCase(10, _green)]
-	[TestCase(50, _yellow)]
-	[TestCase(80, _orange)]
-	[TestCase(95, _red)]
-	public void A_slider_with_thresholds_on_and_none_stored_paints_the_default_band_of_its_value(double value, string expected)
-		=> Assert.That(SliderTrackColor(new { valueVariable = "vol", color = "#123456", thresholdsEnabled = true }, value),
+	[TestCase(10, Green)]
+	[TestCase(50, Yellow)]
+	[TestCase(80, Orange)]
+	[TestCase(95, Red)]
+	public void A_slider_with_thresholds_on_and_none_stored_paints_the_default_band_of_its_value(
+		double value,
+		string expected)
+	{
+		Assert.That(SliderTrackColor(new { valueVariable = "vol", color = "#123456", thresholdsEnabled = true }, value),
 			Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void The_default_bands_follow_the_slider_range()
-		=> Assert.That(SliderTrackColor(new { valueVariable = "vol", thresholdsEnabled = true }, -15, min: -60, max: 0),
-			Is.EqualTo(_orange));
+	{
+		Assert.That(SliderTrackColor(new { valueVariable = "vol", thresholdsEnabled = true }, -15, -60, 0),
+			Is.EqualTo(Orange));
+	}
 
 	[Test]
 	public void A_slider_paints_its_stored_bands_and_ignores_its_accent_while_thresholds_are_on()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
-			Assert.That(SliderTrackColor(new { valueVariable = "vol", color = "#123456", thresholdsEnabled = true, thresholds = _twoBands }, 39),
+			Assert.That(SliderTrackColor(new
+						{ valueVariable = "vol", color = "#123456", thresholdsEnabled = true, thresholds = _twoBands },
+					39),
 				Is.EqualTo("#0000ff"));
-			Assert.That(SliderTrackColor(new { valueVariable = "vol", color = "#123456", thresholdsEnabled = true, thresholds = _twoBands }, 40),
+			Assert.That(SliderTrackColor(new
+						{ valueVariable = "vol", color = "#123456", thresholdsEnabled = true, thresholds = _twoBands },
+					40),
 				Is.EqualTo("#ff0000"));
 		});
+	}
 
 	[Test]
 	public void A_slider_with_thresholds_off_keeps_its_accent_even_when_bands_are_stored()
-		=> Assert.That(SliderTrackColor(new { valueVariable = "vol", color = "#123456", thresholds = _twoBands }, 90),
+	{
+		Assert.That(SliderTrackColor(new { valueVariable = "vol", color = "#123456", thresholds = _twoBands }, 90),
 			Is.EqualTo("#123456"));
+	}
 
 	[Test]
 	public void Unreadable_stored_bands_fall_back_to_the_defaults()
-		=> Assert.That(SliderTrackColor(new { valueVariable = "vol", thresholdsEnabled = true, thresholds = new { bands = "x" } }, 95),
-			Is.EqualTo(_red));
+	{
+		Assert.That(SliderTrackColor(new
+					{ valueVariable = "vol", thresholdsEnabled = true, thresholds = new { bands = "x" } },
+				95),
+			Is.EqualTo(Red));
+	}
 
 	[Test]
 	public void An_unbound_slider_sample_uses_the_band_of_its_preview_level_and_an_unfound_value_uses_the_accent()
 	{
 		var unbound = SliderWidgetData.Parse(JsonSerializer.SerializeToElement(new { thresholdsEnabled = true }));
-		var bound = SliderWidgetData.Parse(JsonSerializer.SerializeToElement(new { valueVariable = "vol", thresholdsEnabled = true }));
+		var bound = SliderWidgetData.Parse(
+			JsonSerializer.SerializeToElement(new { valueVariable = "vol", thresholdsEnabled = true }));
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(SliderWidgetView.TrackColor(unbound, SliderWidgetReadout.Empty, "#123456"), Is.EqualTo(_yellow));
+			Assert.That(SliderWidgetView.TrackColor(unbound, SliderWidgetReadout.Empty, "#123456"), Is.EqualTo(Yellow));
 			Assert.That(SliderWidgetView.TrackColor(bound, new SliderWidgetReadout(false, 0, 100, 1, 0), "#123456"),
 				Is.EqualTo("#123456"));
 		});
 	}
 
 	private static UiTestHost SliderConfig(object data, VariableRegistry? variables = null)
-		=> UiTestHost.Render(SliderWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+	{
+		return UiTestHost.Render(SliderWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
 			variables ?? new VariableRegistry(),
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache()));
+			new Devices.Surfaces.StubIconPackCache()));
+	}
 
 	[Test]
 	public void An_untouched_slider_config_carries_a_null_thresholds_value_so_a_save_writes_no_key()
@@ -105,7 +127,8 @@ public class WidgetColorThresholdsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(editor.Type, Is.EqualTo(UiConfigPrimitives.Thresholds));
-			Assert.That(editor.Property(UiConfigProperties.Value)?.ValueKind ?? JsonValueKind.Null, Is.EqualTo(JsonValueKind.Null),
+			Assert.That(editor.Property(UiConfigProperties.Value)?.ValueKind ?? JsonValueKind.Null,
+				Is.EqualTo(JsonValueKind.Null),
 				"a null value is unset to the draft composer, which then writes no key");
 			Assert.That(editor.HasProperty(UiConfigProperties.DefaultValue), Is.True);
 			Assert.That(host.ById(WidgetThresholds.EnabledKey).Flag(UiConfigProperties.Value), Is.False);
@@ -126,10 +149,11 @@ public class WidgetColorThresholdsTests
 			Value = "20",
 			Min = -20,
 			Max = 60,
-			Unit = "°C",
+			Unit = "°C"
 		});
 
-		var editor = SliderConfig(new { valueVariable = "temp", min = 0, max = 100 }, registry).ById(WidgetThresholds.ValueKey);
+		var editor = SliderConfig(new { valueVariable = "temp", min = 0, max = 100 }, registry)
+			.ById(WidgetThresholds.ValueKey);
 		var parsed = UiThresholds.TryParse(editor.Property(UiConfigProperties.DefaultValue)!.Value, out var defaults);
 
 		Assert.Multiple(() =>
@@ -153,7 +177,7 @@ public class WidgetColorThresholdsTests
 		var composed = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
 		{
 			[WidgetThresholds.EnabledKey] = host.ById(WidgetThresholds.EnabledKey).Flag(UiConfigProperties.Value),
-			[WidgetThresholds.ValueKey] = host.ById(WidgetThresholds.ValueKey).Property(UiConfigProperties.Value),
+			[WidgetThresholds.ValueKey] = host.ById(WidgetThresholds.ValueKey).Property(UiConfigProperties.Value)
 		});
 		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
 		Assert.That(provider.TryGet(WidgetTypeIds.Slider, out var schema), Is.True);
@@ -172,7 +196,8 @@ public class WidgetColorThresholdsTests
 	public void Both_schemas_reject_a_colourless_band_and_crossing_bands_are_refused_on_read()
 	{
 		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
-		var colourless = JsonSerializer.SerializeToElement(new { thresholds = new { bands = new object[] { new { id = "a" } } } });
+		var colourless = JsonSerializer.SerializeToElement(new
+			{ thresholds = new { bands = new object[] { new { id = "a" } } } });
 		var crossing = JsonSerializer.SerializeToElement(new
 		{
 			valueVariable = "vol",
@@ -182,9 +207,9 @@ public class WidgetColorThresholdsTests
 				bands = new object[]
 				{
 					new { id = "a", color = "#000000" }, new { id = "b", color = "#ffffff", from = 50 },
-					new { id = "c", color = "#ff0000", from = 20 },
-				},
-			},
+					new { id = "c", color = "#ff0000", from = 20 }
+				}
+			}
 		});
 
 		Assert.Multiple(() =>
@@ -193,19 +218,25 @@ public class WidgetColorThresholdsTests
 			{
 				Assert.That(provider.TryGet(type, out var schema), Is.True);
 				Assert.That(WidgetDataSchema.Validate(schema!, colourless), Is.Not.Empty, type);
-				Assert.That(WidgetDataSchema.Validate(schema!, JsonSerializer.SerializeToElement(new { thresholds = _twoBands })),
-					Is.Empty, type);
+				Assert.That(WidgetDataSchema.Validate(schema!,
+						JsonSerializer.SerializeToElement(new { thresholds = _twoBands })),
+					Is.Empty,
+					type);
 			}
 
-			Assert.That(SliderWidgetData.Parse(crossing).Thresholds, Is.Null, "crossing bands read as none, so the defaults apply");
+			Assert.That(SliderWidgetData.Parse(crossing).Thresholds,
+				Is.Null,
+				"crossing bands read as none, so the defaults apply");
 			Assert.That(HistoryGraphWidgetData.Parse(crossing).Thresholds, Is.Null);
 		});
 	}
 
-	[TestCase("20", _green)]
-	[TestCase("60", _yellow)]
-	[TestCase("95", _red)]
-	public void A_history_graph_with_thresholds_on_colours_its_chart_and_value_by_the_latest_value(string latest, string expected)
+	[TestCase("20", Green)]
+	[TestCase("60", Yellow)]
+	[TestCase("95", Red)]
+	public void A_history_graph_with_thresholds_on_colours_its_chart_and_value_by_the_latest_value(
+		string latest,
+		string expected)
 	{
 		var data = new { valueVariable = Metric, maxValue = 100, accentColor = "#123456", thresholdsEnabled = true };
 		var state = new UiState<HistoryGraphViewState>(Resolver(data, Registry(latest)).Resolve([10d, 20d]));
@@ -214,7 +245,8 @@ public class WidgetColorThresholdsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(host.ById("historyGraph.chart").Text(UiComponentProperties.Color), Is.EqualTo(expected));
-			Assert.That(host.ById("historyGraph.valueLayer.valueRow.value").Text(UiComponentProperties.Color), Is.EqualTo(expected));
+			Assert.That(host.ById("historyGraph.valueLayer.valueRow.value").Text(UiComponentProperties.Color),
+				Is.EqualTo(expected));
 		});
 	}
 
@@ -228,14 +260,19 @@ public class WidgetColorThresholdsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(host.ById("historyGraph.chart").Text(UiComponentProperties.Color), Is.EqualTo("#123456"));
-			Assert.That(host.ById("historyGraph.valueLayer.valueRow.value").HasProperty(UiComponentProperties.Color), Is.False);
+			Assert.That(host.ById("historyGraph.valueLayer.valueRow.value").HasProperty(UiComponentProperties.Color),
+				Is.False);
 		});
 	}
 
 	[Test]
 	public void The_resolver_reports_no_colour_while_the_value_is_unavailable()
-		=> Assert.That(Resolver(new { valueVariable = Metric, thresholdsEnabled = true }, Registry("n/a")).Resolve([]).Color,
+	{
+		Assert.That(Resolver(new { valueVariable = Metric, thresholdsEnabled = true }, Registry("n/a"))
+				.Resolve([])
+				.Color,
 			Is.Null);
+	}
 
 	[Test]
 	public void An_auto_scaled_graph_takes_its_threshold_scale_from_the_variable_and_otherwise_zero_to_a_hundred()
@@ -248,14 +285,16 @@ public class WidgetColorThresholdsTests
 			Classification = VariableClassification.User,
 			Value = "0",
 			Min = 0,
-			Max = 240,
+			Max = 240
 		};
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(HistoryGraphViewStateResolver.ThresholdScale(Config(new { }), declared), Is.EqualTo((0d, 240d)));
+			Assert.That(HistoryGraphViewStateResolver.ThresholdScale(Config(new { }), declared),
+				Is.EqualTo((0d, 240d)));
 			Assert.That(HistoryGraphViewStateResolver.ThresholdScale(Config(new { }), null), Is.EqualTo((0d, 100d)));
-			Assert.That(HistoryGraphViewStateResolver.ThresholdScale(Config(new { minValue = -10, maxValue = 50 }), declared),
+			Assert.That(
+				HistoryGraphViewStateResolver.ThresholdScale(Config(new { minValue = -10, maxValue = 50 }), declared),
 				Is.EqualTo((-10d, 50d)));
 		});
 	}
@@ -263,11 +302,13 @@ public class WidgetColorThresholdsTests
 	[Test]
 	public void An_untouched_history_graph_config_carries_a_null_thresholds_value()
 	{
-		var host = UiTestHost.Render(HistoryGraphWidgetConfigView.Build(JsonSerializer.SerializeToElement(new { valueVariable = Metric })));
+		var host = UiTestHost.Render(
+			HistoryGraphWidgetConfigView.Build(JsonSerializer.SerializeToElement(new { valueVariable = Metric })));
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.ById(WidgetThresholds.ValueKey).Property(UiConfigProperties.Value)?.ValueKind ?? JsonValueKind.Null,
+			Assert.That(host.ById(WidgetThresholds.ValueKey).Property(UiConfigProperties.Value)?.ValueKind
+				?? JsonValueKind.Null,
 				Is.EqualTo(JsonValueKind.Null));
 			Assert.That(host.ById(WidgetThresholds.ValueKey).Number(UiConfigProperties.Max), Is.EqualTo(100));
 		});
@@ -276,29 +317,40 @@ public class WidgetColorThresholdsTests
 	[Test]
 	public void Stored_graph_thresholds_survive_into_the_config_editor_unchanged()
 	{
-		var host = UiTestHost.Render(HistoryGraphWidgetConfigView.Build(
-			JsonSerializer.SerializeToElement(new { valueVariable = Metric, thresholdsEnabled = true, thresholds = _twoBands })));
+		var host = UiTestHost.Render(HistoryGraphWidgetConfigView.Build(JsonSerializer.SerializeToElement(new
+			{ valueVariable = Metric, thresholdsEnabled = true, thresholds = _twoBands })));
 
-		Assert.That(JsonElement.DeepEquals(host.ById(WidgetThresholds.ValueKey).Property(UiConfigProperties.Value)!.Value,
-			UiCanonicalJson.ToElement(JsonSerializer.SerializeToElement(_twoBands))), Is.True);
+		Assert.That(JsonElement.DeepEquals(
+				host.ById(WidgetThresholds.ValueKey).Property(UiConfigProperties.Value)!.Value,
+				UiCanonicalJson.ToElement(JsonSerializer.SerializeToElement(_twoBands))),
+			Is.True);
 	}
 
 	private static GaugeConfig Gauge(object item)
-		=> GaugeConfig.Parse(JsonSerializer.SerializeToElement(item), "one");
+	{
+		return GaugeConfig.Parse(JsonSerializer.SerializeToElement(item), "one");
+	}
 
-	[TestCase(10, _green)]
-	[TestCase(80, _orange)]
-	[TestCase(95, _red)]
-	public void A_gauge_with_thresholds_on_colours_its_ring_by_the_default_band_of_its_range(double value, string expected)
-		=> Assert.That(GaugesViewStateResolver.ColorOf(value, Gauge(new { max = 100, color = "#123456", thresholdsEnabled = true }), null),
+	[TestCase(10, Green)]
+	[TestCase(80, Orange)]
+	[TestCase(95, Red)]
+	public void A_gauge_with_thresholds_on_colours_its_ring_by_the_default_band_of_its_range(
+		double value,
+		string expected)
+	{
+		Assert.That(GaugesViewStateResolver.ColorOf(value,
+				Gauge(new { max = 100, color = "#123456", thresholdsEnabled = true }),
+				null),
 			Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void A_gauge_with_thresholds_on_ignores_its_single_warning_and_follows_its_stored_bands()
 	{
 		var gauge = Gauge(new
 		{
-			max = 100, color = "#123456", warnWhen = "above", warnAt = 10, thresholdsEnabled = true, thresholds = _twoBands,
+			max = 100, color = "#123456", warnWhen = "above", warnAt = 10, thresholdsEnabled = true,
+			thresholds = _twoBands
 		});
 
 		Assert.Multiple(() =>
@@ -311,12 +363,14 @@ public class WidgetColorThresholdsTests
 	[Test]
 	public void A_gauge_with_thresholds_off_keeps_its_colour_and_warning()
 	{
-		var gauge = Gauge(new { max = 100, color = "#123456", warnWhen = "above", warnAt = 90, thresholds = _twoBands });
+		var gauge = Gauge(new
+			{ max = 100, color = "#123456", warnWhen = "above", warnAt = 90, thresholds = _twoBands });
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(GaugesViewStateResolver.ColorOf(50, gauge, null), Is.EqualTo("#123456"));
-			Assert.That(GaugesViewStateResolver.ColorOf(95, gauge, null), Is.EqualTo(GaugesViewStateResolver.WarningColor));
+			Assert.That(GaugesViewStateResolver.ColorOf(95, gauge, null),
+				Is.EqualTo(GaugesViewStateResolver.WarningColor));
 		});
 	}
 
@@ -325,12 +379,13 @@ public class WidgetColorThresholdsTests
 		gauges = new object[]
 		{
 			new { id = "one", variable = "temp", max = 0, warnWhen = "above", warnAt = 80 },
-			new { id = "two", variable = "temp", max = 100 },
-		},
+			new { id = "two", variable = "temp", max = 100 }
+		}
 	};
 
 	private static VariableEntity Temperature()
-		=> new()
+	{
+		return new VariableEntity
 		{
 			Name = "temp",
 			Scope = VariableScope.Global,
@@ -338,12 +393,15 @@ public class WidgetColorThresholdsTests
 			Classification = VariableClassification.User,
 			Value = "40",
 			Max = 120,
-			Unit = "°C",
+			Unit = "°C"
 		};
+	}
 
 	private static UiTestHost GaugesConfig(object data)
-		=> UiTestHost.Render(GaugesWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+	{
+		return UiTestHost.Render(GaugesWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
 			name => name == "temp" ? Temperature() : null));
+	}
 
 	[Test]
 	public void Turning_on_gauge_thresholds_shows_the_editor_over_the_ring_range_and_hides_the_single_warning()
@@ -360,7 +418,9 @@ public class WidgetColorThresholdsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(host.FindById("gauges.one.warnWhen"), Is.Null);
-			Assert.That(editor.Number(UiConfigProperties.Max), Is.EqualTo(120), "an automatic maximum follows the variable");
+			Assert.That(editor.Number(UiConfigProperties.Max),
+				Is.EqualTo(120),
+				"an automatic maximum follows the variable");
 			Assert.That(editor.Property(UiConfigProperties.Unit)!.Value.ToString(), Does.Contain("°C"));
 			Assert.That(stored.GetProperty("thresholdsEnabled").GetBoolean(), Is.True);
 			Assert.That(stored.TryGetProperty("thresholds", out _), Is.False, "an untouched editor stores no bands");
@@ -384,12 +444,15 @@ public class WidgetColorThresholdsTests
 		{
 			Assert.That(GaugesWidgetData.ParseGauges(gauges)[0].Thresholds!.ColorAt(41), Is.EqualTo("#ff0000"));
 			Assert.That(gauges[1].TryGetProperty("thresholds", out _), Is.False);
-			Assert.That(WidgetDataSchema.Validate(schema!, JsonSerializer.SerializeToElement(new { gauges })), Is.Empty);
+			Assert.That(WidgetDataSchema.Validate(schema!, JsonSerializer.SerializeToElement(new { gauges })),
+				Is.Empty);
 		});
 
-		Assert.That(host.ById("gauges.one.thresholds").Change(JsonDocument.Parse("null").RootElement).IsAccepted, Is.True);
+		Assert.That(host.ById("gauges.one.thresholds").Change(JsonDocument.Parse("null").RootElement).IsAccepted,
+			Is.True);
 
-		Assert.That(host.ById("gauges").Property(UiConfigProperties.Value)!.Value[0].TryGetProperty("thresholds", out _),
+		Assert.That(
+			host.ById("gauges").Property(UiConfigProperties.Value)!.Value[0].TryGetProperty("thresholds", out _),
 			Is.False);
 	}
 }

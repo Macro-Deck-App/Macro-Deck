@@ -13,9 +13,14 @@ public sealed class MusicPlayerStateCache : IMusicPlayerStateCache
 	private string? _activeInstanceId;
 
 	public MusicPlayerStatePayload? GetState(string instanceId)
-		=> _states.GetValueOrDefault(instanceId);
+	{
+		return _states.GetValueOrDefault(instanceId);
+	}
 
-	public IReadOnlyList<MusicPlayerStatePayload> GetAll() => _states.Values.ToList();
+	public IReadOnlyList<MusicPlayerStatePayload> GetAll()
+	{
+		return _states.Values.ToList();
+	}
 
 	public string? ActiveInstanceId => _activeInstanceId;
 
@@ -48,8 +53,12 @@ public sealed class MusicPlayerStateCache : IMusicPlayerStateCache
 	}
 
 	private string? AnotherPlaying(string released)
-		=> _states.FirstOrDefault(pair => pair.Value is { IsConnected: true, IsPlaying: true } &&
-			!string.Equals(pair.Key, released, StringComparison.Ordinal)).Key;
+	{
+		return _states.FirstOrDefault(pair
+				=> pair.Value is { IsConnected: true, IsPlaying: true }
+				&& !string.Equals(pair.Key, released, StringComparison.Ordinal))
+			.Key;
+	}
 
 	private bool ClaimsFocus(MusicPlayerStatePayload? previous, MusicPlayerStatePayload current)
 	{
@@ -60,8 +69,8 @@ public sealed class MusicPlayerStateCache : IMusicPlayerStateCache
 
 		if (previous is null)
 		{
-			return _activeInstanceId is null ||
-				_states.GetValueOrDefault(_activeInstanceId) is not { IsConnected: true, IsPlaying: true };
+			return _activeInstanceId is null
+				|| _states.GetValueOrDefault(_activeInstanceId) is not { IsConnected: true, IsPlaying: true };
 		}
 
 		if (!previous.IsPlaying)
@@ -69,7 +78,7 @@ public sealed class MusicPlayerStateCache : IMusicPlayerStateCache
 			return true;
 		}
 
-		return !string.IsNullOrEmpty(current.TrackName) &&
-			!string.Equals(previous.TrackName, current.TrackName, StringComparison.Ordinal);
+		return !string.IsNullOrEmpty(current.TrackName)
+			&& !string.Equals(previous.TrackName, current.TrackName, StringComparison.Ordinal);
 	}
 }

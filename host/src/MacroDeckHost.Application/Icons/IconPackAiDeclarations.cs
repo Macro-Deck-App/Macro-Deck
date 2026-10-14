@@ -6,25 +6,34 @@ namespace MacroDeckHost.Application.Icons;
 // An icon pack only ships static assets, so of the shared declaration only generatedAssets applies.
 public static class IconPackAiDeclarations
 {
-	public static PackageAiDeclaration? ToManifest(IconPackAiAssets assets) => assets switch
+	public static PackageAiDeclaration? ToManifest(IconPackAiAssets assets)
 	{
-		IconPackAiAssets.None => new PackageAiDeclaration(),
-		IconPackAiAssets.Generated => new PackageAiDeclaration { GeneratedAssets = true },
-		_ => null
-	};
+		return assets switch
+		{
+			IconPackAiAssets.None => new PackageAiDeclaration(),
+			IconPackAiAssets.Generated => new PackageAiDeclaration { GeneratedAssets = true },
+			_ => null
+		};
+	}
 
-	public static IconPackAiAssets FromManifest(PackageAiDeclaration? declaration) => declaration switch
+	public static IconPackAiAssets FromManifest(PackageAiDeclaration? declaration)
 	{
-		{ GeneratedAssets: true } => IconPackAiAssets.Generated,
-		{ Interaction: false, GeneratedContent: false, Services: null or { Count: 0 } } => IconPackAiAssets.None,
-		_ => IconPackAiAssets.NotDeclared
-	};
+		return declaration switch
+		{
+			{ GeneratedAssets: true } => IconPackAiAssets.Generated,
+			{ Interaction: false, GeneratedContent: false, Services: null or { Count: 0 } } => IconPackAiAssets.None,
+			_ => IconPackAiAssets.NotDeclared
+		};
+	}
 
 	// Merged icons can only weaken a "None": the pack's claim must still hold for every icon in it.
-	public static IconPackAiAssets Merge(IconPackAiAssets target, IconPackAiAssets incoming) => (target, incoming) switch
+	public static IconPackAiAssets Merge(IconPackAiAssets target, IconPackAiAssets incoming)
 	{
-		(_, IconPackAiAssets.Generated) => IconPackAiAssets.Generated,
-		(IconPackAiAssets.None, IconPackAiAssets.NotDeclared) => IconPackAiAssets.NotDeclared,
-		_ => target
-	};
+		return (target, incoming) switch
+		{
+			(_, IconPackAiAssets.Generated) => IconPackAiAssets.Generated,
+			(IconPackAiAssets.None, IconPackAiAssets.NotDeclared) => IconPackAiAssets.NotDeclared,
+			_ => target
+		};
+	}
 }

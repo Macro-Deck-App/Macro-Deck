@@ -20,12 +20,14 @@ internal static class StreamChatWidgetView
 	{
 		// The padding stays at least a fifth of the text size, so the clipped edge
 		// never cuts the last line's descenders.
-		public static Metrics For(double scale, string? messageColor = null) => new(
-			UiLength.Capped(0.1 * scale, 12 * scale),
-			UiLength.Capped(0.025 * scale, 3 * scale),
-			UiLength.Capped(0.015 * scale, 2 * scale),
-			UiLength.Capped(0.03 * scale, 4 * scale),
-			messageColor);
+		public static Metrics For(double scale, string? messageColor = null)
+		{
+			return new Metrics(UiLength.Capped(0.1 * scale, 12 * scale),
+				UiLength.Capped(0.025 * scale, 3 * scale),
+				UiLength.Capped(0.015 * scale, 2 * scale),
+				UiLength.Capped(0.03 * scale, 4 * scale),
+				messageColor);
+		}
 	}
 
 	public static UiElement Build(
@@ -66,27 +68,29 @@ internal static class StreamChatWidgetView
 						{
 							Key = "offlineGate",
 							Condition = () => state.Value.Status == StreamChatStatus.Offline,
-							Content = () => Notice("offline", platform.Chat.Offline(), metrics),
+							Content = () => Notice("offline", platform.Chat.Offline(), metrics)
 						},
 						new UiWhen
 						{
 							Key = "emptyGate",
 							Condition = () => state.Value.Status == StreamChatStatus.Empty,
-							Content = () => Notice("empty", AppStrings.Integrations.StreamChat.Widget.Empty(), metrics),
+							Content = () => Notice("empty", AppStrings.Integrations.StreamChat.Widget.Empty(), metrics)
 						},
 						new UiWhen
 						{
 							Key = "messagesGate",
 							Condition = () => state.Value.Status == StreamChatStatus.Messages,
-							Content = () => Log(state, metrics),
-						},
-					],
-				},
-			],
+							Content = () => Log(state, metrics)
+						}
+					]
+				}
+			]
 		};
 	}
 
-	private static UiStack Header(StreamPlatform platform, UiState<StreamChatViewState> state,
+	private static UiStack Header(
+		StreamPlatform platform,
+		UiState<StreamChatViewState> state,
 		UiState<UiResource?>? icon,
 		Metrics metrics)
 	{
@@ -98,7 +102,7 @@ internal static class StreamChatWidgetView
 				: platform.Chat.Name()),
 			Size = metrics.TextSize,
 			Weight = UiComponentTextWeights.SemiBold,
-			Fill = true,
+			Fill = true
 		};
 
 		return new UiStack
@@ -122,19 +126,23 @@ internal static class StreamChatWidgetView
 							Source = UiValue.Optional(() => icon.Value is { } resource
 								? UiValue.Of(resource)
 								: UiValue.None<UiResource>()),
-							Size = metrics.TextSize,
-						},
+							Size = metrics.TextSize
+						}
 					},
-					title,
-				],
+					title
+				]
 		};
 	}
 
 	public static UiTextRun Message(StreamChatLine line, double scale = 1, string? messageColor = null)
-		=> Message(line, Metrics.For(scale, messageColor));
+	{
+		return Message(line, Metrics.For(scale, messageColor));
+	}
 
 	public static UiTextRun FallbackMessage(StreamChatLine line, double scale = 1, string? messageColor = null)
-		=> FallbackMessage(line, Metrics.For(scale, messageColor));
+	{
+		return FallbackMessage(line, Metrics.For(scale, messageColor));
+	}
 
 	private static UiTextRun Message(StreamChatLine line, Metrics metrics)
 	{
@@ -147,7 +155,7 @@ internal static class StreamChatWidgetView
 			Spans = UiValue.Of(line.Spans),
 			Size = metrics.TextSize,
 			Color = Tint(metrics.MessageColor),
-			Wrap = true,
+			Wrap = true
 		};
 	}
 
@@ -162,12 +170,13 @@ internal static class StreamChatWidgetView
 			Size = metrics.TextSize,
 			Color = Tint(metrics.MessageColor),
 			Wrap = true,
-			MaxLines = FallbackMaxLines,
+			MaxLines = FallbackMaxLines
 		};
 	}
 
 	private static UiStack Log(UiState<StreamChatViewState> state, Metrics metrics)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "log",
 			Direction = UiComponentDirections.Vertical,
@@ -183,8 +192,8 @@ internal static class StreamChatWidgetView
 					Key = "messages",
 					Items = UiValue.From(() => state.Value.Lines),
 					KeySelector = line => line.Key,
-					Template = (line, _) => Message(line, metrics),
-				},
+					Template = (line, _) => Message(line, metrics)
+				}
 			],
 			Fallback = new UiStack
 			{
@@ -201,17 +210,21 @@ internal static class StreamChatWidgetView
 						Key = "fallbackMessages",
 						Items = UiValue.From(() => state.Value.FallbackLines),
 						KeySelector = line => line.FallbackKey,
-						Template = (line, _) => FallbackMessage(line, metrics),
-					},
-				],
-			},
+						Template = (line, _) => FallbackMessage(line, metrics)
+					}
+				]
+			}
 		};
+	}
 
 	private static UiValue<string> Tint(string? color)
-		=> color is null ? UiValue.None<string>() : UiValue.Of(color);
+	{
+		return color is null ? UiValue.None<string>() : UiValue.Of(color);
+	}
 
 	private static UiTextRun Notice(string key, UiText text, Metrics metrics)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
@@ -219,6 +232,7 @@ internal static class StreamChatWidgetView
 			Role = UiComponentTextRoles.Secondary,
 			Align = UiComponentAlignments.Center,
 			Wrap = true,
-			MaxLines = 3,
+			MaxLines = 3
 		};
+	}
 }

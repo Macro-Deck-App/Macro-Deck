@@ -331,7 +331,7 @@ public sealed class RemotePluginSnapshotRefresher
 		}
 
 		var migrations = payload.Migrations
-			.Select(descriptor => Enum.TryParse<MigrationSource>(descriptor.Source, ignoreCase: true, out var source)
+			.Select(descriptor => Enum.TryParse<MigrationSource>(descriptor.Source, true, out var source)
 				? new RemoteMigrationDescriptor(source,
 					[.. descriptor.ClaimedActionSources],
 					[.. descriptor.ClaimedSettingsSources])

@@ -14,7 +14,7 @@ namespace MacroDeck.Plugin.Serilog;
 /// </summary>
 public static class MacroDeckLoggingBuilderExtensions
 {
-	private static readonly string[] RequestNoiseCategories =
+	private static readonly string[] _requestNoiseCategories =
 	[
 		"Microsoft.AspNetCore.Hosting.Diagnostics",
 		"Microsoft.AspNetCore.Routing.EndpointMiddleware",
@@ -77,7 +77,7 @@ public static class MacroDeckLoggingBuilderExtensions
 
 		builder.WebApplicationBuilder.Host.UseSerilog((_, services, cfg) =>
 			{
-				foreach (var category in RequestNoiseCategories)
+				foreach (var category in _requestNoiseCategories)
 				{
 					cfg.MinimumLevel.Override(category, LogEventLevel.Warning);
 				}

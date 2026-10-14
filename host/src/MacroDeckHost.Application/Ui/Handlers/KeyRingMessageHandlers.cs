@@ -15,14 +15,16 @@ public sealed class GetKeyRingStatusRequestMessageHandler
 	private readonly IKeyRingProtectionService _keyRing;
 	private readonly IApplicationRestartService _restart;
 
-	public GetKeyRingStatusRequestMessageHandler(IKeyRingProtectionService keyRing,
+	public GetKeyRingStatusRequestMessageHandler(
+		IKeyRingProtectionService keyRing,
 		IApplicationRestartService restart)
 	{
 		_keyRing = keyRing;
 		_restart = restart;
 	}
 
-	public ValueTask<GetKeyRingStatusResponse> Handle(GetKeyRingStatusRequest request,
+	public ValueTask<GetKeyRingStatusResponse> Handle(
+		GetKeyRingStatusRequest request,
 		CancellationToken cancellationToken)
 	{
 		var status = _keyRing.Status;
@@ -50,7 +52,8 @@ public sealed class UnlockKeyRingRequestMessageHandler
 		_restart = restart;
 	}
 
-	public async ValueTask<UnlockKeyRingResponse> Handle(UnlockKeyRingRequest request,
+	public async ValueTask<UnlockKeyRingResponse> Handle(
+		UnlockKeyRingRequest request,
 		CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(request);
@@ -106,9 +109,13 @@ public sealed class GetKeyRingProtectionRequestMessageHandler
 {
 	private readonly IKeyRingProtectionService _keyRing;
 
-	public GetKeyRingProtectionRequestMessageHandler(IKeyRingProtectionService keyRing) => _keyRing = keyRing;
+	public GetKeyRingProtectionRequestMessageHandler(IKeyRingProtectionService keyRing)
+	{
+		_keyRing = keyRing;
+	}
 
-	public ValueTask<GetKeyRingProtectionResponse> Handle(GetKeyRingProtectionRequest request,
+	public ValueTask<GetKeyRingProtectionResponse> Handle(
+		GetKeyRingProtectionRequest request,
 		CancellationToken cancellationToken)
 	{
 		var status = _keyRing.Status;
@@ -131,14 +138,18 @@ public sealed class GetKeyRingProtectionRequestMessageHandler
 
 public static class KeyRingDtoMapper
 {
-	public static TransportError ToTransportError(KeyRingProtectionError error) => new()
+	public static TransportError ToTransportError(KeyRingProtectionError error)
 	{
-		Code = error.ToString(),
-		Message = DefaultMessage(error)
-	};
+		return new TransportError
+		{
+			Code = error.ToString(),
+			Message = DefaultMessage(error)
+		};
+	}
 
 	private static LocalizedText DefaultMessage(KeyRingProtectionError error)
-		=> error switch
+	{
+		return error switch
 		{
 			KeyRingProtectionError.RecoveryKeyInvalid => AppStrings.Errors.KeyRing.RecoveryKeyInvalid(),
 			KeyRingProtectionError.KeystoreUnavailable => AppStrings.Errors.KeyRing.KeystoreUnavailable(),
@@ -146,4 +157,5 @@ public static class KeyRingDtoMapper
 			KeyRingProtectionError.EscrowUnreadable => AppStrings.Errors.KeyRing.EscrowUnreadable(),
 			_ => AppStrings.Errors.KeyRing.Locked()
 		};
+	}
 }

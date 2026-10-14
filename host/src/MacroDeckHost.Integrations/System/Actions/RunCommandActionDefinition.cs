@@ -24,7 +24,6 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Choice("shell",
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -39,30 +38,33 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 					Value = "bash", Label = AppStrings.Integrations.System.Actions.RunCommand.ShellBash()
 				}
 			],
-			label: AppStrings.Integrations.System.Actions.RunCommand.ShellLabel(),
+			AppStrings.Integrations.System.Actions.RunCommand.ShellLabel(),
 			defaultValue: "default"),
 		ActionParameter.MultilineText("command",
-			label: AppStrings.Integrations.System.Actions.RunCommand.CommandLabel(),
-			description: AppStrings.Integrations.System.Actions.SupportsVariablesHint(),
+			AppStrings.Integrations.System.Actions.RunCommand.CommandLabel(),
+			AppStrings.Integrations.System.Actions.SupportsVariablesHint(),
 			required: true),
 		ActionParameter.Folder("workingDirectory",
-			label: AppStrings.Integrations.System.Actions.WorkingDirectoryLabel()),
+			AppStrings.Integrations.System.Actions.WorkingDirectoryLabel()),
 		ActionParameter.Toggle("showWindow",
-			label: AppStrings.Integrations.System.Actions.RunCommand.ShowWindowLabel(),
+			AppStrings.Integrations.System.Actions.RunCommand.ShowWindowLabel(),
 			defaultValue: false),
 		ActionParameter.Autocomplete("outputVariable",
-			label: AppStrings.Integrations.System.Actions.RunCommand.OutputVariableLabel(),
-			description: AppStrings.Integrations.System.Actions.RunCommand.OutputVariableDescription(),
+			AppStrings.Integrations.System.Actions.RunCommand.OutputVariableLabel(),
+			AppStrings.Integrations.System.Actions.RunCommand.OutputVariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables),
 		ActionParameter.Number("timeout",
-			label: AppStrings.Integrations.System.Actions.RunCommand.TimeoutLabel(),
-			description: AppStrings.Integrations.System.Actions.RunCommand.TimeoutDescription(),
-			min: 0,
-			max: 300,
+			AppStrings.Integrations.System.Actions.RunCommand.TimeoutLabel(),
+			AppStrings.Integrations.System.Actions.RunCommand.TimeoutDescription(),
+			0,
+			300,
 			defaultValue: 30)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_variables);
+	}
 
 	private static readonly Lazy<bool> _isPwshInstalled = new(CheckPwshInstalled);
 
@@ -107,9 +109,10 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 		string shell,
 		bool isWindows,
 		bool? isPwshInstalled = null)
-		=> (shell, isWindows) switch
+	{
+		return (shell, isWindows) switch
 		{
-			("powershell", true) => (isPwshInstalled ?? _isPwshInstalled.Value)
+			("powershell", true) => isPwshInstalled ?? _isPwshInstalled.Value
 				? ("pwsh", "-Command", false)
 				: ("powershell.exe", "-Command", false),
 			("powershell", false) => ("pwsh", "-Command", false),
@@ -117,6 +120,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			(_, true) => ("cmd.exe", "/s /c", true),
 			(_, _) => ("sh", "-c", false)
 		};
+	}
 
 	// A command left running must not hold the host's stdout and stderr: those are the bootstrapper's
 	// pipes, and a write after the bootstrapper quits raises SIGPIPE and kills the launched app.
@@ -146,7 +150,8 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			return true;
 		}
 
-		const UnixFileMode anyExecute = UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
+		const UnixFileMode anyExecute
+			= UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
 		return (File.GetUnixFileMode(path) & anyExecute) != 0;
 	}
 
@@ -266,7 +271,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 				if (process.ExitCode != 0)
 				{
 					return ActionResult.Failed("EXIT_CODE",
-						AppStrings.Integrations.System.Errors.CommandExitCode(code: process.ExitCode));
+						AppStrings.Integrations.System.Errors.CommandExitCode(process.ExitCode));
 				}
 
 				return ActionResult.Success();
@@ -310,7 +315,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			{
 				if (process is { HasExited: false })
 				{
-					process.Kill(entireProcessTree: true);
+					process.Kill(true);
 				}
 			}
 			catch

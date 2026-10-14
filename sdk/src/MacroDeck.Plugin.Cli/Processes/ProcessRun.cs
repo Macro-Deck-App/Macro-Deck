@@ -35,7 +35,8 @@ internal sealed class ProcessLaunchException(string fileName)
 /// always passed as a list, never a command string, so nothing is evaluated by a shell.</summary>
 internal static class ProcessRun
 {
-	public static async Task<ProcessRunResult> RunAsync(string fileName,
+	public static async Task<ProcessRunResult> RunAsync(
+		string fileName,
 		IReadOnlyList<string> arguments,
 		CancellationToken cancellationToken,
 		string? workingDirectory = null)
@@ -93,7 +94,7 @@ internal static class ProcessRun
 		{
 			if (!process.HasExited)
 			{
-				process.Kill(entireProcessTree: true);
+				process.Kill(true);
 			}
 		}
 		catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException or Win32Exception)

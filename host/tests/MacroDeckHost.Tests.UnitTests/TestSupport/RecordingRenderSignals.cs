@@ -16,26 +16,50 @@ internal sealed class RecordingRenderSignals : IWidgetRenderSignals
 	public List<Guid> WidgetIconChanges { get; } = [];
 	public int VariableChanges { get; private set; }
 
-	public IDisposable SubscribeState(string widgetId, Action<WidgetStateUpdatedEvent> handler) =>
-		NoopDisposable.Instance;
+	public IDisposable SubscribeState(string widgetId, Action<WidgetStateUpdatedEvent> handler)
+	{
+		return NoopDisposable.Instance;
+	}
 
-	public IDisposable SubscribeLabel(string widgetId, Action<LabelTextUpdatedEvent> handler) =>
-		NoopDisposable.Instance;
+	public IDisposable SubscribeLabel(string widgetId, Action<LabelTextUpdatedEvent> handler)
+	{
+		return NoopDisposable.Instance;
+	}
 
-	public IDisposable SubscribeDataChanged(string widgetId, Action<WidgetEntity> handler) => NoopDisposable.Instance;
+	public IDisposable SubscribeDataChanged(string widgetId, Action<WidgetEntity> handler)
+	{
+		return NoopDisposable.Instance;
+	}
 
-	public IDisposable SubscribeDataChanged(string widgetId, Func<WidgetEntity, bool> handler) =>
-		NoopDisposable.Instance;
+	public IDisposable SubscribeDataChanged(string widgetId, Func<WidgetEntity, bool> handler)
+	{
+		return NoopDisposable.Instance;
+	}
 
-	public IDisposable SubscribeIconInvalidated(Action<Guid> handler) => NoopDisposable.Instance;
+	public IDisposable SubscribeIconInvalidated(Action<Guid> handler)
+	{
+		return NoopDisposable.Instance;
+	}
 
-	public IDisposable SubscribeWidgetIconChanged(string widgetId, Action handler) => NoopDisposable.Instance;
+	public IDisposable SubscribeWidgetIconChanged(string widgetId, Action handler)
+	{
+		return NoopDisposable.Instance;
+	}
 
-	public IDisposable SubscribeVariableChanged(Action handler) => NoopDisposable.Instance;
+	public IDisposable SubscribeVariableChanged(Action handler)
+	{
+		return NoopDisposable.Instance;
+	}
 
-	public void RaiseStateChanged(WidgetStateUpdatedEvent evt) => StateChanges.Add(evt);
+	public void RaiseStateChanged(WidgetStateUpdatedEvent evt)
+	{
+		StateChanges.Add(evt);
+	}
 
-	public void RaiseLabelChanged(LabelTextUpdatedEvent evt) => LabelChanges.Add(evt);
+	public void RaiseLabelChanged(LabelTextUpdatedEvent evt)
+	{
+		LabelChanges.Add(evt);
+	}
 
 	/// <summary>Records the raise and reports it taken, so a caller that falls back when nothing handled a
 	/// change does not take that path here.</summary>
@@ -46,11 +70,20 @@ internal sealed class RecordingRenderSignals : IWidgetRenderSignals
 		return true;
 	}
 
-	public void RaiseIconInvalidated(Guid iconId) => IconInvalidations.Add(iconId);
+	public void RaiseIconInvalidated(Guid iconId)
+	{
+		IconInvalidations.Add(iconId);
+	}
 
-	public void RaiseWidgetIconChanged(Guid widgetId) => WidgetIconChanges.Add(widgetId);
+	public void RaiseWidgetIconChanged(Guid widgetId)
+	{
+		WidgetIconChanges.Add(widgetId);
+	}
 
-	public void RaiseVariableChanged() => VariableChanges++;
+	public void RaiseVariableChanged()
+	{
+		VariableChanges++;
+	}
 
 	private sealed class NoopDisposable : IDisposable
 	{

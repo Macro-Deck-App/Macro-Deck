@@ -64,12 +64,14 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			ClientStepId => await SubmitClientAsync(input, cancellationToken),
 			LinkStepId when _deviceCode is not null => await ContinueLinkAsync(cancellationToken),
 			_ => ConfigFlowResult.Error(ClientStep(), Strings.UnknownStep())
 		};
+	}
 
 	private async Task<ConfigFlowResult> SubmitClientAsync(
 		IReadOnlyDictionary<string, object?> input,
@@ -104,7 +106,7 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 		}
 
 		_pendingTokens = null;
-		return await RequestDeviceCodeAsync(expired: false, cancellationToken);
+		return await RequestDeviceCodeAsync(false, cancellationToken);
 	}
 
 	private async Task<ConfigFlowResult> RequestDeviceCodeAsync(bool expired, CancellationToken cancellationToken)
@@ -134,7 +136,7 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 		LocalizedText message,
 		CancellationToken cancellationToken)
 	{
-		var restarted = await RequestDeviceCodeAsync(expired: false, cancellationToken);
+		var restarted = await RequestDeviceCodeAsync(false, cancellationToken);
 
 		return _deviceCode is null || restarted.Kind is not ConfigFlowResultKind.Step
 			? restarted
@@ -142,9 +144,11 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 	}
 
 	private async Task<ConfigFlowResult> ContinueLinkAsync(CancellationToken cancellationToken)
-		=> _pendingTokens is { } tokens
+	{
+		return _pendingTokens is { } tokens
 			? await CompleteAsync(tokens, cancellationToken)
 			: await PollForTokenAsync(cancellationToken);
+	}
 
 	private async Task<ConfigFlowResult> PollForTokenAsync(CancellationToken cancellationToken)
 	{
@@ -181,7 +185,7 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 					return ConfigFlowResult.Error(ClientStep(), Strings.ClientRejected());
 
 				case YouTubeTokenPollStatus.Expired:
-					return await RequestDeviceCodeAsync(expired: true, cancellationToken);
+					return await RequestDeviceCodeAsync(true, cancellationToken);
 
 				case YouTubeTokenPollStatus.SlowDown:
 					_interval += _slowDownStep;
@@ -251,7 +255,8 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 	}
 
 	private ConfigFlowStep ClientStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = ClientStepId,
 			Title = Strings.ClientTitle(),
@@ -272,41 +277,46 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Text(YouTubeConfigKeys.ClientId,
-					label: Strings.ClientIdLabel(),
+					Strings.ClientIdLabel(),
 					placeholder: Strings.ClientIdPlaceholder(),
 					defaultValue: _clientId,
 					required: true),
 				ActionParameter.Secret(YouTubeConfigKeys.ClientSecret,
-					label: Strings.ClientSecretLabel(),
-					description: Strings.ClientSecretDescription(),
-					required: true)
+					Strings.ClientSecretLabel(),
+					Strings.ClientSecretDescription(),
+					true)
 			],
 			AdvancedFields =
 			[
 				ActionParameter.Number(YouTubeConfigKeys.DailyQuota,
-					label: Strings.DailyQuotaLabel(),
-					description: Strings.DailyQuotaDescription(),
-					min: 1,
+					Strings.DailyQuotaLabel(),
+					Strings.DailyQuotaDescription(),
+					1,
 					step: 1,
 					defaultValue: _dailyQuota)
 			]
 		};
+	}
 
 	private static ConfigFlowStep LinkStep(YouTubeDeviceCode deviceCode, bool expired = false)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = LinkStepId,
 			Title = Strings.LinkTitle(),
 			Description = expired
-				? Strings.LinkDescriptionExpired(count: Minutes(deviceCode.ExpiresIn))
-				: Strings.LinkDescription(count: Minutes(deviceCode.ExpiresIn)),
+				? Strings.LinkDescriptionExpired(Minutes(deviceCode.ExpiresIn))
+				: Strings.LinkDescription(Minutes(deviceCode.ExpiresIn)),
 			Instructions =
 			[
 				new ConfigFlowInstruction { Text = Strings.OpenGoogleInstruction() },
 				new ConfigFlowInstruction
 				{
 					Text = Strings.EnterCodeInstruction(),
-					Values = [new ConfigFlowCopyValue { Label = Strings.DeviceCodeLabel(), Value = deviceCode.UserCode }]
+					Values =
+					[
+						new ConfigFlowCopyValue { Label = Strings.DeviceCodeLabel(), Value = deviceCode.UserCode }
+					]
 				},
 				new ConfigFlowInstruction { Text = Strings.ApproveAccessInstruction() },
 				new ConfigFlowInstruction { Text = Strings.ComeBackPressContinueInstruction() }
@@ -314,9 +324,11 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 			Links = [new ConfigFlowLink { Label = Strings.OpenGoogleLinkLabel(), Url = deviceCode.VerificationUrl }],
 			Fields = []
 		};
+	}
 
 	private static ConfigFlowStep WaitingStep(YouTubeDeviceCode deviceCode)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = LinkStepId,
 			Title = Strings.WaitingTitle(),
@@ -327,16 +339,22 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 				new ConfigFlowInstruction
 				{
 					Text = Strings.EnterCodeInstruction(),
-					Values = [new ConfigFlowCopyValue { Label = Strings.DeviceCodeLabel(), Value = deviceCode.UserCode }]
+					Values =
+					[
+						new ConfigFlowCopyValue { Label = Strings.DeviceCodeLabel(), Value = deviceCode.UserCode }
+					]
 				},
 				new ConfigFlowInstruction { Text = Strings.ThenPressContinueInstruction() }
 			],
 			Links = [new ConfigFlowLink { Label = Strings.OpenGoogleLinkLabel(), Url = deviceCode.VerificationUrl }],
 			Fields = []
 		};
+	}
 
 	private static string ReadText(IReadOnlyDictionary<string, object?> input, string key)
-		=> (input.GetValueOrDefault(key)?.ToString() ?? string.Empty).Trim();
+	{
+		return (input.GetValueOrDefault(key)?.ToString() ?? string.Empty).Trim();
+	}
 
 	private static int? ReadQuota(IReadOnlyDictionary<string, object?> input)
 	{
@@ -353,19 +371,24 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 			return YouTubeQuotaBudget.DefaultDailyLimit;
 		}
 
-		return double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) &&
-			value >= 1 &&
-			value <= int.MaxValue &&
-			Math.Abs(value - Math.Round(value)) < double.Epsilon
+		return double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+			&& value >= 1
+			&& value <= int.MaxValue
+			&& Math.Abs(value - Math.Round(value)) < double.Epsilon
 				? (int)value
 				: null;
 	}
 
-	private static int Minutes(TimeSpan span) => Math.Max(1, (int)Math.Round(span.TotalMinutes));
+	private static int Minutes(TimeSpan span)
+	{
+		return Math.Max(1, (int)Math.Round(span.TotalMinutes));
+	}
 
 	private static IYouTubeApiClient CreateApiClient(string clientId, int dailyQuota, string accessToken)
-		=> new YouTubeApiClient(_ => Task.FromResult(accessToken),
+	{
+		return new YouTubeApiClient(_ => Task.FromResult(accessToken),
 			_ => Task.CompletedTask,
 			YouTubeQuotaBudgets.Shared.For(clientId, dailyQuota),
 			_logger);
+	}
 }

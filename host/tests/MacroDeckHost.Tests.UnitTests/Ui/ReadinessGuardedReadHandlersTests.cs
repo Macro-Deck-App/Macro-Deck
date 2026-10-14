@@ -62,7 +62,10 @@ public class ReadinessGuardedReadHandlersTests
 	public async Task GetFolders_waits_for_startup_readiness()
 	{
 		var readiness = new StartupReadiness();
-		var handler = new GetFoldersRequestMessageHandler(new StubFolderCache(), new StubProfileRegistry(), readiness, TestColors.None);
+		var handler = new GetFoldersRequestMessageHandler(new StubFolderCache(),
+			new StubProfileRegistry(),
+			readiness,
+			TestColors.None);
 
 		var pending = handler.Handle(new GetFoldersRequest(), CancellationToken.None);
 		Assert.That(pending.IsCompleted, Is.False);
@@ -169,78 +172,153 @@ public class ReadinessGuardedReadHandlersTests
 
 	private sealed class StubProfileRegistry : IProfileRegistry
 	{
-		public IReadOnlyList<Profile> GetProfiles() => [new() { Id = "p1", Name = "Default" }];
+		public IReadOnlyList<Profile> GetProfiles()
+		{
+			return [new Profile { Id = "p1", Name = "Default" }];
+		}
 
-		public IReadOnlyList<Folder> GetFoldersForProfile(string profileId) => [];
+		public IReadOnlyList<Folder> GetFoldersForProfile(string profileId)
+		{
+			return [];
+		}
 
-		public bool IsVirtual(string profileId) => false;
+		public bool IsVirtual(string profileId)
+		{
+			return false;
+		}
 
-		public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction) =>
-			Task.FromResult(false);
+		public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class StubDeviceService : IDeviceService
 	{
-		public Task<DeviceRegistrationResult> RegisterOrReuse(DeviceRegistration registration, DateTime now) =>
+		public Task<DeviceRegistrationResult> RegisterOrReuse(DeviceRegistration registration, DateTime now)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task PurgeStale(DateTime now) => throw new NotSupportedException();
+		public Task PurgeStale(DateTime now)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<IReadOnlyList<Device>> GetAll() =>
-			Task.FromResult<IReadOnlyList<Device>>([new Device { Id = Guid.NewGuid().ToString(), Name = "Device" }]);
+		public Task<IReadOnlyList<Device>> GetAll()
+		{
+			return Task.FromResult<IReadOnlyList<Device>>([
+				new Device { Id = Guid.NewGuid().ToString(), Name = "Device" }
+			]);
+		}
 
-		public Task<Device> ToDto(DeviceEntity device) => throw new NotSupportedException();
+		public Task<Device> ToDto(DeviceEntity device)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<DeviceEntity, DeviceError>> Rename(Guid id, string name)
-			=> throw new NotSupportedException();
-
-		public Task<Result<DeviceError>> LogoutDevice(Guid id) => throw new NotSupportedException();
-
-		public Task EndAllSessions() => throw new NotSupportedException();
-
-		public Task<Result<DeviceError>> RemoveDevice(Guid id) => throw new NotSupportedException();
-
-		public Task<Result<DeviceEntity, DeviceError>> SetStartupProfile(Guid id, string? profileId) =>
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<Result<DeviceError>> ShowScreenSaver(Guid id) => throw new NotSupportedException();
+		public Task<Result<DeviceError>> LogoutDevice(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<DeviceEntity, DeviceError>> SetScreenSaver(Guid id,
+		public Task EndAllSessions()
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<DeviceError>> RemoveDevice(Guid id)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<DeviceEntity, DeviceError>> SetStartupProfile(Guid id, string? profileId)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<DeviceError>> ShowScreenSaver(Guid id)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<DeviceEntity, DeviceError>> SetScreenSaver(
+			Guid id,
 			bool enabled,
 			int idleSeconds,
 			string? screenSaverId,
 			string? configuration)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<DeviceEntity, DeviceError>> SetSettingsButtonHidden(Guid id, bool hidden)
-			=> throw new NotSupportedException();
-
-		public Task<string?> ResolveStartupProfileId(Guid deviceId) => throw new NotSupportedException();
-
-		public Task<Result<DeviceError>> OpenProfileOnDevice(Guid id, string profileId) =>
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task ClearStartupProfileAssignments(string profileId) => throw new NotSupportedException();
+		public Task<string?> ResolveStartupProfileId(Guid deviceId)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<DeviceError>> OpenProfileOnDevice(Guid id, string profileId)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task ClearStartupProfileAssignments(string profileId)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class StubFolderCache : IFolderCache
 	{
-		public Task InitializeCache() => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => null;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return null;
+		}
 
-		public List<FolderEntity> GetAllFolders() =>
-			[new() { Id = Guid.NewGuid(), Name = "Main", Order = 0 }];
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [new FolderEntity { Id = Guid.NewGuid(), Name = "Main", Order = 0 }];
+		}
 
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [];
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [];
+		}
 
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [];
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [];
+		}
 
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -277,51 +355,77 @@ public class ReadinessGuardedReadHandlersTests
 
 	private sealed class StubVariableService : IVariableService
 	{
-		private static VariableEntity Variable() => new()
+		private static VariableEntity Variable()
 		{
-			Id = Guid.NewGuid(),
-			Name = "cpu",
-			Scope = VariableScope.Global,
-			Type = VariableType.Numeric,
-			Classification = VariableClassification.User,
-			Value = "1"
-		};
+			return new VariableEntity
+			{
+				Id = Guid.NewGuid(),
+				Name = "cpu",
+				Scope = VariableScope.Global,
+				Type = VariableType.Numeric,
+				Classification = VariableClassification.User,
+				Value = "1"
+			};
+		}
 
-		public Task<IReadOnlyList<VariableEntity>> GetAll() =>
-			Task.FromResult<IReadOnlyList<VariableEntity>>([Variable()]);
+		public Task<IReadOnlyList<VariableEntity>> GetAll()
+		{
+			return Task.FromResult<IReadOnlyList<VariableEntity>>([Variable()]);
+		}
 
-		public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId) =>
-			Task.FromResult<IReadOnlyList<VariableEntity>>([]);
+		public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
+		{
+			return Task.FromResult<IReadOnlyList<VariableEntity>>([]);
+		}
 
-		public Task<VariableEntity?> GetById(Guid id) => Task.FromResult<VariableEntity?>(null);
+		public Task<VariableEntity?> GetById(Guid id)
+		{
+			return Task.FromResult<VariableEntity?>(null);
+		}
 
-		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId) =>
-			Task.FromResult<VariableEntity?>(null);
+		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
+		{
+			return Task.FromResult<VariableEntity?>(null);
+		}
 
-		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(string name,
+		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
+			string name,
 			VariableScope scope,
 			string? scopeRefId,
 			VariableType type,
 			object? initialValue,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) =>
+			VariableTemplateSource? templateSource = null)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+		public Task<Result<VariableEntity, VariableError>> SetValue(
+			Guid id,
 			object? value,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
+		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
+			Guid id,
 			string? name,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) =>
+			VariableTemplateSource? templateSource = null)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+		public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
+			string integrationId,
 			string name,
 			VariableScope scope,
 			string? scopeRefId,
@@ -331,46 +435,72 @@ public class ReadinessGuardedReadHandlersTests
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
 			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
-			bool publishedByHost = false) =>
+			bool publishedByHost = false)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+			string integrationId,
 			string resourceId,
 			string name,
 			VariableType type,
 			int? decimalPlaces,
-			VariableDeclaration? declaration = null) =>
+			VariableDeclaration? declaration = null)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId) =>
-			Task.FromResult<VariableEntity?>(null);
+		public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId)
+		{
+			return Task.FromResult<VariableEntity?>(null);
+		}
 
-		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
+			string integrationId,
 			Guid id,
 			object? value,
-			VariableBounds? bounds = null) =>
+			VariableBounds? bounds = null)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> SetIntegrationVariableAvailability(string integrationId,
+		public Task<Result<VariableError>> SetIntegrationVariableAvailability(
+			string integrationId,
 			Guid id,
-			bool available) =>
+			bool available)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id) =>
+		public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId) =>
-			Task.FromResult<IReadOnlyList<VariableEntity>>([]);
+		public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
+		{
+			return Task.FromResult<IReadOnlyList<VariableEntity>>([]);
+		}
 
-		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId) => Task.CompletedTask;
+		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task UpsertWidgetVariable(VariableScope scope,
+		public Task UpsertWidgetVariable(
+			VariableScope scope,
 			string scopeRefId,
 			string name,
 			VariableType type,
-			object? value) =>
-			Task.CompletedTask;
+			object? value)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name) => Task.CompletedTask;
+		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

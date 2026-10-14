@@ -7,7 +7,7 @@ namespace MacroDeckHost.Tests.UnitTests.Auth;
 public class LoopbackSecretTests
 {
 	private const string Nonce = "00112233445566778899aabbccddeeff";
-	private static readonly DateTimeOffset Now = DateTimeOffset.FromUnixTimeSeconds(1_900_000_000);
+	private static readonly DateTimeOffset _now = DateTimeOffset.FromUnixTimeSeconds(1_900_000_000);
 
 	// The same vector is asserted by the bootstrapper (ui/bootstrapper/src/loopback_secret.rs) and the
 	// E2E code minter, which produce these values without the host.
@@ -22,7 +22,7 @@ public class LoopbackSecretTests
 				Is.EqualTo("964b8fdb3ce49d81ed0660ae293e76bf10eec16fe22020daa3cc5357363a15bb"));
 			Assert.That(LoopbackSecret.TryRedeemCode(
 					"1900000060.00112233445566778899aabbccddeeff.c8ba672b12783beb854f70711c5a5a6df1e45a53ef4abec3163c636c932feb73",
-					Now),
+					_now),
 				Is.True);
 		});
 	}
@@ -30,14 +30,18 @@ public class LoopbackSecretTests
 	[Test]
 	public void A_code_is_redeemable_once_and_only_before_it_expires()
 	{
-		var code = TestListenerPorts.SessionCode(TestListenerPorts.LoopbackSecret, Now, "ffeeddccbbaa99887766554433221100");
-		var late = TestListenerPorts.SessionCode(TestListenerPorts.LoopbackSecret, Now, "0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f");
+		var code = TestListenerPorts.SessionCode(TestListenerPorts.LoopbackSecret,
+			_now,
+			"ffeeddccbbaa99887766554433221100");
+		var late = TestListenerPorts.SessionCode(TestListenerPorts.LoopbackSecret,
+			_now,
+			"0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(LoopbackSecret.TryRedeemCode(late, Now + LoopbackSecret.CodeLifetime), Is.False);
-			Assert.That(LoopbackSecret.TryRedeemCode(code, Now + TimeSpan.FromSeconds(1)), Is.True);
-			Assert.That(LoopbackSecret.TryRedeemCode(code, Now + TimeSpan.FromSeconds(2)), Is.False);
+			Assert.That(LoopbackSecret.TryRedeemCode(late, _now + LoopbackSecret.CodeLifetime), Is.False);
+			Assert.That(LoopbackSecret.TryRedeemCode(code, _now + TimeSpan.FromSeconds(1)), Is.True);
+			Assert.That(LoopbackSecret.TryRedeemCode(code, _now + TimeSpan.FromSeconds(2)), Is.False);
 		});
 	}
 
@@ -45,10 +49,10 @@ public class LoopbackSecretTests
 	public void A_code_claiming_a_far_future_expiry_is_refused()
 	{
 		var future = TestListenerPorts.SessionCode(TestListenerPorts.LoopbackSecret,
-			Now + TimeSpan.FromHours(1),
+			_now + TimeSpan.FromHours(1),
 			"abababababababababababababababab");
 
-		Assert.That(LoopbackSecret.TryRedeemCode(future, Now), Is.False);
+		Assert.That(LoopbackSecret.TryRedeemCode(future, _now), Is.False);
 	}
 
 	[Test]
@@ -134,7 +138,7 @@ public class LoopbackSecretTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 }

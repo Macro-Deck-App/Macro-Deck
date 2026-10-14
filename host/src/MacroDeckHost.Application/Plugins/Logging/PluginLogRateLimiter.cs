@@ -40,7 +40,10 @@ public sealed class PluginLogRateLimiter : IPluginLogRateLimiter
 		}
 	}
 
-	public void Evict(string pluginId) => _buckets.TryRemove(pluginId, out _);
+	public void Evict(string pluginId)
+	{
+		_buckets.TryRemove(pluginId, out _);
+	}
 
 	private void Refill(Bucket bucket)
 	{

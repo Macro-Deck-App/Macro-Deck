@@ -22,7 +22,8 @@ public class PluginSessionRegistryTests
 	}
 
 	private PluginSessionRecord NewRecord(string pluginId = "com.example.plugin", string? sessionId = null)
-		=> new()
+	{
+		return new PluginSessionRecord
 		{
 			SessionId = sessionId ?? Guid.CreateVersion7().ToString("D"),
 			PluginId = pluginId,
@@ -34,6 +35,7 @@ public class PluginSessionRegistryTests
 			State = PluginSessionState.Awaiting,
 			CreatedAt = _time.GetUtcNow()
 		};
+	}
 
 	[Test]
 	public async Task IsCurrentConnection_Is_True_For_The_Attached_Connection()
@@ -400,7 +402,9 @@ public class PluginSessionRegistryTests
 
 	[Test]
 	public void Touch_On_An_Unknown_Session_Does_Nothing()
-		=> Assert.DoesNotThrow(() => _registry.Touch("unknown-session", _time.GetUtcNow()));
+	{
+		Assert.DoesNotThrow(() => _registry.Touch("unknown-session", _time.GetUtcNow()));
+	}
 
 	[Test]
 	public async Task LastInboundAt_Is_Null_Until_Touched()
@@ -462,7 +466,7 @@ public class PluginSessionRegistryTests
 		var connection = new FakePluginConnection();
 		_registry.TryAttach(record.SessionId, connection, null);
 
-		_registry.SetPaused(record.SessionId, paused: true);
+		_registry.SetPaused(record.SessionId, true);
 
 		var envelope = new ProtocolEnvelope { Type = MessageTypes.EventPublish, Id = "1" };
 		var sendTask = _registry.SendToPlugin(record.PluginId, envelope);
@@ -470,7 +474,7 @@ public class PluginSessionRegistryTests
 		Assert.That(sendTask.IsCompleted, Is.False, "a paused, non-exempt send must not complete immediately");
 		Assert.That(connection.Sent, Is.Empty);
 
-		_registry.SetPaused(record.SessionId, paused: false);
+		_registry.SetPaused(record.SessionId, false);
 		var sent = await sendTask;
 
 		Assert.Multiple(() =>
@@ -488,7 +492,7 @@ public class PluginSessionRegistryTests
 		var connection = new FakePluginConnection();
 		_registry.TryAttach(record.SessionId, connection, null);
 
-		_registry.SetPaused(record.SessionId, paused: true);
+		_registry.SetPaused(record.SessionId, true);
 
 		var envelope = new ProtocolEnvelope { Type = MessageTypes.CapabilityResult, Id = "1" };
 		var sent = await _registry.SendToPlugin(record.PluginId, envelope);
@@ -498,7 +502,9 @@ public class PluginSessionRegistryTests
 
 	[Test]
 	public void SetPaused_On_An_Unknown_Session_Does_Nothing()
-		=> Assert.DoesNotThrow(() => _registry.SetPaused("unknown-session", paused: true));
+	{
+		Assert.DoesNotThrow(() => _registry.SetPaused("unknown-session", true));
+	}
 
 	[Test]
 	public async Task SessionEnded_Fires_With_Detached_On_Detach()
@@ -657,5 +663,7 @@ public class PluginSessionRegistryTests
 
 	[Test]
 	public void GetCapabilities_Returns_Null_For_An_Unknown_Plugin()
-		=> Assert.That(_registry.GetCapabilities("com.example.unknown"), Is.Null);
+	{
+		Assert.That(_registry.GetCapabilities("com.example.unknown"), Is.Null);
+	}
 }

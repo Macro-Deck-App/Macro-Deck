@@ -44,7 +44,7 @@ public static class UiViewBuilder
 		ArgumentNullException.ThrowIfNull(surface);
 		ArgumentNullException.ThrowIfNull(root);
 
-		var rootNode = new UiElementMaterializer(view: null).MaterializeRoot(root);
+		var rootNode = new UiElementMaterializer(null).MaterializeRoot(root);
 
 		return new UiTree { Revision = 0, Surface = surface, Root = rootNode.Node };
 	}

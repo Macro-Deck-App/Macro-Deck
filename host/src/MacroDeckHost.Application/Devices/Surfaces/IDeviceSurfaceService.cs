@@ -11,7 +11,8 @@ public interface IDeviceSurfaceService
 {
 	bool IsOpen(Guid deviceId);
 
-	Task OpenAsync(Guid deviceId,
+	Task OpenAsync(
+		Guid deviceId,
 		string providerId,
 		string providerDeviceId,
 		CancellationToken cancellationToken = default);
@@ -20,7 +21,8 @@ public interface IDeviceSurfaceService
 
 	/// <summary>Applies one navigation to a single device. False when the target does not resolve, in
 	/// which case nothing moved and nothing was pushed.</summary>
-	Task<bool> NavigateAsync(Guid deviceId,
+	Task<bool> NavigateAsync(
+		Guid deviceId,
 		DeckNavigationCommand command,
 		CancellationToken cancellationToken = default);
 

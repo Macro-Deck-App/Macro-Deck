@@ -29,7 +29,10 @@ internal sealed class RefreshCalendarsActionDefinition : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-	public IActionExecutor CreateExecutor() => new Executor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

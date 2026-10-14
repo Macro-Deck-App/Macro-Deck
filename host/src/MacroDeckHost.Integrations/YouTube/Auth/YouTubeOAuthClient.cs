@@ -8,7 +8,7 @@ internal sealed class YouTubeOAuthClient : IYouTubeOAuthClient
 {
 	private const string RateLimitExceeded = "rate_limit_exceeded";
 
-	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -23,7 +23,7 @@ internal sealed class YouTubeOAuthClient : IYouTubeOAuthClient
 
 	internal YouTubeOAuthClient(HttpMessageHandler handler, TimeProvider? timeProvider = null)
 	{
-		_http = CreateClient(handler, disposeHandler: false);
+		_http = CreateClient(handler, false);
 		_ownsClient = true;
 		_time = timeProvider ?? TimeProvider.System;
 	}
@@ -91,7 +91,7 @@ internal sealed class YouTubeOAuthClient : IYouTubeOAuthClient
 		if (response.IsSuccessStatusCode)
 		{
 			using var document = Parse(body);
-			var tokens = ReadTokens(document.RootElement, previousRefreshToken: null)
+			var tokens = ReadTokens(document.RootElement, null)
 				?? throw new YouTubeOAuthTransientException("Google returned an incomplete token response.");
 
 			return new YouTubeTokenPoll(YouTubeTokenPollStatus.Success, tokens);
@@ -155,7 +155,8 @@ internal sealed class YouTubeOAuthClient : IYouTubeOAuthClient
 	}
 
 	private static YouTubeTokenPollStatus ClassifyPollError(string? code)
-		=> code switch
+	{
+		return code switch
 		{
 			"authorization_pending" => YouTubeTokenPollStatus.Pending,
 			"slow_down" or RateLimitExceeded => YouTubeTokenPollStatus.SlowDown,
@@ -163,9 +164,12 @@ internal sealed class YouTubeOAuthClient : IYouTubeOAuthClient
 			"expired_token" or "invalid_grant" => YouTubeTokenPollStatus.Expired,
 			_ => YouTubeTokenPollStatus.Rejected
 		};
+	}
 
 	private static bool IsTransient(HttpStatusCode status)
-		=> status is HttpStatusCode.TooManyRequests || (int)status >= 500;
+	{
+		return status is HttpStatusCode.TooManyRequests || (int)status >= 500;
+	}
 
 	private async Task<HttpResponseMessage> PostFormAsync(
 		string url,
@@ -251,11 +255,13 @@ internal sealed class YouTubeOAuthClient : IYouTubeOAuthClient
 	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> root.ValueKind is JsonValueKind.Object &&
-			root.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.String
+	{
+		return root.ValueKind is JsonValueKind.Object
+			&& root.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private static int? ReadInt(JsonElement root, string name)
 	{
@@ -276,5 +282,7 @@ internal sealed class YouTubeOAuthClient : IYouTubeOAuthClient
 	}
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
-		=> new(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	{
+		return IntegrationHttp.CreateClient(handler, disposeHandler, TimeSpan.FromSeconds(15));
+	}
 }

@@ -4,13 +4,13 @@ namespace MacroDeckHost.Tests.UnitTests.Logging;
 
 public class LogTextTests
 {
-	private static readonly char LineSeparator = (char)0x2028;
+	private static readonly char _lineSeparator = (char)0x2028;
 
-	private static readonly char ParagraphSeparator = (char)0x2029;
+	private static readonly char _paragraphSeparator = (char)0x2029;
 
-	private static readonly char Escape = (char)0x1B;
+	private static readonly char _escape = (char)0x1B;
 
-	private static readonly char C1Csi = (char)0x9B;
+	private static readonly char _c1Csi = (char)0x9B;
 
 	[TestCase("a\nb")]
 	[TestCase("a\r\nb")]
@@ -26,13 +26,13 @@ public class LogTextTests
 	[Test]
 	public void Terminal_escapes_and_other_controls_never_survive()
 	{
-		var input = $"a{Escape}[31mb\0c{(char)0x7F}d{C1Csi}e{LineSeparator}f{ParagraphSeparator}g";
+		var input = $"a{_escape}[31mb\0c{(char)0x7F}d{_c1Csi}e{_lineSeparator}f{_paragraphSeparator}g";
 
 		var result = LogText.Neutralize(input)!;
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(result.Any(c => char.IsControl(c) || c == LineSeparator || c == ParagraphSeparator),
+			Assert.That(result.Any(c => char.IsControl(c) || c == _lineSeparator || c == _paragraphSeparator),
 				Is.False);
 			Assert.That(result, Does.Contain("[31m").And.Contain("a").And.Contain("g"));
 		});
@@ -59,14 +59,14 @@ public class LogTextTests
 	[Test]
 	public void Exception_text_keeps_its_line_breaks_but_loses_escapes_and_stray_carriage_returns()
 	{
-		var input = $"first\r\nsecond\n\tthird{Escape}[31m stray\rcursor";
+		var input = $"first\r\nsecond\n\tthird{_escape}[31m stray\rcursor";
 
 		var result = LogText.NeutralizeControls(input)!;
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result, Does.Contain("first\r\nsecond\n\tthird"));
-			Assert.That(result.Contains(Escape), Is.False);
+			Assert.That(result.Contains(_escape), Is.False);
 			Assert.That(result.Replace("\r\n", string.Empty, StringComparison.Ordinal).Contains('\r'), Is.False);
 		});
 	}

@@ -17,7 +17,8 @@ internal sealed class IntegrationHttpSourceGuardTests
 	];
 
 	// Libraries that build their own transport with no injection point.
-	private static readonly string[] _libraryOwnedTransport = ["Obs/ObsClient.cs", "Twitch/Protocol/TwitchHelixClient.cs"];
+	private static readonly string[] _libraryOwnedTransport =
+		["Obs/ObsClient.cs", "Twitch/Protocol/TwitchHelixClient.cs"];
 
 	[Test]
 	public void Integration_code_builds_its_transports_through_the_shared_factory()
@@ -30,12 +31,14 @@ internal sealed class IntegrationHttpSourceGuardTests
 			.Select(path => Path.GetRelativePath(root, path).Replace('\\', '/'))
 			.Where(relative => relative != "IntegrationHttp.cs")
 			.Where(relative => !_libraryOwnedTransport.Contains(relative))
-			.Where(relative => _forbidden.Any(pattern => pattern.IsMatch(File.ReadAllText(Path.Combine(root, relative)))))
+			.Where(relative
+				=> _forbidden.Any(pattern => pattern.IsMatch(File.ReadAllText(Path.Combine(root, relative)))))
 			.ToList();
 
-		Assert.That(offenders, Is.Empty,
-			"These files build an HTTP or WebSocket transport directly instead of through IntegrationHttp, " +
-			"so the configured User-Agent would not reach them.");
+		Assert.That(offenders,
+			Is.Empty,
+			"These files build an HTTP or WebSocket transport directly instead of through IntegrationHttp, "
+			+ "so the configured User-Agent would not reach them.");
 	}
 
 	[Test]
@@ -43,7 +46,9 @@ internal sealed class IntegrationHttpSourceGuardTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(_forbidden.Any(p => p.IsMatch("private static readonly HttpClient _http = new() { Timeout = x };")), Is.True);
+			Assert.That(_forbidden.Any(p
+					=> p.IsMatch("private static readonly HttpClient _http = new() { Timeout = x };")),
+				Is.True);
 			Assert.That(_forbidden.Any(p => p.IsMatch("var client = new HttpClient { Timeout = x };")), Is.True);
 			Assert.That(_forbidden.Any(p => p.IsMatch("var socket = new ClientWebSocket();")), Is.True);
 			Assert.That(_forbidden.Any(p => p.IsMatch("CreateClient(new SocketsHttpHandler(), true)")), Is.True);
@@ -64,6 +69,7 @@ internal sealed class IntegrationHttpSourceGuardTests
 			directory = directory.Parent;
 		}
 
-		throw new InvalidOperationException("Could not locate host/src/MacroDeckHost.Integrations above the test output.");
+		throw new InvalidOperationException(
+			"Could not locate host/src/MacroDeckHost.Integrations above the test output.");
 	}
 }

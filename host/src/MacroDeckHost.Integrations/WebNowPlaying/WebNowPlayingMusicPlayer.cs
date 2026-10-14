@@ -15,41 +15,58 @@ internal sealed class WebNowPlayingMusicPlayer(WebNowPlayingPlayers players) : I
 	// The extension drops its socket whenever the browser idles its worker, so no connection means
 	// nothing is playing, not an outage.
 	public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(players.Active() is { } active
+	{
+		return Task.FromResult(players.Active() is { } active
 			? ToState(active)
 			: new MusicPlayerState { IsConnected = true, PlaybackState = PlaybackState.Stopped });
+	}
 
 	public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(players.Artwork(artworkId) is { } cover ? new MusicPlayerArtwork(cover, "image/png") : null);
+	{
+		return Task.FromResult(players.Artwork(artworkId) is { } cover
+			? new MusicPlayerArtwork(cover, "image/png")
+			: null);
+	}
 
 	public Task PlayAsync(CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSetState,
+	{
+		return SendAsync(player => player.CanSetState,
 			WebNowPlayingEvent.SetState,
 			_ => WebNowPlayingProtocol.StatePlaying,
 			cancellationToken);
+	}
 
 	public Task PauseAsync(CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSetState,
+	{
+		return SendAsync(player => player.CanSetState,
 			WebNowPlayingEvent.SetState,
 			_ => WebNowPlayingProtocol.StatePaused,
 			cancellationToken);
+	}
 
 	public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSetState,
+	{
+		return SendAsync(player => player.CanSetState,
 			WebNowPlayingEvent.SetState,
 			player => player.State == WebNowPlayingProtocol.StatePlaying
 				? WebNowPlayingProtocol.StatePaused
 				: WebNowPlayingProtocol.StatePlaying,
 			cancellationToken);
+	}
 
 	public Task NextAsync(CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSkipNext, WebNowPlayingEvent.SkipNext, _ => 0, cancellationToken);
+	{
+		return SendAsync(player => player.CanSkipNext, WebNowPlayingEvent.SkipNext, _ => 0, cancellationToken);
+	}
 
 	public Task PreviousAsync(CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSkipPrevious, WebNowPlayingEvent.SkipPrevious, _ => 0, cancellationToken);
+	{
+		return SendAsync(player => player.CanSkipPrevious, WebNowPlayingEvent.SkipPrevious, _ => 0, cancellationToken);
+	}
 
 	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSetPosition,
+	{
+		return SendAsync(player => player.CanSetPosition,
 			WebNowPlayingEvent.SetPosition,
 			player =>
 			{
@@ -57,18 +74,23 @@ internal sealed class WebNowPlayingMusicPlayer(WebNowPlayingPlayers players) : I
 				return player.Duration > 0 ? Math.Min(seconds, player.Duration) : seconds;
 			},
 			cancellationToken);
+	}
 
 	public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSetVolume,
+	{
+		return SendAsync(player => player.CanSetVolume,
 			WebNowPlayingEvent.SetVolume,
 			_ => Math.Clamp(volumePercent, 0, 100),
 			cancellationToken);
+	}
 
 	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
-		=> SendAsync(player => player.CanSetShuffle,
+	{
+		return SendAsync(player => player.CanSetShuffle,
 			WebNowPlayingEvent.SetShuffle,
 			_ => enabled ? 1 : 0,
 			cancellationToken);
+	}
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
 	{
@@ -107,22 +129,29 @@ internal sealed class WebNowPlayingMusicPlayer(WebNowPlayingPlayers players) : I
 	}
 
 	internal static PlaybackState ToPlaybackState(int state)
-		=> state switch
+	{
+		return state switch
 		{
 			WebNowPlayingProtocol.StatePlaying => PlaybackState.Playing,
 			WebNowPlayingProtocol.StatePaused => PlaybackState.Paused,
 			_ => PlaybackState.Stopped
 		};
+	}
 
 	internal static RepeatMode ToRepeatMode(int repeat)
-		=> repeat switch
+	{
+		return repeat switch
 		{
 			WebNowPlayingProtocol.RepeatOne => RepeatMode.Track,
 			WebNowPlayingProtocol.RepeatAll => RepeatMode.Context,
 			_ => RepeatMode.Off
 		};
+	}
 
-	internal static string? NullIfEmpty(string value) => value.Length == 0 ? null : value;
+	internal static string? NullIfEmpty(string value)
+	{
+		return value.Length == 0 ? null : value;
+	}
 
 	private async Task SendAsync(
 		Func<WebNowPlayingPlayer, bool> supported,

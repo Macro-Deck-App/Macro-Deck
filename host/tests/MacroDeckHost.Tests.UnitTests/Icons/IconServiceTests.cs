@@ -56,7 +56,7 @@ public class IconServiceTests
 	[Test]
 	public async Task Rename_InReadOnlyPack_IsRejected()
 	{
-		var (_, icon) = await AddIcon(isReadOnly: true);
+		var (_, icon) = await AddIcon(true);
 
 		var result = await _service.Rename(icon.Id, "x");
 
@@ -134,13 +134,15 @@ public class IconServiceTests
 	}
 
 	private static IconEntity NewIcon(Guid packId, string name)
-		=> new()
+	{
+		return new IconEntity
 		{
 			Id = Guid.CreateVersion7(),
 			PackId = packId,
 			Name = name,
 			CreatedAt = DateTime.UtcNow
 		};
+	}
 
 	[Test]
 	public async Task GetImage_NotReadyIcon_ReturnsNotReady()
@@ -149,8 +151,8 @@ public class IconServiceTests
 
 		var result = await _service.GetImage(icon.Id,
 			128,
-			acceptWebp: true,
-			staticFrame: false,
+			true,
+			false,
 			CancellationToken.None);
 
 		Assert.That(result.Error, Is.EqualTo(IconError.NotReady));
@@ -173,8 +175,8 @@ public class IconServiceTests
 
 		var result = await _service.GetImage(icon.Id,
 			128,
-			acceptWebp: true,
-			staticFrame: false,
+			true,
+			false,
 			CancellationToken.None);
 
 		Assert.That(result.Success, Is.True);
@@ -192,8 +194,8 @@ public class IconServiceTests
 	{
 		var result = await _service.GetImage(Guid.NewGuid(),
 			null,
-			acceptWebp: true,
-			staticFrame: false,
+			true,
+			false,
 			CancellationToken.None);
 
 		Assert.That(result.Error, Is.EqualTo(IconError.NotFound));
@@ -206,8 +208,8 @@ public class IconServiceTests
 
 		var result = await _service.GetImage(icon.Id,
 			null,
-			acceptWebp: false,
-			staticFrame: false,
+			false,
+			false,
 			CancellationToken.None);
 
 		Assert.That(result.Success, Is.True);
@@ -227,12 +229,12 @@ public class IconServiceTests
 	[Test]
 	public async Task GetImage_WithoutWebpSupport_AnimatedIcon_ServesGifTranscode()
 	{
-		var (_, icon) = await AddReadyIconWithWebpMaster(animated: true);
+		var (_, icon) = await AddReadyIconWithWebpMaster(true);
 
 		var result = await _service.GetImage(icon.Id,
 			null,
-			acceptWebp: false,
-			staticFrame: false,
+			false,
+			false,
 			CancellationToken.None);
 
 		Assert.That(result.Success, Is.True);
@@ -253,8 +255,8 @@ public class IconServiceTests
 
 		var first = await _service.GetImage(icon.Id,
 			null,
-			acceptWebp: false,
-			staticFrame: false,
+			false,
+			false,
 			CancellationToken.None);
 		await first.Data!.Content.DisposeAsync();
 
@@ -265,8 +267,8 @@ public class IconServiceTests
 
 		var second = await _service.GetImage(icon.Id,
 			null,
-			acceptWebp: false,
-			staticFrame: false,
+			false,
+			false,
 			CancellationToken.None);
 		await second.Data!.Content.DisposeAsync();
 

@@ -49,8 +49,10 @@ public sealed record StoreCatalogEntry
 
 	public IReadOnlyList<StoreReleaseManifest> Releases { get; init; } = [];
 
-	public StoreReleaseManifest? FindRelease(string version) =>
-		StoreVersions.Same(version, LatestVersion)
+	public StoreReleaseManifest? FindRelease(string version)
+	{
+		return StoreVersions.Same(version, LatestVersion)
 			? LatestRelease
 			: Releases.FirstOrDefault(release => StoreVersions.Same(release.Version, version));
+	}
 }

@@ -35,7 +35,9 @@ public sealed class UiInteractions : IUiInteractions
 		string? originClientId,
 		ModalDefinition modal,
 		CancellationToken cancellationToken = default)
-		=> await OpenAsync(originClientId, modal, cancellationToken).ConfigureAwait(false) is not null;
+	{
+		return await OpenAsync(originClientId, modal, cancellationToken).ConfigureAwait(false) is not null;
+	}
 
 	public async Task<ModalResult<T>> ShowModalAsync<T>(
 		string? originClientId,
@@ -53,7 +55,8 @@ public sealed class UiInteractions : IUiInteractions
 		{
 			if (cancellationToken.IsCancellationRequested)
 			{
-				_logger.Information("Modal {ModalId} of integration {IntegrationId} (view {ViewId}) was withdrawn by its caller",
+				_logger.Information(
+					"Modal {ModalId} of integration {IntegrationId} (view {ViewId}) was withdrawn by its caller",
 					modalId,
 					_integrationId,
 					modal.ViewId);

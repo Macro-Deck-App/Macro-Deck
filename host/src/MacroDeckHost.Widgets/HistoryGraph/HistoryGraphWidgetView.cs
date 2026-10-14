@@ -37,7 +37,8 @@ internal static class HistoryGraphWidgetView
 	// the card the way its type deliberately does not grow with it either.
 	private static readonly UiSize _lineThickness = UiSize.Capped(2d / UiLength.Cell, 2);
 
-	public static UiElement Build(UiState<HistoryGraphViewState> state,
+	public static UiElement Build(
+		UiState<HistoryGraphViewState> state,
 		HistoryGraphWidgetData config,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
 		UiState<string?>? accentColor = null)
@@ -62,7 +63,7 @@ internal static class HistoryGraphWidgetView
 
 			// An older reader that cannot layer draws the card's substance - the value - rather than a
 			// placeholder: the labels and the chart are context for a number, not the point of the widget.
-			Fallback = value,
+			Fallback = value
 		};
 
 		if (config.BackgroundColor is not { } background)
@@ -74,12 +75,13 @@ internal static class HistoryGraphWidgetView
 		{
 			Key = "historyGraphBackground",
 			Background = background,
-			Children = [layer with { Fill = true }],
+			Children = [layer with { Fill = true }]
 		};
 	}
 
 	private static UiChart Chart(UiState<HistoryGraphViewState> state, UiState<string?> accent, bool thresholds)
-		=> new()
+	{
+		return new UiChart
 		{
 			Key = "chart",
 			Points = UiValue.From(() => state.Value.Points),
@@ -91,10 +93,12 @@ internal static class HistoryGraphWidgetView
 
 			// Nothing at all rather than a placeholder: an older reader still shows the value and the
 			// labels above, which is the card minus its chart rather than a card that looks broken.
-			Fallback = Nothing("chartFallback"),
+			Fallback = Nothing("chartFallback")
 		};
+	}
 
-	private static UiStack Labels(UiState<HistoryGraphViewState> state,
+	private static UiStack Labels(
+		UiState<HistoryGraphViewState> state,
 		HistoryGraphWidgetData config,
 		UiSize safeArea)
 	{
@@ -108,7 +112,7 @@ internal static class HistoryGraphWidgetView
 				Text = UiText.Of(config.Title),
 				Size = _titleSize,
 				Weight = UiComponentTextWeights.SemiBold,
-				Role = UiComponentTextRoles.Primary,
+				Role = UiComponentTextRoles.Primary
 			});
 		}
 
@@ -123,8 +127,8 @@ internal static class HistoryGraphWidgetView
 				Key = "subtitle",
 				Text = UiText.From(() => state.Value.Subtitle),
 				Size = _subtitleSize,
-				Role = UiComponentTextRoles.Muted,
-			},
+				Role = UiComponentTextRoles.Muted
+			}
 		});
 
 		return new UiStack
@@ -135,7 +139,7 @@ internal static class HistoryGraphWidgetView
 			Align = UiComponentAlignments.Start,
 			Gap = _labelGap,
 			Padding = safeArea,
-			Children = children,
+			Children = children
 		};
 	}
 
@@ -154,7 +158,7 @@ internal static class HistoryGraphWidgetView
 					? UiValue.Of(color)
 					: UiValue.None<string>()),
 				Align = UiComponentAlignments.Center,
-				Digits = UiValue.From(() => state.Value.Digits),
+				Digits = UiValue.From(() => state.Value.Digits)
 			},
 
 			// A gate rather than a decision taken while the tree is built: the unit now comes from the bound
@@ -169,9 +173,9 @@ internal static class HistoryGraphWidgetView
 					Text = UiText.Optional(() => state.Value.Unit),
 					Size = _unitSize,
 					Weight = UiComponentTextWeights.SemiBold,
-					Role = UiComponentTextRoles.Secondary,
-				},
-			},
+					Role = UiComponentTextRoles.Secondary
+				}
+			}
 		};
 
 		// No padding: the value is centred on the card and spans its full width, so a long reading uses the
@@ -191,11 +195,14 @@ internal static class HistoryGraphWidgetView
 					Justify = UiComponentJustify.Center,
 					Align = UiComponentAlignments.Baseline,
 					Gap = _valueGap,
-					Children = children,
-				},
-			],
+					Children = children
+				}
+			]
 		};
 	}
 
-	private static UiTextRun Nothing(string key) => new() { Key = key, Text = UiText.Of(string.Empty) };
+	private static UiTextRun Nothing(string key)
+	{
+		return new UiTextRun { Key = key, Text = UiText.Of(string.Empty) };
+	}
 }

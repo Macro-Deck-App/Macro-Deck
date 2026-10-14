@@ -21,13 +21,13 @@ internal sealed class AdbPlatformToolsInstaller : IAdbPlatformToolsInstaller
 	// cannot hang the request forever.
 	private static readonly TimeSpan _downloadTimeout = TimeSpan.FromMinutes(5);
 
-	private const UnixFileMode ExecutableFileMode = UnixFileMode.UserRead |
-		UnixFileMode.UserWrite |
-		UnixFileMode.UserExecute |
-		UnixFileMode.GroupRead |
-		UnixFileMode.GroupExecute |
-		UnixFileMode.OtherRead |
-		UnixFileMode.OtherExecute;
+	private const UnixFileMode ExecutableFileMode = UnixFileMode.UserRead
+		| UnixFileMode.UserWrite
+		| UnixFileMode.UserExecute
+		| UnixFileMode.GroupRead
+		| UnixFileMode.GroupExecute
+		| UnixFileMode.OtherRead
+		| UnixFileMode.OtherExecute;
 
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly IMacroDeckPaths _paths;
@@ -69,9 +69,9 @@ internal sealed class AdbPlatformToolsInstaller : IAdbPlatformToolsInstaller
 			.Replace('\\', Path.DirectorySeparatorChar)
 			.Replace('/', Path.DirectorySeparatorChar);
 
-		var hasWindowsDriveLetter = normalizedEntry.Length >= 2 &&
-			normalizedEntry[1] == ':' &&
-			normalizedEntry[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
+		var hasWindowsDriveLetter = normalizedEntry.Length >= 2
+			&& normalizedEntry[1] == ':'
+			&& normalizedEntry[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
 
 		if (hasWindowsDriveLetter || Path.IsPathRooted(normalizedEntry))
 		{
@@ -112,7 +112,7 @@ internal sealed class AdbPlatformToolsInstaller : IAdbPlatformToolsInstaller
 
 			if (Directory.Exists(targetDirectory))
 			{
-				Directory.Delete(targetDirectory, recursive: true);
+				Directory.Delete(targetDirectory, true);
 			}
 
 			Directory.CreateDirectory(targetDirectory);
@@ -184,7 +184,7 @@ internal sealed class AdbPlatformToolsInstaller : IAdbPlatformToolsInstaller
 					Directory.CreateDirectory(destinationDirectory);
 				}
 
-				entry.ExtractToFile(destination, overwrite: true);
+				entry.ExtractToFile(destination, true);
 				extractedFiles.Add(destination);
 
 				if (string.Equals(Path.GetFileName(destination), executableName, StringComparison.Ordinal))

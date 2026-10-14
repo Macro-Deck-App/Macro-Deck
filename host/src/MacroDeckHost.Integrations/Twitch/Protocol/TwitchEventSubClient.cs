@@ -63,8 +63,8 @@ internal sealed class TwitchEventSubClient : ITwitchEventSubClient
 
 		var welcome = await _welcome.Task.WaitAsync(_timeout, linked.Token).ConfigureAwait(false);
 
-		return welcome ??
-			throw new TwitchEventSubException(
+		return welcome
+			?? throw new TwitchEventSubException(
 				$"The EventSub connection to {uri} ended before the welcome: {_endReason ?? "unknown"}");
 	}
 
@@ -141,9 +141,11 @@ internal sealed class TwitchEventSubClient : ITwitchEventSubClient
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static TwitchEventSubMessage? ParseMessage(JsonElement root)
 	{
@@ -171,15 +173,20 @@ internal sealed class TwitchEventSubClient : ITwitchEventSubClient
 	}
 
 	private static DateTimeOffset ParseTimestamp(string? value)
-		=> DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
+	{
+		return DateTimeOffset.TryParse(value,
+			CultureInfo.InvariantCulture,
+			DateTimeStyles.RoundtripKind,
+			out var parsed)
 			? parsed
 			: DateTimeOffset.UtcNow;
+	}
 
 	private static TwitchSessionWelcome? ParseWelcome(JsonElement payload)
 	{
-		if (payload.ValueKind != JsonValueKind.Object ||
-			!payload.TryGetProperty("session", out var session) ||
-			session.ValueKind != JsonValueKind.Object)
+		if (payload.ValueKind != JsonValueKind.Object
+			|| !payload.TryGetProperty("session", out var session)
+			|| session.ValueKind != JsonValueKind.Object)
 		{
 			return null;
 		}
@@ -190,9 +197,9 @@ internal sealed class TwitchEventSubClient : ITwitchEventSubClient
 			return null;
 		}
 
-		var keepalive = session.TryGetProperty("keepalive_timeout_seconds", out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var seconds)
+		var keepalive = session.TryGetProperty("keepalive_timeout_seconds", out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var seconds)
 				? TimeSpan.FromSeconds(seconds)
 				: TimeSpan.FromSeconds(30);
 

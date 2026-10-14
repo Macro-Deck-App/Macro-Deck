@@ -82,7 +82,7 @@ public sealed class RunActionFlowRequestMessageHandler
 			return ToResponse(result,
 				ActionExecutionStatus.Cancelled,
 				"TIMEOUT",
-				AppStrings.Errors.Actions.FlowStillRunning(timeout: DescribeTimeout(_executionTimeout)));
+				AppStrings.Errors.Actions.FlowStillRunning(DescribeTimeout(_executionTimeout)));
 		}
 
 		if (result.ErrorCode == ActionExecutionErrorCodes.HostLocked)
@@ -132,17 +132,24 @@ public sealed class RunActionFlowRequestMessageHandler
 	}
 
 	private static Guid? OwnerWidgetIdOf(VariableScope? scope, string? scopeRefId)
-		=> scope == VariableScope.Widget && Guid.TryParse(scopeRefId, out var widgetId) ? widgetId : null;
+	{
+		return scope == VariableScope.Widget && Guid.TryParse(scopeRefId, out var widgetId) ? widgetId : null;
+	}
 
-	private static string DescribeTimeout(TimeSpan timeout) => timeout < TimeSpan.FromMinutes(1)
-		? $"{timeout.TotalSeconds:0} seconds"
-		: $"{timeout.TotalMinutes:0} minutes";
+	private static string DescribeTimeout(TimeSpan timeout)
+	{
+		return timeout < TimeSpan.FromMinutes(1)
+			? $"{timeout.TotalSeconds:0} seconds"
+			: $"{timeout.TotalMinutes:0} minutes";
+	}
 
 	private static RunActionFlowResponse Fail(string code, LocalizedText message)
-		=> new()
+	{
+		return new RunActionFlowResponse
 		{
 			Success = false,
 			Status = ActionExecutionStatus.Failed,
 			Error = new TransportError { Code = code, Message = message }
 		};
+	}
 }

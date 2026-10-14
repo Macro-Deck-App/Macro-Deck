@@ -83,7 +83,7 @@ internal static class ManifestJson
 
 	public static string Minimal(string version = "1.0.0", string pluginId = DefaultPluginId)
 	{
-		return Build(version, pluginId, extraBlocks: null);
+		return Build(version, pluginId, null);
 	}
 
 	public static string Build(string version, string pluginId, string? extraBlocks)

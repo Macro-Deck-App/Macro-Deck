@@ -14,9 +14,12 @@ internal static class LocalizationKeywords
 		"null", "object", "operator", "out", "override", "params", "private", "protected", "public",
 		"readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static",
 		"string", "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong",
-		"unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
+		"unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while"
 	};
 
 	/// <summary>Whether <paramref name="identifier" /> is a C# reserved word.</summary>
-	public static bool IsKeyword(string identifier) => _keywords.Contains(identifier);
+	public static bool IsKeyword(string identifier)
+	{
+		return _keywords.Contains(identifier);
+	}
 }

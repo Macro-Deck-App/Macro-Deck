@@ -26,7 +26,10 @@ internal sealed class GoogleCalendarConfigFlowTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task The_first_step_asks_for_the_users_own_client_and_shows_the_redirect_uri()
@@ -38,7 +41,9 @@ internal sealed class GoogleCalendarConfigFlowTests
 		{
 			Assert.That(step.Fields.Select(f => f.Name), Is.EqualTo(new[] { "clientId", "clientSecret" }));
 			Assert.That(step.Fields[1].Type, Is.EqualTo(ActionParameterType.Secret), "the secret is stored encrypted");
-			Assert.That(step.Fields.Select(f => f.DefaultValue), Is.All.Null, "nothing is carried over from other entries");
+			Assert.That(step.Fields.Select(f => f.DefaultValue),
+				Is.All.Null,
+				"nothing is carried over from other entries");
 			Assert.That(step.Instructions.SelectMany(i => i.Values).Select(v => v.Value),
 				Does.Contain(_context.RedirectUri));
 			Assert.That(instructions, Does.Contain("Desktop app"));
@@ -67,17 +72,24 @@ internal sealed class GoogleCalendarConfigFlowTests
 		var authorize = new Uri(result.ExternalUrl!);
 		var query = new GoogleRecordedRequest(HttpMethod.Get, authorize, null, string.Empty).Query;
 
-		AnswerTokenRequest(Tokens(refreshToken: "refresh-1"));
+		AnswerTokenRequest(Tokens("refresh-1"));
 		_context.AuthorizationCode = "auth-code";
-		await _flow.SubmitAsync(result.ResumeStepId!, new Dictionary<string, object?>(), _context, CancellationToken.None);
+		await _flow.SubmitAsync(result.ResumeStepId!,
+			new Dictionary<string, object?>(),
+			_context,
+			CancellationToken.None);
 		var exchange = _harness.Server.To(GoogleCalendarHarness.TokenPath).Single().Form;
 
-		var expectedChallenge = Convert.ToBase64String(SHA256.HashData(Encoding.ASCII.GetBytes(exchange["code_verifier"])))
-			.TrimEnd('=').Replace('+', '-').Replace('/', '_');
+		var expectedChallenge = Convert
+			.ToBase64String(SHA256.HashData(Encoding.ASCII.GetBytes(exchange["code_verifier"])))
+			.TrimEnd('=')
+			.Replace('+', '-')
+			.Replace('/', '_');
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.External));
-			Assert.That(authorize.GetLeftPart(UriPartial.Path), Is.EqualTo("https://accounts.google.com/o/oauth2/v2/auth"));
+			Assert.That(authorize.GetLeftPart(UriPartial.Path),
+				Is.EqualTo("https://accounts.google.com/o/oauth2/v2/auth"));
 			Assert.That(query["response_type"], Is.EqualTo("code"));
 			Assert.That(query["client_id"], Is.EqualTo("my-client.apps.googleusercontent.com"));
 			Assert.That(query["redirect_uri"], Is.EqualTo(_context.RedirectUri));
@@ -98,7 +110,7 @@ internal sealed class GoogleCalendarConfigFlowTests
 	[Test]
 	public async Task Completing_the_sign_in_keeps_tokens_secret_and_names_the_entry_after_the_account()
 	{
-		var result = await SignInAsync(Tokens(refreshToken: "refresh-1", expiresIn: 3599));
+		var result = await SignInAsync(Tokens("refresh-1", 3599));
 
 		var values = result.Values!;
 		Assert.Multiple(() =>
@@ -117,9 +129,11 @@ internal sealed class GoogleCalendarConfigFlowTests
 	[Test]
 	public async Task Without_an_id_token_the_email_comes_from_the_user_info()
 	{
-		_harness.Server.On(r => r.Uri.AbsolutePath == "/v1/userinfo", HttpStatusCode.OK, """{"email":"other@example.com"}""");
+		_harness.Server.On(r => r.Uri.AbsolutePath == "/v1/userinfo",
+			HttpStatusCode.OK,
+			"""{"email":"other@example.com"}""");
 
-		var result = await SignInAsync(Tokens(refreshToken: "refresh-1", email: null));
+		var result = await SignInAsync(Tokens("refresh-1", email: null));
 
 		Assert.That(result.EntryTitle, Is.EqualTo("other@example.com"));
 	}
@@ -151,7 +165,10 @@ internal sealed class GoogleCalendarConfigFlowTests
 			"""{"error":"invalid_client"}""");
 		_context.AuthorizationCode = "auth-code";
 
-		var result = await _flow.SubmitAsync("authorize", new Dictionary<string, object?>(), _context, CancellationToken.None);
+		var result = await _flow.SubmitAsync("authorize",
+			new Dictionary<string, object?>(),
+			_context,
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -163,8 +180,8 @@ internal sealed class GoogleCalendarConfigFlowTests
 	[Test]
 	public async Task A_grant_without_a_refresh_token_or_calendar_access_is_not_stored()
 	{
-		var withoutRefresh = await SignInAsync(Tokens(refreshToken: null));
-		var withoutCalendar = await SignInAsync(Tokens(refreshToken: "refresh-1", scope: "openid email"));
+		var withoutRefresh = await SignInAsync(Tokens(null));
+		var withoutCalendar = await SignInAsync(Tokens("refresh-1", scope: "openid email"));
 
 		Assert.Multiple(() =>
 		{
@@ -187,13 +204,17 @@ internal sealed class GoogleCalendarConfigFlowTests
 	}
 
 	private Task<ConfigFlowResult> SubmitCredentialsAsync(string clientId, string clientSecret)
-		=> _flow.SubmitAsync("credentials",
+	{
+		return _flow.SubmitAsync("credentials",
 			new Dictionary<string, object?> { ["clientId"] = clientId, ["clientSecret"] = clientSecret },
 			_context,
 			CancellationToken.None);
+	}
 
 	private void AnswerTokenRequest(string body)
-		=> _harness.Server.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.TokenPath, HttpStatusCode.OK, body);
+	{
+		_harness.Server.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.TokenPath, HttpStatusCode.OK, body);
+	}
 
 	private static string Tokens(
 		string? refreshToken,

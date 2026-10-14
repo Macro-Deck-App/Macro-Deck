@@ -20,7 +20,7 @@ public class WidgetSafeAreaTests
 	/// What issue #874 asked for, stated from the requirement rather than from the constant the fix
 	/// introduced: the space a reader sees inside a tile is the space it sees between two tiles.
 	/// </summary>
-	private const double _breathingRoom = GridDefaults.WidgetSpacing;
+	private const double BreathingRoom = GridDefaults.WidgetSpacing;
 
 	private static UiSurface Surface(int? cornerRadius)
 	{
@@ -37,7 +37,9 @@ public class WidgetSafeAreaTests
 	}
 
 	private static double Clearance(int cornerRadius)
-		=> WidgetSafeArea.LengthFor(cornerRadius).MaxOfCell!.Value * UiLength.Cell;
+	{
+		return WidgetSafeArea.LengthFor(cornerRadius).MaxOfCell!.Value * UiLength.Cell;
+	}
 
 	/// <summary>
 	/// What issue #874 reported: at the radius a deck is drawn with by default the curve demands only
@@ -48,7 +50,7 @@ public class WidgetSafeAreaTests
 	public void KeepsTheBreathingRoomWhenTheCornerDemandsLess()
 	{
 		Assert.That(Clearance(WidgetSafeArea.DefaultCornerRadius),
-			Is.EqualTo(_breathingRoom).Within(0.001));
+			Is.EqualTo(BreathingRoom).Within(0.001));
 	}
 
 	/// <summary>The floor holds all the way down to a tile with no corner at all to clear.</summary>
@@ -60,7 +62,7 @@ public class WidgetSafeAreaTests
 			foreach (var radius in new[] { 0, 1, 8, 22, 40 })
 			{
 				Assert.That(Clearance(radius),
-					Is.GreaterThanOrEqualTo(_breathingRoom - 0.001),
+					Is.GreaterThanOrEqualTo(BreathingRoom - 0.001),
 					$"radius {radius}");
 			}
 		});
@@ -106,7 +108,7 @@ public class WidgetSafeAreaTests
 			Assert.That(Clearance(WidgetSafeArea.RadiusOf(Surface(44))), Is.EqualTo(12.8874).Within(0.001));
 			// A square tile has no corner to clear, and still keeps its content off the edge.
 			Assert.That(Clearance(WidgetSafeArea.RadiusOf(Surface(0))),
-				Is.EqualTo(_breathingRoom).Within(0.001));
+				Is.EqualTo(BreathingRoom).Within(0.001));
 		});
 	}
 

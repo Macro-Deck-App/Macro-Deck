@@ -14,10 +14,16 @@ public class PortableWidgetVariableTests
 	private PortabilityTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new PortabilityTestHarness();
+	public void SetUp()
+	{
+		_harness = new PortabilityTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Widgets_RoundTrip_PreservesNameTypeValueAndDecimalPlaces_UnderTheNewWidgetId()
@@ -243,7 +249,7 @@ public class PortableWidgetVariableTests
 		var (manifest, content, icons) = ReadRaw(export.Data!);
 		content.Widgets!.Single().SourceId = null;
 		content.Variables.Clear();
-		var rewritten = PortableArchive.Write(manifest, content, icons, password: null);
+		var rewritten = PortableArchive.Write(manifest, content, icons, null);
 
 		var import = await _harness.WidgetService.Import(target.Id, 0, 0, rewritten, null, CancellationToken.None);
 
@@ -257,7 +263,7 @@ public class PortableWidgetVariableTests
 	{
 		var (profile, sourceFolder, widget) = await _harness.SeedProfile("{\"label\":\"a\"}");
 		var target = await _harness.AddFolder(profile.Id, "Target");
-		var liveLocalWidget = _harness.AddWidget(target.Id, "{\"label\":\"live\"}", x: 4, y: 2);
+		var liveLocalWidget = _harness.AddWidget(target.Id, "{\"label\":\"live\"}", 4, 2);
 
 		var export = await _harness.WidgetService.Export(sourceFolder.Id,
 			[widget.Id],
@@ -279,13 +285,13 @@ public class PortableWidgetVariableTests
 			Type = VariableType.Text,
 			Value = "y"
 		});
-		var rewritten = PortableArchive.Write(manifest, content, icons, password: null);
+		var rewritten = PortableArchive.Write(manifest, content, icons, null);
 
 		var import = await _harness.WidgetService.Import(target.Id, 0, 0, rewritten, null, CancellationToken.None);
 		Assert.That(import.Success, Is.True);
 		var newWidgetId = import.Data!.Single().Id;
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _harness.Variables.GetByScope(VariableScope.Widget, newWidgetId.ToString()), Is.Empty);
 			Assert.That(await _harness.Variables.GetByScope(VariableScope.Widget, liveLocalWidget.Id.ToString()),
@@ -332,12 +338,12 @@ public class PortableWidgetVariableTests
 		entries[contentIndex] = ("content.json", Encoding.UTF8.GetBytes(node.ToJsonString()));
 
 		using var output = new MemoryStream();
-		using (var outZip = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
+		using (var outZip = new ZipArchive(output, ZipArchiveMode.Create, true))
 		{
 			foreach (var (name, bytes) in entries)
 			{
 				var outEntry = outZip.CreateEntry(name, CompressionLevel.NoCompression);
-				using var entryStream = outEntry.Open();
+				using var entryStream = await outEntry.OpenAsync();
 				entryStream.Write(bytes);
 			}
 		}
@@ -423,7 +429,7 @@ public class PortableWidgetVariableTests
 	public async Task TwoWidgetsInOneArchive_DoNotCrossAssignTheirVariables()
 	{
 		var (profile, sourceFolder, widgetA) = await _harness.SeedProfile("{\"label\":\"a\"}");
-		var widgetB = _harness.AddWidget(sourceFolder.Id, "{\"label\":\"b\"}", x: 1, y: 0);
+		var widgetB = _harness.AddWidget(sourceFolder.Id, "{\"label\":\"b\"}", 1, 0);
 		var target = await _harness.AddFolder(profile.Id, "Target");
 		await _harness.AddWidgetVariable(widgetA.Id, "only_a", VariableClassification.User, value: "a-value");
 		await _harness.AddWidgetVariable(widgetB.Id, "only_b", VariableClassification.User, value: "b-value");
@@ -487,7 +493,7 @@ public class PortableWidgetVariableTests
 	private static (PortableArchiveManifest Manifest, PortableContent Content, List<PortableIconFile> Icons) ReadRaw(
 		byte[] archiveBytes)
 	{
-		var outcome = PortableArchive.Read(archiveBytes, password: null);
+		var outcome = PortableArchive.Read(archiveBytes, null);
 		return (outcome.Manifest!, outcome.Content!, outcome.Icons.ToList());
 	}
 }

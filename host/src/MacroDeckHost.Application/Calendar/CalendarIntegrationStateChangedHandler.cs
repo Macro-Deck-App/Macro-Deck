@@ -22,8 +22,8 @@ public sealed class CalendarIntegrationStateChangedHandler : INotificationHandle
 	public ValueTask Handle(IntegrationStateChangedNotification notification, CancellationToken cancellationToken)
 	{
 		var integrationId = notification.IntegrationId;
-		if (_registry.IsCalendarIntegration(integrationId) ||
-			_cache.Snapshot.Accounts.Any(state => state.Account.IntegrationId == integrationId))
+		if (_registry.IsCalendarIntegration(integrationId)
+			|| _cache.Snapshot.Accounts.Any(state => state.Account.IntegrationId == integrationId))
 		{
 			_signal.RequestSync();
 		}

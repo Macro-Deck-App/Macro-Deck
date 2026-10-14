@@ -36,7 +36,7 @@ internal static class WeatherForecastBar
 
 	private static string HslToHex(double hue, double saturation, double lightness)
 	{
-		var h = ((hue % 360) + 360) % 360;
+		var h = (hue % 360 + 360) % 360;
 		var chroma = (1 - Math.Abs(2 * lightness - 1)) * saturation;
 		var x = chroma * (1 - Math.Abs(h / 60 % 2 - 1));
 		var m = lightness - chroma / 2;
@@ -48,7 +48,7 @@ internal static class WeatherForecastBar
 			< 180 => (0.0, chroma, x),
 			< 240 => (0.0, x, chroma),
 			< 300 => (x, 0.0, chroma),
-			_ => (chroma, 0.0, x),
+			_ => (chroma, 0.0, x)
 		};
 
 		var r = (byte)Math.Round((r1 + m) * 255, MidpointRounding.AwayFromZero);

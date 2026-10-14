@@ -23,9 +23,11 @@ public class IntegrationOverviewCapabilitiesTests
 	private static readonly string[] _actionsMusicPlayerNames = ["Actions", "Music Player"];
 
 	private static GetIntegrationsRequestMessageHandler CreateHandler(ConfigurableIntegrationRegistry registry)
-		=> new(registry,
+	{
+		return new GetIntegrationsRequestMessageHandler(registry,
 			new FakeIntegrationConfigStore(),
 			new IntegrationIssueService(registry, new FakeIntegrationHostIssueStore(), new FakeIntegrationLifecycle()));
+	}
 
 	private static async Task<Integration> HandleSingle(IIntegration integration)
 	{
@@ -227,7 +229,8 @@ public class IntegrationOverviewCapabilitiesTests
 		bool hasIcon = false,
 		bool hasConfigFlow = false,
 		bool hasDynamicEventOptions = false)
-		=> RemotePluginIntegrationFactory.Create("com.example.plugin",
+	{
+		return RemotePluginIntegrationFactory.Create("com.example.plugin",
 			"Example Plugin",
 			"1.0.0",
 			snapshot,
@@ -237,9 +240,12 @@ public class IntegrationOverviewCapabilitiesTests
 			hasIcon,
 			hasConfigFlow,
 			hasDynamicEventOptions);
+	}
 
 	private static RemoteActionDescriptor ActionDescriptor(string localId = "play")
-		=> new(localId, "Play", string.Empty, [], null, false, false);
+	{
+		return new RemoteActionDescriptor(localId, "Play", string.Empty, [], null, false, false);
+	}
 
 	[Test]
 	public async Task A_remote_plugin_reports_only_the_kinds_it_negotiated()
@@ -289,7 +295,7 @@ public class IntegrationOverviewCapabilitiesTests
 			AcceptedKinds = CapabilityKinds.All
 		};
 		var integration
-			= CreateRemoteIntegration(snapshot, hasIcon: true, hasConfigFlow: true, hasDynamicEventOptions: true);
+			= CreateRemoteIntegration(snapshot, true, true, true);
 
 		var dto = await HandleSingle(integration);
 
@@ -366,7 +372,11 @@ public class IntegrationOverviewCapabilitiesTests
 	}
 
 	private static List<string> KindsFor(GetIntegrationsResponse response, string integrationId)
-		=> response.Integrations.Single(i => i.Id == integrationId).ProvidedCapabilities.Select(c => c.Kind).ToList();
+	{
+		return response.Integrations.Single(i => i.Id == integrationId)
+			.ProvidedCapabilities.Select(c => c.Kind)
+			.ToList();
+	}
 
 	private static void AssertSameRelativeOrder(List<string> kindsX, List<string> kindsY)
 	{
@@ -384,23 +394,35 @@ public class IntegrationOverviewCapabilitiesTests
 
 	private sealed class ThrowingInvoker : IPluginCapabilityInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException("Not exercised by the overview capability tests.");
+		{
+			throw new NotSupportedException("Not exercised by the overview capability tests.");
+		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => throw new NotSupportedException();
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class AlwaysDisconnected : IRemotePluginConnectionState
 	{
-		public bool IsConnected(string pluginId) => false;
+		public bool IsConnected(string pluginId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class FakeVideoStreamOnlyIntegration : IIntegration, IVideoStreamIntegration
@@ -415,11 +437,19 @@ public class IntegrationOverviewCapabilitiesTests
 
 		public bool IsInitialized => true;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InitializeAsync(IVideoStreamProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

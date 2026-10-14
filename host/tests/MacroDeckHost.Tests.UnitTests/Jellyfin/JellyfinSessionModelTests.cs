@@ -123,11 +123,12 @@ internal sealed class JellyfinEventDiffTests
 			Diff(idle, playing), Diff(playing, paused), Diff(paused, resumed), Diff(resumed, next), Diff(next, stopped)
 		}.Select(events => events.Single().Id);
 
-		Assert.That(ids, Is.EqualTo(new[]
-		{
-			JellyfinEventIds.PlaybackStarted, JellyfinEventIds.PlaybackPaused, JellyfinEventIds.PlaybackResumed,
-			JellyfinEventIds.ItemChanged, JellyfinEventIds.PlaybackStopped
-		}));
+		Assert.That(ids,
+			Is.EqualTo(new[]
+			{
+				JellyfinEventIds.PlaybackStarted, JellyfinEventIds.PlaybackPaused, JellyfinEventIds.PlaybackResumed,
+				JellyfinEventIds.ItemChanged, JellyfinEventIds.PlaybackStopped
+			}));
 
 		var started = Diff(idle, playing).Single().Payload;
 		Assert.Multiple(() =>
@@ -170,18 +171,23 @@ internal sealed class JellyfinEventDiffTests
 		{
 			Assert.That(Diff(connected, reconnecting), Is.Empty);
 			Assert.That(Diff(reconnecting, connected), Is.Empty);
-			Assert.That(Diff(reconnecting, down).Select(e => e.Id), Is.EqualTo(new[] { JellyfinEventIds.Disconnected }));
+			Assert.That(Diff(reconnecting, down).Select(e => e.Id),
+				Is.EqualTo(new[] { JellyfinEventIds.Disconnected }));
 			Assert.That(Diff(down, connected).Select(e => e.Id), Is.EqualTo(new[] { JellyfinEventIds.Connected }));
 		});
 	}
 
 	private static IReadOnlyList<JellyfinEvent> Diff(JellyfinServerState previous, JellyfinServerState current)
-		=> JellyfinEventDiff.Compute(_entry, "Home", previous, current);
+	{
+		return JellyfinEventDiff.Compute(_entry, "Home", previous, current);
+	}
 
 	private static JellyfinServerState State(params JellyfinSessionDto[] sessions)
-		=> new(JellyfinConnectionStatus.Connected,
+	{
+		return new JellyfinServerState(JellyfinConnectionStatus.Connected,
 			JellyfinSessionMapper.Map(sessions, "macro-deck-device"),
 			DateTimeOffset.UtcNow);
+	}
 }
 
 [TestFixture]
@@ -248,5 +254,7 @@ internal sealed class JellyfinDeviceRegistryTests
 	}
 
 	private static IReadOnlyList<JellyfinSession> Map(params JellyfinSessionDto[] sessions)
-		=> JellyfinSessionMapper.Map(sessions, "macro-deck-device");
+	{
+		return JellyfinSessionMapper.Map(sessions, "macro-deck-device");
+	}
 }

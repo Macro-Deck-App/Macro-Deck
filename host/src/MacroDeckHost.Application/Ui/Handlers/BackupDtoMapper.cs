@@ -10,26 +10,30 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 
 public static class BackupDtoMapper
 {
-	public static BackupSummary ToSummary(BackupDescriptor descriptor, string providerDisplayName) => new()
+	public static BackupSummary ToSummary(BackupDescriptor descriptor, string providerDisplayName)
 	{
-		Id = descriptor.BackupId,
-		ProviderId = descriptor.ProviderId,
-		ProviderDisplayName = providerDisplayName,
-		Name = descriptor.Name,
-		CreatedAt = descriptor.CreatedAt,
-		Trigger = descriptor.Trigger.ToString(),
-		MacroDeckVersion = descriptor.MacroDeckVersion,
-		SizeBytes = descriptor.SizeBytes,
-		FormatVersion = descriptor.FormatVersion,
-		IsRemote = descriptor.IsRemote,
-		DecryptableLocally = descriptor.DecryptableLocally,
-		Imported = descriptor.Imported,
-		Note = descriptor.Note,
-		Components = ToNames(descriptor.Components)
-	};
+		return new BackupSummary
+		{
+			Id = descriptor.BackupId,
+			ProviderId = descriptor.ProviderId,
+			ProviderDisplayName = providerDisplayName,
+			Name = descriptor.Name,
+			CreatedAt = descriptor.CreatedAt,
+			Trigger = descriptor.Trigger.ToString(),
+			MacroDeckVersion = descriptor.MacroDeckVersion,
+			SizeBytes = descriptor.SizeBytes,
+			FormatVersion = descriptor.FormatVersion,
+			IsRemote = descriptor.IsRemote,
+			DecryptableLocally = descriptor.DecryptableLocally,
+			Imported = descriptor.Imported,
+			Note = descriptor.Note,
+			Components = ToNames(descriptor.Components)
+		};
+	}
 
 	public static List<BackupComponentCatalogEntry> ToCatalog()
-		=>
+	{
+		return
 		[
 			.. BackupComponentGroups.All.Select(definition => new BackupComponentCatalogEntry
 			{
@@ -37,9 +41,11 @@ public static class BackupDtoMapper
 				Requires = ToNames(definition.Requires)
 			})
 		];
+	}
 
 	public static List<BackupComponentGroupInfoDto> ToComponentInfo(IReadOnlyList<BackupComponentGroupInfo> components)
-		=>
+	{
+		return
 		[
 			.. components.Select(component => new BackupComponentGroupInfoDto
 			{
@@ -49,9 +55,11 @@ public static class BackupDtoMapper
 				Requires = ToNames(component.Requires)
 			})
 		];
+	}
 
 	public static List<BackupDependencyWarningDto> ToWarnings(IReadOnlyList<BackupDependencyWarning> warnings)
-		=>
+	{
+		return
 		[
 			.. warnings.Select(warning => new BackupDependencyWarningDto
 			{
@@ -59,9 +67,11 @@ public static class BackupDtoMapper
 				MissingDependency = warning.MissingDependency.ToString()
 			})
 		];
+	}
 
-	public static InspectBackupResponse ToInspectResponse(BackupInspection inspection, string providerDisplayName) =>
-		new()
+	public static InspectBackupResponse ToInspectResponse(BackupInspection inspection, string providerDisplayName)
+	{
+		return new InspectBackupResponse
 		{
 			Success = true,
 			Backup = ToSummary(inspection.Backup, providerDisplayName),
@@ -69,44 +79,60 @@ public static class BackupDtoMapper
 			Components = ToComponentInfo(inspection.Components),
 			Catalog = ToCatalog()
 		};
+	}
 
-	public static GetBackupRecoveryKeyStateResponse ToStateResponse(BackupRecoveryKeyState state) => new()
+	public static GetBackupRecoveryKeyStateResponse ToStateResponse(BackupRecoveryKeyState state)
 	{
-		Availability = state.Availability.ToString(),
-		KeyId = state.KeyId,
-		CreatedAt = state.CreatedAt,
-		ExportedAt = state.ExportedAt
-	};
+		return new GetBackupRecoveryKeyStateResponse
+		{
+			Availability = state.Availability.ToString(),
+			KeyId = state.KeyId,
+			CreatedAt = state.CreatedAt,
+			ExportedAt = state.ExportedAt
+		};
+	}
 
-	public static BackupRecoveryKeyResponse ToRecoveryKeyResponse(BackupRecoveryKeyState state, string? key) => new()
+	public static BackupRecoveryKeyResponse ToRecoveryKeyResponse(BackupRecoveryKeyState state, string? key)
 	{
-		Success = true,
-		Availability = state.Availability.ToString(),
-		KeyId = state.KeyId,
-		CreatedAt = state.CreatedAt,
-		ExportedAt = state.ExportedAt,
-		Key = key
-	};
+		return new BackupRecoveryKeyResponse
+		{
+			Success = true,
+			Availability = state.Availability.ToString(),
+			KeyId = state.KeyId,
+			CreatedAt = state.CreatedAt,
+			ExportedAt = state.ExportedAt,
+			Key = key
+		};
+	}
 
-	public static BackupRecoveryKeyResponse ToRecoveryKeyFailure(BackupError error, string? message) => new()
+	public static BackupRecoveryKeyResponse ToRecoveryKeyFailure(BackupError error, string? message)
 	{
-		Success = false,
-		Error = ToTransportError(error, message)
-	};
+		return new BackupRecoveryKeyResponse
+		{
+			Success = false,
+			Error = ToTransportError(error, message)
+		};
+	}
 
 	public static (bool Supported, string? Reason) PreUpdateBackupSupport()
-		=> RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+	{
+		return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
 			? (true, null)
 			: (false, "Macro Deck does not install updates itself on Linux.");
+	}
 
-	public static TransportError ToTransportError(BackupError error, string? message) => new()
+	public static TransportError ToTransportError(BackupError error, string? message)
 	{
-		Code = error.ToString(),
-		Message = string.IsNullOrEmpty(message) ? DefaultMessage(error) : message
-	};
+		return new TransportError
+		{
+			Code = error.ToString(),
+			Message = string.IsNullOrEmpty(message) ? DefaultMessage(error) : message
+		};
+	}
 
 	private static LocalizedText DefaultMessage(BackupError error)
-		=> error switch
+	{
+		return error switch
 		{
 			BackupError.NotFound => AppStrings.Errors.Backup.NotFound(),
 			BackupError.ProviderUnavailable => AppStrings.Errors.Backup.ProviderUnavailable(),
@@ -131,13 +157,16 @@ public static class BackupDtoMapper
 			BackupError.FileLocked => AppStrings.Errors.Backup.FileLocked(),
 			_ => AppStrings.Errors.Backup.OperationFailed()
 		};
+	}
 
 	/// <summary>
 	/// Component groups cross the wire by name, like every other enum in these messages. Sending the
 	/// numeric value would tie clients to the declaration order of the enum.
 	/// </summary>
 	public static List<string> ToNames(IEnumerable<BackupComponentGroup> groups)
-		=> [.. groups.Select(group => group.ToString())];
+	{
+		return [.. groups.Select(group => group.ToString())];
+	}
 
 	public static bool TryParseGroups(IEnumerable<string> names, out List<BackupComponentGroup> groups)
 	{
@@ -145,8 +174,7 @@ public static class BackupDtoMapper
 
 		foreach (var name in names)
 		{
-			if (!Enum.TryParse<BackupComponentGroup>(name, ignoreCase: true, out var parsed) ||
-				!Enum.IsDefined(parsed))
+			if (!Enum.TryParse<BackupComponentGroup>(name, true, out var parsed) || !Enum.IsDefined(parsed))
 			{
 				return false;
 			}

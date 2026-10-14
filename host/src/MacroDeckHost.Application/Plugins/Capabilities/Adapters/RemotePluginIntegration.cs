@@ -110,9 +110,15 @@ public abstract partial class RemotePluginIntegration :
 	public IReadOnlyList<IActionDefinition> Actions
 		=> [.. Snapshot.Actions.Select(descriptor => RemoteActionDefinitionFactory.Create(_invoker, Id, descriptor))];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	/// <summary>
 	/// Implemented unconditionally, like the other provider-shaped capabilities: a plugin that declared no
@@ -202,15 +208,18 @@ public abstract partial class RemotePluginIntegration :
 	// Matched by name rather than through Enum.TryParse, which also accepts "3" and a comma list and would
 	// turn a status this build has no name for into a specific one. A write that could not be classified
 	// is not a write that demonstrably landed, so anything unrecognised degrades to Failed.
-	private static VariableWriteStatus ToWriteStatus(string status) => status switch
+	private static VariableWriteStatus ToWriteStatus(string status)
 	{
-		nameof(VariableWriteStatus.Applied) => VariableWriteStatus.Applied,
-		nameof(VariableWriteStatus.NotWritable) => VariableWriteStatus.NotWritable,
-		nameof(VariableWriteStatus.NotFound) => VariableWriteStatus.NotFound,
-		nameof(VariableWriteStatus.Unavailable) => VariableWriteStatus.Unavailable,
-		nameof(VariableWriteStatus.InvalidValue) => VariableWriteStatus.InvalidValue,
-		_ => VariableWriteStatus.Failed
-	};
+		return status switch
+		{
+			nameof(VariableWriteStatus.Applied) => VariableWriteStatus.Applied,
+			nameof(VariableWriteStatus.NotWritable) => VariableWriteStatus.NotWritable,
+			nameof(VariableWriteStatus.NotFound) => VariableWriteStatus.NotFound,
+			nameof(VariableWriteStatus.Unavailable) => VariableWriteStatus.Unavailable,
+			nameof(VariableWriteStatus.InvalidValue) => VariableWriteStatus.InvalidValue,
+			_ => VariableWriteStatus.Failed
+		};
+	}
 
 	public async ValueTask<VariableCatalogPage> DiscoverAsync(
 		VariableCatalogQuery query,
@@ -334,8 +343,8 @@ public abstract partial class RemotePluginIntegration :
 						{
 							Value = option.Value, Label = option.Label ?? default, Metadata = option.Metadata
 						})
-						.ToList() ??
-					[],
+						.ToList()
+					?? [],
 				AllowsCustomValue = result?.AllowsCustomValue ?? false,
 				CacheSeconds = result?.CacheSeconds,
 				Error = result?.Error ?? default
@@ -363,9 +372,15 @@ public abstract partial class RemotePluginIntegration :
 
 	string IMusicPlayerProvider.ProviderName => Snapshot.MusicPlayerProviderName;
 
-	public IReadOnlyList<MusicPlayerInstance> GetInstances() => Snapshot.MusicPlayerInstances;
+	public IReadOnlyList<MusicPlayerInstance> GetInstances()
+	{
+		return Snapshot.MusicPlayerInstances;
+	}
 
-	public IMusicPlayer? GetPlayer(string instanceId) => CreateMusicPlayer(instanceId, options: null);
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return CreateMusicPlayer(instanceId, null);
+	}
 
 	IMusicPlayer? IMusicPlayerProvider.GetPlayerWithOptions(MusicPlayerOptionsRequest request)
 	{
@@ -394,54 +409,79 @@ public abstract partial class RemotePluginIntegration :
 			options);
 	}
 
-	protected IConfigFlow CreateConfigFlowCore() => new RemoteConfigFlow(Id, _invoker);
+	protected IConfigFlow CreateConfigFlowCore()
+	{
+		return new RemoteConfigFlow(Id, _invoker);
+	}
 
 	string IWeatherProvider.ProviderName => Snapshot.WeatherProviderName;
 
-	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances() => Snapshot.WeatherInstances;
+	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances()
+	{
+		return Snapshot.WeatherInstances;
+	}
 
 	WeatherDetailsAction? IWeatherProvider.DetailsAction => Snapshot.WeatherDetailsAction;
 
 	public IWeatherStation? GetStation(string instanceId)
-		=> Snapshot.WeatherInstances.Any(instance => string.Equals(instance.Id, instanceId, StringComparison.Ordinal))
+	{
+		return Snapshot.WeatherInstances.Any(instance
+			=> string.Equals(instance.Id, instanceId, StringComparison.Ordinal))
 			? new RemoteWeatherStation(Id, instanceId, _invoker)
 			: null;
+	}
 
 	string ICalendarProvider.ProviderName => Snapshot.CalendarProviderName;
 
-	IReadOnlyList<CalendarAccount> ICalendarProvider.GetAccounts() => Snapshot.CalendarAccounts;
+	IReadOnlyList<CalendarAccount> ICalendarProvider.GetAccounts()
+	{
+		return Snapshot.CalendarAccounts;
+	}
 
 	Task<IReadOnlyList<CalendarInfo>> ICalendarProvider.GetCalendarsAsync(
 		string accountId,
 		CancellationToken cancellationToken)
-		=> CreateCalendarProvider().GetCalendarsAsync(accountId, cancellationToken);
+	{
+		return CreateCalendarProvider().GetCalendarsAsync(accountId, cancellationToken);
+	}
 
 	Task<IReadOnlyList<CalendarEvent>> ICalendarProvider.GetEventsAsync(
 		string accountId,
 		CalendarEventQuery query,
 		CancellationToken cancellationToken)
-		=> CreateCalendarProvider().GetEventsAsync(accountId, query, cancellationToken);
+	{
+		return CreateCalendarProvider().GetEventsAsync(accountId, query, cancellationToken);
+	}
 
 	Task<CalendarEvent?> ICalendarProvider.GetEventAsync(
 		string accountId,
 		string calendarId,
 		string eventId,
 		CancellationToken cancellationToken)
-		=> CreateCalendarProvider().GetEventAsync(accountId, calendarId, eventId, cancellationToken);
+	{
+		return CreateCalendarProvider().GetEventAsync(accountId, calendarId, eventId, cancellationToken);
+	}
 
 	private RemoteCalendarProvider CreateCalendarProvider()
-		=> new(Id, Snapshot.CalendarProviderName, Snapshot.CalendarAccounts, _invoker);
+	{
+		return new RemoteCalendarProvider(Id, Snapshot.CalendarProviderName, Snapshot.CalendarAccounts, _invoker);
+	}
 
 	string IEmailInboxProvider.ProviderName => Snapshot.EmailInboxProviderName;
 
-	IReadOnlyList<SdkEmailInbox> IEmailInboxProvider.GetInboxes() => Snapshot.EmailInboxes;
+	IReadOnlyList<SdkEmailInbox> IEmailInboxProvider.GetInboxes()
+	{
+		return Snapshot.EmailInboxes;
+	}
 
 	Task<EmailInboxSnapshot> IEmailInboxProvider.GetSnapshotAsync(
 		string inboxId,
 		EmailMessageQuery query,
 		CancellationToken cancellationToken)
-		=> new RemoteEmailInboxProvider(Id, Snapshot.EmailInboxProviderName, Snapshot.EmailInboxes, _invoker)
+	{
+		return new RemoteEmailInboxProvider(Id, Snapshot.EmailInboxProviderName, Snapshot.EmailInboxes, _invoker)
 			.GetSnapshotAsync(inboxId, query, cancellationToken);
+	}
 
 	// Never raised: PluginWebSocketEndpoint routes the plugin's state.update for this kind to the email sync
 	// signal, because a fresh adapter replaces this instance on every snapshot refresh.
@@ -455,22 +495,34 @@ public abstract partial class RemotePluginIntegration :
 	// hosting runs InitializeAsync/ShutdownAsync in its process, and registrations arrive as callbacks.
 	// The host still withdraws the plugin's devices when the integration stops; see DeviceProviderHost.
 	Task IDeviceProvider.InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
-	Task IDeviceProvider.ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	Task IDeviceProvider.ShutdownAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
 	string IBatteryProvider.ProviderName => Snapshot.BatteryProviderName;
 
 	Task IBatteryProvider.InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
-	Task IBatteryProvider.ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	Task IBatteryProvider.ShutdownAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
 	// Same reasoning as IDeviceProvider above: a plugin owns its own layout discovery, and registrations
 	// arrive as host.invoke callbacks (see RemotePluginIntegrationRegistrar.RegisterProviderLayoutsAsync)
 	// rather than through a host-run InitializeAsync.
 	Task ILayoutProvider.InitializeAsync(ILayoutProviderContext context, CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	// Same reasoning again: a plugin owns its own folder view catalog, and registrations arrive as
 	// host.invoke callbacks (see RemotePluginIntegrationRegistrar.RegisterProviderFolderViewsAsync) rather
@@ -478,17 +530,23 @@ public abstract partial class RemotePluginIntegration :
 	Task IFolderViewProvider.InitializeAsync(
 		IFolderViewProviderContext context,
 		CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	Task IScreenSaverProvider.InitializeAsync(
 		IScreenSaverProviderContext context,
 		CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	Task IVideoStreamIntegration.InitializeAsync(
 		IVideoStreamProviderContext context,
 		CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	// Same reasoning again: a plugin owns its own widget type catalog, and registrations arrive as
 	// host.invoke callbacks (see RemotePluginIntegrationRegistrar.RegisterProviderWidgetTypesAsync) rather
@@ -496,11 +554,16 @@ public abstract partial class RemotePluginIntegration :
 	Task IWidgetTypeProvider.InitializeAsync(
 		IWidgetTypeProviderContext context,
 		CancellationToken cancellationToken)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	string IProfileProvider.ProviderName => Snapshot.ProfileProviderName;
 
-	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => Snapshot.Profiles;
+	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+	{
+		return Snapshot.Profiles;
+	}
 
 	async Task IProfileProvider.HandleWidgetInteractionAsync(
 		string profileId,

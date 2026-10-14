@@ -12,7 +12,10 @@ internal sealed class FakeBatteries : IBatteryApi
 
 	public event EventHandler<BatteryDevicesChangedEventArgs>? Changed;
 
-	public BatteryDeviceSnapshot? Find(string id) => _devices.FirstOrDefault(device => device.Id == id);
+	public BatteryDeviceSnapshot? Find(string id)
+	{
+		return _devices.FirstOrDefault(device => device.Id == id);
+	}
 
 	public void Set(params BatteryDeviceSnapshot[] devices)
 	{
@@ -20,14 +23,16 @@ internal sealed class FakeBatteries : IBatteryApi
 		Changed?.Invoke(this, new BatteryDevicesChangedEventArgs([]));
 	}
 
-	public static BatteryDeviceSnapshot Device(string localId,
+	public static BatteryDeviceSnapshot Device(
+		string localId,
 		string name,
 		int? level,
 		string kind = BatteryDeviceKinds.Phone,
 		BatteryChargeState state = BatteryChargeState.Discharging,
 		bool connected = true,
 		string provider = "adb")
-		=> new()
+	{
+		return new BatteryDeviceSnapshot
 		{
 			Id = $"{provider}:{localId}",
 			LocalId = localId,
@@ -37,6 +42,7 @@ internal sealed class FakeBatteries : IBatteryApi
 			Kind = kind,
 			LevelPercent = level,
 			ChargeState = state,
-			IsConnected = connected,
+			IsConnected = connected
 		};
+	}
 }

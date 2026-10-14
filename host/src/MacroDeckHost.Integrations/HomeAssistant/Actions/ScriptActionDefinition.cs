@@ -27,19 +27,24 @@ internal sealed class ScriptActionDefinition : IDynamicOptionsActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(EntityParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Script.EntityLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Script.EntityLabel(),
 			required: true),
 		ActionParameter.Json(DataParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Script.VariablesLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.Script.VariablesDescription())
+			AppStrings.Integrations.HomeAssistant.Actions.Script.VariablesLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Script.VariablesDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, ScriptDomain));
+	{
+		return Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, ScriptDomain));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

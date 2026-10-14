@@ -37,20 +37,25 @@ internal sealed class OutputActionDefinition : IDynamicOptionsActionDefinition, 
 		ObsOutputSupport.OutputChoice()
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _command);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> ObsOutputSupport.OptionsAsync(_resolver, context);
+	{
+		return ObsOutputSupport.OptionsAsync(_resolver, context);
+	}
 
 	public async Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
 	{
-		if (!_providesState ||
-			parameters.GetValueOrDefault(ObsOutputSupport.OutputParameter) is not string { Length: > 0 } output ||
-			string.IsNullOrWhiteSpace(output))
+		if (!_providesState
+			|| parameters.GetValueOrDefault(ObsOutputSupport.OutputParameter) is not string { Length: > 0 } output
+			|| string.IsNullOrWhiteSpace(output))
 		{
 			return null;
 		}

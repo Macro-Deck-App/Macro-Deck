@@ -9,9 +9,15 @@ internal sealed class TestCalendarIntegration(string providerName, params string
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; } = providerName;
 
@@ -22,10 +28,14 @@ internal sealed class TestCalendarIntegration(string providerName, params string
 	public CalendarEventQuery? LastQuery { get; private set; }
 
 	public IReadOnlyList<CalendarAccount> GetAccounts()
-		=> [.. accountIds.Select(id => new CalendarAccount { Id = id, DisplayName = $"{id}@example.com" })];
+	{
+		return [.. accountIds.Select(id => new CalendarAccount { Id = id, DisplayName = $"{id}@example.com" })];
+	}
 
 	public Task<IReadOnlyList<CalendarInfo>> GetCalendarsAsync(string accountId, CancellationToken cancellationToken)
-		=> Task.FromResult(Calendars.GetValueOrDefault(accountId) ?? []);
+	{
+		return Task.FromResult(Calendars.GetValueOrDefault(accountId) ?? []);
+	}
 
 	public Task<IReadOnlyList<CalendarEvent>> GetEventsAsync(
 		string accountId,
@@ -41,6 +51,8 @@ internal sealed class TestCalendarIntegration(string providerName, params string
 		string calendarId,
 		string eventId,
 		CancellationToken cancellationToken)
-		=> Task.FromResult((Events.GetValueOrDefault(accountId) ?? []).FirstOrDefault(calendarEvent =>
+	{
+		return Task.FromResult((Events.GetValueOrDefault(accountId) ?? []).FirstOrDefault(calendarEvent =>
 			calendarEvent.CalendarId == calendarId && calendarEvent.Id == eventId));
+	}
 }

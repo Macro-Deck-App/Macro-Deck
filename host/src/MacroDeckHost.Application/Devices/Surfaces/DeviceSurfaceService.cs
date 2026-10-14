@@ -65,7 +65,10 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		_logger = logger.ForContext<DeviceSurfaceService>();
 	}
 
-	public bool IsOpen(Guid deviceId) => _sessions.ContainsKey(deviceId);
+	public bool IsOpen(Guid deviceId)
+	{
+		return _sessions.ContainsKey(deviceId);
+	}
 
 	public async Task OpenAsync(
 		Guid deviceId,
@@ -107,7 +110,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 				cancellationToken);
 			if (!accepted)
 			{
-				await DiscardAsync(session, reason: null, notifyProvider: false);
+				await DiscardAsync(session, null, false);
 				return;
 			}
 		}
@@ -117,13 +120,13 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 				"Provider '{ProviderId}' failed to open a session for device {DeviceId}",
 				providerId,
 				deviceId);
-			await DiscardAsync(session, reason: null, notifyProvider: false);
+			await DiscardAsync(session, null, false);
 			return;
 		}
 
 		// The first surface is always delivered, complete and at revision 1, even when it is the empty
 		// one: a session that never pushed would leave the provider with nothing to render.
-		await RebuildAsync(session, force: true, cancellationToken);
+		await RebuildAsync(session, true, cancellationToken);
 	}
 
 	public async Task CloseAsync(Guid deviceId, string? reason, CancellationToken cancellationToken = default)
@@ -133,7 +136,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 			return;
 		}
 
-		await DiscardAsync(session, reason, notifyProvider: true);
+		await DiscardAsync(session, reason, true);
 	}
 
 	public async Task<bool> NavigateAsync(
@@ -190,9 +193,11 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		Guid deviceId,
 		DeviceInteraction interaction,
 		CancellationToken cancellationToken = default)
-		=> _sessions.TryGetValue(deviceId, out var session)
+	{
+		return _sessions.TryGetValue(deviceId, out var session)
 			? _interactions.SubmitAsync(session, interaction, cancellationToken)
 			: Task.FromResult(DeviceInteractionOutcome.Reject(DeviceSurfaceErrorCodes.SessionNotFound));
+	}
 
 	public async Task<DeviceIconImage?> GetIconAsync(
 		Guid deviceId,
@@ -213,7 +218,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		// not want and which does not fit ProtocolLimits.MaxAssetBytes.
 		var requestedSize = size ?? IconVariants.TargetSizes.Max();
 
-		var result = await icons.GetImage(id, requestedSize, acceptWebp: true, staticFrame: false, cancellationToken);
+		var result = await icons.GetImage(id, requestedSize, true, false, cancellationToken);
 		if (!result.Success || result.Data is not { } image)
 		{
 			return null;
@@ -238,8 +243,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		if (buffer.Length > ProtocolLimits.MaxAssetBytes)
 		{
 			throw new DeviceSessionException(DeviceSessionReasons.IconTooLarge,
-				$"Icon '{iconId}' is {buffer.Length} bytes at size {requestedSize}, over the " +
-				$"{ProtocolLimits.MaxAssetBytes} byte transfer limit.");
+				$"Icon '{iconId}' is {buffer.Length} bytes at size {requestedSize}, over the "
+				+ $"{ProtocolLimits.MaxAssetBytes} byte transfer limit.");
 		}
 
 		return new DeviceIconImage
@@ -258,10 +263,10 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		string? knownETag = null,
 		CancellationToken cancellationToken = default)
 	{
-		if (!_sessions.TryGetValue(deviceId, out var session) ||
-			session.LastPushed is not { } surface ||
-			surface.Widgets.All(widget => !string.Equals(widget.Id, widgetId, StringComparison.Ordinal)) ||
-			!Guid.TryParse(widgetId, out var id))
+		if (!_sessions.TryGetValue(deviceId, out var session)
+			|| session.LastPushed is not { } surface
+			|| surface.Widgets.All(widget => !string.Equals(widget.Id, widgetId, StringComparison.Ordinal))
+			|| !Guid.TryParse(widgetId, out var id))
 		{
 			return null;
 		}
@@ -272,8 +277,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 		// Device plugins keep receiving provider icons no larger than they always did.
 		var resolution = await icons.Resolve(id, WidgetIconLimit.Protocol, cancellationToken);
-		if (resolution is not { IsActive: true, Resource: { } resource } ||
-			!resources.TryGet(resource.ResourceId, out var content))
+		if (resolution is not { IsActive: true, Resource: { } resource }
+			|| !resources.TryGet(resource.ResourceId, out var content))
 		{
 			return null;
 		}
@@ -355,17 +360,23 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 		// Forced: a device that was powered off renders nothing, so the surface it missed has to be sent
 		// again even when nothing changed while it was away.
-		await RebuildAsync(session, force: true, cancellationToken);
+		await RebuildAsync(session, true, cancellationToken);
 	}
 
 	public Task OnWidgetStateChanged(Guid widgetId, CancellationToken cancellationToken = default)
-		=> InvalidateSubscribers(widgetId);
+	{
+		return InvalidateSubscribers(widgetId);
+	}
 
 	public Task OnWidgetLabelChanged(Guid widgetId, string state, CancellationToken cancellationToken = default)
-		=> InvalidateSubscribers(widgetId);
+	{
+		return InvalidateSubscribers(widgetId);
+	}
 
 	public Task OnWidgetIconChanged(Guid widgetId, CancellationToken cancellationToken = default)
-		=> InvalidateSubscribers(widgetId);
+	{
+		return InvalidateSubscribers(widgetId);
+	}
 
 	public void Dispose()
 	{
@@ -412,7 +423,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 		try
 		{
-			await RebuildAsync(session, force: false, CancellationToken.None);
+			await RebuildAsync(session, false, CancellationToken.None);
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
@@ -458,8 +469,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 		// Reassigning the device has to win over wherever a cross-profile navigation left the session,
 		// so a changed assignment resets the session back to the new profile's start folder.
-		if (session.HasProjected &&
-			!string.Equals(session.AssignedProfileId, device.StartupProfileId, StringComparison.Ordinal))
+		if (session.HasProjected
+			&& !string.Equals(session.AssignedProfileId, device.StartupProfileId, StringComparison.Ordinal))
 		{
 			session.ProfileId = null;
 			session.FolderId = null;
@@ -481,8 +492,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 	{
 		// The current folder was deleted under the device: the projection falls back to the profile's
 		// start folder, and the stale id must not survive in the history either.
-		var fellBack = session.FolderId is not null &&
-			!string.Equals(session.FolderId, projection.FolderId, StringComparison.Ordinal);
+		var fellBack = session.FolderId is not null
+			&& !string.Equals(session.FolderId, projection.FolderId, StringComparison.Ordinal);
 
 		session.ProfileId = projection.ProfileId;
 		session.FolderId = projection.FolderId;
@@ -509,9 +520,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 		// The whole point of the rule: a rebuild that lands on the same content is not a change, so
 		// nothing is pushed and the revision the provider is rendering stays valid.
-		if (!force &&
-			session.LastPushed is { } last &&
-			DeviceSurfaceComparison.SameContent(last, projection.Surface))
+		if (!force && session.LastPushed is { } last && DeviceSurfaceComparison.SameContent(last, projection.Surface))
 		{
 			return;
 		}
@@ -539,9 +548,10 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 				}
 
 				var profileId = command.ProfileId ?? session.ProfileId;
-				if (profileId is null ||
-					!FoldersOf(profileId).Any(folder =>
-						string.Equals(folder.Id, folderId, StringComparison.Ordinal)))
+				if (profileId is null
+					|| !FoldersOf(profileId)
+						.Any(folder =>
+							string.Equals(folder.Id, folderId, StringComparison.Ordinal)))
 				{
 					return false;
 				}
@@ -562,8 +572,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 				var folders = FoldersOf(profileId);
 				var current = folders.FirstOrDefault(folder =>
 					string.Equals(folder.Id, session.FolderId, StringComparison.Ordinal));
-				if (current?.ParentId is not { Length: > 0 } parentId ||
-					folders.All(folder => !string.Equals(folder.Id, parentId, StringComparison.Ordinal)))
+				if (current?.ParentId is not { Length: > 0 } parentId
+					|| folders.All(folder => !string.Equals(folder.Id, parentId, StringComparison.Ordinal)))
 				{
 					return false;
 				}
@@ -580,9 +590,10 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 				while (session.PopHistory() is { } previous)
 				{
 					var profileId = previous.ProfileId ?? session.ProfileId;
-					if (profileId is null ||
-						!FoldersOf(profileId).Any(folder =>
-							string.Equals(folder.Id, previous.FolderId, StringComparison.Ordinal)))
+					if (profileId is null
+						|| !FoldersOf(profileId)
+							.Any(folder =>
+								string.Equals(folder.Id, previous.FolderId, StringComparison.Ordinal)))
 					{
 						continue;
 					}
@@ -604,12 +615,18 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 	private DeckClientChange? TrackLocked(DeviceSurfaceSession session)
 	{
 		var clientId = DeviceOrigin.For(session.DeviceId);
-		return !session.Closed && session.Online && session.ProfileId is { } profileId && session.FolderId is { } folderId
-			? _deckClients.Report(clientId, session.DeviceId, profileId, folderId)
-			: _deckClients.Remove(clientId);
+		return !session.Closed
+			&& session.Online
+			&& session.ProfileId is { } profileId
+			&& session.FolderId is { } folderId
+				? _deckClients.Report(clientId, session.DeviceId, profileId, folderId)
+				: _deckClients.Remove(clientId);
 	}
 
-	private IReadOnlyList<Folder> FoldersOf(string profileId) => _profiles.GetFoldersForProfile(profileId);
+	private IReadOnlyList<Folder> FoldersOf(string profileId)
+	{
+		return _profiles.GetFoldersForProfile(profileId);
+	}
 
 	private async Task ReportFolderChanged(
 		DeviceSurfaceSession session,

@@ -276,7 +276,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		};
 
 		Devices.Devices.Add(device);
-		Presence.Set(device.Id, online: true);
+		Presence.Set(device.Id, true);
 		return device.Id;
 	}
 
@@ -288,13 +288,19 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 	}
 
 	public Task<bool> ChangeToAsync(Guid deviceId, string folderId, string? profileId = null)
-		=> Service.NavigateAsync(deviceId, DeckNavigationCommand.ChangeTo(folderId, profileId));
+	{
+		return Service.NavigateAsync(deviceId, DeckNavigationCommand.ChangeTo(folderId, profileId));
+	}
 
 	public Task<bool> ParentAsync(Guid deviceId)
-		=> Service.NavigateAsync(deviceId, new DeckNavigationCommand { Command = DeckNavigationCommands.Parent });
+	{
+		return Service.NavigateAsync(deviceId, new DeckNavigationCommand { Command = DeckNavigationCommands.Parent });
+	}
 
 	public Task<bool> BackAsync(Guid deviceId)
-		=> Service.NavigateAsync(deviceId, new DeckNavigationCommand { Command = DeckNavigationCommands.Back });
+	{
+		return Service.NavigateAsync(deviceId, new DeckNavigationCommand { Command = DeckNavigationCommands.Back });
+	}
 
 	/// <summary>Advances the clock past any coalescing window and lets the resulting work run.</summary>
 	public async Task SettleAsync()
@@ -321,7 +327,10 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		await SettleAsync();
 	}
 
-	public void SetFolders(string profileId, params Folder[] folders) => Profiles.SetFolders(profileId, folders);
+	public void SetFolders(string profileId, params Folder[] folders)
+	{
+		Profiles.SetFolders(profileId, folders);
+	}
 
 	public void Dispose()
 	{
@@ -333,12 +342,12 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 	{
 		Profiles.AddProfile(StudioProfileId,
 			"Studio",
-			defaultRows: 3,
-			defaultColumns: 5,
-			backgroundColor: "#101010",
-			widgetSpacing: 8,
-			widgetBorderRadius: 12);
-		Profiles.AddProfile(StageProfileId, "Stage", defaultRows: 2, defaultColumns: 2);
+			3,
+			5,
+			"#101010",
+			8,
+			12);
+		Profiles.AddProfile(StageProfileId, "Stage", 2, 2);
 
 		Home = new Folder
 		{
@@ -375,10 +384,15 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 	{
 		private readonly IDeviceSurfaceProvider _provider;
 
-		public SingleProviderResolver(IDeviceSurfaceProvider provider) => _provider = provider;
+		public SingleProviderResolver(IDeviceSurfaceProvider provider)
+		{
+			_provider = provider;
+		}
 
 		public IDeviceSurfaceProvider? Resolve(string providerId)
-			=> string.Equals(providerId, _provider.ProviderId, StringComparison.Ordinal) ? _provider : null;
+		{
+			return string.Equals(providerId, _provider.ProviderId, StringComparison.Ordinal) ? _provider : null;
+		}
 	}
 }
 
@@ -388,7 +402,10 @@ internal sealed class RecordingSurfaceProvider : IDeviceSurfaceProvider
 	private readonly List<(string DeviceId, DeviceSurface Surface)> _pushes = [];
 	private readonly Lock _sync = new();
 
-	public RecordingSurfaceProvider(string providerId) => ProviderId = providerId;
+	public RecordingSurfaceProvider(string providerId)
+	{
+		ProviderId = providerId;
+	}
 
 	public string ProviderId { get; }
 
@@ -418,9 +435,15 @@ internal sealed class RecordingSurfaceProvider : IDeviceSurfaceProvider
 		];
 	}
 
-	public DeviceSurface Latest(Guid deviceId) => SurfacesFor(deviceId)[^1];
+	public DeviceSurface Latest(Guid deviceId)
+	{
+		return SurfacesFor(deviceId)[^1];
+	}
 
-	public int PushCount(Guid deviceId) => SurfacesFor(deviceId).Count;
+	public int PushCount(Guid deviceId)
+	{
+		return SurfacesFor(deviceId).Count;
+	}
 
 	public Task<bool> OpenAsync(DeviceSurfaceSessionDescriptor session, CancellationToken cancellationToken)
 	{
@@ -521,15 +544,22 @@ internal sealed class FakeWidgetStateService : IWidgetStateService
 	private readonly Dictionary<Guid, WidgetStateResolution> _states = [];
 
 	public void Set(Guid widgetId, string stateId, string label)
-		=> _states[widgetId] = new WidgetStateResolution(stateId,
+	{
+		_states[widgetId] = new WidgetStateResolution(stateId,
 			LocalizedText.FromLiteral(label),
 			[],
-			ProviderSetChanged: false);
+			false);
+	}
 
 	public Task<WidgetStateResolution?> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_states.GetValueOrDefault(widgetId));
+	{
+		return Task.FromResult(_states.GetValueOrDefault(widgetId));
+	}
 
-	public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
+	public TimeSpan? GetProviderPollInterval(Guid widgetId)
+	{
+		return null;
+	}
 }
 
 /// <summary>No widget has an active icon provider until a test says otherwise, matching a deck with no
@@ -545,85 +575,170 @@ internal sealed class FakeWidgetIconService : IWidgetIconService
 	}
 
 	public void Set(Guid widgetId, WidgetIconLimit limit, WidgetIconResolution resolution)
-		=> _resolutions[(widgetId, limit)] = resolution;
+	{
+		_resolutions[(widgetId, limit)] = resolution;
+	}
 
 	public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-		=> Resolve(widgetId, WidgetIconLimit.Host, cancellationToken);
+	{
+		return Resolve(widgetId, WidgetIconLimit.Host, cancellationToken);
+	}
 
-	public Task<WidgetIconResolution> Resolve(Guid widgetId,
+	public Task<WidgetIconResolution> Resolve(
+		Guid widgetId,
 		WidgetIconLimit limit,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(_resolutions.GetValueOrDefault((widgetId, limit), WidgetIconResolution.Inactive));
+	{
+		return Task.FromResult(_resolutions.GetValueOrDefault((widgetId, limit), WidgetIconResolution.Inactive));
+	}
 
-	public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
+	public TimeSpan? GetProviderPollInterval(Guid widgetId)
+	{
+		return null;
+	}
 }
 
 internal sealed class FakeLabelTextService : ILabelTextService
 {
 	private readonly Dictionary<(Guid WidgetId, string State), string> _texts = [];
 
-	public void Set(Guid widgetId, string state, string text) => _texts[(widgetId, state)] = text;
+	public void Set(Guid widgetId, string state, string text)
+	{
+		_texts[(widgetId, state)] = text;
+	}
 
 	public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_texts.GetValueOrDefault((widgetId, state)));
+	{
+		return Task.FromResult(_texts.GetValueOrDefault((widgetId, state)));
+	}
 
 	public Task<string?> ResolvePreview(LabelImagePreviewRequest request, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(null);
+	{
+		return Task.FromResult<string?>(null);
+	}
 }
 
 internal sealed class StubIconPackCache : IIconPackCache
 {
 	private readonly Dictionary<Guid, IconEntity> _icons = [];
 
-	public void Add(IconEntity icon) => _icons[icon.Id] = icon;
+	public void Add(IconEntity icon)
+	{
+		_icons[icon.Id] = icon;
+	}
 
-	public IconEntity? GetIconById(Guid iconId) => _icons.GetValueOrDefault(iconId);
+	public IconEntity? GetIconById(Guid iconId)
+	{
+		return _icons.GetValueOrDefault(iconId);
+	}
 
 	public IReadOnlyList<IconEntity> GetAppearances(Guid parentId)
-		=> _icons.Values.Where(icon => icon.AppearanceOfId == parentId).ToList();
+	{
+		return _icons.Values.Where(icon => icon.AppearanceOfId == parentId).ToList();
+	}
 
-	public Task InitializeCache() => Task.CompletedTask;
+	public Task InitializeCache()
+	{
+		return Task.CompletedTask;
+	}
 
-	public IconPackEntity? GetPackById(Guid id) => null;
+	public IconPackEntity? GetPackById(Guid id)
+	{
+		return null;
+	}
 
-	public List<IconPackEntity> GetAllPacks() => [];
+	public List<IconPackEntity> GetAllPacks()
+	{
+		return [];
+	}
 
-	public IconPackEntity? GetDefaultPack() => null;
+	public IconPackEntity? GetDefaultPack()
+	{
+		return null;
+	}
 
-	public Task AddOrUpdatePack(IconPackEntity pack) => Task.CompletedTask;
+	public Task AddOrUpdatePack(IconPackEntity pack)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task RemovePack(Guid id) => Task.CompletedTask;
+	public Task RemovePack(Guid id)
+	{
+		return Task.CompletedTask;
+	}
 
-	public List<IconEntity> GetIconsByPackId(Guid packId) => [];
+	public List<IconEntity> GetIconsByPackId(Guid packId)
+	{
+		return [];
+	}
 
-	public List<IconEntity> GetIconsByBatchId(Guid batchId) => [];
+	public List<IconEntity> GetIconsByBatchId(Guid batchId)
+	{
+		return [];
+	}
 
-	public List<IconEntity> GetIconsByState(params IconProcessingState[] states) => [];
+	public List<IconEntity> GetIconsByState(params IconProcessingState[] states)
+	{
+		return [];
+	}
 
-	public int GetIconCount(Guid packId) => 0;
+	public int GetIconCount(Guid packId)
+	{
+		return 0;
+	}
 
-	public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null) => null;
+	public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null)
+	{
+		return null;
+	}
 
-	public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null) => null;
+	public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null)
+	{
+		return null;
+	}
 
-	public List<IconEntity> GetIconsMissingMasterContentHash() => [];
+	public List<IconEntity> GetIconsMissingMasterContentHash()
+	{
+		return [];
+	}
 
-	public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons) => Task.CompletedTask;
+	public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task UpdateIcon(IconEntity icon) => Task.CompletedTask;
+	public Task UpdateIcon(IconEntity icon)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task RemoveIcon(Guid iconId) => Task.CompletedTask;
+	public Task RemoveIcon(Guid iconId)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds) => Task.CompletedTask;
+	public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task FlushPendingWrites() => Task.CompletedTask;
+	public Task FlushPendingWrites()
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class DeviceDefaultShortPress : IWidgetDefaultShortPress
 {
 	public HashSet<string> TypesWithADeviceDefault { get; } = new(StringComparer.Ordinal);
 
-	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice) => null;
+	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice)
+	{
+		return null;
+	}
 
-	public bool RunsOnDevices(string widgetType) => TypesWithADeviceDefault.Contains(widgetType);
+	public bool RunsOnDevices(string widgetType)
+	{
+		return TypesWithADeviceDefault.Contains(widgetType);
+	}
 }

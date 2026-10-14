@@ -59,12 +59,15 @@ internal static class WidgetConfigTestSupport
 		return values.Any(value => string.Equals(value, current, StringComparison.OrdinalIgnoreCase));
 	}
 
-	private static string SiblingText(JsonElement? value) => value?.ValueKind switch
+	private static string SiblingText(JsonElement? value)
 	{
-		JsonValueKind.String => value.Value.GetString() ?? string.Empty,
-		JsonValueKind.True => "true",
-		JsonValueKind.False => "false",
-		JsonValueKind.Number => value.Value.GetRawText(),
-		_ => string.Empty,
-	};
+		return value?.ValueKind switch
+		{
+			JsonValueKind.String => value.Value.GetString() ?? string.Empty,
+			JsonValueKind.True => "true",
+			JsonValueKind.False => "false",
+			JsonValueKind.Number => value.Value.GetRawText(),
+			_ => string.Empty
+		};
+	}
 }

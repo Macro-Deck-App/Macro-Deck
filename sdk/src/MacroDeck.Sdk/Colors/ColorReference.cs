@@ -9,5 +9,8 @@ public static class ColorReference
 	/// length and step bounds Macro Deck resolves. Pass such a value to <see cref="IColorApi" /> rather than
 	/// painting it.
 	/// </summary>
-	public static bool IsReference(string? value) => ColorGrammar.IsReference(value);
+	public static bool IsReference(string? value)
+	{
+		return ColorGrammar.IsReference(value);
+	}
 }

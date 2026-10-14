@@ -25,17 +25,22 @@ internal sealed class SetRecordDirectoryActionDefinition : IDynamicOptionsAction
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.Text(DirectoryParameter,
-			label: AppStrings.Integrations.Obs.Actions.SetRecordDirectory.DirectoryLabel(),
-			description: AppStrings.Integrations.Obs.Actions.SetRecordDirectory.DirectoryDescription(),
+			AppStrings.Integrations.Obs.Actions.SetRecordDirectory.DirectoryLabel(),
+			AppStrings.Integrations.Obs.Actions.SetRecordDirectory.DirectoryDescription(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(_resolver.ConfigurationOptions());
+	{
+		return Task.FromResult(_resolver.ConfigurationOptions());
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -53,8 +58,8 @@ internal sealed class SetRecordDirectoryActionDefinition : IDynamicOptionsAction
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(DirectoryParameter) is not string directory ||
-				string.IsNullOrWhiteSpace(directory))
+			if (context.Parameters.GetValueOrDefault(DirectoryParameter) is not string directory
+				|| string.IsNullOrWhiteSpace(directory))
 			{
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Obs.Errors.NoDirectorySelected());

@@ -35,7 +35,10 @@ public static partial class UiIdentifier
 
 	/// <summary>True when <paramref name="value" /> matches the grammar. Never throws, including on
 	/// <c>null</c>.</summary>
-	public static bool IsValid(string? value) => value is not null && Pattern().IsMatch(value);
+	public static bool IsValid(string? value)
+	{
+		return value is not null && Pattern().IsMatch(value);
+	}
 
 	/// <summary>Validates <paramref name="value" /> and reports why it failed. <paramref name="error" />
 	/// is non-null exactly when the return value is <c>false</c>.</summary>
@@ -52,8 +55,8 @@ public static partial class UiIdentifier
 			null => "The identifier is null.",
 			{ Length: 0 } => "The identifier is empty.",
 			{ Length: > MaxLength } => $"The identifier is longer than {MaxLength} characters.",
-			_ => "The identifier does not match the required grammar: an ASCII alphanumeric character " +
-				"followed by ASCII alphanumeric characters, dots, hyphens or underscores.",
+			_ => "The identifier does not match the required grammar: an ASCII alphanumeric character "
+				+ "followed by ASCII alphanumeric characters, dots, hyphens or underscores."
 		};
 
 		return false;

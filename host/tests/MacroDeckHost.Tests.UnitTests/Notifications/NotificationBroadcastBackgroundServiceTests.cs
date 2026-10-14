@@ -10,7 +10,9 @@ namespace MacroDeckHost.Tests.UnitTests.Notifications;
 
 public class NotificationBroadcastBackgroundServiceTests
 {
-	private static readonly NotificationOwner _plugin = new(NotificationSourceCategory.Plugin, "com.example", "Example");
+	private static readonly NotificationOwner
+		_plugin = new(NotificationSourceCategory.Plugin, "com.example", "Example");
+
 	private static readonly NotificationPrincipal _admin = new(true, null);
 
 	private NotificationManager _manager = null!;
@@ -79,18 +81,22 @@ public class NotificationBroadcastBackgroundServiceTests
 			await _manager.UpdateAsync(_plugin, shown.Id, new NotificationUpdate { Message = $"step {i}" });
 		}
 
-		Assert.That(() => _transport.Sent.Count(s => s.Message is NotificationUpdatedEvent), Is.EqualTo(1).After(2000, 10));
-		var updated = (NotificationUpdatedEvent)_transport.Sent.Single(s => s.Message is NotificationUpdatedEvent).Message;
+		Assert.That(() => _transport.Sent.Count(s => s.Message is NotificationUpdatedEvent),
+			Is.EqualTo(1).After(2000, 10));
+		var updated = (NotificationUpdatedEvent)_transport.Sent.Single(s => s.Message is NotificationUpdatedEvent)
+			.Message;
 		Assert.That(updated.Notification.Revision, Is.EqualTo(_manager.Find(shown.Id)!.Revision));
 	}
 
 	private static NotificationOptions Dialog()
-		=> new()
+	{
+		return new NotificationOptions
 		{
 			Title = "Question",
 			Popup = NotificationPopup.Dialog,
 			Actions = [new NotificationAction { Id = "ok", Label = "OK" }]
 		};
+	}
 
 	private sealed class CapturingTransport : IUiTransport
 	{
@@ -110,21 +116,31 @@ public class NotificationBroadcastBackgroundServiceTests
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Record("all", message);
+		{
+			return Record("all", message);
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Record(group, message);
+		{
+			return Record(group, message);
+		}
 
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Record(connectionId, message);
+		{
+			return Record(connectionId, message);
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		private Task Record(string route, object message)
 		{

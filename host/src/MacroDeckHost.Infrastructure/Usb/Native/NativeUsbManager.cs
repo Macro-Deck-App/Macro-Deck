@@ -18,7 +18,8 @@ internal sealed class NativeUsbManager : INativeUsbManager, IDisposable
 
 	private NativeUsbSettings? _settings;
 
-	public NativeUsbManager(IServiceScopeFactory scopeFactory,
+	public NativeUsbManager(
+		IServiceScopeFactory scopeFactory,
 		IAdbManager adbManager,
 		IHostListenerState listenerState,
 		AccessoryCoordinator android,
@@ -148,14 +149,18 @@ internal sealed class NativeUsbManager : INativeUsbManager, IDisposable
 	{
 		try
 		{
-			await Task.WhenAll(_android.WhenStopped(), _ios.WhenStopped()).WaitAsync(StopWait, _time, cancellationToken);
+			await Task.WhenAll(_android.WhenStopped(), _ios.WhenStopped())
+				.WaitAsync(StopWait, _time, cancellationToken);
 		}
 		catch (Exception ex) when (ex is TimeoutException or OperationCanceledException)
 		{
 		}
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
 	private bool BridgeAvailable => LoopbackBridgeDialer.Target(_listenerState.PublicEndpoints) is not null;
 
@@ -174,7 +179,9 @@ internal sealed class NativeUsbManager : INativeUsbManager, IDisposable
 		return settings;
 	}
 
-	private async Task<NativeUsbSettings> StoreAsync(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+	private async Task<NativeUsbSettings> StoreAsync(
+		bool? enabled,
+		IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
 	{
 		using var scope = _scopeFactory.CreateScope();
 		return await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>()
@@ -182,11 +189,13 @@ internal sealed class NativeUsbManager : INativeUsbManager, IDisposable
 	}
 
 	private NativeUsbStatus BuildStatus(NativeUsbSettings settings)
-		=> new(settings.Enabled,
+	{
+		return new NativeUsbStatus(settings.Enabled,
 			settings.Enabled && _android.Available,
 			settings.Enabled && _ios.Available,
 			BridgeAvailable,
 			_listenerState.PublicEndpoints is { HasPublicListener: true, LocalClientEndpoint.Ssl: true },
 			settings.Enabled ? [.. _android.Devices, .. _ios.Devices] : [],
 			settings.RememberedDevices);
+	}
 }

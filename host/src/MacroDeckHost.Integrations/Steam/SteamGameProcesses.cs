@@ -21,10 +21,10 @@ internal static class SteamGameProcesses
 		var root = directory.TrimEnd('/', '\\');
 		var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
-		return root.Length > 0 &&
-			path.Length > root.Length + 1 &&
-			path.StartsWith(root, comparison) &&
-			path[root.Length] is '/' or '\\';
+		return root.Length > 0
+			&& path.Length > root.Length + 1
+			&& path.StartsWith(root, comparison)
+			&& path[root.Length] is '/' or '\\';
 	}
 
 	[SupportedOSPlatform("windows")]
@@ -35,9 +35,9 @@ internal static class SteamGameProcesses
 		{
 			using (process)
 			{
-				if (ImagePath(process.Id) is { } path &&
-					IsUnder(path, installDirectory, ignoreCase: true) &&
-					Identify(process) is { } identified)
+				if (ImagePath(process.Id) is { } path
+					&& IsUnder(path, installDirectory, true)
+					&& Identify(process) is { } identified)
 				{
 					found.Add(identified);
 				}
@@ -75,7 +75,8 @@ internal static class SteamGameProcesses
 			process.Kill();
 			return true;
 		}
-		catch (Exception exception) when (exception is Win32Exception or InvalidOperationException
+		catch (Exception exception) when (exception is Win32Exception
+			or InvalidOperationException
 			or NotSupportedException)
 		{
 			return false;
@@ -124,8 +125,10 @@ internal static class SteamGameProcesses
 				return process;
 			}
 		}
-		catch (Exception exception) when (exception is ArgumentException or InvalidOperationException
-			or Win32Exception or NotSupportedException)
+		catch (Exception exception) when (exception is ArgumentException
+			or InvalidOperationException
+			or Win32Exception
+			or NotSupportedException)
 		{
 		}
 
@@ -139,7 +142,8 @@ internal static class SteamGameProcesses
 		{
 			return new SteamGameProcess(process.Id, process.StartTime);
 		}
-		catch (Exception exception) when (exception is InvalidOperationException or Win32Exception
+		catch (Exception exception) when (exception is InvalidOperationException
+			or Win32Exception
 			or NotSupportedException)
 		{
 			return null;

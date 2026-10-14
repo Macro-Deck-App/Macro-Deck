@@ -16,8 +16,8 @@ internal sealed class SpotifyIntegrationInstanceGuardTests
 		{
 			foreach (var variable in integration.Variables)
 			{
-				Assert.DoesNotThrowAsync(
-					async () => await integration.ReadAsync(variable.ResolvedId!, CancellationToken.None),
+				Assert.DoesNotThrowAsync(async ()
+						=> await integration.ReadAsync(variable.ResolvedId!, CancellationToken.None),
 					$"reading '{variable.Name}' must not throw while Spotify has no instances");
 			}
 		});

@@ -11,7 +11,8 @@ public interface IActionConditionEvaluator
 
 	bool Evaluate(JsonElement left, string? op, JsonElement right, VariableContext variables);
 
-	bool EvaluateExpression(JsonElement expression,
+	bool EvaluateExpression(
+		JsonElement expression,
 		VariableContext variables,
 		Action<ConditionLeafOutcome>? onLeaf = null);
 
@@ -99,7 +100,9 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 		JsonElement expression,
 		VariableContext variables,
 		Action<ConditionLeafOutcome>? onLeaf = null)
-		=> EvaluateNode(expression, variables, onLeaf, shortCircuited: false);
+	{
+		return EvaluateNode(expression, variables, onLeaf, false);
+	}
 
 	private bool EvaluateNode(
 		JsonElement node,
@@ -119,17 +122,19 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 		return kind switch
 		{
 			"compare" => EvaluateComparison(node, variables, onLeaf, shortCircuited),
-			"and" => EvaluateLogical(node, variables, onLeaf, shortCircuited, isAnd: true),
-			"or" => EvaluateLogical(node, variables, onLeaf, shortCircuited, isAnd: false),
+			"and" => EvaluateLogical(node, variables, onLeaf, shortCircuited, true),
+			"or" => EvaluateLogical(node, variables, onLeaf, shortCircuited, false),
 			null when IsUntaggedComparison(node) => EvaluateComparison(node, variables, onLeaf, shortCircuited),
 			_ => false
 		};
 	}
 
 	private static bool IsUntaggedComparison(JsonElement node)
-		=> node.TryGetProperty("operator", out _) ||
-			node.TryGetProperty("left", out _) ||
-			node.TryGetProperty("right", out _);
+	{
+		return node.TryGetProperty("operator", out _)
+			|| node.TryGetProperty("left", out _)
+			|| node.TryGetProperty("right", out _);
+	}
 
 	private bool EvaluateComparison(
 		JsonElement node,
@@ -168,7 +173,7 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 			}
 
 			var verdict = EvaluateOperator(leftSide.Value, op, rightOperand);
-			Report(onLeaf, id, shortCircuited ? null : verdict, leftDisplay, rightDisplay, error: null);
+			Report(onLeaf, id, shortCircuited ? null : verdict, leftDisplay, rightDisplay, null);
 			return verdict;
 		}
 		catch (Exception ex)
@@ -278,7 +283,9 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 	/// on purpose, rather than skipping it as unconfigured.
 	/// </summary>
 	public static bool IsStateOperator(string? op)
-		=> op is "isEmpty" or "isNotEmpty" or "isAvailable" or "isNotAvailable";
+	{
+		return op is "isEmpty" or "isNotEmpty" or "isAvailable" or "isNotAvailable";
+	}
 
 	public static bool EvaluateOperator(object? left, string op, object? right)
 	{
@@ -370,7 +377,9 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 	// Whether element carries a "$var" or "$event" key at all, independent of whether that reference goes
 	// on to resolve - see ResolveSide's Object case for why this distinction matters.
 	private static bool IsVariableOrEventReference(JsonElement element)
-		=> TryReadReferenceName(element, "$event", out _) || TryReadReferenceName(element, "$var", out _);
+	{
+		return TryReadReferenceName(element, "$event", out _) || TryReadReferenceName(element, "$var", out _);
+	}
 
 	private static bool TryReadReferenceName(JsonElement element, string property, out string name)
 	{
@@ -417,12 +426,14 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 	}
 
 	private static string Stringify(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			null => string.Empty,
 			bool b => b ? "true" : "false",
 			_ => value.ToString() ?? string.Empty
 		};
+	}
 
 	public static bool TryGetDouble(object? value, out double number)
 	{

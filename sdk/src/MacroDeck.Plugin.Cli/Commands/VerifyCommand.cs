@@ -20,8 +20,8 @@ internal static class VerifyCommand
 		var packageArgument = new Argument<string>("package") { Description = "The package to verify." };
 		var rootPublicOption = new Option<string?>("--root-public")
 		{
-			Description = "Verify the certificate against this root public key instead of the pinned Macro Deck " +
-				"root. Not for production use."
+			Description = "Verify the certificate against this root public key instead of the pinned Macro Deck "
+				+ "root. Not for production use."
 		};
 		var outputFormatOption = GlobalOptions.CreateOutputFormatOption();
 
@@ -46,8 +46,8 @@ internal static class VerifyCommand
 				if (rootPublicKey is null)
 				{
 					console.WriteError("root-public-key-unreadable",
-						$"'{CliText.DisplayPath(rootPublicPath)}' is not a readable base64-encoded Ed25519 public " +
-						"key.");
+						$"'{CliText.DisplayPath(rootPublicPath)}' is not a readable base64-encoded Ed25519 public "
+						+ "key.");
 					return ExitCode.InputUnreadable;
 				}
 
@@ -56,8 +56,8 @@ internal static class VerifyCommand
 				if (!rootAnchored)
 				{
 					console.WriteWarning("non-production-root",
-						"Verifying against --root-public instead of the pinned Macro Deck root; a successful " +
-						"result is not anchored to the Macro Deck root.");
+						"Verifying against --root-public instead of the pinned Macro Deck root; a successful "
+						+ "result is not anchored to the Macro Deck root.");
 				}
 			}
 
@@ -75,7 +75,8 @@ internal static class VerifyCommand
 		return command;
 	}
 
-	private static void WriteResult(CliConsole console,
+	private static void WriteResult(
+		CliConsole console,
 		CliOutputFormat format,
 		PackageVerifyResult result,
 		bool rootAnchored)
@@ -93,9 +94,9 @@ internal static class VerifyCommand
 	{
 		if (result.Success)
 		{
-			console.WriteLine($"{result.Format}: valid, signed by certificate {result.CertificateId}" +
-				(result.IssuerCertificateId is { } issuer ? $" issued by {issuer}" : "") +
-				(rootAnchored ? "." : " (not anchored to the Macro Deck root)."));
+			console.WriteLine($"{result.Format}: valid, signed by certificate {result.CertificateId}"
+				+ (result.IssuerCertificateId is { } issuer ? $" issued by {issuer}" : "")
+				+ (rootAnchored ? "." : " (not anchored to the Macro Deck root)."));
 		}
 		else
 		{

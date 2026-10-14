@@ -161,6 +161,37 @@ text or the anchor's hand. A deck key tile or press-claiming node keeps the hand
 `cursors.test.mjs` in `ui/angular` fails on any `cursor: pointer` that is not on its allowlist; adding
 a link or card means adding its line there.
 
+## C# code style
+
+[`MacroDeck.slnx.DotSettings`](MacroDeck.slnx.DotSettings) is the C# style, applied in Rider by
+"Reformat & Apply Syntax Style". Nothing reformats C# after it is written, so write it the way that
+cleanup would leave it:
+
+- Methods, constructors, operators, local functions and default interface methods get a block body,
+  one-liners included (`ToString()`, `throw new NotSupportedException();`, `return Task.CompletedTask;`).
+  Properties, indexers and lambdas stay expression-bodied; a long one breaks before `=>`.
+- `new()` only where the declaration names the type (field, property, explicitly typed local).
+  Everywhere else write the type: `return new Foo { ... };`, `Use(new Foo(...))`.
+- Positional arguments. Name an argument only where the call cannot compile without it.
+- No trailing comma in object, collection, dictionary or anonymous-object initializers, collection
+  expressions or enums.
+- No redundant parentheses: `a | b << 8`, `State is A or B && ready`.
+- No unused `using` directives; keep them sorted.
+- Wrap at 120 columns, a tab counting as 4:
+  - Binary operators (`&&`, `||`, `??`, `+`) and the `?` and `:` of a conditional start the
+    continuation line, never end the previous one.
+  - A declaration whose parameters do not fit breaks right after `(` with one parameter per line.
+  - A call that does not fit keeps its first argument after `(` and puts each further argument on
+    its own line.
+  - A method chain that does not fit puts each `.Call()` on its own line.
+  - An object or collection initializer that does not fit puts each entry on its own line.
+  - A declaration whose initializer does not fit breaks before `=`.
+- Naming: private static fields, `static readonly` included, are `_camelCase`; constants are
+  `PascalCase` at every access level, interop constants too (`WmQuit`, not `WM_QUIT`); acronyms
+  are words (`CfString`, `ReadNsString`, `Msg`); no trailing underscores. Only `extern` and
+  `DllImport`/`LibraryImport` entry points keep their native names.
+- NUnit: `await Assert.MultipleAsync(async () => ...)`, never `Assert.Multiple` with an async lambda.
+
 ## Code comments
 
 Internal implementation code normally carries no comments and no XML documentation. Comment only for

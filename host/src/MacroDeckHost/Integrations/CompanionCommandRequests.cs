@@ -17,9 +17,15 @@ public sealed record CompanionCommandResult(byte[]? Png, CompanionDeviceFailure?
 
 	public bool IsUnconfirmed { get; init; }
 
-	public static CompanionCommandResult Of(byte[] png) => new(png, null);
+	public static CompanionCommandResult Of(byte[] png)
+	{
+		return new CompanionCommandResult(png, null);
+	}
 
-	public static CompanionCommandResult Failed(CompanionDeviceFailure failure) => new(null, failure);
+	public static CompanionCommandResult Failed(CompanionDeviceFailure failure)
+	{
+		return new CompanionCommandResult(null, failure);
+	}
 }
 
 public sealed class CompanionCommandRequests
@@ -46,7 +52,8 @@ public sealed class CompanionCommandRequests
 		Open = Pending | Claimed
 	}
 
-	public async Task<CompanionCommandResult> RequestAsync(Guid deviceId,
+	public async Task<CompanionCommandResult> RequestAsync(
+		Guid deviceId,
 		CompanionRequestKind kind,
 		bool requiresClaim,
 		Func<string, Task<bool>> send,
@@ -83,7 +90,8 @@ public sealed class CompanionCommandRequests
 		}
 	}
 
-	private async Task<bool> SendAsync(Func<string, Task<bool>> send,
+	private async Task<bool> SendAsync(
+		Func<string, Task<bool>> send,
 		(Guid, string RequestId) key,
 		PendingRequest pending)
 	{
@@ -91,17 +99,19 @@ public sealed class CompanionCommandRequests
 		{
 			return await send(key.RequestId);
 		}
-		catch (Exception ex) when (ex is not OperationCanceledException &&
-			!TryFinish(key, pending, State.Pending, null))
+		catch (Exception ex) when (ex is not OperationCanceledException
+			&& !TryFinish(key, pending, State.Pending, null))
 		{
 			return true;
 		}
 	}
 
 	public bool IsAwaitingAnswer(Guid deviceId, string requestId, CompanionRequestKind kind)
-		=> _pending.TryGetValue((deviceId, requestId), out var pending) &&
-			pending.Kind == kind &&
-			(pending.State & pending.AnswerableFrom) != 0;
+	{
+		return _pending.TryGetValue((deviceId, requestId), out var pending)
+			&& pending.Kind == kind
+			&& (pending.State & pending.AnswerableFrom) != 0;
+	}
 
 	public bool TryClaim(Guid deviceId, string requestId, CompanionRequestKind kind)
 	{
@@ -119,8 +129,8 @@ public sealed class CompanionCommandRequests
 			}
 
 			pending.State = State.Claimed;
-			pending.ClaimedDeadline = _timeProvider.CreateTimer(
-				_ => TryFinish(key, pending, State.Claimed, pending.AfterClaim(CompanionDeviceFailure.TimedOut)),
+			pending.ClaimedDeadline = _timeProvider.CreateTimer(_
+					=> TryFinish(key, pending, State.Claimed, pending.AfterClaim(CompanionDeviceFailure.TimedOut)),
 				null,
 				kind == CompanionRequestKind.Command ? ClaimedCommandDeadline : ClaimedScreenshotDeadline,
 				Timeout.InfiniteTimeSpan);
@@ -129,14 +139,17 @@ public sealed class CompanionCommandRequests
 		return true;
 	}
 
-	public bool TryComplete(Guid deviceId,
+	public bool TryComplete(
+		Guid deviceId,
 		string requestId,
 		CompanionCommandResult result,
 		CompanionRequestKind kind,
 		bool afterRunning)
-		=> _pending.TryGetValue((deviceId, requestId), out var pending) &&
-			pending.Kind == kind &&
-			TryFinish((deviceId, requestId), pending, afterRunning ? pending.AnswerableFrom : State.Open, result);
+	{
+		return _pending.TryGetValue((deviceId, requestId), out var pending)
+			&& pending.Kind == kind
+			&& TryFinish((deviceId, requestId), pending, afterRunning ? pending.AnswerableFrom : State.Open, result);
+	}
 
 	public void FailDevice(Guid deviceId, CompanionDeviceFailure failure)
 	{
@@ -212,8 +225,10 @@ public sealed class CompanionCommandRequests
 		public ITimer? ClaimedDeadline { get; set; }
 
 		public CompanionCommandResult AfterClaim(CompanionDeviceFailure failure)
-			=> Kind == CompanionRequestKind.Command
+		{
+			return Kind == CompanionRequestKind.Command
 				? CompanionCommandResult.Unconfirmed
 				: CompanionCommandResult.Failed(failure);
+		}
 	}
 }

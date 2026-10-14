@@ -61,11 +61,14 @@ public sealed record HistoryGraphWidgetData
 				? (int)Math.Floor(historyLength.Value)
 				: DefaultHistoryLength,
 			ThresholdsEnabled = WidgetThresholds.ReadEnabled(data),
-			Thresholds = WidgetThresholds.ReadStored(data),
+			Thresholds = WidgetThresholds.ReadStored(data)
 		};
 	}
 
-	public static string VariableToken(string variableName) => $"{{{{ vars.{variableName} }}}}";
+	public static string VariableToken(string variableName)
+	{
+		return $"{{{{ vars.{variableName} }}}}";
+	}
 
 	// An empty subtitle is an answer rather than an absence: the user cleared it, and the key it
 	// replaced must not resurrect it.
@@ -100,27 +103,36 @@ public sealed record HistoryGraphWidgetData
 	}
 
 	private static string? ReadString(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	/// <summary>
 	/// A colour only if it is one the widget profile can carry. The editor's reset swatch stores the
 	/// client's own <c>var(--color-accent)</c> sentinel in older profiles, and a widget tree spells "the
 	/// reader's accent" as an absent colour rather than as a literal a reader would have to know.
 	/// </summary>
-	private static string? ReadHexColor(JsonElement data, string name) => WidgetColor.Normalize(ReadString(data, name));
+	private static string? ReadHexColor(JsonElement data, string name)
+	{
+		return WidgetColor.Normalize(ReadString(data, name));
+	}
 
 	private static bool? ReadBool(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
 			? value.GetBoolean()
 			: null;
+	}
 
 	private static double? ReadDouble(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number) &&
-			double.IsFinite(number)
+	{
+		return data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
+			&& double.IsFinite(number)
 				? number
 				: null;
+	}
 }

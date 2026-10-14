@@ -8,15 +8,18 @@ namespace MacroDeck.Plugin.Cli.Packing;
 /// directly rather than through this fixed mapping - see <see cref="PluginPackReporter.Report" />.</summary>
 internal static class PluginPackFailureExitCode
 {
-	public static int For(PluginPackFailureReason? reason) => reason switch
+	public static int For(PluginPackFailureReason? reason)
 	{
-		PluginPackFailureReason.SourceNotFound => ExitCode.InputUnreadable,
-		PluginPackFailureReason.OutputExists => ExitCode.UsageError,
-		PluginPackFailureReason.SourceEntryRejected => ExitCode.SubjectInvalid,
-		PluginPackFailureReason.LimitExceeded => ExitCode.SubjectInvalid,
-		PluginPackFailureReason.WriteFailed => ExitCode.InternalError,
-		PluginPackFailureReason.ManifestInvalid => ExitCode.SubjectInvalid,
-		null => ExitCode.InternalError,
-		_ => ExitCode.InternalError
-	};
+		return reason switch
+		{
+			PluginPackFailureReason.SourceNotFound => ExitCode.InputUnreadable,
+			PluginPackFailureReason.OutputExists => ExitCode.UsageError,
+			PluginPackFailureReason.SourceEntryRejected => ExitCode.SubjectInvalid,
+			PluginPackFailureReason.LimitExceeded => ExitCode.SubjectInvalid,
+			PluginPackFailureReason.WriteFailed => ExitCode.InternalError,
+			PluginPackFailureReason.ManifestInvalid => ExitCode.SubjectInvalid,
+			null => ExitCode.InternalError,
+			_ => ExitCode.InternalError
+		};
+	}
 }

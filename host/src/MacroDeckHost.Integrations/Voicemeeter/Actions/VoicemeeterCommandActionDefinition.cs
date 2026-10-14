@@ -32,10 +32,10 @@ internal sealed class VoicemeeterCommandActionDefinition : IActionDefinition
 		Parameters =
 		[
 			ActionParameter.Choice(CommandParameter,
-				options: commands
+				commands
 					.Select(command => new ActionParameterOption { Value = command.Value, Label = command.Label })
 					.ToList(),
-				label: label,
+				label,
 				defaultValue: commands[0].Value,
 				required: true)
 		];
@@ -49,7 +49,10 @@ internal sealed class VoicemeeterCommandActionDefinition : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(_commands, _resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_commands, _resolver);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

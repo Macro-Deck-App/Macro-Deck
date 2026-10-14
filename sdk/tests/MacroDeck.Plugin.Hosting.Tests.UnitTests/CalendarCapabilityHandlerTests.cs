@@ -22,10 +22,16 @@ public class CalendarCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id_and_no_provider_declares_nothing()
@@ -86,9 +92,13 @@ public class CalendarCapabilityHandlerTests
 	public async Task Calendars_are_read_from_the_provider_that_owns_the_account()
 	{
 		var first = new TestCalendarIntegration("Google", "alice");
-		var second = new TestCalendarIntegration("Outlook", "bob");
-		second.Calendars["bob"] =
-			[new CalendarInfo { Id = "work", Name = "Work", Color = "#336699", IsPrimary = true }];
+		var second = new TestCalendarIntegration("Outlook", "bob")
+		{
+			Calendars =
+			{
+				["bob"] = [new CalendarInfo { Id = "work", Name = "Work", Color = "#336699", IsPrimary = true }]
+			}
+		};
 		var handler = new CalendarCapabilityHandler([first, second], TestMetadata.Default);
 
 		var result = await InvokeAsync<CalendarListResult>(handler,
@@ -107,15 +117,20 @@ public class CalendarCapabilityHandlerTests
 	[Test]
 	public async Task Events_pass_the_query_on_and_answer_with_summaries_in_start_order()
 	{
-		var provider = new TestCalendarIntegration("Google", "alice");
-		provider.Events["alice"] =
-		[
-			Event("late", _monday.AddHours(15)) with
+		var provider = new TestCalendarIntegration("Google", "alice")
+		{
+			Events =
 			{
-				Description = "Notes", Participants = [new CalendarParticipant { Name = "Bob" }]
-			},
-			Event("early", _monday.AddHours(9))
-		];
+				["alice"] =
+				[
+					Event("late", _monday.AddHours(15)) with
+					{
+						Description = "Notes", Participants = [new CalendarParticipant { Name = "Bob" }]
+					},
+					Event("early", _monday.AddHours(9))
+				]
+			}
+		};
 		var handler = new CalendarCapabilityHandler([provider], TestMetadata.Default);
 
 		var result = await InvokeAsync<CalendarEventsResult>(handler,
@@ -138,16 +153,21 @@ public class CalendarCapabilityHandlerTests
 	[Test]
 	public async Task An_events_reply_over_the_byte_budget_keeps_the_earliest_events_and_says_it_was_truncated()
 	{
-		var provider = new TestCalendarIntegration("Google", "alice");
-		provider.Events["alice"] =
-		[
-			.. Enumerable.Range(0, 2000)
-				.Reverse()
-				.Select(index => Event($"evt-{index:D4}", _monday.AddMinutes(index)) with
-				{
-					Title = new string('t', 1000), Location = new string('l', 1000)
-				})
-		];
+		var provider = new TestCalendarIntegration("Google", "alice")
+		{
+			Events =
+			{
+				["alice"] =
+				[
+					.. Enumerable.Range(0, 2000)
+						.Reverse()
+						.Select(index => Event($"evt-{index:D4}", _monday.AddMinutes(index)) with
+						{
+							Title = new string('t', 1000), Location = new string('l', 1000)
+						})
+				]
+			}
+		};
 		var handler = new CalendarCapabilityHandler([provider], TestMetadata.Default);
 
 		var result = await InvokeRawAsync(handler,
@@ -157,7 +177,8 @@ public class CalendarCapabilityHandlerTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Encoding.UTF8.GetByteCount(result.GetRawText()), Is.LessThanOrEqualTo(ProtocolLimits.MaxCalendarReplyBytes));
+			Assert.That(Encoding.UTF8.GetByteCount(result.GetRawText()),
+				Is.LessThanOrEqualTo(ProtocolLimits.MaxCalendarReplyBytes));
 			Assert.That(events.Truncated, Is.True);
 			Assert.That(events.Events, Is.Not.Empty);
 			Assert.That(events.Events.Select(e => e.Id),
@@ -170,24 +191,30 @@ public class CalendarCapabilityHandlerTests
 	[Test]
 	public async Task An_event_reply_carries_the_details_within_the_protocol_caps()
 	{
-		var provider = new TestCalendarIntegration("Google", "alice");
-		provider.Events["alice"] =
-		[
-			Event("review", _monday.AddHours(10)) with
+		var provider = new TestCalendarIntegration("Google", "alice")
+		{
+			Events =
 			{
-				Description = new string('d', ProtocolLimits.MaxCalendarDescriptionLength + 500),
-				MeetingUrl = "https://meet.example.com/" + new string('x', ProtocolLimits.MaxCalendarMeetingUrlLength),
-				Participants =
+				["alice"] =
 				[
-					new CalendarParticipant
+					Event("review", _monday.AddHours(10)) with
 					{
-						Name = "Bob", IsOrganizer = true, Response = CalendarResponseStatus.Tentative
-					},
-					.. Enumerable.Range(0, ProtocolLimits.MaxCalendarParticipants + 20)
-						.Select(index => new CalendarParticipant { Email = $"guest{index}@example.com" })
+						Description = new string('d', ProtocolLimits.MaxCalendarDescriptionLength + 500),
+						MeetingUrl = "https://meet.example.com/"
+						+ new string('x', ProtocolLimits.MaxCalendarMeetingUrlLength),
+						Participants =
+						[
+							new CalendarParticipant
+							{
+								Name = "Bob", IsOrganizer = true, Response = CalendarResponseStatus.Tentative
+							},
+							.. Enumerable.Range(0, ProtocolLimits.MaxCalendarParticipants + 20)
+								.Select(index => new CalendarParticipant { Email = $"guest{index}@example.com" })
+						]
+					}
 				]
 			}
-		];
+		};
 		var handler = new CalendarCapabilityHandler([provider], TestMetadata.Default);
 
 		var result = await InvokeAsync<CalendarEventResult>(handler,
@@ -245,10 +272,14 @@ public class CalendarCapabilityHandlerTests
 	}
 
 	private static CalendarEvent Event(string id, DateTimeOffset start)
-		=> new() { Id = id, CalendarId = "primary", Title = id, Start = start, End = start.AddMinutes(30) };
+	{
+		return new CalendarEvent
+			{ Id = id, CalendarId = "primary", Title = id, Start = start, End = start.AddMinutes(30) };
+	}
 
 	private static CapabilityInvocation Invocation(string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Calendar,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -259,6 +290,7 @@ public class CalendarCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private static async Task<JsonElement> InvokeRawAsync(
 		CalendarCapabilityHandler handler,
@@ -275,5 +307,7 @@ public class CalendarCapabilityHandlerTests
 		CalendarCapabilityHandler handler,
 		string operation,
 		object? arguments = null)
-		=> (await InvokeRawAsync(handler, operation, arguments)).Deserialize<T>(PluginProtocolJson.Options)!;
+	{
+		return (await InvokeRawAsync(handler, operation, arguments)).Deserialize<T>(PluginProtocolJson.Options)!;
+	}
 }

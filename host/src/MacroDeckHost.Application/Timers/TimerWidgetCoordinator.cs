@@ -62,7 +62,8 @@ public sealed class TimerWidgetCoordinator
 			}
 		});
 
-	public async Task<bool> HandleGestureAsync(Guid widgetId,
+	public async Task<bool> HandleGestureAsync(
+		Guid widgetId,
 		TimerGesture gesture,
 		string? originClientId,
 		Guid? originDeviceId)
@@ -105,9 +106,9 @@ public sealed class TimerWidgetCoordinator
 
 	public async Task StartWithDurationAsync(Guid widgetId, int seconds, string? originClientId, Guid? originDeviceId)
 	{
-		if (_lockState.IsLocked ||
-			FindWidget(widgetId) is not { } widget ||
-			TimerWidgetConfig.FromWidget(widget) is not { AsksForDuration: true } config)
+		if (_lockState.IsLocked
+			|| FindWidget(widgetId) is not { } widget
+			|| TimerWidgetConfig.FromWidget(widget) is not { AsksForDuration: true } config)
 		{
 			return;
 		}
@@ -120,7 +121,10 @@ public sealed class TimerWidgetCoordinator
 		}
 	}
 
-	public Task ApplyTickAsync(TimerWidgetTransition transition) => ApplyAsync(transition, null, null);
+	public Task ApplyTickAsync(TimerWidgetTransition transition)
+	{
+		return ApplyAsync(transition, null, null);
+	}
 
 	public async Task SyncAsync(WidgetEntity widget)
 	{
@@ -158,7 +162,7 @@ public sealed class TimerWidgetCoordinator
 	{
 		var previous = _store.Get(widgetId);
 
-		CancelPrompts(widgetId, exceptClientId: null);
+		CancelPrompts(widgetId, null);
 		_store.Remove(widgetId);
 		_variables.Forget(widgetId);
 
@@ -192,7 +196,8 @@ public sealed class TimerWidgetCoordinator
 		{
 			if (snapshot.LastEnteredSeconds is { } lastEntered)
 			{
-				await StartWithDurationAsync(snapshot.WidgetId, lastEntered, null, originDeviceId).ConfigureAwait(false);
+				await StartWithDurationAsync(snapshot.WidgetId, lastEntered, null, originDeviceId)
+					.ConfigureAwait(false);
 			}
 
 			return;
@@ -212,7 +217,8 @@ public sealed class TimerWidgetCoordinator
 		_ = PromptAsync(key, cancellation, snapshot.LastEnteredSeconds);
 	}
 
-	private async Task PromptAsync((Guid WidgetId, string ClientId) key,
+	private async Task PromptAsync(
+		(Guid WidgetId, string ClientId) key,
 		CancellationTokenSource cancellation,
 		int? initialSeconds)
 	{
@@ -249,7 +255,7 @@ public sealed class TimerWidgetCoordinator
 
 		if (snapshot.Phase != TimerWidgetPhase.Idle)
 		{
-			CancelPrompts(snapshot.WidgetId, exceptClientId: originClientId);
+			CancelPrompts(snapshot.WidgetId, originClientId);
 		}
 
 		// The variables are written before the flows run, so a flow starts on the state its trigger reports.
@@ -319,7 +325,7 @@ public sealed class TimerWidgetCoordinator
 						Scope = VariableScope.Widget,
 						ScopeRefId = widgetId.ToString(),
 						OwnerWidgetId = widgetId,
-						Origin = ExecutionOrigin.Host,
+						Origin = ExecutionOrigin.Host
 					},
 					CancellationToken.None)
 				.ConfigureAwait(false);
@@ -342,5 +348,9 @@ public sealed class TimerWidgetCoordinator
 	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)
-		=> _folders.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(widget => widget.Id == widgetId);
+	{
+		return _folders.GetAllFolders()
+			.SelectMany(folder => folder.Widgets)
+			.FirstOrDefault(widget => widget.Id == widgetId);
+	}
 }

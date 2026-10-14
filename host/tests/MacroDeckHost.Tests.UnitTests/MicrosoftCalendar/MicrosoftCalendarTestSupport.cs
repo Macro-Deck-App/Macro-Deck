@@ -32,11 +32,13 @@ internal sealed class GraphRecordedRequest(
 	public IReadOnlyDictionary<string, string> Query => ParseQuery(Uri.Query.TrimStart('?'));
 
 	public static IReadOnlyDictionary<string, string> ParseQuery(string query)
-		=> query.Split('&', StringSplitOptions.RemoveEmptyEntries)
+	{
+		return query.Split('&', StringSplitOptions.RemoveEmptyEntries)
 			.Select(pair => pair.Split('=', 2))
 			.ToDictionary(pair => Uri.UnescapeDataString(pair[0].Replace('+', ' ')),
 				pair => pair.Length > 1 ? Uri.UnescapeDataString(pair[1].Replace('+', ' ')) : string.Empty,
 				StringComparer.Ordinal);
+	}
 }
 
 internal sealed record GraphReply(HttpStatusCode Status, string Body, TimeSpan? RetryAfter = null);
@@ -49,7 +51,9 @@ internal sealed class GraphFakeServer : HttpMessageHandler
 	public List<GraphRecordedRequest> Requests { get; } = [];
 
 	public GraphFakeServer On(Func<GraphRecordedRequest, bool> match, HttpStatusCode status, string body)
-		=> On(match, _ => new GraphReply(status, body));
+	{
+		return On(match, _ => new GraphReply(status, body));
+	}
 
 	public GraphFakeServer On(Func<GraphRecordedRequest, bool> match, Func<GraphRecordedRequest, GraphReply> reply)
 	{
@@ -58,7 +62,9 @@ internal sealed class GraphFakeServer : HttpMessageHandler
 	}
 
 	public IReadOnlyList<GraphRecordedRequest> To(string pathPrefix)
-		=> Requests.Where(r => r.Uri.AbsolutePath.StartsWith(pathPrefix, StringComparison.Ordinal)).ToList();
+	{
+		return Requests.Where(r => r.Uri.AbsolutePath.StartsWith(pathPrefix, StringComparison.Ordinal)).ToList();
+	}
 
 	protected override async Task<HttpResponseMessage> SendAsync(
 		HttpRequestMessage request,
@@ -116,7 +122,8 @@ internal sealed class MicrosoftCalendarHarness : IDisposable
 		string? accountKey = null,
 		string accessToken = "access-0",
 		string refreshToken = "refresh-0")
-		=> Config.AddEntry(title ?? email,
+	{
+		return Config.AddEntry(title ?? email,
 			new Dictionary<string, string?>
 			{
 				[MicrosoftCalendarConfigKeys.ClientId] = ClientId,
@@ -134,8 +141,12 @@ internal sealed class MicrosoftCalendarHarness : IDisposable
 				[MicrosoftCalendarConfigKeys.AccessToken] = accessToken,
 				[MicrosoftCalendarConfigKeys.RefreshToken] = refreshToken
 			});
+	}
 
-	public Task StartAsync() => Integration.InitializeAsync(new SpotifyContextStub(Config));
+	public Task StartAsync()
+	{
+		return Integration.InitializeAsync(new SpotifyContextStub(Config));
+	}
 
 	public MicrosoftCalendarHarness Calendars(params string[] items)
 	{
@@ -160,19 +171,32 @@ internal sealed class MicrosoftCalendarHarness : IDisposable
 		string ownerName = "Megan Bowen",
 		bool isDefault = false,
 		string hexColor = "#e3008c")
-		=> $$"""
-			{"id":"{{id}}","name":"{{name}}","color":"auto","hexColor":"{{hexColor}}","isDefaultCalendar":{{(isDefault ? "true" : "false")}},"canEdit":true,"owner":{"name":"{{ownerName}}","address":"{{ownerAddress}}"} }
-			""";
+	{
+		return $$"""
+				 {"id":"{{id}}","name":"{{name}}","color":"auto","hexColor":"{{hexColor}}","isDefaultCalendar":{{(isDefault ? "true" : "false")}},"canEdit":true,"owner":{"name":"{{ownerName}}","address":"{{ownerAddress}}"} }
+				 """;
+	}
 
-	public static string CalendarViewPath(string calendarId) => $"/v1.0/me/calendars/{calendarId}/calendarView";
+	public static string CalendarViewPath(string calendarId)
+	{
+		return $"/v1.0/me/calendars/{calendarId}/calendarView";
+	}
 
-	public static string EventPath(string calendarId, string eventId) => $"/v1.0/me/calendars/{calendarId}/events/{eventId}";
+	public static string EventPath(string calendarId, string eventId)
+	{
+		return $"/v1.0/me/calendars/{calendarId}/events/{eventId}";
+	}
 
 	public static string IdToken(string email, string oid = "oid-1", string tid = "tid-1", string name = "Megan Bowen")
-		=> $"{Segment("""{"typ":"JWT","alg":"RS256"}""")}." +
-			$"{Segment($$"""{"oid":"{{oid}}","tid":"{{tid}}","preferred_username":"{{email}}","name":"{{name}}"}""")}.signature";
+	{
+		return $"{Segment("""{"typ":"JWT","alg":"RS256"}""")}."
+			+ $"{Segment($$"""{"oid":"{{oid}}","tid":"{{tid}}","preferred_username":"{{email}}","name":"{{name}}"}""")}.signature";
+	}
 
-	private static string Segment(string json) => Base64Url.EncodeToString(Encoding.UTF8.GetBytes(json));
+	private static string Segment(string json)
+	{
+		return Base64Url.EncodeToString(Encoding.UTF8.GetBytes(json));
+	}
 
 	public void Dispose()
 	{

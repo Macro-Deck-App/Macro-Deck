@@ -8,12 +8,16 @@ namespace MacroDeck.Plugin.Cli.Scaffolding;
 internal static class PluginScaffoldValidation
 {
 	public static CliDiagnostic? ValidatePluginId(string id)
-		=> PluginId.TryValidate(id, out var error) ? null : new CliDiagnostic("invalid-plugin-id", error!);
+	{
+		return PluginId.TryValidate(id, out var error) ? null : new CliDiagnostic("invalid-plugin-id", error!);
+	}
 
 	public static CliDiagnostic? ValidateUrl(string value, string fieldName)
-		=> PluginManifestUrls.IsAbsoluteHttpUrl(value)
+	{
+		return PluginManifestUrls.IsAbsoluteHttpUrl(value)
 			? null
 			: new CliDiagnostic($"invalid-{fieldName}-url", $"'{value}' must be an absolute http or https URL.");
+	}
 
 	/// <summary>Checks every token against the known RID vocabulary, then - only once every token is known -
 	/// that at least one survived. Order matters: an unknown token is always reported as
@@ -25,8 +29,8 @@ internal static class PluginScaffoldValidation
 			if (!PluginScaffoldDefaults.KnownPlatforms.Contains(platform, StringComparer.Ordinal))
 			{
 				return new CliDiagnostic("unknown-platform",
-					$"'{platform}' is not a supported target platform. Supported: " +
-					$"{string.Join(", ", PluginScaffoldDefaults.KnownPlatforms)}.");
+					$"'{platform}' is not a supported target platform. Supported: "
+					+ $"{string.Join(", ", PluginScaffoldDefaults.KnownPlatforms)}.");
 			}
 		}
 

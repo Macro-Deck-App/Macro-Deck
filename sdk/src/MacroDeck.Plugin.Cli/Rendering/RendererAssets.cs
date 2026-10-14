@@ -14,8 +14,8 @@ internal static class RendererAssets
 
 	private static byte[] Read(string name)
 	{
-		using var stream = typeof(RendererAssets).Assembly.GetManifestResourceStream(name) ??
-			throw new InvalidOperationException(
+		using var stream = typeof(RendererAssets).Assembly.GetManifestResourceStream(name)
+			?? throw new InvalidOperationException(
 				"This build of macrodeck-plugin has no preview renderer: run npm ci in ui and rebuild the CLI.");
 		using var gzip = new GZipStream(stream, CompressionMode.Decompress);
 		using var buffer = new MemoryStream();

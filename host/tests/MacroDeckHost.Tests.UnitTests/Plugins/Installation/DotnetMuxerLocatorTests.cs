@@ -68,7 +68,10 @@ internal sealed class DotnetMuxerLocatorTests
 	}
 
 	[TearDown]
-	public void DeleteRoot() => Directory.Delete(_root, recursive: true);
+	public void DeleteRoot()
+	{
+		Directory.Delete(_root, true);
+	}
 
 	private string BundledRoot(params (string Framework, string Version)[] frameworks)
 	{
@@ -92,15 +95,20 @@ internal sealed class DotnetMuxerLocatorTests
 		return path;
 	}
 
-	private static Dictionary<string, IReadOnlyList<Version>> Frameworks(params (string Framework, string Version)[] frameworks)
-		=> frameworks.GroupBy(f => f.Framework)
+	private static Dictionary<string, IReadOnlyList<Version>> Frameworks(
+		params (string Framework, string Version)[] frameworks)
+	{
+		return frameworks.GroupBy(f => f.Framework)
 			.ToDictionary(g => g.Key, g => (IReadOnlyList<Version>)g.Select(f => Version.Parse(f.Version)).ToList());
+	}
 
-	private static DotnetMuxerLocator Locator(string bundledRoot,
+	private static DotnetMuxerLocator Locator(
+		string bundledRoot,
 		string? systemMuxer,
 		IReadOnlyDictionary<string, IReadOnlyList<Version>>? systemFrameworks,
 		Action? onProbe = null)
-		=> new(Serilog.Core.Logger.None,
+	{
+		return new DotnetMuxerLocator(Serilog.Core.Logger.None,
 			bundledRoot,
 			() => systemMuxer is null ? [] : [systemMuxer],
 			_ =>
@@ -108,11 +116,16 @@ internal sealed class DotnetMuxerLocatorTests
 				onProbe?.Invoke();
 				return systemFrameworks;
 			});
+	}
 
-	private static DotnetFrameworkRequirement Requires(string name,
+	private static DotnetFrameworkRequirement Requires(
+		string name,
 		string version,
 		DotnetRollForward rollForward = DotnetRollForward.Minor)
-		=> new() { Name = name, Version = Version.Parse(version), RollForward = rollForward };
+	{
+		return new DotnetFrameworkRequirement
+			{ Name = name, Version = Version.Parse(version), RollForward = rollForward };
+	}
 
 	[Test]
 	public void The_bundled_runtime_is_chosen_over_a_system_install_when_it_has_every_framework()
@@ -158,7 +171,7 @@ internal sealed class DotnetMuxerLocatorTests
 	public void A_system_install_whose_frameworks_cannot_be_read_is_still_launched()
 	{
 		var system = SystemMuxer();
-		var locator = Locator(BundledRoot((NetCore, "10.0.12")), system, systemFrameworks: null);
+		var locator = Locator(BundledRoot((NetCore, "10.0.12")), system, null);
 
 		var selection = locator.Locate([Requires(NetCore, "9.0.0")]);
 
@@ -181,7 +194,7 @@ internal sealed class DotnetMuxerLocatorTests
 	[Test]
 	public void No_runtime_anywhere_yields_no_selection()
 	{
-		var locator = Locator(Path.Combine(_root, "missing"), systemMuxer: null, systemFrameworks: null);
+		var locator = Locator(Path.Combine(_root, "missing"), null, null);
 
 		Assert.That(locator.Locate([Requires(NetCore, "10.0.0")]), Is.Null);
 	}
@@ -190,7 +203,7 @@ internal sealed class DotnetMuxerLocatorTests
 	public void A_plugin_that_rolls_forward_across_majors_runs_on_the_bundled_runtime()
 	{
 		var bundled = BundledRoot((NetCore, "10.0.12"));
-		var locator = Locator(bundled, systemMuxer: null, systemFrameworks: null);
+		var locator = Locator(bundled, null, null);
 
 		Assert.Multiple(() =>
 		{
@@ -203,7 +216,7 @@ internal sealed class DotnetMuxerLocatorTests
 	[Test]
 	public void A_prerelease_bundled_runtime_is_read_by_its_numeric_core()
 	{
-		var locator = Locator(BundledRoot((NetCore, "10.0.0-rc.2.25502.107")), systemMuxer: null, systemFrameworks: null);
+		var locator = Locator(BundledRoot((NetCore, "10.0.0-rc.2.25502.107")), null, null);
 
 		Assert.That(locator.Locate([Requires(NetCore, "10.0.0")])?.UnmetRequirement, Is.Null);
 	}

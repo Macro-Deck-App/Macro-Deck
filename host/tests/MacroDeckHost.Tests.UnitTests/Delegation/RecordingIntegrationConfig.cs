@@ -33,10 +33,15 @@ internal sealed class RecordingIntegrationConfig : IIntegrationConfig
 		return entryId;
 	}
 
-	public void RemoveEntry(Guid entryId) => Entries.RemoveAll(e => e.Id == entryId);
+	public void RemoveEntry(Guid entryId)
+	{
+		Entries.RemoveAll(e => e.Id == entryId);
+	}
 
 	public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(Entries.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(Entries.ToList());
+	}
 
 	public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
 	{

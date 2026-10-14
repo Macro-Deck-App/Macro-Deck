@@ -17,16 +17,24 @@ public class PluginRegistrationRepository : IPluginRegistrationRepository
 	// Untracked on purpose: Reactivate, RotateSecret and Revoke write through ExecuteUpdate, which bypasses
 	// the change tracker, so a tracked read in the same scope would still return the row from before.
 	public Task<PluginRegistrationEntity?> GetByPluginId(string pluginId)
-		=> _context.PluginRegistrations.AsNoTracking().FirstOrDefaultAsync(r => r.PluginId == pluginId);
+	{
+		return _context.PluginRegistrations.AsNoTracking().FirstOrDefaultAsync(r => r.PluginId == pluginId);
+	}
 
 	public async Task<IReadOnlyList<PluginRegistrationEntity>> GetByAccessTokenId(Guid accessTokenId)
-		=> await _context.PluginRegistrations.Where(r => r.AccessTokenId == accessTokenId).ToListAsync();
+	{
+		return await _context.PluginRegistrations.Where(r => r.AccessTokenId == accessTokenId).ToListAsync();
+	}
 
 	public async Task<IReadOnlyList<PluginRegistrationEntity>> GetAll()
-		=> await _context.PluginRegistrations.OrderByDescending(r => r.CreatedAt).ToListAsync();
+	{
+		return await _context.PluginRegistrations.OrderByDescending(r => r.CreatedAt).ToListAsync();
+	}
 
 	public async Task<IReadOnlyList<PluginRegistrationEntity>> GetNonRevoked()
-		=> await _context.PluginRegistrations.Where(r => r.RevokedAt == null).ToListAsync();
+	{
+		return await _context.PluginRegistrations.Where(r => r.RevokedAt == null).ToListAsync();
+	}
 
 	public async Task Create(PluginRegistrationEntity registration)
 	{
@@ -44,7 +52,8 @@ public class PluginRegistrationRepository : IPluginRegistrationRepository
 		}
 	}
 
-	public async Task<bool> Reactivate(string pluginId,
+	public async Task<bool> Reactivate(
+		string pluginId,
 		string displayName,
 		string secretHash,
 		Guid? accessTokenId,
@@ -65,7 +74,8 @@ public class PluginRegistrationRepository : IPluginRegistrationRepository
 		return rows > 0;
 	}
 
-	public async Task<bool> RotateSecret(string pluginId,
+	public async Task<bool> RotateSecret(
+		string pluginId,
 		string displayName,
 		string secretHash,
 		Guid? accessTokenId,
@@ -86,14 +96,18 @@ public class PluginRegistrationRepository : IPluginRegistrationRepository
 	}
 
 	public Task TouchLastSeen(string pluginId, DateTime at)
-		=> _context.PluginRegistrations
+	{
+		return _context.PluginRegistrations
 			.Where(r => r.PluginId == pluginId)
 			.ExecuteUpdateAsync(s => s.SetProperty(r => r.LastSeenAt, at));
+	}
 
 	public Task Revoke(string pluginId, DateTime at)
-		=> _context.PluginRegistrations
+	{
+		return _context.PluginRegistrations
 			.Where(r => r.PluginId == pluginId && r.RevokedAt == null)
 			.ExecuteUpdateAsync(s => s.SetProperty(r => r.RevokedAt, at));
+	}
 
 	public async Task<IReadOnlyList<string>> RevokeByAccessTokenId(Guid accessTokenId, DateTime at)
 	{

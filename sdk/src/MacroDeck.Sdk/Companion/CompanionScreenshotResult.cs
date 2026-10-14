@@ -20,5 +20,8 @@ public sealed record CompanionScreenshotResult
 		return new CompanionScreenshotResult(png, null);
 	}
 
-	public static CompanionScreenshotResult Failed(CompanionDeviceFailure failure) => new(null, failure);
+	public static CompanionScreenshotResult Failed(CompanionDeviceFailure failure)
+	{
+		return new CompanionScreenshotResult(null, failure);
+	}
 }

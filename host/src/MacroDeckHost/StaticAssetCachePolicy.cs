@@ -14,14 +14,14 @@ public static partial class StaticAssetCachePolicy
 	// that installed one before the upgrade still has it, and it is only replaced if the response
 	// carrying it is never cached.
 
-	private static readonly HashSet<string> ServiceWorkerControlFiles = new(StringComparer.OrdinalIgnoreCase)
+	private static readonly HashSet<string> _serviceWorkerControlFiles = new(StringComparer.OrdinalIgnoreCase)
 	{
 		"ngsw.json",
 		"ngsw-worker.js",
 		"safety-worker.js",
 		"worker-basic.min.js",
 		"legacy-sw.js",
-		"macro-deck-worker.js",
+		"macro-deck-worker.js"
 	};
 
 	[GeneratedRegex(@"-[A-Za-z0-9]{8,}\.(?:js|css)$", RegexOptions.CultureInvariant)]
@@ -34,7 +34,7 @@ public static partial class StaticAssetCachePolicy
 
 	public static bool IsServiceWorkerControlFile(string fileName)
 	{
-		return ServiceWorkerControlFiles.Contains(fileName);
+		return _serviceWorkerControlFiles.Contains(fileName);
 	}
 
 	public static bool IsHtmlDocument(string fileName)

@@ -52,7 +52,8 @@ public static class NotificationContent
 		return new NotificationContentInfo(fields, bytes.Length);
 	}
 
-	public static bool TryValidateValues(IReadOnlyList<NotificationField> fields,
+	public static bool TryValidateValues(
+		IReadOnlyList<NotificationField> fields,
 		IReadOnlyDictionary<string, JsonElement>? provided,
 		out Dictionary<string, JsonElement> values,
 		out string? error)
@@ -91,23 +92,27 @@ public static class NotificationContent
 		return true;
 	}
 
-	private static bool IsValid(NotificationField field, JsonElement value) => field.Kind switch
+	private static bool IsValid(NotificationField field, JsonElement value)
 	{
-		NotificationFieldKind.Text => value.ValueKind == JsonValueKind.String &&
-			(value.GetString()?.Length ?? 0) <= NotificationLimits.MaxTextFieldLength,
-		NotificationFieldKind.Toggle => value.ValueKind is JsonValueKind.True or JsonValueKind.False,
-		NotificationFieldKind.Slider => value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var level) &&
-			double.IsFinite(level) &&
-			level is >= 0 and <= 1,
-		NotificationFieldKind.Segmented => value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var index) &&
-			index >= 0 &&
-			index < field.ChildCount,
-		_ => false
-	};
+		return field.Kind switch
+		{
+			NotificationFieldKind.Text => value.ValueKind == JsonValueKind.String
+				&& (value.GetString()?.Length ?? 0) <= NotificationLimits.MaxTextFieldLength,
+			NotificationFieldKind.Toggle => value.ValueKind is JsonValueKind.True or JsonValueKind.False,
+			NotificationFieldKind.Slider => value.ValueKind == JsonValueKind.Number
+				&& value.TryGetDouble(out var level)
+				&& double.IsFinite(level)
+				&& level is >= 0 and <= 1,
+			NotificationFieldKind.Segmented => value.ValueKind == JsonValueKind.Number
+				&& value.TryGetInt32(out var index)
+				&& index >= 0
+				&& index < field.ChildCount,
+			_ => false
+		};
+	}
 
-	private static void Walk(UiNode node,
+	private static void Walk(
+		UiNode node,
 		int depth,
 		List<NotificationField> fields,
 		HashSet<string> ids,
@@ -175,16 +180,16 @@ public static class NotificationContent
 
 	private static bool DeclaresValueEvent(UiNode node)
 	{
-		if (!node.Properties.TryGetValue(UiComponentProperties.Events, out var events) ||
-			events.ValueKind != JsonValueKind.Array)
+		if (!node.Properties.TryGetValue(UiComponentProperties.Events, out var events)
+			|| events.ValueKind != JsonValueKind.Array)
 		{
 			return false;
 		}
 
 		foreach (var item in events.EnumerateArray())
 		{
-			if (item.ValueKind == JsonValueKind.String &&
-				item.GetString() is UiComponentEvents.Change or UiComponentEvents.Adjust)
+			if (item.ValueKind == JsonValueKind.String
+				&& item.GetString() is UiComponentEvents.Change or UiComponentEvents.Adjust)
 			{
 				return true;
 			}
@@ -195,8 +200,8 @@ public static class NotificationContent
 
 	private static JsonElement Seed(UiNode node, string property, JsonValueKind? kind, string fallbackJson)
 	{
-		if (node.Properties.TryGetValue(property, out var value) &&
-			(kind is null ? value.ValueKind is JsonValueKind.True or JsonValueKind.False : value.ValueKind == kind))
+		if (node.Properties.TryGetValue(property, out var value)
+			&& (kind is null ? value.ValueKind is JsonValueKind.True or JsonValueKind.False : value.ValueKind == kind))
 		{
 			return value.Clone();
 		}
@@ -204,5 +209,8 @@ public static class NotificationContent
 		return JsonDocument.Parse(fallbackJson).RootElement.Clone();
 	}
 
-	private static NotificationException Invalid(string message) => new(NotificationErrorCode.Invalid, message);
+	private static NotificationException Invalid(string message)
+	{
+		return new NotificationException(NotificationErrorCode.Invalid, message);
+	}
 }

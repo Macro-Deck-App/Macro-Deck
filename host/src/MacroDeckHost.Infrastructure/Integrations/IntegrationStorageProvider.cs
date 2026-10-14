@@ -12,7 +12,7 @@ public sealed class IntegrationStorageProvider : IDisposable
 	// Keyed by storage key alone, because naming the integration here would couple the host to it (ADR 0107).
 	// A file listed here is adopted whenever it exists, so restoring an archive that predates storage wins.
 	private static readonly Dictionary<string, string> _legacyFiles =
-		new Dictionary<string, string>(StringComparer.Ordinal)
+		new(StringComparer.Ordinal)
 		{
 			["system-audio-devices.json"] = "system-audio-devices.json"
 		};
@@ -74,7 +74,7 @@ public sealed class IntegrationStorageProvider : IDisposable
 			{
 				if (File.Exists(legacyPath + suffix))
 				{
-					File.Move(legacyPath + suffix, path + suffix, overwrite: true);
+					File.Move(legacyPath + suffix, path + suffix, true);
 				}
 			}
 
@@ -87,8 +87,10 @@ public sealed class IntegrationStorageProvider : IDisposable
 	}
 
 	private static bool IsSafeDirectoryName(string? name)
-		=> !string.IsNullOrWhiteSpace(name) &&
-			name is not ("." or "..") &&
-			name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0 &&
-			name.IndexOfAny(['/', '\\', ':']) < 0;
+	{
+		return !string.IsNullOrWhiteSpace(name)
+			&& name is not ("." or "..")
+			&& name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
+			&& name.IndexOfAny(['/', '\\', ':']) < 0;
+	}
 }

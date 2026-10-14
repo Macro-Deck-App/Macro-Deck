@@ -26,14 +26,19 @@ internal sealed class YouTubeStatePollerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _poller.Dispose();
+	public void TearDown()
+	{
+		_poller.Dispose();
+	}
 
 	[Test]
 	public async Task A_live_persistent_broadcast_counts_as_live()
 	{
-		_api.Active.Add(YouTubeTestSupport.Broadcast("persistent", YouTubeLifeCycleStatus.Live, "chat-1",
-			enableAutoStart: true));
-		_api.Videos["persistent"] = YouTubeTestSupport.Video("persistent", viewers: 42, likes: 7, title: "Stream now");
+		_api.Active.Add(YouTubeTestSupport.Broadcast("persistent",
+			YouTubeLifeCycleStatus.Live,
+			"chat-1",
+			true));
+		_api.Videos["persistent"] = YouTubeTestSupport.Video("persistent", 42, 7, "Stream now");
 
 		await _poller.PollOnceAsync(CancellationToken.None);
 
@@ -195,13 +200,19 @@ internal sealed class YouTubeStatePollerTests
 	}
 
 	private YouTubeStatePoller Poller(IYouTubeApiClient api)
-		=> new(api,
+	{
+		return new YouTubeStatePoller(api,
 			_budget,
 			YouTubeTestSupport.Account(),
 			update => _state = update(_state),
 			_transitions.Add,
-			_ => { },
-			() => { },
+			_ =>
+			{
+			},
+			() =>
+			{
+			},
 			YouTubeTestSupport.Silent,
 			YouTubeTestSupport.ManualOptions(_clock));
+	}
 }

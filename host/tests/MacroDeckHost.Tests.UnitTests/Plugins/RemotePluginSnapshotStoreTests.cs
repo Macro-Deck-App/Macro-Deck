@@ -106,10 +106,16 @@ internal sealed class RemotePluginSnapshotStoreTests
 	private TestPaths _paths = null!;
 
 	[SetUp]
-	public void SetUp() => _paths = new TestPaths();
+	public void SetUp()
+	{
+		_paths = new TestPaths();
+	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public async Task Accepted_kinds_round_trip_through_a_fresh_store()
@@ -273,7 +279,7 @@ internal sealed class RemotePluginSnapshotStoreTests
 	public async Task The_email_inbox_section_round_trips_and_an_older_document_reads_without_inboxes()
 	{
 		Directory.CreateDirectory(_paths.ConfigDirectory);
-		File.WriteAllText(Path.Combine(_paths.ConfigDirectory, "plugin-capability-snapshots.json"),
+		await File.WriteAllTextAsync(Path.Combine(_paths.ConfigDirectory, "plugin-capability-snapshots.json"),
 			PreAdr0081Document);
 		var older = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.plugin");
 

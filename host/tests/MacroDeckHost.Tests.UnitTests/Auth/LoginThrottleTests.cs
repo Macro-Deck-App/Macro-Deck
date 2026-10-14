@@ -102,7 +102,7 @@ public class LoginThrottleTests
 	[Test]
 	public void Custom_curve_throttles_after_its_own_free_attempt_count()
 	{
-		var custom = new LoginThrottle(_time, freeAttempts: 2, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30));
+		var custom = new LoginThrottle(_time, 2, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30));
 
 		custom.RegisterFailure("plugin-session|com.example.plugin");
 		Assert.That(custom.IsThrottled("plugin-session|com.example.plugin", out _), Is.False);

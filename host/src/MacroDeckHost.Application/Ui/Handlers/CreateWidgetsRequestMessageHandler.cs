@@ -26,14 +26,15 @@ public class CreateWidgetsRequestMessageHandler
 		}
 
 		var widgets = request.Widgets.Select(item => new WidgetEntity
-		{
-			Type = item.Type,
-			PositionX = item.PositionX,
-			PositionY = item.PositionY,
-			Width = item.Width,
-			Height = item.Height,
-			Data = item.Data
-		}).ToList();
+			{
+				Type = item.Type,
+				PositionX = item.PositionX,
+				PositionY = item.PositionY,
+				Width = item.Width,
+				Height = item.Height,
+				Data = item.Data
+			})
+			.ToList();
 
 		List<Guid>? replaceIds = null;
 		if (request.ReplaceIds is not null)
@@ -88,9 +89,11 @@ public class CreateWidgetsRequestMessageHandler
 	}
 
 	private static CreateWidgetsResponse ValidationError(string message)
-		=> new()
+	{
+		return new CreateWidgetsResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = "VALIDATION_ERROR", Message = message }
 		};
+	}
 }

@@ -29,12 +29,16 @@ internal sealed class StoreCatalogPopularityTests
 		_popularity = new StoreCatalogPopularity(new StoreCatalogQueryService(_catalog,
 				new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
 				new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None),
-				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+				new InstalledPluginSigners()),
 			_installs);
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public async Task Every_match_is_listed_most_installed_first_and_packages_without_installs_follow_by_name()
@@ -96,7 +100,8 @@ internal sealed class StoreCatalogPopularityTests
 		{
 			Assert.That(Ids(page), Is.EqualTo(new[] { "pkg149", "pkg000" }));
 			Assert.That(page.Total, Is.EqualTo(150));
-			Assert.That(_installs.Requests.Select(ids => ids.Count), Has.All.LessThanOrEqualTo(StorePlatformOptions.MaxIdsPerRequest));
+			Assert.That(_installs.Requests.Select(ids => ids.Count),
+				Has.All.LessThanOrEqualTo(StorePlatformOptions.MaxIdsPerRequest));
 		});
 	}
 
@@ -107,7 +112,8 @@ internal sealed class StoreCatalogPopularityTests
 		return result.Data!;
 	}
 
-	private void Seed(params string[] ids) =>
+	private void Seed(params string[] ids)
+	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
@@ -127,9 +133,12 @@ internal sealed class StoreCatalogPopularityTests
 				})
 				.ToList()
 		});
+	}
 
-	private static List<string> Ids(StoreCatalogPage page) =>
-		page.Items.Select(item => item.Entry.Id).ToList();
+	private static List<string> Ids(StoreCatalogPage page)
+	{
+		return page.Items.Select(item => item.Entry.Id).ToList();
+	}
 }
 
 internal sealed class FakeStoreInstallCounts : IStoreReviewService
@@ -140,7 +149,8 @@ internal sealed class FakeStoreInstallCounts : IStoreReviewService
 
 	public List<IReadOnlyCollection<string>> Requests { get; } = [];
 
-	public Task<GetStoreInstallsResponse> GetInstalls(IReadOnlyCollection<string> packageIds,
+	public Task<GetStoreInstallsResponse> GetInstalls(
+		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken)
 	{
 		Requests.Add(packageIds);
@@ -156,45 +166,79 @@ internal sealed class FakeStoreInstallCounts : IStoreReviewService
 		return Task.FromResult(response);
 	}
 
-	public Task<GetStoreRatingsResponse> GetRatings(IReadOnlyCollection<string> packageIds,
-		CancellationToken cancellationToken) => throw new NotSupportedException();
+	public Task<GetStoreRatingsResponse> GetRatings(
+		IReadOnlyCollection<string> packageIds,
+		CancellationToken cancellationToken)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<GetStoreRatingResponse> GetRating(StoreExtensionKind kind,
+	public Task<GetStoreRatingResponse> GetRating(
+		StoreExtensionKind kind,
 		string id,
-		CancellationToken cancellationToken) => throw new NotSupportedException();
+		CancellationToken cancellationToken)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<GetStoreReviewsResponse> GetReviews(StoreExtensionKind kind,
+	public Task<GetStoreReviewsResponse> GetReviews(
+		StoreExtensionKind kind,
 		string id,
 		int page,
 		int pageSize,
 		StoreReviewSortOrder sort,
 		int? rating,
-		CancellationToken cancellationToken) => throw new NotSupportedException();
+		CancellationToken cancellationToken)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<GetStoreOwnReviewResponse> GetOwnReview(StoreExtensionKind kind,
+	public Task<GetStoreOwnReviewResponse> GetOwnReview(
+		StoreExtensionKind kind,
 		string id,
-		CancellationToken cancellationToken) => throw new NotSupportedException();
+		CancellationToken cancellationToken)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<StoreOwnReviewWriteResponse> PutOwnReview(StoreExtensionKind kind,
+	public Task<StoreOwnReviewWriteResponse> PutOwnReview(
+		StoreExtensionKind kind,
 		string id,
 		PutStoreOwnReviewRequest request,
-		CancellationToken cancellationToken) => throw new NotSupportedException();
+		CancellationToken cancellationToken)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<StoreOwnReviewWriteResponse> DeleteOwnReview(StoreExtensionKind kind,
+	public Task<StoreOwnReviewWriteResponse> DeleteOwnReview(
+		StoreExtensionKind kind,
 		string id,
-		CancellationToken cancellationToken) => throw new NotSupportedException();
+		CancellationToken cancellationToken)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<StoreReportResponse> ReportEntry(StoreExtensionKind kind,
+	public Task<StoreReportResponse> ReportEntry(
+		StoreExtensionKind kind,
 		string id,
 		ReportStoreContentRequest request,
-		CancellationToken cancellationToken) => throw new NotSupportedException();
+		CancellationToken cancellationToken)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<StoreReportResponse> ReportReview(StoreExtensionKind kind,
+	public Task<StoreReportResponse> ReportReview(
+		StoreExtensionKind kind,
 		string id,
 		Guid reviewId,
 		ReportStoreContentRequest request,
-		CancellationToken cancellationToken) => throw new NotSupportedException();
-
-	public Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken cancellationToken) =>
+		CancellationToken cancellationToken)
+	{
 		throw new NotSupportedException();
+	}
+
+	public Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken cancellationToken)
+	{
+		throw new NotSupportedException();
+	}
 }

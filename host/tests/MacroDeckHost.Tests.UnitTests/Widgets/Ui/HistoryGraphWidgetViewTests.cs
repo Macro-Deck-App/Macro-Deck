@@ -26,7 +26,7 @@ public class HistoryGraphWidgetViewTests
 
 	private static readonly object _default = new
 	{
-		valueVariable = Metric, title = "CPU Load", subtitleVariable = Caption, maxValue = 100,
+		valueVariable = Metric, title = "CPU Load", subtitleVariable = Caption, maxValue = 100
 	};
 
 	[Test]
@@ -60,7 +60,7 @@ public class HistoryGraphWidgetViewTests
 	[Test]
 	public void The_value_and_its_unit_share_a_baseline()
 	{
-		var row = Render(_default, unit: "%").ById("historyGraph.valueLayer.valueRow");
+		var row = Render(_default, "%").ById("historyGraph.valueLayer.valueRow");
 
 		Assert.That(row.Text(UiComponentProperties.Align),
 			Is.EqualTo(UiComponentAlignments.Baseline),
@@ -70,14 +70,14 @@ public class HistoryGraphWidgetViewTests
 	[Test]
 	public void Type_stops_growing_once_the_widget_passes_one_cell()
 	{
-		var host = Render(_default, unit: "%");
+		var host = Render(_default, "%");
 
 		var sizes = new[]
 		{
 			host.ById("historyGraph.labels.title").Property(UiComponentProperties.Size),
 			host.ById("historyGraph.labels.subtitle").Property(UiComponentProperties.Size),
 			host.ById("historyGraph.valueLayer.valueRow.value").Property(UiComponentProperties.Size),
-			host.ById("historyGraph.valueLayer.valueRow.unit").Property(UiComponentProperties.Size),
+			host.ById("historyGraph.valueLayer.valueRow.unit").Property(UiComponentProperties.Size)
 		};
 
 		Assert.That(sizes.Select(size => size?.TryGetProperty("maxOfCell", out _)),

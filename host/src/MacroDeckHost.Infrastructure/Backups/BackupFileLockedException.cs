@@ -13,10 +13,14 @@ public sealed class BackupFileLockedException : IOException
 
 	public BackupFileLockedException(string path, Exception? inner = null)
 		: base($"The file '{path}' could not be read because another program is using it.", inner)
-		=> Path = path;
+	{
+		Path = path;
+	}
 
 	public string Path { get; }
 
 	public static bool IsLockViolation(IOException exception)
-		=> (exception.HResult & 0xFFFF) is SharingViolation or LockViolation;
+	{
+		return (exception.HResult & 0xFFFF) is SharingViolation or LockViolation;
+	}
 }

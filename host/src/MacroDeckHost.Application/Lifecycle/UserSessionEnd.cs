@@ -20,5 +20,8 @@ public sealed class UserSessionEnd
 
 	public bool IsEnding => Volatile.Read(ref _marked) == 1 || _operatingSystemShuttingDown();
 
-	public void Mark() => Volatile.Write(ref _marked, 1);
+	public void Mark()
+	{
+		Volatile.Write(ref _marked, 1);
+	}
 }

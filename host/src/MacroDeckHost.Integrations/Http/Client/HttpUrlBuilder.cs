@@ -12,9 +12,9 @@ internal static class HttpUrlBuilder
 	{
 		uri = null;
 
-		if (string.IsNullOrWhiteSpace(url) ||
-			!Uri.TryCreate(url, UriKind.Absolute, out var parsed) ||
-			!IsHttpOrHttps(parsed))
+		if (string.IsNullOrWhiteSpace(url)
+			|| !Uri.TryCreate(url, UriKind.Absolute, out var parsed)
+			|| !IsHttpOrHttps(parsed))
 		{
 			return false;
 		}
@@ -48,6 +48,8 @@ internal static class HttpUrlBuilder
 	}
 
 	private static bool IsHttpOrHttps(Uri uri)
-		=> string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.Ordinal) ||
-			string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal);
+	{
+		return string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.Ordinal)
+			|| string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal);
+	}
 }

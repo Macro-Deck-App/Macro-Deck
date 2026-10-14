@@ -274,8 +274,8 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 	private static QWebChannelObjectInfo ParseObjectInfo(string name, JsonElement classInfo)
 	{
 		var methods = new Dictionary<string, int>(StringComparer.Ordinal);
-		if (classInfo.TryGetProperty("methods", out var methodsElement) &&
-			methodsElement.ValueKind == JsonValueKind.Array)
+		if (classInfo.TryGetProperty("methods", out var methodsElement)
+			&& methodsElement.ValueKind == JsonValueKind.Array)
 		{
 			foreach (var entry in methodsElement.EnumerateArray())
 			{
@@ -290,8 +290,8 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 
 		var signalNameToIndex = new Dictionary<string, int>(StringComparer.Ordinal);
 		var signalIndexToName = new Dictionary<int, string>();
-		if (classInfo.TryGetProperty("signals", out var signalsElement) &&
-			signalsElement.ValueKind == JsonValueKind.Array)
+		if (classInfo.TryGetProperty("signals", out var signalsElement)
+			&& signalsElement.ValueKind == JsonValueKind.Array)
 		{
 			foreach (var entry in signalsElement.EnumerateArray())
 			{
@@ -307,8 +307,8 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 
 		var propertyNames = new Dictionary<int, string>();
 		var initialProperties = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
-		if (classInfo.TryGetProperty("properties", out var propertiesElement) &&
-			propertiesElement.ValueKind == JsonValueKind.Array)
+		if (classInfo.TryGetProperty("properties", out var propertiesElement)
+			&& propertiesElement.ValueKind == JsonValueKind.Array)
 		{
 			foreach (var entry in propertiesElement.EnumerateArray())
 			{
@@ -366,13 +366,19 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
-	private int NextId() => Interlocked.Increment(ref _nextId);
+	private int NextId()
+	{
+		return Interlocked.Increment(ref _nextId);
+	}
 
-	private async Task SendAsync(WebSocket socket,
+	private async Task SendAsync(
+		WebSocket socket,
 		Dictionary<string, object?> body,
 		CancellationToken cancellationToken)
 	{
@@ -382,7 +388,7 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 		try
 		{
 			await socket
-				.SendAsync(bytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken)
+				.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken)
 				.ConfigureAwait(false);
 		}
 		finally
@@ -475,10 +481,10 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 		using (document)
 		{
 			var root = document.RootElement;
-			if (root.ValueKind != JsonValueKind.Object ||
-				!root.TryGetProperty("type", out var typeElement) ||
-				typeElement.ValueKind != JsonValueKind.Number ||
-				!typeElement.TryGetInt32(out var type))
+			if (root.ValueKind != JsonValueKind.Object
+				|| !root.TryGetProperty("type", out var typeElement)
+				|| typeElement.ValueKind != JsonValueKind.Number
+				|| !typeElement.TryGetInt32(out var type))
 			{
 				return;
 			}
@@ -503,10 +509,10 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 
 	private void HandleResponse(JsonElement root)
 	{
-		if (!root.TryGetProperty("id", out var idElement) ||
-			idElement.ValueKind != JsonValueKind.Number ||
-			!idElement.TryGetInt32(out var id) ||
-			!_pending.TryRemove(id, out var pending))
+		if (!root.TryGetProperty("id", out var idElement)
+			|| idElement.ValueKind != JsonValueKind.Number
+			|| !idElement.TryGetInt32(out var id)
+			|| !_pending.TryRemove(id, out var pending))
 		{
 			return;
 		}
@@ -518,10 +524,10 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 	private void HandleSignal(JsonElement root)
 	{
 		var objectName = ReadString(root, "object");
-		if (objectName is null ||
-			!root.TryGetProperty("signal", out var signalElement) ||
-			signalElement.ValueKind != JsonValueKind.Number ||
-			!signalElement.TryGetInt32(out var index))
+		if (objectName is null
+			|| !root.TryGetProperty("signal", out var signalElement)
+			|| signalElement.ValueKind != JsonValueKind.Number
+			|| !signalElement.TryGetInt32(out var index))
 		{
 			return;
 		}
@@ -577,9 +583,9 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 		}
 
 		var objectName = ReadString(entry, "object");
-		if (objectName is null ||
-			!entry.TryGetProperty("properties", out var propertiesElement) ||
-			propertiesElement.ValueKind != JsonValueKind.Object)
+		if (objectName is null
+			|| !entry.TryGetProperty("properties", out var propertiesElement)
+			|| propertiesElement.ValueKind != JsonValueKind.Object)
 		{
 			return;
 		}
@@ -593,8 +599,8 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 		var resolved = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
 		foreach (var property in propertiesElement.EnumerateObject())
 		{
-			if (int.TryParse(property.Name, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index) &&
-				info.PropertyNames.TryGetValue(index, out var propertyName))
+			if (int.TryParse(property.Name, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
+				&& info.PropertyNames.TryGetValue(index, out var propertyName))
 			{
 				resolved[propertyName] = property.Value.Clone();
 			}

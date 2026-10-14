@@ -28,8 +28,8 @@ public class UiTestHostSettleTests
 			Key = "setup",
 			Children =
 			[
-				new UiStringInput { Key = "loaded", Binding = Bind.ReadOnly(UiValue.From(() => state.Value)) },
-			],
+				new UiStringInput { Key = "loaded", Binding = Bind.ReadOnly(UiValue.From(() => state.Value)) }
+			]
 		});
 
 		// The type is load-bearing: a bare TimeoutException is what the code under test might have thrown itself,
@@ -68,10 +68,10 @@ public class UiTestHostSettleTests
 								await gate.Task.ConfigureAwait(false);
 
 								throw new InvalidOperationException("the remote step failed");
-							}),
-					],
-				},
-			],
+							})
+					]
+				}
+			]
 		});
 
 		Assert.That(host.ById("setup.credentials").Submit().IsAccepted,

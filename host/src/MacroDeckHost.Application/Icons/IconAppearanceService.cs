@@ -14,14 +14,16 @@ public sealed record IconAppearanceMergeResult(IconEntity Icon, Guid MergedIconI
 
 public interface IIconAppearanceService
 {
-	Task<Result<IconEntity, IconError>> AddOrReplace(Guid iconId,
+	Task<Result<IconEntity, IconError>> AddOrReplace(
+		Guid iconId,
 		string key,
 		IconImportFile file,
 		CancellationToken cancellationToken);
 
 	Task<Result<IconEntity, IconError>> Remove(Guid iconId, Guid appearanceId, CancellationToken cancellationToken);
 
-	Task<Result<IconAppearanceMergeResult, IconError>> Merge(Guid targetIconId,
+	Task<Result<IconAppearanceMergeResult, IconError>> Merge(
+		Guid targetIconId,
 		Guid sourceIconId,
 		string key,
 		CancellationToken cancellationToken);
@@ -41,7 +43,8 @@ public sealed class IconAppearanceService : IIconAppearanceService
 	private readonly IMediator _mediator;
 	private readonly IconAppearanceEditLocks _editLocks;
 
-	public IconAppearanceService(IIconPackCache iconPackCache,
+	public IconAppearanceService(
+		IIconPackCache iconPackCache,
 		IIconStorage storage,
 		IconImportBatchTracker batchTracker,
 		IconImportBatchFinalizer batchFinalizer,
@@ -66,7 +69,8 @@ public sealed class IconAppearanceService : IIconAppearanceService
 		_editLocks = editLocks;
 	}
 
-	public async Task<Result<IconEntity, IconError>> AddOrReplace(Guid iconId,
+	public async Task<Result<IconEntity, IconError>> AddOrReplace(
+		Guid iconId,
 		string key,
 		IconImportFile file,
 		CancellationToken cancellationToken)
@@ -112,7 +116,8 @@ public sealed class IconAppearanceService : IIconAppearanceService
 		};
 
 		var assetId = Guid.CreateVersion7();
-		var sourceHash = await _storage.StageOriginal(batch.Id, assetId, file.FileName, file.Content, cancellationToken);
+		var sourceHash
+			= await _storage.StageOriginal(batch.Id, assetId, file.FileName, file.Content, cancellationToken);
 
 		if (replaced is not null)
 		{
@@ -148,7 +153,8 @@ public sealed class IconAppearanceService : IIconAppearanceService
 		return Result.Ok<IconEntity, IconError>(parent);
 	}
 
-	public async Task<Result<IconEntity, IconError>> Remove(Guid iconId,
+	public async Task<Result<IconEntity, IconError>> Remove(
+		Guid iconId,
 		Guid appearanceId,
 		CancellationToken cancellationToken)
 	{
@@ -170,7 +176,8 @@ public sealed class IconAppearanceService : IIconAppearanceService
 		return Result.Ok<IconEntity, IconError>(parent);
 	}
 
-	public async Task<Result<IconAppearanceMergeResult, IconError>> Merge(Guid targetIconId,
+	public async Task<Result<IconAppearanceMergeResult, IconError>> Merge(
+		Guid targetIconId,
 		Guid sourceIconId,
 		string key,
 		CancellationToken cancellationToken)
@@ -268,5 +275,7 @@ public sealed class IconAppearanceService : IIconAppearanceService
 	}
 
 	private static string KeyOf(IconEntity asset)
-		=> asset.AppearanceTraits is { } traits ? IconAppearanceTraits.ToKey(traits) : string.Empty;
+	{
+		return asset.AppearanceTraits is { } traits ? IconAppearanceTraits.ToKey(traits) : string.Empty;
+	}
 }

@@ -5,11 +5,14 @@ namespace MacroDeckHost.Application.Variables;
 
 public static class SdkVariableTypeMapper
 {
-	public static DomainVariableType ToDomain(SdkVariableType type) => type switch
+	public static DomainVariableType ToDomain(SdkVariableType type)
 	{
-		SdkVariableType.Numeric => DomainVariableType.Numeric,
-		SdkVariableType.Boolean => DomainVariableType.Boolean,
-		SdkVariableType.Color => DomainVariableType.Color,
-		_ => DomainVariableType.Text
-	};
+		return type switch
+		{
+			SdkVariableType.Numeric => DomainVariableType.Numeric,
+			SdkVariableType.Boolean => DomainVariableType.Boolean,
+			SdkVariableType.Color => DomainVariableType.Color,
+			_ => DomainVariableType.Text
+		};
+	}
 }

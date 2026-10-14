@@ -105,11 +105,15 @@ internal sealed class DisablingAnIntegrationTests
 	}
 
 	private Task<SetIntegrationEnabledResponse> SetEnabledAsync(string id, bool enabled)
-		=> _handler.Handle(new SetIntegrationEnabledRequest { Id = id, Enabled = enabled }, CancellationToken.None)
+	{
+		return _handler.Handle(new SetIntegrationEnabledRequest { Id = id, Enabled = enabled }, CancellationToken.None)
 			.AsTask();
+	}
 
 	private bool Offers(string qualifiedWidgetTypeId)
-		=> _widgetTypes.All.Any(entry => entry.WidgetTypeId == qualifiedWidgetTypeId);
+	{
+		return _widgetTypes.All.Any(entry => entry.WidgetTypeId == qualifiedWidgetTypeId);
+	}
 
 	private async Task AttachPluginSessionAsync(string pluginId)
 	{
@@ -191,7 +195,8 @@ internal sealed class DisablingAnIntegrationTests
 	[Test]
 	public async Task A_plugin_that_was_never_configured_still_offers_its_widget_type()
 	{
-		await _integrations.RegisterAsync(new UnconfiguredIntegration("com.example.unconfigured"), IntegrationOrigin.Plugin);
+		await _integrations.RegisterAsync(new UnconfiguredIntegration("com.example.unconfigured"),
+			IntegrationOrigin.Plugin);
 
 		await _widgetTypes.Register("com.example.unconfigured", ProvidingIntegration.Gauge);
 
@@ -210,7 +215,8 @@ internal sealed class DisablingAnIntegrationTests
 
 		await _layouts.Register("com.example.plugin",
 			new LayoutDescriptor("grid", "Grid", [new LayoutRegion { Id = "main", Kind = LayoutRegionKinds.Grid }]));
-		await _folderViews.Register("com.example.plugin", new FolderViewDescriptor("tiles", LocalizedText.FromLiteral("Tiles")));
+		await _folderViews.Register("com.example.plugin",
+			new FolderViewDescriptor("tiles", LocalizedText.FromLiteral("Tiles")));
 		await _screenSavers.Register("com.example.plugin",
 			new ScreenSaverDescriptor("photos", LocalizedText.FromLiteral("Photos")));
 
@@ -264,13 +270,20 @@ internal sealed class DisablingAnIntegrationTests
 			return Task.CompletedTask;
 		}
 
-		public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
-			=> await context.RegisterWidgetTypeAsync(Gauge, cancellationToken);
+		public async Task InitializeAsync(
+			IWidgetTypeProviderContext context,
+			CancellationToken cancellationToken = default)
+		{
+			await context.RegisterWidgetTypeAsync(Gauge, cancellationToken);
+		}
 	}
 
 	private sealed class UnconfiguredIntegration(string id) : ProvidingIntegration(id), IConfigFlowProvider
 	{
-		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class ProvidingSystemIntegration() : ProvidingIntegration(IntegrationId), ISystemIntegration

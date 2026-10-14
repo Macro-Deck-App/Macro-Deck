@@ -60,9 +60,15 @@ public sealed class GoogleCalendarIntegration
 
 	public string IconMimeType => "image/svg+xml";
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new GoogleCalendarConfigFlow(_oauthClientFactory(), _time);
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new GoogleCalendarConfigFlow(_oauthClientFactory(), _time);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -77,7 +83,10 @@ public sealed class GoogleCalendarIntegration
 		await _accounts.StopAsync();
 	}
 
-	public IReadOnlyList<CalendarAccount> GetAccounts() => _accounts.CalendarAccounts;
+	public IReadOnlyList<CalendarAccount> GetAccounts()
+	{
+		return _accounts.CalendarAccounts;
+	}
 
 	public async Task<IReadOnlyList<CalendarInfo>> GetCalendarsAsync(
 		string accountId,
@@ -137,22 +146,34 @@ public sealed class GoogleCalendarIntegration
 		string calendarId,
 		string eventId,
 		CancellationToken cancellationToken)
-		=> _api.GetEventAsync(RequireAccount(accountId).Tokens, calendarId, eventId, cancellationToken);
+	{
+		return _api.GetEventAsync(RequireAccount(accountId).Tokens, calendarId, eventId, cancellationToken);
+	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(_accounts.Issues());
+	{
+		return Task.FromResult(_accounts.Issues());
+	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId.StartsWith(GoogleCalendarAccountManager.SignInIssuePrefix, StringComparison.Ordinal)
-			? IssueResolution.Ok(AppStrings.Integrations.GoogleCalendar.Issues.ReconnectResolution(),
-				IssueResolutionFollowUp.StartConfigFlow)
-			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	{
+		return Task.FromResult(
+			issueId.StartsWith(GoogleCalendarAccountManager.SignInIssuePrefix, StringComparison.Ordinal)
+				? IssueResolution.Ok(AppStrings.Integrations.GoogleCalendar.Issues.ReconnectResolution(),
+					IssueResolutionFollowUp.StartConfigFlow)
+				: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
-	public void Dispose() => _api.Dispose();
+	public void Dispose()
+	{
+		_api.Dispose();
+	}
 
 	private GoogleCalendarAccount RequireAccount(string accountId)
-		=> _accounts.Resolve(accountId) ??
-			throw new InvalidOperationException($"Google Calendar has no account '{accountId}'.");
+	{
+		return _accounts.Resolve(accountId)
+			?? throw new InvalidOperationException($"Google Calendar has no account '{accountId}'.");
+	}
 
 	private async Task<IReadOnlyList<CalendarInfo>> CalendarsOfAsync(
 		GoogleCalendarAccount account,

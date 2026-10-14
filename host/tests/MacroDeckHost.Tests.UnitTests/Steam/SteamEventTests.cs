@@ -24,19 +24,23 @@ internal sealed class SteamEventTests
 		_folders = new SteamFolders();
 		_time = new FakeTimeProvider();
 		var steam = _folders.Make("Steam");
-		_platform = new FakeSteamPlatform { Os = SteamOs.Windows, HomeDirectory = _folders.Root, RegistrySteamPath = steam };
+		_platform = new FakeSteamPlatform
+			{ Os = SteamOs.Windows, HomeDirectory = _folders.Root, RegistrySteamPath = steam };
 		_events.Clear();
 		SteamFolders.WriteManifest(steam, 730, "Counter-Strike 2");
 		SteamFolders.WriteManifest(steam, 220, "Half-Life 2");
 	}
 
 	[TearDown]
-	public void TearDown() => _folders.Dispose();
+	public void TearDown()
+	{
+		_folders.Dispose();
+	}
 
 	[Test]
 	public async Task What_is_already_going_on_when_tracking_starts_is_not_reported()
 	{
-		var web = new ScriptedWebApi { Self = Self(SteamPersona.Online, gameId: 440), Friends = [Summary("f1", 1, 570)] };
+		var web = new ScriptedWebApi { Self = Self(SteamPersona.Online, 440), Friends = [Summary("f1", 1, 570)] };
 		_platform.RegistryRunningAppId = 730;
 		var tracker = Tracker(Account("e1", web));
 
@@ -63,7 +67,8 @@ internal sealed class SteamEventTests
 			Is.EqualTo(new[] { SteamEventIds.GameStarted, SteamEventIds.GameStopped }));
 		Assert.Multiple(() =>
 		{
-			Assert.That(_events[0].Payload[SteamEventPayload.Configuration], Is.EqualTo(SteamEventPayload.ThisComputer));
+			Assert.That(_events[0].Payload[SteamEventPayload.Configuration],
+				Is.EqualTo(SteamEventPayload.ThisComputer));
 			Assert.That(_events[0].Payload[SteamEventPayload.GameId], Is.EqualTo(730));
 			Assert.That(_events[0].Payload[SteamEventPayload.GameName], Is.EqualTo("Counter-Strike 2"));
 			Assert.That(_events[1].Payload[SteamEventPayload.DurationSeconds], Is.EqualTo(300L));
@@ -78,13 +83,14 @@ internal sealed class SteamEventTests
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 
-		web.Self = Self(SteamPersona.Online, gameId: 220, gameName: "Half-Life 2");
+		web.Self = Self(SteamPersona.Online, 220, "Half-Life 2");
 		await tracker.PollSelfAsync(CancellationToken.None);
 		web.Self = Self(SteamPersona.Online);
 		await tracker.PollSelfAsync(CancellationToken.None);
 
 		Assert.That(_events.Select(item => (item.Id, item.Payload[SteamEventPayload.Configuration])),
-			Is.EqualTo(new[] { (SteamEventIds.GameStarted, (object?)"e1"), (SteamEventIds.GameStopped, (object?)"e1") }));
+			Is.EqualTo(new[]
+				{ (SteamEventIds.GameStarted, (object?)"e1"), (SteamEventIds.GameStopped, (object?)"e1") }));
 	}
 
 	[Test]
@@ -102,12 +108,14 @@ internal sealed class SteamEventTests
 		}
 
 		web.SelfFailure = null;
-		web.Self = Self(SteamPersona.Online, gameId: 220, gameName: "Half-Life 2");
+		web.Self = Self(SteamPersona.Online, 220, "Half-Life 2");
 		await tracker.PollSelfAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(tracker.Snapshot.Accounts[0].CurrentGame?.AppId, Is.EqualTo(220), "precondition: the game is seen");
+			Assert.That(tracker.Snapshot.Accounts[0].CurrentGame?.AppId,
+				Is.EqualTo(220),
+				"precondition: the game is seen");
 			Assert.That(_events, Is.Empty);
 		});
 	}
@@ -120,7 +128,7 @@ internal sealed class SteamEventTests
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 
-		web.Self = Self(SteamPersona.Online, gameId: 730);
+		web.Self = Self(SteamPersona.Online, 730);
 		await tracker.PollSelfAsync(CancellationToken.None);
 		_platform.RegistryRunningAppId = 730;
 		tracker.PollLocal();
@@ -138,7 +146,7 @@ internal sealed class SteamEventTests
 
 		_platform.RegistryRunningAppId = 730;
 		tracker.PollLocal();
-		web.Self = Self(SteamPersona.Online, gameId: 730);
+		web.Self = Self(SteamPersona.Online, 730);
 		await tracker.PollSelfAsync(CancellationToken.None);
 
 		Assert.That(_events.Select(item => item.Payload[SteamEventPayload.Configuration]),
@@ -151,13 +159,21 @@ internal sealed class SteamEventTests
 		var web = new ScriptedWebApi
 		{
 			Self = Self(SteamPersona.Online),
-			Friends = [Summary("a", SteamPersona.Offline), Summary("b", SteamPersona.Online), Summary("c", SteamPersona.Online, 570)]
+			Friends =
+			[
+				Summary("a", SteamPersona.Offline), Summary("b", SteamPersona.Online),
+				Summary("c", SteamPersona.Online, 570)
+			]
 		};
 		var tracker = Tracker(Account("e1", web));
 		await tracker.PollSelfAsync(CancellationToken.None);
 		await tracker.PollFriendsAsync(CancellationToken.None);
 
-		web.Friends = [Summary("a", SteamPersona.Online), Summary("b", SteamPersona.Offline), Summary("c", SteamPersona.Online, 730)];
+		web.Friends =
+		[
+			Summary("a", SteamPersona.Online), Summary("b", SteamPersona.Offline),
+			Summary("c", SteamPersona.Online, 730)
+		];
 		await tracker.PollFriendsAsync(CancellationToken.None);
 
 		Assert.That(_events.Select(item => (item.Id, item.Payload[SteamEventPayload.FriendId])),
@@ -173,7 +189,8 @@ internal sealed class SteamEventTests
 	[Test]
 	public async Task A_friend_going_from_offline_straight_into_a_game_is_reported_as_online_and_playing()
 	{
-		var web = new ScriptedWebApi { Self = Self(SteamPersona.Online), Friends = [Summary("a", SteamPersona.Offline)] };
+		var web = new ScriptedWebApi
+			{ Self = Self(SteamPersona.Online), Friends = [Summary("a", SteamPersona.Offline)] };
 		var tracker = Tracker(Account("e1", web));
 		await tracker.PollSelfAsync(CancellationToken.None);
 		await tracker.PollFriendsAsync(CancellationToken.None);
@@ -231,8 +248,9 @@ internal sealed class SteamEventTests
 	{
 		var definition = SteamEventDefinitions.All.Single(item => item.Id == SteamEventIds.FriendOnline);
 		var occurrence = SteamEventFactory.FriendChanges("e2",
-			[Friend("a", SteamPersona.Offline)],
-			[Friend("a", SteamPersona.Online)]).Single();
+				[Friend("a", SteamPersona.Offline)],
+				[Friend("a", SteamPersona.Online)])
+			.Single();
 
 		var other = await MatchesAsync(definition, occurrence, "e1");
 		var same = await MatchesAsync(definition, occurrence, "e2");
@@ -250,9 +268,11 @@ internal sealed class SteamEventTests
 		foreach (var definition in SteamEventDefinitions.All)
 		{
 			Assert.That(definition.ConfigurationParameters.Select(parameter => parameter.Name),
-				Does.Contain(SteamEventPayload.Configuration), definition.Id);
+				Does.Contain(SteamEventPayload.Configuration),
+				definition.Id);
 			Assert.That(definition.PayloadParameters.Select(parameter => parameter.Name),
-				Is.SupersetOf(definition.ConfigurationParameters.Select(parameter => parameter.Name)), definition.Id);
+				Is.SupersetOf(definition.ConfigurationParameters.Select(parameter => parameter.Name)),
+				definition.Id);
 		}
 	}
 
@@ -278,22 +298,40 @@ internal sealed class SteamEventTests
 		var context = await new VariableTemplateRenderer(new VariableRegistry())
 			.CreateContextAsync(VariableScope.Global, null);
 
-		return new EventSubscriptionMatcher(new ActionConditionEvaluator(new VariableTemplateRenderer(new VariableRegistry())))
+		return new EventSubscriptionMatcher(
+				new ActionConditionEvaluator(new VariableTemplateRenderer(new VariableRegistry())))
 			.Matches(subscription, descriptor, context.WithEvent(occurrence.Payload));
 	}
 
 	private SteamTracker Tracker(params SteamAccountConfig[] accounts)
-		=> new(_platform, accounts, [], _time, _ => { }, _events.Add);
+	{
+		return new SteamTracker(_platform,
+			accounts,
+			[],
+			_time,
+			_ =>
+			{
+			},
+			_events.Add);
+	}
 
 	private static SteamAccountConfig Account(string entryId, ISteamWebApiClient client)
-		=> new(entryId, "Main", "main", SteamId, client);
+	{
+		return new SteamAccountConfig(entryId, "Main", "main", SteamId, client);
+	}
 
 	private static SteamPlayerSummary Self(int persona, int? gameId = null, string? gameName = null)
-		=> new(SteamId, "Me", persona, gameId, gameName);
+	{
+		return new SteamPlayerSummary(SteamId, "Me", persona, gameId, gameName);
+	}
 
 	private static SteamPlayerSummary Summary(string id, int persona, int? gameId = null)
-		=> new(id, "Friend " + id, persona, gameId, gameId is null ? null : "Game " + gameId);
+	{
+		return new SteamPlayerSummary(id, "Friend " + id, persona, gameId, gameId is null ? null : "Game " + gameId);
+	}
 
 	private static SteamFriend Friend(string id, int persona)
-		=> new(id, "Friend " + id, persona, null, null, null);
+	{
+		return new SteamFriend(id, "Friend " + id, persona, null, null, null);
+	}
 }

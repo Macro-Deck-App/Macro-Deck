@@ -19,10 +19,9 @@ internal sealed class UiNodeIdRegistry
 	{
 		if (_declarationPathsById.TryGetValue(id, out var existingPath))
 		{
-			throw new UiViewException(
-				$"Duplicate node id '{id}': first declared at '{existingPath}', also declared at " +
-				$"'{declarationPath}'. Node ids must be unique across the whole tree, including inside " +
-				"Fallback subtrees.");
+			throw new UiViewException($"Duplicate node id '{id}': first declared at '{existingPath}', also declared at "
+				+ $"'{declarationPath}'. Node ids must be unique across the whole tree, including inside "
+				+ "Fallback subtrees.");
 		}
 
 		_declarationPathsById[id] = declarationPath;

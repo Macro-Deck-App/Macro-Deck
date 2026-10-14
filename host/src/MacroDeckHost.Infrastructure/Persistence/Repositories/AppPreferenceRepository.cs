@@ -14,7 +14,9 @@ public class AppPreferenceRepository : IAppPreferenceRepository
 	}
 
 	public Task<AppPreferenceEntity?> GetByKey(string key)
-		=> _context.AppPreferences.FirstOrDefaultAsync(e => e.Key == key);
+	{
+		return _context.AppPreferences.FirstOrDefaultAsync(e => e.Key == key);
+	}
 
 	public async Task SetValue(string key, string value)
 	{

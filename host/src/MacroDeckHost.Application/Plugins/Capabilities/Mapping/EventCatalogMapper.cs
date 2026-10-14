@@ -7,7 +7,7 @@ public static class EventCatalogMapper
 {
 	public static EventDefinition ToDomain(EventDescriptorDto dto)
 	{
-		if (!Enum.TryParse<EventDeliveryKind>(dto.DeliveryKind, ignoreCase: false, out var deliveryKind))
+		if (!Enum.TryParse<EventDeliveryKind>(dto.DeliveryKind, false, out var deliveryKind))
 		{
 			throw new InvalidOperationException($"Unknown event delivery kind '{dto.DeliveryKind}'.");
 		}
@@ -26,7 +26,8 @@ public static class EventCatalogMapper
 	}
 
 	public static EventDescriptorDto ToDto(EventDefinition definition)
-		=> new()
+	{
+		return new EventDescriptorDto
 		{
 			LocalId = definition.Id,
 			// Only ever called for a descriptor that came back off the wire - where the protocol types this
@@ -39,4 +40,5 @@ public static class EventCatalogMapper
 			ConfigurationParameters = [.. definition.ConfigurationParameters.Select(ActionParameterMapper.ToDto)],
 			PayloadParameters = [.. definition.PayloadParameters.Select(ActionParameterMapper.ToDto)]
 		};
+	}
 }

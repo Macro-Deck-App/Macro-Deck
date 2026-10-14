@@ -170,7 +170,7 @@ internal sealed class VoicemeeterIntegrationTests
 		_remote.UserSets("Strip[1].A1", 0f);
 		await Connected();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync("voicemeeter-strip1-a2", CancellationToken.None)).Value,
 				Is.True);
@@ -192,7 +192,7 @@ internal sealed class VoicemeeterIntegrationTests
 		_remote.UserSets("Strip[0].B1", 1f);
 		await Connected();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync("voicemeeter-strip0-b1", CancellationToken.None)).Value,
 				Is.True);
@@ -247,7 +247,7 @@ internal sealed class VoicemeeterIntegrationTests
 	{
 		await _integration.InitializeAsync(new FakeContext());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync(VoicemeeterVariables.Connected, CancellationToken.None)).Value,
 				Is.False);
@@ -271,7 +271,7 @@ internal sealed class VoicemeeterIntegrationTests
 		_remote.UserSets("Bus[1].Mute", 1f);
 		await Connected();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync(VoicemeeterVariables.Connected, CancellationToken.None)).Value,
 				Is.True);
@@ -297,7 +297,7 @@ internal sealed class VoicemeeterIntegrationTests
 		_remote.Run(VoicemeeterEdition.Banana);
 		await Connected();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync("voicemeeter-strip4-gain", CancellationToken.None)).Value,
 				Is.Not.Null);
@@ -314,7 +314,7 @@ internal sealed class VoicemeeterIntegrationTests
 		_remote.Run(VoicemeeterEdition.Potato);
 		await Connected();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync("voicemeeter-nonsense", CancellationToken.None)).Value, Is.Null);
 			Assert.That((await _integration.ReadAsync("voicemeeter-strip0-nonsense", CancellationToken.None)).Value,
@@ -355,7 +355,7 @@ internal sealed class VoicemeeterIntegrationTests
 		_remote.IsAvailable = false;
 		await _integration.InitializeAsync(new FakeContext());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(_integration.IsInitialized, Is.True);
 			Assert.That(_integration.Actions, Is.Not.Empty);

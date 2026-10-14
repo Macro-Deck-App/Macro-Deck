@@ -21,7 +21,7 @@ internal sealed class PluginManifestReaderTests
 	{
 		if (Directory.Exists(_root))
 		{
-			Directory.Delete(_root, recursive: true);
+			Directory.Delete(_root, true);
 		}
 	}
 
@@ -42,18 +42,20 @@ internal sealed class PluginManifestReaderTests
 	}
 
 	private static string ManifestJson(string id, string version, string rid, string executable, string extra = "")
-		=> $$"""
-			 {
-			 	"manifestVersion": 1,
-			 	"id": "{{id}}",
-			 	"name": "Example",
-			 	"version": "{{version}}",
-			 	"entrypoints": {
-			 		"{{rid}}": { "executable": "{{executable}}" }
-			 	}
-			 	{{extra}}
-			 }
-			 """;
+	{
+		return $$"""
+				 {
+				 	"manifestVersion": 1,
+				 	"id": "{{id}}",
+				 	"name": "Example",
+				 	"version": "{{version}}",
+				 	"entrypoints": {
+				 		"{{rid}}": { "executable": "{{executable}}" }
+				 	}
+				 	{{extra}}
+				 }
+				 """;
+	}
 
 	[Test]
 	public void A_manifest_over_the_artifact_limit_is_rejected_before_it_is_parsed()
@@ -417,7 +419,7 @@ internal sealed class PluginManifestReaderTests
 		var json = ManifestJson("com.example.plugin", "1.0.0", CurrentRid, "app", IconExtra("../icon.png"));
 
 		var result = new PluginManifestReader()
-			.ReadFromJson(json, versionDirectory: null, "com.example.plugin", "1.0.0");
+			.ReadFromJson(json, null, "com.example.plugin", "1.0.0");
 
 		Assert.Multiple(() =>
 		{
@@ -448,24 +450,29 @@ internal sealed class PluginManifestReaderTests
 	/// <summary>Builds an <c>extra</c> fragment for <see cref="ManifestJson"/> that declares
 	/// <paramref name="icon"/>, escaping it for embedding in a JSON string literal.</summary>
 	private static string IconExtra(string icon)
-		=> $", \"icon\": {JsonSerializer.Serialize(icon)}";
+	{
+		return $", \"icon\": {JsonSerializer.Serialize(icon)}";
+	}
 
 	/// <summary>Like <see cref="ManifestJson"/> but with a caller-supplied <c>name</c>, JSON-escaped so a
 	/// name containing a literal control character or quote can still be embedded safely.</summary>
-	private static string ManifestJsonWithName(string name,
+	private static string ManifestJsonWithName(
+		string name,
 		string id = "com.example.plugin",
 		string version = "1.0.0")
-		=> $$"""
-			 {
-			 	"manifestVersion": 1,
-			 	"id": "{{id}}",
-			 	"name": {{JsonSerializer.Serialize(name)}},
-			 	"version": "{{version}}",
-			 	"entrypoints": {
-			 		"{{CurrentRid}}": { "executable": "app" }
-			 	}
-			 }
-			 """;
+	{
+		return $$"""
+				 {
+				 	"manifestVersion": 1,
+				 	"id": "{{id}}",
+				 	"name": {{JsonSerializer.Serialize(name)}},
+				 	"version": "{{version}}",
+				 	"entrypoints": {
+				 		"{{CurrentRid}}": { "executable": "app" }
+				 	}
+				 }
+				 """;
+	}
 
 	private PluginManifestReadResult ReadWithName(string name)
 	{

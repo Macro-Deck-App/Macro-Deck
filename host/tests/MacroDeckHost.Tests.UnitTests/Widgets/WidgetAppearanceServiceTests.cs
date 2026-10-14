@@ -450,10 +450,11 @@ public class WidgetAppearanceServiceTests
 	[Test]
 	public async Task IconAppearance_IsStoredUnderItsCanonicalKey()
 	{
-		var fixture = new Fixture("""{"icon":{"type":"icon-pack","reference":"0198aaaa-1111-2222-3333-444444444444"}}""");
+		var fixture = new Fixture(
+			"""{"icon":{"type":"icon-pack","reference":"0198aaaa-1111-2222-3333-444444444444"}}""");
 
-		var outcome = await fixture.Service.ApplyWithOutcomeAsync(
-			Patch(new WidgetAppearancePatch { IconAppearance = "motion=static;colorScheme=dark" }));
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+			{ IconAppearance = "motion=static;colorScheme=dark" }));
 
 		Assert.Multiple(() =>
 		{
@@ -468,10 +469,11 @@ public class WidgetAppearanceServiceTests
 	[TestCase("colorScheme=dark;colorScheme=light")]
 	public async Task IconAppearance_ThatIsNotAnAppearanceKey_IsRejected_AndNotWritten(string appearance)
 	{
-		var fixture = new Fixture("""{"icon":{"type":"icon-pack","reference":"0198aaaa-1111-2222-3333-444444444444"}}""");
+		var fixture = new Fixture(
+			"""{"icon":{"type":"icon-pack","reference":"0198aaaa-1111-2222-3333-444444444444"}}""");
 
-		var outcome = await fixture.Service.ApplyWithOutcomeAsync(
-			Patch(new WidgetAppearancePatch { IconAppearance = appearance }));
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+			{ IconAppearance = appearance }));
 
 		Assert.Multiple(() =>
 		{
@@ -630,7 +632,7 @@ public class WidgetAppearanceServiceTests
 	[Test]
 	public async Task TwitchChat_SetBackgroundColor_WritesTheKeyItsViewPaints_AndResetRemovesIt()
 	{
-		var config = new Twitch.RecordingIntegrationConfig();
+		var config = new RecordingIntegrationConfig();
 		TwitchChatTestSupport.AddAccount(config, "111", "streamer");
 		using var accounts = new TwitchAccountManager(() => new FakeTwitchOAuthClient(),
 			Logger.None,
@@ -730,7 +732,8 @@ public class WidgetAppearanceServiceTests
 		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.Label],
 			"""{"type":"object","properties":{"label":{"type":"string","pattern":"^[A-Za-z]+$"}}}"""));
 
-		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch { Label = "Two words" }));
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+			{ Label = "Two words" }));
 
 		Assert.Multiple(() =>
 		{
@@ -743,7 +746,8 @@ public class WidgetAppearanceServiceTests
 	public async Task ProviderType_ClearThatBreaksARequiredKey_IsRejected()
 	{
 		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.Font],
-			"""{"type":"object","required":["fontFaceId"]}"""), """{"fontFaceId":"inter"}""");
+				"""{"type":"object","required":["fontFaceId"]}"""),
+			"""{"fontFaceId":"inter"}""");
 
 		var outcome = await fixture.Service.ApplyWithOutcomeAsync(new WidgetAppearanceRequest
 		{
@@ -762,10 +766,12 @@ public class WidgetAppearanceServiceTests
 	[Test]
 	public async Task ProviderType_BorderWrite_IsNotHeldAgainstItsSchema_AsBeforeTypesCouldDeclare()
 	{
-		var fixture = await Fixture.ForProviderType(new WidgetTypeDescriptor("frame", "Frame",
+		var fixture = await Fixture.ForProviderType(new WidgetTypeDescriptor("frame",
+			"Frame",
 			DataSchema: """{"type":"object","additionalProperties":false}"""));
 
-		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch { BorderStyle = "static" }));
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+			{ BorderStyle = "static" }));
 
 		Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Changed));
 	}
@@ -784,7 +790,8 @@ public class WidgetAppearanceServiceTests
 		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.Label]));
 		fixture.Widgets.FailWrites = true;
 
-		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch { Label = "Photos" }));
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+			{ Label = "Photos" }));
 
 		Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.WriteFailed));
 	}
@@ -792,10 +799,14 @@ public class WidgetAppearanceServiceTests
 	private static WidgetTypeDescriptor Frame(
 		IReadOnlyList<WidgetAppearanceProperty> appearance,
 		string schema = """{"type":"object"}""")
-		=> new("frame", "Frame", DataSchema: schema) { AppearanceProperties = appearance };
+	{
+		return new WidgetTypeDescriptor("frame", "Frame", DataSchema: schema) { AppearanceProperties = appearance };
+	}
 
 	private static WidgetAppearanceRequest Patch(WidgetAppearancePatch patch)
-		=> new() { WidgetId = _widgetId.ToString(), Patch = patch };
+	{
+		return new WidgetAppearanceRequest { WidgetId = _widgetId.ToString(), Patch = patch };
+	}
 
 	/// <summary>Reads a state's appearance label by id from the persisted array shape.</summary>
 	private static string? StateLabel(Fixture fixture, string stateId)
@@ -817,21 +828,25 @@ public class WidgetAppearanceServiceTests
 	private static WidgetAppearanceRequest ClearRequest(
 		WidgetAppearanceProperty property,
 		WidgetStateSelector state = WidgetStateSelector.Current)
-		=> new()
+	{
+		return new WidgetAppearanceRequest
 		{
 			WidgetId = _widgetId.ToString(),
 			Patch = new WidgetAppearancePatch(),
 			ClearProperties = [property],
 			State = state
 		};
+	}
 #pragma warning restore CS0618
 
 	private static WidgetAppearanceRequest Request(string label)
-		=> new()
+	{
+		return new WidgetAppearanceRequest
 		{
 			WidgetId = _widgetId.ToString(),
 			Patch = new WidgetAppearancePatch { Label = label }
 		};
+	}
 
 	private sealed class Fixture
 	{
@@ -907,39 +922,57 @@ public class WidgetAppearanceServiceTests
 			return Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
 		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
 			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class SingleFolderCache : IFolderCache
@@ -951,17 +984,45 @@ public class WidgetAppearanceServiceTests
 			_folder = folder;
 		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -1006,17 +1067,40 @@ public class WidgetAppearanceServiceTests
 		}
 
 		public bool HadUnreadableProfiles => false;
-		public ProfileEntity? GetById(Guid id) => id == _profile.Id ? _profile : null;
-		public List<ProfileEntity> GetAll() => [_profile];
-		public Task InitializeCache() => Task.CompletedTask;
-		public Task AddOrUpdate(ProfileEntity profile) => Task.CompletedTask;
+
+		public ProfileEntity? GetById(Guid id)
+		{
+			return id == _profile.Id ? _profile : null;
+		}
+
+		public List<ProfileEntity> GetAll()
+		{
+			return [_profile];
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdate(ProfileEntity profile)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IReadOnlyList<ProfileEntity>> ApplyOrders(IReadOnlyDictionary<Guid, int> orders)
-			=> Task.FromResult<IReadOnlyList<ProfileEntity>>([]);
+		{
+			return Task.FromResult<IReadOnlyList<ProfileEntity>>([]);
+		}
 
 		public Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task Remove(Guid id) => Task.CompletedTask;
+		public Task Remove(Guid id)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

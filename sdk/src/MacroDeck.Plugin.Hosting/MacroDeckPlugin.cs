@@ -13,8 +13,14 @@ namespace MacroDeck.Plugin.Hosting;
 public static class MacroDeckPlugin
 {
 	/// <summary>Starts building a plugin, taking configuration from the command line as well.</summary>
-	public static PluginHostBuilder CreatePlugin(string[] args) => new(args);
+	public static PluginHostBuilder CreatePlugin(string[] args)
+	{
+		return new PluginHostBuilder(args);
+	}
 
 	/// <summary>Starts building a plugin.</summary>
-	public static PluginHostBuilder CreatePlugin() => new([]);
+	public static PluginHostBuilder CreatePlugin()
+	{
+		return new PluginHostBuilder([]);
+	}
 }

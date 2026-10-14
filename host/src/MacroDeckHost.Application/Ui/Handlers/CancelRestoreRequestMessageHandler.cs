@@ -9,9 +9,13 @@ public sealed class CancelRestoreRequestMessageHandler
 {
 	private readonly IRestoreService _restoreService;
 
-	public CancelRestoreRequestMessageHandler(IRestoreService restoreService) => _restoreService = restoreService;
+	public CancelRestoreRequestMessageHandler(IRestoreService restoreService)
+	{
+		_restoreService = restoreService;
+	}
 
-	public async ValueTask<CancelRestoreResponse> Handle(CancelRestoreRequest request,
+	public async ValueTask<CancelRestoreResponse> Handle(
+		CancelRestoreRequest request,
 		CancellationToken cancellationToken)
 	{
 		var result = await _restoreService.Cancel(request.RestoreId, cancellationToken);

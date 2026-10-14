@@ -16,9 +16,9 @@ public static partial class BootstrapperLogParser
 	public static bool TryParseFileDate(string fileName, out DateOnly date)
 	{
 		date = default;
-		if (string.IsNullOrEmpty(fileName) ||
-			!fileName.StartsWith(FilePrefix, StringComparison.Ordinal) ||
-			!fileName.EndsWith(FileSuffix, StringComparison.Ordinal))
+		if (string.IsNullOrEmpty(fileName)
+			|| !fileName.StartsWith(FilePrefix, StringComparison.Ordinal)
+			|| !fileName.EndsWith(FileSuffix, StringComparison.Ordinal))
 		{
 			return false;
 		}
@@ -64,7 +64,10 @@ public static partial class BootstrapperLogParser
 		return true;
 	}
 
-	public static string FileName(string stamp) => $"{FilePrefix}{stamp}{FileSuffix}";
+	public static string FileName(string stamp)
+	{
+		return $"{FilePrefix}{stamp}{FileSuffix}";
+	}
 
 	public static string SearchPattern => $"{FilePrefix}*{FileSuffix}";
 
@@ -78,7 +81,8 @@ public static partial class BootstrapperLogParser
 	}
 
 	public static LogEntryLevel ParseLevel(string tag)
-		=> tag switch
+	{
+		return tag switch
 		{
 			"VRB" => LogEntryLevel.Verbose,
 			"DBG" => LogEntryLevel.Debug,
@@ -87,4 +91,5 @@ public static partial class BootstrapperLogParser
 			"FTL" => LogEntryLevel.Fatal,
 			_ => LogEntryLevel.Information
 		};
+	}
 }

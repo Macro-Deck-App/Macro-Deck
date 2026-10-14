@@ -37,7 +37,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
-	public StoreInstallExecutor(IStoreCatalog catalog,
+	public StoreInstallExecutor(
+		IStoreCatalog catalog,
 		IStoreCatalogQueryService catalogQuery,
 		IStoreOperationTracker tracker,
 		IStoreArtifactDownloader downloader,
@@ -84,8 +85,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 
 		var snapshot = _catalog.Snapshot;
 		var listed = snapshot.Entries.FirstOrDefault(entry =>
-			entry.Kind == operation.ExtensionKind &&
-			string.Equals(entry.Id, operation.PackageId, StringComparison.OrdinalIgnoreCase));
+			entry.Kind == operation.ExtensionKind
+			&& string.Equals(entry.Id, operation.PackageId, StringComparison.OrdinalIgnoreCase));
 		if (listed is null ? snapshot.HasRemoval(operation.PackageId) : snapshot.FindWithdrawal(listed) is not null)
 		{
 			FailRemoved(operationId);
@@ -148,8 +149,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 						item.Entry,
 						release,
 						held,
-						item.InstalledTestBuild is not null ||
-						item.InstalledVersion is { } active && !StoreVersions.Same(release.Version, active),
+						item.InstalledTestBuild is not null
+						|| item.InstalledVersion is { } active && !StoreVersions.Same(release.Version, active),
 						consented,
 						backupBatchId,
 						downloadMetadata,
@@ -204,13 +205,16 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		}
 	}
 
-	private void FailRemoved(Guid operationId) =>
+	private void FailRemoved(Guid operationId)
+	{
 		_tracker.Transition(operationId,
 			StoreOperationState.Failed,
 			StoreOperationError.PackageRemoved,
 			"This package was removed from the registry.");
+	}
 
-	private async Task ExecutePlugin(Guid operationId,
+	private async Task ExecutePlugin(
+		Guid operationId,
 		StoreCatalogEntry entry,
 		StoreReleaseManifest release,
 		bool held,
@@ -290,7 +294,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		_tracker.Transition(operationId, StoreOperationState.Completed);
 	}
 
-	private async Task ExecuteTestBuild(StoreOperation operation,
+	private async Task ExecuteTestBuild(
+		StoreOperation operation,
 		bool consented,
 		CancellationToken cancellationToken)
 	{
@@ -391,7 +396,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		}
 	}
 
-	private async Task ExecuteIconPack(Guid operationId,
+	private async Task ExecuteIconPack(
+		Guid operationId,
 		StoreCatalogEntry entry,
 		StoreReleaseManifest release,
 		bool held,
@@ -486,7 +492,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		}
 	}
 
-	private async Task ExecuteProfileTemplate(Guid operationId,
+	private async Task ExecuteProfileTemplate(
+		Guid operationId,
 		StoreCatalogEntry entry,
 		StoreReleaseManifest release,
 		bool held,
@@ -520,7 +527,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 
 			using var scope = _scopeFactory.CreateScope();
 			var portability = scope.ServiceProvider.GetRequiredService<IProfilePortabilityService>();
-			var importResult = await portability.Import(bytes, password: null, cancellationToken);
+			var importResult = await portability.Import(bytes, null, cancellationToken);
 			if (!importResult.Success)
 			{
 				_tracker.Transition(operationId,
@@ -568,7 +575,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		{
 			if (Directory.Exists(directory))
 			{
-				Directory.Delete(directory, recursive: true);
+				Directory.Delete(directory, true);
 			}
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -577,35 +584,41 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		}
 	}
 
-	private static StoreOperationError MapPluginError(PluginInstallResult result) => result.Error switch
+	private static StoreOperationError MapPluginError(PluginInstallResult result)
 	{
-		PluginInstallError.HashMismatch => StoreOperationError.ChecksumMismatch,
-		PluginInstallError.SignatureInvalid => StoreOperationError.SignatureInvalid,
-		PluginInstallError.SignatureUntrusted
-			or PluginInstallError.SignatureRevoked => StoreOperationError.SignatureUntrusted,
-		PluginInstallError.SignatureUnverifiable => StoreOperationError.SignatureUnverifiable,
-		PluginInstallError.UnsignedNotPermitted => StoreOperationError.UnsignedNotPermitted,
-		PluginInstallError.TrustDowngrade => StoreOperationError.TrustDowngrade,
-		PluginInstallError.Incompatible => result.Incompatibility is PluginIncompatibility.HostTooOld
-			? StoreOperationError.RequiresNewerMacroDeck
-			: StoreOperationError.Incompatible,
-		PluginInstallError.InvalidArchive
-			or PluginInstallError.ManifestMissing
-			or PluginInstallError.ManifestInvalid
-			or PluginInstallError.UnsafeEntry
-			or PluginInstallError.ArtifactLimitExceeded
-			or PluginInstallError.IdMismatch =>
-			StoreOperationError.MalformedPackage,
-		PluginInstallError.ArtifactTooLarge => StoreOperationError.ArtifactTooLarge,
-		_ => StoreOperationError.InstallFailed
-	};
+		return result.Error switch
+		{
+			PluginInstallError.HashMismatch => StoreOperationError.ChecksumMismatch,
+			PluginInstallError.SignatureInvalid => StoreOperationError.SignatureInvalid,
+			PluginInstallError.SignatureUntrusted
+				or PluginInstallError.SignatureRevoked => StoreOperationError.SignatureUntrusted,
+			PluginInstallError.SignatureUnverifiable => StoreOperationError.SignatureUnverifiable,
+			PluginInstallError.UnsignedNotPermitted => StoreOperationError.UnsignedNotPermitted,
+			PluginInstallError.TrustDowngrade => StoreOperationError.TrustDowngrade,
+			PluginInstallError.Incompatible => result.Incompatibility is PluginIncompatibility.HostTooOld
+				? StoreOperationError.RequiresNewerMacroDeck
+				: StoreOperationError.Incompatible,
+			PluginInstallError.InvalidArchive
+				or PluginInstallError.ManifestMissing
+				or PluginInstallError.ManifestInvalid
+				or PluginInstallError.UnsafeEntry
+				or PluginInstallError.ArtifactLimitExceeded
+				or PluginInstallError.IdMismatch =>
+				StoreOperationError.MalformedPackage,
+			PluginInstallError.ArtifactTooLarge => StoreOperationError.ArtifactTooLarge,
+			_ => StoreOperationError.InstallFailed
+		};
+	}
 
-	private static StoreOperationError MapDownloadError(StoreArtifactDownloadError error) => error switch
+	private static StoreOperationError MapDownloadError(StoreArtifactDownloadError error)
 	{
-		StoreArtifactDownloadError.DownloadFailed => StoreOperationError.DownloadFailed,
-		StoreArtifactDownloadError.SizeMismatch => StoreOperationError.SizeMismatch,
-		StoreArtifactDownloadError.ChecksumMismatch => StoreOperationError.ChecksumMismatch,
-		StoreArtifactDownloadError.ArtifactTooLarge => StoreOperationError.ArtifactTooLarge,
-		_ => StoreOperationError.DownloadFailed
-	};
+		return error switch
+		{
+			StoreArtifactDownloadError.DownloadFailed => StoreOperationError.DownloadFailed,
+			StoreArtifactDownloadError.SizeMismatch => StoreOperationError.SizeMismatch,
+			StoreArtifactDownloadError.ChecksumMismatch => StoreOperationError.ChecksumMismatch,
+			StoreArtifactDownloadError.ArtifactTooLarge => StoreOperationError.ArtifactTooLarge,
+			_ => StoreOperationError.DownloadFailed
+		};
+	}
 }

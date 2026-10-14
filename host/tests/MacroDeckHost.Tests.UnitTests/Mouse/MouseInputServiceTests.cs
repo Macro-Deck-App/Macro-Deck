@@ -15,7 +15,10 @@ public class MouseInputServiceTests
 		_service = new MouseInputService(_provider);
 	}
 
-	private void AssertCalls(params string[] expected) => Assert.That(_provider.Calls, Is.EqualTo(expected));
+	private void AssertCalls(params string[] expected)
+	{
+		Assert.That(_provider.Calls, Is.EqualTo(expected));
+	}
 
 	[Test]
 	public async Task Click_at_the_current_position_does_not_move()
@@ -84,7 +87,7 @@ public class MouseInputServiceTests
 	[Test]
 	public async Task Click_passes_the_click_count_through_for_a_double_click()
 	{
-		await _service.ClickAsync(MouseButton.Left, clickCount: 2);
+		await _service.ClickAsync(MouseButton.Left, 2);
 
 		AssertCalls("click(Left,2)");
 	}
@@ -92,7 +95,7 @@ public class MouseInputServiceTests
 	[Test]
 	public async Task Click_clamps_an_out_of_range_click_count()
 	{
-		await _service.ClickAsync(MouseButton.Left, clickCount: 9);
+		await _service.ClickAsync(MouseButton.Left, 9);
 
 		AssertCalls("click(Left,3)");
 	}
@@ -172,8 +175,8 @@ public class MouseInputServiceTests
 		await _service.DragAsync(MouseButton.Left,
 			MouseTarget.At(0, 0),
 			MouseTarget.At(100, 0),
-			durationMs: 0,
-			steps: 4);
+			0,
+			4);
 
 		AssertCalls("down(Left@0,0)",
 			"drag(Left,25,0)",
@@ -189,8 +192,8 @@ public class MouseInputServiceTests
 		await _service.DragAsync(MouseButton.Left,
 			MouseTarget.At(200, 200),
 			MouseTarget.By(40, 0),
-			durationMs: 0,
-			steps: 2);
+			0,
+			2);
 
 		AssertCalls("down(Left@200,200)", "drag(Left,220,200)", "drag(Left,240,200)", "up(Left)");
 	}
@@ -203,8 +206,8 @@ public class MouseInputServiceTests
 		await _service.DragAsync(MouseButton.Left,
 			MouseTarget.Current,
 			MouseTarget.At(300, 500),
-			durationMs: 0,
-			steps: 1);
+			0,
+			1);
 
 		AssertCalls("down(Left@300,400)", "drag(Left,300,500)", "up(Left)");
 	}
@@ -217,9 +220,9 @@ public class MouseInputServiceTests
 		var drag = _service.DragAsync(MouseButton.Left,
 			MouseTarget.At(0, 0),
 			MouseTarget.At(1000, 0),
-			durationMs: 5_000,
-			steps: 50,
-			cancellationToken: cancellation.Token);
+			5_000,
+			50,
+			cancellation.Token);
 
 		await WaitForCall("down(Left@0,0)");
 		await cancellation.CancelAsync();

@@ -19,13 +19,17 @@ public class MacroDeck2StringCipherTests
 
 	[Test]
 	public void TryDecrypt_ReadsTheFormatMacroDeck2Wrote()
-		=> Assert.That(MacroDeck2StringCipher.TryDecrypt(GoldenCipherText, GoldenPassPhrase),
+	{
+		Assert.That(MacroDeck2StringCipher.TryDecrypt(GoldenCipherText, GoldenPassPhrase),
 			Is.EqualTo(GoldenPlainText));
+	}
 
 	[Test]
 	public void TryDecrypt_WithTheWrongKey_ReportsFailureInsteadOfThrowing()
-		=> Assert.That(MacroDeck2StringCipher.TryDecrypt(GoldenCipherText, "00000000-0000-0000-0000-000000000000"),
+	{
+		Assert.That(MacroDeck2StringCipher.TryDecrypt(GoldenCipherText, "00000000-0000-0000-0000-000000000000"),
 			Is.Null);
+	}
 
 	// Macro Deck 2's format carries no authentication tag, so a wrong key clears PKCS7 padding by chance
 	// for roughly one value in 256. This pair is one of those: the wrong key below decrypts it without a
@@ -38,9 +42,11 @@ public class MacroDeck2StringCipherTests
 
 	[Test]
 	public void TryDecrypt_WithAWrongKeyThatClearsPadding_StillReportsFailure()
-		=> Assert.That(MacroDeck2StringCipher.TryDecrypt(PaddingCollisionCipherText,
+	{
+		Assert.That(MacroDeck2StringCipher.TryDecrypt(PaddingCollisionCipherText,
 				PaddingCollisionWrongPassPhrase),
 			Is.Null);
+	}
 
 	// A truncated or hand-edited value must be refused the same way a wrong key is: the migration offers to
 	// carry on without the encrypted data, and that path is only reachable if nothing here throws.
@@ -49,7 +55,9 @@ public class MacroDeck2StringCipherTests
 	[TestCase("not base64 at all")]
 	[TestCase("AAECAwQFBgcICQoLDA0ODw==")]
 	public void TryDecrypt_WithUnusableInput_ReturnsNull(string cipherText)
-		=> Assert.That(MacroDeck2StringCipher.TryDecrypt(cipherText, GoldenPassPhrase), Is.Null);
+	{
+		Assert.That(MacroDeck2StringCipher.TryDecrypt(cipherText, GoldenPassPhrase), Is.Null);
+	}
 
 	[Test]
 	public void Encrypt_ProducesAValueItsOwnReaderAccepts()

@@ -21,12 +21,20 @@ internal sealed class FakeTwitchChatImages : IStreamChatImages
 
 	public IReadOnlySet<string> Pinned { get; private set; } = new HashSet<string>(StringComparer.Ordinal);
 
-	public UiResource? Find(StreamChatImage image) => _resolved.GetValueOrDefault(image.Key);
+	public UiResource? Find(StreamChatImage image)
+	{
+		return _resolved.GetValueOrDefault(image.Key);
+	}
 
-	public void Request(StreamChatImage image) => Requested.Add(image);
+	public void Request(StreamChatImage image)
+	{
+		Requested.Add(image);
+	}
 
 	public void Pin(IReadOnlyCollection<StreamChatImage> referenced)
-		=> Pinned = referenced.Select(image => image.Key).ToHashSet(StringComparer.Ordinal);
+	{
+		Pinned = referenced.Select(image => image.Key).ToHashSet(StringComparer.Ordinal);
+	}
 
 	public UiResource Resolve(StreamChatImage image)
 	{
@@ -35,12 +43,12 @@ internal sealed class FakeTwitchChatImages : IStreamChatImages
 				OwnerId = TwitchStreamPlatform.Platform.OwnerId,
 				Name = image.ResourceName,
 				MediaType = "image/png",
-				Content = new byte[] { 0x89, 0x50, 0x4E, 0x47, 1, 2, 3, 4 },
-			}) ??
-			new UiResource
+				Content = new byte[] { 0x89, 0x50, 0x4E, 0x47, 1, 2, 3, 4 }
+			})
+			?? new UiResource
 			{
 				ResourceId = TwitchStreamPlatform.Platform.OwnerId + "." + image.ResourceName,
-				ContentHash = "sha256:" + new string('a', 64),
+				ContentHash = "sha256:" + new string('a', 64)
 			};
 
 		_resolved[image.Key] = resource;

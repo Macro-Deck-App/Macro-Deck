@@ -15,40 +15,54 @@ public sealed class ConfigFlowTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal ConfigFlowTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal ConfigFlowTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>The config flow's shape, before any step has run.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.ConfigFlow,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.ConfigFlow,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.ConfigFlow.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>Starts a new flow instance.</summary>
-	public Task<CapabilityInvocationOutcome> StartAsync(FlowStartArguments arguments,
+	public Task<CapabilityInvocationOutcome> StartAsync(
+		FlowStartArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.ConfigFlow,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.ConfigFlow,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.ConfigFlow.FlowStart,
 			arguments,
 			options);
+	}
 
 	/// <summary>Submits one step's input.</summary>
-	public Task<CapabilityInvocationOutcome> SubmitAsync(FlowSubmitArguments arguments,
+	public Task<CapabilityInvocationOutcome> SubmitAsync(
+		FlowSubmitArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.ConfigFlow,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.ConfigFlow,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.ConfigFlow.FlowSubmit,
 			arguments,
 			options);
+	}
 
 	/// <summary>Abandons a flow instance the user did not complete.</summary>
-	public Task<CapabilityInvocationOutcome> AbandonAsync(FlowAbandonArguments arguments,
+	public Task<CapabilityInvocationOutcome> AbandonAsync(
+		FlowAbandonArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.ConfigFlow,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.ConfigFlow,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.ConfigFlow.FlowAbandon,
 			arguments,
 			options);
+	}
 }

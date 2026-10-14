@@ -34,7 +34,6 @@ internal sealed class RunVoicemeeterActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Choice(EditionParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -45,11 +44,14 @@ internal sealed class RunVoicemeeterActionDefinition : IActionDefinition
 				new ActionParameterOption { Value = nameof(VoicemeeterEdition.Banana), Label = "Voicemeeter Banana" },
 				new ActionParameterOption { Value = nameof(VoicemeeterEdition.Potato), Label = "Voicemeeter Potato" }
 			],
-			label: AppStrings.Integrations.Voicemeeter.Actions.RunVoicemeeter.EditionLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.RunVoicemeeter.EditionLabel(),
 			defaultValue: AutoEdition)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -80,8 +82,8 @@ internal sealed class RunVoicemeeterActionDefinition : IActionDefinition
 			}
 
 			var selected = VoicemeeterActionValues.ReadText(context.Parameters, EditionParameter) ?? AutoEdition;
-			if (Enum.TryParse<VoicemeeterEdition>(selected, ignoreCase: true, out var edition) &&
-				edition != VoicemeeterEdition.None)
+			if (Enum.TryParse<VoicemeeterEdition>(selected, true, out var edition)
+				&& edition != VoicemeeterEdition.None)
 			{
 				return Task.FromResult(connection.RunVoicemeeter(edition)
 					? ActionResult.Success()
@@ -97,8 +99,8 @@ internal sealed class RunVoicemeeterActionDefinition : IActionDefinition
 
 		private static bool RunInstalled(VoicemeeterConnection connection)
 		{
-			if (connection.Catalog.Edition != VoicemeeterEdition.None &&
-				connection.RunVoicemeeter(connection.Catalog.Edition))
+			if (connection.Catalog.Edition != VoicemeeterEdition.None
+				&& connection.RunVoicemeeter(connection.Catalog.Edition))
 			{
 				return true;
 			}

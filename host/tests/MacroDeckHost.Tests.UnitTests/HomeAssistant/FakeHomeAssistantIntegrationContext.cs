@@ -23,12 +23,14 @@ namespace MacroDeckHost.Tests.UnitTests.HomeAssistant;
 internal sealed class FakeHomeAssistantIntegrationContext : IIntegrationContext
 {
 	public static FakeHomeAssistantIntegrationContext RecordingBindingsIn(IVariableBindingStore store)
-		=> new()
+	{
+		return new FakeHomeAssistantIntegrationContext
 		{
 			Variables = new IntegrationVariableApi(HomeAssistantIntegration.IntegrationId,
 				null!,
 				bindings: new VariableBindingAppender(store))
 		};
+	}
 
 	public FakeHomeAssistantIntegrationConfig ConfigStore { get; } = new();
 
@@ -58,9 +60,15 @@ internal sealed class NoOpEventPublisher : IEventPublisher
 
 internal sealed class NoOpVariableApi : IVariableApi
 {
-	public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => throw new NotSupportedException();
+	public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<VariableHandle?> GetByNameAsync(string name) => throw new NotSupportedException();
+	public Task<VariableHandle?> GetByNameAsync(string name)
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<VariableHandle> CreateAsync(
 		string name,
@@ -68,11 +76,19 @@ internal sealed class NoOpVariableApi : IVariableApi
 		object? initialValue = null,
 		int? decimalPlaces = null,
 		string? definitionId = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task SetValueAsync(Guid variableId, object? value) => throw new NotSupportedException();
+	public Task SetValueAsync(Guid variableId, object? value)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task DeleteAsync(Guid variableId) => throw new NotSupportedException();
+	public Task DeleteAsync(Guid variableId)
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class FakeHomeAssistantIntegrationConfig : IIntegrationConfig
@@ -94,13 +110,19 @@ internal sealed class FakeHomeAssistantIntegrationConfig : IIntegrationConfig
 	}
 
 	public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+	}
 
 	public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(null);
+	{
+		return Task.FromResult<string?>(null);
+	}
 
 	public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken cancellationToken = default)
 	{
@@ -109,7 +131,9 @@ internal sealed class FakeHomeAssistantIntegrationConfig : IIntegrationConfig
 	}
 
 	public Task SetSecretAsync(Guid entryId, string key, string value, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class FakeVariableBindingStore : IVariableBindingStore
@@ -120,7 +144,10 @@ internal sealed class FakeVariableBindingStore : IVariableBindingStore
 
 	public bool FailNextSave { get; set; }
 
-	public IReadOnlyList<VariableBinding> Load() => _bindings;
+	public IReadOnlyList<VariableBinding> Load()
+	{
+		return _bindings;
+	}
 
 	public bool TryLoad(out IReadOnlyList<VariableBinding> bindings)
 	{

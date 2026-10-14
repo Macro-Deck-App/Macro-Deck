@@ -133,7 +133,7 @@ internal static class XdgIconResolver
 		try
 		{
 			var entries = directories ? Directory.EnumerateDirectories(directory) : Directory.EnumerateFiles(directory);
-			return [..entries];
+			return [.. entries];
 		}
 		catch (IOException)
 		{
@@ -189,7 +189,9 @@ internal static class XdgIconResolver
 	}
 
 	private static bool IsBetter(Candidate candidate, Candidate current)
-		=> candidate.Tier > current.Tier || (candidate.Tier == current.Tier && candidate.Score > current.Score);
+	{
+		return candidate.Tier > current.Tier || candidate.Tier == current.Tier && candidate.Score > current.Score;
+	}
 
 	private static PathSize ReadPathSize(string file)
 	{
@@ -238,7 +240,7 @@ internal static class XdgIconResolver
 		if (scaleMarker >= 0)
 		{
 			var scaleSpan = rest[(scaleMarker + 1)..];
-			if (scaleSpan.Length < 2 || (scaleSpan[^1] is not 'x' and not 'X'))
+			if (scaleSpan.Length < 2 || scaleSpan[^1] is not 'x' and not 'X')
 			{
 				return false;
 			}
@@ -254,7 +256,9 @@ internal static class XdgIconResolver
 	}
 
 	private static bool TryParseDimension(ReadOnlySpan<char> value, out int parsed)
-		=> int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out parsed) && parsed > 0;
+	{
+		return int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out parsed) && parsed > 0;
+	}
 
 	private static long ReadLength(string file)
 	{

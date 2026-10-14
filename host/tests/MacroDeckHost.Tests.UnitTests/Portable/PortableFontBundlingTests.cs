@@ -21,7 +21,10 @@ public class PortableFontBundlingTests
 	private string _directory = null!;
 
 	private static byte[] Fixture =>
-		File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "Rendering", "Fixtures", "Anta-Regular.ttf"));
+		File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory,
+			"Rendering",
+			"Fixtures",
+			"Anta-Regular.ttf"));
 
 	[SetUp]
 	public void SetUp()
@@ -36,7 +39,7 @@ public class PortableFontBundlingTests
 	{
 		_source.Dispose();
 		_target.Dispose();
-		Directory.Delete(_directory, recursive: true);
+		Directory.Delete(_directory, true);
 	}
 
 	[Test]
@@ -44,7 +47,7 @@ public class PortableFontBundlingTests
 	{
 		await ImportFixture(_source);
 
-		var read = PortableArchive.Read(await ExportWidget($"{{\"fontFaceId\":\"{AntaFaceId}\"}}"), password: null);
+		var read = PortableArchive.Read(await ExportWidget($"{{\"fontFaceId\":\"{AntaFaceId}\"}}"), null);
 
 		Assert.Multiple(() =>
 		{
@@ -61,7 +64,7 @@ public class PortableFontBundlingTests
 	{
 		await ImportFixture(_source);
 
-		var read = PortableArchive.Read(await ExportWidget("{\"fontFaceId\":\"arial-400-5-upright\"}"), password: null);
+		var read = PortableArchive.Read(await ExportWidget("{\"fontFaceId\":\"arial-400-5-upright\"}"), null);
 
 		Assert.Multiple(() =>
 		{
@@ -122,7 +125,8 @@ public class PortableFontBundlingTests
 
 		await ImportWidget(archive);
 
-		var stored = _target.FolderCache.GetFolderById(existingFolder.Id)!.Widgets.Single(widget => widget.Id == existing.Id);
+		var stored = _target.FolderCache.GetFolderById(existingFolder.Id)!.Widgets.Single(widget
+			=> widget.Id == existing.Id);
 		Assert.Multiple(() =>
 		{
 			Assert.That(stored.Data, Does.Contain(missingId));
@@ -135,10 +139,12 @@ public class PortableFontBundlingTests
 	{
 		await ImportFixture(_source);
 		var (profile, _, _) = await _source.SeedProfile($"{{\"fontFaceId\":\"{AntaFaceId}\"}}");
-		var export = await _source.ProfileService.Export(profile.Id, PortableExportOptions.Default, CancellationToken.None);
+		var export = await _source.ProfileService.Export(profile.Id,
+			PortableExportOptions.Default,
+			CancellationToken.None);
 		Assert.That(export.Success, Is.True);
 
-		var import = await _target.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _target.ProfileService.Import(export.Data!, null, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -152,7 +158,9 @@ public class PortableFontBundlingTests
 	{
 		await ImportFixture(_source);
 		var archive = Rewrite(await ExportWidget($"{{\"fontFaceId\":\"{AntaFaceId}\"}}"),
-			_ => { },
+			_ =>
+			{
+			},
 			font => font with { Bytes = [.. font.Bytes, 0] });
 
 		var created = await ImportWidget(archive);
@@ -173,7 +181,7 @@ public class PortableFontBundlingTests
 
 		var signed = await Sign(package);
 		var verified = await PackageVerifier.VerifyAsync(signed, new PluginManifestReader(), TestPki.Root.PublicKey);
-		using var zip = ZipFile.OpenRead(signed);
+		using var zip = await ZipFile.OpenReadAsync(signed);
 
 		Assert.Multiple(() =>
 		{
@@ -184,14 +192,18 @@ public class PortableFontBundlingTests
 
 	private static async Task ImportFixture(PortabilityTestHarness harness)
 	{
-		var results = await harness.UserFonts.Import([new UserFontUpload("Anta-Regular.ttf", Fixture)], CancellationToken.None);
+		var results = await harness.UserFonts.Import([new UserFontUpload("Anta-Regular.ttf", Fixture)],
+			CancellationToken.None);
 		Assert.That(results.Single().Status, Is.EqualTo(UserFontImportStatus.Imported));
 	}
 
 	private async Task<byte[]> ExportWidget(string data)
 	{
 		var (_, folder, widget) = await _source.SeedProfile(data);
-		var export = await _source.WidgetService.Export(folder.Id, [widget.Id], PortableExportOptions.Default, CancellationToken.None);
+		var export = await _source.WidgetService.Export(folder.Id,
+			[widget.Id],
+			PortableExportOptions.Default,
+			CancellationToken.None);
 		Assert.That(export.Success, Is.True);
 		return export.Data!;
 	}
@@ -199,19 +211,20 @@ public class PortableFontBundlingTests
 	private async Task<WidgetEntity> ImportWidget(byte[] archive)
 	{
 		var (_, folder, _) = await _target.SeedProfile(null);
-		var import = await _target.WidgetService.Import(folder.Id, anchorX: 2, anchorY: 2, archive, password: null, CancellationToken.None);
+		var import = await _target.WidgetService.Import(folder.Id, 2, 2, archive, null, CancellationToken.None);
 		Assert.That(import.Success, Is.True);
 		return import.Data!.Single();
 	}
 
-	private static byte[] Rewrite(byte[] archive,
+	private static byte[] Rewrite(
+		byte[] archive,
 		Action<PortableContent> editContent,
 		Func<PortableFontFile, PortableFontFile>? editFont = null)
 	{
-		var read = PortableArchive.Read(archive, password: null);
+		var read = PortableArchive.Read(archive, null);
 		editContent(read.Content!);
 		var fonts = read.Fonts.Select(editFont ?? (font => font)).ToList();
-		return PortableArchive.Write(read.Manifest!, read.Content!, read.Icons, password: null, fonts);
+		return PortableArchive.Write(read.Manifest!, read.Content!, read.Icons, null, fonts);
 	}
 
 	private async Task<string> Sign(string package)
@@ -224,7 +237,8 @@ public class PortableFontBundlingTests
 			issuer.CertificateSignatureBytes,
 			TestPki.Root.PublicKey,
 			SigningCertificateChain.PackageKeyUsage);
-		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate).Material!;
+		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate)
+			.Material!;
 		var output = Path.Combine(_directory, "signed-" + Path.GetFileName(package));
 
 		var result = await PackageSigner.SignAsync(package,

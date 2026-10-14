@@ -1,6 +1,5 @@
 using MacroDeckHost.Infrastructure.Icons;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -46,7 +45,7 @@ public class AnimatedIconTranscodeTests
 		{
 			for (var x = 0; x < 8; x++)
 			{
-				frame[(index * 10) + x, y] = new Rgba32(255, 255, 255, 255);
+				frame[index * 10 + x, y] = new Rgba32(255, 255, 255, 255);
 			}
 		}
 	}

@@ -52,44 +52,59 @@ internal sealed class IconPackOwnershipTests
 			_updateState,
 			new StoreWithdrawalState(),
 			StoreRegistryOptions.Default);
-		_catalogQuery = new StoreCatalogQueryService(_catalog, _plugins, _installations, new JsonStoreTestInstallationStore(_harness.Paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
+		_catalogQuery = new StoreCatalogQueryService(_catalog,
+			_plugins,
+			_installations,
+			new JsonStoreTestInstallationStore(_harness.Paths, Serilog.Core.Logger.None),
+			new InstalledPluginSigners());
 		_storeOwner = new StoreIconPackOwner(_installations, _updateDetector, _harness.Logger);
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	private IconPackService CreateService(params IIconPackOwner[] owners)
-		=> new(_harness.Cache,
+	{
+		return new IconPackService(_harness.Cache,
 			_harness.BatchTracker,
 			_harness.Storage,
 			_harness.Mediator,
 			new IconPackOwnerRegistry(owners),
 			_harness.Logger);
+	}
 
-	private static StoreReleaseManifest Release(string version) => new()
+	private static StoreReleaseManifest Release(string version)
 	{
-		Version = version,
-		ArtifactUrl = new Uri($"https://cdn.example/artifact-{version}.bin"),
-		Sha256 = new string('a', 64),
-		Size = 16
-	};
+		return new StoreReleaseManifest
+		{
+			Version = version,
+			ArtifactUrl = new Uri($"https://cdn.example/artifact-{version}.bin"),
+			Sha256 = new string('a', 64),
+			Size = 16
+		};
+	}
 
-	private void SwapCatalog(string latestVersion) => _catalog.Swap(new StoreCatalogSnapshot
+	private void SwapCatalog(string latestVersion)
 	{
-		Sequence = 1,
-		Entries =
-		[
-			new StoreCatalogEntry
-			{
-				Kind = StoreExtensionKind.IconPack,
-				Id = IconPackId,
-				Name = "Material Icons",
-				LatestVersion = latestVersion,
-				LatestRelease = Release(latestVersion)
-			}
-		]
-	});
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				new StoreCatalogEntry
+				{
+					Kind = StoreExtensionKind.IconPack,
+					Id = IconPackId,
+					Name = "Material Icons",
+					LatestVersion = latestVersion,
+					LatestRelease = Release(latestVersion)
+				}
+			]
+		});
+	}
 
 	private async Task<IconPackEntity> InstallStorePack(string version = "1.0.0")
 	{
@@ -158,7 +173,7 @@ internal sealed class IconPackOwnershipTests
 	[Test]
 	public async Task Default_and_read_only_protections_keep_their_own_error_and_are_not_shadowed_by_ownership()
 	{
-		var defaultPack = await _harness.CreatePack("Imported Icons", isDefault: true);
+		var defaultPack = await _harness.CreatePack("Imported Icons", true);
 		var readOnlyPack = await _harness.CreatePack("Bundled Pack", isReadOnly: true);
 		var service = CreateService(_storeOwner);
 
@@ -180,7 +195,7 @@ internal sealed class IconPackOwnershipTests
 	public async Task A_provider_that_forbids_removal_refuses_observably()
 	{
 		var pack = await _harness.CreatePack("Plugin Pack");
-		var forbidding = new TestIconPackOwner(canRemove: false);
+		var forbidding = new TestIconPackOwner(false);
 		var service = CreateService(forbidding);
 
 		var result = await service.Delete(pack.Id);
@@ -338,9 +353,9 @@ internal sealed class IconPackOwnershipTests
 		SwapCatalog("1.0.0");
 		var storePack = await InstallStorePack("1.0.0");
 		var userPack = await _harness.CreatePack("User Pack");
-		var defaultPack = await _harness.CreatePack("Imported Icons", isDefault: true);
+		var defaultPack = await _harness.CreatePack("Imported Icons", true);
 		var forbiddenPack = await _harness.CreatePack("Plugin Pack");
-		var forbidding = new TestIconPackOwner(canRemove: false, ownedPackId: forbiddenPack.Id);
+		var forbidding = new TestIconPackOwner(false, forbiddenPack.Id);
 		var registry = new IconPackOwnerRegistry([_storeOwner, forbidding]);
 		var handler = new GetIconPacksRequestMessageHandler(_harness.Cache, registry);
 
@@ -480,13 +495,15 @@ internal sealed class IconPackOwnershipTests
 	}
 
 	private IconService CreateIconService(params IIconPackOwner[] owners)
-		=> new(_harness.Cache,
+	{
+		return new IconService(_harness.Cache,
 			_harness.Storage,
 			_harness.FallbackStore,
 			_harness.VariantDeriver,
 			_harness.Coalescer,
 			_harness.Mediator,
 			new IconPackOwnerRegistry(owners));
+	}
 
 	private static async IAsyncEnumerable<IconImportFile> Files(params string[] names)
 	{
@@ -509,10 +526,19 @@ internal sealed class IconPackOwnershipTests
 			_ownedPackId = ownedPackId;
 		}
 
-		public bool Owns(IconPackEntity pack) => _ownedPackId is null || _ownedPackId == pack.Id;
+		public bool Owns(IconPackEntity pack)
+		{
+			return _ownedPackId is null || _ownedPackId == pack.Id;
+		}
 
-		public IconPackOwnerDescriptor Describe(IconPackEntity pack) => new(IconPackOwnerKind.Plugin, _canRemove);
+		public IconPackOwnerDescriptor Describe(IconPackEntity pack)
+		{
+			return new IconPackOwnerDescriptor(IconPackOwnerKind.Plugin, _canRemove);
+		}
 
-		public Task Release(IconPackEntity pack) => Task.CompletedTask;
+		public Task Release(IconPackEntity pack)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

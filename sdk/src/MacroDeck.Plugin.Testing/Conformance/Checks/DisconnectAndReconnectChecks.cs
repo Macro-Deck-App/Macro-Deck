@@ -23,7 +23,8 @@ internal sealed class ReconnectsAndBecomesReadyCheck() : ConformanceCheckBase("M
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		await using var host = await MacroDeckTestHost.StartAsync().ConfigureAwait(false);
@@ -56,7 +57,8 @@ internal sealed class ReconnectsAndBecomesReadyCheck() : ConformanceCheckBase("M
 			}
 
 			var report = await ConformanceCheckSupport
-				.WaitForHealthAsync(handle.Plugin, r => r.Ready, TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+				.WaitForHealthAsync(handle.Plugin, r => r.Ready, TimeSpan.FromSeconds(10))
+				.ConfigureAwait(false);
 
 			return report.Ready
 				? ConformanceCheckResult.Pass()
@@ -77,7 +79,8 @@ internal sealed class ResumeKeepsTheSameSessionCheck() : ConformanceCheckBase("M
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		await using var host = await MacroDeckTestHost.StartAsync().ConfigureAwait(false);
@@ -133,8 +136,8 @@ internal sealed class ResumeKeepsTheSameSessionCheck() : ConformanceCheckBase("M
 			var hello = hellos[^1];
 			var payload = hello.Envelope.Payload?.Deserialize<SessionHelloPayload>(PluginProtocolJson.Options);
 
-			return payload?.ResumeSessionId is { } presented &&
-				string.Equals(presented, originalSessionId, StringComparison.Ordinal)
+			return payload?.ResumeSessionId is { } presented
+				&& string.Equals(presented, originalSessionId, StringComparison.Ordinal)
 					? ConformanceCheckResult.Pass([ConformanceCheckSupport.Observe("session id", resumed.SessionId)])
 					: ConformanceCheckResult.Fail(
 						$"The reconnecting session.hello presents resumeSessionId '{originalSessionId}'.",
@@ -171,7 +174,8 @@ internal sealed class NonResumeReconnectReinitializesCheck() : ConformanceCheckB
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		// Zero, not merely short: ReconnectPolicy.DelayFor(1, jitterSample) can itself sample arbitrarily
@@ -250,7 +254,8 @@ internal sealed class NonResumeReconnectReinitializesCheck() : ConformanceCheckB
 			}
 
 			var report = await ConformanceCheckSupport
-				.WaitForHealthAsync(handle.Plugin, r => r.Ready, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+				.WaitForHealthAsync(handle.Plugin, r => r.Ready, TimeSpan.FromSeconds(15))
+				.ConfigureAwait(false);
 
 			if (!report.Ready)
 			{
@@ -268,7 +273,7 @@ internal sealed class NonResumeReconnectReinitializesCheck() : ConformanceCheckB
 			{
 				await Wait.UntilAsync(() => host.Logs.AtLeast(LogLevels.Error).Count > errorsBeforeReconnect,
 						TimeSpan.FromSeconds(5),
-						because: "an integration failed to re-initialize after the non-resumed reconnect")
+						"an integration failed to re-initialize after the non-resumed reconnect")
 					.ConfigureAwait(false);
 			}
 			catch (PluginTestTimeoutException)
@@ -282,8 +287,8 @@ internal sealed class NonResumeReconnectReinitializesCheck() : ConformanceCheckB
 
 			return ConformanceCheckResult.Fail(
 				"Every integration re-initializes without error after a non-resumed reconnect.",
-				$"{newErrors} new Error-level log event(s) appeared after reconnecting - a non-idempotent " +
-				"InitializeAsync that throws on a second call produces exactly this symptom.");
+				$"{newErrors} new Error-level log event(s) appeared after reconnecting - a non-idempotent "
+				+ "InitializeAsync that throws on a second call produces exactly this symptom.");
 		}
 		finally
 		{
@@ -306,7 +311,8 @@ internal sealed class SupervisorShutdownStopsOnlyManagedSubjectsCheck() : Confor
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		await using var host = await MacroDeckTestHost.StartAsync().ConfigureAwait(false);
@@ -332,7 +338,8 @@ internal sealed class SupervisorShutdownStopsOnlyManagedSubjectsCheck() : Confor
 			if (isManaged)
 			{
 				var report = await ConformanceCheckSupport
-					.WaitForHealthAsync(handle.Plugin, r => !r.Live, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+					.WaitForHealthAsync(handle.Plugin, r => !r.Live, TimeSpan.FromSeconds(15))
+					.ConfigureAwait(false);
 
 				return !report.Live
 					? ConformanceCheckResult.Pass([ConformanceCheckSupport.Observe("mode", "Managed")])

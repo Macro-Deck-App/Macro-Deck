@@ -18,7 +18,7 @@ public static class IncludedIconPack
 	[
 		Cpu, MemoryStick, Gpu, "hard-drive", "server", "network", "wifi", Battery, "battery-charging",
 		"thermometer", "fan", "gauge", "activity", "droplet", "zap", "power", "sun", "moon", "cloud", "volume-2",
-		"mic", "headphones", "music", "monitor",
+		"mic", "headphones", "music", "monitor"
 	];
 
 	// Name-based, so host code and stored widget data can name an included icon without a lookup and the id
@@ -29,9 +29,9 @@ public static class IncludedIconPack
 
 		var hash = SHA256.HashData(Encoding.UTF8.GetBytes($"{PackId:N}/{name}"));
 		var bytes = hash.AsSpan(0, 16).ToArray();
-		bytes[6] = (byte)((bytes[6] & 0x0F) | 0x50);
-		bytes[8] = (byte)((bytes[8] & 0x3F) | 0x80);
+		bytes[6] = (byte)(bytes[6] & 0x0F | 0x50);
+		bytes[8] = (byte)(bytes[8] & 0x3F | 0x80);
 
-		return new Guid(bytes, bigEndian: true);
+		return new Guid(bytes, true);
 	}
 }

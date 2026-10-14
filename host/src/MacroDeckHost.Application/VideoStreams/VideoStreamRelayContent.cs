@@ -14,10 +14,13 @@ public static class VideoStreamRelayContent
 	public const string PlaylistMediaType = "application/vnd.apple.mpegurl";
 
 	public static bool IsPlaylistPath(string absolutePath)
-		=> absolutePath.EndsWith(".m3u8", StringComparison.OrdinalIgnoreCase);
+	{
+		return absolutePath.EndsWith(".m3u8", StringComparison.OrdinalIgnoreCase);
+	}
 
 	public static VideoStreamRelayContentKind Classify(string transport, string? mediaType, bool playlistPath)
-		=> transport switch
+	{
+		return transport switch
 		{
 			"mjpeg" => IsOneOf(mediaType, "multipart/x-mixed-replace", "image/jpeg")
 				? VideoStreamRelayContentKind.Media
@@ -25,6 +28,7 @@ public static class VideoStreamRelayContent
 			"hls" => ClassifyHls(mediaType, playlistPath),
 			_ => VideoStreamRelayContentKind.Rejected
 		};
+	}
 
 	private static VideoStreamRelayContentKind ClassifyHls(string? mediaType, bool playlistPath)
 	{
@@ -33,8 +37,8 @@ public static class VideoStreamRelayContent
 			return VideoStreamRelayContentKind.Playlist;
 		}
 
-		var isMedia = IsOneOf(mediaType, "video/mp2t", "video/mp4", "video/iso.segment", "text/vtt") ||
-			(mediaType is not null && mediaType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase));
+		var isMedia = IsOneOf(mediaType, "video/mp2t", "video/mp4", "video/iso.segment", "text/vtt")
+			|| mediaType is not null && mediaType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase);
 		var isUntypedBytes = mediaType is null || IsOneOf(mediaType, "application/octet-stream");
 		var isPlainText = IsOneOf(mediaType, "text/plain");
 
@@ -61,5 +65,8 @@ public static class VideoStreamRelayContent
 	}
 
 	private static bool IsOneOf(string? mediaType, params string[] allowed)
-		=> mediaType is not null && allowed.Any(type => string.Equals(type, mediaType, StringComparison.OrdinalIgnoreCase));
+	{
+		return mediaType is not null
+			&& allowed.Any(type => string.Equals(type, mediaType, StringComparison.OrdinalIgnoreCase));
+	}
 }

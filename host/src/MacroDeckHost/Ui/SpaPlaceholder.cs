@@ -5,7 +5,9 @@ namespace MacroDeckHost.Ui;
 internal static class SpaPlaceholder
 {
 	public static bool IsClientMissing(string? webRootPath)
-		=> string.IsNullOrEmpty(webRootPath) || !File.Exists(Path.Combine(webRootPath, "index.html"));
+	{
+		return string.IsNullOrEmpty(webRootPath) || !File.Exists(Path.Combine(webRootPath, "index.html"));
+	}
 
 	public static Task Handle(HttpContext context)
 	{

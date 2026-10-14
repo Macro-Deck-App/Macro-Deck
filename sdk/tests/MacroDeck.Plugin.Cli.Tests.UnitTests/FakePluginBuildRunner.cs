@@ -27,7 +27,8 @@ internal sealed class FakePluginBuildRunner : IPluginBuildRunner
 	/// <summary>Invoked with the executable, arguments and working directory before the result is returned.</summary>
 	public Action<string, IReadOnlyList<string>, string>? OnRun { get; set; }
 
-	public Task<PluginBuildRunResult> RunAsync(string executable,
+	public Task<PluginBuildRunResult> RunAsync(
+		string executable,
 		IReadOnlyList<string> arguments,
 		string workingDirectory,
 		CancellationToken cancellationToken)
@@ -48,5 +49,8 @@ internal sealed class FakePluginBuildRunner : IPluginBuildRunner
 	}
 
 	/// <summary>The launch failure a real runner reports when the configured executable is not on PATH.</summary>
-	public static ProcessLaunchException NotLaunchable(string fileName) => new(fileName);
+	public static ProcessLaunchException NotLaunchable(string fileName)
+	{
+		return new ProcessLaunchException(fileName);
+	}
 }

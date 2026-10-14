@@ -11,7 +11,8 @@ public class MusicPlayerOptionsWireCompatibilityTests
 	[Test]
 	public void An_instance_from_a_plugin_that_predates_options_declares_none()
 	{
-		const string json = """{"id":"account-1","displayName":"Spotify (alice)","hasCatalog":true,"hasDevices":false}""";
+		const string json
+			= """{"id":"account-1","displayName":"Spotify (alice)","hasCatalog":true,"hasDevices":false}""";
 
 		var dto = JsonSerializer.Deserialize<MusicPlayerInstanceDto>(json, PluginProtocolJson.Options)!;
 

@@ -17,7 +17,8 @@ internal sealed class YtmDesktopEventEmitter
 		YtmLikeStatus current,
 		string? trackName,
 		string? videoId)
-		=> _publisher.Publish(YtmDesktopEventIds.LikeChanged,
+	{
+		_publisher.Publish(YtmDesktopEventIds.LikeChanged,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["likeStatus"] = Describe(current),
@@ -25,13 +26,16 @@ internal sealed class YtmDesktopEventEmitter
 				["trackName"] = trackName,
 				["videoId"] = videoId
 			});
+	}
 
 	internal static string Describe(YtmLikeStatus status)
-		=> status switch
+	{
+		return status switch
 		{
 			YtmLikeStatus.Like => "like",
 			YtmLikeStatus.Dislike => "dislike",
 			YtmLikeStatus.Indifferent => "indifferent",
 			_ => "unknown"
 		};
+	}
 }

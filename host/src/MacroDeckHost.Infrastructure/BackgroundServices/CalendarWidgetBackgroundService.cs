@@ -56,7 +56,9 @@ public sealed class CalendarWidgetBackgroundService : HostReadyBackgroundService
 				}
 				catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
 				{
-					_logger.Error(exception, "Updating calendar widgets failed; retrying in {Delay}", _retryAfterFailure);
+					_logger.Error(exception,
+						"Updating calendar widgets failed; retrying in {Delay}",
+						_retryAfterFailure);
 					sleep = _retryAfterFailure;
 				}
 

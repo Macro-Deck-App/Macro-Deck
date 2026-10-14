@@ -50,8 +50,8 @@ public class PluginCatalogNotifierTests
 			state,
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
-			hostInvoker: null,
-			hostStateCache: null);
+			null,
+			null);
 
 		// Normally set by PluginConnectionHostedService once the handshake completes; set directly here,
 		// the same shape HostInvokerTests/DeadlockRegressionTests use to drive a connection without that

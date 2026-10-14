@@ -22,8 +22,13 @@ public readonly record struct UiSessionIngestResult
 
 	public string? Message { get; init; }
 
-	public static UiSessionIngestResult Accept() => new() { Accepted = true };
+	public static UiSessionIngestResult Accept()
+	{
+		return new UiSessionIngestResult { Accepted = true };
+	}
 
 	public static UiSessionIngestResult Reject(string code, string? message = null)
-		=> new() { Accepted = false, Code = code, Message = message };
+	{
+		return new UiSessionIngestResult { Accepted = false, Code = code, Message = message };
+	}
 }

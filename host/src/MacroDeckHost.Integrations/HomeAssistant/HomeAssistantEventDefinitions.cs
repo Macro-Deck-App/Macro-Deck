@@ -18,37 +18,37 @@ internal static class HomeAssistantEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.Autocomplete("entityId",
-					label: AppStrings.Integrations.HomeAssistant.Events.EntityLabel(),
-					description: AppStrings.Integrations.HomeAssistant.Events.EntityFilterDescription(),
+					AppStrings.Integrations.HomeAssistant.Events.EntityLabel(),
+					AppStrings.Integrations.HomeAssistant.Events.EntityFilterDescription(),
 					placeholder: AppStrings.Integrations.HomeAssistant.Events.AnyEntity()),
 				ActionParameter.DynamicChoice("domain",
-					label: AppStrings.Integrations.HomeAssistant.Events.DomainLabel(),
-					description: AppStrings.Integrations.HomeAssistant.Events.DomainFilterDescription(),
+					AppStrings.Integrations.HomeAssistant.Events.DomainLabel(),
+					AppStrings.Integrations.HomeAssistant.Events.DomainFilterDescription(),
 					placeholder: AppStrings.Integrations.HomeAssistant.Events.AnyDomain()),
 				ActionParameter.Autocomplete("toState",
-					label: AppStrings.Integrations.HomeAssistant.Events.NewStateLabel(),
-					description: AppStrings.Integrations.HomeAssistant.Events.ToStateFilterDescription(),
+					AppStrings.Integrations.HomeAssistant.Events.NewStateLabel(),
+					AppStrings.Integrations.HomeAssistant.Events.ToStateFilterDescription(),
 					placeholder: AppStrings.Integrations.HomeAssistant.Events.AnyState()),
 				ActionParameter.Autocomplete("fromState",
-					label: AppStrings.Integrations.HomeAssistant.Events.PreviousStateLabel(),
-					description: AppStrings.Integrations.HomeAssistant.Events.FromStateFilterDescription(),
+					AppStrings.Integrations.HomeAssistant.Events.PreviousStateLabel(),
+					AppStrings.Integrations.HomeAssistant.Events.FromStateFilterDescription(),
 					placeholder: AppStrings.Integrations.HomeAssistant.Events.AnyState())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.Autocomplete("entityId",
-					label: AppStrings.Integrations.HomeAssistant.Events.EntityLabel()),
+					AppStrings.Integrations.HomeAssistant.Events.EntityLabel()),
 				ActionParameter.DynamicChoice("domain",
-					label: AppStrings.Integrations.HomeAssistant.Events.DomainLabel()),
+					AppStrings.Integrations.HomeAssistant.Events.DomainLabel()),
 				ActionParameter.Autocomplete("toState",
-					label: AppStrings.Integrations.HomeAssistant.Events.NewStateLabel()),
+					AppStrings.Integrations.HomeAssistant.Events.NewStateLabel()),
 				ActionParameter.Autocomplete("fromState",
-					label: AppStrings.Integrations.HomeAssistant.Events.PreviousStateLabel()),
-				ActionParameter.Text("friendlyName", label: AppStrings.Integrations.HomeAssistant.Events.NameLabel()),
-				ActionParameter.Text("area", label: AppStrings.Integrations.HomeAssistant.Events.AreaLabel()),
-				ActionParameter.Text("unit", label: AppStrings.Integrations.HomeAssistant.Events.UnitLabel()),
+					AppStrings.Integrations.HomeAssistant.Events.PreviousStateLabel()),
+				ActionParameter.Text("friendlyName", AppStrings.Integrations.HomeAssistant.Events.NameLabel()),
+				ActionParameter.Text("area", AppStrings.Integrations.HomeAssistant.Events.AreaLabel()),
+				ActionParameter.Text("unit", AppStrings.Integrations.HomeAssistant.Events.UnitLabel()),
 				ActionParameter.Text("attributes",
-					label: AppStrings.Integrations.HomeAssistant.Events.AttributesJsonLabel())
+					AppStrings.Integrations.HomeAssistant.Events.AttributesJsonLabel())
 			]
 		},
 		new()
@@ -60,17 +60,17 @@ internal static class HomeAssistantEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.Autocomplete("eventType",
-					label: AppStrings.Integrations.HomeAssistant.Events.EventTypeLabel(),
-					description: AppStrings.Integrations.HomeAssistant.Events.EventTypeFilterDescription(),
+					AppStrings.Integrations.HomeAssistant.Events.EventTypeLabel(),
+					AppStrings.Integrations.HomeAssistant.Events.EventTypeFilterDescription(),
 					placeholder: AppStrings.Integrations.HomeAssistant.Events.AnyEvent())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.Autocomplete("eventType",
-					label: AppStrings.Integrations.HomeAssistant.Events.EventTypeLabel()),
+					AppStrings.Integrations.HomeAssistant.Events.EventTypeLabel()),
 				ActionParameter.Autocomplete("entityId",
-					label: AppStrings.Integrations.HomeAssistant.Events.EntityLabel()),
-				ActionParameter.Text("data", label: AppStrings.Integrations.HomeAssistant.Events.RawDataJsonLabel())
+					AppStrings.Integrations.HomeAssistant.Events.EntityLabel()),
+				ActionParameter.Text("data", AppStrings.Integrations.HomeAssistant.Events.RawDataJsonLabel())
 			]
 		},
 		new()

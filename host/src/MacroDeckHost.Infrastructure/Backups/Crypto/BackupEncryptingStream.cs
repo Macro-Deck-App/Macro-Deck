@@ -20,7 +20,8 @@ public sealed class BackupEncryptingStream : Stream
 	private uint _segment;
 	private bool _finished;
 
-	public BackupEncryptingStream(Stream destination,
+	public BackupEncryptingStream(
+		Stream destination,
 		BackupPayloadHeader header,
 		byte[] headerBytes,
 		byte[] dataKey,
@@ -48,7 +49,10 @@ public sealed class BackupEncryptingStream : Stream
 		set => throw new NotSupportedException();
 	}
 
-	public override void Write(byte[] buffer, int offset, int count) => Write(buffer.AsSpan(offset, count));
+	public override void Write(byte[] buffer, int offset, int count)
+	{
+		Write(buffer.AsSpan(offset, count));
+	}
 
 	public override void Write(ReadOnlySpan<byte> buffer)
 	{
@@ -58,7 +62,7 @@ public sealed class BackupEncryptingStream : Stream
 		{
 			if (_pending == _buffer.Length)
 			{
-				EmitSegment(isFinal: false);
+				EmitSegment(false);
 			}
 
 			var take = Math.Min(_buffer.Length - _pending, buffer.Length);
@@ -89,18 +93,30 @@ public sealed class BackupEncryptingStream : Stream
 			return;
 		}
 
-		EmitSegment(isFinal: true);
+		EmitSegment(true);
 		_finished = true;
 		_destination.Flush();
 	}
 
-	public override void Flush() => _destination.Flush();
+	public override void Flush()
+	{
+		_destination.Flush();
+	}
 
-	public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+	public override int Read(byte[] buffer, int offset, int count)
+	{
+		throw new NotSupportedException();
+	}
 
-	public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+	public override long Seek(long offset, SeekOrigin origin)
+	{
+		throw new NotSupportedException();
+	}
 
-	public override void SetLength(long value) => throw new NotSupportedException();
+	public override void SetLength(long value)
+	{
+		throw new NotSupportedException();
+	}
 
 	protected override void Dispose(bool disposing)
 	{

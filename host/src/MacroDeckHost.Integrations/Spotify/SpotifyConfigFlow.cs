@@ -12,7 +12,7 @@ namespace MacroDeckHost.Integrations.Spotify;
 public sealed class SpotifyConfigFlow : IConfigFlow
 {
 	private static readonly ILogger _logger = IntegrationLog.For<SpotifyConfigFlow>(SpotifyIntegration.IntegrationId);
-	private static readonly SpotifyRequestLimiter _setupLimiter = new(ceilingPerSecond: 0.2, burst: 3);
+	private static readonly SpotifyRequestLimiter _setupLimiter = new(0.2, 3);
 
 	private string _clientId = string.Empty;
 	private string _clientSecret = string.Empty;
@@ -69,7 +69,8 @@ public sealed class SpotifyConfigFlow : IConfigFlow
 		return ConfigFlowResult.External(loginRequest.ToUri().ToString(), "authorize");
 	}
 
-	private async Task<ConfigFlowResult> SubmitAuthorize(IConfigFlowContext context,
+	private async Task<ConfigFlowResult> SubmitAuthorize(
+		IConfigFlowContext context,
 		CancellationToken cancellationToken)
 	{
 		var code = context.OAuth.AuthorizationCode;
@@ -147,7 +148,8 @@ public sealed class SpotifyConfigFlow : IConfigFlow
 	}
 
 	private static ConfigFlowStep CredentialsStep(string redirectUri)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "credentials",
 			Title = AppStrings.Integrations.Spotify.Config.ConnectTitle(),
@@ -178,22 +180,25 @@ public sealed class SpotifyConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Text(SpotifyConfigKeys.ClientId,
-					label: AppStrings.Integrations.Spotify.Config.ClientIdLabel(),
+					AppStrings.Integrations.Spotify.Config.ClientIdLabel(),
 					placeholder: AppStrings.Integrations.Spotify.Config.ClientIdPlaceholder(),
 					required: true),
 				ActionParameter.Secret(SpotifyConfigKeys.ClientSecret,
-					label: AppStrings.Integrations.Spotify.Config.ClientSecretLabel(),
-					description: AppStrings.Integrations.Spotify.Config.ClientSecretDescription(),
-					required: true)
+					AppStrings.Integrations.Spotify.Config.ClientSecretLabel(),
+					AppStrings.Integrations.Spotify.Config.ClientSecretDescription(),
+					true)
 			]
 		};
+	}
 
 	private static ConfigFlowStep AuthorizePendingStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "authorize",
 			Title = AppStrings.Integrations.Spotify.Config.WaitingTitle(),
 			Description = AppStrings.Integrations.Spotify.Config.WaitingDescription(),
 			Fields = []
 		};
+	}
 }

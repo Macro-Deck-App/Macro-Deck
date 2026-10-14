@@ -67,21 +67,24 @@ public sealed class JsonEmailInboxKeyStore : IEmailInboxKeyStore
 		if (_files.Read<PersistedKeys>(_filePath) is { } loaded)
 		{
 			_keys = new EmailInboxKeySet(loaded.Generation,
-				[.. (loaded.Inboxes ?? []).Where(key => !string.IsNullOrEmpty(key.Ref) && !string.IsNullOrEmpty(key.Slug))
-					.DistinctBy(key => key.Ref, StringComparer.Ordinal)
-					.Select(key => new EmailInboxKey(key.Ref!, key.Slug!, key.Seen))]);
+			[
+				.. (loaded.Inboxes ?? [])
+				.Where(key => !string.IsNullOrEmpty(key.Ref) && !string.IsNullOrEmpty(key.Slug))
+				.DistinctBy(key => key.Ref, StringComparer.Ordinal)
+				.Select(key => new EmailInboxKey(key.Ref!, key.Slug!, key.Seen))
+			]);
 			return _keys;
 		}
 
 		// Read returns null for both a missing file and an unrecoverable one; only the former may be
 		// overwritten, or the next save would reassign every inbox's variable names.
-		_persistable = !File.Exists(_filePath) &&
-			!File.Exists(_filePath + DurableJsonFile.TempSuffix) &&
-			!File.Exists(_filePath + DurableJsonFile.BackupSuffix);
+		_persistable = !File.Exists(_filePath)
+			&& !File.Exists(_filePath + DurableJsonFile.TempSuffix)
+			&& !File.Exists(_filePath + DurableJsonFile.BackupSuffix);
 		if (!_persistable)
 		{
-			_logger.Warning("The email inbox key file {Path} could not be read; inbox variable names are not saved " +
-				"until it is repaired",
+			_logger.Warning("The email inbox key file {Path} could not be read; inbox variable names are not saved "
+				+ "until it is repaired",
 				_filePath);
 		}
 
@@ -104,7 +107,10 @@ public sealed class JsonEmailInboxKeyStore : IEmailInboxKeyStore
 				{
 					Version = CurrentVersion,
 					Generation = keys.Generation,
-					Inboxes = [.. keys.Keys.Select(key => new PersistedKey { Ref = key.Ref, Slug = key.Slug, Seen = key.Seen })]
+					Inboxes =
+					[
+						.. keys.Keys.Select(key => new PersistedKey { Ref = key.Ref, Slug = key.Slug, Seen = key.Seen })
+					]
 				});
 		}
 		catch (Exception exception)

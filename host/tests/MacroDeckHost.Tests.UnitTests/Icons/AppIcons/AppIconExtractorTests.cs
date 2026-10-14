@@ -27,7 +27,7 @@ public class AppIconExtractorTests
 	{
 		if (Directory.Exists(_root))
 		{
-			Directory.Delete(_root, recursive: true);
+			Directory.Delete(_root, true);
 		}
 	}
 
@@ -329,7 +329,10 @@ public class AppIconExtractorTests
 	{
 		private readonly MemoryStream _inner;
 
-		public ForwardOnlyStream(byte[] content) => _inner = new MemoryStream(content);
+		public ForwardOnlyStream(byte[] content)
+		{
+			_inner = new MemoryStream(content);
+		}
 
 		public override bool CanRead => true;
 
@@ -345,19 +348,35 @@ public class AppIconExtractorTests
 			set => throw new NotSupportedException();
 		}
 
-		public override int Read(byte[] buffer, int offset, int count) => _inner.Read(buffer, offset, count);
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			return _inner.Read(buffer, offset, count);
+		}
 
 		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-			=> _inner.ReadAsync(buffer, offset, count, cancellationToken);
+		{
+			return _inner.ReadAsync(buffer, offset, count, cancellationToken);
+		}
 
 		public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
-			=> _inner.ReadAsync(buffer, cancellationToken);
+		{
+			return _inner.ReadAsync(buffer, cancellationToken);
+		}
 
-		public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			throw new NotSupportedException();
+		}
 
-		public override void SetLength(long value) => throw new NotSupportedException();
+		public override void SetLength(long value)
+		{
+			throw new NotSupportedException();
+		}
 
-		public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			throw new NotSupportedException();
+		}
 
 		public override void Flush()
 		{
@@ -369,7 +388,10 @@ public class AppIconExtractorTests
 		private readonly long _length;
 		private long _read;
 
-		public ZeroStream(long length) => _length = length;
+		public ZeroStream(long length)
+		{
+			_length = length;
+		}
 
 		public override bool CanRead => true;
 
@@ -398,11 +420,20 @@ public class AppIconExtractorTests
 			return take;
 		}
 
-		public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			throw new NotSupportedException();
+		}
 
-		public override void SetLength(long value) => throw new NotSupportedException();
+		public override void SetLength(long value)
+		{
+			throw new NotSupportedException();
+		}
 
-		public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			throw new NotSupportedException();
+		}
 
 		public override void Flush()
 		{

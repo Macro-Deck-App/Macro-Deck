@@ -15,24 +15,36 @@ namespace MacroDeckHost.Application.Variables;
 public sealed class VariableTemplateContext : LiquidTemplateContext
 {
 	public override bool ToBool(SourceSpan span, object? value)
-		=> base.ToBool(span, VariableTemplateValue.Unwrap(value));
+	{
+		return base.ToBool(span, VariableTemplateValue.Unwrap(value));
+	}
 
 	public override int ToInt(SourceSpan span, object? value)
-		=> base.ToInt(span, VariableTemplateValue.Unwrap(value));
+	{
+		return base.ToInt(span, VariableTemplateValue.Unwrap(value));
+	}
 
 	// A colour filter has to know whether its input came from a Color variable, so it gets the argument
 	// before unwrapping.
 	public override object? ToObject(SourceSpan span, object? value, Type destinationType)
-		=> destinationType == typeof(TemplateFilterArgument)
+	{
+		return destinationType == typeof(TemplateFilterArgument)
 			? value as TemplateFilterArgument ?? new TemplateFilterArgument(value)
 			: base.ToObject(span, VariableTemplateValue.Unwrap(value), destinationType);
+	}
 
 	public override string? ObjectToString(object? value, bool nested = false)
-		=> base.ObjectToString(VariableTemplateValue.Unwrap(value), nested);
+	{
+		return base.ObjectToString(VariableTemplateValue.Unwrap(value), nested);
+	}
 
 	public override object? IsEmpty(SourceSpan span, object? against)
-		=> base.IsEmpty(span, VariableTemplateValue.Unwrap(against));
+	{
+		return base.IsEmpty(span, VariableTemplateValue.Unwrap(against));
+	}
 
 	public override IList? ToList(SourceSpan span, object? value)
-		=> base.ToList(span, VariableTemplateValue.Unwrap(value));
+	{
+		return base.ToList(span, VariableTemplateValue.Unwrap(value));
+	}
 }

@@ -25,7 +25,10 @@ public class EmailInboxWidgetLayoutTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[TestCase("list", 1, 1, "glance")]
 	[TestCase("list", 1, 2, "glance")]
@@ -56,7 +59,8 @@ public class EmailInboxWidgetLayoutTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(glance.Id, Is.Not.EqualTo(counter.Id));
-			Assert.That(EmailInboxTree.Rows(glance).Select(row => EmailInboxTree.Text(row, "title")), Is.EqualTo(new[] { "Ann" }));
+			Assert.That(EmailInboxTree.Rows(glance).Select(row => EmailInboxTree.Text(row, "title")),
+				Is.EqualTo(new[] { "Ann" }));
 			Assert.That(Find(glance, "count"), Is.Null, "the list never shows the big count");
 			Assert.That(Text(Get(glance, "unread")), Is.EqualTo("1"), "the unread number sits in the header badge");
 		});
@@ -71,11 +75,14 @@ public class EmailInboxWidgetLayoutTests
 		bool preview,
 		int rows)
 	{
-		_harness.Imap.Set("work", Snapshot(EmailInboxStatus.Connected, 10,
-			[.. Enumerable.Range(0, 10).Select(index => Message("w" + index, -index, sender: "Sender " + index))]));
+		_harness.Imap.Set("work",
+			Snapshot(EmailInboxStatus.Connected,
+				10,
+				[.. Enumerable.Range(0, 10).Select(index => Message("w" + index, -index, sender: "Sender " + index))]));
 		await _harness.SyncAsync();
 
-		await using var session = await _harness.OpenWidgetAsync(new { mode = "list", maxMessages = 10, showPreview = preview });
+		await using var session
+			= await _harness.OpenWidgetAsync(new { mode = "list", maxMessages = 10, showPreview = preview });
 		var fits = Flatten(EmailInboxTree.Layout(session, layout))
 			.Where(node => node.Id.EndsWith(".fit", StringComparison.Ordinal))
 			.ToList();
@@ -90,7 +97,8 @@ public class EmailInboxWidgetLayoutTests
 				var placed = Get(fit, "placed");
 				var extent = placed.Children.Sum(child => FullSize(child));
 
-				Assert.That(MinHeight(fit) * UiLength.Cell, Is.InRange(extent - 1, extent),
+				Assert.That(MinHeight(fit) * UiLength.Cell,
+					Is.InRange(extent - 1, extent),
 					"an email appears as soon as its whole row fits, and only then");
 			}
 		});
@@ -101,23 +109,27 @@ public class EmailInboxWidgetLayoutTests
 	[TestCase("strip")]
 	public async Task The_unread_dot_column_is_reserved_only_while_an_unread_email_is_on_screen(string layout)
 	{
-		_harness.Imap.Set("work", Snapshot(EmailInboxStatus.Connected, 0,
-		[
-			Message("ann", -5, isRead: true, sender: "Ann"),
-			Message("bob", -10, isRead: true, sender: "Bob"),
-			Message("cy", -15, isRead: true, sender: "Cy"),
-		]));
+		_harness.Imap.Set("work",
+			Snapshot(EmailInboxStatus.Connected,
+				0,
+				[
+					Message("ann", -5, true, "Ann"),
+					Message("bob", -10, true, "Bob"),
+					Message("cy", -15, true, "Cy")
+				]));
 		await _harness.SyncAsync();
 		await using var session = await _harness.OpenWidgetAsync(new { mode = "list" });
 
 		var allRead = EmailInboxTree.Layout(session, layout);
 
-		_harness.Imap.Set("work", Snapshot(EmailInboxStatus.Connected, 1,
-		[
-			Message("ann", -5, isRead: true, sender: "Ann"),
-			Message("bob", -10, sender: "Bob"),
-			Message("cy", -15, isRead: true, sender: "Cy"),
-		]));
+		_harness.Imap.Set("work",
+			Snapshot(EmailInboxStatus.Connected,
+				1,
+				[
+					Message("ann", -5, true, "Ann"),
+					Message("bob", -10, sender: "Bob"),
+					Message("cy", -15, true, "Cy")
+				]));
 		_harness.Imap.RaiseChanged("work");
 		await _harness.World.SyncPendingAsync();
 
@@ -128,17 +140,24 @@ public class EmailInboxWidgetLayoutTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(EmailInboxTree.Rows(allRead), Has.Count.EqualTo(3));
-			Assert.That(EmailInboxTree.Drawn(allRead, EmailInboxTree.AllRoom).Where(IsColumn), Is.Empty,
+			Assert.That(EmailInboxTree.Drawn(allRead, EmailInboxTree.AllRoom).Where(IsColumn),
+				Is.Empty,
 				"read emails line up with the header title, separators included");
 			Assert.That(EmailInboxTree.Rows(mixed, 0.01).Select(row => EmailInboxTree.Text(row, "title")),
 				Is.EqualTo(new[] { "Ann" }));
 			Assert.That(onlyNewest.Where(IsColumn), Is.Empty, "the unread email below is not on screen");
-			Assert.That(everything.Select(row => EmailInboxTree.Text(row, "title")), Is.EqualTo(new[] { "Ann", "Bob", "Cy" }));
-			Assert.That(everything.Select(row => Find(row, "marker") is not null), Is.All.True,
+			Assert.That(everything.Select(row => EmailInboxTree.Text(row, "title")),
+				Is.EqualTo(new[] { "Ann", "Bob", "Cy" }));
+			Assert.That(everything.Select(row => Find(row, "marker") is not null),
+				Is.All.True,
 				"every row keeps the column so the senders stay aligned");
-			Assert.That(everything.Select(row => Find(row, "dot") is not null), Is.EqualTo(new[] { false, true, false }));
-			Assert.That(EmailInboxTree.Drawn(mixed, EmailInboxTree.AllRoom).Count(node => node.Id.EndsWith(".indent",
-				StringComparison.Ordinal)), Is.EqualTo(2), "separators start at the text, past the column");
+			Assert.That(everything.Select(row => Find(row, "dot") is not null),
+				Is.EqualTo(new[] { false, true, false }));
+			Assert.That(EmailInboxTree.Drawn(mixed, EmailInboxTree.AllRoom)
+					.Count(node => node.Id.EndsWith(".indent",
+						StringComparison.Ordinal)),
+				Is.EqualTo(2),
+				"separators start at the text, past the column");
 		});
 	}
 
@@ -148,43 +167,64 @@ public class EmailInboxWidgetLayoutTests
 		var subject = new string('s', 2000);
 		var preview = new string('p', 2000);
 		var sender = new string('n', 2000);
-		_harness.Imap.Set("work", Snapshot(EmailInboxStatus.Connected, 20,
-		[
-			.. Enumerable.Range(0, 20).Select(index => Message("w" + index, -index, isRead: index < 4, sender: sender,
-				subject: subject) with
-			{
-				Preview = preview,
-			}),
-		]));
-		_harness.Other.Set("home", Snapshot(EmailInboxStatus.Connected, 20,
-		[
-			.. Enumerable.Range(0, 20).Select(index => Message("h" + index, -index, isRead: index < 4, sender: sender,
-				subject: subject) with
-			{
-				Preview = preview,
-			}),
-		]));
+		_harness.Imap.Set("work",
+			Snapshot(EmailInboxStatus.Connected,
+				20,
+				[
+					.. Enumerable.Range(0, 20)
+						.Select(index => Message("w" + index,
+								-index,
+								index < 4,
+								sender,
+								subject) with
+							{
+								Preview = preview
+							})
+				]));
+		_harness.Other.Set("home",
+			Snapshot(EmailInboxStatus.Connected,
+				20,
+				[
+					.. Enumerable.Range(0, 20)
+						.Select(index => Message("h" + index,
+								-index,
+								index < 4,
+								sender,
+								subject) with
+							{
+								Preview = preview
+							})
+				]));
 		await _harness.SyncAsync();
 
-		await using var session = await _harness.OpenWidgetAsync(new { mode = "list", maxMessages = 10, showPreview = true });
+		await using var session
+			= await _harness.OpenWidgetAsync(new { mode = "list", maxMessages = 10, showPreview = true });
 		var tree = session.BuildTree();
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(EmailInboxTree.Rows(EmailInboxTree.Layout(session, "list")), Has.Count.EqualTo(10));
-			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length, Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
+			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length,
+				Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
 			Assert.That(Flatten(tree.Root).Count(), Is.LessThanOrEqualTo(ProtocolLimits.MaxUiNodesPerTree));
 		});
 	}
 
 	private static bool IsColumn(UiNode node)
-		=> node.Id.EndsWith(".marker", StringComparison.Ordinal) || node.Id.EndsWith(".indent", StringComparison.Ordinal);
+	{
+		return node.Id.EndsWith(".marker", StringComparison.Ordinal)
+			|| node.Id.EndsWith(".indent", StringComparison.Ordinal);
+	}
 
 	private static double MinHeight(UiNode fit)
-		=> fit.Properties[UiComponentProperties.Variants][0].GetProperty("minHeight").GetDouble();
+	{
+		return fit.Properties[UiComponentProperties.Variants][0].GetProperty("minHeight").GetDouble();
+	}
 
 	private static double FullSize(UiNode node)
-		=> node.Properties[UiComponentProperties.MainSize].GetProperty("maxOfCell").GetDouble() * UiLength.Cell;
+	{
+		return node.Properties[UiComponentProperties.MainSize].GetProperty("maxOfCell").GetDouble() * UiLength.Cell;
+	}
 
 	private static string Chosen(UiNode root, int columns, int rows)
 	{
@@ -203,8 +243,11 @@ public class EmailInboxWidgetLayoutTests
 		var basis = Math.Min(Extent(columns), Extent(rows));
 		var inset = Math.Min(padding.Basis * basis, padding.MaxOfCell!.Value * UiLength.Cell);
 
-		return (Extent(cells) - (2 * inset)) / UiLength.Cell;
+		return (Extent(cells) - 2 * inset) / UiLength.Cell;
 	}
 
-	private static double Extent(int cells) => (cells * UiLength.Cell) + ((cells - 1) * GridDefaults.WidgetSpacing);
+	private static double Extent(int cells)
+	{
+		return cells * UiLength.Cell + (cells - 1) * GridDefaults.WidgetSpacing;
+	}
 }

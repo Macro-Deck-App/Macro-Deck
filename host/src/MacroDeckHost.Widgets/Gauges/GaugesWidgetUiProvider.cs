@@ -21,7 +21,8 @@ public sealed class GaugesWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IWidgetIconResources _iconResources;
 	private readonly IWidgetSampleTextResolver _sampleText;
 
-	public GaugesWidgetUiProvider(VariableRegistry variables,
+	public GaugesWidgetUiProvider(
+		VariableRegistry variables,
 		IVariableChangeNotifier notifier,
 		IWidgetIconResources iconResources,
 		IWidgetSampleTextResolver sampleText)
@@ -41,7 +42,7 @@ public sealed class GaugesWidgetUiProvider : IBuiltInWidgetUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -91,7 +92,8 @@ public sealed class GaugesWidgetUiProvider : IBuiltInWidgetUiProvider
 		return new GaugesWidgetSession(view, gauges, faces, resolver, _notifier);
 	}
 
-	private async Task<Dictionary<string, UiResource>> ResolveIconsAsync(IReadOnlyList<GaugeConfig> gauges,
+	private async Task<Dictionary<string, UiResource>> ResolveIconsAsync(
+		IReadOnlyList<GaugeConfig> gauges,
 		CancellationToken cancellationToken)
 	{
 		var icons = new Dictionary<string, UiResource>(StringComparer.Ordinal);
@@ -108,18 +110,26 @@ public sealed class GaugesWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static string? VariableScopeWidgetId(UiSurface surface)
-		=> ReadStringAttribute(surface, UiWidgetSurfaceAttributes.WidgetId) ??
-			ReadStringAttribute(surface, UiWidgetSurfaceAttributes.VariableScopeWidgetId);
+	{
+		return ReadStringAttribute(surface, UiWidgetSurfaceAttributes.WidgetId)
+			?? ReadStringAttribute(surface, UiWidgetSurfaceAttributes.VariableScopeWidgetId);
+	}
 
 	private static string? ReadStringAttribute(UiSurface surface, string name)
-		=> surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString()
 			: null;
+	}
 
 	private static JsonElement DataElement(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	}
 
 	private VariableEntity? FindVariable(string name, string? scope)
-		=> (scope is null ? null : _variables.FindByName(VariableScope.Widget, scope, name)) ??
-			_variables.FindByName(VariableScope.Global, null, name);
+	{
+		return (scope is null ? null : _variables.FindByName(VariableScope.Widget, scope, name))
+			?? _variables.FindByName(VariableScope.Global, null, name);
+	}
 }

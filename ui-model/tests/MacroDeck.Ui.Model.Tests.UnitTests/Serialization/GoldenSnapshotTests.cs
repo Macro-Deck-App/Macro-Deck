@@ -31,7 +31,7 @@ public class GoldenSnapshotTests
 					RequiredComponentVersion = 2,
 					Properties = Map(("path", Element("\"M0,0 L1,1\""))),
 					Children = [new UiNode { Id = "child", Type = "text" }],
-					Fallback = new UiNode { Id = "root-fallback", Type = "text" },
+					Fallback = new UiNode { Id = "root-fallback", Type = "text" }
 				})
 			.SetName("node_full");
 
@@ -40,7 +40,7 @@ public class GoldenSnapshotTests
 				{
 					Revision = 1,
 					Surface = new UiSurface { Kind = "config", SessionMode = "exclusive" },
-					Root = new UiNode { Id = "root", Type = "stack" },
+					Root = new UiNode { Id = "root", Type = "stack" }
 				})
 			.SetName("tree_config_exclusive");
 
@@ -63,7 +63,7 @@ public class GoldenSnapshotTests
 					NodeId = "n",
 					Name = "change",
 					Data = Element("{\"b\":1,\"a\":2}"),
-					Revision = 7,
+					Revision = 7
 				})
 			.SetName("event_with_data");
 
@@ -78,9 +78,9 @@ public class GoldenSnapshotTests
 						{
 							Op = UiPatchOperations.SetProperties,
 							NodeId = "title",
-							Properties = Map(("text", Element("\"Hello\""))),
-						},
-					],
+							Properties = Map(("text", Element("\"Hello\"")))
+						}
+					]
 				})
 			.SetName("patch_minimal");
 
@@ -96,7 +96,7 @@ public class GoldenSnapshotTests
 					ResourceId = "icon-1",
 					ContentHash = "sha256:0a1b",
 					MediaType = "image/png",
-					ByteLength = 2048,
+					ByteLength = 2048
 				})
 			.SetName("resource_full");
 
@@ -104,7 +104,7 @@ public class GoldenSnapshotTests
 				(object)new UiCapabilities
 				{
 					UiProtocol = new UiVersionRange { Minimum = 1, Maximum = 1 },
-					SupportsAllComponents = true,
+					SupportsAllComponents = true
 				})
 			.SetName("capabilities_everything");
 
@@ -116,8 +116,8 @@ public class GoldenSnapshotTests
 					Components = new Dictionary<string, UiVersionRange>
 					{
 						["chart"] = new() { Minimum = 1, Maximum = 2 },
-						["button"] = new() { Minimum = 1, Maximum = 1 },
-					},
+						["button"] = new() { Minimum = 1, Maximum = 1 }
+					}
 				})
 			.SetName("capabilities_ranged");
 
@@ -132,7 +132,7 @@ public class GoldenSnapshotTests
 						("B", Element("4")),
 						("_x", Element("5")),
 						("10", Element("6")),
-						("2", Element("7"))),
+						("2", Element("7")))
 				})
 			.SetName("properties_key_ordering");
 
@@ -145,7 +145,7 @@ public class GoldenSnapshotTests
 						("b", Element("1e3")),
 						("c", Element("-0.0")),
 						("d", Element("1.0")),
-						("e", Element("10000000000000000000000"))),
+						("e", Element("10000000000000000000000")))
 				})
 			.SetName("numbers_verbatim");
 
@@ -154,7 +154,7 @@ public class GoldenSnapshotTests
 				{
 					Id = "root",
 					Type = "t",
-					Properties = Map(("text", Element("\"<>&'+`é😀\""))),
+					Properties = Map(("text", Element("\"<>&'+`é😀\"")))
 				})
 			.SetName("escaping_and_unicode");
 	}
@@ -238,12 +238,14 @@ public class GoldenSnapshotTests
 	}
 
 	private static bool IsWireRecordType(Type type)
-		=> type.Namespace is not null &&
-			type.Namespace.StartsWith("MacroDeck.Ui.Model", StringComparison.Ordinal) &&
-			type.IsSealed &&
-			!type.IsEnum &&
-			type != typeof(UiNegotiationResult) &&
-			type != typeof(UiPatchOutcome);
+	{
+		return type.Namespace is not null
+			&& type.Namespace.StartsWith("MacroDeck.Ui.Model", StringComparison.Ordinal)
+			&& type.IsSealed
+			&& !type.IsEnum
+			&& type != typeof(UiNegotiationResult)
+			&& type != typeof(UiPatchOutcome);
+	}
 
 	private static HashSet<Type> CoveredTypes()
 	{
@@ -307,110 +309,125 @@ public class GoldenSnapshotTests
 		}
 	}
 
-	private static string Serialize(object value) => value switch
+	private static string Serialize(object value)
 	{
-		UiNode node => UiCanonicalJson.Serialize(node),
-		UiTree tree => UiCanonicalJson.Serialize(tree),
-		UiSurface surface => UiCanonicalJson.Serialize(surface),
-		UiEvent uiEvent => UiCanonicalJson.Serialize(uiEvent),
-		UiPatch patch => UiCanonicalJson.Serialize(patch),
-		UiResource resource => UiCanonicalJson.Serialize(resource),
-		UiCapabilities capabilities => UiCanonicalJson.Serialize(capabilities),
-		_ => throw new ArgumentOutOfRangeException(nameof(value)),
-	};
-
-	private static string DeserializeThenReserialize(object value, string json) => value switch
-	{
-		UiNode => Serialize(JsonSerializer.Deserialize<UiNode>(json, UiCanonicalJson.Options)!),
-		UiTree => Serialize(JsonSerializer.Deserialize<UiTree>(json, UiCanonicalJson.Options)!),
-		UiSurface => Serialize(JsonSerializer.Deserialize<UiSurface>(json, UiCanonicalJson.Options)!),
-		UiEvent => Serialize(JsonSerializer.Deserialize<UiEvent>(json, UiCanonicalJson.Options)!),
-		UiPatch => Serialize(JsonSerializer.Deserialize<UiPatch>(json, UiCanonicalJson.Options)!),
-		UiResource => Serialize(JsonSerializer.Deserialize<UiResource>(json, UiCanonicalJson.Options)!),
-		UiCapabilities => Serialize(JsonSerializer.Deserialize<UiCapabilities>(json, UiCanonicalJson.Options)!),
-		_ => throw new ArgumentOutOfRangeException(nameof(value)),
-	};
-
-	private static UiTree WidgetTree() => new()
-	{
-		Revision = 0,
-		Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-		Root = new UiNode
+		return value switch
 		{
-			Id = "canvas",
-			Type = "macrodeck.canvas",
-			Children =
-			[
-				new UiNode
-				{
-					Id = "art",
-					Type = "ui.image",
-					Properties = Map(("source", UiCanonicalJson.ToElement(new UiResource
-						{
-							ResourceId = "bg-1",
-							MediaType = "image/png",
-						})),
-						("rotation", Element("37.5"))),
-				},
-				new UiNode
-				{
-					Id = "spectrum",
-					Type = "ui.chart",
-					RequiredComponentVersion = 2,
-					Properties = Map(("path", Element("\"M0,0 L10,4\""))),
-					Fallback = new UiNode
-					{
-						Id = "spectrum-fallback",
-						Type = "text",
-						Properties = Map(("text", Element("\"Spectrum unavailable\""))),
-					},
-				},
-				new UiNode
-				{
-					Id = "progress",
-					Type = "macrodeck.progress",
-					Properties = Map(("value", Element("0.42"))),
-				},
-			],
-		},
-	};
+			UiNode node => UiCanonicalJson.Serialize(node),
+			UiTree tree => UiCanonicalJson.Serialize(tree),
+			UiSurface surface => UiCanonicalJson.Serialize(surface),
+			UiEvent uiEvent => UiCanonicalJson.Serialize(uiEvent),
+			UiPatch patch => UiCanonicalJson.Serialize(patch),
+			UiResource resource => UiCanonicalJson.Serialize(resource),
+			UiCapabilities capabilities => UiCanonicalJson.Serialize(capabilities),
+			_ => throw new ArgumentOutOfRangeException(nameof(value))
+		};
+	}
 
-	private static UiPatch PatchAllOperations() => new()
+	private static string DeserializeThenReserialize(object value, string json)
 	{
-		FromRevision = 5,
-		ToRevision = 6,
-		Operations =
-		[
-			new UiPatchOperation
-			{
-				Op = UiPatchOperations.SetProperties,
-				NodeId = "title",
-				Properties = Map(("text", Element("\"Hi\""))),
-				RemovedProperties = ["old"],
-			},
-			new UiPatchOperation
-			{
-				Op = UiPatchOperations.InsertNode,
-				NodeId = "new-item",
-				ParentId = "list",
-				Index = 2,
-				Node = new UiNode { Id = "new-item", Type = "text" },
-			},
-			new UiPatchOperation { Op = UiPatchOperations.RemoveNode, NodeId = "old-item" },
-			new UiPatchOperation
-			{
-				Op = UiPatchOperations.ReplaceNode,
-				NodeId = "header",
-				Node = new UiNode { Id = "header", Type = "text" },
-			},
-			new UiPatchOperation
-			{
-				Op = UiPatchOperations.MoveNode, NodeId = "item-1", ParentId = "list", Index = 0,
-			},
-		],
-	};
+		return value switch
+		{
+			UiNode => Serialize(JsonSerializer.Deserialize<UiNode>(json, UiCanonicalJson.Options)!),
+			UiTree => Serialize(JsonSerializer.Deserialize<UiTree>(json, UiCanonicalJson.Options)!),
+			UiSurface => Serialize(JsonSerializer.Deserialize<UiSurface>(json, UiCanonicalJson.Options)!),
+			UiEvent => Serialize(JsonSerializer.Deserialize<UiEvent>(json, UiCanonicalJson.Options)!),
+			UiPatch => Serialize(JsonSerializer.Deserialize<UiPatch>(json, UiCanonicalJson.Options)!),
+			UiResource => Serialize(JsonSerializer.Deserialize<UiResource>(json, UiCanonicalJson.Options)!),
+			UiCapabilities => Serialize(JsonSerializer.Deserialize<UiCapabilities>(json, UiCanonicalJson.Options)!),
+			_ => throw new ArgumentOutOfRangeException(nameof(value))
+		};
+	}
 
-	internal static JsonElement Element(string json) => JsonDocument.Parse(json).RootElement.Clone();
+	private static UiTree WidgetTree()
+	{
+		return new UiTree
+		{
+			Revision = 0,
+			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
+			Root = new UiNode
+			{
+				Id = "canvas",
+				Type = "macrodeck.canvas",
+				Children =
+				[
+					new UiNode
+					{
+						Id = "art",
+						Type = "ui.image",
+						Properties = Map(("source", UiCanonicalJson.ToElement(new UiResource
+							{
+								ResourceId = "bg-1",
+								MediaType = "image/png"
+							})),
+							("rotation", Element("37.5")))
+					},
+					new UiNode
+					{
+						Id = "spectrum",
+						Type = "ui.chart",
+						RequiredComponentVersion = 2,
+						Properties = Map(("path", Element("\"M0,0 L10,4\""))),
+						Fallback = new UiNode
+						{
+							Id = "spectrum-fallback",
+							Type = "text",
+							Properties = Map(("text", Element("\"Spectrum unavailable\"")))
+						}
+					},
+					new UiNode
+					{
+						Id = "progress",
+						Type = "macrodeck.progress",
+						Properties = Map(("value", Element("0.42")))
+					}
+				]
+			}
+		};
+	}
+
+	private static UiPatch PatchAllOperations()
+	{
+		return new UiPatch
+		{
+			FromRevision = 5,
+			ToRevision = 6,
+			Operations =
+			[
+				new UiPatchOperation
+				{
+					Op = UiPatchOperations.SetProperties,
+					NodeId = "title",
+					Properties = Map(("text", Element("\"Hi\""))),
+					RemovedProperties = ["old"]
+				},
+				new UiPatchOperation
+				{
+					Op = UiPatchOperations.InsertNode,
+					NodeId = "new-item",
+					ParentId = "list",
+					Index = 2,
+					Node = new UiNode { Id = "new-item", Type = "text" }
+				},
+				new UiPatchOperation { Op = UiPatchOperations.RemoveNode, NodeId = "old-item" },
+				new UiPatchOperation
+				{
+					Op = UiPatchOperations.ReplaceNode,
+					NodeId = "header",
+					Node = new UiNode { Id = "header", Type = "text" }
+				},
+				new UiPatchOperation
+				{
+					Op = UiPatchOperations.MoveNode, NodeId = "item-1", ParentId = "list", Index = 0
+				}
+			]
+		};
+	}
+
+	internal static JsonElement Element(string json)
+	{
+		return JsonDocument.Parse(json).RootElement.Clone();
+	}
 
 	internal static Dictionary<string, JsonElement> Map(params (string Key, JsonElement Value)[] entries)
 	{

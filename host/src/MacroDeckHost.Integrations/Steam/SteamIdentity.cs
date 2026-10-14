@@ -28,10 +28,10 @@ internal readonly record struct SteamIdentity(string? SteamId, string? VanityNam
 			return new SteamIdentity(null, text);
 		}
 
-		if (Uri.TryCreate(text, UriKind.Absolute, out var uri) &&
-			(uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp) &&
-			string.Equals(uri.Host, "steamcommunity.com", StringComparison.OrdinalIgnoreCase) &&
-			uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries) is [var kind, var value, ..])
+		if (Uri.TryCreate(text, UriKind.Absolute, out var uri)
+			&& (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
+			&& string.Equals(uri.Host, "steamcommunity.com", StringComparison.OrdinalIgnoreCase)
+			&& uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries) is [var kind, var value, ..])
 		{
 			if (string.Equals(kind, "profiles", StringComparison.OrdinalIgnoreCase) && _steamId64.IsMatch(value))
 			{

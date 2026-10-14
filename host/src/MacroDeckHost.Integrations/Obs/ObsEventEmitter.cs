@@ -94,33 +94,49 @@ internal sealed class ObsEventEmitter
 		}
 	}
 
-	public void Reset() => _previous = null;
+	public void Reset()
+	{
+		_previous = null;
+	}
 
 	public void PublishInputMuteChanged(string inputName, bool muted)
-		=> Publish(ObsEventIds.InputMuteChanged,
+	{
+		Publish(ObsEventIds.InputMuteChanged,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["inputName"] = inputName,
 				["muted"] = muted
 			});
+	}
 
 	public void PublishInputActivity(string eventId, string inputName)
-		=> Publish(eventId,
+	{
+		Publish(eventId,
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["inputName"] = inputName });
+	}
 
-	public void PublishCustomEvent(IReadOnlyDictionary<string, object?> payload) => Publish(ObsEventIds.CustomEvent, payload);
+	public void PublishCustomEvent(IReadOnlyDictionary<string, object?> payload)
+	{
+		Publish(ObsEventIds.CustomEvent, payload);
+	}
 
 	public void PublishReplayBufferSaved(string path)
-		=> Publish(ObsEventIds.ReplayBufferSaved,
+	{
+		Publish(ObsEventIds.ReplayBufferSaved,
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["path"] = path });
+	}
 
 	public void PublishRecordFileChanged(string path)
-		=> Publish(ObsEventIds.RecordFileChanged,
+	{
+		Publish(ObsEventIds.RecordFileChanged,
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["path"] = path });
+	}
 
 	public void PublishScreenshotSaved(string path)
-		=> Publish(ObsEventIds.ScreenshotSaved,
+	{
+		Publish(ObsEventIds.ScreenshotSaved,
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["path"] = path });
+	}
 
 	private void PublishToggle(bool previous, bool current, string onEventId, string offEventId)
 	{

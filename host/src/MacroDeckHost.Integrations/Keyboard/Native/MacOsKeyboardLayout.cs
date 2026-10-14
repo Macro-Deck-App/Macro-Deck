@@ -22,7 +22,8 @@ internal sealed class MacOsKeyboardLayout
 		var letters = new Dictionary<KeyCode, ushort>();
 		for (ushort keyCode = 0; keyCode <= HighestKeyCode; keyCode++)
 		{
-			if (translate(keyCode) is [var character] && char.ToUpperInvariant(character) is >= 'A' and <= 'Z' and var upper)
+			if (translate(keyCode) is [var character]
+				&& char.ToUpperInvariant(character) is >= 'A' and <= 'Z' and var upper)
 			{
 				letters.TryAdd(KeyCode.A + (upper - 'A'), keyCode);
 			}
@@ -86,14 +87,25 @@ internal sealed class MacOsKeyboardLayout
 		return BuildLetterMap(keyCode =>
 		{
 			uint deadKeyState = 0;
-			var status = UCKeyTranslate(layout, keyCode, KeyActionDown, 0, keyboardType, TranslateNoDeadKeys,
-				ref deadKeyState, (nuint)buffer.Length, out var length, buffer);
+			var status = UCKeyTranslate(layout,
+				keyCode,
+				KeyActionDown,
+				0,
+				keyboardType,
+				TranslateNoDeadKeys,
+				ref deadKeyState,
+				(nuint)buffer.Length,
+				out var length,
+				buffer);
 			return status == 0 && length > 0 ? new string(buffer, 0, (int)length) : null;
 		});
 	}
 
 	[SupportedOSPlatform("macos")]
-	private static IntPtr ReadTisKey(string symbol) => MacOsAccessibility.ReadGlobalRef(Carbon, symbol);
+	private static IntPtr ReadTisKey(string symbol)
+	{
+		return MacOsAccessibility.ReadGlobalRef(Carbon, symbol);
+	}
 
 	[DllImport(Carbon)]
 	private static extern IntPtr TISCopyCurrentKeyboardLayoutInputSource();

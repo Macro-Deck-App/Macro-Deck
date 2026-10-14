@@ -27,7 +27,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 		_logger = logger.ForContext<PluginArtifactReader>();
 	}
 
-	public async Task<PluginArtifactInspectionResult> Inspect(string artifactPath,
+	public async Task<PluginArtifactInspectionResult> Inspect(
+		string artifactPath,
 		CancellationToken cancellationToken = default)
 	{
 		var fileInfoResult = TryGetFileInfo(artifactPath);
@@ -97,8 +98,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 					if (counted is null)
 					{
 						return PluginArtifactInspectionResult.Fail(PluginInstallError.ArtifactLimitExceeded,
-							$"The archive entry '{entry.FullName}' exceeds the " +
-							$"{PluginArtifactLimits.MaxEntryBytes}-byte per-entry limit.");
+							$"The archive entry '{entry.FullName}' exceeds the "
+							+ $"{PluginArtifactLimits.MaxEntryBytes}-byte per-entry limit.");
 					}
 
 					totalUncompressed += counted.Value;
@@ -107,8 +108,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 				if (totalUncompressed > PluginArtifactLimits.MaxTotalUncompressedBytes)
 				{
 					return PluginArtifactInspectionResult.Fail(PluginInstallError.ArtifactLimitExceeded,
-						$"The archive exceeds the {PluginArtifactLimits.MaxTotalUncompressedBytes}-byte total " +
-						"uncompressed limit.");
+						$"The archive exceeds the {PluginArtifactLimits.MaxTotalUncompressedBytes}-byte total "
+						+ "uncompressed limit.");
 				}
 			}
 
@@ -136,7 +137,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 		}
 	}
 
-	public async Task<PluginArtifactExtractResult> ExtractTo(string artifactPath,
+	public async Task<PluginArtifactExtractResult> ExtractTo(
+		string artifactPath,
 		string targetDirectory,
 		CancellationToken cancellationToken = default)
 	{
@@ -205,8 +207,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 					{
 						CleanUp(targetDirectory);
 						return PluginArtifactExtractResult.Fail(PluginInstallError.ArtifactLimitExceeded,
-							$"The archive entry '{entry.FullName}' exceeds the " +
-							$"{PluginArtifactLimits.MaxEntryBytes}-byte per-entry limit.");
+							$"The archive entry '{entry.FullName}' exceeds the "
+							+ $"{PluginArtifactLimits.MaxEntryBytes}-byte per-entry limit.");
 					}
 
 					totalUncompressed += written.Value;
@@ -214,8 +216,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 					{
 						CleanUp(targetDirectory);
 						return PluginArtifactExtractResult.Fail(PluginInstallError.ArtifactLimitExceeded,
-							$"The archive exceeds the {PluginArtifactLimits.MaxTotalUncompressedBytes}-byte total " +
-							"uncompressed limit.");
+							$"The archive exceeds the {PluginArtifactLimits.MaxTotalUncompressedBytes}-byte total "
+							+ "uncompressed limit.");
 					}
 
 					extractedFiles.Add(Path.GetRelativePath(targetDirectory, decision.ResolvedPath!)
@@ -243,7 +245,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 	/// <summary>Runs the entry-name policy, the unsafe-file-type check and duplicate detection shared by
 	/// <see cref="Inspect"/> and <see cref="ExtractTo"/>. Returns the failure to report, or null when the
 	/// entry is safe to process further.</summary>
-	private static (PluginInstallError Error, string Message)? ValidateEntry(ZipArchiveEntry entry,
+	private static (PluginInstallError Error, string Message)? ValidateEntry(
+		ZipArchiveEntry entry,
 		string root,
 		HashSet<string> seenNames,
 		out PluginArtifactEntryDecision decision)
@@ -284,7 +287,7 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 				"The manifest has no string 'id' and 'version' properties.");
 		}
 
-		var result = manifestReader.ReadFromJson(json, versionDirectory: null, manifestId, manifestVersion);
+		var result = manifestReader.ReadFromJson(json, null, manifestId, manifestVersion);
 		if (result.Success)
 		{
 			return ManifestReadOutcome.Ok(result.Manifest!);
@@ -302,10 +305,15 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 		PluginInstallError? Error,
 		string? Message)
 	{
-		public static ManifestReadOutcome Ok(PluginManifest manifest) => new(true, manifest, null, null);
+		public static ManifestReadOutcome Ok(PluginManifest manifest)
+		{
+			return new ManifestReadOutcome(true, manifest, null, null);
+		}
 
-		public static ManifestReadOutcome Fail(PluginInstallError error, string message) =>
-			new(false, null, error, message);
+		public static ManifestReadOutcome Fail(PluginInstallError error, string message)
+		{
+			return new ManifestReadOutcome(false, null, error, message);
+		}
 	}
 
 	private static bool ExceedsCompressionRatio(long totalUncompressed, long archiveBytes)
@@ -325,7 +333,7 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 		{
 			if (Directory.Exists(targetDirectory))
 			{
-				Directory.Delete(targetDirectory, recursive: true);
+				Directory.Delete(targetDirectory, true);
 			}
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -359,21 +367,28 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 		return (fileInfo, null, null);
 	}
 
-	private static string NormalizeEntryName(string entryFullName) => entryFullName.Replace('\\', '/');
+	private static string NormalizeEntryName(string entryFullName)
+	{
+		return entryFullName.Replace('\\', '/');
+	}
 
-	private static bool IsDirectoryEntry(string entryFullName) => NormalizeEntryName(entryFullName).EndsWith('/');
+	private static bool IsDirectoryEntry(string entryFullName)
+	{
+		return NormalizeEntryName(entryFullName).EndsWith('/');
+	}
 
 	private static bool IsRootManifestEntry(string entryFullName)
 	{
 		var normalized = NormalizeEntryName(entryFullName);
-		return !normalized.Contains('/') &&
-			string.Equals(normalized, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase);
+		return !normalized.Contains('/')
+			&& string.Equals(normalized, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase);
 	}
 
 	/// <summary>Reads an entry fully into memory, or returns null once it grows past <paramref
 	/// name="limit"/>. Only used for the manifest, which the artifact limits already cap far below any
 	/// size worth streaming.</summary>
-	private static async Task<byte[]?> ReadEntryMaterialized(ZipArchiveEntry entry,
+	private static async Task<byte[]?> ReadEntryMaterialized(
+		ZipArchiveEntry entry,
 		long limit,
 		CancellationToken cancellationToken)
 	{
@@ -396,7 +411,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 
 	/// <summary>Streams an entry and counts its bytes without keeping them, for every entry
 	/// <see cref="Inspect"/> does not need the content of.</summary>
-	private static async Task<long?> CountEntryBytes(ZipArchiveEntry entry,
+	private static async Task<long?> CountEntryBytes(
+		ZipArchiveEntry entry,
 		long limit,
 		CancellationToken cancellationToken)
 	{
@@ -416,7 +432,8 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 		return total;
 	}
 
-	private static async Task<long?> CopyEntryBounded(ZipArchiveEntry entry,
+	private static async Task<long?> CopyEntryBounded(
+		ZipArchiveEntry entry,
 		string destinationPath,
 		long limit,
 		CancellationToken cancellationToken)
@@ -466,10 +483,10 @@ public sealed class PluginArtifactReader : IPluginArtifactReader
 		try
 		{
 			using var document = JsonDocument.Parse(json);
-			if (!TryGetPropertyCaseInsensitive(document.RootElement, "id", out var idElement) ||
-				idElement.ValueKind != JsonValueKind.String ||
-				!TryGetPropertyCaseInsensitive(document.RootElement, "version", out var versionElement) ||
-				versionElement.ValueKind != JsonValueKind.String)
+			if (!TryGetPropertyCaseInsensitive(document.RootElement, "id", out var idElement)
+				|| idElement.ValueKind != JsonValueKind.String
+				|| !TryGetPropertyCaseInsensitive(document.RootElement, "version", out var versionElement)
+				|| versionElement.ValueKind != JsonValueKind.String)
 			{
 				return false;
 			}

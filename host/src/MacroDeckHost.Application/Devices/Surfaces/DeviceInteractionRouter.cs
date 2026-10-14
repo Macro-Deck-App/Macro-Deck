@@ -64,9 +64,9 @@ public sealed class DeviceInteractionRouter
 
 		// A widget id the device is no longer rendering executes nothing, but never ends the session:
 		// the device is expected to catch up on the next surface and press again.
-		if (interaction.Target.WidgetId is not { Length: > 0 } widgetId ||
-			session.LastPushed is not { } surface ||
-			surface.Widgets.All(widget => !string.Equals(widget.Id, widgetId, StringComparison.Ordinal)))
+		if (interaction.Target.WidgetId is not { Length: > 0 } widgetId
+			|| session.LastPushed is not { } surface
+			|| surface.Widgets.All(widget => !string.Equals(widget.Id, widgetId, StringComparison.Ordinal)))
 		{
 			return DeviceInteractionOutcome.Reject(DeviceSurfaceErrorCodes.WidgetNotOnSurface);
 		}
@@ -114,7 +114,7 @@ public sealed class DeviceInteractionRouter
 			var ticket = scope.ServiceProvider.GetRequiredService<IWidgetUiSessionOpener>()
 				.Open(new OpenWidgetUiSessionRequest { WidgetId = widgetId },
 					$"device:{session.DeviceId:N}:{Guid.NewGuid():N}",
-					isAdmin: false);
+					false);
 
 			if (!ticket.Accepted)
 			{
@@ -262,28 +262,34 @@ public sealed class DeviceInteractionRouter
 	public bool HasDoubleTapFlow(DeviceSurfaceSession session, string widgetId)
 	{
 		var type = session.LastPushed?.Widgets
-			.FirstOrDefault(widget => string.Equals(widget.Id, widgetId, StringComparison.Ordinal))?.Type;
-		if (type is null ||
-			string.Equals(type, WidgetTypeIds.Slider, StringComparison.Ordinal) ||
-			!WidgetTypeIds.BuiltIn.Contains(type, StringComparer.Ordinal) ||
-			session.ProfileId is not { } profileId ||
-			session.OwningFolderIdOf(widgetId) is not { } folderId)
+			.FirstOrDefault(widget => string.Equals(widget.Id, widgetId, StringComparison.Ordinal))
+			?.Type;
+		if (type is null
+			|| string.Equals(type, WidgetTypeIds.Slider, StringComparison.Ordinal)
+			|| !WidgetTypeIds.BuiltIn.Contains(type, StringComparer.Ordinal)
+			|| session.ProfileId is not { } profileId
+			|| session.OwningFolderIdOf(widgetId) is not { } folderId)
 		{
 			return false;
 		}
 
 		var widget = _profiles
 			.GetFoldersForProfile(profileId)
-			.FirstOrDefault(folder => string.Equals(folder.Id, folderId, StringComparison.Ordinal))?
+			.FirstOrDefault(folder => string.Equals(folder.Id, folderId, StringComparison.Ordinal))
+			?
 			.Widgets.FirstOrDefault(candidate => string.Equals(candidate.Id, widgetId, StringComparison.Ordinal));
 
 		return widget is not null && WidgetFlowsJson.HasRunnableFlow(widget.Data, WidgetTriggerTypes.DoublePress);
 	}
 
 	private static DeviceSurfacePressTracker Presses(DeviceSurfaceSession session)
-		=> session.Presses ?? throw new InvalidOperationException("The session has no press tracker.");
+	{
+		return session.Presses ?? throw new InvalidOperationException("The session has no press tracker.");
+	}
 
 	// Must equal the box a client lays the tile out in, or a hardware press claims a layout the tile does not show.
 	internal static double SpanInCells(int span, int spacing)
-		=> span + Math.Max(0, span - 1) * spacing / UiLength.Cell;
+	{
+		return span + Math.Max(0, span - 1) * spacing / UiLength.Cell;
+	}
 }

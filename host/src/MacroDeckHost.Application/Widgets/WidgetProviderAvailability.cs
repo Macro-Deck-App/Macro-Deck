@@ -39,8 +39,8 @@ public sealed class WidgetProviderAvailability : IWidgetProviderAvailability
 
 		// IsEnabled is deliberately not consulted: it reads false for a connected config-flow plugin the
 		// user never set up, and disabling a plugin does not stop it serving its widgets.
-		var available = _widgetTypes.IsRegistered(widgetType) &&
-			(_integrations.GetOrigin(owner) != IntegrationOrigin.Plugin || _connections.IsConnected(owner));
+		var available = _widgetTypes.IsRegistered(widgetType)
+			&& (_integrations.GetOrigin(owner) != IntegrationOrigin.Plugin || _connections.IsConnected(owner));
 
 		if (available)
 		{
@@ -49,8 +49,8 @@ public sealed class WidgetProviderAvailability : IWidgetProviderAvailability
 
 		var name = _integrations.Integrations
 				.FirstOrDefault(integration => string.Equals(integration.Id, owner, StringComparison.Ordinal))
-				?.Name ??
-			LocalizedText.FromLiteral(owner);
+				?.Name
+			?? LocalizedText.FromLiteral(owner);
 
 		return new UnavailableWidgetProvider(owner, name);
 	}

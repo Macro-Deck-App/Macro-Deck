@@ -30,11 +30,11 @@ internal static class LinuxSecretServiceInterop
 
 	private const int GErrorMessageOffset = 8;
 
-	private static readonly Lazy<LinuxSecretServiceBinding?> Binding = new(Bind);
+	private static readonly Lazy<LinuxSecretServiceBinding?> _binding = new(Bind);
 
-	public static bool IsLoadable => Binding.Value is not null;
+	public static bool IsLoadable => _binding.Value is not null;
 
-	public static IntPtr Schema => Binding.Value?.Schema ?? IntPtr.Zero;
+	public static IntPtr Schema => _binding.Value?.Schema ?? IntPtr.Zero;
 
 	/// <summary>
 	/// The table is created without destroy notifies, so glib frees its buckets and nothing else. The
@@ -42,7 +42,7 @@ internal static class LinuxSecretServiceInterop
 	/// </summary>
 	public static LinuxSecretAttributes CreateAttributes(string account)
 	{
-		if (Binding.Value is not { } binding)
+		if (_binding.Value is not { } binding)
 		{
 			return LinuxSecretAttributes.None;
 		}
@@ -93,11 +93,11 @@ internal static class LinuxSecretServiceInterop
 				return null;
 			}
 
-			if (!NativeLibrary.TryGetExport(secret, "secret_password_lookupv_sync", out _) ||
-				!NativeLibrary.TryGetExport(secret, "secret_password_storev_sync", out _) ||
-				!NativeLibrary.TryGetExport(glib, "g_hash_table_new", out _) ||
-				!NativeLibrary.TryGetExport(glib, "g_str_hash", out var hash) ||
-				!NativeLibrary.TryGetExport(glib, "g_str_equal", out var equal))
+			if (!NativeLibrary.TryGetExport(secret, "secret_password_lookupv_sync", out _)
+				|| !NativeLibrary.TryGetExport(secret, "secret_password_storev_sync", out _)
+				|| !NativeLibrary.TryGetExport(glib, "g_hash_table_new", out _)
+				|| !NativeLibrary.TryGetExport(glib, "g_str_hash", out var hash)
+				|| !NativeLibrary.TryGetExport(glib, "g_str_equal", out var equal))
 			{
 				return null;
 			}
@@ -135,7 +135,8 @@ internal static class LinuxSecretServiceInterop
 
 	[DllImport(Secret, EntryPoint = "secret_password_storev_sync")]
 	[return: MarshalAs(UnmanagedType.I1)]
-	public static extern bool StoreSync(IntPtr schema,
+	public static extern bool StoreSync(
+		IntPtr schema,
 		IntPtr attributes,
 		IntPtr collection,
 		IntPtr label,

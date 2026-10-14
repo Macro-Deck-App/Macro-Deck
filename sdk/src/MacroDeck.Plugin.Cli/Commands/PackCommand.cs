@@ -25,8 +25,8 @@ internal static class PackCommand
 		var forceOption = new Option<bool>("--force") { Description = "Overwrite an existing output file." };
 		var showDigestOption = new Option<bool>("--show-digest")
 		{
-			Description = "Also print the packed manifest's signable digest, base64-encoded - the exact bytes a " +
-				"signature is computed over."
+			Description = "Also print the packed manifest's signable digest, base64-encoded - the exact bytes a "
+				+ "signature is computed over."
 		};
 
 		var command = new Command("pack", "Build a .macroDeckPlugin artifact from a source tree.");
@@ -49,8 +49,8 @@ internal static class PackCommand
 
 			var result = await PluginPacker.PackAsync(source,
 					manifestPath,
-					manifest => explicitOutput ??
-						$"{manifest.Id}-{manifest.Version}{PluginArtifactFiles.MacroDeckPluginExtension}",
+					manifest => explicitOutput
+						?? $"{manifest.Id}-{manifest.Version}{PluginArtifactFiles.MacroDeckPluginExtension}",
 					force,
 					cancellationToken)
 				.ConfigureAwait(false);

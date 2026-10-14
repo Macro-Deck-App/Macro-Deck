@@ -8,10 +8,18 @@ public enum EventTriggerOwnerKind
 
 public readonly record struct EventTriggerOwner(EventTriggerOwnerKind Kind, Guid Id)
 {
-	public static EventTriggerOwner ForWidget(Guid widgetId) => new(EventTriggerOwnerKind.Widget, widgetId);
+	public static EventTriggerOwner ForWidget(Guid widgetId)
+	{
+		return new EventTriggerOwner(EventTriggerOwnerKind.Widget, widgetId);
+	}
 
 	public static EventTriggerOwner ForAutomation(Guid automationId)
-		=> new(EventTriggerOwnerKind.Automation, automationId);
+	{
+		return new EventTriggerOwner(EventTriggerOwnerKind.Automation, automationId);
+	}
 
-	public override string ToString() => $"{Kind}/{Id}";
+	public override string ToString()
+	{
+		return $"{Kind}/{Id}";
+	}
 }

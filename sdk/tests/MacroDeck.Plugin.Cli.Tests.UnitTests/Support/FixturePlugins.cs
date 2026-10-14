@@ -2,9 +2,15 @@ namespace MacroDeck.Plugin.Cli.Tests.UnitTests.Support;
 
 internal static class FixturePlugins
 {
-	public static string WellBehaved() => Find("MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin");
+	public static string WellBehaved()
+	{
+		return Find("MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin");
+	}
 
-	public static string Misbehaving() => Find("MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin");
+	public static string Misbehaving()
+	{
+		return Find("MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin");
+	}
 
 	private static string Find(string name)
 	{
@@ -16,7 +22,14 @@ internal static class FixturePlugins
 		}
 
 		var configuration = AppContext.BaseDirectory.Contains("Debug", StringComparison.Ordinal) ? "Debug" : "Release";
-		var executable = Path.Combine(directory!.FullName, "sdk", "tests", "fixtures", name, "bin", configuration, "net10.0",
+		var executable = Path.Combine(directory!.FullName,
+			"sdk",
+			"tests",
+			"fixtures",
+			name,
+			"bin",
+			configuration,
+			"net10.0",
 			OperatingSystem.IsWindows() ? $"{name}.exe" : name);
 
 		return File.Exists(executable)

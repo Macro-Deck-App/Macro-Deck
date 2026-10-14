@@ -53,7 +53,7 @@ internal sealed class StreamerbotConfigFlowTests
 	[Test]
 	public async Task An_empty_host_is_a_field_error()
 	{
-		var result = await Submit(host: " ");
+		var result = await Submit(" ");
 
 		Assert.Multiple(() =>
 		{
@@ -95,7 +95,7 @@ internal sealed class StreamerbotConfigFlowTests
 	[Test]
 	public async Task A_pasted_address_is_normalised_before_it_is_stored()
 	{
-		var result = await Submit(host: "ws://192.168.0.5:8080/");
+		var result = await Submit("ws://192.168.0.5:8080/");
 
 		Assert.Multiple(() =>
 		{
@@ -202,7 +202,8 @@ internal sealed class StreamerbotConfigFlowTests
 		int port = 8080,
 		string endpoint = "/",
 		string password = "")
-		=> _flow.SubmitAsync("connection",
+	{
+		return _flow.SubmitAsync("connection",
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["host"] = host,
@@ -212,4 +213,5 @@ internal sealed class StreamerbotConfigFlowTests
 			},
 			null!,
 			CancellationToken.None);
+	}
 }

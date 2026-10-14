@@ -41,7 +41,8 @@ public static class PortableArchive
 	private const long MaxTotalIconBytes = 128L * 1024 * 1024;
 	public const long MaxTotalFontBytes = 64L * 1024 * 1024;
 
-	public static byte[] Write(PortableArchiveManifest manifest,
+	public static byte[] Write(
+		PortableArchiveManifest manifest,
 		PortableContent content,
 		IReadOnlyList<PortableIconFile> icons,
 		string? password,
@@ -62,7 +63,7 @@ public static class PortableArchive
 			var payload = PortableArchiveCrypto.Encrypt(innerBytes, password, manifest.Encryption, manifestBytes);
 
 			using var outer = new MemoryStream();
-			using (var zip = new ZipArchive(outer, ZipArchiveMode.Create, leaveOpen: true))
+			using (var zip = new ZipArchive(outer, ZipArchiveMode.Create, true))
 			{
 				WriteManifest(zip, manifestBytes);
 				var entry = zip.CreateEntry(EncryptedPayloadEntry, CompressionLevel.NoCompression);
@@ -75,7 +76,7 @@ public static class PortableArchive
 
 		manifest.Encryption = null;
 		using var buffer = new MemoryStream();
-		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
 		{
 			manifest.Files = WriteBundleEntries(zip, content, icons, fonts);
 			WriteManifest(zip, SerializeManifest(manifest));
@@ -147,7 +148,8 @@ public static class PortableArchive
 			: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons) { Fonts = ReadFonts(zip) };
 	}
 
-	private static PortableReadOutcome ReadEncrypted(ZipArchive zip,
+	private static PortableReadOutcome ReadEncrypted(
+		ZipArchive zip,
 		PortableArchiveManifest manifest,
 		string? password)
 	{
@@ -207,7 +209,8 @@ public static class PortableArchive
 			var icons = ReadIcons(inner);
 			return icons is null
 				? Fail(PortableReadStatus.InvalidArchive)
-				: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons) { Fonts = ReadFonts(inner) };
+				: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons)
+					{ Fonts = ReadFonts(inner) };
 		}
 		catch (InvalidDataException)
 		{
@@ -215,12 +218,13 @@ public static class PortableArchive
 		}
 	}
 
-	private static byte[] WriteBundle(PortableContent content,
+	private static byte[] WriteBundle(
+		PortableContent content,
 		IReadOnlyList<PortableIconFile> icons,
 		IReadOnlyList<PortableFontFile> fonts)
 	{
 		using var buffer = new MemoryStream();
-		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
 		{
 			// The inner bundle is opaque once encrypted - nothing reads content.json or the icon entries
 			// independently - so the per-entry digests this returns are not needed here.
@@ -230,7 +234,8 @@ public static class PortableArchive
 		return buffer.ToArray();
 	}
 
-	private static List<PackageFileDigest> WriteBundleEntries(ZipArchive zip,
+	private static List<PackageFileDigest> WriteBundleEntries(
+		ZipArchive zip,
 		PortableContent content,
 		IReadOnlyList<PortableIconFile> icons,
 		IReadOnlyList<PortableFontFile> fonts)
@@ -275,10 +280,14 @@ public static class PortableArchive
 	}
 
 	private static PackageFileDigest ComputeFileDigest(string path, byte[] content)
-		=> new() { Path = path, Sha256 = ContentHash.Compute(content), Size = content.Length };
+	{
+		return new PackageFileDigest { Path = path, Sha256 = ContentHash.Compute(content), Size = content.Length };
+	}
 
 	private static byte[] SerializeManifest(PortableArchiveManifest manifest)
-		=> JsonSerializer.SerializeToUtf8Bytes(manifest, PersistenceJsonOptions.Default);
+	{
+		return JsonSerializer.SerializeToUtf8Bytes(manifest, PersistenceJsonOptions.Default);
+	}
 
 	private static void WriteManifest(ZipArchive zip, byte[] manifestBytes)
 	{
@@ -342,9 +351,9 @@ public static class PortableArchive
 		foreach (var entry in zip.Entries)
 		{
 			var segments = entry.FullName.Replace('\\', '/').Split('/');
-			if (segments.Length != 3 ||
-				!segments[0].Equals("icons", StringComparison.OrdinalIgnoreCase) ||
-				!Guid.TryParse(segments[1], out var iconId))
+			if (segments.Length != 3
+				|| !segments[0].Equals("icons", StringComparison.OrdinalIgnoreCase)
+				|| !Guid.TryParse(segments[1], out var iconId))
 			{
 				continue;
 			}
@@ -382,10 +391,10 @@ public static class PortableArchive
 		foreach (var entry in zip.Entries)
 		{
 			var segments = entry.FullName.Replace('\\', '/').Split('/');
-			if (segments.Length != 2 ||
-				!segments[0].Equals("fonts", StringComparison.Ordinal) ||
-				!UserFontFiles.HasFontExtension(segments[1]) ||
-				!UserFontFiles.IsFontId(Path.GetFileNameWithoutExtension(segments[1])))
+			if (segments.Length != 2
+				|| !segments[0].Equals("fonts", StringComparison.Ordinal)
+				|| !UserFontFiles.HasFontExtension(segments[1])
+				|| !UserFontFiles.IsFontId(Path.GetFileNameWithoutExtension(segments[1])))
 			{
 				continue;
 			}
@@ -437,5 +446,7 @@ public static class PortableArchive
 	}
 
 	private static PortableReadOutcome Fail(PortableReadStatus status)
-		=> new(status, null, null, []);
+	{
+		return new PortableReadOutcome(status, null, null, []);
+	}
 }

@@ -8,7 +8,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// test pushes the surfaces the host would push and reads back what the provider reported.
 /// </summary>
 [TestFixture]
-public class A23_DeviceSessionFakeTests
+public class A23DeviceSessionFakeTests
 {
 	private const string DeviceId = "SERIAL-1";
 
@@ -30,7 +30,8 @@ public class A23_DeviceSessionFakeTests
 	private static readonly string[] _expectedWidgetIconRequestIds = ["w1", "w1", "w2"];
 
 	private static DeviceSurface Surface(long revision, string folderId, string label)
-		=> new()
+	{
+		return new DeviceSurface
 		{
 			Revision = revision,
 			Profile = new DeviceSurfaceProfile("studio", "Studio"),
@@ -51,6 +52,7 @@ public class A23_DeviceSessionFakeTests
 				}
 			]
 		};
+	}
 
 	private static async Task<(FakeDeviceProviderContext Context, RenderingProvider Provider, FakeDeviceSession Session
 			)>
@@ -134,8 +136,8 @@ public class A23_DeviceSessionFakeTests
 			NotModified = false
 		};
 
-		var fresh = await session.GetIconAsync("icon-1", size: 72);
-		var cached = await session.GetIconAsync("icon-1", size: 72, knownETag: "etag-1");
+		var fresh = await session.GetIconAsync("icon-1", 72);
+		var cached = await session.GetIconAsync("icon-1", 72, "etag-1");
 		var missing = await session.GetIconAsync("icon-2");
 
 		Assert.Multiple(() =>
@@ -162,7 +164,7 @@ public class A23_DeviceSessionFakeTests
 		};
 
 		var fresh = await session.GetWidgetIconAsync("w1");
-		var cached = await session.GetWidgetIconAsync("w1", knownETag: "sha256:v1");
+		var cached = await session.GetWidgetIconAsync("w1", "sha256:v1");
 		var missing = await session.GetWidgetIconAsync("w2");
 
 		Assert.Multiple(() =>
@@ -196,9 +198,14 @@ public class A23_DeviceSessionFakeTests
 		public List<string?> Closures { get; } = [];
 
 		public Task InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task ShutdownAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
 		{
@@ -209,17 +216,23 @@ public class A23_DeviceSessionFakeTests
 		}
 
 		public Task<DeviceInteractionResult> PressAsync(string widgetId)
-			=> Send(DeviceInteractionKind.Press, widgetId);
+		{
+			return Send(DeviceInteractionKind.Press, widgetId);
+		}
 
 		public Task<DeviceInteractionResult> ReleaseAsync(string widgetId)
-			=> Send(DeviceInteractionKind.Release, widgetId);
+		{
+			return Send(DeviceInteractionKind.Release, widgetId);
+		}
 
 		private Task<DeviceInteractionResult> Send(DeviceInteractionKind kind, string widgetId)
-			=> _session!.SendInteractionAsync(new DeviceInteraction
+		{
+			return _session!.SendInteractionAsync(new DeviceInteraction
 			{
 				Kind = kind,
 				Target = new DeviceInteractionTarget { WidgetId = widgetId },
 				SurfaceRevision = _session.CurrentSurface.Revision
 			});
+		}
 	}
 }

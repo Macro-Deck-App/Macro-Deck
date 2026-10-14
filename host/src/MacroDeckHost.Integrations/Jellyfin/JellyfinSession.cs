@@ -19,8 +19,8 @@ internal sealed record JellyfinMediaItem(
 {
 	public bool IsEpisode => string.Equals(Type, "Episode", StringComparison.OrdinalIgnoreCase);
 
-	public bool IsAudio => string.Equals(Type, "Audio", StringComparison.OrdinalIgnoreCase) ||
-		string.Equals(MediaType, "Audio", StringComparison.OrdinalIgnoreCase);
+	public bool IsAudio => string.Equals(Type, "Audio", StringComparison.OrdinalIgnoreCase)
+		|| string.Equals(MediaType, "Audio", StringComparison.OrdinalIgnoreCase);
 
 	public bool IsMovie => string.Equals(Type, "Movie", StringComparison.OrdinalIgnoreCase);
 
@@ -62,7 +62,10 @@ internal sealed record JellyfinSession(
 
 	public bool IsPlaying => NowPlaying is not null && !IsPaused;
 
-	public bool Supports(string generalCommand) => SupportedCommands.Contains(generalCommand);
+	public bool Supports(string generalCommand)
+	{
+		return SupportedCommands.Contains(generalCommand);
+	}
 
 	// Jellyfin reports progress sparsely, so a playing position is carried forward from the last check-in.
 	// The check-in is stamped by the server's clock; one that lies ahead of ours falls back to the receipt time.
@@ -87,9 +90,11 @@ internal sealed record JellyfinSession(
 	}
 
 	public double? ProgressPercentAt(DateTimeOffset now)
-		=> NowPlaying?.Duration is { TotalMilliseconds: > 0 } duration && PositionAt(now) is { } position
+	{
+		return NowPlaying?.Duration is { TotalMilliseconds: > 0 } duration && PositionAt(now) is { } position
 			? Math.Clamp(position.TotalMilliseconds / duration.TotalMilliseconds * 100, 0, 100)
 			: null;
+	}
 }
 
 internal static class JellyfinSessionMapper
@@ -98,12 +103,14 @@ internal static class JellyfinSessionMapper
 		IEnumerable<JellyfinSessionDto> sessions,
 		string ownDeviceId,
 		DateTimeOffset receivedAt = default)
-		=> sessions
-			.Where(dto => !string.IsNullOrEmpty(dto.Id) &&
-				!string.IsNullOrEmpty(dto.DeviceId) &&
-				!string.Equals(dto.DeviceId, ownDeviceId, StringComparison.Ordinal))
+	{
+		return sessions
+			.Where(dto => !string.IsNullOrEmpty(dto.Id)
+				&& !string.IsNullOrEmpty(dto.DeviceId)
+				&& !string.Equals(dto.DeviceId, ownDeviceId, StringComparison.Ordinal))
 			.Select(dto => Map(dto) with { ReceivedAt = receivedAt })
 			.ToList();
+	}
 
 	public static JellyfinSession Map(JellyfinSessionDto dto)
 	{
@@ -129,8 +136,9 @@ internal static class JellyfinSessionMapper
 			item is not null && (playState?.IsPaused ?? false),
 			playState?.IsMuted ?? false,
 			playState?.VolumeLevel,
-			item is not null && (string.Equals(playState?.PlayMethod, "Transcode", StringComparison.OrdinalIgnoreCase) ||
-				dto.TranscodingInfo is { IsVideoDirect: false } or { IsAudioDirect: false }),
+			item is not null
+			&& (string.Equals(playState?.PlayMethod, "Transcode", StringComparison.OrdinalIgnoreCase)
+				|| dto.TranscodingInfo is { IsVideoDirect: false } or { IsAudioDirect: false }),
 			playState?.RepeatMode,
 			string.Equals(playState?.PlaybackOrder, "Shuffle", StringComparison.OrdinalIgnoreCase));
 	}
@@ -166,5 +174,8 @@ internal static class JellyfinSessionMapper
 			artworkTag);
 	}
 
-	private static string? NullIfEmpty(string? value) => string.IsNullOrEmpty(value) ? null : value;
+	private static string? NullIfEmpty(string? value)
+	{
+		return string.IsNullOrEmpty(value) ? null : value;
+	}
 }

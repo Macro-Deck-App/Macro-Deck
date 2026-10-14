@@ -21,7 +21,8 @@ public sealed class AdbBackgroundService : HostReadyBackgroundService
 	private AdbStatus _lastBroadcastStatus = AdbStatus.Disabled;
 	private IReadOnlyList<AdbDevice> _lastBroadcastDevices = [];
 
-	public AdbBackgroundService(IHostApplicationLifetime lifetime,
+	public AdbBackgroundService(
+		IHostApplicationLifetime lifetime,
 		AdbManager manager,
 		IUiTransport transport,
 		TimeProvider timeProvider,

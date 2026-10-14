@@ -7,7 +7,8 @@ namespace MacroDeck.Plugin.Cli.Building;
 /// <c>pack</c>'s codes or exit codes in a second place.</summary>
 internal static class PluginBuildReporter
 {
-	public static async Task<int> ReportAsync(CliConsole console,
+	public static async Task<int> ReportAsync(
+		CliConsole console,
 		PluginBuildResult result,
 		CancellationToken cancellationToken = default)
 	{
@@ -37,7 +38,7 @@ internal static class PluginBuildReporter
 			console.Info($"Built {string.Join(", ", result.BuiltRids)}.");
 		}
 
-		return await PluginPackReporter.ReportAsync(console, pack, showDigest: false, cancellationToken)
+		return await PluginPackReporter.ReportAsync(console, pack, false, cancellationToken)
 			.ConfigureAwait(false);
 	}
 }

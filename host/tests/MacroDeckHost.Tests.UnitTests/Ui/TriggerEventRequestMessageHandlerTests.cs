@@ -153,52 +153,61 @@ public class TriggerEventRequestMessageHandlerTests
 	}
 
 	private static void AssertRefused(TriggerEventResponse response, string code)
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(response.Success, Is.False);
 			Assert.That(response.Error?.Code, Is.EqualTo(code));
 		});
+	}
 
 	private static Dictionary<string, JsonElement> Values(params (string Name, string Json)[] values)
-		=> values.ToDictionary(v => v.Name, v => JsonDocument.Parse(v.Json).RootElement, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(v => v.Name, v => JsonDocument.Parse(v.Json).RootElement, StringComparer.Ordinal);
+	}
 
 	private static EventSubscription Subscription(string eventId, params (string Name, string Json)[] configuration)
-		=> new(EventTriggerOwner.ForWidget(Guid.NewGuid()),
+	{
+		return new EventSubscription(EventTriggerOwner.ForWidget(Guid.NewGuid()),
 			Guid.NewGuid().ToString(),
 			eventId,
 			configuration.ToDictionary(c => c.Name,
 				c => new EventConfigurationValue(JsonDocument.Parse(c.Json).RootElement),
 				StringComparer.Ordinal),
 			null);
+	}
 
-	private static IReadOnlyList<EventDefinitionDescriptor> StubIntegrationEvents() =>
-	[
-		new(QualifiedId.Parse("app.macro-deck.obs::scene-changed"),
-			"app.macro-deck.obs",
-			"OBS Studio",
-			true,
-			new EventDefinition
-			{
-				Id = "scene-changed",
-				Name = "Scene Changed",
-				ConfigurationParameters = [ActionParameter.Text("sceneName", label: "Scene")],
-				PayloadParameters = [ActionParameter.Text("sceneName", label: "Scene")]
-			}),
-		new(QualifiedId.Parse("app.macro-deck.obs::volume-changed"),
-			"app.macro-deck.obs",
-			"OBS Studio",
-			true,
-			new EventDefinition
-			{
-				Id = "volume-changed",
-				Name = "Volume Changed",
-				PayloadParameters =
-				[
-					ActionParameter.Text("inputName", label: "Input"),
-					ActionParameter.Number("volume", label: "Volume")
-				]
-			})
-	];
+	private static IReadOnlyList<EventDefinitionDescriptor> StubIntegrationEvents()
+	{
+		return
+		[
+			new EventDefinitionDescriptor(QualifiedId.Parse("app.macro-deck.obs::scene-changed"),
+				"app.macro-deck.obs",
+				"OBS Studio",
+				true,
+				new EventDefinition
+				{
+					Id = "scene-changed",
+					Name = "Scene Changed",
+					ConfigurationParameters = [ActionParameter.Text("sceneName", "Scene")],
+					PayloadParameters = [ActionParameter.Text("sceneName", "Scene")]
+				}),
+			new EventDefinitionDescriptor(QualifiedId.Parse("app.macro-deck.obs::volume-changed"),
+				"app.macro-deck.obs",
+				"OBS Studio",
+				true,
+				new EventDefinition
+				{
+					Id = "volume-changed",
+					Name = "Volume Changed",
+					PayloadParameters =
+					[
+						ActionParameter.Text("inputName", "Input"),
+						ActionParameter.Number("volume", "Volume")
+					]
+				})
+		];
+	}
 
 	private sealed class StubHostEventProvider : IHostEventProvider
 	{
@@ -229,12 +238,19 @@ public class TriggerEventRequestMessageHandlerTests
 		}
 
 		public IReadOnlyList<EventDefinitionDescriptor> GetDefinitions()
-			=> [.._inner.GetDefinitions(), .._integrationEvents];
+		{
+			return [.. _inner.GetDefinitions(), .. _integrationEvents];
+		}
 
 		public EventDefinitionDescriptor? Find(string qualifiedEventId)
-			=> GetDefinitions().FirstOrDefault(d => d.Id.ToString() == qualifiedEventId);
+		{
+			return GetDefinitions().FirstOrDefault(d => d.Id.ToString() == qualifiedEventId);
+		}
 
-		public object? FindProvider(string qualifiedEventId) => _inner.FindProvider(qualifiedEventId);
+		public object? FindProvider(string qualifiedEventId)
+		{
+			return _inner.FindProvider(qualifiedEventId);
+		}
 	}
 
 	private sealed class StubEventSubscriptionIndex : IEventSubscriptionIndex
@@ -250,17 +266,29 @@ public class TriggerEventRequestMessageHandlerTests
 		}
 
 		public bool HasSubscribers(string qualifiedEventId)
-			=> _subscriptions.Any(s => s.EventId == qualifiedEventId);
+		{
+			return _subscriptions.Any(s => s.EventId == qualifiedEventId);
+		}
 
 		public IReadOnlyList<EventSubscription> Find(string qualifiedEventId)
-			=> _subscriptions.Where(s => s.EventId == qualifiedEventId).ToList();
+		{
+			return _subscriptions.Where(s => s.EventId == qualifiedEventId).ToList();
+		}
 
 		public EventSubscription? Find(EventTarget target)
-			=> _subscriptions.FirstOrDefault(s => s.Target == target);
+		{
+			return _subscriptions.FirstOrDefault(s => s.Target == target);
+		}
 
-		public IReadOnlyList<EventSubscription> FindByProvider(string providerId) => [];
+		public IReadOnlyList<EventSubscription> FindByProvider(string providerId)
+		{
+			return [];
+		}
 
-		public IReadOnlyCollection<string> ProviderIds() => [];
+		public IReadOnlyCollection<string> ProviderIds()
+		{
+			return [];
+		}
 
 		public void Rebuild()
 		{

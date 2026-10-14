@@ -26,7 +26,8 @@ public sealed class PluginPairingUserNotificationHandler : INotificationHandler<
 		_localization = localization;
 	}
 
-	public async ValueTask Handle(PluginPairingRequestedNotification notification,
+	public async ValueTask Handle(
+		PluginPairingRequestedNotification notification,
 		CancellationToken cancellationToken)
 	{
 		var culture = await ActiveLocalization.Culture(_scopeFactory);
@@ -36,12 +37,13 @@ public sealed class PluginPairingUserNotificationHandler : INotificationHandler<
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.Security,
 			Title = _localization.Resolve(notification.TakesOverInstalledPlugin
-					? AppStrings.Notifications.PluginTakeoverRequested()
-					: AppStrings.Notifications.PluginPairingRequested(),
-				culture) ?? notification.DisplayName,
+						? AppStrings.Notifications.PluginTakeoverRequested()
+						: AppStrings.Notifications.PluginPairingRequested(),
+					culture)
+				?? notification.DisplayName,
 			Message = _localization.Resolve(notification.TakesOverInstalledPlugin
-					? AppStrings.Notifications.PluginTakeoverRequestedMessage(name: notification.DisplayName)
-					: AppStrings.Notifications.PluginPairingRequestedMessage(name: notification.DisplayName),
+					? AppStrings.Notifications.PluginTakeoverRequestedMessage(notification.DisplayName)
+					: AppStrings.Notifications.PluginPairingRequestedMessage(notification.DisplayName),
 				culture),
 			SourceId = notification.PluginId,
 			SourceName = notification.DisplayName,

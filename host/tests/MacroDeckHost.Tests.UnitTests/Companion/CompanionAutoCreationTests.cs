@@ -50,7 +50,7 @@ internal sealed class CompanionAutoCreationTests
 	[Test]
 	public async Task No_entry_is_created_while_the_integration_is_explicitly_disabled()
 	{
-		var harness = new CompanionHarness(storedOff: true);
+		var harness = new CompanionHarness(true);
 		var device = harness.AddDevice("Phone");
 
 		await harness.ReportAsync("connection-1", device);

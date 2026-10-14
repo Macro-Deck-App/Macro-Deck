@@ -21,7 +21,8 @@ public sealed class BackupRecoveryKeyService : IBackupRecoveryKeyService, IDispo
 	private readonly ILogger _logger;
 	private readonly SemaphoreSlim _creationGate = new(1, 1);
 
-	public BackupRecoveryKeyService(IAppPreferenceRepository preferences,
+	public BackupRecoveryKeyService(
+		IAppPreferenceRepository preferences,
 		ISecretService secrets,
 		IKeyRingProtectionService keyRing,
 		TimeProvider timeProvider,
@@ -172,9 +173,9 @@ public sealed class BackupRecoveryKeyService : IBackupRecoveryKeyService, IDispo
 			}
 
 			var preference = await _preferences.GetByKey(AppPreferenceService.BackupRecoveryKeySecretIdKey);
-			var replaced = preference is not null &&
-				Guid.TryParse(preference.Value, out var existingSecretId) &&
-				await _secrets.Replace(existingSecretId, formatted);
+			var replaced = preference is not null
+				&& Guid.TryParse(preference.Value, out var existingSecretId)
+				&& await _secrets.Replace(existingSecretId, formatted);
 
 			if (!replaced)
 			{
@@ -196,7 +197,9 @@ public sealed class BackupRecoveryKeyService : IBackupRecoveryKeyService, IDispo
 	}
 
 	public bool TryParseExportedKey(string? text, out byte[] key)
-		=> BackupRecoveryKeyFormat.TryParseExported(text, out key);
+	{
+		return BackupRecoveryKeyFormat.TryParseExported(text, out key);
+	}
 
 	private async Task ProtectKeyRing(byte[] key, CancellationToken cancellationToken)
 	{
@@ -257,7 +260,9 @@ public sealed class BackupRecoveryKeyService : IBackupRecoveryKeyService, IDispo
 	}
 
 	private string FormatTimestamp()
-		=> _timeProvider.GetUtcNow().ToString("O", CultureInfo.InvariantCulture);
+	{
+		return _timeProvider.GetUtcNow().ToString("O", CultureInfo.InvariantCulture);
+	}
 
 	private static string FormatKey(ReadOnlySpan<byte> key)
 	{
@@ -268,5 +273,7 @@ public sealed class BackupRecoveryKeyService : IBackupRecoveryKeyService, IDispo
 	}
 
 	public void Dispose()
-		=> _creationGate.Dispose();
+	{
+		_creationGate.Dispose();
+	}
 }

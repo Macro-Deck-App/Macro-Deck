@@ -30,8 +30,8 @@ public static class ActionButtonIconJson
 			? id
 			: null;
 
-		if (!string.IsNullOrEmpty(blockId) &&
-			ActionFlowJson.TryFindBlock(ActionFlowJson.ParseFlows(data.ToJsonString()), blockId, out _))
+		if (!string.IsNullOrEmpty(blockId)
+			&& ActionFlowJson.TryFindBlock(ActionFlowJson.ParseFlows(data.ToJsonString()), blockId, out _))
 		{
 			return false;
 		}

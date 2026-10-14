@@ -47,5 +47,8 @@ public static class AssetKinds
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 
-	public static bool IsKnown(string? kind) => kind is not null && _known.Contains(kind);
+	public static bool IsKnown(string? kind)
+	{
+		return kind is not null && _known.Contains(kind);
+	}
 }

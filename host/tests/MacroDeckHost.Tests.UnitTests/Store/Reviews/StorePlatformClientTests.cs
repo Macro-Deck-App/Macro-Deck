@@ -39,7 +39,8 @@ internal sealed class StorePlatformClientTests
 		_handler.Respond = request =>
 		{
 			var requested = Uri.UnescapeDataString(request.RequestUri!.Query).Split('=')[1].Split(',');
-			return Json(requested.ToDictionary(id => id, _ => new { rating = 4.5, ratingCount = 2, distribution = Array.Empty<object>() }));
+			return Json(requested.ToDictionary(id => id,
+				_ => new { rating = 4.5, ratingCount = 2, distribution = Array.Empty<object>() }));
 		};
 
 		var result = await _client.GetRatings(ids);
@@ -50,7 +51,8 @@ internal sealed class StorePlatformClientTests
 			Assert.That(result.Value!.Keys, Is.EquivalentTo(ids));
 			Assert.That(_handler.Requests.Select(request => request.Uri.Query.Split(',').Length),
 				Is.EqualTo(new[] { 100, 100, 50 }));
-			Assert.That(_handler.Requests.All(request => request.Authorization is null), Is.True,
+			Assert.That(_handler.Requests.All(request => request.Authorization is null),
+				Is.True,
 				"public reads must not carry the account token");
 		});
 	}
@@ -77,7 +79,8 @@ internal sealed class StorePlatformClientTests
 				Is.All.EqualTo("/api/v1/store/installs"));
 			Assert.That(_handler.Requests.Select(request => request.Uri.Query.Split(',').Length),
 				Is.EqualTo(new[] { 100, 50 }));
-			Assert.That(_handler.Requests.All(request => request.Authorization is null), Is.True,
+			Assert.That(_handler.Requests.All(request => request.Authorization is null),
+				Is.True,
 				"public reads must not carry the account token");
 		});
 	}
@@ -87,7 +90,9 @@ internal sealed class StorePlatformClientTests
 	{
 		_handler.Respond = _ => new HttpResponseMessage(HttpStatusCode.OK)
 		{
-			Content = new StringContent("## 1. Open Source\n\nPlugins must be open source.", Encoding.UTF8, "text/markdown")
+			Content = new StringContent("## 1. Open Source\n\nPlugins must be open source.",
+				Encoding.UTF8,
+				"text/markdown")
 		};
 
 		var result = await _client.GetCreatorGuidelines();
@@ -97,7 +102,9 @@ internal sealed class StorePlatformClientTests
 			Assert.That(result.Success, Is.True);
 			Assert.That(result.Value, Is.EqualTo("## 1. Open Source\n\nPlugins must be open source."));
 			Assert.That(_handler.Requests.Single().Uri.AbsolutePath, Is.EqualTo("/api/v1/public/creator-guidelines"));
-			Assert.That(_handler.Requests.Single().Authorization, Is.Null, "public reads must not carry the account token");
+			Assert.That(_handler.Requests.Single().Authorization,
+				Is.Null,
+				"public reads must not carry the account token");
 		});
 	}
 
@@ -133,7 +140,9 @@ internal sealed class StorePlatformClientTests
 		_handler.Respond = request =>
 		{
 			var body = JsonDocument.Parse(request.Content!.ReadAsStringAsync().Result).RootElement;
-			return Json(body.GetProperty("packageIds").EnumerateArray().ToDictionary(id => id.GetString()!, _ => "Claimed"));
+			return Json(body.GetProperty("packageIds")
+				.EnumerateArray()
+				.ToDictionary(id => id.GetString()!, _ => "Claimed"));
 		};
 
 		var result = await _client.ClaimEntitlements(ids);
@@ -145,7 +154,8 @@ internal sealed class StorePlatformClientTests
 			Assert.That(_handler.Requests.Select(request => request.Uri.AbsolutePath),
 				Is.All.EqualTo("/api/v1/store/entitlements/claim"));
 			Assert.That(_handler.Requests.Count, Is.EqualTo(2));
-			Assert.That(_handler.Requests.Select(request => request.Authorization), Is.All.EqualTo("Bearer access-token"));
+			Assert.That(_handler.Requests.Select(request => request.Authorization),
+				Is.All.EqualTo("Bearer access-token"));
 		});
 	}
 
@@ -153,11 +163,12 @@ internal sealed class StorePlatformClientTests
 	public async Task Writing_a_review_sends_the_whole_review_including_a_cleared_title()
 	{
 		_handler.Respond = _ => Json(new
-		{
-			id = Guid.NewGuid(), packageId = "com.acme.hue", rating = 4, title = (string?)null, body = "Works well",
-			visibility = "Visible", downloadedBeforeReview = false, createdAt = DateTimeOffset.UnixEpoch,
-			updatedAt = DateTimeOffset.UnixEpoch, isEdited = true, moderationReason = (string?)null
-		}, HttpStatusCode.OK);
+			{
+				id = Guid.NewGuid(), packageId = "com.acme.hue", rating = 4, title = (string?)null, body = "Works well",
+				visibility = "Visible", downloadedBeforeReview = false, createdAt = DateTimeOffset.UnixEpoch,
+				updatedAt = DateTimeOffset.UnixEpoch, isEdited = true, moderationReason = (string?)null
+			},
+			HttpStatusCode.OK);
 
 		var result = await _client.PutOwnReview("com.acme.hue", 4, null, "Works well");
 		var sent = JsonDocument.Parse(_handler.Requests.Single().Body!).RootElement;
@@ -166,7 +177,8 @@ internal sealed class StorePlatformClientTests
 		{
 			Assert.That(result.Success, Is.True);
 			Assert.That(_handler.Requests.Single().Method, Is.EqualTo("PUT"));
-			Assert.That(_handler.Requests.Single().Uri.AbsolutePath, Is.EqualTo("/api/v1/store/packages/com.acme.hue/reviews/me"));
+			Assert.That(_handler.Requests.Single().Uri.AbsolutePath,
+				Is.EqualTo("/api/v1/store/packages/com.acme.hue/reviews/me"));
 			Assert.That(sent.GetProperty("rating").GetInt32(), Is.EqualTo(4));
 			Assert.That(sent.GetProperty("title").ValueKind, Is.EqualTo(JsonValueKind.Null));
 			Assert.That(sent.GetProperty("body").GetString(), Is.EqualTo("Works well"));
@@ -175,21 +187,46 @@ internal sealed class StorePlatformClientTests
 
 	private static IEnumerable<TestCaseData> WriteFailures()
 	{
-		yield return new TestCaseData(HttpStatusCode.Forbidden, "{\"downloadRequired\":true}", null, StorePlatformFailure.DownloadRequired, null);
-		yield return new TestCaseData(HttpStatusCode.Forbidden, "{\"accountSuspended\":true}", null, StorePlatformFailure.AccountSuspended, null);
-		yield return new TestCaseData(HttpStatusCode.Forbidden, "{\"title\":\"no\"}", null, StorePlatformFailure.Forbidden, null);
+		yield return new TestCaseData(HttpStatusCode.Forbidden,
+			"{\"downloadRequired\":true}",
+			null,
+			StorePlatformFailure.DownloadRequired,
+			null);
+		yield return new TestCaseData(HttpStatusCode.Forbidden,
+			"{\"accountSuspended\":true}",
+			null,
+			StorePlatformFailure.AccountSuspended,
+			null);
+		yield return new TestCaseData(HttpStatusCode.Forbidden,
+			"{\"title\":\"no\"}",
+			null,
+			StorePlatformFailure.Forbidden,
+			null);
 		yield return new TestCaseData(HttpStatusCode.Conflict, "{}", null, StorePlatformFailure.Moderated, null);
 		yield return new TestCaseData(HttpStatusCode.Gone, "", null, StorePlatformFailure.Gone, null);
 		yield return new TestCaseData(HttpStatusCode.TooManyRequests, "{}", "60", StorePlatformFailure.Cooldown, 60);
 		yield return new TestCaseData(HttpStatusCode.TooManyRequests, "", null, StorePlatformFailure.Cooldown, null);
-		yield return new TestCaseData(HttpStatusCode.ServiceUnavailable, "{}", "30", StorePlatformFailure.RetryLater, 30);
-		yield return new TestCaseData(HttpStatusCode.BadRequest, "{\"errors\":{\"Title\":[\"too long\"]}}", null, StorePlatformFailure.Validation, null);
+		yield return new TestCaseData(HttpStatusCode.ServiceUnavailable,
+			"{}",
+			"30",
+			StorePlatformFailure.RetryLater,
+			30);
+		yield return new TestCaseData(HttpStatusCode.BadRequest,
+			"{\"errors\":{\"Title\":[\"too long\"]}}",
+			null,
+			StorePlatformFailure.Validation,
+			null);
 		yield return new TestCaseData(HttpStatusCode.Unauthorized, "", null, StorePlatformFailure.Unavailable, null);
-		yield return new TestCaseData(HttpStatusCode.InternalServerError, "", null, StorePlatformFailure.Unavailable, null);
+		yield return new TestCaseData(HttpStatusCode.InternalServerError,
+			"",
+			null,
+			StorePlatformFailure.Unavailable,
+			null);
 	}
 
 	[TestCaseSource(nameof(WriteFailures))]
-	public async Task Every_refused_write_is_reported_as_what_the_platform_meant(HttpStatusCode status,
+	public async Task Every_refused_write_is_reported_as_what_the_platform_meant(
+		HttpStatusCode status,
 		string body,
 		string? retryAfter,
 		StorePlatformFailure expected,
@@ -197,7 +234,8 @@ internal sealed class StorePlatformClientTests
 	{
 		_handler.Respond = _ =>
 		{
-			var response = new HttpResponseMessage(status) { Content = new StringContent(body, Encoding.UTF8, "application/problem+json") };
+			var response = new HttpResponseMessage(status)
+				{ Content = new StringContent(body, Encoding.UTF8, "application/problem+json") };
 			if (retryAfter is not null)
 			{
 				response.Headers.TryAddWithoutValidation("Retry-After", retryAfter);
@@ -229,11 +267,12 @@ internal sealed class StorePlatformClientTests
 		{
 			Assert.That(entry.Success, Is.True);
 			Assert.That(review.Success, Is.True);
-			Assert.That(_handler.Requests.Select(request => (request.Method, request.Uri.AbsolutePath)), Is.EqualTo(new[]
-			{
-				("POST", "/api/v1/store/packages/com.acme.hue/report"),
-				("POST", $"/api/v1/store/packages/com.acme.hue/reviews/{reviewId:D}/report")
-			}));
+			Assert.That(_handler.Requests.Select(request => (request.Method, request.Uri.AbsolutePath)),
+				Is.EqualTo(new[]
+				{
+					("POST", "/api/v1/store/packages/com.acme.hue/report"),
+					("POST", $"/api/v1/store/packages/com.acme.hue/reviews/{reviewId:D}/report")
+				}));
 			Assert.That(_handler.Requests.All(request => request.Authorization == "Bearer access-token"), Is.True);
 			var entryBody = JsonSerializer.Deserialize<JsonElement>(_handler.Requests[0].Body!, _json);
 			Assert.That(entryBody.GetProperty("category").GetString(), Is.EqualTo("Misleading"));
@@ -245,16 +284,20 @@ internal sealed class StorePlatformClientTests
 	}
 
 	[TestCase(HttpStatusCode.Conflict, "{}", StorePlatformFailure.AlreadyReported)]
-	[TestCase(HttpStatusCode.Forbidden, "{\"title\":\"You cannot report your own review.\"}", StorePlatformFailure.Forbidden)]
+	[TestCase(HttpStatusCode.Forbidden,
+		"{\"title\":\"You cannot report your own review.\"}",
+		StorePlatformFailure.Forbidden)]
 	[TestCase(HttpStatusCode.Forbidden, "{\"accountSuspended\":true}", StorePlatformFailure.AccountSuspended)]
 	[TestCase(HttpStatusCode.NotFound, "", StorePlatformFailure.NotFound)]
 	[TestCase(HttpStatusCode.TooManyRequests, "{}", StorePlatformFailure.Cooldown)]
-	public async Task A_refused_report_says_what_the_platform_meant(HttpStatusCode status,
+	public async Task A_refused_report_says_what_the_platform_meant(
+		HttpStatusCode status,
 		string body,
 		StorePlatformFailure expected)
 	{
 		_handler.Respond = _ =>
-			new HttpResponseMessage(status) { Content = new StringContent(body, Encoding.UTF8, "application/problem+json") };
+			new HttpResponseMessage(status)
+				{ Content = new StringContent(body, Encoding.UTF8, "application/problem+json") };
 
 		var entry = await _client.ReportPackage("com.acme.hue", "Spam", null);
 		var review = await _client.ReportReview("com.acme.hue", Guid.NewGuid(), "Spam", null);
@@ -372,7 +415,8 @@ internal sealed class StorePlatformClientTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_handler.Requests.Single().Uri.Query, Is.EqualTo("?page=2&pageSize=10&sort=OldestFirst&rating=3"));
+			Assert.That(_handler.Requests.Single().Uri.Query,
+				Is.EqualTo("?page=2&pageSize=10&sort=OldestFirst&rating=3"));
 			Assert.That(review.Title, Is.EqualTo("Only a title"));
 			Assert.That(review.Body, Is.Null);
 			Assert.That(review.DownloadedBeforeReview, Is.True);
@@ -397,7 +441,11 @@ internal sealed class StorePlatformClientTests
 					author = new { displayName = "Ada", avatarUrl = (string?)null },
 					createdAt = DateTimeOffset.UnixEpoch, updatedAt = DateTimeOffset.UnixEpoch,
 					downloadedBeforeReview = true, isEdited = false,
-					reply = new { body = "Fixed in 1.2, please update.", createdAt = repliedAt, updatedAt = editedAt, isEdited = true }
+					reply = new
+					{
+						body = "Fixed in 1.2, please update.", createdAt = repliedAt, updatedAt = editedAt,
+						isEdited = true
+					}
 				},
 				new
 				{
@@ -491,13 +539,15 @@ internal sealed class StorePlatformClientTests
 		});
 	}
 
-	private static HttpResponseMessage Json(object value, HttpStatusCode status = HttpStatusCode.OK) =>
-		new(status)
+	private static HttpResponseMessage Json(object value, HttpStatusCode status = HttpStatusCode.OK)
+	{
+		return new HttpResponseMessage(status)
 		{
 			Content = new StringContent(JsonSerializer.Serialize(value, _json),
 				Encoding.UTF8,
 				"application/json")
 		};
+	}
 
 	private sealed record RecordedRequest(string Method, Uri Uri, string? Authorization, string? Body);
 
@@ -505,11 +555,13 @@ internal sealed class StorePlatformClientTests
 	{
 		public List<RecordedRequest> Requests { get; } = [];
 
-		public Func<HttpRequestMessage, HttpResponseMessage> Respond { get; set; } = _ => new HttpResponseMessage(HttpStatusCode.OK);
+		public Func<HttpRequestMessage, HttpResponseMessage> Respond { get; set; } = _
+			=> new HttpResponseMessage(HttpStatusCode.OK);
 
 		public bool NeverAnswers { get; set; }
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override async Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			Requests.Add(new RecordedRequest(request.Method.Method,
@@ -534,12 +586,20 @@ internal sealed class StorePlatformClientTests
 
 		public event EventHandler<ConnectSessionSnapshot>? SessionChanged;
 
-		public Task Initialize(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task Initialize(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<ConnectSignInStart> StartSignIn(CancellationToken cancellationToken = default) =>
+		public Task<ConnectSignInStart> StartSignIn(CancellationToken cancellationToken = default)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task CancelSignIn(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task CancelSignIn(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SignOut(CancellationToken cancellationToken = default)
 		{
@@ -547,7 +607,9 @@ internal sealed class StorePlatformClientTests
 			return Task.CompletedTask;
 		}
 
-		public Task<string> GetAccessToken(CancellationToken cancellationToken = default) =>
-			Failure is null ? Task.FromResult("access-token") : Task.FromException<string>(Failure);
+		public Task<string> GetAccessToken(CancellationToken cancellationToken = default)
+		{
+			return Failure is null ? Task.FromResult("access-token") : Task.FromException<string>(Failure);
+		}
 	}
 }

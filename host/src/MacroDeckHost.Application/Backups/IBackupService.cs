@@ -9,24 +9,31 @@ public sealed record BackupSourceRef(string? ProviderId, string? StorageId, stri
 
 public sealed record BackupExportHandle(Stream Content, string FileName, long Length) : IDisposable
 {
-	public void Dispose() => Content.Dispose();
+	public void Dispose()
+	{
+		Content.Dispose();
+	}
 }
 
 public interface IBackupService
 {
-	Task<Result<BackupDescriptor, BackupError>> Create(CreateBackupRequest request,
+	Task<Result<BackupDescriptor, BackupError>> Create(
+		CreateBackupRequest request,
 		CancellationToken cancellationToken = default);
 
 	Task<Result<IReadOnlyList<BackupDescriptor>, BackupError>> List(CancellationToken cancellationToken = default);
 
-	Task<Result<BackupInspection, BackupError>> Inspect(BackupSourceRef source,
+	Task<Result<BackupInspection, BackupError>> Inspect(
+		BackupSourceRef source,
 		string? recoveryKey,
 		CancellationToken cancellationToken = default);
 
-	Task<Result<BackupDescriptor, BackupError>> Import(BackupSourceRef source,
+	Task<Result<BackupDescriptor, BackupError>> Import(
+		BackupSourceRef source,
 		CancellationToken cancellationToken = default);
 
-	Task<Result<BackupExportHandle, BackupError>> OpenExport(Guid backupId,
+	Task<Result<BackupExportHandle, BackupError>> OpenExport(
+		Guid backupId,
 		CancellationToken cancellationToken = default);
 
 	Task<Result<BackupError>> Delete(Guid backupId, CancellationToken cancellationToken = default);

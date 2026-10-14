@@ -70,7 +70,8 @@ internal sealed class HomeAssistantControlsTests
 
 		var children = await provider.DiscoverAsync(new VariableCatalogQuery { ParentId = "entity/light.plug" });
 
-		Assert.That(children.Items.Select(item => item.DisplayName.Literal), Is.EquivalentTo(["state", "supported_color_modes", "attributes"]));
+		Assert.That(children.Items.Select(item => item.DisplayName.Literal),
+			Is.EquivalentTo(["state", "supported_color_modes", "attributes"]));
 	}
 
 	[Test]
@@ -220,23 +221,83 @@ internal sealed class HomeAssistantControlsTests
 	[TestCase(ThreeSpeedFan, "fan.ceiling", "percentage", 100d, "fan", "set_percentage", "percentage", 100d)]
 	[TestCase(TargetHelper, "input_number.target", "state", 55.5, "input_number", "set_value", "value", 55.5)]
 	[TestCase("""{ "entity_id": "number.gain", "state": "3", "attributes": { "min": 0, "max": 10, "step": 1 } }""",
-		"number.gain", "state", 7d, "number", "set_value", "value", 7d)]
-	[TestCase("""{ "entity_id": "cover.blind", "state": "open", "attributes": { "current_position": 70, "current_tilt_position": 50 } }""",
-		"cover.blind", "current_position", 30d, "cover", "set_cover_position", "position", 30d)]
-	[TestCase("""{ "entity_id": "cover.blind", "state": "open", "attributes": { "current_position": 70, "current_tilt_position": 50 } }""",
-		"cover.blind", "current_tilt_position", 20d, "cover", "set_cover_tilt_position", "tilt_position", 20d)]
+		"number.gain",
+		"state",
+		7d,
+		"number",
+		"set_value",
+		"value",
+		7d)]
+	[TestCase(
+		"""{ "entity_id": "cover.blind", "state": "open", "attributes": { "current_position": 70, "current_tilt_position": 50 } }""",
+		"cover.blind",
+		"current_position",
+		30d,
+		"cover",
+		"set_cover_position",
+		"position",
+		30d)]
+	[TestCase(
+		"""{ "entity_id": "cover.blind", "state": "open", "attributes": { "current_position": 70, "current_tilt_position": 50 } }""",
+		"cover.blind",
+		"current_tilt_position",
+		20d,
+		"cover",
+		"set_cover_tilt_position",
+		"tilt_position",
+		20d)]
 	[TestCase("""{ "entity_id": "valve.garden", "state": "open", "attributes": { "current_position": 100 } }""",
-		"valve.garden", "current_position", 25d, "valve", "set_valve_position", "position", 25d)]
+		"valve.garden",
+		"current_position",
+		25d,
+		"valve",
+		"set_valve_position",
+		"position",
+		25d)]
 	[TestCase("""{ "entity_id": "media_player.tv", "state": "playing", "attributes": { "volume_level": 0.35 } }""",
-		"media_player.tv", "volume_level", 0.5, "media_player", "volume_set", "volume_level", 0.5)]
-	[TestCase("""{ "entity_id": "climate.living", "state": "heat", "attributes": { "temperature": 21.0, "min_temp": 7, "max_temp": 35, "target_temp_step": 0.5, "humidity": 40 } }""",
-		"climate.living", "temperature", 22.5, "climate", "set_temperature", "temperature", 22.5)]
-	[TestCase("""{ "entity_id": "climate.living", "state": "heat", "attributes": { "temperature": 21.0, "min_temp": 7, "max_temp": 35, "target_temp_step": 0.5, "humidity": 40 } }""",
-		"climate.living", "humidity", 45d, "climate", "set_humidity", "humidity", 45d)]
-	[TestCase("""{ "entity_id": "water_heater.boiler", "state": "eco", "attributes": { "temperature": 50, "min_temp": 30, "max_temp": 70 } }""",
-		"water_heater.boiler", "temperature", 55d, "water_heater", "set_temperature", "temperature", 55d)]
-	[TestCase("""{ "entity_id": "humidifier.bedroom", "state": "on", "attributes": { "humidity": 40, "min_humidity": 30, "max_humidity": 80 } }""",
-		"humidifier.bedroom", "humidity", 60d, "humidifier", "set_humidity", "humidity", 60d)]
+		"media_player.tv",
+		"volume_level",
+		0.5,
+		"media_player",
+		"volume_set",
+		"volume_level",
+		0.5)]
+	[TestCase(
+		"""{ "entity_id": "climate.living", "state": "heat", "attributes": { "temperature": 21.0, "min_temp": 7, "max_temp": 35, "target_temp_step": 0.5, "humidity": 40 } }""",
+		"climate.living",
+		"temperature",
+		22.5,
+		"climate",
+		"set_temperature",
+		"temperature",
+		22.5)]
+	[TestCase(
+		"""{ "entity_id": "climate.living", "state": "heat", "attributes": { "temperature": 21.0, "min_temp": 7, "max_temp": 35, "target_temp_step": 0.5, "humidity": 40 } }""",
+		"climate.living",
+		"humidity",
+		45d,
+		"climate",
+		"set_humidity",
+		"humidity",
+		45d)]
+	[TestCase(
+		"""{ "entity_id": "water_heater.boiler", "state": "eco", "attributes": { "temperature": 50, "min_temp": 30, "max_temp": 70 } }""",
+		"water_heater.boiler",
+		"temperature",
+		55d,
+		"water_heater",
+		"set_temperature",
+		"temperature",
+		55d)]
+	[TestCase(
+		"""{ "entity_id": "humidifier.bedroom", "state": "on", "attributes": { "humidity": 40, "min_humidity": 30, "max_humidity": 80 } }""",
+		"humidifier.bedroom",
+		"humidity",
+		60d,
+		"humidifier",
+		"set_humidity",
+		"humidity",
+		60d)]
 	public async Task Moving_a_control_calls_the_service_home_assistant_adjusts_it_with(
 		string entity,
 		string entityId,
@@ -319,10 +380,13 @@ internal sealed class HomeAssistantControlsTests
 		Assert.That(Data(home.LastCall())?["value"], Is.EqualTo(90));
 	}
 
-	[TestCase("""{ "entity_id": "media_player.tv", "state": "off", "attributes": { } }""", "media_player.tv/volume_level")]
-	[TestCase("""{ "entity_id": "input_number.target", "state": "unavailable", "attributes": { "min": 10.0, "max": 90.0 } }""",
+	[TestCase("""{ "entity_id": "media_player.tv", "state": "off", "attributes": { } }""",
+		"media_player.tv/volume_level")]
+	[TestCase(
+		"""{ "entity_id": "input_number.target", "state": "unavailable", "attributes": { "min": 10.0, "max": 90.0 } }""",
 		"input_number.target/state")]
-	[TestCase("""{ "entity_id": "light.desk", "state": "unavailable", "attributes": { "supported_color_modes": ["brightness"] } }""",
+	[TestCase(
+		"""{ "entity_id": "light.desk", "state": "unavailable", "attributes": { "supported_color_modes": ["brightness"] } }""",
 		"light.desk/brightness_pct")]
 	public async Task A_control_with_no_value_right_now_refuses_and_sends_nothing(string entity, string resource)
 	{
@@ -391,10 +455,14 @@ internal sealed class HomeAssistantControlsTests
 	}
 
 	private static IReadOnlyDictionary<string, object?>? Data(IReadOnlyDictionary<string, object?>? call)
-		=> call?["service_data"] as IReadOnlyDictionary<string, object?>;
+	{
+		return call?["service_data"] as IReadOnlyDictionary<string, object?>;
+	}
 
 	private static IReadOnlyDictionary<string, object?>? Target(IReadOnlyDictionary<string, object?>? call)
-		=> call?["target"] as IReadOnlyDictionary<string, object?>;
+	{
+		return call?["target"] as IReadOnlyDictionary<string, object?>;
+	}
 
 	private static HomeAssistantVariableCatalog CatalogOf(params string[] entities)
 	{
@@ -447,7 +515,10 @@ internal sealed class HomeAssistantControlsTests
 		FakeHomeAssistantClient Client,
 		HomeAssistantVariableCatalog Provider) : IAsyncDisposable
 	{
-		public IReadOnlyDictionary<string, object?>? LastCall() => Client.PayloadOf("call_service");
+		public IReadOnlyDictionary<string, object?>? LastCall()
+		{
+			return Client.PayloadOf("call_service");
+		}
 
 		public ValueTask DisposeAsync()
 		{
@@ -460,12 +531,17 @@ internal sealed class HomeAssistantControlsTests
 	{
 		public List<VariableValue> Values { get; } = [];
 
-		public Task PublishAsync(IReadOnlyCollection<VariableValue> values, CancellationToken cancellationToken = default)
+		public Task PublishAsync(
+			IReadOnlyCollection<VariableValue> values,
+			CancellationToken cancellationToken = default)
 		{
 			Values.AddRange(values);
 			return Task.CompletedTask;
 		}
 
-		public Task InvalidateCatalogAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task InvalidateCatalogAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

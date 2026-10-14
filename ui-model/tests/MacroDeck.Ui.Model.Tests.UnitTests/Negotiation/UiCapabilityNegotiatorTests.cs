@@ -12,16 +12,19 @@ namespace MacroDeck.Ui.Model.Tests.UnitTests.Negotiation;
 [TestFixture]
 public class UiCapabilityNegotiatorTests
 {
-	private static UiCapabilities Capabilities(int minimum,
+	private static UiCapabilities Capabilities(
+		int minimum,
 		int maximum,
 		bool supportsAll = false,
 		IReadOnlyDictionary<string, UiVersionRange>? components = null)
-		=> new()
+	{
+		return new UiCapabilities
 		{
 			UiProtocol = new UiVersionRange { Minimum = minimum, Maximum = maximum },
 			SupportsAllComponents = supportsAll,
-			Components = components ?? new Dictionary<string, UiVersionRange>(),
+			Components = components ?? new Dictionary<string, UiVersionRange>()
 		};
+	}
 
 	[Test]
 	public void Model_negotiation_accepts_a_renderer_at_the_current_version()
@@ -79,7 +82,7 @@ public class UiCapabilityNegotiatorTests
 	public void Component_negotiation_supports_everything_when_the_renderer_says_so()
 	{
 		var node = new UiNode { Id = "n", Type = "vendor.chart", RequiredComponentVersion = 9 };
-		var capabilities = Capabilities(1, 1, supportsAll: true);
+		var capabilities = Capabilities(1, 1, true);
 
 		var result = UiCapabilityNegotiator.NegotiateComponent(node, capabilities);
 
@@ -137,7 +140,7 @@ public class UiCapabilityNegotiatorTests
 	public void An_unlisted_component_degrades_rather_than_throwing()
 	{
 		var node = new UiNode { Id = "n", Type = "mystery" };
-		var capabilities = Capabilities(1, 1, supportsAll: false);
+		var capabilities = Capabilities(1, 1, false);
 
 		UiNegotiationResult? result = null;
 		Assert.DoesNotThrow(() => result = UiCapabilityNegotiator.NegotiateComponent(node, capabilities));
@@ -205,15 +208,15 @@ public class UiCapabilityNegotiatorTests
 			UiCapabilityNegotiator.NegotiateModelVersion(Capabilities(0, 0)),
 			UiCapabilityNegotiator.NegotiateModelVersion(Capabilities(-3, -1)),
 			UiCapabilityNegotiator.NegotiateModelVersion(Capabilities(2, 5)),
-			UiCapabilityNegotiator.NegotiateComponent(node, Capabilities(1, 1, supportsAll: true)),
+			UiCapabilityNegotiator.NegotiateComponent(node, Capabilities(1, 1, true)),
 			UiCapabilityNegotiator.NegotiateComponent(node,
 				Capabilities(1,
 					1,
 					components: new Dictionary<string, UiVersionRange>
 					{
-						["chart"] = new() { Minimum = 1, Maximum = 3 },
+						["chart"] = new() { Minimum = 1, Maximum = 3 }
 					})),
-			UiCapabilityNegotiator.NegotiateComponent(node, Capabilities(1, 1)),
+			UiCapabilityNegotiator.NegotiateComponent(node, Capabilities(1, 1))
 		};
 
 		Assert.Multiple(() =>

@@ -20,10 +20,16 @@ internal sealed class PluginManifestSchemaTests
 	private JsonDocument _schema = null!;
 
 	[SetUp]
-	public void SetUp() => _schema = JsonDocument.Parse(File.ReadAllText(SchemaPath()));
+	public void SetUp()
+	{
+		_schema = JsonDocument.Parse(File.ReadAllText(SchemaPath()));
+	}
 
 	[TearDown]
-	public void TearDown() => _schema.Dispose();
+	public void TearDown()
+	{
+		_schema.Dispose();
+	}
 
 	private static string SchemaPath()
 	{
@@ -49,17 +55,23 @@ internal sealed class PluginManifestSchemaTests
 
 	/// <summary>Mirrors the camelCase naming policy the host serializes on-disk JSON with.</summary>
 	private static string CamelCase(string name)
-		=> JsonNamingPolicy.CamelCase.ConvertName(name);
+	{
+		return JsonNamingPolicy.CamelCase.ConvertName(name);
+	}
 
 	private static IEnumerable<string> SerializedPropertyNames(Type type)
-		=> type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+	{
+		return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
 			.Select(property => CamelCase(property.Name));
+	}
 
 	private static IEnumerable<string> RequiredPropertyNames(Type type)
-		=> type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+	{
+		return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
 			.Where(property => property.GetCustomAttributes()
 				.Any(attribute => attribute.GetType().Name == "RequiredMemberAttribute"))
 			.Select(property => CamelCase(property.Name));
+	}
 
 	private JsonElement Definition(string name)
 	{
@@ -120,7 +132,8 @@ internal sealed class PluginManifestSchemaTests
 	[Test]
 	public void Only_the_pre_existing_fields_are_required()
 	{
-		Assert.That(_schema.RootElement.GetProperty("required").EnumerateArray()
+		Assert.That(_schema.RootElement.GetProperty("required")
+				.EnumerateArray()
 				.Select(element => element.GetString()),
 			Is.EquivalentTo(_expectedRequired));
 	}
@@ -128,7 +141,8 @@ internal sealed class PluginManifestSchemaTests
 	[Test]
 	public void The_manifests_required_set_matches_the_models_required_members()
 	{
-		var schemaRequired = _schema.RootElement.GetProperty("required").EnumerateArray()
+		var schemaRequired = _schema.RootElement.GetProperty("required")
+			.EnumerateArray()
 			.Select(element => element.GetString()!)
 			.Order(StringComparer.Ordinal);
 
@@ -143,7 +157,8 @@ internal sealed class PluginManifestSchemaTests
 	[TestCase("bundledIconPack", typeof(PluginBundledIconPack))]
 	[TestCase("fileDigest", typeof(PluginFileDigest))]
 	[TestCase("signature", typeof(PluginSignature))]
-	public void Each_nested_objects_required_set_matches_its_models_required_members(string definitionName,
+	public void Each_nested_objects_required_set_matches_its_models_required_members(
+		string definitionName,
 		Type type)
 	{
 		var definition = Definition(definitionName);
@@ -159,8 +174,12 @@ internal sealed class PluginManifestSchemaTests
 	[Test]
 	public void The_runtime_kind_enum_lists_exactly_the_model_members()
 	{
-		var kinds = Definition("entrypointRuntime").GetProperty("properties").GetProperty("kind")
-			.GetProperty("enum").EnumerateArray().Select(element => element.GetString());
+		var kinds = Definition("entrypointRuntime")
+			.GetProperty("properties")
+			.GetProperty("kind")
+			.GetProperty("enum")
+			.EnumerateArray()
+			.Select(element => element.GetString());
 
 		Assert.That(kinds, Is.EquivalentTo(Enum.GetNames<PluginEntrypointRuntimeKind>()));
 	}
@@ -182,8 +201,10 @@ internal sealed class PluginManifestSchemaTests
 	[Test]
 	public void The_manifest_version_is_pinned_to_the_one_the_reader_supports()
 	{
-		Assert.That(_schema.RootElement.GetProperty("properties").GetProperty("manifestVersion")
-				.GetProperty("const").GetInt32(),
+		Assert.That(_schema.RootElement.GetProperty("properties")
+				.GetProperty("manifestVersion")
+				.GetProperty("const")
+				.GetInt32(),
 			Is.EqualTo(PluginManifest.SupportedManifestVersion));
 	}
 
@@ -207,8 +228,7 @@ internal sealed class PluginManifestSchemaTests
 			{
 				foreach (var property in element.EnumerateObject())
 				{
-					if (property.NameEquals("additionalProperties") &&
-						property.Value.ValueKind == JsonValueKind.False)
+					if (property.NameEquals("additionalProperties") && property.Value.ValueKind == JsonValueKind.False)
 					{
 						offenders.Add(path);
 					}

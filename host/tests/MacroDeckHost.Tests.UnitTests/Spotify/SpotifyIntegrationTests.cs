@@ -42,13 +42,14 @@ public class SpotifyIntegrationTests
 		var before = transport.RequestCount;
 		var action = integration.Actions.Single(candidate => candidate.Id == "refresh-state");
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				[MusicPlayerActions.InstanceParameterName] = _entryId.ToString()
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					[MusicPlayerActions.InstanceParameterName] = _entryId.ToString()
+				}
+			});
 
 		await WaitForRequestCountAsync(transport, before + 1);
 		Assert.Multiple(() =>
@@ -73,9 +74,10 @@ public class SpotifyIntegrationTests
 			Assert.That(integration.Variables.Select(variable => variable.Name),
 				Does.Not.Contain("spotify_local_playback_active"));
 			Assert.That(spotifyTypes,
-				Has.None.Matches<string>(name => name is not null &&
-					(name.Contains("LocalPlayback", StringComparison.Ordinal) ||
-						name.Contains("WindowsMediaControl", StringComparison.Ordinal))));
+				Has.None.Matches<string>(name
+					=> name is not null
+					&& (name.Contains("LocalPlayback", StringComparison.Ordinal)
+						|| name.Contains("WindowsMediaControl", StringComparison.Ordinal))));
 		});
 	}
 
@@ -233,7 +235,9 @@ public class SpotifyIntegrationTests
 	}
 
 	private static SpotifyIntegration NewIntegration()
-		=> new(new FakeSpotifyOAuthClient(), new IdleTransport());
+	{
+		return new SpotifyIntegration(new FakeSpotifyOAuthClient(), new IdleTransport());
+	}
 
 	private static async Task WaitForPublishedEpisodeAsync(SpotifyIntegration integration)
 	{
@@ -296,8 +300,8 @@ public class SpotifyIntegrationTests
 
 		public Task<IResponse> DoRequest(IRequest request, CancellationToken cancel)
 		{
-			var asksForEpisodes = request.Parameters.TryGetValue("additional_types", out var types) &&
-				types.Contains("episode", StringComparison.Ordinal);
+			var asksForEpisodes = request.Parameters.TryGetValue("additional_types", out var types)
+				&& types.Contains("episode", StringComparison.Ordinal);
 
 			return Task.FromResult<IResponse>(new Response(new Dictionary<string, string>())
 			{
@@ -324,9 +328,9 @@ public class SpotifyIntegrationTests
 
 		public Task<IResponse> DoRequest(IRequest request, CancellationToken cancel)
 		{
-			if (request.Method == HttpMethod.Get &&
-				request.Endpoint.ToString().Contains("me/player", StringComparison.Ordinal) &&
-				!request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal))
+			if (request.Method == HttpMethod.Get
+				&& request.Endpoint.ToString().Contains("me/player", StringComparison.Ordinal)
+				&& !request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal))
 			{
 				Interlocked.Increment(ref _requestCount);
 			}

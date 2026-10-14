@@ -22,7 +22,7 @@ internal sealed class BatteryVariablePublisherTests
 	private const string PhoneId = $"{Adb}:3fa9c2d1e0b4a756";
 	private const string HeadsetId = $"{Plugin}:hs-1";
 
-	private static readonly string[] Suffixes =
+	private static readonly string[] _suffixes =
 		["level", "charging", "connected", "state", "time_remaining_minutes", "time_to_full_minutes", "health"];
 
 	private VariableCatalogHarness _variables = null!;
@@ -51,13 +51,22 @@ internal sealed class BatteryVariablePublisherTests
 	}
 
 	private static string Hash(string qualifiedId)
-		=> Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(qualifiedId)))[..8];
+	{
+		return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(qualifiedId)))[..8];
+	}
 
-	private static string PhoneVariable(string suffix) => $"battery_pixel_8_{Hash(PhoneId)}_{suffix}";
+	private static string PhoneVariable(string suffix)
+	{
+		return $"battery_pixel_8_{Hash(PhoneId)}_{suffix}";
+	}
 
-	private static string HeadsetVariable(string suffix) => $"battery_headset_{Hash(HeadsetId)}_{suffix}";
+	private static string HeadsetVariable(string suffix)
+	{
+		return $"battery_headset_{Hash(HeadsetId)}_{suffix}";
+	}
 
-	private static BatteryDevice Device(string qualifiedId,
+	private static BatteryDevice Device(
+		string qualifiedId,
 		string name,
 		int? level,
 		BatteryChargeState chargeState = BatteryChargeState.Discharging,
@@ -65,7 +74,8 @@ internal sealed class BatteryVariablePublisherTests
 		TimeSpan? timeRemaining = null,
 		TimeSpan? timeToFull = null,
 		BatteryHealth health = BatteryHealth.Unknown)
-		=> new()
+	{
+		return new BatteryDevice
 		{
 			Id = qualifiedId[(qualifiedId.IndexOf(':') + 1)..],
 			Name = name,
@@ -77,18 +87,31 @@ internal sealed class BatteryVariablePublisherTests
 			TimeToFull = timeToFull,
 			Health = health
 		};
+	}
 
 	private VariableEntity? Variable(string name)
-		=> _variables.Registry.FindByName(VariableScope.Global, null, name);
+	{
+		return _variables.Registry.FindByName(VariableScope.Global, null, name);
+	}
 
 	private object? ValueOf(string name)
-		=> Variable(name) is { } variable ? VariableValueSerializer.Deserialize(variable.Type, variable.Value) : null;
+	{
+		return Variable(name) is { } variable
+			? VariableValueSerializer.Deserialize(variable.Type, variable.Value)
+			: null;
+	}
 
 	private Dictionary<string, object?> ValuesOf(Func<string, string> nameOf)
-		=> Suffixes.ToDictionary(suffix => suffix, suffix => ValueOf(nameOf(suffix)));
+	{
+		return _suffixes.ToDictionary(suffix => suffix, suffix => ValueOf(nameOf(suffix)));
+	}
 
 	private List<VariableEntity> BatteryVariables()
-		=> _variables.Registry.GetAll().Where(variable => variable.Name.StartsWith("battery_", StringComparison.Ordinal)).ToList();
+	{
+		return _variables.Registry.GetAll()
+			.Where(variable => variable.Name.StartsWith("battery_", StringComparison.Ordinal))
+			.ToList();
+	}
 
 	private static async Task WaitUntil(Func<bool> condition)
 	{
@@ -128,33 +151,35 @@ internal sealed class BatteryVariablePublisherTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(ValuesOf(PhoneVariable), Is.EquivalentTo(new Dictionary<string, object?>
-			{
-				["level"] = 81m,
-				["charging"] = true,
-				["connected"] = true,
-				["state"] = "charging",
-				["time_remaining_minutes"] = 0m,
-				["time_to_full_minutes"] = 43m,
-				["health"] = "good"
-			}));
-			Assert.That(ValuesOf(HeadsetVariable), Is.EquivalentTo(new Dictionary<string, object?>
-			{
-				["level"] = 30m,
-				["charging"] = false,
-				["connected"] = true,
-				["state"] = "discharging",
-				["time_remaining_minutes"] = 91m,
-				["time_to_full_minutes"] = 0m,
-				["health"] = "overheat"
-			}));
-			Assert.That(Suffixes.Select(suffix => Variable(PhoneVariable(suffix))!.OwnerIntegrationId),
+			Assert.That(ValuesOf(PhoneVariable),
+				Is.EquivalentTo(new Dictionary<string, object?>
+				{
+					["level"] = 81m,
+					["charging"] = true,
+					["connected"] = true,
+					["state"] = "charging",
+					["time_remaining_minutes"] = 0m,
+					["time_to_full_minutes"] = 43m,
+					["health"] = "good"
+				}));
+			Assert.That(ValuesOf(HeadsetVariable),
+				Is.EquivalentTo(new Dictionary<string, object?>
+				{
+					["level"] = 30m,
+					["charging"] = false,
+					["connected"] = true,
+					["state"] = "discharging",
+					["time_remaining_minutes"] = 91m,
+					["time_to_full_minutes"] = 0m,
+					["health"] = "overheat"
+				}));
+			Assert.That(_suffixes.Select(suffix => Variable(PhoneVariable(suffix))!.OwnerIntegrationId),
 				Is.All.EqualTo(Adb));
-			Assert.That(Suffixes.Select(suffix => Variable(HeadsetVariable(suffix))!.OwnerIntegrationId),
+			Assert.That(_suffixes.Select(suffix => Variable(HeadsetVariable(suffix))!.OwnerIntegrationId),
 				Is.All.EqualTo(Plugin));
 			Assert.That(_variables.Registry.GetByOwnerIntegration("app.macro-deck.batteries"), Is.Empty);
-			Assert.That(Suffixes.Select(suffix => Variable(PhoneVariable(suffix))!.PublishedByHost), Is.All.True);
-			Assert.That(Suffixes.ToDictionary(suffix => suffix, suffix => Variable(PhoneVariable(suffix))!.Type),
+			Assert.That(_suffixes.Select(suffix => Variable(PhoneVariable(suffix))!.PublishedByHost), Is.All.True);
+			Assert.That(_suffixes.ToDictionary(suffix => suffix, suffix => Variable(PhoneVariable(suffix))!.Type),
 				Is.EquivalentTo(new Dictionary<string, VariableType>
 				{
 					["level"] = VariableType.Numeric,
@@ -166,9 +191,9 @@ internal sealed class BatteryVariablePublisherTests
 					["health"] = VariableType.Text
 				}));
 			Assert.That(Variable(PhoneVariable("level"))!.Presentation?.DisplayName,
-				Is.EqualTo((LocalizedText)AppStrings.Integrations.Batteries.Variables.Level(device: "Pixel 8")));
+				Is.EqualTo((LocalizedText)AppStrings.Integrations.Batteries.Variables.Level("Pixel 8")));
 			Assert.That(Variable(HeadsetVariable("health"))!.Presentation?.DisplayName,
-				Is.EqualTo((LocalizedText)AppStrings.Integrations.Batteries.Variables.Health(device: "Headset")));
+				Is.EqualTo((LocalizedText)AppStrings.Integrations.Batteries.Variables.Health("Headset")));
 		});
 	}
 
@@ -213,7 +238,9 @@ internal sealed class BatteryVariablePublisherTests
 	[Test]
 	public async Task A_device_reported_as_not_connected_reads_disconnected_with_no_times()
 	{
-		_batteries.Publish(Adb, null, [Device(PhoneId, "Pixel 8", 81, BatteryChargeState.Charging, health: BatteryHealth.Good)]);
+		_batteries.Publish(Adb,
+			null,
+			[Device(PhoneId, "Pixel 8", 81, BatteryChargeState.Charging, health: BatteryHealth.Good)]);
 		await WaitUntil(() => BatteryVariables().Count == 7);
 
 		_batteries.Publish(Adb,
@@ -223,23 +250,24 @@ internal sealed class BatteryVariablePublisherTests
 					"Pixel 8",
 					64,
 					BatteryChargeState.Charging,
-					connected: false,
-					timeRemaining: TimeSpan.FromMinutes(10),
-					timeToFull: TimeSpan.FromMinutes(30),
-					health: BatteryHealth.Good)
+					false,
+					TimeSpan.FromMinutes(10),
+					TimeSpan.FromMinutes(30),
+					BatteryHealth.Good)
 			]);
 
 		await WaitUntil(() => Equals(ValueOf(PhoneVariable("connected")), false));
-		Assert.That(ValuesOf(PhoneVariable), Is.EquivalentTo(new Dictionary<string, object?>
-		{
-			["level"] = 64m,
-			["charging"] = false,
-			["connected"] = false,
-			["state"] = "disconnected",
-			["time_remaining_minutes"] = 0m,
-			["time_to_full_minutes"] = 0m,
-			["health"] = "good"
-		}));
+		Assert.That(ValuesOf(PhoneVariable),
+			Is.EquivalentTo(new Dictionary<string, object?>
+			{
+				["level"] = 64m,
+				["charging"] = false,
+				["connected"] = false,
+				["state"] = "disconnected",
+				["time_remaining_minutes"] = 0m,
+				["time_to_full_minutes"] = 0m,
+				["health"] = "good"
+			}));
 	}
 
 	[Test]
@@ -255,7 +283,9 @@ internal sealed class BatteryVariablePublisherTests
 					timeToFull: TimeSpan.FromMinutes(20),
 					health: BatteryHealth.Good)
 			]);
-		_batteries.Publish(Plugin, "session-1", [Device(HeadsetId, "Headset", 30, timeRemaining: TimeSpan.FromMinutes(120))]);
+		_batteries.Publish(Plugin,
+			"session-1",
+			[Device(HeadsetId, "Headset", 30, timeRemaining: TimeSpan.FromMinutes(120))]);
 		await WaitUntil(() => BatteryVariables().Count == 14);
 
 		_batteries.RemoveAll(Adb);
@@ -264,16 +294,17 @@ internal sealed class BatteryVariablePublisherTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(BatteryVariables(), Has.Count.EqualTo(14));
-			Assert.That(ValuesOf(PhoneVariable), Is.EquivalentTo(new Dictionary<string, object?>
-			{
-				["level"] = 81m,
-				["charging"] = false,
-				["connected"] = false,
-				["state"] = "disconnected",
-				["time_remaining_minutes"] = 0m,
-				["time_to_full_minutes"] = 0m,
-				["health"] = "good"
-			}));
+			Assert.That(ValuesOf(PhoneVariable),
+				Is.EquivalentTo(new Dictionary<string, object?>
+				{
+					["level"] = 81m,
+					["charging"] = false,
+					["connected"] = false,
+					["state"] = "disconnected",
+					["time_remaining_minutes"] = 0m,
+					["time_to_full_minutes"] = 0m,
+					["health"] = "good"
+				}));
 			Assert.That(ValueOf(HeadsetVariable("time_remaining_minutes")), Is.EqualTo(120m));
 		});
 	}
@@ -304,7 +335,8 @@ internal sealed class BatteryVariablePublisherTests
 		_batteries.Remove(Adb, [PhoneId[(Adb.Length + 1)..]]);
 
 		await WaitUntil(() => BatteryVariables().Count == 7);
-		Assert.That(BatteryVariables().Select(variable => variable.Name), Is.EquivalentTo(Suffixes.Select(HeadsetVariable)));
+		Assert.That(BatteryVariables().Select(variable => variable.Name),
+			Is.EquivalentTo(_suffixes.Select(HeadsetVariable)));
 	}
 
 	[Test]
@@ -316,7 +348,8 @@ internal sealed class BatteryVariablePublisherTests
 		_batteries.Publish(Adb, null, [Device(PhoneId, "Work phone", 70)]);
 
 		await WaitUntil(() => Equals(ValueOf(PhoneVariable("level")), 70m));
-		Assert.That(BatteryVariables().Select(variable => variable.Name), Is.EquivalentTo(Suffixes.Select(PhoneVariable)));
+		Assert.That(BatteryVariables().Select(variable => variable.Name),
+			Is.EquivalentTo(_suffixes.Select(PhoneVariable)));
 	}
 
 	[Test]
@@ -325,16 +358,17 @@ internal sealed class BatteryVariablePublisherTests
 		_batteries.Publish(Adb, null, [Device(PhoneId, "Pixel 8", null, BatteryChargeState.Unknown)]);
 
 		await WaitUntil(() => BatteryVariables().Count == 7);
-		Assert.That(ValuesOf(PhoneVariable), Is.EquivalentTo(new Dictionary<string, object?>
-		{
-			["level"] = 0m,
-			["charging"] = false,
-			["connected"] = true,
-			["state"] = "unknown",
-			["time_remaining_minutes"] = 0m,
-			["time_to_full_minutes"] = 0m,
-			["health"] = "unknown"
-		}));
+		Assert.That(ValuesOf(PhoneVariable),
+			Is.EquivalentTo(new Dictionary<string, object?>
+			{
+				["level"] = 0m,
+				["charging"] = false,
+				["connected"] = true,
+				["state"] = "unknown",
+				["time_remaining_minutes"] = 0m,
+				["time_to_full_minutes"] = 0m,
+				["health"] = "unknown"
+			}));
 	}
 
 	[Test]

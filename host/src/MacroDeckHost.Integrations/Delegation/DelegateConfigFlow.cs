@@ -38,15 +38,18 @@ public sealed class DelegateConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			ConnectionStepId => SubmitConnection(input, cancellationToken),
 			_ => Task.FromResult(ConfigFlowResult.Error(ConnectionStep(),
 				AppStrings.Integrations.Delegation.Config.UnknownStepError()))
 		};
+	}
 
 	private static ConfigFlowStep ConnectionStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = ConnectionStepId,
 			Title = AppStrings.Integrations.Delegation.Config.ConnectionTitle(),
@@ -56,25 +59,25 @@ public sealed class DelegateConfigFlow : IConfigFlow
 				// Plain http by default: the listener this talks to is typically reached over a LAN, not
 				// the public internet, so the field must not silently rewrite a bare address to https.
 				ActionParameter.Url(DelegateConfigKeys.BaseUrl,
-					label: AppStrings.Integrations.Delegation.Config.AddressLabel(),
-					description: AppStrings.Integrations.Delegation.Config.AddressDescription(
-						example: DelegateEndpoint.ExampleUrl),
-					placeholder: DelegateEndpoint.ExampleUrl,
-					required: true,
-					autoPrefixHttps: false),
+					AppStrings.Integrations.Delegation.Config.AddressLabel(),
+					AppStrings.Integrations.Delegation.Config.AddressDescription(DelegateEndpoint.ExampleUrl),
+					DelegateEndpoint.ExampleUrl,
+					true,
+					false),
 				ActionParameter.Text(DelegateConfigKeys.Username,
-					label: AppStrings.Integrations.Delegation.Config.UsernameLabel(),
-					description: AppStrings.Integrations.Delegation.Config.UsernameDescription(),
+					AppStrings.Integrations.Delegation.Config.UsernameLabel(),
+					AppStrings.Integrations.Delegation.Config.UsernameDescription(),
 					required: true),
 				ActionParameter.Secret(DelegateConfigKeys.Password,
-					label: AppStrings.Integrations.Delegation.Config.PasswordLabel(),
-					description: AppStrings.Integrations.Delegation.Config.PasswordDescription(),
-					required: true),
+					AppStrings.Integrations.Delegation.Config.PasswordLabel(),
+					AppStrings.Integrations.Delegation.Config.PasswordDescription(),
+					true),
 				ActionParameter.Toggle(DelegateConfigKeys.ImportSharedVariables,
-					label: AppStrings.Integrations.Delegation.Config.ImportSharedVariablesLabel(),
-					description: AppStrings.Integrations.Delegation.Config.ImportSharedVariablesDescription())
+					AppStrings.Integrations.Delegation.Config.ImportSharedVariablesLabel(),
+					AppStrings.Integrations.Delegation.Config.ImportSharedVariablesDescription())
 			]
 		};
+	}
 
 	private async Task<ConfigFlowResult> SubmitConnection(
 		IReadOnlyDictionary<string, object?> input,
@@ -89,7 +92,7 @@ public sealed class DelegateConfigFlow : IConfigFlow
 		if (uri is null)
 		{
 			fieldErrors[DelegateConfigKeys.BaseUrl] =
-				AppStrings.Integrations.Delegation.Config.AddressRequired(example: DelegateEndpoint.ExampleUrl);
+				AppStrings.Integrations.Delegation.Config.AddressRequired(DelegateEndpoint.ExampleUrl);
 		}
 
 		if (username.Length == 0)
@@ -117,7 +120,7 @@ public sealed class DelegateConfigFlow : IConfigFlow
 		{
 			return ConfigFlowResult.Error(ConnectionStep(),
 				fieldErrors: FieldError(DelegateConfigKeys.BaseUrl,
-					AppStrings.Integrations.Delegation.Config.CertificateNotValidated(host: uri.Host)));
+					AppStrings.Integrations.Delegation.Config.CertificateNotValidated(uri.Host)));
 		}
 		catch (DelegateNotMacroDeckException)
 		{
@@ -233,8 +236,8 @@ public sealed class DelegateConfigFlow : IConfigFlow
 					await _config.GetStringAsync(entry.Id, DelegateConfigKeys.ConfiguredAt, cancellationToken);
 
 				var machineMatches = string.Equals(storedMachineName, machineName, StringComparison.Ordinal);
-				var addressMatches = DelegateEndpoint.TryBuild(storedBaseUrl) is { } storedUri &&
-					string.Equals(storedUri.Authority, uri.Authority, StringComparison.OrdinalIgnoreCase);
+				var addressMatches = DelegateEndpoint.TryBuild(storedBaseUrl) is { } storedUri
+					&& string.Equals(storedUri.Authority, uri.Authority, StringComparison.OrdinalIgnoreCase);
 
 				if (machineMatches || addressMatches)
 				{
@@ -255,14 +258,20 @@ public sealed class DelegateConfigFlow : IConfigFlow
 	}
 
 	private static Dictionary<string, LocalizedText> FieldError(string field, LocalizedText message)
-		=> new(StringComparer.Ordinal) { [field] = message };
+	{
+		return new Dictionary<string, LocalizedText>(StringComparer.Ordinal) { [field] = message };
+	}
 
 	private static LocalizedText Unreachable(Uri uri)
-		=> AppStrings.Integrations.Delegation.Config.Unreachable(host: uri.Host);
+	{
+		return AppStrings.Integrations.Delegation.Config.Unreachable(uri.Host);
+	}
 
 	private static LocalizedText FormatRateLimited(TimeSpan wait)
-		=> wait.TotalMinutes >= 1
-			? AppStrings.Integrations.Delegation.Config.RateLimitedMinutes(count: (int)Math.Ceiling(wait.TotalMinutes))
-			: AppStrings.Integrations.Delegation.Config.RateLimitedSeconds(count: (int)Math.Max(1,
+	{
+		return wait.TotalMinutes >= 1
+			? AppStrings.Integrations.Delegation.Config.RateLimitedMinutes((int)Math.Ceiling(wait.TotalMinutes))
+			: AppStrings.Integrations.Delegation.Config.RateLimitedSeconds((int)Math.Max(1,
 				Math.Ceiling(wait.TotalSeconds)));
+	}
 }

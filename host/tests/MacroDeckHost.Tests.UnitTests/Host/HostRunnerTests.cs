@@ -35,14 +35,19 @@ public class HostRunnerTests
 		}
 
 		public Task StartAsync(CancellationToken cancellationToken)
-			=> _onStart is null ? Task.CompletedTask : Task.FromException(_onStart);
+		{
+			return _onStart is null ? Task.CompletedTask : Task.FromException(_onStart);
+		}
 
 		public Task StopAsync(CancellationToken cancellationToken)
-			=> _onStop is null ? Task.CompletedTask : Task.FromException(_onStop);
+		{
+			return _onStop is null ? Task.CompletedTask : Task.FromException(_onStop);
+		}
 	}
 
 	private static IHost CreateHost(IApplicationRestartService restart, IHostedService? hostedService = null)
-		=> new HostBuilder()
+	{
+		return new HostBuilder()
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton(restart);
@@ -52,6 +57,7 @@ public class HostRunnerTests
 				}
 			})
 			.Build();
+	}
 
 	[Test]
 	public async Task A_restart_requested_while_running_yields_the_restart_exit_code()

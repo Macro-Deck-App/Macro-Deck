@@ -40,5 +40,7 @@ public static class KeyRingXmlNames
 	public const string KekIdAttribute = "kekId";
 
 	public static byte[] AssociatedData(string kekId)
-		=> System.Text.Encoding.UTF8.GetBytes($"{Namespace}|{Version}|{kekId}");
+	{
+		return System.Text.Encoding.UTF8.GetBytes($"{Namespace}|{Version}|{kekId}");
+	}
 }

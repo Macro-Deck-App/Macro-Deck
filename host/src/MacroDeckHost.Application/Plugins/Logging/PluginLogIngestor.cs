@@ -111,12 +111,12 @@ public sealed class PluginLogIngestor : IPluginLogIngestor
 
 		var transitioned = false;
 		_rateLimitedState.AddOrUpdate(pluginId,
-			addValueFactory: _ =>
+			_ =>
 			{
 				transitioned = isLimitedNow;
 				return isLimitedNow;
 			},
-			updateValueFactory: (_, wasLimited) =>
+			(_, wasLimited) =>
 			{
 				transitioned = isLimitedNow && !wasLimited;
 				return isLimitedNow;
@@ -131,5 +131,8 @@ public sealed class PluginLogIngestor : IPluginLogIngestor
 		};
 	}
 
-	public void Evict(string pluginId) => _rateLimitedState.TryRemove(pluginId, out _);
+	public void Evict(string pluginId)
+	{
+		_rateLimitedState.TryRemove(pluginId, out _);
+	}
 }

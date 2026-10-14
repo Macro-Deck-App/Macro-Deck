@@ -49,7 +49,11 @@ public class DeviceScreenSaverSettingsTests
 	[TestCase(int.MaxValue)]
 	public void AnIdleTimeoutOutsideTheBounds_IsRejected(int idleSeconds)
 	{
-		var result = DeviceScreenSaverSettings.Validate(TestScreenSaverProviders.Registry(), true, idleSeconds, null, null);
+		var result = DeviceScreenSaverSettings.Validate(TestScreenSaverProviders.Registry(),
+			true,
+			idleSeconds,
+			null,
+			null);
 
 		Assert.That(result.Success, Is.False);
 	}
@@ -68,7 +72,11 @@ public class DeviceScreenSaverSettingsTests
 	{
 		var configuration = $"{{\"text\":\"{new string('x', DeviceScreenSaverSettings.MaximumConfigurationLength)}\"}}";
 
-		var result = DeviceScreenSaverSettings.Validate(TestScreenSaverProviders.Registry(), true, 300, null, configuration);
+		var result = DeviceScreenSaverSettings.Validate(TestScreenSaverProviders.Registry(),
+			true,
+			300,
+			null,
+			configuration);
 
 		Assert.That(result.Success, Is.False);
 	}
@@ -81,7 +89,7 @@ public class DeviceScreenSaverSettingsTests
 			300,
 			"com.example.gone::photos",
 			null,
-			storedScreenSaverId: "com.example.gone::photos");
+			"com.example.gone::photos");
 
 		Assert.That(result.Success, Is.True);
 	}

@@ -70,10 +70,16 @@ public class AdbProcessRunnerTests
 
 		try
 		{
-			var before = await runner.RunAsync("touch", [spawnedBefore], TimeSpan.FromSeconds(5), CancellationToken.None);
+			var before = await runner.RunAsync("touch",
+				[spawnedBefore],
+				TimeSpan.FromSeconds(5),
+				CancellationToken.None);
 			sessionEnd.Mark();
 			var after = await runner.RunAsync("touch", [spawnedAfter], TimeSpan.FromSeconds(5), CancellationToken.None);
-			var binary = await runner.RunBinaryAsync("touch", [spawnedAfter], TimeSpan.FromSeconds(5), CancellationToken.None);
+			var binary = await runner.RunBinaryAsync("touch",
+				[spawnedAfter],
+				TimeSpan.FromSeconds(5),
+				CancellationToken.None);
 			var bounded = await runner.RunBoundedAsync("touch",
 				[spawnedAfter],
 				TimeSpan.FromSeconds(5),
@@ -82,7 +88,9 @@ public class AdbProcessRunnerTests
 
 			Assert.Multiple(() =>
 			{
-				Assert.That(before.Started && File.Exists(spawnedBefore), Is.True, "precondition: the runner spawns normally");
+				Assert.That(before.Started && File.Exists(spawnedBefore),
+					Is.True,
+					"precondition: the runner spawns normally");
 				Assert.That(after.Started || binary.Started || bounded.Started, Is.False);
 				Assert.That(File.Exists(spawnedAfter), Is.False, "no process may run once the session is ending");
 			});
@@ -96,7 +104,8 @@ public class AdbProcessRunnerTests
 	[Test]
 	public async Task Nothing_is_started_while_the_operating_system_reports_the_session_shutting_down()
 	{
-		using var runner = new AdbProcessRunner(new LoggerConfiguration().CreateLogger(), new UserSessionEnd(() => true));
+		using var runner
+			= new AdbProcessRunner(new LoggerConfiguration().CreateLogger(), new UserSessionEnd(() => true));
 		var spawned = Path.Combine(Path.GetTempPath(), $"macro-deck-spawn-{Guid.NewGuid():N}");
 
 		var result = await runner.RunAsync("touch", [spawned], TimeSpan.FromSeconds(5), CancellationToken.None);

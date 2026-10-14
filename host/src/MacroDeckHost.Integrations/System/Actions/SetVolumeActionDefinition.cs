@@ -25,18 +25,23 @@ internal sealed class SetVolumeActionDefinition : IDynamicOptionsActionDefinitio
 		ActionParameter.Slider("level",
 			0,
 			100,
-			label: AppStrings.Integrations.System.Actions.SetVolume.LevelLabel(),
+			AppStrings.Integrations.System.Actions.SetVolume.LevelLabel(),
 			step: 1,
 			defaultValue: 50),
 		AudioDeviceParameter.Create()
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_volume);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_volume);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
+	{
+		return AudioDeviceParameter.GetOptionsAsync(_volume, _knownName, context, cancellationToken);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -51,8 +56,10 @@ internal sealed class SetVolumeActionDefinition : IDynamicOptionsActionDefinitio
 		{
 			var level = SystemActionValues.ReadDouble(context.Parameters, "level", 50);
 			if (!AudioDeviceParameter.TryRead(context.Parameters.GetValueOrDefault(AudioDeviceParameter.Name),
-					out var target) ||
-				!await _volume.SetVolumeAsync(target, (float)(Math.Clamp(level, 0, 100) / 100), context.CancellationToken))
+					out var target)
+				|| !await _volume.SetVolumeAsync(target,
+					(float)(Math.Clamp(level, 0, 100) / 100),
+					context.CancellationToken))
 			{
 				return ActionResult.Failed(ActionErrorCodes.Unavailable,
 					AppStrings.Integrations.System.Errors.VolumeUnavailable());

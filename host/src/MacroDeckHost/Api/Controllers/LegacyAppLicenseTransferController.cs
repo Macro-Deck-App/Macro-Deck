@@ -32,14 +32,15 @@ public class LegacyAppLicenseTransferController : ControllerBase
 	[RequestSizeLimit(64 * 1024)]
 	public async Task<IActionResult> Transfer(LegacyLicenseTransferRequest body)
 	{
-		if (body.Platform != CompanionLicenseSources.AppStoreLegacy ||
-			body.LegacyKind != CompanionLicenseSources.AppTransactionKind)
+		if (body.Platform != CompanionLicenseSources.AppStoreLegacy
+			|| body.LegacyKind != CompanionLicenseSources.AppTransactionKind)
 		{
-			return Answer(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Rejected, "unsupported-source"));
+			return Answer(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Rejected,
+				"unsupported-source"));
 		}
 
-		if (body.SignedPayload is not { Length: > 0 and <= MaxSignedPayloadLength } signedPayload ||
-			BundleId(signedPayload) is not { } bundleId)
+		if (body.SignedPayload is not { Length: > 0 and <= MaxSignedPayloadLength } signedPayload
+			|| BundleId(signedPayload) is not { } bundleId)
 		{
 			return Answer(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Rejected, "invalid-proof"));
 		}
@@ -91,9 +92,9 @@ public class LegacyAppLicenseTransferController : ControllerBase
 		try
 		{
 			using var payload = JsonDocument.Parse(Base64UrlEncoder.DecodeBytes(parts[1]));
-			return payload.RootElement.ValueKind == JsonValueKind.Object &&
-				payload.RootElement.TryGetProperty("bundleId", out var bundleId) &&
-				bundleId.ValueKind == JsonValueKind.String
+			return payload.RootElement.ValueKind == JsonValueKind.Object
+				&& payload.RootElement.TryGetProperty("bundleId", out var bundleId)
+				&& bundleId.ValueKind == JsonValueKind.String
 					? bundleId.GetString()
 					: null;
 		}

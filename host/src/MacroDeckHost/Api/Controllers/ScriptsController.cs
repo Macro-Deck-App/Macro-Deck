@@ -36,15 +36,21 @@ public class ScriptsController : ControllerBase
 
 	[HttpGet]
 	public Task<GetScriptsResponse> GetAll(CancellationToken ct)
-		=> _getScripts.Handle(new GetScriptsRequest(), ct).AsTask();
+	{
+		return _getScripts.Handle(new GetScriptsRequest(), ct).AsTask();
+	}
 
 	[HttpGet("{id}/usages")]
 	public Task<GetScriptUsagesResponse> GetUsages(string id, CancellationToken ct)
-		=> _getScriptUsages.Handle(new GetScriptUsagesRequest { Id = id }, ct).AsTask();
+	{
+		return _getScriptUsages.Handle(new GetScriptUsagesRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost]
 	public Task<CreateScriptResponse> Create(CreateScriptRequest body, CancellationToken ct)
-		=> _createScript.Handle(body, ct).AsTask();
+	{
+		return _createScript.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut("{id}")]
 	public Task<UpdateScriptResponse> Update(string id, UpdateScriptRequest body, CancellationToken ct)
@@ -55,11 +61,15 @@ public class ScriptsController : ControllerBase
 
 	[HttpPost("{id}/duplicate")]
 	public Task<DuplicateScriptResponse> Duplicate(string id, CancellationToken ct)
-		=> _duplicateScript.Handle(new DuplicateScriptRequest { Id = id }, ct).AsTask();
+	{
+		return _duplicateScript.Handle(new DuplicateScriptRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpDelete("{id}")]
 	public Task<DeleteScriptResponse> Delete(string id, CancellationToken ct)
-		=> _deleteScript.Handle(new DeleteScriptRequest { Id = id }, ct).AsTask();
+	{
+		return _deleteScript.Handle(new DeleteScriptRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost("{id}/run")]
 	public Task<RunScriptResponse> Run(string id, RunScriptRequest body, CancellationToken ct)

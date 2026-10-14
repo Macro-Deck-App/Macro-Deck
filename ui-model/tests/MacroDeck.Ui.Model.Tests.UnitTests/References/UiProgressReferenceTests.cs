@@ -16,7 +16,7 @@ public class UiProgressReferenceTests
 	private static readonly DateTimeOffset _anchor = new(2026, 8, 25, 12, 0, 0, TimeSpan.Zero);
 
 	// Stated once so the assertion that uses it fits a line.
-	private const string _haltedJson =
+	private const string HaltedJson =
 		"""{"$progress":{"positionMs":42000,"durationMs":215000,"rate":0,"anchor":"2026-08-25T12:00:00.000Z"}}""";
 
 	[Test]
@@ -33,7 +33,7 @@ public class UiProgressReferenceTests
 	{
 		// Paused is a value, not an omission - a reader cannot tell "stopped" from "normal speed" otherwise.
 		Assert.That(UiCanonicalJson.Serialize(UiProgressReference.Halted(42_000, _anchor, 215_000)),
-			Is.EqualTo(_haltedJson));
+			Is.EqualTo(HaltedJson));
 	}
 
 	[Test]

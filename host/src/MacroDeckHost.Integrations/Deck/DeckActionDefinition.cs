@@ -29,7 +29,10 @@ internal sealed class DeckActionDefinition : IActionDefinition
 	public LocalizedText Description { get; }
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [DeckDeviceTarget.Parameter()];
 
-	public IActionExecutor CreateExecutor() => new Executor(_navigator, _invoke);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_navigator, _invoke);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

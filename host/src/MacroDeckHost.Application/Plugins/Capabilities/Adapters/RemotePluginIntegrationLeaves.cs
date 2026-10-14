@@ -37,7 +37,10 @@ internal sealed class RemotePluginIntegrationWithIcon(
 {
 	public string IconMimeType => Snapshot.IconMimeType;
 
-	public byte[] GetIcon() => Snapshot.IconBytes;
+	public byte[] GetIcon()
+	{
+		return Snapshot.IconBytes;
+	}
 }
 
 internal sealed class RemotePluginIntegrationWithConfigFlow(
@@ -55,7 +58,10 @@ internal sealed class RemotePluginIntegrationWithConfigFlow(
 
 	public bool RequiresConfiguration => Snapshot.RequiresConfiguration;
 
-	public IConfigFlow CreateConfigFlow() => CreateConfigFlowCore();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return CreateConfigFlowCore();
+	}
 }
 
 internal sealed class RemotePluginIntegrationWithDynamicEventOptions(
@@ -69,9 +75,12 @@ internal sealed class RemotePluginIntegrationWithDynamicEventOptions(
 	: RemotePluginIntegration(pluginId, displayName, version, snapshot, invoker, connectionState, assetCache),
 		IDynamicEventOptionsProvider
 {
-	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(
+		EventOptionsContext context,
 		CancellationToken cancellationToken)
-		=> GetEventOptionsCoreAsync(context, cancellationToken);
+	{
+		return GetEventOptionsCoreAsync(context, cancellationToken);
+	}
 }
 
 internal sealed class RemotePluginIntegrationWithIconAndConfigFlow(
@@ -87,13 +96,19 @@ internal sealed class RemotePluginIntegrationWithIconAndConfigFlow(
 {
 	public string IconMimeType => Snapshot.IconMimeType;
 
-	public byte[] GetIcon() => Snapshot.IconBytes;
+	public byte[] GetIcon()
+	{
+		return Snapshot.IconBytes;
+	}
 
 	public bool AllowsMultipleConfigurations => Snapshot.AllowsMultipleConfigurations;
 
 	public bool RequiresConfiguration => Snapshot.RequiresConfiguration;
 
-	public IConfigFlow CreateConfigFlow() => CreateConfigFlowCore();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return CreateConfigFlowCore();
+	}
 }
 
 internal sealed class RemotePluginIntegrationWithIconAndDynamicEventOptions(
@@ -109,11 +124,17 @@ internal sealed class RemotePluginIntegrationWithIconAndDynamicEventOptions(
 {
 	public string IconMimeType => Snapshot.IconMimeType;
 
-	public byte[] GetIcon() => Snapshot.IconBytes;
+	public byte[] GetIcon()
+	{
+		return Snapshot.IconBytes;
+	}
 
-	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(
+		EventOptionsContext context,
 		CancellationToken cancellationToken)
-		=> GetEventOptionsCoreAsync(context, cancellationToken);
+	{
+		return GetEventOptionsCoreAsync(context, cancellationToken);
+	}
 }
 
 internal sealed class RemotePluginIntegrationWithConfigFlowAndDynamicEventOptions(
@@ -131,11 +152,17 @@ internal sealed class RemotePluginIntegrationWithConfigFlowAndDynamicEventOption
 
 	public bool RequiresConfiguration => Snapshot.RequiresConfiguration;
 
-	public IConfigFlow CreateConfigFlow() => CreateConfigFlowCore();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return CreateConfigFlowCore();
+	}
 
-	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(
+		EventOptionsContext context,
 		CancellationToken cancellationToken)
-		=> GetEventOptionsCoreAsync(context, cancellationToken);
+	{
+		return GetEventOptionsCoreAsync(context, cancellationToken);
+	}
 }
 
 internal sealed class RemotePluginIntegrationWithIconConfigFlowAndDynamicEventOptions(
@@ -151,15 +178,24 @@ internal sealed class RemotePluginIntegrationWithIconConfigFlowAndDynamicEventOp
 {
 	public string IconMimeType => Snapshot.IconMimeType;
 
-	public byte[] GetIcon() => Snapshot.IconBytes;
+	public byte[] GetIcon()
+	{
+		return Snapshot.IconBytes;
+	}
 
 	public bool AllowsMultipleConfigurations => Snapshot.AllowsMultipleConfigurations;
 
 	public bool RequiresConfiguration => Snapshot.RequiresConfiguration;
 
-	public IConfigFlow CreateConfigFlow() => CreateConfigFlowCore();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return CreateConfigFlowCore();
+	}
 
-	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(
+		EventOptionsContext context,
 		CancellationToken cancellationToken)
-		=> GetEventOptionsCoreAsync(context, cancellationToken);
+	{
+		return GetEventOptionsCoreAsync(context, cancellationToken);
+	}
 }

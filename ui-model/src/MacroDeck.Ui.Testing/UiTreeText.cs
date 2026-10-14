@@ -30,7 +30,7 @@ internal static class UiTreeText
 	{
 		var builder = new StringBuilder();
 
-		Append(builder, tree.Root, depth: 0, isFallback: false);
+		Append(builder, tree.Root, 0, false);
 
 		return builder.ToString();
 	}
@@ -63,12 +63,12 @@ internal static class UiTreeText
 
 		foreach (var child in node.Children)
 		{
-			Append(builder, child, depth + 1, isFallback: false);
+			Append(builder, child, depth + 1, false);
 		}
 
 		if (node.Fallback is not null)
 		{
-			Append(builder, node.Fallback, depth + 1, isFallback: true);
+			Append(builder, node.Fallback, depth + 1, true);
 		}
 	}
 }

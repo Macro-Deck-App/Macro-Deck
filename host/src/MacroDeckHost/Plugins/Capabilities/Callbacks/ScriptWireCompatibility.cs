@@ -7,12 +7,16 @@ namespace MacroDeckHost.Plugins.Capabilities.Callbacks;
 public static class ScriptWireCompatibility
 {
 	public static IReadOnlyList<Script> ToWirePayload(IReadOnlyList<Script> scripts, bool supportsColorInputs)
-		=> supportsColorInputs || !scripts.Any(script => script.Inputs.Any(input => input.Type == ScriptInputType.Color))
-			? scripts
-			: [.. scripts.Select(WithoutColorInputs)];
+	{
+		return supportsColorInputs
+			|| !scripts.Any(script => script.Inputs.Any(input => input.Type == ScriptInputType.Color))
+				? scripts
+				: [.. scripts.Select(WithoutColorInputs)];
+	}
 
 	private static Script WithoutColorInputs(Script script)
-		=> new()
+	{
+		return new Script
 		{
 			Id = script.Id,
 			Name = script.Name,
@@ -33,4 +37,5 @@ public static class ScriptWireCompatibility
 					: input)
 			]
 		};
+	}
 }

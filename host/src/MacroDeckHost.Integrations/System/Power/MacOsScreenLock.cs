@@ -15,14 +15,18 @@ internal static class MacOsScreenLock
 	public static bool IsAvailable => _lockScreenImmediate.Value is not null;
 
 	public static int Lock()
-		=> _lockScreenImmediate.Value?.Invoke()
+	{
+		return _lockScreenImmediate.Value?.Invoke()
 			?? throw new PlatformNotSupportedException("SACLockScreenImmediate is not available.");
+	}
 
 	private static LockScreenImmediate? Resolve()
-		=> NativeLibrary.TryLoad(LoginFramework, out var handle)
+	{
+		return NativeLibrary.TryLoad(LoginFramework, out var handle)
 			&& NativeLibrary.TryGetExport(handle, "SACLockScreenImmediate", out var address)
 				? Marshal.GetDelegateForFunctionPointer<LockScreenImmediate>(address)
 				: null;
+	}
 
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 	private delegate int LockScreenImmediate();

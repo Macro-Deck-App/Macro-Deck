@@ -25,7 +25,8 @@ public sealed class PluginAdbCallbacks(
 
 	private readonly AdbDeviceCallPolicy _callPolicy = new(lockState);
 
-	public async Task<HostCallbackResult?> AdmitAsync(string pluginId,
+	public async Task<HostCallbackResult?> AdmitAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -49,15 +50,18 @@ public sealed class PluginAdbCallbacks(
 		return _callPolicy.IsRefusedWhileLocked(payload.Operation)
 			? HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
 				"The host is locked.",
-				retryable: true,
-				details: Reason(ProtocolErrorReasons.HostLocked))
+				true,
+				Reason(ProtocolErrorReasons.HostLocked))
 			: null;
 	}
 
 	public Task<HostCallbackResult> ExecuteAsync(HostInvokePayload payload, CancellationToken cancellationToken)
-		=> ExecuteAsync(string.Empty, payload, cancellationToken);
+	{
+		return ExecuteAsync(string.Empty, payload, cancellationToken);
+	}
 
-	public async Task<HostCallbackResult> ExecuteAsync(string pluginId,
+	public async Task<HostCallbackResult> ExecuteAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -71,13 +75,17 @@ public sealed class PluginAdbCallbacks(
 			case HostOperations.Adb.Shell when Read<AdbShellArguments>(payload) is { } arguments:
 			{
 				var result = await operations.RunShellAsync(arguments.Serial, arguments.Command, cancellationToken);
-				return result.Success ? HostCallbackResult.Ok(FitToBudget(result.Data!)) : Failed(result.Error, result.ErrorMessage);
+				return result.Success
+					? HostCallbackResult.Ok(FitToBudget(result.Data!))
+					: Failed(result.Error, result.ErrorMessage);
 			}
 
 			case HostOperations.Adb.Battery when Read<AdbDeviceArguments>(payload) is { } arguments:
 			{
 				var result = await operations.GetBatteryAsync(arguments.Serial, cancellationToken);
-				return result.Success ? HostCallbackResult.Ok(ToDto(result.Data!)) : Failed(result.Error, result.ErrorMessage);
+				return result.Success
+					? HostCallbackResult.Ok(ToDto(result.Data!))
+					: Failed(result.Error, result.ErrorMessage);
 			}
 
 			case HostOperations.Adb.Push when Read<AdbPushArguments>(payload) is { } arguments:
@@ -93,7 +101,8 @@ public sealed class PluginAdbCallbacks(
 					cancellationToken));
 
 			case HostOperations.Adb.Install when Read<AdbInstallArguments>(payload) is { } arguments:
-				return Completed(await operations.InstallApkAsync(arguments.Serial, arguments.ApkPath, cancellationToken));
+				return Completed(
+					await operations.InstallApkAsync(arguments.Serial, arguments.ApkPath, cancellationToken));
 
 			case HostOperations.Adb.Uninstall when Read<AdbPackageArguments>(payload) is { } arguments:
 				return Completed(await operations.UninstallPackageAsync(arguments.Serial,
@@ -125,7 +134,8 @@ public sealed class PluginAdbCallbacks(
 	}
 
 	private static bool IsTyped(string operation)
-		=> operation is HostOperations.Adb.Key
+	{
+		return operation is HostOperations.Adb.Key
 			or HostOperations.Adb.Tap
 			or HostOperations.Adb.Swipe
 			or HostOperations.Adb.InputText
@@ -135,8 +145,10 @@ public sealed class PluginAdbCallbacks(
 			or HostOperations.Adb.Reboot
 			or HostOperations.Adb.Screenshot
 			or HostOperations.Adb.Status;
+	}
 
-	private async Task<HostCallbackResult> ExecuteTypedAsync(string pluginId,
+	private async Task<HostCallbackResult> ExecuteTypedAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -211,11 +223,14 @@ public sealed class PluginAdbCallbacks(
 	}
 
 	private async Task<HostCallbackResult> RunAsync(AdbCommand command, CancellationToken cancellationToken)
-		=> Completed(await adbManager!.ExecuteAsync(command, cancellationToken));
+	{
+		return Completed(await adbManager!.ExecuteAsync(command, cancellationToken));
+	}
 
 	// The bytes cannot ride the reply, which is capped at the protocol message size, so they follow over
 	// host.asset like a devices icon. The transfer is not awaited: the plugin correlates it by its id.
-	private async Task<HostCallbackResult> ScreenshotAsync(string pluginId,
+	private async Task<HostCallbackResult> ScreenshotAsync(
+		string pluginId,
 		string serial,
 		CancellationToken cancellationToken)
 	{
@@ -258,38 +273,44 @@ public sealed class PluginAdbCallbacks(
 		});
 	}
 
-	private static AdbKey? ToAdbKey(string? key) => key switch
+	private static AdbKey? ToAdbKey(string? key)
 	{
-		AdbKeys.Home => AdbKey.Home,
-		AdbKeys.Back => AdbKey.Back,
-		AdbKeys.Enter => AdbKey.Enter,
-		AdbKeys.Menu => AdbKey.Menu,
-		AdbKeys.Search => AdbKey.Search,
-		AdbKeys.VolumeUp => AdbKey.VolumeUp,
-		AdbKeys.VolumeDown => AdbKey.VolumeDown,
-		AdbKeys.VolumeMute => AdbKey.VolumeMute,
-		AdbKeys.MediaPlayPause => AdbKey.MediaPlayPause,
-		AdbKeys.MediaNext => AdbKey.MediaNext,
-		AdbKeys.MediaPrevious => AdbKey.MediaPrevious,
-		AdbKeys.Power => AdbKey.Power,
-		AdbKeys.Sleep => AdbKey.Sleep,
-		AdbKeys.Wakeup => AdbKey.Wakeup,
-		AdbKeys.AppSwitch => AdbKey.AppSwitch,
-		AdbKeys.DpadUp => AdbKey.DpadUp,
-		AdbKeys.DpadDown => AdbKey.DpadDown,
-		AdbKeys.DpadLeft => AdbKey.DpadLeft,
-		AdbKeys.DpadRight => AdbKey.DpadRight,
-		AdbKeys.DpadCenter => AdbKey.DpadCenter,
-		_ => null
-	};
+		return key switch
+		{
+			AdbKeys.Home => AdbKey.Home,
+			AdbKeys.Back => AdbKey.Back,
+			AdbKeys.Enter => AdbKey.Enter,
+			AdbKeys.Menu => AdbKey.Menu,
+			AdbKeys.Search => AdbKey.Search,
+			AdbKeys.VolumeUp => AdbKey.VolumeUp,
+			AdbKeys.VolumeDown => AdbKey.VolumeDown,
+			AdbKeys.VolumeMute => AdbKey.VolumeMute,
+			AdbKeys.MediaPlayPause => AdbKey.MediaPlayPause,
+			AdbKeys.MediaNext => AdbKey.MediaNext,
+			AdbKeys.MediaPrevious => AdbKey.MediaPrevious,
+			AdbKeys.Power => AdbKey.Power,
+			AdbKeys.Sleep => AdbKey.Sleep,
+			AdbKeys.Wakeup => AdbKey.Wakeup,
+			AdbKeys.AppSwitch => AdbKey.AppSwitch,
+			AdbKeys.DpadUp => AdbKey.DpadUp,
+			AdbKeys.DpadDown => AdbKey.DpadDown,
+			AdbKeys.DpadLeft => AdbKey.DpadLeft,
+			AdbKeys.DpadRight => AdbKey.DpadRight,
+			AdbKeys.DpadCenter => AdbKey.DpadCenter,
+			_ => null
+		};
+	}
 
-	private static AdbRebootMode? ToAdbRebootMode(string? mode) => mode switch
+	private static AdbRebootMode? ToAdbRebootMode(string? mode)
 	{
-		AdbRebootModes.Normal => AdbRebootMode.Normal,
-		AdbRebootModes.Recovery => AdbRebootMode.Recovery,
-		AdbRebootModes.Bootloader => AdbRebootMode.Bootloader,
-		_ => null
-	};
+		return mode switch
+		{
+			AdbRebootModes.Normal => AdbRebootMode.Normal,
+			AdbRebootModes.Recovery => AdbRebootMode.Recovery,
+			AdbRebootModes.Bootloader => AdbRebootMode.Bootloader,
+			_ => null
+		};
+	}
 
 	private async Task AskForAccessAsync(string pluginId, CancellationToken cancellationToken)
 	{
@@ -298,14 +319,19 @@ public sealed class PluginAdbCallbacks(
 			return;
 		}
 
-		var name = sessions?.Snapshot().FirstOrDefault(session => session.PluginId == pluginId)?.DisplayName ?? pluginId;
+		var name = sessions?.Snapshot().FirstOrDefault(session => session.PluginId == pluginId)?.DisplayName
+			?? pluginId;
 		await consent.AskAfterRefusalAsync(pluginId, name, cancellationToken);
 	}
 
-	internal static AdbShellResultDto FitToBudget(AdbShellOutput output) => AdbDeviceCallPolicy.FitToBudget(output);
+	internal static AdbShellResultDto FitToBudget(AdbShellOutput output)
+	{
+		return AdbDeviceCallPolicy.FitToBudget(output);
+	}
 
 	private static AdbBatteryStateDto ToDto(AdbBatteryReading reading)
-		=> new()
+	{
+		return new AdbBatteryStateDto
 		{
 			Level = reading.Level,
 			IsCharging = reading.IsPluggedIn,
@@ -328,9 +354,12 @@ public sealed class PluginAdbCallbacks(
 				_ => AdbBatteryHealths.Unknown
 			}
 		};
+	}
 
 	private static HostCallbackResult Completed(Result<AdbFailureCode> result)
-		=> result.Success ? HostCallbackResult.Ok() : Failed(result.Error, result.ErrorMessage);
+	{
+		return result.Success ? HostCallbackResult.Ok() : Failed(result.Error, result.ErrorMessage);
+	}
 
 	private static HostCallbackResult Failed(AdbFailureCode? code, string? message)
 	{
@@ -359,7 +388,9 @@ public sealed class PluginAdbCallbacks(
 	}
 
 	private static Dictionary<string, string> Reason(string reason)
-		=> new(StringComparer.Ordinal) { ["reason"] = reason };
+	{
+		return new Dictionary<string, string>(StringComparer.Ordinal) { ["reason"] = reason };
+	}
 
 	private static T? Read<T>(HostInvokePayload payload)
 		where T : class

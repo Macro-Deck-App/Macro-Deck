@@ -28,12 +28,16 @@ internal sealed class WidgetBackgroundColorTests
 	[TestCase("rgb(1, 2)")]
 	[TestCase("var(--color-accent)")]
 	public void A_stored_background_reads_as_the_host_widgets_read_it(string? stored)
-		=> Assert.That(WidgetBackgroundColor.Normalize(stored), Is.EqualTo(WidgetColor.NormalizeBackground(stored)));
+	{
+		Assert.That(WidgetBackgroundColor.Normalize(stored), Is.EqualTo(WidgetColor.NormalizeBackground(stored)));
+	}
 
 	[TestCase("transparent", "transparent")]
 	[TestCase("#ABC", "#aabbcc")]
 	[TestCase("rgba(255, 0, 0, 0.5)", "#ff000080")]
 	[TestCase("var(--color-accent)", null)]
 	public void A_stored_background_normalizes_to_a_widget_colour(string stored, string? expected)
-		=> Assert.That(WidgetBackgroundColor.Normalize(stored), Is.EqualTo(expected));
+	{
+		Assert.That(WidgetBackgroundColor.Normalize(stored), Is.EqualTo(expected));
+	}
 }

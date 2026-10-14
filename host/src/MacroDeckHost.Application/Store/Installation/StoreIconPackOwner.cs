@@ -13,7 +13,8 @@ public sealed class StoreIconPackOwner : IIconPackOwner
 	private readonly IStoreUpdateDetector _updateDetector;
 	private readonly ILogger _logger;
 
-	public StoreIconPackOwner(IStoreInstallationStore installations,
+	public StoreIconPackOwner(
+		IStoreInstallationStore installations,
 		IStoreUpdateDetector updateDetector,
 		ILogger logger)
 	{
@@ -27,9 +28,15 @@ public sealed class StoreIconPackOwner : IIconPackOwner
 	// AddOrUpdatePack and the installation save in StoreInstallExecutor) would otherwise be tagged
 	// "Store" while the Store reports it not installed, and would be undeletable-by-delegation with no
 	// record to delete.
-	public bool Owns(IconPackEntity pack) => FindRecord(pack) is not null;
+	public bool Owns(IconPackEntity pack)
+	{
+		return FindRecord(pack) is not null;
+	}
 
-	public IconPackOwnerDescriptor Describe(IconPackEntity pack) => new(IconPackOwnerKind.Store, CanRemove: true, IsReadOnly: true);
+	public IconPackOwnerDescriptor Describe(IconPackEntity pack)
+	{
+		return new IconPackOwnerDescriptor(IconPackOwnerKind.Store, true, true);
+	}
 
 	public Task Release(IconPackEntity pack)
 	{

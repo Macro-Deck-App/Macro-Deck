@@ -32,11 +32,20 @@ internal sealed class FakeVolumeService : IVolumeService
 
 	public event Action? Changed;
 
-	public void RaiseChanged() => Changed?.Invoke();
+	public void RaiseChanged()
+	{
+		Changed?.Invoke();
+	}
 
-	public float? VolumeOf(AudioTarget target) => _volumes.GetValueOrDefault(target);
+	public float? VolumeOf(AudioTarget target)
+	{
+		return _volumes.GetValueOrDefault(target);
+	}
 
-	public bool? MutedOf(AudioTarget target) => _mutes.GetValueOrDefault(target);
+	public bool? MutedOf(AudioTarget target)
+	{
+		return _mutes.GetValueOrDefault(target);
+	}
 
 	public void Set(AudioTarget target, float? volume, bool? muted)
 	{
@@ -45,10 +54,14 @@ internal sealed class FakeVolumeService : IVolumeService
 	}
 
 	public Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<AudioDevice>>([.. Devices]);
+	{
+		return Task.FromResult<IReadOnlyList<AudioDevice>>([.. Devices]);
+	}
 
 	public Task<float?> GetVolumeAsync(AudioTarget target, CancellationToken cancellationToken = default)
-		=> Task.FromResult(VolumeOf(target));
+	{
+		return Task.FromResult(VolumeOf(target));
+	}
 
 	public Task<bool> SetVolumeAsync(AudioTarget target, float level, CancellationToken cancellationToken = default)
 	{
@@ -61,7 +74,9 @@ internal sealed class FakeVolumeService : IVolumeService
 	}
 
 	public Task<bool?> GetMuteAsync(AudioTarget target, CancellationToken cancellationToken = default)
-		=> Task.FromResult(MutedOf(target));
+	{
+		return Task.FromResult(MutedOf(target));
+	}
 
 	public Task<bool> SetMuteAsync(AudioTarget target, bool mute, CancellationToken cancellationToken = default)
 	{

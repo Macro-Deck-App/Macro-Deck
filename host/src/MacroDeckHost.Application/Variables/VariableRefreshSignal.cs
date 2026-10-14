@@ -110,5 +110,7 @@ public sealed class VariableRefreshSignal : IVariableRefreshSignal
 	}
 
 	public bool DrainEagerRefreshRequested(string integrationId)
-		=> _pendingEager.TryRemove(integrationId, out _);
+	{
+		return _pendingEager.TryRemove(integrationId, out _);
+	}
 }

@@ -26,7 +26,10 @@ internal sealed class FakeWeatherStation : IWeatherStation
 			: WeatherSnapshot.Unavailable(locationName);
 	}
 
-	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct) => Task.FromResult(_snapshot);
+	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
+	{
+		return Task.FromResult(_snapshot);
+	}
 }
 
 internal sealed class FakeWeatherProviderIntegration : IIntegration, IWeatherProvider, IIntegrationIconProvider
@@ -52,16 +55,31 @@ internal sealed class FakeWeatherProviderIntegration : IIntegration, IWeatherPro
 	public WeatherDetailsAction? DetailsAction { get; init; }
 
 	public string IconMimeType => "image/svg+xml";
-	public byte[] GetIcon() => [1, 2, 3];
 
-	public IReadOnlyList<WeatherStationInstance> GetInstances() => _instances;
+	public byte[] GetIcon()
+	{
+		return [1, 2, 3];
+	}
+
+	public IReadOnlyList<WeatherStationInstance> GetInstances()
+	{
+		return _instances;
+	}
 
 	public IWeatherStation? GetStation(string instanceId)
-		=> _stations.GetValueOrDefault(instanceId);
+	{
+		return _stations.GetValueOrDefault(instanceId);
+	}
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class FakeOpenMeteoClient : IOpenMeteoClient
@@ -75,7 +93,9 @@ internal sealed class FakeOpenMeteoClient : IOpenMeteoClient
 		double longitude,
 		TemperatureUnit unit,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(Forecast);
+	{
+		return Task.FromResult(Forecast);
+	}
 
 	public Task<IReadOnlyList<GeocodingResult>> SearchLocationAsync(string query, CancellationToken cancellationToken)
 	{

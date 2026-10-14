@@ -9,9 +9,9 @@ namespace MacroDeckHost.Tests.UnitTests.Ui;
 [TestFixture]
 public sealed class WebSocketUiTransportTests
 {
-	private static readonly string[] AllAndGroup = ["all", "group"];
-	private static readonly string[] AllAndDirect = ["all", "direct"];
-	private static readonly string[] CurrentOnly = ["current"];
+	private static readonly string[] _allAndGroup = ["all", "group"];
+	private static readonly string[] _allAndDirect = ["all", "direct"];
+	private static readonly string[] _currentOnly = ["current"];
 
 	[Test]
 	public async Task Broadcast_group_and_connection_targeting_preserve_the_existing_transport_semantics()
@@ -29,8 +29,8 @@ public sealed class WebSocketUiTransportTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Payloads(a), Is.EqualTo(AllAndGroup));
-			Assert.That(Payloads(b), Is.EqualTo(AllAndDirect));
+			Assert.That(Payloads(a), Is.EqualTo(_allAndGroup));
+			Assert.That(Payloads(b), Is.EqualTo(_allAndDirect));
 			Assert.That(a.Concat(b).All(message => message is { Kind: "message", Type: nameof(Notice) }), Is.True);
 		});
 	}
@@ -75,7 +75,7 @@ public sealed class WebSocketUiTransportTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(oldMember, Is.Empty);
-			Assert.That(Payloads(newMember), Is.EqualTo(CurrentOnly));
+			Assert.That(Payloads(newMember), Is.EqualTo(_currentOnly));
 		});
 	}
 
@@ -108,14 +108,18 @@ public sealed class WebSocketUiTransportTests
 
 	private static Func<UiWebSocketEnvelope, CancellationToken, ValueTask<bool>> Record(
 		List<UiWebSocketEnvelope> messages)
-		=> (message, _) =>
+	{
+		return (message, _) =>
 		{
 			messages.Add(message);
 			return ValueTask.FromResult(true);
 		};
+	}
 
 	private static string[] Payloads(IEnumerable<UiWebSocketEnvelope> messages)
-		=> [.. messages.Select(message => ((Notice)message.Payload!).Value)];
+	{
+		return [.. messages.Select(message => ((Notice)message.Payload!).Value)];
+	}
 
 	private sealed record Notice(string Value);
 }

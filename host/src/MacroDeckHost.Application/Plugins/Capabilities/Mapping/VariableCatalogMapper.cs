@@ -6,14 +6,16 @@ namespace MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 public static class VariableCatalogMapper
 {
 	public static VariableDefinition ToDomain(VariableDefinitionDto dto)
-		=> TryToDomain(dto) ?? throw new InvalidOperationException($"Unknown variable type '{dto.Type}'.");
+	{
+		return TryToDomain(dto) ?? throw new InvalidOperationException($"Unknown variable type '{dto.Type}'.");
+	}
 
 	/// <summary>The definition, or <c>null</c> when its type is not one this host knows. Separate from
 	/// <see cref="ToDomain" /> for the persisted-snapshot reader, which drops an entry it cannot read
 	/// rather than losing the whole document.</summary>
 	public static VariableDefinition? TryToDomain(VariableDefinitionDto dto)
 	{
-		if (!Enum.TryParse<VariableType>(dto.Type, ignoreCase: false, out var type))
+		if (!Enum.TryParse<VariableType>(dto.Type, false, out var type))
 		{
 			return null;
 		}
@@ -50,7 +52,8 @@ public static class VariableCatalogMapper
 	}
 
 	public static VariableDefinitionDto ToDto(VariableDefinition definition)
-		=> new()
+	{
+		return new VariableDefinitionDto
 		{
 			Id = definition.Id,
 			Name = definition.Name,
@@ -76,10 +79,16 @@ public static class VariableCatalogMapper
 				? null
 				: new VariableWriteCapabilityDto { CommitOnRelease = definition.Write.CommitOnRelease }
 		};
+	}
 
 	public static VariableCatalogPage ToDomain(VariableCatalogPageResult result)
-		=> new() { Items = [.. result.Items.Select(ToDomain)], ContinuationToken = result.ContinuationToken };
+	{
+		return new VariableCatalogPage
+			{ Items = [.. result.Items.Select(ToDomain)], ContinuationToken = result.ContinuationToken };
+	}
 
 	public static VariableValue ToDomain(VariableIdValueDto dto)
-		=> new() { Id = dto.Id, Reading = VariableValueMapper.ToDomain(dto.Reading) };
+	{
+		return new VariableValue { Id = dto.Id, Reading = VariableValueMapper.ToDomain(dto.Reading) };
+	}
 }

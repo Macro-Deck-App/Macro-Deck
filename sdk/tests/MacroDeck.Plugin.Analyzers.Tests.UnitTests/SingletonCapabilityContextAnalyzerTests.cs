@@ -22,16 +22,16 @@ public class SingletonCapabilityContextAnalyzerTests
 	[Test]
 	public async Task Fires_when_a_type_taking_ICapabilityInvocationContext_is_registered_as_a_singleton()
 	{
-		var source = ServiceDeclaration +
-			"""
-			internal static class Registration
-			{
-				public static void Configure(IServiceCollection services)
-				{
-					services.AddSingleton<MyService>();
-				}
-			}
-			""";
+		var source = ServiceDeclaration
+			+ """
+			  internal static class Registration
+			  {
+			  	public static void Configure(IServiceCollection services)
+			  	{
+			  		services.AddSingleton<MyService>();
+			  	}
+			  }
+			  """;
 
 		var diagnostics
 			= await AnalyzerTestHarness.GetDiagnosticsAsync(source, new SingletonCapabilityContextAnalyzer());
@@ -46,16 +46,16 @@ public class SingletonCapabilityContextAnalyzerTests
 	[Test]
 	public async Task Does_not_fire_when_the_same_type_is_registered_scoped_instead_of_singleton()
 	{
-		var source = ServiceDeclaration +
-			"""
-			internal static class Registration
-			{
-				public static void Configure(IServiceCollection services)
-				{
-					services.AddScoped<MyService>();
-				}
-			}
-			""";
+		var source = ServiceDeclaration
+			+ """
+			  internal static class Registration
+			  {
+			  	public static void Configure(IServiceCollection services)
+			  	{
+			  		services.AddScoped<MyService>();
+			  	}
+			  }
+			  """;
 
 		var diagnostics
 			= await AnalyzerTestHarness.GetDiagnosticsAsync(source, new SingletonCapabilityContextAnalyzer());

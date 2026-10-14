@@ -50,5 +50,7 @@ public class KeyboardProcessNameTests
 	[TestCase(null, "code", false)]
 	[TestCase("", "code", false)]
 	public void Matches_is_case_and_extension_insensitive(string? actual, string configured, bool expected)
-		=> Assert.That(KeyboardProcessName.Matches(actual, configured), Is.EqualTo(expected));
+	{
+		Assert.That(KeyboardProcessName.Matches(actual, configured), Is.EqualTo(expected));
+	}
 }

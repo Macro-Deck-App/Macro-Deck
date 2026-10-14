@@ -57,7 +57,8 @@ public sealed class WidgetApi : IWidgetApi, IWidgetAppearanceOutcomeApi
 			.SetAsync(id, stateId, cancellationToken);
 	}
 
-	public async Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+	public async Task<WidgetStateWriteResult> AdvanceStateAsync(
+		string widgetId,
 		CancellationToken cancellationToken = default)
 	{
 		if (!Guid.TryParse(widgetId, out var id))

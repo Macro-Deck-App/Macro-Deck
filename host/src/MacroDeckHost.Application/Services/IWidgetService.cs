@@ -9,7 +9,8 @@ public interface IWidgetService
 	Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId, WidgetEntity widget, Guid? sourceWidgetId = null);
 	Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget);
 
-	Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(Guid folderId,
+	Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
+		Guid folderId,
 		IReadOnlyList<WidgetPlacement> placements);
 
 	Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId);

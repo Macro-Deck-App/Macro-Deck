@@ -28,7 +28,8 @@ public interface IWidgetIconSource
 	/// the reference does not resolve to anything - never a thrown exception, since an unresolvable icon
 	/// must leave a usable widget behind.
 	/// </summary>
-	Task<WidgetIconImage?> GetImageAsync(string reference,
+	Task<WidgetIconImage?> GetImageAsync(
+		string reference,
 		int size,
 		bool acceptWebp,
 		bool staticFrame,

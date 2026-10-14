@@ -19,12 +19,22 @@ public class PluginPairingServiceTests
 	{
 		public bool Enabled { get; set; } = true;
 
-		public Task<NativeUsbSettings> GetNativeUsb() => throw new NotSupportedException();
+		public Task<NativeUsbSettings> GetNativeUsb()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
-			=> throw new NotSupportedException();
+		public Task<NativeUsbSettings> SetNativeUsb(
+			bool? enabled,
+			IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<DeveloperSettings> GetDeveloper() => Task.FromResult(new DeveloperSettings(Enabled));
+		public Task<DeveloperSettings> GetDeveloper()
+		{
+			return Task.FromResult(new DeveloperSettings(Enabled));
+		}
 
 		public Task<DeveloperSettings> SetDeveloper(bool? enabled)
 		{
@@ -32,78 +42,150 @@ public class PluginPairingServiceTests
 			return Task.FromResult(new DeveloperSettings(Enabled));
 		}
 
-		public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
+		public Task<AppearanceSettings> GetAppearance()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Guid> GetInstallationId() => throw new NotSupportedException();
+		public Task<Guid> GetInstallationId()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<byte[]> GetAdbDeviceIdKey() => throw new NotSupportedException();
+		public Task<byte[]> GetAdbDeviceIdKey()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LoggingSettings> GetLogging() => throw new NotSupportedException();
+		public Task<LoggingSettings> GetLogging()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<LoggingSettings> SetLogging(Application.Logging.LogEntryLevel? minimumLevel)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NetworkSettings> GetNetwork() => throw new NotSupportedException();
+		public Task<NetworkSettings> GetNetwork()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NetworkSettings> SetNetwork(int? publicPort,
+		public Task<NetworkSettings> SetNetwork(
+			int? publicPort,
 			bool? tlsEnabled = null,
 			string? tlsMode = null,
 			int? tlsHttpsPort = null,
 			bool? discoveryEnabled = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<AdbSettings> GetAdb() => throw new NotSupportedException();
+		public Task<AdbSettings> GetAdb()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<AdbSettings> SetAdb(bool? enabled,
+		public Task<AdbSettings> SetAdb(
+			bool? enabled,
 			string? executablePath,
 			bool? usbConnectionsEnabled,
 			string? defaultDeviceSerial,
 			bool? stopServerOnExit,
 			bool allowPlugins)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<OnboardingSettings> GetOnboarding() => throw new NotSupportedException();
+		public Task<OnboardingSettings> GetOnboarding()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<OnboardingSettings> SetOnboarding(bool? pending) => throw new NotSupportedException();
+		public Task<OnboardingSettings> SetOnboarding(bool? pending)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LockScreenSettings> GetLockScreen() => throw new NotSupportedException();
+		public Task<LockScreenSettings> GetLockScreen()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LockScreenSettings> SetLockScreen(bool? enabled) => throw new NotSupportedException();
+		public Task<LockScreenSettings> SetLockScreen(bool? enabled)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<BackupSettings> GetBackups() => throw new NotSupportedException();
+		public Task<BackupSettings> GetBackups()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<BackupSettings> SetBackups(string? scheduleFrequency,
+		public Task<BackupSettings> SetBackups(
+			string? scheduleFrequency,
 			string? scheduleTimeOfDay,
 			string? scheduleDayOfWeek,
 			int? scheduleDayOfMonth,
 			string? retentionPolicy,
 			int? retentionKeepLatest,
 			bool? beforeHostUpdate,
-			bool? beforePluginUpdate) => throw new NotSupportedException();
+			bool? beforePluginUpdate)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<DateTimeOffset?> GetBackupScheduleLastRun() => throw new NotSupportedException();
+		public Task<DateTimeOffset?> GetBackupScheduleLastRun()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task SetBackupScheduleLastRun(DateTimeOffset value) => throw new NotSupportedException();
-		public Task<ExtensionSettings> GetExtensions() => throw new NotSupportedException();
+		public Task SetBackupScheduleLastRun(DateTimeOffset value)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
+		public Task<ExtensionSettings> GetExtensions()
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<ExtensionSettings> SetExtensions(
+			bool? storeEnabled,
 			bool? checkForUpdates,
 			bool? notifyOnUpdates,
 			int? refreshIntervalMinutes,
 			bool? autoUpdate = null,
 			bool? askForRatings = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LocalizationSettings> GetLocalization() => throw new NotSupportedException();
+		public Task<LocalizationSettings> GetLocalization()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
+		public Task<LocalizationSettings> SetLocalization(string? culture)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+		public Task<string> GetTimeFormat()
+		{
+			return Task.FromResult(AppPreferenceService.TimeFormatSystem);
+		}
 
-		public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
+		public Task<string> SetTimeFormat(string? timeFormat)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private ManualTimeProvider _time = null!;
@@ -166,7 +248,8 @@ public class PluginPairingServiceTests
 		return (verifier, challenge);
 	}
 
-	private async Task<(string RequestId, string Verifier)> CreateAndApprove(string pluginId,
+	private async Task<(string RequestId, string Verifier)> CreateAndApprove(
+		string pluginId,
 		string displayName = "Example Plugin",
 		bool replaceExistingRegistration = false,
 		bool takeOverInstalledPlugin = false)
@@ -177,8 +260,8 @@ public class PluginPairingServiceTests
 			displayName,
 			challenge,
 			PluginPairingChallengeMethods.S256,
-			client: null,
-			arrivedOnPublicListener: false);
+			null,
+			false);
 		Assert.That(created.Succeeded, Is.True, "precondition: create must succeed");
 
 		var approved = await _service.Approve(created.Record!.RequestId,
@@ -196,7 +279,7 @@ public class PluginPairingServiceTests
 
 		var redeemed = await _service.Redeem(requestId, verifier);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(redeemed.Succeeded, Is.True);
 			Assert.That(redeemed.PluginId, Is.EqualTo("com.example.plugin"));
@@ -248,7 +331,7 @@ public class PluginPairingServiceTests
 
 		var second = await _service.Redeem(requestId, verifier);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(second.Succeeded, Is.False);
 			var authenticated
@@ -399,11 +482,11 @@ public class PluginPairingServiceTests
 			null,
 			false);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Succeeded, Is.False);
 			Assert.That(result.Error, Is.EqualTo(PluginPairingCreateError.DeveloperModeDisabled));
-			Assert.That((await _service.Pending()), Is.Empty);
+			Assert.That(await _service.Pending(), Is.Empty);
 		});
 	}
 
@@ -424,7 +507,8 @@ public class PluginPairingServiceTests
 	}
 
 	private void Install(string pluginId)
-		=> _catalog.Plugins.Add(new InstalledPlugin
+	{
+		_catalog.Plugins.Add(new InstalledPlugin
 		{
 			PluginId = pluginId,
 			PluginDirectory = $"/plugins/{pluginId}",
@@ -438,9 +522,12 @@ public class PluginPairingServiceTests
 				}
 			]
 		});
+	}
 
 	private bool HasActiveRegistration(string pluginId)
-		=> _registrations.Registrations.Any(r => r.PluginId == pluginId && r.RevokedAt is null);
+	{
+		return _registrations.Registrations.Any(r => r.PluginId == pluginId && r.RevokedAt is null);
+	}
 
 	[Test]
 	public async Task Pairing_an_installed_id_creates_a_request_marked_as_a_takeover()
@@ -477,10 +564,10 @@ public class PluginPairingServiceTests
 			null,
 			false);
 
-		var unconfirmed = await _service.Approve(created.Record!.RequestId, replaceExistingRegistration: false);
+		var unconfirmed = await _service.Approve(created.Record!.RequestId, false);
 		var confirmed = await _service.Approve(created.Record.RequestId,
-			replaceExistingRegistration: false,
-			takeOverInstalledPlugin: true);
+			false,
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -590,14 +677,14 @@ public class PluginPairingServiceTests
 			false);
 		var pending = (await _service.Pending()).Single();
 		var withoutReplacement = await _service.Approve(created.Record!.RequestId,
-			replaceExistingRegistration: false,
-			takeOverInstalledPlugin: true);
+			false,
+			true);
 		var withoutTakeover = await _service.Approve(created.Record.RequestId,
-			replaceExistingRegistration: true,
-			takeOverInstalledPlugin: false);
+			true,
+			false);
 		var withBoth = await _service.Approve(created.Record.RequestId,
-			replaceExistingRegistration: true,
-			takeOverInstalledPlugin: true);
+			true,
+			true);
 		var second = await _service.Redeem(created.Record.RequestId, verifier);
 
 		var oldAuthenticated = await _registrationService.Authenticate("com.example.installed", first.PluginSecret!);
@@ -623,9 +710,9 @@ public class PluginPairingServiceTests
 		Install("com.example.installed");
 		await _registrationService.Register("com.example.installed",
 			"Left over",
-			accessTokenId: null,
+			null,
 			PluginRegistrationOrigins.Pairing,
-			allowInstalledId: true);
+			true);
 
 		var (requestId, verifier) = await CreateAndApprove("com.example.installed",
 			replaceExistingRegistration: true,
@@ -649,11 +736,11 @@ public class PluginPairingServiceTests
 
 		await _registrationService.Revoke("com.example.installed");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(_takeovers.IsActive("com.example.installed"), Is.False);
 			Assert.That(HasActiveRegistration("com.example.installed"), Is.False);
-			Assert.That((await _service.PairedRegistrations()), Is.Empty);
+			Assert.That(await _service.PairedRegistrations(), Is.Empty);
 		});
 	}
 
@@ -662,7 +749,7 @@ public class PluginPairingServiceTests
 	{
 		var originalRegistration = await _registrationService.Register("com.example.plugin",
 			"Original",
-			accessTokenId: null,
+			null,
 			PluginRegistrationOrigins.Pairing);
 
 		var connection = new FakePluginConnection();
@@ -679,7 +766,7 @@ public class PluginPairingServiceTests
 			State = PluginSessionState.Connected,
 			CreatedAt = _time.GetUtcNow()
 		});
-		_sessionRegistry.TryAttach("session-1", connection, instanceId: null);
+		_sessionRegistry.TryAttach("session-1", connection, null);
 
 		var (verifier, challenge) = NewPkcePair();
 		var created = await _service.Create("com.example.plugin",
@@ -690,16 +777,16 @@ public class PluginPairingServiceTests
 			false);
 		Assert.That(created.Succeeded, Is.True);
 
-		var refusedApproval = await _service.Approve(created.Record!.RequestId, replaceExistingRegistration: false);
+		var refusedApproval = await _service.Approve(created.Record!.RequestId, false);
 		Assert.That(refusedApproval.Succeeded, Is.False);
 		Assert.That(refusedApproval.Error, Is.EqualTo(PluginPairingApproveError.ReplacementNotConfirmed));
 
-		var confirmedApproval = await _service.Approve(created.Record.RequestId, replaceExistingRegistration: true);
+		var confirmedApproval = await _service.Approve(created.Record.RequestId, true);
 		Assert.That(confirmedApproval.Succeeded, Is.True);
 
 		var redeemed = await _service.Redeem(created.Record.RequestId, verifier);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(redeemed.Succeeded, Is.True);
 			var oldAuthenticated = await _registrationService.Authenticate("com.example.plugin",
@@ -720,7 +807,7 @@ public class PluginPairingServiceTests
 	{
 		var originalRegistration = await _registrationService.Register("com.example.plugin",
 			"Original",
-			accessTokenId: null,
+			null,
 			PluginRegistrationOrigins.Pairing);
 
 		await CreateAndApprove("com.example.plugin", "Replacement", true);

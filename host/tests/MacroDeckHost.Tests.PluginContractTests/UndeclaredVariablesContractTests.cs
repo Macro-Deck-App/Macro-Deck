@@ -1,7 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Variables;
-using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Versioning;
@@ -19,7 +18,7 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 {
 	private const string LevelId = "device-level";
 
-	private static readonly VariableDefinition Level = new()
+	private static readonly VariableDefinition _level = new()
 	{
 		Id = LevelId,
 		Name = "level",
@@ -33,8 +32,8 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 	{
 		var writes = new List<string>();
 		var provider = new TestVariableCatalogIntegration("Devices",
-			discover: (_, _) => ValueTask.FromResult(new VariableCatalogPage { Items = [Level] }),
-			resolve: (id, _) => ValueTask.FromResult<VariableDefinition?>(id == LevelId ? Level : null),
+			discover: (_, _) => ValueTask.FromResult(new VariableCatalogPage { Items = [_level] }),
+			resolve: (id, _) => ValueTask.FromResult<VariableDefinition?>(id == LevelId ? _level : null),
 			write: (id, value, _) =>
 			{
 				writes.Add($"{id}={value}");
@@ -90,7 +89,7 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 		{
 			SupportsVariableCatalog = true,
 			VariableCatalogName = "Devices",
-			DeclaredVariables = [Level]
+			DeclaredVariables = [_level]
 		});
 		Assert.That(SnapshotStore.GetSnapshot(PluginId).SupportsVariableCatalog, Is.True);
 
@@ -105,7 +104,7 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 		var silent = new SilentVariablesHandler();
 
 		await ConnectAsTheSdkDeclaresAsync([silent],
-			duringRegister: async () =>
+			async () =>
 			{
 				await silent.Asked.Task.WaitAsync(TimeSpan.FromSeconds(10));
 				Time.Advance(RemotePluginSnapshotRefresher.ProbeTimeout);
@@ -119,10 +118,12 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 	}
 
 	private static VariablesCapabilityHandler Handler(IPluginIntegration provider)
-		=> new([provider],
+	{
+		return new VariablesCapabilityHandler([provider],
 			TestMetadata.Default,
 			new VariableSubscriptions(Serilog.Log.Logger),
 			Serilog.Core.Logger.None);
+	}
 
 	private sealed class OnDemandOnlyIntegration : IPluginIntegration, IVariableProvider
 	{
@@ -130,14 +131,22 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 
 		public IReadOnlyList<VariableDefinition> Variables { get; } = [];
 
-		public IReadOnlyList<VariableDefinition> DeclaredVariables { get; } = [Level];
+		public IReadOnlyList<VariableDefinition> DeclaredVariables { get; } = [_level];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Of(1.0));
+		{
+			return ValueTask.FromResult(VariableReading.Of(1.0));
+		}
 	}
 
 	private sealed class ImmediateActionsHandler : ICapabilityHandler
@@ -148,7 +157,8 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 		public string Kind => CapabilityKinds.Actions;
 
 		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-			=>
+		{
+			return
 			[
 				new DeclaredCapability
 				{
@@ -157,11 +167,14 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 					VersionRange = new CapabilityVersionRange { Minimum = 3, Maximum = 3 }
 				}
 			];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(CapabilityInvocationResult.Ok(JsonDocument.Parse(DescribeJson).RootElement.Clone()));
+		{
+			return Task.FromResult(CapabilityInvocationResult.Ok(JsonDocument.Parse(DescribeJson).RootElement.Clone()));
+		}
 	}
 
 	private sealed class SilentVariablesHandler : ICapabilityHandler
@@ -170,7 +183,10 @@ internal sealed class UndeclaredVariablesContractTests : CapabilityContractFixtu
 
 		public string Kind => CapabilityKinds.Variables;
 
-		public IReadOnlyList<DeclaredCapability> DeclareCapabilities() => [];
+		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
+		{
+			return [];
+		}
 
 		public async Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,

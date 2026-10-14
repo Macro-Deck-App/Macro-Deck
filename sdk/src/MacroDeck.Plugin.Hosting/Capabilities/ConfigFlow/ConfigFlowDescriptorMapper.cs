@@ -14,17 +14,25 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 /// </summary>
 internal static class ConfigFlowDescriptorMapper
 {
-	public static ConfigFlowCopyValueDto ToDto(ConfigFlowCopyValue value) =>
-		new() { Label = PluginText.ToWire(value.Label), Value = value.Value };
+	public static ConfigFlowCopyValueDto ToDto(ConfigFlowCopyValue value)
+	{
+		return new ConfigFlowCopyValueDto { Label = PluginText.ToWire(value.Label), Value = value.Value };
+	}
 
 	public static ConfigFlowInstructionDto ToDto(ConfigFlowInstruction instruction)
-		=> new() { Text = PluginText.ToWire(instruction.Text), Values = [.. instruction.Values.Select(ToDto)] };
+	{
+		return new ConfigFlowInstructionDto
+			{ Text = PluginText.ToWire(instruction.Text), Values = [.. instruction.Values.Select(ToDto)] };
+	}
 
-	public static ConfigFlowLinkDto ToDto(ConfigFlowLink link) =>
-		new() { Label = PluginText.ToWire(link.Label), Url = link.Url };
+	public static ConfigFlowLinkDto ToDto(ConfigFlowLink link)
+	{
+		return new ConfigFlowLinkDto { Label = PluginText.ToWire(link.Label), Url = link.Url };
+	}
 
 	public static ConfigFlowStepDto ToDto(ConfigFlowStep step)
-		=> new()
+	{
+		return new ConfigFlowStepDto
 		{
 			StepId = step.StepId,
 			Title = PluginText.ToWireOrNull(step.Title),
@@ -35,12 +43,16 @@ internal static class ConfigFlowDescriptorMapper
 			Fields = [.. step.Fields.Select(ActionParameterMapper.ToDto)],
 			AdvancedFields = [.. step.AdvancedFields.Select(ActionParameterMapper.ToDto)]
 		};
+	}
 
-	public static ConfigFlowValueDto ToDto(ConfigFlowValue value) =>
-		new() { Value = value.Value, IsSecret = value.IsSecret };
+	public static ConfigFlowValueDto ToDto(ConfigFlowValue value)
+	{
+		return new ConfigFlowValueDto { Value = value.Value, IsSecret = value.IsSecret };
+	}
 
 	public static ConfigFlowResultDto ToDto(ConfigFlowResult result)
-		=> result.Kind switch
+	{
+		return result.Kind switch
 		{
 			ConfigFlowResultKind.Step => new ConfigFlowResultDto
 				{ Kind = nameof(ConfigFlowResultKind.Step), NextStep = ToDto(result.NextStep!) },
@@ -67,6 +79,7 @@ internal static class ConfigFlowDescriptorMapper
 			},
 			_ => throw new InvalidOperationException($"Unknown config flow result kind '{result.Kind}'.")
 		};
+	}
 
 	/// <summary>Field errors cross as strings: the protocol's own DTO types them that way.</summary>
 	private static Dictionary<string, LocalizedText>? ToWire(

@@ -62,9 +62,9 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 				var chain = _chainByDevice[deviceId];
 				_chainByDevice.Remove(deviceId);
 
-				if (chain.ReturnOnFocusLoss &&
-					chain.BaselineFolderId != Guid.Empty &&
-					_folderCache.GetFolderById(chain.BaselineFolderId) is not null)
+				if (chain.ReturnOnFocusLoss
+					&& chain.BaselineFolderId != Guid.Empty
+					&& _folderCache.GetFolderById(chain.BaselineFolderId) is not null)
 				{
 					toNavigate.Add((deviceId, chain.BaselineFolderId, Guid.NewGuid()));
 				}
@@ -77,11 +77,11 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 					continue;
 				}
 
-				if (_chainByDevice.TryGetValue(deviceId, out var existingChain) &&
-					string.Equals(existingChain.OwningIdentity,
+				if (_chainByDevice.TryGetValue(deviceId, out var existingChain)
+					&& string.Equals(existingChain.OwningIdentity,
 						match.Rule.ApplicationIdentity,
-						StringComparison.Ordinal) &&
-					existingChain.OwnedFolderId == match.Folder.Id)
+						StringComparison.Ordinal)
+					&& existingChain.OwnedFolderId == match.Folder.Id)
 				{
 					// Idempotent: the same rule already owns this device's current folder - a repeated
 					// OnFocusChanged for the still-focused app must not mint a new token or re-navigate.
@@ -108,7 +108,8 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 		}
 	}
 
-	public async Task OnFolderReported(Guid deviceId,
+	public async Task OnFolderReported(
+		Guid deviceId,
 		Guid folderId,
 		string? navigationToken,
 		bool isResync,
@@ -122,9 +123,9 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 
 			if (_chainByDevice.TryGetValue(deviceId, out var chain))
 			{
-				var tokenMatches = navigationToken is not null &&
-					Guid.TryParse(navigationToken, out var parsedToken) &&
-					parsedToken == chain.Token;
+				var tokenMatches = navigationToken is not null
+					&& Guid.TryParse(navigationToken, out var parsedToken)
+					&& parsedToken == chain.Token;
 
 				if (!tokenMatches && !isResync)
 				{
@@ -174,11 +175,11 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 			{
 				var chain = _chainByDevice[deviceId];
 				var folder = _folderCache.GetFolderById(chain.OwnedFolderId);
-				var stillValid = folder is not null &&
-					folder.FocusRules.Any(rule =>
-						rule.Enabled &&
-						rule.DeviceId == deviceId &&
-						string.Equals(rule.ApplicationIdentity, chain.OwningIdentity, StringComparison.Ordinal));
+				var stillValid = folder is not null
+					&& folder.FocusRules.Any(rule =>
+						rule.Enabled
+						&& rule.DeviceId == deviceId
+						&& string.Equals(rule.ApplicationIdentity, chain.OwningIdentity, StringComparison.Ordinal));
 
 				if (!stillValid)
 				{
@@ -233,7 +234,8 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 		return result;
 	}
 
-	private (Guid DeviceId, Guid FolderId, Guid Token)? TryAcquireForDevice(Guid deviceId,
+	private (Guid DeviceId, Guid FolderId, Guid Token)? TryAcquireForDevice(
+		Guid deviceId,
 		FocusedApplication app,
 		Guid? reportedFolderId = null)
 	{
@@ -247,10 +249,10 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 			return null;
 		}
 
-		if (_chainByDevice.TryGetValue(deviceId, out var existingChain) &&
-			string.Equals(existingChain.OwningIdentity, match.Rule.ApplicationIdentity, StringComparison.Ordinal) &&
-			existingChain.OwnedFolderId == match.Folder.Id &&
-			(reportedFolderId is not { } reported || reported == match.Folder.Id))
+		if (_chainByDevice.TryGetValue(deviceId, out var existingChain)
+			&& string.Equals(existingChain.OwningIdentity, match.Rule.ApplicationIdentity, StringComparison.Ordinal)
+			&& existingChain.OwnedFolderId == match.Folder.Id
+			&& (reportedFolderId is not { } reported || reported == match.Folder.Id))
 		{
 			// Idempotent: the same rule already owns this device's current folder - and, when a
 			// resync says what the device actually shows, it genuinely still shows it. A repeated
@@ -274,6 +276,8 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 	// A provider device holds no WebSocket connection, so connection counts alone would report every one
 	// of them as offline and no focus rule could ever acquire one.
 	private bool IsOnline(Guid deviceId)
-		=> (_deviceConnections.OnlineDeviceConnectionCounts().TryGetValue(deviceId, out var count) && count > 0) ||
-			_providerPresence.IsOnline(deviceId);
+	{
+		return _deviceConnections.OnlineDeviceConnectionCounts().TryGetValue(deviceId, out var count) && count > 0
+			|| _providerPresence.IsOnline(deviceId);
+	}
 }

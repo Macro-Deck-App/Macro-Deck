@@ -10,18 +10,21 @@ internal enum SpotifyPlayingItemKind
 
 internal sealed record SpotifyPlayingItem(string Id, string Uri, string Url, SpotifyPlayingItemKind Kind)
 {
-	public static SpotifyPlayingItem? From(IPlayableItem? item) => item switch
+	public static SpotifyPlayingItem? From(IPlayableItem? item)
 	{
-		FullTrack { IsLocal: false } track => Build(track.Id,
-			track.Uri,
-			track.ExternalUrls,
-			SpotifyPlayingItemKind.Track),
-		FullEpisode episode => Build(episode.Id,
-			episode.Uri,
-			episode.ExternalUrls,
-			SpotifyPlayingItemKind.Episode),
-		_ => null
-	};
+		return item switch
+		{
+			FullTrack { IsLocal: false } track => Build(track.Id,
+				track.Uri,
+				track.ExternalUrls,
+				SpotifyPlayingItemKind.Track),
+			FullEpisode episode => Build(episode.Id,
+				episode.Uri,
+				episode.ExternalUrls,
+				SpotifyPlayingItemKind.Episode),
+			_ => null
+		};
+	}
 
 	private static SpotifyPlayingItem? Build(
 		string? id,
@@ -29,9 +32,9 @@ internal sealed record SpotifyPlayingItem(string Id, string Uri, string Url, Spo
 		IReadOnlyDictionary<string, string>? externalUrls,
 		SpotifyPlayingItemKind kind)
 	{
-		if (string.IsNullOrEmpty(id) ||
-			string.IsNullOrEmpty(uri) ||
-			uri.StartsWith("spotify:local:", StringComparison.Ordinal))
+		if (string.IsNullOrEmpty(id)
+			|| string.IsNullOrEmpty(uri)
+			|| uri.StartsWith("spotify:local:", StringComparison.Ordinal))
 		{
 			return null;
 		}

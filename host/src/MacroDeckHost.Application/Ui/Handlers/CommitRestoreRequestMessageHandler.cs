@@ -9,9 +9,13 @@ public sealed class CommitRestoreRequestMessageHandler
 {
 	private readonly IRestoreService _restoreService;
 
-	public CommitRestoreRequestMessageHandler(IRestoreService restoreService) => _restoreService = restoreService;
+	public CommitRestoreRequestMessageHandler(IRestoreService restoreService)
+	{
+		_restoreService = restoreService;
+	}
 
-	public async ValueTask<CommitRestoreResponse> Handle(CommitRestoreRequest request,
+	public async ValueTask<CommitRestoreResponse> Handle(
+		CommitRestoreRequest request,
 		CancellationToken cancellationToken)
 	{
 		var result = await _restoreService.Commit(request.RestoreId, cancellationToken);

@@ -56,7 +56,8 @@ public sealed class ColorPaletteService : IColorPaletteService, IDisposable
 		}
 	}
 
-	public async Task<ColorPaletteResult> SetColor(string color,
+	public async Task<ColorPaletteResult> SetColor(
+		string color,
 		bool present,
 		CancellationToken cancellationToken = default)
 	{
@@ -117,7 +118,10 @@ public sealed class ColorPaletteService : IColorPaletteService, IDisposable
 		}
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
 	public static string? Normalize(string? color)
 	{

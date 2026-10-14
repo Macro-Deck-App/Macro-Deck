@@ -31,7 +31,8 @@ internal static class RunSession
 	private static readonly TimeSpan _defaultGrace = TimeSpan.FromSeconds(10);
 	private static readonly TimeSpan _logPollInterval = TimeSpan.FromMilliseconds(150);
 
-	public static async Task<int> RunAsync(CliConsole console,
+	public static async Task<int> RunAsync(
+		CliConsole console,
 		RunOptions options,
 		IHostPairingProbe? probe,
 		CancellationToken cancellationToken)
@@ -73,15 +74,16 @@ internal static class RunSession
 			? $"Started a disposable stub host at {hostUrl}."
 			: $"Using host at {hostUrl}.");
 
-		if (!useStub &&
-			options.Mode == PluginRegistrationMode.SelfRegistering &&
-			options.EnrollmentToken is null &&
-			options.PairingEnabled)
+		if (!useStub
+			&& options.Mode == PluginRegistrationMode.SelfRegistering
+			&& options.EnrollmentToken is null
+			&& options.PairingEnabled)
 		{
 			await ReportPairingExpectationAsync(console,
-				probe ?? new HostPairingProbe(),
-				hostUrl,
-				cancellationToken).ConfigureAwait(false);
+					probe ?? new HostPairingProbe(),
+					hostUrl,
+					cancellationToken)
+				.ConfigureAwait(false);
 		}
 
 		var (dataDirectory, ownedDataDirectory) = ResolveManagedDirectory(
@@ -95,15 +97,15 @@ internal static class RunSession
 
 		var pluginId = ResolveManagedPluginId(options.PluginId, manifestPeek.Id, useStub);
 
-		if (options.Mode == PluginRegistrationMode.Managed &&
-			useStub &&
-			options.PluginId is null &&
-			manifestPeek.Id is null)
+		if (options.Mode == PluginRegistrationMode.Managed
+			&& useStub
+			&& options.PluginId is null
+			&& manifestPeek.Id is null)
 		{
 			console.WriteWarning("plugin-id-generated",
-				"No manifest.json next to the launch target, so a development id was generated. If the " +
-				"plugin's own manifest declares an id, the host will reject the mismatch - pass --plugin-id " +
-				"<id>, or use --mode self-registering.");
+				"No manifest.json next to the launch target, so a development id was generated. If the "
+				+ "plugin's own manifest declares an id, the host will reject the mismatch - pass --plugin-id "
+				+ "<id>, or use --mode self-registering.");
 		}
 
 		var request = new PluginEnvironmentRequest
@@ -135,8 +137,15 @@ internal static class RunSession
 			// docs/src/content/docs/guides/packaging.md's --verbosity row - so they print at every verbosity,
 			// each stream on this process's matching one, unlike the stub host's forwarded log narration in
 			// PollLogsAsync below, which goes through console.Info so --verbosity quiet can suppress it.
-			void OnOutput(string line) => WritePluginOutput(console, line, fromStandardError: false);
-			void OnError(string line) => WritePluginOutput(console, line, fromStandardError: true);
+			void OnOutput(string line)
+			{
+				WritePluginOutput(console, line, false);
+			}
+
+			void OnError(string line)
+			{
+				WritePluginOutput(console, line, true);
+			}
 
 			process = options.Watch
 				? SupervisedPluginProcess.Start(DotnetWatchLaunch.For(options.Project!), environment, OnOutput, OnError)
@@ -153,8 +162,8 @@ internal static class RunSession
 
 		if (options.Watch)
 		{
-			console.Info("Watching the project: a saved change is applied with .NET Hot Reload, or rebuilds and " +
-				"restarts the plugin. Open developer previews in Macro Deck follow along.");
+			console.Info("Watching the project: a saved change is applied with .NET Hot Reload, or rebuilds and "
+				+ "restarts the plugin. Open developer previews in Macro Deck follow along.");
 		}
 
 		using var backgroundCts = new CancellationTokenSource();
@@ -192,7 +201,8 @@ internal static class RunSession
 
 			try
 			{
-				await Task.WhenAll(backgroundTasks).WaitAsync(TimeSpan.FromSeconds(2), CancellationToken.None)
+				await Task.WhenAll(backgroundTasks)
+					.WaitAsync(TimeSpan.FromSeconds(2), CancellationToken.None)
 					.ConfigureAwait(false);
 			}
 			catch (Exception ex) when (ex is TimeoutException or OperationCanceledException)
@@ -224,7 +234,8 @@ internal static class RunSession
 	/// process instead. Against a real host (<paramref name="stubHost" /> null), there is no session
 	/// channel this process owns to say goodbye on, so only the grace-then-kill half applies.
 	/// </summary>
-	private static async Task ShutdownAsync(CliConsole console,
+	private static async Task ShutdownAsync(
+		CliConsole console,
 		MacroDeckTestHost? stubHost,
 		SupervisedPluginProcess process,
 		TimeSpan grace)
@@ -234,13 +245,14 @@ internal static class RunSession
 			try
 			{
 				await stubHost.SendAsync(new ProtocolEnvelope
-				{
-					Type = MessageTypes.SessionGoodbye,
-					Id = Guid.CreateVersion7().ToString(),
-					Payload = JsonSerializer.SerializeToElement(
-						new SessionGoodbyePayload { Reason = "macrodeck-plugin run is stopping." },
-						PluginProtocolJson.Options)
-				}).ConfigureAwait(false);
+					{
+						Type = MessageTypes.SessionGoodbye,
+						Id = Guid.CreateVersion7().ToString(),
+						Payload = JsonSerializer.SerializeToElement(
+							new SessionGoodbyePayload { Reason = "macrodeck-plugin run is stopping." },
+							PluginProtocolJson.Options)
+					})
+					.ConfigureAwait(false);
 			}
 			catch (InvalidOperationException)
 			{
@@ -300,26 +312,26 @@ internal static class RunSession
 		if (options.Watch && options.StubHost)
 		{
 			console.WriteError("watch-needs-real-host",
-				"--watch is for iterating against Macro Deck, where developer previews follow the plugin. Drop " +
-				"--stub-host, or run without --watch.");
+				"--watch is for iterating against Macro Deck, where developer previews follow the plugin. Drop "
+				+ "--stub-host, or run without --watch.");
 			return false;
 		}
 
 		if (options.Mode == PluginRegistrationMode.Managed && !useStub)
 		{
 			console.WriteError("managed-needs-stub-host",
-				"Managed mode needs a launch bootstrap token only a real supervisor can mint - " +
-				"run cannot manufacture one against a real host. Use --stub-host, or --mode " +
-				"self-registering (the default) against the running host.");
+				"Managed mode needs a launch bootstrap token only a real supervisor can mint - "
+				+ "run cannot manufacture one against a real host. Use --stub-host, or --mode "
+				+ "self-registering (the default) against the running host.");
 			return false;
 		}
 
 		// What pairing will actually do is reported later, from ReportPairingExpectationAsync: it depends on
 		// the host, which is not resolved yet here.
-		if (options.Mode == PluginRegistrationMode.SelfRegistering &&
-			!useStub &&
-			options.EnrollmentToken is null &&
-			!options.PairingEnabled)
+		if (options.Mode == PluginRegistrationMode.SelfRegistering
+			&& !useStub
+			&& options.EnrollmentToken is null
+			&& !options.PairingEnabled)
 		{
 			console.WriteError("enrollment-token-required",
 				"--mode self-registering against a real host needs --enrollment-token when --pairing is off.");
@@ -335,7 +347,8 @@ internal static class RunSession
 	/// unconditional "a pairing prompt will appear" ended up promising a prompt that Developer Mode
 	/// being off makes impossible.
 	/// </summary>
-	private static async Task ReportPairingExpectationAsync(CliConsole console,
+	private static async Task ReportPairingExpectationAsync(
+		CliConsole console,
 		IHostPairingProbe probe,
 		string hostUrl,
 		CancellationToken cancellationToken)
@@ -345,8 +358,8 @@ internal static class RunSession
 		if (pairing?.DeveloperModeEnabled == false)
 		{
 			console.WriteError("developer-mode-disabled",
-				"Developer Mode is disabled in Macro Deck. Enable it under Settings > Developer before " +
-				"running local plugins.",
+				"Developer Mode is disabled in Macro Deck. Enable it under Settings > Developer before "
+				+ "running local plugins.",
 				"The plugin keeps waiting and pairs as soon as you enable it - no restart needed.");
 			return;
 		}
@@ -360,8 +373,8 @@ internal static class RunSession
 		// Null: unreachable, or a host too old to report it. Neither is a reason to claim Developer Mode
 		// is off, so this stays exactly what run reported before the probe existed.
 		console.WriteWarning("pairing-prompt-expected",
-			"No --enrollment-token given; a pairing prompt will appear in Macro Deck and must be approved " +
-			"there before the plugin can connect.");
+			"No --enrollment-token given; a pairing prompt will appear in Macro Deck and must be approved "
+			+ "there before the plugin can connect.");
 	}
 
 	/// <summary>
@@ -394,22 +407,25 @@ internal static class RunSession
 		}
 
 		console.WriteError("host-not-found",
-			"No running Macro Deck host was found. Its loopback port file is written while the host runs " +
-			"and removed when it stops; none was readable at " +
-			string.Join(" or ", HostDiscovery.ProbedPaths(Path.GetTempPath())) +
-			". Start Macro Deck, pass " +
-			"--host-url <url>, or use --stub-host to run against a disposable stub host instead.");
+			"No running Macro Deck host was found. Its loopback port file is written while the host runs "
+			+ "and removed when it stops; none was readable at "
+			+ string.Join(" or ", HostDiscovery.ProbedPaths(Path.GetTempPath()))
+			+ ". Start Macro Deck, pass "
+			+ "--host-url <url>, or use --stub-host to run against a disposable stub host instead.");
 		return false;
 	}
 
 	private static string? ProjectDirectoryOf(string? project)
-		=> project is null
+	{
+		return project is null
 			? null
 			: Directory.Exists(project)
 				? Path.GetFullPath(project)
 				: Path.GetDirectoryName(Path.GetFullPath(project));
+	}
 
-	private static Task<PluginLaunchSpec> ResolveSubjectAsync(CliConsole console,
+	private static Task<PluginLaunchSpec> ResolveSubjectAsync(
+		CliConsole console,
 		RunOptions options,
 		CancellationToken cancellationToken)
 	{
@@ -433,10 +449,13 @@ internal static class RunSession
 	/// with the manifest's own - a real supervisor reads the id from the manifest of the version it
 	/// activates rather than making one up, and <c>run</c> has to agree or it can never succeed against a
 	/// plugin whose manifest declares a real id.</summary>
-	internal static string? ResolveManagedPluginId(string? explicitId, string? manifestId, bool useStub) =>
-		explicitId ?? manifestId ?? (useStub ? $"dev.macrodeck-plugin.{NewId()}" : null);
+	internal static string? ResolveManagedPluginId(string? explicitId, string? manifestId, bool useStub)
+	{
+		return explicitId ?? manifestId ?? (useStub ? $"dev.macrodeck-plugin.{NewId()}" : null);
+	}
 
-	private static (string? Directory, string? Owned) ResolveManagedDirectory(bool needed,
+	private static (string? Directory, string? Owned) ResolveManagedDirectory(
+		bool needed,
 		string? requested,
 		string label)
 	{
@@ -455,7 +474,8 @@ internal static class RunSession
 		return (owned, owned);
 	}
 
-	private static async Task PollLogsAsync(CliConsole console,
+	private static async Task PollLogsAsync(
+		CliConsole console,
 		MacroDeckTestHost host,
 		CancellationToken cancellationToken)
 	{
@@ -485,8 +505,10 @@ internal static class RunSession
 	/// its use of <see cref="CliConsole.Info" /> (so <c>--verbosity quiet</c> suppresses it, unlike the
 	/// plugin's own <c>[plugin]</c>/<c>[plugin:stderr]</c> output) are unit-testable without a running
 	/// <see cref="MacroDeckTestHost" />.</summary>
-	internal static void WriteForwardedLog(CliConsole console, string level, string? sourceContext, string message) =>
+	internal static void WriteForwardedLog(CliConsole console, string level, string? sourceContext, string message)
+	{
 		console.Info($"[log:{level}] {sourceContext}: {message}");
+	}
 
 	/// <summary>The launched plugin's own console output. The counterpart seam to
 	/// <see cref="WriteForwardedLog" />, and never gated by <c>--verbosity quiet</c>: this is the command's
@@ -504,7 +526,8 @@ internal static class RunSession
 		}
 	}
 
-	private static async Task AnnounceSessionAsync(CliConsole console,
+	private static async Task AnnounceSessionAsync(
+		CliConsole console,
 		MacroDeckTestHost host,
 		CancellationToken cancellationToken)
 	{
@@ -539,10 +562,18 @@ internal static class RunSession
 		return snapshot;
 	}
 
-	private static string NewId() => Guid.NewGuid().ToString("N");
+	private static string NewId()
+	{
+		return Guid.NewGuid().ToString("N");
+	}
 
 	private static string NewSecret()
-		=> Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+			.TrimEnd('=')
+			.Replace('+', '-')
+			.Replace('/', '_');
+	}
 
 	private static void TryDeleteDirectory(string path)
 	{
@@ -550,7 +581,7 @@ internal static class RunSession
 		{
 			if (Directory.Exists(path))
 			{
-				Directory.Delete(path, recursive: true);
+				Directory.Delete(path, true);
 			}
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

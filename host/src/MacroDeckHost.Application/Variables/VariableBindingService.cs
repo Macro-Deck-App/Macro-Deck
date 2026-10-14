@@ -101,10 +101,10 @@ public sealed class VariableBindingService : IVariableBindingService
 			}
 
 			var collision = _registry.FindByName(VariableScope.Global, null, sanitized);
-			if (collision is not null &&
-				!(collision.Classification == VariableClassification.Integration &&
-					string.Equals(collision.OwnerIntegrationId, integrationId, StringComparison.Ordinal) &&
-					string.Equals(collision.DefinitionId, resourceId, StringComparison.Ordinal)))
+			if (collision is not null
+				&& !(collision.Classification == VariableClassification.Integration
+					&& string.Equals(collision.OwnerIntegrationId, integrationId, StringComparison.Ordinal)
+					&& string.Equals(collision.DefinitionId, resourceId, StringComparison.Ordinal)))
 			{
 				return Fail<VariableEntity>(VariableBindingError.AlreadyExists,
 					$"A variable named '{sanitized}' already exists");
@@ -315,21 +315,33 @@ public sealed class VariableBindingService : IVariableBindingService
 		}
 	}
 
-	public IReadOnlyList<VariableBinding> GetBindings() => _bindingStore.Load();
+	public IReadOnlyList<VariableBinding> GetBindings()
+	{
+		return _bindingStore.Load();
+	}
 
-	public VariableBinding? FindByVariableId(Guid variableId) => _lookup.FindByVariableId(variableId);
+	public VariableBinding? FindByVariableId(Guid variableId)
+	{
+		return _lookup.FindByVariableId(variableId);
+	}
 
 	private static VariableBinding? FindBinding(
 		IEnumerable<VariableBinding> bindings,
 		string integrationId,
 		string localResourceId)
-		=> bindings.FirstOrDefault(b =>
-			string.Equals(b.IntegrationId, integrationId, StringComparison.Ordinal) &&
-			string.Equals(b.LocalResourceId, localResourceId, StringComparison.Ordinal));
+	{
+		return bindings.FirstOrDefault(b =>
+			string.Equals(b.IntegrationId, integrationId, StringComparison.Ordinal)
+			&& string.Equals(b.LocalResourceId, localResourceId, StringComparison.Ordinal));
+	}
 
 	private static Result<T, VariableBindingError> Fail<T>(VariableBindingError error, string message)
-		=> Result.Fail<T, VariableBindingError>(error, message);
+	{
+		return Result.Fail<T, VariableBindingError>(error, message);
+	}
 
 	private static Result<VariableBindingError> Fail(VariableBindingError error, string message)
-		=> Result.Fail(error, message);
+	{
+		return Result.Fail(error, message);
+	}
 }

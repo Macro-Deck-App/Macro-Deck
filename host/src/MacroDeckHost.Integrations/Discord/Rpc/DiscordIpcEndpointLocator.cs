@@ -15,7 +15,9 @@ internal static class DiscordIpcEndpointLocator
 	];
 
 	public static IReadOnlyList<string> WindowsPipeNames()
-		=> [.. Enumerable.Range(0, SocketCount).Select(i => $"discord-ipc-{i}")];
+	{
+		return [.. Enumerable.Range(0, SocketCount).Select(i => $"discord-ipc-{i}")];
+	}
 
 	public static IReadOnlyList<string> UnixSocketDirectories()
 	{

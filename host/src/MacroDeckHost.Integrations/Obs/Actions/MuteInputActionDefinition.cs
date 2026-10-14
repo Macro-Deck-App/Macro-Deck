@@ -37,10 +37,9 @@ internal sealed class MuteInputActionDefinition : IDynamicOptionsActionDefinitio
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(InputParameter,
-			label: AppStrings.Integrations.Obs.Params.Input(),
+			AppStrings.Integrations.Obs.Params.Input(),
 			required: true),
 		ActionParameter.Choice(ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 					{ Value = ModeToggle, Label = AppStrings.Integrations.Obs.Params.ModeToggle() },
@@ -49,11 +48,14 @@ internal sealed class MuteInputActionDefinition : IDynamicOptionsActionDefinitio
 				new ActionParameterOption
 					{ Value = ModeUnmute, Label = AppStrings.Integrations.Obs.Actions.MuteInput.ModeUnmute() }
 			],
-			label: AppStrings.Integrations.Obs.Params.Mode(),
+			AppStrings.Integrations.Obs.Params.Mode(),
 			defaultValue: ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public async Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -107,8 +109,8 @@ internal sealed class MuteInputActionDefinition : IDynamicOptionsActionDefinitio
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(InputParameter) is not string input ||
-				string.IsNullOrWhiteSpace(input))
+			if (context.Parameters.GetValueOrDefault(InputParameter) is not string input
+				|| string.IsNullOrWhiteSpace(input))
 			{
 				_logger.Warning("OBS mute action skipped: no input selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,

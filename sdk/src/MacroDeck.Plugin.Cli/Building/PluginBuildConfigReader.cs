@@ -8,12 +8,17 @@ internal readonly record struct PluginBuildConfigReadResult(
 	PluginBuildFailureReason? FailureReason,
 	string? FailureMessage)
 {
-	public static PluginBuildConfigReadResult Ok(IReadOnlyDictionary<string, PluginBuildTarget> targets,
+	public static PluginBuildConfigReadResult Ok(
+		IReadOnlyDictionary<string, PluginBuildTarget> targets,
 		IReadOnlyList<string> include)
-		=> new(targets, include, null, null);
+	{
+		return new PluginBuildConfigReadResult(targets, include, null, null);
+	}
 
 	public static PluginBuildConfigReadResult Fail(PluginBuildFailureReason reason, string message)
-		=> new(null, [], reason, message);
+	{
+		return new PluginBuildConfigReadResult(null, [], reason, message);
+	}
 }
 
 /// <summary>
@@ -37,8 +42,8 @@ internal static class PluginBuildConfigReader
 		if (!File.Exists(buildConfigPath))
 		{
 			return PluginBuildConfigReadResult.Fail(PluginBuildFailureReason.BuildConfigNotFound,
-				$"No build configuration at '{CliText.DisplayPath(buildConfigPath)}'. " +
-				$"'{FileName}' describes how each runtime identifier is built; 'macrodeck-plugin new' writes one.");
+				$"No build configuration at '{CliText.DisplayPath(buildConfigPath)}'. "
+				+ $"'{FileName}' describes how each runtime identifier is built; 'macrodeck-plugin new' writes one.");
 		}
 
 		JsonDocument document;
@@ -70,17 +75,17 @@ internal static class PluginBuildConfigReader
 			return Invalid("The build configuration must be a JSON object.");
 		}
 
-		if (!root.TryGetProperty("version", out var version) ||
-			version.ValueKind != JsonValueKind.Number ||
-			!version.TryGetInt32(out var versionNumber))
+		if (!root.TryGetProperty("version", out var version)
+			|| version.ValueKind != JsonValueKind.Number
+			|| !version.TryGetInt32(out var versionNumber))
 		{
 			return Invalid("The build configuration must declare a numeric 'version'.");
 		}
 
 		if (versionNumber != SupportedVersion)
 		{
-			return Invalid($"The build configuration declares version {versionNumber}; " +
-				$"this tool understands version {SupportedVersion}.");
+			return Invalid($"The build configuration declares version {versionNumber}; "
+				+ $"this tool understands version {SupportedVersion}.");
 		}
 
 		if (!root.TryGetProperty("targets", out var targets) || targets.ValueKind != JsonValueKind.Object)
@@ -148,16 +153,17 @@ internal static class PluginBuildConfigReader
 		return PluginBuildConfigReadResult.Ok(parsed, include);
 	}
 
-	private static PluginBuildTarget? ReadTarget(string rid,
+	private static PluginBuildTarget? ReadTarget(
+		string rid,
 		JsonElement element,
 		string sourceRoot,
 		out string? failure)
 	{
 		failure = null;
 
-		if (!element.TryGetProperty("executable", out var executable) ||
-			executable.ValueKind != JsonValueKind.String ||
-			string.IsNullOrWhiteSpace(executable.GetString()))
+		if (!element.TryGetProperty("executable", out var executable)
+			|| executable.ValueKind != JsonValueKind.String
+			|| string.IsNullOrWhiteSpace(executable.GetString()))
 		{
 			failure = $"Target '{rid}' must declare a non-empty 'executable'.";
 			return null;
@@ -189,9 +195,9 @@ internal static class PluginBuildConfigReader
 			}
 		}
 
-		if (!element.TryGetProperty("output", out var output) ||
-			output.ValueKind != JsonValueKind.String ||
-			string.IsNullOrWhiteSpace(output.GetString()))
+		if (!element.TryGetProperty("output", out var output)
+			|| output.ValueKind != JsonValueKind.String
+			|| string.IsNullOrWhiteSpace(output.GetString()))
 		{
 			failure = $"Target '{rid}' must declare a non-empty 'output'.";
 			return null;
@@ -205,11 +211,11 @@ internal static class PluginBuildConfigReader
 
 		string? workingDirectory = null;
 
-		if (element.TryGetProperty("workingDirectory", out var workingDirectoryElement) &&
-			workingDirectoryElement.ValueKind != JsonValueKind.Null)
+		if (element.TryGetProperty("workingDirectory", out var workingDirectoryElement)
+			&& workingDirectoryElement.ValueKind != JsonValueKind.Null)
 		{
-			if (workingDirectoryElement.ValueKind != JsonValueKind.String ||
-				string.IsNullOrWhiteSpace(workingDirectoryElement.GetString()))
+			if (workingDirectoryElement.ValueKind != JsonValueKind.String
+				|| string.IsNullOrWhiteSpace(workingDirectoryElement.GetString()))
 			{
 				failure = $"Target '{rid}' has a 'workingDirectory' value that is not a non-empty string.";
 				return null;
@@ -219,8 +225,8 @@ internal static class PluginBuildConfigReader
 
 			if (!IsContainedRelativePath(workingDirectory!, sourceRoot))
 			{
-				failure = $"Target '{rid}' declares a 'workingDirectory' outside the project directory: " +
-					$"'{workingDirectory}'.";
+				failure = $"Target '{rid}' declares a 'workingDirectory' outside the project directory: "
+					+ $"'{workingDirectory}'.";
 				return null;
 			}
 		}
@@ -248,11 +254,14 @@ internal static class PluginBuildConfigReader
 		var root = Path.GetFullPath(sourceRoot);
 		var resolved = Path.GetFullPath(Path.Combine(root, path));
 
-		return resolved.Equals(root, StringComparison.Ordinal) ||
-			resolved.StartsWith(root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar,
+		return resolved.Equals(root, StringComparison.Ordinal)
+			|| resolved.StartsWith(
+				root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar,
 				StringComparison.Ordinal);
 	}
 
 	private static PluginBuildConfigReadResult Invalid(string message)
-		=> PluginBuildConfigReadResult.Fail(PluginBuildFailureReason.BuildConfigInvalid, message);
+	{
+		return PluginBuildConfigReadResult.Fail(PluginBuildFailureReason.BuildConfigInvalid, message);
+	}
 }

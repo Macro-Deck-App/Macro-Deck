@@ -21,9 +21,12 @@ public class DeviceRegistrationTests
 	private AuthService _service = null!;
 
 	private DeviceService CreateDeviceService()
-		=> new(_devices,
+	{
+		return new DeviceService(_devices,
 			_tokens,
-			new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
+			new DeviceConnectionTracker(new RecordingEventBus(),
+				_time,
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
 			new RecordingUiTransport(),
 			new RecordingMediator(),
 			_time,
@@ -34,6 +37,7 @@ public class DeviceRegistrationTests
 			new FakeIntegrationRegistry(),
 			TestScreenSaverProviders.Registry(),
 			new DeviceSessionGuard());
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -326,7 +330,8 @@ public class DeviceRegistrationTests
 	}
 
 	private static DeviceRegistration Proposal(string proposedName, Guid? id = null, string? secret = null)
-		=> new(id,
+	{
+		return new DeviceRegistration(id,
 			secret,
 			DeviceClientType.WebClient,
 			proposedName,
@@ -334,4 +339,5 @@ public class DeviceRegistrationTests
 			proposedName.Contains("Firefox", StringComparison.Ordinal) ? "Firefox" : "Chrome",
 			DeviceFormFactor.Desktop,
 			null);
+	}
 }

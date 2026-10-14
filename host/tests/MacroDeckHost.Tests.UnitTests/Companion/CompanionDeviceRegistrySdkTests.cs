@@ -17,7 +17,8 @@ internal sealed class CompanionDeviceRegistrySdkTests
 		var device = harness.AddDevice("Phone");
 		var events = new List<string>();
 		devices.DeviceReady += (_, e) => events.Add($"ready:{e.Device!.ReadySequence}");
-		devices.DeviceChanged += (_, e) => events.Add(e.Device is null ? "gone" : $"changed:{e.Device.State.BatteryLevelPercent}");
+		devices.DeviceChanged += (_, e)
+			=> events.Add(e.Device is null ? "gone" : $"changed:{e.Device.State.BatteryLevelPercent}");
 
 		await harness.ReportAsync("connection-1", device);
 		var first = devices.FindDevice(device)!;
@@ -33,10 +34,12 @@ internal sealed class CompanionDeviceRegistrySdkTests
 			Assert.That(first.State.Model, Is.EqualTo("Pixel 8"));
 			Assert.That(afterDisconnect, Is.Zero);
 			Assert.That(second.ReadySequence, Is.Not.EqualTo(first.ReadySequence));
-			Assert.That(events, Is.EqualTo(new[]
-			{
-				"changed:80", $"ready:{first.ReadySequence}", "changed:70", "gone", "changed:80", $"ready:{second.ReadySequence}"
-			}));
+			Assert.That(events,
+				Is.EqualTo(new[]
+				{
+					"changed:80", $"ready:{first.ReadySequence}", "changed:70", "gone", "changed:80",
+					$"ready:{second.ReadySequence}"
+				}));
 		});
 	}
 
@@ -63,19 +66,23 @@ internal sealed class CompanionDeviceRegistrySdkTests
 
 		var confirmed = harness.DeviceRegistry.RequestAsync(device, CompanionDeviceCommand.SetBrightness(20));
 		var firstId = LastRequestId(harness);
-		harness.Requests.TryComplete(device, firstId, CompanionCommandResult.Done, CompanionRequestKind.Command, afterRunning: false);
+		harness.Requests.TryComplete(device, firstId, CompanionCommandResult.Done, CompanionRequestKind.Command, false);
 		var claimed = harness.DeviceRegistry.RequestAsync(device, CompanionDeviceCommand.Vibrate);
 		var secondId = LastRequestId(harness);
 		harness.Requests.TryClaim(device, secondId, CompanionRequestKind.Command);
 		harness.Time.Advance(CompanionCommandRequests.ClaimedCommandDeadline + TimeSpan.FromSeconds(1));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That(await confirmed.WaitAsync(TimeSpan.FromSeconds(5)), Is.EqualTo(CompanionDeviceCommandResult.Done));
-			Assert.That(await claimed.WaitAsync(TimeSpan.FromSeconds(5)), Is.EqualTo(CompanionDeviceCommandResult.Unconfirmed));
+			Assert.That(await confirmed.WaitAsync(TimeSpan.FromSeconds(5)),
+				Is.EqualTo(CompanionDeviceCommandResult.Done));
+			Assert.That(await claimed.WaitAsync(TimeSpan.FromSeconds(5)),
+				Is.EqualTo(CompanionDeviceCommandResult.Unconfirmed));
 			Assert.That(LastCommand(harness).BrightnessPercent, Is.Null);
-			Assert.That(harness.Transport.GroupMessages.Select(entry => entry.Message).OfType<CompanionCommandEvent>()
-				.Select(message => (message.Command, message.BrightnessPercent)).First(),
+			Assert.That(harness.Transport.GroupMessages.Select(entry => entry.Message)
+					.OfType<CompanionCommandEvent>()
+					.Select(message => (message.Command, message.BrightnessPercent))
+					.First(),
 				Is.EqualTo(("setBrightness", (int?)20)));
 		});
 	}
@@ -93,15 +100,15 @@ internal sealed class CompanionDeviceRegistrySdkTests
 			takenCommand.RequestId!,
 			CompanionCommandResult.Of(_png),
 			CompanionRequestKind.Screenshot,
-			afterRunning: false);
+			false);
 		var declined = harness.DeviceRegistry.CaptureScreenshotAsync(device, CompanionScreenshotMode.FullScreen);
 		harness.Requests.TryComplete(device,
 			LastRequestId(harness),
 			CompanionCommandResult.Failed(CompanionDeviceFailure.ConsentDenied),
 			CompanionRequestKind.Screenshot,
-			afterRunning: false);
+			false);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((takenCommand.Command, takenCommand.ScreenshotMode), Is.EqualTo(("screenshot", "full")));
 			Assert.That((await taken.WaitAsync(TimeSpan.FromSeconds(5))).Png, Is.EqualTo(_png));
@@ -140,7 +147,9 @@ internal sealed class CompanionDeviceRegistrySdkTests
 	}
 
 	private static CompanionCommandEvent LastCommand(CompanionHarness harness)
-		=> harness.Transport.GroupMessages.Select(entry => entry.Message).OfType<CompanionCommandEvent>().Last();
+	{
+		return harness.Transport.GroupMessages.Select(entry => entry.Message).OfType<CompanionCommandEvent>().Last();
+	}
 
 	private static string LastRequestId(CompanionHarness harness)
 	{

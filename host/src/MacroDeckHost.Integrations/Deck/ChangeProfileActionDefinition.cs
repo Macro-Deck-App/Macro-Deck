@@ -21,13 +21,16 @@ internal sealed class ChangeProfileActionDefinition : IDynamicOptionsActionDefin
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice("profileId",
-			label: AppStrings.Integrations.Deck.Actions.ProfileLabel(),
-			description: AppStrings.Integrations.Deck.Actions.ProfileDescription(),
+			AppStrings.Integrations.Deck.Actions.ProfileLabel(),
+			AppStrings.Integrations.Deck.Actions.ProfileDescription(),
 			required: true),
 		DeckDeviceTarget.Parameter()
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_navigator);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_navigator);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -35,8 +38,8 @@ internal sealed class ChangeProfileActionDefinition : IDynamicOptionsActionDefin
 	{
 		var profiles = _navigator()?.GetProfiles() ?? [];
 		var options = profiles
-			.Where(profile => context.Filter is null ||
-				profile.Label.Contains(context.Filter, StringComparison.OrdinalIgnoreCase))
+			.Where(profile
+				=> context.Filter is null || profile.Label.Contains(context.Filter, StringComparison.OrdinalIgnoreCase))
 			.Select(profile => new ActionParameterOption { Value = profile.Id, Label = profile.Label })
 			.ToList();
 
@@ -81,7 +84,7 @@ internal sealed class ChangeProfileActionDefinition : IDynamicOptionsActionDefin
 			if (navigator.GetProfiles().All(profile => profile.Id != profileId))
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.Deck.Errors.ProfileNotFound(profileId: profileId));
+					AppStrings.Integrations.Deck.Errors.ProfileNotFound(profileId));
 			}
 
 			if (!DeckDeviceTarget.TryResolve(navigator, context, out var originClientId, out var failure))

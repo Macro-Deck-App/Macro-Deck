@@ -13,7 +13,7 @@ public sealed class SkiaFontCatalog : IFontCatalog
 	private const uint CollectionSignature = 0x74746366;
 	private const int MaxDirectoryDepth = 8;
 
-	private static readonly HashSet<string> FontFileExtensions =
+	private static readonly HashSet<string> _fontFileExtensions =
 		new([".ttf", ".otf", ".ttc", ".otc"], StringComparer.OrdinalIgnoreCase);
 
 	private readonly Lazy<Catalog> _system;
@@ -63,10 +63,15 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		}
 	}
 
-	public IReadOnlyList<FontFaceInfo> GetFaces() => Current.Faces;
+	public IReadOnlyList<FontFaceInfo> GetFaces()
+	{
+		return Current.Faces;
+	}
 
-	public string ResolveFaceId(string faceId) =>
-		Current.Aliases.TryGetValue(faceId, out var canonical) ? canonical : faceId;
+	public string ResolveFaceId(string faceId)
+	{
+		return Current.Aliases.TryGetValue(faceId, out var canonical) ? canonical : faceId;
+	}
 
 	public void Reload()
 	{
@@ -97,11 +102,11 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		if (source.FilePath is not null)
 		{
 			using var fileTypeface = OpenFace(source.FilePath, source.StyleIndex);
-			if (fileTypeface is null ||
-				!string.Equals(fileTypeface.FamilyName, source.Family, StringComparison.Ordinal) ||
-				fileTypeface.FontWeight != source.Weight ||
-				fileTypeface.FontWidth != source.Width ||
-				fileTypeface.FontSlant != source.Slant)
+			if (fileTypeface is null
+				|| !string.Equals(fileTypeface.FamilyName, source.Family, StringComparison.Ordinal)
+				|| fileTypeface.FontWeight != source.Weight
+				|| fileTypeface.FontWidth != source.Width
+				|| fileTypeface.FontSlant != source.Slant)
 			{
 				return null;
 			}
@@ -138,11 +143,11 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		}
 
 		using var typeface = UserFontFiles.Open(bytes);
-		if (typeface is null ||
-			!string.Equals(typeface.FamilyName, source.Family, StringComparison.Ordinal) ||
-			typeface.FontWeight != source.Weight ||
-			typeface.FontWidth != source.Width ||
-			typeface.FontSlant != source.Slant)
+		if (typeface is null
+			|| !string.Equals(typeface.FamilyName, source.Family, StringComparison.Ordinal)
+			|| typeface.FontWeight != source.Weight
+			|| typeface.FontWidth != source.Width
+			|| typeface.FontSlant != source.Slant)
 		{
 			return null;
 		}
@@ -179,15 +184,19 @@ public sealed class SkiaFontCatalog : IFontCatalog
 			}
 
 			var face = UserFontFiles.Inspect(bytes);
-			if (face is null || installedFamilies.Contains(face.Family) ||
-				!userKeys.Add(new FaceKey(face.Family.ToUpperInvariant(), face.Weight, face.Width, SlantId(face.Slant))))
+			if (face is null
+				|| installedFamilies.Contains(face.Family)
+				|| !userKeys.Add(new FaceKey(face.Family.ToUpperInvariant(),
+					face.Weight,
+					face.Width,
+					SlantId(face.Slant))))
 			{
 				continue;
 			}
 
 			using var style = new SKFontStyle(face.Weight, face.Width, face.Slant);
 			var faceId = ReserveFaceId(sources, face.Family, style);
-			sources[faceId] = new FaceSource(face.Family, 0, face.Weight, face.Width, face.Slant, path, UserFile: true);
+			sources[faceId] = new FaceSource(face.Family, 0, face.Weight, face.Width, face.Slant, path, true);
 			faces.Add(new FontFaceInfo(faceId,
 				face.Family,
 				face.Weight,
@@ -204,7 +213,9 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		return new Catalog(faces, sources, system.Aliases);
 	}
 
-	private static Catalog Load(IReadOnlyList<string> additionalFontDirectories, IEnumerable<SystemFaceEntry> systemFaces)
+	private static Catalog Load(
+		IReadOnlyList<string> additionalFontDirectories,
+		IEnumerable<SystemFaceEntry> systemFaces)
 	{
 		var faces = new List<FontFaceInfo>();
 		var sources = new Dictionary<string, FaceSource>(StringComparer.Ordinal);
@@ -329,7 +340,10 @@ public sealed class SkiaFontCatalog : IFontCatalog
 					typeface.FontWidth,
 					typeface.FontSlant,
 					path);
-				if (!known.Add(new FaceKey(source.Family.ToUpperInvariant(), source.Weight, source.Width, SlantId(source.Slant))))
+				if (!known.Add(new FaceKey(source.Family.ToUpperInvariant(),
+					source.Weight,
+					source.Width,
+					SlantId(source.Slant))))
 				{
 					continue;
 				}
@@ -338,7 +352,8 @@ public sealed class SkiaFontCatalog : IFontCatalog
 			}
 		}
 
-		foreach (var (source, remoteRenderable) in found.OrderBy(entry => entry.Source.Family, StringComparer.OrdinalIgnoreCase))
+		foreach (var (source, remoteRenderable) in found.OrderBy(entry => entry.Source.Family,
+			StringComparer.OrdinalIgnoreCase))
 		{
 			using var style = new SKFontStyle(source.Weight, source.Width, source.Slant);
 			var faceId = ReserveFaceId(sources, source.Family, style);
@@ -365,7 +380,7 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		try
 		{
 			return Directory.EnumerateFiles(directory, "*", options)
-				.Where(path => FontFileExtensions.Contains(Path.GetExtension(path)))
+				.Where(path => _fontFileExtensions.Contains(Path.GetExtension(path)))
 				.Order(StringComparer.Ordinal)
 				.ToList();
 		}
@@ -381,7 +396,7 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		{
 			using var stream = File.OpenRead(path);
 			Span<byte> header = stackalloc byte[12];
-			if (stream.ReadAtLeast(header, header.Length, throwOnEndOfStream: false) < header.Length)
+			if (stream.ReadAtLeast(header, header.Length, false) < header.Length)
 			{
 				return 0;
 			}
@@ -396,7 +411,10 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		}
 	}
 
-	private static SKTypeface? OpenFace(string path, int index) => SKTypeface.FromFile(path, index);
+	private static SKTypeface? OpenFace(string path, int index)
+	{
+		return SKTypeface.FromFile(path, index);
+	}
 
 	private static string ReserveFaceId(Dictionary<string, FaceSource> taken, string family, SKFontStyle style)
 	{
@@ -416,12 +434,15 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		}
 	}
 
-	private static string SlantId(SKFontStyleSlant slant) => slant switch
+	private static string SlantId(SKFontStyleSlant slant)
 	{
-		SKFontStyleSlant.Italic => FontFaceIdentity.ItalicSlant,
-		SKFontStyleSlant.Oblique => FontFaceIdentity.ObliqueSlant,
-		_ => FontFaceIdentity.UprightSlant
-	};
+		return slant switch
+		{
+			SKFontStyleSlant.Italic => FontFaceIdentity.ItalicSlant,
+			SKFontStyleSlant.Oblique => FontFaceIdentity.ObliqueSlant,
+			_ => FontFaceIdentity.UprightSlant
+		};
+	}
 
 	internal static string StyleNameOf(int weight, int width, SKFontStyleSlant slant)
 	{
@@ -451,33 +472,39 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		return parts.Count == 0 ? "Regular" : string.Join(' ', parts);
 	}
 
-	private static string? WidthName(int width) => width switch
+	private static string? WidthName(int width)
 	{
-		1 => "UltraCondensed",
-		2 => "ExtraCondensed",
-		3 => "Condensed",
-		4 => "SemiCondensed",
-		6 => "SemiExpanded",
-		7 => "Expanded",
-		8 => "ExtraExpanded",
-		9 => "UltraExpanded",
-		_ => null
-	};
+		return width switch
+		{
+			1 => "UltraCondensed",
+			2 => "ExtraCondensed",
+			3 => "Condensed",
+			4 => "SemiCondensed",
+			6 => "SemiExpanded",
+			7 => "Expanded",
+			8 => "ExtraExpanded",
+			9 => "UltraExpanded",
+			_ => null
+		};
+	}
 
-	private static string WeightName(int weight) => weight switch
+	private static string WeightName(int weight)
 	{
-		100 => "Thin",
-		200 => "ExtraLight",
-		300 => "Light",
-		RegularWeight => "Regular",
-		500 => "Medium",
-		600 => "SemiBold",
-		700 => "Bold",
-		800 => "ExtraBold",
-		900 => "Black",
-		1000 => "ExtraBlack",
-		_ => weight.ToString(CultureInfo.InvariantCulture)
-	};
+		return weight switch
+		{
+			100 => "Thin",
+			200 => "ExtraLight",
+			300 => "Light",
+			RegularWeight => "Regular",
+			500 => "Medium",
+			600 => "SemiBold",
+			700 => "Bold",
+			800 => "ExtraBold",
+			900 => "Black",
+			1000 => "ExtraBlack",
+			_ => weight.ToString(CultureInfo.InvariantCulture)
+		};
+	}
 
 	private sealed record FaceSource(
 		string Family,

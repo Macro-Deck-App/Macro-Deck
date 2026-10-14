@@ -36,7 +36,7 @@ public sealed record GaugesWidgetData
 			Title = ReadString(data, "title") is { Length: > 0 } title ? title : null,
 			Style = ReadString(data, "style") == StyleArc ? StyleArc : StyleRing,
 			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
-			Gauges = ParseGauges(data.TryGetProperty("gauges", out var gauges) ? gauges : default),
+			Gauges = ParseGauges(data.TryGetProperty("gauges", out var gauges) ? gauges : default)
 		};
 	}
 
@@ -79,23 +79,30 @@ public sealed record GaugesWidgetData
 
 	// Ids become node keys in the editor tree, which only accepts short identifiers.
 	private static bool IsUsableId(string id)
-		=> id.Length is > 0 and <= 32 && id.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_');
+	{
+		return id.Length is > 0 and <= 32
+			&& id.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_');
+	}
 
 	internal static string? ReadString(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	internal static double? ReadDouble(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number) &&
-			double.IsFinite(number)
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
+			&& double.IsFinite(number)
 				? number
 				: null;
+	}
 }
 
 public sealed record GaugeConfig
@@ -146,7 +153,7 @@ public sealed record GaugeConfig
 			WarnWhen = warnWhen is WarnAbove or WarnBelow ? warnWhen : null,
 			WarnAt = GaugesWidgetData.ReadDouble(item, "warnAt"),
 			ThresholdsEnabled = WidgetThresholds.ReadEnabled(item),
-			Thresholds = WidgetThresholds.ReadStored(item),
+			Thresholds = WidgetThresholds.ReadStored(item)
 		};
 	}
 }

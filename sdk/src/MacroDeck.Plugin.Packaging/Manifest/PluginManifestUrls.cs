@@ -10,7 +10,9 @@ namespace MacroDeck.Plugin.Packaging.Manifest;
 internal static class PluginManifestUrls
 {
 	public static bool IsAbsoluteHttpUrl(string value)
-		=> Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
-			(string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.Ordinal) ||
-				string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal));
+	{
+		return Uri.TryCreate(value, UriKind.Absolute, out var uri)
+			&& (string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.Ordinal)
+				|| string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal));
+	}
 }

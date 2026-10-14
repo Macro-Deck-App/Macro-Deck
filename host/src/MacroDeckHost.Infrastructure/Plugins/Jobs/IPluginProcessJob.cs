@@ -13,9 +13,15 @@ internal sealed class NullPluginProcessJob : IPluginProcessJob
 {
 	public bool IsActive => false;
 
-	public bool TryAssign(int processId) => false;
+	public bool TryAssign(int processId)
+	{
+		return false;
+	}
 
-	public bool TryTerminate() => false;
+	public bool TryTerminate()
+	{
+		return false;
+	}
 
 	public void Dispose()
 	{

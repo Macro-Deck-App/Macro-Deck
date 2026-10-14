@@ -7,14 +7,19 @@ namespace MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 internal sealed class FakePluginInstaller : IPluginInstaller
 {
 	public PluginInstallResult ResultToReturn { get; set; } =
-		PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, activated: false);
+		PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, false);
 
 	public PluginUninstallRequest? LastUninstallRequest { get; private set; }
 
-	public Task<PluginInstallResult> Inspect(PluginArtifactSource source,
-		CancellationToken cancellationToken = default) => Task.FromResult(ResultToReturn);
+	public Task<PluginInstallResult> Inspect(
+		PluginArtifactSource source,
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(ResultToReturn);
+	}
 
-	public Task<PluginInstallResult> Install(PluginArtifactSource source,
+	public Task<PluginInstallResult> Install(
+		PluginArtifactSource source,
 		PluginInstallRequest request,
 		CancellationToken cancellationToken = default)
 	{
@@ -28,11 +33,16 @@ internal sealed class FakePluginInstaller : IPluginInstaller
 
 	public PluginArtifactSource? LastInstallSource { get; private set; }
 
-	public Task<PluginInstallResult> Activate(string pluginId,
+	public Task<PluginInstallResult> Activate(
+		string pluginId,
 		string version,
-		CancellationToken cancellationToken = default) => Task.FromResult(ResultToReturn);
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(ResultToReturn);
+	}
 
-	public Task<PluginInstallResult> Uninstall(string pluginId,
+	public Task<PluginInstallResult> Uninstall(
+		string pluginId,
 		PluginUninstallRequest request,
 		CancellationToken cancellationToken = default)
 	{
@@ -43,7 +53,10 @@ internal sealed class FakePluginInstaller : IPluginInstaller
 
 internal sealed class FakeInstallationCatalog : IPluginInstallationCatalog
 {
-	public IReadOnlyList<InstalledPlugin> Discover() => [];
+	public IReadOnlyList<InstalledPlugin> Discover()
+	{
+		return [];
+	}
 
 	public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 	{
@@ -64,9 +77,13 @@ internal sealed class FakeArtifactCache : IPluginArtifactCache
 		return false;
 	}
 
-	public Task<string> Put(string sourcePath,
+	public Task<string> Put(
+		string sourcePath,
 		string sha256,
-		CancellationToken cancellationToken = default) => Task.FromResult(sourcePath);
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(sourcePath);
+	}
 
 	public void Prune()
 	{

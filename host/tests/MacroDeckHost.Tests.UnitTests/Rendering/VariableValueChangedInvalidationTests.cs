@@ -14,22 +14,28 @@ namespace MacroDeckHost.Tests.UnitTests.Rendering;
 [TestFixture]
 public class VariableValueChangedInvalidationTests
 {
-	private static WidgetEntity Button(Guid id, string? data) => new()
+	private static WidgetEntity Button(Guid id, string? data)
 	{
-		Id = id,
-		FolderId = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		Data = data
-	};
+		return new WidgetEntity
+		{
+			Id = id,
+			FolderId = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			Data = data
+		};
+	}
 
-	private static VariableEntity Variable(string name, VariableScope scope, string? scopeRefId = null) => new()
+	private static VariableEntity Variable(string name, VariableScope scope, string? scopeRefId = null)
 	{
-		Name = name,
-		Scope = scope,
-		ScopeRefId = scopeRefId,
-		Type = VariableType.Text,
-		Classification = VariableClassification.User
-	};
+		return new VariableEntity
+		{
+			Name = name,
+			Scope = scope,
+			ScopeRefId = scopeRefId,
+			Type = VariableType.Text,
+			Classification = VariableClassification.User
+		};
+	}
 
 	private static List<Guid> Drain(LabelRenderChannel queue)
 	{
@@ -99,18 +105,45 @@ public class VariableValueChangedInvalidationTests
 			_folder = new FolderEntity { Name = "f", Order = 0, Widgets = widgets.ToList() };
 		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task InitializeCache() => Task.CompletedTask;
-		public FolderEntity? GetFolderById(Guid id) => _folder;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return _folder;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

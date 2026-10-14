@@ -72,12 +72,18 @@ public sealed class IntegrationUserNotifier : IUserNotifier
 		}
 	}
 
-	private string QualifyKey(string? key) => $"integration:{_integrationId}:{key}";
-
-	private static UserNotificationSeverity ToSeverity(UserNotificationLevel level) => level switch
+	private string QualifyKey(string? key)
 	{
-		UserNotificationLevel.Warning => UserNotificationSeverity.Warning,
-		UserNotificationLevel.Error => UserNotificationSeverity.Error,
-		_ => UserNotificationSeverity.Info
-	};
+		return $"integration:{_integrationId}:{key}";
+	}
+
+	private static UserNotificationSeverity ToSeverity(UserNotificationLevel level)
+	{
+		return level switch
+		{
+			UserNotificationLevel.Warning => UserNotificationSeverity.Warning,
+			UserNotificationLevel.Error => UserNotificationSeverity.Error,
+			_ => UserNotificationSeverity.Info
+		};
+	}
 }

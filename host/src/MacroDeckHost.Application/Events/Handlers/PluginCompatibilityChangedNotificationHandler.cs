@@ -14,9 +14,12 @@ public sealed class PluginCompatibilityChangedNotificationHandler
 		_uiTransport = uiTransport;
 	}
 
-	public ValueTask Handle(PluginCompatibilityChangedNotification notification,
+	public ValueTask Handle(
+		PluginCompatibilityChangedNotification notification,
 		CancellationToken cancellationToken)
-		=> new(_uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new PluginCompatibilityChangedEvent(),
 			cancellationToken));
+	}
 }

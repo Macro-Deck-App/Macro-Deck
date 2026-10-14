@@ -13,7 +13,10 @@ namespace MacroDeckHost.Application.Devices.Surfaces;
 /// </summary>
 internal static class SurfaceFolderChain
 {
-	public static string IdOf(Folder folder) => folder.Id;
+	public static string IdOf(Folder folder)
+	{
+		return folder.Id;
+	}
 
 	public static bool ParentIdOf(Folder folder, out string parentId)
 	{
@@ -21,7 +24,10 @@ internal static class SurfaceFolderChain
 		return !string.IsNullOrEmpty(folder.ParentId);
 	}
 
-	public static IEnumerable<Widget> WidgetsOf(Folder folder) => folder.Widgets;
+	public static IEnumerable<Widget> WidgetsOf(Folder folder)
+	{
+		return folder.Widgets;
+	}
 
 	/// <summary>
 	/// Every widget the folder renders, each paired with the folder that owns it. A pinned widget is
@@ -31,7 +37,8 @@ internal static class SurfaceFolderChain
 	public static IEnumerable<(Widget Widget, string FolderId)> DisplayedWidgets(
 		Folder folder,
 		IReadOnlyList<Folder> profileFolders)
-		=> FolderChain.DisplayedWidgets<Folder, string, (Widget Widget, string FolderId)>(folder,
+	{
+		return FolderChain.DisplayedWidgets<Folder, string, (Widget Widget, string FolderId)>(folder,
 			profileFolders,
 			IdOf,
 			ParentIdOf,
@@ -39,23 +46,31 @@ internal static class SurfaceFolderChain
 			entry => entry.Widget.IsPinned,
 			entry => entry.Widget.PinScope == PinScope.Profile,
 			StringComparer.Ordinal);
+	}
 
 	public static int ResolveRows(Folder folder, IReadOnlyList<Folder> profileFolders, int profileDefault)
-		=> Resolve(folder, profileFolders, f => f.Rows) ?? profileDefault;
+	{
+		return Resolve(folder, profileFolders, f => f.Rows) ?? profileDefault;
+	}
 
 	public static int ResolveColumns(Folder folder, IReadOnlyList<Folder> profileFolders, int profileDefault)
-		=> Resolve(folder, profileFolders, f => f.Columns) ?? profileDefault;
+	{
+		return Resolve(folder, profileFolders, f => f.Columns) ?? profileDefault;
+	}
 
 	public static int ResolveWidgetSpacing(Folder folder, IReadOnlyList<Folder> profileFolders, int? profileDefault)
-		=> Resolve(folder, profileFolders, f => f.WidgetSpacing) ?? profileDefault ?? GridDefaults.WidgetSpacing;
+	{
+		return Resolve(folder, profileFolders, f => f.WidgetSpacing) ?? profileDefault ?? GridDefaults.WidgetSpacing;
+	}
 
 	public static int ResolveWidgetBorderRadius(
 		Folder folder,
 		IReadOnlyList<Folder> profileFolders,
 		int? profileDefault)
-		=> Resolve(folder, profileFolders, f => f.WidgetBorderRadius) ??
-			profileDefault ??
-			GridDefaults.WidgetBorderRadius;
+	{
+		return Resolve(folder, profileFolders, f => f.WidgetBorderRadius)
+			?? profileDefault ?? GridDefaults.WidgetBorderRadius;
+	}
 
 	/// <summary>
 	/// Deliberately not a chain walk, unlike every other value here: the client resolves a background
@@ -63,16 +78,22 @@ internal static class SurfaceFolderChain
 	/// render the same surface.
 	/// </summary>
 	public static string? ResolveBackgroundColor(Folder folder, string? profileDefault)
-		=> folder.BackgroundColor ?? profileDefault;
+	{
+		return folder.BackgroundColor ?? profileDefault;
+	}
 
 	private static T? Resolve<T>(Folder folder, IReadOnlyList<Folder> profileFolders, Func<Folder, T?> select)
 		where T : struct
-		=> Chain(folder, profileFolders).Select(select).FirstOrDefault(value => value is not null);
+	{
+		return Chain(folder, profileFolders).Select(select).FirstOrDefault(value => value is not null);
+	}
 
 	private static IEnumerable<Folder> Chain(Folder folder, IReadOnlyList<Folder> profileFolders)
-		=> FolderChain.AncestorsAndSelf<Folder, string>(folder,
+	{
+		return FolderChain.AncestorsAndSelf<Folder, string>(folder,
 			profileFolders,
 			IdOf,
 			ParentIdOf,
 			StringComparer.Ordinal);
+	}
 }

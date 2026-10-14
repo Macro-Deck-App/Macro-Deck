@@ -34,8 +34,8 @@ public sealed class UiResourceStore : IUiResourceStore
 		var maxBytes = Math.Min(registration.MaxBytes, HostUiResourceLimits.MaxHostIconResourceBytes);
 		if (registration.Content.Length > maxBytes)
 		{
-			throw new ArgumentException($"The resource is {registration.Content.Length} bytes, over the " +
-				$"{maxBytes} byte limit.",
+			throw new ArgumentException(
+				$"The resource is {registration.Content.Length} bytes, over the " + $"{maxBytes} byte limit.",
 				nameof(registration));
 		}
 
@@ -43,7 +43,7 @@ public sealed class UiResourceStore : IUiResourceStore
 		{
 			Content = registration.Content,
 			MediaType = registration.MediaType,
-			ContentHash = HashOf(registration),
+			ContentHash = HashOf(registration)
 		};
 
 		_resources[resourceId] = content;
@@ -53,7 +53,7 @@ public sealed class UiResourceStore : IUiResourceStore
 			ResourceId = resourceId,
 			ContentHash = content.ContentHash,
 			MediaType = content.MediaType,
-			ByteLength = registration.Content.Length,
+			ByteLength = registration.Content.Length
 		};
 	}
 
@@ -72,7 +72,9 @@ public sealed class UiResourceStore : IUiResourceStore
 	}
 
 	private static string HashOf(UiResourceRegistration registration)
-		=> HashOf(registration.Content, registration.Variation);
+	{
+		return HashOf(registration.Content, registration.Variation);
+	}
 
 	public bool TryGet(string resourceId, out UiResourceContent content)
 	{
@@ -89,5 +91,7 @@ public sealed class UiResourceStore : IUiResourceStore
 	}
 
 	public bool Remove(string resourceId)
-		=> !string.IsNullOrEmpty(resourceId) && _resources.TryRemove(resourceId, out _);
+	{
+		return !string.IsNullOrEmpty(resourceId) && _resources.TryRemove(resourceId, out _);
+	}
 }

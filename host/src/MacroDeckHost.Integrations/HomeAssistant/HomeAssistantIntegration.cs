@@ -102,9 +102,15 @@ public sealed class HomeAssistantIntegration
 			}
 	];
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new HomeAssistantConfigFlow(() => new HomeAssistantClient());
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new HomeAssistantConfigFlow(() => new HomeAssistantClient());
+	}
 
 	public bool SupportsCatalog => true;
 
@@ -117,7 +123,9 @@ public sealed class HomeAssistantIntegration
 	public ValueTask<VariableCatalogPage> DiscoverAsync(
 		VariableCatalogQuery query,
 		CancellationToken cancellationToken = default)
-		=> _dynamicVariables.DiscoverAsync(query, cancellationToken);
+	{
+		return _dynamicVariables.DiscoverAsync(query, cancellationToken);
+	}
 
 	public async ValueTask<VariableDefinition?> ResolveAsync(
 		string localId,
@@ -130,10 +138,14 @@ public sealed class HomeAssistantIntegration
 	public ValueTask<IReadOnlyList<VariableValue>> SubscribeAsync(
 		IReadOnlyCollection<string> localIds,
 		CancellationToken cancellationToken = default)
-		=> _dynamicVariables.SubscribeAsync(localIds, cancellationToken);
+	{
+		return _dynamicVariables.SubscribeAsync(localIds, cancellationToken);
+	}
 
 	public Task OnAttachedAsync(IVariableSink sink, CancellationToken cancellationToken = default)
-		=> _dynamicVariables.OnAttachedAsync(sink, cancellationToken);
+	{
+		return _dynamicVariables.OnAttachedAsync(sink, cancellationToken);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -163,14 +175,15 @@ public sealed class HomeAssistantIntegration
 		var requests = new List<VariableBindingRequest>();
 		foreach (var request in await migration.BuildAsync())
 		{
-			if (VariableNames.IsValid(request.Name) &&
-				MacroDeckId.IsValidLocalId(request.LocalResourceId, LocalIdKind.Resource))
+			if (VariableNames.IsValid(request.Name)
+				&& MacroDeckId.IsValidLocalId(request.LocalResourceId, LocalIdKind.Resource))
 			{
 				requests.Add(request);
 			}
 			else
 			{
-				_logger.Warning("Home Assistant skipped watched entity resource {ResourceId} named {Name}: not bindable",
+				_logger.Warning(
+					"Home Assistant skipped watched entity resource {ResourceId} named {Name}: not bindable",
 					request.LocalResourceId,
 					request.Name);
 			}
@@ -229,7 +242,9 @@ public sealed class HomeAssistantIntegration
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> _dynamicVariables.SetValueAsync(localId, value, cancellationToken);
+	{
+		return _dynamicVariables.SetValueAsync(localId, value, cancellationToken);
+	}
 
 	public Task<DynamicOptionsResult> GetEventOptionsAsync(
 		EventOptionsContext context,
@@ -283,7 +298,7 @@ public sealed class HomeAssistantIntegration
 				Id = CertificateIssueId,
 				Title = AppStrings.Integrations.HomeAssistant.Issues.CertificateUntrustedTitle(),
 				Description = AppStrings.Integrations.HomeAssistant.Issues.CertificateUntrustedDescription(
-					host: connection.Uri.Host),
+					connection.Uri.Host),
 				Severity = IntegrationIssueSeverity.Error,
 				ActionLabel = AppStrings.Integrations.HomeAssistant.Issues.OpenSetupAction()
 			});
@@ -296,7 +311,7 @@ public sealed class HomeAssistantIntegration
 				Id = UnreachableIssueId,
 				Title = AppStrings.Integrations.HomeAssistant.Issues.UnreachableTitle(),
 				Description = AppStrings.Integrations.HomeAssistant.Issues.UnreachableDescription(
-					uri: connection.Uri.ToString()),
+					connection.Uri.ToString()),
 				Severity = IntegrationIssueSeverity.Warning,
 				ActionLabel = AppStrings.Integrations.HomeAssistant.Issues.OpenSetupAction()
 			});
@@ -307,9 +322,9 @@ public sealed class HomeAssistantIntegration
 			issues.Add(new IntegrationIssue
 			{
 				Id = MissingEntitiesIssueId,
-				Title = AppStrings.Integrations.HomeAssistant.Issues.MissingEntitiesTitle(count: missing.Count),
-				Description = AppStrings.Integrations.HomeAssistant.Issues.MissingEntitiesDescription(
-					entities: Describe(missing)),
+				Title = AppStrings.Integrations.HomeAssistant.Issues.MissingEntitiesTitle(missing.Count),
+				Description
+					= AppStrings.Integrations.HomeAssistant.Issues.MissingEntitiesDescription(Describe(missing)),
 				Severity = IntegrationIssueSeverity.Warning,
 				ActionLabel = AppStrings.Integrations.HomeAssistant.Issues.OpenSetupAction()
 			});
@@ -319,20 +334,22 @@ public sealed class HomeAssistantIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId switch
+	{
+		return Task.FromResult(issueId switch
 		{
 			AuthInvalidIssueId or CertificateIssueId or UnreachableIssueId or MissingEntitiesIssueId =>
 				IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow),
 			_ => IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue())
 		});
+	}
 
 	private static IReadOnlyList<string> KnownStates(HomeAssistantConnection? connection, string? domain)
 	{
 		var states = new SortedSet<string>(StringComparer.Ordinal);
 		foreach (var entity in (connection?.Catalog ?? HomeAssistantCatalog.Empty).Entities.Values)
 		{
-			if (entity.State.Length > 0 &&
-				(domain is not { Length: > 0 } || string.Equals(entity.Domain, domain, StringComparison.Ordinal)))
+			if (entity.State.Length > 0
+				&& (domain is not { Length: > 0 } || string.Equals(entity.Domain, domain, StringComparison.Ordinal)))
 			{
 				states.Add(entity.State);
 			}

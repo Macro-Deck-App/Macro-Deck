@@ -50,9 +50,9 @@ internal sealed class TwitchSubscriptionManager
 			new ParallelOptions { MaxDegreeOfParallelism = MaxParallelism, CancellationToken = cancellationToken },
 			async (spec, token) =>
 			{
-				var result = granted.Count > 0 &&
-					spec.Scope is { } scope &&
-					!granted.Contains(scope, StringComparer.Ordinal)
+				var result = granted.Count > 0
+					&& spec.Scope is { } scope
+					&& !granted.Contains(scope, StringComparer.Ordinal)
 						? TwitchSubscriptionResult.MissingScope
 						: await CreateAsync(spec, sessionId, token);
 
@@ -102,9 +102,11 @@ internal sealed class TwitchSubscriptionManager
 		TwitchSubscriptionSpec spec,
 		string sessionId,
 		CancellationToken cancellationToken)
-		=> _helix.CreateEventSubSubscriptionAsync(spec.Type,
+	{
+		return _helix.CreateEventSubSubscriptionAsync(spec.Type,
 			spec.Version,
 			TwitchEventCatalog.BuildCondition(spec.Condition, _userId),
 			sessionId,
 			cancellationToken);
+	}
 }

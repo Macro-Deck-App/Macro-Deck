@@ -18,19 +18,25 @@ namespace MacroDeckHost.Tests.UnitTests.Ui;
 [TestFixture]
 public class UpdateWidgetSchemaValidationTests
 {
-	private static UpdateWidgetRequestMessageHandler CreateHandler(RecordingWidgetService service,
+	private static UpdateWidgetRequestMessageHandler CreateHandler(
+		RecordingWidgetService service,
 		IFolderCache? folderCache = null)
-		=> new(service,
+	{
+		return new UpdateWidgetRequestMessageHandler(service,
 			new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator())),
 			folderCache ?? new FakeFolderCache(Guid.NewGuid()));
+	}
 
-	private static UpdateWidgetRequest Request(string type, string? data) => new()
+	private static UpdateWidgetRequest Request(string type, string? data)
 	{
-		Id = Guid.NewGuid().ToString(),
-		FolderId = Guid.NewGuid().ToString(),
-		Type = type,
-		Data = data
-	};
+		return new UpdateWidgetRequest
+		{
+			Id = Guid.NewGuid().ToString(),
+			FolderId = Guid.NewGuid().ToString(),
+			Type = type,
+			Data = data
+		};
+	}
 
 	private static string StateData(int count)
 	{
@@ -152,12 +158,12 @@ public class UpdateWidgetSchemaValidationTests
 	{
 		var service = new RecordingWidgetService();
 		var handler = CreateHandler(service);
-		var editorPayload = "{\"stateMode\":true," +
-			"\"states\":[{\"id\":\"muted\",\"label\":\"Muted\"},{\"id\":\"unmuted\",\"label\":\"Unmuted\"}]," +
-			"\"activeStateId\":\"muted\"," +
-			$"\"stateMapping\":{ManualMapping}," +
-			"\"stateProvider\":{\"blockId\":\"b1\",\"integrationId\":\"app.macro-deck.system\",\"actionId\":\"mute-volume\"}," +
-			$"\"manualStateBackup\":{{\"states\":{ManualStates},\"stateMapping\":{ManualMapping},\"activeStateId\":\"on\"}}}}";
+		var editorPayload = "{\"stateMode\":true,"
+			+ "\"states\":[{\"id\":\"muted\",\"label\":\"Muted\"},{\"id\":\"unmuted\",\"label\":\"Unmuted\"}],"
+			+ "\"activeStateId\":\"muted\","
+			+ $"\"stateMapping\":{ManualMapping},"
+			+ "\"stateProvider\":{\"blockId\":\"b1\",\"integrationId\":\"app.macro-deck.system\",\"actionId\":\"mute-volume\"},"
+			+ $"\"manualStateBackup\":{{\"states\":{ManualStates},\"stateMapping\":{ManualMapping},\"activeStateId\":\"on\"}}}}";
 
 		var response = await handler.Handle(Request(WidgetTypeIds.ActionButton, editorPayload), CancellationToken.None);
 
@@ -321,8 +327,8 @@ public class UpdateWidgetSchemaValidationTests
 		var handler = CreateHandler(service);
 		var states = string.Join(",",
 			Enumerable.Range(0, 40).Select(i => $"{{\"id\":\"s{i}\",\"label\":\"State {i}\"}}"));
-		var data = $"{{\"stateMode\":true,\"states\":[{states}]," +
-			$"\"stateProvider\":{{\"blockId\":\"b1\",\"states\":[{states}]}}}}";
+		var data = $"{{\"stateMode\":true,\"states\":[{states}],"
+			+ $"\"stateProvider\":{{\"blockId\":\"b1\",\"states\":[{states}]}}}}";
 
 		var response = await handler.Handle(Request(WidgetTypeIds.ActionButton, data), CancellationToken.None);
 
@@ -342,9 +348,9 @@ public class UpdateWidgetSchemaValidationTests
 		var folderId = Guid.NewGuid();
 		var backup = string.Join(",",
 			Enumerable.Range(0, 60).Select(i => $"{{\"id\":\"s{i}\",\"label\":\"State {i}\"}}"));
-		var stored = $"{{\"stateMode\":true,\"states\":[{{\"id\":\"p1\",\"label\":\"P1\"}}]," +
-			$"\"stateProvider\":{{\"blockId\":\"b1\"}}," +
-			$"\"manualStateBackup\":{{\"states\":[{backup}]}}}}";
+		var stored = $"{{\"stateMode\":true,\"states\":[{{\"id\":\"p1\",\"label\":\"P1\"}}],"
+			+ $"\"stateProvider\":{{\"blockId\":\"b1\"}},"
+			+ $"\"manualStateBackup\":{{\"states\":[{backup}]}}}}";
 
 		var service = new RecordingWidgetService();
 		var cache = new FakeFolderCache(folderId,
@@ -352,8 +358,8 @@ public class UpdateWidgetSchemaValidationTests
 		var handler = CreateHandler(service, cache);
 
 		var request = Request(WidgetTypeIds.ActionButton,
-			$"{{\"stateMode\":true,\"states\":[{{\"id\":\"p1\",\"label\":\"P1\"}}]," +
-			$"\"manualStateBackup\":{{\"states\":[{backup}]}}}}");
+			$"{{\"stateMode\":true,\"states\":[{{\"id\":\"p1\",\"label\":\"P1\"}}],"
+			+ $"\"manualStateBackup\":{{\"states\":[{backup}]}}}}");
 		request.Id = widgetId.ToString();
 		request.FolderId = folderId.ToString();
 
@@ -386,12 +392,14 @@ public class UpdateWidgetSchemaValidationTests
 	private sealed class NoOpFlowExecutor : IFlowExecutor
 	{
 		public Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult(new FlowExecutionResult
+		{
+			return Task.FromResult(new FlowExecutionResult
 			{
 				ExecutionId = Guid.NewGuid(),
 				Status = FlowExecutionStatus.Succeeded,
 				MatchedFlows = 0
 			});
+		}
 	}
 
 	private sealed class RecordingWidgetService : IWidgetService
@@ -404,38 +412,57 @@ public class UpdateWidgetSchemaValidationTests
 			return Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
 		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
+			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class FakeFolderCache : IFolderCache
@@ -447,18 +474,45 @@ public class UpdateWidgetSchemaValidationTests
 			_folder = new FolderEntity { Id = folderId, Name = "f", Order = 0, Widgets = widgets.ToList() };
 		}
 
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

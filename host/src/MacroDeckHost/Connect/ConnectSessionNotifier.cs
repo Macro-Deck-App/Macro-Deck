@@ -55,7 +55,10 @@ public sealed class ConnectSessionNotifier : IHostedService, IDisposable
 		}
 	}
 
-	public void Dispose() => _stopping.Dispose();
+	public void Dispose()
+	{
+		_stopping.Dispose();
+	}
 
 	private void OnSessionChanged(object? sender, ConnectSessionSnapshot snapshot)
 	{
@@ -69,7 +72,9 @@ public sealed class ConnectSessionNotifier : IHostedService, IDisposable
 	}
 
 	private void OnAvatarChanged(object? sender, EventArgs e)
-		=> _ = _transport.Send(new ConnectSessionChangedNotification());
+	{
+		_ = _transport.Send(new ConnectSessionChangedNotification());
+	}
 
 	private async Task RevalidatePeriodically(CancellationToken cancellationToken)
 	{

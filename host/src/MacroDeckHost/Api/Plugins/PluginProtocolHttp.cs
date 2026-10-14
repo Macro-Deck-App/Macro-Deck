@@ -22,12 +22,18 @@ public static class PluginProtocolHttp
 		}
 	}
 
-	public static IActionResult Json<T>(T value, int statusCode) => new ContentResult
+	public static IActionResult Json<T>(T value, int statusCode)
 	{
-		Content = JsonSerializer.Serialize(value, PluginProtocolJson.Options),
-		ContentType = ProtocolConstants.JsonMediaType,
-		StatusCode = statusCode
-	};
+		return new ContentResult
+		{
+			Content = JsonSerializer.Serialize(value, PluginProtocolJson.Options),
+			ContentType = ProtocolConstants.JsonMediaType,
+			StatusCode = statusCode
+		};
+	}
 
-	public static IActionResult Error(ProtocolError error, int statusCode) => Json(error, statusCode);
+	public static IActionResult Error(ProtocolError error, int statusCode)
+	{
+		return Json(error, statusCode);
+	}
 }

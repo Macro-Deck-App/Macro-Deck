@@ -108,8 +108,8 @@ internal static class JsonPathExtractor
 			}
 
 			var digits = indices[(position + 1)..close];
-			if (digits.Length == 0 ||
-				!int.TryParse(digits, NumberStyles.None, CultureInfo.InvariantCulture, out var index))
+			if (digits.Length == 0
+				|| !int.TryParse(digits, NumberStyles.None, CultureInfo.InvariantCulture, out var index))
 			{
 				return false;
 			}
@@ -127,13 +127,16 @@ internal static class JsonPathExtractor
 		return true;
 	}
 
-	private static (VariableType Type, object Value) MapToVariable(JsonElement element) => element.ValueKind switch
+	private static (VariableType Type, object Value) MapToVariable(JsonElement element)
 	{
-		JsonValueKind.Number => (VariableType.Numeric, element.GetDouble()),
-		JsonValueKind.True => (VariableType.Boolean, true),
-		JsonValueKind.False => (VariableType.Boolean, false),
-		JsonValueKind.String => (VariableType.Text, (object)(element.GetString() ?? string.Empty)),
-		JsonValueKind.Null => (VariableType.Text, string.Empty),
-		_ => (VariableType.Text, element.GetRawText())
-	};
+		return element.ValueKind switch
+		{
+			JsonValueKind.Number => (VariableType.Numeric, element.GetDouble()),
+			JsonValueKind.True => (VariableType.Boolean, true),
+			JsonValueKind.False => (VariableType.Boolean, false),
+			JsonValueKind.String => (VariableType.Text, (object)(element.GetString() ?? string.Empty)),
+			JsonValueKind.Null => (VariableType.Text, string.Empty),
+			_ => (VariableType.Text, element.GetRawText())
+		};
+	}
 }

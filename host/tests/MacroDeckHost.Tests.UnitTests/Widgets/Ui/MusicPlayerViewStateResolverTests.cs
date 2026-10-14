@@ -15,7 +15,7 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_playing_track_anchors_its_position_and_leaves_the_rate_unstated()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 42_000));
+		harness.Record(Playing(42_000));
 
 		var state = await harness.ResolveAsync();
 
@@ -33,13 +33,13 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_position_the_reader_is_already_extrapolating_correctly_is_left_exactly_as_it_was()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 42_000));
+		harness.Record(Playing(42_000));
 		var first = await harness.ResolveAsync();
 
 		// Two seconds later the provider reports two seconds further along - precisely what the reference
 		// already predicts, so re-anchoring would spend a patch to change nothing.
 		harness.Advance(TimeSpan.FromSeconds(2));
-		harness.Record(Playing(positionMs: 44_000));
+		harness.Record(Playing(44_000));
 		var second = await harness.ResolveAsync(first);
 
 		Assert.That(second.Position, Is.SameAs(first.Position));
@@ -49,12 +49,12 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_position_that_has_drifted_past_the_tolerance_is_re_anchored()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 42_000));
+		harness.Record(Playing(42_000));
 		var first = await harness.ResolveAsync();
 
 		// A seek: two seconds passed, but playback jumped a minute.
 		harness.Advance(TimeSpan.FromSeconds(2));
-		harness.Record(Playing(positionMs: 104_000));
+		harness.Record(Playing(104_000));
 		var second = await harness.ResolveAsync(first);
 
 		Assert.Multiple(() =>
@@ -69,10 +69,10 @@ public class MusicPlayerViewStateResolverTests
 	public async Task Pausing_re_anchors_even_where_the_position_itself_did_not_move()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 42_000));
+		harness.Record(Playing(42_000));
 		var first = await harness.ResolveAsync();
 
-		harness.Record(Playing(positionMs: 42_000, isPlaying: false));
+		harness.Record(Playing(42_000, isPlaying: false));
 		var second = await harness.ResolveAsync(first);
 
 		Assert.Multiple(() =>
@@ -87,11 +87,11 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_track_change_re_anchors_even_where_the_new_position_matches_the_prediction()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 42_000));
+		harness.Record(Playing(42_000));
 		var first = await harness.ResolveAsync();
 
 		harness.Advance(TimeSpan.FromSeconds(2));
-		harness.Record(Playing(positionMs: 44_000, trackName: "Nannou"));
+		harness.Record(Playing(44_000, "Nannou"));
 		var second = await harness.ResolveAsync(first);
 
 		Assert.That(second.Position, Is.Not.SameAs(first.Position));
@@ -101,7 +101,7 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_player_with_no_length_still_carries_a_position_to_advance()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 3_600_000, durationMs: null));
+		harness.Record(Playing(3_600_000, durationMs: null));
 
 		var state = await harness.ResolveAsync();
 
@@ -132,11 +132,11 @@ public class MusicPlayerViewStateResolverTests
 	public async Task Cover_art_travels_as_a_resource_and_is_fetched_once_per_track()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 1_000));
+		harness.Record(Playing(1_000));
 
 		var first = await harness.ResolveAsync();
 		harness.Advance(TimeSpan.FromSeconds(2));
-		harness.Record(Playing(positionMs: 3_000));
+		harness.Record(Playing(3_000));
 		var second = await harness.ResolveAsync(first);
 
 		Assert.Multiple(() =>
@@ -154,10 +154,10 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_track_with_no_cover_drops_the_colours_with_it()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 1_000));
+		harness.Record(Playing(1_000));
 		var first = await harness.ResolveAsync();
 
-		harness.Record(Playing(positionMs: 1_000, artworkId: null));
+		harness.Record(Playing(1_000, artworkId: null));
 		var second = await harness.ResolveAsync(first);
 
 		Assert.Multiple(() =>
@@ -172,7 +172,7 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_selection_that_no_longer_exists_falls_back_and_says_so()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 1_000));
+		harness.Record(Playing(1_000));
 
 		var state = await harness.ResolveAsync(config: new MusicPlayerWidgetData { InstanceId = "gone" });
 
@@ -188,8 +188,8 @@ public class MusicPlayerViewStateResolverTests
 	public async Task An_unbound_widget_follows_the_player_the_host_marks_active()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 1_000));
-		harness.RecordSecond(Playing(positionMs: 5_000, trackName: "Flim"));
+		harness.Record(Playing(1_000));
+		harness.RecordSecond(Playing(5_000, "Flim"));
 		harness.Focus(StubRegistry.SecondInstanceId);
 
 		var state = await harness.ResolveAsync();
@@ -205,8 +205,8 @@ public class MusicPlayerViewStateResolverTests
 	public async Task An_unbound_widget_shows_the_first_player_while_none_is_active()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 1_000));
-		harness.RecordSecond(Playing(positionMs: 5_000, trackName: "Flim"));
+		harness.Record(Playing(1_000));
+		harness.RecordSecond(Playing(5_000, "Flim"));
 
 		var state = await harness.ResolveAsync();
 
@@ -217,12 +217,12 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_bound_widget_ignores_the_active_player()
 	{
 		var harness = new MusicPlayerTestHarness();
-		harness.Record(Playing(positionMs: 1_000));
-		harness.RecordSecond(Playing(positionMs: 5_000, trackName: "Flim"));
+		harness.Record(Playing(1_000));
+		harness.RecordSecond(Playing(5_000, "Flim"));
 		harness.Focus(StubRegistry.SecondInstanceId);
 
-		var state = await harness.ResolveAsync(
-			config: new MusicPlayerWidgetData { InstanceId = MusicPlayerTestHarness.InstanceId });
+		var state = await harness.ResolveAsync(config: new MusicPlayerWidgetData
+			{ InstanceId = MusicPlayerTestHarness.InstanceId });
 
 		Assert.That(state.TrackName, Is.EqualTo("Windowlicker"));
 	}
@@ -231,7 +231,7 @@ public class MusicPlayerViewStateResolverTests
 	public async Task The_providers_source_and_badge_reach_the_view()
 	{
 		var harness = new MusicPlayerTestHarness();
-		var payload = Playing(positionMs: 1_000);
+		var payload = Playing(1_000);
 		payload.DeviceName = "Firefox";
 		payload.Badge = "2/3";
 		harness.Record(payload);
@@ -249,7 +249,7 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_blank_source_or_badge_is_no_source_or_badge()
 	{
 		var harness = new MusicPlayerTestHarness();
-		var payload = Playing(positionMs: 1_000);
+		var payload = Playing(1_000);
 		payload.DeviceName = "  ";
 		payload.Badge = "";
 		harness.Record(payload);
@@ -267,7 +267,7 @@ public class MusicPlayerViewStateResolverTests
 	public async Task An_oversized_badge_is_bounded_without_splitting_a_character()
 	{
 		var harness = new MusicPlayerTestHarness();
-		var payload = Playing(positionMs: 1_000);
+		var payload = Playing(1_000);
 		payload.Badge = string.Concat(Enumerable.Repeat("e\u0301", 40));
 		harness.Record(payload);
 
@@ -280,7 +280,7 @@ public class MusicPlayerViewStateResolverTests
 	public async Task A_badge_longer_than_the_widget_shows_is_passed_on_unchanged()
 	{
 		var harness = new MusicPlayerTestHarness();
-		var payload = Playing(positionMs: 1_000);
+		var payload = Playing(1_000);
 		payload.Badge = "Track 12 of 30";
 		harness.Record(payload);
 
@@ -295,7 +295,8 @@ public class MusicPlayerViewStateResolverTests
 		string? artworkId = "cover-1",
 		long? durationMs = 215_000,
 		bool isPlaying = true)
-		=> new()
+	{
+		return new MusicPlayerStatePayload
 		{
 			InstanceId = MusicPlayerTestHarness.InstanceId,
 			IsConnected = true,
@@ -306,6 +307,7 @@ public class MusicPlayerViewStateResolverTests
 			AlbumName = "Windowlicker",
 			ArtworkId = artworkId,
 			PositionMs = positionMs,
-			DurationMs = durationMs,
+			DurationMs = durationMs
 		};
+	}
 }

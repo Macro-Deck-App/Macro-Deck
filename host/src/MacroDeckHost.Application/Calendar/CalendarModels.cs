@@ -64,10 +64,15 @@ public sealed record CalendarEventSummary
 
 	public string? MeetingUrl { get; init; }
 
-	public bool IsRunningAt(DateTimeOffset instant) => Start <= instant && instant < End;
+	public bool IsRunningAt(DateTimeOffset instant)
+	{
+		return Start <= instant && instant < End;
+	}
 
 	public bool Overlaps(DateTimeOffset from, DateTimeOffset to)
-		=> Start < to && (End > from || (End == Start && Start >= from));
+	{
+		return Start < to && (End > from || End == Start && Start >= from);
+	}
 }
 
 public sealed record CalendarEventDetails(
@@ -86,24 +91,31 @@ public sealed record CalendarSnapshot(
 	public IEnumerable<CalendarSummary> Calendars => Accounts.SelectMany(account => account.Calendars);
 
 	public CalendarEventSummary? FindEvent(string calendarKey, string eventId)
-		=> Events.FirstOrDefault(e => e.CalendarKey == calendarKey && e.EventId == eventId);
+	{
+		return Events.FirstOrDefault(e => e.CalendarKey == calendarKey && e.EventId == eventId);
+	}
 
 	public IEnumerable<CalendarEventSummary> EventsBetween(
 		DateTimeOffset from,
 		DateTimeOffset to,
 		IReadOnlyCollection<string>? calendarKeys = null,
 		bool includeAllDay = true)
-		=> Events.Where(e => e.Overlaps(from, to) &&
-			(includeAllDay || !e.IsAllDay) &&
-			(calendarKeys is null || calendarKeys.Count == 0 || calendarKeys.Contains(e.CalendarKey)));
+	{
+		return Events.Where(e
+			=> e.Overlaps(from, to)
+			&& (includeAllDay || !e.IsAllDay)
+			&& (calendarKeys is null || calendarKeys.Count == 0 || calendarKeys.Contains(e.CalendarKey)));
+	}
 
 	internal bool SameContentAs(CalendarSnapshot other)
-		=> WindowStart == other.WindowStart &&
-			WindowEnd == other.WindowEnd &&
-			Events.SequenceEqual(other.Events) &&
-			Accounts.Count == other.Accounts.Count &&
-			Accounts.Zip(other.Accounts)
-				.All(pair => pair.First.Account == pair.Second.Account &&
-					pair.First.Status == pair.Second.Status &&
-					pair.First.Calendars.SequenceEqual(pair.Second.Calendars));
+	{
+		return WindowStart == other.WindowStart
+			&& WindowEnd == other.WindowEnd
+			&& Events.SequenceEqual(other.Events)
+			&& Accounts.Count == other.Accounts.Count
+			&& Accounts.Zip(other.Accounts)
+				.All(pair => pair.First.Account == pair.Second.Account
+					&& pair.First.Status == pair.Second.Status
+					&& pair.First.Calendars.SequenceEqual(pair.Second.Calendars));
+	}
 }

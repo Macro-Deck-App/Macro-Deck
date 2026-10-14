@@ -10,7 +10,8 @@ namespace MacroDeck.Signing.Packages;
 /// formats with no typed model in the SDK.</summary>
 internal static class PackageDigest
 {
-	public static PackageDigestResult Compute(SignablePackageFormat format,
+	public static PackageDigestResult Compute(
+		SignablePackageFormat format,
 		JsonObject manifestNode,
 		string manifestJson,
 		IPluginManifestReader manifestReader)
@@ -28,7 +29,7 @@ internal static class PackageDigest
 				"The manifest has no non-empty string 'id' and 'version' properties.");
 		}
 
-		var readResult = manifestReader.ReadFromJson(manifestJson, versionDirectory: null, id, version);
+		var readResult = manifestReader.ReadFromJson(manifestJson, null, id, version);
 		if (!readResult.Success)
 		{
 			return PackageDigestResult.Fail(SigningError.ManifestMalformed,

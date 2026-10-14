@@ -86,8 +86,13 @@ internal sealed class SteamAccountDataTests
 	[Test]
 	public async Task Without_a_key_there_are_no_library_variables()
 	{
-		var tracker = new SteamTracker(new FakeSteamPlatform(), [new SteamAccountConfig("e1", "Main", "main")], [], _time,
-			_ => { });
+		var tracker = new SteamTracker(new FakeSteamPlatform(),
+			[new SteamAccountConfig("e1", "Main", "main")],
+			[],
+			_time,
+			_ =>
+			{
+			});
 
 		await tracker.PollOwnedGamesAsync(CancellationToken.None);
 
@@ -111,7 +116,8 @@ internal sealed class SteamAccountDataTests
 		var account = tracker.Snapshot.Accounts[0];
 		Assert.Multiple(() =>
 		{
-			Assert.That(account.FriendList.Select(friend => friend.Name), Is.EqualTo(new[] { "Bob", "Cid", "Amy", "Zed" }));
+			Assert.That(account.FriendList.Select(friend => friend.Name),
+				Is.EqualTo(new[] { "Bob", "Cid", "Amy", "Zed" }));
 			Assert.That(account.FriendsOnline, Is.EqualTo(3));
 			Assert.That(account.FriendsInGame, Is.EqualTo(1));
 		});
@@ -123,11 +129,15 @@ internal sealed class SteamAccountDataTests
 			[new SteamAccountConfig("e1", "Main", "main", SteamId, _web)],
 			[],
 			_time,
-			_ => { });
+			_ =>
+			{
+			});
 		await tracker.PollSelfAsync(CancellationToken.None);
 		return tracker;
 	}
 
 	private static VariableReading Read(SteamTracker tracker, string name)
-		=> SteamVariables.Read("steam_main_" + name, tracker.Snapshot, DateTimeOffset.UnixEpoch);
+	{
+		return SteamVariables.Read("steam_main_" + name, tracker.Snapshot, DateTimeOffset.UnixEpoch);
+	}
 }

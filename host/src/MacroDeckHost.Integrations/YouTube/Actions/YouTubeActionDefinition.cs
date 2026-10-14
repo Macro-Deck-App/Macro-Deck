@@ -52,23 +52,30 @@ internal sealed class YouTubeActionDefinition : IDynamicOptionsActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(new DynamicOptionsResult
+	{
+		return Task.FromResult(new DynamicOptionsResult
 		{
 			Options = context.ParameterName is AccountParameterName ? _accounts().AccountOptions() : [],
 			AllowsCustomValue = true,
 			CacheSeconds = 30
 		});
+	}
 
 	private static ActionParameter AccountParameter()
-		=> ActionParameter.DynamicChoice(AccountParameterName,
-			label: AppStrings.Integrations.YouTube.Actions.AccountLabel(),
-			description: AppStrings.Integrations.YouTube.Actions.AccountDescription(),
+	{
+		return ActionParameter.DynamicChoice(AccountParameterName,
+			AppStrings.Integrations.YouTube.Actions.AccountLabel(),
+			AppStrings.Integrations.YouTube.Actions.AccountDescription(),
 			placeholder: AppStrings.Integrations.YouTube.Actions.FirstAccountPlaceholder());
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

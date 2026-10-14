@@ -10,14 +10,14 @@ namespace MacroDeckHost.Integrations.Streaming.Widgets;
 
 internal static class StreamStatsWidgetView
 {
-	private const string _liveColor = "#eb0400";
-	private const string _offlineColor = "#8b8b8b";
-	private const string _offlineFace = "#5c5c66";
-	private const string _onPill = "#ffffff";
-	private const string _placeholderColor = "#2c2c30";
+	private const string LiveColor = "#eb0400";
+	private const string OfflineColor = "#8b8b8b";
+	private const string OfflineFace = "#5c5c66";
+	private const string OnPill = "#ffffff";
+	private const string PlaceholderColor = "#2c2c30";
 
-	private const string _tileTint = "#8b8b8b";
-	private const double _tileOpacity = 0.14;
+	private const string TileTint = "#8b8b8b";
+	private const double TileOpacity = 0.14;
 
 	public static UiElement Build(
 		StreamPlatform platform,
@@ -33,13 +33,13 @@ internal static class StreamStatsWidgetView
 		var chosen = options ?? StreamStatsWidgetOptions.Default(platform);
 		var view = new Builder(platform, state, chosen, UiWidgetSafeArea.For(cornerRadius), logo);
 
-		UiComponentContainer content = StreamStatsStyles.Normalize(chosen.Style) switch
+		var content = StreamStatsStyles.Normalize(chosen.Style) switch
 		{
 			StreamStatsStyles.StatsRow => view.StatsRow(),
 			StreamStatsStyles.LiveRow => view.LiveRow(),
 			StreamStatsStyles.ValueGraph => view.ValueGraph(),
 			StreamStatsStyles.Value => view.Value(),
-			_ => view.Overview(),
+			_ => view.Overview()
 		};
 
 		return backgroundColor is { } background
@@ -47,23 +47,36 @@ internal static class StreamStatsWidgetView
 			{
 				Key = "twitchStatsBackground",
 				Background = background,
-				Children = [content with { Fill = true }],
+				Children = [content with { Fill = true }]
 			}
 			: content;
 	}
 
-	private static LocalizedString Label(StreamPlatform platform, string metric) => MetricOf(platform, metric).Label();
+	private static LocalizedString Label(StreamPlatform platform, string metric)
+	{
+		return MetricOf(platform, metric).Label();
+	}
 
-	private static string Icon(StreamPlatform platform, string metric) => MetricOf(platform, metric).Icon;
+	private static string Icon(StreamPlatform platform, string metric)
+	{
+		return MetricOf(platform, metric).Icon;
+	}
 
 	private static StreamStatsMetric MetricOf(StreamPlatform platform, string metric)
-		=> platform.Stats.Metric(metric) ?? platform.Stats.Metric(platform.Stats.DefaultMetric) ??
-			platform.Stats.Metrics[0];
+	{
+		return platform.Stats.Metric(metric)
+			?? platform.Stats.Metric(platform.Stats.DefaultMetric) ?? platform.Stats.Metrics[0];
+	}
 
-	private static UiLength Px(double extent, double reference) => UiLength.Capped(extent / reference, extent * 1.25);
+	private static UiLength Px(double extent, double reference)
+	{
+		return UiLength.Capped(extent / reference, extent * 1.25);
+	}
 
 	private static UiLength Scaled(UiLength length, double factor)
-		=> new() { Basis = length.Basis * factor, MaxOfCell = length.MaxOfCell * factor };
+	{
+		return new UiLength { Basis = length.Basis * factor, MaxOfCell = length.MaxOfCell * factor };
+	}
 
 	private sealed class Builder(
 		StreamPlatform platform,
@@ -72,8 +85,8 @@ internal static class StreamStatsWidgetView
 		UiSize padding,
 		UiState<UiResource?>? logo)
 	{
-		private const double _tall = 240;
-		private const double _short = 120;
+		private const double Tall = 240;
+		private const double Short = 120;
 
 		public UiStack Overview()
 		{
@@ -86,23 +99,23 @@ internal static class StreamStatsWidgetView
 					Key = "header",
 					Direction = UiComponentDirections.Horizontal,
 					Align = UiComponentAlignments.Center,
-					Gap = Px(9, _tall),
+					Gap = Px(9, Tall),
 					Children =
 					[
-						Logo("logo", Px(28, _tall)),
+						Logo("logo", Px(28, Tall)),
 						new UiTextRun
 						{
 							Key = "channel",
 							Text = UiText.Optional(() => state.Value.ChannelName.Length > 0
 								? UiText.Of(state.Value.ChannelName)
 								: UiText.Of(platform.Stats.Heading())),
-							Size = Px(17, _tall),
+							Size = Px(17, Tall),
 							Weight = UiComponentTextWeights.SemiBold,
-							Role = UiComponentTextRoles.Primary,
+							Role = UiComponentTextRoles.Primary
 						},
-						Pill("pill", Px(11, _tall)),
-					],
-				},
+						Pill("pill", Px(11, Tall))
+					]
+				}
 			};
 
 			if (hasBody)
@@ -112,10 +125,10 @@ internal static class StreamStatsWidgetView
 					Key = "body",
 					Direction = UiComponentDirections.Horizontal,
 					Align = UiComponentAlignments.Center,
-					MainSize = hasTiles ? Px(80, _tall) : UiSize.None(),
+					MainSize = hasTiles ? Px(80, Tall) : UiSize.None(),
 					Fill = !hasTiles,
-					Gap = Px(14, _tall),
-					Children = options.ShowThumbnail ? [Thumbnail(Px(142, _tall)), Details()] : [Details()],
+					Gap = Px(14, Tall),
+					Children = options.ShowThumbnail ? [Thumbnail(Px(142, Tall)), Details()] : [Details()]
 				});
 			}
 
@@ -126,8 +139,8 @@ internal static class StreamStatsWidgetView
 					Key = "tiles",
 					Direction = UiComponentDirections.Horizontal,
 					Fill = true,
-					Gap = Px(8, _tall),
-					Children = Tiles(_tall, 1),
+					Gap = Px(8, Tall),
+					Children = Tiles(Tall, 1)
 				});
 			}
 
@@ -136,8 +149,8 @@ internal static class StreamStatsWidgetView
 				Key = "overview",
 				Direction = UiComponentDirections.Vertical,
 				Padding = padding,
-				Gap = Px(12, _tall),
-				Children = children,
+				Gap = Px(12, Tall),
+				Children = children
 			};
 		}
 
@@ -149,8 +162,8 @@ internal static class StreamStatsWidgetView
 				Key = "statsRow",
 				Direction = UiComponentDirections.Horizontal,
 				Padding = padding,
-				Gap = Px(8, _short),
-				Children = Tiles(_short, 1.15, shown),
+				Gap = Px(8, Short),
+				Children = Tiles(Short, 1.15, shown)
 			};
 
 			if (shown.Count < 4)
@@ -167,24 +180,25 @@ internal static class StreamStatsWidgetView
 					Key = "statsGrid",
 					Columns = 2,
 					Padding = padding,
-					Gap = Px(8, _short),
-					Children = Tiles(_short, 1.15, shown),
+					Gap = Px(8, Short),
+					Children = Tiles(Short, 1.15, shown)
 				},
-				Variants = [new UiResponsiveVariant { MinAspect = 2.4, Content = row }],
+				Variants = [new UiResponsiveVariant { MinAspect = 2.4, Content = row }]
 			};
 		}
 
 		public UiStack LiveRow()
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = "liveRow",
 				Direction = UiComponentDirections.Horizontal,
 				Align = UiComponentAlignments.Center,
 				Padding = padding,
-				Gap = Px(12, _short),
+				Gap = Px(12, Short),
 				Children =
 				[
-					Logo("logo", Px(44, _short)),
+					Logo("logo", Px(44, Short)),
 					new UiStack
 					{
 						Key = "info",
@@ -192,21 +206,21 @@ internal static class StreamStatsWidgetView
 						Justify = UiComponentJustify.Center,
 						Align = UiComponentAlignments.Start,
 						Fill = true,
-						Gap = Px(8, _short),
+						Gap = Px(8, Short),
 						Children =
 						[
-							Pill("pill", Px(12, _short)),
+							Pill("pill", Px(12, Short)),
 							new UiTextRun
 							{
 								Key = "category",
 								Text = UiText.Optional(() => state.Value.IsLive
 									? UiText.Of(state.Value.Detail(platform.Stats.LiveRowDetail))
 									: UiText.Of(AppStrings.Integrations.StreamStats.Widget.OfflineHint())),
-								Size = Px(14, _short),
-								MinSize = Px(11, _short),
-								Role = UiComponentTextRoles.Secondary,
-							},
-						],
+								Size = Px(14, Short),
+								MinSize = Px(11, Short),
+								Role = UiComponentTextRoles.Secondary
+							}
+						]
 					},
 					new UiStack
 					{
@@ -214,17 +228,21 @@ internal static class StreamStatsWidgetView
 						Direction = UiComponentDirections.Vertical,
 						Justify = UiComponentJustify.Center,
 						Align = UiComponentAlignments.End,
-						MainSize = Px(84, _short),
-						Gap = Px(5, _short),
+						MainSize = Px(84, Short),
+						Gap = Px(5, Short),
 						Children =
 						[
-							Number("number", Px(28, _short), UiComponentAlignments.End),
-							Caption("label", Label(platform, options.Metric), Px(12, _short), UiComponentAlignments.End,
-								shrinks: false),
-						],
-					},
-				],
+							Number("number", Px(28, Short), UiComponentAlignments.End),
+							Caption("label",
+								Label(platform, options.Metric),
+								Px(12, Short),
+								UiComponentAlignments.End,
+								false)
+						]
+					}
+				]
 			};
+		}
 
 		public UiLayer ValueGraph()
 		{
@@ -233,7 +251,7 @@ internal static class StreamStatsWidgetView
 				Key = "content",
 				Direction = UiComponentDirections.Vertical,
 				Padding = padding,
-				Gap = Px(4, _tall),
+				Gap = Px(4, Tall),
 				Children =
 				[
 					new UiStack
@@ -242,13 +260,13 @@ internal static class StreamStatsWidgetView
 						Direction = UiComponentDirections.Horizontal,
 						Align = UiComponentAlignments.Center,
 						Justify = UiComponentJustify.SpaceBetween,
-						MainSize = Px(36, _tall),
-						Children = [Logo("logo", Px(34, _tall)), Pill("pill", Px(13, _tall))],
+						MainSize = Px(36, Tall),
+						Children = [Logo("logo", Px(34, Tall)), Pill("pill", Px(13, Tall))]
 					},
-					new UiStack { Key = "spacer", MainSize = Px(12, _tall) },
-					Number("number", Px(48, _tall), UiComponentAlignments.Start, shrinks: true),
-					Caption("label", Label(platform, options.Metric), Px(16, _tall), UiComponentAlignments.Start),
-				],
+					new UiStack { Key = "spacer", MainSize = Px(12, Tall) },
+					Number("number", Px(48, Tall), UiComponentAlignments.Start, true),
+					Caption("label", Label(platform, options.Metric), Px(16, Tall), UiComponentAlignments.Start)
+				]
 			};
 
 			return new UiLayer
@@ -268,39 +286,41 @@ internal static class StreamStatsWidgetView
 							Color = platform.AccentColor,
 							PlotTop = 0.62,
 							Thickness = UiSize.Capped(2d / UiLength.Cell, 2.5),
-							Fallback = new UiTextRun { Key = "chartFallback", Text = UiText.Of(string.Empty) },
-						},
+							Fallback = new UiTextRun { Key = "chartFallback", Text = UiText.Of(string.Empty) }
+						}
 					},
-					content,
-				],
+					content
+				]
 			};
 		}
 
 		public UiStack Value()
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = "value",
 				Direction = UiComponentDirections.Vertical,
 				Justify = UiComponentJustify.Center,
 				Align = UiComponentAlignments.Center,
 				Padding = padding,
-				Gap = Px(5, _short),
+				Gap = Px(5, Short),
 				Children =
 				[
-					Logo("logo", Px(30, _short)),
-					new UiStack { Key = "spacer", MainSize = Px(2, _short) },
+					Logo("logo", Px(30, Short)),
+					new UiStack { Key = "spacer", MainSize = Px(2, Short) },
 					new UiStack
 					{
 						Key = "row",
 						Direction = UiComponentDirections.Horizontal,
 						Align = UiComponentAlignments.Center,
 						Justify = UiComponentJustify.Center,
-						Gap = Px(6, _short),
-						Children = [Dot("dot", Px(9, _short)), Number("number", Px(26, _short))],
+						Gap = Px(6, Short),
+						Children = [Dot("dot", Px(9, Short)), Number("number", Px(26, Short))]
 					},
-					Caption("label", Label(platform, options.Metric), Px(12, _short), UiComponentAlignments.Center),
-				],
+					Caption("label", Label(platform, options.Metric), Px(12, Short), UiComponentAlignments.Center)
+				]
 			};
+		}
 
 		private UiStack Details()
 		{
@@ -316,45 +336,45 @@ internal static class StreamStatsWidgetView
 					{
 						Key = id,
 						Text = UiText.From(() => state.Value.Detail(id)),
-						Size = Px(15, _tall),
-						MinSize = Px(13, _tall),
+						Size = Px(15, Tall),
+						MinSize = Px(13, Tall),
 						Weight = UiComponentTextWeights.SemiBold,
 						Role = UiComponentTextRoles.Primary,
 						MaxLines = 2,
-						Wrap = true,
+						Wrap = true
 					},
 					StreamStatsDetailKind.Text => new UiTextRun
 					{
 						Key = id,
 						Text = UiText.From(() => state.Value.Detail(id)),
-						Size = Px(13, _tall),
-						Role = UiComponentTextRoles.Secondary,
+						Size = Px(13, Tall),
+						Role = UiComponentTextRoles.Secondary
 					},
 					_ => new UiStack
 					{
 						Key = id,
 						Direction = UiComponentDirections.Horizontal,
 						Align = UiComponentAlignments.Center,
-						Gap = Px(6, _tall),
+						Gap = Px(6, Tall),
 						Children =
 						[
 							new UiIcon
 							{
 								Key = "icon",
 								Icon = UiIcons.ClockType,
-								Size = Px(13, _tall),
-								MainSize = Px(13, _tall),
-								Role = UiComponentTextRoles.Muted,
+								Size = Px(13, Tall),
+								MainSize = Px(13, Tall),
+								Role = UiComponentTextRoles.Muted
 							},
 							new UiTextRun
 							{
 								Key = "text",
 								Text = UiText.From(() => state.Value.Detail(id)),
-								Size = Px(13, _tall),
-								Role = UiComponentTextRoles.Muted,
-							},
-						],
-					},
+								Size = Px(13, Tall),
+								Role = UiComponentTextRoles.Muted
+							}
+						]
+					}
 				});
 			}
 
@@ -374,9 +394,9 @@ internal static class StreamStatsWidgetView
 						{
 							Key = "lines",
 							Direction = UiComponentDirections.Vertical,
-							Gap = Px(7, _tall),
-							Children = lines,
-						},
+							Gap = Px(7, Tall),
+							Children = lines
+						}
 					},
 					new UiWhen
 					{
@@ -386,21 +406,22 @@ internal static class StreamStatsWidgetView
 						{
 							Key = "hint",
 							Text = AppStrings.Integrations.StreamStats.Widget.OfflineHint(),
-							Size = Px(14, _tall),
-							MinSize = Px(12, _tall),
-							Role = UiComponentTextRoles.Secondary,
-						},
-					},
-				],
+							Size = Px(14, Tall),
+							MinSize = Px(12, Tall),
+							Role = UiComponentTextRoles.Secondary
+						}
+					}
+				]
 			};
 		}
 
 		private UiButton Thumbnail(UiLength width)
-			=> new()
+		{
+			return new UiButton
 			{
 				Key = "thumbnail",
 				MainSize = width,
-				Background = _placeholderColor,
+				Background = PlaceholderColor,
 				Source = UiValue.Optional(() => state.Value.Thumbnail is { } thumbnail
 					? UiValue.Of(thumbnail)
 					: UiValue.None<UiResource>()),
@@ -417,22 +438,28 @@ internal static class StreamStatsWidgetView
 							? new UiStack { Key = "mark" }
 							: new UiImage
 							{
-								Key = "mark", Source = LogoSource(), Size = Px(28, _tall), Opacity = 0.4,
-							},
-					},
-				],
+								Key = "mark", Source = LogoSource(), Size = Px(28, Tall), Opacity = 0.4
+							}
+					}
+				]
 			};
+		}
 
 		private List<UiElement> Tiles(double reference, double scale, IReadOnlyList<string>? metrics = null)
-			=> [.. (metrics ?? options.Tiles).Select(metric => Tile(metric, reference, scale))];
+		{
+			return [.. (metrics ?? options.Tiles).Select(metric => Tile(metric, reference, scale))];
+		}
 
 		// Each run is also held to a share of the tile's own width, so a narrow tile shrinks its type rather
 		// than cutting a number off.
 		private static UiLength Fitted(double extent, double reference, double ofWidth)
-			=> Px(extent, reference) with { MaxOfCross = ofWidth };
+		{
+			return Px(extent, reference) with { MaxOfCross = ofWidth };
+		}
 
 		private UiLayer Tile(string metric, double reference, double scale)
-			=> new()
+		{
+			return new UiLayer
 			{
 				Key = metric,
 				Fill = true,
@@ -441,14 +468,14 @@ internal static class StreamStatsWidgetView
 					new UiModifier
 					{
 						Key = "face",
-						Opacity = _tileOpacity,
+						Opacity = TileOpacity,
 						Child = new UiShape
 						{
 							Key = "shape",
 							Shape = UiComponentShapes.RoundedRectangle,
 							CornerRadius = Px(12, reference),
-							Color = _tileTint,
-						},
+							Color = TileTint
+						}
 					},
 					new UiStack
 					{
@@ -466,7 +493,7 @@ internal static class StreamStatsWidgetView
 								Icon = Icon(platform, metric),
 								Size = Fitted(15 * scale, reference, 0.22),
 								MainSize = Fitted(15 * scale, reference, 0.22),
-								Role = UiComponentTextRoles.Secondary,
+								Role = UiComponentTextRoles.Secondary
 							},
 							new UiTextRun
 							{
@@ -475,7 +502,7 @@ internal static class StreamStatsWidgetView
 								Size = Fitted(20 * scale, reference, 0.3),
 								Weight = UiComponentTextWeights.Bold,
 								Role = UiComponentTextRoles.Primary,
-								Align = UiComponentAlignments.Center,
+								Align = UiComponentAlignments.Center
 							},
 							new UiTextRun
 							{
@@ -483,17 +510,19 @@ internal static class StreamStatsWidgetView
 								Text = Label(platform, metric),
 								Size = Fitted(11.5 * scale, reference, 0.145),
 								Role = UiComponentTextRoles.Muted,
-								Align = UiComponentAlignments.Center,
-							},
-						],
-					},
-				],
+								Align = UiComponentAlignments.Center
+							}
+						]
+					}
+				]
 			};
+		}
 
 		// A stack hands every child its full cross extent, so the pill sits in a row inside a column to keep
 		// its own width and its own height wherever it is placed.
 		private UiStack Pill(string key, UiLength textSize)
-			=> new()
+		{
+			return new UiStack
 			{
 				Key = key,
 				Direction = UiComponentDirections.Horizontal,
@@ -509,7 +538,7 @@ internal static class StreamStatsWidgetView
 							new UiModifier
 							{
 								Key = "face",
-								Background = UiBackgroundValue.From(() => state.Value.IsLive ? _liveColor : _offlineFace),
+								Background = UiBackgroundValue.From(() => state.Value.IsLive ? LiveColor : OfflineFace),
 								Radius = Scaled(textSize, 2),
 								Child = new UiStack
 								{
@@ -521,7 +550,7 @@ internal static class StreamStatsWidgetView
 									Children =
 									[
 										new UiStack { Key = "lead", MainSize = Scaled(textSize, 0.2) },
-										Circle("dot", Scaled(textSize, 0.5), _onPill),
+										Circle("dot", Scaled(textSize, 0.5), OnPill),
 										new UiTextRun
 										{
 											Key = "text",
@@ -530,32 +559,41 @@ internal static class StreamStatsWidgetView
 												: AppStrings.Integrations.StreamStats.Widget.Offline()),
 											Size = textSize,
 											Weight = UiComponentTextWeights.SemiBold,
-											Color = _onPill,
+											Color = OnPill
 										},
-										new UiStack { Key = "trail", MainSize = Scaled(textSize, 0.3) },
-									],
-								},
-							},
-						],
-					},
-				],
+										new UiStack { Key = "trail", MainSize = Scaled(textSize, 0.3) }
+									]
+								}
+							}
+						]
+					}
+				]
 			};
+		}
 
 		private UiModifier Dot(string key, UiLength size)
-			=> Circle(key, size, UiValue.From(() => state.Value.IsLive ? _liveColor : _offlineColor));
+		{
+			return Circle(key, size, UiValue.From(() => state.Value.IsLive ? LiveColor : OfflineColor));
+		}
 
 		// A shape takes the whole cross extent of its stack, so it is framed to keep a dot a dot.
 		private static UiModifier Circle(string key, UiLength size, UiValue<string> color)
-			=> new()
+		{
+			return new UiModifier
 			{
 				Key = key,
 				Frame = new UiFrame { Width = size, Height = size },
-				Child = new UiShape { Key = "shape", Shape = UiComponentShapes.Circle, Color = color },
+				Child = new UiShape { Key = "shape", Shape = UiComponentShapes.Circle, Color = color }
 			};
+		}
 
-		private UiTextRun Number(string key, UiLength size, string align = UiComponentAlignments.Center,
+		private UiTextRun Number(
+			string key,
+			UiLength size,
+			string align = UiComponentAlignments.Center,
 			bool shrinks = false)
-			=> new()
+		{
+			return new UiTextRun
 			{
 				Key = key,
 				Text = UiText.From(() => state.Value.Value(options.Metric)),
@@ -563,26 +601,34 @@ internal static class StreamStatsWidgetView
 				MinSize = shrinks ? Scaled(size, 0.7) : UiSize.None(),
 				Weight = UiComponentTextWeights.Bold,
 				Role = UiComponentTextRoles.Primary,
-				Align = align,
+				Align = align
 			};
+		}
 
 		private static UiTextRun Caption(string key, UiText text, UiLength size, string align, bool shrinks = true)
-			=> new()
+		{
+			return new UiTextRun
 			{
 				Key = key,
 				Text = text,
 				Size = size,
 				MinSize = shrinks ? Scaled(size, 0.7) : UiSize.None(),
 				Role = UiComponentTextRoles.Muted,
-				Align = align,
+				Align = align
 			};
+		}
 
 		private UiElement Logo(string key, UiLength size)
-			=> logo is null
+		{
+			return logo is null
 				? new UiStack { Key = key, MainSize = size }
 				: new UiImage { Key = key, Source = LogoSource(), Size = size, MainSize = size };
+		}
 
 		private UiValue<UiResource> LogoSource()
-			=> UiValue.Optional(() => logo?.Value is { } resource ? UiValue.Of(resource) : UiValue.None<UiResource>());
+		{
+			return UiValue.Optional(()
+				=> logo?.Value is { } resource ? UiValue.Of(resource) : UiValue.None<UiResource>());
+		}
 	}
 }

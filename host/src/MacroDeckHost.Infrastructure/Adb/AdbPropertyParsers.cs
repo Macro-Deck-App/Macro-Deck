@@ -49,7 +49,8 @@ internal static partial class AdbPropertyParsers
 			level = level * 100 / scale;
 		}
 
-		var pluggedIn = _powerSources.Any(key => values.TryGetValue(key, out var value) && bool.TryParse(value, out var powered) && powered);
+		var pluggedIn = _powerSources.Any(key
+			=> values.TryGetValue(key, out var value) && bool.TryParse(value, out var powered) && powered);
 
 		var status = TryInt(values, "status", out var statusCode)
 			? statusCode switch
@@ -81,8 +82,11 @@ internal static partial class AdbPropertyParsers
 	private static bool TryInt(Dictionary<string, string> values, string key, out int value)
 	{
 		value = 0;
-		return values.TryGetValue(key, out var text) &&
-			int.TryParse(text, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out value);
+		return values.TryGetValue(key, out var text)
+			&& int.TryParse(text,
+				System.Globalization.NumberStyles.Integer,
+				System.Globalization.CultureInfo.InvariantCulture,
+				out value);
 	}
 
 	public static bool? ParseScreenOn(string dumpsysPowerOutput)
@@ -92,8 +96,8 @@ internal static partial class AdbPropertyParsers
 			return true;
 		}
 
-		if (dumpsysPowerOutput.Contains("mWakefulness=Asleep", StringComparison.Ordinal) ||
-			dumpsysPowerOutput.Contains("mWakefulness=Dozing", StringComparison.Ordinal))
+		if (dumpsysPowerOutput.Contains("mWakefulness=Asleep", StringComparison.Ordinal)
+			|| dumpsysPowerOutput.Contains("mWakefulness=Dozing", StringComparison.Ordinal))
 		{
 			return false;
 		}

@@ -34,7 +34,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -56,13 +56,13 @@ public class ManifestValidatorTests
 				// this command runs - not merely "something failed".
 				Assert.That(result.Problems,
 					Has.Some.Matches<ManifestProblem>(problem =>
-						problem.Severity == ManifestProblemSeverity.Error &&
-						problem.Message.Contains("not a valid plugin id", StringComparison.OrdinalIgnoreCase)));
+						problem.Severity == ManifestProblemSeverity.Error
+						&& problem.Message.Contains("not a valid plugin id", StringComparison.OrdinalIgnoreCase)));
 			});
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -129,8 +129,7 @@ public class ManifestValidatorTests
 
 				// The version: not SemVer, pointing at /version.
 				Assert.That(errors,
-					Has.Some.Matches<ManifestProblem>(p => p.Code == "invalid-version" &&
-						p.Pointer == "/version"));
+					Has.Some.Matches<ManifestProblem>(p => p.Code == "invalid-version" && p.Pointer == "/version"));
 
 				// The entrypoints: schema minProperties on an empty object, pointing at /entrypoints.
 				Assert.That(errors, Has.Some.Matches<ManifestProblem>(p => p.Pointer == "/entrypoints"));
@@ -138,7 +137,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -158,8 +157,8 @@ public class ManifestValidatorTests
 			// cli.md documents ("a schema pointer when there is one").
 			var idProblems = result.Problems
 				.Where(problem =>
-					problem.Message.Contains(ManifestFixtures.InvalidPluginId, StringComparison.Ordinal) ||
-					problem.Pointer == "/id")
+					problem.Message.Contains(ManifestFixtures.InvalidPluginId, StringComparison.Ordinal)
+					|| problem.Pointer == "/id")
 				.ToList();
 
 			Assert.Multiple(() =>
@@ -171,7 +170,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -201,7 +200,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -219,14 +218,14 @@ public class ManifestValidatorTests
 				Assert.That(result.ExitCode, Is.EqualTo(ExitCode.SubjectInvalid));
 				Assert.That(result.Problems,
 					Has.Some.Matches<ManifestProblem>(p =>
-						p.Severity == ManifestProblemSeverity.Error &&
-						p.Code == "invalid-version" &&
-						p.Message.Contains("not-a-version")));
+						p.Severity == ManifestProblemSeverity.Error
+						&& p.Code == "invalid-version"
+						&& p.Message.Contains("not-a-version")));
 			});
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -251,7 +250,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -282,8 +281,8 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(overLongDirectory, recursive: true);
-			Directory.Delete(atLimitDirectory, recursive: true);
+			Directory.Delete(overLongDirectory, true);
+			Directory.Delete(atLimitDirectory, true);
 		}
 	}
 
@@ -326,8 +325,8 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(earlyDirectory, recursive: true);
-			Directory.Delete(unterminatedDirectory, recursive: true);
+			Directory.Delete(earlyDirectory, true);
+			Directory.Delete(unterminatedDirectory, true);
 		}
 	}
 
@@ -351,7 +350,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -374,7 +373,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -423,7 +422,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -462,7 +461,7 @@ public class ManifestValidatorTests
 
 			var output = new StringWriter();
 			var error = new StringWriter();
-			var console = new CliConsole(Verbosity.Normal, noColor: true, output, error);
+			var console = new CliConsole(Verbosity.Normal, true, output, error);
 
 			ValidationResultWriter.Write(console, CliOutputFormat.Text, result);
 
@@ -484,7 +483,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -500,10 +499,15 @@ public class ManifestValidatorTests
 	[TestCase("""[{ "type": "custom", "url": "https://example.com/setup" }]""", "/additionalLinks/0/label")]
 	[TestCase("""[{ "type": "wiki", "url": "ftp://example.com/wiki" }]""", "/additionalLinks/0/url")]
 	[TestCase("""[{ "url": "https://example.com/wiki" }]""", "/additionalLinks/0/type")]
-	[TestCase("""[{ "type": "wiki", "label": "Wiki", "url": "https://example.com/wiki" }]""", "/additionalLinks/0/label")]
-	[TestCase("""[{ "type": "wiki", "url": "https://example.com/a" }, { "type": "wiki", "url": "https://example.com/b" }]""", "/additionalLinks/1/type")]
+	[TestCase("""[{ "type": "wiki", "label": "Wiki", "url": "https://example.com/wiki" }]""",
+		"/additionalLinks/0/label")]
+	[TestCase(
+		"""[{ "type": "wiki", "url": "https://example.com/a" }, { "type": "wiki", "url": "https://example.com/b" }]""",
+		"/additionalLinks/1/type")]
 	[TestCase("""{ "type": "wiki" }""", "/additionalLinks")]
-	public async Task An_invalid_additional_link_is_reported_once_as_invalid_additional_link(string links, string location)
+	public async Task An_invalid_additional_link_is_reported_once_as_invalid_additional_link(
+		string links,
+		string location)
 	{
 		var directory = ManifestFixtures.WriteManifestDirectoryWithAdditionalLinks(links);
 
@@ -521,7 +525,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -539,12 +543,13 @@ public class ManifestValidatorTests
 			{
 				Assert.That(result.Valid, Is.True);
 				Assert.That(result.Problems.Select(problem => (problem.Severity, problem.Code, problem.Pointer)),
-					Is.EqualTo(new[] { (ManifestProblemSeverity.Warning, "unknown-link-type", "/additionalLinks/0/type") }));
+					Is.EqualTo(new[]
+						{ (ManifestProblemSeverity.Warning, "unknown-link-type", "/additionalLinks/0/type") }));
 			});
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -566,7 +571,7 @@ public class ManifestValidatorTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 }

@@ -11,14 +11,16 @@ public sealed class PrepareRestoreRequestMessageHandler
 	private readonly AppBackups.IRestoreService _restoreService;
 	private readonly AppBackups.IBackupService _backupService;
 
-	public PrepareRestoreRequestMessageHandler(AppBackups.IRestoreService restoreService,
+	public PrepareRestoreRequestMessageHandler(
+		AppBackups.IRestoreService restoreService,
 		AppBackups.IBackupService backupService)
 	{
 		_restoreService = restoreService;
 		_backupService = backupService;
 	}
 
-	public async ValueTask<PrepareRestoreResponse> Handle(PrepareRestoreRequest request,
+	public async ValueTask<PrepareRestoreResponse> Handle(
+		PrepareRestoreRequest request,
 		CancellationToken cancellationToken)
 	{
 		var list = await _backupService.List(cancellationToken);

@@ -54,7 +54,8 @@ public sealed class IconImportService : IIconImportService
 		_logger = logger;
 	}
 
-	public async Task<Result<IconImportBatchEntity, IconError>> Import(Guid? packId,
+	public async Task<Result<IconImportBatchEntity, IconError>> Import(
+		Guid? packId,
 		string? sourceName,
 		IAsyncEnumerable<IconImportFile> files,
 		CancellationToken cancellationToken)
@@ -66,7 +67,7 @@ public sealed class IconImportService : IIconImportService
 		}
 
 		var pack = packResult.Data!;
-		var batch = CreateBatch(pack.Id, sourceName, explicitDestination: packId is not null);
+		var batch = CreateBatch(pack.Id, sourceName, packId is not null);
 		_batchTracker.Register(batch);
 
 		var stagedIcons = new List<IconEntity>();
@@ -87,14 +88,14 @@ public sealed class IconImportService : IIconImportService
 			{
 				await MergePackArchive(batch, pack.Id, file.FileName, file.Content, cancellationToken);
 			}
-			else if (_appIconExtractor.CanExtractContent(file.FileName) &&
-				!IconImportFiles.CarriesDirectory(file.FileName))
+			else if (_appIconExtractor.CanExtractContent(file.FileName)
+				&& !IconImportFiles.CarriesDirectory(file.FileName))
 			{
 				var outcome = await StageAppIconFromContent(batch, file.FileName, file.Content, cancellationToken);
 				ApplyStageOutcome(outcome, batch, file.FileName, stagedIcons, ref duplicates);
 			}
-			else if (IconImportFiles.IsSupportedImportEntry(file.FileName) &&
-				IconImportFiles.TryParseAppearanceName(file.FileName, out var baseName, out var traits))
+			else if (IconImportFiles.IsSupportedImportEntry(file.FileName)
+				&& IconImportFiles.TryParseAppearanceName(file.FileName, out var baseName, out var traits))
 			{
 				duplicates += await StageUploadedAppearance(appearances,
 					file,
@@ -157,7 +158,8 @@ public sealed class IconImportService : IIconImportService
 		return Result.Ok<IconImportBatchEntity, IconError>(batch);
 	}
 
-	public async Task<Result<IconImportBatchEntity, IconError>> ImportFromPath(Guid? packId,
+	public async Task<Result<IconImportBatchEntity, IconError>> ImportFromPath(
+		Guid? packId,
 		IReadOnlyList<string> paths,
 		CancellationToken cancellationToken)
 	{
@@ -225,7 +227,7 @@ public sealed class IconImportService : IIconImportService
 		var pack = packResult.Data!;
 		var batch = CreateBatch(pack.Id,
 			BatchSourceName(paths),
-			explicitDestination: packId is not null);
+			packId is not null);
 		if (unreadable > 0)
 		{
 			batch.Error = unreadable == 1
@@ -346,7 +348,8 @@ public sealed class IconImportService : IIconImportService
 		return Result.Ok<IconImportBatchEntity, IconError>(batch);
 	}
 
-	public async Task<Result<SingleIconImportResult, IconError>> ImportSingle(Guid? packId,
+	public async Task<Result<SingleIconImportResult, IconError>> ImportSingle(
+		Guid? packId,
 		IconImportFile file,
 		CancellationToken cancellationToken)
 	{
@@ -365,7 +368,7 @@ public sealed class IconImportService : IIconImportService
 		var pack = packResult.Data!;
 		var batch = CreateBatch(pack.Id,
 			Path.GetFileName(file.FileName),
-			explicitDestination: packId is not null,
+			packId is not null,
 			silent: true);
 
 		var iconId = Guid.CreateVersion7();
@@ -378,7 +381,7 @@ public sealed class IconImportService : IIconImportService
 			_logger.Debug("Reusing icon {IconId} for {FileName}: identical content is already imported",
 				existing.Id,
 				file.FileName);
-			return Result.Ok<SingleIconImportResult, IconError>(new SingleIconImportResult(existing, Reused: true));
+			return Result.Ok<SingleIconImportResult, IconError>(new SingleIconImportResult(existing, true));
 		}
 
 		_batchTracker.Register(batch);
@@ -387,10 +390,11 @@ public sealed class IconImportService : IIconImportService
 		var (total, _, _) = _batchTracker.GetCounters(batch.Id);
 		await FinishDiscovery(batch, total, cancellationToken);
 
-		return Result.Ok<SingleIconImportResult, IconError>(new SingleIconImportResult(icon, Reused: false));
+		return Result.Ok<SingleIconImportResult, IconError>(new SingleIconImportResult(icon, false));
 	}
 
-	public async Task<Result<IconPackImportResult, IconError>> ImportPacks(IAsyncEnumerable<IconImportFile> files,
+	public async Task<Result<IconPackImportResult, IconError>> ImportPacks(
+		IAsyncEnumerable<IconImportFile> files,
 		CancellationToken cancellationToken)
 	{
 		var restoredPacks = new List<IconPackEntity>();
@@ -408,8 +412,8 @@ public sealed class IconImportService : IIconImportService
 				}
 				else
 				{
-					firstError ??= $"{Path.GetFileName(file.FileName)}: " +
-						(result.ErrorMessage ?? result.Error!.Value.ToString());
+					firstError ??= $"{Path.GetFileName(file.FileName)}: "
+						+ (result.ErrorMessage ?? result.Error!.Value.ToString());
 					_logger.Warning("Failed to restore icon pack {FileName}: {Error}",
 						file.FileName,
 						result.ErrorMessage ?? result.Error!.Value.ToString());
@@ -427,7 +431,7 @@ public sealed class IconImportService : IIconImportService
 
 					batch = CreateBatch(defaultPack.Id,
 						Path.GetFileName(file.FileName),
-						explicitDestination: false,
+						false,
 						IconImportMode.NewPacks);
 					_batchTracker.Register(batch);
 				}
@@ -519,7 +523,8 @@ public sealed class IconImportService : IIconImportService
 		return true;
 	}
 
-	private async Task MergePackArchive(IconImportBatchEntity batch,
+	private async Task MergePackArchive(
+		IconImportBatchEntity batch,
 		Guid packId,
 		string fileName,
 		Stream content,
@@ -528,8 +533,8 @@ public sealed class IconImportService : IIconImportService
 		var result = await _restoreService.MergeIntoPack(packId, batch.Id, fileName, content, cancellationToken);
 		if (!result.Success)
 		{
-			batch.Error = $"Failed to import {Path.GetFileName(fileName)}: " +
-				(result.ErrorMessage ?? result.Error!.Value.ToString());
+			batch.Error = $"Failed to import {Path.GetFileName(fileName)}: "
+				+ (result.ErrorMessage ?? result.Error!.Value.ToString());
 			_logger.Warning("Failed to merge icon pack {FileName} into pack {PackId}: {Error}",
 				fileName,
 				packId,
@@ -561,16 +566,20 @@ public sealed class IconImportService : IIconImportService
 	}
 
 	private static string? BatchSourceName(IReadOnlyList<string> paths)
-		=> paths.Count == 1
+	{
+		return paths.Count == 1
 			? Path.GetFileName(paths[0].TrimEnd(Path.DirectorySeparatorChar))
 			: $"{paths.Count} items";
+	}
 
-	private static IconImportBatchEntity CreateBatch(Guid packId,
+	private static IconImportBatchEntity CreateBatch(
+		Guid packId,
 		string? sourceName,
 		bool explicitDestination,
 		IconImportMode mode = IconImportMode.Destination,
 		bool silent = false)
-		=> new()
+	{
+		return new IconImportBatchEntity
 		{
 			Id = Guid.CreateVersion7(),
 			PackId = packId,
@@ -582,6 +591,7 @@ public sealed class IconImportService : IIconImportService
 			CreatedAt = DateTime.UtcNow,
 			UpdatedAt = DateTime.UtcNow
 		};
+	}
 
 	private List<string> SweepImportFolder(string root, out int skipped)
 	{
@@ -640,7 +650,8 @@ public sealed class IconImportService : IIconImportService
 		return results;
 	}
 
-	private async Task<StagedOutcome> StageAppIcon(IconImportBatchEntity batch,
+	private async Task<StagedOutcome> StageAppIcon(
+		IconImportBatchEntity batch,
 		string relativeName,
 		string fullPath,
 		CancellationToken cancellationToken)
@@ -662,7 +673,8 @@ public sealed class IconImportService : IIconImportService
 		return icon is null ? StagedOutcome.AsDuplicate() : StagedOutcome.Staged(icon);
 	}
 
-	private async Task<StagedOutcome> StageAppIconFromContent(IconImportBatchEntity batch,
+	private async Task<StagedOutcome> StageAppIconFromContent(
+		IconImportBatchEntity batch,
 		string fileName,
 		Stream content,
 		CancellationToken cancellationToken)
@@ -679,7 +691,8 @@ public sealed class IconImportService : IIconImportService
 		return icon is null ? StagedOutcome.AsDuplicate() : StagedOutcome.Staged(icon);
 	}
 
-	private static void ApplyStageOutcome(StagedOutcome outcome,
+	private static void ApplyStageOutcome(
+		StagedOutcome outcome,
 		IconImportBatchEntity batch,
 		string source,
 		List<IconEntity> stagedIcons,
@@ -706,22 +719,36 @@ public sealed class IconImportService : IIconImportService
 	}
 
 	private static void AppendBatchError(IconImportBatchEntity batch, string message)
-		=> batch.Error = batch.Error is null ? message : $"{batch.Error} {message}";
+	{
+		batch.Error = batch.Error is null ? message : $"{batch.Error} {message}";
+	}
 
 	private readonly record struct StagedOutcome(IconEntity? Icon, bool IsDuplicate, string? FailureMessage)
 	{
-		public static StagedOutcome Staged(IconEntity icon) => new(icon, IsDuplicate: false, FailureMessage: null);
+		public static StagedOutcome Staged(IconEntity icon)
+		{
+			return new StagedOutcome(icon, false, null);
+		}
 
-		public static StagedOutcome AsDuplicate() => new(Icon: null, IsDuplicate: true, FailureMessage: null);
+		public static StagedOutcome AsDuplicate()
+		{
+			return new StagedOutcome(null, true, null);
+		}
 
-		public static StagedOutcome Failed(string? message) => new(Icon: null, IsDuplicate: false, message);
+		public static StagedOutcome Failed(string? message)
+		{
+			return new StagedOutcome(null, false, message);
+		}
 	}
 
-	private async Task<IconEntity?> StageImage(IconImportBatchEntity batch,
+	private async Task<IconEntity?> StageImage(
+		IconImportBatchEntity batch,
 		string fileName,
 		Stream content,
 		CancellationToken cancellationToken)
-		=> (await StageImageOrFindDuplicate(batch, fileName, content, cancellationToken)).Staged;
+	{
+		return (await StageImageOrFindDuplicate(batch, fileName, content, cancellationToken)).Staged;
+	}
 
 	private async Task<(IconEntity? Staged, Guid? DuplicateOf)> StageImageOrFindDuplicate(
 		IconImportBatchEntity batch,
@@ -744,10 +771,13 @@ public sealed class IconImportService : IIconImportService
 	// Scoped to the destination pack: a pack import populates the pack the user chose, so an identical
 	// icon sitting in some other pack must not stand in for the item they asked for.
 	private Guid? DuplicateOf(IconImportBatchEntity batch, Guid iconId, SourceContentHash sourceHash)
-		=> _iconPackCache.FindBySourceContentHash(sourceHash, batch.PackId)?.Id ??
-			_coalescer.TryReserve(batch.PackId, sourceHash, iconId);
+	{
+		return _iconPackCache.FindBySourceContentHash(sourceHash, batch.PackId)?.Id
+			?? _coalescer.TryReserve(batch.PackId, sourceHash, iconId);
+	}
 
-	private async Task<int> StageUploadedAppearance(AppearanceStaging appearances,
+	private async Task<int> StageUploadedAppearance(
+		AppearanceStaging appearances,
 		IconImportFile file,
 		string baseName,
 		IReadOnlyDictionary<string, string> traits,
@@ -756,7 +786,12 @@ public sealed class IconImportService : IIconImportService
 		var groupKey = (IconImportFiles.DirectoryOf(file.FileName), baseName);
 		if (appearances.BaseOf(groupKey) is { } parent)
 		{
-			return await StageGroupedAppearance(appearances, parent, file.FileName, traits, file.Content, cancellationToken)
+			return await StageGroupedAppearance(appearances,
+				parent,
+				file.FileName,
+				traits,
+				file.Content,
+				cancellationToken)
 				? 0
 				: 1;
 		}
@@ -809,7 +844,8 @@ public sealed class IconImportService : IIconImportService
 		return duplicates;
 	}
 
-	private async Task<bool> StageGroupedAppearance(AppearanceStaging appearances,
+	private async Task<bool> StageGroupedAppearance(
+		AppearanceStaging appearances,
 		IconEntity? parent,
 		string fileName,
 		IReadOnlyDictionary<string, string> traits,
@@ -855,15 +891,19 @@ public sealed class IconImportService : IIconImportService
 	}
 
 	private static (string Directory, string BaseName) UploadGroupKey(string fileName)
-		=> (IconImportFiles.DirectoryOf(fileName), IconImportFiles.AppearanceBaseNameOf(fileName));
+	{
+		return (IconImportFiles.DirectoryOf(fileName), IconImportFiles.AppearanceBaseNameOf(fileName));
+	}
 
-	private static IconEntity NewStagedAppearance(IconImportBatchEntity batch,
+	private static IconEntity NewStagedAppearance(
+		IconImportBatchEntity batch,
 		IconEntity parent,
 		Guid assetId,
 		string fileName,
 		SourceContentHash sourceHash,
 		IReadOnlyDictionary<string, string> traits)
-		=> new()
+	{
+		return new IconEntity
 		{
 			Id = assetId,
 			PackId = parent.PackId,
@@ -877,12 +917,15 @@ public sealed class IconImportService : IIconImportService
 			CreatedAt = DateTime.UtcNow,
 			UpdatedAt = DateTime.UtcNow
 		};
+	}
 
-	private static IconEntity NewStagedIcon(IconImportBatchEntity batch,
+	private static IconEntity NewStagedIcon(
+		IconImportBatchEntity batch,
 		Guid iconId,
 		string fileName,
 		SourceContentHash sourceHash)
-		=> new()
+	{
+		return new IconEntity
 		{
 			Id = iconId,
 			PackId = batch.PackId,
@@ -894,6 +937,7 @@ public sealed class IconImportService : IIconImportService
 			CreatedAt = DateTime.UtcNow,
 			UpdatedAt = DateTime.UtcNow
 		};
+	}
 
 	private IconEntity? FindReusableIcon(Guid scope, SourceContentHash sourceHash, Guid iconId)
 	{
@@ -929,7 +973,8 @@ public sealed class IconImportService : IIconImportService
 			pack.Name);
 	}
 
-	private async Task RegisterStagedIcons(IconImportBatchEntity batch,
+	private async Task RegisterStagedIcons(
+		IconImportBatchEntity batch,
 		Guid packId,
 		List<IconEntity> icons,
 		CancellationToken cancellationToken)
@@ -964,7 +1009,8 @@ public sealed class IconImportService : IIconImportService
 		await _batchFinalizer.TryFinalize(batch.Id, _mediator, cancellationToken);
 	}
 
-	private sealed record StagedAppearanceFile(Guid AssetId,
+	private sealed record StagedAppearanceFile(
+		Guid AssetId,
 		string FileName,
 		SourceContentHash SourceHash,
 		IReadOnlyDictionary<string, string> Traits);
@@ -1000,11 +1046,19 @@ public sealed class IconImportService : IIconImportService
 		}
 
 		public IconImportAppearanceClaim Claim(IconEntity parent, IReadOnlyDictionary<string, string> traits)
-			=> _claims.Claim(parent, traits);
+		{
+			return _claims.Claim(parent, traits);
+		}
 
-		public IconEntity? BaseOf((string Directory, string BaseName) key) => _bases.GetValueOrDefault(key);
+		public IconEntity? BaseOf((string Directory, string BaseName) key)
+		{
+			return _bases.GetValueOrDefault(key);
+		}
 
-		public bool TryAddBase((string Directory, string BaseName) key, IconEntity parent) => _bases.TryAdd(key, parent);
+		public bool TryAddBase((string Directory, string BaseName) key, IconEntity parent)
+		{
+			return _bases.TryAdd(key, parent);
+		}
 
 		public void AddOrphan((string Directory, string BaseName) key, StagedAppearanceFile orphan)
 		{
@@ -1018,7 +1072,9 @@ public sealed class IconImportService : IIconImportService
 		}
 
 		public List<StagedAppearanceFile> TakeOrphans((string Directory, string BaseName) key)
-			=> _orphans.Remove(key, out var orphans) ? orphans : [];
+		{
+			return _orphans.Remove(key, out var orphans) ? orphans : [];
+		}
 
 		public List<StagedAppearanceFile> TakeOrphans()
 		{

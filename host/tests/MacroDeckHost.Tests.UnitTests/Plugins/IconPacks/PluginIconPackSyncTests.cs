@@ -16,10 +16,16 @@ internal sealed class PluginIconPackSyncTests
 	private PluginIconPackTestHost _host = null!;
 
 	[SetUp]
-	public void SetUp() => _host = new PluginIconPackTestHost();
+	public void SetUp()
+	{
+		_host = new PluginIconPackTestHost();
+	}
 
 	[TearDown]
-	public void TearDown() => _host.Dispose();
+	public void TearDown()
+	{
+		_host.Dispose();
+	}
 
 	[Test]
 	public async Task A_declared_pack_is_added_as_a_read_only_plugin_pack_that_cannot_be_deleted()
@@ -53,7 +59,12 @@ internal sealed class PluginIconPackSyncTests
 	public async Task A_replaced_pack_keeps_icon_ids_by_name_and_only_announces_the_icons_that_changed()
 	{
 		await _host.SyncDevelopment(PluginId,
-			("logos", await _host.BuildArchive("Logos", ("home", "one"), ("play", "one"), ("stop", "one"), ("pause", "one"))));
+			("logos",
+				await _host.BuildArchive("Logos",
+					("home", "one"),
+					("play", "one"),
+					("stop", "one"),
+					("pause", "one"))));
 		var pack = _host.PluginPack(PluginId, "logos")!;
 		var home = _host.Icon(pack, "home");
 		var homeHash = home.MasterContentHash;
@@ -77,8 +88,10 @@ internal sealed class PluginIconPackSyncTests
 			Assert.That(icons.Select(icon => icon.Name), Does.Contain("record"));
 			Assert.That(icons.Select(icon => icon.Id), Does.Contain(stop.Id), "a dropped icon a button uses is kept");
 			Assert.That(icons.Select(icon => icon.Id), Does.Not.Contain(pause.Id), "a dropped unused icon is deleted");
-			Assert.That(published.OfType<IconUpdatedNotification>().Select(n => n.Icon.Id), Is.EqualTo(new[] { home.Id }));
-			Assert.That(published.OfType<IconDeletedNotification>().Select(n => n.IconId), Is.EqualTo(new[] { pause.Id }));
+			Assert.That(published.OfType<IconUpdatedNotification>().Select(n => n.Icon.Id),
+				Is.EqualTo(new[] { home.Id }));
+			Assert.That(published.OfType<IconDeletedNotification>().Select(n => n.IconId),
+				Is.EqualTo(new[] { pause.Id }));
 		});
 	}
 
@@ -114,7 +127,8 @@ internal sealed class PluginIconPackSyncTests
 		{
 			Assert.That(result.Changed, Is.True);
 			Assert.That(_host.Icon(pack, "home").Id, Is.EqualTo(home.Id));
-			Assert.That(dark.MasterContentHash, Is.EqualTo(MasterContentHash.Compute(Encoding.UTF8.GetBytes("dark-two")).Value));
+			Assert.That(dark.MasterContentHash,
+				Is.EqualTo(MasterContentHash.Compute(Encoding.UTF8.GetBytes("dark-two")).Value));
 			Assert.That(_host.Icons.Mediator.Published.OfType<IconUpdatedNotification>().Select(n => n.Icon.Id),
 				Is.EqualTo(new[] { home.Id }));
 		});
@@ -128,7 +142,8 @@ internal sealed class PluginIconPackSyncTests
 		var home = await _host.Icons.AddReadyIcon(source.Id, "home", Encoding.UTF8.GetBytes("home"));
 		await _host.Icons.AddReadyAppearance(home, "colorScheme=dark", Encoding.UTF8.GetBytes(darkBody));
 		using var archive = new MemoryStream();
-		Assert.That((await _host.Icons.CreateExportService().Export(source.Id, archive, CancellationToken.None)).Success,
+		Assert.That(
+			(await _host.Icons.CreateExportService().Export(source.Id, archive, CancellationToken.None)).Success,
 			Is.True);
 		await _host.Icons.Cache.RemovePack(source.Id);
 		return archive.ToArray();
@@ -147,7 +162,8 @@ internal sealed class PluginIconPackSyncTests
 		{
 			Assert.That(result.Status, Is.EqualTo(PluginIconPackSyncStatus.Invalid));
 			Assert.That(result.InvalidKeys, Is.EqualTo(new[] { "logos" }));
-			Assert.That(_host.Icons.Cache.GetIconsByPackId(pack.Id).Select(icon => icon.Name), Is.EqualTo(new[] { "home" }));
+			Assert.That(_host.Icons.Cache.GetIconsByPackId(pack.Id).Select(icon => icon.Name),
+				Is.EqualTo(new[] { "home" }));
 		});
 	}
 
@@ -221,7 +237,9 @@ internal sealed class PluginIconPackSyncTests
 			Assert.That(_host.OwnerRegistry.Describe(_host.PluginPack(PluginId, "status")!).Kind,
 				Is.EqualTo(IconPackOwnerKind.Plugin));
 			Assert.That(icons.Select(icon => icon.Name), Is.EquivalentTo(new[] { "ok", "error" }));
-			Assert.That(icons.Single(icon => icon.Name == "ok").Id, Is.EqualTo(ok.Id), "the icon a button uses keeps its id");
+			Assert.That(icons.Single(icon => icon.Name == "ok").Id,
+				Is.EqualTo(ok.Id),
+				"the icon a button uses keeps its id");
 		});
 	}
 
@@ -273,14 +291,17 @@ internal sealed class PluginIconPackSyncTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_host.Resolver.Resolve(PluginId, "logos/Spotify"), Is.Not.Null, "names match case-insensitively");
+			Assert.That(_host.Resolver.Resolve(PluginId, "logos/Spotify"),
+				Is.Not.Null,
+				"names match case-insensitively");
 			Assert.That(_host.Resolver.Resolve("com.example.other", "logos/spotify"), Is.Null);
 			Assert.That(_host.Resolver.Resolve(PluginId, "logos/missing"), Is.Null);
 		});
 	}
 
 	[Test]
-	public async Task A_development_session_that_ends_leaves_its_packs_as_ordinary_packs_when_the_plugin_is_not_installed()
+	public async Task
+		A_development_session_that_ends_leaves_its_packs_as_ordinary_packs_when_the_plugin_is_not_installed()
 	{
 		await _host.Sessions.Create(Session("session-1"));
 		await _host.SyncDevelopment(PluginId, ("logos", await _host.BuildArchive("Logos", ("home", "one"))));
@@ -296,18 +317,21 @@ internal sealed class PluginIconPackSyncTests
 		});
 	}
 
-	private static PluginSessionRecord Session(string sessionId) => new()
+	private static PluginSessionRecord Session(string sessionId)
 	{
-		SessionId = sessionId,
-		PluginId = PluginId,
-		DisplayName = "Test Plugin",
-		Origin = PluginSessionOrigin.SelfRegistered,
-		NegotiatedVersion = 1,
-		Capabilities = new Dictionary<string, CapabilityNegotiationResult>(),
-		DeclaredCapabilities = [],
-		State = PluginSessionState.Connected,
-		CreatedAt = DateTimeOffset.UtcNow
-	};
+		return new PluginSessionRecord
+		{
+			SessionId = sessionId,
+			PluginId = PluginId,
+			DisplayName = "Test Plugin",
+			Origin = PluginSessionOrigin.SelfRegistered,
+			NegotiatedVersion = 1,
+			Capabilities = new Dictionary<string, CapabilityNegotiationResult>(),
+			DeclaredCapabilities = [],
+			State = PluginSessionState.Connected,
+			CreatedAt = DateTimeOffset.UtcNow
+		};
+	}
 
 	private static async Task WaitUntil(Func<bool> condition)
 	{

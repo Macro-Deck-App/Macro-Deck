@@ -29,7 +29,10 @@ public readonly record struct UiPayloadScan
 	// remove - a relay that holds no tree cannot know a removed subtree's size.
 	public int RemoveOperations { get; init; }
 
-	public static UiPayloadScan Failed(string code) => new() { Ok = false, Code = code };
+	public static UiPayloadScan Failed(string code)
+	{
+		return new UiPayloadScan { Ok = false, Code = code };
+	}
 }
 
 // One forward-only pass over the bytes the provider sent, which are then relayed unchanged: no
@@ -65,7 +68,8 @@ public static class UiPayloadValidator
 		ByteLength
 	}
 
-	public static UiPayloadScan Scan(ReadOnlySpan<byte> utf8,
+	public static UiPayloadScan Scan(
+		ReadOnlySpan<byte> utf8,
 		UiPayloadShape shape,
 		int maxResourceBytes = ProtocolLimits.MaxUiResourceBytes,
 		int maxTreeBytes = ProtocolLimits.MaxUiTreeBytes)
@@ -256,7 +260,8 @@ public static class UiPayloadValidator
 	}
 
 	private static (Role Pending, Scalar Scalar) Classify(Role container, ref Utf8JsonReader reader)
-		=> container switch
+	{
+		return container switch
 		{
 			Role.TreeDocument when reader.ValueTextEquals("root"u8) => (Role.Node, Scalar.None),
 			Role.TreeDocument when reader.ValueTextEquals("revision"u8) => (Role.Opaque, Scalar.Revision),
@@ -272,4 +277,5 @@ public static class UiPayloadValidator
 			Role.NodeProperties when reader.ValueTextEquals("byteLength"u8) => (Role.NodeProperties, Scalar.ByteLength),
 			_ => (Role.Opaque, Scalar.None)
 		};
+	}
 }

@@ -31,7 +31,8 @@ public static class KeyRingStartupState
 
 	public static bool IsLocked => Plan.Mode == KeyRingProtectionMode.Locked;
 
-	public static void Set(KeyRingProtectionPlan plan,
+	public static void Set(
+		KeyRingProtectionPlan plan,
 		KeyRingKekHolder holder,
 		IKekStore store,
 		KekStoreIdentity identity,
@@ -48,7 +49,8 @@ public static class KeyRingStartupState
 
 
 	private static KeyRingProtectionPlan Unresolved()
-		=> new(KeyRingProtectionMode.Unprotected,
+	{
+		return new KeyRingProtectionPlan(KeyRingProtectionMode.Unprotected,
 			KeyRingLockReason.None,
 			KeyRingUnprotectedReason.None,
 			KeyRingBackend.None,
@@ -57,4 +59,5 @@ public static class KeyRingStartupState
 			null,
 			null,
 			false);
+	}
 }

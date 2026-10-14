@@ -14,7 +14,8 @@ public class MarkAnnouncementSeenRequestMessageHandler
 		_announcements = announcements;
 	}
 
-	public async ValueTask<MarkAnnouncementSeenResponse> Handle(MarkAnnouncementSeenRequest request,
+	public async ValueTask<MarkAnnouncementSeenResponse> Handle(
+		MarkAnnouncementSeenRequest request,
 		CancellationToken cancellationToken)
 	{
 		await _announcements.MarkSeen(request.Number, cancellationToken);

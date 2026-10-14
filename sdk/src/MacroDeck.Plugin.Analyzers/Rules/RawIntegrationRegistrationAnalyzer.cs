@@ -53,8 +53,8 @@ public sealed class RawIntegrationRegistrationAnalyzer : DiagnosticAnalyzer
 					var invocation = (IInvocationOperation)operationContext.Operation;
 					var method = invocation.TargetMethod;
 
-					if (method.Name != "AddSingleton" ||
-						!SymbolEqualityComparer.Default.Equals(method.ContainingType, addExtensionsType))
+					if (method.Name != "AddSingleton"
+						|| !SymbolEqualityComparer.Default.Equals(method.ContainingType, addExtensionsType))
 					{
 						return;
 					}
@@ -63,8 +63,8 @@ public sealed class RawIntegrationRegistrationAnalyzer : DiagnosticAnalyzer
 					{
 						// AddSingleton<T>(): T registering itself. Excludes T being IPluginIntegration itself,
 						// which is exactly the shape RegisterIntegration's own factory overload uses.
-						1 when !SymbolEqualityComparer.Default.Equals(method.TypeArguments[0], integrationType) &&
-							method.TypeArguments[0].ImplementsInterface(integrationType)
+						1 when !SymbolEqualityComparer.Default.Equals(method.TypeArguments[0], integrationType)
+							&& method.TypeArguments[0].ImplementsInterface(integrationType)
 							=> method.TypeArguments[0],
 
 						// AddSingleton<IPluginIntegration, T>(): the service type is IPluginIntegration itself.

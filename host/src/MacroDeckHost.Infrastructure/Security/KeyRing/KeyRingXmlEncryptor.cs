@@ -10,14 +10,17 @@ public sealed class KeyRingXmlEncryptor : IXmlEncryptor
 {
 	private readonly IKeyRingKekAccessor _kek;
 
-	public KeyRingXmlEncryptor(IKeyRingKekAccessor kek) => _kek = kek;
+	public KeyRingXmlEncryptor(IKeyRingKekAccessor kek)
+	{
+		_kek = kek;
+	}
 
 	public EncryptedXmlInfo Encrypt(XElement plaintextElement)
 	{
 		ArgumentNullException.ThrowIfNull(plaintextElement);
 
-		var kek = _kek.TryGetKek() ??
-			throw new InvalidOperationException(
+		var kek = _kek.TryGetKek()
+			?? throw new InvalidOperationException(
 				"The key ring cannot be encrypted because no key encryption key is available.");
 
 		try

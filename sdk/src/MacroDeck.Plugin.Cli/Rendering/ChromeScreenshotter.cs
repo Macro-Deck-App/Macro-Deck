@@ -17,13 +17,16 @@ internal sealed class ChromeScreenshotter : IPreviewScreenshotter
 	private static readonly TimeSpan _shotTimeout = TimeSpan.FromSeconds(60);
 
 	private const string Page =
-		"<!doctype html><meta charset=\"utf-8\"><link rel=\"stylesheet\" href=\"/preview-renderer.css\">" +
-		"<div id=\"tile\"></div><script src=\"/preview-renderer.js\"></script>";
+		"<!doctype html><meta charset=\"utf-8\"><link rel=\"stylesheet\" href=\"/preview-renderer.css\">"
+		+ "<div id=\"tile\"></div><script src=\"/preview-renderer.js\"></script>";
 
 	private readonly string _browser;
 	private readonly WebApplication _server;
 	private readonly string _baseAddress;
-	private readonly string _profileRoot = Path.Combine(Path.GetTempPath(), "macrodeck-preview-" + Guid.NewGuid().ToString("N"));
+
+	private readonly string _profileRoot
+		= Path.Combine(Path.GetTempPath(), "macrodeck-preview-" + Guid.NewGuid().ToString("N"));
+
 	private readonly ConcurrentDictionary<string, string> _scenes = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _status = new(StringComparer.Ordinal);
 	private CdpConnection? _cdp;
@@ -51,24 +54,27 @@ internal sealed class ChromeScreenshotter : IPreviewScreenshotter
 		server.MapGet("/render", () => Results.Content(Page, "text/html; charset=utf-8"));
 		server.MapGet("/preview-renderer.js", () => Results.Bytes(script, "text/javascript"));
 		server.MapGet("/preview-renderer.css", () => Results.Bytes(style, "text/css"));
-		server.MapGet("/scene/{id}.json", (string id) => instance!._scenes.TryGetValue(id, out var json)
-			? Results.Content(json, "application/json")
-			: Results.NotFound());
-		server.MapPost("/status/{id}", async (string id, HttpRequest request) =>
-		{
-			using var reader = new StreamReader(request.Body, Encoding.UTF8);
-			var status = await reader.ReadToEndAsync().ConfigureAwait(false);
-
-			if (instance!._status.TryGetValue(id, out var waiting))
+		server.MapGet("/scene/{id}.json",
+			(string id) => instance!._scenes.TryGetValue(id, out var json)
+				? Results.Content(json, "application/json")
+				: Results.NotFound());
+		server.MapPost("/status/{id}",
+			async (string id, HttpRequest request) =>
 			{
-				waiting.TrySetResult(status);
-			}
+				using var reader = new StreamReader(request.Body, Encoding.UTF8);
+				var status = await reader.ReadToEndAsync().ConfigureAwait(false);
 
-			return Results.Ok();
-		});
+				if (instance!._status.TryGetValue(id, out var waiting))
+				{
+					waiting.TrySetResult(status);
+				}
+
+				return Results.Ok();
+			});
 
 		await server.StartAsync(cancellationToken).ConfigureAwait(false);
-		var address = server.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.First();
+		var address = server.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses
+			.First();
 		instance = new ChromeScreenshotter(browser, server, address);
 
 		return instance;
@@ -90,23 +96,28 @@ internal sealed class ChromeScreenshotter : IPreviewScreenshotter
 			var cdp = await Connection(timeout.Token).ConfigureAwait(false);
 
 			await cdp.SendAsync("Emulation.setDeviceMetricsOverride",
-				new
-				{
-					width = shot.Size.Width,
-					height = shot.Size.Height,
-					deviceScaleFactor = shot.Scale,
-					mobile = false
-				},
-				_sessionId,
-				timeout.Token).ConfigureAwait(false);
-			await cdp.SendAsync("Page.navigate", new { url = $"{_baseAddress}/render?id={id}" }, _sessionId, timeout.Token)
+					new
+					{
+						width = shot.Size.Width,
+						height = shot.Size.Height,
+						deviceScaleFactor = shot.Scale,
+						mobile = false
+					},
+					_sessionId,
+					timeout.Token)
+				.ConfigureAwait(false);
+			await cdp.SendAsync("Page.navigate",
+					new { url = $"{_baseAddress}/render?id={id}" },
+					_sessionId,
+					timeout.Token)
 				.ConfigureAwait(false);
 
 			var status = await rendered.Task.WaitAsync(timeout.Token).ConfigureAwait(false);
 
 			if (status.StartsWith("unsupported", StringComparison.Ordinal))
 			{
-				throw new PreviewRenderException("preview-unsupported", status["unsupported".Length..].TrimStart(':', ' '));
+				throw new PreviewRenderException("preview-unsupported",
+					status["unsupported".Length..].TrimStart(':', ' '));
 			}
 
 			if (status != "ready")
@@ -115,14 +126,18 @@ internal sealed class ChromeScreenshotter : IPreviewScreenshotter
 			}
 
 			await cdp.SendAsync("Emulation.setDefaultBackgroundColorOverride",
-				new { color = new { r = 0, g = 0, b = 0, a = 0 } },
-				_sessionId,
-				timeout.Token).ConfigureAwait(false);
-
-			var result = await cdp.SendAsync("Page.captureScreenshot", new { format = "png" }, _sessionId, timeout.Token)
+					new { color = new { r = 0, g = 0, b = 0, a = 0 } },
+					_sessionId,
+					timeout.Token)
 				.ConfigureAwait(false);
-			await File.WriteAllBytesAsync(shot.OutputPath, Convert.FromBase64String(result.GetProperty("data").GetString()!),
-				cancellationToken).ConfigureAwait(false);
+
+			var result = await cdp
+				.SendAsync("Page.captureScreenshot", new { format = "png" }, _sessionId, timeout.Token)
+				.ConfigureAwait(false);
+			await File.WriteAllBytesAsync(shot.OutputPath,
+					Convert.FromBase64String(result.GetProperty("data").GetString()!),
+					cancellationToken)
+				.ConfigureAwait(false);
 		}
 		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
@@ -147,9 +162,10 @@ internal sealed class ChromeScreenshotter : IPreviewScreenshotter
 		var target = await _cdp.SendAsync("Target.createTarget", new { url = "about:blank" }, null, cancellationToken)
 			.ConfigureAwait(false);
 		var attached = await _cdp.SendAsync("Target.attachToTarget",
-			new { targetId = target.GetProperty("targetId").GetString(), flatten = true },
-			null,
-			cancellationToken).ConfigureAwait(false);
+				new { targetId = target.GetProperty("targetId").GetString(), flatten = true },
+				null,
+				cancellationToken)
+			.ConfigureAwait(false);
 		_sessionId = attached.GetProperty("sessionId").GetString();
 		await _cdp.SendAsync("Page.enable", null, _sessionId, cancellationToken).ConfigureAwait(false);
 
@@ -168,7 +184,7 @@ internal sealed class ChromeScreenshotter : IPreviewScreenshotter
 
 		try
 		{
-			Directory.Delete(_profileRoot, recursive: true);
+			Directory.Delete(_profileRoot, true);
 		}
 		catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
 		{

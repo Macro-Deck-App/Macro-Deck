@@ -46,7 +46,7 @@ public class PollingFocusedApplicationWatcherTests
 			() => new FocusedAppInfo(200, null, "app200", null)
 		]);
 
-		var coordinator = await RunEndToEnd(reader, TimeSpan.FromMilliseconds(10), expectedCoordinatorCalls: 2);
+		var coordinator = await RunEndToEnd(reader, TimeSpan.FromMilliseconds(10), 2);
 
 		Assert.That(coordinator.FocusChanges.Select(app => app.ProcessId), Is.EqualTo(new[] { 100, 200 }));
 	}
@@ -61,7 +61,7 @@ public class PollingFocusedApplicationWatcherTests
 			() => new FocusedAppInfo(200, null, "app200", null)
 		]);
 
-		var coordinator = await RunEndToEnd(reader, TimeSpan.FromMilliseconds(10), expectedCoordinatorCalls: 2);
+		var coordinator = await RunEndToEnd(reader, TimeSpan.FromMilliseconds(10), 2);
 
 		Assert.That(coordinator.FocusChanges.Select(app => app.ProcessId), Is.EqualTo(new[] { 100, 200 }));
 	}
@@ -166,7 +166,10 @@ public class PollingFocusedApplicationWatcherTests
 			return value;
 		}
 
-		public void Dispose() => Disposed = true;
+		public void Dispose()
+		{
+			Disposed = true;
+		}
 	}
 
 	private sealed class NonDisposableFocusedWindowReader : IFocusedWindowReader
@@ -175,7 +178,10 @@ public class PollingFocusedApplicationWatcherTests
 
 		public string? UnsupportedReason => null;
 
-		public FocusedAppInfo? Read() => null;
+		public FocusedAppInfo? Read()
+		{
+			return null;
+		}
 	}
 
 	private sealed class ScriptedFocusedWindowReader : IFocusedWindowReader
@@ -183,7 +189,10 @@ public class PollingFocusedApplicationWatcherTests
 		private readonly List<Func<FocusedAppInfo?>> _script;
 		private int _index;
 
-		public ScriptedFocusedWindowReader(IEnumerable<Func<FocusedAppInfo?>> script) => _script = [.. script];
+		public ScriptedFocusedWindowReader(IEnumerable<Func<FocusedAppInfo?>> script)
+		{
+			_script = [.. script];
+		}
 
 		public bool IsSupported => true;
 

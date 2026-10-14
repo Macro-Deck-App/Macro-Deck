@@ -90,7 +90,9 @@ internal readonly struct DeprecationMetadata
 	/// on an unrelated line.
 	/// </summary>
 	public static bool IsAtOrBelow(string? version, Version ceiling)
-		=> Version.TryParse(version, out var parsed) && parsed <= ceiling;
+	{
+		return Version.TryParse(version, out var parsed) && parsed <= ceiling;
+	}
 
 	/// <summary>
 	/// True when both versions parse and <paramref name="removedIn" /> is not strictly after
@@ -98,14 +100,18 @@ internal readonly struct DeprecationMetadata
 	/// deprecated it, which leaves plugin authors no version to migrate on.
 	/// </summary>
 	public static bool IsNotAfter(string? removedIn, string? deprecatedIn)
-		=> Version.TryParse(removedIn, out var removed) &&
-			Version.TryParse(deprecatedIn, out var deprecated) &&
-			removed <= deprecated;
+	{
+		return Version.TryParse(removedIn, out var removed)
+			&& Version.TryParse(deprecatedIn, out var deprecated)
+			&& removed <= deprecated;
+	}
 
 	private static string? Positional(AttributeData attribute, int index)
-		=> attribute.ConstructorArguments.Length > index
+	{
+		return attribute.ConstructorArguments.Length > index
 			? attribute.ConstructorArguments[index].Value as string
 			: null;
+	}
 
 	private static string? Named(AttributeData attribute, string name)
 	{

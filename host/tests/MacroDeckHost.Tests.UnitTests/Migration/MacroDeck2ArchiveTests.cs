@@ -11,7 +11,9 @@ public class MacroDeck2ArchiveTests
 
 	[SetUp]
 	public void SetUp()
-		=> _zipPath = Path.Combine(Path.GetTempPath(), $"md2-backup-{Guid.NewGuid():N}.zip");
+	{
+		_zipPath = Path.Combine(Path.GetTempPath(), $"md2-backup-{Guid.NewGuid():N}.zip");
+	}
 
 	[TearDown]
 	public void TearDown()

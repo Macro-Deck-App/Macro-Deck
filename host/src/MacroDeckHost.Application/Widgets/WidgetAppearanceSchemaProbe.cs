@@ -47,18 +47,21 @@ public sealed class WidgetAppearanceSchemaProbe
 		return !AddsProblems(schema, before, after);
 	}
 
-	private static WidgetAppearancePatch Sample(WidgetAppearanceProperty property) => property switch
+	private static WidgetAppearancePatch Sample(WidgetAppearanceProperty property)
 	{
-		WidgetAppearanceProperty.BackgroundColor => new WidgetAppearancePatch { BackgroundColor = "#000000" },
-		WidgetAppearanceProperty.Label => new WidgetAppearancePatch { Label = "Label" },
-		WidgetAppearanceProperty.LabelColor => new WidgetAppearancePatch { LabelColor = "#000000" },
-		WidgetAppearanceProperty.AccentColor => new WidgetAppearancePatch { AccentColor = "#000000" },
-		WidgetAppearanceProperty.Font => new WidgetAppearancePatch
+		return property switch
 		{
-			FontFaceId = "sample", FontSize = 12, TextAlign = "center", LabelPosition = "center"
-		},
-		_ => new WidgetAppearancePatch()
-	};
+			WidgetAppearanceProperty.BackgroundColor => new WidgetAppearancePatch { BackgroundColor = "#000000" },
+			WidgetAppearanceProperty.Label => new WidgetAppearancePatch { Label = "Label" },
+			WidgetAppearanceProperty.LabelColor => new WidgetAppearancePatch { LabelColor = "#000000" },
+			WidgetAppearanceProperty.AccentColor => new WidgetAppearancePatch { AccentColor = "#000000" },
+			WidgetAppearanceProperty.Font => new WidgetAppearancePatch
+			{
+				FontFaceId = "sample", FontSize = 12, TextAlign = "center", LabelPosition = "center"
+			},
+			_ => new WidgetAppearancePatch()
+		};
+	}
 
 	private static HashSet<(string Pointer, string Keyword)> Problems(JsonSchema schema, JsonObject data)
 	{

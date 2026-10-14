@@ -62,10 +62,14 @@ internal sealed class CarThingProvisioner : IWebClientTargetProvisioner
 	public string TargetId => TargetIdentifier;
 
 	public Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
-		=> Task.FromResult(_adbManager.Status is { Enabled: true, UsbConnectionsEnabled: true });
+	{
+		return Task.FromResult(_adbManager.Status is { Enabled: true, UsbConnectionsEnabled: true });
+	}
 
 	public Task<WebClientTargetProvisioningResult> StartAsync(CancellationToken cancellationToken)
-		=> Task.FromResult(WebClientTargetProvisioningResult.Next(DetectStep()));
+	{
+		return Task.FromResult(WebClientTargetProvisioningResult.Next(DetectStep()));
+	}
 
 	public async Task<WebClientTargetProvisioningResult> AdvanceAsync(
 		string stepId,
@@ -86,11 +90,15 @@ internal sealed class CarThingProvisioner : IWebClientTargetProvisioner
 
 	/// <summary>Any attached Car Thing, whatever state adb has it in.</summary>
 	private AdbDevice? FindDevice()
-		=> _adbManager.Devices.FirstOrDefault(CarThingIdentity.Matches);
+	{
+		return _adbManager.Devices.FirstOrDefault(CarThingIdentity.Matches);
+	}
 
 	/// <summary>The one that can actually be worked on.</summary>
 	private AdbDevice? FindReadyDevice()
-		=> _adbManager.Devices.FirstOrDefault(device => device.IsAuthorized && CarThingIdentity.Matches(device));
+	{
+		return _adbManager.Devices.FirstOrDefault(device => device.IsAuthorized && CarThingIdentity.Matches(device));
+	}
 
 	private WebClientTargetProvisioningResult AdvanceFromDetect()
 	{
@@ -106,7 +114,7 @@ internal sealed class CarThingProvisioner : IWebClientTargetProvisioner
 		if (!device.IsAuthorized)
 		{
 			return WebClientTargetProvisioningResult.Failed(DetectStep(),
-				AppStrings.ClientTargets.CarThing.Detect.NotReady(state: device.State.ToString()));
+				AppStrings.ClientTargets.CarThing.Detect.NotReady(device.State.ToString()));
 		}
 
 		return WebClientTargetProvisioningResult.Next(PrepareStep());
@@ -154,7 +162,7 @@ internal sealed class CarThingProvisioner : IWebClientTargetProvisioner
 			FieldServiceManager,
 			nameof(AdbServiceManager.Supervisord));
 
-		if (!Enum.TryParse<AdbServiceManager>(manager, ignoreCase: true, out var serviceManager))
+		if (!Enum.TryParse<AdbServiceManager>(manager, true, out var serviceManager))
 		{
 			serviceManager = AdbServiceManager.Supervisord;
 		}
@@ -187,7 +195,7 @@ internal sealed class CarThingProvisioner : IWebClientTargetProvisioner
 			if (!push.Success)
 			{
 				return WebClientTargetProvisioningResult.Failed(ConfigureStep(device, firmware),
-					AppStrings.ClientTargets.CarThing.Configure.WriteFailed(path: indexPath));
+					AppStrings.ClientTargets.CarThing.Configure.WriteFailed(indexPath));
 			}
 		}
 		finally
@@ -204,7 +212,7 @@ internal sealed class CarThingProvisioner : IWebClientTargetProvisioner
 			// Reporting this as a failure of the whole run would send the user back through steps that
 			// already succeeded.
 			return WebClientTargetProvisioningResult.Failed(DoneStep(clientUrl),
-				AppStrings.ClientTargets.CarThing.Configure.RestartFailed(service: serviceName));
+				AppStrings.ClientTargets.CarThing.Configure.RestartFailed(serviceName));
 		}
 
 		return WebClientTargetProvisioningResult.Done(DoneStep(clientUrl));
@@ -227,80 +235,98 @@ internal sealed class CarThingProvisioner : IWebClientTargetProvisioner
 		var url = JavaScriptString(clientUrl);
 		var probe = JavaScriptString($"{origin}/api/system/build-info");
 
-		return "<!doctype html>\n" +
-			"<meta charset=\"utf-8\">\n" +
-			"<title>Macro Deck</title>\n" +
-			"<style>html,body{height:100%;margin:0;background:#101014;color:#a0a0a8;" +
-			"font-family:sans-serif;display:flex;align-items:center;justify-content:center}</style>\n" +
-			$"<body><p>{WebUtility.HtmlEncode(waitingText)}</p>\n" +
-			"<script>(function(){\n" +
-			$"var url={url},probe={probe},tries=0;\n" +
-			"function go(){location.replace(url);}\n" +
-			"function attempt(){\n" +
+		return "<!doctype html>\n"
+			+ "<meta charset=\"utf-8\">\n"
+			+ "<title>Macro Deck</title>\n"
+			+ "<style>html,body{height:100%;margin:0;background:#101014;color:#a0a0a8;"
+			+ "font-family:sans-serif;display:flex;align-items:center;justify-content:center}</style>\n"
+			+ $"<body><p>{WebUtility.HtmlEncode(waitingText)}</p>\n"
+			+ "<script>(function(){\n"
+			+ $"var url={url},probe={probe},tries=0;\n"
+			+ "function go(){location.replace(url);}\n"
+			+ "function attempt(){\n"
+			+
 			// Give up probing eventually and go anyway: a firmware whose browser blocks the
 			// cross-origin probe would otherwise wait here forever with the host perfectly reachable.
-			"if(++tries>60){go();return;}\n" +
-			"var x=new XMLHttpRequest();x.open('GET',probe+'?t='+tries,true);x.timeout=2000;\n" +
-			"x.onload=go;x.onerror=retry;x.ontimeout=retry;x.send();}\n" +
-			"function retry(){setTimeout(attempt,1000);}\n" +
-			"attempt();})();</script>\n";
+			"if(++tries>60){go();return;}\n"
+			+ "var x=new XMLHttpRequest();x.open('GET',probe+'?t='+tries,true);x.timeout=2000;\n"
+			+ "x.onload=go;x.onerror=retry;x.ontimeout=retry;x.send();}\n"
+			+ "function retry(){setTimeout(attempt,1000);}\n"
+			+ "attempt();})();</script>\n";
 	}
 
 	/// <summary>Quotes a value for a JavaScript string literal, so a URL cannot end the script.</summary>
-	private static string JavaScriptString(string value) => JsonSerializer.Serialize(value);
+	private static string JavaScriptString(string value)
+	{
+		return JsonSerializer.Serialize(value);
+	}
 
 	internal static string ClientUrlFor(int devicePort)
-		=> $"http://127.0.0.1:{devicePort}/targets/carthing/";
+	{
+		return $"http://127.0.0.1:{devicePort}/targets/carthing/";
+	}
 
 	private static string Read(IReadOnlyDictionary<string, string> input, string key, string fallback)
-		=> input.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value.Trim() : fallback;
-
-	private static WebClientTargetProvisioningStep DetectStep() => new()
 	{
-		StepId = StepDetect,
-		Title = AppStrings.ClientTargets.CarThing.Detect.Title(),
-		Description = AppStrings.ClientTargets.CarThing.Detect.Description(),
-		Instructions =
-		[
-			AppStrings.ClientTargets.CarThing.Detect.ConnectUsb(),
-			AppStrings.ClientTargets.CarThing.Detect.EnableAdb()
-		]
-	};
+		return input.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value.Trim() : fallback;
+	}
 
-	private static WebClientTargetProvisioningStep PrepareStep() => new()
+	private static WebClientTargetProvisioningStep DetectStep()
 	{
-		StepId = StepPrepare,
-		Title = AppStrings.ClientTargets.CarThing.Prepare.Title(),
-		Description = AppStrings.ClientTargets.CarThing.Prepare.Description(),
-		Instructions =
-		[
-			AppStrings.ClientTargets.CarThing.Prepare.EnterUsbMode(),
-			AppStrings.ClientTargets.CarThing.Prepare.RunFlashingTool(),
-			AppStrings.ClientTargets.CarThing.Prepare.Reboot()
-		],
-		Links =
-		[
-			new WebClientTargetProvisioningLink(AppStrings.ClientTargets.CarThing.Prepare.ToolsLink(),
-				FlashingToolUrl)
-		]
-	};
-
-	private static WebClientTargetProvisioningStep ConnectStep(AdbDevice? device) => new()
-	{
-		StepId = StepConnect,
-		Title = AppStrings.ClientTargets.CarThing.Connect.Title(),
-		Description = AppStrings.ClientTargets.CarThing.Connect.Description(),
-		Values = device?.Tunnel is { Established: true } tunnel
-			?
+		return new WebClientTargetProvisioningStep
+		{
+			StepId = StepDetect,
+			Title = AppStrings.ClientTargets.CarThing.Detect.Title(),
+			Description = AppStrings.ClientTargets.CarThing.Detect.Description(),
+			Instructions =
 			[
-				new WebClientTargetProvisioningValue(AppStrings.ClientTargets.CarThing.Connect.AddressLabel(),
-					ClientUrlFor(tunnel.DevicePort))
+				AppStrings.ClientTargets.CarThing.Detect.ConnectUsb(),
+				AppStrings.ClientTargets.CarThing.Detect.EnableAdb()
 			]
-			: []
-	};
+		};
+	}
+
+	private static WebClientTargetProvisioningStep PrepareStep()
+	{
+		return new WebClientTargetProvisioningStep
+		{
+			StepId = StepPrepare,
+			Title = AppStrings.ClientTargets.CarThing.Prepare.Title(),
+			Description = AppStrings.ClientTargets.CarThing.Prepare.Description(),
+			Instructions =
+			[
+				AppStrings.ClientTargets.CarThing.Prepare.EnterUsbMode(),
+				AppStrings.ClientTargets.CarThing.Prepare.RunFlashingTool(),
+				AppStrings.ClientTargets.CarThing.Prepare.Reboot()
+			],
+			Links =
+			[
+				new WebClientTargetProvisioningLink(AppStrings.ClientTargets.CarThing.Prepare.ToolsLink(),
+					FlashingToolUrl)
+			]
+		};
+	}
+
+	private static WebClientTargetProvisioningStep ConnectStep(AdbDevice? device)
+	{
+		return new WebClientTargetProvisioningStep
+		{
+			StepId = StepConnect,
+			Title = AppStrings.ClientTargets.CarThing.Connect.Title(),
+			Description = AppStrings.ClientTargets.CarThing.Connect.Description(),
+			Values = device?.Tunnel is { Established: true } tunnel
+				?
+				[
+					new WebClientTargetProvisioningValue(AppStrings.ClientTargets.CarThing.Connect.AddressLabel(),
+						ClientUrlFor(tunnel.DevicePort))
+				]
+				: []
+		};
+	}
 
 	private static WebClientTargetProvisioningStep ConfigureStep(AdbDevice device, CarThingFirmware firmware)
-		=> new()
+	{
+		return new WebClientTargetProvisioningStep
 		{
 			StepId = StepConfigure,
 			Title = AppStrings.ClientTargets.CarThing.Configure.Title(),
@@ -334,16 +360,21 @@ internal sealed class CarThingProvisioner : IWebClientTargetProvisioner
 					])
 			]
 		};
+	}
 
-	private static WebClientTargetProvisioningStep DoneStep(string clientUrl) => new()
+	private static WebClientTargetProvisioningStep DoneStep(string clientUrl)
 	{
-		StepId = StepDone,
-		Title = AppStrings.ClientTargets.CarThing.Done.Title(),
-		Description = AppStrings.ClientTargets.CarThing.Done.Description(),
-		Values =
-		[
-			new WebClientTargetProvisioningValue(AppStrings.ClientTargets.CarThing.Connect.AddressLabel(), clientUrl)
-		],
-		CanContinue = false
-	};
+		return new WebClientTargetProvisioningStep
+		{
+			StepId = StepDone,
+			Title = AppStrings.ClientTargets.CarThing.Done.Title(),
+			Description = AppStrings.ClientTargets.CarThing.Done.Description(),
+			Values =
+			[
+				new WebClientTargetProvisioningValue(AppStrings.ClientTargets.CarThing.Connect.AddressLabel(),
+					clientUrl)
+			],
+			CanContinue = false
+		};
+	}
 }

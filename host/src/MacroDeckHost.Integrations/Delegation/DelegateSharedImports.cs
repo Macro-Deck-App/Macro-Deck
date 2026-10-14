@@ -25,10 +25,15 @@ internal sealed class DelegateSharedImports
 
 	public IReadOnlyDictionary<string, IReadOnlyList<string>> Skipped { get; }
 
-	public DelegateSharedImport? Find(string definitionId) => _byDefinitionId.GetValueOrDefault(definitionId);
+	public DelegateSharedImport? Find(string definitionId)
+	{
+		return _byDefinitionId.GetValueOrDefault(definitionId);
+	}
 
 	public static string LocalName(string variableKey, string remoteName)
-		=> VariableNames.Sanitize($"{variableKey}_{remoteName}");
+	{
+		return VariableNames.Sanitize($"{variableKey}_{remoteName}");
+	}
 
 	public static DelegateSharedImports Build(IReadOnlyList<DelegateRemote> remotes)
 	{
@@ -39,7 +44,7 @@ internal sealed class DelegateSharedImports
 		var skipped = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
 
 		foreach (var remote in remotes.Where(r => r.ImportsSharedVariables)
-					.OrderBy(r => r.Instance.InstanceId, StringComparer.Ordinal))
+			.OrderBy(r => r.Instance.InstanceId, StringComparer.Ordinal))
 		{
 			var skippedHere = new List<string>();
 			foreach (var variable in remote.SharedVariables.OrderBy(v => v.Name, StringComparer.Ordinal))
@@ -87,16 +92,20 @@ internal sealed class DelegateSharedImports
 			: VariableReading.Of(value, variable.Min, variable.Max, variable.Step);
 	}
 
-	public static string? Format(object? value) => value switch
+	public static string? Format(object? value)
 	{
-		null => null,
-		bool flag => flag ? "true" : "false",
-		IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-		_ => value.ToString()
-	};
+		return value switch
+		{
+			null => null,
+			bool flag => flag ? "true" : "false",
+			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+			_ => value.ToString()
+		};
+	}
 
 	private static VariableDefinition Declare(DelegateRemote remote, DelegateSharedVariable variable)
-		=> VariableDefinition.Eager(LocalName(remote.Instance.VariableKey, variable.Name),
+	{
+		return VariableDefinition.Eager(LocalName(remote.Instance.VariableKey, variable.Name),
 				variable.Type,
 				variable.DecimalPlaces,
 				DelegateRemote.SharedVariableInterval) with
@@ -110,4 +119,5 @@ internal sealed class DelegateSharedImports
 					: null,
 				IsShareable = false
 			};
+	}
 }

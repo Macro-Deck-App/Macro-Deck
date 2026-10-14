@@ -31,19 +31,25 @@ public class EmailInboxVariablesTests
 	{
 		_imap = new FakeEmailIntegration("app.imap", "IMAP").WithInbox("work", "Work");
 		_other = new FakeEmailIntegration("app.other", "Other Mail").WithInbox("home", "Home");
-		_imap.Set("work", Snapshot(EmailInboxStatus.Connected, 2,
-		[
-			Message("standup", -10, sender: "Ann", subject: "Standup notes"),
-			Message("invoice", -30, isRead: true),
-		], totalCount: 40));
-		_other.Set("home", Snapshot(EmailInboxStatus.Connected, 1, [Message("dinner", -20, sender: "Sam")], totalCount: 12));
+		_imap.Set("work",
+			Snapshot(EmailInboxStatus.Connected,
+				2,
+				[
+					Message("standup", -10, sender: "Ann", subject: "Standup notes"),
+					Message("invoice", -30, true)
+				],
+				40));
+		_other.Set("home", Snapshot(EmailInboxStatus.Connected, 1, [Message("dinner", -20, sender: "Sam")], 12));
 		_integrations = new ConfigurableIntegrationRegistry([_imap, _other]);
 		_world = new EmailWorld(_integrations);
 		_variables = new FakeEmailVariableApi();
 	}
 
 	[TearDown]
-	public void TearDown() => _world.Dispose();
+	public void TearDown()
+	{
+		_world.Dispose();
+	}
 
 	[Test]
 	public async Task Each_inbox_gets_its_own_variables_next_to_the_totals()
@@ -55,8 +61,8 @@ public class EmailInboxVariablesTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(email.Variables.Select(variable => variable.Name), Is.EquivalentTo(
-				new[] { "email_unread_count", "email_inbox_count" }
+			Assert.That(email.Variables.Select(variable => variable.Name),
+				Is.EquivalentTo(new[] { "email_unread_count", "email_inbox_count" }
 					.Concat(_suffixes.Select(suffix => "email_work_" + suffix))
 					.Concat(_suffixes.Select(suffix => "email_home_" + suffix))));
 			Assert.That(values["email_unread_count"], Is.EqualTo(3));
@@ -69,7 +75,8 @@ public class EmailInboxVariablesTests
 			Assert.That(values["email_work_is_connected"], Is.EqualTo(true));
 			Assert.That(values["email_home_unread_count"], Is.EqualTo(1));
 			Assert.That(values["email_home_latest_sender"], Is.EqualTo("Sam"));
-			Assert.That(TestLocalization.Resolve(Declared(email, "email_work_unread_count").DisplayName), Does.Contain("Work"));
+			Assert.That(TestLocalization.Resolve(Declared(email, "email_work_unread_count").DisplayName),
+				Does.Contain("Work"));
 		});
 	}
 
@@ -129,7 +136,8 @@ public class EmailInboxVariablesTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_world.Cache.Snapshot.Inboxes.Select(state => state.Ref), Is.EqualTo(new[] { "app.other::home" }));
+			Assert.That(_world.Cache.Snapshot.Inboxes.Select(state => state.Ref),
+				Is.EqualTo(new[] { "app.other::home" }));
 			Assert.That(email.Variables.Select(variable => variable.Name), Has.Some.EqualTo("email_work_unread_count"));
 			Assert.That(_variables.Names, Has.Some.EqualTo("email_work_unread_count"));
 			Assert.That(values["email_work_unread_count"], Is.Null);
@@ -152,7 +160,8 @@ public class EmailInboxVariablesTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(restarted.Variables.Select(variable => variable.Name), Has.Some.EqualTo("email_work_latest_subject"));
+			Assert.That(restarted.Variables.Select(variable => variable.Name),
+				Has.Some.EqualTo("email_work_latest_subject"));
 			Assert.That(values["email_work_latest_subject"], Is.Null);
 			Assert.That(_variables.Names, Has.Some.EqualTo("email_work_latest_subject"));
 		});
@@ -180,14 +189,17 @@ public class EmailInboxVariablesTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(world.Cache.Snapshot.Inboxes, Has.Count.EqualTo(42));
-			Assert.That(names, Has.Count.EqualTo(2 + (6 * 40)));
+			Assert.That(names, Has.Count.EqualTo(2 + 6 * 40));
 			Assert.That(names, Has.Some.EqualTo("email_zulu_0_unread_count"));
 			Assert.That(names, Has.Some.EqualTo("email_zulu_39_unread_count"));
 			Assert.That(names, Has.None.StartsWith("email_alpha_"));
 		});
 	}
 
-	private Task<EmailIntegration> StartAsync() => StartAsync(_world, _integrations);
+	private Task<EmailIntegration> StartAsync()
+	{
+		return StartAsync(_world, _integrations);
+	}
 
 	private async Task<EmailIntegration> StartAsync(EmailWorld world, ConfigurableIntegrationRegistry integrations)
 	{
@@ -198,7 +210,9 @@ public class EmailInboxVariablesTests
 	}
 
 	private static VariableDefinition Declared(EmailIntegration email, string name)
-		=> email.Variables.Single(variable => variable.Name == name);
+	{
+		return email.Variables.Single(variable => variable.Name == name);
+	}
 
 	private static async Task<Dictionary<string, object?>> ReadAllAsync(EmailIntegration email)
 	{
@@ -250,10 +264,14 @@ public class EmailInboxVariablesTests
 		}
 
 		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
-			=> Task.FromResult<IReadOnlyList<VariableHandle>>([.. _handles.Values]);
+		{
+			return Task.FromResult<IReadOnlyList<VariableHandle>>([.. _handles.Values]);
+		}
 
 		public Task<VariableHandle?> GetByNameAsync(string name)
-			=> Task.FromResult(_handles.Values.FirstOrDefault(handle => handle.Name == name));
+		{
+			return Task.FromResult(_handles.Values.FirstOrDefault(handle => handle.Name == name));
+		}
 
 		public Task<VariableHandle> CreateAsync(
 			string name,
@@ -264,13 +282,16 @@ public class EmailInboxVariablesTests
 		{
 			var handle = new VariableHandle(Guid.NewGuid(), name, type, initialValue, decimalPlaces)
 			{
-				DefinitionId = definitionId,
+				DefinitionId = definitionId
 			};
 			_handles[handle.Id] = handle;
 			return Task.FromResult(handle);
 		}
 
-		public Task SetValueAsync(Guid variableId, object? value) => Task.CompletedTask;
+		public Task SetValueAsync(Guid variableId, object? value)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task DeleteAsync(Guid variableId)
 		{

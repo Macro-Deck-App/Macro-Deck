@@ -22,14 +22,19 @@ internal sealed class SetConditionAction(WellBehavedIntegration integration)
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
-		ActionParameter.DynamicChoice("condition", label: "Condition", required: true)
+		ActionParameter.DynamicChoice("condition", "Condition", required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(integration);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(integration);
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(new DynamicOptionsResult
+	{
+		return Task.FromResult(new DynamicOptionsResult
 		{
 			Options =
 			[
@@ -38,13 +43,14 @@ internal sealed class SetConditionAction(WellBehavedIntegration integration)
 						{ Value = condition.ToString(), Label = condition.ToString() })
 			]
 		});
+	}
 
 	private sealed class Executor(WellBehavedIntegration integration) : IActionExecutor
 	{
 		public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
-			if (context.Parameters.GetValueOrDefault("condition") is not string text ||
-				!Enum.TryParse<WeatherCondition>(text, out var condition))
+			if (context.Parameters.GetValueOrDefault("condition") is not string text
+				|| !Enum.TryParse<WeatherCondition>(text, out var condition))
 			{
 				return Task.FromResult(ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					"condition must be a known WeatherCondition name."));

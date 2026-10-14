@@ -14,9 +14,9 @@ public sealed class UiWebSocketTicketsController(IUiWebSocketTickets tickets) : 
 	[HttpPost]
 	public IActionResult Create([FromBody] JsonElement request)
 	{
-		if (!string.Equals(Request.Headers["X-MacroDeck-Ui-Protocol"], "1", StringComparison.Ordinal) ||
-			request.ValueKind != JsonValueKind.Object ||
-			request.EnumerateObject().Any())
+		if (!string.Equals(Request.Headers["X-MacroDeck-Ui-Protocol"], "1", StringComparison.Ordinal)
+			|| request.ValueKind != JsonValueKind.Object
+			|| request.EnumerateObject().Any())
 		{
 			return BadRequest();
 		}

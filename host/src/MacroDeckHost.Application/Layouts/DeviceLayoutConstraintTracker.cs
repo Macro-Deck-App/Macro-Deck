@@ -24,9 +24,11 @@ public sealed class DeviceLayoutConstraintTracker
 	}
 
 	public DeviceGridConstraint? Get(string profileId)
-		=> !string.IsNullOrEmpty(profileId) && _snapshot.TryGetValue(profileId, out var constraint)
+	{
+		return !string.IsNullOrEmpty(profileId) && _snapshot.TryGetValue(profileId, out var constraint)
 			? constraint
 			: null;
+	}
 
 	public async Task RefreshAsync(CancellationToken ct = default)
 	{

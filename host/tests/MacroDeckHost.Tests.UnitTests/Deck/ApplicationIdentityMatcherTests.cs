@@ -132,11 +132,13 @@ public class ApplicationIdentityMatcherTests
 	}
 
 	private static FolderFocusRule Rule(ApplicationIdentityKind kind, string identity, Guid? deviceId = null)
-		=> new()
+	{
+		return new FolderFocusRule
 		{
 			Id = Guid.NewGuid(),
 			ApplicationIdentity = identity,
 			IdentityKind = kind,
 			DeviceId = deviceId ?? Guid.NewGuid()
 		};
+	}
 }

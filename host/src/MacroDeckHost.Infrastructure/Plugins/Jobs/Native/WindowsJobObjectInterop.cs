@@ -55,7 +55,8 @@ internal static class WindowsJobObjectInterop
 
 	[DllImport("kernel32.dll", SetLastError = true)]
 	[return: MarshalAs(UnmanagedType.Bool)]
-	public static extern bool SetInformationJobObject(IntPtr job,
+	public static extern bool SetInformationJobObject(
+		IntPtr job,
 		int informationClass,
 		IntPtr information,
 		uint informationLength);
@@ -69,7 +70,8 @@ internal static class WindowsJobObjectInterop
 	public static extern bool TerminateJobObject(IntPtr job, uint exitCode);
 
 	[DllImport("kernel32.dll", SetLastError = true)]
-	public static extern IntPtr OpenProcess(uint desiredAccess,
+	public static extern IntPtr OpenProcess(
+		uint desiredAccess,
 		[MarshalAs(UnmanagedType.Bool)] bool inheritHandle,
 		int processId);
 

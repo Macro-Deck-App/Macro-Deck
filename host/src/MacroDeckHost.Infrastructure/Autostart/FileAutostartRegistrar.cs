@@ -43,5 +43,8 @@ public abstract class FileAutostartRegistrar : IAutostartRegistrar
 		}
 	}
 
-	private string EntryPath() => Path.Combine(_directory, FileName);
+	private string EntryPath()
+	{
+		return Path.Combine(_directory, FileName);
+	}
 }

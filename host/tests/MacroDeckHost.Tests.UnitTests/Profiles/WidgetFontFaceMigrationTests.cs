@@ -55,9 +55,14 @@ public class WidgetFontFaceMigrationTests
 	[Test]
 	public void Normalize_StoredIdOfAHiddenDuplicateFace_IsRewrittenEverywhereAFontCanBeStored()
 	{
-		var catalog = new FakeFontCatalog();
-		catalog.Aliases["ubuntu-400-5-upright-3"] = "ubuntu-400-5-upright";
-		catalog.Aliases["ubuntu-400-5-italic-2"] = "ubuntu-400-5-italic";
+		var catalog = new FakeFontCatalog
+		{
+			Aliases =
+			{
+				["ubuntu-400-5-upright-3"] = "ubuntu-400-5-upright",
+				["ubuntu-400-5-italic-2"] = "ubuntu-400-5-italic"
+			}
+		};
 
 		var widget = ActionButtonWidget("""
 										{"fontFaceId":"ubuntu-400-5-upright-3",
@@ -84,11 +89,15 @@ public class WidgetFontFaceMigrationTests
 				Is.EqualTo("ubuntu-400-5-upright"));
 			Assert.That(data["states"]![2]!.AsObject().ContainsKey("appearance"), Is.False);
 			Assert.That(legacyChanged, Is.True);
-			Assert.That(legacyData["states"]!["off"]!["fontFaceId"]!.GetValue<string>(), Is.EqualTo("ubuntu-400-5-upright"));
-			Assert.That(legacyData["states"]!["on"]!["fontFaceId"]!.GetValue<string>(), Is.EqualTo("other-400-5-upright"));
+			Assert.That(legacyData["states"]!["off"]!["fontFaceId"]!.GetValue<string>(),
+				Is.EqualTo("ubuntu-400-5-upright"));
+			Assert.That(legacyData["states"]!["on"]!["fontFaceId"]!.GetValue<string>(),
+				Is.EqualTo("other-400-5-upright"));
 		});
 
-		Assert.That(WidgetFontFaceMigration.Normalize(widget, catalog), Is.False, "a second pass has nothing left to rewrite");
+		Assert.That(WidgetFontFaceMigration.Normalize(widget, catalog),
+			Is.False,
+			"a second pass has nothing left to rewrite");
 	}
 
 	[Test]
@@ -211,7 +220,9 @@ public class WidgetFontFaceMigrationTests
 	}
 
 	private static WidgetEntity ActionButtonWidget(string data)
-		=> new() { Id = Guid.NewGuid(), Type = WidgetTypeIds.ActionButton, Data = data };
+	{
+		return new WidgetEntity { Id = Guid.NewGuid(), Type = WidgetTypeIds.ActionButton, Data = data };
+	}
 
 	private sealed class FakeFontCatalog : IFontCatalog
 	{
@@ -224,10 +235,19 @@ public class WidgetFontFaceMigrationTests
 
 		public Dictionary<string, string> Aliases { get; } = [];
 
-		public string ResolveFaceId(string faceId) => Aliases.GetValueOrDefault(faceId, faceId);
+		public string ResolveFaceId(string faceId)
+		{
+			return Aliases.GetValueOrDefault(faceId, faceId);
+		}
 
-		public IReadOnlyList<FontFaceInfo> GetFaces() => _faces;
+		public IReadOnlyList<FontFaceInfo> GetFaces()
+		{
+			return _faces;
+		}
 
-		public byte[]? GetFaceFile(string faceId) => null;
+		public byte[]? GetFaceFile(string faceId)
+		{
+			return null;
+		}
 	}
 }

@@ -31,11 +31,20 @@ internal sealed class DriftingScreenSaverSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _inner.BuildTree();
+	public UiTree BuildTree()
+	{
+		return _inner.BuildTree();
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _inner.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _inner.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _inner.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_inner.Dispatch(uiEvent);
+	}
 
 	public async ValueTask DisposeAsync()
 	{
@@ -47,8 +56,8 @@ internal sealed class DriftingScreenSaverSession : IUiSession
 	// let the face burn in for twice the interval.
 	private void Drift()
 	{
-		var next = (_position.Value + 1 + Random.Shared.Next(ScreenSaverDrift.PositionCount - 1)) %
-			ScreenSaverDrift.PositionCount;
+		var next = (_position.Value + 1 + Random.Shared.Next(ScreenSaverDrift.PositionCount - 1))
+			% ScreenSaverDrift.PositionCount;
 		_position.Value = next;
 	}
 }

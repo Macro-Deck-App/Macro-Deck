@@ -13,10 +13,10 @@ public class RunVerbosityTests
 	public void A_forwarded_host_log_line_is_suppressed_at_quiet_but_not_at_normal()
 	{
 		var quietOutput = new StringWriter();
-		var quietConsole = new CliConsole(Verbosity.Quiet, noColor: true, quietOutput, new StringWriter());
+		var quietConsole = new CliConsole(Verbosity.Quiet, true, quietOutput, new StringWriter());
 
 		var normalOutput = new StringWriter();
-		var normalConsole = new CliConsole(Verbosity.Normal, noColor: true, normalOutput, new StringWriter());
+		var normalConsole = new CliConsole(Verbosity.Normal, true, normalOutput, new StringWriter());
 
 		RunSession.WriteForwardedLog(quietConsole, "Information", "Some.Source", "a forwarded host log line");
 		RunSession.WriteForwardedLog(normalConsole, "Information", "Some.Source", "a forwarded host log line");
@@ -33,10 +33,10 @@ public class RunVerbosityTests
 	{
 		var quietOutput = new StringWriter();
 		var quietError = new StringWriter();
-		var quiet = new CliConsole(Verbosity.Quiet, noColor: true, quietOutput, quietError);
+		var quiet = new CliConsole(Verbosity.Quiet, true, quietOutput, quietError);
 
-		RunSession.WritePluginOutput(quiet, "a line the plugin printed", fromStandardError: false);
-		RunSession.WritePluginOutput(quiet, "a line the plugin wrote to stderr", fromStandardError: true);
+		RunSession.WritePluginOutput(quiet, "a line the plugin printed", false);
+		RunSession.WritePluginOutput(quiet, "a line the plugin wrote to stderr", true);
 
 		// cli.md's --verbosity row promises quiet "never suppresses the command's actual result ... a
 		// plugin's own console output". Paired with the forwarded-log test above, this is what forces the

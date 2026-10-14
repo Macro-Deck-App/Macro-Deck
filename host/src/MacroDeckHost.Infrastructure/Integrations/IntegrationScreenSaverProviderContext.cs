@@ -17,8 +17,12 @@ public sealed class IntegrationScreenSaverProviderContext : IScreenSaverProvider
 	public Task<ScreenSaverRegistration> RegisterScreenSaverAsync(
 		ScreenSaverDescriptor screenSaver,
 		CancellationToken cancellationToken = default)
-		=> _registry.Register(_integrationId, screenSaver, cancellationToken);
+	{
+		return _registry.Register(_integrationId, screenSaver, cancellationToken);
+	}
 
 	public Task UnregisterScreenSaverAsync(string screenSaverId, CancellationToken cancellationToken = default)
-		=> _registry.Unregister(_integrationId, screenSaverId, cancellationToken);
+	{
+		return _registry.Unregister(_integrationId, screenSaverId, cancellationToken);
+	}
 }

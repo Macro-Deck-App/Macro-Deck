@@ -19,12 +19,14 @@ public class AdbManagerStableIdTests
 	}
 
 	private static void Attached(AdbManagerHarness harness, string serial)
-		=> harness.Runner.When(argv => argv is ["devices", "-l"],
+	{
+		harness.Runner.When(argv => argv is ["devices", "-l"],
 			_ => new AdbProcessResult(true,
 				0,
 				$"List of devices attached\n{serial} device product:a54x model:SM_A546B transport_id:1\n",
 				string.Empty,
 				false));
+	}
 
 	private static async Task<string?> StableIdSeenAs(string serial, byte[]? installKey = null)
 	{

@@ -9,9 +9,15 @@ internal sealed class TestEmailInboxIntegration(string providerName, params stri
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; } = providerName;
 
@@ -24,7 +30,13 @@ internal sealed class TestEmailInboxIntegration(string providerName, params stri
 	public event EventHandler<EmailInboxChangedEventArgs>? Changed;
 
 	public IReadOnlyList<EmailInbox> GetInboxes()
-		=> [.. InboxIds.Select(id => new EmailInbox { Id = id, DisplayName = "Inbox " + id, Address = id + "@example.com" })];
+	{
+		return
+		[
+			.. InboxIds.Select(id => new EmailInbox
+				{ Id = id, DisplayName = "Inbox " + id, Address = id + "@example.com" })
+		];
+	}
 
 	public Task<EmailInboxSnapshot> GetSnapshotAsync(
 		string inboxId,
@@ -41,5 +53,8 @@ internal sealed class TestEmailInboxIntegration(string providerName, params stri
 		return Task.FromResult(snapshot with { Messages = [.. messages.Take(query.MaxMessages)] });
 	}
 
-	public void RaiseChanged(string? inboxId) => Changed?.Invoke(this, new EmailInboxChangedEventArgs(inboxId));
+	public void RaiseChanged(string? inboxId)
+	{
+		Changed?.Invoke(this, new EmailInboxChangedEventArgs(inboxId));
+	}
 }

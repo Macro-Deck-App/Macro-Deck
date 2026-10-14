@@ -19,9 +19,10 @@ internal sealed class CargoProcessMetadataSource : ICargoMetadataSource
 			WorkingDirectory = manifestDirectory,
 			RedirectStandardOutput = true,
 			RedirectStandardError = true,
-			UseShellExecute = false,
+			UseShellExecute = false
 		};
-		foreach (var argument in new[] { "metadata", "--format-version", "1", "--locked", "--filter-platform", targetTriple })
+		foreach (var argument in new[]
+			{ "metadata", "--format-version", "1", "--locked", "--filter-platform", targetTriple })
 		{
 			startInfo.ArgumentList.Add(argument);
 		}
@@ -33,7 +34,8 @@ internal sealed class CargoProcessMetadataSource : ICargoMetadataSource
 		}
 		catch (System.ComponentModel.Win32Exception)
 		{
-			throw new ToolException("cargo was not found on PATH; install the Rust toolchain to collect crate licenses");
+			throw new ToolException(
+				"cargo was not found on PATH; install the Rust toolchain to collect crate licenses");
 		}
 
 		using (process)
@@ -70,10 +72,12 @@ internal static class CargoCollector
 
 	private static void CollectTarget(JsonElement metadata, string platform, ComponentSet components, Problems problems)
 	{
-		var packages = metadata.GetProperty("packages").EnumerateArray()
+		var packages = metadata.GetProperty("packages")
+			.EnumerateArray()
 			.ToDictionary(package => package.GetProperty("id").GetString()!, package => package);
 		var resolve = metadata.GetProperty("resolve");
-		var nodes = resolve.GetProperty("nodes").EnumerateArray()
+		var nodes = resolve.GetProperty("nodes")
+			.EnumerateArray()
 			.ToDictionary(node => node.GetProperty("id").GetString()!, node => node);
 		var roots = resolve.GetProperty("root").ValueKind == JsonValueKind.String
 			? [resolve.GetProperty("root").GetString()!]
@@ -86,7 +90,8 @@ internal static class CargoCollector
 			foreach (var dependency in nodes[pending.Pop()].GetProperty("deps").EnumerateArray())
 			{
 				var id = dependency.GetProperty("pkg").GetString()!;
-				var normal = dependency.GetProperty("dep_kinds").EnumerateArray()
+				var normal = dependency.GetProperty("dep_kinds")
+					.EnumerateArray()
 					.Any(kind => kind.GetProperty("kind").ValueKind == JsonValueKind.Null);
 				if (!normal || visited.Contains(id) || IsProcMacro(packages[id]))
 				{
@@ -100,9 +105,13 @@ internal static class CargoCollector
 		}
 	}
 
-	private static bool IsProcMacro(JsonElement package) =>
-		package.GetProperty("targets").EnumerateArray().Any(target =>
-			target.GetProperty("kind").EnumerateArray().Any(kind => kind.GetString() == "proc-macro"));
+	private static bool IsProcMacro(JsonElement package)
+	{
+		return package.GetProperty("targets")
+			.EnumerateArray()
+			.Any(target =>
+				target.GetProperty("kind").EnumerateArray().Any(kind => kind.GetString() == "proc-macro"));
+	}
 
 	private static Component ToComponent(JsonElement package, string platform, Problems problems)
 	{
@@ -142,15 +151,19 @@ internal static class CargoCollector
 			var path = Path.Combine(directory, licenseFile);
 			if (File.Exists(path))
 			{
-				component.AddText(new LicenseText(Path.GetFileName(licenseFile), File.ReadAllText(path), LicenseTextKind.License));
+				component.AddText(new LicenseText(Path.GetFileName(licenseFile),
+					File.ReadAllText(path),
+					LicenseTextKind.License));
 			}
 		}
 
 		return component;
 	}
 
-	private static string? String(JsonElement element, string property) =>
-		element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+	private static string? String(JsonElement element, string property)
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 }

@@ -6,15 +6,15 @@ namespace MacroDeckHost.Infrastructure.Variables;
 
 public sealed class VariableFileSystem : IVariableFileSystem, IDisposable
 {
-	private static readonly TimeSpan ReadTimeout = TimeSpan.FromSeconds(2);
-	private static readonly TimeSpan MissingDirectoryPoll = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _readTimeout = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _missingDirectoryPoll = TimeSpan.FromSeconds(2);
 
-	private static readonly StringComparer FileNameComparer = OperatingSystem.IsLinux()
+	private static readonly StringComparer _fileNameComparer = OperatingSystem.IsLinux()
 		? StringComparer.Ordinal
 		: StringComparer.OrdinalIgnoreCase;
 
 	private readonly object _lock = new();
-	private readonly Dictionary<string, DirectoryWatch> _directories = new(FileNameComparer);
+	private readonly Dictionary<string, DirectoryWatch> _directories = new(_fileNameComparer);
 	private readonly ILogger _logger;
 
 	public VariableFileSystem(ILogger logger)
@@ -32,20 +32,24 @@ public sealed class VariableFileSystem : IVariableFileSystem, IDisposable
 		}
 
 		var read = Task.Run(() => Read(path), CancellationToken.None);
-		var finished = await Task.WhenAny(read, Task.Delay(ReadTimeout, cancellationToken));
+		var finished = await Task.WhenAny(read, Task.Delay(_readTimeout, cancellationToken));
 		return finished == read ? await read : FileReadOutcome.Unavailable;
 	}
 
 	public Task WriteAsync(string path, string content, CancellationToken cancellationToken = default)
-		=> VariableFileText.WriteAsync(path, content, cancellationToken);
+	{
+		return VariableFileText.WriteAsync(path, content, cancellationToken);
+	}
 
 	public IDisposable Watch(string path, Action changed)
 	{
-		if (!Path.IsPathFullyQualified(path) ||
-			Path.GetDirectoryName(path) is not { Length: > 0 } directory ||
-			Path.GetFileName(path) is not { Length: > 0 } fileName)
+		if (!Path.IsPathFullyQualified(path)
+			|| Path.GetDirectoryName(path) is not { Length: > 0 } directory
+			|| Path.GetFileName(path) is not { Length: > 0 } fileName)
 		{
-			return new Subscription(() => { });
+			return new Subscription(() =>
+			{
+			});
 		}
 
 		DirectoryWatch watch;
@@ -117,7 +121,8 @@ public sealed class VariableFileSystem : IVariableFileSystem, IDisposable
 				using var reader = new StreamReader(new MemoryStream(buffer, 0, length), Encoding.UTF8, true);
 				return new FileReadOutcome(reader.ReadToEnd());
 			}
-			catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException
+			catch (Exception ex) when (ex is FileNotFoundException
+				or DirectoryNotFoundException
 				or UnauthorizedAccessException)
 			{
 				return FileReadOutcome.Unavailable;
@@ -138,7 +143,10 @@ public sealed class VariableFileSystem : IVariableFileSystem, IDisposable
 	{
 		private Action? _dispose = dispose;
 
-		public void Dispose() => Interlocked.Exchange(ref _dispose, null)?.Invoke();
+		public void Dispose()
+		{
+			Interlocked.Exchange(ref _dispose, null)?.Invoke();
+		}
 	}
 
 	private sealed class DirectoryWatch : IDisposable
@@ -146,7 +154,7 @@ public sealed class VariableFileSystem : IVariableFileSystem, IDisposable
 		private readonly string _directory;
 		private readonly ILogger _logger;
 		private readonly object _lock = new();
-		private readonly Dictionary<string, List<Action>> _subscribers = new(FileNameComparer);
+		private readonly Dictionary<string, List<Action>> _subscribers = new(_fileNameComparer);
 		private FileSystemWatcher? _watcher;
 		private Timer? _poll;
 		private bool _disposed;
@@ -210,7 +218,7 @@ public sealed class VariableFileSystem : IVariableFileSystem, IDisposable
 
 			if (!Directory.Exists(_directory))
 			{
-				_poll ??= new Timer(_ => OnPoll(), null, MissingDirectoryPoll, MissingDirectoryPoll);
+				_poll ??= new Timer(_ => OnPoll(), null, _missingDirectoryPoll, _missingDirectoryPoll);
 				return;
 			}
 
@@ -219,8 +227,10 @@ public sealed class VariableFileSystem : IVariableFileSystem, IDisposable
 				var watcher = new FileSystemWatcher(_directory)
 				{
 					IncludeSubdirectories = false,
-					NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size |
-						NotifyFilters.CreationTime
+					NotifyFilter = NotifyFilters.FileName
+						| NotifyFilters.LastWrite
+						| NotifyFilters.Size
+						| NotifyFilters.CreationTime
 				};
 				watcher.Changed += (_, e) => Notify(e.Name);
 				watcher.Created += (_, e) => Notify(e.Name);
@@ -237,7 +247,7 @@ public sealed class VariableFileSystem : IVariableFileSystem, IDisposable
 			catch (Exception ex) when (ex is IOException or ArgumentException or UnauthorizedAccessException)
 			{
 				_logger.Warning(ex, "Could not watch {Directory} for variable files", _directory);
-				_poll ??= new Timer(_ => OnPoll(), null, MissingDirectoryPoll, MissingDirectoryPoll);
+				_poll ??= new Timer(_ => OnPoll(), null, _missingDirectoryPoll, _missingDirectoryPoll);
 			}
 		}
 

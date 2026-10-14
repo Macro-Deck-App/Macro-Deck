@@ -21,10 +21,16 @@ public sealed class InProcessColorApi : IColorApi, IAsyncDisposable
 		_watches.Signal.Changed += OnChanged;
 	}
 
-	public Task<string?> ResolveAsync(string value, string? widgetId = null, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_watches.Resolve(value, widgetId));
+	public Task<string?> ResolveAsync(
+		string value,
+		string? widgetId = null,
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(_watches.Resolve(value, widgetId));
+	}
 
-	public Task<IAsyncDisposable> WatchAsync(string value,
+	public Task<IAsyncDisposable> WatchAsync(
+		string value,
 		Func<string?, CancellationToken, Task> onChanged,
 		string? widgetId = null,
 		CancellationToken cancellationToken = default)
@@ -45,7 +51,7 @@ public sealed class InProcessColorApi : IColorApi, IAsyncDisposable
 			_active.Add(watch);
 		}
 
-		_ = watch.RefreshAsync(first: true);
+		_ = watch.RefreshAsync(true);
 		return Task.FromResult<IAsyncDisposable>(watch);
 	}
 
@@ -71,7 +77,7 @@ public sealed class InProcessColorApi : IColorApi, IAsyncDisposable
 
 		foreach (var watch in active)
 		{
-			_ = watch.RefreshAsync(first: false);
+			_ = watch.RefreshAsync(false);
 		}
 	}
 
@@ -91,7 +97,10 @@ public sealed class InProcessColorApi : IColorApi, IAsyncDisposable
 		}
 	}
 
-	private sealed class Watch(InProcessColorApi owner, string value, string? widgetId,
+	private sealed class Watch(
+		InProcessColorApi owner,
+		string value,
+		string? widgetId,
 		Func<string?, CancellationToken, Task> onChanged) : IAsyncDisposable
 	{
 		private readonly Lock _chain = new();
@@ -116,7 +125,7 @@ public sealed class InProcessColorApi : IColorApi, IAsyncDisposable
 			await Task.Yield();
 			try
 			{
-				if (!owner.IsActive(this) || (first && _delivered))
+				if (!owner.IsActive(this) || first && _delivered)
 				{
 					return;
 				}

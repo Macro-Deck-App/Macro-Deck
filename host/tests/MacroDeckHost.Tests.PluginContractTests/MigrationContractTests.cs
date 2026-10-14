@@ -17,17 +17,21 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class MigrationContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Migration,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private Task<MacroDeck.Sdk.IIntegration> ConnectMigrationAsync(params IIntegrationMigration[] migrations)
-		=> ConnectAsync([new MigrationCapabilityHandler([new TestMigrationIntegration(migrations)])],
+	{
+		return ConnectAsync([new MigrationCapabilityHandler([new TestMigrationIntegration(migrations)])],
 			[Provider()],
 			[CapabilityKinds.Migration]);
+	}
 
 	[Test]
 	public async Task Declare_tells_the_host_which_source_the_plugin_migrates_from_and_what_it_claims()

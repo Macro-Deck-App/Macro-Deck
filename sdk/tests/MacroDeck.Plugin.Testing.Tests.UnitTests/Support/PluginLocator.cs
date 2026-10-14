@@ -10,18 +10,22 @@ internal static class PluginLocator
 {
 	/// <summary>The fixture's built executable - the well-behaved subject.</summary>
 	public static string FindWellBehavedPluginExecutable()
-		=> FindExecutable(["sdk", "tests", "fixtures", "MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin"],
+	{
+		return FindExecutable(["sdk", "tests", "fixtures", "MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin"],
 			"MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin");
+	}
 
 	/// <summary>The misbehaving fixture's built executable - see <c>MisbehaviorFlags</c> for what <c>MACRODECK_MISBEHAVE</c> understands.</summary>
 	public static string FindMisbehavingPluginExecutable()
-		=> FindExecutable(["sdk", "tests", "fixtures", "MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin"],
+	{
+		return FindExecutable(["sdk", "tests", "fixtures", "MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin"],
 			"MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin");
+	}
 
 	private static string FindExecutable(string[] projectDirectorySegments, string assemblyName)
 	{
-		var repoRoot = FindRepoRoot(AppContext.BaseDirectory) ??
-			throw new InvalidOperationException(
+		var repoRoot = FindRepoRoot(AppContext.BaseDirectory)
+			?? throw new InvalidOperationException(
 				"Could not locate the repository root (no MacroDeck.slnx found above the test output directory).");
 
 		var configuration = AppContext.BaseDirectory.Contains("Debug", StringComparison.Ordinal) ? "Debug" : "Release";

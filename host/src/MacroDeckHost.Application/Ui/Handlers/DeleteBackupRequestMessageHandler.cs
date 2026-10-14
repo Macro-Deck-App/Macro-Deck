@@ -9,9 +9,13 @@ public sealed class DeleteBackupRequestMessageHandler
 {
 	private readonly IBackupService _backupService;
 
-	public DeleteBackupRequestMessageHandler(IBackupService backupService) => _backupService = backupService;
+	public DeleteBackupRequestMessageHandler(IBackupService backupService)
+	{
+		_backupService = backupService;
+	}
 
-	public async ValueTask<DeleteBackupResponse> Handle(DeleteBackupRequest request,
+	public async ValueTask<DeleteBackupResponse> Handle(
+		DeleteBackupRequest request,
 		CancellationToken cancellationToken)
 	{
 		var result = await _backupService.Delete(request.BackupId, cancellationToken);

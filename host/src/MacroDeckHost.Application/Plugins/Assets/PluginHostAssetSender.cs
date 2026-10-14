@@ -103,8 +103,8 @@ public sealed class PluginHostAssetSender : IPluginHostAssetSender
 	{
 		ArgumentNullException.ThrowIfNull(ack);
 
-		if (ack.CorrelationId is not { Length: > 0 } correlationId ||
-			!_pending.TryRemove((pluginId, correlationId), out var pending))
+		if (ack.CorrelationId is not { Length: > 0 } correlationId
+			|| !_pending.TryRemove((pluginId, correlationId), out var pending))
 		{
 			return false;
 		}
@@ -216,8 +216,8 @@ public sealed class PluginHostAssetSender : IPluginHostAssetSender
 				return false;
 			}
 
-			using var registration = cancellationToken.Register(
-				static state => ((TaskCompletionSource<HostAssetAckPayload>)state!).TrySetCanceled(),
+			using var registration = cancellationToken.Register(static state
+					=> ((TaskCompletionSource<HostAssetAckPayload>)state!).TrySetCanceled(),
 				completion);
 
 			var ack = await completion.Task.ConfigureAwait(false);

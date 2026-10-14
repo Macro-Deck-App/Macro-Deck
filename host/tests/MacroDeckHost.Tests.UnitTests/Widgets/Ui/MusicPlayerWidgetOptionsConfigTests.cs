@@ -103,31 +103,56 @@ public class MusicPlayerWidgetOptionsConfigTests
 	}
 
 	private static UiTestHost Render(object data)
-		=> UiTestHost.Render(MusicPlayerWidgetConfigView.Build(JsonSerializer.SerializeToElement(data), new Registry()));
+	{
+		return UiTestHost.Render(
+			MusicPlayerWidgetConfigView.Build(JsonSerializer.SerializeToElement(data), new Registry()));
+	}
 
 	private sealed class Registry : IMusicPlayerRegistry
 	{
-		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() =>
-		[
-			Descriptor(AnyApp, "Any app",
+		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+		{
+			return
 			[
-				ActionParameter.Number("cycleSeconds", "Cycle every", min: 5, max: 60, defaultValue: 10),
-				ActionParameter.Choice("order",
-					[new ActionParameterOption { Value = "newest" }, new ActionParameterOption { Value = "oldest" }],
-					"Order"),
-				ActionParameter.Choice("playlist",
-					[new ActionParameterOption { Value = "focus" }, new ActionParameterOption { Value = "chill" }],
-					"Playlist").AsSearchable(),
-			]),
-			Descriptor(Spotify, "Spotify", [ActionParameter.Number("cycleSeconds", "Cycle every", defaultValue: 20)]),
-			Descriptor(Vlc, "VLC", [ActionParameter.Toggle("cycleSeconds", "Follow VLC", defaultValue: true)]),
-			new(Plain, "sinusbot", LocalizedText.FromLiteral("SinusBot"), "Bot", false),
-		];
+				Descriptor(AnyApp,
+					"Any app",
+					[
+						ActionParameter.Number("cycleSeconds", "Cycle every", min: 5, max: 60, defaultValue: 10),
+						ActionParameter.Choice("order",
+							[
+								new ActionParameterOption { Value = "newest" },
+								new ActionParameterOption { Value = "oldest" }
+							],
+							"Order"),
+						ActionParameter.Choice("playlist",
+								[
+									new ActionParameterOption { Value = "focus" },
+									new ActionParameterOption { Value = "chill" }
+								],
+								"Playlist")
+							.AsSearchable()
+					]),
+				Descriptor(Spotify,
+					"Spotify",
+					[ActionParameter.Number("cycleSeconds", "Cycle every", defaultValue: 20)]),
+				Descriptor(Vlc, "VLC", [ActionParameter.Toggle("cycleSeconds", "Follow VLC", defaultValue: true)]),
+				new MusicPlayerInstanceDescriptor(Plain,
+					"sinusbot",
+					LocalizedText.FromLiteral("SinusBot"),
+					"Bot",
+					false)
+			];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-			=> null;
+		{
+			return null;
+		}
 
 		public IMusicPlayer? DefaultPlayer => null;
 
@@ -135,6 +160,13 @@ public class MusicPlayerWidgetOptionsConfigTests
 			string id,
 			string name,
 			IReadOnlyList<ActionParameter> options)
-			=> new(id, "system-media", LocalizedText.FromLiteral("System Media"), name, false) { Options = options };
+		{
+			return new MusicPlayerInstanceDescriptor(id,
+					"system-media",
+					LocalizedText.FromLiteral("System Media"),
+					name,
+					false)
+				{ Options = options };
+		}
 	}
 }

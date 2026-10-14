@@ -37,11 +37,14 @@ internal sealed class MessagingContractTests
 			_sessions,
 			_plugins,
 			new PluginSessionConnectionState(_sessions));
-		_runner = new PluginMessagingInvokeRunner(_broker, _registrations, TimeProvider.System, Serilog.Core.Logger.None);
+		_runner = new PluginMessagingInvokeRunner(_broker,
+			_registrations,
+			TimeProvider.System,
+			Serilog.Core.Logger.None);
 
-		await Connect(Obs, "session-obs", declaresMessaging: true);
-		await Connect(Deck, "session-deck", declaresMessaging: true);
-		await Connect(Legacy, "session-legacy", declaresMessaging: false);
+		await Connect(Obs, "session-obs", true);
+		await Connect(Deck, "session-deck", true);
+		await Connect(Legacy, "session-legacy", false);
 	}
 
 	[TearDown]
@@ -54,11 +57,16 @@ internal sealed class MessagingContractTests
 	[Test]
 	public async Task A_plugin_built_before_messaging_is_sent_no_deliveries_and_refused_the_new_api()
 	{
-		await Invoke(Deck, "session-deck", """{"api":"messaging","operation":"subscriptions","arguments":{"events":["obs.*"]}}""");
-
-		var refusal = await Invoke(Legacy, "session-legacy",
+		await Invoke(Deck,
+			"session-deck",
 			"""{"api":"messaging","operation":"subscriptions","arguments":{"events":["obs.*"]}}""");
-		await Invoke(Obs, "session-obs", """{"api":"messaging","operation":"publish","arguments":{"topic":"obs.scene.changed"}}""");
+
+		var refusal = await Invoke(Legacy,
+			"session-legacy",
+			"""{"api":"messaging","operation":"subscriptions","arguments":{"events":["obs.*"]}}""");
+		await Invoke(Obs,
+			"session-obs",
+			"""{"api":"messaging","operation":"publish","arguments":{"topic":"obs.scene.changed"}}""");
 		await _plugins.WaitForAsync(Deck, 1);
 
 		Assert.Multiple(() =>
@@ -72,9 +80,12 @@ internal sealed class MessagingContractTests
 	[Test]
 	public async Task An_event_one_plugin_publishes_reaches_another_plugins_subscription()
 	{
-		await Invoke(Deck, "session-deck", """{"api":"messaging","operation":"subscriptions","arguments":{"events":["obs.*"]}}""");
+		await Invoke(Deck,
+			"session-deck",
+			"""{"api":"messaging","operation":"subscriptions","arguments":{"events":["obs.*"]}}""");
 
-		var accepted = await Invoke(Obs, "session-obs",
+		var accepted = await Invoke(Obs,
+			"session-obs",
 			"""{"api":"messaging","operation":"publish","arguments":{"topic":"obs.scene.changed","payload":{"scene":"Live"}}}""");
 		await _plugins.WaitForAsync(Deck, 1);
 
@@ -82,7 +93,8 @@ internal sealed class MessagingContractTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(accepted.Error, Is.Null);
-			Assert.That((delivery.Kind, delivery.LocalId, delivery.Operation), Is.EqualTo(("messaging", "provider", "event")));
+			Assert.That((delivery.Kind, delivery.LocalId, delivery.Operation),
+				Is.EqualTo(("messaging", "provider", "event")));
 			Assert.That(delivery.Arguments.GetProperty("topic").GetString(), Is.EqualTo("obs.scene.changed"));
 			Assert.That(delivery.Arguments.GetProperty("sender").GetString(), Is.EqualTo(Obs));
 			Assert.That(delivery.Arguments.GetProperty("payload").GetProperty("scene").GetString(), Is.EqualTo("Live"));
@@ -93,9 +105,13 @@ internal sealed class MessagingContractTests
 	public async Task A_request_goes_to_the_plugin_that_handles_the_topic_and_its_reply_comes_back()
 	{
 		_plugins.Answer(Obs, """{"payload":{"scene":"Live"}}""");
-		await Invoke(Obs, "session-obs", """{"api":"messaging","operation":"subscriptions","arguments":{"requests":["obs.scene.current"]}}""");
+		await Invoke(Obs,
+			"session-obs",
+			"""{"api":"messaging","operation":"subscriptions","arguments":{"requests":["obs.scene.current"]}}""");
 
-		var result = await Invoke(Deck, "session-deck", """{"api":"messaging","operation":"request","arguments":{"topic":"obs.scene.current"}}""");
+		var result = await Invoke(Deck,
+			"session-deck",
+			"""{"api":"messaging","operation":"request","arguments":{"topic":"obs.scene.current"}}""");
 
 		Assert.Multiple(() =>
 		{
@@ -109,9 +125,13 @@ internal sealed class MessagingContractTests
 	public async Task A_reply_that_is_not_a_reply_object_fails_the_request_instead_of_leaving_it_unanswered()
 	{
 		_plugins.Answer(Obs, "[1, 2]");
-		await Invoke(Obs, "session-obs", """{"api":"messaging","operation":"subscriptions","arguments":{"requests":["obs.scene.current"]}}""");
+		await Invoke(Obs,
+			"session-obs",
+			"""{"api":"messaging","operation":"subscriptions","arguments":{"requests":["obs.scene.current"]}}""");
 
-		var result = await Invoke(Deck, "session-deck", """{"api":"messaging","operation":"request","arguments":{"topic":"obs.scene.current"}}""");
+		var result = await Invoke(Deck,
+			"session-deck",
+			"""{"api":"messaging","operation":"request","arguments":{"topic":"obs.scene.current"}}""");
 
 		Assert.That(result.Error?.Details?["reason"], Is.EqualTo(ProtocolErrorReasons.MessagingHandlerFailed));
 	}
@@ -119,16 +139,20 @@ internal sealed class MessagingContractTests
 	[Test]
 	public async Task A_second_plugin_claiming_a_handled_topic_is_told_who_handles_it()
 	{
-		await Invoke(Obs, "session-obs", """{"api":"messaging","operation":"subscriptions","arguments":{"commands":["obs.scene.switch"]}}""");
+		await Invoke(Obs,
+			"session-obs",
+			"""{"api":"messaging","operation":"subscriptions","arguments":{"commands":["obs.scene.switch"]}}""");
 
-		var result = await Invoke(Deck, "session-deck",
+		var result = await Invoke(Deck,
+			"session-deck",
 			"""{"api":"messaging","operation":"subscriptions","arguments":{"commands":["obs.scene.switch"]}}""");
 
 		var rejected = result.Data?.GetProperty("rejected")[0];
 		Assert.Multiple(() =>
 		{
 			Assert.That(rejected?.GetProperty("kind").GetString(), Is.EqualTo("command"));
-			Assert.That(rejected?.GetProperty("reason").GetString(), Is.EqualTo(ProtocolErrorReasons.MessagingTopicHandled));
+			Assert.That(rejected?.GetProperty("reason").GetString(),
+				Is.EqualTo(ProtocolErrorReasons.MessagingTopicHandled));
 			Assert.That(rejected?.GetProperty("owner").GetString(), Is.EqualTo(Obs));
 		});
 	}
@@ -136,12 +160,17 @@ internal sealed class MessagingContractTests
 	[Test]
 	public async Task Once_the_handling_plugin_is_gone_a_request_finds_no_handler()
 	{
-		await Invoke(Obs, "session-obs", """{"api":"messaging","operation":"subscriptions","arguments":{"requests":["obs.scene.current"]}}""");
+		await Invoke(Obs,
+			"session-obs",
+			"""{"api":"messaging","operation":"subscriptions","arguments":{"requests":["obs.scene.current"]}}""");
 
-		_sessions.Detach("session-obs", TimeProvider.System.GetUtcNow() - ProtocolTimeouts.SessionResumeWindow - TimeSpan.FromSeconds(1));
+		_sessions.Detach("session-obs",
+			TimeProvider.System.GetUtcNow() - ProtocolTimeouts.SessionResumeWindow - TimeSpan.FromSeconds(1));
 		_ = _sessions.Snapshot();
 
-		var result = await Invoke(Deck, "session-deck", """{"api":"messaging","operation":"request","arguments":{"topic":"obs.scene.current"}}""");
+		var result = await Invoke(Deck,
+			"session-deck",
+			"""{"api":"messaging","operation":"request","arguments":{"topic":"obs.scene.current"}}""");
 
 		Assert.That(result.Error?.Details?["reason"], Is.EqualTo(ProtocolErrorReasons.MessagingNoHandler));
 	}
@@ -149,9 +178,10 @@ internal sealed class MessagingContractTests
 	[Test]
 	public async Task A_sync_from_a_session_that_was_replaced_changes_nothing()
 	{
-		await Connect(Deck, "session-deck-2", declaresMessaging: true);
+		await Connect(Deck, "session-deck-2", true);
 
-		var result = await Invoke(Deck, "session-deck",
+		var result = await Invoke(Deck,
+			"session-deck",
 			"""{"api":"messaging","operation":"subscriptions","arguments":{"requests":["deck.page.current"]}}""");
 
 		Assert.Multiple(() =>
@@ -164,7 +194,9 @@ internal sealed class MessagingContractTests
 	[Test]
 	public async Task An_unknown_operation_is_unsupported_rather_than_fatal()
 	{
-		var result = await Invoke(Deck, "session-deck", """{"api":"messaging","operation":"broadcast","arguments":{}}""");
+		var result = await Invoke(Deck,
+			"session-deck",
+			"""{"api":"messaging","operation":"broadcast","arguments":{}}""");
 
 		Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnsupported));
 	}
@@ -214,7 +246,9 @@ internal sealed class MessagingContractTests
 			CancellationToken.None);
 
 		var reply = await connection.Reply.Task.WaitAsync(TimeSpan.FromSeconds(10));
-		JsonElement? data = reply.Payload is { } payload && payload.TryGetProperty("data", out var value) ? value : null;
+		JsonElement? data = reply.Payload is { } payload && payload.TryGetProperty("data", out var value)
+			? value
+			: null;
 		return new HostResult(data, reply.Error);
 	}
 
@@ -224,7 +258,8 @@ internal sealed class MessagingContractTests
 
 	private sealed class RecordingConnection : IPluginConnection
 	{
-		public TaskCompletionSource<ProtocolEnvelope> Reply { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+		public TaskCompletionSource<ProtocolEnvelope> Reply { get; }
+			= new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 		public string ConnectionId { get; } = Guid.NewGuid().ToString();
 
@@ -234,18 +269,28 @@ internal sealed class MessagingContractTests
 			return Task.CompletedTask;
 		}
 
-		public Task Close(int closeCode, string reason, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task Close(int closeCode, string reason, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class WirePlugins : IPluginCapabilityInvoker
 	{
-		private readonly ConcurrentDictionary<string, ConcurrentQueue<Delivery>> _received = new(StringComparer.Ordinal);
+		private readonly ConcurrentDictionary<string, ConcurrentQueue<Delivery>>
+			_received = new(StringComparer.Ordinal);
+
 		private readonly ConcurrentDictionary<string, JsonElement> _answers = new(StringComparer.Ordinal);
 
-		public void Answer(string pluginId, string resultJson) => _answers[pluginId] = JsonDocument.Parse(resultJson).RootElement.Clone();
+		public void Answer(string pluginId, string resultJson)
+		{
+			_answers[pluginId] = JsonDocument.Parse(resultJson).RootElement.Clone();
+		}
 
 		public IReadOnlyList<Delivery> Received(string pluginId)
-			=> _received.TryGetValue(pluginId, out var queue) ? [.. queue] : [];
+		{
+			return _received.TryGetValue(pluginId, out var queue) ? [.. queue] : [];
+		}
 
 		public async Task WaitForAsync(string pluginId, int count)
 		{
@@ -258,7 +303,10 @@ internal sealed class MessagingContractTests
 			await Task.Delay(50);
 		}
 
-		public Task<JsonElement?> InvokeAsync(string pluginId, CapabilityInvokeRequest request, CancellationToken cancellationToken)
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
+			CapabilityInvokeRequest request,
+			CancellationToken cancellationToken)
 		{
 			var arguments = JsonSerializer.SerializeToElement(request.Arguments, PluginProtocolJson.Options);
 			_received.GetOrAdd(pluginId, _ => new ConcurrentQueue<Delivery>())
@@ -266,12 +314,18 @@ internal sealed class MessagingContractTests
 			return Task.FromResult<JsonElement?>(_answers.TryGetValue(pluginId, out var answer) ? answer : null);
 		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 }

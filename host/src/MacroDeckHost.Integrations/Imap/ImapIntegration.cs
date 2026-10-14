@@ -77,9 +77,15 @@ public sealed class ImapIntegration
 
 	public string IconMimeType => "image/svg+xml";
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new ImapConfigFlow(_factory);
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new ImapConfigFlow(_factory);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -94,7 +100,10 @@ public sealed class ImapIntegration
 		await _accounts.StopAsync().ConfigureAwait(false);
 	}
 
-	public IReadOnlyList<EmailInbox> GetInboxes() => _accounts.Inboxes;
+	public IReadOnlyList<EmailInbox> GetInboxes()
+	{
+		return _accounts.Inboxes;
+	}
 
 	public Task<EmailInboxSnapshot> GetSnapshotAsync(
 		string inboxId,
@@ -102,19 +111,24 @@ public sealed class ImapIntegration
 		CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(query);
-		var connection = _accounts.Resolve(inboxId) ??
-			throw new InvalidOperationException($"IMAP has no inbox '{inboxId}'.");
+		var connection = _accounts.Resolve(inboxId)
+			?? throw new InvalidOperationException($"IMAP has no inbox '{inboxId}'.");
 		return connection.GetSnapshotAsync(query, cancellationToken);
 	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<IntegrationIssue>>(
-			[.. _accounts.Connections.Select(Issue).OfType<IntegrationIssue>()]);
+	{
+		return Task.FromResult<IReadOnlyList<IntegrationIssue>>([
+			.. _accounts.Connections.Select(Issue).OfType<IntegrationIssue>()
+		]);
+	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_issuePrefixes.Any(prefix => issueId.StartsWith(prefix, StringComparison.Ordinal))
+	{
+		return Task.FromResult(_issuePrefixes.Any(prefix => issueId.StartsWith(prefix, StringComparison.Ordinal))
 			? IssueResolution.Ok()
 			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(
 		ConfigEntryPreparation preparation,
@@ -190,7 +204,10 @@ public sealed class ImapIntegration
 		return Task.CompletedTask;
 	}
 
-	public void Dispose() => _accounts.Dispose();
+	public void Dispose()
+	{
+		_accounts.Dispose();
+	}
 
 	private static IntegrationIssue? Issue(ImapAccountConnection connection)
 	{
@@ -200,7 +217,7 @@ public sealed class ImapIntegration
 			return new IntegrationIssue
 			{
 				Id = SignInIssuePrefix + entryId,
-				Title = Strings.Issues.SignInFailedTitle(account: connection.Title),
+				Title = Strings.Issues.SignInFailedTitle(connection.Title),
 				Description = Strings.Issues.SignInFailedDescription(),
 				Severity = IntegrationIssueSeverity.Error
 			};
@@ -211,15 +228,15 @@ public sealed class ImapIntegration
 			ImapFailure.Certificate => new IntegrationIssue
 			{
 				Id = CertificateIssuePrefix + entryId,
-				Title = Strings.Issues.CertificateFailedTitle(account: connection.Title),
-				Description = Strings.Issues.CertificateFailedDescription(host: connection.Settings.Host),
+				Title = Strings.Issues.CertificateFailedTitle(connection.Title),
+				Description = Strings.Issues.CertificateFailedDescription(connection.Settings.Host),
 				Severity = IntegrationIssueSeverity.Error
 			},
 			ImapFailure.FolderNotFound => new IntegrationIssue
 			{
 				Id = FolderIssuePrefix + entryId,
-				Title = Strings.Issues.FolderNotFoundTitle(account: connection.Title),
-				Description = Strings.Issues.FolderNotFoundDescription(folder: connection.Settings.Folder),
+				Title = Strings.Issues.FolderNotFoundTitle(connection.Title),
+				Description = Strings.Issues.FolderNotFoundDescription(connection.Settings.Folder),
 				Severity = IntegrationIssueSeverity.Warning
 			},
 			_ => null

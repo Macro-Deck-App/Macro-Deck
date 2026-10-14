@@ -67,7 +67,8 @@ public class WeatherStatePayload
 	public string? Sunset { get; set; }
 
 	public static WeatherStatePayload From(WeatherSnapshot snapshot, string? instanceId = null)
-		=> new()
+	{
+		return new WeatherStatePayload
 		{
 			InstanceId = instanceId,
 			IsAvailable = snapshot.IsAvailable,
@@ -102,9 +103,12 @@ public class WeatherStatePayload
 			Sunrise = snapshot.Sunrise?.ToString("HH:mm", CultureInfo.InvariantCulture),
 			Sunset = snapshot.Sunset?.ToString("HH:mm", CultureInfo.InvariantCulture)
 		};
+	}
 
 	public static WeatherStatePayload Unavailable(string? instanceId = null, string locationName = "")
-		=> From(WeatherSnapshot.Unavailable(locationName), instanceId);
+	{
+		return From(WeatherSnapshot.Unavailable(locationName), instanceId);
+	}
 
 	public static WeatherStatePayload UnknownStation(string? instanceId)
 	{
@@ -113,21 +117,24 @@ public class WeatherStatePayload
 		return payload;
 	}
 
-	private static string ToSlug(WeatherCondition condition) => condition switch
+	private static string ToSlug(WeatherCondition condition)
 	{
-		WeatherCondition.Clear => "clear",
-		WeatherCondition.MainlyClear => "mainly-clear",
-		WeatherCondition.PartlyCloudy => "partly-cloudy",
-		WeatherCondition.Overcast => "overcast",
-		WeatherCondition.Fog => "fog",
-		WeatherCondition.Drizzle => "drizzle",
-		WeatherCondition.Rain => "rain",
-		WeatherCondition.FreezingRain => "freezing-rain",
-		WeatherCondition.Snow => "snow",
-		WeatherCondition.SnowGrains => "snow-grains",
-		WeatherCondition.RainShowers => "rain-showers",
-		WeatherCondition.SnowShowers => "snow-showers",
-		WeatherCondition.Thunderstorm => "thunderstorm",
-		_ => "unknown"
-	};
+		return condition switch
+		{
+			WeatherCondition.Clear => "clear",
+			WeatherCondition.MainlyClear => "mainly-clear",
+			WeatherCondition.PartlyCloudy => "partly-cloudy",
+			WeatherCondition.Overcast => "overcast",
+			WeatherCondition.Fog => "fog",
+			WeatherCondition.Drizzle => "drizzle",
+			WeatherCondition.Rain => "rain",
+			WeatherCondition.FreezingRain => "freezing-rain",
+			WeatherCondition.Snow => "snow",
+			WeatherCondition.SnowGrains => "snow-grains",
+			WeatherCondition.RainShowers => "rain-showers",
+			WeatherCondition.SnowShowers => "snow-showers",
+			WeatherCondition.Thunderstorm => "thunderstorm",
+			_ => "unknown"
+		};
+	}
 }

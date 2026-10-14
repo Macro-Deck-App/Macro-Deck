@@ -51,13 +51,13 @@ internal sealed class TwitchActionsTests
 	{
 		_accounts.Resolve("111")!.Merge(state => state with
 		{
-			ChatSettings = new TwitchChatSettings(EmoteOnly: true,
-				FollowersOnly: false,
-				FollowersOnlyDurationMinutes: null,
-				SlowMode: null,
-				SlowModeWaitSeconds: null,
-				SubscriberOnly: null,
-				UniqueChat: null)
+			ChatSettings = new TwitchChatSettings(true,
+				false,
+				null,
+				null,
+				null,
+				null,
+				null)
 		});
 		var provider = ChatModeProvider();
 
@@ -95,14 +95,18 @@ internal sealed class TwitchActionsTests
 	}
 
 	private IStateProviderActionDefinition ChatModeProvider()
-		=> (IStateProviderActionDefinition)_actions.Single(action => action.Id == "set-chat-mode");
+	{
+		return (IStateProviderActionDefinition)_actions.Single(action => action.Id == "set-chat-mode");
+	}
 
 	private static Dictionary<string, object?> ChatMode(string accountId, string mode)
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
 		{
 			[TwitchActionDefinition.AccountParameterName] = accountId,
 			[TwitchChatModeActionDefinition.ModeParameterName] = mode
 		};
+	}
 
 	[Test]
 	public void Every_action_is_identified_and_takes_an_account()
@@ -391,12 +395,12 @@ internal sealed class TwitchActionsTests
 		var actions = TwitchActions.Create(() => _accounts,
 			() => targets.IntegrationVariables,
 			InstantDelay,
-			userVariables: () => targets.UserVariables);
+			() => targets.UserVariables);
 		_first.ClipEditUrl = "https://clips.twitch.tv/edit/abc";
 
 		await Run("create-clip", actions, ("targetVariable", "last_clip"));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(_first.Calls, Does.Contain("clip:False"));
 			Assert.That(await targets.ValueOf("last_clip"), Is.EqualTo("https://clips.twitch.tv/edit/abc"));
@@ -410,11 +414,11 @@ internal sealed class TwitchActionsTests
 		var actions = TwitchActions.Create(() => _accounts,
 			() => targets.IntegrationVariables,
 			InstantDelay,
-			userVariables: () => targets.UserVariables);
+			() => targets.UserVariables);
 
 		await Run("create-clip", actions);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(_first.Calls, Does.Contain("clip:False"));
 			Assert.That(await targets.Service.GetAll(), Is.Empty);
@@ -428,12 +432,12 @@ internal sealed class TwitchActionsTests
 		var actions = TwitchActions.Create(() => _accounts,
 			() => targets.IntegrationVariables,
 			InstantDelay,
-			userVariables: () => targets.UserVariables);
+			() => targets.UserVariables);
 		_first.ClipConfirmedAfterPolls = 3;
 
 		var result = await Run("create-clip", actions, ("targetVariable", "last_clip"));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(_first.ClipPollCount, Is.EqualTo(3));
@@ -448,12 +452,12 @@ internal sealed class TwitchActionsTests
 		var actions = TwitchActions.Create(() => _accounts,
 			() => targets.IntegrationVariables,
 			InstantDelay,
-			userVariables: () => targets.UserVariables);
+			() => targets.UserVariables);
 		_first.ClipConfirmedAfterPolls = int.MaxValue;
 
 		var result = await Run("create-clip", actions, ("targetVariable", "last_clip"));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo("CLIP_NOT_CONFIRMED"));
@@ -493,12 +497,12 @@ internal sealed class TwitchActionsTests
 		var actions = TwitchActions.Create(() => _accounts,
 			() => targets.IntegrationVariables,
 			InstantDelay,
-			userVariables: () => targets.UserVariables);
+			() => targets.UserVariables);
 		_first.FailingReads.Add("getClips");
 
 		var result = await Run("create-clip", actions, ("targetVariable", "last_clip"));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.ProviderError));
@@ -506,7 +510,10 @@ internal sealed class TwitchActionsTests
 		});
 	}
 
-	private static Task InstantDelay(TimeSpan duration, CancellationToken cancellationToken) => Task.CompletedTask;
+	private static Task InstantDelay(TimeSpan duration, CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
 	[Test]
 	public async Task The_account_picker_lists_every_configured_account()
@@ -547,7 +554,9 @@ internal sealed class TwitchActionsTests
 	}
 
 	private Task<ActionResult> Run(string actionId, params (string Name, object Value)[] parameters)
-		=> Run(actionId, _actions, parameters);
+	{
+		return Run(actionId, _actions, parameters);
+	}
 
 	private static Task<ActionResult> Run(
 		string actionId,
@@ -564,7 +573,8 @@ internal sealed class TwitchActionsTests
 	}
 
 	private void AddAccount(string userId, string login)
-		=> _config.AddEntry($"Twitch ({login})",
+	{
+		_config.AddEntry($"Twitch ({login})",
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[TwitchConfigKeys.ClientId] = "client-id",
@@ -581,6 +591,10 @@ internal sealed class TwitchActionsTests
 				[TwitchConfigKeys.AccessToken] = "access",
 				[TwitchConfigKeys.RefreshToken] = "refresh"
 			});
+	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 }

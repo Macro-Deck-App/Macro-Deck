@@ -23,14 +23,20 @@ internal static class ImapProviderPresets
 	];
 
 	public static ImapProviderPreset? Find(string? id)
-		=> All.FirstOrDefault(preset => string.Equals(preset.Id, id, StringComparison.Ordinal));
+	{
+		return All.FirstOrDefault(preset => string.Equals(preset.Id, id, StringComparison.Ordinal));
+	}
 
 	public static ImapProviderPreset? Matching(string host, int port, ImapSecurity security)
-		=> All.FirstOrDefault(preset =>
-			string.Equals(preset.Host, host.Trim(), StringComparison.OrdinalIgnoreCase) &&
-			preset.Port == port &&
-			preset.Security == security);
+	{
+		return All.FirstOrDefault(preset =>
+			string.Equals(preset.Host, host.Trim(), StringComparison.OrdinalIgnoreCase)
+			&& preset.Port == port
+			&& preset.Security == security);
+	}
 
 	private static ImapProviderPreset SslTls(string id, string name, string host)
-		=> new(id, name, host, ImapAccountSettings.DefaultPort, ImapSecurity.SslTls);
+	{
+		return new ImapProviderPreset(id, name, host, ImapAccountSettings.DefaultPort, ImapSecurity.SslTls);
+	}
 }

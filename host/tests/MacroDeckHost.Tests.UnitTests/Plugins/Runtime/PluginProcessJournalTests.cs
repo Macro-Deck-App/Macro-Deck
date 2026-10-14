@@ -12,23 +12,36 @@ internal sealed class PluginProcessJournalTests
 	private TestPaths _paths = null!;
 
 	[SetUp]
-	public void SetUp() => _paths = new TestPaths();
+	public void SetUp()
+	{
+		_paths = new TestPaths();
+	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
-	private PluginProcessJournal CreateJournal() => new(_paths, Log.Logger);
+	private PluginProcessJournal CreateJournal()
+	{
+		return new PluginProcessJournal(_paths, Log.Logger);
+	}
 
-	private static PluginProcessJournalEntry Entry(string launchId,
+	private static PluginProcessJournalEntry Entry(
+		string launchId,
 		string pluginId,
 		int processId,
-		DateTimeOffset startedAt) => new()
+		DateTimeOffset startedAt)
 	{
-		LaunchId = launchId,
-		PluginId = pluginId,
-		ProcessId = processId,
-		StartedAt = startedAt
-	};
+		return new PluginProcessJournalEntry
+		{
+			LaunchId = launchId,
+			PluginId = pluginId,
+			ProcessId = processId,
+			StartedAt = startedAt
+		};
+	}
 
 	[Test]
 	public void A_recorded_launch_round_trips_through_a_fresh_journal()
@@ -88,7 +101,9 @@ internal sealed class PluginProcessJournalTests
 
 	[Test]
 	public void A_journal_that_was_never_written_loads_as_empty()
-		=> Assert.That(CreateJournal().Load().Entries, Is.Empty);
+	{
+		Assert.That(CreateJournal().Load().Entries, Is.Empty);
+	}
 
 	[Test]
 	public void A_corrupt_journal_loads_as_empty_without_throwing()

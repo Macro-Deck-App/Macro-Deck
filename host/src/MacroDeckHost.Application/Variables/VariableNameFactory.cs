@@ -71,9 +71,9 @@ public sealed class VariableNameFactory
 		}
 
 		var existing = _registry.FindByName(VariableScope.Global, null, name);
-		return existing is null ||
-			(string.Equals(existing.OwnerIntegrationId, integrationId, StringComparison.Ordinal) &&
-				string.Equals(existing.DefinitionId, localResourceId, StringComparison.Ordinal));
+		return existing is null
+			|| string.Equals(existing.OwnerIntegrationId, integrationId, StringComparison.Ordinal)
+			&& string.Equals(existing.DefinitionId, localResourceId, StringComparison.Ordinal);
 	}
 
 	private static string Shorten(string candidate, string integrationId, string localResourceId, int maxLength)

@@ -51,8 +51,8 @@ internal static class StreamlabsTokenReader
 		using (document)
 		{
 			var root = document.RootElement;
-			if (StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(root, "token")) is not { } token ||
-				string.IsNullOrWhiteSpace(token))
+			if (StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(root, "token")) is not { } token
+				|| string.IsNullOrWhiteSpace(token))
 			{
 				return false;
 			}
@@ -68,7 +68,7 @@ internal static class StreamlabsTokenReader
 	{
 		decoded = string.Empty;
 
-		var buffer = new byte[((text.Length * 3) / 4) + 3];
+		var buffer = new byte[text.Length * 3 / 4 + 3];
 		if (!Convert.TryFromBase64String(text, buffer, out var written) || written == 0)
 		{
 			return false;

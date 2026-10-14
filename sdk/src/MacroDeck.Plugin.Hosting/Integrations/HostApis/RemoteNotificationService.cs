@@ -15,7 +15,8 @@ internal sealed class RemoteNotificationService : INotificationService, IDisposa
 	private readonly PluginConnectionState _state;
 	private readonly NotificationResultStore _results;
 
-	public RemoteNotificationService(IHostInvoker invoker,
+	public RemoteNotificationService(
+		IHostInvoker invoker,
 		PluginConnectionState state,
 		NotificationResultStore results)
 	{
@@ -25,9 +26,13 @@ internal sealed class RemoteNotificationService : INotificationService, IDisposa
 		_state.Connected += OnConnected;
 	}
 
-	public void Dispose() => _state.Connected -= OnConnected;
+	public void Dispose()
+	{
+		_state.Connected -= OnConnected;
+	}
 
-	public async Task<INotificationHandle> ShowAsync(NotificationOptions options,
+	public async Task<INotificationHandle> ShowAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(options);
@@ -35,12 +40,14 @@ internal sealed class RemoteNotificationService : INotificationService, IDisposa
 		var data = await InvokeAsync(HostOperations.Notifications.Show, ToArguments(options), cancellationToken)
 			.ConfigureAwait(false);
 		var shown = data?.Deserialize<NotificationsShowResult>(PluginProtocolJson.Options)
-			?? throw new NotificationException(NotificationErrorCode.Invalid, "The host did not return a notification id.");
+			?? throw new NotificationException(NotificationErrorCode.Invalid,
+				"The host did not return a notification id.");
 
 		return new Handle(this, shown.Id, _results.Register(shown.Id));
 	}
 
-	public async Task<NotificationResult> ShowForResultAsync(NotificationOptions options,
+	public async Task<NotificationResult> ShowForResultAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default)
 	{
 		var handle = await ShowAsync(options, cancellationToken).ConfigureAwait(false);
@@ -76,7 +83,10 @@ internal sealed class RemoteNotificationService : INotificationService, IDisposa
 		}
 	}
 
-	private async Task<JsonElement?> InvokeAsync(string operation, object arguments, CancellationToken cancellationToken)
+	private async Task<JsonElement?> InvokeAsync(
+		string operation,
+		object arguments,
+		CancellationToken cancellationToken)
 	{
 		try
 		{
@@ -92,18 +102,22 @@ internal sealed class RemoteNotificationService : INotificationService, IDisposa
 		}
 	}
 
-	private static NotificationErrorCode MapCode(string code) => code switch
+	private static NotificationErrorCode MapCode(string code)
 	{
-		ProtocolErrorCodes.CapabilityUnsupported => NotificationErrorCode.Unsupported,
-		ProtocolErrorCodes.InvalidPayload => NotificationErrorCode.Invalid,
-		ProtocolErrorCodes.CorrelationUnknown => NotificationErrorCode.NotFound,
-		ProtocolErrorCodes.RateLimited or ProtocolErrorCodes.QueueOverflow or ProtocolErrorCodes.PayloadTooLarge
-			=> NotificationErrorCode.LimitExceeded,
-		_ => NotificationErrorCode.Invalid
-	};
+		return code switch
+		{
+			ProtocolErrorCodes.CapabilityUnsupported => NotificationErrorCode.Unsupported,
+			ProtocolErrorCodes.InvalidPayload => NotificationErrorCode.Invalid,
+			ProtocolErrorCodes.CorrelationUnknown => NotificationErrorCode.NotFound,
+			ProtocolErrorCodes.RateLimited or ProtocolErrorCodes.QueueOverflow or ProtocolErrorCodes.PayloadTooLarge
+				=> NotificationErrorCode.LimitExceeded,
+			_ => NotificationErrorCode.Invalid
+		};
+	}
 
 	private static NotificationsShowArguments ToArguments(NotificationOptions options)
-		=> new()
+	{
+		return new NotificationsShowArguments
 		{
 			Title = options.Title,
 			Message = options.Message,
@@ -128,9 +142,11 @@ internal sealed class RemoteNotificationService : INotificationService, IDisposa
 			Content = options.Content is { } content ? UiCanonicalJson.ToElement(content) : null,
 			Progress = ProgressToWire(options.Progress)
 		};
+	}
 
 	private static NotificationsUpdateArguments ToArguments(Guid id, NotificationUpdate update)
-		=> new()
+	{
+		return new NotificationsUpdateArguments
 		{
 			Id = id,
 			Title = update.Title,
@@ -140,32 +156,45 @@ internal sealed class RemoteNotificationService : INotificationService, IDisposa
 			Actions = update.Actions is null ? null : ActionsToWire(update.Actions),
 			Content = update.Content is { } content ? UiCanonicalJson.ToElement(content) : null
 		};
+	}
 
-	private static string SeverityToWire(NotificationSeverity severity) => severity switch
+	private static string SeverityToWire(NotificationSeverity severity)
 	{
-		NotificationSeverity.Success => NotificationsWire.Severity.Success,
-		NotificationSeverity.Warning => NotificationsWire.Severity.Warning,
-		NotificationSeverity.Error => NotificationsWire.Severity.Error,
-		_ => NotificationsWire.Severity.Info
-	};
+		return severity switch
+		{
+			NotificationSeverity.Success => NotificationsWire.Severity.Success,
+			NotificationSeverity.Warning => NotificationsWire.Severity.Warning,
+			NotificationSeverity.Error => NotificationsWire.Severity.Error,
+			_ => NotificationsWire.Severity.Info
+		};
+	}
 
 	private static IReadOnlyList<NotificationsActionDto>? ActionsToWire(IReadOnlyList<NotificationAction> actions)
-		=> actions.Count == 0
+	{
+		return actions.Count == 0
 			? []
-			: [.. actions.Select(action => new NotificationsActionDto
-			{
-				Id = action.Id,
-				Label = action.Label,
-				Style = action.Style switch
+			:
+			[
+				.. actions.Select(action => new NotificationsActionDto
 				{
-					NotificationActionStyle.Primary => NotificationsWire.ActionStyle.Primary,
-					NotificationActionStyle.Danger => NotificationsWire.ActionStyle.Danger,
-					_ => NotificationsWire.ActionStyle.Default
-				}
-			})];
+					Id = action.Id,
+					Label = action.Label,
+					Style = action.Style switch
+					{
+						NotificationActionStyle.Primary => NotificationsWire.ActionStyle.Primary,
+						NotificationActionStyle.Danger => NotificationsWire.ActionStyle.Danger,
+						_ => NotificationsWire.ActionStyle.Default
+					}
+				})
+			];
+	}
 
 	private static NotificationsProgressDto? ProgressToWire(NotificationProgress? progress)
-		=> progress is null ? null : new NotificationsProgressDto { Processed = progress.Processed, Total = progress.Total };
+	{
+		return progress is null
+			? null
+			: new NotificationsProgressDto { Processed = progress.Processed, Total = progress.Total };
+	}
 
 	private sealed class Handle(RemoteNotificationService owner, Guid id, Task<NotificationResult> completion)
 		: INotificationHandle

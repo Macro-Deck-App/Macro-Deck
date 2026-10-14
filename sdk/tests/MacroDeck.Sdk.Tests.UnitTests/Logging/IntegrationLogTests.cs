@@ -70,14 +70,19 @@ public class IntegrationLogTests
 	}
 
 	private static string? ReadProperty(LogEvent logEvent, string name)
-		=> logEvent.Properties.TryGetValue(name, out var value) && value is ScalarValue { Value: string text }
+	{
+		return logEvent.Properties.TryGetValue(name, out var value) && value is ScalarValue { Value: string text }
 			? text
 			: null;
+	}
 
 	private sealed class CollectingSink : ILogEventSink
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 }

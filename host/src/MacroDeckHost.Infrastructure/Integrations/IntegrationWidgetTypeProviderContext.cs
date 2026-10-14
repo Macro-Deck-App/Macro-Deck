@@ -21,8 +21,12 @@ internal sealed class IntegrationWidgetTypeProviderContext : IWidgetTypeProvider
 	public Task<WidgetTypeRegistration> RegisterWidgetTypeAsync(
 		WidgetTypeDescriptor widgetType,
 		CancellationToken cancellationToken = default)
-		=> _registry.Register(_integrationId, widgetType, cancellationToken);
+	{
+		return _registry.Register(_integrationId, widgetType, cancellationToken);
+	}
 
 	public Task UnregisterWidgetTypeAsync(string widgetTypeId, CancellationToken cancellationToken = default)
-		=> _registry.Unregister(_integrationId, widgetTypeId, cancellationToken);
+	{
+		return _registry.Unregister(_integrationId, widgetTypeId, cancellationToken);
+	}
 }

@@ -98,7 +98,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		foreach (var plugin in installed)
 		{
 			var entry = GetOrCreateEntry(plugin.PluginId);
-			result.Add(BuildSnapshot(entry, managed: true));
+			result.Add(BuildSnapshot(entry, true));
 		}
 
 		foreach (var session in sessions)
@@ -111,8 +111,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			result.Add(new PluginRuntimeSnapshot
 			{
 				PluginId = session.PluginId,
-				DisplayName = PluginDisplayNameResolver.Resolve(session, manifestName: null, session.PluginId),
-				Version = PluginVersionResolver.Resolve(installedVersion: null, session.DeclaredVersion),
+				DisplayName = PluginDisplayNameResolver.Resolve(session, null, session.PluginId),
+				Version = PluginVersionResolver.Resolve(null, session.DeclaredVersion),
 				State = session.State == PluginSessionState.Connected
 					? PluginRuntimeState.Running
 					: PluginRuntimeState.Stopped,
@@ -166,7 +166,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				ResetRestartBudget(entry);
 			}
 
-			var result = await AttemptLaunch(entry, installed!, allowStartupGraceRetry: true, cancellationToken);
+			var result = await AttemptLaunch(entry, installed!, true, cancellationToken);
 			if (result.Success)
 			{
 				await _stateStore.Save(pluginId, true);
@@ -182,7 +182,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
-	public async Task<PluginSupervisorResult> Stop(string pluginId,
+	public async Task<PluginSupervisorResult> Stop(
+		string pluginId,
 		PluginStopReason reason,
 		CancellationToken cancellationToken = default)
 	{
@@ -280,7 +281,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 			ResetRestartBudget(entry);
 
-			var result = await AttemptLaunch(entry, installed!, allowStartupGraceRetry: true, cancellationToken);
+			var result = await AttemptLaunch(entry, installed!, true, cancellationToken);
 			if (result.Success)
 			{
 				await _stateStore.Save(pluginId, true);
@@ -379,7 +380,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			{
 				try
 				{
-					var before = BuildSnapshot(entry, managed: true);
+					var before = BuildSnapshot(entry, true);
 					installed.TryGetValue(entry.PluginId, out var plugin);
 					if (plugin is not null)
 					{
@@ -391,7 +392,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 					await ReconcileEntry(entry, plugin, wantsStarted, session, now, cancellationToken);
 
-					var after = BuildSnapshot(entry, managed: true);
+					var after = BuildSnapshot(entry, true);
 					if (!SnapshotEqualsIgnoringLiveness(before, after))
 					{
 						anyChanged = true;
@@ -470,7 +471,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		await PublishRuntimeChanged(cancellationToken);
 	}
 
-	private async Task ReconcileEntry(PluginRuntimeEntry entry,
+	private async Task ReconcileEntry(
+		PluginRuntimeEntry entry,
 		InstalledPlugin? installed,
 		bool wantsStarted,
 		PluginSessionSnapshot? session,
@@ -480,12 +482,12 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		switch (entry.State)
 		{
 			case PluginRuntimeState.Stopped:
-				if (wantsStarted &&
-					installed?.ActiveVersion is not null &&
-					!entry.IntegrityFailed &&
-					!_takeovers.IsActive(entry.PluginId))
+				if (wantsStarted
+					&& installed?.ActiveVersion is not null
+					&& !entry.IntegrityFailed
+					&& !_takeovers.IsActive(entry.PluginId))
 				{
-					await AttemptLaunch(entry, installed, allowStartupGraceRetry: true, ct);
+					await AttemptLaunch(entry, installed, true, ct);
 				}
 
 				break;
@@ -518,7 +520,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				}
 				else if (entry.NextRestartAt is { } next && now >= next)
 				{
-					await AttemptLaunch(entry, installed, allowStartupGraceRetry: true, ct);
+					await AttemptLaunch(entry, installed, true, ct);
 				}
 
 				break;
@@ -541,7 +543,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
-	private async Task EvaluateStarting(PluginRuntimeEntry entry,
+	private async Task EvaluateStarting(
+		PluginRuntimeEntry entry,
 		PluginSessionSnapshot? session,
 		DateTimeOffset now,
 		CancellationToken ct)
@@ -603,7 +606,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
-	private async Task EvaluateRunning(PluginRuntimeEntry entry,
+	private async Task EvaluateRunning(
+		PluginRuntimeEntry entry,
 		PluginSessionSnapshot? session,
 		DateTimeOffset now,
 		CancellationToken ct)
@@ -614,8 +618,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		var heartbeatAt = session?.LastInboundAt ?? session?.ConnectedAt;
 		var heartbeatFresh = heartbeatAt is { } at && now - at <= ProtocolTimeouts.KeepAliveTimeout;
 		var sessionDroppedWithinResumeWindow
-			= session is { State: PluginSessionState.Dropped, DroppedAt: { } droppedAt } &&
-			now - droppedAt <= ProtocolTimeouts.SessionResumeWindow;
+			= session is { State: PluginSessionState.Dropped, DroppedAt: { } droppedAt }
+			&& now - droppedAt <= ProtocolTimeouts.SessionResumeWindow;
 
 		PluginHealthState health;
 
@@ -652,9 +656,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				entry.LastHeartbeatAt = inboundAt;
 			}
 
-			if (entry.RunningSince is { } since &&
-				PluginRestartPolicy.IsRuntimeStable(now - since, _options) &&
-				(entry.Attempt > 0 || entry.RestartTimestamps.Count > 0))
+			if (entry.RunningSince is { } since
+				&& PluginRestartPolicy.IsRuntimeStable(now - since, _options)
+				&& (entry.Attempt > 0 || entry.RestartTimestamps.Count > 0))
 			{
 				entry.Attempt = 0;
 				entry.RestartTimestamps.Clear();
@@ -712,7 +716,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
-	private async Task TerminateForTakeoverInBackground(PluginRuntimeEntry entry, IPluginProcess process, string? launchId)
+	private async Task TerminateForTakeoverInBackground(
+		PluginRuntimeEntry entry,
+		IPluginProcess process,
+		string? launchId)
 	{
 		try
 		{
@@ -746,8 +753,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	private async Task EndManagedSessions(string pluginId)
 	{
 		var hasManagedSession = _sessionRegistry.Snapshot()
-			.Any(session => session.Origin == PluginSessionOrigin.Managed &&
-				string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
+			.Any(session => session.Origin == PluginSessionOrigin.Managed
+				&& string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
 
 		if (hasManagedSession)
 		{
@@ -781,7 +788,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		entry.LastStopReason = PluginStopReason.DevelopmentTakeover;
 	}
 
-	private async Task TerminateInBackground(PluginRuntimeEntry entry,
+	private async Task TerminateInBackground(
+		PluginRuntimeEntry entry,
 		IPluginProcess process,
 		string? launchId,
 		CancellationToken ct)
@@ -866,7 +874,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		await TerminateAfterIntentSet(entry, ct, process, launchId);
 	}
 
-	private async Task TerminateAfterIntentSet(PluginRuntimeEntry entry,
+	private async Task TerminateAfterIntentSet(
+		PluginRuntimeEntry entry,
 		CancellationToken ct,
 		IPluginProcess? processOverride = null,
 		string? launchIdOverride = null)
@@ -907,7 +916,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		await AwaitExitThenFinalize(entry, process, launchId, ct);
 	}
 
-	private async Task AwaitExitThenFinalize(PluginRuntimeEntry entry,
+	private async Task AwaitExitThenFinalize(
+		PluginRuntimeEntry entry,
 		IPluginProcess process,
 		string? launchId,
 		CancellationToken ct)
@@ -993,7 +1003,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 				default:
 					entry.Health = PluginHealthState.Crashed;
-					HandleAutomaticExitLocked(entry, now, allowStartupGraceRetry: true);
+					HandleAutomaticExitLocked(entry, now, true);
 					break;
 			}
 		}
@@ -1050,9 +1060,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 	private async Task SeedMetadataIfNeeded(PluginRuntimeEntry entry, InstalledPlugin installed, CancellationToken ct)
 	{
-		if (installed.ActiveVersion is not { } active ||
-			string.Equals(entry.MetadataSeededForVersion, active.Version, StringComparison.Ordinal) ||
-			entry.Process is not null)
+		if (installed.ActiveVersion is not { } active
+			|| string.Equals(entry.MetadataSeededForVersion, active.Version, StringComparison.Ordinal)
+			|| entry.Process is not null)
 		{
 			return;
 		}
@@ -1072,8 +1082,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		await entry.Gate.WaitAsync(ct);
 		try
 		{
-			if (entry.Process is null &&
-				!string.Equals(entry.MetadataSeededForVersion, active.Version, StringComparison.Ordinal))
+			if (entry.Process is null
+				&& !string.Equals(entry.MetadataSeededForVersion, active.Version, StringComparison.Ordinal))
 			{
 				entry.DisplayName = manifestName ?? entry.PluginId;
 				entry.Version = active.Version;
@@ -1103,11 +1113,14 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 		catch (Exception exception) when (exception is not OperationCanceledException)
 		{
-			_logger.Warning(exception, "Syncing the bundled icon packs of {PluginId} failed; launching anyway", pluginId);
+			_logger.Warning(exception,
+				"Syncing the bundled icon packs of {PluginId} failed; launching anyway",
+				pluginId);
 		}
 	}
 
-	private async Task<PluginSupervisorResult> AttemptLaunch(PluginRuntimeEntry entry,
+	private async Task<PluginSupervisorResult> AttemptLaunch(
+		PluginRuntimeEntry entry,
 		InstalledPlugin installed,
 		bool allowStartupGraceRetry,
 		CancellationToken ct)
@@ -1204,7 +1217,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		if (candidateEntrypoint.Runtime?.Kind == PluginEntrypointRuntimeKind.FrameworkDependent)
 		{
-			var manifestRequirement = DotnetFrameworkRequirement.ForNetCoreApp(candidateEntrypoint.Runtime.DotnetVersion!);
+			var manifestRequirement
+				= DotnetFrameworkRequirement.ForNetCoreApp(candidateEntrypoint.Runtime.DotnetVersion!);
 			var requirements = PluginRuntimeConfigReader.TryRead(executablePath) ?? [manifestRequirement];
 			var selection = _muxerLocator.Locate(requirements);
 			if (selection is null)
@@ -1373,7 +1387,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			try
 			{
 				entry.LastError = ex.Message;
-				HandleAutomaticExitLocked(entry, _timeProvider.GetUtcNow(), allowStartupGraceRetry: false);
+				HandleAutomaticExitLocked(entry, _timeProvider.GetUtcNow(), false);
 			}
 			finally
 			{
@@ -1451,14 +1465,17 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
-	private static ProtocolEnvelope BuildGoodbyeEnvelope() => new()
+	private static ProtocolEnvelope BuildGoodbyeEnvelope()
 	{
-		Type = MessageTypes.SessionGoodbye,
-		Id = Guid.CreateVersion7().ToString(),
-		Payload = JsonSerializer.SerializeToElement(
-			new SessionGoodbyePayload { Reason = "The supervisor is stopping this plugin." },
-			PluginProtocolJson.Options)
-	};
+		return new ProtocolEnvelope
+		{
+			Type = MessageTypes.SessionGoodbye,
+			Id = Guid.CreateVersion7().ToString(),
+			Payload = JsonSerializer.SerializeToElement(
+				new SessionGoodbyePayload { Reason = "The supervisor is stopping this plugin." },
+				PluginProtocolJson.Options)
+		};
+	}
 
 	private static void ResetRestartBudget(PluginRuntimeEntry entry)
 	{
@@ -1477,14 +1494,16 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	}
 
 	private static PluginSupervisorResult TakenOver()
-		=> PluginSupervisorResult.Fail(PluginSupervisorError.TakenOverByDevelopmentBuild,
+	{
+		return PluginSupervisorResult.Fail(PluginSupervisorError.TakenOverByDevelopmentBuild,
 			"A development build has taken over this plugin id; it resumes when the takeover ends.");
+	}
 
 	private PluginSupervisorResult NotSupervisable(string pluginId)
 	{
 		var selfRegistering = _sessionRegistry.Snapshot()
-			.Any(session => session.Origin == PluginSessionOrigin.SelfRegistered &&
-				string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
+			.Any(session => session.Origin == PluginSessionOrigin.SelfRegistered
+				&& string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
 
 		return selfRegistering
 			? PluginSupervisorResult.Fail(PluginSupervisorError.SelfRegistering,
@@ -1496,8 +1515,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 	private bool TryResolveInstalled(string pluginId, out InstalledPlugin? installed)
 	{
-		installed = SafeDiscover().FirstOrDefault(p =>
-			string.Equals(p.PluginId, pluginId, StringComparison.Ordinal) && p.ActiveVersion is not null);
+		installed = SafeDiscover()
+			.FirstOrDefault(p =>
+				string.Equals(p.PluginId, pluginId, StringComparison.Ordinal) && p.ActiveVersion is not null);
 		return installed is not null;
 	}
 
@@ -1529,53 +1549,59 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
-	private PluginRuntimeSnapshot BuildSnapshot(PluginRuntimeEntry entry, bool managed) => new()
+	private PluginRuntimeSnapshot BuildSnapshot(PluginRuntimeEntry entry, bool managed)
 	{
-		PluginId = entry.PluginId,
-		DisplayName = string.IsNullOrEmpty(entry.DisplayName) ? entry.PluginId : entry.DisplayName,
-		Version = string.IsNullOrEmpty(entry.Version) ? PluginRuntimeSnapshot.UnknownVersion : entry.Version,
-		State = entry.State,
-		Health = entry.Health,
-		Managed = managed,
-		ProcessId = entry.Process?.Id,
-		LaunchId = entry.LaunchId,
-		StartedAt = entry.StartedAt,
-		LastExitCode = entry.LastExitCode,
-		LastStopReason = entry.LastStopReason,
-		LastExitAt = entry.LastExitAt,
-		LastHeartbeatAt = entry.LastHeartbeatAt,
-		LastHealthCheckAt = entry.LastHealthCheckAt,
-		ConsecutiveHealthFailures = entry.ConsecutiveHealthFailures,
-		RestartCount = entry.RestartCount,
-		NextRestartAt = entry.NextRestartAt,
-		LastError = entry.LastError,
-		TakenOverByDevelopmentBuild = managed && _takeovers.IsActive(entry.PluginId),
-		BootstrapOutput = entry.Process?.BootstrapOutput ?? entry.LastBootstrapOutput
-	};
+		return new PluginRuntimeSnapshot
+		{
+			PluginId = entry.PluginId,
+			DisplayName = string.IsNullOrEmpty(entry.DisplayName) ? entry.PluginId : entry.DisplayName,
+			Version = string.IsNullOrEmpty(entry.Version) ? PluginRuntimeSnapshot.UnknownVersion : entry.Version,
+			State = entry.State,
+			Health = entry.Health,
+			Managed = managed,
+			ProcessId = entry.Process?.Id,
+			LaunchId = entry.LaunchId,
+			StartedAt = entry.StartedAt,
+			LastExitCode = entry.LastExitCode,
+			LastStopReason = entry.LastStopReason,
+			LastExitAt = entry.LastExitAt,
+			LastHeartbeatAt = entry.LastHeartbeatAt,
+			LastHealthCheckAt = entry.LastHealthCheckAt,
+			ConsecutiveHealthFailures = entry.ConsecutiveHealthFailures,
+			RestartCount = entry.RestartCount,
+			NextRestartAt = entry.NextRestartAt,
+			LastError = entry.LastError,
+			TakenOverByDevelopmentBuild = managed && _takeovers.IsActive(entry.PluginId),
+			BootstrapOutput = entry.Process?.BootstrapOutput ?? entry.LastBootstrapOutput
+		};
+	}
 
 	// Timestamps and captured output are excluded: they change on almost every tick for a healthy,
 	// chatty plugin, which would turn the one-second tick into a one-hertz broadcast. Nothing is lost,
 	// because output only becomes worth reading alongside a state, health or exit-code change.
 	private static bool SnapshotEqualsIgnoringLiveness(PluginRuntimeSnapshot a, PluginRuntimeSnapshot b)
-		=> a.PluginId == b.PluginId &&
-			a.DisplayName == b.DisplayName &&
-			a.Version == b.Version &&
-			a.State == b.State &&
-			a.Health == b.Health &&
-			a.Managed == b.Managed &&
-			a.ProcessId == b.ProcessId &&
-			a.LaunchId == b.LaunchId &&
-			a.StartedAt == b.StartedAt &&
-			a.LastExitCode == b.LastExitCode &&
-			a.LastStopReason == b.LastStopReason &&
-			a.LastExitAt == b.LastExitAt &&
-			a.ConsecutiveHealthFailures == b.ConsecutiveHealthFailures &&
-			a.RestartCount == b.RestartCount &&
-			a.NextRestartAt == b.NextRestartAt &&
-			a.LastError == b.LastError &&
-			a.TakenOverByDevelopmentBuild == b.TakenOverByDevelopmentBuild;
+	{
+		return a.PluginId == b.PluginId
+			&& a.DisplayName == b.DisplayName
+			&& a.Version == b.Version
+			&& a.State == b.State
+			&& a.Health == b.Health
+			&& a.Managed == b.Managed
+			&& a.ProcessId == b.ProcessId
+			&& a.LaunchId == b.LaunchId
+			&& a.StartedAt == b.StartedAt
+			&& a.LastExitCode == b.LastExitCode
+			&& a.LastStopReason == b.LastStopReason
+			&& a.LastExitAt == b.LastExitAt
+			&& a.ConsecutiveHealthFailures == b.ConsecutiveHealthFailures
+			&& a.RestartCount == b.RestartCount
+			&& a.NextRestartAt == b.NextRestartAt
+			&& a.LastError == b.LastError
+			&& a.TakenOverByDevelopmentBuild == b.TakenOverByDevelopmentBuild;
+	}
 
-	private async Task<PluginTrustGateDecision> EvaluateTrustGate(string pluginId,
+	private async Task<PluginTrustGateDecision> EvaluateTrustGate(
+		string pluginId,
 		string version,
 		PluginTrustResult onDisk,
 		CancellationToken ct)
@@ -1593,7 +1619,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			baselineExists);
 	}
 
-	private async Task ApplyTrustGateAction(string pluginId,
+	private async Task ApplyTrustGateAction(
+		string pluginId,
 		string version,
 		PluginTrustGateAction action,
 		PluginTrustResult onDisk)

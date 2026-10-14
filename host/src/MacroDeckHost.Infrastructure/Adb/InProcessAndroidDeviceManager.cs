@@ -21,7 +21,8 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 	private AndroidDeviceAccess _access = AndroidDeviceAccess.AdbNotEnabled;
 	private bool _adbUnavailable;
 
-	public InProcessAndroidDeviceManager(IAdbManager adbManager,
+	public InProcessAndroidDeviceManager(
+		IAdbManager adbManager,
 		IAdbDeviceOperations operations,
 		IHostLockState lockState,
 		ILogger logger)
@@ -116,7 +117,10 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 		}
 	}
 
-	public void Dispose() => _adbManager.SnapshotChanged -= OnSnapshotChanged;
+	public void Dispose()
+	{
+		_adbManager.SnapshotChanged -= OnSnapshotChanged;
+	}
 
 	internal void ThrowIfLocked(string operation)
 	{
@@ -127,7 +131,9 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 	}
 
 	internal static T Unwrap<T>(Result<T, AdbFailureCode> result)
-		=> result.Success ? result.Data! : throw ToException(result.Error, result.ErrorMessage);
+	{
+		return result.Success ? result.Data! : throw ToException(result.Error, result.ErrorMessage);
+	}
 
 	internal static void Unwrap(Result<AdbFailureCode> result)
 	{
@@ -142,7 +148,8 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 		var errorCode = code switch
 		{
 			AdbFailureCode.Disabled => AndroidDeviceErrorCode.AdbNotEnabled,
-			AdbFailureCode.ExecutableNotFound or AdbFailureCode.ServerUnreachable => AndroidDeviceErrorCode.AdbUnavailable,
+			AdbFailureCode.ExecutableNotFound or AdbFailureCode.ServerUnreachable => AndroidDeviceErrorCode
+				.AdbUnavailable,
 			AdbFailureCode.DeviceNotFound => AndroidDeviceErrorCode.DeviceNotFound,
 			AdbFailureCode.DeviceUnauthorized => AndroidDeviceErrorCode.DeviceUnauthorized,
 			AdbFailureCode.DeviceOffline => AndroidDeviceErrorCode.DeviceOffline,
@@ -152,7 +159,8 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 			_ => AndroidDeviceErrorCode.CommandFailed
 		};
 
-		return new AndroidDeviceException(errorCode, string.IsNullOrWhiteSpace(message) ? $"adb failed with {errorCode}." : message);
+		return new AndroidDeviceException(errorCode,
+			string.IsNullOrWhiteSpace(message) ? $"adb failed with {errorCode}." : message);
 	}
 
 	private void OnSnapshotChanged(object? sender, EventArgs e)
@@ -170,7 +178,8 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 			? AndroidDeviceAccess.Available
 			: AndroidDeviceAccess.AdbNotEnabled;
 		var current = access == AndroidDeviceAccess.Available
-			? _adbManager.Devices.Where(device => device.State != AdbDeviceState.Disconnected).DistinctBy(device => device.Serial)
+			? _adbManager.Devices.Where(device => device.State != AdbDeviceState.Disconnected)
+				.DistinctBy(device => device.Serial)
 			: [];
 
 		var changes = new List<Change>();
@@ -205,9 +214,9 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 				{
 					changes.Add(new Change(ChangeKind.Connected, device, null));
 				}
-				else if (previousState != device.State ||
-					previousLacksUsbPermission != device.LacksUsbPermission ||
-					previousMode != device.Mode)
+				else if (previousState != device.State
+					|| previousLacksUsbPermission != device.LacksUsbPermission
+					|| previousMode != device.Mode)
 				{
 					changes.Add(new Change(ChangeKind.StateChanged, device, previousState));
 				}
@@ -259,16 +268,19 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 	}
 
 	private static AndroidDeviceState ToState(AdbDeviceState state)
-		=> state switch
+	{
+		return state switch
 		{
 			AdbDeviceState.Device => AndroidDeviceState.Online,
 			AdbDeviceState.Authorizing => AndroidDeviceState.Connecting,
 			AdbDeviceState.Unauthorized or AdbDeviceState.NoPermissions => AndroidDeviceState.Unauthorized,
 			_ => AndroidDeviceState.Offline
 		};
+	}
 
 	internal static AndroidDeviceMode ToMode(AdbDeviceState state)
-		=> state switch
+	{
+		return state switch
 		{
 			AdbDeviceState.Bootloader => AndroidDeviceMode.Bootloader,
 			AdbDeviceState.Recovery => AndroidDeviceMode.Recovery,
@@ -276,6 +288,7 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 			AdbDeviceState.Unknown => AndroidDeviceMode.Unknown,
 			_ => AndroidDeviceMode.Normal
 		};
+	}
 
 	private enum ChangeKind
 	{

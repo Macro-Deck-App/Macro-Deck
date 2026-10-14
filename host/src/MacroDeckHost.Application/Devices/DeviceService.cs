@@ -224,7 +224,8 @@ public class DeviceService : IDeviceService
 			device.ScreenSaverId);
 		if (!validated.Success)
 		{
-			return Result.Fail<DeviceEntity, DeviceError>(validated.Error!.Value, validated.ErrorMessage ?? string.Empty);
+			return Result.Fail<DeviceEntity, DeviceError>(validated.Error!.Value,
+				validated.ErrorMessage ?? string.Empty);
 		}
 
 		var requested = validated.Data;
@@ -306,8 +307,8 @@ public class DeviceService : IDeviceService
 			return Result.Fail<DeviceError>(DeviceError.NotFound, "Device not found.");
 		}
 
-		if (_connectionTracker.OnlineDeviceConnectionCounts().GetValueOrDefault(id) <= 0 &&
-			!_providerPresence.IsOnline(id))
+		if (_connectionTracker.OnlineDeviceConnectionCounts().GetValueOrDefault(id) <= 0
+			&& !_providerPresence.IsOnline(id))
 		{
 			return Result.Fail<DeviceError>(DeviceError.Offline, "The device is offline.");
 		}
@@ -467,7 +468,8 @@ public class DeviceService : IDeviceService
 		return device;
 	}
 
-	private async Task<DeviceRegistrationResult> Reuse(DeviceEntity existing,
+	private async Task<DeviceRegistrationResult> Reuse(
+		DeviceEntity existing,
 		DeviceRegistration registration,
 		DateTime now)
 	{
@@ -569,7 +571,9 @@ public class DeviceService : IDeviceService
 	}
 
 	private Dictionary<string, string> ProfileNameMap()
-		=> _profileRegistry.GetProfiles().ToDictionary(p => p.Id, p => p.Name);
+	{
+		return _profileRegistry.GetProfiles().ToDictionary(p => p.Id, p => p.Name);
+	}
 
 	// The name travels as a LocalizedText, resolved by whoever displays it: a plugin's name can itself
 	// be localized, and it must follow the reader's language rather than the language the device
@@ -599,22 +603,31 @@ public class DeviceService : IDeviceService
 		return names;
 	}
 
-	private static string ClientTypeToWire(DeviceClientType type) => type switch
+	private static string ClientTypeToWire(DeviceClientType type)
 	{
-		DeviceClientType.WebClient => "web-client",
-		DeviceClientType.AdminUi => "admin-ui",
-		DeviceClientType.Native => "native",
-		DeviceClientType.Provider => "provider",
-		_ => "unknown"
-	};
+		return type switch
+		{
+			DeviceClientType.WebClient => "web-client",
+			DeviceClientType.AdminUi => "admin-ui",
+			DeviceClientType.Native => "native",
+			DeviceClientType.Provider => "provider",
+			_ => "unknown"
+		};
+	}
 
-	private static string FormFactorToWire(DeviceFormFactor factor) => factor switch
+	private static string FormFactorToWire(DeviceFormFactor factor)
 	{
-		DeviceFormFactor.Desktop => "desktop",
-		DeviceFormFactor.Tablet => "tablet",
-		DeviceFormFactor.Phone => "phone",
-		_ => "unknown"
-	};
+		return factor switch
+		{
+			DeviceFormFactor.Desktop => "desktop",
+			DeviceFormFactor.Tablet => "tablet",
+			DeviceFormFactor.Phone => "phone",
+			_ => "unknown"
+		};
+	}
 
-	private DateTime UtcNow() => _timeProvider.GetUtcNow().UtcDateTime;
+	private DateTime UtcNow()
+	{
+		return _timeProvider.GetUtcNow().UtcDateTime;
+	}
 }

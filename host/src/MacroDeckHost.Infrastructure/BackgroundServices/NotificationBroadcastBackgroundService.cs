@@ -15,12 +15,14 @@ public sealed class NotificationBroadcastBackgroundService : BackgroundService
 	private readonly INotificationManager _manager;
 	private readonly IUiTransport _transport;
 	private readonly TimeProvider _time;
-	private readonly Channel<NotificationEvent> _events = Channel.CreateUnbounded<NotificationEvent>(
-		new UnboundedChannelOptions { SingleReader = true });
+
+	private readonly Channel<NotificationEvent> _events
+		= Channel.CreateUnbounded<NotificationEvent>(new UnboundedChannelOptions { SingleReader = true });
 
 	private readonly Dictionary<Guid, NotificationEvent> _pendingUpdates = [];
 
-	public NotificationBroadcastBackgroundService(INotificationManager manager,
+	public NotificationBroadcastBackgroundService(
+		INotificationManager manager,
 		IUiTransport transport,
 		TimeProvider time)
 	{
@@ -83,7 +85,10 @@ public sealed class NotificationBroadcastBackgroundService : BackgroundService
 		}
 	}
 
-	private void OnPublished(NotificationEvent notification) => _events.Writer.TryWrite(notification);
+	private void OnPublished(NotificationEvent notification)
+	{
+		_events.Writer.TryWrite(notification);
+	}
 
 	private async Task DrainAsync(CancellationToken cancellationToken)
 	{
@@ -115,7 +120,8 @@ public sealed class NotificationBroadcastBackgroundService : BackgroundService
 
 				default:
 					await SendAsync(notification.Notification.Target,
-						new NotificationShownEvent { Notification = ActiveNotificationDto.From(notification.Notification, _time.GetUtcNow()) },
+						new NotificationShownEvent
+							{ Notification = ActiveNotificationDto.From(notification.Notification, _time.GetUtcNow()) },
 						cancellationToken);
 					break;
 			}
@@ -130,7 +136,8 @@ public sealed class NotificationBroadcastBackgroundService : BackgroundService
 		foreach (var update in updates)
 		{
 			await SendAsync(update.Notification.Target,
-				new NotificationUpdatedEvent { Notification = ActiveNotificationDto.From(update.Notification, _time.GetUtcNow()) },
+				new NotificationUpdatedEvent
+					{ Notification = ActiveNotificationDto.From(update.Notification, _time.GetUtcNow()) },
 				cancellationToken);
 		}
 	}
@@ -164,13 +171,16 @@ public sealed class NotificationBroadcastBackgroundService : BackgroundService
 		}
 	}
 
-	internal static string ReasonToWire(NotificationCloseReason? reason) => reason switch
+	internal static string ReasonToWire(NotificationCloseReason? reason)
 	{
-		NotificationCloseReason.Action => NotificationsWire.CloseReason.Action,
-		NotificationCloseReason.Timeout => NotificationsWire.CloseReason.Timeout,
-		NotificationCloseReason.Programmatic => NotificationsWire.CloseReason.Programmatic,
-		NotificationCloseReason.OwnerGone => NotificationsWire.CloseReason.OwnerGone,
-		NotificationCloseReason.HostUnavailable => NotificationsWire.CloseReason.HostUnavailable,
-		_ => NotificationsWire.CloseReason.Dismissed
-	};
+		return reason switch
+		{
+			NotificationCloseReason.Action => NotificationsWire.CloseReason.Action,
+			NotificationCloseReason.Timeout => NotificationsWire.CloseReason.Timeout,
+			NotificationCloseReason.Programmatic => NotificationsWire.CloseReason.Programmatic,
+			NotificationCloseReason.OwnerGone => NotificationsWire.CloseReason.OwnerGone,
+			NotificationCloseReason.HostUnavailable => NotificationsWire.CloseReason.HostUnavailable,
+			_ => NotificationsWire.CloseReason.Dismissed
+		};
+	}
 }

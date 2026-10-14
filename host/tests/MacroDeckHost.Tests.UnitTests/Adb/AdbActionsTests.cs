@@ -18,17 +18,22 @@ internal sealed class AdbActionsTests
 	public void SetUp()
 	{
 		_devices = new ScriptedAndroidDevices();
-		_devices.Attach("DEFAULT", stableId: null);
+		_devices.Attach("DEFAULT", null);
 		_devices.DefaultSerial = "DEFAULT";
 		_health = new AdbHealthTracker();
 		_variables = new VariableApiAccessor();
 		_actions = AdbActions.Create(new AdbActionServices(() => _devices, () => null, _health, _variables));
 	}
 
-	private static ActionExecutionContext Context(Dictionary<string, object> parameters) =>
-		new() { Parameters = parameters };
+	private static ActionExecutionContext Context(Dictionary<string, object> parameters)
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
-	private IActionDefinition Action(string id) => _actions.Single(action => action.Id == id);
+	private IActionDefinition Action(string id)
+	{
+		return _actions.Single(action => action.Id == id);
+	}
 
 	[Test]
 	public void Eleven_actions_are_registered()
@@ -59,9 +64,10 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task StartApp_forwards_the_device_and_package()
 	{
-		_devices.Attach("SERIAL1", stableId: null);
+		_devices.Attach("SERIAL1", null);
 
-		await Action("start-app").CreateExecutor()
+		await Action("start-app")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object>
 				{ ["device"] = "SERIAL1", ["package"] = "com.example.app" }));
 
@@ -84,7 +90,8 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task StopApp_forwards_the_package()
 	{
-		await Action("stop-app").CreateExecutor()
+		await Action("stop-app")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["package"] = "com.example.app" }));
 
 		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "ForceStopApp:DEFAULT:com.example.app" }));
@@ -105,7 +112,8 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task OpenUri_forwards_the_uri()
 	{
-		await Action("open-uri").CreateExecutor()
+		await Action("open-uri")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["uri"] = "https://example.com" }));
 
 		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "OpenUri:DEFAULT:https://example.com" }));
@@ -126,7 +134,8 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task InputText_forwards_the_text()
 	{
-		await Action("input-text").CreateExecutor()
+		await Action("input-text")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["text"] = "hello world" }));
 
 		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "InputText:DEFAULT:hello world" }));
@@ -147,7 +156,8 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task KeyEvent_parses_the_chosen_key()
 	{
-		await Action("key-event").CreateExecutor()
+		await Action("key-event")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["key"] = nameof(AndroidKey.VolumeUp) }));
 
 		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "SendKey:DEFAULT:VolumeUp" }));
@@ -156,7 +166,8 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task KeyEvent_with_an_unrecognized_key_fails_with_invalid_parameter()
 	{
-		var result = await Action("key-event").CreateExecutor()
+		var result = await Action("key-event")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["key"] = "NotARealKey" }));
 
 		Assert.Multiple(() =>
@@ -179,7 +190,8 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task Tap_forwards_the_coordinates()
 	{
-		await Action("tap").CreateExecutor()
+		await Action("tap")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["x"] = 100, ["y"] = 200 }));
 
 		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Tap:DEFAULT:100:200" }));
@@ -188,14 +200,16 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task Swipe_forwards_every_coordinate_and_the_duration()
 	{
-		await Action("swipe").CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["x1"] = 10,
-			["y1"] = 20,
-			["x2"] = 30,
-			["y2"] = 40,
-			["durationMs"] = 500
-		}));
+		await Action("swipe")
+			.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["x1"] = 10,
+				["y1"] = 20,
+				["x2"] = 30,
+				["y2"] = 40,
+				["durationMs"] = 500
+			}));
 
 		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Swipe:DEFAULT:10:20:30:40:500" }));
 	}
@@ -203,13 +217,15 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task Swipe_without_a_duration_defaults_to_300ms()
 	{
-		await Action("swipe").CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["x1"] = 10,
-			["y1"] = 20,
-			["x2"] = 30,
-			["y2"] = 40
-		}));
+		await Action("swipe")
+			.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["x1"] = 10,
+				["y1"] = 20,
+				["x2"] = 30,
+				["y2"] = 40
+			}));
 
 		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Swipe:DEFAULT:10:20:30:40:300" }));
 	}
@@ -217,7 +233,8 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task Reboot_forwards_the_chosen_mode()
 	{
-		await Action("reboot").CreateExecutor()
+		await Action("reboot")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["mode"] = nameof(AndroidRebootMode.Recovery) }));
 
 		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Reboot:DEFAULT:Recovery" }));
@@ -260,7 +277,7 @@ internal sealed class AdbActionsTests
 	public async Task Without_a_chosen_or_default_device_the_action_fails_with_not_found_and_runs_nothing()
 	{
 		_devices.DefaultSerial = null;
-		_devices.Attach("OTHER", stableId: null);
+		_devices.Attach("OTHER", null);
 
 		var result = await Action("wake").CreateExecutor().ExecuteAsync(Context([]));
 
@@ -299,7 +316,8 @@ internal sealed class AdbActionsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Unavailable));
-			Assert.That(TestLocalization.Resolve(result.ErrorMessage), Is.EqualTo("The adb executable could not be located."));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage),
+				Is.EqualTo("The adb executable could not be located."));
 			Assert.That(_health.LastFailure, Is.EqualTo(AndroidDeviceErrorCode.AdbUnavailable));
 			Assert.That(_devices.Calls, Is.Empty);
 		});
@@ -308,7 +326,8 @@ internal sealed class AdbActionsTests
 	[Test]
 	public async Task A_chosen_device_that_is_not_attached_fails_with_not_found()
 	{
-		var result = await Action("wake").CreateExecutor()
+		var result = await Action("wake")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["device"] = "GONE" }));
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
@@ -361,5 +380,8 @@ internal sealed class AdbActionsTests
 		});
 	}
 
-	private ScriptedAndroidDevice Device(string serial) => (ScriptedAndroidDevice)_devices.FindDevice(serial)!;
+	private ScriptedAndroidDevice Device(string serial)
+	{
+		return (ScriptedAndroidDevice)_devices.FindDevice(serial)!;
+	}
 }

@@ -6,16 +6,17 @@ namespace MacroDeckHost.Platform.Native;
 [SupportedOSPlatform("windows")]
 internal static class Win32WinEvent
 {
-	public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
-	public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
-	public const int OBJID_WINDOW = 0;
-	public const int CHILDID_SELF = 0;
-	public const uint WM_QUIT = 0x0012;
-	public const uint WM_USER = 0x0400;
-	public const uint PM_NOREMOVE = 0x0000;
+	public const uint EventSystemForeground = 0x0003;
+	public const uint WineventOutofcontext = 0x0000;
+	public const int ObjidWindow = 0;
+	public const int ChildidSelf = 0;
+	public const uint WmQuit = 0x0012;
+	public const uint WmUser = 0x0400;
+	public const uint PmNoremove = 0x0000;
 
 	[UnmanagedFunctionPointer(CallingConvention.StdCall)]
-	public delegate void WinEventProc(IntPtr hook,
+	public delegate void WinEventProc(
+		IntPtr hook,
 		uint eventType,
 		IntPtr hwnd,
 		int objectId,
@@ -24,25 +25,26 @@ internal static class Win32WinEvent
 		uint eventTime);
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct POINT
+	public struct Point
 	{
 		public int X;
 		public int Y;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct MSG
+	public struct Msg
 	{
 		public IntPtr Hwnd;
 		public uint Message;
 		public IntPtr WParam;
 		public IntPtr LParam;
 		public uint Time;
-		public POINT Pt;
+		public Point Pt;
 	}
 
 	[DllImport("user32.dll")]
-	public static extern IntPtr SetWinEventHook(uint eventMin,
+	public static extern IntPtr SetWinEventHook(
+		uint eventMin,
 		uint eventMax,
 		IntPtr hmodWinEventProc,
 		WinEventProc lpfnWinEventProc,
@@ -55,18 +57,18 @@ internal static class Win32WinEvent
 	public static extern bool UnhookWinEvent(IntPtr hWinEventHook);
 
 	[DllImport("user32.dll")]
-	public static extern int GetMessage(out MSG msg, IntPtr hWnd, uint msgFilterMin, uint msgFilterMax);
+	public static extern int GetMessage(out Msg msg, IntPtr hWnd, uint msgFilterMin, uint msgFilterMax);
 
 	[DllImport("user32.dll")]
 	[return: MarshalAs(UnmanagedType.Bool)]
-	public static extern bool PeekMessage(out MSG msg, IntPtr hWnd, uint filterMin, uint filterMax, uint removeMsg);
+	public static extern bool PeekMessage(out Msg msg, IntPtr hWnd, uint filterMin, uint filterMax, uint removeMsg);
 
 	[DllImport("user32.dll")]
 	[return: MarshalAs(UnmanagedType.Bool)]
-	public static extern bool TranslateMessage(ref MSG msg);
+	public static extern bool TranslateMessage(ref Msg msg);
 
 	[DllImport("user32.dll")]
-	public static extern IntPtr DispatchMessage(ref MSG msg);
+	public static extern IntPtr DispatchMessage(ref Msg msg);
 
 	[DllImport("user32.dll")]
 	[return: MarshalAs(UnmanagedType.Bool)]

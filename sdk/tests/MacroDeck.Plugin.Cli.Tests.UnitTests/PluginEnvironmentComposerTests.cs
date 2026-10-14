@@ -36,36 +36,42 @@ public class PluginEnvironmentComposerTests
 		"ASPNETCORE_URLS"
 	];
 
-	private static PluginEnvironmentRequest ManagedRequest() => new()
+	private static PluginEnvironmentRequest ManagedRequest()
 	{
-		Mode = PluginRegistrationMode.Managed,
-		HostUrl = "http://127.0.0.1:8193",
-		InstanceId = "instance-1",
-		ListenUrl = "http://127.0.0.1:54321",
-		PluginId = "com.example.test-plugin",
-		Secret = "s3cr3t",
-		DataDirectory = "/data",
-		LaunchId = "launch-1",
-		// Populated too, to prove a field the chosen mode does not use is simply ignored, not merely
-		// coincidentally absent because the test never set it.
-		EnrollmentToken = "should-not-appear",
-		StateDirectory = "/should-not-appear"
-	};
+		return new PluginEnvironmentRequest
+		{
+			Mode = PluginRegistrationMode.Managed,
+			HostUrl = "http://127.0.0.1:8193",
+			InstanceId = "instance-1",
+			ListenUrl = "http://127.0.0.1:54321",
+			PluginId = "com.example.test-plugin",
+			Secret = "s3cr3t",
+			DataDirectory = "/data",
+			LaunchId = "launch-1",
+			// Populated too, to prove a field the chosen mode does not use is simply ignored, not merely
+			// coincidentally absent because the test never set it.
+			EnrollmentToken = "should-not-appear",
+			StateDirectory = "/should-not-appear"
+		};
+	}
 
-	private static PluginEnvironmentRequest SelfRegisteringRequest() => new()
+	private static PluginEnvironmentRequest SelfRegisteringRequest()
 	{
-		Mode = PluginRegistrationMode.SelfRegistering,
-		HostUrl = "http://127.0.0.1:8193",
-		InstanceId = "instance-1",
-		ListenUrl = "http://127.0.0.1:54321",
-		EnrollmentToken = "a-real-token",
-		StateDirectory = "/state",
-		// Same reasoning as above, for the managed-only fields.
-		PluginId = "should-not-appear",
-		Secret = "should-not-appear",
-		DataDirectory = "/should-not-appear",
-		LaunchId = "should-not-appear"
-	};
+		return new PluginEnvironmentRequest
+		{
+			Mode = PluginRegistrationMode.SelfRegistering,
+			HostUrl = "http://127.0.0.1:8193",
+			InstanceId = "instance-1",
+			ListenUrl = "http://127.0.0.1:54321",
+			EnrollmentToken = "a-real-token",
+			StateDirectory = "/state",
+			// Same reasoning as above, for the managed-only fields.
+			PluginId = "should-not-appear",
+			Secret = "should-not-appear",
+			DataDirectory = "/should-not-appear",
+			LaunchId = "should-not-appear"
+		};
+	}
 
 	[Test]
 	public void Managed_mode_sets_exactly_the_documented_managed_variables()

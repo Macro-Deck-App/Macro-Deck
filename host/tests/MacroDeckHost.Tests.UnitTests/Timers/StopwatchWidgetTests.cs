@@ -8,10 +8,16 @@ public class StopwatchWidgetTests
 	private TimerWidgetHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new TimerWidgetHarness();
+	public void SetUp()
+	{
+		_harness = new TimerWidgetHarness();
+	}
 
 	[TearDown]
-	public async Task TearDown() => await _harness.DisposeAsync();
+	public async Task TearDown()
+	{
+		await _harness.DisposeAsync();
+	}
 
 	[Test]
 	public async Task Elapsed_time_counts_only_while_running_and_carries_across_pauses()
@@ -31,10 +37,12 @@ public class StopwatchWidgetTests
 			Assert.That(whilePaused, Is.EqualTo("12"));
 			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.StopwatchElapsedSeconds), Is.EqualTo("15"));
 			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.StopwatchRunning), Is.EqualTo("true"));
-			Assert.That(_harness.Triggers.Calls.Select(call => call.Trigger), Is.EqualTo(new[]
-			{
-				WidgetTriggerTypes.StopwatchStarted, WidgetTriggerTypes.StopwatchPaused, WidgetTriggerTypes.StopwatchStarted,
-			}));
+			Assert.That(_harness.Triggers.Calls.Select(call => call.Trigger),
+				Is.EqualTo(new[]
+				{
+					WidgetTriggerTypes.StopwatchStarted, WidgetTriggerTypes.StopwatchPaused,
+					WidgetTriggerTypes.StopwatchStarted
+				}));
 		});
 	}
 

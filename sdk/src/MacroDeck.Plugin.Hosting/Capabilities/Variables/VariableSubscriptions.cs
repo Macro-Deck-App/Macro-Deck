@@ -45,9 +45,9 @@ internal sealed class VariableSubscriptions
 
 		if (ids.Count > ProtocolLimits.MaxVariableSubscriptions)
 		{
-			_logger.Warning("Variable subscribe requested {Requested} ids, more than the " +
-				"{Max} this plugin may watch at once; the excess ids were dropped and are unavailable " +
-				"until the working set shrinks",
+			_logger.Warning("Variable subscribe requested {Requested} ids, more than the "
+				+ "{Max} this plugin may watch at once; the excess ids were dropped and are unavailable "
+				+ "until the working set shrinks",
 				ids.Count,
 				ProtocolLimits.MaxVariableSubscriptions);
 		}

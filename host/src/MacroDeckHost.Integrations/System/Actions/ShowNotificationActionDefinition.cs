@@ -30,14 +30,13 @@ internal sealed class ShowNotificationActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Text(TitleParameter,
-			label: AppStrings.Integrations.System.Actions.ShowNotification.TitleLabel(),
+			AppStrings.Integrations.System.Actions.ShowNotification.TitleLabel(),
 			required: true,
 			maxLength: 200),
 		ActionParameter.MultilineText(MessageParameter,
-			label: AppStrings.Integrations.System.Actions.ShowNotification.MessageLabel(),
+			AppStrings.Integrations.System.Actions.ShowNotification.MessageLabel(),
 			maxLength: 1000),
 		ActionParameter.Choice(SeverityParameter,
-			options:
 			[
 				new ActionParameterOption
 					{ Value = "info", Label = AppStrings.Integrations.System.Actions.ShowNotification.SeverityInfo() },
@@ -52,10 +51,9 @@ internal sealed class ShowNotificationActionDefinition : IActionDefinition
 				new ActionParameterOption
 					{ Value = "error", Label = AppStrings.Integrations.System.Actions.ShowNotification.SeverityError() }
 			],
-			label: AppStrings.Integrations.System.Actions.ShowNotification.SeverityLabel(),
+			AppStrings.Integrations.System.Actions.ShowNotification.SeverityLabel(),
 			defaultValue: "info"),
 		ActionParameter.Choice(PresentationParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -68,7 +66,8 @@ internal sealed class ShowNotificationActionDefinition : IActionDefinition
 				},
 				new ActionParameterOption
 				{
-					Value = "dialog", Label = AppStrings.Integrations.System.Actions.ShowNotification.PresentationDialog()
+					Value = "dialog",
+					Label = AppStrings.Integrations.System.Actions.ShowNotification.PresentationDialog()
 				},
 				new ActionParameterOption
 				{
@@ -80,16 +79,19 @@ internal sealed class ShowNotificationActionDefinition : IActionDefinition
 					Value = "inbox", Label = AppStrings.Integrations.System.Actions.ShowNotification.PresentationInbox()
 				}
 			],
-			label: AppStrings.Integrations.System.Actions.ShowNotification.PresentationLabel(),
+			AppStrings.Integrations.System.Actions.ShowNotification.PresentationLabel(),
 			defaultValue: "toast"),
 		ActionParameter.Duration(TimeoutParameter,
-			label: AppStrings.Integrations.System.Actions.ShowNotification.TimeoutLabel(),
-			description: AppStrings.Integrations.System.Actions.ShowNotification.TimeoutDescription(),
-			min: 1000,
-			max: 3_600_000)
+			AppStrings.Integrations.System.Actions.ShowNotification.TimeoutLabel(),
+			AppStrings.Integrations.System.Actions.ShowNotification.TimeoutDescription(),
+			1000,
+			3_600_000)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_notifications);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_notifications);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

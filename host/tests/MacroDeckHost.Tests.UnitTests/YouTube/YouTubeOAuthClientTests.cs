@@ -40,7 +40,8 @@ internal sealed class YouTubeOAuthClientTests
 		{
 			Assert.That(_handler.RequestedUris[0].ToString(), Is.EqualTo("https://oauth2.googleapis.com/device/code"));
 			Assert.That(_handler.RequestBodies[0],
-				Is.EqualTo("client_id=client-id&scope=" + Uri.EscapeDataString("https://www.googleapis.com/auth/youtube")));
+				Is.EqualTo("client_id=client-id&scope="
+					+ Uri.EscapeDataString("https://www.googleapis.com/auth/youtube")));
 			Assert.That(device.DeviceCode, Is.EqualTo("4/4-GMMhmHCXhWEzkobqIHGG_EnNYYsAkukHspeYUk9E8"));
 			Assert.That(device.UserCode, Is.EqualTo("GQVQ-JKEC"));
 			Assert.That(device.VerificationUrl, Is.EqualTo("https://www.google.com/device"));
@@ -52,7 +53,8 @@ internal sealed class YouTubeOAuthClientTests
 	[Test]
 	public void A_device_request_rate_limit_is_transient()
 	{
-		_handler.Enqueue(HttpStatusCode.Forbidden, """{"error_code":"rate_limit_exceeded","error":"rate_limit_exceeded"}""");
+		_handler.Enqueue(HttpStatusCode.Forbidden,
+			"""{"error_code":"rate_limit_exceeded","error":"rate_limit_exceeded"}""");
 
 		Assert.ThrowsAsync<YouTubeOAuthTransientException>(() =>
 			_client.RequestDeviceCodeAsync("client-id", CancellationToken.None));

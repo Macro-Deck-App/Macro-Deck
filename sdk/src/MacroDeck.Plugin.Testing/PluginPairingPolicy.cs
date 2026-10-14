@@ -17,7 +17,10 @@ public sealed class PluginPairingPolicy
 
 	private readonly Kind _kind;
 
-	private PluginPairingPolicy(Kind kind) => _kind = kind;
+	private PluginPairingPolicy(Kind kind)
+	{
+		_kind = kind;
+	}
 
 	/// <summary>
 	/// Approves every pairing request the moment it is created, as if a human were already sitting at

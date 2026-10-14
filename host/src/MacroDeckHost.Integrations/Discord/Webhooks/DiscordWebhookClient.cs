@@ -75,8 +75,8 @@ internal sealed class DiscordWebhookClient : IDiscordWebhookClient
 			return "No webhook URL was configured.";
 		}
 
-		if (!Uri.TryCreate(webhookUrl, UriKind.Absolute, out var uri) ||
-			!string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal))
+		if (!Uri.TryCreate(webhookUrl, UriKind.Absolute, out var uri)
+			|| !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal))
 		{
 			return "The webhook URL must be an https:// address.";
 		}

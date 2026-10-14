@@ -32,16 +32,24 @@ internal static class LocalizationSourceEmitter
 		}
 
 		builder.Append(indent).Append("/// <summary>\n");
-		builder.Append(indent).Append("/// The localized strings of <c>").Append(Escape(result.Scope))
+		builder.Append(indent)
+			.Append("/// The localized strings of <c>")
+			.Append(Escape(result.Scope))
 			.Append("</c>, generated from its resource files.\n");
 		builder.Append(indent).Append("/// </summary>\n");
-		builder.Append(indent).Append("public static partial class ").Append(Identifier(className))
-			.Append('\n').Append(indent).Append("{\n");
+		builder.Append(indent)
+			.Append("public static partial class ")
+			.Append(Identifier(className))
+			.Append('\n')
+			.Append(indent)
+			.Append("{\n");
 
 		var body = indent + "\t";
 
 		builder.Append(body).Append("/// <summary>The scope every key below belongs to.</summary>\n");
-		builder.Append(body).Append("public const string LocalizationScope = \"").Append(Escape(result.Scope))
+		builder.Append(body)
+			.Append("public const string LocalizationScope = \"")
+			.Append(Escape(result.Scope))
 			.Append("\";\n\n");
 
 		EmitCatalog(builder, body, result);
@@ -65,15 +73,24 @@ internal static class LocalizationSourceEmitter
 		builder.Append(indent)
 			.Append("/// Every culture of this scope's resources, ready to register with the host.\n");
 		builder.Append(indent).Append("/// </summary>\n");
-		builder.Append(indent).Append("public static ").Append(CatalogInterface)
+		builder.Append(indent)
+			.Append("public static ")
+			.Append(CatalogInterface)
 			.Append(" LocalizationCatalog => _localizationCatalog.Value;\n\n");
 
-		builder.Append(indent).Append("private static readonly global::System.Lazy<").Append(CatalogInterface)
-			.Append("> _localizationCatalog = new global::System.Lazy<").Append(CatalogInterface)
+		builder.Append(indent)
+			.Append("private static readonly global::System.Lazy<")
+			.Append(CatalogInterface)
+			.Append("> _localizationCatalog = new global::System.Lazy<")
+			.Append(CatalogInterface)
 			.Append(">(BuildLocalizationCatalog);\n\n");
 
-		builder.Append(indent).Append("private static ").Append(CatalogInterface)
-			.Append(" BuildLocalizationCatalog()\n").Append(indent).Append("{\n");
+		builder.Append(indent)
+			.Append("private static ")
+			.Append(CatalogInterface)
+			.Append(" BuildLocalizationCatalog()\n")
+			.Append(indent)
+			.Append("{\n");
 
 		var body = indent + "\t";
 		builder.Append(body)
@@ -92,23 +109,31 @@ internal static class LocalizationSourceEmitter
 			keys.Sort(StringComparer.Ordinal);
 
 			builder.Append('\n').Append(body).Append("{\n");
-			builder.Append(body).Append("\tvar templates = new global::System.Collections.Generic.")
-				.Append("Dictionary<string, string>(").Append(keys.Count)
+			builder.Append(body)
+				.Append("\tvar templates = new global::System.Collections.Generic.")
+				.Append("Dictionary<string, string>(")
+				.Append(keys.Count)
 				.Append(", global::System.StringComparer.Ordinal);\n");
 
 			foreach (var key in keys)
 			{
-				builder.Append(body).Append("\ttemplates[\"").Append(Escape(key)).Append("\"] = \"")
-					.Append(Escape(templates[key])).Append("\";\n");
+				builder.Append(body)
+					.Append("\ttemplates[\"")
+					.Append(Escape(key))
+					.Append("\"] = \"")
+					.Append(Escape(templates[key]))
+					.Append("\";\n");
 			}
 
 			builder.Append(body).Append("\tbyCulture[\"").Append(Escape(culture)).Append("\"] = templates;\n");
 			builder.Append(body).Append("}\n");
 		}
 
-		builder.Append('\n').Append(body)
+		builder.Append('\n')
+			.Append(body)
 			.Append("return new global::MacroDeck.Localization.LocalizationCatalog(LocalizationScope, \"")
-			.Append(Escape(result.DefaultCulture)).Append("\", byCulture);\n");
+			.Append(Escape(result.DefaultCulture))
+			.Append("\", byCulture);\n");
 
 		builder.Append(indent).Append("}\n");
 	}
@@ -123,10 +148,17 @@ internal static class LocalizationSourceEmitter
 
 		foreach (var child in node.Children)
 		{
-			builder.Append('\n').Append(indent).Append("/// <summary>Keys under <c>")
-				.Append(Escape(child.Key)).Append("</c>.</summary>\n");
-			builder.Append(indent).Append("public static partial class ").Append(Identifier(child.Key))
-				.Append('\n').Append(indent).Append("{\n");
+			builder.Append('\n')
+				.Append(indent)
+				.Append("/// <summary>Keys under <c>")
+				.Append(Escape(child.Key))
+				.Append("</c>.</summary>\n");
+			builder.Append(indent)
+				.Append("public static partial class ")
+				.Append(Identifier(child.Key))
+				.Append('\n')
+				.Append(indent)
+				.Append("{\n");
 
 			EmitMembers(builder, indent + "\t", child.Value);
 
@@ -134,7 +166,8 @@ internal static class LocalizationSourceEmitter
 		}
 	}
 
-	private static void EmitMethod(StringBuilder builder,
+	private static void EmitMethod(
+		StringBuilder builder,
 		string indent,
 		string memberName,
 		LocalizationCompiledEntry entry)
@@ -145,19 +178,28 @@ internal static class LocalizationSourceEmitter
 
 		foreach (var parameter in entry.Parameters)
 		{
-			builder.Append(indent).Append("/// <param name=\"").Append(Identifier(parameter.Name))
-				.Append("\">Value for <c>{").Append(EscapeXml(parameter.Name)).Append("}</c>.</param>\n");
+			builder.Append(indent)
+				.Append("/// <param name=\"")
+				.Append(Identifier(parameter.Name))
+				.Append("\">Value for <c>{")
+				.Append(EscapeXml(parameter.Name))
+				.Append("}</c>.</param>\n");
 		}
 
 		if (entry.RemovedGuidance is { Length: > 0 } guidance)
 		{
 			builder.Append(indent)
 				.Append("[global::MacroDeck.Localization.MacroDeckLocalizationRemoved(\"")
-				.Append(Escape(guidance)).Append("\")]\n");
+				.Append(Escape(guidance))
+				.Append("\")]\n");
 		}
 
-		builder.Append(indent).Append("public static ").Append(LocalizedStringType).Append(' ')
-			.Append(Identifier(memberName)).Append('(');
+		builder.Append(indent)
+			.Append("public static ")
+			.Append(LocalizedStringType)
+			.Append(' ')
+			.Append(Identifier(memberName))
+			.Append('(');
 
 		for (var index = 0; index < entry.Parameters.Count; index++)
 		{
@@ -167,11 +209,19 @@ internal static class LocalizationSourceEmitter
 			}
 
 			builder.Append(LocalizationParameterTypes.ToCSharpKeyword(entry.Parameters[index].Type))
-				.Append(' ').Append(Identifier(entry.Parameters[index].Name));
+				.Append(' ')
+				.Append(Identifier(entry.Parameters[index].Name));
 		}
 
-		builder.Append(")\n").Append(indent).Append("\t=> new ").Append(LocalizedStringType).Append("(new ")
-			.Append(LocalizationKeyType).Append("(LocalizationScope, \"").Append(Escape(entry.Key)).Append("\")");
+		builder.Append(")\n")
+			.Append(indent)
+			.Append("\t=> new ")
+			.Append(LocalizedStringType)
+			.Append("(new ")
+			.Append(LocalizationKeyType)
+			.Append("(LocalizationScope, \"")
+			.Append(Escape(entry.Key))
+			.Append("\")");
 
 		if (entry.Parameters.Count == 0)
 		{
@@ -179,15 +229,22 @@ internal static class LocalizationSourceEmitter
 			return;
 		}
 
-		builder.Append(",\n").Append(indent)
+		builder.Append(",\n")
+			.Append(indent)
 			.Append("\t\tnew global::System.Collections.Generic.Dictionary<string, object?>(")
 			.Append(entry.Parameters.Count)
-			.Append(", global::System.StringComparer.Ordinal)\n").Append(indent).Append("\t\t{\n");
+			.Append(", global::System.StringComparer.Ordinal)\n")
+			.Append(indent)
+			.Append("\t\t{\n");
 
 		foreach (var parameter in entry.Parameters)
 		{
-			builder.Append(indent).Append("\t\t\t[\"").Append(Escape(parameter.Name)).Append("\"] = ")
-				.Append(Identifier(parameter.Name)).Append(",\n");
+			builder.Append(indent)
+				.Append("\t\t\t[\"")
+				.Append(Escape(parameter.Name))
+				.Append("\"] = ")
+				.Append(Identifier(parameter.Name))
+				.Append(",\n");
 		}
 
 		builder.Append(indent).Append("\t\t});\n");
@@ -226,8 +283,12 @@ internal static class LocalizationSourceEmitter
 
 		// Onto one line as well as XML-escaped: a doc comment is a run of `///` lines, so a resource value
 		// that spans lines would put its continuation into the file as code.
-		return value!.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;")
-			.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ');
+		return value!.Replace("&", "&amp;")
+			.Replace("<", "&lt;")
+			.Replace(">", "&gt;")
+			.Replace("\r\n", " ")
+			.Replace('\r', ' ')
+			.Replace('\n', ' ');
 	}
 
 	/// <summary>Turns a key segment into a usable C# identifier. Characters an identifier cannot carry

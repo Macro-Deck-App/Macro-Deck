@@ -23,8 +23,7 @@ internal sealed class StoreRegistryFixture
 	public StoreRegistryFixture(TestPki.IssuedCertificate? certificate = null, TestPki.IssuedCertificate? issuer = null)
 	{
 		Issuer = issuer;
-		Certificate = certificate ??
-			TestPki.IssueCertificate(subjectKind: "service", keyUsage: _registryUsage, issuer: issuer);
+		Certificate = certificate ?? TestPki.IssueCertificate("service", _registryUsage, issuer: issuer);
 	}
 
 	public TestPki.IssuedCertificate Certificate { get; }
@@ -77,7 +76,8 @@ internal sealed class StoreRegistryFixture
 		ManifestRequested.TrySetResult();
 	}
 
-	public void AddPackage(string kind,
+	public void AddPackage(
+		string kind,
 		string id,
 		string version = "1.0.0",
 		string? name = null,
@@ -157,10 +157,15 @@ internal sealed class StoreRegistryFixture
 		WriteText($"{segment}/{id}/versions/{version}/changelog.md", $"# {version}");
 	}
 
-	public void Write(string path, object value) =>
+	public void Write(string path, object value)
+	{
 		_files[path] = JsonSerializer.SerializeToUtf8Bytes(value, _json);
+	}
 
-	public void WriteText(string path, string value) => _files[path] = Encoding.UTF8.GetBytes(value);
+	public void WriteText(string path, string value)
+	{
+		_files[path] = Encoding.UTF8.GetBytes(value);
+	}
 
 	public IHttpClientFactory Build()
 	{
@@ -268,24 +273,30 @@ internal sealed class StoreRegistryFixture
 
 	public IReadOnlyDictionary<string, byte[]> BuiltTree { get; private set; } = new Dictionary<string, byte[]>();
 
-	public static HttpResponseMessage Serve(IReadOnlyDictionary<string, byte[]> tree, string relative) =>
-		tree.TryGetValue(relative, out var body)
+	public static HttpResponseMessage Serve(IReadOnlyDictionary<string, byte[]> tree, string relative)
+	{
+		return tree.TryGetValue(relative, out var body)
 			? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) }
 			: new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new ByteArrayContent([]) };
+	}
 
 	private sealed class FixtureHttpClientFactory : IHttpClientFactory
 	{
 		private readonly IReadOnlyDictionary<string, byte[]> _served;
 		private readonly StoreRegistryFixture _fixture;
 
-		public FixtureHttpClientFactory(IReadOnlyDictionary<string, byte[]> served,
+		public FixtureHttpClientFactory(
+			IReadOnlyDictionary<string, byte[]> served,
 			StoreRegistryFixture fixture)
 		{
 			_served = served;
 			_fixture = fixture;
 		}
 
-		public HttpClient CreateClient(string name) => new(new Handler(_served, _fixture));
+		public HttpClient CreateClient(string name)
+		{
+			return new HttpClient(new Handler(_served, _fixture));
+		}
 
 		private sealed class Handler : HttpMessageHandler
 		{
@@ -298,7 +309,8 @@ internal sealed class StoreRegistryFixture
 				_fixture = fixture;
 			}
 
-			protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+			protected override async Task<HttpResponseMessage> SendAsync(
+				HttpRequestMessage request,
 				CancellationToken cancellationToken)
 			{
 				if (request.RequestUri!.AbsolutePath.EndsWith("/registry-manifest.json", StringComparison.Ordinal))

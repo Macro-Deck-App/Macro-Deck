@@ -87,7 +87,7 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 			new ScreenSaverRegistry(new RecordingMediator()),
 			Modals,
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			eventOrigins: new UiEventOrigins(Broker,
@@ -106,25 +106,61 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 	}
 
 	protected UiAttachSessionResponse Attach(string sessionId, string connectionId)
-		=> Broker.Attach(sessionId, connectionId, OwnerPrincipal);
+	{
+		return Broker.Attach(sessionId, connectionId, OwnerPrincipal);
+	}
 
-	protected static Task SettleAsync() => Task.Delay(_settle);
+	protected static Task SettleAsync()
+	{
+		return Task.Delay(_settle);
+	}
 
 	protected static Task WaitForUiAsync(Func<bool> condition, string failureMessage)
-		=> WaitForAsync(condition, failureMessage);
+	{
+		return WaitForAsync(condition, failureMessage);
+	}
 
 	protected sealed class EmptyFolderCache : IFolderCache
 	{
-		public List<FolderEntity> GetAllFolders() => [];
-		public FolderEntity? GetFolderById(Guid id) => null;
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [];
+		}
+
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return null;
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

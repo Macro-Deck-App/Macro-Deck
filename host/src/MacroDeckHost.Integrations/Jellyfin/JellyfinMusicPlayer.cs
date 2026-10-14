@@ -20,7 +20,8 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 {
 	internal static readonly TimeSpan UnavailableAfter = TimeSpan.FromMinutes(2);
 
-	private static readonly ILogger _logger = IntegrationLog.For<JellyfinMusicPlayer>(JellyfinIntegration.IntegrationId);
+	private static readonly ILogger
+		_logger = IntegrationLog.For<JellyfinMusicPlayer>(JellyfinIntegration.IntegrationId);
 
 	private readonly JellyfinRuntime _runtime;
 	private readonly TimeProvider _time;
@@ -36,10 +37,15 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 
 	public JellyfinRuntime Runtime => _runtime;
 
-	public JellyfinSession? CurrentSession() => Resolve(_runtime.Connection.State);
+	public JellyfinSession? CurrentSession()
+	{
+		return Resolve(_runtime.Connection.State);
+	}
 
 	public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(BuildState(_runtime.Connection.State, _time.GetUtcNow()));
+	{
+		return Task.FromResult(BuildState(_runtime.Connection.State, _time.GetUtcNow()));
+	}
 
 	internal MusicPlayerState BuildState(JellyfinServerState state, DateTimeOffset now)
 	{
@@ -100,22 +106,34 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 	}
 
 	public Task PlayAsync(CancellationToken cancellationToken = default)
-		=> PlaystateAsync("Unpause", null, cancellationToken);
+	{
+		return PlaystateAsync("Unpause", null, cancellationToken);
+	}
 
 	public Task PauseAsync(CancellationToken cancellationToken = default)
-		=> PlaystateAsync("Pause", null, cancellationToken);
+	{
+		return PlaystateAsync("Pause", null, cancellationToken);
+	}
 
 	public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
-		=> PlaystateAsync("PlayPause", null, cancellationToken);
+	{
+		return PlaystateAsync("PlayPause", null, cancellationToken);
+	}
 
 	public Task NextAsync(CancellationToken cancellationToken = default)
-		=> PlaystateAsync("NextTrack", null, cancellationToken);
+	{
+		return PlaystateAsync("NextTrack", null, cancellationToken);
+	}
 
 	public Task PreviousAsync(CancellationToken cancellationToken = default)
-		=> PlaystateAsync("PreviousTrack", null, cancellationToken);
+	{
+		return PlaystateAsync("PreviousTrack", null, cancellationToken);
+	}
 
 	public Task StopAsync(CancellationToken cancellationToken = default)
-		=> PlaystateAsync("Stop", null, cancellationToken);
+	{
+		return PlaystateAsync("Stop", null, cancellationToken);
+	}
 
 	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
 	{
@@ -143,26 +161,31 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 	public Task SeekRelativeAsync(TimeSpan offset, CancellationToken cancellationToken = default)
 	{
 		var session = RequireMediaControl();
-		var position = session.PositionAt(_time.GetUtcNow()) ??
-			throw new JellyfinCommandException(ActionErrorCodes.Unavailable, Strings.Errors.NothingPlaying());
+		var position = session.PositionAt(_time.GetUtcNow())
+			?? throw new JellyfinCommandException(ActionErrorCodes.Unavailable, Strings.Errors.NothingPlaying());
 		return SeekAsync(position + offset, cancellationToken);
 	}
 
 	public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-		=> GeneralCommandAsync("SetVolume",
+	{
+		return GeneralCommandAsync("SetVolume",
 			new Dictionary<string, string>
 			{
 				["Volume"] = Math.Clamp(volumePercent, 0, 100).ToString(CultureInfo.InvariantCulture)
 			},
 			cancellationToken);
+	}
 
 	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
-		=> GeneralCommandAsync("SetShuffleQueue",
+	{
+		return GeneralCommandAsync("SetShuffleQueue",
 			new Dictionary<string, string> { ["ShuffleMode"] = enabled ? "Shuffle" : "Sorted" },
 			cancellationToken);
+	}
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-		=> GeneralCommandAsync("SetRepeatMode",
+	{
+		return GeneralCommandAsync("SetRepeatMode",
 			new Dictionary<string, string>
 			{
 				["RepeatMode"] = mode switch
@@ -173,6 +196,7 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 				}
 			},
 			cancellationToken);
+	}
 
 	public Task GeneralCommandAsync(
 		string command,
@@ -186,7 +210,10 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 		}
 
 		return Send(session,
-			() => _runtime.Connection.Client.SendGeneralCommandAsync(session.Id, command, arguments, cancellationToken));
+			() => _runtime.Connection.Client.SendGeneralCommandAsync(session.Id,
+				command,
+				arguments,
+				cancellationToken));
 	}
 
 	public Task DisplayMessageAsync(string? header, string text, int? timeoutMs, CancellationToken cancellationToken)
@@ -204,8 +231,8 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 	public Task PlayItemAsync(string itemId, string? mediaType, CancellationToken cancellationToken)
 	{
 		var session = RequireSession();
-		if (!session.SupportsMediaControl ||
-			(mediaType is { Length: > 0 } && !session.PlayableMediaTypes.Contains(mediaType)))
+		if (!session.SupportsMediaControl
+			|| mediaType is { Length: > 0 } && !session.PlayableMediaTypes.Contains(mediaType))
 		{
 			throw NotSupported(session);
 		}
@@ -233,17 +260,19 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 		if (!state.IsConnected)
 		{
 			throw new JellyfinCommandException(ActionErrorCodes.NotConnected,
-				Strings.Errors.ServerUnreachable(server: _runtime.Title));
+				Strings.Errors.ServerUnreachable(_runtime.Title));
 		}
 
-		return Resolve(state) ??
-			throw new JellyfinCommandException(ActionErrorCodes.NotFound,
+		return Resolve(state)
+			?? throw new JellyfinCommandException(ActionErrorCodes.NotFound,
 				Strings.Errors.NoSession());
 	}
 
 	private static JellyfinCommandException NotSupported(JellyfinSession session)
-		=> new(ActionErrorCodes.Unavailable,
-			Strings.Errors.NotSupportedByClient(device: session.DeviceName));
+	{
+		return new JellyfinCommandException(ActionErrorCodes.Unavailable,
+			Strings.Errors.NotSupportedByClient(session.DeviceName));
+	}
 
 	private static async Task Send(JellyfinSession session, Func<Task> send)
 	{
@@ -255,7 +284,7 @@ internal sealed class JellyfinMusicPlayer : IMusicPlayer
 		{
 			_logger.Warning(ex, "Jellyfin command to {Device} failed", session.DeviceName);
 			throw new JellyfinCommandException(ActionErrorCodes.ProviderError,
-				Strings.Errors.CommandFailed(device: session.DeviceName));
+				Strings.Errors.CommandFailed(session.DeviceName));
 		}
 	}
 

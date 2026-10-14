@@ -81,5 +81,7 @@ internal sealed class SpotifyApiLimitStoreTests
 	}
 
 	private static SpotifyApiLimitStore Store(RecordingIntegrationConfig config)
-		=> new(config, new LoggerConfiguration().CreateLogger());
+	{
+		return new SpotifyApiLimitStore(config, new LoggerConfiguration().CreateLogger());
+	}
 }

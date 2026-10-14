@@ -16,7 +16,7 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var issued = await IssueFromProofAsync(fixture, "license-bought");
 
-		var result = await fixture.Service.ReconcileAccountAsync(null, default);
+		var result = await fixture.Service.ReconcileAccountAsync(null, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -29,11 +29,11 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_license_transferred_from_a_macro_deck_2_purchase_is_offered_to_an_empty_account()
 	{
 		var fixture = new Fixture();
-		var issued = Sign(ProductionKey, ProductionKeyId, "license-md2");
+		var issued = Sign(_productionKey, ProductionKeyId, "license-md2");
 		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(issued);
 		await TransferAsync(fixture, Md2Purchase("app-transaction-1"));
 
-		var result = await fixture.Service.ReconcileAccountAsync(null, default);
+		var result = await fixture.Service.ReconcileAccountAsync(null, CancellationToken.None);
 
 		Assert.That(result.UploadToken, Is.EqualTo(issued));
 	}
@@ -43,15 +43,16 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 		await fixture.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, "license-friend") },
-			default);
+			new SyncCompanionLicenseRequest { License = Sign(_productionKey, ProductionKeyId, "license-friend") },
+			CancellationToken.None);
 
-		var result = await fixture.Service.ReconcileAccountAsync(null, default);
+		var result = await fixture.Service.ReconcileAccountAsync(null, CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.UploadToken, Is.Null);
-			Assert.That((await fixture.Service.GetStatusAsync(default)).LicenseId, Is.EqualTo("license-friend"));
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).LicenseId,
+				Is.EqualTo("license-friend"));
 		});
 	}
 
@@ -59,11 +60,11 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_license_stored_before_account_sync_existed_is_offered_once_the_host_upgrades()
 	{
 		var fixture = new Fixture();
-		var stored = Sign(ProductionKey, ProductionKeyId, "license-old");
+		var stored = Sign(_productionKey, ProductionKeyId, "license-old");
 		await fixture.Repository.SetValue(CompanionLicenseService.TokenKey, stored);
 		fixture.Restart();
 
-		var result = await fixture.Service.ReconcileAccountAsync(null, default);
+		var result = await fixture.Service.ReconcileAccountAsync(null, CancellationToken.None);
 
 		Assert.That(result.UploadToken, Is.EqualTo(stored));
 	}
@@ -75,10 +76,10 @@ internal sealed partial class CompanionLicenseServiceTests
 		fixture.Restart();
 
 		await fixture.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, "license-friend") },
-			default);
+			new SyncCompanionLicenseRequest { License = Sign(_productionKey, ProductionKeyId, "license-friend") },
+			CancellationToken.None);
 		fixture.Restart();
-		var result = await fixture.Service.ReconcileAccountAsync(null, default);
+		var result = await fixture.Service.ReconcileAccountAsync(null, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -94,20 +95,20 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var device = fixture.Harness.AddDevice("Tablet");
 		await fixture.Harness.ReportAsync("connection-a", device);
-		var account = Sign(ProductionKey, ProductionKeyId, "license-account");
+		var account = Sign(_productionKey, ProductionKeyId, "license-account");
 
-		var result = await fixture.Service.ReconcileAccountAsync(account, default);
+		var result = await fixture.Service.ReconcileAccountAsync(account, CancellationToken.None);
 
 		var pushes = fixture.Harness.Transport.ConnectionMessages
 			.Where(message => message.Message is CompanionLicenseEvent)
 			.ToList();
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.UploadToken, Is.Null);
 			Assert.That(fixture.Repository.Values[CompanionLicenseService.TokenKey], Is.EqualTo(account));
 			Assert.That(pushes.Select(push => push.ConnectionId), Is.EqualTo(new[] { "connection-a" }));
 			Assert.That(pushes.Select(push => ((CompanionLicenseEvent)push.Message).License), Is.All.EqualTo(account));
-			Assert.That((await fixture.Service.GetStatusAsync(default)).AccountSync,
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).AccountSync,
 				Is.EqualTo(CompanionLicenseAccountSync.Synced));
 		});
 	}
@@ -118,8 +119,9 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var local = await IssueFromProofAsync(fixture, "license-local");
 
-		var result = await fixture.Service.ReconcileAccountAsync(Sign(ProductionKey, ProductionKeyId, "license-account"),
-			default);
+		var result = await fixture.Service.ReconcileAccountAsync(
+			Sign(_productionKey, ProductionKeyId, "license-account"),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -135,10 +137,10 @@ internal sealed partial class CompanionLicenseServiceTests
 		await IssueFromProofAsync(fixture, HexId(1));
 		fixture.Platform.RevokedIds = [HexId(1)];
 		fixture.Time.Advance(CompanionLicenseService.RevocationRefreshInterval);
-		await fixture.Service.RunDueWorkAsync(default);
-		var account = Sign(ProductionKey, ProductionKeyId, HexId(2));
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+		var account = Sign(_productionKey, ProductionKeyId, HexId(2));
 
-		await fixture.Service.ReconcileAccountAsync(account, default);
+		await fixture.Service.ReconcileAccountAsync(account, CancellationToken.None);
 
 		Assert.That(fixture.Repository.Values[CompanionLicenseService.TokenKey], Is.EqualTo(account));
 	}
@@ -146,13 +148,19 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task A_revoked_account_license_is_replaced_by_the_valid_local_one()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.RevokedIds = [HexId(2)];
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				RevokedIds = [HexId(2)]
+			}
+		};
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		var local = await IssueFromProofAsync(fixture, HexId(1));
 
-		var result = await fixture.Service.ReconcileAccountAsync(Sign(ProductionKey, ProductionKeyId, HexId(2)), default);
+		var result = await fixture.Service.ReconcileAccountAsync(Sign(_productionKey, ProductionKeyId, HexId(2)),
+			CancellationToken.None);
 
 		Assert.That(result.UploadToken, Is.EqualTo(local));
 	}
@@ -160,12 +168,19 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task A_production_account_license_replaces_a_local_test_license()
 	{
-		var fixture = new Fixture();
-		fixture.Preferences.DeveloperMode = true;
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() }, default);
-		var account = Sign(ProductionKey, ProductionKeyId, "license-account");
+		var fixture = new Fixture
+		{
+			Preferences =
+			{
+				DeveloperMode = true
+			}
+		};
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() },
+			CancellationToken.None);
+		var account = Sign(_productionKey, ProductionKeyId, "license-account");
 
-		await fixture.Service.ReconcileAccountAsync(account, default);
+		await fixture.Service.ReconcileAccountAsync(account, CancellationToken.None);
 
 		Assert.That(fixture.Repository.Values[CompanionLicenseService.TokenKey], Is.EqualTo(account));
 	}
@@ -178,13 +193,14 @@ internal sealed partial class CompanionLicenseServiceTests
 		fixture.Service.LicenseChanged += (_, _) => Interlocked.Increment(ref changes);
 
 		await fixture.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, HexId(1)) },
-			default);
+			new SyncCompanionLicenseRequest { License = Sign(_productionKey, ProductionKeyId, HexId(1)) },
+			CancellationToken.None);
 		var afterCompanion = changes;
 		fixture.Platform.RevokedIds = [HexId(1)];
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		var afterRevocation = changes;
-		await fixture.Service.ReconcileAccountAsync(Sign(ProductionKey, ProductionKeyId, HexId(2)), default);
+		await fixture.Service.ReconcileAccountAsync(Sign(_productionKey, ProductionKeyId, HexId(2)),
+			CancellationToken.None);
 		var afterAccount = changes;
 
 		Assert.Multiple(() =>
@@ -200,18 +216,18 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var owned = new Fixture();
 		await IssueFromProofAsync(owned, "license-bought");
-		await owned.Service.ReportAccountSignedOutAsync(default);
+		await owned.Service.ReportAccountSignedOutAsync(CancellationToken.None);
 		var borrowed = new Fixture();
 		await borrowed.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, "license-friend") },
-			default);
-		await borrowed.Service.ReportAccountSignedOutAsync(default);
+			new SyncCompanionLicenseRequest { License = Sign(_productionKey, ProductionKeyId, "license-friend") },
+			CancellationToken.None);
+		await borrowed.Service.ReportAccountSignedOutAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That((await owned.Service.GetStatusAsync(default)).AccountSync,
+			Assert.That((await owned.Service.GetStatusAsync(CancellationToken.None)).AccountSync,
 				Is.EqualTo(CompanionLicenseAccountSync.SignedOut));
-			Assert.That((await borrowed.Service.GetStatusAsync(default)).AccountSync,
+			Assert.That((await borrowed.Service.GetStatusAsync(CancellationToken.None)).AccountSync,
 				Is.EqualTo(CompanionLicenseAccountSync.Unknown));
 		});
 	}
@@ -238,10 +254,11 @@ internal sealed partial class CompanionLicenseServiceTests
 		await using var sync = new SyncHarness(fixture);
 		await sync.SignInAsync();
 		await Until(() => sync.Account.WaitingPolls > 0);
-		var fromElsewhere = Sign(ProductionKey, ProductionKeyId, "license-elsewhere");
+		var fromElsewhere = Sign(_productionKey, ProductionKeyId, "license-elsewhere");
 
 		sync.Account.Store(fromElsewhere);
-		await Until(() => fixture.Repository.Values.GetValueOrDefault(CompanionLicenseService.TokenKey) == fromElsewhere);
+		await Until(()
+			=> fixture.Repository.Values.GetValueOrDefault(CompanionLicenseService.TokenKey) == fromElsewhere);
 
 		Assert.Multiple(() =>
 		{
@@ -260,7 +277,8 @@ internal sealed partial class CompanionLicenseServiceTests
 		await sync.StartAsync();
 
 		await Until(async () =>
-			(await fixture.Service.GetStatusAsync(default)).AccountSync == CompanionLicenseAccountSync.SignedOut);
+			(await fixture.Service.GetStatusAsync(CancellationToken.None)).AccountSync
+			== CompanionLicenseAccountSync.SignedOut);
 
 		Assert.That(sync.Account.Calls, Is.Zero);
 	}
@@ -300,7 +318,7 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_sign_out_racing_the_start_of_a_sync_does_not_stop_later_syncs()
 	{
 		var fixture = new Fixture();
-		var session = new RacingSession(signOutOnRead: 2);
+		var session = new RacingSession(2);
 		var account = new ScriptedAccount();
 		using var worker = new CompanionLicenseAccountSyncBackgroundService(session,
 			fixture.Service,
@@ -344,7 +362,7 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 		var local = await IssueFromProofAsync(fixture, HexId(1));
-		var winner = Sign(ProductionKey, ProductionKeyId, HexId(2));
+		var winner = Sign(_productionKey, ProductionKeyId, HexId(2));
 		await using var sync = new SyncHarness(fixture);
 		sync.Account.PutAnswer = _ =>
 		{
@@ -409,7 +427,7 @@ internal sealed partial class CompanionLicenseServiceTests
 		sync.Account.PutAnswer = _ => new PlatformAccountLicenseResult.Refused("license-revoked");
 
 		await sync.SignInAsync();
-		await Until(async () => !(await fixture.Service.GetStatusAsync(default)).Licensed);
+		await Until(async () => !(await fixture.Service.GetStatusAsync(CancellationToken.None)).Licensed);
 
 		Assert.That(sync.Account.Puts, Has.Count.EqualTo(1));
 	}
@@ -420,8 +438,8 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 
 		await fixture.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, "license-device") },
-			default);
+			new SyncCompanionLicenseRequest { License = Sign(_productionKey, ProductionKeyId, "license-device") },
+			CancellationToken.None);
 
 		Assert.That(fixture.Notifications.Snapshot().Select(notification => notification.Title),
 			Is.EqualTo(new[] { "Companion license received" }));
@@ -430,10 +448,16 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task Macro_Deck_says_in_the_users_language_when_it_downloads_the_account_license()
 	{
-		var fixture = new Fixture();
-		fixture.Preferences.Culture = "de";
+		var fixture = new Fixture
+		{
+			Preferences =
+			{
+				Culture = "de"
+			}
+		};
 
-		await fixture.Service.ReconcileAccountAsync(Sign(ProductionKey, ProductionKeyId, "license-account"), default);
+		await fixture.Service.ReconcileAccountAsync(Sign(_productionKey, ProductionKeyId, "license-account"),
+			CancellationToken.None);
 
 		Assert.That(fixture.Notifications.Snapshot().Select(notification => notification.Title),
 			Is.EqualTo(new[] { "Companion-Lizenz heruntergeladen" }));
@@ -443,26 +467,33 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_license_already_held_raises_no_notification()
 	{
 		var fixture = new Fixture();
-		var token = Sign(ProductionKey, ProductionKeyId, "license-device");
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = token }, default);
+		var token = Sign(_productionKey, ProductionKeyId, "license-device");
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = token },
+			CancellationToken.None);
 		fixture.Notifications.DismissAll();
 
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = token }, default);
-		await fixture.Service.ReconcileAccountAsync(token, default);
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = token },
+			CancellationToken.None);
+		await fixture.Service.ReconcileAccountAsync(token, CancellationToken.None);
 
 		Assert.That(fixture.Notifications.Snapshot(), Is.Empty);
 	}
 
 	private static async Task<string> IssueFromProofAsync(Fixture fixture, string licenseId)
 	{
-		var token = Sign(ProductionKey, ProductionKeyId, licenseId);
+		var token = Sign(_productionKey, ProductionKeyId, licenseId);
 		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
-		await fixture.Service.SyncAsync("c", GooglePlay($"purchase-{licenseId}"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", GooglePlay($"purchase-{licenseId}"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		return token;
 	}
 
-	private static Task Until(Func<bool> condition) => Until(() => Task.FromResult(condition()));
+	private static Task Until(Func<bool> condition)
+	{
+		return Until(() => Task.FromResult(condition()));
+	}
 
 	private static async Task Until(Func<Task<bool>> condition)
 	{
@@ -552,16 +583,30 @@ internal sealed partial class CompanionLicenseServiceTests
 			SessionChanged?.Invoke(this, snapshot);
 		}
 
-		public Task Initialize(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task Initialize(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<ConnectSignInStart> StartSignIn(CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task CancelSignIn(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task CancelSignIn(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SignOut(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SignOut(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<string> GetAccessToken(CancellationToken cancellationToken = default) => Task.FromResult("access-token");
+		public Task<string> GetAccessToken(CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult("access-token");
+		}
 	}
 
 	internal sealed class ScriptedAccount : IPlatformLicenseAccountClient
@@ -584,7 +629,9 @@ internal sealed partial class CompanionLicenseServiceTests
 		public PlatformAccountLicenseResult? GetAnswer { get; set; }
 		public Func<string, PlatformAccountLicenseResult>? PutAnswer { get; set; }
 		public ConcurrentQueue<string> RedeemLog { get; } = new();
-		public Func<string, PlatformPromoCodeResult> RedeemAnswer { get; set; } = _ => new PlatformPromoCodeResult.Unavailable();
+
+		public Func<string, PlatformPromoCodeResult> RedeemAnswer { get; set; } = _
+			=> new PlatformPromoCodeResult.Unavailable();
 
 		public Task<PlatformPromoCodeResult> RedeemPromoCodeAsync(string code, CancellationToken cancellationToken)
 		{
@@ -612,7 +659,8 @@ internal sealed partial class CompanionLicenseServiceTests
 			}
 		}
 
-		public async Task<PlatformAccountLicenseResult> GetAccountLicenseAsync(long? afterRevision,
+		public async Task<PlatformAccountLicenseResult> GetAccountLicenseAsync(
+			long? afterRevision,
 			TimeSpan wait,
 			CancellationToken cancellationToken)
 		{
@@ -655,7 +703,8 @@ internal sealed partial class CompanionLicenseServiceTests
 			}
 		}
 
-		public Task<PlatformAccountLicenseResult> StoreAccountLicenseAsync(string license,
+		public Task<PlatformAccountLicenseResult> StoreAccountLicenseAsync(
+			string license,
 			CancellationToken cancellationToken)
 		{
 			Interlocked.Increment(ref _calls);
@@ -682,7 +731,10 @@ internal sealed partial class CompanionLicenseServiceTests
 			}
 		}
 
-		private PlatformAccountLicenseResult.Current State() => new(_revoked ? null : License, Revision);
+		private PlatformAccountLicenseResult.Current State()
+		{
+			return new PlatformAccountLicenseResult.Current(_revoked ? null : License, Revision);
+		}
 
 		private void Signal()
 		{

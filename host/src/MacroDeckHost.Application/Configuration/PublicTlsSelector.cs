@@ -23,7 +23,8 @@ public static class PublicTlsSelector
 	// no user intent and follows the default; only an explicit "false" keeps HTTPS closed.
 	public const bool DefaultTlsEnabled = true;
 
-	public static PublicTlsSelection Resolve(string? enabled,
+	public static PublicTlsSelection Resolve(
+		string? enabled,
 		string? mode,
 		string? httpsPort,
 		bool certificateConfigured,
@@ -45,8 +46,8 @@ public static class PublicTlsSelector
 			return new PublicTlsSelection(PublicEndpointSet.HttpsReplacingHttp(publicPort), PublicTlsRejection.None);
 		}
 
-		var port = int.TryParse(httpsPort, NumberStyles.Integer, CultureInfo.InvariantCulture, out var stored) &&
-			PublicPortSelector.IsConfigurable(stored)
+		var port = int.TryParse(httpsPort, NumberStyles.Integer, CultureInfo.InvariantCulture, out var stored)
+			&& PublicPortSelector.IsConfigurable(stored)
 				? stored
 				: BuildConfig.DefaultPublicHttpsPort;
 
@@ -66,10 +67,14 @@ public static class PublicTlsSelector
 	}
 
 	public static bool IsTlsEnabled(string? enabled)
-		=> bool.TryParse(enabled, out var parsed) ? parsed : DefaultTlsEnabled;
+	{
+		return bool.TryParse(enabled, out var parsed) ? parsed : DefaultTlsEnabled;
+	}
 
 	public static PublicTlsMode ParseMode(string? mode)
-		=> string.Equals(mode, nameof(PublicTlsMode.Replace), StringComparison.OrdinalIgnoreCase)
+	{
+		return string.Equals(mode, nameof(PublicTlsMode.Replace), StringComparison.OrdinalIgnoreCase)
 			? PublicTlsMode.Replace
 			: PublicTlsMode.Additional;
+	}
 }

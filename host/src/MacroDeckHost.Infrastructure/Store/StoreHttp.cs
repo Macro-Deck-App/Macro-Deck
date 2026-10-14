@@ -16,20 +16,26 @@ internal sealed record StoreFetch
 
 	public int? StatusCode { get; init; }
 
-	public static StoreFetch Ok(byte[] content) => new()
+	public static StoreFetch Ok(byte[] content)
 	{
-		Success = true,
-		Content = content,
-		Sha256 = Convert.ToHexStringLower(SHA256.HashData(content))
-	};
+		return new StoreFetch
+		{
+			Success = true,
+			Content = content,
+			Sha256 = Convert.ToHexStringLower(SHA256.HashData(content))
+		};
+	}
 
-	public static StoreFetch Fail(string message, bool sizeMismatch = false, int? statusCode = null) => new()
+	public static StoreFetch Fail(string message, bool sizeMismatch = false, int? statusCode = null)
 	{
-		Success = false,
-		FailureMessage = message,
-		SizeMismatch = sizeMismatch,
-		StatusCode = statusCode
-	};
+		return new StoreFetch
+		{
+			Success = false,
+			FailureMessage = message,
+			SizeMismatch = sizeMismatch,
+			StatusCode = statusCode
+		};
+	}
 }
 
 internal static class StoreHttp
@@ -40,10 +46,13 @@ internal static class StoreHttp
 
 	// The registry and the asset CDN are both https today. A plain-http URL anywhere in registry data
 	// is treated as malformed rather than followed, so a downgrade cannot be introduced by content.
-	public static bool IsHttps(Uri uri) =>
-		uri.IsAbsoluteUri && string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal);
+	public static bool IsHttps(Uri uri)
+	{
+		return uri.IsAbsoluteUri && string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal);
+	}
 
-	public static async Task<StoreFetch> Fetch(HttpClient client,
+	public static async Task<StoreFetch> Fetch(
+		HttpClient client,
 		Uri url,
 		long maxBytes,
 		long? expectedSize,
@@ -57,7 +66,7 @@ internal static class StoreHttp
 		if (expectedSize is > 0 && expectedSize > maxBytes)
 		{
 			return StoreFetch.Fail($"'{url}' declares {expectedSize} bytes, above the {maxBytes} byte limit.",
-				sizeMismatch: true);
+				true);
 		}
 
 		HttpResponseMessage response;
@@ -89,7 +98,7 @@ internal static class StoreHttp
 				total += read;
 				if (total > limit)
 				{
-					return StoreFetch.Fail($"'{url}' exceeded {limit} bytes.", sizeMismatch: expectedSize is > 0);
+					return StoreFetch.Fail($"'{url}' exceeded {limit} bytes.", expectedSize is > 0);
 				}
 
 				buffer.Write(chunk, 0, read);
@@ -98,7 +107,7 @@ internal static class StoreHttp
 			if (expectedSize is > 0 && total != expectedSize)
 			{
 				return StoreFetch.Fail($"'{url}' returned {total} bytes, not the declared {expectedSize}.",
-					sizeMismatch: true);
+					true);
 			}
 
 			return StoreFetch.Ok(buffer.ToArray());

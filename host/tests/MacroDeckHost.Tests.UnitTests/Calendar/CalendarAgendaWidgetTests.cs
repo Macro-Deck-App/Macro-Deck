@@ -3,8 +3,6 @@ using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Services;
-using MacroDeckHost.Localization;
-using MacroDeckHost.Widgets.Calendar;
 using static MacroDeckHost.Tests.UnitTests.Calendar.CalendarTesting;
 using static MacroDeckHost.Tests.UnitTests.Calendar.CalendarTree;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Calendar;
@@ -22,9 +20,13 @@ public class CalendarAgendaWidgetTests
 		_harness = new CalendarWidgetHarness()
 			.With(Event("standup", Noon.AddHours(1), TimeSpan.FromMinutes(30), title: "Standup") with
 			{
-				Location = "Room 1",
+				Location = "Room 1"
 			})
-			.With(Event("holiday", new DateTimeOffset(Noon.Date, TimeSpan.Zero), TimeSpan.FromDays(1), title: "Holiday") with { IsAllDay = true })
+			.With(Event("holiday", new DateTimeOffset(Noon.Date, TimeSpan.Zero), TimeSpan.FromDays(1), title: "Holiday")
+				with
+				{
+					IsAllDay = true
+				})
 			.With(Event("review", Noon.AddHours(21), TimeSpan.FromHours(1), "team", "Review"))
 			.With(Event("retro", Noon.AddDays(2).AddHours(-2), TimeSpan.FromHours(1), title: "Retro"));
 	}
@@ -39,8 +41,8 @@ public class CalendarAgendaWidgetTests
 
 		var saturday = new DateOnly(2026, 1, 3);
 		var english = CultureInfo.GetCultureInfo("en");
-		var thirdHeading = Resolve(Strings.DayHeading(weekday: saturday.ToString("dddd", english),
-			date: saturday.ToString(english.DateTimeFormat.MonthDayPattern, english)));
+		var thirdHeading = Resolve(Strings.DayHeading(saturday.ToString("dddd", english),
+			saturday.ToString(english.DateTimeFormat.MonthDayPattern, english)));
 
 		Assert.Multiple(() =>
 		{
@@ -131,12 +133,13 @@ public class CalendarAgendaWidgetTests
 			new { showTime = true });
 		var before = Texts(Get(session.BuildTree().Root, "compact"));
 
-		_harness.Preferences.TimeFormat = AppPreferenceService.TimeFormat12h;
+		_harness.Preferences.TimeFormat = AppPreferenceService.TimeFormat12H;
 		_harness.Time.Advance(TimeSpan.FromMinutes(5));
 
 		Assert.That(before, Does.Contain("13:00"));
 		await WaitForAsync(() => Texts(Get(session.BuildTree().Root, "compact"))
-				.Any(text => text.StartsWith("1:00", StringComparison.Ordinal) && text.EndsWith("PM", StringComparison.Ordinal)),
+				.Any(text => text.StartsWith("1:00", StringComparison.Ordinal)
+					&& text.EndsWith("PM", StringComparison.Ordinal)),
 			"the agenda kept the old time format");
 	}
 
@@ -203,7 +206,8 @@ public class CalendarAgendaWidgetTests
 			Assert.That(Titles(glance), Is.EqualTo(new[] { "Holiday", "Standup" }));
 			Assert.That(Texts(glance), Does.Contain(Resolve(Strings.AllDay())).And.Contain("13:00"));
 			Assert.That(Titles(timedGlance), Is.EqualTo(new[] { "Standup", "Review" }));
-			Assert.That(Texts(timedGlance), Has.Some.Contains(Resolve(Strings.Tomorrow())),
+			Assert.That(Texts(timedGlance),
+				Has.Some.Contains(Resolve(Strings.Tomorrow())),
 				"an event of a later day says which day");
 		});
 	}
@@ -258,7 +262,8 @@ public class CalendarAgendaWidgetTests
 		{
 			Assert.That(before, Does.Not.Contain(Resolve(Strings.AccountError())));
 			Assert.That(after, Does.Contain(Resolve(Strings.AccountError())));
-			Assert.That(Titles(Get(session.BuildTree().Root, "compact")), Does.Contain("Standup"),
+			Assert.That(Titles(Get(session.BuildTree().Root, "compact")),
+				Does.Contain("Standup"),
 				"the last synced events stay visible");
 		});
 	}
@@ -302,7 +307,9 @@ public class CalendarAgendaWidgetTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Titles(Get(root, "compact")), Is.EqualTo(new[] { "Review", "Retro" }));
-			Assert.That(Text(Get(Get(root, "glance"), "weekday")), Is.EqualTo("FRIDAY"), "the date header moves on too");
+			Assert.That(Text(Get(Get(root, "glance"), "weekday")),
+				Is.EqualTo("FRIDAY"),
+				"the date header moves on too");
 			Assert.That(Text(Get(Get(root, "glance"), "dayNumber")), Is.EqualTo("2"));
 			Assert.That(days[0].Heading, Is.EqualTo(Resolve(Strings.Today())));
 			Assert.That(days[0].Titles, Is.EqualTo(new[] { "Review" }));
@@ -344,8 +351,9 @@ public class CalendarAgendaWidgetTests
 		harness.Google.Accounts.Clear();
 		await harness.SyncAsync();
 
-		await using var sample = await harness.OpenWidgetAsync(CalendarWidgetTypes.LayoutAgenda, new { },
-			sample: true);
+		await using var sample = await harness.OpenWidgetAsync(CalendarWidgetTypes.LayoutAgenda,
+			new { },
+			true);
 		var root = sample.BuildTree().Root;
 
 		Assert.Multiple(() =>
@@ -356,9 +364,22 @@ public class CalendarAgendaWidgetTests
 	}
 
 	private static List<(string Heading, List<string> Titles)> Days(UiNode root)
-		=> [.. Get(Get(root, "sections"), "days").Children
-			.Select(day => (Text(Get(day, "heading"))!, Titles(day)))];
+	{
+		return
+		[
+			.. Get(Get(root, "sections"), "days")
+				.Children
+				.Select(day => (Text(Get(day, "heading"))!, Titles(day)))
+		];
+	}
 
 	private static List<string> Titles(UiNode root)
-		=> [.. Flatten(root).Where(node => node.Id.EndsWith(".title", StringComparison.Ordinal)).Select(node => Text(node)!)];
+	{
+		return
+		[
+			.. Flatten(root)
+				.Where(node => node.Id.EndsWith(".title", StringComparison.Ordinal))
+				.Select(node => Text(node)!)
+		];
+	}
 }

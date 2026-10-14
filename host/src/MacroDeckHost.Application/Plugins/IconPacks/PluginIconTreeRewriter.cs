@@ -13,7 +13,8 @@ public static class PluginIconTreeRewriter
 
 	// The rewritten bytes are relayed as JSON only, so escaping them more than the plugin did would only
 	// grow the payload towards its size limit.
-	private static readonly JsonSerializerOptions _writeOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+	private static readonly JsonSerializerOptions _writeOptions = new()
+		{ Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
 	public static UiRawJson Rewrite(string pluginId, UiRawJson payload, IPluginIconResolver resolver)
 	{
@@ -80,12 +81,12 @@ public static class PluginIconTreeRewriter
 	private static bool IsPluginIconReference(JsonObject obj, out string reference)
 	{
 		reference = string.Empty;
-		if (obj.Count != 2 ||
-			obj["type"] is not JsonValue type ||
-			!type.TryGetValue<string>(out var typeValue) ||
-			!string.Equals(typeValue, PluginIconReferences.Type, StringComparison.Ordinal) ||
-			obj["reference"] is not JsonValue value ||
-			!value.TryGetValue<string>(out var referenceValue))
+		if (obj.Count != 2
+			|| obj["type"] is not JsonValue type
+			|| !type.TryGetValue<string>(out var typeValue)
+			|| !string.Equals(typeValue, PluginIconReferences.Type, StringComparison.Ordinal)
+			|| obj["reference"] is not JsonValue value
+			|| !value.TryGetValue<string>(out var referenceValue))
 		{
 			return false;
 		}

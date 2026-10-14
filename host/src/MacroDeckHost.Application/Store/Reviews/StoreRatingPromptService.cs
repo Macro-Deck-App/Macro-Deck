@@ -33,7 +33,8 @@ public sealed class StoreRatingPromptService : IStoreRatingPromptService, IDispo
 	private readonly TimeProvider _timeProvider;
 	private readonly SemaphoreSlim _gate = new(1, 1);
 
-	public StoreRatingPromptService(IStoreOfficialPackages packages,
+	public StoreRatingPromptService(
+		IStoreOfficialPackages packages,
 		IStoreCatalogQueryService catalogQuery,
 		IStoreInstallationStore installations,
 		IStoreReviewService reviews,
@@ -139,12 +140,12 @@ public sealed class StoreRatingPromptService : IStoreRatingPromptService, IDispo
 		var eligible = new List<(StoreCatalogItem Item, DateTimeOffset InstalledAt)>();
 		foreach (var item in _catalogQuery.Installed())
 		{
-			if (item.Withdrawal is not null ||
-				item.InstalledTestBuild is not null ||
-				_packages.ResolveListed(item.Entry.Kind, item.Entry.Id) is null ||
-				_installations.Find(item.Entry.Kind, item.Entry.Id) is not { } record ||
-				!StoreRegistryOptions.IsOfficial(record.Origin) ||
-				now - record.InstalledAt < MinimumInstallAge)
+			if (item.Withdrawal is not null
+				|| item.InstalledTestBuild is not null
+				|| _packages.ResolveListed(item.Entry.Kind, item.Entry.Id) is null
+				|| _installations.Find(item.Entry.Kind, item.Entry.Id) is not { } record
+				|| !StoreRegistryOptions.IsOfficial(record.Origin)
+				|| now - record.InstalledAt < MinimumInstallAge)
 			{
 				continue;
 			}
@@ -153,7 +154,8 @@ public sealed class StoreRatingPromptService : IStoreRatingPromptService, IDispo
 		}
 
 		return eligible
-			.OrderBy(candidate => history.TryGetValue(candidate.Item.Entry.Id, out var shown) ? shown : DateTimeOffset.MinValue)
+			.OrderBy(candidate
+				=> history.TryGetValue(candidate.Item.Entry.Id, out var shown) ? shown : DateTimeOffset.MinValue)
 			.ThenBy(candidate => candidate.InstalledAt)
 			.Select(candidate => candidate.Item);
 	}
@@ -174,7 +176,10 @@ public sealed class StoreRatingPromptService : IStoreRatingPromptService, IDispo
 			var parsed = JsonSerializer.Deserialize<Dictionary<string, string>>(stored);
 			foreach (var (id, value) in parsed ?? [])
 			{
-				if (DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var shown))
+				if (DateTimeOffset.TryParse(value,
+					CultureInfo.InvariantCulture,
+					DateTimeStyles.RoundtripKind,
+					out var shown))
 				{
 					history[id] = shown;
 				}
@@ -196,5 +201,8 @@ public sealed class StoreRatingPromptService : IStoreRatingPromptService, IDispo
 		await repository.SetValue(HistoryKey, serialized);
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 }

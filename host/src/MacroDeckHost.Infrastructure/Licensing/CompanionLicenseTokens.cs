@@ -36,8 +36,8 @@ public sealed class CompanionLicenseTokens
 			["prod-2026"] = "BKvz2Rtk9QDeRDyADewpWlgUi8O3ni2a6e3JAw/UqJZNcwo1m/0hWynei6Y3BOXtQKn/kGMlqBLb11PoNtDN3+E="
 		};
 
-	private static readonly JsonWebTokenHandler Handler = new() { SetDefaultTimesOnTokenCreation = false };
-	private static readonly ECDsaSecurityKey TestKey = PublicKey(TestKeyId, TestPublicKey);
+	private static readonly JsonWebTokenHandler _handler = new() { SetDefaultTimesOnTokenCreation = false };
+	private static readonly ECDsaSecurityKey _testKey = PublicKey(TestKeyId, TestPublicKey);
 
 	private readonly Dictionary<string, ECDsaSecurityKey> _production;
 
@@ -55,7 +55,7 @@ public sealed class CompanionLicenseTokens
 			return null;
 		}
 
-		var result = await Handler.ValidateTokenAsync(token,
+		var result = await _handler.ValidateTokenAsync(token,
 			new TokenValidationParameters
 			{
 				ValidIssuer = Issuer,
@@ -67,14 +67,14 @@ public sealed class CompanionLicenseTokens
 				IssuerSigningKeyResolver = (_, _, kid, _) =>
 					Resolve(kid, trustTestKey) is { } key ? [key] : []
 			});
-		if (!result.IsValid ||
-			result.SecurityToken is not JsonWebToken jwt ||
-			!jwt.TryGetPayloadValue<string>("product", out var product) ||
-			product != Product ||
-			!jwt.TryGetPayloadValue<string>("source", out var source) ||
-			string.IsNullOrEmpty(source) ||
-			string.IsNullOrEmpty(jwt.Subject) ||
-			jwt.IssuedAt == DateTime.MinValue)
+		if (!result.IsValid
+			|| result.SecurityToken is not JsonWebToken jwt
+			|| !jwt.TryGetPayloadValue<string>("product", out var product)
+			|| product != Product
+			|| !jwt.TryGetPayloadValue<string>("source", out var source)
+			|| string.IsNullOrEmpty(source)
+			|| string.IsNullOrEmpty(jwt.Subject)
+			|| jwt.IssuedAt == DateTime.MinValue)
 		{
 			return null;
 		}
@@ -95,16 +95,17 @@ public sealed class CompanionLicenseTokens
 		{
 			using var payload = JsonDocument.Parse(Base64UrlEncoder.DecodeBytes(jwt.EncodedPayload));
 			var root = payload.RootElement;
-			DateTimeOffset? purchasedAt = root.TryGetProperty("purchased_at", out var purchased) &&
-				purchased.ValueKind == JsonValueKind.Number &&
-				purchased.TryGetInt64(out var seconds) &&
-				seconds is > 0 and <= MaximumEpochSeconds
+			DateTimeOffset? purchasedAt
+				= root.TryGetProperty("purchased_at", out var purchased)
+				&& purchased.ValueKind == JsonValueKind.Number
+				&& purchased.TryGetInt64(out var seconds)
+				&& seconds is > 0 and <= MaximumEpochSeconds
 					? DateTimeOffset.FromUnixTimeSeconds(seconds)
 					: null;
-			var billingId = root.TryGetProperty("billing_id", out var billing) &&
-				billing.ValueKind == JsonValueKind.String &&
-				billing.GetString() is { Length: > 0 and <= MaximumBillingIdLength } value &&
-				!value.Any(char.IsControl)
+			var billingId = root.TryGetProperty("billing_id", out var billing)
+				&& billing.ValueKind == JsonValueKind.String
+				&& billing.GetString() is { Length: > 0 and <= MaximumBillingIdLength } value
+				&& !value.Any(char.IsControl)
 					? value
 					: null;
 			return (purchasedAt, billingId);
@@ -115,7 +116,8 @@ public sealed class CompanionLicenseTokens
 		}
 	}
 
-	public static string Sign(ECDsa privateKey,
+	public static string Sign(
+		ECDsa privateKey,
 		string keyId,
 		string licenseId,
 		string source,
@@ -139,15 +141,14 @@ public sealed class CompanionLicenseTokens
 			claims["billing_id"] = billingId;
 		}
 
-		return Handler.CreateToken(new SecurityTokenDescriptor
+		return _handler.CreateToken(new SecurityTokenDescriptor
 		{
 			Issuer = Issuer,
 			Audience = Audience,
 			IssuedAt = issuedAt.UtcDateTime,
 			Claims = claims,
 			// The default factory caches a signer per key id, which outlives a key disposed after signing.
-			SigningCredentials = new SigningCredentials(
-				new ECDsaSecurityKey(privateKey)
+			SigningCredentials = new SigningCredentials(new ECDsaSecurityKey(privateKey)
 				{
 					KeyId = keyId,
 					CryptoProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = false }
@@ -168,7 +169,7 @@ public sealed class CompanionLicenseTokens
 			return key;
 		}
 
-		return trustTestKey && kid == TestKeyId ? TestKey : null;
+		return trustTestKey && kid == TestKeyId ? _testKey : null;
 	}
 
 	private static ECDsaSecurityKey PublicKey(string keyId, string uncompressedPoint)

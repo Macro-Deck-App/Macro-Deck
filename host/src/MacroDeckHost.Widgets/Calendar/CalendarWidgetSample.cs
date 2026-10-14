@@ -37,14 +37,21 @@ internal static class CalendarWidgetSample
 			true);
 
 		var local = TimeZoneInfo.ConvertTime(now, timeZone);
-		var nextHalfHour = local.AddMinutes(30 - (local.Minute % 30)).AddSeconds(-local.Second)
+		var nextHalfHour = local.AddMinutes(30 - local.Minute % 30)
+			.AddSeconds(-local.Second)
 			.AddMilliseconds(-local.Millisecond);
 		var today = CalendarTime.LocalDate(now, timeZone);
 		var tomorrowNoon = CalendarTime.StartOfDay(today.AddDays(1), timeZone).AddHours(12).AddMinutes(30);
 
-		CalendarEventSummary Event(string id, string title, DateTimeOffset start, TimeSpan duration,
-			bool allDay = false, string? location = null)
-			=> new()
+		CalendarEventSummary Event(
+			string id,
+			string title,
+			DateTimeOffset start,
+			TimeSpan duration,
+			bool allDay = false,
+			string? location = null)
+		{
+			return new CalendarEventSummary
 			{
 				InstanceKey = CalendarKeys.EventInstance(calendar.Key, id),
 				EventId = id,
@@ -60,18 +67,22 @@ internal static class CalendarWidgetSample
 				Start = start,
 				End = start + duration,
 				IsAllDay = allDay,
-				Location = location,
+				Location = location
 			};
+		}
 
 		var startOfToday = CalendarTime.StartOfDay(today, timeZone);
 
 		IReadOnlyList<CalendarEventSummary> events =
 		[
-			Event("offsite", offsite, startOfToday, CalendarTime.StartOfDay(today.AddDays(1), timeZone) - startOfToday,
-				allDay: true),
+			Event("offsite",
+				offsite,
+				startOfToday,
+				CalendarTime.StartOfDay(today.AddDays(1), timeZone) - startOfToday,
+				true),
 			Event("standup", standup, nextHalfHour, TimeSpan.FromMinutes(15), location: room),
 			Event("review", review, nextHalfHour.AddHours(2), TimeSpan.FromHours(1), location: room),
-			Event("lunch", lunch, tomorrowNoon, TimeSpan.FromHours(1)),
+			Event("lunch", lunch, tomorrowNoon, TimeSpan.FromHours(1))
 		];
 
 		var (from, to) = CalendarTime.SyncWindow(now, timeZone);

@@ -18,7 +18,7 @@ public class NativeKeyPositionTests
 		{
 			Assert.That(NativeKeys.TryGetWindowsScanCode(key, out var scan), Is.True);
 			Assert.That(scan, Is.EqualTo(scanCode));
-			Assert.That(NativeKeys.TryGetMacOSKeyCode(key, out var mac), Is.True);
+			Assert.That(NativeKeys.TryGetMacOsKeyCode(key, out var mac), Is.True);
 			Assert.That(mac, Is.EqualTo(macKeyCode));
 			Assert.That(NativeKeys.TryFromWindowsScanCode((ushort)scanCode, out var back), Is.True);
 			Assert.That(back, Is.EqualTo(key));
@@ -34,13 +34,15 @@ public class NativeKeyPositionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(NativeKeys.TryGetWindowsScanCode(key, out _), Is.False);
-			Assert.That(NativeKeys.TryGetMacOSKeyCode(key, out _), Is.False);
+			Assert.That(NativeKeys.TryGetMacOsKeyCode(key, out _), Is.False);
 		});
 	}
 
 	[Test]
 	public void A_scan_code_outside_the_main_block_names_no_key()
-		=> Assert.That(NativeKeys.TryFromWindowsScanCode(0x3B, out _), Is.False);
+	{
+		Assert.That(NativeKeys.TryFromWindowsScanCode(0x3B, out _), Is.False);
+	}
 
 	[Test]
 	public void Only_punctuation_keys_are_positional()

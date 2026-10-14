@@ -33,18 +33,21 @@ public class ObsEventEmitterTests
 		bool isStreaming = false,
 		bool replayBuffer = false,
 		bool virtualCam = false,
-		bool studioMode = false) => new()
+		bool studioMode = false)
 	{
-		IsConnected = true,
-		CurrentScene = currentScene,
-		PreviewScene = previewScene,
-		IsRecording = isRecording,
-		RecordingTimecode = recordingTimecode,
-		IsStreaming = isStreaming,
-		ReplayBufferActive = replayBuffer,
-		VirtualCamActive = virtualCam,
-		StudioModeActive = studioMode
-	};
+		return new ObsState
+		{
+			IsConnected = true,
+			CurrentScene = currentScene,
+			PreviewScene = previewScene,
+			IsRecording = isRecording,
+			RecordingTimecode = recordingTimecode,
+			IsStreaming = isStreaming,
+			ReplayBufferActive = replayBuffer,
+			VirtualCamActive = virtualCam,
+			StudioModeActive = studioMode
+		};
+	}
 
 	private void Seed(ObsState state)
 	{
@@ -55,7 +58,7 @@ public class ObsEventEmitterTests
 	[Test]
 	public void The_first_snapshot_reports_the_connection_but_not_the_state_it_found()
 	{
-		_emitter.Observe(Connected(currentScene: "Live", isRecording: true));
+		_emitter.Observe(Connected("Live", isRecording: true));
 
 		Assert.That(_publisher.Published.Select(p => p.EventId), Is.EqualTo(_connectedOnly));
 	}
@@ -63,9 +66,9 @@ public class ObsEventEmitterTests
 	[Test]
 	public void A_scene_switch_reports_both_scenes()
 	{
-		Seed(Connected(currentScene: "Starting Soon"));
+		Seed(Connected("Starting Soon"));
 
-		_emitter.Observe(Connected(currentScene: "Live"));
+		_emitter.Observe(Connected("Live"));
 
 		Assert.Multiple(() =>
 		{
@@ -114,9 +117,9 @@ public class ObsEventEmitterTests
 	[Test]
 	public void An_unchanged_snapshot_emits_nothing()
 	{
-		Seed(Connected(currentScene: "Live"));
+		Seed(Connected("Live"));
 
-		_emitter.Observe(Connected(currentScene: "Live"));
+		_emitter.Observe(Connected("Live"));
 
 		Assert.That(_publisher.Published, Is.Empty);
 	}
@@ -124,7 +127,7 @@ public class ObsEventEmitterTests
 	[Test]
 	public void Losing_the_connection_reports_only_the_disconnect()
 	{
-		Seed(Connected(currentScene: "Live", isRecording: true));
+		Seed(Connected("Live", isRecording: true));
 
 		_emitter.Observe(ObsState.Disconnected);
 
@@ -139,7 +142,7 @@ public class ObsEventEmitterTests
 		_emitter.Reset();
 		_publisher.Published.Clear();
 
-		_emitter.Observe(Connected(currentScene: "Live", isRecording: true));
+		_emitter.Observe(Connected("Live", isRecording: true));
 
 		Assert.That(_publisher.Published.Select(p => p.EventId), Is.EqualTo(_connectedOnly));
 	}
@@ -165,6 +168,8 @@ public class ObsEventEmitterTests
 		public List<(string EventId, IReadOnlyDictionary<string, object?>? Parameters)> Published { get; } = [];
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

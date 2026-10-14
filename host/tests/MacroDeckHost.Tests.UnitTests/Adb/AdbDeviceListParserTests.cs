@@ -8,13 +8,13 @@ public class AdbDeviceListParserTests
 	private static readonly DateTimeOffset _now = new(2026, 8, 10, 12, 0, 0, TimeSpan.Zero);
 
 	private const string FullFixture =
-		"List of devices attached\n" +
-		"R58M12ABCDE            device product:b0q model:SM_S908B device:b0q transport_id:1\n" +
-		"emulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 " +
-		"device:emu64a transport_id:2\n" +
-		"1234567890             unauthorized\n" +
-		"ABCDEF0123             offline\n" +
-		"09876543               no permissions; see [http://developer.android.com/tools/device.html]\n";
+		"List of devices attached\n"
+		+ "R58M12ABCDE            device product:b0q model:SM_S908B device:b0q transport_id:1\n"
+		+ "emulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 "
+		+ "device:emu64a transport_id:2\n"
+		+ "1234567890             unauthorized\n"
+		+ "ABCDEF0123             offline\n"
+		+ "09876543               no permissions; see [http://developer.android.com/tools/device.html]\n";
 
 	[Test]
 	public void Parses_the_full_fixture_into_five_devices_with_correct_states_and_metadata()
@@ -78,8 +78,8 @@ public class AdbDeviceListParserTests
 	[Test]
 	public void A_no_permissions_line_with_the_trailing_see_url_is_recognized()
 	{
-		const string output = "List of devices attached\n" +
-			"09876543               no permissions; see [http://developer.android.com/tools/device.html]\n";
+		const string output = "List of devices attached\n"
+			+ "09876543               no permissions; see [http://developer.android.com/tools/device.html]\n";
 
 		var devices = AdbDeviceListParser.Parse(output, _now);
 
@@ -122,10 +122,10 @@ public class AdbDeviceListParserTests
 	[Test]
 	public void A_malformed_line_is_skipped_rather_than_throwing()
 	{
-		const string output = "List of devices attached\n" +
-			"   \n" +
-			"onlyoneserialword\n" +
-			"R58M12ABCDE            device product:b0q model:SM_S908B device:b0q transport_id:1\n";
+		const string output = "List of devices attached\n"
+			+ "   \n"
+			+ "onlyoneserialword\n"
+			+ "R58M12ABCDE            device product:b0q model:SM_S908B device:b0q transport_id:1\n";
 
 		IReadOnlyList<AdbDevice> devices = [];
 
@@ -140,8 +140,8 @@ public class AdbDeviceListParserTests
 		// Ground truth captured from an attached device (issue #727). The `device:evt` token matters:
 		// it repeats the state keyword as a metadata key, and it must not be mistaken for either.
 		const string line =
-			"List of devices attached\n" +
-			"123456                 device usb:2-1 product:spotify-car-thing model:Car_Thing device:evt transport_id:1";
+			"List of devices attached\n"
+			+ "123456                 device usb:2-1 product:spotify-car-thing model:Car_Thing device:evt transport_id:1";
 
 		var devices = AdbDeviceListParser.Parse(line, DateTimeOffset.UnixEpoch);
 

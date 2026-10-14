@@ -53,22 +53,22 @@ public sealed class EmailEventProvider : IHostEventProvider, IEmailEventPublishe
 			[
 				InboxFilter(),
 				ActionParameter.Text(SenderParameter,
-					label: AppStrings.Events.Email.SenderLabel(),
-					description: AppStrings.Events.Email.SenderFilterDescription()),
+					AppStrings.Events.Email.SenderLabel(),
+					AppStrings.Events.Email.SenderFilterDescription()),
 				ActionParameter.Text(SubjectParameter,
-					label: AppStrings.Events.Email.SubjectLabel(),
-					description: AppStrings.Events.Email.SubjectFilterDescription())
+					AppStrings.Events.Email.SubjectLabel(),
+					AppStrings.Events.Email.SubjectFilterDescription())
 			],
 			PayloadParameters =
 			[
 				Inbox(),
 				InboxName(),
-				ActionParameter.Text(SenderParameter, label: AppStrings.Events.Email.SenderLabel()),
-				ActionParameter.Text(SenderAddressParameter, label: AppStrings.Events.Email.SenderAddressLabel()),
-				ActionParameter.Text(SubjectParameter, label: AppStrings.Events.Email.SubjectLabel()),
-				ActionParameter.Text(PreviewParameter, label: AppStrings.Events.Email.PreviewLabel()),
-				ActionParameter.Text(MessageIdParameter, label: AppStrings.Events.Email.MessageIdLabel()),
-				ActionParameter.Text(ReceivedAtParameter, label: AppStrings.Events.Email.ReceivedAtLabel())
+				ActionParameter.Text(SenderParameter, AppStrings.Events.Email.SenderLabel()),
+				ActionParameter.Text(SenderAddressParameter, AppStrings.Events.Email.SenderAddressLabel()),
+				ActionParameter.Text(SubjectParameter, AppStrings.Events.Email.SubjectLabel()),
+				ActionParameter.Text(PreviewParameter, AppStrings.Events.Email.PreviewLabel()),
+				ActionParameter.Text(MessageIdParameter, AppStrings.Events.Email.MessageIdLabel()),
+				ActionParameter.Text(ReceivedAtParameter, AppStrings.Events.Email.ReceivedAtLabel())
 			]
 		},
 		new()
@@ -82,9 +82,9 @@ public sealed class EmailEventProvider : IHostEventProvider, IEmailEventPublishe
 			[
 				Inbox(),
 				InboxName(),
-				ActionParameter.Number(UnreadCountParameter, label: AppStrings.Events.Email.UnreadCountLabel()),
+				ActionParameter.Number(UnreadCountParameter, AppStrings.Events.Email.UnreadCountLabel()),
 				ActionParameter.Number(PreviousUnreadCountParameter,
-					label: AppStrings.Events.Email.PreviousUnreadCountLabel())
+					AppStrings.Events.Email.PreviousUnreadCountLabel())
 			]
 		},
 		new()
@@ -98,10 +98,10 @@ public sealed class EmailEventProvider : IHostEventProvider, IEmailEventPublishe
 			[
 				Inbox(),
 				InboxName(),
-				ActionParameter.Text(MessageIdParameter, label: AppStrings.Events.Email.MessageIdLabel()),
-				ActionParameter.Text(SubjectParameter, label: AppStrings.Events.Email.SubjectLabel()),
-				ActionParameter.Text(SenderParameter, label: AppStrings.Events.Email.SenderLabel()),
-				ActionParameter.Toggle(IsReadParameter, label: AppStrings.Events.Email.IsReadLabel())
+				ActionParameter.Text(MessageIdParameter, AppStrings.Events.Email.MessageIdLabel()),
+				ActionParameter.Text(SubjectParameter, AppStrings.Events.Email.SubjectLabel()),
+				ActionParameter.Text(SenderParameter, AppStrings.Events.Email.SenderLabel()),
+				ActionParameter.Toggle(IsReadParameter, AppStrings.Events.Email.IsReadLabel())
 			]
 		},
 		Connection(InboxConnectedEventId,
@@ -113,8 +113,10 @@ public sealed class EmailEventProvider : IHostEventProvider, IEmailEventPublishe
 	];
 
 	public static string Qualify(string eventId)
-		=> QualifiedId.Create(ProviderIdValue, eventId, OwnerIdKind.HostProvider, LocalIdKind.Declared, "Event")
+	{
+		return QualifiedId.Create(ProviderIdValue, eventId, OwnerIdKind.HostProvider, LocalIdKind.Declared, "Event")
 			.ToString();
+	}
 
 	public void Publish(IReadOnlyList<EmailInboxChange> changes)
 	{
@@ -169,30 +171,41 @@ public sealed class EmailEventProvider : IHostEventProvider, IEmailEventPublishe
 	}
 
 	private static string SenderOf(MacroDeck.Sdk.Email.EmailMessage message)
-		=> message.SenderName ?? message.SenderAddress ?? string.Empty;
-
-	private static EventDefinition Connection(string id, LocalizedText name, LocalizedText description) => new()
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = AppStrings.Events.Email.Category(),
-		ConfigurationParameters = [InboxFilter()],
-		PayloadParameters = [Inbox(), InboxName()]
-	};
+		return message.SenderName ?? message.SenderAddress ?? string.Empty;
+	}
+
+	private static EventDefinition Connection(string id, LocalizedText name, LocalizedText description)
+	{
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = AppStrings.Events.Email.Category(),
+			ConfigurationParameters = [InboxFilter()],
+			PayloadParameters = [Inbox(), InboxName()]
+		};
+	}
 
 	private static ActionParameter Inbox()
-		=> ActionParameter.DynamicChoice(InboxParameter,
-			label: AppStrings.Events.Email.InboxLabel(),
+	{
+		return ActionParameter.DynamicChoice(InboxParameter,
+			AppStrings.Events.Email.InboxLabel(),
 			optionsSourceId: EmailOptionsSourceIds.Inboxes);
+	}
 
 	private static ActionParameter InboxName()
-		=> ActionParameter.Text(InboxNameParameter, label: AppStrings.Events.Email.InboxNameLabel());
+	{
+		return ActionParameter.Text(InboxNameParameter, AppStrings.Events.Email.InboxNameLabel());
+	}
 
 	private static ActionParameter InboxFilter()
-		=> ActionParameter.DynamicChoice(InboxParameter,
-			label: AppStrings.Events.Email.InboxLabel(),
-			description: AppStrings.Events.Email.InboxFilterDescription(),
-			optionsSourceId: EmailOptionsSourceIds.Inboxes,
-			placeholder: AppStrings.Events.Email.AnyInboxPlaceholder());
+	{
+		return ActionParameter.DynamicChoice(InboxParameter,
+			AppStrings.Events.Email.InboxLabel(),
+			AppStrings.Events.Email.InboxFilterDescription(),
+			EmailOptionsSourceIds.Inboxes,
+			AppStrings.Events.Email.AnyInboxPlaceholder());
+	}
 }

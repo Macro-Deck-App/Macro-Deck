@@ -11,7 +11,10 @@ public sealed class VariableHistoryReadThrottle
 	private readonly TimeProvider _timeProvider;
 	private readonly ConcurrentDictionary<string, Bucket> _buckets = new(StringComparer.Ordinal);
 
-	public VariableHistoryReadThrottle(TimeProvider timeProvider) => _timeProvider = timeProvider;
+	public VariableHistoryReadThrottle(TimeProvider timeProvider)
+	{
+		_timeProvider = timeProvider;
+	}
 
 	public bool TryConsume(string pluginId, int openWindows)
 	{

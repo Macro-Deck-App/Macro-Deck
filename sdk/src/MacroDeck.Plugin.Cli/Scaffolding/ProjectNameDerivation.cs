@@ -47,7 +47,7 @@ internal static class ProjectNameDerivation
 
 	private static bool IsValidIdentifierSegment(string segment)
 	{
-		if (segment.Length == 0 || (!char.IsLetter(segment[0]) && segment[0] != '_'))
+		if (segment.Length == 0 || !char.IsLetter(segment[0]) && segment[0] != '_')
 		{
 			return false;
 		}

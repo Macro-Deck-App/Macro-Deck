@@ -26,12 +26,17 @@ public class InProcessAndroidDeviceTypedOperationsTests
 	}
 
 	[TearDown]
-	public void TearDown() => _manager.Dispose();
+	public void TearDown()
+	{
+		_manager.Dispose();
+	}
 
 	private IAndroidDevice Phone => _manager.FindDevice("device-1")!;
 
 	private static AdbDevice Device(string serial, AdbDeviceState state = AdbDeviceState.Device)
-		=> new(serial, state, "Pixel_8", "Google", "shiba", "1", null, DateTimeOffset.UtcNow);
+	{
+		return new AdbDevice(serial, state, "Pixel_8", "Google", "shiba", "1", null, DateTimeOffset.UtcNow);
+	}
 
 	private T SingleCommand<T>()
 		where T : AdbCommand
@@ -110,7 +115,8 @@ public class InProcessAndroidDeviceTypedOperationsTests
 	[TestCase(AdbFailureCode.InvalidParameter, AndroidDeviceErrorCode.InvalidArgument)]
 	[TestCase(AdbFailureCode.CommandFailed, AndroidDeviceErrorCode.CommandFailed)]
 	[TestCase(AdbFailureCode.Unsupported, AndroidDeviceErrorCode.Unsupported)]
-	public void An_adb_failure_throws_the_matching_error_code_and_message(AdbFailureCode failure,
+	public void An_adb_failure_throws_the_matching_error_code_and_message(
+		AdbFailureCode failure,
 		AndroidDeviceErrorCode expected)
 	{
 		_adb.ExecuteResult = Result.Fail<AdbFailureCode>(failure, "failure detail");
@@ -150,7 +156,8 @@ public class InProcessAndroidDeviceTypedOperationsTests
 		{
 			Assert.That(before, Is.Null);
 			Assert.That(after,
-				Is.EqualTo(new AndroidDeviceStatus { IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" }));
+				Is.EqualTo(new AndroidDeviceStatus
+					{ IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" }));
 			Assert.That(_adb.PropertiesSerials, Is.EqualTo(new[] { "device-1", "device-1" }));
 		});
 	}
@@ -175,7 +182,8 @@ public class InProcessAndroidDeviceTypedOperationsTests
 	public void A_device_without_usb_permission_reads_unauthorized_and_lacking_usb_permission()
 	{
 		var changes = new List<string>();
-		_manager.DeviceStateChanged += (_, e) => changes.Add($"{e.PreviousState}>{e.Device.State}:{e.Device.LacksUsbPermission}");
+		_manager.DeviceStateChanged += (_, e)
+			=> changes.Add($"{e.PreviousState}>{e.Device.State}:{e.Device.LacksUsbPermission}");
 
 		_adb.Devices = [Device("device-1", AdbDeviceState.Unauthorized)];
 		_adb.RaiseSnapshotChanged();
@@ -195,7 +203,8 @@ public class InProcessAndroidDeviceTypedOperationsTests
 	[TestCase(AdbDeviceState.Sideload, AndroidDeviceMode.Sideload)]
 	[TestCase(AdbDeviceState.Unknown, AndroidDeviceMode.Unknown)]
 	[TestCase(AdbDeviceState.Offline, AndroidDeviceMode.Normal)]
-	public void A_device_outside_android_reads_offline_with_its_mode_and_the_change_is_reported(AdbDeviceState state,
+	public void A_device_outside_android_reads_offline_with_its_mode_and_the_change_is_reported(
+		AdbDeviceState state,
 		AndroidDeviceMode mode)
 	{
 		var changes = 0;

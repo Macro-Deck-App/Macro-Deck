@@ -16,7 +16,8 @@ public class DeleteIconRequestMessageHandler : IUiTransportMessageHandler<Delete
 		_iconService = iconService;
 	}
 
-	public async ValueTask<DeleteIconResponse> Handle(DeleteIconRequest request,
+	public async ValueTask<DeleteIconResponse> Handle(
+		DeleteIconRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(request.Id, out var iconId))

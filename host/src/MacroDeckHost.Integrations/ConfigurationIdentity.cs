@@ -7,7 +7,9 @@ internal sealed record ConfigurationIdentity(string SourceTitle, string Key);
 internal static class ConfigurationIdentityJson
 {
 	public static string Serialize(ConfigurationIdentity identity)
-		=> JsonSerializer.Serialize(identity);
+	{
+		return JsonSerializer.Serialize(identity);
+	}
 
 	public static bool TryParse(string? json, out ConfigurationIdentity identity)
 	{

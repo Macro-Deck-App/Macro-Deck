@@ -18,7 +18,8 @@ public sealed class IntegrationWidgetApi : IWidgetApi, IWidgetAppearanceOutcomeA
 	private readonly IWidgetIconInvalidator _iconInvalidator;
 	private readonly IWidgetDataReader? _data;
 
-	public IntegrationWidgetApi(string integrationId,
+	public IntegrationWidgetApi(
+		string integrationId,
 		IWidgetApi inner,
 		IWidgetIconInvalidator iconInvalidator,
 		IWidgetDataReader? data = null)
@@ -35,31 +36,46 @@ public sealed class IntegrationWidgetApi : IWidgetApi, IWidgetAppearanceOutcomeA
 		return Task.FromResult(_data?.Read(_integrationId, widgetId));
 	}
 
-	public IReadOnlyList<WidgetTargetInfo> GetWidgets() => _inner.GetWidgets();
+	public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+	{
+		return _inner.GetWidgets();
+	}
 
-	public bool Exists(string widgetId) => _inner.Exists(widgetId);
+	public bool Exists(string widgetId)
+	{
+		return _inner.Exists(widgetId);
+	}
 
 	public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-		=> _inner.ApplyAsync(request, cancellationToken);
+	{
+		return _inner.ApplyAsync(request, cancellationToken);
+	}
 
 	public async Task<WidgetAppearanceOutcome> ApplyWithOutcomeAsync(
 		WidgetAppearanceRequest request,
 		CancellationToken cancellationToken = default)
-		=> _inner is IWidgetAppearanceOutcomeApi outcomes
+	{
+		return _inner is IWidgetAppearanceOutcomeApi outcomes
 			? await outcomes.ApplyWithOutcomeAsync(request, cancellationToken)
 			: await _inner.ApplyAsync(request, cancellationToken)
 				? WidgetAppearanceOutcome.Changed
 				: WidgetAppearanceOutcome.Unchanged;
+	}
 
 	public Task<WidgetStateWriteResult> SetStateAsync(
 		string widgetId,
 		string stateId,
 		CancellationToken cancellationToken = default)
-		=> _inner.SetStateAsync(widgetId, stateId, cancellationToken);
+	{
+		return _inner.SetStateAsync(widgetId, stateId, cancellationToken);
+	}
 
-	public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+	public Task<WidgetStateWriteResult> AdvanceStateAsync(
+		string widgetId,
 		CancellationToken cancellationToken = default)
-		=> _inner.AdvanceStateAsync(widgetId, cancellationToken);
+	{
+		return _inner.AdvanceStateAsync(widgetId, cancellationToken);
+	}
 
 	public Task InvalidateIconAsync(string actionId, CancellationToken cancellationToken = default)
 	{

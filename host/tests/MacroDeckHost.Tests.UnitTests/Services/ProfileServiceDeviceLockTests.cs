@@ -42,7 +42,10 @@ public class ProfileServiceDeviceLockTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task OneClaimingFixedDevice_LocksTheProfileToItsGrid()
@@ -170,7 +173,8 @@ public class ProfileServiceDeviceLockTests
 	}
 
 	private static LayoutDescriptor FixedGrid(int rows, int columns)
-		=> new("grid",
+	{
+		return new LayoutDescriptor("grid",
 			"Deck",
 			[
 				new LayoutRegion
@@ -178,4 +182,5 @@ public class ProfileServiceDeviceLockTests
 					Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = rows, Columns = columns }
 				}
 			]);
+	}
 }

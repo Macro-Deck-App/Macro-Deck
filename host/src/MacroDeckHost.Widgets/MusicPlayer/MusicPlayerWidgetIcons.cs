@@ -50,7 +50,7 @@ internal static class MusicPlayerWidgetIcons
 				OwnerId = OwnerId,
 				Name = name,
 				MediaType = "image/svg+xml",
-				Content = ReadEmbeddedSvg(assembly, $".Icons.{name}.svg"),
+				Content = ReadEmbeddedSvg(assembly, $".Icons.{name}.svg")
 			});
 		}
 
@@ -69,8 +69,8 @@ internal static class MusicPlayerWidgetIcons
 
 		if (resourceName is null)
 		{
-			throw new InvalidOperationException($"No embedded resource ending with '{suffix}' was found in " +
-				$"'{assembly.GetName().Name}'.");
+			throw new InvalidOperationException($"No embedded resource ending with '{suffix}' was found in "
+				+ $"'{assembly.GetName().Name}'.");
 		}
 
 		using var stream = assembly.GetManifestResourceStream(resourceName)!;

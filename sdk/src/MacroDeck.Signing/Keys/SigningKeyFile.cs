@@ -12,7 +12,8 @@ public static class SigningKeyFile
 	/// <summary>Reads and base64-decodes <paramref name="path"/>, or returns <see langword="null"/> when
 	/// the file is unreadable, not valid base64, or does not decode to exactly
 	/// <paramref name="expectedLength"/> bytes.</summary>
-	public static async Task<byte[]?> ReadBase64Async(string path,
+	public static async Task<byte[]?> ReadBase64Async(
+		string path,
 		int expectedLength,
 		CancellationToken cancellationToken = default)
 	{
@@ -35,7 +36,8 @@ public static class SigningKeyFile
 	/// and writable by its owner only. <paramref name="rawPrivateKey"/> is zeroed once written, regardless
 	/// of outcome.
 	/// </summary>
-	public static async Task<bool> WriteNewPrivateKeyFileAsync(string path,
+	public static async Task<bool> WriteNewPrivateKeyFileAsync(
+		string path,
 		byte[] rawPrivateKey,
 		CancellationToken cancellationToken = default)
 	{
@@ -79,7 +81,8 @@ public static class SigningKeyFile
 	/// <summary>Writes <paramref name="content"/> to a brand-new file at <paramref name="path"/>, refusing
 	/// to overwrite an existing one. For public material - certificates, signatures - that carries no
 	/// confidentiality requirement, unlike <see cref="WriteNewPrivateKeyFileAsync"/>.</summary>
-	public static async Task<bool> WriteNewFileAsync(string path,
+	public static async Task<bool> WriteNewFileAsync(
+		string path,
 		byte[] content,
 		CancellationToken cancellationToken = default)
 	{

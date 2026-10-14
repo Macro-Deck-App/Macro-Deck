@@ -8,14 +8,18 @@ public class PluginRuntimeIdentifiersTests
 	[TestCase("osx-arm64", "osx-x64")]
 	[TestCase("win-arm64", "win-x64")]
 	public void A_silicon_rid_falls_back_to_its_x64_counterpart(string rid, string fallback)
-		=> Assert.That(PluginRuntimeIdentifiers.CandidatesFor(rid), Is.EqualTo(new[] { rid, fallback }));
+	{
+		Assert.That(PluginRuntimeIdentifiers.CandidatesFor(rid), Is.EqualTo(new[] { rid, fallback }));
+	}
 
 	[TestCase("win-x64")]
 	[TestCase("osx-x64")]
 	[TestCase("linux-x64")]
 	[TestCase("linux-arm64")]
 	public void An_exact_match_rid_with_no_fallback_yields_only_itself(string rid)
-		=> Assert.That(PluginRuntimeIdentifiers.CandidatesFor(rid), Is.EqualTo(new[] { rid }));
+	{
+		Assert.That(PluginRuntimeIdentifiers.CandidatesFor(rid), Is.EqualTo(new[] { rid }));
+	}
 
 	[Test]
 	public void An_unknown_rid_yields_only_itself()

@@ -113,7 +113,9 @@ public class IntegrationConfigStore : IIntegrationConfigStore
 	}
 
 	public Task<bool> Rename(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
-		=> Replace(entryId, title, values);
+	{
+		return Replace(entryId, title, values);
+	}
 
 	public async Task Delete(Guid entryId)
 	{
@@ -146,7 +148,13 @@ public class IntegrationConfigStore : IIntegrationConfigStore
 	}
 
 	private static ConfigEntryRecord ToRecord(IntegrationConfigEntryEntity entity)
-		=> new(entity.Id, entity.IntegrationId, entity.Title, entity.CreatedAt, ParseValues(entity.ValuesJson));
+	{
+		return new ConfigEntryRecord(entity.Id,
+			entity.IntegrationId,
+			entity.Title,
+			entity.CreatedAt,
+			ParseValues(entity.ValuesJson));
+	}
 
 	private static Dictionary<string, JsonElement> ParseValues(string json)
 	{
@@ -155,7 +163,7 @@ public class IntegrationConfigStore : IIntegrationConfigStore
 			return new Dictionary<string, JsonElement>();
 		}
 
-		return JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json) ??
-			new Dictionary<string, JsonElement>();
+		return JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)
+			?? new Dictionary<string, JsonElement>();
 	}
 }

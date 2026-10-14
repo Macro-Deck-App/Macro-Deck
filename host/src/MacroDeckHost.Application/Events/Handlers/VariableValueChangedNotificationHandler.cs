@@ -32,9 +32,9 @@ public sealed class VariableValueChangedNotificationHandler : INotificationHandl
 
 		if (variable.Scope == VariableScope.Widget)
 		{
-			if (Guid.TryParse(variable.ScopeRefId, out var ownerId) &&
-				_index.LabelReferences(ownerId, variable.Name) &&
-				HasSubscribers(ownerId))
+			if (Guid.TryParse(variable.ScopeRefId, out var ownerId)
+				&& _index.LabelReferences(ownerId, variable.Name)
+				&& HasSubscribers(ownerId))
 			{
 				_renderQueue.Enqueue(ownerId);
 			}
@@ -53,5 +53,8 @@ public sealed class VariableValueChangedNotificationHandler : INotificationHandl
 		return ValueTask.CompletedTask;
 	}
 
-	private bool HasSubscribers(Guid widgetId) => _subscriptions.HasAnySubscribers(widgetId.ToString());
+	private bool HasSubscribers(Guid widgetId)
+	{
+		return _subscriptions.HasAnySubscribers(widgetId.ToString());
+	}
 }

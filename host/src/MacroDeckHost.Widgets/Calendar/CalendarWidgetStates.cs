@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using System.Text;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Calendar;
-using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Calendar;
 
 namespace MacroDeckHost.Widgets.Calendar;
 
@@ -141,25 +140,31 @@ internal static class CalendarAgenda
 		DateOnly day,
 		CalendarAgendaSettings settings,
 		CalendarFormat format)
-		=> new(prefix + CalendarWidgetStates.KeyOf(calendarEvent),
+	{
+		return new CalendarAgendaRow(prefix + CalendarWidgetStates.KeyOf(calendarEvent),
 			calendarEvent,
 			settings.ShowTime ? format.AgendaTime(calendarEvent, day) : default,
 			CalendarFormat.Title(calendarEvent.Title),
 			settings.ShowLocation ? calendarEvent.Location : null,
 			settings.ShowCalendar ? calendarEvent.CalendarName : null,
 			CalendarWidgetStates.Color(calendarEvent));
+	}
 
 	private static LocalizedText LaterDayTime(
 		CalendarEventSummary calendarEvent,
 		DateOnly today,
 		CalendarAgendaSettings settings,
 		CalendarFormat format)
-		=> settings.ShowTime
+	{
+		return settings.ShowTime
 			? format.WidgetRange(calendarEvent, today)
 			: format.DayName(format.Date(calendarEvent.Start), today);
+	}
 
 	private static CalendarWidgetStatus StatusOf(CalendarSnapshot snapshot)
-		=> snapshot.Accounts.Count == 0 ? CalendarWidgetStatus.NoCalendars : CalendarWidgetStatus.Ready;
+	{
+		return snapshot.Accounts.Count == 0 ? CalendarWidgetStatus.NoCalendars : CalendarWidgetStatus.Ready;
+	}
 }
 
 internal static class CalendarNextEvent
@@ -204,13 +209,21 @@ internal static class CalendarNextEvent
 internal static class CalendarWidgetStates
 {
 	public static string KeyOf(CalendarEventSummary calendarEvent)
-		=> Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(calendarEvent.InstanceKey)))[..24];
+	{
+		return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(calendarEvent.InstanceKey)))[..24];
+	}
 
-	public static string? Color(CalendarEventSummary calendarEvent) => WidgetColor.Normalize(calendarEvent.CalendarColor);
+	public static string? Color(CalendarEventSummary calendarEvent)
+	{
+		return WidgetColor.Normalize(calendarEvent.CalendarColor);
+	}
 
 	public static bool HasAccountError(CalendarSnapshot snapshot, IReadOnlyList<string> calendars)
-		=> snapshot.Accounts.Any(state => state.Status == CalendarAccountStatus.Error &&
-			(calendars.Count == 0 || calendars.Any(key =>
-				CalendarKeys.TryParseCalendar(key, out var accountId, out _) &&
-				accountId == state.Account.AccountId)));
+	{
+		return snapshot.Accounts.Any(state => state.Status == CalendarAccountStatus.Error
+			&& (calendars.Count == 0
+				|| calendars.Any(key =>
+					CalendarKeys.TryParseCalendar(key, out var accountId, out _)
+					&& accountId == state.Account.AccountId)));
+	}
 }

@@ -6,12 +6,14 @@ namespace MacroDeckHost.Integrations.AdGuardHome;
 public static class AdGuardHomeDurationText
 {
 	public static LocalizedText Label(string id)
-		=> id switch
+	{
+		return id switch
 		{
 			AdGuardHomeWidgetType.IndefiniteDuration => Durations.Indefinitely(),
 			_ when AdGuardHomeWidgetType.Duration(id)?.Length is { } length => length.TotalMinutes < 60
-				? Durations.Minutes(count: (int)length.TotalMinutes)
-				: Durations.Hours(count: (int)length.TotalHours),
+				? Durations.Minutes((int)length.TotalMinutes)
+				: Durations.Hours((int)length.TotalHours),
 			_ => id
 		};
+	}
 }

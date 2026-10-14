@@ -39,7 +39,13 @@ public sealed class NullKeyboardInputProvider : IKeyboardInputProvider
 
 	public KeyModifier BackgroundModifiers => KeyModifier.None;
 
-	public string? GetForegroundProcessName() => null;
+	public string? GetForegroundProcessName()
+	{
+		return null;
+	}
 
-	public IKeyboardTargetWindow? ResolveTarget(string processName) => null;
+	public IKeyboardTargetWindow? ResolveTarget(string processName)
+	{
+		return null;
+	}
 }

@@ -8,11 +8,11 @@ public class MacOsIoRegParserTests
 	public void Parses_device_utilization_from_performance_statistics()
 	{
 		const string output =
-			"+-o AGXAcceleratorG14X  <class AGXAcceleratorG14X, id 0x100000304, registered, matched, active>\n" +
-			"    {\n" +
-			"      \"PerformanceStatistics\" = {\"Device Utilization %\"=27,\"Renderer Utilization %\"=25," +
-			"\"Alloc system memory\"=1735786496}\n" +
-			"    }\n";
+			"+-o AGXAcceleratorG14X  <class AGXAcceleratorG14X, id 0x100000304, registered, matched, active>\n"
+			+ "    {\n"
+			+ "      \"PerformanceStatistics\" = {\"Device Utilization %\"=27,\"Renderer Utilization %\"=25,"
+			+ "\"Alloc system memory\"=1735786496}\n"
+			+ "    }\n";
 
 		Assert.That(MacOsIoRegParser.ParseDeviceUtilization(output), Is.EqualTo(27.0));
 	}
@@ -27,10 +27,10 @@ public class MacOsIoRegParserTests
 	public void ParseAcceleratorModel_reads_quoted_model_string()
 	{
 		const string output =
-			"+-o AGXAcceleratorG14X  <class AGXAcceleratorG14X>\n" +
-			"    {\n" +
-			"      \"model\" = \"Apple M2 Pro\"\n" +
-			"    }\n";
+			"+-o AGXAcceleratorG14X  <class AGXAcceleratorG14X>\n"
+			+ "    {\n"
+			+ "      \"model\" = \"Apple M2 Pro\"\n"
+			+ "    }\n";
 
 		Assert.That(MacOsIoRegParser.ParseAcceleratorModel(output), Is.EqualTo("Apple M2 Pro"));
 	}

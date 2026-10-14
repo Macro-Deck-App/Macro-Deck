@@ -121,8 +121,13 @@ public sealed record SigningMaterialResult
 
 	public string? Message { get; init; }
 
-	public static SigningMaterialResult Ok(SigningMaterial material) => new() { Success = true, Material = material };
+	public static SigningMaterialResult Ok(SigningMaterial material)
+	{
+		return new SigningMaterialResult { Success = true, Material = material };
+	}
 
-	public static SigningMaterialResult Fail(SigningError error, string message) =>
-		new() { Success = false, Error = error, Message = message };
+	public static SigningMaterialResult Fail(SigningError error, string message)
+	{
+		return new SigningMaterialResult { Success = false, Error = error, Message = message };
+	}
 }

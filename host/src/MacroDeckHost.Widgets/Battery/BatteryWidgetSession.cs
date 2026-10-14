@@ -20,7 +20,8 @@ internal sealed class BatteryWidgetSession : IUiSession
 	private readonly Lock _sync = new();
 	private bool _disposed;
 
-	public BatteryWidgetSession(UiView view,
+	public BatteryWidgetSession(
+		UiView view,
 		UiState<BatteryViewState> state,
 		BatteryWidgetData config,
 		BatteryViewStateResolver resolver,
@@ -65,7 +66,10 @@ internal sealed class BatteryWidgetSession : IUiSession
 		}
 	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	public ValueTask DisposeAsync()
 	{

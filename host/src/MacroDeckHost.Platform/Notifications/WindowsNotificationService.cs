@@ -79,7 +79,9 @@ internal sealed class WindowsNotificationService(ILogger logger) : IPlatformNoti
 	}
 
 	private static string Truncate(string value, int maxLength)
-		=> value.Length <= maxLength ? value : value[..maxLength];
+	{
+		return value.Length <= maxLength ? value : value[..maxLength];
+	}
 
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 	private struct NotifyIconData

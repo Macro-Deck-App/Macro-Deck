@@ -18,5 +18,7 @@ public class FilesystemController : ControllerBase
 
 	[HttpPost("list")]
 	public Task<GetFilesystemEntriesResponse> List(GetFilesystemEntriesRequest body, CancellationToken ct)
-		=> _getEntries.Handle(body, ct).AsTask();
+	{
+		return _getEntries.Handle(body, ct).AsTask();
+	}
 }

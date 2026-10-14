@@ -19,7 +19,8 @@ public sealed class PublicListenerUnavailableNotifier : IPublicListenerUnavailab
 	private readonly IAppPreferenceService _preferences;
 	private readonly ILocalizationResolver _localization;
 
-	public PublicListenerUnavailableNotifier(IHostListenerState listenerState,
+	public PublicListenerUnavailableNotifier(
+		IHostListenerState listenerState,
 		IApplicationRestartService restart,
 		IUserNotificationStore notifications,
 		IAppPreferenceService preferences,
@@ -47,10 +48,12 @@ public sealed class PublicListenerUnavailableNotifier : IPublicListenerUnavailab
 	}
 
 	private bool HttpsWasRequestedButIsNotServing()
-		=> _listenerState.PublicEndpoints.HttpsPort is null &&
-			(_listenerState.TlsFailure != PublicTlsFailure.None ||
-				_listenerState.TlsRejection != PublicTlsRejection.None ||
-				_listenerState.PublicEndpoints.TlsMode != PublicTlsMode.Disabled);
+	{
+		return _listenerState.PublicEndpoints.HttpsPort is null
+			&& (_listenerState.TlsFailure != PublicTlsFailure.None
+				|| _listenerState.TlsRejection != PublicTlsRejection.None
+				|| _listenerState.PublicEndpoints.TlsMode != PublicTlsMode.Disabled);
+	}
 
 	private void NotifyNothingIsReachable(string? culture)
 	{
@@ -64,9 +67,9 @@ public sealed class PublicListenerUnavailableNotifier : IPublicListenerUnavailab
 			Kind = UserNotificationKind.General,
 			Title = Resolve(AppStrings.Notifications.NetworkUnreachable(), culture),
 			Message = tlsIsTheCause
-				? Resolve(AppStrings.Notifications.NetworkUnreachableTlsMessage(), culture) +
-				" " +
-				Resolve(CertificateAdvice(_listenerState.TlsFailure), culture)
+				? Resolve(AppStrings.Notifications.NetworkUnreachableTlsMessage(), culture)
+				+ " "
+				+ Resolve(CertificateAdvice(_listenerState.TlsFailure), culture)
 				: Resolve(_listenerState.PublicPortOverriddenByEnvironment
 						? AppStrings.Notifications.NetworkUnreachableEnvironmentMessage()
 						: AppStrings.Notifications.NetworkUnreachablePortMessage(),
@@ -86,9 +89,9 @@ public sealed class PublicListenerUnavailableNotifier : IPublicListenerUnavailab
 			Kind = UserNotificationKind.General,
 			Title = Resolve(AppStrings.Notifications.HttpsNotRunning(), culture),
 			Message = _listenerState.TlsFailure != PublicTlsFailure.None
-				? Resolve(AppStrings.Notifications.HttpsNotRunningCertificateMessage(), culture) +
-				" " +
-				Resolve(CertificateAdvice(_listenerState.TlsFailure), culture)
+				? Resolve(AppStrings.Notifications.HttpsNotRunningCertificateMessage(), culture)
+				+ " "
+				+ Resolve(CertificateAdvice(_listenerState.TlsFailure), culture)
 				: Resolve(AppStrings.Notifications.HttpsNotRunningMessage(), culture),
 			Action = _restart.Availability.Supported
 				? new UserNotificationAction(UserNotificationActionKind.RestartApplication, null)
@@ -97,13 +100,18 @@ public sealed class PublicListenerUnavailableNotifier : IPublicListenerUnavailab
 		});
 	}
 
-	private string Resolve(LocalizedString value, string? culture) => _localization.Resolve(value, culture);
+	private string Resolve(LocalizedString value, string? culture)
+	{
+		return _localization.Resolve(value, culture);
+	}
 
 	private static LocalizedString CertificateAdvice(PublicTlsFailure failure)
-		=> failure switch
+	{
+		return failure switch
 		{
 			PublicTlsFailure.KeyUnreadable => AppStrings.Notifications.TlsCertificateKeyUnreadableAdvice(),
 			PublicTlsFailure.CertificateInvalid => AppStrings.Notifications.TlsCertificateInvalidAdvice(),
 			_ => AppStrings.Notifications.TlsCertificateMissingAdvice()
 		};
+	}
 }

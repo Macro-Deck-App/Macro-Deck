@@ -20,10 +20,16 @@ public sealed class FakeMessageChannel : IMessageChannel
 {
 	private readonly Lock _lock = new();
 	private readonly List<(string Pattern, Func<ChannelMessage, CancellationToken, Task> Handler)> _subscriptions = [];
-	private readonly Dictionary<string, Func<ChannelMessage, CancellationToken, Task>> _commands = new(StringComparer.Ordinal);
+
+	private readonly Dictionary<string, Func<ChannelMessage, CancellationToken, Task>> _commands
+		= new(StringComparer.Ordinal);
+
 	private readonly Dictionary<string, Func<ChannelMessage, CancellationToken, Task<JsonElement?>>> _requests
 		= new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<string, Func<ChannelMessage, JsonElement?>> _stubs = new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, Func<ChannelMessage, JsonElement?>> _stubs
+		= new(StringComparer.Ordinal);
+
 	private readonly ConcurrentQueue<ChannelMessage> _published = new();
 	private readonly ConcurrentQueue<ChannelMessage> _sent = new();
 	private readonly ConcurrentQueue<ChannelMessage> _requested = new();
@@ -86,14 +92,18 @@ public sealed class FakeMessageChannel : IMessageChannel
 		_stubs[topic] = reply;
 	}
 
-	public async Task PublishAsync(string topic, JsonElement? payload = null, CancellationToken cancellationToken = default)
+	public async Task PublishAsync(
+		string topic,
+		JsonElement? payload = null,
+		CancellationToken cancellationToken = default)
 	{
 		var message = Message(ChannelMessageKind.Event, topic, payload, SenderId);
 		_published.Enqueue(message);
 		await DeliverToSubscriptionsAsync(message, cancellationToken).ConfigureAwait(false);
 	}
 
-	public async Task SendAsync(string topic,
+	public async Task SendAsync(
+		string topic,
 		JsonElement? payload = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
@@ -116,7 +126,8 @@ public sealed class FakeMessageChannel : IMessageChannel
 		_ = Stub(topic)(message);
 	}
 
-	public async Task<JsonElement?> RequestAsync(string topic,
+	public async Task<JsonElement?> RequestAsync(
+		string topic,
 		JsonElement? payload = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
@@ -135,7 +146,8 @@ public sealed class FakeMessageChannel : IMessageChannel
 			: Stub(topic)(message);
 	}
 
-	public Task<IAsyncDisposable> SubscribeAsync(string topicPattern,
+	public Task<IAsyncDisposable> SubscribeAsync(
+		string topicPattern,
 		Func<ChannelMessage, CancellationToken, Task> handler,
 		CancellationToken cancellationToken = default)
 	{
@@ -157,26 +169,37 @@ public sealed class FakeMessageChannel : IMessageChannel
 		}));
 	}
 
-	public Task<IAsyncDisposable> HandleCommandsAsync(string topic,
+	public Task<IAsyncDisposable> HandleCommandsAsync(
+		string topic,
 		Func<ChannelMessage, CancellationToken, Task> handler,
 		CancellationToken cancellationToken = default)
-		=> Claim(_commands, topic, handler);
+	{
+		return Claim(_commands, topic, handler);
+	}
 
-	public Task<IAsyncDisposable> HandleRequestsAsync(string topic,
+	public Task<IAsyncDisposable> HandleRequestsAsync(
+		string topic,
 		Func<ChannelMessage, CancellationToken, Task<JsonElement?>> handler,
 		CancellationToken cancellationToken = default)
-		=> Claim(_requests, topic, handler);
+	{
+		return Claim(_requests, topic, handler);
+	}
 
 	/// <summary>Delivers an event from another participant to the plugin's matching subscriptions.</summary>
-	public Task DeliverEventAsync(string topic,
+	public Task DeliverEventAsync(
+		string topic,
 		JsonElement? payload = null,
 		string sender = "test-sender",
 		CancellationToken cancellationToken = default)
-		=> DeliverToSubscriptionsAsync(Message(ChannelMessageKind.Event, topic, payload, sender), cancellationToken);
+	{
+		return DeliverToSubscriptionsAsync(Message(ChannelMessageKind.Event, topic, payload, sender),
+			cancellationToken);
+	}
 
 	/// <summary>Delivers a command from another participant to the plugin's handler of <paramref name="topic" />.</summary>
 	/// <exception cref="MessageChannelException">The plugin does not handle the topic, or its handler threw.</exception>
-	public async Task DeliverCommandAsync(string topic,
+	public async Task DeliverCommandAsync(
+		string topic,
 		JsonElement? payload = null,
 		string sender = "test-sender",
 		CancellationToken cancellationToken = default)
@@ -192,13 +215,15 @@ public sealed class FakeMessageChannel : IMessageChannel
 			throw NoHandler(topic);
 		}
 
-		await RunAsync(topic, () => handler(Message(ChannelMessageKind.Command, topic, payload, sender), cancellationToken))
+		await RunAsync(topic,
+				() => handler(Message(ChannelMessageKind.Command, topic, payload, sender), cancellationToken))
 			.ConfigureAwait(false);
 	}
 
 	/// <summary>Delivers a request from another participant to the plugin's handler and returns its reply.</summary>
 	/// <exception cref="MessageChannelException">The plugin does not handle the topic, or its handler threw.</exception>
-	public async Task<JsonElement?> DeliverRequestAsync(string topic,
+	public async Task<JsonElement?> DeliverRequestAsync(
+		string topic,
 		JsonElement? payload = null,
 		string sender = "test-sender",
 		CancellationToken cancellationToken = default)
@@ -219,7 +244,10 @@ public sealed class FakeMessageChannel : IMessageChannel
 			.ConfigureAwait(false);
 	}
 
-	private Task<IAsyncDisposable> Claim<THandler>(Dictionary<string, THandler> handlers, string topic, THandler handler)
+	private Task<IAsyncDisposable> Claim<THandler>(
+		Dictionary<string, THandler> handlers,
+		string topic,
+		THandler handler)
 		where THandler : Delegate
 	{
 		ArgumentNullException.ThrowIfNull(handler);
@@ -264,16 +292,20 @@ public sealed class FakeMessageChannel : IMessageChannel
 	}
 
 	private Func<ChannelMessage, JsonElement?> Stub(string topic)
-		=> _stubs.TryGetValue(topic, out var stub) ? stub : _ => throw NoHandler(topic);
+	{
+		return _stubs.TryGetValue(topic, out var stub) ? stub : _ => throw NoHandler(topic);
+	}
 
 	private static async Task RunAsync(string topic, Func<Task> run)
-		=> await RunAsync(topic,
+	{
+		await RunAsync(topic,
 				async () =>
 				{
 					await run().ConfigureAwait(false);
 					return null;
 				})
 			.ConfigureAwait(false);
+	}
 
 	private static async Task<JsonElement?> RunAsync(string topic, Func<Task<JsonElement?>> run)
 	{
@@ -293,18 +325,24 @@ public sealed class FakeMessageChannel : IMessageChannel
 	{
 		if (!valid)
 		{
-			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic, topic, $"'{topic}' is not a valid topic.");
+			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic,
+				topic,
+				$"'{topic}' is not a valid topic.");
 		}
 	}
 
 	private static MessageChannelException NoHandler(string topic)
-		=> new(MessageChannelErrorCode.NoHandler, topic, $"Nothing handles '{topic}'.");
+	{
+		return new MessageChannelException(MessageChannelErrorCode.NoHandler, topic, $"Nothing handles '{topic}'.");
+	}
 
 	private static ChannelMessage Message(ChannelMessageKind kind, string topic, JsonElement? payload, string sender)
 	{
 		if (!MessageTopic.IsValidTopic(topic))
 		{
-			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic, topic, $"'{topic}' is not a valid topic.");
+			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic,
+				topic,
+				$"'{topic}' is not a valid topic.");
 		}
 
 		return new ChannelMessage

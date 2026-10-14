@@ -5,5 +5,8 @@ namespace MacroDeckHost.Tests.UnitTests.TestSupport;
 
 internal sealed class DelegatingLogSink(Action<LogEvent> emit) : ILogEventSink
 {
-	public void Emit(LogEvent logEvent) => emit(logEvent);
+	public void Emit(LogEvent logEvent)
+	{
+		emit(logEvent);
+	}
 }

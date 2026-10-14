@@ -121,8 +121,8 @@ public class UiTreeContractTests
 			{
 				Id = "fallback",
 				Type = "text",
-				Children = [new UiNode { Id = "fallback-child", Type = "text" }],
-			},
+				Children = [new UiNode { Id = "fallback-child", Type = "text" }]
+			}
 		};
 
 		var first = UiCanonicalJson.Serialize(root);
@@ -139,9 +139,9 @@ public class UiTreeContractTests
 	[Test]
 	public void Deeply_nested_input_fails_bounded_rather_than_crashing()
 	{
-		var deepJson = string.Concat(Enumerable.Repeat("{\"id\":\"x\",\"type\":\"t\",\"children\":[", 64)) +
-			"{\"id\":\"leaf\",\"type\":\"t\"}" +
-			string.Concat(Enumerable.Repeat("]}", 64));
+		var deepJson = string.Concat(Enumerable.Repeat("{\"id\":\"x\",\"type\":\"t\",\"children\":[", 64))
+			+ "{\"id\":\"leaf\",\"type\":\"t\"}"
+			+ string.Concat(Enumerable.Repeat("]}", 64));
 
 		Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<UiNode>(deepJson, UiCanonicalJson.Options));
 	}
@@ -153,11 +153,11 @@ public class UiTreeContractTests
 		{
 			Revision = 1,
 			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-			Root = new UiNode { Id = "root", Type = "t" },
+			Root = new UiNode { Id = "root", Type = "t" }
 		};
 		var exclusive = shared with
 		{
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Exclusive },
+			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Exclusive }
 		};
 
 		var sharedJson = UiCanonicalJson.Serialize(shared);

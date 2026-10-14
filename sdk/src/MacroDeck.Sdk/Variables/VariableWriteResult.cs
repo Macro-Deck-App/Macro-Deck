@@ -42,20 +42,33 @@ public sealed record VariableWriteResult
 	/// </summary>
 	public LocalizedText Message { get; init; }
 
-	public static VariableWriteResult Applied() => new() { Status = VariableWriteStatus.Applied };
+	public static VariableWriteResult Applied()
+	{
+		return new VariableWriteResult { Status = VariableWriteStatus.Applied };
+	}
 
 	public static VariableWriteResult NotWritable(LocalizedText message = default)
-		=> new() { Status = VariableWriteStatus.NotWritable, Message = message };
+	{
+		return new VariableWriteResult { Status = VariableWriteStatus.NotWritable, Message = message };
+	}
 
 	public static VariableWriteResult NotFound(LocalizedText message = default)
-		=> new() { Status = VariableWriteStatus.NotFound, Message = message };
+	{
+		return new VariableWriteResult { Status = VariableWriteStatus.NotFound, Message = message };
+	}
 
 	public static VariableWriteResult Unavailable(LocalizedText message = default)
-		=> new() { Status = VariableWriteStatus.Unavailable, Message = message };
+	{
+		return new VariableWriteResult { Status = VariableWriteStatus.Unavailable, Message = message };
+	}
 
 	public static VariableWriteResult InvalidValue(LocalizedText message = default)
-		=> new() { Status = VariableWriteStatus.InvalidValue, Message = message };
+	{
+		return new VariableWriteResult { Status = VariableWriteStatus.InvalidValue, Message = message };
+	}
 
 	public static VariableWriteResult Failed(LocalizedText message = default)
-		=> new() { Status = VariableWriteStatus.Failed, Message = message };
+	{
+		return new VariableWriteResult { Status = VariableWriteStatus.Failed, Message = message };
+	}
 }

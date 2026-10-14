@@ -35,8 +35,8 @@ public sealed class MusicPlayerDeviceActionDefinition : MusicPlayerActionDefinit
 			description,
 			[
 				ActionParameter.Autocomplete(MusicPlayerActions.DeviceParameterName,
-					label: "Device",
-					description: "Leave empty to pick at run time.",
+					"Device",
+					"Leave empty to pick at run time.",
 					placeholder: "Search devices…",
 					required: false)
 			],
@@ -55,11 +55,17 @@ public sealed class MusicPlayerDeviceActionDefinition : MusicPlayerActionDefinit
 		IReadOnlyDictionary<string, object> __,
 		IActionInteractions? ___,
 		CancellationToken ____)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
-	public override IActionExecutor CreateExecutor() => new DeviceExecutor(this, _resolver);
+	public override IActionExecutor CreateExecutor()
+	{
+		return new DeviceExecutor(this, _resolver);
+	}
 
-	public override async Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public override async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.ParameterName == MusicPlayerActions.InstanceParameterName)
@@ -93,8 +99,8 @@ public sealed class MusicPlayerDeviceActionDefinition : MusicPlayerActionDefinit
 			if (!string.IsNullOrEmpty(context.Filter))
 			{
 				devices = devices.Where(d =>
-						d.Name.Contains(context.Filter, StringComparison.OrdinalIgnoreCase) ||
-						(d.Type?.Contains(context.Filter, StringComparison.OrdinalIgnoreCase) ?? false))
+						d.Name.Contains(context.Filter, StringComparison.OrdinalIgnoreCase)
+						|| (d.Type?.Contains(context.Filter, StringComparison.OrdinalIgnoreCase) ?? false))
 					.ToList();
 			}
 

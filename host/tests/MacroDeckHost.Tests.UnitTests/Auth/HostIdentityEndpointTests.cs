@@ -8,7 +8,6 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Infrastructure.Persistence;
-using MacroDeckHost.Ui;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,7 +72,7 @@ public class HostIdentityEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -172,7 +171,8 @@ public class HostIdentityEndpointTests
 		var statuses = new List<HttpStatusCode>();
 		for (var i = 0; i <= HostIdentityRateLimit.PerAddressLimit; i++)
 		{
-			statuses.Add((await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::1"))).StatusCode);
+			statuses.Add((await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::1")))
+				.StatusCode);
 		}
 
 		var neighbour = await _client.SendAsync(Challenge(new { nonce = Nonce() }, LocalIp, $"{prefix}::2"));
@@ -203,20 +203,26 @@ public class HostIdentityEndpointTests
 	[TestCase("::ffff:192.168.1.50", "192.168.1.50", true)]
 	[TestCase("192.168.1.50", "192.168.1.51", false)]
 	public void Each_address_is_its_own_caller(string first, string second, bool shared)
-		=> Assert.That(HostIdentityRateLimit.AddressKey(IPAddress.Parse(first)) ==
-			HostIdentityRateLimit.AddressKey(IPAddress.Parse(second)),
+	{
+		Assert.That(HostIdentityRateLimit.AddressKey(IPAddress.Parse(first))
+			== HostIdentityRateLimit.AddressKey(IPAddress.Parse(second)),
 			Is.EqualTo(shared));
+	}
 
 	[TestCase("2001:db8:1:2::1", "2001:db8:1:2:ffff::9", true)]
 	[TestCase("2001:db8:1:2::1", "2001:db8:1:3::1", false)]
 	public void Ipv6_addresses_share_a_ceiling_per_64(string first, string second, bool shared)
-		=> Assert.That(HostIdentityRateLimit.NetworkKey(IPAddress.Parse(first)) ==
-			HostIdentityRateLimit.NetworkKey(IPAddress.Parse(second)),
+	{
+		Assert.That(HostIdentityRateLimit.NetworkKey(IPAddress.Parse(first))
+			== HostIdentityRateLimit.NetworkKey(IPAddress.Parse(second)),
 			Is.EqualTo(shared));
+	}
 
 	[Test]
 	public void Ipv4_callers_have_no_network_ceiling()
-		=> Assert.That(HostIdentityRateLimit.NetworkKey(IPAddress.Parse("::ffff:192.168.1.50")), Is.Null);
+	{
+		Assert.That(HostIdentityRateLimit.NetworkKey(IPAddress.Parse("::ffff:192.168.1.50")), Is.Null);
+	}
 
 	[Test]
 	public async Task Login_redeem_and_refresh_carry_the_key_the_challenge_proves()
@@ -237,7 +243,7 @@ public class HostIdentityEndpointTests
 		var code = (await ReadJson(await _client.SendAsync(mint))).GetProperty("code").GetString();
 		var redeem = await _client.PostAsJsonAsync("/api/auth/device-enrollment/redeem", new { token = code });
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await ReadJson(login)).GetProperty("hostKey").GetString(), Is.EqualTo(proof.PublicKey));
 			Assert.That((await ReadJson(refresh)).GetProperty("hostKey").GetString(), Is.EqualTo(proof.PublicKey));
@@ -246,7 +252,9 @@ public class HostIdentityEndpointTests
 	}
 
 	private async Task<Proof> Prove(string nonce, string localIp)
-		=> await ReadProof(await _client.SendAsync(Challenge(new { nonce }, localIp)));
+	{
+		return await ReadProof(await _client.SendAsync(Challenge(new { nonce }, localIp)));
+	}
 
 	private static HttpRequestMessage Challenge(object body, string localIp, string? remoteIp = null)
 	{
@@ -260,11 +268,20 @@ public class HostIdentityEndpointTests
 		return request;
 	}
 
-	private static string NextIpv6Prefix() => $"2001:db8:{Interlocked.Increment(ref _remoteCounter):x}:0";
+	private static string NextIpv6Prefix()
+	{
+		return $"2001:db8:{Interlocked.Increment(ref _remoteCounter):x}:0";
+	}
 
-	private static string NextRemote() => $"10.20.{Interlocked.Increment(ref _remoteCounter) / 250}.{_remoteCounter % 250 + 1}";
+	private static string NextRemote()
+	{
+		return $"10.20.{Interlocked.Increment(ref _remoteCounter) / 250}.{_remoteCounter % 250 + 1}";
+	}
 
-	private static string Nonce(int length = 32) => Convert.ToBase64String(RandomNumberGenerator.GetBytes(length));
+	private static string Nonce(int length = 32)
+	{
+		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(length));
+	}
 
 	private static async Task<Proof> ReadProof(HttpResponseMessage response)
 	{
@@ -277,7 +294,9 @@ public class HostIdentityEndpointTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private static bool Verifies(Proof proof, string message)
 	{

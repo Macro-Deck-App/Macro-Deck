@@ -7,7 +7,8 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 public static class FolderFocusRuleDtoMapper
 {
 	public static WireFolderFocusRule MapToDto(FolderEntity folder, DomainFolderFocusRule rule, DeviceEntity? device)
-		=> new()
+	{
+		return new WireFolderFocusRule
 		{
 			FolderId = folder.Id.ToString(),
 			FolderName = folder.Name,
@@ -21,4 +22,5 @@ public static class FolderFocusRuleDtoMapper
 			DeviceExists = device is not null,
 			ReturnOnFocusLoss = rule.ReturnOnFocusLoss
 		};
+	}
 }

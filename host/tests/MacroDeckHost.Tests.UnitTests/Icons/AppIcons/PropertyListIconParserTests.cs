@@ -15,8 +15,8 @@ public class PropertyListIconParserTests
 	[Test]
 	public void TryReadIconFileName_XmlPlistWithIconFile_ReturnsDeclaredName()
 	{
-		var xml = Plist("<key>CFBundleName</key><string>Foo</string>" +
-			"<key>CFBundleIconFile</key><string>AppIcon.icns</string>");
+		var xml = Plist("<key>CFBundleName</key><string>Foo</string>"
+			+ "<key>CFBundleIconFile</key><string>AppIcon.icns</string>");
 
 		Assert.That(PropertyListIconParser.TryReadIconFileName(xml), Is.EqualTo("AppIcon.icns"));
 	}
@@ -24,8 +24,7 @@ public class PropertyListIconParserTests
 	[Test]
 	public void TryReadIconFileName_AppleDoctypeHeader_IsParsedWithoutResolvingTheDtd()
 	{
-		var xml = Doctype +
-			Plist("<key>CFBundleIconFile</key><string>AppIcon</string>");
+		var xml = Doctype + Plist("<key>CFBundleIconFile</key><string>AppIcon</string>");
 
 		Assert.That(PropertyListIconParser.TryReadIconFileName(xml), Is.EqualTo("AppIcon"));
 	}
@@ -41,8 +40,8 @@ public class PropertyListIconParserTests
 	[Test]
 	public void TryReadIconFileName_BothKeys_PrefersIconFile()
 	{
-		var xml = Plist("<key>CFBundleIconName</key><string>AssetIcon</string>" +
-			"<key>CFBundleIconFile</key><string>FileIcon.icns</string>");
+		var xml = Plist("<key>CFBundleIconName</key><string>AssetIcon</string>"
+			+ "<key>CFBundleIconFile</key><string>FileIcon.icns</string>");
 
 		Assert.That(PropertyListIconParser.TryReadIconFileName(xml), Is.EqualTo("FileIcon.icns"));
 	}
@@ -51,9 +50,9 @@ public class PropertyListIconParserTests
 	public void TryReadIconFileName_ValueIsNotAString_IsIgnored()
 	{
 		var iconFileIsBool = Plist("<key>CFBundleIconFile</key><true/>");
-		var iconFileIsArray = Plist("<key>CFBundleIconFile</key>" +
-			"<array><string>AppIcon.icns</string></array>" +
-			"<key>CFBundleIconName</key><string>AssetIcon</string>");
+		var iconFileIsArray = Plist("<key>CFBundleIconFile</key>"
+			+ "<array><string>AppIcon.icns</string></array>"
+			+ "<key>CFBundleIconName</key><string>AssetIcon</string>");
 
 		Assert.Multiple(() =>
 		{
@@ -98,5 +97,7 @@ public class PropertyListIconParserTests
 	}
 
 	private static string Plist(string body)
-		=> $"<plist version=\"1.0\"><dict>{body}</dict></plist>";
+	{
+		return $"<plist version=\"1.0\"><dict>{body}</dict></plist>";
+	}
 }

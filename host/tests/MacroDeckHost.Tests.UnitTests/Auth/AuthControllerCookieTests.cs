@@ -20,7 +20,7 @@ public class AuthControllerCookieTests
 	[Test]
 	public async Task Refresh_SetsAccessCookieBeforeRefreshCookie()
 	{
-		var setCookies = await RefreshAndCaptureCookies(https: false);
+		var setCookies = await RefreshAndCaptureCookies(false);
 
 		Assert.Multiple(() =>
 		{
@@ -74,8 +74,13 @@ public class AuthControllerCookieTests
 			DateTime.UtcNow.AddDays(30),
 			AuthScope.Client,
 			"manuel");
-		var httpContext = new DefaultHttpContext();
-		httpContext.Request.Host = new HostString("192.168.20.13", 8193);
+		var httpContext = new DefaultHttpContext
+		{
+			Request =
+			{
+				Host = new HostString("192.168.20.13", 8193)
+			}
+		};
 		var controller = new AuthController(new StubAuthService(login),
 			new LoginThrottle(TimeProvider.System),
 			new PairingCodeStore(),
@@ -96,8 +101,8 @@ public class AuthControllerCookieTests
 	[Test]
 	public async Task Auth_cookies_are_marked_secure_only_when_the_request_arrived_over_https()
 	{
-		var overHttps = await RefreshAndCaptureCookies(https: true);
-		var overHttp = await RefreshAndCaptureCookies(https: false);
+		var overHttps = await RefreshAndCaptureCookies(true);
+		var overHttp = await RefreshAndCaptureCookies(false);
 
 		Assert.Multiple(() =>
 		{
@@ -114,7 +119,7 @@ public class AuthControllerCookieTests
 		var host = new ManualTimeProvider();
 		var now = host.Now.UtcDateTime;
 
-		var setCookies = await RefreshAndCaptureCookies(https: false, host, now.AddMinutes(15), now.AddDays(30));
+		var setCookies = await RefreshAndCaptureCookies(false, host, now.AddMinutes(15), now.AddDays(30));
 
 		Assert.Multiple(() =>
 		{
@@ -129,12 +134,13 @@ public class AuthControllerCookieTests
 		var host = new ManualTimeProvider();
 		var past = host.Now.UtcDateTime.AddMinutes(-1);
 
-		var setCookies = await RefreshAndCaptureCookies(https: false, host, past, past);
+		var setCookies = await RefreshAndCaptureCookies(false, host, past, past);
 
 		Assert.That(setCookies, Has.All.Contain("max-age=0").IgnoreCase);
 	}
 
-	private static async Task<List<string>> RefreshAndCaptureCookies(bool https,
+	private static async Task<List<string>> RefreshAndCaptureCookies(
+		bool https,
 		TimeProvider? clock = null,
 		DateTime? accessExpiresAt = null,
 		DateTime? refreshExpiresAt = null)
@@ -147,9 +153,14 @@ public class AuthControllerCookieTests
 			refreshExpiresAt ?? now.AddDays(30),
 			AuthScope.Client,
 			"manuel");
-		var httpContext = new DefaultHttpContext();
-		httpContext.Request.Scheme = https ? "https" : "http";
-		httpContext.Request.Host = new HostString("192.168.20.13", 8193);
+		var httpContext = new DefaultHttpContext
+		{
+			Request =
+			{
+				Scheme = https ? "https" : "http",
+				Host = new HostString("192.168.20.13", 8193)
+			}
+		};
 		var controller = new AuthController(new StubAuthService(login),
 			new LoginThrottle(TimeProvider.System),
 			new PairingCodeStore(),
@@ -200,9 +211,17 @@ public class AuthControllerCookieTests
 
 	private static DefaultHttpContext ContextWithCookies(int port, string cookieHeader)
 	{
-		var context = new DefaultHttpContext();
-		context.Request.Host = new HostString("192.168.20.13", port);
-		context.Request.Headers.Cookie = cookieHeader;
+		var context = new DefaultHttpContext
+		{
+			Request =
+			{
+				Host = new HostString("192.168.20.13", port),
+				Headers =
+				{
+					Cookie = cookieHeader
+				}
+			}
+		};
 
 		return context;
 	}
@@ -245,7 +264,8 @@ public class AuthControllerCookieTests
 	}
 
 	[Test]
-	public async Task A_failed_login_over_a_usb_link_names_a_phone_with_its_masked_serial_instead_of_the_loopback_address()
+	public async Task
+		A_failed_login_over_a_usb_link_names_a_phone_with_its_masked_serial_instead_of_the_loopback_address()
 	{
 		var store = new UserNotificationStore();
 		var controller = new AuthController(new FailingAuthService(),
@@ -359,10 +379,14 @@ public class AuthControllerCookieTests
 	private sealed class StubAuthService : IAuthService
 	{
 		public Task<Result<DeviceEnrollmentTicket, AuthError>> CreateDeviceEnrollment(TimeSpan lifetime)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<LoginResult, AuthError>> RedeemDeviceEnrollment(string token, DeviceRegistration device)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		private readonly LoginResult _login;
 
@@ -372,83 +396,141 @@ public class AuthControllerCookieTests
 		}
 
 		public Task<Result<LoginResult, AuthError>> Refresh(string rawRefreshToken)
-			=> Task.FromResult(Result.Ok<LoginResult, AuthError>(_login));
+		{
+			return Task.FromResult(Result.Ok<LoginResult, AuthError>(_login));
+		}
 
-		public Task<bool> IsSetupComplete() => Task.FromResult(true);
+		public Task<bool> IsSetupComplete()
+		{
+			return Task.FromResult(true);
+		}
 
-		public Task<string?> GetUsername() => Task.FromResult<string?>(_login.Username);
+		public Task<string?> GetUsername()
+		{
+			return Task.FromResult<string?>(_login.Username);
+		}
 
 		public Task<Result<AuthError>> Setup(string username, string password)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<LoginResult, AuthError>> Login(string username,
+		public Task<Result<LoginResult, AuthError>> Login(
+			string username,
 			string password,
 			AuthScope scope,
 			DeviceRegistration? device)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task Logout(string rawRefreshToken) => Task.CompletedTask;
+		public Task Logout(string rawRefreshToken)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<Result<AuthError>> ChangePassword(string currentPassword, string newPassword)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<AuthError>> ChangeUsername(string currentPassword, string newUsername)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<AuthError>> ResetPassword(string newPassword) => throw new NotSupportedException();
+		public Task<Result<AuthError>> ResetPassword(string newPassword)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class FailingAuthService : IAuthService
 	{
 		public Task<Result<DeviceEnrollmentTicket, AuthError>> CreateDeviceEnrollment(TimeSpan lifetime)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<LoginResult, AuthError>> RedeemDeviceEnrollment(string token, DeviceRegistration device)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<bool> IsSetupComplete() => Task.FromResult(true);
+		public Task<bool> IsSetupComplete()
+		{
+			return Task.FromResult(true);
+		}
 
-		public Task<string?> GetUsername() => Task.FromResult<string?>(null);
+		public Task<string?> GetUsername()
+		{
+			return Task.FromResult<string?>(null);
+		}
 
 		public Task<Result<AuthError>> Setup(string username, string password)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<LoginResult, AuthError>> Login(string username,
+		public Task<Result<LoginResult, AuthError>> Login(
+			string username,
 			string password,
 			AuthScope scope,
 			DeviceRegistration? device)
-			=> Task.FromResult(Result.Fail<LoginResult, AuthError>(AuthError.InvalidCredentials));
+		{
+			return Task.FromResult(Result.Fail<LoginResult, AuthError>(AuthError.InvalidCredentials));
+		}
 
 		public Task<Result<LoginResult, AuthError>> Refresh(string rawRefreshToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task Logout(string rawRefreshToken) => throw new NotSupportedException();
+		public Task Logout(string rawRefreshToken)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<AuthError>> ChangePassword(string currentPassword, string newPassword)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<AuthError>> ChangeUsername(string currentPassword, string newUsername)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<AuthError>> ResetPassword(string newPassword) => throw new NotSupportedException();
+		public Task<Result<AuthError>> ResetPassword(string newPassword)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class UnavailableHostIdentity : IHostIdentityKeyProvider
 	{
 		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
-			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+		{
+			return ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+		}
 
 		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
-			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+		{
+			return ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+		}
 	}
 
 	private sealed class DisposedHostIdentity : IHostIdentityKeyProvider
 	{
 		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
-			=> ValueTask.FromException<byte[]>(new ObjectDisposedException("provider"));
+		{
+			return ValueTask.FromException<byte[]>(new ObjectDisposedException("provider"));
+		}
 
 		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
-			=> ValueTask.FromException<byte[]>(new ObjectDisposedException("provider"));
+		{
+			return ValueTask.FromException<byte[]>(new ObjectDisposedException("provider"));
+		}
 	}
 
 	private sealed class FixedHostIdentity : IHostIdentityKeyProvider
@@ -465,9 +547,15 @@ public class AuthControllerCookieTests
 		}
 
 		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(PublicKeyBytes);
+		{
+			return ValueTask.FromResult(PublicKeyBytes);
+		}
 
 		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(_key.SignData(message, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence));
+		{
+			return ValueTask.FromResult(_key.SignData(message,
+				HashAlgorithmName.SHA256,
+				DSASignatureFormat.Rfc3279DerSequence));
+		}
 	}
 }

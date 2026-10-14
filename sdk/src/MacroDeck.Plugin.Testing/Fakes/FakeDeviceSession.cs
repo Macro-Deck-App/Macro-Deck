@@ -119,8 +119,8 @@ public sealed class FakeDeviceSession : IDeviceSession
 			return Task.FromResult<DeviceIconImage?>(null);
 		}
 
-		return Task.FromResult<DeviceIconImage?>(knownETag is { Length: > 0 } &&
-			string.Equals(knownETag, icon.ETag, StringComparison.Ordinal)
+		return Task.FromResult<DeviceIconImage?>(
+			knownETag is { Length: > 0 } && string.Equals(knownETag, icon.ETag, StringComparison.Ordinal)
 				? icon with { Content = ReadOnlyMemory<byte>.Empty, NotModified = true }
 				: icon);
 	}
@@ -141,8 +141,8 @@ public sealed class FakeDeviceSession : IDeviceSession
 			return Task.FromResult<DeviceWidgetIconImage?>(null);
 		}
 
-		return Task.FromResult<DeviceWidgetIconImage?>(knownETag is { Length: > 0 } &&
-			string.Equals(knownETag, icon.ETag, StringComparison.Ordinal)
+		return Task.FromResult<DeviceWidgetIconImage?>(
+			knownETag is { Length: > 0 } && string.Equals(knownETag, icon.ETag, StringComparison.Ordinal)
 				? icon with { Content = ReadOnlyMemory<byte>.Empty, NotModified = true }
 				: icon);
 	}

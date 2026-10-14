@@ -8,7 +8,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// reports success and hides a plugin that never handles <c>NotFound</c>.
 /// </summary>
 [TestFixture]
-public class A12_VariableFakeTests
+public class A12VariableFakeTests
 {
 	private static readonly string[] _refreshedIds = ["muted", "volume-percent"];
 	private static readonly string[] _boundResources = ["entity/light.kitchen/state", "entity/switch.desk/state"];
@@ -18,7 +18,7 @@ public class A12_VariableFakeTests
 	{
 		var api = new FakeUserVariableApi();
 		api.SeedGlobal("counter", VariableType.Numeric, 10.0);
-		api.SeedGlobal("owned", VariableType.Numeric, 1.0, ownedByIntegration: true);
+		api.SeedGlobal("owned", VariableType.Numeric, 1.0, true);
 		api.SeedGlobal("label", VariableType.Text, "hello");
 		api.SeedGlobal("flag", VariableType.Boolean, false);
 		api.SeedWidgetScoped("widget-1", "counter", VariableType.Numeric, 99.0);
@@ -132,7 +132,8 @@ public class A12_VariableFakeTests
 			Assert.That(api.DefinitionRefreshRequests.Single(), Is.EqualTo(_refreshedIds));
 			Assert.That(api.RefreshRequests, Is.Zero);
 			Assert.That(first, Is.EqualTo(new[] { VariableBindingOutcome.Bound }));
-			Assert.That(second, Is.EqualTo(new[] { VariableBindingOutcome.AlreadyBound, VariableBindingOutcome.Bound }));
+			Assert.That(second,
+				Is.EqualTo(new[] { VariableBindingOutcome.AlreadyBound, VariableBindingOutcome.Bound }));
 			Assert.That(api.Bindings.Select(binding => binding.LocalResourceId),
 				Is.EqualTo(_boundResources));
 			Assert.ThrowsAsync<ArgumentException>(() => api.BindAsync([kitchen with { Name = "Not Canonical" }]));

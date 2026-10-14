@@ -17,7 +17,9 @@ public static class PluginPairingClientSanitizer
 	public const int MaxExecutablePathLength = 260;
 
 	public static string SanitizeDisplayName(string displayName)
-		=> Truncate(StripControlCharacters(displayName.Trim()), MaxDisplayNameLength);
+	{
+		return Truncate(StripControlCharacters(displayName.Trim()), MaxDisplayNameLength);
+	}
 
 	public static PluginPairingClientInfo? Sanitize(PluginPairingClientInfo? client)
 	{
@@ -36,7 +38,9 @@ public static class PluginPairingClientSanitizer
 	}
 
 	private static string Truncate(string value, int maxLength)
-		=> value.Length <= maxLength ? value : value[..maxLength];
+	{
+		return value.Length <= maxLength ? value : value[..maxLength];
+	}
 
 	private static string StripControlCharacters(string value)
 	{

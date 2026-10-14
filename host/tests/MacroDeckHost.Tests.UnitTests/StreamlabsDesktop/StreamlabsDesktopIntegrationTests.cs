@@ -19,10 +19,16 @@ public class StreamlabsDesktopIntegrationTests
 	private StreamlabsDesktopIntegration _integration = null!;
 
 	[SetUp]
-	public void SetUp() => _integration = new StreamlabsDesktopIntegration();
+	public void SetUp()
+	{
+		_integration = new StreamlabsDesktopIntegration();
+	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+	}
 
 	[Test]
 	public void TheIntegrationDescribesItself()
@@ -58,15 +64,16 @@ public class StreamlabsDesktopIntegrationTests
 	[Test]
 	public async Task WhileDisconnected_OnlyTheConnectionFlagAnswers()
 	{
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That((await _integration.ReadAsync(StreamlabsDesktopVariables.IsConnected, default)).Value,
+			Assert.That((await _integration.ReadAsync(StreamlabsDesktopVariables.IsConnected, CancellationToken.None))
+				.Value,
 				Is.EqualTo(false));
 
 			foreach (var variable in _integration.Variables
 				.Where(candidate => candidate.Name != StreamlabsDesktopVariables.IsConnected))
 			{
-				Assert.That((await _integration.ReadAsync(variable.ResolvedId!, default)).Value,
+				Assert.That((await _integration.ReadAsync(variable.ResolvedId!, CancellationToken.None)).Value,
 					Is.Null,
 					$"{variable.Name} must not read as a real value while disconnected");
 			}
@@ -76,7 +83,7 @@ public class StreamlabsDesktopIntegrationTests
 	[Test]
 	public async Task AnUnknownVariable_IsNull()
 	{
-		Assert.That((await _integration.ReadAsync("streamlabs-nope", default)).Value, Is.Null);
+		Assert.That((await _integration.ReadAsync("streamlabs-nope", CancellationToken.None)).Value, Is.Null);
 	}
 
 	[Test]
@@ -139,10 +146,11 @@ public class StreamlabsDesktopIntegrationTests
 
 		await _integration.InitializeAsync(context);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(_integration.IsInitialized, Is.True);
-			Assert.That((await _integration.ReadAsync(StreamlabsDesktopVariables.IsConnected, default)).Value,
+			Assert.That((await _integration.ReadAsync(StreamlabsDesktopVariables.IsConnected, CancellationToken.None))
+				.Value,
 				Is.EqualTo(false));
 		});
 
@@ -163,7 +171,8 @@ public class StreamlabsDesktopIntegrationTests
 
 		await _integration.InitializeAsync(context);
 
-		Assert.That((await _integration.ReadAsync(StreamlabsDesktopVariables.IsConnected, default)).Value,
+		Assert.That(
+			(await _integration.ReadAsync(StreamlabsDesktopVariables.IsConnected, CancellationToken.None)).Value,
 			Is.EqualTo(false));
 	}
 
@@ -206,9 +215,14 @@ public class StreamlabsDesktopIntegrationTests
 	private sealed class NullVariableApi : IVariableApi
 	{
 		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
-			=> Task.FromResult<IReadOnlyList<VariableHandle>>([]);
+		{
+			return Task.FromResult<IReadOnlyList<VariableHandle>>([]);
+		}
 
-		public Task<VariableHandle?> GetByNameAsync(string name) => Task.FromResult<VariableHandle?>(null);
+		public Task<VariableHandle?> GetByNameAsync(string name)
+		{
+			return Task.FromResult<VariableHandle?>(null);
+		}
 
 		public Task<VariableHandle> CreateAsync(
 			string name,
@@ -216,14 +230,22 @@ public class StreamlabsDesktopIntegrationTests
 			object? initialValue = null,
 			int? decimalPlaces = null,
 			string? definitionId = null)
-			=> Task.FromResult(new VariableHandle(Guid.NewGuid(), name, type, initialValue, decimalPlaces)
+		{
+			return Task.FromResult(new VariableHandle(Guid.NewGuid(), name, type, initialValue, decimalPlaces)
 			{
 				DefinitionId = definitionId
 			});
+		}
 
-		public Task SetValueAsync(Guid variableId, object? value) => Task.CompletedTask;
+		public Task SetValueAsync(Guid variableId, object? value)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task DeleteAsync(Guid variableId) => Task.CompletedTask;
+		public Task DeleteAsync(Guid variableId)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeConfig : IIntegrationConfig
@@ -254,13 +276,19 @@ public class StreamlabsDesktopIntegrationTests
 		}
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+		}
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+		{
+			return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+		}
 
 		public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+		{
+			return Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+		}
 
 		public Task SetStringAsync(
 			Guid entryId,
@@ -272,7 +300,8 @@ public class StreamlabsDesktopIntegrationTests
 			return Task.CompletedTask;
 		}
 
-		public Task SetSecretAsync(Guid entryId,
+		public Task SetSecretAsync(
+			Guid entryId,
 			string key,
 			string value,
 			CancellationToken cancellationToken = default)

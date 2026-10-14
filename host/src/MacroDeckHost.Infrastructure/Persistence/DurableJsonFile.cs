@@ -8,7 +8,7 @@ namespace MacroDeckHost.Infrastructure.Persistence;
 internal enum PersistenceBackup
 {
 	None,
-	KeepLastKnownGood,
+	KeepLastKnownGood
 }
 
 internal sealed class DurableJsonFile
@@ -41,7 +41,9 @@ internal sealed class DurableJsonFile
 	}
 
 	public void Write<T>(string path, T value)
-		=> WriteBytes(path, JsonSerializer.SerializeToUtf8Bytes(value, _options), rotateBackup: true);
+	{
+		WriteBytes(path, JsonSerializer.SerializeToUtf8Bytes(value, _options), true);
+	}
 
 	public T? Read<T>(string path, bool repair = true)
 		where T : class
@@ -118,17 +120,17 @@ internal sealed class DurableJsonFile
 
 			// The bytes must reach physical storage before the rename publishes them. Without this a
 			// power loss can leave a renamed but empty or truncated file (issue #647).
-			stream.Flush(flushToDisk: true);
+			stream.Flush(true);
 		}
 
 		try
 		{
 			if (rotateBackup && _backup == PersistenceBackup.KeepLastKnownGood && File.Exists(path))
 			{
-				File.Move(path, path + BackupSuffix, overwrite: true);
+				File.Move(path, path + BackupSuffix, true);
 			}
 
-			File.Move(tempPath, path, overwrite: true);
+			File.Move(tempPath, path, true);
 		}
 		catch
 		{
@@ -158,8 +160,8 @@ internal sealed class DurableJsonFile
 					? Publish(path,
 						pending,
 						PersistenceRecoverySource.PendingWrite,
-						preservedCorruptPath: null,
-						rotateBackup: true)
+						null,
+						true)
 					: pending.Value;
 			}
 
@@ -185,8 +187,8 @@ internal sealed class DurableJsonFile
 			if (primaryExists)
 			{
 				_logger.Error(
-					"Failed to read {DataKind} from {Path} and no valid backup or pending write was available; " +
-					"leaving the file untouched",
+					"Failed to read {DataKind} from {Path} and no valid backup or pending write was available; "
+					+ "leaving the file untouched",
 					_dataKind,
 					path);
 				_recoveryReporter?.ReportUnrecoverable(new PersistenceLoss(_dataKind, path));
@@ -207,20 +209,20 @@ internal sealed class DurableJsonFile
 		var preservedCorruptPath = primaryExists ? PreserveCorrupt(path) : null;
 		if (primaryExists && preservedCorruptPath is null)
 		{
-			_logger.Error("Recovered {DataKind} at {Path} in memory only; the damaged file could not be moved aside, " +
-				"so every file was left untouched",
+			_logger.Error("Recovered {DataKind} at {Path} in memory only; the damaged file could not be moved aside, "
+				+ "so every file was left untouched",
 				_dataKind,
 				path);
 			_recoveryReporter?.ReportRecovered(new PersistenceRecovery(_dataKind,
 				path,
 				source,
-				PreservedCorruptPath: null));
+				null));
 			return candidate.Value;
 		}
 
 		// Whatever occupied the primary slot was corrupt or absent, so it must never be rotated into
 		// the backup this recovery may have just read from.
-		return Publish(path, candidate, source, preservedCorruptPath, rotateBackup: false);
+		return Publish(path, candidate, source, preservedCorruptPath, false);
 	}
 
 	private T Publish<T>(
@@ -243,8 +245,8 @@ internal sealed class DurableJsonFile
 			return candidate.Value;
 		}
 
-		_logger.Warning("Recovered {DataKind} at {Path} from its {Source} after an interrupted write; the damaged " +
-			"file was preserved as {PreservedPath}",
+		_logger.Warning("Recovered {DataKind} at {Path} from its {Source} after an interrupted write; the damaged "
+			+ "file was preserved as {PreservedPath}",
 			_dataKind,
 			path,
 			source,

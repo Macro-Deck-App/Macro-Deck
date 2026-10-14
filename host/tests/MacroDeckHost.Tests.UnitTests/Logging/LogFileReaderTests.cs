@@ -22,7 +22,10 @@ public class LogFileReaderTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void A_Multi_Line_Exception_Folds_Into_The_Entry_Above_It()
@@ -137,7 +140,7 @@ public class LogFileReaderTests
 			Today,
 			TestLogFiles.HostLine("from spotify", 1, origin: "Integration/spotify"));
 
-		var page = Read(query: new LogQuery { IntegrationId = integrationId });
+		var page = Read(new LogQuery { IntegrationId = integrationId });
 
 		Assert.That(page.Entries, Has.Count.EqualTo(expected));
 	}
@@ -153,9 +156,9 @@ public class LogFileReaderTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Read(query: new LogQuery { Search = "NEEDLE" }).Entries.Single().Message,
+			Assert.That(Read(new LogQuery { Search = "NEEDLE" }).Entries.Single().Message,
 				Is.EqualTo("wrapped"));
-			Assert.That(Read(query: new LogQuery { Search = "plain" }).Entries.Single().Message, Is.EqualTo("plain"));
+			Assert.That(Read(new LogQuery { Search = "plain" }).Entries.Single().Message, Is.EqualTo("plain"));
 		});
 	}
 
@@ -166,7 +169,7 @@ public class LogFileReaderTests
 			Today,
 			Enumerable.Range(1, 50).Select(i => TestLogFiles.HostLine($"line {i}", i)).ToArray());
 
-		var page = Read(query: new LogQuery { Search = "nothing matches this" });
+		var page = Read(new LogQuery { Search = "nothing matches this" });
 
 		Assert.Multiple(() =>
 		{
@@ -210,7 +213,7 @@ public class LogFileReaderTests
 			TestLogFiles.HostLine("s10", 10),
 			TestLogFiles.HostLine("s15", 15));
 
-		var page = Read(query: new LogQuery { From = At(5), To = At(10) });
+		var page = Read(new LogQuery { From = At(5), To = At(10) });
 
 		string[] expected = ["s5", "s10"];
 		Assert.That(page.Entries.Select(entry => entry.Message), Is.EqualTo(expected));
@@ -224,7 +227,7 @@ public class LogFileReaderTests
 			TestLogFiles.HostLine("before", 1),
 			TestLogFiles.HostLine("after", 10));
 
-		var page = Read(query: new LogQuery { From = At(4), To = At(5) });
+		var page = Read(new LogQuery { From = At(4), To = At(5) });
 
 		Assert.Multiple(() =>
 		{
@@ -249,13 +252,13 @@ public class LogFileReaderTests
 			TestLogFiles.HostLine("t3", 3));
 
 		var query = new LogQuery { From = At(1) };
-		var page = Read(query: query, limit: 2);
+		var page = Read(query, 2);
 		var collected = page.Entries.Select(entry => entry.Message).ToList();
 		var followUps = 0;
 
 		while (page.Older is { } older && followUps < 5)
 		{
-			page = Read(query: query, limit: 2, before: older);
+			page = Read(query, 2, older);
 			collected.InsertRange(0, page.Entries.Select(entry => entry.Message));
 			followUps++;
 		}
@@ -279,7 +282,7 @@ public class LogFileReaderTests
 			TestLogFiles.ExceptionLine("   at MacroDeckHost.Needle.Y()"),
 			TestLogFiles.HostLine("Recovered", 2));
 
-		var page = Read(query: new LogQuery { Search = "needle" });
+		var page = Read(new LogQuery { Search = "needle" });
 
 		Assert.That(page.Entries, Has.Count.EqualTo(1));
 		Assert.Multiple(() =>
@@ -338,15 +341,15 @@ public class LogFileReaderTests
 	[Test]
 	public void The_Source_Rail_Reaches_A_Week_Back_And_No_Further()
 	{
-		const string WithinTheWindow = "20260803";
-		const string BeyondTheWindow = "20260727";
+		const string withinTheWindow = "20260803";
+		const string beyondTheWindow = "20260727";
 
 		TestLogFiles.WriteHost(_paths.LogsDirectory,
-			BeyondTheWindow,
-			TestLogFiles.HostLine("ancient", 1, origin: "Integration/ancient", stamp: BeyondTheWindow));
+			beyondTheWindow,
+			TestLogFiles.HostLine("ancient", 1, origin: "Integration/ancient", stamp: beyondTheWindow));
 		TestLogFiles.WriteHost(_paths.LogsDirectory,
-			WithinTheWindow,
-			TestLogFiles.HostLine("recent", 1, origin: "Integration/recent", stamp: WithinTheWindow));
+			withinTheWindow,
+			TestLogFiles.HostLine("recent", 1, origin: "Integration/recent", stamp: withinTheWindow));
 		TestLogFiles.WriteHost(_paths.LogsDirectory, Today, TestLogFiles.HostLine("now", 1));
 
 		var sources = Reader().ReadSources();
@@ -375,7 +378,7 @@ public class LogFileReaderTests
 				.. newer
 			]);
 
-		var page = Read(query: new LogQuery { From = At(1), To = At(2) });
+		var page = Read(new LogQuery { From = At(1), To = At(2) });
 
 		string[] expected = ["wanted-first", "wanted-last"];
 		Assert.That(page.Entries.Select(entry => entry.Message), Is.EqualTo(expected));
@@ -387,12 +390,13 @@ public class LogFileReaderTests
 	public void A_Range_Does_Not_Walk_The_Day_Files_Below_It()
 	{
 		var belowFloor = new[] { "20260801", "20260802", "20260803" };
-		var perFile = (LogFileReader.MaxSkippedEntries / belowFloor.Length) + 100;
+		var perFile = LogFileReader.MaxSkippedEntries / belowFloor.Length + 100;
 		foreach (var stamp in belowFloor)
 		{
 			TestLogFiles.WriteHost(_paths.LogsDirectory,
 				stamp,
-				Enumerable.Range(0, perFile).Select(i => TestLogFiles.HostLine($"ancient {i}", i % 60, stamp: stamp))
+				Enumerable.Range(0, perFile)
+					.Select(i => TestLogFiles.HostLine($"ancient {i}", i % 60, stamp: stamp))
 					.ToArray());
 		}
 
@@ -401,7 +405,7 @@ public class LogFileReaderTests
 			TestLogFiles.HostLine("wanted", 1),
 			TestLogFiles.HostLine("also-wanted", 2));
 
-		var page = Read(query: new LogQuery { From = At(1) });
+		var page = Read(new LogQuery { From = At(1) });
 
 		string[] expected = ["wanted", "also-wanted"];
 		Assert.Multiple(() =>
@@ -422,16 +426,24 @@ public class LogFileReaderTests
 			TestLogFiles.HostLine("reordered-below-range", 1),
 			TestLogFiles.HostLine("newer-in-range", 20));
 
-		var page = Read(query: new LogQuery { From = At(5) });
+		var page = Read(new LogQuery { From = At(5) });
 
 		string[] expected = ["older-in-range", "newer-in-range"];
 		Assert.That(page.Entries.Select(entry => entry.Message), Is.EqualTo(expected));
 	}
 
-	private static DateTimeOffset At(int second, string stamp = Today) => TestLogFiles.Timestamp(second, stamp);
+	private static DateTimeOffset At(int second, string stamp = Today)
+	{
+		return TestLogFiles.Timestamp(second, stamp);
+	}
 
-	private LogFileReader Reader() => new(_paths, _levelState);
+	private LogFileReader Reader()
+	{
+		return new LogFileReader(_paths, _levelState);
+	}
 
 	private LogPage Read(LogQuery? query = null, int limit = 100, LogCursor? before = null)
-		=> Reader().ReadPage(query ?? LogQuery.All, before, limit);
+	{
+		return Reader().ReadPage(query ?? LogQuery.All, before, limit);
+	}
 }

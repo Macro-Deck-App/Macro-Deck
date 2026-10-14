@@ -32,7 +32,7 @@ public class EmailInboxRegistryTests
 	public void A_disabled_provider_contributes_no_inboxes()
 	{
 		var imap = new FakeEmailIntegration("app.imap").WithInbox("work");
-		using var world = new EmailWorld(new ConfigurableIntegrationRegistry([imap], disabled: ["app.imap"]));
+		using var world = new EmailWorld(new ConfigurableIntegrationRegistry([imap], ["app.imap"]));
 
 		Assert.That(world.Registry.GetInboxes(), Is.Empty);
 	}
@@ -142,7 +142,7 @@ public class EmailInboxRegistryTests
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 
 		public CancellationToken ApplicationStopping { get; } = CancellationToken.None;
 

@@ -37,7 +37,7 @@ public class IconPackRestoreServiceTests
 		sourcePack.Author = "Author";
 		sourcePack.Version = "1.0";
 		await _harness.Cache.AddOrUpdatePack(sourcePack);
-		var sourceIcon = await AddReadyIcon(sourcePack, "star", sizes: [128]);
+		var sourceIcon = await AddReadyIcon(sourcePack, "star", [128]);
 		var archive = await Export(sourcePack.Id);
 
 		var result = await _harness.RestoreService.RestoreAsNewPack("Exported.macroDeckIconPack",
@@ -76,7 +76,7 @@ public class IconPackRestoreServiceTests
 		var sourcePack = await _harness.CreatePack("Generated");
 		sourcePack.AiAssets = IconPackAiAssets.Generated;
 		await _harness.Cache.AddOrUpdatePack(sourcePack);
-		await AddReadyIcon(sourcePack, "star", sizes: []);
+		await AddReadyIcon(sourcePack, "star", []);
 		var archive = await Export(sourcePack.Id);
 
 		var result = await _harness.RestoreService.RestoreAsNewPack("Generated.macroDeckIconPack",
@@ -95,7 +95,7 @@ public class IconPackRestoreServiceTests
 	public async Task RestoreAsNewPack_UndeclaredPack_StaysUndeclaredAndExportsNoDeclaration()
 	{
 		var sourcePack = await _harness.CreatePack("Plain");
-		await AddReadyIcon(sourcePack, "star", sizes: []);
+		await AddReadyIcon(sourcePack, "star", []);
 		var archive = await Export(sourcePack.Id);
 
 		var result = await _harness.RestoreService.RestoreAsNewPack("Plain.macroDeckIconPack",
@@ -114,7 +114,7 @@ public class IconPackRestoreServiceTests
 	public async Task RestoreAsNewPack_SameArchiveTwice_CreatesTwoIndependentPacks()
 	{
 		var sourcePack = await _harness.CreatePack("Twice");
-		await AddReadyIcon(sourcePack, "a", sizes: []);
+		await AddReadyIcon(sourcePack, "a", []);
 		var archive = await Export(sourcePack.Id);
 
 		var first = await _harness.RestoreService.RestoreAsNewPack("Twice.macroDeckIconPack",
@@ -226,7 +226,7 @@ public class IconPackRestoreServiceTests
 	public async Task RestoreAsNewPack_ArchiveWrittenBeforeFilesExisted_StillImportsUnchanged()
 	{
 		var sourcePack = await _harness.CreatePack("Legacy");
-		await AddReadyIcon(sourcePack, "good", sizes: []);
+		await AddReadyIcon(sourcePack, "good", []);
 		var archive = await Export(sourcePack.Id);
 
 		var manifestText = ReadZipEntryText(archive, "pack.json");
@@ -252,14 +252,15 @@ public class IconPackRestoreServiceTests
 	[TestCase(IconPackAiAssets.None, IconPackAiAssets.None, IconPackAiAssets.None)]
 	[TestCase(IconPackAiAssets.Generated, IconPackAiAssets.None, IconPackAiAssets.Generated)]
 	[TestCase(IconPackAiAssets.NotDeclared, IconPackAiAssets.None, IconPackAiAssets.NotDeclared)]
-	public async Task MergeIntoPack_KeepsTheTargetsAiDeclarationTrueForEveryIcon(IconPackAiAssets target,
+	public async Task MergeIntoPack_KeepsTheTargetsAiDeclarationTrueForEveryIcon(
+		IconPackAiAssets target,
 		IconPackAiAssets incoming,
 		IconPackAiAssets expected)
 	{
 		var sourcePack = await _harness.CreatePack("Source");
 		sourcePack.AiAssets = incoming;
 		await _harness.Cache.AddOrUpdatePack(sourcePack);
-		await AddReadyIcon(sourcePack, "star", sizes: []);
+		await AddReadyIcon(sourcePack, "star", []);
 		var archive = await Export(sourcePack.Id);
 		var targetPack = await _harness.CreatePack("Target");
 		targetPack.AiAssets = target;
@@ -282,7 +283,7 @@ public class IconPackRestoreServiceTests
 	public async Task RestoreAsNewPack_ADeclarationWithoutGeneratedAssetsButOtherAiUse_IsNotReadAsNone()
 	{
 		var sourcePack = await _harness.CreatePack("Other");
-		await AddReadyIcon(sourcePack, "star", sizes: []);
+		await AddReadyIcon(sourcePack, "star", []);
 		var archive = await Export(sourcePack.Id);
 		var manifest = JsonNode.Parse(ReadZipEntryText(archive, "pack.json"))!.AsObject();
 		manifest["ai"] = new JsonObject { ["interaction"] = true };
@@ -299,7 +300,7 @@ public class IconPackRestoreServiceTests
 	public async Task MergeIntoPack_AddsReIdedReadyIconsToExistingPack()
 	{
 		var sourcePack = await _harness.CreatePack("Source");
-		var sourceIcon = await AddReadyIcon(sourcePack, "merge-me", sizes: [256]);
+		var sourceIcon = await AddReadyIcon(sourcePack, "merge-me", [256]);
 		var archive = await Export(sourcePack.Id);
 		var target = await _harness.CreatePack("Target");
 		var batchId = Guid.CreateVersion7();
@@ -382,7 +383,7 @@ public class IconPackRestoreServiceTests
 	public async Task RestoreAsNewPack_BundledMasterThatFailsItsDeclaredHash_IsSkipped()
 	{
 		var sourcePack = await _harness.CreatePack("Exported");
-		await AddReadyIcon(sourcePack, "good", sizes: []);
+		await AddReadyIcon(sourcePack, "good", []);
 		var tampered = ReplaceZipEntry(await Export(sourcePack.Id), "master.webp", "tampered"u8.ToArray());
 
 		var result = await _harness.RestoreService.RestoreAsNewPack("Exported.macroDeckIconPack",
@@ -404,7 +405,7 @@ public class IconPackRestoreServiceTests
 	public async Task RestoreAsNewPack_RecordsTheHashOfTheBytesItActuallyWrote()
 	{
 		var sourcePack = await _harness.CreatePack("Exported");
-		await AddReadyIcon(sourcePack, "good", sizes: []);
+		await AddReadyIcon(sourcePack, "good", []);
 
 		var result = await _harness.RestoreService.RestoreAsNewPack("Exported.macroDeckIconPack",
 			new MemoryStream(await Export(sourcePack.Id)),
@@ -452,7 +453,7 @@ public class IconPackRestoreServiceTests
 	private static byte[] CreateZip(params (string Name, byte[] Content)[] entries)
 	{
 		using var stream = new MemoryStream();
-		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			foreach (var (name, content) in entries)
 			{

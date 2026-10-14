@@ -15,6 +15,7 @@ public static class BuiltInFolderViews
 	/// <summary>Whether <paramref name="folderViewId" /> names the built-in grid. An absent or empty id
 	/// does: a folder stored before folder views existed is a grid.</summary>
 	public static bool IsWidgetGrid(string? folderViewId)
-		=> string.IsNullOrEmpty(folderViewId) ||
-			string.Equals(folderViewId, WidgetGrid, StringComparison.Ordinal);
+	{
+		return string.IsNullOrEmpty(folderViewId) || string.Equals(folderViewId, WidgetGrid, StringComparison.Ordinal);
+	}
 }

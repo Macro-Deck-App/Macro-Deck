@@ -29,7 +29,10 @@ public class InProcessVideoStreamEndpointTests
 			var close = Task.Run(async () =>
 			{
 				start.SignalAndWait();
-				await endpoint.CloseAsync("cam", sessionId, VideoStreamSessionReason.ConsumerClosed, CancellationToken.None);
+				await endpoint.CloseAsync("cam",
+					sessionId,
+					VideoStreamSessionReason.ConsumerClosed,
+					CancellationToken.None);
 			});
 			var replace = Task.Run(async () =>
 			{
@@ -41,7 +44,8 @@ public class InProcessVideoStreamEndpointTests
 
 			Assert.Multiple(() =>
 			{
-				Assert.That(original.Closes.Select(closed => closed.SessionId), Is.EqualTo(new[] { sessionId }),
+				Assert.That(original.Closes.Select(closed => closed.SessionId),
+					Is.EqualTo(new[] { sessionId }),
 					$"round {round}");
 				Assert.That(replacement.Closes, Is.Empty, $"round {round}");
 			});

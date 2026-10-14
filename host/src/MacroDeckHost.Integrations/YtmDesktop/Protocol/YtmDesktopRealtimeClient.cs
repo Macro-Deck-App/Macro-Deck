@@ -175,8 +175,10 @@ internal sealed class YtmDesktopRealtimeClient : IYtmDesktopRealtimeClient
 	}
 
 	private string CreateTimeoutMessage(Uri uri, string step)
-		=> string.Create(CultureInfo.InvariantCulture,
+	{
+		return string.Create(CultureInfo.InvariantCulture,
 			$"The Companion Server at {uri} did not complete {step} within {_handshakeTimeout.TotalSeconds} seconds.");
+	}
 
 	private async Task ReadLoopAsync(WebSocket socket, CancellationToken cancellationToken)
 	{
@@ -382,8 +384,8 @@ internal sealed class YtmDesktopRealtimeClient : IYtmDesktopRealtimeClient
 			? idElement.GetString()
 			: null;
 
-		var title = argument.TryGetProperty("title", out var titleElement) &&
-			titleElement.ValueKind == JsonValueKind.String
+		var title = argument.TryGetProperty("title", out var titleElement)
+			&& titleElement.ValueKind == JsonValueKind.String
 				? titleElement.GetString()
 				: null;
 
@@ -416,10 +418,12 @@ internal sealed class YtmDesktopRealtimeClient : IYtmDesktopRealtimeClient
 	}
 
 	private static bool HasUnauthenticatedProperty(JsonElement root, string property)
-		=> root.ValueKind == JsonValueKind.Object &&
-			root.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.String &&
-			(value.GetString()?.Contains(YtmErrorCodes.Unauthenticated, StringComparison.Ordinal) ?? false);
+	{
+		return root.ValueKind == JsonValueKind.Object
+			&& root.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.String
+			&& (value.GetString()?.Contains(YtmErrorCodes.Unauthenticated, StringComparison.Ordinal) ?? false);
+	}
 
 	private async Task SendRawAsync(string text, CancellationToken cancellationToken)
 	{
@@ -434,7 +438,7 @@ internal sealed class YtmDesktopRealtimeClient : IYtmDesktopRealtimeClient
 		await _sendLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 		try
 		{
-			await socket.SendAsync(bytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken)
+			await socket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken)
 				.ConfigureAwait(false);
 		}
 		finally

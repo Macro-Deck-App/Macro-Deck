@@ -33,7 +33,10 @@ public interface IDeviceProvider
 	/// The devices this provider currently offers. The host reads this to recover its view after a
 	/// reconnect; a provider that keeps no catalog of its own may return an empty list.
 	/// </summary>
-	IReadOnlyList<DeviceDescriptor> GetDevices() => [];
+	IReadOnlyList<DeviceDescriptor> GetDevices()
+	{
+		return [];
+	}
 
 	/// <summary>
 	/// Called once a registered device has an open <see cref="IDeviceSession" /> to render against and
@@ -42,5 +45,7 @@ public interface IDeviceProvider
 	/// about registration is unaffected.
 	/// </summary>
 	Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }

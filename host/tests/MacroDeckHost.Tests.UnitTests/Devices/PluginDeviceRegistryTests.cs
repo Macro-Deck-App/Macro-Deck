@@ -41,7 +41,9 @@ public class PluginDeviceRegistryTests
 		_devices = new InMemoryDeviceRepository();
 		_tokens = new InMemoryRefreshTokenRepository();
 		_time = new ManualTimeProvider();
-		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
+		_tracker = new DeviceConnectionTracker(new RecordingEventBus(),
+			_time,
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_presence = new ProviderDevicePresenceTracker();
 		_sessionGuard = new DeviceSessionGuard();
 		_profileRegistry = new FakeProfileRegistry();
@@ -85,21 +87,22 @@ public class PluginDeviceRegistryTests
 		string id = "SERIAL-1",
 		string name = "Stream Deck XL",
 		DevicePresence presence = DevicePresence.Online)
-		=> new(id,
+	{
+		return new DeviceDescriptor(id,
 			name,
 			"Stream Deck XL",
 			"Elgato",
 			"com.example.deck::xl",
 			new DeviceCapabilities { KeyCount = 32, SupportsImages = true },
 			presence);
+	}
 
 	[Test]
 	public async Task A_registered_device_is_one_the_session_guard_knows()
 	{
 		var registration = await _registry.RegisterAsync(ProviderId, Descriptor());
 
-		var token = new ClaimsPrincipal(new ClaimsIdentity(
-		[
+		var token = new ClaimsPrincipal(new ClaimsIdentity([
 			new Claim(AuthDefaults.DeviceClaim, registration.DeviceId.ToString())
 		]));
 
@@ -175,7 +178,9 @@ public class PluginDeviceRegistryTests
 		// Everything the host holds in memory is gone; only the persisted devices survive.
 		var afterRestart = new PluginDeviceRegistry(_scopeFactory,
 			new ProviderDevicePresenceTracker(),
-			new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
+			new DeviceConnectionTracker(new RecordingEventBus(),
+				_time,
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
 			new DeviceSessionGuard(),
 			new LayoutRegistry(new RecordingMediator()),
 			_time);

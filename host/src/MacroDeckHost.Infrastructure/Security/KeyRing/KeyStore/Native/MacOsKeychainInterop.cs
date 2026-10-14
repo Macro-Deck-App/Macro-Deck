@@ -15,7 +15,7 @@ internal static class MacOsKeychainInterop
 
 	private const string Security = "/System/Library/Frameworks/Security.framework/Security";
 
-	private const uint KCFStringEncodingUtf8 = 0x08000100;
+	private const uint KcfStringEncodingUtf8 = 0x08000100;
 
 	public static IntPtr SecClass { get; } = ReadGlobal(Security, "kSecClass");
 	public static IntPtr SecClassGenericPassword { get; } = ReadGlobal(Security, "kSecClassGenericPassword");
@@ -26,7 +26,7 @@ internal static class MacOsKeychainInterop
 	public static IntPtr SecMatchLimit { get; } = ReadGlobal(Security, "kSecMatchLimit");
 	public static IntPtr SecMatchLimitOne { get; } = ReadGlobal(Security, "kSecMatchLimitOne");
 
-	public static IntPtr CFBooleanTrue { get; } = ReadGlobal(CoreFoundation, "kCFBooleanTrue");
+	public static IntPtr CfBooleanTrue { get; } = ReadGlobal(CoreFoundation, "kCFBooleanTrue");
 
 	private static IntPtr TypeDictionaryKeyCallBacks { get; } =
 		ReadGlobalAddress(CoreFoundation, "kCFTypeDictionaryKeyCallBacks");
@@ -38,22 +38,24 @@ internal static class MacOsKeychainInterop
 	// dictionary key, which Core Foundation answers by crashing the process rather than returning an
 	// error.
 	public static bool IsLoadable =>
-		SecClass != IntPtr.Zero &&
-		SecClassGenericPassword != IntPtr.Zero &&
-		SecAttrService != IntPtr.Zero &&
-		SecAttrAccount != IntPtr.Zero &&
-		SecValueData != IntPtr.Zero &&
-		SecReturnData != IntPtr.Zero &&
-		SecMatchLimit != IntPtr.Zero &&
-		SecMatchLimitOne != IntPtr.Zero &&
-		CFBooleanTrue != IntPtr.Zero &&
-		TypeDictionaryKeyCallBacks != IntPtr.Zero &&
-		TypeDictionaryValueCallBacks != IntPtr.Zero;
+		SecClass != IntPtr.Zero
+		&& SecClassGenericPassword != IntPtr.Zero
+		&& SecAttrService != IntPtr.Zero
+		&& SecAttrAccount != IntPtr.Zero
+		&& SecValueData != IntPtr.Zero
+		&& SecReturnData != IntPtr.Zero
+		&& SecMatchLimit != IntPtr.Zero
+		&& SecMatchLimitOne != IntPtr.Zero
+		&& CfBooleanTrue != IntPtr.Zero
+		&& TypeDictionaryKeyCallBacks != IntPtr.Zero
+		&& TypeDictionaryValueCallBacks != IntPtr.Zero;
 
 	public static IntPtr CreateString(string value)
-		=> CFStringCreateWithCString(IntPtr.Zero,
+	{
+		return CFStringCreateWithCString(IntPtr.Zero,
 			System.Text.Encoding.UTF8.GetBytes(value + "\0"),
-			KCFStringEncodingUtf8);
+			KcfStringEncodingUtf8);
+	}
 
 	public static IntPtr CreateData(ReadOnlySpan<byte> value)
 	{
@@ -91,12 +93,14 @@ internal static class MacOsKeychainInterop
 	}
 
 	public static IntPtr CreateDictionary(IntPtr[] keys, IntPtr[] values)
-		=> CFDictionaryCreate(IntPtr.Zero,
+	{
+		return CFDictionaryCreate(IntPtr.Zero,
 			keys,
 			values,
 			keys.Length,
 			TypeDictionaryKeyCallBacks,
 			TypeDictionaryValueCallBacks);
+	}
 
 	private static IntPtr ReadGlobal(string library, string symbol)
 	{
@@ -106,10 +110,12 @@ internal static class MacOsKeychainInterop
 	}
 
 	private static IntPtr ReadGlobalAddress(string library, string symbol)
-		=> NativeLibrary.TryLoad(library, out var handle) &&
-			NativeLibrary.TryGetExport(handle, symbol, out var address)
+	{
+		return NativeLibrary.TryLoad(library, out var handle)
+			&& NativeLibrary.TryGetExport(handle, symbol, out var address)
 				? address
 				: IntPtr.Zero;
+	}
 
 	[DllImport(Security)]
 	public static extern int SecItemCopyMatching(IntPtr query, out IntPtr result);
@@ -139,7 +145,8 @@ internal static class MacOsKeychainInterop
 	private static extern long CFDataGetLength(IntPtr data);
 
 	[DllImport(CoreFoundation)]
-	private static extern IntPtr CFDictionaryCreate(IntPtr allocator,
+	private static extern IntPtr CFDictionaryCreate(
+		IntPtr allocator,
 		IntPtr[] keys,
 		IntPtr[] values,
 		long count,

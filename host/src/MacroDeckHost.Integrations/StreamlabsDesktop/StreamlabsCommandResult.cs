@@ -21,8 +21,12 @@ internal readonly record struct StreamlabsCommandResult(StreamlabsCommandStatus 
 	public bool Succeeded => Status == StreamlabsCommandStatus.Ok;
 
 	public static StreamlabsCommandResult NotFound(string message)
-		=> new(StreamlabsCommandStatus.NotFound, message);
+	{
+		return new StreamlabsCommandResult(StreamlabsCommandStatus.NotFound, message);
+	}
 
 	public static StreamlabsCommandResult Rejected(string message)
-		=> new(StreamlabsCommandStatus.Rejected, message);
+	{
+		return new StreamlabsCommandResult(StreamlabsCommandStatus.Rejected, message);
+	}
 }

@@ -30,17 +30,24 @@ internal class MeldCommandAction : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _command);
+	}
 
 	/// <summary>The connection this action runs against, or null when Meld is not set up.</summary>
-	protected MeldConnection? Connection() => _resolver();
+	protected MeldConnection? Connection()
+	{
+		return _resolver();
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
 		private readonly Func<MeldConnection?> _resolver;
 		private readonly Func<MeldConnection, CancellationToken, Task<ActionResult>> _command;
 
-		public Executor(Func<MeldConnection?> resolver,
+		public Executor(
+			Func<MeldConnection?> resolver,
 			Func<MeldConnection, CancellationToken, Task<ActionResult>> command)
 		{
 			_resolver = resolver;

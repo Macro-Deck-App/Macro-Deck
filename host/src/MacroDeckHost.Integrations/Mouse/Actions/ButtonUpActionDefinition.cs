@@ -19,7 +19,10 @@ internal sealed class ButtonUpActionDefinition : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [MouseParameters.Button];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

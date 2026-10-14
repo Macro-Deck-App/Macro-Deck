@@ -32,9 +32,15 @@ internal sealed class AdbIntegrationTests
 	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+	}
 
-	private Task Initialize() => _integration.InitializeAsync(new FakeContext { Events = _publisher, AndroidDevices = _devices });
+	private Task Initialize()
+	{
+		return _integration.InitializeAsync(new FakeContext { Events = _publisher, AndroidDevices = _devices });
+	}
 
 	[Test]
 	public void The_integration_is_identified()
@@ -142,7 +148,7 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_does_not_report_no_devices_when_one_is_connected()
 	{
-		_devices.Attach("ABC123", stableId: null);
+		_devices.Attach("ABC123", null);
 		await Initialize();
 
 		var issues = await _integration.GetIssuesAsync();
@@ -153,9 +159,9 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_reports_one_issue_per_unauthorized_device()
 	{
-		_devices.Attach("S1", stableId: null, state: AndroidDeviceState.Unauthorized);
-		_devices.Attach("S2", stableId: null, state: AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
-		_devices.Attach("S3", stableId: null, state: AndroidDeviceState.Online);
+		_devices.Attach("S1", null, state: AndroidDeviceState.Unauthorized);
+		_devices.Attach("S2", null, state: AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
+		_devices.Attach("S3", null, state: AndroidDeviceState.Online);
 		await Initialize();
 
 		var issues = await _integration.GetIssuesAsync();
@@ -174,14 +180,18 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task A_device_lacking_usb_permission_gets_the_usb_permission_description()
 	{
-		_devices.Attach("S1", stableId: null, state: AndroidDeviceState.Unauthorized);
-		_devices.Attach("S2", stableId: null, state: AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
+		_devices.Attach("S1", null, state: AndroidDeviceState.Unauthorized);
+		_devices.Attach("S2", null, state: AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
 		await Initialize();
 
 		var issues = await _integration.GetIssuesAsync();
+
 		string? Description(string serial)
-			=> TestLocalization.Resolve(issues.Single(issue => issue.Id == $"{AdbIntegration.UnauthorizedIssuePrefix}{serial}")
+		{
+			return TestLocalization.Resolve(issues
+				.Single(issue => issue.Id == $"{AdbIntegration.UnauthorizedIssuePrefix}{serial}")
 				.Description);
+		}
 
 		Assert.Multiple(() =>
 		{
@@ -195,7 +205,7 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_reports_executable_not_found_after_a_failing_action()
 	{
-		_devices.Attach("ABC123", stableId: null).NextFailure =
+		_devices.Attach("ABC123", null).NextFailure =
 			new AndroidDeviceException(AndroidDeviceErrorCode.AdbUnavailable, "not found");
 		await Initialize();
 
@@ -222,7 +232,7 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_clears_executable_not_found_after_a_successful_action()
 	{
-		var device = _devices.Attach("ABC123", stableId: null);
+		var device = _devices.Attach("ABC123", null);
 		device.NextFailure = new AndroidDeviceException(AndroidDeviceErrorCode.AdbUnavailable, "not found");
 		await Initialize();
 		await RunWakeAction();
@@ -248,7 +258,7 @@ internal sealed class AdbIntegrationTests
 	{
 		await Initialize();
 
-		_devices.Attach("ABC123", stableId: null);
+		_devices.Attach("ABC123", null);
 
 		Assert.That(_publisher.Published, Has.Count.EqualTo(1));
 	}
@@ -259,7 +269,7 @@ internal sealed class AdbIntegrationTests
 		await Initialize();
 		await Initialize();
 
-		_devices.Attach("ABC123", stableId: null);
+		_devices.Attach("ABC123", null);
 
 		Assert.That(_publisher.Published, Has.Count.EqualTo(1));
 	}
@@ -271,7 +281,7 @@ internal sealed class AdbIntegrationTests
 		await _integration.ShutdownAsync();
 		await Initialize();
 
-		_devices.Attach("ABC123", stableId: null);
+		_devices.Attach("ABC123", null);
 
 		Assert.That(_publisher.Published, Has.Count.EqualTo(1));
 	}
@@ -282,7 +292,7 @@ internal sealed class AdbIntegrationTests
 		await Initialize();
 		await _integration.ShutdownAsync();
 
-		_devices.Attach("ABC123", stableId: null);
+		_devices.Attach("ABC123", null);
 
 		Assert.That(_publisher.Published, Is.Empty);
 	}
@@ -305,7 +315,7 @@ internal sealed class AdbIntegrationTests
 		await Initialize();
 
 		_integration.Dispose();
-		_devices.Attach("ABC123", stableId: null);
+		_devices.Attach("ABC123", null);
 
 		Assert.That(_publisher.Published, Is.Empty);
 	}
@@ -313,7 +323,7 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task The_integration_reaches_adb_only_through_its_context()
 	{
-		_devices.Attach("ABC123", stableId: null);
+		_devices.Attach("ABC123", null);
 		await Initialize();
 
 		await RunWakeAction();
@@ -324,8 +334,9 @@ internal sealed class AdbIntegrationTests
 	private async Task RunWakeAction()
 	{
 		var wake = _integration.Actions.Single(action => action.Id == "wake");
-		await wake.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-			{ Parameters = new Dictionary<string, object>() });
+		await wake.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+				{ Parameters = new Dictionary<string, object>() });
 	}
 
 	private sealed class FakeContext : IIntegrationContext

@@ -9,7 +9,8 @@ namespace MacroDeckHost.Application.Plugins;
 
 public interface IPluginCompanionDeviceConsentNotifier
 {
-	Task NotifyIfNeededAsync(string pluginId,
+	Task NotifyIfNeededAsync(
+		string pluginId,
 		string pluginName,
 		bool declaresCompanionDevices,
 		bool previouslyDeclaredCompanionDevices,
@@ -31,15 +32,16 @@ public sealed class PluginCompanionDeviceConsentNotifier(
 	private readonly ConcurrentDictionary<string, byte> _raisedKeys = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, byte> _askedAfterRefusal = new(StringComparer.Ordinal);
 
-	public async Task NotifyIfNeededAsync(string pluginId,
+	public async Task NotifyIfNeededAsync(
+		string pluginId,
 		string pluginName,
 		bool declaresCompanionDevices,
 		bool previouslyDeclaredCompanionDevices,
 		CancellationToken cancellationToken = default)
 	{
-		if (!declaresCompanionDevices ||
-			previouslyDeclaredCompanionDevices ||
-			await accessPolicy.GetAllowPluginsAsync(cancellationToken))
+		if (!declaresCompanionDevices
+			|| previouslyDeclaredCompanionDevices
+			|| await accessPolicy.GetAllowPluginsAsync(cancellationToken))
 		{
 			return;
 		}
@@ -52,10 +54,10 @@ public sealed class PluginCompanionDeviceConsentNotifier(
 		{
 			Severity = UserNotificationSeverity.Warning,
 			Kind = UserNotificationKind.Security,
-			Title = localization.Resolve(AppStrings.Notifications.PluginCompanionDevicesAccessRequested(), culture) ??
-				pluginName,
+			Title = localization.Resolve(AppStrings.Notifications.PluginCompanionDevicesAccessRequested(), culture)
+				?? pluginName,
 			Message = localization.Resolve(
-				AppStrings.Notifications.PluginCompanionDevicesAccessRequestedMessage(name: pluginName),
+				AppStrings.Notifications.PluginCompanionDevicesAccessRequestedMessage(pluginName),
 				culture),
 			SourceId = pluginId,
 			SourceName = pluginName,
@@ -69,13 +71,15 @@ public sealed class PluginCompanionDeviceConsentNotifier(
 	}
 
 	public Task AskAfterRefusalAsync(string pluginId, string pluginName, CancellationToken cancellationToken = default)
-		=> _askedAfterRefusal.TryAdd(pluginId, 0)
+	{
+		return _askedAfterRefusal.TryAdd(pluginId, 0)
 			? NotifyIfNeededAsync(pluginId,
 				pluginName,
-				declaresCompanionDevices: true,
-				previouslyDeclaredCompanionDevices: false,
+				true,
+				false,
 				cancellationToken)
 			: Task.CompletedTask;
+	}
 
 	public void Dismiss(string pluginId)
 	{
@@ -97,5 +101,8 @@ public sealed class PluginCompanionDeviceConsentNotifier(
 		_askedAfterRefusal.Clear();
 	}
 
-	private static string KeyFor(string pluginId) => $"plugin-companion-devices-access:{pluginId}";
+	private static string KeyFor(string pluginId)
+	{
+		return $"plugin-companion-devices-access:{pluginId}";
+	}
 }

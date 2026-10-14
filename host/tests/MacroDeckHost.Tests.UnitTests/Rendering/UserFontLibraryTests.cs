@@ -16,7 +16,10 @@ public class UserFontLibraryTests
 	private FileSystemUserFontLibrary _library = null!;
 
 	private static byte[] Fixture =>
-		File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "Rendering", "Fixtures", "Anta-Regular.ttf"));
+		File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory,
+			"Rendering",
+			"Fixtures",
+			"Anta-Regular.ttf"));
 
 	[SetUp]
 	public void SetUp()
@@ -32,7 +35,7 @@ public class UserFontLibraryTests
 		_library.Dispose();
 		if (Directory.Exists(_paths.BaseDirectory))
 		{
-			Directory.Delete(_paths.BaseDirectory, recursive: true);
+			Directory.Delete(_paths.BaseDirectory, true);
 		}
 	}
 
@@ -61,11 +64,17 @@ public class UserFontLibraryTests
 	[Test]
 	public async Task A_font_whose_family_is_installed_on_the_computer_is_rejected_and_never_listed()
 	{
-		_systemFaces.Add(new SkiaFontCatalog.SystemFaceEntry(FixtureFamily, 0, 700, 5, SKFontStyleSlant.Upright, true, () => null));
+		_systemFaces.Add(new SkiaFontCatalog.SystemFaceEntry(FixtureFamily,
+			0,
+			700,
+			5,
+			SKFontStyleSlant.Upright,
+			true,
+			() => null));
 		CreateLibrary();
 
 		var results = await Import(("Anta-Regular.ttf", Fixture));
-		File.WriteAllBytes(Path.Combine(_paths.FontsDirectory, "0123456789abcdef.ttf"), Fixture);
+		await File.WriteAllBytesAsync(Path.Combine(_paths.FontsDirectory, "0123456789abcdef.ttf"), Fixture);
 		_catalog.Reload();
 
 		Assert.Multiple(() =>
@@ -138,7 +147,13 @@ public class UserFontLibraryTests
 	public async Task A_font_the_catalog_no_longer_offers_is_still_listed_so_it_can_be_removed()
 	{
 		var font = (await Import(("Anta-Regular.ttf", Fixture))).Single().Font!;
-		_systemFaces.Add(new SkiaFontCatalog.SystemFaceEntry(FixtureFamily, 0, 400, 5, SKFontStyleSlant.Upright, true, () => null));
+		_systemFaces.Add(new SkiaFontCatalog.SystemFaceEntry(FixtureFamily,
+			0,
+			400,
+			5,
+			SKFontStyleSlant.Upright,
+			true,
+			() => null));
 		CreateLibrary();
 
 		var listed = _library.List().Single();
@@ -166,5 +181,8 @@ public class UserFontLibraryTests
 	}
 
 	private Task<IReadOnlyList<UserFontImportResult>> Import(params (string Name, byte[] Bytes)[] files)
-		=> _library.Import(files.Select(file => new UserFontUpload(file.Name, file.Bytes)).ToList(), CancellationToken.None);
+	{
+		return _library.Import(files.Select(file => new UserFontUpload(file.Name, file.Bytes)).ToList(),
+			CancellationToken.None);
+	}
 }

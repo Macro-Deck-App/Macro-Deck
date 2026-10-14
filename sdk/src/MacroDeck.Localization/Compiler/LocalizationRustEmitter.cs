@@ -43,7 +43,8 @@ internal static class LocalizationRustEmitter
 	}
 
 	/// <summary>The keys as constants, so a call site names one instead of spelling it out.</summary>
-	private static void EmitKeys(StringBuilder builder,
+	private static void EmitKeys(
+		StringBuilder builder,
 		string keyPrefix,
 		LocalizationCompilationResult result)
 	{
@@ -65,8 +66,11 @@ internal static class LocalizationRustEmitter
 				continue;
 			}
 
-			builder.Append("    pub const ").Append(ConstantName(entry.Key, keyPrefix))
-				.Append(": &str = \"").Append(Escape(entry.Key)).Append("\";\n");
+			builder.Append("    pub const ")
+				.Append(ConstantName(entry.Key, keyPrefix))
+				.Append(": &str = \"")
+				.Append(Escape(entry.Key))
+				.Append("\";\n");
 		}
 
 		builder.Append("}\n\n");
@@ -76,7 +80,8 @@ internal static class LocalizationRustEmitter
 	/// Culture to key to template, as a sorted slice. A slice rather than a map because it is looked up a
 	/// few dozen times over a process's life and a compile-time constant needs no allocation or lazy init.
 	/// </summary>
-	private static void EmitCatalog(StringBuilder builder,
+	private static void EmitCatalog(
+		StringBuilder builder,
 		string keyPrefix,
 		LocalizationCompilationResult result)
 	{
@@ -106,8 +111,11 @@ internal static class LocalizationRustEmitter
 
 			foreach (var key in keys)
 			{
-				builder.Append("        (\"").Append(Escape(key)).Append("\", \"")
-					.Append(Escape(templates[key])).Append("\"),\n");
+				builder.Append("        (\"")
+					.Append(Escape(key))
+					.Append("\", \"")
+					.Append(Escape(templates[key]))
+					.Append("\"),\n");
 			}
 
 			builder.Append("    ]),\n");
@@ -132,10 +140,7 @@ internal static class LocalizationRustEmitter
 				continue;
 			}
 
-			if (char.IsUpper(character) &&
-				index > 0 &&
-				name[index - 1] != '.' &&
-				!char.IsUpper(name[index - 1]))
+			if (char.IsUpper(character) && index > 0 && name[index - 1] != '.' && !char.IsUpper(name[index - 1]))
 			{
 				builder.Append('_');
 			}
@@ -153,7 +158,9 @@ internal static class LocalizationRustEmitter
 			return string.Empty;
 		}
 
-		return value!.Replace("\\", "\\\\").Replace("\"", "\\\"")
-			.Replace("\r", "\\r").Replace("\n", "\\n");
+		return value!.Replace("\\", "\\\\")
+			.Replace("\"", "\\\"")
+			.Replace("\r", "\\r")
+			.Replace("\n", "\\n");
 	}
 }

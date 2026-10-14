@@ -168,14 +168,15 @@ public class VolumeActionDeviceTests
 		volume.Devices.Add(new AudioDevice("second-phone", "iPhone Microphone", AudioFlow.Input, false));
 		volume.Devices.Add(new AudioDevice("speakers", "Speakers", AudioFlow.Output, true));
 
-		var result = await new MuteVolumeActionDefinition(volume).GetDynamicOptionsAsync(
-			new DynamicOptionsContext { ParameterName = "device", CurrentParameters = new Dictionary<string, object?>() },
+		var result = await new MuteVolumeActionDefinition(volume).GetDynamicOptionsAsync(new DynamicOptionsContext
+				{ ParameterName = "device", CurrentParameters = new Dictionary<string, object?>() },
 			CancellationToken.None);
 
 		var devices = result.Options
-			.Where(option => option.Value.StartsWith("input:", StringComparison.Ordinal) ||
-				option.Value.StartsWith("output:", StringComparison.Ordinal))
-			.ToDictionary(option => option.Value, option => option.Label.Localized!.Value.Arguments["device"]?.ToString());
+			.Where(option => option.Value.StartsWith("input:", StringComparison.Ordinal)
+				|| option.Value.StartsWith("output:", StringComparison.Ordinal))
+			.ToDictionary(option => option.Value,
+				option => option.Label.Localized!.Value.Arguments["device"]?.ToString());
 		Assert.Multiple(() =>
 		{
 			Assert.That(devices["input:first-phone"], Is.Not.EqualTo(devices["input:second-phone"]));

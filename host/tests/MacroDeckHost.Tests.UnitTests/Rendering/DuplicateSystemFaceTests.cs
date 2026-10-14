@@ -11,8 +11,7 @@ public class DuplicateSystemFaceTests
 	[Test]
 	public void GetFaces_SymlinkedCopiesOfOneFace_ListTheFaceOnceUnderItsFirstId()
 	{
-		var catalog = Catalog(
-			Regular("A"),
+		var catalog = Catalog(Regular("A"),
 			Regular("A"),
 			Regular("A"),
 			Italic("B"),
@@ -54,7 +53,8 @@ public class DuplicateSystemFaceTests
 		{
 			Assert.That(catalog.GetFaces().Select(face => face.FaceId).ToList(),
 				Is.EqualTo(new[] { "fixture-sans-400-5-upright", "fixture-sans-400-5-upright-2" }));
-			Assert.That(catalog.ResolveFaceId("fixture-sans-400-5-upright-3"), Is.EqualTo("fixture-sans-400-5-upright"));
+			Assert.That(catalog.ResolveFaceId("fixture-sans-400-5-upright-3"),
+				Is.EqualTo("fixture-sans-400-5-upright"));
 		});
 	}
 
@@ -65,7 +65,8 @@ public class DuplicateSystemFaceTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(catalog.ResolveFaceId("fixture-sans-400-5-upright-2"), Is.EqualTo("fixture-sans-400-5-upright"));
+			Assert.That(catalog.ResolveFaceId("fixture-sans-400-5-upright-2"),
+				Is.EqualTo("fixture-sans-400-5-upright"));
 			Assert.That(catalog.ResolveFaceId("fixture-sans-400-5-italic"), Is.EqualTo("fixture-sans-400-5-italic"));
 			Assert.That(catalog.ResolveFaceId("no-such-face"), Is.EqualTo("no-such-face"));
 		});
@@ -80,8 +81,10 @@ public class DuplicateSystemFaceTests
 			Assert.Ignore("No installed family has a face whose tables can be read.");
 		}
 
-		IEnumerable<SkiaFontCatalog.SystemFaceEntry> Installed() =>
-			SkiaFontCatalog.EnumerateSystemFaces().Where(entry => entry.Family == family);
+		IEnumerable<SkiaFontCatalog.SystemFaceEntry> Installed()
+		{
+			return SkiaFontCatalog.EnumerateSystemFaces().Where(entry => entry.Family == family);
+		}
 
 		var baseline = new SkiaFontCatalog([], Installed);
 		var seenTwice = new SkiaFontCatalog([], () => Installed().SelectMany(entry => new[] { entry, entry }));
@@ -113,15 +116,23 @@ public class DuplicateSystemFaceTests
 		return null;
 	}
 
-	private static SkiaFontCatalog Catalog(params SkiaFontCatalog.SystemFaceEntry[] entries) =>
-		new([], () => entries);
+	private static SkiaFontCatalog Catalog(params SkiaFontCatalog.SystemFaceEntry[] entries)
+	{
+		return new SkiaFontCatalog([], () => entries);
+	}
 
-	private static SkiaFontCatalog.SystemFaceEntry Regular(string? fingerprint) =>
-		Entry(400, SKFontStyleSlant.Upright, () => fingerprint);
+	private static SkiaFontCatalog.SystemFaceEntry Regular(string? fingerprint)
+	{
+		return Entry(400, SKFontStyleSlant.Upright, () => fingerprint);
+	}
 
-	private static SkiaFontCatalog.SystemFaceEntry Italic(string? fingerprint) =>
-		Entry(400, SKFontStyleSlant.Italic, () => fingerprint);
+	private static SkiaFontCatalog.SystemFaceEntry Italic(string? fingerprint)
+	{
+		return Entry(400, SKFontStyleSlant.Italic, () => fingerprint);
+	}
 
-	private static SkiaFontCatalog.SystemFaceEntry Entry(int weight, SKFontStyleSlant slant, Func<string?> fingerprint) =>
-		new(Family, 0, weight, 5, slant, true, fingerprint);
+	private static SkiaFontCatalog.SystemFaceEntry Entry(int weight, SKFontStyleSlant slant, Func<string?> fingerprint)
+	{
+		return new SkiaFontCatalog.SystemFaceEntry(Family, 0, weight, 5, slant, true, fingerprint);
+	}
 }

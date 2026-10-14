@@ -18,17 +18,17 @@ internal static class StreamlabsDesktopEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("sceneName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
-					description: AppStrings.Integrations.StreamlabsDesktop.Events
+					AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
+					AppStrings.Integrations.StreamlabsDesktop.Events
 						.OnlyRunWhenSwitchingToThisSceneDescription(),
 					placeholder: AppStrings.Integrations.StreamlabsDesktop.Events.AnyScenePlaceholder())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.DynamicChoice("sceneName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel()),
+					AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel()),
 				ActionParameter.DynamicChoice("previousSceneName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Events.PreviousSceneLabel())
+					AppStrings.Integrations.StreamlabsDesktop.Events.PreviousSceneLabel())
 			]
 		},
 		Simple(StreamlabsDesktopEventIds.StreamingStarted,
@@ -62,7 +62,7 @@ internal static class StreamlabsDesktopEventDefinitions
 			Id = StreamlabsDesktopEventIds.StudioModeChanged,
 			Name = AppStrings.Integrations.StreamlabsDesktop.Events.StudioModeChangedName(),
 			Category = AppStrings.Integrations.StreamlabsDesktop.Events.StudioModeCategory(),
-			PayloadParameters = [ActionParameter.Toggle("enabled", label: MacroDeckStrings.Common.Enabled())]
+			PayloadParameters = [ActionParameter.Toggle("enabled", MacroDeckStrings.Common.Enabled())]
 		},
 		new()
 		{
@@ -73,15 +73,15 @@ internal static class StreamlabsDesktopEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("sourceName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel(),
-					description: AppStrings.Integrations.StreamlabsDesktop.Events.OnlyRunForThisSourceDescription(),
+					AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel(),
+					AppStrings.Integrations.StreamlabsDesktop.Events.OnlyRunForThisSourceDescription(),
 					placeholder: AppStrings.Integrations.StreamlabsDesktop.Events.AnyAudioSourcePlaceholder())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.DynamicChoice("sourceName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel()),
-				ActionParameter.Toggle("muted", label: AppStrings.Integrations.StreamlabsDesktop.Params.MutedLabel())
+					AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel()),
+				ActionParameter.Toggle("muted", AppStrings.Integrations.StreamlabsDesktop.Params.MutedLabel())
 			]
 		},
 		new()
@@ -93,22 +93,22 @@ internal static class StreamlabsDesktopEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("sceneName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
-					description: AppStrings.Integrations.StreamlabsDesktop.Events.OnlyRunForThisSceneDescription(),
+					AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
+					AppStrings.Integrations.StreamlabsDesktop.Events.OnlyRunForThisSceneDescription(),
 					placeholder: AppStrings.Integrations.StreamlabsDesktop.Events.AnyScenePlaceholder()),
 				ActionParameter.DynamicChoice("sourceName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Params.SourceLabel(),
-					description: AppStrings.Integrations.StreamlabsDesktop.Events.OnlyRunForThisSourceDescription(),
+					AppStrings.Integrations.StreamlabsDesktop.Params.SourceLabel(),
+					AppStrings.Integrations.StreamlabsDesktop.Events.OnlyRunForThisSourceDescription(),
 					placeholder: AppStrings.Integrations.StreamlabsDesktop.Events.AnySourcePlaceholder())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.DynamicChoice("sceneName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel()),
+					AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel()),
 				ActionParameter.Text("sourceName",
-					label: AppStrings.Integrations.StreamlabsDesktop.Params.SourceLabel()),
+					AppStrings.Integrations.StreamlabsDesktop.Params.SourceLabel()),
 				ActionParameter.Toggle("visible",
-					label: AppStrings.Integrations.StreamlabsDesktop.Events.VisibleLabel())
+					AppStrings.Integrations.StreamlabsDesktop.Events.VisibleLabel())
 			]
 		},
 		Simple(StreamlabsDesktopEventIds.Connected,
@@ -119,27 +119,34 @@ internal static class StreamlabsDesktopEventDefinitions
 			AppStrings.Integrations.StreamlabsDesktop.Events.ConnectionCategory())
 	];
 
-	private static EventDefinition Simple(string id, LocalizedText name, LocalizedText category) => new()
+	private static EventDefinition Simple(string id, LocalizedText name, LocalizedText category)
 	{
-		Id = id,
-		Name = name,
-		Category = category
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Category = category
+		};
+	}
 
-	private static EventDefinition Status(string id,
+	private static EventDefinition Status(
+		string id,
 		LocalizedText name,
 		LocalizedText category,
-		LocalizedText description) => new()
+		LocalizedText description)
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = category,
-		PayloadParameters =
-		[
-			ActionParameter.Text("status", label: AppStrings.Integrations.StreamlabsDesktop.Events.StatusLabel()),
-			ActionParameter.Text("previousStatus",
-				label: AppStrings.Integrations.StreamlabsDesktop.Events.PreviousStatusLabel())
-		]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = category,
+			PayloadParameters =
+			[
+				ActionParameter.Text("status", AppStrings.Integrations.StreamlabsDesktop.Events.StatusLabel()),
+				ActionParameter.Text("previousStatus",
+					AppStrings.Integrations.StreamlabsDesktop.Events.PreviousStatusLabel())
+			]
+		};
+	}
 }

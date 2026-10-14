@@ -28,17 +28,22 @@ public interface IWidgetApi
 	/// is the one it supplies as a state provider.
 	/// </para>
 	/// </summary>
-	Task<WidgetStateWriteResult> SetStateAsync(string widgetId,
+	Task<WidgetStateWriteResult> SetStateAsync(
+		string widgetId,
 		string stateId,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	{
+		return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	}
 
 	/// <summary>
 	/// Advances the target to the next state in its declared order, wrapping past the last. Same
 	/// failure modes and the same default as <see cref="SetStateAsync" />.
 	/// </summary>
 	Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	{
+		return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	}
 
 	/// <summary>
 	/// Tells the host the icon <paramref name="actionId" /> provides has changed, so widgets following it
@@ -53,7 +58,10 @@ public interface IWidgetApi
 	/// silence, exactly as <see cref="SetStateAsync" /> documents for its own default.
 	/// </para>
 	/// </summary>
-	Task InvalidateIconAsync(string actionId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+	Task InvalidateIconAsync(string actionId, CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	/// <summary>
 	/// Reads the stored data of a widget whose type the calling integration registered, for example to
@@ -67,7 +75,9 @@ public interface IWidgetApi
 	/// </para>
 	/// </summary>
 	Task<WidgetDataSnapshot?> GetWidgetDataAsync(string widgetId, CancellationToken cancellationToken = default)
-		=> Task.FromResult<WidgetDataSnapshot?>(null);
+	{
+		return Task.FromResult<WidgetDataSnapshot?>(null);
+	}
 }
 
 /// <summary>A widget exposed to integration pickers.</summary>

@@ -62,20 +62,20 @@ public class UiTreeApplierTests
 		var preSerialized = UiCanonicalJson.Serialize(tree);
 
 		var caseI = UiTreeApplier.Apply(tree, Patch(1, 2, MoveNode("a", "root", 2)));
-		var caseII = UiTreeApplier.Apply(tree, Patch(1, 2, MoveNode("a", "root", null)));
-		var caseIII = UiTreeApplier.Apply(tree, Patch(1, 2, MoveNode("a", "root", 3)));
+		var caseIi = UiTreeApplier.Apply(tree, Patch(1, 2, MoveNode("a", "root", null)));
+		var caseIii = UiTreeApplier.Apply(tree, Patch(1, 2, MoveNode("a", "root", 3)));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(caseI.IsApplied, Is.True);
 			Assert.That(caseI.Tree.Root.Children.Select(n => n.Id), Is.EqualTo(_bca));
 
-			Assert.That(caseII.IsApplied, Is.True);
-			Assert.That(caseII.Tree.Root.Children.Select(n => n.Id), Is.EqualTo(_bca));
+			Assert.That(caseIi.IsApplied, Is.True);
+			Assert.That(caseIi.Tree.Root.Children.Select(n => n.Id), Is.EqualTo(_bca));
 
-			Assert.That(caseIII.IsApplied, Is.False);
-			Assert.That(caseIII.RejectionReason, Is.Not.Null.And.Not.Empty);
-			Assert.That(UiCanonicalJson.Serialize(caseIII.Tree), Is.EqualTo(preSerialized));
+			Assert.That(caseIii.IsApplied, Is.False);
+			Assert.That(caseIii.RejectionReason, Is.Not.Null.And.Not.Empty);
+			Assert.That(UiCanonicalJson.Serialize(caseIii.Tree), Is.EqualTo(preSerialized));
 		});
 	}
 
@@ -118,7 +118,7 @@ public class UiTreeApplierTests
 		{
 			Id = "a",
 			Type = "input",
-			Properties = new Dictionary<string, JsonElement> { ["label"] = Element("\"original\"") },
+			Properties = new Dictionary<string, JsonElement> { ["label"] = Element("\"original\"") }
 		};
 
 		var root = Node("root", "flow", a, Node("b", "input"));
@@ -129,7 +129,7 @@ public class UiTreeApplierTests
 		{
 			Op = UiPatchOperations.SetProperties,
 			NodeId = "a",
-			Properties = new Dictionary<string, JsonElement> { ["label"] = Element("\"changed\"") },
+			Properties = new Dictionary<string, JsonElement> { ["label"] = Element("\"changed\"") }
 		};
 
 		var validInsertNode = InsertNode("c", "root", Node("c", "input"), null);
@@ -141,7 +141,7 @@ public class UiTreeApplierTests
 			Op = UiPatchOperations.SetProperties,
 			NodeId = "b",
 			Properties = new Dictionary<string, JsonElement> { ["x"] = Element("1") },
-			RemovedProperties = ["x"],
+			RemovedProperties = ["x"]
 		};
 
 		var unknownOp = new UiPatchOperation { Op = "splice-node", NodeId = "a" };
@@ -177,7 +177,7 @@ public class UiTreeApplierTests
 		{
 			Op = UiPatchOperations.SetProperties,
 			NodeId = "x",
-			Properties = new Dictionary<string, JsonElement> { ["label"] = Element("\"hi\"") },
+			Properties = new Dictionary<string, JsonElement> { ["label"] = Element("\"hi\"") }
 		};
 
 		var forwardResult = UiTreeApplier.Apply(tree, Patch(1, 2, insertX, setX));
@@ -209,7 +209,7 @@ public class UiTreeApplierTests
 			{
 				Op = UiPatchOperations.SetProperties,
 				NodeId = "chart-fallback",
-				Properties = new Dictionary<string, JsonElement> { ["text"] = Element("\"unsupported\"") },
+				Properties = new Dictionary<string, JsonElement> { ["text"] = Element("\"unsupported\"") }
 			});
 
 		var setResult = UiTreeApplier.Apply(tree, setPatch);
@@ -244,7 +244,7 @@ public class UiTreeApplierTests
 		{
 			Op = UiPatchOperations.SetProperties,
 			NodeId = "a",
-			Properties = new Dictionary<string, JsonElement> { ["label"] = Element("\"x\"") },
+			Properties = new Dictionary<string, JsonElement> { ["label"] = Element("\"x\"") }
 		};
 
 		var applicable = UiTreeApplier.Apply(tree, Patch(5, 6, validOperation));
@@ -269,28 +269,46 @@ public class UiTreeApplierTests
 	}
 
 	private static UiNode Node(string id, string type, params UiNode[] children)
-		=> new() { Id = id, Type = type, Children = children };
+	{
+		return new UiNode { Id = id, Type = type, Children = children };
+	}
 
-	private static UiTree Tree(int revision, UiNode root) =>
-		new() { Revision = revision, Surface = _surface, Root = root };
+	private static UiTree Tree(int revision, UiNode root)
+	{
+		return new UiTree { Revision = revision, Surface = _surface, Root = root };
+	}
 
-	private static JsonElement Element(string json) => JsonDocument.Parse(json).RootElement.Clone();
+	private static JsonElement Element(string json)
+	{
+		return JsonDocument.Parse(json).RootElement.Clone();
+	}
 
 	private static UiPatch Patch(int fromRevision, int toRevision, params UiPatchOperation[] operations)
-		=> new() { FromRevision = fromRevision, ToRevision = toRevision, Operations = operations };
+	{
+		return new UiPatch { FromRevision = fromRevision, ToRevision = toRevision, Operations = operations };
+	}
 
 	private static UiPatchOperation InsertNode(string nodeId, string parentId, UiNode node, int? index)
-		=> new()
+	{
+		return new UiPatchOperation
 		{
 			Op = UiPatchOperations.InsertNode, NodeId = nodeId, ParentId = parentId, Node = node, Index = index
 		};
+	}
 
-	private static UiPatchOperation RemoveNode(string nodeId) =>
-		new() { Op = UiPatchOperations.RemoveNode, NodeId = nodeId };
+	private static UiPatchOperation RemoveNode(string nodeId)
+	{
+		return new UiPatchOperation { Op = UiPatchOperations.RemoveNode, NodeId = nodeId };
+	}
 
 	private static UiPatchOperation ReplaceNode(string nodeId, UiNode node)
-		=> new() { Op = UiPatchOperations.ReplaceNode, NodeId = nodeId, Node = node };
+	{
+		return new UiPatchOperation { Op = UiPatchOperations.ReplaceNode, NodeId = nodeId, Node = node };
+	}
 
 	private static UiPatchOperation MoveNode(string nodeId, string parentId, int? index)
-		=> new() { Op = UiPatchOperations.MoveNode, NodeId = nodeId, ParentId = parentId, Index = index };
+	{
+		return new UiPatchOperation
+			{ Op = UiPatchOperations.MoveNode, NodeId = nodeId, ParentId = parentId, Index = index };
+	}
 }

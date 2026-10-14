@@ -9,7 +9,9 @@ namespace MacroDeckHost.Tests.UnitTests.Integrations;
 internal sealed class ShippedIntegrationIdsTests
 {
 	private static List<IIntegration> Discovered()
-		=> BuiltInIntegrations.Discover(Serilog.Log.Logger).ToList();
+	{
+		return BuiltInIntegrations.Discover(Serilog.Log.Logger).ToList();
+	}
 
 	[Test]
 	public void Discovery_returns_the_shipped_integrations()
@@ -39,8 +41,8 @@ internal sealed class ShippedIntegrationIdsTests
 				Conflicts = IntegrationCapabilityValidator.Validate(integration)
 			})
 			.Where(result => result.Conflicts.Count > 0)
-			.Select(result => $"{result.Type} ({result.Id}): " +
-				string.Join("; ", result.Conflicts.Select(conflict => conflict.ToString())))
+			.Select(result => $"{result.Type} ({result.Id}): "
+				+ string.Join("; ", result.Conflicts.Select(conflict => conflict.ToString())))
 			.ToList();
 
 		Assert.That(failures, Is.Empty, string.Join(Environment.NewLine, failures));

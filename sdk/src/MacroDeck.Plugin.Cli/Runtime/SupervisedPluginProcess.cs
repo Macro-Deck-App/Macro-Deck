@@ -36,16 +36,20 @@ internal sealed class SupervisedPluginProcess : IAsyncDisposable
 	/// <see cref="PluginEnvironmentComposer.IsScrubbed" /> key is removed first, unconditionally, then
 	/// <paramref name="environment" /> is applied on top.
 	/// </summary>
-	public static SupervisedPluginProcess Start(PluginLaunchSpec spec,
+	public static SupervisedPluginProcess Start(
+		PluginLaunchSpec spec,
 		IReadOnlyDictionary<string, string?> environment,
 		Action<string> onOutputLine,
 		Action<string> onErrorLine)
-		=> Start(new ProcessLaunch(spec.ExecutablePath, spec.Arguments, spec.WorkingDirectory),
+	{
+		return Start(new ProcessLaunch(spec.ExecutablePath, spec.Arguments, spec.WorkingDirectory),
 			environment,
 			onOutputLine,
 			onErrorLine);
+	}
 
-	public static SupervisedPluginProcess Start(ProcessLaunch launch,
+	public static SupervisedPluginProcess Start(
+		ProcessLaunch launch,
 		IReadOnlyDictionary<string, string?> environment,
 		Action<string> onOutputLine,
 		Action<string> onErrorLine)
@@ -112,7 +116,9 @@ internal sealed class SupervisedPluginProcess : IAsyncDisposable
 	}
 
 	public Task WaitForExitAsync(CancellationToken cancellationToken = default)
-		=> _process.WaitForExitAsync(cancellationToken);
+	{
+		return _process.WaitForExitAsync(cancellationToken);
+	}
 
 	/// <summary>Kills the process (and any children it spawned), tolerating one that already exited.</summary>
 	public void Kill()
@@ -121,7 +127,7 @@ internal sealed class SupervisedPluginProcess : IAsyncDisposable
 		{
 			if (!_process.HasExited)
 			{
-				_process.Kill(entireProcessTree: true);
+				_process.Kill(true);
 			}
 		}
 		catch (InvalidOperationException)
@@ -136,7 +142,8 @@ internal sealed class SupervisedPluginProcess : IAsyncDisposable
 
 		try
 		{
-			await _process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None)
+			await _process.WaitForExitAsync()
+				.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None)
 				.ConfigureAwait(false);
 		}
 		catch (Exception ex) when (ex is TimeoutException or OperationCanceledException)

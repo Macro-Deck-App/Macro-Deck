@@ -55,7 +55,7 @@ public class MacOsKeyboardLayoutTests
 
 	private static Dictionary<KeyCode, ushort> LettersOf(string inputSourceId)
 	{
-		var sources = TISCreateInputSourceList(IntPtr.Zero, includeAllInstalled: true);
+		var sources = TISCreateInputSourceList(IntPtr.Zero, true);
 		Assert.That(sources, Is.Not.EqualTo(IntPtr.Zero));
 		try
 		{
@@ -63,7 +63,7 @@ public class MacOsKeyboardLayoutTests
 			for (nint index = 0; index < CFArrayGetCount(sources); index++)
 			{
 				var source = CFArrayGetValueAtIndex(sources, index);
-				if (MacOsCoreFoundation.ReadCFString(TISGetInputSourceProperty(source, idKey)) == inputSourceId)
+				if (MacOsCoreFoundation.ReadCfString(TISGetInputSourceProperty(source, idKey)) == inputSourceId)
 				{
 					return MacOsKeyboardLayout.BuildLetterMap(source);
 				}
@@ -79,7 +79,9 @@ public class MacOsKeyboardLayoutTests
 	}
 
 	[DllImport(Carbon)]
-	private static extern IntPtr TISCreateInputSourceList(IntPtr properties, [MarshalAs(UnmanagedType.I1)] bool includeAllInstalled);
+	private static extern IntPtr TISCreateInputSourceList(
+		IntPtr properties,
+		[MarshalAs(UnmanagedType.I1)] bool includeAllInstalled);
 
 	[DllImport(Carbon)]
 	private static extern IntPtr TISGetInputSourceProperty(IntPtr inputSource, IntPtr propertyKey);

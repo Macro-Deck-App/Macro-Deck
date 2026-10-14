@@ -23,7 +23,7 @@ public class AdditionalFontDirectoryTests
 	[TearDown]
 	public void TearDown()
 	{
-		Directory.Delete(_root, recursive: true);
+		Directory.Delete(_root, true);
 	}
 
 	[Test]
@@ -46,7 +46,8 @@ public class AdditionalFontDirectoryTests
 
 		var directories = LinuxFontDirectories.Candidates(environment.GetValueOrDefault, "/home/user");
 
-		Assert.That(directories, Is.EquivalentTo(new[] { "/data/home/fonts", "/home/user/.fonts", "/opt/share/fonts" }));
+		Assert.That(directories,
+			Is.EquivalentTo(new[] { "/data/home/fonts", "/home/user/.fonts", "/opt/share/fonts" }));
 	}
 
 	[Test]
@@ -149,7 +150,7 @@ public class AdditionalFontDirectoryTests
 		};
 		var strings = records.Select(record => Encoding.BigEndianUnicode.GetBytes(record.Value)).ToArray();
 
-		var headerLength = 6 + (12 * records.Length);
+		var headerLength = 6 + 12 * records.Length;
 		var table = new byte[headerLength + strings.Sum(value => value.Length)];
 		var span = table.AsSpan();
 		BinaryPrimitives.WriteUInt16BigEndian(span[2..], (ushort)records.Length);
@@ -158,7 +159,7 @@ public class AdditionalFontDirectoryTests
 		var offset = 0;
 		for (var i = 0; i < records.Length; i++)
 		{
-			var record = span[(6 + (12 * i))..];
+			var record = span[(6 + 12 * i)..];
 			BinaryPrimitives.WriteUInt16BigEndian(record, 3);
 			BinaryPrimitives.WriteUInt16BigEndian(record[2..], 1);
 			BinaryPrimitives.WriteUInt16BigEndian(record[4..], 0x0409);
@@ -175,14 +176,14 @@ public class AdditionalFontDirectoryTests
 	private static byte[] WithNameTable(byte[] font, byte[] nameTable)
 	{
 		var tableCount = BinaryPrimitives.ReadUInt16BigEndian(font.AsSpan(4));
-		var appendAt = (font.Length + 3) & ~3;
+		var appendAt = font.Length + 3 & ~3;
 		var result = new byte[appendAt + nameTable.Length];
 		font.CopyTo(result, 0);
 		nameTable.CopyTo(result, appendAt);
 
 		for (var i = 0; i < tableCount; i++)
 		{
-			var entry = result.AsSpan(12 + (16 * i));
+			var entry = result.AsSpan(12 + 16 * i);
 			if (BinaryPrimitives.ReadUInt32BigEndian(entry) != NameTag)
 			{
 				continue;

@@ -23,7 +23,8 @@ internal sealed class LoggingWhilePausedDoesNotBlockOrLoseTrafficCheck() : Confo
 	ConformanceRequirement.Recommended,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		foreach (var localId in ConformanceCheckSupport.DeclaredActionLocalIds(context))
@@ -60,7 +61,7 @@ internal sealed class LoggingWhilePausedDoesNotBlockOrLoseTrafficCheck() : Confo
 			{
 				await Wait.UntilAsync(() => context.Logs.Events.Count + context.Logs.Dropped > before,
 						TimeSpan.FromSeconds(5),
-						because: "log traffic queued while paused never appeared after resuming")
+						"log traffic queued while paused never appeared after resuming")
 					.ConfigureAwait(false);
 			}
 			catch (PluginTestTimeoutException)
@@ -84,7 +85,8 @@ internal sealed class ErrorSurvivesFloodAndDroppedIsHonestCheck() : ConformanceC
 	ConformanceRequirement.Recommended,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		foreach (var localId in ConformanceCheckSupport.DeclaredActionLocalIds(context))
@@ -112,7 +114,7 @@ internal sealed class ErrorSurvivesFloodAndDroppedIsHonestCheck() : ConformanceC
 			{
 				await Wait.UntilAsync(() => context.Logs.AtLeast(LogLevels.Error).Count > errorsBefore,
 						TimeSpan.FromSeconds(5),
-						because: "a trailing Error logged while paused never appeared after resuming")
+						"a trailing Error logged while paused never appeared after resuming")
 					.ConfigureAwait(false);
 			}
 			catch (PluginTestTimeoutException)
@@ -134,8 +136,8 @@ internal sealed class ErrorSurvivesFloodAndDroppedIsHonestCheck() : ConformanceC
 
 				return ConformanceCheckResult.Fail(
 					"An Error logged while draining is paused still reaches the host after draining resumes - the priority channel survives an informational flood.",
-					$"The action produced {produced} log event(s) while draining was paused, but no Error-level " +
-					"event arrived within 5 s of resuming.");
+					$"The action produced {produced} log event(s) while draining was paused, but no Error-level "
+					+ "event arrived within 5 s of resuming.");
 			}
 
 			return ConformanceCheckResult.Pass([
@@ -145,8 +147,8 @@ internal sealed class ErrorSurvivesFloodAndDroppedIsHonestCheck() : ConformanceC
 		}
 
 		return ConformanceCheckResult.Skip(
-			"No declared action produced a batch's worth of log traffic while draining was paused, so there " +
-			"was no flood for a trailing Error to have to survive.");
+			"No declared action produced a batch's worth of log traffic while draining was paused, so there "
+			+ "was no flood for a trailing Error to have to survive.");
 	}
 }
 
@@ -157,7 +159,8 @@ internal sealed class LogEventsRespectFieldLimitsCheck() : ConformanceCheckBase(
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var events = context.Logs.Events;
@@ -193,8 +196,8 @@ internal sealed class LogEventsRespectFieldLimitsCheck() : ConformanceCheckBase(
 				}
 			}
 
-			if (logEvent.SourceContext is { } sourceContext &&
-				sourceContext.Length > ProtocolLimits.MaxLogSourceContextLength)
+			if (logEvent.SourceContext is { } sourceContext
+				&& sourceContext.Length > ProtocolLimits.MaxLogSourceContextLength)
 			{
 				return Task.FromResult(ConformanceCheckResult.Fail(
 					$"A log event's SourceContext stays within MaxLogSourceContextLength ({ProtocolLimits.MaxLogSourceContextLength} characters).",
@@ -240,7 +243,8 @@ internal sealed class PublishedEventsAreNotReplayedOnReconnectCheck() : Conforma
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		await using var host = await MacroDeckTestHost.StartAsync().ConfigureAwait(false);
@@ -308,7 +312,8 @@ internal sealed class VariableConcurrencyBoundIsHonestCheck() : ConformanceCheck
 {
 	private const int BurstMargin = 8;
 
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var variable = context.Session!.Declared

@@ -34,13 +34,18 @@ internal sealed class WeatherStation : IWeatherStation
 
 	public WeatherSnapshot Current => _current;
 
-	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct) => Task.FromResult(_current);
+	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
+	{
+		return Task.FromResult(_current);
+	}
 
 	public bool Matches(double latitude, double longitude, TemperatureUnit unit, string displayName)
-		=> _latitude.Equals(latitude) &&
-			_longitude.Equals(longitude) &&
-			_unit == unit &&
-			string.Equals(DisplayName, displayName, StringComparison.Ordinal);
+	{
+		return _latitude.Equals(latitude)
+			&& _longitude.Equals(longitude)
+			&& _unit == unit
+			&& string.Equals(DisplayName, displayName, StringComparison.Ordinal);
+	}
 
 	public async Task RefreshAsync(CancellationToken ct)
 	{
@@ -108,18 +113,22 @@ internal sealed class WeatherStation : IWeatherStation
 	}
 
 	private static DateTimeOffset? FirstTime(List<string>? times)
-		=> times is { Count: > 0 } ? ParseLocalTime(times[0]) : null;
+	{
+		return times is { Count: > 0 } ? ParseLocalTime(times[0]) : null;
+	}
 
 	// Open-Meteo returns local wall-clock times without an offset when timezone=auto. Read as unspecified
 	// and stamped with no offset, so a reader sees the location's own clock rather than one shifted into
 	// whatever zone this host happens to sit in.
 	private static DateTimeOffset? ParseLocalTime(string value)
-		=> DateTime.TryParse(value,
+	{
+		return DateTime.TryParse(value,
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.None,
 			out var parsed)
 			? new DateTimeOffset(DateTime.SpecifyKind(parsed, DateTimeKind.Unspecified), TimeSpan.Zero)
 			: null;
+	}
 
 	private static List<WeatherForecastDay> MapDays(OpenMeteoDaily? daily)
 	{

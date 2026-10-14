@@ -19,7 +19,8 @@ public class CreateIconPackRequestMessageHandler
 		_ownerRegistry = ownerRegistry;
 	}
 
-	public async ValueTask<CreateIconPackResponse> Handle(CreateIconPackRequest request,
+	public async ValueTask<CreateIconPackResponse> Handle(
+		CreateIconPackRequest request,
 		CancellationToken cancellationToken)
 	{
 		var result = await _iconPackService.Create(request.Name,

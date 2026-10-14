@@ -10,7 +10,9 @@ public sealed class GetBackupRecoveryKeyStateRequestMessageHandler
 	private readonly IBackupRecoveryKeyService _recoveryKeyService;
 
 	public GetBackupRecoveryKeyStateRequestMessageHandler(IBackupRecoveryKeyService recoveryKeyService)
-		=> _recoveryKeyService = recoveryKeyService;
+	{
+		_recoveryKeyService = recoveryKeyService;
+	}
 
 	public async ValueTask<GetBackupRecoveryKeyStateResponse> Handle(
 		GetBackupRecoveryKeyStateRequest request,

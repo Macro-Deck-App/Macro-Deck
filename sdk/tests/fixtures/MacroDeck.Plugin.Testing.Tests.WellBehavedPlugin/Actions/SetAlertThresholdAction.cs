@@ -41,11 +41,14 @@ internal sealed class SetAlertThresholdAction(WellBehavedIntegration integration
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
-		ActionParameter.Slider("thresholdCelsius", Min, Max, label: "Alert threshold (°C)", step: 1, defaultValue: 30),
-		ActionParameter.Secret(WebhookSecretParameterName, label: "Webhook signing secret")
+		ActionParameter.Slider("thresholdCelsius", Min, Max, "Alert threshold (°C)", step: 1, defaultValue: 30),
+		ActionParameter.Secret(WebhookSecretParameterName, "Webhook signing secret")
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(integration);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(integration);
+	}
 
 	public Task<IUiSession?> CreateConfigurationSessionAsync(
 		ActionConfigurationRequest request,
@@ -60,42 +63,49 @@ internal sealed class SetAlertThresholdAction(WellBehavedIntegration integration
 
 	// Shared with SetAlertThresholdActionPreviews so a preview renders the tree this action really
 	// serves rather than a copy of it that can drift.
-	internal static UiElement BuildTree(double threshold, string webhookSecret) => new UiStep
+	internal static UiElement BuildTree(double threshold, string webhookSecret)
 	{
-		Key = "set-alert-threshold",
-		StepId = UiValue.Of("set-alert-threshold"),
-		Title = "Alert threshold",
-		Description = "Sets the temperature above which weather-refreshed events report isAlert.",
-		Children =
-		[
-			new UiNumberInput
-			{
-				Key = "thresholdCelsius",
-				Label = "Alert threshold (°C)",
-				Min = Min,
-				Max = Max,
-				Step = 1,
-				ShowSlider = true,
-				Binding = Bind.To(new UiState<double>(threshold))
-			},
-			new UiSecretInput
-			{
-				Key = WebhookSecretParameterName,
-				Label = "Webhook signing secret",
-				Binding = Bind.To(new UiState<string>(webhookSecret))
-			}
-		]
-	};
+		return new UiStep
+		{
+			Key = "set-alert-threshold",
+			StepId = UiValue.Of("set-alert-threshold"),
+			Title = "Alert threshold",
+			Description = "Sets the temperature above which weather-refreshed events report isAlert.",
+			Children =
+			[
+				new UiNumberInput
+				{
+					Key = "thresholdCelsius",
+					Label = "Alert threshold (°C)",
+					Min = Min,
+					Max = Max,
+					Step = 1,
+					ShowSlider = true,
+					Binding = Bind.To(new UiState<double>(threshold))
+				},
+				new UiSecretInput
+				{
+					Key = WebhookSecretParameterName,
+					Label = "Webhook signing secret",
+					Binding = Bind.To(new UiState<string>(webhookSecret))
+				}
+			]
+		};
+	}
 
 	private static double ReadDouble(IReadOnlyDictionary<string, JsonElement> parameters, string name, double fallback)
-		=> parameters.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.Number
+	{
+		return parameters.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.Number
 			? element.GetDouble()
 			: fallback;
+	}
 
 	private static string ReadString(IReadOnlyDictionary<string, JsonElement> parameters, string name)
-		=> parameters.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return parameters.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString() ?? string.Empty
 			: string.Empty;
+	}
 
 	private sealed class Executor(WellBehavedIntegration integration) : IActionExecutor
 	{

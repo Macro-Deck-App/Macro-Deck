@@ -31,11 +31,20 @@ internal sealed class UiPreviewSession : IUiSession, IRebuildableUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _instance.View.Tree;
+	public UiTree BuildTree()
+	{
+		return _instance.View.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _instance.View.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _instance.View.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _instance.View.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_instance.View.Dispatch(uiEvent);
+	}
 
 	public IAsyncDisposable Rebuild()
 	{

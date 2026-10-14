@@ -24,9 +24,11 @@ public class EventBusTests
 	}
 
 	private static EventOccurrence Occurrence(string eventId, EventTarget? target = null)
-		=> new(eventId,
+	{
+		return new EventOccurrence(eventId,
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["sceneName"] = "Live" },
 			target);
+	}
 
 	private void Subscribe(string providerId, string eventId)
 	{

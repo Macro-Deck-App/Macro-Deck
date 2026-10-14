@@ -19,8 +19,8 @@ public sealed class RemoteUiProviderRegistry
 
 	public IUiSessionProvider? Resolve(string providerId)
 	{
-		if (!_snapshots.Has(providerId) ||
-			!_snapshots.GetSnapshot(providerId).AcceptedKinds.Contains(CapabilityKinds.Ui, StringComparer.Ordinal))
+		if (!_snapshots.Has(providerId)
+			|| !_snapshots.GetSnapshot(providerId).AcceptedKinds.Contains(CapabilityKinds.Ui, StringComparer.Ordinal))
 		{
 			return null;
 		}

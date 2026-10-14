@@ -182,7 +182,8 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 
 	// Called on every reconcile, gated inside PublishIfChanged. An unreachable client must not cancel
 	// the flow, so a failing push only logs; a cancelled reconcile still stops before firing one.
-	private async Task PublishTransition(Guid widgetId,
+	private async Task PublishTransition(
+		Guid widgetId,
 		WidgetStateReconciliation reconciliation,
 		CancellationToken cancellationToken)
 	{
@@ -203,10 +204,12 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 	}
 
 	private bool IsCurrent(WidgetStateResolution resolution)
-		=> resolution.OptimisticState is null ||
-			_optimisticStates?.IsCurrent(resolution.OptimisticState) != false;
+	{
+		return resolution.OptimisticState is null || _optimisticStates?.IsCurrent(resolution.OptimisticState) != false;
+	}
 
-	private async Task AdoptProviderStates(Guid widgetId,
+	private async Task AdoptProviderStates(
+		Guid widgetId,
 		WidgetStateResolution resolution,
 		CancellationToken cancellationToken)
 	{
@@ -245,7 +248,8 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 		}
 	}
 
-	private async Task FireStateChange(Guid widgetId,
+	private async Task FireStateChange(
+		Guid widgetId,
 		string stateId,
 		string? previousStateId,
 		CancellationToken cancellationToken)
@@ -276,9 +280,8 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 
 		if (result.Status != FlowExecutionStatus.Succeeded)
 		{
-			_logger.Warning(
-				"onStateChange flow for widget {WidgetId} finished as {Status} (execution {ExecutionId}): " +
-				"{ErrorCode} {ErrorMessage}",
+			_logger.Warning("onStateChange flow for widget {WidgetId} finished as {Status} (execution {ExecutionId}): "
+				+ "{ErrorCode} {ErrorMessage}",
 				widgetId,
 				result.Status,
 				result.ExecutionId,

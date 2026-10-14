@@ -10,29 +10,29 @@ namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 internal sealed class TwitchChatIngestionTests
 {
 	private const string ChatLine = """
-		{
-			"broadcaster_user_id": "111",
-			"chatter_user_id": "4242",
-			"chatter_user_login": "cozyviewer",
-			"chatter_user_name": "CozyViewer",
-			"message_id": "cc106a89-1814-919d-454c-f4f2f970aae7",
-			"message": {
-				"text": "Hi chat Kappa 🎉 你好 @streamer",
-				"fragments": [
-					{ "type": "text", "text": "Hi chat ", "cheermote": null, "emote": null, "mention": null },
-					{ "type": "emote", "text": "Kappa", "emote": { "id": "25", "emote_set_id": "0" } },
-					{ "type": "text", "text": " 🎉 你好 " },
-					{ "type": "mention", "text": "@streamer", "mention": { "user_id": "111" } }
-				]
-			},
-			"color": "#1E90FF",
-			"badges": [
-				{ "set_id": "moderator", "id": "1", "info": "" },
-				{ "set_id": "subscriber", "id": "12", "info": "16" }
-			],
-			"message_type": "text"
-		}
-		""";
+									{
+										"broadcaster_user_id": "111",
+										"chatter_user_id": "4242",
+										"chatter_user_login": "cozyviewer",
+										"chatter_user_name": "CozyViewer",
+										"message_id": "cc106a89-1814-919d-454c-f4f2f970aae7",
+										"message": {
+											"text": "Hi chat Kappa 🎉 你好 @streamer",
+											"fragments": [
+												{ "type": "text", "text": "Hi chat ", "cheermote": null, "emote": null, "mention": null },
+												{ "type": "emote", "text": "Kappa", "emote": { "id": "25", "emote_set_id": "0" } },
+												{ "type": "text", "text": " 🎉 你好 " },
+												{ "type": "mention", "text": "@streamer", "mention": { "user_id": "111" } }
+											]
+										},
+										"color": "#1E90FF",
+										"badges": [
+											{ "set_id": "moderator", "id": "1", "info": "" },
+											{ "set_id": "subscriber", "id": "12", "info": "16" }
+										],
+										"message_type": "text"
+									}
+									""";
 
 	private FakeTwitchHelixClient _helix = null!;
 	private RecordingTwitchChatSink _sink = null!;
@@ -56,7 +56,10 @@ internal sealed class TwitchChatIngestionTests
 	}
 
 	[TearDown]
-	public void TearDown() => _manager.Dispose();
+	public void TearDown()
+	{
+		_manager.Dispose();
+	}
 
 	[Test]
 	public void A_chat_line_reaches_the_chat_with_its_emotes_mentions_and_emoji_intact()
@@ -97,7 +100,8 @@ internal sealed class TwitchChatIngestionTests
 			StringComparison.Ordinal);
 
 		_connection.HandleNotification(FakeEventSubClient.Notification("n1", "channel.chat.message", ChatLine));
-		_connection.HandleNotification(FakeEventSubClient.Notification("n2", "channel.chat.message",
+		_connection.HandleNotification(FakeEventSubClient.Notification("n2",
+			"channel.chat.message",
 			shared.Replace("cc106a89", "dd106a89", StringComparison.Ordinal)));
 
 		var messages = _sink.Posted.OfType<ChatMessageReceived>().Select(received => received.Message).ToList();
@@ -178,7 +182,7 @@ internal sealed class TwitchChatIngestionTests
 		_helix.GlobalBadges =
 		[
 			new TwitchChatBadgeImage("moderator", "1", "https://static-cdn.jtvnw.net/badges/v1/mod/2"),
-			new TwitchChatBadgeImage("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/global-sub/2"),
+			new TwitchChatBadgeImage("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/global-sub/2")
 		];
 		_helix.ChannelBadges =
 			[new TwitchChatBadgeImage("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/channel-sub/2")];
@@ -209,7 +213,8 @@ internal sealed class TwitchChatIngestionTests
 	[Test]
 	public async Task Badges_that_failed_to_load_are_loaded_again_when_the_chat_reconnects()
 	{
-		_helix.GlobalBadges = [new TwitchChatBadgeImage("moderator", "1", "https://static-cdn.jtvnw.net/badges/v1/mod/2")];
+		_helix.GlobalBadges =
+			[new TwitchChatBadgeImage("moderator", "1", "https://static-cdn.jtvnw.net/badges/v1/mod/2")];
 		_helix.FailingReads.Add("globalBadges");
 		await _connection.LoadBadgesAsync(CancellationToken.None);
 		_helix.FailingReads.Clear();
@@ -231,13 +236,15 @@ internal sealed class TwitchChatIngestionTests
 			}
 
 			await Task.Delay(20);
-		}
-		while (DateTime.UtcNow < deadline);
+		} while (DateTime.UtcNow < deadline);
 
-		Assert.That(message.Badges.Select(badge => badge.ImageUrl), Does.Contain("https://static-cdn.jtvnw.net/badges/v1/mod/2"));
+		Assert.That(message.Badges.Select(badge => badge.ImageUrl),
+			Does.Contain("https://static-cdn.jtvnw.net/badges/v1/mod/2"));
 	}
 
 	private static ChatMessage Parse(string json)
-		=> TwitchChatMessageParser.Parse(JsonDocument.Parse(json).RootElement,
+	{
+		return TwitchChatMessageParser.Parse(JsonDocument.Parse(json).RootElement,
 			TwitchChatBadgeMap.Empty)!;
+	}
 }

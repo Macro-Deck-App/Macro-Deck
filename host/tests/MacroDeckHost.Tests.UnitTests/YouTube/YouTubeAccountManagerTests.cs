@@ -22,7 +22,10 @@ internal sealed class YouTubeAccountManagerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _manager.Dispose();
+	public void TearDown()
+	{
+		_manager.Dispose();
+	}
 
 	[Test]
 	public async Task Two_channels_are_kept_apart_and_identified_by_their_channel_id()
@@ -62,10 +65,16 @@ internal sealed class YouTubeAccountManagerTests
 	[Test]
 	public async Task Connecting_the_same_channel_again_keeps_the_newest_entry_and_reports_the_older_one()
 	{
-		YouTubeTestSupport.AddChannel(_config, "UCsame", "Channel",
-			connectedAt: YouTubeTestSupport.Now.AddDays(-3), entryTitle: "YouTube (old)");
-		YouTubeTestSupport.AddChannel(_config, "UCsame", "Channel",
-			connectedAt: YouTubeTestSupport.Now, entryTitle: "YouTube (new)");
+		YouTubeTestSupport.AddChannel(_config,
+			"UCsame",
+			"Channel",
+			connectedAt: YouTubeTestSupport.Now.AddDays(-3),
+			entryTitle: "YouTube (old)");
+		YouTubeTestSupport.AddChannel(_config,
+			"UCsame",
+			"Channel",
+			connectedAt: YouTubeTestSupport.Now,
+			entryTitle: "YouTube (new)");
 
 		await _manager.ReloadAsync(_config);
 

@@ -27,12 +27,15 @@ internal sealed class HttpResponseCaptureTests
 	}
 
 	[TearDown]
-	public void TearDown() => _targets.Dispose();
+	public void TearDown()
+	{
+		_targets.Dispose();
+	}
 
 	[Test]
 	public async Task Every_reserved_token_resolves_to_its_documented_type_and_value()
 	{
-		var response = Snapshot(statusCode: 201, body: "{}", durationMs: 123, truncated: true);
+		var response = Snapshot(201, body: "{}", durationMs: 123, truncated: true);
 		var captures = new Dictionary<string, string>(StringComparer.Ordinal)
 		{
 			["status"] = "$status",
@@ -42,9 +45,9 @@ internal sealed class HttpResponseCaptureTests
 			["trunc"] = "$truncated"
 		};
 
-		await HttpResponseCapture.ApplyAsync(_accessor, captures, response, statusExpected: true, SilentLogger());
+		await HttpResponseCapture.ApplyAsync(_accessor, captures, response, true, SilentLogger());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _targets.ValueOf("status"), Is.EqualTo(201m));
 			Assert.That(await _targets.ValueOf("ok"), Is.EqualTo(true));
@@ -66,7 +69,7 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["h"] = "$headers" },
 			response,
-			statusExpected: true,
+			true,
 			SilentLogger());
 
 		var expected = JsonSerializer.Serialize(response.Headers);
@@ -84,7 +87,7 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["ct"] = "$header:content-type" },
 			response,
-			statusExpected: true,
+			true,
 			SilentLogger());
 
 		Assert.That(await _targets.ValueOf("ct"), Is.EqualTo("application/json"));
@@ -99,7 +102,7 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["v"] = "$header:x-missing" },
 			response,
-			statusExpected: true,
+			true,
 			SilentLogger());
 
 		Assert.That(await _targets.Find("v"), Is.Null);
@@ -117,7 +120,7 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["v"] = path },
 			response,
-			statusExpected: true,
+			true,
 			SilentLogger());
 
 		Assert.That(await _targets.ValueOf("v"), Is.EqualTo(expectedValue));
@@ -131,7 +134,7 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["v"] = "$.nonexistent" },
 			response,
-			statusExpected: true,
+			true,
 			SilentLogger());
 
 		Assert.That(await _targets.Find("v"), Is.Null);
@@ -145,10 +148,10 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["status"] = "$status", ["body"] = "$body" },
 			response,
-			statusExpected: true,
+			true,
 			SilentLogger());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _targets.ValueOf("status"), Is.EqualTo(200m));
 			Assert.That(await _targets.ValueOf("body"), Is.EqualTo("not json at all"));
@@ -169,7 +172,7 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["body"] = "$body" },
 			Snapshot(body: body),
-			statusExpected: true,
+			true,
 			SilentLogger());
 
 		Assert.That(await _targets.ValueOf("body"), Is.EqualTo(expected));
@@ -183,7 +186,7 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["count"] = "$body" },
 			Snapshot(body: "\uFEFF42\n"),
-			statusExpected: true,
+			true,
 			SilentLogger());
 
 		Assert.That(await _targets.ValueOf("count"), Is.EqualTo(42m));
@@ -195,7 +198,7 @@ internal sealed class HttpResponseCaptureTests
 		await HttpResponseCapture.ApplyAsync(_accessor,
 			new Dictionary<string, string>(StringComparer.Ordinal) { ["v"] = "name" },
 			Snapshot(body: """{"name":"SWIT\n"}"""),
-			statusExpected: true,
+			true,
 			SilentLogger());
 
 		Assert.That(await _targets.ValueOf("v"), Is.EqualTo("SWIT\n"));
@@ -213,9 +216,9 @@ internal sealed class HttpResponseCaptureTests
 			["path"] = "$.name"
 		};
 
-		await HttpResponseCapture.ApplyTransportFailureAsync(_accessor, captures, durationMs: 55, SilentLogger());
+		await HttpResponseCapture.ApplyTransportFailureAsync(_accessor, captures, 55, SilentLogger());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _targets.ValueOf("status"), Is.EqualTo(0m));
 			Assert.That(await _targets.ValueOf("ok"), Is.EqualTo(false));
@@ -225,7 +228,10 @@ internal sealed class HttpResponseCaptureTests
 		});
 	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 
 	private static HttpResponseSnapshot Snapshot(
 		int statusCode = 200,
@@ -233,10 +239,12 @@ internal sealed class HttpResponseCaptureTests
 		string body = "{}",
 		bool truncated = false,
 		long durationMs = 10)
-		=> new(statusCode,
+	{
+		return new HttpResponseSnapshot(statusCode,
 			headers ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
 			body,
 			truncated,
 			"application/json",
 			durationMs);
+	}
 }

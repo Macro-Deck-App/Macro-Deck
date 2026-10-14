@@ -16,8 +16,12 @@ public sealed class WeatherBroadcastTrigger : IWeatherBroadcastTrigger, IDisposa
 	}
 
 	public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
-		=> _pending.WaitAsync(timeout, cancellationToken);
+	{
+		return _pending.WaitAsync(timeout, cancellationToken);
+	}
 
 	public void Dispose()
-		=> _pending.Dispose();
+	{
+		_pending.Dispose();
+	}
 }

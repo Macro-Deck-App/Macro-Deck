@@ -18,23 +18,33 @@ public class MouseActionExecutionTests
 	}
 
 	private static ActionExecutionContext Context(Dictionary<string, object> parameters)
-		=> new() { Parameters = parameters };
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
 	private static Task<ActionResult> Execute(IActionDefinition action, Dictionary<string, object> parameters)
-		=> action.CreateExecutor().ExecuteAsync(Context(parameters));
-
-	private void AssertCalls(params string[] expected) => Assert.That(_provider.Calls, Is.EqualTo(expected));
-
-	private IActionDefinition Action(string id) => id switch
 	{
-		"click" => new ClickActionDefinition(_service),
-		"move-cursor" => new MoveCursorActionDefinition(_service),
-		"drag" => new DragActionDefinition(_service),
-		"scroll" => new ScrollActionDefinition(_service),
-		"button-down" => new ButtonDownActionDefinition(_service),
-		"button-up" => new ButtonUpActionDefinition(_service),
-		_ => new ReleaseAllButtonsActionDefinition(_service)
-	};
+		return action.CreateExecutor().ExecuteAsync(Context(parameters));
+	}
+
+	private void AssertCalls(params string[] expected)
+	{
+		Assert.That(_provider.Calls, Is.EqualTo(expected));
+	}
+
+	private IActionDefinition Action(string id)
+	{
+		return id switch
+		{
+			"click" => new ClickActionDefinition(_service),
+			"move-cursor" => new MoveCursorActionDefinition(_service),
+			"drag" => new DragActionDefinition(_service),
+			"scroll" => new ScrollActionDefinition(_service),
+			"button-down" => new ButtonDownActionDefinition(_service),
+			"button-up" => new ButtonUpActionDefinition(_service),
+			_ => new ReleaseAllButtonsActionDefinition(_service)
+		};
+	}
 
 	[TestCase("click")]
 	[TestCase("move-cursor")]

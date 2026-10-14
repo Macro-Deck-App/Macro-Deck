@@ -8,7 +8,9 @@ internal sealed class VideoStreamRelayTests
 	private static readonly Uri _camera = new("https://camera.local:8443/live/cam%201/index.m3u8?key=a%2Fb&x=1#frag");
 
 	private static string TokenOf(string relayUrl)
-		=> relayUrl[VideoStreamRelay.PathPrefix.Length..].Split('/')[0];
+	{
+		return relayUrl[VideoStreamRelay.PathPrefix.Length..].Split('/')[0];
+	}
 
 	private static VideoStreamRelayLease Acquire(VideoStreamRelay relay, string token)
 	{
@@ -137,7 +139,9 @@ internal sealed class VideoStreamRelayTests
 		var relay = new VideoStreamRelay();
 		var token = TokenOf(relay.Arm("s1", _camera, "hls"));
 		var other = TokenOf(relay.Arm("s2", _camera, "hls"));
-		var held = Enumerable.Range(0, VideoStreamRelay.MaxLeasesPerSession).Select(_ => Acquire(relay, token)).ToList();
+		var held = Enumerable.Range(0, VideoStreamRelay.MaxLeasesPerSession)
+			.Select(_ => Acquire(relay, token))
+			.ToList();
 
 		var ninth = relay.Acquire(token, out _);
 		var otherSession = relay.Acquire(other, out var otherLease);

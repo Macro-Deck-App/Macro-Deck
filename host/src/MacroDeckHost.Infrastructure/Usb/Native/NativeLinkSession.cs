@@ -22,7 +22,8 @@ internal sealed class NativeLinkSession : INativeLinkSession, IDisposable
 	private readonly NativeLink _link;
 	private readonly CancellationTokenSource _stop = new();
 
-	public NativeLinkSession(ILinkCarrier carrier,
+	public NativeLinkSession(
+		ILinkCarrier carrier,
 		string deviceKey,
 		ILinkStreamDialer dialer,
 		TimeProvider time,
@@ -68,5 +69,8 @@ internal sealed class NativeLinkSession : INativeLinkSession, IDisposable
 
 	internal Task LoopsEnded => _link.LoopsEnded;
 
-	public void Dispose() => _stop.Dispose();
+	public void Dispose()
+	{
+		_stop.Dispose();
+	}
 }

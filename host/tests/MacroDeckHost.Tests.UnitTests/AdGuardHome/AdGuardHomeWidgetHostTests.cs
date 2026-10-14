@@ -39,7 +39,10 @@ internal sealed class AdGuardHomeWidgetHostTests : UiSessionFixture
 	}
 
 	[TearDown]
-	public Task TearDownIntegration() => _integration.ShutdownAsync();
+	public Task TearDownIntegration()
+	{
+		return _integration.ShutdownAsync();
+	}
 
 	[Test]
 	public async Task A_press_while_the_host_is_locked_is_refused_before_it_reaches_the_server()
@@ -73,7 +76,8 @@ internal sealed class AdGuardHomeWidgetHostTests : UiSessionFixture
 		{
 			Assert.That(response.Accepted, Is.True);
 			Assert.That(StatusEventsToClient().Single().Status, Is.EqualTo(ActionExecutionStatus.Failed));
-			Assert.That(StatusEventsToClient().Single().Error?.Code, Is.EqualTo(ActionExecutionErrorCodes.ActionFailed));
+			Assert.That(StatusEventsToClient().Single().Error?.Code,
+				Is.EqualTo(ActionExecutionErrorCodes.ActionFailed));
 			Assert.That(StatusEventsToClient().Single().WidgetId, Is.EqualTo(_widgetId.ToString()));
 		});
 	}
@@ -87,23 +91,29 @@ internal sealed class AdGuardHomeWidgetHostTests : UiSessionFixture
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(_widgetId.ToString()),
-				[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(AdGuardHomeWidgetType.QualifiedId),
+				[UiWidgetSurfaceAttributes.WidgetType]
+					= JsonSerializer.SerializeToElement(AdGuardHomeWidgetType.QualifiedId),
 				[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new
 				{
 					instance = _entryId.ToString("D"),
-					durations = new[] { "5m" },
-				}),
+					durations = new[] { "5m" }
+				})
 			}
 		};
 
-		await using (var probe = (await _integration.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
+		await using (var probe = (await _integration.CreateSessionAsync(
+			new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
 			CancellationToken.None))!)
 		{
 			var pauseNode = CalendarTree.Flatten(probe.BuildTree().Root)
-				.First(node => node.Id.EndsWith(".pause-5m", StringComparison.Ordinal) && CalendarTree.IsPressable(node))
+				.First(node
+					=> node.Id.EndsWith(".pause-5m", StringComparison.Ordinal) && CalendarTree.IsPressable(node))
 				.Id;
 
-			var ticket = await Broker.OpenAsync(AdGuardHomeIntegration.IntegrationId, surface, DeviceA, CancellationToken.None);
+			var ticket = await Broker.OpenAsync(AdGuardHomeIntegration.IntegrationId,
+				surface,
+				DeviceA,
+				CancellationToken.None);
 			Assert.That(ticket.Accepted, Is.True, "The widget session did not open.");
 			Assert.That(Attach(ticket.SessionId, Connection).Accepted, Is.True);
 			return (ticket.SessionId, pauseNode);
@@ -111,11 +121,20 @@ internal sealed class AdGuardHomeWidgetHostTests : UiSessionFixture
 	}
 
 	private UiSendEventResponse Press(string sessionId, string nodeId)
-		=> Broker.SendEvent(new UiSendEventRequest { SessionId = sessionId, NodeId = nodeId, Name = UiComponentEvents.Press },
+	{
+		return Broker.SendEvent(new UiSendEventRequest
+				{ SessionId = sessionId, NodeId = nodeId, Name = UiComponentEvents.Press },
 			Connection,
 			ClientId);
+	}
 
 	private IReadOnlyList<ActionExecutionStatusEvent> StatusEventsToClient()
-		=> [.. Transport.InGroup(UiClientGroups.For(ClientId)).Select(recorded => recorded.Message)
-			.OfType<ActionExecutionStatusEvent>()];
+	{
+		return
+		[
+			.. Transport.InGroup(UiClientGroups.For(ClientId))
+				.Select(recorded => recorded.Message)
+				.OfType<ActionExecutionStatusEvent>()
+		];
+	}
 }

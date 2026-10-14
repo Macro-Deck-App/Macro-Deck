@@ -18,13 +18,20 @@ public class VirtualProfilesCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(string localId, string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.VirtualProfiles,
 			LocalId = localId,
@@ -35,12 +42,15 @@ public class VirtualProfilesCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private static VirtualProfileDescriptor CarThing()
-		=> new("car-thing",
+	{
+		return new VirtualProfileDescriptor("car-thing",
 			"Car Thing",
 			ProfileLayout.Grid(2, 4),
 			[new VirtualFolderDescriptor("main", "Main", [new VirtualWidgetDescriptor("play", "ActionButton", 0, 0)])]);
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id()
@@ -60,7 +70,9 @@ public class VirtualProfilesCapabilityHandlerTests
 
 	[Test]
 	public void No_provider_declares_nothing()
-		=> Assert.That(new VirtualProfilesCapabilityHandler([], TestMetadata.Default).DeclareCapabilities(), Is.Empty);
+	{
+		Assert.That(new VirtualProfilesCapabilityHandler([], TestMetadata.Default).DeclareCapabilities(), Is.Empty);
+	}
 
 	[Test]
 	public async Task Describe_reports_the_provider_name_and_profiles()

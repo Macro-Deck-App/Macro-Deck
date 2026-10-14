@@ -19,9 +19,13 @@ internal static class YouTubeVariables
 		"stream_thumbnail_url"
 	];
 
-	public static string AccountPrefix(string variableKey) => $"{Prefix}{variableKey}_";
+	public static string AccountPrefix(string variableKey)
+	{
+		return $"{Prefix}{variableKey}_";
+	}
 
-	public static IReadOnlyList<VariableDefinition> Declare(string variableKey,
+	public static IReadOnlyList<VariableDefinition> Declare(
+		string variableKey,
 		VariableConfiguration? configuration = null)
 	{
 		var prefix = AccountPrefix(variableKey);
@@ -87,7 +91,8 @@ internal static class YouTubeVariables
 	}
 
 	public static object? Read(YouTubeAccount account, YouTubeAccountState state, string name, DateTimeOffset now)
-		=> name switch
+	{
+		return name switch
 		{
 			"display_name" => state.ChannelTitle ?? account.Title,
 			"is_live" => state.IsLive,
@@ -99,11 +104,14 @@ internal static class YouTubeVariables
 			"stream_thumbnail_url" => state.IsLive == true ? state.StreamThumbnailUrl : null,
 			_ => null
 		};
+	}
 
 	// A definition id is the canonical name with '_' swapped for '-', and a canonical variable name can
 	// never contain '-', so swapping the separator back recovers the name exactly.
 	public static (string VariableKey, string Name)? SplitDefinitionId(string definitionId)
-		=> Split(definitionId.Replace('-', '_'));
+	{
+		return Split(definitionId.Replace('-', '_'));
+	}
 
 	public static (string VariableKey, string Name)? Split(string variableName)
 	{
@@ -126,7 +134,9 @@ internal static class YouTubeVariables
 	}
 
 	private static long? Uptime(YouTubeAccountState state, DateTimeOffset now)
-		=> state.IsLive == true && state.StreamStartedAt is { } started
+	{
+		return state.IsLive == true && state.StreamStartedAt is { } started
 			? (long)Math.Max(0, (now - started).TotalSeconds)
 			: null;
+	}
 }

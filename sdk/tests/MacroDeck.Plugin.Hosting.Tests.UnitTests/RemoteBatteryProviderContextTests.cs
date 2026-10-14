@@ -60,7 +60,9 @@ public class RemoteBatteryProviderContextTests
 	public async Task A_publish_that_would_exceed_the_limit_is_refused_without_reaching_the_host()
 	{
 		Connect();
-		await _context.PublishAsync([.. Enumerable.Range(0, BatteryLimits.MaxDevicesPerProvider).Select(index => Device($"d{index}"))]);
+		await _context.PublishAsync([
+			.. Enumerable.Range(0, BatteryLimits.MaxDevicesPerProvider).Select(index => Device($"d{index}"))
+		]);
 
 		Assert.That(() => _context.PublishAsync(Device("one-too-many")), Throws.InvalidOperationException);
 		Assert.That(_host.Calls, Has.Count.EqualTo(1));
@@ -70,9 +72,11 @@ public class RemoteBatteryProviderContextTests
 	public async Task Republishing_a_known_id_does_not_count_against_the_limit()
 	{
 		Connect();
-		await _context.PublishAsync([.. Enumerable.Range(0, BatteryLimits.MaxDevicesPerProvider).Select(index => Device($"d{index}"))]);
+		await _context.PublishAsync([
+			.. Enumerable.Range(0, BatteryLimits.MaxDevicesPerProvider).Select(index => Device($"d{index}"))
+		]);
 
-		Assert.DoesNotThrowAsync(() => _context.PublishAsync(Device("d0", level: 10)));
+		Assert.DoesNotThrowAsync(() => _context.PublishAsync(Device("d0", 10)));
 	}
 
 	[Test]
@@ -92,7 +96,7 @@ public class RemoteBatteryProviderContextTests
 
 		Assert.That(() => _context.PublishAsync(Device("a")), Throws.InstanceOf<HostInvocationException>());
 
-		_state.RaiseConnected(resumed: true);
+		_state.RaiseConnected(true);
 		await Task.Delay(100);
 		Assert.That(_host.Calls, Has.Count.EqualTo(1));
 	}
@@ -121,7 +125,7 @@ public class RemoteBatteryProviderContextTests
 		await _context.RemoveAsync("b");
 
 		Connect();
-		_state.RaiseConnected(resumed: true);
+		_state.RaiseConnected(true);
 		await WaitForAsync(() => _host.Calls.Count == 4);
 
 		var sync = _host.Calls[^1];
@@ -140,7 +144,7 @@ public class RemoteBatteryProviderContextTests
 		await _context.PublishAsync(Device("a"));
 
 		Connect();
-		_state.RaiseConnected(resumed: false);
+		_state.RaiseConnected(false);
 		await Task.Delay(100);
 
 		Assert.That(_host.Calls, Has.Count.EqualTo(1));
@@ -153,7 +157,7 @@ public class RemoteBatteryProviderContextTests
 		await _context.PublishAsync(Device("a"));
 
 		await _context.ResetAsync();
-		_state.RaiseConnected(resumed: true);
+		_state.RaiseConnected(true);
 		await Task.Delay(100);
 
 		Assert.That(_host.Calls.Select(call => call.Operation), Does.Not.Contain(HostOperations.Batteries.Sync));
@@ -192,7 +196,7 @@ public class RemoteBatteryProviderContextTests
 
 		Assert.DoesNotThrowAsync(() => _context.ResetAsync());
 
-		_state.RaiseConnected(resumed: true);
+		_state.RaiseConnected(true);
 		await Task.Delay(100);
 		Assert.That(_host.Calls.Select(call => call.Operation), Does.Not.Contain(HostOperations.Batteries.Sync));
 	}
@@ -212,11 +216,11 @@ public class RemoteBatteryProviderContextTests
 	[Test]
 	public async Task A_publish_while_disconnected_reaches_the_host_on_the_next_resume()
 	{
-		await _context.PublishAsync(Device("a", level: 55));
+		await _context.PublishAsync(Device("a", 55));
 		Assert.That(_host.Calls, Is.Empty);
 
 		Connect();
-		_state.RaiseConnected(resumed: true);
+		_state.RaiseConnected(true);
 		await WaitForAsync(() => _host.Calls.Count == 1);
 
 		var device = ((BatteriesSyncArguments)_host.Calls[0].Arguments).Devices.Single();
@@ -257,21 +261,27 @@ public class RemoteBatteryProviderContextTests
 
 		Assert.That(() => _context.PublishAsync(Device("a")),
 			Throws.InstanceOf<HostInvocationException>()
-				.With.Property(nameof(HostInvocationException.Code)).EqualTo(ProtocolErrorCodes.RateLimited));
+				.With.Property(nameof(HostInvocationException.Code))
+				.EqualTo(ProtocolErrorCodes.RateLimited));
 	}
 
 	private static BatteryDevice Device(string id, int? level = 80)
-		=> new() { Id = id, Name = id.ToUpperInvariant(), Kind = BatteryDeviceKinds.Headphones, LevelPercent = level };
+	{
+		return new BatteryDevice
+			{ Id = id, Name = id.ToUpperInvariant(), Kind = BatteryDeviceKinds.Headphones, LevelPercent = level };
+	}
 
 	private void Connect()
-		=> _state.ActiveConnection = new PluginSessionConnection(_socket,
+	{
+		_state.ActiveConnection = new PluginSessionConnection(_socket,
 			TestSession.Create(),
 			TestSession.Dispatcher(),
 			_state,
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
-			hostInvoker: null,
-			hostStateCache: null);
+			null,
+			null);
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{
@@ -297,7 +307,11 @@ public class RemoteBatteryProviderContextTests
 
 		public bool Unsupported { get; set; }
 
-		public Task<JsonElement?> InvokeAsync(string api, string operation, object? arguments, CancellationToken cancellationToken)
+		public Task<JsonElement?> InvokeAsync(
+			string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
 		{
 			Assert.That(api, Is.EqualTo(HostApis.Batteries));
 			_calls.Enqueue((operation, arguments!));
@@ -312,12 +326,16 @@ public class RemoteBatteryProviderContextTests
 
 			if (Failures.TryDequeue(out var code))
 			{
-				throw HostInvocationException.From(new ProtocolError { Code = code, Message = code, Retryable = false });
+				throw HostInvocationException.From(new ProtocolError
+					{ Code = code, Message = code, Retryable = false });
 			}
 
 			return Task.FromResult<JsonElement?>(null);
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

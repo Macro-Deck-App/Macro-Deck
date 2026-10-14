@@ -57,7 +57,10 @@ public class UpdateWidgetPositionsRequestMessageHandlerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task InvalidFolderGuid_ReturnsValidationError()
@@ -130,12 +133,15 @@ public class UpdateWidgetPositionsRequestMessageHandlerTests
 		});
 	}
 
-	private static WidgetPositionUpdate Position(Guid id, int x, int y) => new()
+	private static WidgetPositionUpdate Position(Guid id, int x, int y)
 	{
-		Id = id.ToString(),
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetPositionUpdate
+		{
+			Id = id.ToString(),
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 }

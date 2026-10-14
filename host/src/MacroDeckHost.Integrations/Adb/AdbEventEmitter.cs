@@ -34,14 +34,17 @@ internal sealed class AdbEventEmitter
 		_publisher.Publish(eventId, payload);
 	}
 
-	private static string? EventIdFor(AdbDeviceChangeKind kind) => kind switch
+	private static string? EventIdFor(AdbDeviceChangeKind kind)
 	{
-		AdbDeviceChangeKind.Connected => AdbEventIds.DeviceConnected,
-		AdbDeviceChangeKind.Disconnected => AdbEventIds.DeviceDisconnected,
-		AdbDeviceChangeKind.Authorized => AdbEventIds.DeviceAuthorized,
-		AdbDeviceChangeKind.Unauthorized => AdbEventIds.DeviceUnauthorized,
-		AdbDeviceChangeKind.Online => AdbEventIds.DeviceOnline,
-		AdbDeviceChangeKind.Offline => AdbEventIds.DeviceOffline,
-		_ => null
-	};
+		return kind switch
+		{
+			AdbDeviceChangeKind.Connected => AdbEventIds.DeviceConnected,
+			AdbDeviceChangeKind.Disconnected => AdbEventIds.DeviceDisconnected,
+			AdbDeviceChangeKind.Authorized => AdbEventIds.DeviceAuthorized,
+			AdbDeviceChangeKind.Unauthorized => AdbEventIds.DeviceUnauthorized,
+			AdbDeviceChangeKind.Online => AdbEventIds.DeviceOnline,
+			AdbDeviceChangeKind.Offline => AdbEventIds.DeviceOffline,
+			_ => null
+		};
+	}
 }

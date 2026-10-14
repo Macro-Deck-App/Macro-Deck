@@ -19,16 +19,19 @@ public sealed class LocalizedTextJsonConverter : JsonConverter<LocalizedText>
 	private const string ArgumentsProperty = "arguments";
 
 	/// <inheritdoc />
-	public override LocalizedText Read(ref Utf8JsonReader reader,
+	public override LocalizedText Read(
+		ref Utf8JsonReader reader,
 		Type typeToConvert,
 		JsonSerializerOptions options)
-		=> reader.TokenType switch
+	{
+		return reader.TokenType switch
 		{
 			JsonTokenType.Null => default,
 			JsonTokenType.String => LocalizedText.FromLiteral(reader.GetString()),
 			JsonTokenType.StartObject => ReadLocalized(ref reader),
-			_ => throw new JsonException("Localized text must be a string or a localization object."),
+			_ => throw new JsonException("Localized text must be a string or a localization object.")
 		};
+	}
 
 	/// <inheritdoc />
 	public override void Write(Utf8JsonWriter writer, LocalizedText value, JsonSerializerOptions options)
@@ -80,18 +83,17 @@ public sealed class LocalizedTextJsonConverter : JsonConverter<LocalizedText>
 			throw new JsonException($"A localized text object must carry a '{Marker}' member.");
 		}
 
-		if (!marker.TryGetProperty(ScopeProperty, out var scope) ||
-			!marker.TryGetProperty(KeyProperty, out var key) ||
-			scope.ValueKind != JsonValueKind.String ||
-			key.ValueKind != JsonValueKind.String)
+		if (!marker.TryGetProperty(ScopeProperty, out var scope)
+			|| !marker.TryGetProperty(KeyProperty, out var key)
+			|| scope.ValueKind != JsonValueKind.String
+			|| key.ValueKind != JsonValueKind.String)
 		{
 			throw new JsonException($"A '{Marker}' member needs string '{ScopeProperty}' and '{KeyProperty}'.");
 		}
 
 		var arguments = new Dictionary<string, object?>(StringComparer.Ordinal);
 
-		if (marker.TryGetProperty(ArgumentsProperty, out var declared) &&
-			declared.ValueKind == JsonValueKind.Object)
+		if (marker.TryGetProperty(ArgumentsProperty, out var declared) && declared.ValueKind == JsonValueKind.Object)
 		{
 			foreach (var argument in declared.EnumerateObject())
 			{
@@ -103,12 +105,15 @@ public sealed class LocalizedTextJsonConverter : JsonConverter<LocalizedText>
 			new LocalizedString(new LocalizationKey(scope.GetString()!, key.GetString()!), arguments));
 	}
 
-	private static object? ReadArgument(JsonElement value) => value.ValueKind switch
+	private static object? ReadArgument(JsonElement value)
 	{
-		JsonValueKind.String => value.GetString(),
-		JsonValueKind.True => true,
-		JsonValueKind.False => false,
-		JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
-		_ => null,
-	};
+		return value.ValueKind switch
+		{
+			JsonValueKind.String => value.GetString(),
+			JsonValueKind.True => true,
+			JsonValueKind.False => false,
+			JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
+			_ => null
+		};
+	}
 }

@@ -11,8 +11,13 @@ public sealed record PackageDigestResult
 
 	public string? Message { get; init; }
 
-	public static PackageDigestResult Ok(byte[] digest) => new() { Success = true, Digest = digest };
+	public static PackageDigestResult Ok(byte[] digest)
+	{
+		return new PackageDigestResult { Success = true, Digest = digest };
+	}
 
-	public static PackageDigestResult Fail(SigningError error, string message) =>
-		new() { Success = false, Error = error, Message = message };
+	public static PackageDigestResult Fail(SigningError error, string message)
+	{
+		return new PackageDigestResult { Success = false, Error = error, Message = message };
+	}
 }

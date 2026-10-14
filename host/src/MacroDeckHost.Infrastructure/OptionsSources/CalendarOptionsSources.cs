@@ -32,16 +32,19 @@ public sealed class CalendarAccountsOptionsSource : IHostOptionsSource
 		var accounts = _registry.GetAccounts();
 
 		var qualifyWithProvider = accounts
-			.Select(account => _localization.Resolve(account.ProviderName, culture))
-			.Distinct(StringComparer.Ordinal)
-			.Count() > 1;
+				.Select(account => _localization.Resolve(account.ProviderName, culture))
+				.Distinct(StringComparer.Ordinal)
+				.Count()
+			> 1;
 
 		return CalendarOptions.Result(accounts.Select(account => new ActionParameterOption
 			{
 				Value = account.AccountId,
 				Label = qualifyWithProvider
-					? _localization.Resolve(Strings.Config.AccountProvider(account: account.DisplayName,
-						provider: account.ProviderName), culture) ?? account.DisplayName
+					? _localization.Resolve(Strings.Config.AccountProvider(account.DisplayName,
+							account.ProviderName),
+						culture)
+					?? account.DisplayName
 					: account.DisplayName
 			}),
 			filter);
@@ -77,9 +80,11 @@ public sealed class CalendarCalendarsOptionsSource : IHostOptionsSource
 				{
 					Value = calendar.Key,
 					Label = qualifyWithAccount
-						? _localization.Resolve(Strings.Details.Source(calendar: calendar.Name,
-							account: state.Account.DisplayName,
-							provider: state.Account.ProviderName), culture) ?? calendar.Name
+						? _localization.Resolve(Strings.Details.Source(calendar.Name,
+								state.Account.DisplayName,
+								state.Account.ProviderName),
+							culture)
+						?? calendar.Name
 						: calendar.Name
 				})),
 			filter);
@@ -89,14 +94,17 @@ public sealed class CalendarCalendarsOptionsSource : IHostOptionsSource
 internal static class CalendarOptions
 {
 	public static DynamicOptionsResult Result(IEnumerable<ActionParameterOption> options, string? filter)
-		=> new()
+	{
+		return new DynamicOptionsResult
 		{
 			Options = options
-				.Where(option => filter is null ||
-					(option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
+				.Where(option
+					=> filter is null
+					|| (option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
 				.OrderBy(option => option.Label.Literal, StringComparer.OrdinalIgnoreCase)
 				.ToList(),
 			AllowsCustomValue = true,
 			CacheSeconds = 5
 		};
+	}
 }

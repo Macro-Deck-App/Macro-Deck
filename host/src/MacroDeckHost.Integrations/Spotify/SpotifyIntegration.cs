@@ -76,7 +76,8 @@ public sealed class SpotifyIntegration
 	}
 
 	// The transport is only injected by tests, which must not reach api.spotify.com.
-	internal SpotifyIntegration(ISpotifyOAuthClient oauth,
+	internal SpotifyIntegration(
+		ISpotifyOAuthClient oauth,
 		IHTTPClient? transport = null,
 		TimeSpan? unreachableIssueThreshold = null,
 		TimeSpan? persisterDrainTimeout = null,
@@ -245,22 +246,34 @@ public sealed class SpotifyIntegration
 			}
 	];
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new SpotifyConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new SpotifyConfigFlow();
+	}
 
 	public bool AllowsMultipleConfigurations => false;
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new SpotifyMacroDeck2Migration()];
 
 	public IReadOnlyList<MusicPlayerInstance> GetInstances()
-		=> _instances.Select(i => new MusicPlayerInstance(i.EntryId, i.Title)).ToList();
+	{
+		return _instances.Select(i => new MusicPlayerInstance(i.EntryId, i.Title)).ToList();
+	}
 
 	public IMusicPlayer? GetPlayer(string instanceId)
-		=> _instances.FirstOrDefault(i => i.EntryId == instanceId)?.Player;
+	{
+		return _instances.FirstOrDefault(i => i.EntryId == instanceId)?.Player;
+	}
 
 	private IMusicPlayer? ResolvePlayer(string? instanceId)
-		=> string.IsNullOrEmpty(instanceId) ? DefaultPlayer : GetPlayer(instanceId);
+	{
+		return string.IsNullOrEmpty(instanceId) ? DefaultPlayer : GetPlayer(instanceId);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -367,9 +380,8 @@ public sealed class SpotifyIntegration
 				}
 				catch (TimeoutException)
 				{
-					_logger.Error(
-						"Spotify token persistence did not drain within {Timeout} during shutdown; a rotated " +
-						"refresh token may not have been stored",
+					_logger.Error("Spotify token persistence did not drain within {Timeout} during shutdown; a rotated "
+						+ "refresh token may not have been stored",
 						_persisterDrainTimeout);
 				}
 				catch (Exception ex)
@@ -444,8 +456,8 @@ public sealed class SpotifyIntegration
 		// TemporarilyUnavailable deliberately raises nothing: Macro Deck retries on its own and keeps the
 		// last known state, so a network blink must not send the user through OAuth again (#298).
 		var instances = _instances;
-		var credentialsInvalid = instances.Count == 0 ||
-			instances.Any(i => i.Player.AuthenticationState == SpotifyAuthenticationState.ReauthorizationRequired);
+		var credentialsInvalid = instances.Count == 0
+			|| instances.Any(i => i.Player.AuthenticationState == SpotifyAuthenticationState.ReauthorizationRequired);
 		if (credentialsInvalid)
 		{
 			return SingleIssue(new IntegrationIssue
@@ -480,8 +492,7 @@ public sealed class SpotifyIntegration
 			{
 				Id = PremiumRequiredIssueId,
 				Title = AppStrings.Integrations.Spotify.Issues.PremiumRequiredTitle(),
-				Description = AppStrings.Integrations.Spotify.Issues.PremiumRequiredDescription(
-					url: SpotifyWebApiDocsUrl),
+				Description = AppStrings.Integrations.Spotify.Issues.PremiumRequiredDescription(SpotifyWebApiDocsUrl),
 				Severity = IntegrationIssueSeverity.Warning,
 				ActionLabel = AppStrings.Integrations.Spotify.Issues.ReconnectAction()
 			});
@@ -502,18 +513,18 @@ public sealed class SpotifyIntegration
 					? AppStrings.Integrations.Spotify.Issues.QuotaReachedTitle()
 					: AppStrings.Integrations.Spotify.Issues.RateLimitedTitle(),
 				Description = quota
-					? (sameDay
-						? AppStrings.Integrations.Spotify.Issues.QuotaReachedDescriptionSameDay(pausedAt: pausedAt,
-							resumesAt: resumesTime)
-						: AppStrings.Integrations.Spotify.Issues.QuotaReachedDescriptionOtherDay(pausedAt: pausedAt,
-							resumesDate: resumesAt.ToString("d MMMM", CultureInfo.CurrentCulture),
-							resumesTime: resumesTime))
-					: (sameDay
-						? AppStrings.Integrations.Spotify.Issues.RateLimitedDescriptionSameDay(pausedAt: pausedAt,
-							resumesAt: resumesTime)
-						: AppStrings.Integrations.Spotify.Issues.RateLimitedDescriptionOtherDay(pausedAt: pausedAt,
-							resumesDate: resumesAt.ToString("d MMMM", CultureInfo.CurrentCulture),
-							resumesTime: resumesTime)),
+					? sameDay
+						? AppStrings.Integrations.Spotify.Issues.QuotaReachedDescriptionSameDay(pausedAt,
+							resumesTime)
+						: AppStrings.Integrations.Spotify.Issues.QuotaReachedDescriptionOtherDay(pausedAt,
+							resumesAt.ToString("d MMMM", CultureInfo.CurrentCulture),
+							resumesTime)
+					: sameDay
+						? AppStrings.Integrations.Spotify.Issues.RateLimitedDescriptionSameDay(pausedAt,
+							resumesTime)
+						: AppStrings.Integrations.Spotify.Issues.RateLimitedDescriptionOtherDay(pausedAt,
+							resumesAt.ToString("d MMMM", CultureInfo.CurrentCulture),
+							resumesTime),
 				Severity = IntegrationIssueSeverity.Warning,
 				ActionLabel = null
 			});
@@ -526,7 +537,7 @@ public sealed class SpotifyIntegration
 				Id = UnreachableIssueId,
 				Title = AppStrings.Integrations.Spotify.Issues.NotRespondingTitle(),
 				Description = AppStrings.Integrations.Spotify.Issues.NotRespondingDescription(
-					since: LocalTimeOfDay(await TimeOfDayFormatAsync(), since)),
+					LocalTimeOfDay(await TimeOfDayFormatAsync(), since)),
 				Severity = IntegrationIssueSeverity.Info,
 				ActionLabel = null
 			});
@@ -536,13 +547,19 @@ public sealed class SpotifyIntegration
 	}
 
 	private static List<IntegrationIssue> SingleIssue(IntegrationIssue primary)
-		=> [primary];
+	{
+		return [primary];
+	}
 
 	private Task<TimeOfDayFormat> TimeOfDayFormatAsync()
-		=> (_context?.Locale ?? LocalLocaleApi.Instance).GetTimeOfDayFormatAsync();
+	{
+		return (_context?.Locale ?? LocalLocaleApi.Instance).GetTimeOfDayFormatAsync();
+	}
 
 	private static string LocalTimeOfDay(TimeOfDayFormat format, DateTimeOffset instant)
-		=> format.Format(TimeOnly.FromDateTime(instant.ToLocalTime().DateTime));
+	{
+		return format.Format(TimeOnly.FromDateTime(instant.ToLocalTime().DateTime));
+	}
 
 	// The longest-running episode across instances, so a second account joining a limit that is already
 	// open cannot restart the issue's timestamp (and with it its JSON, and with it a re-send).
@@ -575,7 +592,8 @@ public sealed class SpotifyIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId switch
+	{
+		return Task.FromResult(issueId switch
 		{
 			CredentialsIssueId =>
 				IssueResolution.Ok(AppStrings.Integrations.Spotify.Issues.ReenterCredentialsResolution(),
@@ -588,6 +606,7 @@ public sealed class SpotifyIntegration
 					IssueResolutionFollowUp.StartConfigFlow),
 			_ => IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue())
 		});
+	}
 
 	public async ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -736,10 +755,10 @@ public sealed class SpotifyIntegration
 		var expiresAtRaw = await context.Config.GetStringAsync(entryId, SpotifyConfigKeys.ExpiresAt);
 		var scope = await context.Config.GetStringAsync(entryId, SpotifyConfigKeys.Scope);
 
-		if (string.IsNullOrEmpty(clientId) ||
-			string.IsNullOrEmpty(clientSecret) ||
-			string.IsNullOrEmpty(accessToken) ||
-			string.IsNullOrEmpty(refreshToken))
+		if (string.IsNullOrEmpty(clientId)
+			|| string.IsNullOrEmpty(clientSecret)
+			|| string.IsNullOrEmpty(accessToken)
+			|| string.IsNullOrEmpty(refreshToken))
 		{
 			_logger.Warning("Spotify config entry {EntryId} is incomplete; skipping", entryId);
 			return null;

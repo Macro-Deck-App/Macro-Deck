@@ -19,13 +19,18 @@ internal sealed class PluginProcessLauncherTests
 	}
 
 	private static PluginProcessLauncher CreateLauncher()
-		=> new(new PluginProcessJobFactory(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
+	{
+		return new PluginProcessLauncher(new PluginProcessJobFactory(Serilog.Core.Logger.None),
+			Serilog.Core.Logger.None);
+	}
 
-	private PluginProcessStartRequest Request(IReadOnlyList<string> arguments,
+	private PluginProcessStartRequest Request(
+		IReadOnlyList<string> arguments,
 		IReadOnlyDictionary<string, string?>? environment = null,
 		int maxLines = 100,
 		int maxBytes = 16 * 1024)
-		=> new()
+	{
+		return new PluginProcessStartRequest
 		{
 			ExecutablePath = _stubPath,
 			WorkingDirectory = _workingDirectory,
@@ -34,6 +39,7 @@ internal sealed class PluginProcessLauncherTests
 			BootstrapOutputMaxLines = maxLines,
 			BootstrapOutputMaxBytes = maxBytes
 		};
+	}
 
 	[Test]
 	public async Task Environment_variables_actually_reach_the_child()

@@ -28,14 +28,14 @@ internal sealed class WeatherSurfacesFollowAFetchTests
 	[CancelAfter(30_000)]
 	public async Task The_weather_widget_and_variables_follow_every_fetch_instead_of_their_own_poll()
 	{
-		var client = new FakeOpenMeteoClient { Forecast = Forecast(weatherCode: 0) };
+		var client = new FakeOpenMeteoClient { Forecast = Forecast(0) };
 		var refresh = new VariableRefreshSignal();
 		using var trigger = new WeatherBroadcastTrigger();
 		var context = new Context(new IntegrationVariableApi(WeatherIntegration.IntegrationId, null!, refresh),
 			new IntegrationWeatherProviderApi(trigger));
-		context.ConfigStore.AddEntry("Berlin", latitude: "52.52", longitude: "13.41");
+		context.ConfigStore.AddEntry("Berlin", "52.52", "13.41");
 
-		using var integration = new WeatherIntegration(client, refreshInterval: TimeSpan.FromSeconds(1));
+		using var integration = new WeatherIntegration(client, TimeSpan.FromSeconds(1));
 		var notifier = new WeatherStateNotifier();
 		var published = new ConcurrentQueue<string>();
 		notifier.StateChanged += (_, args) => published.Enqueue(args.State.Condition);
@@ -54,7 +54,7 @@ internal sealed class WeatherSurfacesFollowAFetchTests
 			await WaitUntilAsync(() => published.Contains("clear"));
 			var variablesAskedAfterFirstFetch = refresh.DrainEagerRefreshRequested(WeatherIntegration.IntegrationId);
 
-			client.Forecast = Forecast(weatherCode: 61);
+			client.Forecast = Forecast(61);
 			await WaitUntilAsync(() => published.Contains("rain"));
 			await WaitUntilAsync(() => refresh.DrainEagerRefreshRequested(WeatherIntegration.IntegrationId));
 
@@ -74,7 +74,8 @@ internal sealed class WeatherSurfacesFollowAFetchTests
 		{
 			if (DateTime.UtcNow > deadline)
 			{
-				Assert.Fail($"Not observed within {_wellInsideThePoll.TotalSeconds} s, the widget would have waited for its poll.");
+				Assert.Fail(
+					$"Not observed within {_wellInsideThePoll.TotalSeconds} s, the widget would have waited for its poll.");
 			}
 
 			await Task.Delay(20);
@@ -82,24 +83,31 @@ internal sealed class WeatherSurfacesFollowAFetchTests
 	}
 
 	private static OpenMeteoForecastResponse Forecast(int weatherCode)
-		=> new()
+	{
+		return new OpenMeteoForecastResponse
 		{
-			Current = new OpenMeteoCurrent { Temperature = 12, ApparentTemperature = 11, WeatherCode = weatherCode, IsDay = 1 }
+			Current = new OpenMeteoCurrent
+				{ Temperature = 12, ApparentTemperature = 11, WeatherCode = weatherCode, IsDay = 1 }
 		};
+	}
 
 	private sealed class IntegrationRegistry(WeatherIntegration integration) : IWeatherRegistry
 	{
 		public IReadOnlyList<WeatherStationDescriptor> GetInstances()
-			=> integration.GetInstances()
+		{
+			return integration.GetInstances()
 				.Select(instance => new WeatherStationDescriptor($"{WeatherIntegration.IntegrationId}::{instance.Id}",
 					WeatherIntegration.IntegrationId,
 					"Open-Meteo",
 					instance.DisplayName,
 					false))
 				.ToList();
+		}
 
 		public IWeatherStation? GetStation(string instanceId)
-			=> integration.GetStation(instanceId[(instanceId.IndexOf("::", StringComparison.Ordinal) + 2)..]);
+		{
+			return integration.GetStation(instanceId[(instanceId.IndexOf("::", StringComparison.Ordinal) + 2)..]);
+		}
 
 		public IWeatherStation? DefaultStation => null;
 	}

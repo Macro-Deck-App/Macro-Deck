@@ -91,7 +91,7 @@ internal sealed class DiscordIntegrationTests
 	{
 		var integration = new DiscordIntegration();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await integration.ReadAsync("discord-is-connected", CancellationToken.None)).Value, Is.False);
 
@@ -280,9 +280,9 @@ internal sealed class DiscordIntegrationTests
 	[Test]
 	public void An_ignored_voice_setting_raises_an_issue_naming_every_stuck_field()
 	{
-		var issues = DiscordIntegration.BuildIssues(needsReauthorization: false,
-			accessDenied: false,
-			ignoredVoiceSettings: ["noise_suppression", "mode.type"]);
+		var issues = DiscordIntegration.BuildIssues(false,
+			false,
+			["noise_suppression", "mode.type"]);
 
 		var issue = issues.Single(i => i.Id == DiscordIntegration.VoiceSettingsIgnoredIssueId);
 		Assert.Multiple(() =>
@@ -296,9 +296,9 @@ internal sealed class DiscordIntegrationTests
 	[Test]
 	public void No_issue_is_raised_when_nothing_is_stuck()
 	{
-		var issues = DiscordIntegration.BuildIssues(needsReauthorization: false,
-			accessDenied: false,
-			ignoredVoiceSettings: []);
+		var issues = DiscordIntegration.BuildIssues(false,
+			false,
+			[]);
 
 		Assert.That(issues.Any(i => i.Id == DiscordIntegration.VoiceSettingsIgnoredIssueId), Is.False);
 	}

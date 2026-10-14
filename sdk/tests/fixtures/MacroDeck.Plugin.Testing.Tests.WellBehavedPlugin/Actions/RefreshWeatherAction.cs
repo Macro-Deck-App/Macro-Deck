@@ -19,7 +19,10 @@ internal sealed class RefreshWeatherAction(WellBehavedIntegration integration) :
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-	public IActionExecutor CreateExecutor() => new Executor(integration);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(integration);
+	}
 
 	private sealed class Executor(WellBehavedIntegration integration) : IActionExecutor
 	{

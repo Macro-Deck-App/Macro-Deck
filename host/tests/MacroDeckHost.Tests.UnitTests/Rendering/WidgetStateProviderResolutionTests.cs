@@ -26,10 +26,14 @@ public class WidgetStateProviderResolutionTests
 
 	private static JsonObject ProviderData(string blockId, IReadOnlyList<string> stateIds)
 	{
-		JsonArray StateArray() => new(stateIds.Select(id => (JsonNode)new JsonObject
+		JsonArray StateArray()
 		{
-			["id"] = JsonValue.Create(id), ["label"] = JsonValue.Create(id)
-		}).ToArray());
+			return new JsonArray(stateIds.Select(id => (JsonNode)new JsonObject
+				{
+					["id"] = JsonValue.Create(id), ["label"] = JsonValue.Create(id)
+				})
+				.ToArray());
+		}
 
 		return new JsonObject
 		{
@@ -71,15 +75,17 @@ public class WidgetStateProviderResolutionTests
 	}
 
 	private static string FlowWithBlock(string blockId, bool disabled = false, string? blockType = null)
-		=> "[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"" +
-			blockId +
-			"\"," +
-			"\"type\":\"action\",\"blockType\":\"" +
-			(blockType ?? "integration.provide") +
-			"\"," +
-			"\"integrationId\":\"integration\",\"actionId\":\"provide\",\"disabled\":" +
-			(disabled ? "true" : "false") +
-			",\"parameters\":[]}]}]";
+	{
+		return "[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\""
+			+ blockId
+			+ "\","
+			+ "\"type\":\"action\",\"blockType\":\""
+			+ (blockType ?? "integration.provide")
+			+ "\","
+			+ "\"integrationId\":\"integration\",\"actionId\":\"provide\",\"disabled\":"
+			+ (disabled ? "true" : "false")
+			+ ",\"parameters\":[]}]}]";
+	}
 
 	[Test]
 	public async Task BlockFoundById_InsideNestedChildrenAndBranches()
@@ -90,12 +96,12 @@ public class WidgetStateProviderResolutionTests
 		};
 
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[" +
-			"{\"id\":\"outer\",\"type\":\"condition\",\"children\":[]," +
-			"\"branches\":[{\"id\":\"br-1\",\"kind\":\"if\",\"children\":[" +
-			"{\"id\":\"blk-1\",\"type\":\"action\",\"blockType\":\"integration.provide\"," +
-			"\"integrationId\":\"integration\",\"actionId\":\"provide\",\"parameters\":[]}" +
-			"]}]}]}]";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":["
+			+ "{\"id\":\"outer\",\"type\":\"condition\",\"children\":[],"
+			+ "\"branches\":[{\"id\":\"br-1\",\"kind\":\"if\",\"children\":["
+			+ "{\"id\":\"blk-1\",\"type\":\"action\",\"blockType\":\"integration.provide\","
+			+ "\"integrationId\":\"integration\",\"actionId\":\"provide\",\"parameters\":[]}"
+			+ "]}]}]}]";
 
 		var widget = Button(Guid.NewGuid(), flows, ProviderData("blk-1", ["a"]));
 		var (service, registry) = Build(widget);
@@ -113,7 +119,7 @@ public class WidgetStateProviderResolutionTests
 		{
 			Id = "provide", SnapshotToReturn = new ActionStateSnapshot([new ActionStateDefinition("a", "A")], "a")
 		};
-		var widget = Button(Guid.NewGuid(), FlowWithBlock("blk-1", disabled: true), ProviderData("blk-1", ["a"]));
+		var widget = Button(Guid.NewGuid(), FlowWithBlock("blk-1", true), ProviderData("blk-1", ["a"]));
 		var (service, registry) = Build(widget);
 		registry.Add(new FakeIntegration { Id = "integration", Actions = [action] });
 
@@ -223,14 +229,14 @@ public class WidgetStateProviderResolutionTests
 			Id = "provide", SnapshotToReturn = new ActionStateSnapshot([new ActionStateDefinition("a", "A")], "a")
 		};
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[" +
-			"{\"id\":\"blk-a\",\"type\":\"action\",\"blockType\":\"integration.provide\"," +
-			"\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"parameters\":[{\"name\":\"device\",\"type\":\"string\",\"value\":\"A\"}]}," +
-			"{\"id\":\"blk-b\",\"type\":\"action\",\"blockType\":\"integration.provide\"," +
-			"\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"parameters\":[{\"name\":\"device\",\"type\":\"string\",\"value\":\"B\"}]}" +
-			"]}]";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":["
+			+ "{\"id\":\"blk-a\",\"type\":\"action\",\"blockType\":\"integration.provide\","
+			+ "\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"parameters\":[{\"name\":\"device\",\"type\":\"string\",\"value\":\"A\"}]},"
+			+ "{\"id\":\"blk-b\",\"type\":\"action\",\"blockType\":\"integration.provide\","
+			+ "\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"parameters\":[{\"name\":\"device\",\"type\":\"string\",\"value\":\"B\"}]}"
+			+ "]}]";
 		var widget = Button(Guid.NewGuid(), flows, ProviderData("blk-a", ["a"]));
 		var (service, registry) = Build(widget);
 		registry.Add(new FakeIntegration { Id = "integration", Actions = [action] });
@@ -244,11 +250,11 @@ public class WidgetStateProviderResolutionTests
 
 		// Deleting the other block (B) leaves the provider (A) intact.
 		const string withoutB =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[" +
-			"{\"id\":\"blk-a\",\"type\":\"action\",\"blockType\":\"integration.provide\"," +
-			"\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"parameters\":[{\"name\":\"device\",\"type\":\"string\",\"value\":\"A\"}]}" +
-			"]}]";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":["
+			+ "{\"id\":\"blk-a\",\"type\":\"action\",\"blockType\":\"integration.provide\","
+			+ "\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"parameters\":[{\"name\":\"device\",\"type\":\"string\",\"value\":\"A\"}]}"
+			+ "]}]";
 		widget.Data = Button(widget.Id, withoutB, ProviderData("blk-a", ["a"])).Data;
 
 		var stillResolved = await service.Resolve(widget.Id);
@@ -263,11 +269,11 @@ public class WidgetStateProviderResolutionTests
 	{
 		var action = new FakeStateProviderAction { Id = "provide", SnapshotToReturn = null };
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[" +
-			"{\"id\":\"blk-1\",\"type\":\"action\",\"blockType\":\"integration.provide\"," +
-			"\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"parameters\":[{\"name\":\"device\",\"type\":\"string\",\"value\":\"A\"}]}" +
-			"]}]";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":["
+			+ "{\"id\":\"blk-1\",\"type\":\"action\",\"blockType\":\"integration.provide\","
+			+ "\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"parameters\":[{\"name\":\"device\",\"type\":\"string\",\"value\":\"A\"}]}"
+			+ "]}]";
 		var widget = Button(Guid.NewGuid(), flows, ProviderData("blk-1", ["a"]));
 		var (service, registry) = Build(widget);
 		registry.Add(new FakeIntegration { Id = "integration", Actions = [action] });
@@ -336,19 +342,49 @@ public class WidgetStateProviderResolutionTests
 		private readonly FolderEntity _folder;
 
 		public SingleWidgetFolderCache(WidgetEntity widget)
-			=> _folder = new FolderEntity { Id = widget.FolderId, Name = "f", Order = 0, Widgets = [widget] };
+		{
+			_folder = new FolderEntity { Id = widget.FolderId, Name = "f", Order = 0, Widgets = [widget] };
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

@@ -10,7 +10,8 @@ public sealed partial class JellyfinIntegration
 {
 	private readonly ConcurrentDictionary<Guid, string> _pendingKeys = new();
 
-	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+		ConfigEntryPreparation preparation,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(preparation);
@@ -52,7 +53,8 @@ public sealed partial class JellyfinIntegration
 			JellyfinVariables.DeclareServer(key, preparation.EntryId, preparation.Title)));
 	}
 
-	public async Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+	public async Task<ConfigEntryStatus> GetEntryStatusAsync(
+		StoredConfigEntry entry,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(entry);
@@ -93,7 +95,8 @@ public sealed partial class JellyfinIntegration
 		return true;
 	}
 
-	public async Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	public async Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(entries);
@@ -142,10 +145,14 @@ public sealed partial class JellyfinIntegration
 	}
 
 	private static string? ReadKey(StoredConfigEntry entry)
-		=> ReadString(entry, VariableKeyConfigKey) is { Length: > 0 } key ? key : null;
+	{
+		return ReadString(entry, VariableKeyConfigKey) is { Length: > 0 } key ? key : null;
+	}
 
 	private static string? ReadString(StoredConfigEntry entry, string name)
-		=> entry.Values.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return entry.Values.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString()
 			: null;
+	}
 }

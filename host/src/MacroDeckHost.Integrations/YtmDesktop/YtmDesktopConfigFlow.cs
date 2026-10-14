@@ -52,12 +52,14 @@ public sealed class YtmDesktopConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			EnableStepId => await SubmitEnableAsync(input, cancellationToken),
 			AuthorizeStepId => await SubmitAuthorizeAsync(input, cancellationToken),
 			_ => ConfigFlowResult.Error(EnableStep(), AppStrings.Integrations.YtmDesktop.Config.UnknownStep())
 		};
+	}
 
 	private async Task<ConfigFlowResult> SubmitEnableAsync(
 		IReadOnlyDictionary<string, object?> input,
@@ -91,7 +93,7 @@ public sealed class YtmDesktopConfigFlow : IConfigFlow
 			_logger.Debug(ex, "Could not reach the Companion Server at {Address}", _endpoint.DisplayAddress);
 			return ConfigFlowResult.Error(EnableStep(),
 				AppStrings.Integrations.YtmDesktop.Config
-					.CompanionServerUnreachable(address: _endpoint.DisplayAddress));
+					.CompanionServerUnreachable(_endpoint.DisplayAddress));
 		}
 
 		return await RequestCodeAsync(client, cancellationToken);
@@ -240,7 +242,8 @@ public sealed class YtmDesktopConfigFlow : IConfigFlow
 	}
 
 	private ConfigFlowStep EnableStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = EnableStepId,
 			Title = AppStrings.Integrations.YtmDesktop.Config.EnableTitle(),
@@ -273,9 +276,11 @@ public sealed class YtmDesktopConfigFlow : IConfigFlow
 			Fields = [],
 			AdvancedFields = AddressFields()
 		};
+	}
 
 	private ConfigFlowStep AuthorizeStep(string code)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = AuthorizeStepId,
 			Title = AppStrings.Integrations.YtmDesktop.Config.AuthorizeTitle(),
@@ -300,21 +305,24 @@ public sealed class YtmDesktopConfigFlow : IConfigFlow
 			Fields = [],
 			AdvancedFields = AddressFields()
 		};
+	}
 
 	private IReadOnlyList<ActionParameter> AddressFields()
-		=>
+	{
+		return
 		[
 			ActionParameter.Text(YtmDesktopConfigKeys.Host,
-				label: AppStrings.Integrations.YtmDesktop.Config.AddressLabel(),
-				description: AppStrings.Integrations.YtmDesktop.Config.AddressDescription(),
+				AppStrings.Integrations.YtmDesktop.Config.AddressLabel(),
+				AppStrings.Integrations.YtmDesktop.Config.AddressDescription(),
 				defaultValue: _endpoint.Host),
 			ActionParameter.Number(YtmDesktopConfigKeys.Port,
-				label: AppStrings.Integrations.YtmDesktop.Config.PortLabel(),
-				description: AppStrings.Integrations.YtmDesktop.Config.PortDescription(),
-				min: 1,
-				max: 65535,
+				AppStrings.Integrations.YtmDesktop.Config.PortLabel(),
+				AppStrings.Integrations.YtmDesktop.Config.PortDescription(),
+				1,
+				65535,
 				defaultValue: _endpoint.Port)
 		];
+	}
 
 	private static bool TryReadPort(object? raw, out int port)
 	{

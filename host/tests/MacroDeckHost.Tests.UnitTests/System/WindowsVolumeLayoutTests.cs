@@ -8,7 +8,7 @@ public class WindowsVolumeLayoutTests
 {
 	private static readonly Type _windowsVolumeService = typeof(IVolumeService).Assembly.GetType(
 		"MacroDeckHost.Integrations.System.Volume.WindowsVolumeService",
-		throwOnError: true)!;
+		true)!;
 
 	[Test]
 	public void PropVariant_matches_the_native_size_for_the_process_bitness()

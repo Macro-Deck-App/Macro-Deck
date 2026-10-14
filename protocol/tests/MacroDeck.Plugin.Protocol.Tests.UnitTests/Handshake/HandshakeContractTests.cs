@@ -19,7 +19,7 @@ public class HandshakeContractTests
 			SupportedVersions = ProtocolVersions.Supported,
 			CapabilityKinds = CapabilityKinds.All,
 			Limits = SampleLimits(),
-			Timeouts = SampleTimeouts(),
+			Timeouts = SampleTimeouts()
 		};
 
 		var json = JsonSerializer.Serialize(descriptor, PluginProtocolJson.Options);
@@ -87,9 +87,9 @@ public class HandshakeContractTests
 				{
 					Kind = CapabilityKinds.Actions,
 					LocalId = "set-volume",
-					VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 },
-				},
-			],
+					VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
+				}
+			]
 		};
 
 		var json = JsonSerializer.Serialize(request, PluginProtocolJson.Options);
@@ -199,7 +199,7 @@ public class HandshakeContractTests
 			NegotiatedVersion = ProtocolVersions.Current,
 			Capabilities = [CapabilityNegotiationResult.Accept(CapabilityKinds.Actions, 1)],
 			Limits = SampleLimits(),
-			Timeouts = SampleTimeouts(),
+			Timeouts = SampleTimeouts()
 		};
 
 		var json = JsonSerializer.Serialize(response, PluginProtocolJson.Options);
@@ -237,7 +237,7 @@ public class HandshakeContractTests
 			ProtocolVersion = 1,
 			SessionId = SampleSessionId,
 			ResumeSessionId = "1f8fad5b-d9cb-7f5b-9165-70867728950e",
-			InstanceId = "instance-1",
+			InstanceId = "instance-1"
 		};
 
 		var json = JsonSerializer.Serialize(payload, PluginProtocolJson.Options);
@@ -286,8 +286,8 @@ public class HandshakeContractTests
 			{
 				ExecutablePath = "/usr/local/bin/example",
 				ProcessId = 4242,
-				SdkVersion = "1.0.0",
-			},
+				SdkVersion = "1.0.0"
+			}
 		};
 
 		var json = JsonSerializer.Serialize(request, PluginProtocolJson.Options);
@@ -313,7 +313,7 @@ public class HandshakeContractTests
 		{
 			RequestId = "req-1",
 			ExpiresAt = DateTimeOffset.UnixEpoch,
-			PollIntervalSeconds = 2,
+			PollIntervalSeconds = 2
 		};
 
 		var json = JsonSerializer.Serialize(response, PluginProtocolJson.Options);
@@ -336,7 +336,7 @@ public class HandshakeContractTests
 		var response = new PluginPairingStatusResponse
 		{
 			Status = PluginPairingStatuses.Approved,
-			ExpiresAt = DateTimeOffset.UnixEpoch,
+			ExpiresAt = DateTimeOffset.UnixEpoch
 		};
 
 		var json = JsonSerializer.Serialize(response, PluginProtocolJson.Options);
@@ -375,7 +375,7 @@ public class HandshakeContractTests
 				PluginPairingStatuses.Pending,
 				PluginPairingStatuses.Approved,
 				PluginPairingStatuses.Rejected,
-				PluginPairingStatuses.Expired,
+				PluginPairingStatuses.Expired
 			}));
 	}
 
@@ -444,44 +444,50 @@ public class HandshakeContractTests
 		Assert.That(actual!.Pairing, Is.Null);
 	}
 
-	private static PluginProtocolLimitsDescriptor SampleLimits() => new()
+	private static PluginProtocolLimitsDescriptor SampleLimits()
 	{
-		MaxMessageBytes = ProtocolLimits.MaxMessageBytes,
-		MaxAssetBytes = ProtocolLimits.MaxAssetBytes,
-		MaxAssetChunkBytes = ProtocolLimits.MaxAssetChunkBytes,
-		MaxInboundQueueDepth = ProtocolLimits.MaxInboundQueueDepth,
-		MaxOutboundQueueDepth = ProtocolLimits.MaxOutboundQueueDepth,
-		QueueHighWatermark = ProtocolLimits.QueueHighWatermark,
-		QueueLowWatermark = ProtocolLimits.QueueLowWatermark,
-		MaxConcurrentInvocations = ProtocolLimits.MaxConcurrentInvocations,
-		MaxDeclaredCapabilities = ProtocolLimits.MaxDeclaredCapabilities,
-		MaxIdempotencyKeyLength = ProtocolLimits.MaxIdempotencyKeyLength,
-		MaxErrorMessageLength = ProtocolLimits.MaxErrorMessageLength,
-		MaxErrorDetailEntries = ProtocolLimits.MaxErrorDetailEntries,
-		MaxJsonDepth = ProtocolLimits.MaxJsonDepth,
-		MaxSessionsPerPlugin = ProtocolLimits.MaxSessionsPerPlugin,
-		MaxLogEventsPerBatch = ProtocolLimits.MaxLogEventsPerBatch,
-		MaxLogMessageLength = ProtocolLimits.MaxLogMessageLength,
-		MaxLogPropertiesPerEvent = ProtocolLimits.MaxLogPropertiesPerEvent,
-		MaxLogPropertyNameLength = ProtocolLimits.MaxLogPropertyNameLength,
-		MaxLogPropertyValueLength = ProtocolLimits.MaxLogPropertyValueLength,
-		MaxLogSourceContextLength = ProtocolLimits.MaxLogSourceContextLength,
-		MaxLogExceptionLength = ProtocolLimits.MaxLogExceptionLength,
-		MaxLogExceptionDepth = ProtocolLimits.MaxLogExceptionDepth,
-		MaxLogInboundQueueDepth = ProtocolLimits.MaxLogInboundQueueDepth,
-		MaxLogEventsPerSecond = ProtocolLimits.MaxLogEventsPerSecond,
-		MaxLogEventBurst = ProtocolLimits.MaxLogEventBurst,
-	};
+		return new PluginProtocolLimitsDescriptor
+		{
+			MaxMessageBytes = ProtocolLimits.MaxMessageBytes,
+			MaxAssetBytes = ProtocolLimits.MaxAssetBytes,
+			MaxAssetChunkBytes = ProtocolLimits.MaxAssetChunkBytes,
+			MaxInboundQueueDepth = ProtocolLimits.MaxInboundQueueDepth,
+			MaxOutboundQueueDepth = ProtocolLimits.MaxOutboundQueueDepth,
+			QueueHighWatermark = ProtocolLimits.QueueHighWatermark,
+			QueueLowWatermark = ProtocolLimits.QueueLowWatermark,
+			MaxConcurrentInvocations = ProtocolLimits.MaxConcurrentInvocations,
+			MaxDeclaredCapabilities = ProtocolLimits.MaxDeclaredCapabilities,
+			MaxIdempotencyKeyLength = ProtocolLimits.MaxIdempotencyKeyLength,
+			MaxErrorMessageLength = ProtocolLimits.MaxErrorMessageLength,
+			MaxErrorDetailEntries = ProtocolLimits.MaxErrorDetailEntries,
+			MaxJsonDepth = ProtocolLimits.MaxJsonDepth,
+			MaxSessionsPerPlugin = ProtocolLimits.MaxSessionsPerPlugin,
+			MaxLogEventsPerBatch = ProtocolLimits.MaxLogEventsPerBatch,
+			MaxLogMessageLength = ProtocolLimits.MaxLogMessageLength,
+			MaxLogPropertiesPerEvent = ProtocolLimits.MaxLogPropertiesPerEvent,
+			MaxLogPropertyNameLength = ProtocolLimits.MaxLogPropertyNameLength,
+			MaxLogPropertyValueLength = ProtocolLimits.MaxLogPropertyValueLength,
+			MaxLogSourceContextLength = ProtocolLimits.MaxLogSourceContextLength,
+			MaxLogExceptionLength = ProtocolLimits.MaxLogExceptionLength,
+			MaxLogExceptionDepth = ProtocolLimits.MaxLogExceptionDepth,
+			MaxLogInboundQueueDepth = ProtocolLimits.MaxLogInboundQueueDepth,
+			MaxLogEventsPerSecond = ProtocolLimits.MaxLogEventsPerSecond,
+			MaxLogEventBurst = ProtocolLimits.MaxLogEventBurst
+		};
+	}
 
-	private static PluginProtocolTimeoutsDescriptor SampleTimeouts() => new()
+	private static PluginProtocolTimeoutsDescriptor SampleTimeouts()
 	{
-		Handshake = ProtocolTimeouts.Handshake,
-		DefaultRequest = ProtocolTimeouts.DefaultRequest,
-		CapabilityInvoke = ProtocolTimeouts.CapabilityInvoke,
-		AssetUpload = ProtocolTimeouts.AssetUpload,
-		KeepAliveInterval = ProtocolTimeouts.KeepAliveInterval,
-		KeepAliveTimeout = ProtocolTimeouts.KeepAliveTimeout,
-		SessionResumeWindow = ProtocolTimeouts.SessionResumeWindow,
-		GracefulClose = ProtocolTimeouts.GracefulClose,
-	};
+		return new PluginProtocolTimeoutsDescriptor
+		{
+			Handshake = ProtocolTimeouts.Handshake,
+			DefaultRequest = ProtocolTimeouts.DefaultRequest,
+			CapabilityInvoke = ProtocolTimeouts.CapabilityInvoke,
+			AssetUpload = ProtocolTimeouts.AssetUpload,
+			KeepAliveInterval = ProtocolTimeouts.KeepAliveInterval,
+			KeepAliveTimeout = ProtocolTimeouts.KeepAliveTimeout,
+			SessionResumeWindow = ProtocolTimeouts.SessionResumeWindow,
+			GracefulClose = ProtocolTimeouts.GracefulClose
+		};
+	}
 }

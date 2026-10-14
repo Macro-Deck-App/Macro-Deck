@@ -22,7 +22,8 @@ public class BatteryViewStateResolverTests
 	[TestCase(59, Yellow)]
 	[TestCase(60, Green)]
 	[TestCase(100, Green)]
-	public void By_default_the_level_is_red_below_20_orange_below_40_yellow_below_60_and_green_above(int level,
+	public void By_default_the_level_is_red_below_20_orange_below_40_yellow_below_60_and_green_above(
+		int level,
 		string color)
 	{
 		var face = Resolve(new BatteryWidgetData(), FakeBatteries.Device("p", "Phone", level));
@@ -45,7 +46,9 @@ public class BatteryViewStateResolverTests
 	[Test]
 	public void Stored_thresholds_replace_the_default_bands()
 	{
-		var thresholds = new UiThresholds([new UiThresholdBand("low", "#111111"), new UiThresholdBand("high", "#222222", 50)]);
+		var thresholds = new UiThresholds([
+			new UiThresholdBand("low", "#111111"), new UiThresholdBand("high", "#222222", 50)
+		]);
 		var config = new BatteryWidgetData { Thresholds = thresholds };
 
 		Assert.Multiple(() =>
@@ -63,7 +66,8 @@ public class BatteryViewStateResolverTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Resolve(config, FakeBatteries.Device("p", "Phone", 5)).Color, Is.EqualTo("#abcdef"));
-			Assert.That(Resolve(config, FakeBatteries.Device("p", "Phone", 90, state: BatteryChargeState.Charging)).Color,
+			Assert.That(Resolve(config, FakeBatteries.Device("p", "Phone", 90, state: BatteryChargeState.Charging))
+					.Color,
 				Is.EqualTo("#abcdef"));
 		});
 	}
@@ -100,7 +104,7 @@ public class BatteryViewStateResolverTests
 		var config = new BatteryWidgetData
 		{
 			Mode = BatteryWidgetData.ModeOne,
-			Device = new BatteryDeviceReference("adb:gone", "Old phone", BatteryDeviceKinds.Tablet),
+			Device = new BatteryDeviceReference("adb:gone", "Old phone", BatteryDeviceKinds.Tablet)
 		};
 
 		var face = new BatteryViewStateResolver(new FakeBatteries()).Resolve(config).Faces.Single();
@@ -133,7 +137,9 @@ public class BatteryViewStateResolverTests
 	public void A_selection_shows_its_devices_in_the_picked_order()
 	{
 		var batteries = new FakeBatteries();
-		batteries.Set(FakeBatteries.Device("a", "A", 10), FakeBatteries.Device("b", "B", 20), FakeBatteries.Device("c", "C", 30));
+		batteries.Set(FakeBatteries.Device("a", "A", 10),
+			FakeBatteries.Device("b", "B", 20),
+			FakeBatteries.Device("c", "C", 30));
 
 		var config = new BatteryWidgetData
 		{
@@ -141,8 +147,8 @@ public class BatteryViewStateResolverTests
 			Selection =
 			[
 				new BatteryDeviceReference("adb:c", "C", BatteryDeviceKinds.Phone),
-				new BatteryDeviceReference("adb:a", "A", BatteryDeviceKinds.Phone),
-			],
+				new BatteryDeviceReference("adb:a", "A", BatteryDeviceKinds.Phone)
+			]
 		};
 
 		var faces = new BatteryViewStateResolver(batteries).Resolve(config).Faces;
@@ -154,13 +160,14 @@ public class BatteryViewStateResolverTests
 	public void A_device_withdrawn_and_published_again_under_the_same_id_is_shown_again()
 	{
 		using var registry = new BatteryRegistry(TimeProvider.System, Serilog.Core.Logger.None);
-		var device = new BatteryDevice { Id = "phone", Name = "Pixel", Kind = BatteryDeviceKinds.Phone, LevelPercent = 64 };
+		var device = new BatteryDevice
+			{ Id = "phone", Name = "Pixel", Kind = BatteryDeviceKinds.Phone, LevelPercent = 64 };
 		registry.Publish("adb", "session-1", [device]);
 
 		var config = new BatteryWidgetData
 		{
 			Mode = BatteryWidgetData.ModeOne,
-			Device = BatteryDeviceReference.Of(registry.Devices.Single()),
+			Device = BatteryDeviceReference.Of(registry.Devices.Single())
 		};
 		var resolver = new BatteryViewStateResolver(registry);
 

@@ -11,10 +11,16 @@ internal sealed class DeviceSurfaceNavigationTests
 	private DeviceSurfaceFixture _fixture = null!;
 
 	[SetUp]
-	public void SetUp() => _fixture = new DeviceSurfaceFixture();
+	public void SetUp()
+	{
+		_fixture = new DeviceSurfaceFixture();
+	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task Changing_folder_moves_only_the_addressed_device_and_records_where_it_came_from()

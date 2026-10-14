@@ -5,8 +5,8 @@ using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Model.Versioning;
 using MacroDeckHost.Application.Actions;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
@@ -21,7 +21,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 {
 	private const string ProviderFaultMessage = "The provider of this view stopped responding.";
 
-	private const string ProviderReloadedMessage = "The provider of this view was updated and the view has to be built again.";
+	private const string ProviderReloadedMessage
+		= "The provider of this view was updated and the view has to be built again.";
 
 	private const string ProviderDisconnectedMessage = "The plugin serving this view disconnected.";
 
@@ -43,7 +44,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		UiComponentEvents.Change,
 		UiComponentEvents.Adjust,
 		UiComponentEvents.Swipe,
-		UiComponentEvents.DragEnd,
+		UiComponentEvents.DragEnd
 	};
 
 	private readonly ConcurrentDictionary<string, SessionContext> _contexts = new(StringComparer.Ordinal);
@@ -115,7 +116,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		return new UiSessionOpenTicket { Accepted = true, SessionId = sessionId, Ready = context.Ready.Task };
 	}
 
-	public async Task<UiSessionOpenTicket> OpenAsync(string providerId,
+	public async Task<UiSessionOpenTicket> OpenAsync(
+		string providerId,
 		UiSurface surface,
 		string ownerPrincipal,
 		CancellationToken cancellationToken)
@@ -271,10 +273,12 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 	}
 
 	private bool IsRefusedWhileLocked(SessionContext context, UiSurface surface, string eventName)
-		=> _lockState?.IsLocked == true &&
-			context.Provider.GatedByHostLock &&
-			surface.Kind is UiSurfaceKinds.Widget or UiSurfaceKinds.Dialog &&
-			!string.Equals(eventName, UiComponentEvents.Reveal, StringComparison.Ordinal);
+	{
+		return _lockState?.IsLocked == true
+			&& context.Provider.GatedByHostLock
+			&& surface.Kind is UiSurfaceKinds.Widget or UiSurfaceKinds.Dialog
+			&& !string.Equals(eventName, UiComponentEvents.Reveal, StringComparison.Ordinal);
+	}
 
 	private void ReportLocked(UiSurface surface, string eventName, string? actingClientId)
 	{
@@ -293,9 +297,9 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 
 	public bool IsClientAttached(string providerId, string sessionId, string clientId)
 	{
-		if (string.IsNullOrEmpty(clientId) ||
-			!Owns(providerId, sessionId) ||
-			!_contexts.TryGetValue(sessionId, out var context))
+		if (string.IsNullOrEmpty(clientId)
+			|| !Owns(providerId, sessionId)
+			|| !_contexts.TryGetValue(sessionId, out var context))
 		{
 			return false;
 		}
@@ -314,7 +318,10 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		return connections.Any(connectionId => _registry.IsAttached(sessionId, connectionId));
 	}
 
-	public UiSurface? SurfaceOf(string sessionId) => _registry.Find(sessionId)?.Surface;
+	public UiSurface? SurfaceOf(string sessionId)
+	{
+		return _registry.Find(sessionId)?.Surface;
+	}
 
 	public async Task<UiRawJson?> FirstTreeAsync(string sessionId, CancellationToken cancellationToken)
 	{
@@ -338,10 +345,14 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 	}
 
 	public UiSessionIngestResult PublishSnapshot(string providerId, string sessionId, UiRawJson tree)
-		=> Ingest(providerId, sessionId, tree, UiPayloadShape.Tree);
+	{
+		return Ingest(providerId, sessionId, tree, UiPayloadShape.Tree);
+	}
 
 	public UiSessionIngestResult PublishPatch(string providerId, string sessionId, UiRawJson patch)
-		=> Ingest(providerId, sessionId, patch, UiPayloadShape.Patch);
+	{
+		return Ingest(providerId, sessionId, patch, UiPayloadShape.Patch);
+	}
 
 	public void PublishFault(string providerId, string sessionId, string code, string? message)
 	{
@@ -354,7 +365,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		// trace or a host path - but it is the only description of what went wrong, so it is logged.
 		UiSessionLog.ProviderReportedFault(_logger, sessionId, providerId, code, message);
 
-		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderFaulted, ProviderFaultMessage, retryable: true);
+		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderFaulted, ProviderFaultMessage, true);
 	}
 
 	public void PublishReload(string providerId, string sessionId)
@@ -366,10 +377,13 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 
 		UiSessionLog.ProviderReloaded(_logger, sessionId, providerId);
 
-		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderReloaded, ProviderReloadedMessage, retryable: true);
+		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderReloaded, ProviderReloadedMessage, true);
 	}
 
-	public void SweepDraining() => _registry.SweepDraining();
+	public void SweepDraining()
+	{
+		_registry.SweepDraining();
+	}
 
 	public void Dispose()
 	{
@@ -379,13 +393,14 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 	}
 
 	private static UiSendEventResponse Refused(string code, string message)
-		=> new() { Accepted = false, Code = code, Message = message };
+	{
+		return new UiSendEventResponse { Accepted = false, Code = code, Message = message };
+	}
 
 	private bool Owns(string providerId, string sessionId)
 	{
 		var session = _registry.Find(sessionId);
-		return session is not null &&
-			string.Equals(session.ProviderId, providerId, StringComparison.Ordinal);
+		return session is not null && string.Equals(session.ProviderId, providerId, StringComparison.Ordinal);
 	}
 
 	private UiSessionIngestResult Ingest(string providerId, string sessionId, UiRawJson payload, UiPayloadShape shape)
@@ -523,8 +538,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 	/// </summary>
 	private void RequestSnapshotUnlessOneIsComing(SessionContext context)
 	{
-		if (Interlocked.Read(ref context.SnapshotsRequested) !=
-			Interlocked.Read(ref context.SnapshotsDelivered))
+		if (Interlocked.Read(ref context.SnapshotsRequested) != Interlocked.Read(ref context.SnapshotsDelivered))
 		{
 			return;
 		}
@@ -562,7 +576,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		}
 	}
 
-	private async Task DispatchEventAsync(SessionContext context,
+	private async Task DispatchEventAsync(
+		SessionContext context,
 		UiSessionEventCommand command,
 		CancellationToken cancellationToken)
 	{
@@ -578,7 +593,11 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		}
 	}
 
-	private async Task OpenOnProviderAsync(SessionContext context, string providerId, string sessionId, UiSurface surface)
+	private async Task OpenOnProviderAsync(
+		SessionContext context,
+		string providerId,
+		string sessionId,
+		UiSurface surface)
 	{
 		try
 		{
@@ -604,7 +623,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 				_registry.TryInvalidate(sessionId,
 					UiSessionErrorCodes.ProviderRejected,
 					"The provider declined to serve that surface.",
-					retryable: false);
+					false);
 				return;
 			}
 
@@ -639,7 +658,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 			_registry.TryInvalidate(context.SessionId,
 				UiSessionErrorCodes.ProviderTimeout,
 				"The provider of this view did not answer in time.",
-				retryable: true);
+				true);
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
@@ -664,7 +683,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 				_registry.TryInvalidate(context.SessionId,
 					UiSessionErrorCodes.ProviderTimeout,
 					"The provider of this view did not answer in time.",
-					retryable: true);
+					true);
 			}
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
@@ -677,12 +696,14 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 	// fault: reporting it as one would race the plugin session registry's own verdict and let the client
 	// see either code for one death.
 	private void FaultSession(string sessionId, Exception exception)
-		=> _registry.TryInvalidate(sessionId,
+	{
+		_registry.TryInvalidate(sessionId,
 			exception is UiProviderDisconnectedException
 				? UiSessionErrorCodes.ProviderDisconnected
 				: UiSessionErrorCodes.ProviderFaulted,
 			exception is UiProviderDisconnectedException ? ProviderDisconnectedMessage : ProviderFaultMessage,
-			retryable: true);
+			true);
+	}
 
 	// Matched on the plugin session id rather than the plugin id, the way PluginWebSocketEndpoint guards
 	// the asset path: Detached fires for every socket drop and Pruned fires for the session a reconnect
@@ -697,31 +718,37 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 				_registry.TryInvalidate(context.SessionId,
 					UiSessionErrorCodes.ProviderDisconnected,
 					ProviderDisconnectedMessage,
-					retryable: true);
+					true);
 			}
 		}
 	}
 
 	private static int MaxTreeBytesFor(IUiSessionProvider provider, UiSurface surface)
-		=> provider is InProcessUiSessionProvider && IsWidgetOwnSurface(surface)
+	{
+		return provider is InProcessUiSessionProvider && IsWidgetOwnSurface(surface)
 			? HostUiResourceLimits.MaxHostWidgetTreeBytes
 			: ProtocolLimits.MaxUiTreeBytes;
+	}
 
 	private static bool IsWidgetOwnSurface(UiSurface surface)
-		=> surface.Kind switch
+	{
+		return surface.Kind switch
 		{
 			UiSurfaceKinds.Widget or UiSurfaceKinds.Preview => true,
 			UiSurfaceKinds.Config => surface.Attributes.TryGetValue(UiConfigSurfaceAttributes.EntryPoint,
-					out var entryPoint) &&
-				entryPoint.ValueKind == JsonValueKind.String &&
-				entryPoint.GetString() == UiConfigEntryPoints.WidgetConfig,
+					out var entryPoint)
+				&& entryPoint.ValueKind == JsonValueKind.String
+				&& entryPoint.GetString() == UiConfigEntryPoints.WidgetConfig,
 			_ => false
 		};
+	}
 
 	private string? CurrentPluginSessionId(string providerId)
-		=> _pluginSessions.Snapshot()
+	{
+		return _pluginSessions.Snapshot()
 			.FirstOrDefault(session => string.Equals(session.PluginId, providerId, StringComparison.Ordinal))
 			?.SessionId;
+	}
 
 	private void OnIntegrationAvailabilityChanged(object? sender, IntegrationAvailabilityChangedEventArgs e)
 	{
@@ -742,13 +769,13 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 			_registry.TryInvalidate(session.SessionId,
 				UiSessionErrorCodes.WidgetReconfigured,
 				"The widget was reconfigured and its view has to be built again.",
-				retryable: true);
+				true);
 		}
 	}
 
 	public void CloseWidgetSessions(Guid widgetId, string reason)
 	{
-		foreach (var session in _registry.SessionsForWidget(widgetId.ToString(), includeConfiguration: true))
+		foreach (var session in _registry.SessionsForWidget(widgetId.ToString(), true))
 		{
 			_registry.TryClose(session.SessionId, reason);
 		}
@@ -758,7 +785,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 	{
 		foreach (var session in _registry.SessionsForProvider(providerId))
 		{
-			_registry.TryInvalidate(session.SessionId, code, message, retryable: true);
+			_registry.TryInvalidate(session.SessionId, code, message, true);
 		}
 	}
 

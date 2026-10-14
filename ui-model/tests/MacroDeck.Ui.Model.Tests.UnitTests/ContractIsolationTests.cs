@@ -56,10 +56,12 @@ public partial class ContractIsolationTests
 	/// </para>
 	/// </summary>
 	private static bool IsReaderResolvedReference(Type type)
-		=> (type.Namespace == "MacroDeck.Ui.Model.References" &&
-				type.Name.EndsWith("Reference", StringComparison.Ordinal)) ||
-			(type.Namespace == "MacroDeck.Ui.Model.Serialization" &&
-				type.Name.EndsWith("ReferenceJsonConverter", StringComparison.Ordinal));
+	{
+		return type.Namespace == "MacroDeck.Ui.Model.References"
+			&& type.Name.EndsWith("Reference", StringComparison.Ordinal)
+			|| type.Namespace == "MacroDeck.Ui.Model.Serialization"
+			&& type.Name.EndsWith("ReferenceJsonConverter", StringComparison.Ordinal);
+	}
 
 	[Test]
 	public void No_public_property_is_an_enum()
@@ -67,8 +69,8 @@ public partial class ContractIsolationTests
 		var assembly = typeof(UiNode).Assembly;
 		var enumProperties = assembly.GetExportedTypes()
 			.SelectMany(type => type.GetProperties(AllDeclaredProperties))
-			.Where(property => property.PropertyType.IsEnum ||
-				(Nullable.GetUnderlyingType(property.PropertyType)?.IsEnum ?? false))
+			.Where(property => property.PropertyType.IsEnum
+				|| (Nullable.GetUnderlyingType(property.PropertyType)?.IsEnum ?? false))
 			.Select(property => $"{property.DeclaringType!.FullName}.{property.Name}")
 			.ToList();
 
@@ -113,7 +115,7 @@ public partial class ContractIsolationTests
 		}
 
 		throw new FileNotFoundException(
-			"Could not locate MacroDeck.Ui.Model.csproj by walking up from AppContext.BaseDirectory " +
-			$"('{AppContext.BaseDirectory}').");
+			"Could not locate MacroDeck.Ui.Model.csproj by walking up from AppContext.BaseDirectory "
+			+ $"('{AppContext.BaseDirectory}').");
 	}
 }

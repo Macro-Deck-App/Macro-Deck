@@ -82,7 +82,8 @@ internal static class PluginLanguages
 	/// Empty when nothing was discovered (the declared list is being carried, not replaced), when nothing
 	/// was declared, or when the two name the same set.
 	/// </summary>
-	public static IReadOnlyList<CliDiagnostic> RecomputedWarnings(IReadOnlyList<string>? authored,
+	public static IReadOnlyList<CliDiagnostic> RecomputedWarnings(
+		IReadOnlyList<string>? authored,
 		IReadOnlyList<string> discovered)
 	{
 		if (authored is not { Count: > 0 } || discovered.Count == 0 || SameSet(authored, discovered))
@@ -93,11 +94,13 @@ internal static class PluginLanguages
 		return
 		[
 			new CliDiagnostic("languages-recomputed",
-				$"'languages' was recomputed from '{ResourceDirectoryName}/' as " +
-				$"[{string.Join(", ", discovered)}]; the manifest declared [{string.Join(", ", authored)}].")
+				$"'languages' was recomputed from '{ResourceDirectoryName}/' as "
+				+ $"[{string.Join(", ", discovered)}]; the manifest declared [{string.Join(", ", authored)}].")
 		];
 	}
 
-	private static bool SameSet(IReadOnlyList<string> left, IReadOnlyList<string> right) =>
-		new HashSet<string>(left, StringComparer.OrdinalIgnoreCase).SetEquals(right);
+	private static bool SameSet(IReadOnlyList<string> left, IReadOnlyList<string> right)
+	{
+		return new HashSet<string>(left, StringComparer.OrdinalIgnoreCase).SetEquals(right);
+	}
 }

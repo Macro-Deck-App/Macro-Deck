@@ -6,7 +6,9 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 public class VolumeActionsTests
 {
 	private static ActionExecutionContext Context(Dictionary<string, object> parameters)
-		=> new() { Parameters = parameters };
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
 	[Test]
 	public async Task IncreaseVolume_adds_amount_and_clamps_to_one()

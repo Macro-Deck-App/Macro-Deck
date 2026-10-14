@@ -55,7 +55,7 @@ internal sealed class DiscordRpcClientTests
 		var first = client.SendCommandAsync("GET_GUILDS");
 		var second = client.SendCommandAsync("GET_VOICE_SETTINGS");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await first).GetProperty("echo").GetString(), Is.EqualTo("GET_GUILDS"));
 			Assert.That((await second).GetProperty("echo").GetString(), Is.EqualTo("GET_VOICE_SETTINGS"));

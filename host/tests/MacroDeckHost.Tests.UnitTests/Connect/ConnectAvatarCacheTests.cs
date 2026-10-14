@@ -42,7 +42,7 @@ public class ConnectAvatarCacheTests
 
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -64,7 +64,7 @@ public class ConnectAvatarCacheTests
 		_handler.Respond = _ => Image(_second);
 		await cache.Revalidate();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(first, Is.Not.Null);
 			Assert.That(unchanged, Is.EqualTo(first));
@@ -105,7 +105,7 @@ public class ConnectAvatarCacheTests
 
 		await cache.Revalidate();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(cache.Version, Is.EqualTo(cached));
 			Assert.That(changes, Is.Zero);
@@ -125,7 +125,7 @@ public class ConnectAvatarCacheTests
 		_handler.Respond = _ => new HttpResponseMessage(HttpStatusCode.NotFound);
 		await cache.Revalidate();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(cache.Version, Is.Null);
 			Assert.That(changes, Is.EqualTo(1));
@@ -143,7 +143,7 @@ public class ConnectAvatarCacheTests
 		_session.Current = FakeConnectSessionService.SignedIn(PictureB, "sub-2");
 		_handler.Respond = _ => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(cache.Version, Is.Null);
 			Assert.That(await cache.GetAvatar(), Is.Null);
@@ -164,7 +164,7 @@ public class ConnectAvatarCacheTests
 		var requests = _handler.Requests;
 		using var restarted = Cache();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(restarted.Version, Is.EqualTo(version));
 			Assert.That(await Bytes(restarted), Is.EqualTo(_first));
@@ -213,7 +213,10 @@ public class ConnectAvatarCacheTests
 		});
 	}
 
-	private ConnectAvatarCache Cache() => new(_session, _paths, _handler, Log.Logger);
+	private ConnectAvatarCache Cache()
+	{
+		return new ConnectAvatarCache(_session, _paths, _handler, Log.Logger);
+	}
 
 	private static async Task<byte[]?> Bytes(ConnectAvatarCache cache)
 	{

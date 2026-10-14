@@ -40,7 +40,9 @@ public class SystemIntegrationTests
 	];
 
 	private static SignalForwardingVariableApi Forwarding(IVariableRefreshSignal signal)
-		=> new(new RecordingVariableApi(), SystemIntegration.IntegrationId, signal);
+	{
+		return new SignalForwardingVariableApi(new RecordingVariableApi(), SystemIntegration.IntegrationId, signal);
+	}
 
 	private static SystemIntegration Create(
 		FakeVolumeService? volume = null,
@@ -49,12 +51,14 @@ public class SystemIntegrationTests
 		bool powerSupported = true,
 		FakeLockStateReader? lockStateReader = null,
 		FakeFocusedApplicationWatcher? focusWatcher = null)
-		=> new(new FakeApplicationService { IsSupported = applicationsSupported },
+	{
+		return new SystemIntegration(new FakeApplicationService { IsSupported = applicationsSupported },
 			volume ?? new FakeVolumeService(),
 			metrics ?? new FakeSystemMetricsService(),
 			new FakePowerService(powerSupported),
 			lockStateReader ?? new FakeLockStateReader(),
 			() => focusWatcher ?? new FakeFocusedApplicationWatcher());
+	}
 
 	[Test]
 	public void Exposes_all_sixteen_actions_with_stable_ids()
@@ -103,7 +107,7 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task ReadAsync_returns_null_when_volume_unsupported()
 	{
-		var integration = Create(new FakeVolumeService(supported: false));
+		var integration = Create(new FakeVolumeService(false));
 
 		Assert.That((await integration.ReadAsync("system-volume-percent", CancellationToken.None)).Value, Is.Null);
 	}
@@ -166,14 +170,22 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task Indexed_gpu_variables_read_their_own_gpu()
 	{
-		var metrics = new FakeSystemMetricsService(gpuCount: 2);
-		metrics.GpuUsageByIndex[0] = 11;
-		metrics.GpuUsageByIndex[1] = 72;
-		metrics.GpuNameByIndex[0] = "Discrete";
-		metrics.GpuNameByIndex[1] = "Integrated";
+		var metrics = new FakeSystemMetricsService(gpuCount: 2)
+		{
+			GpuUsageByIndex =
+			{
+				[0] = 11,
+				[1] = 72
+			},
+			GpuNameByIndex =
+			{
+				[0] = "Discrete",
+				[1] = "Integrated"
+			}
+		};
 		var integration = Create(metrics: metrics);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await integration.ReadAsync("system-gpu-0-usage-percent", CancellationToken.None)).Value,
 				Is.EqualTo(11));
@@ -191,7 +203,7 @@ public class SystemIntegrationTests
 	{
 		var integration = Create(metrics: new FakeSystemMetricsService(gpuSupported: false));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(integration.Variables.Select(v => v.Name), Has.None.StartsWith("system_gpu"));
 			Assert.That((await integration.ReadAsync("system-gpu-0-usage-percent", CancellationToken.None)).Value,
@@ -203,7 +215,7 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task ReadAsync_returns_null_metrics_when_readings_unavailable()
 	{
-		var integration = Create(metrics: new FakeSystemMetricsService(supported: false));
+		var integration = Create(metrics: new FakeSystemMetricsService(false));
 
 		var names = new[]
 		{
@@ -219,7 +231,7 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task ReadAsync_returns_metrics_even_when_volume_unsupported()
 	{
-		var integration = Create(new FakeVolumeService(supported: false),
+		var integration = Create(new FakeVolumeService(false),
 			metrics: new FakeSystemMetricsService { CpuUsage = 12.0 });
 
 		Assert.That((await integration.ReadAsync("system-cpu-usage-percent", CancellationToken.None)).Value,
@@ -303,9 +315,9 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_reports_warnings_for_unavailable_backends()
 	{
-		var integration = Create(new FakeVolumeService(supported: false));
+		var integration = Create(new FakeVolumeService(false));
 		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(new VariableRefreshSignal()),
-			new RecordingDesktopNotifier(supported: false)));
+			new RecordingDesktopNotifier(false)));
 
 		var issues = await integration.GetIssuesAsync();
 
@@ -315,11 +327,12 @@ public class SystemIntegrationTests
 	}
 
 	[Test]
-	public async Task GetIssuesAsync_reports_notifications_unavailable_when_the_context_cannot_show_desktop_notifications()
+	public async Task
+		GetIssuesAsync_reports_notifications_unavailable_when_the_context_cannot_show_desktop_notifications()
 	{
 		var integration = Create();
 		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(new VariableRefreshSignal()),
-			new RecordingDesktopNotifier(supported: false)));
+			new RecordingDesktopNotifier(false)));
 
 		var issues = await integration.GetIssuesAsync();
 
@@ -342,10 +355,11 @@ public class SystemIntegrationTests
 		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(new VariableRefreshSignal()), desktop));
 		var action = integration.Actions.Single(candidate => candidate.Id == "send-notification");
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object> { ["title"] = "Build finished", ["message"] = "All green" }
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = new Dictionary<string, object> { ["title"] = "Build finished", ["message"] = "All green" }
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -360,10 +374,11 @@ public class SystemIntegrationTests
 		var integration = Create();
 		var action = integration.Actions.Single(candidate => candidate.Id == "send-notification");
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object> { ["title"] = "Build finished", ["message"] = "All green" }
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = new Dictionary<string, object> { ["title"] = "Build finished", ["message"] = "All green" }
+			});
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Unavailable));
 	}
@@ -386,7 +401,7 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_skips_gpu_warning_when_metrics_unsupported()
 	{
-		var integration = Create(metrics: new FakeSystemMetricsService(supported: false, gpuSupported: false));
+		var integration = Create(metrics: new FakeSystemMetricsService(false, false));
 
 		Assert.That(await integration.GetIssuesAsync(), Is.Empty);
 	}
@@ -716,7 +731,10 @@ public class SystemIntegrationTests
 
 		public bool? Locked { get; set; }
 
-		public bool? IsLocked() => Locked;
+		public bool? IsLocked()
+		{
+			return Locked;
+		}
 	}
 
 	private sealed class FakeFocusedApplicationWatcher : IFocusedApplicationWatcher
@@ -729,7 +747,10 @@ public class SystemIntegrationTests
 
 		public bool Disposed { get; private set; }
 
-		public void Publish(FocusedAppInfo info) => _focus.Writer.TryWrite(info);
+		public void Publish(FocusedAppInfo info)
+		{
+			_focus.Writer.TryWrite(info);
+		}
 
 		public async IAsyncEnumerable<FocusedAppInfo> WatchAsync(
 			[EnumeratorCancellation] CancellationToken cancellationToken)
@@ -740,7 +761,10 @@ public class SystemIntegrationTests
 			}
 		}
 
-		public void Dispose() => Disposed = true;
+		public void Dispose()
+		{
+			Disposed = true;
+		}
 	}
 
 	private sealed class FakeIntegrationContext(IVariableApi variables, IDesktopNotifier? desktopNotifications = null)

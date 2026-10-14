@@ -4,10 +4,10 @@ internal static class DiskRateCalculator
 {
 	public static DiskActivity? Calculate(DiskCounters? previous, DiskCounters current, TimeSpan elapsed)
 	{
-		if (previous is not { } prev ||
-			elapsed <= TimeSpan.Zero ||
-			current.ReadBytes < prev.ReadBytes ||
-			current.WriteBytes < prev.WriteBytes)
+		if (previous is not { } prev
+			|| elapsed <= TimeSpan.Zero
+			|| current.ReadBytes < prev.ReadBytes
+			|| current.WriteBytes < prev.WriteBytes)
 		{
 			return null;
 		}
@@ -19,7 +19,10 @@ internal static class DiskRateCalculator
 			ActivePercent(prev.WriteTime, current.WriteTime, elapsed));
 	}
 
-	public static double ClampPercent(double value) => double.IsFinite(value) ? Math.Clamp(value, 0d, 100d) : 0d;
+	public static double ClampPercent(double value)
+	{
+		return double.IsFinite(value) ? Math.Clamp(value, 0d, 100d) : 0d;
+	}
 
 	private static double? ActivePercent(TimeSpan? previous, TimeSpan? current, TimeSpan elapsed)
 	{

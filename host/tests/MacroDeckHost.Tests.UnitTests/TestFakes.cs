@@ -21,7 +21,10 @@ internal sealed class FakeWidgetIconInvalidator : IWidgetIconInvalidator
 {
 	public List<(string IntegrationId, string ActionId)> Invalidations { get; } = [];
 
-	public void Invalidate(string integrationId, string actionId) => Invalidations.Add((integrationId, actionId));
+	public void Invalidate(string integrationId, string actionId)
+	{
+		Invalidations.Add((integrationId, actionId));
+	}
 }
 
 internal sealed class FakeIntegrationRegistry : IIntegrationRegistry
@@ -38,13 +41,22 @@ internal sealed class FakeIntegrationRegistry : IIntegrationRegistry
 
 	public IReadOnlyList<IIntegration> Integrations => _integrations;
 
-	public void Add(IIntegration integration) => _integrations.Add(integration);
+	public void Add(IIntegration integration)
+	{
+		_integrations.Add(integration);
+	}
 
 	public IActionDefinition? FindAction(string integrationId, string actionId)
-		=> _integrations.FirstOrDefault(i => i.Id == integrationId)?
+	{
+		return _integrations.FirstOrDefault(i => i.Id == integrationId)
+			?
 			.Actions.FirstOrDefault(a => a.Id == actionId && a.RunsHere());
+	}
 
-	public IActionDefinition? FindAction(QualifiedId id) => FindAction(id.OwnerId, id.LocalId);
+	public IActionDefinition? FindAction(QualifiedId id)
+	{
+		return FindAction(id.OwnerId, id.LocalId);
+	}
 
 	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
 	{
@@ -77,7 +89,10 @@ internal sealed class FakeIntegrationRegistry : IIntegrationRegistry
 		return descriptors;
 	}
 
-	public bool IsEnabled(string integrationId) => !_disabled.Contains(integrationId);
+	public bool IsEnabled(string integrationId)
+	{
+		return !_disabled.Contains(integrationId);
+	}
 
 	public void SetEnabled(string integrationId, bool enabled)
 	{
@@ -92,7 +107,9 @@ internal sealed class FakeIntegrationRegistry : IIntegrationRegistry
 	}
 
 	public IntegrationOrigin GetOrigin(string integrationId)
-		=> _origins.TryGetValue(integrationId, out var origin) ? origin : IntegrationOrigin.BuiltIn;
+	{
+		return _origins.TryGetValue(integrationId, out var origin) ? origin : IntegrationOrigin.BuiltIn;
+	}
 
 	public Task<IntegrationRegistrationResult> RegisterAsync(
 		IIntegration integration,
@@ -137,7 +154,10 @@ internal sealed class CapturingActionDefinition : IActionDefinition
 
 	public Action? OnExecuted { get; set; }
 
-	public IActionExecutor CreateExecutor() => new CapturingExecutor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new CapturingExecutor(this);
+	}
 
 	private sealed class CapturingExecutor : IActionExecutor
 	{
@@ -196,13 +216,19 @@ internal sealed class FakeStateProviderAction : IActionDefinition, IStateProvide
 		return SnapshotTask ?? Task.FromResult(SnapshotToReturn);
 	}
 
-	public IActionExecutor CreateExecutor() => new Executor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
 		private readonly FakeStateProviderAction _owner;
 
-		public Executor(FakeStateProviderAction owner) => _owner = owner;
+		public Executor(FakeStateProviderAction owner)
+		{
+			_owner = owner;
+		}
 
 		public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
@@ -219,40 +245,62 @@ internal sealed class ThrowingActionDefinition : IActionDefinition
 	public LocalizedText Description => "Always throws";
 	public IReadOnlyList<ActionParameter> Parameters { get; init; } = [];
 
-	public IActionExecutor CreateExecutor() => new ThrowingExecutor();
+	public IActionExecutor CreateExecutor()
+	{
+		return new ThrowingExecutor();
+	}
 
 	private sealed class ThrowingExecutor : IActionExecutor
 	{
 		public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
-			=> throw new InvalidOperationException("boom");
+		{
+			throw new InvalidOperationException("boom");
+		}
 	}
 }
 
 internal sealed class PassthroughConditionEvaluator : IActionConditionEvaluator
 {
 	public EvaluatedSide ResolveSide(JsonElement value, VariableContext variables)
-		=> new(null, string.Empty);
+	{
+		return new EvaluatedSide(null, string.Empty);
+	}
 
-	public bool Evaluate(JsonElement left, string? op, JsonElement right, VariableContext variables) => false;
+	public bool Evaluate(JsonElement left, string? op, JsonElement right, VariableContext variables)
+	{
+		return false;
+	}
 
-	public bool EvaluateExpression(JsonElement expression,
+	public bool EvaluateExpression(
+		JsonElement expression,
 		VariableContext variables,
 		Action<ConditionLeafOutcome>? onLeaf = null)
-		=> false;
+	{
+		return false;
+	}
 
 	public string? RenderTemplateString(string? raw, VariableContext variables)
-		=> raw?.Replace("{{ test }}", "rendered", StringComparison.Ordinal);
+	{
+		return raw?.Replace("{{ test }}", "rendered", StringComparison.Ordinal);
+	}
 }
 
 internal sealed class FakeVariableTemplateRenderer : IVariableTemplateRenderer
 {
 	public Task<string> RenderAsync(string templateText, VariableScope contextScope, string? contextScopeRefId)
-		=> Task.FromResult(templateText);
+	{
+		return Task.FromResult(templateText);
+	}
 
 	public Task<VariableContext> CreateContextAsync(VariableScope contextScope, string? contextScopeRefId)
-		=> Task.FromResult(VariableContext.Empty);
+	{
+		return Task.FromResult(VariableContext.Empty);
+	}
 
-	public string Render(string templateText, VariableContext context) => templateText;
+	public string Render(string templateText, VariableContext context)
+	{
+		return templateText;
+	}
 }
 
 internal sealed class FakeSecretService : ISecretService
@@ -270,7 +318,10 @@ internal sealed class FakeSecretService : ISecretService
 		return id;
 	}
 
-	public Task<Guid> Create(string value, SecretKind kind) => Task.FromResult(Store(value, kind));
+	public Task<Guid> Create(string value, SecretKind kind)
+	{
+		return Task.FromResult(Store(value, kind));
+	}
 
 	public Task<bool> Replace(Guid id, string value)
 	{
@@ -290,19 +341,28 @@ internal sealed class FakeSecretService : ISecretService
 	}
 
 	public Task<Guid?> Clone(Guid id)
-		=> Task.FromResult(_secrets.TryGetValue(id, out var value)
+	{
+		return Task.FromResult(_secrets.TryGetValue(id, out var value)
 			? Store(value, _kinds.GetValueOrDefault(id, SecretKind.Password))
 			: (Guid?)null);
+	}
 
-	public Task<string?> Reveal(Guid id) => Resolve(id);
+	public Task<string?> Reveal(Guid id)
+	{
+		return Resolve(id);
+	}
 
 	public Task<string?> Resolve(Guid id)
-		=> Task.FromResult(_secrets.TryGetValue(id, out var value) ? value : null);
+	{
+		return Task.FromResult(_secrets.TryGetValue(id, out var value) ? value : null);
+	}
 
 	public Task<SecretMaterial?> ExportForArchive(Guid id)
-		=> Task.FromResult(_secrets.TryGetValue(id, out var value)
+	{
+		return Task.FromResult(_secrets.TryGetValue(id, out var value)
 			? new SecretMaterial(_kinds.GetValueOrDefault(id, SecretKind.Password), value)
 			: null);
+	}
 }
 
 internal sealed class FakeHostListenerState : IHostListenerState
@@ -316,8 +376,8 @@ internal sealed class FakeHostListenerState : IHostListenerState
 
 	public PublicEndpointSet PublicEndpoints
 	{
-		get => _publicEndpoints ??
-			(_publicListenerAvailable
+		get => _publicEndpoints
+			?? (_publicListenerAvailable
 				? PublicEndpointSet.HttpOnly(_publicPort)
 				: PublicEndpointSet.HttpOnly(_publicPort).WithoutHttp());
 		init => _publicEndpoints = value;
@@ -347,7 +407,10 @@ internal sealed class FakeHostListenerState : IHostListenerState
 
 	public string? ActiveCertificateFingerprint { get; init; }
 
-	public void SetLoopbackPort(int port) => LoopbackPort = port;
+	public void SetLoopbackPort(int port)
+	{
+		LoopbackPort = port;
+	}
 }
 
 internal sealed class FakePublicTlsCertificateStore : IPublicTlsCertificateStore
@@ -357,9 +420,15 @@ internal sealed class FakePublicTlsCertificateStore : IPublicTlsCertificateStore
 
 	public bool HasCertificate => _stored is not null;
 
-	public PublicTlsCertificateInfo? ReadInfo() => _stored?.Info;
+	public PublicTlsCertificateInfo? ReadInfo()
+	{
+		return _stored?.Info;
+	}
 
-	public string? ReadCertificatePem() => _stored?.CertificatePem;
+	public string? ReadCertificatePem()
+	{
+		return _stored?.CertificatePem;
+	}
 
 	public PublicTlsCertificateResolution LoadServerCertificate()
 	{
@@ -384,14 +453,22 @@ internal sealed class FakePublicTlsCertificateStore : IPublicTlsCertificateStore
 		return result.Certificate;
 	}
 
-	public PublicTlsCertificateInfo? ReadAuthorityInfo() => _authority?.Info;
+	public PublicTlsCertificateInfo? ReadAuthorityInfo()
+	{
+		return _authority?.Info;
+	}
 
-	public string? ReadAuthorityCertificatePem() => _authority?.Material.CertificatePem;
+	public string? ReadAuthorityCertificatePem()
+	{
+		return _authority?.Material.CertificatePem;
+	}
 
 	public PublicTlsAuthorityResolution LoadAuthority()
-		=> _authority is { } authority
+	{
+		return _authority is { } authority
 			? new PublicTlsAuthorityResolution(authority.Material, PublicTlsFailure.None)
 			: new PublicTlsAuthorityResolution(null, PublicTlsFailure.NotConfigured);
+	}
 
 	public PublicTlsCertificateInfo SaveAuthority(string certificatePem, string privateKeyPem)
 	{
@@ -406,22 +483,39 @@ internal sealed class FakePublicTlsCertificateStore : IPublicTlsCertificateStore
 		return info;
 	}
 
-	public void Delete() => _stored = null;
+	public void Delete()
+	{
+		_stored = null;
+	}
 }
 
 internal sealed class NullWidgetVariableCloner : IWidgetVariableCloner
 {
 	public Task<IReadOnlyList<WidgetVariableSnapshot>> Snapshot(Guid widgetId)
-		=> Task.FromResult<IReadOnlyList<WidgetVariableSnapshot>>([]);
+	{
+		return Task.FromResult<IReadOnlyList<WidgetVariableSnapshot>>([]);
+	}
 
-	public Task Restore(Guid widgetId, IReadOnlyList<WidgetVariableSnapshot> variables) => Task.CompletedTask;
+	public Task Restore(Guid widgetId, IReadOnlyList<WidgetVariableSnapshot> variables)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task Clone(Guid sourceWidgetId, Guid targetWidgetId) => Task.CompletedTask;
+	public Task Clone(Guid sourceWidgetId, Guid targetWidgetId)
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class NoDefaultShortPress : IWidgetDefaultShortPress
 {
-	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice) => null;
+	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice)
+	{
+		return null;
+	}
 
-	public bool RunsOnDevices(string widgetType) => false;
+	public bool RunsOnDevices(string widgetType)
+	{
+		return false;
+	}
 }

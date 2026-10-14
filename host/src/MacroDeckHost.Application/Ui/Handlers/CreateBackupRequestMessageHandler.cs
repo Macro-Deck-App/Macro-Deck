@@ -12,14 +12,16 @@ public sealed class CreateBackupRequestMessageHandler
 	private readonly AppBackups.IBackupService _backupService;
 	private readonly AppBackupsStorage.IBackupStorageRegistry _storageRegistry;
 
-	public CreateBackupRequestMessageHandler(AppBackups.IBackupService backupService,
+	public CreateBackupRequestMessageHandler(
+		AppBackups.IBackupService backupService,
 		AppBackupsStorage.IBackupStorageRegistry storageRegistry)
 	{
 		_backupService = backupService;
 		_storageRegistry = storageRegistry;
 	}
 
-	public async ValueTask<CreateBackupResponse> Handle(CreateBackupRequest request,
+	public async ValueTask<CreateBackupResponse> Handle(
+		CreateBackupRequest request,
 		CancellationToken cancellationToken)
 	{
 		var domainRequest = new AppBackups.CreateBackupRequest(BackupTrigger.Manual, request.Note, request.Protected);

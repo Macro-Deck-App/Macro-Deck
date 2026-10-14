@@ -19,7 +19,10 @@ internal sealed class HomeAssistantConfigFlowTests
 	}
 
 	[TearDown]
-	public void TearDown() => _client.Dispose();
+	public void TearDown()
+	{
+		_client.Dispose();
+	}
 
 	[Test]
 	public async Task The_flow_starts_on_the_connection_step()
@@ -38,7 +41,7 @@ internal sealed class HomeAssistantConfigFlowTests
 	[Test]
 	public async Task A_blank_url_is_a_field_error()
 	{
-		var result = await SubmitConnection(baseUrl: "   ");
+		var result = await SubmitConnection("   ");
 
 		Assert.Multiple(() =>
 		{
@@ -51,7 +54,7 @@ internal sealed class HomeAssistantConfigFlowTests
 	[Test]
 	public async Task An_unparseable_url_is_a_field_error_naming_the_expected_shape()
 	{
-		var result = await SubmitConnection(baseUrl: "ftp://nowhere");
+		var result = await SubmitConnection("ftp://nowhere");
 
 		Assert.Multiple(() =>
 		{
@@ -195,7 +198,8 @@ internal sealed class HomeAssistantConfigFlowTests
 	}
 
 	private static FakeHomeAssistantClient NewClient()
-		=> new()
+	{
+		return new FakeHomeAssistantClient
 		{
 			Responses =
 			{
@@ -203,12 +207,15 @@ internal sealed class HomeAssistantConfigFlowTests
 				["get_config"] = """{ "location_name": "Home", "version": "2026.8.0" }"""
 			}
 		};
+	}
 
 	private Task<ConfigFlowResult> SubmitConnection(
 		string baseUrl = "http://homeassistant.local:8123",
 		string token = "the-token")
-		=> _flow.SubmitAsync("connection",
+	{
+		return _flow.SubmitAsync("connection",
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["baseUrl"] = baseUrl, ["token"] = token },
 			null!,
 			CancellationToken.None);
+	}
 }

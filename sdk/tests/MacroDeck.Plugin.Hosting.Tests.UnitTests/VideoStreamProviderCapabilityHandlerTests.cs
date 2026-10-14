@@ -24,13 +24,16 @@ public class VideoStreamProviderCapabilityHandlerTests
 	public async Task SetUp()
 	{
 		_fixture = new VideoStreamFixture();
-		_fixture.State.RaiseConnected(resumed: false);
+		_fixture.State.RaiseConnected(false);
 		_provider = new TestVideoProvider();
 		await _fixture.Context.RegisterProviderAsync(_provider);
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public void The_capability_is_declared_only_when_an_integration_implements_video_streams()
@@ -103,7 +106,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 		[
 			new VideoStreamDescriptor("bad\nid", LocalizedText.FromLiteral("Broken")),
 			.. Enumerable.Range(0, 300)
-				.Select(index => new VideoStreamDescriptor($"s{index}", LocalizedText.FromLiteral($"Stream {index}"),
+				.Select(index => new VideoStreamDescriptor($"s{index}",
+					LocalizedText.FromLiteral($"Stream {index}"),
 					State: VideoStreamState.Connecting))
 		];
 
@@ -161,7 +165,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 				providerId = "cam",
 				streamId = "main",
 				acceptedTransports = new[] { "hls" },
-				consumer = new { deviceId = "phone", hostAddress = "http://10.0.0.2:8191/", connectionKind = "UsbTunnel" }
+				consumer = new
+					{ deviceId = "phone", hostAddress = "http://10.0.0.2:8191/", connectionKind = "UsbTunnel" }
 			});
 
 		Assert.Multiple(() =>
@@ -205,7 +210,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 	[Test]
 	public async Task A_description_in_a_transport_the_consumer_does_not_accept_is_refused_and_closed_once()
 	{
-		_provider.Open = (_, _) => Task.FromResult(VideoStreamSessionDescription.FromUrl("rtsp", "http://camera.local/x"));
+		_provider.Open = (_, _)
+			=> Task.FromResult(VideoStreamSessionDescription.FromUrl("rtsp", "http://camera.local/x"));
 
 		var result = await _fixture.OpenAsync("s1", "cam", "hls");
 
@@ -281,7 +287,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_provider.Closes.Select(close => close.Reason),
-				Is.EqualTo(new[] { VideoStreamSessionReason.ProviderRemoved, VideoStreamSessionReason.ProviderRemoved }));
+				Is.EqualTo(new[]
+					{ VideoStreamSessionReason.ProviderRemoved, VideoStreamSessionReason.ProviderRemoved }));
 			Assert.That(_provider.Closes.Select(close => close.SessionId), Is.EquivalentTo(new[] { "s1", "s2" }));
 			Assert.That(sent.Select(call => call.Operation),
 				Is.EqualTo(new[]
@@ -321,7 +328,7 @@ public class VideoStreamProviderCapabilityHandlerTests
 		for (var round = 0; round < 200; round++)
 		{
 			using var fixture = new VideoStreamFixture();
-			fixture.State.RaiseConnected(resumed: false);
+			fixture.State.RaiseConnected(false);
 			var original = new TestVideoProvider();
 			var replacement = new TestVideoProvider();
 			await fixture.Context.RegisterProviderAsync(original);
@@ -343,7 +350,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 
 			Assert.Multiple(() =>
 			{
-				Assert.That(original.Closes.Select(closed => closed.SessionId), Is.EqualTo(new[] { "s1" }),
+				Assert.That(original.Closes.Select(closed => closed.SessionId),
+					Is.EqualTo(new[] { "s1" }),
 					$"round {round}");
 				Assert.That(replacement.Closes, Is.Empty, $"round {round}");
 			});
@@ -361,7 +369,7 @@ public class VideoStreamProviderCapabilityHandlerTests
 			_fixture.Context.RegisterProviderAsync(replacement).GetAwaiter().GetResult();
 		};
 
-		_fixture.State.RaiseConnected(resumed: true);
+		_fixture.State.RaiseConnected(true);
 		await VideoStreamFixture.WaitForAsync(() => _provider.Closes.Count == 1);
 		await Task.Delay(50);
 
@@ -377,7 +385,7 @@ public class VideoStreamProviderCapabilityHandlerTests
 	{
 		await _fixture.OpenAsync("before");
 
-		_fixture.State.RaiseConnected(resumed: true);
+		_fixture.State.RaiseConnected(true);
 		await _fixture.OpenAsync("after");
 		await VideoStreamFixture.WaitForAsync(() => _provider.Closes.Count == 1);
 		await Task.Delay(50);
@@ -398,7 +406,7 @@ public class VideoStreamProviderCapabilityHandlerTests
 		var open = _fixture.OpenAsync("s1");
 		await VideoStreamFixture.WaitForAsync(() => _provider.OpenCount == 1);
 
-		_fixture.State.RaiseConnected(resumed: true);
+		_fixture.State.RaiseConnected(true);
 		release.SetResult(VideoStreamSessionDescription.Hls("http://camera.local/main.m3u8"));
 		await open;
 
@@ -414,7 +422,7 @@ public class VideoStreamProviderCapabilityHandlerTests
 
 		var sweep = Task.Run(() => _fixture.State.RaiseConnectionEnded());
 		await sweep.WaitAsync(TimeSpan.FromSeconds(1));
-		_fixture.State.RaiseConnected(resumed: false);
+		_fixture.State.RaiseConnected(false);
 		var reopened = await _fixture.OpenAsync("s2").WaitAsync(TimeSpan.FromSeconds(1));
 		await VideoStreamFixture.WaitForAsync(() => _provider.Closes.Count == 1);
 		hang.SetResult();
@@ -432,7 +440,7 @@ public class VideoStreamProviderCapabilityHandlerTests
 	public async Task The_disconnect_sweep_leaves_the_provider_registered()
 	{
 		_fixture.State.RaiseConnectionEnded();
-		_fixture.State.RaiseConnected(resumed: false);
+		_fixture.State.RaiseConnected(false);
 
 		var described = Describe(await _fixture.InvokeAsync(CapabilityOperations.VideoStreamProvider.Describe));
 
@@ -484,7 +492,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 				Code = ProtocolErrorCodes.CapabilityUnavailable,
 				Message = "No such provider.",
 				Retryable = false,
-				Details = new Dictionary<string, string> { ["reason"] = ProtocolErrorReasons.VideoStreamUnknownProvider }
+				Details = new Dictionary<string, string>
+					{ ["reason"] = ProtocolErrorReasons.VideoStreamUnknownProvider }
 			})
 			: null;
 
@@ -498,9 +507,10 @@ public class VideoStreamProviderCapabilityHandlerTests
 	{
 		await _fixture.OpenAsync("s1");
 		var refusals = 2;
-		_fixture.Invoker.Fail = call => call.Operation == HostOperations.VideoStreams.SessionUpdate &&
-			((VideoStreamsSessionUpdateArguments)call.Arguments!).State == nameof(VideoStreamSessionState.Reconnecting) &&
-			Interlocked.Decrement(ref refusals) >= 0
+		_fixture.Invoker.Fail = call => call.Operation == HostOperations.VideoStreams.SessionUpdate
+			&& ((VideoStreamsSessionUpdateArguments)call.Arguments!).State
+			== nameof(VideoStreamSessionState.Reconnecting)
+			&& Interlocked.Decrement(ref refusals) >= 0
 				? RateLimited()
 				: null;
 
@@ -515,7 +525,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 	public async Task A_session_update_the_host_keeps_rate_limiting_fails_as_busy_after_a_bounded_number_of_attempts()
 	{
 		await _fixture.OpenAsync("s1");
-		_fixture.Invoker.Fail = call => call.Operation == HostOperations.VideoStreams.SessionUpdate ? RateLimited() : null;
+		_fixture.Invoker.Fail = call
+			=> call.Operation == HostOperations.VideoStreams.SessionUpdate ? RateLimited() : null;
 
 		var thrown = Assert.ThrowsAsync<VideoStreamException>(() =>
 			_fixture.Context.UpdateSessionAsync("s1", VideoStreamSessionState.Reconnecting));
@@ -523,7 +534,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(thrown!.ErrorCode, Is.EqualTo(VideoStreamErrorCode.Busy));
-			Assert.That(_fixture.Invoker.Calls.Count(call => call.Operation == HostOperations.VideoStreams.SessionUpdate),
+			Assert.That(
+				_fixture.Invoker.Calls.Count(call => call.Operation == HostOperations.VideoStreams.SessionUpdate),
 				Is.EqualTo(5));
 		});
 	}
@@ -597,7 +609,8 @@ public class VideoStreamProviderCapabilityHandlerTests
 		var time = new ManualTimeProvider();
 		using var fixture = await ConnectedFixtureAsync(time);
 		await fixture.OpenAsync("s1");
-		fixture.Invoker.Fail = call => call.Operation == HostOperations.VideoStreams.SessionClose ? RateLimited() : null;
+		fixture.Invoker.Fail = call
+			=> call.Operation == HostOperations.VideoStreams.SessionClose ? RateLimited() : null;
 
 		var busy = await CaptureAsync(time, fixture.Context.CloseSessionAsync("s1"));
 		var attempts = Count(fixture, HostOperations.VideoStreams.SessionClose);
@@ -613,11 +626,13 @@ public class VideoStreamProviderCapabilityHandlerTests
 	}
 
 	[Test]
-	public async Task A_streams_changed_notice_the_host_keeps_rate_limiting_fails_as_busy_after_a_bounded_number_of_attempts()
+	public async Task
+		A_streams_changed_notice_the_host_keeps_rate_limiting_fails_as_busy_after_a_bounded_number_of_attempts()
 	{
 		var time = new ManualTimeProvider();
 		using var fixture = await ConnectedFixtureAsync(time);
-		fixture.Invoker.Fail = call => call.Operation == HostOperations.VideoStreams.StreamsChanged ? RateLimited() : null;
+		fixture.Invoker.Fail = call
+			=> call.Operation == HostOperations.VideoStreams.StreamsChanged ? RateLimited() : null;
 
 		var busy = await CaptureAsync(time, fixture.Context.NotifyStreamsChangedAsync("cam"));
 
@@ -633,8 +648,9 @@ public class VideoStreamProviderCapabilityHandlerTests
 	{
 		var time = new ManualTimeProvider();
 		using var fixture = new VideoStreamFixture(time: time);
-		fixture.State.RaiseConnected(resumed: false);
-		fixture.Invoker.Fail = call => call.Operation == HostOperations.VideoStreams.ProvidersChanged ? RateLimited() : null;
+		fixture.State.RaiseConnected(false);
+		fixture.Invoker.Fail = call
+			=> call.Operation == HostOperations.VideoStreams.ProvidersChanged ? RateLimited() : null;
 
 		var busy = await CaptureAsync(time, fixture.Context.RegisterProviderAsync(new TestVideoProvider()));
 		var described = Describe(await fixture.InvokeAsync(CapabilityOperations.VideoStreamProvider.Describe));
@@ -698,10 +714,12 @@ public class VideoStreamProviderCapabilityHandlerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(VideoStreamWire.ParseState("Exploded"), Is.EqualTo(VideoStreamState.Unavailable));
-			Assert.That(VideoStreamWire.ParseSessionState("Exploded"), Is.EqualTo(VideoStreamSessionState.Reconnecting));
+			Assert.That(VideoStreamWire.ParseSessionState("Exploded"),
+				Is.EqualTo(VideoStreamSessionState.Reconnecting));
 			Assert.That(VideoStreamWire.ParseReason("Exploded"), Is.EqualTo(VideoStreamSessionReason.None));
 			Assert.That(VideoStreamWire.ParseReason("3"), Is.EqualTo(VideoStreamSessionReason.None));
-			Assert.That(VideoStreamWire.FromError(ProtocolErrorCodes.CapabilityUnavailable, "video_stream_from_the_future"),
+			Assert.That(VideoStreamWire.FromError(ProtocolErrorCodes.CapabilityUnavailable,
+					"video_stream_from_the_future"),
 				Is.EqualTo(VideoStreamErrorCode.Failed));
 		});
 	}
@@ -719,7 +737,7 @@ public class VideoStreamProviderCapabilityHandlerTests
 	private static async Task<VideoStreamFixture> ConnectedFixtureAsync(TimeProvider time)
 	{
 		var fixture = new VideoStreamFixture(time: time);
-		fixture.State.RaiseConnected(resumed: false);
+		fixture.State.RaiseConnected(false);
 		await fixture.Context.RegisterProviderAsync(new TestVideoProvider());
 		return fixture;
 	}
@@ -750,19 +768,29 @@ public class VideoStreamProviderCapabilityHandlerTests
 	}
 
 	private static int Count(VideoStreamFixture fixture, string operation)
-		=> fixture.Invoker.Calls.Count(call => call.Operation == operation);
+	{
+		return fixture.Invoker.Calls.Count(call => call.Operation == operation);
+	}
 
 	private static HostInvocationException RateLimited()
-		=> HostInvocationException.CreateRetryable(ProtocolErrorCodes.RateLimited, "Too many requests.");
+	{
+		return HostInvocationException.CreateRetryable(ProtocolErrorCodes.RateLimited, "Too many requests.");
+	}
 
 	private IEnumerable<string> UpdateStates()
-		=> _fixture.Invoker.Calls
+	{
+		return _fixture.Invoker.Calls
 			.Where(call => call.Operation == HostOperations.VideoStreams.SessionUpdate)
 			.Select(call => ((VideoStreamsSessionUpdateArguments)call.Arguments!).State);
+	}
 
 	private static VideoStreamSessionResumeResult Resumed(Capabilities.CapabilityInvocationResult result)
-		=> result.Data!.Value.Deserialize<VideoStreamSessionResumeResult>(PluginProtocolJson.Options)!;
+	{
+		return result.Data!.Value.Deserialize<VideoStreamSessionResumeResult>(PluginProtocolJson.Options)!;
+	}
 
 	private static VideoStreamProviderDescribePayload Describe(Capabilities.CapabilityInvocationResult result)
-		=> result.Data!.Value.Deserialize<VideoStreamProviderDescribePayload>(PluginProtocolJson.Options)!;
+	{
+		return result.Data!.Value.Deserialize<VideoStreamProviderDescribePayload>(PluginProtocolJson.Options)!;
+	}
 }

@@ -24,7 +24,9 @@ public class LocalizationSettingsHandlersTests
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -40,7 +42,9 @@ public class LocalizationSettingsHandlersTests
 		public int Writes { get; private set; }
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -49,8 +53,10 @@ public class LocalizationSettingsHandlersTests
 			return Task.CompletedTask;
 		}
 
-		public void Seed(string key, string value) =>
+		public void Seed(string key, string value)
+		{
 			_store[key] = new AppPreferenceEntity { Key = key, Value = value };
+		}
 	}
 
 	private sealed class FakeBuildEnvironment : IBuildEnvironment
@@ -63,7 +69,12 @@ public class LocalizationSettingsHandlersTests
 	}
 
 	private static AppPreferenceService CreateService(IAppPreferenceRepository repository)
-		=> new(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+	{
+		return new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
+	}
 
 	[Test]
 	public async Task The_culture_survives_a_restart()
@@ -134,7 +145,8 @@ public class LocalizationSettingsHandlersTests
 
 	[Test]
 	public Task A_fresh_install_follows_the_operating_systems_language()
-		=> WithSystemCulture("fr-FR",
+	{
+		return WithSystemCulture("fr-FR",
 			async () =>
 			{
 				var service = CreateService(new FakeAppPreferenceRepository());
@@ -149,10 +161,12 @@ public class LocalizationSettingsHandlersTests
 					Assert.That(response.FallbackCulture, Is.EqualTo(LocalizationDefaults.Culture));
 				});
 			});
+	}
 
 	[Test]
 	public Task A_chosen_language_stays_put_when_the_system_language_changes()
-		=> WithSystemCulture("fr-FR",
+	{
+		return WithSystemCulture("fr-FR",
 			async () =>
 			{
 				var repository = new FakeAppPreferenceRepository();
@@ -170,10 +184,12 @@ public class LocalizationSettingsHandlersTests
 						});
 					});
 			});
+	}
 
 	[Test]
 	public Task Clearing_the_chosen_language_follows_the_system_again_across_a_restart()
-		=> WithSystemCulture("fr-FR",
+	{
+		return WithSystemCulture("fr-FR",
 			async () =>
 			{
 				var repository = new FakeAppPreferenceRepository();
@@ -194,10 +210,12 @@ public class LocalizationSettingsHandlersTests
 					Assert.That(reloaded.FollowSystem, Is.True);
 				});
 			});
+	}
 
 	[Test]
 	public Task Update_handler_accepts_a_request_to_follow_the_system_without_a_culture()
-		=> WithSystemCulture("fr-FR",
+	{
+		return WithSystemCulture("fr-FR",
 			async () =>
 			{
 				var service = CreateService(new FakeAppPreferenceRepository());
@@ -216,6 +234,7 @@ public class LocalizationSettingsHandlersTests
 					Assert.That(response.FollowSystem, Is.True);
 				});
 			});
+	}
 
 	[Test]
 	public async Task Update_handler_persists_and_echoes_the_applied_culture()
@@ -292,7 +311,10 @@ public class LocalizationSettingsHandlersTests
 
 	private sealed class FixedHourCycleReader(string? hourCycle) : ISystemHourCycleReader
 	{
-		public string? Read() => hourCycle;
+		public string? Read()
+		{
+			return hourCycle;
+		}
 	}
 
 	private static async Task<TimeFormatResolver> Resolver(string culture, string timeFormat, string? systemHourCycle)
@@ -324,7 +346,8 @@ public class LocalizationSettingsHandlersTests
 	[TestCase("24h", HourCycles.H12, HourCycles.H23)]
 	[TestCase("system", HourCycles.H12, HourCycles.H12)]
 	[TestCase("system", HourCycles.H23, HourCycles.H23)]
-	public async Task A_pinned_time_format_wins_and_system_follows_the_operating_system(string timeFormat,
+	public async Task A_pinned_time_format_wins_and_system_follows_the_operating_system(
+		string timeFormat,
 		string systemHourCycle,
 		string expected)
 	{
@@ -347,13 +370,17 @@ public class LocalizationSettingsHandlersTests
 	[TestCase("h:mm 'H'", HourCycles.H12)]
 	[TestCase("mm:ss", null)]
 	public void An_hour_cycle_is_read_from_a_time_pattern(string pattern, string? expected)
-		=> Assert.That(HourCyclePatterns.FromPattern(pattern), Is.EqualTo(expected));
+	{
+		Assert.That(HourCyclePatterns.FromPattern(pattern), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void A_twelve_hour_time_drops_the_leading_zero_of_a_padded_twenty_four_hour_language()
-		=> Assert.That(new TimeOfDayFormat(CultureInfo.GetCultureInfo("de-DE"), HourCycles.H12)
+	{
+		Assert.That(new TimeOfDayFormat(CultureInfo.GetCultureInfo("de-DE"), HourCycles.H12)
 				.Format(new TimeOnly(21, 5)),
 			Does.Match(@"^9:05\s\S+$"));
+	}
 
 	[Test]
 	public async Task Times_are_formatted_in_the_app_language_not_the_process_language()

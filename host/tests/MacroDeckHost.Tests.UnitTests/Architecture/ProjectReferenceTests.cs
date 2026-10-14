@@ -13,7 +13,7 @@ internal sealed class ProjectReferenceTests
 		"MacroDeck.Ui.Model",
 		"MacroDeck.Localization",
 		"MacroDeckHost.Localization",
-		"MacroDeckHost.Platform",
+		"MacroDeckHost.Platform"
 	];
 
 	[Test]
@@ -29,11 +29,15 @@ internal sealed class ProjectReferenceTests
 	{
 		var references = ReferencesOf("MacroDeckHost.Platform");
 
-		Assert.That(references.Where(name => name == "MacroDeck.Sdk" || name.StartsWith("MacroDeckHost", StringComparison.Ordinal)),
+		Assert.That(references.Where(name
+				=> name == "MacroDeck.Sdk" || name.StartsWith("MacroDeckHost", StringComparison.Ordinal)),
 			Is.Empty);
 	}
 
-	private static bool IsMacroDeck(string name) => name.StartsWith("MacroDeck", StringComparison.Ordinal);
+	private static bool IsMacroDeck(string name)
+	{
+		return name.StartsWith("MacroDeck", StringComparison.Ordinal);
+	}
 
 	private static HashSet<string> ReferencesOf(string projectName)
 	{

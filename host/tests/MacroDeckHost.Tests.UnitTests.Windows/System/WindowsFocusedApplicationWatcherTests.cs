@@ -38,7 +38,7 @@ public class WindowsFocusedApplicationWatcherTests
 		// before cancelling. CI's Windows runner may have no interactive foreground window, so no
 		// item arriving here is expected and fine.
 		await Task.Delay(TimeSpan.FromMilliseconds(200));
-		cts.Cancel();
+		await cts.CancelAsync();
 
 		Exception? unexpected = null;
 		try
@@ -73,7 +73,7 @@ public class WindowsFocusedApplicationWatcherTests
 			});
 		}
 
-		TestContext.Out.WriteLine($"Focus events observed before cancellation: {items.Count}");
+		await TestContext.Out.WriteLineAsync($"Focus events observed before cancellation: {items.Count}");
 	}
 
 	[Test]

@@ -93,19 +93,23 @@ public sealed class ScreenSaverUiSessionOpener : IScreenSaverUiSessionOpener
 
 	// A session the client let go of is still draining when the device's settings change, and what it
 	// draws is fixed at open time: only a session for the very same selection and configuration is reused.
-	private string? FindExisting(string providerId, string ownerPrincipal, IReadOnlyDictionary<string, JsonElement> wanted)
+	private string? FindExisting(
+		string providerId,
+		string ownerPrincipal,
+		IReadOnlyDictionary<string, JsonElement> wanted)
 	{
 		foreach (var session in _registry.SessionsForProvider(providerId))
 		{
-			if (!string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal) ||
-				session.State is UiSessionState.Closed or UiSessionState.Invalidated ||
-				!string.Equals(session.Surface.Kind, UiSurfaceKinds.ScreenSaver, StringComparison.Ordinal))
+			if (!string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal)
+				|| session.State is UiSessionState.Closed or UiSessionState.Invalidated
+				|| !string.Equals(session.Surface.Kind, UiSurfaceKinds.ScreenSaver, StringComparison.Ordinal))
 			{
 				continue;
 			}
 
-			if (wanted.All(pair => session.Surface.Attributes.TryGetValue(pair.Key, out var candidate) &&
-					string.Equals(candidate.GetRawText(), pair.Value.GetRawText(), StringComparison.Ordinal)))
+			if (wanted.All(pair
+				=> session.Surface.Attributes.TryGetValue(pair.Key, out var candidate)
+				&& string.Equals(candidate.GetRawText(), pair.Value.GetRawText(), StringComparison.Ordinal)))
 			{
 				return session.SessionId;
 			}
@@ -135,11 +139,16 @@ public sealed class ScreenSaverUiSessionOpener : IScreenSaverUiSessionOpener
 	}
 
 	private static OpenScreenSaverUiSessionResponse Accepted(string sessionId, string screenSaverId, bool interactive)
-		=> new() { Accepted = true, SessionId = sessionId, ScreenSaverId = screenSaverId, Interactive = interactive };
+	{
+		return new OpenScreenSaverUiSessionResponse
+			{ Accepted = true, SessionId = sessionId, ScreenSaverId = screenSaverId, Interactive = interactive };
+	}
 
 	private static OpenScreenSaverUiSessionResponse Rejected(string screenSaverId, string code, string? message)
-		=> new()
+	{
+		return new OpenScreenSaverUiSessionResponse
 		{
 			Accepted = false, SessionId = string.Empty, ScreenSaverId = screenSaverId, Code = code, Message = message
 		};
+	}
 }

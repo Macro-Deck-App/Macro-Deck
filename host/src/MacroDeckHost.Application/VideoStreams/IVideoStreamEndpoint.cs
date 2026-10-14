@@ -18,19 +18,22 @@ internal interface IVideoStreamEndpoint
 
 	Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(string providerId, CancellationToken cancellationToken);
 
-	Task<VideoStreamOpenResult> OpenAsync(string providerId,
+	Task<VideoStreamOpenResult> OpenAsync(
+		string providerId,
 		VideoStreamOpenRequest request,
 		Func<bool> proceed,
 		CancellationToken cancellationToken);
 
 	Task SuspendAsync(string providerId, string sessionId, Func<bool> proceed, CancellationToken cancellationToken);
 
-	Task<VideoStreamSessionDescriptionDto?> ResumeAsync(string providerId,
+	Task<VideoStreamSessionDescriptionDto?> ResumeAsync(
+		string providerId,
 		string sessionId,
 		Func<bool> proceed,
 		CancellationToken cancellationToken);
 
-	Task CloseAsync(string providerId,
+	Task CloseAsync(
+		string providerId,
 		string sessionId,
 		VideoStreamSessionReason reason,
 		CancellationToken cancellationToken);

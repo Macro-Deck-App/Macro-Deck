@@ -35,7 +35,11 @@ internal sealed class StoreInstallCoordinatorTests
 		_channel = new StoreOperationChannel();
 
 		var plugins = new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None);
-		var catalogQuery = new StoreCatalogQueryService(_catalog, plugins, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
+		var catalogQuery = new StoreCatalogQueryService(_catalog,
+			plugins,
+			_installations,
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+			new InstalledPluginSigners());
 		_coordinator = new StoreInstallCoordinator(catalogQuery,
 			_tracker,
 			_channel,
@@ -67,7 +71,10 @@ internal sealed class StoreInstallCoordinatorTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void Two_install_calls_for_the_same_package_return_the_same_operation_id()
@@ -110,7 +117,10 @@ internal sealed class StoreInstallCoordinatorTests
 	public void A_failure_that_would_repeat_is_not_retried()
 	{
 		var first = _coordinator.Install(StoreExtensionKind.Plugin, PluginId);
-		_tracker.Transition(first.Id, StoreOperationState.Failed, StoreOperationError.RequiresNewerMacroDeck, "too old");
+		_tracker.Transition(first.Id,
+			StoreOperationState.Failed,
+			StoreOperationError.RequiresNewerMacroDeck,
+			"too old");
 
 		Assert.That(_coordinator.Retry(first.Id), Is.Null);
 	}

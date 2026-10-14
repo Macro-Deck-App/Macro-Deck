@@ -13,7 +13,7 @@ namespace MacroDeck.Ui.Widgets;
 /// </summary>
 public static class UiWidgetSafeArea
 {
-	private static readonly double _cornerClearance = 1 - (1 / Math.Sqrt(2));
+	private static readonly double _cornerClearance = 1 - 1 / Math.Sqrt(2);
 
 	/// <summary>The corner radius Macro Deck draws a tile with when its surface states none, in reference
 	/// pixels.</summary>
@@ -33,7 +33,10 @@ public static class UiWidgetSafeArea
 	}
 
 	/// <summary><see cref="LengthFor" /> as a property value, for a padding or a gap.</summary>
-	public static UiSize For(int cornerRadius) => UiSize.Of(LengthFor(cornerRadius));
+	public static UiSize For(int cornerRadius)
+	{
+		return UiSize.Of(LengthFor(cornerRadius));
+	}
 
 	/// <summary>
 	/// The corner radius the tile this surface is drawn in carries, from
@@ -44,14 +47,17 @@ public static class UiWidgetSafeArea
 	{
 		ArgumentNullException.ThrowIfNull(surface);
 
-		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.CornerRadius, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var radius)
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.CornerRadius, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var radius)
 				? radius
 				: DefaultCornerRadius;
 	}
 
 	/// <summary>The inset for the tile this surface is drawn in: <see cref="For" /> of
 	/// <see cref="RadiusOf" />.</summary>
-	public static UiSize For(UiSurface surface) => For(RadiusOf(surface));
+	public static UiSize For(UiSurface surface)
+	{
+		return For(RadiusOf(surface));
+	}
 }

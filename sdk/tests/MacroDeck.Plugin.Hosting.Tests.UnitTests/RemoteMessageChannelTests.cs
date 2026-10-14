@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Messaging;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Tests.UnitTests.Support;
@@ -30,7 +29,11 @@ public class RemoteMessageChannelTests
 		_host = new ScriptedHost();
 		_state = new PluginConnectionState();
 		_socket = new FakePluginSocket();
-		_channel = new RemoteMessageChannel(_host, _state, TestMetadata.Default, TimeProvider.System, Serilog.Core.Logger.None);
+		_channel = new RemoteMessageChannel(_host,
+			_state,
+			TestMetadata.Default,
+			TimeProvider.System,
+			Serilog.Core.Logger.None);
 	}
 
 	[TearDown]
@@ -94,20 +97,27 @@ public class RemoteMessageChannelTests
 		Connect();
 		var received = 0;
 
-		await _channel.Lifecycle.SubscribeAsync("obs.scene.changed", (_, _) => Task.FromResult(Interlocked.Increment(ref received)));
-		await _channel.Lifecycle.HandleRequestsAsync("obs.scene.current", (_, _) => Task.FromResult<JsonElement?>(null));
+		await _channel.Lifecycle.SubscribeAsync("obs.scene.changed",
+			(_, _) => Task.FromResult(Interlocked.Increment(ref received)));
+		await _channel.Lifecycle.HandleRequestsAsync("obs.scene.current",
+			(_, _) => Task.FromResult<JsonElement?>(null));
 		var claimedFrom = _host.Tables.Count - 1;
 
 		_channel.ReleaseLifecycleRegistrations();
-		await _channel.Lifecycle.SubscribeAsync("obs.scene.changed", (_, _) => Task.FromResult(Interlocked.Increment(ref received)));
-		await _channel.Lifecycle.HandleRequestsAsync("obs.scene.current", (_, _) => Task.FromResult<JsonElement?>(null));
+		await _channel.Lifecycle.SubscribeAsync("obs.scene.changed",
+			(_, _) => Task.FromResult(Interlocked.Increment(ref received)));
+		await _channel.Lifecycle.HandleRequestsAsync("obs.scene.current",
+			(_, _) => Task.FromResult<JsonElement?>(null));
 		await _channel.CompleteLifecycleReleaseAsync();
 
-		await _channel.DeliverAsync(CapabilityOperations.Messaging.Event, Delivery("obs.scene.changed"), CancellationToken.None);
+		await _channel.DeliverAsync(CapabilityOperations.Messaging.Event,
+			Delivery("obs.scene.changed"),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_host.Tables.Skip(claimedFrom).All(table => table.Requests.Contains("obs.scene.current")), Is.True,
+			Assert.That(_host.Tables.Skip(claimedFrom).All(table => table.Requests.Contains("obs.scene.current")),
+				Is.True,
 				"every table the host saw during the pass still claims the topic");
 			Assert.That(_host.Tables[^1].Events, Is.EqualTo(new[] { "obs.scene.changed" }));
 			Assert.That(received, Is.EqualTo(1));
@@ -147,7 +157,8 @@ public class RemoteMessageChannelTests
 
 		_channel.ReleaseLifecycleRegistrations();
 
-		Assert.DoesNotThrowAsync(() => _channel.Lifecycle.HandleCommandsAsync("lights.toggle", (_, _) => Task.CompletedTask));
+		Assert.DoesNotThrowAsync(()
+			=> _channel.Lifecycle.HandleCommandsAsync("lights.toggle", (_, _) => Task.CompletedTask));
 	}
 
 	[Test]
@@ -157,7 +168,7 @@ public class RemoteMessageChannelTests
 		Assert.That(_host.Tables, Is.Empty);
 
 		Connect();
-		_state.RaiseConnected(resumed: false);
+		_state.RaiseConnected(false);
 
 		await _host.WaitForTableAsync(table => table.Commands.Contains("lights.toggle"));
 	}
@@ -173,11 +184,12 @@ public class RemoteMessageChannelTests
 	[Test]
 	public void On_a_host_without_a_message_channel_every_call_throws_unsupported()
 	{
-		Connect(messagingAccepted: false);
+		Connect(false);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Code(() => _channel.PublishAsync("obs.scene.changed")), Is.EqualTo(MessageChannelErrorCode.Unsupported));
+			Assert.That(Code(() => _channel.PublishAsync("obs.scene.changed")),
+				Is.EqualTo(MessageChannelErrorCode.Unsupported));
 			Assert.That(Code(() => _channel.SubscribeAsync("obs.*", (_, _) => Task.CompletedTask)),
 				Is.EqualTo(MessageChannelErrorCode.Unsupported));
 		});
@@ -243,7 +255,7 @@ public class RemoteMessageChannelTests
 			});
 
 		var result = await _channel.DeliverAsync(CapabilityOperations.Messaging.Request,
-			Delivery("obs.scene.current", sender: "com.example.streamdeck"),
+			Delivery("obs.scene.current", "com.example.streamdeck"),
 			CancellationToken.None);
 
 		var reply = result.Data?.Deserialize<MessagingDeliveryResult>(PluginProtocolJson.Options);
@@ -261,18 +273,22 @@ public class RemoteMessageChannelTests
 		Connect();
 		var received = new ConcurrentBag<string>();
 		await _channel.SubscribeAsync("obs.*", (_, _) => throw new InvalidOperationException("boom"));
-		await _channel.SubscribeAsync("obs.scene.changed", (message, _) =>
-		{
-			received.Add(message.Topic);
-			return Task.CompletedTask;
-		});
-		await _channel.SubscribeAsync("lights.*", (message, _) =>
-		{
-			received.Add("wrong:" + message.Topic);
-			return Task.CompletedTask;
-		});
+		await _channel.SubscribeAsync("obs.scene.changed",
+			(message, _) =>
+			{
+				received.Add(message.Topic);
+				return Task.CompletedTask;
+			});
+		await _channel.SubscribeAsync("lights.*",
+			(message, _) =>
+			{
+				received.Add("wrong:" + message.Topic);
+				return Task.CompletedTask;
+			});
 
-		var result = await _channel.DeliverAsync(CapabilityOperations.Messaging.Event, Delivery("obs.scene.changed"), CancellationToken.None);
+		var result = await _channel.DeliverAsync(CapabilityOperations.Messaging.Event,
+			Delivery("obs.scene.changed"),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -285,9 +301,12 @@ public class RemoteMessageChannelTests
 	public async Task A_throwing_command_handler_answers_handler_failed()
 	{
 		Connect();
-		await _channel.HandleCommandsAsync("lights.toggle", (_, _) => throw new InvalidOperationException("secret detail"));
+		await _channel.HandleCommandsAsync("lights.toggle",
+			(_, _) => throw new InvalidOperationException("secret detail"));
 
-		var result = await _channel.DeliverAsync(CapabilityOperations.Messaging.Command, Delivery("lights.toggle"), CancellationToken.None);
+		var result = await _channel.DeliverAsync(CapabilityOperations.Messaging.Command,
+			Delivery("lights.toggle"),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -301,7 +320,9 @@ public class RemoteMessageChannelTests
 	{
 		Connect();
 
-		var result = await _channel.DeliverAsync(CapabilityOperations.Messaging.Command, Delivery("lights.toggle"), CancellationToken.None);
+		var result = await _channel.DeliverAsync(CapabilityOperations.Messaging.Command,
+			Delivery("lights.toggle"),
+			CancellationToken.None);
 
 		Assert.That(result.Error?.Details?["reason"], Is.EqualTo(ProtocolErrorReasons.MessagingNoHandler));
 	}
@@ -334,22 +355,26 @@ public class RemoteMessageChannelTests
 			_state,
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
-			hostInvoker: null,
-			hostStateCache: null);
+			null,
+			null);
 		_state.MessagingAccepted = messagingAccepted;
 	}
 
 	private static MessageChannelErrorCode? Code(Func<Task> call)
-		=> Assert.ThrowsAsync<MessageChannelException>(() => call())?.ErrorCode;
+	{
+		return Assert.ThrowsAsync<MessageChannelException>(() => call())?.ErrorCode;
+	}
 
 	private static MessagingDeliveryArguments Delivery(string topic, string sender = "com.example.other")
-		=> new()
+	{
+		return new MessagingDeliveryArguments
 		{
 			Topic = topic,
 			Sender = sender,
 			MessageId = Guid.NewGuid().ToString(),
 			SentAt = DateTimeOffset.UtcNow
 		};
+	}
 
 	private sealed class ScriptedHost : IHostInvoker
 	{
@@ -367,12 +392,20 @@ public class RemoteMessageChannelTests
 		public TimeSpan? LastWait { get; private set; }
 
 		public void Reject(string kind, string topic, string owner)
-			=> _rejections.Add(new MessagingRejectedTopic
+		{
+			_rejections.Add(new MessagingRejectedTopic
 				{ Kind = kind, Topic = topic, Reason = ProtocolErrorReasons.MessagingTopicHandled, Owner = owner });
+		}
 
-		public void FailNextSubscriptions(string code) => _failSubscriptions = code;
+		public void FailNextSubscriptions(string code)
+		{
+			_failSubscriptions = code;
+		}
 
-		public void FailNextMessage(string code, string reason) => _failMessage = (code, reason);
+		public void FailNextMessage(string code, string reason)
+		{
+			_failMessage = (code, reason);
+		}
 
 		public async Task WaitForTableAsync(Func<MessagingSubscriptionsArguments, bool> predicate)
 		{
@@ -388,17 +421,32 @@ public class RemoteMessageChannelTests
 			}
 		}
 
-		public Task<JsonElement?> InvokeAsync(string api, string operation, object? arguments, CancellationToken cancellationToken)
-			=> InvokeAsync(api, operation, arguments, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30), cancellationToken);
+		public Task<JsonElement?> InvokeAsync(
+			string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
+		{
+			return InvokeAsync(api,
+				operation,
+				arguments,
+				TimeSpan.FromSeconds(30),
+				TimeSpan.FromSeconds(30),
+				cancellationToken);
+		}
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			TimeSpan timeout,
 			CancellationToken cancellationToken)
-			=> InvokeAsync(api, operation, arguments, timeout, timeout, cancellationToken);
+		{
+			return InvokeAsync(api, operation, arguments, timeout, timeout, cancellationToken);
+		}
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			TimeSpan deadline,
@@ -412,7 +460,8 @@ public class RemoteMessageChannelTests
 				if (_failSubscriptions is { } code)
 				{
 					_failSubscriptions = null;
-					throw HostInvocationException.From(new ProtocolError { Code = code, Message = code, Retryable = true });
+					throw HostInvocationException.From(new ProtocolError
+						{ Code = code, Message = code, Retryable = true });
 				}
 
 				_tables.Enqueue((MessagingSubscriptionsArguments)arguments!);
@@ -441,6 +490,9 @@ public class RemoteMessageChannelTests
 				: JsonSerializer.SerializeToElement(Reply, PluginProtocolJson.Options));
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

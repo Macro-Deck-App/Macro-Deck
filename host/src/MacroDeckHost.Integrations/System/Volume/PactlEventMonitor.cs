@@ -39,7 +39,10 @@ internal sealed class PactlEventMonitor : IDisposable
 		_maxBackoff = maxBackoff ?? TimeSpan.FromSeconds(30);
 	}
 
-	public void Start() => _loop ??= Task.Run(RunAsync);
+	public void Start()
+	{
+		_loop ??= Task.Run(RunAsync);
+	}
 
 	public void Dispose()
 	{
@@ -68,7 +71,8 @@ internal sealed class PactlEventMonitor : IDisposable
 			{
 				return;
 			}
-			catch (Exception ex) when (ex is InvalidOperationException or global::System.ComponentModel.Win32Exception
+			catch (Exception ex) when (ex is InvalidOperationException
+				or global::System.ComponentModel.Win32Exception
 				or IOException)
 			{
 				_logger.Debug(ex, "The audio event subscription failed");
@@ -141,7 +145,7 @@ internal sealed class PactlEventMonitor : IDisposable
 	{
 		try
 		{
-			process.Kill(entireProcessTree: true);
+			process.Kill(true);
 		}
 		catch (Exception ex) when (ex is InvalidOperationException or global::System.ComponentModel.Win32Exception)
 		{

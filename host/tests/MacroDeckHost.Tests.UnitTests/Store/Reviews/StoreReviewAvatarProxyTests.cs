@@ -48,8 +48,8 @@ internal sealed class StoreReviewAvatarProxyTests
 	[Test]
 	public async Task An_svg_avatar_is_refused()
 	{
-		using var proxy = new StoreReviewAvatarProxy(
-			new FakeHttpMessageHandler("<svg xmlns=\"http://www.w3.org/2000/svg\"><script/></svg>"u8.ToArray(),
+		using var proxy = new StoreReviewAvatarProxy(new FakeHttpMessageHandler(
+				"<svg xmlns=\"http://www.w3.org/2000/svg\"><script/></svg>"u8.ToArray(),
 				contentType: "image/png"),
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
@@ -72,7 +72,9 @@ internal sealed class StoreReviewAvatarProxyTests
 	{
 		public int Calls { get; private set; }
 
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
+			CancellationToken cancellationToken)
 		{
 			Calls++;
 			return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) });

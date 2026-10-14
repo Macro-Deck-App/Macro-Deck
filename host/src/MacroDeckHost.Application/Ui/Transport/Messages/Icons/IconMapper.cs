@@ -13,7 +13,8 @@ public static class IconMapper
 	// ever consulting the owner registry, silently reporting every pack as user-created (including
 	// in realtime event payloads a client cannot re-fetch to correct).
 	public static IconPack ToDto(IconPackEntity entity, int iconCount, IconPackOwnerDescriptor owner)
-		=> new()
+	{
+		return new IconPack
 		{
 			Id = entity.Id.ToString(),
 			Name = entity.Name,
@@ -32,8 +33,10 @@ public static class IconMapper
 			StorePackageId = owner.Kind == IconPackOwnerKind.Store ? entity.SourceId : null,
 			OwnerName = owner.OwnerName
 		};
+	}
 
-	public static ImportIconsResponse ToImportResponse(Result<IconImportBatchEntity, IconError> result,
+	public static ImportIconsResponse ToImportResponse(
+		Result<IconImportBatchEntity, IconError> result,
 		IconImportBatchTracker batchTracker)
 	{
 		var response = new ImportIconsResponse { Success = result.Success };
@@ -60,7 +63,8 @@ public static class IconMapper
 		return response;
 	}
 
-	public static ImportSingleIconResponse ToSingleImportResponse(Result<SingleIconImportResult, IconError> result,
+	public static ImportSingleIconResponse ToSingleImportResponse(
+		Result<SingleIconImportResult, IconError> result,
 		IIconPackCache iconPackCache)
 	{
 		if (!result.Success)
@@ -84,7 +88,8 @@ public static class IconMapper
 		};
 	}
 
-	public static ImportIconPacksResponse ToImportPacksResponse(Result<IconPackImportResult, IconError> result,
+	public static ImportIconPacksResponse ToImportPacksResponse(
+		Result<IconPackImportResult, IconError> result,
 		IconImportBatchTracker batchTracker,
 		IIconPackCache iconPackCache,
 		IIconPackOwnerRegistry ownerRegistry)
@@ -120,7 +125,8 @@ public static class IconMapper
 	}
 
 	public static IconImportBatch ToDto(IconImportBatchEntity entity, int? total, int processed, int failed)
-		=> new()
+	{
+		return new IconImportBatch
 		{
 			Id = entity.Id.ToString(),
 			PackId = entity.PackId.ToString(),
@@ -131,12 +137,16 @@ public static class IconMapper
 			Failed = failed,
 			Error = entity.Error
 		};
+	}
 
 	public static Icon ToDto(IconEntity entity, IIconPackCache iconPackCache)
-		=> ToDto(entity, iconPackCache.GetAppearances(entity.Id));
+	{
+		return ToDto(entity, iconPackCache.GetAppearances(entity.Id));
+	}
 
 	public static Icon ToDto(IconEntity entity, IReadOnlyList<IconEntity> appearances)
-		=> new()
+	{
+		return new Icon
 		{
 			Id = entity.Id.ToString(),
 			PackId = entity.PackId.ToString(),
@@ -152,6 +162,7 @@ public static class IconMapper
 			CreatedAt = entity.CreatedAt,
 			Appearances = appearances.Select(ToAppearanceDto).ToList()
 		};
+	}
 
 	private static IconAppearance ToAppearanceDto(IconEntity asset)
 	{

@@ -21,7 +21,8 @@ public sealed class StoreOperationBackgroundService : HostReadyBackgroundService
 	private readonly IStoreUpdateDetector _updateDetector;
 	private readonly ILogger _logger;
 
-	public StoreOperationBackgroundService(IHostApplicationLifetime lifetime,
+	public StoreOperationBackgroundService(
+		IHostApplicationLifetime lifetime,
 		StoreOperationChannel channel,
 		StoreOperationCancellation cancellation,
 		IStoreOperationStore operationStore,

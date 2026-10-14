@@ -16,8 +16,8 @@ public class VariableTemplateRendererCostTests
 	[CancelAfter(120_000)]
 	public void A_grid_of_cards_repaints_its_subtitles_as_fast_with_many_unrelated_variables_as_with_none()
 	{
-		var withNone = MedianPassMilliseconds(unrelatedVariables: 0);
-		var withMany = MedianPassMilliseconds(unrelatedVariables: 2000);
+		var withNone = MedianPassMilliseconds(0);
+		var withMany = MedianPassMilliseconds(2000);
 
 		// A ratio with a floor, not a time budget: the requirement is that the cost does not grow with the
 		// registry, and a fixed number of milliseconds would fail on a slow or busy machine instead.
@@ -60,14 +60,17 @@ public class VariableTemplateRendererCostTests
 		return measured[measured.Count / 2];
 	}
 
-	private static VariableEntity Variable(string name, string value) => new()
+	private static VariableEntity Variable(string name, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = VariableType.Text,
-		Classification = VariableClassification.User,
-		Value = value,
-		UpdatedAt = DateTime.UtcNow,
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = VariableType.Text,
+			Classification = VariableClassification.User,
+			Value = value,
+			UpdatedAt = DateTime.UtcNow
+		};
+	}
 }

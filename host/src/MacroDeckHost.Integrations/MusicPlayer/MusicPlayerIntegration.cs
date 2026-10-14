@@ -41,8 +41,9 @@ public sealed partial class MusicPlayerIntegration : IIntegration, ISystemIntegr
 	public IReadOnlyList<VariableDefinition> Variables
 		=>
 		[
-			.. Players().Select(player => Define($"music_player_{player.Key}_album_color",
-				new VariableConfiguration(player.InstanceId, player.Name)))
+			.. Players()
+				.Select(player => Define($"music_player_{player.Key}_album_color",
+					new VariableConfiguration(player.InstanceId, player.Name)))
 		];
 
 	public IReadOnlyList<VariableDefinition> DeclaredVariables
@@ -60,20 +61,24 @@ public sealed partial class MusicPlayerIntegration : IIntegration, ISystemIntegr
 		return Task.CompletedTask;
 	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public async ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
-		if (_musicPlayers is not { } musicPlayers ||
-			!localId.StartsWith(Prefix, StringComparison.Ordinal) ||
-			!localId.EndsWith(Suffix, StringComparison.Ordinal))
+		if (_musicPlayers is not { } musicPlayers
+			|| !localId.StartsWith(Prefix, StringComparison.Ordinal)
+			|| !localId.EndsWith(Suffix, StringComparison.Ordinal))
 		{
 			return VariableReading.Unavailable;
 		}
 
 		var key = localId[Prefix.Length..^Suffix.Length];
-		var player = Players().FirstOrDefault(candidate =>
-			string.Equals(candidate.Key.Replace('_', '-'), key, StringComparison.Ordinal));
+		var player = Players()
+			.FirstOrDefault(candidate =>
+				string.Equals(candidate.Key.Replace('_', '-'), key, StringComparison.Ordinal));
 		if (player is null)
 		{
 			return VariableReading.Unavailable;
@@ -117,12 +122,14 @@ public sealed partial class MusicPlayerIntegration : IIntegration, ISystemIntegr
 	}
 
 	private static VariableDefinition Define(string name, VariableConfiguration? configuration)
-		=> VariableDefinition.Eager(name, VariableType.Color, refreshInterval: TimeSpan.FromSeconds(2))
+	{
+		return VariableDefinition.Eager(name, VariableType.Color, refreshInterval: TimeSpan.FromSeconds(2))
 			with
 			{
 				DisplayName = AppStrings.Integrations.MusicPlayer.Variables.AlbumColorDisplayName(),
 				Configuration = configuration
 			};
+	}
 
 	private List<Player> Players()
 	{

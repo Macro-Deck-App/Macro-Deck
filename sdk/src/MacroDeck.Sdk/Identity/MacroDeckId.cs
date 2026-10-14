@@ -29,7 +29,9 @@ public static partial class MacroDeckId
 	private static partial Regex PackageOwnerPattern();
 
 	public static bool IsValidOwnerId(string? ownerId, OwnerIdKind kind)
-		=> TryValidateOwnerId(ownerId, kind, out _);
+	{
+		return TryValidateOwnerId(ownerId, kind, out _);
+	}
 
 	/// <summary>
 	/// Accepts either owner kind. Used when reading an id back out of persisted data, where a stored
@@ -37,10 +39,14 @@ public static partial class MacroDeckId
 	/// (<c>app.macro-deck.obs</c>).
 	/// </summary>
 	public static bool IsValidOwnerId(string? ownerId)
-		=> IsValidOwnerId(ownerId, OwnerIdKind.Package) || IsValidOwnerId(ownerId, OwnerIdKind.HostProvider);
+	{
+		return IsValidOwnerId(ownerId, OwnerIdKind.Package) || IsValidOwnerId(ownerId, OwnerIdKind.HostProvider);
+	}
 
 	public static bool IsValidLocalId(string? localId, LocalIdKind kind)
-		=> TryValidateLocalId(localId, kind, out _);
+	{
+		return TryValidateLocalId(localId, kind, out _);
+	}
 
 	/// <summary>
 	/// Validates an owner id and, on failure, explains why in a sentence fit for a log line or an
@@ -73,8 +79,8 @@ public static partial class MacroDeckId
 		if (!valid)
 		{
 			error = kind == OwnerIdKind.Package
-				? "Owner id must be reverse-domain, lowercase and hyphen-separated, with at least two " +
-				"segments (e.g. 'com.example.my-plugin')."
+				? "Owner id must be reverse-domain, lowercase and hyphen-separated, with at least two "
+				+ "segments (e.g. 'com.example.my-plugin')."
 				: "Host provider id must be a single lowercase, hyphen-separated segment (e.g. 'music-player').";
 			return false;
 		}
@@ -112,8 +118,8 @@ public static partial class MacroDeckId
 
 			if (!SegmentPattern().IsMatch(localId))
 			{
-				error = "Local id must be lowercase and hyphen-separated, starting with a letter " +
-					"(e.g. 'set-volume').";
+				error = "Local id must be lowercase and hyphen-separated, starting with a letter "
+					+ "(e.g. 'set-volume').";
 				return false;
 			}
 

@@ -19,11 +19,13 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class ActionsContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Action(string localId)
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Actions, LocalId = localId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	[Test]
 	public async Task Declare_registers_an_adapter_that_passes_the_capability_validator()
@@ -58,7 +60,8 @@ internal sealed class ActionsContractTests : CapabilityContractFixture
 
 		Assert.That(integration.Actions.Single(a => a.Id == "pick"), Is.InstanceOf<IDynamicOptionsActionDefinition>());
 
-		var executeResult = await integration.Actions.Single(a => a.Id == "play").CreateExecutor()
+		var executeResult = await integration.Actions.Single(a => a.Id == "play")
+			.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
 		Assert.That(executeResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 
@@ -109,13 +112,13 @@ internal sealed class ActionsContractTests : CapabilityContractFixture
 		var launcher = new TestRoleAction("launch", ActionRoles.LaunchApplication);
 		var plain = new TestRoleAction("plain", null);
 
-		var integration = await ConnectAsync(
-			[new ActionsCapabilityHandler([new TestIntegration(launcher, plain)])],
+		var integration = await ConnectAsync([new ActionsCapabilityHandler([new TestIntegration(launcher, plain)])],
 			[Action("launch"), Action("plain")],
 			[CapabilityKinds.Actions]);
 
 		Assert.That(integration.Actions.ToDictionary(action => action.Id, action => action.Role),
-			Is.EqualTo(new Dictionary<string, string?> { ["launch"] = ActionRoles.LaunchApplication, ["plain"] = null }));
+			Is.EqualTo(new Dictionary<string, string?>
+				{ ["launch"] = ActionRoles.LaunchApplication, ["plain"] = null }));
 	}
 
 	[Test]
@@ -264,7 +267,8 @@ internal sealed class ActionsContractTests : CapabilityContractFixture
 			[Action("toggle")],
 			[CapabilityKinds.Actions]);
 
-		var result = await integration.Actions.Single().CreateExecutor()
+		var result = await integration.Actions.Single()
+			.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
 
 		Assert.Multiple(() =>
@@ -328,10 +332,11 @@ internal sealed class ActionsContractTests : CapabilityContractFixture
 
 		using var cts = new CancellationTokenSource();
 		var action = integration.Actions.Single(a => a.Id == "play");
-		var executeTask = action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>(), CancellationToken = cts.Token
-		});
+		var executeTask = action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = new Dictionary<string, object>(), CancellationToken = cts.Token
+			});
 
 		await cts.CancelAsync();
 

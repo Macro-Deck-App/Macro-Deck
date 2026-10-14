@@ -27,10 +27,9 @@ internal sealed class MuteAudioSourceActionDefinition : IDynamicOptionsActionDef
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(StreamlabsActionValues.SourceParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel(),
 			required: true),
 		ActionParameter.Choice(StreamlabsActionValues.ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -45,11 +44,14 @@ internal sealed class MuteAudioSourceActionDefinition : IDynamicOptionsActionDef
 					Value = ModeUnmute, Label = AppStrings.Integrations.StreamlabsDesktop.Params.UnmuteLabel()
 				}
 			],
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.ModeLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.ModeLabel(),
 			defaultValue: ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,

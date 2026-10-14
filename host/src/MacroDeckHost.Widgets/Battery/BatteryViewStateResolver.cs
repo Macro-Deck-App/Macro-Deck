@@ -13,7 +13,7 @@ internal sealed class BatteryViewStateResolver
 		new UiThresholdBand("red", WidgetThresholds.Red),
 		new UiThresholdBand("orange", WidgetThresholds.Orange, 20),
 		new UiThresholdBand("yellow", WidgetThresholds.Yellow, 40),
-		new UiThresholdBand("green", WidgetThresholds.Green, 60),
+		new UiThresholdBand("green", WidgetThresholds.Green, 60)
 	]);
 
 	private readonly IBatteryApi _batteries;
@@ -43,7 +43,11 @@ internal sealed class BatteryViewStateResolver
 					? BatteryViewState.PickDevice
 					: new BatteryViewState
 					{
-						Faces = [.. config.Selection.Take(BatteryWidgetData.MaxDevices).Select(device => FaceFor(device, config))],
+						Faces =
+						[
+							.. config.Selection.Take(BatteryWidgetData.MaxDevices)
+								.Select(device => FaceFor(device, config))
+						]
 					};
 
 			default:
@@ -53,21 +57,23 @@ internal sealed class BatteryViewStateResolver
 					? BatteryViewState.NoDevices
 					: new BatteryViewState
 					{
-						Faces = [.. devices.Take(BatteryWidgetData.MaxDevices).Select(device => Face(device, config))],
+						Faces = [.. devices.Take(BatteryWidgetData.MaxDevices).Select(device => Face(device, config))]
 					};
 		}
 	}
 
 	private BatteryFace FaceFor(BatteryDeviceReference stored, BatteryWidgetData config)
-		=> _batteries.Find(stored.Id) is { } device
+	{
+		return _batteries.Find(stored.Id) is { } device
 			? Face(device, config)
 			: new BatteryFace
 			{
 				Id = stored.Id,
 				Name = stored.Name ?? string.Empty,
 				Kind = stored.Kind,
-				Status = BatteryFaceStatus.NotAvailable,
+				Status = BatteryFaceStatus.NotAvailable
 			};
+	}
 
 	public static BatteryFace Face(BatteryDeviceSnapshot device, BatteryWidgetData config)
 	{
@@ -83,7 +89,7 @@ internal sealed class BatteryViewStateResolver
 			ChargeState = device.ChargeState,
 			Status = device.IsConnected ? BatteryFaceStatus.Live : BatteryFaceStatus.NotConnected,
 			MinutesRemaining = Minutes(device.TimeRemaining),
-			MinutesToFull = Minutes(device.TimeToFull),
+			MinutesToFull = Minutes(device.TimeToFull)
 		};
 
 		return face with { Color = ColorOf(face, config) };
@@ -113,7 +119,9 @@ internal sealed class BatteryViewStateResolver
 	}
 
 	private static int? Minutes(TimeSpan? time)
-		=> time is { } value && value > TimeSpan.Zero
+	{
+		return time is { } value && value > TimeSpan.Zero
 			? (int)Math.Min(Math.Ceiling(value.TotalMinutes), int.MaxValue)
 			: null;
+	}
 }

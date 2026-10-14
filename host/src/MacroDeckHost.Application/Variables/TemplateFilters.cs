@@ -48,12 +48,17 @@ internal static class TemplateFilters
 		}
 	}
 
-	internal static string Color(TemplateFilterArgument? value) => ColorOf(value)?.ToString() ?? string.Empty;
+	internal static string Color(TemplateFilterArgument? value)
+	{
+		return ColorOf(value)?.ToString() ?? string.Empty;
+	}
 
 	internal static string Mix(TemplateFilterArgument? value, TemplateFilterArgument? other, object? percent)
-		=> ColorOf(value) is { } color && ColorOf(other) is { } with && NumberOf(percent) is { } amount
+	{
+		return ColorOf(value) is { } color && ColorOf(other) is { } with && NumberOf(percent) is { } amount
 			? color.Mix(with, amount).ToString()
 			: string.Empty;
+	}
 
 	internal static ScriptObject CreateScope()
 	{
@@ -67,26 +72,34 @@ internal static class TemplateFilters
 	}
 
 	private static DelegateCustomFunction Modifier(Func<RgbaColor, double, RgbaColor> apply)
-		=> DelegateCustomFunction.CreateFunc<TemplateFilterArgument?, object?, string>((value, amount)
+	{
+		return DelegateCustomFunction.CreateFunc<TemplateFilterArgument?, object?, string>((value, amount)
 			=> ColorOf(value) is { } color && NumberOf(amount) is { } number
 				? apply(color, number).ToString()
 				: string.Empty);
+	}
 
 	// A variable counts only when it is a Color variable, the same rule the colour resolver applies; an
 	// unavailable or unknown one never parses, so it falls through to the empty string meaning unset.
-	private static RgbaColor? ColorOf(TemplateFilterArgument? argument) => argument?.Value switch
+	private static RgbaColor? ColorOf(TemplateFilterArgument? argument)
 	{
-		VariableTemplateValue { IsColor: true } variable => RgbaColor.Parse(variable.Value as string),
-		VariableTemplateValue => null,
-		string text => RgbaColor.Parse(text),
-		_ => null
-	};
+		return argument?.Value switch
+		{
+			VariableTemplateValue { IsColor: true } variable => RgbaColor.Parse(variable.Value as string),
+			VariableTemplateValue => null,
+			string text => RgbaColor.Parse(text),
+			_ => null
+		};
+	}
 
-	private static double? NumberOf(object? value) => VariableTemplateValue.Unwrap(value) switch
+	private static double? NumberOf(object? value)
 	{
-		IConvertible convertible and not string and not bool => convertible.ToDouble(CultureInfo.InvariantCulture),
-		string text when double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
-			=> parsed,
-		_ => null
-	};
+		return VariableTemplateValue.Unwrap(value) switch
+		{
+			IConvertible convertible and not string and not bool => convertible.ToDouble(CultureInfo.InvariantCulture),
+			string text when double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+				=> parsed,
+			_ => null
+		};
+	}
 }

@@ -30,17 +30,23 @@ public class LayoutRegistryTests
 
 	[Test]
 	public void Register_RejectsAnEmptyOwnerId()
-		=> Assert.That(() => _registry.Register(string.Empty, FixedGrid("grid-1", 3, 5)),
+	{
+		Assert.That(() => _registry.Register(string.Empty, FixedGrid("grid-1", 3, 5)),
 			Throws.ArgumentException);
+	}
 
 	[Test]
 	public void Register_RejectsALocalIdContainingTheQualifierSeparator()
-		=> Assert.That(() => _registry.Register("com.example.deck", FixedGrid("a::b", 3, 5)),
+	{
+		Assert.That(() => _registry.Register("com.example.deck", FixedGrid("a::b", 3, 5)),
 			Throws.ArgumentException);
+	}
 
 	[Test]
 	public void TryResolve_UnknownQualifiedId_ReturnsFalse()
-		=> Assert.That(_registry.TryResolve("com.example.deck::missing", out _), Is.False);
+	{
+		Assert.That(_registry.TryResolve("com.example.deck::missing", out _), Is.False);
+	}
 
 	[Test]
 	public async Task TwoProviders_RegisteringTheSameLocalName_ResolveIndependentlyByQualifiedId()
@@ -96,7 +102,8 @@ public class LayoutRegistryTests
 	}
 
 	private static LayoutDescriptor FixedGrid(string id, int rows, int columns)
-		=> new(id,
+	{
+		return new LayoutDescriptor(id,
 			"Test Grid",
 			[
 				new LayoutRegion
@@ -104,4 +111,5 @@ public class LayoutRegistryTests
 					Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = rows, Columns = columns }
 				}
 			]);
+	}
 }

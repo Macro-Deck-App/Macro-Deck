@@ -119,7 +119,7 @@ public class PluginTakeoverAdmissionTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -132,14 +132,14 @@ public class PluginTakeoverAdmissionTests
 		var created = await CreatePairingRequestAsync(pluginId, challenge);
 		var requestId = (await ReadJson(created)).GetProperty("requestId").GetString()!;
 		var pendingItem = await PendingItemAsync(requestId);
-		var unconfirmed = await ApproveAsync(requestId, takeOverInstalledPlugin: false);
+		var unconfirmed = await ApproveAsync(requestId, false);
 		var unconfirmedJson = await ReadJson(unconfirmed);
-		var confirmed = await ApproveAsync(requestId, takeOverInstalledPlugin: true);
+		var confirmed = await ApproveAsync(requestId, true);
 		var redemption = await RedeemAsync(requestId, verifier);
 		var registration = await PairedRegistrationAsync(pluginId);
 		var runtime = await RuntimeSnapshotAsync(pluginId);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(created.StatusCode,
 				Is.EqualTo(HttpStatusCode.Created),
@@ -188,7 +188,7 @@ public class PluginTakeoverAdmissionTests
 			await scope.ServiceProvider.GetRequiredService<IPluginRegistrationService>().Revoke(pluginId);
 		}
 
-		var secret = await PairAsync(pluginId, takeOverInstalledPlugin: true);
+		var secret = await PairAsync(pluginId, true);
 		var development = await CreateSessionAsync(pluginId, secret);
 
 		Assert.Multiple(() =>
@@ -207,7 +207,7 @@ public class PluginTakeoverAdmissionTests
 		using (var scope = _host.Services.CreateScope())
 		{
 			var registered = await scope.ServiceProvider.GetRequiredService<IPluginRegistrationService>()
-				.Register(pluginId, "Development Build", null, PluginRegistrationOrigins.Pairing, allowInstalledId: true);
+				.Register(pluginId, "Development Build", null, PluginRegistrationOrigins.Pairing, true);
 			secret = registered.PluginSecret!;
 		}
 
@@ -247,7 +247,7 @@ public class PluginTakeoverAdmissionTests
 	{
 		var (takenOverId, _) = await TakeOverAsync();
 		var ordinaryId = NewPluginId();
-		await PairAsync(ordinaryId, takeOverInstalledPlugin: false);
+		await PairAsync(ordinaryId, false);
 
 		await SetDeveloperMode(false);
 		await SetDeveloperMode(true);
@@ -276,7 +276,8 @@ public class PluginTakeoverAdmissionTests
 			"/api/plugins/registration",
 			FakeConnectionShape.Loopback,
 			body: new { pluginId, displayName = "Example Plugin" },
-			extraHeaders: new Dictionary<string, string> { [PluginAuthDefaults.EnrollmentTokenHeaderName] = plaintext });
+			extraHeaders: new Dictionary<string, string>
+				{ [PluginAuthDefaults.EnrollmentTokenHeaderName] = plaintext });
 		var error = await ReadJson(enrolment);
 
 		Assert.Multiple(() =>
@@ -310,7 +311,7 @@ public class PluginTakeoverAdmissionTests
 	private async Task<(string PluginId, string Secret)> TakeOverAsync()
 	{
 		var pluginId = InstallNewPlugin();
-		return (pluginId, await PairAsync(pluginId, takeOverInstalledPlugin: true));
+		return (pluginId, await PairAsync(pluginId, true));
 	}
 
 	private async Task<string> PairAsync(string pluginId, bool takeOverInstalledPlugin)
@@ -329,49 +330,61 @@ public class PluginTakeoverAdmissionTests
 	}
 
 	private List<PluginSessionSnapshot> SessionsOf(string pluginId)
-		=> _host.Services.GetRequiredService<IPluginSessionRegistry>().Snapshot()
+	{
+		return _host.Services.GetRequiredService<IPluginSessionRegistry>()
+			.Snapshot()
 			.Where(session => session.PluginId == pluginId)
 			.ToList();
+	}
 
 	private Task<HttpResponseMessage> CreatePairingRequestAsync(string pluginId, string challenge)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			"/api/plugins/pairing",
 			FakeConnectionShape.Loopback,
 			body: new
 			{
 				pluginId, displayName = "Development Build", codeChallenge = challenge, codeChallengeMethod = "S256"
 			});
+	}
 
 	private Task<HttpResponseMessage> ApproveAsync(string requestId, bool takeOverInstalledPlugin)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			$"/api/plugin-pairing/requests/{requestId}/approve",
 			FakeConnectionShape.Loopback,
 			body: new { replaceExistingRegistration = false, takeOverInstalledPlugin });
+	}
 
 	private Task<HttpResponseMessage> RedeemAsync(string requestId, string verifier)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			$"/api/plugins/pairing/{requestId}/redemption",
 			FakeConnectionShape.Loopback,
 			body: new { codeVerifier = verifier });
+	}
 
 	private async Task<JsonElement> PendingItemAsync(string requestId)
 	{
 		var response = await Send(HttpMethod.Get, "/api/plugin-pairing/requests", FakeConnectionShape.Loopback);
-		return (await ReadJson(response)).GetProperty("requests").EnumerateArray()
+		return (await ReadJson(response)).GetProperty("requests")
+			.EnumerateArray()
 			.Single(item => item.GetProperty("requestId").GetString() == requestId);
 	}
 
 	private async Task<JsonElement> PairedRegistrationAsync(string pluginId)
 	{
 		var response = await Send(HttpMethod.Get, "/api/plugin-pairing/registrations", FakeConnectionShape.Loopback);
-		return (await ReadJson(response)).GetProperty("registrations").EnumerateArray()
+		return (await ReadJson(response)).GetProperty("registrations")
+			.EnumerateArray()
 			.Single(item => item.GetProperty("pluginId").GetString() == pluginId);
 	}
 
 	private async Task<IReadOnlyList<string>> PairedRegistrationIdsAsync()
 	{
 		var response = await Send(HttpMethod.Get, "/api/plugin-pairing/registrations", FakeConnectionShape.Loopback);
-		return (await ReadJson(response)).GetProperty("registrations").EnumerateArray()
+		return (await ReadJson(response)).GetProperty("registrations")
+			.EnumerateArray()
 			.Select(item => item.GetProperty("pluginId").GetString()!)
 			.ToList();
 	}
@@ -380,12 +393,14 @@ public class PluginTakeoverAdmissionTests
 	{
 		var response = await Send(HttpMethod.Get, "/api/plugin-runtime", FakeConnectionShape.PublicLan, _adminToken);
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-		return (await ReadJson(response)).GetProperty("plugins").EnumerateArray()
+		return (await ReadJson(response)).GetProperty("plugins")
+			.EnumerateArray()
 			.Single(item => item.GetProperty("pluginId").GetString() == pluginId);
 	}
 
 	private Task<HttpResponseMessage> CreateSessionAsync(string pluginId, string secret)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			"/api/plugins/sessions",
 			FakeConnectionShape.Loopback,
 			body: new { requestedVersion = new { minimum = 1, maximum = 1 }, capabilities = Array.Empty<object>() },
@@ -393,6 +408,7 @@ public class PluginTakeoverAdmissionTests
 			{
 				[PluginAuthDefaults.PluginIdHeaderName] = pluginId, [PluginAuthDefaults.PluginSecretHeaderName] = secret
 			});
+	}
 
 	private async Task SetDeveloperMode(bool enabled)
 	{
@@ -404,7 +420,10 @@ public class PluginTakeoverAdmissionTests
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 	}
 
-	private static string NewPluginId() => $"com.example.t{Guid.NewGuid():N}";
+	private static string NewPluginId()
+	{
+		return $"com.example.t{Guid.NewGuid():N}";
+	}
 
 	private static (string Verifier, string Challenge) NewPkcePair()
 	{
@@ -422,7 +441,8 @@ public class PluginTakeoverAdmissionTests
 		return readiness;
 	}
 
-	private async Task<HttpResponseMessage> Send(HttpMethod method,
+	private async Task<HttpResponseMessage> Send(
+		HttpMethod method,
 		string path,
 		FakeConnectionShape shape,
 		string? bearerToken = null,
@@ -454,7 +474,9 @@ public class PluginTakeoverAdmissionTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private sealed class SessionCreateHook
 	{
@@ -476,7 +498,8 @@ public class PluginTakeoverAdmissionTests
 			_hook = hook;
 		}
 
-		public async Task<PluginSessionCreationResult> Create(PluginSessionIdentity identity,
+		public async Task<PluginSessionCreationResult> Create(
+			PluginSessionIdentity identity,
 			PluginSessionRequest request)
 		{
 			if (_hook.BeforeCreate is { } before)
@@ -488,6 +511,8 @@ public class PluginTakeoverAdmissionTests
 		}
 
 		public Task<bool> Close(string sessionId, int closeCode, string reason)
-			=> _inner.Close(sessionId, closeCode, reason);
+		{
+			return _inner.Close(sessionId, closeCode, reason);
+		}
 	}
 }

@@ -11,13 +11,13 @@ internal static class ManifestDocumentProblems
 	public static List<ManifestProblem> Evaluate(JsonElement manifest)
 	{
 		var problems = PluginManifestSchema.Validate(manifest)
-			.Where(problem => problem.Pointer is not { } pointer ||
-				(pointer != AdditionalLinksPointer &&
-					!pointer.StartsWith(AdditionalLinksPointer + "/", StringComparison.Ordinal)))
+			.Where(problem => problem.Pointer is not { } pointer
+				|| pointer != AdditionalLinksPointer
+				&& !pointer.StartsWith(AdditionalLinksPointer + "/", StringComparison.Ordinal))
 			.ToList();
 
-		if (manifest.ValueKind == JsonValueKind.Object &&
-			TryGetAdditionalLinks(manifest, out var name, out var additionalLinks))
+		if (manifest.ValueKind == JsonValueKind.Object
+			&& TryGetAdditionalLinks(manifest, out var name, out var additionalLinks))
 		{
 			problems.AddRange(PluginManifestLinks.Validate(additionalLinks)
 				.Select(problem => ToProblem(problem, "/" + name)));

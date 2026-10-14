@@ -11,14 +11,22 @@ namespace MacroDeckHost.Widgets.ActionButton;
 internal static class ActionButtonWidgetViewPreviews
 {
 	[UiPreview("Default", Profile = UiPreviewProfiles.Widget)]
-	public static UiElement Default() => Build("""{"label":"Lights","backgroundColor":"#2196f3"}""");
+	public static UiElement Default()
+	{
+		return Build("""{"label":"Lights","backgroundColor":"#2196f3"}""");
+	}
 
 	[UiPreview("Long text", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement LongText()
-		=> Build("""{"label":"Turn off every light in the living room","backgroundColor":"#37474f"}""");
+	{
+		return Build("""{"label":"Turn off every light in the living room","backgroundColor":"#37474f"}""");
+	}
 
 	[UiPreview("Empty", Profile = UiPreviewProfiles.Widget)]
-	public static UiElement Empty() => Build("{}");
+	public static UiElement Empty()
+	{
+		return Build("{}");
+	}
 
 	private static UiElement Build(string json)
 	{
@@ -30,8 +38,8 @@ internal static class ActionButtonWidgetViewPreviews
 			new UiState<string?>(config.Resolve(config.InitialStateId).Label),
 			new UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>>(
 				new Dictionary<WidgetIconReference, UiResource>()),
-			new UiState<WidgetIconResolution>(new WidgetIconResolution(IsActive: false, Resource: null)),
-			imageResource: null,
-			events: []);
+			new UiState<WidgetIconResolution>(new WidgetIconResolution(false, null)),
+			null,
+			[]);
 	}
 }

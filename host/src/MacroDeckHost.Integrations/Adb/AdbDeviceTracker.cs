@@ -26,7 +26,11 @@ internal enum AdbDeviceChangeKind
 	Offline
 }
 
-internal sealed record AdbTrackedDevice(IAndroidDevice Device, AdbDeviceStatus Status, string? Model, string? Manufacturer)
+internal sealed record AdbTrackedDevice(
+	IAndroidDevice Device,
+	AdbDeviceStatus Status,
+	string? Model,
+	string? Manufacturer)
 {
 	public string Serial => Device.Serial;
 
@@ -93,21 +97,24 @@ internal sealed class AdbDeviceTracker : IDisposable
 		_manager.DeviceDisconnected -= OnDeviceDisconnected;
 	}
 
-	internal static AdbDeviceStatus StatusOf(IAndroidDevice device) => device.State switch
+	internal static AdbDeviceStatus StatusOf(IAndroidDevice device)
 	{
-		AndroidDeviceState.Online => AdbDeviceStatus.Device,
-		AndroidDeviceState.Connecting => AdbDeviceStatus.Authorizing,
-		AndroidDeviceState.Unauthorized when device.LacksUsbPermission => AdbDeviceStatus.NoPermissions,
-		AndroidDeviceState.Unauthorized => AdbDeviceStatus.Unauthorized,
-		_ => device.Mode switch
+		return device.State switch
 		{
-			AndroidDeviceMode.Bootloader => AdbDeviceStatus.Bootloader,
-			AndroidDeviceMode.Recovery => AdbDeviceStatus.Recovery,
-			AndroidDeviceMode.Sideload => AdbDeviceStatus.Sideload,
-			AndroidDeviceMode.Unknown => AdbDeviceStatus.Unknown,
-			_ => AdbDeviceStatus.Offline
-		}
-	};
+			AndroidDeviceState.Online => AdbDeviceStatus.Device,
+			AndroidDeviceState.Connecting => AdbDeviceStatus.Authorizing,
+			AndroidDeviceState.Unauthorized when device.LacksUsbPermission => AdbDeviceStatus.NoPermissions,
+			AndroidDeviceState.Unauthorized => AdbDeviceStatus.Unauthorized,
+			_ => device.Mode switch
+			{
+				AndroidDeviceMode.Bootloader => AdbDeviceStatus.Bootloader,
+				AndroidDeviceMode.Recovery => AdbDeviceStatus.Recovery,
+				AndroidDeviceMode.Sideload => AdbDeviceStatus.Sideload,
+				AndroidDeviceMode.Unknown => AdbDeviceStatus.Unknown,
+				_ => AdbDeviceStatus.Offline
+			}
+		};
+	}
 
 	internal static AdbDeviceChangeKind? KindFor(AdbDeviceStatus? previous, AdbDeviceStatus current)
 	{
@@ -137,10 +144,14 @@ internal sealed class AdbDeviceTracker : IDisposable
 	}
 
 	private void OnDeviceChanged(object? sender, AndroidDeviceEventArgs e)
-		=> Apply(e.Device, StatusOf(e.Device));
+	{
+		Apply(e.Device, StatusOf(e.Device));
+	}
 
 	private void OnDeviceDisconnected(object? sender, AndroidDeviceEventArgs e)
-		=> Apply(e.Device, AdbDeviceStatus.Disconnected);
+	{
+		Apply(e.Device, AdbDeviceStatus.Disconnected);
+	}
 
 	private void Apply(IAndroidDevice device, AdbDeviceStatus status)
 	{
@@ -174,7 +185,9 @@ internal sealed class AdbDeviceTracker : IDisposable
 	}
 
 	private static AdbTrackedDevice Track(IAndroidDevice device, AdbDeviceStatus status)
-		=> new(device, status, device.Info.Model, device.Info.Manufacturer);
+	{
+		return new AdbTrackedDevice(device, status, device.Info.Model, device.Info.Manufacturer);
+	}
 
 	private void Prune()
 	{

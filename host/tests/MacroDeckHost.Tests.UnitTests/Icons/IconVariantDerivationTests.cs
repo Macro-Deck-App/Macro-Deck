@@ -99,7 +99,7 @@ public class IconVariantDerivationTests
 	public async Task A_leftover_size_file_that_the_icon_does_not_list_is_never_served()
 	{
 		var pack = await _harness.CreatePack();
-		var icon = await AddInstalledIcon(pack, Webp(1024, _red), Webp(128, _green), sizes: []);
+		var icon = await AddInstalledIcon(pack, Webp(1024, _red), Webp(128, _green), []);
 
 		var served = await Get(icon, 128);
 
@@ -138,13 +138,14 @@ public class IconVariantDerivationTests
 	}
 
 	[Test]
-	public async Task A_master_that_would_decode_beyond_the_pixel_budget_is_served_as_it_is_and_does_not_stop_other_icons()
+	public async Task
+		A_master_that_would_decode_beyond_the_pixel_budget_is_served_as_it_is_and_does_not_stop_other_icons()
 	{
 		using var deriver = new ImageSharpIconVariantDeriver(_harness.Storage,
 			_harness.Cache,
 			TimeProvider.System,
 			_harness.Logger,
-			maxDecodedPixels: 600_000);
+			600_000);
 		_service = new IconService(_harness.Cache,
 			_harness.Storage,
 			_harness.FallbackStore,
@@ -152,7 +153,7 @@ public class IconVariantDerivationTests
 			_harness.Coalescer,
 			_harness.Mediator,
 			new IconPackOwnerRegistry([]));
-		var longAnimation = Webp(512, _red, frames: 4);
+		var longAnimation = Webp(512, _red, 4);
 		var animated = await Install(new ArchiveIcon("animated", longAnimation));
 		var still = await Install(new ArchiveIcon("still", Webp(512, _blue)));
 
@@ -172,9 +173,9 @@ public class IconVariantDerivationTests
 	{
 		var pack = await _harness.CreatePack();
 		var broken = "not an image"u8.ToArray();
-		var icon = await AddInstalledIcon(pack, broken, plain: null, sizes: []);
+		var icon = await AddInstalledIcon(pack, broken, null, []);
 
-		var result = await _service.GetImage(icon.Id, 128, acceptWebp: true, staticFrame: false, CancellationToken.None);
+		var result = await _service.GetImage(icon.Id, 128, true, false, CancellationToken.None);
 
 		Assert.That(result.Success, Is.True);
 		await using var content = result.Data!.Content;
@@ -188,7 +189,7 @@ public class IconVariantDerivationTests
 	[Test]
 	public async Task An_animated_master_keeps_its_frames_in_the_size_variant()
 	{
-		var icon = await Install(new ArchiveIcon("spinner", Webp(512, _red, frames: 4)));
+		var icon = await Install(new ArchiveIcon("spinner", Webp(512, _red, 4)));
 
 		var served = await Get(icon, 128);
 
@@ -204,7 +205,7 @@ public class IconVariantDerivationTests
 	{
 		var icon = await Install(new ArchiveIcon("star", Webp(1024, _red)));
 
-		var result = await _service.GetImage(icon.Id, 128, acceptWebp: false, staticFrame: false, CancellationToken.None);
+		var result = await _service.GetImage(icon.Id, 128, false, false, CancellationToken.None);
 
 		await using var content = result.Data!.Content;
 		using var image = Image.Load<Rgba32>(ReadAll(content));
@@ -294,7 +295,9 @@ public class IconVariantDerivationTests
 		var result = await _harness.RestoreService.ReplaceFromSource(icon.PackId,
 			"logos.macroDeckIconPack",
 			new MemoryStream(Archive(new ArchiveIcon("star", Webp(1024, _blue)))),
-			new IconPackSourceStamp(IconPackSourceType.Plugin, "com.example.logos/logos", "sha256:" + new string('b', 64)),
+			new IconPackSourceStamp(IconPackSourceType.Plugin,
+				"com.example.logos/logos",
+				"sha256:" + new string('b', 64)),
 			new HashSet<Guid>(),
 			CancellationToken.None);
 		var served = await Get(icon, 128);
@@ -346,7 +349,7 @@ public class IconVariantDerivationTests
 
 	private async Task<Served> Get(IconEntity icon, int size)
 	{
-		var result = await _service.GetImage(icon.Id, size, acceptWebp: true, staticFrame: false, CancellationToken.None);
+		var result = await _service.GetImage(icon.Id, size, true, false, CancellationToken.None);
 		Assert.That(result.Success, Is.True);
 		await using var content = result.Data!.Content;
 		var bytes = ReadAll(content);
@@ -372,7 +375,7 @@ public class IconVariantDerivationTests
 		var manifest = JsonSerializer.Serialize(new { Id = Guid.CreateVersion7(), Name = "Pack", Icons = entries });
 
 		using var stream = new MemoryStream();
-		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			Write(zip, "pack.json", Encoding.UTF8.GetBytes(manifest));
 			foreach (var icon in icons)
@@ -416,7 +419,11 @@ public class IconVariantDerivationTests
 	}
 
 	private static bool Close(Rgba32 actual, Rgba32 expected)
-		=> Math.Abs(actual.R - expected.R) < 40 && Math.Abs(actual.G - expected.G) < 40 && Math.Abs(actual.B - expected.B) < 40;
+	{
+		return Math.Abs(actual.R - expected.R) < 40
+			&& Math.Abs(actual.G - expected.G) < 40
+			&& Math.Abs(actual.B - expected.B) < 40;
+	}
 
 	private sealed record ArchiveIcon(
 		string Name,

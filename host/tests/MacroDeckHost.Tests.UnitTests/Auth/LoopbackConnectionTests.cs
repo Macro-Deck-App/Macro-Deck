@@ -28,16 +28,20 @@ public class LoopbackConnectionTests
 		ResolvedLoopbackPort.Set(TestListenerPorts.Loopback);
 	}
 
-	private static DefaultHttpContext CreateContext(int localPort,
+	private static DefaultHttpContext CreateContext(
+		int localPort,
 		IPAddress? remoteAddress,
 		string host,
 		bool withSecret = true)
 	{
 		var context = new DefaultHttpContext
 		{
-			Connection = { LocalPort = localPort, RemoteIpAddress = remoteAddress }
+			Connection = { LocalPort = localPort, RemoteIpAddress = remoteAddress },
+			Request =
+			{
+				Host = new HostString(host, localPort)
+			}
 		};
-		context.Request.Host = new HostString(host, localPort);
 		if (withSecret)
 		{
 			context.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
@@ -48,7 +52,7 @@ public class LoopbackConnectionTests
 
 	private static DefaultHttpContext CreateLoopbackContext(string? secretHeader = null, string? cookie = null)
 	{
-		var context = CreateContext(LoopbackPort, IPAddress.Loopback, "127.0.0.1", withSecret: false);
+		var context = CreateContext(LoopbackPort, IPAddress.Loopback, "127.0.0.1", false);
 		if (secretHeader is not null)
 		{
 			context.Request.Headers[LoopbackSecret.HeaderName] = secretHeader;
@@ -201,7 +205,7 @@ public class LoopbackConnectionTests
 	{
 		ResolvedPublicEndpoints.Set(PublicEndpointSet.HttpOnly(PublicHttpPort));
 		var value = LoopbackSecret.SessionCookieValue();
-		var onPublic = CreateContext(PublicHttpPort, IPAddress.Loopback, "127.0.0.1", withSecret: false);
+		var onPublic = CreateContext(PublicHttpPort, IPAddress.Loopback, "127.0.0.1", false);
 		onPublic.Request.Headers.Cookie = $"md_loopback_{PublicHttpPort}={value}";
 
 		Assert.Multiple(() =>
@@ -217,7 +221,8 @@ public class LoopbackConnectionTests
 	[Test]
 	public void A_cross_site_page_is_not_trusted_even_with_the_session_cookie()
 	{
-		var context = CreateLoopbackContext(cookie: $"md_loopback_{LoopbackPort}={LoopbackSecret.SessionCookieValue()}");
+		var context = CreateLoopbackContext(
+			cookie: $"md_loopback_{LoopbackPort}={LoopbackSecret.SessionCookieValue()}");
 		context.Request.Headers["Sec-Fetch-Site"] = "cross-site";
 
 		Assert.That(LoopbackConnection.IsTrusted(context), Is.False);

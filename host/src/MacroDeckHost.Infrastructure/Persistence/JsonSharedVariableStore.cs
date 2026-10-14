@@ -40,9 +40,9 @@ public sealed class JsonSharedVariableStore : ISharedVariableStore
 				return true;
 			}
 
-			if (!File.Exists(_filePath) &&
-				!File.Exists(_filePath + DurableJsonFile.TempSuffix) &&
-				!File.Exists(_filePath + DurableJsonFile.BackupSuffix))
+			if (!File.Exists(_filePath)
+				&& !File.Exists(_filePath + DurableJsonFile.TempSuffix)
+				&& !File.Exists(_filePath + DurableJsonFile.BackupSuffix))
 			{
 				entries = [];
 				return true;

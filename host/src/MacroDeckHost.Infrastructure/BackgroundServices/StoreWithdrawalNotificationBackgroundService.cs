@@ -10,10 +10,12 @@ public sealed class StoreWithdrawalNotificationBackgroundService : BackgroundSer
 	private readonly IStoreWithdrawalState _state;
 	private readonly StoreWithdrawalNotifier _notifier;
 	private readonly ILogger _logger;
+
 	private readonly Channel<IReadOnlyList<StoreInstalledWithdrawal>> _channel =
 		Channel.CreateUnbounded<IReadOnlyList<StoreInstalledWithdrawal>>();
 
-	public StoreWithdrawalNotificationBackgroundService(IStoreWithdrawalState state,
+	public StoreWithdrawalNotificationBackgroundService(
+		IStoreWithdrawalState state,
 		StoreWithdrawalNotifier notifier,
 		ILogger logger)
 	{
@@ -51,5 +53,8 @@ public sealed class StoreWithdrawalNotificationBackgroundService : BackgroundSer
 		}
 	}
 
-	private void OnChanged() => _channel.Writer.TryWrite(_state.Current);
+	private void OnChanged()
+	{
+		_channel.Writer.TryWrite(_state.Current);
+	}
 }

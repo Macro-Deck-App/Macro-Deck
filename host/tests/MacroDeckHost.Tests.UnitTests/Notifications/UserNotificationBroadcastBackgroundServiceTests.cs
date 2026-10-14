@@ -95,9 +95,15 @@ public class UserNotificationBroadcastBackgroundServiceTests
 		Assert.That(_transport.Pushes, Is.Empty);
 	}
 
-	private Task StartService() => Task.Run(() => _service.StartAsync(CancellationToken.None));
+	private Task StartService()
+	{
+		return Task.Run(() => _service.StartAsync(CancellationToken.None));
+	}
 
-	private static Task WaitPastTheCoalesceWindow() => Task.Delay(TimeSpan.FromMilliseconds(600));
+	private static Task WaitPastTheCoalesceWindow()
+	{
+		return Task.Delay(TimeSpan.FromMilliseconds(600));
+	}
 
 	private async Task WaitForPushes(int expected)
 	{
@@ -108,24 +114,32 @@ public class UserNotificationBroadcastBackgroundServiceTests
 	}
 
 	private static UserNotificationDraft Draft(string title)
-		=> new()
+	{
+		return new UserNotificationDraft
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.General,
 			Title = title
 		};
+	}
 
 	private sealed class RecordingTransport : IUiTransport
 	{
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		private readonly object _lock = new();
 

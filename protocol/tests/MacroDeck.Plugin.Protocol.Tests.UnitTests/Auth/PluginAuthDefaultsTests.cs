@@ -30,11 +30,15 @@ public class PluginAuthDefaultsTests
 
 	[Test]
 	public void Session_token_lifetime_mirrors_the_hosts_fifteen_minute_access_token_lifetime()
-		=> Assert.That(PluginAuthDefaults.SessionTokenLifetime, Is.EqualTo(TimeSpan.FromMinutes(15)));
+	{
+		Assert.That(PluginAuthDefaults.SessionTokenLifetime, Is.EqualTo(TimeSpan.FromMinutes(15)));
+	}
 
 	[Test]
 	public void Min_plugin_secret_length_is_thirty_two_random_bytes_base64_url_encoded()
-		=> Assert.That(PluginAuthDefaults.MinPluginSecretLength, Is.EqualTo(43));
+	{
+		Assert.That(PluginAuthDefaults.MinPluginSecretLength, Is.EqualTo(43));
+	}
 
 	[Test]
 	public void All_lists_every_header_name_exactly_once()

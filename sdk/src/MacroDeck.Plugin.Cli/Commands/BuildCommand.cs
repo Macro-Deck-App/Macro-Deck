@@ -24,8 +24,8 @@ internal static class BuildCommand
 		};
 		var ridOption = new Option<string?>("--rid")
 		{
-			Description = "Build only this runtime identifier, which the manifest must declare. " +
-				"Defaults to building every declared runtime identifier.",
+			Description = "Build only this runtime identifier, which the manifest must declare. "
+				+ "Defaults to building every declared runtime identifier.",
 			HelpName = "rid"
 		};
 		var outputOption = new Option<string>("--output")
@@ -50,13 +50,13 @@ internal static class BuildCommand
 		{
 			var console = ConsoleFactory.From(parseResult);
 			var source = parseResult.GetValue(sourceOption) ?? ".";
-			var manifestPath = parseResult.GetValue(manifestOption) ??
-				Path.Combine(source, PluginArtifactFiles.ManifestFileName);
+			var manifestPath = parseResult.GetValue(manifestOption)
+				?? Path.Combine(source, PluginArtifactFiles.ManifestFileName);
 
 			// Defaulted from the manifest's directory, not --source: 'new' writes the build config beside the
 			// manifest, which is not necessarily the project root a caller passes as --source.
-			var buildConfigPath = parseResult.GetValue(buildConfigOption) ??
-				Path.Combine(Path.GetDirectoryName(Path.GetFullPath(manifestPath)) ?? source,
+			var buildConfigPath = parseResult.GetValue(buildConfigOption)
+				?? Path.Combine(Path.GetDirectoryName(Path.GetFullPath(manifestPath)) ?? source,
 					PluginBuildConfigReader.FileName);
 
 			var request = new PluginBuildRequest
@@ -69,8 +69,8 @@ internal static class BuildCommand
 				Force = parseResult.GetValue(forceOption)
 			};
 
-			console.Trace($"Building '{source}' with manifest '{manifestPath}' and build configuration " +
-				$"'{buildConfigPath}'.");
+			console.Trace($"Building '{source}' with manifest '{manifestPath}' and build configuration "
+				+ $"'{buildConfigPath}'.");
 
 			var result = await PluginBuilder.BuildAsync(request,
 					runner ?? new ProcessPluginBuildRunner(),

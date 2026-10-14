@@ -17,8 +17,8 @@ public class IntegrationContextUiResourcesCompatibilityTests
 	{
 		IIntegrationContext context = new ContextWrittenBeforeUiResources();
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => context.UiResources.RegisterAsync("photo", new byte[] { 1 }, "image/png"));
+		var exception = Assert.ThrowsAsync<UiResourceException>(()
+			=> context.UiResources.RegisterAsync("photo", new byte[] { 1 }, "image/png"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
 	}

@@ -118,10 +118,14 @@ internal sealed class FakeKeyboardInputService : IKeyboardInputService
 		}
 
 		public Task KeyDownAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
-			=> _owner.KeyDownAsync(modifiers, key, cancellationToken);
+		{
+			return _owner.KeyDownAsync(modifiers, key, cancellationToken);
+		}
 
 		public Task KeyUpAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
-			=> _owner.KeyUpAsync(modifiers, key, cancellationToken);
+		{
+			return _owner.KeyUpAsync(modifiers, key, cancellationToken);
+		}
 
 		public void Dispose()
 		{

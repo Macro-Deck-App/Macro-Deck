@@ -22,8 +22,10 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 	private readonly TimeProvider _time;
 	private readonly Func<double> _random;
 	private readonly ILogger _logger;
+
 	private readonly Channel<bool> _signals =
 		Channel.CreateBounded<bool>(new BoundedChannelOptions(1) { FullMode = BoundedChannelFullMode.DropWrite });
+
 	private readonly Lock _lock = new();
 
 	private CancellationTokenSource? _cycle;
@@ -35,7 +37,8 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 	private UploadAttempt? _lastUpload;
 	private string? _cycleSubject;
 
-	public CompanionLicenseAccountSyncBackgroundService(IConnectSessionService session,
+	public CompanionLicenseAccountSyncBackgroundService(
+		IConnectSessionService session,
 		CompanionLicenseService licenses,
 		IPlatformLicenseAccountClient client,
 		TimeProvider time,
@@ -44,7 +47,8 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 	{
 	}
 
-	internal CompanionLicenseAccountSyncBackgroundService(IConnectSessionService session,
+	internal CompanionLicenseAccountSyncBackgroundService(
+		IConnectSessionService session,
 		CompanionLicenseService licenses,
 		IPlatformLicenseAccountClient client,
 		TimeProvider time,
@@ -143,8 +147,8 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 
 		try
 		{
-			if (_session.Current is { Status: ConnectAccountStatus.SignedIn, Account.Subject: var current } &&
-				current == account.Subject)
+			if (_session.Current is { Status: ConnectAccountStatus.SignedIn, Account.Subject: var current }
+				&& current == account.Subject)
 			{
 				await SyncAsync(account.Subject, cycle.Token);
 			}
@@ -238,7 +242,8 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 				_lastUpload = attempt with { Revision = stored.Revision, AccountLicense = stored.License };
 				if (stored.Revision != attempt.Revision)
 				{
-					_logger.Information("Saved Companion license {LicenseId} to the Macro Deck account", attempt.LicenseId);
+					_logger.Information("Saved Companion license {LicenseId} to the Macro Deck account",
+						attempt.LicenseId);
 				}
 
 				await _licenses.ReconcileAccountAsync(stored.License, cancellationToken);
@@ -249,7 +254,8 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 				return conflict.Revision;
 			case PlatformAccountLicenseResult.Refused refused:
 				_lastUpload = attempt;
-				_logger.Information("The Macro Deck Platform refused to save Companion license {LicenseId} to the account: {Code}",
+				_logger.Information(
+					"The Macro Deck Platform refused to save Companion license {LicenseId} to the account: {Code}",
 					attempt.LicenseId,
 					refused.Code);
 				if (refused.Code == LicenseRevoked)
@@ -277,7 +283,9 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 	}
 
 	private bool UploadBlocked(string subject)
-		=> _uploadBlocked is { } blocked && blocked.Subject == subject && blocked.Until > _time.GetUtcNow();
+	{
+		return _uploadBlocked is { } blocked && blocked.Subject == subject && blocked.Until > _time.GetUtcNow();
+	}
 
 	private DateTimeOffset? RetryAtFor(string? subject)
 	{
@@ -328,11 +336,11 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 		{
 			var previous = _observed;
 			_observed = snapshot;
-			var accountChanged = previous is null ||
-				previous.Status != snapshot.Status ||
-				previous.Account?.Subject != snapshot.Account?.Subject;
-			var backOnline = previous is { Connectivity: ConnectConnectivity.Offline } &&
-				snapshot.Connectivity == ConnectConnectivity.Ok;
+			var accountChanged = previous is null
+				|| previous.Status != snapshot.Status
+				|| previous.Account?.Subject != snapshot.Account?.Subject;
+			var backOnline = previous is { Connectivity: ConnectConnectivity.Offline }
+				&& snapshot.Connectivity == ConnectConnectivity.Ok;
 			if (!accountChanged && !backOnline)
 			{
 				return;
@@ -350,7 +358,10 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 		Restart();
 	}
 
-	private void OnLicenseChanged(object? sender, EventArgs e) => Restart();
+	private void OnLicenseChanged(object? sender, EventArgs e)
+	{
+		Restart();
+	}
 
 	private void Restart()
 	{
@@ -363,7 +374,9 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 	}
 
 	private static TimeSpan Clamp(TimeSpan value, TimeSpan maximum)
-		=> value < TimeSpan.Zero ? TimeSpan.Zero : value > maximum ? maximum : value;
+	{
+		return value < TimeSpan.Zero ? TimeSpan.Zero : value > maximum ? maximum : value;
+	}
 
 	private sealed record UploadAttempt(string Subject, string LicenseId, long Revision, string? AccountLicense);
 }

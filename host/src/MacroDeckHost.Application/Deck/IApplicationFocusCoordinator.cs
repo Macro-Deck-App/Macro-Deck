@@ -4,7 +4,8 @@ public interface IApplicationFocusCoordinator
 {
 	Task OnFocusChanged(FocusedApplication app, CancellationToken cancellationToken);
 
-	Task OnFolderReported(Guid deviceId,
+	Task OnFolderReported(
+		Guid deviceId,
 		Guid folderId,
 		string? navigationToken,
 		bool isResync,

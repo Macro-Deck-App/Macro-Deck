@@ -23,10 +23,13 @@ public class SharedVariablesController : ControllerBase
 
 	[HttpGet]
 	public Task<GetSharedVariablesResponse> List(CancellationToken ct)
-		=> _list.Handle(new GetSharedVariablesRequest(), ct).AsTask();
+	{
+		return _list.Handle(new GetSharedVariablesRequest(), ct).AsTask();
+	}
 
 	[HttpPut("{name}/value")]
-	public Task<SetSharedVariableValueResponse> SetValue(string name,
+	public Task<SetSharedVariableValueResponse> SetValue(
+		string name,
 		SetSharedVariableValueRequest body,
 		CancellationToken ct)
 	{

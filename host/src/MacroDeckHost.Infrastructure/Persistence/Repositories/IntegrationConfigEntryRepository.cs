@@ -14,13 +14,17 @@ public class IntegrationConfigEntryRepository : IIntegrationConfigEntryRepositor
 	}
 
 	public async Task<IReadOnlyList<IntegrationConfigEntryEntity>> GetByIntegrationId(string integrationId)
-		=> await _context.IntegrationConfigEntries
+	{
+		return await _context.IntegrationConfigEntries
 			.Where(e => e.IntegrationId == integrationId)
 			.OrderBy(e => e.CreatedAt)
 			.ToListAsync();
+	}
 
 	public Task<IntegrationConfigEntryEntity?> GetById(Guid id)
-		=> _context.IntegrationConfigEntries.FirstOrDefaultAsync(e => e.Id == id);
+	{
+		return _context.IntegrationConfigEntries.FirstOrDefaultAsync(e => e.Id == id);
+	}
 
 	public async Task Create(IntegrationConfigEntryEntity entry)
 	{
@@ -35,5 +39,7 @@ public class IntegrationConfigEntryRepository : IIntegrationConfigEntryRepositor
 	}
 
 	public Task TryDeleteById(Guid id)
-		=> _context.IntegrationConfigEntries.Where(e => e.Id == id).ExecuteDeleteAsync();
+	{
+		return _context.IntegrationConfigEntries.Where(e => e.Id == id).ExecuteDeleteAsync();
+	}
 }

@@ -324,6 +324,7 @@ public static class UiComponentProperties
 	/// <see cref="UiComponentListAnchors" />. Needs <see cref="UiComponents.List" /> component version 3;
 	/// absent means <see cref="UiComponentListAnchors.Start" />.</summary>
 	public const string Anchor = "anchor";
+
 	/// <summary>The video stream a <see cref="UiMacroDeckComponents.VideoStream" /> shows, as a
 	/// <see cref="Model.References.UiVideoStreamReference" />.</summary>
 	public const string Stream = "stream";
@@ -342,6 +343,6 @@ public static class UiComponentProperties
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, MinCellSize, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
 		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor, Stream, Shadow,
-		TrackColor,
+		TrackColor
 	];
 }

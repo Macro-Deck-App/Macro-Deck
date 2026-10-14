@@ -13,10 +13,12 @@ public sealed class StoreUpdatesBroadcastBackgroundService : BackgroundService
 	private readonly IStoreUpdateState _state;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ILogger _logger;
+
 	private readonly Channel<IReadOnlyList<StoreAvailableUpdate>> _channel =
 		Channel.CreateUnbounded<IReadOnlyList<StoreAvailableUpdate>>();
 
-	public StoreUpdatesBroadcastBackgroundService(IStoreUpdateState state,
+	public StoreUpdatesBroadcastBackgroundService(
+		IStoreUpdateState state,
 		IServiceScopeFactory scopeFactory,
 		ILogger logger)
 	{
@@ -55,5 +57,8 @@ public sealed class StoreUpdatesBroadcastBackgroundService : BackgroundService
 		}
 	}
 
-	private void OnChanged() => _channel.Writer.TryWrite(_state.Current);
+	private void OnChanged()
+	{
+		_channel.Writer.TryWrite(_state.Current);
+	}
 }

@@ -42,7 +42,10 @@ public class DeckNavigatorTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task ChangeFolderAsync_UnknownFolderId_PublishesNoNavigationEvent()
@@ -180,7 +183,7 @@ public class DeckNavigatorTests
 		_profileRegistry.AddProfile("p1", "Profile One")
 			.SetFolders("p1", new Folder { Id = "f1", ParentId = null, Order = 0, IsDefault = true });
 
-		await _navigator.ChangeProfileAsync("p1", originClientId: "client-1");
+		await _navigator.ChangeProfileAsync("p1", "client-1");
 
 		Assert.That(_transport.GroupMessages, Has.Count.EqualTo(1));
 		var (group, _) = _transport.GroupMessages.Single();
@@ -336,17 +339,27 @@ public class DeckNavigatorTests
 		/// <summary>False by default, so a navigation without a device origin takes the client path.</summary>
 		public bool Open { get; set; }
 
-		public bool IsOpen(Guid deviceId) => Open;
+		public bool IsOpen(Guid deviceId)
+		{
+			return Open;
+		}
 
-		public Task OpenAsync(Guid deviceId,
+		public Task OpenAsync(
+			Guid deviceId,
 			string providerId,
 			string providerDeviceId,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task CloseAsync(Guid deviceId, string? reason, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<bool> NavigateAsync(Guid deviceId,
+		public Task<bool> NavigateAsync(
+			Guid deviceId,
 			DeckNavigationCommand command,
 			CancellationToken cancellationToken = default)
 		{
@@ -354,42 +367,66 @@ public class DeckNavigatorTests
 			return Task.FromResult(true);
 		}
 
-		public Task<DeviceInteractionOutcome> SubmitInteractionAsync(Guid deviceId,
+		public Task<DeviceInteractionOutcome> SubmitInteractionAsync(
+			Guid deviceId,
 			DeviceInteraction interaction,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(DeviceInteractionOutcome.Reject(DeviceSurfaceErrorCodes.SessionNotFound));
+		{
+			return Task.FromResult(DeviceInteractionOutcome.Reject(DeviceSurfaceErrorCodes.SessionNotFound));
+		}
 
-		public Task<DeviceIconImage?> GetIconAsync(Guid deviceId,
+		public Task<DeviceIconImage?> GetIconAsync(
+			Guid deviceId,
 			string iconId,
 			int? size = null,
 			string? knownETag = null,
-			CancellationToken cancellationToken = default) => Task.FromResult<DeviceIconImage?>(null);
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<DeviceIconImage?>(null);
+		}
 
-		public Task<DeviceWidgetIconImage?> GetWidgetIconAsync(Guid deviceId,
+		public Task<DeviceWidgetIconImage?> GetWidgetIconAsync(
+			Guid deviceId,
 			string widgetId,
 			string? knownETag = null,
-			CancellationToken cancellationToken = default) => Task.FromResult<DeviceWidgetIconImage?>(null);
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<DeviceWidgetIconImage?>(null);
+		}
 
-		public Task InvalidateAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task InvalidateAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InvalidateAsync(Guid deviceId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetPresenceAsync(Guid deviceId, bool online, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class RecordingTransport : IUiTransport
 	{
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public List<object> Sent { get; } = [];
 

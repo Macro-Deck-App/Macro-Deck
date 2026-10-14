@@ -58,9 +58,11 @@ public sealed class MigrationService : IMigrationService
 	}
 
 	public IReadOnlyList<MigrationSourceDescriptor> GetSources()
-		=> _sources
+	{
+		return _sources
 			.Select(source => new MigrationSourceDescriptor(source.Id, source.Name, source.TryDetectDefaultPath()))
 			.ToList();
+	}
 
 	/// <summary>
 	/// Reads the source without applying it. The plan is disposed before it is returned: a preview only
@@ -151,9 +153,9 @@ public sealed class MigrationService : IMigrationService
 			if (!packIds.TryGetValue(request.PackName, out var packId))
 			{
 				var pack = await _iconPacks.Create(request.PackName + ImportedPackSuffix,
-					description: null,
-					author: null,
-					version: null);
+					null,
+					null,
+					null);
 
 				if (!pack.Success)
 				{
@@ -235,7 +237,9 @@ public sealed class MigrationService : IMigrationService
 	/// plugin-facing contract.
 	/// </summary>
 	private static SecretKind ToSecretKind(MigratedSecretKind kind)
-		=> kind == MigratedSecretKind.Password ? SecretKind.Password : SecretKind.Secret;
+	{
+		return kind == MigratedSecretKind.Password ? SecretKind.Password : SecretKind.Secret;
+	}
 
 	private async Task ImportVariables(MigrationPlan plan)
 	{
@@ -243,7 +247,7 @@ public sealed class MigrationService : IMigrationService
 		{
 			var created = await _variables.CreateUserVariable(variable.Name,
 				VariableScope.Global,
-				scopeRefId: null,
+				null,
 				variable.Type,
 				variable.Value,
 				variable.DecimalPlaces);

@@ -17,29 +17,31 @@ internal static class HttpAuthParameters
 	private const string Bearer = "bearer";
 	private const string Header = "header";
 
-	public static IReadOnlyList<ActionParameter> Declare() =>
-	[
-		ActionParameter.Choice(TypeParameter,
-			options:
-			[
-				new ActionParameterOption { Value = None },
-				new ActionParameterOption { Value = Basic },
-				new ActionParameterOption { Value = Bearer },
-				new ActionParameterOption { Value = Header }
-			],
-			label: AppStrings.Integrations.Http.Auth.TypeLabel(),
-			defaultValue: None),
-		ActionParameter.Text(UsernameParameter, label: AppStrings.Integrations.Http.Auth.UsernameLabel())
-			.OnlyWhen(TypeParameter, Basic),
-		ActionParameter.Secret(SecretParameter,
-				label: AppStrings.Integrations.Http.Auth.SecretLabel(),
-				description: AppStrings.Integrations.Http.Auth.SecretDescription())
-			.OnlyWhen(TypeParameter, Basic, Bearer, Header),
-		ActionParameter.Text(HeaderNameParameter,
-				label: AppStrings.Integrations.Http.Auth.HeaderNameLabel(),
-				placeholder: "X-Api-Key")
-			.OnlyWhen(TypeParameter, Header)
-	];
+	public static IReadOnlyList<ActionParameter> Declare()
+	{
+		return
+		[
+			ActionParameter.Choice(TypeParameter,
+				[
+					new ActionParameterOption { Value = None },
+					new ActionParameterOption { Value = Basic },
+					new ActionParameterOption { Value = Bearer },
+					new ActionParameterOption { Value = Header }
+				],
+				AppStrings.Integrations.Http.Auth.TypeLabel(),
+				defaultValue: None),
+			ActionParameter.Text(UsernameParameter, AppStrings.Integrations.Http.Auth.UsernameLabel())
+				.OnlyWhen(TypeParameter, Basic),
+			ActionParameter.Secret(SecretParameter,
+					AppStrings.Integrations.Http.Auth.SecretLabel(),
+					AppStrings.Integrations.Http.Auth.SecretDescription())
+				.OnlyWhen(TypeParameter, Basic, Bearer, Header),
+			ActionParameter.Text(HeaderNameParameter,
+					AppStrings.Integrations.Http.Auth.HeaderNameLabel(),
+					placeholder: "X-Api-Key")
+				.OnlyWhen(TypeParameter, Header)
+		];
+	}
 
 	public static bool TryRead(
 		IReadOnlyDictionary<string, object> parameters,

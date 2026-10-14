@@ -54,10 +54,15 @@ internal sealed class JellyfinRuntime : IDisposable
 
 	public string InstanceId => EntryId.ToString("N");
 
-	public static string DeviceInstanceId(Guid entryId, string deviceLocalId) => $"{entryId:N}-{deviceLocalId}";
+	public static string DeviceInstanceId(Guid entryId, string deviceLocalId)
+	{
+		return $"{entryId:N}-{deviceLocalId}";
+	}
 
 	public JellyfinMusicPlayer PlayerFor(string deviceId)
-		=> _devicePlayers.GetOrAdd(deviceId, id => new JellyfinMusicPlayer(this, id, _time));
+	{
+		return _devicePlayers.GetOrAdd(deviceId, id => new JellyfinMusicPlayer(this, id, _time));
+	}
 
 	public string RegisterArtwork(JellyfinMediaItem item)
 	{
@@ -76,9 +81,14 @@ internal sealed class JellyfinRuntime : IDisposable
 	}
 
 	public bool TryGetArtwork(string artworkId, out (string ItemId, string? Tag) artwork)
-		=> _artwork.TryGetValue(artworkId, out artwork);
+	{
+		return _artwork.TryGetValue(artworkId, out artwork);
+	}
 
-	public void Dispose() => Connection.Dispose();
+	public void Dispose()
+	{
+		Connection.Dispose();
+	}
 }
 
 internal sealed record JellyfinRuntimeSettings(string Url, string AuthMethod, string? Username, string DeviceId);

@@ -107,7 +107,8 @@ public sealed class FakeDeckNavigator : IDeckNavigator
 	}
 
 	/// <inheritdoc />
-	public Task ChangeFolderAsync(string folderId,
+	public Task ChangeFolderAsync(
+		string folderId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -116,7 +117,8 @@ public sealed class FakeDeckNavigator : IDeckNavigator
 	}
 
 	/// <inheritdoc />
-	public Task ChangeProfileAsync(string profileId,
+	public Task ChangeProfileAsync(
+		string profileId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
 	{

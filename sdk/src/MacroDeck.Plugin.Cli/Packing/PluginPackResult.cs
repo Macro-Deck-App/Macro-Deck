@@ -55,7 +55,8 @@ internal sealed record PluginPackResult
 	/// as narration, not a warning - see <see cref="PluginPackReporter" />.</summary>
 	public string? CreatedOutputDirectory { get; init; }
 
-	public static PluginPackResult Ok(string outputPath,
+	public static PluginPackResult Ok(
+		string outputPath,
 		string pluginId,
 		string version,
 		int entryCount,

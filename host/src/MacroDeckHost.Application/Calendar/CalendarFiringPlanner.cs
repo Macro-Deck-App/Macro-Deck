@@ -75,7 +75,9 @@ public sealed class CalendarFiringPlanner
 						ConsiderPassed(new CalendarFiring(target, calendarEvent, calendarEvent.End));
 						break;
 					default:
-						ConsiderStartsSoon(new CalendarFiring(target, calendarEvent, calendarEvent.Start - target.LeadTime));
+						ConsiderStartsSoon(new CalendarFiring(target,
+							calendarEvent,
+							calendarEvent.Start - target.LeadTime));
 						break;
 				}
 			}
@@ -108,7 +110,10 @@ public sealed class CalendarFiringPlanner
 			}
 		}
 
-		void Schedule(DateTimeOffset instant) => next = next is null || instant < next ? instant : next;
+		void Schedule(DateTimeOffset instant)
+		{
+			next = next is null || instant < next ? instant : next;
+		}
 
 		void Fire(CalendarFiring firing, DateTimeOffset relevantUntil)
 		{

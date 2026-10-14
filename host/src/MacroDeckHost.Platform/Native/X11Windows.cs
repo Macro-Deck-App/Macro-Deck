@@ -19,7 +19,9 @@ internal static class X11Windows
 	}
 
 	public static nuint InternAtom(IntPtr display, string name)
-		=> XInternAtom(display, Encoding.UTF8.GetBytes(name + '\0'), true);
+	{
+		return XInternAtom(display, Encoding.UTF8.GetBytes(name + '\0'), true);
+	}
 
 	public static List<nuint> ReadLongProperty(IntPtr display, nuint window, nuint property)
 	{
@@ -114,7 +116,7 @@ internal static class X11Windows
 		out int actualFormat,
 		out nuint itemCount,
 		out nuint bytesAfter,
-		out IntPtr property_);
+		out IntPtr propertyData);
 
 	[DllImport(LibX11)]
 	private static extern int XFree(IntPtr data);

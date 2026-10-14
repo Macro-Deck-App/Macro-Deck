@@ -17,5 +17,8 @@ public sealed class DeviceLayoutConstraintWarmupBackgroundService : HostReadyBac
 		_tracker = tracker;
 	}
 
-	protected override Task ExecuteWhenReady(CancellationToken stoppingToken) => _tracker.RefreshAsync(stoppingToken);
+	protected override Task ExecuteWhenReady(CancellationToken stoppingToken)
+	{
+		return _tracker.RefreshAsync(stoppingToken);
+	}
 }

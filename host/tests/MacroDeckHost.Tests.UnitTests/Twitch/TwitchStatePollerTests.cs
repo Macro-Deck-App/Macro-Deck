@@ -54,7 +54,7 @@ internal sealed class TwitchStatePollerTests
 		_helix.Subscribers = new TwitchSubscriberInfo(12, 20);
 		_helix.ChatSettings = new TwitchChatSettings(true, false, null, false, null, false, false);
 
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -72,11 +72,11 @@ internal sealed class TwitchStatePollerTests
 	public async Task A_failed_read_leaves_the_previous_value_standing()
 	{
 		_helix.FollowerCount = 4200;
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		_helix.FailingReads.Add("followers");
 		_helix.FailingReads.Add("subscribers");
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		Assert.That(_state.FollowerCount, Is.EqualTo(4200));
 	}
@@ -85,11 +85,11 @@ internal sealed class TwitchStatePollerTests
 	public async Task An_offline_channel_is_reported_offline_without_losing_its_title()
 	{
 		_helix.Stream = new TwitchStreamInfo(true, 120, "Playing Hades", "Hades", DateTimeOffset.UtcNow);
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		_helix.Stream = new TwitchStreamInfo(false, 0, null, null, null);
 		_helix.Channel = new TwitchChannelInfo("Playing Hades", "1", "Hades", "en");
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -110,7 +110,7 @@ internal sealed class TwitchStatePollerTests
 			"https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer-440x248.jpg");
 		_helix.ChatterCount = 37;
 
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -124,11 +124,11 @@ internal sealed class TwitchStatePollerTests
 	{
 		_helix.Stream = new TwitchStreamInfo(true, 120, "t", "c", DateTimeOffset.UtcNow, "https://x/a.jpg");
 		_helix.ChatterCount = 37;
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		_helix.Calls.Clear();
 		_helix.Stream = new TwitchStreamInfo(false, 0, null, null, null);
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -144,12 +144,12 @@ internal sealed class TwitchStatePollerTests
 		_helix.Stream = new TwitchStreamInfo(true, 120, "t", "c", DateTimeOffset.UtcNow);
 		_helix.ChatterCount = 37;
 		_helix.FollowerCount = 7;
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		_helix.FailingReads.Add("chatters");
 		_helix.FailingReadExceptions["chatters"] = new TwitchScopeException();
 		_helix.FollowerCount = 8;
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -164,10 +164,10 @@ internal sealed class TwitchStatePollerTests
 	{
 		_helix.Rewards = [new TwitchCustomReward("r1", "Hydrate")];
 
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 		Assert.That(_rewards, Is.Empty);
 
-		await _poller.PollOnceAsync(includeRewards: true, CancellationToken.None);
+		await _poller.PollOnceAsync(true, CancellationToken.None);
 		Assert.That(_rewards.Select(reward => reward.Title), Is.EqualTo(_hydrateReward));
 	}
 
@@ -175,10 +175,10 @@ internal sealed class TwitchStatePollerTests
 	public async Task A_failed_reward_fetch_keeps_the_known_list()
 	{
 		_helix.Rewards = [new TwitchCustomReward("r1", "Hydrate")];
-		await _poller.PollOnceAsync(includeRewards: true, CancellationToken.None);
+		await _poller.PollOnceAsync(true, CancellationToken.None);
 
 		_helix.FailingReads.Add("rewards");
-		await _poller.PollOnceAsync(includeRewards: true, CancellationToken.None);
+		await _poller.PollOnceAsync(true, CancellationToken.None);
 
 		Assert.That(_rewards.Select(reward => reward.Title), Is.EqualTo(_hydrateReward));
 	}
@@ -189,7 +189,7 @@ internal sealed class TwitchStatePollerTests
 		_helix.FailingReads.Add("subscribers");
 		_helix.FollowerCount = 7;
 
-		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+		await _poller.PollOnceAsync(false, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -198,5 +198,8 @@ internal sealed class TwitchStatePollerTests
 		});
 	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 }

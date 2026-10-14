@@ -6,35 +6,44 @@ namespace MacroDeckHost.Integrations.Meld.Actions;
 internal static class MeldOptions
 {
 	public static IReadOnlyList<ActionParameterOption> Scenes(MeldSession session)
-		=> session.Scenes.Select(scene => new ActionParameterOption { Value = scene.Id, Label = scene.Name }).ToList();
+	{
+		return session.Scenes.Select(scene => new ActionParameterOption { Value = scene.Id, Label = scene.Name })
+			.ToList();
+	}
 
 	public static IReadOnlyList<ActionParameterOption> Layers(MeldSession session)
-		=> session.LayersById.Values
+	{
+		return session.LayersById.Values
 			.Select(layer => new ActionParameterOption
 			{
 				Value = layer.Id,
-				Label = AppStrings.Integrations.Meld.Options.NameInScene(name: layer.Name, sceneName: layer.SceneName)
+				Label = AppStrings.Integrations.Meld.Options.NameInScene(layer.Name, layer.SceneName)
 			})
 			.ToList();
+	}
 
 	public static IReadOnlyList<ActionParameterOption> Effects(MeldSession session)
-		=> session.EffectsById.Values
+	{
+		return session.EffectsById.Values
 			.Select(effect => new ActionParameterOption
 			{
 				Value = effect.Id,
-				Label = AppStrings.Integrations.Meld.Options.NameOnLayer(name: effect.Name,
-					layerName: effect.LayerName)
+				Label = AppStrings.Integrations.Meld.Options.NameOnLayer(effect.Name,
+					effect.LayerName)
 			})
 			.ToList();
+	}
 
 	public static IReadOnlyList<ActionParameterOption> Tracks(MeldSession session)
-		=> session.Tracks
+	{
+		return session.Tracks
 			.Select(track => new ActionParameterOption
 			{
 				Value = track.Id,
 				Label = track.ParentLayerId is null
 					? track.Name
-					: AppStrings.Integrations.Meld.Options.NameInScene(name: track.Name, sceneName: track.SceneName!)
+					: AppStrings.Integrations.Meld.Options.NameInScene(track.Name, track.SceneName!)
 			})
 			.ToList();
+	}
 }

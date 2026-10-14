@@ -11,5 +11,8 @@ public sealed class VariableCatalogInvalidationSignal
 {
 	public event Action<string>? Invalidated;
 
-	public void RaiseInvalidated(string integrationId) => Invalidated?.Invoke(integrationId);
+	public void RaiseInvalidated(string integrationId)
+	{
+		Invalidated?.Invoke(integrationId);
+	}
 }

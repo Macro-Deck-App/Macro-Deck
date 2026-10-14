@@ -24,7 +24,9 @@ internal sealed class SoundPadConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ConnectStep()));
+	{
+		return Task.FromResult(ConfigFlowResult.Step(ConnectStep()));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,
@@ -58,7 +60,7 @@ internal sealed class SoundPadConfigFlow : IConfigFlow
 		{
 			var version = await connection.RunAsync(c => c.GetVersionAsync(),
 				cancellationToken,
-				connectOnDemand: true);
+				true);
 			_logger.Information("SoundPad {Version} answered the setup check", version);
 			return true;
 		}
@@ -70,7 +72,8 @@ internal sealed class SoundPadConfigFlow : IConfigFlow
 	}
 
 	private static ConfigFlowStep ConnectStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = ConnectStepId,
 			Title = AppStrings.Integrations.SoundPad.Config.Title(),
@@ -89,4 +92,5 @@ internal sealed class SoundPadConfigFlow : IConfigFlow
 			],
 			Fields = []
 		};
+	}
 }

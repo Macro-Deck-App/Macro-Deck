@@ -27,7 +27,7 @@ public class VariableHistoryTests
 	{
 		var (history, time, _) = Create("42");
 
-		using var window = history.Open(Name, capacity: 10);
+		using var window = history.Open(Name, 10);
 		Advance(time, 3);
 
 		Assert.That(window.Values,
@@ -40,7 +40,7 @@ public class VariableHistoryTests
 	{
 		var (history, time, variables) = Create("0");
 
-		using var window = history.Open(Name, capacity: 3);
+		using var window = history.Open(Name, 3);
 
 		for (var value = 1; value <= 5; value++)
 		{
@@ -56,7 +56,7 @@ public class VariableHistoryTests
 	{
 		var (history, time, _) = Create("not a number");
 
-		using var window = history.Open(Name, capacity: 10);
+		using var window = history.Open(Name, 10);
 		Advance(time, 3);
 
 		Assert.That(window.Values, Is.Empty, "a value that cannot be plotted must not be plotted as zero");
@@ -67,14 +67,14 @@ public class VariableHistoryTests
 	{
 		var (history, time, variables) = Create("1");
 
-		var first = history.Open(Name, capacity: 5);
+		var first = history.Open(Name, 5);
 		Advance(time, 1);
 		first.Dispose();
 
 		Set(variables, "9");
 		Advance(time, 3);
 
-		using var second = history.Open(Name, capacity: 5);
+		using var second = history.Open(Name, 5);
 
 		Assert.That(second.Values,
 			Is.EqualTo(_backfilled).AsCollection,
@@ -86,7 +86,7 @@ public class VariableHistoryTests
 	{
 		var (history, time, _) = Create("42");
 
-		using var window = history.Open(Name, capacity: 5);
+		using var window = history.Open(Name, 5);
 		var raised = 0;
 		window.Changed += (_, _) => raised++;
 
@@ -100,9 +100,9 @@ public class VariableHistoryTests
 	{
 		var (history, time, _) = Create("42");
 
-		using var first = history.Open(Name, capacity: 10, scopeRefId: "widget-a");
+		using var first = history.Open(Name, 10, "widget-a");
 		Advance(time, 2);
-		using var second = history.Open(Name, capacity: 10, scopeRefId: "widget-b");
+		using var second = history.Open(Name, 10, "widget-b");
 
 		Assert.That(second.Values,
 			Is.EqualTo(first.Values).AsCollection,
@@ -115,8 +115,8 @@ public class VariableHistoryTests
 		var (history, time, variables) = Create("1");
 		variables.Upsert(WidgetVariable("widget-a", "7"));
 
-		using var own = history.Open(Name, capacity: 10, scopeRefId: "widget-a");
-		using var global = history.Open(Name, capacity: 10);
+		using var own = history.Open(Name, 10, "widget-a");
+		using var global = history.Open(Name, 10);
 		Advance(time, 2);
 
 		Assert.Multiple(() =>
@@ -135,7 +135,7 @@ public class VariableHistoryTests
 		var own = WidgetVariable("widget-a", "7");
 		variables.Upsert(own);
 
-		using var window = history.Open(Name, capacity: 10, scopeRefId: "widget-a");
+		using var window = history.Open(Name, 10, "widget-a");
 		Advance(time, 1);
 		variables.Remove(own.Id);
 		Advance(time, 2);
@@ -144,7 +144,8 @@ public class VariableHistoryTests
 	}
 
 	private static VariableEntity WidgetVariable(string widgetId, string value)
-		=> new()
+	{
+		return new VariableEntity
 		{
 			Id = Guid.NewGuid(),
 			Name = Name,
@@ -155,6 +156,7 @@ public class VariableHistoryTests
 			Value = value,
 			UpdatedAt = DateTime.UtcNow
 		};
+	}
 
 	private static (VariableHistory History, FakeTimeProvider Time, VariableRegistry Variables) Create(string value)
 	{
@@ -196,7 +198,7 @@ public class VariableHistoryTests
 			Type = VariableType.Numeric,
 			Classification = VariableClassification.User,
 			Value = value,
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		});
 	}
 }

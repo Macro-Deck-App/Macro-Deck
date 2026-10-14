@@ -22,7 +22,10 @@ internal sealed class FakePowerService : IPowerService
 
 	public bool? LastForce { get; private set; }
 
-	public bool Supports(PowerOperation operation) => IsSupported && !UnsupportedOperations.Contains(operation);
+	public bool Supports(PowerOperation operation)
+	{
+		return IsSupported && !UnsupportedOperations.Contains(operation);
+	}
 
 	public Task<PowerResult> ExecuteAsync(
 		PowerOperation operation,

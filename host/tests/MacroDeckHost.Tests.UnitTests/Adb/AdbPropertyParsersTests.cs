@@ -8,17 +8,17 @@ public class AdbPropertyParsersTests
 	public void ParseBatteryLevel_reads_the_level_marker()
 	{
 		const string output =
-			"Current Battery Service state:\n" +
-			"  AC powered: false\n" +
-			"  USB powered: true\n" +
-			"  status: 2\n" +
-			"  health: 2\n" +
-			"  present: true\n" +
-			"  level: 85\n" +
-			"  scale: 100\n" +
-			"  voltage: 4123\n" +
-			"  temperature: 320\n" +
-			"  technology: Li-ion\n";
+			"Current Battery Service state:\n"
+			+ "  AC powered: false\n"
+			+ "  USB powered: true\n"
+			+ "  status: 2\n"
+			+ "  health: 2\n"
+			+ "  present: true\n"
+			+ "  level: 85\n"
+			+ "  scale: 100\n"
+			+ "  voltage: 4123\n"
+			+ "  temperature: 320\n"
+			+ "  technology: Li-ion\n";
 
 		Assert.That(AdbPropertyParsers.ParseBatteryLevel(output), Is.EqualTo(85));
 	}
@@ -27,10 +27,7 @@ public class AdbPropertyParsersTests
 	public void ParseBatteryLevel_reads_a_terser_OEM_shape()
 	{
 		const string output =
-			"Current Battery Service state:\n" +
-			"  USB powered: false\n" +
-			"  level: 42\n" +
-			"  scale: 100\n";
+			"Current Battery Service state:\n" + "  USB powered: false\n" + "  level: 42\n" + "  scale: 100\n";
 
 		Assert.That(AdbPropertyParsers.ParseBatteryLevel(output), Is.EqualTo(42));
 	}
@@ -103,9 +100,9 @@ public class AdbPropertyParsersTests
 	public void ParseLocked_reads_mDreamingLockscreen_true()
 	{
 		const string output =
-			"WINDOW MANAGER LOCK SCREEN STATE\n" +
-			"  mDreamingLockscreen=true\n" +
-			"  mCurrentFocus=Window{38a38a3 u0 com.example.app/com.example.app.MainActivity}\n";
+			"WINDOW MANAGER LOCK SCREEN STATE\n"
+			+ "  mDreamingLockscreen=true\n"
+			+ "  mCurrentFocus=Window{38a38a3 u0 com.example.app/com.example.app.MainActivity}\n";
 
 		Assert.That(AdbPropertyParsers.ParseLocked(output), Is.True);
 	}
@@ -114,8 +111,8 @@ public class AdbPropertyParsersTests
 	public void ParseLocked_reads_mDreamingLockscreen_false()
 	{
 		const string output =
-			"  mDreamingLockscreen=false\n" +
-			"  mCurrentFocus=Window{a1b2c3d u0 com.android.launcher3/com.android.launcher3.Launcher}\n";
+			"  mDreamingLockscreen=false\n"
+			+ "  mCurrentFocus=Window{a1b2c3d u0 com.android.launcher3/com.android.launcher3.Launcher}\n";
 
 		Assert.That(AdbPropertyParsers.ParseLocked(output), Is.False);
 	}
@@ -132,8 +129,8 @@ public class AdbPropertyParsersTests
 	public void ParseForegroundPackage_reads_the_package_before_the_slash()
 	{
 		const string output =
-			"  mDreamingLockscreen=true\n" +
-			"  mCurrentFocus=Window{38a38a3 u0 com.example.app/com.example.app.MainActivity}\n";
+			"  mDreamingLockscreen=true\n"
+			+ "  mCurrentFocus=Window{38a38a3 u0 com.example.app/com.example.app.MainActivity}\n";
 
 		Assert.That(AdbPropertyParsers.ParseForegroundPackage(output), Is.EqualTo("com.example.app"));
 	}

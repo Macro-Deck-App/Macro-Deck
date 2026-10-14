@@ -129,9 +129,11 @@ public class UpdateWidgetDataRequestMessageHandler
 	}
 
 	private static UpdateWidgetDataResponse Fail(string code, string message)
-		=> new()
+	{
+		return new UpdateWidgetDataResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = code, Message = message }
 		};
+	}
 }

@@ -14,10 +14,16 @@ internal sealed class ActionVariableTargetTests
 	private ActionVariableTargets _targets = null!;
 
 	[SetUp]
-	public void SetUp() => _targets = new ActionVariableTargets("app.macro-deck.test");
+	public void SetUp()
+	{
+		_targets = new ActionVariableTargets("app.macro-deck.test");
+	}
 
 	[TearDown]
-	public void TearDown() => _targets.Dispose();
+	public void TearDown()
+	{
+		_targets.Dispose();
+	}
 
 	[TestCase(0.00001, "0.00001")]
 	[TestCase(1e20, "100000000000000000000")]
@@ -27,7 +33,7 @@ internal sealed class ActionVariableTargetTests
 
 		var written = await Write("level", SdkVariableType.Numeric, reading);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(written, Is.True);
 			Assert.That((await _targets.Find("level"))!.Value, Is.EqualTo(stored));
@@ -41,7 +47,7 @@ internal sealed class ActionVariableTargetTests
 
 		var written = await Write("level", SdkVariableType.Numeric, double.NaN);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(written, Is.False);
 			Assert.That(await _targets.ValueOf("level"), Is.EqualTo(1m));
@@ -75,11 +81,13 @@ internal sealed class ActionVariableTargetTests
 	}
 
 	private Task<bool> Write(string name, SdkVariableType type, object value)
-		=> ActionVariableTarget.WriteAsync(_targets.UserVariables,
+	{
+		return ActionVariableTarget.WriteAsync(_targets.UserVariables,
 			_targets.IntegrationVariables,
 			name,
 			null,
 			type,
 			value,
 			new LoggerConfiguration().CreateLogger());
+	}
 }

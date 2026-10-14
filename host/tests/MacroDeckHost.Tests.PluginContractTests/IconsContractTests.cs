@@ -19,12 +19,14 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class IconsContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Icons,
 			LocalId = IconsCapabilityHandler.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static byte[] RandomBytes(int length)
 	{
@@ -40,7 +42,7 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		var integration = await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(bytes, "image/png"))],
 			[Provider()],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
 
 		Assert.Multiple(() =>
 		{
@@ -56,7 +58,7 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		var integration = await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(bytes, "image/webp"))],
 			[Provider()],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/webp", bytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/webp", bytes));
 
 		var iconProvider = (IIntegrationIconProvider)integration;
 
@@ -74,7 +76,7 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(bytes, "image/svg+xml"))],
 			[Provider()],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/svg+xml", bytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/svg+xml", bytes));
 
 		var described = await InvokeRawAsync(CapabilityKinds.Icons,
 			IconsCapabilityHandler.LocalId,
@@ -119,7 +121,7 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(original, "image/png"))],
 			[Provider()],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/png", original));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/png", original));
 
 		var replacement = RandomBytes(64);
 		await UploadAssetAsync(AssetKinds.Icon, "image/png", replacement);
@@ -186,7 +188,7 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(bytes, "image/png"))],
 			[Provider()],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
 
 		var arbitraryLocalId = await InvokeRawAsync(CapabilityKinds.Icons, "nope", CapabilityOperations.Icons.Describe);
 		var unknownOperation = Assert.CatchAsync<RemoteCapabilityException>(async () =>
@@ -219,7 +221,7 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(bytes, "image/png"))],
 			[Provider()],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
 
 		Link.DropNextReply();
 		var invokeTask = InvokeRawAsync(CapabilityKinds.Icons,
@@ -238,7 +240,7 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(bytes, "image/png"))],
 			[Provider()],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
 
 		Disconnect();
 
@@ -257,7 +259,7 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(bytes, "image/png"))],
 			[Provider()],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
 
 		using var cts = new CancellationTokenSource();
 		using var hold = Link.HoldNextReply();
@@ -277,17 +279,22 @@ internal sealed class IconsContractTests : CapabilityContractFixture
 		public string Kind => CapabilityKinds.Icons;
 
 		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-			=>
+		{
+			return
 			[
-				new()
+				new DeclaredCapability
 				{
 					Kind = CapabilityKinds.Icons, LocalId = IconsCapabilityHandler.LocalId,
 					VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 				}
 			];
+		}
 
-		public Task<CapabilityInvocationResult> InvokeAsync(CapabilityInvocation invocation,
+		public Task<CapabilityInvocationResult> InvokeAsync(
+			CapabilityInvocation invocation,
 			CancellationToken cancellationToken)
-			=> throw new InvalidOperationException("boom: token=abc123");
+		{
+			throw new InvalidOperationException("boom: token=abc123");
+		}
 	}
 }

@@ -22,7 +22,8 @@ internal sealed class SteamTrackerTests
 		_folders = new SteamFolders();
 		_time = new FakeTimeProvider();
 		_steam = _folders.Make("Steam");
-		_platform = new FakeSteamPlatform { Os = SteamOs.Windows, HomeDirectory = _folders.Root, RegistrySteamPath = _steam };
+		_platform = new FakeSteamPlatform
+			{ Os = SteamOs.Windows, HomeDirectory = _folders.Root, RegistrySteamPath = _steam };
 		_web = new FakeWebApi();
 		_published.Clear();
 		SteamFolders.WriteManifest(_steam, 730, "Counter-Strike 2");
@@ -30,13 +31,16 @@ internal sealed class SteamTrackerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _folders.Dispose();
+	public void TearDown()
+	{
+		_folders.Dispose();
+	}
 
 	[Test]
 	public void With_no_steam_installation_nothing_is_found_and_nothing_is_playing()
 	{
 		_platform.RegistrySteamPath = null;
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 
 		tracker.PollLocal();
 
@@ -52,7 +56,7 @@ internal sealed class SteamTrackerTests
 	public void A_running_game_is_named_from_its_manifest()
 	{
 		_platform.RegistryRunningAppId = 730;
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 
 		tracker.PollLocal();
 
@@ -64,7 +68,7 @@ internal sealed class SteamTrackerTests
 	public void A_running_game_without_a_manifest_is_identified_by_its_id_only()
 	{
 		_platform.RegistryRunningAppId = 999999;
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 
 		tracker.PollLocal();
 
@@ -75,7 +79,7 @@ internal sealed class SteamTrackerTests
 	public void The_session_runs_from_the_first_observation_and_restarts_for_another_game()
 	{
 		_platform.RegistryRunningAppId = 730;
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 		tracker.PollLocal();
 		var started = Account(tracker).CurrentGame!.StartedAt;
 
@@ -92,7 +96,7 @@ internal sealed class SteamTrackerTests
 	public void Closing_the_game_ends_the_session_and_the_next_one_starts_fresh()
 	{
 		_platform.RegistryRunningAppId = 730;
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 		tracker.PollLocal();
 
 		_platform.RegistryRunningAppId = 0;
@@ -110,7 +114,7 @@ internal sealed class SteamTrackerTests
 	public async Task The_web_api_game_of_an_account_is_used_when_nothing_runs_locally_but_not_for_this_computer()
 	{
 		_web.Self = new SteamPlayerSummary(SteamId, "Ann", 1, 440, "Team Fortress 2");
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 
 		await tracker.PollSelfAsync(CancellationToken.None);
@@ -128,7 +132,7 @@ internal sealed class SteamTrackerTests
 	{
 		_platform.RegistryRunningAppId = 730;
 		_web.Self = new SteamPlayerSummary(SteamId, "Ann", 1, 440, "Team Fortress 2");
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 
 		await tracker.PollSelfAsync(CancellationToken.None);
@@ -141,7 +145,7 @@ internal sealed class SteamTrackerTests
 	{
 		_platform.RegistryRunningAppId = 730;
 		_web.Self = new SteamPlayerSummary(SteamId, "Ann", 1, 730, "Counter-Strike 2");
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 
@@ -161,7 +165,7 @@ internal sealed class SteamTrackerTests
 	public async Task A_player_who_hides_game_details_is_not_playing_as_far_as_the_web_api_can_tell()
 	{
 		_web.Self = new SteamPlayerSummary(SteamId, "Ann", 1, null, null);
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 
 		await tracker.PollSelfAsync(CancellationToken.None);
@@ -181,7 +185,7 @@ internal sealed class SteamTrackerTests
 			new SteamPlayerSummary("3", "c", 3, 730, "CS"),
 			new SteamPlayerSummary("4", "d", 1, 570, "Dota")
 		];
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 
@@ -200,7 +204,7 @@ internal sealed class SteamTrackerTests
 	{
 		_web.Self = new SteamPlayerSummary(SteamId, "Ann", 1, null, null);
 		_web.FriendIds = null;
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 
@@ -221,7 +225,7 @@ internal sealed class SteamTrackerTests
 	{
 		_web.Self = new SteamPlayerSummary(SteamId, "Ann", 1, null, null);
 		_web.FriendIds = null;
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 		await tracker.PollFriendsAsync(CancellationToken.None);
@@ -240,7 +244,7 @@ internal sealed class SteamTrackerTests
 	public async Task After_rate_limiting_the_web_api_is_left_alone_for_a_while()
 	{
 		_web.SelfFailure = SteamWebFailure.RateLimited;
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 		var calls = _web.SelfCalls;
@@ -257,7 +261,7 @@ internal sealed class SteamTrackerTests
 	public async Task A_configuration_without_a_key_works_locally_and_never_calls_the_web_api()
 	{
 		_platform.RegistryRunningAppId = 220;
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
@@ -276,7 +280,7 @@ internal sealed class SteamTrackerTests
 	[Test]
 	public void Every_change_is_published_and_an_unchanged_poll_is_not()
 	{
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 
 		tracker.PollLocal();
 		tracker.PollLocal();
@@ -289,7 +293,7 @@ internal sealed class SteamTrackerTests
 	[Test]
 	public void Variables_report_idle_values_while_nothing_is_played()
 	{
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 		tracker.PollLocal();
 
 		var now = _time.Now;
@@ -307,7 +311,7 @@ internal sealed class SteamTrackerTests
 	public void Variables_describe_the_running_game_and_its_session_time()
 	{
 		_platform.RegistryRunningAppId = 730;
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 		tracker.PollLocal();
 
 		var later = _time.Now.AddSeconds(125);
@@ -324,7 +328,7 @@ internal sealed class SteamTrackerTests
 	public void Installed_games_and_friends_are_unavailable_when_they_cannot_be_known()
 	{
 		_platform.RegistrySteamPath = null;
-		var tracker = Tracker(web: false);
+		var tracker = Tracker(false);
 		tracker.PollLocal();
 
 		Assert.Multiple(() =>
@@ -372,7 +376,7 @@ internal sealed class SteamTrackerTests
 	public async Task A_brief_web_outage_keeps_the_last_known_game_until_it_persists()
 	{
 		_web.Self = new SteamPlayerSummary(SteamId, "Ann", 1, 440, "Team Fortress 2");
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 		var started = Account(tracker).CurrentGame!.StartedAt;
@@ -425,7 +429,7 @@ internal sealed class SteamTrackerTests
 			new SteamPlayerSummary("9", "a", 1, null, null),
 			new SteamPlayerSummary("8", "b", 1, 730, "CS")
 		];
-		var tracker = Tracker(web: true);
+		var tracker = Tracker(true);
 		tracker.PollLocal();
 		await tracker.PollSelfAsync(CancellationToken.None);
 		await tracker.PollFriendsAsync(CancellationToken.None);
@@ -439,7 +443,8 @@ internal sealed class SteamTrackerTests
 			Assert.That(Read(SteamVariables.FriendsOnline, tracker, now), Is.EqualTo(2));
 			Assert.That(Read(SteamVariables.FriendsInGame, tracker, now), Is.EqualTo(1));
 			Assert.That(SteamVariables.Read("steam_is_playing", tracker.Snapshot, now),
-				Is.EqualTo(VariableReading.Unavailable), "there is no variable without an account name");
+				Is.EqualTo(VariableReading.Unavailable),
+				"there is no variable without an account name");
 			Assert.That(SteamVariables.Read("steam-nobody-is-playing", tracker.Snapshot, now),
 				Is.EqualTo(VariableReading.Unavailable));
 		});
@@ -478,22 +483,33 @@ internal sealed class SteamTrackerTests
 	}
 
 	private SteamTracker Tracker(bool web)
-		=> new(_platform,
+	{
+		return new SteamTracker(_platform,
 			[web ? AccountConfig("e1", "Main", "main", _web) : new SteamAccountConfig("e1", "Main", "main")],
 			[],
 			_time,
 			_published.Add);
+	}
 
 	private static SteamAccountConfig AccountConfig(string entryId, string title, string key, ISteamWebApiClient client)
-		=> new(entryId, title, key, SteamId, client);
+	{
+		return new SteamAccountConfig(entryId, title, key, SteamId, client);
+	}
 
-	private static SteamAccountSnapshot Account(SteamTracker tracker) => tracker.Snapshot.Accounts[0];
+	private static SteamAccountSnapshot Account(SteamTracker tracker)
+	{
+		return tracker.Snapshot.Accounts[0];
+	}
 
 	private static object? Read(string name, SteamTracker tracker, DateTimeOffset now)
-		=> SteamVariables.Read("steam_main_" + name, tracker.Snapshot, now).Value;
+	{
+		return SteamVariables.Read("steam_main_" + name, tracker.Snapshot, now).Value;
+	}
 
 	private static VariableReading Variable(string name, SteamTracker tracker)
-		=> SteamVariables.Read("steam_main_" + name, tracker.Snapshot, DateTimeOffset.UnixEpoch);
+	{
+		return SteamVariables.Read("steam_main_" + name, tracker.Snapshot, DateTimeOffset.UnixEpoch);
+	}
 
 	private sealed class FakeWebApi : ISteamWebApiClient
 	{
@@ -522,15 +538,25 @@ internal sealed class SteamTrackerTests
 		public Task<IReadOnlyList<SteamPlayerSummary>> GetPlayerSummariesAsync(
 			IReadOnlyList<string> steamIds,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(Friends);
+		{
+			return Task.FromResult(Friends);
+		}
 
 		public Task<IReadOnlyList<string>?> GetFriendIdsAsync(string steamId, CancellationToken cancellationToken)
-			=> Task.FromResult(FriendIds);
+		{
+			return Task.FromResult(FriendIds);
+		}
 
 		public Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 
-		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken)
-			=> OwnedFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(OwnedGames);
+		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(
+			string steamId,
+			CancellationToken cancellationToken)
+		{
+			return OwnedFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(OwnedGames);
+		}
 	}
 }

@@ -18,12 +18,12 @@ namespace MacroDeckHost.Widgets.HistoryGraph;
 /// </summary>
 internal static class HistoryGraphWidgetConfigView
 {
-	private const string _cpuUsage = "system_cpu_usage_percent";
-	private const string _cpuName = "system_cpu_name";
-	private const string _ramUsedGb = "system_ram_used_gb";
-	private const string _ramUsagePercent = "system_ram_usage_percent";
-	private const string _gpuUsagePercent = "system_gpu_0_usage_percent";
-	private const string _gpuName = "system_gpu_0_name";
+	private const string CpuUsage = "system_cpu_usage_percent";
+	private const string CpuName = "system_cpu_name";
+	private const string RamUsedGb = "system_ram_used_gb";
+	private const string RamUsagePercent = "system_ram_usage_percent";
+	private const string GpuUsagePercent = "system_gpu_0_usage_percent";
+	private const string GpuName = "system_gpu_0_name";
 
 	public static UiElement Build(JsonElement data, Func<string, VariableEntity?>? findVariable = null)
 	{
@@ -32,8 +32,8 @@ internal static class HistoryGraphWidgetConfigView
 		var showSubtitle = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showSubtitle") ?? true);
 		var subtitle = new UiState<string>(HistoryGraphWidgetData.SubtitleTextOf(
 				WidgetConfigJson.ReadString(data, "subtitle"),
-				WidgetConfigJson.ReadString(data, "subtitleVariable")) ??
-			string.Empty);
+				WidgetConfigJson.ReadString(data, "subtitleVariable"))
+			?? string.Empty);
 		var maxValue = new UiState<double>(NormalizeMaxValue(WidgetConfigJson.ReadDouble(data, "maxValue") ?? 0));
 		var minValue = new UiState<double>(WidgetConfigJson.ReadDouble(data, "minValue") ?? 0);
 		var accentColor = new UiState<string>(WidgetConfigJson.ReadString(data, "accentColor") ?? string.Empty);
@@ -50,11 +50,18 @@ internal static class HistoryGraphWidgetConfigView
 		var thresholds = new UiState<UiThresholds>(WidgetThresholds.ReadStored(data)!);
 
 		VariableEntity? Picked()
-			=> findVariable is null || string.IsNullOrEmpty(valueVariable.Value) ? null : findVariable(valueVariable.Value);
+		{
+			return findVariable is null || string.IsNullOrEmpty(valueVariable.Value)
+				? null
+				: findVariable(valueVariable.Value);
+		}
 
-		(double Min, double Max) Scale() => HistoryGraphViewStateResolver.ThresholdScale(
-			new HistoryGraphWidgetData { MinValue = minValue.Value, MaxValue = maxValue.Value },
-			Picked());
+		(double Min, double Max) Scale()
+		{
+			return HistoryGraphViewStateResolver.ThresholdScale(
+				new HistoryGraphWidgetData { MinValue = minValue.Value, MaxValue = maxValue.Value },
+				Picked());
+		}
 
 		// Writes several UiState cells from one interaction, the pattern
 		// docs/sdk/ui/concepts/state-and-bindings.md sanctions; a button, so no key holds the preset's name.
@@ -84,28 +91,28 @@ internal static class HistoryGraphWidgetConfigView
 						[
 							PresetButton("presetCpu",
 								AppStrings.Widgets.History.PresetCpu(),
-								() => ApplyPreset(_cpuUsage,
+								() => ApplyPreset(CpuUsage,
 									"CPU Load",
-									HistoryGraphWidgetData.VariableToken(_cpuName),
+									HistoryGraphWidgetData.VariableToken(CpuName),
 									100)),
 							PresetButton("presetRamUsed",
 								AppStrings.Widgets.History.PresetRamUsed(),
-								() => ApplyPreset(_ramUsedGb, "RAM Usage", string.Empty, 0)),
+								() => ApplyPreset(RamUsedGb, "RAM Usage", string.Empty, 0)),
 							PresetButton("presetRamPercent",
 								AppStrings.Widgets.History.PresetRamPercent(),
-								() => ApplyPreset(_ramUsagePercent, "RAM Usage", string.Empty, 100)),
+								() => ApplyPreset(RamUsagePercent, "RAM Usage", string.Empty, 100)),
 							PresetButton("presetGpu",
 								AppStrings.Widgets.History.PresetGpu(),
-								() => ApplyPreset(_gpuUsagePercent,
+								() => ApplyPreset(GpuUsagePercent,
 									"GPU Load",
-									HistoryGraphWidgetData.VariableToken(_gpuName),
-									100)),
-						],
+									HistoryGraphWidgetData.VariableToken(GpuName),
+									100))
+						]
 					},
 					new UiProse { Key = "presets-hint", Text = AppStrings.Widgets.History.PresetsHint() },
 					new UiHeading
 					{
-						Key = "metric-heading", Text = AppStrings.Widgets.History.MetricSection(),
+						Key = "metric-heading", Text = AppStrings.Widgets.History.MetricSection()
 					},
 					new UiVariablePickerInput
 					{
@@ -114,7 +121,7 @@ internal static class HistoryGraphWidgetConfigView
 						Placeholder = AppStrings.Widgets.History.ValueVariablePlaceholder(),
 						Description = AppStrings.Widgets.History.ValueVariableHint(),
 						Binding = Bind.To(valueVariable),
-						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"]),
+						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"])
 					},
 					new UiStringInput
 					{
@@ -122,13 +129,13 @@ internal static class HistoryGraphWidgetConfigView
 						Label = AppStrings.Widgets.Editor.Title(),
 						Placeholder = AppStrings.Widgets.History.TitlePlaceholder(),
 						Binding = Bind.To(title),
-						LiteralOnly = true,
+						LiteralOnly = true
 					},
 					new UiBooleanInput
 					{
 						Key = "showSubtitle",
 						Label = AppStrings.Widgets.History.Subtitle(),
-						Binding = Bind.To(showSubtitle),
+						Binding = Bind.To(showSubtitle)
 					},
 					new UiStringInput
 					{
@@ -137,7 +144,7 @@ internal static class HistoryGraphWidgetConfigView
 						Placeholder = AppStrings.Widgets.History.SubtitleTextPlaceholder(),
 						Description = AppStrings.Widgets.History.SubtitleTextHint(),
 						Binding = Bind.To(subtitle),
-						VisibleWhen = new UiVisibleWhen { ParameterName = "showSubtitle", Values = ["true"] },
+						VisibleWhen = new UiVisibleWhen { ParameterName = "showSubtitle", Values = ["true"] }
 					},
 					// No Min bound, unlike the maximum beside it: a negative floor is the whole point.
 					new UiNumberInput
@@ -145,7 +152,7 @@ internal static class HistoryGraphWidgetConfigView
 						Key = "minValue",
 						Label = AppStrings.Widgets.History.ChartMinimum(),
 						Description = AppStrings.Widgets.History.ChartMinimumHint(),
-						Binding = Bind.To(minValue),
+						Binding = Bind.To(minValue)
 					},
 					new UiNumberInput
 					{
@@ -154,7 +161,7 @@ internal static class HistoryGraphWidgetConfigView
 						Placeholder = AppStrings.Widgets.History.ChartMaximumPlaceholder(),
 						Description = AppStrings.Widgets.History.ChartMaximumHint(),
 						Binding = Bind.To(maxValue),
-						Min = 0,
+						Min = 0
 					},
 					new UiColorInput
 					{
@@ -166,14 +173,14 @@ internal static class HistoryGraphWidgetConfigView
 						// default is the theme accent, which an unset value keeps following as the theme
 						// changes - the same "keep an unset colour unset" rule the Action Button label uses.
 						SupportsReset = true,
-						DefaultValue = string.Empty,
+						DefaultValue = string.Empty
 					},
 					new UiBooleanInput
 					{
 						Key = WidgetThresholds.EnabledKey,
 						Label = AppStrings.Widgets.Editor.ColorThresholds(),
 						Description = AppStrings.Widgets.History.ColorThresholdsDescription(),
-						Binding = Bind.To(thresholdsEnabled),
+						Binding = Bind.To(thresholdsEnabled)
 					},
 					new UiThresholdsInput
 					{
@@ -189,29 +196,35 @@ internal static class HistoryGraphWidgetConfigView
 							: UiText.None()),
 						DefaultValue = UiValue.From(() => WidgetThresholds.Defaults(Scale().Min, Scale().Max)),
 						SupportsReset = true,
-						VisibleWhen = new UiVisibleWhen { ParameterName = WidgetThresholds.EnabledKey, Values = ["true"] },
+						VisibleWhen = new UiVisibleWhen
+							{ ParameterName = WidgetThresholds.EnabledKey, Values = ["true"] }
 					},
 					new UiProse { Key = "press-hint", Text = AppStrings.Widgets.History.PressHint() },
 					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
 					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
-					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-				],
+					WidgetConfigFragments.Border(borderStyle, borderColor, false)
+				]
 			},
-			Editor = WidgetConfigFragments.FlowsEditor(flows),
+			Editor = WidgetConfigFragments.FlowsEditor(flows)
 		};
 	}
 
 	private static UiConfigButton PresetButton(string key, LocalizedString label, Action apply)
-		=> new()
+	{
+		return new UiConfigButton
 		{
 			Key = key,
 			Label = label,
-			Events = [UiEventHandler.On(UiConfigEvents.Activate, apply)],
+			Events = [UiEventHandler.On(UiConfigEvents.Activate, apply)]
 		};
+	}
 
 	/// <summary>Clamps a stored bound to what the <c>maxValue</c> field can hold: <c>0</c> for "auto" (absent,
 	/// non-positive or non-finite - the schema's own definition of auto-scaling), since the field is a plain
 	/// number with no separate "unset" state.</summary>
-	private static double NormalizeMaxValue(double value) => double.IsFinite(value) && value > 0 ? value : 0;
+	private static double NormalizeMaxValue(double value)
+	{
+		return double.IsFinite(value) && value > 0 ? value : 0;
+	}
 }

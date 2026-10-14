@@ -9,16 +9,17 @@ internal sealed class ValveKeyValuesTests
 	public void Nested_blocks_are_readable_by_path()
 	{
 		var root = ValveKeyValues.TryParse("""
-			"Registry"
-			{
-				"HKCU"
-				{
-					"Software" { "Valve" { "Steam" { "RunningAppID" "730" } } }
-				}
-			}
-			""");
+										   "Registry"
+										   {
+										   	"HKCU"
+										   	{
+										   		"Software" { "Valve" { "Steam" { "RunningAppID" "730" } } }
+										   	}
+										   }
+										   """);
 
-		Assert.That(root?.Find("Registry", "HKCU", "Software", "Valve", "Steam", "RunningAppID")?.Value, Is.EqualTo("730"));
+		Assert.That(root?.Find("Registry", "HKCU", "Software", "Valve", "Steam", "RunningAppID")?.Value,
+			Is.EqualTo("730"));
 	}
 
 	[Test]

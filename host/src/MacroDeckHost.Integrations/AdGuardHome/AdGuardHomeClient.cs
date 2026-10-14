@@ -43,9 +43,9 @@ internal sealed class AdGuardHomeClient : IAdGuardHomeClient
 	{
 		var status = await GetAsync<StatusResponse>("status", cancellationToken);
 
-		if (status.ProtectionEnabled is not { } protection ||
-			status.Running is not { } running ||
-			string.IsNullOrWhiteSpace(status.Version))
+		if (status.ProtectionEnabled is not { } protection
+			|| status.Running is not { } running
+			|| string.IsNullOrWhiteSpace(status.Version))
 		{
 			throw Incompatible("status");
 		}
@@ -75,13 +75,15 @@ internal sealed class AdGuardHomeClient : IAdGuardHomeClient
 	}
 
 	public Task SetProtectionAsync(bool enabled, TimeSpan? pause, CancellationToken cancellationToken)
-		=> PostAsync("protection",
+	{
+		return PostAsync("protection",
 			new ProtectionRequest
 			{
 				Enabled = enabled,
 				Duration = !enabled && pause is { } length ? (long)length.TotalMilliseconds : null
 			},
 			cancellationToken);
+	}
 
 	public async Task<AdGuardHomeFilteringStatus> GetFilteringStatusAsync(CancellationToken cancellationToken)
 	{
@@ -96,8 +98,11 @@ internal sealed class AdGuardHomeClient : IAdGuardHomeClient
 	}
 
 	public Task SetFilteringAsync(bool enabled, int interval, CancellationToken cancellationToken)
-		=> PostAsync("filtering/config", new FilteringConfigRequest { Enabled = enabled, Interval = interval },
+	{
+		return PostAsync("filtering/config",
+			new FilteringConfigRequest { Enabled = enabled, Interval = interval },
 			cancellationToken);
+	}
 
 	public async Task RefreshFiltersAsync(CancellationToken cancellationToken)
 	{
@@ -133,7 +138,8 @@ internal sealed class AdGuardHomeClient : IAdGuardHomeClient
 		var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8);
 		// AdGuard Home rejects a charset parameter with 415, so the media type is sent bare.
 		content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-		using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_settings.ControlUrl, path)) { Content = content };
+		using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_settings.ControlUrl, path))
+			{ Content = content };
 
 		await SendAsync(request, (_, _) => Task.FromResult(true), cancellationToken);
 	}
@@ -151,7 +157,8 @@ internal sealed class AdGuardHomeClient : IAdGuardHomeClient
 
 		try
 		{
-			using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+			using var response
+				= await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
 			EnsureSuccess(response, request.RequestUri!.AbsolutePath);
 			return await read(response, timeout.Token);
 		}
@@ -204,25 +211,28 @@ internal sealed class AdGuardHomeClient : IAdGuardHomeClient
 	}
 
 	private static AdGuardHomeException Incompatible(string path, Exception? innerException = null)
-		=> new(AdGuardHomeConnection.Incompatible,
+	{
+		return new AdGuardHomeException(AdGuardHomeConnection.Incompatible,
 			$"The response to {path} does not match the AdGuard Home API.",
 			innerException);
+	}
 
 	private static HttpClient CreateClient(bool acceptUntrustedCertificate)
 	{
-		return IntegrationHttp.CreateClient(Timeout.InfiniteTimeSpan, handler =>
-		{
-			handler.AllowAutoRedirect = false;
-			handler.AutomaticDecompression = DecompressionMethods.All;
-			handler.ConnectTimeout = RequestTimeout;
-			handler.PooledConnectionLifetime = TimeSpan.FromMinutes(5);
-
-			if (acceptUntrustedCertificate)
+		return IntegrationHttp.CreateClient(Timeout.InfiniteTimeSpan,
+			handler =>
 			{
+				handler.AllowAutoRedirect = false;
+				handler.AutomaticDecompression = DecompressionMethods.All;
+				handler.ConnectTimeout = RequestTimeout;
+				handler.PooledConnectionLifetime = TimeSpan.FromMinutes(5);
+
+				if (acceptUntrustedCertificate)
+				{
 #pragma warning disable CA5359 // Opt-in per instance for self-signed certificates on home servers.
-				handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+					handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
 #pragma warning restore CA5359
-			}
-		});
+				}
+			});
 	}
 }

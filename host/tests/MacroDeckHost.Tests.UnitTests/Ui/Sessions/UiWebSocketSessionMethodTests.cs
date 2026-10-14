@@ -122,10 +122,11 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 	{
 		using var dispatcher = DispatcherFor("c-admin", new Claim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope));
 
-		Assert.That(
-			async () => await dispatcher.DispatchAsync("GetSomethingNobodyRoutes", null, CancellationToken.None),
+		Assert.That(async ()
+				=> await dispatcher.DispatchAsync("GetSomethingNobodyRoutes", null, CancellationToken.None),
 			Throws.TypeOf<UiWebSocketDispatchException>()
-				.With.Property(nameof(UiWebSocketDispatchException.Code)).EqualTo("unknown_type"));
+				.With.Property(nameof(UiWebSocketDispatchException.Code))
+				.EqualTo("unknown_type"));
 	}
 
 	/// <summary>
@@ -206,24 +207,29 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 	}
 
 	private UiWebSocketDispatcher DispatcherFor(string connectionId, params Claim[] claims)
-		=> DispatcherFor(connectionId, null, claims);
+	{
+		return DispatcherFor(connectionId, null, claims);
+	}
 
 	private UiWebSocketDispatcher CutoffDispatcherFor(
 		string connectionId,
 		AccessTokenCutoff cutoff,
 		params Claim[] claims)
-		=> new(connectionId: connectionId,
-			principal: new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
-			abort: static () => { },
-			labelText: null!,
-			subscriptions: null!,
-			widgetState: null!,
-			widgetStateSubscriptions: null!,
-			variableInterest: null!,
-			variableBroadcaster: null!,
-			getMusicPlayerInstances: null!,
-			getMusicPlayerState: null!,
-			getWeatherInstances: null!,
+	{
+		return new UiWebSocketDispatcher(connectionId,
+			new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
+			static () =>
+			{
+			},
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
 			getWeatherState: null!,
 			getVariableCatalogProviders: null!,
 			discoverCatalogVariables: null!,
@@ -232,7 +238,9 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			listUiPreviews: null!,
 			logSubscriptions: null!,
 			logFileReader: null!,
-			deviceConnections: new DeviceConnectionTracker(new RecordingEventBus(), Time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
+			deviceConnections: new DeviceConnectionTracker(new RecordingEventBus(),
+				Time,
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
 			musicPlayerClientSync: null!,
 			uiSessions: Broker,
 			configUiSessions: null!,
@@ -248,7 +256,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			modalUiSessions: null!,
 			lifetime: new RunningLifetime(),
 			transport: Transport,
-			webSocketTransport: new MacroDeckHost.Ui.WebSocketUiTransport(),
+			webSocketTransport: new WebSocketUiTransport(),
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: cutoff,
@@ -257,6 +265,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
+	}
 
 	private sealed class RunningLifetime : IHostApplicationLifetime
 	{
@@ -275,18 +284,21 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 	/// test can take a connection through the same registration a real client performs before it sends
 	/// anything.</summary>
 	private UiWebSocketDispatcher ConnectedDispatcherFor(string connectionId, params Claim[] claims)
-		=> new(connectionId: connectionId,
-			principal: new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
-			abort: static () => { },
-			labelText: null!,
-			subscriptions: null!,
-			widgetState: null!,
-			widgetStateSubscriptions: null!,
-			variableInterest: null!,
-			variableBroadcaster: null!,
-			getMusicPlayerInstances: null!,
-			getMusicPlayerState: null!,
-			getWeatherInstances: null!,
+	{
+		return new UiWebSocketDispatcher(connectionId,
+			new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
+			static () =>
+			{
+			},
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
 			getWeatherState: null!,
 			getVariableCatalogProviders: null!,
 			discoverCatalogVariables: null!,
@@ -295,7 +307,9 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			listUiPreviews: null!,
 			logSubscriptions: null!,
 			logFileReader: null!,
-			deviceConnections: new DeviceConnectionTracker(new RecordingEventBus(), Time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
+			deviceConnections: new DeviceConnectionTracker(new RecordingEventBus(),
+				Time,
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
 			musicPlayerClientSync: new NoMusicPlayerHandshake(),
 			uiSessions: Broker,
 			configUiSessions: null!,
@@ -311,7 +325,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			modalUiSessions: null!,
 			lifetime: null!,
 			transport: Transport,
-			webSocketTransport: new MacroDeckHost.Ui.WebSocketUiTransport(),
+			webSocketTransport: new WebSocketUiTransport(),
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: new AccessTokenCutoff(),
@@ -320,23 +334,27 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
+	}
 
 	private UiWebSocketDispatcher DispatcherFor(
 		string connectionId,
 		ILabelTextService? labelText,
 		params Claim[] claims)
-		=> new(connectionId: connectionId,
-			principal: new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
-			abort: static () => { },
-			labelText: labelText!,
-			subscriptions: null!,
-			widgetState: null!,
-			widgetStateSubscriptions: null!,
-			variableInterest: null!,
-			variableBroadcaster: null!,
-			getMusicPlayerInstances: null!,
-			getMusicPlayerState: null!,
-			getWeatherInstances: null!,
+	{
+		return new UiWebSocketDispatcher(connectionId,
+			new ClaimsPrincipal(new ClaimsIdentity(claims, "test")),
+			static () =>
+			{
+			},
+			labelText!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
 			getWeatherState: null!,
 			getVariableCatalogProviders: null!,
 			discoverCatalogVariables: null!,
@@ -361,7 +379,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			modalUiSessions: null!,
 			lifetime: null!,
 			transport: null!,
-			webSocketTransport: new MacroDeckHost.Ui.WebSocketUiTransport(),
+			webSocketTransport: new WebSocketUiTransport(),
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: new AccessTokenCutoff(),
@@ -370,6 +388,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
+	}
 
 	/// <summary>Stands in for the real catalog handler: this test asserts the route exists, not what the
 	/// catalog holds.</summary>
@@ -379,23 +398,32 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 		public ValueTask<GetFolderViewsResponse> Handle(
 			GetFolderViewsRequest request,
 			CancellationToken cancellationToken)
-			=> ValueTask.FromResult(new GetFolderViewsResponse());
+		{
+			return ValueTask.FromResult(new GetFolderViewsResponse());
+		}
 	}
 
 	/// <summary>Keeps the handshake empty so registration needs no WebSocket transport to write to.</summary>
 	private sealed class NoMusicPlayerHandshake : IMusicPlayerClientSync
 	{
-		public IReadOnlyList<(string Name, object Payload)> BuildHandshake() => [];
+		public IReadOnlyList<(string Name, object Payload)> BuildHandshake()
+		{
+			return [];
+		}
 	}
 
 	private sealed class NullLabelTextService : ILabelTextService
 	{
 		public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 
 		public Task<string?> ResolvePreview(
 			LabelImagePreviewRequest request,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 	}
 }

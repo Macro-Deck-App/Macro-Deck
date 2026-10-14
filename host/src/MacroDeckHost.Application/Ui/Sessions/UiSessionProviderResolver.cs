@@ -34,11 +34,11 @@ public sealed class UiSessionProviderResolver : IUiSessionProviderResolver
 	// The remote registry is asked first: a plugin id that reaches here names a plugin, and only the
 	// in-process registry's RemotePluginIntegration exclusion keeps the two from both answering. The
 	public IUiSessionProvider? Resolve(string providerId)
-		=> _remote.Resolve(providerId) ??
-			_inProcess.Resolve(providerId) ??
-			_configFlow.Resolve(providerId) ??
-			_actionConfig.Resolve(providerId) ??
-			_widget.Resolve(providerId) ??
-			_integrationUi.Resolve(providerId) ??
-			_preview.Resolve(providerId);
+	{
+		return _remote.Resolve(providerId)
+			?? _inProcess.Resolve(providerId)
+			?? _configFlow.Resolve(providerId)
+			?? _actionConfig.Resolve(providerId)
+			?? _widget.Resolve(providerId) ?? _integrationUi.Resolve(providerId) ?? _preview.Resolve(providerId);
+	}
 }

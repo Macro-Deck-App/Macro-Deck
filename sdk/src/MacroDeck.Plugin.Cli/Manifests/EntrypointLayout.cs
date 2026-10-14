@@ -34,11 +34,11 @@ internal static class EntrypointLayout
 
 			if (separator <= 0)
 			{
-				var failure = $"Entrypoint '{rid}' declares '{manifest.Entrypoints[rid].Executable}' at the package " +
-					"root. Per-runtime output needs its own directory, conventionally 'runtimes/" +
-					rid +
-					"/', " +
-					"so platforms cannot overwrite each other.";
+				var failure = $"Entrypoint '{rid}' declares '{manifest.Entrypoints[rid].Executable}' at the package "
+					+ "root. Per-runtime output needs its own directory, conventionally 'runtimes/"
+					+ rid
+					+ "/', "
+					+ "so platforms cannot overwrite each other.";
 
 				return new Resolution(destinations, failure, [rid]);
 			}
@@ -47,8 +47,8 @@ internal static class EntrypointLayout
 
 			if (byDirectory.TryGetValue(directory, out var other))
 			{
-				var failure = $"Entrypoints '{other}' and '{rid}' both stage into '{directory}'. Each runtime " +
-					"identifier needs its own directory, conventionally 'runtimes/<rid>/'.";
+				var failure = $"Entrypoints '{other}' and '{rid}' both stage into '{directory}'. Each runtime "
+					+ "identifier needs its own directory, conventionally 'runtimes/<rid>/'.";
 
 				return new Resolution(destinations, failure, [other, rid]);
 			}

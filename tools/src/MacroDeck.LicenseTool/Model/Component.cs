@@ -5,13 +5,13 @@ internal enum Ecosystem
 	NuGet,
 	Npm,
 	Cargo,
-	Asset,
+	Asset
 }
 
 internal enum LicenseTextKind
 {
 	License,
-	Notice,
+	Notice
 }
 
 internal sealed record LicenseText(string Title, string Content, LicenseTextKind Kind, bool IsAdditional = false);
@@ -40,8 +40,10 @@ internal sealed class Component(Ecosystem ecosystem, string name)
 
 	public string Key => KeyOf(Ecosystem, Name);
 
-	public static string KeyOf(Ecosystem ecosystem, string name) =>
-		$"{ecosystem.ToString().ToUpperInvariant()}:{name.ToUpperInvariant()}";
+	public static string KeyOf(Ecosystem ecosystem, string name)
+	{
+		return $"{ecosystem.ToString().ToUpperInvariant()}:{name.ToUpperInvariant()}";
+	}
 
 	public void AddText(LicenseText text)
 	{

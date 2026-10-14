@@ -8,25 +8,36 @@ namespace MacroDeckHost.Tests.UnitTests.Network.Discovery;
 [TestFixture]
 internal sealed class ServiceAdvertisementPlannerTests
 {
-	private static readonly NetworkInterfaceSnapshot Wifi =
+	private static readonly NetworkInterfaceSnapshot _wifi =
 		Nic(17, "en0", "Wi-Fi", NetworkInterfaceType.Wireless80211, "192.168.20.13");
 
-	private static NetworkInterfaceSnapshot Nic(int index,
+	private static NetworkInterfaceSnapshot Nic(
+		int index,
 		string name,
 		string description,
 		NetworkInterfaceType type,
 		params string[] addresses)
-		=> new(index, name, description, type, true, addresses.Select(IPAddress.Parse).ToList());
+	{
+		return new NetworkInterfaceSnapshot(index,
+			name,
+			description,
+			type,
+			true,
+			addresses.Select(IPAddress.Parse).ToList());
+	}
 
-	private static ServiceAdvertisement? Plan(PublicEndpointSet? endpoints = null,
+	private static ServiceAdvertisement? Plan(
+		PublicEndpointSet? endpoints = null,
 		bool enabled = true,
 		string name = "Studio PC",
 		params NetworkInterfaceSnapshot[] interfaces)
-		=> ServiceAdvertisementPlanner.Plan(enabled,
+	{
+		return ServiceAdvertisementPlanner.Plan(enabled,
 			endpoints ?? PublicEndpointSet.HttpOnly(8193),
 			name,
 			"3.1.0",
-			interfaces.Length == 0 ? [Wifi] : interfaces);
+			interfaces.Length == 0 ? [_wifi] : interfaces);
+	}
 
 	[Test]
 	public void The_txt_record_carries_the_instance_name_and_the_version_under_lower_case_keys()
@@ -81,7 +92,7 @@ internal sealed class ServiceAdvertisementPlannerTests
 			"192.168.1.5");
 		var interfaces = new[]
 		{
-			Wifi,
+			_wifi,
 			ethernet,
 			Nic(1, "lo0", "Loopback", NetworkInterfaceType.Loopback, "127.0.0.1"),
 			Nic(6, "en5", "USB Ethernet", NetworkInterfaceType.Ethernet, "169.254.3.4"),

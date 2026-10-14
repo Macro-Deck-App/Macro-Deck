@@ -9,7 +9,9 @@ public class VoicemeeterRemoteWindowsTests
 {
 	[Test]
 	public void Looking_for_the_installation_never_throws()
-		=> Assert.DoesNotThrow(() => VoicemeeterInstallation.FindRemoteLibrary());
+	{
+		Assert.DoesNotThrow(() => VoicemeeterInstallation.FindRemoteLibrary());
+	}
 
 	[Test]
 	public void The_factory_produces_a_remote_whatever_is_installed()

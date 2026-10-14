@@ -28,7 +28,9 @@ public static class BridgedConnectionStamp
 	}
 
 	public static string? DeviceKey(HttpContext context)
-		=> context.Features.Get<IBridgedConnectionFeature>()?.DeviceKey;
+	{
+		return context.Features.Get<IBridgedConnectionFeature>()?.DeviceKey;
+	}
 
 	public static string MaskedDevice(string deviceKey)
 	{
@@ -38,5 +40,7 @@ public static class BridgedConnectionStamp
 	}
 
 	public static string ClientKey(HttpContext context)
-		=> DeviceKey(context) ?? context.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+	{
+		return DeviceKey(context) ?? context.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+	}
 }

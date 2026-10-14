@@ -14,22 +14,30 @@ public sealed class EventsTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal EventsTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal EventsTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>The full event catalogue this plugin declares.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Events,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Events,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.Events.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>Asks a dynamic event-options provider for one event's current options.</summary>
-	public Task<CapabilityInvocationOutcome> GetOptionsAsync(EventOptionsArguments arguments,
+	public Task<CapabilityInvocationOutcome> GetOptionsAsync(
+		EventOptionsArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Events,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Events,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.Events.Options,
 			arguments,
 			options);
+	}
 }

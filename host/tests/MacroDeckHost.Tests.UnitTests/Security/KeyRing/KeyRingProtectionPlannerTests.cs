@@ -21,7 +21,7 @@ namespace MacroDeckHost.Tests.UnitTests.Security.KeyRing;
 [TestFixture]
 public class KeyRingProtectionPlannerTests
 {
-	private static readonly KekStoreIdentity Identity = new("Macro Deck Tests", "key-ring-kek");
+	private static readonly KekStoreIdentity _identity = new("Macro Deck Tests", "key-ring-kek");
 
 	private string _keysDirectory = null!;
 
@@ -38,14 +38,14 @@ public class KeyRingProtectionPlannerTests
 		var root = Directory.GetParent(_keysDirectory)!.FullName;
 		if (Directory.Exists(root))
 		{
-			Directory.Delete(root, recursive: true);
+			Directory.Delete(root, true);
 		}
 	}
 
 	[Test]
 	public void A_fresh_installation_is_unprotected_and_says_the_recovery_key_was_never_exported()
 	{
-		var plan = Resolve(new FakeKekStore(), recoveryKeyExported: false);
+		var plan = Resolve(new FakeKekStore(), false);
 
 		Assert.Multiple(() =>
 		{
@@ -57,7 +57,7 @@ public class KeyRingProtectionPlannerTests
 	[Test]
 	public void A_portable_installation_is_unprotected_even_with_a_keystore_and_an_exported_key()
 	{
-		var plan = Resolve(new FakeKekStore(), recoveryKeyExported: true, portable: true);
+		var plan = Resolve(new FakeKekStore(), true, true);
 
 		Assert.Multiple(() =>
 		{
@@ -71,7 +71,7 @@ public class KeyRingProtectionPlannerTests
 	{
 		var store = new FakeKekStore { Availability = new KekStoreAvailability(false, "libsecret is not installed") };
 
-		var plan = Resolve(store, recoveryKeyExported: true);
+		var plan = Resolve(store, true);
 
 		Assert.Multiple(() =>
 		{
@@ -90,7 +90,7 @@ public class KeyRingProtectionPlannerTests
 		var store = new FakeKekStore();
 		store.Seed(kek);
 
-		var plan = Resolve(store, recoveryKeyExported: true);
+		var plan = Resolve(store, true);
 
 		Assert.Multiple(() =>
 		{
@@ -106,7 +106,7 @@ public class KeyRingProtectionPlannerTests
 		WrapRing(kek);
 		WriteEscrow(kek);
 
-		var plan = Resolve(new FakeKekStore(), recoveryKeyExported: true);
+		var plan = Resolve(new FakeKekStore(), true);
 
 		Assert.Multiple(() =>
 		{
@@ -122,7 +122,7 @@ public class KeyRingProtectionPlannerTests
 	{
 		WrapRing(KeyRingKeyDerivation.CreateKek());
 
-		var plan = Resolve(new FakeKekStore(), recoveryKeyExported: true);
+		var plan = Resolve(new FakeKekStore(), true);
 
 		Assert.Multiple(() =>
 		{
@@ -139,7 +139,7 @@ public class KeyRingProtectionPlannerTests
 		var store = new FakeKekStore();
 		store.Seed(KeyRingKeyDerivation.CreateKek());
 
-		var plan = Resolve(store, recoveryKeyExported: true);
+		var plan = Resolve(store, true);
 
 		Assert.Multiple(() =>
 		{
@@ -162,7 +162,7 @@ public class KeyRingProtectionPlannerTests
 			Availability = new KekStoreAvailability(false, "the keychain is locked")
 		};
 
-		var plan = Resolve(store, recoveryKeyExported: true);
+		var plan = Resolve(store, true);
 
 		Assert.Multiple(() =>
 		{
@@ -173,7 +173,9 @@ public class KeyRingProtectionPlannerTests
 	}
 
 	private KeyRingProtectionPlan Resolve(FakeKekStore store, bool recoveryKeyExported, bool portable = false)
-		=> KeyRingProtectionPlanner.Resolve(_keysDirectory, store, Identity, recoveryKeyExported, portable);
+	{
+		return KeyRingProtectionPlanner.Resolve(_keysDirectory, store, _identity, recoveryKeyExported, portable);
+	}
 
 	private void WrapRing(byte[] kek)
 	{
@@ -198,7 +200,9 @@ public class KeyRingProtectionPlannerTests
 	}
 
 	private void WriteEscrow(byte[] kek)
-		=> new KekEscrowStore(Log.Logger, TimeProvider.System).AddWrap(_keysDirectory,
+	{
+		new KekEscrowStore(Log.Logger, TimeProvider.System).AddWrap(_keysDirectory,
 			kek,
 			RandomNumberGenerator.GetBytes(BackupKeyDerivation.RecoveryKeyBytes));
+	}
 }

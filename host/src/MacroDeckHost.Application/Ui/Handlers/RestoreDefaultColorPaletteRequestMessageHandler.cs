@@ -17,5 +17,7 @@ public sealed class RestoreDefaultColorPaletteRequestMessageHandler
 	public async ValueTask<GetColorPaletteResponse> Handle(
 		RestoreDefaultColorPaletteRequest request,
 		CancellationToken cancellationToken)
-		=> new() { Colors = await _palette.RestoreDefaults(cancellationToken) };
+	{
+		return new GetColorPaletteResponse { Colors = await _palette.RestoreDefaults(cancellationToken) };
+	}
 }

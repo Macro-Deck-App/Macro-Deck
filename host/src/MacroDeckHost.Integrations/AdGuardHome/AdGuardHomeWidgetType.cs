@@ -54,7 +54,7 @@ public static class AdGuardHomeWidgetType
 		AverageProcessingTimeStatistic,
 		SafeBrowsingStatistic,
 		ParentalStatistic,
-		SafeSearchStatistic,
+		SafeSearchStatistic
 	];
 
 	public static IReadOnlyList<string> DefaultStatistics { get; } =
@@ -71,7 +71,7 @@ public static class AdGuardHomeWidgetType
 		new("2h", TimeSpan.FromHours(2)),
 		new("8h", TimeSpan.FromHours(8)),
 		new("24h", TimeSpan.FromHours(24)),
-		new(IndefiniteDuration, null),
+		new(IndefiniteDuration, null)
 	];
 
 	public static IReadOnlyList<string> DurationIds { get; } = [.. PauseDurations.Select(duration => duration.Id)];
@@ -79,7 +79,9 @@ public static class AdGuardHomeWidgetType
 	public static IReadOnlyList<string> DefaultDurations { get; } = ["5m", "1h", "8h", IndefiniteDuration];
 
 	public static AdGuardHomePauseDuration? Duration(string? id)
-		=> PauseDurations.FirstOrDefault(duration => string.Equals(duration.Id, id, StringComparison.Ordinal));
+	{
+		return PauseDurations.FirstOrDefault(duration => string.Equals(duration.Id, id, StringComparison.Ordinal));
+	}
 }
 
 public sealed record AdGuardHomePauseDuration(string Id, TimeSpan? Length);

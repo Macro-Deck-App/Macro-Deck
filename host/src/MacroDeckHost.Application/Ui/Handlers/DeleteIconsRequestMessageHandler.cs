@@ -16,7 +16,8 @@ public class DeleteIconsRequestMessageHandler : IUiTransportMessageHandler<Delet
 		_iconService = iconService;
 	}
 
-	public async ValueTask<DeleteIconsResponse> Handle(DeleteIconsRequest request,
+	public async ValueTask<DeleteIconsResponse> Handle(
+		DeleteIconsRequest request,
 		CancellationToken cancellationToken)
 	{
 		var iconIds = new List<Guid>();

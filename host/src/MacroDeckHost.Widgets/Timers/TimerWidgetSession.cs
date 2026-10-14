@@ -32,7 +32,8 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 	private string? _pendingOriginClientId;
 	private bool _disposed;
 
-	public TimerWidgetSession(UiSurface surface,
+	public TimerWidgetSession(
+		UiSurface surface,
 		Guid widgetId,
 		TimerWidgetConfig config,
 		TimerWidgetSettings settings,
@@ -54,7 +55,7 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 		IReadOnlyList<UiEventHandler> events =
 		[
 			UiEventHandler.On(UiComponentEvents.Press, _ => Press(TimerGesture.Press)),
-			UiEventHandler.On(UiComponentEvents.LongPress, _ => Press(TimerGesture.LongPress)),
+			UiEventHandler.On(UiComponentEvents.LongPress, _ => Press(TimerGesture.LongPress))
 		];
 
 		_view = new UiView(surface,
@@ -73,11 +74,20 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => Dispatch(uiEvent, null);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		Dispatch(uiEvent, null);
+	}
 
 	public void Dispatch(UiEvent uiEvent, string? originClientId)
 	{
@@ -113,7 +123,7 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 			return UiEventOutcome.Rejected("The host is locked.");
 		}
 
-		_timers.Post(_widgetId, gesture, originClientId, originDeviceId: null);
+		_timers.Post(_widgetId, gesture, originClientId, null);
 
 		return UiEventOutcome.Accepted;
 	}

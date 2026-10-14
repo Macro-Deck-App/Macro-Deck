@@ -50,7 +50,10 @@ public sealed class PluginProcessJournal : IPluginProcessJournal
 		return Task.CompletedTask;
 	}
 
-	public Task Remove(string launchId) => Remove([launchId]);
+	public Task Remove(string launchId)
+	{
+		return Remove([launchId]);
+	}
 
 	public Task Remove(IReadOnlyCollection<string> launchIds)
 	{
@@ -82,7 +85,10 @@ public sealed class PluginProcessJournal : IPluginProcessJournal
 		return Task.CompletedTask;
 	}
 
-	private JournalDocument? Read() => _files.Read<JournalDocument>(_filePath);
+	private JournalDocument? Read()
+	{
+		return _files.Read<JournalDocument>(_filePath);
+	}
 
 	private void Write(JournalDocument document)
 	{

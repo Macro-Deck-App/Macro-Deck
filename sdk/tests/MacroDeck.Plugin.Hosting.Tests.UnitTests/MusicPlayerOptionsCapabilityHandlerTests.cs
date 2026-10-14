@@ -19,20 +19,25 @@ public class MusicPlayerOptionsCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	[Test]
 	public async Task Describe_carries_the_supported_options_and_leaves_out_the_rest()
 	{
-		var handler = Handler(new CyclingIntegration(
-		[
+		var handler = Handler(new CyclingIntegration([
 			ActionParameter.Number("cycleSeconds", "Cycle every", min: 5, max: 60, defaultValue: 10),
 			ActionParameter.Text("bad.name", "Dotted"),
 			ActionParameter.Color("tint", "Tint"),
-			ActionParameter.Toggle("cycleSeconds", "Duplicate"),
+			ActionParameter.Toggle("cycleSeconds", "Duplicate")
 		]));
 
 		var result = await handler.InvokeAsync(Invocation(CapabilityOperations.MusicPlayer.Describe),
@@ -50,12 +55,11 @@ public class MusicPlayerOptionsCapabilityHandlerTests
 	[Test]
 	public async Task A_state_read_with_options_resolves_the_player_with_every_declared_option_typed_and_bounded()
 	{
-		var integration = new CyclingIntegration(
-		[
+		var integration = new CyclingIntegration([
 			ActionParameter.Number("cycleSeconds", "Cycle every", min: 5, max: 60, defaultValue: 10),
 			ActionParameter.Toggle("skipPaused", "Skip paused apps", defaultValue: true),
 			ActionParameter.Choice("order", [Option("newest"), Option("oldest")], "Order", defaultValue: "oldest"),
-			ActionParameter.Text("label", "Label"),
+			ActionParameter.Text("label", "Label")
 		]);
 		var handler = Handler(integration);
 
@@ -63,7 +67,8 @@ public class MusicPlayerOptionsCapabilityHandlerTests
 				new
 				{
 					instanceId = CyclingIntegration.InstanceId,
-					options = new Dictionary<string, object> { ["cycleSeconds"] = 500, ["order"] = "sideways", ["unknown"] = 1 }
+					options = new Dictionary<string, object>
+						{ ["cycleSeconds"] = 500, ["order"] = "sideways", ["unknown"] = 1 }
 				}),
 			CancellationToken.None);
 
@@ -72,10 +77,11 @@ public class MusicPlayerOptionsCapabilityHandlerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(request.InstanceId, Is.EqualTo(CyclingIntegration.InstanceId));
-			Assert.That(request.Options, Is.EquivalentTo(new Dictionary<string, object>
-			{
-				["cycleSeconds"] = 60d, ["skipPaused"] = true, ["order"] = "oldest", ["label"] = string.Empty,
-			}));
+			Assert.That(request.Options,
+				Is.EquivalentTo(new Dictionary<string, object>
+				{
+					["cycleSeconds"] = 60d, ["skipPaused"] = true, ["order"] = "oldest", ["label"] = string.Empty
+				}));
 			Assert.That(State(result).TrackName, Is.EqualTo("cycling every 60"));
 		});
 	}
@@ -117,15 +123,23 @@ public class MusicPlayerOptionsCapabilityHandlerTests
 	}
 
 	private static MusicPlayerCapabilityHandler Handler(CyclingIntegration integration)
-		=> new([integration], TestMetadata.Default, new FakeAssetUploader());
+	{
+		return new MusicPlayerCapabilityHandler([integration], TestMetadata.Default, new FakeAssetUploader());
+	}
 
-	private static ActionParameterOption Option(string value) => new() { Value = value, Label = value };
+	private static ActionParameterOption Option(string value)
+	{
+		return new ActionParameterOption { Value = value, Label = value };
+	}
 
 	private static MusicPlayerStateDto State(CapabilityInvocationResult result)
-		=> result.Data!.Value.Deserialize<MusicPlayerStateDto>(PluginProtocolJson.Options)!;
+	{
+		return result.Data!.Value.Deserialize<MusicPlayerStateDto>(PluginProtocolJson.Options)!;
+	}
 
 	private static CapabilityInvocation Invocation(string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.MusicPlayer,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -136,6 +150,7 @@ public class MusicPlayerOptionsCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private sealed class CyclingIntegration(IReadOnlyList<ActionParameter> options)
 		: IPluginIntegration, IMusicPlayerProvider
@@ -146,29 +161,42 @@ public class MusicPlayerOptionsCapabilityHandlerTests
 
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public IReadOnlyList<MusicPlayerInstance> GetInstances()
-			=> [new MusicPlayerInstance(InstanceId, "Any app") { Options = options }];
+		{
+			return [new MusicPlayerInstance(InstanceId, "Any app") { Options = options }];
+		}
 
 		public IMusicPlayer? GetPlayer(string instanceId)
-			=> instanceId == InstanceId ? Player("plain", 0) : null;
+		{
+			return instanceId == InstanceId ? Player("plain", 0) : null;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(MusicPlayerOptionsRequest request)
 		{
 			Requests.Add(request);
-			var seconds = Convert.ToDouble(request.Options["cycleSeconds"], System.Globalization.CultureInfo.InvariantCulture);
+			var seconds = Convert.ToDouble(request.Options["cycleSeconds"],
+				System.Globalization.CultureInfo.InvariantCulture);
 
 			return Player($"cycling every {seconds}", (byte)seconds);
 		}
 
 		private static TestMusicPlayer Player(string track, byte cover)
-			=> new()
+		{
+			return new TestMusicPlayer
 			{
 				StateToReturn = new MusicPlayerState { IsConnected = true, TrackName = track },
-				ArtworkToReturn = new MusicPlayerArtwork([cover], "image/png"),
+				ArtworkToReturn = new MusicPlayerArtwork([cover], "image/png")
 			};
+		}
 	}
 }

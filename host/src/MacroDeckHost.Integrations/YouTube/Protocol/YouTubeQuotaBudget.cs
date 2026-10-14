@@ -156,7 +156,9 @@ internal sealed class YouTubeQuotaBudget
 	}
 
 	private static DateOnly PacificDay(DateTimeOffset utcNow)
-		=> DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(utcNow, _pacific).DateTime);
+	{
+		return DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(utcNow, _pacific).DateTime);
+	}
 
 	// Pacific DST switches at 02:00 local, so local midnight always exists exactly once.
 	private static DateTimeOffset NextPacificMidnight(DateOnly day)

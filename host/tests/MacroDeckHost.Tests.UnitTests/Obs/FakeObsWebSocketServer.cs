@@ -75,18 +75,19 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 				continue;
 			}
 
-			var socket = (await context.AcceptWebSocketAsync(subProtocol: null)).WebSocket;
+			var socket = (await context.AcceptWebSocketAsync(null)).WebSocket;
 			_ = Task.Run(() => SessionAsync(socket));
 		}
 	}
 
 	private async Task SessionAsync(WebSocket socket)
 	{
-		await SendAsync(socket, new JsonObject
-		{
-			["op"] = 0,
-			["d"] = new JsonObject { ["obsWebSocketVersion"] = "5.4.0", ["rpcVersion"] = 1 }
-		});
+		await SendAsync(socket,
+			new JsonObject
+			{
+				["op"] = 0,
+				["d"] = new JsonObject { ["obsWebSocketVersion"] = "5.4.0", ["rpcVersion"] = 1 }
+			});
 
 		while (socket.State == WebSocketState.Open && !_cts.IsCancellationRequested)
 		{
@@ -99,11 +100,12 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 			var op = message["op"]!.GetValue<int>();
 			if (op == 1)
 			{
-				await SendAsync(socket, new JsonObject
-				{
-					["op"] = 2,
-					["d"] = new JsonObject { ["negotiatedRpcVersion"] = 1 }
-				});
+				await SendAsync(socket,
+					new JsonObject
+					{
+						["op"] = 2,
+						["d"] = new JsonObject { ["negotiatedRpcVersion"] = 1 }
+					});
 			}
 			else if (op == 6)
 			{
@@ -119,26 +121,29 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 					continue;
 				}
 
-				await SendAsync(socket, new JsonObject
-				{
-					["op"] = 7,
-					["d"] = new JsonObject
+				await SendAsync(socket,
+					new JsonObject
 					{
-						["requestType"] = requestType,
-						["requestId"] = requestId,
-						["requestStatus"] = new JsonObject { ["result"] = code == 100, ["code"] = code },
-						["responseData"] = new JsonObject()
-					}
-				});
+						["op"] = 7,
+						["d"] = new JsonObject
+						{
+							["requestType"] = requestType,
+							["requestId"] = requestId,
+							["requestStatus"] = new JsonObject { ["result"] = code == 100, ["code"] = code },
+							["responseData"] = new JsonObject()
+						}
+					});
 			}
 		}
 	}
 
 	private async Task SendAsync(WebSocket socket, JsonObject message)
-		=> await socket.SendAsync(Encoding.UTF8.GetBytes(message.ToJsonString()),
+	{
+		await socket.SendAsync(Encoding.UTF8.GetBytes(message.ToJsonString()),
 			WebSocketMessageType.Text,
 			true,
 			_cts.Token);
+	}
 
 	private async Task<JsonNode?> ReceiveAsync(WebSocket socket)
 	{

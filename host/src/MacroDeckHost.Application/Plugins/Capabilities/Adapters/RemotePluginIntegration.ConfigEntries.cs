@@ -12,10 +12,12 @@ public abstract partial class RemotePluginIntegration : IConfigEntryLifecycle
 {
 	private bool DeclaresConfigEntries => Snapshot.AcceptedKinds.Contains(CapabilityKinds.ConfigEntries);
 
-	public async Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+	public async Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+		ConfigEntryPreparation preparation,
 		CancellationToken cancellationToken = default)
 	{
-		var result = await InvokeConfigEntriesAsync<ConfigEntryPrepareResult>(CapabilityOperations.ConfigEntries.Prepare,
+		var result = await InvokeConfigEntriesAsync<ConfigEntryPrepareResult>(
+				CapabilityOperations.ConfigEntries.Prepare,
 				new ConfigEntryPrepareArguments
 				{
 					EntryId = preparation.EntryId,
@@ -41,10 +43,11 @@ public abstract partial class RemotePluginIntegration : IConfigEntryLifecycle
 				[
 					.. result.ReservedVariables
 						.Where(variable => Enum.TryParse<VariableType>(variable.Type, out _))
-						.Select(variable => VariableDefinition.Eager(variable.Name, Enum.Parse<VariableType>(variable.Type)) with
-						{
-							Id = variable.DefinitionId
-						})
+						.Select(variable
+							=> VariableDefinition.Eager(variable.Name, Enum.Parse<VariableType>(variable.Type)) with
+							{
+								Id = variable.DefinitionId
+							})
 				]) with
 				{
 					RetryOnConflict = result.RetryOnConflict == true
@@ -52,7 +55,8 @@ public abstract partial class RemotePluginIntegration : IConfigEntryLifecycle
 			: ConfigEntryPreparationResult.Refuse(result.Error ?? default);
 	}
 
-	public async Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+	public async Task<ConfigEntryStatus> GetEntryStatusAsync(
+		StoredConfigEntry entry,
 		CancellationToken cancellationToken = default)
 	{
 		var result = await InvokeConfigEntriesAsync<ConfigEntryStatusResult>(CapabilityOperations.ConfigEntries.Status,
@@ -85,18 +89,24 @@ public abstract partial class RemotePluginIntegration : IConfigEntryLifecycle
 		return result?.Reloaded ?? false;
 	}
 
-	public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	public Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		CancellationToken cancellationToken = default)
-		=> InvokeConfigEntriesAsync<JsonElement?>(CapabilityOperations.ConfigEntries.Synchronize,
+	{
+		return InvokeConfigEntriesAsync<JsonElement?>(CapabilityOperations.ConfigEntries.Synchronize,
 			new ConfigEntrySynchronizeArguments { Entries = [.. entries.Select(ToDto)] },
 			cancellationToken);
+	}
 
 	public Task ReleasePreparationAsync(Guid entryId, CancellationToken cancellationToken = default)
-		=> InvokeConfigEntriesAsync<JsonElement?>(CapabilityOperations.ConfigEntries.Release,
+	{
+		return InvokeConfigEntriesAsync<JsonElement?>(CapabilityOperations.ConfigEntries.Release,
 			new ConfigEntryReleaseArguments { EntryId = entryId },
 			cancellationToken);
+	}
 
-	private async Task<T?> InvokeConfigEntriesAsync<T>(string operation,
+	private async Task<T?> InvokeConfigEntriesAsync<T>(
+		string operation,
 		object? arguments,
 		CancellationToken cancellationToken)
 	{
@@ -127,5 +137,8 @@ public abstract partial class RemotePluginIntegration : IConfigEntryLifecycle
 	}
 
 	private static ConfigEntryDto ToDto(StoredConfigEntry entry)
-		=> new() { Id = entry.Id, Title = entry.Title, CreatedAt = entry.CreatedAt, Values = entry.Values };
+	{
+		return new ConfigEntryDto
+			{ Id = entry.Id, Title = entry.Title, CreatedAt = entry.CreatedAt, Values = entry.Values };
+	}
 }

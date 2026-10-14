@@ -31,11 +31,13 @@ internal sealed class WindowsPowerService : IPowerService
 	public bool IsSupported => true;
 
 	public bool Supports(PowerOperation operation)
-		=> operation switch
+	{
+		return operation switch
 		{
 			PowerOperation.Hibernate => IsHibernationAvailable(),
 			_ => true
 		};
+	}
 
 	public async Task<PowerResult> ExecuteAsync(
 		PowerOperation operation,
@@ -55,7 +57,7 @@ internal sealed class WindowsPowerService : IPowerService
 		return operation switch
 		{
 			PowerOperation.Lock => ExecuteLock(),
-			PowerOperation.Sleep => ExecuteSuspend(hibernate: false),
+			PowerOperation.Sleep => ExecuteSuspend(false),
 			PowerOperation.Hibernate => await ExecuteHibernateAsync(),
 			PowerOperation.Restart => await ExecuteShutdownAsync(ShutdownRestart, force),
 			PowerOperation.ShutDown => await ExecuteShutdownAsync(ShutdownPowerOff, force),
@@ -84,12 +86,12 @@ internal sealed class WindowsPowerService : IPowerService
 				ActionErrorCodes.Unavailable));
 		}
 
-		return Task.FromResult(ExecuteSuspend(hibernate: true));
+		return Task.FromResult(ExecuteSuspend(true));
 	}
 
 	private static PowerResult ExecuteSuspend(bool hibernate)
 	{
-		if (SetSuspendState(hibernate, forceCritical: false, disableWakeEvent: false))
+		if (SetSuspendState(hibernate, false, false))
 		{
 			return PowerResult.Succeeded();
 		}

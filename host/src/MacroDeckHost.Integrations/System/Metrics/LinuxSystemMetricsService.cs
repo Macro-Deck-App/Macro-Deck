@@ -18,10 +18,14 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 	public override int GpuCount => _nvidiaGpuCount + _amdGpuBusyPercentPaths.Count;
 
 	protected override async Task<CpuTimes?> ReadCpuTimesAsync(CancellationToken cancellationToken)
-		=> LinuxMetricsParser.ParseProcStat(await File.ReadAllTextAsync("/proc/stat", cancellationToken));
+	{
+		return LinuxMetricsParser.ParseProcStat(await File.ReadAllTextAsync("/proc/stat", cancellationToken));
+	}
 
 	protected override async Task<MemoryInfo?> ReadMemoryAsync(CancellationToken cancellationToken)
-		=> LinuxMetricsParser.ParseMemInfo(await File.ReadAllTextAsync("/proc/meminfo", cancellationToken));
+	{
+		return LinuxMetricsParser.ParseMemInfo(await File.ReadAllTextAsync("/proc/meminfo", cancellationToken));
+	}
 
 	protected override async Task<IReadOnlyList<GpuSample>> ReadGpuSnapshotAsync(CancellationToken cancellationToken)
 	{
@@ -56,8 +60,8 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 
 	protected override async Task<IReadOnlyList<DiskReading>> ReadDisksAsync(CancellationToken cancellationToken)
 	{
-		var mounts = LinuxDiskParser.ParseMountInfo(
-			await File.ReadAllTextAsync("/proc/self/mountinfo", cancellationToken));
+		var mounts = LinuxDiskParser.ParseMountInfo(await File.ReadAllTextAsync("/proc/self/mountinfo",
+			cancellationToken));
 		var stats = LinuxDiskParser.ParseDiskStats(await ReadOptionalAsync("/proc/diskstats", cancellationToken));
 		var labels = ReadLabels();
 
@@ -93,7 +97,9 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 		}
 	}
 
-	private static async Task<DeviceNumber?> ReadDeviceNumberAsync(string deviceName, CancellationToken cancellationToken)
+	private static async Task<DeviceNumber?> ReadDeviceNumberAsync(
+		string deviceName,
+		CancellationToken cancellationToken)
 	{
 		var content = await ReadOptionalAsync($"/sys/class/block/{deviceName}/dev", cancellationToken);
 		return LinuxDiskParser.ParseDeviceNumber(content);
@@ -108,7 +114,7 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 
 		try
 		{
-			var target = new FileInfo(source).ResolveLinkTarget(returnFinalTarget: true);
+			var target = new FileInfo(source).ResolveLinkTarget(true);
 			return Path.GetFileName(target?.FullName ?? source);
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -124,7 +130,7 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 		{
 			foreach (var link in new DirectoryInfo("/dev/disk/by-label").EnumerateFiles())
 			{
-				if (link.ResolveLinkTarget(returnFinalTarget: true) is { } target)
+				if (link.ResolveLinkTarget(true) is { } target)
 				{
 					labels.TryAdd(Path.GetFileName(target.FullName), LinuxDiskParser.DecodeUdevLabel(link.Name));
 				}

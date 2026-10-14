@@ -60,18 +60,20 @@ internal sealed class StreamChatLines
 
 	private static readonly UiSurface _measureSurface = new()
 	{
-		Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared,
+		Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared
 	};
 
 	public static readonly StreamChatLineLayout Widget = WidgetLayout(1);
 
 	public static StreamChatLineLayout WidgetLayout(double scale, string? messageColor = null, string? nameColor = null)
-		=> new(line => StreamChatWidgetView.Message(line, scale, messageColor),
+	{
+		return new StreamChatLineLayout(line => StreamChatWidgetView.Message(line, scale, messageColor),
 			line => StreamChatWidgetView.FallbackMessage(line, scale, messageColor),
 			MaxMessages,
 			MaxBytes,
 			FallbackMessages,
 			nameColor);
+	}
 
 	private readonly string _separator;
 	private readonly IStreamChatImages? _images;
@@ -147,8 +149,8 @@ internal sealed class StreamChatLines
 
 		foreach (var badge in message.Badges.Take(MaxBadges))
 		{
-			if (badge.ImageUrl is { } url &&
-				Find(images, StreamChatImage.Badge(badge.SetId, badge.Id, url)) is { } image)
+			if (badge.ImageUrl is { } url
+				&& Find(images, StreamChatImage.Badge(badge.SetId, badge.Id, url)) is { } image)
 			{
 				if (resolved > 0)
 				{
@@ -165,7 +167,8 @@ internal sealed class StreamChatLines
 			spans.Add(UiTextSpan.FromText(" "));
 		}
 
-		spans.Add(UiTextSpan.FromText(message.AuthorName, layout.NameColor ?? message.Color,
+		spans.Add(UiTextSpan.FromText(message.AuthorName,
+			layout.NameColor ?? message.Color,
 			UiComponentTextWeights.SemiBold));
 		spans.Add(UiTextSpan.FromText(separator));
 
@@ -174,9 +177,9 @@ internal sealed class StreamChatLines
 
 		foreach (var fragment in message.Fragments)
 		{
-			if (fragment is { Kind: ChatFragmentKind.Emote, EmoteId: { } emoteId } &&
-				emotes < MaxEmoteImages &&
-				Find(images, StreamChatImage.Emote(emoteId)) is { } emote)
+			if (fragment is { Kind: ChatFragmentKind.Emote, EmoteId: { } emoteId }
+				&& emotes < MaxEmoteImages
+				&& Find(images, StreamChatImage.Emote(emoteId)) is { } emote)
 			{
 				Flush(spans, text);
 				spans.Add(UiTextSpan.FromImage(emote, fragment.Text));
@@ -202,15 +205,15 @@ internal sealed class StreamChatLines
 		return line with
 		{
 			Bytes = Measure(layout.Message(line)),
-			FallbackBytes = Measure(layout.FallbackMessage(line)),
+			FallbackBytes = Measure(layout.FallbackMessage(line))
 		};
 	}
 
 	private StreamChatLine LineFor(ChatMessage message)
 	{
-		if (_cache.TryGetValue(message.MessageId, out var cached) &&
-			ReferenceEquals(cached.Message, message) &&
-			cached.Line.ResolvedImages == CountResolved(message))
+		if (_cache.TryGetValue(message.MessageId, out var cached)
+			&& ReferenceEquals(cached.Message, message)
+			&& cached.Line.ResolvedImages == CountResolved(message))
 		{
 			return cached.Line;
 		}
@@ -226,8 +229,9 @@ internal sealed class StreamChatLines
 		}
 
 		var badges = message.Badges.Take(MaxBadges)
-			.Count(badge => badge.ImageUrl is { } url &&
-				_images.Find(StreamChatImage.Badge(badge.SetId, badge.Id, url)) is not null);
+			.Count(badge
+				=> badge.ImageUrl is { } url
+				&& _images.Find(StreamChatImage.Badge(badge.SetId, badge.Id, url)) is not null);
 
 		var emotes = message.Fragments
 			.Where(fragment => fragment is { Kind: ChatFragmentKind.Emote, EmoteId: not null })
@@ -237,9 +241,11 @@ internal sealed class StreamChatLines
 	}
 
 	private static UiResource? Find(IStreamChatImages? images, StreamChatImage image)
-		=> images?.Find(image) is { } resource
+	{
+		return images?.Find(image) is { } resource
 			? new UiResource { ResourceId = resource.ResourceId, ContentHash = resource.ContentHash }
 			: null;
+	}
 
 	private static void Flush(List<UiTextSpan> spans, StringBuilder text)
 	{
@@ -253,6 +259,8 @@ internal sealed class StreamChatLines
 	}
 
 	private static int Measure(UiElement element)
-		=> UiCanonicalJson.SerializeToUtf8Bytes(UiViewBuilder.Build(_measureSurface, element).Root).Length +
-			IdAllowance;
+	{
+		return UiCanonicalJson.SerializeToUtf8Bytes(UiViewBuilder.Build(_measureSurface, element).Root).Length
+			+ IdAllowance;
+	}
 }

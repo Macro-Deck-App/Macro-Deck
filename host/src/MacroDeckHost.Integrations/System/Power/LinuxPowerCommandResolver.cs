@@ -3,7 +3,9 @@ namespace MacroDeckHost.Integrations.System.Power;
 internal static class LinuxPowerCommandResolver
 {
 	public static (string FileName, string[] Arguments) ResolveLock(bool hasLoginctl)
-		=> hasLoginctl ? ("loginctl", ["lock-session"]) : ("xdg-screensaver", ["lock"]);
+	{
+		return hasLoginctl ? ("loginctl", ["lock-session"]) : ("xdg-screensaver", ["lock"]);
+	}
 
 	public static (string FileName, string[] Arguments) Resolve(PowerOperation operation, bool force, bool useSystemctl)
 	{

@@ -30,7 +30,7 @@ internal sealed class PackageVerifierExtractedTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -51,7 +51,7 @@ internal sealed class PackageVerifierExtractedTests
 	{
 		var (archivePath, _) = await CreateSignedArchiveAsync();
 		var extracted = Path.Combine(_directory, "extracted");
-		ZipFile.ExtractToDirectory(archivePath, extracted);
+		await ZipFile.ExtractToDirectoryAsync(archivePath, extracted);
 
 		var archiveResult = await PackageVerifier.VerifyAsync(archivePath, _manifestReader, TestPki.Root.PublicKey);
 		var extractedResult = await VerifyExtractedAsync(extracted);
@@ -192,7 +192,7 @@ internal sealed class PackageVerifierExtractedTests
 			"1.0.0",
 			[new PackageArchiveFixtures.DeclaredFile("app", "binary-content")]);
 		var extracted = Path.Combine(_directory, "extracted");
-		ZipFile.ExtractToDirectory(packagePath, extracted);
+		await ZipFile.ExtractToDirectoryAsync(packagePath, extracted);
 
 		var result = await VerifyExtractedAsync(extracted);
 
@@ -203,17 +203,19 @@ internal sealed class PackageVerifierExtractedTests
 		});
 	}
 
-	private static Task<PackageVerifyResult> VerifyExtractedAsync(string rootDirectory) =>
-		PackageVerifier.VerifyExtractedAsync(rootDirectory,
+	private static Task<PackageVerifyResult> VerifyExtractedAsync(string rootDirectory)
+	{
+		return PackageVerifier.VerifyExtractedAsync(rootDirectory,
 			SignablePackageFormat.Plugin,
 			_manifestReader,
 			TestPki.Root.PublicKey);
+	}
 
 	private async Task<string> CreateExtractedSignedPluginAsync()
 	{
 		var (archivePath, _) = await CreateSignedArchiveAsync();
 		var extracted = Path.Combine(_directory, Guid.NewGuid().ToString("N"));
-		ZipFile.ExtractToDirectory(archivePath, extracted);
+		await ZipFile.ExtractToDirectoryAsync(archivePath, extracted);
 		return extracted;
 	}
 

@@ -228,7 +228,8 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 	}
 
 	private static IntegrationInitializer EmptyInitializer()
-		=> new(null!,
+	{
+		return new IntegrationInitializer(null!,
 			null!,
 			null!,
 			null!,
@@ -248,11 +249,13 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger(),
-			new MessageBroker(Serilog.Core.Logger.None),
+			new MessageBroker(Logger.None),
 			TestColors.Watches);
+	}
 
 	private static IntegrationInitializer CreateRealInitializer(IServiceScopeFactory scopeFactory)
-		=> new(scopeFactory,
+	{
+		return new IntegrationInitializer(scopeFactory,
 			new NoOpDeckNavigator(),
 			null!,
 			null!,
@@ -272,44 +275,71 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger(),
-			new MessageBroker(Serilog.Core.Logger.None),
+			new MessageBroker(Logger.None),
 			TestColors.Watches);
+	}
 
 	private static ServiceProvider BuildScopeServices()
-		=> new ServiceCollection()
+	{
+		return new ServiceCollection()
 			.AddSingleton<IVariableService>(new NotSupportedVariableService())
 			.AddSingleton(TestLocalization.Resolver)
 			.AddSingleton(TestLocalization.Preferences)
 			.BuildServiceProvider();
+	}
 
 	private sealed class CapturingSink : ILogEventSink
 	{
 		private readonly List<LogEvent> _events;
 
-		public CapturingSink(List<LogEvent> events) => _events = events;
+		public CapturingSink(List<LogEvent> events)
+		{
+			_events = events;
+		}
 
-		public void Emit(LogEvent logEvent) => _events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			_events.Add(logEvent);
+		}
 	}
 
 	private sealed class NoOpDeckNavigator : MacroDeck.Sdk.Decks.IDeckNavigator
 	{
-		public Task ChangeFolderAsync(string folderId,
+		public Task ChangeFolderAsync(
+			string folderId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ChangeProfileAsync(string profileId,
+		public Task ChangeProfileAsync(
+			string profileId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<MacroDeck.Sdk.Decks.DeckFolder> GetFolders() => [];
+		public IReadOnlyList<MacroDeck.Sdk.Decks.DeckFolder> GetFolders()
+		{
+			return [];
+		}
 
-		public IReadOnlyList<MacroDeck.Sdk.Decks.DeckProfile> GetProfiles() => [];
+		public IReadOnlyList<MacroDeck.Sdk.Decks.DeckProfile> GetProfiles()
+		{
+			return [];
+		}
 	}
 
 	private sealed class FixedRegistry : IIntegrationRegistry
@@ -334,24 +364,48 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 		}
 
 		public IReadOnlyList<IIntegration> Integrations { get; }
-		public IActionDefinition? FindAction(string integrationId, string actionId) => null;
-		public IActionDefinition? FindAction(QualifiedId id) => null;
-		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
-		public bool IsEnabled(string integrationId) => !_disabled.Contains(integrationId);
+
+		public IActionDefinition? FindAction(string integrationId, string actionId)
+		{
+			return null;
+		}
+
+		public IActionDefinition? FindAction(QualifiedId id)
+		{
+			return null;
+		}
+
+		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+		{
+			return [];
+		}
+
+		public bool IsEnabled(string integrationId)
+		{
+			return !_disabled.Contains(integrationId);
+		}
 
 		public void SetEnabled(string integrationId, bool enabled)
 		{
 		}
 
-		public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+		public IntegrationOrigin GetOrigin(string integrationId)
+		{
+			return IntegrationOrigin.BuiltIn;
+		}
 
 		public Task<IntegrationRegistrationResult> RegisterAsync(
 			IIntegration integration,
 			IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 			IntegrationMetadata? metadata = null)
-			=> Task.FromResult(IntegrationRegistrationResult.Success);
+		{
+			return Task.FromResult(IntegrationRegistrationResult.Success);
+		}
 
-		public Task<bool> UnregisterAsync(string integrationId) => Task.FromResult(false);
+		public Task<bool> UnregisterAsync(string integrationId)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class LifetimeStub : IHostApplicationLifetime
@@ -392,38 +446,64 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 
 	private sealed class NotSupportedVariableService : IVariableService
 	{
-		public Task<IReadOnlyList<VariableEntity>> GetAll() => throw new NotSupportedException();
+		public Task<IReadOnlyList<VariableEntity>> GetAll()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetById(Guid id) => throw new NotSupportedException();
+		public Task<VariableEntity?> GetById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(string name,
+		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
+			string name,
 			VariableScope scope,
 			string? scopeRefId,
 			DomainVariableType type,
 			object? initialValue,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+			VariableTemplateSource? templateSource = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+		public Task<Result<VariableEntity, VariableError>> SetValue(
+			Guid id,
 			object? value,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
+		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
+			Guid id,
 			string? name,
 			int? decimalPlaces,
 			VariableFileSource? fileSource = null,
-			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
+			VariableTemplateSource? templateSource = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+		public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
+			string integrationId,
 			string name,
 			VariableScope scope,
 			string? scopeRefId,
@@ -433,44 +513,72 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
 			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
-			bool publishedByHost = false) => throw new NotSupportedException();
+			bool publishedByHost = false)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+			string integrationId,
 			string resourceId,
 			string name,
 			VariableType type,
 			int? decimalPlaces,
-			VariableDeclaration? declaration = null) =>
+			VariableDeclaration? declaration = null)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId) =>
-			Task.FromResult<VariableEntity?>(null);
+		public Task<VariableEntity?> GetByDefinition(QualifiedId definitionId)
+		{
+			return Task.FromResult<VariableEntity?>(null);
+		}
 
-		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(string integrationId,
+		public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
+			string integrationId,
 			Guid id,
 			object? value,
-			VariableBounds? bounds = null) => throw new NotSupportedException();
+			VariableBounds? bounds = null)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<VariableError>> SetIntegrationVariableAvailability(string integrationId,
+		public Task<Result<VariableError>> SetIntegrationVariableAvailability(
+			string integrationId,
 			Guid id,
-			bool available) => throw new NotSupportedException();
+			bool available)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task UpsertWidgetVariable(VariableScope scope,
+		public Task UpsertWidgetVariable(
+			VariableScope scope,
 			string scopeRefId,
 			string name,
 			DomainVariableType type,
-			object? value) => throw new NotSupportedException();
+			object? value)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

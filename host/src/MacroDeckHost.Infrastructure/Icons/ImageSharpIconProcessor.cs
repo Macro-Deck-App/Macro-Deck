@@ -31,7 +31,8 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 		_logger = logger;
 	}
 
-	public async Task<Result<ProcessedIconResult, IconError>> Process(Stream original,
+	public async Task<Result<ProcessedIconResult, IconError>> Process(
+		Stream original,
 		string originalFileName,
 		CancellationToken cancellationToken)
 	{
@@ -115,7 +116,8 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 		}
 	}
 
-	private static async Task<Result<ProcessedIconResult, IconError>> Encode(byte[] decodeBytes,
+	private static async Task<Result<ProcessedIconResult, IconError>> Encode(
+		byte[] decodeBytes,
 		string? originalFormat,
 		SourceContentHash sourceHash,
 		CancellationToken cancellationToken)
@@ -170,7 +172,8 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 		return Result.Ok<ProcessedIconResult, IconError>(result);
 	}
 
-	private static async Task<Result<ProcessedIconResult, IconError>> EncodeLottie(byte[] originalBytes,
+	private static async Task<Result<ProcessedIconResult, IconError>> EncodeLottie(
+		byte[] originalBytes,
 		SourceContentHash sourceHash,
 		CancellationToken cancellationToken)
 	{
@@ -181,7 +184,7 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 		}
 
 		using var renderer = opened.Data!;
-		var encoder = IconWebpEncoding.For(isAnimated: false);
+		var encoder = IconWebpEncoding.For(false);
 
 		await _lottieGate.WaitAsync(cancellationToken);
 		try
@@ -247,7 +250,9 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 	}
 
 	private static bool LooksLikeGif(byte[] bytes)
-		=> bytes.Length > 3 && bytes[0] == (byte)'G' && bytes[1] == (byte)'I' && bytes[2] == (byte)'F';
+	{
+		return bytes.Length > 3 && bytes[0] == (byte)'G' && bytes[1] == (byte)'I' && bytes[2] == (byte)'F';
+	}
 
 	private static void CopyAnimationMetadata(Image image, byte[] bytes)
 	{
@@ -280,8 +285,8 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 		var prefix = System.Text.Encoding.UTF8
 			.GetString(bytes, 0, Math.Min(bytes.Length, 256))
 			.TrimStart('﻿', ' ', '\t', '\r', '\n');
-		return prefix.StartsWith("<svg", StringComparison.OrdinalIgnoreCase) ||
-			prefix.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase);
+		return prefix.StartsWith("<svg", StringComparison.OrdinalIgnoreCase)
+			|| prefix.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase);
 	}
 
 	private static byte[]? TryRasterizeSvg(byte[] bytes)

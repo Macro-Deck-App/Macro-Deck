@@ -13,20 +13,20 @@ internal static class ConfigurationLoader
 {
 	public const string DirectoryName = "third-party";
 
-	private static readonly IDeserializer Deserializer = new DeserializerBuilder()
+	private static readonly IDeserializer _deserializer = new DeserializerBuilder()
 		.WithNamingConvention(CamelCaseNamingConvention.Instance)
 		.Build();
 
 	public static LoadedConfiguration Load(string repositoryRoot)
 	{
 		var directory = Path.Combine(repositoryRoot, DirectoryName);
-		return new LoadedConfiguration(
-			Read<ToolConfiguration>(Path.Combine(directory, "config.yml")),
+		return new LoadedConfiguration(Read<ToolConfiguration>(Path.Combine(directory, "config.yml")),
 			Read<OverridesFile>(Path.Combine(directory, "overrides.yml")),
 			Read<AttributionsFile>(Path.Combine(directory, "attributions.yml")));
 	}
 
-	private static T Read<T>(string path) where T : new()
+	private static T Read<T>(string path)
+		where T : new()
 	{
 		if (!File.Exists(path))
 		{
@@ -35,7 +35,7 @@ internal static class ConfigurationLoader
 
 		try
 		{
-			return Deserializer.Deserialize<T?>(File.ReadAllText(path)) ?? new T();
+			return _deserializer.Deserialize<T?>(File.ReadAllText(path)) ?? new T();
 		}
 		catch (YamlException exception)
 		{

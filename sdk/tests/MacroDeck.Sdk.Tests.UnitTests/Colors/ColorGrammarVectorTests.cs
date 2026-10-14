@@ -21,13 +21,21 @@ public class ColorGrammarVectorTests
 	}
 
 	private static IEnumerable<TestCaseData> Cases(string section)
-		=> _fixture.GetProperty(section)
+	{
+		return _fixture.GetProperty(section)
 			.EnumerateArray()
 			.Select((vector, index) => new TestCaseData(vector).SetName($"{section}[{index}]"));
+	}
 
-	private static IEnumerable<TestCaseData> ParseCases() => Cases("parse");
+	private static IEnumerable<TestCaseData> ParseCases()
+	{
+		return Cases("parse");
+	}
 
-	private static IEnumerable<TestCaseData> ReferenceCases() => Cases("references");
+	private static IEnumerable<TestCaseData> ReferenceCases()
+	{
+		return Cases("references");
+	}
 
 	[TestCaseSource(nameof(ParseCases))]
 	public async Task A_fixed_colour_resolves_to_its_canonical_form(JsonElement vector)
@@ -42,8 +50,10 @@ public class ColorGrammarVectorTests
 
 	[TestCaseSource(nameof(ReferenceCases))]
 	public void Only_the_reference_grammar_within_its_bounds_is_a_reference(JsonElement vector)
-		=> Assert.That(ColorReference.IsReference(vector.GetProperty("text").GetString()),
+	{
+		Assert.That(ColorReference.IsReference(vector.GetProperty("text").GetString()),
 			Is.EqualTo(vector.GetProperty("isReference").GetBoolean()));
+	}
 
 	[Test]
 	public async Task A_context_from_a_macro_deck_without_colours_resolves_fixed_colours_and_no_references()
@@ -53,13 +63,14 @@ public class ColorGrammarVectorTests
 
 		var literal = await context.Colors.ResolveAsync("#ABC");
 		var reference = await context.Colors.ResolveAsync("{{ vars.primary | color }}");
-		await context.Colors.WatchAsync("#3366FF", (color, _) =>
-		{
-			received.TrySetResult(color);
-			return Task.CompletedTask;
-		});
+		await context.Colors.WatchAsync("#3366FF",
+			(color, _) =>
+			{
+				received.TrySetResult(color);
+				return Task.CompletedTask;
+			});
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(literal, Is.EqualTo("#aabbcc"));
 			Assert.That(reference, Is.Null);
@@ -77,7 +88,7 @@ public class ColorGrammarVectorTests
 
 		public MacroDeck.Sdk.Decks.IDeckNavigator Deck => throw new NotSupportedException();
 
-		public MacroDeck.Sdk.Scripts.IScriptApi Scripts => throw new NotSupportedException();
+		public Scripts.IScriptApi Scripts => throw new NotSupportedException();
 
 		public MacroDeck.Sdk.Widgets.IWidgetApi Widgets => throw new NotSupportedException();
 

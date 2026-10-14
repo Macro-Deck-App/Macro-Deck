@@ -73,10 +73,10 @@ public sealed class PluginLaunchSpec
 
 		var entrypoint = PluginRuntimeIdentifiers.CandidatesFor(PluginRuntimeIdentifiers.Current)
 				.Select(rid => manifest.Entrypoints.GetValueOrDefault(rid))
-				.FirstOrDefault(candidate => candidate is not null) ??
-			throw new InvalidOperationException(
-				$"The manifest for '{manifest.Id}' {manifest.Version} declares no entrypoint for " +
-				$"'{PluginRuntimeIdentifiers.Current}' or its fallbacks.");
+				.FirstOrDefault(candidate => candidate is not null)
+			?? throw new InvalidOperationException(
+				$"The manifest for '{manifest.Id}' {manifest.Version} declares no entrypoint for "
+				+ $"'{PluginRuntimeIdentifiers.Current}' or its fallbacks.");
 
 		var executablePath = Path.Combine(versionDirectory, entrypoint.Executable);
 		var arguments = entrypoint.Arguments ?? [];
@@ -135,7 +135,9 @@ public sealed class PluginLaunchSpec
 	}
 
 	private static string WorkingDirectoryOf(string path)
-		=> Path.GetDirectoryName(Path.GetFullPath(path)) ?? System.Environment.CurrentDirectory;
+	{
+		return Path.GetDirectoryName(Path.GetFullPath(path)) ?? System.Environment.CurrentDirectory;
+	}
 
 	/// <summary>Adds the executable bit for a self-contained entrypoint - see <see cref="ForManifest" />'s
 	/// own remarks. A no-op on Windows, which has no such bit. A file system without mode bits, or one this
@@ -150,13 +152,13 @@ public sealed class PluginLaunchSpec
 
 		try
 		{
-			const UnixFileMode executable = UnixFileMode.UserRead |
-				UnixFileMode.UserWrite |
-				UnixFileMode.UserExecute |
-				UnixFileMode.GroupRead |
-				UnixFileMode.GroupExecute |
-				UnixFileMode.OtherRead |
-				UnixFileMode.OtherExecute;
+			const UnixFileMode executable = UnixFileMode.UserRead
+				| UnixFileMode.UserWrite
+				| UnixFileMode.UserExecute
+				| UnixFileMode.GroupRead
+				| UnixFileMode.GroupExecute
+				| UnixFileMode.OtherRead
+				| UnixFileMode.OtherExecute;
 
 			File.SetUnixFileMode(path, File.GetUnixFileMode(path) | executable);
 		}
@@ -169,8 +171,8 @@ public sealed class PluginLaunchSpec
 	{
 		var current = Process.GetCurrentProcess().MainModule?.FileName;
 
-		if (!string.IsNullOrEmpty(current) &&
-			string.Equals(Path.GetFileNameWithoutExtension(current), "dotnet", StringComparison.OrdinalIgnoreCase))
+		if (!string.IsNullOrEmpty(current)
+			&& string.Equals(Path.GetFileNameWithoutExtension(current), "dotnet", StringComparison.OrdinalIgnoreCase))
 		{
 			return current;
 		}

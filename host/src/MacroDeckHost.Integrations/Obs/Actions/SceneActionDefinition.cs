@@ -13,7 +13,8 @@ internal sealed class SceneActionDefinition : IDynamicOptionsActionDefinition, I
 	private readonly ObsTargetResolver _resolver;
 	private readonly bool _preview;
 
-	public SceneActionDefinition(string id,
+	public SceneActionDefinition(
+		string id,
 		LocalizedText name,
 		LocalizedText description,
 		bool preview,
@@ -22,7 +23,8 @@ internal sealed class SceneActionDefinition : IDynamicOptionsActionDefinition, I
 	{
 	}
 
-	public SceneActionDefinition(string id,
+	public SceneActionDefinition(
+		string id,
 		LocalizedText name,
 		LocalizedText description,
 		bool preview,
@@ -44,10 +46,13 @@ internal sealed class SceneActionDefinition : IDynamicOptionsActionDefinition, I
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ObsTargetResolver.Parameter(),
-		ActionParameter.DynamicChoice(SceneParameter, label: AppStrings.Integrations.Obs.Params.Scene(), required: true)
+		ActionParameter.DynamicChoice(SceneParameter, AppStrings.Integrations.Obs.Params.Scene(), required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _preview);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _preview);
+	}
 
 	// Answers for the scene this instance is configured with, not for the scene that happens to be live:
 	// several buttons each naming a different scene is the normal layout, and every one of them has to be
@@ -110,8 +115,8 @@ internal sealed class SceneActionDefinition : IDynamicOptionsActionDefinition, I
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(SceneParameter) is not string scene ||
-				string.IsNullOrWhiteSpace(scene))
+			if (context.Parameters.GetValueOrDefault(SceneParameter) is not string scene
+				|| string.IsNullOrWhiteSpace(scene))
 			{
 				_logger.Warning("OBS scene action skipped: no scene selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,

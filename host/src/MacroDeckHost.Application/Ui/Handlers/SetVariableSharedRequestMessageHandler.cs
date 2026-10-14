@@ -17,7 +17,8 @@ public class SetVariableSharedRequestMessageHandler
 	private readonly VariableRegistry _registry;
 	private readonly IMediator _mediator;
 
-	public SetVariableSharedRequestMessageHandler(SharedVariables sharedVariables,
+	public SetVariableSharedRequestMessageHandler(
+		SharedVariables sharedVariables,
 		VariableRegistry registry,
 		IMediator mediator)
 	{
@@ -61,5 +62,8 @@ public class SetVariableSharedRequestMessageHandler
 	}
 
 	private static SetVariableSharedResponse Failed(string code, LocalizedText message)
-		=> new() { Success = false, Error = new TransportError { Code = code, Message = message } };
+	{
+		return new SetVariableSharedResponse
+			{ Success = false, Error = new TransportError { Code = code, Message = message } };
+	}
 }

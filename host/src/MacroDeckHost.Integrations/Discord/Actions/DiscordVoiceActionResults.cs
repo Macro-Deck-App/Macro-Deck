@@ -7,8 +7,8 @@ namespace MacroDeckHost.Integrations.Discord.Actions;
 internal static class DiscordVoiceActionResults
 {
 	private const string RemedyHint =
-		"Another application connected over Discord's RPC interface may hold the voice settings lock, or " +
-		"this Discord client does not offer the setting.";
+		"Another application connected over Discord's RPC interface may hold the voice settings lock, or "
+		+ "this Discord client does not offer the setting.";
 
 	public static ActionResult ToActionResult(DiscordVoiceSettingsResult result, string action)
 	{
@@ -28,7 +28,7 @@ internal static class DiscordVoiceActionResults
 			};
 
 			return ActionResult.Failed(code,
-				AppStrings.Integrations.Discord.Errors.VoiceActionFailed(details: ex.Message));
+				AppStrings.Integrations.Discord.Errors.VoiceActionFailed(ex.Message));
 		}
 	}
 

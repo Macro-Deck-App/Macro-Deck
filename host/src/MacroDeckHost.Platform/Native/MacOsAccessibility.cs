@@ -14,10 +14,16 @@ internal static class MacOsAccessibility
 
 	private static int _startupPromptClaimed;
 
-	public static bool TryClaimStartupPrompt() => Interlocked.Exchange(ref _startupPromptClaimed, 1) == 0;
+	public static bool TryClaimStartupPrompt()
+	{
+		return Interlocked.Exchange(ref _startupPromptClaimed, 1) == 0;
+	}
 
 	[SupportedOSPlatform("macos")]
-	public static bool IsTrusted() => AXIsProcessTrusted();
+	public static bool IsTrusted()
+	{
+		return AXIsProcessTrusted();
+	}
 
 	[SupportedOSPlatform("macos")]
 	public static void RequestTrust()
@@ -48,8 +54,8 @@ internal static class MacOsAccessibility
 
 	public static IntPtr ReadGlobalRef(string library, string symbol)
 	{
-		if (!NativeLibrary.TryLoad(library, out var handle) ||
-			!NativeLibrary.TryGetExport(handle, symbol, out var address))
+		if (!NativeLibrary.TryLoad(library, out var handle)
+			|| !NativeLibrary.TryGetExport(handle, symbol, out var address))
 		{
 			return IntPtr.Zero;
 		}
@@ -57,7 +63,10 @@ internal static class MacOsAccessibility
 		return Marshal.ReadIntPtr(address);
 	}
 
-	public static byte[] Utf8(string value) => Encoding.UTF8.GetBytes(value + '\0');
+	public static byte[] Utf8(string value)
+	{
+		return Encoding.UTF8.GetBytes(value + '\0');
+	}
 
 	[DllImport(ApplicationServices)]
 	private static extern bool AXIsProcessTrusted();

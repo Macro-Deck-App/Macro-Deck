@@ -25,8 +25,8 @@ internal sealed class RemoteUserVariableApi(IHostInvoker invoker) : IUserVariabl
 			},
 			cancellationToken);
 
-		return result?.Deserialize<UserVariableWriteResult>(PluginProtocolJson.Options) ??
-			new UserVariableWriteResult(UserVariableWriteStatus.NotFound, "The host returned no result.");
+		return result?.Deserialize<UserVariableWriteResult>(PluginProtocolJson.Options)
+			?? new UserVariableWriteResult(UserVariableWriteStatus.NotFound, "The host returned no result.");
 	}
 
 	public async Task<UserVariableCreateResult> CreateAsync(
@@ -50,8 +50,8 @@ internal sealed class RemoteUserVariableApi(IHostInvoker invoker) : IUserVariabl
 			cancellationToken);
 
 		// Not NotSupported: this host does implement creation, the answer just never arrived.
-		return result?.Deserialize<UserVariableCreateResult>(PluginProtocolJson.Options) ??
-			UserVariableCreateResult.Failed(UserVariableCreateStatus.Unavailable,
+		return result?.Deserialize<UserVariableCreateResult>(PluginProtocolJson.Options)
+			?? UserVariableCreateResult.Failed(UserVariableCreateStatus.Unavailable,
 				"The host returned no result.");
 	}
 }

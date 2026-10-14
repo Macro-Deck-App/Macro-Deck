@@ -14,7 +14,8 @@ public interface ILayoutRegistry
 	/// </summary>
 	/// <exception cref="ArgumentException">The owner id, the descriptor's id or name is invalid or
 	/// empty, or a region id is empty or repeated within the layout.</exception>
-	Task<LayoutRegistration> Register(string ownerId,
+	Task<LayoutRegistration> Register(
+		string ownerId,
 		LayoutDescriptor layout,
 		CancellationToken cancellationToken = default);
 

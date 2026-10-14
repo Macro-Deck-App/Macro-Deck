@@ -23,29 +23,56 @@ internal sealed class FakeEnrollmentAuthService : IAuthService
 	}
 
 	public Task<Result<LoginResult, AuthError>> RedeemDeviceEnrollment(string token, DeviceRegistration device)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<bool> IsSetupComplete() => throw new NotSupportedException();
+	public Task<bool> IsSetupComplete()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<string?> GetUsername() => throw new NotSupportedException();
+	public Task<string?> GetUsername()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<AuthError>> Setup(string username, string password) => throw new NotSupportedException();
+	public Task<Result<AuthError>> Setup(string username, string password)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<LoginResult, AuthError>> Login(string username,
+	public Task<Result<LoginResult, AuthError>> Login(
+		string username,
 		string password,
 		AuthScope scope,
 		DeviceRegistration? device = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<LoginResult, AuthError>> Refresh(string rawRefreshToken) => throw new NotSupportedException();
+	public Task<Result<LoginResult, AuthError>> Refresh(string rawRefreshToken)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task Logout(string rawRefreshToken) => throw new NotSupportedException();
+	public Task Logout(string rawRefreshToken)
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<Result<AuthError>> ChangePassword(string currentPassword, string newPassword)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<Result<AuthError>> ChangeUsername(string currentPassword, string newUsername)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<AuthError>> ResetPassword(string newPassword) => throw new NotSupportedException();
+	public Task<Result<AuthError>> ResetPassword(string newPassword)
+	{
+		throw new NotSupportedException();
+	}
 }

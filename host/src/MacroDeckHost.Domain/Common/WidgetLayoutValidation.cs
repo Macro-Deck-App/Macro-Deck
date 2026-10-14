@@ -18,8 +18,8 @@ public static class WidgetLayoutValidation
 		var finalRects = folder.Widgets
 			.Where(w => !removed.Contains(w.Id))
 			.Select(w =>
-				moved.FirstOrDefault(p => p.WidgetId == w.Id) ??
-				new WidgetPlacement(w.Id, w.PositionX, w.PositionY, w.Width, w.Height))
+				moved.FirstOrDefault(p => p.WidgetId == w.Id)
+				?? new WidgetPlacement(w.Id, w.PositionX, w.PositionY, w.Width, w.Height))
 			.Concat(added)
 			.Concat(foreignPinned.Select(w =>
 				new WidgetPlacement(w.Id, w.PositionX, w.PositionY, w.Width, w.Height)))
@@ -36,10 +36,10 @@ public static class WidgetLayoutValidation
 					continue;
 				}
 
-				var overlaps = a.X < b.X + b.Width &&
-					a.X + a.Width > b.X &&
-					a.Y < b.Y + b.Height &&
-					a.Y + a.Height > b.Y;
+				var overlaps = a.X < b.X + b.Width
+					&& a.X + a.Width > b.X
+					&& a.Y < b.Y + b.Height
+					&& a.Y + a.Height > b.Y;
 				if (overlaps)
 				{
 					return true;
@@ -52,11 +52,11 @@ public static class WidgetLayoutValidation
 
 	public static bool OutOfBounds(WidgetPlacement placement, int columns, int rows)
 	{
-		return placement.Width < 1 ||
-			placement.Height < 1 ||
-			placement.X < 0 ||
-			placement.Y < 0 ||
-			placement.X + placement.Width > columns ||
-			placement.Y + placement.Height > rows;
+		return placement.Width < 1
+			|| placement.Height < 1
+			|| placement.X < 0
+			|| placement.Y < 0
+			|| placement.X + placement.Width > columns
+			|| placement.Y + placement.Height > rows;
 	}
 }

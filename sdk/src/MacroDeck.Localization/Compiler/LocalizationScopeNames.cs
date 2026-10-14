@@ -22,8 +22,10 @@ internal static class LocalizationScopeNames
 	/// plugins compile against.
 	/// </summary>
 	public static bool IsMacroDeckOwned(string? scope)
-		=> scope != null &&
-			scope.StartsWith(MacroDeckPrefix, StringComparison.Ordinal) &&
-			scope.Length > MacroDeckPrefix.Length &&
-			scope.IndexOf(':') < 0;
+	{
+		return scope != null
+			&& scope.StartsWith(MacroDeckPrefix, StringComparison.Ordinal)
+			&& scope.Length > MacroDeckPrefix.Length
+			&& scope.IndexOf(':') < 0;
+	}
 }
