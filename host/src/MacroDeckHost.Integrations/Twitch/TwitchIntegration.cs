@@ -13,6 +13,13 @@ using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Integrations.Twitch.Chat;
+using MacroDeckHost.Integrations.Twitch.Configuration;
+using MacroDeckHost.Integrations.Twitch.Connections;
+using MacroDeckHost.Integrations.Twitch.Events;
+using MacroDeckHost.Integrations.Twitch.Migration;
+using MacroDeckHost.Integrations.Twitch.Variables;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 using MacroDeckHost.Localization;
 using Serilog;
 

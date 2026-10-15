@@ -1,6 +1,8 @@
 using System.Reflection;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Discord;
+using MacroDeckHost.Integrations.Discord.Events;
+using MacroDeckHost.Integrations.Discord.State;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Issues;

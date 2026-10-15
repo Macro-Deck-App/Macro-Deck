@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MacroDeckHost.Integrations.Meld;
+using MacroDeckHost.Integrations.Meld.State;
 
 namespace MacroDeckHost.Tests.UnitTests.Meld;
 

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using MacroDeckHost.Integrations.HomeAssistant;
+using MacroDeckHost.Integrations.HomeAssistant.Connections;
+using MacroDeckHost.Integrations.HomeAssistant.Events;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 using MacroDeck.Sdk.Events;
 using MacroDeckHost.Tests.UnitTests.TestSupport;

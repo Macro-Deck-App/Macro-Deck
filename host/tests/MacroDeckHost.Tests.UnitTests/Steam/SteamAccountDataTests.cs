@@ -1,5 +1,7 @@
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Integrations.Steam;
+using MacroDeckHost.Integrations.Steam.Protocol;
+using MacroDeckHost.Integrations.Steam.State;
+using MacroDeckHost.Integrations.Steam.Variables;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 
 namespace MacroDeckHost.Tests.UnitTests.Steam;

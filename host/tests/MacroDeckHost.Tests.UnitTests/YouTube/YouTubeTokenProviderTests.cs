@@ -1,6 +1,6 @@
 using MacroDeck.Sdk.ConfigFlow;
-using MacroDeckHost.Integrations.YouTube;
 using MacroDeckHost.Integrations.YouTube.Auth;
+using MacroDeckHost.Integrations.YouTube.Configuration;
 using Serilog;
 using Serilog.Core;
 

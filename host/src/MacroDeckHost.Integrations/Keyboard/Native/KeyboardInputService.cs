@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Logging;
+using MacroDeckHost.Integrations.Keyboard.Models;
 using MacroDeckHost.Platform.Processes;
 using ILogger = Serilog.ILogger;
 

@@ -1,6 +1,7 @@
 using System.Net;
-using MacroDeckHost.Integrations.YouTube;
+using MacroDeckHost.Integrations.YouTube.Connections;
 using MacroDeckHost.Integrations.YouTube.Protocol;
+using MacroDeckHost.Integrations.YouTube.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.YouTube;
 

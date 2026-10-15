@@ -16,6 +16,11 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations;
+using MacroDeckHost.Integrations.Obs.Configuration;
+using MacroDeckHost.Integrations.Obs.Connections;
+using MacroDeckHost.Integrations.Obs.Events;
+using MacroDeckHost.Integrations.Obs.Protocol;
+using MacroDeckHost.Integrations.Obs.Variables;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 

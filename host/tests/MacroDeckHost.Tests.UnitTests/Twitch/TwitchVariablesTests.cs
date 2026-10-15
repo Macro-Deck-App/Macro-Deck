@@ -1,4 +1,5 @@
-using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Integrations.Twitch.Connections;
+using MacroDeckHost.Integrations.Twitch.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch;
 

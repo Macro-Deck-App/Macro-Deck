@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
+using MacroDeckHost.Integrations.System.State;
 using MacroDeckHost.Platform.Focus;
 using MacroDeckHost.Platform.Lock;
 using MacroDeckHost.Integrations.System.Metrics;

@@ -1,5 +1,7 @@
-using MacroDeckHost.Integrations.Discord;
-using MacroDeckHost.Integrations.Discord.Rpc;
+using MacroDeckHost.Integrations.Discord.Auth;
+using MacroDeckHost.Integrations.Discord.Connections;
+using MacroDeckHost.Integrations.Discord.Protocol;
+using MacroDeckHost.Integrations.Discord.State;
 
 namespace MacroDeckHost.Tests.UnitTests.Discord;
 

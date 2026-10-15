@@ -2,6 +2,8 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Integrations.Obs;
 using MacroDeckHost.Integrations.Obs.Actions;
+using MacroDeckHost.Integrations.Obs.Connections;
+using MacroDeckHost.Integrations.Obs.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 

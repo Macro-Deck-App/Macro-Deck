@@ -1,5 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Models;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop.Actions;

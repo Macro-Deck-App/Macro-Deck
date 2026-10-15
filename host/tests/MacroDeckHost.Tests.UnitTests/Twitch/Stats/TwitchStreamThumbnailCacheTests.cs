@@ -1,6 +1,7 @@
 using System.Net;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
 using MacroDeckHost.Integrations.Twitch;

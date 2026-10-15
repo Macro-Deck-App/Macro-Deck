@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
-using MacroDeckHost.Integrations.Meld;
+using MacroDeckHost.Integrations.Meld.Configuration;
 using MacroDeckHost.Integrations.Meld.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.ConfigFlow;

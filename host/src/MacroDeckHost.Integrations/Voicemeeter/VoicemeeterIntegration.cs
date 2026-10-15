@@ -1,5 +1,9 @@
 using System.Globalization;
 using MacroDeckHost.Integrations.Voicemeeter.Actions;
+using MacroDeckHost.Integrations.Voicemeeter.Connections;
+using MacroDeckHost.Integrations.Voicemeeter.Events;
+using MacroDeckHost.Integrations.Voicemeeter.Migration;
+using MacroDeckHost.Integrations.Voicemeeter.Models;
 using MacroDeckHost.Integrations.Voicemeeter.Native;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
@@ -8,6 +12,8 @@ using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Voicemeeter.State;
+using MacroDeckHost.Integrations.Voicemeeter.Variables;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Voicemeeter;

@@ -2,7 +2,8 @@ using System.Globalization;
 using System.Net;
 using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.Issues;
-using MacroDeckHost.Integrations.MicrosoftCalendar;
+using MacroDeckHost.Integrations.MicrosoftCalendar.Auth;
+using MacroDeckHost.Integrations.MicrosoftCalendar.Configuration;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.MicrosoftCalendar;

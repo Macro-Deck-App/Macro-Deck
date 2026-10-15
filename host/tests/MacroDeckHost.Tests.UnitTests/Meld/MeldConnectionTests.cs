@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
-using MacroDeckHost.Integrations.Meld;
+using MacroDeckHost.Integrations.Meld.Connections;
+using MacroDeckHost.Integrations.Meld.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 

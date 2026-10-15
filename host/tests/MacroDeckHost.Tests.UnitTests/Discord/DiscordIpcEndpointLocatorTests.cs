@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Discord.Rpc;
+using MacroDeckHost.Integrations.Discord.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Discord;
 

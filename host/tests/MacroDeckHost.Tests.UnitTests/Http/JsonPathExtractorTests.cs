@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.Http.JsonPath;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Http.Actions;
 
 namespace MacroDeckHost.Tests.UnitTests.Http;
 

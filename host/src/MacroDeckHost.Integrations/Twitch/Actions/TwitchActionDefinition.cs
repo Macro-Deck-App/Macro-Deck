@@ -1,3 +1,4 @@
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;

@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Migration;
 using MacroDeckHost.Integrations.SinusBot;
+using MacroDeckHost.Integrations.SinusBot.Migration;
 
 namespace MacroDeckHost.Tests.UnitTests.Integrations;
 

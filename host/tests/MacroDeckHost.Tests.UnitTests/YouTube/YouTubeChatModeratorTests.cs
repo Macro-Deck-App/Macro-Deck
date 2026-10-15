@@ -1,6 +1,7 @@
 using System.Net;
 using MacroDeckHost.Integrations.Streaming;
-using MacroDeckHost.Integrations.YouTube;
+using MacroDeckHost.Integrations.YouTube.Chat;
+using MacroDeckHost.Integrations.YouTube.Connections;
 using MacroDeckHost.Tests.UnitTests.Twitch;
 
 namespace MacroDeckHost.Tests.UnitTests.YouTube;

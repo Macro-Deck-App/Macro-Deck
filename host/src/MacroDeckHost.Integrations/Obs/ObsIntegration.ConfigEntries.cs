@@ -1,6 +1,9 @@
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Obs.Configuration;
+using MacroDeckHost.Integrations.Obs.Connections;
+using MacroDeckHost.Integrations.Obs.Variables;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Obs;
 
 namespace MacroDeckHost.Integrations.Obs;

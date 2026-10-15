@@ -1,3 +1,4 @@
+using MacroDeckHost.Integrations.YtmDesktop.Providers;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;

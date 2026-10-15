@@ -1,6 +1,7 @@
 using System.Globalization;
-using MacroDeckHost.Integrations.Spotify;
 using MacroDeck.Sdk.ConfigFlow;
+using MacroDeckHost.Integrations.Spotify.Auth;
+using MacroDeckHost.Integrations.Spotify.Configuration;
 
 namespace MacroDeckHost.Tests.UnitTests.Spotify;
 

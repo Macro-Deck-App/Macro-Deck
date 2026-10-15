@@ -1,7 +1,7 @@
-using MacroDeckHost.Integrations.Discord;
 using MacroDeckHost.Integrations.Discord.Actions;
-using MacroDeckHost.Integrations.Discord.Rpc;
-using MacroDeckHost.Integrations.Discord.Webhooks;
+using MacroDeckHost.Integrations.Discord.Auth;
+using MacroDeckHost.Integrations.Discord.Connections;
+using MacroDeckHost.Integrations.Discord.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 

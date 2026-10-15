@@ -2,6 +2,7 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Widgets;
+using MacroDeckHost.Integrations.AdGuardHome.Connections;
 using MacroDeckHost.Integrations.Ui;
 
 namespace MacroDeckHost.Integrations.AdGuardHome.Widgets;

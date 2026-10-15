@@ -1,5 +1,7 @@
 using System.Globalization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.AdGuardHome.State;
+using MacroDeckHost.Integrations.AdGuardHome.Widgets;
 using ActionStrings = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Actions;
 using Params = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Params;
 using Durations = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Durations;

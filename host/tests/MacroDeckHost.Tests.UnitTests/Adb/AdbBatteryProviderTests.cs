@@ -1,7 +1,7 @@
 using System.Reflection;
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Batteries;
-using MacroDeckHost.Integrations.Adb;
+using MacroDeckHost.Integrations.Adb.Providers;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;

@@ -10,6 +10,7 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Widgets.ActionButton;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Ui.Config;

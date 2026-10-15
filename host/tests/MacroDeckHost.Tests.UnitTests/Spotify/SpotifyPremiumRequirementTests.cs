@@ -1,5 +1,5 @@
 using System.Net;
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Protocol;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Http;
 

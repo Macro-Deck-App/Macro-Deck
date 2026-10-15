@@ -9,6 +9,9 @@ using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Integrations.Weather.Configuration;
+using MacroDeckHost.Integrations.Weather.Protocol;
+using MacroDeckHost.Integrations.Weather.Providers;
 
 namespace MacroDeckHost.Tests.UnitTests.Weather;
 

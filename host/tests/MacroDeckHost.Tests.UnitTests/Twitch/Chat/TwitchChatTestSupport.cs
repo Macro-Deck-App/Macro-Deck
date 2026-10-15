@@ -1,8 +1,8 @@
 using System.Globalization;
 using MacroDeck.Sdk.Events;
 using MacroDeckHost.Integrations.Streaming;
-using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
+using MacroDeckHost.Integrations.Twitch.Configuration;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 

@@ -5,6 +5,13 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.SoundPad.Actions;
+using MacroDeckHost.Integrations.SoundPad.Configuration;
+using MacroDeckHost.Integrations.SoundPad.Connections;
+using MacroDeckHost.Integrations.SoundPad.Migration;
+using MacroDeckHost.Integrations.SoundPad.Protocol;
+using MacroDeckHost.Integrations.SoundPad.Providers;
+using MacroDeckHost.Integrations.SoundPad.Variables;
 
 namespace MacroDeckHost.Integrations.SoundPad;
 

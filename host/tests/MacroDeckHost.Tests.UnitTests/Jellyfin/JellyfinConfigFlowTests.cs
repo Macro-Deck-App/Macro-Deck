@@ -1,5 +1,5 @@
 using MacroDeck.Sdk.ConfigFlow;
-using MacroDeckHost.Integrations.Jellyfin;
+using MacroDeckHost.Integrations.Jellyfin.Configuration;
 
 namespace MacroDeckHost.Tests.UnitTests.Jellyfin;
 

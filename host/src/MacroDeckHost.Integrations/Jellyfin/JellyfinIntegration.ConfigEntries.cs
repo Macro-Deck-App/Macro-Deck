@@ -2,6 +2,10 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Jellyfin.Configuration;
+using MacroDeckHost.Integrations.Jellyfin.Connections;
+using MacroDeckHost.Integrations.Jellyfin.State;
+using MacroDeckHost.Integrations.Jellyfin.Variables;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Jellyfin;
 
 namespace MacroDeckHost.Integrations.Jellyfin;

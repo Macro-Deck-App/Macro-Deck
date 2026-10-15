@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Text.Json;
-using MacroDeckHost.Integrations.HomeAssistant;
+using MacroDeckHost.Integrations.HomeAssistant.Connections;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
+using MacroDeckHost.Integrations.HomeAssistant.State;
+using MacroDeckHost.Integrations.HomeAssistant.Variables;
 using MacroDeckHost.Tests.UnitTests.HomeAssistant;
 using MacroDeck.Sdk.Variables;
 

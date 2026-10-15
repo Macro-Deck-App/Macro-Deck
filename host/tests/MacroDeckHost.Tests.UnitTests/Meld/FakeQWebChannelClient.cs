@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text.Json;
-using MacroDeckHost.Integrations.Meld;
 using MacroDeckHost.Integrations.Meld.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Meld;

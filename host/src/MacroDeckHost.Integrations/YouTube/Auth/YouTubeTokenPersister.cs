@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeck.Sdk.ConfigFlow;
+using MacroDeckHost.Integrations.YouTube.Configuration;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.YouTube.Auth;

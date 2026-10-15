@@ -1,7 +1,5 @@
 using System.Globalization;
 using MacroDeckHost.Integrations.Discord.Actions;
-using MacroDeckHost.Integrations.Discord.Rpc;
-using MacroDeckHost.Integrations.Discord.Webhooks;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -11,6 +9,14 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Discord.Auth;
+using MacroDeckHost.Integrations.Discord.Configuration;
+using MacroDeckHost.Integrations.Discord.Connections;
+using MacroDeckHost.Integrations.Discord.Events;
+using MacroDeckHost.Integrations.Discord.Migration;
+using MacroDeckHost.Integrations.Discord.Models;
+using MacroDeckHost.Integrations.Discord.Protocol;
+using MacroDeckHost.Integrations.Discord.State;
 using MacroDeckHost.Localization;
 using Serilog;
 

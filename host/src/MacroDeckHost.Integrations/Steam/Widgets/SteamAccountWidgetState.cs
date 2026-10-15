@@ -1,6 +1,7 @@
 using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Ui.Model.Resources;
+using MacroDeckHost.Integrations.Steam.State;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;

@@ -1,5 +1,6 @@
 using MacroDeckHost.Integrations.Mouse;
 using MacroDeckHost.Integrations.Mouse.Actions;
+using MacroDeckHost.Integrations.Mouse.Models;
 using MacroDeckHost.Integrations.Mouse.Native;
 using MacroDeck.Sdk.Actions;
 

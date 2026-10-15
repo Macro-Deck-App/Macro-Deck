@@ -5,6 +5,7 @@ using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Integrations.Streaming;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.Streaming;
 using Serilog.Core;

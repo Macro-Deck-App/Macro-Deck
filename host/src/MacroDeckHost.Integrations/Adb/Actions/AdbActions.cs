@@ -1,4 +1,5 @@
 using System.Text;
+using MacroDeckHost.Integrations.Adb.Models;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;

@@ -1,4 +1,5 @@
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Auth;
+using MacroDeckHost.Integrations.Spotify.Configuration;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using Serilog;
 using Serilog.Core;

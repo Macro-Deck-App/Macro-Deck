@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Obs;
+using MacroDeckHost.Integrations.Obs.Configuration;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.ConfigFlow;
 

@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Meld;
+using MacroDeckHost.Integrations.Meld.Configuration;
 
 namespace MacroDeckHost.Tests.UnitTests.Meld;
 

@@ -1,5 +1,7 @@
-using MacroDeckHost.Integrations.Jellyfin;
+using MacroDeckHost.Integrations.Jellyfin.Connections;
+using MacroDeckHost.Integrations.Jellyfin.Events;
 using MacroDeckHost.Integrations.Jellyfin.Protocol;
+using MacroDeckHost.Integrations.Jellyfin.State;
 using static MacroDeckHost.Tests.UnitTests.Jellyfin.JellyfinSessions;
 
 namespace MacroDeckHost.Tests.UnitTests.Jellyfin;

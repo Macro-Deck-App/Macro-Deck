@@ -5,6 +5,7 @@ using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Integrations.Steam.State;
 using Heading = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Widget;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Steam.Config;
 using ViewStrings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;

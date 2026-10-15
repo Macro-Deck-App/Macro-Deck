@@ -92,4 +92,4 @@ does not know them.
 - [Batteries](../../docs/src/content/docs/features/batteries.md)
 - [`MacroDeck.Sdk.Batteries`](../../sdk/src/MacroDeck.Sdk/Batteries/)
 - [ADR 0107](0107-built-in-integrations-are-built-as-extractable-plugins.md)
-- [`AdbBatteryProvider.cs`](../../host/src/MacroDeckHost.Integrations/Adb/AdbBatteryProvider.cs)
+- [`AdbBatteryProvider.cs`](../../host/src/MacroDeckHost.Integrations/Adb/Providers/AdbBatteryProvider.cs)

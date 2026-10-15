@@ -1,6 +1,6 @@
-using MacroDeckHost.Integrations.YtmDesktop;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.YtmDesktop.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.YtmDesktop;
 

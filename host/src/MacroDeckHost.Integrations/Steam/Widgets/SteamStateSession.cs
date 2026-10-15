@@ -5,6 +5,7 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Integrations.Steam.State;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;
 

@@ -1,5 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.AdGuardHome.State;
 using Errors = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Errors;
 using Params = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Params;
 

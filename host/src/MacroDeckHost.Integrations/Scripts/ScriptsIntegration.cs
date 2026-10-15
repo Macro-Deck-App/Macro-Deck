@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Scripts;
+using MacroDeckHost.Integrations.Scripts.Actions;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Scripts;

@@ -1,6 +1,7 @@
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeckHost.Integrations.SoundPad;
+using MacroDeckHost.Integrations.SoundPad.Actions;
 using MacroDeckHost.Tests.UnitTests.SinusBot;
 
 namespace MacroDeckHost.Tests.UnitTests.SoundPad;

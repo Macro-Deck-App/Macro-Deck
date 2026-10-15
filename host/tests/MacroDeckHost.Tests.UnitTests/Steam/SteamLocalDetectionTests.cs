@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Steam;
+using MacroDeckHost.Integrations.Steam.Native;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 
 namespace MacroDeckHost.Tests.UnitTests.Steam;

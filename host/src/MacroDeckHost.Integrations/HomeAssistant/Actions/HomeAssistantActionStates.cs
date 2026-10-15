@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.HomeAssistant.Connections;
 
 namespace MacroDeckHost.Integrations.HomeAssistant.Actions;
 

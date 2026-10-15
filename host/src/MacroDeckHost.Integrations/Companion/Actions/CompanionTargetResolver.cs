@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Companion;
+using MacroDeckHost.Integrations.Companion.Configuration;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Companion.Actions;

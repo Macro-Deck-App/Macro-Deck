@@ -4,6 +4,8 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Example.Actions;
+using MacroDeckHost.Integrations.Example.Configuration;
 using MacroDeckHost.Localization;
 using Serilog;
 

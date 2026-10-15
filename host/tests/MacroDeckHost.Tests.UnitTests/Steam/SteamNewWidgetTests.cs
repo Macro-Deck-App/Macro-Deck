@@ -4,7 +4,7 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Integrations.Steam;
+using MacroDeckHost.Integrations.Steam.State;
 using MacroDeckHost.Integrations.Steam.Widgets;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;

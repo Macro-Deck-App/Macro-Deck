@@ -3,6 +3,7 @@ using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Integrations.Steam.State;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;

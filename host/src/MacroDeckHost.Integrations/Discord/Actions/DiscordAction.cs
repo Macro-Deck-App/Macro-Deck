@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
+using MacroDeckHost.Integrations.Discord.Connections;
 using Serilog;
 using MacroDeckHost.Localization;
 

@@ -1,6 +1,8 @@
 using System.Globalization;
 using MacroDeckHost.Integrations.StreamlabsDesktop;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Actions;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Configuration;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Connections;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;

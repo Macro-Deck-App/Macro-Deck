@@ -2,6 +2,8 @@ using System.Globalization;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Actions;
 using MacroDeckHost.Integrations.Twitch.Auth;
+using MacroDeckHost.Integrations.Twitch.Configuration;
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;

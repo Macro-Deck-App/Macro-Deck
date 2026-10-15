@@ -1,6 +1,9 @@
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Voicemeeter;
+using MacroDeckHost.Integrations.Voicemeeter.Events;
+using MacroDeckHost.Integrations.Voicemeeter.Models;
+using MacroDeckHost.Integrations.Voicemeeter.Variables;
 using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;

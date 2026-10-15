@@ -9,6 +9,11 @@ using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.SinusBot.Configuration;
+using MacroDeckHost.Integrations.SinusBot.Migration;
+using MacroDeckHost.Integrations.SinusBot.Protocol;
+using MacroDeckHost.Integrations.SinusBot.Providers;
+using MacroDeckHost.Integrations.SinusBot.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.SinusBot;

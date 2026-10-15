@@ -1,6 +1,6 @@
-using MacroDeckHost.Integrations.Keyboard;
 using MacroDeckHost.Integrations.Keyboard.Actions;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Keyboard.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.Keyboard;
 

@@ -2,7 +2,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Integrations.Http.Protocol;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk.Logging;
 using Serilog;

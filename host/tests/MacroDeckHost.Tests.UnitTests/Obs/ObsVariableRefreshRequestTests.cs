@@ -10,6 +10,8 @@ using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Integrations.Obs.Configuration;
+using MacroDeckHost.Integrations.Obs.Protocol;
 using MacroDeckHost.Tests.UnitTests.HomeAssistant;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;

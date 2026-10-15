@@ -3,6 +3,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Streamerbot.Connections;
 using MacroDeckHost.Localization;
 using Serilog;
 

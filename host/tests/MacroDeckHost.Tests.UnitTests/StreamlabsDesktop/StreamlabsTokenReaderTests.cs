@@ -1,5 +1,5 @@
 using System.Text;
-using MacroDeckHost.Integrations.StreamlabsDesktop;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Auth;
 
 namespace MacroDeckHost.Tests.UnitTests.StreamlabsDesktop;
 

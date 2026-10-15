@@ -1,4 +1,5 @@
-using MacroDeckHost.Integrations.SoundPad;
+using MacroDeckHost.Integrations.SoundPad.Connections;
+using MacroDeckHost.Integrations.SoundPad.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.SoundPad;
 

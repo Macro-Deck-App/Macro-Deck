@@ -1,5 +1,4 @@
 using MacroDeckHost.Integrations.Keyboard.Models;
-using MacroDeckHost.Integrations.Keyboard;
 using MacroDeckHost.Integrations.Keyboard.Native;
 using Serilog;
 

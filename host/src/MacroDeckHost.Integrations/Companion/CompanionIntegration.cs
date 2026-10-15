@@ -6,6 +6,9 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Integrations.Companion.Actions;
+using MacroDeckHost.Integrations.Companion.Configuration;
+using MacroDeckHost.Integrations.Companion.Events;
+using MacroDeckHost.Integrations.Companion.Variables;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Companion;

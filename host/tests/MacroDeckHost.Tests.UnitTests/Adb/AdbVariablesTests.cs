@@ -1,7 +1,8 @@
 using System.Text.RegularExpressions;
-using MacroDeckHost.Integrations.Adb;
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Adb.Connections;
+using MacroDeckHost.Integrations.Adb.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
 

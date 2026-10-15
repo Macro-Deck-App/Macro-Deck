@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.Mouse;
 using MacroDeckHost.Integrations.Mouse.Actions;
+using MacroDeckHost.Integrations.Mouse.Models;
 
 namespace MacroDeckHost.Tests.UnitTests.Mouse;
 

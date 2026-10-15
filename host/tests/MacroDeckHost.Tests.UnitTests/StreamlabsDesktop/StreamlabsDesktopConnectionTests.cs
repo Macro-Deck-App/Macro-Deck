@@ -1,6 +1,10 @@
-using MacroDeckHost.Integrations.StreamlabsDesktop;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Configuration;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Connections;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Events;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Models;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 using MacroDeck.Sdk.Events;
+using MacroDeckHost.Integrations.StreamlabsDesktop.State;
 
 namespace MacroDeckHost.Tests.UnitTests.StreamlabsDesktop;
 

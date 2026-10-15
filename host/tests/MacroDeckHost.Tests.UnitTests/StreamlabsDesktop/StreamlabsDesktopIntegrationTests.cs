@@ -1,5 +1,8 @@
 using MacroDeckHost.Integrations.Obs;
 using MacroDeckHost.Integrations.StreamlabsDesktop;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Configuration;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Events;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Variables;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;

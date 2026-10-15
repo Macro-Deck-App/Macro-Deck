@@ -1,5 +1,9 @@
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Delegation.Actions;
+using MacroDeckHost.Integrations.Delegation.Configuration;
+using MacroDeckHost.Integrations.Delegation.Connections;
 using MacroDeckHost.Integrations.Delegation.Protocol;
+using MacroDeckHost.Integrations.Delegation.Variables;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;

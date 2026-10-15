@@ -1,5 +1,5 @@
 using MacroDeck.Sdk.Android;
-using MacroDeckHost.Integrations.Adb;
+using MacroDeckHost.Integrations.Adb.Connections;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
 

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeckHost.Integrations.Imap;
+using MacroDeckHost.Integrations.Imap.Configuration;
+using MacroDeckHost.Integrations.Imap.Models;
 
 namespace MacroDeckHost.Tests.UnitTests.Imap;
 

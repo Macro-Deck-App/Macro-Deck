@@ -1,5 +1,7 @@
+using MacroDeckHost.Integrations.HomeAssistant.Connections;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.HomeAssistant.State;
 
 namespace MacroDeckHost.Integrations.HomeAssistant.Actions;
 

@@ -1,5 +1,9 @@
 using System.Globalization;
 using MacroDeckHost.Integrations.Streamerbot.Actions;
+using MacroDeckHost.Integrations.Streamerbot.Configuration;
+using MacroDeckHost.Integrations.Streamerbot.Connections;
+using MacroDeckHost.Integrations.Streamerbot.Events;
+using MacroDeckHost.Integrations.Streamerbot.Migration;
 using MacroDeckHost.Integrations.Streamerbot.Protocol;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -10,6 +14,7 @@ using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Streamerbot.State;
 using MacroDeckHost.Localization;
 using Serilog;
 

@@ -1,5 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Voicemeeter.Native;
+using MacroDeckHost.Integrations.Voicemeeter.State;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Voicemeeter.Actions;
