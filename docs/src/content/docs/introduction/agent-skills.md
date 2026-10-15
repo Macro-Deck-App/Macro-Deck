@@ -4,9 +4,9 @@ description: Official skills that let coding agents such as Claude Code, Codex, 
 ---
 
 If you build plugins with a coding agent, install the official Macro Deck skills from
-[Macro-Deck-Agentic-Skills](https://github.com/Macro-Deck-App/Macro-Deck-Agentic-Skills). A skill
-gives the agent the Macro Deck workflow and points it at the official sources, so it does not have to
-guess SDK APIs, manifest fields or Store rules.
+[Macro-Deck-Skills](https://github.com/Macro-Deck-App/Macro-Deck-Skills). A skill gives the
+agent the Macro Deck workflow and points it at the official sources, so it does not have to guess SDK
+APIs, manifest fields or Store rules.
 
 The skills use the portable `SKILL.md` format and work with agent hosts that support Agent Skills,
 including Claude Code, Codex, OpenCode and GitHub Copilot.
@@ -33,7 +33,7 @@ moves on.
 With the [GitHub CLI](https://cli.github.com/):
 
 ```bash
-gh skill install Macro-Deck-App/Macro-Deck-Agentic-Skills macro-deck-plugin-creator
+gh skill install Macro-Deck-App/Macro-Deck-Skills macro-deck-plugin-creator
 ```
 
 `gh skill` installs into the location your agent expects; pass `--agent` to pick a specific one.
@@ -43,7 +43,7 @@ Update later with:
 gh skill update macro-deck-plugin-creator
 ```
 
-The [repository README](https://github.com/Macro-Deck-App/Macro-Deck-Agentic-Skills#readme) covers the
+The [repository README](https://github.com/Macro-Deck-App/Macro-Deck-Skills#readme) covers the
 required GitHub CLI version, manual installation without `gh skill`, and pinning a skill version.
 
 Building plugins with the skill needs the same tools as building them by hand: the
