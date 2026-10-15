@@ -1,8 +1,9 @@
 import { CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Subject } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ActionBlock } from '@macro-deck/runtime';
-import { HOST_URL_RESOLVER } from '@shared';
+import { ApiService, HOST_URL_RESOLVER } from '@shared';
 import type { UiNode } from '@macro-deck/runtime';
 import type { UiSessionHandle, UiSessionRejection } from '@shared';
 import { ActionOptionsService } from '../../../../services/action-options.service';
@@ -74,6 +75,7 @@ describe('ParamListComponent state row', () => {
           useValue: {
             actionRole: () => undefined,
             previewScopeRefId: () => ownerId,
+            previewOwnerWidgetId: () => ownerId,
             hasOwnerWidget: () => !!ownerId,
             previewScopeHasOnOffStates: () => draftHasOnOffStates,
             providesButtonState: () => providesButtonState,
@@ -321,6 +323,7 @@ describe('ParamListComponent conditional rows', () => {
           useValue: {
             actionRole: () => undefined,
             previewScopeRefId: () => undefined,
+            previewOwnerWidgetId: () => undefined,
             hasOwnerWidget: () => false,
             previewScopeHasOnOffStates: () => undefined,
             providesButtonState: () => false,
@@ -387,6 +390,7 @@ describe('ParamListComponent config tree', () => {
             actionRole: () => undefined,
             previewScope: () => 'widget',
             previewScopeRefId: () => undefined,
+            previewOwnerWidgetId: () => undefined,
             hasOwnerWidget: () => false,
             previewScopeHasOnOffStates: () => undefined,
             providesButtonState: () => false,
@@ -621,5 +625,78 @@ describe('ParamListComponent node event forwarding', () => {
     expect(session.send).toHaveBeenCalledWith({ nodeId: 'scene', name: 'change', data: 'b' });
     expect(store.updateParam).toHaveBeenCalledTimes(1);
     expect(store.updateParam).toHaveBeenCalledWith('action-1', 'scene', 'b');
+  });
+});
+
+describe('ParamListComponent $self outside the widget editor', () => {
+  let options: jasmine.SpyObj<ActionOptionsService>;
+  let store: ActionFlowStore;
+
+  const selfTargeted: ActionBlock = {
+    id: 'action-1',
+    type: 'action',
+    blockType: 'app.macro-deck.widget.set-label',
+    label: 'Set Label',
+    color: '',
+    integrationId: 'app.macro-deck.widget',
+    actionId: 'set-label',
+    parameters: [
+      { name: 'widget', type: 'widget-target', label: 'Widget', value: '$self' },
+      { name: 'state', type: 'dynamic-choice', label: 'State', value: 'current' },
+      { name: 'label', type: 'string', label: 'Label', value: '' },
+    ],
+  };
+
+  async function render(): Promise<void> {
+    const fixture = TestBed.createComponent(ParamListComponent);
+    fixture.componentRef.setInput('block', selfTargeted);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  beforeEach(async () => {
+    options = jasmine.createSpyObj<ActionOptionsService>('ActionOptionsService', ['getOptions']);
+    options.getOptions.and.resolveTo({ options: [], allowsCustomValue: false });
+
+    await TestBed.configureTestingModule({
+      imports: [ParamListComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ActionFlowStore,
+        { provide: ActionOptionsService, useValue: options },
+        { provide: ApiService, useValue: {
+          onNotification: () => new Subject(),
+          connectionStateSignal: signal('disconnected'),
+        } as unknown as ApiService },
+      ],
+    })
+      .overrideComponent(ParamListComponent, { set: { imports: [], schemas: [CUSTOM_ELEMENTS_SCHEMA] } })
+      .compileComponents();
+
+    store = TestBed.inject(ActionFlowStore);
+  });
+
+  function lookedUpTargets(): unknown[] {
+    return options.getOptions.calls.all().map(call => call.args[0].currentParameters?.['widget']);
+  }
+
+  it('does not resolve $self to the script being edited', async () => {
+    store.previewScope.set('script');
+    store.previewScopeRefId.set('script-1');
+    store.scriptRunsOnWidget.set(true);
+
+    await render();
+
+    expect(lookedUpTargets()).not.toContain('script-1');
+  });
+
+  it('still resolves $self to the widget being edited', async () => {
+    store.previewScope.set('widget');
+    store.previewScopeRefId.set('widget-1');
+    store.ownerWidgetId.set('widget-1');
+
+    await render();
+
+    expect(lookedUpTargets()).toContain('widget-1');
   });
 });

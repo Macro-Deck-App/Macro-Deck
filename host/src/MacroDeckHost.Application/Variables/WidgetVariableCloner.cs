@@ -15,10 +15,19 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 		_logger = logger;
 	}
 
-	public async Task<IReadOnlyList<WidgetVariableSnapshot>> Snapshot(Guid widgetId)
+	public Task<IReadOnlyList<WidgetVariableSnapshot>> Snapshot(Guid widgetId)
 	{
-		var scopeRefId = widgetId.ToString();
-		var variables = await _variableService.GetByScope(VariableScope.Widget, scopeRefId);
+		return SnapshotScope(VariableScope.Widget, widgetId.ToString());
+	}
+
+	public Task Restore(Guid widgetId, IReadOnlyList<WidgetVariableSnapshot> variables)
+	{
+		return RestoreScope(VariableScope.Widget, widgetId.ToString(), variables);
+	}
+
+	public async Task<IReadOnlyList<WidgetVariableSnapshot>> SnapshotScope(VariableScope scope, string scopeRefId)
+	{
+		var variables = await _variableService.GetByScope(scope, scopeRefId);
 		return variables
 			.Where(variable => variable.Classification == VariableClassification.User)
 			.Select(variable => new WidgetVariableSnapshot(variable.Name,
@@ -30,14 +39,16 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 			.ToList();
 	}
 
-	public async Task Restore(Guid widgetId, IReadOnlyList<WidgetVariableSnapshot> variables)
+	public async Task RestoreScope(
+		VariableScope scope,
+		string scopeRefId,
+		IReadOnlyList<WidgetVariableSnapshot> variables)
 	{
-		var scopeRefId = widgetId.ToString();
 		foreach (var variable in variables)
 		{
 			try
 			{
-				var existing = await _variableService.GetByScope(VariableScope.Widget, scopeRefId);
+				var existing = await _variableService.GetByScope(scope, scopeRefId);
 				var collision = existing.FirstOrDefault(v =>
 					v.Name == variable.Name && v.Classification == VariableClassification.Widget);
 				if (collision is not null)
@@ -45,11 +56,11 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 					// The imported user variable deliberately wins over host-derived widget state, so the
 					// imported widget ends up matching the source instead of keeping whatever the
 					// newly-created widget happened to derive locally.
-					await _variableService.RemoveWidgetVariable(VariableScope.Widget, scopeRefId, variable.Name);
+					await _variableService.RemoveWidgetVariable(scope, scopeRefId, variable.Name);
 				}
 
 				var result = await _variableService.CreateUserVariable(variable.Name,
-					VariableScope.Widget,
+					scope,
 					scopeRefId,
 					variable.Type,
 					variable.Value,
@@ -59,18 +70,20 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 				if (!result.Success)
 				{
 					_logger.Warning(
-						"Skipping widget variable '{VariableName}' for widget {WidgetId} during import: {Error}",
+						"Skipping {Scope} variable '{VariableName}' for {ScopeRefId} during import: {Error}",
+						scope,
 						variable.Name,
-						widgetId,
+						scopeRefId,
 						result.ErrorMessage);
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.Warning(ex,
-					"Failed to restore widget variable '{VariableName}' for widget {WidgetId}",
+					"Failed to restore {Scope} variable '{VariableName}' for {ScopeRefId}",
+					scope,
 					variable.Name,
-					widgetId);
+					scopeRefId);
 			}
 		}
 	}

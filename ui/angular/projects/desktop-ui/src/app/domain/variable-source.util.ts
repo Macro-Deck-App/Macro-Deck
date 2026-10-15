@@ -1,5 +1,5 @@
 import { AppStrings } from '@macro-deck/runtime';
-import type { Variable, VariableType } from '@macro-deck/runtime';
+import type { Variable, VariableScope, VariableType } from '@macro-deck/runtime';
 
 export const VARIABLE_TYPE_LABEL_KEYS: Record<VariableType, string> = {
   text: AppStrings.Variables.Manager.TypeText,
@@ -15,6 +15,18 @@ export function variableTypeLabels(translate: (key: string) => string): Record<V
     boolean: translate(VARIABLE_TYPE_LABEL_KEYS.boolean),
     color: translate(VARIABLE_TYPE_LABEL_KEYS.color),
   };
+}
+
+export function scopeLabelKey(scope: VariableScope): string {
+  switch (scope) {
+    case 'script':
+      return AppStrings.Variables.ThisScript;
+    case 'automation':
+      return AppStrings.Variables.ThisAutomation;
+    case 'widget':
+    case 'global':
+      return AppStrings.Variables.ThisWidget;
+  }
 }
 
 export type VariableSourceFilter =
@@ -102,7 +114,7 @@ export function groupVariablesBySource(
     groups.push({ key: 'event', label: t(AppStrings.Variables.Source.ThisEvent), variables: eventParams });
   }
   if (scriptInputs.length > 0) {
-    groups.push({ key: 'input', label: t(AppStrings.Variables.Source.ThisScript), variables: scriptInputs });
+    groups.push({ key: 'input', label: t(AppStrings.Scripts.InputsTabLabel), variables: scriptInputs });
   }
   if (locals.length > 0) {
     groups.push({ key: 'scope', label: scopeLabel, variables: locals });

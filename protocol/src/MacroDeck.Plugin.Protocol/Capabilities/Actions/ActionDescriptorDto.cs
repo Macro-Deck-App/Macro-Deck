@@ -72,6 +72,12 @@ public sealed record ActionExecuteArguments
 	public string? OriginClientId { get; init; }
 
 	public string? OwnerWidgetId { get; init; }
+
+	/// <summary>The script the step runs in, when it runs in one. Optional: absent from an older host.</summary>
+	public string? ScriptId { get; init; }
+
+	/// <summary>The automation the step runs in, when it runs in one. Optional: absent from an older host.</summary>
+	public string? AutomationId { get; init; }
 }
 
 /// <summary>Result of the <c>execute</c> operation. A failure is carried as a

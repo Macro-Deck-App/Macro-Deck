@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>このウィジェットの変数</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>このスクリプトの変数</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>このオートメーションの変数</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>予定の終了</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>ウィジェットの変数</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>スクリプトの変数</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>オートメーションの変数</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>{date} に公開</value>
@@ -2985,6 +2997,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>不明な変数のスコープです</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>この変数が属するウィジェット、スクリプト、またはオートメーションが存在しません。</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>ビデオソースは現在使用中です。</value>
@@ -14436,6 +14451,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>このスクリプトの実行中、変数「vars.{name}」を上書きします。</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>このスクリプトの実行中、スクリプトの変数「vars.{name}」を上書きします。</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>種類</value>
   </data>
@@ -18257,6 +18275,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>このウィジェットのみが参照でき、ここでは同名のグローバル変数より優先されます。</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>このスクリプトのみが参照でき、ここでは同名のグローバル変数より優先されます。</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>このオートメーションのみが参照でき、ここでは同名のグローバル変数より優先されます。</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>変数を検索…</value>
   </data>
@@ -18391,14 +18415,17 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>このイベント</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>このスクリプト</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>ユーザー</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>このウィジェット</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>このスクリプト</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>このオートメーション</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>ユーザー</value>

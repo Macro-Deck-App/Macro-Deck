@@ -37,6 +37,21 @@ public class SetVariableActionTests
 	}
 
 	[Test]
+	public async Task It_passes_the_script_and_automation_it_runs_in_through()
+	{
+		await _executor.ExecuteAsync(new ActionExecutionContext
+		{
+			Parameters = new Dictionary<string, object> { ["variable"] = "count", ["value"] = "2" },
+			OwnerWidgetId = "widget-1",
+			ScriptId = "script-1",
+			AutomationId = "automation-1"
+		});
+
+		Assert.That(_api.Contexts.Single(),
+			Is.EqualTo(new UserVariableContext("widget-1", "script-1", "automation-1")));
+	}
+
+	[Test]
 	public async Task A_missing_operation_sets()
 	{
 		await Execute(new Dictionary<string, object> { ["variable"] = "count", ["value"] = "2" });
@@ -137,7 +152,20 @@ public class SetVariableActionTests
 		public List<(string Name, string? OwnerWidgetId, UserVariableOperation Operation, string? Value)> Calls { get; }
 			= [];
 
+		public List<UserVariableContext> Contexts { get; } = [];
+
 		public UserVariableWriteResult Result { get; set; } = UserVariableWriteResult.Applied();
+
+		public Task<UserVariableWriteResult> ApplyInContextAsync(
+			string name,
+			UserVariableContext context,
+			UserVariableOperation operation,
+			string? value,
+			CancellationToken cancellationToken = default)
+		{
+			Contexts.Add(context);
+			return ApplyAsync(name, context.OwnerWidgetId, operation, value, cancellationToken);
+		}
 
 		public Task<UserVariableWriteResult> ApplyAsync(
 			string name,

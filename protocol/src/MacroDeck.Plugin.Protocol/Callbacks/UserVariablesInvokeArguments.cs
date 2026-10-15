@@ -8,6 +8,14 @@ public sealed record UserVariablesApplyArguments
 
 	public string? OwnerWidgetId { get; init; }
 
+	/// <summary>The running script, so its local variables resolve first. Optional: a host that predates
+	/// script variables ignores it, and an older plugin never sends it.</summary>
+	public string? ScriptId { get; init; }
+
+	/// <summary>The running automation, so its local variables resolve first. Optional, like
+	/// <see cref="ScriptId"/>.</summary>
+	public string? AutomationId { get; init; }
+
 	/// <summary>The <c>MacroDeck.Sdk.Variables.UserVariableOperation</c> enumerant name, e.g. <c>"Toggle"</c> -
 	/// see <see cref="VariablesCreateArguments.Type"/>'s remarks on why this is a plain string.</summary>
 	public required string Operation { get; init; }
@@ -22,6 +30,14 @@ public sealed record UserVariablesCreateArguments
 	public required string Name { get; init; }
 
 	public string? OwnerWidgetId { get; init; }
+
+	/// <summary>The running script, so its local variables resolve first. Optional: a host that predates
+	/// script variables ignores it, and an older plugin never sends it.</summary>
+	public string? ScriptId { get; init; }
+
+	/// <summary>The running automation, so its local variables resolve first. Optional, like
+	/// <see cref="ScriptId"/>.</summary>
+	public string? AutomationId { get; init; }
 
 	/// <summary>The <c>MacroDeck.Sdk.Variables.VariableType</c> enumerant name, e.g. <c>"Numeric"</c> -
 	/// see <see cref="VariablesCreateArguments.Type"/>'s remarks on why this is a plain string.</summary>

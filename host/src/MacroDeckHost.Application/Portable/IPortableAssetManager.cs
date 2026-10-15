@@ -10,7 +10,8 @@ public sealed record PortableAssetBundle(
 	IReadOnlyList<PortableIntegrationRequirement> Integrations,
 	IReadOnlyList<PortableVariable> Variables,
 	IReadOnlyList<PortableFont> Fonts,
-	IReadOnlyList<PortableFontFile> FontFiles);
+	IReadOnlyList<PortableFontFile> FontFiles,
+	IReadOnlyList<PortableScriptVariable> ScriptVariables);
 
 public interface IPortableAssetManager
 {

@@ -5,6 +5,8 @@ using MacroDeck.Sdk.Actions;
 using Serilog;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 using SdkVariableType = MacroDeck.Sdk.Variables.VariableType;
+using UserVariableContext = MacroDeck.Sdk.Variables.UserVariableContext;
+using VariableScope = MacroDeckHost.Domain.Enums.VariableScope;
 
 namespace MacroDeckHost.Tests.UnitTests.Variables;
 
@@ -65,6 +67,32 @@ internal sealed class ActionVariableTargetTests
 	}
 
 	[Test]
+	public async Task An_output_written_inside_a_script_lands_on_the_scripts_local_result()
+	{
+		var scriptId = Guid.NewGuid().ToString();
+		await _targets.CreateUserVariable("result", DomainVariableType.Text, "global");
+		await _targets.Service.CreateUserVariable("result",
+			VariableScope.Script,
+			scriptId,
+			DomainVariableType.Text,
+			"local",
+			null);
+
+		var written = await Write("result",
+			SdkVariableType.Text,
+			"output",
+			new UserVariableContext(ScriptId: scriptId));
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(written, Is.True);
+			Assert.That((await _targets.Service.Resolve("result", VariableScope.Script, scriptId))!.Value,
+				Is.EqualTo("output"));
+			Assert.That(await _targets.ValueOf("result"), Is.EqualTo("global"));
+		});
+	}
+
+	[Test]
 	public void Streamerbot_offers_the_picker_for_the_target_but_not_for_the_variable_it_reads()
 	{
 		var parameters = new GetGlobalVariableActionDefinition(() => null, new StreamerbotVariableAccessor())
@@ -80,12 +108,12 @@ internal sealed class ActionVariableTargetTests
 		});
 	}
 
-	private Task<bool> Write(string name, SdkVariableType type, object value)
+	private Task<bool> Write(string name, SdkVariableType type, object value, UserVariableContext? context = null)
 	{
 		return ActionVariableTarget.WriteAsync(_targets.UserVariables,
 			_targets.IntegrationVariables,
 			name,
-			null,
+			context ?? new UserVariableContext(),
 			type,
 			value,
 			new LoggerConfiguration().CreateLogger());

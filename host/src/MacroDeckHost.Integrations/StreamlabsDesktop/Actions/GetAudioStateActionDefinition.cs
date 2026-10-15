@@ -113,7 +113,7 @@ internal sealed class GetAudioStateActionDefinition : IDynamicOptionsActionDefin
 			return await StreamlabsVariableWriter
 				.WriteAsync(_variables,
 					variable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					muted ? VariableType.Boolean : VariableType.Numeric,
 					value)
 				.ConfigureAwait(false)

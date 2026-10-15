@@ -223,6 +223,30 @@ describe('shared-ui-node the five new configuration node types (issue #837)', ()
       expect(pickerNames()).toEqual(['own', 'global']);
     });
 
+    it('never offers a script\'s or an automation\'s local variables, which a widget configuration cannot read', async () => {
+      const scriptLocal = makeVariable({ name: 'scriptLocal', type: 'text', scope: 'script', scopeRefId: 'script-a' });
+      const automationLocal = makeVariable({
+        name: 'automationLocal',
+        type: 'text',
+        scope: 'automation',
+        scopeRefId: 'automation-a',
+      });
+      const widgetLocal = makeVariable({ name: 'widgetLocal', type: 'text', scope: 'widget', scopeRefId: 'widget-a' });
+      const global = makeVariable({ name: 'global', type: 'text' });
+      const root: UiNode = { id: 'n', type: 'variable-picker', properties: { events: ['change'] } };
+      const rendered = await renderTree(root, null, [
+        {
+          provide: VariableService,
+          useValue: { variables: signal([scriptLocal, automationLocal, widgetLocal, global]) },
+        },
+      ]);
+
+      const picker = rendered.fixture.debugElement.query(By.directive(VariablePickerComponent))
+        .componentInstance as VariablePickerComponent;
+
+      expect(picker.variables.map(v => v.name)).toEqual(['widgetLocal', 'global']);
+    });
+
     it('shows a chip once a variable is picked, and clearing it emits an empty string', async () => {
       const root: UiNode = { id: 'n', type: 'variable-picker', properties: { value: 'myVar', events: ['change'] } };
       const rendered = await renderTree(root);

@@ -79,7 +79,10 @@ export class AutomationsPageComponent implements OnInit {
     this.automations.automations().find(automation => automation.id === this.selectedAutomationId()) ?? null,
   );
 
-  protected readonly variables = computed(() => this.variableService.globalVariables());
+  protected readonly variableScopeRefId = computed(() => this.selectedAutomation()?.id);
+
+  protected readonly variables = computed(() =>
+    this.variableService.visibleForContext('automation', this.variableScopeRefId()));
 
   protected readonly canSave = computed(() =>
     this.isDirty() && this.flowValidity().valid && !this.isSaving(),

@@ -138,7 +138,7 @@ internal sealed class GetSourceFilterStateActionDefinition : IDynamicOptionsActi
 
 			var written = await ObsVariableWriter.WriteAsync(_variables,
 				variable,
-				context.OwnerWidgetId,
+				UserVariableContext.From(context),
 				VariableType.Boolean,
 				enabled.Value);
 

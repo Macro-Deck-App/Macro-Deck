@@ -352,6 +352,20 @@ What did **not** need a major:
   a user variable of type `Color` exists, the persisted user-variables file cannot be read by a Macro Deck
   release from before `Color`, which then starts without any user variables. Downgrading the host is
   unsupported from that point; see [Colors from a variable](/guide/tips/#colors-from-a-variable).
+- Script and automation variables added `ActionExecutionContext.ScriptId` and `AutomationId`, the
+  `UserVariableContext` record, `IUserVariableApi.ApplyInContextAsync` and `CreateInContextAsync`, the
+  `UserVariableCreateStatus` values `UnknownScript` (7) and `UnknownAutomation` (8), and optional
+  `scriptId` and `automationId` fields on the `user-variables` `apply` and `create` arguments and on the
+  `actions` `execute` arguments, all within major `3` and the `actions` capability version `1`. The new
+  methods are default interface members that delegate to `ApplyAsync` and `CreateAsync` with the owner
+  widget, so an existing `IUserVariableApi` implementation keeps compiling and loading, and calls of the old
+  methods, `null` arguments included, resolve as before. An older host never sends the new `execute` fields
+  and ignores them on `apply` and `create`, so a plugin gets widget and global behaviour there; an older
+  plugin never sends them and gets the same on a new host. See [Scopes](/features/variables/#scopes).
+- Script and automation variables are another one-way step for the host's own data: once a variable local
+  to a script or an automation exists, the persisted user-variables file cannot be read by a Macro Deck
+  release from before them, which then starts without any user variables. Downgrading the host is
+  unsupported from that point, as with `Color`.
 - Resolving colours added the `colors` host api (`resolve`, `watches` and a `colors` `host.state`), the
   optional `maxColorWatches` field in the protocol descriptor's limits, and `IIntegrationContext.Colors` as
   a default interface member, so an existing `IIntegrationContext` implementation keeps compiling and

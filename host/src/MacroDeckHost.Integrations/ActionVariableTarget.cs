@@ -10,7 +10,7 @@ internal static class ActionVariableTarget
 		IUserVariableApi? userVariables,
 		IVariableApi? integrationVariables,
 		string name,
-		string? ownerWidgetId,
+		UserVariableContext variableContext,
 		VariableType type,
 		object value,
 		ILogger logger,
@@ -35,7 +35,7 @@ internal static class ActionVariableTarget
 
 			var text = Format(value);
 			var applied = await userVariables
-				.ApplyAsync(name, ownerWidgetId, UserVariableOperation.Set, text, cancellationToken)
+				.ApplyInContextAsync(name, variableContext, UserVariableOperation.Set, text, cancellationToken)
 				.ConfigureAwait(false);
 			if (applied.Status == UserVariableWriteStatus.NotFound)
 			{
@@ -57,7 +57,7 @@ internal static class ActionVariableTarget
 				}
 
 				applied = await userVariables
-					.ApplyAsync(name, ownerWidgetId, UserVariableOperation.Set, text, cancellationToken)
+					.ApplyInContextAsync(name, variableContext, UserVariableOperation.Set, text, cancellationToken)
 					.ConfigureAwait(false);
 			}
 

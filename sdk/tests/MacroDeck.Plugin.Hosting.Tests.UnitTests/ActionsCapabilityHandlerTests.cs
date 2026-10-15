@@ -238,6 +238,39 @@ public class ActionsCapabilityHandlerTests
 	}
 
 	[Test]
+	public async Task Script_and_automation_ids_are_bound_from_the_wire()
+	{
+		var action = new TestAction("play");
+		var handler = Handler(new TestIntegration(action));
+
+		await handler.InvokeAsync(
+			Invocation("play", arguments: new { scriptId = "script-1", automationId = "automation-1" }),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(action.LastContext!.ScriptId, Is.EqualTo("script-1"));
+			Assert.That(action.LastContext!.AutomationId, Is.EqualTo("automation-1"));
+		});
+	}
+
+	[Test]
+	public async Task An_execute_from_a_host_that_predates_scripts_ids_binds_none()
+	{
+		var action = new TestAction("play");
+		var handler = Handler(new TestIntegration(action));
+
+		await handler.InvokeAsync(Invocation("play", arguments: new { ownerWidgetId = "widget-1" }),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(action.LastContext!.ScriptId, Is.Null);
+			Assert.That(action.LastContext!.AutomationId, Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task Origin_and_owner_widget_ids_are_bound_from_the_wire()
 	{
 		var action = new TestAction("play");

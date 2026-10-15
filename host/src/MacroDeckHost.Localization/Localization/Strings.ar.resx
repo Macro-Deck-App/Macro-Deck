@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>متغيرات هذه الأداة</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>متغيرات هذا النص البرمجي</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>متغيرات هذه الأتمتة</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>انتهى الحدث</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>متغيرات الأداة</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>متغيرات النص البرمجي</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>متغيرات الأتمتة</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>نُشر في {date}</value>
@@ -2985,6 +2997,9 @@
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>نطاق المتغير غير معروف</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>الأداة أو النص البرمجي أو الأتمتة التي ينتمي إليها هذا المتغير غير موجودة.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>مصدر الفيديو مشغول حاليًا.</value>
@@ -14436,6 +14451,9 @@
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>يحجب المتغير “vars.{name}” أثناء تشغيل هذا النص البرمجي.</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>يحجب متغير النص البرمجي “vars.{name}” أثناء تشغيل هذا النص البرمجي.</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>النوع</value>
   </data>
@@ -18257,6 +18275,12 @@
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>تراه هذه الأداة فقط، ويحجب متغيرًا عامًا بالاسم نفسه هنا.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>يراه هذا النص البرمجي فقط، ويحجب متغيرًا عامًا بالاسم نفسه هنا.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>تراه هذه الأتمتة فقط، ويحجب متغيرًا عامًا بالاسم نفسه هنا.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>ابحث في المتغيرات…</value>
   </data>
@@ -18391,14 +18415,17 @@
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>هذا الحدث</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>هذا النص البرمجي</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>المستخدم</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>هذه الأداة</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>هذا النص البرمجي</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>هذه الأتمتة</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>المستخدم</value>

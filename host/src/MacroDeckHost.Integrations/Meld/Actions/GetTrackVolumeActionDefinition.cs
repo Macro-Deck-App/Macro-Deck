@@ -93,7 +93,7 @@ internal sealed class GetTrackVolumeActionDefinition : IDynamicOptionsActionDefi
 			var written = await MeldVariableWriter
 				.WriteAsync(_variables,
 					variable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Numeric,
 					Math.Round(gain.Gain * 100))
 				.ConfigureAwait(false);

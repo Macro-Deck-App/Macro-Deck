@@ -88,7 +88,11 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 			}
 
 			return await StreamlabsVariableWriter
-				.WriteAsync(_variables, variable, context.OwnerWidgetId, VariableType.Boolean, visible.Value)
+				.WriteAsync(_variables,
+					variable,
+					UserVariableContext.From(context),
+					VariableType.Boolean,
+					visible.Value)
 				.ConfigureAwait(false)
 				? ActionResult.Success()
 				: ActionResult.Failed(ActionErrorCodes.ProviderError,

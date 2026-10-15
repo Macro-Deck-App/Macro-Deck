@@ -502,3 +502,47 @@ against an older one gets the same `NotEditable` it already handles for read-onl
 variable that renders a template is read-only the same way: every operation answers `NotEditable`, and
 its value changes only when a variable its template reads changes. `CreateAsync` always creates a
 variable that holds its own value.
+
+### Scopes
+
+A user variable is global, or local to one widget, one script or one automation. A local variable
+shadows a variable of the same name further out. A running flow resolves a name in this order:
+
+| The flow runs in | Order |
+| --- | --- |
+| A widget | The widget's locals, then globals |
+| A script | Its inputs, then the script's locals, then, for a script that runs on a widget, that widget's locals, then globals |
+| An automation | The automation's locals, then globals |
+
+A script started by **Run Script** resolves only along its own chain, never the caller's. Script inputs
+are read-only: an operation on one is refused.
+
+From an action, write in the context of the step that is running so script and automation locals are
+found too. `UserVariableContext.From` copies the step's `OwnerWidgetId`, `ScriptId` and `AutomationId`
+(see [What the executor gets](/features/actions/#what-the-executor-gets)). Here `_userVariables` is
+the `IIntegrationContext.UserVariables` the integration kept from `InitializeAsync`:
+
+```csharp
+var variables = UserVariableContext.From(context);
+var result = await _userVariables.ApplyInContextAsync(
+	"count", variables, UserVariableOperation.Add, "1", context.CancellationToken);
+if (result.Status == UserVariableWriteStatus.NotFound)
+{
+	await _userVariables.CreateInContextAsync(
+		"count", variables, VariableType.Numeric, "1", cancellationToken: context.CancellationToken);
+}
+```
+
+- `ApplyInContextAsync` resolves the name along the order above and otherwise behaves like `ApplyAsync`.
+- `CreateInContextAsync` creates the variable in the most local scope the context names: the script,
+  else the automation, else the owner widget, else global. It refuses a script that does not exist with
+  `UnknownScript` and an automation that does not exist with `UnknownAutomation`.
+- Both are default interface members. An `IUserVariableApi` implementation that predates them, and a host
+  that predates script and automation variables, use only `OwnerWidgetId`: the call behaves like
+  `ApplyAsync` or `CreateAsync` with the owner widget, so the plugin keeps working with widget and global
+  variables. `ApplyAsync` and `CreateAsync` keep that behaviour on every host.
+- Over the protocol, the context travels as the optional `scriptId` and `automationId` fields of the
+  `user-variables` `apply` and `create` arguments, next to `ownerWidgetId`.
+- In `MacroDeck.Plugin.Testing`, `ActionsTestClient.ExecuteWithContextAsync` runs a step inside a script or
+  automation, and `FakeUserVariableApi` resolves script and automation locals and keeps the last context it
+  was called with in `LastContext`.

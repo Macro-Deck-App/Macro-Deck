@@ -264,6 +264,7 @@
             [ngModel]="stringValue"
             [allowVariables]="allowReferences && !param.literalOnly"
             [allowAlpha]="param.allowAlpha === true"
+            [variableScope]="store.previewScope()"
             [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="colorResetValue"
             (ngModelChange)="onChange($event)">
@@ -400,6 +401,7 @@
       @if (showsExternalVariablePicker) {
         <shared-variable-picker
           [variables]="store.pickerVariables()"
+          [scope]="store.previewScope()"
           [acceptedTypes]="acceptedVariableTypes"
           (pick)="onPickVariable($event)"
           (pickEventParameter)="onPickEventParameter($event)">

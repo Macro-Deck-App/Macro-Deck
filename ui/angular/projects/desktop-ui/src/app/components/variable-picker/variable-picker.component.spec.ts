@@ -67,6 +67,21 @@ describe('VariablePickerComponent', () => {
     expect((browser.componentInstance as VariableBrowserModalComponent).writableOnlyState()).toBeTrue();
   });
 
+  it('labels the script editor\'s own variables as this script\'s', async () => {
+    fixture.componentRef.setInput('scope', 'script');
+    fixture.componentRef.setInput('variables', [
+      variable({ id: 's1', name: 'counter', scope: 'script', scopeRefId: 'script-1' }),
+    ]);
+    component.toggle();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const labels = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('shared-rail-item'))
+      .map(el => el.textContent?.trim() ?? '');
+    expect(labels.some(label => label.startsWith('This script'))).toBeTrue();
+    expect(labels.some(label => label.startsWith('This widget'))).toBeFalse();
+  });
+
   it('emits the canonical variable name on pick and closes', async () => {
     const picked: string[] = [];
     component.pick.subscribe(name => picked.push(name));

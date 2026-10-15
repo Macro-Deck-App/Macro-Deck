@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variabelen van deze widget</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Variabelen van dit script</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Variabelen van deze automatisering</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Gebeurtenis beëindigd</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Widgetvariabelen</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Scriptvariabelen</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Automatiseringsvariabelen</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Gepubliceerd op {date}</value>
@@ -2985,6 +2997,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Onbekend variabelenbereik</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>De widget, het script of de automatisering waartoe deze variabele behoort, bestaat niet.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>De videobron is op dit moment bezet.</value>
@@ -14436,6 +14451,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Overschaduwt de variabele “vars.{name}” terwijl dit script draait.</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Overschaduwt de scriptvariabele “vars.{name}” terwijl dit script draait.</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Type</value>
   </data>
@@ -18257,6 +18275,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Alleen deze widget ziet hem, en hij overschaduwt hier een globale variabele met dezelfde naam.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Alleen dit script ziet hem, en hij overschaduwt hier een globale variabele met dezelfde naam.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Alleen deze automatisering ziet hem, en hij overschaduwt hier een globale variabele met dezelfde naam.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Zoek variabelen…</value>
   </data>
@@ -18391,14 +18415,17 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>Deze gebeurtenis</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Dit script</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Gebruiker</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Deze widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Dit script</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Deze automatisering</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Gebruiker</value>

@@ -182,6 +182,10 @@ are listed in the descriptor's `capabilityKinds`:
   the optional `isShareable` (`VariableDefinition.IsShareable`), additively in major `3` and within each
   kind's capability version. An absent `role` means no role and an absent `isShareable` means `true`,
   which is what a plugin built before them sends; an older host ignores both.
+- `actions` `execute` arguments gained the optional `scriptId` and `automationId`
+  (`ActionExecutionContext.ScriptId` and `AutomationId`), additively in major `3` and within capability
+  version `1`. A host that predates them leaves them out, which a plugin reads as a step outside a script
+  or automation; an older plugin ignores them.
 - `calendar` was added as a new kind at capability version `1`, additively in major `3`. A host that
   predates it rejects the declaration non-fatally (`accepted: false`) and the session goes on without it.
   Its operations and reply limits are in the [WebSocket reference](/reference/websocket/#calendar).
@@ -229,6 +233,11 @@ that predates them answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hos
 `false`, no widget data, an unsupported variable history, a `NotSupportedException` for bindings or a
 cancellation. `refresh` later gained an optional `definitionIds` argument, which a host that predates it
 ignores, reading every declared variable instead.
+The `user-variables` `apply` and `create` arguments gained the optional `scriptId` and `automationId`
+next to `ownerWidgetId`, additively in major `3`, behind `IUserVariableApi.ApplyInContextAsync` and
+`CreateInContextAsync`. A host that predates them ignores them and resolves by `ownerWidgetId` alone, and an
+older plugin never sends them. `create` can answer the new statuses `UnknownScript` and `UnknownAutomation`.
+See [Scopes](/features/variables/#scopes).
 
 The `locale` host API (`time-of-day-format`) and the push-only `http` host API were added the same way. A
 host that predates `locale` answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into the
