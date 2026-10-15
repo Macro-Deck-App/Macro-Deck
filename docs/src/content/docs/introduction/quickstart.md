@@ -165,4 +165,5 @@ the artifact, see [Publishing to the Store](/guides/publishing/).
 - [Features](/features/) - variables, events, button states, setup flows and more.
 - [UI](/ui/) - build configuration and widget UI.
 - [Plugin CLI](/cli/) - every command and option.
+- [Agent skills](/introduction/agent-skills/) - let a coding agent build the plugin with you.
 - [Troubleshooting](/guides/troubleshooting/) - if you never see `Session established`.
