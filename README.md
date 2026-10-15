@@ -95,6 +95,7 @@ Macro Deck provides a public plugin SDK, tooling and documentation for building 
 
 - [Developer documentation](https://docs.macro-deck.app/)
 - [Plugin template](https://github.com/Macro-Deck-App/Macro-Deck-Plugin-Template)
+- [Agent skills for coding agents](https://github.com/Macro-Deck-App/Macro-Deck-Skills)
 - [Engineering documentation](engineering/README.md)
 - [Development setup](engineering/development/setup.md)
 
