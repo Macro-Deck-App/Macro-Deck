@@ -432,6 +432,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variables de este widget</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Variables de este script</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Variables de esta automatización</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Evento terminado</value>
   </data>
@@ -509,6 +515,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Variables del widget</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Variables del script</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Variables de la automatización</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Publicado el {date}</value>
@@ -2986,6 +2998,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Ámbito de variable desconocido</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>El widget, script o automatización al que pertenece esta variable no existe.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>La fuente de vídeo está ocupada en este momento.</value>
@@ -14435,6 +14450,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Oculta la variable "vars.{name}" mientras se ejecuta este script.</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Oculta la variable del script "vars.{name}" mientras se ejecuta este script.</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Tipo</value>
   </data>
@@ -18256,6 +18274,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Solo este widget la ve, y aquí oculta a una global con el mismo nombre.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Solo este script la ve, y aquí oculta a una global con el mismo nombre.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Solo esta automatización la ve, y aquí oculta a una global con el mismo nombre.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Buscar variables…</value>
   </data>
@@ -18390,14 +18414,17 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>Este evento</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Este script</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Usuario</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Este widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Este script</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Esta automatización</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Usuario</value>

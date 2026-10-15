@@ -38,7 +38,7 @@ public class ScriptRunnerTests
 	}
 
 	[Test]
-	public async Task RunAsync_SelectsTheOnRunFlowInGlobalScope()
+	public async Task RunAsync_SelectsTheOnRunFlowInTheScriptsOwnScope()
 	{
 		var script = await Store("[{\"triggerId\":\"onRun\",\"triggerType\":\"onRun\",\"children\":[]}]");
 
@@ -49,8 +49,8 @@ public class ScriptRunnerTests
 		{
 			Assert.That(request.Trigger.ByTriggerId, Is.False);
 			Assert.That(request.Trigger.Value, Is.EqualTo("onRun"));
-			Assert.That(request.Scope, Is.EqualTo(VariableScope.Global));
-			Assert.That(request.ScopeRefId, Is.Null);
+			Assert.That(request.Scope, Is.EqualTo(VariableScope.Script));
+			Assert.That(request.ScopeRefId, Is.EqualTo(script.Id.ToString()));
 			Assert.That(request.OriginClientId, Is.EqualTo("client-1"));
 		});
 	}
@@ -172,8 +172,8 @@ public class ScriptRunnerTests
 		{
 			Assert.That(result.Status, Is.EqualTo(FlowExecutionStatus.Succeeded));
 			Assert.That(request.Trigger.Value, Is.EqualTo("onRun"));
-			Assert.That(request.Scope, Is.EqualTo(VariableScope.Global));
-			Assert.That(request.ScopeRefId, Is.Null);
+			Assert.That(request.Scope, Is.EqualTo(VariableScope.Script));
+			Assert.That(request.ScopeRefId, Is.EqualTo(script.Id.ToString()));
 			Assert.That(request.ScriptInputs, Is.Empty);
 			Assert.That(result.AppliedInputs, Is.Empty);
 		});

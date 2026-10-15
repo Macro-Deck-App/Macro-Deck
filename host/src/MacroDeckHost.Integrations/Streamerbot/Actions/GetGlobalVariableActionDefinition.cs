@@ -115,7 +115,11 @@ internal sealed class GetGlobalVariableActionDefinition : IActionDefinition
 			}
 
 			var (type, converted) = Convert(element);
-			await StreamerbotVariableWriter.WriteAsync(_variables, target, context.OwnerWidgetId, type, converted);
+			await StreamerbotVariableWriter.WriteAsync(_variables,
+				target,
+				UserVariableContext.From(context),
+				type,
+				converted);
 
 			return ActionResult.Success();
 		}

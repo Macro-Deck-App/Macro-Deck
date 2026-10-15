@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -14,6 +15,8 @@ public interface IVariableService
 	Task<VariableEntity?> GetById(Guid id);
 
 	Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId);
+
+	Task<VariableEntity?> Resolve(string name, VariableScopeChain chain);
 
 	Task<Result<VariableEntity, VariableError>> CreateUserVariable(
 		string name,

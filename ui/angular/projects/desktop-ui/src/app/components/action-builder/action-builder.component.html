@@ -115,9 +115,6 @@
         }
 
         @if (showVariables()) {
-          <!-- The widget's own variables, in the row that already exists rather than a toolbar of
-               its own. Only while the flow belongs to a widget: a script or an automation has no
-               widget whose variables these would be. -->
           <button
             type="button"
             class="open-variables"
@@ -242,9 +239,10 @@
 @if (variablesOpen()) {
   <shared-variable-browser
     mode="manage"
-    [heading]="widgetVariablesHeading()"
-    [scopeLabel]="'macrodeck.app:Variables.ThisWidget' | translate"
+    [heading]="variablesHeading()"
+    [scopeLabel]="variablesScopeLabel()"
     [variables]="scopedVariables()"
+    [scope]="store.previewScope()"
     [scopeRefId]="store.previewScopeRefId()"
     (close)="variablesOpen.set(false)" />
 }

@@ -110,7 +110,7 @@ internal sealed class ScreenshotActionDefinition : IActionDefinition
 				await ActionVariableTarget.WriteAsync(_services.Variables.UserVariables,
 					_services.Variables.Current,
 					fileNameVariable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Text,
 					path,
 					_logger);

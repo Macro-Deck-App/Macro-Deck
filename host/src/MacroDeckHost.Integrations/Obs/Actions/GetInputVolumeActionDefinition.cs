@@ -116,7 +116,7 @@ internal sealed class GetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 
 			var written = await ObsVariableWriter.WriteAsync(_variables,
 				variable,
-				context.OwnerWidgetId,
+				UserVariableContext.From(context),
 				VariableType.Numeric,
 				Math.Round(percent.Value));
 

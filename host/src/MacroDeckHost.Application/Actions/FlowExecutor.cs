@@ -129,7 +129,13 @@ public sealed class FlowExecutor : IFlowExecutor
 			};
 		}
 
-		var variableContext = await _variableRenderer.CreateContextAsync(request.Scope, request.ScopeRefId);
+		var chain = VariableScopeChain.Of(request.Scope, request.ScopeRefId);
+		if (request.OwnerWidgetId is { } ownerWidgetId && request.Scope != VariableScope.Widget)
+		{
+			chain = chain.Append(VariableScope.Widget, ownerWidgetId.ToString());
+		}
+
+		var variableContext = await _variableRenderer.CreateContextAsync(chain);
 		if (request.EventParameters is { Count: > 0 })
 		{
 			variableContext = variableContext.WithEvent(request.EventParameters);
@@ -145,7 +151,9 @@ public sealed class FlowExecutor : IFlowExecutor
 			request.OriginClientId,
 			request.OwnerWidgetId,
 			request.Origin,
-			request.FlowsSource);
+			request.FlowsSource,
+			request.Scope == VariableScope.Script ? request.ScopeRefId : null,
+			request.Scope == VariableScope.Automation ? request.ScopeRefId : null);
 
 		try
 		{
@@ -445,6 +453,8 @@ public sealed class FlowExecutor : IFlowExecutor
 				Parameters = parameters,
 				OriginClientId = run.OriginClientId,
 				OwnerWidgetId = run.OwnerWidgetId?.ToString(),
+				ScriptId = run.ScriptId,
+				AutomationId = run.AutomationId,
 				Interactions = _interactions,
 				Ui = _uiInteractions.ForIntegration(integrationId),
 				CancellationToken = cancellationToken,
@@ -958,8 +968,12 @@ public sealed class FlowExecutor : IFlowExecutor
 			string? originClientId,
 			Guid? ownerWidgetId,
 			ExecutionOrigin origin,
-			string? flowsSource)
+			string? flowsSource,
+			string? scriptId,
+			string? automationId)
 		{
+			ScriptId = scriptId;
+			AutomationId = automationId;
 			ExecutionId = executionId;
 			Variables = variables;
 			OriginClientId = originClientId;
@@ -972,6 +986,8 @@ public sealed class FlowExecutor : IFlowExecutor
 		public VariableContext Variables { get; }
 		public string? OriginClientId { get; }
 		public Guid? OwnerWidgetId { get; }
+		public string? ScriptId { get; }
+		public string? AutomationId { get; }
 		public ExecutionOrigin Origin { get; }
 		public string? ProviderBlockId => _providerBlockId.Value;
 		public List<ActionExecutionOutcome> Outcomes { get; } = [];

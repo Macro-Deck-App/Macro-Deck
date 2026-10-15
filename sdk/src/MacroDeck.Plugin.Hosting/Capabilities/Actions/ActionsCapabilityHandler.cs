@@ -119,6 +119,8 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 			CancellationToken = cancellationToken,
 			OriginClientId = arguments?.OriginClientId,
 			OwnerWidgetId = arguments?.OwnerWidgetId,
+			ScriptId = arguments?.ScriptId,
+			AutomationId = arguments?.AutomationId,
 
 			// Built from this invocation's own correlation id, so the host can verify a picker request
 			// names a live actions/execute of this same plugin before honouring it - see

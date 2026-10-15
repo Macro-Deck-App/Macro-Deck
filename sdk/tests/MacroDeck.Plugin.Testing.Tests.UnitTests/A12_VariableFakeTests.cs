@@ -1,4 +1,6 @@
 using MacroDeck.Plugin.Testing.Fakes;
+using MacroDeck.Plugin.Testing.Tests.UnitTests.Support;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
 
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
@@ -43,6 +45,77 @@ public class A12VariableFakeTests
 			Assert.That(api.GetCurrentValue("counter", "widget-1"), Is.EqualTo(99.0));
 			// ...but a null owner resolves globally, even though a widget-scoped "counter" exists elsewhere.
 			Assert.That(api.GetCurrentValue("counter", null), Is.EqualTo(10.0));
+		});
+	}
+
+	[Test]
+	public async Task FakeUserVariableApi_resolves_and_creates_in_a_script_or_automation_context()
+	{
+		var api = new FakeUserVariableApi();
+		api.SeedGlobal("count", VariableType.Numeric, 1m);
+		api.SeedWidgetScoped("widget-1", "count", VariableType.Numeric, 10m);
+		api.SeedScriptScoped("script-1", "count", VariableType.Numeric, 100m);
+		api.SeedAutomation("automation-1");
+
+		var inScript = await api.ApplyInContextAsync("count",
+			new UserVariableContext("widget-1", "script-1"),
+			UserVariableOperation.Add,
+			"1");
+		var created = await api.CreateInContextAsync("result",
+			new UserVariableContext(AutomationId: "automation-1"),
+			VariableType.Text,
+			"x");
+		var unknown = await api.CreateInContextAsync("result",
+			new UserVariableContext(ScriptId: "script-2"),
+			VariableType.Text);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(inScript.Status, Is.EqualTo(UserVariableWriteStatus.Applied));
+			Assert.That(api.GetCurrentValueInContext("count", new UserVariableContext("widget-1", "script-1")),
+				Is.EqualTo(101m));
+			Assert.That(api.GetCurrentValue("count", "widget-1"), Is.EqualTo(10m));
+			Assert.That(api.GetCurrentValue("count"), Is.EqualTo(1m));
+			Assert.That(created.Status, Is.EqualTo(UserVariableCreateStatus.Created));
+			Assert.That(api.GetCurrentValueInContext("result", new UserVariableContext(AutomationId: "automation-1")),
+				Is.EqualTo("x"));
+			Assert.That(api.GetCurrentValue("result"), Is.Null);
+			Assert.That(unknown.Status, Is.EqualTo(UserVariableCreateStatus.UnknownScript));
+			Assert.That(api.LastContext, Is.EqualTo(new UserVariableContext(ScriptId: "script-2")));
+		});
+	}
+
+	[Test]
+	public async Task An_action_run_as_a_script_step_reaches_the_fake_with_its_script()
+	{
+		TestIntegration? integration = null;
+		await using var harness = PluginTestHarness.Create(builder => builder.RegisterIntegration(_ =>
+			integration = new TestIntegration("test.a12.context").WithAction(new DelegateAction("write",
+				async context =>
+				{
+					var written = await integration!.Context!.UserVariables.ApplyInContextAsync("result",
+						UserVariableContext.From(context),
+						UserVariableOperation.Set,
+						"done",
+						context.CancellationToken);
+					return written.Status == UserVariableWriteStatus.Applied
+						? ActionResult.Success()
+						: ActionResult.Failed(ActionErrorCodes.NotFound, "not written");
+				}))));
+		await harness.InitializeIntegrationsAsync();
+		harness.Context.UserVariables.SeedGlobal("result", VariableType.Text, "global");
+		harness.Context.UserVariables.SeedScriptScoped("script-1", "result", VariableType.Text, "local");
+
+		var outcome = await harness.Actions.ExecuteWithContextAsync("write", scriptId: "script-1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome.Succeeded, Is.True);
+			Assert.That(harness.Context.UserVariables.LastContext?.ScriptId, Is.EqualTo("script-1"));
+			Assert.That(harness.Context.UserVariables.GetCurrentValueInContext("result",
+					new UserVariableContext(ScriptId: "script-1")),
+				Is.EqualTo("done"));
+			Assert.That(harness.Context.UserVariables.GetCurrentValue("result"), Is.EqualTo("global"));
 		});
 	}
 

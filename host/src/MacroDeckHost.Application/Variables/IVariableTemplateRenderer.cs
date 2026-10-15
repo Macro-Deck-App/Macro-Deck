@@ -8,5 +8,9 @@ public interface IVariableTemplateRenderer
 
 	Task<VariableContext> CreateContextAsync(VariableScope contextScope, string? contextScopeRefId);
 
+	Task<string> RenderAsync(string templateText, VariableScopeChain chain);
+
+	Task<VariableContext> CreateContextAsync(VariableScopeChain chain);
+
 	string Render(string templateText, VariableContext context);
 }

@@ -12,8 +12,8 @@ import {
 } from '@angular/core';
 import { AppStrings, resolveLocalizedText } from '@macro-deck/runtime';
 import { LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
-import type { Variable, VariableCatalogNode, VariableCatalogProvider, VariableType } from '@macro-deck/runtime';
-import { IntegrationSourceEntry, VariableSourceFilter, integrationSourceEntries, isEventParameter, isScopeLocal, matchesVariableSource } from '../../domain/variable-source.util';
+import type { Variable, VariableCatalogNode, VariableCatalogProvider, VariableScope, VariableType } from '@macro-deck/runtime';
+import { IntegrationSourceEntry, VariableSourceFilter, integrationSourceEntries, isEventParameter, isScopeLocal, isScriptInput, matchesVariableSource, scopeLabelKey } from '../../domain/variable-source.util';
 import { RailItemComponent } from '../rail-page/rail-item.component';
 import { VariablesManagerComponent } from './variables-manager.component';
 import { VariableBindDialogComponent } from './variable-bind-dialog.component';
@@ -55,6 +55,10 @@ export class VariableBrowserModalComponent implements OnInit {
     this.scopeRefIdState.set(value ?? null);
   }
 
+  @Input() set scope(value: VariableScope | undefined | null) {
+    this.scopeState.set(value ?? 'widget');
+  }
+
   @Input() set scopeLabel(value: string) {
     this.scopeLabelOverride.set(value);
   }
@@ -80,11 +84,12 @@ export class VariableBrowserModalComponent implements OnInit {
   private readonly selectedSource = signal<VariableSourceFilter>({ kind: 'all' });
   readonly catalogOnlyState = signal(false);
   private readonly scopeRefIdState = signal<string | null>(null);
+  readonly scopeState = signal<VariableScope>('widget');
 
   readonly modeState = signal<'manage' | 'pick'>('manage');
   private readonly scopeLabelOverride = signal<string | null>(null);
   readonly scopeLabelState = computed(() =>
-    this.scopeLabelOverride() ?? this.localization.translateKey(AppStrings.Variables.ThisWidget));
+    this.scopeLabelOverride() ?? this.localization.translateKey(scopeLabelKey(this.scopeState())));
 
   readonly scopeRefIdValue = computed(() => this.scopeRefIdState() ?? undefined);
 
@@ -104,6 +109,9 @@ export class VariableBrowserModalComponent implements OnInit {
     const accepted = this.acceptedTypesState();
     const writableOnly = this.writableOnlyState();
     let list = this.variablesState();
+    if (this.modeState() === 'manage') {
+      list = list.filter(v => !isScriptInput(v));
+    }
     if (accepted) {
       list = list.filter(v => accepted.includes(v.type));
     }

@@ -46,7 +46,6 @@ internal sealed class PortabilityTestHarness : IDisposable
 		FolderCache = new FolderCache(ProfileCache);
 		ScriptCache = new ScriptCache(new InMemoryScriptStore(), Icons.Logger);
 		ScriptCache.InitializeCache().GetAwaiter().GetResult();
-		Scripts = new ScriptService(ScriptCache, Icons.Mediator);
 		Integrations = new ConfigurableIntegrationRegistry([
 			StubIntegration.Create("app.macro-deck.obs", "OBS Studio", true),
 			StubIntegration.Create("app.macro-deck.keyboard", "Keyboard"),
@@ -54,6 +53,7 @@ internal sealed class PortabilityTestHarness : IDisposable
 		]);
 		Variables = TestVariableServices.Create(VariableRegistry, new NullUserVariableStore(), Icons.Mediator);
 		VariableCloner = new WidgetVariableCloner(Variables, Icons.Logger);
+		Scripts = new ScriptService(ScriptCache, Icons.Mediator, VariableCloner);
 		AssetManager = new PortableAssetManager(Icons.Cache,
 			Icons.Storage,
 			Secrets,

@@ -13,10 +13,10 @@ internal static class TwitchVariableWriter
 		IUserVariableApi? userVariables,
 		IVariableApi? api,
 		string variableName,
-		string? ownerWidgetId,
+		UserVariableContext variableContext,
 		VariableType type,
 		object value)
 	{
-		return ActionVariableTarget.WriteAsync(userVariables, api, variableName, ownerWidgetId, type, value, _logger);
+		return ActionVariableTarget.WriteAsync(userVariables, api, variableName, variableContext, type, value, _logger);
 	}
 }

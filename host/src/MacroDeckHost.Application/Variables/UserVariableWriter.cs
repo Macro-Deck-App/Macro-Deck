@@ -34,13 +34,25 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		_gate.Dispose();
 	}
 
-	public async Task<UserVariableWriteResult> ApplyAsync(
+	public Task<UserVariableWriteResult> ApplyAsync(
 		string name,
 		string? ownerWidgetId,
 		UserVariableOperation operation,
 		string? value,
 		CancellationToken cancellationToken = default)
 	{
+		return ApplyInContextAsync(name, new UserVariableContext(ownerWidgetId), operation, value, cancellationToken);
+	}
+
+	public async Task<UserVariableWriteResult> ApplyInContextAsync(
+		string name,
+		UserVariableContext context,
+		UserVariableOperation operation,
+		string? value,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
 		var canonical = VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
 		if (!VariableNameSanitizer.IsValid(canonical))
 		{
@@ -67,7 +79,7 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		await _gate.WaitAsync(cancellationToken);
 		try
 		{
-			var entity = await Resolve(service, canonical, ownerWidgetId);
+			var entity = await service.Resolve(canonical, VariableScopeChain.For(context));
 			if (entity is null)
 			{
 				return UserVariableWriteResult.Failed(UserVariableWriteStatus.NotFound,
@@ -152,7 +164,7 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		return await ActiveLocalization.Resolve(services, AppStrings.Errors.Variables.OwnerUnavailable(name));
 	}
 
-	public async Task<UserVariableCreateResult> CreateAsync(
+	public Task<UserVariableCreateResult> CreateAsync(
 		string name,
 		string? ownerWidgetId,
 		SdkVariableType type,
@@ -160,6 +172,24 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		int? decimalPlaces = null,
 		CancellationToken cancellationToken = default)
 	{
+		return CreateInContextAsync(name,
+			new UserVariableContext(ownerWidgetId),
+			type,
+			initialValue,
+			decimalPlaces,
+			cancellationToken);
+	}
+
+	public async Task<UserVariableCreateResult> CreateInContextAsync(
+		string name,
+		UserVariableContext context,
+		SdkVariableType type,
+		string? initialValue = null,
+		int? decimalPlaces = null,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
 		var canonical = VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
 		if (!VariableNameSanitizer.IsValid(canonical))
 		{
@@ -174,27 +204,24 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 			return UserVariableCreateResult.Failed(UserVariableCreateStatus.InvalidValue, parsed.Message!);
 		}
 
-		var widgetScoped = !string.IsNullOrWhiteSpace(ownerWidgetId);
-
 		await _gate.WaitAsync(cancellationToken);
 		try
 		{
 			await using var scope = _scopeFactory.CreateAsyncScope();
 
-			// The caller supplies the widget id, so an unchecked one would let a plugin create a variable
-			// under a widget that does not exist - or under an id it simply guessed.
-			if (widgetScoped
-				&& !scope.ServiceProvider.GetRequiredService<IWidgetAppearanceService>().Exists(ownerWidgetId!))
+			// The caller supplies the owner id, so an unchecked one would let a plugin create a variable
+			// under a widget, script or automation that does not exist - or under an id it simply guessed.
+			var target = CreateTarget(scope.ServiceProvider, context);
+			if (target.Refused is { } refused)
 			{
-				return UserVariableCreateResult.Failed(UserVariableCreateStatus.UnknownWidget,
-					$"No widget with id '{ownerWidgetId}' exists.");
+				return refused;
 			}
 
 			var service = scope.ServiceProvider.GetRequiredService<IVariableService>();
 
 			var result = await service.CreateUserVariable(canonical,
-				widgetScoped ? VariableScope.Widget : VariableScope.Global,
-				widgetScoped ? ownerWidgetId : null,
+				target.Scope,
+				target.ScopeRefId,
 				domainType,
 				parsed.Value,
 				decimalPlaces);
@@ -207,6 +234,48 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		finally
 		{
 			_gate.Release();
+		}
+	}
+
+	private static CreateTargetResult CreateTarget(IServiceProvider services, UserVariableContext context)
+	{
+		if (!string.IsNullOrWhiteSpace(context.ScriptId))
+		{
+			return Guid.TryParse(context.ScriptId, out var scriptId)
+				&& services.GetRequiredService<IScriptService>().GetById(scriptId) is not null
+					? new CreateTargetResult(VariableScope.Script, scriptId.ToString(), null)
+					: CreateTargetResult.Refuse(UserVariableCreateStatus.UnknownScript,
+						$"No script with id '{context.ScriptId}' exists.");
+		}
+
+		if (!string.IsNullOrWhiteSpace(context.AutomationId))
+		{
+			return Guid.TryParse(context.AutomationId, out var automationId)
+				&& services.GetRequiredService<IAutomationService>().GetById(automationId) is not null
+					? new CreateTargetResult(VariableScope.Automation, automationId.ToString(), null)
+					: CreateTargetResult.Refuse(UserVariableCreateStatus.UnknownAutomation,
+						$"No automation with id '{context.AutomationId}' exists.");
+		}
+
+		if (!string.IsNullOrWhiteSpace(context.OwnerWidgetId))
+		{
+			return services.GetRequiredService<IWidgetAppearanceService>().Exists(context.OwnerWidgetId)
+				? new CreateTargetResult(VariableScope.Widget, context.OwnerWidgetId, null)
+				: CreateTargetResult.Refuse(UserVariableCreateStatus.UnknownWidget,
+					$"No widget with id '{context.OwnerWidgetId}' exists.");
+		}
+
+		return new CreateTargetResult(VariableScope.Global, null, null);
+	}
+
+	private readonly record struct CreateTargetResult(
+		VariableScope Scope,
+		string? ScopeRefId,
+		UserVariableCreateResult? Refused)
+	{
+		public static CreateTargetResult Refuse(UserVariableCreateStatus status, string message)
+		{
+			return new CreateTargetResult(VariableScope.Global, null, UserVariableCreateResult.Failed(status, message));
 		}
 	}
 
@@ -255,13 +324,6 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		return RgbaColor.Canonicalize(text) is { } color
 			? ComputedValue.Ok(color)
 			: ComputedValue.Invalid($"'{text}' is not a color.");
-	}
-
-	private static Task<VariableEntity?> Resolve(IVariableService service, string name, string? ownerWidgetId)
-	{
-		return string.IsNullOrWhiteSpace(ownerWidgetId)
-			? service.Resolve(name, VariableScope.Global, null)
-			: service.Resolve(name, VariableScope.Widget, ownerWidgetId);
 	}
 
 	private static ComputedValue Compute(VariableEntity entity, UserVariableOperation operation, string? value)

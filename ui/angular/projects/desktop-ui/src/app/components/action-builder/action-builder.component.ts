@@ -20,6 +20,7 @@ import { ActionBlockDefinition, ActionFlow, AppStrings, eventConfigurationValues
 import { ContextMenuComponent, ContextMenuItem, LocalizationService, formatRunDuration, OverlayPanelComponent, ToastService, TranslatePipe, UiFontService } from '@shared';
 import type { Variable, VariableScope } from '@macro-deck/runtime';
 import { ActionFlowValidationResult } from '../../domain/action-flow-validation.util';
+import { scopeLabelKey } from '../../domain/variable-source.util';
 import { isToolbarCompact, measureToolbarNaturalWidth } from './action-builder-layout';
 import { offersPasteMenu } from './paste-target.util';
 import { TEMPLATE_PREVIEW_SERVICE } from '../../domain/template-preview.interface';
@@ -37,6 +38,8 @@ import { ActionFlowStore, IconProviderToggleRequest, StateProviderToggleRequest 
 import { ActionDragService } from './services/action-drag.service';
 import { ConditionEvalService } from './services/condition-eval.service';
 import { DEFAULT_TRIGGER_TYPE, TOGGLE_TRIGGER_TYPE, TriggerTab, defaultActionDefs, defaultTriggerTabs, toggleTriggerTab } from './default-action-defs';
+
+const LOCAL_VARIABLE_SCOPES: ReadonlySet<VariableScope> = new Set<VariableScope>(['widget', 'script', 'automation']);
 
 // Re-exported for backwards compatibility with existing imports.
 export { comparisonOperatorOptions } from './default-action-defs';
@@ -90,8 +93,14 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
     this.localization.translateKey(AppStrings.ActionBuilder.Toolbar.NoEventTriggersYet));
   protected readonly addEventTriggerLabel = computed(() =>
     this.localization.translateKey(AppStrings.ActionBuilder.Toolbar.AddEventTrigger));
-  protected readonly variablesTooltip = computed(() =>
-    this.localization.translateKey(AppStrings.ActionBuilder.Toolbar.VariablesOfThisWidget));
+  protected readonly variablesTooltip = computed(() => {
+    const scope = this.store.previewScope();
+    const T = AppStrings.ActionBuilder.Toolbar;
+    return this.localization.translateKey(
+      scope === 'script' ? T.VariablesOfThisScript
+        : scope === 'automation' ? T.VariablesOfThisAutomation
+          : T.VariablesOfThisWidget);
+  });
   protected readonly variablesLabel = computed(() =>
     this.localization.translateKey(AppStrings.ActionBuilder.Toolbar.Variables));
   protected readonly runLabel = computed(() => this.localization.translateKey(
@@ -107,8 +116,16 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
     this.localization.translateKey(AppStrings.ActionBuilder.Paste));
   protected readonly removeTriggerHeading = computed(() =>
     this.localization.translateKey(AppStrings.ActionBuilder.RemoveTriggerHeading));
-  protected readonly widgetVariablesHeading = computed(() =>
-    this.localization.translateKey(AppStrings.ActionBuilder.WidgetVariablesHeading));
+  protected readonly variablesHeading = computed(() => {
+    const scope = this.store.previewScope();
+    const A = AppStrings.ActionBuilder;
+    return this.localization.translateKey(
+      scope === 'script' ? A.ScriptVariablesHeading
+        : scope === 'automation' ? A.AutomationVariablesHeading
+          : A.WidgetVariablesHeading);
+  });
+  protected readonly variablesScopeLabel = computed(() =>
+    this.localization.translateKey(scopeLabelKey(this.store.previewScope())));
 
   @Input()
   set flows(value: ActionFlow[]) {
@@ -133,6 +150,10 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   }
   @Input() set previewScopeRefId(value: string | undefined) {
     this.store.previewScopeRefId.set(value);
+  }
+
+  @Input() set ownerWidgetId(value: string | undefined) {
+    this.store.ownerWidgetId.set(value);
   }
 
   @Input() set flowOwner(value: ActionFlowOwner | null | undefined) {
@@ -281,7 +302,8 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
 
   readonly showTabRow = computed(() =>
     this.alwaysShowTabRowInput()
-      || this.effectiveTriggerTabs().length > 1 || this.showAddEventTrigger() || !!this.auxTabItem(),
+      || this.effectiveTriggerTabs().length > 1 || this.showAddEventTrigger() || !!this.auxTabItem()
+      || (this.showVariables() && this.store.previewScope() !== 'widget'),
   );
 
   readonly showAddEventTrigger = computed(() =>
@@ -298,7 +320,7 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   readonly showRun = computed(() => this.allowRunInput() && !this.isAuxSelected());
 
   readonly showVariables = computed(() =>
-    this.store.previewScope() === 'widget' && !!this.store.previewScopeRefId());
+    LOCAL_VARIABLE_SCOPES.has(this.store.previewScope()) && !!this.store.previewScopeRefId());
 
   readonly variablesOpen = signal(false);
 

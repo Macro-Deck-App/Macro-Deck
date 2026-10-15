@@ -14,6 +14,7 @@ using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -63,6 +64,11 @@ internal sealed class CallbackFakeVariableService : IVariableService
 	}
 
 	public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
+	{
+		return Task.FromResult(_byId.Values.FirstOrDefault(entity => entity.Name == name));
+	}
+
+	public Task<VariableEntity?> Resolve(string name, VariableScopeChain chain)
 	{
 		return Task.FromResult(_byId.Values.FirstOrDefault(entity => entity.Name == name));
 	}

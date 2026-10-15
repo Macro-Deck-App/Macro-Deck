@@ -65,8 +65,8 @@ public sealed class EventTriggerContextResolver : IEventTriggerContextResolver
 				return automation is null || !automation.Enabled
 					? null
 					: new EventTriggerSource(WidgetFlowsJson.ToSource(automation.Flows),
-						VariableScope.Global,
-						null,
+						VariableScope.Automation,
+						automation.Id.ToString(),
 						null);
 			}
 

@@ -528,7 +528,7 @@ export class ParamRowComponent implements OnInit, OnChanges {
     if ('widget' in currentParameters) {
       const widgetTarget = currentParameters['widget'];
       if (widgetTarget === WIDGET_TARGET_SELF || widgetTarget === '' || widgetTarget === undefined) {
-        resolvedOwnerTarget = this.store.previewScopeRefId();
+        resolvedOwnerTarget = this.store.previewOwnerWidgetId();
         currentParameters['widget'] = resolvedOwnerTarget ?? widgetTarget;
       }
     }

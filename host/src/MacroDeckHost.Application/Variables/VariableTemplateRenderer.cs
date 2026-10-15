@@ -137,7 +137,7 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 
 	private readonly VariableRegistry _registry;
 	private readonly ConcurrentDictionary<string, ParsedTemplate> _templateCache = new();
-	private readonly ConcurrentDictionary<(VariableScope Scope, string? ScopeRefId), RenderMemo> _memo = new();
+	private readonly ConcurrentDictionary<VariableScopeChain, RenderMemo> _memo = new();
 
 	public VariableTemplateRenderer(VariableRegistry registry)
 	{
@@ -146,10 +146,20 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 
 	public Task<string> RenderAsync(string templateText, VariableScope contextScope, string? contextScopeRefId)
 	{
-		return Task.FromResult(Render(templateText, contextScope, contextScopeRefId));
+		return Task.FromResult(Render(templateText, VariableScopeChain.Of(contextScope, contextScopeRefId)));
+	}
+
+	public Task<string> RenderAsync(string templateText, VariableScopeChain chain)
+	{
+		return Task.FromResult(Render(templateText, chain));
 	}
 
 	public string Render(string templateText, VariableScope contextScope, string? contextScopeRefId)
+	{
+		return Render(templateText, VariableScopeChain.Of(contextScope, contextScopeRefId));
+	}
+
+	public string Render(string templateText, VariableScopeChain chain)
 	{
 		if (!ContainsLiquid(templateText))
 		{
@@ -159,11 +169,11 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 		var parsed = Parse(templateText);
 		if (parsed.Names is null)
 		{
-			return Render(parsed.Template, BuildContext(contextScope, contextScopeRefId));
+			return Render(parsed.Template, BuildContext(chain));
 		}
 
-		var snapshot = CaptureSnapshot(parsed.Names, contextScope, contextScopeRefId);
-		var key = (contextScope, contextScopeRefId);
+		var snapshot = CaptureSnapshot(parsed.Names, chain);
+		var key = chain;
 
 		if (_memo.TryGetValue(key, out var memo)
 			&& string.Equals(memo.TemplateText, templateText, StringComparison.Ordinal)
@@ -182,13 +192,18 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 		VariableScope contextScope,
 		string? contextScopeRefId)
 	{
-		var readsLocals = contextScope != VariableScope.Global && !string.IsNullOrEmpty(contextScopeRefId);
+		return CaptureSnapshot(names, VariableScopeChain.Of(contextScope, contextScopeRefId));
+	}
+
+	internal IReadOnlyList<VariableSnapshot> CaptureSnapshot(
+		IReadOnlyCollection<string> names,
+		VariableScopeChain chain)
+	{
 		var snapshot = new List<VariableSnapshot>(names.Count);
 
 		foreach (var name in names)
 		{
-			var entity = (readsLocals ? _registry.FindByName(contextScope, contextScopeRefId, name) : null)
-				?? _registry.FindByName(VariableScope.Global, null, name);
+			var entity = Find(chain, name);
 
 			snapshot.Add(entity is null
 				? new VariableSnapshot(name, null, false)
@@ -234,16 +249,19 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 		string? contextScopeRefId,
 		ISet<string> reads)
 	{
+		return RenderRecording(templateText, VariableScopeChain.Of(contextScope, contextScopeRefId), reads);
+	}
+
+	internal string RenderRecording(string templateText, VariableScopeChain chain, ISet<string> reads)
+	{
 		if (!ContainsLiquid(templateText))
 		{
 			return templateText;
 		}
 
-		var readsLocals = contextScope != VariableScope.Global && !string.IsNullOrEmpty(contextScopeRefId);
 		var vars = new RecordingVariablesScriptObject(name =>
 			{
-				var entity = (readsLocals ? _registry.FindByName(contextScope, contextScopeRefId, name) : null)
-					?? _registry.FindByName(VariableScope.Global, null, name);
+				var entity = Find(chain, name);
 				return entity is null
 					? VariableTemplateValue.Unknown
 					: EntryOf(entity, _registry.IsAvailable(entity.Id));
@@ -301,25 +319,42 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 
 	public Task<VariableContext> CreateContextAsync(VariableScope contextScope, string? contextScopeRefId)
 	{
-		return Task.FromResult(BuildContext(contextScope, contextScopeRefId));
+		return Task.FromResult(BuildContext(VariableScopeChain.Of(contextScope, contextScopeRefId)));
 	}
 
-	private VariableContext BuildContext(VariableScope contextScope, string? contextScopeRefId)
+	public Task<VariableContext> CreateContextAsync(VariableScopeChain chain)
 	{
-		var globals = _registry.GetByScope(VariableScope.Global, null);
-		var locals = contextScope != VariableScope.Global && !string.IsNullOrEmpty(contextScopeRefId)
-			? _registry.GetByScope(contextScope, contextScopeRefId)
-			: [];
+		return Task.FromResult(BuildContext(chain));
+	}
 
+	private VariableEntity? Find(VariableScopeChain chain, string name)
+	{
+		foreach (var layer in chain.Layers)
+		{
+			if (_registry.FindByName(layer.Scope, layer.ScopeRefId, name) is { } local)
+			{
+				return local;
+			}
+		}
+
+		return _registry.FindByName(VariableScope.Global, null, name);
+	}
+
+	private VariableContext BuildContext(VariableScopeChain chain)
+	{
 		var byName = new Dictionary<string, VariableEntity>(StringComparer.Ordinal);
-		foreach (var v in globals)
+		foreach (var v in _registry.GetByScope(VariableScope.Global, null))
 		{
 			byName[v.Name] = v;
 		}
 
-		foreach (var v in locals)
+		for (var index = chain.Layers.Count - 1; index >= 0; index--)
 		{
-			byName[v.Name] = v;
+			var layer = chain.Layers[index];
+			foreach (var v in _registry.GetByScope(layer.Scope, layer.ScopeRefId))
+			{
+				byName[v.Name] = v;
+			}
 		}
 
 		var vars = new VariablesScriptObject();

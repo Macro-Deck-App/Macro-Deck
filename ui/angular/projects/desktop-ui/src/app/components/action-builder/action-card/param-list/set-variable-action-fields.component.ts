@@ -70,6 +70,7 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
             @if (showsVariablePicker) {
               <shared-variable-picker
                 [variables]="store.pickerVariables()"
+                [scope]="store.previewScope()"
                 [acceptedTypes]="acceptedVariableTypes"
                 (pick)="pickVariable($event)"
                 (pickEventParameter)="pickEventParameter($event)" />

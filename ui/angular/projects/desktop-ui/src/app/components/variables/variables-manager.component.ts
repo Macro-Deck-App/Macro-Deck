@@ -19,7 +19,7 @@ import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrollin
 import { AppStrings, VariableCatalogNode, resolveLocalizedText } from '@macro-deck/runtime';
 import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, LocalizationService, ModalComponent, ToggleSwitchComponent, TranslatePipe, VariableService, dismissModal } from '@shared';
 import type { Variable, VariableClassification, VariableScope, VariableType } from '@macro-deck/runtime';
-import { VariableGroup, VariableSourceFilter, groupVariablesBySource, isEventParameter, matchesVariableSource, variableTypeLabels } from '../../domain/variable-source.util';
+import { VariableGroup, VariableSourceFilter, groupVariablesBySource, isEventParameter, matchesVariableSource, scopeLabelKey, variableTypeLabels } from '../../domain/variable-source.util';
 import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confirmation-modal.component';
 import { DropdownMenuComponent } from '../overlay/dropdown-menu/dropdown-menu.component';
 import { EmptyStateComponent } from '../feedback/empty-state/empty-state.component';
@@ -115,6 +115,10 @@ export class VariablesManagerComponent implements OnInit {
     this.scopeRefIdState.set(value ?? null);
   }
 
+  @Input() set scope(value: VariableScope | undefined | null) {
+    this.localScopeState.set(value && value !== 'global' ? value : 'widget');
+  }
+
   @Input() set scopeLabel(value: string) {
     this.scopeLabelOverride.set(value);
   }
@@ -157,6 +161,7 @@ export class VariablesManagerComponent implements OnInit {
   private readonly variablesOverride = signal<Variable[] | null>(null);
   private readonly sourceState = signal<VariableSourceFilter>({ kind: 'all' });
   private readonly scopeRefIdState = signal<string | null>(null);
+  readonly localScopeState = signal<VariableScope>('widget');
   private readonly scopeLabelOverride = signal<string | null>(null);
   private readonly modeState = signal<'manage' | 'pick'>('manage');
   private readonly acceptedTypesState = signal<readonly VariableType[]>([]);
@@ -170,7 +175,7 @@ export class VariablesManagerComponent implements OnInit {
   private readonly localization = inject(LocalizationService);
 
   private readonly scopeLabelState = computed(() =>
-    this.scopeLabelOverride() ?? this.localization.translateKey(AppStrings.Variables.ThisWidget));
+    this.scopeLabelOverride() ?? this.localization.translateKey(scopeLabelKey(this.localScopeState())));
 
   readonly typeLabels = computed(() => variableTypeLabels(key => this.localization.translateKey(key)));
   readonly classificationLabels = computed<Record<VariableClassification, string>>(() => ({
@@ -184,7 +189,7 @@ export class VariablesManagerComponent implements OnInit {
     this.types.map(t => ({ value: t, label: this.typeLabels()[t] })));
 
   readonly scopeOptions = computed<SelectOption[]>(() => [
-    { value: 'widget', label: this.scopeLabelState() },
+    { value: this.localScopeState(), label: this.scopeLabelState() },
     { value: 'global', label: this.localization.translateKey(AppStrings.Variables.Manager.GlobalScope) },
   ]);
 
@@ -228,8 +233,12 @@ export class VariablesManagerComponent implements OnInit {
     this.localization.translateKey(AppStrings.Variables.Manager.NameHint));
   readonly scopeFieldLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.ScopeField));
-  readonly scopeHintWidget = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.ScopeHintWidget));
+  readonly scopeHintLocal = computed(() => {
+    const M = AppStrings.Variables.Manager;
+    const scope = this.localScopeState();
+    return this.localization.translateKey(
+      scope === 'script' ? M.ScopeHintScript : scope === 'automation' ? M.ScopeHintAutomation : M.ScopeHintWidget);
+  });
   readonly scopeHintGlobal = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.ScopeHintGlobal));
   readonly typeFieldLabel = computed(() =>
@@ -648,13 +657,13 @@ export class VariablesManagerComponent implements OnInit {
   }
 
   readonly createScoped = computed(() =>
-    this.createForm().scope === 'widget' && this.scopeRefIdState() !== null);
+    this.createForm().scope !== 'global' && this.scopeRefIdState() !== null);
 
   readonly createScopeRefId = computed(() =>
     this.createScoped() ? this.scopeRefIdState() ?? undefined : undefined);
 
   readonly createTemplateVariables = computed(() => this.createScoped()
-    ? this.variableService.visibleForContext('widget', this.createScopeRefId())
+    ? this.variableService.visibleForContext(this.localScopeState(), this.createScopeRefId())
     : this.variableService.visibleForContext('global'));
 
   readonly createTemplateOptions = computed(() => {
@@ -681,11 +690,11 @@ export class VariablesManagerComponent implements OnInit {
       : form.initialValue;
 
     const scopeRefId = this.scopeRefIdState() ?? undefined;
-    const scoped = form.scope === 'widget' && scopeRefId !== undefined;
+    const scoped = form.scope !== 'global' && scopeRefId !== undefined;
     this.createError.set(null);
     const result = await this.variableService.create({
       name: sanitized,
-      scope: scoped ? 'widget' : 'global',
+      scope: scoped ? this.localScopeState() : 'global',
       scopeRefId: scoped ? scopeRefId : undefined,
       type: form.type,
       initialValue: fromFile || fromTemplate ? undefined : initialValue,
@@ -732,7 +741,7 @@ export class VariablesManagerComponent implements OnInit {
       this.scheduleTemplatePreview(settings.template, settings.scope, settings.scopeRefId,
         { resultType: settings.type, ...this.templateSettingsOptions() });
     } else if (this.showCreateModal() && form.source === 'template') {
-      this.scheduleTemplatePreview(form.template, this.createScoped() ? 'widget' : 'global', this.createScopeRefId(),
+      this.scheduleTemplatePreview(form.template, this.createScoped() ? this.localScopeState() : 'global', this.createScopeRefId(),
         { resultType: form.type, ...this.createTemplateOptions() });
     } else {
       this.scheduleTemplatePreview('', 'global', undefined, null);
@@ -770,8 +779,8 @@ export class VariablesManagerComponent implements OnInit {
   readonly templateSettingsVariables = computed(() => {
     const form = this.templateSettings();
     if (!form) return [];
-    return form.scope === 'widget' && form.scopeRefId
-      ? this.variableService.visibleForContext('widget', form.scopeRefId)
+    return form.scope !== 'global' && form.scopeRefId
+      ? this.variableService.visibleForContext(form.scope, form.scopeRefId)
       : this.variableService.visibleForContext('global');
   });
 
@@ -1012,13 +1021,12 @@ export class VariablesManagerComponent implements OnInit {
   }
 
   private defaultCreateForm(): CreateForm {
-    // Reaching this from a widget means the widget is what you meant - the browser opens on the
-    // "all" source, so keying the default off the selected source instead would default to global
-    // for everyone who came from a widget editor. Global is one click away in the field.
+    // Opened from an editor, default to its scope: keying off the selected source would default to
+    // global, since the browser opens on the all source. Global is one click away in the field.
     const scoped = this.scopeRefIdState() !== null;
     return {
       rawName: '',
-      scope: scoped ? 'widget' : 'global',
+      scope: scoped ? this.localScopeState() : 'global',
       source: 'value',
       type: 'text',
       initialValue: '',

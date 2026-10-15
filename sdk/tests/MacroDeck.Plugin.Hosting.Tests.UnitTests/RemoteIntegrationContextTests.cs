@@ -235,6 +235,40 @@ public class RemoteIntegrationContextTests
 	}
 
 	[Test]
+	public async Task A_user_variable_write_in_context_carries_the_script_and_automation_on_the_wire()
+	{
+		var context = new UserVariableContext("w1", "s1", "a1");
+
+		await _context.UserVariables.ApplyInContextAsync("n", context, UserVariableOperation.Set, "1");
+		var applied = (UserVariablesApplyArguments)_invoker.LastArguments!;
+		await _context.UserVariables.CreateInContextAsync("n", context, VariableType.Text);
+		var created = (UserVariablesCreateArguments)_invoker.LastArguments!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That((applied.OwnerWidgetId, applied.ScriptId, applied.AutomationId),
+				Is.EqualTo(("w1", "s1", "a1")));
+			Assert.That((created.OwnerWidgetId, created.ScriptId, created.AutomationId),
+				Is.EqualTo(("w1", "s1", "a1")));
+		});
+	}
+
+	[Test]
+	public async Task A_user_variable_write_through_the_old_method_sends_no_script_or_automation()
+	{
+		await _context.UserVariables.ApplyAsync("n", "w1", UserVariableOperation.Set, "1");
+
+		var applied = (UserVariablesApplyArguments)_invoker.LastArguments!;
+		var json = JsonSerializer.Serialize(applied, PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(applied.OwnerWidgetId, Is.EqualTo("w1"));
+			Assert.That(json, Does.Not.Contain("scriptId").And.Not.Contain("automationId"));
+		});
+	}
+
+	[Test]
 	public async Task Action_interactions_send_the_declared_Api_Operation_pair()
 	{
 		var interactions = new RemoteActionInteractions(_invoker, Serilog.Core.Logger.None, "correlation-1");

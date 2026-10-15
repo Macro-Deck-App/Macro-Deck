@@ -34,22 +34,22 @@ type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'i
         }
         @case ('background') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
-            [allowVariables]="true" [allowAlpha]="true" [variableScopeRefId]="store.previewScopeRefId()"
+            [allowVariables]="true" [allowAlpha]="true" [variableScope]="store.previewScope()" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('labelColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
-            [allowVariables]="true" [allowAlpha]="true" [variableScopeRefId]="store.previewScopeRefId()"
+            [allowVariables]="true" [allowAlpha]="true" [variableScope]="store.previewScope()" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('accentColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
-            [allowVariables]="true" [allowAlpha]="true" [variableScopeRefId]="store.previewScopeRefId()"
+            [allowVariables]="true" [allowAlpha]="true" [variableScope]="store.previewScope()" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('iconColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
-            [allowVariables]="true" [allowAlpha]="true" [variableScopeRefId]="store.previewScopeRefId()"
+            [allowVariables]="true" [allowAlpha]="true" [variableScope]="store.previewScope()" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('iconAppearance') {
@@ -220,7 +220,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
 
   private async resolveCapabilities(): Promise<void> {
     const target = this.stringValue('widget');
-    const ownerId = this.store.previewScopeRefId();
+    const ownerId = this.store.previewOwnerWidgetId();
     const lookupTarget = target === WIDGET_TARGET_SELF ? ownerId : target;
     const request = ++this.capabilityRequest;
     if (!lookupTarget) {

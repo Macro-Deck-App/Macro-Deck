@@ -30,6 +30,11 @@ public sealed class VariableValueChangedNotificationHandler : INotificationHandl
 
 		_renderSignals.RaiseVariableChanged();
 
+		if (variable.Scope is VariableScope.Script or VariableScope.Automation)
+		{
+			return ValueTask.CompletedTask;
+		}
+
 		if (variable.Scope == VariableScope.Widget)
 		{
 			if (Guid.TryParse(variable.ScopeRefId, out var ownerId)

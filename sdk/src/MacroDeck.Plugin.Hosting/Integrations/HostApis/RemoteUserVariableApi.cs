@@ -10,18 +10,35 @@ namespace MacroDeck.Plugin.Hosting.Integrations.HostApis;
 /// <see cref="HostApis.UserVariables"/>.</summary>
 internal sealed class RemoteUserVariableApi(IHostInvoker invoker) : IUserVariableApi
 {
-	public async Task<UserVariableWriteResult> ApplyAsync(
+	public Task<UserVariableWriteResult> ApplyAsync(
 		string name,
 		string? ownerWidgetId,
 		UserVariableOperation operation,
 		string? value,
 		CancellationToken cancellationToken = default)
 	{
+		return ApplyInContextAsync(name, new UserVariableContext(ownerWidgetId), operation, value, cancellationToken);
+	}
+
+	public async Task<UserVariableWriteResult> ApplyInContextAsync(
+		string name,
+		UserVariableContext context,
+		UserVariableOperation operation,
+		string? value,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
 		var result = await invoker.InvokeAsync(Protocol.Callbacks.HostApis.UserVariables,
 			HostOperations.UserVariables.Apply,
 			new UserVariablesApplyArguments
 			{
-				Name = name, OwnerWidgetId = ownerWidgetId, Operation = operation.ToString(), Value = value
+				Name = name,
+				OwnerWidgetId = context.OwnerWidgetId,
+				ScriptId = context.ScriptId,
+				AutomationId = context.AutomationId,
+				Operation = operation.ToString(),
+				Value = value
 			},
 			cancellationToken);
 
@@ -29,7 +46,7 @@ internal sealed class RemoteUserVariableApi(IHostInvoker invoker) : IUserVariabl
 			?? new UserVariableWriteResult(UserVariableWriteStatus.NotFound, "The host returned no result.");
 	}
 
-	public async Task<UserVariableCreateResult> CreateAsync(
+	public Task<UserVariableCreateResult> CreateAsync(
 		string name,
 		string? ownerWidgetId,
 		VariableType type,
@@ -37,12 +54,32 @@ internal sealed class RemoteUserVariableApi(IHostInvoker invoker) : IUserVariabl
 		int? decimalPlaces = null,
 		CancellationToken cancellationToken = default)
 	{
+		return CreateInContextAsync(name,
+			new UserVariableContext(ownerWidgetId),
+			type,
+			initialValue,
+			decimalPlaces,
+			cancellationToken);
+	}
+
+	public async Task<UserVariableCreateResult> CreateInContextAsync(
+		string name,
+		UserVariableContext context,
+		VariableType type,
+		string? initialValue = null,
+		int? decimalPlaces = null,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
 		var result = await invoker.InvokeAsync(Protocol.Callbacks.HostApis.UserVariables,
 			HostOperations.UserVariables.Create,
 			new UserVariablesCreateArguments
 			{
 				Name = name,
-				OwnerWidgetId = ownerWidgetId,
+				OwnerWidgetId = context.OwnerWidgetId,
+				ScriptId = context.ScriptId,
+				AutomationId = context.AutomationId,
 				Type = type.ToString(),
 				InitialValue = initialValue,
 				DecimalPlaces = decimalPlaces

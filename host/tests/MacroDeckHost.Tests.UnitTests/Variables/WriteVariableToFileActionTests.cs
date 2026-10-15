@@ -122,8 +122,8 @@ public class WriteVariableToFileActionTests
 
 	private Task<ActionResult> Execute(string variable, string path, string? ownerWidgetId = null)
 	{
-		VariableReader reader = (name, widget, _) =>
-			Task.FromResult(_variables.TryGetValue((name, widget), out var value)
+		VariableReader reader = (name, variableContext, _) =>
+			Task.FromResult(_variables.TryGetValue((name, variableContext.OwnerWidgetId), out var value)
 				|| _variables.TryGetValue((name, null), out value)
 					? value
 					: null);

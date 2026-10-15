@@ -53,7 +53,8 @@ export class NodeVariablePickerComponent {
     const scopeRefId = this.context.scopeRefId;
     const all = scopeRefId
       ? this.variableService.visibleForContext('widget', scopeRefId)
-      : this.variableService.variables();
+      : this.variableService.variables()
+        .filter(variable => variable.scope !== 'script' && variable.scope !== 'automation');
     return this.writableOnly() ? all.filter(variable => variable.canWrite === true) : all;
   });
 }

@@ -134,6 +134,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 
 		var secrets = options.IncludeSecrets ? await CollectSecrets(referencingData) : [];
 		var variables = await CollectVariables(widgets);
+		var scriptVariables = await CollectScriptVariables(scripts);
 		var culture = (await _preferences.GetLocalization()).Culture;
 		var (fonts, fontFiles) = CollectFonts(referencingData);
 		return new PortableAssetBundle(icons,
@@ -143,7 +144,8 @@ public sealed class PortableAssetManager : IPortableAssetManager
 			CollectIntegrations(referencingData, culture),
 			variables,
 			fonts,
-			fontFiles);
+			fontFiles,
+			scriptVariables);
 	}
 
 	private List<PortableIconAppearance> CollectAppearances(
@@ -487,6 +489,30 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		return variables;
 	}
 
+	private async Task<List<PortableScriptVariable>> CollectScriptVariables(IReadOnlyList<PortableScript> scripts)
+	{
+		var variables = new List<PortableScriptVariable>();
+		foreach (var script in scripts)
+		{
+			foreach (var snapshot in await _variableCloner.SnapshotScope(VariableScope.Script, script.Id.ToString()))
+			{
+				variables.Add(new PortableScriptVariable
+				{
+					ScriptId = script.Id,
+					Name = snapshot.Name,
+					Type = snapshot.Type,
+					Value = snapshot.FileSource is null && snapshot.TemplateSource is null
+						? snapshot.Value
+						: string.Empty,
+					DecimalPlaces = snapshot.DecimalPlaces,
+					Template = snapshot.TemplateSource?.Template
+				});
+			}
+		}
+
+		return variables;
+	}
+
 	// A portable bundle is a stored artefact, so the name it records has to be finished text and never a
 	// localization reference.
 	private List<PortableIntegrationRequirement> CollectIntegrations(
@@ -603,7 +629,27 @@ public sealed class PortableAssetManager : IPortableAssetManager
 				_logger.Warning("Skipping script '{ScriptName}' during import: {Error}",
 					script.Name,
 					result.ErrorMessage);
+				continue;
 			}
+
+			await RestoreScriptVariables(content, script.Id, idMap[script.Id]);
+		}
+	}
+
+	private async Task RestoreScriptVariables(PortableContent content, Guid sourceScriptId, Guid targetScriptId)
+	{
+		var snapshots = content.ScriptVariables
+			.Where(variable => variable.ScriptId == sourceScriptId)
+			.Select(variable => new WidgetVariableSnapshot(variable.Name,
+				variable.Type,
+				variable.Value,
+				variable.DecimalPlaces,
+				TemplateSource: variable.Template is { } template ? new VariableTemplateSource(template) : null))
+			.ToList();
+
+		if (snapshots.Count > 0)
+		{
+			await _variableCloner.RestoreScope(VariableScope.Script, targetScriptId.ToString(), snapshots);
 		}
 	}
 

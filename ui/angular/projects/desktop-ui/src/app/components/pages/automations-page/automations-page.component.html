@@ -93,7 +93,8 @@
           [allowRun]="false"
           [availableBlocks]="availableActionBlocks()"
           [variables]="variables()"
-          previewScope="global"
+          previewScope="automation"
+          [previewScopeRefId]="variableScopeRefId()"
           (flowsChange)="onFlowsChange($event)"
           (validityChange)="onValidityChange($event)" />
       </div>

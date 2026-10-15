@@ -87,7 +87,7 @@ internal sealed class GetTrackMuteActionDefinition : IDynamicOptionsActionDefini
 			var muted = MeldTargetResolver.CurrentMuted(connection, target!);
 			var written = await MeldVariableWriter.WriteAsync(_variables,
 					variable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Boolean,
 					muted)
 				.ConfigureAwait(false);

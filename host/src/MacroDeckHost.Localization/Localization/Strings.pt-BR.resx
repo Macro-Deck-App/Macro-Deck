@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variáveis deste widget</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Variáveis deste script</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Variáveis desta automação</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Evento encerrado</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Variáveis do widget</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Variáveis do script</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Variáveis da automação</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Publicado em {date}</value>
@@ -2985,6 +2997,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Escopo de variável desconhecido</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>O widget, script ou automação ao qual esta variável pertence não existe.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>A fonte de vídeo está ocupada no momento.</value>
@@ -14436,6 +14451,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Sobrepõe a variável "vars.{name}" enquanto este script é executado.</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Sobrepõe a variável do script "vars.{name}" enquanto este script é executado.</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Tipo</value>
   </data>
@@ -18257,6 +18275,12 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Somente este widget a vê, e ela substitui uma variável global de mesmo nome aqui.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Somente este script a vê, e ela substitui uma variável global de mesmo nome aqui.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Somente esta automação a vê, e ela substitui uma variável global de mesmo nome aqui.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Pesquisar variáveis…</value>
   </data>
@@ -18391,14 +18415,17 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>Este evento</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Este script</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Usuário</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Este widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Este script</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Esta automação</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Usuário</value>

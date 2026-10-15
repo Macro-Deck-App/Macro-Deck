@@ -90,8 +90,8 @@ internal sealed class SetVariableActionDefinition : IActionDefinition
 					AppStrings.Integrations.Variables.Errors.UnknownOperation(raw ?? string.Empty));
 			}
 
-			var result = await variables.ApplyAsync(name,
-				context.OwnerWidgetId,
+			var result = await variables.ApplyInContextAsync(name,
+				UserVariableContext.From(context),
 				operation,
 				Read(context, "value"),
 				context.CancellationToken);

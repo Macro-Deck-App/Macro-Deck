@@ -30,6 +30,11 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 	private readonly Dictionary<string, VariableRecord> _global = new(StringComparer.Ordinal);
 	private readonly Dictionary<(string WidgetId, string Name), VariableRecord> _widgetScoped = new();
 	private readonly HashSet<string> _widgets = new(StringComparer.Ordinal);
+	private readonly Dictionary<(string ScriptId, string Name), VariableRecord> _scriptScoped = new();
+	private readonly HashSet<string> _scripts = new(StringComparer.Ordinal);
+	private readonly Dictionary<(string AutomationId, string Name), VariableRecord> _automationScoped = new();
+	private readonly HashSet<string> _automations = new(StringComparer.Ordinal);
+	private UserVariableContext? _lastContext;
 	private readonly Func<string, bool>? _widgetExists;
 
 	/// <summary>Creates a fake that knows only the widgets seeded on it.</summary>
@@ -55,6 +60,76 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 		lock (_gate)
 		{
 			_widgets.Add(widgetId);
+		}
+	}
+
+	/// <summary>
+	/// The context the most recent apply or create was made in, or <c>null</c> before the first one. A call
+	/// through <see cref="ApplyAsync" /> or <see cref="CreateAsync" /> records a context with only the
+	/// owner widget set, so a test can tell whether the plugin passed its script or automation on.
+	/// </summary>
+	public UserVariableContext? LastContext
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return _lastContext;
+			}
+		}
+	}
+
+	/// <summary>Declares a script as existing, so <see cref="CreateInContextAsync" /> will scope a variable to it.</summary>
+	public void SeedScript(string scriptId)
+	{
+		lock (_gate)
+		{
+			_scripts.Add(scriptId);
+		}
+	}
+
+	/// <summary>Declares an automation as existing, so <see cref="CreateInContextAsync" /> will scope a variable to it.</summary>
+	public void SeedAutomation(string automationId)
+	{
+		lock (_gate)
+		{
+			_automations.Add(automationId);
+		}
+	}
+
+	/// <summary>
+	/// Seeds (or replaces) a variable local to one script, which shadows widget-scoped and global variables
+	/// of the same name for a context naming that script.
+	/// </summary>
+	public void SeedScriptScoped(
+		string scriptId,
+		string name,
+		VariableType type,
+		object? value,
+		bool ownedByIntegration = false)
+	{
+		lock (_gate)
+		{
+			_scripts.Add(scriptId);
+			_scriptScoped[(scriptId, name)] = new VariableRecord(type, value, ownedByIntegration);
+		}
+	}
+
+	/// <summary>
+	/// Seeds (or replaces) a variable local to one automation, which shadows widget-scoped and global
+	/// variables of the same name for a context naming that automation.
+	/// </summary>
+	public void SeedAutomationScoped(
+		string automationId,
+		string name,
+		VariableType type,
+		object? value,
+		bool ownedByIntegration = false)
+	{
+		lock (_gate)
+		{
+			_automations.Add(automationId);
+			_automationScoped[(automationId, name)] = new VariableRecord(type, value, ownedByIntegration);
 		}
 	}
 
@@ -95,7 +170,21 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 	{
 		lock (_gate)
 		{
-			return Resolve(name, ownerWidgetId)?.Value;
+			return Resolve(name, new UserVariableContext(ownerWidgetId))?.Value;
+		}
+	}
+
+	/// <summary>
+	/// The current value of a seeded variable, resolved the way <see cref="ApplyInContextAsync" /> resolves
+	/// it in <paramref name="context" />.
+	/// </summary>
+	public object? GetCurrentValueInContext(string name, UserVariableContext context)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
+		lock (_gate)
+		{
+			return Resolve(name, context)?.Value;
 		}
 	}
 
@@ -113,9 +202,26 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 		string? value,
 		CancellationToken cancellationToken = default)
 	{
+		return ApplyInContextAsync(name, new UserVariableContext(ownerWidgetId), operation, value, cancellationToken);
+	}
+
+	/// <summary>
+	/// <see cref="ApplyAsync" /> in a flow's context: a variable seeded for the context's script wins, then
+	/// one for its automation, then its widget, then a global. The context is kept in <see cref="LastContext" />.
+	/// </summary>
+	public Task<UserVariableWriteResult> ApplyInContextAsync(
+		string name,
+		UserVariableContext context,
+		UserVariableOperation operation,
+		string? value,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
 		lock (_gate)
 		{
-			var record = Resolve(name, ownerWidgetId);
+			_lastContext = context;
+			var record = Resolve(name, context);
 			if (record is null)
 			{
 				return Task.FromResult(UserVariableWriteResult.Failed(UserVariableWriteStatus.NotFound,
@@ -158,6 +264,36 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 		int? decimalPlaces = null,
 		CancellationToken cancellationToken = default)
 	{
+		return CreateInContextAsync(name,
+			new UserVariableContext(ownerWidgetId),
+			type,
+			initialValue,
+			decimalPlaces,
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// <see cref="CreateAsync" /> in a flow's context: the variable goes to the context's script, else its
+	/// automation, else its widget, else global, and a script or automation this fake has not been told
+	/// about is refused with <see cref="UserVariableCreateStatus.UnknownScript" /> or
+	/// <see cref="UserVariableCreateStatus.UnknownAutomation" />. The context is kept in <see cref="LastContext" />.
+	/// </summary>
+	public Task<UserVariableCreateResult> CreateInContextAsync(
+		string name,
+		UserVariableContext context,
+		VariableType type,
+		string? initialValue = null,
+		int? decimalPlaces = null,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
+		lock (_gate)
+		{
+			_lastContext = context;
+		}
+
+		var ownerWidgetId = context.OwnerWidgetId;
 		var canonical = Canonical(name);
 		if (canonical.Length == 0)
 		{
@@ -173,6 +309,28 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 
 		lock (_gate)
 		{
+			if (!string.IsNullOrWhiteSpace(context.ScriptId))
+			{
+				return Task.FromResult(CreateLocal(_scripts,
+					_scriptScoped,
+					context.ScriptId,
+					canonical,
+					new VariableRecord(type, value, false),
+					UserVariableCreateStatus.UnknownScript,
+					"script"));
+			}
+
+			if (!string.IsNullOrWhiteSpace(context.AutomationId))
+			{
+				return Task.FromResult(CreateLocal(_automations,
+					_automationScoped,
+					context.AutomationId,
+					canonical,
+					new VariableRecord(type, value, false),
+					UserVariableCreateStatus.UnknownAutomation,
+					"automation"));
+			}
+
 			if (string.IsNullOrWhiteSpace(ownerWidgetId))
 			{
 				if (!_global.TryAdd(canonical, new VariableRecord(type, value, false)))
@@ -198,6 +356,26 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 
 			return Task.FromResult(UserVariableCreateResult.Created());
 		}
+	}
+
+	private static UserVariableCreateResult CreateLocal(
+		HashSet<string> owners,
+		Dictionary<(string OwnerId, string Name), VariableRecord> scoped,
+		string ownerId,
+		string canonical,
+		VariableRecord record,
+		UserVariableCreateStatus unknownOwner,
+		string ownerKind)
+	{
+		if (!owners.Contains(ownerId))
+		{
+			return UserVariableCreateResult.Failed(unknownOwner, $"No {ownerKind} with id '{ownerId}' exists.");
+		}
+
+		return scoped.TryAdd((ownerId, canonical), record)
+			? UserVariableCreateResult.Created()
+			: UserVariableCreateResult.Failed(UserVariableCreateStatus.AlreadyExists,
+				$"'{canonical}' already exists on {ownerKind} '{ownerId}'.");
 	}
 
 	private static bool TryParseInitial(VariableType type, string? initialValue, out object? value)
@@ -244,11 +422,23 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 		return name.StartsWith("vars.", StringComparison.Ordinal) ? name["vars.".Length..] : name;
 	}
 
-	private VariableRecord? Resolve(string name, string? ownerWidgetId)
+	private VariableRecord? Resolve(string name, UserVariableContext context)
 	{
 		var canonical = Canonical(name);
 
-		if (ownerWidgetId is not null && _widgetScoped.TryGetValue((ownerWidgetId, canonical), out var scoped))
+		if (context.ScriptId is { } scriptId && _scriptScoped.TryGetValue((scriptId, canonical), out var script))
+		{
+			return script;
+		}
+
+		if (context.AutomationId is { } automationId
+			&& _automationScoped.TryGetValue((automationId, canonical), out var automation))
+		{
+			return automation;
+		}
+
+		if (context.OwnerWidgetId is { } ownerWidgetId
+			&& _widgetScoped.TryGetValue((ownerWidgetId, canonical), out var scoped))
 		{
 			return scoped;
 		}

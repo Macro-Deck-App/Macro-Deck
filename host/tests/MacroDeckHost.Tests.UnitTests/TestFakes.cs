@@ -146,6 +146,8 @@ internal sealed class CapturingActionDefinition : IActionDefinition
 
 	public string? CapturedOwnerWidgetId { get; private set; }
 
+	public ActionExecutionContext? CapturedContext { get; private set; }
+
 	public int ExecuteCount { get; private set; }
 
 	public ActionResult Result { get; set; } = ActionResult.Success();
@@ -172,6 +174,7 @@ internal sealed class CapturingActionDefinition : IActionDefinition
 		{
 			_owner.CapturedParameters = context.Parameters;
 			_owner.CapturedOwnerWidgetId = context.OwnerWidgetId;
+			_owner.CapturedContext = context;
 			_owner.ExecuteCount++;
 			_owner.OnExecuted?.Invoke();
 			return _owner.Throw is { } exception
@@ -293,6 +296,16 @@ internal sealed class FakeVariableTemplateRenderer : IVariableTemplateRenderer
 	}
 
 	public Task<VariableContext> CreateContextAsync(VariableScope contextScope, string? contextScopeRefId)
+	{
+		return Task.FromResult(VariableContext.Empty);
+	}
+
+	public Task<string> RenderAsync(string templateText, VariableScopeChain chain)
+	{
+		return Task.FromResult(templateText);
+	}
+
+	public Task<VariableContext> CreateContextAsync(VariableScopeChain chain)
 	{
 		return Task.FromResult(VariableContext.Empty);
 	}
@@ -502,6 +515,16 @@ internal sealed class NullWidgetVariableCloner : IWidgetVariableCloner
 	}
 
 	public Task Clone(Guid sourceWidgetId, Guid targetWidgetId)
+	{
+		return Task.CompletedTask;
+	}
+
+	public Task<IReadOnlyList<WidgetVariableSnapshot>> SnapshotScope(VariableScope scope, string scopeRefId)
+	{
+		return Task.FromResult<IReadOnlyList<WidgetVariableSnapshot>>([]);
+	}
+
+	public Task RestoreScope(VariableScope scope, string scopeRefId, IReadOnlyList<WidgetVariableSnapshot> variables)
 	{
 		return Task.CompletedTask;
 	}

@@ -71,14 +71,19 @@ public class VariableService : IVariableService
 
 	public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
 	{
+		return Resolve(name, VariableScopeChain.Of(contextScope, contextScopeRefId));
+	}
+
+	public Task<VariableEntity?> Resolve(string name, VariableScopeChain chain)
+	{
 		if (!VariableNameSanitizer.IsValid(name))
 		{
 			return Task.FromResult<VariableEntity?>(null);
 		}
 
-		if (contextScope != VariableScope.Global && contextScopeRefId is not null)
+		foreach (var layer in chain.Layers)
 		{
-			var local = _registry.FindByName(contextScope, contextScopeRefId, name);
+			var local = _registry.FindByName(layer.Scope, layer.ScopeRefId, name);
 			if (local is not null)
 			{
 				return Task.FromResult<VariableEntity?>(local);

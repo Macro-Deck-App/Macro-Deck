@@ -141,7 +141,7 @@ export class ParamListComponent implements OnChanges {
     }
 
     const target = this.targetValue();
-    this.targetIsOwner.set(target !== '' && target === this.store.previewScopeRefId());
+    this.targetIsOwner.set(target !== '' && target === this.store.previewOwnerWidgetId());
     if (target === this.resolvedTarget) return;
     this.resolvedTarget = target;
 
@@ -168,6 +168,6 @@ export class ParamListComponent implements OnChanges {
     const target = this.block.parameters?.find(parameter => parameter.name === 'widget')?.value;
     const value = typeof target === 'string' ? target : '';
     if (value !== WIDGET_TARGET_SELF && value !== '') return value;
-    return this.store.previewScopeRefId() ?? '';
+    return this.store.previewOwnerWidgetId() ?? '';
   }
 }

@@ -1,6 +1,7 @@
 using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Localization;
@@ -9,7 +10,7 @@ namespace MacroDeckHost.Infrastructure.SystemIntegrations.Variables;
 
 internal delegate Task<HostVariableValue?> VariableReader(
 	string name,
-	string? ownerWidgetId,
+	UserVariableContext variableContext,
 	CancellationToken cancellationToken);
 
 internal sealed class WriteVariableToFileActionDefinition : IActionDefinition
@@ -74,7 +75,7 @@ internal sealed class WriteVariableToFileActionDefinition : IActionDefinition
 					AppStrings.Integrations.Variables.Errors.FilePathNotAbsolute());
 			}
 
-			var reading = await reader(name, context.OwnerWidgetId, context.CancellationToken);
+			var reading = await reader(name, UserVariableContext.From(context), context.CancellationToken);
 			if (reading is null)
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound,

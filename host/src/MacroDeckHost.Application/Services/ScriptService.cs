@@ -15,11 +15,13 @@ public class ScriptService : IScriptService
 
 	private readonly IScriptCache _scriptCache;
 	private readonly IMediator _mediator;
+	private readonly IWidgetVariableCloner _variableCloner;
 
-	public ScriptService(IScriptCache scriptCache, IMediator mediator)
+	public ScriptService(IScriptCache scriptCache, IMediator mediator, IWidgetVariableCloner variableCloner)
 	{
 		_scriptCache = scriptCache;
 		_mediator = mediator;
+		_variableCloner = variableCloner;
 	}
 
 	public IReadOnlyList<ScriptEntity> GetAll()
@@ -154,12 +156,21 @@ public class ScriptService : IScriptService
 			return Result.Fail<ScriptEntity, ScriptError>(ScriptError.NotFound, "Script not found");
 		}
 
-		return await Create(NextCopyName(source.Name),
+		var copy = await Create(NextCopyName(source.Name),
 			source.Description,
 			source.Flows,
 			null,
 			source.Inputs,
 			source.RunsOnWidget);
+
+		if (copy.Success && copy.Data is { } created)
+		{
+			await _variableCloner.RestoreScope(VariableScope.Script,
+				created.Id.ToString(),
+				await _variableCloner.SnapshotScope(VariableScope.Script, source.Id.ToString()));
+		}
+
+		return copy;
 	}
 
 	public async Task<Result<ScriptError>> Delete(Guid id)

@@ -86,10 +86,21 @@ export class ScriptsPageComponent implements OnInit, ConfirmsNavigation {
     this.scripts.scripts().find(script => script.id === this.selectedScriptId()) ?? null,
   );
 
+  protected readonly variableScopeRefId = computed(() => this.selectedScript()?.id);
+
   protected readonly variables = computed(() => [
     ...scriptInputVariables(this.draftInputs()),
-    ...this.variableService.globalVariables(),
+    ...this.variableService.visibleForContext('script', this.variableScopeRefId()),
   ]);
+
+  protected readonly scriptLocalNames = computed(() => {
+    const scriptId = this.variableScopeRefId();
+    return scriptId
+      ? this.variableService.variables()
+        .filter(variable => variable.scope === 'script' && variable.scopeRefId === scriptId)
+        .map(variable => variable.name)
+      : [];
+  });
 
   protected readonly globalNames = computed(() =>
     this.variableService.globalVariables().map(variable => variable.name),
