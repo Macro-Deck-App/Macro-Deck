@@ -147,6 +147,7 @@ export default defineConfig({
 										'introduction/first-action',
 										{ label: 'Project setup', slug: 'introduction/manual-setup' },
 										'introduction/samples-and-template',
+										'introduction/agent-skills',
 									],
 								},
 								{
