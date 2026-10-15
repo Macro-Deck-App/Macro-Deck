@@ -293,6 +293,21 @@ describe('runtime widget grid', () => {
     expect(container.querySelector('.widget-dynamic-text')!.textContent).toMatch(/^3:04\s?am$/i);
   });
 
+  it('hands each tile the leading zero the shared host states', () => {
+    const handle = renderWidgetGrid(container, {
+      host: {
+        ...host, now: () => Date.parse('2026-01-02T03:04:05Z'), culture: () => 'es', hourCycle: () => 'h23',
+        hourPadded: () => true,
+      },
+      geometry: { cols: 5, rows: 3 },
+    });
+    handle.update([widget('a', 0, 0)], () => ({
+      id: 'clock', type: 'macrodeck.dynamic-text', properties: { format: 'time', value: { $time: { zone: 'UTC' } } },
+    }) as UiNode);
+
+    expect(container.querySelector('.widget-dynamic-text')!.textContent).toBe('03:04');
+  });
+
   it('keeps a tile across updates instead of building it again', () => {
     const handle = mount();
     handle.update([widget('a', 0, 0)], () => tree('before'));

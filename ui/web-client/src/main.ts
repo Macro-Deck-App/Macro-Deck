@@ -114,6 +114,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     // is configured for, and the two disagree about as often as they agree.
     culture: () => client.localization.culture(),
     hourCycle: () => client.localization.hourCycle(),
+    hourPadded: () => client.localization.hourPadded(),
     simpleRendering: () => rendering.simple(),
     fontFamily: faceId => (faceId ? `MacroDeckFont_${faceId}, var(--font-sans)` : null),
     fontReady: faceId => fonts.ready(faceId),

@@ -51,6 +51,14 @@
     {
       "tree": "conformance-todo-header-tree.json",
       "cases": [{ "tile": { "width": 295, "height": 295 }, "basis": 295 }]
+    },
+    {
+      "tree": "conformance-clock-widget-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
     }
   ]
 }

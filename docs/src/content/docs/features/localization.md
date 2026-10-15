@@ -230,8 +230,10 @@ var text = Strings.Issues.ResumesAt(time: format.Format(TimeOnly.FromDateTime(re
 `TimeOfDayFormat` (`MacroDeck.Sdk.Locale`) carries the `Culture` of the Macro Deck interface and the
 `HourCycle`, `HourCycles.H12` or `HourCycles.H23`: the user's 12-hour or 24-hour setting, or the operating
 system's when the setting follows the system. `Format` writes the culture's short time pattern in that hour
-cycle; a 12-hour clock in a culture without AM/PM designators is written as `h:mm tt` in the invariant
-culture.
+cycle. A 24-hour clock in a culture whose pattern is 12-hour, such as English or Korean, has a two-digit hour
+(`09:05`), the way those languages write a 24-hour clock; a 24-hour pattern keeps its own (`09:05` in German,
+`9:05` in Spanish). A 12-hour clock never pads the hour, and in a culture without AM/PM designators it is
+written as `h:mm tt` in the invariant culture.
 
 A plugin's call crosses as `locale`/`time-of-day-format`. A Macro Deck that predates it, and a context that
 does not implement `Locale`, answer the process's current culture with a 24-hour clock. In tests, set

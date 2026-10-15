@@ -14,6 +14,8 @@ export interface UiRenderHost {
 
   hourCycle?(): 'h12' | 'h23' | undefined;
 
+  hourPadded?(): boolean | undefined;
+
   simpleRendering(): boolean;
 
   fontFamily(faceId: string): string | null;

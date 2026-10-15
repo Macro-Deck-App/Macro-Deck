@@ -93,6 +93,20 @@ describe('ModalHost', () => {
     expect(calls[1].payload).toEqual([{ sessionId: 's1' }]);
   });
 
+  it('writes a clock with the leading zero the host states', async () => {
+    const own = document.createElement('div');
+    document.body.appendChild(own);
+    new ModalHost(own, client, {
+      ...host, now: () => Date.parse('2026-01-02T03:04:05Z'), culture: () => 'es', hourCycle: () => 'h23', hourPadded: () => true,
+    });
+    await open();
+    client.sessions.treeUpdated('s1', 1,
+      { id: 'root', type: 'macrodeck.dynamic-text', properties: { format: 'time', value: { $time: { zone: 'UTC' } } } } as UiNode);
+
+    expect(own.querySelector('.wc-modal-content .widget-dynamic-text')!.textContent).toBe('03:04');
+    own.remove();
+  });
+
   it('draws the tree the host pushed for it', async () => {
     await open();
     client.sessions.treeUpdated('s1', 1, tree());

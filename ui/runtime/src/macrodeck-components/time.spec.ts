@@ -66,6 +66,34 @@ describe('pinned time formats', () => {
   });
 });
 
+describe('the time format the host states', () => {
+  const MORNING = new Date(Date.UTC(2025, 11, 31, 9, 5, 7));
+  const whole = (run: { before: string; seconds: string; after: string }) =>
+    `${run.before}${run.seconds}${run.after}`;
+
+  it('writes the leading zero the host states for its cycle, whatever the reader\'s locale data writes', () => {
+    const padded = formatTimeRun(MORNING, 'UTC', false, 'en-DE', undefined, 'h23', true);
+    const bare = formatTimeRun(MORNING, 'UTC', false, 'en-US', undefined, 'h23', false);
+
+    expect(whole(padded)).toBe('09:05');
+    expect(whole(bare)).toBe('9:05');
+  });
+
+  it('keeps the reader\'s own leading zero for the cycle when the host states none', () => {
+    const run = formatTimeRun(MORNING, 'UTC', false, 'en-US', undefined, 'h23');
+
+    expect(whole(run)).toBe(new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC',
+    }).format(MORNING));
+  });
+
+  it('lets a pinned face win over the host\'s format', () => {
+    const run = formatTimeRun(MORNING, 'UTC', false, 'en-GB', { cycle: 'h23', padded: false }, 'h23', true);
+
+    expect(whole(run)).toBe('9:05');
+  });
+});
+
 describe('pinned date formats', () => {
   // The last day of the year: the one date where a wrong zone shows a different year, not just a
   // different day.

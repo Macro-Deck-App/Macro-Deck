@@ -105,6 +105,32 @@ describe('LocalizationService', () => {
     expect(service.translate('macrodeck', 'Common.Save')).toBe('Speichern');
   });
 
+  it('takes the leading zero the host states and keeps it for the next start, or forgets it', async () => {
+    apiSpy.getLocalization.and.resolveTo({
+      culture: 'de-DE', fallbackCulture: 'en', translations: {}, followSystem: false,
+      availableCultures: ['en', 'de-DE'], hourCycle: 'h23', hourPadded: true,
+    } as never);
+    const service = create();
+    await service.loadFromHost();
+
+    expect(service.hourPadded()).toBeTrue();
+    expect(localStorage.getItem('md.localization.hourPadded')).toBe('true');
+
+    apiSpy.getLocalization.and.resolveTo({
+      culture: 'de-DE', fallbackCulture: 'en', translations: {}, followSystem: false, availableCultures: ['en', 'de-DE'],
+    });
+    await service.loadFromHost();
+
+    expect(service.hourPadded()).toBeUndefined();
+    expect(localStorage.getItem('md.localization.hourPadded')).toBeNull();
+  });
+
+  it('starts with the leading zero it kept from the last start', () => {
+    localStorage.setItem('md.localization.hourPadded', 'false');
+
+    expect(create().hourPadded()).toBeFalse();
+  });
+
   it('refetches the catalog when the host pushes a culture change', async () => {
     create();
 

@@ -33,6 +33,16 @@ public class ClockWidgetViewTests
 	}
 
 	[Test]
+	public void The_conformance_fixture_of_the_shipped_clock_is_what_the_default_clock_builds()
+	{
+		var fixture = File.ReadAllText(Path.Combine(FixtureDirectory(), "conformance-clock-widget-tree.json"));
+
+		Assert.That(Render(new { }).ToCanonicalJson(),
+			Is.EqualTo(fixture.Trim()),
+			"The default clock changed: regenerate conformance-clock-widget-tree.json and re-measure it.");
+	}
+
+	[Test]
 	public void The_time_and_the_date_travel_as_references_rather_than_text()
 	{
 		var host = Render(new { });
@@ -428,6 +438,19 @@ public class ClockWidgetViewTests
 				yield return descendant;
 			}
 		}
+	}
+
+	private static string FixtureDirectory()
+	{
+		var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+		while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "ui-model", "fixtures")))
+		{
+			directory = directory.Parent;
+		}
+
+		Assert.That(directory, Is.Not.Null, "the repository root carrying ui-model/fixtures was not found");
+
+		return Path.Combine(directory!.FullName, "ui-model", "fixtures", "component-profile");
 	}
 
 	private static UiTestHost Render(object data)

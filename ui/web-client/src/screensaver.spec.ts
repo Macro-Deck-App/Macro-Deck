@@ -74,6 +74,20 @@ describe('screensaver', () => {
     return event;
   };
 
+  it('writes a clock with the leading zero the host states', async () => {
+    saver = new ScreenSaver({
+      connection, sessions, localization: catalog, onDismiss: () => undefined,
+      host: { ...host, now: () => Date.parse('2026-01-02T03:04:05Z'), culture: () => 'es', hourCycle: () => 'h23', hourPadded: () => true },
+    });
+    document.body.appendChild(saver.element);
+    saver.show();
+    await settle();
+    sessions.treeUpdated(sessionId(), 1,
+      { id: 'root', type: 'macrodeck.dynamic-text', properties: { format: 'time', value: { $time: { zone: 'UTC' } } } } as UiNode);
+
+    expect(saver.element.querySelector('.widget-dynamic-text')!.textContent).toBe('03:04');
+  });
+
   it('opens the surface, attaches and draws the tree while it shows', async () => {
     const view = mount();
     view.show();

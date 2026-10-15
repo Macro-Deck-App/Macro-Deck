@@ -51,7 +51,15 @@ function timeRun(node: UiNode, ctx: UiComponentContext<UiDynamicTextState>): Tim
   const plain = (before: string): TimeRun => ({ before, seconds: '', after: '' });
 
   if (format === UiTimeFormats.Time) {
-    return formatTimeRun(instant, reference.zone, showsSeconds(node), locale, undefined, ctx.host.hourCycle?.());
+    return formatTimeRun(
+      instant,
+      reference.zone,
+      showsSeconds(node),
+      locale,
+      undefined,
+      ctx.host.hourCycle?.(),
+      ctx.host.hourPadded?.(),
+    );
   }
   if (format in HOUR_STYLES) {
     return formatTimeRun(instant, reference.zone, showsSeconds(node), locale, HOUR_STYLES[format]);
@@ -126,12 +134,12 @@ export const macrodeckDynamicTextComponent: UiComponentDefinition<UiDynamicTextS
     if (state.secondsAfter!.nodeValue !== run.after) state.secondsAfter!.nodeValue = run.after;
     if (seconds.textContent !== run.seconds) seconds.textContent = run.seconds;
     ctx.setStyle(seconds, 'color', 'var(--color-text-muted)');
+    ctx.setStyle(seconds, 'font-size', '0.55em');
 
     const declared = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx);
     const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx);
-    ctx.keepFit(element, textFit(element, declared, minSize, size => {
-      ctx.setStyle(seconds, 'font-size', size === undefined ? null : px(size * 0.55));
-    }), `${declared}|${minSize}|${run.before}${run.seconds}${run.after}|${ctx.host.uiFontKey?.() ?? ''}`);
+    ctx.keepFit(element, textFit(element, declared, minSize),
+      `${declared}|${minSize}|${run.before}${run.seconds}${run.after}|${ctx.host.uiFontKey?.() ?? ''}`);
   },
 
   intrinsicMainPx: textIntrinsicMainPx,

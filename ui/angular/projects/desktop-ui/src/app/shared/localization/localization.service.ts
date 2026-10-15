@@ -23,6 +23,7 @@ const STORAGE_KEY_AVAILABLE_CULTURES = 'md.localization.availableCultures';
 const STORAGE_KEY_FOLLOW_SYSTEM = 'md.localization.followSystem';
 const STORAGE_KEY_TIME_FORMAT = 'md.localization.timeFormat';
 const STORAGE_KEY_HOUR_CYCLE = 'md.localization.hourCycle';
+const STORAGE_KEY_HOUR_PADDED = 'md.localization.hourPadded';
 
 export const DEFAULT_CULTURE = 'en';
 
@@ -45,6 +46,7 @@ export class LocalizationService {
   readonly followsSystem = signal(false);
   readonly timeFormat = signal<LocalizationTimeFormat>('system');
   readonly hourCycle = signal<LocalizationHourCycle | undefined>(undefined);
+  readonly hourPadded = signal<boolean | undefined>(undefined);
 
   private readonly translations = signal<Record<string, string>>({ ...BUNDLED_DEFAULTS });
 
@@ -147,6 +149,7 @@ export class LocalizationService {
     this.followsSystem.set(response.followSystem ?? false);
     this.timeFormat.set(isTimeFormat(response.timeFormat) ? response.timeFormat : 'system');
     this.hourCycle.set(isHourCycle(response.hourCycle) ? response.hourCycle : undefined);
+    this.hourPadded.set(typeof response.hourPadded === 'boolean' ? response.hourPadded : undefined);
     this.catalogVersion.update(v => v + 1);
     this.syncDocument();
     this.persist();
@@ -174,6 +177,9 @@ export class LocalizationService {
       const hourCycle = this.hourCycle();
       if (hourCycle) localStorage.setItem(STORAGE_KEY_HOUR_CYCLE, hourCycle);
       else localStorage.removeItem(STORAGE_KEY_HOUR_CYCLE);
+      const hourPadded = this.hourPadded();
+      if (hourPadded === undefined) localStorage.removeItem(STORAGE_KEY_HOUR_PADDED);
+      else localStorage.setItem(STORAGE_KEY_HOUR_PADDED, String(hourPadded));
     } catch {
     }
   }
@@ -192,6 +198,8 @@ export class LocalizationService {
       if (isTimeFormat(timeFormat)) this.timeFormat.set(timeFormat);
       const hourCycle = localStorage.getItem(STORAGE_KEY_HOUR_CYCLE);
       if (isHourCycle(hourCycle)) this.hourCycle.set(hourCycle);
+      const hourPadded = localStorage.getItem(STORAGE_KEY_HOUR_PADDED);
+      if (hourPadded === 'true' || hourPadded === 'false') this.hourPadded.set(hourPadded === 'true');
       if (rawTranslations) {
         const parsed: unknown = JSON.parse(rawTranslations);
         if (isTranslationMap(parsed)) this.merge(parsed);

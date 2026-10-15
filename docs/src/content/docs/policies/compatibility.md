@@ -259,7 +259,10 @@ What did **not** need a major:
   `host.state` are new: an older host answers `CAPABILITY_UNSUPPORTED` or pushes nothing, and the SDK falls
   back to those same defaults; an older SDK ignores the `http` push. Storage needs no host support: a plugin
   keeps it in its own data directory. `HourCycles` and `TimeOfDayFormat` (`MacroDeck.Sdk.Locale`) and
-  `IntegrationStorageKeys` (`MacroDeck.Sdk.Storage`) are new SDK types.
+  `IntegrationStorageKeys` (`MacroDeck.Sdk.Storage`) are new SDK types. After 3.0.0-beta.17,
+  `TimeOfDayFormat.Format` writes a 24-hour clock in a culture whose pattern is 12-hour with a two-digit
+  hour (`09:05`, before `9:05`); the API is unchanged, and a plugin built against beta.17 keeps its own copy
+  of the formatter until it is rebuilt.
 - `maxUiResourceBytesPerPlugin` and `maxUiResourcesPerPlugin` rose from 16 MiB and 256 to 48 MiB and 1024.
   The host advertises them in the protocol descriptor; a plugin built against an older SDK keeps its
   own, lower quota, which a newer host still accepts.

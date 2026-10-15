@@ -43,6 +43,7 @@ lays out from it:
 | `conformance-video-stream-layout.json` | each view's box, drawn with no session: the placeholder fills the box the stack gave it |
 | `conformance-text-fit-tree.json` | the wire form of the text a browser has to squeeze, cut off or clamp - see below; it has no layout table, only a measured file |
 | `conformance-todo-header-tree.json` | the Todo List header before its fix: a count with no `mainSize` beside a `fill` title, where the browser shrinks the count and "128" is cut off |
+| `conformance-clock-widget-tree.json` | the default Clock widget exactly as the host builds it - a fitted time with seconds and a date in the widget's own padding; it has no layout table, only a measured file |
 | `measured-scenes.json` | which trees are measured, at which tiles and bases, with which face |
 | `<scene>-measured.json` | what headless Chrome **lays out** from each tree: every node's box, and each text's natural width, given width and whether it is cut off - generated, never hand-edited |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
@@ -70,6 +71,13 @@ runtime in headless Chrome and writes, per case and per node id:
 - for every `.widget-text` element the node draws: `text` as drawn, `naturalWidth` (the max-content
   width), `givenWidth` (the computed width it was given) and `truncated` - `x` when `scrollWidth >
   clientWidth`, `y` when an unclamped copy at the same width is taller than the height it was given.
+
+The files record what the runtime draws, so they cannot by themselves tell a wrong fit from a right one.
+One rule comes from the contract instead: a text whose node states a `minSize` is cut off only once it is
+fitted down to that minimum. The script checks every text against it before it writes or compares
+anything, and refuses a text cut off above its minimum (`fitProblems` in `measure-conformance/compare.mjs`).
+It resolves a minimum from `basis` and `maxOfCell`; a tree whose minimum has a cross or parent term is
+refused rather than left unchecked.
 
 The frame is the jsdom spec's: the tree is rendered unscaled at the case's `tile` with its `basis`, so
 every number is in tile px. Cases come from the tree's layout table when it has one; a case without a
@@ -230,6 +238,21 @@ whatever space its siblings leave, and adding a node to it would move the very g
   beside its version 1 fallback. This is the degradation the pinned formats depend on: an unknown format
   value is caught by nothing, so without the version ask a reader draws an empty run rather than a clock.
   The fixture states that the asking node is **not** drawn and its fallback is.
+
+## What the clock widget tree deliberately contains
+
+Not authored for the fixture, unlike the other trees: it is the default Clock widget as
+`ClockWidgetView` builds it, and `ClockWidgetViewTests` fails when the two drift apart. It is here
+because the authored clock tree pads less than the widget does, so its time never had to shrink much.
+While the runtime fitted the clock against a stale size for its seconds, both clock files recorded the
+cut-off time as `truncated.x: true`, and regenerating them carried the bug along; the minimum rule above is
+what refuses that now.
+
+- a time with `seconds` that is wider than its box at its declared size, so it has to be fitted with
+  the seconds at 0.55 of every size the fit tries - a reader that measures the seconds at a stale size
+  fits too large and cuts the time off with an ellipsis;
+- measured in a 1x1 tile, where the fit settles a fraction of a unit inside the box, and in a 2x1 and
+  a 1x2 tile, where the time has room or the same width as in 1x1.
 
 ## What the slider tree deliberately contains
 

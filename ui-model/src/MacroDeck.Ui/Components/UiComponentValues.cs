@@ -314,13 +314,15 @@ public static class UiTimeFormats
 	/// The clock time of the referenced instant, formatted in the reader's own language, including the
 	/// seconds exactly when <see cref="UiComponentProperties.Seconds" /> is set. The hour cycle follows the
 	/// user's app-wide time format preference (12-hour, 24-hour or the operating system's) when the host
-	/// supplies one, and the reader's language otherwise; the pinned <c>time-*</c> formats are unaffected.
+	/// supplies one, and the reader's language otherwise; so does the hour's leading zero, which the host
+	/// states with the hour cycle. The pinned <c>time-*</c> formats are unaffected.
 	///
 	/// <para>
 	/// <b>The seconds are drawn differently, and that is normative</b> - the properties do not say so,
 	/// and a reader that ignores it draws a visibly different clock. The seconds, together with the
-	/// separator in front of them, are drawn at <c>0.55</c> of the run's own
-	/// <see cref="UiComponentProperties.Size" /> and in <see cref="UiComponentTextRoles.Muted" />; everything
+	/// separator in front of them, are drawn at <c>0.55</c> of the run's size - its own
+	/// <see cref="UiComponentProperties.Size" />, or the size it inherits where it states none - and in
+	/// <see cref="UiComponentTextRoles.Muted" />; everything
 	/// else in the run uses the node's own size and role. Digits are drawn with equal advance width, so
 	/// the run does not shift sideways as it counts.
 	/// </para>

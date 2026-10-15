@@ -51,6 +51,7 @@ export class UiWidgetRenderHostFactory {
       now: () => this.serverClock.now(),
       culture: () => this.localization.culture(),
       hourCycle: () => this.localization.hourCycle(),
+      hourPadded: () => this.localization.hourPadded(),
       simpleRendering: () => this.renderingMode.mode() === 'simple',
       fontFamily: faceId => `${internalFontFamily(faceId)}, var(--font-sans)`,
       // Reading the face's status signal inside the paint is the whole of the readiness gate: the
