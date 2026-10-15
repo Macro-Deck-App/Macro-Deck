@@ -583,7 +583,7 @@ example `battery_pixel_8_3f9a1c2e_level`. They belong to the integration or plug
 so on the **Variables** page an Android phone's variables are listed under **ADB / Android Debug Bridge**
 and a headset's under the plugin that reports it:
 
-- `_level`: the charge in percent.
+- `_level`: the charge in percent, with the unit `%`.
 - `_charging`: whether the device charges.
 - `_connected`: whether the device is reachable.
 - `_state`: `charging`, `discharging`, `full`, `not-charging` (plugged in but not charging) or `unknown`,
