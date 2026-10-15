@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Auth;
+using MacroDeckHost.Integrations.Spotify.Providers;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using Serilog;
 using Serilog.Core;

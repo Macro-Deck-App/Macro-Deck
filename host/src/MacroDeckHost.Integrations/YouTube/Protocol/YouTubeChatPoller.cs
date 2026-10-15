@@ -1,4 +1,5 @@
 using MacroDeckHost.Integrations.YouTube.Auth;
+using MacroDeckHost.Integrations.YouTube.Chat;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.YouTube.Protocol;

@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
+using MacroDeckHost.Integrations.Twitch.Events;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog;
 using Serilog.Core;

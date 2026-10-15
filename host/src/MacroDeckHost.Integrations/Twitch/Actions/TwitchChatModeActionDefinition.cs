@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Twitch.Connections;
 
 namespace MacroDeckHost.Integrations.Twitch.Actions;
 

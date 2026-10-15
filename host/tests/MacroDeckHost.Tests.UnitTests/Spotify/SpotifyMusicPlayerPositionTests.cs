@@ -1,6 +1,8 @@
 using System.Net;
 using MacroDeck.Sdk.MusicPlayer;
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Auth;
+using MacroDeckHost.Integrations.Spotify.Protocol;
+using MacroDeckHost.Integrations.Spotify.Providers;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using Serilog;
 using SpotifyAPI.Web;

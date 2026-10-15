@@ -1,6 +1,7 @@
 using System.Text;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Streamerbot;
+using MacroDeckHost.Integrations.Streamerbot.Configuration;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;

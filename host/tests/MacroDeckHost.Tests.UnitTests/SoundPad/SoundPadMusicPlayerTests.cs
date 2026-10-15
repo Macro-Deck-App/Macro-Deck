@@ -1,5 +1,8 @@
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeckHost.Integrations.SoundPad;
+using MacroDeckHost.Integrations.SoundPad.Connections;
+using MacroDeckHost.Integrations.SoundPad.Protocol;
+using MacroDeckHost.Integrations.SoundPad.Providers;
 using static MacroDeckHost.Tests.UnitTests.SoundPad.SoundPadTestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.SoundPad;

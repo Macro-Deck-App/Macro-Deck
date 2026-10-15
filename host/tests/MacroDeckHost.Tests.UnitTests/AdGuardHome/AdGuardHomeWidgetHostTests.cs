@@ -8,6 +8,9 @@ using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Integrations.AdGuardHome;
+using MacroDeckHost.Integrations.AdGuardHome.Configuration;
+using MacroDeckHost.Integrations.AdGuardHome.State;
+using MacroDeckHost.Integrations.AdGuardHome.Widgets;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 

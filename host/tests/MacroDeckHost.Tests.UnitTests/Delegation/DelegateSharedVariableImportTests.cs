@@ -3,6 +3,8 @@ using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Delegation;
+using MacroDeckHost.Integrations.Delegation.Configuration;
+using MacroDeckHost.Integrations.Delegation.Connections;
 using MacroDeckHost.Integrations.Delegation.Protocol;
 using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;

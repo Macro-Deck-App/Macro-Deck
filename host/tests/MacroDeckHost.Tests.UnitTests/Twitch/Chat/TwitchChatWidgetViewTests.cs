@@ -8,6 +8,7 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Integrations.Streaming.Widgets;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.Streaming;
 using MacroDeckHost.Tests.UnitTests.TestSupport;

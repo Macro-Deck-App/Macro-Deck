@@ -5,6 +5,7 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.YouTube;
+using MacroDeckHost.Integrations.YouTube.Widgets;
 using MacroDeckHost.Tests.UnitTests.Streaming;
 using MacroDeckHost.Integrations.Streaming.Widgets;
 using Serilog.Core;

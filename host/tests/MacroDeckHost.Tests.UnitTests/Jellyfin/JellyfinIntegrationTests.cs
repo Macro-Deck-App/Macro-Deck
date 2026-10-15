@@ -5,6 +5,9 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Integrations.Jellyfin;
+using MacroDeckHost.Integrations.Jellyfin.Configuration;
+using MacroDeckHost.Integrations.Jellyfin.Events;
+using MacroDeckHost.Integrations.Jellyfin.State;
 using static MacroDeckHost.Tests.UnitTests.Jellyfin.JellyfinSessions;
 
 namespace MacroDeckHost.Tests.UnitTests.Jellyfin;

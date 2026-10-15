@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MacroDeckHost.Integrations.HomeAssistant;
+using MacroDeckHost.Integrations.HomeAssistant.Events;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.HomeAssistant;

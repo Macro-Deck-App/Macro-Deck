@@ -3,7 +3,11 @@ using MacroDeck.Sdk.Identity;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Enums;
-using MacroDeckHost.Integrations.Steam;
+using MacroDeckHost.Integrations.Steam.Events;
+using MacroDeckHost.Integrations.Steam.Native;
+using MacroDeckHost.Integrations.Steam.Protocol;
+using MacroDeckHost.Integrations.Steam.State;
+using MacroDeckHost.Integrations.Steam.Widgets;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 
 namespace MacroDeckHost.Tests.UnitTests.Steam;

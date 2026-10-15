@@ -2,6 +2,8 @@ using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Integrations.Twitch.Connections;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog.Core;
 

@@ -1,4 +1,6 @@
 using MacroDeckHost.Integrations.YtmDesktop;
+using MacroDeckHost.Integrations.YtmDesktop.Configuration;
+using MacroDeckHost.Integrations.YtmDesktop.Variables;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Issues;

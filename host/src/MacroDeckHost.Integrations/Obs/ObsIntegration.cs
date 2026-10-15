@@ -8,6 +8,12 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Obs.Configuration;
+using MacroDeckHost.Integrations.Obs.Connections;
+using MacroDeckHost.Integrations.Obs.Events;
+using MacroDeckHost.Integrations.Obs.Migration;
+using MacroDeckHost.Integrations.Obs.Protocol;
+using MacroDeckHost.Integrations.Obs.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Obs;

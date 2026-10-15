@@ -1,5 +1,5 @@
 using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Integrations.System;
+using MacroDeckHost.Integrations.System.Variables;
 using MacroDeckHost.Integrations.System.Volume;
 
 namespace MacroDeckHost.Tests.UnitTests.System;

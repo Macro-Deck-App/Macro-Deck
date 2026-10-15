@@ -1,5 +1,7 @@
-using MacroDeckHost.Integrations.Voicemeeter;
 using MacroDeck.Sdk.Events;
+using MacroDeckHost.Integrations.Voicemeeter.Events;
+using MacroDeckHost.Integrations.Voicemeeter.Models;
+using MacroDeckHost.Integrations.Voicemeeter.State;
 
 namespace MacroDeckHost.Tests.UnitTests.Voicemeeter;
 

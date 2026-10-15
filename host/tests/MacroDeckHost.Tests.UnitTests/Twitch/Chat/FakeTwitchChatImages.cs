@@ -1,7 +1,7 @@
 using MacroDeck.Ui.Model.Resources;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 

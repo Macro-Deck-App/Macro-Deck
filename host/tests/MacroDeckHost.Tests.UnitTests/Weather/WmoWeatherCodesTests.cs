@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.Weather;
 using MacroDeck.Sdk.Weather;
+using MacroDeckHost.Integrations.Weather.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Weather;
 

@@ -10,6 +10,8 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Integrations.Jellyfin;
+using MacroDeckHost.Integrations.Jellyfin.Configuration;
+using MacroDeckHost.Integrations.Jellyfin.Connections;
 using MacroDeckHost.Integrations.Jellyfin.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Jellyfin;

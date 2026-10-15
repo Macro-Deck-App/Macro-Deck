@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Steam.Native;
+using MacroDeckHost.Integrations.Steam.State;
 using ActionStrings = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Actions;
 using Errors = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Errors;
 using Params = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Params;

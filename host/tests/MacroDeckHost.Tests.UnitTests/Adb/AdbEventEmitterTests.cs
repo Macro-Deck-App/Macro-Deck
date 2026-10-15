@@ -1,4 +1,5 @@
-using MacroDeckHost.Integrations.Adb;
+using MacroDeckHost.Integrations.Adb.Connections;
+using MacroDeckHost.Integrations.Adb.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
 

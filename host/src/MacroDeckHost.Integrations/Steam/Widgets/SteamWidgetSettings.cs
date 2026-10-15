@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeckHost.Integrations.Steam.Native;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;
 

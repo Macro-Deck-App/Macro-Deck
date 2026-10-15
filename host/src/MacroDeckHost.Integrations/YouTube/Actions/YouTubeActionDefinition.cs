@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Integrations.YouTube.Auth;
+using MacroDeckHost.Integrations.YouTube.Connections;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 using MacroDeckHost.Localization;
 using Serilog;

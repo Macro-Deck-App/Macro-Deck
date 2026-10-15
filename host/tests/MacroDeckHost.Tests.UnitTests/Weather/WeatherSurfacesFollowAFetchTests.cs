@@ -14,6 +14,7 @@ using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Integrations.Weather.Protocol;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 

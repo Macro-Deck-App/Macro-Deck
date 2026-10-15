@@ -6,6 +6,10 @@ using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
+using MacroDeckHost.Integrations.GoogleCalendar.Auth;
+using MacroDeckHost.Integrations.GoogleCalendar.Configuration;
+using MacroDeckHost.Integrations.GoogleCalendar.Connections;
+using MacroDeckHost.Integrations.GoogleCalendar.Protocol;
 using MacroDeckHost.Localization;
 using Serilog;
 

@@ -1,8 +1,9 @@
 using System.Globalization;
 using System.Text.Json.Nodes;
 using MacroDeck.Sdk.Actions;
-using MacroDeckHost.Integrations.Obs;
 using MacroDeckHost.Integrations.Obs.Actions;
+using MacroDeckHost.Integrations.Obs.Connections;
+using MacroDeckHost.Integrations.Obs.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;
 

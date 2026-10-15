@@ -1,6 +1,8 @@
 using System.Text.Json;
 using MacroDeckHost.Integrations.Streaming;
-using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Integrations.Twitch.Chat;
+using MacroDeckHost.Integrations.Twitch.Connections;
+using MacroDeckHost.Integrations.Twitch.Events;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog.Core;
 

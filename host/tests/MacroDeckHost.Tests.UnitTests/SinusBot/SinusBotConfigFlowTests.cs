@@ -1,4 +1,5 @@
-using MacroDeckHost.Integrations.SinusBot;
+using MacroDeckHost.Integrations.SinusBot.Configuration;
+using MacroDeckHost.Integrations.SinusBot.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.ConfigFlow;
 

@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeckHost.Integrations.Mouse.Models;
 
 namespace MacroDeckHost.Integrations.Mouse.Actions;
 

@@ -41,7 +41,7 @@ assets:
       - ui/web-client/public/icons/icon-maskable-512.png
       - ui/angular/projects/desktop-ui/public/favicon.ico
       - ui/angular/projects/desktop-ui/public/images/logo.png
-      - host/src/MacroDeckHost.Integrations/Delegation/delegate-icon.png
+      - host/src/MacroDeckHost.Integrations/Delegation/Icons/delegate-icon.png
 
   - name: Lucide icons
     url: https://github.com/lucide-icons/lucide
@@ -189,14 +189,14 @@ assets:
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/volume-2.svg
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/wifi.svg
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/zap.svg
-      - host/src/MacroDeckHost.Integrations/Companion/companion-icon.svg
-      - host/src/MacroDeckHost.Integrations/Http/http-icon.svg
-      - host/src/MacroDeckHost.Integrations/Imap/imap.svg
-      - host/src/MacroDeckHost.Integrations/Keyboard/keyboard-icon.svg
-      - host/src/MacroDeckHost.Integrations/Mouse/mouse-icon.svg
-      - host/src/MacroDeckHost.Integrations/System/system-icon.svg
-      - host/src/MacroDeckHost.Integrations/Voicemeeter/voicemeeter-icon.svg
-      - host/src/MacroDeckHost.Integrations/Weather/weather-icon.svg
+      - host/src/MacroDeckHost.Integrations/Companion/Icons/companion-icon.svg
+      - host/src/MacroDeckHost.Integrations/Http/Icons/http-icon.svg
+      - host/src/MacroDeckHost.Integrations/Imap/Icons/imap-icon.svg
+      - host/src/MacroDeckHost.Integrations/Keyboard/Icons/keyboard-icon.svg
+      - host/src/MacroDeckHost.Integrations/Mouse/Icons/mouse-icon.svg
+      - host/src/MacroDeckHost.Integrations/System/Icons/system-icon.svg
+      - host/src/MacroDeckHost.Integrations/Voicemeeter/Icons/voicemeeter-icon.svg
+      - host/src/MacroDeckHost.Integrations/Weather/Icons/weather-icon.svg
       - ui/angular/projects/desktop-ui/src/app/components/action-builder/action-card/nested-action-list.component.html
       - ui/angular/projects/desktop-ui/src/app/components/config-flow/config-field.component.ts
       - ui/angular/projects/desktop-ui/src/app/components/forms/color-picker/color-picker.component.html
@@ -226,15 +226,15 @@ assets:
       microsoft-outlook.svg with its CSS converted to presentation attributes.
     paths:
       - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/logo.svg
-      - host/src/MacroDeckHost.Integrations/Discord/discord-icon.svg
-      - host/src/MacroDeckHost.Integrations/HomeAssistant/home-assistant-icon.svg
+      - host/src/MacroDeckHost.Integrations/Discord/Icons/discord-icon.svg
+      - host/src/MacroDeckHost.Integrations/HomeAssistant/Icons/home-assistant-icon.svg
       - host/src/MacroDeckHost.Integrations/Jellyfin/Icons/widget/logo.svg
-      - host/src/MacroDeckHost.Integrations/MicrosoftCalendar/outlook-calendar-icon.svg
-      - host/src/MacroDeckHost.Integrations/Spotify/spotify-icon.svg
+      - host/src/MacroDeckHost.Integrations/MicrosoftCalendar/Icons/outlook-calendar-icon.svg
+      - host/src/MacroDeckHost.Integrations/Spotify/Icons/spotify-icon.svg
       - host/src/MacroDeckHost.Integrations/Steam/Icons/widget/logo.svg
       - host/src/MacroDeckHost.Integrations/Twitch/Icons/widget/logo.svg
       - host/src/MacroDeckHost.Integrations/YouTube/Icons/widget/logo.svg
-      - host/src/MacroDeckHost.Integrations/YtmDesktop/ytmdesktop-icon.svg
+      - host/src/MacroDeckHost.Integrations/YtmDesktop/Icons/ytmdesktop-icon.svg
       - ui/runtime/styles/icons/windows.svg
 
   - name: Android robot
@@ -247,7 +247,7 @@ assets:
       work created and shared by Google and used according to terms described in the Creative Commons 3.0
       Attribution License.
     paths:
-      - host/src/MacroDeckHost.Integrations/Adb/adb-icon.svg
+      - host/src/MacroDeckHost.Integrations/Adb/Icons/adb-icon.svg
 
   - name: Simple Icons (Discord glyph)
     url: https://github.com/simple-icons/simple-icons
@@ -281,13 +281,13 @@ assets:
       (File:Google_Calendar_icon_(2026).svg), with editor metadata and inline styles removed and a viewBox added.
       The SoundPad logo is Leppsoft's own, from leppsoft.com/soundpad/images/logos/main-128.png.
     paths:
-      - host/src/MacroDeckHost.Integrations/Obs/obs-icon.svg
-      - host/src/MacroDeckHost.Integrations/Streamerbot/streamerbot-icon.svg
-      - host/src/MacroDeckHost.Integrations/Meld/meld-icon.svg
-      - host/src/MacroDeckHost.Integrations/StreamlabsDesktop/streamlabs-icon.png
-      - host/src/MacroDeckHost.Integrations/SinusBot/sinusbot-icon.svg
-      - host/src/MacroDeckHost.Integrations/GoogleCalendar/google-calendar-icon.svg
-      - host/src/MacroDeckHost.Integrations/SoundPad/soundpad-icon.png
+      - host/src/MacroDeckHost.Integrations/Obs/Icons/obs-icon.svg
+      - host/src/MacroDeckHost.Integrations/Streamerbot/Icons/streamerbot-icon.svg
+      - host/src/MacroDeckHost.Integrations/Meld/Icons/meld-icon.svg
+      - host/src/MacroDeckHost.Integrations/StreamlabsDesktop/Icons/streamlabs-icon.png
+      - host/src/MacroDeckHost.Integrations/SinusBot/Icons/sinusbot-icon.svg
+      - host/src/MacroDeckHost.Integrations/GoogleCalendar/Icons/google-calendar-icon.svg
+      - host/src/MacroDeckHost.Integrations/SoundPad/Icons/soundpad-icon.png
 
   - name: Weather icons (Makin-Things/weather-icons)
     url: https://github.com/Makin-Things/weather-icons
@@ -296,7 +296,8 @@ assets:
     note: Weather widget icons, embedded in the host. Artwork (c) ammap.com.
     paths:
       - host/src/MacroDeckHost.Widgets/Weather/Icons/**/*.svg
-      - host/src/MacroDeckHost.Integrations/Weather/Icons/**/*.svg
+      - host/src/MacroDeckHost.Integrations/Weather/Icons/animated/**/*.svg
+      - host/src/MacroDeckHost.Integrations/Weather/Icons/static/**/*.svg
 
   - name: WebNowPlaying icon
     url: https://github.com/keifufu/WebNowPlaying
@@ -304,7 +305,7 @@ assets:
     copyright: keifufu (2024)
     note: The WebNowPlaying integration icon is adapted from the WebNowPlaying logo.
     paths:
-      - host/src/MacroDeckHost.Integrations/WebNowPlaying/webnowplaying-icon.png
+      - host/src/MacroDeckHost.Integrations/WebNowPlaying/Icons/webnowplaying-icon.png
 
   - name: .NET runtime and ASP.NET Core runtime
     url: https://github.com/dotnet/dotnet

@@ -1,5 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.HomeAssistant.Connections;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.HomeAssistant.Actions;

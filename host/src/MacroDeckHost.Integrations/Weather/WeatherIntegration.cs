@@ -1,4 +1,9 @@
 using System.Globalization;
+using MacroDeckHost.Integrations.Weather.Actions;
+using MacroDeckHost.Integrations.Weather.Configuration;
+using MacroDeckHost.Integrations.Weather.Protocol;
+using MacroDeckHost.Integrations.Weather.Providers;
+using MacroDeckHost.Integrations.Weather.Widgets;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
@@ -8,7 +13,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
-using MacroDeckHost.Integrations.Weather.Details;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Weather;

@@ -1,5 +1,6 @@
 using System.Diagnostics;
-using MacroDeckHost.Integrations.Obs;
+using MacroDeckHost.Integrations.Obs.Connections;
+using MacroDeckHost.Integrations.Obs.Protocol;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;

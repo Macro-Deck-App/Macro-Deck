@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Providers;
 using SpotifyAPI.Web;
 
 namespace MacroDeckHost.Tests.UnitTests.Spotify;

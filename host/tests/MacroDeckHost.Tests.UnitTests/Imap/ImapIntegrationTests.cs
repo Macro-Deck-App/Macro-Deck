@@ -4,6 +4,8 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Email;
 using MacroDeck.Sdk.Issues;
 using MacroDeckHost.Integrations.Imap;
+using MacroDeckHost.Integrations.Imap.Configuration;
+using MacroDeckHost.Integrations.Imap.Protocol;
 using static MacroDeckHost.Tests.UnitTests.Imap.ImapTestTimings;
 
 namespace MacroDeckHost.Tests.UnitTests.Imap;

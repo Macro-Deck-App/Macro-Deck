@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
+using MacroDeckHost.Integrations.System.State;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeck.Sdk;

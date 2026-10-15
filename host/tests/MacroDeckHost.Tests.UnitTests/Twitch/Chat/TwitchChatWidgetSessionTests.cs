@@ -3,6 +3,7 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 using MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.Calendar;

@@ -7,6 +7,8 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Integrations.AdGuardHome;
+using MacroDeckHost.Integrations.AdGuardHome.Connections;
+using MacroDeckHost.Integrations.AdGuardHome.State;
 using MacroDeckHost.Integrations.AdGuardHome.Widgets;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;

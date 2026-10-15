@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Adb.Actions;
+using MacroDeckHost.Integrations.Adb.State;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Android;

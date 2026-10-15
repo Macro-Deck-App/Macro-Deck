@@ -1,4 +1,10 @@
 using System.Globalization;
+using MacroDeckHost.Integrations.WebNowPlaying.Connections;
+using MacroDeckHost.Integrations.WebNowPlaying.Migration;
+using MacroDeckHost.Integrations.WebNowPlaying.Protocol;
+using MacroDeckHost.Integrations.WebNowPlaying.Providers;
+using MacroDeckHost.Integrations.WebNowPlaying.State;
+using MacroDeckHost.Integrations.WebNowPlaying.Variables;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;

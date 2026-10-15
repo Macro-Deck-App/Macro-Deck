@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Configuration;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.ConfigFlow;
 

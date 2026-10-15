@@ -1,6 +1,7 @@
 using System.Text.Json;
-using MacroDeckHost.Integrations.Discord;
 using MacroDeck.Sdk.Events;
+using MacroDeckHost.Integrations.Discord.Events;
+using MacroDeckHost.Integrations.Discord.State;
 
 namespace MacroDeckHost.Tests.UnitTests.Discord;
 

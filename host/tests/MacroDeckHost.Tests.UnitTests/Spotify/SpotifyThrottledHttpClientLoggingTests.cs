@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Net;
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Protocol;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;

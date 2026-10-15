@@ -1,6 +1,8 @@
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Companion.Configuration;
+using MacroDeckHost.Integrations.Companion.Variables;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Companion;
 
 namespace MacroDeckHost.Integrations.Companion;

@@ -1,4 +1,8 @@
 using MacroDeckHost.Integrations.HomeAssistant.Actions;
+using MacroDeckHost.Integrations.HomeAssistant.Configuration;
+using MacroDeckHost.Integrations.HomeAssistant.Connections;
+using MacroDeckHost.Integrations.HomeAssistant.Events;
+using MacroDeckHost.Integrations.HomeAssistant.Migration;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
@@ -10,6 +14,8 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.HomeAssistant.State;
+using MacroDeckHost.Integrations.HomeAssistant.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
 

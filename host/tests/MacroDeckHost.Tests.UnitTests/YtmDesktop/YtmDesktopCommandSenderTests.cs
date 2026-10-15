@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using MacroDeckHost.Integrations.YtmDesktop;
+using MacroDeckHost.Integrations.YtmDesktop.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.YtmDesktop;
 

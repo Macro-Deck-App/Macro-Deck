@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Configuration;
-using MacroDeckHost.Integrations.Discord;
-using MacroDeckHost.Integrations.Discord.Rpc;
+using MacroDeckHost.Integrations.Discord.Auth;
+using MacroDeckHost.Integrations.Discord.Configuration;
+using MacroDeckHost.Integrations.Discord.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.ConfigFlow;
 

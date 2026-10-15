@@ -1,5 +1,5 @@
 using System.Globalization;
-using MacroDeckHost.Integrations.Obs;
+using MacroDeckHost.Integrations.Obs.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;
 

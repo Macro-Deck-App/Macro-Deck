@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Integrations.YouTube;
+using MacroDeckHost.Integrations.YouTube.Connections;
+using MacroDeckHost.Integrations.YouTube.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.YouTube;
 

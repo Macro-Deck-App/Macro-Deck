@@ -1,5 +1,6 @@
 using System.Globalization;
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Auth;
+using MacroDeckHost.Integrations.Spotify.Configuration;
 using Serilog;
 using Serilog.Core;
 

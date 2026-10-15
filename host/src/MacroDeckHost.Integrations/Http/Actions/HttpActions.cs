@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.Http.Client;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Http.Protocol;
 
 namespace MacroDeckHost.Integrations.Http.Actions;
 

@@ -1,5 +1,9 @@
 using System.Globalization;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Actions;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Configuration;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Connections;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Events;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Migration;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
@@ -10,6 +14,8 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.StreamlabsDesktop.State;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
 

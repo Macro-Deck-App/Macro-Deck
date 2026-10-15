@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text.Json;
 using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeckHost.Integrations.HomeAssistant.Actions;
+using MacroDeckHost.Integrations.HomeAssistant.Connections;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;

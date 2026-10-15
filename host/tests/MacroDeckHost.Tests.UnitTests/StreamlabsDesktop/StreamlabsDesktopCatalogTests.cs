@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.StreamlabsDesktop;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
+using MacroDeckHost.Integrations.StreamlabsDesktop.State;
 
 namespace MacroDeckHost.Tests.UnitTests.StreamlabsDesktop;
 

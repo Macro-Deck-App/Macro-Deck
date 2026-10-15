@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.StreamlabsDesktop;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Events;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 using MacroDeck.Sdk.Events;
 

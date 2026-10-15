@@ -1,6 +1,8 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
+using MacroDeckHost.Integrations.Voicemeeter.Connections;
+using MacroDeckHost.Integrations.Voicemeeter.Models;
 using MacroDeckHost.Localization;
 using Serilog;
 

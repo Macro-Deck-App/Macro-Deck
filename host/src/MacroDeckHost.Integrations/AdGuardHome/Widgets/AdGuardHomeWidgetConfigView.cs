@@ -3,6 +3,7 @@ using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Integrations.AdGuardHome.State;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.AdGuardHome;
 
 namespace MacroDeckHost.Integrations.AdGuardHome.Widgets;

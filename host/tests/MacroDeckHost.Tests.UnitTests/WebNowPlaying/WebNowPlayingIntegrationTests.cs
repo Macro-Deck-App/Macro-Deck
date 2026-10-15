@@ -6,6 +6,8 @@ using System.Net.WebSockets;
 using System.Text;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.WebNowPlaying;
+using MacroDeckHost.Integrations.WebNowPlaying.Connections;
+using MacroDeckHost.Integrations.WebNowPlaying.Variables;
 using MacroDeckHost.Tests.UnitTests.YtmDesktop;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.MusicPlayer;

@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Streamerbot.Connections;
 
 namespace MacroDeckHost.Integrations.Streamerbot.Actions;
 

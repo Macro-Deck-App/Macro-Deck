@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using MacroDeckHost.Integrations.Twitch.Auth;
+using MacroDeckHost.Integrations.Twitch.Connections;
 using Serilog;
 using TwitchLib.Api;
 using TwitchLib.Api.Core;

@@ -1,5 +1,8 @@
 using MacroDeck.Sdk.Events;
-using MacroDeckHost.Integrations.Obs;
+using MacroDeckHost.Integrations.Obs.Connections;
+using MacroDeckHost.Integrations.Obs.Events;
+using MacroDeckHost.Integrations.Obs.Protocol;
+using MacroDeckHost.Integrations.Obs.Variables;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;

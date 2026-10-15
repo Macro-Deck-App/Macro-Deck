@@ -1,7 +1,6 @@
 using System.Text.Json;
-using MacroDeckHost.Integrations.Http.Client;
-using MacroDeckHost.Integrations.Http.JsonPath;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Http.Protocol;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Http.Actions;

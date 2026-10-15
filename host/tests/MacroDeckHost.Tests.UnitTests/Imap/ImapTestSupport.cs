@@ -6,7 +6,9 @@ using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Integrations.Imap;
+using MacroDeckHost.Integrations.Imap.Configuration;
+using MacroDeckHost.Integrations.Imap.Connections;
+using MacroDeckHost.Integrations.Imap.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Imap;
 

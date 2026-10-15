@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
 using MacroDeckHost.Integrations.System.Metrics;
+using MacroDeckHost.Integrations.System.Variables;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Variables;

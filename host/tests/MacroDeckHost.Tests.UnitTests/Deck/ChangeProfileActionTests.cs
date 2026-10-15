@@ -1,6 +1,6 @@
-using MacroDeckHost.Integrations.Deck;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Decks;
+using MacroDeckHost.Integrations.Deck.Actions;
 
 namespace MacroDeckHost.Tests.UnitTests.Deck;
 

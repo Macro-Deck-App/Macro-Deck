@@ -1,4 +1,5 @@
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Configuration;
+using MacroDeckHost.Integrations.Spotify.Protocol;
 using Serilog;
 
 namespace MacroDeckHost.Tests.UnitTests.Spotify;

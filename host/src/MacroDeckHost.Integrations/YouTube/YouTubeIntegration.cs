@@ -12,6 +12,12 @@ using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Streaming.Widgets;
 using MacroDeckHost.Integrations.YouTube.Actions;
 using MacroDeckHost.Integrations.YouTube.Auth;
+using MacroDeckHost.Integrations.YouTube.Chat;
+using MacroDeckHost.Integrations.YouTube.Configuration;
+using MacroDeckHost.Integrations.YouTube.Connections;
+using MacroDeckHost.Integrations.YouTube.Events;
+using MacroDeckHost.Integrations.YouTube.Variables;
+using MacroDeckHost.Integrations.YouTube.Widgets;
 using MacroDeckHost.Localization;
 using Serilog;
 

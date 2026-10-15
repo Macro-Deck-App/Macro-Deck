@@ -1,4 +1,6 @@
-using MacroDeckHost.Integrations.Delegation;
+using MacroDeckHost.Integrations.Delegation.Actions;
+using MacroDeckHost.Integrations.Delegation.Configuration;
+using MacroDeckHost.Integrations.Delegation.Connections;
 using MacroDeckHost.Integrations.Delegation.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Localization;

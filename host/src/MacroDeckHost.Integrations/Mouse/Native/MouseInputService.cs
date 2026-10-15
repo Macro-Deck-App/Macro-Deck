@@ -1,5 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Logging;
+using MacroDeckHost.Integrations.Mouse.Models;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Integrations.Mouse.Native;

@@ -5,7 +5,7 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Notifications;
-using MacroDeckHost.Integrations.Scripts;
+using MacroDeckHost.Integrations.Scripts.Actions;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.MusicPlayer;

@@ -13,7 +13,7 @@ using MacroDeck.Ui.Model.Resources;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Streaming.Widgets;
-using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 using Serilog.Core;
 using MacroDeck.Sdk.Notifications;
 

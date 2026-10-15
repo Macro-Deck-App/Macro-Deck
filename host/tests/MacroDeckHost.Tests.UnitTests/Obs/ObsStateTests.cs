@@ -1,4 +1,6 @@
-using MacroDeckHost.Integrations.Obs;
+using MacroDeckHost.Integrations.Obs.Protocol;
+using MacroDeckHost.Integrations.Obs.State;
+using MacroDeckHost.Integrations.Obs.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;
 

@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeckHost.Integrations.Obs;
 using MacroDeck.Localization;
 using MacroDeckHost.Integrations.Obs.Actions;
+using MacroDeckHost.Integrations.Obs.Connections;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;

@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.AdGuardHome;
+using MacroDeckHost.Integrations.AdGuardHome.Configuration;
 
 namespace MacroDeckHost.Tests.UnitTests.AdGuardHome;
 

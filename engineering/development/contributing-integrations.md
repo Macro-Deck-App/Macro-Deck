@@ -26,7 +26,7 @@ New integrations must be implemented inside the `MacroDeckHost.Integrations` pro
 
 `ProjectReferenceTests` in `host/tests/MacroDeckHost.Tests.UnitTests/Architecture` fails the build if another Macro Deck project is referenced. See [`MacroDeckHost.Integrations.csproj`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/MacroDeckHost.Integrations.csproj). Two other project settings matter for integration authors:
 
-- `*.svg` and `*.png` files are compiled in as `EmbeddedResource`. Brand icons are loaded from the assembly at runtime rather than from disk (see Step 5).
+- `*.svg` and `*.png` files are compiled in as `EmbeddedResource`. Brand icons live in the integration's `Icons/` folder and are loaded from the assembly at runtime rather than from disk (see Step 5).
 - `InternalsVisibleTo` is granted to the four unit test projects (`MacroDeckHost.Tests.UnitTests` and its `.Windows`, `.MacOS`, `.Linux` variants), so internal helpers can be tested directly. No host project gets it: apart from the public types of system integration folders, the host reaches the integrations only through the public `IntegrationDiscovery`.
 
 ### The platform library
@@ -46,6 +46,37 @@ Put your integration in its own folder, for example `host/src/MacroDeckHost.Inte
 - The root namespace holds helpers several integrations share, such as `IntegrationHttp`, `ConfigurationIdentity` and `ScriptInputParameters`. Root code uses no integration folder. Host code uses none of it either, except the discovery entry point `IntegrationDiscovery`. Some root helpers keep state (`IntegrationHttp` holds the host's HTTP API once an integration hands it over), so do not treat the root as stateless.
 - A shared folder is a deliberately reviewed library that declares no integration, today `Ui` and `Streaming`. It is listed by name in `IntegrationBoundaryTests`; adding one is a reviewed decision, not a way around the folder rule. A shared folder uses no integration folder.
 - When two integrations need the same code, move it to the root namespace or a shared folder instead of reaching into the other integration.
+
+### Folder layout of an integration
+
+Every integration folder is laid out the same way, so actions, configuration, events or protocol code sit in the same place in every integration. The root of the folder holds only the entry point (`TwitchIntegration.cs`; a few names differ from the folder, such as `DeckNavigationIntegration.cs`) and its partial parts (`ObsIntegration.ConfigEntries.cs`, `SteamIntegration.Ui.cs`). A partial class has to share the namespace of its main file, and the host derives the icon prefix from the namespace of the entry point (`BuiltInUiResources`), so the entry point stays in the integration's root namespace. Everything else sits in one folder per responsibility, and a folder exists only when it has files. A namespace follows its folder: `Twitch/Auth/` is `MacroDeckHost.Integrations.Twitch.Auth`.
+
+| Folder | What belongs there |
+| --- | --- |
+| `Actions/` | Action definitions and executors, their parameter values, options and target resolvers, and helpers only actions use (variable writers, accessors for the variable API). |
+| `Auth/` | OAuth and sign-in clients, token providers and persisters, scopes. |
+| `Chat/` | The chat feature of a stream platform (Twitch, YouTube): message mapping, moderation, chat images. |
+| `Configuration/` | Config flow, config keys, endpoint and account settings records, presets. |
+| `Connections/` | Live links and accounts: connections, account managers, instance and remote lifecycle, device discovery, the key (slug) of an account. |
+| `Events/` | Event ids, definitions, emitters, payloads and catalogs. |
+| `Icons/` | Embedded icons. The integration's own icon is `Icons/<name>-icon.svg` (or `.png`). Icons its UI registers with the host are `Icons/<key>/<name>.svg`; the host resolves the key from this folder. |
+| `Migration/` | Migrations from Macro Deck 2 and between stored configuration versions. |
+| `Models/` | Plain domain value types and enums that are neither wire types nor state. |
+| `Native/` | Access to the local machine: OS APIs, processes, files, native libraries, with their per-platform implementations. |
+| `Protocol/` | Everything that talks to a remote API or application: clients, transports, pollers and subscription managers, wire DTOs, quota budgets and their exceptions. |
+| `Providers/` | Implementations of an SDK capability provider the integration exposes: music player, weather station, battery source. |
+| `State/` | State records, snapshots, mappers from wire data to state, and holders that accumulate state. |
+| `Variables/` | Variable providers, catalogs and variable names. |
+| `Widgets/` | Widget types, sessions, views, UI providers, previews and helpers only widgets use. |
+
+Rules of thumb:
+
+- Pick the folder by what a type does, not by its name. A type that fits no folder goes beside the code that uses it. There is no `Services`, `Helpers` or `Common` folder.
+- Do not nest folders. `Icons/<key>/` is the one exception.
+- An embedded file's resource name carries its folder. Look a file up by the exact resource name or by a unique file name suffix such as `-icon.svg`, and change the lookup together with the file.
+- Exceptions: `System` keeps `Metrics/`, `Power/` and `Volume/`, three operating system subsystems with one implementation per platform each. The shared folders `Streaming` and `Ui` are libraries that declare no integration and keep their own layout. Helpers shared by several integrations live in the root namespace of the project (`ActionStates`, `IntegrationHttp`, `ConfigurationIdentity`).
+
+`IntegrationLayoutTests` in `host/tests/MacroDeckHost.Tests.UnitTests/Architecture` enforces the folder names (its list is authoritative if this table drifts), the empty integration root, the nesting rule and the namespace rule.
 
 ---
 
@@ -221,7 +252,7 @@ Short pointers; the mechanics of each are in the [capabilities reference](https:
 
 - Variables. Declare `Variables` with `VariableDefinition.Eager(...)` (name, type, decimal places, refresh interval) and return current values from `ReadAsync`, keyed by the definition's `ResolvedId` rather than by its name. Return `VariableReading.Unavailable` to mark a variable unavailable. Attach a `Unit` and a `SemanticKind` to any number that has one, so every consumer formats it the same way instead of each widget being configured again, and return `Min`/`Max`/`Step` from `ReadAsync` when they can change with the value. Declare `Write` and implement `SetValueAsync` when the integration can set the value as well as read it - that, not an action, is what a Slider binds to. The eager set is bounded at `VariableLimits.MaxEagerVariablesPerProvider`; a set too large to declare goes behind `SupportsCatalog` and `DiscoverAsync` instead. See `ExampleIntegration` and `WeatherIntegration` for the eager pattern, the OBS and Home Assistant integrations for a provider serving both halves at once, and the [capabilities reference](https://docs.macro-deck.app/features/#variables) for the contract.
 - Actions. Add `IActionDefinition` instances to the `Actions` property. The host resolves them with `IntegrationRegistry.FindAction(integrationId, actionId)` and runs them through the action executor. See the `Example` integration's action definitions for parameter handling. Parse every string-valued parameter with `CultureInfo.InvariantCulture`: a variable-backed value arrives as wire text, and a current-culture parse reads `"41.6"` as `416` under a culture that uses `.` as the group separator, so the action misbehaves only for some users. `MouseActionValues.ReadInt` and `SystemActionValues` are the reference.
-- Icons. Ship an SVG or PNG as an embedded resource and return its bytes plus MIME type from `IIntegrationIconProvider`. `WeatherIntegration.LoadIcon` loads it from the assembly manifest at startup and caches it.
+- Icons. Ship an SVG or PNG in `Icons/` as an embedded resource and return its bytes plus MIME type from `IIntegrationIconProvider`. `WeatherIntegration.LoadIcon` loads it from the assembly manifest at startup and caches it.
 - Issues. Implement `IIntegrationIssueProvider` to surface health badges (missing permission, bad credentials, disconnected service) and a resolution action. `GetIssuesAsync` must be cheap because it is both polled and broadcast to clients; do the real work in `ResolveIssueAsync`.
 
 ---
@@ -260,6 +291,7 @@ More on the test setup and commands is in [building and testing](https://github.
 Every integration contribution has to satisfy these constraints. Review enforces all of them, and the architecture tests in `host/tests/MacroDeckHost.Tests.UnitTests/Architecture` enforce placement and isolation:
 
 - Location. New integrations live in `MacroDeckHost.Integrations`, in their own folder, including their widget and dialog UI. Do not add integration logic to the host, application, infrastructure, or widgets projects.
+- Folder layout. The files of an integration sit in the folders of the [layout convention](#folder-layout-of-an-integration) and its root holds only the entry point. `IntegrationLayoutTests` fails on a root file, a folder name outside the convention, nested folders or a namespace that does not follow its folder.
 - Placement and isolation, tested. `ProjectReferenceTests` keeps `MacroDeckHost.Integrations` off the host projects. `IntegrationBoundaryTests` checks that only an `ISystemIntegration` lives outside `MacroDeckHost.Integrations`, that an integration uses no host type and no other integration's folder, and that host code uses neither a specific integration's types or ids nor the shared root helpers. `PlatformStateTests` keeps shared static state out of the platform library. The baseline `IntegrationBoundary.baseline` lists known exceptions and may only shrink. The checks follow type references in signatures and IL, so they miss what the compiler copies into the using code (constants, enum values, attribute arguments) and loading a host assembly or type by name through reflection (`Assembly.Load`, `Type.GetType`). Review has to catch those; never load host types by name from an integration.
 - No bypassing SDK abstractions. Talk to the host only through `IIntegrationContext` (variables, config, deck, notifications, Companion devices) and the SDK provider interfaces. Do not reach into host internals or persistence directly. If the SDK lacks something, it gains it for plugins too; the integration has to stay extractable into an out-of-process plugin ([ADR 0107](../decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md)).
 - Cross-platform. Macro Deck 3 runs on Linux, Windows, and macOS. Guard any OS-specific code (paths, process APIs, native calls) behind a platform check and use `Path.Combine` rather than hardcoded separators. The `System` integration's per-OS parsers and their tests are the reference for this.

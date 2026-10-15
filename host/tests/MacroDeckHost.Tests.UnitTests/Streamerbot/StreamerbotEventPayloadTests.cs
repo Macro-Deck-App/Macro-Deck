@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MacroDeckHost.Integrations.Streamerbot;
+using MacroDeckHost.Integrations.Streamerbot.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.Streamerbot;
 

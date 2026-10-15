@@ -1,6 +1,7 @@
 using MacroDeckHost.Integrations.Streaming;
-using MacroDeckHost.Integrations.YouTube;
 using MacroDeckHost.Integrations.YouTube.Auth;
+using MacroDeckHost.Integrations.YouTube.Connections;
+using MacroDeckHost.Integrations.YouTube.Events;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.YouTube;

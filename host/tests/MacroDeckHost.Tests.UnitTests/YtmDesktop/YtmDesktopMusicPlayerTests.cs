@@ -1,8 +1,10 @@
 using System.Net;
-using MacroDeckHost.Integrations.YtmDesktop;
+using MacroDeckHost.Integrations.YtmDesktop.Configuration;
+using MacroDeckHost.Integrations.YtmDesktop.Connections;
 using MacroDeckHost.Integrations.YtmDesktop.Protocol;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.MusicPlayer;
+using MacroDeckHost.Integrations.YtmDesktop.Providers;
 
 namespace MacroDeckHost.Tests.UnitTests.YtmDesktop;
 

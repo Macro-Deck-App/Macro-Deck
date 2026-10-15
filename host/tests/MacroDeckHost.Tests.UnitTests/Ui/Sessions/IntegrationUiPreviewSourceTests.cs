@@ -10,8 +10,8 @@ internal sealed class IntegrationUiPreviewSourceTests
 
 	private readonly IntegrationUiPreviewSource _source = new(typeof(IntegrationDiscovery).Assembly);
 
-	[TestCase("MacroDeckHost.Integrations.Weather.Details.WeatherDetailsViewPreviews.ClearDay")]
-	[TestCase("MacroDeckHost.Integrations.Weather.Details.WeatherDetailsViewPreviews.Unavailable")]
+	[TestCase("MacroDeckHost.Integrations.Weather.Widgets.WeatherDetailsViewPreviews.ClearDay")]
+	[TestCase("MacroDeckHost.Integrations.Weather.Widgets.WeatherDetailsViewPreviews.Unavailable")]
 	[TestCase("MacroDeckHost.Integrations.Jellyfin.Widgets.JellyfinSessionsViewPreviews.Several")]
 	[TestCase("MacroDeckHost.Integrations.Twitch.Widgets.TwitchStatsWidgetViewPreviews.Overview")]
 	public void A_built_in_integrations_scenario_is_listed_for_developer_tools(string member)

@@ -287,7 +287,7 @@ the public SDK: the devices, their connection events and their battery readings 
 `IIntegrationContext.AndroidDevices`, the same `IAndroidDeviceManager` a plugin uses (see
 [Android devices](/features/android-devices/)), so it would keep working if it were moved into a plugin.
 See
-[`AdbBatteryProvider.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/Adb/AdbBatteryProvider.cs).
+[`AdbBatteryProvider.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/Adb/Providers/AdbBatteryProvider.cs).
 It shows the rules on this page in practice:
 
 - **A stable id that reveals nothing.** The id is the device's `StableId`, a keyed hash of its hardware

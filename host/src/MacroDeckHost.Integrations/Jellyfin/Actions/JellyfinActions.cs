@@ -4,6 +4,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
+using MacroDeckHost.Integrations.Jellyfin.Providers;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Jellyfin.Actions;
 using Params = MacroDeckHost.Localization.AppStrings.Integrations.Jellyfin.Params;

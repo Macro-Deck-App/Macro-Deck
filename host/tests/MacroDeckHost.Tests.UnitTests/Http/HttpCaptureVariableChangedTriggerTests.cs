@@ -7,7 +7,7 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Integrations.Http;
 using MacroDeckHost.Integrations.Http.Actions;
-using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Integrations.Http.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeck.Sdk.Identity;

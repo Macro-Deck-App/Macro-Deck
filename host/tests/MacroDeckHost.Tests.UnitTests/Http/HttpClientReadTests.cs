@@ -1,5 +1,5 @@
 using System.Text;
-using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Integrations.Http.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Http;
 

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MacroDeckHost.Integrations.Discord.Actions;
-using MacroDeckHost.Integrations.Discord.Webhooks;
+using MacroDeckHost.Integrations.Discord.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Discord;
 

@@ -1,6 +1,8 @@
 using System.Globalization;
 using MacroDeck.Sdk.Events;
-using MacroDeckHost.Integrations.Steam;
+using MacroDeckHost.Integrations.Steam.Native;
+using MacroDeckHost.Integrations.Steam.Protocol;
+using MacroDeckHost.Integrations.Steam.State;
 
 namespace MacroDeckHost.Tests.UnitTests.Steam;
 

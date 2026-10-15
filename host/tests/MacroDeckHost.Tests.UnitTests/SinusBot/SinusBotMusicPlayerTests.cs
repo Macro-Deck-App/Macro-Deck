@@ -1,6 +1,7 @@
 using System.Net;
-using MacroDeckHost.Integrations.SinusBot;
 using MacroDeck.Sdk.MusicPlayer;
+using MacroDeckHost.Integrations.SinusBot.Protocol;
+using MacroDeckHost.Integrations.SinusBot.Providers;
 
 namespace MacroDeckHost.Tests.UnitTests.SinusBot;
 

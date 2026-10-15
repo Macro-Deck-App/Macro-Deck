@@ -1,6 +1,6 @@
 using MacroDeckHost.Integrations.Http;
 using MacroDeckHost.Integrations.Http.Actions;
-using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Integrations.Http.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;

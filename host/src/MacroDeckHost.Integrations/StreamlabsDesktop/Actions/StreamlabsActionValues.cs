@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.StreamlabsDesktop.Connections;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop.Actions;
 

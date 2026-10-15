@@ -1,5 +1,6 @@
 using System.Globalization;
-using MacroDeckHost.Integrations.Voicemeeter;
+using MacroDeckHost.Integrations.Voicemeeter.Models;
+using MacroDeckHost.Integrations.Voicemeeter.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.Voicemeeter;
 

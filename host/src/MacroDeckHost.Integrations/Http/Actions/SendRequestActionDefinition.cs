@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Integrations.Http.Protocol;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;

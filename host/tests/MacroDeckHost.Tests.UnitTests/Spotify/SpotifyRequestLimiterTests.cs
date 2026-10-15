@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Spotify;
 

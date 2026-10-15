@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Delegation;
+using MacroDeckHost.Integrations.Delegation.Connections;
 
 namespace MacroDeckHost.Tests.UnitTests.Delegation;
 

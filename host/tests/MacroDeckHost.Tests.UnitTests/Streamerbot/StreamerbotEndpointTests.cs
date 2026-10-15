@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Streamerbot;
+using MacroDeckHost.Integrations.Streamerbot.Configuration;
 
 namespace MacroDeckHost.Tests.UnitTests.Streamerbot;
 

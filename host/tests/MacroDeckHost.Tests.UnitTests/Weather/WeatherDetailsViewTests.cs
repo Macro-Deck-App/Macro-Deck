@@ -8,7 +8,7 @@ using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Testing;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Integrations.Weather;
-using MacroDeckHost.Integrations.Weather.Details;
+using MacroDeckHost.Integrations.Weather.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Weather;
 

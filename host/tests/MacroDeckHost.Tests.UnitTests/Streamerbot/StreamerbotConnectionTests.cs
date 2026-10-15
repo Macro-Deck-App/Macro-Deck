@@ -1,5 +1,6 @@
 using System.Diagnostics;
-using MacroDeckHost.Integrations.Streamerbot;
+using MacroDeckHost.Integrations.Streamerbot.Connections;
+using MacroDeckHost.Integrations.Streamerbot.Events;
 using MacroDeckHost.Integrations.Streamerbot.Protocol;
 using MacroDeck.Sdk.Events;
 

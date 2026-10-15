@@ -1,7 +1,7 @@
 using System.Text.Json;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Integrations;
-using MacroDeckHost.Integrations.Companion;
+using MacroDeckHost.Integrations.Companion.Configuration;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 

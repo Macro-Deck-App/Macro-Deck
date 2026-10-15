@@ -1,6 +1,6 @@
-using MacroDeckHost.Integrations.SinusBot;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.SinusBot.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.SinusBot;
 

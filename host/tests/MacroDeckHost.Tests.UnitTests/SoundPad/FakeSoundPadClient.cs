@@ -1,5 +1,5 @@
 using System.Globalization;
-using MacroDeckHost.Integrations.SoundPad;
+using MacroDeckHost.Integrations.SoundPad.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.SoundPad;
 

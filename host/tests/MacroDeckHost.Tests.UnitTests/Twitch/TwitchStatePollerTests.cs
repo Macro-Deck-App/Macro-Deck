@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog;
 using Serilog.Core;

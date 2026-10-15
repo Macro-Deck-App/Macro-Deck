@@ -1,3 +1,5 @@
+using MacroDeckHost.Integrations.Twitch.Connections;
+
 namespace MacroDeckHost.Integrations.Twitch.Protocol;
 
 internal interface ITwitchHelixClient

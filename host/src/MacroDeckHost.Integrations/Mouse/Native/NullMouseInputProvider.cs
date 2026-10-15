@@ -1,4 +1,5 @@
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Mouse.Models;
 
 namespace MacroDeckHost.Integrations.Mouse.Native;
 

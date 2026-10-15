@@ -1,5 +1,7 @@
 using System.Net;
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Auth;
+using MacroDeckHost.Integrations.Spotify.Models;
+using MacroDeckHost.Integrations.Spotify.Providers;
 using Serilog;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Http;

@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Obs.Connections;
 using MacroDeckHost.Localization;
 using Serilog;
 
