@@ -101,6 +101,30 @@ public class IntegrationContextStorageLocaleAndHttpCompatibilityTests
 		});
 	}
 
+	[TestCase("en-US", "09:05")]
+	[TestCase("ko-KR", "09:05")]
+	[TestCase("hi-IN", "09:05")]
+	[TestCase("zh-TW", "09:05")]
+	[TestCase("de-DE", "09:05")]
+	[TestCase("es-ES", "9:05")]
+	[TestCase("cs-CZ", "9:05")]
+	public void A_twenty_four_hour_clock_has_the_leading_zero_the_language_writes_one_with(
+		string culture,
+		string expected)
+	{
+		Assert.That(new TimeOfDayFormat(CultureInfo.GetCultureInfo(culture), HourCycles.H23).Format(new TimeOnly(9, 5)),
+			Is.EqualTo(expected));
+	}
+
+	[TestCase("en-US")]
+	[TestCase("ko-KR")]
+	[TestCase("de-DE")]
+	public void A_twelve_hour_clock_never_pads_the_hour(string culture)
+	{
+		Assert.That(new TimeOfDayFormat(CultureInfo.GetCultureInfo(culture), HourCycles.H12).Format(new TimeOnly(9, 5)),
+			Does.Contain("9:05").And.Not.Contain("09:05"));
+	}
+
 	private sealed class ContextWrittenBeforeStorage : IIntegrationContext
 	{
 		public IVariableApi Variables => throw new NotSupportedException();

@@ -1,3 +1,5 @@
+using MacroDeck.Sdk.Actions;
+
 namespace MacroDeck.Sdk.Variables;
 
 /// <summary>Writes variables by name, on behalf of a plugin acting for the user.</summary>
@@ -44,6 +46,72 @@ public interface IUserVariableApi
 	{
 		return Task.FromResult(UserVariableCreateResult.Failed(UserVariableCreateStatus.NotSupported,
 			"This host does not support creating user variables."));
+	}
+
+	/// <summary>
+	/// Applies an operation to the variable <paramref name="name" /> as the running flow sees it: a variable
+	/// local to the script or automation in <paramref name="context" /> wins, then one local to its owner
+	/// widget, then a global. The operations and refusals are those of <see cref="ApplyAsync" />.
+	/// </summary>
+	/// <remarks>
+	/// Default-implemented so an existing implementation keeps compiling: it delegates to
+	/// <see cref="ApplyAsync" /> with <see cref="UserVariableContext.OwnerWidgetId" />, so script and
+	/// automation locals are not consulted there. A host that predates script and automation variables
+	/// behaves the same way.
+	/// </remarks>
+	Task<UserVariableWriteResult> ApplyInContextAsync(
+		string name,
+		UserVariableContext context,
+		UserVariableOperation operation,
+		string? value,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+		return ApplyAsync(name, context.OwnerWidgetId, operation, value, cancellationToken);
+	}
+
+	/// <summary>
+	/// Creates a user variable in the most local scope <paramref name="context" /> names: its script, else
+	/// its automation, else its owner widget, else global. A script or automation that does not exist is
+	/// refused with <see cref="UserVariableCreateStatus.UnknownScript" /> or
+	/// <see cref="UserVariableCreateStatus.UnknownAutomation" />, a missing widget as in
+	/// <see cref="CreateAsync" />.
+	/// </summary>
+	/// <remarks>
+	/// Default-implemented so an existing implementation keeps compiling: it delegates to
+	/// <see cref="CreateAsync" /> with <see cref="UserVariableContext.OwnerWidgetId" />, ignoring the script
+	/// and automation.
+	/// </remarks>
+	Task<UserVariableCreateResult> CreateInContextAsync(
+		string name,
+		UserVariableContext context,
+		VariableType type,
+		string? initialValue = null,
+		int? decimalPlaces = null,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+		return CreateAsync(name, context.OwnerWidgetId, type, initialValue, decimalPlaces, cancellationToken);
+	}
+}
+
+/// <summary>
+/// Where a running flow stands, for resolving and creating user variables by name. Every member is
+/// optional; an empty context means global.
+/// </summary>
+/// <param name="OwnerWidgetId">The widget the flow runs on, as in <c>ActionExecutionContext.OwnerWidgetId</c>.</param>
+/// <param name="ScriptId">The script the flow belongs to, as in <c>ActionExecutionContext.ScriptId</c>.</param>
+/// <param name="AutomationId">The automation the flow belongs to, as in <c>ActionExecutionContext.AutomationId</c>.</param>
+public sealed record UserVariableContext(
+	string? OwnerWidgetId = null,
+	string? ScriptId = null,
+	string? AutomationId = null)
+{
+	/// <summary>The context of the action step that is executing.</summary>
+	public static UserVariableContext From(ActionExecutionContext context)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+		return new UserVariableContext(context.OwnerWidgetId, context.ScriptId, context.AutomationId);
 	}
 }
 
@@ -113,7 +181,13 @@ public enum UserVariableCreateStatus
 	NotSupported = 5,
 
 	/// <summary>The host could not be reached, so whether anything was created is unknown.</summary>
-	Unavailable = 6
+	Unavailable = 6,
+
+	/// <summary>No script with the given id exists.</summary>
+	UnknownScript = 7,
+
+	/// <summary>No automation with the given id exists.</summary>
+	UnknownAutomation = 8
 }
 
 /// <summary>The outcome of <see cref="IUserVariableApi.CreateAsync" />.</summary>

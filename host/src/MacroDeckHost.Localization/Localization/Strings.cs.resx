@@ -432,6 +432,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Proměnné tohoto widgetu</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Proměnné tohoto skriptu</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Proměnné této automatizace</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Událost skončila</value>
   </data>
@@ -509,6 +515,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Proměnné widgetu</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Proměnné skriptu</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Proměnné automatizace</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Zveřejněno {date}</value>
@@ -2986,6 +2998,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Neznámý rozsah proměnné</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>Widget, skript nebo automatizace, ke které tato proměnná patří, neexistuje.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>Zdroj videa je právě vytížený.</value>
@@ -14438,6 +14453,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Po dobu běhu tohoto skriptu zastiňuje proměnnou "vars.{name}".</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Po dobu běhu tohoto skriptu zastiňuje proměnnou skriptu "vars.{name}".</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Typ</value>
   </data>
@@ -18259,6 +18277,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Vidí ji jen tento widget a v jeho rámci zastiňuje globální proměnnou stejného názvu.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Vidí ji jen tento skript a v jeho rámci zastiňuje globální proměnnou stejného názvu.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Vidí ji jen tato automatizace a v jejím rámci zastiňuje globální proměnnou stejného názvu.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Hledat proměnné…</value>
   </data>
@@ -18393,14 +18417,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>Tato událost</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Tento skript</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Uživatel</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Tento widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Tento skript</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Tato automatizace</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Uživatel</value>

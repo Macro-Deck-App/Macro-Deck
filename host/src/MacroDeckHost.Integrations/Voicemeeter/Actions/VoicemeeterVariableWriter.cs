@@ -19,14 +19,14 @@ internal static class VoicemeeterVariableWriter
 	public static Task WriteAsync(
 		VoicemeeterVariableAccessor accessor,
 		string variableName,
-		string? ownerWidgetId,
+		UserVariableContext variableContext,
 		VariableType type,
 		object value)
 	{
 		return ActionVariableTarget.WriteAsync(accessor.UserVariables,
 			accessor.Current,
 			variableName,
-			ownerWidgetId,
+			variableContext,
 			type,
 			value,
 			_logger);

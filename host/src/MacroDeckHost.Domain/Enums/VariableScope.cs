@@ -11,5 +11,9 @@ public enum VariableScope
 
 	// Named ActionButton until the scope was generalized to every widget type. The converter still
 	// reads the old spelling, and the numeric value is unchanged for files that stored the integer.
-	Widget = 1
+	Widget = 1,
+
+	Script = 2,
+
+	Automation = 3
 }

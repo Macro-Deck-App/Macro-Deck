@@ -27,6 +27,7 @@ import {
   resolveColorReference,
   serializeColorReference,
   type Variable,
+  type VariableScope,
 } from '@macro-deck/runtime';
 import {
   ColorPaletteService,
@@ -69,10 +70,11 @@ export function paletteColorLabel(color: string, localization: LocalizationServi
     : localization.translateKey(AppStrings.Forms.ColorPicker.CustomSwatch, { hex: color });
 }
 
-export function colorVariablesInScope(variables: readonly Variable[], scopeRefId: string | undefined): Variable[] {
+export function colorVariablesInScope(variables: readonly Variable[], scopeRefId: string | undefined,
+                                      scope: VariableScope = 'widget'): Variable[] {
   const colors = variables.filter(variable => variable.type === 'color');
-  const locals = scopeRefId
-    ? colors.filter(variable => variable.scope === 'widget' && variable.scopeRefId === scopeRefId)
+  const locals = scopeRefId && scope !== 'global'
+    ? colors.filter(variable => variable.scope === scope && variable.scopeRefId === scopeRefId)
     : [];
   const localNames = new Set(locals.map(variable => variable.name));
   const globals = colors.filter(variable => variable.scope === 'global' && !localNames.has(variable.name));
@@ -201,6 +203,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
   public readonly allowAlpha = input(false);
   public readonly allowVariables = input(false);
   public readonly variableScopeRefId = input<string | undefined>(undefined);
+  public readonly variableScope = input<VariableScope>('widget');
   public readonly resetPlacement = input<'inline' | 'none'>('inline');
   public readonly disabled = input(false);
   public readonly inline = input(false);
@@ -266,7 +269,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
 
   protected readonly colorVariables = computed<Variable[]>(() => {
     const service = this.variableService();
-    return service ? colorVariablesInScope(service.variables(), this.variableScopeRefId()) : [];
+    return service ? colorVariablesInScope(service.variables(), this.variableScopeRefId(), this.variableScope()) : [];
   });
 
   protected readonly variableOptions = computed<SelectOption[]>(() =>

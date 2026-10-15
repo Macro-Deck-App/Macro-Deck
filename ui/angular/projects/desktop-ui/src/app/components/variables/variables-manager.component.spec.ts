@@ -241,6 +241,35 @@ describe('VariablesManagerComponent', () => {
     }));
   });
 
+  it('creates a script variable when opened from the script editor', async () => {
+    fixture.componentRef.setInput('scope', 'script');
+    fixture.componentRef.setInput('scopeRefId', 'script-1');
+    component.openCreate();
+    await component.onNameInput('my_var');
+
+    await component.submitCreate();
+
+    expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'my_var',
+      scope: 'script',
+      scopeRefId: 'script-1',
+    }));
+  });
+
+  it('creates an automation variable when opened from the automation editor', async () => {
+    fixture.componentRef.setInput('scope', 'automation');
+    fixture.componentRef.setInput('scopeRefId', 'automation-1');
+    component.openCreate();
+    await component.onNameInput('my_var');
+
+    await component.submitCreate();
+
+    expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
+      scope: 'automation',
+      scopeRefId: 'automation-1',
+    }));
+  });
+
   it('defaults to global with no widget to scope to', async () => {
     component.openCreate();
     await component.onNameInput('my_var');

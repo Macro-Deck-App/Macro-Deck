@@ -10,7 +10,8 @@ import {
 } from '@angular/core';
 import { AppStrings } from '@macro-deck/runtime';
 import { LocalizationService, TranslatePipe } from '@shared';
-import type { Variable, VariableType } from '@macro-deck/runtime';
+import type { Variable, VariableScope, VariableType } from '@macro-deck/runtime';
+import { scopeLabelKey } from '../../domain/variable-source.util';
 import { VariableBrowserModalComponent } from '../variables/variable-browser-modal.component';
 
 @Component({
@@ -36,6 +37,7 @@ import { VariableBrowserModalComponent } from '../variables/variable-browser-mod
         [variables]="variables"
         [acceptedTypes]="acceptedTypes"
         [writableOnly]="writableOnly"
+        [scope]="scopeState()"
         [scopeLabel]="scopeLabelState()"
         [zIndex]="1100"
         (pick)="onPick($event)"
@@ -51,6 +53,9 @@ export class VariablePickerComponent {
 
   @Input() writableOnly = false;
 
+  readonly scopeState = signal<VariableScope>('widget');
+  @Input() set scope(value: VariableScope | undefined | null) { this.scopeState.set(value ?? 'widget'); }
+
   private readonly scopeLabelOverride = signal<string | null>(null);
   @Input() set scopeLabel(value: string) { this.scopeLabelOverride.set(value); }
 
@@ -61,7 +66,7 @@ export class VariablePickerComponent {
   private readonly localization = inject(LocalizationService);
 
   readonly scopeLabelState = computed(() =>
-    this.scopeLabelOverride() ?? this.localization.translateKey(AppStrings.Variables.ThisWidget));
+    this.scopeLabelOverride() ?? this.localization.translateKey(scopeLabelKey(this.scopeState())));
   readonly insertTooltip = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Picker.InsertTooltip));
   readonly pickHeading = computed(() =>

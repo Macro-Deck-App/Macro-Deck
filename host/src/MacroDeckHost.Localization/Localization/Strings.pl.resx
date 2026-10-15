@@ -432,6 +432,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Zmienne tego widżetu</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Zmienne tego skryptu</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Zmienne tej automatyzacji</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Wydarzenie się zakończyło</value>
   </data>
@@ -509,6 +515,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Zmienne widżetu</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Zmienne skryptu</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Zmienne automatyzacji</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Opublikowano {date}</value>
@@ -2986,6 +2998,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Nieznany zakres zmiennej</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>Widget, skrypt lub automatyzacja, do której należy ta zmienna, nie istnieje.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>Źródło wideo jest teraz zajęte.</value>
@@ -14438,6 +14453,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Przesłania zmienną „vars.{name}” na czas działania tego skryptu.</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Przesłania zmienną skryptu „vars.{name}” na czas działania tego skryptu.</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Typ</value>
   </data>
@@ -18259,6 +18277,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Widzi ją tylko ten widget i przesłania tu globalną zmienną o tej samej nazwie.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Widzi ją tylko ten skrypt i przesłania tu globalną zmienną o tej samej nazwie.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Widzi ją tylko ta automatyzacja i przesłania tu globalną zmienną o tej samej nazwie.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Szukaj zmiennych…</value>
   </data>
@@ -18393,14 +18417,17 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>To zdarzenie</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Ten skrypt</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Użytkownik</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Ten widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Ten skrypt</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Ta automatyzacja</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Użytkownik</value>

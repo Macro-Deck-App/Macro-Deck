@@ -14,7 +14,7 @@ internal sealed record TwitchActionScope(
 	IVariableApi? Variables,
 	CancellationToken CancellationToken,
 	IUserVariableApi? UserVariables = null,
-	string? OwnerWidgetId = null)
+	UserVariableContext? VariableContext = null)
 {
 	public ITwitchHelixClient Helix => Connection.Helix;
 
@@ -171,7 +171,7 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 					_definition._variables(),
 					context.CancellationToken,
 					_definition._userVariables(),
-					context.OwnerWidgetId));
+					UserVariableContext.From(context)));
 			}
 			catch (TwitchScopeException)
 			{

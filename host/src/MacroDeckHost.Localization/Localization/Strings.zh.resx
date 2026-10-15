@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>此组件的变量</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>此脚本的变量</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>此自动化的变量</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>事件已结束</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>组件变量</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>脚本变量</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>自动化变量</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>发布于 {date}</value>
@@ -2985,6 +2997,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>未知的变量范围</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>此变量所属的组件、脚本或自动化不存在。</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>视频源目前正忙。</value>
@@ -14439,6 +14454,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>在此脚本运行期间会遮蔽变量“vars.{name}”。</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>在此脚本运行期间会遮蔽脚本变量“vars.{name}”。</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>类型</value>
   </data>
@@ -18260,6 +18278,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>只有此组件能看到它，并且它在这里会遮蔽同名的全局变量。</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>只有此脚本能看到它，并且它在这里会遮蔽同名的全局变量。</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>只有此自动化能看到它，并且它在这里会遮蔽同名的全局变量。</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>搜索变量…</value>
   </data>
@@ -18394,14 +18418,17 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>此事件</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>此脚本</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>用户</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>此组件</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>此脚本</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>此自动化</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>用户</value>

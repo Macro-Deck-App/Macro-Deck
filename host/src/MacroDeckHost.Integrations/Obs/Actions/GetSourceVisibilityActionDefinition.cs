@@ -139,7 +139,7 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 			var written =
 				await ObsVariableWriter.WriteAsync(_variables,
 					variable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Boolean,
 					visible.Value);
 

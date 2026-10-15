@@ -52,7 +52,8 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
           faceById: () => undefined, facesForFamily: () => [] } },
         { provide: IconImageService, useValue: { getIconUrl: () => null } },
         { provide: ActionFlowStore, useValue: { updateParam, pickerVariables: () => [],
-          previewScope: () => 'global', previewScopeRefId: () => ownerId } },
+          previewScope: () => 'global', previewScopeRefId: () => ownerId,
+          previewOwnerWidgetId: () => ownerId } },
         { provide: ApiService, useValue: apiSpy },
       ],
     }).compileComponents();

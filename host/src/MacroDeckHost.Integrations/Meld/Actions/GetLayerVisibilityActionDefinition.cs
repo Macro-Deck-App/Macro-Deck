@@ -85,7 +85,11 @@ internal sealed class GetLayerVisibilityActionDefinition : IDynamicOptionsAction
 			}
 
 			var written = await MeldVariableWriter
-				.WriteAsync(_variables, variable, context.OwnerWidgetId, VariableType.Boolean, target!.Visible)
+				.WriteAsync(_variables,
+					variable,
+					UserVariableContext.From(context),
+					VariableType.Boolean,
+					target!.Visible)
 				.ConfigureAwait(false);
 			return written
 				? ActionResult.Success()

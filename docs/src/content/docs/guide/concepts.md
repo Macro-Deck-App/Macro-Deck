@@ -550,6 +550,32 @@ example the current OBS scene or `system_cpu_usage_percent`, create an automatio
 **Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
 Every change then lands in the file.
 
+### Variables of a widget, script or automation
+
+The variables on the **Variables** page are global: every button, script and automation sees them. A
+widget, a script and an automation can also have variables of their own, which nothing else sees. Open
+one in its editor and choose **Variables** in the toolbar of its actions (**Variables of this widget**,
+**Variables of this script** or **Variables of this automation**). The panel lists its own variables
+under **Widget variables**, **Script variables** or **Automation variables**, and you add, edit and
+remove them there. In a variable picker they appear under **This widget**, **This script** or **This
+automation**. A new script or automation has no **Variables** button until you save it once.
+
+An own variable with the same name as a global one hides the global one there, so a `count` of a script
+is a different variable from the global `count`, and **Set Variable** inside the script changes the
+script's. Which `count` a step sees:
+
+- In a widget's actions: the widget's own, then the global one.
+- In a script: the script's inputs, then the script's own variables, then, for a script that runs on a
+  widget, that widget's variables, then the global one.
+- In an automation: the automation's own, then the global one.
+
+A script started with **Run Script** sees only its own variables, not those of the script, widget or
+automation that started it; pass values to it as inputs instead.
+
+Deleting a widget, script or automation deletes its variables, and duplicating one copies them. When you
+export or share widgets, the scripts they use bring their variables along. The **Variables** page still
+lists only global variables.
+
 ### Battery variables
 
 Every device a [Battery](#battery) widget can show gets seven variables, named after the device, for
@@ -645,6 +671,10 @@ Deck can change it. A Macro Deck from before variable sharing simply shares noth
 
 Other events: a device connects, a variable changes, OBS reports **Streaming Started**, a song
 starts playing.
+
+Scripts and automations can keep variables of their own, for example a counter only one script uses:
+choose **Variables** in the editor's toolbar. A script that runs on a widget also sees that widget's
+variables. See [Variables of a widget, script or automation](#variables-of-a-widget-script-or-automation).
 
 ### Calendar triggers and Join Meeting
 

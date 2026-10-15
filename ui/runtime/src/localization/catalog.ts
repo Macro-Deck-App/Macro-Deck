@@ -11,6 +11,7 @@ export interface LocalizationCatalogSnapshot {
   translations?: { [key: string]: string };
   availableCultures?: string[];
   hourCycle?: 'h12' | 'h23';
+  hourPadded?: boolean;
 }
 
 export const DEFAULT_CULTURE = 'en';
@@ -22,6 +23,7 @@ export class LocalizationCatalog implements LocalizationTranslator {
   private active = DEFAULT_CULTURE;
   private available: string[] = [];
   private activeHourCycle: 'h12' | 'h23' | undefined;
+  private activeHourPadded: boolean | undefined;
   private readonly listeners: Array<() => void> = [];
 
   culture(): string {
@@ -36,6 +38,10 @@ export class LocalizationCatalog implements LocalizationTranslator {
     return this.activeHourCycle;
   }
 
+  hourPadded(): boolean | undefined {
+    return this.activeHourPadded;
+  }
+
   onChange(listener: () => void): () => void {
     this.listeners.push(listener);
     return () => {
@@ -48,6 +54,7 @@ export class LocalizationCatalog implements LocalizationTranslator {
     this.active = snapshot.culture || DEFAULT_CULTURE;
     this.available = snapshot.availableCultures ?? [];
     this.activeHourCycle = snapshot.hourCycle === 'h12' || snapshot.hourCycle === 'h23' ? snapshot.hourCycle : undefined;
+    this.activeHourPadded = typeof snapshot.hourPadded === 'boolean' ? snapshot.hourPadded : undefined;
     this.translations = { ...StringsDefaults, ...ClientAppStringsDefaults, ...(snapshot.translations ?? {}) };
     for (let index = 0; index < this.listeners.length; index++) this.listeners[index]();
   }

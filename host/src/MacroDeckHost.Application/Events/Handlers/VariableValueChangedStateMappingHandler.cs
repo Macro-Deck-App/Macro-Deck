@@ -21,6 +21,11 @@ public sealed class VariableValueChangedStateMappingHandler
 	{
 		var variable = notification.Variable;
 
+		if (variable.Scope is VariableScope.Script or VariableScope.Automation)
+		{
+			return ValueTask.CompletedTask;
+		}
+
 		if (variable.Scope == VariableScope.Widget)
 		{
 			// A button's own state variables are the *output* of resolving it, never an input. Without

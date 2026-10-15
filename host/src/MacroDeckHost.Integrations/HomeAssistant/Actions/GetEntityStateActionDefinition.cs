@@ -128,7 +128,7 @@ internal sealed class GetEntityStateActionDefinition : IDynamicOptionsActionDefi
 
 			await HomeAssistantVariableWriter.WriteAsync(_variables,
 				target,
-				context.OwnerWidgetId,
+				UserVariableContext.From(context),
 				VariableType.Text,
 				value);
 

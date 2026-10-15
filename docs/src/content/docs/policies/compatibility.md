@@ -259,7 +259,10 @@ What did **not** need a major:
   `host.state` are new: an older host answers `CAPABILITY_UNSUPPORTED` or pushes nothing, and the SDK falls
   back to those same defaults; an older SDK ignores the `http` push. Storage needs no host support: a plugin
   keeps it in its own data directory. `HourCycles` and `TimeOfDayFormat` (`MacroDeck.Sdk.Locale`) and
-  `IntegrationStorageKeys` (`MacroDeck.Sdk.Storage`) are new SDK types.
+  `IntegrationStorageKeys` (`MacroDeck.Sdk.Storage`) are new SDK types. After 3.0.0-beta.17,
+  `TimeOfDayFormat.Format` writes a 24-hour clock in a culture whose pattern is 12-hour with a two-digit
+  hour (`09:05`, before `9:05`); the API is unchanged, and a plugin built against beta.17 keeps its own copy
+  of the formatter until it is rebuilt.
 - `maxUiResourceBytesPerPlugin` and `maxUiResourcesPerPlugin` rose from 16 MiB and 256 to 48 MiB and 1024.
   The host advertises them in the protocol descriptor; a plugin built against an older SDK keeps its
   own, lower quota, which a newer host still accepts.
@@ -352,6 +355,20 @@ What did **not** need a major:
   a user variable of type `Color` exists, the persisted user-variables file cannot be read by a Macro Deck
   release from before `Color`, which then starts without any user variables. Downgrading the host is
   unsupported from that point; see [Colors from a variable](/guide/tips/#colors-from-a-variable).
+- Script and automation variables added `ActionExecutionContext.ScriptId` and `AutomationId`, the
+  `UserVariableContext` record, `IUserVariableApi.ApplyInContextAsync` and `CreateInContextAsync`, the
+  `UserVariableCreateStatus` values `UnknownScript` (7) and `UnknownAutomation` (8), and optional
+  `scriptId` and `automationId` fields on the `user-variables` `apply` and `create` arguments and on the
+  `actions` `execute` arguments, all within major `3` and the `actions` capability version `1`. The new
+  methods are default interface members that delegate to `ApplyAsync` and `CreateAsync` with the owner
+  widget, so an existing `IUserVariableApi` implementation keeps compiling and loading, and calls of the old
+  methods, `null` arguments included, resolve as before. An older host never sends the new `execute` fields
+  and ignores them on `apply` and `create`, so a plugin gets widget and global behaviour there; an older
+  plugin never sends them and gets the same on a new host. See [Scopes](/features/variables/#scopes).
+- Script and automation variables are another one-way step for the host's own data: once a variable local
+  to a script or an automation exists, the persisted user-variables file cannot be read by a Macro Deck
+  release from before them, which then starts without any user variables. Downgrading the host is
+  unsupported from that point, as with `Color`.
 - Resolving colours added the `colors` host api (`resolve`, `watches` and a `colors` `host.state`), the
   optional `maxColorWatches` field in the protocol descriptor's limits, and `IIntegrationContext.Colors` as
   a default interface member, so an existing `IIntegrationContext` implementation keeps compiling and

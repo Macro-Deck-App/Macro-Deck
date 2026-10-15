@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>इस विजेट के वेरिएबल</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>इस स्क्रिप्ट के वेरिएबल</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>इस ऑटोमेशन के वेरिएबल</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>इवेंट समाप्त</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>विजेट वेरिएबल</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>स्क्रिप्ट वेरिएबल</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>ऑटोमेशन वेरिएबल</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>{date} को प्रकाशित</value>
@@ -2985,6 +2997,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>अज्ञात वेरिएबल स्कोप</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>यह वेरिएबल जिस विजेट, स्क्रिप्ट या ऑटोमेशन का है, वह मौजूद नहीं है।</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>वीडियो स्रोत अभी व्यस्त है।</value>
@@ -14439,6 +14454,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>इस स्क्रिप्ट के चलने के दौरान "vars.{name}" वेरिएबल को ढकता है।</value>
   </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>इस स्क्रिप्ट के चलने के दौरान स्क्रिप्ट वेरिएबल "vars.{name}" को ढकता है।</value>
+  </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>प्रकार</value>
   </data>
@@ -18260,6 +18278,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>केवल यह विजेट इसे देखता है, और यहाँ इसी नाम के वैश्विक वेरिएबल को ढक लेता है।</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>केवल यह स्क्रिप्ट इसे देखती है, और यहाँ यह इसी नाम के वैश्विक वेरिएबल को ढक लेता है।</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>केवल यह ऑटोमेशन इसे देखता है, और यहाँ इसी नाम के वैश्विक वेरिएबल को ढक लेता है।</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>वेरिएबल खोजें…</value>
   </data>
@@ -18394,14 +18418,17 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>यह इवेंट</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>यह स्क्रिप्ट</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>उपयोगकर्ता</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>यह विजेट</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>यह स्क्रिप्ट</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>यह ऑटोमेशन</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>उपयोगकर्ता</value>

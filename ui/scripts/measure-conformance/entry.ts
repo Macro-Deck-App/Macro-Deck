@@ -53,6 +53,8 @@ function measure(surface: HTMLElement): Record<string, unknown> {
       naturalWidth: round(naturalTextWidth(text) ?? Number.NaN),
       givenWidth: round(parseFloat(getComputedStyle(text).width)),
       truncated: { x: text.scrollWidth > text.clientWidth, y: clippedVertically(text) },
+      // Checked against the node's minimum and dropped before the file is written.
+      fontSize: parseFloat(getComputedStyle(text).fontSize),
     }));
     if (texts.length > 0) entry['texts'] = texts;
     nodes[element.getAttribute('data-node-id')!] = entry;

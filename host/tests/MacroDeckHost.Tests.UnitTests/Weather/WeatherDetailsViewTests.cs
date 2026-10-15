@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Ui.Model.Negotiation;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
@@ -204,6 +205,17 @@ public class WeatherDetailsViewTests
 				yield return descendant;
 			}
 		}
+	}
+
+	[TestCase("en-US", "09:05")]
+	[TestCase("es-ES", "9:05")]
+	public void The_twenty_four_hour_hours_are_written_as_every_other_time_of_day_is(string culture, string expected)
+	{
+		var format = new WeatherDetailsTimeFormat(CultureInfo.GetCultureInfo(culture), false);
+
+		Assert.That(format.Format(new TimeOnly(9, 5)),
+			Is.EqualTo(new TimeOfDayFormat(format.Culture, HourCycles.H23).Format(new TimeOnly(9, 5)))
+				.And.EqualTo(expected));
 	}
 
 	[Test]

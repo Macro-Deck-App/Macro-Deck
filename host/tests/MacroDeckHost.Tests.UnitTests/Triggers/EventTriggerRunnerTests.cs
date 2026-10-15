@@ -87,7 +87,7 @@ public class EventTriggerRunnerTests
 	}
 
 	[Test]
-	public async Task An_automation_trigger_runs_its_flows_in_global_scope()
+	public async Task An_automation_trigger_runs_its_flows_in_its_own_scope()
 	{
 		var automation = _automations.Add(Flows);
 		var subscription = Subscription(EventTriggerOwner.ForAutomation(automation.Id));
@@ -99,8 +99,8 @@ public class EventTriggerRunnerTests
 		{
 			Assert.That(WidgetFlowsJson.TryExtract(request.FlowsSource, out var extracted), Is.True);
 			Assert.That(extracted, Is.EqualTo(Flows));
-			Assert.That(request.Scope, Is.EqualTo(VariableScope.Global));
-			Assert.That(request.ScopeRefId, Is.Null);
+			Assert.That(request.Scope, Is.EqualTo(VariableScope.Automation));
+			Assert.That(request.ScopeRefId, Is.EqualTo(automation.Id.ToString()));
 			Assert.That(request.OwnerWidgetId, Is.Null);
 			Assert.That(request.Trigger.ByTriggerId, Is.True);
 			Assert.That(request.Trigger.Value, Is.EqualTo("t1"));
@@ -216,6 +216,16 @@ public class EventTriggerRunnerTests
 		}
 
 		public Task<VariableContext> CreateContextAsync(VariableScope contextScope, string? contextScopeRefId)
+		{
+			return Task.FromResult(VariableContext.Empty);
+		}
+
+		public Task<string> RenderAsync(string templateText, VariableScopeChain chain)
+		{
+			return Task.FromResult(templateText);
+		}
+
+		public Task<VariableContext> CreateContextAsync(VariableScopeChain chain)
 		{
 			return Task.FromResult(VariableContext.Empty);
 		}

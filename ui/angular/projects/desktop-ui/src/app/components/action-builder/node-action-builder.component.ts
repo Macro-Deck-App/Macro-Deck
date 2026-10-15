@@ -31,6 +31,7 @@ export interface ProviderChangeRequest {
       [variables]="variables()"
       previewScope="widget"
       [previewScopeRefId]="scopeRefId()"
+      [ownerWidgetId]="scopeRefId()"
       [previewScopeStates]="previewScopeStates()"
       [showToggleTriggers]="showToggleTriggers()"
       [triggerTabs]="fixedTriggerTabs()"

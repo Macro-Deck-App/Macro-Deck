@@ -11,6 +11,7 @@ public static class PortableContentFactory
 			Scripts = [.. assets.Scripts],
 			Secrets = [.. assets.Secrets],
 			Variables = [.. assets.Variables],
+			ScriptVariables = [.. assets.ScriptVariables],
 			Fonts = [.. assets.Fonts]
 		};
 	}

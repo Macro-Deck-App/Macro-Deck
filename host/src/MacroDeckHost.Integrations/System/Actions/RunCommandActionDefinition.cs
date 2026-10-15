@@ -257,7 +257,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 					await ActionVariableTarget.WriteAsync(_variables.UserVariables,
 						_variables.Current,
 						outputVariable!,
-						context.OwnerWidgetId,
+						UserVariableContext.From(context),
 						VariableType.Text,
 						output,
 						_logger);

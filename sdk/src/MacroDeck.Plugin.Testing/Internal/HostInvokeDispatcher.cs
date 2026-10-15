@@ -989,8 +989,8 @@ internal static class HostInvokeDispatcher
 		{
 			var create = Require<UserVariablesCreateArguments>(payload);
 
-			var created = await context.UserVariables.CreateAsync(create.Name,
-					create.OwnerWidgetId,
+			var created = await context.UserVariables.CreateInContextAsync(create.Name,
+					new UserVariableContext(create.OwnerWidgetId, create.ScriptId, create.AutomationId),
 					Enum.Parse<VariableType>(create.Type),
 					create.InitialValue,
 					create.DecimalPlaces,
@@ -1002,8 +1002,8 @@ internal static class HostInvokeDispatcher
 
 		var arguments = Require<UserVariablesApplyArguments>(payload);
 
-		var result = await context.UserVariables.ApplyAsync(arguments.Name,
-				arguments.OwnerWidgetId,
+		var result = await context.UserVariables.ApplyInContextAsync(arguments.Name,
+				new UserVariableContext(arguments.OwnerWidgetId, arguments.ScriptId, arguments.AutomationId),
 				Enum.Parse<UserVariableOperation>(arguments.Operation),
 				arguments.Value,
 				cancellationToken)

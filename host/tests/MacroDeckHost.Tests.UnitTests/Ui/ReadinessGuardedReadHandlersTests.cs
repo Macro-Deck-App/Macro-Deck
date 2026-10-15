@@ -388,6 +388,11 @@ public class ReadinessGuardedReadHandlersTests
 			return Task.FromResult<VariableEntity?>(null);
 		}
 
+		public Task<VariableEntity?> Resolve(string name, VariableScopeChain chain)
+		{
+			return Task.FromResult<VariableEntity?>(null);
+		}
+
 		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
 			string name,
 			VariableScope scope,

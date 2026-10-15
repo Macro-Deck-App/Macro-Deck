@@ -26,7 +26,7 @@ public class AutomationServiceTests
 		_cache = new AutomationCache(_store, new LoggerConfiguration().CreateLogger());
 		await _cache.InitializeCache();
 		_mediator = new RecordingMediator();
-		_service = new AutomationService(_cache, _mediator);
+		_service = new AutomationService(_cache, _mediator, new NullWidgetVariableCloner());
 	}
 
 	[TearDown]

@@ -683,8 +683,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					return MissingArguments();
 				}
 
-				var result = await _userVariableApi.ApplyAsync(arguments.Name,
-					arguments.OwnerWidgetId,
+				var result = await _userVariableApi.ApplyInContextAsync(arguments.Name,
+					new UserVariableContext(arguments.OwnerWidgetId, arguments.ScriptId, arguments.AutomationId),
 					operation,
 					arguments.Value,
 					cancellationToken);
@@ -700,8 +700,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					return MissingArguments();
 				}
 
-				var result = await _userVariableApi.CreateAsync(arguments.Name,
-					arguments.OwnerWidgetId,
+				var result = await _userVariableApi.CreateInContextAsync(arguments.Name,
+					new UserVariableContext(arguments.OwnerWidgetId, arguments.ScriptId, arguments.AutomationId),
 					type,
 					arguments.InitialValue,
 					arguments.DecimalPlaces,

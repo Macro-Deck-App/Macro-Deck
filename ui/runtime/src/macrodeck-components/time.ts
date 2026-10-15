@@ -92,9 +92,14 @@ export function formatTimeRun(
   zone: string | undefined,
   withSeconds: boolean,
   locale: string,
-  hour?: UiHourStyle,
+  pinned?: UiHourStyle,
   preferredCycle?: 'h12' | 'h23',
+  preferredPadded?: boolean,
 ): UiTimeRun {
+  const hour = pinned
+    ?? (preferredCycle !== undefined && preferredPadded !== undefined
+      ? { cycle: preferredCycle, padded: preferredPadded }
+      : undefined);
   if (!hasIntlParts()) {
     // 24-hour: which of the two a language writes is locale data, and there is none here. A producer
     // that asked for a 12-hour face gets this one anyway - there is no day-period text to write it with.
@@ -106,9 +111,8 @@ export function formatTimeRun(
   }
   const timeZone = isSupportedZone(zone) ? zone : undefined;
   const parts = repadHour(new Intl.DateTimeFormat(locale, {
-    // Asked for as two digits whenever the producer pinned the face, so the padding is decided by
-    // `repadHour` alone: `hour: 'numeric'` is a *request*, and a locale whose pattern uses HH answers it
-    // with two digits anyway - which is exactly the leading zero this format promises to control.
+    // Two digits whenever the face is pinned or the host states the padding, so repadHour alone decides it: a
+    // numeric hour is only a request, which a locale whose pattern uses HH answers with two digits anyway.
     hour: hour ? '2-digit' : 'numeric',
     minute: '2-digit',
     ...(hour ? { hourCycle: hour.cycle } : preferredCycle ? { hourCycle: preferredCycle } : {}),

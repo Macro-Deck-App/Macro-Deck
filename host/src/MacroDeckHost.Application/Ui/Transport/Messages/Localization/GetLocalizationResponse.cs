@@ -22,4 +22,6 @@ public class GetLocalizationResponse
 	public string TimeFormat { get; set; } = AppPreferenceService.TimeFormatSystem;
 
 	public string HourCycle { get; set; } = HourCycles.H23;
+
+	public bool HourPadded { get; set; }
 }

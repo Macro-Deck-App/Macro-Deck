@@ -116,7 +116,7 @@ internal sealed class GetInputMuteActionDefinition : IDynamicOptionsActionDefini
 
 			var written = await ObsVariableWriter.WriteAsync(_variables,
 				variable,
-				context.OwnerWidgetId,
+				UserVariableContext.From(context),
 				VariableType.Boolean,
 				muted.Value);
 

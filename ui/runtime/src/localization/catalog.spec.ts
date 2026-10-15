@@ -70,6 +70,16 @@ describe('LocalizationCatalog', () => {
     expect(catalog.culture()).toBe(DEFAULT_CULTURE);
   });
 
+  it('keeps the leading zero the host states for the time format, and forgets it when a later answer has none', () => {
+    const catalog = new LocalizationCatalog();
+
+    catalog.apply({ culture: 'en', hourCycle: 'h23', hourPadded: false, translations: {} });
+    expect(catalog.hourPadded()).toBeFalse();
+
+    catalog.apply({ culture: 'en', hourCycle: 'h23', translations: {} });
+    expect(catalog.hourPadded()).toBeUndefined();
+  });
+
   it('reports the culture its text is actually served in', () => {
     const catalog = new LocalizationCatalog();
 

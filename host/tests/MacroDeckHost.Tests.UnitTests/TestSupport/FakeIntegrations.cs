@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -1291,6 +1292,11 @@ internal sealed class ThrowingVariableService : IVariableService
 	}
 
 	public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
+	{
+		throw new NotSupportedException();
+	}
+
+	public Task<VariableEntity?> Resolve(string name, VariableScopeChain chain)
 	{
 		throw new NotSupportedException();
 	}

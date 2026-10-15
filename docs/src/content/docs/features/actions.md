@@ -182,10 +182,15 @@ For a configuration view, see [Letting the user search a long list](/ui/views/co
 | --- | --- |
 | `Parameters` | Configured values, keyed by parameter name. |
 | `CancellationToken` | Cancelled when the flow is aborted. |
-| `OwnerWidgetId` | The widget whose flow is running; `null` for scripts, automations and other widget-less runs. |
+| `OwnerWidgetId` | The widget whose flow is running, also inside a script that runs on a widget; `null` for automations, other scripts and other widget-less runs. |
+| `ScriptId` | The script whose flow is running; for a nested **Run Script**, the called script. `null` outside a script, and on a host that predates it. |
+| `AutomationId` | The automation whose flow is running; `null` outside one, inside a script it started, and on a host that predates it. |
 | `OriginClientId` | The client that pressed, or `null` for a backend-initiated run. |
 | `Interactions`, `Ui` | Ask the originating client a question or open a [modal](/ui/views/modal/). `null` when nobody is there to ask - handle it. |
 | `CallDepth` | Script hops this run is nested behind. Pass it on, incremented, when handing work to another Macro Deck. |
+
+To write the user's variables as this step sees them, script and automation locals included, pass
+`UserVariableContext.From(context)`; see [Scopes](/features/variables/#scopes).
 
 ## Options that depend on provider state
 

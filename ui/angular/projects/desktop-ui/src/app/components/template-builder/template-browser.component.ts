@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, comput
 
 import { AppStrings, variableTokenKind, variableTokenLabel, variableTokenText } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
-import type { Variable } from '@macro-deck/runtime';
+import type { Variable, VariableScope } from '@macro-deck/runtime';
 import { TabBarComponent } from '../tab-bar/tab-bar.component';
 import type { TabItem } from '../tab-bar/tab-bar.model';
 import { TemplateVariableTreeComponent } from './template-variable-tree.component';
@@ -70,6 +70,7 @@ type BrowserTab = 'variables' | 'filters' | 'control-flow';
         mode="pick"
         [catalogOnly]="true"
         [variables]="variables"
+        [scope]="scope"
         [scopeLabel]="scopeLabel"
         [zIndex]="1100"
         (pick)="onDynamicPick($event)"
@@ -80,6 +81,7 @@ type BrowserTab = 'variables' | 'filters' | 'control-flow';
 })
 export class TemplateBrowserComponent {
   @Input() variables: Variable[] = [];
+  @Input() scope: VariableScope = 'widget';
   @Input() scopeLabel = '';
 
   @Output() insert = new EventEmitter<SnippetInsertion>();

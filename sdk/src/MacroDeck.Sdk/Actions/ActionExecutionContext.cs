@@ -29,11 +29,23 @@ public sealed class ActionExecutionContext
 
 	/// <summary>
 	/// Id of the widget whose flow is running, when the flow belongs to one - a press trigger, a
-	/// state change, or a widget's own event trigger. Null for a script, an automation and any other
-	/// widget-less run, which is why an action that targets "this widget" must handle its absence
-	/// rather than assume it.
+	/// state change, a widget's own event trigger, or a script that runs on a widget. Null for an
+	/// automation, any other script and any other widget-less run, which is why an action that targets
+	/// "this widget" must handle its absence rather than assume it.
 	/// </summary>
 	public string? OwnerWidgetId { get; init; }
+
+	/// <summary>
+	/// Id of the script whose flow is running, when this step runs inside a script. A nested Run Script
+	/// reports the called script, not its caller. Null outside a script, and on a host that predates it.
+	/// </summary>
+	public string? ScriptId { get; init; }
+
+	/// <summary>
+	/// Id of the automation whose flow is running, when this step runs inside an automation. Null
+	/// outside one, inside a script the automation called, and on a host that predates it.
+	/// </summary>
+	public string? AutomationId { get; init; }
 
 	/// <summary>
 	/// Cancellation token for the running flow. Long-running actions (key sequences, delays, network

@@ -97,7 +97,8 @@ public sealed class ScriptRunner : IScriptRunner
 				{
 					FlowsSource = ScriptFlows.ToFlowsSource(script.Flows),
 					Trigger = TriggerSelector.ByType(ScriptFlows.TriggerType),
-					Scope = VariableScope.Global,
+					Scope = VariableScope.Script,
+					ScopeRefId = script.Id.ToString(),
 					OriginClientId = originClientId,
 					OwnerWidgetId = resolvedOwnerWidgetId,
 					Origin = ExecutionOrigin.Host,

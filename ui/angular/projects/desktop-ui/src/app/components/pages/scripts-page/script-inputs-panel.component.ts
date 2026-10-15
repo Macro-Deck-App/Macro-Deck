@@ -57,6 +57,7 @@ export class ScriptInputsPanelComponent {
   @Input() inputs: ScriptInput[] = [];
 
   @Input() globalNames: string[] = [];
+  @Input() scriptVariableNames: string[] = [];
 
   @Input() runsOnWidget = false;
 
@@ -120,9 +121,7 @@ export class ScriptInputsPanelComponent {
   protected readonly createShadowWarning = computed(() => {
     const sanitized = this.createNameSanitized().sanitized;
     if (!this.createNameSanitized().isValid || this.createNameTaken()) return null;
-    return this.globalNames.includes(sanitized)
-      ? this.localization.translateKey(AppStrings.Scripts.ShadowsVariableWarning, { name: sanitized })
-      : null;
+    return this.shadowMessage(sanitized);
   });
 
   protected rowKey(index: number): string {
@@ -246,8 +245,15 @@ export class ScriptInputsPanelComponent {
   protected shadowWarning(index: number): string | null {
     const input = this.inputs[index];
     if (!input || input.name === '' || this.nameError(index)) return null;
-    return this.globalNames.includes(input.name)
-      ? this.localization.translateKey(AppStrings.Scripts.ShadowsVariableWarning, { name: input.name })
+    return this.shadowMessage(input.name);
+  }
+
+  private shadowMessage(name: string): string | null {
+    if (this.scriptVariableNames.includes(name)) {
+      return this.localization.translateKey(AppStrings.Scripts.ShadowsScriptVariableWarning, { name });
+    }
+    return this.globalNames.includes(name)
+      ? this.localization.translateKey(AppStrings.Scripts.ShadowsVariableWarning, { name })
       : null;
   }
 

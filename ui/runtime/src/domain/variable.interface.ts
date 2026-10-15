@@ -1,6 +1,6 @@
 import type { LocalizedText } from '../localization/localized-text';
 
-export type VariableScope = 'global' | 'widget';
+export type VariableScope = 'global' | 'widget' | 'script' | 'automation';
 
 export type VariableType = 'text' | 'numeric' | 'boolean' | 'color';
 

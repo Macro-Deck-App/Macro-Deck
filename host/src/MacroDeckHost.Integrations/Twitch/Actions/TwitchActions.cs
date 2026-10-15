@@ -971,7 +971,7 @@ internal static class TwitchActions
 							await TwitchVariableWriter.WriteAsync(scope.UserVariables,
 								scope.Variables,
 								variable,
-								scope.OwnerWidgetId,
+								scope.VariableContext ?? new UserVariableContext(),
 								VariableType.Text,
 								created.EditUrl);
 						}

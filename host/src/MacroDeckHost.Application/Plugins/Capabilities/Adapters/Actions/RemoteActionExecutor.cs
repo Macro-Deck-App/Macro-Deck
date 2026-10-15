@@ -23,7 +23,9 @@ public sealed class RemoteActionExecutor(
 			{
 				Parameters = ToWireParameters(context.Parameters),
 				OriginClientId = context.OriginClientId,
-				OwnerWidgetId = context.OwnerWidgetId
+				OwnerWidgetId = context.OwnerWidgetId,
+				ScriptId = context.ScriptId,
+				AutomationId = context.AutomationId
 			}
 		};
 

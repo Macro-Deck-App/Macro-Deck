@@ -262,8 +262,8 @@ public static class Program
 
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
 			Infrastructure.SystemIntegrations.Variables.VariablesIntegration.HostVariableReader
-				= (name, ownerWidgetId, _)
-					=> Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, ownerWidgetId);
+				= (name, variableContext, _)
+					=> Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, variableContext);
 
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to
 			// survive the graceful shutdown RunAsync performs.
