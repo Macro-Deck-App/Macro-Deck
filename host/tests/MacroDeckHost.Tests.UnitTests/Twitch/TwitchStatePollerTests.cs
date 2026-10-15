@@ -198,6 +198,78 @@ internal sealed class TwitchStatePollerTests
 		});
 	}
 
+	[Test]
+	public async Task A_timed_out_read_still_lets_the_rest_of_the_cycle_run()
+	{
+		_helix.FollowerCount = 4200;
+		_helix.FailingReads.Add("stream");
+		_helix.FailingReadExceptions["stream"] = TimedOut();
+
+		await _poller.PollOnceAsync(false, CancellationToken.None);
+
+		Assert.That(_state.FollowerCount, Is.EqualTo(4200));
+	}
+
+	[Test]
+	public async Task A_timed_out_read_does_not_stop_the_polling_loop()
+	{
+		_helix.Stream = new TwitchStreamInfo(true, 120, "Live", "Hades", DateTimeOffset.UtcNow);
+		_helix.FailingReads.Add("stream");
+		_helix.FailingReadExceptions["stream"] = TimedOut();
+		var secondCycle = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var cycles = 0;
+		using var poller = new TwitchStatePoller(_helix,
+			_account,
+			update =>
+			{
+				_state = update(_state);
+				return _state;
+			},
+			_ =>
+			{
+			},
+			SilentLogger(),
+			new TwitchStatePollerOptions
+			{
+				Delay = (_, cancellationToken) =>
+				{
+					if (++cycles == 1)
+					{
+						_helix.FailingReads.Remove("stream");
+					}
+					else
+					{
+						secondCycle.TrySetResult();
+					}
+
+					return Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken);
+				}
+			});
+
+		poller.Start();
+		await secondCycle.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+		Assert.That(_state.ViewerCount, Is.EqualTo(120));
+	}
+
+	[Test]
+	public void Cancelling_the_poll_still_stops_it()
+	{
+		using var cancellation = new CancellationTokenSource();
+		cancellation.Cancel();
+		_helix.FailingReads.Add("stream");
+		_helix.FailingReadExceptions["stream"] = new OperationCanceledException(cancellation.Token);
+
+		Assert.That(async () => await _poller.PollOnceAsync(false, cancellation.Token),
+			Throws.InstanceOf<OperationCanceledException>());
+	}
+
+	private static TaskCanceledException TimedOut()
+	{
+		return new TaskCanceledException("The request was canceled due to the configured HttpClient.Timeout.",
+			new TimeoutException());
+	}
+
 	private static Logger SilentLogger()
 	{
 		return new LoggerConfiguration().CreateLogger();

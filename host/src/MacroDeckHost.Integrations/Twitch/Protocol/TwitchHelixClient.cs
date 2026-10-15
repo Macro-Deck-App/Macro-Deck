@@ -761,6 +761,10 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 			{
 				await _delay(_rateLimitBackoff * attempt, cancellationToken);
 			}
+			catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+			{
+				throw new TimeoutException("The request to Twitch timed out.", ex);
+			}
 		}
 	}
 

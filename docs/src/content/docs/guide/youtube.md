@@ -45,15 +45,20 @@ to verify the app for that, because YouTube access is a sensitive permission.
 ## Quota
 
 Google gives every project 10,000 units of quota a day. It resets at midnight Pacific Time. Reading the stream
-state costs about one unit a minute, reading the chat a few units every few seconds while you are live, and
-every change, such as a chat message, a ban or a new title, costs 50.
+state costs about two units a minute, and reading the chat costs five units a time, every few seconds while you
+are live. A chat message costs 20 units, a timeout or ban 200, a new title, description or tags 50, and an ad
+break, **Go Live** or **End Stream** 1.
 
-Macro Deck keeps count of what it spends. Near the limit it reads the chat less often, and when the quota is
-almost used up it stops reading until midnight Pacific Time; **Integrations** shows a note until then. Actions
-still work until Google refuses them. If Google raised your project's quota, enter the new limit under **Daily
-quota (units)** in the advanced settings of the setup. The count starts again when Macro Deck restarts, so it
-is an estimate; Google's own count is in the Google Cloud console under **APIs & Services > YouTube Data API
-v3 > Quotas**.
+Macro Deck keeps count of what it spends. Near the limit it reads the chat less often. Shortly before the quota
+is used up it stops reading the chat, so the viewer and like counts keep updating every two minutes for many
+more hours; bans and more channels on the same project shorten that. The uptime keeps counting either way.
+**Integrations** shows a note while the chat is paused, and another one when the quota is used up and Macro
+Deck stops reading until midnight Pacific Time. Actions still work until Google refuses them. If Google raised
+your project's quota, enter the new limit under **Daily quota (units)** in the advanced settings of the setup.
+
+The count is an estimate: it starts again when Macro Deck restarts, and channels that use the same client ID
+share it. If Google's own count runs out first, everything waits until midnight Pacific Time. Google's count is
+in the Google Cloud console under **APIs & Services > YouTube Data API v3 > Quotas**.
 
 ## What you can use
 
@@ -77,8 +82,8 @@ start your streaming software first. A broadcast that starts by itself when the 
 **Stream now** broadcast in YouTube Studio, are started by YouTube and not by this action. **Start Ad Break**
 only works while you are live and your channel can show mid-roll ads.
 
-Chat, Super Chats and membership events arrive only while a broadcast is live and Macro Deck is not waiting
-for the quota to reset. Events that happened while Macro Deck was not running are not fired later, and
+Chat, Super Chats and membership events arrive only while a broadcast is live and Macro Deck has not paused
+the chat to save quota. Events that happened while Macro Deck was not running are not fired later, and
 starting Macro Deck while you are already live does not fire **Stream Online**.
 
 ## Moderating YouTube chat

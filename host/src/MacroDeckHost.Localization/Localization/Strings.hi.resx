@@ -11289,6 +11289,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch ने अनुरोध अस्वीकार किया।</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch ने समय पर जवाब नहीं दिया।</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>खाता</value>
   </data>
@@ -21974,6 +21977,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>आपके Google Cloud प्रोजेक्ट का दैनिक YouTube कोटा खत्म हो गया है, इसलिए Macro Deck ने लाइव स्थिति और चैट अपडेट रोक दिए हैं। प्रशांत समय की मध्यरात्रि पर कोटा रीसेट होने के बाद ये फिर शुरू होंगे।</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>कोटा बचाने के लिए YouTube चैट रोकी गई</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>आपके Google Cloud प्रोजेक्ट का दैनिक YouTube कोटा लगभग खत्म हो गया है, इसलिए Macro Deck ने चैट अपडेट रोक दिए हैं और लाइव स्थिति कम बार पढ़ता है। प्रशांत समय की मध्यरात्रि पर कोटा रीसेट होने के बाद चैट फिर शुरू होगी।</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube चैनल दो बार कनेक्ट है</value>

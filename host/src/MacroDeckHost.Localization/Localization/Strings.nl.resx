@@ -11289,6 +11289,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch heeft het verzoek afgewezen.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch reageerde niet op tijd.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Account</value>
   </data>
@@ -21974,6 +21977,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Je Google Cloud-project heeft zijn dagelijkse YouTube-quotum opgebruikt, dus Macro Deck heeft de updates van livestatus en chat gepauzeerd. Ze worden hervat na middernacht Pacifische tijd, wanneer Google het quotum terugzet.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>YouTube-chat gepauzeerd om quotum te sparen</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Je Google Cloud-project heeft zijn dagelijkse YouTube-quotum bijna opgebruikt, dus Macro Deck heeft de chatupdates gepauzeerd en leest de livestatus minder vaak. De chat wordt hervat na middernacht Pacifische tijd, wanneer Google het quotum terugzet.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube-kanaal twee keer verbonden</value>

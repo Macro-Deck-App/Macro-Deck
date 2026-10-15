@@ -11288,6 +11288,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch žádost odmítl.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch neodpověděl včas.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Účet</value>
   </data>
@@ -21952,6 +21955,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Projekt Google Cloud vyčerpal denní kvótu YouTube, proto Macro Deck pozastavil aktualizaci stavu vysílání a chatu. Obnoví se po půlnoci tichomořského času, kdy Google kvótu vynuluje.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Chat YouTube pozastaven kvůli kvótě</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Projekt Google Cloud téměř vyčerpal denní kvótu YouTube, proto Macro Deck pozastavil aktualizaci chatu a stav vysílání načítá méně často. Chat se obnoví po půlnoci tichomořského času, kdy Google kvótu vynuluje.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>Kanál YouTube připojen dvakrát</value>

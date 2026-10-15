@@ -11289,6 +11289,9 @@
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>رفض Twitch الطلب.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>لم يستجب Twitch في الوقت المحدد.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>الحساب</value>
   </data>
@@ -21974,6 +21977,12 @@
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>استنفد مشروع Google Cloud الخاص بك حصته اليومية من YouTube، لذلك أوقف Macro Deck تحديثات الحالة المباشرة والدردشة. تُستأنف بعد منتصف الليل بتوقيت المحيط الهادئ، عندما تعيد Google ضبط الحصة.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>أُوقفت دردشة YouTube مؤقتًا لتوفير الحصة</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>أوشك مشروع Google Cloud الخاص بك على استنفاد حصته اليومية من YouTube، لذلك أوقف Macro Deck تحديثات الدردشة مؤقتًا ويقرأ الحالة المباشرة بوتيرة أقل. تُستأنف الدردشة بعد منتصف الليل بتوقيت المحيط الهادئ، عندما تعيد Google ضبط الحصة.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>قناة YouTube متصلة مرتين</value>

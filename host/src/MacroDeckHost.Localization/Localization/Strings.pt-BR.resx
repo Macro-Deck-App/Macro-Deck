@@ -11289,6 +11289,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>A Twitch rejeitou a solicitação.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>A Twitch não respondeu a tempo.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Conta</value>
   </data>
@@ -21974,6 +21977,12 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>O projeto do Google Cloud esgotou a cota diária do YouTube, por isso o Macro Deck pausou as atualizações de status ao vivo e de chat. Elas são retomadas após a meia-noite, no horário do Pacífico, quando o Google reinicia a cota.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Chat do YouTube pausado para economizar cota</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>O projeto do Google Cloud quase esgotou a cota diária do YouTube, por isso o Macro Deck pausou as atualizações de chat e lê o status ao vivo com menos frequência. O chat é retomado após a meia-noite, no horário do Pacífico, quando o Google reinicia a cota.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>Canal do YouTube conectado duas vezes</value>

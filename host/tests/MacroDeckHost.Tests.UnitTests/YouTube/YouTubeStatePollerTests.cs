@@ -169,6 +169,39 @@ internal sealed class YouTubeStatePollerTests
 	}
 
 	[Test]
+	public async Task Once_the_chat_stops_to_save_quota_the_viewers_keep_updating()
+	{
+		_api.Active.Add(YouTubeTestSupport.Broadcast("b1", YouTubeLifeCycleStatus.Live, "chat-1"));
+		_api.Videos["b1"] = YouTubeTestSupport.Video("b1", 42, 7, "Stream now");
+		using var chat = new YouTubeChatPoller(_api,
+			_budget,
+			"chat-1",
+			(_, _) =>
+			{
+			},
+			() =>
+			{
+			},
+			() =>
+			{
+			},
+			YouTubeTestSupport.Silent,
+			YouTubeTestSupport.ManualOptions(_clock));
+		_budget.Charge(9_000);
+
+		var chatWait = await chat.NextStepAsync(CancellationToken.None);
+		var statusWait = await _poller.NextStepAsync(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(chatWait, Is.EqualTo(_budget.ResetsAt - _clock.Now));
+			Assert.That(_api.Calls, Has.None.EqualTo("chat:chat-1"));
+			Assert.That(_state.ViewerCount, Is.EqualTo(42));
+			Assert.That(statusWait, Is.EqualTo(TimeSpan.FromMinutes(2)));
+		});
+	}
+
+	[Test]
 	public async Task A_used_up_quota_pauses_polling_until_google_resets_it()
 	{
 		_budget.MarkExhausted();

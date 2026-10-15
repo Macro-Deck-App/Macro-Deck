@@ -163,7 +163,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 		var response = await SendForJsonAsync<YouTubeIdWire>(HttpMethod.Post,
 			"liveChat/messages?part=snippet",
 			body,
-			YouTubeQuotaCosts.Write,
+			YouTubeQuotaCosts.ChatMessageWrite,
 			cancellationToken);
 
 		return response.Id ?? string.Empty;
@@ -174,7 +174,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 		return SendAsync(HttpMethod.Delete,
 			$"liveChat/messages?id={Escape(messageId)}",
 			null,
-			YouTubeQuotaCosts.Write,
+			YouTubeQuotaCosts.ChatMessageWrite,
 			cancellationToken);
 	}
 
@@ -192,7 +192,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 		var response = await SendForJsonAsync<YouTubeIdWire>(HttpMethod.Post,
 			"liveChat/bans?part=snippet",
 			body,
-			YouTubeQuotaCosts.Write,
+			YouTubeQuotaCosts.Ban,
 			cancellationToken);
 
 		return response.Id ?? string.Empty;
@@ -203,7 +203,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 		return SendAsync(HttpMethod.Delete,
 			$"liveChat/bans?id={Escape(banId)}",
 			null,
-			YouTubeQuotaCosts.Write,
+			YouTubeQuotaCosts.Ban,
 			cancellationToken);
 	}
 
@@ -221,7 +221,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 				NullIfEmpty(snippet.DefaultLanguage),
 				NullIfEmpty(snippet.DefaultAudioLanguage)));
 
-		return SendAsync(HttpMethod.Put, "videos?part=snippet", body, YouTubeQuotaCosts.Write, cancellationToken);
+		return SendAsync(HttpMethod.Put, "videos?part=snippet", body, YouTubeQuotaCosts.VideoUpdate, cancellationToken);
 	}
 
 	public async Task<string> TransitionBroadcastAsync(
@@ -232,7 +232,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 		var response = await SendForJsonAsync<YouTubeIdWire>(HttpMethod.Post,
 			$"liveBroadcasts/transition?broadcastStatus={Escape(broadcastStatus)}&id={Escape(broadcastId)}&part=id,status",
 			null,
-			YouTubeQuotaCosts.Write,
+			YouTubeQuotaCosts.BroadcastWrite,
 			cancellationToken);
 
 		return response.Status?.LifeCycleStatus ?? string.Empty;
@@ -243,7 +243,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 		return SendAsync(HttpMethod.Post,
 			$"liveBroadcasts/cuepoint?id={Escape(broadcastId)}",
 			new YouTubeCuepointWire("cueTypeAd", durationSeconds),
-			YouTubeQuotaCosts.Write,
+			YouTubeQuotaCosts.BroadcastWrite,
 			cancellationToken);
 	}
 

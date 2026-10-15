@@ -11289,6 +11289,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch가 요청을 거부했습니다.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch가 제때 응답하지 않았습니다.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>계정</value>
   </data>
@@ -21974,6 +21977,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Google Cloud 프로젝트가 하루 YouTube 할당량을 모두 사용하여 Macro Deck이 라이브 상태와 채팅 업데이트를 일시 중지했습니다. Google이 할당량을 초기화하는 태평양 표준시 자정 이후에 재개됩니다.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>YouTube 채팅 일시 중지됨</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Google Cloud 프로젝트가 하루 YouTube 할당량을 거의 다 사용하여 Macro Deck이 채팅 업데이트를 일시 중지하고 라이브 상태를 덜 자주 읽습니다. Google이 할당량을 초기화하는 태평양 표준시 자정 이후에 채팅이 재개됩니다.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube 채널이 두 번 연결됨</value>

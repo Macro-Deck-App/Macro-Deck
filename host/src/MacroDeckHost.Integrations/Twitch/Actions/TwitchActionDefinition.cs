@@ -182,6 +182,13 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 				return ActionResult.Failed(ActionErrorCodes.PermissionDenied,
 					AppStrings.Integrations.Twitch.Errors.MissingScopePermission());
 			}
+			catch (TimeoutException ex)
+			{
+				_logger.Warning(ex, "Twitch action '{Action}' timed out", _definition.Id);
+
+				return ActionResult.Failed(ActionErrorCodes.Timeout,
+					AppStrings.Integrations.Twitch.Errors.RequestTimedOut());
+			}
 			catch (Exception ex) when (ex is not OperationCanceledException)
 			{
 				_logger.Warning(ex, "Twitch action '{Action}' failed", _definition.Id);

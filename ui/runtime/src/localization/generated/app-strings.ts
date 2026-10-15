@@ -4983,6 +4983,7 @@ export const AppStrings = {
 				ClipNotCreated: 'macrodeck.app:Integrations.Twitch.Errors.ClipNotCreated',
 				MissingScopePermission: 'macrodeck.app:Integrations.Twitch.Errors.MissingScopePermission',
 				RequestRejected: 'macrodeck.app:Integrations.Twitch.Errors.RequestRejected',
+				RequestTimedOut: 'macrodeck.app:Integrations.Twitch.Errors.RequestTimedOut',
 			},
 			Events: {
 				Account: 'macrodeck.app:Integrations.Twitch.Events.Account',
@@ -5800,6 +5801,8 @@ export const AppStrings = {
 				Title: 'macrodeck.app:Integrations.YouTube.Events.Title',
 			},
 			Issues: {
+				ChatPausedDescription: 'macrodeck.app:Integrations.YouTube.Issues.ChatPausedDescription',
+				ChatPausedTitle: 'macrodeck.app:Integrations.YouTube.Issues.ChatPausedTitle',
 				DuplicateChannelDescription: 'macrodeck.app:Integrations.YouTube.Issues.DuplicateChannelDescription',
 				DuplicateChannelTitle: 'macrodeck.app:Integrations.YouTube.Issues.DuplicateChannelTitle',
 				QuotaExhaustedDescription: 'macrodeck.app:Integrations.YouTube.Issues.QuotaExhaustedDescription',
@@ -13257,6 +13260,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Twitch.Errors.ClipNotCreated': 'Twitch did not create a clip. The channel has to be live.',
 	'macrodeck.app:Integrations.Twitch.Errors.MissingScopePermission': 'Twitch did not grant Macro Deck the permission for this action. Reconnect the account to grant it.',
 	'macrodeck.app:Integrations.Twitch.Errors.RequestRejected': 'Twitch rejected the request.',
+	'macrodeck.app:Integrations.Twitch.Errors.RequestTimedOut': 'Twitch did not answer in time.',
 	'macrodeck.app:Integrations.Twitch.Events.Account': 'Account',
 	'macrodeck.app:Integrations.Twitch.Events.AccountDescription': 'Optional. Only run for this Twitch account.',
 	'macrodeck.app:Integrations.Twitch.Events.AccountId': 'Account id',
@@ -13964,6 +13968,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.YouTube.Events.SuperStickerName': 'Super Sticker',
 	'macrodeck.app:Integrations.YouTube.Events.Tier': 'Tier',
 	'macrodeck.app:Integrations.YouTube.Events.Title': 'Title',
+	'macrodeck.app:Integrations.YouTube.Issues.ChatPausedDescription': 'Your Google Cloud project has almost used up its daily YouTube quota, so Macro Deck paused chat updates and reads the live status less often. Chat resumes after midnight Pacific Time, when Google resets the quota.',
+	'macrodeck.app:Integrations.YouTube.Issues.ChatPausedTitle': 'YouTube chat paused to save quota',
 	'macrodeck.app:Integrations.YouTube.Issues.DuplicateChannelDescription': '"{title}" is an older connection for the same YouTube channel and is not used. Remove it in the list of configurations below.',
 	'macrodeck.app:Integrations.YouTube.Issues.DuplicateChannelTitle': 'YouTube channel connected twice',
 	'macrodeck.app:Integrations.YouTube.Issues.QuotaExhaustedDescription': 'Your Google Cloud project has used up its daily YouTube quota, so Macro Deck paused live status and chat updates. They resume after midnight Pacific Time, when Google resets the quota.',

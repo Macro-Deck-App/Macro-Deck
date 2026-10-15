@@ -11289,6 +11289,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch 拒絕了此請求。</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch 未及時回應。</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>帳戶</value>
   </data>
@@ -21974,6 +21977,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>你的 Google Cloud 專案已用完今日的 YouTube 配額，因此 Macro Deck 已暫停直播狀態與聊天室更新。配額會在太平洋時間午夜由 Google 重設，之後即會恢復。</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>YouTube 聊天室已暫停以節省配額</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Google Cloud 專案即將用完今日的 YouTube 配額，因此 Macro Deck 已暫停聊天室更新，並降低直播狀態的讀取頻率。配額會在太平洋時間午夜由 Google 重設，之後聊天室即會恢復。</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube 頻道重複連線</value>

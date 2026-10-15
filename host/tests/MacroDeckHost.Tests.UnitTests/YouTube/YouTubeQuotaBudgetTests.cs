@@ -27,6 +27,21 @@ internal sealed class YouTubeQuotaBudgetTests
 		});
 	}
 
+	[TestCase(0, YouTubeQuotaLevel.Normal)]
+	[TestCase(79, YouTubeQuotaLevel.Normal)]
+	[TestCase(80, YouTubeQuotaLevel.Throttled)]
+	[TestCase(84, YouTubeQuotaLevel.Throttled)]
+	[TestCase(85, YouTubeQuotaLevel.Paused)]
+	[TestCase(94, YouTubeQuotaLevel.Paused)]
+	public void Chat_stops_before_the_status_poll_runs_out(int spent, YouTubeQuotaLevel expected)
+	{
+		var budget = new YouTubeQuotaBudget(100, new YouTubeManualClock(_summerNoonLosAngeles));
+
+		budget.Charge(spent);
+
+		Assert.That(budget.ChatLevel, Is.EqualTo(expected));
+	}
+
 	[Test]
 	public void A_quota_exceeded_answer_pauses_until_the_next_pacific_midnight()
 	{
@@ -39,6 +54,7 @@ internal sealed class YouTubeQuotaBudgetTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(budget.Level, Is.EqualTo(YouTubeQuotaLevel.Paused));
+			Assert.That(budget.ChatLevel, Is.EqualTo(YouTubeQuotaLevel.Paused));
 			Assert.That(budget.Remaining, Is.Zero);
 			Assert.That(budget.ResetsAt, Is.EqualTo(new DateTimeOffset(2026, 7, 2, 7, 0, 0, TimeSpan.Zero)));
 		});
