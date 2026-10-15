@@ -6,6 +6,7 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Sdk.Batteries;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
@@ -26,6 +27,7 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 	private const string HealthSuffix = "health";
 
 	private const string DisconnectedState = "disconnected";
+	private const string PercentUnit = "%";
 
 	private const string Prefix = "battery_";
 	private const string FallbackSlug = "device";
@@ -297,8 +299,22 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 		LocalizedText displayName,
 		object? value)
 	{
+		var unit = UnitOf(suffix);
+		var declaration = new VariableDeclaration
+		{
+			Presentation = new VariablePresentation(displayName, null, default),
+			DecimalPlaces = decimalPlaces,
+			Unit = unit
+		};
+		var name = $"{group.Stem}_{suffix}";
 		if (group.Variables.TryGetValue(suffix, out var existing))
 		{
+			// A variable created before it had a unit gets it by re-declaring it, which keeps its identity.
+			if (!string.Equals(existing.Unit, unit, StringComparison.Ordinal))
+			{
+				await DeclareAsync(variables, owner, name, type, DefaultOf(type), decimalPlaces, declaration);
+			}
+
 			if (value is not null)
 			{
 				await ReportAsync(variables, owner, existing, value);
@@ -307,22 +323,13 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 			return;
 		}
 
-		var name = $"{group.Stem}_{suffix}";
-		var created = await variables.CreateIntegrationVariable(owner,
+		var created = await DeclareAsync(variables,
+			owner,
 			name,
-			VariableScope.Global,
-			null,
 			type,
 			value ?? DefaultOf(type),
 			decimalPlaces,
-			declaration: new VariableDeclaration
-			{
-				Presentation = new VariablePresentation(displayName, null, default),
-				DecimalPlaces = decimalPlaces
-			},
-			// Pushed, not polled: an unchanged level is never reported again, so a polled one would go stale.
-			updateMode: VariableUpdateMode.Pushed,
-			publishedByHost: true);
+			declaration);
 		if (!created.Success || created.Data is null)
 		{
 			_logger.Warning("Could not create the battery variable '{Name}' of '{IntegrationId}': {Error}",
@@ -337,6 +344,33 @@ public sealed partial class BatteryVariablePublisher : IHostedService
 		{
 			await ReportAsync(variables, owner, created.Data, value);
 		}
+	}
+
+	private static Task<Result<VariableEntity, VariableError>> DeclareAsync(
+		IVariableService variables,
+		string owner,
+		string name,
+		VariableType type,
+		object initialValue,
+		int? decimalPlaces,
+		VariableDeclaration declaration)
+	{
+		return variables.CreateIntegrationVariable(owner,
+			name,
+			VariableScope.Global,
+			null,
+			type,
+			initialValue,
+			decimalPlaces,
+			declaration: declaration,
+			// Pushed, not polled: an unchanged level is never reported again, so a polled one would go stale.
+			updateMode: VariableUpdateMode.Pushed,
+			publishedByHost: true);
+	}
+
+	private static string? UnitOf(string suffix)
+	{
+		return suffix == LevelSuffix ? PercentUnit : null;
 	}
 
 	private async Task ReportAsync(IVariableService variables, string owner, VariableEntity variable, object value)
