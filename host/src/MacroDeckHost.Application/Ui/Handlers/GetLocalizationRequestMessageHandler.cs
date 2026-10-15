@@ -67,6 +67,8 @@ public class GetLocalizationRequestMessageHandler
 			}
 		}
 
+		var timeOfDay = await _timeFormat.ResolveAsync();
+
 		return new GetLocalizationResponse
 		{
 			Culture = settings.Culture,
@@ -75,7 +77,8 @@ public class GetLocalizationRequestMessageHandler
 			AvailableCultures = [.. availableCultures],
 			FollowSystem = settings.FollowSystem,
 			TimeFormat = await _preferences.GetTimeFormat(),
-			HourCycle = await _timeFormat.ResolveHourCycle()
+			HourCycle = timeOfDay.HourCycle,
+			HourPadded = TimeFormatResolver.WritesPaddedHour(timeOfDay)
 		};
 	}
 }

@@ -1,5 +1,54 @@
 export const TOLERANCE_PX = 0.1;
 
+const REFERENCE_CELL = 120;
+
+const FIT_EPSILON_PX = 0.01;
+
+// Null for a minimum that needs the layout around it, a cross or parent term: the check refuses it rather
+// than skip it.
+function minimumSizes(node, basis, sizes = new Map()) {
+	const length = node.properties?.minSize;
+	if (length && typeof length.basis === 'number' && length.maxOfCross === undefined && length.ofParent === undefined) {
+		const own = length.basis * basis;
+		sizes.set(node.id, typeof length.maxOfCell === 'number' ? Math.min(own, length.maxOfCell * REFERENCE_CELL) : own);
+	} else if (length) {
+		sizes.set(node.id, null);
+	}
+	for (const child of [...(node.children ?? []), ...(node.fallback ? [node.fallback] : [])]) minimumSizes(child, basis, sizes);
+	return sizes;
+}
+
+// The contract decides, not the implementation the files are regenerated from (see the README).
+export function fitProblems(root, measured) {
+	const problems = [];
+	for (const testCase of measured.cases) {
+		const minimums = minimumSizes(root, testCase.basis);
+		for (const [id, node] of Object.entries(testCase.nodes)) {
+			const minimum = minimums.get(id);
+			if (minimum === undefined) continue;
+			if (minimum === null) {
+				problems.push(`${caseKey(testCase)} ${id}: its minSize needs the layout around it, which this check cannot resolve`);
+				continue;
+			}
+			for (const text of node.texts ?? []) {
+				if (text.truncated.x && text.fontSize > minimum + FIT_EPSILON_PX) {
+					problems.push(`${caseKey(testCase)} ${id}: cut off at ${text.fontSize} px, above its minimum ${Math.round(minimum * 100) / 100} px`);
+				}
+			}
+		}
+	}
+	return problems;
+}
+
+export function withoutFitSizes(measured) {
+	for (const testCase of measured.cases) {
+		for (const node of Object.values(testCase.nodes)) {
+			for (const text of node.texts ?? []) delete text.fontSize;
+		}
+	}
+	return measured;
+}
+
 function near(expected, actual) {
 	return typeof expected === 'number' && typeof actual === 'number' && Math.abs(expected - actual) <= TOLERANCE_PX;
 }

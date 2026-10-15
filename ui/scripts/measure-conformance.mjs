@@ -6,7 +6,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { compareMeasured } from './measure-conformance/compare.mjs';
+import { compareMeasured, fitProblems, withoutFitSizes } from './measure-conformance/compare.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ui = path.resolve(here, '..');
@@ -187,6 +187,8 @@ class Browser {
 	}
 }
 
+const fitFailures = [];
+
 async function measureAll(manifest) {
 	const fontPath = path.join(repo, manifest.font);
 	const font = readFileSync(fontPath);
@@ -232,7 +234,10 @@ async function measureAll(manifest) {
 				if (result.error) throw new Error(`${scene.tree} at ${JSON.stringify(testCase)}: ${result.error}`);
 				cases.push({ ...testCase, nodes: result.nodes });
 			}
-			results.set(measuredFile(scene.tree), { tree: scene.tree, font: fontInfo, timeZone: TIME_ZONE, chrome: browser.version, cases });
+			const measured = { tree: scene.tree, font: fontInfo, timeZone: TIME_ZONE, chrome: browser.version, cases };
+			const problems = fitProblems(tree.root, measured);
+			if (problems.length > 0) fitFailures.push({ file: measuredFile(scene.tree), differences: problems });
+			results.set(measuredFile(scene.tree), withoutFitSizes(measured));
 		}
 		return results;
 	} finally {
@@ -245,6 +250,15 @@ const args = parseArgs(process.argv.slice(2));
 const manifest = readJson(path.join(fixtures, 'measured-scenes.json'));
 const results = await measureAll(manifest);
 const serialize = value => `${JSON.stringify(value, null, 2)}\n`;
+
+if (fitFailures.length > 0) {
+	for (const { file, differences } of fitFailures) {
+		console.error(`${file}:`);
+		for (const difference of differences) console.error(`  ${difference}`);
+	}
+	console.error('A fitted text is cut off above its minimum: the runtime\'s fit is wrong, so nothing was written.');
+	process.exit(1);
+}
 
 if (!args.check) {
 	for (const [file, measured] of results) writeFileSync(path.join(fixtures, file), serialize(measured));

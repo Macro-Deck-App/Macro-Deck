@@ -353,7 +353,7 @@ public class LocalizationSettingsHandlersTests
 	{
 		var resolver = await Resolver("de-DE", timeFormat, systemHourCycle);
 
-		Assert.That(await resolver.ResolveHourCycle(), Is.EqualTo(expected));
+		Assert.That((await resolver.ResolveAsync()).HourCycle, Is.EqualTo(expected));
 	}
 
 	[TestCase("en-US", HourCycles.H12)]
@@ -362,7 +362,7 @@ public class LocalizationSettingsHandlersTests
 	{
 		var resolver = await Resolver(culture, "system", null);
 
-		Assert.That(await resolver.ResolveHourCycle(), Is.EqualTo(expected));
+		Assert.That((await resolver.ResolveAsync()).HourCycle, Is.EqualTo(expected));
 	}
 
 	[TestCase("HH 'h' mm", HourCycles.H23)]

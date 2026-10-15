@@ -781,7 +781,8 @@ function naturalWidthOf(element: HTMLElement): number {
       const mutedSibling = host.querySelector('[data-node-id="muted-sibling"].widget-text') as HTMLElement;
 
       expect(secondsSpan.textContent).toBe(expectedSecondsSubstring(instant, 'en'));
-      expect(parseFloat(secondsSpan.style.fontSize)).toBeCloseTo(0.55 * parseFloat(run.style.fontSize), 5);
+      expect(parseFloat(getComputedStyle(secondsSpan).fontSize))
+        .toBeCloseTo(0.55 * parseFloat(getComputedStyle(run).fontSize), 3);
       expect(secondsSpan.style.color).toBe(mutedSibling.style.color);
     });
 

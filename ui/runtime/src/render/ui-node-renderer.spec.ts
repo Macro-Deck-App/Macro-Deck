@@ -546,7 +546,7 @@ describe('widget node renderer', () => {
     expect(seconds).not.toBeNull();
     expect(seconds.textContent!.length).toBeGreaterThan(0);
     // The seconds run is deliberately smaller than the rest of the clock.
-    expect(parseFloat(seconds.style.fontSize)).toBeLessThan(24);
+    expect(parseFloat(getComputedStyle(seconds).fontSize)).toBeLessThan(24);
   });
 
   it('renders a slider track, fill and thumb along its axis', () => {
@@ -1997,6 +1997,16 @@ describe('widget clock ticking', () => {
     expect(shown()).toBe('3:05');
   });
 
+  it('draws the seconds of a clock without a size at 0.55 of the size it inherits', () => {
+    const clock = fakeClock('2026-01-02T03:04:05.400Z');
+    mountAt(clock, digital({ seconds: true }));
+    const run = container.querySelector('.widget-dynamic-text') as HTMLElement;
+    const seconds = run.querySelector('.widget-dynamic-text-seconds') as HTMLElement;
+
+    expect(parseFloat(getComputedStyle(seconds).fontSize))
+      .toBeCloseTo(0.55 * parseFloat(getComputedStyle(run).fontSize), 3);
+  });
+
   it('moves an analog second hand on its own', () => {
     const clock = fakeClock('2026-01-02T03:04:05.000Z');
     mountAt(clock, node('macrodeck.clock-dial', { seconds: true, value: { $time: { zone: 'UTC' } } }));
@@ -2687,5 +2697,11 @@ describe('macrodeck.dynamic-text time with a host hour cycle', () => {
 
   it('keeps a pinned 24-hour face when the host prefers h12', () => {
     expect(shown('time-24h', { hourCycle: () => 'h12' })).toBe('03:04');
+  });
+
+  it('writes the leading zero the host states, whatever the language writes', () => {
+    expect(shown('time', { culture: () => 'es', hourCycle: () => 'h23', hourPadded: () => true })).toBe('03:04');
+    container.innerHTML = '';
+    expect(shown('time', { culture: () => 'en', hourCycle: () => 'h23', hourPadded: () => false })).toBe('3:04');
   });
 });

@@ -13,8 +13,9 @@ public sealed record TimeOfDayFormat(CultureInfo Culture, string HourCycle)
 {
 	/// <summary>
 	/// Writes <paramref name="time" /> with the culture's short time pattern, switched to the hour cycle. A
-	/// 12-hour cycle in a culture without AM/PM designators is written in the invariant culture's
-	/// <c>h:mm tt</c>.
+	/// 24-hour cycle in a culture whose pattern is 12-hour has a two-digit hour, the way those languages write
+	/// a 24-hour clock; a 24-hour pattern keeps its own. A 12-hour cycle in a culture without AM/PM designators
+	/// is written in the invariant culture's <c>h:mm tt</c>.
 	/// </summary>
 	public string Format(TimeOnly time)
 	{
@@ -32,6 +33,7 @@ public sealed record TimeOfDayFormat(CultureInfo Culture, string HourCycle)
 		var builder = new StringBuilder(culturePattern.Length + 3);
 		var quoted = false;
 		var hasDesignator = false;
+		var previous = '\0';
 		foreach (var character in culturePattern)
 		{
 			if (character == '\'')
@@ -42,6 +44,13 @@ public sealed record TimeOfDayFormat(CultureInfo Culture, string HourCycle)
 			else if (quoted)
 			{
 				builder.Append(character);
+			}
+			else if (character == 'h' && !twelveHour)
+			{
+				if (previous != 'h')
+				{
+					builder.Append("HH");
+				}
 			}
 			else if (character is 'h' or 'H')
 			{
@@ -66,6 +75,8 @@ public sealed record TimeOfDayFormat(CultureInfo Culture, string HourCycle)
 			{
 				builder.Append(character);
 			}
+
+			previous = quoted ? '\0' : character;
 		}
 
 		var pattern = builder.ToString().Trim();

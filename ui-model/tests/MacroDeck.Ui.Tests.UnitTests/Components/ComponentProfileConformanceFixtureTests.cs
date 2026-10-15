@@ -42,6 +42,7 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-tree.json";
 		yield return "conformance-clock-tree.json";
 		yield return "conformance-clock-formats-tree.json";
+		yield return "conformance-clock-widget-tree.json";
 		yield return "conformance-slider-tree.json";
 		yield return "conformance-action-button-tree.json";
 		yield return "conformance-music-player-tree.json";

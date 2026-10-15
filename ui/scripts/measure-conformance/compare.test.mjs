@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { compareMeasured } from './compare.mjs';
+import { compareMeasured, fitProblems, withoutFitSizes } from './compare.mjs';
 
 function measured(change = () => {}) {
 	const value = {
@@ -54,4 +54,49 @@ test('a node that appears or disappears fails', () => {
 
 test('measuring with another face fails', () => {
 	assert.match(compareMeasured(measured(), measured(value => { value.font.sha256 = 'def'; }))[0], /different face/);
+});
+
+function fitted(fontSize, truncatedX) {
+	return {
+		cases: [{
+			tile: { width: 120, height: 120 },
+			basis: 120,
+			nodes: {
+				clock: {
+					type: 'macrodeck.dynamic-text',
+					box: { x: 0, y: 0, width: 96, height: 30 },
+					texts: [{ text: '14:05:30', naturalWidth: 97, givenWidth: 96, truncated: { x: truncatedX, y: false }, fontSize }],
+				},
+			},
+		}],
+	};
+}
+
+const clockRoot = { id: 'root', type: 'ui.stack', children: [{ id: 'clock', type: 'macrodeck.dynamic-text', properties: { minSize: { basis: 0.13 } } }] };
+
+test('a fitted text cut off above its minimum is a problem, whatever the reference says', () => {
+	const problems = fitProblems(clockRoot, fitted(28.8, true));
+	assert.equal(problems.length, 1);
+	assert.match(problems[0], /120x120@120 clock: cut off at 28\.8 px, above its minimum 15\.6/);
+});
+
+test('a fitted text cut off at its minimum, or fitting above it, is not', () => {
+	assert.deepEqual(fitProblems(clockRoot, fitted(15.6, true)), []);
+	assert.deepEqual(fitProblems(clockRoot, fitted(28.8, false)), []);
+});
+
+test('a minimum the check cannot resolve is refused, not skipped', () => {
+	const root = { id: 'root', children: [{ id: 'clock', properties: { minSize: { basis: 0.13, ofParent: 0.2 } } }] };
+	const problems = fitProblems(root, fitted(28.8, false));
+	assert.equal(problems.length, 1);
+	assert.match(problems[0], /clock: its minSize needs the layout around it/);
+});
+
+test('a drawn fallback is checked against its own minimum', () => {
+	const root = { id: 'root', children: [{ id: 'dial', fallback: { id: 'clock', properties: { minSize: { basis: 0.13 } } } }] };
+	assert.equal(fitProblems(root, fitted(28.8, true)).length, 1);
+});
+
+test('the size checked against the minimum is not written', () => {
+	assert.equal('fontSize' in withoutFitSizes(fitted(28.8, false)).cases[0].nodes.clock.texts[0], false);
 });

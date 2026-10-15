@@ -1,4 +1,5 @@
 using MacroDeck.Localization;
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Localization;
@@ -19,6 +20,8 @@ public class GetLocalizationRequestMessageHandlerTests
 	{
 		public string Culture { get; set; } = "en";
 
+		public string TimeFormat { get; set; } = AppPreferenceService.TimeFormatSystem;
+
 		public Task<LocalizationSettings> GetLocalization()
 		{
 			return Task.FromResult(new LocalizationSettings(Culture));
@@ -31,7 +34,7 @@ public class GetLocalizationRequestMessageHandlerTests
 
 		public Task<string> GetTimeFormat()
 		{
-			return Task.FromResult(AppPreferenceService.TimeFormatSystem);
+			return Task.FromResult(TimeFormat);
 		}
 
 		public Task<string> SetTimeFormat(string? timeFormat)
@@ -253,6 +256,37 @@ public class GetLocalizationRequestMessageHandlerTests
 			Assert.That(response.Translations, Contains.Key($"{scopeB}:OnlyB"));
 			Assert.That(response.Translations, Does.Not.ContainKey($"{scopeB}:OnlyA"));
 			Assert.That(response.Translations, Does.Not.ContainKey($"{scopeA}:OnlyB"));
+		});
+	}
+
+	[TestCase("de-DE", AppPreferenceService.TimeFormat24H, HourCycles.H23, true)]
+	[TestCase("en-US", AppPreferenceService.TimeFormat24H, HourCycles.H23, true)]
+	[TestCase("ko-KR", AppPreferenceService.TimeFormat24H, HourCycles.H23, true)]
+	[TestCase("es-ES", AppPreferenceService.TimeFormat24H, HourCycles.H23, false)]
+	[TestCase("en-US", AppPreferenceService.TimeFormat12H, HourCycles.H12, false)]
+	[TestCase("de-DE", AppPreferenceService.TimeFormat12H, HourCycles.H12, false)]
+	[TestCase("ko-KR", AppPreferenceService.TimeFormat12H, HourCycles.H12, false)]
+	[TestCase("de-DE", AppPreferenceService.TimeFormatSystem, HourCycles.H23, true)]
+	public async Task The_hour_is_padded_exactly_where_the_users_time_format_writes_a_leading_zero(
+		string culture,
+		string timeFormat,
+		string hourCycle,
+		bool padded)
+	{
+		var preferences = new FakeLocalizationPreferenceService { Culture = culture, TimeFormat = timeFormat };
+		var catalogs = new LocalizationCatalogRegistry();
+		catalogs.Register(MacroDeckStrings.LocalizationCatalog);
+		var handler = new GetLocalizationRequestMessageHandler(preferences,
+			catalogs,
+			new LocalizationResolver(catalogs),
+			new TimeFormatResolver(preferences, new NoSystemHourCycle()));
+
+		var response = await handler.Handle(new GetLocalizationRequest(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.HourCycle, Is.EqualTo(hourCycle));
+			Assert.That(response.HourPadded, Is.EqualTo(padded));
 		});
 	}
 }

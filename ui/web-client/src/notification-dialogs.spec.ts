@@ -125,6 +125,23 @@ describe('notification dialogs', () => {
     expect(buttons()[0].disabled).toBeFalse();
   });
 
+  it('writes a clock in a dialog with the leading zero the host states', () => {
+    const own = document.createElement('div');
+    document.body.appendChild(own);
+    const ownFeed = new NotificationFeed(wire.request);
+    new NotificationDialogs(own, ownFeed, {
+      ...host, now: () => Date.parse('2026-01-02T03:04:05Z'), culture: () => 'es', hourCycle: () => 'h23', hourPadded: () => true,
+    });
+    ownFeed.shown(notification({
+      id: 'a', popup: 'dialog',
+      content: { id: 'root', type: 'macrodeck.dynamic-text', properties: { format: 'time', value: { $time: { zone: 'UTC' } } } } as UiNode,
+    }));
+
+    expect(own.querySelector('.widget-dynamic-text')!.textContent).toBe('03:04');
+    ownFeed.clear();
+    own.remove();
+  });
+
   it('keeps the dialog and its values when the host finds the answer invalid, and says so in its own words', async () => {
     answer = () => ({ status: 'invalid', message: 'Name is required' });
     feed.shown(notification({
