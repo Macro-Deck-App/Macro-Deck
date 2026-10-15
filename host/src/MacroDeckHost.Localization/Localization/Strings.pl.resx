@@ -11273,6 +11273,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch odrzucił żądanie.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch nie odpowiedział na czas.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Konto</value>
   </data>
@@ -21925,6 +21928,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Projekt Google Cloud wykorzystał dzienny limit YouTube, dlatego Macro Deck wstrzymał aktualizację stanu transmisji i czatu. Zostanie ona wznowiona po północy czasu pacyficznego, gdy Google odnowi limit.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Czat YouTube wstrzymany, aby oszczędzić limit</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Projekt Google Cloud prawie wykorzystał dzienny limit YouTube, dlatego Macro Deck wstrzymał aktualizację czatu i rzadziej odczytuje stan transmisji. Czat zostanie wznowiony po północy czasu pacyficznego, gdy Google odnowi limit.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>Kanał YouTube połączony dwukrotnie</value>

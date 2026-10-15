@@ -196,6 +196,21 @@ internal sealed class TwitchActionsTests
 	}
 
 	[Test]
+	public async Task A_call_Twitch_never_answers_is_reported_as_a_timeout_not_as_rejected()
+	{
+		_first.FailingReads.Add("user");
+		_first.FailingReadExceptions["user"] = new TimeoutException("The request to Twitch timed out.");
+
+		var result = await Run("start-raid", ("targetLogin", "other"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Timeout));
+		});
+	}
+
+	[Test]
 	public async Task A_call_Twitch_refuses_for_a_missing_scope_is_PERMISSION_DENIED()
 	{
 		_first.FailingReads.Add("user");

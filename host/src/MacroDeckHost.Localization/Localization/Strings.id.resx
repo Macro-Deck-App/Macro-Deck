@@ -11274,6 +11274,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch menolak permintaan.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch tidak merespons tepat waktu.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Akun</value>
   </data>
@@ -21947,6 +21950,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Proyek Google Cloud telah menghabiskan kuota harian YouTube, sehingga Macro Deck menjeda pembaruan status langsung dan obrolan. Pembaruan dilanjutkan setelah tengah malam Pacific Time, saat Google mereset kuota.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Obrolan YouTube dijeda untuk menghemat kuota</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Proyek Google Cloud hampir menghabiskan kuota harian YouTube, sehingga Macro Deck menjeda pembaruan obrolan dan membaca status langsung lebih jarang. Obrolan dilanjutkan setelah tengah malam Pacific Time, saat Google mereset kuota.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>Kanal YouTube terhubung dua kali</value>

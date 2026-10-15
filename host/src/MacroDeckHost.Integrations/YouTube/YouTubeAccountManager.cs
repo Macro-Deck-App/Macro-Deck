@@ -15,6 +15,7 @@ internal sealed class YouTubeAccountManager : IDisposable
 	internal const string DuplicateIssuePrefix = "duplicate-account:";
 	internal const string TokenIssuePrefix = "token-invalid:";
 	internal const string QuotaIssuePrefix = "quota-exhausted:";
+	internal const string ChatQuotaIssuePrefix = "quota-chat-paused:";
 
 	private readonly Func<IYouTubeOAuthClient> _oauthClientFactory;
 	private readonly Func<YouTubeAccount, YouTubeTokenProvider, YouTubeQuotaBudget, IYouTubeApiClient> _apiFactory;
@@ -159,6 +160,20 @@ internal sealed class YouTubeAccountManager : IDisposable
 				Id = QuotaIssuePrefix + connection.Account.ClientId,
 				Title = AppStrings.Integrations.YouTube.Issues.QuotaExhaustedTitle(),
 				Description = AppStrings.Integrations.YouTube.Issues.QuotaExhaustedDescription(),
+				Severity = IntegrationIssueSeverity.Warning
+			});
+		}
+
+		foreach (var connection in _connections
+			.Where(c => c.Budget.ChatLevel is YouTubeQuotaLevel.Paused
+				&& c.Budget.Level is not YouTubeQuotaLevel.Paused)
+			.DistinctBy(c => c.Account.ClientId, StringComparer.Ordinal))
+		{
+			issues.Add(new IntegrationIssue
+			{
+				Id = ChatQuotaIssuePrefix + connection.Account.ClientId,
+				Title = AppStrings.Integrations.YouTube.Issues.ChatPausedTitle(),
+				Description = AppStrings.Integrations.YouTube.Issues.ChatPausedDescription(),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}

@@ -73,7 +73,8 @@ internal sealed class TwitchStatePoller : IDisposable
 					StreamCategory = stream.CategoryName ?? state.StreamCategory,
 					StreamThumbnailUrl = stream.IsLive ? stream.ThumbnailUrl ?? state.StreamThumbnailUrl : null
 				});
-			});
+			},
+			cancellationToken);
 
 		await TryAsync("chatters",
 			async () =>
@@ -94,7 +95,8 @@ internal sealed class TwitchStatePoller : IDisposable
 					_merge(state => state with { ChatterCount = null });
 					throw;
 				}
-			});
+			},
+			cancellationToken);
 
 		await TryAsync("channel",
 			async () =>
@@ -105,7 +107,8 @@ internal sealed class TwitchStatePoller : IDisposable
 					StreamTitle = channel.Title ?? state.StreamTitle,
 					StreamCategory = channel.CategoryName ?? state.StreamCategory
 				});
-			});
+			},
+			cancellationToken);
 
 		await TryAsync("followers",
 			async () =>
@@ -115,7 +118,8 @@ internal sealed class TwitchStatePoller : IDisposable
 				{
 					_merge(state => state with { FollowerCount = count });
 				}
-			});
+			},
+			cancellationToken);
 
 		await TryAsync("subscribers",
 			async () =>
@@ -126,20 +130,23 @@ internal sealed class TwitchStatePoller : IDisposable
 					SubscriberCount = subscribers.Count ?? state.SubscriberCount,
 					SubscriberPoints = subscribers.Points ?? state.SubscriberPoints
 				});
-			});
+			},
+			cancellationToken);
 
 		await TryAsync("chat settings",
 			async () =>
 			{
 				var settings = await _helix.GetChatSettingsAsync(_account.UserId, cancellationToken);
 				_merge(state => state with { ChatSettings = settings });
-			});
+			},
+			cancellationToken);
 
 		if (includeRewards)
 		{
 			await TryAsync("rewards",
 				async () =>
-					_rewards(await _helix.GetCustomRewardsAsync(_account.UserId, cancellationToken)));
+					_rewards(await _helix.GetCustomRewardsAsync(_account.UserId, cancellationToken)),
+				cancellationToken);
 		}
 	}
 
@@ -164,13 +171,13 @@ internal sealed class TwitchStatePoller : IDisposable
 		}
 	}
 
-	private async Task TryAsync(string what, Func<Task> call)
+	private async Task TryAsync(string what, Func<Task> call, CancellationToken cancellationToken)
 	{
 		try
 		{
 			await call();
 		}
-		catch (OperationCanceledException)
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{
 			throw;
 		}

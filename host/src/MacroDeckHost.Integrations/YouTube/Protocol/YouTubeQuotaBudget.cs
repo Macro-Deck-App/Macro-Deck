@@ -14,6 +14,7 @@ internal sealed class YouTubeQuotaBudget
 	public const int DefaultDailyLimit = 10_000;
 
 	private const int ThrottlePercent = 80;
+	private const int ChatPausePercent = 85;
 	private const int PausePercent = 95;
 
 	private static readonly TimeZoneInfo _pacific = ResolvePacific();
@@ -82,25 +83,9 @@ internal sealed class YouTubeQuotaBudget
 		}
 	}
 
-	public YouTubeQuotaLevel Level
-	{
-		get
-		{
-			lock (_sync)
-			{
-				RollOver();
+	public YouTubeQuotaLevel Level => LevelPausedAt(PausePercent);
 
-				if (_exhausted || (long)_spent * 100 >= (long)_limit * PausePercent)
-				{
-					return YouTubeQuotaLevel.Paused;
-				}
-
-				return (long)_spent * 100 >= (long)_limit * ThrottlePercent
-					? YouTubeQuotaLevel.Throttled
-					: YouTubeQuotaLevel.Normal;
-			}
-		}
-	}
+	public YouTubeQuotaLevel ChatLevel => LevelPausedAt(ChatPausePercent);
 
 	public DateTimeOffset ResetsAt
 	{
@@ -139,6 +124,23 @@ internal sealed class YouTubeQuotaBudget
 		lock (_sync)
 		{
 			_limit = dailyLimit;
+		}
+	}
+
+	private YouTubeQuotaLevel LevelPausedAt(int pausePercent)
+	{
+		lock (_sync)
+		{
+			RollOver();
+
+			if (_exhausted || (long)_spent * 100 >= (long)_limit * pausePercent)
+			{
+				return YouTubeQuotaLevel.Paused;
+			}
+
+			return (long)_spent * 100 >= (long)_limit * ThrottlePercent
+				? YouTubeQuotaLevel.Throttled
+				: YouTubeQuotaLevel.Normal;
 		}
 	}
 

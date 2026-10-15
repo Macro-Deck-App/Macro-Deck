@@ -11274,6 +11274,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch відхилив запит.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch не відповів вчасно.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Обліковий запис</value>
   </data>
@@ -21947,6 +21950,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Ваш проєкт Google Cloud вичерпав денну квоту YouTube, тому Macro Deck призупинив оновлення статусу наживо та чату. Вони відновляться після півночі за тихоокеанським часом, коли Google скидає квоту.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Чат YouTube призупинено для економії квоти</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Ваш проєкт Google Cloud майже вичерпав денну квоту YouTube, тому Macro Deck призупинив оновлення чату й рідше отримує статус наживо. Чат відновиться після півночі за тихоокеанським часом, коли Google скидає квоту.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>Канал YouTube під'єднано двічі</value>

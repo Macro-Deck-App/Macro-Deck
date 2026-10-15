@@ -11274,6 +11274,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch isteği reddetti.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch zamanında yanıt vermedi.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Hesap</value>
   </data>
@@ -21947,6 +21950,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Google Cloud projeniz günlük YouTube kotasını tüketti; bu nedenle Macro Deck canlı durum ve sohbet güncellemelerini duraklattı. Google kotayı sıfırladığında, Pasifik saatiyle gece yarısından sonra devam ederler.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Kotadan tasarruf için YouTube sohbeti duraklatıldı</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Google Cloud projeniz günlük YouTube kotasını neredeyse tüketti; bu nedenle Macro Deck sohbet güncellemelerini duraklattı ve canlı durumu daha seyrek okuyor. Google kotayı sıfırladığında, Pasifik saatiyle gece yarısından sonra sohbet devam eder.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube kanalı iki kez bağlandı</value>

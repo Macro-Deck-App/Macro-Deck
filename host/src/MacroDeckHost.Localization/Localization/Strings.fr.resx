@@ -11273,6 +11273,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch a rejeté la demande.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch n'a pas répondu à temps.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Compte</value>
   </data>
@@ -21925,6 +21928,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Ton projet Google Cloud a épuisé son quota YouTube quotidien, Macro Deck a donc mis en pause la mise à jour du statut en direct et du chat. Elle reprend après minuit, heure du Pacifique, lorsque Google réinitialise le quota.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Chat YouTube en pause pour économiser le quota</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Ton projet Google Cloud a presque épuisé son quota YouTube quotidien, Macro Deck a donc mis en pause la mise à jour du chat et lit le statut en direct moins souvent. Le chat reprend après minuit, heure du Pacifique, lorsque Google réinitialise le quota.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>Chaîne YouTube connectée deux fois</value>
