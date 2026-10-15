@@ -118,6 +118,17 @@ internal sealed class RemotePluginSnapshotStoreTests
 	}
 
 	[Test]
+	public async Task A_disposed_store_no_longer_writes_to_the_data_directory()
+	{
+		var store = new RemotePluginSnapshotStore(_paths, Log.Logger);
+		store.Dispose();
+
+		await store.SaveAsync(RemotePluginCapabilitySnapshot.Empty("com.example.plugin"));
+
+		Assert.That(File.Exists(Path.Combine(_paths.ConfigDirectory, "plugin-capability-snapshots.json")), Is.False);
+	}
+
+	[Test]
 	public async Task Accepted_kinds_round_trip_through_a_fresh_store()
 	{
 		var store = new RemotePluginSnapshotStore(_paths, Log.Logger);
