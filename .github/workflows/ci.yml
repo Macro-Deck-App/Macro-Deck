@@ -356,6 +356,11 @@ jobs:
           path: ${{ runner.temp }}/measured-conformance
           if-no-files-found: ignore
 
+      - name: Animated image fixtures
+        run: |
+          node ui-model/fixtures/animated-images/generate.mjs --check
+          node ui/scripts/animated-images.mjs
+
   third-party-notices:
     name: Third-party notices & license policy
     needs: changes

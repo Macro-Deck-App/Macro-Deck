@@ -417,9 +417,24 @@ size, not how long it runs. That is why one long GIF plays while a shorter, more
   first frame.
 - Widgets from plugins, images an action draws itself for a button, and action icons on hardware devices
   keep a limit of 2 MB, so the same GIF can animate on one button and show a still image on another.
+- The Companion app on Android 6 to 8 shows a GIF still when it is wider or taller than 2048 pixels, or
+  larger than about one megapixel, as a large image a widget or action draws can be.
 
 To make a large animation play, shorten it, crop it to the part that matters, lower its frame rate, or
 reduce its colors before importing it again.
+
+## An animated icon plays faster or slower than elsewhere
+
+Macro Deck plays an animation at the speed its file states, in the web client, the desktop app and the
+Companion app alike, and keeps that speed however many animations are on the deck. Two rules can make it
+look different from an image editor:
+
+- A frame stored as 10 ms or less shows for 100 ms, as in every web browser. An animation saved with
+  frames "as fast as possible" therefore plays slower than the editor shows it. Save it with frames of
+  20 ms or longer.
+- Buttons show an animated icon as a GIF, which counts time in hundredths of a second. Frames shorter
+  than 20 ms, such as in an animation of 60 frames per second, are combined: the animation keeps its
+  length but shows fewer frames.
 
 ## Installing on Linux
 

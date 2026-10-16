@@ -188,100 +188,215 @@ describe('widget node renderer', () => {
     const artwork = () => container.querySelectorAll('.widget-button-artwork');
     const image = () => container.querySelector('img.widget-button-artwork') as HTMLImageElement;
     const tintLayer = () => container.querySelector('div.widget-button-artwork') as HTMLElement | null;
+    const filter = (color: string) => document.getElementById(`macro-deck-tint-${color}`);
 
-    it('draws a loaded icon as a silhouette in the tint colour over the hidden image', () => {
-      loaded = true;
-      mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff', opacity: 0.5 }));
+    describe('where the engine draws an SVG filter on an element', () => {
+      const mounted: Array<{ destroy(): void }> = [];
+      const mountTinted = (tree: UiNode) => {
+        const handle = mount(tree);
+        mounted.push(handle);
+        return handle;
+      };
+      const tintFilterOf = (element: HTMLElement) => element.style.filter.replace(/"/g, '');
 
-      expect(tintLayer()).not.toBeNull();
-      expect(tintLayer()!.style.backgroundColor).toBe('rgb(79, 140, 255)');
-      expect(tintLayer()!.style.getPropertyValue('mask-image')).toBe('url("/api/ui/resources/abc")');
-      expect(tintLayer()!.style.opacity).toBe('0.5');
-      expect(image().style.opacity).toBe('0');
-      expect(artwork()[1]).toBe(tintLayer()!);
-    });
+      afterEach(() => mounted.splice(0).forEach(handle => handle.destroy()));
 
-    it('keeps the untinted image until it has loaded, then tints it', () => {
-      mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+      it('tints the image itself, so an animated picture keeps the one clock it has', () => {
+        mountTinted(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff', opacity: 0.5, brightness: 0.8 }));
 
-      expect(tintLayer()).toBeNull();
-      expect(image().style.opacity).toBe('1');
+        expect(tintLayer()).toBeNull();
+        expect(artwork().length).toBe(1);
+        expect(tintFilterOf(image())).toBe('url(#macro-deck-tint-4f8cff) brightness(0.8)');
+        expect(image().style.opacity).toBe('0.5');
+        const flood = filter('4f8cff')!.querySelector('feFlood')!;
+        expect(flood.getAttribute('flood-color')).toBe('rgb(79, 140, 255)');
+        expect(filter('4f8cff')!.getAttribute('color-interpolation-filters')).toBe('sRGB');
+        expect(filter('4f8cff')!.querySelector('feComposite')!.getAttribute('operator')).toBe('in');
+      });
 
-      loaded = true;
-      image().dispatchEvent(new Event('load'));
-
-      expect(tintLayer()).not.toBeNull();
-      expect(image().style.opacity).toBe('0');
-    });
-
-    it('draws the image in its own colours where the engine cannot mask', () => {
-      loaded = true;
-      delete globals.CSS;
-      mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
-
-      expect(tintLayer()).toBeNull();
-      expect(image().style.opacity).toBe('1');
-    });
-
-    it('drops the tint and restores the image when the tint goes away', () => {
-      loaded = true;
-      const handle = mount(node2('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
-      handle.update(node2('ui.button', { source: { resourceId: 'abc' } }), { width: 120, height: 120 }, null);
-
-      expect(tintLayer()).toBeNull();
-      expect(image().style.opacity).toBe('1');
-    });
-
-    describe('on a ui.image', () => {
-      const plain = () => container.querySelector('.widget-image img') as HTMLImageElement | null;
-      const layer = () => container.querySelector('.widget-image-tint') as HTMLElement | null;
-
-      it('draws a loaded image as a silhouette in the tint colour over the hidden image', () => {
+      it('keeps the same image and source when the tint comes, changes, goes and comes back', () => {
         loaded = true;
-        mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff', opacity: 0.5 }));
+        const handle = mountTinted(node2('ui.button', { source: { resourceId: 'abc' } }));
+        const first = image();
+        for (const tint of ['#4f8cff', '#ff4040', undefined, '#ff4040', undefined]) {
+          handle.update(node2('ui.button', tint === undefined
+            ? { source: { resourceId: 'abc' } }
+            : { source: { resourceId: 'abc' }, tint }), { width: 120, height: 120 }, null);
 
-        expect(layer()).not.toBeNull();
-        expect(layer()!.style.backgroundColor).toBe('rgb(79, 140, 255)');
-        expect(layer()!.style.getPropertyValue('mask-image')).toBe('url("/api/ui/resources/abc")');
-        expect(layer()!.style.opacity).toBe('0.5');
-        expect(plain()!.style.opacity).toBe('0');
+          expect(image()).withContext(String(tint)).toBe(first);
+          expect(image().getAttribute('src')).toBe('/api/ui/resources/abc');
+          expect(tintLayer()).toBeNull();
+          expect(container.querySelectorAll('img').length).toBe(1);
+        }
+        expect(image().style.filter).toBe('');
+      });
+
+      it('releases a filter once no artwork draws in its colour any more', () => {
+        const one = mountTinted(node2('ui.button', { source: { resourceId: 'a' }, tint: '#4f8cff' }));
+        const second = document.createElement('div');
+        document.body.appendChild(second);
+        const other = renderUiNode(second, node('ui.button', { source: { resourceId: 'b' }, tint: '#4f8cff' }),
+          { width: 120, height: 120 }, null, 120, testHost());
+
+        expect(document.querySelectorAll('#macro-deck-tint-4f8cff').length).toBe(1);
+
+        one.update(node2('ui.button', { source: { resourceId: 'a' }, tint: '#ff4040' }), { width: 120, height: 120 }, null);
+        expect(filter('4f8cff')).not.toBeNull();
+        expect(filter('ff4040')).not.toBeNull();
+
+        other.destroy();
+        second.remove();
+        expect(filter('4f8cff')).toBeNull();
+
+        one.update(node2('ui.button', { source: { resourceId: 'a' } }), { width: 120, height: 120 }, null);
+        expect(filter('ff4040')).toBeNull();
+        expect(document.getElementById('macro-deck-tint-filters')).toBeNull();
+      });
+
+      it('shares one filter between spellings of one colour and releases it with the last', () => {
+        const one = mountTinted(node2('ui.button', { source: { resourceId: 'a' }, tint: '#4F8CFF' }));
+        const second = document.createElement('div');
+        document.body.appendChild(second);
+        const other = renderUiNode(second, node('ui.button', { source: { resourceId: 'b' }, tint: '#4f8cff' }),
+          { width: 120, height: 120 }, null, 120, testHost());
+
+        expect(document.querySelectorAll('#macro-deck-tint-4f8cff').length).toBe(1);
+
+        other.destroy();
+        second.remove();
+        expect(filter('4f8cff')).not.toBeNull();
+        one.update(node2('ui.button', { source: { resourceId: 'a' } }), { width: 120, height: 120 }, null);
+        expect(filter('4f8cff')).toBeNull();
+      });
+
+      it('releases its filter when the button goes', () => {
+        mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' })).destroy();
+
+        expect(filter('4f8cff')).toBeNull();
+      });
+
+      it('tints a ui.image the same way and releases it with the image', () => {
+        const handle = mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff', opacity: 0.5 }));
+        const plain = container.querySelector('.widget-image img') as HTMLImageElement;
+
+        expect(container.querySelector('.widget-image-tint')).toBeNull();
+        expect(tintFilterOf(plain)).toBe('url(#macro-deck-tint-4f8cff)');
+        expect(plain.style.opacity).toBe('0.5');
+
+        handle.destroy();
+        expect(filter('4f8cff')).toBeNull();
+      });
+
+      it('gives the filter up for the mask when the engine stops drawing filters', () => {
+        loaded = true;
+        const handle = mountTinted(node2('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+        globals.CSS = { supports: (property: string) => property.indexOf('mask') >= 0 };
+        handle.update(node2('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }), { width: 120, height: 120 }, null);
+
+        expect(filter('4f8cff')).toBeNull();
+        expect(tintLayer()).not.toBeNull();
+      });
+    });
+
+    describe('where the engine can only mask', () => {
+      beforeEach(() => {
+        globals.CSS = { supports: (property: string) => property.indexOf('mask') >= 0 };
+      });
+
+      it('draws a loaded icon as a silhouette in the tint colour over the hidden image', () => {
+        loaded = true;
+        mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff', opacity: 0.5 }));
+
+        expect(tintLayer()).not.toBeNull();
+        expect(tintLayer()!.style.backgroundColor).toBe('rgb(79, 140, 255)');
+        expect(tintLayer()!.style.getPropertyValue('mask-image')).toBe('url("/api/ui/resources/abc")');
+        expect(tintLayer()!.style.opacity).toBe('0.5');
+        expect(image().style.opacity).toBe('0');
+        expect(artwork()[1]).toBe(tintLayer()!);
       });
 
       it('keeps the untinted image until it has loaded, then tints it', () => {
-        mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+        mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
 
-        expect(layer()).toBeNull();
-        expect(plain()!.style.opacity).toBe('1');
+        expect(tintLayer()).toBeNull();
+        expect(image().style.opacity).toBe('1');
 
         loaded = true;
-        plain()!.dispatchEvent(new Event('load'));
+        image().dispatchEvent(new Event('load'));
 
-        expect(layer()).not.toBeNull();
+        expect(tintLayer()).not.toBeNull();
+        expect(image().style.opacity).toBe('0');
       });
 
-      it('draws its own colours where the engine cannot mask, and without a tint', () => {
+      it('draws the image in its own colours where the engine cannot mask', () => {
         loaded = true;
         delete globals.CSS;
-        mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+        mount(node('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
 
-        expect(layer()).toBeNull();
-        expect(plain()!.style.opacity).toBe('1');
+        expect(tintLayer()).toBeNull();
+        expect(image().style.opacity).toBe('1');
       });
 
-      it('draws no layer for an image without a tint', () => {
+      it('drops the tint and restores the image when the tint goes away', () => {
         loaded = true;
-        mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' } }));
+        const handle = mount(node2('ui.button', { source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+        handle.update(node2('ui.button', { source: { resourceId: 'abc' } }), { width: 120, height: 120 }, null);
 
-        expect(layer()).toBeNull();
-        expect(plain()!.style.opacity).toBe('1');
+        expect(tintLayer()).toBeNull();
+        expect(image().style.opacity).toBe('1');
       });
-    });
 
-    it('ignores a tint that is not a colour', () => {
-      loaded = true;
-      mount(node('ui.button', { source: { resourceId: 'abc' }, tint: 'blue; background: red' }));
+      describe('on a ui.image', () => {
+        const plain = () => container.querySelector('.widget-image img') as HTMLImageElement | null;
+        const layer = () => container.querySelector('.widget-image-tint') as HTMLElement | null;
 
-      expect(tintLayer()).toBeNull();
+        it('draws a loaded image as a silhouette in the tint colour over the hidden image', () => {
+          loaded = true;
+          mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff', opacity: 0.5 }));
+
+          expect(layer()).not.toBeNull();
+          expect(layer()!.style.backgroundColor).toBe('rgb(79, 140, 255)');
+          expect(layer()!.style.getPropertyValue('mask-image')).toBe('url("/api/ui/resources/abc")');
+          expect(layer()!.style.opacity).toBe('0.5');
+          expect(plain()!.style.opacity).toBe('0');
+        });
+
+        it('keeps the untinted image until it has loaded, then tints it', () => {
+          mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+
+          expect(layer()).toBeNull();
+          expect(plain()!.style.opacity).toBe('1');
+
+          loaded = true;
+          plain()!.dispatchEvent(new Event('load'));
+
+          expect(layer()).not.toBeNull();
+        });
+
+        it('draws its own colours where the engine cannot mask, and without a tint', () => {
+          loaded = true;
+          delete globals.CSS;
+          mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+
+          expect(layer()).toBeNull();
+          expect(plain()!.style.opacity).toBe('1');
+        });
+
+        it('draws no layer for an image without a tint', () => {
+          loaded = true;
+          mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' } }));
+
+          expect(layer()).toBeNull();
+          expect(plain()!.style.opacity).toBe('1');
+        });
+      });
+
+      it('ignores a tint that is not a colour', () => {
+        loaded = true;
+        mount(node('ui.button', { source: { resourceId: 'abc' }, tint: 'blue; background: red' }));
+
+        expect(tintLayer()).toBeNull();
+      });
     });
   });
 

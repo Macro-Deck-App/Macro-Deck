@@ -39,6 +39,8 @@ export interface UiComponentContext<TState = unknown> extends LengthScope {
 
   dropPart(name: string): void;
 
+  renamePart(from: string, to: string): void;
+
   syncChildren(
     parent: Element,
     entries: Array<{ child: UiNode; box: UiComponentBox; crossExtent: number | null; container?: number | null }>,

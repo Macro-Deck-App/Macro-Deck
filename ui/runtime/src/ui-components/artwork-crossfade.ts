@@ -12,7 +12,7 @@ export interface ArtworkCrossfadeState<TLook = unknown> {
   preloader: HTMLImageElement | null;
   requestId: number;
   promoteTimer: ReturnType<typeof setTimeout> | null;
-  promoteFrame: number | null;
+  promoted: boolean;
   graceTimer: ReturnType<typeof setTimeout> | null;
 }
 
@@ -27,20 +27,13 @@ export function createArtworkCrossfadeState<TLook = unknown>(): ArtworkCrossfade
     preloader: null,
     requestId: 0,
     promoteTimer: null,
-    promoteFrame: null,
+    promoted: false,
     graceTimer: null,
   };
 }
 
 export function showsBitmap(image: HTMLImageElement | null): boolean {
   return image !== null && image.complete && image.naturalWidth > 0;
-}
-
-function clearPromoteFrame(state: ArtworkCrossfadeState): void {
-  if (state.promoteFrame !== null) {
-    cancelAnimationFrame(state.promoteFrame);
-    state.promoteFrame = null;
-  }
 }
 
 function finishPreloader(state: ArtworkCrossfadeState): HTMLImageElement | null {
@@ -62,7 +55,6 @@ function cancelInFlight(state: ArtworkCrossfadeState): void {
     clearTimeout(state.promoteTimer);
     state.promoteTimer = null;
   }
-  clearPromoteFrame(state);
   const abandoned = finishPreloader(state);
   // Dropping the source cancels a download nobody is waiting for any more.
   if (abandoned !== null) abandoned.src = '';
@@ -84,6 +76,13 @@ export function releaseArtworkCrossfade(state: ArtworkCrossfadeState): void {
   cancelInFlight(state);
   state.settled = null;
   state.settledLook = null;
+  state.promoted = false;
+}
+
+export function takePromotion(state: ArtworkCrossfadeState): boolean {
+  const promoted = state.promoted;
+  state.promoted = false;
+  return promoted;
 }
 
 export function swapArtwork<TLook>(
@@ -146,20 +145,14 @@ export function swapArtwork<TLook>(
         state.promoteTimer = null;
         if (request !== state.requestId) return;
 
-        // The overlay is dropped only once the settled layer has painted the new source: doing both in one
-        // tick lets the browser blank that img for a frame while it re-resolves the cached source.
+        // The incoming element itself becomes the settled one: giving its source to the other element would
+        // start an animated picture over there, a jump back to its first frame once the overlay goes.
         state.settled = state.incoming;
         state.settledLook = state.incomingLook;
+        state.incoming = null;
+        state.incomingLook = null;
+        state.promoted = true;
         repaint();
-        state.promoteFrame = requestAnimationFrame(() => {
-          state.promoteFrame = requestAnimationFrame(() => {
-            state.promoteFrame = null;
-            if (request !== state.requestId) return;
-            state.incoming = null;
-            state.incomingLook = null;
-            repaint();
-          });
-        });
       }, CROSSFADE_PROMOTE_MS);
     };
 

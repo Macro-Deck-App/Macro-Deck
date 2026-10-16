@@ -18,6 +18,10 @@ namespace MacroDeckHost.Infrastructure.Icons;
 /// </summary>
 internal static class AnimatedGifTranscode
 {
+	private const int MinimumDelay = 2;
+	private const uint ClampedDelayMs = 10;
+	private const int ShortFrameShownForMs = 100;
+
 	private static readonly byte[] _loopBlockStart =
 	[
 		0x21, 0xFF, 0x0B, (byte)'N', (byte)'E', (byte)'T', (byte)'S', (byte)'C', (byte)'A', (byte)'P', (byte)'E',
@@ -31,25 +35,92 @@ internal static class AnimatedGifTranscode
 	/// <para>
 	/// The timing has to be copied here rather than left to the encoder, because asking a frame for its
 	/// GIF metadata is what creates it: on an image decoded from WebP there is none until this runs, and
-	/// what it creates carries a zero delay. Setting the disposal alone therefore replaced the delay the
-	/// encoder would have derived from the WebP with nothing at all, and a zero-delay GIF is one every
-	/// reader clamps to a floor of its own - the animation came out several times too slow.
+	/// what it creates carries a zero delay.
 	/// </para>
 	/// </summary>
 	private static void PrepareForGif(Image<Rgba32> image)
 	{
-		foreach (var frame in image.Frames)
+		var starts = new int[image.Frames.Count + 1];
+		var elapsedMs = 0;
+		for (var index = 0; index < image.Frames.Count; index++)
 		{
+			starts[index] = ToHundredths(elapsedMs);
+			elapsedMs += ShownForMs(image.Frames[index].Metadata.GetWebpMetadata().FrameDelay);
+		}
+
+		starts[image.Frames.Count] = ToHundredths(elapsedMs);
+
+		var shown = ShownFrames(starts);
+		for (var index = image.Frames.Count - 1; index > 0; index--)
+		{
+			if (!shown.Exists(frame => frame.Index == index))
+			{
+				image.Frames.RemoveFrame(index);
+			}
+		}
+
+		for (var position = 0; position < image.Frames.Count; position++)
+		{
+			var frame = image.Frames[position];
 			SnapToSingleBitAlpha(frame);
 
-			var delayMs = frame.Metadata.GetWebpMetadata().FrameDelay;
 			var gif = frame.Metadata.GetGifMetadata();
-
 			gif.DisposalMethod = GifDisposalMethod.RestoreToBackground;
-			// GIF counts in hundredths of a second, WebP in milliseconds. Never rounded down to zero:
-			// a frame that asked to be shown at all must not ask to be shown for no time.
-			gif.FrameDelay = delayMs == 0 ? gif.FrameDelay : Math.Max(1, (int)Math.Round(delayMs / 10d));
+			gif.FrameDelay = shown[position].Delay;
 		}
+	}
+
+	private static List<(int Index, int Delay)> ShownFrames(int[] starts)
+	{
+		var frameCount = starts.Length - 1;
+		var last = frameCount - 1;
+		if (last == 0)
+		{
+			return [(0, Math.Max(MinimumDelay, starts[frameCount]))];
+		}
+
+		// A picture that stops holds its last frame, so that one is always kept, starting early enough to show
+		// for the shortest delay a GIF can carry without every reader stretching it to 100 ms.
+		var lastStart = Math.Min(starts[last], starts[frameCount] - MinimumDelay);
+		var kept = new List<int> { 0 };
+		for (var index = 1; index < last; index++)
+		{
+			if (starts[index] - starts[kept[^1]] >= MinimumDelay)
+			{
+				kept.Add(index);
+			}
+		}
+
+		while (kept.Count > 1 && lastStart - starts[kept[^1]] < MinimumDelay)
+		{
+			kept.RemoveAt(kept.Count - 1);
+		}
+
+		if (lastStart - starts[0] < MinimumDelay)
+		{
+			return [(0, MinimumDelay), (last, Math.Max(MinimumDelay, starts[frameCount] - MinimumDelay))];
+		}
+
+		var shown = new List<(int Index, int Delay)>();
+		for (var position = 0; position < kept.Count; position++)
+		{
+			var end = position + 1 < kept.Count ? starts[kept[position + 1]] : lastStart;
+			shown.Add((kept[position], end - starts[kept[position]]));
+		}
+
+		shown.Add((last, starts[frameCount] - lastStart));
+		return shown;
+	}
+
+	// Every reader shows a frame of 10 ms or less for 100 ms, Chrome, Firefox and Safari alike.
+	private static int ShownForMs(uint delayMs)
+	{
+		return delayMs <= ClampedDelayMs ? ShortFrameShownForMs : (int)delayMs;
+	}
+
+	private static int ToHundredths(int milliseconds)
+	{
+		return (milliseconds + 5) / 10;
 	}
 
 	public static ushort ReadPlays(ReadOnlySpan<byte> gif)
