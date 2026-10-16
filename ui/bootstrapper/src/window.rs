@@ -1,6 +1,7 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 
+use tauri::image::Image;
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::utils::platform::Target;
@@ -11,6 +12,7 @@ use crate::bridge;
 use crate::host;
 use crate::localization::{self, keys};
 use crate::logging;
+use crate::tray_badge::{self, BadgeStyle};
 use crate::updater;
 
 pub const MAIN_WINDOW: &str = "main";
@@ -357,6 +359,19 @@ pub fn show_main_window(app: &AppHandle) {
 
 const TRAY_ID: &str = "main";
 
+// macOS gets a flat black silhouette because it is used as a template image:
+// the system recolours it for the menu bar's appearance and for the selected
+// state, which a coloured icon would not follow. Windows takes the icon's
+// foreground artwork instead of the simplified glyph the other two use: its
+// glow and gradients are what keep the keys solid in the notification area.
+const TRAY_ICON: &[u8] = if cfg!(target_os = "macos") {
+    include_bytes!("../icons/tray-icon-macos.png")
+} else if cfg!(windows) {
+    include_bytes!("../icons/tray-icon-win.png")
+} else {
+    include_bytes!("../icons/tray-icon.png")
+};
+
 static TRAY_UPDATE_VERSION: Mutex<Option<String>> = Mutex::new(None);
 
 fn tray_menu(app: &AppHandle, update_version: Option<&str>) -> tauri::Result<Menu<Wry>> {
@@ -374,16 +389,32 @@ fn tray_menu(app: &AppHandle, update_version: Option<&str>) -> tauri::Result<Men
     menu.item(&show).item(&quit).build()
 }
 
+fn tray_icon(update_available: bool) -> tauri::Result<Image<'static>> {
+    let base = Image::from_bytes(TRAY_ICON)?;
+    if !update_available {
+        return Ok(base);
+    }
+    let style = if cfg!(target_os = "macos") {
+        BadgeStyle::Template
+    } else {
+        BadgeStyle::Colour
+    };
+    let rgba = tray_badge::with_update_badge(base.rgba(), base.width(), base.height(), style);
+    Ok(Image::new_owned(rgba, base.width(), base.height()))
+}
+
 pub fn sync_tray_update(app: &AppHandle, version: Option<&str>) {
-    {
+    let badge_changed = {
         let mut current = TRAY_UPDATE_VERSION
             .lock()
             .unwrap_or_else(|e| e.into_inner());
         if current.as_deref() == version {
             return;
         }
+        let badge_changed = current.is_some() != version.is_some();
         *current = version.map(str::to_string);
-    }
+        badge_changed
+    };
     let version = version.map(str::to_string);
     dispatch_to_main_thread(app, "update the tray menu", {
         let app = app.clone();
@@ -399,6 +430,16 @@ pub fn sync_tray_update(app: &AppHandle, version: Option<&str>) {
                     logging::error(&format!("[tray] could not rebuild the menu: {error}"))
                 }
             }
+            if badge_changed {
+                // Plain set_icon drops the template flag on macOS, and the menu bar then
+                // stops recolouring the icon for light, dark and the highlighted state.
+                let result = tray_icon(version.is_some()).and_then(|icon| {
+                    tray.set_icon_with_as_template(Some(icon), cfg!(target_os = "macos"))
+                });
+                if let Err(error) = result {
+                    logging::error(&format!("[tray] could not update the icon: {error}"));
+                }
+            }
         }
     });
 }
@@ -406,19 +447,7 @@ pub fn sync_tray_update(app: &AppHandle, version: Option<&str>) {
 pub fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     let menu = tray_menu(app, None)?;
 
-    // macOS gets a flat black silhouette because it is used as a template image:
-    // the system recolours it for the menu bar's appearance and for the selected
-    // state, which a coloured icon would not follow. Windows takes the icon's
-    // foreground artwork instead of the simplified glyph the other two use: its
-    // glow and gradients are what keep the keys solid in the notification area.
-    let icon_bytes: &[u8] = if cfg!(target_os = "macos") {
-        include_bytes!("../icons/tray-icon-macos.png")
-    } else if cfg!(windows) {
-        include_bytes!("../icons/tray-icon-win.png")
-    } else {
-        include_bytes!("../icons/tray-icon.png")
-    };
-    let icon = tauri::image::Image::from_bytes(icon_bytes)?;
+    let icon = tray_icon(false)?;
 
     let mut builder = TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
@@ -469,6 +498,39 @@ mod tests {
             .split("#[cfg(test)]")
             .next()
             .expect("splitting on the test module always yields a first part")
+    }
+
+    #[test]
+    fn the_up_to_date_tray_icon_is_the_shipped_artwork() {
+        let shipped = Image::from_bytes(TRAY_ICON).expect("the tray icon decodes");
+        let icon = tray_icon(false).expect("the tray icon builds");
+        assert_eq!(icon.rgba(), shipped.rgba());
+    }
+
+    #[test]
+    fn the_update_badge_only_covers_the_top_right_corner() {
+        let shipped = Image::from_bytes(TRAY_ICON).expect("the tray icon decodes");
+        let badged = tray_icon(true).expect("the badged tray icon builds");
+        let (width, height) = (shipped.width(), shipped.height());
+        assert_eq!((badged.width(), badged.height()), (width, height));
+        assert_ne!(badged.rgba(), shipped.rgba());
+        for (i, (a, b)) in badged
+            .rgba()
+            .chunks(4)
+            .zip(shipped.rgba().chunks(4))
+            .enumerate()
+        {
+            let (x, y) = (i as u32 % width, i as u32 / width);
+            if x < width / 2 || y >= height / 2 {
+                assert_eq!(a, b, "pixel {x},{y} outside the badge corner changed");
+            }
+        }
+    }
+
+    #[test]
+    fn the_tray_icon_is_never_replaced_without_its_template_flag() {
+        assert!(!production_source().contains(".set_icon("));
+        assert!(production_source().contains(".set_icon_with_as_template("));
     }
 
     #[test]
