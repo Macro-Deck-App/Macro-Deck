@@ -128,9 +128,12 @@ internal sealed class SteamConfigFlowTests
 		});
 	}
 
-	[TestCase(SteamId, "")]
-	[TestCase("", Key)]
-	public async Task The_steam_id_and_the_key_are_given_together_or_not_at_all(string steamId, string key)
+	[TestCase(SteamId, "", "apiKey")]
+	[TestCase("", Key, "steamId")]
+	public async Task The_steam_id_and_the_key_are_given_together_or_not_at_all(
+		string steamId,
+		string key,
+		string missingField)
 	{
 		var result = await Submit(new Dictionary<string, object?> { ["steamId"] = steamId, ["apiKey"] = key });
 
@@ -138,8 +141,19 @@ internal sealed class SteamConfigFlowTests
 		{
 			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
 			Assert.That(result.FieldErrors, Has.Count.EqualTo(1));
+			Assert.That(result.FieldErrors, Does.ContainKey(missingField));
 			Assert.That(_client.Calls, Is.Zero);
 		});
+	}
+
+	[TestCase(null)]
+	[TestCase("Steam")]
+	public async Task The_key_is_asked_for_before_the_steam_id_it_belongs_to(string? entryTitle)
+	{
+		var start = await _flow.StartAsync(new FakeEntryContext(entryTitle), CancellationToken.None);
+
+		var names = start.NextStep!.Fields.Select(field => field.Name).ToList();
+		Assert.That(names.IndexOf("apiKey"), Is.GreaterThanOrEqualTo(0).And.LessThan(names.IndexOf("steamId")));
 	}
 
 	[TestCase("12345")]

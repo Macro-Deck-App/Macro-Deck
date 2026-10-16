@@ -22719,13 +22719,13 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Configura Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>I giochi installati vengono trovati senza alcuna configurazione. Aggiungi un SteamID e una chiave API web per mostrare anche lo stato e gli amici di un account. Puoi aggiungere più account.</value>
+    <value>I giochi installati vengono trovati senza alcuna configurazione. Aggiungi una chiave API web e uno SteamID per mostrare anche lo stato e gli amici di un account. Puoi aggiungere più account.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Accedi a Steam, apri la pagina delle chiavi API e registra una chiave. La pagina chiede un nome di dominio; va bene qualsiasi valore. Gli account limitati non possono ottenere una chiave.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>Inserisci il tuo SteamID64 di 17 cifre, il link del tuo profilo o il nome del profilo personalizzato. Un nome personalizzato richiede la chiave.</value>
+    <value>Inserisci il tuo SteamID64 di 17 cifre, il link del tuo profilo o il nome del profilo personalizzato.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Apri la pagina delle chiavi API web di Steam</value>
@@ -22734,7 +22734,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Lascia vuoto per usare solo i giochi installati.</value>
+    <value>Va inserito insieme alla chiave. Lascia vuoti entrambi per usare solo i giochi installati.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 o link del profilo</value>
@@ -22743,7 +22743,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Chiave API web</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Salvata su questo computer e usata solo per chiedere a Steam informazioni sul tuo profilo.</value>
+    <value>Va inserita insieme allo SteamID. Salvata su questo computer e usata solo per chiedere a Steam informazioni sul tuo profilo.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Cartelle di libreria aggiuntive</value>
@@ -22758,10 +22758,10 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Inserisci percorsi di cartella completi.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Inserisci la chiave API web di questo profilo.</value>
+    <value>Inserisci anche la chiave oppure svuota lo SteamID per usare solo i giochi installati.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Inserisci lo SteamID associato a questa chiave.</value>
+    <value>Inserisci anche lo SteamID oppure svuota la chiave per usare solo i giochi installati.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>Inserisci uno SteamID64 di 17 cifre, un link al profilo o un nome di profilo personalizzato.</value>

@@ -22741,13 +22741,13 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>設定 Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>不需任何設定即可找到已安裝的遊戲。新增 SteamID 與 Web API 金鑰後，還能顯示帳號的狀態與好友。可以新增多個帳號。</value>
+    <value>不需任何設定即可找到已安裝的遊戲。新增 Web API 金鑰與 SteamID 後，還能顯示帳號的狀態與好友。可以新增多個帳號。</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>登入 Steam，開啟 API 金鑰頁面並註冊一組金鑰。頁面會要求填寫網域名稱，填入任意值即可。受限制的帳號無法取得金鑰。</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>輸入 17 位數的 SteamID64、個人檔案連結或自訂個人檔案名稱。自訂名稱需要金鑰。</value>
+    <value>輸入 17 位數的 SteamID64、個人檔案連結或自訂個人檔案名稱。</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>開啟 Steam Web API 金鑰頁面</value>
@@ -22756,7 +22756,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>留空則僅使用已安裝的遊戲。</value>
+    <value>需與金鑰一起填寫。兩者皆留空則僅使用已安裝的遊戲。</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 或個人檔案連結</value>
@@ -22765,7 +22765,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>Web API 金鑰</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>儲存在此電腦上，僅用於向 Steam 查詢您的個人檔案。</value>
+    <value>需與 SteamID 一起填寫。儲存在此電腦上，僅用於向 Steam 查詢您的個人檔案。</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>其他遊戲庫資料夾</value>
@@ -22780,10 +22780,10 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>請輸入完整的資料夾路徑。</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>輸入此個人檔案的 Web API 金鑰。</value>
+    <value>請一併輸入金鑰，或清除 SteamID 以僅使用已安裝的遊戲。</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>輸入與此金鑰對應的 SteamID。</value>
+    <value>請一併輸入 SteamID，或清除金鑰以僅使用已安裝的遊戲。</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>輸入 17 位數的 SteamID64、個人檔案連結或自訂個人檔案名稱。</value>

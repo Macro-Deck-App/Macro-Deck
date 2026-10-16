@@ -22719,13 +22719,13 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Konfiguracja Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>Zainstalowane gry są wykrywane bez konfiguracji. Dodaj SteamID i klucz Web API, aby wyświetlać także status i znajomych konta. Można dodać kilka kont.</value>
+    <value>Zainstalowane gry są wykrywane bez konfiguracji. Dodaj klucz Web API i SteamID, aby wyświetlać także status i znajomych konta. Można dodać kilka kont.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Zaloguj się w Steamie, otwórz stronę kluczy API i zarejestruj klucz. Strona prosi o nazwę domeny; wystarczy dowolna wartość. Konta z ograniczeniami nie mogą uzyskać klucza.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>Wpisz 17-cyfrowy SteamID64, link do profilu lub niestandardową nazwę profilu. Niestandardowa nazwa wymaga klucza.</value>
+    <value>Wpisz 17-cyfrowy SteamID64, link do profilu lub niestandardową nazwę profilu.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Otwórz stronę kluczy Steam Web API</value>
@@ -22734,7 +22734,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Pozostaw puste, aby używać tylko zainstalowanych gier.</value>
+    <value>Wymagany razem z kluczem. Pozostaw oba pola puste, aby używać tylko zainstalowanych gier.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 lub link do profilu</value>
@@ -22743,7 +22743,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Klucz Web API</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Zapisany na tym komputerze i używany tylko do zapytań do Steama o profil.</value>
+    <value>Wymagany razem ze SteamID. Zapisany na tym komputerze i używany tylko do zapytań do Steama o profil.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Dodatkowe foldery biblioteki</value>
@@ -22758,10 +22758,10 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Wpisz pełne ścieżki folderów.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Wpisz klucz Web API dla tego profilu.</value>
+    <value>Wpisz także klucz lub wyczyść SteamID, aby używać tylko zainstalowanych gier.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Wpisz SteamID powiązany z tym kluczem.</value>
+    <value>Wpisz także SteamID lub wyczyść klucz, aby używać tylko zainstalowanych gier.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>Wpisz 17-cyfrowy SteamID64, link do profilu lub niestandardową nazwę profilu.</value>

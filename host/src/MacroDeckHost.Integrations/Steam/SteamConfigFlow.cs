@@ -193,13 +193,13 @@ public sealed class SteamConfigFlow : IConfigFlow
 		}
 
 		fields.AddRange([
+			ActionParameter.Secret(SteamConfigKeys.ApiKey,
+				Strings.ApiKeyLabel(),
+				Strings.ApiKeyDescription()),
 			ActionParameter.Text(SteamConfigKeys.SteamId,
 				Strings.SteamIdLabel(),
 				Strings.SteamIdDescription(),
-				Strings.SteamIdPlaceholder()),
-			ActionParameter.Secret(SteamConfigKeys.ApiKey,
-				Strings.ApiKeyLabel(),
-				Strings.ApiKeyDescription())
+				Strings.SteamIdPlaceholder())
 		]);
 
 		return new ConfigFlowStep

@@ -22719,13 +22719,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Nastavit Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>Nainstalované hry se najdou bez jakéhokoli nastavení. Přidejte SteamID a klíč Web API, aby se zobrazoval také stav a přátelé účtu. Můžete přidat více účtů.</value>
+    <value>Nainstalované hry se najdou bez jakéhokoli nastavení. Přidejte klíč Web API a SteamID, aby se zobrazoval také stav a přátelé účtu. Můžete přidat více účtů.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Přihlaste se ke Steamu, otevřete stránku s klíči API a zaregistrujte klíč. Stránka žádá název domény; stačí libovolná hodnota. Omezené účty klíč získat nemohou.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>Zadejte své 17místné SteamID64, odkaz na profil nebo vlastní název profilu. Vlastní název vyžaduje klíč.</value>
+    <value>Zadejte své 17místné SteamID64, odkaz na profil nebo vlastní název profilu.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Otevřít stránku klíčů Steam Web API</value>
@@ -22734,7 +22734,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Nechte prázdné, aby se použily jen nainstalované hry.</value>
+    <value>Vyplňuje se společně s klíčem. Pro použití jen nainstalovaných her nechte obě pole prázdná.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 nebo odkaz na profil</value>
@@ -22743,7 +22743,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Klíč Web API</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Uložen v tomto počítači a používá se jen k dotazům na Steam ohledně vašeho profilu.</value>
+    <value>Vyplňuje se společně se SteamID. Uložen v tomto počítači a používá se jen k dotazům na Steam ohledně vašeho profilu.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Další složky knihovny</value>
@@ -22758,10 +22758,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Zadejte úplné cesty ke složkám.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Zadejte klíč Web API pro tento profil.</value>
+    <value>Zadejte také klíč, nebo vymažte SteamID, aby se použily jen nainstalované hry.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Zadejte SteamID, které patří k tomuto klíči.</value>
+    <value>Zadejte také SteamID, nebo vymažte klíč, aby se použily jen nainstalované hry.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>Zadejte 17místné SteamID64, odkaz na profil nebo vlastní název profilu.</value>

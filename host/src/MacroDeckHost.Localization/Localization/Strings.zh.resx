@@ -22723,13 +22723,13 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>设置 Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>无需任何设置即可找到已安装的游戏。添加 SteamID 和 Web API 密钥后，还可以显示账户的状态和好友。可以添加多个账户。</value>
+    <value>无需任何设置即可找到已安装的游戏。添加 Web API 密钥和 SteamID 后，还可以显示账户的状态和好友。可以添加多个账户。</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>登录 Steam，打开 API 密钥页面并注册一个密钥。页面会要求填写域名，填写任意值即可。受限账户无法获取密钥。</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>输入 17 位 SteamID64、个人资料链接或自定义个人资料名称。自定义名称需要密钥。</value>
+    <value>输入 17 位 SteamID64、个人资料链接或自定义个人资料名称。</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>打开 Steam Web API 密钥页面</value>
@@ -22738,7 +22738,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>留空则仅使用已安装的游戏。</value>
+    <value>需与密钥一起填写。两者都留空则仅使用已安装的游戏。</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 或个人资料链接</value>
@@ -22747,7 +22747,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>Web API 密钥</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>存储在此电脑上，仅用于向 Steam 查询你的个人资料。</value>
+    <value>需与 SteamID 一起填写。存储在此电脑上，仅用于向 Steam 查询你的个人资料。</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>其他库文件夹</value>
@@ -22762,10 +22762,10 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>请输入完整的文件夹路径。</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>输入此个人资料的 Web API 密钥。</value>
+    <value>请同时输入密钥，或清空 SteamID 以仅使用已安装的游戏。</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>输入与此密钥对应的 SteamID。</value>
+    <value>请同时输入 SteamID，或清空密钥以仅使用已安装的游戏。</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>输入 17 位 SteamID64、个人资料链接或自定义个人资料名称。</value>
