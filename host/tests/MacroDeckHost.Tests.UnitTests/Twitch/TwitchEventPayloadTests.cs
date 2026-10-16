@@ -219,6 +219,46 @@ internal sealed class TwitchEventPayloadTests
 		});
 	}
 
+	[Test]
+	public void A_version_two_hype_train_fills_every_declared_value()
+	{
+		var begin = Build(TwitchEventIds.HypeTrainBegin,
+			"""
+			{"id":"1b0AsbInCHZW2SQFQkCzqN07Ib2","broadcaster_user_id":"1337","total":137,"progress":137,
+			 "goal":500,"level":2,"all_time_high_level":4,"all_time_high_total":2845,"type":"regular",
+			 "is_shared_train":false,"shared_train_participants":null,
+			 "started_at":"2020-07-15T17:16:03.17106713Z","expires_at":"2020-07-15T17:16:11.17106713Z"}
+			""");
+		var progress = Build(TwitchEventIds.HypeTrainProgress,
+			"""
+			{"id":"1b0AsbInCHZW2SQFQkCzqN07Ib2","total":700,"progress":200,"goal":1000,"level":2,
+			 "type":"golden_kappa","is_shared_train":false,
+			 "started_at":"2020-07-15T17:16:03.17106713Z","expires_at":"2020-07-15T17:16:11.17106713Z"}
+			""");
+		var end = Build(TwitchEventIds.HypeTrainEnd,
+			"""
+			{"id":"1b0AsbInCHZW2SQFQkCzqN07Ib2","total":137,"level":2,"type":"treasure","is_shared_train":false,
+			 "started_at":"2020-07-15T17:16:03.17106713Z","ended_at":"2020-07-15T17:16:11.17106713Z",
+			 "cooldown_ends_at":"2020-07-15T18:16:11.17106713Z"}
+			""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(begin["level"], Is.EqualTo(2L));
+			Assert.That(begin["total"], Is.EqualTo(137L));
+			Assert.That(begin["goal"], Is.EqualTo(500L));
+			Assert.That(begin["startedAt"], Is.EqualTo("2020-07-15T17:16:03.17106713Z"));
+			Assert.That(begin["expiresAt"], Is.EqualTo("2020-07-15T17:16:11.17106713Z"));
+			Assert.That(progress["level"], Is.EqualTo(2L));
+			Assert.That(progress["total"], Is.EqualTo(700L));
+			Assert.That(progress["progress"], Is.EqualTo(200L));
+			Assert.That(progress["goal"], Is.EqualTo(1000L));
+			Assert.That(end["level"], Is.EqualTo(2L));
+			Assert.That(end["total"], Is.EqualTo(137L));
+			Assert.That(end["endedAt"], Is.EqualTo("2020-07-15T17:16:11.17106713Z"));
+		});
+	}
+
 	private static Dictionary<string, object?> Build(string eventId, string eventJson)
 	{
 		return TwitchEventPayload.Build(TwitchEventDefinitions.PayloadNames[eventId], Element(eventJson), _account);

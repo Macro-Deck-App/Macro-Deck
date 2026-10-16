@@ -713,12 +713,12 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		{
 			return TwitchSubscriptionResult.MissingScope;
 		}
-		catch (BadRequestException ex) when (IsDuplicate(ex))
+		catch (Exception ex) when (IsDuplicate(ex))
 		{
 			// A reconnect race can ask twice; an existing subscription is as good as a created one.
 			return TwitchSubscriptionResult.Duplicate;
 		}
-		catch (Exception ex) when (ex is BadRequestException or BadParameterException)
+		catch (Exception ex) when (IsRejectedVersion(ex))
 		{
 			_logger.Error(ex, "Twitch rejected the subscription {Type} v{Version}", type, version);
 			return TwitchSubscriptionResult.Unsupported;
@@ -732,8 +732,25 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 
 	private static bool IsDuplicate(Exception exception)
 	{
-		return exception.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase)
-			|| exception.Message.Contains("conflict", StringComparison.OrdinalIgnoreCase);
+		return exception switch
+		{
+			BadRequestException => exception.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase)
+				|| exception.Message.Contains("conflict", StringComparison.OrdinalIgnoreCase),
+			HttpRequestException => exception.Message.StartsWith("Conflict", StringComparison.Ordinal),
+			_ => false
+		};
+	}
+
+	private static bool IsRejectedVersion(Exception exception)
+	{
+		// TwitchLib carries Twitch's "error - message" text. A 400 naming the version or a 410 means
+		// the type and version pair will never be accepted; every other 400 can be a dead session.
+		return exception switch
+		{
+			BadRequestException => exception.Message.Contains("version", StringComparison.OrdinalIgnoreCase),
+			HttpRequestException => exception.Message.StartsWith("Gone", StringComparison.Ordinal),
+			_ => false
+		};
 	}
 
 	private async Task<T> CallAsync<T>(Func<string, Task<T>> call, CancellationToken cancellationToken)
