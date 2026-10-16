@@ -17,4 +17,8 @@ public class StoreVersionHistoryBody
 	public bool Installable { get; set; }
 
 	public string? UnavailableReason { get; set; }
+
+	public StoreDependenciesBody? Dependencies { get; set; }
+
+	public string? SourceUrl { get; set; }
 }

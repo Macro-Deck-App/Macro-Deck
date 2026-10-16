@@ -1,0 +1,122 @@
+@use '../../../../styles/index' as ds;
+
+.issues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.issues-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+.issues-summary {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+}
+
+.issues-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.issues-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.issues-list {
+  @include ds.card($padding: 0);
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+.issue {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+  }
+}
+
+.issue-state {
+  position: relative;
+  flex-shrink: 0;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-top: 0.1875rem;
+  border: 2px solid var(--color-success);
+  border-radius: 50%;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 50%;
+    background-color: var(--color-success);
+  }
+}
+
+.issue-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.issue-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+
+  &:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.issue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.issue-comments {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: 0.125rem;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}

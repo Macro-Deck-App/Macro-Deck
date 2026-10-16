@@ -17095,9 +17095,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>Vše</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>Všechny verze ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Zpět do Store</value>
   </data>
@@ -17113,6 +17110,29 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>Kopírovat odkaz</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>Přímé závislosti</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>Tato verze nemá žádné přímé závislosti na balíčcích.</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>Pro tuto verzi nebyl zveřejněn seznam závislostí.</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>požadováno {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>Sestaveno pomocí .NET SDK {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>Tranzitivní balíčky: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>Tranzitivní balíčky: {count}</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Podrobnosti</value>
@@ -17186,6 +17206,55 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Nainstalovaná verze</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>Komentáře: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>Komentáře: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>Issues jsou v repozitáři tohoto balíčku vypnuté.</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>Tento balíček nemá žádné otevřené issues.</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>Načítání otevřených issues…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>Nové issue</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>Tento balíček nemá repozitář na GitHubu, proto nelze zobrazit jeho issues.</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>Repozitář balíčku na GitHubu se nepodařilo najít.</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>Otevřené issues: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>Otevřené issues: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>Otevřené issues: více než {count}</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>od {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub momentálně omezuje požadavky. Zkuste to znovu za několik minut.</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>Otevřené issues se nepodařilo načíst.</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>Zobrazit vše na GitHubu</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>Vše</value>
@@ -17294,9 +17363,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>Otevřít nastavení</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>Přehled</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: nepodporováno</value>
@@ -17434,6 +17500,24 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Nainstalováno, dostupné aktualizace: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>Podrobnosti balíčku</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>Kód</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>Závislosti</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>Popis</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>Issues</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>Verze</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Sekce Store</value>
   </data>
@@ -17475,9 +17559,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Verze</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>Historie verzí</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Verze {version}</value>
     <comment>[version:string]</comment>
@@ -17491,8 +17572,8 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>Tato verze byla stažena ze Store.</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>Co je nového?</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>Stránky verzí</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>Vydavatel ověřen</value>

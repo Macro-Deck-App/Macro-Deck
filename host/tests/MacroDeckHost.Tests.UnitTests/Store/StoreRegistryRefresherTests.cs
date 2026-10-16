@@ -15,9 +15,13 @@ namespace MacroDeckHost.Tests.UnitTests.Store;
 [TestFixture]
 internal sealed class StoreRegistryRefresherTests
 {
+	private const string Commit = "0123456789abcdef0123456789abcdef01234567";
+
 	private static readonly string[] _registryUsage = [SigningCertificateChain.RegistryKeyUsage];
 	private static readonly string[] _packageUsage = [SigningCertificateChain.PackageKeyUsage];
 	private static readonly string[] _expectedHistory = ["2.2.0", "2.1.0", "2.0.0"];
+	private static readonly string[] _netTen = ["net10.0"];
+	private static readonly string[] _serilogOnly = ["Serilog"];
 
 	private static readonly string[] _expectedLanguages = ["en", "de", "zh-Hant-TW"];
 
@@ -205,6 +209,210 @@ internal sealed class StoreRegistryRefresherTests
 			Assert.That(entry.History.Where(version => version.Version != entry.LatestVersion)
 					.Select(version => (version.HasRelease, version.Size)),
 				Has.All.EqualTo((false, (long?)null)));
+		});
+	}
+
+	[Test]
+	public async Task A_version_that_published_its_dependencies_lists_them_and_one_that_did_not_lists_none()
+	{
+		var fixture = Registry();
+		fixture.AddVersion("plugins", "com.acme.hue", "2.0.0");
+		fixture.AddDependencies("plugins",
+			"com.acme.hue",
+			"2.1.0",
+			new[]
+			{
+				new
+				{
+					framework = "net10.0",
+					packages = new object[]
+					{
+						new
+						{
+							id = "MacroDeck.Sdk",
+							version = "3.0.0-beta.16",
+							requestedVersion = "3.0.0-beta.16",
+							direct = true
+						},
+						new { id = "Serilog", version = "4.4.0", direct = false }
+					}
+				}
+			},
+			"10.0.401");
+
+		await Create(fixture).Refresh();
+
+		var history = _catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").History;
+		var dependencies = history.Single(entry => entry.Version == "2.1.0").Dependencies;
+		Assert.Multiple(() =>
+		{
+			Assert.That(dependencies?.SdkVersion, Is.EqualTo("10.0.401"));
+			Assert.That(dependencies?.Frameworks.Select(framework => framework.Framework), Is.EqualTo(_netTen));
+			Assert.That(dependencies?.Frameworks.Single().Packages,
+				Is.EqualTo(new[]
+				{
+					new StoreDependencyPackage
+					{
+						Id = "MacroDeck.Sdk",
+						Version = "3.0.0-beta.16",
+						RequestedVersion = "3.0.0-beta.16",
+						Direct = true
+					},
+					new StoreDependencyPackage { Id = "Serilog", Version = "4.4.0", Direct = false }
+				}));
+			Assert.That(history.Single(entry => entry.Version == "2.0.0").Dependencies, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_dependency_entry_that_breaks_the_schema_is_dropped_and_the_rest_of_the_list_stays()
+	{
+		var fixture = Registry();
+		fixture.AddDependencies("plugins",
+			"com.acme.hue",
+			"2.1.0",
+			new object[]
+			{
+				new
+				{
+					framework = "net10.0",
+					packages = new object[]
+					{
+						new { id = "Serilog", version = "4.4.0", direct = false },
+						new { id = "Bad Id", version = "1.0.0", direct = false },
+						new { id = "Avalonia", version = "latest", direct = false },
+						new { id = "Missing.Direct", version = "1.0.0" },
+						new { id = "Bad.Range", version = "1.0.0", requestedVersion = "1.0;rm", direct = true },
+						"not an object"
+					}
+				},
+				new { framework = "net 10", packages = Array.Empty<object>() }
+			});
+
+		var result = await Create(fixture).Refresh();
+
+		var dependencies = _catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue")
+			.History
+			.Single(entry => entry.Version == "2.1.0")
+			.Dependencies;
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(dependencies?.Frameworks.Select(framework => framework.Framework), Is.EqualTo(_netTen));
+			Assert.That(dependencies?.Frameworks.Single().Packages.Select(package => package.Id),
+				Is.EqualTo(_serilogOnly));
+		});
+	}
+
+	[Test]
+	public async Task A_version_names_the_commit_and_tag_it_was_built_from()
+	{
+		var fixture = Registry();
+		fixture.AddVersion("plugins", "com.acme.hue", "2.0.0", new { tag = "release/v2.0.0", commit = Commit });
+
+		await Create(fixture).Refresh();
+
+		var source = _catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue")
+			.History
+			.Single(entry => entry.Version == "2.0.0")
+			.Source;
+		Assert.That(source, Is.EqualTo(new StoreVersionSource { Commit = Commit, Tag = "release/v2.0.0" }));
+	}
+
+	[TestCase("not an object")]
+	[TestCase("ABCDEF0123456789ABCDEF0123456789ABCDEF01", "-v2")]
+	[TestCase("0123456789abcdef", "/v2")]
+	[TestCase(null, "v2/")]
+	[TestCase(null, "v2.lock")]
+	[TestCase(null, "v2/../main")]
+	[TestCase(null, "v2 beta")]
+	public async Task A_source_reference_that_breaks_the_rules_is_ignored_and_the_version_stays_installable(
+		string? commit,
+		string? tag = null)
+	{
+		var fixture = Registry();
+		fixture.AddVersion("plugins",
+			"com.acme.hue",
+			"2.0.0",
+			commit == "not an object" ? (object)commit : new { tag, commit });
+
+		var result = await Create(fixture).Refresh();
+
+		var entry = _catalog.Snapshot.Entries.Single(candidate => candidate.Id == "com.acme.hue");
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(entry.History.Single(version => version.Version == "2.0.0").Source, Is.Null);
+			Assert.That(entry.FindRelease("2.0.0"), Is.Not.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_dependency_list_names_its_ecosystem_and_one_it_cannot_read_as_unknown()
+	{
+		var fixture = Registry();
+		fixture.AddVersion("plugins", "com.acme.hue", "1.0.0");
+		fixture.AddVersion("plugins", "com.acme.hue", "2.0.0");
+		fixture.AddVersion("plugins", "com.acme.hue", "2.2.0");
+		var frameworks = new[] { new { framework = "net10.0", packages = Array.Empty<object>() } };
+		fixture.AddDependencies("plugins", "com.acme.hue", "2.2.0", frameworks, ecosystem: "npm");
+		fixture.AddDependencies("plugins", "com.acme.hue", "2.1.0", frameworks);
+		fixture.AddDependencies("plugins", "com.acme.hue", "2.0.0", frameworks, ecosystem: "Npm!");
+		fixture.AddDependencies("plugins", "com.acme.hue", "1.0.0", frameworks, ecosystem: 42);
+
+		await Create(fixture).Refresh();
+
+		var history = _catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").History;
+		Assert.Multiple(() =>
+		{
+			Assert.That(history.Select(entry => entry.Dependencies?.Ecosystem),
+				Is.EqualTo(new[] { "npm", null, "unknown", "unknown" }));
+			Assert.That(history.Select(entry => entry.Dependencies?.Frameworks.Count), Has.All.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_malformed_dependency_list_reads_as_no_list_without_failing_the_refresh()
+	{
+		var fixture = Registry();
+		fixture.AddVersion("plugins", "com.acme.hue", "2.0.0");
+		fixture.AddVersion("plugins", "com.acme.hue", "2.2.0");
+		fixture.WriteText("plugins/com.acme.hue/versions/2.2.0/dependencies.json", "{ not json");
+		fixture.AddDependencies("plugins", "com.acme.hue", "2.1.0", "net10.0");
+		fixture.AddDependencies("plugins",
+			"com.acme.hue",
+			"2.0.0",
+			Enumerable.Range(0, 33)
+				.Select(index => new { framework = $"net{index}.0", packages = Array.Empty<object>() }));
+
+		var result = await Create(fixture).Refresh();
+
+		var history = _catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").History;
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(history.Select(entry => entry.Dependencies), Has.All.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_list_without_frameworks_has_no_dependencies_while_one_with_only_broken_frameworks_is_no_list()
+	{
+		var fixture = Registry();
+		fixture.AddVersion("plugins", "com.acme.hue", "2.0.0");
+		fixture.AddDependencies("plugins", "com.acme.hue", "2.1.0", Array.Empty<object>());
+		fixture.AddDependencies("plugins",
+			"com.acme.hue",
+			"2.0.0",
+			new[] { new { framework = "not a framework!", packages = Array.Empty<object>() } });
+
+		await Create(fixture).Refresh();
+
+		var history = _catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").History;
+		Assert.Multiple(() =>
+		{
+			Assert.That(history.Single(entry => entry.Version == "2.1.0").Dependencies?.Frameworks, Is.Empty);
+			Assert.That(history.Single(entry => entry.Version == "2.0.0").Dependencies, Is.Null);
 		});
 	}
 

@@ -15,8 +15,25 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AppStrings, StoreCatalogItemBody, StoreExtensionDetailBody, StoreExtensionKind, StoreVersionHistoryBody } from '@macro-deck/runtime';
-import { ApiService, ButtonComponent, ErrorBannerComponent, LocalizationKey, LocalizationService, ToastService, TranslatePipe } from '@shared';
+import {
+  AppStrings,
+  GetStoreRepositoryIssuesResponse,
+  StoreCatalogItemBody,
+  StoreExtensionDetailBody,
+  StoreExtensionKind,
+  StoreVersionHistoryBody,
+} from '@macro-deck/runtime';
+import {
+  ApiService,
+  ButtonComponent,
+  ErrorBannerComponent,
+  LocalizationKey,
+  LocalizationService,
+  SegmentedControlComponent,
+  SegmentedOption,
+  ToastService,
+  TranslatePipe,
+} from '@shared';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { SelectOption } from '../../forms/select/select.component';
@@ -48,7 +65,10 @@ import { StoreDetailHeaderComponent } from './store-detail-header.component';
 import { StoreLanguagesModalComponent } from './store-languages-modal.component';
 import { StoreScreenshotStripComponent } from './store-screenshot-strip.component';
 import { StoreWithdrawalNoticeComponent } from './store-withdrawal-notice.component';
-import { StoreVersionHistoryModalComponent } from './store-version-history-modal.component';
+import { dependencyPackageCount } from './store-dependencies';
+import { StoreDependenciesPanelComponent } from './store-dependencies-panel.component';
+import { StoreIssuesPanelComponent } from './store-issues-panel.component';
+import { StoreVersionListComponent } from './store-version-list.component';
 
 const KNOWN_KINDS = STORE_DETAIL_KINDS;
 
@@ -60,8 +80,7 @@ const PLATFORMS: readonly { name: string; icon: string }[] = [
   { name: 'Linux', icon: 'linux' },
 ];
 
-const LONG_CHANGELOG_CHARACTERS = 600;
-const LONG_CHANGELOG_LINES = 10;
+export type StoreDetailTab = 'description' | 'dependencies' | 'issues' | 'versions';
 
 const STANDARD_LINK_LABELS: Readonly<Record<string, LocalizationKey>> = {
   documentation: AppStrings.Store.Page.Link.Documentation,
@@ -108,7 +127,10 @@ interface StoreDetailLink {
     StoreMarkdownComponent,
     StoreReportDialogComponent,
     StoreReviewsSectionComponent,
-    StoreVersionHistoryModalComponent,
+    StoreDependenciesPanelComponent,
+    StoreIssuesPanelComponent,
+    StoreVersionListComponent,
+    SegmentedControlComponent,
     TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -171,18 +193,57 @@ export class StoreDetailPageComponent implements OnInit {
     return this.localization.translateKey(storeUninstallMessageKey(extension.kind), { name: extension.name });
   });
 
-  protected readonly latestChangelogEntry = computed<StoreVersionHistoryBody | null>(() => {
+  protected readonly versions = computed<StoreVersionHistoryBody[]>(() => {
     const extension = this.extension();
     if (!extension) {
-      return null;
+      return [];
     }
-    const [latest] = extension.history;
-    if (latest) {
-      return latest;
+    if (extension.history.length > 0) {
+      return extension.history;
     }
-    return extension.changelog
-      ? { version: extension.latestVersion, releasedAt: extension.updatedAt, changelog: extension.changelog }
-      : null;
+    return [{ version: extension.latestVersion, releasedAt: extension.updatedAt, changelog: extension.changelog }];
+  });
+
+  protected readonly activeTab = signal<StoreDetailTab>('description');
+
+  protected readonly issues = signal<GetStoreRepositoryIssuesResponse | null>(null);
+
+  protected readonly selectedDependencies = computed(() => this.selectedEntry()?.dependencies ?? null);
+
+  private readonly repositoryUrl = computed(() => {
+    const repository = this.extension()?.repository;
+    return repository && isHttps(repository) ? repository : null;
+  });
+
+  protected readonly tabs = computed<SegmentedOption[]>(() => {
+    const packageCount = dependencyPackageCount(this.selectedDependencies());
+    const issues = this.issues();
+    const openCount = issues && !issues.error ? issues.openCount : 0;
+    const versionCount = this.versions().length;
+    const translate = (key: LocalizationKey) => this.localization.translateKey(key);
+    return [
+      { value: 'description', label: translate(AppStrings.Store.Page.Tabs.Description) },
+      {
+        value: 'issues',
+        label: translate(AppStrings.Store.Page.Tabs.Issues),
+        badge: openCount > 0 ? `${openCount}${issues?.truncated ? '+' : ''}` : undefined,
+      },
+      {
+        value: 'versions',
+        label: translate(AppStrings.Store.Page.Tabs.Versions),
+        badge: versionCount > 0 ? String(versionCount) : undefined,
+      },
+      ...this.extension()?.kind === 'Plugin'
+        ? [{
+          value: 'dependencies',
+          label: translate(AppStrings.Store.Page.Tabs.Dependencies),
+          badge: packageCount ? String(packageCount) : undefined,
+        }]
+        : [],
+      ...this.repositoryUrl()
+        ? [{ value: 'code', label: translate(AppStrings.Store.Page.Tabs.Code), icon: 'code', link: true }]
+        : [],
+    ];
   });
 
   private readonly installedIconPackId = computed(() => {
@@ -202,15 +263,6 @@ export class StoreDetailPageComponent implements OnInit {
     }
     return this.installedIconPackId() ? 'library' : null;
   });
-
-  protected readonly changelogExpanded = signal(false);
-
-  protected readonly changelogIsLong = computed(() => {
-    const changelog = this.latestChangelogEntry()?.changelog ?? '';
-    return changelog.length > LONG_CHANGELOG_CHARACTERS || changelog.split('\n').length > LONG_CHANGELOG_LINES;
-  });
-
-  protected readonly hasVersionHistory = computed(() => (this.extension()?.history.length ?? 0) > 1);
 
   protected readonly selectedVersion = signal<string | null>(null);
 
@@ -295,9 +347,6 @@ export class StoreDetailPageComponent implements OnInit {
       version: this.effectiveVersion() ?? '',
     });
   });
-
-  protected readonly historyModalOpen = signal(false);
-  private historyTriggerElement: HTMLElement | null = null;
 
   protected readonly languages = computed(() =>
     sortCulturesForReader(this.extension()?.languages ?? [], this.localization.culture()));
@@ -438,20 +487,6 @@ export class StoreDetailPageComponent implements OnInit {
       });
   }
 
-  protected openHistoryModal(event: MouseEvent): void {
-    // `shared-button` renders its own native <button> as a child, so the focusable element to
-    // return to on close lives one level below the host the (click) listener is bound to.
-    const host = event.currentTarget as HTMLElement;
-    this.historyTriggerElement = host.querySelector('button') ?? host;
-    this.historyModalOpen.set(true);
-  }
-
-  protected onHistoryModalClosed(): void {
-    this.historyModalOpen.set(false);
-    this.historyTriggerElement?.focus();
-    this.historyTriggerElement = null;
-  }
-
   protected openLanguagesModal(event: MouseEvent): void {
     const host = event.currentTarget as HTMLElement;
     this.languagesTriggerElement = host.querySelector('button') ?? host;
@@ -485,7 +520,22 @@ export class StoreDetailPageComponent implements OnInit {
       void this.iconPacks.loadPacks();
     }
     await this.loadExtension();
+    void this.loadIssues();
     await this.loadSimilar();
+  }
+
+  private async loadIssues(): Promise<void> {
+    const kind = this.kind();
+    const id = this.extensionId();
+    if (!kind || !id) {
+      return;
+    }
+    try {
+      const response = await this.api.getStoreRepositoryIssues(kind, id);
+      this.issues.set({ ...response, issues: response.issues ?? [] });
+    } catch {
+      this.issues.set({ issues: [], openCount: 0, truncated: false, error: 'Unavailable' });
+    }
   }
 
   private async loadSimilar(): Promise<void> {
@@ -635,9 +685,20 @@ export class StoreDetailPageComponent implements OnInit {
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  protected onHistoryVersionSelected(version: string): void {
-    this.selectedVersion.set(version);
-    this.onHistoryModalClosed();
+  protected onTabChange(tab: string): void {
+    if (tab === 'code') {
+      const sourceUrl = this.selectedEntry()?.sourceUrl;
+      const target = sourceUrl && isHttps(sourceUrl) ? sourceUrl : this.repositoryUrl();
+      if (target) {
+        this.externalLinks.open(target);
+      }
+      return;
+    }
+    this.activeTab.set(tab as StoreDetailTab);
+  }
+
+  protected openExternal(url: string): void {
+    this.externalLinks.open(url);
   }
 
   protected async onRetry(): Promise<void> {

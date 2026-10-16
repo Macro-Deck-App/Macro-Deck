@@ -148,6 +148,9 @@ internal sealed record RegistryReleaseDocument
 	public DateTimeOffset? UploadedAt { get; init; }
 
 	public RegistryReleaseMedia? Media { get; init; }
+
+	// Raw JSON: an optional source reference of the wrong type must never cost the release itself.
+	public JsonElement? Source { get; init; }
 }
 
 internal sealed record RegistryReleaseMedia
@@ -168,4 +171,14 @@ internal sealed record RegistryMediaAsset
 	public string? ContentType { get; init; }
 
 	public string? Caption { get; init; }
+}
+
+// Kept as raw JSON so a malformed package entry costs only that entry, not the version's whole list.
+internal sealed record RegistryDependenciesDocument
+{
+	public JsonElement? Ecosystem { get; init; }
+
+	public JsonElement? SdkVersion { get; init; }
+
+	public JsonElement? Frameworks { get; init; }
 }

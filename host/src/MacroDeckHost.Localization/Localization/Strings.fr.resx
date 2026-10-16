@@ -17095,9 +17095,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>Tout</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>Toutes les versions ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Retour au Store</value>
   </data>
@@ -17113,6 +17110,29 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>Copier le lien</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>Dépendances directes</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>Cette version n'a aucune dépendance directe de paquet.</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>Aucune liste de dépendances n'a été publiée pour cette version.</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>demandé {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>Compilé avec .NET SDK {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>{count} paquet transitif</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>{count} paquets transitifs</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Détails</value>
@@ -17186,6 +17206,55 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Version installée</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>{count} commentaire</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>{count} commentaires</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>Les tickets sont désactivés dans le dépôt de ce paquet.</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>Ce paquet n'a aucun ticket ouvert.</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>Chargement des tickets ouverts…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>Nouveau ticket</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>Ce paquet n'a pas de dépôt GitHub, ses tickets ne peuvent donc pas être affichés.</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>Le dépôt GitHub du paquet est introuvable.</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>{count} ticket ouvert</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>{count} tickets ouverts</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>Plus de {count} tickets ouverts</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>par {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub limite les requêtes en ce moment. Réessaie dans quelques minutes.</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>Impossible de charger les tickets ouverts.</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>Tout voir sur GitHub</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>Tout</value>
@@ -17294,9 +17363,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>Ouvrir les paramètres</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>Aperçu</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform} : non pris en charge</value>
@@ -17434,6 +17500,24 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Installées, {count} mises à jour disponibles</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>Détails du paquet</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>Dépendances</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>Tickets</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>Versions</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Sections du Store</value>
   </data>
@@ -17475,9 +17559,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Version</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>Historique des versions</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Version {version}</value>
     <comment>[version:string]</comment>
@@ -17491,8 +17572,8 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>Cette version a été retirée du Store.</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>Quoi de neuf ?</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>Pages des versions</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>Éditeur vérifié</value>

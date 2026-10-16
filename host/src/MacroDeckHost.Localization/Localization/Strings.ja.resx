@@ -17096,9 +17096,6 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>すべて</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>すべてのバージョン ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>ストアに戻る</value>
   </data>
@@ -17114,6 +17111,29 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>リンクをコピー</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>直接の依存関係</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>このバージョンには直接のパッケージ依存関係はありません。</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>このバージョンの依存関係リストは公開されていません。</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>要求バージョン {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>.NET SDK {version} でビルド</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>推移的なパッケージ {count} 件</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>推移的なパッケージ {count} 件</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>詳細</value>
@@ -17187,6 +17207,55 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>インストール済みのバージョン</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>コメント {count} 件</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>コメント {count} 件</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>このパッケージのリポジトリでは Issue が無効になっています。</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>このパッケージにオープンな Issue はありません。</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>オープンな Issue を読み込んでいます…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>新しい Issue</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>このパッケージには GitHub リポジトリがないため、Issue を表示できません。</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>パッケージの GitHub リポジトリが見つかりませんでした。</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>オープンな Issue {count} 件</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>オープンな Issue {count} 件</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>オープンな Issue {count} 件以上</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>作成者: {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>現在 GitHub がリクエストを制限しています。数分後にもう一度お試しください。</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>オープンな Issue を読み込めませんでした。</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>GitHub ですべて表示</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>すべて</value>
@@ -17295,9 +17364,6 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>設定を開く</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>概要</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: 非対応</value>
@@ -17435,6 +17501,24 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>インストール済み、{count} 件の更新あり</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>パッケージの詳細</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>コード</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>依存関係</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>説明</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>Issue</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>バージョン</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>ストアのセクション</value>
   </data>
@@ -17476,9 +17560,6 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>バージョン</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>バージョン履歴</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>バージョン {version}</value>
     <comment>[version:string]</comment>
@@ -17492,8 +17573,8 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>このバージョンはストアから取り下げられました。</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>新機能</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>バージョンのページ</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>発行元確認済み</value>

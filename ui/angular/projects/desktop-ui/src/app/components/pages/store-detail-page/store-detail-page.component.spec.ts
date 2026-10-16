@@ -3,7 +3,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
 
-import { AppStrings, StoreCatalogItemBody, StoreExtensionDetailBody, StoreOperationBody, StoreVersionHistoryBody, StoreCategoryBody } from '@macro-deck/runtime';
+import {
+  AppStrings,
+  GetStoreRepositoryIssuesResponse,
+  StoreCatalogItemBody,
+  StoreCategoryBody,
+  StoreDependenciesBody,
+  StoreExtensionDetailBody,
+  StoreOperationBody,
+  StoreVersionHistoryBody,
+} from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ToastService } from '@shared';
 import { ConnectAccountService } from '../../../services/connect-account.service';
 import { IconPackService } from '../../../services/icon-pack.service';
@@ -86,10 +95,12 @@ describe('StoreDetailPageComponent', () => {
 
   let similarItems: StoreCatalogItemBody[] = [];
   let categories: StoreCategoryBody[] = [];
+  let issuesResponse: Promise<GetStoreRepositoryIssuesResponse>;
 
   beforeEach(() => {
     similarItems = [];
     categories = [];
+    issuesResponse = Promise.resolve({ issues: [], openCount: 0, truncated: false, newIssueUrl: null, error: 'NoRepository' });
   });
 
   async function createFixture(
@@ -103,8 +114,9 @@ describe('StoreDetailPageComponent', () => {
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'getStoreExtension', 'getStoreExtensionIconUrl', 'getStoreScreenshotUrl', 'getStoreStatus', 'onNotification',
       'getStoreRating', 'getStoreReviews', 'getOwnStoreReview', 'getStoreInstalls', 'getStoreRatings',
-      'getStoreSimilar', 'getStoreCategories',
+      'getStoreSimilar', 'getStoreCategories', 'getStoreRepositoryIssues',
     ]);
+    api.getStoreRepositoryIssues.and.callFake(() => issuesResponse);
     api.getStoreSimilar.and.resolveTo({ items: similarItems });
     api.getStoreCategories.and.callFake(() => Promise.resolve({ categories }));
     api.getStoreRatings.and.resolveTo({ available: false, ratings: {} });
@@ -174,6 +186,41 @@ describe('StoreDetailPageComponent', () => {
     fixture.detectChanges();
   }
 
+  function tabs(): HTMLButtonElement[] {
+    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.seg-option'));
+  }
+
+  function tabLabels(): string[] {
+    return tabs().map(button => {
+      const badge = button.querySelector('.seg-badge')?.textContent ?? '';
+      return (button.textContent ?? '').replace(badge, '').trim();
+    });
+  }
+
+  function tab(label: string): HTMLButtonElement {
+    return tabs().find(button => button.textContent?.trim().startsWith(label))!;
+  }
+
+  function tabBadge(label: string): string | null {
+    return tab(label).querySelector('.seg-badge')?.textContent?.trim() ?? null;
+  }
+
+  async function openTab(label: string): Promise<void> {
+    tab(label).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  async function issuesLoaded(): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve));
+    fixture.detectChanges();
+  }
+
+  function panel(): HTMLElement {
+    return (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('[role="tabpanel"]')!;
+  }
+
   it('loads the icon and every screenshot, thumbnail and enlarged, by the digest of the current image', async () => {
     await createFixture(null, {
       hasIcon: true,
@@ -232,7 +279,7 @@ describe('StoreDetailPageComponent', () => {
     const copyText = spyOn(TestBed.inject(TextClipboardService), 'copyText')
       .and.resolveTo({ status: 'copied', via: 'clipboard-api' });
 
-    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.copy-link button')!.click();
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('button.copy-link')!.click();
 
     expect(copyText).toHaveBeenCalledOnceWith('https://store.macro-deck.app/app.example.plugin');
   });
@@ -281,26 +328,289 @@ describe('StoreDetailPageComponent', () => {
     expect(retryButton).toBeUndefined();
   });
 
-  it("shows the newest version's notes and version label in the What's new? card, not the older one's", async () => {
+  it('opens on the description and offers issues, versions and dependencies as tabs instead of an overview heading', async () => {
+    await createFixture(null, { longDescription: 'Long description text' });
+
+    expect(tabLabels()).toEqual(['Description', 'Issues', 'Versions', 'Dependencies']);
+    expect(tab('Description').getAttribute('aria-selected')).toBe('true');
+    expect(panel().textContent).toContain('Long description text');
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Overview');
+  });
+
+  it('ends the tabs with Code, which opens the repository in the system browser and stays on the current tab', async () => {
+    await createFixture(null, { repository: 'https://github.com/example/plugin' });
+    const externalLinks = TestBed.inject(ExternalLinkService);
+    spyOn(externalLinks, 'open');
+
+    expect(tabLabels()).toEqual(['Description', 'Issues', 'Versions', 'Dependencies', 'Code']);
+    tab('Code').click();
+    fixture.detectChanges();
+
+    expect(externalLinks.open).toHaveBeenCalledOnceWith('https://github.com/example/plugin');
+    expect(tab('Description').getAttribute('aria-selected')).toBe('true');
+    expect(tab('Code').getAttribute('role')).toBe('link');
+  });
+
+  it('opens the source of the selected version under Code when the registry names it', async () => {
+    await createFixture(null, {
+      repository: 'https://github.com/example/plugin',
+      latestVersion: '2.0.0',
+      history: [
+        { version: '2.0.0', installable: true, sourceUrl: 'https://github.com/example/plugin/tree/v2.0.0' },
+        { version: '1.0.0', installable: true, sourceUrl: 'https://github.com/example/plugin/tree/1111111111111111111111111111111111111111' },
+      ],
+    });
+    const open = spyOn(TestBed.inject(ExternalLinkService), 'open');
+
+    tab('Code').click();
+    (fixture.componentInstance as unknown as { onVersionChange(value: string): void }).onVersionChange('1.0.0');
+    fixture.detectChanges();
+    tab('Code').click();
+
+    expect(open.calls.allArgs()).toEqual([
+      ['https://github.com/example/plugin/tree/v2.0.0'],
+      ['https://github.com/example/plugin/tree/1111111111111111111111111111111111111111'],
+    ]);
+  });
+
+  it('offers no Code tab without an https repository', async () => {
+    await createFixture(null, { repository: 'javascript:alert(1)' });
+
+    expect(tabLabels()).not.toContain('Code');
+  });
+
+  it('lists every version with its own notes in the Versions tab, newest first', async () => {
     const history: StoreVersionHistoryBody[] = [
       { version: '2.0.0', releasedAt: '2026-06-03T00:00:00Z', changelog: 'Newest release notes' },
       { version: '1.1.0', releasedAt: '2026-01-01T00:00:00Z', changelog: 'Older release notes' },
     ];
     await createFixture(null, { history });
 
-    const cardText = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(cardText).toContain('Newest release notes');
-    expect(cardText).toContain('Version 2.0.0');
-    expect(cardText).not.toContain('Older release notes');
+    await openTab('Versions');
+
+    const entries = Array.from(panel().querySelectorAll('[data-testid="store-version-entry"]'))
+      .map(entry => entry.textContent ?? '');
+    expect(entries.length).toBe(2);
+    expect(entries[0]).toContain('Version 2.0.0');
+    expect(entries[0]).toContain('Newest release notes');
+    expect(entries[1]).toContain('Older release notes');
   });
 
-  it('hides the version-history trigger when there is a single history entry', async () => {
-    await createFixture(null, {
-      history: [{ version: '1.1.0', releasedAt: '2026-01-01T00:00:00Z', changelog: 'Only release notes' }],
+  it('counts the versions on their tab and pages through them five at a time', async () => {
+    const history: StoreVersionHistoryBody[] = Array.from({ length: 7 }, (_, index) => ({
+      version: `1.${6 - index}.0`,
+      releasedAt: '2026-01-01T00:00:00Z',
+      changelog: `Notes ${6 - index}`,
+    }));
+    await createFixture(null, { latestVersion: '1.6.0', history });
+
+    expect(tabBadge('Versions')).toBe('7');
+    await openTab('Versions');
+    const versions = () => Array.from(panel().querySelectorAll('[data-testid="store-version-entry"] .history-entry-version'))
+      .map(entry => entry.textContent?.trim());
+    expect(versions()).toEqual(['Version 1.6.0', 'Version 1.5.0', 'Version 1.4.0', 'Version 1.3.0', 'Version 1.2.0']);
+    expect(panel().textContent).toContain('Page 1 of 2');
+
+    Array.from(panel().querySelectorAll<HTMLButtonElement>('.history-pager button'))
+      .find(button => button.textContent?.trim() === 'Next')!.click();
+    fixture.detectChanges();
+
+    expect(versions()).toEqual(['Version 1.1.0', 'Version 1.0.0']);
+    expect(panel().textContent).toContain('Page 2 of 2');
+  });
+
+  it('offers no pages when every version fits on one', async () => {
+    await createFixture(null, { latestVersion: '1.1.0', history: [{ version: '1.1.0', changelog: 'Only notes' }] });
+
+    await openTab('Versions');
+
+    expect(panel().querySelector('.history-pager')).toBeNull();
+  });
+
+  it('still shows the latest release notes under Versions when an older host sends no history', async () => {
+    await createFixture(null, { latestVersion: '1.1.0', changelog: 'Notes from an older host', history: [] });
+
+    await openTab('Versions');
+
+    expect(panel().textContent).toContain('Version 1.1.0');
+    expect(panel().textContent).toContain('Notes from an older host');
+  });
+
+  describe('dependencies', () => {
+    function dependencies(direct: string[], transitive: string[] = []): StoreDependenciesBody {
+      return {
+        sdkVersion: '10.0.401',
+        frameworks: [{
+          framework: 'net10.0',
+          packages: [
+            ...direct.map(id => ({ id, version: '1.0.0', requestedVersion: '1.0.0', direct: true })),
+            ...transitive.map(id => ({ id, version: '2.0.0', direct: false })),
+          ],
+        }],
+      };
+    }
+
+    it('counts every package of the selected version and lists the transitive ones apart', async () => {
+      await createFixture(null, {
+        latestVersion: '2.0.0',
+        history: [
+          { version: '2.0.0', installable: true, dependencies: dependencies(['MacroDeck.Sdk', 'Serilog'], ['Avalonia', 'SkiaSharp', 'HarfBuzzSharp']) },
+          { version: '1.0.0', installable: true, dependencies: dependencies(['MacroDeck.Sdk']) },
+        ],
+      });
+
+      expect(tabBadge('Dependencies')).toBe('5');
+      await openTab('Dependencies');
+      const direct = panel().querySelector('[data-testid="store-dependencies-direct"]')!.textContent ?? '';
+      expect(direct).toContain('MacroDeck.Sdk');
+      expect(direct).toContain('Serilog');
+      expect(direct).not.toContain('Avalonia');
+      expect(panel().querySelector('[data-testid="store-dependencies-transitive"] summary')!.textContent).toContain('3');
+      expect(panel().textContent).toContain('10.0.401');
+
+      (fixture.componentInstance as unknown as { onVersionChange(value: string): void }).onVersionChange('1.0.0');
+      fixture.detectChanges();
+      expect(tabBadge('Dependencies')).toBe('1');
     });
-    const historyButton = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('shared-button'))
-      .find(btn => btn.textContent?.trim().startsWith('All versions'));
-    expect(historyButton).toBeUndefined();
+
+    it('opens a package on NuGet at the version the release uses', async () => {
+      await createFixture(null, {
+        latestVersion: '1.0.0',
+        history: [{ version: '1.0.0', installable: true, dependencies: dependencies(['MacroDeck.Sdk'], ['Avalonia']) }],
+      });
+      const open = spyOn(TestBed.inject(ExternalLinkService), 'open');
+      await openTab('Dependencies');
+
+      const links = Array.from(panel().querySelectorAll<HTMLAnchorElement>('a.dependency-id'));
+      links.forEach(link => link.click());
+
+      expect(open.calls.allArgs()).toEqual([
+        ['https://www.nuget.org/packages/MacroDeck.Sdk/1.0.0'],
+        ['https://www.nuget.org/packages/Avalonia/2.0.0'],
+      ]);
+    });
+
+    it('links no package to NuGet when the list names another package registry', async () => {
+      await createFixture(null, {
+        latestVersion: '1.0.0',
+        history: [{ version: '1.0.0', installable: true, dependencies: { ...dependencies(['left-pad']), ecosystem: 'npm' } }],
+      });
+      await openTab('Dependencies');
+
+      expect(panel().querySelector('a.dependency-id')).toBeNull();
+      expect(panel().textContent).toContain('left-pad');
+    });
+
+    it('counts a package targeted by several frameworks once', async () => {
+      await createFixture(null, {
+        latestVersion: '1.0.0',
+        history: [{
+          version: '1.0.0',
+          installable: true,
+          dependencies: {
+            frameworks: [
+              { framework: 'net8.0', packages: [{ id: 'MacroDeck.Sdk', version: '1.0.0', direct: true }] },
+              { framework: 'net10.0', packages: [{ id: 'MacroDeck.Sdk', version: '1.0.0', direct: true }] },
+            ],
+          },
+        }],
+      });
+
+      expect(tabBadge('Dependencies')).toBe('1');
+    });
+
+    it('offers no dependencies tab for an icon pack, which never publishes a dependency list', async () => {
+      await createFixture(null, { kind: 'IconPack', latestVersion: '1.0.0', history: [{ version: '1.0.0', installable: true }] });
+
+      expect(tabLabels()).toEqual(['Description', 'Issues', 'Versions']);
+    });
+
+    it('says a published list without frameworks has no direct dependencies', async () => {
+      await createFixture(null, { latestVersion: '1.0.0', history: [{ version: '1.0.0', installable: true, dependencies: { frameworks: [] } }] });
+
+      expect(tabBadge('Dependencies')).toBeNull();
+      await openTab('Dependencies');
+      expect(panel().textContent).toContain('This version has no direct package dependencies.');
+    });
+
+    it('says no list was published, never that there are no dependencies, when a version has none', async () => {
+      await createFixture(null, { latestVersion: '1.0.0', history: [{ version: '1.0.0', installable: true }] });
+
+      expect(tabBadge('Dependencies')).toBeNull();
+      await openTab('Dependencies');
+      expect(panel().textContent).toContain('No dependency list was published for this version.');
+    });
+  });
+
+  describe('issues', () => {
+    const issue = { number: 7, title: 'Battery level stuck', url: 'https://github.com/example/plugin/issues/7', author: 'someone', createdAt: '2026-09-01T00:00:00Z', comments: 2 };
+
+    it('shows the open issue count and lists the issues from the repository', async () => {
+      issuesResponse = Promise.resolve({ issues: [issue], openCount: 1, truncated: false, newIssueUrl: 'https://github.com/example/plugin/issues/new' });
+      await createFixture(null, { repository: 'https://github.com/example/plugin' });
+      await issuesLoaded();
+
+      expect(tabBadge('Issues')).toBe('1');
+      await openTab('Issues');
+      const items = panel().querySelectorAll('[data-testid="store-issue"]');
+      expect(items.length).toBe(1);
+      expect(items[0].textContent).toContain('Battery level stuck');
+      expect(items[0].textContent).toContain('#7');
+    });
+
+    it('marks a count beyond the first page as incomplete', async () => {
+      issuesResponse = Promise.resolve({ issues: [issue], openCount: 60, truncated: true, newIssueUrl: 'https://github.com/example/plugin/issues/new' });
+      await createFixture(null, { repository: 'https://github.com/example/plugin' });
+      await issuesLoaded();
+
+      expect(tabBadge('Issues')).toBe('60+');
+    });
+
+    it('opens a new issue and each issue in the system browser', async () => {
+      issuesResponse = Promise.resolve({ issues: [issue], openCount: 1, truncated: false, newIssueUrl: 'https://github.com/example/plugin/issues/new' });
+      await createFixture(null, { repository: 'https://github.com/example/plugin' });
+      await issuesLoaded();
+      const externalLinks = TestBed.inject(ExternalLinkService);
+      spyOn(externalLinks, 'open');
+      await openTab('Issues');
+
+      panel().querySelector<HTMLElement>('[data-testid="store-issues-new"] button')!.click();
+      panel().querySelector<HTMLAnchorElement>('[data-testid="store-issue"] a')!.click();
+
+      expect(externalLinks.open).toHaveBeenCalledWith('https://github.com/example/plugin/issues/new');
+      expect(externalLinks.open).toHaveBeenCalledWith('https://github.com/example/plugin/issues/7');
+    });
+
+    it('explains that issues are turned off and offers no new issue', async () => {
+      issuesResponse = Promise.resolve({ issues: [], openCount: 0, truncated: false, newIssueUrl: null, error: 'IssuesDisabled' });
+      await createFixture(null, { repository: 'https://github.com/example/plugin' });
+      await issuesLoaded();
+
+      expect(tabBadge('Issues')).toBeNull();
+      await openTab('Issues');
+      expect(panel().textContent).toContain('Issues are turned off');
+      expect(panel().querySelector('[data-testid="store-issues-new"]')).toBeNull();
+    });
+
+    it('still offers a new issue while GitHub limits requests', async () => {
+      issuesResponse = Promise.resolve({ issues: [], openCount: 0, truncated: false, newIssueUrl: 'https://github.com/example/plugin/issues/new', error: 'RateLimited' });
+      await createFixture(null, { repository: 'https://github.com/example/plugin' });
+      await issuesLoaded();
+
+      await openTab('Issues');
+      expect(panel().textContent).toContain('GitHub is limiting requests');
+      expect(panel().querySelector('[data-testid="store-issues-new"]')).not.toBeNull();
+    });
+
+    it('says the issues could not be loaded when the host does not serve them', async () => {
+      issuesResponse = Promise.reject(new Error('404'));
+      await createFixture(null, { repository: 'https://github.com/example/plugin' });
+      await issuesLoaded();
+
+      expect(tabBadge('Issues')).toBeNull();
+      await openTab('Issues');
+      expect(panel().textContent).toContain('The open issues could not be loaded.');
+    });
   });
 
   it('lists the reader\'s own language first, then English, then the rest by name', async () => {
@@ -599,18 +909,6 @@ describe('StoreDetailPageComponent', () => {
     expect(fixture.nativeElement.querySelector('.links-group')).toBeNull();
   });
 
-  it('shows the version-history trigger when there are two history entries', async () => {
-    await createFixture(null, {
-      history: [
-        { version: '2.0.0', releasedAt: '2026-06-03T00:00:00Z', changelog: 'Newest release notes' },
-        { version: '1.1.0', releasedAt: '2026-01-01T00:00:00Z', changelog: 'Older release notes' },
-      ],
-    });
-    const historyButton = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('shared-button'))
-      .find(btn => btn.textContent?.trim() === 'All versions (2)');
-    expect(historyButton).withContext('two history entries should offer a Version history trigger').not.toBeUndefined();
-  });
-
   it('reloads the extension when the catalog changes, so a stale Installed state does not survive an uninstall', async () => {
     await createFixture(null, { installState: 'Installed', installedVersion: '1.1.0' });
     expect(fixture.nativeElement.textContent).toContain('Installed');
@@ -896,20 +1194,22 @@ describe('StoreDetailPageComponent', () => {
     it('shows the first lines of long release notes until the reader expands them', async () => {
       const changelog = Array.from({ length: 30 }, (_, index) => `- Change ${index + 1}`).join('\n');
       await createFixture(null, { history: [{ version: '1.1.0', releasedAt: '2026-01-01T00:00:00Z', changelog }] });
+      await openTab('Versions');
       const host = fixture.nativeElement as HTMLElement;
 
-      expect(host.querySelector('.whats-new-notes')!.classList).toContain('collapsed');
-      (host.querySelector('.whats-new-toggle') as HTMLElement).click();
+      expect(host.querySelector('.history-entry-notes')!.classList).toContain('collapsed');
+      (host.querySelector('.history-entry-toggle') as HTMLElement).click();
       fixture.detectChanges();
-      expect(host.querySelector('.whats-new-notes')!.classList).not.toContain('collapsed');
+      expect(host.querySelector('.history-entry-notes')!.classList).not.toContain('collapsed');
     });
 
     it('shows short release notes in full without a toggle', async () => {
       await createFixture(null, { history: [{ version: '1.1.0', releasedAt: '2026-01-01T00:00:00Z', changelog: 'Small fix' }] });
+      await openTab('Versions');
       const host = fixture.nativeElement as HTMLElement;
 
-      expect(host.querySelector('.whats-new-notes')!.classList).not.toContain('collapsed');
-      expect(host.querySelector('.whats-new-toggle')).toBeNull();
+      expect(host.querySelector('.history-entry-notes')!.classList).not.toContain('collapsed');
+      expect(host.querySelector('.history-entry-toggle')).toBeNull();
     });
   });
 

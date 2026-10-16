@@ -11,4 +11,8 @@ public sealed record StoreVersionHistoryEntry
 	public long? Size { get; init; }
 
 	public bool HasRelease { get; init; }
+
+	public StoreDependencyList? Dependencies { get; init; }
+
+	public StoreVersionSource? Source { get; init; }
 }

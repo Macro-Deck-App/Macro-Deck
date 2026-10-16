@@ -17096,9 +17096,6 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>सभी</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>सभी संस्करण ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>स्टोर पर वापस जाएं</value>
   </data>
@@ -17114,6 +17111,29 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>लिंक कॉपी करें</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>प्रत्यक्ष निर्भरताएँ</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>इस संस्करण में कोई प्रत्यक्ष पैकेज निर्भरता नहीं है।</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>इस संस्करण के लिए कोई निर्भरता सूची प्रकाशित नहीं की गई।</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>अनुरोधित {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>.NET SDK {version} से बनाया गया</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>{count} ट्रांज़िटिव पैकेज</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>ट्रांज़िटिव पैकेज: {count}</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>विवरण</value>
@@ -17187,6 +17207,55 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>इंस्टॉल किया गया संस्करण</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>{count} टिप्पणी</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>टिप्पणियाँ: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>इस पैकेज के रिपॉज़िटरी में इश्यू बंद हैं।</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>इस पैकेज में कोई खुला इश्यू नहीं है।</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>खुले इश्यू लोड हो रहे हैं…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>नया इश्यू</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>इस पैकेज का कोई GitHub रिपॉज़िटरी नहीं है, इसलिए इसके इश्यू नहीं दिखाए जा सकते।</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>पैकेज का GitHub रिपॉज़िटरी नहीं मिला।</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>{count} खुला इश्यू</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>खुले इश्यू: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>खुले इश्यू: {count} से अधिक</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>{author} द्वारा</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub अभी अनुरोधों को सीमित कर रहा है। कुछ मिनट बाद फिर से प्रयास करें।</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>खुले इश्यू लोड नहीं हो सके।</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>GitHub पर सभी देखें</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>सभी</value>
@@ -17295,9 +17364,6 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>सेटिंग्स खोलें</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>सारांश</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: समर्थित नहीं</value>
@@ -17435,6 +17501,24 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>इंस्टॉल किए गए, {count} अपडेट उपलब्ध</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>पैकेज विवरण</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>कोड</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>निर्भरताएँ</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>विवरण</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>इश्यू</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>संस्करण</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>स्टोर अनुभाग</value>
   </data>
@@ -17476,9 +17560,6 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>संस्करण</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>संस्करण इतिहास</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>संस्करण {version}</value>
     <comment>[version:string]</comment>
@@ -17492,8 +17573,8 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>यह संस्करण स्टोर से वापस ले लिया गया है।</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>नया क्या है?</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>संस्करण पृष्ठ</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>प्रकाशक सत्यापित</value>

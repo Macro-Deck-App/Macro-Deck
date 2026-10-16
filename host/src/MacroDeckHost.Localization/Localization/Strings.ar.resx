@@ -17096,9 +17096,6 @@
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>الكل</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>جميع الإصدارات ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>العودة إلى المتجر</value>
   </data>
@@ -17114,6 +17111,29 @@
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>نسخ الرابط</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>التبعيات المباشرة</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>لا توجد تبعيات حزم مباشرة لهذا الإصدار.</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>لم تُنشر قائمة تبعيات لهذا الإصدار.</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>المطلوب {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>تم الإنشاء باستخدام .NET SDK {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>{count} حزمة غير مباشرة</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>الحزم غير المباشرة: {count}</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>التفاصيل</value>
@@ -17187,6 +17207,55 @@
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>الإصدار المثبّت</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>{count} تعليق</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>التعليقات: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>المشكلات معطّلة في مستودع هذه الحزمة.</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>لا توجد مشكلات مفتوحة لهذه الحزمة.</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>جارٍ تحميل المشكلات المفتوحة…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>مشكلة جديدة</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>لا يوجد مستودع GitHub لهذه الحزمة، لذا لا يمكن عرض مشكلاتها.</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>تعذّر العثور على مستودع GitHub الخاص بالحزمة.</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>{count} مشكلة مفتوحة</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>المشكلات المفتوحة: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>المشكلات المفتوحة: أكثر من {count}</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>بواسطة {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>يحدّ GitHub من الطلبات حاليًا. حاول مرة أخرى بعد بضع دقائق.</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>تعذّر تحميل المشكلات المفتوحة.</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>عرض الكل على GitHub</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>الكل</value>
@@ -17295,9 +17364,6 @@
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>فتح الإعدادات</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>نظرة عامة</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: غير مدعوم</value>
@@ -17435,6 +17501,24 @@
     <value>المثبّتة، التحديثات المتاحة: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>تفاصيل الحزمة</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>الشيفرة البرمجية</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>التبعيات</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>الوصف</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>المشكلات</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>الإصدارات</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>أقسام المتجر</value>
   </data>
@@ -17476,9 +17560,6 @@
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>الإصدار</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>سجل الإصدارات</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>الإصدار {version}</value>
     <comment>[version:string]</comment>
@@ -17492,8 +17573,8 @@
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>تم سحب هذا الإصدار من المتجر.</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>ما الجديد؟</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>صفحات الإصدارات</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>الناشر موثّق</value>

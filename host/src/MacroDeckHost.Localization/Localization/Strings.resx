@@ -17096,9 +17096,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>All</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>All versions ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Back to the store</value>
   </data>
@@ -17114,6 +17111,29 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>Copy link</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>Direct dependencies</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>This version has no direct package dependencies.</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>No dependency list was published for this version.</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>requested {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>Built with .NET SDK {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>{count} transitive package</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>{count} transitive packages</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Details</value>
@@ -17187,6 +17207,55 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Installed version</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>{count} comment</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>{count} comments</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>Issues are turned off for this package's repository.</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>This package has no open issues.</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>Loading open issues…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>New issue</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>This package has no GitHub repository, so its issues cannot be shown.</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>The package's GitHub repository could not be found.</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>{count} open issue</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>{count} open issues</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>More than {count} open issues</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>by {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub is limiting requests right now. Try again in a few minutes.</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>The open issues could not be loaded.</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>View all on GitHub</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>All</value>
@@ -17295,9 +17364,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>Open settings</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>Overview</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: not supported</value>
@@ -17435,6 +17501,24 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Installed, {count} updates available</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>Package details</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>Dependencies</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>Issues</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>Versions</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Store sections</value>
   </data>
@@ -17476,9 +17560,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Version</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>Version history</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Version {version}</value>
     <comment>[version:string]</comment>
@@ -17492,8 +17573,8 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>This version was withdrawn from the Store.</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>What's new?</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>Version pages</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>Publisher verified</value>

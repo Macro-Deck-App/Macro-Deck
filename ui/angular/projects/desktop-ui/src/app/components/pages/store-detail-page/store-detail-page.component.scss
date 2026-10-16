@@ -47,13 +47,6 @@
   gap: var(--space-3);
 }
 
-.block-heading-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
 .overview-text {
   max-width: 72ch;
   font-size: var(--text-base);
@@ -68,68 +61,17 @@
   color: var(--color-text-muted);
 }
 
-.whats-new {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding-inline-start: var(--space-4);
-  border-inline-start: 2px solid var(--color-border-accent);
-  overflow-wrap: anywhere;
-}
-
-.whats-new-notes {
-  position: relative;
-
-  &.collapsed {
-    max-height: 12rem;
-    overflow: hidden;
-
-    &::after {
-      content: '';
-      position: absolute;
-      inset: auto 0 0;
-      height: 4rem;
-      background: linear-gradient(to bottom, transparent, var(--color-bg-primary));
-      pointer-events: none;
-    }
-  }
-}
-
-.whats-new-toggle {
+.detail-tabs {
   align-self: flex-start;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--color-accent);
-  font-size: var(--text-sm);
-  cursor: pointer;
+  max-width: 100%;
+}
 
-  &:hover {
-    text-decoration: underline;
-  }
+.detail-tab-panel {
+  min-width: 0;
 
   &:focus-visible {
     @include ds.focus-ring;
   }
-}
-
-.whats-new-meta {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.whats-new-version {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--color-text-primary);
-}
-
-.whats-new-date {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  white-space: nowrap;
 }
 
 .detail-sidebar {

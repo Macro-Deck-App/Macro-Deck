@@ -72,6 +72,50 @@ export interface StoreVersionHistoryBody {
   size?: number | null;
   installable?: boolean;
   unavailableReason?: StoreVersionUnavailableReason | null;
+  // Absent from an older host. Null means the version published no dependency list, not that it has none.
+  dependencies?: StoreDependenciesBody | null;
+  // Absent from an older host. The repository at the commit or tag this version was built from, when known.
+  sourceUrl?: string | null;
+}
+
+export interface StoreDependencyPackageBody {
+  id: string;
+  version: string;
+  requestedVersion?: string | null;
+  direct: boolean;
+}
+
+export interface StoreDependencyFrameworkBody {
+  framework: string;
+  packages: StoreDependencyPackageBody[];
+}
+
+// ecosystem is absent for every list published so far, which are all NuGet; another value names a package
+// registry this client may not know, so it must not be linked to nuget.org.
+export interface StoreDependenciesBody {
+  ecosystem?: string | null;
+  sdkVersion?: string | null;
+  frameworks: StoreDependencyFrameworkBody[];
+}
+
+export type StoreRepositoryIssuesError = 'NoRepository' | 'NotFound' | 'IssuesDisabled' | 'RateLimited' | 'Unavailable';
+
+export interface StoreRepositoryIssueBody {
+  number: number;
+  title: string;
+  url: string;
+  author?: string | null;
+  createdAt?: string | null;
+  comments: number;
+}
+
+// Not served by an older host. newIssueUrl is set for every state but NoRepository and IssuesDisabled.
+export interface GetStoreRepositoryIssuesResponse {
+  issues: StoreRepositoryIssueBody[];
+  openCount: number;
+  truncated: boolean;
+  newIssueUrl?: string | null;
+  error?: StoreRepositoryIssuesError | null;
 }
 
 // A standard type is labelled by the client in the viewer's language; only custom links carry a label.

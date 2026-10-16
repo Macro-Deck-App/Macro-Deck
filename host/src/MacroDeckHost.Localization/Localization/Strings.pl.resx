@@ -17095,9 +17095,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>Wszystkie</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>Wszystkie wersje ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Powrót do Store</value>
   </data>
@@ -17113,6 +17110,29 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>Kopiuj link</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>Zależności bezpośrednie</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>Ta wersja nie ma bezpośrednich zależności od pakietów.</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>Dla tej wersji nie opublikowano listy zależności.</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>wymagana {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>Zbudowano za pomocą .NET SDK {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>Pakiety przechodnie: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>Pakiety przechodnie: {count}</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Szczegóły</value>
@@ -17186,6 +17206,55 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Zainstalowana wersja</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>Komentarze: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>Komentarze: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>Problemy są wyłączone w repozytorium tego pakietu.</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>Ten pakiet nie ma otwartych problemów.</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>Wczytywanie otwartych problemów…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>Nowy problem</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>Ten pakiet nie ma repozytorium GitHub, więc nie można wyświetlić jego problemów.</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>Nie znaleziono repozytorium GitHub pakietu.</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>Otwarte problemy: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>Otwarte problemy: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>Otwarte problemy: ponad {count}</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>autor: {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub obecnie ogranicza liczbę żądań. Spróbuj ponownie za kilka minut.</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>Nie udało się wczytać otwartych problemów.</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>Pokaż wszystkie w GitHub</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>Wszystkie</value>
@@ -17294,9 +17363,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>Otwórz ustawienia</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>Przegląd</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: nieobsługiwane</value>
@@ -17434,6 +17500,24 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Zainstalowane, dostępne aktualizacje: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>Szczegóły pakietu</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>Kod</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>Zależności</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>Problemy</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>Wersje</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Sekcje Store</value>
   </data>
@@ -17475,9 +17559,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Wersja</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>Historia wersji</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Wersja {version}</value>
     <comment>[version:string]</comment>
@@ -17491,8 +17572,8 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>Ta wersja została wycofana ze Store.</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>Co nowego?</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>Strony wersji</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>Wydawca zweryfikowany</value>

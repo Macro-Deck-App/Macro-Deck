@@ -857,8 +857,24 @@ An exported pack has a size limit: at most 29,995 icons, and only so much text
 for the icons' names and details. When a pack is larger, Macro Deck tells you it is too large to export; split
 it into smaller packs.
 
-An item's page shows its screenshots, description, what changed in the latest version and, in the details
-beside it, whether it runs on your platform. It lists **Links** its creator provides, such as its **Homepage**,
+An item's page shows its screenshots and, in the details beside it, whether it runs on your platform. Below the
+screenshots, tabs show more about it:
+
+- **Description** is the creator's description of the item.
+- **Issues** lists the open issues of the item's GitHub repository, with their number on the tab, and
+  **New issue** opens GitHub in your browser to report a problem. To show them, Macro Deck asks GitHub for
+  the open issues when you open the page. Items without a GitHub repository have no issues to show.
+- **Versions** lists every version, five per page, with its release date and release notes, and their
+  number on the tab.
+- **Dependencies**, on a plugin's page, lists the packages the selected version was built with, with their
+  number on the tab: the ones it uses directly, and the packages those pull in under a collapsed list. A
+  version whose creator published no dependency list says so; that does not mean it has none.
+- **Code**, when the item names its source repository, opens it in your browser, at the state of the selected
+  version when its creator published where it was built from.
+
+The share button next to the install button copies a link to the item's Store page.
+
+The page also lists **Links** its creator provides, such as its **Homepage**,
 the source repository, documentation or a place to report an issue. They open in your browser.
 
 An item in a Store category lists it under **Categories**, and any other tags its creator gave it under
@@ -882,7 +898,7 @@ selected by default. The button then says **Install**, **Update to** or **Downgr
 downgrade asks you to confirm first. Versions that cannot be installed on your computer stay in the list but
 cannot be selected. Whether a version works with your Macro Deck version is only known once it is downloaded:
 if it needs a newer Macro Deck, the Store says so and offers **Check for updates** instead of **Retry**.
-**All versions** under **What's new** lists every version with its release notes. See
+**Versions** lists every version with its release notes and lets you select one there too. See
 [Updates](/guide/updates/#extension-updates) for how an older version affects automatic updates.
 
 Select the publisher's name on a card or an item's page to see everything that publisher offers. An installed

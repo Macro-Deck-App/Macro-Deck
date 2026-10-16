@@ -181,6 +181,7 @@ import {
   GetStoreCatalogResponse,
   GetStoreCategoriesResponse,
   GetStoreExtensionResponse,
+  GetStoreRepositoryIssuesResponse,
   ResolveStoreLinkResponse,
   GetStoreSimilarResponse,
   GetStoreOperationsResponse,
@@ -1046,6 +1047,10 @@ export class ApiService {
 
   getStoreExtension(kind: StoreExtensionKind, packageId: string): Promise<GetStoreExtensionResponse> {
     return this.http('GET', `/api/store/catalog/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}`);
+  }
+
+  getStoreRepositoryIssues(kind: StoreExtensionKind, packageId: string): Promise<GetStoreRepositoryIssuesResponse> {
+    return this.http('GET', `/api/store/catalog/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}/issues`);
   }
 
   resolveStoreLink(packageId: string): Promise<ResolveStoreLinkResponse> {

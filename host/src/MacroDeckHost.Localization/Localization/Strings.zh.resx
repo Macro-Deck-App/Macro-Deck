@@ -17096,9 +17096,6 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>全部</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>所有版本（{count}）</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>返回商店</value>
   </data>
@@ -17114,6 +17111,29 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>复制链接</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>直接依赖项</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>此版本没有直接的包依赖项。</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>此版本未发布依赖项列表。</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>请求的版本 {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>使用 .NET SDK {version} 构建</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>{count} 个传递包</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>{count} 个传递包</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>详情</value>
@@ -17187,6 +17207,55 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>已安装的版本</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>{count} 条评论</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>{count} 条评论</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>此安装包的仓库已关闭议题功能。</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>此安装包没有未关闭的议题。</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>正在加载未关闭的议题…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>新建议题</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>此安装包没有 GitHub 仓库，因此无法显示其议题。</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>找不到此安装包的 GitHub 仓库。</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>{count} 个未关闭的议题</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>{count} 个未关闭的议题</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>超过 {count} 个未关闭的议题</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>作者：{author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub 当前正在限制请求。请几分钟后重试。</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>无法加载未关闭的议题。</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>在 GitHub 上查看全部</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>全部</value>
@@ -17295,9 +17364,6 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>打开设置</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>概览</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}：不支持</value>
@@ -17435,6 +17501,24 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>已安装，有 {count} 个更新可用</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>安装包详情</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>代码</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>依赖项</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>描述</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>议题</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>版本</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>商店分区</value>
   </data>
@@ -17476,9 +17560,6 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>版本</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>版本历史</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>版本 {version}</value>
     <comment>[version:string]</comment>
@@ -17492,8 +17573,8 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>此版本已从商店撤下。</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>新增内容</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>版本页面</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>发布者已验证</value>

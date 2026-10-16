@@ -3,6 +3,7 @@ using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Installation;
+using MacroDeckHost.Application.Store.Issues;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
 using MacroDeckHost.Application.Store.Updates;
@@ -22,6 +23,7 @@ namespace MacroDeckHost.Tests.UnitTests.Api;
 internal sealed class StoreControllerTests
 {
 	private const string PluginId = "com.acme.hue";
+	private const string SourceCommit = "0123456789abcdef0123456789abcdef01234567";
 
 	private static readonly string[] _appleAndWindowsRids = ["osx-arm64", "osx-x64", "win-x64"];
 	private static readonly string[] _expectedOperatingSystems = ["Windows", "macOS"];
@@ -38,6 +40,7 @@ internal sealed class StoreControllerTests
 	private FakeStoreUninstallService _uninstallService = null!;
 	private StoreController _controller = null!;
 	private FakeStoreInstallCounts _reviews = null!;
+	private FakeStoreRepositoryIssueClient _issues = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -65,6 +68,7 @@ internal sealed class StoreControllerTests
 
 		_uninstallService = new FakeStoreUninstallService();
 		_reviews = new FakeStoreInstallCounts();
+		_issues = new FakeStoreRepositoryIssueClient();
 		_controller = CreateController(new FakeStoreRegistryRefresher(),
 			new StoreRegistryRefreshTracker(TimeProvider.System));
 	}
@@ -95,7 +99,8 @@ internal sealed class StoreControllerTests
 			new StoreUpdateBatchInstaller(_installCoordinator),
 			new StoreCatalogPopularity(_catalogQuery, _reviews),
 			new StoreSimilarPackages(_catalogQuery, _reviews),
-			new StoreLinkResolver(_catalog, StoreRegistryOptions.Default))
+			new StoreLinkResolver(_catalog, StoreRegistryOptions.Default),
+			new StoreRepositoryIssueService(_issues, TimeProvider.System))
 		{
 			ControllerContext = new ControllerContext
 			{
@@ -811,6 +816,136 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
+	public void Each_version_carries_the_dependency_list_it_published_in_the_wire_shape()
+	{
+		SeedPluginVersions(dependencies: new StoreDependencyList
+		{
+			Ecosystem = "npm",
+			SdkVersion = "10.0.401",
+			Frameworks =
+			[
+				new StoreDependencyFramework
+				{
+					Framework = "net10.0",
+					Packages =
+					[
+						new StoreDependencyPackage
+							{ Id = "MacroDeck.Sdk", Version = "3.0.0", RequestedVersion = "3.0.0", Direct = true },
+						new StoreDependencyPackage { Id = "Serilog", Version = "4.4.0" }
+					]
+				}
+			]
+		});
+
+		var history = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.History;
+
+		var json = JsonSerializer.SerializeToElement(history, JsonSerializerOptions.Web);
+		var dependencies = json[0].GetProperty("dependencies");
+		var packages = dependencies.GetProperty("frameworks")[0].GetProperty("packages");
+		Assert.Multiple(() =>
+		{
+			Assert.That(dependencies.GetProperty("ecosystem").GetString(), Is.EqualTo("npm"));
+			Assert.That(dependencies.GetProperty("sdkVersion").GetString(), Is.EqualTo("10.0.401"));
+			Assert.That(dependencies.GetProperty("frameworks")[0].GetProperty("framework").GetString(),
+				Is.EqualTo("net10.0"));
+			Assert.That(packages.EnumerateArray()
+					.Select(package => (package.GetProperty("id").GetString(),
+						package.GetProperty("version").GetString(),
+						package.GetProperty("requestedVersion").GetString(),
+						package.GetProperty("direct").GetBoolean())),
+				Is.EqualTo(new (string?, string?, string?, bool)[]
+				{
+					("MacroDeck.Sdk", "3.0.0", "3.0.0", true),
+					("Serilog", "4.4.0", null, false)
+				}));
+			Assert.That(json[1].GetProperty("dependencies").ValueKind, Is.EqualTo(JsonValueKind.Null));
+			Assert.That(json[2].GetProperty("dependencies").ValueKind, Is.EqualTo(JsonValueKind.Null));
+		});
+	}
+
+	[TestCase("https://github.com/acme/hue",
+		SourceCommit,
+		"v2.0.0",
+		"https://github.com/acme/hue/tree/" + SourceCommit)]
+	[TestCase("https://github.com/acme/hue.git",
+		null,
+		"release/v2.0.0+build",
+		"https://github.com/acme/hue/tree/release/v2.0.0%2Bbuild")]
+	[TestCase("https://gitlab.com/acme/hue", SourceCommit, "v2.0.0", null)]
+	[TestCase(null, SourceCommit, "v2.0.0", null)]
+	public void A_version_links_to_the_repository_at_the_commit_or_tag_it_was_built_from(
+		string? repository,
+		string? commit,
+		string? tag,
+		string? expectedSourceUrl)
+	{
+		SeedPluginVersions(repository: repository, source: new StoreVersionSource { Commit = commit, Tag = tag });
+
+		var history = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.History;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(history[0].SourceUrl, Is.EqualTo(expectedSourceUrl));
+			Assert.That(history[0].Installable, Is.True);
+		});
+	}
+
+	[Test]
+	public void A_version_without_a_source_reference_has_no_source_link()
+	{
+		SeedPluginVersions(repository: "https://github.com/acme/hue");
+
+		var history = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.History;
+
+		Assert.That(history.Select(entry => entry.SourceUrl), Has.All.Null);
+	}
+
+	[Test]
+	public async Task Open_issues_are_read_from_the_repository_the_catalog_entry_names()
+	{
+		SeedPluginVersions(repository: "https://github.com/acme/hue");
+		_issues.Next = new StoreRepositoryIssueFetch
+		{
+			Status = StoreRepositoryIssueFetchStatus.Ok,
+			Issues =
+			[
+				new StoreRepositoryIssue
+					{ Number = 4, Title = "Bridge offline", Url = "https://github.com/acme/hue/issues/4", Comments = 2 }
+			]
+		};
+
+		var response = await _controller.GetIssues(StoreExtensionKind.Plugin, PluginId, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_issues.Requested.Select(repository => (repository.Owner, repository.Name)),
+				Is.EqualTo(new[] { ("acme", "hue") }));
+			Assert.That(response.Issues.Select(issue => (issue.Number, issue.Title, issue.Comments)),
+				Is.EqualTo(new[] { (4, "Bridge offline", 2) }));
+			Assert.That(response.OpenCount, Is.EqualTo(1));
+			Assert.That(response.NewIssueUrl, Is.EqualTo("https://github.com/acme/hue/issues/new"));
+			Assert.That(response.Error, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_package_the_catalog_does_not_know_or_that_names_no_repository_has_no_issues_to_read()
+	{
+		SeedPluginVersions();
+
+		var unknown = await _controller.GetIssues(StoreExtensionKind.Plugin, "com.acme.other", CancellationToken.None);
+		var withoutRepository
+			= await _controller.GetIssues(StoreExtensionKind.Plugin, PluginId, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unknown.Error, Is.EqualTo(StoreRepositoryIssuesError.NoRepository));
+			Assert.That(withoutRepository.Error, Is.EqualTo(StoreRepositoryIssuesError.NoRepository));
+			Assert.That(_issues.Requested, Is.Empty);
+		});
+	}
+
+	[Test]
 	public void No_version_of_a_package_this_platform_cannot_run_is_installable()
 	{
 		SeedPluginVersions(supportedRids: ["plan9-sparc"]);
@@ -974,7 +1109,10 @@ internal sealed class StoreControllerTests
 		string[]? screenshots = null,
 		string[]? supportedRids = null,
 		IReadOnlyList<StoreRemovedPackage>? removed = null,
-		StoreExtensionKind kind = StoreExtensionKind.Plugin)
+		StoreExtensionKind kind = StoreExtensionKind.Plugin,
+		string? repository = null,
+		StoreDependencyList? dependencies = null,
+		StoreVersionSource? source = null)
 	{
 		StoreReleaseManifest Release(string version, long size)
 		{
@@ -998,6 +1136,7 @@ internal sealed class StoreControllerTests
 					Id = PluginId,
 					Name = "Hue Bridge",
 					LatestVersion = "2.0.0",
+					Repository = repository,
 					SupportedRids = supportedRids ?? [],
 					LatestRelease = Release("2.0.0", 200) with
 					{
@@ -1013,7 +1152,14 @@ internal sealed class StoreControllerTests
 					Releases = [Release("2.0.0", 200), Release("1.0.0", 100)],
 					History =
 					[
-						new StoreVersionHistoryEntry { Version = "2.0.0", Size = 200, HasRelease = true },
+						new StoreVersionHistoryEntry
+						{
+							Version = "2.0.0",
+							Size = 200,
+							HasRelease = true,
+							Dependencies = dependencies,
+							Source = source
+						},
 						new StoreVersionHistoryEntry { Version = "1.5.0" },
 						new StoreVersionHistoryEntry { Version = "1.0.0", Size = 100, HasRelease = true }
 					]
@@ -1152,6 +1298,23 @@ internal sealed class FakeStoreUninstallService : IStoreUninstallService
 		string packageId,
 		CancellationToken cancellationToken = default)
 	{
+		return Task.FromResult(Next);
+	}
+}
+
+internal sealed class FakeStoreRepositoryIssueClient : IStoreRepositoryIssueClient
+{
+	public StoreRepositoryIssueFetch Next { get; set; }
+		= new() { Status = StoreRepositoryIssueFetchStatus.Unavailable };
+
+	public List<StoreRepository> Requested { get; } = [];
+
+	public Task<StoreRepositoryIssueFetch> GetOpenIssues(
+		StoreRepository repository,
+		string? etag,
+		CancellationToken cancellationToken)
+	{
+		Requested.Add(repository);
 		return Task.FromResult(Next);
 	}
 }

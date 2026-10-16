@@ -52,6 +52,83 @@ describe('SegmentedControlComponent', () => {
     expect(values).toEqual([]);
   });
 
+  it('stays a group of pressed buttons by default, outside the tab order rules', () => {
+    const group = fixture.nativeElement.querySelector('.seg') as HTMLElement;
+    expect(group.getAttribute('role')).toBe('group');
+    expect(optionButtons().map(button => button.getAttribute('aria-pressed'))).toEqual(['true', 'false']);
+    expect(optionButtons().some(button => button.hasAttribute('role') || button.hasAttribute('tabindex'))).toBeFalse();
+  });
+
+  describe('as a tab list', () => {
+    beforeEach(async () => {
+      fixture.componentRef.setInput('tablist', true);
+      fixture.componentRef.setInput('idPrefix', 'demo');
+      fixture.componentRef.setInput('options', [
+        { value: 'a', label: 'A' },
+        { value: 'b', label: 'B', badge: '3' },
+        { value: 'c', label: 'C' },
+      ]);
+      await fixture.whenStable();
+    });
+
+    it('exposes tabs with the selected one in the tab order and tied to its panel', () => {
+      const group = fixture.nativeElement.querySelector('.seg-items') as HTMLElement;
+      expect(group.getAttribute('role')).toBe('tablist');
+      const [first, second] = optionButtons();
+      expect(first.getAttribute('role')).toBe('tab');
+      expect(first.getAttribute('aria-selected')).toBe('true');
+      expect(first.getAttribute('tabindex')).toBe('0');
+      expect(first.getAttribute('aria-controls')).toBe('demo-panel-a');
+      expect(second.getAttribute('aria-selected')).toBe('false');
+      expect(second.getAttribute('tabindex')).toBe('-1');
+      expect(second.hasAttribute('aria-pressed')).toBeFalse();
+    });
+
+    it('lets assistive technology read the badge as part of the tab name', () => {
+      const badge = optionButtons()[1].querySelector('.seg-badge')!;
+      expect(badge.hasAttribute('aria-hidden')).toBeFalse();
+      expect(optionButtons()[1].hasAttribute('aria-label')).toBeFalse();
+    });
+
+    it('renders a link option as a link that reports every activation without becoming selected', async () => {
+      fixture.componentRef.setInput('options', [
+        { value: 'a', label: 'A' },
+        { value: 'code', label: 'Code', link: true },
+      ]);
+      await fixture.whenStable();
+      const values: string[] = [];
+      component.valueChange.subscribe(v => values.push(v));
+
+      const link = optionButtons()[1];
+      link.click();
+      link.click();
+
+      expect(link.getAttribute('role')).toBe('link');
+      expect(link.closest('[role="tablist"]')).toBeNull();
+      expect(link.hasAttribute('aria-selected')).toBeFalse();
+      expect(link.querySelector('.icon-external-link')).toBeTruthy();
+      expect(values).toEqual(['code', 'code']);
+    });
+
+    it('moves focus between tabs with the arrow, Home and End keys, wrapping at the ends', () => {
+      const buttons = optionButtons();
+      const group = fixture.nativeElement.querySelector('[role="tablist"]') as HTMLElement;
+      const press = (key: string) => group.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+
+      buttons[0].focus();
+      press('ArrowRight');
+      expect(document.activeElement).toBe(buttons[1]);
+      press('End');
+      expect(document.activeElement).toBe(buttons[2]);
+      press('ArrowRight');
+      expect(document.activeElement).toBe(buttons[0]);
+      press('ArrowLeft');
+      expect(document.activeElement).toBe(buttons[2]);
+      press('Home');
+      expect(document.activeElement).toBe(buttons[0]);
+    });
+  });
+
   it('toggles the stretch host class with the stretch input', async () => {
     const host = fixture.nativeElement as HTMLElement;
     expect(host.classList.contains('stretch')).toBeFalse();

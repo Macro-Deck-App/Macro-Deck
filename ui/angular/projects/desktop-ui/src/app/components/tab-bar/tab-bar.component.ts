@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { AppStrings, scrollActiveIntoView } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
+import { focusTabForKey } from '../../shared/util/tab-keyboard';
 import type { TabItem } from './tab-bar.model';
 
 @Component({
@@ -127,36 +128,8 @@ export class TabBarComponent implements OnChanges, AfterViewInit {
   }
 
   onKeydown(event: KeyboardEvent): void {
-    const key = event.key;
-    if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'Home' && key !== 'End') {
-      return;
-    }
-
     const bar = this.barRef?.nativeElement;
-    const buttons = bar ? Array.from(bar.querySelectorAll<HTMLButtonElement>('.tab-item')) : [];
-    if (buttons.length === 0) {
-      return;
-    }
-
-    const currentIndex = buttons.indexOf(document.activeElement as HTMLButtonElement);
-    let nextIndex: number;
-    switch (key) {
-      case 'ArrowLeft':
-        nextIndex = currentIndex <= 0 ? buttons.length - 1 : currentIndex - 1;
-        break;
-      case 'ArrowRight':
-        nextIndex = currentIndex === -1 || currentIndex === buttons.length - 1 ? 0 : currentIndex + 1;
-        break;
-      case 'Home':
-        nextIndex = 0;
-        break;
-      default: // 'End'
-        nextIndex = buttons.length - 1;
-        break;
-    }
-
-    event.preventDefault();
-    buttons[nextIndex].focus();
+    focusTabForKey(event, bar ? Array.from(bar.querySelectorAll<HTMLButtonElement>('.tab-item')) : []);
   }
 
   ensureActiveVisible(): void {

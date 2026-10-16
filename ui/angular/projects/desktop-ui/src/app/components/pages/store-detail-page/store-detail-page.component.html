@@ -39,60 +39,50 @@
         <div class="detail-columns">
           <section class="detail-overview">
             <div class="overview-block">
-              <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.OverviewHeading' | translate }}</h2>
-              @if (extension.longDescription || extension.description) {
-                <div class="overview-text">
-                  <shared-store-markdown [text]="extension.longDescription || extension.description || ''" />
-                </div>
-              } @else {
-                <p class="detail-empty">{{ 'macrodeck.app:Store.Page.NoDescription' | translate }}</p>
-              }
-            </div>
+              <shared-segmented-control
+                class="detail-tabs"
+                idPrefix="store-detail"
+                [tablist]="true"
+                [ariaLabel]="'macrodeck.app:Store.Page.Tabs.AriaLabel' | translate"
+                [options]="tabs()"
+                [value]="activeTab()"
+                (valueChange)="onTabChange($event)" />
 
-            @if (latestChangelogEntry(); as entry) {
-              <div class="overview-block">
-                <div class="block-heading-row">
-                  <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.WhatsNewHeading' | translate }}</h2>
-                  @if (hasVersionHistory()) {
-                    <shared-button variant="ghost" size="compact" (click)="openHistoryModal($event)">
-                      {{ 'macrodeck.app:Store.Page.AllVersionsAction' | translate:{ count: extension.history.length } }}
-                    </shared-button>
+              <div
+                class="detail-tab-panel"
+                role="tabpanel"
+                tabindex="0"
+                [attr.id]="'store-detail-panel-' + activeTab()"
+                [attr.aria-labelledby]="'store-detail-tab-' + activeTab()">
+                @switch (activeTab()) {
+                  @case ('dependencies') {
+                    <app-store-dependencies-panel [dependencies]="selectedDependencies()" />
                   }
-                </div>
-                <div class="whats-new">
-                  <div class="whats-new-meta">
-                    <span class="whats-new-version">{{ 'macrodeck.app:Store.Page.VersionLabel' | translate:{ version: entry.version } }}</span>
-                    @if (entry.releasedAt) {
-                      <span class="whats-new-date">{{ entry.releasedAt | date: 'mediumDate' }}</span>
-                    }
-                  </div>
-                  @if (entry.changelog) {
-                    <div class="whats-new-notes" [class.collapsed]="changelogIsLong() && !changelogExpanded()">
-                      <shared-store-markdown [text]="entry.changelog" />
-                    </div>
-                    @if (changelogIsLong()) {
-                      <button type="button" class="whats-new-toggle" [attr.aria-expanded]="changelogExpanded()" (click)="changelogExpanded.set(!changelogExpanded())">
-                        {{ (changelogExpanded() ? 'macrodeck.app:Store.Reviews.ShowLessAction' : 'macrodeck.app:Store.Reviews.ShowMoreAction') | translate }}
-                      </button>
-                    }
-                  } @else {
-                    <p class="detail-empty">{{ 'macrodeck.app:Store.Page.NoChangelog' | translate }}</p>
+                  @case ('issues') {
+                    <app-store-issues-panel [response]="issues()" (openUrl)="openExternal($event)" />
                   }
-                </div>
+                  @case ('versions') {
+                    <app-store-version-list
+                      [history]="versions()"
+                      [options]="versionOptions()"
+                      [selectedVersion]="effectiveVersion()"
+                      (selectVersion)="onVersionChange($event)" />
+                  }
+                  @default {
+                    @if (extension.longDescription || extension.description) {
+                      <div class="overview-text">
+                        <shared-store-markdown [text]="extension.longDescription || extension.description || ''" />
+                      </div>
+                    } @else {
+                      <p class="detail-empty">{{ 'macrodeck.app:Store.Page.NoDescription' | translate }}</p>
+                    }
+                  }
+                }
               </div>
-            }
+            </div>
 
             @if (!extension.withdrawal) {
               <app-store-reviews-section class="overview-block" [kind]="extension.kind" [id]="extension.id" [repository]="extension.repository ?? null" [publisher]="extension.publisher ?? null" />
-            }
-
-            @if (historyModalOpen()) {
-              <app-store-version-history-modal
-                [history]="extension.history"
-                [options]="versionOptions()"
-                [selectedVersion]="effectiveVersion()"
-                (selectVersion)="onHistoryVersionSelected($event)"
-                (closed)="onHistoryModalClosed()" />
             }
           </section>
 

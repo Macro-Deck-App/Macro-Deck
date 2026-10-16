@@ -17096,9 +17096,6 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>Alles</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>Alle versies ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Terug naar de store</value>
   </data>
@@ -17114,6 +17111,29 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>Link kopiëren</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>Directe afhankelijkheden</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>Deze versie heeft geen directe pakketafhankelijkheden.</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>Voor deze versie is geen lijst met afhankelijkheden gepubliceerd.</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>gevraagd {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>Gebouwd met .NET SDK {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>{count} transitief pakket</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>{count} transitieve pakketten</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Details</value>
@@ -17187,6 +17207,55 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Geïnstalleerde versie</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>{count} reactie</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>{count} reacties</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>Meldingen staan uit in de repository van dit pakket.</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>Dit pakket heeft geen openstaande meldingen.</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>Openstaande meldingen laden…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>Nieuwe melding</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>Dit pakket heeft geen GitHub-repository, dus de meldingen kunnen niet worden getoond.</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>De GitHub-repository van het pakket kon niet worden gevonden.</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>{count} openstaande melding</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>{count} openstaande meldingen</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>Meer dan {count} openstaande meldingen</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>door {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub beperkt op dit moment het aantal verzoeken. Probeer het over een paar minuten opnieuw.</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>De openstaande meldingen konden niet worden geladen.</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>Alles bekijken op GitHub</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>Alles</value>
@@ -17295,9 +17364,6 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>Instellingen openen</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>Overzicht</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: niet ondersteund</value>
@@ -17435,6 +17501,24 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Geïnstalleerd, {count} updates beschikbaar</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>Pakketdetails</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>Afhankelijkheden</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>Beschrijving</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>Meldingen</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>Versies</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Store-onderdelen</value>
   </data>
@@ -17476,9 +17560,6 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Versie</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>Versiegeschiedenis</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Versie {version}</value>
     <comment>[version:string]</comment>
@@ -17492,8 +17573,8 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>Deze versie is uit de store teruggetrokken.</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>Wat is er nieuw?</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>Versiepagina's</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>Uitgever geverifieerd</value>
