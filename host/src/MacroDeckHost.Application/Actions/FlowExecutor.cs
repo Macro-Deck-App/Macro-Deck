@@ -135,19 +135,10 @@ public sealed class FlowExecutor : IFlowExecutor
 			chain = chain.Append(VariableScope.Widget, ownerWidgetId.ToString());
 		}
 
-		var variableContext = await _variableRenderer.CreateContextAsync(chain);
-		if (request.EventParameters is { Count: > 0 })
-		{
-			variableContext = variableContext.WithEvent(request.EventParameters);
-		}
-
-		if (request.ScriptInputs is { Count: > 0 })
-		{
-			variableContext = variableContext.WithInputs(request.ScriptInputs);
-		}
-
 		var run = new FlowRun(request.ExecutionId,
-			variableContext,
+			chain,
+			request.EventParameters,
+			request.ScriptInputs,
 			request.OriginClientId,
 			request.OwnerWidgetId,
 			request.Origin,
@@ -303,7 +294,7 @@ public sealed class FlowExecutor : IFlowExecutor
 				await ExecuteIntegrationActionAsync(block, run, cancellationToken);
 				break;
 			case "delay":
-				await ExecuteDelayAsync(block, run.Variables, cancellationToken);
+				await ExecuteDelayAsync(block, await CurrentVariablesAsync(run), cancellationToken);
 				break;
 			case "condition":
 				await ExecuteConditionAsync(block, run, cancellationToken);
@@ -433,7 +424,9 @@ public sealed class FlowExecutor : IFlowExecutor
 			return;
 		}
 
-		var parameters = await BuildParameterDictionary(block.Parameters, run.Variables, action.Parameters);
+		var parameters = await BuildParameterDictionary(block.Parameters,
+			await CurrentVariablesAsync(run),
+			action.Parameters);
 		var stopwatch = Stopwatch.StartNew();
 		WidgetOptimisticStateIdentity? optimisticIdentity = null;
 		long optimisticGeneration = 0;
@@ -575,7 +568,7 @@ public sealed class FlowExecutor : IFlowExecutor
 			foreach (var branch in branches)
 			{
 				var kind = branch.Kind.ToLowerInvariant();
-				if (kind == "else" || EvaluateCondition(branch.Condition, run.Variables))
+				if (kind == "else" || EvaluateCondition(branch.Condition, await CurrentVariablesAsync(run)))
 				{
 					await ExecuteBlocksAsync(branch.Children, run, cancellationToken);
 					return;
@@ -589,14 +582,15 @@ public sealed class FlowExecutor : IFlowExecutor
 		FlowRun run,
 		CancellationToken cancellationToken)
 	{
-		var subjectAvailable = _conditionEvaluator.ResolveSide(block.Subject, run.Variables).Value is not null;
+		var variables = await CurrentVariablesAsync(run);
+		var subjectAvailable = _conditionEvaluator.ResolveSide(block.Subject, variables).Value is not null;
 		foreach (var branch in block.Branches ?? [])
 		{
 			var kind = branch.Kind.ToLowerInvariant();
 			if (kind == "else"
 				|| kind == "case"
 				&& subjectAvailable
-				&& _conditionEvaluator.Evaluate(block.Subject, "==", branch.Value, run.Variables))
+				&& _conditionEvaluator.Evaluate(block.Subject, "==", branch.Value, variables))
 			{
 				await ExecuteBlocksAsync(branch.Children, run, cancellationToken);
 				return;
@@ -612,9 +606,8 @@ public sealed class FlowExecutor : IFlowExecutor
 		switch (block.BlockType)
 		{
 			case "repeatLoop":
-				var count = Math.Clamp((int)Math.Round(await GetNumberParameter(block, "count", run.Variables) ?? 0),
-					0,
-					10_000);
+				var repeatCount = await GetNumberParameter(block, "count", await CurrentVariablesAsync(run));
+				var count = Math.Clamp((int)Math.Round(repeatCount ?? 0), 0, 10_000);
 				for (var i = 0; i < count; i++)
 				{
 					cancellationToken.ThrowIfCancellationRequested();
@@ -631,7 +624,8 @@ public sealed class FlowExecutor : IFlowExecutor
 				break;
 			case "whileLoop":
 				var iterations = 0;
-				while (EvaluateCondition(block.Condition, run.Variables) && iterations++ < MaxWhileIterations)
+				while (EvaluateCondition(block.Condition, await CurrentVariablesAsync(run))
+					&& iterations++ < MaxWhileIterations)
 				{
 					cancellationToken.ThrowIfCancellationRequested();
 					try
@@ -674,6 +668,22 @@ public sealed class FlowExecutor : IFlowExecutor
 		}
 
 		return _conditionEvaluator.EvaluateExpression(condition, variables);
+	}
+
+	private async Task<VariableContext> CurrentVariablesAsync(FlowRun run)
+	{
+		var variables = await _variableRenderer.CreateContextAsync(run.VariableChain);
+		if (run.EventParameters is { Count: > 0 })
+		{
+			variables = variables.WithEvent(run.EventParameters);
+		}
+
+		if (run.ScriptInputs is { Count: > 0 })
+		{
+			variables = variables.WithInputs(run.ScriptInputs);
+		}
+
+		return variables;
 	}
 
 	private async Task<Dictionary<string, object>> BuildParameterDictionary(
@@ -964,7 +974,9 @@ public sealed class FlowExecutor : IFlowExecutor
 
 		public FlowRun(
 			Guid executionId,
-			VariableContext variables,
+			VariableScopeChain variableChain,
+			IReadOnlyDictionary<string, object?>? eventParameters,
+			IReadOnlyDictionary<string, object?>? scriptInputs,
 			string? originClientId,
 			Guid? ownerWidgetId,
 			ExecutionOrigin origin,
@@ -975,7 +987,9 @@ public sealed class FlowExecutor : IFlowExecutor
 			ScriptId = scriptId;
 			AutomationId = automationId;
 			ExecutionId = executionId;
-			Variables = variables;
+			VariableChain = variableChain;
+			EventParameters = eventParameters;
+			ScriptInputs = scriptInputs;
 			OriginClientId = originClientId;
 			OwnerWidgetId = ownerWidgetId;
 			Origin = origin;
@@ -983,7 +997,9 @@ public sealed class FlowExecutor : IFlowExecutor
 		}
 
 		public Guid ExecutionId { get; }
-		public VariableContext Variables { get; }
+		public VariableScopeChain VariableChain { get; }
+		public IReadOnlyDictionary<string, object?>? EventParameters { get; }
+		public IReadOnlyDictionary<string, object?>? ScriptInputs { get; }
 		public string? OriginClientId { get; }
 		public Guid? OwnerWidgetId { get; }
 		public string? ScriptId { get; }
