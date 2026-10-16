@@ -57,15 +57,33 @@ function drag(fixture: ComponentFixture<WidgetIconDisplayControlComponent>, dx: 
 }
 
 describe('WidgetIconDisplayControlComponent editor mode', () => {
-  it('previews the icon in the icon colour with the same framing', () => {
+  it('previews the icon in the icon colour on the image itself, with the same framing', () => {
     const { fixture } = createFixture({ previewTint: '#ef4444', display: { opacity: 50, fit: 'cover' } });
-    const tint = fixture.nativeElement.querySelector('.idc-tint') as HTMLElement;
+    const image = fixture.nativeElement.querySelector('img.idc-image') as HTMLImageElement;
 
-    expect(fixture.nativeElement.querySelector('img.idc-image')).toBeNull();
-    expect(tint.style.backgroundColor).toBe('rgb(239, 68, 68)');
-    expect(tint.style.getPropertyValue('mask-image') || tint.style.getPropertyValue('-webkit-mask-image'))
-      .toContain('https://host.invalid/icon');
-    expect(tint.style.opacity).toBe('0.5');
+    expect(fixture.nativeElement.querySelector('.idc-tint')).toBeNull();
+    expect(image.style.filter.replace(/"/g, '')).toBe('url(#macro-deck-tint-ef4444)');
+    expect(document.querySelector('#macro-deck-tint-ef4444 feFlood')!.getAttribute('flood-color')).toBe('rgb(239, 68, 68)');
+    expect(image.style.opacity).toBe('0.5');
+    expect(image.style.objectFit).toBe('cover');
+
+    fixture.destroy();
+    expect(document.getElementById('macro-deck-tint-ef4444')).toBeNull();
+  });
+
+  it('keeps the same image when the icon colour comes and goes', () => {
+    const { fixture } = createFixture();
+    const image = fixture.nativeElement.querySelector('img.idc-image') as HTMLImageElement;
+
+    for (const tint of ['#ef4444', '#22c55e', undefined, '#22c55e']) {
+      fixture.componentRef.setInput('previewTint', tint);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('img.idc-image')).toBe(image);
+    }
+    expect(document.getElementById('macro-deck-tint-ef4444')).toBeNull();
+
+    fixture.destroy();
+    expect(document.getElementById('macro-deck-tint-22c55e')).toBeNull();
   });
 
   it('shows the icon in its own colours without an icon colour', () => {

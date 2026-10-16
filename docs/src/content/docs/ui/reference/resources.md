@@ -36,6 +36,32 @@ looking like whatever sits behind it. Both are multipliers where absent means `1
 first and then saturation; the saturation result is normative down to its luma coefficients, since two
 readers using different ones desaturate the same image to different greys.
 
+## Animated pictures
+
+A GIF or a WebP can move, and every reader plays it on the timeline the file states:
+
+- **Each frame shows for its own delay.** A delay of 10 ms or less shows for 100 ms, in GIF and WebP alike,
+  which is what every browser does.
+- **The file says how often it plays.** A GIF without a loop extension plays once, a GIF loop count of N plays
+  N + 1 times and 0 plays for ever; a WebP plays its loop count, 0 for ever. A picture that stops holds its
+  last frame.
+- **The timeline holds.** A frame that could not be drawn in time is skipped rather than shown late, so a
+  busy device, its refresh rate or a redraw of something else never slows a picture down or speeds it up.
+- **A picture starts at its first frame** when it starts being shown while no element of the reader shows
+  it: when its node first draws it, when `Source` changes to it, and when the deck comes back to its folder.
+- **The look never restarts it.** `Tint`, `Opacity`, `Brightness`, `Saturation`, `Zoom`, `OffsetX`,
+  `OffsetY` and `Fit` change how the picture is drawn, never where its play stands. A zoom large enough to
+  need a larger rendition of an icon loads another file, which a web reader shows as a new picture from its
+  first frame, and a browser engine that can only mask draws `Tint` on a second image with a play of its own.
+
+Whether a second element joins the play of a picture already on screen or starts its own is the reader's:
+the Companion app starts each one at its first frame, a web reader leaves it to its browser engine. The
+Companion app also plays an animated WebP on Android with the platform's own player, which follows the
+display rather than this timeline: after a stall it carries on rather than catching up, and before Android
+14 it shows frames of 10 ms or less at the display's rate. The files in
+[`ui-model/fixtures/animated-images`](https://github.com/Macro-Deck-App/Macro-Deck/tree/main/ui-model/fixtures/animated-images)
+pin these rules, with every frame composited.
+
 ## Registering your own images
 
 ```csharp

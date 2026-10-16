@@ -1,6 +1,19 @@
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AppStrings, DEFAULT_ICON_DISPLAY, ICON_DISPLAY_LIMITS, WidgetIconDisplay, WidgetIconFit, iconDisplayStyle, resolveIconDisplay } from '@macro-deck/runtime';
+import {
+  AppStrings,
+  DEFAULT_ICON_DISPLAY,
+  ICON_DISPLAY_LIMITS,
+  WidgetIconDisplay,
+  WidgetIconFit,
+  createTintFilterHold,
+  holdTintFilter,
+  iconDisplayStyle,
+  releaseTintFilter,
+  resolveIconDisplay,
+  supportsFilterTint,
+} from '@macro-deck/runtime';
 import { ButtonComponent, InputComponent, LocalizationService, SegmentedControlComponent, SegmentedOption, TranslatePipe } from '@shared';
 
 export type WidgetIconDisplayField = 'fit' | 'zoom' | 'offsetX' | 'offsetY' | 'opacity';
@@ -17,7 +30,7 @@ const WHEEL_ZOOM_STEP = 10;
   templateUrl: './widget-icon-display-control.component.html',
   styleUrls: ['./widget-icon-display-control.component.scss'],
 })
-export class WidgetIconDisplayControlComponent implements OnChanges {
+export class WidgetIconDisplayControlComponent implements OnChanges, OnDestroy {
   @Input() display: WidgetIconDisplay | undefined;
   @Input() actionMode = false;
   @Input() aspectRatio = 1;
@@ -32,6 +45,9 @@ export class WidgetIconDisplayControlComponent implements OnChanges {
   @ViewChild('frame') private frame?: ElementRef<HTMLElement>;
 
   private readonly localization = inject(LocalizationService);
+  private readonly document = inject(DOCUMENT);
+  private readonly tintFilter = createTintFilterHold();
+  private tintFilterReference: string | null = null;
 
   protected readonly limits = ICON_DISPLAY_LIMITS;
 
@@ -65,6 +81,20 @@ export class WidgetIconDisplayControlComponent implements OnChanges {
     if (changes['display']) {
       this.pending = null;
     }
+    if (changes['previewTint']) {
+      const tint = this.previewTint && /^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(this.previewTint) && supportsFilterTint()
+        ? this.previewTint
+        : null;
+      this.tintFilterReference = holdTintFilter(this.tintFilter, this.document, tint);
+    }
+  }
+
+  ngOnDestroy(): void {
+    releaseTintFilter(this.tintFilter);
+  }
+
+  protected get masksTint(): boolean {
+    return !!this.previewTint && this.tintFilterReference === null;
   }
 
   private get current(): WidgetIconDisplay | undefined {
@@ -95,7 +125,8 @@ export class WidgetIconDisplayControlComponent implements OnChanges {
   }
 
   protected get previewStyle(): Record<string, string> {
-    return iconDisplayStyle(this.current);
+    const style = iconDisplayStyle(this.current);
+    return this.tintFilterReference === null ? style : { ...style, filter: this.tintFilterReference };
   }
 
   protected get tintStyle(): Record<string, string> {

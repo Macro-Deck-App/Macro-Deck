@@ -115,7 +115,11 @@ An image is `size` on both axes, fitted into a square box. Along its parent stac
 - `saturation` is normative: `out = luma + saturation * (channel - luma)`, with
   `luma = 0.213 R + 0.715 G + 0.072 B`, applied after `brightness`.
 - `tint` is normative: every pixel takes the colour and keeps its own alpha, then `opacity` applies. A reader
-  that does not implement the key, or whose engine cannot mask, draws the image in its own colours.
+  that does not implement the key, or whose engine can neither filter nor mask, draws the image in its own
+  colours.
+- An animated image follows [Animated pictures](/ui/reference/resources/#animated-pictures): its own timeline,
+  never restarted by a change of `tint`, `opacity`, `brightness`, `saturation` or `zoom`. An engine that can
+  only mask draws `tint` on a second image, whose play is its own.
 
 ## See also
 

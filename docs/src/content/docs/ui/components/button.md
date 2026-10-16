@@ -66,7 +66,9 @@ a rebuilt subtree. `hue-shift` and `rgb` rings cycle their own colours and ignor
 `Tint = "#4f8cff"` draws the artwork as a silhouette in that colour: every pixel keeps its own
 transparency, so a white icon on a transparent background becomes a blue icon, while an image without
 transparency becomes a solid rectangle. A reader that does not know `tint` draws the artwork in its own
-colours, and so does one whose engine cannot mask. Tint is unrelated to the press feedback.
+colours, and so does one whose engine can neither filter nor mask. The tint is drawn on the artwork itself,
+so changing it does not restart an animated picture, except on an engine that can only mask, where the mask is
+a second image with a play of its own. Tint is unrelated to the press feedback.
 
 ## Filling the tile
 
@@ -149,6 +151,8 @@ box among its children. On its parent's main axis a button follows the ordinary 
   `fit`, `zoom`, `offsetX`, `offsetY`, `opacity`, `brightness`, `saturation` or `tint` values keeps the outgoing
   artwork drawn with its own values until the incoming artwork can be drawn, then switches the artwork and its
   values in the same frame. A new value for an unchanged `source` applies at once.
+- **Animated artwork** follows [Animated pictures](/ui/reference/resources/#animated-pictures): its own
+  timeline, never restarted by a change of its look.
 - **Transparent face:** a `background` of `transparent` paints nothing instead of the accent colour. On a
   button that is the widget's root, draw the tile without its face fill and shadow too. Any other value
   that is not `#rrggbb` still falls back to the accent colour, and a modifier's `background` stays

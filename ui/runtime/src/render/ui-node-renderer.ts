@@ -213,6 +213,14 @@ function renderInScope(
     delete parts[name];
   }
 
+  function renamePart(from: string, to: string): void {
+    const element = parts[from];
+    if (element === undefined) return;
+    if (parts[to] !== undefined && parts[to] !== element) dropPart(to);
+    delete parts[from];
+    parts[to] = element;
+  }
+
   function containerOf(entry: { box: UiComponentBox; container?: number | null }): number | null {
     return entry.container === undefined ? boxExtent(entry.box.width, entry.box.height) : entry.container;
   }
@@ -367,6 +375,7 @@ function renderInScope(
     sizeTo,
     part,
     dropPart,
+    renamePart,
     syncChildren,
     keepFit,
     onSettled: listener => scope.onSettled(listener),

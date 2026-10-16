@@ -512,6 +512,13 @@ export {
 } from './ui-components/style';
 export { reloadFailedImages } from './ui-components/image-recovery';
 export {
+  createTintFilterHold,
+  holdTintFilter,
+  releaseTintFilter,
+  supportsFilterTint,
+  type TintFilterHold,
+} from './ui-components/artwork-tint';
+export {
   browserLockEnvironment,
   type CrossTabLockEnvironment,
   type CrossTabLockStorage,

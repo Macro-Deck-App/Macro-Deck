@@ -10,10 +10,21 @@ import {
   releaseArtworkCrossfade,
   showsBitmap,
   swapArtwork,
+  takePromotion,
 } from './artwork-crossfade';
 import { px } from './px.util';
 import { setImageSource } from './image-recovery';
-import { maskImageUrl, repaintOnLoad, supportsMasks } from './artwork-tint';
+import {
+  createTintFilterHold,
+  holdTintFilter,
+  maskImageUrl,
+  releaseTintFilter,
+  repaintOnLoad,
+  supportsFilterTint,
+  supportsMasks,
+  TintFilterHold,
+  withTintFilter,
+} from './artwork-tint';
 
 interface ImageArtworkLook {
   transform: string;
@@ -24,6 +35,7 @@ interface ImageArtworkLook {
 
 export interface UiImageState {
   artwork: ArtworkCrossfadeState<ImageArtworkLook>;
+  tintFilter: TintFilterHold;
 }
 
 export const uiImageComponent: UiComponentDefinition<UiImageState> = {
@@ -34,7 +46,7 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
   },
 
   createState(): UiImageState {
-    return { artwork: createArtworkCrossfadeState() };
+    return { artwork: createArtworkCrossfadeState(), tintFilter: createTintFilterHold() };
   },
 
   paint(node, ctx) {
@@ -48,7 +60,7 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
       nodeResource(node, UiComponentProperties.Source),
       edge !== undefined && edge > 0 ? { displayPx: edge * buttonZoom(node) } : undefined);
     const state = ctx.state.artwork;
-    const tint = supportsMasks() ? nodeHexColor(node, UiComponentProperties.Tint) ?? null : null;
+    const tint = supportsFilterTint() || supportsMasks() ? nodeHexColor(node, UiComponentProperties.Tint) ?? null : null;
     const look: ImageArtworkLook = {
       transform: buttonArtworkTransform(node),
       filter: artworkFilter(node),
@@ -61,18 +73,24 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
       if (state.settled === null) {
         ctx.dropPart('image');
         ctx.dropPart('image-tint');
+        releaseTintFilter(ctx.state.tintFilter);
       } else {
         const image = ctx.part('image', 'img') as HTMLImageElement;
+        ctx.setClassName(image, '');
         ctx.setAttribute(image, 'alt', '');
         ctx.setAttribute(image, 'draggable', 'false');
+        ctx.setAttribute(image, 'aria-hidden', null);
+        ctx.setStyle(image, '--widget-artwork-opacity', null);
         ctx.setStyle(image, 'width', px(edge));
         ctx.setStyle(image, 'height', px(edge));
         ctx.setStyle(image, 'transform', settledLook.transform);
-        ctx.setStyle(image, 'filter', settledLook.filter);
         setImageSource(image, state.settled);
-        // The mask fetch has no retry of its own, so the untinted image stays until it has loaded.
         const settledTint = settledLook.tint;
-        const tinted = settledTint !== null && image.complete && image.naturalWidth > 0;
+        const filterTint = settledTint !== null && supportsFilterTint();
+        const tintFilter = holdTintFilter(ctx.state.tintFilter, image.ownerDocument, filterTint ? settledTint : null);
+        ctx.setStyle(image, 'filter', withTintFilter(tintFilter, settledLook.filter));
+        // The mask fetch has no retry of its own, so the untinted image stays until it has loaded.
+        const tinted = !filterTint && settledTint !== null && image.complete && image.naturalWidth > 0;
         ctx.setStyle(image, 'opacity', tinted ? '0' : String(settledLook.opacity));
         if (tinted) {
           const layer = ctx.part('image-tint', 'div') as HTMLElement;
@@ -86,7 +104,7 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
           ctx.setStyle(layer, 'filter', settledLook.filter);
         } else {
           ctx.dropPart('image-tint');
-          if (settledTint !== null) repaintOnLoad(image, ctx);
+          if (settledTint !== null && !filterTint) repaintOnLoad(image, ctx);
         }
       }
 
@@ -109,6 +127,10 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
       }
     };
 
+    if (takePromotion(state)) {
+      ctx.dropPart('image');
+      ctx.renamePart('image-incoming', 'image');
+    }
     const outgoing = state.settled === null ? null : ctx.part('image', 'img') as HTMLImageElement;
     swapArtwork(state, source, look, artworkCrossfades(node) && tint === null, showsBitmap(outgoing),
       () => ctx.repaint());
@@ -117,6 +139,7 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
 
   release(ctx) {
     releaseArtworkCrossfade(ctx.state.artwork);
+    releaseTintFilter(ctx.state.tintFilter);
   },
 
   intrinsicMainPx(node, m) {

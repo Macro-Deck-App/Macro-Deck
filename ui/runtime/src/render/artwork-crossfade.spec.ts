@@ -353,24 +353,52 @@ describe('artwork crossfade', () => {
     expect(sources()[0]).toContain('first');
     expect(sources()[1]).toContain('second');
 
+    const incoming = images()[1];
     jasmine.clock().tick(CROSSFADE_PROMOTE_MS);
     settleFrames();
 
     expect(sources().length).toBe(1);
     expect(sources()[0]).toContain('second');
+    expect(images()[0]).toBe(incoming);
   });
 
-  it('keeps the overlay through the promotion handover when the node repaints', () => {
-    const mounted = mount(imageNode('first', 'crossfade'));
-    mounted.update(imageNode('second', 'crossfade'), box, null);
+  it('hands the faded-in element over as the settled one, so an animated picture is not started over', () => {
+    const mounted = mount(imageNode('first', 'crossfade', { [UiComponentProperties.Opacity]: 0.7 }));
+    mounted.update(imageNode('second', 'crossfade', { [UiComponentProperties.Opacity]: 0.7 }), box, null);
     created[0].load();
+    const incoming = images()[1];
+
     jasmine.clock().tick(CROSSFADE_PROMOTE_MS);
-
-    mounted.update(imageNode('second', 'crossfade'), box, null);
-
-    expect(sources().length).toBe(2);
     settleFrames();
-    expect(sources()).toEqual(['/api/ui/resources/second']);
+    mounted.update(imageNode('second', 'crossfade', { [UiComponentProperties.Opacity]: 0.7 }), box, null);
+
+    expect(images()).toEqual([incoming]);
+    expect(incoming.getAttribute('src')).toBe('/api/ui/resources/second');
+    expect(incoming.className).toBe('');
+    expect(incoming.getAttribute('aria-hidden')).toBeNull();
+    expect(incoming.style.opacity).toBe('0.7');
+    expect(incoming.style.getPropertyValue('--widget-artwork-opacity')).toBe('');
+  });
+
+  it('hands a button\'s faded-in artwork over as its settled artwork and fades the next one in above it', () => {
+    const mounted = mount({ ...buttonNode('first', 1), properties: { ...buttonNode('first', 1).properties, [UiComponentProperties.Transition]: 'crossfade' } } as UiNode);
+    const crossfading = (resourceId: string) =>
+      ({ ...buttonNode(resourceId, 1), properties: { ...buttonNode(resourceId, 1).properties, [UiComponentProperties.Transition]: 'crossfade' } }) as UiNode;
+    mounted.update(crossfading('second'), box, null);
+    created[0].load();
+    const incoming = images()[1];
+
+    jasmine.clock().tick(CROSSFADE_PROMOTE_MS);
+    settleFrames();
+
+    expect(images()).toEqual([incoming]);
+    expect(incoming.className).toBe('widget-button-artwork');
+
+    showBitmaps();
+    mounted.update(crossfading('third'), box, null);
+    created[1].load();
+    expect(images()[0]).toBe(incoming);
+    expect(images()[1].className).toContain('widget-artwork-incoming');
   });
 
   it('eases the outgoing layer with the current brightness while it fades out', () => {
