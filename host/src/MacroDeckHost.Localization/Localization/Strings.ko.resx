@@ -9339,6 +9339,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Spotify.Config.RedirectUriLabel" xml:space="preserve">
     <value>리디렉션 URI</value>
   </data>
+  <data name="Integrations.Spotify.Config.SpotifyUnreachable" xml:space="preserve">
+    <value>Spotify에 연결할 수 없거나 제시간에 응답하지 않았습니다. 인터넷 연결을 확인하고 계속을 눌러 다시 로그인하세요.</value>
+  </data>
   <data name="Integrations.Spotify.Config.TokenExchangeFailed" xml:space="preserve">
     <value>인증 코드를 교환할 수 없습니다. 클라이언트 ID와 비밀 값을 확인한 다음 다시 시도하세요.</value>
   </data>

@@ -9339,6 +9339,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Spotify.Config.RedirectUriLabel" xml:space="preserve">
     <value>Redirect URI</value>
   </data>
+  <data name="Integrations.Spotify.Config.SpotifyUnreachable" xml:space="preserve">
+    <value>Spotify could not be reached or did not respond in time. Check your internet connection, then continue to sign in again.</value>
+  </data>
   <data name="Integrations.Spotify.Config.TokenExchangeFailed" xml:space="preserve">
     <value>Could not exchange the authorization code. Check the Client ID/Secret and try again.</value>
   </data>

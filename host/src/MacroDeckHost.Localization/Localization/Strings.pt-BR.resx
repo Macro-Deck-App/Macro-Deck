@@ -9339,6 +9339,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Integrations.Spotify.Config.RedirectUriLabel" xml:space="preserve">
     <value>URI de redirecionamento</value>
   </data>
+  <data name="Integrations.Spotify.Config.SpotifyUnreachable" xml:space="preserve">
+    <value>Não foi possível acessar o Spotify ou ele não respondeu a tempo. Verifique sua conexão com a internet e continue para entrar novamente.</value>
+  </data>
   <data name="Integrations.Spotify.Config.TokenExchangeFailed" xml:space="preserve">
     <value>Não foi possível trocar o código de autorização. Verifique o ID e o Segredo do cliente e tente novamente.</value>
   </data>

@@ -9338,6 +9338,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Spotify.Config.RedirectUriLabel" xml:space="preserve">
     <value>URI przekierowania</value>
   </data>
+  <data name="Integrations.Spotify.Config.SpotifyUnreachable" xml:space="preserve">
+    <value>Nie udało się połączyć ze Spotify lub Spotify nie odpowiedział na czas. Sprawdź połączenie z internetem i kliknij Dalej, aby zalogować się ponownie.</value>
+  </data>
   <data name="Integrations.Spotify.Config.TokenExchangeFailed" xml:space="preserve">
     <value>Nie udało się wymienić kodu autoryzacji. Sprawdź identyfikator klienta / tajny klucz i spróbuj ponownie.</value>
   </data>

@@ -233,6 +233,14 @@ Vesktop, Equibop, Legcord or Dorion can share game activity, but Macro Deck cann
 Start the official Discord desktop app, including the Flatpak or Snap version on Linux, and try
 again. The third-party client can keep running alongside it.
 
+## Spotify sign-in says Spotify could not be reached
+
+After you log in to Spotify, the setup says **Spotify could not be reached or did not respond in time**.
+Macro Deck could not finish the sign-in with Spotify, usually because the internet connection dropped or a
+firewall, proxy or VPN blocks `accounts.spotify.com`. Check the connection and choose **Continue**: Macro Deck
+opens the Spotify login again and finishes the sign-in with it. If a proxy blocks the request, see
+[A reverse proxy or firewall blocks a connection to a service](#a-reverse-proxy-or-firewall-blocks-a-connection-to-a-service).
+
 ## Google Calendar asks you to sign in again
 
 **Integrations** shows **Google sign-in expired** for an account, and calendar widgets say **Some

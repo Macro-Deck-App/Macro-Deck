@@ -17,6 +17,10 @@ internal sealed class FakeSpotifyOAuthClient : ISpotifyOAuthClient
 
 	public List<string> UsedRefreshTokens { get; } = [];
 
+	public Queue<Func<CancellationToken, Task<SpotifyAuthorizedToken>>> Exchanges { get; } = new();
+
+	public List<string> ExchangedCodes { get; } = [];
+
 	public async Task<SpotifyRefreshedToken> RefreshAsync(
 		string clientId,
 		string clientSecret,
@@ -48,6 +52,29 @@ internal sealed class FakeSpotifyOAuthClient : ISpotifyOAuthClient
 		return scripted is not null
 			? scripted()
 			: new SpotifyRefreshedToken($"access-{attempt}", $"refresh-{attempt}", 3600);
+	}
+
+	public Task<SpotifyAuthorizedToken> ExchangeCodeAsync(
+		string clientId,
+		string clientSecret,
+		string code,
+		string redirectUri,
+		CancellationToken cancellationToken)
+	{
+		Func<CancellationToken, Task<SpotifyAuthorizedToken>>? scripted;
+		lock (_sync)
+		{
+			ExchangedCodes.Add(code);
+			scripted = Exchanges.Count > 0 ? Exchanges.Dequeue() : null;
+		}
+
+		return scripted is not null
+			? scripted(cancellationToken)
+			: Task.FromResult(new SpotifyAuthorizedToken($"access-{code}",
+				$"refresh-{code}",
+				3600,
+				DateTime.UtcNow,
+				null));
 	}
 
 	public static Func<SpotifyRefreshedToken> Rejected(string message = "invalid_grant")
