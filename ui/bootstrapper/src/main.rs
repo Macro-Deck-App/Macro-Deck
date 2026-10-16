@@ -31,6 +31,7 @@ mod post_update_changelog;
 mod quit_after_update;
 mod redact;
 mod release_notes;
+mod tray_badge;
 mod update_channel;
 mod update_mode;
 mod update_state;

@@ -59,7 +59,8 @@ The update window opens on its own at most once per version while Macro Deck run
 in the background. It never opens in **Off** or **Automatic** mode, and not when you open the Macro Deck
 window before it appears.
 
-While an update is waiting, the Macro Deck icon in the system tray or menu bar has an **Update to**
+While an update is waiting, the Macro Deck icon in the system tray or menu bar shows a small arrow in its
+top-right corner, which goes away once Macro Deck is up to date. The icon's menu has an **Update to**
 entry with the new version. It opens the update window right away and brings it to the front.
 
 With **Before Macro Deck updates** turned on in **Settings > Backups**, Macro Deck makes a backup before it
