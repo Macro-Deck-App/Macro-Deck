@@ -212,6 +212,13 @@ pub(crate) fn periodic_action(mode: UpdateMode, strategy: UpdateInstallStrategy)
     }
 }
 
+pub(crate) fn update_window_offered_in_background(app: &AppHandle) -> bool {
+    matches!(
+        periodic_action(update_mode::current(app), install_strategy()),
+        PeriodicAction::Check(CheckAction::ExternalNotify | CheckAction::ConfirmThenInstall)
+    )
+}
+
 fn external_download_refusal(strategy: UpdateInstallStrategy) -> Option<String> {
     match strategy {
         UpdateInstallStrategy::InApp => None,
