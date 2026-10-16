@@ -23,12 +23,11 @@ can add as many as you like, for example your own and one of a friend or family 
 
 - **Configuration name**: how the account is called in the widget settings and in its variable names, for
   example `Main`.
-- **SteamID**: your 17-digit SteamID64, the link to your Steam profile, or your custom profile name. A custom
-  name needs the Web API key.
 - **Web API key**: a key from Steam that lets Macro Deck ask Steam about your profile. Open the Steam Web API
   key page, sign in, and register a key. The page asks for a domain name; any value works. Steam does not give
   keys to limited accounts, which are accounts that never spent money on Steam. The key is stored encrypted
   on this computer and only used to ask Steam about your profile.
+- **SteamID**: your 17-digit SteamID64, the link to your Steam profile, or your custom profile name.
 
 Enter the SteamID and the key together, or neither; without them the configuration only covers this computer.
 Macro Deck checks both with Steam before it saves them

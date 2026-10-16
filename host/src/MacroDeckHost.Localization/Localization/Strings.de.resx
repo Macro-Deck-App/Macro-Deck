@@ -22756,13 +22756,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Steam einrichten</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>Installierte Spiele werden ohne Einrichtung gefunden. Trage eine SteamID und einen Web-API-Schlüssel ein, um auch Status und Freunde eines Accounts anzuzeigen. Du kannst mehrere Accounts hinzufügen.</value>
+    <value>Installierte Spiele werden ohne Einrichtung gefunden. Trage einen Web-API-Schlüssel und eine SteamID ein, um auch Status und Freunde eines Accounts anzuzeigen. Du kannst mehrere Accounts hinzufügen.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Melde dich bei Steam an, öffne die Seite für API-Schlüssel und registriere einen Schlüssel. Die Seite fragt nach einem Domainnamen; ein beliebiger Wert genügt. Eingeschränkte Konten können keinen Schlüssel erhalten.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>Gib deine 17-stellige SteamID64, deinen Profillink oder deinen benutzerdefinierten Profilnamen ein. Ein benutzerdefinierter Name erfordert den Schlüssel.</value>
+    <value>Gib deine 17-stellige SteamID64, deinen Profillink oder deinen benutzerdefinierten Profilnamen ein.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Seite für Steam-Web-API-Schlüssel öffnen</value>
@@ -22771,7 +22771,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Leer lassen, um nur die installierten Spiele zu verwenden.</value>
+    <value>Muss zusammen mit dem Schlüssel angegeben werden. Lass beide leer, um nur die installierten Spiele zu verwenden.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 oder Profillink</value>
@@ -22780,7 +22780,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Web-API-Schlüssel</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Wird auf diesem Computer gespeichert und nur verwendet, um Steam nach deinem Profil zu fragen.</value>
+    <value>Muss zusammen mit der SteamID angegeben werden. Wird auf diesem Computer gespeichert und nur verwendet, um Steam nach deinem Profil zu fragen.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Weitere Bibliotheksordner</value>
@@ -22795,10 +22795,10 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Gib vollständige Ordnerpfade ein.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Gib den Web-API-Schlüssel für dieses Profil ein.</value>
+    <value>Gib auch den Schlüssel ein oder leere die SteamID, um nur die installierten Spiele zu verwenden.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Gib die SteamID ein, die zu diesem Schlüssel gehört.</value>
+    <value>Gib auch die SteamID ein oder leere den Schlüssel, um nur die installierten Spiele zu verwenden.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>Gib eine 17-stellige SteamID64, einen Profillink oder einen benutzerdefinierten Profilnamen ein.</value>

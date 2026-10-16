@@ -22780,13 +22780,13 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Steam instellen</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>Geïnstalleerde spellen worden zonder instellingen gevonden. Voeg een SteamID en een Web API-sleutel toe om ook de status en vrienden van een account te tonen. Je kunt meerdere accounts toevoegen.</value>
+    <value>Geïnstalleerde spellen worden zonder instellingen gevonden. Voeg een Web API-sleutel en een SteamID toe om ook de status en vrienden van een account te tonen. Je kunt meerdere accounts toevoegen.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Meld je aan bij Steam, open de pagina voor API-sleutels en registreer een sleutel. De pagina vraagt om een domeinnaam; elke waarde werkt. Beperkte accounts kunnen geen sleutel krijgen.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>Voer je 17-cijferige SteamID64, je profielkoppeling of je aangepaste profielnaam in. Een aangepaste naam heeft de sleutel nodig.</value>
+    <value>Voer je 17-cijferige SteamID64, je profielkoppeling of je aangepaste profielnaam in.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Pagina voor Steam Web API-sleutels openen</value>
@@ -22795,7 +22795,7 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Laat leeg om alleen de geïnstalleerde spellen te gebruiken.</value>
+    <value>Nodig samen met de sleutel. Laat beide leeg om alleen de geïnstalleerde spellen te gebruiken.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 of profielkoppeling</value>
@@ -22804,7 +22804,7 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Web API-sleutel</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Opgeslagen op deze computer en alleen gebruikt om Steam naar je profiel te vragen.</value>
+    <value>Nodig samen met de SteamID. Opgeslagen op deze computer en alleen gebruikt om Steam naar je profiel te vragen.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Extra bibliotheekmappen</value>
@@ -22819,10 +22819,10 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Voer volledige mappaden in.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Voer de Web API-sleutel voor dit profiel in.</value>
+    <value>Voer ook de sleutel in, of maak de SteamID leeg om alleen de geïnstalleerde spellen te gebruiken.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Voer de SteamID in die bij deze sleutel hoort.</value>
+    <value>Voer ook de SteamID in, of maak de sleutel leeg om alleen de geïnstalleerde spellen te gebruiken.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>Voer een 17-cijferige SteamID64, een profielkoppeling of een aangepaste profielnaam in.</value>

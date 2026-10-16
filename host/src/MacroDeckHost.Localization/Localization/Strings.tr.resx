@@ -22780,13 +22780,13 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Steam&apos;i kur</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>Yüklü oyunlar herhangi bir kurulum yapmadan bulunur. Bir hesabın durumunu ve arkadaşlarını da göstermek için SteamID ve Web API anahtarı ekleyin. Birden fazla hesap ekleyebilirsiniz.</value>
+    <value>Yüklü oyunlar herhangi bir kurulum yapmadan bulunur. Bir hesabın durumunu ve arkadaşlarını da göstermek için Web API anahtarı ve SteamID ekleyin. Birden fazla hesap ekleyebilirsiniz.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Steam&apos;de oturum açın, API anahtarı sayfasını açın ve bir anahtar kaydedin. Sayfa bir alan adı ister; herhangi bir değer olur. Sınırlı hesaplar anahtar alamaz.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>17 haneli SteamID64&apos;ünüzü, profil bağlantınızı veya özel profil adınızı girin. Özel ad için anahtar gerekir.</value>
+    <value>17 haneli SteamID64&apos;ünüzü, profil bağlantınızı veya özel profil adınızı girin.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Steam Web API anahtarı sayfasını aç</value>
@@ -22795,7 +22795,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Yalnızca yüklü oyunları kullanmak için boş bırakın.</value>
+    <value>Anahtar ile birlikte gereklidir. Yalnızca yüklü oyunları kullanmak için ikisini de boş bırakın.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 veya profil bağlantısı</value>
@@ -22804,7 +22804,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Web API anahtarı</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Bu bilgisayarda saklanır ve yalnızca Steam&apos;e profilinizi sormak için kullanılır.</value>
+    <value>SteamID ile birlikte gereklidir. Bu bilgisayarda saklanır ve yalnızca Steam&apos;e profilinizi sormak için kullanılır.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Ek kitaplık klasörleri</value>
@@ -22819,10 +22819,10 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Tam klasör yollarını girin.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Bu profil için Web API anahtarını girin.</value>
+    <value>Anahtarı da girin veya yalnızca yüklü oyunları kullanmak için SteamID&apos;yi temizleyin.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Bu anahtara ait SteamID&apos;yi girin.</value>
+    <value>SteamID&apos;yi de girin veya yalnızca yüklü oyunları kullanmak için anahtarı temizleyin.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>17 haneli bir SteamID64, bir profil bağlantısı veya özel bir profil adı girin.</value>

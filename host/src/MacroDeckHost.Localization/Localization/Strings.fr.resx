@@ -22758,13 +22758,13 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Configurer Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>Les jeux installés sont détectés sans configuration. Ajoute un SteamID et une clé d&apos;API Web pour afficher aussi le statut et les amis d&apos;un compte. Tu peux ajouter plusieurs comptes.</value>
+    <value>Les jeux installés sont détectés sans configuration. Ajoute une clé d&apos;API Web et un SteamID pour afficher aussi le statut et les amis d&apos;un compte. Tu peux ajouter plusieurs comptes.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Connecte-toi à Steam, ouvre la page des clés d&apos;API et enregistre une clé. La page demande un nom de domaine ; n&apos;importe quelle valeur convient. Les comptes limités ne peuvent pas obtenir de clé.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>Saisis ton SteamID64 à 17 chiffres, le lien de ton profil ou ton nom de profil personnalisé. Un nom personnalisé nécessite la clé.</value>
+    <value>Saisis ton SteamID64 à 17 chiffres, le lien de ton profil ou ton nom de profil personnalisé.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Ouvrir la page des clés d&apos;API Web Steam</value>
@@ -22773,7 +22773,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Laisse vide pour n&apos;utiliser que les jeux installés.</value>
+    <value>À renseigner avec la clé. Laisse les deux vides pour n&apos;utiliser que les jeux installés.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 ou lien du profil</value>
@@ -22782,7 +22782,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Clé d&apos;API Web</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Enregistrée sur cet ordinateur et utilisée uniquement pour interroger Steam sur ton profil.</value>
+    <value>À renseigner avec le SteamID. Enregistrée sur cet ordinateur et utilisée uniquement pour interroger Steam sur ton profil.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Dossiers de bibliothèque supplémentaires</value>
@@ -22797,10 +22797,10 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Saisis des chemins de dossier complets.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Saisis la clé d&apos;API Web de ce profil.</value>
+    <value>Saisis aussi la clé, ou vide le SteamID pour n&apos;utiliser que les jeux installés.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Saisis le SteamID associé à cette clé.</value>
+    <value>Saisis aussi le SteamID, ou vide la clé pour n&apos;utiliser que les jeux installés.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>Saisis un SteamID64 à 17 chiffres, un lien de profil ou un nom de profil personnalisé.</value>

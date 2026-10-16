@@ -22780,13 +22780,13 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Настройка Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>Установленные игры находятся без какой-либо настройки. Добавьте SteamID и ключ Web API, чтобы также показывать статус и друзей аккаунта. Можно добавить несколько аккаунтов.</value>
+    <value>Установленные игры находятся без какой-либо настройки. Добавьте ключ Web API и SteamID, чтобы также показывать статус и друзей аккаунта. Можно добавить несколько аккаунтов.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Войдите в Steam, откройте страницу ключей API и зарегистрируйте ключ. Страница запрашивает доменное имя; подойдёт любое значение. Ограниченные аккаунты не могут получить ключ.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>Введите свой 17-значный SteamID64, ссылку на профиль или своё имя профиля. Для имени профиля нужен ключ.</value>
+    <value>Введите свой 17-значный SteamID64, ссылку на профиль или своё имя профиля.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Открыть страницу ключей Steam Web API</value>
@@ -22795,7 +22795,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Оставьте пустым, чтобы использовать только установленные игры.</value>
+    <value>Указывается вместе с ключом. Оставьте оба поля пустыми, чтобы использовать только установленные игры.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 или ссылка на профиль</value>
@@ -22804,7 +22804,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Ключ Web API</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Хранится на этом компьютере и используется только для запросов к Steam о вашем профиле.</value>
+    <value>Указывается вместе со SteamID. Хранится на этом компьютере и используется только для запросов к Steam о вашем профиле.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Дополнительные папки библиотеки</value>
@@ -22819,10 +22819,10 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Введите полные пути к папкам.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Введите ключ Web API для этого профиля.</value>
+    <value>Введите также ключ или очистите SteamID, чтобы использовать только установленные игры.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Введите SteamID, соответствующий этому ключу.</value>
+    <value>Введите также SteamID или очистите ключ, чтобы использовать только установленные игры.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>Введите 17-значный SteamID64, ссылку на профиль или имя профиля.</value>
