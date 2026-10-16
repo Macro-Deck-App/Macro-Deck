@@ -91,6 +91,42 @@ internal sealed class TwitchSubscriptionManagerTests
 	}
 
 	[Test]
+	public async Task A_pair_twitch_rejected_is_not_requested_again_in_the_next_session()
+	{
+		_helix.SubscriptionResults["channel.hype_train.begin"] = TwitchSubscriptionResult.Unsupported;
+		var manager = Manager();
+
+		await manager.SubscribeAllAsync("session-1", CancellationToken.None);
+		_helix.Subscriptions.Clear();
+		var report = await manager.SubscribeAllAsync("session-2", CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_helix.Subscriptions.Select(s => s.Type), Does.Not.Contain("channel.hype_train.begin"));
+			Assert.That(_helix.Subscriptions, Has.Count.EqualTo(TwitchEventCatalog.All.Count - 1));
+			Assert.That(report.Unsupported, Is.EqualTo(new[] { TwitchEventIds.HypeTrainBegin }));
+		});
+	}
+
+	[Test]
+	public async Task A_failed_subscription_is_requested_again_in_the_next_session()
+	{
+		_helix.SubscriptionResults["channel.cheer"] = TwitchSubscriptionResult.Failed;
+		var manager = Manager();
+
+		await manager.SubscribeAllAsync("session-1", CancellationToken.None);
+		_helix.Subscriptions.Clear();
+		_helix.SubscriptionResults.Remove("channel.cheer");
+		var report = await manager.SubscribeAllAsync("session-2", CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_helix.Subscriptions.Select(s => s.Type), Does.Contain("channel.cheer"));
+			Assert.That(report.Created, Does.Contain(TwitchEventIds.Cheer));
+		});
+	}
+
+	[Test]
 	public async Task A_scope_that_was_not_granted_is_not_even_requested()
 	{
 		var granted = new[] { TwitchScopes.UserReadChat };
