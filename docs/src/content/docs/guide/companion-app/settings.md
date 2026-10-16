@@ -62,6 +62,11 @@ follows the language set there.
 **Device name** is the name this phone or tablet has in Macro Deck's **Settings > Devices** and in the device
 list of automations. A computer shows the new name the next time this device signs in to it.
 
+**Open after the device starts**, on Android only, opens the app by itself once the device has started or
+restarted, and connects to the computers under **Connect on opening** as if you had opened it. Off by default.
+From Android 10 it also needs **Display over other apps**; see
+[Open after the device starts](/guide/companion-app/android/#open-after-the-device-starts).
+
 ## Connections
 
 | Setting | Does |
