@@ -17099,9 +17099,6 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>Все</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>Все версии ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Вернуться в магазин</value>
   </data>
@@ -17117,6 +17114,29 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>Копировать ссылку</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>Прямые зависимости</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>У этой версии нет прямых зависимостей от пакетов.</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>Для этой версии не опубликован список зависимостей.</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>запрошена {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>Собрано с .NET SDK {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>Транзитивных пакетов: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>Транзитивных пакетов: {count}</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Подробности</value>
@@ -17190,6 +17210,55 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Установленная версия</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>Комментариев: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>Комментариев: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>Запросы отключены в репозитории этого пакета.</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>У этого пакета нет открытых запросов.</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>Загрузка открытых запросов…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>Новый запрос</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>У этого пакета нет репозитория на GitHub, поэтому его запросы невозможно показать.</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>Репозиторий пакета на GitHub не найден.</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>Открытые запросы: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>Открытые запросы: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>Открытые запросы: более {count}</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>от {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub сейчас ограничивает запросы. Повторите попытку через несколько минут.</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>Не удалось загрузить открытые запросы.</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>Посмотреть все на GitHub</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>Все</value>
@@ -17298,9 +17367,6 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>Открыть настройки</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>Обзор</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: не поддерживается</value>
@@ -17438,6 +17504,24 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Установлено, доступно обновлений: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>Сведения о пакете</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>Код</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>Зависимости</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>Описание</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>Запросы</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>Версии</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Разделы магазина</value>
   </data>
@@ -17479,9 +17563,6 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Версия</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>История версий</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Версия {version}</value>
     <comment>[version:string]</comment>
@@ -17495,8 +17576,8 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>Эта версия была изъята из магазина.</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>Что нового?</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>Страницы версий</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>Издатель подтверждён</value>

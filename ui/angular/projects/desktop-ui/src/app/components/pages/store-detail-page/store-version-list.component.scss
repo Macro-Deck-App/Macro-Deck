@@ -1,3 +1,5 @@
+@use '../../../../styles/index' as ds;
+
 .history-list {
   display: flex;
   flex-direction: column;
@@ -58,4 +60,60 @@
   font-size: var(--text-xs);
   color: var(--color-text-muted);
   white-space: nowrap;
+}
+
+.history-entry-notes {
+  position: relative;
+  overflow-wrap: anywhere;
+
+  &.collapsed {
+    max-height: 12rem;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 0;
+      height: 4rem;
+      background: linear-gradient(to bottom, transparent, var(--color-bg-primary));
+      pointer-events: none;
+    }
+  }
+}
+
+.history-entry-toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.history-entry-empty {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.history-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.history-pager-position {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
 }

@@ -17099,9 +17099,6 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>Усі</value>
   </data>
-  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
-    <value>Усі версії ({count})</value>
-  </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Назад до магазину</value>
   </data>
@@ -17117,6 +17114,29 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Store.Page.CopyLinkAction" xml:space="preserve">
     <value>Копіювати посилання</value>
+  </data>
+  <data name="Store.Page.Dependencies.DirectHeading" xml:space="preserve">
+    <value>Прямі залежності</value>
+  </data>
+  <data name="Store.Page.Dependencies.NoDirect" xml:space="preserve">
+    <value>Ця версія не має прямих залежностей від пакетів.</value>
+  </data>
+  <data name="Store.Page.Dependencies.NotPublished" xml:space="preserve">
+    <value>Для цієї версії не опубліковано список залежностей.</value>
+  </data>
+  <data name="Store.Page.Dependencies.Requested" xml:space="preserve">
+    <value>запитано {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.SdkVersion" xml:space="preserve">
+    <value>Зібрано з .NET SDK {version}</value>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.One" xml:space="preserve">
+    <value>Транзитивних пакетів: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Dependencies.TransitiveSummary.Other" xml:space="preserve">
+    <value>Транзитивних пакетів: {count}</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Докладно</value>
@@ -17190,6 +17210,55 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Встановлена версія</value>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.One" xml:space="preserve">
+    <value>Коментарів: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.CommentCount.Other" xml:space="preserve">
+    <value>Коментарів: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.Disabled" xml:space="preserve">
+    <value>Запити вимкнено в репозиторії цього пакета.</value>
+  </data>
+  <data name="Store.Page.Issues.Empty" xml:space="preserve">
+    <value>Цей пакет не має відкритих запитів.</value>
+  </data>
+  <data name="Store.Page.Issues.Loading" xml:space="preserve">
+    <value>Завантаження відкритих запитів…</value>
+  </data>
+  <data name="Store.Page.Issues.NewIssueAction" xml:space="preserve">
+    <value>Новий запит</value>
+  </data>
+  <data name="Store.Page.Issues.NoRepository" xml:space="preserve">
+    <value>Цей пакет не має репозиторію на GitHub, тому його запити неможливо показати.</value>
+  </data>
+  <data name="Store.Page.Issues.NotFound" xml:space="preserve">
+    <value>Репозиторій пакета на GitHub не знайдено.</value>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.One" xml:space="preserve">
+    <value>Відкриті запити: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCount.Other" xml:space="preserve">
+    <value>Відкриті запити: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.Issues.OpenCountTruncated" xml:space="preserve">
+    <value>Відкриті запити: понад {count}</value>
+  </data>
+  <data name="Store.Page.Issues.OpenedBy" xml:space="preserve">
+    <value>від {author}</value>
+  </data>
+  <data name="Store.Page.Issues.RateLimited" xml:space="preserve">
+    <value>GitHub зараз обмежує запити. Спробуйте ще раз за кілька хвилин.</value>
+  </data>
+  <data name="Store.Page.Issues.Unavailable" xml:space="preserve">
+    <value>Не вдалося завантажити відкриті запити.</value>
+  </data>
+  <data name="Store.Page.Issues.ViewAllAction" xml:space="preserve">
+    <value>Переглянути всі на GitHub</value>
   </data>
   <data name="Store.Page.KindAll" xml:space="preserve">
     <value>Усі</value>
@@ -17298,9 +17367,6 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
     <value>Відкрити налаштування</value>
-  </data>
-  <data name="Store.Page.OverviewHeading" xml:space="preserve">
-    <value>Огляд</value>
   </data>
   <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
     <value>{platform}: не підтримується</value>
@@ -17438,6 +17504,24 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Встановлені, доступно оновлень: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Store.Page.Tabs.AriaLabel" xml:space="preserve">
+    <value>Відомості про пакет</value>
+  </data>
+  <data name="Store.Page.Tabs.Code" xml:space="preserve">
+    <value>Код</value>
+  </data>
+  <data name="Store.Page.Tabs.Dependencies" xml:space="preserve">
+    <value>Залежності</value>
+  </data>
+  <data name="Store.Page.Tabs.Description" xml:space="preserve">
+    <value>Опис</value>
+  </data>
+  <data name="Store.Page.Tabs.Issues" xml:space="preserve">
+    <value>Запити</value>
+  </data>
+  <data name="Store.Page.Tabs.Versions" xml:space="preserve">
+    <value>Версії</value>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Розділи магазину</value>
   </data>
@@ -17479,9 +17563,6 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Версія</value>
   </data>
-  <data name="Store.Page.VersionHistoryAction" xml:space="preserve">
-    <value>Історія версій</value>
-  </data>
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Версія {version}</value>
     <comment>[version:string]</comment>
@@ -17495,8 +17576,8 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
     <value>Цю версію було вилучено з магазину.</value>
   </data>
-  <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
-    <value>Що нового?</value>
+  <data name="Store.Page.Versions.PagesAriaLabel" xml:space="preserve">
+    <value>Сторінки версій</value>
   </data>
   <data name="Store.PublisherVerified" xml:space="preserve">
     <value>Видавця перевірено</value>

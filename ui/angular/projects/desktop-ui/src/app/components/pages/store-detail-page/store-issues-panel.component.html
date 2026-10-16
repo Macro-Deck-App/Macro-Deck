@@ -1,0 +1,58 @@
+@if (response(); as response) {
+  <div class="issues" data-testid="store-issues">
+    <div class="issues-header">
+      @if (!errorKey() && response.openCount > 0) {
+        <span class="issues-summary">
+          {{ (response.truncated ? 'macrodeck.app:Store.Page.Issues.OpenCountTruncated' : 'macrodeck.app:Store.Page.Issues.OpenCount') | translate:{ count: response.openCount } }}
+        </span>
+      }
+      <div class="issues-actions">
+        @if (allIssuesUrl(); as url) {
+          <shared-button variant="ghost" size="compact" (click)="openUrl.emit(url)">
+            {{ 'macrodeck.app:Store.Page.Issues.ViewAllAction' | translate }}
+            <span class="icon icon-external-link icon-xs" aria-hidden="true"></span>
+          </shared-button>
+        }
+        @if (response.newIssueUrl) {
+          <shared-button variant="primary" size="compact" data-testid="store-issues-new" (click)="openUrl.emit(response.newIssueUrl)">
+            <span class="icon icon-plus icon-xs" aria-hidden="true"></span>
+            {{ 'macrodeck.app:Store.Page.Issues.NewIssueAction' | translate }}
+          </shared-button>
+        }
+      </div>
+    </div>
+    @if (errorKey(); as key) {
+      <p class="issues-note" data-testid="store-issues-error">{{ key | translate }}</p>
+    } @else if (response.issues.length === 0) {
+      <p class="issues-note">{{ 'macrodeck.app:Store.Page.Issues.Empty' | translate }}</p>
+    } @else {
+      <ul class="issues-list">
+        @for (issue of response.issues; track issue.number) {
+          <li class="issue" data-testid="store-issue">
+            <span class="issue-state" aria-hidden="true"></span>
+            <div class="issue-body">
+              <a class="issue-title" [href]="issue.url" target="_blank" rel="noopener noreferrer" (click)="open($event, issue.url)">{{ issue.title }}</a>
+              <span class="issue-meta">
+                <span>#{{ issue.number }}</span>
+                @if (issue.createdAt) {
+                  <span>{{ issue.createdAt | date: 'mediumDate' }}</span>
+                }
+                @if (issue.author) {
+                  <span>{{ 'macrodeck.app:Store.Page.Issues.OpenedBy' | translate:{ author: issue.author } }}</span>
+                }
+              </span>
+            </div>
+            @if (issue.comments > 0) {
+              <span class="issue-comments" [attr.aria-label]="'macrodeck.app:Store.Page.Issues.CommentCount' | translate:{ count: issue.comments }">
+                <span class="icon icon-message-square icon-xs" aria-hidden="true"></span>
+                <span aria-hidden="true">{{ issue.comments }}</span>
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+} @else {
+  <p class="issues-note" data-testid="store-issues-loading">{{ 'macrodeck.app:Store.Page.Issues.Loading' | translate }}</p>
+}

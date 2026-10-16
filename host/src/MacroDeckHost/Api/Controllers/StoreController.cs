@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Installation;
+using MacroDeckHost.Application.Store.Issues;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
 using MacroDeckHost.Application.Store.Updates;
@@ -31,6 +32,7 @@ public class StoreController : ControllerBase
 	private readonly StoreCatalogPopularity _popularity;
 	private readonly StoreSimilarPackages _similar;
 	private readonly IStoreLinkResolver _linkResolver;
+	private readonly IStoreRepositoryIssueService _issues;
 
 	public StoreController(
 		IStoreCatalogQueryService catalogQuery,
@@ -48,7 +50,8 @@ public class StoreController : ControllerBase
 		IStoreUpdateBatchInstaller updateInstaller,
 		StoreCatalogPopularity popularity,
 		StoreSimilarPackages similar,
-		IStoreLinkResolver linkResolver)
+		IStoreLinkResolver linkResolver,
+		IStoreRepositoryIssueService issues)
 	{
 		_catalogQuery = catalogQuery;
 		_refresher = refresher;
@@ -66,6 +69,7 @@ public class StoreController : ControllerBase
 		_popularity = popularity;
 		_similar = similar;
 		_linkResolver = linkResolver;
+		_issues = issues;
 	}
 
 	[HttpGet("status")]
@@ -218,6 +222,15 @@ public class StoreController : ControllerBase
 		}
 
 		return new GetStoreSimilarResponse { Items = result.Data!.Select(ToItemBody).ToList() };
+	}
+
+	// The repository always comes from the signed catalog entry, so a caller cannot aim the host at an
+	// arbitrary GitHub repository.
+	[HttpGet("catalog/{kind}/{id}/issues")]
+	public Task<GetStoreRepositoryIssuesResponse> GetIssues(StoreExtensionKind kind, string id, CancellationToken ct)
+	{
+		var result = _catalogQuery.Find(kind, id);
+		return _issues.GetIssues(result.Success ? result.Data!.Entry.Repository : null, ct);
 	}
 
 	[HttpGet("updates")]
@@ -603,8 +616,39 @@ public class StoreController : ControllerBase
 			Changelog = entry.Changelog,
 			Size = entry.Size,
 			Installable = reason is null,
-			UnavailableReason = reason
+			UnavailableReason = reason,
+			Dependencies = DependenciesBody(entry.Dependencies),
+			SourceUrl = StoreRepository.Parse(item.Entry.Repository) is { } repository
+				&& (entry.Source?.Commit ?? entry.Source?.Tag) is { } reference
+					? repository.TreeUrl(reference)
+					: null
 		};
+	}
+
+	private static StoreDependenciesBody? DependenciesBody(StoreDependencyList? dependencies)
+	{
+		return dependencies is null
+			? null
+			: new StoreDependenciesBody
+			{
+				Ecosystem = dependencies.Ecosystem,
+				SdkVersion = dependencies.SdkVersion,
+				Frameworks = dependencies.Frameworks
+					.Select(framework => new StoreDependencyFrameworkBody
+					{
+						Framework = framework.Framework,
+						Packages = framework.Packages
+							.Select(package => new StoreDependencyPackageBody
+							{
+								Id = package.Id,
+								Version = package.Version,
+								RequestedVersion = package.RequestedVersion,
+								Direct = package.Direct
+							})
+							.ToList()
+					})
+					.ToList()
+			};
 	}
 
 	private static StoreVersionWithdrawalBody? WithdrawalBody(StoreRemovedPackage? removal)

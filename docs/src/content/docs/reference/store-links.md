@@ -6,11 +6,6 @@ description: The address every Store entry can be shared under, the macrodeck://
 Every entry in the official Store, whether a plugin, an icon pack or a template, has one address you can
 share, for example in a README, a Discord message or a video description.
 
-:::caution
-The Store website that this address opens is not live yet. Until it is, the `https` address does not show a
-page. The `macrodeck://` link described below already works in Macro Deck.
-:::
-
 ## Sharing an entry
 
 Use the entry's package id, the reverse-DNS name from its manifest:
@@ -20,7 +15,7 @@ https://store.macro-deck.app/<package-id>
 ```
 
 The page shows the entry, an **Open in Macro Deck** button, and download links for people who do not have
-Macro Deck yet. Macro Deck will offer **Copy link** on an entry's Store page once the website is live.
+Macro Deck yet. In Macro Deck, the share button next to an entry's install button copies this address.
 
 Only entries of the official Macro Deck registry have an address. An unknown id, an entry that is not listed
 in the Store and a withdrawn package all answer "not found". The address has no way to name another registry,

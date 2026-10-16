@@ -1,0 +1,56 @@
+@if (dependencies(); as dependencies) {
+  <div class="dependencies" data-testid="store-dependencies">
+    @if (dependencies.sdkVersion) {
+      <p class="dependencies-sdk">{{ 'macrodeck.app:Store.Page.Dependencies.SdkVersion' | translate:{ version: dependencies.sdkVersion } }}</p>
+    }
+    @if (frameworks().length === 0) {
+      <p class="dependencies-empty">{{ 'macrodeck.app:Store.Page.Dependencies.NoDirect' | translate }}</p>
+    }
+    @for (framework of frameworks(); track framework.framework) {
+      <section class="dependencies-framework">
+        @if (showFrameworkNames()) {
+          <h3 class="dependencies-framework-name">{{ framework.framework }}</h3>
+        }
+        <h4 class="dependencies-heading">{{ 'macrodeck.app:Store.Page.Dependencies.DirectHeading' | translate }}</h4>
+        @if (framework.direct.length > 0) {
+          <ul class="dependencies-list" data-testid="store-dependencies-direct">
+            @for (entry of framework.direct; track entry.id) {
+              <li class="dependency">
+                @if (packageUrl(entry); as url) {
+                  <a class="dependency-id" [href]="url" target="_blank" rel="noopener noreferrer" (click)="open($event, url)">{{ entry.id }}</a>
+                } @else {
+                  <span class="dependency-id">{{ entry.id }}</span>
+                }
+                <span class="dependency-version">{{ entry.version }}</span>
+                @if (entry.requestedVersion && entry.requestedVersion !== entry.version) {
+                  <span class="dependency-requested">{{ 'macrodeck.app:Store.Page.Dependencies.Requested' | translate:{ version: entry.requestedVersion } }}</span>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="dependencies-empty">{{ 'macrodeck.app:Store.Page.Dependencies.NoDirect' | translate }}</p>
+        }
+        @if (framework.transitive.length > 0) {
+          <details class="dependencies-transitive" data-testid="store-dependencies-transitive">
+            <summary class="dependencies-transitive-summary">{{ 'macrodeck.app:Store.Page.Dependencies.TransitiveSummary' | translate:{ count: framework.transitive.length } }}</summary>
+            <ul class="dependencies-list">
+              @for (entry of framework.transitive; track entry.id) {
+                <li class="dependency">
+                  @if (packageUrl(entry); as url) {
+                  <a class="dependency-id" [href]="url" target="_blank" rel="noopener noreferrer" (click)="open($event, url)">{{ entry.id }}</a>
+                } @else {
+                  <span class="dependency-id">{{ entry.id }}</span>
+                }
+                  <span class="dependency-version">{{ entry.version }}</span>
+                </li>
+              }
+            </ul>
+          </details>
+        }
+      </section>
+    }
+  </div>
+} @else {
+  <p class="dependencies-empty" data-testid="store-dependencies-none">{{ 'macrodeck.app:Store.Page.Dependencies.NotPublished' | translate }}</p>
+}

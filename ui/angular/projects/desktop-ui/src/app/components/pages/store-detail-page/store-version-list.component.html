@@ -1,0 +1,53 @@
+<ol class="history-list">
+  @for (entry of visibleHistory(); track entry.version) {
+    <li class="history-entry" [class.selected]="isSelected(entry)" data-testid="store-version-entry">
+      <div class="history-entry-header">
+        <span class="history-entry-version">{{ 'macrodeck.app:Store.Page.VersionLabel' | translate:{ version: entry.version } }}</span>
+        @if (option(entry)?.badge; as badge) {
+          <span class="history-entry-badge" [class.unavailable]="option(entry)?.disabled">{{ badge }}</span>
+        }
+        <span class="history-entry-meta">
+          @if (entry.releasedAt) {
+            <span>{{ entry.releasedAt | date: 'mediumDate' }}</span>
+          }
+          @if (entry.size) {
+            <span>{{ formatBytes(entry.size) }}</span>
+          }
+        </span>
+        @if (selectable() && !option(entry)?.disabled && !isSelected(entry)) {
+          <shared-button variant="ghost" size="compact" (click)="selectVersion.emit(entry.version)">
+            {{ 'macrodeck.app:Store.Page.SelectVersionAction' | translate }}
+          </shared-button>
+        }
+      </div>
+      @if (entry.changelog) {
+        <div class="history-entry-notes" [class.collapsed]="isLong(entry) && !isExpanded(entry)">
+          <shared-store-markdown [text]="entry.changelog" />
+        </div>
+        @if (isLong(entry)) {
+          <button type="button" class="history-entry-toggle" [attr.aria-expanded]="isExpanded(entry)" (click)="toggle(entry)">
+            {{ (isExpanded(entry) ? 'macrodeck.app:Store.Reviews.ShowLessAction' : 'macrodeck.app:Store.Reviews.ShowMoreAction') | translate }}
+          </button>
+        }
+      } @else {
+        <p class="history-entry-empty">{{ 'macrodeck.app:Store.Page.NoChangelog' | translate }}</p>
+      }
+    </li>
+  }
+</ol>
+
+@if (pageCount() > 1) {
+  <nav class="history-pager" [attr.aria-label]="'macrodeck.app:Store.Page.Versions.PagesAriaLabel' | translate">
+    <shared-button variant="secondary" size="compact" [disabled]="currentPage() === 0" (click)="goToPage(currentPage() - 1)">
+      <span class="icon icon-chevron-left icon-xs" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Settings.Backups.PreviousPage' | translate }}
+    </shared-button>
+    <span class="history-pager-position">
+      {{ 'macrodeck.app:Settings.Backups.PagePosition' | translate: { current: currentPage() + 1, total: pageCount() } }}
+    </span>
+    <shared-button variant="secondary" size="compact" [disabled]="currentPage() >= pageCount() - 1" (click)="goToPage(currentPage() + 1)">
+      {{ 'macrodeck.app:Settings.Backups.NextPage' | translate }}
+      <span class="icon icon-chevron-right icon-xs" aria-hidden="true"></span>
+    </shared-button>
+  </nav>
+}

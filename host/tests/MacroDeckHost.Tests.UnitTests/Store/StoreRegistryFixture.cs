@@ -143,7 +143,7 @@ internal sealed class StoreRegistryFixture
 
 	/// <summary>Publishes an additional version directory for a package that already exists, so version
 	/// history can be exercised without the package's advertised latest version changing.</summary>
-	public void AddVersion(string segment, string id, string version)
+	public void AddVersion(string segment, string id, string version, object? source = null)
 	{
 		Write($"{segment}/{id}/versions/{version}/manifest.json",
 			new
@@ -151,10 +151,33 @@ internal sealed class StoreRegistryFixture
 				url = $"https://assets.test/{id}/{version}/artifact.bin",
 				sha256 = new string('a', 64),
 				size = 16L,
-				uploadedAt = DateTimeOffset.UnixEpoch
+				uploadedAt = DateTimeOffset.UnixEpoch,
+				source
 			});
 
 		WriteText($"{segment}/{id}/versions/{version}/changelog.md", $"# {version}");
+	}
+
+	public void AddDependencies(
+		string segment,
+		string id,
+		string version,
+		object frameworks,
+		string? sdkVersion = null,
+		object? ecosystem = null)
+	{
+		var document = new Dictionary<string, object?>
+		{
+			["$schema"] = "../../../../schemas/dependencies.schema.json",
+			["sdkVersion"] = sdkVersion,
+			["frameworks"] = frameworks
+		};
+		if (ecosystem is not null)
+		{
+			document["ecosystem"] = ecosystem;
+		}
+
+		Write($"{segment}/{id}/versions/{version}/dependencies.json", document);
 	}
 
 	public void Write(string path, object value)

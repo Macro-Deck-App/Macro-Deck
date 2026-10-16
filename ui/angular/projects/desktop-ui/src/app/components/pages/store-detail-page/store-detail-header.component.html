@@ -61,30 +61,36 @@
 </div>
 
 <div class="header-action">
-  <shared-store-install-button
-    size="lg"
-    [item]="extension()"
-    [operation]="operation()"
-    [targetVersion]="selectedVersion()"
-    [targetInstallable]="targetInstallable()"
-    [targetUnavailableReason]="targetUnavailableReason()"
-    [otherVersionsAvailable]="otherVersionsAvailable()"
-    [updatesAvailable]="updatesAvailable()"
-    [manageAction]="manageAction()"
-    (manage)="manage.emit($event)"
-    (install)="install.emit()"
-    (installUnsigned)="installUnsigned.emit($event)"
-    (retry)="retry.emit()"
-    (uninstall)="uninstall.emit()"
-    (checkForUpdates)="checkForUpdates.emit()"
-    (chooseVersion)="focusVersionSelect()" />
+  <div class="install-row">
+    <shared-store-install-button
+      size="lg"
+      [item]="extension()"
+      [operation]="operation()"
+      [targetVersion]="selectedVersion()"
+      [targetInstallable]="targetInstallable()"
+      [targetUnavailableReason]="targetUnavailableReason()"
+      [otherVersionsAvailable]="otherVersionsAvailable()"
+      [updatesAvailable]="updatesAvailable()"
+      [manageAction]="manageAction()"
+      (manage)="manage.emit($event)"
+      (install)="install.emit()"
+      (installUnsigned)="installUnsigned.emit($event)"
+      (retry)="retry.emit()"
+      (uninstall)="uninstall.emit()"
+      (checkForUpdates)="checkForUpdates.emit()"
+      (chooseVersion)="focusVersionSelect()" />
 
-  @if (shareLinksEnabled && !extension().withdrawal) {
-    <shared-button class="copy-link" variant="ghost" size="compact" (click)="copyLink()">
-      <span class="icon icon-share-2 icon-xs" aria-hidden="true"></span>
-      {{ 'macrodeck.app:Store.Page.CopyLinkAction' | translate }}
-    </shared-button>
-  }
+    @if (shareLinksEnabled && !extension().withdrawal) {
+      <button
+        type="button"
+        class="copy-link"
+        [attr.aria-label]="'macrodeck.app:Store.Page.CopyLinkAction' | translate"
+        [title]="'macrodeck.app:Store.Page.CopyLinkAction' | translate"
+        (click)="copyLink()">
+        <span class="icon icon-share icon-sm" aria-hidden="true"></span>
+      </button>
+    }
+  </div>
 
   @if (showVersionSelect()) {
     <label class="version-picker">

@@ -13,6 +13,7 @@ public sealed class StoreRegistryReader
 	private const string SecurityFileName = "security.json";
 	private const string CategoriesFileName = "categories.json";
 	private const string PackageManifestFileName = "manifest.json";
+	private const string DependenciesFileName = "dependencies.json";
 
 	private readonly ILogger _logger;
 
@@ -267,13 +268,17 @@ public sealed class StoreRegistryReader
 				releases.Add(release);
 			}
 
+			var dependencies
+				= ReadDocument<RegistryDependenciesDocument>(Path.Combine(directory, DependenciesFileName));
 			entries.Add(new StoreVersionHistoryEntry
 			{
 				Version = version,
 				ReleasedAt = document?.UploadedAt,
 				Changelog = ReadText(Path.Combine(directory, "changelog.md")),
 				Size = release?.Size,
-				HasRelease = release is not null
+				HasRelease = release is not null,
+				Dependencies = StoreRegistryDependencies.Parse(dependencies),
+				Source = StoreRegistrySource.Parse(document?.Source)
 			});
 		}
 

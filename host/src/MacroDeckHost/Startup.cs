@@ -88,6 +88,7 @@ using MacroDeckHost.Application.Migration;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Installation;
+using MacroDeckHost.Application.Store.Issues;
 using MacroDeckHost.Application.Store.Operations;
 using MacroDeckHost.Application.Store.Reviews;
 using MacroDeckHost.Application.Store.Updates;
@@ -836,6 +837,11 @@ public class Startup
 		services.AddSingleton<IStoreOfficialPackages, StoreOfficialPackages>();
 		services.AddSingleton<IStoreLinkResolver, StoreLinkResolver>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
+		services.AddHttpClient(GitHubRepositoryIssueClient.HttpClientName)
+			.ConfigureHttpClient(client => GitHubRepositoryIssueClient.Configure(client))
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<IStoreRepositoryIssueClient, GitHubRepositoryIssueClient>();
+		services.AddSingleton<IStoreRepositoryIssueService, StoreRepositoryIssueService>();
 		services.AddSingleton<IStoreRatingPromptService, StoreRatingPromptService>();
 		services.AddSingleton<IGitHubStarPromptService, GitHubStarPromptService>();
 		services.AddSingleton<StoreCatalogPopularity>();
