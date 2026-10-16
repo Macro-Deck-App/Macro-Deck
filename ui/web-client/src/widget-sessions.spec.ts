@@ -1,5 +1,10 @@
 import { GridWidget, UiSessionStore, type UiNode } from '@macro-deck/runtime';
-import { WIDGET_SESSION_MEMO_CAPACITY, WidgetSessions } from './widget-sessions';
+import {
+  type SessionTimers,
+  WIDGET_SESSION_CLOSE_GRACE_MS,
+  WIDGET_SESSION_MEMO_CAPACITY,
+  WidgetSessions,
+} from './widget-sessions';
 
 const widget = (id: string): GridWidget =>
   ({ id, folderId: 'f', x: 0, y: 0, w: 1, h: 1, type: 'action-button', data: {} }) as GridWidget;
@@ -42,16 +47,45 @@ class FakeConnection {
   }
 }
 
+class FakeClock implements SessionTimers {
+  private now = 0;
+  private next = 0;
+  private readonly due = new Map<number, { at: number; callback: () => void }>();
+
+  set(callback: () => void, delayMs: number): unknown {
+    const handle = ++this.next;
+    this.due.set(handle, { at: this.now + delayMs, callback });
+    return handle;
+  }
+
+  clear(handle: unknown): void {
+    this.due.delete(handle as number);
+  }
+
+  advance(ms: number): void {
+    this.now += ms;
+    for (const [handle, timer] of [...this.due]) {
+      if (timer.at > this.now) continue;
+      this.due.delete(handle);
+      timer.callback();
+    }
+  }
+}
+
 describe('WidgetSessions', () => {
   let connection: FakeConnection;
   let store: UiSessionStore;
   let sessions: WidgetSessions;
+  let clock: FakeClock;
 
   beforeEach(() => {
     connection = new FakeConnection();
     store = new UiSessionStore();
-    sessions = new WidgetSessions(connection, store);
+    clock = new FakeClock();
+    sessions = new WidgetSessions(connection, store, clock);
   });
+
+  const closes = () => connection.calls.filter(call => call.type === 'CloseUiSession');
 
   const settle = async () => { for (let turn = 0; turn < 6; turn++) await Promise.resolve(); };
 
@@ -113,10 +147,10 @@ describe('WidgetSessions', () => {
     sessions.sync([widget('w1')]);
     await settle();
     store.treeUpdated('s1', 1, tree('Lights'));
-    // The grid drawing it before the widget leaves the deck - what the memo remembers.
     expect(sessions.treeFor('w1')!.properties!['text']).toBe('Lights');
 
     sessions.sync([]);
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
     await settle();
 
     expect(sessions.treeFor('w1')!.properties!['text']).toBe('Lights');
@@ -130,6 +164,161 @@ describe('WidgetSessions', () => {
     // restated across a folder switch rather than a reconnect.
     store.treeUpdated('s2', 1, tree('Lights on'));
     expect(sessions.treeFor('w1')!.properties!['text']).toBe('Lights on');
+  });
+
+  it('paints on return the tree that arrived before the widget left, drawn or not', async () => {
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Off'));
+    store.treeUpdated('s1', 2, tree('On'));
+
+    sessions.sync([]);
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+    sessions.sync([widget('w1')]);
+
+    expect(sessions.treeFor('w1')!.properties!['text']).toBe('On');
+  });
+
+  it('keeps the tree that arrives just after its widget left, as a press that switches folders sends it', async () => {
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Off'));
+
+    sessions.sync([]);
+    store.treeUpdated('s1', 2, tree('On'));
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+    await settle();
+    sessions.sync([widget('w1')]);
+
+    expect(closes().length).toBe(1);
+    expect(sessions.treeFor('w1')!.properties!['text']).toBe('On');
+  });
+
+  it('keeps the session of a widget that comes back before its close was due', async () => {
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Lights'));
+
+    sessions.sync([]);
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS / 2);
+    sessions.sync([widget('w1')]);
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+    await settle();
+
+    expect(closes().length).toBe(0);
+    expect(connection.opens()).toBe(1);
+    expect(sessions.treeFor('w1')!.properties!['text']).toBe('Lights');
+  });
+
+  it('paints nothing outdated for a widget whose state moved while it was hidden', async () => {
+    const changed: string[] = [];
+    sessions.onWidgetChanged(widgetId => changed.push(widgetId));
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Off'));
+    sessions.sync([]);
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+    await settle();
+
+    sessions.invalidate('w1');
+    sessions.sync([widget('w1')]);
+    await settle();
+
+    expect(changed).toEqual(['w1']);
+    expect(sessions.treeFor('w1')).toBeUndefined();
+    store.treeUpdated('s2', 1, tree('On'));
+    expect(sessions.treeFor('w1')!.properties!['text']).toBe('On');
+  });
+
+  it('keeps painting at once on return a widget whose state moved while it was shown', async () => {
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Off'));
+    store.treeUpdated('s1', 2, tree('On'));
+    sessions.invalidate('w1');
+
+    sessions.sync([]);
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+    await settle();
+    sessions.sync([widget('w1')]);
+
+    expect(sessions.treeFor('w1')!.properties!['text']).toBe('On');
+  });
+
+  it('keeps the tree that follows a state change of a widget still closing', async () => {
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Off'));
+    sessions.sync([]);
+
+    sessions.invalidate('w1');
+    store.treeUpdated('s1', 2, tree('On'));
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+    await settle();
+    sessions.sync([widget('w1')]);
+
+    expect(sessions.treeFor('w1')!.properties!['text']).toBe('On');
+  });
+
+  it('paints nothing outdated when the change of a widget still closing never arrived before it closed', async () => {
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Off'));
+    sessions.sync([]);
+
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS - 10);
+    sessions.invalidate('w1');
+    clock.advance(10);
+    await settle();
+    sessions.sync([widget('w1')]);
+
+    expect(closes().length).toBe(1);
+    expect(sessions.treeFor('w1')).toBeUndefined();
+  });
+
+  it('closes a hidden widget on time however often its state moves', async () => {
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('0'));
+    sessions.sync([]);
+
+    for (let step = 1; step <= 4; step++) {
+      clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS / 4);
+      sessions.invalidate('w1');
+    }
+    await settle();
+
+    expect(closes().length).toBe(1);
+  });
+
+  it('sends no close for a session the host already ended while its widget was hidden', async () => {
+    sessions.sync([widget('w1')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Lights'));
+    sessions.sync([]);
+
+    sessions.sessionClosed('s1');
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+    await settle();
+
+    expect(closes().length).toBe(0);
+  });
+
+  it('forgets after a reconnect what hidden widgets drew, keeping what the deck shows', async () => {
+    sessions.sync([widget('w1'), widget('w2')]);
+    await settle();
+    store.treeUpdated('s1', 1, tree('Shown'));
+    store.treeUpdated('s2', 1, tree('Hidden'));
+    sessions.sync([widget('w1')]);
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+    await settle();
+    store.clear();
+    sessions.reset();
+
+    sessions.forgetHidden([widget('w1')]);
+
+    expect(sessions.treeFor('w1')!.properties!['text']).toBe('Shown');
+    expect(sessions.treeFor('w2')).toBeUndefined();
   });
 
   it('has no tree for a widget whose session has not answered yet', async () => {
@@ -162,9 +351,11 @@ describe('WidgetSessions', () => {
     sessions.treeFor('w2');
 
     sessions.sync([widget('w1')]);
+    expect(closes().length).toBe(0);
+    clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
     await settle();
 
-    const closed = connection.calls.filter(call => call.type === 'CloseUiSession');
+    const closed = closes();
     expect(closed.length).toBe(1);
     expect(closed[0].payload).toEqual(['s2']);
     // The session closes, but what it last drew stays in the memo (issue #856) - see the folder
@@ -330,14 +521,14 @@ describe('WidgetSessions', () => {
         sessions.sync([widget(`w${index}`)]);
         await settle();
         store.treeUpdated(`s${index + 1}`, 1, tree(`text-${index}`));
-        // The grid actually drawing it - what the memo remembers.
-        sessions.treeFor(`w${index}`);
+        clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
       }
       sessions.sync([]);
+      clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
       await settle();
     };
 
-    it('evicts the least recently drawn widget once the bound is passed', async () => {
+    it('evicts the widget whose tree arrived longest ago once the bound is passed', async () => {
       await fillToCapacity();
 
       expect(sessions.treeFor('w0')).toBeUndefined();

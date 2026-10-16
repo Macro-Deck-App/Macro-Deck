@@ -159,6 +159,66 @@ public class WidgetStateVariablesAndPushTests
 		});
 	}
 
+	[Test]
+	public async Task A_transition_nobody_subscribes_to_still_tells_every_client_the_widget_state_is_outdated()
+	{
+		var transport = new RecordingTransport();
+		var publisher
+			= new WidgetStatePublisher(transport, new WidgetStateSubscriptionTracker(), new WidgetRenderSignals());
+		var widgetId = Guid.NewGuid();
+
+		var transition = new WidgetStateReconciliation("on",
+			"On",
+			[new WidgetStateOption("off", "Off"), new WidgetStateOption("on", "On")],
+			true,
+			true,
+			false);
+		await publisher.PublishIfChanged(widgetId, transition);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(transport.Broadcast.Select(evt => evt.WidgetId), Is.EqualTo(new[] { widgetId.ToString() }));
+			Assert.That(transport.Sent, Is.Empty, "the state push itself still goes only to subscribers");
+		});
+	}
+
+	[Test]
+	public async Task A_provider_renaming_the_states_of_a_widget_nobody_subscribes_to_outdates_it()
+	{
+		var transport = new RecordingTransport();
+		var publisher
+			= new WidgetStatePublisher(transport, new WidgetStateSubscriptionTracker(), new WidgetRenderSignals());
+		var widgetId = Guid.NewGuid();
+
+		var renamed = new WidgetStateReconciliation("live",
+			"Live",
+			[new WidgetStateOption("live", "On air"), new WidgetStateOption("offline", "Off air")],
+			false,
+			false,
+			true);
+		await publisher.PublishIfChanged(widgetId, renamed);
+
+		Assert.That(transport.Broadcast.Select(evt => evt.WidgetId), Is.EqualTo(new[] { widgetId.ToString() }));
+	}
+
+	[Test]
+	public async Task The_first_state_a_widget_is_seen_in_outdates_nothing()
+	{
+		var transport = new RecordingTransport();
+		var publisher
+			= new WidgetStatePublisher(transport, new WidgetStateSubscriptionTracker(), new WidgetRenderSignals());
+
+		var seed = new WidgetStateReconciliation("off",
+			"Off",
+			[new WidgetStateOption("off", "Off"), new WidgetStateOption("on", "On")],
+			true,
+			false,
+			false);
+		await publisher.PublishIfChanged(Guid.NewGuid(), seed);
+
+		Assert.That(transport.Broadcast, Is.Empty);
+	}
+
 	// The render-signal seam beside PublishIfChanged's client push: an open in-process session must
 	// see exactly the same event a legacy client is pushed, in the same call.
 	[Test]
@@ -442,6 +502,8 @@ public class WidgetStateVariablesAndPushTests
 	{
 		public List<WidgetStateUpdatedEvent> Sent { get; } = [];
 
+		public List<WidgetStateInvalidatedEvent> Broadcast { get; } = [];
+
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
 		{
@@ -461,6 +523,11 @@ public class WidgetStateVariablesAndPushTests
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
 		{
+			if (message is WidgetStateInvalidatedEvent evt)
+			{
+				Broadcast.Add(evt);
+			}
+
 			return Task.CompletedTask;
 		}
 

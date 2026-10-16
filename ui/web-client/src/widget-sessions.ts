@@ -4,6 +4,16 @@ interface SessionOpener {
   request<T>(type: string, payload?: unknown): Promise<T>;
 }
 
+export interface SessionTimers {
+  set(callback: () => void, delayMs: number): unknown;
+  clear(handle: unknown): void;
+}
+
+const browserTimers: SessionTimers = {
+  set: (callback, delayMs) => setTimeout(callback, delayMs),
+  clear: handle => clearTimeout(handle as ReturnType<typeof setTimeout>),
+};
+
 function args(...values: unknown[]): unknown[] {
   return values;
 }
@@ -14,6 +24,7 @@ interface OpenResponse {
 }
 
 export const WIDGET_SESSION_MEMO_CAPACITY = 120;
+export const WIDGET_SESSION_CLOSE_GRACE_MS = 1000;
 const MAX_REOPENS_WITHOUT_A_TREE = 3;
 
 type HandshakeOutcome = 'live' | 'refused' | 'ended';
@@ -24,33 +35,45 @@ export class WidgetSessions {
   private readonly opening: { [widgetId: string]: true } = {};
   private readonly wanted: { [widgetId: string]: true } = {};
   private readonly reopens: { [widgetId: string]: number } = {};
+  private readonly closing: { [widgetId: string]: unknown } = {};
+  private readonly outdated: { [widgetId: string]: true } = {};
 
   private readonly lastTree: { [widgetId: string]: UiNode } = {};
   private readonly memoOrder: string[] = [];
+  private widgetListeners: Array<(widgetId: string) => void> = [];
 
   constructor(
     private readonly connection: SessionOpener,
     private readonly sessions: UiSessionStore,
+    private readonly timers: SessionTimers = browserTimers,
   ) {
     this.sessions.onChange(sessionId => {
       if (sessionId === null || !this.sessions.has(sessionId)) return;
       const widgetId = this.widgetBySession[sessionId];
-      if (widgetId !== undefined) delete this.reopens[widgetId];
+      if (widgetId === undefined) return;
+      delete this.reopens[widgetId];
+      const tree = this.sessions.tree(sessionId);
+      if (tree !== undefined) this.remember(widgetId, tree);
     });
   }
 
   treeFor(widgetId: string): UiNode | undefined {
-    const sessionId = this.sessionByWidget[widgetId];
-    const live = sessionId === undefined ? undefined : this.sessions.tree(sessionId);
-    if (live !== undefined) {
-      this.remember(widgetId, live);
-      return live;
-    }
-    return this.lastTree[widgetId];
+    return this.liveTree(widgetId) ?? this.lastTree[widgetId];
   }
 
   widgetFor(sessionId: string): string | undefined {
     return this.widgetBySession[sessionId];
+  }
+
+  isDisplayed(widgetId: string): boolean {
+    return this.wanted[widgetId] === true;
+  }
+
+  onWidgetChanged(listener: (widgetId: string) => void): () => void {
+    this.widgetListeners.push(listener);
+    return () => {
+      this.widgetListeners = this.widgetListeners.filter(candidate => candidate !== listener);
+    };
   }
 
   sendEvent(widgetId: string, nodeId: string, name: string, data?: unknown): void {
@@ -74,8 +97,9 @@ export class WidgetSessions {
 
     for (const widgetId in this.sessionByWidget) {
       if (!Object.prototype.hasOwnProperty.call(this.sessionByWidget, widgetId)) continue;
-      if (this.wanted[widgetId]) continue;
-      this.close(widgetId);
+      if (this.wanted[widgetId]) this.cancelClose(widgetId);
+      else if (this.liveTree(widgetId) === undefined) this.close(widgetId);
+      else if (!this.isClosing(widgetId)) this.scheduleClose(widgetId);
     }
 
     for (let index = 0; index < widgets.length; index++) {
@@ -85,9 +109,29 @@ export class WidgetSessions {
     }
   }
 
+  invalidate(widgetId: string): void {
+    if (this.liveTree(widgetId) !== undefined) {
+      if (this.isClosing(widgetId)) this.outdated[widgetId] = true;
+      return;
+    }
+    if (!this.dropMemo(widgetId)) return;
+    const notified = this.widgetListeners.slice();
+    for (let index = 0; index < notified.length; index++) notified[index](widgetId);
+  }
+
+  forgetHidden(displayed: readonly GridWidget[]): void {
+    const keep: { [widgetId: string]: true } = {};
+    for (let index = 0; index < displayed.length; index++) keep[displayed[index].id] = true;
+    const remembered = this.memoOrder.slice();
+    for (let index = 0; index < remembered.length; index++) {
+      if (!keep[remembered[index]]) this.dropMemo(remembered[index]);
+    }
+  }
+
   reset(): void {
     for (const widgetId in this.sessionByWidget) {
       if (Object.prototype.hasOwnProperty.call(this.sessionByWidget, widgetId)) {
+        this.cancelClose(widgetId);
         delete this.sessionByWidget[widgetId];
         delete this.reopens[widgetId];
       }
@@ -102,8 +146,11 @@ export class WidgetSessions {
   sessionClosed(sessionId: string): void {
     const widgetId = this.widgetBySession[sessionId];
     if (widgetId === undefined) return;
+    const outdated = this.outdated[widgetId] === true;
+    this.cancelClose(widgetId);
     delete this.widgetBySession[sessionId];
     delete this.sessionByWidget[widgetId];
+    if (outdated) this.dropMemo(widgetId);
   }
 
   forgetAll(): void {
@@ -111,6 +158,11 @@ export class WidgetSessions {
       if (Object.prototype.hasOwnProperty.call(this.lastTree, widgetId)) delete this.lastTree[widgetId];
     }
     this.memoOrder.length = 0;
+  }
+
+  private liveTree(widgetId: string): UiNode | undefined {
+    const sessionId = this.sessionByWidget[widgetId];
+    return sessionId === undefined ? undefined : this.sessions.tree(sessionId);
   }
 
   private async open(widget: GridWidget): Promise<void> {
@@ -171,11 +223,20 @@ export class WidgetSessions {
   }
 
   private remember(widgetId: string, tree: UiNode): void {
+    delete this.outdated[widgetId];
     this.lastTree[widgetId] = tree;
     const at = this.memoOrder.indexOf(widgetId);
     if (at >= 0) this.memoOrder.splice(at, 1);
     this.memoOrder.push(widgetId);
     this.evictOverCapacity();
+  }
+
+  private dropMemo(widgetId: string): boolean {
+    if (!Object.prototype.hasOwnProperty.call(this.lastTree, widgetId)) return false;
+    delete this.lastTree[widgetId];
+    const at = this.memoOrder.indexOf(widgetId);
+    if (at >= 0) this.memoOrder.splice(at, 1);
+    return true;
   }
 
   private evictOverCapacity(): void {
@@ -193,7 +254,31 @@ export class WidgetSessions {
     }
   }
 
+  private isClosing(widgetId: string): boolean {
+    return Object.prototype.hasOwnProperty.call(this.closing, widgetId);
+  }
+
+  // The host does not flush a session's pending patches before it closes it, so closing the moment
+  // a widget leaves would lose a patch that races the folder switch.
+  private scheduleClose(widgetId: string): void {
+    this.closing[widgetId] = this.timers.set(() => {
+      delete this.closing[widgetId];
+      if (this.wanted[widgetId]) return;
+      const outdated = this.outdated[widgetId] === true;
+      this.close(widgetId);
+      if (outdated) this.dropMemo(widgetId);
+    }, WIDGET_SESSION_CLOSE_GRACE_MS);
+  }
+
+  private cancelClose(widgetId: string): void {
+    delete this.outdated[widgetId];
+    if (!this.isClosing(widgetId)) return;
+    this.timers.clear(this.closing[widgetId]);
+    delete this.closing[widgetId];
+  }
+
   private close(widgetId: string): void {
+    this.cancelClose(widgetId);
     const sessionId = this.sessionByWidget[widgetId];
     delete this.sessionByWidget[widgetId];
     delete this.reopens[widgetId];
