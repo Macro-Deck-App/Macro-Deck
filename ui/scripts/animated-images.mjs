@@ -12,6 +12,7 @@ const fixturesFile = path.join(repo, 'ui-model/fixtures/animated-images/fixtures
 const TIMEOUT_MS = 30000;
 const PHASE_FRAME_MS = 200;
 const PHASE_FRAMES = 8;
+const INCOMING_FADE_MS = 220;
 const BUTTON_BACKGROUND = [0, 0, 0];
 
 const decoderPage = `<!doctype html><meta charset="utf-8"><script>
@@ -257,8 +258,9 @@ async function runtimeChecks(evaluate, browser, fixtures) {
 		samples.push({ t: shot.at - started, latency: shot.latency, index: isRed ? read.index : null });
 	}
 	const after = await settled();
-	const promoted = phaseSpread(samples);
 	const shownAt = await evaluate("animatedArtwork.loadedAt('phase-red')") - started;
+	// Read during its fade the incoming picture is mixed with the outgoing one, so its cells give no index.
+	const promoted = phaseSpread(samples.filter(sample => sample.t >= shownAt + INCOMING_FADE_MS));
 	const differences = [];
 	if (promoted.readable < 4 || promoted.spread > promoted.allowed) differences.push(`the incoming play moved by ${Math.round(promoted.spread)} ms (allowed ${Math.round(promoted.allowed)})`);
 	const startedOff = Math.abs(promoted.middle + shownAt + PHASE_FRAME_MS / 2);
