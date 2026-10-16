@@ -9339,6 +9339,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Integrations.Spotify.Config.RedirectUriLabel" xml:space="preserve">
     <value>URI de redirecionamento</value>
   </data>
+  <data name="Integrations.Spotify.Config.SpotifyUnreachable" xml:space="preserve">
+    <value>Não foi possível acessar o Spotify ou ele não respondeu a tempo. Verifique sua conexão com a internet e continue para entrar novamente.</value>
+  </data>
   <data name="Integrations.Spotify.Config.TokenExchangeFailed" xml:space="preserve">
     <value>Não foi possível trocar o código de autorização. Verifique o ID e o Segredo do cliente e tente novamente.</value>
   </data>
@@ -22858,13 +22861,13 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>Configurar a Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>Os jogos instalados são encontrados sem nenhuma configuração. Adicione um SteamID e uma chave da API Web para mostrar também o status e os amigos de uma conta. Você pode adicionar várias contas.</value>
+    <value>Os jogos instalados são encontrados sem nenhuma configuração. Adicione uma chave da API Web e um SteamID para mostrar também o status e os amigos de uma conta. Você pode adicionar várias contas.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Entre na Steam, abra a página de chaves de API e registre uma chave. A página pede um nome de domínio; qualquer valor serve. Contas limitadas não podem obter uma chave.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>Informe seu SteamID64 de 17 dígitos, o link do seu perfil ou o nome personalizado do perfil. Um nome personalizado exige a chave.</value>
+    <value>Informe seu SteamID64 de 17 dígitos, o link do seu perfil ou o nome personalizado do perfil.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Abrir a página de chaves da API Web da Steam</value>
@@ -22873,7 +22876,7 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>Deixe vazio para usar apenas os jogos instalados.</value>
+    <value>Necessário junto com a chave. Deixe ambos vazios para usar apenas os jogos instalados.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 ou link do perfil</value>
@@ -22882,7 +22885,7 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>Chave da API Web</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>Armazenada neste computador e usada apenas para consultar a Steam sobre seu perfil.</value>
+    <value>Necessária junto com o SteamID. Armazenada neste computador e usada apenas para consultar a Steam sobre seu perfil.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>Pastas de biblioteca adicionais</value>
@@ -22897,10 +22900,10 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>Informe caminhos de pasta completos.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>Informe a chave da API Web deste perfil.</value>
+    <value>Informe também a chave ou limpe o SteamID para usar apenas os jogos instalados.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>Informe o SteamID que pertence a esta chave.</value>
+    <value>Informe também o SteamID ou limpe a chave para usar apenas os jogos instalados.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>Informe um SteamID64 de 17 dígitos, um link de perfil ou um nome de perfil personalizado.</value>

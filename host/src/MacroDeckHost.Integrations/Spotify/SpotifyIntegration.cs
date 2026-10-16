@@ -259,7 +259,7 @@ public sealed class SpotifyIntegration
 
 	public IConfigFlow CreateConfigFlow()
 	{
-		return new SpotifyConfigFlow();
+		return new SpotifyConfigFlow(_oauth, _transport);
 	}
 
 	public bool AllowsMultipleConfigurations => false;

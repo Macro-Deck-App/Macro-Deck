@@ -12,7 +12,7 @@ namespace MacroDeckHost.Infrastructure.Icons;
 public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisposable
 {
 	private const string CacheDirectoryName = "fallback-cache";
-	private const string TranscodeVersion = "t2";
+	private const string TranscodeVersion = "t3";
 
 	private readonly IIconStorage _storage;
 	private readonly IMacroDeckPaths _paths;

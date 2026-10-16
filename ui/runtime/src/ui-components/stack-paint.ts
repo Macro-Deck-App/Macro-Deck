@@ -29,10 +29,21 @@ import {
   releaseArtworkCrossfade,
   showsBitmap,
   swapArtwork,
+  takePromotion,
 } from './artwork-crossfade';
 import { px } from './px.util';
 import { setImageSource } from './image-recovery';
-import { maskImageUrl, repaintOnLoad, supportsMasks } from './artwork-tint';
+import {
+  createTintFilterHold,
+  holdTintFilter,
+  maskImageUrl,
+  releaseTintFilter,
+  repaintOnLoad,
+  supportsFilterTint,
+  supportsMasks,
+  TintFilterHold,
+  withTintFilter,
+} from './artwork-tint';
 import { nodeModifierOwns } from '../render/node-modifiers';
 
 const BUTTON_CORNER_RATIO = 0.12;
@@ -48,10 +59,11 @@ interface ButtonArtworkLook {
 export interface StackButtonState {
   artwork: ArtworkCrossfadeState<ButtonArtworkLook>;
   border: WidgetBorderHandle | null;
+  tintFilter: TintFilterHold;
 }
 
 export function createStackButtonState(): StackButtonState {
-  return { artwork: createArtworkCrossfadeState(), border: null };
+  return { artwork: createArtworkCrossfadeState(), border: null, tintFilter: createTintFilterHold() };
 }
 
 function buttonCornerPx(element: HTMLElement, boxHeight: number | null): number | undefined {
@@ -124,7 +136,7 @@ export function paintButtonArtwork<TState>(
   const artwork = ctx.host.resourceUrl(
     nodeResource(node, UiComponentProperties.Source),
     edge > 0 ? { displayPx: edge * buttonZoom(node) } : undefined);
-  const tint = supportsMasks() ? nodeHexColor(node, UiComponentProperties.Tint) ?? null : null;
+  const tint = supportsFilterTint() || supportsMasks() ? nodeHexColor(node, UiComponentProperties.Tint) ?? null : null;
   const look: ButtonArtworkLook = {
     fit: buttonFit(node),
     transform: buttonArtworkTransform(node),
@@ -138,6 +150,7 @@ export function paintButtonArtwork<TState>(
     if (state.artwork.settled === null) {
       ctx.dropPart('artwork');
       ctx.dropPart('artwork-tint');
+      releaseTintFilter(state.tintFilter);
     } else {
       const image = ctx.part('artwork', 'img') as HTMLImageElement;
       ctx.setClassName(image, 'widget-button-artwork');
@@ -151,19 +164,29 @@ export function paintButtonArtwork<TState>(
       // CSSOM entirely: the value becomes unreadable, and the fallback that stands in for the property
       // on the compatibility floor has nothing left to key off. Costs one attribute.
       ctx.setAttribute(image, 'data-object-fit', settledLook.fit);
+      ctx.setAttribute(image, 'aria-hidden', null);
+      ctx.setStyle(image, '--widget-artwork-opacity', null);
       ctx.setStyle(image, 'transform', settledLook.transform);
-      ctx.setStyle(image, 'filter', settledLook.filter);
       setImageSource(image, state.artwork.settled);
-      // The mask fetch has no retry of its own, so it follows the image: until the image has loaded
-      // (and after every recovery reload) the untinted image stays visible instead of a blank mask.
       const settledTint = settledLook.tint;
-      const tinted = settledTint !== null && image.complete && image.naturalWidth > 0;
-      ctx.setStyle(image, 'opacity', tinted ? '0' : String(settledLook.opacity));
-      if (tinted) {
-        paintArtworkTint(ctx, settledLook, settledTint, state.artwork.settled);
-      } else {
+      if (settledTint !== null && supportsFilterTint()) {
         ctx.dropPart('artwork-tint');
-        if (settledTint !== null) repaintOnLoad(image, ctx);
+        const tintFilter = holdTintFilter(state.tintFilter, image.ownerDocument, settledTint);
+        ctx.setStyle(image, 'filter', withTintFilter(tintFilter, settledLook.filter));
+        ctx.setStyle(image, 'opacity', String(settledLook.opacity));
+      } else {
+        releaseTintFilter(state.tintFilter);
+        ctx.setStyle(image, 'filter', settledLook.filter);
+        // The mask fetch has no retry of its own, so it follows the image: until the image has loaded
+        // (and after every recovery reload) the untinted image stays visible instead of a blank mask.
+        const tinted = settledTint !== null && image.complete && image.naturalWidth > 0;
+        ctx.setStyle(image, 'opacity', tinted ? '0' : String(settledLook.opacity));
+        if (tinted) {
+          paintArtworkTint(ctx, settledLook, settledTint, state.artwork.settled);
+        } else {
+          ctx.dropPart('artwork-tint');
+          if (settledTint !== null) repaintOnLoad(image, ctx);
+        }
       }
     }
 
@@ -189,6 +212,10 @@ export function paintButtonArtwork<TState>(
     }
   };
 
+  if (takePromotion(state.artwork)) {
+    ctx.dropPart('artwork');
+    ctx.renamePart('artwork-incoming', 'artwork');
+  }
   const outgoing = state.artwork.settled === null ? null : ctx.part('artwork', 'img') as HTMLImageElement;
   swapArtwork(state.artwork, artwork, look, artworkCrossfades(node) && tint === null, showsBitmap(outgoing),
     () => ctx.repaint());
@@ -215,6 +242,7 @@ export function paintButtonArtwork<TState>(
 
 export function releaseStackButtonState(state: StackButtonState): void {
   releaseArtworkCrossfade(state.artwork);
+  releaseTintFilter(state.tintFilter);
   if (state.border !== null) {
     state.border.destroy();
     state.border = null;

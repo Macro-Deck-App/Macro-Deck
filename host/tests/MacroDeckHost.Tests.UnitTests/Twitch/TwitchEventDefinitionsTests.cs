@@ -154,6 +154,29 @@ internal sealed class TwitchEventDefinitionsTests
 	}
 
 	[Test]
+	public void Every_subscription_uses_a_type_and_version_twitch_documents()
+	{
+		string[] documented =
+		[
+			"stream.online v1", "stream.offline v1", "channel.update v2", "channel.ad_break.begin v1",
+			"channel.follow v2", "channel.raid v1", "channel.raid v1", "channel.shoutout.create v1",
+			"channel.shoutout.receive v1", "channel.vip.add v1", "channel.vip.remove v1", "channel.subscribe v1",
+			"channel.subscription.message v1", "channel.subscription.gift v1", "channel.subscription.end v1",
+			"channel.cheer v1", "channel.channel_points_custom_reward_redemption.add v1",
+			"channel.channel_points_custom_reward_redemption.update v1",
+			"channel.channel_points_automatic_reward_redemption.add v2", "channel.poll.begin v1",
+			"channel.poll.end v1", "channel.prediction.begin v1", "channel.prediction.lock v1",
+			"channel.prediction.end v1", "channel.hype_train.begin v2", "channel.hype_train.progress v2",
+			"channel.hype_train.end v2", "channel.goal.begin v1", "channel.goal.progress v1", "channel.goal.end v1",
+			"channel.chat.notification v1", "channel.chat.clear v1", "channel.chat.message_delete v1",
+			"channel.chat.message v1", "channel.chat.clear_user_messages v1", "channel.chat_settings.update v1",
+			"channel.ban v1", "channel.unban v1"
+		];
+
+		Assert.That(TwitchEventCatalog.All.Select(spec => $"{spec.Type} v{spec.Version}"), Is.EquivalentTo(documented));
+	}
+
+	[Test]
 	public void At_least_one_subscription_needs_no_scope()
 	{
 		Assert.That(TwitchEventCatalog.All.Where(spec => spec.Scope is null), Is.Not.Empty);

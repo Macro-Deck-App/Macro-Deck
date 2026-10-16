@@ -883,6 +883,25 @@ describe('Shell', () => {
       expect(root.querySelector('[data-widget-id="w2"]')).toBe(w2Tile);
     });
 
+    it('clears a tile that shows what its widget drew once the host says that is outdated', async () => {
+      client.deck.load([folderWithWidgets('root', ['w1'])]);
+      mount(scheduler.schedule);
+      client.app.set({ probed: true, authenticated: true, connected: true, deckRendered: true });
+      widgetSessions.sync([gridWidget('w1', 0, 0)]);
+      await settle();
+      client.sessions.treeUpdated('s1', 1, tree('Old'));
+      scheduler.flush();
+      client.sessions.invalidated('s1');
+      widgetSessions.sessionClosed('s1');
+      scheduler.flush();
+      expect(tileText('w1')).toBe('Old');
+
+      widgetSessions.invalidate('w1');
+      scheduler.flush();
+
+      expect(root.querySelector('[data-widget-id="w1"] .widget-text')).toBeNull();
+    });
+
     it('repaints the deck when a session change cannot be mapped to any widget', async () => {
       client.deck.load([folderWithWidgets('root', ['w1', 'w2'])]);
       mount(scheduler.schedule);

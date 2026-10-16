@@ -9339,6 +9339,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Spotify.Config.RedirectUriLabel" xml:space="preserve">
     <value>リダイレクト URI</value>
   </data>
+  <data name="Integrations.Spotify.Config.SpotifyUnreachable" xml:space="preserve">
+    <value>Spotify に接続できないか、時間内に応答がありませんでした。インターネット接続を確認して、続行してもう一度サインインしてください。</value>
+  </data>
   <data name="Integrations.Spotify.Config.TokenExchangeFailed" xml:space="preserve">
     <value>認証コードを交換できませんでした。クライアント ID とクライアントシークレットを確認して、もう一度お試しください。</value>
   </data>
@@ -22858,13 +22861,13 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>Steamのセットアップ</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>インストール済みのゲームはセットアップなしで見つかります。アカウントのステータスとフレンドも表示するには、SteamIDとWeb APIキーを追加してください。複数のアカウントを追加できます。</value>
+    <value>インストール済みのゲームはセットアップなしで見つかります。アカウントのステータスとフレンドも表示するには、Web APIキーとSteamIDを追加してください。複数のアカウントを追加できます。</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Steamにサインインし、APIキーのページを開いてキーを登録してください。ページではドメイン名の入力を求められますが、任意の値で構いません。制限付きアカウントではキーを取得できません。</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>17桁のSteamID64、プロフィールのリンク、またはカスタムプロフィール名を入力してください。カスタム名にはキーが必要です。</value>
+    <value>17桁のSteamID64、プロフィールのリンク、またはカスタムプロフィール名を入力してください。</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Steam Web APIキーのページを開く</value>
@@ -22873,7 +22876,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>インストール済みのゲームだけを使う場合は空のままにしてください。</value>
+    <value>キーと一緒に入力が必要です。インストール済みのゲームだけを使う場合は両方とも空のままにしてください。</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64またはプロフィールのリンク</value>
@@ -22882,7 +22885,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>Web APIキー</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>このコンピューターに保存され、Steamにプロフィールを問い合わせるためだけに使われます。</value>
+    <value>SteamIDと一緒に入力が必要です。このコンピューターに保存され、Steamにプロフィールを問い合わせるためだけに使われます。</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>追加のライブラリフォルダー</value>
@@ -22897,10 +22900,10 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>完全なフォルダーパスを入力してください。</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>このプロフィールのWeb APIキーを入力してください。</value>
+    <value>キーも入力するか、インストール済みのゲームだけを使う場合はSteamIDを空にしてください。</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>このキーに対応するSteamIDを入力してください。</value>
+    <value>SteamIDも入力するか、インストール済みのゲームだけを使う場合はキーを空にしてください。</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>17桁のSteamID64、プロフィールのリンク、またはカスタムプロフィール名を入力してください。</value>

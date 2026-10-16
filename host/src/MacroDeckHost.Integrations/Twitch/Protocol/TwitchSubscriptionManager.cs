@@ -17,6 +17,7 @@ internal sealed class TwitchSubscriptionManager
 	private readonly string _userId;
 	private readonly Func<IReadOnlyList<string>> _grantedScopes;
 	private readonly ILogger _logger;
+	private readonly HashSet<TwitchSubscriptionSpec> _rejected = [];
 
 	public TwitchSubscriptionManager(
 		ITwitchHelixClient helix,
@@ -41,11 +42,25 @@ internal sealed class TwitchSubscriptionManager
 		var granted = _grantedScopes();
 		var recordLock = new Lock();
 
-		var specs = TwitchEventCatalog.All.ToList();
-		var first = specs.First(spec => spec.Scope is null);
-		specs.Remove(first);
+		var specs = TwitchEventCatalog.All.Where(spec => !_rejected.Contains(spec)).ToList();
+		var skipped = TwitchEventCatalog.All.Where(_rejected.Contains).ToList();
+		foreach (var spec in skipped)
+		{
+			Record(spec, TwitchSubscriptionResult.Unsupported);
+		}
 
-		Record(first, await CreateAsync(first, sessionId, cancellationToken));
+		if (skipped.Count > 0)
+		{
+			_logger.Information("Skipping {Count} Twitch event(s) Twitch rejected earlier: {Events}",
+				skipped.Count,
+				string.Join(", ", skipped.Select(spec => spec.EventId)));
+		}
+
+		if (specs.FirstOrDefault(spec => spec.Scope is null) is { } first)
+		{
+			specs.Remove(first);
+			Record(first, await CreateAsync(first, sessionId, cancellationToken));
+		}
 
 		await Parallel.ForEachAsync(specs,
 			new ParallelOptions { MaxDegreeOfParallelism = MaxParallelism, CancellationToken = cancellationToken },
@@ -90,6 +105,7 @@ internal sealed class TwitchSubscriptionManager
 
 				case TwitchSubscriptionResult.Unsupported:
 					unsupported.Add(spec.EventId);
+					_rejected.Add(spec);
 					break;
 
 				default:

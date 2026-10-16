@@ -9339,6 +9339,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Spotify.Config.RedirectUriLabel" xml:space="preserve">
     <value>리디렉션 URI</value>
   </data>
+  <data name="Integrations.Spotify.Config.SpotifyUnreachable" xml:space="preserve">
+    <value>Spotify에 연결할 수 없거나 제시간에 응답하지 않았습니다. 인터넷 연결을 확인하고 계속을 눌러 다시 로그인하세요.</value>
+  </data>
   <data name="Integrations.Spotify.Config.TokenExchangeFailed" xml:space="preserve">
     <value>인증 코드를 교환할 수 없습니다. 클라이언트 ID와 비밀 값을 확인한 다음 다시 시도하세요.</value>
   </data>
@@ -22858,13 +22861,13 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>Steam 설정</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>설치된 게임은 별도 설정 없이 찾을 수 있습니다. 계정의 상태와 친구도 표시하려면 SteamID와 Web API 키를 추가하세요. 계정을 여러 개 추가할 수 있습니다.</value>
+    <value>설치된 게임은 별도 설정 없이 찾을 수 있습니다. 계정의 상태와 친구도 표시하려면 Web API 키와 SteamID를 추가하세요. 계정을 여러 개 추가할 수 있습니다.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>Steam에 로그인한 뒤 API 키 페이지를 열고 키를 등록하세요. 페이지에서 도메인 이름을 요구하지만 아무 값이나 입력해도 됩니다. 제한된 계정은 키를 받을 수 없습니다.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>17자리 SteamID64, 프로필 링크 또는 사용자 지정 프로필 이름을 입력하세요. 사용자 지정 이름에는 키가 필요합니다.</value>
+    <value>17자리 SteamID64, 프로필 링크 또는 사용자 지정 프로필 이름을 입력하세요.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>Steam Web API 키 페이지 열기</value>
@@ -22873,7 +22876,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>설치된 게임만 사용하려면 비워 두세요.</value>
+    <value>키와 함께 입력해야 합니다. 설치된 게임만 사용하려면 둘 다 비워 두세요.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 또는 프로필 링크</value>
@@ -22882,7 +22885,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>Web API 키</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>이 컴퓨터에 저장되며 Steam에 내 프로필을 조회하는 데만 사용됩니다.</value>
+    <value>SteamID와 함께 입력해야 합니다. 이 컴퓨터에 저장되며 Steam에 내 프로필을 조회하는 데만 사용됩니다.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>추가 라이브러리 폴더</value>
@@ -22897,10 +22900,10 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>전체 폴더 경로를 입력하세요.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>이 프로필의 Web API 키를 입력하세요.</value>
+    <value>키도 입력하거나, 설치된 게임만 사용하려면 SteamID를 지우세요.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>이 키에 해당하는 SteamID를 입력하세요.</value>
+    <value>SteamID도 입력하거나, 설치된 게임만 사용하려면 키를 지우세요.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>17자리 SteamID64, 프로필 링크 또는 사용자 지정 프로필 이름을 입력하세요.</value>

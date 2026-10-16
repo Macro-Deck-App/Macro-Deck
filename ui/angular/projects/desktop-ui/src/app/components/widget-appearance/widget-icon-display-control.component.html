@@ -12,7 +12,7 @@
         (pointerup)="onPointerUp($event)"
         (pointercancel)="onPointerUp($event)"
         (wheel)="onWheel($event)">
-        @if (previewTint) {
+        @if (masksTint) {
           <div class="idc-image idc-tint" [style]="tintStyle"></div>
         } @else {
           <img class="idc-image" [src]="iconUrl" [style]="previewStyle" alt="" draggable="false" />

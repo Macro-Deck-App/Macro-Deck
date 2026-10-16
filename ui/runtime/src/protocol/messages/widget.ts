@@ -189,6 +189,10 @@ export interface WidgetStateChangedNotification {
   data?: string;
 }
 
+export interface WidgetStateInvalidatedEvent {
+  widgetId: string;
+}
+
 export interface LabelTextUpdatedEvent {
   widgetId: string;
   state: string;

@@ -9339,6 +9339,9 @@
   <data name="Integrations.Spotify.Config.RedirectUriLabel" xml:space="preserve">
     <value>Redirect URI</value>
   </data>
+  <data name="Integrations.Spotify.Config.SpotifyUnreachable" xml:space="preserve">
+    <value>تعذّر الوصول إلى Spotify أو لم يستجب في الوقت المحدد. تحقّق من اتصالك بالإنترنت ثم تابع لتسجيل الدخول مرة أخرى.</value>
+  </data>
   <data name="Integrations.Spotify.Config.TokenExchangeFailed" xml:space="preserve">
     <value>تعذّر استبدال رمز التفويض. تحقق من معرّف العميل والسر السري وحاول مرة أخرى.</value>
   </data>
@@ -22858,13 +22861,13 @@
     <value>إعداد Steam</value>
   </data>
   <data name="Integrations.Steam.Config.Description" xml:space="preserve">
-    <value>يتم العثور على الألعاب المثبّتة دون أي إعداد. أضف SteamID ومفتاح Web API لعرض حالة حساب وأصدقائه أيضًا. يمكنك إضافة عدة حسابات.</value>
+    <value>يتم العثور على الألعاب المثبّتة دون أي إعداد. أضف مفتاح Web API وSteamID لعرض حالة حساب وأصدقائه أيضًا. يمكنك إضافة عدة حسابات.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
     <value>سجّل الدخول إلى Steam وافتح صفحة مفاتيح API وسجّل مفتاحًا. تطلب الصفحة اسم نطاق؛ أي قيمة تصلح. لا يمكن للحسابات المحدودة الحصول على مفتاح.</value>
   </data>
   <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
-    <value>أدخل SteamID64 المكوّن من 17 رقمًا أو رابط ملفك الشخصي أو اسم ملفك الشخصي المخصص. الاسم المخصص يحتاج إلى المفتاح.</value>
+    <value>أدخل SteamID64 المكوّن من 17 رقمًا أو رابط ملفك الشخصي أو اسم ملفك الشخصي المخصص.</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
     <value>فتح صفحة مفاتيح Steam Web API</value>
@@ -22873,7 +22876,7 @@
     <value>SteamID</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
-    <value>اتركه فارغًا لاستخدام الألعاب المثبّتة فقط.</value>
+    <value>مطلوب مع المفتاح. اترك الحقلين فارغين لاستخدام الألعاب المثبّتة فقط.</value>
   </data>
   <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
     <value>SteamID64 أو رابط الملف الشخصي</value>
@@ -22882,7 +22885,7 @@
     <value>مفتاح Web API</value>
   </data>
   <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
-    <value>يُخزَّن على هذا الكمبيوتر ويُستخدم فقط للاستعلام من Steam عن ملفك الشخصي.</value>
+    <value>مطلوب مع SteamID. يُخزَّن على هذا الكمبيوتر ويُستخدم فقط للاستعلام من Steam عن ملفك الشخصي.</value>
   </data>
   <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
     <value>مجلدات مكتبة إضافية</value>
@@ -22897,10 +22900,10 @@
     <value>أدخل مسارات مجلدات كاملة.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
-    <value>أدخل مفتاح Web API لهذا الملف الشخصي.</value>
+    <value>أدخل المفتاح أيضًا، أو امسح SteamID لاستخدام الألعاب المثبّتة فقط.</value>
   </data>
   <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
-    <value>أدخل SteamID الخاص بهذا المفتاح.</value>
+    <value>أدخل SteamID أيضًا، أو امسح المفتاح لاستخدام الألعاب المثبّتة فقط.</value>
   </data>
   <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
     <value>أدخل SteamID64 مكوّنًا من 17 رقمًا أو رابط ملف شخصي أو اسم ملف شخصي مخصصًا.</value>

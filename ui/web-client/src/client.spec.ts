@@ -1598,6 +1598,70 @@ describe('Client', () => {
     });
   });
 
+  describe('what a widget that is not on screen last drew', () => {
+    const notify = (client: Client, type: string, body: unknown) =>
+      (client as unknown as { onNotification(type: string, payload: unknown): void }).onNotification(type, body);
+
+    const withHiddenDrawing = async (): Promise<{ client: Client; sessions: WidgetSessions }> => {
+      twoProfiles();
+      const client = build();
+      await client.probe();
+      await client.signIn('owner', 'secret');
+      const opener = {
+        request: <T>(type: string): Promise<T> => Promise.resolve(
+          (type === 'OpenWidgetUiSession'
+            ? { accepted: true, sessionId: 's1' }
+            : { accepted: true }) as T),
+      };
+      const sessions = new WidgetSessions(opener, client.sessions);
+      (client as unknown as { widgetSessions: WidgetSessions }).widgetSessions = sessions;
+      sessions.sync([
+        { id: 'w1', folderId: 'a-child', x: 0, y: 0, w: 1, h: 1, type: 'action-button', data: {} } as never,
+      ]);
+      for (let tick = 0; tick < 5; tick++) await Promise.resolve();
+      client.sessions.treeUpdated('s1', 1, { id: 1, type: 'ui.stack' } as never);
+      client.sessions.invalidated('s1');
+      sessions.sessionClosed('s1');
+      expect(sessions.treeFor('w1')).toBeDefined();
+      return { client, sessions };
+    };
+
+    it('is not painted again once the host says the widget changed state', async () => {
+      const { client, sessions } = await withHiddenDrawing();
+
+      notify(client, 'WidgetStateInvalidatedEvent', { widgetId: 'w1' });
+
+      expect(sessions.treeFor('w1')).toBeUndefined();
+    });
+
+    it('is not painted again once the widget itself was changed', async () => {
+      const { client, sessions } = await withHiddenDrawing();
+
+      notify(client, 'WidgetUpdatedEvent', {
+        folderId: 'a-child',
+        widget: { id: 'w1', type: 'ActionButton', positionX: 0, positionY: 0, width: 1, height: 1, data: '{}' },
+      });
+
+      expect(sessions.treeFor('w1')).toBeUndefined();
+    });
+
+    it('survives a change to another widget', async () => {
+      const { client, sessions } = await withHiddenDrawing();
+
+      notify(client, 'WidgetStateInvalidatedEvent', { widgetId: 'w2' });
+
+      expect(sessions.treeFor('w1')).toBeDefined();
+    });
+
+    it('is not painted again after a reconnect, since changes while offline reached nobody', async () => {
+      const { client, sessions } = await withHiddenDrawing();
+
+      client.connection.state.set('connected');
+
+      expect(sessions.treeFor('w1')).toBeUndefined();
+    });
+  });
+
   describe('a session that ends without being asked to', () => {
     const revoke = (client: Client) =>
       (client as unknown as { onNotification(type: string, payload: unknown): void })

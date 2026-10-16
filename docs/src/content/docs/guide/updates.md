@@ -44,7 +44,10 @@ longer installs it on quit.
 
 Macro Deck keeps checking for updates while it runs in the background, for example after it started with
 your computer or after you closed its window. When it finds a new version then, it opens a small update
-window with the release notes, so you do not have to open Macro Deck to see it.
+window with the release notes, so you do not have to open Macro Deck to see it. The window opens without
+taking the keyboard focus, so whatever you are typing or playing keeps it. On Windows, Macro Deck also
+waits while Windows reports a fullscreen game, a fullscreen app or a presentation, and opens the window
+once you are back on the desktop.
 
 - In **Notify only**, choose **Download & install**. The window shows the download, then Macro Deck
   restarts to install the update.
@@ -53,10 +56,11 @@ window with the release notes, so you do not have to open Macro Deck to see it.
 - **Later**, or closing the window, leaves the update for now.
 
 The update window opens on its own at most once per version while Macro Deck runs, when an update is found
-in the background. It never opens in **Off** or **Automatic** mode.
+in the background. It never opens in **Off** or **Automatic** mode, and not when you open the Macro Deck
+window before it appears.
 
 While an update is waiting, the Macro Deck icon in the system tray or menu bar has an **Update to**
-entry with the new version. It opens the update window again.
+entry with the new version. It opens the update window right away and brings it to the front.
 
 With **Before Macro Deck updates** turned on in **Settings > Backups**, Macro Deck makes a backup before it
 installs. See [Backups](/guide/backups/).

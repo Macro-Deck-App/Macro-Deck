@@ -143,7 +143,11 @@ export class Shell {
         this.repaintQueue.deck();
         return;
       }
+      if (!this.client.widgetSessions.isDisplayed(widgetId)) return;
       this.repaintQueue.widget(widgetId);
+    });
+    this.client.widgetSessions.onWidgetChanged(widgetId => {
+      if (this.client.widgetSessions.isDisplayed(widgetId)) this.repaintQueue.widget(widgetId);
     });
     this.client.reopenableSessions.subscribe(lost => {
       if (lost !== null) this.folderView?.sessionLost(lost.sessionId);
