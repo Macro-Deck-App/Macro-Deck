@@ -53,14 +53,25 @@ public sealed class WidgetStatePublisher : IWidgetStatePublisher
 		// A provider that renames a state or changes which states it offers moves the set without
 		// moving the active id, so gating on Changed alone would leave every live deck rendering a
 		// stale set - and a stale label for the state it is already showing - until it reconnected.
-		if (result.StateId is null
-			|| !result.Changed && !result.SetChanged
-			|| !_subscriptions.HasSubscribers(widgetId.ToString()))
+		if (result.StateId is null || !result.Changed && !result.SetChanged)
 		{
 			return;
 		}
 
 		var id = widgetId.ToString();
+
+		// Not gated on subscribers: a client still showing the last face of a widget it closed holds no
+		// subscription, and another client may hold the only one.
+		if (result.Transitioned || result.SetChanged)
+		{
+			await _uiTransport.Send(new WidgetStateInvalidatedEvent { WidgetId = id }, cancellationToken);
+		}
+
+		if (!_subscriptions.HasSubscribers(id))
+		{
+			return;
+		}
+
 		var evt = new WidgetStateUpdatedEvent
 		{
 			WidgetId = id,

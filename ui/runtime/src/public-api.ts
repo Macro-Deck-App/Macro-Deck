@@ -1467,6 +1467,7 @@ export {
   type WidgetsCreatedEvent,
   type WidgetsDeletedEvent,
   type WidgetStateChangedNotification,
+  type WidgetStateInvalidatedEvent,
   type WidgetStateUpdatedEvent,
   type WidgetsUpdatedEvent,
   type WidgetUpdatedEvent,

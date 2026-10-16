@@ -271,6 +271,7 @@ export class Client {
         this.app.set({ connected: true, deckRendered: true });
         // The host keeps no sessions across a socket, so they are asked for again rather than reused.
         this.widgetSessions.sync(this.deck.displayedWidgets);
+        this.widgetSessions.forgetHidden(this.deck.displayedWidgets);
         // A lock or unlock that happened while the socket was down arrived as an event nobody
         // received, so the state is re-read rather than assumed.
         void this.hostLock.load();
@@ -1124,12 +1125,23 @@ export class Client {
       case 'WidgetCreatedEvent':
       case 'WidgetUpdatedEvent':
         if (typeof body['folderId'] === 'string' && body['widget']) {
-          this.deck.widgetsUpserted(
-            body['folderId'], [widgetFromWire(body['widget'] as never, body['folderId'])]);
+          const widget = widgetFromWire(body['widget'] as never, body['folderId']);
+          if (type === 'WidgetUpdatedEvent') this.widgetSessions.invalidate(widget.id);
+          this.deck.widgetsUpserted(body['folderId'], [widget]);
         }
         break;
-      case 'WidgetsCreatedEvent':
       case 'WidgetsUpdatedEvent':
+        if (typeof body['folderId'] === 'string' && Array.isArray(body['widgets'])) {
+          const folderId = body['folderId'];
+          const widgets = (body['widgets'] as never[]).map(widget => widgetFromWire(widget, folderId));
+          for (const widget of widgets) this.widgetSessions.invalidate(widget.id);
+          this.deck.widgetsUpserted(folderId, widgets);
+        }
+        break;
+      case 'WidgetStateInvalidatedEvent':
+        if (typeof body['widgetId'] === 'string') this.widgetSessions.invalidate(body['widgetId']);
+        break;
+      case 'WidgetsCreatedEvent':
       case 'WidgetPositionsUpdatedEvent':
         if (typeof body['folderId'] === 'string' && Array.isArray(body['widgets'])) {
           const folderId = body['folderId'];
