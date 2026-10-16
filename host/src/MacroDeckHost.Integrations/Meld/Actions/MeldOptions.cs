@@ -1,3 +1,4 @@
+using MacroDeckHost.Integrations.Meld.State;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk.Actions;
 

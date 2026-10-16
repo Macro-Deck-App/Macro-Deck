@@ -32,6 +32,7 @@ describe('ParamRowComponent host-backed option labels', () => {
       'ActionFlowStore', ['updateParam', 'updateEventParamOperator', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
     loadLabeledOptions = jasmine.createSpy('loadLabeledOptions').and.resolveTo({ options: [] });
 
     TestBed.configureTestingModule({
@@ -473,6 +474,7 @@ describe('ParamRowComponent recovered option label', () => {
     store = jasmine.createSpyObj('ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
     loadLabeledOptions = jasmine.createSpy('loadLabeledOptions').and.resolveTo({ options: [] });
 
     TestBed.configureTestingModule({
@@ -658,6 +660,7 @@ describe('ParamRowComponent multiselect saved values', () => {
       'ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
     loadLabeledOptions = jasmine.createSpy('loadLabeledOptions').and.resolveTo({ options: [] });
 
     TestBed.configureTestingModule({
@@ -837,6 +840,7 @@ describe('ParamRowComponent widget-target option fetch', () => {
       integrationId === 'example.scripts' ? actionId : undefined);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     options = jasmine.createSpyObj<ActionOptionsService>('ActionOptionsService', ['loadLabeledOptions']);
     options.loadLabeledOptions.and.resolveTo({ options: [] });
@@ -958,6 +962,7 @@ describe('ParamRowComponent widget-action state options (issue #718)', () => {
 
     store = TestBed.inject(ActionFlowStore);
     store.previewScopeRefId.set('w-1');
+    store.ownerWidgetId.set('w-1');
 
     component = TestBed.createComponent(ParamRowComponent).componentInstance;
     component.blockId = 'block-1';
@@ -1164,6 +1169,7 @@ describe('ParamRowComponent stale dynamic options', () => {
       'ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     options = jasmine.createSpyObj<ActionOptionsService>('ActionOptionsService', ['loadLabeledOptions']);
     options.loadLabeledOptions.and.resolveTo({ options: [] });
@@ -1232,6 +1238,7 @@ describe('ParamRowComponent dynamic-choice label preloading', () => {
       'ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     options = jasmine.createSpyObj<ActionOptionsService>('ActionOptionsService', ['loadLabeledOptions']);
     options.loadLabeledOptions.and.resolveTo({ options: [] });
@@ -1297,6 +1304,7 @@ describe('ParamRowComponent event filter operator', () => {
     );
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     TestBed.configureTestingModule({
       imports: [ParamRowComponent],
@@ -1410,6 +1418,7 @@ describe('ParamRowComponent event filter operator rendering', () => {
     );
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     TestBed.configureTestingModule({
       imports: [ParamRowComponent],
@@ -1535,6 +1544,7 @@ describe('ParamRowComponent options reload (issue #806)', () => {
     const store = jasmine.createSpyObj<ActionFlowStore>('ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     TestBed.configureTestingModule({
       imports: [ParamRowComponent],
@@ -1613,6 +1623,7 @@ describe('ParamRowComponent right-hand modifier keys', () => {
       'ActionFlowStore', ['updateParam', 'updateEventParamOperator', 'errorsFor', 'pickerVariables', 'cacheParamLabel']);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     TestBed.configureTestingModule({
       imports: [ParamRowComponent],

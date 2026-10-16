@@ -125,6 +125,56 @@ internal sealed class BatteryVariablePublisherTests
 	}
 
 	[Test]
+	public async Task Only_the_level_variable_declares_a_percent_unit()
+	{
+		_batteries.Publish(Adb, null, [Device(PhoneId, "Pixel 8", 81)]);
+
+		await WaitUntil(() => BatteryVariables().Count == 7);
+
+		Assert.That(_suffixes.ToDictionary(suffix => suffix, suffix => Variable(PhoneVariable(suffix))!.Unit),
+			Is.EquivalentTo(new Dictionary<string, string?>
+			{
+				["level"] = "%",
+				["charging"] = null,
+				["connected"] = null,
+				["state"] = null,
+				["time_remaining_minutes"] = null,
+				["time_to_full_minutes"] = null,
+				["health"] = null
+			}));
+	}
+
+	[Test]
+	public async Task A_level_variable_created_without_a_unit_gains_it_and_keeps_its_name()
+	{
+		var displayName = (LocalizedText)AppStrings.Integrations.Batteries.Variables.Level("Pixel 8");
+		await _variables.VariableService.CreateIntegrationVariable(Adb,
+			PhoneVariable("level"),
+			VariableScope.Global,
+			null,
+			VariableType.Numeric,
+			50,
+			0,
+			declaration: new VariableDeclaration
+			{
+				Presentation = new VariablePresentation(displayName, null, default),
+				DecimalPlaces = 0
+			},
+			updateMode: VariableUpdateMode.Pushed,
+			publishedByHost: true);
+		Assert.That(Variable(PhoneVariable("level"))!.Unit, Is.Null);
+
+		_batteries.Publish(Adb, null, [Device(PhoneId, "Pixel 8", 81)]);
+
+		await WaitUntil(() => Variable(PhoneVariable("level"))!.Unit == "%");
+		Assert.Multiple(() =>
+		{
+			Assert.That(Variable(PhoneVariable("level"))!.Presentation?.DisplayName, Is.EqualTo(displayName));
+			Assert.That(ValueOf(PhoneVariable("level")), Is.EqualTo(81m));
+		});
+	}
+
+	[Test]
 	public async Task Each_device_gets_its_seven_variables_under_the_integration_that_provides_it()
 	{
 		_batteries.Publish(Adb,

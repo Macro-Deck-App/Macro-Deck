@@ -35,6 +35,7 @@ import { ActionCardFrameComponent } from '../shell/action-card-frame.component';
             <shared-variable-picker
               class="switch-operand-picker"
               [variables]="store.pickerVariables()"
+              [scope]="store.previewScope()"
               (pick)="store.updateSwitchSubject(block.id, { $var: $event })"
               (pickEventParameter)="store.updateSwitchSubject(block.id, { $event: $event })" />
           </div>
@@ -54,6 +55,7 @@ import { ActionCardFrameComponent } from '../shell/action-card-frame.component';
                 <shared-variable-picker
                   class="switch-operand-picker"
                   [variables]="store.pickerVariables()"
+                  [scope]="store.previewScope()"
                   (pick)="store.updateCaseValue(block.id, branch.id, { $var: $event })"
                   (pickEventParameter)="store.updateCaseValue(block.id, branch.id, { $event: $event })" />
               </div>

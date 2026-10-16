@@ -2,6 +2,8 @@ using MacroDeck.Sdk.Issues;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Integrations.Twitch.Connections;
+using MacroDeckHost.Integrations.Twitch.Widgets;
 using MacroDeckHost.Tests.UnitTests.Streaming;
 using MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 using MacroDeckHost.Tests.UnitTests.TestSupport;

@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Net.WebSockets;
 using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Integrations;
-using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Integrations.Http.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Http;
 

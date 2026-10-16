@@ -7,6 +7,7 @@ using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Integrations.Steam.State;
 using Errors = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Errors;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;

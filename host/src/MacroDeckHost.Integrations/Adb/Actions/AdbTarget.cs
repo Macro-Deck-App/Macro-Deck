@@ -1,4 +1,6 @@
 using MacroDeck.Sdk.Android;
+using MacroDeckHost.Integrations.Adb.Connections;
+using MacroDeckHost.Integrations.Adb.Models;
 
 namespace MacroDeckHost.Integrations.Adb.Actions;
 

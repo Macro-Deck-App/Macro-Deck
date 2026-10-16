@@ -1,9 +1,9 @@
-using MacroDeckHost.Integrations.Http.Client;
-using MacroDeckHost.Integrations.Http.JsonPath;
+using MacroDeckHost.Integrations.Http.Protocol;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
+using MacroDeck.Sdk.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Http.Actions;
@@ -105,7 +105,7 @@ internal sealed class GetJsonValueActionDefinition : IActionDefinition
 			}
 
 			var written = await HttpVariableWriter
-				.WriteAsync(_variables, variableName, context.OwnerWidgetId, type, value)
+				.WriteAsync(_variables, variableName, UserVariableContext.From(context), type, value)
 				.ConfigureAwait(false);
 
 			return written

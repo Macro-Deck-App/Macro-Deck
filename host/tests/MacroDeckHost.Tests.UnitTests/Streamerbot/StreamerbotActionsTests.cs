@@ -3,6 +3,7 @@ using MacroDeckHost.Integrations.Streamerbot;
 using MacroDeckHost.Integrations.Streamerbot.Actions;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Streamerbot.Connections;
 
 namespace MacroDeckHost.Tests.UnitTests.Streamerbot;
 

@@ -80,7 +80,8 @@ public class PluginCallbackRouterTests
 		TimeSpan? musicPlayerArtworkTimeout = null,
 		INotificationManager? notificationManager = null,
 		PluginVariableHistoryWindows? variableHistory = null,
-		VariableHistoryReadThrottle? variableHistoryReadThrottle = null)
+		VariableHistoryReadThrottle? variableHistoryReadThrottle = null,
+		FakeUserVariableApi? userVariableApi = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -95,7 +96,7 @@ public class PluginCallbackRouterTests
 			scriptApi ?? new FakeScriptApi(),
 			new FakeWidgetApi(),
 			new FakeWidgetIconInvalidator(),
-			new FakeUserVariableApi(),
+			userVariableApi ?? new FakeUserVariableApi(),
 			actionInteractions,
 			uiSessions ?? new NoOpUiSessionSink(),
 			deviceRegistry ?? new FakePluginDeviceRegistry(),
@@ -1647,6 +1648,42 @@ public class PluginCallbackRouterTests
 	}
 
 	[Test]
+	public async Task UserVariables_apply_hands_the_script_and_automation_on_and_an_old_plugin_sends_neither()
+	{
+		var userVariables = new FakeUserVariableApi();
+		var router = Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, 100, 100),
+			userVariableApi: userVariables);
+
+		await router.RouteAsync("plugin.a",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.UserVariables,
+				Operation = HostOperations.UserVariables.Apply,
+				Arguments = Arg(new UserVariablesApplyArguments
+				{
+					Name = "v", Operation = "Set", OwnerWidgetId = "w1", ScriptId = "s1", AutomationId = "a1"
+				})
+			},
+			CancellationToken.None);
+		await router.RouteAsync("plugin.a",
+			"c2",
+			new HostInvokePayload
+			{
+				Api = HostApis.UserVariables,
+				Operation = HostOperations.UserVariables.Apply,
+				Arguments = Arg(new UserVariablesApplyArguments { Name = "v", Operation = "Set", OwnerWidgetId = "w1" })
+			},
+			CancellationToken.None);
+
+		Assert.That(userVariables.Contexts,
+			Is.EqualTo(new[] { new UserVariableContext("w1", "s1", "a1"), new UserVariableContext("w1") }));
+	}
+
+	[Test]
 	public async Task Deck_change_folder_is_refused_while_locked()
 	{
 		var router = Router(lockState: new FakeHostLockState { IsLocked = true });
@@ -2218,6 +2255,8 @@ public class PluginCallbackRouterTests
 
 	private sealed class FakeUserVariableApi : IUserVariableApi
 	{
+		public List<UserVariableContext> Contexts { get; } = [];
+
 		public Task<UserVariableWriteResult> ApplyAsync(
 			string name,
 			string? ownerWidgetId,
@@ -2225,6 +2264,17 @@ public class PluginCallbackRouterTests
 			string? value,
 			CancellationToken cancellationToken = default)
 		{
+			return Task.FromResult(UserVariableWriteResult.Applied());
+		}
+
+		public Task<UserVariableWriteResult> ApplyInContextAsync(
+			string name,
+			UserVariableContext context,
+			UserVariableOperation operation,
+			string? value,
+			CancellationToken cancellationToken = default)
+		{
+			Contexts.Add(context);
 			return Task.FromResult(UserVariableWriteResult.Applied());
 		}
 	}
@@ -2254,6 +2304,11 @@ public class PluginCallbackRouterTests
 		}
 
 		public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
+		{
+			return Task.FromResult(_byId.Values.FirstOrDefault(entity => entity.Name == name));
+		}
+
+		public Task<VariableEntity?> Resolve(string name, VariableScopeChain chain)
 		{
 			return Task.FromResult(_byId.Values.FirstOrDefault(entity => entity.Name == name));
 		}

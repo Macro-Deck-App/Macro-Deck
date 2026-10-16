@@ -62,6 +62,34 @@ public sealed class ActionsTestClient
 			options);
 	}
 
+	/// <summary>
+	/// Runs the action declared under <paramref name="localId" /> as a step of a script or automation, so
+	/// the action sees <paramref name="scriptId" /> and <paramref name="automationId" /> on its
+	/// <c>ActionExecutionContext</c> the way the host sends them.
+	/// </summary>
+	public Task<CapabilityInvocationOutcome> ExecuteWithContextAsync(
+		string localId,
+		IReadOnlyDictionary<string, object?>? parameters = null,
+		string? originClientId = null,
+		string? ownerWidgetId = null,
+		string? scriptId = null,
+		string? automationId = null,
+		CapabilityInvokeOptions? options = null)
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Actions,
+			localId,
+			CapabilityOperations.Actions.Execute,
+			new ActionExecuteArguments
+			{
+				Parameters = ToElements(parameters),
+				OriginClientId = originClientId,
+				OwnerWidgetId = ownerWidgetId,
+				ScriptId = scriptId,
+				AutomationId = automationId
+			},
+			options);
+	}
+
 	/// <summary>Asks a dynamic-options action declared under <paramref name="localId" /> for its current options.</summary>
 	public Task<CapabilityInvocationOutcome> GetOptionsAsync(
 		string localId,

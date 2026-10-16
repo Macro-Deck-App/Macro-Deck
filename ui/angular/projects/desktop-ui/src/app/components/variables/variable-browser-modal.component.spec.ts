@@ -249,6 +249,17 @@ describe('VariableBrowserModalComponent', () => {
     expect(manager.isCatalogBindable(node({ id: 'b1', type: 'boolean', canWrite: true }))).toBeFalse();
   });
 
+  it('offers nothing to manage for a script input, which exists only while the script runs', () => {
+    const input = variable({ id: 'input:scene', name: 'scene', origin: 'input' });
+    fixture.componentRef.setInput('variables', [userVar, input]);
+
+    fixture.componentRef.setInput('mode', 'manage');
+    expect(component.effectiveVariables().map(v => v.id)).toEqual(['u1']);
+
+    fixture.componentRef.setInput('mode', 'pick');
+    expect(component.effectiveVariables().map(v => v.id)).toEqual(['u1', 'input:scene']);
+  });
+
   it('renders one rail entry per source', () => {
     const labels = Array.from(
       fixture.nativeElement.querySelectorAll('shared-rail-item'),

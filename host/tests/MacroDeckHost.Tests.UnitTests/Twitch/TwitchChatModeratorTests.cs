@@ -2,6 +2,8 @@ using System.Globalization;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
+using MacroDeckHost.Integrations.Twitch.Configuration;
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog;
 using TwitchLib.Api.Core.Exceptions;

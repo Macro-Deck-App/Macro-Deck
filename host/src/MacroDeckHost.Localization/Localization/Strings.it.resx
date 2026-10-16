@@ -432,6 +432,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variabili di questo widget</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Variabili di questo script</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Variabili di questa automazione</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Evento terminato</value>
   </data>
@@ -509,6 +515,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Variabili del widget</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Variabili dello script</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Variabili dell'automazione</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Pubblicato il {date}</value>
@@ -2986,6 +2998,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Ambito della variabile sconosciuto</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>Il widget, lo script o l'automazione a cui appartiene questa variabile non esiste.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>La sorgente video è occupata in questo momento.</value>
@@ -11273,6 +11288,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch ha rifiutato la richiesta.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch non ha risposto in tempo.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Account</value>
   </data>
@@ -14434,6 +14452,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Oscura la variabile "vars.{name}" durante l'esecuzione di questo script.</value>
+  </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Oscura la variabile dello script "vars.{name}" durante l'esecuzione di questo script.</value>
   </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Tipo</value>
@@ -18256,6 +18277,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Solo questo widget la vede, e qui nasconde una variabile globale con lo stesso nome.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Solo questo script la vede, e qui nasconde una variabile globale con lo stesso nome.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Solo questa automazione la vede, e qui nasconde una variabile globale con lo stesso nome.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Cerca variabili…</value>
   </data>
@@ -18390,14 +18417,17 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>Questo evento</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Questo script</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Utente</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Questo widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Questo script</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Questa automazione</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Utente</value>
@@ -21925,6 +21955,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Il tuo progetto Google Cloud ha esaurito la quota giornaliera di YouTube, quindi Macro Deck ha sospeso l'aggiornamento dello stato live e della chat. Riprende dopo mezzanotte, ora del Pacifico, quando Google azzera la quota.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Chat YouTube in pausa per risparmiare quota</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Il tuo progetto Google Cloud ha quasi esaurito la quota giornaliera di YouTube, quindi Macro Deck ha sospeso l'aggiornamento della chat e legge lo stato live meno spesso. La chat riprende dopo mezzanotte, ora del Pacifico, quando Google azzera la quota.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>Canale YouTube connesso due volte</value>

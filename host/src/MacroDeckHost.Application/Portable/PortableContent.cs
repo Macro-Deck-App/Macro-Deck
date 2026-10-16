@@ -20,5 +20,7 @@ public sealed class PortableContent
 
 	public List<PortableVariable> Variables { get; set; } = [];
 
+	public List<PortableScriptVariable> ScriptVariables { get; set; } = [];
+
 	public List<PortableFont> Fonts { get; set; } = [];
 }

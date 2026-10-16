@@ -1,6 +1,7 @@
 using System.Globalization;
-using MacroDeckHost.Integrations.Mouse;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Mouse.Models;
+using MacroDeckHost.Integrations.Mouse.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.Mouse;
 

@@ -163,9 +163,15 @@ These are `macrodeck.*` types because a reader cannot draw them from the tree al
   `dynamic-text`'s `value` accepts only a time reference - never a progress reference.
 - Separator, digit system, writing direction and day-period position come from the reader's language.
   `time`'s hour cycle follows the user's app-wide preference as supplied by the host, falling back to the
-  reader's language; the pinned `time-*` formats ignore it.
+  reader's language, and so does the hour's leading zero: the host states whether the user's time format
+  writes one, by the same rule it writes its own times with, so every reader draws the same `08:05` or
+  `8:05` whatever its own locale data says. A 12-hour clock has none; a 24-hour clock has the one the
+  language's own pattern writes, and two digits in a language that writes 12 hours. The pinned `time-*`
+  formats ignore both.
 - Every `time*` format draws seconds, with the separator before them, at `0.55` of the run's `size` in
-  the `muted` role - even when `color` is set.
+  the `muted` role - even when `color` is set, and also when the run states no `size` and takes the
+  inherited one. A fitted run is fitted with its seconds at that ratio, so a clock that fits is never
+  cut off.
 - Digits are drawn with equal advance width, so the run does not shift as it counts.
 - `zone-name` is the last segment of the IANA id with underscores replaced by spaces; `zone-offset` is
   `UTC±hh:mm` at that instant. Both are empty with no zone.

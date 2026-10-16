@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -14,11 +15,16 @@ public class AutomationService : IAutomationService
 
 	private readonly IAutomationCache _automationCache;
 	private readonly IMediator _mediator;
+	private readonly IWidgetVariableCloner _variableCloner;
 
-	public AutomationService(IAutomationCache automationCache, IMediator mediator)
+	public AutomationService(
+		IAutomationCache automationCache,
+		IMediator mediator,
+		IWidgetVariableCloner variableCloner)
 	{
 		_automationCache = automationCache;
 		_mediator = mediator;
+		_variableCloner = variableCloner;
 	}
 
 	public IReadOnlyList<AutomationEntity> GetAll()
@@ -124,7 +130,16 @@ public class AutomationService : IAutomationService
 			return Result.Fail<AutomationEntity, AutomationError>(AutomationError.NotFound, "Automation not found");
 		}
 
-		return await Create(NextCopyName(source.Name), source.Description, source.Flows, false);
+		var copy = await Create(NextCopyName(source.Name), source.Description, source.Flows, false);
+
+		if (copy.Success && copy.Data is { } created)
+		{
+			await _variableCloner.RestoreScope(VariableScope.Automation,
+				created.Id.ToString(),
+				await _variableCloner.SnapshotScope(VariableScope.Automation, source.Id.ToString()));
+		}
+
+		return copy;
 	}
 
 	public async Task<Result<AutomationError>> Delete(Guid id)

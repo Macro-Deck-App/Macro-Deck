@@ -1,3 +1,4 @@
+using MacroDeckHost.Integrations.System.Variables;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk.Actions;

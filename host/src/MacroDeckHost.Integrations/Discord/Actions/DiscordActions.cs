@@ -1,6 +1,6 @@
-using MacroDeckHost.Integrations.Discord.Rpc;
-using MacroDeckHost.Integrations.Discord.Webhooks;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Discord.Connections;
+using MacroDeckHost.Integrations.Discord.Protocol;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Discord.Actions;

@@ -8,6 +8,7 @@ import { ApiService, HOST_URL_RESOLVER } from '../../transport';
 import { UiNodeEventBus } from './ui-node-event-bus';
 import { UiWidgetRenderHostFactory } from './ui-widget-render-host';
 import { UiWidgetResourceBaseUrl } from './ui-widget-resource-base-url';
+import { LocalizationService } from '../../localization';
 
 describe('UiWidgetRenderHostFactory resource urls', () => {
   const theme = signal<'light' | 'dark'>('dark');
@@ -50,5 +51,29 @@ describe('UiWidgetRenderHostFactory resource urls', () => {
     expect(host.resourceUrl(icon)).toBe('http://host/api/ui/resources/app.macro-deck.widget-icon.icon-pack.1?v=h');
     theme.set('light');
     expect(host.resourceUrl(icon)).toBe('http://host/api/ui/resources/app.macro-deck.widget-icon.icon-pack.1?v=h');
+  });
+});
+
+describe('UiWidgetRenderHostFactory time format', () => {
+  it('hands a tile the hour cycle and leading zero the host stated', () => {
+    const api = jasmine.createSpyObj<ApiService>('ApiService', ['getLocalization', 'onNotification']);
+    api.onNotification.and.callFake(<T>(): Observable<T> => EMPTY);
+    (api as unknown as { connectionStateSignal: () => string }).connectionStateSignal = () => 'disconnected';
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: HOST_URL_RESOLVER, useValue: async () => 'http://host' },
+        { provide: ApiService, useValue: api },
+        { provide: ThemeService, useValue: { resolvedTheme: signal('dark').asReadonly() } },
+      ],
+    });
+    const localization = TestBed.inject(LocalizationService);
+    const host = TestBed.inject(UiWidgetRenderHostFactory).bind(new UiNodeEventBus());
+
+    localization.hourCycle.set('h23');
+    localization.hourPadded.set(false);
+
+    expect(host.hourCycle?.()).toBe('h23');
+    expect(host.hourPadded?.()).toBeFalse();
   });
 });

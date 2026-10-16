@@ -1,7 +1,6 @@
 using System.Text.Json;
-using MacroDeckHost.Integrations.Http.Client;
-using MacroDeckHost.Integrations.Http.JsonPath;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Http.Protocol;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Http.Actions;
@@ -22,7 +21,7 @@ internal static class HttpResponseCapture
 		HttpResponseSnapshot response,
 		bool statusExpected,
 		ILogger logger,
-		string? ownerWidgetId = null)
+		UserVariableContext? variableContext = null)
 	{
 		foreach (var (name, selector) in captures)
 		{
@@ -37,7 +36,9 @@ internal static class HttpResponseCapture
 				continue;
 			}
 
-			await HttpVariableWriter.WriteAsync(accessor, name, ownerWidgetId, type, value).ConfigureAwait(false);
+			await HttpVariableWriter
+				.WriteAsync(accessor, name, variableContext ?? new UserVariableContext(), type, value)
+				.ConfigureAwait(false);
 		}
 	}
 
@@ -46,7 +47,7 @@ internal static class HttpResponseCapture
 		IReadOnlyDictionary<string, string> captures,
 		long durationMs,
 		ILogger logger,
-		string? ownerWidgetId = null)
+		UserVariableContext? variableContext = null)
 	{
 		foreach (var (name, selector) in captures)
 		{
@@ -64,7 +65,9 @@ internal static class HttpResponseCapture
 				continue;
 			}
 
-			await HttpVariableWriter.WriteAsync(accessor, name, ownerWidgetId, type, value).ConfigureAwait(false);
+			await HttpVariableWriter
+				.WriteAsync(accessor, name, variableContext ?? new UserVariableContext(), type, value)
+				.ConfigureAwait(false);
 		}
 	}
 

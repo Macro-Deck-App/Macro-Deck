@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.Keyboard;
 using MacroDeckHost.Integrations.Keyboard.Actions;
+using MacroDeckHost.Integrations.Keyboard.Models;
 using MacroDeckHost.Platform.Processes;
 
 namespace MacroDeckHost.Tests.UnitTests.Keyboard;

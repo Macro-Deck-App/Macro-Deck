@@ -1,8 +1,9 @@
-using MacroDeckHost.Integrations.Http.Client;
+using MacroDeckHost.Integrations.Http.Protocol;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
+using MacroDeck.Sdk.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Http.Actions;
@@ -154,7 +155,7 @@ internal sealed class SendRequestActionDefinition : IActionDefinition
 						captures,
 						outcome.DurationMs,
 						_logger,
-						context.OwnerWidgetId)
+						UserVariableContext.From(context))
 					.ConfigureAwait(false);
 
 				var (code, message) = HttpFailureMessages.ForFailure(failure);
@@ -165,7 +166,7 @@ internal sealed class SendRequestActionDefinition : IActionDefinition
 			var statusExpected = expectedStatus.Matches(response.StatusCode);
 
 			await HttpResponseCapture
-				.ApplyAsync(_variables, captures, response, statusExpected, _logger, context.OwnerWidgetId)
+				.ApplyAsync(_variables, captures, response, statusExpected, _logger, UserVariableContext.From(context))
 				.ConfigureAwait(false);
 
 			if (!statusExpected)

@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>此小工具的變數</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>此指令碼的變數</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>此自動化的變數</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>事件已結束</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>小工具變數</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>指令碼變數</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>自動化變數</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>發佈於 {date}</value>
@@ -2985,6 +2997,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>未知的變數範圍</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>此變數所屬的小工具、指令碼或自動化不存在。</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>影片來源目前忙碌中。</value>
@@ -11274,6 +11289,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch 拒絕了此請求。</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch 未及時回應。</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>帳戶</value>
   </data>
@@ -14435,6 +14453,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>在此指令碼執行期間，會遮蔽變數「vars.{name}」。</value>
+  </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>在此指令碼執行期間，會遮蔽指令碼變數「vars.{name}」。</value>
   </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>類型</value>
@@ -18257,6 +18278,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>只有此小工具可以看到它，並且在這裡會覆蓋同名的全域變數。</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>只有此指令碼可以看到它，並且在這裡會覆蓋同名的全域變數。</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>只有此自動化可以看到它，並且在這裡會覆蓋同名的全域變數。</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>搜尋變數…</value>
   </data>
@@ -18391,14 +18418,17 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>此事件</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>此指令碼</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>使用者</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>此小工具</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>此指令碼</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>此自動化</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>使用者</value>
@@ -21947,6 +21977,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>你的 Google Cloud 專案已用完今日的 YouTube 配額，因此 Macro Deck 已暫停直播狀態與聊天室更新。配額會在太平洋時間午夜由 Google 重設，之後即會恢復。</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>YouTube 聊天室已暫停以節省配額</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Google Cloud 專案即將用完今日的 YouTube 配額，因此 Macro Deck 已暫停聊天室更新，並降低直播狀態的讀取頻率。配額會在太平洋時間午夜由 Google 重設，之後聊天室即會恢復。</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube 頻道重複連線</value>

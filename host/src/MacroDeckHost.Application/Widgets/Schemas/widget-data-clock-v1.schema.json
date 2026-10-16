@@ -48,11 +48,11 @@
     },
     "hourCycle": {
       "enum": ["auto", "12h", "24h", null],
-      "description": "Which face the time is drawn on. Absent, null or 'auto' leaves the choice to the viewing device's language, which is what a clock did before the choice existed."
+      "description": "Which face the time is drawn on. Absent, null or 'auto' follows the time format in Macro Deck's settings, which is what a clock did before the choice existed."
     },
     "leadingZero": {
       "type": "boolean",
-      "description": "Whether the hour is padded to two digits (09:05 rather than 9:05). Defaults to true; meaningless while hourCycle is 'auto', where the viewing device's language decides."
+      "description": "Whether the hour is padded to two digits (09:05 rather than 9:05). Defaults to true; meaningless while hourCycle is 'auto', where the time format in Macro Deck's settings decides."
     },
     "dateFormat": {
       "enum": ["default", "day-first", "month-first", "iso", "long", null],

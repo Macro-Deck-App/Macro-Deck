@@ -18,7 +18,7 @@ internal sealed class IntegrationHttpSourceGuardTests
 
 	// Libraries that build their own transport with no injection point.
 	private static readonly string[] _libraryOwnedTransport =
-		["Obs/ObsClient.cs", "Twitch/Protocol/TwitchHelixClient.cs"];
+		["Obs/Protocol/ObsClient.cs", "Twitch/Protocol/TwitchHelixClient.cs"];
 
 	[Test]
 	public void Integration_code_builds_its_transports_through_the_shared_factory()

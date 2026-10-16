@@ -1,5 +1,7 @@
 using MacroDeck.Sdk.ConfigFlow;
-using MacroDeckHost.Integrations.AdGuardHome;
+using MacroDeckHost.Integrations.AdGuardHome.Configuration;
+using MacroDeckHost.Integrations.AdGuardHome.Protocol;
+using MacroDeckHost.Integrations.AdGuardHome.State;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.AdGuardHome;

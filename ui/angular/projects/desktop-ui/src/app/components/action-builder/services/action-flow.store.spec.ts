@@ -718,6 +718,34 @@ describe('ActionFlowStore.hasOwnerWidget', () => {
     expect(store.hasOwnerWidget()).toBeTrue();
   });
 
+  it('has no owner widget in the script editor, whose variable scope is the script', () => {
+    store.previewScope.set('script');
+    store.previewScopeRefId.set('script-1');
+
+    expect(store.hasOwnerWidget()).toBeFalse();
+    expect(store.previewOwnerWidgetId()).toBeUndefined();
+    expect(store.resolvedOwner()).toBeNull();
+  });
+
+  it('never resolves $self to the script id when the script runs on a widget', () => {
+    store.previewScope.set('script');
+    store.previewScopeRefId.set('script-1');
+    store.scriptRunsOnWidget.set(true);
+
+    expect(store.hasOwnerWidget()).toBeTrue();
+    expect(store.previewOwnerWidgetId()).toBeUndefined();
+    expect(store.resolvedOwner()).toBeNull();
+  });
+
+  it('keeps the edited widget as the owner in the widget editor', () => {
+    store.previewScope.set('widget');
+    store.previewScopeRefId.set('w-1');
+    store.ownerWidgetId.set('w-1');
+
+    expect(store.previewOwnerWidgetId()).toBe('w-1');
+    expect(store.resolvedOwner()).toEqual({ kind: 'widget', widgetId: 'w-1' });
+  });
+
   it('is true for a widget flow regardless of the script toggle', () => {
     for (const scriptRunsOnWidget of [true, false]) {
       store.previewScope.set('widget');

@@ -1,3 +1,4 @@
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -971,7 +972,7 @@ internal static class TwitchActions
 							await TwitchVariableWriter.WriteAsync(scope.UserVariables,
 								scope.Variables,
 								variable,
-								scope.OwnerWidgetId,
+								scope.VariableContext ?? new UserVariableContext(),
 								VariableType.Text,
 								created.EditUrl);
 						}

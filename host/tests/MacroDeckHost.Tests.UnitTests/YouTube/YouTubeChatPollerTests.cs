@@ -1,6 +1,7 @@
 using MacroDeckHost.Integrations.Streaming;
-using MacroDeckHost.Integrations.YouTube;
 using MacroDeckHost.Integrations.YouTube.Auth;
+using MacroDeckHost.Integrations.YouTube.Connections;
+using MacroDeckHost.Integrations.YouTube.Events;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.YouTube;
@@ -70,12 +71,26 @@ internal sealed class YouTubeChatPollerTests
 	[Test]
 	public async Task A_low_quota_stretches_the_chat_interval_four_times()
 	{
-		_budget.Charge(8_500);
+		_budget.Charge(8_000);
 		_api.ChatPages.Enqueue(new YouTubeChatPage("next", 2000, null, []));
 
 		var wait = await _poller.NextStepAsync(CancellationToken.None);
 
 		Assert.That(wait, Is.EqualTo(TimeSpan.FromSeconds(8)));
+	}
+
+	[Test]
+	public async Task A_nearly_used_up_quota_pauses_chat_until_the_reset()
+	{
+		_budget.Charge(8_500);
+
+		var wait = await _poller.NextStepAsync(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(wait, Is.EqualTo(_budget.ResetsAt - _clock.Now));
+			Assert.That(_api.Calls, Is.Empty);
+		});
 	}
 
 	[Test]

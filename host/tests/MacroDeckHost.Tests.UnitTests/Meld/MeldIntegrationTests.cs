@@ -1,6 +1,7 @@
 using System.Text;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Meld;
+using MacroDeckHost.Integrations.Meld.Configuration;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;

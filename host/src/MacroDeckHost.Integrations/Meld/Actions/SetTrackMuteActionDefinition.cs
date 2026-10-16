@@ -1,3 +1,5 @@
+using MacroDeckHost.Integrations.Meld.Connections;
+using MacroDeckHost.Integrations.Meld.State;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;

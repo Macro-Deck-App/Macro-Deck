@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variables of this widget</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Variables of this script</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Variables of this automation</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Event Ended</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Widget variables</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Script variables</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Automation variables</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Published {date}</value>
@@ -2985,6 +2997,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Unknown variable scope</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>The widget, script or automation this variable belongs to does not exist.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>The video source is busy right now.</value>
@@ -11274,6 +11289,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch rejected the request.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch did not answer in time.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Account</value>
   </data>
@@ -14435,6 +14453,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Shadows the variable "vars.{name}" while this script runs.</value>
+  </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Shadows the script variable "vars.{name}" while this script runs.</value>
   </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Type</value>
@@ -18257,6 +18278,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Only this widget sees it, and it shadows a global of the same name here.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Only this script sees it, and it shadows a global of the same name here.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Only this automation sees it, and it shadows a global of the same name here.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Search variables…</value>
   </data>
@@ -18391,14 +18418,17 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>This event</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>This script</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>User</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>This widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>This script</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>This automation</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>User</value>
@@ -21948,6 +21978,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Your Google Cloud project has used up its daily YouTube quota, so Macro Deck paused live status and chat updates. They resume after midnight Pacific Time, when Google resets the quota.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>YouTube chat paused to save quota</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Your Google Cloud project has almost used up its daily YouTube quota, so Macro Deck paused chat updates and reads the live status less often. Chat resumes after midnight Pacific Time, when Google resets the quota.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube channel connected twice</value>

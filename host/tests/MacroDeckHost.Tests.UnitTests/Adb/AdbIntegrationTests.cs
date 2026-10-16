@@ -1,3 +1,4 @@
+using MacroDeckHost.Integrations.Adb.Variables;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Integrations.Adb;

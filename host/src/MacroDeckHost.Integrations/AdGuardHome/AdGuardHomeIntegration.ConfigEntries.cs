@@ -1,6 +1,9 @@
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.AdGuardHome.Configuration;
+using MacroDeckHost.Integrations.AdGuardHome.State;
+using MacroDeckHost.Integrations.AdGuardHome.Variables;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;
 

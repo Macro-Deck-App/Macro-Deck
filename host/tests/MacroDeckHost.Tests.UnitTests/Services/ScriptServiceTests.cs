@@ -27,7 +27,7 @@ public class ScriptServiceTests
 		_cache = new ScriptCache(_store, new LoggerConfiguration().CreateLogger());
 		await _cache.InitializeCache();
 		_mediator = new RecordingMediator();
-		_service = new ScriptService(_cache, _mediator);
+		_service = new ScriptService(_cache, _mediator, new NullWidgetVariableCloner());
 	}
 
 	[TearDown]

@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Voicemeeter.Connections;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -122,7 +123,7 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 
 				await VoicemeeterVariableWriter.WriteAsync(_variables,
 					variable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Text,
 					text);
 				return ActionResult.Success();
@@ -139,7 +140,7 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 			{
 				await VoicemeeterVariableWriter.WriteAsync(_variables,
 					variable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Boolean,
 					value > 0.5f);
 				return ActionResult.Success();
@@ -147,7 +148,7 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 
 			await VoicemeeterVariableWriter.WriteAsync(_variables,
 				variable,
-				context.OwnerWidgetId,
+				UserVariableContext.From(context),
 				VariableType.Numeric,
 				Math.Round(value, 2));
 

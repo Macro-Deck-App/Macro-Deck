@@ -157,6 +157,20 @@ describe('folder view', () => {
     button.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true, pointerId: 1, button: 0 }));
   };
 
+  it('writes a clock with the leading zero the host states', async () => {
+    host = {
+      ...host, now: () => Date.parse('2026-01-02T03:04:05Z'), culture: () => 'es', hourCycle: () => 'h23', hourPadded: () => true,
+    };
+    const mounted = mount();
+    mounted.open('f1');
+    await accept(0, 's1');
+    sessions.treeUpdated('s1', 1,
+      { id: 'root', type: 'macrodeck.dynamic-text', properties: { format: 'time', value: { $time: { zone: 'UTC' } } } } as UiNode);
+    mounted.paint();
+
+    expect(mounted.element.querySelector('.widget-dynamic-text')!.textContent).toBe('03:04');
+  });
+
   it('opens the same folder again when its session is lost, and talks to the new session', async () => {
     const mounted = mount();
     mounted.open('f1');

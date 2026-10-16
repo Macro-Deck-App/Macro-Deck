@@ -1,3 +1,5 @@
+using MacroDeckHost.Integrations.Meld.Connections;
+using MacroDeckHost.Integrations.Meld.State;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -93,7 +95,7 @@ internal sealed class GetTrackVolumeActionDefinition : IDynamicOptionsActionDefi
 			var written = await MeldVariableWriter
 				.WriteAsync(_variables,
 					variable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Numeric,
 					Math.Round(gain.Gain * 100))
 				.ConfigureAwait(false);

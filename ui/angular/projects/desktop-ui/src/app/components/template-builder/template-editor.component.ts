@@ -25,6 +25,7 @@ import {
   TemplateVariablePreviewOptions,
 } from '../../domain/template-preview.interface';
 import { templateVariableErrorMessage } from '../../domain/template-variable-error.util';
+import { scopeLabelKey } from '../../domain/variable-source.util';
 import { TemplateBrowserComponent } from './template-browser.component';
 import { LiquidEditorComponent } from './liquid-editor.component';
 import { SnippetInsertion } from './template-snippet-list.component';
@@ -37,6 +38,7 @@ import { SnippetInsertion } from './template-snippet-list.component';
   template: `
     <shared-template-browser
       [variables]="variables"
+      [scope]="scope"
       [scopeLabel]="scopeLabel"
       (insert)="onBrowserInsert($event)" />
 
@@ -87,7 +89,7 @@ export class TemplateEditorComponent {
   }
   get scopeLabel(): string {
     return this.scopeLabelOverride
-      ?? this.localization.translateKey(AppStrings.Variables.ThisWidget);
+      ?? this.localization.translateKey(scopeLabelKey(this.scope));
   }
 
   @Input() set value(value: string) {

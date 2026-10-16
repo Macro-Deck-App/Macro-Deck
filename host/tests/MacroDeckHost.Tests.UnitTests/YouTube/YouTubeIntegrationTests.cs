@@ -10,6 +10,8 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.YouTube;
+using MacroDeckHost.Integrations.YouTube.Variables;
+using MacroDeckHost.Integrations.YouTube.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Twitch;
 using Serilog;

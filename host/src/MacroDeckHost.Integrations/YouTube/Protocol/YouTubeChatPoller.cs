@@ -1,4 +1,5 @@
 using MacroDeckHost.Integrations.YouTube.Auth;
+using MacroDeckHost.Integrations.YouTube.Chat;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.YouTube.Protocol;
@@ -88,7 +89,7 @@ internal sealed class YouTubeChatPoller : IDisposable
 
 	internal async Task<TimeSpan> NextStepAsync(CancellationToken cancellationToken)
 	{
-		if (_budget.Level is YouTubeQuotaLevel.Paused)
+		if (_budget.ChatLevel is YouTubeQuotaLevel.Paused)
 		{
 			return UntilReset();
 		}
@@ -122,7 +123,7 @@ internal sealed class YouTubeChatPoller : IDisposable
 		catch (Exception ex)
 		{
 			_logger.Debug(ex, "Could not read the YouTube live chat {LiveChatId}", _liveChatId);
-			return _budget.Level is YouTubeQuotaLevel.Paused ? UntilReset() : _options.ChatRetryInterval;
+			return _budget.ChatLevel is YouTubeQuotaLevel.Paused ? UntilReset() : _options.ChatRetryInterval;
 		}
 
 		var live = _primed;
@@ -145,7 +146,7 @@ internal sealed class YouTubeChatPoller : IDisposable
 		var interval = TimeSpan.FromMilliseconds(Math.Max(page.PollingIntervalMillis,
 			_options.MinimumChatInterval.TotalMilliseconds));
 
-		return _budget.Level switch
+		return _budget.ChatLevel switch
 		{
 			YouTubeQuotaLevel.Paused => UntilReset(),
 			YouTubeQuotaLevel.Throttled => interval * _options.ThrottledChatFactor,

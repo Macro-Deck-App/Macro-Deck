@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Meld.Protocol;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Meld.Actions;
@@ -12,14 +13,14 @@ internal static class MeldVariableWriter
 	public static Task<bool> WriteAsync(
 		VariableApiAccessor accessor,
 		string variableName,
-		string? ownerWidgetId,
+		UserVariableContext variableContext,
 		VariableType type,
 		object value)
 	{
 		return ActionVariableTarget.WriteAsync(accessor.UserVariables,
 			accessor.Current,
 			variableName,
-			ownerWidgetId,
+			variableContext,
 			type,
 			value,
 			_logger);

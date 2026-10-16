@@ -1,3 +1,4 @@
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -14,7 +15,7 @@ internal sealed record TwitchActionScope(
 	IVariableApi? Variables,
 	CancellationToken CancellationToken,
 	IUserVariableApi? UserVariables = null,
-	string? OwnerWidgetId = null)
+	UserVariableContext? VariableContext = null)
 {
 	public ITwitchHelixClient Helix => Connection.Helix;
 
@@ -171,7 +172,7 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 					_definition._variables(),
 					context.CancellationToken,
 					_definition._userVariables(),
-					context.OwnerWidgetId));
+					UserVariableContext.From(context)));
 			}
 			catch (TwitchScopeException)
 			{
@@ -181,6 +182,13 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 
 				return ActionResult.Failed(ActionErrorCodes.PermissionDenied,
 					AppStrings.Integrations.Twitch.Errors.MissingScopePermission());
+			}
+			catch (TimeoutException ex)
+			{
+				_logger.Warning(ex, "Twitch action '{Action}' timed out", _definition.Id);
+
+				return ActionResult.Failed(ActionErrorCodes.Timeout,
+					AppStrings.Integrations.Twitch.Errors.RequestTimedOut());
 			}
 			catch (Exception ex) when (ex is not OperationCanceledException)
 			{

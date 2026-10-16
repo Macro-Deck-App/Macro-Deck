@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Bu widget'ın değişkenleri</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Bu betiğin değişkenleri</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Bu otomasyonun değişkenleri</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Etkinlik sona erdi</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Widget değişkenleri</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Betik değişkenleri</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Otomasyon değişkenleri</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Yayımlandı: {date}</value>
@@ -2985,6 +2997,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Bilinmeyen değişken kapsamı</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>Bu değişkenin ait olduğu widget, betik veya otomasyon mevcut değil.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>Video kaynağı şu anda meşgul.</value>
@@ -11274,6 +11289,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch isteği reddetti.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch zamanında yanıt vermedi.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Hesap</value>
   </data>
@@ -14435,6 +14453,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Bu betik çalışırken "vars.{name}" değişkenini gölgeler.</value>
+  </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Bu betik çalışırken "vars.{name}" betik değişkenini gölgeler.</value>
   </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Tür</value>
@@ -18257,6 +18278,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Yalnızca bu widget görür ve burada aynı adlı genel değişkenin üzerine yazar.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Yalnızca bu betik görür ve burada aynı adlı genel değişkenin üzerine yazar.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Yalnızca bu otomasyon görür ve burada aynı adlı genel değişkenin üzerine yazar.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Değişkenleri ara…</value>
   </data>
@@ -18391,14 +18418,17 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>Bu olay</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Bu betik</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Kullanıcı</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Bu widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Bu betik</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Bu otomasyon</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Kullanıcı</value>
@@ -21947,6 +21977,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Google Cloud projeniz günlük YouTube kotasını tüketti; bu nedenle Macro Deck canlı durum ve sohbet güncellemelerini duraklattı. Google kotayı sıfırladığında, Pasifik saatiyle gece yarısından sonra devam ederler.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Kotadan tasarruf için YouTube sohbeti duraklatıldı</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Google Cloud projeniz günlük YouTube kotasını neredeyse tüketti; bu nedenle Macro Deck sohbet güncellemelerini duraklattı ve canlı durumu daha seyrek okuyor. Google kotayı sıfırladığında, Pasifik saatiyle gece yarısından sonra sohbet devam eder.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube kanalı iki kez bağlandı</value>

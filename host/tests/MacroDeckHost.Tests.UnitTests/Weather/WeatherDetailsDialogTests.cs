@@ -4,6 +4,7 @@ using MacroDeck.Ui.Model.Serialization;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Integrations.Weather;
+using MacroDeckHost.Integrations.Weather.Providers;
 
 namespace MacroDeckHost.Tests.UnitTests.Weather;
 

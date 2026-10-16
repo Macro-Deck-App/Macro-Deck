@@ -2,6 +2,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Weather;
 using MacroDeckHost.Application.Weather;
 using MacroDeckHost.Integrations.Weather;
+using MacroDeckHost.Integrations.Weather.Actions;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 

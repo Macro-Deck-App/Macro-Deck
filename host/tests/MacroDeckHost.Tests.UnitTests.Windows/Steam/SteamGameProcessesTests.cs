@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
-using MacroDeckHost.Integrations.Steam;
+using MacroDeckHost.Integrations.Steam.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.Windows.Steam;
 

@@ -1,6 +1,12 @@
 using System.Globalization;
 using MacroDeckHost.Integrations.YtmDesktop.Actions;
+using MacroDeckHost.Integrations.YtmDesktop.Configuration;
+using MacroDeckHost.Integrations.YtmDesktop.Connections;
+using MacroDeckHost.Integrations.YtmDesktop.Events;
 using MacroDeckHost.Integrations.YtmDesktop.Protocol;
+using MacroDeckHost.Integrations.YtmDesktop.Providers;
+using MacroDeckHost.Integrations.YtmDesktop.State;
+using MacroDeckHost.Integrations.YtmDesktop.Variables;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;

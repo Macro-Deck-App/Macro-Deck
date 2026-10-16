@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
-using MacroDeckHost.Integrations.MicrosoftCalendar;
+using MacroDeckHost.Integrations.MicrosoftCalendar.Auth;
 using MacroDeckHost.Tests.UnitTests.GoogleCalendar;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 

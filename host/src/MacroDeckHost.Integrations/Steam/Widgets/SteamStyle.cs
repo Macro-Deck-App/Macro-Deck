@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Resources;
+using MacroDeckHost.Integrations.Steam.State;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;
 

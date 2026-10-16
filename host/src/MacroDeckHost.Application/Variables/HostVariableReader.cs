@@ -1,5 +1,5 @@
 using MacroDeckHost.Application.Services;
-using MacroDeckHost.Domain.Enums;
+using MacroDeck.Sdk.Variables;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Application.Variables;
@@ -11,7 +11,7 @@ public static class HostVariableReader
 	public static async Task<HostVariableValue?> ReadAsync(
 		IServiceScopeFactory scopeFactory,
 		string name,
-		string? ownerWidgetId)
+		UserVariableContext variableContext)
 	{
 		var canonical = VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
 
@@ -19,9 +19,7 @@ public static class HostVariableReader
 		var service = scope.ServiceProvider.GetRequiredService<IVariableService>();
 		var registry = scope.ServiceProvider.GetRequiredService<VariableRegistry>();
 
-		var entity = string.IsNullOrWhiteSpace(ownerWidgetId)
-			? await service.Resolve(canonical, VariableScope.Global, null)
-			: await service.Resolve(canonical, VariableScope.Widget, ownerWidgetId);
+		var entity = await service.Resolve(canonical, VariableScopeChain.For(variableContext));
 
 		return entity is null ? null : new HostVariableValue(entity.Value, registry.IsAvailable(entity.Id));
 	}

@@ -1,6 +1,7 @@
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Integrations.Obs;
 using MacroDeckHost.Integrations.Obs.Actions;
+using MacroDeckHost.Integrations.Obs.Connections;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;

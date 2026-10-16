@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.HomeAssistant;
+using MacroDeckHost.Integrations.HomeAssistant.Configuration;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.ConfigFlow;

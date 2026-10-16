@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.SinusBot;
+using MacroDeckHost.Integrations.SinusBot.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.SinusBot;
 

@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.System;
+using MacroDeckHost.Integrations.System.State;
 
 namespace MacroDeckHost.Tests.UnitTests.System;
 

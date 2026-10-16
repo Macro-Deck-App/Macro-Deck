@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 using System.Text;
-using MacroDeckHost.Integrations.Discord.Rpc;
+using MacroDeckHost.Integrations.Discord.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Discord;
 

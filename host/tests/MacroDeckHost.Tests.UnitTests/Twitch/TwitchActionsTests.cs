@@ -2,6 +2,8 @@ using System.Globalization;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Actions;
 using MacroDeckHost.Integrations.Twitch.Auth;
+using MacroDeckHost.Integrations.Twitch.Configuration;
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
@@ -192,6 +194,21 @@ internal sealed class TwitchActionsTests
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.ProviderError));
+		});
+	}
+
+	[Test]
+	public async Task A_call_Twitch_never_answers_is_reported_as_a_timeout_not_as_rejected()
+	{
+		_first.FailingReads.Add("user");
+		_first.FailingReadExceptions["user"] = new TimeoutException("The request to Twitch timed out.");
+
+		var result = await Run("start-raid", ("targetLogin", "other"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Timeout));
 		});
 	}
 

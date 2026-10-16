@@ -345,7 +345,7 @@ describe('component-profile conformance fixtures: clock tree', () => {
           if ('secondsFontSize' in spec || 'secondsRole' in spec) {
             const seconds = byId(id).querySelector('.widget-dynamic-text-seconds') as HTMLElement;
             if ('secondsFontSize' in spec) {
-              expect(num(seconds.style.fontSize)).withContext(`${id}.secondsFontSize`)
+              expect(num(getComputedStyle(seconds).fontSize)).withContext(`${id}.secondsFontSize`)
                 .toBeCloseTo(spec.secondsFontSize as number, 2);
             }
             if ('secondsRole' in spec) {

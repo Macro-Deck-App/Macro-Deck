@@ -1,6 +1,7 @@
 using MacroDeck.Sdk.Actions;
-using MacroDeckHost.Integrations.Steam;
 using MacroDeckHost.Integrations.Steam.Actions;
+using MacroDeckHost.Integrations.Steam.Native;
+using MacroDeckHost.Integrations.Steam.State;
 using MacroDeckHost.Platform.Applications;
 using MacroDeckHost.Tests.UnitTests.System;
 

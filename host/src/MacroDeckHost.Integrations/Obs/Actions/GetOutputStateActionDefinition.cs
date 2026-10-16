@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Obs.Protocol;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Obs.Actions;
@@ -85,7 +86,7 @@ internal sealed class GetOutputStateActionDefinition : IDynamicOptionsActionDefi
 
 			var written = await ObsVariableWriter.WriteAsync(_variables,
 				variable,
-				context.OwnerWidgetId,
+				UserVariableContext.From(context),
 				VariableType.Boolean,
 				read.Active);
 

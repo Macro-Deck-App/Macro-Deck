@@ -58,6 +58,8 @@ internal static class VariableDtoMapper
 		{
 			DomainScope.Global => "global",
 			DomainScope.Widget => "widget",
+			DomainScope.Script => "script",
+			DomainScope.Automation => "automation",
 			_ => s.ToString().ToLowerInvariant()
 		};
 	}
@@ -76,6 +78,8 @@ internal static class VariableDtoMapper
 			// The scope was called "actionButton" before it was generalized to every widget type; a client
 			// built against the old vocabulary still sends it.
 			"actionbutton" => DomainScope.Widget,
+			"script" => DomainScope.Script,
+			"automation" => DomainScope.Automation,
 			_ => null
 		};
 	}

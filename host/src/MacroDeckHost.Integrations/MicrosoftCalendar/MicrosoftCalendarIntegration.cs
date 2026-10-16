@@ -6,6 +6,10 @@ using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
+using MacroDeckHost.Integrations.MicrosoftCalendar.Auth;
+using MacroDeckHost.Integrations.MicrosoftCalendar.Configuration;
+using MacroDeckHost.Integrations.MicrosoftCalendar.Connections;
+using MacroDeckHost.Integrations.MicrosoftCalendar.Protocol;
 using MacroDeckHost.Localization;
 using Serilog;
 

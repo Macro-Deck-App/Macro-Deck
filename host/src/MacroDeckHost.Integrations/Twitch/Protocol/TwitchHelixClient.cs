@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using MacroDeckHost.Integrations.Twitch.Auth;
+using MacroDeckHost.Integrations.Twitch.Connections;
 using Serilog;
 using TwitchLib.Api;
 using TwitchLib.Api.Core;
@@ -760,6 +761,10 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 			catch (TooManyRequestsException) when (attempt < RateLimitAttempts)
 			{
 				await _delay(_rateLimitBackoff * attempt, cancellationToken);
+			}
+			catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+			{
+				throw new TimeoutException("The request to Twitch timed out.", ex);
 			}
 		}
 	}

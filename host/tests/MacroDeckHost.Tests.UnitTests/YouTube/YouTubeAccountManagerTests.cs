@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Issues;
-using MacroDeckHost.Integrations.YouTube;
+using MacroDeckHost.Integrations.YouTube.Configuration;
+using MacroDeckHost.Integrations.YouTube.Connections;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Twitch;
@@ -174,6 +175,33 @@ internal sealed class YouTubeAccountManagerTests
 			Assert.That(issue.Severity, Is.EqualTo(IntegrationIssueSeverity.Warning));
 			Assert.That(TestLocalization.Resolve(issue.ActionLabel), Is.Null);
 			Assert.That(TestLocalization.Resolve(issue.Description), Does.Contain("Pacific"));
+		});
+	}
+
+	[Test]
+	public async Task A_nearly_used_up_quota_notes_once_per_google_project_that_chat_paused()
+	{
+		YouTubeTestSupport.AddChannel(_config, "UCone", "One");
+		YouTubeTestSupport.AddChannel(_config, "UCtwo", "Two");
+		await _manager.ReloadAsync(_config);
+		var budget = _manager.Connections[0].Budget;
+
+		budget.Charge(8_400);
+		var belowChatPause = _manager.Issues();
+		budget.Charge(100);
+		var chatPaused = _manager.Issues();
+		budget.MarkExhausted();
+		var usedUp = _manager.Issues();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(belowChatPause, Is.Empty);
+			Assert.That(chatPaused.Select(issue => issue.Id), Has.Exactly(1).StartsWith("quota-chat-paused:"));
+			Assert.That(chatPaused, Has.Count.EqualTo(1));
+			Assert.That(chatPaused[0].Severity, Is.EqualTo(IntegrationIssueSeverity.Warning));
+			Assert.That(TestLocalization.Resolve(chatPaused[0].Description), Does.Contain("Pacific"));
+			Assert.That(usedUp, Has.Count.EqualTo(1));
+			Assert.That(usedUp.Select(issue => issue.Id), Has.Exactly(1).StartsWith("quota-exhausted:"));
 		});
 	}
 

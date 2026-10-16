@@ -1,4 +1,3 @@
-using MacroDeckHost.Integrations.Keyboard;
 using MacroDeckHost.Integrations.Keyboard.Actions;
 using MacroDeckHost.Integrations.Keyboard.Native;
 using MacroDeckHost.Tests.UnitTests.TestSupport;

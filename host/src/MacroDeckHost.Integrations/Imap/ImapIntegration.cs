@@ -6,6 +6,10 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Email;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
+using MacroDeckHost.Integrations.Imap.Configuration;
+using MacroDeckHost.Integrations.Imap.Connections;
+using MacroDeckHost.Integrations.Imap.Models;
+using MacroDeckHost.Integrations.Imap.Protocol;
 using MacroDeckHost.Localization;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Imap;
@@ -247,7 +251,7 @@ public sealed class ImapIntegration
 	{
 		var assembly = typeof(ImapIntegration).Assembly;
 		var name = assembly.GetManifestResourceNames()
-			.First(resource => resource.EndsWith(".Imap.imap.svg", StringComparison.Ordinal));
+			.First(resource => resource.EndsWith("imap-icon.svg", StringComparison.Ordinal));
 		using var stream = assembly.GetManifestResourceStream(name)!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);

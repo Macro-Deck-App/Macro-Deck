@@ -184,6 +184,15 @@ describe('ScriptInputsPanelComponent', () => {
     expect(panel.createShadowWarning()).toContain('vars.scene');
   });
 
+  it('warns that an input shadows the script\'s own variable of that name', () => {
+    seed([{ name: 'counter', type: 'numeric' }], ['counter']);
+    fixture.componentRef.setInput('scriptVariableNames', ['counter']);
+    fixture.detectChanges();
+
+    expect(panel.shadowWarning(0)).toContain('script variable');
+    expect(panel.shadowWarning(0)).toContain('vars.counter');
+  });
+
   it('says nothing about a name that shadows nothing', () => {
     seed([{ name: 'scene', type: 'text' }], ['streaming']);
 

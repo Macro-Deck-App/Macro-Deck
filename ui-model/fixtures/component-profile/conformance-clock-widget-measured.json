@@ -1,0 +1,185 @@
+{
+  "tree": "conformance-clock-widget-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "clock": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "clock.time": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 39.36,
+            "width": 96,
+            "height": 28.08
+          },
+          "texts": [
+            {
+              "text": "2:05:30 PM",
+              "naturalWidth": 95.98,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "clock.date": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 65.13,
+            "width": 96,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "Sat, Sep 12",
+              "naturalWidth": 50.77,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 252,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "clock": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 120
+          }
+        },
+        "clock.time": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 33.25,
+            "width": 228,
+            "height": 40.3
+          },
+          "texts": [
+            {
+              "text": "2:05:30 PM",
+              "naturalWidth": 137.69,
+              "givenWidth": 228,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "clock.date": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 69.48,
+            "width": 228,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "Sat, Sep 12",
+              "naturalWidth": 50.77,
+              "givenWidth": 228,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 252
+      },
+      "basis": 120,
+      "nodes": {
+        "clock": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 252
+          }
+        },
+        "clock.time": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 105.36,
+            "width": 96,
+            "height": 28.08
+          },
+          "texts": [
+            {
+              "text": "2:05:30 PM",
+              "naturalWidth": 95.98,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "clock.date": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 131.13,
+            "width": 96,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "Sat, Sep 12",
+              "naturalWidth": 50.77,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

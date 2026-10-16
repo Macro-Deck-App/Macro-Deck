@@ -7,6 +7,7 @@ using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Integrations.Steam.State;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Integrations.Steam;

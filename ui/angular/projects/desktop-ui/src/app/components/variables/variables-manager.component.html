@@ -303,8 +303,8 @@
             name="scope" />
           <span class="form-preview">
             <span class="hint">
-              @if (createForm().scope === 'widget') {
-                {{ scopeHintWidget() }}
+              @if (createForm().scope !== 'global') {
+                {{ scopeHintLocal() }}
               } @else {
                 {{ scopeHintGlobal() }}
               }
@@ -386,7 +386,7 @@
             class="vars-input"
             [ariaLabel]="templateFieldLabel()"
             [variables]="createTemplateVariables()"
-            [scope]="createScoped() ? 'widget' : 'global'"
+            [scope]="createScoped() ? localScopeState() : 'global'"
             [scopeRefId]="createScopeRefId()"
             [resultType]="createForm().type"
             [resultOptions]="createTemplateOptions()"

@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Actions;
-using MacroDeckHost.Integrations.YouTube;
+using MacroDeckHost.Integrations.YouTube.Connections;
+using MacroDeckHost.Integrations.YouTube.Events;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 

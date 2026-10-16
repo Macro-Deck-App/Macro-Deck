@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Migration;
 using MacroDeckHost.Integrations.SoundPad;
+using MacroDeckHost.Integrations.SoundPad.Migration;
 
 namespace MacroDeckHost.Tests.UnitTests.Integrations;
 

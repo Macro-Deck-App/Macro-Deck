@@ -68,7 +68,8 @@
           [availableBlocks]="availableActionBlocks()"
           [variables]="variables()"
           [runsOnWidget]="draftRunsOnWidget()"
-          previewScope="global"
+          previewScope="script"
+          [previewScopeRefId]="variableScopeRefId()"
           [auxTabId]="inputsTabId"
           [auxTabLabel]="'macrodeck.app:Scripts.InputsTabLabel' | translate"
           [auxTabInline]="true"
@@ -80,6 +81,7 @@
             auxPanel
             [inputs]="draftInputs()"
             [globalNames]="globalNames()"
+            [scriptVariableNames]="scriptLocalNames()"
             [runsOnWidget]="draftRunsOnWidget()"
             (inputsChange)="onInputsChange($event)"
             (validityChange)="onInputsValidityChange($event)"

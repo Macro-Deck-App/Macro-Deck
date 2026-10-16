@@ -100,8 +100,8 @@ public sealed class TimeFormatResolver
 		};
 	}
 
-	public async Task<string> ResolveHourCycle()
+	public static bool WritesPaddedHour(TimeOfDayFormat format)
 	{
-		return (await ResolveAsync()).HourCycle;
+		return format.Format(new TimeOnly(1, 0)).Contains("01", StringComparison.Ordinal);
 	}
 }

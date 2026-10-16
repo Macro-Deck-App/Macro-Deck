@@ -18,4 +18,8 @@ public interface IWidgetVariableCloner
 	Task Restore(Guid widgetId, IReadOnlyList<WidgetVariableSnapshot> variables);
 
 	Task Clone(Guid sourceWidgetId, Guid targetWidgetId);
+
+	Task<IReadOnlyList<WidgetVariableSnapshot>> SnapshotScope(VariableScope scope, string scopeRefId);
+
+	Task RestoreScope(VariableScope scope, string scopeRefId, IReadOnlyList<WidgetVariableSnapshot> variables);
 }

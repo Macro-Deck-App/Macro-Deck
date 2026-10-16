@@ -359,6 +359,7 @@ export class NotificationDialogs {
       now: () => base.now(),
       culture: () => base.culture(),
       hourCycle: () => base.hourCycle?.(),
+      hourPadded: () => base.hourPadded?.(),
       simpleRendering: () => base.simpleRendering(),
       fontFamily: faceId => base.fontFamily(faceId),
       fontReady: faceId => base.fontReady(faceId),

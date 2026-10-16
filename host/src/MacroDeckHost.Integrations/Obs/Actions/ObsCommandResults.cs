@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Obs.Connections;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Obs.Actions;

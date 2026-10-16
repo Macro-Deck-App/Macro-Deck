@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Переменные этого виджета</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Переменные этого скрипта</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Переменные этой автоматизации</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Событие завершилось</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Переменные виджета</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Переменные скрипта</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Переменные автоматизации</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Опубликовано {date}</value>
@@ -2985,6 +2997,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Неизвестная область переменной</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>Владелец этой переменной (виджет, скрипт или автоматизация) не существует.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>Источник видео сейчас занят.</value>
@@ -11274,6 +11289,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch отклонил запрос.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch не ответил вовремя.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Аккаунт</value>
   </data>
@@ -14435,6 +14453,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Перекрывает переменную «vars.{name}» во время работы скрипта.</value>
+  </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Перекрывает переменную скрипта «vars.{name}» во время работы скрипта.</value>
   </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Тип</value>
@@ -18257,6 +18278,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Её видит только этот виджет, и она заменяет глобальную переменную с тем же именем здесь.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Её видит только этот скрипт, и она заменяет глобальную переменную с тем же именем здесь.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Её видит только эта автоматизация, и она заменяет глобальную переменную с тем же именем здесь.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Поиск переменных…</value>
   </data>
@@ -18391,14 +18418,17 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>Это событие</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Этот скрипт</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Пользователь</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Этот виджет</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Этот скрипт</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Эта автоматизация</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Пользователь</value>
@@ -21947,6 +21977,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Дневная квота YouTube для вашего проекта Google Cloud исчерпана, поэтому Macro Deck приостановил обновления статуса эфира и чата. Они возобновятся после полуночи по тихоокеанскому времени, когда Google обновит квоту.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>Чат YouTube приостановлен для экономии квоты</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Дневная квота YouTube для вашего проекта Google Cloud почти исчерпана, поэтому Macro Deck приостановил обновления чата и реже получает статус эфира. Чат возобновится после полуночи по тихоокеанскому времени, когда Google обновит квоту.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>Канал YouTube подключён дважды</value>

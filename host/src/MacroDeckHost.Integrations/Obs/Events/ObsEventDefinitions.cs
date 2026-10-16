@@ -1,0 +1,238 @@
+using MacroDeck.Localization;
+using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Events;
+using MacroDeckHost.Localization;
+using MacroDeckHost.Integrations.Obs.Actions;
+
+namespace MacroDeckHost.Integrations.Obs.Events;
+
+internal static class ObsEventDefinitions
+{
+	public static IReadOnlyList<EventDefinition> All { get; } =
+	[
+		SceneEvent(ObsEventIds.SceneChanged,
+			AppStrings.Integrations.Obs.Events.SceneChangedName(),
+			AppStrings.Integrations.Obs.Events.SceneChangedDescription()),
+		SceneEvent(ObsEventIds.PreviewSceneChanged,
+			AppStrings.Integrations.Obs.Events.PreviewSceneChangedName(),
+			AppStrings.Integrations.Obs.Events.PreviewSceneChangedDescription()),
+		Simple(ObsEventIds.RecordingStarted,
+			AppStrings.Integrations.Obs.Events.RecordingStartedName(),
+			AppStrings.Integrations.Obs.Events.RecordingCategory()),
+		Simple(ObsEventIds.RecordingStopped,
+			AppStrings.Integrations.Obs.Events.RecordingStoppedName(),
+			AppStrings.Integrations.Obs.Events.RecordingCategory()),
+		Simple(ObsEventIds.RecordingPaused,
+			AppStrings.Integrations.Obs.Events.RecordingPausedName(),
+			AppStrings.Integrations.Obs.Events.RecordingCategory()),
+		Simple(ObsEventIds.RecordingResumed,
+			AppStrings.Integrations.Obs.Events.RecordingResumedName(),
+			AppStrings.Integrations.Obs.Events.RecordingCategory()),
+		Simple(ObsEventIds.StreamingStarted,
+			AppStrings.Integrations.Obs.Events.StreamingStartedName(),
+			AppStrings.Integrations.Obs.Events.StreamingCategory()),
+		Simple(ObsEventIds.StreamingStopped,
+			AppStrings.Integrations.Obs.Events.StreamingStoppedName(),
+			AppStrings.Integrations.Obs.Events.StreamingCategory()),
+		Simple(ObsEventIds.ReplayBufferStarted,
+			AppStrings.Integrations.Obs.Events.ReplayBufferStartedName(),
+			AppStrings.Integrations.Obs.Events.ReplayBufferCategory()),
+		Simple(ObsEventIds.ReplayBufferStopped,
+			AppStrings.Integrations.Obs.Events.ReplayBufferStoppedName(),
+			AppStrings.Integrations.Obs.Events.ReplayBufferCategory()),
+		new()
+		{
+			Id = ObsEventIds.ReplayBufferSaved,
+			Name = AppStrings.Integrations.Obs.Events.ReplayBufferSavedName(),
+			Description = AppStrings.Integrations.Obs.Events.ReplayBufferSavedDescription(),
+			Category = AppStrings.Integrations.Obs.Events.ReplayBufferCategory(),
+			ConfigurationParameters = [ConfigurationParameter()],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.Text("path", AppStrings.Integrations.Obs.Events.PathLabel())
+			]
+		},
+		PathEvent(ObsEventIds.RecordFileChanged,
+			AppStrings.Integrations.Obs.Events.RecordFileChangedName(),
+			AppStrings.Integrations.Obs.Events.RecordFileChangedDescription(),
+			AppStrings.Integrations.Obs.Events.RecordingCategory()),
+		PathEvent(ObsEventIds.ScreenshotSaved,
+			AppStrings.Integrations.Obs.Events.ScreenshotSavedName(),
+			AppStrings.Integrations.Obs.Events.ScreenshotSavedDescription(),
+			AppStrings.Integrations.Obs.Events.ScreenshotsCategory()),
+		Simple(ObsEventIds.VirtualCamStarted,
+			AppStrings.Integrations.Obs.Events.VirtualCamStartedName(),
+			AppStrings.Integrations.Obs.Events.VirtualCameraCategory()),
+		Simple(ObsEventIds.VirtualCamStopped,
+			AppStrings.Integrations.Obs.Events.VirtualCamStoppedName(),
+			AppStrings.Integrations.Obs.Events.VirtualCameraCategory()),
+		new()
+		{
+			Id = ObsEventIds.StudioModeChanged,
+			Name = AppStrings.Integrations.Obs.Events.StudioModeChangedName(),
+			Category = AppStrings.Integrations.Obs.Events.StudioModeCategory(),
+			ConfigurationParameters = [ConfigurationParameter()],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.Toggle("enabled", MacroDeckStrings.Common.Enabled())
+			]
+		},
+		new()
+		{
+			Id = ObsEventIds.InputMuteChanged,
+			Name = AppStrings.Integrations.Obs.Events.InputMuteChangedName(),
+			Description = AppStrings.Integrations.Obs.Events.InputMuteChangedDescription(),
+			Category = AppStrings.Integrations.Obs.Events.AudioCategory(),
+			ConfigurationParameters =
+			[
+				ConfigurationParameter(),
+				ActionParameter.DynamicChoice("inputName",
+					AppStrings.Integrations.Obs.Params.Input(),
+					AppStrings.Integrations.Obs.Events.InputMuteConfigDescription())
+			],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.DynamicChoice("inputName", AppStrings.Integrations.Obs.Params.Input()),
+				ActionParameter.Toggle("muted", AppStrings.Integrations.Obs.Events.MutedLabel())
+			]
+		},
+		InputActivity(ObsEventIds.InputBecameActive,
+			AppStrings.Integrations.Obs.Events.InputBecameActiveName(),
+			AppStrings.Integrations.Obs.Events.InputBecameActiveDescription()),
+		InputActivity(ObsEventIds.InputBecameInactive,
+			AppStrings.Integrations.Obs.Events.InputBecameInactiveName(),
+			AppStrings.Integrations.Obs.Events.InputBecameInactiveDescription()),
+		InputActivity(ObsEventIds.InputStartedShowing,
+			AppStrings.Integrations.Obs.Events.InputStartedShowingName(),
+			AppStrings.Integrations.Obs.Events.InputStartedShowingDescription()),
+		InputActivity(ObsEventIds.InputStoppedShowing,
+			AppStrings.Integrations.Obs.Events.InputStoppedShowingName(),
+			AppStrings.Integrations.Obs.Events.InputStoppedShowingDescription()),
+		new()
+		{
+			Id = ObsEventIds.CustomEvent,
+			Name = AppStrings.Integrations.Obs.Events.CustomEventName(),
+			Description = AppStrings.Integrations.Obs.Events.CustomEventDescription(),
+			Category = AppStrings.Integrations.Obs.Events.CustomCategory(),
+			ConfigurationParameters =
+			[
+				ConfigurationParameter(),
+				ActionParameter.Text(ObsCustomEvent.EventNameKey,
+					AppStrings.Integrations.Obs.Events.EventNameLabel(),
+					AppStrings.Integrations.Obs.Events.CustomEventNameConfigDescription())
+			],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.Text(ObsCustomEvent.EventNameKey,
+					AppStrings.Integrations.Obs.Events.EventNameLabel()),
+				ActionParameter.Text(ObsCustomEvent.DataKey,
+					AppStrings.Integrations.Obs.Events.EventDataLabel())
+			]
+		},
+		Simple(ObsEventIds.Connected,
+			MacroDeckStrings.Connection.Connected(),
+			AppStrings.Integrations.Obs.Events.ConnectionCategory()),
+		Simple(ObsEventIds.Disconnected,
+			MacroDeckStrings.Connection.Disconnected(),
+			AppStrings.Integrations.Obs.Events.ConnectionCategory())
+	];
+
+	private static EventDefinition SceneEvent(string id, LocalizedText name, LocalizedText description)
+	{
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = AppStrings.Integrations.Obs.Events.ScenesCategory(),
+			ConfigurationParameters =
+			[
+				ConfigurationParameter(),
+				ActionParameter.DynamicChoice("sceneName",
+					AppStrings.Integrations.Obs.Params.Scene(),
+					AppStrings.Integrations.Obs.Events.SceneConfigDescription())
+			],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.DynamicChoice("sceneName", AppStrings.Integrations.Obs.Params.Scene()),
+				ActionParameter.DynamicChoice("previousSceneName",
+					AppStrings.Integrations.Obs.Events.PreviousSceneLabel())
+			]
+		};
+	}
+
+	private static EventDefinition PathEvent(
+		string id,
+		LocalizedText name,
+		LocalizedText description,
+		LocalizedText category)
+	{
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = category,
+			ConfigurationParameters = [ConfigurationParameter()],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.Text("path", AppStrings.Integrations.Obs.Events.PathLabel())
+			]
+		};
+	}
+
+	private static EventDefinition InputActivity(string id, LocalizedText name, LocalizedText description)
+	{
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = AppStrings.Integrations.Obs.Events.InputsCategory(),
+			ConfigurationParameters =
+			[
+				ConfigurationParameter(),
+				ActionParameter.DynamicChoice("inputName",
+					AppStrings.Integrations.Obs.Params.Input(),
+					AppStrings.Integrations.Obs.Events.InputActivityConfigDescription())
+			],
+			PayloadParameters =
+			[
+				ConfigurationPayload(),
+				ActionParameter.DynamicChoice("inputName", AppStrings.Integrations.Obs.Params.Input())
+			]
+		};
+	}
+
+	private static EventDefinition Simple(string id, LocalizedText name, LocalizedText category)
+	{
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Category = category,
+			ConfigurationParameters = [ConfigurationParameter()],
+			PayloadParameters = [ConfigurationPayload()]
+		};
+	}
+
+	private static ActionParameter ConfigurationParameter()
+	{
+		return ActionParameter.DynamicChoice(ObsTargetResolver.ConfigurationParameter,
+			AppStrings.Integrations.Obs.Params.Configuration(),
+			required: true);
+	}
+
+	private static ActionParameter ConfigurationPayload()
+	{
+		return ActionParameter.DynamicChoice(ObsTargetResolver.ConfigurationParameter,
+			AppStrings.Integrations.Obs.Params.Configuration(),
+			required: true);
+	}
+}

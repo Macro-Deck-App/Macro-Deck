@@ -195,6 +195,7 @@
       <shared-variable-picker
         class="cb-var-picker"
         [variables]="variables"
+        [scope]="previewScope"
         [acceptedTypes]="param.type === 'boolean' ? booleanAcceptedTypes : undefined"
         (pick)="pickComparisonVariable(comp, side, $event, change)"
         (pickEventParameter)="pickComparisonEventParameter(comp, side, $event, change)">
@@ -212,6 +213,7 @@
       <shared-variable-picker
         class="cb-var-picker"
         [variables]="variables"
+        [scope]="previewScope"
         (pick)="pickComparisonVariable(comp, side, $event, change)"
         (pickEventParameter)="pickComparisonEventParameter(comp, side, $event, change)">
       </shared-variable-picker>

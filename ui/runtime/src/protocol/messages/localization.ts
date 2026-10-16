@@ -10,6 +10,7 @@ export interface GetLocalizationResponse {
   followSystem: boolean;
   timeFormat?: LocalizationTimeFormat;
   hourCycle?: LocalizationHourCycle;
+  hourPadded?: boolean;
 }
 
 export interface LocalizationCultureChangedEvent {

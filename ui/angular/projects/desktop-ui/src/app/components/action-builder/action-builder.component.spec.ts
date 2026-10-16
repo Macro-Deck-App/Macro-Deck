@@ -380,12 +380,36 @@ describe('ActionBuilderComponent widget variables', () => {
   });
 
   it('offers none for a widget scope with nothing to scope to', () => {
-    // A script and an automation reach the builder this way; without a ref id there is no widget
-    // whose variables these would be.
     store.previewScope.set('widget');
     store.previewScopeRefId.set(undefined);
 
     expect(component.showVariables()).toBeFalse();
+  });
+
+  it('offers the variables of a saved script or automation', () => {
+    for (const scope of ['script', 'automation'] as const) {
+      store.previewScope.set(scope);
+      store.previewScopeRefId.set('owner-1');
+
+      expect(component.showVariables()).withContext(scope).toBeTrue();
+    }
+  });
+
+  it('shows the row holding the Variables button for a saved one-trigger automation', () => {
+    fixture.componentRef.setInput('singleEventTrigger', true);
+    store.previewScope.set('automation');
+    store.previewScopeRefId.set('automation-1');
+
+    expect(component.showTabRow()).toBeTrue();
+  });
+
+  it('offers none for an unsaved script or automation draft', () => {
+    for (const scope of ['script', 'automation'] as const) {
+      store.previewScope.set(scope);
+      store.previewScopeRefId.set(undefined);
+
+      expect(component.showVariables()).withContext(scope).toBeFalse();
+    }
   });
 });
 

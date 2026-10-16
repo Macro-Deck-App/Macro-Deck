@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Net;
 using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.Issues;
-using MacroDeckHost.Integrations.GoogleCalendar;
+using MacroDeckHost.Integrations.GoogleCalendar.Configuration;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.GoogleCalendar;

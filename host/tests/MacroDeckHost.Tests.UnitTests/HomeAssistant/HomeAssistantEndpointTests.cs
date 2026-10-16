@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.HomeAssistant;
+using MacroDeckHost.Integrations.HomeAssistant.Configuration;
 
 namespace MacroDeckHost.Tests.UnitTests.HomeAssistant;
 

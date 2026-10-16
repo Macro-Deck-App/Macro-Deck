@@ -18,7 +18,7 @@ using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Plugins;
 
-public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
+public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore, IDisposable
 {
 	/// <summary>
 	/// The schema this store writes. A document with no <c>version</c> at all predates ADR 0081 and is
@@ -41,6 +41,8 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 
 	private readonly ConcurrentDictionary<string, RemotePluginCapabilitySnapshot> _byPluginId =
 		new(StringComparer.Ordinal);
+
+	private bool _disposed;
 
 	public RemotePluginSnapshotStore(IMacroDeckPaths paths, ILogger logger)
 	{
@@ -75,6 +77,16 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 		return Task.CompletedTask;
 	}
 
+	// A plugin's registration can still finish after the host stopped; once disposed, the store must not
+	// recreate files in a data directory that may already be being removed.
+	public void Dispose()
+	{
+		lock (_fileLock)
+		{
+			_disposed = true;
+		}
+	}
+
 	private Dictionary<string, PersistedSnapshot> LoadFromDisk()
 	{
 		lock (_fileLock)
@@ -87,6 +99,11 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 	{
 		lock (_fileLock)
 		{
+			if (_disposed)
+			{
+				return;
+			}
+
 			try
 			{
 				var persisted = _byPluginId.ToDictionary(pair => pair.Key,

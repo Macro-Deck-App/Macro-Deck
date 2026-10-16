@@ -1,5 +1,6 @@
-using MacroDeckHost.Integrations.Obs;
 using MacroDeck.Sdk.Events;
+using MacroDeckHost.Integrations.Obs.Events;
+using MacroDeckHost.Integrations.Obs.State;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;
 

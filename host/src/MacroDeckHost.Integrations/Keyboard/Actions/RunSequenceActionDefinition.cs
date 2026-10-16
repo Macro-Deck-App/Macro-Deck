@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeckHost.Integrations.Keyboard.Models;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Keyboard.Native;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Keyboard.Actions;

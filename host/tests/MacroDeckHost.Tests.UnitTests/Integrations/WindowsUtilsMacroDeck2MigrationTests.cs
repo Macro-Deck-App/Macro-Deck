@@ -1,5 +1,5 @@
 using MacroDeck.Sdk.Migration;
-using MacroDeckHost.Integrations.System;
+using MacroDeckHost.Integrations.System.Migration;
 
 namespace MacroDeckHost.Tests.UnitTests.Integrations;
 

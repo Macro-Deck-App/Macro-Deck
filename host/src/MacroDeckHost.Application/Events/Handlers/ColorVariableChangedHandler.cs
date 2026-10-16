@@ -67,7 +67,7 @@ public sealed class ColorVariableChangedHandler :
 	// variable of any type can too, because it shadows the global one of the same name for that widget.
 	public async ValueTask Handle(VariableUpdatedNotification notification, CancellationToken cancellationToken)
 	{
-		if (notification.Variable.Type != VariableType.Color)
+		if (notification.Variable.Type != VariableType.Color || !ReadByAppearance(notification.Variable))
 		{
 			return;
 		}
@@ -101,7 +101,13 @@ public sealed class ColorVariableChangedHandler :
 
 	private static bool AffectsResolution(VariableEntity variable)
 	{
-		return variable.Type == VariableType.Color || variable.Scope == VariableScope.Widget;
+		return ReadByAppearance(variable)
+			&& (variable.Type == VariableType.Color || variable.Scope == VariableScope.Widget);
+	}
+
+	private static bool ReadByAppearance(VariableEntity variable)
+	{
+		return variable.Scope is VariableScope.Global or VariableScope.Widget;
 	}
 
 	private async Task RefreshAsync(VariableEntity variable, string name, CancellationToken cancellationToken)

@@ -1,5 +1,5 @@
 using System.Text;
-using MacroDeckHost.Integrations.Obs;
+using MacroDeckHost.Integrations.Obs.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;
 

@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations.Discord.Rpc;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Discord.Protocol;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Discord.Actions;

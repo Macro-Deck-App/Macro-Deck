@@ -1,6 +1,7 @@
 using System.Text;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.YouTube.Connections;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 using Errors = MacroDeckHost.Localization.AppStrings.Integrations.YouTube.Errors;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.YouTube.Actions;

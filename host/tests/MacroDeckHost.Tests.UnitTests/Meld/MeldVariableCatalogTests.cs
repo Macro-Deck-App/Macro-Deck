@@ -1,6 +1,8 @@
 using System.Diagnostics;
-using MacroDeckHost.Integrations.Meld;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Meld.Connections;
+using MacroDeckHost.Integrations.Meld.Protocol;
+using MacroDeckHost.Integrations.Meld.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Meld;
 

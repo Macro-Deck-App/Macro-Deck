@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-using MacroDeckHost.Integrations.Obs;
+using MacroDeckHost.Integrations.Obs.Protocol;
 using OBSWebsocketDotNet.Types;
 using Serilog;
 using Serilog.Core;

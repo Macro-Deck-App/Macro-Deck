@@ -1,3 +1,5 @@
+using MacroDeckHost.Integrations.AdGuardHome.State;
+
 namespace MacroDeckHost.Integrations.AdGuardHome.Widgets;
 
 internal static class AdGuardHomeWidgetSample

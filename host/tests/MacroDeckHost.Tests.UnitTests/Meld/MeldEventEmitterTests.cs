@@ -1,6 +1,7 @@
 using System.Text.Json;
-using MacroDeckHost.Integrations.Meld;
 using MacroDeck.Sdk.Events;
+using MacroDeckHost.Integrations.Meld.Events;
+using MacroDeckHost.Integrations.Meld.State;
 
 namespace MacroDeckHost.Tests.UnitTests.Meld;
 

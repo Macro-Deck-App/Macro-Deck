@@ -1,3 +1,5 @@
+using MacroDeckHost.Integrations.Meld.Connections;
+using MacroDeckHost.Integrations.Meld.State;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -85,7 +87,11 @@ internal sealed class GetEffectStateActionDefinition : IDynamicOptionsActionDefi
 			}
 
 			var written = await MeldVariableWriter
-				.WriteAsync(_variables, variable, context.OwnerWidgetId, VariableType.Boolean, target!.Enabled)
+				.WriteAsync(_variables,
+					variable,
+					UserVariableContext.From(context),
+					VariableType.Boolean,
+					target!.Enabled)
 				.ConfigureAwait(false);
 			return written
 				? ActionResult.Success()

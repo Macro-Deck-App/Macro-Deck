@@ -1,6 +1,9 @@
 using System.Globalization;
 using System.Threading.Channels;
 using MacroDeckHost.Integrations.System.Actions;
+using MacroDeckHost.Integrations.System.Migration;
+using MacroDeckHost.Integrations.System.State;
+using MacroDeckHost.Integrations.System.Variables;
 using MacroDeckHost.Platform.Applications;
 using MacroDeckHost.Platform.Focus;
 using MacroDeckHost.Platform.Lock;

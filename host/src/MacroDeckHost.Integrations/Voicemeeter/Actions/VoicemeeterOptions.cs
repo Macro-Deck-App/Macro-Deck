@@ -1,4 +1,6 @@
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Voicemeeter.Models;
+using MacroDeckHost.Integrations.Voicemeeter.State;
 
 namespace MacroDeckHost.Integrations.Voicemeeter.Actions;
 

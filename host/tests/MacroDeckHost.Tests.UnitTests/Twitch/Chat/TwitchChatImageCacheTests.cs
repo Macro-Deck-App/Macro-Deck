@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Integrations.Twitch.Chat;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
 using MacroDeckHost.Integrations.Twitch;

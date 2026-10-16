@@ -1,5 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Integrations.Meld.Connections;
 
 namespace MacroDeckHost.Integrations.Meld.Actions;
 

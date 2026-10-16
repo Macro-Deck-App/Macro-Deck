@@ -476,7 +476,7 @@ internal sealed class YouTubeApiClientTests
 			Assert.That(snippet.GetProperty("type").GetString(), Is.EqualTo("textMessageEvent"));
 			Assert.That(snippet.GetProperty("textMessageDetails").GetProperty("messageText").GetString(),
 				Is.EqualTo("hi there"));
-			Assert.That(_budget.Spent, Is.EqualTo(YouTubeQuotaCosts.Write));
+			Assert.That(_budget.Spent, Is.EqualTo(20));
 		});
 	}
 
@@ -532,7 +532,7 @@ internal sealed class YouTubeApiClientTests
 			Assert.That(Query(_handler.RequestedUris[0])["id"], Is.EqualTo("msg/1"));
 			Assert.That(_handler.RequestedUris[1].AbsolutePath, Is.EqualTo("/youtube/v3/liveChat/bans"));
 			Assert.That(Query(_handler.RequestedUris[1])["id"], Is.EqualTo("ban-1"));
-			Assert.That(_budget.Spent, Is.EqualTo(2 * YouTubeQuotaCosts.Write));
+			Assert.That(_budget.Spent, Is.EqualTo(220));
 		});
 	}
 
@@ -580,7 +580,7 @@ internal sealed class YouTubeApiClientTests
 			Assert.That(_handler.RequestedUris[0].AbsolutePath, Is.EqualTo("/youtube/v3/liveBroadcasts/transition"));
 			Assert.That(query["broadcastStatus"], Is.EqualTo("live"));
 			Assert.That(query["id"], Is.EqualTo("b1"));
-			Assert.That(_budget.Spent, Is.EqualTo(YouTubeQuotaCosts.Write));
+			Assert.That(_budget.Spent, Is.EqualTo(1));
 		});
 	}
 
@@ -614,11 +614,25 @@ internal sealed class YouTubeApiClientTests
 		Assert.That(_budget.Spent, Is.EqualTo(3));
 
 		await _client.ListChatMessagesAsync("chat", null, CancellationToken.None);
-		Assert.That(_budget.Spent, Is.EqualTo(4));
+		Assert.That(_budget.Spent, Is.EqualTo(8));
 
 		_handler.Enqueue(HttpStatusCode.OK, """{"id":"msg"}""");
 		await _client.InsertChatMessageAsync("chat", "hi", CancellationToken.None);
-		Assert.That(_budget.Spent, Is.EqualTo(54));
+		Assert.That(_budget.Spent, Is.EqualTo(28));
+
+		_handler.Enqueue(HttpStatusCode.OK, """{"id":"ban"}""");
+		await _client.InsertBanAsync("chat", "UCtroll", 300, CancellationToken.None);
+		Assert.That(_budget.Spent, Is.EqualTo(228));
+
+		_handler.Enqueue(HttpStatusCode.OK, """{"id":"v1"}""");
+		await _client.UpdateVideoSnippetAsync("v1",
+			new YouTubeVideoSnippet("Title", "", [], "20"),
+			CancellationToken.None);
+		Assert.That(_budget.Spent, Is.EqualTo(278));
+
+		_handler.Enqueue(HttpStatusCode.OK, """{"id":"cue"}""");
+		await _client.InsertCuepointAsync("b1", 30, CancellationToken.None);
+		Assert.That(_budget.Spent, Is.EqualTo(279));
 	}
 
 	private static Dictionary<string, string> Query(Uri uri)

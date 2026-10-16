@@ -431,6 +431,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variablen dieses Widgets</value>
   </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisScript" xml:space="preserve">
+    <value>Variablen dieses Skripts</value>
+  </data>
+  <data name="ActionBuilder.Toolbar.VariablesOfThisAutomation" xml:space="preserve">
+    <value>Variablen dieser Automation</value>
+  </data>
   <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
     <value>Termin ist beendet</value>
   </data>
@@ -508,6 +514,12 @@
   </data>
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Widget-Variablen</value>
+  </data>
+  <data name="ActionBuilder.ScriptVariablesHeading" xml:space="preserve">
+    <value>Skript-Variablen</value>
+  </data>
+  <data name="ActionBuilder.AutomationVariablesHeading" xml:space="preserve">
+    <value>Automations-Variablen</value>
   </data>
   <data name="Announcements.PublishedOn" xml:space="preserve">
     <value>Veröffentlicht am {date}</value>
@@ -2985,6 +2997,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Unbekannter Geltungsbereich der Variable</value>
+  </data>
+  <data name="Errors.Variables.UnknownScopeOwner" xml:space="preserve">
+    <value>Das Widget, Skript oder die Automation dieser Variable existiert nicht.</value>
   </data>
   <data name="Errors.VideoStream.Busy" xml:space="preserve">
     <value>Die Videoquelle ist gerade ausgelastet.</value>
@@ -11271,6 +11286,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.Errors.RequestRejected" xml:space="preserve">
     <value>Twitch hat die Anfrage abgelehnt.</value>
   </data>
+  <data name="Integrations.Twitch.Errors.RequestTimedOut" xml:space="preserve">
+    <value>Twitch hat nicht rechtzeitig geantwortet.</value>
+  </data>
   <data name="Integrations.Twitch.Events.Account" xml:space="preserve">
     <value>Konto</value>
   </data>
@@ -14432,6 +14450,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Scripts.ShadowsVariableWarning" xml:space="preserve">
     <value>Überdeckt die Variable „vars.{name}“ während dieses Skript läuft.</value>
+  </data>
+  <data name="Scripts.ShadowsScriptVariableWarning" xml:space="preserve">
+    <value>Überdeckt die Skript-Variable „vars.{name}“ während dieses Skript läuft.</value>
   </data>
   <data name="Scripts.TypeFieldLabel" xml:space="preserve">
     <value>Typ</value>
@@ -18254,6 +18275,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Variables.Manager.ScopeHintWidget" xml:space="preserve">
     <value>Nur dieses Widget sieht sie, und sie überdeckt hier eine globale Variable mit demselben Namen.</value>
   </data>
+  <data name="Variables.Manager.ScopeHintScript" xml:space="preserve">
+    <value>Nur dieses Skript sieht sie, und sie überdeckt hier eine globale Variable mit demselben Namen.</value>
+  </data>
+  <data name="Variables.Manager.ScopeHintAutomation" xml:space="preserve">
+    <value>Nur diese Automation sieht sie, und sie überdeckt hier eine globale Variable mit demselben Namen.</value>
+  </data>
   <data name="Variables.Manager.SearchPlaceholder" xml:space="preserve">
     <value>Variablen durchsuchen…</value>
   </data>
@@ -18388,14 +18415,17 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Variables.Source.ThisEvent" xml:space="preserve">
     <value>Dieses Ereignis</value>
   </data>
-  <data name="Variables.Source.ThisScript" xml:space="preserve">
-    <value>Dieses Skript</value>
-  </data>
   <data name="Variables.Source.User" xml:space="preserve">
     <value>Benutzer</value>
   </data>
   <data name="Variables.ThisWidget" xml:space="preserve">
     <value>Dieses Widget</value>
+  </data>
+  <data name="Variables.ThisScript" xml:space="preserve">
+    <value>Dieses Skript</value>
+  </data>
+  <data name="Variables.ThisAutomation" xml:space="preserve">
+    <value>Diese Automation</value>
   </data>
   <data name="Variables.UserLabel" xml:space="preserve">
     <value>Benutzer</value>
@@ -21923,6 +21953,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
     <value>Dein Google-Cloud-Projekt hat sein tägliches YouTube-Kontingent aufgebraucht, daher hat Macro Deck die Aktualisierung von Live-Status und Chat pausiert. Sie läuft nach Mitternacht pazifischer Zeit weiter, wenn Google das Kontingent zurücksetzt.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedTitle" xml:space="preserve">
+    <value>YouTube-Chat pausiert, um Kontingent zu sparen</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ChatPausedDescription" xml:space="preserve">
+    <value>Dein Google-Cloud-Projekt hat sein tägliches YouTube-Kontingent fast aufgebraucht, daher hat Macro Deck die Chat-Aktualisierung pausiert und liest den Live-Status seltener. Der Chat läuft nach Mitternacht pazifischer Zeit weiter, wenn Google das Kontingent zurücksetzt.</value>
   </data>
   <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
     <value>YouTube-Kanal zweimal verbunden</value>

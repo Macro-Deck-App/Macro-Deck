@@ -1,7 +1,8 @@
 using System.Globalization;
 using MacroDeck.Sdk.Issues;
-using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
+using MacroDeckHost.Integrations.Twitch.Configuration;
+using MacroDeckHost.Integrations.Twitch.Connections;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 using Serilog.Core;

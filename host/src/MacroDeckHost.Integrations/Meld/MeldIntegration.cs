@@ -1,5 +1,8 @@
 using System.Globalization;
 using MacroDeckHost.Integrations.Meld.Actions;
+using MacroDeckHost.Integrations.Meld.Configuration;
+using MacroDeckHost.Integrations.Meld.Connections;
+using MacroDeckHost.Integrations.Meld.Events;
 using MacroDeckHost.Integrations.Meld.Protocol;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
@@ -9,6 +12,8 @@ using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.Meld.State;
+using MacroDeckHost.Integrations.Meld.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
 

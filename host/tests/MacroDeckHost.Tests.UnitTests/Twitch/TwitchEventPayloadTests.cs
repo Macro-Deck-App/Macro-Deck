@@ -1,6 +1,7 @@
 using System.Text.Json;
-using MacroDeckHost.Integrations.Twitch;
 using MacroDeck.Sdk.Events;
+using MacroDeckHost.Integrations.Twitch.Connections;
+using MacroDeckHost.Integrations.Twitch.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch;
 

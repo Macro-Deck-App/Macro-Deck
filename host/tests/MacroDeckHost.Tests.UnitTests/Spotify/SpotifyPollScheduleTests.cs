@@ -1,5 +1,5 @@
 using MacroDeck.Sdk.MusicPlayer;
-using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Providers;
 
 namespace MacroDeckHost.Tests.UnitTests.Spotify;
 

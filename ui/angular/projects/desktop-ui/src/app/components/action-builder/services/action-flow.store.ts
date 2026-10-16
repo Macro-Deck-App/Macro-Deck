@@ -40,6 +40,9 @@ export class ActionFlowStore {
   readonly pickerVariables = computed<Variable[]>(() => [...this.eventVariables(), ...this.variables()]);
   readonly previewScope = signal<VariableScope>('global');
   readonly previewScopeRefId = signal<string | undefined>(undefined);
+  readonly ownerWidgetId = signal<string | undefined>(undefined);
+  readonly previewOwnerWidgetId = computed<string | undefined>(() =>
+    this.ownerWidgetId() ?? (this.previewScope() === 'widget' ? this.previewScopeRefId() : undefined));
   readonly previewScopeStates = signal<{ id: string; label: string }[] | undefined>(undefined);
 
   readonly previewScopeHasOnOffStates = computed<boolean | undefined>(() => {
@@ -104,14 +107,14 @@ export class ActionFlowStore {
   private readonly toasts = inject(ToastService);
 
   readonly hasOwnerWidget = computed(() =>
-    (this.previewScope() === 'widget' && !!this.previewScopeRefId()) || this.scriptRunsOnWidget());
+    !!this.previewOwnerWidgetId() || this.scriptRunsOnWidget());
 
   readonly flowOwner = signal<ActionFlowOwner | null>(null);
 
   readonly resolvedOwner = computed<ActionFlowOwner | null>(() => {
     const declared = this.flowOwner();
     if (declared) return declared;
-    const widgetId = this.previewScopeRefId();
+    const widgetId = this.previewOwnerWidgetId();
     return this.hasOwnerWidget() && widgetId ? { kind: 'widget', widgetId } : null;
   });
 

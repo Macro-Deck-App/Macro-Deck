@@ -4,6 +4,10 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Integrations.AdGuardHome;
+using MacroDeckHost.Integrations.AdGuardHome.Configuration;
+using MacroDeckHost.Integrations.AdGuardHome.Protocol;
+using MacroDeckHost.Integrations.AdGuardHome.State;
+using MacroDeckHost.Integrations.AdGuardHome.Widgets;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 

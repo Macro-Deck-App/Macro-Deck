@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text;
-using MacroDeckHost.Integrations.AdGuardHome;
+using MacroDeckHost.Integrations.AdGuardHome.Configuration;
+using MacroDeckHost.Integrations.AdGuardHome.Protocol;
+using MacroDeckHost.Integrations.AdGuardHome.State;
 
 namespace MacroDeckHost.Tests.UnitTests.AdGuardHome;
 

@@ -1,5 +1,7 @@
 using System.Net;
 using MacroDeckHost.Integrations.Spotify;
+using MacroDeckHost.Integrations.Spotify.Configuration;
+using MacroDeckHost.Integrations.Spotify.Providers;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Issues;
 using SpotifyAPI.Web.Http;

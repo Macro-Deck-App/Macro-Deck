@@ -7,6 +7,8 @@ using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Widgets;
+using MacroDeckHost.Integrations.AdGuardHome.Connections;
+using MacroDeckHost.Integrations.AdGuardHome.State;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.AdGuardHome;
 
 namespace MacroDeckHost.Integrations.AdGuardHome.Widgets;

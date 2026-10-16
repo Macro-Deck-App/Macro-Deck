@@ -164,7 +164,7 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 				await ActionVariableTarget.WriteAsync(_userVariables(),
 					_variables(),
 					variableName,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Text,
 					path,
 					_logger);

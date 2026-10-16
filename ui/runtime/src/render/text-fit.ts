@@ -144,7 +144,6 @@ export function textFit(
   element: HTMLElement,
   declared: number | undefined,
   minimum: number | undefined,
-  onApplied?: (size: number | undefined) => void,
 ): TextFit {
   return {
     declare(): void {
@@ -182,7 +181,6 @@ export function textFit(
       }
 
       setFontSize(element, px(size));
-      if (onApplied) onApplied(size);
       return size;
     },
   };

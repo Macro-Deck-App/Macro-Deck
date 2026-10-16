@@ -1,3 +1,5 @@
+using MacroDeckHost.Integrations.Meld.Connections;
+using MacroDeckHost.Integrations.Meld.State;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -87,7 +89,7 @@ internal sealed class GetTrackMuteActionDefinition : IDynamicOptionsActionDefini
 			var muted = MeldTargetResolver.CurrentMuted(connection, target!);
 			var written = await MeldVariableWriter.WriteAsync(_variables,
 					variable,
-					context.OwnerWidgetId,
+					UserVariableContext.From(context),
 					VariableType.Boolean,
 					muted)
 				.ConfigureAwait(false);

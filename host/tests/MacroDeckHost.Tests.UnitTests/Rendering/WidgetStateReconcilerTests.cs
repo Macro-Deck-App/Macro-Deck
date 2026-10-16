@@ -585,6 +585,11 @@ public class WidgetStateReconcilerTests
 			throw new NotSupportedException();
 		}
 
+		public Task<VariableEntity?> Resolve(string name, VariableScopeChain chain)
+		{
+			throw new NotSupportedException();
+		}
+
 		public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
 			string name,
 			VariableScope scope,

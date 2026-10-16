@@ -1,5 +1,7 @@
 using MacroDeckHost.Integrations.SinusBot;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Integrations.SinusBot.Configuration;
+using MacroDeckHost.Integrations.SinusBot.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.SinusBot;
 

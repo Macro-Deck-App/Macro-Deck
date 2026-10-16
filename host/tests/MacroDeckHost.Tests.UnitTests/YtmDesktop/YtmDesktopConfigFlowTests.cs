@@ -1,5 +1,5 @@
 using System.Net;
-using MacroDeckHost.Integrations.YtmDesktop;
+using MacroDeckHost.Integrations.YtmDesktop.Configuration;
 using MacroDeckHost.Integrations.YtmDesktop.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.ConfigFlow;

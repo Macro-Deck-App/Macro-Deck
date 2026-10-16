@@ -3,6 +3,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Streamerbot.Connections;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -115,7 +116,11 @@ internal sealed class GetGlobalVariableActionDefinition : IActionDefinition
 			}
 
 			var (type, converted) = Convert(element);
-			await StreamerbotVariableWriter.WriteAsync(_variables, target, context.OwnerWidgetId, type, converted);
+			await StreamerbotVariableWriter.WriteAsync(_variables,
+				target,
+				UserVariableContext.From(context),
+				type,
+				converted);
 
 			return ActionResult.Success();
 		}
