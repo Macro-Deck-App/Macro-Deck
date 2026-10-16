@@ -7,6 +7,7 @@ using MacroDeckHost.Integrations.Spotify.Protocol;
 using MacroDeckHost.Localization;
 using Serilog;
 using SpotifyAPI.Web;
+using SpotifyAPI.Web.Http;
 using MacroDeck.Localization;
 
 namespace MacroDeckHost.Integrations.Spotify.Configuration;
@@ -16,8 +17,27 @@ public sealed class SpotifyConfigFlow : IConfigFlow
 	private static readonly ILogger _logger = IntegrationLog.For<SpotifyConfigFlow>(SpotifyIntegration.IntegrationId);
 	private static readonly SpotifyRequestLimiter _setupLimiter = new(0.2, 3);
 
+	private readonly ISpotifyOAuthClient _oauth;
+	private readonly IHTTPClient _profileTransport;
+	private readonly SpotifyRequestLimiter _profileLimiter;
+
 	private string _clientId = string.Empty;
 	private string _clientSecret = string.Empty;
+
+	public SpotifyConfigFlow()
+		: this(new SpotifyOAuthClient(), SpotifyHttpClients.Api)
+	{
+	}
+
+	internal SpotifyConfigFlow(
+		ISpotifyOAuthClient oauth,
+		IHTTPClient profileTransport,
+		SpotifyRequestLimiter? profileLimiter = null)
+	{
+		_oauth = oauth;
+		_profileTransport = profileTransport;
+		_profileLimiter = profileLimiter ?? _setupLimiter;
+	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
 	{
@@ -82,67 +102,67 @@ public sealed class SpotifyConfigFlow : IConfigFlow
 				AppStrings.Integrations.Spotify.Config.AuthorizationNotCompleted());
 		}
 
+		SpotifyAuthorizedToken token;
 		try
 		{
-			var setupConfig = SpotifyClientConfig.CreateDefault()
-				.WithHTTPClient(new SpotifyThrottledHttpClient(
-					SpotifyHttpClients.CreateBounded(SpotifyHttpClients.TokenEndpointTimeout),
-					_setupLimiter))
-				.WithRetryHandler(new SpotifyRetryHandler());
-			var oauth = new OAuthClient(setupConfig);
-			using var requestScope = SpotifyRequestScope.Interactive("authorization-code-exchange", "setup");
-			var token = await oauth.RequestToken(
-				new AuthorizationCodeTokenRequest(_clientId, _clientSecret, code, new Uri(context.OAuth.RedirectUri)),
+			token = await _oauth.ExchangeCodeAsync(_clientId,
+				_clientSecret,
+				code,
+				context.OAuth.RedirectUri,
 				cancellationToken);
-
-			var displayName = await ResolveDisplayName(token.AccessToken, cancellationToken);
-			var expiresAt = token.CreatedAt.AddSeconds(token.ExpiresIn)
-				.ToUniversalTime()
-				.ToString("o", CultureInfo.InvariantCulture);
-
-			// A grant Spotify declines to describe (empty/null Scope in the token response) must not store
-			// a value that reads back as outdated on every start - the requested scopes are what the user
-			// just granted, since Spotify's consent screen is all-or-nothing.
-			var scope = string.IsNullOrEmpty(token.Scope) ? string.Join(' ', SpotifyScopes.Required) : token.Scope;
-
-			var values = new Dictionary<string, ConfigFlowValue>
-			{
-				[SpotifyConfigKeys.AccessToken] = ConfigFlowValue.Secret(token.AccessToken),
-				[SpotifyConfigKeys.RefreshToken] = ConfigFlowValue.Secret(token.RefreshToken),
-				[SpotifyConfigKeys.ExpiresAt] = ConfigFlowValue.Plain(expiresAt),
-				[SpotifyConfigKeys.Scope] = ConfigFlowValue.Plain(scope),
-				[SpotifyConfigKeys.DisplayName] = ConfigFlowValue.Plain(displayName)
-			};
-
-			var title = string.IsNullOrWhiteSpace(displayName) ? "Spotify" : $"Spotify ({displayName})";
-			return ConfigFlowResult.Complete(title, values);
 		}
-		catch (APIException ex)
+		catch (SpotifyAuthRejectedException ex)
 		{
-			_logger.Warning("Spotify token exchange failed ({Failure}, status {Status})",
-				ex.GetType().Name,
-				ex.Response is { } response ? (int)response.StatusCode : null);
+			_logger.Warning("Spotify token exchange was rejected ({Failure}, status {Status})",
+				ex.InnerException?.GetType().Name,
+				ex.InnerException is APIException { Response: { } response } ? (int)response.StatusCode : null);
 			return ConfigFlowResult.Error(AuthorizePendingStep(),
 				AppStrings.Integrations.Spotify.Config.TokenExchangeFailed());
 		}
+		catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+		{
+			_logger.Warning("Spotify token exchange failed ({Failure})",
+				(ex.InnerException ?? ex).GetType().Name);
+			return ConfigFlowResult.Error(CredentialsStep(context.OAuth.RedirectUri),
+				AppStrings.Integrations.Spotify.Config.SpotifyUnreachable());
+		}
+
+		var displayName = await ResolveDisplayName(token.AccessToken, cancellationToken);
+		var expiresAt = token.CreatedAt.AddSeconds(token.ExpiresIn)
+			.ToUniversalTime()
+			.ToString("o", CultureInfo.InvariantCulture);
+
+		// Spotify may omit Scope in the token response; its consent screen is all-or-nothing, so the
+		// requested scopes are what was granted and storing them avoids reading back as outdated.
+		var scope = string.IsNullOrEmpty(token.Scope) ? string.Join(' ', SpotifyScopes.Required) : token.Scope;
+
+		var values = new Dictionary<string, ConfigFlowValue>
+		{
+			[SpotifyConfigKeys.AccessToken] = ConfigFlowValue.Secret(token.AccessToken),
+			[SpotifyConfigKeys.RefreshToken] = ConfigFlowValue.Secret(token.RefreshToken),
+			[SpotifyConfigKeys.ExpiresAt] = ConfigFlowValue.Plain(expiresAt),
+			[SpotifyConfigKeys.Scope] = ConfigFlowValue.Plain(scope),
+			[SpotifyConfigKeys.DisplayName] = ConfigFlowValue.Plain(displayName)
+		};
+
+		var title = string.IsNullOrWhiteSpace(displayName) ? "Spotify" : $"Spotify ({displayName})";
+		return ConfigFlowResult.Complete(title, values);
 	}
 
-	private static async Task<string?> ResolveDisplayName(string accessToken, CancellationToken cancellationToken)
+	private async Task<string?> ResolveDisplayName(string accessToken, CancellationToken cancellationToken)
 	{
 		try
 		{
 			var config = SpotifyClientConfig.CreateDefault()
 				.WithToken(accessToken)
-				.WithHTTPClient(new SpotifyThrottledHttpClient(
-					SpotifyHttpClients.CreateBounded(SpotifyHttpClients.ApiTimeout),
-					_setupLimiter))
+				.WithHTTPClient(new SpotifyThrottledHttpClient(_profileTransport, _profileLimiter))
 				.WithRetryHandler(new SpotifyRetryHandler());
 			var client = new SpotifyClient(config);
 			using var scope = SpotifyRequestScope.Interactive("profile-name", "setup");
 			var profile = await client.UserProfile.Current(cancellationToken);
 			return profile.DisplayName ?? profile.Id;
 		}
-		catch (Exception ex)
+		catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning("Could not load Spotify profile name ({Failure})", ex.GetType().Name);
 			return null;
