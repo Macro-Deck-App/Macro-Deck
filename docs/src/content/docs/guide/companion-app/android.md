@@ -62,6 +62,25 @@ on. **Not now** skips it; you can turn it on later under **Device control**.
 Android blocks this switch for apps installed outside a store, such as the version without Google Play. Open
 **App info** for Macro Deck, choose **Allow restricted settings** from its menu, and turn the service on again.
 
+## Open after the device starts
+
+For a phone or tablet that is only a deck, such as a wall-mounted tablet, **Open after the device starts** under
+**Device** in the app settings opens the app by itself after a restart or a power cut. It then connects the way
+it does when you open it, to the first computer under **Connect on opening** that answers.
+
+- **Android 10 and later** let an app open itself only with **Display over other apps**. Turning the setting on
+  opens that system screen; while the permission is missing, the setting says so. Android 6 to 9 need no
+  permission for it.
+- **Screen lock:** with a PIN, pattern or password, Android starts apps only after you unlock the device once
+  after the restart, so the app opens then. With no screen lock or only a swipe screen, it opens right after
+  the start, over the lock screen.
+- **Devices without the screen:** some builds of Android, Amazon Fire OS among them, have no **Display over other
+  apps** screen, and the app opens **App info** instead. If App info has no such permission either, you can
+  grant it from a computer with ADB:
+  `adb shell appops set app.macrodeck.companion SYSTEM_ALERT_WINDOW allow`
+- **Autostart managers:** some manufacturers keep apps from starting with the device until you allow it in their
+  own battery or autostart settings. Allow Macro Deck there if the app does not open after a restart.
+
 ## Brightness
 
 When Macro Deck sets the brightness, it applies to the Macro Deck app while it is in front; the rest of the
