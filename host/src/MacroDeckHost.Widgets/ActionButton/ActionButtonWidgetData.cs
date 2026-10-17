@@ -245,16 +245,9 @@ public sealed class ActionButtonWidgetData
 	/// <c>ActionButtonStateJson.NextStateId</c>'s own "no current" case.</summary>
 	public string? StoredActiveStateId => StateMode ? _model.ActiveStateId : null;
 
-	/// <summary>Whether a short press can advance the active state on its own: the button has not turned
-	/// cycling off (<c>cycleStatesOnPress</c>) and nothing else is authoritative for the state - the same
-	/// condition <c>WidgetTriggerService</c> enforces before writing, restated here as a pure read so the
+	/// <summary>Whether a short press can advance the active state on its own, as a pure read so the
 	/// declared event set never depends on a live resolution.</summary>
-	public bool CanAdvanceState
-		=> StateMode
-			&& _model.CycleStatesOnPress
-			&& _model.StateProvider is null
-			&& _model.StateMapping is null
-			&& States.Count > 0;
+	public bool CanAdvanceState => _model.AdvancesOnPress;
 
 	public static ActionButtonWidgetData Parse(JsonElement data)
 	{

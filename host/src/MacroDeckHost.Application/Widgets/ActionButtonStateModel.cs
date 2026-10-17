@@ -73,9 +73,7 @@ public sealed class ActionButtonStateModel
 	/// <summary>
 	/// Whether a short press on the button advances it to its next state on its own. On unless the
 	/// button has explicitly turned it off, so an absent key - every button saved before the flag
-	/// existed included - keeps stepping through its states on tap the way it always did. Only ever
-	/// consulted while nothing else is authoritative for the state - a provider or a mapping refuses
-	/// the write regardless.
+	/// existed included - keeps stepping through its states on tap the way it always did.
 	/// </summary>
 	public required bool CycleStatesOnPress { get; init; }
 
@@ -86,6 +84,9 @@ public sealed class ActionButtonStateModel
 	public string? ActiveStateId { get; init; }
 
 	public ActionButtonManualStateBackup? ManualStateBackup { get; init; }
+
+	public bool AdvancesOnPress
+		=> StateMode && CycleStatesOnPress && StateProvider is null && StateMapping is null && States.Count > 0;
 
 	/// <summary>The fully upgraded and structurally-normalized data bag this model was read from, for callers that also need a root-level appearance field.</summary>
 	public required JsonObject Data { get; init; }
