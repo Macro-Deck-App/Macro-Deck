@@ -1,19 +1,22 @@
-using EvolveDb;
+using System.Globalization;
 using MacroDeckHost.Application.Paths;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace MacroDeckHost.Infrastructure.Persistence;
 
 public static class DatabaseMigrationHelper
 {
-	public const string MetadataTable = "database_migration_history";
+	public const string HistoryTable = "__EFMigrationsHistory";
+	public const string LegacyHistoryTable = "database_migration_history";
+	public const string LockTable = "__EFMigrationsLock";
 
 	public static void MigrateDatabase(IMacroDeckPaths paths)
 	{
 		try
 		{
-			Migrate(paths.DatabasePath, paths.DatabaseMigrationsDirectory);
+			Migrate(paths.DatabasePath);
 			UseWriteAheadLog(paths.DatabasePath);
 		}
 		catch (Exception ex)
@@ -40,22 +43,51 @@ public static class DatabaseMigrationHelper
 		}
 	}
 
-	/// <summary>
-	/// Migrates a database file that is not the live one. Restore uses this on the copy inside an archive:
-	/// the archive carries its own migration history, so Evolve knows exactly which scripts - including
-	/// their data backfills - still have to run before the rows can be read into the current schema.
-	/// </summary>
-	public static void Migrate(string databasePath, string migrationsDirectory)
+	public static void Migrate(string databasePath)
 	{
-		var connectionStringBuilder = new SqliteConnectionStringBuilder { DataSource = databasePath };
-		var connection = new SqliteConnection(connectionStringBuilder.ToString());
-		var evolve = new Evolve(connection, Log.Information)
+		try
 		{
-			Locations = [migrationsDirectory],
-			IsEraseDisabled = true,
-			MetadataTableName = MetadataTable
-		};
+			using var context = new DatabaseContext(Log.Logger, databasePath);
+			context.Database.OpenConnection();
 
-		evolve.Migrate();
+			try
+			{
+				LegacyEvolveMigrations.UpgradeIfNeeded(context);
+				ReleaseStaleMigrationLock((SqliteConnection)context.Database.GetDbConnection());
+			}
+			finally
+			{
+				context.Database.CloseConnection();
+			}
+
+			context.Database.Migrate();
+		}
+		catch (Exception ex) when (ex is not DatabaseMigrationException)
+		{
+			throw new DatabaseMigrationException($"The database {databasePath} could not be migrated.", ex);
+		}
+	}
+
+	// EF Core's SQLite migration lock never expires, so a row left by a killed host would block every later
+	// start. Two hosts racing past the best-effort single-instance probe can fail a start, but never lose data.
+	private static void ReleaseStaleMigrationLock(SqliteConnection connection)
+	{
+		if (!TableExists(connection, LockTable))
+		{
+			return;
+		}
+
+		using var command = connection.CreateCommand();
+		command.CommandText = $"DELETE FROM \"{LockTable}\";";
+		command.ExecuteNonQuery();
+	}
+
+	internal static bool TableExists(SqliteConnection connection, string table)
+	{
+		using var command = connection.CreateCommand();
+		command.CommandText = "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = $name;";
+		command.Parameters.AddWithValue("$name", table);
+
+		return Convert.ToInt64(command.ExecuteScalar(), CultureInfo.InvariantCulture) > 0;
 	}
 }

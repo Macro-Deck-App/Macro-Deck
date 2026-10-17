@@ -17,13 +17,20 @@ public class DatabaseContext : DbContext
 	private static readonly string _migrationsAssembly = typeof(DatabaseContext).Assembly.GetName().Name!;
 	private static int _pathLogged;
 
+	private readonly string? _databasePath;
 	private readonly ILogger _logger;
-	private readonly IMacroDeckPaths _paths;
+	private readonly IMacroDeckPaths? _paths;
 
 	public DatabaseContext(ILogger logger, IMacroDeckPaths paths)
 	{
 		_logger = logger;
 		_paths = paths;
+	}
+
+	internal DatabaseContext(ILogger logger, string databasePath)
+	{
+		_logger = logger;
+		_databasePath = databasePath;
 	}
 
 	public DbSet<SecretEntity> Secrets => Set<SecretEntity>();
@@ -46,9 +53,9 @@ public class DatabaseContext : DbContext
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		var databasePath = _paths.DatabasePath;
+		var databasePath = _databasePath ?? _paths!.DatabasePath;
 
-		if (Interlocked.Exchange(ref _pathLogged, 1) == 0)
+		if (_databasePath is null && Interlocked.Exchange(ref _pathLogged, 1) == 0)
 		{
 			_logger.Information("Database path: {DbPath}", databasePath);
 		}

@@ -28,6 +28,13 @@ public static class StagedRestoreApplier
 	private const string LockFileName = "restore.lock";
 	private const string RollbackDirectoryName = "rollback";
 
+	private static readonly HashSet<string> _migrationHistoryTables = new(StringComparer.OrdinalIgnoreCase)
+	{
+		DatabaseMigrationHelper.HistoryTable,
+		DatabaseMigrationHelper.LegacyHistoryTable,
+		DatabaseMigrationHelper.LockTable
+	};
+
 	public static StagedRestoreOutcome ApplyPending(IMacroDeckPaths paths)
 	{
 		var markerPath = Path.Combine(paths.RestoreStagingDirectory, PendingRestoreDocument.FileName);
@@ -198,7 +205,7 @@ public static class StagedRestoreApplier
 
 			foreach (var table in document.Tables)
 			{
-				if (string.Equals(table, DatabaseMigrationHelper.MetadataTable, StringComparison.OrdinalIgnoreCase))
+				if (_migrationHistoryTables.Contains(table))
 				{
 					continue;
 				}

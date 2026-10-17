@@ -16,10 +16,16 @@ public class IntegrationConfigEntryEntityConfig : BaseEntityConfig<IntegrationCo
 		base.Configure(builder);
 
 		builder.Property(x => x.IntegrationId).HasColumnName(ColumnPrefix + "integration_id");
-		builder.Property(x => x.Title).HasColumnName(ColumnPrefix + "title");
-		builder.Property(x => x.ValuesJson).HasColumnName(ColumnPrefix + "values_json");
+		builder.Property(x => x.Title)
+			.HasColumnName(ColumnPrefix + "title")
+			.HasDefaultValue(string.Empty)
+			.ValueGeneratedNever();
+		builder.Property(x => x.ValuesJson)
+			.HasColumnName(ColumnPrefix + "values_json")
+			.HasDefaultValue("{}")
+			.ValueGeneratedNever();
 		builder.Property(x => x.UpdatedAt).HasColumnName(ColumnPrefix + "updated_at");
 
-		builder.HasIndex(x => x.IntegrationId);
+		builder.HasIndex(x => x.IntegrationId).HasDatabaseName("ix_integration_config_entry_integration_id");
 	}
 }

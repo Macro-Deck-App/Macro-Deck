@@ -1,7 +1,6 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text.Json;
-using EvolveDb;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Backups.Storage;
 using MacroDeckHost.Application.Events;
@@ -280,9 +279,9 @@ public sealed class RestoreService : IRestoreService
 				// anything is applied - or the copy at boot would fail after files were already swapped.
 				try
 				{
-					DatabaseMigrationHelper.Migrate(databasePath, _paths.DatabaseMigrationsDirectory);
+					DatabaseMigrationHelper.Migrate(databasePath);
 				}
-				catch (EvolveException)
+				catch (DatabaseMigrationException)
 				{
 					return Fail(operationId,
 						request.BackupId,

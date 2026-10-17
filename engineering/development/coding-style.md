@@ -30,7 +30,9 @@ For the larger dependency model and trust boundaries, see [architecture.md](../a
 
 ## Persistence
 
-Database schema changes require an Evolve SQL migration under `host/src/MacroDeckHost.Infrastructure/Persistence/DatabaseMigrations/`. Changing an EF entity alone does not change the schema.
+Database schema changes are EF Core migrations. Change the entity and its configuration under `host/src/MacroDeckHost.Infrastructure/Persistence/EntityConfigurations/`, then run `dotnet tool restore` once and `dotnet ef migrations add <Name> --project host/src/MacroDeckHost.Infrastructure`. The tool writes the migration and updates the model snapshot in `Persistence/Migrations/`; commit both as the tool wrote them. That folder is marked as generated code in `.editorconfig` and is exempt from the formatting and comment rules. A host test fails while the model has changes no migration covers.
+
+The SQL scripts under `Persistence/DatabaseMigrations/` are frozen. They only bring databases created by the former Evolve setup up to the first EF Core migration and are removed before 3.1.0 ([ADR 0111](../decisions/0111-the-host-database-is-migrated-by-ef-core.md)).
 
 Use the repository's shared persistence JSON options rather than creating per-store serializer options. This keeps persisted data and package/manifest serialization compatible.
 

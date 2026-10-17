@@ -10,12 +10,13 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 ## Host and platform
 
 - [0001 - Profiles are JSON files, written durably and recovered on read](0001-json-profiles-and-durable-writes.md)
-- [0002 - Data roots and build channels](0002-platform-data-directories-and-build-channels.md)
+- [0002 - Data roots and build channels](0002-platform-data-directories-and-build-channels.md) (partially superseded by 0111)
 - [0006 - A Tauri bootstrapper is the installed entry point](0006-tauri-bootstrapper-is-the-installed-entry-point.md)
 - [0015 - Installation and update delivery are bounded by each platform's ownership model](0015-installation-and-update-delivery.md)
 - [0024 - The log files are the log viewer's source of truth, and their format is a contract](0024-log-files-are-the-source-of-truth.md)
 - [0078 - The macOS host pumps a CoreFoundation run loop on the main thread](0078-macos-host-pumps-a-core-foundation-run-loop-on-the-main-thread.md)
 - [0100 - Store entries are shared as https links, and `macrodeck://` carries only a package id](0100-store-entries-are-shared-as-https-links-and-opened-through-a-macrodeck-url.md)
+- [0111 - The host database is migrated by EF Core](0111-the-host-database-is-migrated-by-ef-core.md)
 
 ## Networking, trust and secrets
 

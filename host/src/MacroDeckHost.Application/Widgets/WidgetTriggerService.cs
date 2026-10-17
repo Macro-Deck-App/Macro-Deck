@@ -19,9 +19,9 @@ public interface IWidgetTriggerService
 {
 	/// <summary>
 	/// Advances the widget's active state first when <paramref name="triggerType" /> is
-	/// <see cref="WidgetTriggerTypes.ShortPress" /> and the button has not turned cycling off, then runs
-	/// the widget's flow for that trigger - or, for a short press that the widget has no
-	/// runnable flow for, its type's default action - bounded to 5 seconds. The advance never links to
+	/// <see cref="WidgetTriggerTypes.ShortPress" />, the button has not turned cycling off and no provider or
+	/// mapping owns its state, then runs the widget's flow for that trigger - or, for a short press that the
+	/// widget has no runnable flow for, its type's default action - bounded to 5 seconds. The advance never links to
 	/// <paramref name="cancellationToken" /> and never escapes - a failure is logged and the flow still
 	/// runs - so a press is always dispatched even if the state write threw.
 	/// </summary>
@@ -72,24 +72,27 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 		ArgumentNullException.ThrowIfNull(widget);
 		ArgumentException.ThrowIfNullOrWhiteSpace(triggerType);
 
-		if (string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase)
-			&& CyclesStatesOnPress(widget))
+		if (IsShortPress(triggerType))
 		{
 			// Advance before the flow runs so the flow's own vars.state and any onStateChange handler
 			// observe the state this press just switched to. Never linked to the caller's token and never
 			// allowed to escape: a press must still be dispatched even if the state write threw.
 			try
 			{
-				using var scope = _scopeFactory.CreateScope();
-				var stateService = scope.ServiceProvider.GetRequiredService<IActionButtonStateService>();
-
-				var advance = await stateService.AdvanceAsync(widget.Id, CancellationToken.None).ConfigureAwait(false);
-
-				if (!advance.Success)
+				if (CyclesStatesOnPress(widget))
 				{
-					_logger.Warning("Implicit state advance for widget {WidgetId} did not succeed: {Error}",
-						widget.Id,
-						advance.Error);
+					using var scope = _scopeFactory.CreateScope();
+					var stateService = scope.ServiceProvider.GetRequiredService<IActionButtonStateService>();
+
+					var advance = await stateService.AdvanceAsync(widget.Id, CancellationToken.None)
+						.ConfigureAwait(false);
+
+					if (!advance.Success)
+					{
+						_logger.Warning("Implicit state advance for widget {WidgetId} did not succeed: {Error}",
+							widget.Id,
+							advance.Error);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -122,12 +125,6 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 		return string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase);
 	}
 
-	/// <summary>
-	/// Whether this press is the button's own way of stepping to its next state. Mirrors
-	/// <c>ActionButtonWidgetData.CanAdvanceState</c>, which decides whether the tile declares a press
-	/// event at all - the provider/mapping cases are still refused by
-	/// <see cref="IActionButtonStateService.AdvanceAsync" /> either way.
-	/// </summary>
 	private static bool CyclesStatesOnPress(WidgetEntity widget)
 	{
 		if (widget.Type != WidgetTypeIds.ActionButton)
@@ -135,7 +132,7 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 			return false;
 		}
 
-		var model = ActionButtonStateModel.Read(widget.Data);
-		return model.StateMode && model.CycleStatesOnPress;
+		var data = ActionButtonStateJson.Normalize(ActionButtonStateJson.ParseDataBag(widget.Data));
+		return ActionButtonStateModel.Read(data).AdvancesOnPress;
 	}
 }
