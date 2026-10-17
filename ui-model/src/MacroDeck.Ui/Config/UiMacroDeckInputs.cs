@@ -170,6 +170,11 @@ public sealed record UiIntegrationPickerInput : UiInput<string>
 /// A widget icon's framing - fit, zoom, position and opacity - edited on a live preview of the button
 /// face. Names the original Action Button appearance form's icon display block rather than rebuilding
 /// drag-to-position and zoom-on-wheel from primitives.
+///
+/// <para>
+/// The control always offers a reset, and its reset writes <b>null</b>, not a copy of the defaults, so a
+/// <c>Bind.Custom</c> setter must accept null and treat it as "back to the default framing".
+/// </para>
 /// </summary>
 public sealed record UiIconDisplayInput : UiInput<UiIconDisplay>
 {
@@ -208,7 +213,8 @@ public sealed record UiIconDisplayInput : UiInput<UiIconDisplay>
 /// <summary>
 /// A widget icon's framing, exactly as the appearance form's preview edits it: a fit mode plus zoom,
 /// offset and opacity, every field independently optional so a value can override only the ones it means
-/// to - the control emits the complete object on every change regardless, never a single field.
+/// to - the control emits the complete object on every change regardless, never a single field. Its reset
+/// is the one exception: it writes null instead of an object (see <see cref="UiIconDisplayInput" />).
 ///
 /// <para>
 /// <see cref="Fit" /> is an open string, like every other vocabulary in this profile: a client that does

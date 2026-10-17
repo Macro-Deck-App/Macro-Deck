@@ -1826,6 +1826,8 @@ internal static class ActionButtonWidgetConfigView
 						iconOpacity.Value),
 					value =>
 					{
+						value ??= DefaultIconDisplay();
+
 						if (value.Fit is not null)
 						{
 							iconFit.Value = value.Fit;
@@ -2125,10 +2127,6 @@ internal static class ActionButtonWidgetConfigView
 			});
 	}
 
-	/// <summary>The per-state counterpart of the root <c>iconDisplay</c> binding built inline in
-	/// <see cref="Build" />: one value carrying the whole framing object, read with the same fallbacks a
-	/// freshly-created state would show and written field-by-field so a value that leaves a field out never
-	/// clobbers what is already there - see <see cref="UiIconDisplay" />'s own remarks.</summary>
 	private static UiBinding<UiIconDisplay> StateIconDisplayBinding(
 		UiState<List<ActionButtonStateEntry>> states,
 		string stateId)
@@ -2146,35 +2144,49 @@ internal static class ActionButtonWidgetConfigView
 				Numeric("offsetX") ?? 0,
 				Numeric("offsetY") ?? 0,
 				Numeric("opacity") ?? 100),
-			value => MutateIconDisplay(states,
-				stateId,
-				display =>
-				{
-					if (value.Fit is not null)
-					{
-						display["fit"] = value.Fit;
-					}
+			value =>
+			{
+				// A state without its own framing falls back to the root framing on the deck, so a reset
+				// stores the defaults rather than removing the key.
+				value ??= DefaultIconDisplay();
 
-					if (value.Zoom is not null)
+				MutateIconDisplay(states,
+					stateId,
+					display =>
 					{
-						display["zoom"] = value.Zoom.Value;
-					}
+						if (value.Fit is not null)
+						{
+							display["fit"] = value.Fit;
+						}
 
-					if (value.OffsetX is not null)
-					{
-						display["offsetX"] = value.OffsetX.Value;
-					}
+						if (value.Zoom is not null)
+						{
+							display["zoom"] = value.Zoom.Value;
+						}
 
-					if (value.OffsetY is not null)
-					{
-						display["offsetY"] = value.OffsetY.Value;
-					}
+						if (value.OffsetX is not null)
+						{
+							display["offsetX"] = value.OffsetX.Value;
+						}
 
-					if (value.Opacity is not null)
-					{
-						display["opacity"] = value.Opacity.Value;
-					}
-				}));
+						if (value.OffsetY is not null)
+						{
+							display["offsetY"] = value.OffsetY.Value;
+						}
+
+						if (value.Opacity is not null)
+						{
+							display["opacity"] = value.Opacity.Value;
+						}
+					});
+			});
+	}
+
+	private static UiIconDisplay DefaultIconDisplay()
+	{
+		var defaults = ActionButtonIconDisplay.Default;
+
+		return new UiIconDisplay(defaults.Fit, defaults.Zoom, defaults.OffsetX, defaults.OffsetY, defaults.Opacity);
 	}
 
 	private static void MutateIconDisplay(
