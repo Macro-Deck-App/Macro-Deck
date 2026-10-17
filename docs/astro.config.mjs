@@ -119,6 +119,7 @@ export default defineConfig({
 										'guide/companion-app/android',
 										'guide/companion-app/ios',
 										'guide/companion-app/automation',
+										'guide/companion-app/nfc-tags',
 										'guide/companion-app/install-over-adb',
 										'guide/companion-app/tips',
 										{ label: 'FAQ', slug: 'guide/companion-app/faq' },

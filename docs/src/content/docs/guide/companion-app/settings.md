@@ -91,6 +91,11 @@ From Android 10 it also needs **Display over other apps**; see
 
 See [Run scripts from other apps](/guide/companion-app/automation/).
 
+## NFC tags
+
+**NFC tags** lists the tags you set up, each opening a computer's deck, running a script, or both when tapped.
+Add, edit, write, read, test and delete them there. See [NFC tags](/guide/companion-app/nfc-tags/).
+
 ## Only on Android: Device control
 
 These let Macro Deck control the phone or tablet beyond the deck. Each one asks Android for a permission; see

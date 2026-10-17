@@ -107,6 +107,11 @@ the lock screen. See [Run scripts from other apps](/guide/companion-app/automati
 
 A wake tile wakes a computer from the panel. See [Wake the computer](/guide/companion-app/deck/#wake-the-computer).
 
+## NFC tags
+
+Tap an NFC tag to open a computer's deck or run a script, with the screen on and unlocked and NFC turned on. See
+[NFC tags](/guide/companion-app/nfc-tags/).
+
 ## Tasker, MacroDroid and other apps
 
 Automation apps can run Macro Deck scripts with an intent, once you allow it in the settings under

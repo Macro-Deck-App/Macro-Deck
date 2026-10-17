@@ -62,6 +62,13 @@ or open its deck, the app says so and names both versions. Update Macro Deck on 
 computer is updated. For a computer with a Macro Deck from before this check, the list can still show **Online**;
 its deck says so when you open it.
 
+## Nothing happens when I tap an NFC tag
+
+Check that the screen is on and, on Android, unlocked, and that NFC is turned on. On iPhone, tap the banner iOS
+shows. The tag has to be set up and enabled in the app on this device under **NFC tags**: **Read tag** tells you
+whether it is. A tag tapped again within a few seconds does nothing on purpose. See
+[NFC tags](/guide/companion-app/nfc-tags/).
+
 ## Can I use the app on a device without Google Play services?
 
 Yes. There is a separate version of the Android app that does not need Google Play services, for example for

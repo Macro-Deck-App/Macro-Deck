@@ -109,7 +109,8 @@ example `input.scene=Big%20Scene`. **Copy link** in the **Automation** settings 
 the key.
 
 The app shows whether the script ran. On Android, the link only works from apps that open it directly, such as
-Tasker's **Browse URL** or an NFC tag app, and not from a web page. Set the package `app.macrodeck.companion` when
+Tasker's **Browse URL**, and not from a web page. To run a script from an NFC tag, use
+[NFC tags](/guide/companion-app/nfc-tags/) instead: a tag needs no key, because it is set up in the app. Set the package `app.macrodeck.companion` when
 an app lets you, so the link cannot reach another app. On iPhone and iPad, any app or web page can open the link,
 so the key is what protects it. Another app could also claim the `macrodeck-companion` link for itself and receive
 the key: generate a new key if you ever suspect that.
