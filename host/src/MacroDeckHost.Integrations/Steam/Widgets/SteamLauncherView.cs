@@ -92,22 +92,22 @@ internal static class SteamLauncherView
 		};
 	}
 
-	private static UiStack Failure(UiState<SteamLauncherState> state, int cornerRadius)
+	private static UiWhen Failure(UiState<SteamLauncherState> state, int cornerRadius)
 	{
-		return new UiStack
+		return new UiWhen
 		{
-			Key = "failureLayer",
-			Fill = true,
-			Justify = UiComponentJustify.End,
-			Align = UiComponentAlignments.Center,
-			Padding = SteamSurfaces.SafeArea(cornerRadius),
-			Children =
-			[
-				new UiWhen
-				{
-					Key = "failureGate",
-					Condition = () => !state.Value.Failure.IsEmpty,
-					Content = () => new UiModifier
+			Key = "failureGate",
+			Condition = () => !state.Value.Failure.IsEmpty,
+			Content = () => new UiStack
+			{
+				Key = "failureLayer",
+				Fill = true,
+				Justify = UiComponentJustify.End,
+				Align = UiComponentAlignments.Center,
+				Padding = SteamSurfaces.SafeArea(cornerRadius),
+				Children =
+				[
+					new UiModifier
 					{
 						Key = "failurePill",
 						Background = "#000000cc",
@@ -124,8 +124,8 @@ internal static class SteamLauncherView
 							MaxLines = 2
 						}
 					}
-				}
-			]
+				]
+			}
 		};
 	}
 
