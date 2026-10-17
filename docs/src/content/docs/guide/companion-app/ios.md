@@ -29,6 +29,9 @@ says it started and is still running.
 With the Shortcuts app's own automations, a script can run when you arrive home, at a time of day, when a Focus
 turns on or when you tap an NFC tag, for example to start your stream setup on the computer.
 
+The app can also write NFC tags itself, which open the app after you tap the banner iOS shows. A Shortcuts
+automation with the NFC trigger runs without that tap. See [NFC tags](/guide/companion-app/nfc-tags/).
+
 Other apps can run a script with a `macrodeck-companion://run-script` link once you allow it in the settings under
 **Automation**. See [Run scripts from other apps](/guide/companion-app/automation/).
 
