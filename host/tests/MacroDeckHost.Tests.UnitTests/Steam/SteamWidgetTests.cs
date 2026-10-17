@@ -247,6 +247,34 @@ internal sealed class SteamWidgetTests
 	}
 
 	[Test]
+	public async Task Nothing_is_drawn_over_the_launcher_tiles()
+	{
+		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", DateTimeOffset.FromUnixTimeSeconds(1)),
+			new SteamGame(440, "Team Fortress 2", DateTimeOffset.FromUnixTimeSeconds(2)));
+		await using var session = await OpenAsync(SteamWidgetType.GameLauncherQualifiedId, new { source = "recent" });
+
+		Assert.That(Covered(session), Is.Empty);
+	}
+
+	[Test]
+	public async Task Nothing_covers_the_launcher_tiles_once_a_failure_is_no_longer_shown()
+	{
+		_source.Outcome = SteamCommandOutcome.Failed;
+		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", DateTimeOffset.FromUnixTimeSeconds(1)));
+		await using var session = await OpenAsync(SteamWidgetType.GameLauncherQualifiedId, new { source = "recent" });
+
+		CalendarTree.Press(session, Tiles(session).First());
+		await CalendarTree.WaitForAsync(()
+				=> CalendarTree.Texts(session.BuildTree().Root)
+					.Any(text => text.Contains("could not be opened", StringComparison.Ordinal)),
+			"the failure was not shown");
+
+		_time.Advance(SteamLauncherSession.FailureDisplay + TimeSpan.FromSeconds(1));
+
+		await CalendarTree.WaitForAsync(() => Covered(session).Count == 0, "the failure still covers the tiles");
+	}
+
+	[Test]
 	public async Task A_failed_launch_is_reported_to_the_client_that_pressed()
 	{
 		_source.Outcome = SteamCommandOutcome.InvalidAppId;
@@ -332,6 +360,34 @@ internal sealed class SteamWidgetTests
 				.Where(node => CalendarTree.IsPressable(node)
 					&& node.Id.Split('.')[^1].StartsWith("game-", StringComparison.Ordinal))
 		];
+	}
+
+	private static List<string> Covered(IUiSession session)
+	{
+		var covered = new List<string>();
+		var tiles = Tiles(session).Select(tile => tile.Id).ToHashSet(StringComparer.Ordinal);
+		Collect(session.BuildTree().Root, tiles, covered);
+		return covered;
+	}
+
+	private static bool Collect(UiNode node, HashSet<string> tiles, List<string> covered)
+	{
+		var holdsTile = tiles.Contains(node.Id);
+		for (var index = 0; index < node.Children.Count; index++)
+		{
+			if (!Collect(node.Children[index], tiles, covered))
+			{
+				continue;
+			}
+
+			holdsTile = true;
+			if (node.Type == UiComponents.Layer && index < node.Children.Count - 1)
+			{
+				covered.Add($"{node.Id}[{index}] under {node.Children[^1].Id}");
+			}
+		}
+
+		return holdsTile;
 	}
 
 	private static List<UiNode> WideTiles(IUiSession session)
