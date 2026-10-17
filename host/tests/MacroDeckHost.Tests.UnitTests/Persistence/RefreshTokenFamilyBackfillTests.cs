@@ -1,3 +1,4 @@
+using MacroDeckHost.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 
 namespace MacroDeckHost.Tests.UnitTests.Persistence;
@@ -98,13 +99,11 @@ public class RefreshTokenFamilyBackfillTests
 
 	private void Migrate()
 	{
-		var script = Path.Combine(AppContext.BaseDirectory,
-			"DatabaseMigrations",
-			"V1_17_0_0__AddRefreshTokenFamily.sql");
-		Assert.That(File.Exists(script), Is.True, $"migration script not found at {script}");
+		var script = LegacyEvolveMigrations.Scripts
+			.Single(candidate => candidate.Name == "V1_17_0_0__AddRefreshTokenFamily.sql");
 
 		using var connection = Open();
-		Execute(connection, File.ReadAllText(script));
+		Execute(connection, script.Sql);
 	}
 
 	private Dictionary<string, string> Families()

@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Cronos" Version="0.13.0" />
-    <PackageVersion Include="Evolve" Version="3.2.0" />
     <PackageVersion Include="MailKit" Version="4.18.1" />
     <PackageVersion Include="Mediator.Abstractions" Version="3.1.0-rc.1" />
     <PackageVersion Include="Mediator.SourceGenerator" Version="3.1.0-rc.1" />
@@ -21,6 +20,7 @@
          Microsoft.Extensions.Logging.Abstractions; 10.0.1 would be a downgrade (NU1109). -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
     <!-- MacroDeck.Signing: .NET ships no in-box Ed25519 primitive, and the plugin signature format is
          Ed25519 over the canonical plugin digest. NSec is libsodium-backed and is what the offline root
          and certificate generator already used to issue the certificates in the field, so the same

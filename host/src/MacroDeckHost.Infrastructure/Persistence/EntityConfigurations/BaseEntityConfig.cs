@@ -21,7 +21,7 @@ public class BaseEntityConfig<T> : IEntityTypeConfiguration<T>
 	{
 		builder.ToTable(_tableName);
 
-		builder.HasKey(x => x.Id);
+		builder.HasKey(x => x.Id).HasName("pk_" + _tableName);
 
 		builder.Property(x => x.Id).HasColumnName(ColumnPrefix + "id");
 		builder.Property(x => x.CreatedAt).HasColumnName(ColumnPrefix + "created_at");

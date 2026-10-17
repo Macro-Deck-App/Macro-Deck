@@ -39,8 +39,13 @@
 
     <ItemGroup>
       <PackageReference Include="Cronos" />
-      <PackageReference Include="Evolve" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <!-- dotnet ef only: the Design package needs Roslyn 5; the central 4.14 pin is for the plugin analyzers. -->
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="5.0.0" PrivateAssets="all" />
       <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
@@ -61,11 +66,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="Persistence\DatabaseMigrations\*.sql">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-            <TargetPath>DatabaseMigrations\%(Filename)%(Extension)</TargetPath>
-        </Content>
+        <EmbeddedResource Include="Persistence\DatabaseMigrations\*.sql" LogicalName="MacroDeckHost.LegacyEvolveMigrations.%(Filename)%(Extension)" />
     </ItemGroup>
 
 

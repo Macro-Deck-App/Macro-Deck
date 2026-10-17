@@ -58,6 +58,7 @@ jobs:
             jb cleanupcode MacroDeck.Format.sln \
               --profile="Built-in: Reformat Code" \
               --settings=MacroDeck.slnx.DotSettings \
+              --exclude="host/src/MacroDeckHost.Infrastructure/Persistence/Migrations/**" \
               --no-buildin-settings \
               --no-build \
               --verbosity=WARN

@@ -21,7 +21,6 @@ internal sealed class TestPaths : IMacroDeckPaths
 	public string IconStagingDirectory => Path.Combine(IconsDirectory, "staging");
 	public string FontsDirectory => Path.Combine(DataDirectory, "fonts");
 	public string DatabasePath => Path.Combine(BaseDirectory, "database.db");
-	public string DatabaseMigrationsDirectory => Path.Combine(BaseDirectory, "DatabaseMigrations");
 	public string ConfigDirectory => Path.Combine(BaseDirectory, "config");
 	public string LogsDirectory => Path.Combine(BaseDirectory, "logs");
 	public string KeysDirectory => Path.Combine(BaseDirectory, "keys");

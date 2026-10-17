@@ -22,7 +22,7 @@ dotnet test MacroDeck.slnx -c Release --filter "FullyQualifiedName~FolderCache"
 
 Platform-specific test projects live beside the cross-platform host tests. Run the project for the operating system affected by a change when that platform is available.
 
-Database schema changes require a new Evolve migration under `host/src/MacroDeckHost.Infrastructure/Persistence/DatabaseMigrations/`. The migration, not the EF entity definition, is the schema change.
+Database schema changes require a new EF Core migration: `dotnet tool restore`, then `dotnet ef migrations add <Name> --project host/src/MacroDeckHost.Infrastructure`. See [coding style](coding-style.md#persistence).
 
 C# formatting follows the repository Rider/ReSharper settings in `MacroDeck.slnx.DotSettings`. The build enforces `.editorconfig` and analyzer style rules; the finer ReSharper layout is not a CI gate. Run Rider's Code Cleanup with the Reformat Code profile before committing, or trigger the manual `Cleanup C# code` workflow on a branch for a full sweep.
 

@@ -30,8 +30,6 @@ public class MacroDeckPaths : IMacroDeckPaths
 
 	public string DatabasePath => Path.Combine(DataRootDirectory, "database.db");
 
-	public string DatabaseMigrationsDirectory => Path.Combine(BaseDirectory, "DatabaseMigrations");
-
 	public string ConfigDirectory => Path.Combine(DataRootDirectory, "config");
 
 	public string LogsDirectory => Path.Combine(DataRootDirectory, "logs");

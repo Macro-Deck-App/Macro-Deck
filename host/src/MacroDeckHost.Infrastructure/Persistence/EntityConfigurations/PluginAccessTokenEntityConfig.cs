@@ -22,6 +22,6 @@ public class PluginAccessTokenEntityConfig : BaseEntityConfig<PluginAccessTokenE
 		builder.Property(x => x.LastUsedAt).HasColumnName(ColumnPrefix + "last_used_at");
 		builder.Property(x => x.RevokedAt).HasColumnName(ColumnPrefix + "revoked_at");
 
-		builder.HasIndex(x => x.TokenHash).IsUnique();
+		builder.HasIndex(x => x.TokenHash).IsUnique().HasDatabaseName("ux_plugin_access_token_hash");
 	}
 }

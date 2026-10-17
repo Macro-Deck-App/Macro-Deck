@@ -23,7 +23,7 @@ public class PluginRegistrationEntityConfig : BaseEntityConfig<PluginRegistratio
 		builder.Property(x => x.LastSeenAt).HasColumnName(ColumnPrefix + "last_seen_at");
 		builder.Property(x => x.RevokedAt).HasColumnName(ColumnPrefix + "revoked_at");
 
-		builder.HasIndex(x => x.PluginId).IsUnique();
-		builder.HasIndex(x => x.AccessTokenId);
+		builder.HasIndex(x => x.PluginId).IsUnique().HasDatabaseName("ux_plugin_registration_plugin_id");
+		builder.HasIndex(x => x.AccessTokenId).HasDatabaseName("ix_plugin_registration_access_token");
 	}
 }

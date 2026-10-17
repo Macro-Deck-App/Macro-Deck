@@ -10,10 +10,10 @@ public class AppPreferenceEntityConfig : IEntityTypeConfiguration<AppPreferenceE
 	{
 		builder.ToTable("app_preference");
 
-		builder.HasKey(x => x.Key);
+		builder.HasKey(x => x.Key).HasName("pk_app_preference");
 
 		builder.Property(x => x.Key).HasColumnName("ap_key");
-		builder.Property(x => x.Value).HasColumnName("ap_value");
+		builder.Property(x => x.Value).HasColumnName("ap_value").HasDefaultValue(string.Empty).ValueGeneratedNever();
 		builder.Property(x => x.CreatedAt).HasColumnName("ap_created_at");
 		builder.Property(x => x.UpdatedAt).HasColumnName("ap_updated_at");
 	}
