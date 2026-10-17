@@ -16,7 +16,10 @@ public class SecretEntityConfig : BaseEntityConfig<SecretEntity>
 		base.Configure(builder);
 
 		builder.Property(x => x.Kind).HasColumnName(ColumnPrefix + "kind");
-		builder.Property(x => x.EncryptedValue).HasColumnName(ColumnPrefix + "encrypted_value");
+		builder.Property(x => x.EncryptedValue)
+			.HasColumnName(ColumnPrefix + "encrypted_value")
+			.HasDefaultValue(string.Empty)
+			.ValueGeneratedNever();
 		builder.Property(x => x.UpdatedAt).HasColumnName(ColumnPrefix + "updated_at");
 	}
 }

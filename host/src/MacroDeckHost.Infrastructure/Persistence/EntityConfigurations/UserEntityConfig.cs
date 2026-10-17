@@ -15,8 +15,10 @@ public class UserEntityConfig : BaseEntityConfig<UserEntity>
 	{
 		base.Configure(builder);
 
-		builder.Property(x => x.Username).HasColumnName(ColumnPrefix + "username");
+		builder.Property(x => x.Username).HasColumnName(ColumnPrefix + "username").UseCollation("NOCASE");
 		builder.Property(x => x.PasswordHash).HasColumnName(ColumnPrefix + "password_hash");
 		builder.Property(x => x.UpdatedAt).HasColumnName(ColumnPrefix + "updated_at");
+
+		builder.HasIndex(x => x.Username).IsUnique().HasDatabaseName("ux_app_user_username");
 	}
 }

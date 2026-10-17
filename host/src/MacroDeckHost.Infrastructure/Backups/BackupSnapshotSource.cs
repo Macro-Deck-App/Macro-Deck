@@ -109,17 +109,26 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 		using var connection = new SqliteConnection(Unpooled(databasePath));
 		connection.Open();
 
+		return ReadScalar(connection,
+				$"SELECT \"MigrationId\" FROM \"{DatabaseMigrationHelper.HistoryTable}\" "
+				+ "ORDER BY \"MigrationId\" DESC LIMIT 1;")
+			?? ReadScalar(connection,
+				$"SELECT version FROM {DatabaseMigrationHelper.LegacyHistoryTable} ORDER BY id DESC LIMIT 1;")
+			?? string.Empty;
+	}
+
+	private static string? ReadScalar(SqliteConnection connection, string sql)
+	{
 		using var command = connection.CreateCommand();
-		command.CommandText =
-			$"SELECT version FROM {DatabaseMigrationHelper.MetadataTable} ORDER BY id DESC LIMIT 1;";
+		command.CommandText = sql;
 
 		try
 		{
-			return command.ExecuteScalar() as string ?? string.Empty;
+			return command.ExecuteScalar() as string;
 		}
 		catch (SqliteException)
 		{
-			return string.Empty;
+			return null;
 		}
 	}
 
