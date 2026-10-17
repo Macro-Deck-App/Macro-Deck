@@ -72,9 +72,17 @@ class FakeHost {
   localizationAnswer: { culture: string; translations: Record<string, string> } =
     { culture: 'en', translations: {} };
 
+  hanging: string[] = [];
+
   install(): void {
     (globalThis as { fetch: unknown }).fetch = (url: string, init?: RequestInit) => {
       const answer = this.answer(url, init);
+      const path = String(url).replace('http://host', '');
+      if (this.hanging.indexOf(path) >= 0) {
+        return new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+        });
+      }
       // Checked after the call above records the attempt, so an offline spec can still assert on
       // what the client tried - a fetch that never happened proves nothing about giving up.
       if (this.offline) return Promise.reject(new TypeError('Failed to fetch'));
@@ -1704,6 +1712,138 @@ describe('Client', () => {
       revoke(client);
 
       expect(sessions.treeFor('w1')).toBeUndefined();
+    });
+  });
+
+  describe('a request the host never answers', () => {
+    const timeouts = {
+      requestTimeoutMs: () => 1000,
+      lockEnvironment: { locks: null, storage: null, now: () => Date.now(), delay: () => Promise.resolve() },
+    };
+    const settleFully = async () => { for (let pass = 0; pass < 4; pass++) await settle(); };
+
+    it('asks again after the first probe request went unanswered, and gets past the starting screen', async () => {
+      host.refreshable = null;
+      host.hanging = ['/api/key-ring/status'];
+      const client = build(timeouts);
+      const stop = client.watchForRecovery(500);
+
+      void client.probe();
+      await settleFully();
+      expect(client.app.screen.get()).toBe('starting');
+
+      host.hanging = [];
+      jasmine.clock().tick(1000);
+      await settleFully();
+      jasmine.clock().tick(500);
+      await settleFully();
+
+      expect(client.app.screen.get()).toBe('signedOut');
+      stop();
+    });
+
+    it('keeps the session when the refresh went unanswered once', async () => {
+      twoProfiles();
+      host.refreshable = token();
+      host.hanging = ['/api/auth/refresh'];
+      const client = build(timeouts);
+      const stop = client.watchForRecovery(500);
+
+      void client.probe();
+      await settleFully();
+      host.hanging = [];
+      jasmine.clock().tick(1000);
+      await settleFully();
+      jasmine.clock().tick(500);
+      await settleFully();
+
+      expect(client.app.conditions.get().authenticated).toBeTrue();
+      expect(client.app.screen.get()).toBe('connecting');
+      stop();
+    });
+
+    it('gives an ordinary request 15 seconds and the session refresh 30 by default', async () => {
+      twoProfiles();
+      host.refreshable = token();
+      host.hanging = ['/api/key-ring/status'];
+      const client = build({ lockEnvironment: timeouts.lockEnvironment });
+      const stop = client.watchForRecovery(500);
+
+      void client.probe();
+      await settleFully();
+      jasmine.clock().tick(14_999);
+      await settleFully();
+      expect(host.pathsFor('GET', '/api/key-ring/status').length).toBe(1);
+
+      host.hanging = ['/api/auth/refresh'];
+      jasmine.clock().tick(1);
+      await settleFully();
+      jasmine.clock().tick(500);
+      await settleFully();
+      expect(host.pathsFor('POST', '/api/auth/refresh').length).toBe(1);
+
+      jasmine.clock().tick(29_999);
+      await settleFully();
+      expect(host.pathsFor('POST', '/api/auth/refresh').length).toBe(1);
+
+      host.hanging = [];
+      jasmine.clock().tick(1);
+      await settleFully();
+      jasmine.clock().tick(500);
+      await settleFully();
+      expect(host.pathsFor('POST', '/api/auth/refresh').length).toBe(2);
+      expect(client.app.conditions.get().authenticated).toBeTrue();
+      stop();
+      client.connection.disconnect();
+    });
+
+    it('waits out an unanswered catalogue and appearance together before reading the deck', async () => {
+      twoProfiles();
+      host.refreshable = token();
+      host.hanging = ['/api/localization', '/api/settings/appearance'];
+      const client = build({ ...timeouts, appearance: { applyFromHost: () => undefined } });
+
+      void client.probe();
+      await settleFully();
+      expect(host.pathsFor('GET', '/api/folders').length).toBe(0);
+
+      jasmine.clock().tick(1000);
+      await settleFully();
+
+      expect(host.pathsFor('GET', '/api/folders').length).toBe(1);
+      client.connection.disconnect();
+    });
+
+    it('asks for another socket ticket after one went unanswered', async () => {
+      const originalWebSocket = (globalThis as { WebSocket?: unknown }).WebSocket;
+      (globalThis as { WebSocket: unknown }).WebSocket = class {
+        onopen: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        onmessage: ((event: MessageEvent) => void) | null = null;
+        onclose: (() => void) | null = null;
+        close(): void {}
+      };
+      try {
+        twoProfiles();
+        host.refreshable = token();
+        host.hanging = ['/api/ui-websocket/tickets'];
+        const client = build(timeouts);
+
+        await client.probe();
+        await settleFully();
+        expect(host.pathsFor('POST', '/api/ui-websocket/tickets').length).toBe(1);
+
+        host.hanging = [];
+        jasmine.clock().tick(1000);
+        await settleFully();
+        jasmine.clock().tick(2000);
+        await settleFully();
+
+        expect(host.pathsFor('POST', '/api/ui-websocket/tickets').length).toBe(2);
+        client.connection.disconnect();
+      } finally {
+        (globalThis as { WebSocket?: unknown }).WebSocket = originalWebSocket;
+      }
     });
   });
 

@@ -1,3 +1,4 @@
+import { isUnreachable } from '../protocol/refresh-outcome';
 import { TransportError } from '../protocol/transport-error';
 import { HttpClient, HttpClientOptions } from './http-client';
 
@@ -130,5 +131,116 @@ describe('HttpClient', () => {
 
     expect(calls.map(call => call.url))
       .toEqual(['http://first/api/x', 'http://second/api/x']);
+  });
+
+  describe('with a request timeout', () => {
+    beforeEach(() => jasmine.clock().install());
+    afterEach(() => jasmine.clock().uninstall());
+
+    function hangingFetch(): Array<{ url: string; init: RequestInit }> {
+      const calls: Array<{ url: string; init: RequestInit }> = [];
+      (globalThis as { fetch: unknown }).fetch = (url: string, init: RequestInit) => {
+        calls.push({ url, init });
+        return new Promise<Response>((_resolve, reject) => {
+          init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+        });
+      };
+      return calls;
+    }
+
+    it('gives up on a request the host never answers, as an unreachable host', async () => {
+      hangingFetch();
+      let failure: unknown = null;
+
+      const request = client({ requestTimeoutMs: () => 15_000 }).get('/api/x').catch(error => { failure = error; });
+      jasmine.clock().tick(14_999);
+      await Promise.resolve();
+      expect(failure).toBeNull();
+
+      jasmine.clock().tick(1);
+      await request;
+
+      expect(failure).not.toBeNull();
+      expect(isUnreachable(failure)).toBeTrue();
+    });
+
+    function slowBody(arrivesAfterMs: number | null): void {
+      (globalThis as { fetch: unknown }).fetch = (_url: string, init: RequestInit) => Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: '',
+        text: () => new Promise<string>((resolve, reject) => {
+          init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+          if (arrivesAfterMs !== null) setTimeout(() => resolve('{"name":"Deck"}'), arrivesAfterMs);
+        }),
+      } as unknown as Response);
+    }
+
+    it('lets a body that streams past the header timeout finish', async () => {
+      slowBody(45_000);
+
+      const request = client({ requestTimeoutMs: () => 15_000 }).get<{ name: string }>('/api/x');
+      for (let turn = 0; turn < 5; turn++) await Promise.resolve();
+      jasmine.clock().tick(45_000);
+
+      await expectAsync(request).toBeResolvedTo({ name: 'Deck' });
+    });
+
+    it('gives up on a body that stops arriving, as an unreachable host', async () => {
+      slowBody(null);
+      let failure: unknown = null;
+
+      const request = client({ requestTimeoutMs: () => 15_000 }).get('/api/x').catch(error => { failure = error; });
+      for (let turn = 0; turn < 5; turn++) await Promise.resolve();
+      jasmine.clock().tick(10 * 60_000);
+      await request;
+
+      expect(isUnreachable(failure)).toBeTrue();
+    });
+
+    it('times out the retry after a refreshed session on its own', async () => {
+      let call = 0;
+      (globalThis as { fetch: unknown }).fetch = (_url: string, init: RequestInit) => {
+        call++;
+        if (call === 1) {
+          return Promise.resolve({ ok: false, status: 401, statusText: '', text: () => Promise.resolve('') } as unknown as Response);
+        }
+        return new Promise<Response>((_resolve, reject) => {
+          init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+        });
+      };
+
+      const request = client({ requestTimeoutMs: () => 15_000, onUnauthorized: () => Promise.resolve(true) })
+        .get('/api/x');
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(call).toBe(2);
+      jasmine.clock().tick(15_000);
+
+      await expectAsync(request).toBeRejected();
+    });
+
+    it('still aborts when the caller cancels before the timeout', async () => {
+      hangingFetch();
+      const caller = new AbortController();
+
+      const request = client({ requestTimeoutMs: () => 15_000 }).get('/api/x', caller.signal);
+      caller.abort();
+
+      await expectAsync(request).toBeRejected();
+    });
+
+    it('waits as long as the host takes when no timeout is set', async () => {
+      const calls = hangingFetch();
+      let settled = false;
+
+      void client().get('/api/x').finally(() => { settled = true; });
+      jasmine.clock().tick(10 * 60_000);
+      await Promise.resolve();
+
+      expect(settled).toBeFalse();
+      expect(calls[0].init.signal).toBeUndefined();
+    });
   });
 });
