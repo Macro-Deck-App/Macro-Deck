@@ -98,6 +98,66 @@ public class WidgetTriggerServiceTests
 		Assert.That(stateService.AdvanceCalls, Is.EqualTo(1));
 	}
 
+	[TestCase("""
+			  {"stateMode":true,"states":[{"id":"off"},{"id":"on"}],
+			   "stateMapping":{"rules":[{"id":"r1","stateId":"on","when":{"kind":"compare","left":{"$var":"cpu"},
+			   "operator":">=","right":90}}],"fallbackStateId":"off"}}
+			  """)]
+	[TestCase("""
+			  {"mode":"toggle","stateBinding":{"kind":"compare","left":{"$var":"cpu"},"operator":">=","right":90}}
+			  """)]
+	[TestCase("""
+			  {"stateMode":true,"states":[{"id":"a"},{"id":"b"}],
+			   "stateProvider":{"blockId":"b1","integrationId":"app.macro-deck.system","actionId":"mute-volume"}}
+			  """)]
+	[TestCase("""
+			  {"stateMode":true,"states":[{"id":"a"},{"id":"b"}],
+			   "manualStateBackup":{"states":[{"id":"off"},{"id":"on"}],"activeStateId":"off",
+			   "stateMapping":{"rules":[{"id":"r1","stateId":"on","when":{"kind":"compare","left":{"$var":"cpu"},
+			   "operator":">=","right":90}}],"fallbackStateId":"off"}}}
+			  """)]
+	[TestCase("""{"stateMode":true,"states":[]}""")]
+	public async Task A_short_press_on_a_button_whose_state_it_cannot_advance_leaves_its_state_alone(string data)
+	{
+		var stateService = new RecordingStateService();
+		var coordinator = new RecordingCoordinator();
+		var service = CreateService(coordinator, stateService, out var services);
+		using var _ = services;
+
+		await service.ExecuteAsync(Widget(data),
+			WidgetTriggerTypes.ShortPress,
+			"client-1",
+			null,
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stateService.AdvanceCalls, Is.Zero);
+			Assert.That(coordinator.Runs, Is.EqualTo(1), "the flow still runs");
+		});
+	}
+
+	[Test]
+	public async Task A_short_press_cycles_a_button_whose_stored_mapping_has_no_rules()
+	{
+		var stateService = new RecordingStateService();
+		var coordinator = new RecordingCoordinator();
+		var service = CreateService(coordinator, stateService, out var services);
+		using var _ = services;
+
+		await service.ExecuteAsync(
+			Widget("""
+				   {"stateMode":true,"states":[{"id":"a"},{"id":"b"}],
+				    "stateMapping":{"rules":[],"fallbackStateId":"a"}}
+				   """),
+			WidgetTriggerTypes.ShortPress,
+			"client-1",
+			null,
+			CancellationToken.None);
+
+		Assert.That(stateService.AdvanceCalls, Is.EqualTo(1));
+	}
+
 	[Test]
 	public async Task A_long_press_does_not_advance_state()
 	{
