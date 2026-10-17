@@ -110,8 +110,9 @@ deck itself.
   phone, so you see when the tablet on the wall needs charging.
 - **Screenshots for sharing:** a button with **Take screenshot** saves the deck as a PNG file on the computer,
   and **Save path to variable** puts the file's path into a variable for the next action.
-- **Burn-in:** a deck that is always on shows the same picture for hours. With **Keep screen on**, also set up a
-  **Screensaver** for the device in **Settings > Devices**, a dark theme and a lower brightness.
+- **Burn-in:** a deck that is always on shows the same picture for hours. With **Keep screen on**, also turn on
+  **Dim when idle** in the app's [settings](/guide/companion-app/settings/#deck), set up a **Screensaver** for the
+  device in **Settings > Devices**, and use a dark theme and a lower brightness.
 - **Wake the computer:** turn on **Wake this computer when connecting** for a connection, and the app wakes the
   computer with Wake-on-LAN when you open its deck. To wake it without opening the app, use the power button on the
   host widget, a wake tile or shortcut on Android, or the **Wake Computer** action and control on iPhone and iPad;
