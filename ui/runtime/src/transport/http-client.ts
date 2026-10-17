@@ -1,5 +1,7 @@
 import { TransportError } from '../protocol/transport-error';
 
+const BODY_TIMEOUT_FACTOR = 4;
+
 export interface HttpClientOptions {
   baseUrl(): string;
 
@@ -8,6 +10,8 @@ export interface HttpClientOptions {
   onUnauthorized?(): Promise<boolean>;
 
   onForbidden?(): void;
+
+  requestTimeoutMs?(method: string, path: string): number | undefined;
 }
 
 export class HttpClient {
@@ -45,8 +49,7 @@ export class HttpClient {
     signal?: AbortSignal,
     extraHeaders?: Record<string, string>,
   ): Promise<Response> {
-    const response = await fetch(
-      this.options.baseUrl() + path, this.buildInit(method, body, signal, extraHeaders));
+    const response = await this.fetchBounded(method, path, body, signal, extraHeaders);
 
     if (response.status === 403) {
       if (this.options.onForbidden) this.options.onForbidden();
@@ -58,7 +61,37 @@ export class HttpClient {
     const retry = await this.options.onUnauthorized();
     if (!retry) return response;
 
-    return fetch(this.options.baseUrl() + path, this.buildInit(method, body, signal, extraHeaders));
+    return this.fetchBounded(method, path, body, signal, extraHeaders);
+  }
+
+  // The headers get the short bound and the body a longer one, so a connection that died mid-request
+  // cannot hang its caller while a large body on a weak link still has time to arrive.
+  private async fetchBounded(
+    method: string,
+    path: string,
+    body: unknown,
+    signal: AbortSignal | undefined,
+    extraHeaders: Record<string, string> | undefined,
+  ): Promise<Response> {
+    const url = this.options.baseUrl() + path;
+    const timeoutMs = this.options.requestTimeoutMs ? this.options.requestTimeoutMs(method, path) : undefined;
+    if (timeoutMs === undefined || typeof AbortController === 'undefined') {
+      return fetch(url, this.buildInit(method, body, signal, extraHeaders));
+    }
+
+    const controller = new AbortController();
+    const abortWithCaller = () => controller.abort(signal?.reason);
+    if (signal?.aborted) abortWithCaller();
+    else signal?.addEventListener('abort', abortWithCaller, { once: true });
+    const headersTimer = setTimeout(() => controller.abort(), timeoutMs);
+    let response: Response;
+    try {
+      response = await fetch(url, this.buildInit(method, body, controller.signal, extraHeaders));
+    } finally {
+      clearTimeout(headersTimer);
+    }
+    setTimeout(() => controller.abort(), timeoutMs * BODY_TIMEOUT_FACTOR);
+    return response;
   }
 
   private buildInit(

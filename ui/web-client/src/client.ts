@@ -81,6 +81,11 @@ const MAX_LOCALIZATION_RETRY_DELAY_MS = 60000;
 const INITIAL_SESSION_RETRY_DELAY_MS = 2000;
 const MAX_SESSION_RETRY_DELAY_MS = 60000;
 
+const REQUEST_TIMEOUT_MS = 15000;
+// The refresh rotates the cookie, and the host forgives one reuse for 60 s: a lost answer has to be
+// retried inside that window rather than abandoned early and then spent twice.
+const REFRESH_REQUEST_TIMEOUT_MS = 30000;
+
 const DEVICE_ID_KEY = 'md.device.web-client.id';
 const DEVICE_SECRET_KEY = 'md.device.web-client.secret';
 const DEVICE_CLIENT_TYPE = 'web-client';
@@ -107,10 +112,16 @@ export interface ClientOptions {
   lockEnvironment?: CrossTabLockEnvironment;
 
   appearance?: AppearanceSink;
+
+  requestTimeoutMs?(method: string, path: string): number | undefined;
 }
 
 export interface AppearanceSink {
   applyFromHost(mode: ThemeMode | undefined, accent: string | undefined, fontFamily?: string): void;
+}
+
+function defaultRequestTimeoutMs(method: string, path: string): number {
+  return method === 'POST' && path === '/api/auth/refresh' ? REFRESH_REQUEST_TIMEOUT_MS : REQUEST_TIMEOUT_MS;
 }
 
 function defaultReadHash(): string {
@@ -253,6 +264,7 @@ export class Client {
       accessToken: () => this.accessToken,
       onUnauthorized: () => this.handleUnauthorized(),
       onForbidden: () => this.handleForbidden(),
+      requestTimeoutMs: options.requestTimeoutMs ?? defaultRequestTimeoutMs,
     });
 
     this.connection = new UiConnection({
@@ -508,8 +520,7 @@ export class Client {
   async start(): Promise<void> {
     // Before the deck, because the deck is what needs it: a widget's text and the language its dates
     // are written in both come from here, and loading it afterwards paints everything twice.
-    await this.loadLocalization();
-    await this.loadAppearance();
+    await Promise.all([this.loadLocalization(), this.loadAppearance()]);
     try {
       await this.loadDeck();
       this.deckLoaded = true;

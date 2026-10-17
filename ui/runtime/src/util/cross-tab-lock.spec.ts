@@ -33,7 +33,7 @@ describe('runExclusively', () => {
     // exists - the storage scheme below can only ever narrow the race, not close it.
     const calls: string[] = [];
     const locks = {
-      request: async <T>(name: string, callback: () => Promise<T>): Promise<T> => {
+      request: async <T>(name: string, _options: unknown, callback: () => Promise<T>): Promise<T> => {
         calls.push(name);
         return callback();
       },
@@ -98,5 +98,65 @@ describe('runExclusively', () => {
     }, environment({ storage: null }));
 
     expect(ran).toBeTrue();
+  });
+
+  describe('with Web Locks', () => {
+    beforeEach(() => jasmine.clock().install());
+    afterEach(() => jasmine.clock().uninstall());
+
+    function heldForever() {
+      return {
+        request: <T>(_name: string, options: { signal?: AbortSignal }): Promise<T> =>
+          new Promise<T>((_resolve, reject) => {
+            options.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+          }),
+      };
+    }
+
+    it('still runs the work once a holder that never lets go has kept the lock past the wait', async () => {
+      const storage = fakeStorage();
+      let ran = false;
+
+      const running = runExclusively('lock-a', async () => {
+        ran = true;
+      }, environment({ locks: heldForever(), storage }));
+      jasmine.clock().tick(44_000);
+      await Promise.resolve();
+      expect(ran).toBeFalse();
+
+      jasmine.clock().tick(2_000);
+      await running;
+
+      expect(ran).toBeTrue();
+      expect(storage.getItem('lock-a')).toBeNull();
+    });
+
+    it('falls back to the storage lock when the browser refuses the lock options', async () => {
+      const storage = fakeStorage();
+      let heldWhileRunning: string | null = null;
+      const locks = {
+        request: (): Promise<never> => Promise.reject(new TypeError('options not supported')),
+      };
+
+      await runExclusively('lock-a', async () => {
+        heldWhileRunning = storage.getItem('lock-a');
+      }, environment({ locks, storage }));
+
+      expect(heldWhileRunning).not.toBeNull();
+    });
+
+    it('runs work that failed under the lock only once', async () => {
+      let runs = 0;
+      const locks = {
+        request: <T>(_name: string, _options: unknown, callback: () => Promise<T>): Promise<T> => callback(),
+      };
+
+      await expectAsync(runExclusively('lock-a', () => {
+        runs++;
+        return Promise.reject(new Error('boom'));
+      }, environment({ locks }))).toBeRejectedWithError('boom');
+
+      expect(runs).toBe(1);
+    });
   });
 });

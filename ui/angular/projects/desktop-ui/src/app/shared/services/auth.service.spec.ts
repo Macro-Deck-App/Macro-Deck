@@ -41,7 +41,7 @@ describe('AuthService', () => {
   function lockEnvironment(): CrossTabLockEnvironment {
     return {
       locks: {
-        request: <T>(name: string, callback: () => Promise<T>): Promise<T> => {
+        request: <T>(name: string, _options: unknown, callback: () => Promise<T>): Promise<T> => {
           lockRequests.push(name);
           return callback();
         },
