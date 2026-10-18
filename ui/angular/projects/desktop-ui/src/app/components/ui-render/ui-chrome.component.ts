@@ -266,7 +266,7 @@ function isExternalUrl(url: string): boolean {
       </shared-confirmation-modal>
     }
   `,
-  styleUrls: ['./ui-render.component.scss'],
+  styleUrls: ['./ui-render.component.scss', './ui-chrome-styled.component.scss'],
 })
 export class UiChromeComponent {
   readonly node = input.required<UiNode>();

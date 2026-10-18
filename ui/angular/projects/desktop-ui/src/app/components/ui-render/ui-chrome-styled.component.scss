@@ -1,0 +1,59 @@
+.config-chrome-prose-styled {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+
+  &[data-variant='quote'] {
+    padding-inline-start: var(--space-3);
+    border-inline-start: 4px solid var(--color-border-light);
+    border-radius: 2px;
+  }
+
+  &[data-variant='code-block'] {
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-mono);
+    background-color: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  &[data-variant='heading-1'] {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+  }
+
+  &[data-variant='heading-2'] {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+  }
+
+  &[data-variant='heading-3'] {
+    font-size: var(--text-md);
+    font-weight: var(--font-semibold);
+  }
+
+  &[data-variant='subtext'] {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+}
+
+// Fixed colours rather than theme tokens: content styled for a dark chat surface has to keep its
+// contrast in the light theme too, so the card and the tokens its children read stay dark.
+.config-chrome-stack-accent {
+  --color-text-primary: #dbdee1;
+  --color-text-secondary: #b5bac1;
+  --color-text-muted: #949ba4;
+  --color-border: #3f4147;
+  --color-border-light: #4e5058;
+  --color-bg-tertiary: #1e1f22;
+
+  color-scheme: dark;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-primary);
+  background-color: #2b2d31;
+  border-inline-start: 4px solid var(--config-chrome-stack-accent);
+  border-radius: var(--radius-md);
+}
