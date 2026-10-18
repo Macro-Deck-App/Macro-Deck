@@ -236,9 +236,20 @@ When a change affects only a few variables, name them by definition id so the re
 await context.Variables.RequestDefinitionRefreshAsync(["volume-percent", "muted"], cancellationToken);
 ```
 
-Ids you do not declare are ignored and an empty list asks for nothing. Reading more than asked for is always
-allowed: a pending request for every variable covers pending requests for some, and an `IVariableApi` that
-does not override the member, or a Macro Deck that predates it, reads every declared variable instead.
+The ids can also name catalog resources a user bound, so a catalog provider that polls (`SupportsPush` is
+`false`) can turn an event from its service into an immediate read of only the affected resources:
+
+```csharp
+// The service reported that the microphone input was muted.
+await context.Variables.RequestDefinitionRefreshAsync([$"{connectionId}/input/mic/muted"], cancellationToken);
+```
+
+Ids that match neither a declared variable nor a bound catalog resource are ignored, and an empty list asks for
+nothing. Reading more than asked for is always allowed: a pending request for every declared variable covers
+pending requests for declared ones, while named catalog resources are still sent next to it. An `IVariableApi`
+that does not override the member, or a Macro Deck that predates it, reads every declared variable instead. An
+older Macro Deck ignores catalog resource ids, so those resources keep their refresh interval there. Pushed
+catalog resources are unaffected; publish those through the sink.
 
 ## Names
 

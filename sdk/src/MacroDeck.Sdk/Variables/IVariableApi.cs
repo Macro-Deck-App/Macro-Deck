@@ -62,16 +62,19 @@ public interface IVariableApi
 	}
 
 	/// <summary>
-	/// Asks Macro Deck to read only the declared variables with the given definition ids again now, instead
-	/// of at their next refresh interval. Use it when a change affects a few variables and reading every
-	/// declared variable would be wasteful. Ids the integration does not declare are ignored, and an empty
-	/// collection asks for nothing. Requests made while one is pending are merged into one read.
+	/// Asks Macro Deck to read only the variables with the given definition ids again now, instead of at their
+	/// next refresh interval: declared variables, and catalog resources a user bound that Macro Deck polls.
+	/// Use it when a change affects a few variables and reading every declared variable would be wasteful.
+	/// Ids that match neither are ignored, and an empty collection asks for nothing. Requests made while one is
+	/// pending are merged into one read.
 	/// </summary>
 	/// <remarks>
 	/// Best effort, like <see cref="RequestRefreshAsync" />: it never throws because the request could not be
 	/// delivered. Reading more than asked for is always allowed, so the default implementation, and a Macro
 	/// Deck that predates this member, read every declared variable instead. A pending request for every
-	/// variable covers any pending request for some.
+	/// declared variable covers any pending request for some. An older Macro Deck ignores catalog resource ids,
+	/// so those keep their refresh interval there. Pushed catalog resources are unaffected: publish those
+	/// through the sink.
 	/// </remarks>
 	Task RequestDefinitionRefreshAsync(
 		IReadOnlyCollection<string> definitionIds,

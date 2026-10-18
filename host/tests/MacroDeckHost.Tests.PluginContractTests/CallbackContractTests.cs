@@ -246,9 +246,23 @@ internal sealed class CallbackContractTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_refreshSignal.DrainDefinitionsFor(PluginId),
+			Assert.That(_refreshSignal.DrainDefinitionsFor(PluginId, VariableRefreshLane.Eager),
 				Is.EquivalentTo(new[] { "volume-percent", "muted" }));
 			Assert.That(_refreshSignal.DrainEagerRefreshRequested(PluginId), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_definition_refresh_over_the_wire_also_reaches_the_loop_that_reads_bound_catalog_resources()
+	{
+		await _context.Variables.RequestDefinitionRefreshAsync(["entity/light.kitchen/state", "muted"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_refreshSignal.DrainDefinitionsFor(PluginId, VariableRefreshLane.Catalog),
+				Is.EquivalentTo(new[] { "entity/light.kitchen/state", "muted" }));
+			Assert.That(_refreshSignal.DrainDefinitionsFor(PluginId, VariableRefreshLane.Eager),
+				Is.EquivalentTo(new[] { "entity/light.kitchen/state", "muted" }));
 		});
 	}
 

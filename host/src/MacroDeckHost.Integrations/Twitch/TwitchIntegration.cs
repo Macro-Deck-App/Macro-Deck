@@ -166,7 +166,9 @@ public sealed class TwitchIntegration
 		_userVariables = context.UserVariables;
 
 		_pump.Start();
-		await _accounts.ReloadAsync(context.Config, new TwitchEventEmitter(context.Events));
+		await _accounts.ReloadAsync(context.Config,
+			new TwitchEventEmitter(context.Events),
+			() => _ = _variables?.RequestRefreshAsync());
 		Chat.SetAccounts(_accounts.ChatAccounts());
 		_stats.SetAccounts(_accounts.StatsAccounts());
 		_accounts.StartAll();

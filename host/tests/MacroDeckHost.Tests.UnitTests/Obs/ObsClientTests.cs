@@ -97,7 +97,6 @@ internal sealed class ObsClientTests
 			Assert.That(mask.HasFlag(EventSubscription.SceneItemTransformChanged), Is.False);
 			Assert.That(mask
 				& (EventSubscription.Transitions
-					| EventSubscription.SceneItems
 					| EventSubscription.MediaInputs
 					| EventSubscription.Vendors
 					| EventSubscription.Canvases),
@@ -110,10 +109,12 @@ internal sealed class ObsClientTests
 			| EventSubscription.Inputs
 			| EventSubscription.Filters
 			| EventSubscription.Outputs
+			| EventSubscription.SceneItems
 			| EventSubscription.Ui;
 		Assert.That(mask & required,
 			Is.EqualTo(required),
-			"CustomEvent (General), profile (Config), scenes, mute and settings (Inputs), filters, outputs and studio mode (Ui)");
+			"CustomEvent (General), profile (Config), scenes, mute, volume, audio and settings (Inputs), filters, "
+			+ "outputs, scene item visibility (SceneItems) and studio mode (Ui)");
 	}
 
 	[Test]

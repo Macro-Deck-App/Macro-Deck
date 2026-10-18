@@ -13,6 +13,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 	private readonly ILogger _logger;
 	private readonly TwitchEventEmitter? _emitter;
 	private readonly IStreamChatSink? _chatSink;
+	private readonly Action? _onStateChanged;
 	private readonly Lock _sync = new();
 	private readonly CancellationTokenSource _stopping = new();
 
@@ -34,7 +35,8 @@ internal sealed class TwitchAccountConnection : IDisposable
 		ITwitchHelixClient helix,
 		TwitchEventEmitter? emitter,
 		ILogger logger,
-		IStreamChatSink? chatSink = null)
+		IStreamChatSink? chatSink = null,
+		Action? onStateChanged = null)
 	{
 		Account = account;
 		Tokens = tokens;
@@ -43,6 +45,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 		_emitter = emitter;
 		_logger = logger;
 		_chatSink = chatSink;
+		_onStateChanged = onStateChanged;
 	}
 
 	public TwitchAccount Account { get; }
@@ -99,12 +102,21 @@ internal sealed class TwitchAccountConnection : IDisposable
 
 	public TwitchAccountState Merge(Func<TwitchAccountState, TwitchAccountState> update)
 	{
+		TwitchAccountState next;
+		bool changed;
 		lock (_sync)
 		{
-			var next = update(_state);
+			next = update(_state);
+			changed = next != _state;
 			_state = next;
-			return next;
 		}
+
+		if (changed)
+		{
+			_onStateChanged?.Invoke();
+		}
+
+		return next;
 	}
 
 	public void Dispose()

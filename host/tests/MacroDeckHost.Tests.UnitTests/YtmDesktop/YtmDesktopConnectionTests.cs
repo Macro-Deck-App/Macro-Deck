@@ -310,6 +310,37 @@ internal sealed class YtmDesktopConnectionTests
 	}
 
 	[Test]
+	public async Task A_pushed_update_that_changes_what_the_player_shows_asks_for_a_refresh()
+	{
+		var changes = 0;
+		var connection = Create(onSnapshotChanged: () => Interlocked.Increment(ref changes));
+		connection.Start();
+		await WaitForSeededSessionAsync(connection);
+		_realtime.RaiseState(PlayingState);
+		var before = Volatile.Read(ref changes);
+
+		_realtime.RaiseState(LikedState);
+
+		Assert.That(Volatile.Read(ref changes), Is.EqualTo(before + 1));
+	}
+
+	[Test]
+	public async Task A_pushed_update_that_only_moves_the_playback_position_asks_for_nothing()
+	{
+		var changes = 0;
+		var connection = Create(onSnapshotChanged: () => Interlocked.Increment(ref changes));
+		connection.Start();
+		await WaitForSeededSessionAsync(connection);
+		_realtime.RaiseState(PlayingState);
+		var before = Volatile.Read(ref changes);
+		var later = PlayingState.Replace("\"videoProgress\": 12", "\"videoProgress\": 13", StringComparison.Ordinal);
+
+		_realtime.RaiseState(later);
+
+		Assert.That(Volatile.Read(ref changes), Is.EqualTo(before));
+	}
+
+	[Test]
 	public async Task A_track_change_does_not_raise_a_rating_change()
 	{
 		var publisher = new RecordingEventPublisher();
@@ -403,7 +434,7 @@ internal sealed class YtmDesktopConnectionTests
 		}
 	}
 
-	private YtmDesktopConnection Create(YtmDesktopEventEmitter? events = null)
+	private YtmDesktopConnection Create(YtmDesktopEventEmitter? events = null, Action? onSnapshotChanged = null)
 	{
 		var connection = new YtmDesktopConnection(() => _realtime,
 			() => _api,
@@ -412,7 +443,8 @@ internal sealed class YtmDesktopConnectionTests
 			events,
 			_reconnect,
 			_refresh,
-			TimeSpan.FromMilliseconds(10));
+			TimeSpan.FromMilliseconds(10),
+			onSnapshotChanged: onSnapshotChanged);
 
 		_connections.Add(connection);
 		return connection;

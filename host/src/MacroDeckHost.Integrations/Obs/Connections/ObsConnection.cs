@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Threading.Channels;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Integrations.Obs.Events;
@@ -124,6 +125,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_client.SourceFilterChanged += OnSourceFilterChanged;
 		_client.InputActiveChanged += OnInputActiveChanged;
 		_client.InputShowingChanged += OnInputShowingChanged;
+		_client.InputAudioChanged += OnInputAudioChanged;
+		_client.SceneItemEnableChanged += OnSceneItemEnableChanged;
 		_client.CustomEventReceived += OnCustomEventReceived;
 	}
 
@@ -622,6 +625,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_client.SourceFilterChanged -= OnSourceFilterChanged;
 		_client.InputActiveChanged -= OnInputActiveChanged;
 		_client.InputShowingChanged -= OnInputShowingChanged;
+		_client.InputAudioChanged -= OnInputAudioChanged;
+		_client.SceneItemEnableChanged -= OnSceneItemEnableChanged;
 		_client.CustomEventReceived -= OnCustomEventReceived;
 		_changes.Dispose();
 		StopPolling();
@@ -808,6 +813,7 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	private void OnInputMuteChanged(object? sender, ObsInputMuteChange change)
 	{
 		ForgetTargetRead($"mute:{change.InputName}");
+		_changes.Add(new ObsTargetChange(ObsTargetKind.InputMute, change.InputName));
 		lock (_publicationGate)
 		{
 			if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
@@ -815,6 +821,51 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 				_events?.PublishInputMuteChanged(change.InputName, change.Muted);
 			}
 		}
+	}
+
+	private void OnInputAudioChanged(object? sender, ObsInputAudioChange change)
+	{
+		ObsTargetKind? kind = change.Property switch
+		{
+			ObsInputAudioProperty.Volume => ObsTargetKind.InputVolume,
+			ObsInputAudioProperty.Tracks => ObsTargetKind.InputAudioTracks,
+			ObsInputAudioProperty.MonitorType => ObsTargetKind.InputMonitorType,
+			ObsInputAudioProperty.SyncOffset => ObsTargetKind.InputSyncOffset,
+			_ => null
+		};
+
+		if (kind is { } target)
+		{
+			_changes.Add(new ObsTargetChange(target, change.InputName));
+		}
+	}
+
+	// The event names the scene item by id only. Resolving it is a blocking request to OBS, so it stays off the
+	// callback that delivered the event.
+	private void OnSceneItemEnableChanged(object? sender, ObsSceneItemEnableChange change)
+	{
+		_ = Task.Run(() =>
+		{
+			try
+			{
+				if (_cts.IsCancellationRequested || Volatile.Read(ref _disposed) != 0)
+				{
+					return;
+				}
+
+				if (_client.GetSceneItemSourceName(change.SceneName, change.SceneItemId) is { } sourceName)
+				{
+					_changes.Add(new ObsTargetChange(ObsTargetKind.SceneItemVisibility, change.SceneName, sourceName));
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.Debug(ex,
+					"Failed to resolve the OBS scene item {Id} in {Scene}",
+					change.SceneItemId,
+					change.SceneName);
+			}
+		});
 	}
 
 	private void OnInputSettingsChanged(object? sender, ObsInputSettingsChange change)
@@ -905,7 +956,14 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 					{
 						ObsTargetKind.InputSettings => $"settings:{change.Name}",
 						ObsTargetKind.SourceActivity => $"source-active:{change.Name}",
-						_ => $"filter:{change.Name}\u0000{change.Child}"
+						ObsTargetKind.Filter => $"filter:{change.Name}\u0000{change.Child}",
+						ObsTargetKind.InputMute => $"mute:{change.Name}",
+						ObsTargetKind.InputVolume => $"volume:{change.Name}",
+						ObsTargetKind.InputAudioTracks => $"audio-tracks:{change.Name}",
+						ObsTargetKind.InputMonitorType => $"monitor-type:{change.Name}",
+						ObsTargetKind.InputSyncOffset => $"sync-offset:{change.Name}",
+						ObsTargetKind.SceneItemVisibility => $"visible:{change.Name}\u0000{change.Child}",
+						_ => throw new UnreachableException()
 					});
 				}
 			}

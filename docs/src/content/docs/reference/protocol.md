@@ -232,7 +232,8 @@ in-process timing.
 that predates them answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into a no-op,
 `false`, no widget data, an unsupported variable history, a `NotSupportedException` for bindings or a
 cancellation. `refresh` later gained an optional `definitionIds` argument, which a host that predates it
-ignores, reading every declared variable instead.
+ignores, reading every declared variable instead. A newer host also reads the bound catalog resources a
+`definitionIds` list names; an older one leaves them on their refresh interval.
 The `user-variables` `apply` and `create` arguments gained the optional `scriptId` and `automationId`
 next to `ownerWidgetId`, additively in major `3`, behind `IUserVariableApi.ApplyInContextAsync` and
 `CreateInContextAsync`. A host that predates them ignores them and resolves by `ownerWidgetId` alone, and an

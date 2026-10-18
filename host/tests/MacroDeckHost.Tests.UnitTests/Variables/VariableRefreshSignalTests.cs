@@ -57,7 +57,7 @@ internal sealed class VariableRefreshSignalTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(signal.DrainEagerRefreshRequested("app.test.one"), Is.True);
-			Assert.That(signal.DrainFor("app.test.one"), Is.EqualTo(new[] { variable }));
+			Assert.That(signal.DrainFor("app.test.one", VariableRefreshLane.Eager), Is.EqualTo(new[] { variable }));
 		});
 	}
 
@@ -72,8 +72,52 @@ internal sealed class VariableRefreshSignalTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(signal.DrainDefinitionsFor("app.test.one"), Is.EquivalentTo(new[] { "volume", "muted" }));
-			Assert.That(signal.DrainDefinitionsFor("app.test.one"), Is.Empty);
+			Assert.That(signal.DrainDefinitionsFor("app.test.one", VariableRefreshLane.Eager),
+				Is.EquivalentTo(new[] { "volume", "muted" }));
+			Assert.That(signal.DrainDefinitionsFor("app.test.one", VariableRefreshLane.Eager), Is.Empty);
+		});
+	}
+
+	[Test]
+	public void Draining_one_lane_leaves_the_request_for_the_other_loop()
+	{
+		var signal = new VariableRefreshSignal();
+		var variable = Guid.NewGuid();
+
+		signal.RequestRefresh("app.test.one", variable);
+		signal.RequestDefinitionRefresh("app.test.one", "input/mic/muted");
+
+		var eagerVariables = signal.DrainFor("app.test.one", VariableRefreshLane.Eager);
+		var eagerDefinitions = signal.DrainDefinitionsFor("app.test.one", VariableRefreshLane.Eager);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(eagerVariables, Is.EqualTo(new[] { variable }));
+			Assert.That(eagerDefinitions, Is.EqualTo(new[] { "input/mic/muted" }));
+			Assert.That(signal.DrainFor("app.test.one", VariableRefreshLane.Catalog), Is.EqualTo(new[] { variable }));
+			Assert.That(signal.DrainDefinitionsFor("app.test.one", VariableRefreshLane.Catalog),
+				Is.EqualTo(new[] { "input/mic/muted" }));
+		});
+	}
+
+	[Test]
+	public void Pending_integrations_lists_each_integration_with_a_request_until_it_is_drained()
+	{
+		var signal = new VariableRefreshSignal();
+
+		signal.RequestDefinitionRefresh("app.test.one", "volume");
+		signal.RequestRefresh("app.test.two", Guid.NewGuid());
+		var before = signal.PendingIntegrations(VariableRefreshLane.Catalog);
+
+		signal.DrainDefinitionsFor("app.test.one", VariableRefreshLane.Catalog);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before, Is.EquivalentTo(new[] { "app.test.one", "app.test.two" }));
+			Assert.That(signal.PendingIntegrations(VariableRefreshLane.Catalog),
+				Is.EquivalentTo(new[] { "app.test.two" }));
+			Assert.That(signal.PendingIntegrations(VariableRefreshLane.Eager),
+				Is.EquivalentTo(new[] { "app.test.one", "app.test.two" }));
 		});
 	}
 
@@ -86,8 +130,8 @@ internal sealed class VariableRefreshSignalTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(signal.DrainDefinitionsFor("app.test.two"), Is.Empty);
-			Assert.That(signal.DrainFor("app.test.one"), Is.Empty);
+			Assert.That(signal.DrainDefinitionsFor("app.test.two", VariableRefreshLane.Eager), Is.Empty);
+			Assert.That(signal.DrainFor("app.test.one", VariableRefreshLane.Eager), Is.Empty);
 			Assert.That(signal.DrainEagerRefreshRequested("app.test.one"), Is.False);
 		});
 	}

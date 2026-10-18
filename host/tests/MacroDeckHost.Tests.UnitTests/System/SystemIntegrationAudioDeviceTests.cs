@@ -434,7 +434,7 @@ public class SystemIntegrationAudioDeviceTests
 
 		volume.RaiseChanged();
 
-		Assert.That(refresh.DrainDefinitionsFor(SystemIntegration.IntegrationId),
+		Assert.That(refresh.DrainDefinitionsFor(SystemIntegration.IntegrationId, VariableRefreshLane.Eager),
 			Is.EquivalentTo(new[]
 			{
 				"system-volume-percent",
