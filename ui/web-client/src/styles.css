@@ -783,6 +783,12 @@ body,
   overflow-wrap: break-word;
 }
 
+.wc-toast-link {
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
 .wc-toast-dismiss {
   flex: none;
   display: flex;

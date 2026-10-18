@@ -246,6 +246,7 @@ internal sealed class CompanionStateAndActionsTests
 			null!,
 			null!,
 			new NullNotificationManager(),
+			new UiClientFeatures(),
 			CancellationToken.None);
 	}
 }

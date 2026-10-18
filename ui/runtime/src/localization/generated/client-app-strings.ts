@@ -341,6 +341,10 @@ export const ClientAppStrings = {
 		Meta: {
 			Title: 'macrodeck.app:WebClient.Meta.Title',
 		},
+		OpenLink: {
+			Blocked: 'macrodeck.app:WebClient.OpenLink.Blocked',
+			TapToOpen: 'macrodeck.app:WebClient.OpenLink.TapToOpen',
+		},
 		Outdated: {
 			Body: 'macrodeck.app:WebClient.Outdated.Body',
 			Title: 'macrodeck.app:WebClient.Outdated.Title',
@@ -698,6 +702,8 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Lock.Body': 'This deck is hidden while the host computer is locked. It reappears automatically once it is unlocked.',
 	'macrodeck.app:WebClient.Lock.Title': 'Computer locked',
 	'macrodeck.app:WebClient.Meta.Title': 'Web Client - Macro Deck',
+	'macrodeck.app:WebClient.OpenLink.Blocked': 'Your browser blocked the link',
+	'macrodeck.app:WebClient.OpenLink.TapToOpen': 'Tap the link to open it.',
 	'macrodeck.app:WebClient.Outdated.Body': 'Reload the page. If it stays out of date, clear the browser cache.',
 	'macrodeck.app:WebClient.Outdated.Title': 'This page is out of date',
 	'macrodeck.app:WebClient.Reconnecting.Body': 'The connection to Macro Deck was lost. This deck comes back on its own as soon as Macro Deck is reachable again.',

@@ -558,6 +558,7 @@ public class RemoteIntegrationContextTests
 
 		covered.Add((HostApis.Ui, HostOperations.Ui.OriginReportFailure));
 		covered.Add((HostApis.Ui, HostOperations.Ui.OriginShowModal));
+		covered.Add((HostApis.Ui, HostOperations.Ui.OriginOpenUrl));
 
 		covered.Add((HostApis.Variables, HostOperations.Variables.HistoryOpen));
 		covered.Add((HostApis.Variables, HostOperations.Variables.HistoryRead));

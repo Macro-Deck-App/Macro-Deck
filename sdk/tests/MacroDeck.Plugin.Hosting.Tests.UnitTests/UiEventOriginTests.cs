@@ -78,12 +78,54 @@ public class UiEventOriginTests
 		var reported = await origin.ReportFailureAsync(LocalizedText.FromLiteral("Offline."));
 		var opened = await origin.ShowModalAsync(new ModalDefinition { ViewId = "details" });
 		var answered = await origin.ShowModalAsync<string>(new ModalDefinition { ViewId = "details" });
+		var linked = await origin.OpenUrlAsync(new Uri("https://example.com/article"));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(reported, Is.False);
 			Assert.That(opened, Is.False);
 			Assert.That(answered.Cancelled, Is.True);
+			Assert.That(linked, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_link_opened_through_the_origin_names_the_session_the_client_and_the_url()
+	{
+		var host = new ScriptedHost { Answer = new UiOriginOpenUrlResult { Delivered = true } };
+		var session = new OriginSession();
+		await using var handler = await OpenAsync(session, host);
+		await PressAsync(handler, "client-a");
+		var origin = await session.NextOriginAsync();
+
+		var delivered = await origin.OpenUrlAsync(new Uri("https://example.com/article?id=1"));
+
+		var call = host.Calls.Single(entry => entry.Operation == HostOperations.Ui.OriginOpenUrl);
+		var arguments = (UiOriginOpenUrlArguments)call.Arguments!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(delivered, Is.True);
+			Assert.That(call.Api, Is.EqualTo(HostApis.Ui));
+			Assert.That(arguments.SessionId, Is.EqualTo("s1"));
+			Assert.That(arguments.ClientId, Is.EqualTo("client-a"));
+			Assert.That(arguments.Url, Is.EqualTo("https://example.com/article?id=1"));
+		});
+	}
+
+	[Test]
+	public async Task A_link_that_is_not_http_is_refused_before_it_reaches_the_host()
+	{
+		var host = new ScriptedHost { Answer = new UiOriginOpenUrlResult { Delivered = true } };
+		var session = new OriginSession();
+		await using var handler = await OpenAsync(session, host);
+		await PressAsync(handler, "client-a");
+		var origin = await session.NextOriginAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.ThrowsAsync<ArgumentException>(() => origin.OpenUrlAsync(new Uri("javascript:alert(1)")));
+			Assert.ThrowsAsync<ArgumentException>(() => origin.OpenUrlAsync(new Uri("file:///etc/passwd")));
+			Assert.That(host.Calls.Where(call => call.Operation == HostOperations.Ui.OriginOpenUrl), Is.Empty);
 		});
 	}
 

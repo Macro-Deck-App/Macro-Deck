@@ -198,6 +198,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 			context.PendingAttachments.Remove(connectionId);
 			context.EstablishedAttachments.Remove(connectionId);
 			context.ClientsByConnection.Remove(connectionId);
+			context.LastEventByConnection.Remove(connectionId);
 		}
 
 		var group = UiSessionGroups.For(sessionId!);
@@ -246,6 +247,14 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		{
 			ReportLocked(session.Surface, request.Name, actingClientId);
 			return Refused(UiSessionErrorCodes.HostLocked, "The host is locked.");
+		}
+
+		if (!string.IsNullOrEmpty(actingClientId) && _discreteEvents.Contains(request.Name))
+		{
+			lock (context.Gate)
+			{
+				context.LastEventByConnection[connectionId] = _timeProvider.GetUtcNow();
+			}
 		}
 
 		var command = new UiSessionEventCommand
@@ -316,6 +325,49 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		}
 
 		return connections.Any(connectionId => _registry.IsAttached(sessionId, connectionId));
+	}
+
+	public string? TakeRecentEventConnection(string providerId, string sessionId, string clientId, TimeSpan within)
+	{
+		if (string.IsNullOrEmpty(clientId)
+			|| !Owns(providerId, sessionId)
+			|| !_contexts.TryGetValue(sessionId, out var context))
+		{
+			return null;
+		}
+
+		var since = _timeProvider.GetUtcNow() - within;
+		(string ConnectionId, DateTimeOffset At)[] candidates;
+		lock (context.Gate)
+		{
+			candidates =
+			[
+				.. context.LastEventByConnection
+					.Where(pair => pair.Value >= since
+						&& context.ClientsByConnection.TryGetValue(pair.Key, out var owner)
+						&& string.Equals(owner, clientId, StringComparison.Ordinal))
+					.Select(pair => (pair.Key, pair.Value))
+			];
+		}
+
+		foreach (var candidate in candidates.OrderByDescending(candidate => candidate.At))
+		{
+			if (!_registry.IsAttached(sessionId, candidate.ConnectionId))
+			{
+				continue;
+			}
+
+			lock (context.Gate)
+			{
+				if (context.LastEventByConnection.TryGetValue(candidate.ConnectionId, out var at) && at == candidate.At)
+				{
+					context.LastEventByConnection.Remove(candidate.ConnectionId);
+					return candidate.ConnectionId;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public UiSurface? SurfaceOf(string sessionId)
@@ -897,6 +949,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		public HashSet<string> EstablishedAttachments { get; } = new(StringComparer.Ordinal);
 
 		public Dictionary<string, string> ClientsByConnection { get; } = new(StringComparer.Ordinal);
+
+		public Dictionary<string, DateTimeOffset> LastEventByConnection { get; } = new(StringComparer.Ordinal);
 
 		public bool ResyncRequested { get; set; }
 

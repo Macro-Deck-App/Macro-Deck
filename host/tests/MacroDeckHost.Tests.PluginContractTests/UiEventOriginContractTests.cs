@@ -3,6 +3,7 @@ using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Capabilities;
+using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
@@ -10,6 +11,7 @@ using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
+using MacroDeckHost.Application.Ui.Transport.Messages.Links;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Tests.PluginContractTests.Harness;
@@ -171,5 +173,75 @@ internal sealed class UiEventOriginContractTests : UiContractFixture
 			Assert.That(opened.Opened, Is.True);
 			Assert.That(opened.ModalId, Is.Not.Empty);
 		});
+	}
+
+	[Test]
+	public async Task A_link_the_plugin_opens_reaches_the_pressing_connection_that_can_open_links()
+	{
+		ClientFeatures.Declare(Connection, [UiClientFeatures.OpenUrl]);
+		var sessionId = await OpenPressedWidgetAsync();
+
+		var result = await InvokeAsync(HostOperations.Ui.OriginOpenUrl,
+			new UiOriginOpenUrlArguments
+			{
+				SessionId = sessionId, ClientId = ClientId, Url = "https://example.com/article"
+			});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Data!.Value.Deserialize<UiOriginOpenUrlResult>(PluginProtocolJson.Options)!.Delivered,
+				Is.True);
+			Assert.That(UiTransport.MessagesFor<UiOpenUrlEvent>(Connection).Single().Url,
+				Is.EqualTo("https://example.com/article"));
+		});
+	}
+
+	[Test]
+	public async Task A_link_is_not_delivered_to_a_client_that_did_not_say_it_can_open_links()
+	{
+		var sessionId = await OpenPressedWidgetAsync();
+
+		var result = await InvokeAsync(HostOperations.Ui.OriginOpenUrl,
+			new UiOriginOpenUrlArguments
+			{
+				SessionId = sessionId, ClientId = ClientId, Url = "https://example.com/article"
+			});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Data!.Value.Deserialize<UiOriginOpenUrlResult>(PluginProtocolJson.Options)!.Delivered,
+				Is.False);
+			Assert.That(UiTransport.MessagesFor<UiOpenUrlEvent>(Connection), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_link_that_is_not_http_is_refused()
+	{
+		ClientFeatures.Declare(Connection, [UiClientFeatures.OpenUrl]);
+		var sessionId = await OpenPressedWidgetAsync();
+
+		var result = await InvokeAsync(HostOperations.Ui.OriginOpenUrl,
+			new UiOriginOpenUrlArguments { SessionId = sessionId, ClientId = ClientId, Url = "javascript:alert(1)" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(UiTransport.MessagesFor<UiOpenUrlEvent>(Connection), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task An_origin_operation_this_host_does_not_know_answers_as_an_older_host_answers_open_url()
+	{
+		var sessionId = await OpenPressedWidgetAsync();
+
+		var result = await InvokeAsync("origin.not-yet-invented",
+			new UiOriginOpenUrlArguments
+			{
+				SessionId = sessionId, ClientId = ClientId, Url = "https://example.com/article"
+			});
+
+		Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnsupported));
 	}
 }

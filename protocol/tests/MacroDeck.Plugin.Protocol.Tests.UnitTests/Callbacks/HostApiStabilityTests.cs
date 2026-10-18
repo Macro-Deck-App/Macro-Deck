@@ -60,7 +60,7 @@ public class HostApiStabilityTests
 			[HostApis.Ui] =
 			[
 				"snapshot", "patch", "fault", "reload", "register-resource", "remove-resource",
-				"register-music-player-artwork", "origin.report-failure", "origin.show-modal"
+				"register-music-player-artwork", "origin.report-failure", "origin.show-modal", "origin.open-url"
 			],
 			[HostApis.Devices] =
 				["register", "update", "presence", "unregister", "interaction", "icon", "widget-icon", "close"],

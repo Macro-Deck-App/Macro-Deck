@@ -11,6 +11,7 @@ using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeckHost.Application.Applications;
 using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices;
@@ -283,6 +284,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					=> await RouteMusicPlayerArtworkAsync(pluginId, sessionId, payload, cancellationToken),
 				HostApis.Ui when payload.Operation is HostOperations.Ui.OriginReportFailure
 						or HostOperations.Ui.OriginShowModal
+						or HostOperations.Ui.OriginOpenUrl
 					=> await RouteUiOriginAsync(pluginId, payload, cancellationToken),
 				HostApis.Ui => RouteUi(pluginId, sessionId, payload),
 				HostApis.Devices => await RouteDevicesAsync(pluginId, payload, cancellationToken),
@@ -1952,6 +1954,30 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				.ConfigureAwait(false);
 
 			return HostCallbackResult.Ok(new UiOriginReportFailureResult { Delivered = delivered });
+		}
+
+		if (payload.Operation == HostOperations.Ui.OriginOpenUrl)
+		{
+			var link = Deserialize<UiOriginOpenUrlArguments>(payload.Arguments);
+			if (link is null || string.IsNullOrEmpty(link.SessionId) || string.IsNullOrEmpty(link.Url))
+			{
+				return MissingArguments();
+			}
+
+			if (!ExternalUrls.TryNormalizeWebUrl(link.Url, out _))
+			{
+				return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+					"Only absolute http and https URLs can be opened.");
+			}
+
+			var linked = await _eventOrigins.OpenUrlAsync(pluginId,
+					link.SessionId,
+					ClientOrigin(link.ClientId),
+					link.Url,
+					cancellationToken)
+				.ConfigureAwait(false);
+
+			return HostCallbackResult.Ok(new UiOriginOpenUrlResult { Delivered = linked });
 		}
 
 		var modal = Deserialize<UiOriginShowModalArguments>(payload.Arguments);

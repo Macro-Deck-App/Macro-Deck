@@ -21,6 +21,8 @@ export interface TextFit {
   measure(): number;
 
   apply(available: number): number | undefined;
+
+  settled?(): void;
 }
 
 export interface MountedFit {
@@ -29,6 +31,7 @@ export interface MountedFit {
   signature: string;
   lastSize: number | undefined;
   lastWidth: number;
+  moved: boolean;
 }
 
 export interface TextFitScope {
@@ -231,7 +234,12 @@ export function createTextFitScope(): TextFitScope {
   function settleIfDirty(): void {
     if (!dirty) return;
     dirty = false;
+    const sizesBefore = fits.map(entry => entry.lastSize);
     runSettle(fits);
+    // Only a fit whose own text, width or size moved needs settled: a ticking sibling must not redo it.
+    const moved = fits.filter((entry, index) => entry.moved || entry.lastSize !== sizesBefore[index]);
+    for (const entry of fits) entry.moved = false;
+    for (const entry of moved) entry.fit.settled?.();
     for (const listener of [...listeners]) listener();
   }
 
@@ -242,6 +250,7 @@ export function createTextFitScope(): TextFitScope {
       const width = elementWidth(entry.element);
       if (Math.abs(entry.lastWidth - width) < 1) continue;
       entry.lastWidth = width;
+      entry.moved = true;
       moved = true;
     }
     if (moved) {
@@ -265,7 +274,10 @@ export function createTextFitScope(): TextFitScope {
   return {
     keep(prior: MountedFit | null, element: Element, fit: TextFit, signature: string): MountedFit {
       if (prior !== null && prior.element === element) {
-        if (prior.signature !== signature) dirty = true;
+        if (prior.signature !== signature) {
+          dirty = true;
+          prior.moved = true;
+        }
         prior.fit = fit;
         prior.signature = signature;
         return prior;
@@ -274,7 +286,7 @@ export function createTextFitScope(): TextFitScope {
       if (prior !== null) dropEntry(prior);
 
       const entry: MountedFit = {
-        element, fit, signature, lastSize: undefined, lastWidth: elementWidth(element),
+        element, fit, signature, lastSize: undefined, lastWidth: elementWidth(element), moved: true,
       };
       fits.push(entry);
       dirty = true;

@@ -407,6 +407,15 @@
   white-space: normal;
 }
 
+.widget-text-clamp span.widget-text-clamp-overflow {
+  color: transparent;
+  text-shadow: none;
+}
+
+.widget-text-clamp img.widget-text-clamp-overflow {
+  opacity: 0;
+}
+
 .widget-clock-dial {
   display: block;
 }
