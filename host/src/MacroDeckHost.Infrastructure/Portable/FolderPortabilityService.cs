@@ -300,41 +300,41 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		var rootOrder = siblings.Count > 0 ? siblings.Max(folder => folder.Order) + 1 : 0;
 
 		return ordered.Select((source, index) => new FolderEntity
+		{
+			Id = idMap[source.Id],
+			ProfileId = profileId,
+			Name = source.Name,
+			ParentId = source.ParentId is { } sourceParentId ? idMap[sourceParentId] : parentFolderId,
+			Order = index == 0 ? rootOrder : source.Order,
+			Rows = source.Rows,
+			Columns = source.Columns,
+			BackgroundColor = source.BackgroundColor,
+			WidgetSpacing = source.WidgetSpacing,
+			WidgetBorderRadius = source.WidgetBorderRadius,
+			EmptyCellStyle = EmptyCellStyleText.Parse(source.EmptyCellStyle),
+			IsDefault = false,
+			// Imported as-is, never validated against the live catalog: an archive may well name a
+			// view whose integration is not installed here yet, and dropping it would lose the very
+			// configuration reinstalling that integration is meant to restore.
+			ViewId = source.ViewId,
+			ViewConfiguration = source.ViewConfiguration,
+			CreatedAt = DateTime.UtcNow,
+			Widgets = source.Widgets.Select(widget => new WidgetEntity
 			{
-				Id = idMap[source.Id],
-				ProfileId = profileId,
-				Name = source.Name,
-				ParentId = source.ParentId is { } sourceParentId ? idMap[sourceParentId] : parentFolderId,
-				Order = index == 0 ? rootOrder : source.Order,
-				Rows = source.Rows,
-				Columns = source.Columns,
-				BackgroundColor = source.BackgroundColor,
-				WidgetSpacing = source.WidgetSpacing,
-				WidgetBorderRadius = source.WidgetBorderRadius,
-				EmptyCellStyle = EmptyCellStyleText.Parse(source.EmptyCellStyle),
-				IsDefault = false,
-				// Imported as-is, never validated against the live catalog: an archive may well name a
-				// view whose integration is not installed here yet, and dropping it would lose the very
-				// configuration reinstalling that integration is meant to restore.
-				ViewId = source.ViewId,
-				ViewConfiguration = source.ViewConfiguration,
-				CreatedAt = DateTime.UtcNow,
-				Widgets = source.Widgets.Select(widget => new WidgetEntity
-					{
-						Id = idMap[widget.Id],
-						FolderId = idMap[source.Id],
-						Type = widget.Type,
-						PositionX = widget.PositionX,
-						PositionY = widget.PositionY,
-						Width = widget.Width,
-						Height = widget.Height,
-						Data = widget.Data,
-						IsPinned = false,
-						PinScope = PinScope.Profile,
-						CreatedAt = DateTime.UtcNow
-					})
-					.ToList()
+				Id = idMap[widget.Id],
+				FolderId = idMap[source.Id],
+				Type = widget.Type,
+				PositionX = widget.PositionX,
+				PositionY = widget.PositionY,
+				Width = widget.Width,
+				Height = widget.Height,
+				Data = widget.Data,
+				IsPinned = false,
+				PinScope = PinScope.Profile,
+				CreatedAt = DateTime.UtcNow
 			})
+					.ToList()
+		})
 			.ToList();
 	}
 
