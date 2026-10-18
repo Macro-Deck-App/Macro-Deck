@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -39,6 +40,8 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 	/// one the way <c>show-modal</c> does rather than against a second instance.</summary>
 	protected ModalInteractionCoordinator Modals { get; private set; } = null!;
 
+	protected UiClientFeatures ClientFeatures { get; private set; } = null!;
+
 	[SetUp]
 	public void UiSetUp()
 	{
@@ -62,6 +65,7 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 			Serilog.Core.Logger.None);
 
 		Modals = new ModalInteractionCoordinator(TimeProvider.System);
+		ClientFeatures = new UiClientFeatures();
 
 		var services = new ServiceCollection();
 		services.AddSingleton<IIntegrationConfigStore>(new CallbackFakeConfigStore());
@@ -92,7 +96,8 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 			Serilog.Core.Logger.None,
 			eventOrigins: new UiEventOrigins(Broker,
 				UiTransport,
-				new UiInteractionsFactory(Modals, UiTransport, Serilog.Core.Logger.None)));
+				new UiInteractionsFactory(Modals, UiTransport, Serilog.Core.Logger.None),
+				ClientFeatures));
 
 		HostInvokeHandler = (correlationId, payload, cancellationToken)
 			=> router.RouteAsync(PluginId, correlationId, payload, cancellationToken);

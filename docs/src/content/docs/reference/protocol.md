@@ -233,6 +233,11 @@ that predates them answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hos
 `false`, no widget data, an unsupported variable history, a `NotSupportedException` for bindings or a
 cancellation. `refresh` later gained an optional `definitionIds` argument, which a host that predates it
 ignores, reading every declared variable instead.
+`ui` later gained `origin.open-url`, additively in major `3`. A host that predates it answers
+`CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into `false`, the same answer a client that
+cannot open links gets; see
+[Opening a link on the client that pressed](/ui/views/sessions/#opening-a-link-on-the-client-that-pressed).
+
 The `user-variables` `apply` and `create` arguments gained the optional `scriptId` and `automationId`
 next to `ownerWidgetId`, additively in major `3`, behind `IUserVariableApi.ApplyInContextAsync` and
 `CreateInContextAsync`. A host that predates them ignores them and resolves by `ownerWidgetId` alone, and an

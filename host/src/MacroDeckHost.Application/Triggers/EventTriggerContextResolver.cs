@@ -89,6 +89,6 @@ public sealed class EventTriggerContextResolver : IEventTriggerContextResolver
 
 		var context = await _variableRenderer.CreateContextAsync(source.Scope, source.ScopeRefId);
 
-		return _matcher.Matches(subscription, descriptor, context.WithEvent(parameters));
+		return _matcher.Matches(subscription, descriptor, context.WithEvent(parameters), source.OwnerWidgetId);
 	}
 }

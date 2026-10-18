@@ -19,6 +19,7 @@ import { ScreenSaver } from './screensaver';
 import { ModalHost } from './modal';
 import { NotificationDialogs } from './notification-dialogs';
 import { NotificationToasts } from './notification-toasts';
+import { BlockedLinkBanner } from './link-opener';
 import { RenderingModeStore } from './rendering-mode';
 import { IconResolutionStore } from './icon-resolution';
 import { ServerClock } from './server-clock';
@@ -68,6 +69,7 @@ export class Shell {
   private deckHost: HTMLElement | null = null;
   private readonly modals: ModalHost;
   private readonly notificationToasts: NotificationToasts;
+  private readonly blockedLinks: BlockedLinkBanner;
   private readonly notificationDialogs: NotificationDialogs;
   private readonly deckInput: DeckInput;
   private readonly deviceSetup: DeviceSetupService;
@@ -99,6 +101,7 @@ export class Shell {
       dismissLabel: client.translate(ClientAppStrings.Feedback.Dismiss),
     });
     this.notificationToasts = new NotificationToasts(client.notifications, client.localization);
+    this.blockedLinks = new BlockedLinkBanner(client.links, key => client.translate(key));
     this.notificationDialogs = new NotificationDialogs(this.root, client.notifications, host);
 
     this.deckInput = new DeckInput(

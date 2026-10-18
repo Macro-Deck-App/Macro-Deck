@@ -202,7 +202,8 @@ public class EventTriggerRunnerTests
 		public bool Matches(
 			EventSubscription subscription,
 			EventDefinitionDescriptor descriptor,
-			VariableContext context)
+			VariableContext context,
+			Guid? ownerWidgetId = null)
 		{
 			return true;
 		}

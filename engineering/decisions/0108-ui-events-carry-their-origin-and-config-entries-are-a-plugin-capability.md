@@ -39,6 +39,37 @@ same guarantees, and a plugin compiled against an older SDK, or talking to an ol
 - `config-entries` is a new kind within protocol major `3`; an older host rejects it non-fatally and stores
   entries as before.
 
+## Update 2026-10-18: opening a link on the pressing client
+
+A widget that lists links, such as a feed reader, needs to open the page a user tapped on the device the user
+tapped it on, not on the computer Macro Deck runs on. The origin gained `OpenUrlAsync(Uri)`, out of process
+`ui`/`origin.open-url`, as a default interface member that checks the URL and answers `false`, so an
+`IUiEventOrigin` implemented before it keeps compiling and an older host answers `false` through
+`CAPABILITY_UNSUPPORTED`.
+
+Opening a page on a phone is more intrusive than a toast or a dialog, so it is narrower than the other
+origin calls:
+
+- Only an absolute `http` or `https` URL. The SDK throws for anything else, the host answers
+  `INVALID_PAYLOAD` and normalises the URL again before sending it, and the client checks it once more.
+- Keyed on the connection, not the client id: the broker records, per session, the time of the last
+  discrete event (press, tap, change and the like) each connection sent. The link goes only to the newest
+  connection of that client that sent one within 10 seconds and is still attached. Web client tabs share a
+  client id, so a client-id group would have opened the page in every tab.
+- Only to a connection that declared the `open-url` feature when it registered. The declaration is an
+  optional second `RegisterClient` argument that an older host never reads; clients that do not send it
+  (hardware decks, the current Companion app, older web clients) are answered `false`, and the provider
+  falls back, for example to a dialog showing the link.
+- One event opens one link: a successful call consumes the event's window, so a press cannot fan out
+  into many tabs, in process (the desktop UI opens links without a popup blocker) or out of process.
+- Out of process, also charged to the per-plugin callback throttle, like the other origin calls.
+- `true` means handed to the client, not that a page opened: a browser may block the new tab, and the web
+  client then shows the link to tap. The web client opens the page without an opener and with a
+  `no-referrer` policy, so the site learns nothing about the deck.
+
+The desktop UI declares the feature too and opens the link in the host's browser, because that is where its
+user is. The client message is `UiOpenUrlEvent { url }`, sent to that one connection.
+
 ## References
 
 - [ADR 0107](0107-built-in-integrations-are-built-as-extractable-plugins.md)

@@ -354,6 +354,7 @@ public class Startup
 		services.AddSingleton<IUiSessionSink>(provider => provider.GetRequiredService<UiSessionBroker>());
 		services.AddSingleton<IUiEventOriginTracker>(provider => provider.GetRequiredService<UiSessionBroker>());
 		services.AddSingleton<UiEventOrigins>();
+		services.AddSingleton<UiClientFeatures>();
 		services.AddSingleton<IConfigUiSessionOpener, ConfigUiSessionOpener>();
 		services.AddSingleton<IHostUiCulture, HostUiCulture>();
 		services.AddSingleton<IWidgetUiSessionOpener, WidgetUiSessionOpener>();

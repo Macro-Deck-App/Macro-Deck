@@ -3,6 +3,7 @@ import { RouteReuseStrategy, provideRouter, withHashLocation } from '@angular/ro
 
 import { HOST_URL_RESOLVER, AUTH_REQUIRED_SCOPE, CLIENT_TYPE, provideVersionCheck, UiWidgetResourceBaseUrl } from '@shared';
 import { TEMPLATE_PREVIEW_SERVICE } from './domain/template-preview.interface';
+import { OriginLinkService } from './services/origin-link.service';
 import { TemplatePreviewApiService } from './services/template-preview.service';
 import { routes } from './app.routes';
 import { RecreateOnParamChangeStrategy } from './util/recreate-on-param-change.strategy';
@@ -28,5 +29,8 @@ export const appConfig: ApplicationConfig = {
     // Resolves the host base URL before the first widget tree ever renders, so a folder switch does
     // not turn every button/slider artwork into a cold fetch behind an async resolve (#748).
     provideAppInitializer(() => inject(UiWidgetResourceBaseUrl).get()),
+    provideAppInitializer(() => {
+      inject(OriginLinkService);
+    }),
   ]
 };

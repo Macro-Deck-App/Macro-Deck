@@ -78,6 +78,28 @@ internal sealed class RemoteUiEventOrigin(
 		}
 	}
 
+	public async Task<bool> OpenUrlAsync(Uri url, CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(url);
+
+		if (!url.IsAbsoluteUri || url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps)
+		{
+			throw new ArgumentException("Only absolute http and https URLs can be opened.", nameof(url));
+		}
+
+		if (ClientId is null)
+		{
+			return false;
+		}
+
+		var result = await InvokeAsync(HostOperations.Ui.OriginOpenUrl,
+				new UiOriginOpenUrlArguments { SessionId = sessionId, ClientId = ClientId, Url = url.AbsoluteUri },
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		return result?.Deserialize<UiOriginOpenUrlResult>(PluginProtocolJson.Options)?.Delivered == true;
+	}
+
 	private async Task<string?> OpenAsync(ModalDefinition modal, bool awaitResult, CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(modal);

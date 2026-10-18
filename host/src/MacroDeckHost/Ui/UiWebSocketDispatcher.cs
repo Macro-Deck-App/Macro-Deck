@@ -109,6 +109,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly IVideoStreamSessionBroker _videoStreams;
 	private readonly VideoStreamProviderRegistry _videoStreamProviders;
 	private readonly INotificationManager _notifications;
+	private readonly UiClientFeatures _clientFeatures;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -162,9 +163,11 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		IVideoStreamSessionBroker videoStreams,
 		VideoStreamProviderRegistry videoStreamProviders,
 		INotificationManager notifications,
+		UiClientFeatures clientFeatures,
 		CancellationToken connectionCancellation)
 	{
 		_notifications = notifications;
+		_clientFeatures = clientFeatures;
 		_connectionId = connectionId;
 		_principal = principal;
 		_connectionCancellation = connectionCancellation;
@@ -253,6 +256,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_logSubscriptions.Remove(_connectionId);
 		_deviceConnections.Remove(_connectionId);
 		_uiSessions.DetachConnection(_connectionId);
+		_clientFeatures.Remove(_connectionId);
 		_companions.Disconnected(_connectionId);
 		_videoStreams.CloseConnection(_connectionId, VideoStreamSessionReason.ConsumerDisconnected);
 		return Task.CompletedTask;
@@ -312,7 +316,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 					cancellationToken),
 				"ReportFolderChanged" => await ReportFolderChanged(Arg<ReportFolderChangedRequest>(payload, 0),
 					cancellationToken),
-				"RegisterClient" => await RegisterClient(Arg<string>(payload, 0), cancellationToken),
+				"RegisterClient" => await RegisterClient(Arg<string>(payload, 0),
+					ClientFeaturesArg(payload),
+					cancellationToken),
 				"SubscribeLogs" when IsAdmin => await SubscribeLogs(Arg<GetLogsRequest?>(payload, 0),
 					Arg<string?>(payload, 1),
 					cancellationToken),
@@ -424,9 +430,13 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		return await _reportFolderChanged.Handle(request, cancellationToken);
 	}
 
-	private async Task<object?> RegisterClient(string clientId, CancellationToken cancellationToken)
+	private async Task<object?> RegisterClient(
+		string clientId,
+		string[] features,
+		CancellationToken cancellationToken)
 	{
 		_registeredClientId = clientId;
+		_clientFeatures.Declare(_connectionId, features);
 		_deviceConnections.Register(_connectionId, clientId);
 		await _transport.AddToGroup(_connectionId, UiClientGroups.For(clientId), cancellationToken);
 		foreach (var (name, payload) in _musicPlayerClientSync.BuildHandshake())
@@ -640,6 +650,26 @@ public sealed class UiWebSocketDispatcher : IDisposable
 
 		var item = value.ValueKind == JsonValueKind.Array ? value[index] : value;
 		return item.Deserialize<T>(UiWebSocketProtocol.Json)!;
+	}
+
+	// Clients that predate the features argument send a one-element array, and Arg would hand back argument 0
+	// for a payload that is not an array, so the features are read only when the array actually carries them.
+	private static string[] ClientFeaturesArg(JsonElement? payload)
+	{
+		if (payload is not { ValueKind: JsonValueKind.Array } value
+			|| value.GetArrayLength() < 2
+			|| value[1].ValueKind != JsonValueKind.Array)
+		{
+			return [];
+		}
+
+		return
+		[
+			.. value[1]
+				.EnumerateArray()
+				.Where(item => item.ValueKind == JsonValueKind.String)
+				.Select(item => item.GetString()!)
+		];
 	}
 
 	public void Dispose()

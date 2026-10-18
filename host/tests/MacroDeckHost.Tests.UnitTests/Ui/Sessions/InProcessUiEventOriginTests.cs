@@ -11,6 +11,7 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
+using MacroDeckHost.Application.Ui.Transport.Messages.Links;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
@@ -101,6 +102,23 @@ internal sealed class InProcessUiEventOriginTests : UiSessionFixture
 			Assert.That(opened, Is.True);
 			Assert.That(Interactions.Opened.Single().IntegrationId, Is.EqualTo(IntegrationId));
 			Assert.That(Interactions.Opened.Single().ClientId, Is.EqualTo(ClientId));
+		});
+	}
+
+	[Test]
+	public async Task The_pressing_connection_is_sent_a_link_it_said_it_can_open()
+	{
+		ClientFeatures.Declare(Connection, [UiClientFeatures.OpenUrl]);
+		await PressAsync();
+
+		var delivered = await _session.Origin!.OpenUrlAsync(new Uri("https://example.com/article"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(delivered, Is.True);
+			Assert.That(MessagesFor<UiOpenUrlEvent>(Connection).Single().Url,
+				Is.EqualTo("https://example.com/article"));
+			Assert.ThrowsAsync<ArgumentException>(() => _session.Origin.OpenUrlAsync(new Uri("javascript:alert(1)")));
 		});
 	}
 

@@ -21,6 +21,29 @@ public class UiSessionOriginCompatibilityTests
 		Assert.That(session.Received.Single().Name, Is.EqualTo("press"));
 	}
 
+	[Test]
+	public async Task An_origin_written_before_links_answers_that_it_opened_none()
+	{
+		IUiEventOrigin origin = new OriginWrittenBeforeLinks();
+
+		var opened = await origin.OpenUrlAsync(new Uri("https://example.com/article"));
+
+		Assert.That(opened, Is.False);
+	}
+
+	[Test]
+	public void An_origin_written_before_links_still_refuses_a_link_that_is_not_http()
+	{
+		IUiEventOrigin origin = new OriginWrittenBeforeLinks();
+
+		Assert.Multiple(() =>
+		{
+			Assert.ThrowsAsync<ArgumentException>(() => origin.OpenUrlAsync(new Uri("javascript:alert(1)")));
+			Assert.ThrowsAsync<ArgumentException>(() => origin.OpenUrlAsync(new Uri("ftp://example.com/file")));
+			Assert.ThrowsAsync<ArgumentException>(() => origin.OpenUrlAsync(new Uri("/relative", UriKind.Relative)));
+		});
+	}
+
 	private sealed class SessionWrittenBeforeOrigins : IUiSession
 	{
 		public List<UiEvent> Received { get; } = [];
@@ -75,6 +98,28 @@ public class UiSessionOriginCompatibilityTests
 		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
 		{
 			return Task.FromResult(false);
+		}
+
+		public Task<ModalResult<T>> ShowModalAsync<T>(
+			ModalDefinition modal,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(ModalResult.FromCancellation<T>());
+		}
+	}
+
+	private sealed class OriginWrittenBeforeLinks : IUiEventOrigin
+	{
+		public string? ClientId => "client-a";
+
+		public Task<bool> ReportFailureAsync(LocalizedText message, CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(true);
+		}
+
+		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(true);
 		}
 
 		public Task<ModalResult<T>> ShowModalAsync<T>(
