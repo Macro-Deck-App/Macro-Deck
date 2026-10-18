@@ -7,6 +7,7 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Identity;
+using MacroDeck.Sdk.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Triggers;
 
@@ -813,6 +814,107 @@ public class EventSubscriptionMatcherTests
 		{
 			Assert.That(Matcher().Matches(subscription, _sceneChanged, Context(Payload("Zulu"))), Is.True);
 			Assert.That(Matcher().Matches(subscription, _sceneChanged, Context(Payload("Break"))), Is.False);
+		});
+	}
+
+	private static readonly EventDefinitionDescriptor _itemOpened = new(QualifiedId.Parse("feeds::item-opened"),
+		"feeds",
+		"Feeds",
+		true,
+		new EventDefinition
+		{
+			Id = "item-opened",
+			Name = "Item Opened",
+			ConfigurationParameters = [ActionParameter.WidgetTarget("widget", "Widget")],
+			PayloadParameters = [ActionParameter.Text("widget", "Widget")]
+		});
+
+	private static EventSubscription WidgetSubscription(string configuredWidget, string? op = null)
+	{
+		var configuration = new Dictionary<string, EventConfigurationValue>(StringComparer.Ordinal)
+		{
+			["widget"] = Config(JsonSerializer.Serialize(configuredWidget), op)
+		};
+
+		return new EventSubscription(EventTriggerOwner.ForWidget(Guid.NewGuid()),
+			"t1",
+			"feeds::item-opened",
+			configuration,
+			null);
+	}
+
+	private static Dictionary<string, object?> WidgetPayload(Guid widgetId)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal) { ["widget"] = widgetId.ToString() };
+	}
+
+	[Test]
+	public void This_widget_matches_an_event_from_the_widget_whose_flow_is_listening_and_no_other()
+	{
+		var own = Guid.NewGuid();
+		var other = Guid.NewGuid();
+		var subscription = WidgetSubscription(WidgetTargets.Self);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Matcher().Matches(subscription, _itemOpened, Context(WidgetPayload(own)), own), Is.True);
+			Assert.That(Matcher().Matches(subscription, _itemOpened, Context(WidgetPayload(other)), own), Is.False);
+			Assert.That(EventSubscriptionMatcher.QuickReject(subscription,
+					new EventOccurrence("feeds::item-opened", WidgetPayload(own), null)),
+				Is.False);
+		});
+	}
+
+	[Test]
+	public void This_widget_compares_widget_ids_regardless_of_their_spelling()
+	{
+		var own = Guid.NewGuid();
+		var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
+		{
+			["widget"] = own.ToString("B").ToUpperInvariant()
+		};
+
+		var matched = Matcher().Matches(WidgetSubscription(WidgetTargets.Self), _itemOpened, Context(payload), own);
+
+		Assert.That(matched, Is.True);
+	}
+
+	[Test]
+	public void An_automation_left_on_the_default_widget_runs_for_every_widget()
+	{
+		var subscription = WidgetSubscription(WidgetTargets.Self);
+
+		var matched = Matcher().Matches(subscription, _itemOpened, Context(WidgetPayload(Guid.NewGuid())));
+
+		Assert.That(matched, Is.True);
+	}
+
+	[Test]
+	public void A_widget_picked_by_id_still_matches_only_that_widget()
+	{
+		var picked = Guid.NewGuid();
+		var subscription = WidgetSubscription(picked.ToString());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Matcher().Matches(subscription, _itemOpened, Context(WidgetPayload(picked)), Guid.NewGuid()),
+				Is.True);
+			Assert.That(Matcher().Matches(subscription, _itemOpened, Context(WidgetPayload(Guid.NewGuid())), picked),
+				Is.False);
+		});
+	}
+
+	[Test]
+	public void A_text_parameter_holding_the_self_sentinel_is_compared_as_text()
+	{
+		var subscription = Subscription(WidgetTargets.Self);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Matcher().Matches(subscription, _sceneChanged, Context(Payload("$self")), Guid.NewGuid()),
+				Is.True);
+			Assert.That(Matcher().Matches(subscription, _sceneChanged, Context(Payload("Live")), Guid.NewGuid()),
+				Is.False);
 		});
 	}
 }

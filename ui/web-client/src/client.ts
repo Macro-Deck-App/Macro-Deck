@@ -52,6 +52,7 @@ import {
   type ActiveNotificationsEvent,
   type NotificationClosedEvent,
   type UiModalOpenedEvent,
+  UI_CLIENT_FEATURE_OPEN_URL,
   widgetFromWire,
   WidgetType,
   type WritableStore,
@@ -63,6 +64,7 @@ import { AppState } from './app-state';
 import { ExecutionFeedback } from './execution-feedback';
 import { NotificationFeed } from './notification-feed';
 import { HostLock } from './host-lock';
+import { LinkOpener, type OpenWindow } from './link-opener';
 import { WidgetSessions } from './widget-sessions';
 
 const REQUESTED_SCOPE: AuthScope = 'client';
@@ -114,6 +116,8 @@ export interface ClientOptions {
   appearance?: AppearanceSink;
 
   requestTimeoutMs?(method: string, path: string): number | undefined;
+
+  openWindow?: OpenWindow;
 }
 
 export interface AppearanceSink {
@@ -178,6 +182,7 @@ export class Client {
     () => this.translate(ClientAppStrings.Errors.Folder.ActionRunFailed));
   readonly http: HttpClient;
   readonly connection: UiConnection;
+  readonly links: LinkOpener;
   readonly modal: WritableStore<UiModalOpenedEvent | null> = store<UiModalOpenedEvent | null>(null);
   readonly notifications = new NotificationFeed((type, payload) => this.connection.request(type, payload));
   private readonly reopenableSessionStore: WritableStore<{ sessionId: string } | null> =
@@ -267,10 +272,13 @@ export class Client {
       requestTimeoutMs: options.requestTimeoutMs ?? defaultRequestTimeoutMs,
     });
 
+    this.links = new LinkOpener(options.openWindow);
+
     this.connection = new UiConnection({
       http: this.http,
       baseUrl,
       clientId,
+      features: [UI_CLIENT_FEATURE_OPEN_URL],
       onUnauthorized: () => this.handleConnectionUnauthorized(),
     });
 
@@ -1229,6 +1237,9 @@ export class Client {
         if (typeof body['modalId'] === 'string') {
           this.modal.set({ modalId: body['modalId'], title: body['title'] as never });
         }
+        break;
+      case 'UiOpenUrlEvent':
+        this.links.open(body['url']);
         break;
       case 'NotificationShownEvent':
         if (body['notification']) this.notifications.shown(body['notification'] as ActiveNotification);

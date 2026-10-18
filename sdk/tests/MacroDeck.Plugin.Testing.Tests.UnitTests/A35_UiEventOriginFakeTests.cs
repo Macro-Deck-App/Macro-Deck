@@ -50,4 +50,33 @@ public class A35UiEventOriginFakeTests
 
 		Assert.That(answer.Value, Is.EqualTo("yes"));
 	}
+
+	[Test]
+	public async Task It_records_the_links_a_session_opened_while_the_client_is_attached()
+	{
+		var origin = new FakeUiEventOrigin("client-a");
+
+		var opened = await origin.OpenUrlAsync(new Uri("https://example.com/article"));
+		origin.IsAttached = false;
+		var afterLeaving = await origin.OpenUrlAsync(new Uri("https://example.com/other"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(opened, Is.True);
+			Assert.That(afterLeaving, Is.False);
+			Assert.That(origin.OpenedUrls, Is.EqualTo(new[] { new Uri("https://example.com/article") }));
+		});
+	}
+
+	[Test]
+	public void A_link_that_is_not_http_is_refused_as_macro_deck_refuses_it()
+	{
+		var origin = new FakeUiEventOrigin("client-a");
+
+		Assert.Multiple(() =>
+		{
+			Assert.ThrowsAsync<ArgumentException>(() => origin.OpenUrlAsync(new Uri("javascript:alert(1)")));
+			Assert.That(origin.OpenedUrls, Is.Empty);
+		});
+	}
 }

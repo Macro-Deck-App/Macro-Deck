@@ -319,10 +319,14 @@ initialized. See
 
 ## Testing what a session shows on the pressing client
 
-Pass a `FakeUiEventOrigin` to your session's `Dispatch(UiEvent, IUiEventOrigin)` and read `ReportedFailures`
-and `OpenedModals`. Set `IsAttached = false` to test what happens once the client left, and `ModalAnswer` to
-answer a dialog. `MacroDeckTestHost` has no clients, so over the wire it answers an origin's calls as Macro
-Deck answers them for a client that is no longer attached.
+Pass a `FakeUiEventOrigin` to your session's `Dispatch(UiEvent, IUiEventOrigin)` and read `ReportedFailures`,
+`OpenedModals` and `OpenedUrls`. Set `IsAttached = false` to test what happens once the client left, and
+`ModalAnswer` to answer a dialog. `OpenUrlAsync` refuses a URL that is not `http` or `https` with
+`ArgumentException`, as Macro Deck does, and answers `true` and records the link while the client is attached;
+to test your fallback for a client that cannot open links, set `IsAttached = false`. Unlike Macro Deck, the
+fake does not limit a press to one link: it records every call, so assert on `OpenedUrls` that your session
+opens one. `MacroDeckTestHost` has no clients, so over the wire it answers an origin's calls as Macro Deck
+answers them for a client that is no longer attached.
 
 ## Testing previews
 

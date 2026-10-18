@@ -15,6 +15,7 @@ import { textFit } from '../render/text-fit';
 import { px } from './px.util';
 import { forgetTextSpans, paintTextSpans, textSpansSignature, UiTextSpanRun } from './text-spans';
 import { textOutlineFilterId } from './text-outline';
+import { hideClampOverflow } from './text-clamp';
 
 const MAX_OUTLINE_OF_BASIS = 0.1;
 
@@ -87,7 +88,11 @@ export function paintTextCommon<TState>(
   const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx);
   const fontReady = faceId ? ctx.host.fontReady(faceId) : true;
   const font = faceId ? `${faceId}|${fontReady}` : `|${ctx.host.uiFontKey?.() ?? ''}`;
-  ctx.keepFit(element, textFit(element, size, minSize), `${size}|${minSize}|${content}|${font}`);
+  const fit = textFit(element, size, minSize);
+  fit.settled = () => hideClampOverflow(element, maxLines);
+  // Everything that moves a line break belongs here, since the clamp step only reruns when this changes.
+  const lines = `${maxLines}|${wraps}|${textFontWeight(node)}|${digits}|${outline}`;
+  ctx.keepFit(element, fit, `${size}|${minSize}|${lines}|${content}|${font}`);
 }
 
 export function textIntrinsicMainPx(

@@ -133,6 +133,12 @@ Unlike an action's modal, nothing bounds the wait but your `cancellationToken`, 
 staying attached: a client that leaves the view or disconnects ends it as a cancellation. Pass a token that
 ends with the work the dialog belongs to.
 
+A dialog is also the fallback for a link. `origin.OpenUrlAsync(url)` opens a web page in the browser of the
+device that pressed, but answers `false` on a client that cannot open links, such as a hardware deck or an
+older client, on a Macro Deck that predates it, and once the press is more than a few seconds old. Show the
+address in a dialog then, as selectable text, so the user can still reach it; see
+[Opening a link on the client that pressed](/ui/views/sessions/#opening-a-link-on-the-client-that-pressed).
+
 ## How a dialog is sized
 
 Lengths are fractions of the box Macro Deck hands the dialog - see [Sizing](/ui/concepts/sizing/). The box

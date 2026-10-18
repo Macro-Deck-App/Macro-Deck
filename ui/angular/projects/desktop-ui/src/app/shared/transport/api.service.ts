@@ -328,6 +328,8 @@ import {
   TriggerEventResponse,
   UiAttachSessionResponse,
   UiModalOpenedEvent,
+  UiOpenUrlEvent,
+  UI_CLIENT_FEATURE_OPEN_URL,
   UiSendEventRequest,
   UiSendEventResponse,
   UiSessionClosedEvent,
@@ -583,7 +585,7 @@ export class ApiService {
         connection.disconnect();
         return;
       }
-      await connection.request<void>('RegisterClient', [this._clientId]);
+      await connection.request<void>('RegisterClient', [this._clientId, [UI_CLIENT_FEATURE_OPEN_URL]]);
       if (!this.isCurrentAttempt(attempt)) {
         if (this.connection === connection) this.connection = null;
         connection.disconnect();
@@ -1981,6 +1983,10 @@ export class ApiService {
 
   onUiModalOpened(): Observable<UiModalOpenedEvent> {
     return this.onNotification<UiModalOpenedEvent>('UiModalOpenedEvent');
+  }
+
+  onUiOpenUrl(): Observable<UiOpenUrlEvent> {
+    return this.onNotification<UiOpenUrlEvent>('UiOpenUrlEvent');
   }
 
   getFolderViews(): Promise<GetFolderViewsResponse | null> {

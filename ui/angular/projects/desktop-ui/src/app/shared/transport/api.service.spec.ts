@@ -350,6 +350,20 @@ describe('ApiService', () => {
       }
     });
 
+    it('declares that it can open links when it registers', async () => {
+      acceptTickets();
+      const api = configure(async () => 'http://localhost:5191');
+      api.connect();
+      await flushMicrotasks();
+      await completeUiSocket(FakeWebSocket.instances[0]);
+
+      const registration = FakeWebSocket.instances[0].sent
+        .map(value => JSON.parse(value) as { kind: string; type?: string; payload?: unknown })
+        .find(envelope => envelope.kind === 'request' && envelope.type === 'RegisterClient');
+      expect(registration?.payload).toEqual([api.clientId, ['open-url']]);
+      api.disconnect();
+    });
+
     it('reconnects once two seconds after a connected socket closes', async () => {
       jasmine.clock().install();
       try {

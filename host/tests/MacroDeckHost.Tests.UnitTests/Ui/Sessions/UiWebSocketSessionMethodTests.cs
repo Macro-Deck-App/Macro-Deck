@@ -153,6 +153,25 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 		Assert.That(provider.Events[0].ClientId, Is.EqualTo("client-1"));
 	}
 
+	[Test]
+	public async Task A_connection_can_open_links_only_when_its_registration_declared_it()
+	{
+		using var declaring = ConnectedDispatcherFor("connection-new", new Claim(AuthDefaults.DeviceClaim, DeviceA));
+		using var older = ConnectedDispatcherFor("connection-old", new Claim(AuthDefaults.DeviceClaim, DeviceA));
+
+		await declaring.DispatchAsync("RegisterClient",
+			JsonSerializer.SerializeToElement(new object[] { "client-1", new[] { UiClientFeatures.OpenUrl } },
+				UiWebSocketProtocol.Json),
+			CancellationToken.None);
+		await Register(older, "client-1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ClientFeatures.Supports("connection-new", UiClientFeatures.OpenUrl), Is.True);
+			Assert.That(ClientFeatures.Supports("connection-old", UiClientFeatures.OpenUrl), Is.False);
+		});
+	}
+
 	/// <summary>A connection that never registered a client has no origin to name, and the provider is
 	/// told so rather than being handed the connection id as a stand-in.</summary>
 	[Test]
@@ -264,6 +283,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreams: null!,
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
+			clientFeatures: ClientFeatures,
 			connectionCancellation: CancellationToken.None);
 	}
 
@@ -333,6 +353,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreams: null!,
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
+			clientFeatures: ClientFeatures,
 			connectionCancellation: CancellationToken.None);
 	}
 
@@ -387,6 +408,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreams: null!,
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
+			clientFeatures: ClientFeatures,
 			connectionCancellation: CancellationToken.None);
 	}
 
