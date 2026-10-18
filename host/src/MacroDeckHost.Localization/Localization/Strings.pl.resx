@@ -2878,6 +2878,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Import nie powiódł się</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Nieprawidłowe dane JSON w {location}. Sprawdź typ pola i składnię.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Plik nie jest prawidłowym archiwum Macro Deck</value>
   </data>

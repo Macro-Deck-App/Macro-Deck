@@ -2877,6 +2877,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>匯入失敗</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>{location} 的 JSON 資料無效。請檢查欄位類型和語法。</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>此檔案不是有效的 Macro Deck 封存檔</value>
   </data>

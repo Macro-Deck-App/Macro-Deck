@@ -12,6 +12,7 @@ internal static class PortableReadStatusMapper
 			PortableReadStatus.PasswordRequired => PortabilityError.PasswordRequired,
 			PortableReadStatus.WrongPassword => PortabilityError.InvalidPassword,
 			PortableReadStatus.UnsupportedVersion => PortabilityError.UnsupportedVersion,
+			PortableReadStatus.InvalidJson => PortabilityError.InvalidJson,
 			_ => PortabilityError.InvalidArchive
 		};
 	}

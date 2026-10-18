@@ -2877,6 +2877,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>आयात विफल रहा</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>{location} पर JSON डेटा अमान्य है। फ़ील्ड का प्रकार और सिंटैक्स जाँचें।</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>यह फ़ाइल एक मान्य Macro Deck आर्काइव नहीं है</value>
   </data>

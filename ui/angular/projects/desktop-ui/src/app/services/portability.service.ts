@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiError, AppStrings, ArchiveSummary } from '@macro-deck/runtime';
+import { ApiError, AppStrings, ArchiveSummary, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ProfileService } from '@shared';
 import { FileSaveService } from './file-save.service';
 
@@ -157,7 +157,8 @@ export class PortabilityService {
       }
       return {
         status: 'error',
-        message: response.error?.message ?? this.localization.translateKey(AppStrings.Errors.Portability.InvalidArchive),
+        message: resolveLocalizedText(response.error?.message, this.localization)
+          || this.localization.translateKey(AppStrings.Errors.Portability.InvalidArchive),
       };
     } catch (error) {
       return { status: 'error', message: errorMessage(error, this.localization.translateKey(AppStrings.Errors.Portability.OperationFailed)) };
@@ -186,7 +187,8 @@ function mapImportError(error: ApiError | undefined, localization: LocalizationS
   }
   return {
     status: 'error',
-    message: error?.message ?? localization.translateKey(AppStrings.Errors.Portability.ImportFailed),
+    message: resolveLocalizedText(error?.message, localization)
+      || localization.translateKey(AppStrings.Errors.Portability.ImportFailed),
   };
 }
 

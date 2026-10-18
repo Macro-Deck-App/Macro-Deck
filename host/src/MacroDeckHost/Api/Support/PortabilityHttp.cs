@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MacroDeckHost.Api.Support;
@@ -22,7 +23,9 @@ public static class PortabilityHttp
 		return new TransportError
 		{
 			Code = error.ToString(),
-			Message = message ?? DefaultMessage(error)
+			Message = error == PortabilityError.InvalidJson
+				? AppStrings.Errors.Portability.InvalidJson(message ?? "$")
+				: message ?? DefaultMessage(error)
 		};
 	}
 

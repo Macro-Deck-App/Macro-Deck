@@ -99,7 +99,13 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		var mapped = PortableReadStatusMapper.ToError(outcome.Status);
 		if (mapped is not null)
 		{
-			return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(mapped.Value);
+			if (mapped == PortabilityError.InvalidJson)
+			{
+				_logger.Warning("Rejected portable archive {Operation}: {ErrorCode} at {JsonLocation}",
+					"WidgetImport", mapped.Value.ToString(), outcome.JsonErrorLocation);
+			}
+
+			return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(mapped.Value, outcome.JsonErrorLocation);
 		}
 
 		var content = outcome.Content!;

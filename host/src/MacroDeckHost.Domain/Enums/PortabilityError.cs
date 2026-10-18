@@ -11,5 +11,6 @@ public enum PortabilityError
 	WeakPassword,
 	ValidationError,
 	StorageFailure,
-	DesktopOnly
+	DesktopOnly,
+	InvalidJson
 }
