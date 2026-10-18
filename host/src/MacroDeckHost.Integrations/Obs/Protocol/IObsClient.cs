@@ -24,6 +24,10 @@ internal interface IObsClient
 
 	event EventHandler<ObsInputFlagChange>? InputShowingChanged;
 
+	event EventHandler<ObsInputAudioChange>? InputAudioChanged;
+
+	event EventHandler<ObsSceneItemEnableChange>? SceneItemEnableChanged;
+
 	event EventHandler<string>? CustomEventReceived;
 
 	bool IsConnected { get; }
@@ -37,6 +41,8 @@ internal interface IObsClient
 	IReadOnlyList<string> GetSceneNames();
 
 	IReadOnlyList<string> GetSceneItemNames(string sceneName);
+
+	string? GetSceneItemSourceName(string sceneName, int sceneItemId);
 
 	IReadOnlyList<string> GetGroupNames();
 
@@ -175,6 +181,18 @@ internal sealed record ObsInputSettingsChange(string InputName, IReadOnlyList<st
 internal readonly record struct ObsFilterChange(string SourceName, string FilterName);
 
 internal readonly record struct ObsInputFlagChange(string InputName, bool Value);
+
+internal enum ObsInputAudioProperty
+{
+	Volume,
+	Tracks,
+	MonitorType,
+	SyncOffset
+}
+
+internal readonly record struct ObsInputAudioChange(string InputName, ObsInputAudioProperty Property);
+
+internal readonly record struct ObsSceneItemEnableChange(string SceneName, int SceneItemId);
 
 /// <summary>Which of OBS's six audio tracks an input is assigned to, in track order 1..6.</summary>
 internal sealed record ObsAudioTracks(IReadOnlyList<bool> Tracks);

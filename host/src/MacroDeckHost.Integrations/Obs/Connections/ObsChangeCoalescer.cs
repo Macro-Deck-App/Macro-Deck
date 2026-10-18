@@ -4,7 +4,13 @@ internal enum ObsTargetKind
 {
 	InputSettings,
 	SourceActivity,
-	Filter
+	Filter,
+	InputMute,
+	InputVolume,
+	InputAudioTracks,
+	InputMonitorType,
+	InputSyncOffset,
+	SceneItemVisibility
 }
 
 internal sealed record ObsTargetChange(

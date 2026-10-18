@@ -33,6 +33,7 @@ internal sealed class MeldConnection : IDisposable
 	private readonly Action<MeldState>? _onState;
 	private readonly Action? _onVariablesChanged;
 	private readonly Action<string, string, bool>? _onTrackMute;
+	private readonly Action<string>? _onTrackGain;
 	private readonly Action? _onReset;
 
 	private readonly ConcurrentDictionary<string, MeldGain> _gains = new(StringComparer.Ordinal);
@@ -61,7 +62,8 @@ internal sealed class MeldConnection : IDisposable
 		Action<string, string, bool>? onTrackMute = null,
 		Action? onReset = null,
 		TimeSpan? needsSetupReconnectDelay = null,
-		Action? onVariablesChanged = null)
+		Action? onVariablesChanged = null,
+		Action<string>? onTrackGain = null)
 	{
 		_clientFactory = clientFactory;
 		_endpoint = endpoint;
@@ -71,6 +73,7 @@ internal sealed class MeldConnection : IDisposable
 		_onState = onState;
 		_onVariablesChanged = onVariablesChanged;
 		_onTrackMute = onTrackMute;
+		_onTrackGain = onTrackGain;
 		_onReset = onReset;
 		_needsSetupReconnectDelay = needsSetupReconnectDelay ?? _needsSetupReconnectDelayDefault;
 	}
@@ -610,6 +613,7 @@ internal sealed class MeldConnection : IDisposable
 
 		_gains[trackId] = new MeldGain(gain, muted);
 		Pulse();
+		_onTrackGain?.Invoke(trackId);
 
 		var name = _state.Session.TracksById.TryGetValue(trackId, out var track) ? track.Name : trackId;
 		_onTrackMute?.Invoke(trackId, name, muted);

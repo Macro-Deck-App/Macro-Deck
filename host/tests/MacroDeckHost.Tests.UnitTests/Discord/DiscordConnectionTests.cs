@@ -165,6 +165,22 @@ internal sealed class DiscordConnectionTests
 	}
 
 	[Test]
+	public async Task A_pushed_change_reports_the_state_before_and_after_and_a_repeat_reports_nothing()
+	{
+		var changes = new List<(DiscordState Previous, DiscordState Next)>();
+		using var connection = Create(onStateChanged: (previous, next) => changes.Add((previous, next)));
+		connection.Start();
+		await WaitForAsync(() => connection.State.IsConnected);
+		changes.Clear();
+
+		_client.RaiseEvent("SPEAKING_START", """{"user_id":"me"}""");
+		_client.RaiseEvent("SPEAKING_START", """{"user_id":"me"}""");
+
+		Assert.That(changes.Select(change => (change.Previous.SelfSpeaking, change.Next.SelfSpeaking)),
+			Is.EqualTo(new[] { (false, true) }));
+	}
+
+	[Test]
 	public async Task A_deafen_push_with_mute_false_silences_the_microphone()
 	{
 		using var connection = Create();
@@ -668,7 +684,10 @@ internal sealed class DiscordConnectionTests
 		});
 	}
 
-	private DiscordConnection Create(DateTimeOffset? expiresAt = null, TimeSpan? reconnectDelay = null)
+	private DiscordConnection Create(
+		DateTimeOffset? expiresAt = null,
+		TimeSpan? reconnectDelay = null,
+		Action<DiscordState, DiscordState>? onStateChanged = null)
 	{
 		return new DiscordConnection(() => _client,
 			_oauth,
@@ -681,7 +700,8 @@ internal sealed class DiscordConnectionTests
 				return Task.CompletedTask;
 			},
 			null,
-			reconnectDelay ?? TimeSpan.FromMinutes(5));
+			reconnectDelay ?? TimeSpan.FromMinutes(5),
+			onStateChanged);
 	}
 
 	private static async Task WaitForAsync(Func<bool> condition)

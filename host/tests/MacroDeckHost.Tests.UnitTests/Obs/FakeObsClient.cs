@@ -102,11 +102,27 @@ internal sealed class FakeObsClient : IObsClient
 
 	public event EventHandler<ObsInputFlagChange>? InputShowingChanged;
 
+	public event EventHandler<ObsInputAudioChange>? InputAudioChanged;
+
+	public event EventHandler<ObsSceneItemEnableChange>? SceneItemEnableChanged;
+
 	public event EventHandler<string>? CustomEventReceived;
 
 	public int QueryStatusCount { get; private set; }
 
 	public Dictionary<string, int> Reads { get; } = new(StringComparer.Ordinal);
+
+	public Dictionary<(string SceneName, int SceneItemId), string> SceneItemSources { get; } = new();
+
+	public void RaiseInputAudioChanged(string inputName, ObsInputAudioProperty property)
+	{
+		InputAudioChanged?.Invoke(this, new ObsInputAudioChange(inputName, property));
+	}
+
+	public void RaiseSceneItemEnableChanged(string sceneName, int sceneItemId)
+	{
+		SceneItemEnableChanged?.Invoke(this, new ObsSceneItemEnableChange(sceneName, sceneItemId));
+	}
 
 	public void RaiseInputSettingsChanged(string inputName, params string[] keys)
 	{
@@ -191,6 +207,11 @@ internal sealed class FakeObsClient : IObsClient
 	public IReadOnlyList<string> GetSceneItemNames(string sceneName)
 	{
 		return Groups.ContainsKey(sceneName) ? [] : SceneItems.GetValueOrDefault(sceneName, []);
+	}
+
+	public string? GetSceneItemSourceName(string sceneName, int sceneItemId)
+	{
+		return SceneItemSources.GetValueOrDefault((sceneName, sceneItemId));
 	}
 
 	public IReadOnlyList<string> GetGroupNames()

@@ -39,12 +39,19 @@ public sealed class MeldIntegration
 
 	private readonly VariableApiAccessor _variableAccessor = new();
 	private readonly MeldVariableCatalog _catalog;
+	private readonly Func<IQWebChannelClient> _clientFactory;
 
 	private MeldConnection? _connection;
 	private MeldEventEmitter? _events;
 
 	public MeldIntegration()
+		: this(() => new QWebChannelClient())
 	{
+	}
+
+	internal MeldIntegration(Func<IQWebChannelClient> clientFactory)
+	{
+		_clientFactory = clientFactory;
 		Actions = MeldActions.Create(() => _connection, _variableAccessor);
 		_catalog = new MeldVariableCatalog(() => _connection);
 	}
@@ -294,12 +301,14 @@ public sealed class MeldIntegration
 		}
 
 		var events = _events;
-		_connection = new MeldConnection(() => new QWebChannelClient(),
+		_connection = new MeldConnection(_clientFactory,
 			endpoint,
 			onState: state => events?.Observe(state),
 			onTrackMute: (trackId, trackName, muted) => events?.ObserveTrackMute(trackId, trackName, muted),
 			onReset: () => events?.Reset(),
-			onVariablesChanged: () => _ = _variableAccessor.Current?.RequestRefreshAsync());
+			onVariablesChanged: () => _ = _variableAccessor.Current?.RequestRefreshAsync(),
+			onTrackGain: trackId => _ = _variableAccessor.Current?.RequestDefinitionRefreshAsync(
+				MeldVariableCatalog.GainDefinitionIds(trackId)));
 		_connection.Start();
 	}
 

@@ -5,6 +5,7 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
 
 namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
@@ -93,20 +94,47 @@ public class RemoteVariableRefreshTests
 	}
 
 	[Test]
-	public async Task A_refresh_of_every_variable_covers_definition_refreshes_queued_with_it()
+	public async Task A_refresh_of_every_declared_variable_still_sends_the_ids_queued_with_it_for_catalog_resources()
 	{
 		var host = new GatedHost();
 		var api = new RemoteVariableApi(host);
 
 		var first = api.RequestDefinitionRefreshAsync(["muted"]);
 		await host.WaitForCallsAsync(1);
-		var second = api.RequestDefinitionRefreshAsync(["volume-percent"]);
+		var second = api.RequestDefinitionRefreshAsync(["input/mic/volume"]);
 		var third = api.RequestRefreshAsync();
 		var fourth = api.RequestDefinitionRefreshAsync(["cpu"]);
 		host.Release();
 		await Task.WhenAll(first, second, third, fourth).WaitAsync(TimeSpan.FromSeconds(5));
 
-		Assert.That(host.Arguments, Is.EqualTo(new[] { """{"definitionIds":["muted"]}""", null }));
+		Assert.That(host.Arguments,
+			Is.EqualTo(new[]
+			{
+				"""{"definitionIds":["muted"]}""", null, """{"definitionIds":["cpu","input/mic/volume"]}"""
+			}));
+	}
+
+	[Test]
+	public async Task More_ids_than_one_request_may_carry_are_sent_in_several_requests_instead_of_being_dropped()
+	{
+		var host = new GatedHost();
+		host.Release();
+		var ids = Enumerable.Range(0, ProtocolLimits.MaxVariableRefreshDefinitionIds + 1)
+			.Select(index => $"input/{index:D5}/muted")
+			.ToList();
+
+		await new RemoteVariableApi(host).RequestDefinitionRefreshAsync(ids);
+
+		var sent = host.Arguments
+			.Select(arguments
+				=> JsonSerializer.Deserialize<VariablesRefreshArguments>(arguments!, PluginProtocolJson.Options)!)
+			.ToList();
+		Assert.Multiple(() =>
+		{
+			Assert.That(sent.Select(arguments => arguments.DefinitionIds!.Count),
+				Is.EqualTo(new[] { ProtocolLimits.MaxVariableRefreshDefinitionIds, 1 }));
+			Assert.That(sent.SelectMany(arguments => arguments.DefinitionIds!), Is.EquivalentTo(ids));
+		});
 	}
 
 	[Test]

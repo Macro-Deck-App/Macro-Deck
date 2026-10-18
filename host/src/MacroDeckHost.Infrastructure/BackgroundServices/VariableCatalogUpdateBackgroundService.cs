@@ -157,9 +157,12 @@ public sealed class VariableCatalogUpdateBackgroundService : HostReadyBackground
 	{
 		var bindings = _bindingStore.Load();
 		var live = new HashSet<(string, string)>();
+		var bound = new HashSet<string>(StringComparer.Ordinal);
 
 		foreach (var group in bindings.GroupBy(b => b.IntegrationId, StringComparer.Ordinal))
 		{
+			bound.Add(group.Key);
+
 			// Drained before the push check so a push provider's requests cannot accumulate: it publishes on
 			// its own and has no poll to bring forward.
 			var bringForward = ResourcesToRefresh(group.Key);
@@ -188,9 +191,19 @@ public sealed class VariableCatalogUpdateBackgroundService : HostReadyBackground
 					state.Schedule.MarkDueNow();
 				}
 
-				if (state.Schedule.IsDue(DateTime.UtcNow) && state.TryBeginRead())
+				// Checked before IsDue so a brought-forward read is not used up while an earlier read is in flight.
+				if (!state.TryBeginRead())
+				{
+					continue;
+				}
+
+				if (state.Schedule.IsDue(DateTime.UtcNow))
 				{
 					_ = PollAndRelease(group.Key, provider, binding.LocalResourceId, state, cancellationToken);
+				}
+				else
+				{
+					state.EndRead();
 				}
 			}
 		}
@@ -199,20 +212,25 @@ public sealed class VariableCatalogUpdateBackgroundService : HostReadyBackground
 		{
 			_polls.Remove(stale);
 		}
+
+		foreach (var integrationId in _refresh.PendingIntegrations(VariableRefreshLane.Catalog))
+		{
+			if (!bound.Contains(integrationId))
+			{
+				_refresh.DrainFor(integrationId, VariableRefreshLane.Catalog);
+				_refresh.DrainDefinitionsFor(integrationId, VariableRefreshLane.Catalog);
+			}
+		}
 	}
 
 	// A write is applied by the owner and never echoed, so the value the host shows still comes from a
 	// read; this is what pulls that read forward instead of leaving the control on the pre-write reading.
 	private HashSet<string> ResourcesToRefresh(string integrationId)
 	{
-		var pending = _refresh.DrainFor(integrationId);
-		if (pending.Count == 0)
-		{
-			return [];
-		}
+		var resources = new HashSet<string>(_refresh.DrainDefinitionsFor(integrationId, VariableRefreshLane.Catalog),
+			StringComparer.Ordinal);
 
-		var resources = new HashSet<string>(StringComparer.Ordinal);
-		foreach (var variableId in pending)
+		foreach (var variableId in _refresh.DrainFor(integrationId, VariableRefreshLane.Catalog))
 		{
 			var definitionId = _registry.GetById(variableId)?.DefinitionId;
 			if (definitionId is not null)

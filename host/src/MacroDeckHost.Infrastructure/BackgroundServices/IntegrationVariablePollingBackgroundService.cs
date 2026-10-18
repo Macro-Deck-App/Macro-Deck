@@ -68,6 +68,7 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 			_runtimes.Remove(staleId);
 		}
 
+		var polled = new HashSet<string>(StringComparer.Ordinal);
 		foreach (var integration in _integrations.Integrations)
 		{
 			if (integration is not IVariableProvider provider
@@ -77,14 +78,15 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 				continue;
 			}
 
+			polled.Add(integration.Id);
 			if (!_runtimes.TryGetValue(integration.Id, out var runtime))
 			{
 				runtime = await Register(integration.Id, provider, ct);
 				_runtimes[integration.Id] = runtime;
 			}
 
-			runtime.BringForward(_refresh.DrainFor(integration.Id));
-			runtime.BringForwardDefinitions(_refresh.DrainDefinitionsFor(integration.Id));
+			runtime.BringForward(_refresh.DrainFor(integration.Id, VariableRefreshLane.Eager));
+			runtime.BringForwardDefinitions(_refresh.DrainDefinitionsFor(integration.Id, VariableRefreshLane.Eager));
 			if (_refresh.DrainEagerRefreshRequested(integration.Id))
 			{
 				runtime.BringForwardAll();
@@ -105,6 +107,15 @@ public sealed class IntegrationVariablePollingBackgroundService : HostReadyBackg
 				}
 
 				_ = Task.Run(() => PollAndRelease(integration.Id, provider, state, ct), ct);
+			}
+		}
+
+		foreach (var integrationId in _refresh.PendingIntegrations(VariableRefreshLane.Eager))
+		{
+			if (!polled.Contains(integrationId))
+			{
+				_refresh.DrainFor(integrationId, VariableRefreshLane.Eager);
+				_refresh.DrainDefinitionsFor(integrationId, VariableRefreshLane.Eager);
 			}
 		}
 	}

@@ -1,3 +1,5 @@
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations.YtmDesktop;
 using MacroDeckHost.Integrations.YtmDesktop.Configuration;
 using MacroDeckHost.Integrations.YtmDesktop.Variables;
@@ -12,6 +14,16 @@ namespace MacroDeckHost.Tests.UnitTests.YtmDesktop;
 internal sealed class YtmDesktopIntegrationTests
 {
 	private static readonly string[] _payloadNames = ["likeStatus", "previousLikeStatus", "trackName", "videoId"];
+
+	private const string PlayingState = """
+		{
+			"player": { "trackState": 1, "videoProgress": 12, "volume": 60, "muted": false, "adPlaying": false,
+				"queue": null },
+			"video": { "id": "abc", "title": "Song", "author": "Artist", "album": "Album",
+				"likeStatus": 1, "thumbnails": [], "durationSeconds": 200 },
+			"playlistId": null
+		}
+		""";
 
 	[Test]
 	public async Task Without_a_configuration_there_is_no_player_and_nothing_throws()
@@ -224,6 +236,42 @@ internal sealed class YtmDesktopIntegrationTests
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotConfigured));
 		});
+	}
+
+	[Test]
+	public async Task A_state_pushed_by_the_player_makes_macro_deck_read_the_variables_again()
+	{
+		using var realtime = new FakeYtmDesktopRealtimeClient();
+		using var api = new FakeYtmDesktopApiClient();
+		using var integration = new YtmDesktopIntegration(() => realtime, _ => api);
+		var signal = new VariableRefreshSignal();
+		var context = new FakeYtmDesktopIntegrationContext
+		{
+			VariableApi = new IntegrationVariableApi(YtmDesktopIntegration.IntegrationId, null!, signal)
+		};
+		context.ConfigStore.AddEntry("YouTube Music Desktop App",
+			new Dictionary<string, string?> { ["host"] = "127.0.0.1", ["port"] = "9863" },
+			new Dictionary<string, string> { ["token"] = "token" });
+		await integration.InitializeAsync(context);
+		await WaitForRefreshRequestAsync(signal);
+
+		realtime.RaiseState(PlayingState);
+
+		Assert.That(signal.DrainEagerRefreshRequested(YtmDesktopIntegration.IntegrationId), Is.True);
+	}
+
+	private static async Task WaitForRefreshRequestAsync(VariableRefreshSignal signal)
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+		while (!signal.DrainEagerRefreshRequested(YtmDesktopIntegration.IntegrationId))
+		{
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail("the connection never asked for a refresh");
+			}
+
+			await Task.Delay(10);
+		}
 	}
 
 	private static async Task<Guid> ConfigureAsync(YtmDesktopIntegration integration)

@@ -232,7 +232,8 @@ in-process timing.
 that predates them answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into a no-op,
 `false`, no widget data, an unsupported variable history, a `NotSupportedException` for bindings or a
 cancellation. `refresh` later gained an optional `definitionIds` argument, which a host that predates it
-ignores, reading every declared variable instead.
+ignores, reading every declared variable instead. A newer host also reads the bound catalog resources a
+`definitionIds` list names; an older one leaves them on their refresh interval.
 `ui` later gained `origin.open-url`, additively in major `3`. A host that predates it answers
 `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into `false`, the same answer a client that
 cannot open links gets; see

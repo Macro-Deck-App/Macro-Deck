@@ -25,6 +25,7 @@ internal sealed class TwitchAccountManager : IDisposable
 	private readonly ILogger _logger;
 
 	private TwitchEventEmitter? _emitter;
+	private Action? _stateChanged;
 	private IStreamChatSink? _chatSink;
 
 	private volatile List<TwitchAccountConnection> _connections = [];
@@ -69,9 +70,11 @@ internal sealed class TwitchAccountManager : IDisposable
 	public async Task ReloadAsync(
 		IIntegrationConfig config,
 		TwitchEventEmitter? emitter = null,
+		Action? stateChanged = null,
 		CancellationToken cancellationToken = default)
 	{
 		_emitter = emitter;
+		_stateChanged = stateChanged;
 		await StopConnectionsAsync();
 
 		if (_persister is { } previousPersister)
@@ -297,7 +300,8 @@ internal sealed class TwitchAccountManager : IDisposable
 			_helixFactory(account, tokens),
 			_emitter,
 			_logger,
-			_chatSink);
+			_chatSink,
+			_stateChanged);
 	}
 
 	public void StartAll()

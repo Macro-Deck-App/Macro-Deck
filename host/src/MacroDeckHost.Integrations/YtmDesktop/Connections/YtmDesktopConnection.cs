@@ -17,6 +17,10 @@ internal sealed class YtmDesktopConnection : IDisposable
 
 	private static readonly TimeSpan _playlistRefreshFloor = TimeSpan.FromSeconds(30);
 
+	private static readonly IReadOnlyList<YtmQueueItem> _noQueue = [];
+
+	private static readonly IReadOnlyList<string> _noArtists = [];
+
 	private readonly Func<IYtmDesktopRealtimeClient> _realtimeFactory;
 	private readonly Func<IYtmDesktopApiClient> _apiFactory;
 	private readonly YtmDesktopEndpoint _endpoint;
@@ -25,6 +29,7 @@ internal sealed class YtmDesktopConnection : IDisposable
 	private readonly TimeSpan _reconnectDelay;
 	private readonly TimeSpan _stateRefreshInterval;
 	private readonly Func<string, string> _registerArtwork;
+	private readonly Action? _onSnapshotChanged;
 	private readonly CancellationTokenSource _cts = new();
 
 	private readonly CancellationToken _lifetime;
@@ -57,7 +62,8 @@ internal sealed class YtmDesktopConnection : IDisposable
 		TimeSpan? reconnectDelay = null,
 		TimeSpan? stateRefreshInterval = null,
 		TimeSpan? commandInterval = null,
-		Func<string, string>? registerArtwork = null)
+		Func<string, string>? registerArtwork = null,
+		Action? onSnapshotChanged = null)
 	{
 		_realtimeFactory = realtimeFactory;
 		_apiFactory = apiFactory;
@@ -67,6 +73,7 @@ internal sealed class YtmDesktopConnection : IDisposable
 		_reconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(5);
 		_stateRefreshInterval = stateRefreshInterval ?? TimeSpan.FromSeconds(5);
 		_registerArtwork = registerArtwork ?? (url => url);
+		_onSnapshotChanged = onSnapshotChanged;
 		_lifetime = _cts.Token;
 		_sender = new YtmDesktopCommandSender(SendCommandCoreAsync, commandInterval);
 	}
@@ -318,11 +325,17 @@ internal sealed class YtmDesktopConnection : IDisposable
 			_realtime = null;
 			_api = null;
 			_playlists = null;
+			var hadSnapshot = _hasSnapshot;
 			_snapshot = YtmDesktopSnapshot.Disconnected;
 			_hasSnapshot = false;
 			Interlocked.Exchange(ref _lastStateTicks, 0);
 			Interlocked.Exchange(ref _lastFetchTicks, 0);
 			Interlocked.Exchange(ref _lastPlaylistTicks, 0);
+
+			if (hadSnapshot)
+			{
+				_onSnapshotChanged?.Invoke();
+			}
 
 			try
 			{
@@ -437,6 +450,28 @@ internal sealed class YtmDesktopConnection : IDisposable
 		{
 			RaiseLikeChanged(previous, next);
 		}
+
+		if (!hadSnapshot || VariablesDiffer(previous, next))
+		{
+			_onSnapshotChanged?.Invoke();
+		}
+	}
+
+	private static bool VariablesDiffer(YtmDesktopSnapshot previous, YtmDesktopSnapshot next)
+	{
+		return !previous.Player.Artists.SequenceEqual(next.Player.Artists, StringComparer.Ordinal)
+			|| !Normalized(previous).Equals(Normalized(next));
+	}
+
+	// Position moves with every update and the lists are rebuilt each time. No variable reads the queue, and
+	// the position variable keeps its own refresh interval.
+	private static YtmDesktopSnapshot Normalized(YtmDesktopSnapshot snapshot)
+	{
+		return snapshot with
+		{
+			Queue = _noQueue,
+			Player = snapshot.Player with { Position = null, Artists = _noArtists }
+		};
 	}
 
 	private void RaiseLikeChanged(YtmDesktopSnapshot previous, YtmDesktopSnapshot next)
