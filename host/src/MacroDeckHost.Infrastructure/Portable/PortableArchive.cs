@@ -219,7 +219,7 @@ public static class PortableArchive
 			return icons is null
 				? Fail(PortableReadStatus.InvalidArchive)
 				: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons)
-					{ Fonts = ReadFonts(inner) };
+				{ Fonts = ReadFonts(inner) };
 		}
 		catch (InvalidDataException)
 		{
@@ -468,7 +468,7 @@ public static class PortableArchive
 		return jsonErrorLocation is null
 			? Fail(PortableReadStatus.InvalidArchive)
 			: new PortableReadOutcome(PortableReadStatus.InvalidJson, null, null, [])
-				{ JsonErrorLocation = jsonErrorLocation };
+			{ JsonErrorLocation = jsonErrorLocation };
 	}
 
 	private static string JsonLocation(string entry, JsonException error)

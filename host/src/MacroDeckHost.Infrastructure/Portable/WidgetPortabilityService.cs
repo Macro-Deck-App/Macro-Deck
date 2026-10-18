@@ -58,15 +58,15 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		var minX = selected.Min(widget => widget.PositionX);
 		var minY = selected.Min(widget => widget.PositionY);
 		var portableWidgets = selected.Select(widget => new PortableWidget
-			{
-				Type = widget.Type,
-				PositionX = widget.PositionX - minX,
-				PositionY = widget.PositionY - minY,
-				Width = widget.Width,
-				Height = widget.Height,
-				Data = widget.Data,
-				SourceId = widget.Id
-			})
+		{
+			Type = widget.Type,
+			PositionX = widget.PositionX - minX,
+			PositionY = widget.PositionY - minY,
+			Width = widget.Width,
+			Height = widget.Height,
+			Data = widget.Data,
+			SourceId = widget.Id
+		})
 			.ToList();
 
 		var assets = await _assetManager.Collect(
