@@ -44,7 +44,7 @@ public class IntegrationVariableRefreshTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(refresh.DrainDefinitionsFor(IntegrationId),
+			Assert.That(refresh.DrainDefinitionsFor(IntegrationId, VariableRefreshLane.Eager),
 				Is.EquivalentTo(new[] { "volume-percent", "muted" }));
 			Assert.That(refresh.DrainEagerRefreshRequested(IntegrationId), Is.False);
 		});

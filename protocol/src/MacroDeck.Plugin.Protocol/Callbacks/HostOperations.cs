@@ -16,12 +16,13 @@ public static class HostOperations
 
 		public const string Delete = "delete";
 
-		/// <summary>Asks the host to read declared variables of the calling plugin again on its next poll
-		/// instead of at each variable's refresh interval: every one when it carries no arguments, or only
-		/// those named by <see cref="VariablesRefreshArguments.DefinitionIds" />. Requests that arrive while
-		/// one is pending are merged. A host that predates the operation answers
-		/// <c>CAPABILITY_UNSUPPORTED</c>; the SDK treats that as a no-op. A host that predates the definition
-		/// ids ignores them and reads every declared variable.</summary>
+		/// <summary>Asks the host to read variables of the calling plugin again on its next poll instead of at
+		/// each variable's refresh interval: every declared one when it carries no arguments, or only those named
+		/// by <see cref="VariablesRefreshArguments.DefinitionIds" />, declared variables and polled catalog
+		/// resources a user bound alike. Requests that arrive while one is pending are merged. A host that
+		/// predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>; the SDK treats that as a no-op. A host
+		/// that predates the definition ids ignores them and reads every declared variable, and an older host
+		/// ignores catalog resource ids.</summary>
 		public const string Refresh = "refresh";
 
 		/// <summary>Opens a history window on one of the calling plugin's own global variables and answers

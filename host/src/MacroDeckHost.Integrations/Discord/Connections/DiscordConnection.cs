@@ -30,6 +30,7 @@ internal sealed class DiscordConnection : IDisposable
 	private readonly IDiscordOAuthClient _oauth;
 	private readonly Func<DiscordTokens, CancellationToken, Task> _persistTokens;
 	private readonly DiscordEventEmitter? _events;
+	private readonly Action<DiscordState, DiscordState>? _onStateChanged;
 	private readonly TimeSpan _reconnectDelay;
 	private readonly CancellationTokenSource _cts = new();
 	private readonly Lock _stateLock = new();
@@ -60,7 +61,8 @@ internal sealed class DiscordConnection : IDisposable
 		DiscordTokens tokens,
 		Func<DiscordTokens, CancellationToken, Task> persistTokens,
 		DiscordEventEmitter? events = null,
-		TimeSpan? reconnectDelay = null)
+		TimeSpan? reconnectDelay = null,
+		Action<DiscordState, DiscordState>? onStateChanged = null)
 	{
 		_clientFactory = clientFactory;
 		_oauth = oauth;
@@ -70,6 +72,7 @@ internal sealed class DiscordConnection : IDisposable
 		_persistTokens = persistTokens;
 		_events = events;
 		_reconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(10);
+		_onStateChanged = onStateChanged;
 	}
 
 	public DiscordState State
@@ -823,10 +826,13 @@ internal sealed class DiscordConnection : IDisposable
 
 	private void UpdateState(Func<DiscordState, DiscordState> transition)
 	{
+		DiscordState previous;
+		DiscordState updated;
 		lock (_stateLock)
 		{
-			var updated = transition(_state);
-			if (updated == _state)
+			previous = _state;
+			updated = transition(previous);
+			if (updated == previous)
 			{
 				return;
 			}
@@ -834,6 +840,8 @@ internal sealed class DiscordConnection : IDisposable
 			_state = updated;
 			_events?.Observe(updated);
 		}
+
+		_onStateChanged?.Invoke(previous, updated);
 	}
 
 	private sealed record AuthenticateArgs

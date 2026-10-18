@@ -32,10 +32,14 @@ internal sealed class MeldVariableCatalog
 
 	public static string CatalogName => "Meld Studio";
 
-	// Meld pushes gain updates but nothing for mute or monitoring, and SupportsPush is all-or-nothing per
-	// provider: reporting true would turn off polling for the leaves it never pushes, freezing them at
-	// their first value.
+	// Meld pushes gain and mute, which only bring the read forward, but nothing for monitoring. SupportsPush is
+	// all-or-nothing per provider: true would stop polling and freeze monitoring at its first value.
 	public static bool SupportsPush => false;
+
+	public static IReadOnlyList<string> GainDefinitionIds(string trackId)
+	{
+		return [LeafId(trackId, GainLeaf), LeafId(trackId, MutedLeaf)];
+	}
 
 	// A session has a handful of tracks, so the host correctly omits the search box rather than offering
 	// one that filters a single already-loaded page.

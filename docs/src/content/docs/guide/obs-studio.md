@@ -40,12 +40,14 @@ when OBS refuses the change.
 ## Changes show up quickly
 
 Macro Deck listens to what OBS reports instead of only asking again every second. Variables that follow
-an input's settings, whether an input is active or showing, and whether a filter is enabled refresh
-within a fraction of a second after you change them in OBS.
+an input's mute state, volume, audio tracks, monitoring, sync offset and settings, whether an input is
+active or showing, whether a scene item is visible and whether a filter is enabled refresh within a fraction
+of a second after you change them in OBS. A button state mapped to one of these variables follows just as
+quickly.
 
-Buttons that follow OBS state (for example a mute or filter toggle) read the current value the next time
-the button refreshes, so they can lag by up to a couple of seconds. Variables are the fastest way to see
-a change.
+Buttons that follow the state of an OBS action instead (for example the state of a **Mute Input** or
+filter toggle button) read the current value the next time the button refreshes, so they can lag by up to
+a couple of seconds. Variables are the fastest way to see a change.
 
 Macro Deck never listens to the per-frame OBS events (audio level meters and scene item transforms),
 so a busy OBS does not slow Macro Deck down.

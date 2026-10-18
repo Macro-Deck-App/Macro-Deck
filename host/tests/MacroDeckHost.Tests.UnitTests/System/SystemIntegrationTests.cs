@@ -684,7 +684,7 @@ public class SystemIntegrationTests
 
 			Assert.Multiple(() =>
 			{
-				Assert.That(signal.DrainDefinitionsFor(SystemIntegration.IntegrationId),
+				Assert.That(signal.DrainDefinitionsFor(SystemIntegration.IntegrationId, VariableRefreshLane.Eager),
 					Is.EquivalentTo(new[] { "system-volume-percent", "system-muted" }));
 				Assert.That(signal.DrainEagerRefreshRequested(SystemIntegration.IntegrationId), Is.False);
 			});
@@ -708,7 +708,7 @@ public class SystemIntegrationTests
 
 		volume.RaiseChanged();
 
-		Assert.That(signal.DrainDefinitionsFor(SystemIntegration.IntegrationId), Is.Empty);
+		Assert.That(signal.DrainDefinitionsFor(SystemIntegration.IntegrationId, VariableRefreshLane.Eager), Is.Empty);
 	}
 
 	private sealed class RecordingDesktopNotifier(bool supported = true) : IDesktopNotifier

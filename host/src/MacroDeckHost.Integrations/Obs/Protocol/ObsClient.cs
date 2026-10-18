@@ -15,13 +15,14 @@ internal sealed class ObsClient : IObsClient
 	private readonly TimeSpan _reachabilityTimeout;
 
 	// Every category a handler below needs and nothing else. The library default is All, which also
-	// carries SceneItems, MediaInputs, Vendors and Canvases traffic nothing here reads.
+	// carries MediaInputs, Vendors and Canvases traffic nothing here reads.
 	internal const EventSubscription BaseSubscriptions = EventSubscription.General
 		| EventSubscription.Config
 		| EventSubscription.Scenes
 		| EventSubscription.Inputs
 		| EventSubscription.Filters
 		| EventSubscription.Outputs
+		| EventSubscription.SceneItems
 		| EventSubscription.Ui;
 
 	private readonly OBSWebsocket _obs = new();
@@ -47,6 +48,16 @@ internal sealed class ObsClient : IObsClient
 
 		_obs.InputMuteStateChanged += (_, args) =>
 			InputMuteChanged?.Invoke(this, new ObsInputMuteChange(args.InputName, args.InputMuted));
+		_obs.InputVolumeChanged += (_, args) => Raise(() =>
+			RaiseInputAudioChanged(args.Volume.InputName, ObsInputAudioProperty.Volume));
+		_obs.InputAudioTracksChanged += (_, args) =>
+			RaiseInputAudioChanged(args.InputName, ObsInputAudioProperty.Tracks);
+		_obs.InputAudioMonitorTypeChanged += (_, args) =>
+			RaiseInputAudioChanged(args.InputName, ObsInputAudioProperty.MonitorType);
+		_obs.InputAudioSyncOffsetChanged += (_, args) =>
+			RaiseInputAudioChanged(args.InputName, ObsInputAudioProperty.SyncOffset);
+		_obs.SceneItemEnableStateChanged += (_, args) =>
+			SceneItemEnableChanged?.Invoke(this, new ObsSceneItemEnableChange(args.SceneName, args.SceneItemId));
 		_obs.ReplayBufferSaved += (_, args) => ReplayBufferSaved?.Invoke(this, args.SavedReplayPath);
 		_obs.RecordFileChanged += (_, args) => RecordFileChanged?.Invoke(this, args.NewOutputPath);
 		_obs.ScreenshotSaved += (_, args) => ScreenshotSaved?.Invoke(this, args.SavedScreenshotPath);
@@ -88,6 +99,10 @@ internal sealed class ObsClient : IObsClient
 	public event EventHandler<ObsInputFlagChange>? InputActiveChanged;
 
 	public event EventHandler<ObsInputFlagChange>? InputShowingChanged;
+
+	public event EventHandler<ObsInputAudioChange>? InputAudioChanged;
+
+	public event EventHandler<ObsSceneItemEnableChange>? SceneItemEnableChanged;
 
 	public event EventHandler<string>? CustomEventReceived;
 
@@ -195,6 +210,11 @@ internal sealed class ObsClient : IObsClient
 	{
 		var items = Try(() => _obs.GetSceneItemList(sceneName), null);
 		return items?.Select(i => i.SourceName).ToList() ?? [];
+	}
+
+	public string? GetSceneItemSourceName(string sceneName, int sceneItemId)
+	{
+		return Try<string?>(() => _obs.GetSceneItemSource(sceneName, sceneItemId)?.SourceName, null);
 	}
 
 	public IReadOnlyList<string> GetGroupNames()
@@ -546,6 +566,11 @@ internal sealed class ObsClient : IObsClient
 			InputActiveChanged?.Invoke(this, new ObsInputFlagChange(args.InputName, args.VideoActive));
 		_obs.InputShowStateChanged += (_, args) =>
 			InputShowingChanged?.Invoke(this, new ObsInputFlagChange(args.InputName, args.VideoShowing));
+	}
+
+	private void RaiseInputAudioChanged(string inputName, ObsInputAudioProperty property)
+	{
+		InputAudioChanged?.Invoke(this, new ObsInputAudioChange(inputName, property));
 	}
 
 	private void Raise(Action raise)

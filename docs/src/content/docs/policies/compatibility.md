@@ -258,6 +258,13 @@ What did **not** need a major:
   `NotSupportedException`, and the `variables` host API gained `bind`; against an older host the SDK
   reports the bindings as not supported. Two limits were added: `maxVariableRefreshDefinitionIds` and
   `maxVariableBindingsPerCall`.
+- `RequestDefinitionRefreshAsync` and `variables`/`refresh` with `definitionIds` also bring catalog resources
+  a user bound forward, not only declared variables, when Macro Deck polls them; a pushed resource is
+  unaffected. Reading more than asked for was always allowed. An older host ignores a catalog resource id,
+  so that resource keeps its refresh interval.
+  `MacroDeck.Plugin.Hosting` keeps the named ids when it merges a pending request with a request for every
+  declared variable and sends them next to it, split into lists of at most `maxVariableRefreshDefinitionIds`;
+  an earlier version folded them into the request for every declared variable.
 - `VariableNames` (`MacroDeck.Sdk.Variables`), `HostOptionsSources` (`MacroDeck.Sdk.Actions`) and the
   `NativeKeys` members `IsPositional`, `TryGetWindowsScanCode`, `TryGetMacOsKeyCode` and
   `TryFromWindowsScanCode` are new SDK helpers. They need no host support: the option source ids are the

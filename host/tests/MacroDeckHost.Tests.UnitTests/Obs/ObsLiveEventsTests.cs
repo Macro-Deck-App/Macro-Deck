@@ -102,6 +102,38 @@ internal sealed class ObsLiveEventsTests
 	}
 
 	[Test]
+	public async Task A_volume_change_makes_the_next_volume_read_fresh()
+	{
+		_fake.InputVolumes["Cam"] = 0.5f;
+		await _connection.GetInputVolumePercentCachedAsync("Cam");
+		_fake.InputVolumes["Cam"] = 0.25f;
+
+		_fake.RaiseInputAudioChanged("Cam", ObsInputAudioProperty.Volume);
+		_time.Advance(_window);
+
+		Assert.That(await _connection.GetInputVolumePercentCachedAsync("Cam"), Is.EqualTo(25d).Within(0.001));
+	}
+
+	[Test]
+	public async Task A_scene_item_shown_in_obs_makes_the_next_visibility_read_fresh()
+	{
+		_fake.SceneItemSources[("Live", 3)] = "Cam";
+		_fake.VisibleSources["Live:Cam"] = false;
+		await _connection.GetSourceVisibleCachedAsync("Live", "Cam");
+		_fake.VisibleSources["Live:Cam"] = true;
+
+		_fake.RaiseSceneItemEnableChanged("Live", 3);
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+		while (_batches.Count == 0 && DateTime.UtcNow < deadline)
+		{
+			_time.Advance(_window);
+			await Task.Delay(10);
+		}
+
+		Assert.That(await _connection.GetSourceVisibleCachedAsync("Live", "Cam"), Is.True);
+	}
+
+	[Test]
 	public async Task A_filter_change_makes_the_next_filter_read_fresh_for_inputs_and_scenes()
 	{
 		_fake.InputNames = ["Cam", "Scene"];

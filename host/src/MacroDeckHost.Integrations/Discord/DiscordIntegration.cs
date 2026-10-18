@@ -53,6 +53,7 @@ public sealed class DiscordIntegration
 	private static readonly byte[] _icon = LoadIcon();
 
 	private readonly IDiscordOAuthClient _oauth;
+	private readonly Func<IDiscordRpcClient> _rpcClientFactory;
 
 	private IIntegrationContext? _context;
 	private DiscordConnection? _connection;
@@ -64,9 +65,13 @@ public sealed class DiscordIntegration
 	{
 	}
 
-	internal DiscordIntegration(IDiscordOAuthClient oauth, IDiscordWebhookClient webhooks)
+	internal DiscordIntegration(
+		IDiscordOAuthClient oauth,
+		IDiscordWebhookClient webhooks,
+		Func<IDiscordRpcClient>? rpcClientFactory = null)
 	{
 		_oauth = oauth;
+		_rpcClientFactory = rpcClientFactory ?? (() => new DiscordRpcClient(() => new DiscordIpcTransport()));
 		Actions = DiscordActions.Create(() => _connection, webhooks);
 	}
 
@@ -517,14 +522,38 @@ public sealed class DiscordIntegration
 			.ConfigureAwait(false));
 
 		_entryId = entry.Id;
-		_connection = new DiscordConnection(() => new DiscordRpcClient(() => new DiscordIpcTransport()),
+		_connection = new DiscordConnection(_rpcClientFactory,
 			_oauth,
 			clientId,
 			clientSecret,
 			new DiscordTokens(accessToken, refreshToken, expiresAt, scope),
 			PersistTokensAsync,
-			_events);
+			_events,
+			onStateChanged: RequestChangedVariablesRefresh);
 		_connection.Start();
+	}
+
+	private void RequestChangedVariablesRefresh(DiscordState previous, DiscordState next)
+	{
+		if (_context is not { } context)
+		{
+			return;
+		}
+
+		var changed = ChangedVariableIds(previous, next);
+		if (changed.Count > 0)
+		{
+			_ = context.Variables.RequestDefinitionRefreshAsync(changed);
+		}
+	}
+
+	private List<string> ChangedVariableIds(DiscordState previous, DiscordState next)
+	{
+		return Variables
+			.Select(variable => variable.ResolvedId)
+			.OfType<string>()
+			.Where(id => !Equals(ReadVariable(previous, id), ReadVariable(next, id)))
+			.ToList();
 	}
 
 	private static DateTimeOffset? ParseExpiry(string? raw)

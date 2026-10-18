@@ -75,6 +75,79 @@ internal sealed class ObsVariableRefreshRequestTests
 			+ "declared refresh interval");
 	}
 
+	[Test]
+	public async Task A_mute_change_in_obs_asks_for_the_muted_variable_of_that_input()
+	{
+		var fake = new FakeObsClient { IsConnected = true };
+		var signal = new VariableRefreshSignal();
+		using var integration = await StartIntegration(fake, signal);
+
+		fake.RaiseInputMuteChanged("Mic", true);
+
+		var requested = await WaitForDefinitionRequests(signal, 1);
+		Assert.That(WithoutRuntimeId(requested), Is.EqualTo(new[] { "/input/Mic/muted" }));
+	}
+
+	[TestCase(ObsInputAudioProperty.Volume, new[] { "/input/Mic/volume" })]
+	[TestCase(ObsInputAudioProperty.MonitorType, new[] { "/input/Mic/monitor-type" })]
+	[TestCase(ObsInputAudioProperty.SyncOffset, new[] { "/input/Mic/sync-offset" })]
+	[TestCase(ObsInputAudioProperty.Tracks,
+		new[]
+		{
+			"/input/Mic/track-1", "/input/Mic/track-2", "/input/Mic/track-3", "/input/Mic/track-4",
+			"/input/Mic/track-5", "/input/Mic/track-6"
+		})]
+	public async Task An_audio_change_in_obs_asks_for_the_matching_variables_of_that_input(
+		ObsInputAudioProperty property,
+		string[] expectedSuffixes)
+	{
+		var fake = new FakeObsClient { IsConnected = true };
+		var signal = new VariableRefreshSignal();
+		using var integration = await StartIntegration(fake, signal);
+
+		fake.RaiseInputAudioChanged("Mic", property);
+
+		var requested = await WaitForDefinitionRequests(signal, expectedSuffixes.Length);
+		Assert.That(WithoutRuntimeId(requested), Is.EquivalentTo(expectedSuffixes));
+	}
+
+	[Test]
+	public async Task A_scene_item_shown_or_hidden_in_obs_asks_for_the_visibility_variable_of_that_source()
+	{
+		var fake = new FakeObsClient { IsConnected = true };
+		fake.SceneItemSources[("Live", 7)] = "Camera";
+		var signal = new VariableRefreshSignal();
+		using var integration = await StartIntegration(fake, signal);
+
+		fake.RaiseSceneItemEnableChanged("Live", 7);
+
+		var requested = await WaitForDefinitionRequests(signal, 1);
+		Assert.That(WithoutRuntimeId(requested), Is.EqualTo(new[] { "/scene/Live/item/Camera/visible" }));
+	}
+
+	private static IEnumerable<string> WithoutRuntimeId(IEnumerable<string> definitionIds)
+	{
+		return definitionIds.Select(id => id[Guid.Empty.ToString("D").Length..]);
+	}
+
+	private static async Task<List<string>> WaitForDefinitionRequests(VariableRefreshSignal signal, int count)
+	{
+		var requested = new List<string>();
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+		while (requested.Count < count)
+		{
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail($"expected {count} definition refresh request(s), got {requested.Count}");
+			}
+
+			requested.AddRange(signal.DrainDefinitionsFor(ObsIntegration.IntegrationId, VariableRefreshLane.Eager));
+			await Task.Delay(10);
+		}
+
+		return requested;
+	}
+
 	private static async Task WaitForQueryStatusCalls(Func<int> calls, int target)
 	{
 		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);

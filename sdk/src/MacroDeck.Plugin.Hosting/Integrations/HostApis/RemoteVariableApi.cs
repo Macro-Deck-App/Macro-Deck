@@ -291,44 +291,61 @@ internal sealed class RemoteVariableApi(
 
 	private async Task InvokeRefreshAsync(PendingRefresh request)
 	{
-		try
+		foreach (var arguments in request.ToArguments())
 		{
-			await invoker.InvokeAsync(Protocol.Callbacks.HostApis.Variables,
-					HostOperations.Variables.Refresh,
-					request.ToArguments(),
-					CancellationToken.None)
-				.ConfigureAwait(false);
-		}
-		catch (Exception exception) when (exception is not OutOfMemoryException)
-		{
-			// Best effort by contract: a host that predates the operation answers CAPABILITY_UNSUPPORTED,
-			// and a refused or undelivered request still leaves the variables read at their interval.
+			try
+			{
+				await invoker.InvokeAsync(Protocol.Callbacks.HostApis.Variables,
+						HostOperations.Variables.Refresh,
+						arguments,
+						CancellationToken.None)
+					.ConfigureAwait(false);
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				// Best effort by contract: a host that predates the operation answers CAPABILITY_UNSUPPORTED,
+				// and a refused or undelivered request still leaves the variables read at their interval.
+			}
 		}
 	}
 
-	private sealed class PendingRefresh(HashSet<string>? definitionIds)
+	private sealed class PendingRefresh
 	{
-		private HashSet<string>? _definitionIds = definitionIds;
+		private readonly HashSet<string> _definitionIds = new(StringComparer.Ordinal);
+		private bool _everyDeclared;
+
+		public PendingRefresh(HashSet<string>? definitionIds)
+		{
+			Merge(definitionIds);
+		}
 
 		public void Merge(HashSet<string>? definitionIds)
 		{
 			if (definitionIds is null)
 			{
-				_definitionIds = null;
+				_everyDeclared = true;
 			}
 			else
 			{
-				_definitionIds?.UnionWith(definitionIds);
+				_definitionIds.UnionWith(definitionIds);
 			}
 		}
 
-		// Reading every declared variable covers any subset, so a list too long for one request is sent
-		// as a request for all of them.
-		public VariablesRefreshArguments? ToArguments()
+		// A request for every declared variable does not reach bound catalog resources on the host, so named
+		// ids are still sent next to it, split into lists the protocol accepts.
+		public IEnumerable<VariablesRefreshArguments?> ToArguments()
 		{
-			return _definitionIds is { Count: > 0 and <= ProtocolLimits.MaxVariableRefreshDefinitionIds } ids
-				? new VariablesRefreshArguments { DefinitionIds = [.. ids.Order(StringComparer.Ordinal)] }
-				: null;
+			if (_everyDeclared)
+			{
+				yield return null;
+			}
+
+			foreach (var ids in _definitionIds
+				.Order(StringComparer.Ordinal)
+				.Chunk(ProtocolLimits.MaxVariableRefreshDefinitionIds))
+			{
+				yield return new VariablesRefreshArguments { DefinitionIds = [.. ids] };
+			}
 		}
 	}
 }

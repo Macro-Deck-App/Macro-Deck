@@ -45,12 +45,23 @@ public sealed class YtmDesktopIntegration
 	private static readonly byte[] _icon = LoadIcon();
 
 	private readonly YtmDesktopMusicPlayer _player = new();
+	private readonly Func<IYtmDesktopRealtimeClient> _realtimeFactory;
+	private readonly Func<YtmDesktopEndpoint, IYtmDesktopApiClient> _apiFactory;
 
 	private YtmDesktopConnection? _connection;
 	private string? _entryId;
 
 	public YtmDesktopIntegration()
+		: this(() => new YtmDesktopRealtimeClient(), endpoint => new YtmDesktopApiClient(endpoint))
 	{
+	}
+
+	internal YtmDesktopIntegration(
+		Func<IYtmDesktopRealtimeClient> realtimeFactory,
+		Func<YtmDesktopEndpoint, IYtmDesktopApiClient> apiFactory)
+	{
+		_realtimeFactory = realtimeFactory;
+		_apiFactory = apiFactory;
 		Actions =
 		[
 			.. MusicPlayerActions.Common(ResolvePlayer, GetInstances),
@@ -309,12 +320,13 @@ public sealed class YtmDesktopIntegration
 		var endpoint = YtmDesktopEndpoint.Create(host, parsedPort);
 		var events = new YtmDesktopEventEmitter(context.Events);
 
-		var connection = new YtmDesktopConnection(() => new YtmDesktopRealtimeClient(),
-			() => new YtmDesktopApiClient(endpoint),
+		var connection = new YtmDesktopConnection(_realtimeFactory,
+			() => _apiFactory(endpoint),
 			endpoint,
 			token,
 			events,
-			registerArtwork: _player.RegisterArtwork);
+			registerArtwork: _player.RegisterArtwork,
+			onSnapshotChanged: () => _ = context.Variables.RequestRefreshAsync());
 
 		_entryId = entry.Id.ToString();
 		_connection = connection;

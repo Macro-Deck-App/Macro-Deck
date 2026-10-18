@@ -58,7 +58,7 @@ internal sealed class IntegrationGatewayBinderTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(signal.DrainDefinitionsFor(integration.Id),
+			Assert.That(signal.DrainDefinitionsFor(integration.Id, VariableRefreshLane.Eager),
 				Is.EquivalentTo(new[] { "volume-percent", "muted" }));
 			Assert.That(signal.DrainEagerRefreshRequested(integration.Id), Is.False);
 		});

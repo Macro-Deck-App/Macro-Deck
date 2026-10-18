@@ -1,7 +1,10 @@
 using System.Text;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations.Meld;
 using MacroDeckHost.Integrations.Meld.Configuration;
+using MacroDeckHost.Integrations.Meld.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -40,6 +43,14 @@ internal sealed class MeldIntegrationTests
 		"session-changed",
 		"connected", "disconnected"
 	];
+
+	private const string OneTrackSessionJson =
+		"""
+		{"items":{
+		"scene1":{"current":true,"index":0,"name":"Scene","staged":false,"type":"scene"},
+		"track1":{"name":"Track One","muted":false,"monitoring":false,"type":"track"}
+		}}
+		""";
 
 	private MeldIntegration _integration = null!;
 
@@ -276,6 +287,56 @@ internal sealed class MeldIntegrationTests
 			Is.EqualTo(false));
 	}
 
+	[Test]
+	public async Task A_gain_update_from_meld_makes_macro_deck_read_that_tracks_gain_and_muted_variables_again()
+	{
+		var client = new FakeQWebChannelClient();
+		client.Objects["meld"] = FakeQWebChannelClient.BuildMeldObjectInfo(sessionJson: OneTrackSessionJson);
+		using var integration = new MeldIntegration(() => client);
+		var signal = new VariableRefreshSignal();
+		var context = new FakeContext
+		{
+			Variables = new IntegrationVariableApi(MeldIntegration.IntegrationId, null!, signal)
+		};
+		context.ConfigStore.AddEntry("Meld Studio",
+			new Dictionary<string, string?> { [MeldConfigKeys.Host] = "127.0.0.1", [MeldConfigKeys.Port] = "13376" });
+		await integration.InitializeAsync(context);
+		var track = await WaitForTrackAsync(integration);
+		var leaves = (await integration.DiscoverAsync(new VariableCatalogQuery { ParentId = track.Id })).Items;
+
+		client.RaiseSignal(MeldObjects.Object,
+			MeldObjects.GainUpdatedSignal,
+			FakeQWebChannelClient.Parse("\"track1\""),
+			FakeQWebChannelClient.Parse("0.42"),
+			FakeQWebChannelClient.Parse("true"));
+
+		Assert.That(signal.DrainDefinitionsFor(MeldIntegration.IntegrationId, VariableRefreshLane.Eager),
+			Is.EquivalentTo(leaves
+				.Select(leaf => leaf.Id!)
+				.Where(id => id.EndsWith("/gain", StringComparison.Ordinal)
+					|| id.EndsWith("/muted", StringComparison.Ordinal))));
+	}
+
+	private static async Task<VariableDefinition> WaitForTrackAsync(MeldIntegration integration)
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+		while (true)
+		{
+			var tracks = (await integration.DiscoverAsync(new VariableCatalogQuery())).Items;
+			if (tracks.Count > 0)
+			{
+				return tracks[0];
+			}
+
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail("Meld never connected");
+			}
+
+			await Task.Delay(10);
+		}
+	}
+
 	private static EventOptionsContext Options(string eventId, string parameterName)
 	{
 		return new EventOptionsContext
@@ -294,7 +355,7 @@ internal sealed class MeldIntegrationTests
 
 		public IEventPublisher Events { get; } = new NullPublisher();
 
-		public IVariableApi Variables { get; } = new NullVariableApi();
+		public IVariableApi Variables { get; init; } = new NullVariableApi();
 
 		public IUserVariableApi UserVariables => null!;
 

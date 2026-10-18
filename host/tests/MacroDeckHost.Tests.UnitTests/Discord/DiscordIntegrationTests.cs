@@ -1,12 +1,22 @@
 using System.Reflection;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations.Discord;
+using MacroDeckHost.Integrations.Discord.Configuration;
 using MacroDeckHost.Integrations.Discord.Events;
+using MacroDeckHost.Integrations.Discord.Protocol;
 using MacroDeckHost.Integrations.Discord.State;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.ConfigFlow;
+using MacroDeck.Sdk.Decks;
+using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
+using MacroDeck.Sdk.Notifications;
+using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
+using MacroDeck.Sdk.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Discord;
 
@@ -112,6 +122,67 @@ internal sealed class DiscordIntegrationTests
 		var integration = new DiscordIntegration();
 
 		Assert.That((await integration.ReadAsync("discord-nonsense", CancellationToken.None)).Value, Is.Null);
+	}
+
+	[Test]
+	public async Task Starting_to_speak_makes_macro_deck_read_only_the_speaking_variable_again()
+	{
+		using var client = ConnectedRpcClient();
+		var signal = new VariableRefreshSignal();
+		using var integration = await StartAsync(client, signal);
+
+		client.RaiseEvent("SPEAKING_START", """{"user_id":"me"}""");
+
+		Assert.That(signal.DrainDefinitionsFor(DiscordIntegration.IntegrationId, VariableRefreshLane.Eager),
+			Is.EqualTo(new[] { "discord-is-speaking" }));
+	}
+
+	[Test]
+	public async Task Muting_in_discord_makes_macro_deck_read_the_mute_variables_again()
+	{
+		using var client = ConnectedRpcClient();
+		var signal = new VariableRefreshSignal();
+		using var integration = await StartAsync(client, signal);
+
+		client.RaiseEvent("VOICE_SETTINGS_UPDATE", """{"mute":true}""");
+
+		Assert.That(signal.DrainDefinitionsFor(DiscordIntegration.IntegrationId, VariableRefreshLane.Eager),
+			Is.EquivalentTo(new[] { "discord-is-self-muted", "discord-is-muted" }));
+	}
+
+	private static FakeDiscordRpcClient ConnectedRpcClient()
+	{
+		return new FakeDiscordRpcClient()
+			.Responds("AUTHENTICATE",
+				"""{"user":{"id":"me","username":"tester"},"scopes":["rpc","rpc.voice.read","rpc.voice.write"]}""")
+			.Responds("GET_VOICE_SETTINGS", """{"mute":false,"deaf":false,"input":{"volume":80}}""")
+			.Responds("GET_SELECTED_VOICE_CHANNEL",
+				"""{"id":"555","name":"General","guild_id":"999","voice_states":[]}""")
+			.Responds("GET_GUILDS", """{"guilds":[{"id":"999","name":"My Server"}]}""");
+	}
+
+	private static async Task<DiscordIntegration> StartAsync(FakeDiscordRpcClient client, VariableRefreshSignal signal)
+	{
+		var integration = new DiscordIntegration(new FakeDiscordOAuthClient(),
+			new DiscordWebhookClient(),
+			() => client);
+		var variables = new IntegrationVariableApi(DiscordIntegration.IntegrationId, null!, signal);
+		await integration.InitializeAsync(new ConfiguredContext(variables));
+
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+		while (!Equals((await integration.ReadAsync("discord-voice-server")).Value, "My Server")
+			|| !Equals((await integration.ReadAsync("discord-voice-channel")).Value, "General"))
+		{
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail("Discord never connected");
+			}
+
+			await Task.Delay(10);
+		}
+
+		signal.DrainDefinitionsFor(DiscordIntegration.IntegrationId, VariableRefreshLane.Eager);
+		return integration;
 	}
 
 	[Test]
@@ -384,5 +455,59 @@ internal sealed class DiscordIntegrationTests
 
 		Assert.DoesNotThrowAsync(async () => await integration.ShutdownAsync());
 		Assert.DoesNotThrow(integration.Dispose);
+	}
+
+	private sealed class ConfiguredContext(IVariableApi variables) : IIntegrationContext
+	{
+		public IIntegrationConfig Config { get; } = new SingleEntryConfig();
+		public IEventPublisher Events { get; } = new SilentPublisher();
+		public IVariableApi Variables { get; } = variables;
+		public IUserVariableApi UserVariables => throw new NotSupportedException();
+		public IDeckNavigator Deck => throw new NotSupportedException();
+		public IScriptApi Scripts => throw new NotSupportedException();
+		public IWidgetApi Widgets => throw new NotSupportedException();
+		public IUserNotifier Notifications => throw new NotSupportedException();
+	}
+
+	private sealed class SilentPublisher : IEventPublisher
+	{
+		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
+		{
+		}
+	}
+
+	private sealed class SingleEntryConfig : IIntegrationConfig
+	{
+		private static readonly Guid _entryId = Guid.NewGuid();
+
+		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([new ConfigEntrySnapshot(_entryId, "Discord")]);
+		}
+
+		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(key == DiscordConfigKeys.ClientId ? "123456" : null);
+		}
+
+		public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<string?>(key switch
+			{
+				DiscordConfigKeys.ClientSecret => "secret",
+				DiscordConfigKeys.AccessToken => "stored-access",
+				_ => null
+			});
+		}
+
+		public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken ct = default)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task SetSecretAsync(Guid entryId, string key, string value, CancellationToken ct = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

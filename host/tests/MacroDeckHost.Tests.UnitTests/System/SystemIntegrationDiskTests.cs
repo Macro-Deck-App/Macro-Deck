@@ -185,13 +185,13 @@ public class SystemIntegrationDiskTests
 			stale));
 		metrics.Disks.AddRange([_system, _backup]);
 		await integration.RefreshDisksAsync();
-		refresh.DrainDefinitionsFor(SystemIntegration.IntegrationId);
+		refresh.DrainDefinitionsFor(SystemIntegration.IntegrationId, VariableRefreshLane.Eager);
 
 		metrics.Disks.Remove(_backup);
 		metrics.Disks.Add(_stick);
 		await integration.RefreshDisksAsync();
 
-		var requested = refresh.DrainDefinitionsFor(SystemIntegration.IntegrationId);
+		var requested = refresh.DrainDefinitionsFor(SystemIntegration.IntegrationId, VariableRefreshLane.Eager);
 		Assert.Multiple(() =>
 		{
 			Assert.That(requested, Does.Contain("system-disk-1-name").And.Contain("system-disk-1-free-bytes"));

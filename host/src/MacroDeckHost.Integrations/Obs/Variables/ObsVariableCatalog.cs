@@ -123,9 +123,31 @@ internal sealed class ObsVariableCatalog
 					yield return InputLeafId(runtimeId, change.Name, _activeSpec.Segment);
 					yield return InputLeafId(runtimeId, change.Name, _showingSpec.Segment);
 					break;
-				default:
+				case ObsTargetKind.Filter:
 					yield return InputFilterEnabledId(runtimeId, change.Name, change.Child!);
 					yield return SceneFilterEnabledId(runtimeId, change.Name, change.Child!);
+					break;
+				case ObsTargetKind.InputMute:
+					yield return InputLeafId(runtimeId, change.Name, _mutedSpec.Segment);
+					break;
+				case ObsTargetKind.InputVolume:
+					yield return InputLeafId(runtimeId, change.Name, _volumeSpec.Segment);
+					break;
+				case ObsTargetKind.InputAudioTracks:
+					foreach (var track in _audioTrackSpecs)
+					{
+						yield return InputLeafId(runtimeId, change.Name, track.Segment);
+					}
+
+					break;
+				case ObsTargetKind.InputMonitorType:
+					yield return InputLeafId(runtimeId, change.Name, _monitorTypeSpec.Segment);
+					break;
+				case ObsTargetKind.InputSyncOffset:
+					yield return InputLeafId(runtimeId, change.Name, _syncOffsetSpec.Segment);
+					break;
+				case ObsTargetKind.SceneItemVisibility:
+					yield return SceneItemVisibleId(runtimeId, change.Name, change.Child!);
 					break;
 			}
 		}
@@ -133,8 +155,8 @@ internal sealed class ObsVariableCatalog
 
 	public static string CatalogName => "OBS Studio";
 
-	// OBS has no event stream for volume, audio tracks or monitor type, and SupportsPush is all-or-nothing
-	// per provider: true would stop polling for every resource, freezing the event-less ones forever.
+	// OBS events only bring a read forward through a definition refresh: the value still comes from that read,
+	// and SupportsPush is all-or-nothing per provider, so true would stop the reads altogether.
 	public static bool SupportsPush => false;
 
 	// A single OBS install has dozens of resources, not thousands; the host then correctly omits the

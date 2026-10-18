@@ -69,6 +69,33 @@ internal sealed class MeldVariableCatalogTests
 		Assert.That(muted.Status, Is.EqualTo(VariableWriteStatus.NotWritable));
 	}
 
+	[Test]
+	public async Task A_gain_update_from_meld_names_the_gain_and_muted_variables_of_that_track_for_a_refresh()
+	{
+		var client = new FakeQWebChannelClient();
+		client.Objects["meld"] = FakeQWebChannelClient.BuildMeldObjectInfo(sessionJson: SessionJson);
+		var updatedTracks = new List<string>();
+		using var connection = new MeldConnection(() => client, _uri, onTrackGain: updatedTracks.Add);
+		connection.Start();
+		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
+		var catalog = new MeldVariableCatalog(() => connection);
+		var track = (await catalog.DiscoverAsync(new VariableCatalogQuery())).Items.Single();
+		var leaves = (await catalog.DiscoverAsync(new VariableCatalogQuery { ParentId = track.Id })).Items;
+
+		client.RaiseSignal(MeldObjects.Object,
+			MeldObjects.GainUpdatedSignal,
+			FakeQWebChannelClient.Parse("\"track1\""),
+			FakeQWebChannelClient.Parse("0.42"),
+			FakeQWebChannelClient.Parse("true"));
+		await WaitForAsync(() => updatedTracks.Count > 0, "the gain update to be reported");
+
+		Assert.That(MeldVariableCatalog.GainDefinitionIds(updatedTracks.Single()),
+			Is.EquivalentTo(leaves
+				.Select(leaf => leaf.Id!)
+				.Where(id => id.EndsWith("/gain", StringComparison.Ordinal)
+					|| id.EndsWith("/muted", StringComparison.Ordinal))));
+	}
+
 	private static async Task<string> GainIdAsync(MeldVariableCatalog catalog, MeldConnection connection)
 	{
 		_ = connection;

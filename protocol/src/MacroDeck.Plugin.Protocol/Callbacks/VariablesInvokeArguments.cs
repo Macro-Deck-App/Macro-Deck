@@ -71,8 +71,9 @@ public sealed record VariablesHistoryReadResult
 /// <summary>Optional arguments for <c>refresh</c> on <see cref="HostApis.Variables" />.</summary>
 public sealed record VariablesRefreshArguments
 {
-	/// <summary>The definition ids of the declared variables to read again. Absent or empty asks for every
-	/// declared variable. At most <see cref="Limits.ProtocolLimits.MaxVariableRefreshDefinitionIds" /> ids.</summary>
+	/// <summary>The definition ids of the declared variables and bound catalog resources to read again. Absent
+	/// or empty asks for every declared variable. At most
+	/// <see cref="Limits.ProtocolLimits.MaxVariableRefreshDefinitionIds" /> ids.</summary>
 	public IReadOnlyList<string>? DefinitionIds { get; init; }
 }
 
