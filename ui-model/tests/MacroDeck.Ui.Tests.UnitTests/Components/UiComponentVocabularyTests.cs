@@ -1,8 +1,10 @@
+using System.Text.Json;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Negotiation;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Resources;
+using MacroDeck.Ui.Model.Serialization;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Model.References;
 using MacroDeck.Ui.Runtime;
@@ -969,6 +971,32 @@ public class UiComponentVocabularyTests
 				Is.EqualTo("""[{"text":"hi ","color":"#9146ff","weight":"bold"},"""
 					+ """{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"},"alt":"Kappa"},"""
 					+ """{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"}}]"""));
+		});
+	}
+
+	[Test]
+	public void Text_span_styling_reaches_the_wire_only_when_declared_and_reads_back_unchanged()
+	{
+		var styled = UiTextSpan.FromText("x") with
+		{
+			Italic = true,
+			Underline = true,
+			Strikethrough = true,
+			Monospace = true,
+			Background = "#1e1f2280"
+		};
+
+		var plainJson = UiCanonicalJson.Serialize(UiTextSpan.FromText("x", "#9146ff", UiComponentTextWeights.Bold));
+		var styledJson = UiCanonicalJson.Serialize(styled);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plainJson, Is.EqualTo("""{"text":"x","color":"#9146ff","weight":"bold"}"""));
+			Assert.That(styledJson,
+				Is.EqualTo("{\"text\":\"x\",\"italic\":true,\"underline\":true,\"strikethrough\":true,"
+					+ "\"monospace\":true,\"background\":\"#1e1f2280\"}"));
+			Assert.That(JsonSerializer.Deserialize<UiTextSpan>(styledJson, UiCanonicalJson.Options),
+				Is.EqualTo(styled));
 		});
 	}
 

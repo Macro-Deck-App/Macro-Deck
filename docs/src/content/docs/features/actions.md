@@ -292,6 +292,11 @@ than a flat list; the descriptor then reports `configuresWithUiTree`. `Parameter
 is what a client that cannot render a tree falls back to and what the host persists into. Returning `null`
 declines and is not an error. See [Serving a configuration view](/ui/views/configuration/#from-an-action).
 
+A tree's top-level inputs are saved as the parameters they are named after. A value the tree builds itself,
+from nested fields or several inputs, is saved by wrapping the session in an `ActionConfigurationSession`
+and reporting it for its declared parameter; see
+[Reporting values the tree edits](/ui/views/configuration/#reporting-values-the-tree-edits).
+
 ## Inside an action flow
 
 Action flows are user-authored block trees - action calls, conditions, delays, loops, scripts - stored and

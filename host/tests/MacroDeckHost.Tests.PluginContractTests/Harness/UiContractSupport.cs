@@ -153,6 +153,10 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 
 	public string SessionMode { get; set; } = "exclusive";
 
+	public List<string> Flushes { get; } = [];
+
+	public bool SupportsFlush { get; set; } = true;
+
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
 	{
 		return
@@ -226,6 +230,17 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 				if (arguments is not null)
 				{
 					Events.Add(arguments);
+				}
+
+				return CapabilityInvocationResult.Ok();
+			}
+
+			case CapabilityOperations.Ui.SessionFlush when SupportsFlush:
+			{
+				var arguments = Read<UiSessionFlushArguments>(invocation);
+				if (arguments is not null)
+				{
+					Flushes.Add(arguments.SessionId);
 				}
 
 				return CapabilityInvocationResult.Ok();

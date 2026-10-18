@@ -100,6 +100,16 @@ Keep `Text` the plain equivalent of the spans - the same words, with each image 
 A reader that does not know `spans` draws `Text` instead. A span's text is drawn exactly as given: it is
 never resolved as a localization reference and never read as markup.
 
+A text span can also be set in `Italic`, `Underline` or `Strikethrough` (the two lines combine), in a
+`Monospace` face instead of the run's own, and over a `Background` colour spelled like `Color`:
+
+```csharp
+UiTextSpan.FromText("npm ci") with { Monospace = true, Background = "#1e1f22" }
+```
+
+A reader that does not know one of these keys draws the span without it, so the words stay the same and
+only the styling is lost.
+
 ## Colour
 
 ```csharp
@@ -144,7 +154,7 @@ A localization reference resolves in each reader's own active language.
 | `Wrap` (`wrap`) | `bool` | One line, ellipsized | Whether the run may break across lines at all. |
 | `FontFace` (`fontFace`) | Font catalogue identifier | The reader's default face | The typeface, from Macro Deck's font catalogue. |
 | `Digits` (`digits`) | `double`, digit widths | Exactly as wide as the content | How many digit widths the run reserves. |
-| `Spans` (`spans`) | List of `UiTextSpan`: `text` with optional `color` and `weight`, or `image` (`UiResource`) with optional `alt` | Draws `Text` | Inline runs of styled text and images drawn in place of `Text`. |
+| `Spans` (`spans`) | List of `UiTextSpan`: `text` with optional `color`, `weight`, `italic`, `underline`, `strikethrough`, `monospace` and `background`, or `image` (`UiResource`) with optional `alt` | Draws `Text` | Inline runs of styled text and images drawn in place of `Text`. |
 | `Shadow` (`shadow`) | `bool` | The reader decides | `false` turns off the legibility shadow a reader draws behind text, such as Macro Deck's shadow behind text on a button. |
 | `StrokeColor` (`strokeColor`) | `#rrggbb` | No outline | The colour of an outline around the glyphs. |
 | `StrokeWidth` (`strokeWidth`) | `UiSize` length | No outline | How far the outline reaches outside each glyph. Drawn only with `StrokeColor` and a width above zero. |
@@ -200,6 +210,10 @@ takes their width too and pushes them out of the box. See [Sizing](/ui/concepts/
   stays one; draw its `alt` text while the image is unavailable, or nothing when `alt` is absent. Ignore a
   span `color` that is not `#rrggbb` or `#rrggbbaa` and a span that carries neither `text` nor `image`. A
   reader that does not implement `spans` draws `text`.
+- Span styling: draw a text span in italics when `italic` is `true`, underlined and struck through when
+  `underline` and `strikethrough` are (both together when both are), in a monospaced face when `monospace`
+  is, and over `background` with a little padding when it is `#rrggbb` or `#rrggbbaa`. Ignore a value of
+  any other type or spelling, and draw a span whose styling keys you do not implement as a plain span.
 - `shadow`: when `false`, draw no legibility shadow behind the run. Absent or `true` keeps the reader's
   default. A reader that does not know the key keeps its default.
 - `strokeColor` and `strokeWidth`: draw an outline of that colour around every glyph, reaching `strokeWidth`

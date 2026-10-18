@@ -160,6 +160,11 @@ internal static class HostingLog
 		logger.Debug(exception, "Fire-and-forget host callback '{Api}/{Operation}' failed.", api, operation);
 	}
 
+	public static void ParameterValueReportsUnsupported(this ILogger logger)
+	{
+		logger.Information("The host does not accept reported action parameter values, so they are not saved.");
+	}
+
 	public static void UiSessionCallFailed(
 		this ILogger logger,
 		string sessionId,

@@ -6,6 +6,7 @@ using MacroDeck.Plugin.Hosting.Integrations;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Plugins;
@@ -898,6 +899,21 @@ internal sealed class CallbackContractTests
 	}
 
 	[Test]
+	public async Task Reported_parameter_values_reach_the_hosts_ui_session_sink_as_the_calling_plugins()
+	{
+		await _hostInvoker.InvokeAsync(HostApis.Ui,
+			HostOperations.Ui.ReportParameterValues,
+			new UiReportParameterValuesArguments
+			{
+				SessionId = "s1",
+				Values = new Dictionary<string, JsonElement> { ["title"] = JsonSerializer.SerializeToElement("x") }
+			},
+			CancellationToken.None);
+
+		Assert.That(_uiSessions.ParameterValues.Single(), Is.EqualTo((PluginId, "s1", "{\"title\":\"x\"}")));
+	}
+
+	[Test]
 	public async Task A_reload_reaches_the_hosts_ui_session_sink_as_a_reload_and_not_a_fault()
 	{
 		await _hostInvoker.InvokeAsync(HostApis.Ui,
@@ -980,6 +996,17 @@ internal sealed class RecordingUiSessionSink : IUiSessionSink
 	public void PublishReload(string providerId, string sessionId)
 	{
 		Reloads.Add((providerId, sessionId));
+	}
+
+	public List<(string ProviderId, string SessionId, string Values)> ParameterValues { get; } = [];
+
+	public UiSessionIngestResult PublishParameterValues(
+		string providerId,
+		string sessionId,
+		IReadOnlyDictionary<string, JsonElement> values)
+	{
+		ParameterValues.Add((providerId, sessionId, JsonSerializer.Serialize(values)));
+		return Verdict;
 	}
 }
 

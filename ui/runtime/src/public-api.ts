@@ -512,6 +512,12 @@ export {
 } from './ui-components/style';
 export { reloadFailedImages } from './ui-components/image-recovery';
 export {
+  nodeTextSpans,
+  textSpanStyle,
+  type UiTextSpanRun,
+  type UiTextSpanStyling,
+} from './ui-components/text-spans';
+export {
   createTintFilterHold,
   holdTintFilter,
   releaseTintFilter,
@@ -1364,12 +1370,16 @@ export {
   type OpenUiPreviewSessionResponse,
   type OpenWidgetUiSessionRequest,
   type OpenWidgetUiSessionResponse,
+  type FlushUiSessionRequest,
+  type FlushUiSessionResponse,
   type UiAttachSessionRequest,
   type UiAttachSessionResponse,
   type UiSendEventRequest,
   type UiSendEventResponse,
   type UiSessionClosedEvent,
+  type UiSessionFlushedEvent,
   type UiSessionInvalidatedEvent,
+  type UiSessionParameterValuesReportedEvent,
   type UiSessionPatchedEvent,
   type UiSessionTreeUpdatedEvent,
 } from './protocol/messages/ui-session';

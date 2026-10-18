@@ -115,3 +115,24 @@ export interface UiSessionClosedEvent {
   sessionId: string;
   reason?: string;
 }
+
+export interface UiSessionParameterValuesReportedEvent {
+  sessionId: string;
+  values: Record<string, unknown>;
+}
+
+export interface FlushUiSessionRequest {
+  sessionId: string;
+  flushId: string;
+}
+
+export interface FlushUiSessionResponse {
+  accepted: boolean;
+  code?: string;
+  message?: string;
+}
+
+export interface UiSessionFlushedEvent {
+  sessionId: string;
+  flushId: string;
+}

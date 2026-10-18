@@ -28,7 +28,7 @@ add the source's setting variables from the OBS variables: they use the same nam
 The value takes the type the setting already has in OBS:
 
 - An on/off setting needs `true` or `false`.
-- A numeric setting needs a number, such as `75` or `0.5`. OBS stores colours as numbers too, so a value
+- A numeric setting needs a number, such as `75` or `0.5`. OBS stores colors as numbers too, so a value
   like `#FF0000` does not work.
 - A setting that holds a group, such as `font`, needs the whole group as JSON, for example
   `{"face": "Arial", "size": 72}`. OBS replaces the group, so leave nothing out.

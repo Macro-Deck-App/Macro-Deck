@@ -6,9 +6,21 @@ import { UiComponentProperties } from './component-properties';
 import { textWeightValue } from './style';
 import { setImageSource } from './image-recovery';
 
+export interface UiTextSpanStyling {
+  italic?: true;
+  underline?: true;
+  strikethrough?: true;
+  monospace?: true;
+  background?: string;
+}
+
 export type UiTextSpanRun =
-  | { kind: 'text'; text: string; color: string | undefined; weight: string | undefined }
+  | ({ kind: 'text'; text: string; color: string | undefined; weight: string | undefined } & UiTextSpanStyling)
   | { kind: 'image'; image: UiResource; alt: string | undefined };
+
+type SpanStyleSource = UiTextSpanStyling & { color?: string; weight?: string };
+
+const SpanFontMono = 'var(--font-mono, ui-monospace, Menlo, Consolas, monospace)';
 
 interface SpanCarrier extends HTMLElement {
   __mdSpansSignature?: string;
@@ -35,9 +47,15 @@ export function nodeTextSpans(node: UiNode): UiTextSpanRun[] | null {
   const runs: UiTextSpanRun[] = [];
   for (const entry of raw) {
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) continue;
-    const span = entry as { text?: unknown; image?: unknown; alt?: unknown; color?: unknown; weight?: unknown };
+    const span = entry as Record<string, unknown>;
     if (typeof span.text === 'string') {
-      runs.push({ kind: 'text', text: span.text, color: asHexColor(span.color), weight: optionalString(span.weight) });
+      runs.push({
+        kind: 'text',
+        text: span.text,
+        color: asHexColor(span.color),
+        weight: optionalString(span.weight),
+        ...spanStyling(span),
+      });
       continue;
     }
     const image = asResource(span.image);
@@ -46,15 +64,43 @@ export function nodeTextSpans(node: UiNode): UiTextSpanRun[] | null {
   return runs;
 }
 
+function spanStyling(span: Record<string, unknown>): UiTextSpanStyling {
+  const styling: UiTextSpanStyling = {};
+  if (span.italic === true) styling.italic = true;
+  if (span.underline === true) styling.underline = true;
+  if (span.strikethrough === true) styling.strikethrough = true;
+  if (span.monospace === true) styling.monospace = true;
+  const background = asHexColor(span.background);
+  if (background !== undefined) styling.background = background;
+  return styling;
+}
+
+export function textSpanStyle(run: SpanStyleSource): Record<string, string> {
+  const style: Record<string, string> = {};
+  if (run.color !== undefined) style['color'] = run.color;
+  if (run.weight !== undefined) style['font-weight'] = String(textWeightValue(run.weight));
+  if (run.italic) style['font-style'] = 'italic';
+  const lines = [run.underline ? 'underline' : '', run.strikethrough ? 'line-through' : ''].filter(Boolean);
+  if (lines.length > 0) style['text-decoration'] = lines.join(' ');
+  if (run.monospace) style['font-family'] = SpanFontMono;
+  if (run.background !== undefined) {
+    style['background-color'] = run.background;
+    style['padding'] = '0 0.2em';
+    style['border-radius'] = '0.25em';
+    style['box-decoration-break'] = 'clone';
+  }
+  return style;
+}
+
 export function textSpansSignature(runs: UiTextSpanRun[]): string {
   return JSON.stringify(runs);
 }
 
-function textSpan(doc: Document, text: string, color?: string, weight?: string): HTMLElement {
+function textSpan(doc: Document, text: string, styling: SpanStyleSource = {}): HTMLElement {
   const span = doc.createElement('span');
   span.textContent = text;
-  if (color !== undefined) span.style.setProperty('color', color);
-  if (weight !== undefined) span.style.setProperty('font-weight', String(textWeightValue(weight)));
+  const style = textSpanStyle(styling);
+  for (const property of Object.keys(style)) span.style.setProperty(property, style[property]);
   return span;
 }
 
@@ -98,7 +144,7 @@ export function paintTextSpans(
   const doc = element.ownerDocument;
   runs.forEach((run, index) => {
     if (run.kind === 'text') {
-      element.appendChild(textSpan(doc, run.text, run.color, run.weight));
+      element.appendChild(textSpan(doc, run.text, run));
       return;
     }
     const src = sources[index];

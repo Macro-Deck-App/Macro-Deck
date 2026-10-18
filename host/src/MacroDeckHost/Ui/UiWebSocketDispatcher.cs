@@ -341,6 +341,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 				"SendUiEvent" => _uiSessions.SendEvent(Arg<UiSendEventRequest>(payload, 0),
 					_connectionId,
 					_registeredClientId),
+				"FlushUiSession" => _uiSessions.FlushSession(Arg<FlushUiSessionRequest>(payload, 0), _connectionId),
 				"ReportCompanionState" => ReportCompanionState(Arg<ReportCompanionStateRequest>(payload, 0)),
 				"SyncCompanionLicense" => await SyncCompanionLicense(Arg<SyncCompanionLicenseRequest?>(payload, 0),
 					cancellationToken),

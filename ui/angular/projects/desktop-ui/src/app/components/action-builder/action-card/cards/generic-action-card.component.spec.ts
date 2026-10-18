@@ -7,6 +7,7 @@ import {
   UiSessionService,
 } from '@shared';
 import { ActionService } from '../../../../services/action.service';
+import { ActionConfigSessionFlusher } from '../../services/action-config-session-flusher.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { GenericActionCardComponent } from './generic-action-card.component';
 
@@ -330,5 +331,110 @@ describe('GenericActionCardComponent configuration session', () => {
 
     expect(sessions.length).toBe(1);
     expect(sessions[0].closed).toBeFalse();
+  });
+});
+
+class FakeReportingSession extends FakeCardSession {
+  private listener: ((values: Readonly<Record<string, unknown>>) => void) | null = null;
+  flushes = 0;
+
+  onParameterValuesReported(listener: (values: Readonly<Record<string, unknown>>) => void): () => void {
+    this.listener = listener;
+    return () => this.listener = null;
+  }
+
+  flush(): Promise<void> {
+    this.flushes++;
+    return Promise.resolve();
+  }
+
+  report(values: Record<string, unknown>): void {
+    this.listener?.(values);
+  }
+}
+
+describe('GenericActionCardComponent reported parameter values', () => {
+  let fixture: ComponentFixture<GenericActionCardComponent>;
+  let sessions: FakeReportingSession[];
+  let updateParam: jasmine.Spy;
+
+  const BLOCK = {
+    id: 'action-1',
+    type: 'action',
+    blockType: 'acme.compose',
+    label: 'Compose',
+    color: '',
+    integrationId: 'acme',
+    actionId: 'compose',
+    parameters: [
+      { name: 'message', type: 'keyValue', value: {} },
+      { name: 'token', type: 'secret', value: '' },
+      { name: 'password', type: 'password', value: '' },
+    ],
+  } as unknown as ActionBlock;
+
+  beforeEach(async () => {
+    sessions = [];
+    updateParam = jasmine.createSpy('updateParam');
+    await TestBed.configureTestingModule({
+      imports: [GenericActionCardComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        {
+          provide: ActionFlowStore,
+          useValue: {
+            providesButtonState: () => false,
+            consumerSupportsStateProvider: () => false,
+            providesWidgetIcon: () => false,
+            consumerSupportsIconProvider: () => false,
+            isExpanded: () => true,
+            stateProviderBlockId: signal(undefined),
+            iconProviderBlockId: signal(undefined),
+            updateParam,
+          },
+        },
+        { provide: ActionService, useValue: { definitionFor: () => ({ supportsConfigUi: true }) } },
+        {
+          provide: UiSessionService,
+          useValue: {
+            open: (source: UiSessionOpenRequestSource) => {
+              const session = new FakeReportingSession(source);
+              sessions.push(session);
+              return session;
+            },
+          },
+        },
+        { provide: LocalizationService, useValue: { translateKey: (key: string) => key } },
+      ],
+    })
+      .overrideComponent(GenericActionCardComponent, { set: { imports: [], schemas: [CUSTOM_ELEMENTS_SCHEMA] } })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(GenericActionCardComponent);
+    fixture.componentRef.setInput('block', BLOCK);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  it('applies a reported value of a declared parameter as an edit of that parameter', () => {
+    sessions[0].report({ message: { content: 'hi' } });
+
+    expect(updateParam).toHaveBeenCalledOnceWith('action-1', 'message', { content: 'hi' });
+  });
+
+  it('ignores reported values for undeclared, secret and password parameters', () => {
+    sessions[0].report({ undeclared: 'x', token: 'leaked', password: 'hunter2' });
+
+    expect(updateParam).not.toHaveBeenCalled();
+  });
+
+  it('is flushed before a save while its session is open, and no longer once it closed', async () => {
+    const flusher = TestBed.inject(ActionConfigSessionFlusher);
+
+    await flusher.flushAll();
+    fixture.destroy();
+    await flusher.flushAll();
+
+    expect(sessions[0].flushes).toBe(1);
   });
 });

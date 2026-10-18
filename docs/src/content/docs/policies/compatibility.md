@@ -238,6 +238,13 @@ What did **not** need a major:
   `IUiSession.Dispatch(UiEvent, IUiEventOrigin)` overload whose default forwards to `Dispatch(UiEvent)`, so a
   session compiled before it keeps receiving every event. The `ui` host API gained `origin.report-failure`
   and `origin.show-modal`; against an older host they answer `false` or a cancellation.
+- [Reporting values from an action's configuration](/ui/views/configuration/#reporting-values-the-tree-edits)
+  added `IActionConfigurationSession`, `ActionConfigurationSession` and
+  `ActionParameterValuesReportedEventArgs`. A configuration session written before them is unchanged and
+  never reports. The `ui` host API gained `report-parameter-values`, which an older host answers with
+  `CAPABILITY_UNSUPPORTED` and the SDK then drops, so a reported value is not saved there. The `ui`
+  capability gained `session.flush`, which a plugin built before it answers with `CAPABILITY_UNSUPPORTED`
+  and the host treats as flushed.
 - `IVariableApi` gained `RequestRefreshAsync` and `NotifyDeclarationsChangedAsync`, both defaulting to a
   no-op, and the `variables` host API gained `refresh`; an older host makes the request a no-op.
   `NotifyDeclarationsChangedAsync` uses the existing `state.update`.

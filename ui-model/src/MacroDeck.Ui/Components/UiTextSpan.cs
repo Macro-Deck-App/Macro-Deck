@@ -36,6 +36,32 @@ public sealed record UiTextSpan
 	[JsonPropertyOrder(4)]
 	public string? Weight { get; init; }
 
+	/// <summary>Whether a text span is drawn in italics. Absent or <c>false</c> means upright. A reader that
+	/// does not know the key draws the span upright.</summary>
+	[JsonPropertyOrder(5)]
+	public bool? Italic { get; init; }
+
+	/// <summary>Whether a text span is underlined. Combines with <see cref="Strikethrough" />. A reader that
+	/// does not know the key draws no line.</summary>
+	[JsonPropertyOrder(6)]
+	public bool? Underline { get; init; }
+
+	/// <summary>Whether a text span is struck through. Combines with <see cref="Underline" />. A reader that
+	/// does not know the key draws no line.</summary>
+	[JsonPropertyOrder(7)]
+	public bool? Strikethrough { get; init; }
+
+	/// <summary>Whether a text span is drawn in a monospaced face instead of the run's own face. A reader that
+	/// does not know the key draws the run's face.</summary>
+	[JsonPropertyOrder(8)]
+	public bool? Monospace { get; init; }
+
+	/// <summary>A literal colour drawn behind a text span, spelled as <see cref="Color" /> is. Absent means no
+	/// background. A reader ignores any other spelling, and a reader that does not know the key draws none.
+	/// </summary>
+	[JsonPropertyOrder(9)]
+	public string? Background { get; init; }
+
 	/// <summary>A text span.</summary>
 	public static UiTextSpan FromText(string text, string? color = null, string? weight = null)
 	{

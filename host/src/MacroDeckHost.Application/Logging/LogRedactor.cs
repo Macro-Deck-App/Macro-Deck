@@ -15,6 +15,7 @@ public static partial class LogRedactor
 
 		var result = UserPathRedactor.Current.Redact(text);
 		result = VideoStreamRelayPathRegex().Replace(result, "${prefix}" + Placeholder);
+		result = WebhookPathRegex().Replace(result, "${prefix}" + Placeholder);
 		result = SensitivePairRegex().Replace(result, "${key}${separator}${quote}" + Placeholder);
 		result = UrlUserInfoRegex().Replace(result, $"${{scheme}}{Placeholder}:{Placeholder}@");
 		result = AuthorizationSchemeRegex().Replace(result, $"${{scheme}} {Placeholder}");
@@ -28,6 +29,11 @@ public static partial class LogRedactor
 	[GeneratedRegex("""(?<prefix>api/+video-streams/+relay/+)[A-Za-z0-9_\-]+""",
 		RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
 	private static partial Regex VideoStreamRelayPathRegex();
+
+	// A Discord style webhook URL carries its token in the path, so the token alone authorizes posting.
+	[GeneratedRegex("""(?<prefix>api/+(?:v\d+/+)?webhooks/+\d+/+)[A-Za-z0-9_\-]+""",
+		RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+	private static partial Regex WebhookPathRegex();
 
 	[GeneratedRegex(
 		"""(?<![A-Za-z0-9_])(?:(?<key>access_token|refresh_token|id_token|client_secret|private_key|api_key|api_token|apikey|apitoken|pluginSecret|sessionToken|enrollmentToken|ticket|authorization|credentials|credential|signature|password|passwd|token|secret|jwt|auth|pwd|key)(?<separator>["']?\s*[:=]\s*)|(?<key>code)(?<separator>["']?\s*=\s*))(?<quote>["']?)(?:(?:Bearer|Basic|Digest)\s+)?[^\s&"'{}\\]+""",

@@ -119,7 +119,7 @@ public class UiOpaquePayloadTests
 	private static readonly string[] _uiHostOperations =
 	[
 		"snapshot", "patch", "fault", "reload", "register-resource", "remove-resource", "register-music-player-artwork",
-		"origin.report-failure", "origin.show-modal"
+		"origin.report-failure", "origin.show-modal", "report-parameter-values"
 	];
 
 	[Test]

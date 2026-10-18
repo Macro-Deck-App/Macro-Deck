@@ -103,5 +103,12 @@ public interface IUiSessionBroker : IUiSessionSink
 	/// </summary>
 	UiSendEventResponse SendEvent(UiSendEventRequest request, string connectionId, string? actingClientId = null);
 
+	/// <summary>
+	/// Queues a flush behind every event already relayed to the session's provider and answers at once. Once
+	/// the provider has handled those events, <see cref="UiSessionFlushedEvent" /> is sent to
+	/// <paramref name="connectionId" /> alone, after every value the session reported while handling them.
+	/// </summary>
+	FlushUiSessionResponse FlushSession(FlushUiSessionRequest request, string connectionId);
+
 	void SweepDraining();
 }

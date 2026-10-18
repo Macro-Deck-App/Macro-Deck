@@ -281,6 +281,17 @@ public static class UiConfigProperties
 	/// <summary>The most bands a thresholds editor lets the user add up to.</summary>
 	public const string MaxCount = "maxCount";
 
+	/// <summary>A paragraph's inline runs of styled text, drawn in place of its plain <see cref="Text" />.
+	/// </summary>
+	public const string Spans = "spans";
+
+	/// <summary>How a paragraph is set as a block, such as a quote or a code block.</summary>
+	public const string Variant = "variant";
+
+	/// <summary>The colour of the leading bar that sets a stack apart as a card on a fixed dark surface.
+	/// </summary>
+	public const string Accent = "accent";
+
 #pragma warning restore CA1720
 
 	/// <summary>The property keys this package ships names for, in declaration order. Not exhaustive - see the
@@ -296,6 +307,6 @@ public static class UiConfigProperties
 		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
 		Reorderable, Searchable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
 		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent, AllowVariables, Unit,
-		FixedCount, FixedColors, MaxCount
+		FixedCount, FixedColors, MaxCount, Spans, Variant, Accent
 	];
 }

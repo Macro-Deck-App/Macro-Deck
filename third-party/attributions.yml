@@ -219,7 +219,7 @@ assets:
     license: Apache-2.0
     copyright: Dashboard Icons contributors
     note: >-
-      Logos of the AdGuard Home, Discord, Home Assistant, Jellyfin, Outlook Calendar, Spotify, Steam, Twitch, YouTube and
+      Logos of the AdGuard Home, Discord, Discord Webhooks, Home Assistant, Jellyfin, Outlook Calendar, Spotify, Steam, Twitch, YouTube and
       YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are
       trademarks of their respective owners and are used to identify the integration or platform only. The AdGuard
       Home, Jellyfin and Steam logos' inline styles were rewritten as presentation attributes, and the Outlook Calendar logo is
@@ -227,6 +227,7 @@ assets:
     paths:
       - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/logo.svg
       - host/src/MacroDeckHost.Integrations/Discord/Icons/discord-icon.svg
+      - host/src/MacroDeckHost.Integrations/DiscordWebhooks/Icons/discord-webhooks-icon.svg
       - host/src/MacroDeckHost.Integrations/HomeAssistant/Icons/home-assistant-icon.svg
       - host/src/MacroDeckHost.Integrations/Jellyfin/Icons/widget/logo.svg
       - host/src/MacroDeckHost.Integrations/MicrosoftCalendar/Icons/outlook-calendar-icon.svg

@@ -80,7 +80,7 @@ plays elsewhere.
 
 ## Widgets
 
-The Steam widgets have a dark face in Steam's colours unless you pick a background colour or a transparent
+The Steam widgets have a dark face in Steam's colors unless you pick a background color or a transparent
 background in their settings.
 
 ### Steam currently playing

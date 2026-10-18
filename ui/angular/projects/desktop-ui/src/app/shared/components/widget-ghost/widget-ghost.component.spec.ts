@@ -43,12 +43,14 @@ describe('WidgetGhostComponent', () => {
 
   beforeEach(() => {
     const apiSpy = jasmine.createSpyObj<ApiService>('ApiService',
-      ['onNotification', 'onUiSessionTreeUpdated', 'onUiSessionPatched', 'onUiSessionInvalidated', 'onUiSessionClosed', 'openWidgetUiSession', 'closeUiSession', 'onWidgetTypeCatalogChanged']);
+      ['onNotification', 'onUiSessionTreeUpdated', 'onUiSessionPatched', 'onUiSessionInvalidated', 'onUiSessionClosed', 'onUiSessionParameterValuesReported', 'onUiSessionFlushed', 'openWidgetUiSession', 'closeUiSession', 'onWidgetTypeCatalogChanged']);
     apiSpy.onNotification.and.callFake(() => new Subject());
     apiSpy.onUiSessionTreeUpdated.and.callFake(() => new Subject());
     apiSpy.onUiSessionPatched.and.callFake(() => new Subject());
     apiSpy.onUiSessionInvalidated.and.callFake(() => new Subject());
     apiSpy.onUiSessionClosed.and.callFake(() => new Subject());
+    apiSpy.onUiSessionParameterValuesReported.and.callFake(() => new Subject());
+    apiSpy.onUiSessionFlushed.and.callFake(() => new Subject());
     apiSpy.openWidgetUiSession.and.returnValue(Promise.resolve({ success: false } as never));
     apiSpy.closeUiSession.and.returnValue(Promise.resolve({ success: true } as never));
     apiSpy.onWidgetTypeCatalogChanged.and.callFake(() => new Subject());
