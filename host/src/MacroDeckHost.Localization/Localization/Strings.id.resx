@@ -2877,6 +2877,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Impor gagal</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Data JSON tidak valid di {location}. Periksa jenis kolom dan sintaksnya.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Berkas ini bukan arsip Macro Deck yang valid</value>
   </data>

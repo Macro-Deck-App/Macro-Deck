@@ -2878,6 +2878,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Échec de l'importation</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Données JSON invalides à {location}. Vérifie le type du champ et la syntaxe.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Le fichier n'est pas une archive Macro Deck valide</value>
   </data>

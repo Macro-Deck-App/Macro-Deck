@@ -2877,6 +2877,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Import failed</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Invalid JSON data at {location}. Check the field type and syntax.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>The file is not a valid Macro Deck archive</value>
   </data>

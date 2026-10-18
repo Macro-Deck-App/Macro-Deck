@@ -2877,6 +2877,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Importeren is mislukt</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Ongeldige JSON-gegevens bij {location}. Controleer het veldtype en de syntaxis.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Het bestand is geen geldig Macro Deck-archief</value>
   </data>

@@ -1153,6 +1153,7 @@ export const AppStrings = {
 		Portability: {
 			ImportFailed: 'macrodeck.app:Errors.Portability.ImportFailed',
 			InvalidArchive: 'macrodeck.app:Errors.Portability.InvalidArchive',
+			InvalidJson: 'macrodeck.app:Errors.Portability.InvalidJson',
 			OperationFailed: 'macrodeck.app:Errors.Portability.OperationFailed',
 		},
 		Profile: {
@@ -10496,6 +10497,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.Plugins.TakeoverConfirmationRequired': 'Approving this request lets a development build take over an installed plugin. Confirm the takeover first.',
 	'macrodeck.app:Errors.Portability.ImportFailed': 'Import failed',
 	'macrodeck.app:Errors.Portability.InvalidArchive': 'The file is not a valid Macro Deck archive',
+	'macrodeck.app:Errors.Portability.InvalidJson': 'Invalid JSON data at {location}. Check the field type and syntax.',
 	'macrodeck.app:Errors.Portability.OperationFailed': 'Operation failed',
 	'macrodeck.app:Errors.Profile.CreateFailed': 'Failed to create profile',
 	'macrodeck.app:Errors.Profile.DeleteFailed': 'Failed to delete profile',

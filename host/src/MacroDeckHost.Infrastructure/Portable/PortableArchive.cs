@@ -16,7 +16,8 @@ public enum PortableReadStatus
 	InvalidArchive,
 	UnsupportedVersion,
 	PasswordRequired,
-	WrongPassword
+	WrongPassword,
+	InvalidJson
 }
 
 public sealed record PortableReadOutcome(
@@ -26,6 +27,8 @@ public sealed record PortableReadOutcome(
 	IReadOnlyList<PortableIconFile> Icons)
 {
 	public IReadOnlyList<PortableFontFile> Fonts { get; init; } = [];
+
+	public string? JsonErrorLocation { get; init; }
 }
 
 public static class PortableArchive
@@ -87,10 +90,16 @@ public static class PortableArchive
 
 	public static PortableArchiveManifest? ReadManifest(byte[] archiveBytes)
 	{
+		return ReadManifest(archiveBytes, out _);
+	}
+
+	public static PortableArchiveManifest? ReadManifest(byte[] archiveBytes, out string? jsonErrorLocation)
+	{
+		jsonErrorLocation = null;
 		try
 		{
 			using var zip = new ZipArchive(new MemoryStream(archiveBytes), ZipArchiveMode.Read);
-			return ReadManifest(zip);
+			return ReadManifest(zip, out jsonErrorLocation);
 		}
 		catch (InvalidDataException)
 		{
@@ -117,10 +126,10 @@ public static class PortableArchive
 				return Fail(PortableReadStatus.InvalidArchive);
 			}
 
-			var manifest = ReadManifest(zip);
+			var manifest = ReadManifest(zip, out var jsonErrorLocation);
 			if (manifest is null)
 			{
-				return Fail(PortableReadStatus.InvalidArchive);
+				return ReadFailure(jsonErrorLocation);
 			}
 
 			if (manifest.FormatVersion > PortableArchiveManifest.CurrentFormatVersion)
@@ -136,10 +145,10 @@ public static class PortableArchive
 
 	private static PortableReadOutcome ReadPlain(ZipArchive zip, PortableArchiveManifest manifest)
 	{
-		var content = ReadContent(zip);
+		var content = ReadContent(zip, out var jsonErrorLocation);
 		if (content is null)
 		{
-			return Fail(PortableReadStatus.InvalidArchive);
+			return ReadFailure(jsonErrorLocation);
 		}
 
 		var icons = ReadIcons(zip);
@@ -200,10 +209,10 @@ public static class PortableArchive
 				return Fail(PortableReadStatus.InvalidArchive);
 			}
 
-			var content = ReadContent(inner);
+			var content = ReadContent(inner, out var jsonErrorLocation);
 			if (content is null)
 			{
-				return Fail(PortableReadStatus.InvalidArchive);
+				return ReadFailure(jsonErrorLocation);
 			}
 
 			var icons = ReadIcons(inner);
@@ -296,8 +305,9 @@ public static class PortableArchive
 		stream.Write(manifestBytes);
 	}
 
-	private static PortableArchiveManifest? ReadManifest(ZipArchive zip)
+	private static PortableArchiveManifest? ReadManifest(ZipArchive zip, out string? jsonErrorLocation)
 	{
+		jsonErrorLocation = null;
 		var entry = zip.GetEntry(ManifestEntry);
 		if (entry is null)
 		{
@@ -314,14 +324,16 @@ public static class PortableArchive
 		{
 			return JsonSerializer.Deserialize<PortableArchiveManifest>(bytes, PersistenceJsonOptions.Default);
 		}
-		catch (JsonException)
+		catch (JsonException ex)
 		{
+			jsonErrorLocation = JsonLocation(ManifestEntry, ex);
 			return null;
 		}
 	}
 
-	private static PortableContent? ReadContent(ZipArchive zip)
+	private static PortableContent? ReadContent(ZipArchive zip, out string? jsonErrorLocation)
 	{
+		jsonErrorLocation = null;
 		var entry = zip.GetEntry(ContentEntry);
 		if (entry is null)
 		{
@@ -338,8 +350,9 @@ public static class PortableArchive
 		{
 			return JsonSerializer.Deserialize<PortableContent>(bytes, PersistenceJsonOptions.Default);
 		}
-		catch (JsonException)
+		catch (JsonException ex)
 		{
+			jsonErrorLocation = JsonLocation(ContentEntry, ex);
 			return null;
 		}
 	}
@@ -448,5 +461,28 @@ public static class PortableArchive
 	private static PortableReadOutcome Fail(PortableReadStatus status)
 	{
 		return new PortableReadOutcome(status, null, null, []);
+	}
+
+	private static PortableReadOutcome ReadFailure(string? jsonErrorLocation)
+	{
+		return jsonErrorLocation is null
+			? Fail(PortableReadStatus.InvalidArchive)
+			: new PortableReadOutcome(PortableReadStatus.InvalidJson, null, null, [])
+				{ JsonErrorLocation = jsonErrorLocation };
+	}
+
+	private static string JsonLocation(string entry, JsonException error)
+	{
+		var path = error.Path;
+		if (string.IsNullOrEmpty(path) || path.Length > 256 || path.Any(char.IsControl))
+		{
+			path = "$";
+		}
+
+		// Parser messages can include archive values. Only report coordinates, never the exception message.
+		var line = error.LineNumber.GetValueOrDefault() + 1;
+		var column = error.BytePositionInLine.GetValueOrDefault() + 1;
+		return string.Create(CultureInfo.InvariantCulture,
+			$"{entry}:{path}:{line}:{column}");
 	}
 }

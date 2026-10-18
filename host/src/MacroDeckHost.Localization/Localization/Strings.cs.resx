@@ -2878,6 +2878,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Import se nezdařil</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Neplatná data JSON na pozici {location}. Zkontrolujte typ pole a syntaxi.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Tento soubor není platným archivem Macro Deck</value>
   </data>

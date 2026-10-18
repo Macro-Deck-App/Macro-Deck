@@ -2877,6 +2877,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>가져오기에 실패했습니다</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>{location}의 JSON 데이터가 유효하지 않습니다. 필드 형식과 구문을 확인하세요.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>이 파일은 올바른 Macro Deck 아카이브가 아닙니다</value>
   </data>

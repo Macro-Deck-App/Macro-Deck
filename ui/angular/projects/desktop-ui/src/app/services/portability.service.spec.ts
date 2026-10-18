@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import { ArchiveSummary, IpcFolder, IpcProfile, IpcWidget } from '@macro-deck/runtime';
-import { ApiService, ProfileService } from '@shared';
+import { ApiService, LocalizationService, ProfileService } from '@shared';
 import { FileSaveService } from './file-save.service';
 import { PortabilityService, fileSource, pathSource } from './portability.service';
 
@@ -12,6 +12,7 @@ describe('PortabilityService', () => {
   let service: PortabilityService;
 
   beforeEach(() => {
+    localStorage.clear();
     apiSpy = jasmine.createSpyObj<ApiService>('ApiService', [
       'exportProfile',
       'importProfile',
@@ -25,6 +26,7 @@ describe('PortabilityService', () => {
       'inspectArchive',
       'inspectArchivePath',
       'onNotification',
+      'getLocalization',
     ]);
     apiSpy.onNotification.and.returnValue(new Subject().asObservable());
     profileSpy = jasmine.createSpyObj<ProfileService>('ProfileService', ['loadProfiles', 'selectProfile']);
@@ -43,6 +45,83 @@ describe('PortabilityService', () => {
       ],
     });
     service = TestBed.inject(PortabilityService);
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+    document.documentElement.removeAttribute('dir');
+    document.documentElement.lang = 'en';
+  });
+
+  function diagnosticResponse(location: string) {
+    return JSON.parse(JSON.stringify({
+      success: false,
+      error: {
+        code: 'InvalidJson',
+        message: {
+          $localized: {
+            scope: 'macrodeck.app',
+            key: 'Errors.Portability.InvalidJson',
+            arguments: { location },
+          },
+        },
+      },
+    }));
+  }
+
+  for (const kind of ['profile', 'folder', 'widgets'] as const) {
+    it(`resolves a localized ${kind} import error from the wire before showing it`, async () => {
+      const location = 'content.json:$.profile.defaultRows:1:153';
+      const response = diagnosticResponse(location);
+      apiSpy.importProfile.and.resolveTo(response);
+      apiSpy.importFolder.and.resolveTo(response);
+      apiSpy.importWidgets.and.resolveTo(response);
+      const source = fileSource(new File(['x'], 'sample'));
+
+      const outcome = kind === 'profile' ? await service.importProfile(source)
+        : kind === 'folder' ? await service.importFolder('pid', null, source)
+        : await service.importWidgets('fid', 0, 0, source);
+
+      expect(outcome).toEqual({
+        status: 'error',
+        message: `Invalid JSON data at ${location}. Check the field type and syntax.`,
+      });
+    });
+  }
+
+  it('resolves localized inspection errors as readable text', async () => {
+    const location = 'manifest.json:$.kind:1:20';
+    apiSpy.inspectArchive.and.resolveTo(diagnosticResponse(location));
+
+    const outcome = await service.inspectArchive(fileSource(new File(['x'], 'sample')));
+
+    expect(outcome).toEqual({
+      status: 'error',
+      message: `Invalid JSON data at ${location}. Check the field type and syntax.`,
+    });
+  });
+
+  it('uses the client language and preserves the import field coordinates', async () => {
+    const location = 'content.json:$.profile.defaultRows:1:153';
+    apiSpy.getLocalization.and.resolveTo({
+      culture: 'fr',
+      fallbackCulture: 'en',
+      followSystem: false,
+      availableCultures: ['en', 'fr'],
+      translations: {
+        'macrodeck.app:Errors.Portability.InvalidJson':
+          'Données JSON invalides à {location}. Vérifie le type du champ et la syntaxe.',
+      },
+    });
+    await TestBed.inject(LocalizationService).loadFromHost();
+    apiSpy.importProfile.and.resolveTo(diagnosticResponse(location));
+
+    const outcome = await service.importProfile(fileSource(new File(['x'], 'sample')));
+
+    expect(outcome).toEqual({
+      status: 'error',
+      message: `Données JSON invalides à ${location}. Vérifie le type du champ et la syntaxe.`,
+    });
   });
 
   it('exportProfile forwards the password only when including secrets', async () => {

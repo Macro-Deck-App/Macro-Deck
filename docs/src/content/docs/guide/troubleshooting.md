@@ -18,6 +18,27 @@ Macro Deck writes its logs to the `logs` folder inside its data folder:
 | macOS | `~/Library/Application Support/MacroDeck` |
 | Linux | `~/.local/share/MacroDeck`, or `$XDG_DATA_HOME/MacroDeck` if that is set |
 
+## An exported profile, folder or button will not import
+
+An invalid JSON error identifies a location such as
+`content.json:$.widgets[0].width:2:24`: the archive entry, the JSON path, then the line and byte position
+(both start at one). The byte position may differ from a text editor's character column when the line
+contains non-ASCII text.
+
+If you generated or edited the archive yourself, check that field's type and the JSON syntax. For example,
+grid dimensions require integer tokens such as `3`, not `3.0`. Re-exporting the item from Macro Deck is
+another way to obtain the supported format. A valid JSON file can still contain an incompatible field type.
+
+If the file came from someone else, share the error location with its creator. Do not post an entire
+archive publicly if it contains private commands, variables or secrets. Other archive failures can still
+show the general invalid-archive error; the JSON location is only available when parsing fails.
+
+JSON rejections during profile, folder or button import, and invalid JSON found while inspecting a
+manifest, also produce a warning in the existing host logs. Look for `Rejected portable archive`:
+the entry records the operation, `InvalidJson` and the same JSON location shown in the dialog. The log
+does not include the archive contents, password or local filename. The configured minimum log level
+must allow warnings. JSON paths can include custom field names, so review an excerpt before sharing it.
+
 ## A device cannot connect
 
 - **Same network:** your phone, tablet or browser must be on the same network as the computer

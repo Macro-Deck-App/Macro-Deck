@@ -2877,6 +2877,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>インポートに失敗しました</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>{location} の JSON データが無効です。フィールドの型と構文を確認してください。</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>このファイルは有効な Macro Deck のアーカイブではありません</value>
   </data>

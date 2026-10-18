@@ -2877,6 +2877,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Не удалось импортировать</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Недопустимые данные JSON в {location}. Проверьте тип поля и синтаксис.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Файл не является допустимым архивом Macro Deck</value>
   </data>
