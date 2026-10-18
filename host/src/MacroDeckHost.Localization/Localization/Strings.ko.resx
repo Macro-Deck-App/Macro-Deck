@@ -19150,6 +19150,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="WebClient.Meta.Title" xml:space="preserve">
     <value>웹 클라이언트 - Macro Deck</value>
   </data>
+  <data name="WebClient.OpenLink.Blocked" xml:space="preserve">
+    <value>브라우저가 링크를 차단했습니다</value>
+  </data>
+  <data name="WebClient.OpenLink.TapToOpen" xml:space="preserve">
+    <value>링크를 탭하여 여세요.</value>
+  </data>
   <data name="WebClient.Outdated.Body" xml:space="preserve">
     <value>페이지를 새로 고치세요. 계속 오래된 상태면 브라우저 캐시를 지우세요.</value>
   </data>
@@ -23720,5 +23726,308 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
     <value>배터리</value>
+  </data>
+  <data name="Integrations.Feeds.Name" xml:space="preserve">
+    <value>RSS 피드</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Title" xml:space="preserve">
+    <value>피드 추가</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Description" xml:space="preserve">
+    <value>RSS 또는 Atom 피드를 구독합니다. Macro Deck은 피드를 저장하기 전에 주소를 확인합니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlLabel" xml:space="preserve">
+    <value>피드 주소</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlDescription" xml:space="preserve">
+    <value>RSS 또는 Atom 피드의 주소입니다. 예를 들어 웹사이트의 RSS 아이콘에 연결된 링크입니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.NameDescription" xml:space="preserve">
+    <value>비워 두면 피드 자체의 제목을 사용합니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupLabel" xml:space="preserve">
+    <value>그룹</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupDescription" xml:space="preserve">
+    <value>선택 사항입니다. 같은 그룹의 피드는 하나의 위젯에 함께 표시할 수 있습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshLabel" xml:space="preserve">
+    <value>새로 고침 간격(분)</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshDescription" xml:space="preserve">
+    <value>Macro Deck이 피드에서 새 글을 확인하는 빈도입니다. 최소 5분입니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeLabel" xml:space="preserve">
+    <value>다음을 포함하는 글만</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeDescription" xml:space="preserve">
+    <value>선택 사항입니다. 쉼표로 구분한 단어입니다. 제목이나 설명에 그중 하나가 포함된 글만 남깁니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeLabel" xml:space="preserve">
+    <value>다음을 포함하는 글 건너뛰기</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeDescription" xml:space="preserve">
+    <value>선택 사항입니다. 쉼표로 구분한 단어입니다. 제목이나 설명에 그중 하나가 포함된 글은 건너뜁니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesLabel" xml:space="preserve">
+    <value>다음 카테고리만</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesDescription" xml:space="preserve">
+    <value>선택 사항입니다. 쉼표로 구분한 카테고리입니다. 그중 하나에 속한 글만 남깁니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkLabel" xml:space="preserve">
+    <value>로컬 네트워크 주소 허용</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkDescription" xml:space="preserve">
+    <value>NAS처럼 자체 네트워크에서 제공되는 피드에만 켜세요. 그렇지 않으면 Macro Deck은 로컬 및 사설 네트워크의 주소를 거부합니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.EnterUrl" xml:space="preserve">
+    <value>올바른 피드 주소를 입력하세요(예: {exampleUrl}).</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UnknownStep" xml:space="preserve">
+    <value>이 단계는 피드 추가 과정에 포함되지 않습니다. 처음부터 다시 시작하세요.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Timeout" xml:space="preserve">
+    <value>피드가 제 시간에 응답하지 않았습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.BlockedAddress" xml:space="preserve">
+    <value>이 주소는 로컬 또는 사설 네트워크에 있습니다. 사용하려면 로컬 네트워크 주소 허용을 켜세요.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.InvalidFeed" xml:space="preserve">
+    <value>이 주소는 RSS 또는 Atom 피드를 반환하지 않습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.TooLarge" xml:space="preserve">
+    <value>피드가 5MB보다 큽니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Network" xml:space="preserve">
+    <value>피드에 연결할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.HttpStatus" xml:space="preserve">
+    <value>피드 서버가 오류 {status}(으)로 응답했습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Name" xml:space="preserve">
+    <value>피드 업데이트</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Description" xml:space="preserve">
+    <value>모든 피드 또는 선택한 피드에서 새 글을 바로 확인합니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.FeedNotFound" xml:space="preserve">
+    <value>이 피드는 더 이상 없습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.SomeFeedsFailed" xml:space="preserve">
+    <value>일부 피드를 업데이트하지 못했습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.Category" xml:space="preserve">
+    <value>RSS 피드</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemName" xml:space="preserve">
+    <value>새 피드 글</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemDescription" xml:space="preserve">
+    <value>피드에 이전에 없던 글이 있습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedName" xml:space="preserve">
+    <value>피드 업데이트됨</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedDescription" xml:space="preserve">
+    <value>새로 고침 시 피드의 글이 변경되었습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedName" xml:space="preserve">
+    <value>피드 업데이트 실패</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedDescription" xml:space="preserve">
+    <value>피드를 새로 고칠 수 없습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedName" xml:space="preserve">
+    <value>피드 글 열림</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedDescription" xml:space="preserve">
+    <value>피드 위젯에서 글을 탭했습니다.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Feed" xml:space="preserve">
+    <value>피드</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedDescription" xml:space="preserve">
+    <value>모든 피드에 적용하려면 비워 두세요.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.AllFeeds" xml:space="preserve">
+    <value>모든 피드</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedTitle" xml:space="preserve">
+    <value>피드 이름</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Title" xml:space="preserve">
+    <value>제목</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Url" xml:space="preserve">
+    <value>링크</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Description" xml:space="preserve">
+    <value>설명</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Author" xml:space="preserve">
+    <value>작성자</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Published" xml:space="preserve">
+    <value>게시 시간</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Categories" xml:space="preserve">
+    <value>카테고리</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Error" xml:space="preserve">
+    <value>오류</value>
+  </data>
+  <data name="Integrations.Feeds.Params.ErrorDescription" xml:space="preserve">
+    <value>원인을 나타내는 코드입니다(예: timeout, http-404).</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Widget" xml:space="preserve">
+    <value>위젯</value>
+  </data>
+  <data name="Integrations.Feeds.Params.WidgetDescription" xml:space="preserve">
+    <value>글을 탭한 위젯입니다. 모든 위젯에 적용하려면 비워 두세요.</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestTitle" xml:space="preserve">
+    <value>최신 글 제목</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestUrl" xml:space="preserve">
+    <value>최신 글 링크</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestDescription" xml:space="preserve">
+    <value>최신 글 설명</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestPublished" xml:space="preserve">
+    <value>최신 글 게시 시간</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestAuthor" xml:space="preserve">
+    <value>최신 글 작성자</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.ItemCount" xml:space="preserve">
+    <value>글 수</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UnreadCount" xml:space="preserve">
+    <value>읽지 않은 글 수</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LastUpdated" xml:space="preserve">
+    <value>마지막 업데이트</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UpdateStatus" xml:space="preserve">
+    <value>업데이트 상태</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllItemCount" xml:space="preserve">
+    <value>전체 피드의 글 수</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllUnreadCount" xml:space="preserve">
+    <value>전체 피드의 읽지 않은 글 수</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Name" xml:space="preserve">
+    <value>피드 목록</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Description" xml:space="preserve">
+    <value>RSS 및 Atom 피드의 최신 글입니다.</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Name" xml:space="preserve">
+    <value>추천 글</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Description" xml:space="preserve">
+    <value>피드의 최신 글을 이미지와 함께 표시합니다.</value>
+  </data>
+  <data name="Widgets.Feeds.AllFeeds" xml:space="preserve">
+    <value>모든 피드</value>
+  </data>
+  <data name="Widgets.Feeds.NoFeeds" xml:space="preserve">
+    <value>연동의 RSS 피드에서 피드를 추가하세요.</value>
+  </data>
+  <data name="Widgets.Feeds.FeedMissing" xml:space="preserve">
+    <value>이 피드는 더 이상 없습니다. 위젯 설정에서 다른 피드를 선택하세요.</value>
+  </data>
+  <data name="Widgets.Feeds.GroupEmpty" xml:space="preserve">
+    <value>이 그룹에 피드가 없습니다.</value>
+  </data>
+  <data name="Widgets.Feeds.NoArticles" xml:space="preserve">
+    <value>아직 글이 없습니다.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Source" xml:space="preserve">
+    <value>표시</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceAll" xml:space="preserve">
+    <value>모든 피드</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceFeed" xml:space="preserve">
+    <value>피드 하나</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceGroup" xml:space="preserve">
+    <value>그룹 하나</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Feed" xml:space="preserve">
+    <value>피드</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Group" xml:space="preserve">
+    <value>그룹</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Count" xml:space="preserve">
+    <value>글 수</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CountDescription" xml:space="preserve">
+    <value>위젯 목록에 표시할 글의 수입니다.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCount" xml:space="preserve">
+    <value>순환할 글 수</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCountDescription" xml:space="preserve">
+    <value>위젯이 번갈아 표시할 최신 글의 수입니다.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowDescription" xml:space="preserve">
+    <value>설명 표시</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowThumbnail" xml:space="preserve">
+    <value>이미지 표시</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSeconds" xml:space="preserve">
+    <value>다음 글로 넘어가는 시간(초)</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSecondsDescription" xml:space="preserve">
+    <value>0이면 최신 글을 계속 표시합니다.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Tap" xml:space="preserve">
+    <value>탭할 때</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
+    <value>탭할 때마다 이 위젯의 피드 글 열림 트리거도 실행됩니다.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
+    <value>브라우저에서 열기</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDialog" xml:space="preserve">
+    <value>세부 정보 표시</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapFlows" xml:space="preserve">
+    <value>위젯의 액션만 실행</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Title" xml:space="preserve">
+    <value>글</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Open" xml:space="preserve">
+    <value>열기</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.CannotOpen" xml:space="preserve">
+    <value>이 기기에서는 Macro Deck의 링크를 열 수 없습니다. 대신 주소를 복사하세요.</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Unavailable" xml:space="preserve">
+    <value>이 글은 더 이상 피드에 없습니다.</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Feed" xml:space="preserve">
+    <value>테크 뉴스</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.First" xml:space="preserve">
+    <value>새 휴대폰 배터리, 일주일 내내 지속</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Second" xml:space="preserve">
+    <value>시, 첫 태양광 다리 개통</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Third" xml:space="preserve">
+    <value>오픈 소스 프로젝트, 버전 2.0 도달</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
+    <value>여기에 글의 짧은 요약이 표시됩니다.</value>
   </data>
 </root>

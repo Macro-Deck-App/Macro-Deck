@@ -19150,6 +19150,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="WebClient.Meta.Title" xml:space="preserve">
     <value>网页客户端 - Macro Deck</value>
   </data>
+  <data name="WebClient.OpenLink.Blocked" xml:space="preserve">
+    <value>浏览器拦截了链接</value>
+  </data>
+  <data name="WebClient.OpenLink.TapToOpen" xml:space="preserve">
+    <value>点击链接即可打开。</value>
+  </data>
   <data name="WebClient.Outdated.Body" xml:space="preserve">
     <value>请重新加载页面。如果仍然过时，请清除浏览器缓存。</value>
   </data>
@@ -23702,5 +23708,308 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
     <value>电池</value>
+  </data>
+  <data name="Integrations.Feeds.Name" xml:space="preserve">
+    <value>RSS 订阅源</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Title" xml:space="preserve">
+    <value>添加订阅源</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Description" xml:space="preserve">
+    <value>关注 RSS 或 Atom 订阅源。Macro Deck 会在保存订阅源前检查地址。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlLabel" xml:space="preserve">
+    <value>订阅源地址</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlDescription" xml:space="preserve">
+    <value>RSS 或 Atom 订阅源的地址，例如网站 RSS 图标背后的链接。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.NameDescription" xml:space="preserve">
+    <value>留空则使用订阅源自身的标题。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupLabel" xml:space="preserve">
+    <value>分组</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupDescription" xml:space="preserve">
+    <value>可选。同一分组中的订阅源可以在一个组件中一起显示。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshLabel" xml:space="preserve">
+    <value>刷新间隔（分钟）</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshDescription" xml:space="preserve">
+    <value>Macro Deck 检查订阅源新文章的频率。至少 5 分钟。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeLabel" xml:space="preserve">
+    <value>仅包含以下内容的文章</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeDescription" xml:space="preserve">
+    <value>可选。以逗号分隔的词语。标题或描述包含其中任一词语的文章会被保留。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeLabel" xml:space="preserve">
+    <value>跳过包含以下内容的文章</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeDescription" xml:space="preserve">
+    <value>可选。以逗号分隔的词语。标题或描述包含其中任一词语的文章会被跳过。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesLabel" xml:space="preserve">
+    <value>仅限以下分类</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesDescription" xml:space="preserve">
+    <value>可选。以逗号分隔的分类。属于其中任一分类的文章会被保留。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkLabel" xml:space="preserve">
+    <value>允许局域网地址</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkDescription" xml:space="preserve">
+    <value>仅当订阅源由你自己的网络提供（例如 NAS）时才开启。否则 Macro Deck 会拒绝局域网和专用网络中的地址。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.EnterUrl" xml:space="preserve">
+    <value>请输入有效的订阅源地址，例如 {exampleUrl}。</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UnknownStep" xml:space="preserve">
+    <value>此步骤不属于添加订阅源。请重新开始。</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Timeout" xml:space="preserve">
+    <value>订阅源未及时响应。</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.BlockedAddress" xml:space="preserve">
+    <value>此地址位于局域网或专用网络中。要使用它，请开启“允许局域网地址”。</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.InvalidFeed" xml:space="preserve">
+    <value>此地址未返回 RSS 或 Atom 订阅源。</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.TooLarge" xml:space="preserve">
+    <value>订阅源大于 5 MB。</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Network" xml:space="preserve">
+    <value>无法访问订阅源。</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.HttpStatus" xml:space="preserve">
+    <value>订阅源服务器返回了错误 {status}。</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Name" xml:space="preserve">
+    <value>更新订阅源</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Description" xml:space="preserve">
+    <value>立即检查所有订阅源或所选订阅源中的新文章。</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.FeedNotFound" xml:space="preserve">
+    <value>此订阅源已不存在。</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.SomeFeedsFailed" xml:space="preserve">
+    <value>部分订阅源无法更新。</value>
+  </data>
+  <data name="Integrations.Feeds.Events.Category" xml:space="preserve">
+    <value>RSS 订阅源</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemName" xml:space="preserve">
+    <value>订阅源新文章</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemDescription" xml:space="preserve">
+    <value>订阅源中出现了之前没有的文章。</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedName" xml:space="preserve">
+    <value>订阅源已更新</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedDescription" xml:space="preserve">
+    <value>刷新时订阅源的文章发生了变化。</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedName" xml:space="preserve">
+    <value>订阅源更新失败</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedDescription" xml:space="preserve">
+    <value>无法刷新订阅源。</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedName" xml:space="preserve">
+    <value>已打开订阅源文章</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedDescription" xml:space="preserve">
+    <value>在订阅源组件上点击了一篇文章。</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Feed" xml:space="preserve">
+    <value>订阅源</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedDescription" xml:space="preserve">
+    <value>留空则适用于所有订阅源。</value>
+  </data>
+  <data name="Integrations.Feeds.Params.AllFeeds" xml:space="preserve">
+    <value>所有订阅源</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedTitle" xml:space="preserve">
+    <value>订阅源名称</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Title" xml:space="preserve">
+    <value>标题</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Url" xml:space="preserve">
+    <value>链接</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Description" xml:space="preserve">
+    <value>描述</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Author" xml:space="preserve">
+    <value>作者</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Published" xml:space="preserve">
+    <value>发布时间</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Categories" xml:space="preserve">
+    <value>分类</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Integrations.Feeds.Params.ErrorDescription" xml:space="preserve">
+    <value>表示原因的代码，例如 timeout 或 http-404。</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Widget" xml:space="preserve">
+    <value>组件</value>
+  </data>
+  <data name="Integrations.Feeds.Params.WidgetDescription" xml:space="preserve">
+    <value>点击文章所在的组件。留空则适用于所有组件。</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestTitle" xml:space="preserve">
+    <value>最新文章标题</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestUrl" xml:space="preserve">
+    <value>最新文章链接</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestDescription" xml:space="preserve">
+    <value>最新文章描述</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestPublished" xml:space="preserve">
+    <value>最新文章发布时间</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestAuthor" xml:space="preserve">
+    <value>最新文章作者</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.ItemCount" xml:space="preserve">
+    <value>文章数</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UnreadCount" xml:space="preserve">
+    <value>未读文章数</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LastUpdated" xml:space="preserve">
+    <value>上次更新</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UpdateStatus" xml:space="preserve">
+    <value>更新状态</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllItemCount" xml:space="preserve">
+    <value>所有订阅源的文章数</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllUnreadCount" xml:space="preserve">
+    <value>所有订阅源的未读文章数</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Name" xml:space="preserve">
+    <value>订阅源列表</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Description" xml:space="preserve">
+    <value>RSS 和 Atom 订阅源中的最新文章。</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Name" xml:space="preserve">
+    <value>精选文章</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Description" xml:space="preserve">
+    <value>订阅源中的最新文章及其图片。</value>
+  </data>
+  <data name="Widgets.Feeds.AllFeeds" xml:space="preserve">
+    <value>所有订阅源</value>
+  </data>
+  <data name="Widgets.Feeds.NoFeeds" xml:space="preserve">
+    <value>请在“集成”的“RSS 订阅源”中添加订阅源。</value>
+  </data>
+  <data name="Widgets.Feeds.FeedMissing" xml:space="preserve">
+    <value>此订阅源已不存在。请在组件设置中选择其他订阅源。</value>
+  </data>
+  <data name="Widgets.Feeds.GroupEmpty" xml:space="preserve">
+    <value>此分组中没有订阅源。</value>
+  </data>
+  <data name="Widgets.Feeds.NoArticles" xml:space="preserve">
+    <value>还没有文章。</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Source" xml:space="preserve">
+    <value>显示</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceAll" xml:space="preserve">
+    <value>所有订阅源</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceFeed" xml:space="preserve">
+    <value>单个订阅源</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceGroup" xml:space="preserve">
+    <value>单个分组</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Feed" xml:space="preserve">
+    <value>订阅源</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Group" xml:space="preserve">
+    <value>分组</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Count" xml:space="preserve">
+    <value>文章数</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CountDescription" xml:space="preserve">
+    <value>组件列表中显示的文章数量。</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCount" xml:space="preserve">
+    <value>轮播文章数</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCountDescription" xml:space="preserve">
+    <value>组件轮流显示的最新文章数量。</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowDescription" xml:space="preserve">
+    <value>显示描述</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowThumbnail" xml:space="preserve">
+    <value>显示图片</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSeconds" xml:space="preserve">
+    <value>切换到下一篇文章的间隔（秒）</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSecondsDescription" xml:space="preserve">
+    <value>设为 0 则一直显示最新文章。</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Tap" xml:space="preserve">
+    <value>点击时</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
+    <value>每次点击还会运行此组件的“已打开订阅源文章”触发器。</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
+    <value>在浏览器中打开</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDialog" xml:space="preserve">
+    <value>显示详情</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapFlows" xml:space="preserve">
+    <value>仅运行组件的动作</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Title" xml:space="preserve">
+    <value>文章</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Open" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.CannotOpen" xml:space="preserve">
+    <value>此设备无法打开来自 Macro Deck 的链接。请改为复制地址。</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Unavailable" xml:space="preserve">
+    <value>此文章已不在订阅源中。</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Feed" xml:space="preserve">
+    <value>科技新闻</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.First" xml:space="preserve">
+    <value>新型手机电池续航整整一周</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Second" xml:space="preserve">
+    <value>城市开通首座太阳能桥</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Third" xml:space="preserve">
+    <value>开源项目发布 2.0 版本</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
+    <value>文章的简短摘要显示在这里。</value>
   </data>
 </root>

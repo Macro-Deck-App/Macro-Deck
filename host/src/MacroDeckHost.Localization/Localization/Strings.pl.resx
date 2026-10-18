@@ -19149,6 +19149,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="WebClient.Meta.Title" xml:space="preserve">
     <value>Klient webowy - Macro Deck</value>
   </data>
+  <data name="WebClient.OpenLink.Blocked" xml:space="preserve">
+    <value>Przeglądarka zablokowała link</value>
+  </data>
+  <data name="WebClient.OpenLink.TapToOpen" xml:space="preserve">
+    <value>Dotknij linku, aby go otworzyć.</value>
+  </data>
   <data name="WebClient.Outdated.Body" xml:space="preserve">
     <value>Odśwież stronę. Jeśli nadal będzie nieaktualna, wyczyść pamięć podręczną przeglądarki.</value>
   </data>
@@ -23698,5 +23704,308 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
     <value>Baterie</value>
+  </data>
+  <data name="Integrations.Feeds.Name" xml:space="preserve">
+    <value>Kanały RSS</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Title" xml:space="preserve">
+    <value>Dodaj kanał</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Description" xml:space="preserve">
+    <value>Obserwuj kanał RSS lub Atom. Macro Deck sprawdza adres przed zapisaniem kanału.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlLabel" xml:space="preserve">
+    <value>Adres kanału</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlDescription" xml:space="preserve">
+    <value>Adres kanału RSS lub Atom, na przykład link pod ikoną RSS na stronie internetowej.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.NameDescription" xml:space="preserve">
+    <value>Pozostaw puste, aby użyć tytułu samego kanału.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupLabel" xml:space="preserve">
+    <value>Grupa</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupDescription" xml:space="preserve">
+    <value>Opcjonalne. Kanały z tej samej grupy można wyświetlać razem w jednym widżecie.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshLabel" xml:space="preserve">
+    <value>Odświeżaj co (minuty)</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshDescription" xml:space="preserve">
+    <value>Jak często Macro Deck sprawdza, czy w kanale są nowe artykuły. Co najmniej 5 minut.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeLabel" xml:space="preserve">
+    <value>Tylko artykuły zawierające</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeDescription" xml:space="preserve">
+    <value>Opcjonalne. Słowa rozdzielone przecinkami. Artykuł zostaje zachowany, gdy jego tytuł lub opis zawiera jedno z nich.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeLabel" xml:space="preserve">
+    <value>Pomijaj artykuły zawierające</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeDescription" xml:space="preserve">
+    <value>Opcjonalne. Słowa rozdzielone przecinkami. Artykuł, którego tytuł lub opis zawiera jedno z nich, zostaje pominięty.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesLabel" xml:space="preserve">
+    <value>Tylko te kategorie</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesDescription" xml:space="preserve">
+    <value>Opcjonalne. Kategorie rozdzielone przecinkami. Artykuł zostaje zachowany, gdy ma jedną z nich.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkLabel" xml:space="preserve">
+    <value>Zezwalaj na adresy w sieci lokalnej</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkDescription" xml:space="preserve">
+    <value>Włącz tylko dla kanału udostępnianego we własnej sieci, na przykład przez serwer NAS. W przeciwnym razie Macro Deck odrzuca adresy w sieciach lokalnych i prywatnych.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.EnterUrl" xml:space="preserve">
+    <value>Wprowadź prawidłowy adres kanału, na przykład {exampleUrl}.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UnknownStep" xml:space="preserve">
+    <value>Ten krok nie należy do dodawania kanału. Zacznij od nowa.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Timeout" xml:space="preserve">
+    <value>Kanał nie odpowiedział na czas.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.BlockedAddress" xml:space="preserve">
+    <value>Ten adres znajduje się w sieci lokalnej lub prywatnej. Włącz opcję Zezwalaj na adresy w sieci lokalnej, aby go użyć.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.InvalidFeed" xml:space="preserve">
+    <value>Pod tym adresem nie ma kanału RSS ani Atom.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.TooLarge" xml:space="preserve">
+    <value>Kanał jest większy niż 5 MB.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Network" xml:space="preserve">
+    <value>Nie można połączyć się z kanałem.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.HttpStatus" xml:space="preserve">
+    <value>Serwer kanału odpowiedział błędem {status}.</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Name" xml:space="preserve">
+    <value>Aktualizuj kanały</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Description" xml:space="preserve">
+    <value>Natychmiast sprawdza nowe artykuły we wszystkich kanałach lub tylko w wybranym.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.FeedNotFound" xml:space="preserve">
+    <value>Ten kanał już nie istnieje.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.SomeFeedsFailed" xml:space="preserve">
+    <value>Nie udało się zaktualizować niektórych kanałów.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.Category" xml:space="preserve">
+    <value>Kanały RSS</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemName" xml:space="preserve">
+    <value>Nowy artykuł w kanale</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemDescription" xml:space="preserve">
+    <value>W kanale pojawił się artykuł, którego wcześniej nie było.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedName" xml:space="preserve">
+    <value>Kanał zaktualizowany</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedDescription" xml:space="preserve">
+    <value>Artykuły kanału zmieniły się podczas odświeżania.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedName" xml:space="preserve">
+    <value>Aktualizacja kanału nie powiodła się</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedDescription" xml:space="preserve">
+    <value>Nie można odświeżyć kanału.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedName" xml:space="preserve">
+    <value>Otwarto artykuł z kanału</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedDescription" xml:space="preserve">
+    <value>Dotknięto artykułu w widżecie kanału.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Feed" xml:space="preserve">
+    <value>Kanał</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedDescription" xml:space="preserve">
+    <value>Pozostaw puste dla wszystkich kanałów.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.AllFeeds" xml:space="preserve">
+    <value>Wszystkie kanały</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedTitle" xml:space="preserve">
+    <value>Nazwa kanału</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Title" xml:space="preserve">
+    <value>Tytuł</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Url" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Description" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Author" xml:space="preserve">
+    <value>Autor</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Published" xml:space="preserve">
+    <value>Opublikowano</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Categories" xml:space="preserve">
+    <value>Kategorie</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Error" xml:space="preserve">
+    <value>Błąd</value>
+  </data>
+  <data name="Integrations.Feeds.Params.ErrorDescription" xml:space="preserve">
+    <value>Kod przyczyny, na przykład timeout lub http-404.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Widget" xml:space="preserve">
+    <value>Widżet</value>
+  </data>
+  <data name="Integrations.Feeds.Params.WidgetDescription" xml:space="preserve">
+    <value>Widżet, w którym dotknięto artykułu. Pozostaw puste dla wszystkich widżetów.</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestTitle" xml:space="preserve">
+    <value>Tytuł najnowszego artykułu</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestUrl" xml:space="preserve">
+    <value>Link do najnowszego artykułu</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestDescription" xml:space="preserve">
+    <value>Opis najnowszego artykułu</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestPublished" xml:space="preserve">
+    <value>Czas publikacji najnowszego artykułu</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestAuthor" xml:space="preserve">
+    <value>Autor najnowszego artykułu</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.ItemCount" xml:space="preserve">
+    <value>Artykuły</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UnreadCount" xml:space="preserve">
+    <value>Nieprzeczytane artykuły</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LastUpdated" xml:space="preserve">
+    <value>Ostatnia aktualizacja</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UpdateStatus" xml:space="preserve">
+    <value>Stan aktualizacji</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllItemCount" xml:space="preserve">
+    <value>Artykuły we wszystkich kanałach</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllUnreadCount" xml:space="preserve">
+    <value>Nieprzeczytane artykuły we wszystkich kanałach</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Name" xml:space="preserve">
+    <value>Lista kanałów</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Description" xml:space="preserve">
+    <value>Najnowsze artykuły z kanałów RSS i Atom.</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Name" xml:space="preserve">
+    <value>Wyróżniony artykuł</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Description" xml:space="preserve">
+    <value>Najnowszy artykuł z kanałów wraz z obrazem.</value>
+  </data>
+  <data name="Widgets.Feeds.AllFeeds" xml:space="preserve">
+    <value>Wszystkie kanały</value>
+  </data>
+  <data name="Widgets.Feeds.NoFeeds" xml:space="preserve">
+    <value>Dodaj kanał w sekcji Integracje, Kanały RSS.</value>
+  </data>
+  <data name="Widgets.Feeds.FeedMissing" xml:space="preserve">
+    <value>Ten kanał już nie istnieje. Wybierz inny w ustawieniach widżetu.</value>
+  </data>
+  <data name="Widgets.Feeds.GroupEmpty" xml:space="preserve">
+    <value>W tej grupie nie ma żadnego kanału.</value>
+  </data>
+  <data name="Widgets.Feeds.NoArticles" xml:space="preserve">
+    <value>Brak artykułów.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Source" xml:space="preserve">
+    <value>Pokaż</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceAll" xml:space="preserve">
+    <value>Wszystkie kanały</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceFeed" xml:space="preserve">
+    <value>Jeden kanał</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceGroup" xml:space="preserve">
+    <value>Jedna grupa</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Feed" xml:space="preserve">
+    <value>Kanał</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Group" xml:space="preserve">
+    <value>Grupa</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Count" xml:space="preserve">
+    <value>Artykuły</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CountDescription" xml:space="preserve">
+    <value>Liczba artykułów na liście widżetu.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCount" xml:space="preserve">
+    <value>Artykuły do przełączania</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCountDescription" xml:space="preserve">
+    <value>Liczba najnowszych artykułów, które widżet pokazuje na zmianę.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowDescription" xml:space="preserve">
+    <value>Pokaż opis</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowThumbnail" xml:space="preserve">
+    <value>Pokaż obrazy</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSeconds" xml:space="preserve">
+    <value>Następny artykuł po (sekundy)</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSecondsDescription" xml:space="preserve">
+    <value>Wartość 0 pozostawia najnowszy artykuł na ekranie.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Tap" xml:space="preserve">
+    <value>Po dotknięciu</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
+    <value>Każde dotknięcie uruchamia też wyzwalacze Otwarto artykuł z kanału tego widżetu.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
+    <value>Otwórz w przeglądarce</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDialog" xml:space="preserve">
+    <value>Pokaż szczegóły</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapFlows" xml:space="preserve">
+    <value>Tylko uruchom akcje widżetu</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Title" xml:space="preserve">
+    <value>Artykuł</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Open" xml:space="preserve">
+    <value>Otwórz</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.CannotOpen" xml:space="preserve">
+    <value>To urządzenie nie może otwierać linków z Macro Deck. Skopiuj adres.</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Unavailable" xml:space="preserve">
+    <value>Tego artykułu nie ma już w kanale.</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Feed" xml:space="preserve">
+    <value>Wiadomości technologiczne</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.First" xml:space="preserve">
+    <value>Nowe baterie do telefonów działają cały tydzień</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Second" xml:space="preserve">
+    <value>Miasto otwiera swój pierwszy most solarny</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Third" xml:space="preserve">
+    <value>Projekt open source osiąga wersję 2.0</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
+    <value>Tutaj pojawia się krótkie podsumowanie artykułu.</value>
   </data>
 </root>

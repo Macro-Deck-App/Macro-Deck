@@ -68,12 +68,18 @@ describe('UiConnection', () => {
     (globalThis as { WebSocket?: unknown }).WebSocket = originalSocket;
   });
 
-  const build = (onUnauthorized?: () => Promise<boolean>) => new UiConnection({
+  const build = (onUnauthorized?: () => Promise<boolean>, features?: readonly string[]) => new UiConnection({
     http: new HttpClient({ baseUrl: () => 'http://host:8194' }),
     baseUrl: () => 'http://host:8194',
     clientId: 'client-1',
+    features,
     onUnauthorized,
   });
+
+  const registrations = (socket: FakeWebSocket) => socket.sent
+    .map(value => JSON.parse(value) as { kind: string; type?: string; payload?: unknown })
+    .filter(envelope => envelope.kind === 'request' && envelope.type === 'RegisterClient')
+    .map(envelope => envelope.payload);
 
   const settle = async () => { for (let turn = 0; turn < 8; turn++) await Promise.resolve(); };
 
@@ -119,6 +125,37 @@ describe('UiConnection', () => {
     await settle();
 
     expect(connection.state.get()).toBe('connected');
+    connection.disconnect();
+  });
+
+  it('declares its features with the registration on every connect', async () => {
+    const connection = build(undefined, ['open-url']);
+    connection.connect();
+    await settle();
+    FakeWebSocket.instances[0].handshake();
+    await settle();
+    FakeWebSocket.instances[0].answerPending();
+    await settle();
+
+    FakeWebSocket.instances[0].close();
+    jasmine.clock().tick(2000);
+    await settle();
+    FakeWebSocket.instances[1].handshake();
+    await settle();
+
+    expect(registrations(FakeWebSocket.instances[0])).toEqual([['client-1', ['open-url']]]);
+    expect(registrations(FakeWebSocket.instances[1])).toEqual([['client-1', ['open-url']]]);
+    connection.disconnect();
+  });
+
+  it('registers with the client id alone when it declares no features', async () => {
+    const connection = build();
+    connection.connect();
+    await settle();
+    FakeWebSocket.instances[0].handshake();
+    await settle();
+
+    expect(registrations(FakeWebSocket.instances[0])).toEqual([['client-1']]);
     connection.disconnect();
   });
 

@@ -2,12 +2,17 @@ using System.Text.Json;
 using MacroDeckHost.Application.Variables;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Input;
+using MacroDeck.Sdk.Widgets;
 
 namespace MacroDeckHost.Application.Triggers;
 
 public interface IEventSubscriptionMatcher
 {
-	bool Matches(EventSubscription subscription, EventDefinitionDescriptor descriptor, VariableContext context);
+	bool Matches(
+		EventSubscription subscription,
+		EventDefinitionDescriptor descriptor,
+		VariableContext context,
+		Guid? ownerWidgetId = null);
 }
 
 public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
@@ -19,7 +24,11 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 		_evaluator = evaluator;
 	}
 
-	public bool Matches(EventSubscription subscription, EventDefinitionDescriptor descriptor, VariableContext context)
+	public bool Matches(
+		EventSubscription subscription,
+		EventDefinitionDescriptor descriptor,
+		VariableContext context,
+		Guid? ownerWidgetId = null)
 	{
 		foreach (var required in descriptor.Definition.ConfigurationParameters.Where(parameter => parameter.Required))
 		{
@@ -69,6 +78,22 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 				continue;
 			}
 
+			if (IsSelfWidgetTarget(descriptor, payload.Name, configured.Value))
+			{
+				if (ownerWidgetId is null)
+				{
+					continue;
+				}
+
+				context.TryResolveEventParameter(payload.Name, out var widget);
+				if (!HoldsForOwnWidget(widget, configured.Operator, ownerWidgetId.Value))
+				{
+					return false;
+				}
+
+				continue;
+			}
+
 			var expected = _evaluator.ResolveSide(configured.Value, context);
 			if (IsUnset(expected.Value))
 			{
@@ -88,6 +113,22 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 		}
 
 		return _evaluator.EvaluateExpression(filter, context);
+	}
+
+	private static bool IsSelfWidgetTarget(EventDefinitionDescriptor descriptor, string name, JsonElement configured)
+	{
+		return configured.ValueKind == JsonValueKind.String
+			&& WidgetTargets.IsSelf(configured.GetString())
+			&& descriptor.Definition.ConfigurationParameters.Any(parameter => parameter.Name == name
+				&& parameter.Type == ActionParameterType.WidgetTarget);
+	}
+
+	// "This widget" names the widget whose flow is listening. An automation has none and its picker shows the
+	// stored default as empty, so there it filters nothing.
+	private static bool HoldsForOwnWidget(object? actual, string? @operator, Guid owner)
+	{
+		var same = Guid.TryParse(actual?.ToString(), out var widgetId) && widgetId == owner;
+		return @operator == "!=" ? !same : same;
 	}
 
 	private static bool IsUnset(object? value)
@@ -239,6 +280,11 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 				}
 
 				if (VariableTemplateRenderer.ContainsLiquid(text))
+				{
+					continue;
+				}
+
+				if (WidgetTargets.IsSelf(text))
 				{
 					continue;
 				}

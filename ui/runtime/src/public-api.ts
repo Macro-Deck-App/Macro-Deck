@@ -975,6 +975,11 @@ export {
   type MigrationWarningDto,
 } from './protocol/messages/migration';
 export {
+  isOpenableWebUrl,
+  UI_CLIENT_FEATURE_OPEN_URL,
+  type UiOpenUrlEvent,
+} from './protocol/messages/links';
+export {
   type CompleteUiModalRequest,
   type CompleteUiModalResponse,
   type OpenModalUiSessionRequest,

@@ -185,6 +185,12 @@ public static class HostOperations
 		/// <c>CAPABILITY_UNSUPPORTED</c>.</summary>
 		public const string OriginShowModal = "origin.show-modal";
 
+		/// <summary>Opens an absolute <c>http</c> or <c>https</c> URL in the browser of the client that raised an
+		/// event in one of the plugin's sessions. Delivered only to the connection that raised the event, only
+		/// while it is attached and declared it can open links, and only shortly after that event. A host that
+		/// predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>.</summary>
+		public const string OriginOpenUrl = "origin.open-url";
+
 		/// <summary>Reports values for the declared parameters of the action an action configuration session
 		/// configures. Each value is treated as a user edit of that parameter; undeclared, <c>Secret</c> and
 		/// <c>Password</c> parameters and values of the wrong shape are dropped, and a session that configures
@@ -195,7 +201,7 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All =
 		[
 			Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource, RegisterMusicPlayerArtwork,
-			OriginReportFailure, OriginShowModal, ReportParameterValues
+			OriginReportFailure, OriginShowModal, OriginOpenUrl, ReportParameterValues
 		];
 	}
 

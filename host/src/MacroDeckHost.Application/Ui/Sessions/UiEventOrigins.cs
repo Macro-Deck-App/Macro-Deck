@@ -1,8 +1,10 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Applications;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Ui.Transport;
+using MacroDeckHost.Application.Ui.Transport.Messages.Links;
 
 namespace MacroDeckHost.Application.Ui.Sessions;
 
@@ -13,13 +15,21 @@ public sealed class UiEventOrigins
 	private readonly IUiEventOriginTracker _tracker;
 	private readonly IUiTransport _transport;
 	private readonly IUiInteractionsFactory _interactions;
+	private readonly UiClientFeatures _clientFeatures;
 
-	public UiEventOrigins(IUiEventOriginTracker tracker, IUiTransport transport, IUiInteractionsFactory interactions)
+	public UiEventOrigins(
+		IUiEventOriginTracker tracker,
+		IUiTransport transport,
+		IUiInteractionsFactory interactions,
+		UiClientFeatures clientFeatures)
 	{
 		_tracker = tracker;
 		_transport = transport;
 		_interactions = interactions;
+		_clientFeatures = clientFeatures;
 	}
+
+	public static TimeSpan OpenUrlWindow { get; } = TimeSpan.FromSeconds(10);
 
 	public IUiEventOrigin Create(string providerId, string sessionId, string? clientId, string eventName)
 	{
@@ -50,6 +60,31 @@ public sealed class UiEventOrigins
 			eventName);
 
 		await _transport.SendToGroup(UiClientGroups.For(clientId!), evt, cancellationToken).ConfigureAwait(false);
+		return true;
+	}
+
+	// A link only goes to the connection that raised an event in this session moments ago and said it can
+	// open links, and one event opens one link: a plugin must not open pages the user did not ask for.
+	public async Task<bool> OpenUrlAsync(
+		string providerId,
+		string sessionId,
+		string? clientId,
+		string? url,
+		CancellationToken cancellationToken)
+	{
+		if (string.IsNullOrEmpty(clientId) || !ExternalUrls.TryNormalizeWebUrl(url, out var normalized))
+		{
+			return false;
+		}
+
+		var connectionId = _tracker.TakeRecentEventConnection(providerId, sessionId, clientId, OpenUrlWindow);
+		if (connectionId is null || !_clientFeatures.Supports(connectionId, UiClientFeatures.OpenUrl))
+		{
+			return false;
+		}
+
+		await _transport.SendToConnection(connectionId, new UiOpenUrlEvent { Url = normalized }, cancellationToken)
+			.ConfigureAwait(false);
 		return true;
 	}
 
@@ -85,6 +120,18 @@ public sealed class UiEventOrigins
 			return owner.IsClientAttached(providerId, sessionId, ClientId)
 				? owner._interactions.ForIntegration(providerId).ShowModalAsync<T>(ClientId, modal, cancellationToken)
 				: Task.FromResult(ModalResult.FromCancellation<T>());
+		}
+
+		public Task<bool> OpenUrlAsync(Uri url, CancellationToken cancellationToken = default)
+		{
+			ArgumentNullException.ThrowIfNull(url);
+
+			if (!url.IsAbsoluteUri || url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps)
+			{
+				throw new ArgumentException("Only absolute http and https URLs can be opened.", nameof(url));
+			}
+
+			return owner.OpenUrlAsync(providerId, sessionId, ClientId, url.AbsoluteUri, cancellationToken);
 		}
 	}
 }

@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.VideoStreams;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.VideoStreams;
@@ -253,6 +254,7 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			videoStreams: _world.Broker,
 			videoStreamProviders: _world.Registry,
 			notifications: new NullNotificationManager(),
+			clientFeatures: new UiClientFeatures(),
 			connectionCancellation: CancellationToken.None);
 	}
 }

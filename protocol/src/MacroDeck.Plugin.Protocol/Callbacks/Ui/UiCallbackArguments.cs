@@ -168,3 +168,23 @@ public sealed record UiOriginShowModalResult
 	/// <summary>The id a later <c>modal.result</c> names. Empty when <see cref="Opened" /> is false.</summary>
 	public string ModalId { get; init; } = string.Empty;
 }
+
+/// <summary>Arguments for <c>host.invoke ui/origin.open-url</c>: opens <see cref="Url" /> in the browser of the
+/// client that raised an event in one of the calling plugin's sessions. <see cref="Url" /> must be an absolute
+/// <c>http</c> or <c>https</c> URL.</summary>
+public sealed record UiOriginOpenUrlArguments
+{
+	public required string SessionId { get; init; }
+
+	/// <summary>The client that raised the event, as <c>ui/session.event</c> carried it.</summary>
+	public required string ClientId { get; init; }
+
+	public required string Url { get; init; }
+}
+
+/// <summary>Result of <c>host.invoke ui/origin.open-url</c>. <see cref="Delivered" /> is <c>true</c> when the
+/// URL was handed to the client, which does not prove a browser opened it.</summary>
+public sealed record UiOriginOpenUrlResult
+{
+	public required bool Delivered { get; init; }
+}

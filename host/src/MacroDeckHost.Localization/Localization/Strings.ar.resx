@@ -19150,6 +19150,12 @@
   <data name="WebClient.Meta.Title" xml:space="preserve">
     <value>عميل الويب - Macro Deck</value>
   </data>
+  <data name="WebClient.OpenLink.Blocked" xml:space="preserve">
+    <value>حظر المتصفح الرابط</value>
+  </data>
+  <data name="WebClient.OpenLink.TapToOpen" xml:space="preserve">
+    <value>اضغط على الرابط لفتحه.</value>
+  </data>
   <data name="WebClient.Outdated.Body" xml:space="preserve">
     <value>أعد تحميل الصفحة. إذا بقيت قديمة، فامسح ذاكرة التخزين المؤقت للمتصفح.</value>
   </data>
@@ -23720,5 +23726,308 @@
   </data>
   <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
     <value>البطاريات</value>
+  </data>
+  <data name="Integrations.Feeds.Name" xml:space="preserve">
+    <value>خلاصات RSS</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Title" xml:space="preserve">
+    <value>إضافة خلاصة</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Description" xml:space="preserve">
+    <value>تابع خلاصة RSS أو Atom. يتحقق Macro Deck من العنوان قبل حفظ الخلاصة.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlLabel" xml:space="preserve">
+    <value>عنوان الخلاصة</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlDescription" xml:space="preserve">
+    <value>عنوان خلاصة RSS أو Atom، مثل الرابط خلف أيقونة RSS في موقع ويب.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.NameDescription" xml:space="preserve">
+    <value>اتركه فارغًا لاستخدام العنوان الخاص بالخلاصة.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupLabel" xml:space="preserve">
+    <value>المجموعة</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupDescription" xml:space="preserve">
+    <value>اختياري. يمكن عرض الخلاصات التي في المجموعة نفسها معًا في أداة واحدة.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshLabel" xml:space="preserve">
+    <value>التحديث كل (دقائق)</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshDescription" xml:space="preserve">
+    <value>عدد المرات التي يتحقق فيها Macro Deck من وجود مقالات جديدة في الخلاصة. 5 دقائق على الأقل.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeLabel" xml:space="preserve">
+    <value>المقالات التي تحتوي فقط على</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeDescription" xml:space="preserve">
+    <value>اختياري. كلمات مفصولة بفواصل. يُحتفظ بالمقالة إذا احتوى عنوانها أو وصفها على إحداها.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeLabel" xml:space="preserve">
+    <value>تخطي المقالات التي تحتوي على</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeDescription" xml:space="preserve">
+    <value>اختياري. كلمات مفصولة بفواصل. تُتخطى المقالة إذا احتوى عنوانها أو وصفها على إحداها.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesLabel" xml:space="preserve">
+    <value>هذه الفئات فقط</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesDescription" xml:space="preserve">
+    <value>اختياري. فئات مفصولة بفواصل. يُحتفظ بالمقالة إذا كانت لها إحداها.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkLabel" xml:space="preserve">
+    <value>السماح بعناوين الشبكة المحلية</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkDescription" xml:space="preserve">
+    <value>فعّل هذا فقط لخلاصة تُقدَّم من شبكتك الخاصة، مثل جهاز NAS. وإلا يرفض Macro Deck العناوين في الشبكات المحلية والخاصة.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.EnterUrl" xml:space="preserve">
+    <value>أدخل عنوان خلاصة صالحًا، مثل {exampleUrl}.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UnknownStep" xml:space="preserve">
+    <value>هذه الخطوة ليست جزءًا من إضافة خلاصة. ابدأ من جديد.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Timeout" xml:space="preserve">
+    <value>لم تستجب الخلاصة في الوقت المحدد.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.BlockedAddress" xml:space="preserve">
+    <value>هذا العنوان في شبكة محلية أو خاصة. فعّل السماح بعناوين الشبكة المحلية لاستخدامه.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.InvalidFeed" xml:space="preserve">
+    <value>لا يُرجع هذا العنوان خلاصة RSS أو Atom.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.TooLarge" xml:space="preserve">
+    <value>حجم الخلاصة أكبر من 5 ميغابايت.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Network" xml:space="preserve">
+    <value>تعذّر الوصول إلى الخلاصة.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.HttpStatus" xml:space="preserve">
+    <value>استجاب خادم الخلاصة بالخطأ {status}.</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Name" xml:space="preserve">
+    <value>تحديث الخلاصات</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Description" xml:space="preserve">
+    <value>يبحث فورًا عن مقالات جديدة في كل الخلاصات أو في الخلاصة المختارة فقط.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.FeedNotFound" xml:space="preserve">
+    <value>هذه الخلاصة لم تعد موجودة.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.SomeFeedsFailed" xml:space="preserve">
+    <value>تعذّر تحديث بعض الخلاصات.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.Category" xml:space="preserve">
+    <value>خلاصات RSS</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemName" xml:space="preserve">
+    <value>مقالة جديدة في الخلاصة</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemDescription" xml:space="preserve">
+    <value>تحتوي خلاصة على مقالة لم تكن موجودة من قبل.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedName" xml:space="preserve">
+    <value>تم تحديث الخلاصة</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedDescription" xml:space="preserve">
+    <value>تغيّرت مقالات خلاصة عند التحديث.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedName" xml:space="preserve">
+    <value>فشل تحديث الخلاصة</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedDescription" xml:space="preserve">
+    <value>تعذّر تحديث خلاصة.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedName" xml:space="preserve">
+    <value>تم فتح مقالة من الخلاصة</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedDescription" xml:space="preserve">
+    <value>تم الضغط على مقالة في أداة خلاصة.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Feed" xml:space="preserve">
+    <value>الخلاصة</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedDescription" xml:space="preserve">
+    <value>اتركه فارغًا لكل الخلاصات.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.AllFeeds" xml:space="preserve">
+    <value>كل الخلاصات</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedTitle" xml:space="preserve">
+    <value>اسم الخلاصة</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Title" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Url" xml:space="preserve">
+    <value>الرابط</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Description" xml:space="preserve">
+    <value>الوصف</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Author" xml:space="preserve">
+    <value>المؤلف</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Published" xml:space="preserve">
+    <value>تاريخ النشر</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Categories" xml:space="preserve">
+    <value>الفئات</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Error" xml:space="preserve">
+    <value>الخطأ</value>
+  </data>
+  <data name="Integrations.Feeds.Params.ErrorDescription" xml:space="preserve">
+    <value>رمز للسبب، مثل timeout أو http-404.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Widget" xml:space="preserve">
+    <value>الأداة</value>
+  </data>
+  <data name="Integrations.Feeds.Params.WidgetDescription" xml:space="preserve">
+    <value>الأداة التي تم الضغط فيها على المقالة. اتركه فارغًا لكل الأدوات.</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestTitle" xml:space="preserve">
+    <value>عنوان أحدث مقالة</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestUrl" xml:space="preserve">
+    <value>رابط أحدث مقالة</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestDescription" xml:space="preserve">
+    <value>وصف أحدث مقالة</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestPublished" xml:space="preserve">
+    <value>وقت نشر أحدث مقالة</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestAuthor" xml:space="preserve">
+    <value>مؤلف أحدث مقالة</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.ItemCount" xml:space="preserve">
+    <value>المقالات</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UnreadCount" xml:space="preserve">
+    <value>المقالات غير المقروءة</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LastUpdated" xml:space="preserve">
+    <value>آخر تحديث</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UpdateStatus" xml:space="preserve">
+    <value>حالة التحديث</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllItemCount" xml:space="preserve">
+    <value>المقالات في كل الخلاصات</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllUnreadCount" xml:space="preserve">
+    <value>المقالات غير المقروءة في كل الخلاصات</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Name" xml:space="preserve">
+    <value>قائمة الخلاصات</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Description" xml:space="preserve">
+    <value>أحدث المقالات من خلاصات RSS وAtom.</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Name" xml:space="preserve">
+    <value>مقالة مميزة</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Description" xml:space="preserve">
+    <value>أحدث مقالة من خلاصاتك، مع صورتها.</value>
+  </data>
+  <data name="Widgets.Feeds.AllFeeds" xml:space="preserve">
+    <value>كل الخلاصات</value>
+  </data>
+  <data name="Widgets.Feeds.NoFeeds" xml:space="preserve">
+    <value>أضف خلاصة من التكاملات، خلاصات RSS.</value>
+  </data>
+  <data name="Widgets.Feeds.FeedMissing" xml:space="preserve">
+    <value>هذه الخلاصة لم تعد موجودة. اختر خلاصة أخرى في إعدادات الأداة.</value>
+  </data>
+  <data name="Widgets.Feeds.GroupEmpty" xml:space="preserve">
+    <value>لا توجد خلاصة في هذه المجموعة.</value>
+  </data>
+  <data name="Widgets.Feeds.NoArticles" xml:space="preserve">
+    <value>لا توجد مقالات بعد.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Source" xml:space="preserve">
+    <value>العرض</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceAll" xml:space="preserve">
+    <value>كل الخلاصات</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceFeed" xml:space="preserve">
+    <value>خلاصة واحدة</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceGroup" xml:space="preserve">
+    <value>مجموعة واحدة</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Feed" xml:space="preserve">
+    <value>الخلاصة</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Group" xml:space="preserve">
+    <value>المجموعة</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Count" xml:space="preserve">
+    <value>المقالات</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CountDescription" xml:space="preserve">
+    <value>عدد المقالات التي تعرضها قائمة الأداة.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCount" xml:space="preserve">
+    <value>المقالات المتناوبة</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCountDescription" xml:space="preserve">
+    <value>عدد أحدث المقالات التي تعرضها الأداة بالتناوب.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowDescription" xml:space="preserve">
+    <value>عرض الوصف</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowThumbnail" xml:space="preserve">
+    <value>عرض الصور</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSeconds" xml:space="preserve">
+    <value>المقالة التالية بعد (ثوانٍ)</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSecondsDescription" xml:space="preserve">
+    <value>القيمة 0 تُبقي أحدث مقالة معروضة.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Tap" xml:space="preserve">
+    <value>عند الضغط</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
+    <value>كل ضغطة تشغّل أيضًا مشغّلات تم فتح مقالة من الخلاصة الخاصة بهذه الأداة.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
+    <value>فتح في المتصفح</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDialog" xml:space="preserve">
+    <value>عرض التفاصيل</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapFlows" xml:space="preserve">
+    <value>تشغيل إجراءات الأداة فقط</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Title" xml:space="preserve">
+    <value>المقالة</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Open" xml:space="preserve">
+    <value>فتح</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.CannotOpen" xml:space="preserve">
+    <value>لا يستطيع هذا الجهاز فتح الروابط من Macro Deck. انسخ العنوان بدلًا من ذلك.</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Unavailable" xml:space="preserve">
+    <value>هذه المقالة لم تعد في الخلاصة.</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Feed" xml:space="preserve">
+    <value>أخبار التقنية</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.First" xml:space="preserve">
+    <value>بطاريات هواتف جديدة تدوم أسبوعًا كاملًا</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Second" xml:space="preserve">
+    <value>المدينة تفتتح أول جسر شمسي لها</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Third" xml:space="preserve">
+    <value>مشروع مفتوح المصدر يصل إلى الإصدار 2.0</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
+    <value>يظهر هنا ملخص قصير للمقالة.</value>
   </data>
 </root>

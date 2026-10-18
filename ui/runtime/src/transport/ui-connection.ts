@@ -16,6 +16,8 @@ export interface UiConnectionOptions {
   http: HttpClient;
   baseUrl(): string;
   clientId: string;
+  // A host that predates the declaration reads only the client id, so sending it is always safe.
+  features?: readonly string[];
   onUnauthorized?(): Promise<boolean>;
 }
 
@@ -101,7 +103,10 @@ export class UiConnection {
         return;
       }
 
-      await transport.request<void>('RegisterClient', [this.options.clientId]);
+      const registration = this.options.features
+        ? [this.options.clientId, [...this.options.features]]
+        : [this.options.clientId];
+      await transport.request<void>('RegisterClient', registration);
       if (!this.isCurrent(attempt)) {
         this.abandon(transport);
         return;

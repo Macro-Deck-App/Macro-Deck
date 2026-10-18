@@ -19150,6 +19150,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="WebClient.Meta.Title" xml:space="preserve">
     <value>Webclient - Macro Deck</value>
   </data>
+  <data name="WebClient.OpenLink.Blocked" xml:space="preserve">
+    <value>Je browser heeft de link geblokkeerd</value>
+  </data>
+  <data name="WebClient.OpenLink.TapToOpen" xml:space="preserve">
+    <value>Tik op de link om deze te openen.</value>
+  </data>
   <data name="WebClient.Outdated.Body" xml:space="preserve">
     <value>Laad de pagina opnieuw. Als hij verouderd blijft, wis dan de browsercache.</value>
   </data>
@@ -23720,5 +23726,308 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
     <value>Batterijen</value>
+  </data>
+  <data name="Integrations.Feeds.Name" xml:space="preserve">
+    <value>RSS-feeds</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Title" xml:space="preserve">
+    <value>Feed toevoegen</value>
+  </data>
+  <data name="Integrations.Feeds.Config.Description" xml:space="preserve">
+    <value>Volg een RSS- of Atom-feed. Macro Deck controleert het adres voordat de feed wordt opgeslagen.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlLabel" xml:space="preserve">
+    <value>Feedadres</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UrlDescription" xml:space="preserve">
+    <value>Het adres van de RSS- of Atom-feed, bijvoorbeeld de link achter het RSS-pictogram van een website.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.NameDescription" xml:space="preserve">
+    <value>Laat leeg om de eigen titel van de feed te gebruiken.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupLabel" xml:space="preserve">
+    <value>Groep</value>
+  </data>
+  <data name="Integrations.Feeds.Config.GroupDescription" xml:space="preserve">
+    <value>Optioneel. Feeds in dezelfde groep kunnen samen in één widget worden getoond.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshLabel" xml:space="preserve">
+    <value>Vernieuwen elke (minuten)</value>
+  </data>
+  <data name="Integrations.Feeds.Config.RefreshDescription" xml:space="preserve">
+    <value>Hoe vaak Macro Deck de feed controleert op nieuwe artikelen. Minimaal 5 minuten.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeLabel" xml:space="preserve">
+    <value>Alleen artikelen met</value>
+  </data>
+  <data name="Integrations.Feeds.Config.IncludeDescription" xml:space="preserve">
+    <value>Optioneel. Woorden gescheiden door komma's. Een artikel blijft staan als de titel of beschrijving een ervan bevat.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeLabel" xml:space="preserve">
+    <value>Artikelen overslaan met</value>
+  </data>
+  <data name="Integrations.Feeds.Config.ExcludeDescription" xml:space="preserve">
+    <value>Optioneel. Woorden gescheiden door komma's. Een artikel waarvan de titel of beschrijving een ervan bevat, wordt overgeslagen.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesLabel" xml:space="preserve">
+    <value>Alleen deze categorieën</value>
+  </data>
+  <data name="Integrations.Feeds.Config.CategoriesDescription" xml:space="preserve">
+    <value>Optioneel. Categorieën gescheiden door komma's. Een artikel blijft staan als het een ervan heeft.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkLabel" xml:space="preserve">
+    <value>Adressen in het lokale netwerk toestaan</value>
+  </data>
+  <data name="Integrations.Feeds.Config.AllowLocalNetworkDescription" xml:space="preserve">
+    <value>Zet dit alleen aan voor een feed uit je eigen netwerk, bijvoorbeeld van een NAS. Anders weigert Macro Deck adressen in lokale en privénetwerken.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.EnterUrl" xml:space="preserve">
+    <value>Voer een geldig feedadres in, bijvoorbeeld {exampleUrl}.</value>
+  </data>
+  <data name="Integrations.Feeds.Config.UnknownStep" xml:space="preserve">
+    <value>Deze stap hoort niet bij het toevoegen van een feed. Begin opnieuw.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Timeout" xml:space="preserve">
+    <value>De feed heeft niet op tijd gereageerd.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.BlockedAddress" xml:space="preserve">
+    <value>Dit adres ligt in een lokaal of privénetwerk. Zet Adressen in het lokale netwerk toestaan aan om het te gebruiken.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.InvalidFeed" xml:space="preserve">
+    <value>Dit adres levert geen RSS- of Atom-feed op.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.TooLarge" xml:space="preserve">
+    <value>De feed is groter dan 5 MB.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.Network" xml:space="preserve">
+    <value>De feed is niet bereikbaar.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.HttpStatus" xml:space="preserve">
+    <value>De feedserver antwoordde met fout {status}.</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Name" xml:space="preserve">
+    <value>Feeds bijwerken</value>
+  </data>
+  <data name="Integrations.Feeds.Actions.Refresh.Description" xml:space="preserve">
+    <value>Zoekt direct naar nieuwe artikelen in alle feeds of alleen in de gekozen feed.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.FeedNotFound" xml:space="preserve">
+    <value>Deze feed bestaat niet meer.</value>
+  </data>
+  <data name="Integrations.Feeds.Errors.SomeFeedsFailed" xml:space="preserve">
+    <value>Sommige feeds konden niet worden bijgewerkt.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.Category" xml:space="preserve">
+    <value>RSS-feeds</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemName" xml:space="preserve">
+    <value>Nieuw feedartikel</value>
+  </data>
+  <data name="Integrations.Feeds.Events.NewItemDescription" xml:space="preserve">
+    <value>Een feed heeft een artikel dat er eerder niet was.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedName" xml:space="preserve">
+    <value>Feed bijgewerkt</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdatedDescription" xml:space="preserve">
+    <value>De artikelen van een feed zijn bij het vernieuwen gewijzigd.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedName" xml:space="preserve">
+    <value>Bijwerken van feed mislukt</value>
+  </data>
+  <data name="Integrations.Feeds.Events.UpdateFailedDescription" xml:space="preserve">
+    <value>Een feed kon niet worden vernieuwd.</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedName" xml:space="preserve">
+    <value>Feedartikel geopend</value>
+  </data>
+  <data name="Integrations.Feeds.Events.ItemOpenedDescription" xml:space="preserve">
+    <value>Er is op een artikel in een feedwidget getikt.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Feed" xml:space="preserve">
+    <value>Feed</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedDescription" xml:space="preserve">
+    <value>Laat leeg voor alle feeds.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.AllFeeds" xml:space="preserve">
+    <value>Alle feeds</value>
+  </data>
+  <data name="Integrations.Feeds.Params.FeedTitle" xml:space="preserve">
+    <value>Feednaam</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Title" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Url" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Description" xml:space="preserve">
+    <value>Beschrijving</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Author" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Published" xml:space="preserve">
+    <value>Gepubliceerd</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Categories" xml:space="preserve">
+    <value>Categorieën</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Error" xml:space="preserve">
+    <value>Fout</value>
+  </data>
+  <data name="Integrations.Feeds.Params.ErrorDescription" xml:space="preserve">
+    <value>Een code voor de oorzaak, zoals timeout of http-404.</value>
+  </data>
+  <data name="Integrations.Feeds.Params.Widget" xml:space="preserve">
+    <value>Widget</value>
+  </data>
+  <data name="Integrations.Feeds.Params.WidgetDescription" xml:space="preserve">
+    <value>De widget waarop het artikel is aangetikt. Laat leeg voor alle widgets.</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestTitle" xml:space="preserve">
+    <value>Titel van nieuwste artikel</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestUrl" xml:space="preserve">
+    <value>Link van nieuwste artikel</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestDescription" xml:space="preserve">
+    <value>Beschrijving van nieuwste artikel</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestPublished" xml:space="preserve">
+    <value>Publicatietijd van nieuwste artikel</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LatestAuthor" xml:space="preserve">
+    <value>Auteur van nieuwste artikel</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.ItemCount" xml:space="preserve">
+    <value>Artikelen</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UnreadCount" xml:space="preserve">
+    <value>Ongelezen artikelen</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.LastUpdated" xml:space="preserve">
+    <value>Laatst bijgewerkt</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.UpdateStatus" xml:space="preserve">
+    <value>Updatestatus</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllItemCount" xml:space="preserve">
+    <value>Artikelen in alle feeds</value>
+  </data>
+  <data name="Integrations.Feeds.Variables.AllUnreadCount" xml:space="preserve">
+    <value>Ongelezen artikelen in alle feeds</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Name" xml:space="preserve">
+    <value>Feedlijst</value>
+  </data>
+  <data name="Widgets.Feeds.FeedList.Description" xml:space="preserve">
+    <value>De nieuwste artikelen uit je RSS- en Atom-feeds.</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Name" xml:space="preserve">
+    <value>Uitgelicht artikel</value>
+  </data>
+  <data name="Widgets.Feeds.Featured.Description" xml:space="preserve">
+    <value>Het nieuwste artikel uit je feeds, met de bijbehorende afbeelding.</value>
+  </data>
+  <data name="Widgets.Feeds.AllFeeds" xml:space="preserve">
+    <value>Alle feeds</value>
+  </data>
+  <data name="Widgets.Feeds.NoFeeds" xml:space="preserve">
+    <value>Voeg een feed toe onder Integraties, RSS-feeds.</value>
+  </data>
+  <data name="Widgets.Feeds.FeedMissing" xml:space="preserve">
+    <value>Deze feed bestaat niet meer. Kies een andere in de widgetinstellingen.</value>
+  </data>
+  <data name="Widgets.Feeds.GroupEmpty" xml:space="preserve">
+    <value>Er zit geen feed in deze groep.</value>
+  </data>
+  <data name="Widgets.Feeds.NoArticles" xml:space="preserve">
+    <value>Nog geen artikelen.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Source" xml:space="preserve">
+    <value>Tonen</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceAll" xml:space="preserve">
+    <value>Alle feeds</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceFeed" xml:space="preserve">
+    <value>Eén feed</value>
+  </data>
+  <data name="Widgets.Feeds.Config.SourceGroup" xml:space="preserve">
+    <value>Eén groep</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Feed" xml:space="preserve">
+    <value>Feed</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Group" xml:space="preserve">
+    <value>Groep</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Count" xml:space="preserve">
+    <value>Artikelen</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CountDescription" xml:space="preserve">
+    <value>Hoeveel artikelen de widget toont.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCount" xml:space="preserve">
+    <value>Artikelen om af te wisselen</value>
+  </data>
+  <data name="Widgets.Feeds.Config.FeaturedCountDescription" xml:space="preserve">
+    <value>Hoeveel van de nieuwste artikelen de widget om de beurt toont.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowDescription" xml:space="preserve">
+    <value>Beschrijving tonen</value>
+  </data>
+  <data name="Widgets.Feeds.Config.ShowThumbnail" xml:space="preserve">
+    <value>Afbeeldingen tonen</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSeconds" xml:space="preserve">
+    <value>Volgend artikel na (seconden)</value>
+  </data>
+  <data name="Widgets.Feeds.Config.CycleSecondsDescription" xml:space="preserve">
+    <value>Bij 0 blijft het nieuwste artikel staan.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.Tap" xml:space="preserve">
+    <value>Bij tikken</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
+    <value>Elke tik voert ook de triggers Feedartikel geopend van deze widget uit.</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
+    <value>Openen in de browser</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapDialog" xml:space="preserve">
+    <value>Details tonen</value>
+  </data>
+  <data name="Widgets.Feeds.Config.TapFlows" xml:space="preserve">
+    <value>Alleen de acties van de widget uitvoeren</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Title" xml:space="preserve">
+    <value>Artikel</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Open" xml:space="preserve">
+    <value>Openen</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.CannotOpen" xml:space="preserve">
+    <value>Dit apparaat kan geen links vanuit Macro Deck openen. Kopieer in plaats daarvan het adres.</value>
+  </data>
+  <data name="Widgets.Feeds.Dialog.Unavailable" xml:space="preserve">
+    <value>Dit artikel staat niet meer in de feed.</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Feed" xml:space="preserve">
+    <value>Technieuws</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.First" xml:space="preserve">
+    <value>Nieuwe telefoonaccu's gaan een hele week mee</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Second" xml:space="preserve">
+    <value>Stad opent haar eerste zonnebrug</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Third" xml:space="preserve">
+    <value>Opensourceproject bereikt versie 2.0</value>
+  </data>
+  <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
+    <value>Hier verschijnt een korte samenvatting van het artikel.</value>
   </data>
 </root>

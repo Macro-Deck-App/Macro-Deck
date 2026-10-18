@@ -109,6 +109,7 @@ client (`ClientId`) and acts on it:
 | `ReportFailureAsync(message)` | A failure, shown the way a failed action is shown, for example as a toast. |
 | `ShowModalAsync(modal)` | One of your provider's `dialog` views, opened as a [modal](/ui/views/modal/); returns once it is open. |
 | `ShowModalAsync<T>(modal)` | The same, waiting for the user's answer. |
+| `OpenUrlAsync(url)` | An `http` or `https` page opened in the browser of the device that pressed, for example the phone running the web client. Never the computer Macro Deck runs on, unless that is where the press came from. |
 
 An origin stays usable after your handler returned, so work that finishes later - a request to a device or
 a server - can still report its failure on the client that pressed. It acts only while that client is still
@@ -147,10 +148,49 @@ public sealed class ViewSession : IUiSession
 Capture the origin into a local before the first `await`, as `ToggleAsync` does: the field holds the
 origin of the latest event, which may be a different client's by the time the work resumes.
 
+### Opening a link on the client that pressed
+
+`OpenUrlAsync` is narrower than the other members, because it puts a page in front of someone:
+
+- It accepts only an absolute `http` or `https` URL and throws `ArgumentException` for anything else, such
+  as `javascript:`, `file:` or a relative path.
+- It reaches only the connection the event came from, not every tab or device that shares its client id.
+- That connection must have told Macro Deck it can open links. The web client and the desktop UI do;
+  hardware decks, older clients and clients that cannot open a browser do not.
+- It works only for a short time after the event, about 10 seconds, so answer the press with it rather
+  than keep it for later work.
+- One event opens one link. A second call for the same press answers `false`. Calls from a plugin also
+  count against its callback throttle.
+
+It answers `true` when the link was handed to the client. That does not prove a page opened: a browser may
+still block the new tab, in which case the web client offers the link to tap. It answers `false` when any
+of the conditions above does not hold, and a Macro Deck or client that predates it always answers `false`.
+Show the link some other way then, for example in one of your dialogs:
+
+```csharp
+private async Task OpenArticleAsync(IUiEventOrigin origin, Uri link)
+{
+    if (!await origin.OpenUrlAsync(link))
+    {
+        await origin.ShowModalAsync(new ModalDefinition
+        {
+            ViewId = "article",
+            Data = new Dictionary<string, JsonElement>
+            {
+                ["url"] = JsonSerializer.SerializeToElement(link.AbsoluteUri)
+            }
+        });
+    }
+}
+```
+
+An `IUiEventOrigin` implemented before `OpenUrlAsync` existed keeps compiling: the default member checks
+the URL the same way and answers `false`.
+
 A plugin talking to a Macro Deck that predates origins still receives every event through this overload;
 its origins answer `false` or a cancellation. In tests, pass a `FakeUiEventOrigin` from
-`MacroDeck.Plugin.Testing` to `Dispatch` and read what the session showed from `ReportedFailures` and
-`OpenedModals`.
+`MacroDeck.Plugin.Testing` to `Dispatch` and read what the session showed from `ReportedFailures`,
+`OpenedModals` and `OpenedUrls`.
 
 ## While Macro Deck is locked
 
@@ -229,10 +269,12 @@ Like the other provider-shaped capabilities, `ui` declares the single local id `
 | `modal.result` | How a modal this plugin opened ended. Host-to-plugin because a person, not a timeout, bounds the wait - see [Modal views](/ui/views/modal/). |
 
 Trees, patches and faults travel the other way through the [`ui` host api](/reference/websocket/#host-callbacks),
-and so do an origin's calls: `origin.report-failure` and `origin.show-modal` name the session and the
-`clientId` the event carried. The host acts on them only for a session the plugin serves and a client still
-attached to it, and answers `delivered: false` or `opened: false` otherwise. A host that predates them
-answers `CAPABILITY_UNSUPPORTED`, which the SDK turns into `false` or a cancellation.
+and so do an origin's calls: `origin.report-failure`, `origin.show-modal` and `origin.open-url` name the
+session and the `clientId` the event carried. The host acts on them only for a session the plugin serves and
+a client still attached to it, and answers `delivered: false` or `opened: false` otherwise; `origin.open-url`
+also needs the conditions in [Opening a link on the client that pressed](#opening-a-link-on-the-client-that-pressed)
+and answers `INVALID_PAYLOAD` for a URL that is not `http` or `https`. A host that predates them answers
+`CAPABILITY_UNSUPPORTED`, which the SDK turns into `false` or a cancellation.
 
 An action configuration session that reports parameter values (see
 [From an action](/ui/views/configuration/#reporting-values-the-tree-edits)) sends them as

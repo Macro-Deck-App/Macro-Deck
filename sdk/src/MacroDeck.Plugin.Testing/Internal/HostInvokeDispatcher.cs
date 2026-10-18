@@ -131,6 +131,8 @@ internal static class HostInvokeDispatcher
 					=> HostInvokeOutcome.Ok(new UiOriginReportFailureResult { Delivered = false }),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.OriginShowModal
 					=> HostInvokeOutcome.Ok(new UiOriginShowModalResult { Opened = false }),
+				HostApis.Ui when payload.Operation == HostOperations.Ui.OriginOpenUrl
+					=> HostInvokeOutcome.Ok(new UiOriginOpenUrlResult { Delivered = false }),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.ReportParameterValues
 					=> HostInvokeOutcome.Ok((JsonElement?)null),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork

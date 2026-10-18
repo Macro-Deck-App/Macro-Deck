@@ -45,4 +45,24 @@ public interface IUiEventOrigin
 	/// <returns>The user's answer, or a cancellation when the dialog could not be opened, was dismissed, or
 	/// <paramref name="cancellationToken" /> fired.</returns>
 	Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Opens <paramref name="url" /> in the browser of the device that raised the event, for example the phone
+	/// the user tapped a widget on, never on the machine Macro Deck runs on.
+	/// </summary>
+	/// <remarks>
+	/// Macro Deck only delivers it to a client that said it can open links, only to the connection the event
+	/// came from, only for a short time after that event and only once per event, so keep it for answering a
+	/// press rather than for later work. A Macro Deck or client that predates this answers <c>false</c>; fall
+	/// back to showing the link, for example in a dialog.
+	/// </remarks>
+	/// <returns>Whether the link was handed to the client. <c>true</c> does not prove a browser opened it, for
+	/// example when the browser blocked the window.</returns>
+	/// <exception cref="ArgumentException"><paramref name="url" /> is not an absolute <c>http</c> or
+	/// <c>https</c> URL.</exception>
+	Task<bool> OpenUrlAsync(Uri url, CancellationToken cancellationToken = default)
+	{
+		UiEventOriginUrls.EnsureWebUrl(url);
+		return Task.FromResult(false);
+	}
 }

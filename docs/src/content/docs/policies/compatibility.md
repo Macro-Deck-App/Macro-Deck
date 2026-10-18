@@ -238,6 +238,10 @@ What did **not** need a major:
   `IUiSession.Dispatch(UiEvent, IUiEventOrigin)` overload whose default forwards to `Dispatch(UiEvent)`, so a
   session compiled before it keeps receiving every event. The `ui` host API gained `origin.report-failure`
   and `origin.show-modal`; against an older host they answer `false` or a cancellation.
+- `IUiEventOrigin` gained `OpenUrlAsync` as a default interface member that checks the URL and answers
+  `false`, so an origin implemented before it keeps compiling and loading. The `ui` host API gained
+  `origin.open-url`; against an older host, and on a client that did not declare it can open links, it
+  answers `false`. A client declares that ability when it connects, in a form an older host ignores.
 - [Reporting values from an action's configuration](/ui/views/configuration/#reporting-values-the-tree-edits)
   added `IActionConfigurationSession`, `ActionConfigurationSession` and
   `ActionParameterValuesReportedEventArgs`. A configuration session written before them is unchanged and

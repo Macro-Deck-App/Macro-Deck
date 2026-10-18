@@ -127,7 +127,7 @@ export default defineConfig({
 								},
 								{
 									label: 'Using Macro Deck',
-									items: ['guide/concepts', 'guide/fonts', 'guide/tips', 'guide/obs-studio', 'guide/soundpad', 'guide/youtube', 'guide/jellyfin', 'guide/adguard-home', 'guide/steam', 'guide/discord-webhooks', 'guide/updates', 'guide/backups', 'guide/troubleshooting'],
+									items: ['guide/concepts', 'guide/fonts', 'guide/tips', 'guide/obs-studio', 'guide/soundpad', 'guide/youtube', 'guide/jellyfin', 'guide/adguard-home', 'guide/steam', 'guide/rss-feeds', 'guide/discord-webhooks', 'guide/updates', 'guide/backups', 'guide/troubleshooting'],
 								},
 								{
 									label: 'Reference',

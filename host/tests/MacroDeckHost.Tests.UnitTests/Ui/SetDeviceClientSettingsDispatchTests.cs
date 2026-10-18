@@ -231,6 +231,7 @@ public class SetDeviceClientSettingsDispatchTests
 			null!,
 			null!,
 			new NullNotificationManager(),
+			new UiClientFeatures(),
 			CancellationToken.None);
 	}
 }

@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Ui;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -50,6 +51,8 @@ internal abstract class UiSessionFixture
 
 	protected UiEventOrigins Origins { get; private set; } = null!;
 
+	protected UiClientFeatures ClientFeatures { get; private set; } = null!;
+
 	[SetUp]
 	public void UiSessionSetUp()
 	{
@@ -73,7 +76,8 @@ internal abstract class UiSessionFixture
 
 		Invoker = new RecordingCapabilityInvoker();
 		Interactions = new RecordingUiInteractionsFactory();
-		Origins = new UiEventOrigins(Broker, Transport, Interactions);
+		ClientFeatures = new UiClientFeatures();
+		Origins = new UiEventOrigins(Broker, Transport, Interactions, ClientFeatures);
 		Resolver.Fallback = new UiSessionProviderResolver(
 			new RemoteUiProviderRegistry(new EmptyRemotePluginSnapshotStore(), Invoker),
 			new UiProviderRegistry(Integrations, () => Broker, Serilog.Core.Logger.None, () => Origins),
