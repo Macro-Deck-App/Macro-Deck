@@ -156,7 +156,7 @@ new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true
 | `device-picker` | `UiDevicePickerInput` | One connected device |
 | `integration-picker` | `UiIntegrationPickerInput` | One integration, or one of its configuration entries |
 | `icon` | `UiIconReferenceInput` | One icon, as a typed provider reference |
-| `icon-display` | `UiIconDisplayInput` | An icon's framing (fit, zoom, offset, opacity) over a preview of `Icon` at `AspectRatio` against `Background`; with `Tint` set, the preview draws the icon in that colour, keeping its transparency |
+| `icon-display` | `UiIconDisplayInput` | An icon's framing (fit, zoom, offset, opacity) over a preview of `Icon` at `AspectRatio` against `Background`; with `Tint` set, the preview draws the icon in that colour, keeping its transparency. Reset is always offered and writes **null**, not a copy of the defaults, so a `Bind.Custom` setter must handle null |
 | `thresholds` | `UiThresholdsInput` | A range divided into coloured bands, edited on a bar with a draggable handle between each pair - see [Colour thresholds](#colour-thresholds) |
 
 Each renderer maps these onto the editors it already ships; a plugin ships no renderer code for them.

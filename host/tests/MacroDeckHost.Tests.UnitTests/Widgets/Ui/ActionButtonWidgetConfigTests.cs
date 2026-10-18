@@ -4,6 +4,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Model.Surfaces;
+using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Testing;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
@@ -809,6 +810,121 @@ public class ActionButtonWidgetConfigTests
 
 		var value = host.ById("states.on.appearance.iconDisplay").Property(UiConfigProperties.Value)!.Value;
 		Assert.That(value.GetProperty("zoom").GetDouble(), Is.EqualTo(200));
+	}
+
+	[Test]
+	public void Per_state_iconDisplay_reset_clears_only_that_states_framing()
+	{
+		var host = Render(TwoFramedStates());
+		host.ById("activeStateId").Change("on");
+
+		var result = host.ById("states.on.appearance.iconDisplay").Change(JsonNullElement());
+
+		var value = host.ById("states.on.appearance.iconDisplay").Property(UiConfigProperties.Value)!.Value;
+		var states = ComposeRootWithStates(host).GetProperty("states");
+		var on = states.EnumerateArray().Single(s => s.GetProperty("id").GetString() == "on");
+		var off = states.EnumerateArray().Single(s => s.GetProperty("id").GetString() == "off");
+		var storedOnDisplay = JsonNode.Parse(on.GetProperty("appearance").GetProperty("iconDisplay").GetRawText());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Outcome, Is.EqualTo(UiDispatchOutcome.Accepted), result.Reason);
+			Assert.That(value.GetProperty("fit").GetString(), Is.EqualTo("contain"));
+			Assert.That(value.GetProperty("zoom").GetDouble(), Is.EqualTo(100));
+			Assert.That(value.GetProperty("offsetX").GetDouble(), Is.EqualTo(0));
+			Assert.That(value.GetProperty("offsetY").GetDouble(), Is.EqualTo(0));
+			Assert.That(value.GetProperty("opacity").GetDouble(), Is.EqualTo(100));
+			Assert.That(ActionButtonIconDisplay.Parse(storedOnDisplay as JsonObject).IsDefault, Is.True);
+			Assert.That(off.GetProperty("appearance").GetProperty("iconDisplay").GetProperty("zoom").GetDouble(),
+				Is.EqualTo(150));
+		});
+	}
+
+	[Test]
+	public void Per_state_iconDisplay_partial_change_keeps_the_other_stored_fields()
+	{
+		var host = Render(TwoFramedStates());
+		host.ById("activeStateId").Change("on");
+
+		var result = host.ById("states.on.appearance.iconDisplay").Change(new { zoom = 120d });
+
+		var value = host.ById("states.on.appearance.iconDisplay").Property(UiConfigProperties.Value)!.Value;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Outcome, Is.EqualTo(UiDispatchOutcome.Accepted), result.Reason);
+			Assert.That(value.GetProperty("zoom").GetDouble(), Is.EqualTo(120));
+			Assert.That(value.GetProperty("fit").GetString(), Is.EqualTo("cover"));
+			Assert.That(value.GetProperty("offsetX").GetDouble(), Is.EqualTo(10));
+			Assert.That(value.GetProperty("offsetY").GetDouble(), Is.EqualTo(-10));
+			Assert.That(value.GetProperty("opacity").GetDouble(), Is.EqualTo(40));
+		});
+	}
+
+	[Test]
+	public void Root_iconDisplay_reset_returns_the_framing_to_its_defaults()
+	{
+		var host = Render(new
+		{
+			icon = new { type = "icon-pack", reference = "bolt" },
+			iconDisplay = new { fit = "cover", zoom = 180, offsetX = 10, offsetY = -10, opacity = 40 }
+		});
+
+		var result = host.ById("iconDisplay").Change(JsonNullElement());
+
+		var composed = ComposeRoot(host);
+		var display = composed.GetProperty("iconDisplay");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Outcome, Is.EqualTo(UiDispatchOutcome.Accepted), result.Reason);
+			Assert.That(display.GetProperty("fit").GetString(), Is.EqualTo("contain"));
+			Assert.That(display.GetProperty("zoom").GetDouble(), Is.EqualTo(100));
+			Assert.That(display.GetProperty("offsetX").GetDouble(), Is.EqualTo(0));
+			Assert.That(display.GetProperty("offsetY").GetDouble(), Is.EqualTo(0));
+			Assert.That(display.GetProperty("opacity").GetDouble(), Is.EqualTo(100));
+		});
+
+		AssertValidatesAgainstSchema(composed);
+	}
+
+	private static object TwoFramedStates()
+	{
+		var icon = new { type = "icon-pack", reference = "bolt" };
+
+		return new
+		{
+			stateMode = true,
+			states = new object[]
+			{
+				new
+				{
+					id = "off",
+					label = "Off",
+					appearance = new
+					{
+						icon,
+						iconDisplay = new { fit = "cover", zoom = 150, offsetX = 5, offsetY = 5, opacity = 80 }
+					}
+				},
+				new
+				{
+					id = "on",
+					label = "On",
+					appearance = new
+					{
+						icon,
+						iconDisplay = new { fit = "cover", zoom = 180, offsetX = 10, offsetY = -10, opacity = 40 }
+					}
+				}
+			}
+		};
+	}
+
+	// The harness sends a C# null as an event without payload, while the client's reset sends JSON null.
+	private static JsonElement JsonNullElement()
+	{
+		return JsonDocument.Parse("null").RootElement;
 	}
 
 	[Test]
