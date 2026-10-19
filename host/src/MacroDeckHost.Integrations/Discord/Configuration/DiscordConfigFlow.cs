@@ -3,10 +3,12 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Integrations.Discord.Auth;
+using MacroDeckHost.Integrations.Discord.Connections;
 using MacroDeckHost.Integrations.Discord.Protocol;
 using MacroDeckHost.Integrations.Discord.State;
 using MacroDeckHost.Localization;
 using Serilog;
+using Serilog.Events;
 using MacroDeck.Localization;
 
 namespace MacroDeckHost.Integrations.Discord.Configuration;
@@ -150,10 +152,19 @@ public sealed class DiscordConfigFlow : IConfigFlow
 		}
 		catch (DiscordIpcUnavailableException ex)
 		{
+			if (ex.Denial is { } denial)
+			{
+				DiscordIpcDenialLog.Write(_logger, LogEventLevel.Warning, denial);
+			}
+			else
+			{
+				_logger.Information("Discord client not found for authorization: {Reason}", ex.Message);
+			}
+
 			return ConfigFlowResult.Error(AuthorizeStep(),
 				ex switch
 				{
-					{ AccessDenied: true } => AppStrings.Integrations.Discord.Config.PrivilegeMismatch(),
+					{ AccessDenied: true } => DiscordAccessDeniedText.ConfigError(ex.Denial),
 					{ RichPresenceOnly: true } => AppStrings.Integrations.Discord.Config.OnlyRichPresenceServer(),
 					_ => AppStrings.Integrations.Discord.Config.NoClientFound()
 				});

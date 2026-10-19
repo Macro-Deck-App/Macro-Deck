@@ -40,7 +40,7 @@ internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
 
 	public string Name { get; init; } = "fake";
 
-	public bool AccessDenied { get; init; }
+	public DiscordIpcDenial? Denial { get; init; }
 
 	public bool Disposed { get; private set; }
 
@@ -63,9 +63,9 @@ internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
 			return Task.FromException(ConnectException);
 		}
 
-		if (AccessDenied || skippedEndpoints.Contains(Name))
+		if (Denial is not null || skippedEndpoints.Contains(Name))
 		{
-			return Task.FromException(new DiscordIpcUnavailableException("No usable endpoint.", AccessDenied));
+			return Task.FromException(new DiscordIpcUnavailableException("No usable endpoint.", Denial));
 		}
 
 		IsConnected = true;

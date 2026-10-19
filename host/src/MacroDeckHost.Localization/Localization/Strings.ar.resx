@@ -5504,6 +5504,18 @@
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>تشغيل</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>حظر Windows الاتصال بـ Discord رغم أن Macro Deck وDiscord يعملان بالصلاحيات نفسها. السبب المرجّح هو برنامج حماية: اسمح لـ Macro Deck فيه، ثم أعد المحاولة.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>يشغل {program} اتصال Discord، لذا لا يستطيع Macro Deck الوصول إلى Discord. أغلق هذا البرنامج، وأعد تشغيل Discord، ثم أعد المحاولة.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>يعمل Discord باسم مستخدم Windows آخر أو في جلسة Windows أخرى. شغّل Discord باسم المستخدم نفسه وفي الجلسة نفسها التي يعمل فيها Macro Deck، ثم أعد المحاولة.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>رفض Discord الاتصال، ولم يتمكن Macro Deck من معرفة السبب. تحقق من أن Macro Deck وDiscord يعملان باسم المستخدم نفسه وبالصلاحيات نفسها، وأنه لا يوجد برنامج حماية يحظر Macro Deck، ثم أعد المحاولة.</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>رفض Discord التفويض: {details}</value>
   </data>
@@ -5758,6 +5770,30 @@
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>تغيّرت حالة الاتصال الصوتي</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>يحظر Windows الاتصال بـ Discord رغم أن Macro Deck وDiscord يعملان بالصلاحيات نفسها. السبب المرجّح هو برنامج حماية: اسمح لـ Macro Deck فيه.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>اسمح لـ Macro Deck في برنامج الحماية، ثم أعد الاتصال.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>يشغل {program} اتصال Discord، لذا لا يستطيع Macro Deck الوصول إلى Discord. أغلق هذا البرنامج وأعد تشغيل Discord.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>أغلق {program}، وأعد تشغيل Discord، ثم أعد الاتصال.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>يعمل Discord باسم مستخدم Windows آخر أو في جلسة Windows أخرى، لذا لن يتواصل مع Macro Deck. شغّل Discord باسم المستخدم نفسه وفي الجلسة نفسها التي يعمل فيها Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>شغّل Discord باسم مستخدم Windows نفسه وفي الجلسة نفسها التي يعمل فيها Macro Deck، ثم أعد الاتصال.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>تم رفض الوصول إلى Discord، ولم يتمكن Macro Deck من معرفة السبب. تحقق من أن Macro Deck وDiscord يعملان باسم المستخدم نفسه وبالصلاحيات نفسها، وأنه لا يوجد برنامج حماية يحظر Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>شغّل Macro Deck وDiscord باسم المستخدم نفسه وبالصلاحيات نفسها، وتحقق من برنامج الحماية، ثم أعد الاتصال.</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord يعمل، لكنه لن يتواصل مع Macro Deck. يحدث هذا عندما يعمل الاثنان بصلاحيات مختلفة: إذا شُغّل أحدهما كمسؤول، فشغّل الاثنين بالطريقة نفسها.</value>

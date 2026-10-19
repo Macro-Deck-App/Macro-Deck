@@ -5503,6 +5503,18 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>Activer</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Windows a bloqué la connexion à Discord alors que Macro Deck et Discord s'exécutent avec les mêmes privilèges. Un logiciel de sécurité en est probablement la cause : autorise Macro Deck dans ce logiciel, puis réessaie.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>{program} occupe la connexion de Discord, Macro Deck ne peut donc pas joindre Discord. Ferme ce programme, redémarre Discord et réessaie.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord s'exécute sous un autre utilisateur Windows ou dans une autre session Windows. Démarre Discord sous le même utilisateur et dans la même session que Macro Deck, puis réessaie.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord a refusé la connexion et Macro Deck n'a pas pu en déterminer la raison. Vérifie que Macro Deck et Discord s'exécutent sous le même utilisateur avec les mêmes privilèges et qu'aucun logiciel de sécurité ne bloque Macro Deck, puis réessaie.</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord a refusé l'autorisation : {details}</value>
   </data>
@@ -5757,6 +5769,30 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>État de la connexion vocale modifié</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Windows bloque la connexion à Discord alors que Macro Deck et Discord s'exécutent avec les mêmes privilèges. Un logiciel de sécurité en est probablement la cause : autorise Macro Deck dans ce logiciel.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>Autorise Macro Deck dans ton logiciel de sécurité, puis reconnecte-toi.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>{program} occupe la connexion de Discord, Macro Deck ne peut donc pas joindre Discord. Ferme ce programme et redémarre Discord.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>Ferme {program}, redémarre Discord, puis reconnecte-toi.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord s'exécute sous un autre utilisateur Windows ou dans une autre session Windows et ne communique donc pas avec Macro Deck. Démarre Discord sous le même utilisateur et dans la même session que Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Démarre Discord sous le même utilisateur Windows et dans la même session que Macro Deck, puis reconnecte-toi.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>L'accès à Discord a été refusé et Macro Deck n'a pas pu en déterminer la raison. Vérifie que Macro Deck et Discord s'exécutent sous le même utilisateur avec les mêmes privilèges et qu'aucun logiciel de sécurité ne bloque Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Exécute Macro Deck et Discord sous le même utilisateur avec les mêmes privilèges, vérifie ton logiciel de sécurité, puis reconnecte-toi.</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord est en cours d'exécution, mais ne communiquera pas avec Macro Deck. Cela se produit lorsque les deux s'exécutent avec des privilèges différents : si l'un d'eux a été démarré en tant qu'administrateur, démarre les deux de la même façon.</value>

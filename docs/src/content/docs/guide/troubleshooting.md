@@ -233,6 +233,20 @@ Vesktop, Equibop, Legcord or Dorion can share game activity, but Macro Deck cann
 Start the official Discord desktop app, including the Flatpak or Snap version on Linux, and try
 again. The third-party client can keep running alongside it.
 
+If Discord is running but refuses the connection, Macro Deck checks which program holds Discord's
+connection and names the cause in the setup and under **Integrations**:
+
+- **Different privileges:** one of Macro Deck and Discord was started as administrator. Start both
+  the same way.
+- **Another Windows user or session:** Discord runs under a different account or in another
+  session, for example through fast user switching. Start Discord under the same user as Macro Deck.
+- **Another program occupies Discord's connection:** the message names the program. Close it and
+  restart Discord.
+- **Blocked although both run with the same privileges:** security software is the likely cause.
+  Allow Macro Deck in it.
+- **Macro Deck could not find out why:** check all of the above. The [logs](#where-to-find-the-logs)
+  contain a warning with the program, session and privileges Macro Deck found.
+
 ## Spotify sign-in says Spotify could not be reached
 
 After you log in to Spotify, the setup says **Spotify could not be reached or did not respond in time**.

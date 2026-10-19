@@ -34,7 +34,7 @@ internal sealed class FakeDiscordIpcEndpoints
 
 		public async Task ConnectAsync(IReadOnlySet<string> skippedEndpoints, CancellationToken cancellationToken)
 		{
-			var accessDenied = false;
+			DiscordIpcDenial? denial = null;
 			foreach (var create in _owner._endpoints)
 			{
 				var endpoint = create();
@@ -44,7 +44,7 @@ internal sealed class FakeDiscordIpcEndpoints
 				}
 				catch (DiscordIpcUnavailableException ex)
 				{
-					accessDenied |= ex.AccessDenied;
+					denial ??= ex.Denial;
 					continue;
 				}
 
@@ -53,7 +53,7 @@ internal sealed class FakeDiscordIpcEndpoints
 				return;
 			}
 
-			throw new DiscordIpcUnavailableException("No usable endpoint.", accessDenied);
+			throw new DiscordIpcUnavailableException("No usable endpoint.", denial);
 		}
 
 		public Task WriteFrameAsync(

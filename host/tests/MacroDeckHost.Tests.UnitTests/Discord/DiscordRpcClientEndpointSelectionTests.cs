@@ -87,13 +87,57 @@ internal sealed class DiscordRpcClientEndpointSelectionTests
 	{
 		var endpoints = new FakeDiscordIpcEndpoints(()
 				=> new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
-			() => new FakeDiscordIpcTransport { Name = "discord-ipc-1", AccessDenied = true });
+			() => new FakeDiscordIpcTransport
+			{
+				Name = "discord-ipc-1",
+				Denial = TestDenials.Of(DiscordIpcDenialCause.PrivilegeMismatch)
+			});
 		using var client = new DiscordRpcClient(endpoints.CreateTransport, _probeTimeout);
 
 		var exception = Assert.ThrowsAsync<DiscordIpcUnavailableException>(async () =>
 			await client.ConnectAsync("1", CancellationToken.None));
 
 		Assert.That(exception!.AccessDenied, Is.True);
+	}
+
+	[Test]
+	public void A_rich_presence_server_outranks_a_refusal_no_probe_could_examine()
+	{
+		var endpoints = new FakeDiscordIpcEndpoints(()
+				=> new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
+			() => new FakeDiscordIpcTransport
+			{
+				Name = "discord-ipc-1",
+				Denial = TestDenials.Unattributed("discord-ipc-1")
+			});
+		using var client = new DiscordRpcClient(endpoints.CreateTransport, _probeTimeout);
+
+		var exception = Assert.ThrowsAsync<DiscordIpcUnavailableException>(async () =>
+			await client.ConnectAsync("1", CancellationToken.None));
+
+		Assert.That(exception!.RichPresenceOnly, Is.True);
+	}
+
+	[Test]
+	public void A_refusal_whose_probe_failed_still_outranks_a_rich_presence_server()
+	{
+		var endpoints = new FakeDiscordIpcEndpoints(()
+				=> new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
+			() => new FakeDiscordIpcTransport
+			{
+				Name = "discord-ipc-1",
+				Denial = TestDenials.ProbeFailed("discord-ipc-1")
+			});
+		using var client = new DiscordRpcClient(endpoints.CreateTransport, _probeTimeout);
+
+		var exception = Assert.ThrowsAsync<DiscordIpcUnavailableException>(async () =>
+			await client.ConnectAsync("1", CancellationToken.None));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(exception!.RichPresenceOnly, Is.False);
+			Assert.That(exception.Denial?.Cause, Is.EqualTo(DiscordIpcDenialCause.Unknown));
+		});
 	}
 
 	[Test]

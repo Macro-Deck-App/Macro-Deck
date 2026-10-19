@@ -5504,6 +5504,18 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>オンにする</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Macro Deck と Discord は同じ権限で実行されていますが、Windows が Discord への接続をブロックしました。セキュリティソフトが原因と考えられます。セキュリティソフトで Macro Deck を許可してから、もう一度お試しください。</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>{program} が Discord の接続を占有しているため、Macro Deck は Discord に接続できません。そのプログラムを終了し、Discord を再起動してから、もう一度お試しください。</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord は別の Windows ユーザーまたは別の Windows セッションで実行されています。Macro Deck と同じユーザー、同じセッションで Discord を起動してから、もう一度お試しください。</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord が接続を拒否しましたが、Macro Deck は原因を特定できませんでした。Macro Deck と Discord が同じユーザー、同じ権限で実行されていること、およびセキュリティソフトが Macro Deck をブロックしていないことを確認してから、もう一度お試しください。</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord が認可を拒否しました: {details}</value>
   </data>
@@ -5758,6 +5770,30 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>ボイス接続の状態が変化</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Macro Deck と Discord は同じ権限で実行されていますが、Windows が Discord への接続をブロックしています。セキュリティソフトが原因と考えられます。セキュリティソフトで Macro Deck を許可してください。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>セキュリティソフトで Macro Deck を許可してから、再接続してください。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>{program} が Discord の接続を占有しているため、Macro Deck は Discord に接続できません。そのプログラムを終了し、Discord を再起動してください。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>{program} を終了し、Discord を再起動してから、再接続してください。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord は別の Windows ユーザーまたは別の Windows セッションで実行されているため、Macro Deck と通信しません。Macro Deck と同じユーザー、同じセッションで Discord を起動してください。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Macro Deck と同じ Windows ユーザー、同じセッションで Discord を起動してから、再接続してください。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>Discord へのアクセスが拒否されましたが、Macro Deck は原因を特定できませんでした。Macro Deck と Discord が同じユーザー、同じ権限で実行されていること、およびセキュリティソフトが Macro Deck をブロックしていないことを確認してください。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Macro Deck と Discord を同じユーザー、同じ権限で実行し、セキュリティソフトを確認してから、再接続してください。</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord は起動していますが、Macro Deck と通信しません。両者の権限レベルが異なると発生します。どちらかを管理者として起動している場合は、両方を同じ方法で起動してください。</value>

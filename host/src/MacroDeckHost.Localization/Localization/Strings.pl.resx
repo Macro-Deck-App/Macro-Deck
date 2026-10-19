@@ -5503,6 +5503,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>Włącz</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Windows zablokował połączenie z Discordem, mimo że Macro Deck i Discord działają z takimi samymi uprawnieniami. Prawdopodobną przyczyną jest oprogramowanie zabezpieczające: zezwól w nim na Macro Deck i spróbuj ponownie.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>Program {program} zajmuje połączenie Discorda, więc Macro Deck nie może połączyć się z Discordem. Zamknij go, uruchom ponownie Discord i spróbuj jeszcze raz.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord działa na innym koncie użytkownika Windows lub w innej sesji Windows. Uruchom Discord na tym samym koncie i w tej samej sesji co Macro Deck, a następnie spróbuj ponownie.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord odmówił połączenia, a Macro Deck nie zdołał ustalić przyczyny. Sprawdź, czy Macro Deck i Discord działają na tym samym koncie z takimi samymi uprawnieniami i czy żadne oprogramowanie zabezpieczające nie blokuje Macro Deck, a następnie spróbuj ponownie.</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord odrzucił autoryzację: {details}</value>
   </data>
@@ -5757,6 +5769,30 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>Zmiana stanu połączenia głosowego</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Windows blokuje połączenie z Discordem, mimo że Macro Deck i Discord działają z takimi samymi uprawnieniami. Prawdopodobną przyczyną jest oprogramowanie zabezpieczające: zezwól w nim na Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>Zezwól na Macro Deck w oprogramowaniu zabezpieczającym, a następnie połącz ponownie.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>Program {program} zajmuje połączenie Discorda, więc Macro Deck nie może połączyć się z Discordem. Zamknij go i uruchom ponownie Discord.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>Zamknij program {program}, uruchom ponownie Discord, a następnie połącz ponownie.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord działa na innym koncie użytkownika Windows lub w innej sesji Windows, więc nie komunikuje się z Macro Deck. Uruchom Discord na tym samym koncie i w tej samej sesji co Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Uruchom Discord na tym samym koncie użytkownika Windows i w tej samej sesji co Macro Deck, a następnie połącz ponownie.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>Odmówiono dostępu do Discorda, a Macro Deck nie zdołał ustalić przyczyny. Sprawdź, czy Macro Deck i Discord działają na tym samym koncie z takimi samymi uprawnieniami i czy żadne oprogramowanie zabezpieczające nie blokuje Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Uruchom Macro Deck i Discord na tym samym koncie z takimi samymi uprawnieniami, sprawdź oprogramowanie zabezpieczające, a następnie połącz ponownie.</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord jest uruchomiony, ale nie komunikuje się z Macro Deck. Dzieje się tak, gdy oba programy działają z różnymi uprawnieniami: jeśli jeden z nich został uruchomiony jako administrator, uruchom oba w ten sam sposób.</value>

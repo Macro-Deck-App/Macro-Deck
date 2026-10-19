@@ -5503,6 +5503,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>Zapnout</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Windows zablokoval připojení k Discordu, přestože Macro Deck a Discord běží se stejnými oprávněními. Pravděpodobnou příčinou je bezpečnostní software: povolte v něm Macro Deck a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>Připojení Discordu obsazuje program {program}, takže se Macro Deck k Discordu nemůže připojit. Zavřete jej, restartujte Discord a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord běží pod jiným uživatelem Windows nebo v jiné relaci Windows. Spusťte Discord pod stejným uživatelem a ve stejné relaci jako Macro Deck a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord odmítl připojení a Macro Deck nedokázal zjistit proč. Zkontrolujte, zda Macro Deck a Discord běží pod stejným uživatelem se stejnými oprávněními a zda Macro Deck neblokuje žádný bezpečnostní software, a zkuste to znovu.</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord odmítl autorizaci: {details}</value>
   </data>
@@ -5757,6 +5769,30 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>Změna stavu hlasového připojení</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Windows blokuje připojení k Discordu, přestože Macro Deck a Discord běží se stejnými oprávněními. Pravděpodobnou příčinou je bezpečnostní software: povolte v něm Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>Povolte Macro Deck v bezpečnostním softwaru a poté se znovu připojte.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>Připojení Discordu obsazuje program {program}, takže se Macro Deck k Discordu nemůže připojit. Zavřete jej a restartujte Discord.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>Zavřete program {program}, restartujte Discord a poté se znovu připojte.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord běží pod jiným uživatelem Windows nebo v jiné relaci Windows, a proto nekomunikuje s aplikací Macro Deck. Spusťte Discord pod stejným uživatelem a ve stejné relaci jako Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Spusťte Discord pod stejným uživatelem Windows a ve stejné relaci jako Macro Deck a poté se znovu připojte.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>Přístup k Discordu byl odepřen a Macro Deck nedokázal zjistit proč. Zkontrolujte, zda Macro Deck a Discord běží pod stejným uživatelem se stejnými oprávněními a zda Macro Deck neblokuje žádný bezpečnostní software.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Spusťte Macro Deck a Discord pod stejným uživatelem se stejnými oprávněními, zkontrolujte bezpečnostní software a poté se znovu připojte.</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord je spuštěn, ale nekomunikuje s Macro Deck. K tomu dochází, když obě aplikace běží s různými oprávněními: pokud byla jedna z nich spuštěna jako správce, je nutné spustit stejným způsobem i tu druhou.</value>

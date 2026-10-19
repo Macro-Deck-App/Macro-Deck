@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using System.Runtime.Versioning;
 using MacroDeckHost.Integrations.Discord.Protocol;
 
 namespace MacroDeckHost.Tests.UnitTests.Discord;
@@ -65,6 +66,43 @@ internal sealed class DiscordIpcTransportTests
 			Assert.ThrowsAsync<DiscordIpcUnavailableException>(async () =>
 				await transport.ConnectAsync(new HashSet<string>(StringComparer.Ordinal) { only },
 					CancellationToken.None));
+		}
+		finally
+		{
+			Directory.Delete(directory, true);
+		}
+	}
+
+	[Test]
+	[UnsupportedOSPlatform("windows")]
+	public void A_socket_that_refuses_access_is_a_denial_without_a_claimed_cause()
+	{
+		Assume.That(Environment.UserName, Is.Not.EqualTo("root"), "root ignores the socket's file mode");
+		var directory = Directory.CreateTempSubdirectory("mdipc-").FullName;
+		using var scope = new EnvironmentScope
+		{
+			["XDG_RUNTIME_DIR"] = directory,
+			["TMPDIR"] = null,
+			["TMP"] = null,
+			["TEMP"] = null
+		};
+		var only = Path.Combine(directory, "discord-ipc-0");
+
+		try
+		{
+			using var listener = Listen(only);
+			File.SetUnixFileMode(only, UnixFileMode.None);
+			using var transport = new DiscordIpcTransport();
+
+			var exception = Assert.ThrowsAsync<DiscordIpcUnavailableException>(async () =>
+				await transport.ConnectAsync(new HashSet<string>(StringComparer.Ordinal), CancellationToken.None));
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(exception!.Denial?.Endpoint, Is.EqualTo(only));
+				Assert.That(exception.Denial?.Cause, Is.EqualTo(DiscordIpcDenialCause.Unknown));
+				Assert.That(exception.RichPresenceOnly, Is.False);
+			});
 		}
 		finally
 		{
