@@ -254,6 +254,7 @@ fn ensure_main_window_capability(app: &AppHandle, url: &tauri::Url) {
         .permission("allow-get-cursor-position")
         .permission("allow-open-external")
         .permission("allow-show-open-dialog")
+        .permission("allow-pick-screen-color")
         .permission("allow-save-file")
         .permission("allow-save-backup")
         .permission("allow-take-opened-files")

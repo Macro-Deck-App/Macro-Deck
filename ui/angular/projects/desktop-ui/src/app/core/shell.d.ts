@@ -13,6 +13,7 @@ declare global {
         webviewVersion: string | null;
       }>;
       getCursorPosition?: () => Promise<ShellCursorPosition | null>;
+      pickScreenColor?: () => Promise<string | null>;
       openExternal: (url: string) => Promise<boolean>;
       showOpenDialog: (options?: {
         directory?: boolean;

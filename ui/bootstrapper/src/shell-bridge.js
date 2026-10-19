@@ -73,6 +73,9 @@
         },
       });
     },
+    pickScreenColor: function () {
+      return invoke('pick_screen_color');
+    },
     onFileDrop: function (callback) {
       return listen('file-drop', callback);
     },

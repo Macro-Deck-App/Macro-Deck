@@ -15,6 +15,7 @@
     "allow-get-cursor-position",
     "allow-open-external",
     "allow-show-open-dialog",
+    "allow-pick-screen-color",
     "allow-save-file",
     "allow-save-backup",
     "allow-take-opened-files",

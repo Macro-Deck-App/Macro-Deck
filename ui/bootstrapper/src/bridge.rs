@@ -247,6 +247,30 @@ pub async fn show_open_dialog(app: AppHandle, options: OpenDialogOptions) -> Opt
 }
 
 #[tauri::command]
+pub async fn pick_screen_color(app: AppHandle) -> Option<String> {
+    #[cfg(windows)]
+    {
+        logging::info(
+            "[bridge] webview eyedropper refused, opening the native screen color picker",
+        );
+        let picked = tauri::async_runtime::spawn_blocking(crate::windows_screen_color::pick)
+            .await
+            .ok()
+            .flatten();
+        if let Some(window) = app.get_webview_window(window::MAIN_WINDOW) {
+            let _ = window.set_focus();
+        }
+        picked
+    }
+
+    #[cfg(not(windows))]
+    {
+        let _ = app;
+        None
+    }
+}
+
+#[tauri::command]
 pub async fn save_file(app: AppHandle, request: Request<'_>) -> Result<SaveFileResult, String> {
     let InvokeBody::Raw(data) = request.body() else {
         return Err("save_file expects a raw request body".to_string());
@@ -556,13 +580,15 @@ mod tests {
         assert!(script.contains("encodeURIComponent"));
     }
 
-    const SHARED_COMMANDS: [&str; 22] = [
+    const SHARED_COMMANDS: [&str; 23] = [
         "get_host_port",
         "reauthenticate",
         "get_shell_info",
         "get_cursor_position",
         "open_external",
         "show_open_dialog",
+        // Granted everywhere although only Windows has a native picker: elsewhere it answers None.
+        "pick_screen_color",
         "save_file",
         "save_backup",
         "take_opened_files",

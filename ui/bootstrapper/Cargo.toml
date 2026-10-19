@@ -54,7 +54,7 @@ open = "5"
 
 # Same story as semver/url: tauri already pulls it in (locked at 0.61.3), declared directly because
 # the Windows file picker has to be opened through IFileOpenDialog by hand - see
-# src/windows_file_dialog.rs.
+# src/windows_file_dialog.rs - and the screen color picker draws its own overlay.
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.61", features = [
     "Win32_Foundation",
@@ -62,7 +62,10 @@ windows = { version = "0.61", features = [
     "Win32_Security",
     "Win32_System_Com",
     "Win32_System_JobObjects",
+    "Win32_System_LibraryLoader",
     "Win32_System_Threading",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Input_KeyboardAndMouse",
     "Win32_UI_Shell",
     "Win32_UI_Shell_Common",
     "Win32_UI_WindowsAndMessaging",
