@@ -56,6 +56,7 @@ describe('ColorPickerComponent', () => {
   });
 
   afterEach(() => {
+    delete (window as { macroDeckShell?: unknown }).macroDeckShell;
     if (originalEyeDropper === undefined) {
       delete (window as unknown as { EyeDropper?: unknown }).EyeDropper;
     } else {
@@ -113,6 +114,34 @@ describe('ColorPickerComponent', () => {
     }
 
     fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+  }
+
+  function withRejectingEyeDropper(errorName: string, rejectsAfterMs: number): void {
+    let now = 1000;
+    spyOn(performance, 'now').and.callFake(() => now);
+    (window as unknown as { EyeDropper?: unknown }).EyeDropper = class {
+      open(): Promise<{ sRGBHex: string }> {
+        now += rejectsAfterMs;
+        return Promise.reject(new DOMException('The user canceled the selection.', errorName));
+      }
+    };
+
+    fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+  }
+
+  function withShellPicker(pick: () => Promise<string | null>): jasmine.Spy {
+    const pickScreenColor = jasmine.createSpy('pickScreenColor').and.callFake(pick);
+    (window as { macroDeckShell?: unknown }).macroDeckShell = { pickScreenColor };
+    return pickScreenColor;
+  }
+
+  async function pickFromScreen(): Promise<void> {
+    open();
+    query<HTMLButtonElement>('.cp-eyedropper')!.click();
+    await new Promise(resolve => setTimeout(resolve));
+    await fixture.whenStable();
     fixture.detectChanges();
   }
 
@@ -302,6 +331,81 @@ describe('ColorPickerComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.componentInstance.value()).toBe('#00aaff');
+    });
+
+    describe('when the platform refuses to open its eyedropper', () => {
+      it('picks the colour with the desktop shell picker instead', async () => {
+        withRejectingEyeDropper('AbortError', 2);
+        const shellPicker = withShellPicker(() => Promise.resolve('#123456'));
+        await show('#ef4444');
+
+        await pickFromScreen();
+
+        expect(shellPicker).toHaveBeenCalledTimes(1);
+        expect(fixture.componentInstance.value()).toBe('#123456');
+      });
+
+      it('keeps the chosen transparency for the colour the shell picker returns', async () => {
+        withRejectingEyeDropper('AbortError', 2);
+        withShellPicker(() => Promise.resolve('#aabbcc'));
+        fixture.componentInstance.allowAlpha.set(true);
+        await show('#11223380');
+
+        await pickFromScreen();
+
+        expect(fixture.componentInstance.value().toLowerCase()).toBe('#aabbcc80');
+      });
+
+      it('leaves the colour unchanged when the shell picker is cancelled', async () => {
+        withRejectingEyeDropper('AbortError', 2);
+        withShellPicker(() => Promise.resolve(null));
+        await show('#ef4444');
+
+        await pickFromScreen();
+
+        expect(fixture.componentInstance.value()).toBe('#ef4444');
+      });
+
+      it('leaves the colour unchanged when the shell picker fails', async () => {
+        withRejectingEyeDropper('AbortError', 2);
+        withShellPicker(() => Promise.reject(new Error('Tauri IPC is not available')));
+        await show('#ef4444');
+
+        await pickFromScreen();
+
+        expect(fixture.componentInstance.value()).toBe('#ef4444');
+      });
+
+      it('leaves the colour unchanged outside the desktop shell', async () => {
+        withRejectingEyeDropper('AbortError', 2);
+        await show('#ef4444');
+
+        await pickFromScreen();
+
+        expect(fixture.componentInstance.value()).toBe('#ef4444');
+      });
+    });
+
+    it('does not open the shell picker when the user cancels the eyedropper', async () => {
+      withRejectingEyeDropper('AbortError', 2000);
+      const shellPicker = withShellPicker(() => Promise.resolve('#123456'));
+      await show('#ef4444');
+
+      await pickFromScreen();
+
+      expect(shellPicker).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.value()).toBe('#ef4444');
+    });
+
+    it('does not open the shell picker when the eyedropper fails for another reason', async () => {
+      withRejectingEyeDropper('NotAllowedError', 2);
+      const shellPicker = withShellPicker(() => Promise.resolve('#123456'));
+      await show('#ef4444');
+
+      await pickFromScreen();
+
+      expect(shellPicker).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.value()).toBe('#ef4444');
     });
 
     it('closes when the field is clicked again', () => {

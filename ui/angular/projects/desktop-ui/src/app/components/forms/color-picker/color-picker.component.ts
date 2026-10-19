@@ -45,6 +45,9 @@ import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/con
 import { SelectComponent, type SelectOption } from '../select/select.component';
 import { ColorPickerChipComponent } from './color-picker-chip.component';
 import { Hsv, hexToHsv, hsvToHex, normalizeHex } from './color-conversion';
+import { shellBridge } from '../../../util/shell-bridge';
+
+const EYEDROPPER_REFUSED_MS = 250;
 
 export interface ColorPreset {
   label: string;
@@ -800,11 +803,8 @@ export class ColorPickerComponent implements ControlValueAccessor {
       return;
     }
 
-    let picked: string;
-    try {
-      picked = (await new factory().open()).sRGBHex;
-    } catch {
-      // Rejects when the user dismisses the eyedropper, which is not an error worth reporting.
+    const picked = await pickScreenColor(factory);
+    if (picked === null) {
       return;
     }
 
@@ -868,4 +868,27 @@ interface ScreenEyeDropper {
 // Chromium-only, so the affordance it backs is offered only where it exists.
 function eyedropperFactory(): (new () => ScreenEyeDropper) | undefined {
   return (globalThis as unknown as { EyeDropper?: new () => ScreenEyeDropper }).EyeDropper;
+}
+
+async function pickScreenColor(factory: new () => ScreenEyeDropper): Promise<string | null> {
+  const opened = performance.now();
+  try {
+    return (await new factory().open()).sRGBHex;
+  } catch (error) {
+    // WebView2 can refuse to open with the AbortError of a user cancel, but sooner than anyone
+    // could cancel.
+    const refused = error instanceof DOMException
+      && error.name === 'AbortError'
+      && performance.now() - opened < EYEDROPPER_REFUSED_MS;
+    const fallback = shellBridge()?.pickScreenColor;
+    if (!refused || !fallback) {
+      return null;
+    }
+
+    try {
+      return await fallback();
+    } catch {
+      return null;
+    }
+  }
 }

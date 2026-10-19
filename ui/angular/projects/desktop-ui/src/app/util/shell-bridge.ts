@@ -54,6 +54,7 @@ export interface ShellBridge {
   getCursorPosition?: () => Promise<ShellCursorPosition | null>;
   openExternal?: (url: string) => Promise<boolean>;
   showOpenDialog?: (options?: ShellOpenDialogOptions) => Promise<string | null>;
+  pickScreenColor?: () => Promise<string | null>;
   onFileDrop?: (callback: (event: ShellFileDropEvent) => void) => Promise<() => void>;
   onFileOpen?: (callback: () => void) => Promise<() => void>;
   takeOpenedFiles?: () => Promise<string[]>;

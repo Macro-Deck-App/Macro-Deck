@@ -43,6 +43,8 @@ mod window_geometry;
 mod window_state;
 #[cfg(windows)]
 mod windows_file_dialog;
+#[cfg(windows)]
+mod windows_screen_color;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -190,6 +192,7 @@ fn main() {
             bridge::get_cursor_position,
             bridge::open_external,
             bridge::show_open_dialog,
+            bridge::pick_screen_color,
             bridge::save_file,
             bridge::save_backup,
             dock_icon::get_hide_dock_icon,

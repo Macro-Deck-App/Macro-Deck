@@ -40,6 +40,7 @@ fn main() {
             "get_cursor_position",
             "open_external",
             "show_open_dialog",
+            "pick_screen_color",
             "save_file",
             "save_backup",
             "get_hide_dock_icon",
