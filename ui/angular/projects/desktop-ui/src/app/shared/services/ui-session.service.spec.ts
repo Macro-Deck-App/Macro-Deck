@@ -28,11 +28,16 @@ describe('UiSessionService version negotiation', () => {
       'onUiSessionPatched',
       'onUiSessionInvalidated',
       'onUiSessionClosed',
+      'onUiSessionParameterValuesReported',
+      'onUiSessionFlushed',
+      'flushUiSession',
     ]);
     api.onUiSessionTreeUpdated.and.returnValue(NEVER);
     api.onUiSessionPatched.and.returnValue(NEVER);
     api.onUiSessionInvalidated.and.returnValue(NEVER);
     api.onUiSessionClosed.and.returnValue(NEVER);
+    api.onUiSessionParameterValuesReported.and.returnValue(NEVER);
+    api.onUiSessionFlushed.and.returnValue(NEVER);
 
     toast = jasmine.createSpyObj<ToastService>('ToastService', ['show']);
 
@@ -160,11 +165,16 @@ describe('UiSessionService widget sessions', () => {
       'onUiSessionPatched',
       'onUiSessionInvalidated',
       'onUiSessionClosed',
+      'onUiSessionParameterValuesReported',
+      'onUiSessionFlushed',
+      'flushUiSession',
     ]);
     api.onUiSessionTreeUpdated.and.returnValue(treeUpdated);
     api.onUiSessionPatched.and.returnValue(NEVER);
     api.onUiSessionInvalidated.and.returnValue(invalidated);
     api.onUiSessionClosed.and.returnValue(NEVER);
+    api.onUiSessionParameterValuesReported.and.returnValue(NEVER);
+    api.onUiSessionFlushed.and.returnValue(NEVER);
     api.openWidgetUiSession.and.returnValue(Promise.resolve({ accepted: true, sessionId: 'widget-session-1' }));
     api.attachUiSession.and.returnValue(Promise.resolve({
       accepted: true,
@@ -346,11 +356,16 @@ describe('UiSessionService sessions that end before or while they are shown', ()
       'onUiSessionPatched',
       'onUiSessionInvalidated',
       'onUiSessionClosed',
+      'onUiSessionParameterValuesReported',
+      'onUiSessionFlushed',
+      'flushUiSession',
     ]);
     api.onUiSessionTreeUpdated.and.returnValue(treeUpdated);
     api.onUiSessionPatched.and.returnValue(patched);
     api.onUiSessionInvalidated.and.returnValue(invalidated);
     api.onUiSessionClosed.and.returnValue(NEVER);
+    api.onUiSessionParameterValuesReported.and.returnValue(NEVER);
+    api.onUiSessionFlushed.and.returnValue(NEVER);
     api.openConfigUiSession.and.callFake(() => {
       latestSessionId = `config-session-${++opened}`;
       return Promise.resolve({ accepted: true, sessionId: latestSessionId });
@@ -509,5 +524,88 @@ describe('UiSessionService sessions that end before or while they are shown', ()
 
     expect(toast.show).toHaveBeenCalledTimes(1);
     expect(handle.root()).toBeNull();
+  });
+});
+
+describe('UiSessionService reported values and flush', () => {
+  let api: jasmine.SpyObj<ApiService>;
+  let reported: Subject<{ sessionId: string; values: Record<string, unknown> }>;
+  let flushed: Subject<{ sessionId: string; flushId: string }>;
+
+  beforeEach(() => {
+    reported = new Subject();
+    flushed = new Subject();
+    api = jasmine.createSpyObj<ApiService>('ApiService', [
+      'openWidgetUiSession',
+      'attachUiSession',
+      'closeUiSession',
+      'onUiSessionTreeUpdated',
+      'onUiSessionPatched',
+      'onUiSessionInvalidated',
+      'onUiSessionClosed',
+      'onUiSessionParameterValuesReported',
+      'onUiSessionFlushed',
+      'flushUiSession',
+    ]);
+    api.onUiSessionTreeUpdated.and.returnValue(NEVER);
+    api.onUiSessionPatched.and.returnValue(NEVER);
+    api.onUiSessionInvalidated.and.returnValue(NEVER);
+    api.onUiSessionClosed.and.returnValue(NEVER);
+    api.onUiSessionParameterValuesReported.and.returnValue(reported);
+    api.onUiSessionFlushed.and.returnValue(flushed);
+    api.openWidgetUiSession.and.returnValue(Promise.resolve({ accepted: true, sessionId: 's1' }));
+    api.attachUiSession.and.returnValue(Promise.resolve({
+      accepted: true, sessionId: 's1', surfaceKind: 'config', sessionMode: 'exclusive', revision: 0,
+    }));
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        UiSessionService,
+        { provide: ApiService, useValue: api },
+        { provide: ToastService, useValue: jasmine.createSpyObj<ToastService>('ToastService', ['show']) },
+        { provide: LocalizationService, useValue: { translateKey: (key: string) => key } },
+      ],
+    });
+  });
+
+  async function openHandle() {
+    const handle = TestBed.inject(UiSessionService).open({ kind: 'widget', widgetId: 'w1' });
+    await settle();
+    return handle;
+  }
+
+  it('hands a report for its own session to its listeners as it arrives', async () => {
+    const handle = await openHandle();
+    const received: unknown[] = [];
+    handle.onParameterValuesReported!(values => received.push(values));
+
+    reported.next({ sessionId: 'other', values: { title: 'no' } });
+    reported.next({ sessionId: 's1', values: { title: 'yes' } });
+
+    expect(received).toEqual([{ title: 'yes' }]);
+  });
+
+  it('settles a flush when the host confirms that flush', async () => {
+    api.flushUiSession.and.returnValue(Promise.resolve({ accepted: true }));
+    const handle = await openHandle();
+    let done = false;
+
+    const flush = handle.flush!().then(() => done = true);
+    await settle();
+    expect(done).toBeFalse();
+
+    const { flushId } = api.flushUiSession.calls.mostRecent().args[0];
+    flushed.next({ sessionId: 's1', flushId });
+    await flush;
+
+    expect(done).toBeTrue();
+  });
+
+  it('treats a host that does not know flushing as flushed at once', async () => {
+    api.flushUiSession.and.returnValue(Promise.resolve(null));
+    const handle = await openHandle();
+
+    await expectAsync(handle.flush!()).toBeResolved();
   });
 });

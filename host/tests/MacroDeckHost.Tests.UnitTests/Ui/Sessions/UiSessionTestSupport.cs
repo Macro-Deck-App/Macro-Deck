@@ -391,7 +391,9 @@ internal sealed class StubIntegrationRegistry : IIntegrationRegistry
 
 	public IActionDefinition? FindAction(string integrationId, string actionId)
 	{
-		return null;
+		return _integrations
+			.FirstOrDefault(integration => string.Equals(integration.Id, integrationId, StringComparison.Ordinal))
+			?.Actions.FirstOrDefault(action => string.Equals(action.Id, actionId, StringComparison.Ordinal));
 	}
 
 	public IActionDefinition? FindAction(QualifiedId id)

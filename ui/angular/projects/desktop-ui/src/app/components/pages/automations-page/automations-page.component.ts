@@ -11,6 +11,7 @@ import {
 import { ActionBlockDefinition, ActionFlow, AppStrings, generateBlockId } from '@macro-deck/runtime';
 import { ButtonComponent, ErrorBannerComponent, LocalizationService, ToastService, ToggleSwitchComponent, TranslatePipe, VariableService } from '@shared';
 import { ActionBuilderComponent } from '../../action-builder/action-builder.component';
+import { ActionConfigSessionFlusher } from '../../action-builder/services/action-config-session-flusher.service';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
@@ -50,6 +51,7 @@ export class AutomationsPageComponent implements OnInit {
   @ViewChild(ActionBuilderComponent) private builder?: ActionBuilderComponent;
 
   private readonly localization = inject(LocalizationService);
+  private readonly flusher = inject(ActionConfigSessionFlusher);
   protected readonly automations = inject(AutomationService);
   private readonly actionService = inject(ActionService);
   private readonly integrationService = inject(IntegrationService);
@@ -166,6 +168,7 @@ export class AutomationsPageComponent implements OnInit {
     }
 
     this.isSaving.set(true);
+    await this.flusher.flushAll();
     const result = await this.automations.updateAutomation(automation.id, { flows: this.draftFlows() });
     this.isSaving.set(false);
 

@@ -5286,7 +5286,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Avatar URL'sini geçersiz kıl</value>
   </data>
   <data name="Integrations.Discord.Actions.ExecuteWebhook.Description" xml:space="preserve">
-    <value>Bir webhook üzerinden Discord kanalına mesaj gönderir</value>
+    <value>Bir webhook üzerinden Discord kanalına mesaj gönderir. Kayıtlı webhook'lar ve önizlemeli görsel düzenleyici için Discord Webhook'ları entegrasyonunu kullanın</value>
   </data>
   <data name="Integrations.Discord.Actions.ExecuteWebhook.EmbedColourLabel" xml:space="preserve">
     <value>Gömülü içerik rengi</value>
@@ -5848,6 +5848,381 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>Ses sunucusu</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Name" xml:space="preserve">
+    <value>Discord Webhook'ları</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.SendMessageName" xml:space="preserve">
+    <value>Discord webhook mesajı gönder</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.SendMessageDescription" xml:space="preserve">
+    <value>Kayıtlı veya özel bir Discord webhook'u üzerinden isteğe bağlı gömülü içeriklerle, canlı önizlemeyle düzenlenen bir mesaj gönderir</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookLabel" xml:space="preserve">
+    <value>Webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookDescription" xml:space="preserve">
+    <value>Kayıtlı bir webhook veya yalnızca bu eylem için bir webhook girmek üzere Özel URL.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookPlaceholder" xml:space="preserve">
+    <value>Bir webhook seçin</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.CustomWebhook" xml:space="preserve">
+    <value>Özel URL</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.NoWebhooksSaved" xml:space="preserve">
+    <value>Henüz kayıtlı webhook yok. Aşağıya bir URL girin veya webhook'ları Discord Webhook'ları entegrasyonuna kaydedin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookUrlLabel" xml:space="preserve">
+    <value>Webhook URL'si</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookUrlDescription" xml:space="preserve">
+    <value>Webhook, Özel URL olarak ayarlandığında kullanılır. Şifrelenmiş olarak saklanır ve bir daha gösterilmez.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.MessageLabel" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.MessageDescription" xml:space="preserve">
+    <value>Anahtar ve değerler olarak mesaj, örneğin content ve embeds.0.title. Masaüstü uygulaması onu görsel bir düzenleyiciyle düzenler.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.Title" xml:space="preserve">
+    <value>Discord webhook'u ekle</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.Description" xml:space="preserve">
+    <value>Eylemlerin URL'yi tekrarlamadan gönderebilmesi için bir webhook'u bir adla kaydedin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.InstructionCreate" xml:space="preserve">
+    <value>Discord'da kanal ayarlarını açın, Entegrasyonlar'a ve ardından Webhook'lar'a gidin ve bir webhook oluşturun veya seçin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.InstructionCopy" xml:space="preserve">
+    <value>Webhook URL'sini Kopyala'yı seçin ve aşağıya yapıştırın.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameLabel" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameDescription" xml:space="preserve">
+    <value>Bu webhook bir eylemde seçilirken gösterilir, örneğin kanal adı.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameRequired" xml:space="preserve">
+    <value>Bir ad girin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlLabel" xml:space="preserve">
+    <value>Webhook URL'si</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlDescription" xml:space="preserve">
+    <value>Şifrelenmiş olarak saklanır. Bir daha gösterilmez ve günlüklere asla yazılmaz.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlInvalid" xml:space="preserve">
+    <value>Bu bir Discord webhook URL'si değil. https://discord.com/api/webhooks/ ile başlar.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UnknownStep" xml:space="preserve">
+    <value>Bu kurulum adımı bilinmiyor. Yeniden başlayın.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabMessage" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabEmbeds" xml:space="preserve">
+    <value>Gömülü içerikler</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabProfile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabMentions" xml:space="preserve">
+    <value>Bahsetmeler</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ContentLabel" xml:space="preserve">
+    <value>Mesaj metni</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ContentDescription" xml:space="preserve">
+    <value>Discord Markdown'ını ve satır sonlarını destekler. Değişkenler eylem çalıştığında doldurulur.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertUserMention" xml:space="preserve">
+    <value>Bir kullanıcıdan bahset</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertRoleMention" xml:space="preserve">
+    <value>Bir rolden bahset</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertEveryone" xml:space="preserve">
+    <value>@everyone ekle</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertHere" xml:space="preserve">
+    <value>@here ekle</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.MentionIdPlaceholder" xml:space="preserve">
+    <value>Discord kimliği</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.Insert" xml:space="preserve">
+    <value>Ekle</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.EmbedHeading" xml:space="preserve">
+    <value>Gömülü içerik {number}</value>
+    <comment>[number:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TitleLabel" xml:space="preserve">
+    <value>Başlık</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.DescriptionLabel" xml:space="preserve">
+    <value>Açıklama</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UrlLabel" xml:space="preserve">
+    <value>Başlık bağlantısı</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ColorLabel" xml:space="preserve">
+    <value>Renk</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampLabel" xml:space="preserve">
+    <value>Zaman damgası</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampNone" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampFixed" xml:space="preserve">
+    <value>Sabit</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampNow" xml:space="preserve">
+    <value>Gönderim zamanı</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampValueLabel" xml:space="preserve">
+    <value>Tarih ve saat</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorNameLabel" xml:space="preserve">
+    <value>Yazar adı</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorUrlLabel" xml:space="preserve">
+    <value>Yazar bağlantısı</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorIconLabel" xml:space="preserve">
+    <value>Yazar simgesi URL'si</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FooterTextLabel" xml:space="preserve">
+    <value>Altbilgi metni</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FooterIconLabel" xml:space="preserve">
+    <value>Altbilgi simgesi URL'si</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ImageLabel" xml:space="preserve">
+    <value>Görsel URL'si</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ThumbnailLabel" xml:space="preserve">
+    <value>Küçük resim URL'si</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldsHeading" xml:space="preserve">
+    <value>Alanlar</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldNameLabel" xml:space="preserve">
+    <value>Alan adı</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldValueLabel" xml:space="preserve">
+    <value>Alan değeri</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldInlineLabel" xml:space="preserve">
+    <value>Yan yana göster</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsernameLabel" xml:space="preserve">
+    <value>Kullanıcı adı</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsernameDescription" xml:space="preserve">
+    <value>Bu mesaj için webhook'un adını değiştirir.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AvatarLabel" xml:space="preserve">
+    <value>Avatar URL'si</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AvatarDescription" xml:space="preserve">
+    <value>Bu mesaj için webhook'un avatarını değiştirir.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.MentionsDescription" xml:space="preserve">
+    <value>Varsayılan olarak, mesajda bahsedilse bile kimseye bildirim gitmez. Kimlerin bildirim alabileceğini seçin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsersLabel" xml:space="preserve">
+    <value>Kullanıcı bahsetmeleri</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.RolesLabel" xml:space="preserve">
+    <value>Rol bahsetmeleri</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingNone" xml:space="preserve">
+    <value>Kimseye bildirme</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingAll" xml:space="preserve">
+    <value>Bahsedilen herkese bildir</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingListed" xml:space="preserve">
+    <value>Yalnızca bu kimliklere bildir</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UserIdsLabel" xml:space="preserve">
+    <value>Kullanıcı kimlikleri</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.RoleIdsLabel" xml:space="preserve">
+    <value>Rol kimlikleri</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.IdsDescription" xml:space="preserve">
+    <value>Kimlikleri virgül veya boşlukla ayırın.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.EveryoneLabel" xml:space="preserve">
+    <value>@everyone ve @here bildirim göndersin</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.NamesLabel" xml:space="preserve">
+    <value>Önizlemedeki adlar</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.NamesDescription" xml:space="preserve">
+    <value>Bir Discord kimliği ve önizlemenin onun için gösterdiği ad. Yalnızca önizleme için kullanılır.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PreviewHeading" xml:space="preserve">
+    <value>Önizleme</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PreviewNote" xml:space="preserve">
+    <value>Görseller yer tutucu olarak gösterilir ve yüklenmez. Sunucuya bağlı adlar ve renkler Discord'da farklı görünebilir.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSend" xml:space="preserve">
+    <value>Test mesajı gönder</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSendArmed" xml:space="preserve">
+    <value>Bu, mesajı şimdi Discord'a gönderir. Değişkenler doldurulmadan, yazıldığı gibi gönderilir.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSendNow" xml:space="preserve">
+    <value>Şimdi gönder</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSending" xml:space="preserve">
+    <value>Test mesajı gönderiliyor…</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSent" xml:space="preserve">
+    <value>Test mesajı gönderildi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestNoWebhook" xml:space="preserve">
+    <value>Önce kayıtlı bir webhook seçin veya bir webhook URL'si girin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestReenterUrl" xml:space="preserve">
+    <value>Test göndermek için webhook URL'sini yeniden girin. Kayıtlı bir URL bir daha gösterilmez.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestInvalid" xml:space="preserve">
+    <value>Göndermeden önce yukarıda listelenen sorunları düzeltin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.AppBadge" xml:space="preserve">
+    <value>UYGULAMA</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.TodayAt" xml:space="preserve">
+    <value>Bugün saat {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.DefaultUsername" xml:space="preserve">
+    <value>Webhook adı</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.WillNotPing" xml:space="preserve">
+    <value>Bildirim gitmeyecek: {mentions}</value>
+    <comment>[mentions:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.UnnamedMentions" xml:space="preserve">
+    <value>Bahsetmeler kimliklerini gösterir. Önizlemede görmek için Bahsetmeler sekmesinde bir kimliğe ad verin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.AvatarFrom" xml:space="preserve">
+    <value>{host} adresinden avatar</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.ImageFrom" xml:space="preserve">
+    <value>{host} adresinden görsel</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.ThumbnailFrom" xml:space="preserve">
+    <value>{host} adresinden küçük resim</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.Empty" xml:space="preserve">
+    <value>Henüz gösterilecek bir şey yok. Bir mesaj yazın veya gömülü içerik ekleyin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.Empty" xml:space="preserve">
+    <value>Mesaj boş. Bir mesaj metni yazın veya gömülü içerik ekleyin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.Part" xml:space="preserve">
+    <value>{owner}: {part}</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.FieldRef" xml:space="preserve">
+    <value>Gömülü içerik {embed}, alan {field}</value>
+    <comment>[embed:int][field:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooLong" xml:space="preserve">
+    <value>{field} çok uzun ({length}/{limit}).</value>
+    <comment>[length:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyEmbeds" xml:space="preserve">
+    <value>Çok fazla gömülü içerik ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyFields" xml:space="preserve">
+    <value>{embed}: çok fazla alan ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.EmbedTextTooLong" xml:space="preserve">
+    <value>Tüm gömülü içerikler birlikte çok fazla metin içeriyor ({length}/{limit}).</value>
+    <comment>[length:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.EmbedEmpty" xml:space="preserve">
+    <value>{embed} boş. Bir başlık, açıklama, alan, yazar, altbilgi veya görsel ekleyin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.FieldIncomplete" xml:space="preserve">
+    <value>{field} için hem ad hem değer gerekir.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.UsernameForbidden" xml:space="preserve">
+    <value>Kullanıcı adı "clyde" veya "discord" içeremez.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidColor" xml:space="preserve">
+    <value>{embed}: renk geçerli değil.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidTimestamp" xml:space="preserve">
+    <value>{embed}: zaman damgası geçerli bir tarih ve saat değil.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidUrl" xml:space="preserve">
+    <value>{field} http:// veya https:// ile başlamalıdır.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidImageUrl" xml:space="preserve">
+    <value>{field} http://, https:// veya attachment:// ile başlamalıdır.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.UserMentionConflict" xml:space="preserve">
+    <value>Kullanıcı bahsetmeleri aynı anda hem bahsedilen herkese hem de bir kimlik listesine bildirim gönderemez.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.RoleMentionConflict" xml:space="preserve">
+    <value>Rol bahsetmeleri aynı anda hem bahsedilen herkese hem de bir kimlik listesine bildirim gönderemez.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyIds" xml:space="preserve">
+    <value>{list}: çok fazla kimlik ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidId" xml:space="preserve">
+    <value>{list}: "{id}" bir Discord kimliği değil.</value>
+    <comment>[id:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.NoWebhook" xml:space="preserve">
+    <value>Webhook seçilmedi. Kayıtlı bir webhook seçin veya bir webhook URL'si girin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.WebhookNotFound" xml:space="preserve">
+    <value>Kayıtlı webhook bulunamadı. Discord Webhook'ları entegrasyonundan kaldırılmış olabilir.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.InvalidUrl" xml:space="preserve">
+    <value>Webhook URL'si bir Discord webhook URL'si değil.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.InvalidMessage" xml:space="preserve">
+    <value>Mesaj gönderilemiyor: {reason}</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Rejected" xml:space="preserve">
+    <value>Discord mesajı reddetti: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Unauthorized" xml:space="preserve">
+    <value>Discord webhook belirtecini reddetti. Webhook URL'sini yeniden kopyalayın.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Deleted" xml:space="preserve">
+    <value>Webhook artık Discord'da yok.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.RateLimited" xml:space="preserve">
+    <value>Discord bu webhook'a gelen istekleri sınırlıyor. Biraz sonra yeniden deneyin.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Unreachable" xml:space="preserve">
+    <value>Discord'a ulaşılamadı.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Timeout" xml:space="preserve">
+    <value>Discord zamanında yanıt vermedi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Status" xml:space="preserve">
+    <value>Discord {status} durumuyla yanıt verdi.</value>
+    <comment>[status:int]</comment>
   </data>
   <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
     <value>Bir sonraki güncellemeyi beklemeden bağlı tüm gelen kutularını yeni mesajlar için hemen denetler.</value>

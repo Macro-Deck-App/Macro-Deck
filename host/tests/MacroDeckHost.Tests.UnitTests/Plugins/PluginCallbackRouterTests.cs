@@ -1979,6 +1979,14 @@ public class PluginCallbackRouterTests
 		public void PublishReload(string providerId, string sessionId)
 		{
 		}
+
+		public UiSessionIngestResult PublishParameterValues(
+			string providerId,
+			string sessionId,
+			IReadOnlyDictionary<string, JsonElement> values)
+		{
+			return UiSessionIngestResult.Accept();
+		}
 	}
 
 	private sealed class PluginAssetReceiverStub : MacroDeckHost.Application.Plugins.Assets.IPluginAssetReceiver
@@ -2669,5 +2677,13 @@ internal sealed class NoOpUiSessionSink : IUiSessionSink
 
 	public void PublishReload(string providerId, string sessionId)
 	{
+	}
+
+	public UiSessionIngestResult PublishParameterValues(
+		string providerId,
+		string sessionId,
+		IReadOnlyDictionary<string, JsonElement> values)
+	{
+		return UiSessionIngestResult.Accept();
 	}
 }

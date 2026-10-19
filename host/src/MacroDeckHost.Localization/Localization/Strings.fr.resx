@@ -5285,7 +5285,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>URL d'avatar personnalisée</value>
   </data>
   <data name="Integrations.Discord.Actions.ExecuteWebhook.Description" xml:space="preserve">
-    <value>Envoie un message dans un canal Discord via un webhook</value>
+    <value>Envoie un message dans un canal Discord via un webhook. Pour des webhooks enregistrés et un éditeur visuel avec aperçu, utilise l'intégration Webhooks Discord</value>
   </data>
   <data name="Integrations.Discord.Actions.ExecuteWebhook.EmbedColourLabel" xml:space="preserve">
     <value>Couleur de l'embed</value>
@@ -5847,6 +5847,381 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>Serveur vocal</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Name" xml:space="preserve">
+    <value>Webhooks Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.SendMessageName" xml:space="preserve">
+    <value>Envoyer un message par webhook Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.SendMessageDescription" xml:space="preserve">
+    <value>Envoie un message avec des embeds facultatifs via un webhook Discord enregistré ou personnalisé, modifié avec un aperçu en direct</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookLabel" xml:space="preserve">
+    <value>Webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookDescription" xml:space="preserve">
+    <value>Un webhook enregistré, ou URL personnalisée pour en saisir un pour cette action uniquement.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookPlaceholder" xml:space="preserve">
+    <value>Sélectionne un webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.CustomWebhook" xml:space="preserve">
+    <value>URL personnalisée</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.NoWebhooksSaved" xml:space="preserve">
+    <value>Aucun webhook n'est encore enregistré. Saisis une URL ci-dessous ou enregistre des webhooks dans l'intégration Webhooks Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookUrlLabel" xml:space="preserve">
+    <value>URL du webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookUrlDescription" xml:space="preserve">
+    <value>Utilisée quand Webhook est réglé sur URL personnalisée. Elle est stockée chiffrée et n'est plus jamais affichée.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.MessageLabel" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.MessageDescription" xml:space="preserve">
+    <value>Le message sous forme de clés et de valeurs, comme content et embeds.0.title. L'application de bureau le modifie avec un éditeur visuel.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.Title" xml:space="preserve">
+    <value>Ajouter un webhook Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.Description" xml:space="preserve">
+    <value>Enregistre un webhook sous un nom pour que les actions puissent l'utiliser sans répéter son URL.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.InstructionCreate" xml:space="preserve">
+    <value>Dans Discord, ouvre les paramètres du salon, va dans Intégrations puis Webhooks, et crée ou choisis un webhook.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.InstructionCopy" xml:space="preserve">
+    <value>Sélectionne Copier l'URL du webhook et colle-la ci-dessous.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameLabel" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameDescription" xml:space="preserve">
+    <value>Affiché quand tu choisis ce webhook dans une action, par exemple le nom du salon.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameRequired" xml:space="preserve">
+    <value>Saisis un nom.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlLabel" xml:space="preserve">
+    <value>URL du webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlDescription" xml:space="preserve">
+    <value>Stockée chiffrée. Elle n'est plus jamais affichée ni écrite dans les journaux.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlInvalid" xml:space="preserve">
+    <value>Ce n'est pas une URL de webhook Discord. Elle commence par https://discord.com/api/webhooks/.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UnknownStep" xml:space="preserve">
+    <value>Cette étape de configuration est inconnue. Recommence.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabMessage" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabEmbeds" xml:space="preserve">
+    <value>Embeds</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabProfile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabMentions" xml:space="preserve">
+    <value>Mentions</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ContentLabel" xml:space="preserve">
+    <value>Texte du message</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ContentDescription" xml:space="preserve">
+    <value>Prend en charge le Markdown de Discord et les retours à la ligne. Les variables sont remplies à l'exécution de l'action.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertUserMention" xml:space="preserve">
+    <value>Mentionner un utilisateur</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertRoleMention" xml:space="preserve">
+    <value>Mentionner un rôle</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertEveryone" xml:space="preserve">
+    <value>Insérer @everyone</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertHere" xml:space="preserve">
+    <value>Insérer @here</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.MentionIdPlaceholder" xml:space="preserve">
+    <value>ID Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.Insert" xml:space="preserve">
+    <value>Insérer</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.EmbedHeading" xml:space="preserve">
+    <value>Embed {number}</value>
+    <comment>[number:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TitleLabel" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.DescriptionLabel" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UrlLabel" xml:space="preserve">
+    <value>Lien du titre</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ColorLabel" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampLabel" xml:space="preserve">
+    <value>Horodatage</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampNone" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampFixed" xml:space="preserve">
+    <value>Fixe</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampNow" xml:space="preserve">
+    <value>Moment de l'envoi</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampValueLabel" xml:space="preserve">
+    <value>Date et heure</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorNameLabel" xml:space="preserve">
+    <value>Nom de l'auteur</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorUrlLabel" xml:space="preserve">
+    <value>Lien de l'auteur</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorIconLabel" xml:space="preserve">
+    <value>URL de l'icône de l'auteur</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FooterTextLabel" xml:space="preserve">
+    <value>Texte du pied de page</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FooterIconLabel" xml:space="preserve">
+    <value>URL de l'icône du pied de page</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ImageLabel" xml:space="preserve">
+    <value>URL de l'image</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ThumbnailLabel" xml:space="preserve">
+    <value>URL de la miniature</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldsHeading" xml:space="preserve">
+    <value>Champs</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldNameLabel" xml:space="preserve">
+    <value>Nom du champ</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldValueLabel" xml:space="preserve">
+    <value>Valeur du champ</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldInlineLabel" xml:space="preserve">
+    <value>Afficher en ligne</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsernameLabel" xml:space="preserve">
+    <value>Nom d'utilisateur</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsernameDescription" xml:space="preserve">
+    <value>Remplace le nom du webhook pour ce message.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AvatarLabel" xml:space="preserve">
+    <value>URL de l'avatar</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AvatarDescription" xml:space="preserve">
+    <value>Remplace l'avatar du webhook pour ce message.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.MentionsDescription" xml:space="preserve">
+    <value>Par défaut, personne n'est notifié, même si le message le mentionne. Choisis qui peut être notifié.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsersLabel" xml:space="preserve">
+    <value>Mentions d'utilisateurs</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.RolesLabel" xml:space="preserve">
+    <value>Mentions de rôles</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingNone" xml:space="preserve">
+    <value>Ne notifier personne</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingAll" xml:space="preserve">
+    <value>Notifier toutes les personnes mentionnées</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingListed" xml:space="preserve">
+    <value>Notifier uniquement ces ID</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UserIdsLabel" xml:space="preserve">
+    <value>ID d'utilisateurs</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.RoleIdsLabel" xml:space="preserve">
+    <value>ID de rôles</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.IdsDescription" xml:space="preserve">
+    <value>Sépare les ID par des virgules ou des espaces.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.EveryoneLabel" xml:space="preserve">
+    <value>Autoriser @everyone et @here à notifier</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.NamesLabel" xml:space="preserve">
+    <value>Noms dans l'aperçu</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.NamesDescription" xml:space="preserve">
+    <value>Un ID Discord et le nom que l'aperçu affiche pour lui. Utilisé uniquement pour l'aperçu.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PreviewHeading" xml:space="preserve">
+    <value>Aperçu</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PreviewNote" xml:space="preserve">
+    <value>Les images sont affichées comme des espaces réservés et ne sont pas chargées. Les noms et couleurs qui dépendent du serveur peuvent apparaître différemment dans Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSend" xml:space="preserve">
+    <value>Envoyer un message de test</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSendArmed" xml:space="preserve">
+    <value>Le message est envoyé à Discord maintenant. Les variables sont envoyées telles qu'elles sont écrites, sans être remplies.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSendNow" xml:space="preserve">
+    <value>Envoyer maintenant</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSending" xml:space="preserve">
+    <value>Envoi du message de test…</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSent" xml:space="preserve">
+    <value>Le message de test a été envoyé.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestNoWebhook" xml:space="preserve">
+    <value>Choisis d'abord un webhook enregistré ou saisis une URL de webhook.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestReenterUrl" xml:space="preserve">
+    <value>Saisis à nouveau l'URL du webhook pour envoyer un test. Une URL enregistrée n'est plus jamais affichée.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestInvalid" xml:space="preserve">
+    <value>Corrige les problèmes listés ci-dessus avant d'envoyer.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.AppBadge" xml:space="preserve">
+    <value>APP</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.TodayAt" xml:space="preserve">
+    <value>Aujourd'hui à {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.DefaultUsername" xml:space="preserve">
+    <value>Nom du webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.WillNotPing" xml:space="preserve">
+    <value>Pas de notification pour : {mentions}</value>
+    <comment>[mentions:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.UnnamedMentions" xml:space="preserve">
+    <value>Les mentions affichent leur ID. Donne un nom à un ID dans l'onglet Mentions pour le voir dans l'aperçu.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.AvatarFrom" xml:space="preserve">
+    <value>Avatar de {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.ImageFrom" xml:space="preserve">
+    <value>Image de {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.ThumbnailFrom" xml:space="preserve">
+    <value>Miniature de {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.Empty" xml:space="preserve">
+    <value>Rien à afficher pour l'instant. Écris un message ou ajoute un embed.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.Empty" xml:space="preserve">
+    <value>Le message est vide. Écris un texte ou ajoute un embed.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.Part" xml:space="preserve">
+    <value>{owner} : {part}</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.FieldRef" xml:space="preserve">
+    <value>Embed {embed}, champ {field}</value>
+    <comment>[embed:int][field:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooLong" xml:space="preserve">
+    <value>{field} est trop long ({length}/{limit}).</value>
+    <comment>[length:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyEmbeds" xml:space="preserve">
+    <value>Trop d'embeds ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyFields" xml:space="preserve">
+    <value>{embed} : trop de champs ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.EmbedTextTooLong" xml:space="preserve">
+    <value>L'ensemble des embeds contient trop de texte ({length}/{limit}).</value>
+    <comment>[length:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.EmbedEmpty" xml:space="preserve">
+    <value>{embed} est vide. Ajoute un titre, une description, un champ, un auteur, un pied de page ou une image.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.FieldIncomplete" xml:space="preserve">
+    <value>{field} a besoin d'un nom et d'une valeur.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.UsernameForbidden" xml:space="preserve">
+    <value>Le nom d'utilisateur ne doit contenir ni "clyde" ni "discord".</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidColor" xml:space="preserve">
+    <value>{embed} : la couleur n'est pas valide.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidTimestamp" xml:space="preserve">
+    <value>{embed} : l'horodatage n'est pas une date et heure valide.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidUrl" xml:space="preserve">
+    <value>{field} doit commencer par http:// ou https://.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidImageUrl" xml:space="preserve">
+    <value>{field} doit commencer par http://, https:// ou attachment://.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.UserMentionConflict" xml:space="preserve">
+    <value>Les mentions d'utilisateurs ne peuvent pas notifier à la fois toutes les personnes mentionnées et une liste d'ID.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.RoleMentionConflict" xml:space="preserve">
+    <value>Les mentions de rôles ne peuvent pas notifier à la fois toutes les personnes mentionnées et une liste d'ID.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyIds" xml:space="preserve">
+    <value>{list} : trop d'ID ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidId" xml:space="preserve">
+    <value>{list} : "{id}" n'est pas un ID Discord.</value>
+    <comment>[id:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.NoWebhook" xml:space="preserve">
+    <value>Aucun webhook n'est sélectionné. Choisis un webhook enregistré ou saisis une URL de webhook.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.WebhookNotFound" xml:space="preserve">
+    <value>Le webhook enregistré est introuvable. Il a peut-être été supprimé de l'intégration Webhooks Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.InvalidUrl" xml:space="preserve">
+    <value>L'URL du webhook n'est pas une URL de webhook Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.InvalidMessage" xml:space="preserve">
+    <value>Le message ne peut pas être envoyé : {reason}</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Rejected" xml:space="preserve">
+    <value>Discord a refusé le message : {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Unauthorized" xml:space="preserve">
+    <value>Discord a refusé le jeton du webhook. Copie à nouveau l'URL du webhook.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Deleted" xml:space="preserve">
+    <value>Le webhook n'existe plus dans Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.RateLimited" xml:space="preserve">
+    <value>Discord limite les requêtes vers ce webhook. Réessaie dans un instant.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Unreachable" xml:space="preserve">
+    <value>Impossible de joindre Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Timeout" xml:space="preserve">
+    <value>Discord n'a pas répondu à temps.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Status" xml:space="preserve">
+    <value>Discord a répondu avec le statut {status}.</value>
+    <comment>[status:int]</comment>
   </data>
   <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
     <value>Vérifie tout de suite si de nouveaux messages sont arrivés dans toutes les boîtes de réception connectées au lieu d'attendre la prochaine actualisation.</value>

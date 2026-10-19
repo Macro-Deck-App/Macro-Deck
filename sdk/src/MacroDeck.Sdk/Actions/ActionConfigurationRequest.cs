@@ -15,7 +15,9 @@ public sealed record ActionConfigurationRequest
 	/// </summary>
 	/// <remarks>
 	/// A tree renders these; it does not persist them. Macro Deck stores what the tree reports through
-	/// its top-level input ids, exactly as it stores values entered into the declared parameter list.
+	/// its top-level input ids, exactly as it stores values entered into the declared parameter list. A
+	/// value edited in nested or computed state is persisted by returning an
+	/// <see cref="IActionConfigurationSession" /> and reporting it for its declared parameter.
 	/// </remarks>
 	public IReadOnlyDictionary<string, JsonElement> Parameters { get; init; } =
 		new Dictionary<string, JsonElement>(StringComparer.Ordinal);

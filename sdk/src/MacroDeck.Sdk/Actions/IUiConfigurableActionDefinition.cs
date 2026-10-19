@@ -21,7 +21,9 @@ public interface IUiConfigurableActionDefinition : IActionDefinition
 	/// <remarks>
 	/// One session per open configuration surface, so several may be live at once for the same action.
 	/// State kept here belongs to the session, never to the definition. The returned session is owned by
-	/// the host and is disposed when the session closes.
+	/// the host and is disposed when the session closes. Return an <see cref="IActionConfigurationSession" />,
+	/// for example an <see cref="ActionConfigurationSession" /> around the tree's session, to report values
+	/// for the declared parameters that the tree edits outside its top-level inputs.
 	/// </remarks>
 	Task<IUiSession?> CreateConfigurationSessionAsync(
 		ActionConfigurationRequest request,

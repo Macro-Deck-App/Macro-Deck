@@ -18,6 +18,7 @@ import { PortabilityService, PortableExportOptions, ArchiveSource } from '../../
 import { WidgetSelectionService } from '../../../services/widget-selection.service';
 import { FolderNavigationComponent, GridSettingsMenuComponent, WidgetTypeSelectorComponent } from '../../widgets';
 import { FolderViewPickerComponent } from '../../widgets/folder-view-picker/folder-view-picker.component';
+import { ActionConfigSessionFlusher } from '../../action-builder/services/action-config-session-flusher.service';
 
 @Component({
   selector: 'app-deck-page',
@@ -40,6 +41,7 @@ export class DeckPageComponent {
   private readonly toasts = inject(ToastService);
   private readonly router = inject(Router);
   private readonly folderViews = inject(FolderViewService);
+  private readonly flusher = inject(ActionConfigSessionFlusher);
 
   @ViewChild('widgetImportInput') private widgetImportInput?: { nativeElement: HTMLInputElement };
   @ViewChild(DeckEditorGridComponent) private widgetGrid?: DeckEditorGridComponent;
@@ -96,6 +98,7 @@ export class DeckPageComponent {
     const folderId = this.editingFolderId();
     if (!folderId) return;
 
+    await this.flusher.flushAll();
     const result = await this.folderService.setFolderView(folderId,
       this.editViewId(),
       this.editViewConfiguration());

@@ -5286,7 +5286,7 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Timpa URL avatar</value>
   </data>
   <data name="Integrations.Discord.Actions.ExecuteWebhook.Description" xml:space="preserve">
-    <value>Mengirim pesan ke saluran Discord melalui webhook</value>
+    <value>Mengirim pesan ke saluran Discord melalui webhook. Untuk webhook tersimpan dan editor visual dengan pratinjau, gunakan integrasi Webhook Discord</value>
   </data>
   <data name="Integrations.Discord.Actions.ExecuteWebhook.EmbedColourLabel" xml:space="preserve">
     <value>Warna embed</value>
@@ -5848,6 +5848,381 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>Server Suara</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Name" xml:space="preserve">
+    <value>Webhook Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.SendMessageName" xml:space="preserve">
+    <value>Kirim pesan webhook Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.SendMessageDescription" xml:space="preserve">
+    <value>Mengirim pesan dengan embed opsional melalui webhook Discord yang tersimpan atau kustom, disunting dengan pratinjau langsung</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookLabel" xml:space="preserve">
+    <value>Webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookDescription" xml:space="preserve">
+    <value>Webhook tersimpan, atau URL kustom untuk memasukkan webhook hanya untuk tindakan ini.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookPlaceholder" xml:space="preserve">
+    <value>Pilih webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.CustomWebhook" xml:space="preserve">
+    <value>URL kustom</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.NoWebhooksSaved" xml:space="preserve">
+    <value>Belum ada webhook yang disimpan. Masukkan URL di bawah, atau simpan webhook di integrasi Webhook Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookUrlLabel" xml:space="preserve">
+    <value>URL webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookUrlDescription" xml:space="preserve">
+    <value>Dipakai saat Webhook diatur ke URL kustom. Disimpan terenkripsi dan tidak pernah ditampilkan lagi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.MessageLabel" xml:space="preserve">
+    <value>Pesan</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.MessageDescription" xml:space="preserve">
+    <value>Pesan sebagai kunci dan nilai, misalnya content dan embeds.0.title. Aplikasi desktop menyuntingnya dengan editor visual.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.Title" xml:space="preserve">
+    <value>Tambahkan webhook Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.Description" xml:space="preserve">
+    <value>Simpan webhook dengan sebuah nama agar tindakan dapat mengirim ke sana tanpa mengulang URL-nya.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.InstructionCreate" xml:space="preserve">
+    <value>Di Discord, buka pengaturan saluran, masuk ke Integrasi lalu Webhook, lalu buat atau pilih webhook.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.InstructionCopy" xml:space="preserve">
+    <value>Pilih Salin URL Webhook dan tempel di bawah.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameLabel" xml:space="preserve">
+    <value>Nama</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameDescription" xml:space="preserve">
+    <value>Ditampilkan saat memilih webhook ini dalam tindakan, misalnya nama saluran.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameRequired" xml:space="preserve">
+    <value>Masukkan nama.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlLabel" xml:space="preserve">
+    <value>URL webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlDescription" xml:space="preserve">
+    <value>Disimpan terenkripsi. Tidak pernah ditampilkan lagi dan tidak pernah ditulis ke log.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlInvalid" xml:space="preserve">
+    <value>Ini bukan URL webhook Discord. URL itu diawali https://discord.com/api/webhooks/.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UnknownStep" xml:space="preserve">
+    <value>Langkah penyiapan ini tidak dikenal. Mulai lagi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabMessage" xml:space="preserve">
+    <value>Pesan</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabEmbeds" xml:space="preserve">
+    <value>Embed</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabProfile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabMentions" xml:space="preserve">
+    <value>Sebutan</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ContentLabel" xml:space="preserve">
+    <value>Teks pesan</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ContentDescription" xml:space="preserve">
+    <value>Mendukung Markdown Discord dan baris baru. Variabel diisi saat tindakan dijalankan.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertUserMention" xml:space="preserve">
+    <value>Sebut pengguna</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertRoleMention" xml:space="preserve">
+    <value>Sebut peran</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertEveryone" xml:space="preserve">
+    <value>Sisipkan @everyone</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertHere" xml:space="preserve">
+    <value>Sisipkan @here</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.MentionIdPlaceholder" xml:space="preserve">
+    <value>ID Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.Insert" xml:space="preserve">
+    <value>Sisipkan</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.EmbedHeading" xml:space="preserve">
+    <value>Embed {number}</value>
+    <comment>[number:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TitleLabel" xml:space="preserve">
+    <value>Judul</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.DescriptionLabel" xml:space="preserve">
+    <value>Deskripsi</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UrlLabel" xml:space="preserve">
+    <value>Tautan judul</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ColorLabel" xml:space="preserve">
+    <value>Warna</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampLabel" xml:space="preserve">
+    <value>Stempel waktu</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampNone" xml:space="preserve">
+    <value>Tidak ada</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampFixed" xml:space="preserve">
+    <value>Tetap</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampNow" xml:space="preserve">
+    <value>Waktu pengiriman</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampValueLabel" xml:space="preserve">
+    <value>Tanggal dan waktu</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorNameLabel" xml:space="preserve">
+    <value>Nama penulis</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorUrlLabel" xml:space="preserve">
+    <value>Tautan penulis</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorIconLabel" xml:space="preserve">
+    <value>URL ikon penulis</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FooterTextLabel" xml:space="preserve">
+    <value>Teks footer</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FooterIconLabel" xml:space="preserve">
+    <value>URL ikon footer</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ImageLabel" xml:space="preserve">
+    <value>URL gambar</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ThumbnailLabel" xml:space="preserve">
+    <value>URL thumbnail</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldsHeading" xml:space="preserve">
+    <value>Bidang</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldNameLabel" xml:space="preserve">
+    <value>Nama bidang</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldValueLabel" xml:space="preserve">
+    <value>Nilai bidang</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldInlineLabel" xml:space="preserve">
+    <value>Tampilkan berdampingan</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsernameLabel" xml:space="preserve">
+    <value>Nama pengguna</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsernameDescription" xml:space="preserve">
+    <value>Mengganti nama webhook untuk pesan ini.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AvatarLabel" xml:space="preserve">
+    <value>URL avatar</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AvatarDescription" xml:space="preserve">
+    <value>Mengganti avatar webhook untuk pesan ini.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.MentionsDescription" xml:space="preserve">
+    <value>Secara default tidak ada yang diberi notifikasi, meskipun pesan menyebutnya. Pilih siapa yang boleh diberi notifikasi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsersLabel" xml:space="preserve">
+    <value>Sebutan pengguna</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.RolesLabel" xml:space="preserve">
+    <value>Sebutan peran</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingNone" xml:space="preserve">
+    <value>Jangan beri notifikasi</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingAll" xml:space="preserve">
+    <value>Beri notifikasi semua yang disebut</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingListed" xml:space="preserve">
+    <value>Beri notifikasi hanya ID ini</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UserIdsLabel" xml:space="preserve">
+    <value>ID pengguna</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.RoleIdsLabel" xml:space="preserve">
+    <value>ID peran</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.IdsDescription" xml:space="preserve">
+    <value>Pisahkan ID dengan koma atau spasi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.EveryoneLabel" xml:space="preserve">
+    <value>Izinkan @everyone dan @here memberi notifikasi</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.NamesLabel" xml:space="preserve">
+    <value>Nama di pratinjau</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.NamesDescription" xml:space="preserve">
+    <value>ID Discord dan nama yang ditampilkan pratinjau untuknya. Hanya dipakai untuk pratinjau.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PreviewHeading" xml:space="preserve">
+    <value>Pratinjau</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PreviewNote" xml:space="preserve">
+    <value>Gambar ditampilkan sebagai placeholder dan tidak dimuat. Nama dan warna yang bergantung pada server bisa terlihat berbeda di Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSend" xml:space="preserve">
+    <value>Kirim pesan uji</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSendArmed" xml:space="preserve">
+    <value>Ini mengirim pesan ke Discord sekarang. Variabel dikirim apa adanya, tidak diisi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSendNow" xml:space="preserve">
+    <value>Kirim sekarang</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSending" xml:space="preserve">
+    <value>Mengirim pesan uji…</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSent" xml:space="preserve">
+    <value>Pesan uji telah dikirim.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestNoWebhook" xml:space="preserve">
+    <value>Pilih webhook tersimpan atau masukkan URL webhook terlebih dahulu.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestReenterUrl" xml:space="preserve">
+    <value>Masukkan URL webhook lagi untuk mengirim uji. URL yang tersimpan tidak pernah ditampilkan lagi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestInvalid" xml:space="preserve">
+    <value>Perbaiki masalah yang tercantum di atas sebelum mengirim.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.AppBadge" xml:space="preserve">
+    <value>APLIKASI</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.TodayAt" xml:space="preserve">
+    <value>Hari ini pukul {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.DefaultUsername" xml:space="preserve">
+    <value>Nama webhook</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.WillNotPing" xml:space="preserve">
+    <value>Tanpa notifikasi: {mentions}</value>
+    <comment>[mentions:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.UnnamedMentions" xml:space="preserve">
+    <value>Sebutan menampilkan ID-nya. Beri nama ID di tab Sebutan untuk melihatnya di pratinjau.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.AvatarFrom" xml:space="preserve">
+    <value>Avatar dari {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.ImageFrom" xml:space="preserve">
+    <value>Gambar dari {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.ThumbnailFrom" xml:space="preserve">
+    <value>Thumbnail dari {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.Empty" xml:space="preserve">
+    <value>Belum ada yang ditampilkan. Tulis pesan atau tambahkan embed.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.Empty" xml:space="preserve">
+    <value>Pesan kosong. Tulis teks pesan atau tambahkan embed.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.Part" xml:space="preserve">
+    <value>{owner}: {part}</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.FieldRef" xml:space="preserve">
+    <value>Embed {embed}, bidang {field}</value>
+    <comment>[embed:int][field:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooLong" xml:space="preserve">
+    <value>{field} terlalu panjang ({length}/{limit}).</value>
+    <comment>[length:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyEmbeds" xml:space="preserve">
+    <value>Terlalu banyak embed ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyFields" xml:space="preserve">
+    <value>{embed}: terlalu banyak bidang ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.EmbedTextTooLong" xml:space="preserve">
+    <value>Semua embed bersama-sama berisi terlalu banyak teks ({length}/{limit}).</value>
+    <comment>[length:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.EmbedEmpty" xml:space="preserve">
+    <value>{embed} kosong. Tambahkan judul, deskripsi, bidang, penulis, footer, atau gambar.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.FieldIncomplete" xml:space="preserve">
+    <value>{field} memerlukan nama dan nilai.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.UsernameForbidden" xml:space="preserve">
+    <value>Nama pengguna tidak boleh berisi "clyde" atau "discord".</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidColor" xml:space="preserve">
+    <value>{embed}: warna tidak valid.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidTimestamp" xml:space="preserve">
+    <value>{embed}: stempel waktu bukan tanggal dan waktu yang valid.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidUrl" xml:space="preserve">
+    <value>{field} harus diawali http:// atau https://.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidImageUrl" xml:space="preserve">
+    <value>{field} harus diawali http://, https://, atau attachment://.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.UserMentionConflict" xml:space="preserve">
+    <value>Sebutan pengguna tidak dapat memberi notifikasi semua yang disebut dan daftar ID sekaligus.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.RoleMentionConflict" xml:space="preserve">
+    <value>Sebutan peran tidak dapat memberi notifikasi semua yang disebut dan daftar ID sekaligus.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyIds" xml:space="preserve">
+    <value>{list}: terlalu banyak ID ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidId" xml:space="preserve">
+    <value>{list}: "{id}" bukan ID Discord.</value>
+    <comment>[id:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.NoWebhook" xml:space="preserve">
+    <value>Tidak ada webhook yang dipilih. Pilih webhook tersimpan atau masukkan URL webhook.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.WebhookNotFound" xml:space="preserve">
+    <value>Webhook tersimpan tidak ditemukan. Mungkin sudah dihapus dari integrasi Webhook Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.InvalidUrl" xml:space="preserve">
+    <value>URL webhook bukan URL webhook Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.InvalidMessage" xml:space="preserve">
+    <value>Pesan tidak dapat dikirim: {reason}</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Rejected" xml:space="preserve">
+    <value>Discord menolak pesan: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Unauthorized" xml:space="preserve">
+    <value>Discord menolak token webhook. Salin URL webhook lagi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Deleted" xml:space="preserve">
+    <value>Webhook sudah tidak ada di Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.RateLimited" xml:space="preserve">
+    <value>Discord membatasi permintaan ke webhook ini. Coba lagi sebentar lagi.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Unreachable" xml:space="preserve">
+    <value>Tidak dapat menjangkau Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Timeout" xml:space="preserve">
+    <value>Discord tidak menjawab tepat waktu.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Status" xml:space="preserve">
+    <value>Discord menjawab dengan status {status}.</value>
+    <comment>[status:int]</comment>
   </data>
   <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
     <value>Segera memeriksa pesan baru di semua kotak masuk yang terhubung tanpa menunggu pembaruan berikutnya.</value>

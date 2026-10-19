@@ -237,8 +237,18 @@ public static class CapabilityOperations
 		/// </summary>
 		public const string NotificationResult = "notification.result";
 
+		/// <summary>
+		/// Answers once every <see cref="SessionEvent" /> sent for the session before it has been handled, after
+		/// every <c>ui/report-parameter-values</c> those events raised. A plugin that predates the operation
+		/// answers <c>CAPABILITY_UNSUPPORTED</c>; it never reports values, so the host treats that as flushed.
+		/// </summary>
+		public const string SessionFlush = "session.flush";
+
 		public static readonly IReadOnlyList<string> All =
-			[Describe, SessionOpen, SessionClose, SessionSnapshot, SessionEvent, ModalResult, NotificationResult];
+		[
+			Describe, SessionOpen, SessionClose, SessionSnapshot, SessionEvent, ModalResult, NotificationResult,
+			SessionFlush
+		];
 	}
 
 	/// <summary>

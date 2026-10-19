@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Config.Validation;
@@ -148,6 +149,60 @@ public class UiConfigVocabularyTests
 			Assert.That(renderedTypes,
 				Is.EquivalentTo(UiConfigPrimitives.WellKnown),
 				"the fixture has to author one element of every type for the key union to be complete");
+		});
+	}
+
+	[Test]
+	public void Prose_and_a_stack_authored_without_the_styling_properties_emit_the_same_nodes_as_before()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			new UiConfigStack { Key = "card", Children = [new UiProse { Key = "prose", Text = "Hello" }] });
+
+		var stack = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Stack);
+		var prose = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Prose);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stack.Properties.Keys, Does.Not.Contain(UiConfigProperties.Accent));
+			Assert.That(prose.Properties.Keys, Does.Not.Contain(UiConfigProperties.Spans));
+			Assert.That(prose.Properties.Keys, Does.Not.Contain(UiConfigProperties.Variant));
+		});
+	}
+
+	[Test]
+	public void Styled_prose_in_an_accented_stack_carries_its_spans_variant_and_accent_beside_the_plain_text()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			new UiConfigStack
+			{
+				Key = "card",
+				Accent = "#5865f2",
+				Children =
+				[
+					new UiProse
+					{
+						Key = "prose",
+						Text = "Hello world",
+						Variant = "quote",
+						Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>([
+							UiTextSpan.FromText("Hello ") with { Italic = true },
+							UiTextSpan.FromText("world") with { Monospace = true, Background = "#1e1f22" }
+						])
+					}
+				]
+			});
+
+		var stack = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Stack);
+		var prose = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Prose);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stack.Properties["accent"].GetString(), Is.EqualTo("#5865f2"));
+			Assert.That(prose.Properties["text"].GetString(), Is.EqualTo("Hello world"));
+			Assert.That(prose.Properties["variant"].GetString(), Is.EqualTo("quote"));
+			Assert.That(prose.Properties["spans"].GetRawText(),
+				Is.EqualTo("""[{"text":"Hello ","italic":true},"""
+					+ """{"text":"world","monospace":true,"background":"#1e1f22"}]"""));
 		});
 	}
 
@@ -483,10 +538,16 @@ public class UiConfigVocabularyTests
 						},
 						new UiConfigStack
 						{
-							Key = "row", Direction = "horizontal", Wrap = false, RowWeight = 1
+							Key = "row", Direction = "horizontal", Wrap = false, RowWeight = 1, Accent = "#5865f2"
 						},
 						new UiHeading { Key = "heading", Text = "Configuration" },
-						new UiProse { Key = "prose", Text = "Some explanation." },
+						new UiProse
+						{
+							Key = "prose",
+							Text = "Some explanation.",
+							Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>([UiTextSpan.FromText("Some explanation.")]),
+							Variant = "quote"
+						},
 						new UiInstructions
 						{
 							Key = "steps",

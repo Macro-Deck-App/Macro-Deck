@@ -227,8 +227,8 @@ maps these to `IIntegrationContext`. Some synchronous-looking SDK state is serve
 in-process timing.
 
 `variables` gained `refresh`, `history.open`, `history.read`, `history.close` and `bind`, `widgets` gained
-`get-data`, `ui` gained `origin.report-failure` and `origin.show-modal`, and the `weather` api with
-`snapshots-changed` was added, additively in major `3`. A host
+`get-data`, `ui` gained `origin.report-failure`, `origin.show-modal` and `report-parameter-values`, and the
+`weather` api with `snapshots-changed` was added, additively in major `3`. A host
 that predates them answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into a no-op,
 `false`, no widget data, an unsupported variable history, a `NotSupportedException` for bindings or a
 cancellation. `refresh` later gained an optional `definitionIds` argument, which a host that predates it

@@ -192,10 +192,17 @@ public static class HostOperations
 		/// predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>.</summary>
 		public const string OriginOpenUrl = "origin.open-url";
 
+		/// <summary>Reports values for the declared parameters of the action an action configuration session
+		/// configures. Each value is treated as a user edit of that parameter; undeclared, <c>Secret</c> and
+		/// <c>Password</c> parameters and values of the wrong shape are dropped, and a session that configures
+		/// no action ignores the report. A host that predates the operation answers
+		/// <c>CAPABILITY_UNSUPPORTED</c>.</summary>
+		public const string ReportParameterValues = "report-parameter-values";
+
 		public static readonly IReadOnlyList<string> All =
 		[
 			Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource, RegisterMusicPlayerArtwork,
-			OriginReportFailure, OriginShowModal, OriginOpenUrl
+			OriginReportFailure, OriginShowModal, OriginOpenUrl, ReportParameterValues
 		];
 	}
 

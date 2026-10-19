@@ -204,6 +204,43 @@ stored values, keyed by parameter name. `Secret` and `Password` parameters arriv
 (`UiConfigSurfaceAttributes.MaskedSecretValue`, `"$masked"`), because opening a configuration surface is
 not an intent to reveal a secret. You get the real value the ordinary way, when the user submits.
 
+### Reporting values the tree edits
+
+Macro Deck saves what the tree's top-level inputs report as `change` events, keyed by their ids. A value
+the tree builds itself - nested fields, a list of rows, a value computed from several inputs - has no
+top-level input to report it. Wrap the session in an `ActionConfigurationSession` and report the
+parameter yourself:
+
+```csharp
+public Task<IUiSession?> CreateConfigurationSessionAsync(ActionConfigurationRequest request,
+    CancellationToken cancellationToken)
+{
+    var rows = new UiState<IReadOnlyList<Row>>(ReadRows(request));
+    ActionConfigurationSession? session = null;
+
+    var root = BuildEditor(rows, onEdited: () =>
+        session!.Report("rows", JsonSerializer.SerializeToElement(ToStoredMap(rows.Value))));
+
+    session = new ActionConfigurationSession(new ViewSession(new UiView(request.Session.Surface, root)));
+    return Task.FromResult<IUiSession?>(session);
+}
+```
+
+- **A report is a user edit of that parameter.** The value goes into the action being edited exactly as if
+  the user had typed it into the parameter list, and like any edit it is saved only when the user saves.
+- **Only declared parameters.** A name that is not in `Parameters`, a `Secret` or `Password` parameter, and
+  a value whose JSON shape does not fit the parameter type (a `KeyValue` must be an object of strings, an
+  `Array` an array) are dropped - by the host and again by the client.
+- **Report from the event handler.** Before it saves, the desktop app waits until every event it already
+  sent has been handled and every value reported while handling it has arrived. That covers a report
+  raised synchronously inside `Dispatch`. A report raised after awaited work, a lookup or a timer, can
+  arrive after the user saved and is then lost until the next edit.
+- **Older hosts and clients ignore reports.** The session still works as a plain session there: the tree
+  shows and edits, but a value only reported is not saved. Keep a top-level input, or the declared
+  parameter list, as the way to set anything that must be saved everywhere.
+- `IActionConfigurationSession` is the interface behind the wrapper, for a session that raises
+  `ParameterValuesReported` itself.
+
 ## Letting the user search a long list
 
 A choice draws a plain select. When its list is long, a few dozen counters, scenes or devices, set
@@ -323,6 +360,43 @@ new UiStatus
 
 A renderer that predates `status` declines it like any unknown type and draws the `Fallback`, so give it one
 built from a `UiProse` and the same button where the line matters.
+
+## Styled text and cards
+
+`UiProse` can carry `Spans`, the same [text spans](/ui/components/text/#mixing-text-and-images) a `ui.text` draws,
+in place of its plain `Text`, and a `Variant` that sets the paragraph as a block: `quote`, `code-block`,
+`heading-1`, `heading-2`, `heading-3` or `subtext`. A paragraph with spans or a variant keeps the line
+breaks in its text. Keep `Text` the plain equivalent of the spans: a renderer that does not know `spans`
+draws `Text`, and one that does not know a variant draws a plain paragraph. An image span in prose is
+drawn as its `Alt` text.
+
+A `UiConfigStack` with an `Accent` colour (`#rrggbb`) is drawn as a card: a leading bar in that colour on
+a fixed dark surface with light text, the same in the light and the dark theme, so text styled for that
+surface keeps its contrast. A renderer that does not know `accent` draws a plain stack.
+
+```csharp
+new UiConfigStack
+{
+    Key = "preview",
+    Accent = "#5865f2",
+    Children =
+    [
+        new UiProse
+        {
+            Key = "message",
+            Text = "Build finished\nnpm ci",
+            Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>(
+            [
+                UiTextSpan.FromText("Build ", weight: UiComponentTextWeights.Bold),
+                UiTextSpan.FromText("finished") with { Italic = true },
+                UiTextSpan.FromText("\n"),
+                UiTextSpan.FromText("npm ci") with { Monospace = true, Background = "#1e1f22" },
+            ]),
+        },
+        new UiProse { Key = "footer", Text = "Sent by Macro Deck", Variant = "subtext" },
+    ],
+}
+```
 
 ## Asking before a button acts
 

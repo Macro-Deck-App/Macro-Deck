@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
@@ -108,6 +109,14 @@ public class InProcessUiSessionProviderOriginTests
 
 		public void PublishReload(string providerId, string sessionId)
 		{
+		}
+
+		public UiSessionIngestResult PublishParameterValues(
+			string providerId,
+			string sessionId,
+			IReadOnlyDictionary<string, JsonElement> values)
+		{
+			return UiSessionIngestResult.Accept();
 		}
 	}
 

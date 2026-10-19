@@ -86,6 +86,12 @@ public sealed record UiSessionSnapshotArguments
 	public required string SessionId { get; init; }
 }
 
+/// <summary>Arguments for <c>session.flush</c>.</summary>
+public sealed record UiSessionFlushArguments
+{
+	public required string SessionId { get; init; }
+}
+
 /// <summary>Arguments for <c>session.event</c>: the envelope <c>UiEvent</c>'s own contract defers to
 /// the plugin protocol. <see cref="ClientId" /> identifies which attached client acted, and is
 /// meaningful only for a shared session.</summary>

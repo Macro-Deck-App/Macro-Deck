@@ -2060,6 +2060,17 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return HostCallbackResult.Ok();
 			}
 
+			case HostOperations.Ui.ReportParameterValues:
+			{
+				var arguments = Deserialize<UiReportParameterValuesArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				return FromIngest(_uiSessions.PublishParameterValues(pluginId, arguments.SessionId, arguments.Values));
+			}
+
 			case HostOperations.Ui.RegisterResource:
 			case HostOperations.Ui.RemoveResource:
 				return RouteUiResource(pluginId, sessionId, payload);

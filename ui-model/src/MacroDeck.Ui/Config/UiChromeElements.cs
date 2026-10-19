@@ -1,3 +1,4 @@
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 
 namespace MacroDeck.Ui.Config;
@@ -94,6 +95,12 @@ public sealed record UiConfigStack : UiContainer
 	/// the row's width in proportion rather than size to their own content.</summary>
 	public UiValue<bool> Wrap { get; init; }
 
+	/// <summary>A literal colour, as <c>#rrggbb</c>, that sets the stack apart as a card: a renderer draws a
+	/// leading bar in this colour along a fixed dark surface with light text, the same in every theme, so
+	/// content styled for that surface keeps its contrast. Absent means a plain stack. A reader that does not
+	/// know the key, or does not recognise the spelling, ignores it.</summary>
+	public UiValue<string> Accent { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Stack;
 
@@ -106,6 +113,7 @@ public sealed record UiConfigStack : UiContainer
 
 		properties.Set(UiConfigProperties.Direction, Direction);
 		properties.Set(UiConfigProperties.Wrap, Wrap);
+		properties.Set(UiConfigProperties.Accent, Accent);
 	}
 }
 
@@ -182,6 +190,23 @@ public sealed record UiProse : UiLeaf
 	/// absent renders as a plain paragraph.</summary>
 	public UiValue<string> Severity { get; init; }
 
+	/// <summary>
+	/// Inline runs of styled text drawn in place of <see cref="Text" />. Absent means the paragraph draws
+	/// <see cref="Text" />.
+	///
+	/// <para>
+	/// A reader that does not know the key draws <see cref="Text" />, so a producer keeps <see cref="Text" />
+	/// the plain equivalent of the spans. A paragraph carrying spans keeps the line breaks in its text.
+	/// </para>
+	/// </summary>
+	public UiValue<IReadOnlyList<UiTextSpan>> Spans { get; init; }
+
+	/// <summary>How the paragraph is set as a block: <c>quote</c>, <c>code-block</c>, <c>heading-1</c>,
+	/// <c>heading-2</c>, <c>heading-3</c> or <c>subtext</c>. An open vocabulary; absent, or a value a reader
+	/// does not know, renders as a plain paragraph. A paragraph carrying a variant keeps the line breaks in
+	/// its text.</summary>
+	public UiValue<string> Variant { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Prose;
 
@@ -194,6 +219,8 @@ public sealed record UiProse : UiLeaf
 
 		properties.Set(UiConfigProperties.Text, Text.Value);
 		properties.Set(UiConfigProperties.Severity, Severity);
+		properties.Set(UiConfigProperties.Spans, Spans);
+		properties.Set(UiConfigProperties.Variant, Variant);
 	}
 }
 

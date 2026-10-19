@@ -98,6 +98,8 @@ import {
   ExportFolderRequest,
   ExportProfileRequest,
   ExportWidgetsRequest,
+  FlushUiSessionRequest,
+  FlushUiSessionResponse,
   FolderViewCatalogChangedEvent,
   ScreenSaverCatalogChangedEvent,
   GetScreenSaversResponse,
@@ -333,7 +335,9 @@ import {
   UiSendEventRequest,
   UiSendEventResponse,
   UiSessionClosedEvent,
+  UiSessionFlushedEvent,
   UiSessionInvalidatedEvent,
+  UiSessionParameterValuesReportedEvent,
   UiSessionPatchedEvent,
   UiSessionTreeUpdatedEvent,
   UnbindCatalogVariableRequest,
@@ -2055,6 +2059,18 @@ export class ApiService {
 
   onUiSessionClosed(): Observable<UiSessionClosedEvent> {
     return this.onNotification<UiSessionClosedEvent>('UiSessionClosedEvent');
+  }
+
+  onUiSessionParameterValuesReported(): Observable<UiSessionParameterValuesReportedEvent> {
+    return this.onNotification<UiSessionParameterValuesReportedEvent>('UiSessionParameterValuesReportedEvent');
+  }
+
+  flushUiSession(request: FlushUiSessionRequest): Promise<FlushUiSessionResponse | null> {
+    return this.invokeResult<FlushUiSessionResponse>('FlushUiSession', request);
+  }
+
+  onUiSessionFlushed(): Observable<UiSessionFlushedEvent> {
+    return this.onNotification<UiSessionFlushedEvent>('UiSessionFlushedEvent');
   }
 
   getIconPacks(): Promise<GetIconPacksResponse> {

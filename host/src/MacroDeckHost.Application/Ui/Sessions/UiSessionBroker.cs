@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Limits;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Model.Versioning;
@@ -281,6 +282,58 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		return new UiSendEventResponse { Accepted = true };
 	}
 
+	public FlushUiSessionResponse FlushSession(FlushUiSessionRequest request, string connectionId)
+	{
+		ArgumentNullException.ThrowIfNull(request);
+
+		if (_registry.Find(request.SessionId) is null)
+		{
+			return _registry.WasEnded(request.SessionId)
+				? RefusedFlush(UiSessionErrorCodes.SessionClosed, "This session has ended.")
+				: RefusedFlush(UiSessionErrorCodes.SessionNotFound, "There is no session with that id.");
+		}
+
+		if (!_registry.IsAttached(request.SessionId, connectionId))
+		{
+			return RefusedFlush(UiSessionErrorCodes.SessionForbidden,
+				"This connection is not attached to that session.");
+		}
+
+		if (!_contexts.TryGetValue(request.SessionId, out var context))
+		{
+			return RefusedFlush(UiSessionErrorCodes.SessionNotFound, "There is no session with that id.");
+		}
+
+		var flushed = new UiSessionFlushedEvent { SessionId = request.SessionId, FlushId = request.FlushId };
+		context.ProviderPump.Enqueue(ct => FlushOnProviderAsync(context, connectionId, flushed, ct));
+
+		return new FlushUiSessionResponse { Accepted = true };
+	}
+
+	private async Task FlushOnProviderAsync(
+		SessionContext context,
+		string connectionId,
+		UiSessionFlushedEvent flushed,
+		CancellationToken cancellationToken)
+	{
+		try
+		{
+			await context.Provider.FlushAsync(context.SessionId, cancellationToken).ConfigureAwait(false);
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			return;
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			UiSessionLog.ProviderCallFailed(_logger, context.SessionId, "flush", exception);
+		}
+
+		// Answered even when the provider failed: the client waits for it before saving, and what was reported
+		// up to here is already queued ahead of it on the outbound pump.
+		context.Outbound.Enqueue(ct => _transport.SendToConnection(connectionId, flushed, ct));
+	}
+
 	private bool IsRefusedWhileLocked(SessionContext context, UiSurface surface, string eventName)
 	{
 		return _lockState?.IsLocked == true
@@ -432,6 +485,72 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderReloaded, ProviderReloadedMessage, true);
 	}
 
+	public UiSessionIngestResult PublishParameterValues(
+		string providerId,
+		string sessionId,
+		IReadOnlyDictionary<string, JsonElement> values)
+	{
+		ArgumentNullException.ThrowIfNull(values);
+
+		var session = _registry.Find(sessionId);
+		if (session is null
+			|| !string.Equals(session.ProviderId, providerId, StringComparison.Ordinal)
+			|| !_contexts.TryGetValue(sessionId, out var context))
+		{
+			return UiSessionIngestResult.Reject(UiSessionErrorCodes.SessionNotFound,
+				"That session is not open for this provider.");
+		}
+
+		if (ConfiguredActionOf(session.Surface) is not { } action)
+		{
+			UiSessionLog.ParameterValuesIgnored(_logger, sessionId, providerId);
+			return UiSessionIngestResult.Accept();
+		}
+
+		var accepted = ReportedParameterValueFilter.Filter(action.Parameters, values, out var dropped);
+		if (dropped.Count > 0)
+		{
+			UiSessionLog.ParameterValuesDropped(_logger, sessionId, providerId, dropped);
+		}
+
+		if (accepted.Count == 0)
+		{
+			return UiSessionIngestResult.Accept();
+		}
+
+		if (JsonSerializer.SerializeToUtf8Bytes(accepted).Length > context.MaxTreeBytes)
+		{
+			return UiSessionIngestResult.Reject(UiSessionErrorCodes.PayloadTooLarge,
+				"The reported values are larger than the host can relay.");
+		}
+
+		var group = UiSessionGroups.For(sessionId);
+		var message = new UiSessionParameterValuesReportedEvent { SessionId = sessionId, Values = accepted };
+		context.Outbound.Enqueue(ct => _transport.SendToGroup(group, message, ct));
+
+		return UiSessionIngestResult.Accept();
+	}
+
+	private IActionDefinition? ConfiguredActionOf(UiSurface surface)
+	{
+		if (!string.Equals(surface.Kind, UiSurfaceKinds.Config, StringComparison.Ordinal)
+			|| AttributeText(surface, UiConfigSurfaceAttributes.EntryPoint) != UiConfigEntryPoints.ActionConfig
+			|| AttributeText(surface, UiConfigSurfaceAttributes.IntegrationId) is not { Length: > 0 } integrationId
+			|| AttributeText(surface, UiConfigSurfaceAttributes.ActionId) is not { Length: > 0 } actionId)
+		{
+			return null;
+		}
+
+		return _integrations.FindAction(integrationId, actionId);
+	}
+
+	private static string? AttributeText(UiSurface surface, string name)
+	{
+		return surface.Attributes.TryGetValue(name, out var value) && value.ValueKind == JsonValueKind.String
+			? value.GetString()
+			: null;
+	}
+
 	public void SweepDraining()
 	{
 		_registry.SweepDraining();
@@ -447,6 +566,11 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 	private static UiSendEventResponse Refused(string code, string message)
 	{
 		return new UiSendEventResponse { Accepted = false, Code = code, Message = message };
+	}
+
+	private static FlushUiSessionResponse RefusedFlush(string code, string message)
+	{
+		return new FlushUiSessionResponse { Accepted = false, Code = code, Message = message };
 	}
 
 	private bool Owns(string providerId, string sessionId)

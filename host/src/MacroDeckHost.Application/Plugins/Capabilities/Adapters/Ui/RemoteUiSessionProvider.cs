@@ -96,6 +96,22 @@ public sealed class RemoteUiSessionProvider : IUiSessionProvider
 		}
 	}
 
+	public async Task FlushAsync(string sessionId, CancellationToken cancellationToken)
+	{
+		try
+		{
+			await InvokeAsync(CapabilityOperations.Ui.SessionFlush,
+					new UiSessionFlushArguments { SessionId = sessionId },
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (RemoteCapabilityException exception)
+			when (string.Equals(exception.Code, ProtocolErrorCodes.CapabilityUnsupported, StringComparison.Ordinal))
+		{
+			// A plugin built before session.flush never reports parameter values, so it has nothing to flush.
+		}
+	}
+
 	private static bool IsDroppableMove(UiSessionEventCommand command, RemoteCapabilityException exception)
 	{
 		return string.Equals(command.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal)

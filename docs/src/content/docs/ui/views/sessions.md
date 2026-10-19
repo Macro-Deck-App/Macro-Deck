@@ -264,6 +264,7 @@ Like the other provider-shaped capabilities, `ui` declares the single local id `
 | `session.open` (developer preview) | A `developer-preview` surface names one registered scenario in its surface attributes. `MacroDeck.Plugin.Hosting` builds that scenario and never consults `IUiProvider`, so a production provider is unreachable from a preview. |
 | `session.snapshot` | Produce the current full tree. The tree does not return on the result - it arrives as a separate `host.invoke ui/snapshot`, so a first attach and a resync share one delivery path. A provider may also send `ui/snapshot` unasked to replace its whole tree, at any revision; later patches continue from that tree's revision. |
 | `session.event` | A client acted on a node. `clientId` says which one, and is meaningful only for a shared session. `MacroDeck.Plugin.Hosting` hands it to your session as the event's origin. A `pointer-move` still waiting to be sent is replaced by a newer one for the same node from the same client, and one the plugin could not take because it was busy or slow is dropped; see [Pointer streams and taps](/ui/components/modifier/#pointer-streams-and-taps). |
+| `session.flush` | Answer once every `session.event` sent for the session before it has been handled, and every `ui/report-parameter-values` those events raised has been answered. The host sends it when a client is about to save an action. A plugin built before it answers `CAPABILITY_UNSUPPORTED`, which the host treats as flushed: such a plugin never reports values. |
 | `session.close` | The host is ending this session. |
 | `modal.result` | How a modal this plugin opened ended. Host-to-plugin because a person, not a timeout, bounds the wait - see [Modal views](/ui/views/modal/). |
 
@@ -274,6 +275,20 @@ a client still attached to it, and answers `delivered: false` or `opened: false`
 also needs the conditions in [Opening a link on the client that pressed](#opening-a-link-on-the-client-that-pressed)
 and answers `INVALID_PAYLOAD` for a URL that is not `http` or `https`. A host that predates them answers
 `CAPABILITY_UNSUPPORTED`, which the SDK turns into `false` or a cancellation.
+
+An action configuration session that reports parameter values (see
+[From an action](/ui/views/configuration/#reporting-values-the-tree-edits)) sends them as
+`ui/report-parameter-values`. `MacroDeck.Plugin.Hosting` sends each report from the session's own queue,
+in order, and waits for its answer before it handles the next queued item, which is what lets
+`session.flush` promise that the host already has them. A host that predates the operation answers
+`CAPABILITY_UNSUPPORTED`; the SDK then drops reports for the rest of the connection and logs it once.
+
+On the client side, a session's reported values reach the attached client as
+`UiSessionParameterValuesReportedEvent` (`sessionId`, `values`). A client asks with
+`FlushUiSession` (`sessionId`, `flushId`), which is answered at once, and receives
+`UiSessionFlushedEvent` (`sessionId`, `flushId`) on that connection alone once the session's provider has
+handled every event the client sent before, after every value those events reported. A host that predates
+flushing refuses the request as an unknown type, so a client treats that as flushed.
 
 ## See also
 

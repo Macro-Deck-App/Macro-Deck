@@ -133,6 +133,8 @@ internal static class HostInvokeDispatcher
 					=> HostInvokeOutcome.Ok(new UiOriginShowModalResult { Opened = false }),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.OriginOpenUrl
 					=> HostInvokeOutcome.Ok(new UiOriginOpenUrlResult { Delivered = false }),
+				HostApis.Ui when payload.Operation == HostOperations.Ui.ReportParameterValues
+					=> HostInvokeOutcome.Ok((JsonElement?)null),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
 					=> await MusicPlayerArtworkAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Ui when uiResourceUploads is not null

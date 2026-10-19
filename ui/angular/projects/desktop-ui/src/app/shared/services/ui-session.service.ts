@@ -15,6 +15,8 @@ import {
   UiNode,
   UiNodeEvent,
   UiPatch,
+  type UiSessionFlushedEvent,
+  type UiSessionParameterValuesReportedEvent,
   type UiSessionPatchedEvent,
   type UiSessionTreeUpdatedEvent,
 } from '@macro-deck/runtime';
@@ -39,6 +41,10 @@ export interface UiSessionHandle {
   readonly reopenReason?: Signal<string | null>;
   send(event: UiNodeEvent): void;
   close(): void;
+  // Synchronous rather than a signal: a save that awaited flush() reads the store right after, before any
+  // effect would have run.
+  onParameterValuesReported?(listener: (values: Readonly<Record<string, unknown>>) => void): () => void;
+  flush?(): Promise<void>;
 }
 
 export interface UiSessionOpenOptions {
@@ -92,6 +98,8 @@ class NullUiSessionHandle implements UiSessionHandle {
 
 const MAX_REOPENS_WITHOUT_A_TREE = 3;
 
+let nextFlushId = 0;
+
 class LiveUiSessionHandle implements UiSessionHandle {
   readonly root = signal<UiNode | null>(null);
   readonly revision = signal(0);
@@ -107,6 +115,8 @@ class LiveUiSessionHandle implements UiSessionHandle {
   private hadTree = false;
   private readonly subscription = new Subscription();
   private reopens = 0;
+  private readonly reportListeners = new Set<(values: Readonly<Record<string, unknown>>) => void>();
+  private readonly pendingFlushes = new Map<string, () => void>();
 
   constructor(
     private readonly api: ApiService,
@@ -128,6 +138,9 @@ class LiveUiSessionHandle implements UiSessionHandle {
     this.subscription.add(this.api.onUiSessionClosed().subscribe(event => {
       if (event.sessionId === this.sessionId) this.onFaulted({ message: event.reason });
     }));
+    this.subscription.add(this.api.onUiSessionParameterValuesReported()
+      .subscribe(event => this.onParameterValuesReportedEvent(event)));
+    this.subscription.add(this.api.onUiSessionFlushed().subscribe(event => this.onFlushed(event)));
 
     void this.start();
   }
@@ -147,10 +160,53 @@ class LiveUiSessionHandle implements UiSessionHandle {
     if (this.closed) return;
     this.closed = true;
     this.subscription.unsubscribe();
+    this.reportListeners.clear();
+    this.settleFlushes();
     this.root.set(null);
     if (this.sessionId) {
       void this.api.closeUiSession(this.sessionId);
     }
+  }
+
+  onParameterValuesReported(listener: (values: Readonly<Record<string, unknown>>) => void): () => void {
+    this.reportListeners.add(listener);
+    return () => this.reportListeners.delete(listener);
+  }
+
+  flush(): Promise<void> {
+    const sessionId = this.sessionId;
+    if (this.closed || !sessionId) return Promise.resolve();
+
+    const flushId = `flush-${++nextFlushId}`;
+    return new Promise<void>(resolve => {
+      this.pendingFlushes.set(flushId, resolve);
+      void this.api.flushUiSession({ sessionId, flushId }).then(response => {
+        // A host that predates flushing answers with an error, and a refused flush has nothing queued.
+        if (!response?.accepted) this.settleFlush(flushId);
+      });
+    });
+  }
+
+  private onParameterValuesReportedEvent(event: UiSessionParameterValuesReportedEvent): void {
+    if (event.sessionId !== this.sessionId || this.closed || !event.values) return;
+    for (const listener of [...this.reportListeners]) listener(event.values);
+  }
+
+  private onFlushed(event: UiSessionFlushedEvent): void {
+    if (event.sessionId !== this.sessionId) return;
+    this.settleFlush(event.flushId);
+  }
+
+  private settleFlush(flushId: string): void {
+    const resolve = this.pendingFlushes.get(flushId);
+    if (!resolve) return;
+    this.pendingFlushes.delete(flushId);
+    resolve();
+  }
+
+  private settleFlushes(): void {
+    for (const resolve of this.pendingFlushes.values()) resolve();
+    this.pendingFlushes.clear();
   }
 
   private async start(): Promise<void> {
@@ -243,6 +299,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
 
     this.reopens++;
     this.sessionId = null;
+    this.settleFlushes();
     this.reopenReason.set(rejection.code ?? null);
     if (this.nextRequest) this.request = untracked(this.nextRequest);
     void this.start();
@@ -252,6 +309,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
     if (this.closed) return;
 
     const wasShowingTree = this.hadTree && this.root() !== null;
+    this.settleFlushes();
     this.fault.set(rejection);
     this.root.set(null);
     if (!this.hadTree) this.rejection.set(rejection);

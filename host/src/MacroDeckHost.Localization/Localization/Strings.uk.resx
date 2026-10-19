@@ -5286,7 +5286,7 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Замінити URL аватара</value>
   </data>
   <data name="Integrations.Discord.Actions.ExecuteWebhook.Description" xml:space="preserve">
-    <value>Надсилає повідомлення до каналу Discord через вебхук</value>
+    <value>Надсилає повідомлення до каналу Discord через вебхук. Для збережених вебхуків і візуального редактора з попереднім переглядом використовуйте інтеграцію «Вебхуки Discord»</value>
   </data>
   <data name="Integrations.Discord.Actions.ExecuteWebhook.EmbedColourLabel" xml:space="preserve">
     <value>Колір вкладення</value>
@@ -5848,6 +5848,381 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>Голосовий сервер</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Name" xml:space="preserve">
+    <value>Вебхуки Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.SendMessageName" xml:space="preserve">
+    <value>Надіслати повідомлення через вебхук Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.SendMessageDescription" xml:space="preserve">
+    <value>Надсилає повідомлення з необов'язковими вкладеннями через збережений або власний вебхук Discord, яке редагується з попереднім переглядом у реальному часі</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookLabel" xml:space="preserve">
+    <value>Вебхук</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookDescription" xml:space="preserve">
+    <value>Збережений вебхук або «Власний URL», щоб вказати вебхук лише для цієї дії.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookPlaceholder" xml:space="preserve">
+    <value>Виберіть вебхук</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.CustomWebhook" xml:space="preserve">
+    <value>Власний URL</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.NoWebhooksSaved" xml:space="preserve">
+    <value>Збережених вебхуків ще немає. Введіть URL нижче або збережіть вебхуки в інтеграції «Вебхуки Discord».</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookUrlLabel" xml:space="preserve">
+    <value>URL вебхука</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.WebhookUrlDescription" xml:space="preserve">
+    <value>Використовується, коли для поля «Вебхук» вибрано «Власний URL». Зберігається в зашифрованому вигляді й більше не показується.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.MessageLabel" xml:space="preserve">
+    <value>Повідомлення</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Actions.MessageDescription" xml:space="preserve">
+    <value>Повідомлення у вигляді ключів і значень, наприклад content і embeds.0.title. Настільний застосунок редагує його у візуальному редакторі.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.Title" xml:space="preserve">
+    <value>Додати вебхук Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.Description" xml:space="preserve">
+    <value>Збережіть вебхук під назвою, щоб дії могли надсилати до нього повідомлення без повторення URL.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.InstructionCreate" xml:space="preserve">
+    <value>У Discord відкрийте налаштування каналу, перейдіть до «Інтеграції», потім «Вебхуки», і створіть або виберіть вебхук.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.InstructionCopy" xml:space="preserve">
+    <value>Виберіть «Копіювати URL вебхука» і вставте його нижче.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameLabel" xml:space="preserve">
+    <value>Назва</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameDescription" xml:space="preserve">
+    <value>Показується під час вибору цього вебхука в дії, наприклад назва каналу.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.NameRequired" xml:space="preserve">
+    <value>Введіть назву.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlLabel" xml:space="preserve">
+    <value>URL вебхука</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlDescription" xml:space="preserve">
+    <value>Зберігається в зашифрованому вигляді. Більше не показується й ніколи не записується в журнали.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UrlInvalid" xml:space="preserve">
+    <value>Це не URL вебхука Discord. Він починається з https://discord.com/api/webhooks/.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Config.UnknownStep" xml:space="preserve">
+    <value>Цей крок налаштування невідомий. Почніть спочатку.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabMessage" xml:space="preserve">
+    <value>Повідомлення</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabEmbeds" xml:space="preserve">
+    <value>Вкладення</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabProfile" xml:space="preserve">
+    <value>Профіль</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TabMentions" xml:space="preserve">
+    <value>Згадки</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ContentLabel" xml:space="preserve">
+    <value>Текст повідомлення</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ContentDescription" xml:space="preserve">
+    <value>Підтримує Markdown Discord і розриви рядків. Змінні підставляються під час виконання дії.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertUserMention" xml:space="preserve">
+    <value>Згадати користувача</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertRoleMention" xml:space="preserve">
+    <value>Згадати роль</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertEveryone" xml:space="preserve">
+    <value>Вставити @everyone</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.InsertHere" xml:space="preserve">
+    <value>Вставити @here</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.MentionIdPlaceholder" xml:space="preserve">
+    <value>ID у Discord</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.Insert" xml:space="preserve">
+    <value>Вставити</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.EmbedHeading" xml:space="preserve">
+    <value>Вкладення {number}</value>
+    <comment>[number:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TitleLabel" xml:space="preserve">
+    <value>Заголовок</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.DescriptionLabel" xml:space="preserve">
+    <value>Опис</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UrlLabel" xml:space="preserve">
+    <value>Посилання заголовка</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ColorLabel" xml:space="preserve">
+    <value>Колір</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampLabel" xml:space="preserve">
+    <value>Позначка часу</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampNone" xml:space="preserve">
+    <value>Немає</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampFixed" xml:space="preserve">
+    <value>Фіксована</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampNow" xml:space="preserve">
+    <value>Час надсилання</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TimestampValueLabel" xml:space="preserve">
+    <value>Дата й час</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorNameLabel" xml:space="preserve">
+    <value>Ім'я автора</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorUrlLabel" xml:space="preserve">
+    <value>Посилання автора</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AuthorIconLabel" xml:space="preserve">
+    <value>URL значка автора</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FooterTextLabel" xml:space="preserve">
+    <value>Текст нижнього колонтитула</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FooterIconLabel" xml:space="preserve">
+    <value>URL значка нижнього колонтитула</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ImageLabel" xml:space="preserve">
+    <value>URL зображення</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.ThumbnailLabel" xml:space="preserve">
+    <value>URL мініатюри</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldsHeading" xml:space="preserve">
+    <value>Поля</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldNameLabel" xml:space="preserve">
+    <value>Назва поля</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldValueLabel" xml:space="preserve">
+    <value>Значення поля</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.FieldInlineLabel" xml:space="preserve">
+    <value>Показувати в ряд</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsernameLabel" xml:space="preserve">
+    <value>Ім'я користувача</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsernameDescription" xml:space="preserve">
+    <value>Замінює ім'я вебхука для цього повідомлення.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AvatarLabel" xml:space="preserve">
+    <value>URL аватара</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.AvatarDescription" xml:space="preserve">
+    <value>Замінює аватар вебхука для цього повідомлення.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.MentionsDescription" xml:space="preserve">
+    <value>Типово ніхто не отримує сповіщення, навіть якщо повідомлення його згадує. Виберіть, хто може отримати сповіщення.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UsersLabel" xml:space="preserve">
+    <value>Згадки користувачів</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.RolesLabel" xml:space="preserve">
+    <value>Згадки ролей</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingNone" xml:space="preserve">
+    <value>Нікого не сповіщати</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingAll" xml:space="preserve">
+    <value>Сповіщати всіх згаданих</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PingListed" xml:space="preserve">
+    <value>Сповіщати лише ці ID</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.UserIdsLabel" xml:space="preserve">
+    <value>ID користувачів</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.RoleIdsLabel" xml:space="preserve">
+    <value>ID ролей</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.IdsDescription" xml:space="preserve">
+    <value>Розділяйте ID комами або пробілами.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.EveryoneLabel" xml:space="preserve">
+    <value>Дозволити сповіщення через @everyone і @here</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.NamesLabel" xml:space="preserve">
+    <value>Імена в попередньому перегляді</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.NamesDescription" xml:space="preserve">
+    <value>ID у Discord та ім'я, яке для нього показує попередній перегляд. Використовується лише для попереднього перегляду.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PreviewHeading" xml:space="preserve">
+    <value>Попередній перегляд</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.PreviewNote" xml:space="preserve">
+    <value>Зображення показано заповнювачами, вони не завантажуються. Імена й кольори, що залежать від сервера, у Discord можуть виглядати інакше.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSend" xml:space="preserve">
+    <value>Надіслати тестове повідомлення</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSendArmed" xml:space="preserve">
+    <value>Повідомлення буде надіслано в Discord зараз. Змінні надсилаються так, як написані, без підстановки.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSendNow" xml:space="preserve">
+    <value>Надіслати зараз</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSending" xml:space="preserve">
+    <value>Надсилання тестового повідомлення…</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestSent" xml:space="preserve">
+    <value>Тестове повідомлення надіслано.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestNoWebhook" xml:space="preserve">
+    <value>Спочатку виберіть збережений вебхук або введіть URL вебхука.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestReenterUrl" xml:space="preserve">
+    <value>Щоб надіслати тест, введіть URL вебхука ще раз. Збережений URL більше не показується.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Editor.TestInvalid" xml:space="preserve">
+    <value>Перед надсиланням виправте проблеми, перелічені вище.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.AppBadge" xml:space="preserve">
+    <value>ЗАСТОСУНОК</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.TodayAt" xml:space="preserve">
+    <value>Сьогодні о {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.DefaultUsername" xml:space="preserve">
+    <value>Назва вебхука</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.WillNotPing" xml:space="preserve">
+    <value>Без сповіщення: {mentions}</value>
+    <comment>[mentions:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.UnnamedMentions" xml:space="preserve">
+    <value>Згадки показують свій ID. Задайте ім'я для ID на вкладці «Згадки», щоб побачити його в попередньому перегляді.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.AvatarFrom" xml:space="preserve">
+    <value>Аватар з {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.ImageFrom" xml:space="preserve">
+    <value>Зображення з {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.ThumbnailFrom" xml:space="preserve">
+    <value>Мініатюра з {host}</value>
+    <comment>[host:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Preview.Empty" xml:space="preserve">
+    <value>Поки нічого показати. Напишіть повідомлення або додайте вкладення.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.Empty" xml:space="preserve">
+    <value>Повідомлення порожнє. Напишіть текст повідомлення або додайте вкладення.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.Part" xml:space="preserve">
+    <value>{owner}: {part}</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.FieldRef" xml:space="preserve">
+    <value>Вкладення {embed}, поле {field}</value>
+    <comment>[embed:int][field:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooLong" xml:space="preserve">
+    <value>{field}: задовгий текст ({length}/{limit}).</value>
+    <comment>[length:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyEmbeds" xml:space="preserve">
+    <value>Забагато вкладень ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyFields" xml:space="preserve">
+    <value>{embed}: забагато полів ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.EmbedTextTooLong" xml:space="preserve">
+    <value>У всіх вкладеннях разом забагато тексту ({length}/{limit}).</value>
+    <comment>[length:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.EmbedEmpty" xml:space="preserve">
+    <value>{embed}: вкладення порожнє. Додайте заголовок, опис, поле, автора, нижній колонтитул або зображення.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.FieldIncomplete" xml:space="preserve">
+    <value>{field}: потрібні і назва, і значення.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.UsernameForbidden" xml:space="preserve">
+    <value>Ім'я користувача не повинно містити "clyde" або "discord".</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidColor" xml:space="preserve">
+    <value>{embed}: недійсний колір.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidTimestamp" xml:space="preserve">
+    <value>{embed}: позначка часу не є дійсною датою й часом.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidUrl" xml:space="preserve">
+    <value>{field}: адреса має починатися з http:// або https://.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidImageUrl" xml:space="preserve">
+    <value>{field}: адреса має починатися з http://, https:// або attachment://.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.UserMentionConflict" xml:space="preserve">
+    <value>Згадки користувачів не можуть одночасно сповіщати всіх згаданих і список ID.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.RoleMentionConflict" xml:space="preserve">
+    <value>Згадки ролей не можуть одночасно сповіщати всіх згаданих і список ID.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.TooManyIds" xml:space="preserve">
+    <value>{list}: забагато ID ({count}/{limit}).</value>
+    <comment>[count:int][limit:int]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Validation.InvalidId" xml:space="preserve">
+    <value>{list}: "{id}" не є ID у Discord.</value>
+    <comment>[id:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.NoWebhook" xml:space="preserve">
+    <value>Вебхук не вибрано. Виберіть збережений вебхук або введіть URL вебхука.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.WebhookNotFound" xml:space="preserve">
+    <value>Збережений вебхук не знайдено. Можливо, його видалено з інтеграції «Вебхуки Discord».</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.InvalidUrl" xml:space="preserve">
+    <value>URL вебхука не є URL вебхука Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.InvalidMessage" xml:space="preserve">
+    <value>Не вдалося надіслати повідомлення: {reason}</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Rejected" xml:space="preserve">
+    <value>Discord відхилив повідомлення: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Unauthorized" xml:space="preserve">
+    <value>Discord відхилив токен вебхука. Скопіюйте URL вебхука ще раз.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Deleted" xml:space="preserve">
+    <value>Вебхук більше не існує в Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.RateLimited" xml:space="preserve">
+    <value>Discord обмежує запити до цього вебхука. Спробуйте ще раз трохи згодом.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Unreachable" xml:space="preserve">
+    <value>Не вдалося підключитися до Discord.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Timeout" xml:space="preserve">
+    <value>Discord не відповів вчасно.</value>
+  </data>
+  <data name="Integrations.DiscordWebhooks.Errors.Status" xml:space="preserve">
+    <value>Discord відповів зі статусом {status}.</value>
+    <comment>[status:int]</comment>
   </data>
   <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
     <value>Одразу перевіряє всі під'єднані поштові скриньки на нові листи, а не чекає наступного оновлення.</value>

@@ -23,6 +23,7 @@ import { FolderItemComponent } from './folder-item/folder-item.component';
 import { FolderContextMenuComponent, type FolderContextMenuAction } from './folder-context-menu/folder-context-menu.component';
 import { FolderFocusRuleModalComponent } from '../folder-focus-rule-modal/folder-focus-rule-modal.component';
 import { FolderViewPickerComponent } from '../folder-view-picker/folder-view-picker.component';
+import { ActionConfigSessionFlusher } from '../../action-builder/services/action-config-session-flusher.service';
 
 type FolderNavigateDirection = 'up' | 'down' | 'left' | 'right' | 'home' | 'end';
 
@@ -45,6 +46,7 @@ export class FolderNavigationComponent implements AfterViewInit, OnDestroy {
   private readonly toasts = inject(ToastService);
   private readonly focusRules = inject(FolderFocusRuleService);
   private readonly folderViews = inject(FolderViewService);
+  private readonly flusher = inject(ActionConfigSessionFlusher);
 
   @ViewChild('folderList') private folderListRef?: ElementRef<HTMLElement>;
   private readonly droppedSub: Subscription;
@@ -339,6 +341,7 @@ export class FolderNavigationComponent implements AfterViewInit, OnDestroy {
   }
 
   async confirmCreate(): Promise<void> {
+    await this.flusher.flushAll();
     const name = this.renameValue.trim() || this.localization.translateKey(AppStrings.Widgets.Folder.NewFolder);
     const result = await this.folderService.createFolder(name,
       this.createParentId,

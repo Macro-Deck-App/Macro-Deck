@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { ActionFlow, Script, ScriptInput, ScriptInputValue, ScriptUsage } from '@macro-deck/runtime';
 import { ApiService, ToastService } from '@shared';
 import { ScriptService } from '../../../services/script.service';
+import { ActionConfigSessionFlusher } from '../../action-builder/services/action-config-session-flusher.service';
 
 import { ScriptsPageComponent } from './scripts-page.component';
 
@@ -180,6 +181,19 @@ describe('ScriptsPageComponent', () => {
 
     expect(scripts.updateScript).toHaveBeenCalledWith('a', { flows: edited, inputs: [], runsOnWidget: false });
     expect(page.isDirty()).toBeFalse();
+  });
+
+  it('saves a value an open action configuration reported before its flush confirmed', async () => {
+    selectFirst();
+    page.onFlowsChange([]);
+    const reported = [{ triggerId: 'onRun', triggerType: 'onRun', children: [{ id: 'reported' }] }] as ActionFlow[];
+    spyOn(TestBed.inject(ActionConfigSessionFlusher), 'flushAll').and.callFake(async () => {
+      page.onFlowsChange(reported);
+    });
+
+    await page.save();
+
+    expect(scripts.updateScript).toHaveBeenCalledWith('a', jasmine.objectContaining({ flows: reported }));
   });
 
   it('restores the stored flow on discard', () => {

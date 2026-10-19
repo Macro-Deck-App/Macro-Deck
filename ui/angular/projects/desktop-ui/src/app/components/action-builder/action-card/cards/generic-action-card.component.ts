@@ -6,8 +6,9 @@ import type { UiNode } from '@macro-deck/runtime';
 
 import { UiConfigEntryPoints } from '@macro-deck/runtime';
 import { LocalizationService, UiSessionHandle, UiSessionService } from '@shared';
-import type { ActionBlock } from '@macro-deck/runtime';
+import type { ActionBlock, ParameterValue } from '@macro-deck/runtime';
 import { ActionService } from '../../../../services/action.service';
+import { ActionConfigSessionFlusher } from '../../services/action-config-session-flusher.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { ActionCardFrameComponent } from '../shell/action-card-frame.component';
 import { ParamListComponent } from '../param-list/param-list.component';
@@ -42,6 +43,7 @@ export class GenericActionCardComponent {
   private readonly localization = inject(LocalizationService);
   private readonly actionService = inject(ActionService);
   private readonly uiSessions = inject(UiSessionService);
+  private readonly flusher = inject(ActionConfigSessionFlusher);
 
   protected readonly session = signal<UiSessionHandle | null>(null);
 
@@ -54,6 +56,7 @@ export class GenericActionCardComponent {
   private retainedRoot: UiNode | null = null;
   private shownRoot: UiNode | null = null;
   private caughtUp = false;
+  private releaseSession: (() => void) | null = null;
 
   constructor() {
     effect(() => {
@@ -103,7 +106,7 @@ export class GenericActionCardComponent {
     const { integrationId, actionId } = this.block;
     this.generation = 0;
     this.shownRoot = null;
-    this.session.set(this.uiSessions.open(() => {
+    const session = this.uiSessions.open(() => {
       this.openedWith = JSON.stringify(this.parameters());
       return {
         kind: 'config',
@@ -113,7 +116,24 @@ export class GenericActionCardComponent {
         parameters: this.parameters(),
         configUiModelVersion: definition.configUiModelVersion ?? 0,
       };
-    }));
+    });
+    const unregister = this.flusher.register(session);
+    const unsubscribe = session.onParameterValuesReported?.(values => this.applyReportedValues(values));
+    this.releaseSession = () => {
+      unregister();
+      unsubscribe?.();
+    };
+    this.session.set(session);
+  }
+
+  private applyReportedValues(values: Readonly<Record<string, unknown>>): void {
+    const declared = new Map((this.block.parameters ?? []).map(parameter => [parameter.name, parameter]));
+    for (const [name, value] of Object.entries(values)) {
+      const parameter = declared.get(name);
+      if (!parameter || parameter.type === 'secret' || parameter.type === 'password') continue;
+      if (JSON.stringify(parameter.value) === JSON.stringify(value)) continue;
+      this.store.updateParam(this.block.id, name, value as ParameterValue);
+    }
   }
 
   private parameters(): Record<string, unknown> {
@@ -136,6 +156,8 @@ export class GenericActionCardComponent {
   }
 
   private closeSession(): void {
+    this.releaseSession?.();
+    this.releaseSession = null;
     this.session()?.close();
     this.session.set(null);
   }

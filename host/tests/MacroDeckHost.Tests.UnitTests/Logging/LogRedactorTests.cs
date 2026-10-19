@@ -38,6 +38,23 @@ public class LogRedactorTests
 		});
 	}
 
+	[TestCase("POST https://discord.com/api/webhooks/123456789012345678/{0} failed",
+		"POST https://discord.com/api/webhooks/123456789012345678/*** failed")]
+	[TestCase("https://canary.discord.com/api/v10/webhooks/1/{0}?wait=true",
+		"https://canary.discord.com/api/v10/webhooks/1/***?wait=true")]
+	public void Redacts_The_Token_Of_A_Webhook_Url(string line, string expected)
+	{
+		const string token = "aB3_dE-fGhIjKlMnOpQrStUvWxYz0123456789abcdefGHIJKL";
+
+		var redacted = LogRedactor.Redact(string.Format(CultureInfo.InvariantCulture, line, token));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(redacted, Is.EqualTo(expected));
+			Assert.That(redacted, Does.Not.Contain(token));
+		});
+	}
+
 	[Test]
 	public void Redacts_OAuth_AuthorizationCode_But_Keeps_State()
 	{

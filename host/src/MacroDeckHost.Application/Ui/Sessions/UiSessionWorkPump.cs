@@ -116,6 +116,25 @@ internal static class UiSessionLog
 			sessionId);
 	}
 
+	public static void ParameterValuesIgnored(ILogger logger, string sessionId, string providerId)
+	{
+		logger.Debug("Ignored parameter values reported by '{ProviderId}' for non-action session '{SessionId}'",
+			providerId,
+			sessionId);
+	}
+
+	public static void ParameterValuesDropped(
+		ILogger logger,
+		string sessionId,
+		string providerId,
+		IReadOnlyList<string> names)
+	{
+		logger.Debug("Dropped reported parameter values {Names} from '{ProviderId}' for session '{SessionId}'",
+			names,
+			providerId,
+			sessionId);
+	}
+
 	public static void ProviderCallFailed(ILogger logger, string sessionId, string operation, Exception exception)
 	{
 		logger.Error(exception,

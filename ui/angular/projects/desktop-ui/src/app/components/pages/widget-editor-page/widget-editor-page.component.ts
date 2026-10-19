@@ -31,6 +31,7 @@ import { applyWidgetDataPatch, diffWidgetData } from '../../../util/widget-data-
 import { ConfirmsNavigation } from '../../../guards';
 import { FolderService, WidgetSchemaService } from '../../../services';
 import { WidgetJsonEditorComponent } from '../../widgets';
+import { ActionConfigSessionFlusher } from '../../action-builder/services/action-config-session-flusher.service';
 
 const DIRTY_POLL_MS = 150;
 
@@ -58,6 +59,7 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
   private readonly registry = inject(WidgetRegistryService);
   private readonly toasts = inject(ToastService);
   private readonly cutOrigin = inject(ActionCutOriginService);
+  private readonly flusher = inject(ActionConfigSessionFlusher);
   private readonly injector = inject(Injector);
   private readonly widgetSchemas = inject(WidgetSchemaService);
   private readonly localization = inject(LocalizationService);
@@ -358,6 +360,7 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
   private async save(): Promise<boolean> {
     let widget = this.widget();
     if (!widget || !this.canSave() || this.saving()) return false;
+    await this.flusher.flushAll();
     // `jsonValid()` lags behind the buffer by the 300 ms lint delay, so it cannot be trusted alone
     // here - a synchronous re-check of the buffer's own parseability is what makes "invalid JSON can
     // never overwrite a valid widget configuration" true by construction rather than by timing.

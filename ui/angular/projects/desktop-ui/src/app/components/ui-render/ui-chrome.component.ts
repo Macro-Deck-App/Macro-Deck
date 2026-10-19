@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, signal } from '@angular/core';
 
-import { AppStrings, UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, emitsEvent, nodeBoolean, nodeNumber, nodeRaw, nodeString, nodeText } from '@macro-deck/runtime';
+import { AppStrings, UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, UiTextSpanRun, emitsEvent, nodeBoolean, nodeNumber, nodeRaw, nodeString, nodeText, nodeTextSpans, textSpanStyle } from '@macro-deck/runtime';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent, InputComponent, LocalizationService, ModalComponent, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent } from '@shared';
 import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confirmation-modal.component';
@@ -13,6 +13,8 @@ import { ExternalLinkService } from '../../services/external-link.service';
 
 const Primitives = UiConfigPrimitives;
 const Properties = UiConfigProperties;
+const HexColor = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
+const HeadingLevels: Record<string, number> = { 'heading-1': 1, 'heading-2': 2, 'heading-3': 3 };
 
 function isExternalUrl(url: string): boolean {
   try {
@@ -56,6 +58,8 @@ function isExternalUrl(url: string): boolean {
       @case (types.Stack) {
         <div
           class="config-chrome-stack"
+          [class.config-chrome-stack-accent]="accent() !== undefined"
+          [style.--config-chrome-stack-accent]="accent()"
           [class.config-chrome-stack-row]="direction() === 'horizontal'"
           [class.config-chrome-stack-nowrap]="!wrap()"
           [class.config-chrome-stack-captioned]="!wrap() && hasCaptionedInput()">
@@ -83,7 +87,16 @@ function isExternalUrl(url: string): boolean {
         <h3 class="config-chrome-heading">{{ text() }}</h3>
       }
       @case (types.Prose) {
-        <p class="config-chrome-prose" [attr.data-severity]="severity()">{{ text() }}</p>
+        <p
+          class="config-chrome-prose"
+          [class.config-chrome-prose-styled]="proseSpans() !== null || variant() !== undefined"
+          [attr.data-severity]="severity()"
+          [attr.data-variant]="variant()"
+          [attr.role]="headingLevel() ? 'heading' : null"
+          [attr.aria-level]="headingLevel()"
+          >@if (proseSpans(); as runs) {@for (run of runs; track $index) {@if (run.kind === 'text') {<span
+          [style]="spanStyle(run)">{{ run.text }}</span>} @else if (run.alt) {<span>{{ run.alt }}</span>}}} @else {<ng-container>{{ text() }}</ng-container>}</p
+        >
       }
       @case (types.Divider) {
         <hr class="config-chrome-divider" />
@@ -253,7 +266,7 @@ function isExternalUrl(url: string): boolean {
       </shared-confirmation-modal>
     }
   `,
-  styleUrls: ['./ui-render.component.scss'],
+  styleUrls: ['./ui-render.component.scss', './ui-chrome-styled.component.scss'],
 })
 export class UiChromeComponent {
   readonly node = input.required<UiNode>();
@@ -275,6 +288,20 @@ export class UiChromeComponent {
   protected readonly url = computed(() => nodeString(this.node(), Properties.Url) ?? '');
   protected readonly severity = computed(() => nodeString(this.node(), Properties.Severity));
   protected readonly direction = computed(() => nodeString(this.node(), Properties.Direction));
+  protected readonly accent = computed(() => {
+    const accent = nodeString(this.node(), Properties.Accent);
+    return accent !== undefined && HexColor.test(accent) ? accent : undefined;
+  });
+  protected readonly variant = computed(() => nodeString(this.node(), Properties.Variant));
+  protected readonly headingLevel = computed(() => HeadingLevels[this.variant() ?? ''] ?? null);
+  protected readonly proseSpans = computed(() => {
+    const runs = nodeTextSpans(this.node());
+    return runs !== null && runs.length > 0 ? runs : null;
+  });
+
+  protected spanStyle(run: UiTextSpanRun): Record<string, string> {
+    return run.kind === 'text' ? textSpanStyle(run) : {};
+  }
   protected readonly wrap = computed(() => nodeBoolean(this.node(), Properties.Wrap) !== false);
   protected readonly hasCaptionedInput = computed(() => this.children().some(child =>
     !UI_CHROME_TYPES.has(child.type) && !!nodeRaw(child, Properties.Label)

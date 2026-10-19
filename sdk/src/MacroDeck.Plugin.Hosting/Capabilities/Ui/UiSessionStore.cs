@@ -5,6 +5,7 @@ using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
@@ -18,7 +19,7 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Ui;
 /// <summary>
 /// The plugin's live UI sessions: which <see cref="IUiSession" /> serves each host-issued session id,
 /// and the pump that turns what it produces into <c>host.invoke ui/snapshot</c>, <c>ui/patch</c> and
-/// <c>ui/fault</c>.
+/// <c>ui/fault</c>, plus <c>ui/report-parameter-values</c> for an <see cref="IActionConfigurationSession" />.
 /// </summary>
 internal sealed class UiSessionStore : IAsyncDisposable
 {
@@ -27,6 +28,8 @@ internal sealed class UiSessionStore : IAsyncDisposable
 	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<string, LiveSession> _sessions = new(StringComparer.Ordinal);
+
+	private int _reportsUnsupported;
 
 	public UiSessionStore(IHostInvoker hostInvoker, ILogger logger, ModalResultStore? modalResults = null)
 	{
@@ -81,6 +84,17 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		return true;
 	}
 
+	public async Task<bool> FlushAsync(string sessionId, CancellationToken cancellationToken)
+	{
+		if (!_sessions.TryGetValue(sessionId, out var live))
+		{
+			return false;
+		}
+
+		await live.FlushAsync(cancellationToken).ConfigureAwait(false);
+		return true;
+	}
+
 	public void ReloadAll()
 	{
 		foreach (var live in _sessions.Values)
@@ -122,8 +136,18 @@ internal sealed class UiSessionStore : IAsyncDisposable
 
 		Rebuild,
 
-		Reload
+		Reload,
+
+		Report,
+
+		Flush
 	}
+
+	private readonly record struct WorkItem(
+		WorkKind Kind,
+		UiEvent? Event,
+		string? ClientId,
+		TaskCompletionSource? Flushed);
 
 	private sealed class LiveSession : IAsyncDisposable
 	{
@@ -132,10 +156,12 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		private readonly IUiSession _session;
 		private readonly string _surfaceKind;
 
-		private readonly UiReplaceableWork<(WorkKind Kind, UiEvent? Event, string? ClientId)> _work = new();
+		private readonly UiReplaceableWork<WorkItem> _work = new();
+		private readonly ConcurrentQueue<IReadOnlyDictionary<string, JsonElement>> _reports = new();
 
 		private Task? _pump;
 		private int _drainQueued;
+		private int _reportQueued;
 		private volatile bool _disposing;
 
 		public LiveSession(UiSessionStore owner, string sessionId, IUiSession session, string surfaceKind)
@@ -150,12 +176,28 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		{
 			_session.Changed += OnChanged;
 			_session.Faulted += OnFaulted;
+			if (_session is IActionConfigurationSession configuration)
+			{
+				configuration.ParameterValuesReported += OnParameterValuesReported;
+			}
+
 			_pump = Task.Run(RunAsync);
 		}
 
 		public void RequestSnapshot()
 		{
-			_work.Write((WorkKind.Snapshot, null, null));
+			_work.Write(new WorkItem(WorkKind.Snapshot, null, null, null));
+		}
+
+		public Task FlushAsync(CancellationToken cancellationToken)
+		{
+			var flushed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+			if (!_work.Write(new WorkItem(WorkKind.Flush, null, null, flushed)))
+			{
+				return Task.CompletedTask;
+			}
+
+			return flushed.Task.WaitAsync(cancellationToken);
 		}
 
 		public void Dispatch(UiEvent uiEvent, string? clientId)
@@ -163,11 +205,11 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			if (string.Equals(uiEvent.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal))
 			{
 				_work.WriteReplaceable((clientId ?? string.Empty) + "\n" + uiEvent.NodeId,
-					(WorkKind.Event, uiEvent, clientId));
+					new WorkItem(WorkKind.Event, uiEvent, clientId, null));
 			}
 			else
 			{
-				_work.Write((WorkKind.Event, uiEvent, clientId));
+				_work.Write(new WorkItem(WorkKind.Event, uiEvent, clientId, null));
 			}
 		}
 
@@ -175,7 +217,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		{
 			if (_session is IRebuildableUiSession)
 			{
-				_work.Write((WorkKind.Rebuild, null, null));
+				_work.Write(new WorkItem(WorkKind.Rebuild, null, null, null));
 				return;
 			}
 
@@ -183,7 +225,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			// the code it was opened with.
 			if (!string.Equals(_surfaceKind, UiSurfaceKinds.Dialog, StringComparison.Ordinal))
 			{
-				_work.Write((WorkKind.Reload, null, null));
+				_work.Write(new WorkItem(WorkKind.Reload, null, null, null));
 			}
 		}
 
@@ -192,6 +234,11 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			_disposing = true;
 			_session.Changed -= OnChanged;
 			_session.Faulted -= OnFaulted;
+			if (_session is IActionConfigurationSession configuration)
+			{
+				configuration.ParameterValuesReported -= OnParameterValuesReported;
+			}
+
 			_work.Complete();
 
 			if (_pump is { } pump)
@@ -216,7 +263,18 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			// would either lose patches or drain an empty session.
 			if (Interlocked.Exchange(ref _drainQueued, 1) == 0)
 			{
-				_work.Write((WorkKind.Drain, null, null));
+				_work.Write(new WorkItem(WorkKind.Drain, null, null, null));
+			}
+		}
+
+		// Never sent from the raising thread: the pump sends reports in order and awaits each one, so a
+		// flush queued behind the event that raised a report is answered only after the host took it.
+		private void OnParameterValuesReported(object? sender, ActionParameterValuesReportedEventArgs e)
+		{
+			_reports.Enqueue(e.Values);
+			if (Interlocked.Exchange(ref _reportQueued, 1) == 0)
+			{
+				_work.Write(new WorkItem(WorkKind.Report, null, null, null));
 			}
 		}
 
@@ -229,9 +287,10 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		{
 			try
 			{
-				await foreach (var (kind, uiEvent, clientId) in _work.ReadAllAsync().ConfigureAwait(false))
+				await foreach (var item in _work.ReadAllAsync().ConfigureAwait(false))
 				{
-					await HandleAsync(kind, uiEvent, clientId).ConfigureAwait(false);
+					await HandleAsync(item.Kind, item.Event, item.ClientId).ConfigureAwait(false);
+					item.Flushed?.TrySetResult();
 				}
 			}
 			catch (Exception exception) when (exception is not OutOfMemoryException)
@@ -250,6 +309,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 				WorkKind.Event when uiEvent is not null => DispatchAsync(uiEvent, clientId),
 				WorkKind.Rebuild => RebuildAsync(),
 				WorkKind.Reload => ReloadAsync(),
+				WorkKind.Report => SendQueuedReportsAsync(),
 				_ => Task.CompletedTask
 			};
 		}
@@ -373,6 +433,47 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			catch (Exception exception) when (exception is not OutOfMemoryException)
 			{
 				await FaultOnThrowAsync(exception, "event").ConfigureAwait(false);
+				return;
+			}
+
+			await SendReportsAsync().ConfigureAwait(false);
+		}
+
+		private Task SendQueuedReportsAsync()
+		{
+			Interlocked.Exchange(ref _reportQueued, 0);
+			return SendReportsAsync();
+		}
+
+		private async Task SendReportsAsync()
+		{
+			while (_reports.TryDequeue(out var values))
+			{
+				if (Volatile.Read(ref _owner._reportsUnsupported) != 0)
+				{
+					continue;
+				}
+
+				try
+				{
+					await _owner._hostInvoker.InvokeAsync(HostApis.Ui,
+							HostOperations.Ui.ReportParameterValues,
+							new UiReportParameterValuesArguments { SessionId = _sessionId, Values = values },
+							CancellationToken.None)
+						.ConfigureAwait(false);
+				}
+				catch (HostInvocationException exception)
+					when (exception.Code == ProtocolErrorCodes.CapabilityUnsupported)
+				{
+					if (Interlocked.Exchange(ref _owner._reportsUnsupported, 1) == 0)
+					{
+						_owner._logger.ParameterValueReportsUnsupported();
+					}
+				}
+				catch (Exception exception) when (exception is not OutOfMemoryException)
+				{
+					_owner._logger.HostCallbackFailed(HostApis.Ui, HostOperations.Ui.ReportParameterValues, exception);
+				}
 			}
 		}
 

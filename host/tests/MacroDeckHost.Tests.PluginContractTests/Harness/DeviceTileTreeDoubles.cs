@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
@@ -97,5 +98,18 @@ internal sealed class PendingTreeUiSessionBroker : IUiSessionBroker
 
 	public void PublishReload(string providerId, string sessionId)
 	{
+	}
+
+	public FlushUiSessionResponse FlushSession(FlushUiSessionRequest request, string connectionId)
+	{
+		return new FlushUiSessionResponse { Accepted = false, Code = "not_supported", Message = null };
+	}
+
+	public UiSessionIngestResult PublishParameterValues(
+		string providerId,
+		string sessionId,
+		IReadOnlyDictionary<string, JsonElement> values)
+	{
+		return new UiSessionIngestResult { Accepted = false, Code = "not_supported", Message = null };
 	}
 }

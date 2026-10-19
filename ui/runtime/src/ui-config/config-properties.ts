@@ -78,6 +78,9 @@ export const UiConfigProperties = {
   FixedCount: 'fixedCount',
   FixedColors: 'fixedColors',
   MaxCount: 'maxCount',
+  Spans: 'spans',
+  Variant: 'variant',
+  Accent: 'accent',
 } as const;
 
 export interface UiNodeOption {

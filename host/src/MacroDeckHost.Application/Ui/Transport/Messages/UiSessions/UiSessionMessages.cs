@@ -220,3 +220,38 @@ public sealed record UiSessionClosedEvent
 
 	public string? Reason { get; init; }
 }
+
+/// <summary>Values an action configuration session reported for the action's declared parameters. The client
+/// treats each one as a user edit of that parameter; it is persisted when the action is saved.</summary>
+public sealed record UiSessionParameterValuesReportedEvent
+{
+	public required string SessionId { get; init; }
+
+	public required IReadOnlyDictionary<string, JsonElement> Values { get; init; }
+}
+
+/// <summary>Asks the host to answer with <see cref="UiSessionFlushedEvent" /> once every event this
+/// connection sent to the session before has been handled, so every value reported while handling them has
+/// been sent first.</summary>
+public sealed record FlushUiSessionRequest
+{
+	public string SessionId { get; init; } = string.Empty;
+
+	public string FlushId { get; init; } = string.Empty;
+}
+
+public sealed record FlushUiSessionResponse
+{
+	public required bool Accepted { get; init; }
+
+	public string? Code { get; init; }
+
+	public string? Message { get; init; }
+}
+
+public sealed record UiSessionFlushedEvent
+{
+	public required string SessionId { get; init; }
+
+	public required string FlushId { get; init; }
+}

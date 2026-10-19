@@ -141,6 +141,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 			CapabilityOperations.Ui.SessionClose => CloseAsync(invocation),
 			CapabilityOperations.Ui.SessionSnapshot => Task.FromResult(Snapshot(invocation)),
 			CapabilityOperations.Ui.SessionEvent => Task.FromResult(Event(invocation)),
+			CapabilityOperations.Ui.SessionFlush => FlushAsync(invocation, cancellationToken),
 			CapabilityOperations.Ui.ModalResult => Task.FromResult(ModalResult(invocation)),
 			CapabilityOperations.Ui.NotificationResult => Task.FromResult(NotificationResult(invocation)),
 			_ => Task.FromResult(CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
@@ -469,6 +470,21 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		};
 
 		return _sessions.Dispatch(arguments.SessionId, uiEvent, arguments.ClientId)
+			? CapabilityInvocationResult.Ok()
+			: UnknownSession(arguments.SessionId);
+	}
+
+	private async Task<CapabilityInvocationResult> FlushAsync(
+		CapabilityInvocation invocation,
+		CancellationToken cancellationToken)
+	{
+		if (Read<UiSessionFlushArguments>(invocation) is not { } arguments)
+		{
+			return CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
+				"The session.flush operation requires arguments.");
+		}
+
+		return await _sessions.FlushAsync(arguments.SessionId, cancellationToken).ConfigureAwait(false)
 			? CapabilityInvocationResult.Ok()
 			: UnknownSession(arguments.SessionId);
 	}

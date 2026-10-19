@@ -22,6 +22,13 @@ public interface IUiSessionProvider
 	Task RequestSnapshotAsync(string sessionId, CancellationToken cancellationToken);
 
 	Task DispatchEventAsync(string sessionId, UiSessionEventCommand command, CancellationToken cancellationToken);
+
+	// Completes once every event dispatched before it has been handled by the session, so everything those
+	// events published synchronously through the sink is already queued for the client.
+	Task FlushAsync(string sessionId, CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 }
 
 public sealed record UiSessionOpenCommand

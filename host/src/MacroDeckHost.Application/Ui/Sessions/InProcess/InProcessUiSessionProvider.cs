@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MacroDeck.Localization;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
@@ -99,6 +100,13 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		return Task.CompletedTask;
 	}
 
+	public Task FlushAsync(string sessionId, CancellationToken cancellationToken)
+	{
+		return _sessions.TryGetValue(sessionId, out var live)
+			? live.FlushAsync(cancellationToken)
+			: Task.CompletedTask;
+	}
+
 	public async ValueTask DisposeAsync()
 	{
 		foreach (var sessionId in _sessions.Keys)
@@ -143,8 +151,16 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 
 		Snapshot,
 
-		Event
+		Event,
+
+		Flush
 	}
+
+	private readonly record struct WorkItem(
+		WorkKind Kind,
+		UiEvent? Event,
+		string? OriginClientId,
+		TaskCompletionSource? Flushed);
 
 	private sealed class LiveSession : IAsyncDisposable
 	{
@@ -153,7 +169,7 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		private readonly IUiSession _session;
 		private readonly CancellationTokenSource _stopping = new();
 
-		private readonly UiReplaceableWork<(WorkKind Kind, UiEvent? Event, string? OriginClientId)> _work = new();
+		private readonly UiReplaceableWork<WorkItem> _work = new();
 
 		private Task? _pump;
 		private int _drainQueued;
@@ -169,12 +185,28 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		{
 			_session.Changed += OnChanged;
 			_session.Faulted += OnFaulted;
+			if (_session is IActionConfigurationSession configuration)
+			{
+				configuration.ParameterValuesReported += OnParameterValuesReported;
+			}
+
 			_pump = Task.Run(RunAsync);
 		}
 
 		public void RequestSnapshot()
 		{
-			_work.Write((WorkKind.Snapshot, null, null));
+			_work.Write(new WorkItem(WorkKind.Snapshot, null, null, null));
+		}
+
+		public Task FlushAsync(CancellationToken cancellationToken)
+		{
+			var flushed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+			if (!_work.Write(new WorkItem(WorkKind.Flush, null, null, flushed)))
+			{
+				return Task.CompletedTask;
+			}
+
+			return flushed.Task.WaitAsync(cancellationToken);
 		}
 
 		public void Dispatch(UiEvent uiEvent, string? originClientId)
@@ -182,11 +214,11 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 			if (string.Equals(uiEvent.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal))
 			{
 				_work.WriteReplaceable((originClientId ?? string.Empty) + "\n" + uiEvent.NodeId,
-					(WorkKind.Event, uiEvent, originClientId));
+					new WorkItem(WorkKind.Event, uiEvent, originClientId, null));
 			}
 			else
 			{
-				_work.Write((WorkKind.Event, uiEvent, originClientId));
+				_work.Write(new WorkItem(WorkKind.Event, uiEvent, originClientId, null));
 			}
 		}
 
@@ -194,6 +226,11 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		{
 			_session.Changed -= OnChanged;
 			_session.Faulted -= OnFaulted;
+			if (_session is IActionConfigurationSession configuration)
+			{
+				configuration.ParameterValuesReported -= OnParameterValuesReported;
+			}
+
 			_work.Complete();
 			await _stopping.CancelAsync().ConfigureAwait(false);
 
@@ -221,8 +258,13 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 			// never depends on the number of raises matching the number of patches.
 			if (Interlocked.Exchange(ref _drainQueued, 1) == 0)
 			{
-				_work.Write((WorkKind.Drain, null, null));
+				_work.Write(new WorkItem(WorkKind.Drain, null, null, null));
 			}
+		}
+
+		private void OnParameterValuesReported(object? sender, ActionParameterValuesReportedEventArgs e)
+		{
+			_owner._sink.PublishParameterValues(_owner.ProviderId, _sessionId, e.Values);
 		}
 
 		private void OnFaulted(object? sender, UiSessionFaultedEventArgs e)
@@ -241,9 +283,10 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		{
 			try
 			{
-				await foreach (var (kind, uiEvent, originClientId) in _work.ReadAllAsync().ConfigureAwait(false))
+				await foreach (var item in _work.ReadAllAsync().ConfigureAwait(false))
 				{
-					Handle(kind, uiEvent, originClientId);
+					Handle(item.Kind, item.Event, item.OriginClientId);
+					item.Flushed?.TrySetResult();
 				}
 			}
 			catch (Exception exception) when (exception is not OutOfMemoryException)

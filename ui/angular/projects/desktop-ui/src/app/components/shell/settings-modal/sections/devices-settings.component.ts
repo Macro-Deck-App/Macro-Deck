@@ -9,6 +9,7 @@ import { ConfirmationModalComponent } from '../../../overlay/confirmation-modal/
 import { DropdownMenuComponent } from '../../../overlay/dropdown-menu/dropdown-menu.component';
 import { ScreenSaverPickerComponent } from '../../../widgets/screensaver-picker/screensaver-picker.component';
 import { DeviceService } from '../../../../services/device.service';
+import { ActionConfigSessionFlusher } from '../../../action-builder/services/action-config-session-flusher.service';
 
 const FORM_FACTOR_ICONS: Record<DeviceFormFactor, string> = {
   phone: 'device-phone',
@@ -60,6 +61,7 @@ export class DevicesSettingsComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly localization = inject(LocalizationService);
   private readonly screenSavers = inject(ScreenSaverService);
+  private readonly flusher = inject(ActionConfigSessionFlusher);
 
   readonly thisDeviceId = computed(() => this.authService.currentDeviceId() ?? this.deviceIdentity.deviceId);
 
@@ -177,6 +179,7 @@ export class DevicesSettingsComponent implements OnInit {
   }
 
   private async saveScreenSaver(): Promise<boolean> {
+    await this.flusher.flushAll();
     const device = this.screenSaverDevice();
     if (!device) {
       return false;

@@ -23,6 +23,7 @@ import { CopyValueComponent } from '../copy-value/copy-value.component';
 import { UiTreeComponent } from '../ui-render/ui-tree.component';
 import { ConfigFieldComponent } from './config-field.component';
 import { ConfigFlowInstructionsComponent } from './config-flow-instructions.component';
+import { ActionConfigSessionFlusher } from '../action-builder/services/action-config-session-flusher.service';
 
 const COPY_FALLBACK_Z_INDEX = 1100;
 
@@ -177,6 +178,7 @@ export class ConfigFlowDialogComponent implements OnChanges {
   protected readonly flow = inject(ConfigFlowService);
   private readonly externalLinks = inject(ExternalLinkService);
   private readonly localization = inject(LocalizationService);
+  private readonly flusher = inject(ActionConfigSessionFlusher);
 
   protected readonly copyFallbackZIndex = COPY_FALLBACK_Z_INDEX;
 
@@ -259,6 +261,7 @@ export class ConfigFlowDialogComponent implements OnChanges {
   }
 
   async onSubmit(): Promise<void> {
+    await this.flusher.flushAll();
     if (this.root) {
       const current = this.flow.values();
       for (const [name, value] of Object.entries(this.shownValues())) {

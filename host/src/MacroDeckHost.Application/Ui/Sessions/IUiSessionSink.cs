@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace MacroDeckHost.Application.Ui.Sessions;
 
 // Where a provider's output enters the host. Every member is synchronous and returns the ingest verdict
@@ -12,6 +14,11 @@ public interface IUiSessionSink
 	void PublishFault(string providerId, string sessionId, string code, string? message);
 
 	void PublishReload(string providerId, string sessionId);
+
+	UiSessionIngestResult PublishParameterValues(
+		string providerId,
+		string sessionId,
+		IReadOnlyDictionary<string, JsonElement> values);
 }
 
 public readonly record struct UiSessionIngestResult

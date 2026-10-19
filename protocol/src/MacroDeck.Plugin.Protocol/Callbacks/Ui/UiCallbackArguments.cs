@@ -42,6 +42,16 @@ public sealed record UiReloadArguments
 	public required string SessionId { get; init; }
 }
 
+/// <summary>Arguments for <c>host.invoke ui/report-parameter-values</c>: values for the declared parameters
+/// of the action <see cref="SessionId" /> configures, keyed by parameter name, in the JSON shape Macro Deck
+/// stores for each parameter type.</summary>
+public sealed record UiReportParameterValuesArguments
+{
+	public required string SessionId { get; init; }
+
+	public required IReadOnlyDictionary<string, JsonElement> Values { get; init; }
+}
+
 /// <summary>Arguments for <c>host.invoke ui/register-resource</c>. <see cref="ContentHash" /> names bytes
 /// this plugin uploaded as kind <c>ui-resource</c>; <see cref="MediaType" /> must match the type that
 /// upload declared.</summary>
