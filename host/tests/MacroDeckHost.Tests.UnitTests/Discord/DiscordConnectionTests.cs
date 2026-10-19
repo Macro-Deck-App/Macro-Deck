@@ -294,21 +294,26 @@ internal sealed class DiscordConnectionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(connection.NeedsReauthorization, Is.False);
-			Assert.That(connection.AccessDenied, Is.False);
+			Assert.That(connection.AccessDenial, Is.Null);
 			Assert.That(connection.State.IsConnected, Is.False);
 		});
 	}
 
 	[Test]
-	public async Task A_refused_endpoint_is_reported_as_a_privilege_problem()
+	public async Task A_refused_endpoint_keeps_its_diagnosis()
 	{
-		_client.ConnectException = new DiscordIpcUnavailableException("refused", true);
+		_client.ConnectException = new DiscordIpcUnavailableException("refused",
+			TestDenials.Of(DiscordIpcDenialCause.Blocked));
 		using var connection = Create();
 		connection.Start();
 
-		await WaitForAsync(() => connection.AccessDenied);
+		await WaitForAsync(() => connection.AccessDenial is not null);
 
-		Assert.That(connection.NeedsReauthorization, Is.False);
+		Assert.Multiple(() =>
+		{
+			Assert.That(connection.AccessDenial!.Cause, Is.EqualTo(DiscordIpcDenialCause.Blocked));
+			Assert.That(connection.NeedsReauthorization, Is.False);
+		});
 	}
 
 	[Test]

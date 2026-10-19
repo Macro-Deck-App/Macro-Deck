@@ -5504,6 +5504,18 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>Nyalakan</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Windows memblokir koneksi ke Discord meskipun Macro Deck dan Discord berjalan dengan hak akses yang sama. Kemungkinan penyebabnya adalah perangkat lunak keamanan: izinkan Macro Deck di dalamnya, lalu coba lagi.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>{program} menempati koneksi Discord sehingga Macro Deck tidak dapat menjangkau Discord. Tutup program tersebut, mulai ulang Discord, lalu coba lagi.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord berjalan di bawah pengguna Windows lain atau di sesi Windows lain. Mulai Discord di bawah pengguna yang sama dan di sesi yang sama dengan Macro Deck, lalu coba lagi.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord menolak koneksi dan Macro Deck tidak dapat mengetahui penyebabnya. Pastikan Macro Deck dan Discord berjalan di bawah pengguna yang sama dengan hak akses yang sama dan tidak ada perangkat lunak keamanan yang memblokir Macro Deck, lalu coba lagi.</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord menolak otorisasi: {details}</value>
   </data>
@@ -5758,6 +5770,30 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>Status Koneksi Suara Berubah</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Windows memblokir koneksi ke Discord meskipun Macro Deck dan Discord berjalan dengan hak akses yang sama. Kemungkinan penyebabnya adalah perangkat lunak keamanan: izinkan Macro Deck di dalamnya.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>Izinkan Macro Deck di perangkat lunak keamanan, lalu hubungkan kembali.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>{program} menempati koneksi Discord sehingga Macro Deck tidak dapat menjangkau Discord. Tutup program tersebut dan mulai ulang Discord.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>Tutup {program}, mulai ulang Discord, lalu hubungkan kembali.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord berjalan di bawah pengguna Windows lain atau di sesi Windows lain sehingga tidak berkomunikasi dengan Macro Deck. Mulai Discord di bawah pengguna yang sama dan di sesi yang sama dengan Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Mulai Discord di bawah pengguna Windows yang sama dan di sesi yang sama dengan Macro Deck, lalu hubungkan kembali.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>Akses ke Discord ditolak dan Macro Deck tidak dapat mengetahui penyebabnya. Pastikan Macro Deck dan Discord berjalan di bawah pengguna yang sama dengan hak akses yang sama dan tidak ada perangkat lunak keamanan yang memblokir Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Jalankan Macro Deck dan Discord di bawah pengguna yang sama dengan hak akses yang sama, periksa perangkat lunak keamanan, lalu hubungkan kembali.</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord berjalan, tetapi tidak akan berkomunikasi dengan Macro Deck. Ini terjadi jika keduanya berjalan dengan hak akses berbeda: jika salah satunya dimulai sebagai administrator, mulai keduanya dengan cara yang sama.</value>

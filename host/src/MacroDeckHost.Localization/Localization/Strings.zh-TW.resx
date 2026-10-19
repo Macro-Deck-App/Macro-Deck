@@ -5504,6 +5504,18 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>開啟</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>儘管 Macro Deck 與 Discord 以相同權限執行，Windows 仍封鎖了與 Discord 的連線。可能是安全性軟體造成的：請在安全性軟體中允許 Macro Deck，然後再試一次。</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>{program} 佔用了 Discord 的連線，因此 Macro Deck 無法連線到 Discord。請關閉該程式，重新啟動 Discord 後再試一次。</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord 正以其他 Windows 使用者身分或在其他 Windows 工作階段中執行。請以與 Macro Deck 相同的使用者身分並在同一工作階段中啟動 Discord，然後再試一次。</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord 拒絕了連線，Macro Deck 無法判斷原因。請確認 Macro Deck 與 Discord 是否以相同使用者身分和相同權限執行，以及是否有安全性軟體封鎖 Macro Deck，然後再試一次。</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord 拒絕了授權：{details}</value>
   </data>
@@ -5758,6 +5770,30 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>語音連線狀態已變更</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>儘管 Macro Deck 與 Discord 以相同權限執行，Windows 仍封鎖與 Discord 的連線。可能是安全性軟體造成的：請在安全性軟體中允許 Macro Deck。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>請在安全性軟體中允許 Macro Deck，然後重新連線。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>{program} 佔用了 Discord 的連線，因此 Macro Deck 無法連線到 Discord。請關閉該程式並重新啟動 Discord。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>請關閉 {program}，重新啟動 Discord，然後重新連線。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord 正以其他 Windows 使用者身分或在其他 Windows 工作階段中執行，因此不會與 Macro Deck 通訊。請以與 Macro Deck 相同的使用者身分並在同一工作階段中啟動 Discord。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>請以與 Macro Deck 相同的 Windows 使用者身分並在同一工作階段中啟動 Discord，然後重新連線。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>對 Discord 的存取遭到拒絕，Macro Deck 無法判斷原因。請確認 Macro Deck 與 Discord 是否以相同使用者身分和相同權限執行，以及是否有安全性軟體封鎖 Macro Deck。</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>請以相同使用者身分和相同權限執行 Macro Deck 與 Discord，檢查安全性軟體，然後重新連線。</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord 正在執行，但不會與 Macro Deck 通訊。這是因為兩者以不同的權限執行：若其中一個以系統管理員身分啟動，請以相同方式啟動兩者。</value>

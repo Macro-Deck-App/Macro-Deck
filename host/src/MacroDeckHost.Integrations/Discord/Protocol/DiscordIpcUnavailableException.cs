@@ -2,14 +2,19 @@ namespace MacroDeckHost.Integrations.Discord.Protocol;
 
 internal sealed class DiscordIpcUnavailableException : IOException
 {
-	public DiscordIpcUnavailableException(string message, bool accessDenied = false, bool richPresenceOnly = false)
+	public DiscordIpcUnavailableException(
+		string message,
+		DiscordIpcDenial? denial = null,
+		bool richPresenceOnly = false)
 		: base(message)
 	{
-		AccessDenied = accessDenied;
+		Denial = denial;
 		RichPresenceOnly = richPresenceOnly;
 	}
 
-	public bool AccessDenied { get; }
+	public DiscordIpcDenial? Denial { get; }
+
+	public bool AccessDenied => Denial is not null;
 
 	public bool RichPresenceOnly { get; }
 }

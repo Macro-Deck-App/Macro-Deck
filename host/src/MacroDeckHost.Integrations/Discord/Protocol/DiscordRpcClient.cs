@@ -168,7 +168,7 @@ internal sealed class DiscordRpcClient : IDiscordRpcClient
 		{
 			await transport.ConnectAsync(skipped, cancellationToken).ConfigureAwait(false);
 		}
-		catch (DiscordIpcUnavailableException ex) when (!ex.AccessDenied && skipped.Count > 0)
+		catch (DiscordIpcUnavailableException ex) when (ex.Denial is not { WasProbed: true } && skipped.Count > 0)
 		{
 			throw new DiscordIpcUnavailableException(
 				"Only Discord Rich Presence servers answered; the Discord client itself was not found.",

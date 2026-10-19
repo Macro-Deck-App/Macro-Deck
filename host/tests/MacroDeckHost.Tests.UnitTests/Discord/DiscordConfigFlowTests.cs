@@ -161,7 +161,8 @@ internal sealed class DiscordConfigFlowTests
 	[Test]
 	public async Task A_refused_endpoint_explains_the_privilege_mismatch()
 	{
-		_client.ConnectException = new DiscordIpcUnavailableException("refused", true);
+		_client.ConnectException = new DiscordIpcUnavailableException("refused",
+			TestDenials.Of(DiscordIpcDenialCause.PrivilegeMismatch));
 		await Submit("credentials", Credentials());
 
 		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
@@ -188,12 +189,54 @@ internal sealed class DiscordConfigFlowTests
 	public async Task A_refused_endpoint_outranks_a_skipped_rich_presence_server()
 	{
 		_client.ConnectException =
-			new DiscordIpcUnavailableException("refused", true, true);
+			new DiscordIpcUnavailableException("refused",
+				TestDenials.Of(DiscordIpcDenialCause.PrivilegeMismatch),
+				true);
 		await Submit("credentials", Credentials());
 
 		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
 
 		Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("same privileges"));
+	}
+
+	[Test]
+	public async Task A_discord_blocked_despite_equal_privileges_points_at_security_software()
+	{
+		_client.ConnectException =
+			new DiscordIpcUnavailableException("refused", TestDenials.Of(DiscordIpcDenialCause.Blocked));
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		var message = TestLocalization.Resolve(result.ErrorMessage);
+		Assert.Multiple(() =>
+		{
+			Assert.That(message, Does.Contain("Security software"));
+			Assert.That(message, Does.Not.Contain("administrator"));
+		});
+	}
+
+	[Test]
+	public async Task Another_program_holding_the_pipe_is_named()
+	{
+		_client.ConnectException = new DiscordIpcUnavailableException("refused",
+			TestDenials.Of(DiscordIpcDenialCause.OtherProgram, "SomeOverlay"));
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("SomeOverlay"));
+	}
+
+	[Test]
+	public async Task A_refusal_without_a_diagnosis_claims_no_cause()
+	{
+		_client.ConnectException = new DiscordIpcUnavailableException("refused", TestDenials.Unattributed());
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("could not find out why"));
 	}
 
 	[Test]

@@ -33,6 +33,7 @@ internal sealed class DiscordConnection : IDisposable
 	private readonly Action<DiscordState, DiscordState>? _onStateChanged;
 	private readonly TimeSpan _reconnectDelay;
 	private readonly CancellationTokenSource _cts = new();
+	private readonly DiscordIpcDenialLog _denialLog = new(_logger);
 	private readonly Lock _stateLock = new();
 
 	private readonly Channel<Func<CancellationToken, Task>> _work =
@@ -90,7 +91,7 @@ internal sealed class DiscordConnection : IDisposable
 
 	public bool NeedsReauthorization { get; private set; }
 
-	public bool AccessDenied { get; private set; }
+	public DiscordIpcDenial? AccessDenial { get; private set; }
 
 	public bool HasIgnoredVoiceSettings => !_ignoredVoiceSettings.IsEmpty;
 
@@ -486,12 +487,12 @@ internal sealed class DiscordConnection : IDisposable
 			UpdateState(state => state with { IsConnected = true });
 
 			_consecutiveFailures = 0;
-			AccessDenied = false;
+			RecordDenial(null);
 			_logger.Information("Connected to Discord as {User}", State.UserName ?? "unknown user");
 		}
 		catch (DiscordIpcUnavailableException ex)
 		{
-			AccessDenied = ex.AccessDenied;
+			RecordDenial(ex.Denial);
 			_logger.Debug("Discord is not reachable: {Reason}", ex.Message);
 			DetachClient();
 			ScheduleReconnect();
@@ -514,10 +515,17 @@ internal sealed class DiscordConnection : IDisposable
 		}
 		catch (Exception ex)
 		{
+			_denialLog.Record(null);
 			_logger.Warning(ex, "Connecting to Discord failed; retrying in {Delay}s", NextDelay().TotalSeconds);
 			DetachClient();
 			ScheduleReconnect();
 		}
+	}
+
+	private void RecordDenial(DiscordIpcDenial? denial)
+	{
+		AccessDenial = denial;
+		_denialLog.Record(denial);
 	}
 
 	private async Task AuthenticateAsync(

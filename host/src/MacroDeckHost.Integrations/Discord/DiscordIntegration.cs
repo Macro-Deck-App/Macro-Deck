@@ -411,13 +411,13 @@ public sealed class DiscordIntegration
 		}
 
 		return Task.FromResult(BuildIssues(connection.NeedsReauthorization,
-			connection.AccessDenied,
+			connection.AccessDenial,
 			connection.IgnoredVoiceSettings));
 	}
 
 	internal static IReadOnlyList<IntegrationIssue> BuildIssues(
 		bool needsReauthorization,
-		bool accessDenied,
+		DiscordIpcDenial? accessDenial,
 		IReadOnlyList<string> ignoredVoiceSettings)
 	{
 		var issues = new List<IntegrationIssue>();
@@ -434,13 +434,13 @@ public sealed class DiscordIntegration
 			});
 		}
 
-		if (accessDenied)
+		if (accessDenial is not null)
 		{
 			issues.Add(new IntegrationIssue
 			{
 				Id = PrivilegeMismatchIssueId,
 				Title = AppStrings.Integrations.Discord.Issues.PrivilegeMismatchTitle(),
-				Description = AppStrings.Integrations.Discord.Issues.PrivilegeMismatchDescription(),
+				Description = DiscordAccessDeniedText.IssueDescription(accessDenial),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
@@ -463,12 +463,12 @@ public sealed class DiscordIntegration
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
 	{
+		var denial = _connection?.AccessDenial;
 		return Task.FromResult(issueId switch
 		{
 			ReauthorizationIssueId => IssueResolution.Ok(AppStrings.Integrations.Discord.Issues.ReauthorizeResolution(),
 				IssueResolutionFollowUp.StartConfigFlow),
-			PrivilegeMismatchIssueId => IssueResolution.Failed(AppStrings.Integrations.Discord.Issues
-				.PrivilegeMismatchResolution()),
+			PrivilegeMismatchIssueId => IssueResolution.Failed(DiscordAccessDeniedText.IssueResolution(denial)),
 			VoiceSettingsIgnoredIssueId => IssueResolution.Failed(AppStrings.Integrations.Discord.Issues
 				.VoiceSettingsIgnoredResolution()),
 			_ => IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue())

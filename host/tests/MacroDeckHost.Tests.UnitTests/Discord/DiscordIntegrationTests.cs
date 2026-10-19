@@ -4,6 +4,7 @@ using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations.Discord;
 using MacroDeckHost.Integrations.Discord.Configuration;
+using MacroDeckHost.Integrations.Discord.Connections;
 using MacroDeckHost.Integrations.Discord.Events;
 using MacroDeckHost.Integrations.Discord.Protocol;
 using MacroDeckHost.Integrations.Discord.State;
@@ -336,25 +337,61 @@ internal sealed class DiscordIntegrationTests
 	}
 
 	[Test]
-	public async Task A_privilege_mismatch_explains_the_manual_fix()
+	public async Task Resolving_a_refusal_without_a_diagnosis_claims_no_cause()
 	{
 		var integration = new DiscordIntegration();
 
 		var resolution = await integration.ResolveIssueAsync(DiscordIntegration.PrivilegeMismatchIssueId,
 			CancellationToken.None);
 
+		var message = TestLocalization.Resolve(resolution.Message);
 		Assert.Multiple(() =>
 		{
 			Assert.That(resolution.Success, Is.False);
-			Assert.That(TestLocalization.Resolve(resolution.Message), Does.Contain("same privileges"));
+			Assert.That(message, Does.Contain("same privileges"));
+			Assert.That(message, Does.Contain("security software"));
 		});
+	}
+
+	[TestCase(DiscordIpcDenialCause.PrivilegeMismatch, "Discord", "administrator")]
+	[TestCase(DiscordIpcDenialCause.Blocked, "Discord", "Security software")]
+	[TestCase(DiscordIpcDenialCause.OtherSession, "Discord", "another Windows user")]
+	[TestCase(DiscordIpcDenialCause.OtherProgram, "SomeOverlay", "SomeOverlay")]
+	[TestCase(DiscordIpcDenialCause.Unknown, "Discord", "could not find out why")]
+	public void A_refused_connection_raises_an_issue_describing_its_cause(
+		DiscordIpcDenialCause cause,
+		string processName,
+		string expected)
+	{
+		var issues = DiscordIntegration.BuildIssues(false, TestDenials.Of(cause, processName), []);
+
+		var issue = issues.Single(i => i.Id == DiscordIntegration.PrivilegeMismatchIssueId);
+		Assert.Multiple(() =>
+		{
+			Assert.That(TestLocalization.Resolve(issue.Description), Does.Contain(expected));
+			Assert.That(issue.Severity, Is.EqualTo(IntegrationIssueSeverity.Warning));
+		});
+	}
+
+	[TestCase(DiscordIpcDenialCause.PrivilegeMismatch, "Discord", "same privileges")]
+	[TestCase(DiscordIpcDenialCause.Blocked, "Discord", "security software")]
+	[TestCase(DiscordIpcDenialCause.OtherSession, "Discord", "same Windows user")]
+	[TestCase(DiscordIpcDenialCause.OtherProgram, "SomeOverlay", "Close SomeOverlay")]
+	public void The_resolution_follows_the_diagnosed_cause(
+		DiscordIpcDenialCause cause,
+		string processName,
+		string expected)
+	{
+		var resolution = DiscordAccessDeniedText.IssueResolution(TestDenials.Of(cause, processName));
+
+		Assert.That(TestLocalization.Resolve(resolution), Does.Contain(expected));
 	}
 
 	[Test]
 	public void An_ignored_voice_setting_raises_an_issue_naming_every_stuck_field()
 	{
 		var issues = DiscordIntegration.BuildIssues(false,
-			false,
+			null,
 			["noise_suppression", "mode.type"]);
 
 		var issue = issues.Single(i => i.Id == DiscordIntegration.VoiceSettingsIgnoredIssueId);
@@ -370,7 +407,7 @@ internal sealed class DiscordIntegrationTests
 	public void No_issue_is_raised_when_nothing_is_stuck()
 	{
 		var issues = DiscordIntegration.BuildIssues(false,
-			false,
+			null,
 			[]);
 
 		Assert.That(issues.Any(i => i.Id == DiscordIntegration.VoiceSettingsIgnoredIssueId), Is.False);

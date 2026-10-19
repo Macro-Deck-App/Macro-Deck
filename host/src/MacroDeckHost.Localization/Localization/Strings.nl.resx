@@ -5504,6 +5504,18 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>Inschakelen</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Windows heeft de verbinding met Discord geblokkeerd, hoewel Macro Deck en Discord met dezelfde rechten draaien. Waarschijnlijk is beveiligingssoftware de oorzaak: sta Macro Deck daarin toe en probeer het opnieuw.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>{program} bezet de verbinding van Discord, daardoor kan Macro Deck Discord niet bereiken. Sluit dat programma, start Discord opnieuw en probeer het nog eens.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord draait onder een andere Windows-gebruiker of in een andere Windows-sessie. Start Discord onder dezelfde gebruiker en in dezelfde sessie als Macro Deck en probeer het opnieuw.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord heeft de verbinding geweigerd en Macro Deck kon niet achterhalen waarom. Controleer of Macro Deck en Discord onder dezelfde gebruiker met dezelfde rechten draaien en of er geen beveiligingssoftware Macro Deck blokkeert, en probeer het opnieuw.</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord heeft de autorisatie geweigerd: {details}</value>
   </data>
@@ -5758,6 +5770,30 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>Status van spraakverbinding gewijzigd</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Windows blokkeert de verbinding met Discord, hoewel Macro Deck en Discord met dezelfde rechten draaien. Waarschijnlijk is beveiligingssoftware de oorzaak: sta Macro Deck daarin toe.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>Sta Macro Deck toe in je beveiligingssoftware en maak daarna opnieuw verbinding.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>{program} bezet de verbinding van Discord, daardoor kan Macro Deck Discord niet bereiken. Sluit dat programma en start Discord opnieuw.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>Sluit {program}, start Discord opnieuw en maak daarna opnieuw verbinding.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord draait onder een andere Windows-gebruiker of in een andere Windows-sessie en communiceert daarom niet met Macro Deck. Start Discord onder dezelfde gebruiker en in dezelfde sessie als Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Start Discord onder dezelfde Windows-gebruiker en in dezelfde sessie als Macro Deck en maak daarna opnieuw verbinding.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>De toegang tot Discord is geweigerd en Macro Deck kon niet achterhalen waarom. Controleer of Macro Deck en Discord onder dezelfde gebruiker met dezelfde rechten draaien en of er geen beveiligingssoftware Macro Deck blokkeert.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Start Macro Deck en Discord onder dezelfde gebruiker met dezelfde rechten, controleer je beveiligingssoftware en maak daarna opnieuw verbinding.</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord draait, maar het praat niet met Macro Deck. Dit gebeurt wanneer de twee met verschillende rechten draaien: als een van beide als beheerder is gestart, start dan beide op dezelfde manier.</value>

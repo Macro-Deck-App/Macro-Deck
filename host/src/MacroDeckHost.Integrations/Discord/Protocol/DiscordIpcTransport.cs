@@ -1,19 +1,33 @@
 using System.IO.Pipes;
 using System.Net.Sockets;
 using MacroDeck.Sdk.Logging;
+using MacroDeckHost.Integrations.Discord.Native;
 using Serilog;
+using Serilog.Events;
 
 namespace MacroDeckHost.Integrations.Discord.Protocol;
 
 internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 {
 	private static readonly ILogger _logger = IntegrationLog.For<DiscordIpcTransport>(DiscordIntegration.IntegrationId);
-	private static readonly TimeSpan _connectTimeout = TimeSpan.FromSeconds(2);
 
 	private readonly SemaphoreSlim _writeLock = new(1, 1);
+	private readonly IReadOnlyList<string> _windowsPipeNames;
+	private readonly TimeSpan _connectTimeout;
 
 	private Stream? _stream;
 	private bool _disposed;
+
+	public DiscordIpcTransport()
+		: this(DiscordIpcEndpointLocator.WindowsPipeNames(), TimeSpan.FromSeconds(2))
+	{
+	}
+
+	internal DiscordIpcTransport(IReadOnlyList<string> windowsPipeNames, TimeSpan connectTimeout)
+	{
+		_windowsPipeNames = windowsPipeNames;
+		_connectTimeout = connectTimeout;
+	}
 
 	public bool IsConnected => _stream is not null && !_disposed;
 
@@ -26,7 +40,7 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 			throw new InvalidOperationException("The transport is already connected.");
 		}
 
-		var accessDenied = false;
+		var denials = new List<DiscordIpcDenial>();
 		var attempted = 0;
 
 		foreach (var candidate in Candidates().Where(c => !skippedEndpoints.Contains(c.Target)))
@@ -41,10 +55,17 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 				_logger.Debug("Connected to Discord IPC endpoint {Endpoint}", Endpoint);
 				return;
 			}
-			catch (UnauthorizedAccessException ex)
+			catch (UnauthorizedAccessException)
 			{
-				accessDenied = true;
-				_logger.Debug(ex, "Discord IPC endpoint {Endpoint} refused access", candidate.Description);
+				denials.Add(Deny(candidate));
+			}
+			catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AccessDenied)
+			{
+				denials.Add(Deny(candidate));
+			}
+			catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+			{
+				_logger.Debug(ex, "Discord IPC endpoint {Endpoint} did not accept in time", candidate.Description);
 			}
 			catch (Exception ex) when (ex is IOException or SocketException or TimeoutException)
 			{
@@ -55,7 +76,7 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 		throw new DiscordIpcUnavailableException(attempted == 0
 				? "No Discord IPC endpoint exists. Discord does not appear to be running."
 				: "No Discord IPC endpoint accepted the connection.",
-			accessDenied);
+			denials.Count > 0 ? DiscordIpcDenial.Prefer(denials) : null);
 	}
 
 	public async Task WriteFrameAsync(
@@ -104,11 +125,22 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 		_writeLock.Dispose();
 	}
 
-	private static IEnumerable<IpcCandidate> Candidates()
+	private static DiscordIpcDenial Deny(IpcCandidate candidate)
+	{
+		var denial = OperatingSystem.IsWindows()
+			? DiscordIpcDenial.Create(candidate.Description,
+				WindowsPipeServerProbe.FindServer(candidate.Target),
+				WindowsPipeServerProbe.Current())
+			: DiscordIpcDenial.Create(candidate.Description, null, null);
+		DiscordIpcDenialLog.Write(_logger, LogEventLevel.Debug, denial);
+		return denial;
+	}
+
+	private IEnumerable<IpcCandidate> Candidates()
 	{
 		if (OperatingSystem.IsWindows())
 		{
-			foreach (var pipe in DiscordIpcEndpointLocator.WindowsPipeNames())
+			foreach (var pipe in _windowsPipeNames)
 			{
 				if (File.Exists($@"\\.\pipe\{pipe}"))
 				{
@@ -128,7 +160,7 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 		}
 	}
 
-	private static async Task<Stream> OpenAsync(IpcCandidate candidate, CancellationToken cancellationToken)
+	private async Task<Stream> OpenAsync(IpcCandidate candidate, CancellationToken cancellationToken)
 	{
 		using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		timeoutCts.CancelAfter(_connectTimeout);

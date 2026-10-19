@@ -5504,6 +5504,18 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>Увімкнути</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Windows заблокувала підключення до Discord, хоча Macro Deck і Discord працюють з однаковими привілеями. Ймовірна причина — захисне ПЗ: дозвольте в ньому Macro Deck і спробуйте ще раз.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>Підключення Discord займає програма {program}, тому Macro Deck не може зв'язатися з Discord. Закрийте її, перезапустіть Discord і спробуйте ще раз.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord запущено від імені іншого користувача Windows або в іншому сеансі Windows. Запустіть Discord від імені того самого користувача й у тому самому сеансі, що й Macro Deck, і спробуйте ще раз.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord відхилив підключення, і Macro Deck не вдалося визначити причину. Перевірте, що Macro Deck і Discord запущено від імені одного користувача з однаковими привілеями і що захисне ПЗ не блокує Macro Deck, потім спробуйте ще раз.</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord відхилив авторизацію: {details}</value>
   </data>
@@ -5758,6 +5770,30 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>Змінено стан голосового підключення</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Windows блокує підключення до Discord, хоча Macro Deck і Discord працюють з однаковими привілеями. Ймовірна причина — захисне ПЗ: дозвольте в ньому Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>Дозвольте Macro Deck у захисному ПЗ, а потім під'єднайтеся знову.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>Підключення Discord займає програма {program}, тому Macro Deck не може зв'язатися з Discord. Закрийте її та перезапустіть Discord.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>Закрийте програму {program}, перезапустіть Discord, а потім під'єднайтеся знову.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord запущено від імені іншого користувача Windows або в іншому сеансі Windows, тому він не взаємодіє з Macro Deck. Запустіть Discord від імені того самого користувача й у тому самому сеансі, що й Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Запустіть Discord від імені того самого користувача Windows і в тому самому сеансі, що й Macro Deck, а потім під'єднайтеся знову.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>Доступ до Discord заборонено, і Macro Deck не вдалося визначити причину. Перевірте, що Macro Deck і Discord запущено від імені одного користувача з однаковими привілеями і що захисне ПЗ не блокує Macro Deck.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Запустіть Macro Deck і Discord від імені одного користувача з однаковими привілеями, перевірте захисне ПЗ, а потім під'єднайтеся знову.</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord запущено, але він не взаємодіє з Macro Deck. Так буває, коли обидві програми працюють з різними привілеями: якщо одну з них запущено від імені адміністратора, запустіть обидві однаково.</value>

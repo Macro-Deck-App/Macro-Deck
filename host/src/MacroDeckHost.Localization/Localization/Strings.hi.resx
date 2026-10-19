@@ -5504,6 +5504,18 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>चालू करें</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Macro Deck और Discord एक ही विशेषाधिकारों के साथ चल रहे हैं, फिर भी Windows ने Discord से कनेक्शन को अवरुद्ध कर दिया। संभावित कारण कोई सुरक्षा सॉफ़्टवेयर है: उसमें Macro Deck को अनुमति दें, फिर दोबारा कोशिश करें।</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>{program} Discord के कनेक्शन को घेरे हुए है, इसलिए Macro Deck Discord तक नहीं पहुँच सकता। उस प्रोग्राम को बंद करें, Discord को पुनः आरंभ करें और दोबारा कोशिश करें।</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord किसी अन्य Windows उपयोगकर्ता के अंतर्गत या किसी अन्य Windows सत्र में चल रहा है। Discord को उसी उपयोगकर्ता के अंतर्गत और उसी सत्र में शुरू करें जिसमें Macro Deck चल रहा है, फिर दोबारा कोशिश करें।</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord ने कनेक्शन अस्वीकार किया, और Macro Deck इसका कारण पता नहीं लगा सका। जाँचें कि Macro Deck और Discord एक ही उपयोगकर्ता के अंतर्गत एक ही विशेषाधिकारों के साथ चल रहे हैं और कोई सुरक्षा सॉफ़्टवेयर Macro Deck को अवरुद्ध नहीं कर रहा है, फिर दोबारा कोशिश करें।</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord ने अधिकृति अस्वीकार की: {details}</value>
   </data>
@@ -5758,6 +5770,30 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>वॉइस कनेक्शन स्थिति बदली गई</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Macro Deck और Discord एक ही विशेषाधिकारों के साथ चल रहे हैं, फिर भी Windows Discord से कनेक्शन को अवरुद्ध कर रहा है। संभावित कारण कोई सुरक्षा सॉफ़्टवेयर है: उसमें Macro Deck को अनुमति दें।</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>अपने सुरक्षा सॉफ़्टवेयर में Macro Deck को अनुमति दें, फिर से कनेक्ट करें।</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>{program} Discord के कनेक्शन को घेरे हुए है, इसलिए Macro Deck Discord तक नहीं पहुँच सकता। उस प्रोग्राम को बंद करें और Discord को पुनः आरंभ करें।</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>{program} को बंद करें, Discord को पुनः आरंभ करें, फिर से कनेक्ट करें।</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord किसी अन्य Windows उपयोगकर्ता के अंतर्गत या किसी अन्य Windows सत्र में चल रहा है, इसलिए वह Macro Deck से संवाद नहीं करेगा। Discord को उसी उपयोगकर्ता के अंतर्गत और उसी सत्र में शुरू करें जिसमें Macro Deck चल रहा है।</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Discord को उसी Windows उपयोगकर्ता के अंतर्गत और उसी सत्र में शुरू करें जिसमें Macro Deck चल रहा है, फिर से कनेक्ट करें।</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>Discord तक पहुँच अस्वीकार कर दी गई, और Macro Deck इसका कारण पता नहीं लगा सका। जाँचें कि Macro Deck और Discord एक ही उपयोगकर्ता के अंतर्गत एक ही विशेषाधिकारों के साथ चल रहे हैं और कोई सुरक्षा सॉफ़्टवेयर Macro Deck को अवरुद्ध नहीं कर रहा है।</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Macro Deck और Discord को एक ही उपयोगकर्ता के अंतर्गत एक ही विशेषाधिकारों के साथ चलाएं, अपना सुरक्षा सॉफ़्टवेयर जाँचें, फिर से कनेक्ट करें।</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord चल रहा है, लेकिन वह Macro Deck से बात नहीं करेगा। यह तब होता है जब दोनों अलग अनुमतियों के साथ चल रहे हों: अगर उनमें से किसी एक को एडमिनिस्ट्रेटर के रूप में शुरू किया गया है, तो दोनों को एक ही तरह से शुरू करें।</value>

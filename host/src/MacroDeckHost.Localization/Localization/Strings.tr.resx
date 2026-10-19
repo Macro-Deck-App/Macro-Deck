@@ -5504,6 +5504,18 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Discord.Actions.VoiceToggle.TurnOnOption" xml:space="preserve">
     <value>Aç</value>
   </data>
+  <data name="Integrations.Discord.Config.AccessDeniedBlocked" xml:space="preserve">
+    <value>Macro Deck ve Discord aynı ayrıcalıklarla çalışmasına rağmen Windows, Discord bağlantısını engelledi. Olası neden bir güvenlik yazılımıdır: Macro Deck'e bu yazılımda izin verin ve yeniden deneyin.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherProgram" xml:space="preserve">
+    <value>{program}, Discord'un bağlantısını kullanıyor; bu nedenle Macro Deck Discord'a ulaşamıyor. Bu programı kapatın, Discord'u yeniden başlatın ve yeniden deneyin.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedOtherSession" xml:space="preserve">
+    <value>Discord başka bir Windows kullanıcısı altında veya başka bir Windows oturumunda çalışıyor. Discord'u Macro Deck ile aynı kullanıcı altında ve aynı oturumda başlatın, ardından yeniden deneyin.</value>
+  </data>
+  <data name="Integrations.Discord.Config.AccessDeniedUnknown" xml:space="preserve">
+    <value>Discord bağlantıyı reddetti ve Macro Deck nedenini belirleyemedi. Macro Deck ile Discord'un aynı kullanıcı altında aynı ayrıcalıklarla çalıştığını ve hiçbir güvenlik yazılımının Macro Deck'i engellemediğini kontrol edin, ardından yeniden deneyin.</value>
+  </data>
   <data name="Integrations.Discord.Config.AuthorizationDeclined" xml:space="preserve">
     <value>Discord yetkilendirmeyi reddetti: {details}</value>
   </data>
@@ -5758,6 +5770,30 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Discord.Events.VoiceConnectionStateChangedName" xml:space="preserve">
     <value>Ses bağlantı durumu değişti</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedDescription" xml:space="preserve">
+    <value>Macro Deck ve Discord aynı ayrıcalıklarla çalışmasına rağmen Windows, Discord bağlantısını engelliyor. Olası neden bir güvenlik yazılımıdır: Macro Deck'e bu yazılımda izin verin.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedBlockedResolution" xml:space="preserve">
+    <value>Güvenlik yazılımınızda Macro Deck'e izin verin, ardından yeniden bağlanın.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramDescription" xml:space="preserve">
+    <value>{program}, Discord'un bağlantısını kullanıyor; bu nedenle Macro Deck Discord'a ulaşamıyor. Bu programı kapatın ve Discord'u yeniden başlatın.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherProgramResolution" xml:space="preserve">
+    <value>{program} programını kapatın, Discord'u yeniden başlatın, ardından yeniden bağlanın.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionDescription" xml:space="preserve">
+    <value>Discord başka bir Windows kullanıcısı altında veya başka bir Windows oturumunda çalıştığı için Macro Deck ile iletişim kurmuyor. Discord'u Macro Deck ile aynı kullanıcı altında ve aynı oturumda başlatın.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedOtherSessionResolution" xml:space="preserve">
+    <value>Discord'u Macro Deck ile aynı Windows kullanıcısı altında ve aynı oturumda başlatın, ardından yeniden bağlanın.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownDescription" xml:space="preserve">
+    <value>Discord'a erişim reddedildi ve Macro Deck nedenini belirleyemedi. Macro Deck ile Discord'un aynı kullanıcı altında aynı ayrıcalıklarla çalıştığını ve hiçbir güvenlik yazılımının Macro Deck'i engellemediğini kontrol edin.</value>
+  </data>
+  <data name="Integrations.Discord.Issues.AccessDeniedUnknownResolution" xml:space="preserve">
+    <value>Macro Deck ile Discord'u aynı kullanıcı altında aynı ayrıcalıklarla çalıştırın, güvenlik yazılımınızı kontrol edin, ardından yeniden bağlanın.</value>
   </data>
   <data name="Integrations.Discord.Issues.PrivilegeMismatchDescription" xml:space="preserve">
     <value>Discord çalışıyor, ancak Macro Deck ile iletişim kurmuyor. Bu, ikisi farklı ayrıcalıklarla çalıştığında olur: uygulamalardan biri yönetici olarak başlatıldıysa ikisini de aynı şekilde başlatın.</value>
