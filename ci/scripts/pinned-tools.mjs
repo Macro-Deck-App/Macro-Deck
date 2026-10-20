@@ -3,7 +3,7 @@
 // See engineering/development/releasing.md.
 
 import { createHash } from 'node:crypto';
-import { chmodSync, createReadStream, createWriteStream, existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
+import { chmodSync, createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -22,21 +22,9 @@ export const TOOL_SETS = {
 			executable: true
 		},
 		{
-			file: 'linuxdeploy-x86_64.AppImage',
-			url: 'https://github.com/tauri-apps/binary-releases/releases/download/linuxdeploy/linuxdeploy-x86_64.AppImage',
-			sha256: 'e762bea85c8eb0d4b3508d46e5c1f037f717d0f9303ae3b4aafc8b04991fa1ef',
-			executable: true
-		},
-		{
-			file: 'linuxdeploy-plugin-gtk.sh',
-			url: 'https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gtk/dda522bce37387f1b853d9095713bfaa924c8423/linuxdeploy-plugin-gtk.sh',
-			sha256: '7804c9eef13e59bf2783aad9882ef9db8f3f3f9e8d631874b1d348d550a3693f',
-			executable: true
-		},
-		{
-			file: 'linuxdeploy-plugin-gstreamer.sh',
-			url: 'https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gstreamer/2a2e67491c32995a3f279ad0ecbe77abd512b42a/linuxdeploy-plugin-gstreamer.sh',
-			sha256: 'c107b49d84edbffc6ab226ed1007e0626a4f7aa2c3a36b7782bef62351d49e94',
+			file: 'linuxdeploy-07333c6-x86_64.AppImage',
+			url: 'https://github.com/tauri-apps/binary-releases/releases/download/linuxdeploy-07333c6/linuxdeploy-x86_64.AppImage',
+			sha256: '36a2d7e274d12e1050d0e9ecfe11d339ed54720b2bec464c286d53f8b07f5c62',
 			executable: true
 		},
 		{
@@ -158,13 +146,36 @@ export function selectTools(set, files = []) {
 	});
 }
 
-const USAGE = 'usage: pinned-tools.mjs fetch <set> <dir> [file...]';
+// tauri-bundler writes these plugin scripts from its own package, which the npm lockfile pins.
+export const BUNDLER_WRITTEN = {
+	'linuxdeploy-x86_64': ['linuxdeploy-plugin-gtk.sh', 'linuxdeploy-plugin-gstreamer.sh']
+};
+
+export function unpinnedFiles(set, dir) {
+	const known = new Set([...selectTools(set).map(entry => entry.file), ...(BUNDLER_WRITTEN[set] ?? [])]);
+	return readdirSync(dir).filter(file => !known.has(file)).sort();
+}
+
+const USAGE = 'usage: pinned-tools.mjs fetch <set> <dir> [file...] | check <set> <dir>';
 
 async function main([command, set, dir, ...files]) {
-	if (command !== 'fetch' || !set || !dir) {
+	if (!set || !dir) {
 		throw new PinnedToolError(USAGE);
 	}
-	await fetchTools(selectTools(set, files), dir);
+	if (command === 'fetch') {
+		await fetchTools(selectTools(set, files), dir);
+	} else if (command === 'check' && files.length === 0) {
+		const unpinned = unpinnedFiles(set, dir);
+		if (unpinned.length > 0) {
+			throw new PinnedToolError(
+				`${dir} holds tools fetched outside the pins: ${unpinned.join(', ')}. `
+					+ 'The bundler probably expects new file names; review and pin them in pinned-tools.mjs.'
+			);
+		}
+		console.log(`${dir}: only pinned tools`);
+	} else {
+		throw new PinnedToolError(USAGE);
+	}
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
