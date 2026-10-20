@@ -95,6 +95,34 @@ public class PactlEventMonitorTests
 		Assert.That(Volatile.Read(ref raised), Is.EqualTo(after));
 	}
 
+	[Test]
+	public async Task It_reports_listening_only_while_the_subscriber_runs()
+	{
+		using var monitor = Monitor("sleep 0.5", Ignore, TimeSpan.FromSeconds(30));
+		Assert.That(monitor.ListeningSince, Is.EqualTo(PactlEventMonitor.NotListening));
+
+		monitor.Start();
+		await Eventually(() => monitor.ListeningSince != PactlEventMonitor.NotListening);
+
+		await Eventually(() => monitor.ListeningSince == PactlEventMonitor.NotListening);
+	}
+
+	[Test]
+	public async Task Disposing_ends_listening()
+	{
+		var monitor = Monitor("sleep 30", Ignore);
+		monitor.Start();
+		await Eventually(() => monitor.ListeningSince != PactlEventMonitor.NotListening);
+
+		monitor.Dispose();
+
+		Assert.That(monitor.ListeningSince, Is.EqualTo(PactlEventMonitor.NotListening));
+	}
+
+	private static void Ignore()
+	{
+	}
+
 	private static async Task Eventually(Func<bool> condition)
 	{
 		var deadline = DateTime.UtcNow.AddSeconds(5);

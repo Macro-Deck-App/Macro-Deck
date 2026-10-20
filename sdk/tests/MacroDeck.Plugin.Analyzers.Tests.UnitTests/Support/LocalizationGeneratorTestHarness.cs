@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -111,6 +112,25 @@ internal static class LocalizationGeneratorTestHarness
 				.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
 				.Select(diagnostic => diagnostic.Id)
 		];
+	}
+
+	public static Type LoadGeneratedClass(string generatedSource, AssemblyLoadContext context)
+	{
+		var compilation = CSharpCompilation.Create($"TestPluginStrings{Guid.NewGuid():N}",
+			[CSharpSyntaxTree.ParseText(generatedSource)],
+			AnalyzerTestHarness.PlatformReferences.Add(
+				MetadataReference.CreateFromFile(typeof(Localization.LocalizedString).Assembly.Location)),
+			new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+		using var image = new MemoryStream();
+		var emitted = compilation.Emit(image);
+		Assert.That(emitted.Success,
+			Is.True,
+			string.Join("\n",
+				emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)));
+
+		image.Position = 0;
+		return context.LoadFromStream(image).GetType("TestPlugin.Strings", true)!;
 	}
 
 	/// <summary>Runs <paramref name="analyzer" /> over the generated source plus a call site, which is how

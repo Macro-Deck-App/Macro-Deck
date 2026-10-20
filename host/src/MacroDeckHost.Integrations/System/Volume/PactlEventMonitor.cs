@@ -6,6 +6,8 @@ namespace MacroDeckHost.Integrations.System.Volume;
 
 internal sealed class PactlEventMonitor : IDisposable
 {
+	public const long NotListening = -1;
+
 	private static readonly ILogger _logger = Log.ForContext<PactlEventMonitor>();
 
 	private readonly string _fileName;
@@ -20,6 +22,7 @@ internal sealed class PactlEventMonitor : IDisposable
 
 	private bool _pending;
 	private Task? _loop;
+	private long _listeningSince = NotListening;
 
 	public PactlEventMonitor(
 		Action onEvent,
@@ -38,6 +41,8 @@ internal sealed class PactlEventMonitor : IDisposable
 		_minBackoff = minBackoff ?? TimeSpan.FromSeconds(1);
 		_maxBackoff = maxBackoff ?? TimeSpan.FromSeconds(30);
 	}
+
+	public long ListeningSince => Volatile.Read(ref _listeningSince);
 
 	public void Start()
 	{
@@ -97,16 +102,24 @@ internal sealed class PactlEventMonitor : IDisposable
 		using var registration = token.Register(() => Kill(process));
 		_ = process.StandardError.ReadToEndAsync(CancellationToken.None);
 
-		Notify();
-		while (await process.StandardOutput.ReadLineAsync(token) is { } line)
+		Volatile.Write(ref _listeningSince, Environment.TickCount64);
+		try
 		{
-			if (PactlOutputParser.IsAudioEvent(line))
+			Notify();
+			while (await process.StandardOutput.ReadLineAsync(token) is { } line)
 			{
-				Notify();
+				if (PactlOutputParser.IsAudioEvent(line))
+				{
+					Notify();
+				}
 			}
-		}
 
-		await process.WaitForExitAsync(token);
+			await process.WaitForExitAsync(token);
+		}
+		finally
+		{
+			Volatile.Write(ref _listeningSince, NotListening);
+		}
 	}
 
 	private void Notify()

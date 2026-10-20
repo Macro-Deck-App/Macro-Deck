@@ -12,6 +12,7 @@ internal static class LocalizationSourceEmitter
 	private const string LocalizedStringType = "global::MacroDeck.Localization.LocalizedString";
 	private const string LocalizationKeyType = "global::MacroDeck.Localization.LocalizationKey";
 	private const string CatalogInterface = "global::MacroDeck.Localization.ILocalizationCatalog";
+	private const int CatalogPartSize = 256;
 
 	/// <summary>Renders the whole file for one resource set.</summary>
 	/// <param name="namespaceName">The namespace to declare, or null/blank for the global namespace.</param>
@@ -102,6 +103,9 @@ internal static class LocalizationSourceEmitter
 		var cultures = new List<string>(result.Catalog.Keys);
 		cultures.Sort(StringComparer.Ordinal);
 
+		var parts = new StringBuilder();
+		var partCount = 0;
+
 		foreach (var culture in cultures)
 		{
 			var templates = result.Catalog[culture];
@@ -115,14 +119,17 @@ internal static class LocalizationSourceEmitter
 				.Append(keys.Count)
 				.Append(", global::System.StringComparer.Ordinal);\n");
 
-			foreach (var key in keys)
+			// The runtime JIT needs memory far out of proportion to one huge method's size, and glibc keeps
+			// that peak resident, so the entries are filled through many small methods instead.
+			for (var start = 0; start < keys.Count; start += CatalogPartSize)
 			{
-				builder.Append(body)
-					.Append("\ttemplates[\"")
-					.Append(Escape(key))
-					.Append("\"] = \"")
-					.Append(Escape(templates[key]))
-					.Append("\";\n");
+				builder.Append(body).Append("\tFillLocalizationCatalog").Append(partCount).Append("(templates);\n");
+				EmitCatalogPart(parts,
+					indent,
+					partCount,
+					templates,
+					keys.GetRange(start, Math.Min(CatalogPartSize, keys.Count - start)));
+				partCount++;
 			}
 
 			builder.Append(body).Append("\tbyCulture[\"").Append(Escape(culture)).Append("\"] = templates;\n");
@@ -134,6 +141,35 @@ internal static class LocalizationSourceEmitter
 			.Append("return new global::MacroDeck.Localization.LocalizationCatalog(LocalizationScope, \"")
 			.Append(Escape(result.DefaultCulture))
 			.Append("\", byCulture);\n");
+
+		builder.Append(indent).Append("}\n");
+		builder.Append(parts);
+	}
+
+	private static void EmitCatalogPart(
+		StringBuilder builder,
+		string indent,
+		int part,
+		Dictionary<string, string> templates,
+		List<string> keys)
+	{
+		builder.Append('\n')
+			.Append(indent)
+			.Append("private static void FillLocalizationCatalog")
+			.Append(part)
+			.Append("(global::System.Collections.Generic.Dictionary<string, string> templates)\n")
+			.Append(indent)
+			.Append("{\n");
+
+		foreach (var key in keys)
+		{
+			builder.Append(indent)
+				.Append("\ttemplates[\"")
+				.Append(Escape(key))
+				.Append("\"] = \"")
+				.Append(Escape(templates[key]))
+				.Append("\";\n");
+		}
 
 		builder.Append(indent).Append("}\n");
 	}
