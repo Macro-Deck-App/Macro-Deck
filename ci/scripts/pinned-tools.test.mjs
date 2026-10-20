@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
 
-import { TOOL_SETS, fetchTools, selectTools } from './pinned-tools.mjs';
+import { TOOL_SETS, fetchTools, selectTools, unpinnedFiles } from './pinned-tools.mjs';
 
 const TOOL = Buffer.from('#!/bin/sh\necho pinned tool\n');
 const TOOL_SHA256 = createHash('sha256').update(TOOL).digest('hex');
@@ -103,4 +103,15 @@ test('selecting single files keeps their pins and rejects unknown names', () => 
 	assert.equal(plugin.file, 'linuxdeploy-plugin-appimage.AppImage');
 	assert.throws(() => selectTools('linuxdeploy-x86_64', ['unknown']), /not part of/);
 	assert.throws(() => selectTools('unknown'), /unknown tool set/);
+});
+
+test('a tools directory holding a file outside the pins is reported, bundler-written scripts are not', () => {
+	const dir = mkdtempSync(join(tmpdir(), 'pinned-'));
+	for (const { file } of TOOL_SETS['linuxdeploy-x86_64']) {
+		writeFileSync(join(dir, file), '');
+	}
+	writeFileSync(join(dir, 'linuxdeploy-plugin-gtk.sh'), '');
+	assert.deepEqual(unpinnedFiles('linuxdeploy-x86_64', dir), []);
+	writeFileSync(join(dir, 'linuxdeploy-abc1234-x86_64.AppImage'), '');
+	assert.deepEqual(unpinnedFiles('linuxdeploy-x86_64', dir), ['linuxdeploy-abc1234-x86_64.AppImage']);
 });

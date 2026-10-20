@@ -498,6 +498,10 @@ jobs:
           # bare "failed to run linuxdeploy". Skip stripping - see tauri-apps/tauri#14796.
           NO_STRIP: 'true'
 
+      # A Tauri update that renames a tool downloads it unverified instead of using the seeded pin.
+      - name: Check AppImage tooling stayed pinned
+        run: node ci/scripts/pinned-tools.mjs check linuxdeploy-x86_64 "${XDG_CACHE_HOME:-$HOME/.cache}/tauri"
+
       # The strip step below holds the signing key and runs the built AppImage, so its runtime is
       # checked first, in a step without secrets.
       - name: Check the AppImage runtime

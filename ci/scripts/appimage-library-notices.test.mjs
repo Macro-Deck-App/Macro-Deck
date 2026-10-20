@@ -188,12 +188,20 @@ test('does not attribute the app binary, its icons, desktop entry, host tree or 
 });
 
 test('lists generated caches that no package owns instead of failing', async () => {
-	const root = appDir({ 'usr/share/glib-2.0/schemas/gschemas.compiled': 'gvariant' });
-	const env = machine({ files: { '/usr/share/glib-2.0/schemas/gschemas.compiled': '/usr/share/glib-2.0/schemas/gschemas.compiled' } });
+	const root = appDir({
+		'usr/share/glib-2.0/schemas/gschemas.compiled': 'gvariant',
+		'usr/lib/gio/modules/giomodule.cache': 'modules'
+	});
+	const env = machine({
+		files: {
+			'/usr/share/glib-2.0/schemas/gschemas.compiled': '/usr/share/glib-2.0/schemas/gschemas.compiled',
+			'/usr/lib/x86_64-linux-gnu/gio/modules/giomodule.cache': '/usr/lib/x86_64-linux-gnu/gio/modules/giomodule.cache'
+		}
+	});
 
 	const { text, generated } = await generateNotices(root, env);
 
-	assert.deepEqual(generated, ['usr/share/glib-2.0/schemas/gschemas.compiled']);
+	assert.deepEqual(generated, ['usr/lib/gio/modules/giomodule.cache', 'usr/share/glib-2.0/schemas/gschemas.compiled']);
 	assert.match(text, /Generated files[\s\S]*usr\/share\/glib-2\.0\/schemas\/gschemas\.compiled/);
 });
 
