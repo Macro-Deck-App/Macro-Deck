@@ -6,13 +6,31 @@ namespace MacroDeckHost.Integrations.System.Metrics;
 [SupportedOSPlatform("linux")]
 internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 {
-	private readonly bool _hasNvidiaSmi = ProcessRunner.CommandExists("nvidia-smi");
-	private readonly IReadOnlyList<string> _amdGpuBusyPercentPaths = LinuxDrmEnumerator.FindAmdGpuBusyPercentPaths();
+	private readonly string _nvidiaSmi;
+	private readonly bool _hasNvidiaSmi;
+	private readonly IReadOnlyList<string> _amdGpuBusyPercentPaths;
 	private readonly int _nvidiaGpuCount;
+	private readonly Func<int, IReadOnlyList<GpuSample>?> _readNvml;
 
 	public LinuxSystemMetricsService()
+		: this(LinuxDrmEnumerator.DefaultRoot,
+			LinuxDrmEnumerator.DefaultNvidiaRoot,
+			"nvidia-smi",
+			new LinuxNvml().TryRead)
 	{
-		_nvidiaGpuCount = LinuxDrmEnumerator.CountNvidiaGpus() ?? (_hasNvidiaSmi ? 1 : 0);
+	}
+
+	internal LinuxSystemMetricsService(
+		string drmRoot,
+		string nvidiaRoot,
+		string nvidiaSmi,
+		Func<int, IReadOnlyList<GpuSample>?> readNvml)
+	{
+		_nvidiaSmi = nvidiaSmi;
+		_hasNvidiaSmi = ProcessRunner.CommandExists(nvidiaSmi);
+		_amdGpuBusyPercentPaths = LinuxDrmEnumerator.FindAmdGpuBusyPercentPaths(drmRoot);
+		_nvidiaGpuCount = LinuxDrmEnumerator.CountNvidiaGpus(nvidiaRoot) ?? (_hasNvidiaSmi ? 1 : 0);
+		_readNvml = readNvml;
 	}
 
 	public override int GpuCount => _nvidiaGpuCount + _amdGpuBusyPercentPaths.Count;
@@ -33,7 +51,7 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 
 		if (_nvidiaGpuCount > 0)
 		{
-			var nvidia = await ReadNvidiaGpusAsync(cancellationToken);
+			var nvidia = _readNvml(_nvidiaGpuCount) ?? await ReadNvidiaSmiAsync(cancellationToken);
 			for (var index = 0; index < _nvidiaGpuCount; index++)
 			{
 				samples.Add(index < nvidia.Count ? nvidia[index] : new GpuSample(null, null));
@@ -156,7 +174,7 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 		}
 	}
 
-	private async Task<IReadOnlyList<GpuSample>> ReadNvidiaGpusAsync(CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<GpuSample>> ReadNvidiaSmiAsync(CancellationToken cancellationToken)
 	{
 		if (!_hasNvidiaSmi)
 		{
@@ -165,7 +183,7 @@ internal sealed class LinuxSystemMetricsService : SystemMetricsServiceBase
 
 		try
 		{
-			var output = await ProcessRunner.RunAsync("nvidia-smi",
+			var output = await ProcessRunner.RunAsync(_nvidiaSmi,
 				["--query-gpu=index,name,utilization.gpu", "--format=csv,noheader,nounits"],
 				cancellationToken);
 			return NvidiaSmiParser.ParseGpus(output);

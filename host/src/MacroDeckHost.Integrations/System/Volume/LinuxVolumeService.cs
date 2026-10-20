@@ -8,11 +8,16 @@ namespace MacroDeckHost.Integrations.System.Volume;
 internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 {
 	private const long SnapshotLifetimeMs = 1000;
+	private const long SubscribedSnapshotLifetimeMs = 30_000;
+	private const long SubscribeSettleMs = 1000;
 
 	private static readonly TimeSpan _pactlTimeout = TimeSpan.FromSeconds(3);
 
-	private readonly bool _hasPactl = ProcessRunner.CommandExists("pactl");
-	private readonly bool _hasAmixer = ProcessRunner.CommandExists("amixer");
+	private readonly string _pactl;
+	private readonly string _amixer;
+	private readonly TimeSpan? _monitorRestartDelay;
+	private readonly bool _hasPactl;
+	private readonly bool _hasAmixer;
 
 	private readonly IReadOnlyDictionary<string, string?> _pactlEnvironment =
 		PactlOutputParser.UnlocalizedEnvironment(Environment.GetEnvironmentVariable("LC_ALL"));
@@ -23,6 +28,20 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 	private readonly object _monitorGate = new();
 	private Action? _changed;
 	private PactlEventMonitor? _monitor;
+
+	public LinuxVolumeService()
+		: this("pactl", "amixer", null)
+	{
+	}
+
+	internal LinuxVolumeService(string pactl, string amixer, TimeSpan? monitorRestartDelay)
+	{
+		_pactl = pactl;
+		_amixer = amixer;
+		_monitorRestartDelay = monitorRestartDelay;
+		_hasPactl = ProcessRunner.CommandExists(pactl);
+		_hasAmixer = ProcessRunner.CommandExists(amixer);
+	}
 
 	public bool IsSupported => _hasPactl || _hasAmixer;
 
@@ -35,7 +54,12 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 				_changed += value;
 				if (_hasPactl && _monitor is null && _changed is not null)
 				{
-					_monitor = new PactlEventMonitor(OnAudioEvent, _pactlEnvironment);
+					_monitor = new PactlEventMonitor(OnAudioEvent,
+						_pactlEnvironment,
+						_pactl,
+						null,
+						null,
+						_monitorRestartDelay);
 					_monitor.Start();
 				}
 			}
@@ -160,12 +184,17 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 	// pactl; a write drops the listing so the next read sees its effect.
 	private Task<PactlSnapshot> SnapshotAsync(CancellationToken cancellationToken)
 	{
+		long listeningSince;
+		lock (_monitorGate)
+		{
+			listeningSince = _monitor?.ListeningSince ?? PactlEventMonitor.NotListening;
+		}
+
 		lock (_snapshotGate)
 		{
 			if (_snapshot is { } current
 				&& (!current.IsCompleted
-					|| current.IsCompletedSuccessfully
-					&& Environment.TickCount64 - current.Result.TakenAt < SnapshotLifetimeMs))
+					|| current.IsCompletedSuccessfully && IsFresh(current.Result, listeningSince)))
 			{
 				return current.WaitAsync(cancellationToken);
 			}
@@ -175,8 +204,20 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 		}
 	}
 
+	// While pactl subscribe runs, every device or default change drops the snapshot, so it only expires
+	// by time without a subscription. A load right after subscribe started may predate its connection.
+	private static bool IsFresh(PactlSnapshot snapshot, long listeningSince)
+	{
+		var subscribed = snapshot.Complete
+			&& listeningSince != PactlEventMonitor.NotListening
+			&& snapshot.StartedAt - listeningSince >= SubscribeSettleMs;
+		var lifetime = subscribed ? SubscribedSnapshotLifetimeMs : SnapshotLifetimeMs;
+		return Environment.TickCount64 - snapshot.TakenAt < lifetime;
+	}
+
 	private async Task<PactlSnapshot> LoadSnapshotAsync()
 	{
+		var startedAt = Environment.TickCount64;
 		var listing = await PactlAsync(["list"], CancellationToken.None);
 		var info = await PactlAsync(["info"], CancellationToken.None);
 		var parsed = listing is null ? new PactlListing([], []) : PactlOutputParser.ParseListing(listing);
@@ -184,7 +225,9 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 		return new PactlSnapshot(parsed.Sinks,
 			parsed.Sources,
 			info is null ? default : PactlOutputParser.ParseDefaults(info),
-			Environment.TickCount64);
+			startedAt,
+			Environment.TickCount64,
+			listing is not null && info is not null);
 	}
 
 	private async Task<bool> PactlSetAsync(
@@ -212,7 +255,7 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 		timeout.CancelAfter(_pactlTimeout);
 		try
 		{
-			var result = await ProcessRunner.RunWithResultAsync("pactl", arguments, _pactlEnvironment, timeout.Token);
+			var result = await ProcessRunner.RunWithResultAsync(_pactl, arguments, _pactlEnvironment, timeout.Token);
 			return result.Succeeded ? result.StandardOutput : null;
 		}
 		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -234,7 +277,7 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 
 		var control = target.Flow == AudioFlow.Output ? "Master" : "Capture";
 		string[] arguments = value is null ? [.. verb, control] : [.. verb, control, value];
-		var result = await ProcessRunner.RunWithResultAsync("amixer", arguments, cancellationToken);
+		var result = await ProcessRunner.RunWithResultAsync(_amixer, arguments, cancellationToken);
 		return result.Succeeded ? result.StandardOutput : null;
 	}
 
@@ -242,7 +285,9 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 		IReadOnlyList<PactlDevice> Sinks,
 		IReadOnlyList<PactlDevice> Sources,
 		PactlDefaults Defaults,
-		long TakenAt)
+		long StartedAt,
+		long TakenAt,
+		bool Complete)
 	{
 		public PactlDevice? Find(AudioTarget target)
 		{
