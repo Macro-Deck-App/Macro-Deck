@@ -664,6 +664,7 @@ public class Startup
 		services.AddScoped<IPluginPairingService, PluginPairingService>();
 		services.AddKeyedSingleton<LoginThrottle>("plugin",
 			(sp, _) => new LoginThrottle(sp.GetRequiredService<TimeProvider>()));
+		services.AddSingleton<PluginConnectionLifetime>();
 		services.AddSingleton<PluginWebSocketEndpoint>();
 		// log.publish ingestion (issue #414 stage 2): the rate limiter is a singleton keyed by plugin id
 		// on purpose - see its remarks on why a per-connection bucket would reopen a reconnect bypass.

@@ -25,7 +25,7 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 	public async Task An_enabled_server_started_automation_runs_once_when_the_host_has_started()
 	{
 		var automations = new StubAutomationCache();
-		var automation = automations.Add(ServerStartedFlows());
+		var automation = automations.Add(EventFlows("server-started"));
 		var index = new EventSubscriptionIndex(new StubFolderCache(), automations);
 		var runner = new RecordingTriggerRunner();
 		var readiness = new StartupReadiness();
@@ -58,7 +58,7 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 			Is.EqualTo(new[] { (EventTriggerOwner.ForAutomation(automation.Id), ServerStarted) }));
 	}
 
-	private static string ServerStartedFlows()
+	private static string EventFlows(string eventId)
 	{
 		return JsonSerializer.Serialize(new[]
 		{
@@ -66,11 +66,23 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 			{
 				triggerId = "t1",
 				triggerType = "onEvent",
-				@event = new
-					{ providerId = "macro-deck", eventId = "server-started", parameters = Array.Empty<object>() },
+				@event = new { providerId = "macro-deck", eventId, parameters = Array.Empty<object>() },
 				children = Array.Empty<object>()
 			}
 		});
+	}
+
+	private static EventSubscriptionIndex SubscriptionsFor(params string[] eventIds)
+	{
+		var automations = new StubAutomationCache();
+		foreach (var eventId in eventIds)
+		{
+			automations.Add(EventFlows(eventId));
+		}
+
+		var index = new EventSubscriptionIndex(new StubFolderCache(), automations);
+		index.Rebuild();
+		return index;
 	}
 
 	[Test]
@@ -88,6 +100,7 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton<IEventBus>(bus);
+				services.AddSingleton<IEventSubscriptionIndex>(SubscriptionsFor("server-stopped"));
 				services.AddSingleton<TimeProvider>(time);
 				services.AddSingleton(tracker);
 				services.AddSingleton(new StartupReadiness());
@@ -111,6 +124,33 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 			Assert.That(closedBeforeDispatchWindowEnded, Is.False);
 			Assert.That(webServer.ClientClosedWhenStopping, Is.True);
 		});
+	}
+
+	[Test]
+	public async Task Shutdown_does_not_wait_for_server_stopped_flows_when_no_automation_listens()
+	{
+		var time = new ManualTimeProvider();
+		var bus = new ConnectionAwareEventBus();
+		var tracker = new DeviceConnectionTracker(bus, time, new DeckClientTracker(Serilog.Core.Logger.None));
+		var clientClosed = false;
+		tracker.Attach("companion", Guid.NewGuid(), () => clientClosed = true);
+
+		using var host = new HostBuilder()
+			.ConfigureServices(services =>
+			{
+				services.AddSingleton<IEventBus>(bus);
+				services.AddSingleton<IEventSubscriptionIndex>(SubscriptionsFor("server-started"));
+				services.AddSingleton<TimeProvider>(time);
+				services.AddSingleton(tracker);
+				services.AddSingleton(new StartupReadiness());
+				services.AddHostedService<ServerLifecycleEventBackgroundService>();
+			})
+			.Build();
+		await host.StartAsync();
+
+		await host.StopAsync().WaitAsync(TimeSpan.FromSeconds(10));
+
+		Assert.That(clientClosed, Is.True);
 	}
 
 	private sealed class RecordingTriggerRunner : IEventTriggerRunner

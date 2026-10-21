@@ -25,6 +25,7 @@ using MacroDeckHost.Application.VideoStreams;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Logging;
+using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
@@ -71,6 +72,7 @@ public sealed class PluginWebSocketEndpoint
 	private readonly TimeProvider _timeProvider;
 	private readonly IMediator _mediator;
 	private readonly IHostApplicationLifetime _lifetime;
+	private readonly PluginConnectionLifetime? _connectionLifetime;
 	private readonly IPluginLogIngestor _logIngestor;
 	private readonly VideoStreamPluginSessions? _videoStreams;
 	private readonly IEmailSyncSignal? _emailSync;
@@ -98,8 +100,10 @@ public sealed class PluginWebSocketEndpoint
 		VideoStreamPluginSessions? videoStreams = null,
 		PluginCompanionDeviceInvokeRunner? companionInvokes = null,
 		IEmailSyncSignal? emailSync = null,
-		PluginDesktopNotificationInvokeRunner? desktopNotificationInvokes = null)
+		PluginDesktopNotificationInvokeRunner? desktopNotificationInvokes = null,
+		PluginConnectionLifetime? connectionLifetime = null)
 	{
+		_connectionLifetime = connectionLifetime;
 		_desktopNotificationInvokes = desktopNotificationInvokes;
 		_companionInvokes = companionInvokes;
 		_videoStreams = videoStreams;
@@ -198,8 +202,8 @@ public sealed class PluginWebSocketEndpoint
 		// framework's notion of "the request", which is not the same lifetime as the socket itself on
 		// every host (in particular, TestServer's in-memory pipeline completes the request as soon as
 		// the 101 response is written, well before the socket closes). The connection instead lives
-		// until the process is shutting down or the socket itself ends the loop.
-		var hostCancellationToken = _lifetime.ApplicationStopping;
+		// until the plugins have been stopped or the socket itself ends the loop.
+		var hostCancellationToken = _connectionLifetime?.Closing ?? _lifetime.ApplicationStopping;
 
 		// Step 6: the handshake. Cancelling a pending receive aborts the socket, so the deadline races the
 		// receive instead and leaves the socket able to carry the protocol.error and the close.

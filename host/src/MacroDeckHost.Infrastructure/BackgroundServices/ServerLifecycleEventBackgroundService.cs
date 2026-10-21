@@ -11,6 +11,7 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 	private static readonly TimeSpan _shutdownDispatchWindow = TimeSpan.FromSeconds(2);
 
 	private readonly IEventBus _bus;
+	private readonly IEventSubscriptionIndex _subscriptions;
 	private readonly StartupReadiness _readiness;
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly DeviceConnectionTracker _connections;
@@ -18,12 +19,14 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 
 	public ServerLifecycleEventBackgroundService(
 		IEventBus bus,
+		IEventSubscriptionIndex subscriptions,
 		StartupReadiness readiness,
 		IHostApplicationLifetime lifetime,
 		DeviceConnectionTracker connections,
 		TimeProvider timeProvider)
 	{
 		_bus = bus;
+		_subscriptions = subscriptions;
 		_readiness = readiness;
 		_lifetime = lifetime;
 		_connections = connections;
@@ -50,8 +53,12 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 	{
 		try
 		{
-			_bus.Publish(Occurrence(EventIds.ServerStopped));
-			await Task.Delay(_shutdownDispatchWindow, _timeProvider, cancellationToken);
+			var occurrence = Occurrence(EventIds.ServerStopped);
+			_bus.Publish(occurrence);
+			if (_subscriptions.HasSubscribers(occurrence.EventId))
+			{
+				await Task.Delay(_shutdownDispatchWindow, _timeProvider, cancellationToken);
+			}
 		}
 		finally
 		{
