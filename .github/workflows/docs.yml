@@ -1,8 +1,9 @@
 name: Docs
 
 # Rebuilds the plugin documentation site whenever the SDK, the protocol, the UI model
-# or the documentation itself changes, and on demand. Deployment to the production
-# Cloudflare Worker is a manual step: run this workflow from main with "Deploy" enabled.
+# or the documentation itself changes on main or in a pull request, and on demand.
+# Deployment to the production Cloudflare Worker is a manual step: run this workflow
+# from main with "Deploy" enabled.
 on:
   workflow_dispatch:
     inputs:
@@ -12,6 +13,13 @@ on:
         default: false
   push:
     branches: [main]
+    paths:
+      - 'docs/**'
+      - 'sdk/src/**'
+      - 'protocol/src/**'
+      - 'ui-model/src/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
     paths:
       - 'docs/**'
       - 'sdk/src/**'
