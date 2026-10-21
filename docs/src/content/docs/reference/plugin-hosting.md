@@ -80,6 +80,10 @@ The SDK also reads, but the supervisor does not set: `MACRO_DECK_PLUGIN_ENROLLME
 keeps its credentials), `MACRO_DECK_PLUGIN_PAIRING` (`PairingEnabled`, default `true`) and
 `MACRO_DECK_PLUGIN_PAIRING_TIMEOUT` (`PairingTimeout`). `HostUrl` defaults to `http://127.0.0.1:8193`. All
 of `PluginHostOptions` binds from `MacroDeck:Plugin`, so `appsettings.json` and the command line work too.
+The SDK reads configuration files once at startup and does not watch them, because a file watcher can hold
+up a plugin's start for a minute on macOS. To reload them when they change, set
+`hostBuilder:reloadConfigOnChange` to `true`: `DOTNET_hostBuilder__reloadConfigOnChange=true` (or the
+`ASPNETCORE_` variant) in the environment, or `--hostBuilder:reloadConfigOnChange=true` on the command line.
 
 `macrodeck-plugin run` additionally sets `MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS` (`BundledIconPacks`) for a
 self-registering launch against a real host: `sync` brings the host's copy of the plugin's

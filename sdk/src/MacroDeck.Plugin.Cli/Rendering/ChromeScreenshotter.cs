@@ -42,7 +42,7 @@ internal sealed class ChromeScreenshotter : IPreviewScreenshotter
 
 	public static async Task<ChromeScreenshotter> StartAsync(string browser, CancellationToken cancellationToken)
 	{
-		var builder = WebApplication.CreateSlimBuilder();
+		var builder = WebApplication.CreateSlimBuilder(["--hostBuilder:reloadConfigOnChange=false"]);
 		builder.Logging.ClearProviders();
 		builder.WebHost.ConfigureKestrel(kestrel => kestrel.Listen(IPAddress.Loopback, 0));
 		var server = builder.Build();

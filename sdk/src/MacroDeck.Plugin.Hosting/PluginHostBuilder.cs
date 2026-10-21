@@ -54,6 +54,8 @@ namespace MacroDeck.Plugin.Hosting;
 /// </summary>
 public sealed class PluginHostBuilder
 {
+	private const string ReloadConfigOnChangeKey = "hostBuilder:reloadConfigOnChange";
+
 	private readonly List<Action<PluginHostBuilderContext, IApplicationBuilder>> _configure = [];
 	private readonly List<Action<PluginHostBuilderContext, IServiceCollection>> _configureServices = [];
 
@@ -62,7 +64,7 @@ public sealed class PluginHostBuilder
 
 	internal PluginHostBuilder(string[] args)
 	{
-		WebApplicationBuilder = WebApplication.CreateBuilder(args);
+		WebApplicationBuilder = WebApplication.CreateBuilder(WithoutConfigReloadByDefault(args));
 		WebApplicationBuilder.Configuration.AddMacroDeckPluginEnvironmentVariables();
 
 		// A plugin binds a loopback port by default: the listener exists to serve the SDK's own health
@@ -83,6 +85,18 @@ public sealed class PluginHostBuilder
 			providerOptions.ValidateOnBuild = true;
 			providerOptions.ValidateScopes = true;
 		});
+	}
+
+	private static string[] WithoutConfigReloadByDefault(string[] args)
+	{
+		var environment = new ConfigurationBuilder()
+			.AddEnvironmentVariables("ASPNETCORE_")
+			.AddEnvironmentVariables("DOTNET_")
+			.Build();
+
+		// Reloading starts a FileSystemWatcher, which can block startup for a minute on macOS. Prepended,
+		// so a trailing value-less switch cannot take it as its value and a later explicit setting wins.
+		return environment[ReloadConfigOnChangeKey] is null ? [$"--{ReloadConfigOnChangeKey}=false", .. args] : args;
 	}
 
 	/// <summary>The wrapped builder. Everything else here is sugar over it.</summary>
