@@ -547,9 +547,11 @@ internal static class StreamStatsWidgetView
 									Align = UiComponentAlignments.Center,
 									Padding = Scaled(textSize, 0.32),
 									Gap = Scaled(textSize, 0.4),
+									// The trail is shorter because the label's own side bearing already adds space after
+									// the last glyph; equal spacers would leave the content visibly left of centre.
 									Children =
 									[
-										new UiStack { Key = "lead", MainSize = Scaled(textSize, 0.2) },
+										new UiStack { Key = "lead", MainSize = Scaled(textSize, 0.25) },
 										Circle("dot", Scaled(textSize, 0.5), OnPill),
 										new UiTextRun
 										{
@@ -561,7 +563,7 @@ internal static class StreamStatsWidgetView
 											Weight = UiComponentTextWeights.SemiBold,
 											Color = OnPill
 										},
-										new UiStack { Key = "trail", MainSize = Scaled(textSize, 0.3) }
+										new UiStack { Key = "trail", MainSize = Scaled(textSize, 0.2) }
 									]
 								}
 							}
