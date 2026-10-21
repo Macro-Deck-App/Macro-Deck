@@ -19,6 +19,7 @@ public sealed class PluginSupervisorBackgroundService : HostReadyBackgroundServi
 	private readonly IHostListenerState _listenerState;
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly PluginConnectionLifetime _connectionLifetime;
 	private readonly ILogger _logger;
 
 	private Task? _stopAllTask;
@@ -31,6 +32,7 @@ public sealed class PluginSupervisorBackgroundService : HostReadyBackgroundServi
 		IHostListenerState listenerState,
 		IHostApplicationLifetime lifetime,
 		IServiceScopeFactory scopeFactory,
+		PluginConnectionLifetime connectionLifetime,
 		ILogger logger)
 		: base(lifetime)
 	{
@@ -40,6 +42,7 @@ public sealed class PluginSupervisorBackgroundService : HostReadyBackgroundServi
 		_listenerState = listenerState;
 		_lifetime = lifetime;
 		_scopeFactory = scopeFactory;
+		_connectionLifetime = connectionLifetime;
 		_logger = logger.ForContext<PluginSupervisorBackgroundService>();
 	}
 
@@ -162,6 +165,10 @@ public sealed class PluginSupervisorBackgroundService : HostReadyBackgroundServi
 		catch (Exception ex)
 		{
 			_logger.Error(ex, "Stopping managed plugins during host shutdown failed");
+		}
+		finally
+		{
+			_connectionLifetime.Close();
 		}
 	}
 }

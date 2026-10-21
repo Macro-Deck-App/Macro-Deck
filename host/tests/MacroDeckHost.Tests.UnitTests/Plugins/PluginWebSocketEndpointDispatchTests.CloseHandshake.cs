@@ -9,10 +9,12 @@ using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Assets;
+using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Plugins;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using Microsoft.Extensions.Hosting;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins;
 
@@ -97,8 +99,59 @@ public partial class PluginWebSocketEndpointDispatchTests
 		Assert.That(session.State, Is.EqualTo(PluginSessionState.Dropped));
 	}
 
+	[Test]
+	public async Task A_plugin_connected_when_the_host_starts_stopping_still_gets_the_supervisors_goodbye_and_close()
+	{
+		using var lifetime = new StoppingLifetime();
+		using var connections = new PluginConnectionLifetime();
+		var (endpoint, registry) = CreateSocketEndpoint(new ManualTimeProvider(), lifetime, connections);
+		using var pair = await PluginWebSocketConnectionPair.CreateAsync();
+
+		var running = endpoint.RunConnectionAsync(pair.Host, ClosePluginId, CloseSessionId);
+		await SendHelloAsync(pair.Plugin);
+		Assert.That((await ReceiveEnvelopeAsync(pair.Plugin))?.Type, Is.EqualTo(MessageTypes.SessionWelcome));
+
+		lifetime.StopApplication();
+		await registry.SendToPlugin(ClosePluginId,
+			new ProtocolEnvelope { Type = MessageTypes.SessionGoodbye, Id = Guid.CreateVersion7().ToString() },
+			CancellationToken.None);
+		await registry.TerminateForPlugin(ClosePluginId, ProtocolCloseCodes.SupervisorShutdown, "Stopping.");
+
+		var received = new List<string>();
+		while (await ReceiveEnvelopeAsync(pair.Plugin) is { } envelope)
+		{
+			received.Add(envelope.Type);
+		}
+
+		Assert.That(received, Does.Contain(MessageTypes.SessionGoodbye));
+		Assert.That((int?)pair.Plugin.CloseStatus, Is.EqualTo(ProtocolCloseCodes.SupervisorShutdown));
+
+		await pair.Plugin.CloseAsync(WebSocketCloseStatus.NormalClosure, null, Timeout());
+		await running.WaitAsync(_closeTestTimeout);
+	}
+
+	[Test]
+	public async Task A_plugin_socket_still_open_is_ended_once_plugin_connections_close()
+	{
+		using var lifetime = new StoppingLifetime();
+		using var connections = new PluginConnectionLifetime();
+		var (endpoint, _) = CreateSocketEndpoint(new ManualTimeProvider(), lifetime, connections);
+		using var pair = await PluginWebSocketConnectionPair.CreateAsync();
+
+		var running = endpoint.RunConnectionAsync(pair.Host, ClosePluginId, CloseSessionId);
+		await SendHelloAsync(pair.Plugin);
+		Assert.That((await ReceiveEnvelopeAsync(pair.Plugin))?.Type, Is.EqualTo(MessageTypes.SessionWelcome));
+
+		connections.Close();
+
+		await running.WaitAsync(_closeTestTimeout);
+		Assert.That(pair.Host.State, Is.Not.EqualTo(WebSocketState.Open));
+	}
+
 	private static (PluginWebSocketEndpoint Endpoint, PluginSessionRegistry Registry) CreateSocketEndpoint(
-		TimeProvider clock)
+		TimeProvider clock,
+		IHostApplicationLifetime? lifetime = null,
+		PluginConnectionLifetime? connectionLifetime = null)
 	{
 		var registry = new PluginSessionRegistry(clock, Serilog.Core.Logger.None);
 		var statePusher
@@ -121,9 +174,10 @@ public partial class PluginWebSocketEndpointDispatchTests
 			new LoginThrottle(clock),
 			clock,
 			new RecordingMediator(),
-			new NeverStoppingLifetime(),
+			lifetime ?? new NeverStoppingLifetime(),
 			CreateLogIngestor(registry),
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			connectionLifetime: connectionLifetime);
 
 		registry.Create(new PluginSessionRecord
 			{
@@ -172,5 +226,24 @@ public partial class PluginWebSocketEndpointDispatchTests
 	private static CancellationToken Timeout()
 	{
 		return new CancellationTokenSource(_closeTestTimeout).Token;
+	}
+
+	private sealed class StoppingLifetime : IHostApplicationLifetime, IDisposable
+	{
+		private readonly CancellationTokenSource _stopping = new();
+
+		public CancellationToken ApplicationStarted => CancellationToken.None;
+		public CancellationToken ApplicationStopping => _stopping.Token;
+		public CancellationToken ApplicationStopped => CancellationToken.None;
+
+		public void StopApplication()
+		{
+			_stopping.Cancel();
+		}
+
+		public void Dispose()
+		{
+			_stopping.Dispose();
+		}
 	}
 }

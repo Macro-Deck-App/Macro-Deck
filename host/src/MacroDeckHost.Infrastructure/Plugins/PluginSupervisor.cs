@@ -893,6 +893,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			_launchTokenService.Discard(launchId);
 		}
 
+		PluginInfrastructureLog.StoppingPlugin(_logger, entry.PluginId, process.Id, entry.PendingIntent);
+
 		try
 		{
 			await _sessionRegistry.SendToPlugin(entry.PluginId, BuildGoodbyeEnvelope(), ct);
@@ -923,14 +925,23 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		CancellationToken ct)
 	{
 		var grace = entry.GracefulShutdownTimeout ?? _options.GracefulShutdownTimeout;
+		var stopStarted = _timeProvider.GetTimestamp();
 
 		if (!process.HasExited)
 		{
 			await Task.WhenAny(process.Exited, Task.Delay(grace, _timeProvider, ct));
 		}
 
-		if (!process.HasExited)
+		if (process.HasExited)
 		{
+			PluginInfrastructureLog.PluginExitedAfterStop(_logger,
+				entry.PluginId,
+				process.Id,
+				_timeProvider.GetElapsedTime(stopStarted));
+		}
+		else
+		{
+			PluginInfrastructureLog.PluginIgnoredStop(_logger, entry.PluginId, process.Id, grace);
 			await process.KillTree(ct);
 			// Deliberately not on the shutdown token: during host shutdown it is already cancelled, and a
 			// zero length wait here would skip FinalizeExit and lose the exit accounting entirely.

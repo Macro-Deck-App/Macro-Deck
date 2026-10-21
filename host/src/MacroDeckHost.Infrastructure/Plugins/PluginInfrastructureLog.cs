@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
 using Serilog;
 
@@ -112,6 +113,31 @@ internal static class PluginInfrastructureLog
 	public static void BackgroundTerminationFailed(ILogger logger, string pluginId, Exception exception)
 	{
 		logger.Error(exception, "Background termination of plugin '{PluginId}' failed unexpectedly.", pluginId);
+	}
+
+	public static void StoppingPlugin(ILogger logger, string pluginId, int processId, PluginStopReason reason)
+	{
+		logger.Information("Stopping plugin '{PluginId}' (PID {ProcessId}, reason {Reason}).",
+			pluginId,
+			processId,
+			reason);
+	}
+
+	public static void PluginExitedAfterStop(ILogger logger, string pluginId, int processId, TimeSpan elapsed)
+	{
+		logger.Information("Plugin '{PluginId}' (PID {ProcessId}) exited {ElapsedMs} ms after the stop request.",
+			pluginId,
+			processId,
+			(long)elapsed.TotalMilliseconds);
+	}
+
+	public static void PluginIgnoredStop(ILogger logger, string pluginId, int processId, TimeSpan grace)
+	{
+		logger.Warning(
+			"Plugin '{PluginId}' (PID {ProcessId}) did not exit {GraceMs} ms after the stop request; killing it.",
+			pluginId,
+			processId,
+			(long)grace.TotalMilliseconds);
 	}
 
 	public static void ProcessSurvivedKill(ILogger logger, string pluginId, int processId)
