@@ -22,5 +22,10 @@
     "starlight-links-validator": "^0.26.0",
     "starlight-openapi": "^0.26.2",
     "starlight-sidebar-topics": "^0.9.0"
+  },
+  "overrides": {
+    "astro-mermaid": {
+      "mermaid": "$mermaid"
+    }
   }
 }
