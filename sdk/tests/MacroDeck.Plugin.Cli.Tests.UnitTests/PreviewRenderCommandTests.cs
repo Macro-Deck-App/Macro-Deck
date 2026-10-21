@@ -14,6 +14,7 @@ public class PreviewRenderCommandTests
 {
 	private static readonly string[] _stationTileSizes = ["station-tile-200x200.png", "station-tile-252x120.png"];
 	private static readonly string[] _oneCellStationTile = ["station-tile-120x120.png"];
+	private static readonly int[] _cellOfTwoDeckSizesAndOnePixelSize = [120, 120, 200];
 
 	private static readonly string[] _defaultViews =
 		["setalertthresholdaction-default-120x120.png", "wellbehavedconfigflow-default-120x120.png"];
@@ -124,6 +125,27 @@ public class PreviewRenderCommandTests
 					.All(group => group.Count() == 2),
 				Is.True);
 		});
+	}
+
+	[Test]
+	public async Task Deck_cells_keep_the_120_pixel_cell_and_a_pixel_size_is_one_tile()
+	{
+		var screenshotter = new FakeScreenshotter();
+
+		await Render(screenshotter,
+			"--preview",
+			"Station tile",
+			"--cells",
+			"2x1",
+			"--cells",
+			"2x2",
+			"--size",
+			"200x200");
+
+		Assert.That(screenshotter.Shots.Select(shot => JsonDocument.Parse(shot.SceneJson)
+				.RootElement.GetProperty("cell")
+				.GetInt32()),
+			Is.EquivalentTo(_cellOfTwoDeckSizesAndOnePixelSize));
 	}
 
 	[Test]
@@ -528,6 +550,81 @@ public class PreviewRenderCommandTests
 		{
 			Assert.That(exitCode, Is.EqualTo(ExitCode.UsageError));
 			Assert.That(error, Does.Contain("invalid-video-stream-image").And.Contain("larger than 8 MB"));
+		});
+	}
+
+	[Test]
+	public async Task A_responsive_root_sees_a_multi_cell_tile_as_that_many_cells_like_the_deck()
+	{
+		var browser = RealBrowser();
+		Directory.CreateDirectory(_output);
+		var root = JsonDocument.Parse("""
+									  {"id":"r","type":"ui.responsive","properties":{"variants":[{"minWidth":1.5,"minHeight":1.5}]},"children":[
+									  {"id":"r.d","type":"ui.shape","properties":{"color":"#000000","shape":"rectangle"},"children":[]},
+									  {"id":"r.l","type":"ui.shape","properties":{"color":"#FF0000","shape":"rectangle"},"children":[]}]}
+									  """)
+			.RootElement;
+		var shotter = await ChromeScreenshotter.StartAsync(browser, CancellationToken.None);
+		await using var _ = shotter.ConfigureAwait(false);
+		var centres = new Dictionary<string, byte[]>();
+
+		foreach (var (name, size) in new[]
+			{
+				("1x1", PreviewSize.OfCells(1, 1)), ("2x1", PreviewSize.OfCells(2, 1)),
+				("2x2", PreviewSize.OfCells(2, 2))
+			})
+		{
+			var path = Path.Combine(_output, name + ".png");
+			await shotter.CaptureAsync(new PreviewShot(PreviewScene.Build(root,
+						size,
+						new PreviewRenderOptions { Background = "#000000", Radius = 0 },
+						new Dictionary<string, string>(),
+						new Dictionary<string, string>()),
+					size,
+					1,
+					path),
+				CancellationToken.None);
+			centres[name] = PngProbe.Read(path).PixelAt(size.Width / 2, size.Height / 2);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(centres["2x2"][0], Is.GreaterThan(200), "2x2 is at least 1.5 cells each way");
+			Assert.That(centres["2x1"][0], Is.LessThan(50), "2x1 is one cell tall");
+			Assert.That(centres["1x1"][0], Is.LessThan(50), "1x1 is one cell");
+		});
+	}
+
+	[Test]
+	public async Task A_multi_cell_tile_keeps_the_corner_radius_of_one_cell_like_the_deck()
+	{
+		var browser = RealBrowser();
+
+		await CliRunner.Run("preview",
+			"render",
+			"--executable",
+			FixturePlugins.WellBehaved(),
+			"--preview",
+			"Station tile",
+			"--cells",
+			"2x2",
+			"--scale",
+			"1",
+			"--radius",
+			"22",
+			"--background",
+			"transparent",
+			"--output",
+			_output,
+			"--browser",
+			browser);
+
+		var png = PngProbe.Read(Path.Combine(_output, "station-tile-252x252.png"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(png.PixelAt(1, 1)[3], Is.EqualTo(0), "outside a 22 px corner");
+			Assert.That(png.PixelAt(8, 8)[3], Is.EqualTo(255), "inside a 22 px corner");
 		});
 	}
 

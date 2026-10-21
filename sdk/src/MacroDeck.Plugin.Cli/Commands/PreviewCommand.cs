@@ -14,7 +14,7 @@ internal static class PreviewCommand
 		var artifactOption = new Option<string?>("--artifact") { Description = "A packed .macroDeckPlugin artifact." };
 		var sizeOption = new Option<string[]>("--size")
 		{
-			Description = "WIDTHxHEIGHT in pixels (repeatable). Defaults to one deck cell.",
+			Description = "WIDTHxHEIGHT in pixels (repeatable), drawn as one tile. Defaults to one deck cell.",
 			DefaultValueFactory = _ => []
 		};
 		var cellsOption = new Option<string[]>("--cells")

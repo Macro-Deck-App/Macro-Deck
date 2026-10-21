@@ -11,19 +11,19 @@ writes one PNG per scenario and size. It needs no running Macro Deck and no sign
 
 ```bash
 macrodeck-plugin preview render --project src/DeviceBatteryInfo \
-  --size 200x200 --size 420x200 --size 420x420 \
+  --cells 1x1 --cells 2x1 --cells 2x2 \
   --scale 2 --theme dark --background transparent \
   --output artifacts/previews
 ```
 
 ```text
-Wrote artifacts/previews/battery-tile-200x200.png
-Wrote artifacts/previews/battery-tile-420x200.png
-Wrote artifacts/previews/battery-tile-420x420.png
+Wrote artifacts/previews/battery-tile-120x120.png
+Wrote artifacts/previews/battery-tile-252x120.png
+Wrote artifacts/previews/battery-tile-252x252.png
 Rendered 3 image(s) to artifacts/previews.
 ```
 
-Every scenario at three sizes, at twice the resolution, with transparent corners.
+Every scenario at three deck sizes, at twice the resolution, with transparent corners.
 
 ```bash
 macrodeck-plugin preview render --project src/DeviceBatteryInfo --cells 1x1 --cells 2x1 --preview "Low battery"
@@ -33,8 +33,11 @@ One scenario at deck sizes: a cell is 120 px with a 12 px gap, so `2x1` is 252 b
 
 ## What it draws
 
-Only widget previews. A widget is laid out in the deck's 120 px reference cell and scaled to the requested
-size, exactly as a tile on the deck is, so a size that is not a whole number of cells still looks like a tile.
+Only widget previews, drawn as a tile on the deck is. With `--cells`, the widget is laid out across that many
+120 px cells, so a [`UiResponsive`](/ui/components/responsive/) sees a `2x2` tile as two cells wide and two
+tall, and the corners and the tile border keep the size of one cell. A `--size` is always one tile: its shorter
+side is one cell and the rest is scaled with it, whatever the aspect, so a size that is not a whole number of
+cells still looks like a tile. Use `--cells` for a layout meant for a square tile of more than one cell.
 Configuration views, such as an action editor or a configuration flow, are drawn by the desktop app and are
 skipped with a `preview-unsupported` warning. A skipped preview does not fail the run.
 
@@ -64,13 +67,13 @@ Pick exactly one of `--project`, `--executable` or `--artifact`, as for [`run`](
 
 | Option | Meaning |
 | --- | --- |
-| `--size <W>x<H>` | A size in pixels. Repeatable. Defaults to one deck cell, `120x120`. |
+| `--size <W>x<H>` | A size in pixels, drawn as one tile whose shorter side is one cell. Repeatable. Defaults to one deck cell, `120x120`. |
 | `--cells <C>x<R>` | A size in deck cells. Repeatable, and combinable with `--size`. |
 | `--preview <name>` | Only the scenario with this name or id. Repeatable. Defaults to every scenario. An unknown name is a usage error. |
 | `--scale <n>` | Device pixels per pixel, greater than 0 and at most 8. Defaults to `2`, so `200x200` is a 400 by 400 image. |
 | `--theme dark\|light` | Defaults to `dark`. |
 | `--background <color>` | `transparent` (the default), a color name or a `#hex` color. |
-| `--radius <px>` | The tile's corner radius in the 120 px reference cell, scaled with the tile as on the deck. Defaults to `22`, the deck's default. |
+| `--radius <px>` | The tile's corner radius in the 120 px reference cell, scaled with the cell size as on the deck. Defaults to `22`, the deck's default. |
 | `--locale <culture>` | The culture dates and numbers are formatted in, and the language of the plugin's own text. Plugin text falls back to the plugin's default language when it has no resources for the culture. Defaults to `en-US`. |
 | `--video-stream-image <file>` | A PNG, JPEG or WebP of up to 8 MB, drawn in place of every video stream. See [Video streams](#video-streams). |
 | `--output <dir>` | Where the files go. Defaults to `./previews`. |
