@@ -118,7 +118,7 @@ internal static class PluginInfrastructureLog
 	public static void StoppingPlugin(ILogger logger, string pluginId, int processId, PluginStopReason reason)
 	{
 		logger.Information("Stopping plugin '{PluginId}' (PID {ProcessId}, reason {Reason}).",
-			pluginId,
+			SingleLine(pluginId),
 			processId,
 			reason);
 	}
@@ -126,7 +126,7 @@ internal static class PluginInfrastructureLog
 	public static void PluginExitedAfterStop(ILogger logger, string pluginId, int processId, TimeSpan elapsed)
 	{
 		logger.Information("Plugin '{PluginId}' (PID {ProcessId}) exited {ElapsedMs} ms after the stop request.",
-			pluginId,
+			SingleLine(pluginId),
 			processId,
 			(long)elapsed.TotalMilliseconds);
 	}
@@ -135,7 +135,7 @@ internal static class PluginInfrastructureLog
 	{
 		logger.Warning(
 			"Plugin '{PluginId}' (PID {ProcessId}) did not exit {GraceMs} ms after the stop request; killing it.",
-			pluginId,
+			SingleLine(pluginId),
 			processId,
 			(long)grace.TotalMilliseconds);
 	}
@@ -211,5 +211,12 @@ internal static class PluginInfrastructureLog
 		logger.Warning("Opening plugin PID {ProcessId} to assign it to a job object failed with {LastError}.",
 			processId,
 			lastError);
+	}
+
+	private static string SingleLine(string value)
+	{
+		return value
+			.Replace("\r", string.Empty, StringComparison.Ordinal)
+			.Replace("\n", string.Empty, StringComparison.Ordinal);
 	}
 }
