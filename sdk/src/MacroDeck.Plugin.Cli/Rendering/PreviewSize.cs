@@ -2,12 +2,13 @@ using System.Globalization;
 
 namespace MacroDeck.Plugin.Cli.Rendering;
 
-internal readonly record struct PreviewSize(int Width, int Height)
+internal readonly record struct PreviewSize(int Width, int Height, int Cell)
 {
 	public static PreviewSize OfCells(int columns, int rows)
 	{
 		return new PreviewSize(columns * PreviewMetrics.CellSize + (columns - 1) * PreviewMetrics.CellGap,
-			rows * PreviewMetrics.CellSize + (rows - 1) * PreviewMetrics.CellGap);
+			rows * PreviewMetrics.CellSize + (rows - 1) * PreviewMetrics.CellGap,
+			PreviewMetrics.CellSize);
 	}
 
 	public static bool TryParse(string text, bool cells, out PreviewSize size)
@@ -24,7 +25,7 @@ internal readonly record struct PreviewSize(int Width, int Height)
 			return false;
 		}
 
-		size = cells ? OfCells(first, second) : new PreviewSize(first, second);
+		size = cells ? OfCells(first, second) : new PreviewSize(first, second, Math.Min(first, second));
 
 		return size.Width <= PreviewMetrics.MaxPixels && size.Height <= PreviewMetrics.MaxPixels;
 	}

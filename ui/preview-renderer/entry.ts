@@ -3,6 +3,7 @@ import { asLocalizedRef, bundledTranslator, formatTemplate, isComponentProfileTy
 interface Scene {
   width: number;
   height: number;
+  cell: number;
   radius: number;
   theme: 'dark' | 'light';
   background: string;
@@ -54,7 +55,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    const scale = Math.min(scene.width, scene.height) / WIDGET_REFERENCE_CELL;
+    const scale = scene.cell / WIDGET_REFERENCE_CELL;
     tile.style.borderRadius = `${scene.radius * scale}px`;
     const width = scene.width / scale;
     const height = scene.height / scale;

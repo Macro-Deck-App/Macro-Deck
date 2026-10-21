@@ -11,14 +11,14 @@ public class PreviewSizeTests
 	public void Deck_cells_are_120_pixels_with_a_12_pixel_gap(string text, int width, int height)
 	{
 		Assert.That(PreviewSize.TryParse(text, true, out var size), Is.True);
-		Assert.That(size, Is.EqualTo(new PreviewSize(width, height)));
+		Assert.That(size, Is.EqualTo(new PreviewSize(width, height, 120)));
 	}
 
 	[Test]
-	public void Pixel_sizes_are_taken_as_written()
+	public void Pixel_sizes_are_taken_as_written_and_drawn_as_one_tile()
 	{
 		Assert.That(PreviewSize.TryParse("420x200", false, out var size), Is.True);
-		Assert.That(size, Is.EqualTo(new PreviewSize(420, 200)));
+		Assert.That(size, Is.EqualTo(new PreviewSize(420, 200, 200)));
 	}
 
 	[TestCase("")]
