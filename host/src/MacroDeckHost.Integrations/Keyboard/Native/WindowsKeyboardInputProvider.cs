@@ -18,6 +18,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	private const uint KeyEventFScanCode = 0x0008;
 	private const uint MapVkVkToVsc = 0;
 	private const uint MapVkVscToVkEx = 3;
+	private const ushort PrintScreenScanCode = 0x37;
 
 	public string PlatformName => "Windows (SendInput)";
 
@@ -100,34 +101,40 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 	private static void SendKey(KeyCode key, bool isUp)
 	{
-		if (!TryMapKey(key, LayoutOf(Win32Windows.GetForegroundWindow()), out var vk, out var scan))
+		if (!TryBuildKeyInput(key, LayoutOf(Win32Windows.GetForegroundWindow()), isUp, out var keyboard))
 		{
 			return;
 		}
 
-		var flags = KeyEventFScanCode | (isUp ? KeyEventFKeyUp : 0);
+		Send([new Input { type = InputKeyboard, union = new InputUnion { keyboard = keyboard } }]);
+	}
+
+	internal static bool TryBuildKeyInput(KeyCode key, IntPtr layout, bool isUp, out Keybdinput input)
+	{
+		input = default;
+		if (!TryMapKey(key, layout, out var vk, out var scan))
+		{
+			return false;
+		}
+
+		var flags = isUp ? KeyEventFKeyUp : 0;
+		if (scan == 0)
+		{
+			input = new Keybdinput { wVk = vk, dwFlags = flags };
+			return true;
+		}
+
 		if (IsExtendedKey(key))
 		{
 			flags |= KeyEventFExtendedKey;
 		}
 
-		var input = new Input
-		{
-			type = InputKeyboard,
-			union = new InputUnion
-			{
-				keyboard = new Keybdinput
-				{
-					wVk = scan == 0 ? vk : (ushort)0,
-					wScan = scan,
-					dwFlags = scan == 0 ? isUp ? KeyEventFKeyUp : 0 : flags,
-					time = 0,
-					dwExtraInfo = IntPtr.Zero
-				}
-			}
-		};
-
-		Send([input]);
+		// Windows resolves an injected E0 45 to no key: the physical NumLock sends a plain 0x45 and only its
+		// messages carry the extended flag, so it goes by virtual key with the scan code alongside.
+		input = key == KeyCode.NumLock
+			? new Keybdinput { wVk = vk, wScan = scan, dwFlags = flags }
+			: new Keybdinput { wScan = scan, dwFlags = flags | KeyEventFScanCode };
+		return true;
 	}
 
 	private static Input UnicodeInput(char unit, bool isUp)
@@ -281,7 +288,12 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 			return false;
 		}
 
-		if (!IsMediaKey(key))
+		if (key == KeyCode.PrintScreen)
+		{
+			// Windows maps VK_SNAPSHOT to 0x54, the Alt+SysRq code; the key itself sends E0 37.
+			scan = PrintScreenScanCode;
+		}
+		else if (!IsMediaKey(key))
 		{
 			scan = (ushort)MapVirtualKeyEx(vk, MapVkVkToVsc, layout);
 			if (scan == 0)
