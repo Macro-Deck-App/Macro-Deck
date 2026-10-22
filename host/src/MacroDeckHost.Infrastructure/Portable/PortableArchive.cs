@@ -474,7 +474,7 @@ public static class PortableArchive
 	private static string JsonLocation(string entry, JsonException error)
 	{
 		var path = error.Path;
-		if (string.IsNullOrEmpty(path) || path.Length > 256 || path.Any(char.IsControl))
+		if (string.IsNullOrEmpty(path) || path.Length > 256 || path.Any(c => char.IsControl(c) || char.GetUnicodeCategory(c) == UnicodeCategory.Format))
 		{
 			path = "$";
 		}
