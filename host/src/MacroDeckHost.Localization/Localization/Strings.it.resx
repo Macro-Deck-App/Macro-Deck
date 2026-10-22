@@ -21362,6 +21362,298 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Detail.ConfigStatusReady" xml:space="preserve"><value>Pronto</value></data>
   <data name="Integrations.Detail.ConfigStatusNeedsReconfiguration" xml:space="preserve"><value>Richiede riconfigurazione</value></data>
   <data name="Integrations.Detail.ConfigurationMutationFailed" xml:space="preserve"><value>Impossibile aggiornare la configurazione.</value></data>
+  <data name="Integrations.Detail.DataTab" xml:space="preserve">
+    <value>Dati</value>
+  </data>
+  <data name="Integrations.Detail.DataNavLabel" xml:space="preserve">
+    <value>Dati forniti</value>
+  </data>
+  <data name="Integrations.Detail.ValueUnknown" xml:space="preserve">
+    <value>Sconosciuto</value>
+  </data>
+  <data name="Integrations.Detail.StatusLabel" xml:space="preserve">
+    <value>Stato</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableHeading" xml:space="preserve">
+    <value>Non disponibile al momento</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableMessage" xml:space="preserve">
+    <value>Attiva l'integrazione e attendi che sia pronta per vederne i dati.</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityLoadFailed" xml:space="preserve">
+    <value>Impossibile caricare i dati.</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Loading" xml:space="preserve">
+    <value>Caricamento batterie…</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyHeading" xml:space="preserve">
+    <value>Nessuna batteria</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyMessage" xml:space="preserve">
+    <value>Al momento questa integrazione non segnala alcuna batteria.</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.LevelValue" xml:space="preserve">
+    <value>{level}%</value>
+    <comment>[level:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.UpdatedAt" xml:space="preserve">
+    <value>Aggiornato {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.State.Discharging" xml:space="preserve">
+    <value>In scarica</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Good" xml:space="preserve">
+    <value>Buona</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Overheat" xml:space="preserve">
+    <value>Surriscaldata</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Dead" xml:space="preserve">
+    <value>Esaurita</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.OverVoltage" xml:space="preserve">
+    <value>Sovratensione</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Cold" xml:space="preserve">
+    <value>Troppo fredda</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Failure" xml:space="preserve">
+    <value>Guasto</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Phone" xml:space="preserve">
+    <value>Telefono</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Tablet" xml:space="preserve">
+    <value>Tablet</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Laptop" xml:space="preserve">
+    <value>Portatile</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Headphones" xml:space="preserve">
+    <value>Cuffie</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Watch" xml:space="preserve">
+    <value>Orologio</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Controller" xml:space="preserve">
+    <value>Controller</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Mouse" xml:space="preserve">
+    <value>Mouse</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Keyboard" xml:space="preserve">
+    <value>Tastiera</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Speaker" xml:space="preserve">
+    <value>Altoparlante</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Other" xml:space="preserve">
+    <value>Altro dispositivo</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Loading" xml:space="preserve">
+    <value>Caricamento calendari…</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyHeading" xml:space="preserve">
+    <value>Nessun calendario</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyMessage" xml:space="preserve">
+    <value>Questa integrazione non ha ancora collegato un calendario.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountLabel" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountError" xml:space="preserve">
+    <value>Impossibile sincronizzare questo account.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Primary" xml:space="preserve">
+    <value>Principale</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.SyncWindow" xml:space="preserve">
+    <value>Periodo sincronizzato: da {from} a {to}</value>
+    <comment>[from:string] [to:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsHeading" xml:space="preserve">
+    <value>Nessun evento</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsMessage" xml:space="preserve">
+    <value>Non ci sono eventi nel periodo sincronizzato.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AllDay" xml:space="preserve">
+    <value>Tutto il giorno</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.OnlineMeeting" xml:space="preserve">
+    <value>Riunione online</value>
+  </data>
+  <data name="Integrations.Detail.Email.Loading" xml:space="preserve">
+    <value>Caricamento caselle di posta…</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyHeading" xml:space="preserve">
+    <value>Nessuna casella di posta</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyMessage" xml:space="preserve">
+    <value>Questa integrazione non ha ancora collegato una casella di posta.</value>
+  </data>
+  <data name="Integrations.Detail.Email.InboxListLabel" xml:space="preserve">
+    <value>Caselle di posta</value>
+  </data>
+  <data name="Integrations.Detail.Email.Unread" xml:space="preserve">
+    <value>Non lette</value>
+  </data>
+  <data name="Integrations.Detail.Email.Total" xml:space="preserve">
+    <value>Totale</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connecting" xml:space="preserve">
+    <value>Connessione in corso</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connected" xml:space="preserve">
+    <value>Connessa</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Disconnected" xml:space="preserve">
+    <value>Disconnessa</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Error" xml:space="preserve">
+    <value>Errore</value>
+  </data>
+  <data name="Integrations.Detail.Email.Stale" xml:space="preserve">
+    <value>I dati potrebbero non essere aggiornati.</value>
+  </data>
+  <data name="Integrations.Detail.Email.SyncedAt" xml:space="preserve">
+    <value>Sincronizzata {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Email.MessagesHeading" xml:space="preserve">
+    <value>Ultimi messaggi</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesHeading" xml:space="preserve">
+    <value>Nessun messaggio</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesMessage" xml:space="preserve">
+    <value>Questa casella di posta non ha messaggi da mostrare.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Loading" xml:space="preserve">
+    <value>Caricamento posizioni…</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyHeading" xml:space="preserve">
+    <value>Nessuna posizione</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyMessage" xml:space="preserve">
+    <value>Questa integrazione non fornisce ancora una posizione meteo.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.LocationLabel" xml:space="preserve">
+    <value>Posizione</value>
+  </data>
+  <data name="Integrations.Detail.Weather.NoData" xml:space="preserve">
+    <value>Non ci sono ancora dati meteo per questa posizione.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Temperature" xml:space="preserve">
+    <value>Temperatura</value>
+  </data>
+  <data name="Integrations.Detail.Weather.FeelsLike" xml:space="preserve">
+    <value>Percepita</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Condition" xml:space="preserve">
+    <value>Condizioni</value>
+  </data>
+  <data name="Integrations.Detail.Weather.ForecastHeading" xml:space="preserve">
+    <value>Previsioni</value>
+  </data>
+  <data name="Integrations.Detail.Music.Loading" xml:space="preserve">
+    <value>Caricamento lettori…</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyHeading" xml:space="preserve">
+    <value>Nessun lettore</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyMessage" xml:space="preserve">
+    <value>Questa integrazione non fornisce ancora un lettore musicale.</value>
+  </data>
+  <data name="Integrations.Detail.Music.PlayerLabel" xml:space="preserve">
+    <value>Lettore</value>
+  </data>
+  <data name="Integrations.Detail.Music.NotConnected" xml:space="preserve">
+    <value>Non connesso</value>
+  </data>
+  <data name="Integrations.Detail.Music.NothingPlaying" xml:space="preserve">
+    <value>Nessuna riproduzione in corso</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playing" xml:space="preserve">
+    <value>In riproduzione</value>
+  </data>
+  <data name="Integrations.Detail.Music.Paused" xml:space="preserve">
+    <value>In pausa</value>
+  </data>
+  <data name="Integrations.Detail.Music.Track" xml:space="preserve">
+    <value>Brano</value>
+  </data>
+  <data name="Integrations.Detail.Music.Artist" xml:space="preserve">
+    <value>Artista</value>
+  </data>
+  <data name="Integrations.Detail.Music.Album" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playback" xml:space="preserve">
+    <value>Riproduzione</value>
+  </data>
+  <data name="Integrations.Detail.Music.Position" xml:space="preserve">
+    <value>Posizione</value>
+  </data>
+  <data name="Integrations.Detail.Music.Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="Integrations.Detail.Music.VolumeValue" xml:space="preserve">
+    <value>{volume}%</value>
+    <comment>[volume:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Music.Device" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="Integrations.Detail.Music.Shuffle" xml:space="preserve">
+    <value>Riproduzione casuale</value>
+  </data>
+  <data name="Integrations.Detail.Music.Repeat" xml:space="preserve">
+    <value>Ripeti</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchPlaceholder" xml:space="preserve">
+    <value>Cerca eventi</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchAriaLabel" xml:space="preserve">
+    <value>Cerca eventi</value>
+  </data>
+  <data name="Integrations.Detail.Events.Loading" xml:space="preserve">
+    <value>Caricamento eventi…</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyHeading" xml:space="preserve">
+    <value>Nessun evento</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyMessage" xml:space="preserve">
+    <value>Questa integrazione non fornisce alcun evento.</value>
+  </data>
+  <data name="Integrations.Detail.Events.NoMatchingHeading" xml:space="preserve">
+    <value>Nessun evento corrispondente</value>
+  </data>
+  <data name="Integrations.Detail.Events.Payload" xml:space="preserve">
+    <value>Fornisce: {names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Options" xml:space="preserve">
+    <value>Opzioni: {names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Scheduled" xml:space="preserve">
+    <value>Pianificato</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Loading" xml:space="preserve">
+    <value>Caricamento widget…</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyHeading" xml:space="preserve">
+    <value>Nessun widget</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyMessage" xml:space="preserve">
+    <value>Al momento questa integrazione non fornisce alcun widget.</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Configurable" xml:space="preserve">
+    <value>Configurabile</value>
+  </data>
   <data name="Layouts.Grid.LockedByDevice" xml:space="preserve">
     <value>{deviceName} blocca questa griglia su {columns} x {rows}.</value>
   </data>

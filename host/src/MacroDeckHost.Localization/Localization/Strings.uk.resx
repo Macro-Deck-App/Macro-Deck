@@ -21384,6 +21384,298 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Detail.ConfigStatusReady" xml:space="preserve"><value>Готово</value></data>
   <data name="Integrations.Detail.ConfigStatusNeedsReconfiguration" xml:space="preserve"><value>Потребує повторного налаштування</value></data>
   <data name="Integrations.Detail.ConfigurationMutationFailed" xml:space="preserve"><value>Не вдалося оновити налаштування.</value></data>
+  <data name="Integrations.Detail.DataTab" xml:space="preserve">
+    <value>Дані</value>
+  </data>
+  <data name="Integrations.Detail.DataNavLabel" xml:space="preserve">
+    <value>Надані дані</value>
+  </data>
+  <data name="Integrations.Detail.ValueUnknown" xml:space="preserve">
+    <value>Невідомо</value>
+  </data>
+  <data name="Integrations.Detail.StatusLabel" xml:space="preserve">
+    <value>Стан</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableHeading" xml:space="preserve">
+    <value>Зараз недоступно</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableMessage" xml:space="preserve">
+    <value>Увімкніть інтеграцію й дочекайтеся її готовності, щоб побачити дані.</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityLoadFailed" xml:space="preserve">
+    <value>Не вдалося завантажити дані.</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Loading" xml:space="preserve">
+    <value>Завантаження батарей…</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyHeading" xml:space="preserve">
+    <value>Немає батарей</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyMessage" xml:space="preserve">
+    <value>Ця інтеграція зараз не повідомляє про жодну батарею.</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.LevelValue" xml:space="preserve">
+    <value>{level} %</value>
+    <comment>[level:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.UpdatedAt" xml:space="preserve">
+    <value>Оновлено: {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.State.Discharging" xml:space="preserve">
+    <value>Розряджається</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Good" xml:space="preserve">
+    <value>Добрий</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Overheat" xml:space="preserve">
+    <value>Перегрів</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Dead" xml:space="preserve">
+    <value>Несправна</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.OverVoltage" xml:space="preserve">
+    <value>Перенапруга</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Cold" xml:space="preserve">
+    <value>Занадто холодно</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Failure" xml:space="preserve">
+    <value>Збій</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Phone" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Tablet" xml:space="preserve">
+    <value>Планшет</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Laptop" xml:space="preserve">
+    <value>Ноутбук</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Headphones" xml:space="preserve">
+    <value>Навушники</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Watch" xml:space="preserve">
+    <value>Годинник</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Controller" xml:space="preserve">
+    <value>Контролер</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Mouse" xml:space="preserve">
+    <value>Миша</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Keyboard" xml:space="preserve">
+    <value>Клавіатура</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Speaker" xml:space="preserve">
+    <value>Динамік</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Other" xml:space="preserve">
+    <value>Інший пристрій</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Loading" xml:space="preserve">
+    <value>Завантаження календарів…</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyHeading" xml:space="preserve">
+    <value>Немає календарів</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyMessage" xml:space="preserve">
+    <value>Ця інтеграція ще не підключила жодного календаря.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountLabel" xml:space="preserve">
+    <value>Обліковий запис</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountError" xml:space="preserve">
+    <value>Не вдалося синхронізувати цей обліковий запис.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Primary" xml:space="preserve">
+    <value>Основний</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.SyncWindow" xml:space="preserve">
+    <value>Синхронізований період: з {from} по {to}</value>
+    <comment>[from:string] [to:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsHeading" xml:space="preserve">
+    <value>Немає подій</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsMessage" xml:space="preserve">
+    <value>У синхронізованому періоді немає подій.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AllDay" xml:space="preserve">
+    <value>Весь день</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.OnlineMeeting" xml:space="preserve">
+    <value>Онлайн-зустріч</value>
+  </data>
+  <data name="Integrations.Detail.Email.Loading" xml:space="preserve">
+    <value>Завантаження поштових скриньок…</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyHeading" xml:space="preserve">
+    <value>Немає поштових скриньок</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyMessage" xml:space="preserve">
+    <value>Ця інтеграція ще не підключила жодної поштової скриньки.</value>
+  </data>
+  <data name="Integrations.Detail.Email.InboxListLabel" xml:space="preserve">
+    <value>Поштові скриньки</value>
+  </data>
+  <data name="Integrations.Detail.Email.Unread" xml:space="preserve">
+    <value>Непрочитані</value>
+  </data>
+  <data name="Integrations.Detail.Email.Total" xml:space="preserve">
+    <value>Усього</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connecting" xml:space="preserve">
+    <value>Під'єднання</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connected" xml:space="preserve">
+    <value>Під'єднано</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Disconnected" xml:space="preserve">
+    <value>Від'єднано</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Error" xml:space="preserve">
+    <value>Помилка</value>
+  </data>
+  <data name="Integrations.Detail.Email.Stale" xml:space="preserve">
+    <value>Дані можуть бути застарілими.</value>
+  </data>
+  <data name="Integrations.Detail.Email.SyncedAt" xml:space="preserve">
+    <value>Синхронізовано: {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Email.MessagesHeading" xml:space="preserve">
+    <value>Останні листи</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesHeading" xml:space="preserve">
+    <value>Листів немає</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesMessage" xml:space="preserve">
+    <value>У цій поштовій скриньці немає листів для показу.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Loading" xml:space="preserve">
+    <value>Завантаження місць…</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyHeading" xml:space="preserve">
+    <value>Немає місць</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyMessage" xml:space="preserve">
+    <value>Ця інтеграція ще не надає місця для погоди.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.LocationLabel" xml:space="preserve">
+    <value>Місце</value>
+  </data>
+  <data name="Integrations.Detail.Weather.NoData" xml:space="preserve">
+    <value>Для цього місця ще немає даних про погоду.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Temperature" xml:space="preserve">
+    <value>Температура</value>
+  </data>
+  <data name="Integrations.Detail.Weather.FeelsLike" xml:space="preserve">
+    <value>Відчувається як</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Condition" xml:space="preserve">
+    <value>Погодні умови</value>
+  </data>
+  <data name="Integrations.Detail.Weather.ForecastHeading" xml:space="preserve">
+    <value>Прогноз</value>
+  </data>
+  <data name="Integrations.Detail.Music.Loading" xml:space="preserve">
+    <value>Завантаження програвачів…</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyHeading" xml:space="preserve">
+    <value>Немає програвачів</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyMessage" xml:space="preserve">
+    <value>Ця інтеграція ще не надає музичного програвача.</value>
+  </data>
+  <data name="Integrations.Detail.Music.PlayerLabel" xml:space="preserve">
+    <value>Програвач</value>
+  </data>
+  <data name="Integrations.Detail.Music.NotConnected" xml:space="preserve">
+    <value>Не під'єднано</value>
+  </data>
+  <data name="Integrations.Detail.Music.NothingPlaying" xml:space="preserve">
+    <value>Нічого не відтворюється</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playing" xml:space="preserve">
+    <value>Відтворюється</value>
+  </data>
+  <data name="Integrations.Detail.Music.Paused" xml:space="preserve">
+    <value>Призупинено</value>
+  </data>
+  <data name="Integrations.Detail.Music.Track" xml:space="preserve">
+    <value>Трек</value>
+  </data>
+  <data name="Integrations.Detail.Music.Artist" xml:space="preserve">
+    <value>Виконавець</value>
+  </data>
+  <data name="Integrations.Detail.Music.Album" xml:space="preserve">
+    <value>Альбом</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playback" xml:space="preserve">
+    <value>Відтворення</value>
+  </data>
+  <data name="Integrations.Detail.Music.Position" xml:space="preserve">
+    <value>Позиція</value>
+  </data>
+  <data name="Integrations.Detail.Music.Volume" xml:space="preserve">
+    <value>Гучність</value>
+  </data>
+  <data name="Integrations.Detail.Music.VolumeValue" xml:space="preserve">
+    <value>{volume} %</value>
+    <comment>[volume:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Music.Device" xml:space="preserve">
+    <value>Пристрій</value>
+  </data>
+  <data name="Integrations.Detail.Music.Shuffle" xml:space="preserve">
+    <value>Перемішування</value>
+  </data>
+  <data name="Integrations.Detail.Music.Repeat" xml:space="preserve">
+    <value>Повтор</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchPlaceholder" xml:space="preserve">
+    <value>Пошук подій</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchAriaLabel" xml:space="preserve">
+    <value>Пошук подій</value>
+  </data>
+  <data name="Integrations.Detail.Events.Loading" xml:space="preserve">
+    <value>Завантаження подій…</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyHeading" xml:space="preserve">
+    <value>Немає подій</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyMessage" xml:space="preserve">
+    <value>Ця інтеграція не надає жодних подій.</value>
+  </data>
+  <data name="Integrations.Detail.Events.NoMatchingHeading" xml:space="preserve">
+    <value>Немає відповідних подій</value>
+  </data>
+  <data name="Integrations.Detail.Events.Payload" xml:space="preserve">
+    <value>Надає: {names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Options" xml:space="preserve">
+    <value>Параметри: {names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Scheduled" xml:space="preserve">
+    <value>За розкладом</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Loading" xml:space="preserve">
+    <value>Завантаження віджетів…</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyHeading" xml:space="preserve">
+    <value>Немає віджетів</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyMessage" xml:space="preserve">
+    <value>Ця інтеграція зараз не надає жодних віджетів.</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Configurable" xml:space="preserve">
+    <value>Налаштовуваний</value>
+  </data>
   <data name="Layouts.Grid.LockedByDevice" xml:space="preserve">
     <value>{deviceName} фіксує цю сітку на {columns} x {rows}.</value>
   </data>

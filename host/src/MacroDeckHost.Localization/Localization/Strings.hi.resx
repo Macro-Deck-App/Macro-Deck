@@ -21384,6 +21384,298 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Detail.ConfigStatusReady" xml:space="preserve"><value>तैयार</value></data>
   <data name="Integrations.Detail.ConfigStatusNeedsReconfiguration" xml:space="preserve"><value>फिर से कॉन्फ़िगर करना आवश्यक</value></data>
   <data name="Integrations.Detail.ConfigurationMutationFailed" xml:space="preserve"><value>कॉन्फ़िगरेशन अपडेट नहीं किया जा सका।</value></data>
+  <data name="Integrations.Detail.DataTab" xml:space="preserve">
+    <value>डेटा</value>
+  </data>
+  <data name="Integrations.Detail.DataNavLabel" xml:space="preserve">
+    <value>प्रदान किया गया डेटा</value>
+  </data>
+  <data name="Integrations.Detail.ValueUnknown" xml:space="preserve">
+    <value>अज्ञात</value>
+  </data>
+  <data name="Integrations.Detail.StatusLabel" xml:space="preserve">
+    <value>स्थिति</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableHeading" xml:space="preserve">
+    <value>अभी उपलब्ध नहीं</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableMessage" xml:space="preserve">
+    <value>डेटा देखने के लिए एकीकरण चालू करें और उसके तैयार होने तक प्रतीक्षा करें।</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityLoadFailed" xml:space="preserve">
+    <value>डेटा लोड नहीं हो सका।</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Loading" xml:space="preserve">
+    <value>बैटरियां लोड हो रही हैं…</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyHeading" xml:space="preserve">
+    <value>कोई बैटरी नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyMessage" xml:space="preserve">
+    <value>यह एकीकरण अभी किसी बैटरी की जानकारी नहीं दे रहा है।</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.LevelValue" xml:space="preserve">
+    <value>{level}%</value>
+    <comment>[level:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.UpdatedAt" xml:space="preserve">
+    <value>अपडेट किया गया: {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.State.Discharging" xml:space="preserve">
+    <value>डिस्चार्ज हो रही है</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Good" xml:space="preserve">
+    <value>अच्छी</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Overheat" xml:space="preserve">
+    <value>ज़्यादा गर्म</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Dead" xml:space="preserve">
+    <value>खराब</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.OverVoltage" xml:space="preserve">
+    <value>ओवरवोल्टेज</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Cold" xml:space="preserve">
+    <value>बहुत ठंडी</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Failure" xml:space="preserve">
+    <value>विफलता</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Phone" xml:space="preserve">
+    <value>फ़ोन</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Tablet" xml:space="preserve">
+    <value>टैबलेट</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Laptop" xml:space="preserve">
+    <value>लैपटॉप</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Headphones" xml:space="preserve">
+    <value>हेडफ़ोन</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Watch" xml:space="preserve">
+    <value>घड़ी</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Controller" xml:space="preserve">
+    <value>कंट्रोलर</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Mouse" xml:space="preserve">
+    <value>माउस</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Keyboard" xml:space="preserve">
+    <value>कीबोर्ड</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Speaker" xml:space="preserve">
+    <value>स्पीकर</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Other" xml:space="preserve">
+    <value>अन्य डिवाइस</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Loading" xml:space="preserve">
+    <value>कैलेंडर लोड हो रहे हैं…</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyHeading" xml:space="preserve">
+    <value>कोई कैलेंडर नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyMessage" xml:space="preserve">
+    <value>इस एकीकरण ने अभी तक कोई कैलेंडर कनेक्ट नहीं किया है।</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountLabel" xml:space="preserve">
+    <value>खाता</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountError" xml:space="preserve">
+    <value>इस खाते को सिंक नहीं किया जा सका।</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Primary" xml:space="preserve">
+    <value>प्राथमिक</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.SyncWindow" xml:space="preserve">
+    <value>सिंक की गई अवधि: {from} से {to}</value>
+    <comment>[from:string] [to:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsHeading" xml:space="preserve">
+    <value>कोई इवेंट नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsMessage" xml:space="preserve">
+    <value>सिंक की गई अवधि में कोई इवेंट नहीं है।</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AllDay" xml:space="preserve">
+    <value>पूरे दिन</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.OnlineMeeting" xml:space="preserve">
+    <value>ऑनलाइन मीटिंग</value>
+  </data>
+  <data name="Integrations.Detail.Email.Loading" xml:space="preserve">
+    <value>इनबॉक्स लोड हो रहे हैं…</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyHeading" xml:space="preserve">
+    <value>कोई इनबॉक्स नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyMessage" xml:space="preserve">
+    <value>इस एकीकरण ने अभी तक कोई इनबॉक्स कनेक्ट नहीं किया है।</value>
+  </data>
+  <data name="Integrations.Detail.Email.InboxListLabel" xml:space="preserve">
+    <value>इनबॉक्स</value>
+  </data>
+  <data name="Integrations.Detail.Email.Unread" xml:space="preserve">
+    <value>अपठित</value>
+  </data>
+  <data name="Integrations.Detail.Email.Total" xml:space="preserve">
+    <value>कुल</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connecting" xml:space="preserve">
+    <value>कनेक्ट हो रहा है</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connected" xml:space="preserve">
+    <value>कनेक्टेड</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Disconnected" xml:space="preserve">
+    <value>डिस्कनेक्ट</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Error" xml:space="preserve">
+    <value>त्रुटि</value>
+  </data>
+  <data name="Integrations.Detail.Email.Stale" xml:space="preserve">
+    <value>हो सकता है कि डेटा अद्यतन न हो।</value>
+  </data>
+  <data name="Integrations.Detail.Email.SyncedAt" xml:space="preserve">
+    <value>सिंक किया गया: {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Email.MessagesHeading" xml:space="preserve">
+    <value>नवीनतम संदेश</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesHeading" xml:space="preserve">
+    <value>कोई संदेश नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesMessage" xml:space="preserve">
+    <value>इस इनबॉक्स में दिखाने के लिए कोई संदेश नहीं है।</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Loading" xml:space="preserve">
+    <value>स्थान लोड हो रहे हैं…</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyHeading" xml:space="preserve">
+    <value>कोई स्थान नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyMessage" xml:space="preserve">
+    <value>यह एकीकरण अभी तक कोई मौसम स्थान प्रदान नहीं करता है।</value>
+  </data>
+  <data name="Integrations.Detail.Weather.LocationLabel" xml:space="preserve">
+    <value>स्थान</value>
+  </data>
+  <data name="Integrations.Detail.Weather.NoData" xml:space="preserve">
+    <value>इस स्थान के लिए अभी तक कोई मौसम डेटा नहीं है।</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Temperature" xml:space="preserve">
+    <value>तापमान</value>
+  </data>
+  <data name="Integrations.Detail.Weather.FeelsLike" xml:space="preserve">
+    <value>महसूस होता है</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Condition" xml:space="preserve">
+    <value>मौसम की स्थिति</value>
+  </data>
+  <data name="Integrations.Detail.Weather.ForecastHeading" xml:space="preserve">
+    <value>पूर्वानुमान</value>
+  </data>
+  <data name="Integrations.Detail.Music.Loading" xml:space="preserve">
+    <value>प्लेयर लोड हो रहे हैं…</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyHeading" xml:space="preserve">
+    <value>कोई प्लेयर नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyMessage" xml:space="preserve">
+    <value>यह एकीकरण अभी तक कोई म्यूज़िक प्लेयर प्रदान नहीं करता है।</value>
+  </data>
+  <data name="Integrations.Detail.Music.PlayerLabel" xml:space="preserve">
+    <value>प्लेयर</value>
+  </data>
+  <data name="Integrations.Detail.Music.NotConnected" xml:space="preserve">
+    <value>कनेक्ट नहीं है</value>
+  </data>
+  <data name="Integrations.Detail.Music.NothingPlaying" xml:space="preserve">
+    <value>कुछ नहीं चल रहा</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playing" xml:space="preserve">
+    <value>चल रहा है</value>
+  </data>
+  <data name="Integrations.Detail.Music.Paused" xml:space="preserve">
+    <value>रुका हुआ</value>
+  </data>
+  <data name="Integrations.Detail.Music.Track" xml:space="preserve">
+    <value>ट्रैक</value>
+  </data>
+  <data name="Integrations.Detail.Music.Artist" xml:space="preserve">
+    <value>कलाकार</value>
+  </data>
+  <data name="Integrations.Detail.Music.Album" xml:space="preserve">
+    <value>एल्बम</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playback" xml:space="preserve">
+    <value>प्लेबैक</value>
+  </data>
+  <data name="Integrations.Detail.Music.Position" xml:space="preserve">
+    <value>स्थिति</value>
+  </data>
+  <data name="Integrations.Detail.Music.Volume" xml:space="preserve">
+    <value>वॉल्यूम</value>
+  </data>
+  <data name="Integrations.Detail.Music.VolumeValue" xml:space="preserve">
+    <value>{volume}%</value>
+    <comment>[volume:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Music.Device" xml:space="preserve">
+    <value>डिवाइस</value>
+  </data>
+  <data name="Integrations.Detail.Music.Shuffle" xml:space="preserve">
+    <value>शफ़ल</value>
+  </data>
+  <data name="Integrations.Detail.Music.Repeat" xml:space="preserve">
+    <value>दोहराएं</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchPlaceholder" xml:space="preserve">
+    <value>इवेंट खोजें</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchAriaLabel" xml:space="preserve">
+    <value>इवेंट खोजें</value>
+  </data>
+  <data name="Integrations.Detail.Events.Loading" xml:space="preserve">
+    <value>इवेंट लोड हो रहे हैं…</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyHeading" xml:space="preserve">
+    <value>कोई इवेंट नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyMessage" xml:space="preserve">
+    <value>यह एकीकरण कोई इवेंट प्रदान नहीं करता है।</value>
+  </data>
+  <data name="Integrations.Detail.Events.NoMatchingHeading" xml:space="preserve">
+    <value>कोई मिलता-जुलता इवेंट नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Events.Payload" xml:space="preserve">
+    <value>प्रदान करता है: {names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Options" xml:space="preserve">
+    <value>विकल्प: {names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Scheduled" xml:space="preserve">
+    <value>शेड्यूल किया गया</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Loading" xml:space="preserve">
+    <value>विजेट लोड हो रहे हैं…</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyHeading" xml:space="preserve">
+    <value>कोई विजेट नहीं</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyMessage" xml:space="preserve">
+    <value>यह एकीकरण अभी कोई विजेट प्रदान नहीं करता है।</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Configurable" xml:space="preserve">
+    <value>कॉन्फ़िगर करने योग्य</value>
+  </data>
   <data name="Layouts.Grid.LockedByDevice" xml:space="preserve">
     <value>{deviceName} इस ग्रिड को {columns} x {rows} पर लॉक करता है।</value>
   </data>

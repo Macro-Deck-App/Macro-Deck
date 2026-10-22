@@ -815,6 +815,17 @@ Outlook Calendar, [email over IMAP](#connect-an-imap-account), [AdGuard Home](/g
 
 ![The Integrations page listing ADB, Discord, Email (IMAP), Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
 
+Open an integration or plugin to see what it provides. **Capabilities** on its **Overview** lists everything
+it brings along with how many of each, for example 12 actions, 3 widgets or 2 batteries; choose a row to open
+its page. **Actions** and **Variables** have their own tabs, and so do **Events** and **Widgets** when the
+integration has any. **Widgets** shows a preview of each widget the integration adds. Data the integration
+reads for you gets a page to look at it: its **Batteries** with their charge, its **Calendar** accounts,
+calendars and upcoming events, its **Email Inbox** with unread counts and the latest messages, its
+**Weather** locations and its **Music Player**. When an integration has two or more of these, they share
+one **Data** tab with a list to switch between them. The pages update by themselves while you watch, and say
+so when the integration is turned off or still starting instead of showing an empty list. **Devices** opens
+**Settings > Devices**.
+
 The **Store** offers more plugins and icon packs. Everything published there is reviewed and signed
 first.
 

@@ -68,6 +68,113 @@ export interface GetIntegrationCapabilitiesResponse {
   configuredEntryCount: number;
   actions: IpcIntegrationActionCapability[];
   variables: IpcIntegrationVariableCapability[];
+  counts?: IpcIntegrationCapabilityCount[];
+}
+
+export interface IpcIntegrationCapabilityCount {
+  kind: string;
+  count: number;
+}
+
+export interface IntegrationCapabilityDataChangedEvent {
+  kind: string;
+  integrationIds: string[];
+}
+
+export type IntegrationBatteryChargeState = 'Unknown' | 'Discharging' | 'Charging' | 'Full' | 'NotCharging';
+
+export type IntegrationBatteryHealth =
+  | 'Unknown'
+  | 'Good'
+  | 'Overheat'
+  | 'Dead'
+  | 'OverVoltage'
+  | 'Cold'
+  | 'Failure';
+
+export interface IpcIntegrationBattery {
+  id: string;
+  name: string;
+  kind: string;
+  levelPercent?: number | null;
+  chargeState: IntegrationBatteryChargeState;
+  isConnected: boolean;
+  timeRemainingSeconds?: number | null;
+  timeToFullSeconds?: number | null;
+  health: IntegrationBatteryHealth;
+  updatedAt: string;
+}
+
+export interface GetIntegrationBatteriesResponse {
+  found: boolean;
+  available: boolean;
+  batteries: IpcIntegrationBattery[];
+}
+
+export interface IpcIntegrationCalendar {
+  key: string;
+  name: string;
+  color?: string | null;
+  isPrimary: boolean;
+}
+
+export interface IpcIntegrationCalendarAccount {
+  accountId: string;
+  displayName: string;
+  status: 'Ok' | 'Error';
+  calendars: IpcIntegrationCalendar[];
+}
+
+export interface IpcIntegrationCalendarEvent {
+  instanceKey: string;
+  accountId: string;
+  calendarKey: string;
+  title: string;
+  start: string;
+  end: string;
+  isAllDay: boolean;
+  location?: string | null;
+  hasMeetingUrl: boolean;
+}
+
+export interface GetIntegrationCalendarsResponse {
+  found: boolean;
+  available: boolean;
+  windowStart?: string | null;
+  windowEnd?: string | null;
+  accounts: IpcIntegrationCalendarAccount[];
+  events: IpcIntegrationCalendarEvent[];
+}
+
+export type IntegrationEmailInboxStatus = 'Connecting' | 'Connected' | 'Disconnected' | 'Error';
+
+export interface IpcIntegrationEmailMessage {
+  id: string;
+  senderName?: string | null;
+  senderAddress?: string | null;
+  subject: string;
+  preview?: string | null;
+  receivedAt: string;
+  isRead: boolean;
+}
+
+export interface IpcIntegrationEmailInbox {
+  ref: string;
+  displayName: string;
+  address?: string | null;
+  status: IntegrationEmailInboxStatus;
+  statusMessage?: string | null;
+  unreadCount: number;
+  totalCount: number;
+  syncedAt?: string | null;
+  isStale: boolean;
+  messages: IpcIntegrationEmailMessage[];
+}
+
+export interface GetIntegrationEmailInboxesResponse {
+  found: boolean;
+  available: boolean;
+  inboxes: IpcIntegrationEmailInbox[];
 }
 
 export interface IpcIntegrationIssue {

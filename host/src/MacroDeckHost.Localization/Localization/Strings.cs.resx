@@ -21362,6 +21362,298 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Detail.ConfigStatusReady" xml:space="preserve"><value>Připraveno</value></data>
   <data name="Integrations.Detail.ConfigStatusNeedsReconfiguration" xml:space="preserve"><value>Vyžaduje novou konfiguraci</value></data>
   <data name="Integrations.Detail.ConfigurationMutationFailed" xml:space="preserve"><value>Konfiguraci se nepodařilo aktualizovat.</value></data>
+  <data name="Integrations.Detail.DataTab" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="Integrations.Detail.DataNavLabel" xml:space="preserve">
+    <value>Poskytovaná data</value>
+  </data>
+  <data name="Integrations.Detail.ValueUnknown" xml:space="preserve">
+    <value>Neznámé</value>
+  </data>
+  <data name="Integrations.Detail.StatusLabel" xml:space="preserve">
+    <value>Stav</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableHeading" xml:space="preserve">
+    <value>Momentálně nedostupné</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableMessage" xml:space="preserve">
+    <value>Data se zobrazí po zapnutí integrace, jakmile bude připravená.</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityLoadFailed" xml:space="preserve">
+    <value>Data se nepodařilo načíst.</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Loading" xml:space="preserve">
+    <value>Načítání baterií…</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyHeading" xml:space="preserve">
+    <value>Žádné baterie</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyMessage" xml:space="preserve">
+    <value>Tato integrace momentálně nehlásí žádné baterie.</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.LevelValue" xml:space="preserve">
+    <value>{level} %</value>
+    <comment>[level:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.UpdatedAt" xml:space="preserve">
+    <value>Aktualizováno {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.State.Discharging" xml:space="preserve">
+    <value>Vybíjení</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Good" xml:space="preserve">
+    <value>Dobrá</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Overheat" xml:space="preserve">
+    <value>Přehřátí</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Dead" xml:space="preserve">
+    <value>Nefunkční</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.OverVoltage" xml:space="preserve">
+    <value>Přepětí</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Cold" xml:space="preserve">
+    <value>Příliš studená</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Failure" xml:space="preserve">
+    <value>Porucha</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Phone" xml:space="preserve">
+    <value>Telefon</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Tablet" xml:space="preserve">
+    <value>Tablet</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Laptop" xml:space="preserve">
+    <value>Notebook</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Headphones" xml:space="preserve">
+    <value>Sluchátka</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Watch" xml:space="preserve">
+    <value>Hodinky</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Controller" xml:space="preserve">
+    <value>Ovladač</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Mouse" xml:space="preserve">
+    <value>Myš</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Keyboard" xml:space="preserve">
+    <value>Klávesnice</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Speaker" xml:space="preserve">
+    <value>Reproduktor</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Other" xml:space="preserve">
+    <value>Jiné zařízení</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Loading" xml:space="preserve">
+    <value>Načítání kalendářů…</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyHeading" xml:space="preserve">
+    <value>Žádné kalendáře</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyMessage" xml:space="preserve">
+    <value>Tato integrace zatím nepřipojila žádný kalendář.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountLabel" xml:space="preserve">
+    <value>Účet</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountError" xml:space="preserve">
+    <value>Tento účet se nepodařilo synchronizovat.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Primary" xml:space="preserve">
+    <value>Hlavní</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.SyncWindow" xml:space="preserve">
+    <value>Synchronizované období: {from} až {to}</value>
+    <comment>[from:string] [to:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsHeading" xml:space="preserve">
+    <value>Žádné události</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsMessage" xml:space="preserve">
+    <value>V synchronizovaném období nejsou žádné události.</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AllDay" xml:space="preserve">
+    <value>Celý den</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.OnlineMeeting" xml:space="preserve">
+    <value>Online schůzka</value>
+  </data>
+  <data name="Integrations.Detail.Email.Loading" xml:space="preserve">
+    <value>Načítání schránek…</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyHeading" xml:space="preserve">
+    <value>Žádné schránky</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyMessage" xml:space="preserve">
+    <value>Tato integrace zatím nepřipojila žádnou schránku.</value>
+  </data>
+  <data name="Integrations.Detail.Email.InboxListLabel" xml:space="preserve">
+    <value>Schránky</value>
+  </data>
+  <data name="Integrations.Detail.Email.Unread" xml:space="preserve">
+    <value>Nepřečtené</value>
+  </data>
+  <data name="Integrations.Detail.Email.Total" xml:space="preserve">
+    <value>Celkem</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connecting" xml:space="preserve">
+    <value>Připojování</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connected" xml:space="preserve">
+    <value>Připojeno</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Disconnected" xml:space="preserve">
+    <value>Odpojeno</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Error" xml:space="preserve">
+    <value>Chyba</value>
+  </data>
+  <data name="Integrations.Detail.Email.Stale" xml:space="preserve">
+    <value>Data nemusí být aktuální.</value>
+  </data>
+  <data name="Integrations.Detail.Email.SyncedAt" xml:space="preserve">
+    <value>Synchronizováno {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Email.MessagesHeading" xml:space="preserve">
+    <value>Nejnovější zprávy</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesHeading" xml:space="preserve">
+    <value>Žádné zprávy</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesMessage" xml:space="preserve">
+    <value>V této schránce nejsou žádné zprávy k zobrazení.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Loading" xml:space="preserve">
+    <value>Načítání míst…</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyHeading" xml:space="preserve">
+    <value>Žádná místa</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyMessage" xml:space="preserve">
+    <value>Tato integrace zatím neposkytuje žádné místo pro počasí.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.LocationLabel" xml:space="preserve">
+    <value>Místo</value>
+  </data>
+  <data name="Integrations.Detail.Weather.NoData" xml:space="preserve">
+    <value>Pro toto místo zatím nejsou k dispozici údaje o počasí.</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Temperature" xml:space="preserve">
+    <value>Teplota</value>
+  </data>
+  <data name="Integrations.Detail.Weather.FeelsLike" xml:space="preserve">
+    <value>Pocitově</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Condition" xml:space="preserve">
+    <value>Podmínky</value>
+  </data>
+  <data name="Integrations.Detail.Weather.ForecastHeading" xml:space="preserve">
+    <value>Předpověď</value>
+  </data>
+  <data name="Integrations.Detail.Music.Loading" xml:space="preserve">
+    <value>Načítání přehrávačů…</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyHeading" xml:space="preserve">
+    <value>Žádné přehrávače</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyMessage" xml:space="preserve">
+    <value>Tato integrace zatím neposkytuje žádný přehrávač hudby.</value>
+  </data>
+  <data name="Integrations.Detail.Music.PlayerLabel" xml:space="preserve">
+    <value>Přehrávač</value>
+  </data>
+  <data name="Integrations.Detail.Music.NotConnected" xml:space="preserve">
+    <value>Nepřipojeno</value>
+  </data>
+  <data name="Integrations.Detail.Music.NothingPlaying" xml:space="preserve">
+    <value>Nic se nepřehrává</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playing" xml:space="preserve">
+    <value>Přehrává se</value>
+  </data>
+  <data name="Integrations.Detail.Music.Paused" xml:space="preserve">
+    <value>Pozastaveno</value>
+  </data>
+  <data name="Integrations.Detail.Music.Track" xml:space="preserve">
+    <value>Skladba</value>
+  </data>
+  <data name="Integrations.Detail.Music.Artist" xml:space="preserve">
+    <value>Umělec</value>
+  </data>
+  <data name="Integrations.Detail.Music.Album" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playback" xml:space="preserve">
+    <value>Přehrávání</value>
+  </data>
+  <data name="Integrations.Detail.Music.Position" xml:space="preserve">
+    <value>Pozice</value>
+  </data>
+  <data name="Integrations.Detail.Music.Volume" xml:space="preserve">
+    <value>Hlasitost</value>
+  </data>
+  <data name="Integrations.Detail.Music.VolumeValue" xml:space="preserve">
+    <value>{volume} %</value>
+    <comment>[volume:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Music.Device" xml:space="preserve">
+    <value>Zařízení</value>
+  </data>
+  <data name="Integrations.Detail.Music.Shuffle" xml:space="preserve">
+    <value>Náhodné přehrávání</value>
+  </data>
+  <data name="Integrations.Detail.Music.Repeat" xml:space="preserve">
+    <value>Opakování</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchPlaceholder" xml:space="preserve">
+    <value>Hledat události</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchAriaLabel" xml:space="preserve">
+    <value>Hledat události</value>
+  </data>
+  <data name="Integrations.Detail.Events.Loading" xml:space="preserve">
+    <value>Načítání událostí…</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyHeading" xml:space="preserve">
+    <value>Žádné události</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyMessage" xml:space="preserve">
+    <value>Tato integrace neposkytuje žádné události.</value>
+  </data>
+  <data name="Integrations.Detail.Events.NoMatchingHeading" xml:space="preserve">
+    <value>Žádné odpovídající události</value>
+  </data>
+  <data name="Integrations.Detail.Events.Payload" xml:space="preserve">
+    <value>Poskytuje: {names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Options" xml:space="preserve">
+    <value>Možnosti: {names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Scheduled" xml:space="preserve">
+    <value>Naplánováno</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Loading" xml:space="preserve">
+    <value>Načítání widgetů…</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyHeading" xml:space="preserve">
+    <value>Žádné widgety</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyMessage" xml:space="preserve">
+    <value>Tato integrace momentálně neposkytuje žádné widgety.</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Configurable" xml:space="preserve">
+    <value>Konfigurovatelné</value>
+  </data>
   <data name="Layouts.Grid.LockedByDevice" xml:space="preserve">
     <value>Mřížka je uzamčena zařízením {deviceName} na {columns} x {rows}.</value>
   </data>

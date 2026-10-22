@@ -1,0 +1,99 @@
+<div class="cap-panel">
+  @if (loading() && players().length === 0) {
+    <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.Music.Loading' | translate" />
+  } @else if (player(); as current) {
+    <div class="cap-split">
+      @if (players().length > 1) {
+        <ul class="cap-rail" role="listbox" [attr.aria-label]="'macrodeck.app:Integrations.Detail.Music.PlayerLabel' | translate">
+          @for (entry of players(); track entry.instanceId) {
+            <li>
+              <shared-rail-item
+                [label]="entry.displayName"
+                [active]="entry.instanceId === current.instanceId"
+                (click)="select(entry)" />
+            </li>
+          }
+        </ul>
+      }
+
+      <section class="cap-card">
+        <h2 class="cap-card-title">{{ current.displayName }}</h2>
+        @if (state(); as playback) {
+          @if (!playback.isConnected) {
+            <p class="cap-notice">{{ playback.statusMessage || ('macrodeck.app:Integrations.Detail.Music.NotConnected' | translate) }}</p>
+          } @else if (!playback.trackName) {
+            <p class="cap-notice">{{ 'macrodeck.app:Integrations.Detail.Music.NothingPlaying' | translate }}</p>
+          } @else {
+            <div class="now-playing">
+              @if (artwork(); as url) {
+                <img class="now-playing-artwork" [src]="url" alt="" />
+              }
+              <div class="now-playing-fields">
+                <div class="cap-field">
+                  <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Music.Track' | translate }}</span>
+                  <span class="cap-field-value">{{ playback.trackName }}</span>
+                </div>
+                @if (playback.artistName) {
+                  <div class="cap-field">
+                    <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Music.Artist' | translate }}</span>
+                    <span class="cap-field-value">{{ playback.artistName }}</span>
+                  </div>
+                }
+                @if (playback.albumName) {
+                  <div class="cap-field">
+                    <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Music.Album' | translate }}</span>
+                    <span class="cap-field-value">{{ playback.albumName }}</span>
+                  </div>
+                }
+                <div class="cap-field">
+                  <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Music.Playback' | translate }}</span>
+                  <span class="availability-pill" [class]="playback.isPlaying ? 'availability-Ready' : 'availability-Muted'">
+                    {{ (playback.isPlaying ? 'macrodeck.app:Integrations.Detail.Music.Playing' : 'macrodeck.app:Integrations.Detail.Music.Paused') | translate }}
+                  </span>
+                </div>
+                @if (position(playback.positionMs, playback.durationMs); as time) {
+                  <div class="cap-field">
+                    <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Music.Position' | translate }}</span>
+                    <span class="cap-field-value">{{ time }}</span>
+                  </div>
+                }
+                @if (volume(playback.volume); as level) {
+                  <div class="cap-field">
+                    <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Music.Volume' | translate }}</span>
+                    <span class="cap-field-value">{{ level }}</span>
+                  </div>
+                }
+                @if (playback.deviceName) {
+                  <div class="cap-field">
+                    <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Music.Device' | translate }}</span>
+                    <span class="cap-field-value">{{ playback.deviceName }}</span>
+                  </div>
+                }
+                @if (playback.shuffleEnabled || (playback.repeatMode && playback.repeatMode !== 'off')) {
+                  <div class="now-playing-flags">
+                    @if (playback.shuffleEnabled) {
+                      <span class="availability-pill availability-Muted">{{ 'macrodeck.app:Integrations.Detail.Music.Shuffle' | translate }}</span>
+                    }
+                    @if (playback.repeatMode && playback.repeatMode !== 'off') {
+                      <span class="availability-pill availability-Muted">{{ 'macrodeck.app:Integrations.Detail.Music.Repeat' | translate }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      </section>
+    </div>
+  } @else if (!available()) {
+    <shared-empty-state
+      icon="music-player-type"
+      [heading]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableHeading' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableMessage' | translate" />
+  } @else {
+    <shared-empty-state
+      icon="music-player-type"
+      [heading]="'macrodeck.app:Integrations.Detail.Music.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.Music.EmptyMessage' | translate" />
+  }
+</div>

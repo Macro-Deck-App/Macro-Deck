@@ -21366,6 +21366,298 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Detail.ConfigStatusReady" xml:space="preserve"><value>就绪</value></data>
   <data name="Integrations.Detail.ConfigStatusNeedsReconfiguration" xml:space="preserve"><value>需要重新配置</value></data>
   <data name="Integrations.Detail.ConfigurationMutationFailed" xml:space="preserve"><value>无法更新该配置。</value></data>
+  <data name="Integrations.Detail.DataTab" xml:space="preserve">
+    <value>数据</value>
+  </data>
+  <data name="Integrations.Detail.DataNavLabel" xml:space="preserve">
+    <value>提供的数据</value>
+  </data>
+  <data name="Integrations.Detail.ValueUnknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="Integrations.Detail.StatusLabel" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableHeading" xml:space="preserve">
+    <value>当前不可用</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityUnavailableMessage" xml:space="preserve">
+    <value>启用此集成并等待其就绪后即可查看数据。</value>
+  </data>
+  <data name="Integrations.Detail.CapabilityLoadFailed" xml:space="preserve">
+    <value>无法加载数据。</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Loading" xml:space="preserve">
+    <value>正在加载电池…</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyHeading" xml:space="preserve">
+    <value>没有电池</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.EmptyMessage" xml:space="preserve">
+    <value>此集成目前未报告任何电池。</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.LevelValue" xml:space="preserve">
+    <value>{level}%</value>
+    <comment>[level:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.UpdatedAt" xml:space="preserve">
+    <value>更新于 {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Batteries.State.Discharging" xml:space="preserve">
+    <value>正在放电</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Good" xml:space="preserve">
+    <value>良好</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Overheat" xml:space="preserve">
+    <value>过热</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Dead" xml:space="preserve">
+    <value>已损坏</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.OverVoltage" xml:space="preserve">
+    <value>过压</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Cold" xml:space="preserve">
+    <value>温度过低</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Health.Failure" xml:space="preserve">
+    <value>故障</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Phone" xml:space="preserve">
+    <value>手机</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Tablet" xml:space="preserve">
+    <value>平板电脑</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Laptop" xml:space="preserve">
+    <value>笔记本电脑</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Headphones" xml:space="preserve">
+    <value>耳机</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Watch" xml:space="preserve">
+    <value>手表</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Controller" xml:space="preserve">
+    <value>手柄</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Mouse" xml:space="preserve">
+    <value>鼠标</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Keyboard" xml:space="preserve">
+    <value>键盘</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Speaker" xml:space="preserve">
+    <value>扬声器</value>
+  </data>
+  <data name="Integrations.Detail.Batteries.Kind.Other" xml:space="preserve">
+    <value>其他设备</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Loading" xml:space="preserve">
+    <value>正在加载日历…</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyHeading" xml:space="preserve">
+    <value>没有日历</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.EmptyMessage" xml:space="preserve">
+    <value>此集成尚未连接日历。</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountLabel" xml:space="preserve">
+    <value>账户</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AccountError" xml:space="preserve">
+    <value>无法同步此账户。</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.Primary" xml:space="preserve">
+    <value>主日历</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.SyncWindow" xml:space="preserve">
+    <value>同步时段：{from} 至 {to}</value>
+    <comment>[from:string] [to:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsHeading" xml:space="preserve">
+    <value>没有事件</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.NoEventsMessage" xml:space="preserve">
+    <value>同步时段内没有事件。</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.AllDay" xml:space="preserve">
+    <value>全天</value>
+  </data>
+  <data name="Integrations.Detail.Calendars.OnlineMeeting" xml:space="preserve">
+    <value>在线会议</value>
+  </data>
+  <data name="Integrations.Detail.Email.Loading" xml:space="preserve">
+    <value>正在加载收件箱…</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyHeading" xml:space="preserve">
+    <value>没有收件箱</value>
+  </data>
+  <data name="Integrations.Detail.Email.EmptyMessage" xml:space="preserve">
+    <value>此集成尚未连接收件箱。</value>
+  </data>
+  <data name="Integrations.Detail.Email.InboxListLabel" xml:space="preserve">
+    <value>收件箱</value>
+  </data>
+  <data name="Integrations.Detail.Email.Unread" xml:space="preserve">
+    <value>未读</value>
+  </data>
+  <data name="Integrations.Detail.Email.Total" xml:space="preserve">
+    <value>总计</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connecting" xml:space="preserve">
+    <value>正在连接</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Connected" xml:space="preserve">
+    <value>已连接</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Disconnected" xml:space="preserve">
+    <value>已断开连接</value>
+  </data>
+  <data name="Integrations.Detail.Email.Status.Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Integrations.Detail.Email.Stale" xml:space="preserve">
+    <value>数据可能不是最新的。</value>
+  </data>
+  <data name="Integrations.Detail.Email.SyncedAt" xml:space="preserve">
+    <value>同步于 {time}</value>
+    <comment>[time:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Email.MessagesHeading" xml:space="preserve">
+    <value>最新邮件</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesHeading" xml:space="preserve">
+    <value>没有邮件</value>
+  </data>
+  <data name="Integrations.Detail.Email.NoMessagesMessage" xml:space="preserve">
+    <value>此收件箱中没有可显示的邮件。</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Loading" xml:space="preserve">
+    <value>正在加载位置…</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyHeading" xml:space="preserve">
+    <value>没有位置</value>
+  </data>
+  <data name="Integrations.Detail.Weather.EmptyMessage" xml:space="preserve">
+    <value>此集成尚未提供天气位置。</value>
+  </data>
+  <data name="Integrations.Detail.Weather.LocationLabel" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="Integrations.Detail.Weather.NoData" xml:space="preserve">
+    <value>此位置暂无天气数据。</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Temperature" xml:space="preserve">
+    <value>温度</value>
+  </data>
+  <data name="Integrations.Detail.Weather.FeelsLike" xml:space="preserve">
+    <value>体感温度</value>
+  </data>
+  <data name="Integrations.Detail.Weather.Condition" xml:space="preserve">
+    <value>天气状况</value>
+  </data>
+  <data name="Integrations.Detail.Weather.ForecastHeading" xml:space="preserve">
+    <value>预报</value>
+  </data>
+  <data name="Integrations.Detail.Music.Loading" xml:space="preserve">
+    <value>正在加载播放器…</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyHeading" xml:space="preserve">
+    <value>没有播放器</value>
+  </data>
+  <data name="Integrations.Detail.Music.EmptyMessage" xml:space="preserve">
+    <value>此集成尚未提供音乐播放器。</value>
+  </data>
+  <data name="Integrations.Detail.Music.PlayerLabel" xml:space="preserve">
+    <value>播放器</value>
+  </data>
+  <data name="Integrations.Detail.Music.NotConnected" xml:space="preserve">
+    <value>未连接</value>
+  </data>
+  <data name="Integrations.Detail.Music.NothingPlaying" xml:space="preserve">
+    <value>没有正在播放的内容</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playing" xml:space="preserve">
+    <value>正在播放</value>
+  </data>
+  <data name="Integrations.Detail.Music.Paused" xml:space="preserve">
+    <value>已暂停</value>
+  </data>
+  <data name="Integrations.Detail.Music.Track" xml:space="preserve">
+    <value>曲目</value>
+  </data>
+  <data name="Integrations.Detail.Music.Artist" xml:space="preserve">
+    <value>艺术家</value>
+  </data>
+  <data name="Integrations.Detail.Music.Album" xml:space="preserve">
+    <value>专辑</value>
+  </data>
+  <data name="Integrations.Detail.Music.Playback" xml:space="preserve">
+    <value>播放</value>
+  </data>
+  <data name="Integrations.Detail.Music.Position" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="Integrations.Detail.Music.Volume" xml:space="preserve">
+    <value>音量</value>
+  </data>
+  <data name="Integrations.Detail.Music.VolumeValue" xml:space="preserve">
+    <value>{volume}%</value>
+    <comment>[volume:int]</comment>
+  </data>
+  <data name="Integrations.Detail.Music.Device" xml:space="preserve">
+    <value>设备</value>
+  </data>
+  <data name="Integrations.Detail.Music.Shuffle" xml:space="preserve">
+    <value>随机播放</value>
+  </data>
+  <data name="Integrations.Detail.Music.Repeat" xml:space="preserve">
+    <value>重复</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchPlaceholder" xml:space="preserve">
+    <value>搜索事件</value>
+  </data>
+  <data name="Integrations.Detail.Events.SearchAriaLabel" xml:space="preserve">
+    <value>搜索事件</value>
+  </data>
+  <data name="Integrations.Detail.Events.Loading" xml:space="preserve">
+    <value>正在加载事件…</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyHeading" xml:space="preserve">
+    <value>没有事件</value>
+  </data>
+  <data name="Integrations.Detail.Events.EmptyMessage" xml:space="preserve">
+    <value>此集成不提供任何事件。</value>
+  </data>
+  <data name="Integrations.Detail.Events.NoMatchingHeading" xml:space="preserve">
+    <value>没有匹配的事件</value>
+  </data>
+  <data name="Integrations.Detail.Events.Payload" xml:space="preserve">
+    <value>提供：{names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Options" xml:space="preserve">
+    <value>选项：{names}</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Integrations.Detail.Events.Scheduled" xml:space="preserve">
+    <value>定时</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Loading" xml:space="preserve">
+    <value>正在加载组件…</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyHeading" xml:space="preserve">
+    <value>没有组件</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.EmptyMessage" xml:space="preserve">
+    <value>此集成目前不提供任何组件。</value>
+  </data>
+  <data name="Integrations.Detail.Widgets.Configurable" xml:space="preserve">
+    <value>可配置</value>
+  </data>
   <data name="Layouts.Grid.LockedByDevice" xml:space="preserve">
     <value>{deviceName}将此网格锁定为 {columns} x {rows}。</value>
   </data>

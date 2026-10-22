@@ -159,6 +159,40 @@
 .detail-label { color: var(--color-text-secondary); }
 .detail-value { font-weight: var(--font-medium); }
 
+.capability-link {
+  @include ds.interactive-row;
+  justify-content: space-between;
+  width: calc(100% + 2 * var(--space-2));
+  margin: 0 calc(-1 * var(--space-2));
+  padding: 0.3125rem var(--space-2);
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+
+  .detail-value {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+}
+
+.capability-link-chevron { color: var(--color-text-muted); }
+
+.capability-page-panel.with-nav {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+  max-width: none;
+  margin: 0;
+}
+
+@include ds.breakpoint-down(md) {
+  .capability-page-panel.with-nav { grid-template-columns: minmax(0, 1fr); }
+}
+
 .config-entry-remove {
   display: inline-flex;
   align-items: center;

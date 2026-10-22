@@ -396,6 +396,7 @@ public class Startup
 		services.AddHostedService<VariableCatalogUpdateBackgroundService>();
 		services.AddHostedService<MusicPlayerStateBroadcastBackgroundService>();
 		services.AddHostedService<WeatherStateBroadcastBackgroundService>();
+		services.AddHostedService<IntegrationCapabilityDataBroadcastBackgroundService>();
 		services.AddHostedService<CalendarSyncBackgroundService>();
 		services.AddHostedService<CalendarTriggerBackgroundService>();
 		services.AddHostedService<CalendarWidgetBackgroundService>();
@@ -503,6 +504,7 @@ public class Startup
 		services.AddSingleton<IPluginDeviceRegistry, PluginDeviceRegistry>();
 		services.AddSingleton<DeviceProviderHost>();
 		services.AddSingleton<IBatteryRegistry, BatteryRegistry>();
+		services.AddScoped<IIntegrationCapabilityCounter, IntegrationCapabilityCounter>();
 		services.AddSingleton<BatteryProviderHost>();
 		services.AddScoped<DeviceSurfaceBuilder>();
 		services.AddSingleton<DeviceInteractionRouter>();

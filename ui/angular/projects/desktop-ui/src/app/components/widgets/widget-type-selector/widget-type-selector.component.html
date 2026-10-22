@@ -31,26 +31,7 @@
         <div class="type-card" [class.favorite]="isFavorite(option)" [hidden]="!matches(option)">
           <button class="type-select" type="button" [attr.aria-label]="name(option)" (click)="selectType(option.id)">
             <span class="type-preview" #previewBox>
-              <shared-ui-tree-widget
-                #preview
-                class="type-preview-widget"
-                [widgetType]="option.id"
-                [sample]="true"
-                [width]="previewCell"
-                [height]="previewCell"
-                [style.width.px]="previewCell"
-                [style.height.px]="previewCell"
-                [style.margin-right.px]="previewSize() - previewCell"
-                [style.margin-bottom.px]="previewSize() - previewCell"
-                [style.transform]="'scale(' + previewScale() + ')'"
-                [disabled]="true"
-                [style.--wq.px]="previewCell"
-                [style.--widget-scale]="1"
-                [style.--widget-radius.px]="previewRadius">
-              </shared-ui-tree-widget>
-              @if (preview.rejected()) {
-                <span class="type-preview-placeholder">{{ 'macrodeck.app:WebClient.Widgets.NoPreview' | translate }}</span>
-              }
+              <app-widget-type-preview [widgetType]="option.id" [size]="previewSize()" />
             </span>
             <span class="type-info">
               <span class="type-name">{{ name(option) }}</span>

@@ -1,0 +1,20 @@
+<shared-ui-tree-widget
+  #preview
+  class="type-preview-widget"
+  [widgetType]="widgetType()"
+  [sample]="true"
+  [width]="cell"
+  [height]="cell"
+  [style.width.px]="cell"
+  [style.height.px]="cell"
+  [style.margin-right.px]="size() - cell"
+  [style.margin-bottom.px]="size() - cell"
+  [style.transform]="'scale(' + size() / cell + ')'"
+  [disabled]="true"
+  [style.--wq.px]="cell"
+  [style.--widget-scale]="1"
+  [style.--widget-radius.px]="radius">
+</shared-ui-tree-widget>
+@if (preview.rejected()) {
+  <span class="type-preview-placeholder">{{ 'macrodeck.app:WebClient.Widgets.NoPreview' | translate }}</span>
+}

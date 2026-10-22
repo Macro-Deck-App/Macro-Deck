@@ -153,7 +153,10 @@ import {
   GetIconsRequest,
   GetIconsResponse,
   GetInstalledPluginsResponse,
+  GetIntegrationBatteriesResponse,
+  GetIntegrationCalendarsResponse,
   GetIntegrationCapabilitiesResponse,
+  GetIntegrationEmailInboxesResponse,
   GetIntegrationIssuesResponse,
   GetIntegrationsResponse,
   GetKeyRingProtectionResponse,
@@ -1774,6 +1777,18 @@ export class ApiService {
 
   getIntegrationCapabilities(integrationId: string): Promise<GetIntegrationCapabilitiesResponse> {
     return this.http('GET', `/api/integrations/${encodeURIComponent(integrationId)}/capabilities`);
+  }
+
+  getIntegrationBatteries(integrationId: string): Promise<GetIntegrationBatteriesResponse> {
+    return this.http('GET', `/api/integrations/${encodeURIComponent(integrationId)}/batteries`);
+  }
+
+  getIntegrationCalendars(integrationId: string): Promise<GetIntegrationCalendarsResponse> {
+    return this.http('GET', `/api/integrations/${encodeURIComponent(integrationId)}/calendars`);
+  }
+
+  getIntegrationEmailInboxes(integrationId: string): Promise<GetIntegrationEmailInboxesResponse> {
+    return this.http('GET', `/api/integrations/${encodeURIComponent(integrationId)}/email-inboxes`);
   }
 
   resolveIntegrationIssue(integrationId: string, issueId: string): Promise<ResolveIntegrationIssueResponse> {

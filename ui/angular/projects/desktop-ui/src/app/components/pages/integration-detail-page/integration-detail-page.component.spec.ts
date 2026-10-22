@@ -5,7 +5,7 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { Subject, EMPTY } from 'rxjs';
 
-import { VariableCatalogNode, ActionParameterType, AppStrings, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
+import { VariableCatalogNode, ActionParameterType, AppStrings, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationCapabilityDataChangedEvent, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ToastService, VariableService } from '@shared';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
@@ -27,6 +27,8 @@ describe('IntegrationDetailPageComponent', () => {
   let getLocalization: jasmine.Spy;
   let getIntegrationIssues: jasmine.Spy;
   let getIntegrationCapabilities: jasmine.Spy;
+  let getIntegrationBatteries: jasmine.Spy;
+  let capabilityDataEvents: Subject<IntegrationCapabilityDataChangedEvent>;
   let resolveIntegrationIssue: jasmine.Spy;
   let getVariableCatalogProviders: jasmine.Spy;
   let discoverCatalogVariables: jasmine.Spy;
@@ -190,6 +192,9 @@ describe('IntegrationDetailPageComponent', () => {
     });
     getIntegrationIssues = jasmine.createSpy('getIntegrationIssues').and.resolveTo({ issues: [] });
     getIntegrationCapabilities = jasmine.createSpy('getIntegrationCapabilities').and.resolveTo(capabilitiesResponse());
+    getIntegrationBatteries = jasmine.createSpy('getIntegrationBatteries')
+      .and.resolveTo({ found: true, available: true, batteries: [] });
+    capabilityDataEvents = new Subject<IntegrationCapabilityDataChangedEvent>();
     resolveIntegrationIssue = jasmine
       .createSpy('resolveIntegrationIssue')
       .and.resolveTo({ success: true, followUp: 'None' });
@@ -240,6 +245,9 @@ describe('IntegrationDetailPageComponent', () => {
             getConfigEntries: async () => ({ entries }),
             getIntegrationIssues: (...args: unknown[]) => getIntegrationIssues(...args),
             getIntegrationCapabilities: (...args: unknown[]) => getIntegrationCapabilities(...args),
+            getIntegrationBatteries: (...args: unknown[]) => getIntegrationBatteries(...args),
+            getIntegrationCalendars: async () => ({ found: true, available: true, accounts: [], events: [] }),
+            getIntegrationEmailInboxes: async () => ({ found: true, available: true, inboxes: [] }),
             resolveIntegrationIssue: (...args: unknown[]) => resolveIntegrationIssue(...args),
             getVariableCatalogProviders: (...args: unknown[]) => getVariableCatalogProviders(...args),
             discoverCatalogVariables: (...args: unknown[]) => discoverCatalogVariables(...args),
@@ -254,6 +262,9 @@ describe('IntegrationDetailPageComponent', () => {
               }
               if (name === 'IntegrationsChangedEvent') {
                 return integrationsEvents.asObservable();
+              }
+              if (name === 'IntegrationCapabilityDataChangedEvent') {
+                return capabilityDataEvents.asObservable();
               }
               return name === 'IntegrationIssuesChangedEvent' ? issuesEvents.asObservable() : EMPTY;
             },
@@ -1384,6 +1395,113 @@ describe('IntegrationDetailPageComponent', () => {
 
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/integrations']);
       expect(locationSpy.back).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('capability pages', () => {
+    function provided(...kinds: string[]): Integration['providedCapabilities'] {
+      return kinds.map(kind => ({ kind, name: kind }));
+    }
+
+    function tabIds(fixture: ComponentFixture<IntegrationDetailPageComponent>): string[] {
+      return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('[role="tab"]'))
+        .map(tab => tab.id.replace('integration-detail-tab-', ''));
+    }
+
+    function capabilityRow(fixture: ComponentFixture<IntegrationDetailPageComponent>, kind: string): HTMLElement {
+      return fixture.nativeElement.querySelector(`[data-capability="${kind}"]`) as HTMLElement;
+    }
+
+    it('gives events and widgets their own tabs and groups two or more data capabilities under one tab', async () => {
+      integrations.set([integration({
+        providedCapabilities: provided('events', 'widget-type-provider', 'battery-provider', 'calendar', 'migration'),
+      })]);
+
+      const fixture = await createFixture();
+
+      expect(tabIds(fixture)).toEqual(['overview', 'actions', 'variables', 'events', 'widgets', 'data']);
+      fixture.destroy();
+    });
+
+    it('gives a single data capability its own tab', async () => {
+      integrations.set([integration({ providedCapabilities: provided('battery-provider') })]);
+
+      const fixture = await createFixture();
+
+      expect(tabIds(fixture)).toEqual(['overview', 'actions', 'variables', 'batteries']);
+      fixture.destroy();
+    });
+
+    it('opens a grouped page from a deep link, under the shared tab, with a navigation to its siblings', async () => {
+      queryTab = 'batteries';
+      integrations.set([integration({ providedCapabilities: provided('battery-provider', 'email-inbox') })]);
+      getIntegrationBatteries.and.resolveTo({
+        found: true,
+        available: true,
+        batteries: [{
+          id: 'app.macro-deck.spotify:pad', name: 'Game pad', kind: 'controller', levelPercent: 50,
+          chargeState: 'Discharging', isConnected: true, health: 'Unknown', updatedAt: '2026-10-22T10:00:00Z',
+        }],
+      });
+
+      const fixture = await createFixture();
+
+      expect(fixture.nativeElement.querySelector('#integration-detail-tab-data').getAttribute('aria-selected')).toBe('true');
+      expect(fixture.nativeElement.querySelector('app-integration-batteries-panel').textContent).toContain('Game pad');
+      const nav = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.data-nav shared-rail-item'))
+        .map(item => item.textContent?.trim());
+      expect(nav.length).toBe(2);
+      fixture.destroy();
+    });
+
+    it('falls back to the overview when a deep link names a page the integration does not provide', async () => {
+      queryTab = 'calendars';
+      integrations.set([integration({ providedCapabilities: provided('battery-provider') })]);
+
+      const fixture = await createFixture();
+
+      expect(fixture.nativeElement.querySelector('#integration-detail-panel-overview')).not.toBeNull();
+      expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({ queryParams: { tab: null } }));
+      fixture.destroy();
+    });
+
+    it('shows the count of every capability on the overview and opens its page from the row', async () => {
+      integrations.set([integration({ providedCapabilities: provided('battery-provider', 'migration') })]);
+      getIntegrationCapabilities.and.resolveTo(capabilitiesResponse({
+        counts: [{ kind: 'battery-provider', count: 3 }],
+      }));
+
+      const fixture = await createFixture();
+
+      const batteries = capabilityRow(fixture, 'battery-provider');
+      expect(batteries.tagName).toBe('BUTTON');
+      expect(batteries.querySelector('.detail-value')?.textContent?.trim()).toBe('3');
+      expect(fixture.nativeElement.querySelector('#integration-detail-tab-batteries .tab-badge')?.textContent?.trim()).toBe('3');
+      const migration = capabilityRow(fixture, 'migration');
+      expect(migration.tagName).not.toBe('BUTTON');
+      expect(migration.querySelector('.icon-check')).not.toBeNull();
+
+      batteries.click();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('app-integration-batteries-panel')).not.toBeNull();
+      fixture.destroy();
+    });
+
+    it('refreshes the counts when the host reports changed data for this integration', async () => {
+      integrations.set([integration({ providedCapabilities: provided('battery-provider') })]);
+      const fixture = await createFixture();
+      const calls = getIntegrationCapabilities.calls.count();
+
+      capabilityDataEvents.next({ kind: 'battery-provider', integrationIds: ['com.example.other'] });
+      await new Promise(resolve => setTimeout(resolve, 600));
+      expect(getIntegrationCapabilities.calls.count()).toBe(calls);
+
+      capabilityDataEvents.next({ kind: 'battery-provider', integrationIds: ['app.macro-deck.spotify'] });
+      await new Promise(resolve => setTimeout(resolve, 600));
+      expect(getIntegrationCapabilities.calls.count()).toBe(calls + 1);
+      fixture.destroy();
     });
   });
 });

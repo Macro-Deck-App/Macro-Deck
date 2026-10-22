@@ -1,0 +1,11 @@
+<ul class="data-nav" role="listbox" [attr.aria-label]="'macrodeck.app:Integrations.Detail.DataNavLabel' | translate">
+  @for (entry of pages(); track entry.id) {
+    <li>
+      <shared-rail-item
+        [label]="entry.labelKey | translate"
+        [count]="counts().get(entry.kind) ?? null"
+        [active]="entry.id === activeId()"
+        (click)="selected.emit(entry.id)" />
+    </li>
+  }
+</ul>

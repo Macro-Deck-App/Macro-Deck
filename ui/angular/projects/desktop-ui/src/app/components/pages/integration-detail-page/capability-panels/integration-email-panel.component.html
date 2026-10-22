@@ -1,0 +1,86 @@
+<div class="cap-panel">
+  @if (loader.loading()) {
+    <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.Email.Loading' | translate" />
+  } @else if (loader.error(); as error) {
+    <shared-error-banner [message]="error" (dismiss)="loader.error.set(null)" />
+  } @else if (loader.data(); as data) {
+    @if (selected(); as inbox) {
+      <div class="cap-split">
+        @if (inboxes().length > 1) {
+          <ul class="cap-rail" role="listbox" [attr.aria-label]="'macrodeck.app:Integrations.Detail.Email.InboxListLabel' | translate">
+            @for (entry of inboxes(); track entry.ref) {
+              <li>
+                <shared-rail-item
+                  [label]="entry.displayName"
+                  [count]="entry.unreadCount"
+                  [active]="entry.ref === inbox.ref"
+                  (click)="select(entry)" />
+              </li>
+            }
+          </ul>
+        }
+
+        <section class="cap-card">
+          <h2 class="cap-card-title">{{ inbox.address || inbox.displayName }}</h2>
+          <div class="cap-field">
+            <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.StatusLabel' | translate }}</span>
+            <span class="availability-pill" [class]="'availability-' + statusTone(inbox.status)">{{ statusLabel(inbox.status) }}</span>
+          </div>
+          @if (inbox.statusMessage) {
+            <p class="cap-notice">{{ inbox.statusMessage }}</p>
+          }
+          <div class="cap-field">
+            <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Email.Unread' | translate }}</span>
+            <span class="cap-field-value">{{ inbox.unreadCount }}</span>
+          </div>
+          <div class="cap-field">
+            <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Email.Total' | translate }}</span>
+            <span class="cap-field-value">{{ inbox.totalCount }}</span>
+          </div>
+          @if (syncedAt(inbox); as synced) {
+            <p class="cap-notice">{{ synced }}</p>
+          }
+          @if (inbox.isStale) {
+            <p class="cap-notice">{{ 'macrodeck.app:Integrations.Detail.Email.Stale' | translate }}</p>
+          }
+        </section>
+      </div>
+
+      <shared-variable-group-header [label]="'macrodeck.app:Integrations.Detail.Email.MessagesHeading' | translate" [section]="true" />
+      @if (inbox.messages.length > 0) {
+        <ul class="cap-rows">
+          @for (message of inbox.messages; track message.id) {
+            <li>
+              <shared-variable-row
+                class="message-row"
+                [primary]="message.subject"
+                [primaryMono]="false"
+                [secondary]="message.senderName || message.senderAddress || null"
+                [value]="format(message.receivedAt)">
+                @if (!message.isRead) {
+                  <span row-meta class="availability-pill availability-Ready">{{ 'macrodeck.app:Integrations.Detail.Email.Unread' | translate }}</span>
+                }
+              </shared-variable-row>
+            </li>
+          }
+        </ul>
+      } @else {
+        <shared-empty-state
+          compact
+          icon="mail"
+          [heading]="'macrodeck.app:Integrations.Detail.Email.NoMessagesHeading' | translate"
+          [message]="'macrodeck.app:Integrations.Detail.Email.NoMessagesMessage' | translate" />
+      }
+    } @else if (!data.available) {
+      <shared-empty-state
+        icon="mail"
+        [heading]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableHeading' | translate"
+        [message]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableMessage' | translate" />
+    } @else {
+      <shared-empty-state
+        icon="mail"
+        [heading]="'macrodeck.app:Integrations.Detail.Email.EmptyHeading' | translate"
+        [message]="'macrodeck.app:Integrations.Detail.Email.EmptyMessage' | translate" />
+    }
+  }
+</div>
