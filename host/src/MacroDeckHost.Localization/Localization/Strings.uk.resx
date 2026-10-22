@@ -7085,6 +7085,18 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>Невідомий крок</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>Вибір датчиків акумулятора</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Виберіть датчики акумулятора з Home Assistant, які Macro Deck показуватиме як пристрої з акумулятором. Щоб не показувати жодного, залиште всі прапорці знятими.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>Датчики акумулятора</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>Вибрано забагато датчиків акумулятора. Обмеження: {max}.</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>Кожна сутність, призначена вибраним зонам.</value>
   </data>
@@ -23683,7 +23695,7 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>{device} (недоступно)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>Поки жоден пристрій не повідомляє про акумулятор. Увімкніть інтеграцію ADB і підключіть телефон або встановіть плагін, що надає дані про акумулятори.</value>
+    <value>Поки жоден пристрій не повідомляє про акумулятор. Увімкніть інтеграцію ADB і підключіть телефон, створіть пару із застосунком Macro Deck Companion, виберіть датчики акумулятора в налаштуваннях Home Assistant або встановіть плагін, що надає дані про акумулятори.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>Смуга</value>

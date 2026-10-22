@@ -20,6 +20,9 @@ internal sealed record HomeAssistantCatalog
 
 	public IReadOnlyDictionary<string, string> EntityAreas { get; init; } = HomeAssistantResponses.EmptyEntityAreas;
 
+	public IReadOnlyDictionary<string, string> EntityDevices { get; init; }
+		= HomeAssistantResponses.EmptyEntityDevices;
+
 	public HomeAssistantEntityState? Entity(string? entityId)
 	{
 		return entityId is { Length: > 0 } id && Entities.TryGetValue(id, out var state) ? state : null;

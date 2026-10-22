@@ -54,6 +54,7 @@ internal sealed class HomeAssistantConnection : IDisposable
 
 	private IHomeAssistantClient? _client;
 	private readonly Action? _onVariablesChanged;
+	private readonly Action? _onBatteryRelevantChange;
 
 	private volatile HomeAssistantState _state = HomeAssistantState.Disconnected;
 	private volatile HomeAssistantCatalog _catalog = HomeAssistantCatalog.Empty;
@@ -63,6 +64,8 @@ internal sealed class HomeAssistantConnection : IDisposable
 	// fixed at construction: the watched-entity config-flow step is gone, so what "watched" means now
 	// comes from HomeAssistantVariableCatalog.SubscribeAsync instead of a one-time selection.
 	private volatile IReadOnlyList<string> _watchedEntities;
+
+	private volatile IReadOnlySet<string> _batteryEntities = new HashSet<string>(StringComparer.Ordinal);
 
 	private int _failures;
 	private int _refreshQueued;
@@ -76,7 +79,8 @@ internal sealed class HomeAssistantConnection : IDisposable
 		HomeAssistantEventEmitter? events = null,
 		HomeAssistantVariableCatalog? dynamicVariables = null,
 		TimeSpan? reconnectDelay = null,
-		Action? onVariablesChanged = null)
+		Action? onVariablesChanged = null,
+		Action? onBatteryRelevantChange = null)
 	{
 		_clientFactory = clientFactory;
 		_uri = uri;
@@ -85,6 +89,7 @@ internal sealed class HomeAssistantConnection : IDisposable
 		_events = events;
 		_dynamicVariables = dynamicVariables;
 		_onVariablesChanged = onVariablesChanged;
+		_onBatteryRelevantChange = onBatteryRelevantChange;
 		_reconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(5);
 	}
 
@@ -120,6 +125,11 @@ internal sealed class HomeAssistantConnection : IDisposable
 	{
 		_watchedEntities = entityIds as IReadOnlyList<string> ?? entityIds.ToList();
 		_missingEntities = FindMissingEntities();
+	}
+
+	public void WatchBatteryEntities(IReadOnlySet<string> entityIds)
+	{
+		_batteryEntities = entityIds;
 	}
 
 	public HomeAssistantEntityState? Entity(string? entityId)
@@ -324,6 +334,7 @@ internal sealed class HomeAssistantConnection : IDisposable
 			};
 
 			_onVariablesChanged?.Invoke();
+			_onBatteryRelevantChange?.Invoke();
 
 			_missingEntities = FindMissingEntities();
 
@@ -367,6 +378,7 @@ internal sealed class HomeAssistantConnection : IDisposable
 			_client = null;
 			_state = HomeAssistantState.Disconnected;
 			_onVariablesChanged?.Invoke();
+			_onBatteryRelevantChange?.Invoke();
 
 			try
 			{
@@ -450,6 +462,11 @@ internal sealed class HomeAssistantConnection : IDisposable
 			_dynamicVariables?.Push(newState);
 		}
 
+		if (_batteryEntities.Contains(entityId))
+		{
+			_onBatteryRelevantChange?.Invoke();
+		}
+
 		_events?.PublishStateChanged(entityId, newState, fromState, _catalog.AreaOf(entityId));
 	}
 
@@ -497,6 +514,9 @@ internal sealed class HomeAssistantConnection : IDisposable
 		var entityAreas = entityRegistry is { } e
 			? HomeAssistantResponses.ReadEntityAreas(e, areaList, deviceList)
 			: previous.EntityAreas;
+		var entityDevices = entityRegistry is { } registry
+			? HomeAssistantResponses.ReadEntityDevices(registry)
+			: previous.EntityDevices;
 
 		_catalog = new HomeAssistantCatalog
 		{
@@ -505,7 +525,8 @@ internal sealed class HomeAssistantConnection : IDisposable
 			Services = serviceMap,
 			Areas = areaList,
 			Devices = deviceList,
-			EntityAreas = entityAreas
+			EntityAreas = entityAreas,
+			EntityDevices = entityDevices
 		};
 	}
 
@@ -532,6 +553,7 @@ internal sealed class HomeAssistantConnection : IDisposable
 				if (_client is { IsConnected: true } client)
 				{
 					await LoadCatalogAsync(client, _cts.Token).ConfigureAwait(false);
+					_onBatteryRelevantChange?.Invoke();
 				}
 			}
 			catch (OperationCanceledException)

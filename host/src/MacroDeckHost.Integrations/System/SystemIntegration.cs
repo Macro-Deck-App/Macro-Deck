@@ -9,11 +9,13 @@ using MacroDeckHost.Platform.Focus;
 using MacroDeckHost.Platform.Lock;
 using MacroDeckHost.Integrations.System.Metrics;
 using MacroDeckHost.Integrations.System.Power;
+using MacroDeckHost.Integrations.System.Providers;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
@@ -29,7 +31,9 @@ public sealed class SystemIntegration
 		IVariableProvider,
 		IIntegrationIssueProvider,
 		IIntegrationIconProvider,
-		IMigrationProvider
+		IMigrationProvider,
+		IBatteryProvider,
+		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.system";
 
@@ -90,6 +94,7 @@ public sealed class SystemIntegration
 	private readonly VariableApiAccessor _variableAccessor = new();
 	private readonly NotificationServiceAccessor _notificationServiceAccessor = new();
 	private readonly DesktopNotifierAccessor _desktopNotifierAccessor = new();
+	private readonly SystemBatteryProvider _batteries;
 
 	private Channel<FocusedAppInfo?>? _focusChannel;
 	private Task? _focusWriterLoop;
@@ -118,7 +123,8 @@ public sealed class SystemIntegration
 			SystemMetricsServiceFactory.Create(),
 			PowerServiceFactory.Create(),
 			LockStateReaderFactory.Create(),
-			FocusedApplicationWatcherFactory.Create)
+			FocusedApplicationWatcherFactory.Create,
+			HostBatteryReaderFactory.Create())
 	{
 	}
 
@@ -129,7 +135,8 @@ public sealed class SystemIntegration
 		ISystemMetricsService metrics,
 		IPowerService power,
 		ILockStateReader? lockStateReader = null,
-		Func<IFocusedApplicationWatcher>? focusWatcherFactory = null)
+		Func<IFocusedApplicationWatcher>? focusWatcherFactory = null,
+		IHostBatteryReader? batteryReader = null)
 	{
 		_applications = applications;
 		_volume = volume;
@@ -137,6 +144,9 @@ public sealed class SystemIntegration
 		_power = power;
 		_lock = lockStateReader ?? new NullLockStateReader();
 		_createFocusWatcher = focusWatcherFactory ?? (() => new NullFocusedApplicationWatcher());
+		_batteries = new SystemBatteryProvider(batteryReader ?? new NullHostBatteryReader(),
+			TimeProvider.System,
+			Environment.MachineName);
 
 		_fixedVariables = BuildVariables(_metrics.GpuCount);
 		_audio = new AudioState([], new HashSet<string>(StringComparer.Ordinal), null);
@@ -177,6 +187,21 @@ public sealed class SystemIntegration
 	public byte[] GetIcon()
 	{
 		return _icon;
+	}
+
+	Task IBatteryProvider.InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken)
+	{
+		return _batteries.InitializeAsync(context, cancellationToken);
+	}
+
+	Task IBatteryProvider.ShutdownAsync(CancellationToken cancellationToken)
+	{
+		return _batteries.ShutdownAsync(cancellationToken);
+	}
+
+	public void Dispose()
+	{
+		_batteries.Dispose();
 	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new WindowsUtilsMacroDeck2Migration()];

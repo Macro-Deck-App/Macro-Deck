@@ -7085,6 +7085,18 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>Onbekende stap</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>Kies batterijsensoren</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Kies de batterijsensoren uit Home Assistant die Macro Deck als apparaten met batterij toont. Laat alles uitgevinkt om er geen te tonen.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>Batterijsensoren</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>Te veel batterijsensoren geselecteerd. De limiet is {max}.</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>Elke entiteit die aan de gekozen gebieden is toegewezen.</value>
   </data>
@@ -23683,7 +23695,7 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>{device} (niet beschikbaar)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>Nog geen apparaat meldt een batterij. Zet de ADB-integratie aan en sluit een telefoon aan, of installeer een plug-in die batterijen levert.</value>
+    <value>Nog geen apparaat meldt een batterij. Zet de ADB-integratie aan en sluit een telefoon aan, koppel de Macro Deck Companion-app, kies batterijsensoren in de Home Assistant-configuratie of installeer een plug-in die batterijen levert.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>Balk</value>

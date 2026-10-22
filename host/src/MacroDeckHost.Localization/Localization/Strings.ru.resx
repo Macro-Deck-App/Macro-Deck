@@ -7085,6 +7085,18 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>Неизвестный шаг</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>Выбор датчиков батареи</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Выберите датчики батареи из Home Assistant, которые Macro Deck будет показывать как устройства с батареей. Чтобы не показывать ни одного, оставьте все флажки снятыми.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>Датчики батареи</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>Выбрано слишком много датчиков батареи. Ограничение: {max}.</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>Все объекты, назначенные выбранным зонам.</value>
   </data>
@@ -23683,7 +23695,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>{device} (недоступно)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>Пока ни одно устройство не сообщает о батарее. Включите интеграцию ADB и подключите телефон или установите плагин, предоставляющий данные о батареях.</value>
+    <value>Пока ни одно устройство не сообщает о батарее. Включите интеграцию ADB и подключите телефон, выполните сопряжение с приложением Macro Deck Companion, выберите датчики батареи в настройках Home Assistant или установите плагин, предоставляющий данные о батареях.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>Полоса</value>

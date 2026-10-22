@@ -7085,6 +7085,18 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>अज्ञात चरण</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>बैटरी सेंसर चुनें</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Home Assistant के वे बैटरी सेंसर चुनें जिन्हें Macro Deck बैटरी डिवाइस के रूप में दिखाए। कोई भी न दिखाने के लिए सभी को अचयनित छोड़ें।</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>बैटरी सेंसर</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>बहुत अधिक बैटरी सेंसर चुने गए हैं। सीमा {max} है।</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>चुने गए क्षेत्रों को सौंपी गई हर इकाई।</value>
   </data>
@@ -23683,7 +23695,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>{device} (उपलब्ध नहीं)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>अभी तक कोई डिवाइस बैटरी की जानकारी नहीं दे रहा है। ADB इंटीग्रेशन चालू करें और फ़ोन कनेक्ट करें, या बैटरी जानकारी देने वाला प्लगइन इंस्टॉल करें।</value>
+    <value>अभी तक कोई डिवाइस बैटरी की जानकारी नहीं दे रहा है। ADB इंटीग्रेशन चालू करें और फ़ोन कनेक्ट करें, Macro Deck Companion ऐप पेयर करें, Home Assistant कॉन्फ़िगरेशन में बैटरी सेंसर चुनें, या बैटरी जानकारी देने वाला प्लगइन इंस्टॉल करें।</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>बार</value>

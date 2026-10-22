@@ -7085,6 +7085,18 @@
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>خطوة غير معروفة</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>اختيار مستشعرات البطارية</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>اختر مستشعرات البطارية من Home Assistant التي يعرضها Macro Deck كأجهزة ببطارية. اترك الكل دون تحديد لعدم عرض أي منها.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>مستشعرات البطارية</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>تم تحديد عدد كبير جدًا من مستشعرات البطارية. الحد الأقصى هو {max}.</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>كل كيان مخصص للمناطق المختارة.</value>
   </data>
@@ -23683,7 +23695,7 @@
     <value>{device} (غير متاح)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>لا يُبلغ أي جهاز عن بطارية بعد. شغّل تكامل ADB ووصّل هاتفًا، أو ثبّت إضافة توفر البطاريات.</value>
+    <value>لا يُبلغ أي جهاز عن بطارية بعد. شغّل تكامل ADB ووصّل هاتفًا، أو اقرن تطبيق Macro Deck Companion، أو اختر مستشعرات البطارية في إعدادات Home Assistant، أو ثبّت إضافة توفر البطاريات.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>شريط</value>

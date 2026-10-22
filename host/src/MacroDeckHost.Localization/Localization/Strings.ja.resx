@@ -7085,6 +7085,18 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>不明な手順です</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>バッテリーセンサーの選択</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Macro Deck でバッテリーデバイスとして表示する Home Assistant のバッテリーセンサーを選択してください。何も表示しない場合は、すべてのチェックを外したままにしてください。</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>バッテリーセンサー</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>選択したバッテリーセンサーが多すぎます。上限は {max} です。</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>選択したエリアに割り当てられているすべてのエンティティです。</value>
   </data>
@@ -23683,7 +23695,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>{device}（利用不可）</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>バッテリーを報告しているデバイスはまだありません。ADB 連携をオンにしてスマートフォンを接続するか、バッテリーを提供するプラグインをインストールしてください。</value>
+    <value>バッテリーを報告しているデバイスはまだありません。ADB 連携をオンにしてスマートフォンを接続するか、Macro Deck Companion アプリをペアリングするか、Home Assistant の設定でバッテリーセンサーを選択するか、バッテリーを提供するプラグインをインストールしてください。</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>バー</value>

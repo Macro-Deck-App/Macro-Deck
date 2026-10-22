@@ -7085,6 +7085,18 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>未知步骤</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>选择电池传感器</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>选择要在 Macro Deck 中显示为电池设备的 Home Assistant 电池传感器。全部不勾选则不显示任何传感器。</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>电池传感器</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>选择的电池传感器过多。上限为 {max}。</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>分配给所选区域的每个实体。</value>
   </data>
@@ -23665,7 +23677,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>{device}（不可用）</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>暂无设备报告电池信息。请开启 ADB 集成并连接手机，或安装提供电池信息的插件。</value>
+    <value>暂无设备报告电池信息。请开启 ADB 集成并连接手机、配对 Macro Deck Companion 应用、在 Home Assistant 配置中选择电池传感器，或安装提供电池信息的插件。</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>条形</value>

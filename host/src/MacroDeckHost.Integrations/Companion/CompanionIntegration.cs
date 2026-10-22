@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
@@ -8,6 +9,7 @@ using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Integrations.Companion.Actions;
 using MacroDeckHost.Integrations.Companion.Configuration;
 using MacroDeckHost.Integrations.Companion.Events;
+using MacroDeckHost.Integrations.Companion.Providers;
 using MacroDeckHost.Integrations.Companion.Variables;
 using MacroDeckHost.Localization;
 
@@ -22,6 +24,7 @@ public sealed partial class CompanionIntegration
 		IVariableProvider,
 		IEventProvider,
 		IIntegrationIconProvider,
+		IBatteryProvider,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.companion";
@@ -32,6 +35,7 @@ public sealed partial class CompanionIntegration
 	private readonly Lock _announceGate = new();
 	private readonly Dictionary<Guid, long> _announced = new();
 	private readonly Func<int>? _suffixFactory;
+	private readonly CompanionBatteryProvider _batteries;
 
 	private ICompanionDeviceApi? _devices;
 	private IVariableApi? _variables;
@@ -39,6 +43,7 @@ public sealed partial class CompanionIntegration
 	private IIntegrationContext? _context;
 	private IEventPublisher? _events;
 	private CompanionRuntime[] _runtimes = [];
+	private IReadOnlySet<Guid>? _entryIds;
 
 	public CompanionIntegration()
 		: this(null)
@@ -51,6 +56,9 @@ public sealed partial class CompanionIntegration
 		Actions = CompanionActions.Create(new CompanionTargetResolver(RuntimeSnapshot, () => _devices),
 			() => _variables,
 			() => _userVariables);
+		_batteries = new CompanionBatteryProvider(() => Volatile.Read(ref _devices),
+			RuntimeSnapshot,
+			() => Volatile.Read(ref _entryIds));
 	}
 
 	public string Id => IntegrationId;
@@ -86,6 +94,16 @@ public sealed partial class CompanionIntegration
 	public IReadOnlyList<EventDefinition> EventDefinitions => CompanionEventDefinitions.All;
 
 	internal IReadOnlyList<CompanionRuntime> Runtimes => RuntimeSnapshot();
+
+	Task IBatteryProvider.InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken)
+	{
+		return _batteries.InitializeAsync(context, cancellationToken);
+	}
+
+	Task IBatteryProvider.ShutdownAsync(CancellationToken cancellationToken)
+	{
+		return _batteries.ShutdownAsync(cancellationToken);
+	}
 
 	public byte[] GetIcon()
 	{
@@ -127,6 +145,7 @@ public sealed partial class CompanionIntegration
 		}
 
 		Volatile.Write(ref _runtimes, []);
+		Volatile.Write(ref _entryIds, null);
 		_context = null;
 		_variables = null;
 		_userVariables = null;
@@ -137,6 +156,7 @@ public sealed partial class CompanionIntegration
 	public void Dispose()
 	{
 		ShutdownAsync().GetAwaiter().GetResult();
+		_batteries.Dispose();
 		_reloadGate.Dispose();
 	}
 
@@ -167,8 +187,10 @@ public sealed partial class CompanionIntegration
 		try
 		{
 			var runtimes = new List<CompanionRuntime>();
+			var entryIds = new HashSet<Guid>();
 			foreach (var entry in await context.Config.GetEntriesAsync(cancellationToken))
 			{
+				entryIds.Add(entry.Id);
 				var schema = await context.Config.GetStringAsync(entry.Id,
 					CompanionConfigurationMetadata.SchemaKey,
 					cancellationToken);
@@ -183,11 +205,14 @@ public sealed partial class CompanionIntegration
 			}
 
 			Volatile.Write(ref _runtimes, runtimes.ToArray());
+			Volatile.Write(ref _entryIds, entryIds);
 		}
 		finally
 		{
 			_reloadGate.Release();
 		}
+
+		_batteries.EntriesReloaded();
 
 		_ = _variables?.RequestRefreshAsync(CancellationToken.None);
 		if (Volatile.Read(ref _devices) is { } devices)

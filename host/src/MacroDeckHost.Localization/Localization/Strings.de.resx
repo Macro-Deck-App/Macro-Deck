@@ -7083,6 +7083,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>Unbekannter Schritt</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>Akkusensoren auswählen</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Wähle die Akkusensoren aus Home Assistant, die Macro Deck als Akkugeräte anzeigt. Lass alle abgewählt, um keine anzuzeigen.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>Akkusensoren</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>Zu viele Akkusensoren ausgewählt. Das Limit liegt bei {max}.</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>Jede Entity, die den gewählten Bereichen zugeordnet ist.</value>
   </data>
@@ -23659,7 +23671,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{device} (nicht verfügbar)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>Noch meldet kein Gerät einen Akku. Schalte die ADB-Integration ein und verbinde ein Handy, oder installiere ein Plugin, das Akkus bereitstellt.</value>
+    <value>Noch meldet kein Gerät einen Akku. Schalte die ADB-Integration ein und verbinde ein Handy, kopple die Macro Deck Companion-App, wähle Akkusensoren in der Home-Assistant-Konfiguration aus oder installiere ein Plugin, das Akkus bereitstellt.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>Balken</value>

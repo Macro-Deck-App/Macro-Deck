@@ -7085,6 +7085,18 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>Langkah tidak dikenal</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>Pilih sensor baterai</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Pilih sensor baterai Home Assistant yang ditampilkan Macro Deck sebagai perangkat berbaterai. Biarkan semua tidak dicentang agar tidak ada yang ditampilkan.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>Sensor baterai</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>Terlalu banyak sensor baterai dipilih. Batasnya {max}.</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>Setiap entitas yang ditetapkan ke area yang dipilih.</value>
   </data>
@@ -23683,7 +23695,7 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>{device} (tidak tersedia)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>Belum ada perangkat yang melaporkan baterai. Aktifkan integrasi ADB dan hubungkan ponsel, atau instal plugin yang menyediakan baterai.</value>
+    <value>Belum ada perangkat yang melaporkan baterai. Aktifkan integrasi ADB dan hubungkan ponsel, pasangkan aplikasi Macro Deck Companion, pilih sensor baterai di konfigurasi Home Assistant, atau instal plugin yang menyediakan baterai.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>Bilah</value>

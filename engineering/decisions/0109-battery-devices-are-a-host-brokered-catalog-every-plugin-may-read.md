@@ -93,3 +93,37 @@ does not know them.
 - [`MacroDeck.Sdk.Batteries`](../../sdk/src/MacroDeck.Sdk/Batteries/)
 - [ADR 0107](0107-built-in-integrations-are-built-as-extractable-plugins.md)
 - [`AdbBatteryProvider.cs`](../../host/src/MacroDeckHost.Integrations/Adb/Providers/AdbBatteryProvider.cs)
+
+## Amendment (2026-10-21): Companion devices join the catalog
+
+The built-in Companion integration is a battery provider too: every phone and tablet running Macro Deck
+Companion that reported a battery level is published under its configuration, readable by every plugin.
+
+Decision (user, 2026-10-21): like the ADB devices, these are not filtered by `host:companion-devices` or
+**Allow plugins to use Companion devices**. That permission is about reading a device's full state, sending it
+commands and capturing its screen; a name, a kind and a charge level are what a deck shows anyway. The local
+id is a SHA-256 of a fixed prefix and the configuration id, truncated, so the Companion device id stays behind
+the permission. The provider uses only `IIntegrationContext.CompanionDevices` (ADR 0107); extracted into a
+plugin it would need `host:companion-devices` and the user's consent, and without them its battery devices
+would disappear.
+
+A phone connected over ADB that also runs the Companion app is published twice, once by each provider. That
+is accepted: the two providers cannot match their devices without sharing a hardware identifier, and a
+reader picks the one it wants.
+
+## Amendment (2026-10-21): the computer's battery and Home Assistant sensors
+
+Two more built-in providers join, by the user's decision, without a new permission:
+
+- **System** publishes the computer's own battery, named after the computer, under an `internal-<n>` id
+  that carries no hardware identifier. It polls every 15 seconds; a battery that is gone stays published as
+  not connected, and a computer without a battery stops checking after the first read.
+- **Home Assistant** publishes only the battery sensors the user picks in its configuration, at most 64,
+  so a large Home Assistant does not flood the catalog and the variables (seven per device). The local id
+  is an unkeyed hash of the entity id: the entity id is not spelled out in the catalog, but a plugin that
+  guesses one can confirm it, which tells it little beyond the device name it already sees. A
+  sensor renamed in Home Assistant still has to be picked again. The integration implements
+  `IConfigEntryLifecycle.ReloadEntriesAsync` so that unchecking a sensor removes it instead of only
+  withdrawing it through a restart of the integration.
+
+Both use only the SDK and their integration's own folder (ADR 0107).

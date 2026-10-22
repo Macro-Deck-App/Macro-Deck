@@ -7084,6 +7084,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>Nieznany krok</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>Wybór czujników baterii</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Wybierz czujniki baterii z Home Assistant, które Macro Deck pokaże jako urządzenia z baterią. Aby nie pokazywać żadnego, pozostaw wszystkie niezaznaczone.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>Czujniki baterii</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>Wybrano zbyt wiele czujników baterii. Limit wynosi {max}.</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>Każda encja przypisana do wybranych obszarów.</value>
   </data>
@@ -23661,7 +23673,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>{device} (niedostępne)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>Żadne urządzenie nie zgłasza jeszcze baterii. Włącz integrację ADB i podłącz telefon albo zainstaluj wtyczkę, która udostępnia baterie.</value>
+    <value>Żadne urządzenie nie zgłasza jeszcze baterii. Włącz integrację ADB i podłącz telefon, sparuj aplikację Macro Deck Companion, wybierz czujniki baterii w konfiguracji Home Assistant albo zainstaluj wtyczkę, która udostępnia baterie.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>Pasek</value>
