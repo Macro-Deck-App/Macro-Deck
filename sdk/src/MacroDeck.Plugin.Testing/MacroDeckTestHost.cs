@@ -121,7 +121,7 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	{
 		options ??= new MacroDeckTestHostOptions();
 
-		var builder = WebApplication.CreateBuilder();
+		var builder = WebApplication.CreateBuilder(["--hostBuilder:reloadConfigOnChange=false"]);
 		builder.WebHost.UseSetting("urls", "http://127.0.0.1:0");
 		builder.Logging.ClearProviders();
 

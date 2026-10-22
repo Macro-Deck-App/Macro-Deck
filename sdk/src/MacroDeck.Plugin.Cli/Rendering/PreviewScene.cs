@@ -19,6 +19,7 @@ internal static class PreviewScene
 			writer.WriteStartObject();
 			writer.WriteNumber("width", size.Width);
 			writer.WriteNumber("height", size.Height);
+			writer.WriteNumber("cell", size.Cell);
 			writer.WriteNumber("radius", options.Radius);
 			writer.WriteString("theme", options.Theme == PreviewTheme.Light ? "light" : "dark");
 			writer.WriteString("background", options.Background);
