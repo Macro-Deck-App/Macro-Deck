@@ -2,7 +2,6 @@ using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Domain.Enums;
-using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MacroDeckHost.Api.Support;
@@ -18,13 +17,13 @@ public static class PortabilityHttp
 			: ToTransportError(PortabilityError.DesktopOnly, null);
 	}
 
-	public static TransportError ToTransportError(PortabilityError error, string? message)
+	public static TransportError ToTransportError(PortabilityError error, string? message, string? invalidJsonLocation = null)
 	{
 		return new TransportError
 		{
 			Code = error.ToString(),
 			Message = error == PortabilityError.InvalidJson
-				? AppStrings.Errors.Portability.InvalidJson(message ?? "$")
+				? MacroDeckHost.Localization.AppStrings.Errors.Portability.InvalidJson(invalidJsonLocation ?? message ?? "$")
 				: message ?? DefaultMessage(error)
 		};
 	}

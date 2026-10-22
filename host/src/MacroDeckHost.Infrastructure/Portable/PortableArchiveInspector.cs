@@ -14,11 +14,6 @@ public sealed class PortableArchiveInspector : IPortableArchiveInspector
 	private readonly IIntegrationConfigStore _configStore;
 	private readonly ILogger _logger;
 
-	public PortableArchiveInspector(IIntegrationRegistry integrationRegistry, IIntegrationConfigStore configStore)
-		: this(integrationRegistry, configStore, Serilog.Log.Logger)
-	{
-	}
-
 	public PortableArchiveInspector(
 		IIntegrationRegistry integrationRegistry,
 		IIntegrationConfigStore configStore,
