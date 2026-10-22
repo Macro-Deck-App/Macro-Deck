@@ -1,0 +1,57 @@
+<div class="cap-panel">
+  <shared-input
+    class="capability-search"
+    type="search"
+    [placeholder]="'macrodeck.app:Integrations.Detail.Events.SearchPlaceholder' | translate"
+    [ariaLabel]="'macrodeck.app:Integrations.Detail.Events.SearchAriaLabel' | translate"
+    [ngModel]="search()"
+    (ngModelChange)="search.set($event)" />
+
+  @if (catalog.loading() && events().length === 0) {
+    <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.Events.Loading' | translate" />
+  } @else if (catalog.error(); as error) {
+    <shared-error-banner [message]="error" />
+  } @else if (events().length === 0) {
+    <shared-empty-state
+      icon="bell"
+      [heading]="'macrodeck.app:Integrations.Detail.Events.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.Events.EmptyMessage' | translate" />
+  } @else {
+    <p class="capability-result-count" aria-live="polite">
+      {{ 'macrodeck.app:Integrations.Detail.ResultCountOf' | translate:{ shown: filtered().length, total: events().length } }}
+    </p>
+    @if (filtered().length === 0) {
+      <shared-empty-state
+        icon="bell"
+        [heading]="'macrodeck.app:Integrations.Detail.Events.NoMatchingHeading' | translate"
+        [message]="'macrodeck.app:Integrations.Detail.NoMatchingSearchMessage' | translate" />
+    } @else {
+      <ul class="capability-list">
+        @for (event of filtered(); track event.id) {
+          <li class="capability-row event-definition-row">
+            <div class="capability-row-main">
+              <span class="capability-row-name">{{ event.name }}</span>
+              @if (event.description) {
+                <span class="capability-row-desc">{{ event.description }}</span>
+              }
+              @if (event.payloadParameters.length > 0) {
+                <span class="capability-row-params">{{ 'macrodeck.app:Integrations.Detail.Events.Payload' | translate:{ names: names(event.payloadParameters) } }}</span>
+              }
+              @if (event.configurationParameters.length > 0) {
+                <span class="capability-row-params">{{ 'macrodeck.app:Integrations.Detail.Events.Options' | translate:{ names: names(event.configurationParameters) } }}</span>
+              }
+            </div>
+            <div class="capability-row-side">
+              @if (event.category) {
+                <span class="availability-pill availability-IntegrationDisabled">{{ event.category }}</span>
+              }
+              @if (event.deliveryKind === 'scheduled') {
+                <span class="availability-pill availability-Ready">{{ 'macrodeck.app:Integrations.Detail.Events.Scheduled' | translate }}</span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</div>

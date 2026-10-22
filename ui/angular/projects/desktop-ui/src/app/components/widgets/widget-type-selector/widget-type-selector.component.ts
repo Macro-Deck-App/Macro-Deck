@@ -8,7 +8,6 @@ import {
   AppStrings,
   WidgetType,
   WIDGET_REFERENCE_CELL_SIZE,
-  WIDGET_REFERENCE_BORDER_RADIUS,
   resolveLocalizedText,
 } from '@macro-deck/runtime';
 import { Subscription } from 'rxjs';
@@ -21,13 +20,13 @@ import {
   SegmentedControlComponent,
   SegmentedOption,
   TranslatePipe,
-  UiTreeWidgetComponent,
   WidgetTypeCatalogService,
   WidgetTypeFavoritesService,
   WidgetTypeInfo,
   dismissModal,
 } from '@shared';
 import { SelectComponent, SelectOption } from '../../forms/select/select.component';
+import { WidgetTypePreviewComponent } from '../widget-type-preview/widget-type-preview.component';
 
 export type WidgetTypeSelectorView = 'grid' | 'list';
 
@@ -69,7 +68,7 @@ const GROUP_HEADINGS: Record<TypeGroup, string> = {
   selector: 'app-widget-type-selector',
   standalone: true,
   imports: [ModalComponent, ButtonComponent, InputComponent, SegmentedControlComponent, SelectComponent, FormsModule,
-    TranslatePipe, UiTreeWidgetComponent],
+    TranslatePipe, WidgetTypePreviewComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './widget-type-selector.component.html',
   styleUrls: ['./widget-type-selector.component.scss']
@@ -77,13 +76,7 @@ const GROUP_HEADINGS: Record<TypeGroup, string> = {
 export class WidgetTypeSelectorComponent implements AfterViewInit, OnDestroy, OnInit {
   private static readonly MaxPreviewSize = 132;
 
-  protected readonly previewRadius = WIDGET_REFERENCE_BORDER_RADIUS;
-
-  protected readonly previewCell = WIDGET_REFERENCE_CELL_SIZE;
-
   protected readonly previewSize = signal(WIDGET_REFERENCE_CELL_SIZE);
-
-  protected readonly previewScale = signal(1);
 
   @Output() typeSelected = new EventEmitter<WidgetType>();
   @Output() cancel = new EventEmitter<void>();
@@ -293,7 +286,6 @@ export class WidgetTypeSelectorComponent implements AfterViewInit, OnDestroy, On
     if (size <= 0) return;
 
     this.previewSize.set(size);
-    this.previewScale.set(size / WIDGET_REFERENCE_CELL_SIZE);
   }
 }
 

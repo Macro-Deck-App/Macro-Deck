@@ -1,0 +1,92 @@
+<div class="cap-panel">
+  @if (loader.loading()) {
+    <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.Calendars.Loading' | translate" />
+  } @else if (loader.error(); as error) {
+    <shared-error-banner [message]="error" (dismiss)="loader.error.set(null)" />
+  } @else if (loader.data(); as data) {
+    @if (account(); as current) {
+      <div class="cap-split">
+        @if (accounts().length > 1) {
+          <ul class="cap-rail" role="listbox" [attr.aria-label]="'macrodeck.app:Integrations.Detail.Calendars.AccountLabel' | translate">
+            @for (entry of accounts(); track entry.accountId) {
+              <li>
+                <shared-rail-item
+                  [label]="entry.displayName"
+                  [count]="entry.calendars.length"
+                  [active]="entry.accountId === current.accountId"
+                  (click)="selectAccount(entry)">
+                  @if (entry.status === 'Error') {
+                    <span class="icon icon-alert-triangle icon-xs account-error" [title]="'macrodeck.app:Integrations.Detail.Calendars.AccountError' | translate"></span>
+                  }
+                </shared-rail-item>
+              </li>
+            }
+          </ul>
+        }
+
+        <section class="cap-card">
+          <h2 class="cap-card-title">{{ current.displayName }}</h2>
+          @if (current.status === 'Error') {
+            <p class="cap-notice">{{ 'macrodeck.app:Integrations.Detail.Calendars.AccountError' | translate }}</p>
+          }
+          @for (calendar of current.calendars; track calendar.key) {
+            <div class="cap-field calendar-field">
+              <span class="calendar-toggle">
+                <span class="calendar-dot" [style.--calendar-color]="calendar.color"></span>
+                <shared-checkbox
+                  [label]="calendar.name"
+                  [ngModel]="isShown(calendar)"
+                  (ngModelChange)="toggleCalendar(calendar)" />
+              </span>
+              @if (calendar.isPrimary) {
+                <span class="availability-pill availability-Muted">{{ 'macrodeck.app:Integrations.Detail.Calendars.Primary' | translate }}</span>
+              }
+            </div>
+          }
+          @if (window(); as period) {
+            <p class="cap-notice">{{ period }}</p>
+          }
+        </section>
+      </div>
+
+      @for (day of days(); track day.key) {
+        <shared-variable-group-header [label]="day.label" [section]="true" />
+        <ul class="cap-rows">
+          @for (row of day.events; track row.event.instanceKey) {
+            <li>
+              <shared-variable-row
+                class="event-row"
+                [primary]="row.event.title"
+                [primaryMono]="false"
+                [secondary]="row.details"
+                [value]="row.calendar?.name ?? null">
+                @if (row.event.hasMeetingUrl) {
+                  <span row-meta class="availability-pill availability-Ready">{{ 'macrodeck.app:Integrations.Detail.Calendars.OnlineMeeting' | translate }}</span>
+                }
+                @if (row.calendar; as calendar) {
+                  <span row-side class="calendar-dot" [style.--calendar-color]="calendar.color"></span>
+                }
+              </shared-variable-row>
+            </li>
+          }
+        </ul>
+      } @empty {
+        <shared-empty-state
+          compact
+          icon="clock-type"
+          [heading]="'macrodeck.app:Integrations.Detail.Calendars.NoEventsHeading' | translate"
+          [message]="'macrodeck.app:Integrations.Detail.Calendars.NoEventsMessage' | translate" />
+      }
+    } @else if (!data.available) {
+      <shared-empty-state
+        icon="clock-type"
+        [heading]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableHeading' | translate"
+        [message]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableMessage' | translate" />
+    } @else {
+      <shared-empty-state
+        icon="clock-type"
+        [heading]="'macrodeck.app:Integrations.Detail.Calendars.EmptyHeading' | translate"
+        [message]="'macrodeck.app:Integrations.Detail.Calendars.EmptyMessage' | translate" />
+    }
+  }
+</div>

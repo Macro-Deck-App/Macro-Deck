@@ -25,6 +25,7 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 	private readonly IAppPreferenceService _preferences;
 	private readonly ILocalizationResolver _localization;
 	private readonly IIntegrationConfigMutationCoordinator? _mutations;
+	private readonly IIntegrationCapabilityCounter? _counter;
 
 	public GetIntegrationCapabilitiesRequestMessageHandler(
 		IIntegrationRegistry integrationRegistry,
@@ -33,7 +34,8 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 		StartupReadiness readiness,
 		IAppPreferenceService preferences,
 		ILocalizationResolver localization,
-		IIntegrationConfigMutationCoordinator? mutations = null)
+		IIntegrationConfigMutationCoordinator? mutations = null,
+		IIntegrationCapabilityCounter? counter = null)
 	{
 		_integrationRegistry = integrationRegistry;
 		_configStore = configStore;
@@ -42,6 +44,7 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 		_preferences = preferences;
 		_localization = localization;
 		_mutations = mutations;
+		_counter = counter;
 	}
 
 	public async ValueTask<GetIntegrationCapabilitiesResponse> Handle(
@@ -119,6 +122,15 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 		}
 
 		AddHostPublishedVariables(response, integration.Id, enabled, requiresSetup);
+
+		if (_counter is not null)
+		{
+			var counts = await _counter.CountAsync(integration, cancellationToken);
+			response.Counts =
+			[
+				.. counts.Select(count => new IntegrationCapabilityCountDto { Kind = count.Key, Count = count.Value })
+			];
+		}
 
 		return response;
 	}

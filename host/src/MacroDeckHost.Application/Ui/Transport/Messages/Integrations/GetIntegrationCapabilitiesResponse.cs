@@ -19,4 +19,6 @@ public class GetIntegrationCapabilitiesResponse
 	public List<IntegrationActionCapability> Actions { get; set; } = new();
 
 	public List<IntegrationVariableCapability> Variables { get; set; } = new();
+
+	public List<IntegrationCapabilityCountDto> Counts { get; set; } = new();
 }

@@ -27,12 +27,12 @@
       <shared-tab-bar
         [idPrefix]="tabIdPrefix"
         [items]="tabs()"
-        [activeId]="activeTab()"
+        [activeId]="activeTabBarId()"
         (activeIdChange)="onTabChange($event)" />
     </div>
 
     <div class="detail-body">
-      @switch (activeTab()) {
+      @switch (currentTab()) {
         @case ('overview') {
           <div
             [id]="tabIdPrefix + '-panel-overview'"
@@ -92,21 +92,49 @@
 
             <section class="detail-card">
               <h2 class="detail-card-title">{{ 'macrodeck.app:Integrations.Detail.CapabilitiesSectionTitle' | translate }}</h2>
-              <div class="detail-field">
+              <button
+                type="button"
+                class="detail-field capability-link"
+                (click)="onTabChange('actions')">
                 <span class="detail-label">{{ 'macrodeck.app:Integrations.Detail.ActionsTab' | translate }}</span>
-                <span class="detail-value">{{ actionsCount() }}</span>
-              </div>
-              <div class="detail-field">
+                <span class="detail-value">{{ actionsCount() }}<span class="icon icon-chevron-right icon-xs capability-link-chevron"></span></span>
+              </button>
+              <button
+                type="button"
+                class="detail-field capability-link"
+                (click)="onTabChange('variables')">
                 <span class="detail-label">{{ 'macrodeck.app:Integrations.Detail.VariablesTab' | translate }}</span>
-                <span class="detail-value">{{ variablesCount() }}</span>
-              </div>
-              @for (capability of additionalCapabilities(); track capability.kind) {
-                <div class="detail-field">
-                  <span class="detail-label">{{ capability.name | localizedText }}</span>
-                  <span class="detail-value">
-                    <span class="icon icon-check icon-xs"></span>
-                  </span>
-                </div>
+                <span class="detail-value">{{ variablesCount() }}<span class="icon icon-chevron-right icon-xs capability-link-chevron"></span></span>
+              </button>
+              @for (row of capabilityRows(); track row.kind) {
+                @if (row.page || row.settingsSection) {
+                  <button
+                    type="button"
+                    class="detail-field capability-link"
+                    [attr.data-capability]="row.kind"
+                    (click)="openCapability(row)">
+                    <span class="detail-label">{{ row.name | localizedText }}</span>
+                    <span class="detail-value">
+                      @if (row.count !== null) {
+                        {{ row.count }}
+                      } @else {
+                        <span class="icon icon-check icon-xs"></span>
+                      }
+                      <span class="icon icon-chevron-right icon-xs capability-link-chevron"></span>
+                    </span>
+                  </button>
+                } @else {
+                  <div class="detail-field" [attr.data-capability]="row.kind">
+                    <span class="detail-label">{{ row.name | localizedText }}</span>
+                    <span class="detail-value">
+                      @if (row.count !== null) {
+                        {{ row.count }}
+                      } @else {
+                        <span class="icon icon-check icon-xs"></span>
+                      }
+                    </span>
+                  </div>
+                }
               }
               @if (usesAdb()) {
                 <div class="detail-field">
@@ -377,6 +405,36 @@
                 (close)="closeCatalogBindDialog()" />
             }
           </div>
+        }
+
+        @default {
+          @if (currentPage(); as page) {
+            <div
+              [id]="tabIdPrefix + '-panel-' + (page.group === 'data' && groupsDataPages() ? 'data' : page.id)"
+              role="tabpanel"
+              [attr.aria-labelledby]="tabIdPrefix + '-tab-' + (page.group === 'data' && groupsDataPages() ? 'data' : page.id)"
+              class="capability-panel capability-page-panel"
+              [class.with-nav]="page.group === 'data' && groupsDataPages()">
+              @if (page.group === 'data' && groupsDataPages()) {
+                <app-integration-data-nav
+                  [pages]="dataPages()"
+                  [activeId]="page.id"
+                  [counts]="capabilityCounts()"
+                  (selected)="onTabChange($event)" />
+              }
+              <div class="capability-page-body">
+                @switch (page.id) {
+                  @case ('events') { <app-integration-events-panel [integrationId]="integrationId()" /> }
+                  @case ('widgets') { <app-integration-widgets-panel [integrationId]="integrationId()" [available]="capabilityAvailable()" /> }
+                  @case ('batteries') { <app-integration-batteries-panel [integrationId]="integrationId()" /> }
+                  @case ('calendars') { <app-integration-calendars-panel [integrationId]="integrationId()" /> }
+                  @case ('email') { <app-integration-email-panel [integrationId]="integrationId()" /> }
+                  @case ('weather') { <app-integration-weather-panel [integrationId]="integrationId()" [available]="capabilityAvailable()" /> }
+                  @case ('music') { <app-integration-music-panel [integrationId]="integrationId()" [available]="capabilityAvailable()" /> }
+                }
+              </div>
+            </div>
+          }
         }
       }
     </div>

@@ -1,0 +1,18 @@
+.calendar-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.calendar-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 999px;
+  background-color: var(--calendar-color, var(--color-accent));
+}
+
+.account-error {
+  color: var(--color-warning);
+}

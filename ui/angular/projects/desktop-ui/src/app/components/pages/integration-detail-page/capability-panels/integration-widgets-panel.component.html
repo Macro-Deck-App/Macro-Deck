@@ -1,0 +1,34 @@
+<div class="cap-panel">
+  @if (loading() && types().length === 0) {
+    <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.Widgets.Loading' | translate" />
+  } @else if (types().length > 0) {
+    <ul class="widget-cards" [attr.aria-label]="'macrodeck.app:Integrations.Capability.WidgetTypeProvider' | translate">
+      @for (type of types(); track type.id) {
+        <li class="widget-card">
+          <span class="widget-card-preview">
+            <app-widget-type-preview [widgetType]="type.id" [size]="previewSize" />
+          </span>
+          <span class="widget-card-name">{{ name(type) }}</span>
+          @if (description(type); as text) {
+            <span class="widget-card-description">{{ text }}</span>
+          }
+          @if (type.supportsConfigUi) {
+            <span class="widget-card-badges">
+              <span class="availability-pill availability-Muted">{{ 'macrodeck.app:Integrations.Detail.Widgets.Configurable' | translate }}</span>
+            </span>
+          }
+        </li>
+      }
+    </ul>
+  } @else if (!available()) {
+    <shared-empty-state
+      icon="grid"
+      [heading]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableHeading' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableMessage' | translate" />
+  } @else {
+    <shared-empty-state
+      icon="grid"
+      [heading]="'macrodeck.app:Integrations.Detail.Widgets.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.Widgets.EmptyMessage' | translate" />
+  }
+</div>

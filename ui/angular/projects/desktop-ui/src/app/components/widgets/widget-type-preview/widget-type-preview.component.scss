@@ -1,0 +1,24 @@
+:host {
+  display: contents;
+}
+
+.type-preview-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  text-align: center;
+  font-size: var(--widget-type-preview-placeholder-size, var(--text-sm));
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-primary);
+}
+
+// Laid out as one deck cell and scaled to the stage, so a responsive tree picks its one-cell layout.
+// flex: none and the class selector matter: shared-ui-tree-widget's :host sets 100% at this specificity.
+.type-preview-widget.type-preview-widget {
+  display: block;
+  flex: none;
+  transform-origin: 0 0;
+}

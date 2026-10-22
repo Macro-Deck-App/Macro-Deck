@@ -1,0 +1,70 @@
+<div class="cap-panel">
+  @if (loading() && stations().length === 0) {
+    <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.Weather.Loading' | translate" />
+  } @else if (station(); as current) {
+    <div class="cap-split">
+      @if (stations().length > 1) {
+        <ul class="cap-rail" role="listbox" [attr.aria-label]="'macrodeck.app:Integrations.Detail.Weather.LocationLabel' | translate">
+          @for (entry of stations(); track entry.instanceId) {
+            <li>
+              <shared-rail-item
+                [label]="entry.displayName"
+                [active]="entry.instanceId === current.instanceId"
+                (click)="select(entry)" />
+            </li>
+          }
+        </ul>
+      }
+
+      <section class="cap-card">
+        <h2 class="cap-card-title">{{ state()?.locationName || current.displayName }}</h2>
+        @if (state(); as weather) {
+          @if (weather.isAvailable) {
+            <div class="cap-field">
+              <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Weather.Condition' | translate }}</span>
+              <span class="cap-field-value">{{ condition(weather.condition) }}</span>
+            </div>
+            <div class="cap-field">
+              <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Weather.Temperature' | translate }}</span>
+              <span class="cap-field-value">{{ temperature(weather.temperature) }}</span>
+            </div>
+            @if (weather.apparentTemperature !== undefined && weather.apparentTemperature !== null) {
+              <div class="cap-field">
+                <span class="cap-field-label">{{ 'macrodeck.app:Integrations.Detail.Weather.FeelsLike' | translate }}</span>
+                <span class="cap-field-value">{{ temperature(weather.apparentTemperature) }}</span>
+              </div>
+            }
+          } @else {
+            <p class="cap-notice">{{ 'macrodeck.app:Integrations.Detail.Weather.NoData' | translate }}</p>
+          }
+        }
+      </section>
+    </div>
+
+    @if (state()?.isAvailable && (state()?.days?.length ?? 0) > 0) {
+      <shared-variable-group-header [label]="'macrodeck.app:Integrations.Detail.Weather.ForecastHeading' | translate" [section]="true" />
+      <ul class="cap-rows">
+        @for (day of state()!.days; track day.date) {
+          <li>
+            <shared-variable-row
+              class="forecast-row"
+              [primary]="weekday(day.date)"
+              [primaryMono]="false"
+              [secondary]="condition(day.condition)"
+              [value]="temperature(day.min) + ' / ' + temperature(day.max)" />
+          </li>
+        }
+      </ul>
+    }
+  } @else if (!available()) {
+    <shared-empty-state
+      icon="weather-type"
+      [heading]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableHeading' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.CapabilityUnavailableMessage' | translate" />
+  } @else {
+    <shared-empty-state
+      icon="weather-type"
+      [heading]="'macrodeck.app:Integrations.Detail.Weather.EmptyHeading' | translate"
+      [message]="'macrodeck.app:Integrations.Detail.Weather.EmptyMessage' | translate" />
+  }
+</div>

@@ -153,29 +153,6 @@
   pointer-events: none;
 }
 
-/* Covers the sample area for a type whose provider declined the preview session - the sample tree
-   itself renders nothing to look at in that case, but the card still needs to say what type it is. */
-.type-preview-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2);
-  text-align: center;
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  background-color: var(--color-bg-primary);
-}
-
-// Laid out as one deck cell and scaled to the stage, so a responsive tree picks its one-cell layout.
-// flex: none and the child selector matter: shared-ui-tree-widget's :host sets 100% at this specificity.
-.type-preview > .type-preview-widget {
-  display: block;
-  flex: none;
-  transform-origin: 0 0;
-}
-
 .type-info {
   display: flex;
   flex-direction: column;
@@ -235,10 +212,7 @@
   width: 4.5rem;
   padding: var(--space-1);
   border-radius: var(--radius-sm);
-}
-
-.widget-types.list .type-preview-placeholder {
-  font-size: var(--text-xs);
+  --widget-type-preview-placeholder-size: var(--text-xs);
 }
 
 .widget-types.list .type-info {

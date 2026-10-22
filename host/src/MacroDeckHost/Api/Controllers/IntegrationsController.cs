@@ -30,6 +30,16 @@ public class IntegrationsController : ControllerBase
 	private readonly IUiTransportMessageHandler<GetIntegrationCapabilitiesRequest, GetIntegrationCapabilitiesResponse>
 		_getCapabilities;
 
+	private readonly IUiTransportMessageHandler<GetIntegrationBatteriesRequest, GetIntegrationBatteriesResponse>
+		_getBatteries;
+
+	private readonly IUiTransportMessageHandler<GetIntegrationCalendarsRequest, GetIntegrationCalendarsResponse>
+		_getCalendars;
+
+	private readonly
+		IUiTransportMessageHandler<GetIntegrationEmailInboxesRequest, GetIntegrationEmailInboxesResponse>
+		_getEmailInboxes;
+
 	public IntegrationsController(
 		IUiTransportMessageHandler<GetIntegrationsRequest, GetIntegrationsResponse> getIntegrations,
 		IUiTransportMessageHandler<SetIntegrationEnabledRequest, SetIntegrationEnabledResponse> setIntegrationEnabled,
@@ -41,7 +51,11 @@ public class IntegrationsController : ControllerBase
 		IUiTransportMessageHandler<GetIntegrationIssuesRequest, GetIntegrationIssuesResponse> getIssues,
 		IUiTransportMessageHandler<ResolveIntegrationIssueRequest, ResolveIntegrationIssueResponse> resolveIssue,
 		IUiTransportMessageHandler<GetIntegrationCapabilitiesRequest, GetIntegrationCapabilitiesResponse>
-			getCapabilities)
+			getCapabilities,
+		IUiTransportMessageHandler<GetIntegrationBatteriesRequest, GetIntegrationBatteriesResponse> getBatteries,
+		IUiTransportMessageHandler<GetIntegrationCalendarsRequest, GetIntegrationCalendarsResponse> getCalendars,
+		IUiTransportMessageHandler<GetIntegrationEmailInboxesRequest, GetIntegrationEmailInboxesResponse>
+			getEmailInboxes)
 	{
 		_getIntegrations = getIntegrations;
 		_setIntegrationEnabled = setIntegrationEnabled;
@@ -53,6 +67,9 @@ public class IntegrationsController : ControllerBase
 		_getIssues = getIssues;
 		_resolveIssue = resolveIssue;
 		_getCapabilities = getCapabilities;
+		_getBatteries = getBatteries;
+		_getCalendars = getCalendars;
+		_getEmailInboxes = getEmailInboxes;
 	}
 
 	[HttpGet]
@@ -157,5 +174,23 @@ public class IntegrationsController : ControllerBase
 	public Task<GetIntegrationCapabilitiesResponse> GetCapabilities(string id, CancellationToken ct)
 	{
 		return _getCapabilities.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = id }, ct).AsTask();
+	}
+
+	[HttpGet("{id}/batteries")]
+	public Task<GetIntegrationBatteriesResponse> GetBatteries(string id, CancellationToken ct)
+	{
+		return _getBatteries.Handle(new GetIntegrationBatteriesRequest { IntegrationId = id }, ct).AsTask();
+	}
+
+	[HttpGet("{id}/calendars")]
+	public Task<GetIntegrationCalendarsResponse> GetCalendars(string id, CancellationToken ct)
+	{
+		return _getCalendars.Handle(new GetIntegrationCalendarsRequest { IntegrationId = id }, ct).AsTask();
+	}
+
+	[HttpGet("{id}/email-inboxes")]
+	public Task<GetIntegrationEmailInboxesResponse> GetEmailInboxes(string id, CancellationToken ct)
+	{
+		return _getEmailInboxes.Handle(new GetIntegrationEmailInboxesRequest { IntegrationId = id }, ct).AsTask();
 	}
 }

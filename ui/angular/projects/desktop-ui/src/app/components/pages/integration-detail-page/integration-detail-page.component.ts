@@ -3,9 +3,9 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, EMPTY, exhaustMap, from, timer } from 'rxjs';
+import { catchError, debounceTime, EMPTY, exhaustMap, filter, from, merge, Subject, timer } from 'rxjs';
 import type { Variable } from '@macro-deck/runtime';
-import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PLUGIN_PERMISSION_HOST_ADB, PLUGIN_PERMISSION_HOST_COMPANION_DEVICES, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
+import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationCapabilityDataChangedEvent, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PLUGIN_PERMISSION_HOST_ADB, PLUGIN_PERMISSION_HOST_COMPANION_DEVICES, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, CheckboxComponent, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, ButtonComponent, TranslatePipe, VariableService } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
@@ -15,10 +15,12 @@ import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/con
 import { TabBarComponent } from '../../tab-bar/tab-bar.component';
 import { TabItem } from '../../tab-bar/tab-bar.model';
 import { COUNTED_CAPABILITY_KINDS } from '../../../domain/integration-capability.util';
+import { CapabilityPage, DATA_TAB_ID, SETTINGS_LINKED_CAPABILITIES, capabilityPageForKind, capabilityPagesFor } from '../../../domain/integration-capability-pages';
 import { ConfigFlowService } from '../../../services/config-flow.service';
 import { IntegrationService, Integration } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
 import { PluginInstallationService } from '../../../services/plugin-installation.service';
+import { SettingsCategory, SettingsModalService } from '../../../services/settings-modal.service';
 import { isStoreDetailUrl } from '../../../services/store-browse-state.service';
 import { VariableCatalogService } from '../../../services/variable-catalog.service';
 import { VariableBindDialogComponent } from '../../variables/variable-bind-dialog.component';
@@ -26,11 +28,29 @@ import { VariableCatalogRow, createVariableCatalogRows } from '../../variables/v
 import { VariableGroupHeaderComponent } from '../../variables/variable-group-header.component';
 import { VARIABLE_ROW_HEIGHT, VARIABLE_ROW_INDENT, VariableRowComponent } from '../../variables/variable-row.component';
 import { ActionCapabilityRowComponent } from './action-capability-row.component';
+import { IntegrationBatteriesPanelComponent } from './capability-panels/integration-batteries-panel.component';
+import { IntegrationCalendarsPanelComponent } from './capability-panels/integration-calendars-panel.component';
+import { IntegrationDataNavComponent } from './capability-panels/integration-data-nav.component';
+import { IntegrationEmailPanelComponent } from './capability-panels/integration-email-panel.component';
+import { IntegrationEventsPanelComponent } from './capability-panels/integration-events-panel.component';
+import { IntegrationMusicPanelComponent } from './capability-panels/integration-music-panel.component';
+import { IntegrationWeatherPanelComponent } from './capability-panels/integration-weather-panel.component';
+import { IntegrationWidgetsPanelComponent } from './capability-panels/integration-widgets-panel.component';
 import { IntegrationCompatibilityCardComponent } from './integration-compatibility-card.component';
 import { IntegrationIssuesCardComponent } from './integration-issues-card.component';
 import { IntegrationStatusBadge, IntegrationStatusStripComponent } from './integration-status-strip.component';
 
-type DetailTab = 'overview' | 'actions' | 'variables';
+type DetailTab = string;
+
+const FIXED_TABS: readonly string[] = ['overview', 'actions', 'variables'];
+
+interface CapabilityOverviewRow {
+  kind: string;
+  name: IpcProvidedCapability['name'];
+  count: number | null;
+  page: CapabilityPage | undefined;
+  settingsSection: SettingsCategory | undefined;
+}
 
 type VariableTabRow =
   | { kind: 'unbound-header'; key: string; count: number | null; expanded: boolean; collapsible: boolean }
@@ -67,6 +87,14 @@ const TAB_ID_PREFIX = 'integration-detail';
     IntegrationIssuesCardComponent,
     IntegrationCompatibilityCardComponent,
     IntegrationStatusStripComponent,
+    IntegrationBatteriesPanelComponent,
+    IntegrationCalendarsPanelComponent,
+    IntegrationDataNavComponent,
+    IntegrationEmailPanelComponent,
+    IntegrationEventsPanelComponent,
+    IntegrationMusicPanelComponent,
+    IntegrationWeatherPanelComponent,
+    IntegrationWidgetsPanelComponent,
     LocalizedTextPipe,
     TranslatePipe,
   ],
@@ -89,6 +117,8 @@ export class IntegrationDetailPageComponent implements OnInit {
   private readonly toasts = inject(ToastService);
   protected readonly compatibilityService = inject(PluginCompatibilityService);
   private readonly installation = inject(PluginInstallationService);
+  private readonly settingsModal = inject(SettingsModalService);
+  private readonly capabilityDataChanged = new Subject<void>();
 
   protected readonly integrationId = signal<string>('');
   protected readonly showStoreLink = signal(false);
@@ -390,8 +420,43 @@ export class IntegrationDetailPageComponent implements OnInit {
       && !!this.installation.find(integration.id)?.permissions.includes(permission);
   }
 
-  protected readonly additionalCapabilities = computed<IpcProvidedCapability[]>(() =>
-    (this.integration()?.providedCapabilities ?? []).filter(c => !COUNTED_CAPABILITY_KINDS.includes(c.kind)));
+  protected readonly capabilityPages = computed<CapabilityPage[]>(() =>
+    capabilityPagesFor(this.integration()?.providedCapabilities));
+
+  protected readonly dataPages = computed(() => this.capabilityPages().filter(page => page.group === 'data'));
+
+  protected readonly groupsDataPages = computed(() => this.dataPages().length > 1);
+
+  protected readonly capabilityCounts = computed(() =>
+    new Map((this.capabilities()?.counts ?? []).map(entry => [entry.kind, entry.count] as const)));
+
+  protected readonly capabilityRows = computed<CapabilityOverviewRow[]>(() =>
+    (this.integration()?.providedCapabilities ?? [])
+      .filter(capability => !COUNTED_CAPABILITY_KINDS.includes(capability.kind))
+      .map(capability => ({
+        kind: capability.kind,
+        name: capability.name,
+        count: this.capabilityCounts().get(capability.kind) ?? null,
+        page: capabilityPageForKind(capability.kind),
+        settingsSection: SETTINGS_LINKED_CAPABILITIES[capability.kind],
+      })));
+
+  protected readonly capabilityAvailable = computed(() => {
+    const integration = this.integration();
+    return !!integration?.enabled && integration.isInitialized !== false;
+  });
+
+  protected readonly currentTab = computed<DetailTab>(() => {
+    const tab = this.activeTab();
+    return FIXED_TABS.includes(tab) || this.capabilityPages().some(page => page.id === tab) ? tab : 'overview';
+  });
+
+  protected readonly currentPage = computed(() => this.capabilityPages().find(page => page.id === this.currentTab()));
+
+  protected readonly activeTabBarId = computed(() =>
+    this.currentPage()?.group === 'data' && this.groupsDataPages() ? DATA_TAB_ID : this.currentTab());
+
+  private lastDataPageId: string | null = null;
 
   protected readonly requiresSetup = computed(() =>
     this.canSetUp() && this.integration()?.requiresConfiguration !== false
@@ -471,11 +536,28 @@ export class IntegrationDetailPageComponent implements OnInit {
   protected readonly variablesCount = computed(() =>
     (this.capabilities()?.variables.length ?? this.integration()?.variableCount ?? 0) + this.boundVariables().length);
 
-  protected readonly tabs = computed<TabItem[]>(() => [
-    { id: 'overview', label: this.localization.translateKey(AppStrings.Integrations.Detail.OverviewTab) },
-    { id: 'actions', label: this.localization.translateKey(AppStrings.Integrations.Detail.ActionsTab), badge: this.actionsCount() },
-    { id: 'variables', label: this.localization.translateKey(AppStrings.Integrations.Detail.VariablesTab), badge: this.variablesCount() },
-  ]);
+  protected readonly tabs = computed<TabItem[]>(() => {
+    const pageTab = (page: CapabilityPage): TabItem => ({
+      id: page.id,
+      label: this.localization.translateKey(page.labelKey),
+      badge: this.capabilityCounts().get(page.kind),
+    });
+
+    const tabs: TabItem[] = [
+      { id: 'overview', label: this.localization.translateKey(AppStrings.Integrations.Detail.OverviewTab) },
+      { id: 'actions', label: this.localization.translateKey(AppStrings.Integrations.Detail.ActionsTab), badge: this.actionsCount() },
+      { id: 'variables', label: this.localization.translateKey(AppStrings.Integrations.Detail.VariablesTab), badge: this.variablesCount() },
+      ...this.capabilityPages().filter(page => page.group === 'primary').map(pageTab),
+    ];
+
+    const dataPages = this.dataPages();
+    if (dataPages.length === 1) {
+      tabs.push(pageTab(dataPages[0]));
+    } else if (dataPages.length > 1) {
+      tabs.push({ id: DATA_TAB_ID, label: this.localization.translateKey(AppStrings.Integrations.Detail.DataTab) });
+    }
+    return tabs;
+  });
 
   protected readonly filteredActions = computed<IpcIntegrationActionCapability[]>(() => {
     const query = this.actionSearch().trim().toLowerCase();
@@ -529,6 +611,21 @@ export class IntegrationDetailPageComponent implements OnInit {
         }
       });
 
+    merge(
+      this.api.onNotification<IntegrationCapabilityDataChangedEvent>('IntegrationCapabilityDataChangedEvent')
+        .pipe(filter(event => event.integrationIds.includes(this.integrationId()))),
+      this.api.onNotification('WidgetTypeCatalogChangedEvent'),
+      this.api.onNotification('WeatherInstancesChangedNotification'),
+      this.api.onNotification('MusicPlayerInstancesChangedNotification'),
+      this.api.onNotification('DeviceChangedEvent'),
+    )
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.capabilityDataChanged.next());
+
+    this.capabilityDataChanged
+      .pipe(debounceTime(500), takeUntilDestroyed())
+      .subscribe(() => void this.loadCapabilities());
+
     // Connection states may change without a configuration mutation. Exhausting rather than
     // overlapping requests keeps a slow/offline OBS endpoint from building up refresh work.
     timer(2000, 2000)
@@ -562,6 +659,10 @@ export class IntegrationDetailPageComponent implements OnInit {
 
     if (this.integrationService.integrations().length === 0) {
       await this.integrationService.loadIntegrations();
+    }
+
+    if (initialTab && !FIXED_TABS.includes(initialTab)) {
+      this.onTabChange(this.capabilityPages().some(page => page.id === initialTab) ? initialTab : 'overview');
     }
 
     void this.loadStoreListing();
@@ -639,7 +740,10 @@ export class IntegrationDetailPageComponent implements OnInit {
   }
 
   onTabChange(id: string): void {
-    const tab = id as DetailTab;
+    const tab = id === DATA_TAB_ID ? this.dataPageToOpen() : id;
+    if (this.dataPages().some(page => page.id === tab)) {
+      this.lastDataPageId = tab;
+    }
     this.activeTab.set(tab);
     void this.router.navigate([], {
       relativeTo: this.route,
@@ -647,6 +751,19 @@ export class IntegrationDetailPageComponent implements OnInit {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+  }
+
+  protected openCapability(row: CapabilityOverviewRow): void {
+    if (row.page) {
+      this.onTabChange(row.page.id);
+    } else if (row.settingsSection) {
+      this.settingsModal.open(row.settingsSection);
+    }
+  }
+
+  private dataPageToOpen(): string {
+    const pages = this.dataPages();
+    return pages.find(page => page.id === this.lastDataPageId)?.id ?? pages[0]?.id ?? 'overview';
   }
 
   onToggle(toggle: ToggleSwitchComponent): void {

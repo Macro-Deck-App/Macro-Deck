@@ -1,0 +1,16 @@
+@use '../../../../../styles/index' as ds;
+
+.data-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: sticky;
+  top: 0;
+}
+
+@include ds.breakpoint-down(md) {
+  .data-nav { position: static; }
+}
