@@ -121,7 +121,7 @@ internal sealed class FakeHomeAssistantIntegrationConfig : IIntegrationConfig
 
 	public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
 	{
-		return Task.FromResult<string?>(null);
+		return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
 	}
 
 	public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken cancellationToken = default)

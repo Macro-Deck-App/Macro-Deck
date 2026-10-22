@@ -8,6 +8,8 @@ internal static class HomeAssistantConfigKeys
 	public const string BaseUrl = "baseUrl";
 	public const string Token = "token";
 
+	public const string BatteryEntities = "batteryEntities";
+
 	// The four keys below are compatibility-only: they were written by the config-flow watched-entity
 	// step that HomeAssistantWatchedEntityMigration now migrates away from. Nothing writes them anymore,
 	// but an existing install's stored config still carries them until that migration runs, so the keys

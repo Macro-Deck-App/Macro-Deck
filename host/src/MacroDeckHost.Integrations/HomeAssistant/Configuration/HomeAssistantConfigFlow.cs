@@ -1,6 +1,9 @@
+using System.Text.Json;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
+using MacroDeckHost.Integrations.HomeAssistant.Providers;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
@@ -12,12 +15,18 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 {
 	private const string ConnectionStepId = "connection";
 
+	private const string BatteriesStepId = "batteries";
+
 	private static readonly ILogger _logger =
 		IntegrationLog.For<HomeAssistantConfigFlow>(HomeAssistantIntegration.IntegrationId);
 
 	private static readonly TimeSpan _connectTimeout = TimeSpan.FromSeconds(15);
 
 	private readonly Func<IHomeAssistantClient> _clientFactory;
+
+	private string? _title;
+	private IReadOnlyList<HomeAssistantEntityState> _offeredBatteries = [];
+	private IReadOnlyList<string> _previousBatteries = [];
 
 	public HomeAssistantConfigFlow()
 		: this(() => new HomeAssistantClient())
@@ -41,10 +50,80 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
 	{
-		return stepId == ConnectionStepId
-			? SubmitConnection(input, cancellationToken)
-			: Task.FromResult(ConfigFlowResult.Error(ConnectionStep(),
-				AppStrings.Integrations.HomeAssistant.Config.UnknownStep()));
+		return stepId switch
+		{
+			ConnectionStepId => SubmitConnection(input, cancellationToken),
+			BatteriesStepId when _title is not null => Task.FromResult(SubmitBatteries(input)),
+			_ => Task.FromResult(ConfigFlowResult.Error(ConnectionStep(),
+				AppStrings.Integrations.HomeAssistant.Config.UnknownStep()))
+		};
+	}
+
+	private static IReadOnlyList<string> ParseSelection(object? value)
+	{
+		return value switch
+		{
+			string text => HomeAssistantConfigKeys.ParseEntities(text),
+			IEnumerable<string> ids => [.. ids.Where(id => id.Length > 0)],
+			_ => []
+		};
+	}
+
+	private static ActionParameterOption OptionFor(HomeAssistantEntityState sensor)
+	{
+		return new ActionParameterOption
+		{
+			Value = sensor.EntityId,
+			Label = sensor.FriendlyName is { Length: > 0 } name ? $"{name} ({sensor.EntityId})" : sensor.EntityId
+		};
+	}
+
+	private ConfigFlowStep BatteriesStep(IReadOnlyList<string> selection)
+	{
+		return new ConfigFlowStep
+		{
+			StepId = BatteriesStepId,
+			Title = AppStrings.Integrations.HomeAssistant.Config.BatteriesTitle(),
+			Description = AppStrings.Integrations.HomeAssistant.Config.BatteriesDescription(),
+			Fields =
+			[
+				new ActionParameter
+				{
+					Name = HomeAssistantConfigKeys.BatteryEntities,
+					Type = ActionParameterType.MultiSelect,
+					Options = [.. _offeredBatteries.Select(OptionFor)],
+					Label = AppStrings.Integrations.HomeAssistant.Config.BatteriesLabel(),
+					Required = false,
+					DefaultValue = selection.ToArray()
+				}
+			]
+		};
+	}
+
+	private ConfigFlowResult SubmitBatteries(IReadOnlyDictionary<string, object?> input)
+	{
+		var offered = _offeredBatteries.Select(sensor => sensor.EntityId).ToHashSet(StringComparer.Ordinal);
+		var selected = ParseSelection(input.GetValueOrDefault(HomeAssistantConfigKeys.BatteryEntities))
+			.Where(offered.Contains)
+			.Distinct(StringComparer.Ordinal)
+			.ToList();
+
+		if (selected.Count > BatteryLimits.MaxDevicesPerProvider)
+		{
+			return ConfigFlowResult.Error(BatteriesStep(selected),
+				fieldErrors: new Dictionary<string, LocalizedText>(StringComparer.Ordinal)
+				{
+					[HomeAssistantConfigKeys.BatteryEntities] =
+						AppStrings.Integrations.HomeAssistant.Config.TooManyBatteries(BatteryLimits
+							.MaxDevicesPerProvider)
+				});
+		}
+
+		return ConfigFlowResult.Complete(_title!,
+			new Dictionary<string, ConfigFlowValue>(StringComparer.Ordinal)
+			{
+				[HomeAssistantConfigKeys.BatteryEntities] = ConfigFlowValue.Plain(JsonSerializer.Serialize(selected))
+			});
 	}
 
 	private static ConfigFlowStep ConnectionStep()
@@ -97,6 +176,8 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 	{
 		var baseUrl = (input.GetValueOrDefault(HomeAssistantConfigKeys.BaseUrl) as string ?? string.Empty).Trim();
 		var token = (input.GetValueOrDefault(HomeAssistantConfigKeys.Token) as string ?? string.Empty).Trim();
+		_title = null;
+		_previousBatteries = ParseSelection(input.GetValueOrDefault(HomeAssistantConfigKeys.BatteryEntities));
 
 		var fieldErrors = new Dictionary<string, LocalizedText>(StringComparer.Ordinal);
 		var uri = HomeAssistantEndpoint.TryBuild(baseUrl);
@@ -141,7 +222,17 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 			? $"Home Assistant ({location})"
 			: $"Home Assistant ({uri.Host})";
 
-		return ConfigFlowResult.Complete(title, new Dictionary<string, ConfigFlowValue>(StringComparer.Ordinal));
+		// Without a battery sensor to offer, the key stays out so a previous selection survives a
+		// reconfigure while Home Assistant is still starting.
+		_offeredBatteries = test.Batteries ?? [];
+		if (_offeredBatteries.Count == 0)
+		{
+			return ConfigFlowResult.Complete(title, new Dictionary<string, ConfigFlowValue>(StringComparer.Ordinal));
+		}
+
+		_title = title;
+		var offered = _offeredBatteries.Select(sensor => sensor.EntityId).ToHashSet(StringComparer.Ordinal);
+		return ConfigFlowResult.Step(BatteriesStep([.. _previousBatteries.Where(offered.Contains)]));
 	}
 
 	private async Task<TestResult> TestConnectionAsync(Uri uri, string token, CancellationToken cancellationToken)
@@ -159,11 +250,17 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 			await client.ConnectAsync(uri, token, timeout.Token);
 			authenticated = true;
 
-			await client.SendCommandAsync("get_states", cancellationToken: timeout.Token);
+			var states = HomeAssistantResponses.ReadStates(
+				await client.SendCommandAsync("get_states", cancellationToken: timeout.Token));
 			var (locationName, _) = HomeAssistantResponses.ReadConfig(
 				await client.SendCommandAsync("get_config", cancellationToken: timeout.Token));
 
-			return new TestResult(locationName, null, null);
+			var batteries = states
+				.Where(HomeAssistantBatteryProvider.IsBatterySensor)
+				.OrderBy(sensor => sensor.FriendlyName ?? sensor.EntityId, StringComparer.CurrentCultureIgnoreCase)
+				.ThenBy(sensor => sensor.EntityId, StringComparer.Ordinal)
+				.ToList();
+			return new TestResult(locationName, null, null, batteries);
 		}
 		catch (HomeAssistantAuthenticationException ex)
 		{
@@ -220,5 +317,9 @@ public sealed class HomeAssistantConfigFlow : IConfigFlow
 			+ "running. The default port is 8123.";
 	}
 
-	private sealed record TestResult(string? LocationName, string? Error, string? TokenError);
+	private sealed record TestResult(
+		string? LocationName,
+		string? Error,
+		string? TokenError,
+		IReadOnlyList<HomeAssistantEntityState>? Batteries = null);
 }

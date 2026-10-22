@@ -7084,6 +7084,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>Neznámý krok</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>Výběr senzorů baterie</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Vyberte senzory baterie z Home Assistant, které Macro Deck zobrazí jako zařízení s baterií. Pokud nemá být zobrazen žádný, ponechte vše nezaškrtnuté.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>Senzory baterie</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>Vybráno příliš mnoho senzorů baterie. Limit je {max}.</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>Všechny entity přiřazené k vybraným oblastem.</value>
   </data>
@@ -23953,7 +23965,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>{device} (není k dispozici)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>Zatím žádné zařízení nehlásí baterii. Zapněte integraci ADB a připojte telefon, nebo nainstalujte plugin, který baterie poskytuje.</value>
+    <value>Zatím žádné zařízení nehlásí baterii. Zapněte integraci ADB a připojte telefon, spárujte aplikaci Macro Deck Companion, vyberte senzory baterie v konfiguraci Home Assistant, nebo nainstalujte plugin, který baterie poskytuje.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>Pruh</value>

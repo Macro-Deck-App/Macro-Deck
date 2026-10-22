@@ -471,16 +471,20 @@ browser. What the page itself does is up to the site, as with any link the user 
 ## Battery devices
 
 Every plugin can read every [battery device](/features/batteries/) in Macro Deck: the ones other plugins
-publish, Macro Deck's own, and the Android phones and tablets its ADB integration reports. The host pushes
-the whole catalog, each device's name, kind, level, charge state and connection, to every connected plugin.
-No permission covers publishing or reading, and the ADB devices are not filtered by **Allow plugins to use
-ADB** or `host:adb`: a battery level is not access to the device, and gating it would leave other plugins'
-widgets blank. This is a deliberate decision, recorded in
+publish, Macro Deck's own, the Android phones and tablets its ADB integration reports, the devices running
+Macro Deck Companion, the computer's own battery under the computer's name, and the Home Assistant battery
+sensors the user picked, under their device name. The host pushes the whole catalog, each device's name,
+kind, level, charge state and connection, to every connected plugin. No permission covers publishing or reading: the ADB devices are not
+filtered by **Allow plugins to use ADB** or `host:adb`, and the Companion devices not by **Allow plugins to
+use Companion devices** or `host:companion-devices`. A battery level is not access to the device, and
+gating it would leave other plugins' widgets blank. This is a deliberate decision, recorded in
 [ADR 0109](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0109-battery-devices-are-a-host-brokered-catalog-every-plugin-may-read.md).
 
 - **Ids carry no hardware identifiers.** The ADB integration publishes a phone under an HMAC of its
   serial, keyed with a secret of this install, so the serial never leaves Macro Deck's ADB service, is
-  never stored, and cannot be matched against a list of serials or across installs. A provider must not put a
+  never stored, and cannot be matched against a list of serials or across installs. The Companion
+  integration publishes a device under a hash of its configuration id, so the Companion device id, which
+  only plugins with `host:companion-devices` see, is not handed out either. A provider must not put a
   serial or anything else it would not show every plugin into a device's name or id.
 - **A provider speaks only for itself.** Devices are stored under the authenticated plugin or the
   integration that published them; a plugin cannot publish, change or remove another provider's devices.

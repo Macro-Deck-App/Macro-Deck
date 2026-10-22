@@ -121,7 +121,9 @@ devices** is off, Macro Deck asks the user in a dialog, **A plugin wants to use 
 keeps the question in its notifications; **Allow** turns the setting on. It asks the same way, once per run
 of Macro Deck, when your plugin calls an operation and is refused; a plugin that does not declare
 `host:companion-devices` is refused without asking. That switch covers every plugin that declares the
-permission, not only yours. The user guide describes all of this in
+permission, not only yours. It does not cover a device's battery: the built-in Companion integration
+publishes it to the [battery catalog](/features/batteries/#the-companion-provider), which every plugin reads
+without a permission. The user guide describes all of this in
 [Plugins and your Companion devices](/guide/companion-app/tips/#plugins-and-your-companion-devices).
 
 | `CompanionDeviceAccess` | Meaning |

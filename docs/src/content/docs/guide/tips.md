@@ -137,6 +137,10 @@ Good for a clock or a **Go Back** button.
 - **Your phone's battery on the deck:** under **Settings > ADB** turn on **Enable ADB**, turn on the
   **ADB / Android Debug Bridge** integration under **Integrations**, connect the phone once and allow USB
   debugging, then add a **Battery** widget. See [Battery](/guide/concepts/#battery).
+- **Phones and tablets with the Companion app** appear in the Battery widget by themselves once they connect.
+- **Your laptop's battery** appears while the **System** integration is on.
+- **Sensors from Home Assistant:** reconfigure Home Assistant under **Integrations** and check the battery
+  sensors you want in **Choose battery sensors**, for example the remote or the smoke detector.
 - **Headsets, controllers and more** appear in the same widget when a plugin reports them.
 - **React to a low battery:** every device has a `battery_..._level` variable, so an automation on
   **Variable Changed** with an **If / Else** can warn you or change a button's color when it drops. See

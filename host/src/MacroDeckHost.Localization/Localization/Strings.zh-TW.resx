@@ -7085,6 +7085,18 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>未知的步驟</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>選擇電池感測器</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>選擇要在 Macro Deck 中顯示為電池裝置的 Home Assistant 電池感測器。全部不勾選則不顯示任何感測器。</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>電池感測器</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>選擇的電池感測器過多。上限為 {max}。</value>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>指派給所選區域的每個實體。</value>
   </data>
@@ -23975,7 +23987,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>{device}（無法使用）</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>目前沒有裝置回報電池資訊。請開啟 ADB 整合並連接手機，或安裝提供電池資訊的外掛程式。</value>
+    <value>目前沒有裝置回報電池資訊。請開啟 ADB 整合並連接手機、配對 Macro Deck Companion App、在 Home Assistant 設定中選擇電池感測器，或安裝提供電池資訊的外掛程式。</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>長條</value>

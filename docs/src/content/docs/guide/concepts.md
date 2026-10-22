@@ -361,10 +361,26 @@ Which devices are offered:
   Debug Bridge** integration is turned on under **Integrations**, and the device has allowed USB debugging
   for this computer (see [Connect over USB](/guide/usb-connection/)). A phone you unplug stays in the list as
   not connected.
+- **Phones and tablets running Macro Deck Companion**, once they reported a battery level and the **Macro
+  Deck Companion** integration is turned on under **Integrations**. Each is listed under the name of its
+  Companion configuration and stays in the list as not connected when the app disconnects, until Macro
+  Deck restarts; deleting the configuration removes it. Deleting the last one turns the integration off,
+  so that device is shown as not available instead. The app reports only whether the device is charging,
+  so a device plugged in but not charging reads as discharging. An Android phone connected over ADB that also
+  runs the Companion app is listed twice, once for each integration; pick either.
+- **This computer's battery**, on a laptop, while the **System** integration is turned on. It is listed
+  under the computer's name and checked every 15 seconds. A computer without a battery adds nothing.
+- **Home Assistant battery sensors you pick.** When you set up or reconfigure Home Assistant under
+  **Integrations**, the step **Choose battery sensors** lists every battery sensor of your Home Assistant;
+  check the ones you want, up to 64. Each is listed under its Home Assistant device's name, and shows as
+  charging when the device also has a battery charging sensor that is on. A sensor that is unavailable, or
+  every sensor while Home Assistant is unreachable, shows as not connected. Unchecking a sensor removes it;
+  a sensor renamed in Home Assistant has to be picked again. Deleting the Home Assistant configuration turns
+  the integration off, so its sensors are shown as not available.
 - **Devices from plugins**, such as headsets, controllers or mice, when a plugin you installed reports
   them.
 
-Every device also gets [battery variables](#battery-variables).
+Every device also gets [battery variables](#battery-variables), seven per device.
 
 ## Actions and triggers
 

@@ -7085,6 +7085,19 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.HomeAssistant.Config.UnknownStep" xml:space="preserve">
     <value>Unknown step</value>
   </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesTitle" xml:space="preserve">
+    <value>Choose battery sensors</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesDescription" xml:space="preserve">
+    <value>Pick the Home Assistant battery sensors Macro Deck shows as battery devices. Leave all unchecked to show none.</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.BatteriesLabel" xml:space="preserve">
+    <value>Battery sensors</value>
+  </data>
+  <data name="Integrations.HomeAssistant.Config.TooManyBatteries" xml:space="preserve">
+    <value>Too many battery sensors selected. The limit is {max}.</value>
+    <comment>[max:int]</comment>
+  </data>
   <data name="Integrations.HomeAssistant.Config.WatchAreasDescription" xml:space="preserve">
     <value>Every entity assigned to the chosen areas.</value>
   </data>
@@ -23976,7 +23989,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{device} (not available)</value>
   </data>
   <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
-    <value>No device reports a battery yet. Turn on the ADB integration and connect a phone, or install a plugin that provides batteries.</value>
+    <value>No device reports a battery yet. Turn on the ADB integration and connect a phone, pair the Macro Deck Companion app, pick battery sensors in the Home Assistant configuration, or install a plugin that provides batteries.</value>
   </data>
   <data name="Widgets.Battery.StyleBar" xml:space="preserve">
     <value>Bar</value>

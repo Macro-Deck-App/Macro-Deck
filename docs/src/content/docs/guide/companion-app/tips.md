@@ -26,7 +26,8 @@ asks for the device first: choose it from the list, where it appears once it con
 The device's variables are **Battery level**, **Charging**, **Orientation**, **Screen brightness**, **Model**,
 **Platform**, **App version**, **In focus**, **Network type**, **Metered network**, **Internet access**,
 **Network name** (Android, needs the Wi-Fi name permission), **CPU usage** (iOS) and **Memory usage**. Use them in
-labels, conditions and automations like any other variable.
+labels, conditions and automations like any other variable. The device's battery also appears in the
+[Battery widget](/guide/concepts/#battery), with its own [battery variables](/guide/concepts/#battery-variables).
 
 ## Turn the screen off when Macro Deck quits
 
@@ -99,6 +100,11 @@ Turning off **Allow plugins to use Companion devices** stops every plugin from u
 It does not affect the **Macro Deck Companion** integration's own actions, variables and events, or the
 deck itself.
 
+The battery level, name and kind of your Companion devices are not covered by this setting: while the
+**Macro Deck Companion** integration is turned on, they are shown in the [Battery widget](/guide/concepts/#battery)
+and every plugin can read them, like the batteries plugins report. Turn off the integration under
+**Integrations** to hide them.
+
 ## More ideas
 
 - **Brightness by time of day:** a **Schedule** event at 22:00 runs **Set screen brightness** at 20%, another one at
@@ -106,8 +112,8 @@ deck itself.
   [connection settings](/guide/companion-app/deck/#connection-settings) hands it back to the device.
 - **A deck per orientation:** **Profile Changed** runs **Set orientation**, for example landscape for a gaming
   profile with many buttons and portrait for a music profile.
-- **Battery at a glance:** show the tablet's **Battery level** in a widget label, for example on the deck of your
-  phone, so you see when the tablet on the wall needs charging.
+- **Battery at a glance:** add a **Battery** widget to the deck of your phone and pick the tablet, so you see
+  when the tablet on the wall needs charging.
 - **Screenshots for sharing:** a button with **Take screenshot** saves the deck as a PNG file on the computer,
   and **Save path to variable** puts the file's path into a variable for the next action.
 - **Burn-in:** a deck that is always on shows the same picture for hours. With **Keep screen on**, also turn on

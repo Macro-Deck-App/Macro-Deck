@@ -10,6 +10,9 @@ internal static class HomeAssistantResponses
 	public static IReadOnlyDictionary<string, string> EmptyEntityAreas { get; }
 		= new Dictionary<string, string>(StringComparer.Ordinal);
 
+	public static IReadOnlyDictionary<string, string> EmptyEntityDevices { get; }
+		= new Dictionary<string, string>(StringComparer.Ordinal);
+
 	public static IReadOnlyList<HomeAssistantEntityState> ReadStates(JsonElement result)
 	{
 		if (result.ValueKind != JsonValueKind.Array)
@@ -166,6 +169,26 @@ internal static class HomeAssistantResponses
 			if (areaId is not null && areaNames.TryGetValue(areaId, out var name))
 			{
 				result[entityId] = name;
+			}
+		}
+
+		return result;
+	}
+
+	public static IReadOnlyDictionary<string, string> ReadEntityDevices(JsonElement entityRegistry)
+	{
+		if (entityRegistry.ValueKind != JsonValueKind.Array)
+		{
+			return EmptyEntityDevices;
+		}
+
+		var result = new Dictionary<string, string>(StringComparer.Ordinal);
+		foreach (var entry in entityRegistry.EnumerateArray())
+		{
+			if (ReadString(entry, "entity_id") is { Length: > 0 } entityId
+				&& ReadString(entry, "device_id") is { Length: > 0 } deviceId)
+			{
+				result[entityId] = deviceId;
 			}
 		}
 

@@ -4,9 +4,11 @@ using MacroDeckHost.Integrations.HomeAssistant.Connections;
 using MacroDeckHost.Integrations.HomeAssistant.Events;
 using MacroDeckHost.Integrations.HomeAssistant.Migration;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
+using MacroDeckHost.Integrations.HomeAssistant.Providers;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Identity;
@@ -31,6 +33,8 @@ public sealed class HomeAssistantIntegration
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
 		IMigrationProvider,
+		IConfigEntryLifecycle,
+		IBatteryProvider,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.homeassistant";
@@ -47,13 +51,23 @@ public sealed class HomeAssistantIntegration
 
 	private readonly HomeAssistantVariableAccessor _variableAccessor = new();
 	private readonly HomeAssistantVariableCatalog _dynamicVariables;
+	private readonly HomeAssistantBatteryProvider _batteries;
+	private readonly Func<IHomeAssistantClient> _clientFactory;
 
 	private HomeAssistantConnection? _connection;
 	private HomeAssistantEventEmitter? _events;
 	private IIntegrationConfig? _config;
+	private IIntegrationContext? _context;
 
 	public HomeAssistantIntegration()
+		: this(() => new HomeAssistantClient())
 	{
+	}
+
+	internal HomeAssistantIntegration(Func<IHomeAssistantClient> clientFactory)
+	{
+		_clientFactory = clientFactory;
+		_batteries = new HomeAssistantBatteryProvider(() => _connection);
 		Actions = HomeAssistantActions.Create(() => _connection, _variableAccessor);
 		_dynamicVariables = new HomeAssistantVariableCatalog(() => _connection?.Catalog ?? HomeAssistantCatalog.Empty,
 			entityIds => _connection?.UpdateWatchedEntities(entityIds),
@@ -115,7 +129,7 @@ public sealed class HomeAssistantIntegration
 
 	public IConfigFlow CreateConfigFlow()
 	{
-		return new HomeAssistantConfigFlow(() => new HomeAssistantClient());
+		return new HomeAssistantConfigFlow(_clientFactory);
 	}
 
 	public bool SupportsCatalog => true;
@@ -160,14 +174,42 @@ public sealed class HomeAssistantIntegration
 		_variableAccessor.UserVariables = context.UserVariables;
 		_events = new HomeAssistantEventEmitter(context.Events);
 		_config = context.Config;
+		_context = context;
 
 		// Must finish before ConnectFromConfig reads WatchedEntities: a successful migration clears that
 		// key, and the migration's own bindings - not the config-flow leftovers - are what should back the
 		// user's ha_* variables from here on.
 		await RunWatchedEntityMigrationAsync(context);
 
-		await ConnectFromConfig(context);
+		await ConnectFromConfig(context, CancellationToken.None);
 		IsInitialized = true;
+	}
+
+	public async Task<bool> ReloadEntriesAsync(CancellationToken cancellationToken = default)
+	{
+		if (!IsInitialized || _context is not { } context)
+		{
+			return false;
+		}
+
+		var entries = await context.Config.GetEntriesAsync(cancellationToken);
+		if (entries.Count == 0)
+		{
+			return false;
+		}
+
+		await ConnectFromConfig(context, cancellationToken);
+		return true;
+	}
+
+	Task IBatteryProvider.InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken)
+	{
+		return _batteries.InitializeAsync(context, cancellationToken);
+	}
+
+	Task IBatteryProvider.ShutdownAsync(CancellationToken cancellationToken)
+	{
+		return _batteries.ShutdownAsync(cancellationToken);
 	}
 
 	private static async Task RunWatchedEntityMigrationAsync(IIntegrationContext context)
@@ -214,8 +256,7 @@ public sealed class HomeAssistantIntegration
 
 	public Task ShutdownAsync()
 	{
-		_connection?.Dispose();
-		_connection = null;
+		ReplaceConnection(null);
 
 		IsInitialized = false;
 		return Task.CompletedTask;
@@ -225,6 +266,7 @@ public sealed class HomeAssistantIntegration
 	{
 		_connection?.Dispose();
 		_connection = null;
+		_batteries.Dispose();
 	}
 
 	// An eager id is "homeassistant-<slot>" and a catalog id is "entity/<entity_id>/<child>", so the two
@@ -383,39 +425,63 @@ public sealed class HomeAssistantIntegration
 		return memory.ToArray();
 	}
 
-	private async Task ConnectFromConfig(IIntegrationContext context)
+	private async Task ConnectFromConfig(IIntegrationContext context, CancellationToken cancellationToken)
 	{
-		_connection?.Dispose();
-		_connection = null;
-
-		var entries = await context.Config.GetEntriesAsync();
+		var entries = await context.Config.GetEntriesAsync(cancellationToken);
 		var entry = entries.Count > 0 ? entries[0] : null;
 		if (entry is null)
 		{
 			_logger.Information("Home Assistant not configured; skipping connection");
+			ReplaceConnection(null);
+			await _batteries.UpdateSelectionAsync([], cancellationToken);
 			return;
 		}
 
-		var baseUrl = await context.Config.GetStringAsync(entry.Id, HomeAssistantConfigKeys.BaseUrl);
-		var token = (await context.Config.GetSecretAsync(entry.Id, HomeAssistantConfigKeys.Token))?.Trim();
+		var baseUrl = await context.Config.GetStringAsync(entry.Id, HomeAssistantConfigKeys.BaseUrl, cancellationToken);
+		var token = (await context.Config.GetSecretAsync(entry.Id, HomeAssistantConfigKeys.Token, cancellationToken))
+			?.Trim();
 		var uri = HomeAssistantEndpoint.TryBuild(baseUrl);
+		var watchedEntities = HomeAssistantConfigKeys.ParseEntities(
+			await context.Config.GetStringAsync(entry.Id, HomeAssistantConfigKeys.WatchedEntities, cancellationToken));
+		var batteryEntities = HomeAssistantConfigKeys.ParseEntities(
+			await context.Config.GetStringAsync(entry.Id, HomeAssistantConfigKeys.BatteryEntities, cancellationToken));
 
+		ConnectionSettings? settings = null;
 		if (uri is null || string.IsNullOrEmpty(token))
 		{
 			_logger.Warning("Home Assistant config entry {EntryId} is incomplete; skipping", entry.Id);
+		}
+		else
+		{
+			settings = new ConnectionSettings(uri, token, watchedEntities);
+		}
+
+		ReplaceConnection(settings);
+		await _batteries.UpdateSelectionAsync(batteryEntities, cancellationToken);
+	}
+
+	private void ReplaceConnection(ConnectionSettings? settings)
+	{
+		_connection?.Dispose();
+		_connection = null;
+
+		var generation = _batteries.BeginConnection();
+		if (settings is null)
+		{
+			_batteries.ConnectionChanged(generation);
 			return;
 		}
 
-		var watchedEntities = HomeAssistantConfigKeys.ParseEntities(
-			await context.Config.GetStringAsync(entry.Id, HomeAssistantConfigKeys.WatchedEntities));
-
-		_connection = new HomeAssistantConnection(() => new HomeAssistantClient(),
-			uri,
-			token,
-			watchedEntities,
+		_connection = new HomeAssistantConnection(_clientFactory,
+			settings.Uri,
+			settings.Token,
+			settings.WatchedEntities,
 			_events,
 			_dynamicVariables,
-			onVariablesChanged: () => _ = _variableAccessor.Current?.RequestRefreshAsync());
+			onVariablesChanged: () => _ = _variableAccessor.Current?.RequestRefreshAsync(),
+			onBatteryRelevantChange: () => _batteries.ConnectionChanged(generation));
 		_connection.Start();
 	}
+
+	private sealed record ConnectionSettings(Uri Uri, string Token, IReadOnlyList<string> WatchedEntities);
 }
