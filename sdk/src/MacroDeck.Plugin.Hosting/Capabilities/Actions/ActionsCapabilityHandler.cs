@@ -113,6 +113,7 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 		var interactionsLogger = (invocation.Services.GetService<ILogger>() ?? Serilog.Core.Logger.None)
 			.ForContext<RemoteActionInteractions>();
 
+		var interactions = new RemoteActionInteractions(hostInvoker, interactionsLogger, invocation.CorrelationId);
 		var context = new ActionExecutionContext
 		{
 			Parameters = ActionArgumentBinder.Bind(definition.Parameters, SerializeParameters(arguments?.Parameters)),
@@ -125,7 +126,7 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 			// Built from this invocation's own correlation id, so the host can verify a picker request
 			// names a live actions/execute of this same plugin before honouring it - see
 			// RemoteActionInteractions and ActionInteractionsRequestItemPickerArguments.ExecuteCorrelationId.
-			Interactions = new RemoteActionInteractions(hostInvoker, interactionsLogger, invocation.CorrelationId),
+			Interactions = interactions,
 
 			// Same correlation, same gate: a modal is only opened while this execute is live. The store is
 			// resolved rather than required for the same reason the logger above is: an invocation driven
@@ -137,8 +138,32 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 				invocation.CorrelationId)
 		};
 
-		var result = await definition.CreateExecutor().ExecuteAsync(context);
+		ActionResult result;
+		try
+		{
+			result = await definition.CreateExecutor().ExecuteAsync(context);
+		}
+		finally
+		{
+			await AwaitPickerRequestsAsync(interactions, cancellationToken);
+		}
+
 		return MapExecuteResult(result);
+	}
+
+	// The host honours a picker request only while this execute is pending, so its result must not
+	// overtake a request the action fired and did not await.
+	private static async Task AwaitPickerRequestsAsync(
+		RemoteActionInteractions interactions,
+		CancellationToken cancellationToken)
+	{
+		try
+		{
+			await interactions.WaitForRequestsAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+		}
 	}
 
 	private async Task<CapabilityInvocationResult> GetOptionsAsync(
