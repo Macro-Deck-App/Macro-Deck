@@ -891,7 +891,9 @@ public class Startup
 		services.AddSingleton<CompanionCommandRequests>();
 		services.AddSingleton<CompanionDeviceRegistry>();
 		services.AddSingleton<ICompanionDeviceApi>(sp => sp.GetRequiredService<CompanionDeviceRegistry>());
-		services.AddSingleton(new CompanionLicenseTokens(CompanionLicenseTokens.ProductionKeys));
+		services.AddSingleton(provider => new CompanionLicenseTokens(CompanionLicenseTokens.ProductionKeys,
+			provider.GetRequiredService<Serilog.ILogger>(),
+			provider.GetRequiredService<TimeProvider>()));
 		services.AddHttpClient(PlatformLicenseClient.HttpClientName)
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
 		services.AddSingleton<IPlatformLicenseClient, PlatformLicenseClient>();

@@ -21,6 +21,7 @@ const UNLICENSED: CompanionLicenseStatus = {
   accountSync: 'unknown',
   issuePending: false,
   nextIssueAttemptAt: null,
+  verificationUnavailable: false,
 };
 
 const LICENSED: CompanionLicenseStatus = {
@@ -127,6 +128,14 @@ describe('CompanionAppSettingsComponent', () => {
 
   it('drops the trial warning once the host holds a purchased license', async () => {
     api.getCompanionLicense.and.resolveTo(LICENSED);
+
+    const fixture = await create();
+
+    expect(text(fixture, 'companion-app-no-license')).toBeUndefined();
+  });
+
+  it('shows no trial warning while the host cannot check licenses', async () => {
+    api.getCompanionLicense.and.resolveTo({ ...UNLICENSED, verificationUnavailable: true });
 
     const fixture = await create();
 

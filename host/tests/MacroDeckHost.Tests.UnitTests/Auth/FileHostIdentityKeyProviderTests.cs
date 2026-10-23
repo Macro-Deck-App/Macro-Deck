@@ -185,6 +185,30 @@ public class FileHostIdentityKeyProviderTests
 	}
 
 	[Test]
+	public async Task A_key_the_unreachable_key_isolation_service_cannot_open_is_kept_and_loads_once_it_is_back()
+	{
+		var original = await NewProvider().GetPublicKey();
+		var reachable = false;
+		var provider = NewProvider(createKey: () => reachable ? ECDsa.Create() : new UnreachableEcdsa());
+
+		Assert.ThrowsAsync<HostIdentityUnavailableException>(async () => await provider.GetPublicKey());
+		Assert.Multiple(() =>
+		{
+			Assert.That(File.Exists(KeyPath), Is.True);
+			Assert.That(Directory.GetFiles(_paths.KeysDirectory, "*.unreadable-*"), Is.Empty);
+		});
+
+		reachable = true;
+		_time.Advance(FileHostIdentityKeyProvider.RetryInterval);
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(await provider.GetPublicKey(), Is.EqualTo(original));
+			Assert.That(_notifications.Snapshot(), Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task A_key_on_another_curve_is_treated_as_unreadable()
 	{
 		using var p384 = ECDsa.Create(ECCurve.NamedCurves.nistP384);
@@ -331,7 +355,7 @@ public class FileHostIdentityKeyProviderTests
 			.BuildServiceProvider();
 	}
 
-	private FileHostIdentityKeyProvider NewProvider(ServiceProvider? services = null)
+	private FileHostIdentityKeyProvider NewProvider(ServiceProvider? services = null, Func<ECDsa>? createKey = null)
 	{
 		return new FileHostIdentityKeyProvider(_protection,
 			_paths,
@@ -339,7 +363,8 @@ public class FileHostIdentityKeyProviderTests
 			_notifications,
 			TestLocalization.Resolver,
 			_time,
-			new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Sink(_log).CreateLogger());
+			new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Sink(_log).CreateLogger(),
+			createKey ?? ECDsa.Create);
 	}
 
 	// Background bookkeeping waits on the fake clock, so each round advances it past any retry delay.
@@ -446,6 +471,24 @@ public class FileHostIdentityKeyProviderTests
 					Interlocked.Increment(ref _debugs);
 					break;
 			}
+		}
+	}
+
+	private sealed class UnreachableEcdsa : ECDsa
+	{
+		public override void ImportPkcs8PrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
+		{
+			throw new CryptographicException("no endpoints") { HResult = unchecked((int)0x800706D9) };
+		}
+
+		public override byte[] SignHash(byte[] hash)
+		{
+			throw new NotSupportedException();
+		}
+
+		public override bool VerifyHash(byte[] hash, byte[] signature)
+		{
+			throw new NotSupportedException();
 		}
 	}
 }

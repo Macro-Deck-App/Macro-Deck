@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeckHost.Application.Security;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.DataProtection;
@@ -32,6 +33,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	private readonly ILocalizationResolver _localization;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
+	private readonly Func<ECDsa> _createKey;
 
 	private volatile LoadedKey? _loaded;
 	private DateTimeOffset _retryNotBefore = DateTimeOffset.MinValue;
@@ -47,6 +49,26 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 		ILocalizationResolver localization,
 		TimeProvider timeProvider,
 		ILogger logger)
+		: this(dataProtectionProvider,
+			paths,
+			scopeFactory,
+			notifications,
+			localization,
+			timeProvider,
+			logger,
+			ECDsa.Create)
+	{
+	}
+
+	internal FileHostIdentityKeyProvider(
+		IDataProtectionProvider dataProtectionProvider,
+		IMacroDeckPaths paths,
+		IServiceScopeFactory scopeFactory,
+		IUserNotificationStore notifications,
+		ILocalizationResolver localization,
+		TimeProvider timeProvider,
+		ILogger logger,
+		Func<ECDsa> createKey)
 	{
 		_protector = dataProtectionProvider.CreateProtector("MacroDeck.Auth.HostIdentityKey");
 		_keyFilePath = Path.Combine(paths.KeysDirectory, KeyFileName);
@@ -55,6 +77,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 		_localization = localization;
 		_timeProvider = timeProvider;
 		_logger = logger;
+		_createKey = createKey;
 	}
 
 	public async ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
@@ -168,11 +191,12 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 			return await CreateForMissingFile();
 		}
 
+		// A key the provider cannot open right now is not unreadable: renewing it would unpair every device.
 		try
 		{
 			return Import(protectedBytes);
 		}
-		catch (CryptographicException e)
+		catch (CryptographicException e) when (!CryptographyProviderErrors.IsProviderUnreachable(e))
 		{
 			return await Renew(e);
 		}
@@ -215,7 +239,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 
 	private ECDsa Import(byte[] protectedBytes)
 	{
-		var key = ECDsa.Create();
+		var key = _createKey();
 		try
 		{
 			key.ImportPkcs8PrivateKey(_protector.Unprotect(protectedBytes), out _);

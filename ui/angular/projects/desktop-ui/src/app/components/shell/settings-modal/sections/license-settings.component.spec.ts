@@ -18,6 +18,7 @@ const UNLICENSED: CompanionLicenseStatus = {
   accountSync: 'unknown',
   issuePending: false,
   nextIssueAttemptAt: null,
+  verificationUnavailable: false,
 };
 
 const TEST_LICENSE: CompanionLicenseStatus = {
@@ -32,6 +33,7 @@ const TEST_LICENSE: CompanionLicenseStatus = {
   accountSync: 'unknown',
   issuePending: false,
   nextIssueAttemptAt: null,
+  verificationUnavailable: false,
 };
 
 const PURCHASED: CompanionLicenseStatus = {
@@ -88,6 +90,15 @@ describe('LicenseSettingsComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('button').length).toBe(1);
     expect(find(fixture, 'license-redeem')?.querySelectorAll('button').length).toBe(1);
     expect(find(fixture, 'license-test-marker')).toBeNull();
+  });
+
+  it('says licenses cannot be checked instead of calling the host unlicensed', async () => {
+    api.getCompanionLicense.and.resolveTo({ ...UNLICENSED, verificationUnavailable: true });
+    const fixture = await create();
+
+    expect(find(fixture, 'license-verification-unavailable')?.textContent).toContain('cannot be checked right now');
+    expect(find(fixture, 'license-status')).toBeNull();
+    expect(find(fixture, 'license-redeem')).toBeNull();
   });
 
   it('marks a test license so it is never mistaken for a purchased one', async () => {

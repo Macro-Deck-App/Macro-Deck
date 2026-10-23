@@ -882,6 +882,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>No se pudo iniciar Macro Deck</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck no pudo usar el servicio de criptografía del sistema operativo. En Windows, asegúrate de que el servicio CNG Key Isolation (KeyIso) esté en ejecución o reinicia el equipo.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Falta el binario del host de Macro Deck:
 {paths}</value>
@@ -14339,6 +14342,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>Su clave privada no se pudo leer en este equipo, algo que ocurre tras mover o restaurar el directorio de datos en otra máquina. Genera un certificado nuevo o vuelve a subir uno en Configuración &gt; Red.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>El servicio de criptografía del sistema operativo no está disponible. En Windows, asegúrate de que el servicio CNG Key Isolation (KeyIso) esté en ejecución y luego reinicia Macro Deck.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>Añade un certificado en Configuración &gt; Red.</value>
   </data>
@@ -16251,6 +16257,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Comprada a través de</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>Ahora mismo no se pueden comprobar las licencias porque el servicio de criptografía del sistema operativo no está disponible. En Windows, asegúrate de que el servicio CNG Key Isolation (KeyIso) esté en ejecución. Tu licencia se conserva y se vuelve a comprobar automáticamente.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>Mostrar detalles</value>
   </data>
@@ -16420,6 +16429,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>El certificado almacenado no es válido y no se pudo usar.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>HTTPS está desactivado porque el servicio de criptografía del sistema operativo no está disponible. En Windows, asegúrate de que el servicio CNG Key Isolation (KeyIso) esté en ejecución y luego reinicia Macro Deck.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>No se pudo usar el certificado. Reemplázalo abajo.</value>

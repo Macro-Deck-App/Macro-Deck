@@ -2,11 +2,18 @@
   <shared-settings-section
     [heading]="'macrodeck.app:Settings.License.Heading' | translate"
     [description]="'macrodeck.app:Settings.License.Description' | translate">
-    <shared-settings-row [label]="'macrodeck.app:Settings.License.StatusLabel' | translate">
-      <span class="license-settings__value" data-testid="license-status">
-        {{ (status()?.licensed ? 'macrodeck.app:Settings.License.Licensed' : 'macrodeck.app:Settings.License.NotLicensed') | translate }}
-      </span>
-    </shared-settings-row>
+    @if (status()?.verificationUnavailable) {
+      <p class="license-settings__unavailable" data-testid="license-verification-unavailable" role="status">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Settings.License.VerificationUnavailable' | translate }}
+      </p>
+    } @else {
+      <shared-settings-row [label]="'macrodeck.app:Settings.License.StatusLabel' | translate">
+        <span class="license-settings__value" data-testid="license-status">
+          {{ (status()?.licensed ? 'macrodeck.app:Settings.License.Licensed' : 'macrodeck.app:Settings.License.NotLicensed') | translate }}
+        </span>
+      </shared-settings-row>
+    }
     @if (canRedeemEntry()) {
       <shared-settings-row
         [label]="'macrodeck.app:Settings.License.Redeem.Heading' | translate"

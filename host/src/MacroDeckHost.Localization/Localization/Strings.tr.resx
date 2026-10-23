@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck başlatılamadı</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck, işletim sisteminin şifreleme hizmetini kullanamadı. Windows'ta CNG Key Isolation (KeyIso) hizmetinin çalıştığından emin olun veya bilgisayarı yeniden başlatın.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck ana bilgisayar ikili dosyası eksik:
 {paths}</value>
@@ -14340,6 +14343,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>Özel anahtarı bu bilgisayarda okunamadı; bu, veri dizini başka bir makineye taşındığında veya geri yüklendiğinde olur. Ayarlar &gt; Ağ bölümünde yeni bir sertifika oluşturun veya tekrar yükleyin.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>İşletim sisteminin şifreleme hizmeti kullanılamıyor. Windows'ta CNG Key Isolation (KeyIso) hizmetinin çalıştığından emin olun, ardından Macro Deck'i yeniden başlatın.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>Ayarlar &gt; Ağ bölümünde bir sertifika ekleyin.</value>
   </data>
@@ -16252,6 +16258,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Satın alındığı yer</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>İşletim sisteminin şifreleme hizmeti kullanılamadığı için lisanslar şu anda doğrulanamıyor. Windows'ta CNG Key Isolation (KeyIso) hizmetinin çalıştığından emin olun. Lisans korunur ve otomatik olarak yeniden doğrulanır.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>Ayrıntıları göster</value>
   </data>
@@ -16421,6 +16430,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>Kayıtlı sertifika geçersiz ve kullanılamadı.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>İşletim sisteminin şifreleme hizmeti kullanılamadığı için HTTPS kapalı. Windows'ta CNG Key Isolation (KeyIso) hizmetinin çalıştığından emin olun, ardından Macro Deck'i yeniden başlatın.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>Sertifika kullanılamadı. Aşağıdan değiştirin.</value>

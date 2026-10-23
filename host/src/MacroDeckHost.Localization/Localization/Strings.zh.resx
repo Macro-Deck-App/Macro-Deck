@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck 无法启动</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck 无法使用操作系统的加密服务。在 Windows 上，请确保 CNG Key Isolation (KeyIso) 服务正在运行，或重启计算机。</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>缺少 Macro Deck 主机程序：
 {paths}</value>
@@ -14340,6 +14343,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>无法在这台电脑上读取其私钥，数据目录被移动或还原到另一台机器上时会发生这种情况。请在“设置 &gt; 网络”中生成新证书或重新上传证书。</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>操作系统的加密服务不可用。在 Windows 上，请确保 CNG Key Isolation (KeyIso) 服务正在运行，然后重启 Macro Deck。</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>请在“设置 &gt; 网络”中添加证书。</value>
   </data>
@@ -16252,6 +16258,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>购买渠道</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>由于操作系统的加密服务不可用，目前无法验证授权。在 Windows 上，请确保 CNG Key Isolation (KeyIso) 服务正在运行。授权会被保留，并将自动重新验证。</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>显示详情</value>
   </data>
@@ -16421,6 +16430,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>已存储的证书无效，无法使用。</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>由于操作系统的加密服务不可用，HTTPS 已关闭。在 Windows 上，请确保 CNG Key Isolation (KeyIso) 服务正在运行，然后重启 Macro Deck。</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>无法使用该证书。请在下方替换它。</value>

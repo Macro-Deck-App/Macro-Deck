@@ -177,7 +177,7 @@ public static class Program
 			//
 			// Skipped while the key ring is locked: the provider is pointed at a scratch ring then, so
 			// seeding would write a private key that nothing can read once the real ring is back.
-			new PublicTlsBootstrapper(certificateStore,
+			var tlsBootstrap = new PublicTlsBootstrapper(certificateStore,
 					new LocalAddressProvider(),
 					new HostNameProvider(),
 					Log.ForContext<PublicTlsBootstrapper>())
@@ -224,7 +224,9 @@ public static class Program
 			var listenerState = new HostListenerState(listenerPlan.Endpoints,
 				selection.Source == PublicPortSource.Environment,
 				refusedPort,
-				certificate.Failure,
+				certificate.Failure == PublicTlsFailure.None && tlsBootstrap.CryptographyUnavailable
+					? PublicTlsFailure.CryptographyUnavailable
+					: certificate.Failure,
 				tls.Rejection,
 				activeFingerprint);
 
@@ -280,7 +282,7 @@ public static class Program
 			Log.Fatal(e,
 				"Host terminated unexpectedly (public port {PublicPort})",
 				ResolvedPublicEndpoints.Value.PublicPort);
-			Environment.ExitCode = 1;
+			Environment.ExitCode = HostExitCodes.ForStartupFailure(e);
 		}
 		finally
 		{
