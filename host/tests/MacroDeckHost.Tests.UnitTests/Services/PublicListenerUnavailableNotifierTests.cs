@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
@@ -29,7 +30,8 @@ public class PublicListenerUnavailableNotifierTests
 		bool restartSupported = true,
 		bool overriddenByEnvironment = false,
 		PublicEndpointSet? endpoints = null,
-		string culture = "en")
+		string culture = "en",
+		PublicTlsFailure tlsFailure = PublicTlsFailure.None)
 	{
 		var listenerState = new FakeHostListenerState
 		{
@@ -38,7 +40,8 @@ public class PublicListenerUnavailableNotifierTests
 			PublicEndpoints = endpoints
 				?? (publicListenerAvailable
 					? PublicEndpointSet.HttpOnly(8193)
-					: PublicEndpointSet.HttpOnly(8193).WithoutHttp())
+					: PublicEndpointSet.HttpOnly(8193).WithoutHttp()),
+			TlsFailure = tlsFailure
 		};
 		var notifications = new UserNotificationStore();
 		var restart = new FakeRestartService
@@ -137,6 +140,23 @@ public class PublicListenerUnavailableNotifierTests
 			Assert.That(notification.Severity, Is.EqualTo(UserNotificationSeverity.Warning));
 			Assert.That(notification.Title, Is.EqualTo("HTTPS is not running"));
 			Assert.That(notification.Message, Does.Contain("reachable over HTTP"));
+		});
+	}
+
+	[Test]
+	public async Task An_unavailable_cryptography_service_is_named_instead_of_asking_for_a_certificate()
+	{
+		var fixture = CreateFixture(true,
+			endpoints: HttpsThatCouldNotBeOpened(),
+			tlsFailure: PublicTlsFailure.CryptographyUnavailable);
+
+		await fixture.Notifier.NotifyIfUnavailable();
+
+		var notification = fixture.Notifications.Snapshot().Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(notification.Message, Does.Contain("CNG Key Isolation"));
+			Assert.That(notification.Message, Does.Not.Contain("Add a certificate"));
 		});
 	}
 

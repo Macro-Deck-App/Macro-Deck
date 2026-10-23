@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>無法啟動 Macro Deck</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck 無法使用作業系統的加密服務。在 Windows 上，請確認 CNG Key Isolation (KeyIso) 服務正在執行，或重新啟動電腦。</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>缺少 Macro Deck 主機執行檔：
 {paths}</value>
@@ -14337,6 +14340,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>其私密金鑰無法在這台電腦上讀取，這通常發生在資料目錄被移動或還原到另一台機器之後。請產生新的憑證，或在「設定 &gt; 網路」中重新上傳。</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>作業系統的加密服務無法使用。在 Windows 上，請確認 CNG Key Isolation (KeyIso) 服務正在執行，然後重新啟動 Macro Deck。</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>請在「設定 &gt; 網路」中新增憑證。</value>
   </data>
@@ -16249,6 +16255,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>購買管道</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>由於作業系統的加密服務無法使用，目前無法驗證授權。在 Windows 上，請確認 CNG Key Isolation (KeyIso) 服務正在執行。授權會保留，並將自動重新驗證。</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>顯示詳細資料</value>
   </data>
@@ -16418,6 +16427,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>已儲存的憑證無效，無法使用。</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>由於作業系統的加密服務無法使用，HTTPS 已關閉。在 Windows 上，請確認 CNG Key Isolation (KeyIso) 服務正在執行，然後重新啟動 Macro Deck。</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>無法使用此憑證。請在下方更換。</value>

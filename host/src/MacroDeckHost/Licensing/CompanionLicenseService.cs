@@ -81,6 +81,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	private DateTimeOffset? _revocationDueAt;
 	private int _revocationFailures;
 	private bool _eligibilityInitialized;
+	private volatile bool _verificationRestored;
 	private AccountState _account = AccountState.Unknown;
 
 	public event EventHandler? LicenseChanged;
@@ -138,6 +139,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		_time = time;
 		_random = random;
 		_logger = logger;
+		_tokens.VerificationRestored += OnVerificationRestored;
 	}
 
 	public async Task<SyncCompanionLicenseResponse> SyncAsync(
@@ -151,22 +153,59 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 			Wake();
 		}
 
-		var license = await AdoptAsync(request.License, cancellationToken);
-		var trialStartedAt = await TrialStartAsync(request.TrialDeviceId, request.TrialStarted, cancellationToken);
-		if (license is null or { IsTest: true } && request.Proof is { } proof)
+		try
 		{
-			await QueueAsync(connectionId, proof, false, cancellationToken);
-		}
+			CompanionLicense? license = null;
+			var verified = _tokens.VerificationAvailable;
+			if (verified)
+			{
+				try
+				{
+					license = await AdoptAsync(request.License, cancellationToken);
+				}
+				catch (CompanionLicenseVerificationUnavailableException)
+				{
+					verified = false;
+				}
+			}
 
-		return new SyncCompanionLicenseResponse
+			var trialStartedAt = await TrialStartAsync(request.TrialDeviceId, request.TrialStarted, cancellationToken);
+			if (verified && license is null or { IsTest: true } && request.Proof is { } proof)
+			{
+				await QueueAsync(connectionId, proof, false, cancellationToken);
+			}
+
+			return new SyncCompanionLicenseResponse
+			{
+				License = license?.Token,
+				TrialStartedAt = trialStartedAt,
+				RevokedLicenseIds = await RevokedIdsForAsync(request.License, license, cancellationToken)
+			};
+		}
+		catch (CompanionLicenseVerificationUnavailableException)
 		{
-			License = license?.Token,
-			TrialStartedAt = trialStartedAt,
-			RevokedLicenseIds = await RevokedIdsForAsync(request.License, license, cancellationToken)
-		};
+			return new SyncCompanionLicenseResponse();
+		}
 	}
 
 	public async Task<CompanionLicenseStatus> GetStatusAsync(CancellationToken cancellationToken)
+	{
+		if (!_tokens.VerificationAvailable)
+		{
+			return new CompanionLicenseStatus { VerificationUnavailable = true };
+		}
+
+		try
+		{
+			return await StatusAsync(cancellationToken);
+		}
+		catch (CompanionLicenseVerificationUnavailableException)
+		{
+			return new CompanionLicenseStatus { VerificationUnavailable = true };
+		}
+	}
+
+	private async Task<CompanionLicenseStatus> StatusAsync(CancellationToken cancellationToken)
 	{
 		var license = await AdoptAsync(null, cancellationToken);
 		var status = Status(license);
@@ -191,6 +230,25 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	}
 
 	public async Task<LegacyPurchaseTransferResult> TransferLegacyPurchaseAsync(
+		CompanionLicenseProof proof,
+		CancellationToken cancellationToken)
+	{
+		if (!_tokens.VerificationAvailable)
+		{
+			return new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Unavailable);
+		}
+
+		try
+		{
+			return await TransferAsync(proof, cancellationToken);
+		}
+		catch (CompanionLicenseVerificationUnavailableException)
+		{
+			return new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Unavailable);
+		}
+	}
+
+	private async Task<LegacyPurchaseTransferResult> TransferAsync(
 		CompanionLicenseProof proof,
 		CancellationToken cancellationToken)
 	{
@@ -233,6 +291,23 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 			return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.Invalid);
 		}
 
+		if (!_tokens.VerificationAvailable)
+		{
+			return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.Unavailable);
+		}
+
+		try
+		{
+			return await RedeemAsync(trimmed, cancellationToken);
+		}
+		catch (CompanionLicenseVerificationUnavailableException)
+		{
+			return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.Unavailable);
+		}
+	}
+
+	private async Task<PromoCodeRedemptionResult> RedeemAsync(string trimmed, CancellationToken cancellationToken)
+	{
 		bool developerMode;
 		await using (var scope = _scopeFactory.CreateAsyncScope())
 		{
@@ -426,9 +501,52 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 
 	internal async Task<DateTimeOffset?> RunDueWorkAsync(CancellationToken cancellationToken)
 	{
-		await RefreshRevocationsAsync(cancellationToken);
-		await IssueDueProofsAsync(cancellationToken);
-		return await NextDueAsync(cancellationToken);
+		if (!_tokens.VerificationAvailable)
+		{
+			return _time.GetUtcNow() + CompanionLicenseBackgroundService.FailureDelay;
+		}
+
+		try
+		{
+			if (_verificationRestored)
+			{
+				_verificationRestored = false;
+				await AnnounceRestoredLicenseAsync(cancellationToken);
+			}
+
+			await RefreshRevocationsAsync(cancellationToken);
+			await IssueDueProofsAsync(cancellationToken);
+			return await NextDueAsync(cancellationToken);
+		}
+		catch (CompanionLicenseVerificationUnavailableException)
+		{
+			return _time.GetUtcNow() + CompanionLicenseBackgroundService.FailureDelay;
+		}
+	}
+
+	private async Task AnnounceRestoredLicenseAsync(CancellationToken cancellationToken)
+	{
+		bool developerMode;
+		await using (var scope = _scopeFactory.CreateAsyncScope())
+		{
+			developerMode = await DeveloperModeAsync(scope.ServiceProvider);
+		}
+
+		var license = await LockedAsync(async preferences
+				=> await _tokens.VerifyAsync(await StoredTokenAsync(preferences), developerMode),
+			cancellationToken);
+		RaiseLicenseChanged();
+		await NotifyChangedAsync();
+		if (license is not null)
+		{
+			await _companions.SendLicenseAsync(new CompanionLicenseEvent { License = license.Token }, null);
+		}
+	}
+
+	private void OnVerificationRestored(object? sender, EventArgs e)
+	{
+		_verificationRestored = true;
+		Wake();
 	}
 
 	internal async Task WaitForWorkAsync(DateTimeOffset? due, CancellationToken cancellationToken)
@@ -959,7 +1077,16 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		CompanionLicense? stored,
 		CancellationToken cancellationToken)
 	{
-		var submittedId = (await _tokens.VerifyAsync(submitted, true))?.LicenseId;
+		string? submittedId;
+		try
+		{
+			submittedId = (await _tokens.VerifyAsync(submitted, true))?.LicenseId;
+		}
+		catch (CompanionLicenseVerificationUnavailableException)
+		{
+			submittedId = null;
+		}
+
 		return await LockedAsync(async preferences =>
 			{
 				var platform = await PlatformRevokedAsync(preferences);
@@ -1301,6 +1428,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 
 	public void Dispose()
 	{
+		_tokens.VerificationRestored -= OnVerificationRestored;
 		_gate.Dispose();
 	}
 

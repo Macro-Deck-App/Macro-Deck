@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck kon niet worden gestart</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck kon de cryptografieservice van het besturingssysteem niet gebruiken. Controleer in Windows of de service CNG Key Isolation (KeyIso) actief is, of start de computer opnieuw op.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Het uitvoerbare bestand van de Macro Deck-host ontbreekt:
 {paths}</value>
@@ -14337,6 +14340,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>De privésleutel kon op deze computer niet worden gelezen; dit gebeurt nadat de gegevensmap is verplaatst of hersteld naar een andere computer. Genereer een nieuw certificaat of upload er opnieuw een onder Instellingen &gt; Netwerk.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>De cryptografieservice van het besturingssysteem is niet beschikbaar. Controleer in Windows of de service CNG Key Isolation (KeyIso) actief is en start Macro Deck daarna opnieuw.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>Voeg een certificaat toe onder Instellingen &gt; Netwerk.</value>
   </data>
@@ -16249,6 +16255,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Gekocht via</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>Licenties kunnen nu niet worden gecontroleerd, omdat de cryptografieservice van het besturingssysteem niet beschikbaar is. Controleer in Windows of de service CNG Key Isolation (KeyIso) actief is. Je licentie blijft behouden en wordt automatisch opnieuw gecontroleerd.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>Details tonen</value>
   </data>
@@ -16418,6 +16427,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>Het opgeslagen certificaat is ongeldig en kon niet worden gebruikt.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>HTTPS staat uit, omdat de cryptografieservice van het besturingssysteem niet beschikbaar is. Controleer in Windows of de service CNG Key Isolation (KeyIso) actief is en start Macro Deck daarna opnieuw.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>Het certificaat kon niet worden gebruikt. Vervang het hieronder.</value>

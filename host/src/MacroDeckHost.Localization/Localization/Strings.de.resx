@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck konnte nicht gestartet werden</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck konnte den Kryptografiedienst des Betriebssystems nicht verwenden. Stelle unter Windows sicher, dass der Dienst „CNG-Schlüsselisolation“ (KeyIso) läuft, oder starte den Computer neu.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Die Host-Binärdatei von Macro Deck fehlt:
 {paths}</value>
@@ -14334,6 +14337,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>Sein privater Schlüssel konnte auf diesem Computer nicht gelesen werden - das passiert, wenn das Datenverzeichnis auf einen anderen Rechner verschoben oder dort wiederhergestellt wurde. Erzeuge unter Einstellungen &gt; Netzwerk ein neues Zertifikat oder lade erneut eines hoch.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>Der Kryptografiedienst des Betriebssystems ist nicht verfügbar. Stelle unter Windows sicher, dass der Dienst „CNG-Schlüsselisolation“ (KeyIso) läuft, und starte Macro Deck dann neu.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>Füge unter Einstellungen &gt; Netzwerk ein Zertifikat hinzu.</value>
   </data>
@@ -16246,6 +16252,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Gekauft über</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>Lizenzen können gerade nicht geprüft werden, weil der Kryptografiedienst des Betriebssystems nicht verfügbar ist. Stelle unter Windows sicher, dass der Dienst „CNG-Schlüsselisolation“ (KeyIso) läuft. Deine Lizenz bleibt erhalten und wird automatisch erneut geprüft.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>Details anzeigen</value>
   </data>
@@ -16415,6 +16424,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>Das gespeicherte Zertifikat ist ungültig und konnte nicht verwendet werden.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>HTTPS ist aus, weil der Kryptografiedienst des Betriebssystems nicht verfügbar ist. Stelle unter Windows sicher, dass der Dienst „CNG-Schlüsselisolation“ (KeyIso) läuft, und starte Macro Deck dann neu.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>Das Zertifikat konnte nicht verwendet werden. Ersetze es unten.</value>

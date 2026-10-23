@@ -9,6 +9,7 @@ const TLS_FAILURE_KEYS: Record<string, string> = {
   NotConfigured: AppStrings.Settings.Network.Tls.FailureNotConfigured,
   KeyUnreadable: AppStrings.Settings.Network.Tls.FailureKeyUnreadable,
   CertificateInvalid: AppStrings.Settings.Network.Tls.FailureCertificateInvalid,
+  CryptographyUnavailable: AppStrings.Settings.Network.Tls.FailureCryptographyUnavailable,
 };
 
 const TLS_REJECTION_KEYS: Record<string, string> = {
@@ -138,7 +139,7 @@ export class NetworkTlsSettingsComponent {
 
   readonly rejectionMessage = computed(() => {
     const rejection = this.state().tlsRejection;
-    if (!rejection || rejection === 'None') {
+    if (!rejection || rejection === 'None' || this.state().tlsFailure === 'CryptographyUnavailable') {
       return null;
     }
     const key = TLS_REJECTION_KEYS[rejection] ?? AppStrings.Settings.Network.Tls.RejectionGeneric;

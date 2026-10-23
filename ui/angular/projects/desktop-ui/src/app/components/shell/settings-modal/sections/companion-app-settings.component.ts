@@ -243,7 +243,7 @@ export class CompanionAppSettingsComponent {
   private async loadLicense(): Promise<void> {
     try {
       const license = await this.api.getCompanionLicense();
-      this.unlicensed.set(!license.licensed || license.isTest);
+      this.unlicensed.set(!license.verificationUnavailable && (!license.licensed || license.isTest));
     } catch {
       this.unlicensed.set(false);
     }

@@ -1,11 +1,15 @@
 using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using MacroDeckHost.Application.Security;
 using Serilog;
 
 namespace MacroDeckHost.Application.Network.Tls;
 
-public readonly record struct PublicTlsBootstrapResult(PublicTlsBootstrapAction Action, bool CertificateChanged);
+public readonly record struct PublicTlsBootstrapResult(
+	PublicTlsBootstrapAction Action,
+	bool CertificateChanged,
+	bool CryptographyUnavailable = false);
 
 public sealed class PublicTlsBootstrapper
 {
@@ -55,7 +59,9 @@ public sealed class PublicTlsBootstrapper
 			// A certificate problem must never be fatal: the loopback settings screen is the only place
 			// the user can fix one, and it is served by the host that would otherwise fail to start.
 			_logger.Warning(ex, "The public TLS certificate could not be prepared");
-			return new PublicTlsBootstrapResult(PublicTlsBootstrapAction.None, false);
+			return new PublicTlsBootstrapResult(PublicTlsBootstrapAction.None,
+				false,
+				CryptographyProviderErrors.IsProviderUnreachable(ex));
 		}
 	}
 

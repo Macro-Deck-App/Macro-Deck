@@ -111,6 +111,7 @@ public sealed class PublicListenerUnavailableNotifier : IPublicListenerUnavailab
 		{
 			PublicTlsFailure.KeyUnreadable => AppStrings.Notifications.TlsCertificateKeyUnreadableAdvice(),
 			PublicTlsFailure.CertificateInvalid => AppStrings.Notifications.TlsCertificateInvalidAdvice(),
+			PublicTlsFailure.CryptographyUnavailable => AppStrings.Notifications.TlsCryptographyUnavailableAdvice(),
 			_ => AppStrings.Notifications.TlsCertificateMissingAdvice()
 		};
 	}

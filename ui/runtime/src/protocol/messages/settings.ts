@@ -353,6 +353,7 @@ export interface CompanionLicenseStatus {
   accountSync: CompanionLicenseAccountSync;
   issuePending: boolean;
   nextIssueAttemptAt: number | null;
+  verificationUnavailable: boolean;
 }
 
 export type CompanionLicenseAccountSync = 'unknown' | 'synced' | 'signedOut';

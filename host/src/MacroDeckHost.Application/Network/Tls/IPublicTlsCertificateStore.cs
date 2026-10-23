@@ -10,7 +10,9 @@ public enum PublicTlsFailure
 
 	KeyUnreadable,
 
-	CertificateInvalid
+	CertificateInvalid,
+
+	CryptographyUnavailable
 }
 
 public readonly record struct PublicTlsCertificateResolution(X509Certificate2? Certificate, PublicTlsFailure Failure);

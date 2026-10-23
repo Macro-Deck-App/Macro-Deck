@@ -23,4 +23,6 @@ public class CompanionLicenseStatus
 	public bool IssuePending { get; set; }
 
 	public long? NextIssueAttemptAt { get; set; }
+
+	public bool VerificationUnavailable { get; set; }
 }

@@ -232,6 +232,17 @@ describe('NetworkTlsSettingsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('could not be read on this computer');
   });
 
+  it('names the unavailable cryptography service instead of asking for a certificate', async () => {
+    const fixture = await create({
+      tlsEnabled: true,
+      tlsFailure: 'CryptographyUnavailable',
+      tlsRejection: 'NoCertificate',
+    });
+
+    expect(fixture.nativeElement.textContent).toContain('CNG Key Isolation');
+    expect(fixture.nativeElement.textContent).not.toContain('Add a certificate before turning HTTPS on');
+  });
+
   it('shows a different, specific message for a TLS rejection', async () => {
     const fixture = await create({
       tlsEnabled: true,

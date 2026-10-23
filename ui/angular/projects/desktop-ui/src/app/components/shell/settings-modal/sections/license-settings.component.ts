@@ -45,7 +45,7 @@ export class LicenseSettingsComponent {
 
   readonly canRedeemEntry = computed(() => {
     const status = this.status();
-    return status != null && (!status.licensed || status.isTest);
+    return status != null && !status.verificationUnavailable && (!status.licensed || status.isTest);
   });
 
   readonly sourceLabel = computed(() => {

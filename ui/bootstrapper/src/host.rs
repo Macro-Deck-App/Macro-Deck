@@ -97,6 +97,8 @@ pub const WINDOWS_END_SESSION_ALLOWANCE: Duration = Duration::from_secs(5);
 
 pub const HOST_RESTART_EXIT_CODE: i32 = 86;
 
+pub const HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE: i32 = 87;
+
 pub const RELAUNCH_MARKER_ENVIRONMENT_VARIABLE: &str = "MACRODECK_RELAUNCH";
 
 pub const RELAUNCH_SETTLE_DELAY: Duration = Duration::from_millis(1500);
@@ -382,6 +384,14 @@ pub fn startup_failure_reason(log: &str) -> String {
         localization::t_args(keys::ERRORS_PORT_IN_USE, &[("port", &port)])
     } else {
         localization::t(keys::ERRORS_HOST_DID_NOT_START)
+    }
+}
+
+fn exit_failure_reason(code: Option<i32>, log: &str) -> String {
+    if code == Some(HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE) {
+        localization::t(keys::ERRORS_CRYPTOGRAPHY_UNAVAILABLE)
+    } else {
+        startup_failure_reason(log)
     }
 }
 
@@ -954,7 +964,7 @@ fn failure_reason(failure: Failure, log: &str) -> Option<String> {
             keys::HOST_ERROR_UNRESPONSIVE,
             &[("seconds", &timeout.as_secs().to_string())],
         )),
-        Failure::Exited(_) => Some(startup_failure_reason(log)),
+        Failure::Exited(code) => Some(exit_failure_reason(code, log)),
     }
 }
 
@@ -978,7 +988,11 @@ async fn give_up(app: &AppHandle, reason: Option<String>, exit: ExitStatus, log:
     };
     let reason = match (kind, exit) {
         (HostErrorKind::Stopped, ExitStatus::Code(_) | ExitStatus::Unknown)
-            if !detect_port_conflict(&log) =>
+            if !detect_port_conflict(&log)
+                && !matches!(
+                    exit,
+                    ExitStatus::Code(HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE)
+                ) =>
         {
             None
         }
@@ -1756,6 +1770,25 @@ mod tests {
                     crit: Failed to bind to address http://0.0.0.0:9100.\n";
 
         assert_eq!(conflicting_port_from_log(tail), Some(9100));
+    }
+
+    #[test]
+    fn an_unavailable_cryptography_service_is_explained_with_the_fix() {
+        let message = exit_failure_reason(Some(HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE), "boom");
+        assert!(message.contains("cryptography service"));
+        assert!(message.contains("CNG Key Isolation"));
+    }
+
+    #[test]
+    fn any_other_exit_code_keeps_the_log_based_reason() {
+        assert!(exit_failure_reason(Some(1), "boom").contains("did not start"));
+        assert!(exit_failure_reason(None, "Address already in use").contains("is already in use"));
+    }
+
+    #[test]
+    fn the_cryptography_exit_code_matches_the_host_constant() {
+        // Keep in sync with HostExitCodes.CryptographyUnavailable in the .NET host.
+        assert_eq!(HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE, 87);
     }
 
     #[test]

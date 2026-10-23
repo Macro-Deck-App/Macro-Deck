@@ -107,7 +107,9 @@ listener serves.
 - The public port is user state that feeds the auth trust boundary, so a configured port is refused
   implicit trust exactly as the build default was. The shell keeps no copy of the setting — its
   port-conflict message reads the port out of the host's own bind failure, so the two cannot drift.
-- Exit code 86 is a cross-language contract, pinned by a test on both sides. A configured port that
+- Exit code 86 is a cross-language contract, pinned by a test on both sides. So is exit code 87: the
+  host could not start because the operating system's key storage (Windows CNG Key Isolation) cannot be
+  reached, and the shell explains that instead of the generic startup error. A configured port that
   cannot be bound leaves the host unable to start and the settings UI unreachable; the startup error
   names `MACRO_DECK_PORT` as the way back in. Picking a different port automatically was rejected: it
   would make existing clients, bookmarks and QR codes unreliable.

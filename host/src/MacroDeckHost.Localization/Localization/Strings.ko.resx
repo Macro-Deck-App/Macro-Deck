@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck을 시작할 수 없습니다</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck에서 운영 체제의 암호화 서비스를 사용할 수 없습니다. Windows에서 CNG Key Isolation(KeyIso) 서비스가 실행 중인지 확인하거나 컴퓨터를 다시 시작하세요.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck 호스트 바이너리가 없습니다:
 {paths}</value>
@@ -14337,6 +14340,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>이 컴퓨터에서 개인 키를 읽을 수 없습니다. 데이터 디렉터리를 다른 컴퓨터로 옮기거나 복원한 뒤 발생합니다. 인증서를 새로 만들거나 설정 &gt; 네트워크에서 다시 업로드하세요.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>운영 체제의 암호화 서비스를 사용할 수 없습니다. Windows에서 CNG Key Isolation(KeyIso) 서비스가 실행 중인지 확인한 다음 Macro Deck을 다시 시작하세요.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>설정 &gt; 네트워크에서 인증서를 추가하세요.</value>
   </data>
@@ -16249,6 +16255,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>구매처</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>운영 체제의 암호화 서비스를 사용할 수 없어 지금은 라이선스를 확인할 수 없습니다. Windows에서 CNG Key Isolation(KeyIso) 서비스가 실행 중인지 확인하세요. 라이선스는 유지되며 자동으로 다시 확인됩니다.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>세부 정보 표시</value>
   </data>
@@ -16418,6 +16427,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>저장된 인증서가 올바르지 않아 사용할 수 없습니다.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>운영 체제의 암호화 서비스를 사용할 수 없어 HTTPS가 꺼져 있습니다. Windows에서 CNG Key Isolation(KeyIso) 서비스가 실행 중인지 확인한 다음 Macro Deck을 다시 시작하세요.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>인증서를 사용할 수 없습니다. 아래에서 교체하세요.</value>

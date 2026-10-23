@@ -144,6 +144,9 @@ Macro Deck servers. **Settings > Companion App** shows the progress:
   least every 30 minutes, also after a restart. The page shows when the next attempt runs. A purchase
   the store is still processing can take a while.
 - **Licensed:** Macro Deck hands the license to every Companion app that connects to it.
+- **Licenses cannot be checked right now:** Windows' cryptography service is not available, so Macro Deck
+  cannot check any license. It keeps the license it has and checks again on its own. Make sure the
+  **CNG Key Isolation** service (KeyIso) is running in **Services**, or restart the computer.
 - **Not licensed, nothing pending:** the store did not confirm the purchase, for example after a
   refund or for a test purchase. Macro Deck asks again at most once a day, and never again for a
   refunded, cancelled or revoked purchase. Check the purchase in the Google Play or App Store account
@@ -192,6 +195,12 @@ window instead:
 
 If the window says a port is already in use, see
 [Macro Deck is not listening on its port](#macro-deck-is-not-listening-on-its-port).
+
+If the window says Macro Deck could not use the operating system's cryptography service, Windows' **CNG
+Key Isolation** service (KeyIso) is stopped or not reachable. Open **Services**, start **CNG Key
+Isolation** (and change its startup type if it was set to **Disabled**), or restart the computer.
+Then choose **Restart Macro Deck**. While that service is unavailable Macro Deck also cannot serve HTTPS
+and cannot check Companion licenses; both come back once the service runs again.
 
 If the host does not start although nothing seems to use the port, a host left over from an earlier
 Macro Deck may still be running and can no longer be taken over. End the **Macro Deck Host** process in

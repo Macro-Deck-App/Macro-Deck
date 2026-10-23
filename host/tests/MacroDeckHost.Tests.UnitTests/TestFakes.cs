@@ -433,6 +433,8 @@ internal sealed class FakePublicTlsCertificateStore : IPublicTlsCertificateStore
 
 	public bool HasCertificate => _stored is not null;
 
+	public Exception? SaveAuthorityFailure { get; set; }
+
 	public PublicTlsCertificateInfo? ReadInfo()
 	{
 		return _stored?.Info;
@@ -485,6 +487,11 @@ internal sealed class FakePublicTlsCertificateStore : IPublicTlsCertificateStore
 
 	public PublicTlsCertificateInfo SaveAuthority(string certificatePem, string privateKeyPem)
 	{
+		if (SaveAuthorityFailure is { } failure)
+		{
+			throw failure;
+		}
+
 		using var certificate = X509Certificate2.CreateFromPem(certificatePem, privateKeyPem);
 		var info = new PublicTlsCertificateInfo(certificate.Subject,
 			certificate.GetCertHashString(HashAlgorithmName.SHA256),
