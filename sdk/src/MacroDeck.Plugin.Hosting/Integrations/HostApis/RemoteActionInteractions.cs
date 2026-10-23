@@ -18,6 +18,9 @@ namespace MacroDeck.Plugin.Hosting.Integrations.HostApis;
 internal sealed class RemoteActionInteractions(IHostInvoker invoker, ILogger logger, string executeCorrelationId)
 	: IActionInteractions
 {
+	private readonly Lock _gate = new();
+	private readonly List<Task> _requests = [];
+
 	public void RequestItemPicker(
 		string? originClientId,
 		string instanceId,
@@ -54,9 +57,21 @@ internal sealed class RemoteActionInteractions(IHostInvoker invoker, ILogger log
 			"request-device-picker");
 	}
 
+	public Task WaitForRequestsAsync()
+	{
+		lock (_gate)
+		{
+			return Task.WhenAll(_requests);
+		}
+	}
+
 	private void Fire(string operation, object arguments, string label)
 	{
-		_ = InvokeBestEffortAsync(operation, arguments, label);
+		var request = InvokeBestEffortAsync(operation, arguments, label);
+		lock (_gate)
+		{
+			_requests.Add(request);
+		}
 	}
 
 	private async Task InvokeBestEffortAsync(string operation, object arguments, string label)
