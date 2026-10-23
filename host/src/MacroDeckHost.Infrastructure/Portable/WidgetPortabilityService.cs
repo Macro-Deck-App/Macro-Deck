@@ -58,15 +58,15 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		var minX = selected.Min(widget => widget.PositionX);
 		var minY = selected.Min(widget => widget.PositionY);
 		var portableWidgets = selected.Select(widget => new PortableWidget
-		{
-			Type = widget.Type,
-			PositionX = widget.PositionX - minX,
-			PositionY = widget.PositionY - minY,
-			Width = widget.Width,
-			Height = widget.Height,
-			Data = widget.Data,
-			SourceId = widget.Id
-		})
+			{
+				Type = widget.Type,
+				PositionX = widget.PositionX - minX,
+				PositionY = widget.PositionY - minY,
+				Width = widget.Width,
+				Height = widget.Height,
+				Data = widget.Data,
+				SourceId = widget.Id
+			})
 			.ToList();
 
 		var assets = await _assetManager.Collect(
@@ -102,10 +102,13 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 			if (mapped == PortabilityError.InvalidJson)
 			{
 				_logger.Warning("Rejected portable archive {Operation}: {ErrorCode} at {JsonLocation}",
-					"WidgetImport", mapped.Value.ToString(), outcome.JsonErrorLocation);
+					"WidgetImport",
+					mapped.Value.ToString(),
+					outcome.JsonErrorLocation);
 			}
 
-			return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(mapped.Value, outcome.JsonErrorLocation);
+			return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(mapped.Value,
+				outcome.JsonErrorLocation);
 		}
 
 		var content = outcome.Content!;

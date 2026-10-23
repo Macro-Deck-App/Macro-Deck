@@ -26,7 +26,7 @@ public class PortableController : ControllerBase
 			return new InspectArchiveResponse
 			{
 				Success = false,
-				Error = PortabilityHttp.ToTransportError(bytes.Error!.Value, bytes.ErrorMessage)
+				Error = PortabilityHttp.ToTransportError(bytes)
 			};
 		}
 
@@ -36,7 +36,7 @@ public class PortableController : ControllerBase
 			return new InspectArchiveResponse
 			{
 				Success = false,
-				Error = PortabilityHttp.ToTransportError(result.Error!.Value, result.ErrorMessage)
+				Error = PortabilityHttp.ToTransportError(result)
 			};
 		}
 
@@ -61,7 +61,7 @@ public class PortableController : ControllerBase
 			return new InspectArchiveResponse
 			{
 				Success = false,
-				Error = PortabilityHttp.ToTransportError(bytes.Error!.Value, bytes.ErrorMessage)
+				Error = PortabilityHttp.ToTransportError(bytes)
 			};
 		}
 
@@ -71,7 +71,7 @@ public class PortableController : ControllerBase
 			return new InspectArchiveResponse
 			{
 				Success = false,
-				Error = PortabilityHttp.ToTransportError(result.Error!.Value, result.ErrorMessage)
+				Error = PortabilityHttp.ToTransportError(result)
 			};
 		}
 

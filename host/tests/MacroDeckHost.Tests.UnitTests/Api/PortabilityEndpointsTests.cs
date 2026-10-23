@@ -488,6 +488,31 @@ public class PortabilityEndpointsTests
 	}
 
 	[Test]
+	public async Task Inspect_from_path_returns_a_localized_json_error_for_a_malformed_manifest()
+	{
+		using var buffer = new MemoryStream();
+		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
+		{
+			using var manifest = zip.CreateEntry("manifest.json").Open();
+			manifest.Write("""{"formatVersion":"two"}"""u8);
+		}
+
+		var path = WriteArchive(buffer.ToArray(), "broken.macroDeckProfile");
+		var body = await ReadJson(await SendJson(HttpMethod.Post, "/api/portable/inspect-path", new { path }));
+		var error = body.GetProperty("error");
+		var localized = error.GetProperty("message").GetProperty("$localized");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(body.GetProperty("success").GetBoolean(), Is.False);
+			Assert.That(error.GetProperty("code").GetString(), Is.EqualTo("InvalidJson"));
+			Assert.That(localized.GetProperty("key").GetString(), Is.EqualTo("Errors.Portability.InvalidJson"));
+			Assert.That(localized.GetProperty("arguments").GetProperty("location").GetString(),
+				Does.StartWith("manifest.json:$.formatVersion:1:"));
+		});
+	}
+
+	[Test]
 	public async Task Folder_import_from_path_lands_under_the_target_parent()
 	{
 		var profileId = await CreateProfile("Path Folder");

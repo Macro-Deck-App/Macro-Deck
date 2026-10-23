@@ -34,7 +34,9 @@ public sealed class PortableArchiveInspector : IPortableArchiveInspector
 			if (jsonErrorLocation is not null)
 			{
 				_logger.Warning("Rejected portable archive {Operation}: {ErrorCode} at {JsonLocation}",
-					"Inspect", PortabilityError.InvalidJson.ToString(), jsonErrorLocation);
+					"Inspect",
+					PortabilityError.InvalidJson.ToString(),
+					jsonErrorLocation);
 			}
 
 			return Result.Fail<PortableArchiveInfo, PortabilityError>(

@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using MacroDeckHost.Api.Support;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Persistence;
@@ -33,6 +34,19 @@ public class PortableImportDiagnosticsTests
 			Assert.That(outcome.JsonErrorLocation, Does.StartWith($"content.json:{path}:1:"));
 			Assert.That(outcome.Content, Is.Null);
 		});
+	}
+
+	[TestCase("ab", "$.icons[0].fileContentHashes.ab")]
+	[TestCase("a\\u202Eb", "$")]
+	[TestCase("a\\u2028b", "$")]
+	[TestCase("a\\uDB40\\uDC01b", "$")]
+	public void Read_InvalidContent_ReportsTheRootForAnUnsafePropertyName(string key, string path)
+	{
+		var content = $$$"""{"icons":[{"fileContentHashes":{"{{{key}}}":1}}]}""";
+
+		var outcome = PortableArchive.Read(Archive(Manifest, content), null);
+
+		Assert.That(outcome.JsonErrorLocation, Does.StartWith($"content.json:{path}:1:"));
 	}
 
 	[Test]
@@ -118,7 +132,7 @@ public class PortableImportDiagnosticsTests
 		var bytes = Archive(Manifest,
 			"""{"scripts":[{"inputs":[{"type":"private-fixture-value"}]}]}""");
 		var failure = await Import(harness, kind, bytes);
-		var error = PortabilityHttp.ToTransportError(failure.Error!.Value, failure.ErrorMessage);
+		var error = failure.Transport!;
 
 		Assert.Multiple(() =>
 		{
@@ -154,7 +168,9 @@ public class PortableImportDiagnosticsTests
 		using var logger = new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(events.Add)).CreateLogger();
 		using var harness = new PortabilityTestHarness(logger);
 		var encrypted = PortableArchive.Write(new PortableArchiveManifest { Kind = PortableArchiveKind.Widgets },
-			new PortableContent { Kind = PortableArchiveKind.Widgets }, [], "fixture-password");
+			new PortableContent { Kind = PortableArchiveKind.Widgets },
+			[],
+			"fixture-password");
 		var newerManifest = JsonSerializer.Serialize(new
 		{
 			formatVersion = PortableArchiveManifest.CurrentFormatVersion + 1
@@ -201,7 +217,31 @@ public class PortableImportDiagnosticsTests
 		});
 	}
 
-	private static async Task<(bool Success, PortabilityError? Error, string? ErrorMessage)> Import(
+	[Test]
+	public void TransportError_ForAMessage_NeverReadsTheMessageAsAJsonLocation()
+	{
+		var error = PortabilityHttp.ToTransportError(PortabilityError.InvalidJson, "some text");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(error.Code, Is.EqualTo("InvalidJson"));
+			Assert.That(error.Message.IsLocalized, Is.False);
+			Assert.That(TestLocalization.Resolve(error.Message, "en"), Is.EqualTo("some text"));
+		});
+	}
+
+	[TestCase("content.json:$.profile:1:5", "content.json:$.profile:1:5")]
+	[TestCase(null, "$")]
+	public void TransportError_ForAnInvalidJsonResult_ShowsTheLocation(string? location, string expected)
+	{
+		var failure = Result.Fail<string, PortabilityError>(PortabilityError.InvalidJson, location);
+
+		var error = PortabilityHttp.ToTransportError(failure);
+
+		Assert.That(TestLocalization.Resolve(error.Message, "en"), Does.StartWith($"Invalid JSON data at {expected}."));
+	}
+
+	private static async Task<ImportFailure> Import(
 		PortabilityTestHarness harness,
 		string kind,
 		byte[] bytes,
@@ -210,17 +250,26 @@ public class PortableImportDiagnosticsTests
 		return kind switch
 		{
 			"Profile" => Failure(await harness.ProfileService.Import(bytes, password, CancellationToken.None)),
-			"Folder" => Failure(await harness.FolderService.Import(Guid.NewGuid(), null, bytes, password,
+			"Folder" => Failure(await harness.FolderService.Import(Guid.NewGuid(),
+				null,
+				bytes,
+				password,
 				CancellationToken.None)),
-			_ => Failure(await harness.WidgetService.Import(Guid.NewGuid(), 0, 0, bytes, password,
+			_ => Failure(await harness.WidgetService.Import(Guid.NewGuid(),
+				0,
+				0,
+				bytes,
+				password,
 				CancellationToken.None))
 		};
 	}
 
-	private static (bool Success, PortabilityError? Error, string? ErrorMessage) Failure<T>(
-		Result<T, PortabilityError> result)
+	private static ImportFailure Failure<T>(Result<T, PortabilityError> result)
 	{
-		return (result.Success, result.Error, result.ErrorMessage);
+		return new ImportFailure(result.Success,
+			result.Error,
+			result.ErrorMessage,
+			result.Success ? null : PortabilityHttp.ToTransportError(result));
 	}
 
 	private static byte[] Archive(string manifest, string content)
@@ -246,4 +295,10 @@ public class PortableImportDiagnosticsTests
 
 		return buffer.ToArray();
 	}
+
+	private sealed record ImportFailure(
+		bool Success,
+		PortabilityError? Error,
+		string? ErrorMessage,
+		TransportError? Transport);
 }

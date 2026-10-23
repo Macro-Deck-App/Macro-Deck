@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Packaging;
@@ -219,7 +220,7 @@ public static class PortableArchive
 			return icons is null
 				? Fail(PortableReadStatus.InvalidArchive)
 				: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons)
-				{ Fonts = ReadFonts(inner) };
+					{ Fonts = ReadFonts(inner) };
 		}
 		catch (InvalidDataException)
 		{
@@ -468,13 +469,21 @@ public static class PortableArchive
 		return jsonErrorLocation is null
 			? Fail(PortableReadStatus.InvalidArchive)
 			: new PortableReadOutcome(PortableReadStatus.InvalidJson, null, null, [])
-			{ JsonErrorLocation = jsonErrorLocation };
+				{ JsonErrorLocation = jsonErrorLocation };
+	}
+
+	private static bool IsUnsafePathCharacter(Rune rune)
+	{
+		return Rune.GetUnicodeCategory(rune) is UnicodeCategory.Control
+			or UnicodeCategory.Format
+			or UnicodeCategory.LineSeparator
+			or UnicodeCategory.ParagraphSeparator;
 	}
 
 	private static string JsonLocation(string entry, JsonException error)
 	{
 		var path = error.Path;
-		if (string.IsNullOrEmpty(path) || path.Length > 256 || path.Any(c => char.IsControl(c) || char.GetUnicodeCategory(c) == UnicodeCategory.Format))
+		if (string.IsNullOrEmpty(path) || path.Length > 256 || path.EnumerateRunes().Any(IsUnsafePathCharacter))
 		{
 			path = "$";
 		}
@@ -482,7 +491,6 @@ public static class PortableArchive
 		// Parser messages can include archive values. Only report coordinates, never the exception message.
 		var line = error.LineNumber.GetValueOrDefault() + 1;
 		var column = error.BytePositionInLine.GetValueOrDefault() + 1;
-		return string.Create(CultureInfo.InvariantCulture,
-			$"{entry}:{path}:{line}:{column}");
+		return string.Create(CultureInfo.InvariantCulture, $"{entry}:{path}:{line}:{column}");
 	}
 }

@@ -103,7 +103,9 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 			if (mapped == PortabilityError.InvalidJson)
 			{
 				_logger.Warning("Rejected portable archive {Operation}: {ErrorCode} at {JsonLocation}",
-					"ProfileImport", mapped.Value.ToString(), outcome.JsonErrorLocation);
+					"ProfileImport",
+					mapped.Value.ToString(),
+					outcome.JsonErrorLocation);
 			}
 
 			return Result.Fail<ProfileEntity, PortabilityError>(mapped.Value, outcome.JsonErrorLocation);
@@ -212,39 +214,39 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 		};
 
 		var folders = source.Folders.Select(folder => new FolderEntity
-		{
-			Id = idMap[folder.Id],
-			ProfileId = newProfileId,
-			Name = folder.Name,
-			ParentId = folder.ParentId is { } parentId && idMap.TryGetValue(parentId, out var mapped)
+			{
+				Id = idMap[folder.Id],
+				ProfileId = newProfileId,
+				Name = folder.Name,
+				ParentId = folder.ParentId is { } parentId && idMap.TryGetValue(parentId, out var mapped)
 					? mapped
 					: folder.ParentId,
-			Order = folder.Order,
-			Rows = folder.Rows,
-			Columns = folder.Columns,
-			BackgroundColor = folder.BackgroundColor,
-			WidgetSpacing = folder.WidgetSpacing,
-			WidgetBorderRadius = folder.WidgetBorderRadius,
-			EmptyCellStyle = EmptyCellStyleText.Parse(folder.EmptyCellStyle),
-			IsDefault = folder.Id == importedStartFolderId,
-			CreatedAt = importedCreatedAt[folder.Id],
-			Widgets = folder.Widgets.Select(widget => new WidgetEntity
-			{
-				Id = idMap[widget.Id],
-				FolderId = idMap[folder.Id],
-				Type = widget.Type,
-				PositionX = widget.PositionX,
-				PositionY = widget.PositionY,
-				Width = widget.Width,
-				Height = widget.Height,
-				Data = PortableActionButtonStateNormalizer.Normalize(widget.Type,
-						PortableGuidRemapper.Remap(widget.Data, idMap)),
-				IsPinned = widget.IsPinned,
-				PinScope = widget.PinScope,
-				CreatedAt = DateTime.UtcNow
-			})
+				Order = folder.Order,
+				Rows = folder.Rows,
+				Columns = folder.Columns,
+				BackgroundColor = folder.BackgroundColor,
+				WidgetSpacing = folder.WidgetSpacing,
+				WidgetBorderRadius = folder.WidgetBorderRadius,
+				EmptyCellStyle = EmptyCellStyleText.Parse(folder.EmptyCellStyle),
+				IsDefault = folder.Id == importedStartFolderId,
+				CreatedAt = importedCreatedAt[folder.Id],
+				Widgets = folder.Widgets.Select(widget => new WidgetEntity
+					{
+						Id = idMap[widget.Id],
+						FolderId = idMap[folder.Id],
+						Type = widget.Type,
+						PositionX = widget.PositionX,
+						PositionY = widget.PositionY,
+						Width = widget.Width,
+						Height = widget.Height,
+						Data = PortableActionButtonStateNormalizer.Normalize(widget.Type,
+							PortableGuidRemapper.Remap(widget.Data, idMap)),
+						IsPinned = widget.IsPinned,
+						PinScope = widget.PinScope,
+						CreatedAt = DateTime.UtcNow
+					})
 					.ToList()
-		})
+			})
 			.ToList();
 
 		return (profile, folders);
