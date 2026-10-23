@@ -2869,6 +2869,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Una build di sviluppo ha preso il controllo di questo plugin. Termina la presa di controllo prima di installarlo o aggiornarlo.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck si sta chiudendo, quindi il plugin non è stato avviato.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>Una build di sviluppo ha preso il controllo di questo plugin. La versione installata si riavvia quando la presa di controllo termina.</value>
   </data>

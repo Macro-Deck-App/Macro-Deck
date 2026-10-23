@@ -1,5 +1,7 @@
+using MacroDeck.Localization;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Plugins.Runtime;
+using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Runtime;
 
@@ -88,6 +90,28 @@ internal sealed class PluginRuntimeControllerTests
 		{
 			Assert.That(response.Success, Is.False);
 			Assert.That(response.Error!.Code, Is.EqualTo(expectedCode));
+		});
+	}
+
+	[Test]
+	public async Task A_start_refused_for_host_shutdown_reports_a_localized_message()
+	{
+		var supervisor = new FakePluginSupervisor
+		{
+			StartResults =
+			{
+				["com.example.plugin"] = PluginSupervisorResult.Fail(PluginSupervisorError.HostShuttingDown)
+			}
+		};
+		var controller = new PluginRuntimeController(supervisor);
+
+		var response = await controller.Start("com.example.plugin", CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Error!.Code, Is.EqualTo("failed"));
+			Assert.That(response.Error!.Message.ToString(),
+				Is.EqualTo(((LocalizedText)AppStrings.Errors.Plugins.HostShuttingDown()).ToString()));
 		});
 	}
 

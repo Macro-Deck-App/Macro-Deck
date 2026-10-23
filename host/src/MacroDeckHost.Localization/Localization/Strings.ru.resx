@@ -2868,6 +2868,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Сборка для разработки заменила этот плагин. Завершите замену, прежде чем устанавливать или обновлять его.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck завершает работу, поэтому плагин не был запущен.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>Сборка для разработки заменила этот плагин. Установленная версия запустится снова после завершения замены.</value>
   </data>

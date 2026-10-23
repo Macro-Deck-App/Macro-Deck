@@ -2868,6 +2868,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>개발 빌드가 이 플러그인을 대체하고 있습니다. 설치하거나 업데이트하기 전에 대체를 종료하세요.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck이 종료되는 중이므로 플러그인을 시작하지 않았습니다.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>개발 빌드가 이 플러그인을 대체하고 있습니다. 대체가 끝나면 설치된 버전이 다시 시작됩니다.</value>
   </data>

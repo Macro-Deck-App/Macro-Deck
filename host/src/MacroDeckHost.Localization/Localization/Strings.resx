@@ -2868,6 +2868,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>A development build has taken over this plugin. End the takeover before installing or updating it.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck is shutting down, so the plugin was not started.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>A development build has taken over this plugin. The installed version starts again when the takeover ends.</value>
   </data>

@@ -2,6 +2,7 @@ using System.Globalization;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Runtime;
@@ -139,7 +140,7 @@ internal sealed class PluginSupervisorTests
 			});
 	}
 
-	private PluginSupervisor CreateSupervisor()
+	private PluginSupervisor CreateSupervisor(UserSessionEnd? sessionEnd = null)
 	{
 		var services = new ServiceCollection()
 			.AddSingleton<Mediator.IMediator>(_mediator)
@@ -162,7 +163,8 @@ internal sealed class PluginSupervisorTests
 			services.GetRequiredService<IServiceScopeFactory>(),
 			_time,
 			_options,
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			sessionEnd: sessionEnd);
 	}
 
 	private void UseFrameworkDependentEntrypoint(string executable, params string[] arguments)
@@ -379,6 +381,95 @@ internal sealed class PluginSupervisorTests
 	}
 
 	[Test]
+	public async Task A_plugin_that_exits_while_the_session_ends_is_relaunched_only_once_it_is_over()
+	{
+		var ending = false;
+		var supervisor = CreateSupervisor(new UserSessionEnd(() => ending));
+		await supervisor.Start(PluginId);
+
+		ending = true;
+		_launcher.StartedProcesses[0].CompleteExit(-1);
+		await Task.Delay(50);
+		await supervisor.Reconcile();
+		await supervisor.Reconcile();
+
+		Assert.That(_launcher.Requests, Has.Count.EqualTo(1), "nothing may be launched while the session ends");
+		Assert.That(supervisor.Snapshot().Single(s => s.PluginId == PluginId).State,
+			Is.EqualTo(PluginRuntimeState.Backoff));
+
+		ending = false;
+		await supervisor.Reconcile();
+
+		Assert.That(_launcher.Requests, Has.Count.EqualTo(2), "a cancelled shutdown brings the plugin back");
+	}
+
+	[Test]
+	public async Task A_desired_plugin_stopped_by_a_session_end_shutdown_is_not_relaunched()
+	{
+		var sessionEnd = new UserSessionEnd();
+		var supervisor = CreateSupervisor(sessionEnd);
+		await supervisor.Start(PluginId);
+		var process = _launcher.StartedProcesses[0];
+
+		sessionEnd.Mark();
+		var stopAllTask = supervisor.StopAll(PluginStopReason.HostShutdown);
+		process.CompleteExit(0);
+		await stopAllTask;
+		await supervisor.Reconcile();
+
+		Assert.That(_stateStore.States[PluginId], Is.True);
+		Assert.That(_launcher.Requests, Has.Count.EqualTo(1));
+	}
+
+	[Test]
+	public async Task A_session_end_during_a_reconcile_tick_stops_the_rest_of_that_tick_from_launching()
+	{
+		const string otherPluginId = "com.example.other";
+		var sessionEnd = new UserSessionEnd();
+		var supervisor = CreateSupervisor(sessionEnd);
+		await supervisor.Start(PluginId);
+		AddInstalledPlugin(otherPluginId);
+		_stateStore.States[otherPluginId] = true;
+		_healthProbe.OnProbe = (_, _) =>
+		{
+			sessionEnd.Mark();
+			return true;
+		};
+
+		await supervisor.Reconcile();
+
+		Assert.That(_healthProbe.Probes, Is.Not.Empty);
+		Assert.That(_launcher.Requests, Has.Count.EqualTo(1), "the other plugin must not be launched");
+	}
+
+	[Test]
+	public async Task An_explicit_start_after_host_shutdown_began_spawns_nothing()
+	{
+		var supervisor = CreateSupervisor();
+		await supervisor.StopAll(PluginStopReason.HostShutdown);
+
+		var result = await supervisor.Start(PluginId);
+
+		Assert.That(result.Error, Is.EqualTo(PluginSupervisorError.HostShuttingDown));
+		Assert.That(_launcher.Requests, Is.Empty);
+		Assert.That(supervisor.Snapshot().Single(x => x.PluginId == PluginId).State,
+			Is.EqualTo(PluginRuntimeState.Stopped));
+	}
+
+	[Test]
+	public async Task An_explicit_start_while_the_session_ends_spawns_nothing()
+	{
+		var supervisor = CreateSupervisor(new UserSessionEnd(() => true));
+
+		var result = await supervisor.Start(PluginId);
+
+		Assert.That(result.Error, Is.EqualTo(PluginSupervisorError.HostShuttingDown));
+		Assert.That(_launcher.Requests, Is.Empty);
+		Assert.That(supervisor.Snapshot().Single(x => x.PluginId == PluginId).State,
+			Is.EqualTo(PluginRuntimeState.Stopped));
+	}
+
+	[Test]
 	public async Task Stop_with_UserRequested_does_not_restart()
 	{
 		var supervisor = CreateSupervisor();
@@ -408,10 +499,8 @@ internal sealed class PluginSupervisorTests
 		var stopAllTask = supervisor.StopAll(PluginStopReason.HostShutdown);
 		process.CompleteExit(0);
 		await stopAllTask;
+		await supervisor.Reconcile();
 
-		// StopAll itself must not trigger a relaunch, and must leave desired state alone - a later
-		// reconcile tick relaunching a desired-started plugin (autostart at host ready) is the whole
-		// point of leaving that flag untouched, so it is deliberately not asserted away here.
 		Assert.That(_launcher.Requests, Has.Count.EqualTo(1));
 		Assert.That(_stateStore.States[PluginId], Is.True, "HostShutdown must not touch desired state");
 		Assert.That(supervisor.Snapshot().Single(s => s.PluginId == PluginId).State,

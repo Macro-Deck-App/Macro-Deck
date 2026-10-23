@@ -699,6 +699,7 @@ public class Startup
 			});
 		services.AddSingleton<IDotnetMuxerLocator, DotnetMuxerLocator>();
 		services.AddSingleton<IThirdPartyNotices, ThirdPartyNoticesFile>();
+		services.TryAddSingleton(_ => UserSessionEndFactory.Create());
 		services.AddSingleton<IPluginSupervisor, PluginSupervisor>();
 		services.AddHostedService<PluginSupervisorBackgroundService>();
 

@@ -115,6 +115,16 @@ internal static class PluginInfrastructureLog
 		logger.Error(exception, "Background termination of plugin '{PluginId}' failed unexpectedly.", pluginId);
 	}
 
+	public static void ReconcilePausedForSessionEnd(ILogger logger)
+	{
+		logger.Information("The user session is ending; plugins are not started or restarted until it is over.");
+	}
+
+	public static void ReconcileResumedAfterSessionEnd(ILogger logger)
+	{
+		logger.Information("The user session is no longer ending; resuming plugin supervision.");
+	}
+
 	public static void StoppingPlugin(ILogger logger, string pluginId, int processId, PluginStopReason reason)
 	{
 		logger.Information("Stopping plugin '{PluginId}' (PID {ProcessId}, reason {Reason}).",

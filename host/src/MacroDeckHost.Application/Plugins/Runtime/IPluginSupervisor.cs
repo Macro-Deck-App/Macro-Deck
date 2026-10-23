@@ -20,7 +20,9 @@ public enum PluginSupervisorError
 	/// Only an explicit Start/Restart re-evaluates it.</summary>
 	IntegrityFailed,
 
-	TakenOverByDevelopmentBuild
+	TakenOverByDevelopmentBuild,
+
+	HostShuttingDown
 }
 
 public sealed record PluginSupervisorResult(bool Success, PluginSupervisorError? Error = null, string? Message = null)

@@ -2868,6 +2868,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>開発ビルドがこのプラグインを引き継いでいます。インストールまたは更新する前に、引き継ぎを終了してください。</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck が終了処理中のため、プラグインは起動されませんでした。</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>開発ビルドがこのプラグインを引き継いでいます。引き継ぎが終わると、インストール済みのバージョンが再び起動します。</value>
   </data>
