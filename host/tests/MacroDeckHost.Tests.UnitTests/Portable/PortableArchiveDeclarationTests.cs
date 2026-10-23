@@ -239,7 +239,7 @@ public class PortableArchiveDeclarationTests
 			new FakeConfigurableVariableProviderIntegration { Id = ObsId, RequiresConfiguration = false }
 		]);
 
-		var info = (await new PortableArchiveInspector(optional, new StubConfigStore())
+		var info = (await new PortableArchiveInspector(optional, new StubConfigStore(), Serilog.Log.Logger)
 			.Inspect(archive, CancellationToken.None)).Data!;
 
 		Assert.Multiple(() =>
@@ -276,7 +276,7 @@ public class PortableArchiveDeclarationTests
 		var archive = await ArchiveRequiring(ObsId);
 		var withoutObs = new ConfigurableIntegrationRegistry([StubIntegration.Create(KeyboardId, "Keyboard")]);
 
-		var inspector = new PortableArchiveInspector(withoutObs, new StubConfigStore());
+		var inspector = new PortableArchiveInspector(withoutObs, new StubConfigStore(), Serilog.Log.Logger);
 		var info = (await inspector.Inspect(archive, CancellationToken.None)).Data!;
 
 		Assert.Multiple(() =>
@@ -309,7 +309,7 @@ public class PortableArchiveDeclarationTests
 
 	private PortableArchiveInspector Inspector(StubConfigStore? store = null)
 	{
-		return new PortableArchiveInspector(_harness.Integrations, store ?? new StubConfigStore());
+		return new PortableArchiveInspector(_harness.Integrations, store ?? new StubConfigStore(), Serilog.Log.Logger);
 	}
 
 	private sealed class StubConfigStore : IIntegrationConfigStore

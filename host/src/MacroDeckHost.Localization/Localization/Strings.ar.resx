@@ -2877,6 +2877,9 @@
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>فشل الاستيراد</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>بيانات JSON غير صالحة في {location}. تحقق من نوع الحقل وبنية البيانات.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>الملف ليس أرشيف Macro Deck صالحًا</value>
   </data>

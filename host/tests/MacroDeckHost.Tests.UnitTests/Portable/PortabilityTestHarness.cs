@@ -37,7 +37,7 @@ internal sealed class PortabilityTestHarness : IDisposable
 	public WidgetPortabilityService WidgetService { get; }
 	public FolderPortabilityService FolderService { get; }
 
-	public PortabilityTestHarness()
+	public PortabilityTestHarness(Serilog.ILogger? importLogger = null)
 	{
 		FontCatalog = new SkiaFontCatalog([], () => [], Icons.Paths.FontsDirectory);
 		UserFonts = new FileSystemUserFontLibrary(FontCatalog, Icons.Paths);
@@ -67,12 +67,13 @@ internal sealed class PortabilityTestHarness : IDisposable
 			UserFonts,
 			OwnerRegistry,
 			Icons.Logger);
+		var logger = importLogger ?? Icons.Logger;
 		ProfileService
-			= new ProfilePortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, Icons.Logger);
+			= new ProfilePortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, logger);
 		WidgetService
-			= new WidgetPortabilityService(FolderCache, ProfileCache, AssetManager, Icons.Mediator, Icons.Logger);
+			= new WidgetPortabilityService(FolderCache, ProfileCache, AssetManager, Icons.Mediator, logger);
 		FolderService
-			= new FolderPortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, Icons.Logger);
+			= new FolderPortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, logger);
 	}
 
 	public async Task<Guid> AddWidgetVariable(

@@ -1,7 +1,9 @@
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Auth;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MacroDeckHost.Api.Support;
@@ -23,6 +25,22 @@ public static class PortabilityHttp
 		{
 			Code = error.ToString(),
 			Message = message ?? DefaultMessage(error)
+		};
+	}
+
+	// Portability services report an InvalidJson failure with the sanitized JSON location as ErrorMessage.
+	public static TransportError ToTransportError<TData>(Result<TData, PortabilityError> failure)
+	{
+		var error = failure.Error!.Value;
+		if (error != PortabilityError.InvalidJson)
+		{
+			return ToTransportError(error, failure.ErrorMessage);
+		}
+
+		return new TransportError
+		{
+			Code = error.ToString(),
+			Message = AppStrings.Errors.Portability.InvalidJson(failure.ErrorMessage ?? "$")
 		};
 	}
 

@@ -187,7 +187,7 @@ public class IconPacksController : ControllerBase
 			return new ImportIconPacksResponse
 			{
 				Success = false,
-				Error = PortabilityHttp.ToTransportError(archive.Error!.Value, archive.ErrorMessage)
+				Error = PortabilityHttp.ToTransportError(archive)
 			};
 		}
 

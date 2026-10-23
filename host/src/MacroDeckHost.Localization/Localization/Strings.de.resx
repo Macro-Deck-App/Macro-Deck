@@ -2877,6 +2877,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Import fehlgeschlagen</value>
   </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Ungültige JSON-Daten bei {location}. Prüfe den Feldtyp und die Syntax.</value>
+  </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Die Datei ist kein gültiges Macro-Deck-Archiv</value>
   </data>

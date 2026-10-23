@@ -118,7 +118,15 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		var mapped = PortableReadStatusMapper.ToError(outcome.Status);
 		if (mapped is not null)
 		{
-			return Fail(mapped.Value);
+			if (mapped == PortabilityError.InvalidJson)
+			{
+				_logger.Warning("Rejected portable archive {Operation}: {ErrorCode} at {JsonLocation}",
+					"FolderImport",
+					mapped.Value.ToString(),
+					outcome.JsonErrorLocation);
+			}
+
+			return Fail(mapped.Value, outcome.JsonErrorLocation);
 		}
 
 		var content = outcome.Content!;
