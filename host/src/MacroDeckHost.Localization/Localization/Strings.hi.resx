@@ -2868,6 +2868,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>एक डेवलपमेंट बिल्ड ने इस प्लगइन पर कब्ज़ा कर लिया है। इसे इंस्टॉल या अपडेट करने से पहले टेकओवर समाप्त करें।</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck बंद हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया।</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>एक डेवलपमेंट बिल्ड ने इस प्लगइन पर कब्ज़ा कर लिया है। टेकओवर समाप्त होने पर इंस्टॉल किया गया संस्करण फिर से शुरू होगा।</value>
   </data>

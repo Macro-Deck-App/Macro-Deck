@@ -2868,6 +2868,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>開發版本已接管此外掛。請先結束接管，再安裝或更新它。</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck 正在關閉，因此未啟動外掛。</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>開發版本已接管此外掛。接管結束後，已安裝的版本會重新啟動。</value>
   </data>

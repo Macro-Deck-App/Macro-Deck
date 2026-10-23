@@ -2868,6 +2868,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Ein Entwicklungs-Build hat dieses Plugin übernommen. Beende die Übernahme, bevor du es installierst oder aktualisierst.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck wird beendet, daher wurde das Plugin nicht gestartet.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>Ein Entwicklungs-Build hat dieses Plugin übernommen. Die installierte Version startet wieder, sobald die Übernahme endet.</value>
   </data>

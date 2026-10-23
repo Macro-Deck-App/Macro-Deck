@@ -2869,6 +2869,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Une build de développement a pris le contrôle de cette extension. Termine la prise de contrôle avant de l'installer ou de la mettre à jour.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck est en cours de fermeture, l'extension n'a donc pas été démarrée.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>Une build de développement a pris le contrôle de cette extension. La version installée redémarre à la fin de la prise de contrôle.</value>
   </data>

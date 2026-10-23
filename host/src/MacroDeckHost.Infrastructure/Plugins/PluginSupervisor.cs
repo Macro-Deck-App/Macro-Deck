@@ -11,6 +11,7 @@ using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.IconPacks;
@@ -44,7 +45,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	private readonly PluginSupervisorOptions _options;
 	private readonly ILogger _logger;
 	private readonly IPluginIconPackSync? _iconPackSync;
+	private readonly UserSessionEnd _sessionEnd;
 	private readonly Random _random = new();
+	private bool _pausedForSessionEnd;
+	private volatile bool _hostShuttingDown;
 
 	private readonly Dictionary<string, PluginRuntimeEntry> _entries = new(StringComparer.Ordinal);
 	private readonly object _entriesLock = new();
@@ -66,9 +70,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		TimeProvider timeProvider,
 		PluginSupervisorOptions options,
 		ILogger logger,
-		IPluginIconPackSync? iconPackSync = null)
+		IPluginIconPackSync? iconPackSync = null,
+		UserSessionEnd? sessionEnd = null)
 	{
 		_iconPackSync = iconPackSync;
+		_sessionEnd = sessionEnd ?? new UserSessionEnd();
 		_manifestReader = manifestReader;
 		_catalog = catalog;
 		_stateStore = stateStore;
@@ -303,6 +309,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	// restart its exit code and made the shell report a crash (#737).
 	public async Task StopAll(PluginStopReason reason, CancellationToken cancellationToken = default)
 	{
+		if (reason == PluginStopReason.HostShutdown)
+		{
+			_hostShuttingDown = true;
+		}
+
 		List<PluginRuntimeEntry> entries;
 		lock (_entriesLock)
 		{
@@ -354,6 +365,28 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 	public async Task Reconcile(CancellationToken cancellationToken = default)
 	{
+		if (_hostShuttingDown)
+		{
+			return;
+		}
+
+		if (_sessionEnd.IsEnding)
+		{
+			if (!_pausedForSessionEnd)
+			{
+				_pausedForSessionEnd = true;
+				PluginInfrastructureLog.ReconcilePausedForSessionEnd(_logger);
+			}
+
+			return;
+		}
+
+		if (_pausedForSessionEnd)
+		{
+			_pausedForSessionEnd = false;
+			PluginInfrastructureLog.ReconcileResumedAfterSessionEnd(_logger);
+		}
+
 		try
 		{
 			var installed = SafeDiscover().ToDictionary(p => p.PluginId, StringComparer.Ordinal);
@@ -378,6 +411,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 			foreach (var entry in entries)
 			{
+				if (_hostShuttingDown || _sessionEnd.IsEnding)
+				{
+					break;
+				}
+
 				try
 				{
 					var before = BuildSnapshot(entry, true);
@@ -1327,6 +1365,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 
 		var abortedForTakeover = false;
+		var abortedForShutdown = false;
 		await entry.Gate.WaitAsync(ct);
 		try
 		{
@@ -1334,6 +1373,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			{
 				MarkStoppedForTakeoverLocked(entry);
 				abortedForTakeover = true;
+			}
+			else if (_hostShuttingDown || _sessionEnd.IsEnding)
+			{
+				entry.State = PluginRuntimeState.Stopped;
+				abortedForShutdown = true;
 			}
 		}
 		finally
@@ -1344,6 +1388,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		if (abortedForTakeover)
 		{
 			return TakenOver();
+		}
+
+		if (abortedForShutdown)
+		{
+			return PluginSupervisorResult.Fail(PluginSupervisorError.HostShuttingDown);
 		}
 
 		var launchId = Guid.CreateVersion7().ToString();
