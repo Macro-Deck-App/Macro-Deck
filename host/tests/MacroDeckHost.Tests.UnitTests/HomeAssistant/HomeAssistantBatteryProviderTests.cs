@@ -304,13 +304,10 @@ internal sealed class HomeAssistantBatteryProviderTests
 
 		await context.ConfigStore.SetStringAsync(entryId, HomeAssistantConfigKeys.BaseUrl, "http://ha.lan:8123");
 		var reloaded = await ((IConfigEntryLifecycle)integration).ReloadEntriesAsync();
-		await WaitForAsync(() => _clients.Count == 2, "the new connection");
+		// The first connection may be replaced before its pump ever creates a client, so count nothing.
+		await WaitForAsync(() => ConnectedTo("ha.lan"), "the new connection");
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(reloaded, Is.True);
-			Assert.That(_clients[^1].LastUri?.Host, Is.EqualTo("ha.lan"));
-		});
+		Assert.That(reloaded, Is.True);
 		await integration.ShutdownAsync();
 	}
 
@@ -331,6 +328,14 @@ internal sealed class HomeAssistantBatteryProviderTests
 				[HomeAssistantConfigKeys.Token] = "the-token",
 				[HomeAssistantConfigKeys.BatteryEntities] = JsonSerializer.Serialize(batteries)
 			});
+	}
+
+	private bool ConnectedTo(string host)
+	{
+		lock (_clients)
+		{
+			return _clients.Any(c => c.IsConnected && string.Equals(c.LastUri?.Host, host, StringComparison.Ordinal));
+		}
 	}
 
 	private static string IdOf(string entityId)
