@@ -468,6 +468,11 @@ internal sealed class ObsClient : IObsClient
 		return _obs.GetInputAudioMonitorType(inputName);
 	}
 
+	public void SetInputAudioMonitorType(string inputName, string monitorType)
+	{
+		_obs.SetInputAudioMonitorType(inputName, monitorType);
+	}
+
 	// obs-websocket reports the offset in nanoseconds; every value OBS itself produces is a whole
 	// millisecond in nanoseconds, so plain integer division is exact and keeps a negative offset negative.
 	public int GetInputAudioSyncOffsetMilliseconds(string inputName)

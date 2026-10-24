@@ -1,6 +1,6 @@
 ---
 title: OBS Studio
-description: How Macro Deck changes what OBS Studio sources show, switches profiles and scene collections, follows changes in OBS and reacts to events your OBS scripts send.
+description: How Macro Deck changes what OBS Studio sources show, turns audio monitoring on and off, switches profiles and scene collections, follows changes in OBS and reacts to events your OBS scripts send.
 ---
 
 Macro Deck connects to OBS Studio through its built-in WebSocket server (obs-websocket 5.x). Add the
@@ -36,6 +36,21 @@ The value takes the type the setting already has in OBS:
 
 The action fails with a message when the value does not fit the setting, when the source does not exist or
 when OBS refuses the change.
+
+## Audio monitoring
+
+The action **Set Input Audio Monitoring** changes whether you hear an audio input through your monitoring
+device, the same setting as **Audio Monitoring** in OBS's Advanced Audio Properties. Choose the input under
+**Input** and what to do under **Mode**:
+
+- **Turn on** sets the input to the **Monitoring type** you choose: **Monitor and output** (the default) or
+  **Monitor only (mute output)**.
+- **Turn off** sets it to Monitor Off.
+- **Toggle** turns monitoring off when it is on in either type, and otherwise turns it on with the chosen
+  type.
+
+A button with this action shows whether the input is monitored. The action fails with a message when the input
+has no audio or does not exist.
 
 ## Changes show up quickly
 

@@ -141,6 +141,7 @@ internal static class ObsActions
 
 			new SourceVisibilityActionDefinition(resolver),
 			new MuteInputActionDefinition(resolver),
+			new SetInputMonitoringActionDefinition(resolver),
 			new SetInputVolumeActionDefinition(resolver),
 			new SetSourceFilterActionDefinition(resolver),
 			new SetInputSettingActionDefinition(resolver),
