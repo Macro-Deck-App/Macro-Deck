@@ -1,8 +1,11 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
 import { UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, nodeString, nodeText, nodeVisibleWhen } from '@macro-deck/runtime';
+import type { UiContentUploadResponse } from '@macro-deck/runtime';
 import { LocalizationService, UiNodeEventBus } from '@shared';
 import { UI_CHROME_TYPES } from './ui-chrome-types.util';
+
+export type UiContentUploader = (nodeId: string, text: string) => Promise<UiContentUploadResponse | null>;
 
 export interface UiHoistedMessage {
   id: string;
@@ -30,6 +33,8 @@ export class UiRenderContext {
   private readonly disabledSignal = signal(false);
   private readonly scopeRefIdSignal = signal<string | undefined>(undefined);
   private readonly unsavedChangesSignal = signal(false);
+  private contentUploader: UiContentUploader | null = null;
+  private readonly contentFlushers = new Set<() => void>();
 
   readonly events$ = this.eventBus.events$;
 
@@ -84,6 +89,23 @@ export class UiRenderContext {
 
   get unsavedChanges(): boolean {
     return this.unsavedChangesSignal();
+  }
+
+  setContentUploader(uploader: UiContentUploader | null): void {
+    this.contentUploader = uploader;
+  }
+
+  uploadContent(node: UiNode, text: string): Promise<UiContentUploadResponse | null> {
+    if (!this.contentUploader) {
+      this.eventBus.emit(node, UiConfigEvents.ContentUploadFailed);
+      return Promise.resolve(null);
+    }
+    return this.contentUploader(node.id, text);
+  }
+
+  registerContentFlusher(flush: () => void): () => void {
+    this.contentFlushers.add(flush);
+    return () => this.contentFlushers.delete(flush);
   }
 
   messagesFor(nodeId: string): UiHoistedMessage[] {
@@ -147,6 +169,8 @@ export class UiRenderContext {
   }
 
   emit(node: UiNode, name: string, data?: unknown): void {
+    // Starting the pending content uploads first holds this event behind them in the session.
+    for (const flush of [...this.contentFlushers]) flush();
     this.eventBus.emit(node, name, data);
   }
 

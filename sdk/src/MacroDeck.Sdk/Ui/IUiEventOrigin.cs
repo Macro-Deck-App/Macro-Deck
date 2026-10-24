@@ -65,4 +65,23 @@ public interface IUiEventOrigin
 		UiEventOriginUrls.EnsureWebUrl(url);
 		return Task.FromResult(false);
 	}
+
+	/// <summary>
+	/// Reads the bytes a code input in content-resource mode uploaded, named by the <c>uploadId</c> of the
+	/// <c>content-uploaded</c> event it raised (<c>MacroDeck.Ui.Config.UiContentUpload</c>). An origin reads only
+	/// uploads of the session the event came from; text arrives as UTF-8 exactly as the client sent it.
+	/// </summary>
+	/// <remarks>
+	/// Unlike the other members this does not depend on the client still being attached: the upload is held by
+	/// Macro Deck for a few minutes, until a newer upload of the same input replaces it, or until the session
+	/// closes.
+	/// </remarks>
+	/// <returns>The uploaded bytes, at most 2 MiB.</returns>
+	/// <exception cref="UiUploadNotFoundException">Macro Deck holds no such upload for this session.</exception>
+	/// <exception cref="NotSupportedException">The Macro Deck this provider talks to, or this origin, predates
+	/// uploads. The default implementation throws it.</exception>
+	Task<ReadOnlyMemory<byte>> ReadUploadAsync(string uploadId, CancellationToken cancellationToken = default)
+	{
+		throw new NotSupportedException("This Macro Deck cannot read uploads.");
+	}
 }

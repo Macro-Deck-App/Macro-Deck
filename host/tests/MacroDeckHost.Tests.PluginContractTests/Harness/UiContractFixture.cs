@@ -42,6 +42,8 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 
 	protected UiClientFeatures ClientFeatures { get; private set; } = null!;
 
+	protected UiUploadStore UiUploads { get; private set; } = null!;
+
 	[SetUp]
 	public void UiSetUp()
 	{
@@ -66,6 +68,7 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 
 		Modals = new ModalInteractionCoordinator(TimeProvider.System);
 		ClientFeatures = new UiClientFeatures();
+		UiUploads = new UiUploadStore(UiRegistry, Time);
 
 		var services = new ServiceCollection();
 		services.AddSingleton<IIntegrationConfigStore>(new CallbackFakeConfigStore());
@@ -94,10 +97,12 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
+			assets: HostAssetSender,
 			eventOrigins: new UiEventOrigins(Broker,
 				UiTransport,
 				new UiInteractionsFactory(Modals, UiTransport, Serilog.Core.Logger.None),
-				ClientFeatures));
+				ClientFeatures,
+				UiUploads));
 
 		HostInvokeHandler = (correlationId, payload, cancellationToken)
 			=> router.RouteAsync(PluginId, correlationId, payload, cancellationToken);
@@ -106,6 +111,7 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 	[TearDown]
 	public void UiTearDown()
 	{
+		UiUploads.Dispose();
 		Broker.Dispose();
 		UiRegistry.Dispose();
 	}

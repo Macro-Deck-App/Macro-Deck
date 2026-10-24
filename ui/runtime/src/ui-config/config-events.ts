@@ -12,4 +12,6 @@ export const UiConfigEvents = {
   Add: 'add',
   Remove: 'remove',
   Provide: 'provide',
+  ContentUploaded: 'content-uploaded',
+  ContentUploadFailed: 'content-upload-failed',
 } as const;

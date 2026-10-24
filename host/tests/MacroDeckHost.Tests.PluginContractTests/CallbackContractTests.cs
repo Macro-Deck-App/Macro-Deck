@@ -477,6 +477,33 @@ internal sealed class CallbackContractTests
 
 
 	[Test]
+	public async Task Reading_a_user_variable_in_context_returns_the_hosts_typed_value_across_the_socket()
+	{
+		_userVariableApi.ReadResultToReturn = UserVariableReadResult.Found(SdkVariableType.Numeric, 1.5d, "1.50");
+		var context = new UserVariableContext("widget-1", "script-1", "automation-1");
+
+		var result = await _context.UserVariables.ReadInContextAsync("volume", context);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(UserVariableReadStatus.Found));
+			Assert.That(result.Type, Is.EqualTo(SdkVariableType.Numeric));
+			Assert.That(result.Value, Is.EqualTo(1.5d));
+			Assert.That(result.Text, Is.EqualTo("1.50"));
+			Assert.That(_userVariableApi.Read, Is.EqualTo(new[] { ("volume", context) }));
+		});
+	}
+
+	[Test]
+	public async Task A_read_of_an_unknown_variable_surfaces_not_found_across_the_socket()
+	{
+		var result = await _context.UserVariables.ReadInContextAsync("missing", new UserVariableContext());
+
+		Assert.That(result.Status, Is.EqualTo(UserVariableReadStatus.NotFound));
+	}
+
+
+	[Test]
 	public async Task A_config_value_set_through_IIntegrationConfig_is_readable_back_through_it()
 	{
 		var entryId = _configStore.Seed(PluginId, "Account", new Dictionary<string, JsonElement>());

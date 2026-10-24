@@ -33,6 +33,7 @@ public sealed class WeatherUiProvider : IUiProvider
 | `folder` | A whole folder that selected a custom view | Every client showing the folder | shared | [Folder views](/ui/views/folder-views/) |
 | `screensaver` | What a device shows after sitting idle | The device itself, when its idle timer fires | shared | [Screensavers](/ui/views/screensavers/) |
 | `dialog` | A modal an action opened | The action | exclusive | [Modal views](/ui/views/modal/) |
+| `page` | A tab an integration adds to its own page in the desktop app | An administrator, from the integration's page | exclusive | [Integration pages](/ui/views/page/) |
 | `developer-preview` | One `[UiPreview]` scenario | Developer Tools | exclusive | [Developer preview](/ui/views/developer-preview/) |
 
 - **shared** - several clients may be attached at once, such as the same widget on two devices. You never

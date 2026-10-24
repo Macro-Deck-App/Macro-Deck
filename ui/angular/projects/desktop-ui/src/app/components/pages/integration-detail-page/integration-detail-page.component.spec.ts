@@ -6,7 +6,7 @@ import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { Subject, EMPTY } from 'rxjs';
 
 import { VariableCatalogNode, ActionParameterType, AppStrings, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationCapabilityDataChangedEvent, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
-import { ApiService, LocalizationService, ToastService, VariableService } from '@shared';
+import { ApiService, LocalizationService, ToastService, UiSessionService, VariableService } from '@shared';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { Integration, IntegrationService } from '../../../services/integration.service';
@@ -41,6 +41,7 @@ describe('IntegrationDetailPageComponent', () => {
   let previousUrl: string | null;
   let routeIntegrationId: string;
   let queryTab: string | null;
+  let pageSessions: { request: unknown; close: jasmine.Spy }[];
 
   function installedPlugin(overrides: Partial<InstalledPlugin> = {}): InstalledPlugin {
     return {
@@ -181,6 +182,7 @@ describe('IntegrationDetailPageComponent', () => {
     entries = [];
     routeIntegrationId = 'app.macro-deck.spotify';
     queryTab = null;
+    pageSessions = [];
     issuesEvents = new Subject<IntegrationIssuesChangedEvent>();
     integrationsEvents = new Subject<IntegrationsChangedEvent>();
     cultureEvents = new Subject<unknown>();
@@ -302,6 +304,23 @@ describe('IntegrationDetailPageComponent', () => {
             installedIds: () => new Set(installedPlugins().map(p => p.pluginId)),
             load: async () => undefined,
             uninstall: (...args: unknown[]) => uninstallPlugin(...args),
+          },
+        },
+        {
+          provide: UiSessionService,
+          useValue: {
+            open: (request: unknown) => {
+              const session = {
+                request,
+                close: jasmine.createSpy('close'),
+                root: signal(null),
+                rejection: signal(null),
+                fault: signal(null),
+                send: () => undefined,
+              };
+              pageSessions.push(session);
+              return session;
+            },
           },
         },
         { provide: Router, useValue: routerSpy },
@@ -1486,6 +1505,59 @@ describe('IntegrationDetailPageComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('app-integration-batteries-panel')).not.toBeNull();
+      fixture.destroy();
+    });
+
+    it('adds the pages an integration provides as tabs after its capability tabs', async () => {
+      integrations.set([integration({
+        providedCapabilities: provided('events'),
+        pages: [
+          { id: 'scripts', title: 'Scripts', icon: 'file-text' },
+          { id: 'logs', title: 'Logs', icon: 'not-a-macro-deck-icon' },
+        ],
+      })]);
+
+      const fixture = await createFixture();
+
+      expect(tabIds(fixture)).toEqual(['overview', 'actions', 'variables', 'events', 'page:scripts', 'page:logs']);
+      const scripts = fixture.nativeElement.querySelector('[id="integration-detail-tab-page:scripts"]') as HTMLElement;
+      expect(scripts.textContent?.trim()).toBe('Scripts');
+      expect(scripts.querySelector('.icon-file-text')).not.toBeNull();
+      const logs = fixture.nativeElement.querySelector('[id="integration-detail-tab-page:logs"]') as HTMLElement;
+      expect(logs.querySelector('.icon')).toBeNull();
+      fixture.destroy();
+    });
+
+    it('opens a provided page from its deep link and closes its session when another tab is chosen', async () => {
+      queryTab = 'page:scripts';
+      integrations.set([integration({ pages: [{ id: 'scripts', title: 'Scripts', icon: null }] })]);
+
+      const fixture = await createFixture();
+
+      expect(fixture.nativeElement.querySelector('[id="integration-detail-tab-page:scripts"]').getAttribute('aria-selected'))
+        .toBe('true');
+      expect(pageSessions.map(session => session.request))
+        .toEqual([{ kind: 'page', integrationId: 'app.macro-deck.spotify', pageId: 'scripts' }]);
+      const panel = fixture.nativeElement.querySelector('.provider-page-panel') as HTMLElement;
+      expect(getComputedStyle(panel).maxWidth).toBe('none');
+
+      selectTab(fixture, 'overview');
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('app-integration-ui-page-panel')).toBeNull();
+      expect(pageSessions[0].close).toHaveBeenCalled();
+      fixture.destroy();
+    });
+
+    it('falls back to the overview for a deep link to a page the integration does not provide', async () => {
+      queryTab = 'page:missing';
+      integrations.set([integration({ pages: [{ id: 'scripts', title: 'Scripts', icon: null }] })]);
+
+      const fixture = await createFixture();
+
+      expect(fixture.nativeElement.querySelector('#integration-detail-panel-overview')).not.toBeNull();
+      expect(pageSessions).toEqual([]);
       fixture.destroy();
     });
 

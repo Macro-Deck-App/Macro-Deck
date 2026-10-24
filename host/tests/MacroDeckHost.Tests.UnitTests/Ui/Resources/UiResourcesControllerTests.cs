@@ -100,6 +100,47 @@ public class UiResourcesControllerTests
 	}
 
 	[Test]
+	public async Task A_text_resource_is_served_as_utf8_text_that_cannot_be_sniffed_or_run()
+	{
+		var store = new UiResourceStore();
+		var handle = store.Register(new UiResourceRegistration
+		{
+			OwnerId = "app.macro-deck.autohotkey",
+			Name = "ahk-5f0c2d7a9b1e4c3f8a6d2b0e9c7f1a3d",
+			MediaType = "text/plain",
+			Content = Encoding.UTF8.GetBytes("MsgBox \"äöü\"")
+		});
+		var controller = Controller(store);
+
+		var result = await controller.Get(handle.ResourceId) as FileContentResult;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result!.ContentType, Is.EqualTo("text/plain; charset=utf-8"));
+			Assert.That(Encoding.UTF8.GetString(result.FileContents), Is.EqualTo("MsgBox \"äöü\""));
+			Assert.That(controller.Response.Headers["X-Content-Type-Options"].ToString(), Is.EqualTo("nosniff"));
+			Assert.That(controller.Response.Headers.ContentSecurityPolicy.ToString(), Does.Contain("sandbox"));
+		});
+	}
+
+	[Test]
+	public async Task A_text_resource_is_not_found_by_a_client_that_only_knows_its_owner()
+	{
+		var store = new UiResourceStore();
+		store.Register(new UiResourceRegistration
+		{
+			OwnerId = "app.macro-deck.autohotkey",
+			Name = "ahk-5f0c2d7a9b1e4c3f8a6d2b0e9c7f1a3d",
+			MediaType = "text/plain",
+			Content = Encoding.UTF8.GetBytes("secret script")
+		});
+
+		var guessed = await Controller(store).Get("app.macro-deck.autohotkey.ahk-00000000000000000000000000000000");
+
+		Assert.That(guessed, Is.InstanceOf<NotFoundResult>());
+	}
+
+	[Test]
 	public async Task A_matching_if_none_match_is_answered_with_304_and_no_body()
 	{
 		var store = StoreWith(out var resourceId);

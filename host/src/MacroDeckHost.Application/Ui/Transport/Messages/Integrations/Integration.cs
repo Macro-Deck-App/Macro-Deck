@@ -43,4 +43,6 @@ public class Integration
 	public string? IssueSeverity { get; set; }
 
 	public List<ProvidedCapabilityDto> ProvidedCapabilities { get; set; } = new();
+
+	public List<IntegrationPageDto> Pages { get; set; } = new();
 }

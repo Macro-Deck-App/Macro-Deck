@@ -65,10 +65,22 @@ public static class UiConfigEvents
 	/// handler decides, and the node's provider block ids report the outcome.</summary>
 	public const string Provide = "provide";
 
+	/// <summary>A code input whose text is loaded from a content resource uploaded its edited text. The
+	/// payload is an object: <c>uploadId</c>, <c>length</c> and <c>contentHash</c> - see
+	/// <see cref="UiContentUpload" />. The text itself never travels in an event; the provider reads it
+	/// through its event origin.</summary>
+	public const string ContentUploaded = "content-uploaded";
+
+	/// <summary>A code input whose text is loaded from a content resource could not upload its edited text,
+	/// for example because it was too large. Carries no payload; the provider keeps its previous
+	/// draft.</summary>
+	public const string ContentUploadFailed = "content-upload-failed";
+
 	/// <summary>The event names this package ships, in declaration order. Not exhaustive - see the type's
 	/// remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
-		Change, Submit, Cancel, Back, Activate, Expand, Collapse, Open, Filter, Reload, Add, Remove, Provide
+		Change, Submit, Cancel, Back, Activate, Expand, Collapse, Open, Filter, Reload, Add, Remove, Provide,
+		ContentUploaded, ContentUploadFailed
 	];
 }

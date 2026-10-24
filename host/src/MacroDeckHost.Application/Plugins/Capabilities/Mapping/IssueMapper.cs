@@ -15,7 +15,8 @@ public static class IssueMapper
 		return new IntegrationIssue
 		{
 			Id = dto.Id, Title = dto.Title, Description = dto.Description ?? default, Severity = severity,
-			ActionLabel = dto.ActionLabel ?? default
+			ActionLabel = dto.ActionLabel ?? default,
+			HelpUrl = Uri.TryCreate(dto.HelpUrl, UriKind.Absolute, out var helpUrl) ? helpUrl : null
 		};
 	}
 

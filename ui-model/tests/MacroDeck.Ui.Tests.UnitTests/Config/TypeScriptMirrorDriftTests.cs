@@ -26,6 +26,7 @@ public class TypeScriptMirrorDriftTests
 	private const string EventsPath = "ui/runtime/src/ui-config/config-events.ts";
 	private const string EntryPointsPath = "ui/runtime/src/ui-config/config-entry-points.ts";
 	private const string PropertiesPath = "ui/runtime/src/ui-config/config-properties.ts";
+	private const string LayoutValuesPath = "ui/runtime/src/ui-config/config-layout-values.ts";
 	private const string ComponentPropertiesPath = "ui/runtime/src/ui-components/component-properties.ts";
 	private const string ComponentEventsPath = "ui/runtime/src/ui-components/component-events.ts";
 	private const string ComponentModifiersPath = "ui/runtime/src/ui-components/component-modifiers.ts";
@@ -70,6 +71,18 @@ public class TypeScriptMirrorDriftTests
 	public void The_client_mirrors_the_configuration_property_keys_in_declaration_order()
 	{
 		AssertMirrors(PropertiesPath, "UiConfigProperties", UiConfigProperties.WellKnown);
+	}
+
+	[Test]
+	public void The_client_mirrors_the_page_layout_values_in_declaration_order()
+	{
+		AssertMirrors(LayoutValuesPath, "UiButtonVariants", UiButtonVariants.WellKnown);
+		AssertMirrors(LayoutValuesPath, "UiStackAlignments", UiStackAlignments.WellKnown);
+		AssertMirrors(LayoutValuesPath, "UiStackGaps", UiStackGaps.WellKnown);
+		AssertMirrors(LayoutValuesPath, "UiStackVariants", UiStackVariants.WellKnown);
+		AssertMirrors(LayoutValuesPath,
+			"UiSplitRegions",
+			[UiSplit.RailActionsKey, UiSplit.RailKey, UiSplit.DetailKey]);
 	}
 
 	[Test]

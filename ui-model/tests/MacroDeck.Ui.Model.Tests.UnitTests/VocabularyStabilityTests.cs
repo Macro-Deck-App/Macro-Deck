@@ -18,7 +18,7 @@ public class VocabularyStabilityTests
 	private static readonly string[] _twoSessionModes = ["shared", "exclusive"];
 
 	private static readonly string[] _surfaceKinds =
-		["config", "widget", "dialog", "preview", "folder", "developer-preview", "screensaver"];
+		["config", "widget", "dialog", "preview", "folder", "developer-preview", "screensaver", "page"];
 
 	private static readonly int[] _supportedVersions = [3, 4];
 
@@ -38,6 +38,17 @@ public class VocabularyStabilityTests
 	public void The_well_known_surface_kinds_are_the_frozen_list()
 	{
 		Assert.That(UiSurfaceKinds.WellKnown, Is.EqualTo(_surfaceKinds));
+	}
+
+	[Test]
+	public void The_page_surface_attribute_keys_keep_their_values()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(UiPageSurfaceAttributes.IntegrationId, Is.EqualTo("integrationId"));
+			Assert.That(UiPageSurfaceAttributes.PageId, Is.EqualTo("pageId"));
+			Assert.That(UiPageSurfaceAttributes.Culture, Is.EqualTo("culture"));
+		});
 	}
 
 	[Test]

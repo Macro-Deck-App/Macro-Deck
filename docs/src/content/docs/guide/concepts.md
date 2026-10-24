@@ -825,7 +825,7 @@ of one inside Macro Deck.
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,
-[SoundPad](/guide/soundpad/), Twitch, [YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord,
+[SoundPad](/guide/soundpad/), [AutoHotkey](/guide/autohotkey/), Twitch, [YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord,
 [Discord Webhooks](/guide/discord-webhooks/), Google Calendar,
 Outlook Calendar, [email over IMAP](#connect-an-imap-account), [AdGuard Home](/guide/adguard-home/), [Steam](/guide/steam/) and more. Turn on the ones you use under **Integrations**.
 

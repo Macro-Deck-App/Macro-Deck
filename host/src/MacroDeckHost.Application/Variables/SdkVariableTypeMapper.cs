@@ -15,4 +15,15 @@ public static class SdkVariableTypeMapper
 			_ => DomainVariableType.Text
 		};
 	}
+
+	public static SdkVariableType ToSdk(DomainVariableType type)
+	{
+		return type switch
+		{
+			DomainVariableType.Numeric => SdkVariableType.Numeric,
+			DomainVariableType.Boolean => SdkVariableType.Boolean,
+			DomainVariableType.Color => SdkVariableType.Color,
+			_ => SdkVariableType.Text
+		};
+	}
 }

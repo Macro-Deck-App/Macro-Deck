@@ -251,6 +251,8 @@ import {
   OpenModalUiSessionResponse,
   OpenProfileOnDeviceRequest,
   OpenProfileOnDeviceResponse,
+  OpenPageUiSessionRequest,
+  OpenPageUiSessionResponse,
   OpenUiPreviewSessionRequest,
   OpenUiPreviewSessionResponse,
   OpenWidgetUiSessionRequest,
@@ -332,6 +334,7 @@ import {
   TriggerEventRequest,
   TriggerEventResponse,
   UiAttachSessionResponse,
+  UiContentUploadResponse,
   UiModalOpenedEvent,
   UiOpenUrlEvent,
   UI_CLIENT_FEATURE_OPEN_URL,
@@ -343,6 +346,8 @@ import {
   UiSessionParameterValuesReportedEvent,
   UiSessionPatchedEvent,
   UiSessionTreeUpdatedEvent,
+  type UiResource,
+  uiResourceUrl,
   UnbindCatalogVariableRequest,
   UnbindCatalogVariableResponse,
   UninstallStoreExtensionResponse,
@@ -2022,6 +2027,30 @@ export class ApiService {
 
   openUiPreviewSession(request: OpenUiPreviewSessionRequest): Promise<OpenUiPreviewSessionResponse | null> {
     return this.invokeResult<OpenUiPreviewSessionResponse>('OpenUiPreviewSession', request);
+  }
+
+  openPageUiSession(request: OpenPageUiSessionRequest): Promise<OpenPageUiSessionResponse | null> {
+    return this.invokeResult<OpenPageUiSessionResponse>('OpenPageUiSession', request);
+  }
+
+  async uploadUiContent(sessionId: string, nodeId: string, text: string): Promise<UiContentUploadResponse> {
+    const path = `/api/ui/sessions/${encodeURIComponent(sessionId)}/uploads?nodeId=${encodeURIComponent(nodeId)}`;
+    const response = await this.fetchWithAuth(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      body: new TextEncoder().encode(text),
+    });
+    return ApiService.parseResponse<UiContentUploadResponse>(response);
+  }
+
+  async getUiResourceText(resource: UiResource): Promise<string> {
+    const baseUrl = await this.resolveBaseUrl() ?? '';
+    const url = uiResourceUrl(baseUrl, resource);
+    if (!url) throw new TransportError(0, 'The host address is not known.');
+
+    const response = await this.fetchWithAuth(url.slice(baseUrl.length), { method: 'GET' });
+    if (!response.ok) throw new TransportError(response.status, `HTTP ${response.status}`);
+    return response.text();
   }
 
   onFolderViewCatalogChanged(): Observable<FolderViewCatalogChangedEvent> {

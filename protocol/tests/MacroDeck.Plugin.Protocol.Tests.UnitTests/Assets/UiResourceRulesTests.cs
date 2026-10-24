@@ -6,7 +6,10 @@ namespace MacroDeck.Plugin.Protocol.Tests.UnitTests.Assets;
 public class UiResourceRulesTests
 {
 	private static readonly string[] _publishedKinds =
-		["icon", "artwork", "action-icon", "ui-resource", "icon-pack", "android-screenshot", "companion-screenshot"];
+	[
+		"icon", "artwork", "action-icon", "ui-resource", "icon-pack", "android-screenshot", "companion-screenshot",
+		"ui-upload"
+	];
 
 	[TestCase("photo")]
 	[TestCase("a")]
@@ -35,7 +38,8 @@ public class UiResourceRulesTests
 	[TestCase("image/webp")]
 	[TestCase("image/gif")]
 	[TestCase("IMAGE/PNG")]
-	public void Raster_images_are_supported(string mediaType)
+	[TestCase("text/plain")]
+	public void Raster_images_and_plain_text_are_supported(string mediaType)
 	{
 		Assert.That(UiResourceRules.IsSupportedMediaType(mediaType), Is.True);
 	}

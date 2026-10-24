@@ -63,6 +63,24 @@ export interface OpenUiPreviewSessionResponse {
   message?: string;
 }
 
+export interface OpenPageUiSessionRequest {
+  integrationId: string;
+  pageId: string;
+}
+
+export interface OpenPageUiSessionResponse {
+  accepted: boolean;
+  sessionId: string;
+  code?: string;
+  message?: string;
+}
+
+export interface UiContentUploadResponse {
+  uploadId: string;
+  length: number;
+  contentHash: string;
+}
+
 export interface UiAttachSessionRequest {
   sessionId: string;
 }

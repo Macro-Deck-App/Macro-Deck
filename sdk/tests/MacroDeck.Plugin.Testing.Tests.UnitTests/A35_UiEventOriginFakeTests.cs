@@ -79,4 +79,21 @@ public class A35UiEventOriginFakeTests
 			Assert.That(origin.OpenedUrls, Is.Empty);
 		});
 	}
+
+	[Test]
+	public async Task An_upload_added_to_the_fake_is_read_back_and_any_other_is_not_found()
+	{
+		var origin = new FakeUiEventOrigin("client-a");
+		origin.AddUpload("u1", "MsgBox 1"u8.ToArray());
+
+		var read = await origin.ReadUploadAsync("u1");
+		origin.RemoveUpload("u1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(read.ToArray(), Is.EqualTo("MsgBox 1"u8.ToArray()));
+			Assert.ThrowsAsync<UiUploadNotFoundException>(() => origin.ReadUploadAsync("u1"));
+			Assert.ThrowsAsync<UiUploadNotFoundException>(() => origin.ReadUploadAsync("u2"));
+		});
+	}
 }

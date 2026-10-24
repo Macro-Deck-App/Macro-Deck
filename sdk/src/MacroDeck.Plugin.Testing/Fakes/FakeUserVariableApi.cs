@@ -64,7 +64,7 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 	}
 
 	/// <summary>
-	/// The context the most recent apply or create was made in, or <c>null</c> before the first one. A call
+	/// The context the most recent apply, create or read was made in, or <c>null</c> before the first one. A call
 	/// through <see cref="ApplyAsync" /> or <see cref="CreateAsync" /> records a context with only the
 	/// owner widget set, so a test can tell whether the plugin passed its script or automation on.
 	/// </summary>
@@ -356,6 +356,61 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 
 			return Task.FromResult(UserVariableCreateResult.Created());
 		}
+	}
+
+	/// <summary>
+	/// Reads a seeded variable the way <see cref="ApplyInContextAsync" /> resolves it: script, then
+	/// automation, then widget, then global. Answers <see cref="UserVariableReadStatus.NotFound" /> when
+	/// nothing resolves and <see cref="UserVariableReadStatus.InvalidName" /> for an empty name. The value comes
+	/// back in the contract's shape: a <see cref="double" /> for a numeric variable, a <see cref="bool" /> for
+	/// a boolean one, text otherwise. The context is kept in <see cref="LastContext" />.
+	/// </summary>
+	public Task<UserVariableReadResult> ReadInContextAsync(
+		string name,
+		UserVariableContext context,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
+		lock (_gate)
+		{
+			_lastContext = context;
+			if (Canonical(name).Length == 0)
+			{
+				return Task.FromResult(UserVariableReadResult.Failed(UserVariableReadStatus.InvalidName,
+					$"'{name}' is not a variable name."));
+			}
+
+			if (Resolve(name, context) is not { } record)
+			{
+				return Task.FromResult(UserVariableReadResult.Failed(UserVariableReadStatus.NotFound,
+					$"No variable named '{name}' is visible here."));
+			}
+
+			return Task.FromResult(record.Type switch
+			{
+				VariableType.Numeric => ReadNumber(ToDecimalOrZero(record.Value)),
+				VariableType.Boolean => ReadBoolean(ToBoolOrFalse(record.Value)),
+				_ => ReadText(record.Type, Convert.ToString(record.Value, CultureInfo.InvariantCulture) ?? string.Empty)
+			});
+		}
+	}
+
+	private static UserVariableReadResult ReadText(VariableType type, string value)
+	{
+		return UserVariableReadResult.Found(type, value, value);
+	}
+
+	private static UserVariableReadResult ReadNumber(decimal value)
+	{
+		return UserVariableReadResult.Found(VariableType.Numeric,
+			(double)value,
+			value.ToString(CultureInfo.InvariantCulture));
+	}
+
+	private static UserVariableReadResult ReadBoolean(bool value)
+	{
+		return UserVariableReadResult.Found(VariableType.Boolean, value, value ? "true" : "false");
 	}
 
 	private static UserVariableCreateResult CreateLocal(

@@ -58,6 +58,9 @@ import type { TabItem } from './tab-bar.model';
         [attr.aria-selected]="activeId === item.id"
         [attr.tabindex]="tabIndexFor(item)"
         (click)="select(item.id)">
+        @if (item.icon) {
+          <span class="icon icon-{{ item.icon }} icon-sm" aria-hidden="true"></span>
+        }
         <span class="tab-label">{{ item.label }}</span>
         @if (item.badge !== undefined && item.badge !== null && item.badge !== 0) {
           <span class="tab-badge">{{ item.badge }}</span>

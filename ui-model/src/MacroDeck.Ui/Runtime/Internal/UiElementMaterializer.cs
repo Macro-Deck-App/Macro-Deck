@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Ui.Components;
+using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Identity;
 using MacroDeck.Ui.Model.Nodes;
@@ -220,6 +221,17 @@ internal sealed class UiElementMaterializer
 
 			case UiResponsive responsive:
 				region.AddNode(MaterializeResponsive(responsive,
+					structuralPrefix,
+					inputScope,
+					parentDeclarationPath,
+					disabled,
+					modifiers));
+
+				return;
+
+			case UiSplit split:
+				region.AddNode(MaterializeStructural(split,
+					split.Regions,
 					structuralPrefix,
 					inputScope,
 					parentDeclarationPath,

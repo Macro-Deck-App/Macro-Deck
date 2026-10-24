@@ -8,6 +8,7 @@ using MacroDeck.Sdk.Profiles;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Migration;
+using MacroDeckHost.Application.Ui.Pages;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities;
 
@@ -92,6 +93,8 @@ public sealed record RemotePluginCapabilitySnapshot
 	public int UiModelVersion { get; init; }
 
 	public IReadOnlyList<RemoteUiPreviewDescriptor> UiPreviews { get; init; } = [];
+
+	public IReadOnlyList<UiPageDescriptor> UiPages { get; init; } = [];
 
 	// Only the catalog's shape is cached, never its contents: discovery over a provider's own resource
 	// tree is deliberately never enumerated or persisted here - see IVariableProvider's remarks on why

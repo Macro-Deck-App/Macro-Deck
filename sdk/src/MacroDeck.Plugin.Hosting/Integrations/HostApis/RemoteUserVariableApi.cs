@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Sdk.Variables;
 
@@ -90,5 +91,69 @@ internal sealed class RemoteUserVariableApi(IHostInvoker invoker) : IUserVariabl
 		return result?.Deserialize<UserVariableCreateResult>(PluginProtocolJson.Options)
 			?? UserVariableCreateResult.Failed(UserVariableCreateStatus.Unavailable,
 				"The host returned no result.");
+	}
+
+	public async Task<UserVariableReadResult> ReadInContextAsync(
+		string name,
+		UserVariableContext context,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
+		JsonElement? result;
+		try
+		{
+			result = await invoker.InvokeAsync(Protocol.Callbacks.HostApis.UserVariables,
+					HostOperations.UserVariables.Read,
+					new UserVariablesReadArguments
+					{
+						Name = name,
+						OwnerWidgetId = context.OwnerWidgetId,
+						ScriptId = context.ScriptId,
+						AutomationId = context.AutomationId
+					},
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (HostInvocationException exception) when (exception.Code == ProtocolErrorCodes.CapabilityUnsupported)
+		{
+			return UserVariableReadResult.Failed(UserVariableReadStatus.NotSupported,
+				"This Macro Deck cannot read variables.");
+		}
+		catch (HostInvocationException exception)
+		{
+			return UserVariableReadResult.Failed(UserVariableReadStatus.Unavailable, exception.Message);
+		}
+
+		return result?.Deserialize<UserVariablesReadResult>(PluginProtocolJson.Options) is { } read
+			? FromWire(read)
+			: UserVariableReadResult.Failed(UserVariableReadStatus.Unavailable, "The host returned no result.");
+	}
+
+	private static UserVariableReadResult FromWire(UserVariablesReadResult read)
+	{
+		VariableType? type = Enum.TryParse<VariableType>(read.Type, out var parsed) && Enum.IsDefined(parsed)
+			? parsed
+			: null;
+		if (!Enum.TryParse<UserVariableReadStatus>(read.Status, out var status) || !Enum.IsDefined(status))
+		{
+			return UserVariableReadResult.Failed(UserVariableReadStatus.Unavailable,
+				read.Message ?? $"The host answered an unknown read status '{read.Status}'.",
+				type);
+		}
+
+		return new UserVariableReadResult(status, type, ValueOf(read.Value), read.Text, read.Message);
+	}
+
+	private static object? ValueOf(JsonElement? element)
+	{
+		return element switch
+		{
+			{ ValueKind: JsonValueKind.String } value => value.GetString(),
+			{ ValueKind: JsonValueKind.Number } value => value.GetDouble(),
+			{ ValueKind: JsonValueKind.True } => true,
+			{ ValueKind: JsonValueKind.False } => false,
+			_ => null
+		};
 	}
 }

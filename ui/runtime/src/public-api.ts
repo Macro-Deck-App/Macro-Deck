@@ -386,6 +386,13 @@ export {
 export { applyConfigDraftEvent, composeConfigDraft } from './ui-config/config-draft.util';
 export { UiConfigEntryPoints } from './ui-config/config-entry-points';
 export { UiConfigEvents } from './ui-config/config-events';
+export {
+  UiButtonVariants,
+  UiSplitRegions,
+  UiStackAlignments,
+  UiStackGaps,
+  UiStackVariants,
+} from './ui-config/config-layout-values';
 export { UI_CONFIG_PRIMITIVES_WELL_KNOWN, UiConfigPrimitives } from './ui-config/config-primitives';
 export { UiConfigProperties, type UiNodeOption } from './ui-config/config-properties';
 export {
@@ -939,6 +946,7 @@ export {
   type IpcIntegrationEmailInbox,
   type IpcIntegrationEmailMessage,
   type IpcIntegrationIssue,
+  type IpcIntegrationPage,
   type IpcIntegrationVariableCapability,
   type IpcProvidedCapability,
   type IssueResolutionFollowUp,
@@ -1385,6 +1393,8 @@ export {
   type OpenConfigUiSessionResponse,
   type OpenFolderUiSessionRequest,
   type OpenFolderUiSessionResponse,
+  type OpenPageUiSessionRequest,
+  type OpenPageUiSessionResponse,
   type OpenUiPreviewSessionRequest,
   type OpenUiPreviewSessionResponse,
   type OpenWidgetUiSessionRequest,
@@ -1393,6 +1403,7 @@ export {
   type FlushUiSessionResponse,
   type UiAttachSessionRequest,
   type UiAttachSessionResponse,
+  type UiContentUploadResponse,
   type UiSendEventRequest,
   type UiSendEventResponse,
   type UiSessionClosedEvent,

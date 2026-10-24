@@ -1,4 +1,5 @@
 using MacroDeck.Ui.Dsl;
+using MacroDeck.Ui.Model.Resources;
 
 namespace MacroDeck.Ui.Config;
 
@@ -98,12 +99,81 @@ public sealed record UiJsonInput : UiInput<string>
 /// renders in its code editor with the parameter's language.</summary>
 public sealed record UiCodeInput : UiInput<string>
 {
-	/// <summary>The language the editor highlights. Counterpart of the parameter schema's <c>Language</c>.
-	/// </summary>
+	/// <summary>The language the editor highlights, one of <see cref="UiCodeLanguages" /> or a newer name. A
+	/// client that does not know the language edits the text without highlighting. Counterpart of the
+	/// parameter schema's <c>Language</c>.</summary>
 	public UiValue<string> Language { get; init; }
+
+	/// <summary>
+	/// What the editor's insert-variable button inserts at the cursor, with every <c>{name}</c> replaced by the
+	/// chosen variable's name, for example <c>MacroDeck.GetVar("{name}")</c>. Variable names consist of
+	/// letters, digits and <c>_ . : -</c>, so the name is inserted unescaped. Absent, the editor offers no
+	/// insert-variable button; a client that predates the property ignores it.
+	/// </summary>
+	public UiValue<string> VariableInsertFormat { get; init; }
+
+	/// <summary>
+	/// A text UI resource (<c>text/plain</c>, UTF-8) the editor loads its text from instead of the bound value,
+	/// for text too large to travel in the tree. Absent, the editor edits the bound value as before.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// In this mode the editor never sends the text in an event and sends no <c>change</c>: it uploads the
+	/// edited text to Macro Deck and raises <see cref="UiConfigEvents.ContentUploaded" />, or
+	/// <see cref="UiConfigEvents.ContentUploadFailed" /> when the upload failed. Handle them with
+	/// <see cref="OnContentUploaded" /> and <see cref="OnContentUploadFailed" />, and do not also put the text
+	/// in the bound value. When the tree then names a resource whose content hash equals the client's own
+	/// last upload, the client keeps its editor state, cursor and undo history included, so register exactly
+	/// the uploaded bytes.
+	/// </para>
+	/// <para>
+	/// <b>Security:</b> any authenticated Macro Deck client that knows a resource's id can read it, and an id is
+	/// derived from the name it was registered under. Register text content under an unguessable name, for
+	/// example one with 128 random bits, and remove it when it is no longer shown.
+	/// </para>
+	/// </remarks>
+	public UiValue<UiResource> ContentResource { get; init; }
+
+	/// <summary>
+	/// How many lines of text the editor shows, which sets its visible height; longer text scrolls. Absent means
+	/// the editor's default height, as before. A renderer clamps the value to a range it can draw, for example
+	/// 3 to 60, and a reader that predates the key draws its default height.
+	/// </summary>
+	public UiValue<int> Rows { get; init; }
 
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Code;
+
+	/// <summary>
+	/// Handles <see cref="UiConfigEvents.ContentUploaded" />: <paramref name="handler" /> receives the upload's
+	/// description and reads the bytes through the event origin, for example with
+	/// <c>IUiEventOrigin.ReadUploadAsync</c>. A payload that does not read as a <see cref="UiContentUpload" /> is
+	/// declined without calling the handler.
+	/// </summary>
+	public static UiEventHandler OnContentUploaded(Func<UiContentUpload, CancellationToken, Task> handler)
+	{
+		ArgumentNullException.ThrowIfNull(handler);
+
+		return UiEventHandler.OnAsync(UiConfigEvents.ContentUploaded,
+			async (data, cancellationToken) =>
+			{
+				if (!UiContentUpload.TryRead(data, out var upload))
+				{
+					return UiEventOutcome.Rejected("The event does not describe an upload.");
+				}
+
+				await handler(upload!, cancellationToken).ConfigureAwait(false);
+
+				return UiEventOutcome.Accepted;
+			});
+	}
+
+	/// <summary>Handles <see cref="UiConfigEvents.ContentUploadFailed" />. The client already told the user;
+	/// keep the previous draft.</summary>
+	public static UiEventHandler OnContentUploadFailed(Action handler)
+	{
+		return UiEventHandler.On(UiConfigEvents.ContentUploadFailed, handler);
+	}
 
 	/// <inheritdoc />
 	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
@@ -113,5 +183,8 @@ public sealed record UiCodeInput : UiInput<string>
 		base.DeclareProperties(properties);
 
 		properties.Set(UiConfigProperties.Language, Language);
+		properties.Set(UiConfigProperties.VariableInsertFormat, VariableInsertFormat);
+		properties.Set(UiConfigProperties.ContentResource, ContentResource);
+		properties.Set(UiConfigProperties.Rows, Rows);
 	}
 }

@@ -285,6 +285,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.Ui when payload.Operation is HostOperations.Ui.OriginReportFailure
 						or HostOperations.Ui.OriginShowModal
 						or HostOperations.Ui.OriginOpenUrl
+						or HostOperations.Ui.OriginReadUpload
 					=> await RouteUiOriginAsync(pluginId, payload, cancellationToken),
 				HostApis.Ui => RouteUi(pluginId, sessionId, payload),
 				HostApis.Devices => await RouteDevicesAsync(pluginId, payload, cancellationToken),
@@ -710,6 +711,30 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					cancellationToken);
 
 				return HostCallbackResult.Ok(result);
+			}
+
+			case HostOperations.UserVariables.Read:
+			{
+				var arguments = Deserialize<UserVariablesReadArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				var result = await _userVariableApi.ReadInContextAsync(arguments.Name,
+					new UserVariableContext(arguments.OwnerWidgetId, arguments.ScriptId, arguments.AutomationId),
+					cancellationToken);
+
+				return HostCallbackResult.Ok(new UserVariablesReadResult
+				{
+					Status = result.Status.ToString(),
+					Type = result.Type?.ToString(),
+					Value = result.Value is null
+						? null
+						: JsonSerializer.SerializeToElement(result.Value, PluginProtocolJson.Options),
+					Text = result.Text,
+					Message = result.Message
+				});
 			}
 
 			default:
@@ -1918,6 +1943,44 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		return null;
 	}
 
+	// The bytes follow over host.asset like a screenshot, since the reply is capped at the protocol message
+	// size. ReadUpload answers only the plugin serving the session, so a foreign session reads as not found.
+	private HostCallbackResult ReadUpload(
+		UiEventOrigins origins,
+		string pluginId,
+		UiOriginReadUploadArguments arguments)
+	{
+		if (_assets is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+				"This host cannot transfer an upload to a plugin.");
+		}
+
+		if (origins.ReadUpload(pluginId, arguments.SessionId, arguments.UploadId) is not { } upload)
+		{
+			return HostCallbackResult.Ok(new UiOriginReadUploadResult { Found = false });
+		}
+
+		var transferId = Guid.CreateVersion7().ToString();
+		var sender = _assets;
+		_ = Task.Run(() => sender.SendAsync(pluginId,
+				transferId,
+				AssetKinds.UiUpload,
+				"text/plain",
+				upload.Content,
+				upload.ContentHash,
+				CancellationToken.None),
+			CancellationToken.None);
+
+		return HostCallbackResult.Ok(new UiOriginReadUploadResult
+		{
+			Found = true,
+			ByteLength = upload.Content.Length,
+			ContentHash = upload.ContentHash,
+			TransferId = transferId
+		});
+	}
+
 	// The ui api is exempt from the per-plugin throttle for its tree traffic; an origin call puts something
 	// on a user's screen, so it is charged like any other callback.
 	private async Task<HostCallbackResult> RouteUiOriginAsync(
@@ -1978,6 +2041,17 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				.ConfigureAwait(false);
 
 			return HostCallbackResult.Ok(new UiOriginOpenUrlResult { Delivered = linked });
+		}
+
+		if (payload.Operation == HostOperations.Ui.OriginReadUpload)
+		{
+			var read = Deserialize<UiOriginReadUploadArguments>(payload.Arguments);
+			if (read is null || string.IsNullOrEmpty(read.SessionId) || string.IsNullOrEmpty(read.UploadId))
+			{
+				return MissingArguments();
+			}
+
+			return ReadUpload(_eventOrigins, pluginId, read);
 		}
 
 		var modal = Deserialize<UiOriginShowModalArguments>(payload.Arguments);

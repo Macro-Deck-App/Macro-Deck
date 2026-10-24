@@ -27,6 +27,16 @@
               <span class="issue-desc">{{ issue.description | localizedText }}</span>
             }
           </div>
+          @if (issue.helpUrl) {
+            <shared-button
+              class="issue-help"
+              variant="ghost"
+              size="compact"
+              (click)="openHelp(issue)">
+              <span class="icon icon-external-link icon-sm" aria-hidden="true"></span>
+              {{ 'macrodeck.app:Integrations.Detail.IssueHelpLink' | translate }}
+            </shared-button>
+          }
           @if (issue.actionLabel) {
             <shared-button
               variant="secondary"

@@ -3621,6 +3621,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Forms.CodeEditor.InvalidJson" xml:space="preserve">
     <value>अमान्य JSON</value>
   </data>
+  <data name="Forms.CodeEditor.LoadFailed" xml:space="preserve">
+    <value>टेक्स्ट लोड नहीं किया जा सका।</value>
+  </data>
+  <data name="Forms.CodeEditor.UploadFailed" xml:space="preserve">
+    <value>आपके बदलाव अपलोड नहीं किए जा सके। फिर से प्रयास करने के लिए टेक्स्ट संपादित करें।</value>
+  </data>
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>मॉडिफ़ायर जोड़ें</value>
   </data>
@@ -4699,6 +4705,601 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Adb.Variables.DeviceScreenOn" xml:space="preserve">
     <value>डिवाइस स्क्रीन चालू</value>
   </data>
+  <data name="Integrations.AutoHotkey.Actions.OpenWindowSpy.Description" xml:space="preserve">
+    <value>विंडो के शीर्षक, क्लास और कंट्रोल देखने के लिए आपके AutoHotkey इंस्टॉलेशन से Window Spy खोलता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.OpenWindowSpy.Name" xml:space="preserve">
+    <value>Window Spy खोलें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Restart.Description" xml:space="preserve">
+    <value>Macro Deck द्वारा शुरू की गई AutoHotkey स्क्रिप्ट को रोकता है और नए पैरामीटर के साथ फिर से शुरू करता है। स्क्रिप्ट न चल रही हो तो उसे शुरू करता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Restart.Name" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट फिर से शुरू करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunFile.Description" xml:space="preserve">
+    <value>AutoHotkey v2 की .ahk फ़ाइल को उसी जगह से चलाता है जहाँ वह सहेजी गई है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunFile.Name" xml:space="preserve">
+    <value>AutoHotkey फ़ाइल चलाएं</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunInlineCode.Description" xml:space="preserve">
+    <value>इस क्रिया में लिखा गया AutoHotkey v2 कोड चलाता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunInlineCode.Name" xml:space="preserve">
+    <value>इनलाइन AutoHotkey कोड चलाएं</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunScript.Description" xml:space="preserve">
+    <value>AutoHotkey एकीकरण की स्क्रिप्ट लाइब्रेरी से एक AutoHotkey स्क्रिप्ट चलाता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunScript.Name" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट चलाएं</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Stop.Description" xml:space="preserve">
+    <value>Macro Deck द्वारा शुरू की गई AutoHotkey स्क्रिप्ट रोकता है। पहले स्क्रिप्ट से बंद होने का अनुरोध किया जाता है, और बंद न होने पर उसे समाप्त कर दिया जाता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Stop.Name" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट रोकें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Toggle.Description" xml:space="preserve">
+    <value>अगर Macro Deck AutoHotkey स्क्रिप्ट नहीं चला रहा है तो उसे शुरू करता है, और चला रहा है तो उसे रोक देता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Toggle.Name" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट टॉगल करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.AutomaticOption" xml:space="preserve">
+    <value>स्वचालित रूप से खोजें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.Description" xml:space="preserve">
+    <value>Macro Deck इस कंप्यूटर पर इंस्टॉल AutoHotkey v2 से AutoHotkey स्क्रिप्ट चलाता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DetectedExecutableLabel" xml:space="preserve">
+    <value>उपयोग में AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DetectedVersionLabel" xml:space="preserve">
+    <value>AutoHotkey संस्करण</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DownloadLinkLabel" xml:space="preserve">
+    <value>AutoHotkey डाउनलोड करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.EnableFirst" xml:space="preserve">
+    <value>इसकी सेटिंग बदलने के लिए AutoHotkey एकीकरण चालू करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableDoesNotRun" xml:space="preserve">
+    <value>यह AutoHotkey एक्ज़ीक्यूटेबल शुरू नहीं हुआ।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableInvalid" xml:space="preserve">
+    <value>किसी AutoHotkey .exe फ़ाइल का पूरा पथ चुनें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableModeLabel" xml:space="preserve">
+    <value>AutoHotkey एक्ज़ीक्यूटेबल</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableNotFound" xml:space="preserve">
+    <value>यह फ़ाइल मौजूद नहीं है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableNotVersion2" xml:space="preserve">
+    <value>यह AutoHotkey v2 नहीं है। Macro Deck केवल AutoHotkey v2 का समर्थन करता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutablePathDescription" xml:space="preserve">
+    <value>किसी AutoHotkey v2 इंस्टॉलेशन (उदाहरण के लिए पोर्टेबल) की AutoHotkey64.exe या AutoHotkey32.exe।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutablePathLabel" xml:space="preserve">
+    <value>एक्ज़ीक्यूटेबल</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.GracePeriodDescription" xml:space="preserve">
+    <value>रुक रही AutoHotkey स्क्रिप्ट, Macro Deck द्वारा समाप्त किए जाने से पहले, कितनी देर तक अपना एग्ज़िट रूटीन चला सकती है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.GracePeriodLabel" xml:space="preserve">
+    <value>रोकने की छूट अवधि (सेकंड में)</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ManualOption" xml:space="preserve">
+    <value>एक्ज़ीक्यूटेबल चुनें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.NotDetected" xml:space="preserve">
+    <value>इस कंप्यूटर पर AutoHotkey v2 नहीं मिला। इसे इंस्टॉल करें, या नीचे इसका एक्ज़ीक्यूटेबल चुनें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.Title" xml:space="preserve">
+    <value>AutoHotkey सेटिंग्स</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.UnknownStep" xml:space="preserve">
+    <value>यह सेटअप चरण अज्ञात है। सेटअप फिर से शुरू करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.AlreadyRunning" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट {name} पहले से चल रही है।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.CheckTimedOut" xml:space="preserve">
+    <value>सिंटैक्स जाँच समय पर पूरी नहीं हुई।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.ExitCode" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट {name} कोड {code} के साथ बंद हुई।</value>
+    <comment>[name:string][code:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.FileNotFound" xml:space="preserve">
+    <value>AutoHotkey फ़ाइल मौजूद नहीं है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.InvalidParameterName" xml:space="preserve">
+    <value>{name} मान्य पैरामीटर नाम नहीं है। अक्षर, अंक और अंडरस्कोर इस्तेमाल करें, और नाम अंक से शुरू न करें।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.InvalidParameterValue" xml:space="preserve">
+    <value>किसी पैरामीटर मान में ऐसा वर्ण है जिसे AutoHotkey प्राप्त नहीं कर सकता।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LibraryUnreadable" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट लाइब्रेरी पढ़ी नहीं जा सकी।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LoadFailed" xml:space="preserve">
+    <value>पंक्ति {line} पर त्रुटि के कारण AutoHotkey स्क्रिप्ट {name} लोड नहीं की जा सकी।</value>
+    <comment>[name:string][line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LoadFailedNoLine" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट {name} लोड नहीं की जा सकी।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoCode" xml:space="preserve">
+    <value>चलाने के लिए AutoHotkey कोड दर्ज करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoFileSelected" xml:space="preserve">
+    <value>एक AutoHotkey फ़ाइल चुनें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoScriptSelected" xml:space="preserve">
+    <value>एक AutoHotkey स्क्रिप्ट चुनें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NotInstalled" xml:space="preserve">
+    <value>AutoHotkey v2 उपलब्ध नहीं है। AutoHotkey एकीकरण जाँचें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.RuntimeError" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट {name} पंक्ति {line} पर त्रुटि के साथ रुक गई।</value>
+    <comment>[name:string][line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.RuntimeErrorNoLine" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट {name} त्रुटि के साथ रुक गई।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.ScriptNotFound" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट अब मौजूद नहीं है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.SourceUnreadable" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट {name} पढ़ी नहीं जा सकी।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.StartFailed" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट {name} शुरू नहीं की जा सकी।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.TimedOut" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट {name} समय पर पूरी नहीं हुई, इसलिए उसे रोक दिया गया।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.TooManyRuns" xml:space="preserve">
+    <value>बहुत सारी AutoHotkey स्क्रिप्ट चल रही हैं। किसी एक को रोकें और फिर से प्रयास करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WindowSpyFailed" xml:space="preserve">
+    <value>Window Spy शुरू नहीं किया जा सका।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WindowSpyNotFound" xml:space="preserve">
+    <value>AutoHotkey इंस्टॉलेशन में Window Spy नहीं मिला।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WorkingDirectoryNotFound" xml:space="preserve">
+    <value>कार्य फ़ोल्डर मौजूद नहीं है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.Category" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.DurationLabel" xml:space="preserve">
+    <value>मिलीसेकंड में अवधि</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitCodeLabel" xml:space="preserve">
+    <value>एग्ज़िट कोड</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitedDescription" xml:space="preserve">
+    <value>Macro Deck द्वारा शुरू की गई एक AutoHotkey स्क्रिप्ट समाप्त हो गई है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitedName" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट बंद हुई</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.FailedDescription" xml:space="preserve">
+    <value>कोई AutoHotkey स्क्रिप्ट शुरू या लोड नहीं की जा सकी, उसने त्रुटि बताई, या समय पर पूरी नहीं हुई।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.FailedName" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट विफल</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonLabel" xml:space="preserve">
+    <value>कारण</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonLoadError" xml:space="preserve">
+    <value>लोड नहीं हो सकी</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonRuntimeError" xml:space="preserve">
+    <value>त्रुटि बताई</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonStartFailed" xml:space="preserve">
+    <value>शुरू नहीं हो सकी</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonTimeout" xml:space="preserve">
+    <value>समय पर पूरी नहीं हुई</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ScriptLabel" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.StartedDescription" xml:space="preserve">
+    <value>Macro Deck द्वारा शुरू की गई एक AutoHotkey स्क्रिप्ट चल रही है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.StartedName" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट शुरू हुई</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.NoAnswer" xml:space="preserve">
+    <value>Macro Deck ने समय पर जवाब नहीं दिया।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.RequestRejected" xml:space="preserve">
+    <value>Macro Deck ने यह अनुरोध अस्वीकार कर दिया, क्योंकि स्क्रिप्ट ने बहुत सारे संदेश भेजे या कोई बहुत लंबा संदेश भेजा।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableInvalidName" xml:space="preserve">
+    <value>{name} मान्य Macro Deck वेरिएबल नाम नहीं है।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableNotFound" xml:space="preserve">
+    <value>Macro Deck वेरिएबल {name} नहीं मिला।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableUnavailable" xml:space="preserve">
+    <value>Macro Deck वेरिएबल {name} अभी पढ़ा नहीं जा सकता।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.InlineCodeName" xml:space="preserve">
+    <value>इनलाइन AutoHotkey कोड</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.CheckAgain" xml:space="preserve">
+    <value>फिर से जाँचें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.ChooseExecutable" xml:space="preserve">
+    <value>AutoHotkey v2 अब भी उपलब्ध नहीं है। सेटिंग्स में इसका एक्ज़ीक्यूटेबल चुनें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.Found" xml:space="preserve">
+    <value>AutoHotkey {version} मिला।</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryReadable" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट लाइब्रेरी फिर से पढ़ी जा सकती है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryStillUnreadable" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट लाइब्रेरी अब भी पढ़ी नहीं जा सकती।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableAction" xml:space="preserve">
+    <value>फिर से प्रयास करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableDescription" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट की सहेजी गई सूची खराब हो गई है। जब तक इसे फिर से पढ़ा नहीं जा सकता, Macro Deck इसमें कोई बदलाव नहीं करता; इसे वापस पाने के लिए कोई बैकअप पुनर्स्थापित करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableTitle" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट पढ़ी नहीं जा सकीं</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotFoundDescription" xml:space="preserve">
+    <value>AutoHotkey v2 इंस्टॉल करें, या AutoHotkey सेटिंग्स में इसका एक्ज़ीक्यूटेबल चुनें। तब तक AutoHotkey स्क्रिप्ट नहीं चल सकतीं।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotFoundTitle" xml:space="preserve">
+    <value>AutoHotkey नहीं मिला</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotRunnableDescription" xml:space="preserve">
+    <value>AutoHotkey एक्ज़ीक्यूटेबल शुरू नहीं हुआ। AutoHotkey v2 फिर से इंस्टॉल करें या AutoHotkey सेटिंग्स में कोई दूसरा एक्ज़ीक्यूटेबल चुनें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotRunnableTitle" xml:space="preserve">
+    <value>AutoHotkey शुरू नहीं होता</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotVersion2Description" xml:space="preserve">
+    <value>इस कंप्यूटर पर मिला AutoHotkey संस्करण 2 नहीं है। Macro Deck केवल AutoHotkey v2 का समर्थन करता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotVersion2Title" xml:space="preserve">
+    <value>AutoHotkey v2 आवश्यक</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Migration.EnableIntegration" xml:space="preserve">
+    <value>AutoHotkey एकीकरण चालू करें और AutoHotkey v2 इंस्टॉल करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Migration.TemplatePlaceholders" xml:space="preserve">
+    <value>इस कोड में Macro Deck 2 के वेरिएबल प्लेसहोल्डर इस्तेमाल हुए थे, जो अब भरे नहीं जाते। मान पैरामीटर के रूप में भेजें और उन्हें MacroDeck.Params या MacroDeck.GetVar से पढ़ें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.CheckSyntaxButton" xml:space="preserve">
+    <value>सिंटैक्स जाँचें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ChooseExportFolder" xml:space="preserve">
+    <value>पहले वह फ़ोल्डर चुनें जिसमें निर्यात करना है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ChooseImportFile" xml:space="preserve">
+    <value>पहले आयात करने के लिए एक .ahk फ़ाइल चुनें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.CopyName" xml:space="preserve">
+    <value>{name} की कॉपी</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DeleteMessage" xml:space="preserve">
+    <value>{name} हटा दी जाएगी। इसे चलाने वाले बटन तब तक विफल होंगे, जब तक आप कोई दूसरी स्क्रिप्ट नहीं चुनते। इसे वापस नहीं लाया जा सकता।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DeleteTitle" xml:space="preserve">
+    <value>स्क्रिप्ट हटाएं?</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DiscardButton" xml:space="preserve">
+    <value>बदलाव छोड़ें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DownloadButton" xml:space="preserve">
+    <value>AutoHotkey डाउनलोड करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DurationLabel" xml:space="preserve">
+    <value>अवधि</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.EditorLabel" xml:space="preserve">
+    <value>स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ErrorNoLine" xml:space="preserve">
+    <value>त्रुटि: {message}</value>
+    <comment>[message:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ErrorWithLine" xml:space="preserve">
+    <value>पंक्ति {line} पर त्रुटि: {message}</value>
+    <comment>[line:int][message:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportButton" xml:space="preserve">
+    <value>निर्यात करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportExistsMessage" xml:space="preserve">
+    <value>इस फ़ोल्डर में {file} पहले से मौजूद है। इसे बदलें?</value>
+    <comment>[file:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportExistsTitle" xml:space="preserve">
+    <value>फ़ाइल बदलें?</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportFolderLabel" xml:space="preserve">
+    <value>निर्यात के लिए फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Exported" xml:space="preserve">
+    <value>{file} के रूप में निर्यात किया गया।</value>
+    <comment>[file:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportButton" xml:space="preserve">
+    <value>आयात करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportFileLabel" xml:space="preserve">
+    <value>.ahk फ़ाइल आयात करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportNotUtf8" xml:space="preserve">
+    <value>यह फ़ाइल UTF-8 टेक्स्ट नहीं है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportNote" xml:space="preserve">
+    <value>आयात की गई स्क्रिप्ट आपकी अनुमतियों के साथ चलती हैं। केवल वही स्क्रिप्ट आयात करें जिन पर आपको भरोसा है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportTooLarge" xml:space="preserve">
+    <value>यह फ़ाइल 1 MiB से बड़ी है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Imported" xml:space="preserve">
+    <value>{name} आयात किया गया।</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportedName" xml:space="preserve">
+    <value>आयात की गई AutoHotkey स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.InvalidName" xml:space="preserve">
+    <value>अधिकतम 100 वर्णों का नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.LibraryReadOnlyBanner" xml:space="preserve">
+    <value>स्क्रिप्ट की सूची पढ़ी नहीं जा सकी, इसलिए इसे बदला नहीं जा सकता। इसे वापस पाने के लिए कोई बैकअप पुनर्स्थापित करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoScriptsText" xml:space="preserve">
+    <value>कोई स्क्रिप्ट बनाएं या कोई .ahk फ़ाइल आयात करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoScriptsTitle" xml:space="preserve">
+    <value>अभी तक कोई स्क्रिप्ट नहीं</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoSelectionText" xml:space="preserve">
+    <value>संपादित करने और चलाने के लिए सूची से कोई स्क्रिप्ट चुनें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoSelectionTitle" xml:space="preserve">
+    <value>कोई स्क्रिप्ट चयनित नहीं</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NotInstalledBanner" xml:space="preserve">
+    <value>AutoHotkey v2 नहीं मिला। आप स्क्रिप्ट संपादित कर सकते हैं, लेकिन इसके इंस्टॉल होने तक वे चल नहीं सकतीं।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NotRunYet" xml:space="preserve">
+    <value>अभी तक नहीं चलाई गई</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.OperationFailed" xml:space="preserve">
+    <value>यह बदलाव नहीं किया जा सका।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ReplaceButton" xml:space="preserve">
+    <value>बदलें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ResultLabel" xml:space="preserve">
+    <value>परिणाम</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.RunHeading" xml:space="preserve">
+    <value>पिछला रन</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.RunStatusLabel" xml:space="preserve">
+    <value>स्थिति</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SaveButton" xml:space="preserve">
+    <value>सहेजें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Saved" xml:space="preserve">
+    <value>सहेजा गया।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ScriptGone" xml:space="preserve">
+    <value>यह स्क्रिप्ट अब मौजूद नहीं है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Seconds" xml:space="preserve">
+    <value>{seconds} सेकंड</value>
+    <comment>[seconds:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SettingsHeading" xml:space="preserve">
+    <value>सेटिंग्स</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SourceReadOnlyBanner" xml:space="preserve">
+    <value>यह स्क्रिप्ट पढ़ी नहीं जा सकी, इसलिए इसे बदला नहीं जा सकता। इसे वापस पाने के लिए कोई बैकअप पुनर्स्थापित करें।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StartWithMacroDeckDescription" xml:space="preserve">
+    <value>जब भी Macro Deck शुरू होता है, स्क्रिप्ट को शुरू करता है, उदाहरण के लिए उन हॉटकी के लिए जिन्हें हमेशा काम करना चाहिए।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StartWithMacroDeckLabel" xml:space="preserve">
+    <value>Macro Deck शुरू होने पर शुरू करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusExited" xml:space="preserve">
+    <value>कोड {code} के साथ बंद हुई</value>
+    <comment>[code:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusFailedToStart" xml:space="preserve">
+    <value>शुरू नहीं हो सकी</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusStarting" xml:space="preserve">
+    <value>शुरू हो रही है</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusTimedOut" xml:space="preserve">
+    <value>समय समाप्त</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StopButton" xml:space="preserve">
+    <value>रोकें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxError" xml:space="preserve">
+    <value>पंक्ति {line} पर सिंटैक्स त्रुटि।</value>
+    <comment>[line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxErrorNoLine" xml:space="preserve">
+    <value>स्क्रिप्ट में सिंटैक्स त्रुटि है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxOk" xml:space="preserve">
+    <value>कोई सिंटैक्स त्रुटि नहीं मिली।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Title" xml:space="preserve">
+    <value>स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.TooLarge" xml:space="preserve">
+    <value>स्क्रिप्ट 1 MiB से बड़ी है और सहेजी नहीं जा सकती।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.UploadFailed" xml:space="preserve">
+    <value>आपके नवीनतम बदलाव Macro Deck तक नहीं पहुँचे। जब तक एडिटर उन्हें भेज नहीं पाता, तब तक सहेजना उपलब्ध नहीं है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.WorkingDirectoryDescription" xml:space="preserve">
+    <value>वह फ़ोल्डर जिसमें स्क्रिप्ट शुरू होती है। खाली छोड़ने पर हर बार चलाने के लिए एक अस्थायी फ़ोल्डर इस्तेमाल होता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentLabel" xml:space="preserve">
+    <value>आर्गुमेंट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentsDescription" xml:space="preserve">
+    <value>A_Args में स्क्रिप्ट को भेजे जाते हैं। हर आर्गुमेंट में वेरिएबल इस्तेमाल किए जा सकते हैं।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentsLabel" xml:space="preserve">
+    <value>आर्गुमेंट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.CodeDescription" xml:space="preserve">
+    <value>मान पैरामीटर या MacroDeck.GetVar के ज़रिए कोड तक पहुँचते हैं; उन्हें कभी कोड में नहीं डाला जाता।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.CodeLabel" xml:space="preserve">
+    <value>AutoHotkey कोड</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.FileLabel" xml:space="preserve">
+    <value>AutoHotkey फ़ाइल</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.IncludeHelperDescription" xml:space="preserve">
+    <value>स्क्रिप्ट को MacroDeck.SetVar, GetVar, Notify, SetResult और Log इस्तेमाल करने देता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.IncludeHelperLabel" xml:space="preserve">
+    <value>Macro Deck हेल्पर शामिल करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.OutputVariableDescription" xml:space="preserve">
+    <value>स्क्रिप्ट द्वारा MacroDeck.SetResult से सेट किया गया टेक्स्ट पाता है, नहीं तो स्क्रिप्ट का आउटपुट।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.OutputVariableLabel" xml:space="preserve">
+    <value>आउटपुट वेरिएबल</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ParametersDescription" xml:space="preserve">
+    <value>स्क्रिप्ट इन्हें MacroDeck.Params["name"] के रूप में पढ़ती है। नामों में अक्षर, अंक और अंडरस्कोर होते हैं।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ParametersLabel" xml:space="preserve">
+    <value>पैरामीटर</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ScriptLabel" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ScriptPlaceholder" xml:space="preserve">
+    <value>AutoHotkey स्क्रिप्ट चुनें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.StopAllDescription" xml:space="preserve">
+    <value>बंद होने पर केवल सबसे हाल में शुरू किया गया इंस्टेंस रुकता है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.StopAllLabel" xml:space="preserve">
+    <value>सभी इंस्टेंस रोकें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetFile" xml:space="preserve">
+    <value>AutoHotkey फ़ाइल</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetLabel" xml:space="preserve">
+    <value>लक्ष्य</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetManaged" xml:space="preserve">
+    <value>लाइब्रेरी से AutoHotkey स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TimeoutDescription" xml:space="preserve">
+    <value>स्क्रिप्ट इससे ज़्यादा देर चलने पर Macro Deck उसे रोक देता है। अधिकतम 9 मिनट।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TimeoutLabel" xml:space="preserve">
+    <value>टाइमआउट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WaitDescription" xml:space="preserve">
+    <value>स्क्रिप्ट समाप्त होने पर क्रिया पूरी होती है, और स्क्रिप्ट त्रुटि कोड के साथ बंद होने पर क्रिया विफल होती है।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WaitLabel" xml:space="preserve">
+    <value>पूरा होने तक प्रतीक्षा करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningFail" xml:space="preserve">
+    <value>क्रिया को विफल करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningIgnore" xml:space="preserve">
+    <value>कुछ न करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningLabel" xml:space="preserve">
+    <value>पहले से चल रही हो तो</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningRestart" xml:space="preserve">
+    <value>फिर से शुरू करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningStartAnother" xml:space="preserve">
+    <value>एक और इंस्टेंस शुरू करें</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WorkingDirectoryDescription" xml:space="preserve">
+    <value>वह फ़ोल्डर जिसमें स्क्रिप्ट शुरू होती है। डिफ़ॉल्ट रूप से फ़ाइल वाला फ़ोल्डर।</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WorkingDirectoryLabel" xml:space="preserve">
+    <value>कार्य फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.AutoHotkey.States.NotRunning" xml:space="preserve">
+    <value>नहीं चल रही</value>
+  </data>
+  <data name="Integrations.AutoHotkey.States.Running" xml:space="preserve">
+    <value>चल रही है</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.Installed" xml:space="preserve">
+    <value>AutoHotkey इंस्टॉल है</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastError" xml:space="preserve">
+    <value>अंतिम AutoHotkey त्रुटि</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastExitCode" xml:space="preserve">
+    <value>अंतिम AutoHotkey एग्ज़िट कोड</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastResult" xml:space="preserve">
+    <value>अंतिम AutoHotkey परिणाम</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastScript" xml:space="preserve">
+    <value>अंतिम AutoHotkey स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.RunningScripts" xml:space="preserve">
+    <value>चल रही AutoHotkey स्क्रिप्ट</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.ScriptRunning" xml:space="preserve">
+    <value>{name} चल रही है</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.Version" xml:space="preserve">
+    <value>AutoHotkey संस्करण</value>
+  </data>
   <data name="Integrations.Calendar.Actions.JoinMeeting.CalendarDescription" xml:space="preserve">
     <value>वैकल्पिक। केवल इस कैलेंडर के इवेंट जोड़ें।</value>
   </data>
@@ -5121,6 +5722,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Detail.IntegrationNotFound" xml:space="preserve">
     <value>एकीकरण नहीं मिला</value>
+  </data>
+  <data name="Integrations.Detail.IssueHelpLink" xml:space="preserve">
+    <value>और जानें</value>
   </data>
   <data name="Integrations.Detail.IssuesTitle" xml:space="preserve">
     <value>समस्याएं</value>

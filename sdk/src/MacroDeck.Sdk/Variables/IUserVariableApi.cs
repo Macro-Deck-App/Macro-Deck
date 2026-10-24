@@ -2,7 +2,7 @@ using MacroDeck.Sdk.Actions;
 
 namespace MacroDeck.Sdk.Variables;
 
-/// <summary>Writes variables by name, on behalf of a plugin acting for the user.</summary>
+/// <summary>Reads and writes variables by name, on behalf of a plugin acting for the user.</summary>
 public interface IUserVariableApi
 {
 	/// <summary>
@@ -92,6 +92,29 @@ public interface IUserVariableApi
 	{
 		ArgumentNullException.ThrowIfNull(context);
 		return CreateAsync(name, context.OwnerWidgetId, type, initialValue, decimalPlaces, cancellationToken);
+	}
+
+	/// <summary>
+	/// Reads the variable <paramref name="name" /> as <c>{{ vars.name }}</c> resolves it for a flow running in
+	/// <paramref name="context" />: a variable local to its script wins, then one local to its automation,
+	/// then one local to its owner widget, then a global. Integration and widget variables are found by name
+	/// like user variables. Run-local script inputs are not part of this lookup. The value is read live, never
+	/// cached by the caller's side.
+	/// </summary>
+	/// <remarks>
+	/// Default-implemented so an existing implementation keeps compiling: it answers
+	/// <see cref="UserVariableReadStatus.NotSupported" />. A plugin talking to a Macro Deck release that
+	/// predates reads gets the same answer, and <see cref="UserVariableReadStatus.Unavailable" /> when the
+	/// host could not be reached. Never throws for a missing or invalid name; those are statuses.
+	/// </remarks>
+	Task<UserVariableReadResult> ReadInContextAsync(
+		string name,
+		UserVariableContext context,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+		return Task.FromResult(UserVariableReadResult.Failed(UserVariableReadStatus.NotSupported,
+			"This host does not support reading variables."));
 	}
 }
 
@@ -201,5 +224,56 @@ public sealed record UserVariableCreateResult(UserVariableCreateStatus Status, s
 	public static UserVariableCreateResult Failed(UserVariableCreateStatus status, string message)
 	{
 		return new UserVariableCreateResult(status, message);
+	}
+}
+
+/// <summary>Result status of <see cref="IUserVariableApi.ReadInContextAsync" />.</summary>
+public enum UserVariableReadStatus
+{
+	Found = 0,
+
+	/// <summary>No variable of that name is visible in the given context.</summary>
+	NotFound = 1,
+
+	/// <summary>The name cannot be a variable name.</summary>
+	InvalidName = 2,
+
+	/// <summary>The host does not implement reads.</summary>
+	NotSupported = 3,
+
+	/// <summary>The value cannot be read right now: the host could not be reached, or the variable exists but
+	/// its owner currently has no value for it (a template shows it as unavailable). A retry may succeed.</summary>
+	Unavailable = 4
+}
+
+/// <summary>The outcome of <see cref="IUserVariableApi.ReadInContextAsync" />.</summary>
+/// <param name="Status">Whether a value was read.</param>
+/// <param name="Type">The variable's type when it was found, also when its value is unavailable.</param>
+/// <param name="Value">
+/// The value when <paramref name="Status" /> is <see cref="UserVariableReadStatus.Found" />: a
+/// <see cref="string" /> for <see cref="VariableType.Text" /> and <see cref="VariableType.Color" />, a
+/// <see cref="double" /> for <see cref="VariableType.Numeric" /> (a stored value that is not a number stays a
+/// string) and a <see cref="bool" /> for <see cref="VariableType.Boolean" />.
+/// </param>
+/// <param name="Text">The value as a template renders it, e.g. a number with the variable's decimal places.</param>
+/// <param name="Message">Why the read did not find a value, for diagnostics only.</param>
+public sealed record UserVariableReadResult(
+	UserVariableReadStatus Status,
+	VariableType? Type = null,
+	object? Value = null,
+	string? Text = null,
+	string? Message = null)
+{
+	public static UserVariableReadResult Found(VariableType type, object? value, string text)
+	{
+		return new UserVariableReadResult(UserVariableReadStatus.Found, type, value, text);
+	}
+
+	public static UserVariableReadResult Failed(
+		UserVariableReadStatus status,
+		string message,
+		VariableType? type = null)
+	{
+		return new UserVariableReadResult(status, type, null, null, message);
 	}
 }

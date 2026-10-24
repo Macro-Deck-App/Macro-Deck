@@ -1,0 +1,189 @@
+@use '../../../styles/index' as ds;
+
+// Page layout: stack alignment, gap and card, heading tag, split, list and empty state.
+.config-chrome-stack {
+  &[data-gap='none'] { gap: 0; }
+  &[data-gap='small'] { gap: var(--space-2); }
+  &[data-gap='medium'] { gap: var(--space-4); }
+  &[data-gap='large'] { gap: var(--space-6); }
+
+  &[data-align='center'] { align-items: center; }
+  &[data-align='end'] { align-items: flex-end; }
+  &[data-align='space-between'] { justify-content: space-between; }
+}
+
+.config-chrome-stack-row {
+  &[data-align='start'] { justify-content: flex-start; }
+  &[data-align='center'] { justify-content: center; }
+  &[data-align='end'] { justify-content: flex-end; }
+  &[data-align='space-between'] { justify-content: space-between; }
+}
+
+.config-chrome-stack-card {
+  @include ds.card($padding: var(--space-4) 1rem);
+}
+
+.config-chrome-stack-card-accent {
+  border-inline-start: 4px solid var(--config-chrome-stack-accent);
+}
+
+.config-chrome-heading:has(.config-chrome-tag) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.config-chrome-tag {
+  @include ds.tag;
+  flex: none;
+  font-weight: 400;
+}
+
+// The split reuses shared-rail-page; inside a tab the surrounding page already pads, so its own padding goes.
+shared-rail-page.config-chrome-split {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 24rem;
+  padding: 0;
+}
+
+.config-chrome-split-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.config-chrome-split-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.config-chrome-split-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.config-chrome-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.config-chrome-list-item {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-md);
+
+  &.active {
+    background: var(--color-accent-muted);
+  }
+}
+
+.config-chrome-list-item-main {
+  @include ds.rail-item;
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-start;
+  text-align: start;
+  font-family: inherit;
+
+  // The row's background carries the selection so a trailing menu shares it.
+  &.active {
+    background: transparent;
+  }
+}
+
+.config-chrome-list-item-icon {
+  flex: none;
+  background-color: currentColor;
+}
+
+.config-chrome-list-item-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.config-chrome-list-item-label {
+  @include ds.truncate;
+}
+
+.config-chrome-list-item-description {
+  @include ds.truncate;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.config-chrome-list-item-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+
+  &[data-severity='info'] { background: var(--color-accent); }
+  &[data-severity='success'] { background: var(--color-success); }
+  &[data-severity='warning'] { background: var(--color-warning); }
+  &[data-severity='error'] { background: var(--color-danger); }
+}
+
+.config-chrome-list-item-trailing {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+  max-height: var(--control-height-compact);
+  padding-inline-end: var(--space-1);
+}
+
+// A trailing control is a compact borderless ghost square, like the row menus of the app's own lists,
+// so it never makes its row taller than a plain rail row.
+.config-chrome-list-item-trailing ::ng-deep :is(.dropdown-trigger, .config-chrome-icon-button) {
+  width: var(--control-height-compact);
+  height: var(--control-height-compact);
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+
+  &:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+}
+
+// A trailing shared-button keeps its variant colours but takes the compact size, a square when icon-only.
+.config-chrome-list-item-trailing ::ng-deep .sb {
+  min-height: 0;
+  height: var(--control-height-compact);
+  font-size: var(--text-sm);
+
+  &.sb-icon,
+  &.sb-icon-compact {
+    width: var(--control-height-compact);
+    padding: 0;
+  }
+
+  &:not(.sb-icon, .sb-icon-compact) {
+    padding-block: 0;
+  }
+}
+
+.config-chrome-empty-state-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}

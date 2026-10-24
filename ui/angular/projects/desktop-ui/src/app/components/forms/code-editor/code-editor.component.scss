@@ -15,6 +15,13 @@
   gap: var(--space-2);
 }
 
+.ce-toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
 .ce-language {
   @include ds.section-label;
 }
@@ -22,6 +29,10 @@
 .ce-error {
   font-size: var(--text-xs);
   color: var(--color-danger);
+}
+
+.ce-hidden {
+  display: none;
 }
 
 .ce-textarea {
@@ -34,6 +45,36 @@
   tab-size: 2;
 }
 
+.ce-cm-host {
+  box-sizing: border-box;
+  width: 100%;
+  height: calc(var(--ce-rows, 8) * var(--leading-normal) * var(--text-base) + var(--space-2) * 2);
+  min-height: calc(3 * var(--leading-normal) * var(--text-base));
+  resize: vertical;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  &:hover:not(:focus-within) {
+    border-color: var(--color-border-light);
+  }
+
+  &:focus-within {
+    border-color: var(--color-accent);
+  }
+}
+
 .ce-invalid {
   @include ds.control-invalid;
+}
+
+.ce-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: calc(var(--ce-rows, 8) * var(--leading-normal) * var(--text-base) + var(--space-2) * 2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }

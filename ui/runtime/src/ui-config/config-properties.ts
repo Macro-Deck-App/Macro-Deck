@@ -30,6 +30,8 @@ export const UiConfigProperties = {
   FilterDebounceMs: 'filterDebounceMs',
   FileExtensions: 'fileExtensions',
   Language: 'language',
+  VariableInsertFormat: 'variableInsertFormat',
+  ContentResource: 'contentResource',
   AutoPrefixHttps: 'autoPrefixHttps',
   Title: 'title',
   StepId: 'stepId',
@@ -81,6 +83,13 @@ export const UiConfigProperties = {
   Spans: 'spans',
   Variant: 'variant',
   Accent: 'accent',
+  RailTitle: 'railTitle',
+  Selected: 'selected',
+  Badge: 'badge',
+  IconWithLabel: 'iconWithLabel',
+  Align: 'align',
+  Gap: 'gap',
+  Rows: 'rows',
 } as const;
 
 export interface UiNodeOption {

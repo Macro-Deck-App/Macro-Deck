@@ -1,0 +1,22 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ui-page-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+// The renderer hosts between this panel and a split each pass the height on, so the split fills the tab.
+:host ::ng-deep :is(shared-ui-tree, shared-ui-node, shared-ui-chrome, .config-chrome-stack):has(.config-chrome-split) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}

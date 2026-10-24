@@ -334,6 +334,7 @@ public class Startup
 			provider.GetRequiredService<IUiSessionSink>,
 			provider.GetRequiredService<Serilog.ILogger>()));
 		services.AddSingleton<IUiPreviewSessionOpener, UiPreviewSessionOpener>();
+		services.AddSingleton<IPageUiSessionOpener, PageUiSessionOpener>();
 		services.AddSingleton<IUiSessionProviderResolver, UiSessionProviderResolver>();
 		services.AddSingleton(provider => new IntegrationUiProviderRegistry(
 			provider.GetRequiredService<IEnumerable<IBuiltInIntegrationUiProvider>>(),
@@ -353,6 +354,7 @@ public class Startup
 		services.AddSingleton<IUiSessionBroker>(provider => provider.GetRequiredService<UiSessionBroker>());
 		services.AddSingleton<IUiSessionSink>(provider => provider.GetRequiredService<UiSessionBroker>());
 		services.AddSingleton<IUiEventOriginTracker>(provider => provider.GetRequiredService<UiSessionBroker>());
+		services.AddSingleton<UiUploadStore>();
 		services.AddSingleton<UiEventOrigins>();
 		services.AddSingleton<UiClientFeatures>();
 		services.AddSingleton<IConfigUiSessionOpener, ConfigUiSessionOpener>();

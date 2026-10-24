@@ -116,8 +116,15 @@ public static class UiConfigProperties
 	/// <summary>The extensions a browse dialog offers.</summary>
 	public const string FileExtensions = "fileExtensions";
 
-	/// <summary>The language a code editor highlights.</summary>
+	/// <summary>The language a code editor highlights - see <see cref="UiCodeLanguages" />.</summary>
 	public const string Language = "language";
+
+	/// <summary>The text a code editor's insert-variable button inserts, with <c>{name}</c> standing for the
+	/// variable's name.</summary>
+	public const string VariableInsertFormat = "variableInsertFormat";
+
+	/// <summary>The UI resource a code editor loads its text from instead of the inline value.</summary>
+	public const string ContentResource = "contentResource";
 
 	/// <summary>Whether a URL field adds <c>https://</c> to a value without a protocol.</summary>
 	public const string AutoPrefixHttps = "autoPrefixHttps";
@@ -292,6 +299,27 @@ public static class UiConfigProperties
 	/// </summary>
 	public const string Accent = "accent";
 
+	/// <summary>The caption above a split's rail - see <see cref="UiSplit" />.</summary>
+	public const string RailTitle = "railTitle";
+
+	/// <summary>Whether a list item is the selected one - see <see cref="UiConfigListItem" />.</summary>
+	public const string Selected = "selected";
+
+	/// <summary>A short tag drawn beside a list item's label or a heading, such as a count or a state.</summary>
+	public const string Badge = "badge";
+
+	/// <summary>Whether a button with an icon draws its label beside the icon instead of the icon alone.</summary>
+	public const string IconWithLabel = "iconWithLabel";
+
+	/// <summary>How a stack places its children along its run - see <see cref="UiStackAlignments" />.</summary>
+	public const string Align = "align";
+
+	/// <summary>The space between a stack's children - see <see cref="UiStackGaps" />.</summary>
+	public const string Gap = "gap";
+
+	/// <summary>How many lines of text a code editor shows - see <see cref="UiCodeInput.Rows" />.</summary>
+	public const string Rows = "rows";
+
 #pragma warning restore CA1720
 
 	/// <summary>The property keys this package ships names for, in declaration order. Not exhaustive - see the
@@ -301,12 +329,14 @@ public static class UiConfigProperties
 		Events, Value, Label, Description, Placeholder, DefaultValue, Required, Disabled, LiteralOnly,
 		SupportsReset, Transient, ValidationRegex, MaxLength, VisibleWhen, Invalid, ValidationMessage, Min, Max, Step,
 		ShowSlider, Multiline, Options, OptionsSourceId, DynamicOptions, AllowsCustomValue, Loading, Error,
-		CacheSeconds, FilterDebounceMs, FileExtensions, Language, AutoPrefixHttps, Title, StepId, State,
-		CanSubmit, Direction, Text, Url, DefaultExpanded, ClearOnCollapse, Severity, For, Triggers, CanRun,
+		CacheSeconds, FilterDebounceMs, FileExtensions, Language, VariableInsertFormat, ContentResource,
+		AutoPrefixHttps, Title, StepId, State, CanSubmit, Direction, Text, Url, DefaultExpanded, ClearOnCollapse,
+		Severity, For, Triggers, CanRun,
 		IntegrationId, VariableTypes, WritableOnly, Capability, ConfigurationEntries, Segmented, Cards, Icon,
 		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
 		Reorderable, Searchable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
 		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent, AllowVariables, Unit,
-		FixedCount, FixedColors, MaxCount, Spans, Variant, Accent
+		FixedCount, FixedColors, MaxCount, Spans, Variant, Accent, RailTitle, Selected, Badge, IconWithLabel, Align,
+		Gap, Rows
 	];
 }

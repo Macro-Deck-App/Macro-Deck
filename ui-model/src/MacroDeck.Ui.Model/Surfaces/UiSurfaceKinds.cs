@@ -34,7 +34,12 @@ public static class UiSurfaceKinds
 	/// a screensaver provider. Opened by the device itself when its own idle timer fires.</summary>
 	public const string ScreenSaver = "screensaver";
 
+	/// <summary>A page surface: a whole tab an integration adds to its own page in the Macro Deck app, for
+	/// example a library it manages. Opened only by an administrator's desktop app; see
+	/// <see cref="UiPageSurfaceAttributes" />.</summary>
+	public const string Page = "page";
+
 	/// <summary>The kinds this package ships names for. Not exhaustive - see the type's remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
-		[Config, Widget, Dialog, Preview, Folder, DeveloperPreview, ScreenSaver];
+		[Config, Widget, Dialog, Preview, Folder, DeveloperPreview, ScreenSaver, Page];
 }

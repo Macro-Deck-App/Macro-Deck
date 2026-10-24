@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { IntegrationIssueSeverity, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegration, IpcProvidedCapability, resolveLocalizedText } from '@macro-deck/runtime';
+import { IntegrationIssueSeverity, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegration, IpcIntegrationPage, IpcProvidedCapability, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 
 export interface Integration {
@@ -21,6 +21,7 @@ export interface Integration {
   isInitialized: boolean;
   variablesDependOnConfiguration: boolean;
   providedCapabilities: IpcProvidedCapability[];
+  pages?: IpcIntegrationPage[];
 }
 
 @Injectable({
@@ -191,6 +192,7 @@ export class IntegrationService {
     isInitialized: integration.isInitialized ?? false,
     variablesDependOnConfiguration: integration.variablesDependOnConfiguration ?? false,
     providedCapabilities: integration.providedCapabilities ?? [],
+    pages: integration.pages ?? [],
   });
 
   async refreshConfigEntries(id: string): Promise<void> {

@@ -699,7 +699,10 @@ public sealed class FlowExecutor : IFlowExecutor
 				continue;
 			}
 
-			var value = await ConvertParameterValue(parameter, variables) ?? string.Empty;
+			var templatedItems = declared?.FirstOrDefault(candidate =>
+					string.Equals(candidate.Name, parameter.Name, StringComparison.OrdinalIgnoreCase)) is
+				{ TemplatedItems: true };
+			var value = await ConvertParameterValue(parameter, variables, templatedItems) ?? string.Empty;
 			result[parameter.Name] = FlattenTemplatedColor(parameter, value, declared);
 		}
 
@@ -740,7 +743,10 @@ public sealed class FlowExecutor : IFlowExecutor
 		return ActionConditionEvaluator.TryGetDouble(value, out var number) ? number : null;
 	}
 
-	private async Task<object?> ConvertParameterValue(ActionBlockParameter parameter, VariableContext variables)
+	private async Task<object?> ConvertParameterValue(
+		ActionBlockParameter parameter,
+		VariableContext variables,
+		bool templatedItems = false)
 	{
 		var type = parameter.Type.ToLowerInvariant();
 
@@ -765,7 +771,7 @@ public sealed class FlowExecutor : IFlowExecutor
 			JsonValueKind.True => true,
 			JsonValueKind.False => false,
 			JsonValueKind.Object => await ConvertObjectParameter(parameter, variables),
-			JsonValueKind.Array => ConvertArrayParameter(parameter, variables),
+			JsonValueKind.Array => ConvertArrayParameter(parameter, variables, templatedItems),
 			_ => parameter.Value.ToString()
 		};
 	}
@@ -826,7 +832,7 @@ public sealed class FlowExecutor : IFlowExecutor
 		};
 	}
 
-	private object ConvertArrayParameter(ActionBlockParameter parameter, VariableContext variables)
+	private object ConvertArrayParameter(ActionBlockParameter parameter, VariableContext variables, bool templatedItems)
 	{
 		if (parameter.Type.ToLowerInvariant() is "multiselect")
 		{
@@ -843,6 +849,21 @@ public sealed class FlowExecutor : IFlowExecutor
 					_ => element.ToString()
 				})
 				.ToArray();
+		}
+
+		if (templatedItems)
+		{
+			return parameter.Value.EnumerateArray()
+				.Select(element => element.ValueKind switch
+				{
+					JsonValueKind.String => _conditionEvaluator
+							.RenderTemplateString(element.GetString() ?? string.Empty, variables)
+						?? string.Empty,
+					JsonValueKind.Object => ActionConditionEvaluator.ResolveVariableReference(element, variables)
+						?? ConvertJsonElement(element),
+					_ => ConvertJsonElement(element)
+				})
+				.ToList();
 		}
 
 		return ConvertJsonElement(parameter.Value) ?? parameter.Value.GetRawText();

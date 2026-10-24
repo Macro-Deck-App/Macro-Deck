@@ -141,6 +141,16 @@ import { ActionOptionsService } from '../../services/action-options.service';
               (valueChange)="emit($event)" />
           </div>
         }
+        @case ('file') {
+          <div class="cf-path">
+            <shared-file-path-input
+              kind="file"
+              [extensions]="field.fileExtensions"
+              [value]="stringValue"
+              [placeholder]="(field.placeholder | localizedText)"
+              (valueChange)="emit($event)" />
+          </div>
+        }
         @case ('folder-list') {
           <div class="cf-list">
             @for (item of arrayValue; track $index) {
@@ -264,7 +274,7 @@ export class ConfigFieldComponent {
   protected readonly clearStoredSecretLabel = computed(() =>
     this.localization.translateKey(AppStrings.ConfigFlow.ClearStoredSecret));
 
-  get controlType(): 'secret' | 'choice' | 'boolean' | 'number' | 'multiselect' | 'widget-target' | 'hotkey' | 'folder' | 'folder-list' | 'text-list'
+  get controlType(): 'secret' | 'choice' | 'boolean' | 'number' | 'multiselect' | 'widget-target' | 'hotkey' | 'file' | 'folder' | 'folder-list' | 'text-list'
     | 'keyboard-combo' | 'keyboard-sequence' | 'text' {
     switch (this.field.type) {
       case ActionParameterType.Password:
@@ -286,6 +296,8 @@ export class ConfigFieldComponent {
         return 'keyboard-combo';
       case ActionParameterType.KeyboardSequence:
         return 'keyboard-sequence';
+      case ActionParameterType.File:
+        return 'file';
       case ActionParameterType.Folder:
         return 'folder';
       case ActionParameterType.Array:

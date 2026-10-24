@@ -101,6 +101,24 @@ public sealed record UiConfigStack : UiContainer
 	/// know the key, or does not recognise the spelling, ignores it.</summary>
 	public UiValue<string> Accent { get; init; }
 
+	/// <summary>Where the children sit along the run, one of <see cref="UiStackAlignments" />. Absent means
+	/// <see cref="UiStackAlignments.Start" />, how every stack was drawn before; a reader that does not know the
+	/// key or the value draws that.</summary>
+	public UiValue<string> Align { get; init; }
+
+	/// <summary>The space between the children, one of <see cref="UiStackGaps" />. Absent means
+	/// <see cref="UiStackGaps.Medium" />, the space every stack had before; a reader that does not know the key or
+	/// the value draws that.</summary>
+	public UiValue<string> Gap { get; init; }
+
+	/// <summary>
+	/// How the stack is set apart, one of <see cref="UiStackVariants" />. <see cref="UiStackVariants.Card" /> draws
+	/// it as a framed section on the theme's own card surface, in every theme. On a card, <see cref="Accent" /> adds
+	/// a leading bar in its colour to that theme card instead of switching to the fixed dark surface it means on a
+	/// plain stack. Absent, or a value a reader does not know, is a plain stack.
+	/// </summary>
+	public UiValue<string> Variant { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Stack;
 
@@ -114,6 +132,9 @@ public sealed record UiConfigStack : UiContainer
 		properties.Set(UiConfigProperties.Direction, Direction);
 		properties.Set(UiConfigProperties.Wrap, Wrap);
 		properties.Set(UiConfigProperties.Accent, Accent);
+		properties.Set(UiConfigProperties.Align, Align);
+		properties.Set(UiConfigProperties.Gap, Gap);
+		properties.Set(UiConfigProperties.Variant, Variant);
 	}
 }
 
@@ -162,6 +183,10 @@ public sealed record UiHeading : UiLeaf
 	/// <summary>The caption.</summary>
 	public UiText Text { get; init; }
 
+	/// <summary>A short tag drawn beside the caption, such as "Unsaved". Absent draws none; a reader that predates
+	/// the key draws the caption alone.</summary>
+	public UiText Badge { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Heading;
 
@@ -173,6 +198,7 @@ public sealed record UiHeading : UiLeaf
 		base.DeclareProperties(properties);
 
 		properties.Set(UiConfigProperties.Text, Text.Value);
+		properties.Set(UiConfigProperties.Badge, Badge.Value);
 	}
 }
 
@@ -553,6 +579,17 @@ public sealed record UiConfigButton : UiLeaf
 	/// <summary>The hint shown in the prompt's empty text field.</summary>
 	public UiText Placeholder { get; init; }
 
+	/// <summary>How the button is drawn, one of <see cref="UiButtonVariants" />. Absent means
+	/// <see cref="UiButtonVariants.Secondary" />, how every button was drawn before; a reader that does not know the
+	/// key or the value draws that. Independent of <see cref="ConfirmDanger" />, which styles the confirmation
+	/// dialog, not the button; in a menu, either one draws the entry as a danger entry.</summary>
+	public UiValue<string> Variant { get; init; }
+
+	/// <summary>Whether a button with an <see cref="Icon" /> draws its <see cref="Label" /> beside the icon. Absent or
+	/// <c>false</c> keeps the icon-only meaning of <see cref="Icon" />; a reader that predates the key draws the
+	/// icon alone.</summary>
+	public UiValue<bool> IconWithLabel { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Button;
 
@@ -571,6 +608,8 @@ public sealed record UiConfigButton : UiLeaf
 		properties.Set(UiConfigProperties.ConfirmDanger, ConfirmDanger);
 		properties.Set(UiConfigProperties.PromptValue, PromptValue);
 		properties.Set(UiConfigProperties.Placeholder, Placeholder.Value);
+		properties.Set(UiConfigProperties.Variant, Variant);
+		properties.Set(UiConfigProperties.IconWithLabel, IconWithLabel);
 	}
 }
 

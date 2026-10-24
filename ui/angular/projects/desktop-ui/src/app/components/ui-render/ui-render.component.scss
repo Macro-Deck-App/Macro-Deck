@@ -198,7 +198,12 @@
     color: var(--color-text-primary);
   }
 
+  &.is-danger {
+    color: var(--color-danger);
+  }
+
   &.is-danger:hover {
+    background-color: var(--color-danger-muted);
     color: var(--color-danger);
   }
 }

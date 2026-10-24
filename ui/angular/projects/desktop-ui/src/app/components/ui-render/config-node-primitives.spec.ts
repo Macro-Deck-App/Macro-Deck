@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { UiNode } from '@macro-deck/runtime';
+import { UI_CONFIG_PRIMITIVES_WELL_KNOWN, UiNode } from '@macro-deck/runtime';
 import { el, renderTree, tick } from './ui-render-test-support';
 
 // Copied verbatim, in declaration order, from the two .NET source files - not imported from the
@@ -11,8 +11,8 @@ const VOCABULARY = [
   'widget-target', 'actions-list-editor', 'action-picker', 'variable-picker', 'device-picker',
   'integration-picker', 'icon-display', 'state-mapping-editor', 'thresholds', 'flow', 'step', 'stack',
   'tabs', 'tab', 'heading', 'prose', 'instructions', 'instruction', 'copy-value', 'link',
-  'advanced-section', 'divider', 'banner', 'validation-message', 'busy', 'widget-configuration',
-  'widget-properties', 'widget-editor',
+  'advanced-section', 'divider', 'banner', 'validation-message', 'busy', 'button', 'widget-configuration',
+  'widget-properties', 'widget-editor', 'status', 'menu', 'dialog', 'split', 'list', 'list-item', 'empty-state',
 ];
 
 describe('shared-ui-node every configuration primitive', () => {
@@ -21,6 +21,10 @@ describe('shared-ui-node every configuration primitive', () => {
   // Structured-value controls: a bare string "value" (fine for every other type) is the wrong shape
   // for these, so they are left without one and rendered with their own type's defaults instead.
   const STRUCTURED_VALUE_TYPES = new Set(['hotkey', 'keyboard-combo', 'keyboard-sequence']);
+
+  it('knows the same primitives, in the same order, as the runtime vocabulary', () => {
+    expect([...UI_CONFIG_PRIMITIVES_WELL_KNOWN]).toEqual(VOCABULARY);
+  });
 
   for (const type of VOCABULARY) {
     it(`renders "${type}" as a supported component`, async () => {

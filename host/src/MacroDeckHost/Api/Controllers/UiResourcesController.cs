@@ -56,7 +56,7 @@ public class UiResourcesController : ControllerBase
 		{
 			Response.Headers.CacheControl = "no-store";
 
-			return File(resource.Content.ToArray(), resource.MediaType);
+			return File(resource.Content.ToArray(), ContentTypeOf(resource.MediaType));
 		}
 
 		var etag = $"\"{resource.ContentHash}\"";
@@ -72,7 +72,15 @@ public class UiResourcesController : ControllerBase
 		Response.Headers.CacheControl = "private, max-age=31536000, immutable";
 		Response.Headers.ETag = etag;
 
-		return File(resource.Content.ToArray(), resource.MediaType);
+		return File(resource.Content.ToArray(), ContentTypeOf(resource.MediaType));
+	}
+
+	// Text is only ever code input content; naming the charset keeps a browser from guessing one.
+	private static string ContentTypeOf(string mediaType)
+	{
+		return string.Equals(mediaType, "text/plain", StringComparison.OrdinalIgnoreCase)
+			? "text/plain; charset=utf-8"
+			: mediaType;
 	}
 
 	private IActionResult ServeSized(SizedIconResource sized, UiResourceContent resource, string? version)

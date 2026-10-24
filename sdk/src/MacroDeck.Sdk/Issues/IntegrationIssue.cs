@@ -23,4 +23,12 @@ public sealed class IntegrationIssue
 	/// informational and shows no action button.
 	/// </summary>
 	public LocalizedText ActionLabel { get; init; }
+
+	/// <summary>
+	/// A page with more help on the issue, e.g. a download page for a missing program. The issue box shows a
+	/// button that opens it in the browser. Only an absolute <c>http</c> or <c>https</c> address is shown; the
+	/// host drops any other value. Null shows no link, and a Macro Deck release that predates this member
+	/// ignores it.
+	/// </summary>
+	public Uri? HelpUrl { get; init; }
 }

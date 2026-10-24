@@ -209,6 +209,14 @@ are listed in the descriptor's `capabilityKinds`:
   device, and its only operation, `describe`, answers without data. A host that predates it rejects the
   declaration non-fatally. See [Companion devices](/features/companion-devices/#a-configuration-entry-per-device).
 
+- `ui` `describe` gained the optional `pages`, additively in major `3` and within capability version `1`:
+  the [integration pages](/ui/views/page/) the plugin declares, each with `id`, `title` and an optional
+  `iconName`. The host keeps them only when `surfaces` also declares the `page` kind, and drops a page whose
+  `id` is not a letter or digit followed by up to 63 letters, digits, hyphens or underscores, or repeats an
+  earlier one. A plugin built against an SDK that predates pages omits the member, which reads as none; a
+  host that predates them ignores it. The host then opens a `page` surface with the `integrationId`,
+  `pageId` and `culture` attributes, from an administrator's desktop app only.
+
 See [capabilities](/features/) and [Capability parity](/reference/capability-parity/).
 
 ## Host callbacks
@@ -244,6 +252,27 @@ next to `ownerWidgetId`, additively in major `3`, behind `IUserVariableApi.Apply
 `CreateInContextAsync`. A host that predates them ignores them and resolves by `ownerWidgetId` alone, and an
 older plugin never sends them. `create` can answer the new statuses `UnknownScript` and `UnknownAutomation`.
 See [Scopes](/features/variables/#scopes).
+
+`user-variables` later gained `read`, additively in major `3`, behind `IUserVariableApi.ReadInContextAsync`.
+It reads a variable the way `{{ vars.<name> }}` resolves it for a flow in the given context: script local,
+then automation local, then widget local, then global; integration and widget variables by name; script
+inputs excluded. Its arguments are `name` (required) and the optional `ownerWidgetId`, `scriptId` and
+`automationId`. It answers `status` (`Found`, `NotFound`, `InvalidName`, `NotSupported` or `Unavailable`),
+`type` (the variable type's member name, set when found and when unavailable), `value` (a JSON string,
+number or boolean by type, when found), `text` (the value as a template renders it) and `message`
+(diagnostic). The host never caches the answer. A host that predates it answers `CAPABILITY_UNSUPPORTED`,
+which `MacroDeck.Plugin.Hosting` reports as `NotSupported`; a transport failure or an empty reply is
+reported as `Unavailable`.
+
+<a id="ui-uploads"></a>`ui` later gained `origin.read-upload`, additively in major `3`. A
+[code input](/ui/views/configuration/#code-input) whose text is a content resource uploads its edits to the
+host over HTTP and raises `content-uploaded` with an `uploadId`; the plugin then reads the bytes with
+`origin.read-upload` (`sessionId`, `uploadId`). The host answers `found`, and when `true` also
+`byteLength`, `contentHash` and `transferId`, and sends the bytes over `host.asset.*` as kind `ui-upload`
+under that `transferId`. It answers `found: false` alike for an unknown, expired or replaced upload and for
+a session the calling plugin does not serve, so a plugin can never read another's uploads. A host that
+predates it answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into
+`NotSupportedException`; a `found: false` becomes `UiUploadNotFoundException`.
 
 The `locale` host API (`time-of-day-format`) and the push-only `http` host API were added the same way. A
 host that predates `locale` answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into the
@@ -284,7 +313,8 @@ and no colour; an older plugin ignores the push. See [`music-players`](/referenc
 
 A callback can return bytes: an icon from the `devices` api's `icon` operation, a widget's rendered
 action icon from its `widget-icon` operation, an Android screenshot from the `adb` api's `screenshot`
-operation, or a Companion device's screenshot from the `companion-devices` api's `screenshot` operation. These travel over `host.asset.*`, a host-to-plugin
+operation, a Companion device's screenshot from the `companion-devices` api's `screenshot` operation, or
+the text a code input uploaded from the `ui` api's `origin.read-upload` operation. These travel over `host.asset.*`, a host-to-plugin
 pipeline kept separate from the plugin-to-host `asset.*` types so those keep their major-1 direction.
 See [the WebSocket reference](/reference/websocket/#assets).
 

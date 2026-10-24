@@ -80,6 +80,15 @@ public sealed class ActionParameter
 
 	public string? Language { get; init; }
 
+	/// <summary>
+	/// The text the editor inserts at the cursor when the user picks a variable for a <c>Code</c> parameter,
+	/// with <c>{name}</c> standing for the variable's name, e.g. <c>MacroDeck.GetVar("{name}")</c>. Null
+	/// offers no variable insertion. Other parameter types ignore it, and so does a Macro Deck desktop release
+	/// that predates it. Inserting only edits the code text: the host does not render a <c>Code</c> value as a
+	/// template.
+	/// </summary>
+	public string? VariableInsertFormat { get; init; }
+
 	public IReadOnlyList<ActionParameter>? Children { get; init; }
 
 	public ActionParameter? ItemTemplate { get; init; }
@@ -138,6 +147,34 @@ public sealed class ActionParameter
 	{
 		var copy = (ActionParameter)MemberwiseClone();
 		copy._searchable = true;
+		return copy;
+	}
+
+	/// <summary>
+	/// Whether the host renders the items of an <c>Array</c> parameter before the action receives them: a
+	/// string item is rendered as a Liquid template and an item bound to a variable becomes that variable's
+	/// value, as for the host's other templated parameters. Other items are passed unchanged. Off by default,
+	/// so an array keeps receiving its items exactly as the user entered them; a Macro Deck release that
+	/// predates this flag ignores it. Set it with <see cref="WithTemplatedItems" /> rather than through an
+	/// object initializer, so the static factories stay usable.
+	/// </summary>
+	public bool TemplatedItems
+	{
+		get => _templatedItems;
+		init => _templatedItems = value;
+	}
+
+	private bool _templatedItems;
+
+	/// <summary>
+	/// Returns a copy of this <c>Array</c> parameter whose items the host renders before the action runs:
+	/// <c>ActionParameter.Array("arguments", ActionParameter.Text("argument")).WithTemplatedItems()</c>. See
+	/// <see cref="TemplatedItems" />.
+	/// </summary>
+	public ActionParameter WithTemplatedItems()
+	{
+		var copy = (ActionParameter)MemberwiseClone();
+		copy._templatedItems = true;
 		return copy;
 	}
 

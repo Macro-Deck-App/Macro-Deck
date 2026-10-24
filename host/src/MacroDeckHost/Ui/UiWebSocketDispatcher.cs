@@ -11,6 +11,7 @@ using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
+using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
 using MacroDeckHost.Application.Ui.Transport.Messages.Licensing;
 using MacroDeckHost.Application.Ui.Transport.Messages.Logging;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
@@ -110,6 +111,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly VideoStreamProviderRegistry _videoStreamProviders;
 	private readonly INotificationManager _notifications;
 	private readonly UiClientFeatures _clientFeatures;
+	private readonly IPageUiSessionOpener? _pageUiSessions;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -164,8 +166,10 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		VideoStreamProviderRegistry videoStreamProviders,
 		INotificationManager notifications,
 		UiClientFeatures clientFeatures,
-		CancellationToken connectionCancellation)
+		CancellationToken connectionCancellation,
+		IPageUiSessionOpener? pageUiSessions = null)
 	{
+		_pageUiSessions = pageUiSessions;
 		_notifications = notifications;
 		_clientFeatures = clientFeatures;
 		_connectionId = connectionId;
@@ -332,6 +336,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 					cancellationToken),
 				"OpenUiPreviewSession" when IsAdmin => OpenUiPreviewSession(
 					Arg<OpenUiPreviewSessionRequest>(payload, 0)),
+				"OpenPageUiSession" when IsAdmin => OpenPageUiSession(Arg<OpenPageUiSessionRequest>(payload, 0)),
 				"OpenFolderUiSession" => _folderUiSessions.Open(Arg<OpenFolderUiSessionRequest>(payload, 0),
 					OwnerPrincipal()),
 				"OpenModalUiSession" => _modalUiSessions.Open(Arg<OpenModalUiSessionRequest>(payload, 0),
@@ -530,6 +535,18 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			{ Accepted = ticket.Accepted, SessionId = ticket.SessionId, Code = ticket.Code, Message = ticket.Message };
 	}
 
+	private OpenPageUiSessionResponse OpenPageUiSession(OpenPageUiSessionRequest request)
+	{
+		if (_pageUiSessions is null)
+		{
+			throw new UiWebSocketDispatchException("unknown_type");
+		}
+
+		var ticket = _pageUiSessions.Open(request, OwnerPrincipal(), IsAdmin);
+		return new OpenPageUiSessionResponse
+			{ Accepted = ticket.Accepted, SessionId = ticket.SessionId, Code = ticket.Code, Message = ticket.Message };
+	}
+
 	private object? DetachUiSession(string sessionId)
 	{
 		_uiSessions.Detach(sessionId, _connectionId);
@@ -639,7 +656,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			or "SubscribeLogs"
 			or "UnsubscribeLogs"
 			or "ListUiPreviews"
-			or "OpenUiPreviewSession";
+			or "OpenUiPreviewSession"
+			or "OpenPageUiSession";
 	}
 
 	private static T Arg<T>(JsonElement? payload, int index)

@@ -36,6 +36,7 @@ export function mapActionParameterDef(
     widgetTypes: p.widgetTypes,
     fileExtensions: p.fileExtensions,
     language: p.language,
+    variableInsertFormat: p.variableInsertFormat,
     children: p.children?.map(c => mapActionParameterDef(c, localization)),
     itemTemplate: p.itemTemplate ? mapActionParameterDef(p.itemTemplate, localization) : undefined,
     visibleWhen: p.visibleWhen

@@ -86,6 +86,31 @@ public class A12VariableFakeTests
 	}
 
 	[Test]
+	public async Task FakeUserVariableApi_reads_the_most_local_variable_in_the_contracts_shape()
+	{
+		var api = new FakeUserVariableApi();
+		api.SeedGlobal("count", VariableType.Numeric, 1m);
+		api.SeedWidgetScoped("widget-1", "count", VariableType.Numeric, 10m);
+		api.SeedAutomationScoped("automation-1", "count", VariableType.Numeric, 2.5m);
+		api.SeedGlobal("flag", VariableType.Boolean, true);
+		var context = new UserVariableContext("widget-1", null, "automation-1");
+
+		var local = await api.ReadInContextAsync("count", context);
+		var global = await api.ReadInContextAsync("count", new UserVariableContext());
+		var flag = await api.ReadInContextAsync("flag", context);
+		var missing = await api.ReadInContextAsync("missing", context);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(local, Is.EqualTo(UserVariableReadResult.Found(VariableType.Numeric, 2.5d, "2.5")));
+			Assert.That(global.Value, Is.EqualTo(1d));
+			Assert.That(flag, Is.EqualTo(UserVariableReadResult.Found(VariableType.Boolean, true, "true")));
+			Assert.That(missing.Status, Is.EqualTo(UserVariableReadStatus.NotFound));
+			Assert.That(api.LastContext, Is.EqualTo(context));
+		});
+	}
+
+	[Test]
 	public async Task An_action_run_as_a_script_step_reaches_the_fake_with_its_script()
 	{
 		TestIntegration? integration = null;

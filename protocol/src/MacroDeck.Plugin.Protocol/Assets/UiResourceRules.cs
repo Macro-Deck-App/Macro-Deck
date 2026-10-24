@@ -12,11 +12,13 @@ public static partial class UiResourceRules
 	public const int MaxNameLength = 64;
 
 	/// <summary>
-	/// The media types a UI resource may have: raster images only. Scriptable formats such as SVG are not
-	/// accepted from a plugin, the same rule that applies to icons a plugin supplies.
+	/// The media types a UI resource may have: raster images, and plain text for the content of a code input.
+	/// Scriptable formats such as SVG are not accepted from a plugin, the same rule that applies to icons a
+	/// plugin supplies. Text is served as UTF-8 and never as a document. A host that predates text refuses a
+	/// text registration as an unsupported media type.
 	/// </summary>
 	public static readonly IReadOnlyList<string> SupportedMediaTypes =
-		Array.AsReadOnly(new[] { "image/png", "image/jpeg", "image/webp", "image/gif" });
+		Array.AsReadOnly(new[] { "image/png", "image/jpeg", "image/webp", "image/gif", "text/plain" });
 
 	[GeneratedRegex(@"\A[A-Za-z0-9][A-Za-z0-9_-]{0,63}\z", RegexOptions.CultureInvariant)]
 	private static partial Regex NamePattern();

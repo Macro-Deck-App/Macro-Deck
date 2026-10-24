@@ -5,6 +5,7 @@ using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests;
@@ -195,6 +196,53 @@ public class GetIntegrationsRequestMessageHandlerTests
 		public Task ShutdownAsync()
 		{
 			return Task.CompletedTask;
+		}
+	}
+
+	[TestCase("page", 1)]
+	[TestCase("widget", 0)]
+	public async Task A_built_in_provider_lists_its_pages_only_with_a_page_surface(string surfaceKind, int expected)
+	{
+		var integration = new PageStubIntegration { SurfaceKind = surfaceKind };
+		var registry = new ConfigurableIntegrationRegistry([integration], []);
+		var handler = CreateHandler(registry, new FakeIntegrationConfigStore());
+
+		var response = await handler.Handle(new GetIntegrationsRequest(), CancellationToken.None);
+
+		(string, string?, string?)[] listed = expected == 0 ? [] : [("scripts", "Scripts", "file-code")];
+		Assert.That(response.Integrations.Single().Pages.Select(page => (page.Id, page.Title.Literal, page.Icon)),
+			Is.EqualTo(listed));
+	}
+
+	private sealed class PageStubIntegration : IIntegration, IUiProvider
+	{
+		public string Id => "page-int";
+		public LocalizedText Name => "Page Integration";
+		public string Version => "1.0.0";
+		public IReadOnlyList<IActionDefinition> Actions => [];
+		public bool IsInitialized => true;
+
+		public required string SurfaceKind { get; init; }
+
+		public IReadOnlyList<UiSurfaceDeclaration> Surfaces =>
+			[new() { Kind = SurfaceKind, SessionMode = "exclusive" }];
+
+		public IReadOnlyList<UiPageDeclaration> Pages =>
+			[new() { Id = "scripts", Title = "Scripts", IconName = "file-code" }];
+
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+		{
+			return Task.FromResult<IUiSession?>(null);
 		}
 	}
 }

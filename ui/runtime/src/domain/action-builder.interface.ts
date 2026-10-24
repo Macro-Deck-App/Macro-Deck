@@ -153,6 +153,7 @@ export interface ActionBlockParameter {
   widgetTypes?: string[];
   fileExtensions?: string[];
   language?: string;
+  variableInsertFormat?: string;
   children?: Omit<ActionBlockParameter, 'value'>[];
   itemTemplate?: Omit<ActionBlockParameter, 'value'>;
 

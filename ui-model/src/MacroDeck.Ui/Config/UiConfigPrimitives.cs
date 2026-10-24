@@ -1,7 +1,8 @@
 namespace MacroDeck.Ui.Config;
 
 /// <summary>
-/// The node type strings the configuration profile ships: thirty-five inputs and twenty chrome elements.
+/// The node type strings the configuration profile ships: thirty-five inputs, twenty-three chrome elements and
+/// four page layout elements.
 ///
 /// <para>
 /// <b>Derived, not invented.</b> The first twenty-seven input names are exactly the control names the existing
@@ -19,7 +20,9 @@ namespace MacroDeck.Ui.Config;
 /// application already ships - the action list, the pickers for actions, variables, devices and
 /// integrations, the icon-framing control from the widget appearance form, the button state-mapping
 /// editor and the colour-threshold editor - so a widget reaches one by naming it rather than by rebuilding it from primitives. The three
-/// chrome types after the flow's own name the regions of a widget's configuration surface. Both groups are
+/// chrome types after the flow's own name the regions of a widget's configuration surface. The four layout
+/// types after the chrome - split, list, list item and empty state - draw a page the way Macro Deck's own
+/// library pages are drawn. Both groups are
 /// app-specific by design and neither has a parameter counterpart.
 /// </para>
 ///
@@ -221,6 +224,19 @@ public static class UiConfigPrimitives
 	/// <summary>A question the surface puts to the user in a modal dialog while the node is in the tree.</summary>
 	public const string Dialog = "dialog";
 
+	/// <summary>A page laid out as a rail beside a detail area, the way Macro Deck's own library pages are.
+	/// </summary>
+	public const string Split = "split";
+
+	/// <summary>A list of selectable rows, each a <see cref="ListItem" />.</summary>
+	public const string List = "list";
+
+	/// <summary>One selectable row of a <see cref="List" />.</summary>
+	public const string ListItem = "list-item";
+
+	/// <summary>What a region shows while it has nothing to show: an icon, a title and a line of text.</summary>
+	public const string EmptyState = "empty-state";
+
 #pragma warning restore CA1720
 
 	/// <summary>The types this package ships names for, inputs first and then chrome, each in the order they
@@ -239,6 +255,6 @@ public static class UiConfigPrimitives
 		DevicePicker, IntegrationPicker, IconDisplay, StateMappingEditor, Thresholds, Flow, Step, Stack, Tabs,
 		Tab, Heading, Prose, Instructions, Instruction, CopyValue, Link, AdvancedSection, Divider, Banner,
 		ValidationMessage, Busy, Button, WidgetConfiguration, WidgetProperties, WidgetEditor, Status,
-		Menu, Dialog
+		Menu, Dialog, Split, List, ListItem, EmptyState
 	];
 }

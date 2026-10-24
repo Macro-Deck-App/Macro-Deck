@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, debounceTime, EMPTY, exhaustMap, filter, from, merge, Subject, timer } from 'rxjs';
 import type { Variable } from '@macro-deck/runtime';
-import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationCapabilityDataChangedEvent, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PLUGIN_PERMISSION_HOST_ADB, PLUGIN_PERMISSION_HOST_COMPANION_DEVICES, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
+import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationCapabilityDataChangedEvent, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, IpcIntegrationPage, PLUGIN_PERMISSION_HOST_ADB, PLUGIN_PERMISSION_HOST_COMPANION_DEVICES, PluginCompatibilityReport, UI_ICONS_WELL_KNOWN, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, CheckboxComponent, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, ButtonComponent, TranslatePipe, VariableService } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
@@ -39,6 +39,7 @@ import { IntegrationWidgetsPanelComponent } from './capability-panels/integratio
 import { IntegrationCompatibilityCardComponent } from './integration-compatibility-card.component';
 import { IntegrationIssuesCardComponent } from './integration-issues-card.component';
 import { IntegrationStatusBadge, IntegrationStatusStripComponent } from './integration-status-strip.component';
+import { IntegrationUiPagePanelComponent } from './integration-ui-page-panel.component';
 
 type DetailTab = string;
 
@@ -62,6 +63,8 @@ type VariableTabRow =
 const TEMPLATE_PLACEHOLDER = /<([^<>]+)>/;
 
 const TAB_ID_PREFIX = 'integration-detail';
+
+const PROVIDER_PAGE_TAB_PREFIX = 'page:';
 
 @Component({
   selector: 'app-integration-detail-page',
@@ -87,6 +90,7 @@ const TAB_ID_PREFIX = 'integration-detail';
     IntegrationIssuesCardComponent,
     IntegrationCompatibilityCardComponent,
     IntegrationStatusStripComponent,
+    IntegrationUiPagePanelComponent,
     IntegrationBatteriesPanelComponent,
     IntegrationCalendarsPanelComponent,
     IntegrationDataNavComponent,
@@ -446,9 +450,18 @@ export class IntegrationDetailPageComponent implements OnInit {
     return !!integration?.enabled && integration.isInitialized !== false;
   });
 
+  protected readonly providerPages = computed<IpcIntegrationPage[]>(() => this.integration()?.pages ?? []);
+
   protected readonly currentTab = computed<DetailTab>(() => {
     const tab = this.activeTab();
-    return FIXED_TABS.includes(tab) || this.capabilityPages().some(page => page.id === tab) ? tab : 'overview';
+    return this.isKnownTab(tab) ? tab : 'overview';
+  });
+
+  protected readonly currentProviderPage = computed(() => {
+    const tab = this.currentTab();
+    return tab.startsWith(PROVIDER_PAGE_TAB_PREFIX)
+      ? this.providerPages().find(page => page.id === tab.slice(PROVIDER_PAGE_TAB_PREFIX.length)) ?? null
+      : null;
   });
 
   protected readonly currentPage = computed(() => this.capabilityPages().find(page => page.id === this.currentTab()));
@@ -556,6 +569,14 @@ export class IntegrationDetailPageComponent implements OnInit {
     } else if (dataPages.length > 1) {
       tabs.push({ id: DATA_TAB_ID, label: this.localization.translateKey(AppStrings.Integrations.Detail.DataTab) });
     }
+
+    for (const page of this.providerPages()) {
+      tabs.push({
+        id: PROVIDER_PAGE_TAB_PREFIX + page.id,
+        label: resolveLocalizedText(page.title, this.localization) || page.id,
+        icon: page.icon && UI_ICONS_WELL_KNOWN.includes(page.icon) ? page.icon : undefined,
+      });
+    }
     return tabs;
   });
 
@@ -662,7 +683,7 @@ export class IntegrationDetailPageComponent implements OnInit {
     }
 
     if (initialTab && !FIXED_TABS.includes(initialTab)) {
-      this.onTabChange(this.capabilityPages().some(page => page.id === initialTab) ? initialTab : 'overview');
+      this.onTabChange(this.isKnownTab(initialTab) ? initialTab : 'overview');
     }
 
     void this.loadStoreListing();
@@ -759,6 +780,12 @@ export class IntegrationDetailPageComponent implements OnInit {
     } else if (row.settingsSection) {
       this.settingsModal.open(row.settingsSection);
     }
+  }
+
+  private isKnownTab(tab: string): boolean {
+    if (FIXED_TABS.includes(tab) || this.capabilityPages().some(page => page.id === tab)) return true;
+    return tab.startsWith(PROVIDER_PAGE_TAB_PREFIX)
+      && this.providerPages().some(page => page.id === tab.slice(PROVIDER_PAGE_TAB_PREFIX.length));
   }
 
   private dataPageToOpen(): string {

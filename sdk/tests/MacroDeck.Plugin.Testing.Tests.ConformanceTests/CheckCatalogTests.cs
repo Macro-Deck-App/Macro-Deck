@@ -60,9 +60,9 @@ internal sealed class CheckCatalogTests
 	}
 
 	[Test]
-	public void ThereAreFortyNineChecksAcrossEightCategories()
+	public void ThereAreFiftyChecksAcrossEightCategories()
 	{
-		Assert.That(Checks, Has.Count.EqualTo(49));
+		Assert.That(Checks, Has.Count.EqualTo(50));
 		Assert.That(Checks.Select(check => check.Category).Distinct().ToList(), Has.Count.EqualTo(8));
 	}
 }

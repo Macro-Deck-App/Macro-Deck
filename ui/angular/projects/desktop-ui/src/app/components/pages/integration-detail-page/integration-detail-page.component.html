@@ -408,7 +408,18 @@
         }
 
         @default {
-          @if (currentPage(); as page) {
+          @if (currentProviderPage(); as providerPage) {
+            <div
+              [id]="tabIdPrefix + '-panel-' + currentTab()"
+              role="tabpanel"
+              [attr.aria-labelledby]="tabIdPrefix + '-tab-' + currentTab()"
+              class="capability-panel provider-page-panel">
+              <app-integration-ui-page-panel
+                [integrationId]="integrationId()"
+                [pageId]="providerPage.id"
+                [available]="capabilityAvailable()" />
+            </div>
+          } @else if (currentPage(); as page) {
             <div
               [id]="tabIdPrefix + '-panel-' + (page.group === 'data' && groupsDataPages() ? 'data' : page.id)"
               role="tabpanel"

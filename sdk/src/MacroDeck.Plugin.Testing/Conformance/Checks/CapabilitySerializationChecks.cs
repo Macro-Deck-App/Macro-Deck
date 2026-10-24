@@ -8,6 +8,7 @@ using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Variables;
+using MacroDeck.Ui.Model.Surfaces;
 
 namespace MacroDeck.Plugin.Testing.Conformance.Checks;
 
@@ -1450,5 +1451,71 @@ internal sealed class EagerVariableSetIsWithinLimitCheck() : ConformanceCheckBas
 				ConformanceCheckSupport.Observe("eager variables provided", provided),
 				ConformanceCheckSupport.Observe("eager variables declared", declared)
 			]);
+	}
+}
+
+/// <summary>
+/// A page is only reachable through a <c>page</c> surface, and Macro Deck ignores the pages of a provider that
+/// declares none, as well as a page whose id is malformed or repeated: the tab would simply never appear, with
+/// nothing to say why. Nothing at the protocol level ties the two lists together, which makes this a real
+/// check rather than a regression guard.
+/// </summary>
+internal sealed class UiPagesAreReachableCheck() : ConformanceCheckBase("MDC0316",
+	"ui/describe declares a page surface for its pages, each with a well-formed, unique id",
+	ConformanceCategory.CapabilitySerialization,
+	ConformanceRequirement.Required,
+	ConformancePrecondition.Session)
+{
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
+		CancellationToken cancellationToken)
+	{
+		if (!ConformanceCheckSupport.Declares(context, CapabilityKinds.Ui))
+		{
+			return ConformanceCheckResult.Skip("This subject does not declare the ui capability.");
+		}
+
+		var outcome = await DescribeProbe.DescribeAsync(context, CapabilityKinds.Ui).ConfigureAwait(false);
+
+		if (outcome.Failure is { } failure)
+		{
+			return failure;
+		}
+
+		var described = outcome.Result!.DataAs<UiDescribePayload>();
+
+		if (described is null)
+		{
+			return ConformanceCheckResult.Inconclusive(
+				"ui/describe's result did not deserialize - MDC0306 reports that.");
+		}
+
+		var pages = described.Pages ?? [];
+
+		if (pages.Count == 0)
+		{
+			return ConformanceCheckResult.Skip("This subject declares no pages.");
+		}
+
+		if (!described.Surfaces.Any(surface
+			=> string.Equals(surface.Kind, UiSurfaceKinds.Page, StringComparison.Ordinal)))
+		{
+			return ConformanceCheckResult.Fail("A provider that declares pages also declares a 'page' surface.",
+				$"{pages.Count} page(s) were declared without one.");
+		}
+
+		var ids = new HashSet<string>(StringComparer.Ordinal);
+
+		foreach (var page in pages)
+		{
+			if (!UiPageDescriptorDto.IsValidId(page.Id) || !ids.Add(page.Id))
+			{
+				return ConformanceCheckResult.Fail("Every page id is a letter or digit followed by up to 63 letters, "
+					+ "digits, hyphens or underscores, and no two pages share one.",
+					$"Page '{page.Id}' is malformed or repeated.");
+			}
+		}
+
+		return ConformanceCheckResult.Pass([ConformanceCheckSupport.Observe("declared pages", pages.Count)]);
 	}
 }

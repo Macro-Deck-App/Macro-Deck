@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.FolderViews;
+using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Tests.UnitTests.Triggers;
@@ -186,6 +187,20 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 		await WaitForAsync(() => provider.Events.Count >= 1, "The provider was never sent the event.");
 
 		Assert.That(provider.Events[0].ClientId, Is.Null);
+	}
+
+	[Test]
+	public void A_device_connection_cannot_open_an_integration_page()
+	{
+		using var dispatcher = DispatcherFor("c-device", new Claim(AuthDefaults.DeviceClaim, DeviceA));
+		var payload = JsonSerializer.SerializeToElement(
+			new object[] { new OpenPageUiSessionRequest { IntegrationId = ProviderId, PageId = "scripts" } },
+			UiWebSocketProtocol.Json);
+
+		var refused = Assert.ThrowsAsync<UiWebSocketDispatchException>(() =>
+			dispatcher.DispatchAsync("OpenPageUiSession", payload, CancellationToken.None));
+
+		Assert.That(refused!.Code, Is.EqualTo("forbidden"));
 	}
 
 	private static async Task Register(UiWebSocketDispatcher dispatcher, string clientId)

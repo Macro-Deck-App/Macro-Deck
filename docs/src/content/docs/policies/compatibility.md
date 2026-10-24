@@ -413,6 +413,40 @@ What did **not** need a major:
   on `VariableDefinitionDto`, defaulting to `true` when absent, all within major `3` and without moving the
   `variables` capability version: a definition from an older plugin stays shareable, and an older host
   ignores the field. See [Defining a variable](/features/variables/#defining-a-variable).
+- [Code parameters](/features/actions/#code-parameters) added `ActionParameter.VariableInsertFormat` and an
+  optional `variableInsertFormat` field on `ActionParameterDto`, all within major `3`, and the documented
+  `language` vocabulary gained `autohotkey`. A parameter from an older plugin has no format and its editor
+  offers no variable insertion; an older desktop app ignores the field. A language an editor does not know
+  is edited as plain text, never refused.
+- [Rendering array items](/features/actions/#rendering-array-items) added `ActionParameter.TemplatedItems`
+  with `ActionParameter.WithTemplatedItems()`, and an optional `templatedItems` field on `ActionParameterDto`,
+  all within major `3`. Absent or `false` keeps the items unrendered, exactly as before, so an older
+  plugin's `Array` parameters are unchanged; an older host ignores the field and passes the items as
+  entered.
+- [Reading a variable as a flow sees it](/features/variables/#reading-a-variable-as-a-flow-sees-it) added
+  `IUserVariableApi.ReadInContextAsync`, a default interface member answering `NotSupported`, the
+  `UserVariableReadStatus` enum and the `UserVariableReadResult` record, and the `user-variables` `read`
+  operation, all within major `3`. An existing `IUserVariableApi` implementation keeps compiling and
+  loading. An older host answers `read` with `CAPABILITY_UNSUPPORTED`, which the SDK reports as
+  `NotSupported`; a transport failure or an empty reply is reported as `Unavailable`.
+- [Integration issues](/features/integration-issues/#what-an-issue-carries) added `IntegrationIssue.HelpUrl`
+  and an optional `helpUrl` field on a listed issue, all within major `3`. Only an absolute `http` or `https`
+  address is shown. An issue from an older plugin has no link, and an older host ignores the field.
+- [Integration pages](/ui/views/page/) added `UiSurfaceKinds.Page`, `UiPageSurfaceAttributes`,
+  `UiPageDeclaration` and `IUiProvider.Pages`, a default interface member answering no pages, and an
+  optional `pages` member on `ui` `describe`, all within major `3` and `ui` capability version `1`. A
+  provider written before pages keeps compiling and declares none; an older host ignores the member and the
+  `page` surface and shows no tab. Conformance check [MDC0316](/reference/conformance/#mdc0316) was added
+  for pages declared without a `page` surface or with a malformed or repeated id.
+- [Uploaded code input text](/ui/views/configuration/#text-too-large-for-the-tree) added
+  `IUiEventOrigin.ReadUploadAsync`, a default interface member throwing `NotSupportedException`,
+  `UiUploadNotFoundException`, the `ui` host API operation `origin.read-upload` and the host-to-plugin
+  asset kind `ui-upload`, all within major `3`. An origin implemented before it keeps compiling and
+  loading. An older host answers `CAPABILITY_UNSUPPORTED`, which the SDK turns into
+  `NotSupportedException`. See [the protocol reference](/reference/protocol/#ui-uploads).
+- [UI resources](/ui/reference/resources/) accept `text/plain`, served as UTF-8, for the text of a code
+  input. Nothing changed for the image types. An older host refuses a text registration, which throws
+  `UiResourceException` with `Failed`.
 - Localization moved the **UI model** major, not this one - see [the localization major](#the-localization-major).
 
 **Negotiation happens exactly once**, in `POST /api/plugins/sessions`:
@@ -483,6 +517,25 @@ New component types and properties are additive. The [modifiers](/ui/components/
 type it answers with the node's `fallback`; `UiModelVersions` did not move. [Responsive layouts](/ui/components/responsive/)
 added the `ui.responsive` type the same way, and [first-fit layouts](/ui/components/first-fit/) the `ui.first-fit` type. See
 [UI model compatibility](/ui/reference/compatibility/#additions-that-moved-no-version).
+
+The [code input](/ui/views/configuration/#code-input) added the open `UiCodeLanguages` vocabulary and the
+`variableInsertFormat` and `contentResource` properties (`UiCodeInput.VariableInsertFormat` and
+`ContentResource`), the `content-uploaded` and `content-upload-failed` events with
+`UiCodeInput.OnContentUploaded`, `OnContentUploadFailed` and `UiContentUpload`, and the `page` surface kind
+with `UiPageSurfaceAttributes`; `UiModelVersions` did not move. An older client ignores both properties,
+offers no variable insertion and edits the bound value, and never sends the new events; it has no page
+surface to open.
+
+The code input later added `rows` (`UiCodeInput.Rows`), the editor's visible line count; an older reader
+ignores it and draws its default height.
+
+The [page layout](/ui/views/configuration/#page-layout) added the configuration types `split` (`UiSplit`),
+`list` (`UiConfigList`), `list-item` (`UiConfigListItem`) and `empty-state` (`UiEmptyState`), the properties
+`railTitle`, `selected`, `badge`, `iconWithLabel`, `align` and `gap`, `variant` on `button` and `stack`, and
+the value vocabularies `UiButtonVariants`, `UiStackAlignments`, `UiStackGaps` and `UiStackVariants`;
+`UiModelVersions` did not move. An older reader declines the new types and draws each node's explicit
+fallback, and ignores the new properties, drawing an ordinary button, a plain stack and a heading without a
+badge.
 
 ### What "maintained per major" means in practice
 

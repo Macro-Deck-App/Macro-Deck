@@ -8,6 +8,7 @@ import {
   type OpenConfigUiSessionRequest,
   type OpenFolderUiSessionRequest,
   type OpenModalUiSessionRequest,
+  type OpenPageUiSessionRequest,
   type OpenUiPreviewSessionRequest,
   type OpenWidgetUiSessionRequest,
   rootNodeOf,
@@ -15,10 +16,12 @@ import {
   UiNode,
   UiNodeEvent,
   UiPatch,
+  type UiContentUploadResponse,
   type UiSessionFlushedEvent,
   type UiSessionParameterValuesReportedEvent,
   type UiSessionPatchedEvent,
   type UiSessionTreeUpdatedEvent,
+  UiConfigEvents,
 } from '@macro-deck/runtime';
 import { LocalizationService } from '../localization';
 import { ToastService } from './toast.service';
@@ -28,7 +31,8 @@ export type UiSessionOpenRequest =
   | ({ kind: 'widget' } & OpenWidgetUiSessionRequest)
   | ({ kind: 'folder' } & OpenFolderUiSessionRequest)
   | ({ kind: 'modal' } & OpenModalUiSessionRequest)
-  | ({ kind: 'preview' } & OpenUiPreviewSessionRequest);
+  | ({ kind: 'preview' } & OpenUiPreviewSessionRequest)
+  | ({ kind: 'page' } & OpenPageUiSessionRequest);
 
 export type UiSessionOpenRequestSource = UiSessionOpenRequest | (() => UiSessionOpenRequest);
 
@@ -45,6 +49,9 @@ export interface UiSessionHandle {
   // effect would have run.
   onParameterValuesReported?(listener: (values: Readonly<Record<string, unknown>>) => void): () => void;
   flush?(): Promise<void>;
+  // Events sent while an upload is in flight are held until its content-uploaded or content-upload-failed
+  // event went out, so the provider reads the edited text before anything the user did afterwards.
+  uploadContent?(nodeId: string, text: string): Promise<UiContentUploadResponse | null>;
 }
 
 export interface UiSessionOpenOptions {
@@ -117,6 +124,8 @@ class LiveUiSessionHandle implements UiSessionHandle {
   private reopens = 0;
   private readonly reportListeners = new Set<(values: Readonly<Record<string, unknown>>) => void>();
   private readonly pendingFlushes = new Map<string, () => void>();
+  private uploadsInFlight = 0;
+  private heldEvents: UiNodeEvent[] = [];
 
   constructor(
     private readonly api: ApiService,
@@ -146,6 +155,44 @@ class LiveUiSessionHandle implements UiSessionHandle {
   }
 
   send(event: UiNodeEvent): void {
+    if (this.closed || !this.sessionId) return;
+    if (this.uploadsInFlight > 0) {
+      this.heldEvents.push(event);
+      return;
+    }
+    this.dispatch(event);
+  }
+
+  async uploadContent(nodeId: string, text: string): Promise<UiContentUploadResponse | null> {
+    const sessionId = this.sessionId;
+    if (this.closed || !sessionId) return null;
+
+    this.uploadsInFlight++;
+    try {
+      const uploaded = await this.api.uploadUiContent(sessionId, nodeId, text).catch(() => null);
+      if (!this.closed && this.sessionId === sessionId) {
+        this.dispatch(uploaded
+          ? {
+            nodeId,
+            name: UiConfigEvents.ContentUploaded,
+            data: { uploadId: uploaded.uploadId, length: uploaded.length, contentHash: uploaded.contentHash },
+          }
+          : { nodeId, name: UiConfigEvents.ContentUploadFailed });
+      }
+      return uploaded;
+    } finally {
+      this.uploadsInFlight--;
+      if (this.uploadsInFlight === 0) this.releaseHeldEvents();
+    }
+  }
+
+  private releaseHeldEvents(): void {
+    const held = this.heldEvents;
+    this.heldEvents = [];
+    for (const event of held) this.send(event);
+  }
+
+  private dispatch(event: UiNodeEvent): void {
     if (this.closed || !this.sessionId) return;
     void this.api.sendUiEvent({
       sessionId: this.sessionId,
@@ -231,6 +278,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
       case 'folder': return this.api.openFolderUiSession(this.request);
       case 'modal': return this.api.openModalUiSession(this.request);
       case 'preview': return this.api.openUiPreviewSession(this.request);
+      case 'page': return this.api.openPageUiSession(this.request);
     }
   }
 

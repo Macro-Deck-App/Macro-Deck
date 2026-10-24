@@ -16,13 +16,16 @@ public sealed class UiEventOrigins
 	private readonly IUiTransport _transport;
 	private readonly IUiInteractionsFactory _interactions;
 	private readonly UiClientFeatures _clientFeatures;
+	private readonly UiUploadStore? _uploads;
 
 	public UiEventOrigins(
 		IUiEventOriginTracker tracker,
 		IUiTransport transport,
 		IUiInteractionsFactory interactions,
-		UiClientFeatures clientFeatures)
+		UiClientFeatures clientFeatures,
+		UiUploadStore? uploads = null)
 	{
+		_uploads = uploads;
 		_tracker = tracker;
 		_transport = transport;
 		_interactions = interactions;
@@ -88,6 +91,14 @@ public sealed class UiEventOrigins
 		return true;
 	}
 
+	// An upload is read only by the provider serving the session it was posted to.
+	public UiUpload? ReadUpload(string providerId, string sessionId, string? uploadId)
+	{
+		return _uploads is null || string.IsNullOrEmpty(uploadId)
+			? null
+			: _uploads.Read(providerId, sessionId, uploadId);
+	}
+
 	private sealed class InProcessUiEventOrigin(
 		UiEventOrigins owner,
 		string providerId,
@@ -132,6 +143,18 @@ public sealed class UiEventOrigins
 			}
 
 			return owner.OpenUrlAsync(providerId, sessionId, ClientId, url.AbsoluteUri, cancellationToken);
+		}
+
+		public Task<ReadOnlyMemory<byte>> ReadUploadAsync(
+			string uploadId,
+			CancellationToken cancellationToken = default)
+		{
+			ArgumentException.ThrowIfNullOrEmpty(uploadId);
+			cancellationToken.ThrowIfCancellationRequested();
+
+			return owner.ReadUpload(providerId, sessionId, uploadId) is { } upload
+				? Task.FromResult(upload.Content)
+				: Task.FromException<ReadOnlyMemory<byte>>(new UiUploadNotFoundException());
 		}
 	}
 }

@@ -258,7 +258,7 @@ Like the other provider-shaped capabilities, `ui` declares the single local id `
 
 | Operation | Purpose |
 | --- | --- |
-| `describe` | The surfaces this provider serves, the UI model version it speaks, and the [preview scenarios](/ui/views/developer-preview/) it declares. `previews` is optional: a plugin built against an SDK that predates it omits the key, and the host reads that as none. |
+| `describe` | The surfaces this provider serves, the UI model version it speaks, and the [preview scenarios](/ui/views/developer-preview/) it declares. `previews` is optional: a plugin built against an SDK that predates it omits the key, and the host reads that as none. `pages` lists the [integration pages](/ui/views/page/) it declares, optional the same way. |
 | `session.open` | Open a session for one surface. The session id is host-issued; a provider never mints one. |
 | `session.open` (config) | A `config` surface names its entry point in its surface attributes - `integration-config` with the config flow session, `action-config` with the action id and the instance's stored parameters, `folder-view-config` with the folder and its view, or `widget-config` with the widget id, type and stored configuration. `MacroDeck.Plugin.Hosting` routes `integration-config` and `action-config` to `IUiConfigFlow`/`IUiConfigurableActionDefinition` before it consults `IUiProvider`. |
 | `session.open` (developer preview) | A `developer-preview` surface names one registered scenario in its surface attributes. `MacroDeck.Plugin.Hosting` builds that scenario and never consults `IUiProvider`, so a production provider is unreachable from a preview. |
@@ -275,6 +275,12 @@ a client still attached to it, and answers `delivered: false` or `opened: false`
 also needs the conditions in [Opening a link on the client that pressed](#opening-a-link-on-the-client-that-pressed)
 and answers `INVALID_PAYLOAD` for a URL that is not `http` or `https`. A host that predates them answers
 `CAPABILITY_UNSUPPORTED`, which the SDK turns into `false` or a cancellation.
+
+`origin.read-upload` reads text a [code input](/ui/views/configuration/#code-input) uploaded in one of the
+plugin's sessions. It answers `found: false` for any session the plugin does not serve, so one plugin never
+reads another's uploads, and sends the bytes after the reply as a `ui-upload` asset; see
+[the protocol reference](/reference/protocol/#ui-uploads). A host that predates it answers
+`CAPABILITY_UNSUPPORTED`, which the SDK turns into `NotSupportedException`.
 
 An action configuration session that reports parameter values (see
 [From an action](/ui/views/configuration/#reporting-values-the-tree-edits)) sends them as
@@ -293,6 +299,7 @@ flushing refuses the request as an unknown type, so a client treats that as flus
 ## See also
 
 - [Views and surfaces](/ui/views/)
+- [Integration pages](/ui/views/page/)
 - [Patches](/ui/reference/patches/)
 - [Resources](/ui/reference/resources/)
 - [Plugin hosting](/reference/plugin-hosting/)

@@ -321,6 +321,100 @@ In a declared field list, the counterparts are `ActionParameter.File` (with `fil
 `ActionParameter.Folder` and `ActionParameter.Image`, which takes no extensions and always offers the
 image formats.
 
+<a id="code-input"></a>
+
+## Editing code
+
+A `UiCodeInput` draws Macro Deck's code editor, with line numbers, undo, search and bracket matching:
+
+```csharp
+new UiCodeInput
+{
+    Key = "script",
+    Label = Strings.Script.Label(),
+    Language = UiCodeLanguages.AutoHotkey,
+    VariableInsertFormat = "MacroDeck.GetVar(\"{name}\")",
+    Binding = Bind.To(script),
+}
+```
+
+| Node type | DSL element | Value |
+| --- | --- | --- |
+| `code` | `UiCodeInput` | The source text, or nothing in content-resource mode (below) |
+
+- **`Language`** picks the highlighting. `UiCodeLanguages` names the languages Macro Deck ships
+  highlighting for: `text`, `json`, `liquid` and `autohotkey` (v2). The vocabulary is
+  open: a language a client does not know is edited as plain text, never refused. `ActionParameter.Code`
+  takes the same values.
+- **`VariableInsertFormat`** adds an **Insert variable** button. The editor inserts the format at the cursor
+  with every `{name}` replaced by the picked variable's name; names are letters, digits and `_ . : -`, so
+  nothing is escaped. Without it there is no button, and a client from before the property ignores it.
+- **`Rows`** sets how many lines the editor shows, which is its visible height; longer text scrolls. Without
+  it the editor keeps its default height. The desktop app clamps the value to 3 to 60 lines, and a client
+  from before the property draws its default height.
+
+### Text too large for the tree
+
+Up to about a megabyte of source does not belong in a tree, which every patch would carry. Register the
+text as a `text/plain` [UI resource](/ui/reference/resources/#registering-your-own-images) and hand the
+handle to `ContentResource`; the editor loads the text from it instead of the bound value:
+
+```csharp
+var name = "script-" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16));
+var handle = await context.UiResources.RegisterAsync(name, Encoding.UTF8.GetBytes(source), "text/plain");
+
+new UiCodeInput
+{
+    Key = "script",
+    Language = UiCodeLanguages.AutoHotkey,
+    ContentResource = UiValue.Of(handle),
+    Events =
+    [
+        UiCodeInput.OnContentUploaded(async (upload, cancellationToken) =>
+        {
+            var origin = _origin;
+            _draft = await origin!.ReadUploadAsync(upload.UploadId, cancellationToken);
+        }),
+        UiCodeInput.OnContentUploadFailed(() => { }),
+    ],
+}
+```
+
+`_origin` is the origin your session keeps in `Dispatch`, as [Serving a view](/ui/views/sessions/) shows.
+
+In this mode the text never travels in an event and the input sends no `change`:
+
+1. While the user edits, the editor uploads the whole text (UTF-8, at most 2 MiB) to Macro Deck, shortly
+   after typing stops and when the editor loses focus.
+2. It then raises `content-uploaded` with `uploadId`, `length` and `contentHash`, the SHA-256 Macro Deck
+   computed in the `sha256:<hex>` form a resource's content hash takes. `OnContentUploaded` hands you that
+   as a `UiContentUpload`.
+3. Read the bytes with `IUiEventOrigin.ReadUploadAsync(uploadId)` on the origin of that event. An origin
+   reads only uploads of its own session. An upload is held for five minutes, until a newer upload of the
+   same input replaces it, or until the session closes; after that the read throws
+   `UiUploadNotFoundException`, and you ignore that event, because a newer one follows.
+4. The client holds the session's later events until the upload event is sent, so a Save button pressed
+   right after typing always sees the latest text.
+
+When the upload fails (too large, the network, more than four uploads pending in the session) the client
+shows the failure, raises `content-upload-failed` without data, and your handler keeps the previous draft.
+
+To save, register the uploaded bytes unchanged as the input's next resource. When the tree then names a
+resource whose content hash equals the client's own last upload, the client keeps its editor state,
+cursor and undo history included. Changing the bytes, even only a byte order mark or line endings, makes
+it reload the text.
+
+- **Security:** a resource is readable by any client signed in to Macro Deck that knows its id, and the id
+  is made of your plugin's id and the name. Use an unguessable name, as above, register again under a new
+  name rather than reusing one that was shown before, and remove a name when nothing shows it.
+- **Use it on a [page](/ui/views/page/).** The desktop app uploads edits only from a page session. In any
+  other session, such as a config flow, a folder view or a modal, it raises `content-upload-failed`
+  instead, so the provider never receives the edited text there.
+- A client from before content resources ignores `ContentResource` and edits the bound value, which is
+  empty when you keep the text out of the tree. `ReadUploadAsync` on a Macro Deck from before uploads
+  throws `NotSupportedException`.
+- In tests, `FakeUiEventOrigin.AddUpload` makes bytes readable under an upload id.
+
 ## Letting the user set colour thresholds
 
 A `UiThresholdsInput` works in a config flow and an action's configuration as it does in a
@@ -460,6 +554,85 @@ new UiWhen
 ```
 
 A renderer that predates `dialog` declines it and draws its fallback in place.
+
+<a id="page-layout"></a>
+
+## Page layout
+
+A tree that fills a whole page, such as an [integration page](/ui/views/page/), is laid out like Macro
+Deck's own library pages with four layout types and a few presentation properties. They work in every
+configuration surface, but they are made for a page.
+
+| Node type | DSL element | What it draws |
+| --- | --- | --- |
+| `split` | `UiSplit` | A titled rail beside a detail card; stacked on a narrow screen |
+| `list` | `UiConfigList` | Selectable rows, each a `list-item` |
+| `list-item` | `UiConfigListItem` | One row: label, description, icon, badge, status dot, trailing controls |
+| `empty-state` | `UiEmptyState` | An icon, a title and a line of text for a region with nothing in it |
+
+**`UiSplit`** has three regions: `RailActions` (controls in the rail's header beside `RailTitle`, such as an
+icon button that adds an item), `Rail` (typically a `UiConfigList`) and `Detail` (drawn on a card). On the
+wire a `split` node always has exactly three `stack` children in that order, keyed `rail-actions`, `rail` and
+`detail`, each present even when empty, so a reader finds a region by its position and a patch edits a region
+like any stack. A region does not open an input scope: an input in the detail keeps its bare key.
+
+**`UiConfigListItem`** carries `Label`, `Description` (a muted second line), `Icon`, `Badge` (a short tag
+such as a count), `Severity` (a status dot: `info`, `success`, `warning` or `error`, as on a banner) and
+`Selected`. Choosing the row raises `activate`; set `Selected` in the handler. Its children are drawn
+trailing the row, typically a `UiConfigMenu` with the row's own actions, and choosing one of those does not
+activate the row. A list contributes no key and no value: the selection is the provider's own state.
+
+**Selection is per session.** A page is an exclusive surface, so every client that opens it has its own
+session, and one client's selection never shows up in another's tree. In a shared surface every attached
+client sees the same row selected.
+
+**`UiEmptyState`** carries `Icon`, `Title` and `Text`; its children, such as a button that creates the
+first item, are drawn below the text.
+
+The presentation properties change how existing types are drawn:
+
+| Property | On | Values | Absent |
+| --- | --- | --- | --- |
+| `Variant` | `UiConfigButton` | `UiButtonVariants`: `primary`, `secondary`, `danger`, `ghost` | `secondary`, as before |
+| `IconWithLabel` | `UiConfigButton` | `true` draws the `Label` beside the `Icon` | icon-only when `Icon` is set, as before |
+| `Align` | `UiConfigStack` | `UiStackAlignments`: `start`, `center`, `end`, `space-between` | `start`, as before |
+| `Gap` | `UiConfigStack` | `UiStackGaps`: `none`, `small`, `medium`, `large` | `medium`, as before |
+| `Variant` | `UiConfigStack` | `UiStackVariants.Card` (`card`): a framed section on the theme's card surface | a plain stack |
+| `Badge` | `UiHeading` | A short tag beside the caption, such as "Unsaved" | the caption alone |
+
+`Accent` keeps its meaning on a plain stack (the fixed dark card described under
+[Styled text and cards](#styled-text-and-cards)). On a stack whose `Variant` is `card`, it adds a leading bar
+in its colour to the theme card instead. `ConfirmDanger` styles a button's confirmation dialog; use
+`Variant = "danger"` to style the button itself. In a menu, either one draws the entry as a danger entry.
+
+```csharp
+new UiConfigStack
+{
+    Key = "footer",
+    Direction = "horizontal",
+    Align = UiStackAlignments.End,
+    Gap = UiStackGaps.Small,
+    Children =
+    [
+        new UiConfigButton { Key = "discard", Label = Strings.Page.Discard() },
+        new UiConfigButton
+        {
+            Key = "save",
+            Label = Strings.Page.Save(),
+            Icon = "check",
+            IconWithLabel = true,
+            Variant = UiButtonVariants.Primary,
+        },
+    ],
+}
+```
+
+**No fallback is invented.** Like `status`, `menu` and `dialog`, a reader that predates `split`, `list`,
+`list-item` or `empty-state` declines the node and draws its explicit `Fallback`, or nothing without one. A
+reader that predates the properties ignores them and draws an ordinary button, a plain stack and a heading
+without a badge. Give a node a `Fallback` where an older reader matters; Macro Deck's own desktop app always
+draws the current types. See [UI model compatibility](/ui/reference/compatibility/#additions-that-moved-no-version)
+and the full example in [Integration pages](/ui/views/page/#a-master-detail-page).
 
 ## Declining and fallback
 
