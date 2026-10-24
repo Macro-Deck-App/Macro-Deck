@@ -119,7 +119,7 @@ internal sealed class FeedRuntime : IAsyncDisposable
 	public async Task RefreshAsync(CancellationToken cancellationToken)
 	{
 		using var stopping = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _stop.Token);
-		await _gate.WaitAsync(stopping.Token).ConfigureAwait(false);
+		await EnterAsync(stopping.Token).ConfigureAwait(false);
 		try
 		{
 			var current = Document;
@@ -156,7 +156,7 @@ internal sealed class FeedRuntime : IAsyncDisposable
 	public async Task<bool> MarkReadAsync(string key, CancellationToken cancellationToken)
 	{
 		using var stopping = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _stop.Token);
-		await _gate.WaitAsync(stopping.Token).ConfigureAwait(false);
+		await EnterAsync(stopping.Token).ConfigureAwait(false);
 		try
 		{
 			var current = Document;
@@ -248,6 +248,17 @@ internal sealed class FeedRuntime : IAsyncDisposable
 		_stop.Dispose();
 		_gate.Dispose();
 		_wake.Dispose();
+	}
+
+	private async Task EnterAsync(CancellationToken token)
+	{
+		await _gate.WaitAsync(token).ConfigureAwait(false);
+		// A release can hand the gate to a waiter whose token was cancelled before it observed the cancellation.
+		if (token.IsCancellationRequested)
+		{
+			_gate.Release();
+			token.ThrowIfCancellationRequested();
+		}
 	}
 
 	private FeedRefreshOutcome Parse(FeedStateDocument current, FeedFetchResult fetch, DateTimeOffset now)
