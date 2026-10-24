@@ -21,6 +21,7 @@ mod host_job;
 mod host_supervisor;
 mod install_integrity;
 mod install_state;
+mod launch_handoff;
 mod localization;
 mod logging;
 mod loopback_secret;
@@ -65,6 +66,10 @@ pub fn clear_quitting() {
 
 pub fn is_quitting() -> bool {
     QUITTING.load(Ordering::SeqCst)
+}
+
+pub fn claim_quit() -> bool {
+    !QUITTING.swap(true, Ordering::SeqCst)
 }
 
 pub fn request_quit(app: &AppHandle) {
@@ -160,7 +165,13 @@ fn main() {
     }
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+        // Must stay registered before single_instance: a second instance exits inside its setup.
+        .plugin(launch_handoff::plugin())
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            if let Some(executable) = launch_handoff::take_target(app) {
+                launch_handoff::hand_over(app, executable, argv, cwd);
+                return;
+            }
             let launch = deep_links::classify(argv);
             if launch.wants_window {
                 window::show_main_window(app);
@@ -263,6 +274,7 @@ fn main() {
                 tauri::async_runtime::spawn(async move { install_state::prompt_and_install(handle).await });
                 return Ok(());
             }
+            launch_handoff::clear(&handle);
             window::setup_tray(&handle)?;
             menu::setup(&handle)?;
             let launch = deep_links::classify(deep_links::launch_arguments());
