@@ -153,13 +153,13 @@ public class FoldersController : ControllerBase
 		var target = ResolveTarget(profileId, parentFolderId);
 		if (!target.Success)
 		{
-			return Fail(target.Error!.Value, target.ErrorMessage);
+			return Fail(target);
 		}
 
 		var bytes = await ArchivePathReader.ReadUpload(file, ct);
 		if (!bytes.Success)
 		{
-			return Fail(bytes.Error!.Value, bytes.ErrorMessage);
+			return Fail(bytes);
 		}
 
 		return await Import(target.Data, bytes.Data!, password, ct);
@@ -177,7 +177,7 @@ public class FoldersController : ControllerBase
 		var target = ResolveTarget(body.ProfileId, body.ParentFolderId);
 		if (!target.Success)
 		{
-			return Fail(target.Error!.Value, target.ErrorMessage);
+			return Fail(target);
 		}
 
 		var bytes = await ArchivePathReader.Read(body.Path,
@@ -186,7 +186,7 @@ public class FoldersController : ControllerBase
 			ct);
 		if (!bytes.Success)
 		{
-			return Fail(bytes.Error!.Value, bytes.ErrorMessage);
+			return Fail(bytes);
 		}
 
 		return await Import(target.Data, bytes.Data!, body.Password, ct);
@@ -201,7 +201,7 @@ public class FoldersController : ControllerBase
 		var result = await _portability.Import(target.ProfileId, target.ParentFolderId, archiveBytes, password, ct);
 		if (!result.Success)
 		{
-			return Fail(result.Error!.Value, result.ErrorMessage);
+			return Fail(result);
 		}
 
 		return new ImportFolderResponse
@@ -242,12 +242,12 @@ public class FoldersController : ControllerBase
 
 	private readonly record struct FolderImportTarget(Guid ProfileId, Guid? ParentFolderId);
 
-	private static ImportFolderResponse Fail(Domain.Enums.PortabilityError error, string? message)
+	private static ImportFolderResponse Fail<TData>(Result<TData, Domain.Enums.PortabilityError> failure)
 	{
 		return new ImportFolderResponse
 		{
 			Success = false,
-			Error = PortabilityHttp.ToTransportError(error, message)
+			Error = PortabilityHttp.ToTransportError(failure)
 		};
 	}
 }

@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Configuration;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -10,6 +11,7 @@ using MacroDeckHost.Tests.UnitTests.Migration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -67,6 +69,7 @@ public class PortabilityEndpointsTests
 		_client.Dispose();
 		await _host.StopAsync();
 		_host.Dispose();
+		SqliteConnection.ClearAllPools();
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
@@ -392,6 +395,38 @@ public class PortabilityEndpointsTests
 	}
 
 	[Test]
+	public async Task Import_returns_a_localized_json_error_with_the_field_location()
+	{
+		using var buffer = new MemoryStream();
+		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
+		{
+			using (var manifest = zip.CreateEntry("manifest.json").Open())
+			{
+				manifest.Write("""{"formatVersion":2,"kind":"Profile"}"""u8);
+			}
+
+			using var content = zip.CreateEntry("content.json").Open();
+			content.Write("""{"profile":{"defaultRows":3.0}}"""u8);
+		}
+
+		var response = await ImportProfile(buffer.ToArray(), null);
+		var body = await ReadJson(response);
+		var error = body.GetProperty("error");
+		var localized = error.GetProperty("message").GetProperty("$localized");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(body.GetProperty("success").GetBoolean(), Is.False);
+			Assert.That(error.GetProperty("code").GetString(), Is.EqualTo("InvalidJson"));
+			Assert.That(localized.GetProperty("scope").GetString(), Is.EqualTo("macrodeck.app"));
+			Assert.That(localized.GetProperty("key").GetString(), Is.EqualTo("Errors.Portability.InvalidJson"));
+			Assert.That(localized.GetProperty("arguments").GetProperty("location").GetString(),
+				Does.StartWith("content.json:$.profile.defaultRows:1:"));
+		});
+	}
+
+	[Test]
 	public async Task Profile_import_from_path_creates_a_new_profile()
 	{
 		var profileId = await CreateProfile("Path Round Trip");
@@ -449,6 +484,31 @@ public class PortabilityEndpointsTests
 			Assert.That(body.GetProperty("archive").GetProperty("kind").GetString(), Is.EqualTo("Profile"));
 			Assert.That(body.GetProperty("archive").GetProperty("name").GetString(), Is.EqualTo("Path Inspect"));
 			Assert.That(body.GetProperty("archive").GetProperty("encrypted").GetBoolean(), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Inspect_from_path_returns_a_localized_json_error_for_a_malformed_manifest()
+	{
+		using var buffer = new MemoryStream();
+		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
+		{
+			using var manifest = zip.CreateEntry("manifest.json").Open();
+			manifest.Write("""{"formatVersion":"two"}"""u8);
+		}
+
+		var path = WriteArchive(buffer.ToArray(), "broken.macroDeckProfile");
+		var body = await ReadJson(await SendJson(HttpMethod.Post, "/api/portable/inspect-path", new { path }));
+		var error = body.GetProperty("error");
+		var localized = error.GetProperty("message").GetProperty("$localized");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(body.GetProperty("success").GetBoolean(), Is.False);
+			Assert.That(error.GetProperty("code").GetString(), Is.EqualTo("InvalidJson"));
+			Assert.That(localized.GetProperty("key").GetString(), Is.EqualTo("Errors.Portability.InvalidJson"));
+			Assert.That(localized.GetProperty("arguments").GetProperty("location").GetString(),
+				Does.StartWith("manifest.json:$.formatVersion:1:"));
 		});
 	}
 

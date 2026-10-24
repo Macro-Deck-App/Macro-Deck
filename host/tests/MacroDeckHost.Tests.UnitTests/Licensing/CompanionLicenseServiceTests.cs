@@ -1400,6 +1400,8 @@ internal sealed partial class CompanionLicenseServiceTests
 		public double RandomValue { get; set; } = 0.5;
 		public IServiceScopeFactory ScopeFactory { get; }
 		public CompanionLicenseService Service { get; private set; }
+		public SwitchableKeyFactory Keys { get; } = new();
+		public CompanionLicenseTokens Tokens { get; private set; } = null!;
 
 		public CompanionLicenseService Restart()
 		{
@@ -1417,10 +1419,11 @@ internal sealed partial class CompanionLicenseServiceTests
 
 		private CompanionLicenseService Create()
 		{
+			Tokens = new CompanionLicenseTokens(_trustedKeys, Serilog.Core.Logger.None, Time, Keys.Create);
 			return new CompanionLicenseService(ScopeFactory,
 				Platform,
 				Accounts,
-				new CompanionLicenseTokens(_trustedKeys),
+				Tokens,
 				Harness.DeviceRegistry,
 				Harness.Transport,
 				Notifications,

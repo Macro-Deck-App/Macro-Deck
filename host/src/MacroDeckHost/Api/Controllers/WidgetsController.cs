@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Portable;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Auth;
+using MacroDeckHost.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -237,7 +238,7 @@ public class WidgetsController : ControllerBase
 		var bytes = await ArchivePathReader.ReadUpload(file, ct);
 		if (!bytes.Success)
 		{
-			return Fail(bytes.Error!.Value, bytes.ErrorMessage);
+			return Fail(bytes);
 		}
 
 		return await Import(targetFolderId, anchorX, anchorY, bytes.Data!, password, ct);
@@ -263,7 +264,7 @@ public class WidgetsController : ControllerBase
 			ct);
 		if (!bytes.Success)
 		{
-			return Fail(bytes.Error!.Value, bytes.ErrorMessage);
+			return Fail(bytes);
 		}
 
 		return await Import(targetFolderId, body.AnchorX, body.AnchorY, bytes.Data!, body.Password, ct);
@@ -280,7 +281,7 @@ public class WidgetsController : ControllerBase
 		var result = await _portability.Import(folderId, anchorX, anchorY, archiveBytes, password, ct);
 		if (!result.Success)
 		{
-			return Fail(result.Error!.Value, result.ErrorMessage);
+			return Fail(result);
 		}
 
 		return new ImportWidgetsResponse
@@ -296,6 +297,15 @@ public class WidgetsController : ControllerBase
 		{
 			Success = false,
 			Error = PortabilityHttp.ToTransportError(error, message)
+		};
+	}
+
+	private static ImportWidgetsResponse Fail<TData>(Result<TData, Domain.Enums.PortabilityError> failure)
+	{
+		return new ImportWidgetsResponse
+		{
+			Success = false,
+			Error = PortabilityHttp.ToTransportError(failure)
 		};
 	}
 }

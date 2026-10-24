@@ -882,6 +882,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck se nepodařilo spustit</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck nemohl použít kryptografickou službu operačního systému. Ve Windows ověřte, že běží služba CNG Key Isolation (KeyIso), nebo restartujte počítač.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Chybí spustitelný soubor hostitele Macro Deck:
 {paths}</value>
@@ -2866,6 +2869,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Tento plugin převzalo vývojové sestavení. Před instalací nebo aktualizací je nutné převzetí ukončit.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck se vypíná, proto plugin nebyl spuštěn.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>Tento plugin převzalo vývojové sestavení. Nainstalovaná verze se znovu spustí po ukončení převzetí.</value>
   </data>
@@ -2877,6 +2883,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Import se nezdařil</value>
+  </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Neplatná data JSON na pozici {location}. Zkontrolujte typ pole a syntaxi.</value>
   </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Tento soubor není platným archivem Macro Deck</value>
@@ -14940,6 +14949,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>Jeho soukromý klíč nebylo možné na tomto počítači přečíst, což nastává po přesunu nebo obnovení datového adresáře na jiný stroj. Vygenerujte nový certifikát nebo znovu nahrajte jiný v Nastavení &gt; Síť.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>Kryptografická služba operačního systému není dostupná. Ve Windows ověřte, že běží služba CNG Key Isolation (KeyIso), a potom restartujte Macro Deck.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>Přidejte certifikát v Nastavení &gt; Síť.</value>
   </data>
@@ -16852,6 +16864,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Zakoupeno přes</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>Licence teď nelze ověřit, protože kryptografická služba operačního systému není dostupná. Ve Windows ověřte, že běží služba CNG Key Isolation (KeyIso). Licence zůstane zachována a automaticky se znovu ověří.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>Zobrazit podrobnosti</value>
   </data>
@@ -17021,6 +17036,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>Uložený certifikát je neplatný a nepodařilo se ho použít.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>HTTPS je vypnuté, protože kryptografická služba operačního systému není dostupná. Ve Windows ověřte, že běží služba CNG Key Isolation (KeyIso), a potom restartujte Macro Deck.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>Certifikát se nepodařilo použít. Nahraďte ho níže.</value>

@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Paths;
+using MacroDeckHost.Application.Security;
 using Microsoft.AspNetCore.DataProtection;
 using Serilog;
 
@@ -87,7 +88,7 @@ public sealed class FilePublicTlsCertificateStore : IPublicTlsCertificateStore
 
 		try
 		{
-			var certificatePem = File.ReadAllText(_certificateFilePath);
+				var certificatePem = File.ReadAllText(_certificateFilePath);
 			var serverCertificate = PublicTlsServerCertificate.Create(certificatePem, keyPem);
 
 			_logger.Information(
@@ -102,7 +103,10 @@ public sealed class FilePublicTlsCertificateStore : IPublicTlsCertificateStore
 		catch (Exception ex) when (ex is CryptographicException or IOException or UnauthorizedAccessException)
 		{
 			_logger.Warning(ex, "The stored public TLS certificate material could not be loaded");
-			return new PublicTlsCertificateResolution(null, PublicTlsFailure.CertificateInvalid);
+			return new PublicTlsCertificateResolution(null,
+				CryptographyProviderErrors.IsProviderUnreachable(ex)
+					? PublicTlsFailure.CryptographyUnavailable
+					: PublicTlsFailure.CertificateInvalid);
 		}
 	}
 

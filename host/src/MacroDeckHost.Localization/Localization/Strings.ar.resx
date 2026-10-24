@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>تعذّر تشغيل Macro Deck</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>تعذّر على Macro Deck استخدام خدمة التشفير في نظام التشغيل. في Windows، تأكّد من تشغيل خدمة CNG Key Isolation (KeyIso)، أو أعد تشغيل الكمبيوتر.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>ملف المضيف التنفيذي لـ Macro Deck مفقود:
 {paths}</value>
@@ -2865,6 +2868,9 @@
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>استبدلت نسخة تطوير هذا المكوّن الإضافي. أنهِ الاستبدال قبل تثبيته أو تحديثه.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>يتم إيقاف تشغيل Macro Deck، لذلك لم يتم تشغيل المكوّن الإضافي.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>استبدلت نسخة تطوير هذا المكوّن الإضافي. ستبدأ النسخة المثبّتة من جديد عند انتهاء الاستبدال.</value>
   </data>
@@ -2876,6 +2882,9 @@
   </data>
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>فشل الاستيراد</value>
+  </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>بيانات JSON غير صالحة في {location}. تحقق من نوع الحقل وبنية البيانات.</value>
   </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>الملف ليس أرشيف Macro Deck صالحًا</value>
@@ -14941,6 +14950,9 @@
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>تعذّرت قراءة مفتاحها الخاص على هذا الكمبيوتر، وهذا يحدث بعد نقل مجلد البيانات أو استعادته على جهاز آخر. أنشئ شهادة جديدة أو ارفع واحدة مرة أخرى من الإعدادات &gt; الشبكة.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>خدمة التشفير في نظام التشغيل غير متاحة. في Windows، تأكّد من تشغيل خدمة CNG Key Isolation (KeyIso)، ثم أعد تشغيل Macro Deck.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>أضف شهادة من الإعدادات &gt; الشبكة.</value>
   </data>
@@ -16853,6 +16865,9 @@
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>تم الشراء عبر</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>يتعذّر التحقق من التراخيص حاليًا لأن خدمة التشفير في نظام التشغيل غير متاحة. في Windows، تأكّد من تشغيل خدمة CNG Key Isolation (KeyIso). يُحتفظ بالترخيص وسيُعاد التحقق منه تلقائيًا.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>عرض التفاصيل</value>
   </data>
@@ -17022,6 +17037,9 @@
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>الشهادة المحفوظة غير صالحة ولا يمكن استخدامها.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>HTTPS متوقف لأن خدمة التشفير في نظام التشغيل غير متاحة. في Windows، تأكّد من تشغيل خدمة CNG Key Isolation (KeyIso)، ثم أعد تشغيل Macro Deck.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>تعذّر استخدام الشهادة. استبدلها أدناه.</value>

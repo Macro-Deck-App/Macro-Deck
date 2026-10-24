@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
 using MacroDeck.Sdk;
+using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Portable;
 
@@ -11,21 +12,36 @@ public sealed class PortableArchiveInspector : IPortableArchiveInspector
 {
 	private readonly IIntegrationRegistry _integrationRegistry;
 	private readonly IIntegrationConfigStore _configStore;
+	private readonly ILogger _logger;
 
-	public PortableArchiveInspector(IIntegrationRegistry integrationRegistry, IIntegrationConfigStore configStore)
+	public PortableArchiveInspector(
+		IIntegrationRegistry integrationRegistry,
+		IIntegrationConfigStore configStore,
+		ILogger logger)
 	{
 		_integrationRegistry = integrationRegistry;
 		_configStore = configStore;
+		_logger = logger;
 	}
 
 	public async Task<Result<PortableArchiveInfo, PortabilityError>> Inspect(
 		byte[] archiveBytes,
 		CancellationToken cancellationToken)
 	{
-		var manifest = PortableArchive.ReadManifest(archiveBytes);
+		var manifest = PortableArchive.ReadManifest(archiveBytes, out var jsonErrorLocation);
 		if (manifest is null)
 		{
-			return Result.Fail<PortableArchiveInfo, PortabilityError>(PortabilityError.InvalidArchive);
+			if (jsonErrorLocation is not null)
+			{
+				_logger.Warning("Rejected portable archive {Operation}: {ErrorCode} at {JsonLocation}",
+					"Inspect",
+					PortabilityError.InvalidJson.ToString(),
+					jsonErrorLocation);
+			}
+
+			return Result.Fail<PortableArchiveInfo, PortabilityError>(
+				jsonErrorLocation is null ? PortabilityError.InvalidArchive : PortabilityError.InvalidJson,
+				jsonErrorLocation);
 		}
 
 		if (manifest.FormatVersion > PortableArchiveManifest.CurrentFormatVersion)

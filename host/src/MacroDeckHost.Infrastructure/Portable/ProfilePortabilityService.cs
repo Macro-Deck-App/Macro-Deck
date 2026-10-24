@@ -100,7 +100,15 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 		var mapped = PortableReadStatusMapper.ToError(outcome.Status);
 		if (mapped is not null)
 		{
-			return Result.Fail<ProfileEntity, PortabilityError>(mapped.Value);
+			if (mapped == PortabilityError.InvalidJson)
+			{
+				_logger.Warning("Rejected portable archive {Operation}: {ErrorCode} at {JsonLocation}",
+					"ProfileImport",
+					mapped.Value.ToString(),
+					outcome.JsonErrorLocation);
+			}
+
+			return Result.Fail<ProfileEntity, PortabilityError>(mapped.Value, outcome.JsonErrorLocation);
 		}
 
 		var content = outcome.Content!;

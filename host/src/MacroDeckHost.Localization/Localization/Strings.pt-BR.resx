@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Não foi possível iniciar o Macro Deck</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>O Macro Deck não conseguiu usar o serviço de criptografia do sistema operacional. No Windows, verifique se o serviço CNG Key Isolation (KeyIso) está em execução ou reinicie o computador.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>O executável do host do Macro Deck está ausente:
 {paths}</value>
@@ -2865,6 +2868,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Um build de desenvolvimento assumiu este plugin. Encerre a substituição antes de instalá-lo ou atualizá-lo.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>O Macro Deck está sendo encerrado, então o plugin não foi iniciado.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>Um build de desenvolvimento assumiu este plugin. A versão instalada é iniciada novamente quando a substituição terminar.</value>
   </data>
@@ -2876,6 +2882,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Falha na importação</value>
+  </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Dados JSON inválidos em {location}. Verifique o tipo do campo e a sintaxe.</value>
   </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>O arquivo não é um arquivo válido do Macro Deck</value>
@@ -14941,6 +14950,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>A chave privada dele não pôde ser lida neste computador, o que acontece quando o diretório de dados é movido ou restaurado para outra máquina. Gere um novo certificado ou envie-o novamente em Configurações &gt; Rede.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>O serviço de criptografia do sistema operacional não está disponível. No Windows, verifique se o serviço CNG Key Isolation (KeyIso) está em execução e reinicie o Macro Deck.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>Adicione um certificado em Configurações &gt; Rede.</value>
   </data>
@@ -16853,6 +16865,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Comprada por meio de</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>No momento não é possível verificar licenças porque o serviço de criptografia do sistema operacional não está disponível. No Windows, verifique se o serviço CNG Key Isolation (KeyIso) está em execução. A licença é mantida e será verificada novamente de forma automática.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>Mostrar detalhes</value>
   </data>
@@ -17022,6 +17037,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>O certificado armazenado é inválido e não pôde ser usado.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>O HTTPS está desligado porque o serviço de criptografia do sistema operacional não está disponível. No Windows, verifique se o serviço CNG Key Isolation (KeyIso) está em execução e reinicie o Macro Deck.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>Não foi possível usar o certificado. Substitua-o abaixo.</value>

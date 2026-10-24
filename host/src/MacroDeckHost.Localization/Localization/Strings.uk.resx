@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck не вдалося запустити</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck не вдалося використати службу криптографії операційної системи. У Windows переконайтеся, що службу CNG Key Isolation (KeyIso) запущено, або перезавантажте комп'ютер.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Відсутній виконуваний файл хоста Macro Deck:
 {paths}</value>
@@ -2865,6 +2868,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Збірка для розробки перейняла цей плагін. Завершіть перехоплення, перш ніж встановлювати або оновлювати його.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck завершує роботу, тому плагін не було запущено.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>Збірка для розробки перейняла цей плагін. Встановлена версія запускається знову після завершення перехоплення.</value>
   </data>
@@ -2876,6 +2882,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Не вдалося імпортувати</value>
+  </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Некоректні дані JSON у {location}. Перевірте тип поля та синтаксис.</value>
   </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Файл не є дійсним архівом Macro Deck</value>
@@ -14941,6 +14950,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>Його закритий ключ не вдалося прочитати на цьому комп'ютері. Таке трапляється після переміщення або відновлення каталогу даних на інший комп'ютер. Створіть новий сертифікат або завантажте його знову в Налаштування &gt; Мережа.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>Служба криптографії операційної системи недоступна. У Windows переконайтеся, що службу CNG Key Isolation (KeyIso) запущено, потім перезапустіть Macro Deck.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>Додайте сертифікат у Налаштування &gt; Мережа.</value>
   </data>
@@ -16853,6 +16865,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Придбано через</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>Зараз неможливо перевірити ліцензії, оскільки служба криптографії операційної системи недоступна. У Windows переконайтеся, що службу CNG Key Isolation (KeyIso) запущено. Ліцензія зберігається й буде автоматично перевірена повторно.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>Показати деталі</value>
   </data>
@@ -17022,6 +17037,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>Збережений сертифікат недійсний і не може бути використаний.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>HTTPS вимкнено, оскільки служба криптографії операційної системи недоступна. У Windows переконайтеся, що службу CNG Key Isolation (KeyIso) запущено, потім перезапустіть Macro Deck.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>Не вдалося використати сертифікат. Замініть його нижче.</value>

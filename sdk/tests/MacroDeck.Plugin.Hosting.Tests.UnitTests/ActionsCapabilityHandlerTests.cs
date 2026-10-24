@@ -3,12 +3,14 @@ using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Actions;
 using MacroDeck.Plugin.Hosting.Tests.UnitTests.Support;
 using MacroDeck.Plugin.Hosting.Transport;
-using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Capabilities.Actions;
+using MacroDeck.Plugin.Protocol.Envelope;
+using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.MusicPlayer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
@@ -40,7 +42,8 @@ public class ActionsCapabilityHandlerTests
 	private static CapabilityInvocation Invocation(
 		string localId,
 		string operation = "execute",
-		object? arguments = null)
+		object? arguments = null,
+		IServiceProvider? services = null)
 	{
 		return new CapabilityInvocation
 		{
@@ -51,7 +54,7 @@ public class ActionsCapabilityHandlerTests
 				? null
 				: JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options),
 			CorrelationId = "correlation",
-			Services = _services
+			Services = services ?? _services
 		};
 	}
 
@@ -314,5 +317,99 @@ public class ActionsCapabilityHandlerTests
 		var result = await handler.InvokeAsync(Invocation("play", "options"), CancellationToken.None);
 
 		Assert.That(result.Error!.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnavailable));
+	}
+
+	[TestCase(true)]
+	[TestCase(false)]
+	public async Task A_picker_request_reaches_the_host_before_the_execute_answers(bool devicePicker)
+	{
+		var host = new HeldHost();
+		await using var services = new ServiceCollection().AddSingleton<IHostInvoker>(host).BuildServiceProvider();
+		var action = new TestAction("pick",
+			context =>
+			{
+				if (devicePicker)
+				{
+					context.Interactions!.RequestDevicePicker("client-1", "player::default", true);
+				}
+				else
+				{
+					context.Interactions!.RequestItemPicker("client-1",
+						"player::default",
+						MusicPlayerCatalogItemKind.Track);
+				}
+
+				return Task.FromResult(ActionResult.Accepted("Waiting for a pick."));
+			});
+
+		var execute = Handler(new TestIntegration(action))
+			.InvokeAsync(Invocation("pick", services: services), CancellationToken.None);
+		await host.Called.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.ThrowsAsync<TimeoutException>(() => execute.WaitAsync(TimeSpan.FromMilliseconds(200)));
+
+		host.Release();
+		var result = await execute.WaitAsync(TimeSpan.FromSeconds(5));
+		var payload = result.Data!.Value.Deserialize<ActionExecuteResult>(PluginProtocolJson.Options);
+
+		Assert.That(payload!.Accepted, Is.True);
+	}
+
+	[Test]
+	public async Task A_picker_request_the_host_refuses_still_answers_with_the_actions_result()
+	{
+		var host = new HeldHost { Failure = new InvalidOperationException("refused") };
+		await using var services = new ServiceCollection().AddSingleton<IHostInvoker>(host).BuildServiceProvider();
+		var action = new TestAction("pick",
+			context =>
+			{
+				context.Interactions!.RequestDevicePicker("client-1", "player::default", false);
+				return Task.FromResult(ActionResult.Accepted("Waiting for a pick."));
+			});
+
+		var execute = Handler(new TestIntegration(action))
+			.InvokeAsync(Invocation("pick", services: services), CancellationToken.None);
+		await host.Called.WaitAsync(TimeSpan.FromSeconds(5));
+		host.Release();
+		var result = await execute.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.That(result.Data!.Value.Deserialize<ActionExecuteResult>(PluginProtocolJson.Options)!.Accepted,
+			Is.True);
+	}
+
+	private sealed class HeldHost : IHostInvoker
+	{
+		private readonly TaskCompletionSource _called = new(TaskCreationOptions.RunContinuationsAsynchronously);
+		private readonly TaskCompletionSource _released = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public Exception? Failure { get; init; }
+
+		public Task Called => _called.Task;
+
+		public void Release()
+		{
+			_released.TrySetResult();
+		}
+
+		public async Task<JsonElement?> InvokeAsync(
+			string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
+		{
+			_called.TrySetResult();
+			await _released.Task.ConfigureAwait(false);
+			if (Failure is { } failure)
+			{
+				throw failure;
+			}
+
+			return null;
+		}
+
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

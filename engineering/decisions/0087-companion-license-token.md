@@ -128,6 +128,15 @@ stored from a Companion, a purchase proof or the account raises an informational
 time (dedupe key `companionLicense.received`). The License page says when the license is saved to the
 account, or asks a signed-out owner to sign in.
 
+Verification can be unavailable: on Windows the public keys are imported through CNG, which fails while the
+Key Isolation service is stopped. The keys are imported lazily, never during startup, and a failed import is
+retried after 60 seconds. While verification is unavailable the host writes nothing it would derive from a
+verification: the stored license, eligibility and pending proofs stay as they are, no proof is issued, no
+promo code is redeemed and a legacy transfer answers `unavailable`. A sync is answered without a license but
+with the known trial start and revoked ids, unless eligibility was never initialised, when it is answered
+empty. The License page says licenses cannot be checked right now. Once keys import again, the host tells the
+admin UI and pushes the stored license to connected Companions.
+
 ## Consequences
 
 - Trial anchoring has known gaps. A new trial is possible:

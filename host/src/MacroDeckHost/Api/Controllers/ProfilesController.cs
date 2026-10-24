@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Portable;
 using MacroDeckHost.Application.Ui.Transport.Messages.Profiles;
 using MacroDeckHost.Auth;
+using MacroDeckHost.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -120,7 +121,7 @@ public class ProfilesController : ControllerBase
 		var bytes = await ArchivePathReader.ReadUpload(file, ct);
 		if (!bytes.Success)
 		{
-			return Fail(bytes.Error!.Value, bytes.ErrorMessage);
+			return Fail(bytes);
 		}
 
 		return await Import(bytes.Data!, password, ct);
@@ -141,7 +142,7 @@ public class ProfilesController : ControllerBase
 			ct);
 		if (!bytes.Success)
 		{
-			return Fail(bytes.Error!.Value, bytes.ErrorMessage);
+			return Fail(bytes);
 		}
 
 		return await Import(bytes.Data!, body.Password, ct);
@@ -152,7 +153,7 @@ public class ProfilesController : ControllerBase
 		var result = await _portability.Import(archiveBytes, password, ct);
 		if (!result.Success)
 		{
-			return Fail(result.Error!.Value, result.ErrorMessage);
+			return Fail(result);
 		}
 
 		return new ImportProfileResponse
@@ -162,12 +163,12 @@ public class ProfilesController : ControllerBase
 		};
 	}
 
-	private static ImportProfileResponse Fail(Domain.Enums.PortabilityError error, string? message)
+	private static ImportProfileResponse Fail<TData>(Result<TData, Domain.Enums.PortabilityError> failure)
 	{
 		return new ImportProfileResponse
 		{
 			Success = false,
-			Error = PortabilityHttp.ToTransportError(error, message)
+			Error = PortabilityHttp.ToTransportError(failure)
 		};
 	}
 }

@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck शुरू नहीं हो सका</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck ऑपरेटिंग सिस्टम की क्रिप्टोग्राफ़ी सेवा का उपयोग नहीं कर सका। Windows पर सुनिश्चित करें कि CNG Key Isolation (KeyIso) सेवा चल रही है, या कंप्यूटर को पुनः प्रारंभ करें।</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck होस्ट बाइनरी गायब है:
 {paths}</value>
@@ -2865,6 +2868,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>एक डेवलपमेंट बिल्ड ने इस प्लगइन पर कब्ज़ा कर लिया है। इसे इंस्टॉल या अपडेट करने से पहले टेकओवर समाप्त करें।</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck बंद हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया।</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>एक डेवलपमेंट बिल्ड ने इस प्लगइन पर कब्ज़ा कर लिया है। टेकओवर समाप्त होने पर इंस्टॉल किया गया संस्करण फिर से शुरू होगा।</value>
   </data>
@@ -2876,6 +2882,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>आयात विफल रहा</value>
+  </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>{location} पर JSON डेटा अमान्य है। फ़ील्ड का प्रकार और सिंटैक्स जाँचें।</value>
   </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>यह फ़ाइल एक मान्य Macro Deck आर्काइव नहीं है</value>
@@ -14941,6 +14950,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>इस कंप्यूटर पर इसकी निजी कुंजी पढ़ी नहीं जा सकी, जो तब होता है जब डेटा डायरेक्टरी किसी दूसरी मशीन पर ले जाई या पुनर्स्थापित की जाती है। सेटिंग्स &gt; नेटवर्क में नया सर्टिफ़िकेट बनाएं या फिर से अपलोड करें।</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>ऑपरेटिंग सिस्टम की क्रिप्टोग्राफ़ी सेवा उपलब्ध नहीं है। Windows पर सुनिश्चित करें कि CNG Key Isolation (KeyIso) सेवा चल रही है, फिर Macro Deck को पुनः प्रारंभ करें।</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>सेटिंग्स &gt; नेटवर्क में एक सर्टिफ़िकेट जोड़ें।</value>
   </data>
@@ -16853,6 +16865,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>किससे खरीदा गया</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>ऑपरेटिंग सिस्टम की क्रिप्टोग्राफ़ी सेवा उपलब्ध नहीं होने के कारण अभी लाइसेंस की जाँच नहीं की जा सकती। Windows पर सुनिश्चित करें कि CNG Key Isolation (KeyIso) सेवा चल रही है। लाइसेंस सुरक्षित रहता है और उसकी जाँच अपने आप फिर से की जाएगी।</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>विवरण दिखाएँ</value>
   </data>
@@ -17022,6 +17037,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>सहेजा गया प्रमाणपत्र अमान्य है और उपयोग नहीं किया जा सकता।</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>ऑपरेटिंग सिस्टम की क्रिप्टोग्राफ़ी सेवा उपलब्ध नहीं होने के कारण HTTPS बंद है। Windows पर सुनिश्चित करें कि CNG Key Isolation (KeyIso) सेवा चल रही है, फिर Macro Deck को पुनः प्रारंभ करें।</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>प्रमाणपत्र उपयोग नहीं किया जा सका। नीचे उसे बदलें।</value>

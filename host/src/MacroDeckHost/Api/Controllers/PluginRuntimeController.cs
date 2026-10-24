@@ -74,9 +74,13 @@ public class PluginRuntimeController : ControllerBase
 				new TransportError
 				{
 					Code = ToErrorCode(result.Error!.Value),
-					Message = result.Error == PluginSupervisorError.TakenOverByDevelopmentBuild
-						? AppStrings.Errors.Plugins.TakenOverByDevelopmentBuild()
-						: result.Message ?? string.Empty
+					Message = result.Error switch
+					{
+						PluginSupervisorError.TakenOverByDevelopmentBuild =>
+							AppStrings.Errors.Plugins.TakenOverByDevelopmentBuild(),
+						PluginSupervisorError.HostShuttingDown => AppStrings.Errors.Plugins.HostShuttingDown(),
+						_ => result.Message ?? string.Empty
+					}
 				});
 	}
 

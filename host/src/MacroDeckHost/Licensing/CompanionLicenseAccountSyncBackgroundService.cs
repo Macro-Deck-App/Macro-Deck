@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using MacroDeckHost.Application.Connect;
 using MacroDeckHost.Application.Licensing;
+using MacroDeckHost.Infrastructure.Licensing;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Licensing;
@@ -98,6 +99,12 @@ public sealed class CompanionLicenseAccountSyncBackgroundService : BackgroundSer
 			catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
 			{
 				return;
+			}
+			catch (CompanionLicenseVerificationUnavailableException)
+			{
+				_logger.Debug("Syncing the Companion license with the Macro Deck account is deferred: "
+					+ "licenses cannot be verified right now");
+				ScheduleRetry(null, false, _session.Current.Account?.Subject);
 			}
 			catch (Exception ex)
 			{

@@ -881,6 +881,9 @@
   <data name="Bootstrapper.Errors.CouldNotStartTitle" xml:space="preserve">
     <value>Macro Deck tidak dapat dimulai</value>
   </data>
+  <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
+    <value>Macro Deck tidak dapat menggunakan layanan kriptografi sistem operasi. Di Windows, pastikan layanan CNG Key Isolation (KeyIso) sedang berjalan, atau mulai ulang komputer.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>File biner host Macro Deck tidak ditemukan:
 {paths}</value>
@@ -2865,6 +2868,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Sebuah build pengembangan telah mengambil alih plugin ini. Akhiri pengambilalihan sebelum memasang atau memperbaruinya.</value>
   </data>
+  <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
+    <value>Macro Deck sedang dimatikan, jadi plugin tidak dijalankan.</value>
+  </data>
   <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
     <value>Sebuah build pengembangan telah mengambil alih plugin ini. Versi terpasang dimulai lagi saat pengambilalihan berakhir.</value>
   </data>
@@ -2876,6 +2882,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Errors.Portability.ImportFailed" xml:space="preserve">
     <value>Impor gagal</value>
+  </data>
+  <data name="Errors.Portability.InvalidJson" xml:space="preserve">
+    <value>Data JSON tidak valid di {location}. Periksa jenis kolom dan sintaksnya.</value>
   </data>
   <data name="Errors.Portability.InvalidArchive" xml:space="preserve">
     <value>Berkas ini bukan arsip Macro Deck yang valid</value>
@@ -14941,6 +14950,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Notifications.TlsCertificateKeyUnreadableAdvice" xml:space="preserve">
     <value>Kunci privatnya tidak dapat dibaca di komputer ini, yang terjadi setelah direktori data dipindahkan atau dipulihkan ke mesin lain. Buat sertifikat baru atau unggah lagi di Pengaturan &gt; Jaringan.</value>
   </data>
+  <data name="Notifications.TlsCryptographyUnavailableAdvice" xml:space="preserve">
+    <value>Layanan kriptografi sistem operasi tidak tersedia. Di Windows, pastikan layanan CNG Key Isolation (KeyIso) sedang berjalan, lalu mulai ulang Macro Deck.</value>
+  </data>
   <data name="Notifications.TlsCertificateMissingAdvice" xml:space="preserve">
     <value>Tambahkan sertifikat di Pengaturan &gt; Jaringan.</value>
   </data>
@@ -16853,6 +16865,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Dibeli melalui</value>
   </data>
+  <data name="Settings.License.VerificationUnavailable" xml:space="preserve">
+    <value>Lisensi tidak dapat diperiksa saat ini karena layanan kriptografi sistem operasi tidak tersedia. Di Windows, pastikan layanan CNG Key Isolation (KeyIso) sedang berjalan. Lisensi tetap disimpan dan akan diperiksa ulang secara otomatis.</value>
+  </data>
   <data name="Settings.License.ShowDetails" xml:space="preserve">
     <value>Tampilkan detail</value>
   </data>
@@ -17022,6 +17037,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.Network.Tls.FailureCertificateInvalid" xml:space="preserve">
     <value>Sertifikat yang tersimpan tidak valid dan tidak dapat digunakan.</value>
+  </data>
+  <data name="Settings.Network.Tls.FailureCryptographyUnavailable" xml:space="preserve">
+    <value>HTTPS nonaktif karena layanan kriptografi sistem operasi tidak tersedia. Di Windows, pastikan layanan CNG Key Isolation (KeyIso) sedang berjalan, lalu mulai ulang Macro Deck.</value>
   </data>
   <data name="Settings.Network.Tls.FailureGeneric" xml:space="preserve">
     <value>Sertifikat tidak dapat digunakan. Ganti di bawah.</value>
