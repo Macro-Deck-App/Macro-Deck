@@ -9,6 +9,8 @@ changelog:
       - internal
       - area:ci
       - area:e2e
+      - documentation
+      - area:docs
 
   categories:
     - title: 🔐 Security
@@ -65,15 +67,6 @@ changelog:
       labels:
         - area:localization
 
-    - title: 📚 Documentation
-      labels:
-        - documentation
-        - area:docs
-
     - title: ⬆️ Dependencies
       labels:
         - dependencies
-
-    - title: 🛠️ Other Changes
-      labels:
-        - "*"
