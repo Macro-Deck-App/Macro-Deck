@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Companion;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Integrations;
 
 namespace MacroDeckHost.Tests.UnitTests.Companion;
@@ -40,6 +41,64 @@ internal sealed class CompanionDeviceRegistrySdkTests
 					"changed:80", $"ready:{first.ReadySequence}", "changed:70", "gone", "changed:80",
 					$"ready:{second.ReadySequence}"
 				}));
+		});
+	}
+
+	[TestCase(DeviceFormFactor.Phone, CompanionFormFactors.Phone)]
+	[TestCase(DeviceFormFactor.Tablet, CompanionFormFactors.Tablet)]
+	[TestCase(DeviceFormFactor.Desktop, CompanionFormFactors.Desktop)]
+	[TestCase(DeviceFormFactor.Unknown, null)]
+	public async Task A_device_reports_the_form_factor_it_signed_in_with(DeviceFormFactor stored, string? expected)
+	{
+		var harness = new CompanionHarness();
+		var device = harness.AddDevice("Phone", formFactor: stored);
+
+		await harness.ReportAsync("connection-1", device);
+
+		Assert.That(harness.DeviceRegistry.FindDevice(device)!.State.FormFactor, Is.EqualTo(expected));
+	}
+
+	[Test]
+	public async Task A_changed_form_factor_is_reported_from_the_next_connection_on()
+	{
+		var harness = new CompanionHarness();
+		var device = harness.AddDevice("Phone", formFactor: DeviceFormFactor.Phone);
+
+		await harness.ReportAsync("connection-1", device);
+		var first = harness.DeviceRegistry.FindDevice(device)!.State;
+		harness.Devices.Devices.Single(row => row.Id == device).FormFactor = DeviceFormFactor.Tablet;
+		harness.DeviceRegistry.Disconnected("connection-1");
+		await harness.ReportAsync("connection-2", device);
+		var next = harness.DeviceRegistry.FindDevice(device)!.State;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.FormFactor, Is.EqualTo(CompanionFormFactors.Phone));
+			Assert.That(next.FormFactor, Is.EqualTo(CompanionFormFactors.Tablet));
+		});
+	}
+
+	[Test]
+	public async Task A_device_whose_form_factor_cannot_be_read_still_reports_and_gets_it_once_it_can_be_read()
+	{
+		var harness = new CompanionHarness();
+		var device = harness.AddDevice("Phone", formFactor: DeviceFormFactor.Phone);
+		harness.Devices.GetByIdFailure = new InvalidOperationException("database busy");
+		var ready = false;
+		harness.DeviceRegistry.DeviceReady += (_, _) => ready = true;
+
+		await harness.DeviceRegistry.ReportAsync("connection-1", device, WithBattery(55));
+		var failed = harness.DeviceRegistry.FindDevice(device)?.State;
+		harness.Devices.GetByIdFailure = null;
+		await harness.DeviceRegistry.ReportAsync("connection-1", device, WithBattery(54));
+		var recovered = harness.DeviceRegistry.FindDevice(device)?.State;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ready, Is.True);
+			Assert.That(failed?.BatteryLevelPercent, Is.EqualTo(55));
+			Assert.That(failed?.FormFactor, Is.Null);
+			Assert.That(recovered?.FormFactor, Is.EqualTo(CompanionFormFactors.Phone));
 		});
 	}
 

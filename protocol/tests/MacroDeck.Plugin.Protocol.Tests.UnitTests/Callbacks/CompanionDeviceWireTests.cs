@@ -30,7 +30,8 @@ public class CompanionDeviceWireTests
 							RequestableCapabilities
 								= new HashSet<string> { CompanionDeviceCapabilities.ScreenshotFull },
 							ConfirmsCommands = true,
-							NetworkType = CompanionNetworkTypes.Wifi
+							NetworkType = CompanionNetworkTypes.Wifi,
+							FormFactor = CompanionFormFactors.Tablet
 						}))
 				],
 				Revision = 3
@@ -51,6 +52,7 @@ public class CompanionDeviceWireTests
 			Assert.That(device.GetProperty("requestableCapabilities")[0].GetString(), Is.EqualTo("screenshotFull"));
 			Assert.That(device.GetProperty("confirmsCommands").GetBoolean(), Is.True);
 			Assert.That(device.GetProperty("networkType").GetString(), Is.EqualTo("wifi"));
+			Assert.That(device.GetProperty("formFactor").GetString(), Is.EqualTo("tablet"));
 			Assert.That(device.TryGetProperty("model", out _), Is.False);
 		});
 	}
@@ -66,6 +68,32 @@ public class CompanionDeviceWireTests
 		});
 
 		Assert.That(device!.State.Capabilities, Is.EquivalentTo(_screenOnAndUnknown));
+	}
+
+	[Test]
+	public void A_device_pushed_by_a_host_without_form_factors_reads_back_without_one()
+	{
+		var dto = JsonSerializer.Deserialize<CompanionDeviceStateDto>(
+			$$"""{"deviceId":"{{_deviceId:D}}","readySequence":1,"model":"Pixel 8","platform":"Android 14"}""",
+			PluginProtocolJson.Options)!;
+
+		var device = CompanionDeviceWire.ToDevice(dto)!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(device.State.Model, Is.EqualTo("Pixel 8"));
+			Assert.That(device.State.FormFactor, Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_device_without_a_form_factor_is_pushed_without_one()
+	{
+		var json = JsonSerializer.SerializeToElement(
+			CompanionDeviceWire.ToDto(new CompanionDevice(_deviceId, 1, new CompanionDeviceState())),
+			PluginProtocolJson.Options);
+
+		Assert.That(json.TryGetProperty("formFactor", out _), Is.False);
 	}
 
 	[Test]

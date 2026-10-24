@@ -810,13 +810,14 @@ report. Its shape is `CompanionDevicesStateDto`:
 {"type":"host.state","id":"<uuid-v7>","payload":{"api":"companion-devices","data":{"access":"available","revision":12,
  "devices":[{"deviceId":"5d0c6a8e-3b1f-4c2a-9e57-0a1b2c3d4e5f","readySequence":3,"batteryLevelPercent":80,
    "charging":false,"orientation":"landscape","screenBrightnessPercent":60,"model":"SM-X200","platform":"Android 14",
-   "appVersion":"3.0.0","capabilities":["screenOff","screenshotDeck"],"requestableCapabilities":["screenOn","focus"],
+   "appVersion":"3.0.0","formFactor":"tablet","capabilities":["screenOff","screenshotDeck"],"requestableCapabilities":["screenOn","focus"],
    "confirmsCommands":true,"inFocus":true,"networkType":"wifi","networkMetered":false,"networkValidated":true}]}}}
 ```
 
 `access` is `available` or `not-allowed`; `devices` is empty unless it is `available`, and a device that left
 is simply absent. A value the device does not report is absent; percentages are 0 to 100 and texts at most
-64 characters. `readySequence` changes exactly when a device becomes ready again after it was gone.
+64 characters. `formFactor` is `phone`, `tablet` or `desktop`, absent on a host that predates it.
+`readySequence` changes exactly when a device becomes ready again after it was gone.
 `capabilities` and `requestableCapabilities` are open lists: ignore a name you do not know. `revision`
 follows the same rule as the `deck` push: apply a push only when its revision is higher than the last one
 applied in this session. A host without this api never pushes it and answers every `companion-devices`

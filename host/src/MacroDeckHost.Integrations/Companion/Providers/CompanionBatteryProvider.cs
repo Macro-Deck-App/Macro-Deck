@@ -216,6 +216,14 @@ internal sealed class CompanionBatteryProvider : IDisposable
 
 	private static string KindOf(CompanionDeviceState state)
 	{
+		switch (state.FormFactor)
+		{
+			case CompanionFormFactors.Tablet:
+				return BatteryDeviceKinds.Tablet;
+			case CompanionFormFactors.Phone:
+				return BatteryDeviceKinds.Phone;
+		}
+
 		if (StartsWith(state.Model, "iPad") || StartsWith(state.Platform, "iPadOS"))
 		{
 			return BatteryDeviceKinds.Tablet;

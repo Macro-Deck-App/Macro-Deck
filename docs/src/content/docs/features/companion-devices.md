@@ -180,6 +180,7 @@ report, is `null`; percentages are 0 to 100 and texts at most 64 characters.
 | `Orientation` | `portrait` or `landscape` (`CompanionOrientations`). |
 | `ScreenBrightnessPercent` | The screen brightness. |
 | `Model`, `Platform`, `AppVersion` | The device model, its operating system with version (for example `Android 14`), and the Companion app version. |
+| `FormFactor` | `phone`, `tablet` or `desktop` (`CompanionFormFactors`), as the device declared it when it signed in. |
 | `InFocus` | Whether Macro Deck is in front on the device. |
 | `NetworkType` | `wifi`, `cellular`, `ethernet`, `vpn` or `none` (`CompanionNetworkTypes`). |
 | `NetworkMetered`, `NetworkValidated` | Whether the network is metered, and whether it reaches the internet. |
@@ -340,7 +341,8 @@ declaration non-fatally and creates no entries for your plugin.
 
 On a Macro Deck that predates this API, `Access` stays `Unsupported`, `Devices` stays empty, no event is
 raised, `SendAsync` and `WaitForDeviceAsync` answer `false`, and `RequestAsync` and
-`CaptureScreenshotAsync` fail with `NotConnected`. Nothing throws. An `IIntegrationContext` you implemented
+`CaptureScreenshotAsync` fail with `NotConnected`. Nothing throws. A Macro Deck that has the API but predates
+`FormFactor` leaves it `null`. An `IIntegrationContext` you implemented
 yourself against an older SDK, such as a test double, keeps compiling: `CompanionDevices` is a default
 interface member that returns `UnsupportedCompanionDeviceApi.Instance`, which behaves the same way. A
 plugin that uses Companion devices for an optional feature keeps working there with that feature off. Set

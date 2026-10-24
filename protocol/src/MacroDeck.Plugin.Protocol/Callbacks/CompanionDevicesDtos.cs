@@ -43,6 +43,9 @@ public sealed record CompanionDeviceStateDto
 
 	public string? AppVersion { get; init; }
 
+	/// <summary><c>phone</c>, <c>tablet</c> or <c>desktop</c>, as the device declared it when it signed in.</summary>
+	public string? FormFactor { get; init; }
+
 	/// <summary>Capability names, see the SDK's <c>CompanionDeviceCapabilities</c>. A reader ignores names it does
 	/// not know.</summary>
 	public IReadOnlyList<string> Capabilities { get; init; } = [];

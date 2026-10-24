@@ -100,7 +100,7 @@ internal sealed class CompanionAutoCreationTests
 		var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 		harness.Coordinator.BeforeComplete = () => release.Task;
 
-		harness.DeviceRegistry.Report("connection-1", device, CompanionHarness.Report());
+		await harness.DeviceRegistry.ReportAsync("connection-1", device, CompanionHarness.Report());
 		var stateVisible = harness.DeviceRegistry.TryGetState(device, out _);
 		var entriesWhileBlocked = harness.Entries.Count;
 

@@ -353,7 +353,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 					_connectionId,
 					_registeredClientId),
 				"FlushUiSession" => _uiSessions.FlushSession(Arg<FlushUiSessionRequest>(payload, 0), _connectionId),
-				"ReportCompanionState" => ReportCompanionState(Arg<ReportCompanionStateRequest>(payload, 0)),
+				"ReportCompanionState" => await ReportCompanionState(Arg<ReportCompanionStateRequest>(payload, 0)),
 				"SyncCompanionLicense" => await SyncCompanionLicense(Arg<SyncCompanionLicenseRequest?>(payload, 0),
 					cancellationToken),
 				"GetVideoStreams" => VideoStreamUiMapping.ToResponse(_videoStreamProviders.GetProviders()),
@@ -553,7 +553,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		return null;
 	}
 
-	private object? ReportCompanionState(ReportCompanionStateRequest request)
+	private async Task<object?> ReportCompanionState(ReportCompanionStateRequest request)
 	{
 		// The device is taken from the token only, so a client can never report state for another device.
 		if (!Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var deviceId))
@@ -561,7 +561,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			throw new UiWebSocketDispatchException("forbidden");
 		}
 
-		_companions.Report(_connectionId, deviceId, request);
+		await _companions.ReportAsync(_connectionId, deviceId, request);
 		return null;
 	}
 

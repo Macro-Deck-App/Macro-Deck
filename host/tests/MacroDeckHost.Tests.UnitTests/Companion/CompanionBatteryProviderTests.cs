@@ -234,21 +234,29 @@ internal sealed class CompanionBatteryProviderTests
 		Assert.That(batteries.Publishes, Has.Count.EqualTo(before));
 	}
 
-	[TestCase("iPad13,4", "iPadOS 18.2", BatteryDeviceKinds.Tablet)]
-	[TestCase("iPad", "iOS 18.2", BatteryDeviceKinds.Tablet)]
-	[TestCase("iPhone16,1", "iOS 18.2", BatteryDeviceKinds.Phone)]
-	[TestCase(null, "iOS 18.2", BatteryDeviceKinds.Phone)]
-	[TestCase("Pixel 8", "Android 14", BatteryDeviceKinds.Other)]
-	[TestCase(null, null, BatteryDeviceKinds.Other)]
-	public async Task An_ipad_is_a_tablet_an_iphone_a_phone_and_an_undeterminable_device_other(
+	[TestCase("Google Pixel 8", "Android 14", CompanionFormFactors.Phone, BatteryDeviceKinds.Phone)]
+	[TestCase("samsung SM-X200", "Android 14", CompanionFormFactors.Tablet, BatteryDeviceKinds.Tablet)]
+	[TestCase("iPad13,4", "iPadOS 18.2", CompanionFormFactors.Tablet, BatteryDeviceKinds.Tablet)]
+	[TestCase("iPhone16,1", "iOS 18.2", CompanionFormFactors.Phone, BatteryDeviceKinds.Phone)]
+	[TestCase("iPad13,4", "iPadOS 18.2", null, BatteryDeviceKinds.Tablet)]
+	[TestCase("iPad", "iOS 18.2", null, BatteryDeviceKinds.Tablet)]
+	[TestCase("iPhone16,1", "iOS 18.2", null, BatteryDeviceKinds.Phone)]
+	[TestCase(null, "iOS 18.2", null, BatteryDeviceKinds.Phone)]
+	[TestCase("Google Pixel 8", "Android 14", null, BatteryDeviceKinds.Other)]
+	[TestCase("Google Pixel 8", "Android 14", CompanionFormFactors.Desktop, BatteryDeviceKinds.Other)]
+	[TestCase("Google Pixel 8", "Android 14", "watch", BatteryDeviceKinds.Other)]
+	[TestCase(null, null, null, BatteryDeviceKinds.Other)]
+	public async Task The_form_factor_decides_the_kind_and_without_one_an_ipad_is_a_tablet_and_an_iphone_a_phone(
 		string? model,
 		string? platform,
+		string? formFactor,
 		string kind)
 	{
 		var (harness, device) = await WithEntryAsync("Device");
 		var devices = new ScriptedCompanionDevices();
 		devices.Connect(device,
-			new CompanionDeviceState { BatteryLevelPercent = 50, Model = model, Platform = platform });
+			new CompanionDeviceState
+				{ BatteryLevelPercent = 50, Model = model, Platform = platform, FormFactor = formFactor });
 		var (integration, batteries) = await StartAsync(harness, devices);
 
 		var published = batteries.Latest(CompanionBatteryProvider.IdFor(device));
