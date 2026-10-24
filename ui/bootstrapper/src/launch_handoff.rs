@@ -133,11 +133,15 @@ pub fn hand_over(app: &AppHandle, executable: PathBuf, argv: Vec<String>, cwd: S
 mod tests {
     use super::*;
 
-    fn record(version: &str, executable: &str) -> Option<LaunchRecord> {
+    fn record(version: &str, executable: PathBuf) -> Option<LaunchRecord> {
         Some(LaunchRecord {
             version: version.to_string(),
-            executable: PathBuf::from(executable),
+            executable,
         })
+    }
+
+    fn installed(name: &str) -> PathBuf {
+        std::env::temp_dir().join(name)
     }
 
     const JUST_NOW: Option<Duration> = Some(Duration::from_secs(1));
@@ -149,14 +153,12 @@ mod tests {
                 "3.0.0-beta.19",
                 record(
                     "3.0.0-beta.20",
-                    "/home/user/Macro Deck_3.0.0-beta.20_amd64.AppImage"
+                    installed("Macro Deck_3.0.0-beta.20_amd64.AppImage")
                 ),
                 JUST_NOW,
                 |_| true
             ),
-            Some(PathBuf::from(
-                "/home/user/Macro Deck_3.0.0-beta.20_amd64.AppImage"
-            ))
+            Some(installed("Macro Deck_3.0.0-beta.20_amd64.AppImage"))
         );
     }
 
@@ -165,7 +167,7 @@ mod tests {
         assert_eq!(
             handoff_target(
                 "3.0.0-beta.19",
-                record("3.0.0-beta.19", "/opt/md.AppImage"),
+                record("3.0.0-beta.19", installed("md.AppImage")),
                 JUST_NOW,
                 |_| true
             ),
@@ -178,7 +180,7 @@ mod tests {
         assert_eq!(
             handoff_target(
                 "3.0.0-beta.19",
-                record("3.0.0-beta.20", "/opt/md.AppImage"),
+                record("3.0.0-beta.20", installed("md.AppImage")),
                 Some(Duration::from_secs(31)),
                 |_| true
             ),
@@ -187,7 +189,7 @@ mod tests {
         assert_eq!(
             handoff_target(
                 "3.0.0-beta.19",
-                record("3.0.0-beta.20", "/opt/md.AppImage"),
+                record("3.0.0-beta.20", installed("md.AppImage")),
                 None,
                 |_| true
             ),
@@ -200,7 +202,7 @@ mod tests {
         assert_eq!(
             handoff_target(
                 "3.0.0-beta.19",
-                record("3.0.0-beta.20", "md.AppImage"),
+                record("3.0.0-beta.20", PathBuf::from("md.AppImage")),
                 JUST_NOW,
                 |_| true
             ),
@@ -209,7 +211,7 @@ mod tests {
         assert_eq!(
             handoff_target(
                 "3.0.0-beta.19",
-                record("3.0.0-beta.20", "/opt/md.AppImage"),
+                record("3.0.0-beta.20", installed("md.AppImage")),
                 JUST_NOW,
                 |_| false
             ),
