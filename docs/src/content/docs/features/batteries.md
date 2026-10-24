@@ -308,8 +308,9 @@ reported a battery level, from `IIntegrationContext.CompanionDevices` alone (see
 [`CompanionBatteryProvider.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/Companion/Providers/CompanionBatteryProvider.cs).
 
 - **One device per Companion configuration.** The id is a hash of the configuration's id, stable across
-  reconnects and restarts, and the name is the configuration's title. An iPad is a `tablet` and an iPhone a
-  `phone`; the app reports no form factor, so an Android device is `other`.
+  reconnects and restarts, and the name is the configuration's title. The kind follows the device's
+  [`FormFactor`](/features/companion-devices/#what-a-device-reports): `tablet` or `phone`. A device without
+  one is a `tablet` when it is an iPad, a `phone` when it is an iPhone, and `other` otherwise.
 - **Events only.** It publishes when a device reports its state, connects or disconnects, and when
   configurations change. A disconnected device stays published as not connected until the integration
   stops; after a restart it returns once it connects and reports a level.

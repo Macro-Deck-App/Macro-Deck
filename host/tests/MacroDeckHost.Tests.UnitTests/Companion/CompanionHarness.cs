@@ -157,10 +157,14 @@ internal sealed class CompanionHarness
 	public IReadOnlyList<ConfigEntryRecord> Entries
 		=> Store.Entries.Where(entry => entry.IntegrationId == IntegrationId).ToList();
 
-	public Guid AddDevice(string name, DeviceClientType clientType = DeviceClientType.Native)
+	public Guid AddDevice(
+		string name,
+		DeviceClientType clientType = DeviceClientType.Native,
+		DeviceFormFactor formFactor = DeviceFormFactor.Unknown)
 	{
 		var id = Guid.NewGuid();
-		Devices.Devices.Add(new DeviceEntity { Id = id, SecretHash = "hash", Name = name, ClientType = clientType });
+		Devices.Devices.Add(new DeviceEntity
+			{ Id = id, SecretHash = "hash", Name = name, ClientType = clientType, FormFactor = formFactor });
 		return id;
 	}
 
@@ -171,7 +175,7 @@ internal sealed class CompanionHarness
 
 	public async Task ReportAsync(string connectionId, Guid deviceId, ReportCompanionStateRequest? report = null)
 	{
-		DeviceRegistry.Report(connectionId, deviceId, report ?? Report());
+		await DeviceRegistry.ReportAsync(connectionId, deviceId, report ?? Report());
 		await DeviceRegistry.CreationFor(deviceId).WaitAsync(TimeSpan.FromSeconds(5));
 		await DeviceRegistry.WakeOnLanSent.WaitAsync(TimeSpan.FromSeconds(5));
 	}

@@ -100,7 +100,7 @@ internal sealed class CompanionDeviceRemovalTests
 			return release.Task;
 		};
 
-		harness.DeviceRegistry.Report("connection-1", device, CompanionHarness.Report());
+		await harness.DeviceRegistry.ReportAsync("connection-1", device, CompanionHarness.Report());
 		var creation = harness.DeviceRegistry.CreationFor(device);
 		await entered.Task.WaitAsync(TimeSpan.FromSeconds(5));
 		harness.RemoveDeviceRow(device);

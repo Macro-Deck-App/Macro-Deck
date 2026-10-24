@@ -151,9 +151,16 @@ internal sealed class InMemoryDeviceRepository : IDeviceRepository
 	/// <summary>How often a device was read back. An idle device session must not raise it.</summary>
 	public int Reads { get; private set; }
 
+	public Exception? GetByIdFailure { get; set; }
+
 	public Task<DeviceEntity?> GetById(Guid id)
 	{
 		Reads++;
+		if (GetByIdFailure is not null)
+		{
+			return Task.FromException<DeviceEntity?>(GetByIdFailure);
+		}
+
 		return Task.FromResult(Devices.FirstOrDefault(d => d.Id == id));
 	}
 

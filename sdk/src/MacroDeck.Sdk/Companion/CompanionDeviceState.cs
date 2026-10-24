@@ -23,6 +23,12 @@ public sealed record CompanionDeviceState
 	/// <summary>The version of the Companion app.</summary>
 	public string? AppVersion { get; init; }
 
+	/// <summary>
+	/// One of <see cref="CompanionFormFactors" />, as the device declared it when it signed in, or <c>null</c> when it
+	/// declared none or the host predates this property.
+	/// </summary>
+	public string? FormFactor { get; init; }
+
 	/// <summary>The capabilities the device can use right now, from <see cref="CompanionDeviceCapabilities" />.</summary>
 	public IReadOnlySet<string> Capabilities { get; init; } = new HashSet<string>(StringComparer.Ordinal);
 

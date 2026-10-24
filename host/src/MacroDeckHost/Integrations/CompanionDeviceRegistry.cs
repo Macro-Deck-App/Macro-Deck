@@ -60,6 +60,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 	private readonly ILogger _logger;
 	private readonly Lock _connectionGate = new();
 	private readonly Dictionary<string, Guid> _connections = new(StringComparer.Ordinal);
+	private readonly HashSet<string> _unreadFormFactors = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<Guid, CompanionDevice> _states = new();
 	private long _nextReadySequence;
 	private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _deviceGates = new();
@@ -126,8 +127,16 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		return _states.GetValueOrDefault(deviceId);
 	}
 
-	public void Report(string connectionId, Guid deviceId, ReportCompanionStateRequest report)
+	public async Task ReportAsync(string connectionId, Guid deviceId, ReportCompanionStateRequest report)
 	{
+		bool resolved;
+		lock (_connectionGate)
+		{
+			resolved = _connections.ContainsKey(connectionId) && !_unreadFormFactors.Contains(connectionId);
+		}
+
+		var (read, formFactor) = resolved ? (true, null) : await ReadFormFactorAsync(deviceId);
+
 		bool firstOfConnection;
 		bool ready;
 		CompanionDevice device;
@@ -135,9 +144,22 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		{
 			firstOfConnection = _connections.TryAdd(connectionId, deviceId);
 			ready = !_states.TryGetValue(deviceId, out var previous);
+			if (resolved)
+			{
+				formFactor = previous?.State.FormFactor;
+			}
+			else if (read)
+			{
+				_unreadFormFactors.Remove(connectionId);
+			}
+			else
+			{
+				_unreadFormFactors.Add(connectionId);
+			}
+
 			device = new CompanionDevice(deviceId,
 				previous?.ReadySequence ?? ++_nextReadySequence,
-				Sanitize(report));
+				Sanitize(report, formFactor));
 			_states[deviceId] = device;
 		}
 
@@ -223,6 +245,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			Guid deviceId;
 			lock (_connectionGate)
 			{
+				_unreadFormFactors.Remove(connectionId);
 				if (!_connections.Remove(connectionId, out deviceId) || _connections.ContainsValue(deviceId))
 				{
 					return;
@@ -587,6 +610,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 					.ToList())
 				{
 					_connections.Remove(connectionId);
+					_unreadFormFactors.Remove(connectionId);
 				}
 
 				wasConnected = _states.TryRemove(deviceId, out _);
@@ -704,7 +728,28 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		return _deviceGates.GetOrAdd(deviceId, _ => new SemaphoreSlim(1, 1));
 	}
 
-	private static CompanionDeviceState Sanitize(ReportCompanionStateRequest report)
+	private async Task<(bool Read, string? FormFactor)> ReadFormFactorAsync(Guid deviceId)
+	{
+		try
+		{
+			await using var scope = _scopeFactory.CreateAsyncScope();
+			var device = await scope.ServiceProvider.GetRequiredService<IDeviceRepository>().GetById(deviceId);
+			return (true, device?.FormFactor switch
+			{
+				DeviceFormFactor.Phone => CompanionFormFactors.Phone,
+				DeviceFormFactor.Tablet => CompanionFormFactors.Tablet,
+				DeviceFormFactor.Desktop => CompanionFormFactors.Desktop,
+				_ => null
+			});
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "Could not read the form factor of Companion device {DeviceId}", deviceId);
+			return (false, null);
+		}
+	}
+
+	private static CompanionDeviceState Sanitize(ReportCompanionStateRequest report, string? formFactor)
 	{
 		var capabilities = (report.Capabilities ?? [])
 			.Where(_knownCapabilities.Contains)
@@ -720,6 +765,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			Model = Text(report.Model),
 			Platform = Text(report.Platform),
 			AppVersion = Text(report.AppVersion),
+			FormFactor = formFactor,
 			Capabilities = capabilities,
 			ConfirmsCommands = report.RequestableCapabilities is not null,
 			RequestableCapabilities = (report.RequestableCapabilities ?? [])

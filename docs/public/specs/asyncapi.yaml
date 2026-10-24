@@ -1254,6 +1254,11 @@ components:
           type: string
         appVersion:
           type: string
+        formFactor:
+          type: string
+          description: >-
+            phone, tablet or desktop, as the device declared it when it signed in. Absent when it declared none
+            or the host predates it.
         capabilities:
           type: array
           items:

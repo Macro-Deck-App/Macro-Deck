@@ -260,7 +260,7 @@ public class CompanionAppServiceTests
 
 		var report = CompanionHarness.Report("26.0.3");
 		report.BatteryLevelPercent = 42;
-		fixture.Harness.DeviceRegistry.Report("c1", device, report);
+		await fixture.Harness.DeviceRegistry.ReportAsync("c1", device, report);
 		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
 		Assert.That(fixture.Announcements, Is.EqualTo(announced));
