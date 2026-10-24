@@ -389,10 +389,22 @@
       }
       @case (types.Code) {
         <shared-code-editor
-          [value]="stringValue()"
+          #codeEditor
+          [value]="contentResource() ? '' : stringValue()"
           [language]="language() ?? 'text'"
+          [rows]="codeRows()"
           [placeholder]="placeholder()"
-          (valueChange)="onChange($event)" />
+          [variableInsertFormat]="variableInsertFormat()"
+          [contentResource]="contentResource()"
+          [contentUploader]="contentUploader"
+          (valueChange)="onChange($event)">
+          @if (variableInsertFormat()) {
+            <shared-variable-picker
+              codeEditorVariablePicker
+              [variables]="codeVariables()"
+              (pick)="codeEditor.insertVariable($event)" />
+          }
+        </shared-code-editor>
       }
       @case (types.KeyValue) {
         <shared-keyvalue-editor [value]="recordValue()" (valueChange)="onChange($event)" />

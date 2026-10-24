@@ -66,6 +66,20 @@ public class UserVariableApiCompatibilityTests
 	}
 
 	[Test]
+	public async Task An_implementation_written_before_reads_reports_that_it_does_not_support_them()
+	{
+		IUserVariableApi api = new ApplyOnlyUserVariableApi();
+
+		var result = await api.ReadInContextAsync("count", new UserVariableContext("widget-1"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(UserVariableReadStatus.NotSupported));
+			Assert.That(result.Value, Is.Null);
+		});
+	}
+
+	[Test]
 	public void The_context_of_an_executing_step_names_its_widget_script_and_automation()
 	{
 		var context = UserVariableContext.From(new ActionExecutionContext

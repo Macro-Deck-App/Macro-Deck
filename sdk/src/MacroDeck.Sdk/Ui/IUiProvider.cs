@@ -21,6 +21,16 @@ public interface IUiProvider
 	/// </remarks>
 	IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; }
 
+	/// <summary>The pages this provider adds as tabs to its integration's page in the Macro Deck app, in the
+	/// order they are shown. Empty by default.</summary>
+	/// <remarks>
+	/// Read like <see cref="Surfaces" />, so the same rules apply: side-effect free and independent of a live
+	/// connection or completed configuration. A provider that declares pages must also declare a <c>page</c>
+	/// surface in <see cref="Surfaces" />, or Macro Deck ignores them. Macro Deck builds that predate pages,
+	/// and every client that cannot show them, ignore this list.
+	/// </remarks>
+	IReadOnlyList<UiPageDeclaration> Pages => [];
+
 	/// <summary>
 	/// Creates a session for the requested surface, or returns <c>null</c> to decline it - which is the
 	/// correct answer for a surface kind this provider does not serve, and is not an error.

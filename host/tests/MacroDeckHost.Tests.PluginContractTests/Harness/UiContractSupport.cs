@@ -153,6 +153,8 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 
 	public string SessionMode { get; set; } = "exclusive";
 
+	public IReadOnlyList<UiPageDescriptorDto>? Pages { get; set; }
+
 	public List<string> Flushes { get; } = [];
 
 	public bool SupportsFlush { get; set; } = true;
@@ -180,7 +182,8 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 				return CapabilityInvocationResult.Ok(new UiDescribePayload
 				{
 					Surfaces = [new UiSurfaceDescriptorDto { Kind = SurfaceKind, SessionMode = SessionMode }],
-					UiModelVersion = 1
+					UiModelVersion = 1,
+					Pages = Pages
 				});
 
 			case CapabilityOperations.Ui.SessionOpen:

@@ -3612,6 +3612,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Forms.CodeEditor.InvalidJson" xml:space="preserve">
     <value>잘못된 JSON</value>
   </data>
+  <data name="Forms.CodeEditor.LoadFailed" xml:space="preserve">
+    <value>텍스트를 불러올 수 없습니다.</value>
+  </data>
+  <data name="Forms.CodeEditor.UploadFailed" xml:space="preserve">
+    <value>변경 사항을 업로드할 수 없습니다. 다시 시도하려면 텍스트를 편집하세요.</value>
+  </data>
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>수정자 추가</value>
   </data>
@@ -4690,6 +4696,601 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Adb.Variables.DeviceScreenOn" xml:space="preserve">
     <value>기기 화면 켜짐</value>
   </data>
+  <data name="Integrations.AutoHotkey.Actions.OpenWindowSpy.Description" xml:space="preserve">
+    <value>설치된 AutoHotkey의 Window Spy를 열어 창 제목, 클래스, 컨트롤을 확인합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.OpenWindowSpy.Name" xml:space="preserve">
+    <value>Window Spy 열기</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Restart.Description" xml:space="preserve">
+    <value>Macro Deck이 시작한 AutoHotkey 스크립트를 중지하고 새 매개변수로 다시 시작합니다. 실행 중이 아니면 시작합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Restart.Name" xml:space="preserve">
+    <value>AutoHotkey 스크립트 다시 시작</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunFile.Description" xml:space="preserve">
+    <value>저장된 위치에서 AutoHotkey v2 .ahk 파일을 실행합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunFile.Name" xml:space="preserve">
+    <value>AutoHotkey 파일 실행</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunInlineCode.Description" xml:space="preserve">
+    <value>이 액션에 작성한 AutoHotkey v2 코드를 실행합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunInlineCode.Name" xml:space="preserve">
+    <value>인라인 AutoHotkey 코드 실행</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunScript.Description" xml:space="preserve">
+    <value>AutoHotkey 연동의 스크립트 라이브러리에 있는 AutoHotkey 스크립트를 실행합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunScript.Name" xml:space="preserve">
+    <value>AutoHotkey 스크립트 실행</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Stop.Description" xml:space="preserve">
+    <value>Macro Deck이 시작한 AutoHotkey 스크립트를 중지합니다. 먼저 스크립트에 종료를 요청하고, 종료되지 않으면 강제로 끝냅니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Stop.Name" xml:space="preserve">
+    <value>AutoHotkey 스크립트 중지</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Toggle.Description" xml:space="preserve">
+    <value>Macro Deck이 AutoHotkey 스크립트를 실행하고 있지 않으면 시작하고, 실행 중이면 중지합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Toggle.Name" xml:space="preserve">
+    <value>AutoHotkey 스크립트 전환</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.AutomaticOption" xml:space="preserve">
+    <value>자동으로 찾기</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.Description" xml:space="preserve">
+    <value>Macro Deck은 이 컴퓨터에 설치된 AutoHotkey v2로 AutoHotkey 스크립트를 실행합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DetectedExecutableLabel" xml:space="preserve">
+    <value>사용 중인 AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DetectedVersionLabel" xml:space="preserve">
+    <value>AutoHotkey 버전</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DownloadLinkLabel" xml:space="preserve">
+    <value>AutoHotkey 다운로드</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.EnableFirst" xml:space="preserve">
+    <value>설정을 변경하려면 AutoHotkey 연동을 활성화하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableDoesNotRun" xml:space="preserve">
+    <value>이 AutoHotkey 실행 파일이 시작되지 않았습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableInvalid" xml:space="preserve">
+    <value>AutoHotkey .exe 파일의 전체 경로를 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableModeLabel" xml:space="preserve">
+    <value>AutoHotkey 실행 파일</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableNotFound" xml:space="preserve">
+    <value>이 파일이 존재하지 않습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableNotVersion2" xml:space="preserve">
+    <value>AutoHotkey v2가 아닙니다. Macro Deck은 AutoHotkey v2만 지원합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutablePathDescription" xml:space="preserve">
+    <value>포터블 버전 등 AutoHotkey v2 설치의 AutoHotkey64.exe 또는 AutoHotkey32.exe입니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutablePathLabel" xml:space="preserve">
+    <value>실행 파일</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.GracePeriodDescription" xml:space="preserve">
+    <value>중지 중인 AutoHotkey 스크립트가 Macro Deck에 의해 강제 종료되기 전에 종료 루틴을 실행할 수 있는 시간입니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.GracePeriodLabel" xml:space="preserve">
+    <value>중지 유예 시간(초)</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ManualOption" xml:space="preserve">
+    <value>실행 파일 선택</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.NotDetected" xml:space="preserve">
+    <value>이 컴퓨터에서 AutoHotkey v2를 찾을 수 없습니다. 설치하거나 아래에서 실행 파일을 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.Title" xml:space="preserve">
+    <value>AutoHotkey 설정</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.UnknownStep" xml:space="preserve">
+    <value>알 수 없는 설정 단계입니다. 설정을 다시 시작하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.AlreadyRunning" xml:space="preserve">
+    <value>AutoHotkey 스크립트 {name}이(가) 이미 실행 중입니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.CheckTimedOut" xml:space="preserve">
+    <value>구문 검사가 제시간에 끝나지 않았습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.ExitCode" xml:space="preserve">
+    <value>AutoHotkey 스크립트 {name}이(가) 코드 {code}(으)로 종료되었습니다.</value>
+    <comment>[name:string][code:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.FileNotFound" xml:space="preserve">
+    <value>AutoHotkey 파일이 존재하지 않습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.InvalidParameterName" xml:space="preserve">
+    <value>{name}은(는) 올바른 매개변수 이름이 아닙니다. 문자, 숫자, 밑줄을 사용하고 숫자로 시작하지 마세요.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.InvalidParameterValue" xml:space="preserve">
+    <value>매개변수 값에 AutoHotkey가 받을 수 없는 문자가 포함되어 있습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LibraryUnreadable" xml:space="preserve">
+    <value>AutoHotkey 스크립트 라이브러리를 읽을 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LoadFailed" xml:space="preserve">
+    <value>{line}번 줄의 오류로 인해 AutoHotkey 스크립트 {name}을(를) 불러올 수 없습니다.</value>
+    <comment>[name:string][line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LoadFailedNoLine" xml:space="preserve">
+    <value>AutoHotkey 스크립트 {name}을(를) 불러올 수 없습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoCode" xml:space="preserve">
+    <value>실행할 AutoHotkey 코드를 입력하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoFileSelected" xml:space="preserve">
+    <value>AutoHotkey 파일을 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoScriptSelected" xml:space="preserve">
+    <value>AutoHotkey 스크립트를 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NotInstalled" xml:space="preserve">
+    <value>AutoHotkey v2를 사용할 수 없습니다. AutoHotkey 연동을 확인하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.RuntimeError" xml:space="preserve">
+    <value>AutoHotkey 스크립트 {name}이(가) {line}번 줄에서 오류로 중지되었습니다.</value>
+    <comment>[name:string][line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.RuntimeErrorNoLine" xml:space="preserve">
+    <value>AutoHotkey 스크립트 {name}이(가) 오류로 중지되었습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.ScriptNotFound" xml:space="preserve">
+    <value>AutoHotkey 스크립트가 더 이상 존재하지 않습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.SourceUnreadable" xml:space="preserve">
+    <value>AutoHotkey 스크립트 {name}을(를) 읽을 수 없습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.StartFailed" xml:space="preserve">
+    <value>AutoHotkey 스크립트 {name}을(를) 시작할 수 없습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.TimedOut" xml:space="preserve">
+    <value>AutoHotkey 스크립트 {name}이(가) 제시간에 끝나지 않아 중지되었습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.TooManyRuns" xml:space="preserve">
+    <value>실행 중인 AutoHotkey 스크립트가 너무 많습니다. 하나를 중지하고 다시 시도하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WindowSpyFailed" xml:space="preserve">
+    <value>Window Spy를 시작할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WindowSpyNotFound" xml:space="preserve">
+    <value>AutoHotkey 설치에서 Window Spy를 찾을 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WorkingDirectoryNotFound" xml:space="preserve">
+    <value>작업 폴더가 존재하지 않습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.Category" xml:space="preserve">
+    <value>AutoHotkey 스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.DurationLabel" xml:space="preserve">
+    <value>소요 시간(밀리초)</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitCodeLabel" xml:space="preserve">
+    <value>종료 코드</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitedDescription" xml:space="preserve">
+    <value>Macro Deck이 시작한 AutoHotkey 스크립트가 종료되었습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitedName" xml:space="preserve">
+    <value>AutoHotkey 스크립트 종료됨</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.FailedDescription" xml:space="preserve">
+    <value>AutoHotkey 스크립트를 시작하거나 불러올 수 없었거나, 스크립트가 오류를 보고했거나, 제시간에 끝나지 않았습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.FailedName" xml:space="preserve">
+    <value>AutoHotkey 스크립트 실패</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonLabel" xml:space="preserve">
+    <value>사유</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonLoadError" xml:space="preserve">
+    <value>불러올 수 없음</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonRuntimeError" xml:space="preserve">
+    <value>오류 보고됨</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonStartFailed" xml:space="preserve">
+    <value>시작할 수 없음</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonTimeout" xml:space="preserve">
+    <value>제시간에 끝나지 않음</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ScriptLabel" xml:space="preserve">
+    <value>AutoHotkey 스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.StartedDescription" xml:space="preserve">
+    <value>Macro Deck이 시작한 AutoHotkey 스크립트가 실행 중입니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.StartedName" xml:space="preserve">
+    <value>AutoHotkey 스크립트 시작됨</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.NoAnswer" xml:space="preserve">
+    <value>Macro Deck이 제시간에 응답하지 않았습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.RequestRejected" xml:space="preserve">
+    <value>스크립트가 메시지를 너무 많이 보냈거나 너무 긴 메시지를 보내서 Macro Deck이 이 요청을 거부했습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableInvalidName" xml:space="preserve">
+    <value>{name}은(는) 올바른 Macro Deck 변수 이름이 아닙니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableNotFound" xml:space="preserve">
+    <value>Macro Deck 변수 {name}을(를) 찾을 수 없습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableUnavailable" xml:space="preserve">
+    <value>지금은 Macro Deck 변수 {name}을(를) 읽을 수 없습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.InlineCodeName" xml:space="preserve">
+    <value>인라인 AutoHotkey 코드</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.CheckAgain" xml:space="preserve">
+    <value>다시 확인</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.ChooseExecutable" xml:space="preserve">
+    <value>AutoHotkey v2를 여전히 사용할 수 없습니다. 설정에서 실행 파일을 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.Found" xml:space="preserve">
+    <value>AutoHotkey {version}을(를) 찾았습니다.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryReadable" xml:space="preserve">
+    <value>AutoHotkey 스크립트 라이브러리를 다시 읽을 수 있습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryStillUnreadable" xml:space="preserve">
+    <value>AutoHotkey 스크립트 라이브러리를 여전히 읽을 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableAction" xml:space="preserve">
+    <value>다시 시도</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableDescription" xml:space="preserve">
+    <value>저장된 AutoHotkey 스크립트 목록이 손상되었습니다. 다시 읽을 수 있을 때까지 Macro Deck은 목록을 변경하지 않습니다. 복구하려면 백업을 복원하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableTitle" xml:space="preserve">
+    <value>AutoHotkey 스크립트를 읽을 수 없음</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotFoundDescription" xml:space="preserve">
+    <value>AutoHotkey v2를 설치하거나 AutoHotkey 설정에서 실행 파일을 선택하세요. 그 전까지는 AutoHotkey 스크립트를 실행할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotFoundTitle" xml:space="preserve">
+    <value>AutoHotkey를 찾을 수 없음</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotRunnableDescription" xml:space="preserve">
+    <value>AutoHotkey 실행 파일이 시작되지 않았습니다. AutoHotkey v2를 다시 설치하거나 AutoHotkey 설정에서 다른 실행 파일을 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotRunnableTitle" xml:space="preserve">
+    <value>AutoHotkey가 시작되지 않음</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotVersion2Description" xml:space="preserve">
+    <value>이 컴퓨터에서 찾은 AutoHotkey는 버전 2가 아닙니다. Macro Deck은 AutoHotkey v2만 지원합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotVersion2Title" xml:space="preserve">
+    <value>AutoHotkey v2 필요</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Migration.EnableIntegration" xml:space="preserve">
+    <value>AutoHotkey 연동을 활성화하고 AutoHotkey v2를 설치하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Migration.TemplatePlaceholders" xml:space="preserve">
+    <value>이 코드는 더 이상 채워지지 않는 Macro Deck 2 변수 자리 표시자를 사용했습니다. 값을 매개변수로 전달하고 MacroDeck.Params 또는 MacroDeck.GetVar로 읽으세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.CheckSyntaxButton" xml:space="preserve">
+    <value>구문 검사</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ChooseExportFolder" xml:space="preserve">
+    <value>먼저 내보낼 폴더를 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ChooseImportFile" xml:space="preserve">
+    <value>먼저 가져올 .ahk 파일을 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.CopyName" xml:space="preserve">
+    <value>{name} 사본</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DeleteMessage" xml:space="preserve">
+    <value>{name}이(가) 삭제됩니다. 이 스크립트를 실행하는 버튼은 다른 스크립트를 선택할 때까지 실패합니다. 이 작업은 되돌릴 수 없습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DeleteTitle" xml:space="preserve">
+    <value>스크립트를 삭제하시겠습니까?</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DiscardButton" xml:space="preserve">
+    <value>변경 사항 버리기</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DownloadButton" xml:space="preserve">
+    <value>AutoHotkey 다운로드</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DurationLabel" xml:space="preserve">
+    <value>소요 시간</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.EditorLabel" xml:space="preserve">
+    <value>스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ErrorNoLine" xml:space="preserve">
+    <value>오류: {message}</value>
+    <comment>[message:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ErrorWithLine" xml:space="preserve">
+    <value>{line}번 줄 오류: {message}</value>
+    <comment>[line:int][message:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportButton" xml:space="preserve">
+    <value>내보내기</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportExistsMessage" xml:space="preserve">
+    <value>이 폴더에 {file}이(가) 이미 있습니다. 바꾸시겠습니까?</value>
+    <comment>[file:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportExistsTitle" xml:space="preserve">
+    <value>파일을 바꾸시겠습니까?</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportFolderLabel" xml:space="preserve">
+    <value>내보낼 폴더</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Exported" xml:space="preserve">
+    <value>{file}(으)로 내보냈습니다.</value>
+    <comment>[file:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportButton" xml:space="preserve">
+    <value>가져오기</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportFileLabel" xml:space="preserve">
+    <value>.ahk 파일 가져오기</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportNotUtf8" xml:space="preserve">
+    <value>이 파일은 UTF-8 텍스트가 아닙니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportNote" xml:space="preserve">
+    <value>가져온 스크립트는 사용자의 권한으로 실행됩니다. 신뢰할 수 있는 스크립트만 가져오세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportTooLarge" xml:space="preserve">
+    <value>이 파일은 1 MiB보다 큽니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Imported" xml:space="preserve">
+    <value>{name}을(를) 가져왔습니다.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportedName" xml:space="preserve">
+    <value>가져온 AutoHotkey 스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.InvalidName" xml:space="preserve">
+    <value>최대 100자의 이름을 입력하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.LibraryReadOnlyBanner" xml:space="preserve">
+    <value>스크립트 목록을 읽을 수 없어 변경할 수 없습니다. 복구하려면 백업을 복원하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoScriptsText" xml:space="preserve">
+    <value>스크립트를 만들거나 .ahk 파일을 가져오세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoScriptsTitle" xml:space="preserve">
+    <value>아직 스크립트가 없습니다</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoSelectionText" xml:space="preserve">
+    <value>편집하고 실행하려면 목록에서 스크립트를 선택하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoSelectionTitle" xml:space="preserve">
+    <value>선택된 스크립트가 없습니다</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NotInstalledBanner" xml:space="preserve">
+    <value>AutoHotkey v2를 찾을 수 없습니다. 스크립트를 편집할 수는 있지만 AutoHotkey v2를 설치하기 전까지는 실행할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NotRunYet" xml:space="preserve">
+    <value>아직 실행하지 않음</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.OperationFailed" xml:space="preserve">
+    <value>이 변경을 적용할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ReplaceButton" xml:space="preserve">
+    <value>교체</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ResultLabel" xml:space="preserve">
+    <value>결과</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.RunHeading" xml:space="preserve">
+    <value>마지막 실행</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.RunStatusLabel" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SaveButton" xml:space="preserve">
+    <value>저장</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Saved" xml:space="preserve">
+    <value>저장되었습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ScriptGone" xml:space="preserve">
+    <value>이 스크립트는 더 이상 존재하지 않습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Seconds" xml:space="preserve">
+    <value>{seconds}초</value>
+    <comment>[seconds:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SettingsHeading" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SourceReadOnlyBanner" xml:space="preserve">
+    <value>이 스크립트를 읽을 수 없어 변경할 수 없습니다. 복구하려면 백업을 복원하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StartWithMacroDeckDescription" xml:space="preserve">
+    <value>Macro Deck이 시작될 때마다 스크립트를 시작합니다. 항상 작동해야 하는 단축키 등에 사용하세요.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StartWithMacroDeckLabel" xml:space="preserve">
+    <value>Macro Deck 시작 시 실행</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusExited" xml:space="preserve">
+    <value>코드 {code}(으)로 종료됨</value>
+    <comment>[code:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusFailedToStart" xml:space="preserve">
+    <value>시작 실패</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusStarting" xml:space="preserve">
+    <value>시작 중</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusTimedOut" xml:space="preserve">
+    <value>시간 초과</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StopButton" xml:space="preserve">
+    <value>중지</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxError" xml:space="preserve">
+    <value>{line}번 줄에 구문 오류가 있습니다.</value>
+    <comment>[line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxErrorNoLine" xml:space="preserve">
+    <value>스크립트에 구문 오류가 있습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxOk" xml:space="preserve">
+    <value>구문 오류가 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Title" xml:space="preserve">
+    <value>스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.TooLarge" xml:space="preserve">
+    <value>스크립트가 1 MiB보다 커서 저장할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.UploadFailed" xml:space="preserve">
+    <value>최근 변경 사항이 Macro Deck에 전달되지 않았습니다. 편집기가 변경 사항을 보낼 수 있을 때까지 저장할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.WorkingDirectoryDescription" xml:space="preserve">
+    <value>스크립트가 시작되는 폴더입니다. 비워 두면 실행할 때마다 임시 폴더를 사용합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentLabel" xml:space="preserve">
+    <value>인수</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentsDescription" xml:space="preserve">
+    <value>A_Args로 스크립트에 전달됩니다. 각 인수에 변수를 사용할 수 있습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentsLabel" xml:space="preserve">
+    <value>인수</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.CodeDescription" xml:space="preserve">
+    <value>값은 매개변수나 MacroDeck.GetVar를 통해 코드에 전달되며, 코드에 직접 삽입되지 않습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.CodeLabel" xml:space="preserve">
+    <value>AutoHotkey 코드</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.FileLabel" xml:space="preserve">
+    <value>AutoHotkey 파일</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.IncludeHelperDescription" xml:space="preserve">
+    <value>스크립트에서 MacroDeck.SetVar, GetVar, Notify, SetResult, Log를 사용할 수 있게 합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.IncludeHelperLabel" xml:space="preserve">
+    <value>Macro Deck 도우미 포함</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.OutputVariableDescription" xml:space="preserve">
+    <value>스크립트가 MacroDeck.SetResult로 설정한 텍스트를 받으며, 없으면 스크립트의 출력을 받습니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.OutputVariableLabel" xml:space="preserve">
+    <value>출력 변수</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ParametersDescription" xml:space="preserve">
+    <value>스크립트는 MacroDeck.Params["name"]으로 읽습니다. 이름에는 문자, 숫자, 밑줄을 사용합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ParametersLabel" xml:space="preserve">
+    <value>매개변수</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ScriptLabel" xml:space="preserve">
+    <value>AutoHotkey 스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ScriptPlaceholder" xml:space="preserve">
+    <value>AutoHotkey 스크립트 선택</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.StopAllDescription" xml:space="preserve">
+    <value>끄면 가장 최근에 시작된 인스턴스만 중지됩니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.StopAllLabel" xml:space="preserve">
+    <value>모든 인스턴스 중지</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetFile" xml:space="preserve">
+    <value>AutoHotkey 파일</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetLabel" xml:space="preserve">
+    <value>대상</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetManaged" xml:space="preserve">
+    <value>라이브러리의 AutoHotkey 스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TimeoutDescription" xml:space="preserve">
+    <value>스크립트가 이 시간보다 오래 실행되면 Macro Deck이 중지합니다. 최대 9분입니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TimeoutLabel" xml:space="preserve">
+    <value>시간 제한</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WaitDescription" xml:space="preserve">
+    <value>스크립트가 끝나면 액션이 완료되고, 스크립트가 오류 코드로 종료되면 액션이 실패합니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WaitLabel" xml:space="preserve">
+    <value>끝날 때까지 대기</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningFail" xml:space="preserve">
+    <value>액션 실패 처리</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningIgnore" xml:space="preserve">
+    <value>아무것도 하지 않음</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningLabel" xml:space="preserve">
+    <value>이미 실행 중일 때</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningRestart" xml:space="preserve">
+    <value>다시 시작</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningStartAnother" xml:space="preserve">
+    <value>다른 인스턴스 시작</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WorkingDirectoryDescription" xml:space="preserve">
+    <value>스크립트가 시작되는 폴더입니다. 기본값은 파일이 있는 폴더입니다.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WorkingDirectoryLabel" xml:space="preserve">
+    <value>작업 폴더</value>
+  </data>
+  <data name="Integrations.AutoHotkey.States.NotRunning" xml:space="preserve">
+    <value>실행 중 아님</value>
+  </data>
+  <data name="Integrations.AutoHotkey.States.Running" xml:space="preserve">
+    <value>실행 중</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.Installed" xml:space="preserve">
+    <value>AutoHotkey 설치됨</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastError" xml:space="preserve">
+    <value>마지막 AutoHotkey 오류</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastExitCode" xml:space="preserve">
+    <value>마지막 AutoHotkey 종료 코드</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastResult" xml:space="preserve">
+    <value>마지막 AutoHotkey 결과</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastScript" xml:space="preserve">
+    <value>마지막 AutoHotkey 스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.RunningScripts" xml:space="preserve">
+    <value>실행 중인 AutoHotkey 스크립트</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.ScriptRunning" xml:space="preserve">
+    <value>{name} 실행 중</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.Version" xml:space="preserve">
+    <value>AutoHotkey 버전</value>
+  </data>
   <data name="Integrations.Calendar.Actions.JoinMeeting.CalendarDescription" xml:space="preserve">
     <value>선택 사항입니다. 이 캘린더의 일정만 실행합니다.</value>
   </data>
@@ -5112,6 +5713,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.Detail.IntegrationNotFound" xml:space="preserve">
     <value>연동을 찾을 수 없습니다</value>
+  </data>
+  <data name="Integrations.Detail.IssueHelpLink" xml:space="preserve">
+    <value>자세히 보기</value>
   </data>
   <data name="Integrations.Detail.IssuesTitle" xml:space="preserve">
     <value>문제</value>

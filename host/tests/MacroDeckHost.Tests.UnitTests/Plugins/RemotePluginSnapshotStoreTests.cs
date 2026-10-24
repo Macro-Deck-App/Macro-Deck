@@ -190,6 +190,18 @@ internal sealed class RemotePluginSnapshotStoreTests
 	}
 
 	[Test]
+	public void A_document_written_before_pages_loads_with_none()
+	{
+		Directory.CreateDirectory(_paths.ConfigDirectory);
+		File.WriteAllText(Path.Combine(_paths.ConfigDirectory, "plugin-capability-snapshots.json"),
+			PreAdr0081Document);
+
+		var snapshot = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.plugin");
+
+		Assert.That(snapshot.UiPages, Is.Empty);
+	}
+
+	[Test]
 	public void A_persisted_file_with_no_accepted_kinds_field_loads_without_throwing()
 	{
 		Directory.CreateDirectory(_paths.ConfigDirectory);

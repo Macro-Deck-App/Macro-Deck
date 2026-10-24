@@ -1,4 +1,6 @@
 using System.Text.Json;
+using MacroDeck.Localization;
+using MacroDeck.Plugin.Protocol.Assets;
 
 namespace MacroDeck.Plugin.Protocol.Capabilities.Ui;
 
@@ -42,6 +44,34 @@ public sealed record UiDescribePayload
 	/// <remarks>Optional rather than required: a plugin built against an SDK that predates previews omits
 	/// the key entirely, and it must still describe successfully.</remarks>
 	public IReadOnlyList<UiPreviewDescriptorDto>? Previews { get; init; }
+
+	/// <summary>The pages this plugin adds as tabs to its integration's page in the Macro Deck app, in order.
+	/// Optional: absent reads as none, which is what an SDK that predates pages sends. A host ignores them
+	/// unless <see cref="Surfaces" /> also declares the <c>page</c> kind, and ignores a page whose id is not a
+	/// letter or digit followed by up to 63 letters, digits, hyphens or underscores, or repeats an earlier
+	/// one. A host that predates pages ignores the member.</summary>
+	public IReadOnlyList<UiPageDescriptorDto>? Pages { get; init; }
+}
+
+/// <summary>One page a plugin declares in <see cref="UiDescribePayload.Pages" />.</summary>
+public sealed record UiPageDescriptorDto
+{
+	/// <summary>Reaches the provider as the <c>pageId</c> attribute of the <c>page</c> surface Macro Deck
+	/// opens for it.</summary>
+	public required string Id { get; init; }
+
+	public required LocalizedText Title { get; init; }
+
+	/// <summary>A built-in Macro Deck icon name, or absent for none.</summary>
+	public string? IconName { get; init; }
+
+	/// <summary>True when <paramref name="id" /> is a usable page id: an ASCII letter or digit followed by up to 63
+	/// more letters, digits, hyphens or underscores, the grammar a UI resource name has. Never throws, including on
+	/// <c>null</c>.</summary>
+	public static bool IsValidId(string? id)
+	{
+		return UiResourceRules.IsValidName(id);
+	}
 }
 
 /// <summary>Arguments for <c>session.open</c>. The session id is host-issued; a provider never mints

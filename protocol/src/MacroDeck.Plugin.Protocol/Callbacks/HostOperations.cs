@@ -54,7 +54,13 @@ public static class HostOperations
 
 		public const string Create = "create";
 
-		public static readonly IReadOnlyList<string> All = [Apply, Create];
+		/// <summary>Reads a variable as a flow in the given context resolves it, see
+		/// <see cref="UserVariablesReadArguments" />, and answers a <see cref="UserVariablesReadResult" />. A host
+		/// that predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>; the SDK reports that as not
+		/// supported.</summary>
+		public const string Read = "read";
+
+		public static readonly IReadOnlyList<string> All = [Apply, Create, Read];
 	}
 
 	public static class Config
@@ -199,10 +205,18 @@ public static class HostOperations
 		/// <c>CAPABILITY_UNSUPPORTED</c>.</summary>
 		public const string ReportParameterValues = "report-parameter-values";
 
+		/// <summary>Reads text a code input uploaded in one of the calling plugin's sessions, named by the upload
+		/// id its <c>content-uploaded</c> event carried, see <c>UiOriginReadUploadArguments</c>. Answers
+		/// <c>UiOriginReadUploadResult</c>; the bytes follow over <c>host.asset.*</c> with asset kind
+		/// <c>ui-upload</c>. An unknown, expired or replaced upload, and any session the calling plugin does not
+		/// serve, answer not found alike. A host that predates the operation answers
+		/// <c>CAPABILITY_UNSUPPORTED</c>.</summary>
+		public const string OriginReadUpload = "origin.read-upload";
+
 		public static readonly IReadOnlyList<string> All =
 		[
 			Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource, RegisterMusicPlayerArtwork,
-			OriginReportFailure, OriginShowModal, OriginOpenUrl, ReportParameterValues
+			OriginReportFailure, OriginShowModal, OriginOpenUrl, ReportParameterValues, OriginReadUpload
 		];
 	}
 

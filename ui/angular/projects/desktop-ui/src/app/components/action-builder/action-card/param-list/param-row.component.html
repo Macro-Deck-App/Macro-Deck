@@ -344,10 +344,19 @@
         }
         @case ('code') {
           <shared-code-editor
+            #codeEditor
             [value]="stringValue"
             [language]="codeLanguage"
             [placeholder]="param.placeholder ?? ''"
+            [variableInsertFormat]="param.variableInsertFormat"
             (valueChange)="onChange($event)">
+            @if (param.variableInsertFormat) {
+              <shared-variable-picker
+                codeEditorVariablePicker
+                [variables]="store.pickerVariables()"
+                [scope]="store.previewScope()"
+                (pick)="codeEditor.insertVariable($event)" />
+            }
           </shared-code-editor>
         }
         @case ('keyvalue') {

@@ -38,6 +38,20 @@ public class PluginAssetReceiverTests
 		});
 	}
 
+	[TestCase(AssetKinds.AndroidScreenshot)]
+	[TestCase(AssetKinds.CompanionScreenshot)]
+	[TestCase(AssetKinds.UiUpload)]
+	public void A_kind_only_the_host_sends_is_refused_from_a_plugin(string kind)
+	{
+		var result = _receiver.Begin(PluginId, "a1", kind, "text/plain", 4, "sha256:whatever");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Accepted, Is.False);
+			Assert.That(result.ErrorCode, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+		});
+	}
+
 	[Test]
 	public void A_chunk_over_the_chunk_size_limit_is_rejected()
 	{

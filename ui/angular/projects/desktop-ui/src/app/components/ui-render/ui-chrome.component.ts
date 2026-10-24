@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, signal } from '@angular/core';
 
-import { AppStrings, UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, UiTextSpanRun, emitsEvent, nodeBoolean, nodeNumber, nodeRaw, nodeString, nodeText, nodeTextSpans, textSpanStyle } from '@macro-deck/runtime';
+import { AppStrings, UiButtonVariants, UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, UiSplitRegions, UiStackAlignments, UiStackGaps, UiStackVariants, UiTextSpanRun, emitsEvent, nodeBoolean, nodeNumber, nodeRaw, nodeString, nodeText, nodeTextSpans, textSpanStyle } from '@macro-deck/runtime';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent, InputComponent, LocalizationService, ModalComponent, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent } from '@shared';
+import { ButtonComponent, type ButtonVariant, InputComponent, LocalizationService, ModalComponent, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent } from '@shared';
+import { EmptyStateComponent } from '../feedback/empty-state/empty-state.component';
+import { RailPageComponent } from '../rail-page/rail-page.component';
 import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confirmation-modal.component';
 import { DropdownMenuComponent } from '../overlay/dropdown-menu/dropdown-menu.component';
 import { CopyValueComponent } from '../copy-value/copy-value.component';
@@ -15,6 +17,11 @@ const Primitives = UiConfigPrimitives;
 const Properties = UiConfigProperties;
 const HexColor = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
 const HeadingLevels: Record<string, number> = { 'heading-1': 1, 'heading-2': 2, 'heading-3': 3 };
+const ButtonVariants: readonly string[] = Object.values(UiButtonVariants);
+const StackAlignments: readonly string[] = Object.values(UiStackAlignments);
+const StackGaps: readonly string[] = Object.values(UiStackGaps);
+const ListItemSeverities: readonly string[] = ['info', 'success', 'warning', 'error'];
+const SplitRegionOrder = [UiSplitRegions.RailActions, UiSplitRegions.Rail, UiSplitRegions.Detail];
 
 function isExternalUrl(url: string): boolean {
   try {
@@ -34,9 +41,11 @@ function isExternalUrl(url: string): boolean {
     ConfirmationModalComponent,
     CopyValueComponent,
     DropdownMenuComponent,
+    EmptyStateComponent,
     FormsModule,
     InputComponent,
     ModalComponent,
+    RailPageComponent,
     SegmentedControlComponent,
     ToggleSwitchComponent,
   ],
@@ -58,7 +67,11 @@ function isExternalUrl(url: string): boolean {
       @case (types.Stack) {
         <div
           class="config-chrome-stack"
-          [class.config-chrome-stack-accent]="accent() !== undefined"
+          [class.config-chrome-stack-accent]="accent() !== undefined && !card()"
+          [class.config-chrome-stack-card]="card()"
+          [class.config-chrome-stack-card-accent]="card() && accent() !== undefined"
+          [attr.data-align]="stackAlign()"
+          [attr.data-gap]="stackGap()"
           [style.--config-chrome-stack-accent]="accent()"
           [class.config-chrome-stack-row]="direction() === 'horizontal'"
           [class.config-chrome-stack-nowrap]="!wrap()"
@@ -84,7 +97,7 @@ function isExternalUrl(url: string): boolean {
         </div>
       }
       @case (types.Heading) {
-        <h3 class="config-chrome-heading">{{ text() }}</h3>
+        <h3 class="config-chrome-heading">{{ text() }}@if (badge(); as tag) {<span class="config-chrome-tag">{{ tag }}</span>}</h3>
       }
       @case (types.Prose) {
         <p
@@ -152,7 +165,21 @@ function isExternalUrl(url: string): boolean {
         </div>
       }
       @case (types.Button) {
-        @if (buttonIcon(); as icon) {
+        @if (buttonIcon() && iconWithLabel()) {
+          <shared-button [variant]="buttonVariant()" size="compact" (click)="requestActivate(node())">
+            <span class="icon icon-{{ buttonIcon() }} icon-xs" aria-hidden="true"></span>
+            {{ label() ?? '' }}
+          </shared-button>
+        } @else if (buttonIcon() && declaredVariant()) {
+          <shared-button
+            [variant]="buttonVariant()"
+            size="icon"
+            [title]="label() ?? ''"
+            [ariaLabel]="label() ?? ''"
+            (click)="requestActivate(node())">
+            <span class="icon icon-{{ buttonIcon() }} icon-sm" aria-hidden="true"></span>
+          </shared-button>
+        } @else if (buttonIcon(); as icon) {
           <button
             type="button"
             class="config-chrome-icon-button"
@@ -162,7 +189,7 @@ function isExternalUrl(url: string): boolean {
             <span class="icon icon-{{ icon }} icon-xs" aria-hidden="true"></span>
           </button>
         } @else {
-          <shared-button variant="secondary" size="compact" (click)="requestActivate(node())">{{ label() ?? '' }}</shared-button>
+          <shared-button [variant]="buttonVariant()" size="compact" (click)="requestActivate(node())">{{ label() ?? '' }}</shared-button>
         }
       }
       @case (types.Status) {
@@ -201,7 +228,7 @@ function isExternalUrl(url: string): boolean {
                   <button
                     type="button"
                     class="config-chrome-menu-item"
-                    [class.is-danger]="isDanger(child)"
+                    [class.is-danger]="isDangerButton(child)"
                     (click)="requestActivate(child)">
                     @if (iconOf(child); as icon) {
                       <span class="icon icon-{{ icon }} icon-sm" aria-hidden="true"></span>
@@ -225,11 +252,70 @@ function isExternalUrl(url: string): boolean {
           <div modal-footer>
             @for (answer of dialogAnswers(); track answer.id; let last = $last) {
               <shared-button
-                [variant]="isDanger(answer) ? 'danger' : last ? 'primary' : 'secondary'"
+                [variant]="isDangerButton(answer) ? 'danger' : last ? 'primary' : 'secondary'"
                 (click)="requestActivate(answer)">{{ labelOf(answer) }}</shared-button>
             }
           </div>
         </shared-modal>
+      }
+      @case (types.Split) {
+        <shared-rail-page class="config-chrome-split" [railTitle]="railTitle()">
+          <div rail-actions class="config-chrome-split-actions">
+            @for (child of splitRegion(0); track child.id) { <shared-ui-node [node]="child" /> }
+          </div>
+          <div rail class="config-chrome-split-rail">
+            @for (child of splitRegion(1); track child.id) { <shared-ui-node [node]="child" /> }
+          </div>
+          <div class="config-chrome-split-detail">
+            @for (child of splitRegion(2); track child.id) { <shared-ui-node [node]="child" /> }
+          </div>
+        </shared-rail-page>
+      }
+      @case (types.List) {
+        <div class="config-chrome-list" role="listbox" [attr.aria-label]="label() ?? null">
+          @for (child of children(); track child.id) { <shared-ui-node [node]="child" /> }
+        </div>
+      }
+      @case (types.ListItem) {
+        <div class="config-chrome-list-item" [class.active]="selected()">
+          <button
+            type="button"
+            class="config-chrome-list-item-main"
+            role="option"
+            [class.active]="selected()"
+            [attr.aria-selected]="selected()"
+            (click)="requestActivate(node())">
+            @if (buttonIcon(); as icon) {
+              <span class="icon icon-{{ icon }} icon-sm config-chrome-list-item-icon" aria-hidden="true"></span>
+            }
+            <span class="config-chrome-list-item-text">
+              <span class="config-chrome-list-item-label" [title]="label() ?? ''">{{ label() }}</span>
+              @if (description(); as text) {
+                <span class="config-chrome-list-item-description" [title]="text">{{ text }}</span>
+              }
+            </span>
+            @if (badge(); as tag) {
+              <span class="config-chrome-tag">{{ tag }}</span>
+            }
+            @if (listItemSeverity(); as level) {
+              <span class="config-chrome-list-item-dot" [attr.data-severity]="level" aria-hidden="true"></span>
+            }
+          </button>
+          @if (children().length > 0) {
+            <div class="config-chrome-list-item-trailing">
+              @for (child of children(); track child.id) { <shared-ui-node [node]="child" /> }
+            </div>
+          }
+        </div>
+      }
+      @case (types.EmptyState) {
+        <shared-empty-state [icon]="buttonIcon() ?? ''" [heading]="title() ?? ''" [message]="text() ?? ''">
+          @if (children().length > 0) {
+            <div class="config-chrome-empty-state-actions">
+              @for (child of children(); track child.id) { <shared-ui-node [node]="child" /> }
+            </div>
+          }
+        </shared-empty-state>
       }
       @case (types.WidgetConfiguration) {
         <div class="config-chrome-widget-configuration">
@@ -266,7 +352,7 @@ function isExternalUrl(url: string): boolean {
       </shared-confirmation-modal>
     }
   `,
-  styleUrls: ['./ui-render.component.scss', './ui-chrome-styled.component.scss'],
+  styleUrls: ['./ui-render.component.scss', './ui-chrome-styled.component.scss', './ui-chrome-layout.component.scss'],
 })
 export class UiChromeComponent {
   readonly node = input.required<UiNode>();
@@ -293,6 +379,36 @@ export class UiChromeComponent {
     return accent !== undefined && HexColor.test(accent) ? accent : undefined;
   });
   protected readonly variant = computed(() => nodeString(this.node(), Properties.Variant));
+  protected readonly card = computed(() => this.variant() === UiStackVariants.Card);
+  protected readonly stackAlign = computed(() => {
+    const align = nodeString(this.node(), Properties.Align);
+    return align !== undefined && StackAlignments.includes(align) ? align : null;
+  });
+  protected readonly stackGap = computed(() => {
+    const gap = nodeString(this.node(), Properties.Gap);
+    return gap !== undefined && StackGaps.includes(gap) ? gap : null;
+  });
+  protected readonly declaredVariant = computed(() => {
+    const variant = this.variant();
+    return variant !== undefined && ButtonVariants.includes(variant) ? variant as ButtonVariant : null;
+  });
+  protected readonly buttonVariant = computed<ButtonVariant>(() => this.declaredVariant() ?? 'secondary');
+  protected readonly iconWithLabel = computed(() => nodeBoolean(this.node(), Properties.IconWithLabel) === true);
+  protected readonly badge = computed(() => nodeText(this.node(), Properties.Badge, this.localization) || null);
+  protected readonly selected = computed(() => nodeBoolean(this.node(), Properties.Selected) === true);
+  protected readonly railTitle = computed(() => nodeText(this.node(), Properties.RailTitle, this.localization) ?? '');
+  protected readonly listItemSeverity = computed(() => {
+    const severity = this.severity();
+    if (severity === undefined) return null;
+    return ListItemSeverities.includes(severity) ? severity : 'neutral';
+  });
+
+  protected splitRegion(index: number): UiNode[] {
+    const children = this.children();
+    const suffix = `.${SplitRegionOrder[index]}`;
+    const region = children.find(child => child.id.endsWith(suffix)) ?? children[index];
+    return region?.children ?? [];
+  }
   protected readonly headingLevel = computed(() => HeadingLevels[this.variant() ?? ''] ?? null);
   protected readonly proseSpans = computed(() => {
     const runs = nodeTextSpans(this.node());
@@ -371,6 +487,10 @@ export class UiChromeComponent {
 
   protected textOf(node: UiNode, key: string): string | undefined {
     return nodeText(node, key, this.localization) ?? undefined;
+  }
+
+  protected isDangerButton(node: UiNode): boolean {
+    return nodeString(node, Properties.Variant) === UiButtonVariants.Danger || this.isDanger(node);
   }
 
   protected isDanger(node: UiNode): boolean {

@@ -95,11 +95,20 @@ public sealed record ActionParameterDto
 
 	public string? Language { get; init; }
 
+	/// <summary>Text a code parameter's editor inserts for a picked variable, <c>{name}</c> standing for its
+	/// name. Optional and additive: absent means no variable insertion, as before.</summary>
+	public string? VariableInsertFormat { get; init; }
+
 	/// <summary>Present only for <c>Object</c>-typed parameters.</summary>
 	public IReadOnlyList<ActionParameterDto>? Children { get; init; }
 
 	/// <summary>Present only for <c>Array</c>-typed parameters.</summary>
 	public ActionParameterDto? ItemTemplate { get; init; }
+
+	/// <summary>Whether the host renders an array parameter's items as templates before the action runs.
+	/// Optional and additive: absent means false, so a plugin that predates it receives its items unrendered.
+	/// </summary>
+	public bool? TemplatedItems { get; init; }
 
 	public ParameterVisibilityDto? VisibleWhen { get; init; }
 }

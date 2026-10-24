@@ -3,7 +3,7 @@ title: Conformance suite
 description: The fixed set of protocol-level checks any plugin can be run against, in any language, without a Macro Deck installation.
 ---
 
-The conformance suite is 49 protocol-level checks in 8 categories. It runs against any plugin, in any language, with no Macro Deck installation: it lives in `MacroDeck.Plugin.Testing.Conformance`, on the same `MacroDeckTestHost` as [Testing plugins](/features/testing/), and produces one report with no test-framework types in it.
+The conformance suite is 50 protocol-level checks in 8 categories. It runs against any plugin, in any language, with no Macro Deck installation: it lives in `MacroDeck.Plugin.Testing.Conformance`, on the same `MacroDeckTestHost` as [Testing plugins](/features/testing/), and produces one report with no test-framework types in it.
 
 ## Example
 
@@ -180,6 +180,7 @@ subject that declares `variables` and cannot answer `describe` fails them.
 | <a id="mdc0313"></a>MDC0313 | R | A non-`NoIcon` snapshot with no `Reference` answers `icon.content` with a non-empty `ContentHash` and an `image/*` `MediaType`, reports its `Version` has moved on, or fails only with `AssetTooLarge`; skips without `ProvidesIcon`. | Serve the icon bytes you advertise. |
 | <a id="mdc0314"></a>MDC0314 | R | For each eager variable declaring `write`, writing its current reading back through `variables/set` succeeds as an invocation with a status other than `NotWritable` or `NotFound`; skips without [variables](#variables-precondition) or when nothing declares `write`, inconclusive when every writable variable reads unavailable. | Declare `write` only on variables you accept writes for. |
 | <a id="mdc0315"></a>MDC0315 | R | `variables` and `declaredVariables` together hold at most `VariableLimits.MaxEagerVariablesPerProvider` eager entries, counted across the whole plugin; skips without [variables](#variables-precondition). | Move the rest into a catalog. |
+| <a id="mdc0316"></a>MDC0316 | R | When `ui/describe` lists `pages`, its `surfaces` include the `page` kind, and every page id is a letter or digit followed by up to 63 letters, digits, hyphens or underscores, unique within the plugin; skips without ui or without pages. | Declare a `page` surface with your pages, and give each a unique, well-formed id. |
 
 ### Duplicate ids (MDC04xx)
 

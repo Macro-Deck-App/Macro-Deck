@@ -52,8 +52,10 @@ public static class ActionParameterMapper
 			WidgetTypes = parameter.WidgetTypes,
 			FileExtensions = parameter.FileExtensions,
 			Language = parameter.Language,
+			VariableInsertFormat = parameter.VariableInsertFormat,
 			Children = parameter.Children?.Select(child => ToDto(child, depth + 1)).ToList(),
 			ItemTemplate = parameter.ItemTemplate is { } template ? ToDto(template, depth + 1) : null,
+			TemplatedItems = parameter.TemplatedItems ? true : null,
 			VisibleWhen = parameter.VisibleWhen is { } visibility
 				? new ParameterVisibilityDto { ParameterName = visibility.ParameterName, Values = visibility.Values }
 				: null
@@ -114,8 +116,10 @@ public static class ActionParameterMapper
 			WidgetTypes = dto.WidgetTypes ?? [],
 			FileExtensions = dto.FileExtensions,
 			Language = dto.Language,
+			VariableInsertFormat = dto.VariableInsertFormat,
 			Children = dto.Children?.Select(child => ToDomain(child, depth + 1)).ToList(),
-			ItemTemplate = dto.ItemTemplate is { } template ? ToDomain(template, depth + 1) : null
+			ItemTemplate = dto.ItemTemplate is { } template ? ToDomain(template, depth + 1) : null,
+			TemplatedItems = dto.TemplatedItems ?? false
 		}.ApplyVisibility(dto.VisibleWhen);
 	}
 

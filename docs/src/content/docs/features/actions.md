@@ -176,6 +176,44 @@ option's label. Other parameter
 types ignore it, and so does a Macro Deck release from before `Searchable`, which draws the plain select.
 For a configuration view, see [Letting the user search a long list](/ui/views/configuration/#letting-the-user-search-a-long-list).
 
+### Code parameters
+
+`ActionParameter.Code(name, language)` draws a code editor. `language` picks its highlighting; use one of
+the documented `UiCodeLanguages` values from `MacroDeck.Ui` (the same vocabulary as a
+[code input](/ui/views/configuration/#code-input)). An editor that does not know the language shows plain text.
+
+Set `VariableInsertFormat` to offer an **Insert variable** button: the editor inserts the format at the
+cursor with `{name}` replaced by the picked variable's name.
+
+```csharp
+new ActionParameter
+{
+	Name = "script",
+	Type = ActionParameterType.Code,
+	Language = "autohotkey",
+	Label = Strings.Parameters.Script(),
+	VariableInsertFormat = "MacroDeck.GetVar(\"{name}\")"
+}
+```
+
+Inserting only edits the code text. Macro Deck never renders a `Code` value as a template, so your
+language reads the variable itself at run time. Without the format, and on a desktop release from before
+`VariableInsertFormat`, the editor offers no insertion. Other parameter types ignore it.
+
+### Rendering array items
+
+An `Array` parameter's items reach the executor exactly as the user entered them. Call
+`WithTemplatedItems()` to have Macro Deck render them first, like other templated parameters: a string
+item is rendered as a template, so `--user={{ vars.user }}` arrives as `--user=Ada`, and an item bound to
+a variable arrives as that variable's value. Other items are passed unchanged.
+
+```csharp
+ActionParameter.Array("arguments", ActionParameter.Text("argument"), label: Strings.Parameters.Arguments())
+	.WithTemplatedItems()
+```
+
+A Macro Deck release from before `TemplatedItems` ignores it and passes the items as entered.
+
 ## What the executor gets
 
 | `ActionExecutionContext` | |
@@ -353,6 +391,10 @@ integration uses the pattern above after starting a stream.
 | `options` | `IDynamicOptionsActionDefinition.GetDynamicOptionsAsync` |
 | `state` | [`IStateProviderActionDefinition.GetActionStateAsync`](/features/button-states/) |
 | `icon`, `icon.content` | [`IIconProviderActionDefinition`](/features/button-icons/) |
+
+`VariableInsertFormat` and `TemplatedItems` travel as the optional `variableInsertFormat` and
+`templatedItems` fields of a described parameter. A plugin that predates them sends neither and keeps the
+old behaviour.
 
 `PluginTestHarness.Actions` drives each operation the way the host does - see
 [Testing](/features/testing/).

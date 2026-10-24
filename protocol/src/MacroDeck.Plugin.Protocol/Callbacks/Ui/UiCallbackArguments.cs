@@ -188,3 +188,29 @@ public sealed record UiOriginOpenUrlResult
 {
 	public required bool Delivered { get; init; }
 }
+
+/// <summary>Arguments for <c>host.invoke ui/origin.read-upload</c>: reads text a code input uploaded in
+/// <see cref="SessionId" />, which must be one of the calling plugin's sessions.</summary>
+public sealed record UiOriginReadUploadArguments
+{
+	public required string SessionId { get; init; }
+
+	/// <summary>The id the <c>content-uploaded</c> event carried.</summary>
+	public required string UploadId { get; init; }
+}
+
+/// <summary>Result of <c>host.invoke ui/origin.read-upload</c>. When <see cref="Found" /> is <c>true</c> the
+/// bytes follow over <c>host.asset.*</c> under <see cref="TransferId" /> with asset kind <c>ui-upload</c>, at
+/// most <c>ProtocolLimits.MaxUiResourceBytes</c>. <see cref="Found" /> is <c>false</c> for an unknown, expired
+/// or replaced upload and for a session the calling plugin does not serve alike.</summary>
+public sealed record UiOriginReadUploadResult
+{
+	public required bool Found { get; init; }
+
+	public int ByteLength { get; init; }
+
+	/// <summary>Must match the <c>contentHash</c> of the <c>host.asset.begin</c> that follows.</summary>
+	public string? ContentHash { get; init; }
+
+	public string? TransferId { get; init; }
+}

@@ -73,6 +73,36 @@ internal sealed class IntegrationIssueDtoTests
 		});
 	}
 
+	[Test]
+	public void A_web_help_link_reaches_the_desktop()
+	{
+		var dto = IntegrationIssueDto.From(new IntegrationIssue
+			{ Id = "missing", Title = "Missing", HelpUrl = new Uri("https://www.autohotkey.com/download/") });
+
+		Assert.That(dto.HelpUrl, Is.EqualTo("https://www.autohotkey.com/download/"));
+	}
+
+	[TestCase("file:///C:/Windows/System32/calc.exe")]
+	[TestCase("javascript:alert(1)")]
+	[TestCase("ms-settings:privacy")]
+	[TestCase("/relative/help")]
+	public void A_help_link_that_is_not_an_absolute_web_address_is_dropped(string address)
+	{
+		var dto = IntegrationIssueDto.From(new IntegrationIssue
+			{ Id = "missing", Title = "Missing", HelpUrl = new Uri(address, UriKind.RelativeOrAbsolute) });
+
+		Assert.That(dto.HelpUrl, Is.Null);
+	}
+
+	[Test]
+	public void An_issue_without_a_help_link_sends_the_payload_it_sent_before()
+	{
+		var json = JsonSerializer.Serialize(IntegrationIssueDto.From(new IntegrationIssue { Id = "a", Title = "A" }),
+			HostPayloadOptions());
+
+		Assert.That(json, Does.Not.Contain("helpUrl"));
+	}
+
 	private static (string Scope, string Key) Reference(JsonElement issue, string property)
 	{
 		var reference = issue.GetProperty(property).GetProperty("$localized");

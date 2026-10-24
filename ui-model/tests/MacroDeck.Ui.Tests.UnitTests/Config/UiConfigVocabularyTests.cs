@@ -5,6 +5,7 @@ using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Config.Validation;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Nodes;
+using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 
@@ -57,10 +58,12 @@ public class UiConfigVocabularyTests
 
 	private static readonly string[] _expectedLaterChrome = ["status", "menu", "dialog"];
 
+	private static readonly string[] _expectedPageLayout = ["split", "list", "list-item", "empty-state"];
+
 	private static readonly string[] _expectedEvents =
 	[
 		"change", "submit", "cancel", "back", "activate", "expand", "collapse", "open", "filter", "reload",
-		"add", "remove", "provide"
+		"add", "remove", "provide", "content-uploaded", "content-upload-failed"
 	];
 
 	/// <summary>Regularised spellings a reasonable person would reach for and this vocabulary must not
@@ -88,6 +91,7 @@ public class UiConfigVocabularyTests
 			.Concat(_expectedChrome)
 			.Concat(_expectedWidgetChrome)
 			.Concat(_expectedLaterChrome)
+			.Concat(_expectedPageLayout)
 			.ToArray();
 
 		Assert.Multiple(() =>
@@ -95,10 +99,11 @@ public class UiConfigVocabularyTests
 			Assert.That(UiConfigPrimitives.WellKnown,
 				Is.EqualTo(expected).AsCollection,
 				"the primitive vocabulary is the 27 control names, then the 8 high-level controls, then the "
-				+ "17 chrome names, then the 3 widget configuration regions, then later chrome, in order");
-			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(58));
+				+ "17 chrome names, then the 3 widget configuration regions, then later chrome, then the 4 page "
+				+ "layout types, in order");
+			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(62));
 			Assert.That(UiConfigPrimitives.WellKnown.Distinct(StringComparer.Ordinal).Count(),
-				Is.EqualTo(58));
+				Is.EqualTo(62));
 
 			foreach (var forbidden in _forbiddenPrimitives)
 			{
@@ -115,7 +120,7 @@ public class UiConfigVocabularyTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiConfigEvents.WellKnown, Is.EqualTo(_expectedEvents).AsCollection);
-			Assert.That(UiConfigEvents.WellKnown, Has.Count.EqualTo(13));
+			Assert.That(UiConfigEvents.WellKnown, Has.Count.EqualTo(15));
 
 			foreach (var forbidden in _forbiddenEvents)
 			{
@@ -467,7 +472,14 @@ public class UiConfigVocabularyTests
 						Configure(new UiDurationInput { Key = "timeout", Min = 0, Max = 1000 }),
 						Configure(new UiDateTimeInput { Key = "when" }),
 						Configure(new UiJsonInput { Key = "payload" }),
-						Configure(new UiCodeInput { Key = "script", Language = "lua" }),
+						Configure(new UiCodeInput
+						{
+							Key = "script",
+							Language = "lua",
+							VariableInsertFormat = "vars[\"{name}\"]",
+							ContentResource = new UiResource { ResourceId = "plugin.script-text" },
+							Rows = 22
+						}),
 						Configure(new UiKeyValueInput { Key = "headers" }),
 						Configure(new UiObjectInput { Key = "endpoint" }),
 						Configure(new UiArrayInput { Key = "items" }),
@@ -538,9 +550,16 @@ public class UiConfigVocabularyTests
 						},
 						new UiConfigStack
 						{
-							Key = "row", Direction = "horizontal", Wrap = false, RowWeight = 1, Accent = "#5865f2"
+							Key = "row",
+							Direction = "horizontal",
+							Wrap = false,
+							RowWeight = 1,
+							Accent = "#5865f2",
+							Align = "space-between",
+							Gap = "small",
+							Variant = "card"
 						},
-						new UiHeading { Key = "heading", Text = "Configuration" },
+						new UiHeading { Key = "heading", Text = "Configuration", Badge = "Unsaved" },
 						new UiProse
 						{
 							Key = "prose",
@@ -566,7 +585,14 @@ public class UiConfigVocabularyTests
 						new UiBanner { Key = "notice", Severity = "warning", Text = "Careful." },
 						new UiValidationMessage { Key = "message", Text = "Required.", For = "text" },
 						new UiBusy { Key = "busy", Text = "Loading..." },
-						new UiConfigButton { Key = "apply", Label = "Apply preset", Icon = "plus" },
+						new UiConfigButton
+						{
+							Key = "apply",
+							Label = "Apply preset",
+							Icon = "plus",
+							Variant = "primary",
+							IconWithLabel = true
+						},
 						new UiStatus
 						{
 							Key = "status",
@@ -599,6 +625,40 @@ public class UiConfigVocabularyTests
 									ConfirmDanger = false,
 									PromptValue = "Old",
 									Placeholder = "Name"
+								}
+							]
+						},
+						new UiSplit
+						{
+							Key = "page",
+							RailTitle = "Scripts",
+							RailActions = [new UiConfigButton { Key = "new", Label = "New", Icon = "plus" }],
+							Rail =
+							[
+								new UiConfigList
+								{
+									Key = "scripts",
+									Label = "Scripts",
+									Children =
+									[
+										new UiConfigListItem
+										{
+											Key = "first",
+											Label = "First",
+											Description = "Ran 2 minutes ago",
+											Icon = "file",
+											Badge = "3",
+											Severity = "success",
+											Selected = true
+										}
+									]
+								}
+							],
+							Detail =
+							[
+								new UiEmptyState
+								{
+									Key = "nothing", Icon = "file", Title = "No script", Text = "Pick one."
 								}
 							]
 						}

@@ -7,6 +7,7 @@ import { WidgetTargetPickerComponent } from '../forms/widget-target-picker/widge
 import { HotkeyRecorderComponent } from '../forms/hotkey-recorder/hotkey-recorder.component';
 import { KeyboardComboEditorComponent } from '../forms/keyboard-combo-editor/keyboard-combo-editor.component';
 import { KeyboardSequenceEditorComponent } from '../forms/keyboard-sequence-editor/keyboard-sequence-editor.component';
+import { FilePathInputComponent } from '../forms/file-path-input/file-path-input.component';
 import { ActionOptionsService } from '../../services/action-options.service';
 import { provideLocalizationTesting } from '../../../testing/localization-test-support';
 
@@ -309,5 +310,15 @@ describe('ConfigFieldComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('shared-file-path-input')).not.toBeNull();
+  });
+
+  it('gives a file field the file dialog limited to its extensions', () => {
+    component.field = field(ActionParameterType.File, { fileExtensions: ['exe'] });
+    component.value = 'C:\\Tools\\AutoHotkey64.exe';
+    fixture.detectChanges();
+
+    const picker = fixture.debugElement.query(By.directive(FilePathInputComponent)).componentInstance as FilePathInputComponent;
+    expect(picker.kind).toBe('file');
+    expect(picker.extensions).toEqual(['exe']);
   });
 });

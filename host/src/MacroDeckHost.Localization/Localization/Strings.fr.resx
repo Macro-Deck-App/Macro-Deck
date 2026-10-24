@@ -3611,6 +3611,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Forms.CodeEditor.InvalidJson" xml:space="preserve">
     <value>JSON invalide</value>
   </data>
+  <data name="Forms.CodeEditor.LoadFailed" xml:space="preserve">
+    <value>Le texte n'a pas pu être chargé.</value>
+  </data>
+  <data name="Forms.CodeEditor.UploadFailed" xml:space="preserve">
+    <value>Tes modifications n'ont pas pu être envoyées. Modifie le texte pour réessayer.</value>
+  </data>
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Ajouter un modificateur</value>
   </data>
@@ -4689,6 +4695,601 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Adb.Variables.DeviceScreenOn" xml:space="preserve">
     <value>Écran de l'appareil allumé</value>
   </data>
+  <data name="Integrations.AutoHotkey.Actions.OpenWindowSpy.Description" xml:space="preserve">
+    <value>Ouvre Window Spy depuis ton installation AutoHotkey pour consulter les titres, classes et contrôles des fenêtres.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.OpenWindowSpy.Name" xml:space="preserve">
+    <value>Ouvrir Window Spy</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Restart.Description" xml:space="preserve">
+    <value>Arrête un script AutoHotkey lancé par Macro Deck et le relance avec de nouveaux paramètres. Le lance s'il n'est pas en cours d'exécution.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Restart.Name" xml:space="preserve">
+    <value>Redémarrer un script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunFile.Description" xml:space="preserve">
+    <value>Exécute un fichier .ahk AutoHotkey v2 à l'emplacement où il est enregistré.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunFile.Name" xml:space="preserve">
+    <value>Exécuter un fichier AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunInlineCode.Description" xml:space="preserve">
+    <value>Exécute du code AutoHotkey v2 écrit dans cette action.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunInlineCode.Name" xml:space="preserve">
+    <value>Exécuter du code AutoHotkey intégré</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunScript.Description" xml:space="preserve">
+    <value>Exécute un script AutoHotkey de la bibliothèque de scripts de l'intégration AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunScript.Name" xml:space="preserve">
+    <value>Exécuter un script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Stop.Description" xml:space="preserve">
+    <value>Arrête les scripts AutoHotkey lancés par Macro Deck. Le script est d'abord invité à se fermer, puis il est terminé de force s'il ne le fait pas.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Stop.Name" xml:space="preserve">
+    <value>Arrêter un script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Toggle.Description" xml:space="preserve">
+    <value>Lance le script AutoHotkey si Macro Deck ne l'exécute pas, et l'arrête s'il est en cours d'exécution.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Toggle.Name" xml:space="preserve">
+    <value>Lancer ou arrêter un script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.AutomaticOption" xml:space="preserve">
+    <value>Rechercher automatiquement</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.Description" xml:space="preserve">
+    <value>Macro Deck exécute les scripts AutoHotkey avec l'AutoHotkey v2 installé sur cet ordinateur.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DetectedExecutableLabel" xml:space="preserve">
+    <value>AutoHotkey utilisé</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DetectedVersionLabel" xml:space="preserve">
+    <value>Version d'AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DownloadLinkLabel" xml:space="preserve">
+    <value>Télécharger AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.EnableFirst" xml:space="preserve">
+    <value>Active l'intégration AutoHotkey pour modifier ses paramètres.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableDoesNotRun" xml:space="preserve">
+    <value>Cet exécutable AutoHotkey n'a pas démarré.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableInvalid" xml:space="preserve">
+    <value>Choisis le chemin complet d'un fichier .exe AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableModeLabel" xml:space="preserve">
+    <value>Exécutable AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableNotFound" xml:space="preserve">
+    <value>Ce fichier n'existe pas.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableNotVersion2" xml:space="preserve">
+    <value>Ce n'est pas AutoHotkey v2. Macro Deck prend uniquement en charge AutoHotkey v2.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutablePathDescription" xml:space="preserve">
+    <value>AutoHotkey64.exe ou AutoHotkey32.exe d'une installation AutoHotkey v2, par exemple une version portable.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutablePathLabel" xml:space="preserve">
+    <value>Exécutable</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.GracePeriodDescription" xml:space="preserve">
+    <value>Durée pendant laquelle un script AutoHotkey en cours d'arrêt peut exécuter sa routine de sortie avant que Macro Deck ne le termine.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.GracePeriodLabel" xml:space="preserve">
+    <value>Délai de grâce à l'arrêt en secondes</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ManualOption" xml:space="preserve">
+    <value>Choisir l'exécutable</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.NotDetected" xml:space="preserve">
+    <value>AutoHotkey v2 est introuvable sur cet ordinateur. Installe-le ou choisis son exécutable ci-dessous.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.Title" xml:space="preserve">
+    <value>Paramètres d'AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.UnknownStep" xml:space="preserve">
+    <value>Cette étape de configuration est inconnue. Recommence la configuration.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.AlreadyRunning" xml:space="preserve">
+    <value>Le script AutoHotkey {name} est déjà en cours d'exécution.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.CheckTimedOut" xml:space="preserve">
+    <value>La vérification de la syntaxe ne s'est pas terminée à temps.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.ExitCode" xml:space="preserve">
+    <value>Le script AutoHotkey {name} s'est terminé avec le code {code}.</value>
+    <comment>[name:string][code:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.FileNotFound" xml:space="preserve">
+    <value>Le fichier AutoHotkey n'existe pas.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.InvalidParameterName" xml:space="preserve">
+    <value>{name} n'est pas un nom de paramètre valide. Utilise des lettres, des chiffres et des traits de soulignement, sans commencer par un chiffre.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.InvalidParameterValue" xml:space="preserve">
+    <value>Une valeur de paramètre contient un caractère qu'AutoHotkey ne peut pas recevoir.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LibraryUnreadable" xml:space="preserve">
+    <value>La bibliothèque de scripts AutoHotkey n'a pas pu être lue.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LoadFailed" xml:space="preserve">
+    <value>Le script AutoHotkey {name} n'a pas pu être chargé à cause d'une erreur à la ligne {line}.</value>
+    <comment>[name:string][line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LoadFailedNoLine" xml:space="preserve">
+    <value>Le script AutoHotkey {name} n'a pas pu être chargé.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoCode" xml:space="preserve">
+    <value>Saisis le code AutoHotkey à exécuter.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoFileSelected" xml:space="preserve">
+    <value>Choisis un fichier AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoScriptSelected" xml:space="preserve">
+    <value>Choisis un script AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NotInstalled" xml:space="preserve">
+    <value>AutoHotkey v2 n'est pas disponible. Vérifie l'intégration AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.RuntimeError" xml:space="preserve">
+    <value>Le script AutoHotkey {name} s'est arrêté sur une erreur à la ligne {line}.</value>
+    <comment>[name:string][line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.RuntimeErrorNoLine" xml:space="preserve">
+    <value>Le script AutoHotkey {name} s'est arrêté sur une erreur.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.ScriptNotFound" xml:space="preserve">
+    <value>Le script AutoHotkey n'existe plus.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.SourceUnreadable" xml:space="preserve">
+    <value>Le script AutoHotkey {name} n'a pas pu être lu.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.StartFailed" xml:space="preserve">
+    <value>Le script AutoHotkey {name} n'a pas pu être lancé.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.TimedOut" xml:space="preserve">
+    <value>Le script AutoHotkey {name} ne s'est pas terminé à temps et a été arrêté.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.TooManyRuns" xml:space="preserve">
+    <value>Trop de scripts AutoHotkey sont en cours d'exécution. Arrêtes-en un et réessaie.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WindowSpyFailed" xml:space="preserve">
+    <value>Window Spy n'a pas pu être lancé.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WindowSpyNotFound" xml:space="preserve">
+    <value>Window Spy est introuvable dans l'installation AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WorkingDirectoryNotFound" xml:space="preserve">
+    <value>Le répertoire de travail n'existe pas.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.Category" xml:space="preserve">
+    <value>Scripts AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.DurationLabel" xml:space="preserve">
+    <value>Durée en millisecondes</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitCodeLabel" xml:space="preserve">
+    <value>Code de sortie</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitedDescription" xml:space="preserve">
+    <value>Un script AutoHotkey lancé par Macro Deck s'est terminé.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitedName" xml:space="preserve">
+    <value>Script AutoHotkey terminé</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.FailedDescription" xml:space="preserve">
+    <value>Un script AutoHotkey n'a pas pu être lancé ou chargé, a signalé une erreur ou ne s'est pas terminé à temps.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.FailedName" xml:space="preserve">
+    <value>Échec du script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonLabel" xml:space="preserve">
+    <value>Motif</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonLoadError" xml:space="preserve">
+    <value>N'a pas pu être chargé</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonRuntimeError" xml:space="preserve">
+    <value>A signalé une erreur</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonStartFailed" xml:space="preserve">
+    <value>N'a pas pu être lancé</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonTimeout" xml:space="preserve">
+    <value>Ne s'est pas terminé à temps</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ScriptLabel" xml:space="preserve">
+    <value>Script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.StartedDescription" xml:space="preserve">
+    <value>Un script AutoHotkey lancé par Macro Deck est en cours d'exécution.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.StartedName" xml:space="preserve">
+    <value>Script AutoHotkey lancé</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.NoAnswer" xml:space="preserve">
+    <value>Macro Deck n'a pas répondu à temps.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.RequestRejected" xml:space="preserve">
+    <value>Macro Deck a rejeté cette requête, car le script a envoyé trop de messages ou un message trop long.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableInvalidName" xml:space="preserve">
+    <value>{name} n'est pas un nom de variable Macro Deck valide.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableNotFound" xml:space="preserve">
+    <value>La variable Macro Deck {name} est introuvable.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableUnavailable" xml:space="preserve">
+    <value>La variable Macro Deck {name} ne peut pas être lue pour le moment.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.InlineCodeName" xml:space="preserve">
+    <value>Code AutoHotkey intégré</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.CheckAgain" xml:space="preserve">
+    <value>Vérifier à nouveau</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.ChooseExecutable" xml:space="preserve">
+    <value>AutoHotkey v2 n'est toujours pas disponible. Choisis son exécutable dans les paramètres.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.Found" xml:space="preserve">
+    <value>AutoHotkey {version} trouvé.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryReadable" xml:space="preserve">
+    <value>La bibliothèque de scripts AutoHotkey peut de nouveau être lue.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryStillUnreadable" xml:space="preserve">
+    <value>La bibliothèque de scripts AutoHotkey ne peut toujours pas être lue.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableAction" xml:space="preserve">
+    <value>Réessayer</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableDescription" xml:space="preserve">
+    <value>La liste enregistrée des scripts AutoHotkey est endommagée. Macro Deck ne la modifie pas tant qu'elle ne peut pas être relue ; restaure une sauvegarde pour la récupérer.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableTitle" xml:space="preserve">
+    <value>Les scripts AutoHotkey n'ont pas pu être lus</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotFoundDescription" xml:space="preserve">
+    <value>Installe AutoHotkey v2 ou choisis son exécutable dans les paramètres d'AutoHotkey. Les scripts AutoHotkey ne peuvent pas s'exécuter d'ici là.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotFoundTitle" xml:space="preserve">
+    <value>AutoHotkey introuvable</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotRunnableDescription" xml:space="preserve">
+    <value>L'exécutable AutoHotkey n'a pas démarré. Réinstalle AutoHotkey v2 ou choisis un autre exécutable dans les paramètres d'AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotRunnableTitle" xml:space="preserve">
+    <value>AutoHotkey ne démarre pas</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotVersion2Description" xml:space="preserve">
+    <value>L'AutoHotkey trouvé sur cet ordinateur n'est pas la version 2. Macro Deck prend uniquement en charge AutoHotkey v2.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotVersion2Title" xml:space="preserve">
+    <value>AutoHotkey v2 requis</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Migration.EnableIntegration" xml:space="preserve">
+    <value>Active l'intégration AutoHotkey et installe AutoHotkey v2.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Migration.TemplatePlaceholders" xml:space="preserve">
+    <value>Ce code utilisait des espaces réservés de variables de Macro Deck 2, qui ne sont plus remplis. Transmets les valeurs comme paramètres et lis-les avec MacroDeck.Params ou MacroDeck.GetVar.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.CheckSyntaxButton" xml:space="preserve">
+    <value>Vérifier la syntaxe</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ChooseExportFolder" xml:space="preserve">
+    <value>Choisis d'abord le dossier d'exportation.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ChooseImportFile" xml:space="preserve">
+    <value>Choisis d'abord un fichier .ahk à importer.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.CopyName" xml:space="preserve">
+    <value>Copie de {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DeleteMessage" xml:space="preserve">
+    <value>{name} sera supprimé. Les boutons qui l'exécutent échouent jusqu'à ce que tu choisisses un autre script. Cette opération est irréversible.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DeleteTitle" xml:space="preserve">
+    <value>Supprimer le script ?</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DiscardButton" xml:space="preserve">
+    <value>Annuler les modifications</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DownloadButton" xml:space="preserve">
+    <value>Télécharger AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DurationLabel" xml:space="preserve">
+    <value>Durée</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.EditorLabel" xml:space="preserve">
+    <value>Script</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ErrorNoLine" xml:space="preserve">
+    <value>Erreur : {message}</value>
+    <comment>[message:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ErrorWithLine" xml:space="preserve">
+    <value>Erreur à la ligne {line} : {message}</value>
+    <comment>[line:int][message:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportButton" xml:space="preserve">
+    <value>Exporter</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportExistsMessage" xml:space="preserve">
+    <value>{file} existe déjà dans ce dossier. Le remplacer ?</value>
+    <comment>[file:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportExistsTitle" xml:space="preserve">
+    <value>Remplacer le fichier ?</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportFolderLabel" xml:space="preserve">
+    <value>Exporter vers le dossier</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Exported" xml:space="preserve">
+    <value>Exporté sous {file}.</value>
+    <comment>[file:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportButton" xml:space="preserve">
+    <value>Importer</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportFileLabel" xml:space="preserve">
+    <value>Importer un fichier .ahk</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportNotUtf8" xml:space="preserve">
+    <value>Ce fichier n'est pas du texte UTF-8.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportNote" xml:space="preserve">
+    <value>Les scripts importés s'exécutent avec tes autorisations. N'importe que des scripts de confiance.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportTooLarge" xml:space="preserve">
+    <value>Ce fichier dépasse 1 MiB.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Imported" xml:space="preserve">
+    <value>{name} importé.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportedName" xml:space="preserve">
+    <value>Script AutoHotkey importé</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.InvalidName" xml:space="preserve">
+    <value>Saisis un nom de 100 caractères maximum.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.LibraryReadOnlyBanner" xml:space="preserve">
+    <value>La liste des scripts n'a pas pu être lue, elle ne peut donc pas être modifiée. Restaure une sauvegarde pour la récupérer.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoScriptsText" xml:space="preserve">
+    <value>Crée un script ou importe un fichier .ahk.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoScriptsTitle" xml:space="preserve">
+    <value>Aucun script pour l'instant</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoSelectionText" xml:space="preserve">
+    <value>Choisis un script dans la liste pour le modifier et l'exécuter.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoSelectionTitle" xml:space="preserve">
+    <value>Aucun script sélectionné</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NotInstalledBanner" xml:space="preserve">
+    <value>AutoHotkey v2 est introuvable. Tu peux modifier les scripts, mais ils ne peuvent pas s'exécuter tant qu'il n'est pas installé.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NotRunYet" xml:space="preserve">
+    <value>Pas encore exécuté</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.OperationFailed" xml:space="preserve">
+    <value>Cette modification n'a pas pu être effectuée.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ReplaceButton" xml:space="preserve">
+    <value>Remplacer</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ResultLabel" xml:space="preserve">
+    <value>Résultat</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.RunHeading" xml:space="preserve">
+    <value>Dernière exécution</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.RunStatusLabel" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SaveButton" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Saved" xml:space="preserve">
+    <value>Enregistré.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ScriptGone" xml:space="preserve">
+    <value>Ce script n'existe plus.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Seconds" xml:space="preserve">
+    <value>{seconds} s</value>
+    <comment>[seconds:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SettingsHeading" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SourceReadOnlyBanner" xml:space="preserve">
+    <value>Ce script n'a pas pu être lu, il ne peut donc pas être modifié. Restaure une sauvegarde pour le récupérer.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StartWithMacroDeckDescription" xml:space="preserve">
+    <value>Lance le script à chaque démarrage de Macro Deck, par exemple pour des raccourcis qui doivent toujours fonctionner.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StartWithMacroDeckLabel" xml:space="preserve">
+    <value>Lancer au démarrage de Macro Deck</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusExited" xml:space="preserve">
+    <value>Terminé avec le code {code}</value>
+    <comment>[code:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusFailedToStart" xml:space="preserve">
+    <value>Échec du lancement</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusStarting" xml:space="preserve">
+    <value>Démarrage</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusTimedOut" xml:space="preserve">
+    <value>Délai dépassé</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StopButton" xml:space="preserve">
+    <value>Arrêter</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxError" xml:space="preserve">
+    <value>Erreur de syntaxe à la ligne {line}.</value>
+    <comment>[line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxErrorNoLine" xml:space="preserve">
+    <value>Le script contient une erreur de syntaxe.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxOk" xml:space="preserve">
+    <value>Aucune erreur de syntaxe trouvée.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Title" xml:space="preserve">
+    <value>Scripts</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.TooLarge" xml:space="preserve">
+    <value>Le script dépasse 1 MiB et ne peut pas être enregistré.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.UploadFailed" xml:space="preserve">
+    <value>Tes dernières modifications ne sont pas parvenues à Macro Deck. L'enregistrement est indisponible tant que l'éditeur ne peut pas les envoyer.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.WorkingDirectoryDescription" xml:space="preserve">
+    <value>Le dossier dans lequel le script démarre. S'il est vide, un dossier temporaire est utilisé pour chaque exécution.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentLabel" xml:space="preserve">
+    <value>Argument</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentsDescription" xml:space="preserve">
+    <value>Transmis au script dans A_Args. Chaque argument peut utiliser des variables.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentsLabel" xml:space="preserve">
+    <value>Arguments</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.CodeDescription" xml:space="preserve">
+    <value>Les valeurs parviennent au code via des paramètres ou MacroDeck.GetVar ; elles ne sont jamais insérées dans le code.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.CodeLabel" xml:space="preserve">
+    <value>Code AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.FileLabel" xml:space="preserve">
+    <value>Fichier AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.IncludeHelperDescription" xml:space="preserve">
+    <value>Permet au script d'utiliser MacroDeck.SetVar, GetVar, Notify, SetResult et Log.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.IncludeHelperLabel" xml:space="preserve">
+    <value>Inclure l'assistant Macro Deck</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.OutputVariableDescription" xml:space="preserve">
+    <value>Reçoit le texte que le script définit avec MacroDeck.SetResult, ou à défaut sa sortie.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.OutputVariableLabel" xml:space="preserve">
+    <value>Variable de sortie</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ParametersDescription" xml:space="preserve">
+    <value>Le script les lit avec MacroDeck.Params["name"]. Les noms se composent de lettres, de chiffres et de traits de soulignement.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ParametersLabel" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ScriptLabel" xml:space="preserve">
+    <value>Script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ScriptPlaceholder" xml:space="preserve">
+    <value>Choisis un script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.StopAllDescription" xml:space="preserve">
+    <value>Si cette option est désactivée, seule l'instance lancée le plus récemment s'arrête.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.StopAllLabel" xml:space="preserve">
+    <value>Arrêter toutes les instances</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetFile" xml:space="preserve">
+    <value>Fichier AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetLabel" xml:space="preserve">
+    <value>Cible</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetManaged" xml:space="preserve">
+    <value>Script AutoHotkey de la bibliothèque</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TimeoutDescription" xml:space="preserve">
+    <value>Macro Deck arrête le script s'il s'exécute plus longtemps. 9 minutes maximum.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TimeoutLabel" xml:space="preserve">
+    <value>Délai d'expiration</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WaitDescription" xml:space="preserve">
+    <value>L'action se termine quand le script prend fin, et échoue s'il se termine avec un code d'erreur.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WaitLabel" xml:space="preserve">
+    <value>Attendre la fin</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningFail" xml:space="preserve">
+    <value>Faire échouer l'action</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningIgnore" xml:space="preserve">
+    <value>Ne rien faire</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningLabel" xml:space="preserve">
+    <value>S'il est déjà en cours d'exécution</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningRestart" xml:space="preserve">
+    <value>Le redémarrer</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningStartAnother" xml:space="preserve">
+    <value>Lancer une autre instance</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WorkingDirectoryDescription" xml:space="preserve">
+    <value>Le dossier dans lequel le script démarre. Par défaut, le dossier du fichier.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WorkingDirectoryLabel" xml:space="preserve">
+    <value>Répertoire de travail</value>
+  </data>
+  <data name="Integrations.AutoHotkey.States.NotRunning" xml:space="preserve">
+    <value>Arrêté</value>
+  </data>
+  <data name="Integrations.AutoHotkey.States.Running" xml:space="preserve">
+    <value>En cours d'exécution</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.Installed" xml:space="preserve">
+    <value>AutoHotkey installé</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastError" xml:space="preserve">
+    <value>Dernière erreur AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastExitCode" xml:space="preserve">
+    <value>Dernier code de sortie AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastResult" xml:space="preserve">
+    <value>Dernier résultat AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastScript" xml:space="preserve">
+    <value>Dernier script AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.RunningScripts" xml:space="preserve">
+    <value>Scripts AutoHotkey en cours d'exécution</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.ScriptRunning" xml:space="preserve">
+    <value>{name} en cours d'exécution</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.Version" xml:space="preserve">
+    <value>Version d'AutoHotkey</value>
+  </data>
   <data name="Integrations.Calendar.Actions.JoinMeeting.CalendarDescription" xml:space="preserve">
     <value>Facultatif. Rejoins uniquement les événements de ce calendrier.</value>
   </data>
@@ -5111,6 +5712,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Detail.IntegrationNotFound" xml:space="preserve">
     <value>Intégration introuvable</value>
+  </data>
+  <data name="Integrations.Detail.IssueHelpLink" xml:space="preserve">
+    <value>En savoir plus</value>
   </data>
   <data name="Integrations.Detail.IssuesTitle" xml:space="preserve">
     <value>Problèmes</value>

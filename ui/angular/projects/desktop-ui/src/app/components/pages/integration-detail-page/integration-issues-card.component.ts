@@ -3,6 +3,7 @@ import { AppStrings, IntegrationIssueSeverity, IpcIntegrationIssue } from '@macr
 import { ButtonComponent, ErrorBannerComponent, LocalizationService, LocalizedTextPipe, TranslatePipe } from '@shared';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
+import { ExternalLinkService } from '../../../services/external-link.service';
 
 const SEVERITY_RANK: Record<IntegrationIssueSeverity, number> = { info: 0, warning: 1, error: 2 };
 
@@ -24,6 +25,7 @@ const SEVERITY_RANK: Record<IntegrationIssueSeverity, number> = { info: 0, warni
 })
 export class IntegrationIssuesCardComponent {
   private readonly localization = inject(LocalizationService);
+  private readonly externalLinks = inject(ExternalLinkService);
 
   readonly issues = input.required<IpcIntegrationIssue[]>();
   readonly loading = input(false);
@@ -43,6 +45,10 @@ export class IntegrationIssuesCardComponent {
       issues[0].severity
     );
   });
+
+  protected openHelp(issue: IpcIntegrationIssue): void {
+    if (issue.helpUrl) this.externalLinks.open(issue.helpUrl);
+  }
 
   protected readonly issueCountLabel = computed(() =>
     this.localization.translateKey(AppStrings.Integrations.Page.IssueCount, { count: this.issues().length }));

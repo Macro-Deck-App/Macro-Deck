@@ -30,6 +30,7 @@
     <ItemGroup>
       <EmbeddedResource Include="**\*.svg" />
       <EmbeddedResource Include="**\*.png" />
+      <EmbeddedResource Include="AutoHotkey\Protocol\*.ahk" />
     </ItemGroup>
 
     <ItemGroup>

@@ -82,8 +82,16 @@ one you build yourself: it carries the `contentHash` that makes clients fetch ne
   photo frame can show every picture under one name. Update the tree with the new handle and clients draw
   the new picture; a client still holding the old hash is sent the current bytes without caching them.
   Registering the same bytes under the same name again costs no upload.
-- **Media types** are `image/png`, `image/jpeg`, `image/webp` and `image/gif`. SVG is not accepted from a
-  plugin, the same rule as for icons a plugin supplies. PNG and JPEG are the safe choice for photos.
+- **Media types** are `image/png`, `image/jpeg`, `image/webp` and `image/gif`, plus `text/plain` (UTF-8)
+  for the text of a [code input](/ui/views/configuration/#code-input). SVG is not accepted from a plugin, the
+  same rule as for icons a plugin supplies. PNG and JPEG are the safe choice for photos. Text is served as
+  `text/plain; charset=utf-8` under the same `nosniff` and sandbox rules as every resource, so a browser
+  never runs it. A Macro Deck release from before text resources refuses the upload, and the
+  registration throws `UiResourceException` with `Failed`; a plugin built against an SDK from before them
+  refuses the media type itself with an `ArgumentException`.
+- **Anyone signed in to Macro Deck can read a resource whose id they know**, and the id is your plugin's id
+  and the name. Register text under an unguessable name, for example one that ends in 32 random hex
+  digits, and remove it when nothing shows it any more.
 - **Size.** One resource is at most `maxUiResourceBytes` (2 MiB). That limit is deliberate and applies per
   resource: downscale camera photos before registering them. All of a plugin's resources together are at
   most `maxUiResourceBytesPerPlugin` (48 MiB) and `maxUiResourcesPerPlugin` (1024); Macro Deck holds them in

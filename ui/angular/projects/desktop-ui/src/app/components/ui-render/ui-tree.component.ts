@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, effect, forwardRef, inj
 import { UiNode, UiNodeEvent, UiComponentBox } from '@macro-deck/runtime';
 import { UiNodeEventBus } from '@shared';
 import { UiNodeComponent } from './ui-node.component';
-import { UiRenderContext } from './ui-render-context';
+import { UiContentUploader, UiRenderContext } from './ui-render-context';
 
 @Component({
   selector: 'shared-ui-tree',
@@ -26,6 +26,7 @@ export class UiTreeComponent {
   readonly disabled = input(false);
   readonly scopeRefId = input<string | undefined>(undefined);
   readonly unsavedChanges = input(false);
+  readonly contentUploader = input<UiContentUploader | null>(null);
   readonly nodeEvent = output<UiNodeEvent>();
 
   protected readonly context = inject(UiRenderContext);
@@ -36,6 +37,7 @@ export class UiTreeComponent {
     effect(() => this.context.setDisabled(this.disabled()));
     effect(() => this.context.setScopeRefId(this.scopeRefId()));
     effect(() => this.context.setUnsavedChanges(this.unsavedChanges()));
+    effect(() => this.context.setContentUploader(this.contentUploader()));
 
     const subscription = this.context.events$.subscribe(event => this.nodeEvent.emit(event));
     inject(DestroyRef).onDestroy(() => subscription.unsubscribe());

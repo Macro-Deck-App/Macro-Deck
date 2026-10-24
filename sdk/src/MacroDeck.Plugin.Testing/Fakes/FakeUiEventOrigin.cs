@@ -19,6 +19,7 @@ public sealed class FakeUiEventOrigin : IUiEventOrigin
 	private readonly List<LocalizedText> _failures = [];
 	private readonly List<ModalDefinition> _modals = [];
 	private readonly List<Uri> _urls = [];
+	private readonly Dictionary<string, byte[]> _uploads = new(StringComparer.Ordinal);
 
 	/// <summary>Creates an origin for <paramref name="clientId" />.</summary>
 	public FakeUiEventOrigin(string? clientId = "test-client")
@@ -138,6 +139,46 @@ public sealed class FakeUiEventOrigin : IUiEventOrigin
 		}
 
 		return Task.FromResult(true);
+	}
+
+	/// <summary>
+	/// Makes <paramref name="content" /> readable through <see cref="ReadUploadAsync" /> under
+	/// <paramref name="uploadId" />, as a code input's upload is in the session the event came from. Adding the
+	/// same id again replaces the content.
+	/// </summary>
+	public void AddUpload(string uploadId, ReadOnlyMemory<byte> content)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(uploadId);
+
+		lock (_gate)
+		{
+			_uploads[uploadId] = content.ToArray();
+		}
+	}
+
+	/// <summary>Forgets an upload, as Macro Deck does once it expired or a newer upload replaced it.</summary>
+	public void RemoveUpload(string uploadId)
+	{
+		lock (_gate)
+		{
+			_uploads.Remove(uploadId);
+		}
+	}
+
+	/// <inheritdoc />
+	/// <remarks>Answers what <see cref="AddUpload" /> added, whether or not <see cref="IsAttached" /> is set,
+	/// and throws <see cref="UiUploadNotFoundException" /> for any other id.</remarks>
+	public Task<ReadOnlyMemory<byte>> ReadUploadAsync(string uploadId, CancellationToken cancellationToken = default)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(uploadId);
+		cancellationToken.ThrowIfCancellationRequested();
+
+		lock (_gate)
+		{
+			return _uploads.TryGetValue(uploadId, out var content)
+				? Task.FromResult<ReadOnlyMemory<byte>>(content)
+				: Task.FromException<ReadOnlyMemory<byte>>(new UiUploadNotFoundException());
+		}
 	}
 
 	private bool TryOpen(ModalDefinition modal)

@@ -3612,6 +3612,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Forms.CodeEditor.InvalidJson" xml:space="preserve">
     <value>Некоректний JSON</value>
   </data>
+  <data name="Forms.CodeEditor.LoadFailed" xml:space="preserve">
+    <value>Не вдалося завантажити текст.</value>
+  </data>
+  <data name="Forms.CodeEditor.UploadFailed" xml:space="preserve">
+    <value>Не вдалося передати зміни. Змініть текст, щоб спробувати знову.</value>
+  </data>
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Додати модифікатор</value>
   </data>
@@ -4690,6 +4696,601 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Adb.Variables.DeviceScreenOn" xml:space="preserve">
     <value>Екран пристрою увімкнено</value>
   </data>
+  <data name="Integrations.AutoHotkey.Actions.OpenWindowSpy.Description" xml:space="preserve">
+    <value>Відкриває Window Spy зі встановленого AutoHotkey, щоб дізнатися заголовки, класи й елементи керування вікон.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.OpenWindowSpy.Name" xml:space="preserve">
+    <value>Відкрити Window Spy</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Restart.Description" xml:space="preserve">
+    <value>Зупиняє скрипт AutoHotkey, запущений Macro Deck, і знову запускає його з новими параметрами. Якщо скрипт не запущено, просто запускає його.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Restart.Name" xml:space="preserve">
+    <value>Перезапустити скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunFile.Description" xml:space="preserve">
+    <value>Запускає файл .ahk для AutoHotkey v2 з місця, де він зберігається.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunFile.Name" xml:space="preserve">
+    <value>Запустити файл AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunInlineCode.Description" xml:space="preserve">
+    <value>Виконує код AutoHotkey v2, написаний у цій дії.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunInlineCode.Name" xml:space="preserve">
+    <value>Виконати вбудований код AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunScript.Description" xml:space="preserve">
+    <value>Запускає скрипт AutoHotkey з бібліотеки скриптів інтеграції AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.RunScript.Name" xml:space="preserve">
+    <value>Запустити скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Stop.Description" xml:space="preserve">
+    <value>Зупиняє скрипти AutoHotkey, запущені Macro Deck. Спершу скрипту надсилається запит на закриття, а якщо він не закривається, його буде примусово завершено.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Stop.Name" xml:space="preserve">
+    <value>Зупинити скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Toggle.Description" xml:space="preserve">
+    <value>Запускає скрипт AutoHotkey, якщо Macro Deck його не виконує, і зупиняє, якщо виконує.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Actions.Toggle.Name" xml:space="preserve">
+    <value>Перемкнути скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.AutomaticOption" xml:space="preserve">
+    <value>Знайти автоматично</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.Description" xml:space="preserve">
+    <value>Macro Deck запускає скрипти AutoHotkey за допомогою AutoHotkey v2, встановленого на цьому комп'ютері.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DetectedExecutableLabel" xml:space="preserve">
+    <value>Використовуваний AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DetectedVersionLabel" xml:space="preserve">
+    <value>Версія AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.DownloadLinkLabel" xml:space="preserve">
+    <value>Завантажити AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.EnableFirst" xml:space="preserve">
+    <value>Увімкніть інтеграцію AutoHotkey, щоб змінити її налаштування.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableDoesNotRun" xml:space="preserve">
+    <value>Цей виконуваний файл AutoHotkey не запустився.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableInvalid" xml:space="preserve">
+    <value>Вкажіть повний шлях до файлу .exe програми AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableModeLabel" xml:space="preserve">
+    <value>Виконуваний файл AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableNotFound" xml:space="preserve">
+    <value>Цей файл не існує.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutableNotVersion2" xml:space="preserve">
+    <value>Це не AutoHotkey v2. Macro Deck підтримує лише AutoHotkey v2.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutablePathDescription" xml:space="preserve">
+    <value>AutoHotkey64.exe або AutoHotkey32.exe з інсталяції AutoHotkey v2, наприклад портативної.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ExecutablePathLabel" xml:space="preserve">
+    <value>Виконуваний файл</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.GracePeriodDescription" xml:space="preserve">
+    <value>Скільки часу скрипт AutoHotkey, що зупиняється, може виконувати свою процедуру завершення, перш ніж Macro Deck примусово його завершить.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.GracePeriodLabel" xml:space="preserve">
+    <value>Час на завершення під час зупинки, с</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.ManualOption" xml:space="preserve">
+    <value>Вибрати виконуваний файл</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.NotDetected" xml:space="preserve">
+    <value>AutoHotkey v2 не знайдено на цьому комп'ютері. Встановіть його або виберіть його виконуваний файл нижче.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.Title" xml:space="preserve">
+    <value>Налаштування AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Config.UnknownStep" xml:space="preserve">
+    <value>Невідомий крок налаштування. Почніть налаштування знову.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.AlreadyRunning" xml:space="preserve">
+    <value>Скрипт AutoHotkey {name} уже запущено.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.CheckTimedOut" xml:space="preserve">
+    <value>Перевірка синтаксису не завершилася вчасно.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.ExitCode" xml:space="preserve">
+    <value>Скрипт AutoHotkey {name} завершився з кодом {code}.</value>
+    <comment>[name:string][code:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.FileNotFound" xml:space="preserve">
+    <value>Файл AutoHotkey не існує.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.InvalidParameterName" xml:space="preserve">
+    <value>{name} — неприпустима назва параметра. Використовуйте літери, цифри та символи підкреслення; назва не повинна починатися з цифри.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.InvalidParameterValue" xml:space="preserve">
+    <value>Значення параметра містить символ, який AutoHotkey не може прийняти.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LibraryUnreadable" xml:space="preserve">
+    <value>Не вдалося прочитати бібліотеку скриптів AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LoadFailed" xml:space="preserve">
+    <value>Не вдалося завантажити скрипт AutoHotkey {name} через помилку в рядку {line}.</value>
+    <comment>[name:string][line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.LoadFailedNoLine" xml:space="preserve">
+    <value>Не вдалося завантажити скрипт AutoHotkey {name}.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoCode" xml:space="preserve">
+    <value>Введіть код AutoHotkey для виконання.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoFileSelected" xml:space="preserve">
+    <value>Виберіть файл AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NoScriptSelected" xml:space="preserve">
+    <value>Виберіть скрипт AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.NotInstalled" xml:space="preserve">
+    <value>AutoHotkey v2 недоступний. Перевірте інтеграцію AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.RuntimeError" xml:space="preserve">
+    <value>Скрипт AutoHotkey {name} зупинився через помилку в рядку {line}.</value>
+    <comment>[name:string][line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.RuntimeErrorNoLine" xml:space="preserve">
+    <value>Скрипт AutoHotkey {name} зупинився через помилку.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.ScriptNotFound" xml:space="preserve">
+    <value>Скрипт AutoHotkey більше не існує.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.SourceUnreadable" xml:space="preserve">
+    <value>Не вдалося прочитати скрипт AutoHotkey {name}.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.StartFailed" xml:space="preserve">
+    <value>Не вдалося запустити скрипт AutoHotkey {name}.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.TimedOut" xml:space="preserve">
+    <value>Скрипт AutoHotkey {name} не завершився вчасно, тому його зупинено.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.TooManyRuns" xml:space="preserve">
+    <value>Запущено забагато скриптів AutoHotkey. Зупиніть один із них і спробуйте знову.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WindowSpyFailed" xml:space="preserve">
+    <value>Не вдалося запустити Window Spy.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WindowSpyNotFound" xml:space="preserve">
+    <value>Window Spy не знайдено в інсталяції AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Errors.WorkingDirectoryNotFound" xml:space="preserve">
+    <value>Робочий каталог не існує.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.Category" xml:space="preserve">
+    <value>Скрипти AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.DurationLabel" xml:space="preserve">
+    <value>Тривалість у мілісекундах</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitCodeLabel" xml:space="preserve">
+    <value>Код виходу</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitedDescription" xml:space="preserve">
+    <value>Скрипт AutoHotkey, запущений Macro Deck, завершився.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ExitedName" xml:space="preserve">
+    <value>Скрипт AutoHotkey завершився</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.FailedDescription" xml:space="preserve">
+    <value>Скрипт AutoHotkey не вдалося запустити чи завантажити, він повідомив про помилку або не завершився вчасно.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.FailedName" xml:space="preserve">
+    <value>Збій скрипту AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonLabel" xml:space="preserve">
+    <value>Причина</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonLoadError" xml:space="preserve">
+    <value>Не вдалося завантажити</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonRuntimeError" xml:space="preserve">
+    <value>Повідомив про помилку</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonStartFailed" xml:space="preserve">
+    <value>Не вдалося запустити</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ReasonTimeout" xml:space="preserve">
+    <value>Не завершився вчасно</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.ScriptLabel" xml:space="preserve">
+    <value>Скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.StartedDescription" xml:space="preserve">
+    <value>Скрипт AutoHotkey, запущений Macro Deck, виконується.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Events.StartedName" xml:space="preserve">
+    <value>Скрипт AutoHotkey запущено</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.NoAnswer" xml:space="preserve">
+    <value>Macro Deck не відповів вчасно.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.RequestRejected" xml:space="preserve">
+    <value>Macro Deck відхилив цей запит, оскільки скрипт надіслав забагато повідомлень або надто довге повідомлення.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableInvalidName" xml:space="preserve">
+    <value>{name} — неприпустима назва змінної Macro Deck.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableNotFound" xml:space="preserve">
+    <value>Змінну Macro Deck {name} не знайдено.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Helper.VariableUnavailable" xml:space="preserve">
+    <value>Змінну Macro Deck {name} зараз неможливо прочитати.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.InlineCodeName" xml:space="preserve">
+    <value>Вбудований код AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.CheckAgain" xml:space="preserve">
+    <value>Перевірити знову</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.ChooseExecutable" xml:space="preserve">
+    <value>AutoHotkey v2 досі недоступний. Виберіть його виконуваний файл у налаштуваннях.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.Found" xml:space="preserve">
+    <value>Знайдено AutoHotkey {version}.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryReadable" xml:space="preserve">
+    <value>Бібліотеку скриптів AutoHotkey знову можна прочитати.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryStillUnreadable" xml:space="preserve">
+    <value>Бібліотеку скриптів AutoHotkey досі неможливо прочитати.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableAction" xml:space="preserve">
+    <value>Спробувати знову</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableDescription" xml:space="preserve">
+    <value>Збережений список скриптів AutoHotkey пошкоджено. Macro Deck не змінює його, доки його знову не вдасться прочитати; щоб відновити список, відновіть резервну копію.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.LibraryUnreadableTitle" xml:space="preserve">
+    <value>Не вдалося прочитати скрипти AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotFoundDescription" xml:space="preserve">
+    <value>Встановіть AutoHotkey v2 або виберіть його виконуваний файл у налаштуваннях AutoHotkey. До того часу скрипти AutoHotkey не запускатимуться.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotFoundTitle" xml:space="preserve">
+    <value>AutoHotkey не знайдено</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotRunnableDescription" xml:space="preserve">
+    <value>Виконуваний файл AutoHotkey не запустився. Перевстановіть AutoHotkey v2 або виберіть інший виконуваний файл у налаштуваннях AutoHotkey.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotRunnableTitle" xml:space="preserve">
+    <value>AutoHotkey не запускається</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotVersion2Description" xml:space="preserve">
+    <value>Знайдений на цьому комп'ютері AutoHotkey — не версії 2. Macro Deck підтримує лише AutoHotkey v2.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Issues.NotVersion2Title" xml:space="preserve">
+    <value>Потрібен AutoHotkey v2</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Migration.EnableIntegration" xml:space="preserve">
+    <value>Увімкніть інтеграцію AutoHotkey і встановіть AutoHotkey v2.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Migration.TemplatePlaceholders" xml:space="preserve">
+    <value>У цьому коді використовувалися заповнювачі змінних Macro Deck 2, які більше не підставляються. Передавайте значення як параметри й читайте їх через MacroDeck.Params або MacroDeck.GetVar.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.CheckSyntaxButton" xml:space="preserve">
+    <value>Перевірити синтаксис</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ChooseExportFolder" xml:space="preserve">
+    <value>Спершу виберіть папку для експорту.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ChooseImportFile" xml:space="preserve">
+    <value>Спершу виберіть файл .ahk для імпорту.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.CopyName" xml:space="preserve">
+    <value>{name} (копія)</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DeleteMessage" xml:space="preserve">
+    <value>{name} буде видалено. Кнопки, які його запускають, не працюватимуть, доки для них не буде вибрано інший скрипт. Це не можна скасувати.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DeleteTitle" xml:space="preserve">
+    <value>Видалити скрипт?</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DiscardButton" xml:space="preserve">
+    <value>Скасувати зміни</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DownloadButton" xml:space="preserve">
+    <value>Завантажити AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.DurationLabel" xml:space="preserve">
+    <value>Тривалість</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.EditorLabel" xml:space="preserve">
+    <value>Скрипт</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ErrorNoLine" xml:space="preserve">
+    <value>Помилка: {message}</value>
+    <comment>[message:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ErrorWithLine" xml:space="preserve">
+    <value>Помилка в рядку {line}: {message}</value>
+    <comment>[line:int][message:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportButton" xml:space="preserve">
+    <value>Експортувати</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportExistsMessage" xml:space="preserve">
+    <value>Файл {file} уже існує в цій папці. Замінити його?</value>
+    <comment>[file:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportExistsTitle" xml:space="preserve">
+    <value>Замінити файл?</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ExportFolderLabel" xml:space="preserve">
+    <value>Папка для експорту</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Exported" xml:space="preserve">
+    <value>Експортовано як {file}.</value>
+    <comment>[file:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportButton" xml:space="preserve">
+    <value>Імпортувати</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportFileLabel" xml:space="preserve">
+    <value>Імпорт файлу .ahk</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportNotUtf8" xml:space="preserve">
+    <value>Цей файл не є текстом у кодуванні UTF-8.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportNote" xml:space="preserve">
+    <value>Імпортовані скрипти виконуються з вашими правами. Імпортуйте лише скрипти, яким довіряєте.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportTooLarge" xml:space="preserve">
+    <value>Розмір цього файлу перевищує 1 MiB.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Imported" xml:space="preserve">
+    <value>Імпортовано: {name}.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ImportedName" xml:space="preserve">
+    <value>Імпортований скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.InvalidName" xml:space="preserve">
+    <value>Введіть назву довжиною не більше 100 символів.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.LibraryReadOnlyBanner" xml:space="preserve">
+    <value>Не вдалося прочитати список скриптів, тому його не можна змінити. Відновіть резервну копію, щоб повернути його.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoScriptsText" xml:space="preserve">
+    <value>Створіть скрипт або імпортуйте файл .ahk.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoScriptsTitle" xml:space="preserve">
+    <value>Скриптів поки немає</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoSelectionText" xml:space="preserve">
+    <value>Виберіть скрипт у списку, щоб змінити й запустити його.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NoSelectionTitle" xml:space="preserve">
+    <value>Скрипт не вибрано</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NotInstalledBanner" xml:space="preserve">
+    <value>AutoHotkey v2 не знайдено. Скрипти можна редагувати, але запустити їх можна буде лише після його встановлення.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.NotRunYet" xml:space="preserve">
+    <value>Ще не запускався</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.OperationFailed" xml:space="preserve">
+    <value>Не вдалося внести цю зміну.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ReplaceButton" xml:space="preserve">
+    <value>Замінити</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ResultLabel" xml:space="preserve">
+    <value>Результат</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.RunHeading" xml:space="preserve">
+    <value>Останній запуск</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.RunStatusLabel" xml:space="preserve">
+    <value>Стан</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SaveButton" xml:space="preserve">
+    <value>Зберегти</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Saved" xml:space="preserve">
+    <value>Збережено.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.ScriptGone" xml:space="preserve">
+    <value>Цей скрипт більше не існує.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Seconds" xml:space="preserve">
+    <value>{seconds} с</value>
+    <comment>[seconds:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SettingsHeading" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SourceReadOnlyBanner" xml:space="preserve">
+    <value>Не вдалося прочитати цей скрипт, тому його не можна змінити. Відновіть резервну копію, щоб повернути його.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StartWithMacroDeckDescription" xml:space="preserve">
+    <value>Запускає скрипт щоразу під час запуску Macro Deck, наприклад для гарячих клавіш, які мають працювати завжди.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StartWithMacroDeckLabel" xml:space="preserve">
+    <value>Запускати разом із Macro Deck</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusExited" xml:space="preserve">
+    <value>Завершено з кодом {code}</value>
+    <comment>[code:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusFailedToStart" xml:space="preserve">
+    <value>Не вдалося запустити</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusStarting" xml:space="preserve">
+    <value>Запускається</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StatusTimedOut" xml:space="preserve">
+    <value>Час очікування минув</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.StopButton" xml:space="preserve">
+    <value>Зупинити</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxError" xml:space="preserve">
+    <value>Синтаксична помилка в рядку {line}.</value>
+    <comment>[line:int]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxErrorNoLine" xml:space="preserve">
+    <value>У скрипті є синтаксична помилка.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.SyntaxOk" xml:space="preserve">
+    <value>Синтаксичних помилок не знайдено.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.Title" xml:space="preserve">
+    <value>Скрипти</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.TooLarge" xml:space="preserve">
+    <value>Розмір скрипту перевищує 1 MiB, тому його не можна зберегти.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.UploadFailed" xml:space="preserve">
+    <value>Останні зміни не надійшли до Macro Deck. Збереження недоступне, доки редактор не зможе їх передати.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Page.WorkingDirectoryDescription" xml:space="preserve">
+    <value>Папка, у якій запускається скрипт. Якщо поле порожнє, для кожного запуску використовується тимчасова папка.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentLabel" xml:space="preserve">
+    <value>Аргумент</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentsDescription" xml:space="preserve">
+    <value>Передаються скрипту в A_Args. У кожному аргументі можна використовувати змінні.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ArgumentsLabel" xml:space="preserve">
+    <value>Аргументи</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.CodeDescription" xml:space="preserve">
+    <value>Значення потрапляють у код через параметри або MacroDeck.GetVar і ніколи не вставляються в сам код.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.CodeLabel" xml:space="preserve">
+    <value>Код AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.FileLabel" xml:space="preserve">
+    <value>Файл AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.IncludeHelperDescription" xml:space="preserve">
+    <value>Дає змогу скрипту використовувати MacroDeck.SetVar, GetVar, Notify, SetResult і Log.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.IncludeHelperLabel" xml:space="preserve">
+    <value>Підключити помічник Macro Deck</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.OutputVariableDescription" xml:space="preserve">
+    <value>Отримує текст, який скрипт задає через MacroDeck.SetResult, а якщо його немає, — вивід скрипту.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.OutputVariableLabel" xml:space="preserve">
+    <value>Змінна для виводу</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ParametersDescription" xml:space="preserve">
+    <value>Скрипт читає їх як MacroDeck.Params["name"]. Назви складаються з літер, цифр і символів підкреслення.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ParametersLabel" xml:space="preserve">
+    <value>Параметри</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ScriptLabel" xml:space="preserve">
+    <value>Скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.ScriptPlaceholder" xml:space="preserve">
+    <value>Виберіть скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.StopAllDescription" xml:space="preserve">
+    <value>Якщо вимкнено, зупиняється лише останній запущений екземпляр.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.StopAllLabel" xml:space="preserve">
+    <value>Зупинити всі екземпляри</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetFile" xml:space="preserve">
+    <value>Файл AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetLabel" xml:space="preserve">
+    <value>Ціль</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TargetManaged" xml:space="preserve">
+    <value>Скрипт AutoHotkey з бібліотеки</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TimeoutDescription" xml:space="preserve">
+    <value>Macro Deck зупинить скрипт, якщо він працюватиме довше. Не більше 9 хвилин.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.TimeoutLabel" xml:space="preserve">
+    <value>Час очікування</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WaitDescription" xml:space="preserve">
+    <value>Дія завершується разом зі скриптом і завершується з помилкою, якщо скрипт виходить із кодом помилки.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WaitLabel" xml:space="preserve">
+    <value>Чекати завершення</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningFail" xml:space="preserve">
+    <value>Завершити дію з помилкою</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningIgnore" xml:space="preserve">
+    <value>Нічого не робити</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningLabel" xml:space="preserve">
+    <value>Якщо вже запущено</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningRestart" xml:space="preserve">
+    <value>Перезапустити</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WhenRunningStartAnother" xml:space="preserve">
+    <value>Запустити ще один екземпляр</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WorkingDirectoryDescription" xml:space="preserve">
+    <value>Папка, у якій запускається скрипт. За замовчуванням — папка файлу.</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Parameters.WorkingDirectoryLabel" xml:space="preserve">
+    <value>Робочий каталог</value>
+  </data>
+  <data name="Integrations.AutoHotkey.States.NotRunning" xml:space="preserve">
+    <value>Не виконується</value>
+  </data>
+  <data name="Integrations.AutoHotkey.States.Running" xml:space="preserve">
+    <value>Виконується</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.Installed" xml:space="preserve">
+    <value>AutoHotkey встановлено</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastError" xml:space="preserve">
+    <value>Остання помилка AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastExitCode" xml:space="preserve">
+    <value>Останній код виходу AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastResult" xml:space="preserve">
+    <value>Останній результат AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.LastScript" xml:space="preserve">
+    <value>Останній скрипт AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.RunningScripts" xml:space="preserve">
+    <value>Запущені скрипти AutoHotkey</value>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.ScriptRunning" xml:space="preserve">
+    <value>{name} виконується</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Integrations.AutoHotkey.Variables.Version" xml:space="preserve">
+    <value>Версія AutoHotkey</value>
+  </data>
   <data name="Integrations.Calendar.Actions.JoinMeeting.CalendarDescription" xml:space="preserve">
     <value>Необов'язково. Приєднувати лише події з цього календаря.</value>
   </data>
@@ -5112,6 +5713,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.Detail.IntegrationNotFound" xml:space="preserve">
     <value>Інтеграцію не знайдено</value>
+  </data>
+  <data name="Integrations.Detail.IssueHelpLink" xml:space="preserve">
+    <value>Докладніше</value>
   </data>
   <data name="Integrations.Detail.IssuesTitle" xml:space="preserve">
     <value>Проблеми</value>

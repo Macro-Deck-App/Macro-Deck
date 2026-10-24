@@ -133,6 +133,8 @@ internal static class HostInvokeDispatcher
 					=> HostInvokeOutcome.Ok(new UiOriginShowModalResult { Opened = false }),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.OriginOpenUrl
 					=> HostInvokeOutcome.Ok(new UiOriginOpenUrlResult { Delivered = false }),
+				HostApis.Ui when payload.Operation == HostOperations.Ui.OriginReadUpload
+					=> HostInvokeOutcome.Ok(new UiOriginReadUploadResult { Found = false }),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.ReportParameterValues
 					=> HostInvokeOutcome.Ok((JsonElement?)null),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
@@ -1002,6 +1004,27 @@ internal static class HostInvokeDispatcher
 				.ConfigureAwait(false);
 
 			return HostInvokeOutcome.Ok(created);
+		}
+
+		if (payload.Operation == HostOperations.UserVariables.Read)
+		{
+			var read = Require<UserVariablesReadArguments>(payload);
+
+			var value = await context.UserVariables.ReadInContextAsync(read.Name,
+					new UserVariableContext(read.OwnerWidgetId, read.ScriptId, read.AutomationId),
+					cancellationToken)
+				.ConfigureAwait(false);
+
+			return HostInvokeOutcome.Ok(new UserVariablesReadResult
+			{
+				Status = value.Status.ToString(),
+				Type = value.Type?.ToString(),
+				Value = value.Value is null
+					? null
+					: JsonSerializer.SerializeToElement(value.Value, PluginProtocolJson.Options),
+				Text = value.Text,
+				Message = value.Message
+			});
 		}
 
 		var arguments = Require<UserVariablesApplyArguments>(payload);

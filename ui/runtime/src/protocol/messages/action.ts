@@ -64,6 +64,7 @@ export interface ActionParameterDef {
   widgetTypes?: string[];
   fileExtensions?: string[];
   language?: string;
+  variableInsertFormat?: string;
   children?: ActionParameterDef[];
   itemTemplate?: ActionParameterDef;
   visibleWhen?: ParameterVisibility;

@@ -262,6 +262,20 @@ internal sealed class CallbackFakeUserVariableApi : IUserVariableApi
 		Created.Add((name, ownerWidgetId, type, initialValue, decimalPlaces));
 		return Task.FromResult(CreateResultToReturn);
 	}
+
+	public List<(string Name, UserVariableContext Context)> Read { get; } = [];
+
+	public UserVariableReadResult ReadResultToReturn { get; set; } =
+		UserVariableReadResult.Failed(UserVariableReadStatus.NotFound, "Not seeded.");
+
+	public Task<UserVariableReadResult> ReadInContextAsync(
+		string name,
+		UserVariableContext context,
+		CancellationToken cancellationToken = default)
+	{
+		Read.Add((name, context));
+		return Task.FromResult(ReadResultToReturn);
+	}
 }
 
 internal sealed class CallbackFakeHostLockState : IHostLockState

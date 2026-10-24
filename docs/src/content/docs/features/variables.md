@@ -557,3 +557,34 @@ if (result.Status == UserVariableWriteStatus.NotFound)
 - In `MacroDeck.Plugin.Testing`, `ActionsTestClient.ExecuteWithContextAsync` runs a step inside a script or
   automation, and `FakeUserVariableApi` resolves script and automation locals and keeps the last context it
   was called with in `LastContext`.
+
+### Reading a variable as a flow sees it
+
+`ReadInContextAsync` answers what `{{ vars.<name> }}` resolves to for a step running in a context: a
+script local, then an automation local, then a widget local, then a global. Integration and widget
+variables are found by their name like user variables. Script inputs are not part of the lookup. Every
+call is a live read; nothing is cached on the plugin's side.
+
+```csharp
+var read = await _userVariables.ReadInContextAsync(
+	"volume", UserVariableContext.From(context), context.CancellationToken);
+if (read.Status == UserVariableReadStatus.Found)
+{
+	// read.Value is a double for Numeric, a bool for Boolean and a string for Text and Color;
+	// read.Text is the value as a template renders it, e.g. "0.50" with two decimal places.
+}
+```
+
+| `UserVariableReadStatus` | Meaning |
+| --- | --- |
+| `Found` | `Type`, `Value` and `Text` are set. |
+| `NotFound` | No variable of that name is visible in the context. |
+| `InvalidName` | The name cannot be a variable name. |
+| `NotSupported` | The host does not implement reads: an `IUserVariableApi` implementation or a Macro Deck release that predates the method. |
+| `Unavailable` | The host could not be reached, or the variable exists but its owner has no value right now (a template shows it as unavailable). `Type` is set in the second case. Retry later. |
+
+The method is a default interface member, so an implementation written against an older SDK keeps
+compiling and answers `NotSupported`. Over the protocol it is the `user-variables` `read` operation with
+the same `name`, `ownerWidgetId`, `scriptId` and `automationId` fields as `apply`; a host that predates it
+answers `CAPABILITY_UNSUPPORTED`, which the SDK reports as `NotSupported`. `FakeUserVariableApi` reads
+the variables seeded on it along the same order.

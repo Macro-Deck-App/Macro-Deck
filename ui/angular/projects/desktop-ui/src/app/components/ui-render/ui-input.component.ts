@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, Injector, computed, effect, forwardRef, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Injector, computed, effect, forwardRef, inject, input, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { AppStrings, UiConfigEvents, readThresholds, UiConfigPrimitives, UiConfigProperties, UiNode, UiNodeOption, resolveLocalizedText, WidgetIconDisplay, WidgetIconRef, emitsEvent, iconPackRef, iconPackReferenceOf, isIconPackRef, nodeBoolean, nodeNumber, nodeOptions, nodeRaw, nodeString, nodeStringArray, nodeText, readWidgetIconRef } from '@macro-deck/runtime';
-import { ButtonComponent, IconImageService, InputComponent, LocalizationService, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent, TranslatePipe } from '@shared';
-import type { ActionFlow, HotkeyValue, KeyboardComboValue, KeyboardSequenceValue, VariableType } from '@macro-deck/runtime';
+import { AppStrings, UiConfigEvents, readThresholds, UiConfigPrimitives, UiConfigProperties, UiNode, UiNodeOption, resolveLocalizedText, WidgetIconDisplay, WidgetIconRef, emitsEvent, iconPackRef, iconPackReferenceOf, isIconPackRef, nodeBoolean, nodeNumber, nodeOptions, nodeRaw, nodeResource, nodeString, nodeStringArray, nodeText, readWidgetIconRef } from '@macro-deck/runtime';
+import { ButtonComponent, IconImageService, InputComponent, LocalizationService, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent, TranslatePipe, VariableService } from '@shared';
+import type { ActionFlow, HotkeyValue, KeyboardComboValue, KeyboardSequenceValue, Variable, VariableType } from '@macro-deck/runtime';
 import { normalizeHttpsUrl } from '../../domain/url-input.util';
 import { SelectComponent, SelectOption } from '../forms/select/select.component';
 import { ComboboxComponent, ComboboxOption } from '../forms/combobox/combobox.component';
@@ -24,6 +24,7 @@ import { WidgetTargetPickerComponent } from '../forms/widget-target-picker/widge
 import { DevicePickerComponent } from '../forms/device-picker/device-picker.component';
 import { IntegrationPickerComponent } from '../forms/integration-picker/integration-picker.component';
 import { NodeVariablePickerComponent } from '../forms/variable-picker-field/variable-picker-field.component';
+import { VariablePickerComponent } from '../variable-picker/variable-picker.component';
 import { NodeParamInputComponent } from '../forms/param-input-field/param-input-field.component';
 import { NodeActionBuilderComponent, type ProviderChangeRequest } from '../action-builder/node-action-builder.component';
 import { NodeActionPickerComponent } from '../action-builder/action-picker/node-action-picker.component';
@@ -70,6 +71,7 @@ const HOST_RESOLVED_OPTION_SOURCES: readonly string[] = ['macrodeck.fonts'];
     DevicePickerComponent,
     IntegrationPickerComponent,
     NodeVariablePickerComponent,
+    VariablePickerComponent,
     NodeParamInputComponent,
     NodeActionPickerComponent,
     // `NodeActionBuilderComponent` wraps `ActionBuilderComponent`, which renders a parameter's own
@@ -152,6 +154,27 @@ export class UiInputComponent {
   );
   protected readonly fileExtensions = computed(() => nodeStringArray(this.node(), Properties.FileExtensions));
   protected readonly language = computed(() => nodeString(this.node(), Properties.Language));
+  protected readonly variableInsertFormat = computed(
+    () => nodeString(this.node(), Properties.VariableInsertFormat) || undefined,
+  );
+  protected readonly contentResource = computed(() => nodeResource(this.node(), Properties.ContentResource) ?? null);
+  protected readonly codeRows = computed(() => {
+    const rows = nodeNumber(this.node(), Properties.Rows);
+    return rows === undefined
+      ? CodeEditorComponent.defaultRows
+      : Math.min(60, Math.max(3, Math.round(rows)));
+  });
+  protected readonly contentUploader = (text: string) => this.context.uploadContent(this.node(), text);
+  private readonly codeEditor = viewChild<CodeEditorComponent>('codeEditor');
+  protected readonly codeVariables = computed<Variable[]>(() => {
+    if (!this.variableInsertFormat()) return [];
+    const variableService = this.injector.get(VariableService);
+    const scopeRefId = this.context.scopeRefId;
+    return scopeRefId
+      ? variableService.visibleForContext('widget', scopeRefId)
+      : variableService.variables()
+        .filter(variable => variable.scope !== 'script' && variable.scope !== 'automation');
+  });
 
   protected readonly supportsReset = computed(() => nodeBoolean(this.node(), Properties.SupportsReset) === true);
   protected readonly colorAllowsVariables = computed(() => nodeBoolean(this.node(), Properties.AllowVariables) === true);
@@ -416,6 +439,10 @@ export class UiInputComponent {
     effect(() => {
       const sourceId = this.hostOptionsSourceId();
       if (sourceId) void this.loadHostOptions(sourceId);
+    });
+    effect(onCleanup => {
+      if (!this.contentResource()) return;
+      onCleanup(this.context.registerContentFlusher(() => this.codeEditor()?.flushContent()));
     });
   }
 

@@ -1,4 +1,8 @@
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Ui;
+using MacroDeckHost.Application.Plugins.Capabilities;
+using MacroDeckHost.Application.Plugins.Capabilities.Adapters;
+using MacroDeckHost.Application.Ui.Pages;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Ui.Transport;
@@ -18,15 +22,18 @@ public class GetIntegrationsRequestMessageHandler
 	private readonly IIntegrationIssueService _issueService;
 	private readonly IIntegrationConfigMutationCoordinator? _mutations;
 	private readonly VariableRegistry? _variables;
+	private readonly IRemotePluginSnapshotStore? _snapshots;
 
 	public GetIntegrationsRequestMessageHandler(
 		IIntegrationRegistry integrationRegistry,
 		IIntegrationConfigStore configStore,
 		IIntegrationIssueService issueService,
 		IIntegrationConfigMutationCoordinator? mutations = null,
-		VariableRegistry? variables = null)
+		VariableRegistry? variables = null,
+		IRemotePluginSnapshotStore? snapshots = null)
 	{
 		_variables = variables;
+		_snapshots = snapshots;
 		_integrationRegistry = integrationRegistry;
 		_configStore = configStore;
 		_issueService = issueService;
@@ -77,11 +84,26 @@ public class GetIntegrationsRequestMessageHandler
 				IssueSeverity = IntegrationIssueDto.MaxSeverityName(issues),
 				ProvidedCapabilities = ProvidedCapabilityCatalog.For(integration)
 					.Select(capability => new ProvidedCapabilityDto { Kind = capability.Kind, Name = capability.Name })
+					.ToList(),
+				Pages = PagesOf(integration)
+					.Select(page => new IntegrationPageDto { Id = page.Id, Title = page.Title, Icon = page.IconName })
 					.ToList()
 			});
 		}
 
 		return response;
+	}
+
+	private IReadOnlyList<UiPageDescriptor> PagesOf(IIntegration integration)
+	{
+		if (integration is RemotePluginIntegration)
+		{
+			return _snapshots is not null && _snapshots.Has(integration.Id)
+				? _snapshots.GetSnapshot(integration.Id).UiPages
+				: [];
+		}
+
+		return integration is IUiProvider provider ? UiPageCatalog.Of(provider) : [];
 	}
 
 	private int VariableCountOf(string integrationId, IVariableProvider? variableProvider)

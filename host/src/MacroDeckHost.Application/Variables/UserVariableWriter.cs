@@ -164,6 +164,66 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		return await ActiveLocalization.Resolve(services, AppStrings.Errors.Variables.OwnerUnavailable(name));
 	}
 
+	public async Task<UserVariableReadResult> ReadInContextAsync(
+		string name,
+		UserVariableContext context,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
+		if (!VariableNameSanitizer.IsValid(name))
+		{
+			return UserVariableReadResult.Failed(UserVariableReadStatus.InvalidName,
+				$"'{name}' is not a variable name.");
+		}
+
+		await using var scope = _scopeFactory.CreateAsyncScope();
+		var service = scope.ServiceProvider.GetRequiredService<IVariableService>();
+		var registry = scope.ServiceProvider.GetRequiredService<VariableRegistry>();
+
+		var entity = await service.Resolve(name, VariableScopeChain.For(context));
+		if (entity is null)
+		{
+			return UserVariableReadResult.Failed(UserVariableReadStatus.NotFound,
+				$"No variable named '{name}' exists.");
+		}
+
+		var type = SdkVariableTypeMapper.ToSdk(entity.Type);
+		if (!registry.IsAvailable(entity.Id))
+		{
+			return UserVariableReadResult.Failed(UserVariableReadStatus.Unavailable,
+				$"'{name}' has no value right now.",
+				type);
+		}
+
+		var value = ReadValue(entity);
+		return UserVariableReadResult.Found(type, value.Value, value.Text);
+	}
+
+	private static (object? Value, string Text) ReadValue(VariableEntity entity)
+	{
+		var raw = entity.Value;
+		switch (entity.Type)
+		{
+			case DomainVariableType.Numeric when TryParseDecimal(raw, out var number):
+			{
+				var text = entity.DecimalPlaces is { } places
+					? number.ToString("F" + places, CultureInfo.InvariantCulture)
+					: number.ToString(CultureInfo.InvariantCulture);
+				return ((double)decimal.Parse(text, NumberStyles.Number, CultureInfo.InvariantCulture), text);
+			}
+
+			case DomainVariableType.Boolean:
+			{
+				var flag = string.Equals(raw, "true", StringComparison.OrdinalIgnoreCase);
+				return (flag, flag ? "true" : "false");
+			}
+
+			default:
+				return (raw, raw);
+		}
+	}
+
 	public Task<UserVariableCreateResult> CreateAsync(
 		string name,
 		string? ownerWidgetId,

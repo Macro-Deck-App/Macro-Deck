@@ -69,6 +69,7 @@ Things to know:
 | `Description` | Localized detail: what happened and what to do. | `Strings.Issues.WrongEndpointDescription()` |
 | `Severity` | `Info`, `Warning` (default) or `Error`. Colours the badge and orders the list. | `IntegrationIssueSeverity.Error` |
 | `ActionLabel` | Text of the resolve button. Leave it unset for an informational issue with no button. | `Strings.Issues.OpenSetup()` |
+| `HelpUrl` | A web page with more help, opened in the browser from a link button on the issue. Only an absolute `http` or `https` address is shown; Macro Deck drops any other value. A release from before `HelpUrl` ignores it. | `new Uri("https://example.com/download")` |
 
 An `Error` issue additionally raises one user notification when it first appears, linking to the
 integration. It notifies again only after it has gone away and come back.
@@ -134,7 +135,8 @@ var resolved = await harness.Issues.ResolveAsync(new IssueResolveArguments { Iss
 Issues are one provider-shaped `issues` capability per plugin. `list` and `resolve` are always live
 round trips - there is no snapshot - so an out-of-process `GetIssuesAsync` is called over the WebSocket
 on every poll, which is one more reason to keep it cheap. Severity and follow-up travel as their enum
-member names. See [capability parity](/reference/capability-parity/) and
+member names. `HelpUrl` travels as the optional `helpUrl` string of a listed issue; a plugin that predates it
+sends none, and a host that predates it ignores it. See [capability parity](/reference/capability-parity/) and
 [the WebSocket reference](/reference/websocket/#capabilities).
 
 ## See also

@@ -15,6 +15,8 @@ public class IntegrationIssueDto
 
 	public LocalizedText ActionLabel { get; set; }
 
+	public string? HelpUrl { get; set; }
+
 	public static IntegrationIssueDto From(IntegrationIssue issue)
 	{
 		return new IntegrationIssueDto
@@ -23,8 +25,17 @@ public class IntegrationIssueDto
 			Title = issue.Title,
 			Description = issue.Description,
 			Severity = SeverityName(issue.Severity),
-			ActionLabel = issue.ActionLabel
+			ActionLabel = issue.ActionLabel,
+			HelpUrl = WebAddress(issue.HelpUrl)
 		};
+	}
+
+	// The desktop opens this address in the system browser, so anything but a web page is dropped.
+	private static string? WebAddress(Uri? url)
+	{
+		return url is { IsAbsoluteUri: true } && (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps)
+			? url.AbsoluteUri
+			: null;
 	}
 
 	public static string SeverityName(IntegrationIssueSeverity severity)

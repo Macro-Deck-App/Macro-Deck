@@ -5,6 +5,7 @@ using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Sdk.Ui;
 using Serilog;
@@ -14,6 +15,7 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Ui;
 internal sealed class RemoteUiEventOrigin(
 	IHostInvoker invoker,
 	ModalResultStore? modalResults,
+	IPluginHostAssetReceiver? hostAssets,
 	ILogger logger,
 	string sessionId,
 	string? clientId,
@@ -98,6 +100,50 @@ internal sealed class RemoteUiEventOrigin(
 			.ConfigureAwait(false);
 
 		return result?.Deserialize<UiOriginOpenUrlResult>(PluginProtocolJson.Options)?.Delivered == true;
+	}
+
+	public async Task<ReadOnlyMemory<byte>> ReadUploadAsync(
+		string uploadId,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(uploadId);
+
+		if (hostAssets is null)
+		{
+			throw new NotSupportedException("This plugin host cannot receive uploads.");
+		}
+
+		JsonElement? reply;
+		try
+		{
+			reply = await invoker.InvokeAsync(HostApis.Ui,
+					HostOperations.Ui.OriginReadUpload,
+					new UiOriginReadUploadArguments { SessionId = sessionId, UploadId = uploadId },
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (HostInvocationException exception)
+			when (exception.Code == ProtocolErrorCodes.CapabilityUnsupported)
+		{
+			throw new NotSupportedException("This Macro Deck cannot read uploads.", exception);
+		}
+
+		var result = reply?.Deserialize<UiOriginReadUploadResult>(PluginProtocolJson.Options);
+		if (result is not { Found: true, TransferId.Length: > 0 })
+		{
+			throw new UiUploadNotFoundException();
+		}
+
+		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		timeout.CancelAfter(ProtocolTimeouts.AssetUpload);
+
+		var transfer = await hostAssets.AwaitAsync(result.TransferId, timeout.Token).ConfigureAwait(false);
+		if (!transfer.Accepted)
+		{
+			throw new UiUploadNotFoundException("The upload did not arrive intact.");
+		}
+
+		return transfer.Content;
 	}
 
 	private async Task<string?> OpenAsync(ModalDefinition modal, bool awaitResult, CancellationToken cancellationToken)

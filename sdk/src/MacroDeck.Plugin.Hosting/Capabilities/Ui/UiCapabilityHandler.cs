@@ -60,7 +60,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		PluginConfigFlowSessions configFlowSessions,
 		ModalResultStore modalResults,
 		IPluginCatalogNotifier? catalogNotifier = null,
-		NotificationResultStore? notificationResults = null)
+		NotificationResultStore? notificationResults = null,
+		IPluginHostAssetReceiver? hostAssets = null)
 	{
 		var integrationList = integrations as IReadOnlyCollection<IPluginIntegration> ?? [.. integrations];
 
@@ -75,7 +76,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 				ServesConfigUiTree: true
 			};
 		_configFlowSessions = configFlowSessions;
-		_sessions = new UiSessionStore(hostInvoker, logger, modalResults);
+		_sessions = new UiSessionStore(hostInvoker, logger, modalResults, hostAssets);
 		_modalResults = modalResults;
 		_notificationResults = notificationResults ?? new NotificationResultStore();
 
@@ -232,6 +233,16 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 					Scenario = preview.Declaration.Scenario,
 					Profile = preview.Declaration.Profile
 				})
+			],
+			Pages =
+			[
+				.. _providers.SelectMany(provider => provider.Pages)
+					.Select(page => new UiPageDescriptorDto
+					{
+						Id = page.Id,
+						Title = page.Title,
+						IconName = page.IconName
+					})
 			]
 		});
 	}

@@ -19,6 +19,10 @@ public sealed record IntegrationIssueDescriptorDto
 	public required string Severity { get; init; }
 
 	public LocalizedText? ActionLabel { get; init; }
+
+	/// <summary>An absolute <c>http</c> or <c>https</c> address with more help on the issue. Optional and additive:
+	/// absent means no link, and a host drops any other value.</summary>
+	public string? HelpUrl { get; init; }
 }
 
 /// <summary>Result of the <c>list</c> operation.</summary>

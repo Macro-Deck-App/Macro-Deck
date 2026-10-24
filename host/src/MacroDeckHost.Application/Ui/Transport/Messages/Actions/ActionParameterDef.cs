@@ -61,6 +61,8 @@ public class ActionParameterDef
 
 	public string? Language { get; set; }
 
+	public string? VariableInsertFormat { get; set; }
+
 	public List<ActionParameterDef>? Children { get; set; }
 
 	public ActionParameterDef? ItemTemplate { get; set; }

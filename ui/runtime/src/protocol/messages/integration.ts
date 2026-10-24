@@ -22,6 +22,13 @@ export interface IpcIntegration {
   isInitialized?: boolean;
   variablesDependOnConfiguration?: boolean;
   providedCapabilities?: IpcProvidedCapability[];
+  pages?: IpcIntegrationPage[];
+}
+
+export interface IpcIntegrationPage {
+  id: string;
+  title: LocalizedText;
+  icon?: string | null;
 }
 
 export interface IpcProvidedCapability {
@@ -183,6 +190,7 @@ export interface IpcIntegrationIssue {
   description?: LocalizedText;
   severity: IntegrationIssueSeverity;
   actionLabel?: LocalizedText;
+  helpUrl?: string | null;
 }
 
 export type IssueResolutionFollowUp = 'None' | 'StartConfigFlow';

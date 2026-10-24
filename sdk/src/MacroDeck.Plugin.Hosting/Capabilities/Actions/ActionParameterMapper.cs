@@ -57,8 +57,10 @@ internal static class ActionParameterMapper
 			OptionsSourceId = parameter.OptionsSourceId,
 			FileExtensions = parameter.FileExtensions,
 			Language = parameter.Language,
+			VariableInsertFormat = parameter.VariableInsertFormat,
 			Children = parameter.Children?.Select(child => ToDto(child, depth + 1)).ToList(),
 			ItemTemplate = parameter.ItemTemplate is { } template ? ToDto(template, depth + 1) : null,
+			TemplatedItems = parameter.TemplatedItems ? true : null,
 			VisibleWhen = parameter.VisibleWhen is { } visibility
 				? new ParameterVisibilityDto { ParameterName = visibility.ParameterName, Values = visibility.Values }
 				: null

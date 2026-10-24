@@ -5,6 +5,7 @@ using MacroDeck.Plugin.Protocol.Capabilities.Calendar;
 using MacroDeck.Plugin.Protocol.Capabilities.EmailInbox;
 using MacroDeck.Plugin.Protocol.Capabilities.Migration;
 using MacroDeck.Plugin.Protocol.Capabilities.MusicPlayer;
+using MacroDeck.Plugin.Protocol.Capabilities.Ui;
 using MacroDeck.Plugin.Protocol.Capabilities.VirtualProfiles;
 using MacroDeck.Plugin.Protocol.Capabilities.Weather;
 using MacroDeck.Plugin.Protocol.Envelope;
@@ -357,6 +358,46 @@ public class RemotePluginSnapshotRefresherTests
 			Assert.That(result.Snapshot.Migrations.Single().ClaimedActionSources,
 				Is.EqualTo(new[] { "OBS-WebSocket Plugin" }));
 		});
+	}
+
+	[Test]
+	public async Task Described_pages_reach_the_snapshot_only_with_a_page_surface_and_a_usable_unique_id()
+	{
+		var withSurface = await DescribeUiAsync("page",
+		[
+			new UiPageDescriptorDto { Id = "scripts", Title = "Scripts", IconName = "file-code" },
+			new UiPageDescriptorDto { Id = "my scripts", Title = "Bad" },
+			new UiPageDescriptorDto { Id = "scripts", Title = "Again" }
+		]);
+		var withoutSurface = await DescribeUiAsync("widget",
+			[new UiPageDescriptorDto { Id = "scripts", Title = "Scripts" }]);
+		var olderSdk = await DescribeUiAsync("page", null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(withSurface.UiPages.Select(page => (page.Id, page.IconName)),
+				Is.EqualTo(new[] { ("scripts", (string?)"file-code") }));
+			Assert.That(withoutSurface.UiPages, Is.Empty);
+			Assert.That(olderSdk.UiPages, Is.Empty);
+		});
+	}
+
+	private static async Task<RemotePluginCapabilitySnapshot> DescribeUiAsync(
+		string surfaceKind,
+		IReadOnlyList<UiPageDescriptorDto>? pages)
+	{
+		var invoker = new RecordingInvoker
+		{
+			Result = new UiDescribePayload
+			{
+				Surfaces = [new UiSurfaceDescriptorDto { Kind = surfaceKind, SessionMode = "exclusive" }],
+				UiModelVersion = 4,
+				Pages = pages
+			}
+		};
+		var refresher = new RemotePluginSnapshotRefresher(invoker, new InMemorySnapshotStore());
+
+		return (await refresher.RefreshKindAsync(PluginId, CapabilityKinds.Ui, CancellationToken.None)).Snapshot;
 	}
 
 	private sealed class RecordingInvoker : IPluginCapabilityInvoker

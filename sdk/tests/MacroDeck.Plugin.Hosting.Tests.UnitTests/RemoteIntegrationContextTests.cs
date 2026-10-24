@@ -146,6 +146,9 @@ public class RemoteIntegrationContextTests
 		yield return Case(HostApis.UserVariables,
 			HostOperations.UserVariables.Create,
 			(context, invoker) => context.UserVariables.CreateAsync("n", null, VariableType.Text, "1"));
+		yield return Case(HostApis.UserVariables,
+			HostOperations.UserVariables.Read,
+			(context, invoker) => context.UserVariables.ReadInContextAsync("n", new UserVariableContext()));
 
 		yield return Case(HostApis.Locale,
 			HostOperations.Locale.TimeOfDayFormat,
@@ -559,6 +562,8 @@ public class RemoteIntegrationContextTests
 		covered.Add((HostApis.Ui, HostOperations.Ui.OriginReportFailure));
 		covered.Add((HostApis.Ui, HostOperations.Ui.OriginShowModal));
 		covered.Add((HostApis.Ui, HostOperations.Ui.OriginOpenUrl));
+
+		covered.Add((HostApis.Ui, HostOperations.Ui.OriginReadUpload));
 
 		covered.Add((HostApis.Ui, HostOperations.Ui.ReportParameterValues));
 

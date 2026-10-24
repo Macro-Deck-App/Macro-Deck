@@ -82,7 +82,7 @@ x-macrodeck-backpressure-exempt-types:
 # CAPABILITY_UNSUPPORTED.
 x-macrodeck-host-operations:
   variables: [list, get, create, set, delete, refresh, history.open, history.read, history.close, bind]
-  user-variables: [apply, create]
+  user-variables: [apply, create, read]
   config: [entries, get-string, get-secret, set-string, set-secret]
   deck: [change-folder, change-profile, parent, back]
   scripts: [run]
@@ -90,7 +90,7 @@ x-macrodeck-host-operations:
   notifications: [notify, dismiss, show, update, close]
   action-interactions: [request-item-picker, request-device-picker, show-modal]
   ui: [snapshot, patch, fault, reload, register-resource, remove-resource, register-music-player-artwork, origin.report-failure, origin.show-modal, origin.open-url,
-    report-parameter-values]
+    report-parameter-values, origin.read-upload]
   devices: [register, update, presence, unregister, interaction, icon, widget-icon, close]
   variable-values: [value, invalidate]
   layouts: [register, unregister]
@@ -121,6 +121,7 @@ x-macrodeck-asset-kinds:
   - icon-pack
   - android-screenshot
   - companion-screenshot
+  - ui-upload
 
 defaultContentType: application/json
 

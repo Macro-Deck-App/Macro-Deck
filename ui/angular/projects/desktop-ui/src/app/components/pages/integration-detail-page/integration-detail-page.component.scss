@@ -96,6 +96,12 @@
   margin: 0 auto;
 }
 
+// A provider page lays itself out (often as a rail and a detail card), so it takes the whole tab.
+.capability-panel.provider-page-panel {
+  max-width: none;
+  margin: 0;
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

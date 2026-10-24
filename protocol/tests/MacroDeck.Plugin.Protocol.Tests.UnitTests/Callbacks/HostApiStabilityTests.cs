@@ -50,7 +50,7 @@ public class HostApiStabilityTests
 				"list", "get", "create", "set", "delete", "refresh", "history.open", "history.read", "history.close",
 				"bind"
 			],
-			[HostApis.UserVariables] = ["apply", "create"],
+			[HostApis.UserVariables] = ["apply", "create", "read"],
 			[HostApis.Config] = ["entries", "get-string", "get-secret", "set-string", "set-secret"],
 			[HostApis.Deck] = ["change-folder", "change-profile", "parent", "back"],
 			[HostApis.Scripts] = ["run"],
@@ -61,7 +61,7 @@ public class HostApiStabilityTests
 			[
 				"snapshot", "patch", "fault", "reload", "register-resource", "remove-resource",
 				"register-music-player-artwork", "origin.report-failure", "origin.show-modal", "origin.open-url",
-				"report-parameter-values"
+				"report-parameter-values", "origin.read-upload"
 			],
 			[HostApis.Devices] =
 				["register", "update", "presence", "unregister", "interaction", "icon", "widget-icon", "close"],

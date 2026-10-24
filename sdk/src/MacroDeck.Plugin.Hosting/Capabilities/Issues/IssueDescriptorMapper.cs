@@ -15,7 +15,8 @@ internal static class IssueDescriptorMapper
 			Title = PluginText.ToWire(issue.Title),
 			Description = PluginText.ToWireOrNull(issue.Description),
 			Severity = issue.Severity.ToString(),
-			ActionLabel = PluginText.ToWireOrNull(issue.ActionLabel)
+			ActionLabel = PluginText.ToWireOrNull(issue.ActionLabel),
+			HelpUrl = issue.HelpUrl?.OriginalString
 		};
 	}
 

@@ -45,6 +45,7 @@ public static class ActionParameterDefMapper
 			WidgetTypes = param.WidgetTypes,
 			FileExtensions = param.FileExtensions?.ToList(),
 			Language = param.Language,
+			VariableInsertFormat = param.VariableInsertFormat,
 			Children = param.Children?.Select(Map).ToList(),
 			ItemTemplate = param.ItemTemplate is null ? null : Map(param.ItemTemplate),
 			VisibleWhen = param.VisibleWhen is null

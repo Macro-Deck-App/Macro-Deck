@@ -295,6 +295,7 @@ public sealed class ConformanceRunner
 		yield return new ActionIconContentIsAnswerableCheck();
 		yield return new WritableVariablesAcceptWritesCheck();
 		yield return new EagerVariableSetIsWithinLimitCheck();
+		yield return new UiPagesAreReachableCheck();
 
 		// MDC04xx - duplicate ids.
 		yield return new NoDuplicateDeclaredIdsCheck();

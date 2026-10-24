@@ -42,8 +42,15 @@ public static class AssetKinds
 	/// </summary>
 	public const string CompanionScreenshot = "companion-screenshot";
 
+	/// <summary>
+	/// Text a code input uploaded in one of the plugin's UI sessions, which the host sends after answering
+	/// <c>ui</c>/<c>origin.read-upload</c>. Host to plugin only, bounded by
+	/// <see cref="Limits.ProtocolLimits.MaxUiResourceBytes" />.
+	/// </summary>
+	public const string UiUpload = "ui-upload";
+
 	public static readonly IReadOnlyList<string> All =
-		[Icon, Artwork, ActionIcon, UiResource, IconPack, AndroidScreenshot, CompanionScreenshot];
+		[Icon, Artwork, ActionIcon, UiResource, IconPack, AndroidScreenshot, CompanionScreenshot, UiUpload];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 

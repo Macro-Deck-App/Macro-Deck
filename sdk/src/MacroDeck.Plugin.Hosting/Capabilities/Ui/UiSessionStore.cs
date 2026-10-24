@@ -25,16 +25,22 @@ internal sealed class UiSessionStore : IAsyncDisposable
 {
 	private readonly IHostInvoker _hostInvoker;
 	private readonly ModalResultStore? _modalResults;
+	private readonly IPluginHostAssetReceiver? _hostAssets;
 	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<string, LiveSession> _sessions = new(StringComparer.Ordinal);
 
 	private int _reportsUnsupported;
 
-	public UiSessionStore(IHostInvoker hostInvoker, ILogger logger, ModalResultStore? modalResults = null)
+	public UiSessionStore(
+		IHostInvoker hostInvoker,
+		ILogger logger,
+		ModalResultStore? modalResults = null,
+		IPluginHostAssetReceiver? hostAssets = null)
 	{
 		_hostInvoker = hostInvoker;
 		_modalResults = modalResults;
+		_hostAssets = hostAssets;
 		_logger = logger.ForContext<UiSessionStore>();
 	}
 
@@ -425,6 +431,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 				_session.Dispatch(uiEvent,
 					new RemoteUiEventOrigin(_owner._hostInvoker,
 						_owner._modalResults,
+						_owner._hostAssets,
 						_owner._logger,
 						_sessionId,
 						clientId,

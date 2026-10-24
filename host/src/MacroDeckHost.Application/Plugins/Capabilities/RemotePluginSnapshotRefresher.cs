@@ -21,6 +21,7 @@ using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Ui;
 using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Migration;
+using MacroDeckHost.Application.Ui.Pages;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities;
 
@@ -512,7 +513,14 @@ public sealed class RemotePluginSnapshotRefresher
 				{
 					Id = preview.Id, View = preview.View, Scenario = preview.Scenario, Profile = preview.Profile
 				})
-			]
+			],
+			UiPages = UiPageCatalog.Accept(payload.Surfaces.Select(surface => surface.Kind),
+				(payload.Pages ?? []).Select(page => new UiPageDescriptor
+				{
+					Id = page.Id,
+					Title = page.Title,
+					IconName = page.IconName
+				}))
 		};
 	}
 
