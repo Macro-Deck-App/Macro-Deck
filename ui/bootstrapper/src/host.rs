@@ -68,6 +68,12 @@ const UPDATE_STOP_TIMEOUT: Duration = Duration::from_secs(35);
 
 const FORCED_STOP_TIMEOUT: Duration = Duration::from_secs(10);
 
+const REPLACED_HOST_STOP_TIMEOUT: Duration = QUIT_STOP_TIMEOUT;
+
+const LEGACY_HOST_STOP_TIMEOUT: Duration = Duration::from_secs(10);
+
+const ADOPTION_PROBE_TIMEOUT: Duration = Duration::from_secs(1);
+
 // Must match UserSessionEnd.ShutdownReason in the host.
 #[cfg(any(windows, test))]
 const SESSION_END_REASON: &str = "session-end";
@@ -252,6 +258,57 @@ pub fn parse_trusted_status(body: &str) -> bool {
         .unwrap_or(false)
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum Adoption {
+    Adopt,
+    Replace,
+    Ignore,
+}
+
+// Fail-closed: an unreadable version is replaced too, so a host of another build never stays adopted.
+pub fn adoption_decision(
+    proved: bool,
+    running_version: Option<&str>,
+    own_version: &str,
+) -> Adoption {
+    if !proved {
+        return Adoption::Ignore;
+    }
+    match running_version {
+        Some(version) if version.trim() == own_version.trim() => Adoption::Adopt,
+        _ => Adoption::Replace,
+    }
+}
+
+#[derive(Deserialize)]
+struct HostStatus {
+    version: Option<String>,
+}
+
+async fn host_version(port: u16) -> Option<String> {
+    let client = loopback_secret::http_client(ADOPTION_PROBE_TIMEOUT).ok()?;
+    let response = client
+        .get(format!("http://127.0.0.1:{port}/api/auth/status"))
+        .send()
+        .await
+        .ok()?;
+    if !response.status().is_success() {
+        return None;
+    }
+    response.json::<HostStatus>().await.ok()?.version
+}
+
+async fn wait_until_unreachable(port: u16, timeout: Duration) -> bool {
+    let deadline = Instant::now() + timeout;
+    while Instant::now() < deadline {
+        if !is_reachable(Some(port), Duration::from_millis(300)).await {
+            return true;
+        }
+        tokio::time::sleep(STOP_POLL_INTERVAL).await;
+    }
+    !is_reachable(Some(port), Duration::from_millis(300)).await
+}
+
 // A host from before the per-launch secret trusts any loopback caller; only such a host of ours
 // answers trusted to a request that carries no credential at all.
 async fn is_legacy_trusted_loopback(port: u16, timeout: Duration) -> bool {
@@ -322,6 +379,14 @@ fn autostart_executable<F: Fn(&Path) -> bool>(
     appimage
         .filter(|path| path.is_absolute() && is_file(path))
         .or(current_exe)
+}
+
+pub fn shell_executable() -> Option<PathBuf> {
+    autostart_executable(
+        std::env::var_os("APPIMAGE").map(PathBuf::from),
+        std::env::current_exe().ok(),
+        |path| path.is_file(),
+    )
 }
 
 fn host_binary_candidates(app: &AppHandle) -> Vec<PathBuf> {
@@ -434,9 +499,21 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
         port_file_port(),
         read_persisted_port(port_file_dir),
     ) {
-        if let Some(secret) = loopback_secret::load(port_file_dir) {
-            loopback_secret::set_secret(secret);
-            if loopback_secret::prove(port, Duration::from_secs(1)).await {
+        let proved = match loopback_secret::load(port_file_dir) {
+            Some(secret) => {
+                loopback_secret::set_secret(secret);
+                loopback_secret::prove(port, ADOPTION_PROBE_TIMEOUT).await
+            }
+            None => false,
+        };
+        let running_version = if proved {
+            host_version(port).await
+        } else {
+            None
+        };
+        let own_version = crate::updater::current_version(app);
+        match adoption_decision(proved, running_version.as_deref(), &own_version) {
+            Adoption::Adopt => {
                 logging::info(&format!(
                     "[host] adopting running host on loopback port {port}"
                 ));
@@ -446,22 +523,44 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
                 adopt_host_culture(app, port).await;
                 return true;
             }
-        }
-        if is_legacy_trusted_loopback(port, Duration::from_secs(1)).await {
-            logging::info(&format!(
-                "[host] stopping the host on port {port}, which predates the loopback secret"
-            ));
-            let _ = post_shutdown(port, "replaced").await;
-            let deadline = Instant::now() + Duration::from_secs(10);
-            while Instant::now() < deadline
-                && is_reachable(Some(port), Duration::from_millis(300)).await
-            {
-                tokio::time::sleep(STOP_POLL_INTERVAL).await;
+            Adoption::Replace => {
+                logging::info(&format!(
+                    "[host] replacing the running host {} on port {port} with {own_version}",
+                    running_version.as_deref().unwrap_or("of unknown version")
+                ));
+                let _ = post_shutdown(port, "replaced").await;
+                if !wait_until_unreachable(port, REPLACED_HOST_STOP_TIMEOUT).await {
+                    logging::error(&format!(
+                        "[host] the replaced host on port {port} is still running; not starting a second one"
+                    ));
+                    let started = state
+                        .supervisor
+                        .lock()
+                        .map(|mut supervisor| supervisor.start())
+                        .unwrap_or(false);
+                    if started {
+                        let reason = localization::t_args(
+                            keys::ERRORS_PORT_IN_USE,
+                            &[("port", &port.to_string())],
+                        );
+                        give_up(app, Some(reason), ExitStatus::NotRecorded, String::new()).await;
+                    }
+                    return false;
+                }
             }
-        } else if is_reachable(Some(port), Duration::from_millis(500)).await {
-            logging::warn(&format!(
-                "[host] port {port} answers but is not a trusted loopback listener; starting our own host"
-            ));
+            Adoption::Ignore => {
+                if is_legacy_trusted_loopback(port, ADOPTION_PROBE_TIMEOUT).await {
+                    logging::info(&format!(
+                        "[host] stopping the host on port {port}, which predates the loopback secret"
+                    ));
+                    let _ = post_shutdown(port, "replaced").await;
+                    wait_until_unreachable(port, LEGACY_HOST_STOP_TIMEOUT).await;
+                } else if is_reachable(Some(port), Duration::from_millis(500)).await {
+                    logging::warn(&format!(
+                        "[host] port {port} answers but is not a trusted loopback listener; starting our own host"
+                    ));
+                }
+            }
         }
     }
 
@@ -550,11 +649,7 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
     if let Some(dir) = &config_dir {
         command.env("DOTNET_BUNDLE_EXTRACT_BASE_DIR", dir.join("host-runtime"));
     }
-    if let Some(exe) = autostart_executable(
-        std::env::var_os("APPIMAGE").map(PathBuf::from),
-        std::env::current_exe().ok(),
-        |path| path.is_file(),
-    ) {
+    if let Some(exe) = shell_executable() {
         command.env("MACRODECK_SHELL_EXECUTABLE", exe);
     }
     #[cfg(windows)]
@@ -1678,6 +1773,46 @@ mod tests {
     }
 
     #[test]
+    fn a_proven_host_of_the_same_version_is_adopted() {
+        assert_eq!(
+            adoption_decision(true, Some("3.0.0-beta.19"), "3.0.0-beta.19"),
+            Adoption::Adopt
+        );
+    }
+
+    #[test]
+    fn a_proven_host_of_an_older_or_newer_version_is_replaced() {
+        assert_eq!(
+            adoption_decision(true, Some("3.0.0-beta.14"), "3.0.0-beta.19"),
+            Adoption::Replace
+        );
+        assert_eq!(
+            adoption_decision(true, Some("3.0.0-beta.20"), "3.0.0-beta.19"),
+            Adoption::Replace
+        );
+    }
+
+    #[test]
+    fn a_proven_host_whose_version_cannot_be_read_is_replaced() {
+        assert_eq!(
+            adoption_decision(true, None, "3.0.0-beta.19"),
+            Adoption::Replace
+        );
+    }
+
+    #[test]
+    fn an_unproven_listener_is_never_adopted_or_replaced() {
+        assert_eq!(
+            adoption_decision(false, Some("3.0.0-beta.19"), "3.0.0-beta.19"),
+            Adoption::Ignore
+        );
+        assert_eq!(
+            adoption_decision(false, None, "3.0.0-beta.19"),
+            Adoption::Ignore
+        );
+    }
+
+    #[test]
     fn trusted_status_requires_explicit_trusted_true() {
         assert!(parse_trusted_status(
             r#"{"setupComplete":true,"authenticated":true,"trusted":true,"scope":"admin","username":null}"#
@@ -1903,6 +2038,11 @@ mod tests {
             UPDATE_STOP_TIMEOUT,
             FORCED_STOP_TIMEOUT
         ));
+    }
+
+    #[test]
+    fn replacing_a_host_of_another_version_waits_out_its_worst_case_shutdown() {
+        assert!(REPLACED_HOST_STOP_TIMEOUT > HOST_SHUTDOWN_WORST_CASE);
     }
 
     #[test]

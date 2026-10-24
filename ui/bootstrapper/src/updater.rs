@@ -508,6 +508,10 @@ fn state_cell(app: &AppHandle) -> &'static Mutex<UpdateState> {
     UPDATE_STATE.get_or_init(|| Mutex::new(initial_state(app)))
 }
 
+pub fn is_installing(app: &AppHandle) -> bool {
+    lock_state(app).phase == UpdatePhase::Installing
+}
+
 fn lock_state(app: &AppHandle) -> std::sync::MutexGuard<'static, UpdateState> {
     state_cell(app).lock().unwrap_or_else(|e| e.into_inner())
 }

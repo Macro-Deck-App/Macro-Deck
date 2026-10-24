@@ -197,6 +197,20 @@ never shown.
 Only one Macro Deck can run on a computer at a time. If it is already running, starting it again
 does not open a second copy. Look for the running Macro Deck in the system tray or menu bar.
 
+## Macro Deck shows an older version after you started a new one
+
+**About** and the version at the bottom of the sidebar show the version that is actually running. If they
+show an older version than the one you just started, for example after downloading a new AppImage, the
+older Macro Deck was still running in the system tray, and plugins that need the newer version cannot be
+installed. Current versions close the running Macro Deck and start the new one when you start a different
+version. Older versions do not, so:
+
+1. Select **Quit** in the Macro Deck tray menu.
+2. Start the new version again.
+
+If you start Macro Deck automatically when you sign in, it starts the new version from then on once the
+new version has run.
+
 ## Macro Deck stopped
 
 Macro Deck runs its host, the part that talks to your devices and plugins, as a separate process. If

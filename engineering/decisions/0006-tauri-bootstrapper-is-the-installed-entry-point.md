@@ -54,6 +54,14 @@ host; there is no fallback to the public origin. Without that, a dev host publis
 make the packaged app open a window against an origin that never authenticated it — a window with no
 profiles in it.
 
+**Adoption also requires the bootstrapper's own release version.** A proven host whose
+`GET /api/auth/status` `version` differs from the bootstrapper's release version, or cannot be read, is
+asked to shut down and replaced by the bundled host; if it is still answering after the host's worst-case
+shutdown budget, the bootstrapper reports the port as in use instead of starting a second host. A launch
+of a different build while one is running is handed over: the launching build writes its version and
+executable to `launch-handoff.json` in the config directory before single-instance forwards its `argv`,
+and the running instance stops its host, starts that executable with the forwarded arguments and exits.
+
 ### The host owns the OS autostart entry
 
 The login item is written by the host (`IAutostartService`, with platform registrars for a macOS
