@@ -483,6 +483,7 @@ export {
   sliderThumbDiameterPx,
   sliderThumbOffsetPx,
   sliderThumbStrokePx,
+  sliderTrackInsetPx,
 } from './ui-components/bar';
 export {
   artworkCrossfades,

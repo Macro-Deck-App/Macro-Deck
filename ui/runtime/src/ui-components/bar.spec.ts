@@ -11,7 +11,10 @@ import {
   sliderLevel,
   sliderLevelColor,
   sliderLevelFromPointer,
+  sliderThumbDiameterPx,
   sliderThumbOffsetPx,
+  sliderThumbStrokePx,
+  sliderTrackInsetPx,
 } from './bar';
 
 let nextId = 0;
@@ -115,6 +118,25 @@ describe('bars', () => {
       expect(low).toBeGreaterThanOrEqual(0);
       expect(high).toBeLessThanOrEqual(extent);
       expect(high).toBeGreaterThan(low);
+    });
+
+    it('tucks both track ends inside the thumb ring at either end', () => {
+      const thickness = 16;
+      const extent = 300;
+      const outerRadius = sliderThumbDiameterPx(thickness) / 2 + sliderThumbStrokePx(thickness);
+      const inset = sliderTrackInsetPx(thickness);
+
+      for (const level of [0, 1]) {
+        const centre = sliderThumbOffsetPx(level, extent, thickness) + outerRadius;
+        const tip = level === 0 ? inset : extent - inset;
+        const halfWidth = thickness / 2;
+        // Every point of the track's rounded cap, not only its tip, must sit inside the ring.
+        for (let x = -halfWidth; x <= halfWidth; x += halfWidth / 8) {
+          const capDepth = halfWidth - Math.sqrt(halfWidth * halfWidth - x * x);
+          const capPoint = level === 0 ? tip + capDepth : tip - capDepth;
+          expect(Math.hypot(capPoint - centre, x)).toBeLessThan(outerRadius - 1);
+        }
+      }
     });
   });
 });
