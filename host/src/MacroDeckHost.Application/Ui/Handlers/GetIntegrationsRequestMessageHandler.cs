@@ -109,10 +109,10 @@ public class GetIntegrationsRequestMessageHandler
 	private int VariableCountOf(string integrationId, IVariableProvider? variableProvider)
 	{
 		var declared = (variableProvider?.DeclaredVariables ?? [])
-			.Select(variable => variable.Name ?? variable.ResolvedId ?? string.Empty)
+			.Select(DeclaredVariableNames.PublishedNameOf)
 			.ToHashSet(StringComparer.Ordinal);
 
-		return (variableProvider?.DeclaredVariables.Count ?? 0)
+		return declared.Count
 			+ (_variables is null
 				? 0
 				: HostPublishedIntegrationVariables.Of(_variables, integrationId, declared).Count);

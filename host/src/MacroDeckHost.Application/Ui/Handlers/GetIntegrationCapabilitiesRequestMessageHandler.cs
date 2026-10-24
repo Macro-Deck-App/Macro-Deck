@@ -108,10 +108,18 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 		if (variableProvider is not null)
 		{
 			Dictionary<string, VariableEntity>? ownerVariablesByName = null;
+			var listed = new HashSet<string>(StringComparer.Ordinal);
 
 			foreach (var declared in variableProvider.DeclaredVariables)
 			{
+				var name = DeclaredVariableNames.PublishedNameOf(declared);
+				if (!listed.Add(name))
+				{
+					continue;
+				}
+
 				response.Variables.Add(BuildVariableCapability(declared,
+					name,
 					variablesDependOnConfiguration,
 					requiresSetup,
 					enabled,
@@ -223,13 +231,13 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 
 	private IntegrationVariableCapability BuildVariableCapability(
 		VariableDefinition declared,
+		string name,
 		bool variablesDependOnConfiguration,
 		bool requiresSetup,
 		bool enabled,
 		bool isInitialized,
 		Func<Dictionary<string, VariableEntity>> ownerVariablesByName)
 	{
-		var name = declared.Name ?? declared.ResolvedId ?? string.Empty;
 		var isTemplate = variablesDependOnConfiguration
 			&& name.Contains(VariableNameTemplate.PlaceholderStart, StringComparison.Ordinal);
 

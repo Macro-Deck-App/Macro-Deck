@@ -10,6 +10,7 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
 using DomainEnums = MacroDeckHost.Domain.Enums;
+using NullUserVariableStore = MacroDeckHost.Tests.UnitTests.Variables.NullUserVariableStore;
 
 namespace MacroDeckHost.Tests.UnitTests;
 
@@ -521,6 +522,136 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 			Assert.That(integration.InitializeCallCount, Is.EqualTo(0));
 			Assert.That(integration.IsInitialized, Is.False);
 			Assert.That(variableRegistry.GetAll(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_declared_name_the_host_sanitized_is_listed_under_its_published_name_with_its_value()
+	{
+		var declared = VariableDefinition.Eager("ts3-current-channel", VariableType.Text) with
+		{
+			Id = "ts3-current-channel"
+		};
+		var integration = new FakeVariableProviderIntegration
+		{
+			Id = "com.example.teamspeak", IsInitialized = true, Variables = [declared]
+		};
+		var registry = new ConfigurableIntegrationRegistry([integration]);
+		var variableRegistry = new VariableRegistry();
+		var service = TestVariableServices.Create(variableRegistry,
+			new NullUserVariableStore(),
+			new RecordingMediator());
+		var created = await service.CreateIntegrationVariable(integration.Id,
+			declared.Name!,
+			DomainEnums.VariableScope.Global,
+			null,
+			DomainEnums.VariableType.Text,
+			null,
+			null,
+			declared.ResolvedId);
+		await service.ReportIntegrationVariableValue(integration.Id, created.Data!.Id, "Lobby");
+		var handler = CreateHandler(registry, new FakeIntegrationConfigStore(), variableRegistry);
+
+		var response = await handler.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = integration.Id },
+			CancellationToken.None);
+
+		var variable = response.Variables.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(variable.Name, Is.EqualTo(created.Data.Name));
+			Assert.That(variable.Name, Is.EqualTo("ts3_current_channel"));
+			Assert.That(variable.Availability, Is.EqualTo(CapabilityAvailability.Ready));
+			Assert.That(variable.Value, Is.EqualTo("Lobby"));
+		});
+	}
+
+	[TestCase(true, CapabilityAvailability.IntegrationDisabled)]
+	[TestCase(false, CapabilityAvailability.Unavailable)]
+	public async Task A_sanitized_declared_name_keeps_its_published_name_while_it_cannot_be_read(
+		bool disabled,
+		CapabilityAvailability expected)
+	{
+		var integration = new FakeVariableProviderIntegration
+		{
+			Id = "com.example.teamspeak",
+			IsInitialized = false,
+			Variables = [VariableDefinition.Eager("ts3-input-state", VariableType.Boolean)]
+		};
+		var registry = new ConfigurableIntegrationRegistry([integration], disabled ? [integration.Id] : []);
+		var handler = CreateHandler(registry, new FakeIntegrationConfigStore(), new VariableRegistry());
+
+		var response = await handler.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = integration.Id },
+			CancellationToken.None);
+
+		var variable = response.Variables.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(variable.Name, Is.EqualTo("ts3_input_state"));
+			Assert.That(variable.Availability, Is.EqualTo(expected));
+		});
+	}
+
+	[Test]
+	public async Task A_valid_declared_name_is_listed_unchanged()
+	{
+		var integration = new FakeVariableProviderIntegration
+		{
+			Id = "com.example.sensors",
+			IsInitialized = true,
+			Variables = [VariableDefinition.Eager("cpu__temp", VariableType.Numeric)]
+		};
+		var registry = new ConfigurableIntegrationRegistry([integration]);
+		var handler = CreateHandler(registry, new FakeIntegrationConfigStore(), new VariableRegistry());
+
+		var response = await handler.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = integration.Id },
+			CancellationToken.None);
+
+		Assert.That(response.Variables.Single().Name, Is.EqualTo("cpu__temp"));
+	}
+
+	[Test]
+	public async Task Declared_names_that_publish_as_one_variable_are_listed_and_counted_once()
+	{
+		var integration = new FakeVariableProviderIntegration
+		{
+			Id = "com.example.headsets",
+			IsInitialized = true,
+			Variables =
+			[
+				VariableDefinition.Eager("headset-mode", VariableType.Numeric) with { Id = "headset-mode" },
+				VariableDefinition.Eager("headset_mode", VariableType.Numeric) with { Id = "headset-mode-2" }
+			]
+		};
+		var registry = new ConfigurableIntegrationRegistry([integration]);
+		var variableRegistry = new VariableRegistry();
+		variableRegistry.Upsert(new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "battery_arctis_headset_d15c7416_level",
+			Scope = DomainEnums.VariableScope.Global,
+			Type = DomainEnums.VariableType.Numeric,
+			Classification = DomainEnums.VariableClassification.Integration,
+			OwnerIntegrationId = integration.Id,
+			Value = "64",
+			UpdateMode = DomainEnums.VariableUpdateMode.Pushed,
+			PublishedByHost = true,
+			UpdatedAt = DateTime.UtcNow
+		});
+		var overview = new GetIntegrationsRequestMessageHandler(registry,
+			new FakeIntegrationConfigStore(),
+			new IntegrationIssueService(registry, new FakeIntegrationHostIssueStore(), new FakeIntegrationLifecycle()),
+			variables: variableRegistry);
+		var detail = CreateHandler(registry, new FakeIntegrationConfigStore(), variableRegistry);
+
+		var listed = await overview.Handle(new GetIntegrationsRequest(), CancellationToken.None);
+		var capabilities = await detail.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = integration.Id },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(capabilities.Variables.Select(v => v.Name),
+				Is.EqualTo(new[] { "headset_mode", "battery_arctis_headset_d15c7416_level" }));
+			Assert.That(listed.Integrations.Single().VariableCount, Is.EqualTo(capabilities.Variables.Count));
 		});
 	}
 

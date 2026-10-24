@@ -16,6 +16,11 @@ public static class VariableNameSanitizer
 		return VariableNames.IsValid(name);
 	}
 
+	public static string Canonicalize(string name)
+	{
+		return IsValid(name) ? name : Sanitize(name);
+	}
+
 	public static string ToPublicName(string name)
 	{
 		return PublicPrefix + name;
