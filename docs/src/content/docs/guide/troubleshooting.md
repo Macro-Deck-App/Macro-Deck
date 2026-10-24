@@ -235,7 +235,9 @@ If the window says Macro Deck could not use the operating system's cryptography 
 Key Isolation** service (KeyIso) is stopped or not reachable. Open **Services**, start **CNG Key
 Isolation** (and change its startup type if it was set to **Disabled**), or restart the computer.
 Then choose **Restart Macro Deck**. While that service is unavailable Macro Deck also cannot serve HTTPS
-and cannot check Companion licenses; both come back once the service runs again.
+and cannot check Companion licenses; both come back once the service runs again. A Companion app paired
+with this computer shows it as offline until then, without asking you to pair it again, and keeps its
+own license or trial.
 
 If the host does not start although nothing seems to use the port, a host left over from an earlier
 Macro Deck may still be running and can no longer be taken over. End the **Macro Deck Host** process in
