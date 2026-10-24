@@ -477,7 +477,14 @@ internal sealed class FakeObsClient : IObsClient
 	public string GetInputAudioMonitorType(string inputName)
 	{
 		EnsureExists(inputName);
-		return InputAudioMonitorTypes.GetValueOrDefault(inputName, "OBS_MONITORING_TYPE_NONE");
+		return InputAudioMonitorTypes.GetValueOrDefault(inputName, ObsMonitorTypes.None);
+	}
+
+	public void SetInputAudioMonitorType(string inputName, string monitorType)
+	{
+		Calls.Add($"SetInputAudioMonitorType:{inputName}:{monitorType}");
+		ThrowRequestFailure();
+		InputAudioMonitorTypes[inputName] = monitorType;
 	}
 
 	public int GetInputAudioSyncOffsetMilliseconds(string inputName)

@@ -9424,6 +9424,24 @@
   <data name="Integrations.Obs.Actions.MuteInput.Name" xml:space="preserve">
     <value>كتم الإدخال</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Description" xml:space="preserve">
+    <value>يشغّل مراقبة صوت الإدخال أو يوقفها أو يبدّلها</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOff" xml:space="preserve">
+    <value>إيقاف</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOn" xml:space="preserve">
+    <value>تشغيل</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorAndOutput" xml:space="preserve">
+    <value>المراقبة والإخراج</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorOnly" xml:space="preserve">
+    <value>المراقبة فقط (كتم الإخراج)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Name" xml:space="preserve">
+    <value>ضبط مراقبة صوت الإدخال</value>
+  </data>
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Description" xml:space="preserve">
     <value>يحفظ مخزن الإعادة الحالي على القرص</value>
   </data>
@@ -9883,6 +9901,9 @@
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>تبديل</value>
+  </data>
+  <data name="Integrations.Obs.Params.MonitorType" xml:space="preserve">
+    <value>نوع المراقبة</value>
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>ملف التعريف</value>

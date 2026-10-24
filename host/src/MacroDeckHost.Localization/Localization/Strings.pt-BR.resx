@@ -9424,6 +9424,24 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Integrations.Obs.Actions.MuteInput.Name" xml:space="preserve">
     <value>Silenciar entrada</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Description" xml:space="preserve">
+    <value>Ativa, desativa ou alterna o monitoramento de áudio de uma entrada</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOff" xml:space="preserve">
+    <value>Desativar</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOn" xml:space="preserve">
+    <value>Ativar</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorAndOutput" xml:space="preserve">
+    <value>Monitorar e enviar à saída</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorOnly" xml:space="preserve">
+    <value>Somente monitorar (silenciar saída)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Name" xml:space="preserve">
+    <value>Definir monitoramento de áudio da entrada</value>
+  </data>
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Description" xml:space="preserve">
     <value>Salva o buffer de repetição atual em disco</value>
   </data>
@@ -9883,6 +9901,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>Alternar</value>
+  </data>
+  <data name="Integrations.Obs.Params.MonitorType" xml:space="preserve">
+    <value>Tipo de monitoramento</value>
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>Perfil</value>

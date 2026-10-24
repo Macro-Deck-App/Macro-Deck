@@ -136,6 +136,8 @@ internal interface IObsClient
 
 	string GetInputAudioMonitorType(string inputName);
 
+	void SetInputAudioMonitorType(string inputName, string monitorType);
+
 	int GetInputAudioSyncOffsetMilliseconds(string inputName);
 
 	ObsAudioTracks GetInputAudioTracks(string inputName);

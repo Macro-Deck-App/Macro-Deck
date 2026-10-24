@@ -9424,6 +9424,24 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Obs.Actions.MuteInput.Name" xml:space="preserve">
     <value>入力をミュート</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Description" xml:space="preserve">
+    <value>入力のオーディオモニタリングをオン、オフ、または切り替えます</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOff" xml:space="preserve">
+    <value>オフ</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOn" xml:space="preserve">
+    <value>オン</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorAndOutput" xml:space="preserve">
+    <value>モニターと出力</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorOnly" xml:space="preserve">
+    <value>モニターのみ（出力はミュート）</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Name" xml:space="preserve">
+    <value>入力のオーディオモニタリングを設定</value>
+  </data>
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Description" xml:space="preserve">
     <value>現在のリプレイバッファーをディスクに保存します</value>
   </data>
@@ -9883,6 +9901,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>切り替え</value>
+  </data>
+  <data name="Integrations.Obs.Params.MonitorType" xml:space="preserve">
+    <value>モニタリングの種類</value>
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>プロファイル</value>

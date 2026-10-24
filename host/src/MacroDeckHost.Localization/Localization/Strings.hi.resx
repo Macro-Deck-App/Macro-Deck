@@ -9424,6 +9424,24 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Obs.Actions.MuteInput.Name" xml:space="preserve">
     <value>इनपुट म्यूट करें</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Description" xml:space="preserve">
+    <value>किसी इनपुट की ऑडियो मॉनिटरिंग चालू, बंद या टॉगल करता है</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOff" xml:space="preserve">
+    <value>बंद करें</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOn" xml:space="preserve">
+    <value>चालू करें</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorAndOutput" xml:space="preserve">
+    <value>मॉनिटर और आउटपुट</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorOnly" xml:space="preserve">
+    <value>केवल मॉनिटर (आउटपुट म्यूट)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Name" xml:space="preserve">
+    <value>इनपुट की ऑडियो मॉनिटरिंग सेट करें</value>
+  </data>
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Description" xml:space="preserve">
     <value>वर्तमान रीप्ले बफ़र को डिस्क पर सहेजता है</value>
   </data>
@@ -9883,6 +9901,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>टॉगल</value>
+  </data>
+  <data name="Integrations.Obs.Params.MonitorType" xml:space="preserve">
+    <value>मॉनिटरिंग प्रकार</value>
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>प्रोफ़ाइल</value>

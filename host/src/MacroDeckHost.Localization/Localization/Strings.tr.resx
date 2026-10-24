@@ -9424,6 +9424,24 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Obs.Actions.MuteInput.Name" xml:space="preserve">
     <value>Girişi sessize al</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Description" xml:space="preserve">
+    <value>Bir girişin ses izlemesini açar, kapatır veya durumunu değiştirir</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOff" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOn" xml:space="preserve">
+    <value>Aç</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorAndOutput" xml:space="preserve">
+    <value>İzle ve çıkışa ver</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorOnly" xml:space="preserve">
+    <value>Yalnızca izle (çıkışı sessize al)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Name" xml:space="preserve">
+    <value>Girişin ses izlemesini ayarla</value>
+  </data>
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Description" xml:space="preserve">
     <value>Geçerli yeniden oynatma arabelleğini diske kaydeder</value>
   </data>
@@ -9883,6 +9901,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>Aç/kapat</value>
+  </data>
+  <data name="Integrations.Obs.Params.MonitorType" xml:space="preserve">
+    <value>İzleme türü</value>
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>Profil</value>

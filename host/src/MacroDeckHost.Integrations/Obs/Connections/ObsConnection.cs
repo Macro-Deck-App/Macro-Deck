@@ -505,6 +505,13 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		return succeeded;
 	}
 
+	private async Task<ObsCommandResult> RunForResultAndForgetTargetReadAsync(Action action, string key)
+	{
+		var result = await RunForResultAsync(action).ConfigureAwait(false);
+		ForgetTargetRead(key);
+		return result;
+	}
+
 	private void ForgetTargetRead(string key)
 	{
 		lock (_targetReadGate)
@@ -532,6 +539,23 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	public Task<bool> ToggleInputMuteAsync(string inputName)
 	{
 		return RunAndForgetTargetReadAsync(() => _client.ToggleInputMute(inputName), $"mute:{inputName}");
+	}
+
+	public Task<ObsCommandResult> SetInputAudioMonitorTypeAsync(string inputName, string monitorType)
+	{
+		return RunForResultAndForgetTargetReadAsync(() => _client.SetInputAudioMonitorType(inputName, monitorType),
+			$"monitor-type:{inputName}");
+	}
+
+	public Task<ObsCommandResult> ToggleInputAudioMonitorTypeAsync(string inputName, string activeMonitorType)
+	{
+		return RunForResultAndForgetTargetReadAsync(() =>
+			{
+				var current = _client.GetInputAudioMonitorType(inputName);
+				_client.SetInputAudioMonitorType(inputName,
+					current == ObsMonitorTypes.None ? activeMonitorType : ObsMonitorTypes.None);
+			},
+			$"monitor-type:{inputName}");
 	}
 
 	public Task<double?> GetInputVolumePercentAsync(string inputName)

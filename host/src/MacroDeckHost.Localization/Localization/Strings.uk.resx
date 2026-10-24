@@ -9424,6 +9424,24 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Obs.Actions.MuteInput.Name" xml:space="preserve">
     <value>Вимкнути звук входу</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Description" xml:space="preserve">
+    <value>Вмикає, вимикає або перемикає моніторинг аудіо входу</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOff" xml:space="preserve">
+    <value>Вимкнути</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.ModeOn" xml:space="preserve">
+    <value>Увімкнути</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorAndOutput" xml:space="preserve">
+    <value>Моніторинг і вивід</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.MonitorOnly" xml:space="preserve">
+    <value>Лише моніторинг (без виводу)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputMonitoring.Name" xml:space="preserve">
+    <value>Встановити моніторинг аудіо входу</value>
+  </data>
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Description" xml:space="preserve">
     <value>Зберігає поточний буфер повтору на диск</value>
   </data>
@@ -9883,6 +9901,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>Перемкнути</value>
+  </data>
+  <data name="Integrations.Obs.Params.MonitorType" xml:space="preserve">
+    <value>Тип моніторингу</value>
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>Профіль</value>
