@@ -17844,6 +17844,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Mark all as read</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>More notification actions</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Requires attention</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Earlier</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Unread</value>
   </data>

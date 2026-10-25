@@ -17843,6 +17843,15 @@
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>تحديد الكل كمقروء</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>إجراءات أخرى للإشعارات</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>يتطلب الانتباه</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>سابقًا</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>غير مقروء</value>
   </data>

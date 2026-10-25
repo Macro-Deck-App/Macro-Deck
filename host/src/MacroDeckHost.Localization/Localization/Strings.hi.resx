@@ -17843,6 +17843,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>सभी को पढ़ा हुआ चिह्नित करें</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>सूचनाओं की और कार्रवाइयाँ</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>ध्यान देना ज़रूरी है</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>पहले की</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>अपठित</value>
   </data>

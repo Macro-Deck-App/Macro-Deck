@@ -17843,6 +17843,15 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>全部标记为已读</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>更多通知操作</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>需要处理</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>更早</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>未读</value>
   </data>

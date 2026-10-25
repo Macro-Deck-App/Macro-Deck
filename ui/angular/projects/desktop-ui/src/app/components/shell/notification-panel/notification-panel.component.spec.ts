@@ -28,6 +28,7 @@ describe('NotificationPanelComponent', () => {
   let notifications: ReturnType<typeof signal<UserNotification[]>>;
   let dismissAllSpy: jasmine.Spy;
   let dismissSpy: jasmine.Spy;
+  let resolveLocallySpy: jasmine.Spy;
   let markReadSpy: jasmine.Spy;
   let markAllReadSpy: jasmine.Spy;
   let navigateSpy: jasmine.Spy;
@@ -44,6 +45,14 @@ describe('NotificationPanelComponent', () => {
 
   function fireAction(notification: UserNotification, action: UserNotificationAction): void {
     fixture.componentInstance.onAction({ notification, action });
+  }
+
+  function expectResolvedLocally(kind: UserNotificationAction['kind'], otherConsent: UserNotificationAction['kind']): void {
+    expect(resolveLocallySpy).toHaveBeenCalledTimes(1);
+    const matches = resolveLocallySpy.calls.mostRecent().args[0] as (entry: UserNotification) => boolean;
+    expect(matches(notification({ id: 'request', actions: [{ kind }] }))).toBeTrue();
+    expect(matches(notification({ id: 'other-consent', actions: [{ kind: otherConsent }] }))).toBeFalse();
+    expect(matches(notification({ id: 'unrelated', actions: [{ kind: 'OpenLogs' }] }))).toBeFalse();
   }
 
   function notification(overrides: Partial<UserNotification> = {}): UserNotification {
@@ -65,11 +74,27 @@ describe('NotificationPanelComponent', () => {
     fixture.detectChanges();
   }
 
+  function menuTrigger(): HTMLButtonElement | null {
+    return fixture.nativeElement.querySelector('.np-menu .dropdown-trigger');
+  }
+
+  async function openMenu(): Promise<void> {
+    menuTrigger()!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  function menuItem(selector: string): HTMLButtonElement {
+    return document.body.querySelector(selector) as HTMLButtonElement;
+  }
+
   beforeEach(async () => {
     notifications = signal<UserNotification[]>([]);
     restartRequired = signal(true);
     dismissAllSpy = jasmine.createSpy('dismissAll');
     dismissSpy = jasmine.createSpy('dismiss');
+    resolveLocallySpy = jasmine.createSpy('resolveLocally');
     markReadSpy = jasmine.createSpy('markRead');
     markAllReadSpy = jasmine.createSpy('markAllRead');
     navigateSpy = jasmine.createSpy('navigate').and.resolveTo(true);
@@ -99,6 +124,7 @@ describe('NotificationPanelComponent', () => {
             badgeText: computed(() => `${notifications().length}`),
             dismissAll: dismissAllSpy,
             dismiss: dismissSpy,
+            resolveLocally: resolveLocallySpy,
             markRead: markReadSpy,
             markAllRead: markAllReadSpy,
           },
@@ -130,7 +156,7 @@ describe('NotificationPanelComponent', () => {
     expect(panel.hasAttribute('inert')).toBeTrue();
   });
 
-  it('opens 40rem wide when there is room for it', async () => {
+  it('opens 25rem wide, compact rather than filling the window', async () => {
     const host = TestBed.createComponent(WideNotificationHostComponent);
     host.detectChanges();
     await host.whenStable();
@@ -139,7 +165,7 @@ describe('NotificationPanelComponent', () => {
     panel.getAnimations().forEach(animation => animation.finish());
     const rootFontSizePx = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
-    expect(panel.getBoundingClientRect().width).toBeCloseTo(40 * rootFontSizePx, 0);
+    expect(panel.getBoundingClientRect().width).toBeCloseTo(25 * rootFontSizePx, 0);
   });
 
   it('shows the empty state when there is nothing to report', async () => {
@@ -175,43 +201,164 @@ describe('NotificationPanelComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('app-notification-item').length).toBe(2);
   });
 
-  it('offers no clear-all while the only entry is still running', async () => {
-    notifications.set([notification({ progress: { processed: 1, total: 10 } })]);
+  it('offers no bulk actions while the only entry is still running and already read', async () => {
+    notifications.set([notification({ read: true, progress: { processed: 1, total: 10 } })]);
     await open();
 
-    expect(fixture.nativeElement.querySelector('.np-header-btn')).toBeNull();
+    expect(menuTrigger()).toBeNull();
   });
 
-  it('clears everything on clear-all', async () => {
+  it('clears everything from the overflow menu', async () => {
     notifications.set([notification()]);
     await open();
+    await openMenu();
 
-    (fixture.nativeElement.querySelector('.np-header-btn') as HTMLButtonElement).click();
+    menuItem('.np-clear-all').click();
 
     expect(dismissAllSpy).toHaveBeenCalled();
+  });
+
+  describe('closing once the user has emptied it', () => {
+    let closedSpy: jasmine.Spy;
+
+    beforeEach(() => {
+      dismissSpy.and.callFake((id: string) => notifications.update(list => list.filter(n => n.id !== id)));
+      dismissAllSpy.and.callFake(() => notifications.update(list => list.filter(n => !!n.progress)));
+      closedSpy = jasmine.createSpy('closed');
+      fixture.componentInstance.closed.subscribe(closedSpy);
+    });
+
+    it('closes after clear all removed everything', async () => {
+      notifications.set([notification({ id: 'a' }), notification({ id: 'b' })]);
+      await open();
+      await openMenu();
+
+      menuItem('.np-clear-all').click();
+
+      expect(closedSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes when the last entry is dismissed, and only then', async () => {
+      notifications.set([notification({ id: 'a' }), notification({ id: 'b' })]);
+      await open();
+
+      fixture.componentInstance.onDismiss('a');
+      expect(closedSpy).not.toHaveBeenCalled();
+
+      fixture.componentInstance.onDismiss('b');
+      expect(closedSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes when a DismissNotification action removes the last entry', async () => {
+      const update = notification({ id: 'update-1', kind: 'Update' });
+      notifications.set([update]);
+      await open();
+
+      fireAction(update, { kind: 'DismissNotification' });
+
+      expect(closedSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays open while running work is left after clear all', async () => {
+      notifications.set([notification({ id: 'a' }), notification({ id: 'run', progress: { processed: 1, total: 4 } })]);
+      await open();
+      await openMenu();
+
+      menuItem('.np-clear-all').click();
+
+      expect(closedSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not close by itself when the host empties the list or it opens empty', async () => {
+      notifications.set([notification({ id: 'a' })]);
+      await open();
+
+      notifications.set([]);
+      fixture.detectChanges();
+
+      expect(closedSpy).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.querySelector('shared-empty-state')).not.toBeNull();
+    });
   });
 
   it('offers mark-all-as-read only while something is unread', async () => {
     notifications.set([notification({ read: true })]);
     await open();
-    const labels = () => Array.from(fixture.nativeElement.querySelectorAll('.np-header-btn'))
-      .map(button => (button as HTMLElement).textContent?.trim());
+    await openMenu();
 
-    expect(labels()).not.toContain('Mark all as read');
+    expect(menuItem('.np-mark-all-read').disabled).toBeTrue();
+    expect(menuItem('.np-clear-all').disabled).toBeFalse();
 
     notifications.set([notification({ read: false })]);
     fixture.detectChanges();
 
-    expect(labels()).toContain('Mark all as read');
+    expect(menuItem('.np-mark-all-read').disabled).toBeFalse();
   });
 
-  it('marks everything read from the header', async () => {
+  it('marks everything read from the overflow menu', async () => {
     notifications.set([notification({ id: 'a', read: false }), notification({ id: 'b', read: false })]);
     await open();
+    await openMenu();
 
-    (fixture.nativeElement.querySelector('.np-header-btn button') as HTMLButtonElement).click();
+    menuItem('.np-mark-all-read').click();
 
     expect(markAllReadSpy).toHaveBeenCalled();
+  });
+
+  it('names the overflow menu for assistive technology', async () => {
+    notifications.set([notification({ read: false })]);
+    await open();
+
+    expect(menuTrigger()!.getAttribute('aria-label')).toBe('More notification actions');
+  });
+
+  it('heads the list with what needs the user only when there is something else below it', async () => {
+    const update = notification({ id: 'update', kind: 'Update', actions: [{ kind: 'InstallUpdate' }] });
+    const headings = () => Array.from(fixture.nativeElement.querySelectorAll('.np-section'))
+      .map(element => (element as HTMLElement).textContent?.trim());
+    const titles = () => Array.from(fixture.nativeElement.querySelectorAll('app-notification-item'))
+      .map(element => (element as HTMLElement).querySelector('.ni-title')?.textContent?.trim());
+
+    notifications.set([notification({ id: 'other', title: 'Other' }), { ...update, title: 'Update' }]);
+    await open();
+
+    expect(headings()).toEqual(['Requires attention', 'Earlier']);
+    expect(titles()).toEqual(['Update', 'Other']);
+
+    notifications.set([{ ...update, title: 'Update' }]);
+    fixture.detectChanges();
+    expect(headings()).toEqual([]);
+
+    notifications.set([notification({ id: 'other', title: 'Other' })]);
+    fixture.detectChanges();
+    expect(headings()).toEqual([]);
+  });
+
+  it('shows a consent request as pending while the host has not answered, and keeps the panel open', async () => {
+    let answer!: (value: UpdateAdbSettingsResponse) => void;
+    updateAdbSettingsSpy.and.returnValue(new Promise<UpdateAdbSettingsResponse>(resolve => (answer = resolve)));
+    const request = notification({ id: 'adb-1', severity: 'Warning', actions: [{ kind: 'EnablePluginAdb' }] });
+    notifications.set([request]);
+    await open();
+    const closedSpy = jasmine.createSpy('closed');
+    fixture.componentInstance.closed.subscribe(closedSpy);
+
+    fireAction(request, { kind: 'EnablePluginAdb' });
+    fireAction(request, { kind: 'EnablePluginAdb' });
+    fixture.detectChanges();
+
+    const allow = fixture.nativeElement.querySelector('.ni-action button') as HTMLButtonElement;
+    expect(allow.disabled).toBeTrue();
+    expect(updateAdbSettingsSpy).toHaveBeenCalledTimes(1);
+    expect(resolveLocallySpy).not.toHaveBeenCalled();
+    expect(closedSpy).not.toHaveBeenCalled();
+
+    answer({ success: true, error: null, resolvedExecutablePath: 'C:/platform-tools/adb.exe' } as UpdateAdbSettingsResponse);
+    await new Promise(resolve => setTimeout(resolve));
+    fixture.detectChanges();
+
+    expectResolvedLocally('EnablePluginAdb', 'EnablePluginCompanionDevices');
+    expect((fixture.nativeElement.querySelector('.ni-action button') as HTMLButtonElement).disabled).toBeFalse();
   });
 
   it('marks one entry read from its own button and leaves read entries without one', async () => {
@@ -346,7 +493,7 @@ describe('NotificationPanelComponent', () => {
       await new Promise(resolve => setTimeout(resolve));
 
       expect(updateAdbSettingsSpy).toHaveBeenCalledOnceWith({ enabled: true, allowPlugins: true });
-      expect(dismissSpy).toHaveBeenCalledWith('adb-1');
+      expectResolvedLocally('EnablePluginAdb', 'EnablePluginCompanionDevices');
       expect(settingsOpenSpy).not.toHaveBeenCalled();
     });
 
@@ -356,7 +503,7 @@ describe('NotificationPanelComponent', () => {
       fireAction(notification({ id: 'adb-1', severity: 'Warning' }), { kind: 'EnablePluginAdb' });
       await new Promise(resolve => setTimeout(resolve));
 
-      expect(dismissSpy).not.toHaveBeenCalled();
+      expect(resolveLocallySpy).not.toHaveBeenCalled();
       expect(settingsOpenSpy).toHaveBeenCalledWith('adb');
     });
 
@@ -382,7 +529,7 @@ describe('NotificationPanelComponent', () => {
       await new Promise(resolve => setTimeout(resolve));
 
       expect(accessSpy).toHaveBeenCalledOnceWith(true);
-      expect(dismissSpy).toHaveBeenCalledWith('companion-1');
+      expectResolvedLocally('EnablePluginCompanionDevices', 'EnablePluginAdb');
       expect(updateAdbSettingsSpy).not.toHaveBeenCalled();
     });
   });
