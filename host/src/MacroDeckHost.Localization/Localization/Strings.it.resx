@@ -17911,6 +17911,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Segna tutte come lette</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>Altre azioni sulle notifiche</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Richiede attenzione</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Meno recenti</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Non letta</value>
   </data>

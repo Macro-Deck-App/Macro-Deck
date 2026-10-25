@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ButtonComponent, ErrorBannerComponent, ModalComponent, TranslatePipe } from '@shared';
 import { PluginAdbConsentService } from '../../../services/plugin-adb-consent.service';
 
@@ -17,19 +17,14 @@ export class PluginAdbConsentDialogComponent {
   readonly offeringDownload = this.consent.offeringDownload;
   readonly downloading = this.consent.downloading;
   readonly downloadError = this.consent.downloadError;
-  readonly busy = signal(false);
+  readonly busy = computed(() => this.consent.allowing() !== null);
 
   async allow(): Promise<void> {
     const request = this.pending();
     if (!request || this.busy()) {
       return;
     }
-    this.busy.set(true);
-    try {
-      await this.consent.allow(request.id);
-    } finally {
-      this.busy.set(false);
-    }
+    await this.consent.allow(request.id);
   }
 
   notNow(): void {

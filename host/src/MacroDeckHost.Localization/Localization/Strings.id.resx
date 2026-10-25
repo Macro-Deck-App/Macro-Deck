@@ -17912,6 +17912,15 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Tandai semua sudah dibaca</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>Tindakan notifikasi lainnya</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Perlu perhatian</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Sebelumnya</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Belum dibaca</value>
   </data>

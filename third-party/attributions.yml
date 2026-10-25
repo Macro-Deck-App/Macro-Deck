@@ -78,10 +78,13 @@ assets:
       - ui/runtime/styles/icons/bug.svg
       - ui/runtime/styles/icons/chart.svg
       - ui/runtime/styles/icons/check.svg
+      - ui/runtime/styles/icons/check-check.svg
       - ui/runtime/styles/icons/chevron-down.svg
       - ui/runtime/styles/icons/chevron-left.svg
       - ui/runtime/styles/icons/chevron-right.svg
       - ui/runtime/styles/icons/chevron-up.svg
+      - ui/runtime/styles/icons/circle-check.svg
+      - ui/runtime/styles/icons/circle-x.svg
       - ui/runtime/styles/icons/clipboard.svg
       - ui/runtime/styles/icons/clock-type.svg
       - ui/runtime/styles/icons/code.svg

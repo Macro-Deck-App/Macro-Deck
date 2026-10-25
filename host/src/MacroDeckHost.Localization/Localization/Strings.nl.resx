@@ -17912,6 +17912,15 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Alles markeren als gelezen</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>Meer meldingsacties</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Vraagt je aandacht</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Eerder</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Ongelezen</value>
   </data>

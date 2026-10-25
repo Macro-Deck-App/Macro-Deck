@@ -11,7 +11,7 @@ import { PluginAdbConsentDialogComponent } from './plugin-adb-consent-dialog.com
 describe('PluginAdbConsentDialogComponent', () => {
   let fixture: ComponentFixture<PluginAdbConsentDialogComponent>;
   let notifications: ReturnType<typeof signal<UserNotification[]>>;
-  let dismissSpy: jasmine.Spy;
+  let resolveLocallySpy: jasmine.Spy;
   let settingsOpenSpy: jasmine.Spy;
   let updateAdbSettingsSpy: jasmine.Spy;
 
@@ -29,7 +29,7 @@ describe('PluginAdbConsentDialogComponent', () => {
 
   beforeEach(async () => {
     notifications = signal<UserNotification[]>([]);
-    dismissSpy = jasmine.createSpy('dismiss');
+    resolveLocallySpy = jasmine.createSpy('resolveLocally');
     settingsOpenSpy = jasmine.createSpy('open');
 
     await TestBed.configureTestingModule({
@@ -39,7 +39,7 @@ describe('PluginAdbConsentDialogComponent', () => {
         ...provideLocalizationTesting(),
         {
           provide: NotificationCenterService,
-          useValue: { notifications: computed(() => notifications()), dismiss: dismissSpy },
+          useValue: { notifications: computed(() => notifications()), resolveLocally: resolveLocallySpy },
         },
         { provide: SettingsModalService, useValue: { open: settingsOpenSpy } },
       ],
@@ -69,6 +69,14 @@ describe('PluginAdbConsentDialogComponent', () => {
     return buttons().find(candidate => candidate.textContent!.includes(label))!;
   }
 
+  function expectResolvedLocally(): void {
+    expect(resolveLocallySpy).toHaveBeenCalledTimes(1);
+    const matches = resolveLocallySpy.calls.mostRecent().args[0] as (entry: UserNotification) => boolean;
+    expect(matches(adbRequest)).toBeTrue();
+    expect(matches({ ...adbRequest, id: 'other-consent', action: undefined, actions: [{ kind: 'EnablePluginCompanionDevices' }] })).toBeFalse();
+    expect(matches({ ...adbRequest, id: 'unrelated', action: undefined, actions: [{ kind: 'OpenLogs' }] })).toBeFalse();
+  }
+
   it('stays out of the way while no plugin is waiting for ADB', async () => {
     notifications.set([{ ...adbRequest, id: 'other', actions: [{ kind: 'OpenLogs' }], title: 'Something else' }]);
 
@@ -94,7 +102,7 @@ describe('PluginAdbConsentDialogComponent', () => {
     await new Promise(resolve => setTimeout(resolve));
 
     expect(updateAdbSettingsSpy).toHaveBeenCalledOnceWith({ enabled: true, allowPlugins: true });
-    expect(dismissSpy).toHaveBeenCalledWith('adb-1');
+    expectResolvedLocally();
     expect(settingsOpenSpy).not.toHaveBeenCalled();
   });
 
@@ -110,7 +118,7 @@ describe('PluginAdbConsentDialogComponent', () => {
     notifications.set([]);
     await render();
 
-    expect(dismissSpy).toHaveBeenCalledWith('adb-1');
+    expectResolvedLocally();
     expect(fixture.nativeElement.textContent).toContain('Macro Deck cannot find adb');
 
     button('Download platform-tools').click();
@@ -148,7 +156,7 @@ describe('PluginAdbConsentDialogComponent', () => {
     await render();
 
     expect(updateAdbSettingsSpy).not.toHaveBeenCalled();
-    expect(dismissSpy).not.toHaveBeenCalled();
+    expect(resolveLocallySpy).not.toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).not.toContain('A plugin wants to use ADB');
   });
 
@@ -160,7 +168,7 @@ describe('PluginAdbConsentDialogComponent', () => {
     button('Allow').click();
     await new Promise(resolve => setTimeout(resolve));
 
-    expect(dismissSpy).not.toHaveBeenCalled();
+    expect(resolveLocallySpy).not.toHaveBeenCalled();
     expect(settingsOpenSpy).toHaveBeenCalledWith('adb');
   });
 });

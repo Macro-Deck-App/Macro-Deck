@@ -2369,11 +2369,11 @@ export class ApiService {
     return this.http('GET', '/api/notifications');
   }
 
-  dismissNotification(id: string): Promise<void> {
+  dismissNotification(id: string): Promise<{ success: boolean }> {
     return this.http('DELETE', `/api/notifications/${encodeURIComponent(id)}`);
   }
 
-  dismissAllNotifications(): Promise<void> {
+  dismissAllNotifications(): Promise<{ success: boolean }> {
     return this.http('DELETE', '/api/notifications');
   }
 

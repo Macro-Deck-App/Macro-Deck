@@ -17911,6 +17911,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Označit vše jako přečtené</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>Další akce s oznámeními</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Vyžaduje pozornost</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Dřívější</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Nepřečtené</value>
   </data>

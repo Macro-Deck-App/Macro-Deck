@@ -3,36 +3,81 @@
   [heading]="appStrings.Nav.Notifications | translate"
   [closeLabel]="appStrings.Shell.Notifications.Close | translate"
   (closed)="closed.emit()">
-  @if (notificationCenter.hasUnread()) {
-    <shared-button sidePanelActions class="np-header-btn" variant="ghost" size="compact" (click)="onMarkAllRead()">
-      <span>{{ appStrings.Shell.Notifications.MarkAllRead | translate }}</span>
-    </shared-button>
-  }
-
-  @if (notificationCenter.hasDismissable()) {
-    <shared-button sidePanelActions class="np-header-btn" variant="ghost" size="compact" (click)="onClearAll()">
-      <span>{{ appStrings.Shell.Notifications.ClearAll | translate }}</span>
-    </shared-button>
+  @if (notificationCenter.hasUnread() || notificationCenter.hasDismissable()) {
+    <shared-dropdown-menu
+      sidePanelActions
+      class="np-menu"
+      position="bottom-right"
+      closeOnItemClick
+      [minWidth]="200"
+      [isOpen]="menuOpen()"
+      [triggerAriaLabel]="appStrings.Shell.Notifications.MoreActions | translate"
+      [sharedTooltip]="appStrings.Shell.Notifications.MoreActions | translate"
+      [tooltipDisabled]="menuOpen()"
+      (isOpenChange)="menuOpen.set($event)">
+      <ng-template #menuContent>
+        <div class="np-menu-list" role="menu">
+          <button
+            type="button"
+            role="menuitem"
+            class="np-menu-item np-mark-all-read"
+            [disabled]="!notificationCenter.hasUnread()"
+            (click)="onMarkAllRead()">
+            <span class="icon icon-check-check icon-sm" aria-hidden="true"></span>
+            <span>{{ appStrings.Shell.Notifications.MarkAllRead | translate }}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            class="np-menu-item np-menu-danger np-clear-all"
+            [disabled]="!notificationCenter.hasDismissable()"
+            (click)="onClearAll()">
+            <span class="icon icon-trash icon-sm" aria-hidden="true"></span>
+            <span>{{ appStrings.Shell.Notifications.ClearAll | translate }}</span>
+          </button>
+        </div>
+      </ng-template>
+    </shared-dropdown-menu>
   }
 
   <div class="np-body">
     @if (notifications().length === 0) {
-      <shared-empty-state
-        compact
-        icon="bell"
-        [heading]="appStrings.Shell.Notifications.EmptyHeading | translate"
-        [message]="appStrings.Shell.Notifications.EmptyMessage | translate" />
+      <div class="np-empty" animate.enter="np-fade-in">
+        <shared-empty-state
+          icon="bell"
+          [heading]="appStrings.Shell.Notifications.EmptyHeading | translate"
+          [message]="appStrings.Shell.Notifications.EmptyMessage | translate" />
+      </div>
     } @else {
-      <div class="np-list">
-        @for (notification of notifications(); track notification.id) {
-          <app-notification-item
-            [notification]="notification"
-            (action)="onAction($event)"
-            (dismissed)="onDismiss($event)"
-            (markRead)="onMarkRead($event)"
-            (cancel)="onCancel($event)" />
+      <div class="np-list" animate.enter="np-fade-in" animate.leave="np-fade-out">
+        @if (showSections()) {
+          <h3 class="np-section">{{ appStrings.Shell.Notifications.Section.RequiresAttention | translate }}</h3>
+        }
+        @for (notification of attention(); track notification.id) {
+          <ng-container *ngTemplateOutlet="item; context: { $implicit: notification, attention: true }" />
+        }
+        @if (showSections()) {
+          <h3 class="np-section">{{ appStrings.Shell.Notifications.Section.Earlier | translate }}</h3>
+        }
+        @for (notification of earlier(); track notification.id) {
+          <ng-container *ngTemplateOutlet="item; context: { $implicit: notification, attention: false }" />
         }
       </div>
     }
   </div>
 </shared-side-panel>
+
+<ng-template #item let-notification let-attention="attention">
+  <div class="np-item" animate.enter="np-item-enter" animate.leave="np-item-leave">
+    <div class="np-item-inner">
+      <app-notification-item
+        [notification]="notification"
+        [attention]="attention"
+        [pending]="isPending(notification)"
+        (action)="onAction($event)"
+        (dismissed)="onDismiss($event)"
+        (markRead)="onMarkRead($event)"
+        (cancel)="onCancel($event)" />
+    </div>
+  </div>
+</ng-template>

@@ -17911,6 +17911,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Oznacz wszystkie jako przeczytane</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>Więcej akcji powiadomień</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Wymaga uwagi</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Wcześniejsze</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Nieprzeczytane</value>
   </data>

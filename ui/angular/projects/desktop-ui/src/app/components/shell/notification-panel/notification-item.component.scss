@@ -2,23 +2,54 @@
 
 .ni-row {
   @include ds.interactive-row;
+  position: relative;
   align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
 
   &:focus-visible {
     @include ds.focus-ring;
   }
 }
 
-.ni-severity {
-  @include ds.badge;
+.ni-attention {
+  border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  background-color: color-mix(in srgb, var(--color-accent) 6%, transparent);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+}
+
+.ni-glyph {
+  @include ds.flex-center;
   flex-shrink: 0;
-  padding: var(--space-1);
+  width: 2rem;
+  height: 2rem;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
 
-  @include ds.issue-badge-severities;
+  &-info {
+    color: var(--color-text-secondary);
+    background-color: var(--color-bg-tertiary);
+  }
+
+  &-success {
+    color: var(--color-success);
+    background-color: color-mix(in srgb, var(--color-success) 14%, transparent);
+  }
+
+  &-warning {
+    color: var(--color-warning);
+    background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
+  }
+
+  &-error {
+    color: var(--color-danger);
+    background-color: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  }
 }
 
 .ni-body {
@@ -29,30 +60,49 @@
   min-width: 0;
 }
 
+.ni-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
 .ni-title {
-  @include ds.truncate;
-  font-size: var(--text-md);
-  font-weight: var(--font-semibold);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 0.375rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-tight);
   color: var(--color-text-primary);
 }
 
+.ni-unread .ni-title {
+  font-weight: var(--font-semibold);
+}
+
 .ni-message {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: var(--leading-normal);
+  overflow-wrap: anywhere;
 }
 
 .ni-time {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-1);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
 .ni-source::before {
   content: '\00b7';
-  margin-inline-end: var(--space-2);
+  margin-inline-end: var(--space-1);
 }
 
 .ni-source-name::before {
@@ -60,13 +110,13 @@
   margin-inline: var(--space-1);
 }
 
-.ni-unread-dot {
-  display: inline-block;
-  width: 0.5rem;
-  height: 0.5rem;
-  margin-inline-end: var(--space-2);
-  border-radius: 50%;
-  background: var(--color-accent);
+.ni-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 // Same visual language as shared/components/import-progress: 4px bar, accent fill, indeterminate
@@ -74,6 +124,7 @@
 .ni-progress-bar {
   position: relative;
   height: 4px;
+  margin-top: var(--space-1);
   border-radius: 2px;
   background: var(--color-bg-tertiary);
   overflow: hidden;
@@ -134,8 +185,33 @@
   max-width: 100%;
 }
 
-.ni-mark-read,
-.ni-dismiss {
+.ni-controls {
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
-  margin-block: calc(-1 * var(--space-2));
+  margin-block: calc(-1 * var(--space-1)) calc(-1 * var(--space-2));
+  margin-inline-end: calc(-1 * var(--space-1));
+}
+
+.ni-unread-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.ni-dismiss {
+  opacity: 0.55;
+  transition: opacity var(--transition-fast);
+}
+
+.ni-row:hover .ni-dismiss,
+.ni-row:focus-within .ni-dismiss {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .ni-dismiss {
+    opacity: 1;
+  }
 }

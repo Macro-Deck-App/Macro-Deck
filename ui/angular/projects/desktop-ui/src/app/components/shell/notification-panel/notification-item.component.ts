@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, booleanAttribute, inject } from '@angular/core';
 
 import {
   AppStrings,
@@ -11,22 +11,24 @@ import {
 } from '@macro-deck/runtime';
 import {
   ButtonComponent,
+  ButtonVariant,
   LocalizationService,
   TranslatePipe,
 } from '@shared';
+import { TooltipDirective } from '../../overlay/tooltip/tooltip.directive';
 
 const SEVERITY_ICON: Record<UserNotificationSeverity, string> = {
   Info: 'icon-info',
-  Success: 'icon-check',
+  Success: 'icon-circle-check',
   Warning: 'icon-alert-triangle',
-  Error: 'icon-alert-triangle',
+  Error: 'icon-circle-x',
 };
 
 const SEVERITY_CLASS: Record<UserNotificationSeverity, string> = {
-  Info: 'issue-badge-info',
-  Success: 'issue-badge-success',
-  Warning: 'issue-badge-warning',
-  Error: 'issue-badge-error',
+  Info: 'ni-glyph-info',
+  Success: 'ni-glyph-success',
+  Warning: 'ni-glyph-warning',
+  Error: 'ni-glyph-error',
 };
 
 const SOURCE_CATEGORY_LABEL: Record<UserNotificationSourceCategory, string> = {
@@ -51,15 +53,33 @@ const ACTION_LABEL: Record<Exclude<UserNotificationActionKind, 'None'>, string> 
   EnablePluginCompanionDevices: AppStrings.Shell.Notifications.Action.EnablePluginAdb,
 };
 
+const ATTENTION_ACTIONS: ReadonlySet<UserNotificationActionKind> = new Set<UserNotificationActionKind>([
+  'EnablePluginAdb',
+  'EnablePluginCompanionDevices',
+  'InstallUpdate',
+  'RestartApplication',
+]);
+
 export interface NotificationActionEvent {
   notification: UserNotification;
   action: UserNotificationAction;
 }
 
+export function notificationActions(notification: UserNotification): UserNotificationAction[] {
+  if (notification.actions && notification.actions.length > 0) {
+    return notification.actions.filter(action => action.kind !== 'None');
+  }
+  return notification.action && notification.action.kind !== 'None' ? [notification.action] : [];
+}
+
+export function requiresAttention(notification: UserNotification): boolean {
+  return notificationActions(notification).some(action => ATTENTION_ACTIONS.has(action.kind));
+}
+
 @Component({
   selector: 'app-notification-item',
   standalone: true,
-  imports: [ButtonComponent, TranslatePipe],
+  imports: [ButtonComponent, TooltipDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notification-item.component.html',
   styleUrls: ['./notification-item.component.scss'],
@@ -70,6 +90,8 @@ export class NotificationItemComponent {
   protected readonly commonStrings = Strings;
 
   @Input({ required: true }) notification!: UserNotification;
+  @Input({ transform: booleanAttribute }) attention = false;
+  @Input({ transform: booleanAttribute }) pending = false;
 
   @Output() action = new EventEmitter<NotificationActionEvent>();
   @Output() dismissed = new EventEmitter<string>();
@@ -99,11 +121,14 @@ export class NotificationItemComponent {
   }
 
   protected get actionList(): UserNotificationAction[] {
-    const notification = this.notification;
-    if (notification.actions && notification.actions.length > 0) {
-      return notification.actions.filter(action => action.kind !== 'None');
+    return notificationActions(this.notification);
+  }
+
+  protected variantFor(action: UserNotificationAction): ButtonVariant {
+    if (action.kind === 'DismissNotification') {
+      return 'ghost';
     }
-    return notification.action && notification.action.kind !== 'None' ? [notification.action] : [];
+    return this.attention && ATTENTION_ACTIONS.has(action.kind) ? 'primary' : 'secondary';
   }
 
   protected labelFor(action: UserNotificationAction): string {
@@ -142,6 +167,9 @@ export class NotificationItemComponent {
 
   onAction(event: MouseEvent, action: UserNotificationAction): void {
     event.stopPropagation();
+    if (this.pending) {
+      return;
+    }
     this.action.emit({ notification: this.notification, action });
   }
 

@@ -61,6 +61,18 @@
   mask-image: url('./icons/check.svg');
   -webkit-mask-image: url('./icons/check.svg');
 }
+.icon-check-check {
+  mask-image: url('./icons/check-check.svg');
+  -webkit-mask-image: url('./icons/check-check.svg');
+}
+.icon-circle-check {
+  mask-image: url('./icons/circle-check.svg');
+  -webkit-mask-image: url('./icons/circle-check.svg');
+}
+.icon-circle-x {
+  mask-image: url('./icons/circle-x.svg');
+  -webkit-mask-image: url('./icons/circle-x.svg');
+}
 .icon-device-floppy {
   mask-image: url('./icons/device-floppy.svg');
   -webkit-mask-image: url('./icons/device-floppy.svg');

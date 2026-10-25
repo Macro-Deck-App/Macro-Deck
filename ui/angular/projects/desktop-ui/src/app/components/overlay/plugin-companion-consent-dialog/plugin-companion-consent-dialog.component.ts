@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ButtonComponent, ModalComponent, TranslatePipe } from '@shared';
 import { PluginCompanionConsentService } from '../../../services/plugin-companion-consent.service';
 
@@ -14,19 +14,14 @@ export class PluginCompanionConsentDialogComponent {
   private readonly consent = inject(PluginCompanionConsentService);
 
   readonly pending = this.consent.pending;
-  readonly busy = signal(false);
+  readonly busy = computed(() => this.consent.allowing() !== null);
 
   async allow(): Promise<void> {
     const request = this.pending();
     if (!request || this.busy()) {
       return;
     }
-    this.busy.set(true);
-    try {
-      await this.consent.allow(request.id);
-    } finally {
-      this.busy.set(false);
-    }
+    await this.consent.allow(request.id);
   }
 
   notNow(): void {

@@ -17912,6 +17912,15 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>すべて既読にする</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>通知のその他の操作</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>対応が必要</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>以前</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>未読</value>
   </data>

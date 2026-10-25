@@ -17909,6 +17909,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Alle als gelesen markieren</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>Weitere Aktionen für Benachrichtigungen</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Erfordert Aufmerksamkeit</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Früher</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Ungelesen</value>
   </data>

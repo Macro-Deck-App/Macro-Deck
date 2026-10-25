@@ -11,7 +11,7 @@ import { PluginCompanionConsentDialogComponent } from './plugin-companion-consen
 describe('PluginCompanionConsentDialogComponent', () => {
   let fixture: ComponentFixture<PluginCompanionConsentDialogComponent>;
   let notifications: ReturnType<typeof signal<UserNotification[]>>;
-  let dismissSpy: jasmine.Spy;
+  let resolveLocallySpy: jasmine.Spy;
   let settingsOpenSpy: jasmine.Spy;
   let pluginAccessSpy: jasmine.Spy;
 
@@ -29,7 +29,7 @@ describe('PluginCompanionConsentDialogComponent', () => {
 
   beforeEach(async () => {
     notifications = signal<UserNotification[]>([]);
-    dismissSpy = jasmine.createSpy('dismiss');
+    resolveLocallySpy = jasmine.createSpy('resolveLocally');
     settingsOpenSpy = jasmine.createSpy('open');
 
     await TestBed.configureTestingModule({
@@ -39,7 +39,7 @@ describe('PluginCompanionConsentDialogComponent', () => {
         ...provideLocalizationTesting(),
         {
           provide: NotificationCenterService,
-          useValue: { notifications: computed(() => notifications()), dismiss: dismissSpy },
+          useValue: { notifications: computed(() => notifications()), resolveLocally: resolveLocallySpy },
         },
         { provide: SettingsModalService, useValue: { open: settingsOpenSpy } },
       ],
@@ -60,6 +60,14 @@ describe('PluginCompanionConsentDialogComponent', () => {
   function button(label: string): HTMLButtonElement {
     return Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button'))
       .find(candidate => candidate.textContent!.includes(label))!;
+  }
+
+  function expectResolvedLocally(): void {
+    expect(resolveLocallySpy).toHaveBeenCalledTimes(1);
+    const matches = resolveLocallySpy.calls.mostRecent().args[0] as (entry: UserNotification) => boolean;
+    expect(matches(companionRequest)).toBeTrue();
+    expect(matches({ ...companionRequest, id: 'other-consent', action: undefined, actions: [{ kind: 'EnablePluginAdb' }] })).toBeFalse();
+    expect(matches({ ...companionRequest, id: 'unrelated', action: undefined, actions: [{ kind: 'OpenLogs' }] })).toBeFalse();
   }
 
   it('stays out of the way while no plugin is waiting for Companion devices', async () => {
@@ -87,7 +95,7 @@ describe('PluginCompanionConsentDialogComponent', () => {
     await new Promise(resolve => setTimeout(resolve));
 
     expect(pluginAccessSpy).toHaveBeenCalledOnceWith(true);
-    expect(dismissSpy).toHaveBeenCalledWith('companion-1');
+    expectResolvedLocally();
     expect(settingsOpenSpy).not.toHaveBeenCalled();
   });
 
@@ -99,7 +107,7 @@ describe('PluginCompanionConsentDialogComponent', () => {
     button('Allow').click();
     await new Promise(resolve => setTimeout(resolve));
 
-    expect(dismissSpy).not.toHaveBeenCalled();
+    expect(resolveLocallySpy).not.toHaveBeenCalled();
     expect(settingsOpenSpy).toHaveBeenCalledWith('license');
   });
 
@@ -111,7 +119,7 @@ describe('PluginCompanionConsentDialogComponent', () => {
     await render();
 
     expect(pluginAccessSpy).not.toHaveBeenCalled();
-    expect(dismissSpy).not.toHaveBeenCalled();
+    expect(resolveLocallySpy).not.toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).not.toContain('Phone Tools wants to work');
   });
 });
