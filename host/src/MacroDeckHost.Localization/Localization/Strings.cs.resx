@@ -8675,8 +8675,8 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Napsat text</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>Text, který se má napsat. Podporuje proměnné/šablony, např. {{ vars.name }}.</value>
-    <comment>The literal {{ vars.name }} is Macro Deck's own template syntax shown as an example, not a translation placeholder.</comment>
+    <value>Text, který se má napsat. Podporuje proměnné/šablony, např. {example}.</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Ahoj světe</value>
@@ -11510,7 +11510,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Uspat</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>Podporuje proměnné: {{ vars.name }}</value>
+    <value>Podporuje proměnné: {example}</value>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Množství (%)</value>

@@ -8676,8 +8676,8 @@
     <value>كتابة النص</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>النص المراد كتابته. يدعم المتغيرات والقوالب، مثل {{ vars.name }}.</value>
-    <comment>The literal {{ vars.name }} is Macro Deck's own template syntax shown as an example, not a translation placeholder.</comment>
+    <value>النص المراد كتابته. يدعم المتغيرات والقوالب، مثل {example}.</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>مرحباً بالعالم</value>
@@ -11511,7 +11511,7 @@
     <value>سكون</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>يدعم المتغيرات: {{ vars.name }}</value>
+    <value>يدعم المتغيرات: {example}</value>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>المقدار (%)</value>

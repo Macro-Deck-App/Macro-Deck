@@ -8676,8 +8676,8 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Ввести текст</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>Вводимый текст. Поддерживает переменные и шаблоны, например {{ vars.name }}.</value>
-    <comment>The literal {{ vars.name }} is Macro Deck's own template syntax shown as an example, not a translation placeholder.</comment>
+    <value>Вводимый текст. Поддерживает переменные и шаблоны, например {example}.</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Привет, мир</value>
@@ -11511,7 +11511,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Спящий режим</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>Поддерживаются переменные: {{ vars.name }}</value>
+    <value>Поддерживаются переменные: {example}</value>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Величина (%)</value>

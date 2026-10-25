@@ -24,6 +24,12 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	private const uint ControlMask = 1 << 2;
 	private const uint Mod1Mask = 1 << 3; // Alt
 	private const uint Mod4Mask = 1 << 6; // Super/Meta
+	private const uint XkbUseCoreKbd = 0x0100;
+	private const int XkbGroupShift = 13;
+	private const nuint ReturnKeysym = 0xFF0D;
+	private const nuint TabKeysym = 0xFF09;
+	private const nuint ShiftLeftKeysym = 0xFFE1;
+	private const nuint IsoLevel3ShiftKeysym = 0xFE03;
 
 	private readonly IntPtr _display;
 	private readonly int _spareKeycode;
@@ -69,14 +75,22 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			return;
 		}
 
-		foreach (var rune in text.EnumerateRunes())
+		var layout = ReadLayout(_display);
+		var level3Mask = layout.Level3Keycode == 0 ? 0 : layout.Level3Mask;
+		var shiftMask = layout.ShiftKeycode == 0 ? 0 : ShiftMask;
+		foreach (var keysym in ToKeysyms(text))
 		{
-			var keysym = rune.Value <= 0xFF ? (nuint)rune.Value : (nuint)(0x01000000 + rune.Value);
-			var keycode = XKeysymToKeycode(_display, keysym);
-			if (keycode != 0)
+			if (TryResolveTyping(keysym,
+				XKeysymToKeycode(_display, keysym),
+				layout.MinKeycode,
+				layout.MaxKeycode,
+				shiftMask,
+				level3Mask,
+				layout.Group,
+				(keycode, state) => LookupKeysym(_display, keycode, state),
+				out var key))
 			{
-				FakeKey(keycode, true);
-				FakeKey(keycode, false);
+				TypeKey(layout, key);
 				continue;
 			}
 
@@ -84,6 +98,133 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		}
 
 		_ = XFlush(_display);
+	}
+
+	internal static List<nuint> ToKeysyms(string text)
+	{
+		var keysyms = new List<nuint>(text.Length);
+		var previousWasCarriageReturn = false;
+		foreach (var rune in text.EnumerateRunes())
+		{
+			if (rune.Value == '\n' && previousWasCarriageReturn)
+			{
+				previousWasCarriageReturn = false;
+				continue;
+			}
+
+			previousWasCarriageReturn = rune.Value == '\r';
+			keysyms.Add(rune.Value switch
+			{
+				'\r' or '\n' => ReturnKeysym,
+				'\t' => TabKeysym,
+				<= 0xFF => (nuint)rune.Value,
+				_ => (nuint)(0x01000000 + rune.Value)
+			});
+		}
+
+		return keysyms;
+	}
+
+	internal static bool TryResolveTyping(
+		nuint keysym,
+		uint candidate,
+		int minKeycode,
+		int maxKeycode,
+		uint shiftMask,
+		uint level3Mask,
+		uint group,
+		Func<uint, uint, nuint> lookup,
+		out TypingKey key)
+	{
+		var modifierSets = new List<uint> { 0 };
+		if (shiftMask != 0)
+		{
+			modifierSets.Add(shiftMask);
+		}
+
+		if (level3Mask != 0)
+		{
+			modifierSets.Add(level3Mask);
+			if (shiftMask != 0)
+			{
+				modifierSets.Add(shiftMask | level3Mask);
+			}
+		}
+
+		var groupState = (group & 3) << XkbGroupShift;
+		if (candidate != 0)
+		{
+			foreach (var modifiers in modifierSets)
+			{
+				if (lookup(candidate, modifiers | groupState) == keysym)
+				{
+					key = new TypingKey(candidate, modifiers);
+					return true;
+				}
+			}
+		}
+
+		foreach (var modifiers in modifierSets)
+		{
+			for (var keycode = minKeycode; keycode <= maxKeycode; keycode++)
+			{
+				if (lookup((uint)keycode, modifiers | groupState) == keysym)
+				{
+					key = new TypingKey((uint)keycode, modifiers);
+					return true;
+				}
+			}
+		}
+
+		key = default;
+		return false;
+	}
+
+	private void TypeKey(TypingLayout layout, TypingKey key)
+	{
+		// A modifier the user or a Key down action already holds stays as it is, so typing never ends that hold.
+		var pressShift = (key.Modifiers & ShiftMask) != 0 && (layout.ActiveModifiers & ShiftMask) == 0;
+		var pressLevel3 = (key.Modifiers & layout.Level3Mask) != 0 && (layout.ActiveModifiers & layout.Level3Mask) == 0;
+		if (pressShift)
+		{
+			FakeKey(layout.ShiftKeycode, true);
+		}
+
+		if (pressLevel3)
+		{
+			FakeKey(layout.Level3Keycode, true);
+		}
+
+		FakeKey(key.Keycode, true);
+		FakeKey(key.Keycode, false);
+
+		if (pressLevel3)
+		{
+			FakeKey(layout.Level3Keycode, false);
+		}
+
+		if (pressShift)
+		{
+			FakeKey(layout.ShiftKeycode, false);
+		}
+	}
+
+	private static TypingLayout ReadLayout(IntPtr display)
+	{
+		_ = XDisplayKeycodes(display, out var min, out var max);
+		var hasState = XkbGetState(display, XkbUseCoreKbd, out var state) == 0;
+		return new TypingLayout(hasState ? state.Group : 0u,
+			hasState ? state.Mods : 0u,
+			XkbKeysymToModifiers(display, IsoLevel3ShiftKeysym),
+			XKeysymToKeycode(display, ShiftLeftKeysym),
+			XKeysymToKeycode(display, IsoLevel3ShiftKeysym),
+			min,
+			max);
+	}
+
+	private static nuint LookupKeysym(IntPtr display, uint keycode, uint state)
+	{
+		return XkbLookupKeySym(display, (byte)keycode, state, out _, out var keysym) ? keysym : 0;
 	}
 
 	public bool SupportsWindowTargeting => _display != IntPtr.Zero;
@@ -311,6 +452,21 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		nuint[] keysyms,
 		int numCodes);
 
+	[DllImport(LibX11)]
+	private static extern int XkbGetState(IntPtr display, uint deviceSpec, out XkbState state);
+
+	[DllImport(LibX11)]
+	private static extern uint XkbKeysymToModifiers(IntPtr display, nuint keysym);
+
+	[DllImport(LibX11)]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	private static extern bool XkbLookupKeySym(
+		IntPtr display,
+		byte keycode,
+		uint modifiers,
+		out uint modifiersReturn,
+		out nuint keysymReturn);
+
 	[DllImport(LibXtst)]
 	private static extern int XTestFakeKeyEvent(IntPtr display, uint keycode, bool isPress, ulong delay);
 
@@ -407,6 +563,37 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		return true;
 	}
 
+	internal readonly record struct TypingKey(uint Keycode, uint Modifiers);
+
+	private readonly record struct TypingLayout(
+		uint Group,
+		uint ActiveModifiers,
+		uint Level3Mask,
+		uint ShiftKeycode,
+		uint Level3Keycode,
+		int MinKeycode,
+		int MaxKeycode);
+
+	// Mirrors XkbStateRec from XKBstr.h field for field.
+	[StructLayout(LayoutKind.Sequential)]
+	private struct XkbState
+	{
+		public byte Group;
+		public byte LockedGroup;
+		public ushort BaseGroup;
+		public ushort LatchedGroup;
+		public byte Mods;
+		public byte BaseMods;
+		public byte LatchedMods;
+		public byte LockedMods;
+		public byte CompatState;
+		public byte GrabMods;
+		public byte CompatGrabMods;
+		public byte LookupMods;
+		public byte CompatLookupMods;
+		public ushort PtrButtons;
+	}
+
 	private sealed class LinuxTargetWindow : IKeyboardTargetWindow
 	{
 		private readonly IntPtr _display;
@@ -447,19 +634,28 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 		public void TypeUnicode(string text)
 		{
-			foreach (var rune in text.EnumerateRunes())
+			var layout = ReadLayout(_display);
+			var groupState = (layout.Group & 3) << XkbGroupShift;
+			foreach (var keysym in ToKeysyms(text))
 			{
-				var keysym = rune.Value <= 0xFF ? (nuint)rune.Value : (nuint)(0x01000000 + rune.Value);
-				var keycode = XKeysymToKeycode(_display, keysym);
-				if (keycode == 0)
+				if (!TryResolveTyping(keysym,
+					XKeysymToKeycode(_display, keysym),
+					layout.MinKeycode,
+					layout.MaxKeycode,
+					ShiftMask,
+					layout.Level3Mask,
+					layout.Group,
+					(keycode, state) => LookupKeysym(_display, keycode, state),
+					out var key))
 				{
 					continue;
 				}
 
+				var state = key.Modifiers | groupState;
 				foreach (var window in _windows)
 				{
-					SendKeyEvent(_display, _root, window, keycode, 0, true);
-					SendKeyEvent(_display, _root, window, keycode, 0, false);
+					SendKeyEvent(_display, _root, window, key.Keycode, state, true);
+					SendKeyEvent(_display, _root, window, key.Keycode, state, false);
 				}
 			}
 

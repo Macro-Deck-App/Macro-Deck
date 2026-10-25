@@ -8676,8 +8676,8 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>輸入文字</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>要輸入的文字。支援變數與範本，例如 {{ vars.name }}。</value>
-    <comment>The literal {{ vars.name }} is Macro Deck's own template syntax shown as an example, not a translation placeholder.</comment>
+    <value>要輸入的文字。支援變數與範本，例如 {example}。</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>你好，世界</value>
@@ -11511,7 +11511,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>睡眠</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>支援變數：{{ vars.name }}</value>
+    <value>支援變數：{example}</value>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>幅度（%）</value>

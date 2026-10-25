@@ -1,6 +1,7 @@
 using MacroDeckHost.Integrations.Keyboard.Actions;
 using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Integrations.Keyboard.Native;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Keyboard;
 
@@ -112,5 +113,15 @@ public class TypeTextActionDefinitionTests
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Unavailable));
 		});
+	}
+
+	[TestCase("en")]
+	[TestCase("de")]
+	public void The_text_description_shows_the_real_template_syntax(string culture)
+	{
+		var text = new TypeTextActionDefinition(new FakeKeyboardInputService()).Parameters
+			.Single(p => p.Name == "text");
+
+		Assert.That(TestLocalization.Resolve(text.Description, culture), Does.Contain("{{ vars.name }}"));
 	}
 }

@@ -311,4 +311,14 @@ public class RunCommandActionTests
 			}
 		}
 	}
+
+	[TestCase("en")]
+	[TestCase("de")]
+	public void The_command_hint_shows_the_real_template_syntax(string culture)
+	{
+		var action = new RunCommandActionDefinition(new VariableApiAccessor { Current = new RecordingVariableApi() });
+		var command = action.Parameters.Single(p => p.Name == "command");
+
+		Assert.That(TestLocalization.Resolve(command.Description, culture), Does.Contain("{{ vars.name }}"));
+	}
 }

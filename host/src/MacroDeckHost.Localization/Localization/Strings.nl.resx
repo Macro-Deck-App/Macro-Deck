@@ -8676,8 +8676,8 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Tekst typen</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>De te typen tekst. Ondersteunt variabelen en sjablonen, bijv. {{ vars.name }}.</value>
-    <comment>The literal {{ vars.name }} is Macro Deck's own template syntax shown as an example, not a translation placeholder.</comment>
+    <value>De te typen tekst. Ondersteunt variabelen en sjablonen, bijv. {example}.</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Hallo wereld</value>
@@ -11511,7 +11511,7 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Slaapstand</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>Ondersteunt variabelen: {{ vars.name }}</value>
+    <value>Ondersteunt variabelen: {example}</value>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Hoeveelheid (%)</value>

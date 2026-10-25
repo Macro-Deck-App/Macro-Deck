@@ -22,7 +22,7 @@ internal sealed class OpenWebsiteActionDefinition : IActionDefinition
 	[
 		ActionParameter.Url("url",
 			AppStrings.Integrations.System.Actions.OpenWebsite.UrlLabel(),
-			AppStrings.Integrations.System.Actions.SupportsVariablesHint(),
+			AppStrings.Integrations.System.Actions.SupportsVariablesHint("{{ vars.name }}"),
 			"https://example.com",
 			true,
 			true)

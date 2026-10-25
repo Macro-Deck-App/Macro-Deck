@@ -22,7 +22,7 @@ internal sealed class TypeTextActionDefinition : IActionDefinition
 	[
 		ActionParameter.MultilineText("text",
 			AppStrings.Integrations.Keyboard.Actions.TypeTextLabel(),
-			AppStrings.Integrations.Keyboard.Actions.TypeTextParameterDescription(),
+			AppStrings.Integrations.Keyboard.Actions.TypeTextParameterDescription("{{ vars.name }}"),
 			AppStrings.Integrations.Keyboard.Actions.TypeTextPlaceholder(),
 			required: true),
 		.. KeyboardTargetParameters.All

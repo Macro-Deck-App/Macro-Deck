@@ -8674,7 +8674,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Text eingeben</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>Der einzugebende Text. Unterstützt Variablen/Vorlagen, z. B. {{ vars.name }}.</value>
+    <value>Der einzugebende Text. Unterstützt Variablen/Vorlagen, z. B. {example}.</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Hallo Welt</value>
@@ -11508,7 +11508,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Ruhemodus</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>Unterstützt Variablen: {{ vars.name }}</value>
+    <value>Unterstützt Variablen: {example}</value>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Menge (%)</value>

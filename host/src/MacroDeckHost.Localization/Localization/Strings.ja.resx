@@ -8676,8 +8676,8 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>テキストを入力</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>入力するテキスト。変数やテンプレートに対応しています（例: {{ vars.name }}）。</value>
-    <comment>The literal {{ vars.name }} is Macro Deck's own template syntax shown as an example, not a translation placeholder.</comment>
+    <value>入力するテキスト。変数やテンプレートに対応しています（例: {example}）。</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>こんにちは世界</value>
@@ -11511,7 +11511,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>スリープ</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>変数に対応しています: {{ vars.name }}</value>
+    <value>変数に対応しています: {example}</value>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>量 (%)</value>

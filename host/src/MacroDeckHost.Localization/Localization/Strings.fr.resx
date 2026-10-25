@@ -8675,8 +8675,8 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Saisir du texte</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>Le texte à saisir. Prend en charge les variables/modèles, par ex. {{ vars.name }}.</value>
-    <comment>The literal {{ vars.name }} is Macro Deck's own template syntax shown as an example, not a translation placeholder.</comment>
+    <value>Le texte à saisir. Prend en charge les variables/modèles, par ex. {example}.</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Bonjour le monde</value>
@@ -11510,7 +11510,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Veille</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>Prend en charge les variables : {{ vars.name }}</value>
+    <value>Prend en charge les variables : {example}</value>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Quantité (%)</value>
