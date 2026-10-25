@@ -147,6 +147,33 @@ describe('BackupsSettingsComponent', () => {
       expect(modal.textContent).toContain('Copying and encrypting your data');
     });
 
+    async function closeModalWithX(): Promise<void> {
+      (fixture.nativeElement.querySelector('shared-modal .modal-close-btn') as HTMLButtonElement).click();
+      jasmine.clock().tick(150);
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    it('stays closed when its X is clicked while the backup keeps running', async () => {
+      fixture = await create();
+      await pushStatus('Saving');
+
+      await closeModalWithX();
+      await pushStatus('Validating');
+
+      expect(fixture.nativeElement.querySelector('shared-modal')).toBeNull();
+    });
+
+    it('still shows a failure of a backup whose dialog was closed', async () => {
+      fixture = await create();
+      await pushStatus('Saving');
+      await closeModalWithX();
+
+      await pushStatus('Failed');
+
+      expect(fixture.nativeElement.querySelector('shared-modal')?.textContent).toContain('The disk is full');
+    });
+
     it('ends a cancelled backup quietly with a toast, not as a failure', async () => {
       fixture = await create();
       await pushStatus('Saving');

@@ -7,6 +7,7 @@ import { BackupRestoreModalComponent } from '../../../backup/backup-restore-moda
 import { RecoveryKeyPromptModalComponent } from '../../../backup/recovery-key-prompt-modal/recovery-key-prompt-modal.component';
 import { ConfirmationModalComponent } from '../../../overlay/confirmation-modal/confirmation-modal.component';
 import { BackupService } from '../../../../services/backup.service';
+import { isActiveBackupStage } from '../../../../util/backup-progress-display';
 import { BackupListComponent } from './backup-list.component';
 import { BackupRecoveryKeySettingsComponent } from './backup-recovery-key-settings.component';
 import { BackupScheduleSettingsComponent } from './backup-schedule-settings.component';
@@ -64,6 +65,12 @@ export class BackupsSettingsComponent {
   readonly modal = signal<BackupsModalState>({ kind: 'none' });
 
   protected readonly operation = this.backupService.operation;
+  private readonly hiddenWhileRunning = signal(false);
+
+  protected readonly visibleOperation = computed(() => {
+    const op = this.operation();
+    return op && this.hiddenWhileRunning() && isActiveBackupStage(op.stage) ? null : op;
+  });
 
   protected readonly operationFailed = computed(() => {
     const op = this.operation();
@@ -71,8 +78,20 @@ export class BackupsSettingsComponent {
   });
 
   protected dismissOperation(): void {
+    const op = this.operation();
+    if (op && isActiveBackupStage(op.stage)) {
+      this.hiddenWhileRunning.set(true);
+      return;
+    }
     this.backupService.dismissOperation();
   }
+
+  private readonly showAgainWhenDone = effect(() => {
+    const op = this.operation();
+    if (!op || !isActiveBackupStage(op.stage)) {
+      untracked(() => this.hiddenWhileRunning.set(false));
+    }
+  });
 
   protected cancelOperation(operation: GetBackupStatusResponse): void {
     if (operation.operationId) {

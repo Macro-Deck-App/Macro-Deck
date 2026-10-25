@@ -1,4 +1,4 @@
-@if (operation(); as op) {
+@if (visibleOperation(); as op) {
   <shared-modal
     [heading]="(operationFailed() ? 'macrodeck.app:Settings.Backups.FailedHeading' : 'macrodeck.app:Settings.Backups.WorkingHeading') | translate"
     [showFooter]="operationFailed()"
