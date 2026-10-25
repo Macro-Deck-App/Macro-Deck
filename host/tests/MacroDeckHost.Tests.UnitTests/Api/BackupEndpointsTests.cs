@@ -1,10 +1,14 @@
-using MacroDeckHost.Application.Configuration;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using MacroDeckHost.Application.Backups;
+using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Infrastructure.Backups;
 using MacroDeckHost.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,6 +30,7 @@ public class BackupEndpointsTests
 	private HttpClient _client = null!;
 	private string _dataDir = null!;
 	private string? _previousDataDir;
+	private RecordingProgressReporter _progress = null!;
 
 	[OneTimeSetUp]
 	public async Task OneTimeSetUp()
@@ -48,11 +53,16 @@ public class BackupEndpointsTests
 					services.AddSingleton<IStartupFilter, LoopbackStartupFilter>();
 					services.RemoveAll<StartupReadiness>();
 					services.AddSingleton(CompletedStartupReadiness());
+					services.RemoveAll<IBackupProgressReporter>();
+					services.AddSingleton<RecordingProgressReporter>();
+					services.AddSingleton<IBackupProgressReporter>(provider
+						=> provider.GetRequiredService<RecordingProgressReporter>());
 				});
 			})
 			.StartAsync();
 
 		_client = _host.GetTestClient();
+		_progress = _host.Services.GetRequiredService<RecordingProgressReporter>();
 
 		var setup = await Send(HttpMethod.Post,
 			"/api/auth/setup",
@@ -106,6 +116,178 @@ public class BackupEndpointsTests
 			Assert.That(deleted.GetProperty("success").GetBoolean(), Is.True);
 			Assert.That(Ids(afterDelete), Does.Not.Contain(backupId));
 		});
+	}
+
+	[Test]
+	public async Task Creating_a_backup_reports_real_progress_that_only_moves_forward()
+	{
+		var created = await ReadJson(await Send(HttpMethod.Post, "/api/backups", new { note = "progress" }));
+		var backupId = created.GetProperty("backup").GetProperty("id").GetGuid();
+
+		var reports = _progress.Reports.Where(status => status.BackupId == backupId).ToList();
+		var percents = reports.Select(status => status.PercentComplete).OfType<int>().ToList();
+		var saving = reports.Where(status => status.Stage == BackupOperationStage.Saving).ToList();
+		var validating = reports.Where(status => status.Stage == BackupOperationStage.Validating).ToList();
+		var completed = reports.Last();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(percents, Is.Ordered, "progress never goes backwards");
+			Assert.That(percents.Take(percents.Count - 1), Is.All.LessThan(100), "100 % only once the backup is done");
+			Assert.That(completed.Stage, Is.EqualTo(BackupOperationStage.Completed));
+			Assert.That(completed.PercentComplete, Is.EqualTo(100));
+			Assert.That(saving.Max(status => status.BytesProcessed), Is.EqualTo(saving[0].TotalBytes));
+			Assert.That(saving.Count, Is.GreaterThan(1), "the write pass reports while it runs");
+			Assert.That(validating.Select(status => status.PercentComplete), Is.All.Not.Null);
+			Assert.That(completed.TotalBytes, Is.EqualTo(saving[0].TotalBytes));
+		});
+	}
+
+	[Test]
+	public async Task Cancelling_a_backup_while_it_is_written_stores_nothing_and_frees_the_way()
+	{
+		var before = Ids(await ReadJson(await Send(HttpMethod.Get, "/api/backups"))).ToList();
+		CancelOnFirst(status
+			=> status.Kind == BackupOperationKind.Create && status.Stage == BackupOperationStage.Saving);
+
+		var cancelled = await ReadJson(await Send(HttpMethod.Post, "/api/backups", new { note = "cancel me" }));
+		_progress.OnReport = null;
+		var after = Ids(await ReadJson(await Send(HttpMethod.Get, "/api/backups"))).ToList();
+		var status = await ReadJson(await Send(HttpMethod.Get, "/api/backups/status"));
+		var next = await ReadJson(await Send(HttpMethod.Post, "/api/backups", new { note = "after cancel" }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(cancelled.GetProperty("success").GetBoolean(), Is.False);
+			Assert.That(cancelled.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("Cancelled"));
+			Assert.That(after, Is.EquivalentTo(before), "a cancelled backup leaves nothing behind");
+			Assert.That(status.GetProperty("stage").GetString(), Is.EqualTo("Failed"));
+			Assert.That(status.GetProperty("error").GetString(), Is.EqualTo("Cancelled"));
+			Assert.That(next.GetProperty("success").GetBoolean(), Is.True, "the next backup is not blocked");
+		});
+	}
+
+	[Test]
+	public async Task Cancelling_an_unknown_operation_changes_nothing()
+	{
+		var response = await ReadJson(await Send(HttpMethod.Post, $"/api/backups/operations/{Guid.NewGuid()}/cancel"));
+
+		Assert.That(response.GetProperty("success").GetBoolean(), Is.False);
+	}
+
+	[Test]
+	public async Task Cancelling_a_restore_while_it_checks_the_backup_stages_nothing()
+	{
+		var backupId = await CreateBackupId("restore source");
+		CancelOnFirst(status
+			=> status.Kind == BackupOperationKind.Restore && status.Stage == BackupOperationStage.Validating);
+
+		var prepare = await ReadJson(await Send(HttpMethod.Post,
+			"/api/backups/restore/prepare",
+			new { backupId, components = new[] { "Profiles" } }));
+		_progress.OnReport = null;
+		var listed = await ReadJson(await Send(HttpMethod.Get, "/api/backups"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(prepare.GetProperty("success").GetBoolean(), Is.False);
+			Assert.That(prepare.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("Cancelled"));
+			Assert.That(listed.TryGetProperty("pendingRestore", out var pending)
+				&& pending.ValueKind != JsonValueKind.Null,
+				Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Cancelling_the_safety_backup_cancels_the_restore_even_when_it_may_go_on_without_one()
+	{
+		var backupId = await CreateBackupId("restore source");
+		CancelOnFirst(status => status.Kind == BackupOperationKind.Create
+			&& status.Trigger == BackupTrigger.BeforeRestore
+			&& status.Stage == BackupOperationStage.Saving);
+
+		var prepare = await ReadJson(await Send(HttpMethod.Post,
+			"/api/backups/restore/prepare",
+			new { backupId, components = new[] { "Profiles" }, proceedWithoutSafetyBackup = true }));
+		_progress.OnReport = null;
+		var listed = await ReadJson(await Send(HttpMethod.Get, "/api/backups"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(prepare.GetProperty("success").GetBoolean(), Is.False);
+			Assert.That(prepare.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("Cancelled"));
+			Assert.That(listed.TryGetProperty("pendingRestore", out var pending)
+				&& pending.ValueKind != JsonValueKind.Null,
+				Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_cancel_after_the_safety_backup_was_stored_leaves_that_backup_completed()
+	{
+		var backupId = await CreateBackupId("restore source");
+		CancelRestoreWhenSafetyBackupCompletes();
+
+		var prepare = await ReadJson(await Send(HttpMethod.Post,
+			"/api/backups/restore/prepare",
+			new { backupId, components = new[] { "Profiles" } }));
+		_progress.OnReport = null;
+		var safetyBackupReports = _progress.Reports
+			.Where(status => status.Kind == BackupOperationKind.Create && status.Trigger == BackupTrigger.BeforeRestore)
+			.ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(safetyBackupReports[^1].Stage, Is.EqualTo(BackupOperationStage.Completed));
+			Assert.That(prepare.GetProperty("safetyBackupCreated").GetBoolean(), Is.True);
+		});
+
+		if (prepare.GetProperty("success").GetBoolean())
+		{
+			await Send(HttpMethod.Post,
+				"/api/backups/restore/cancel",
+				new { restoreId = prepare.GetProperty("restoreId").GetGuid() });
+		}
+	}
+
+	private void CancelRestoreWhenSafetyBackupCompletes()
+	{
+		var cancellation = _host.Services.GetRequiredService<IBackupOperationCancellation>();
+		Guid? restoreOperation = null;
+		_progress.OnReport = status =>
+		{
+			if (status.Kind == BackupOperationKind.Restore && status.OperationId is { } id)
+			{
+				restoreOperation = id;
+			}
+
+			if (status.Kind == BackupOperationKind.Create
+				&& status.Trigger == BackupTrigger.BeforeRestore
+				&& status.Stage == BackupOperationStage.Completed
+				&& restoreOperation is { } restore)
+			{
+				cancellation.Cancel(restore);
+			}
+		};
+	}
+
+	private void CancelOnFirst(Func<BackupOperationStatus, bool> when)
+	{
+		var cancellation = _host.Services.GetRequiredService<IBackupOperationCancellation>();
+		var done = 0;
+		_progress.OnReport = status =>
+		{
+			if (status.OperationId is { } operationId && when(status) && Interlocked.Exchange(ref done, 1) == 0)
+			{
+				cancellation.Cancel(operationId);
+			}
+		};
+	}
+
+	private async Task<string?> CreateBackupId(string note)
+	{
+		var created = await ReadJson(await Send(HttpMethod.Post, "/api/backups", new { note }));
+		return created.GetProperty("backup").GetProperty("id").GetString();
 	}
 
 	// A backup archive carries the data protection key ring, the auth signing key, the TLS private key and
@@ -314,6 +496,30 @@ public class BackupEndpointsTests
 				});
 				next(app);
 			};
+		}
+	}
+
+	private sealed class RecordingProgressReporter : IBackupProgressReporter
+	{
+		private readonly BackupProgressReporter _inner;
+		private readonly ConcurrentQueue<BackupOperationStatus> _reports = new();
+
+		public RecordingProgressReporter(IServiceScopeFactory scopeFactory)
+		{
+			_inner = new BackupProgressReporter(scopeFactory, TimeProvider.System);
+		}
+
+		public IReadOnlyList<BackupOperationStatus> Reports => [.. _reports];
+
+		public BackupOperationStatus Current => _inner.Current;
+
+		public Action<BackupOperationStatus>? OnReport { get; set; }
+
+		public void Report(BackupOperationStatus status)
+		{
+			_reports.Enqueue(status);
+			OnReport?.Invoke(status);
+			_inner.Report(status);
 		}
 	}
 }

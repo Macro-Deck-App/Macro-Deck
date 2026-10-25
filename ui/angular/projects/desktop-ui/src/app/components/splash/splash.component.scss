@@ -59,6 +59,85 @@
   margin: 0;
 }
 
+.status-detail {
+  font-size: var(--text-sm);
+  color: #a1a1aa;
+  margin: calc(var(--space-4) * -0.5) 0 0;
+}
+
+.status-separator {
+  margin-inline: var(--space-2);
+}
+
+.status-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+  color: #71717a;
+}
+
+.status-step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.status-step-done {
+  color: #a1a1aa;
+}
+
+.status-step-current {
+  color: #e4e4e7;
+}
+
+.status-step-marker {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+}
+
+.status-step-done .status-step-marker {
+  border-color: #34d399;
+  background: #34d399;
+}
+
+.status-step-current .status-step-marker {
+  border-color: #60a5fa;
+  background: #60a5fa;
+}
+
+.cancel-button {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+}
+
+.cancel-button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.progress-bar {
+  width: 240px;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background-color: rgba(96, 165, 250, 0.2);
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #60a5fa;
+  transition: width 0.2s ease-out;
+}
+
 .retry-button {
   margin-top: var(--space-5);
   padding: var(--space-3) var(--space-5);

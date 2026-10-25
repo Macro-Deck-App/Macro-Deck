@@ -144,7 +144,28 @@ describe('BackupsSettingsComponent', () => {
 
       const modal = fixture.nativeElement.querySelector('shared-modal');
       expect(modal).toBeTruthy();
-      expect(modal.textContent).toContain('Encrypting');
+      expect(modal.textContent).toContain('Copying and encrypting your data');
+    });
+
+    it('ends a cancelled backup quietly with a toast, not as a failure', async () => {
+      fixture = await create();
+      await pushStatus('Saving');
+      const service = TestBed.inject(BackupService);
+
+      service.operation.set({
+        operationId: 'op1',
+        kind: 'Create',
+        stage: 'Failed',
+        trigger: 'Manual',
+        error: 'Cancelled',
+        updatedAt: '2026-08-17T03:00:01Z',
+      });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('shared-modal')).toBeNull();
+      expect(toastSpy.show).toHaveBeenCalledWith(jasmine.any(String), { variant: 'info' });
     });
 
     // The complaint that started this: a finished operation used to leave a large empty box behind.

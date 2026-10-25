@@ -5,7 +5,7 @@
     [closeOnOverlay]="operationFailed()"
     maxWidth="420px"
     (close)="dismissOperation()">
-    <shared-backup-progress-card [operation]="op" />
+    <shared-backup-progress-card [operation]="op" [cancellable]="true" (cancel)="cancelOperation(op)" />
     <div modal-footer>
       <shared-button variant="secondary" (clicked)="dismissOperation()">{{ 'macrodeck:Common.Close' | translate }}</shared-button>
     </div>

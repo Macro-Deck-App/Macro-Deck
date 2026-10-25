@@ -27,3 +27,13 @@ public sealed class DeleteBackupResponse
 
 	public TransportError? Error { get; set; }
 }
+
+public sealed class CancelBackupOperationRequest
+{
+	public Guid OperationId { get; set; }
+}
+
+public sealed class CancelBackupOperationResponse
+{
+	public bool Success { get; set; }
+}

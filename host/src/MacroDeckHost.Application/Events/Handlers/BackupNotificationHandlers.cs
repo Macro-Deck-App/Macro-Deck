@@ -33,6 +33,7 @@ public sealed class BackupOperationProgressNotificationHandler
 				PercentComplete = status.PercentComplete,
 				BytesProcessed = status.BytesProcessed,
 				TotalBytes = status.TotalBytes,
+				EtaSeconds = status.EtaSeconds,
 				BackupId = status.BackupId,
 				Error = status.Error?.ToString(),
 				ErrorMessage = status.ErrorMessage,

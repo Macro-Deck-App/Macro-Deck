@@ -57,6 +57,19 @@
   color: var(--color-text-secondary);
 }
 
+.progress-cancel {
+  align-self: flex-start;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+}
+
+.progress-cancel:hover {
+  text-decoration: underline;
+}
+
 .store-failed {
   display: flex;
   align-items: center;

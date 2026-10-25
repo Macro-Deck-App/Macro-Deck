@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { AppStrings, AppStringsKey, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_USES_ADB, PLUGIN_WARNING_USES_COMPANION_DEVICES, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
+import { AppStrings, AppStringsKey, GetBackupStatusResponse, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_USES_ADB, PLUGIN_WARNING_USES_COMPANION_DEVICES, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
 import { BackupService } from '../../../services/backup.service';
+import { isActiveBackupFor } from '../../../util/backup-progress-display';
+import { BackupProgressCardComponent } from '../../backup/backup-progress-card/backup-progress-card.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 
 const TRUST_REFUSALS: Record<string, string> = {
@@ -25,7 +27,7 @@ interface WarningEntry {
 @Component({
   selector: 'shared-plugin-install-confirm-modal',
   standalone: true,
-  imports: [ModalComponent, ButtonComponent, LoadingStateComponent, TranslatePipe],
+  imports: [ModalComponent, ButtonComponent, BackupProgressCardComponent, LoadingStateComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Wider than a plain confirmation: the trust warning and the installer's own warnings are
@@ -148,6 +150,10 @@ interface WarningEntry {
             <p class="plugin-install-trust">
               {{ 'macrodeck.app:Plugins.RunsAsProgramNote' | translate }}
             </p>
+          }
+
+          @if (backupInProgress(); as op) {
+            <shared-backup-progress-card [operation]="op" [cancellable]="true" (cancel)="cancelBackup(op)" />
           }
         }
       </div>
@@ -308,13 +314,23 @@ export class PluginInstallConfirmModalComponent {
       }))
   );
 
+  protected cancelBackup(operation: GetBackupStatusResponse): void {
+    if (operation.operationId) {
+      void this.backup.cancelOperation(operation.operationId);
+    }
+  }
+
+  protected backupInProgress(): GetBackupStatusResponse | null {
+    const operation = this.backup.operation();
+    return this.busy && isActiveBackupFor(operation, 'BeforePluginUpdate') ? operation : null;
+  }
+
   protected buttonLabelKey(): AppStringsKey {
     if (!this.busy) {
       return AppStrings.Plugins.InstallButton;
     }
 
-    const backingUp = this.backup.running() && this.backup.operation()?.trigger === 'BeforePluginUpdate';
-    return backingUp ? AppStrings.Store.BackingUpEllipsis : AppStrings.Store.InstallingEllipsis;
+    return this.backupInProgress() ? AppStrings.Store.BackingUpEllipsis : AppStrings.Store.InstallingEllipsis;
   }
 
   protected onUnsignedAcceptedChange(event: Event): void {

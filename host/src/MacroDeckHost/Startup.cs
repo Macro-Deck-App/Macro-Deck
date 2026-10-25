@@ -1045,6 +1045,7 @@ public class Startup
 		});
 		services.AddSingleton<IBackupOperationGate, BackupOperationGate>();
 		services.AddSingleton<IBackupProgressReporter, BackupProgressReporter>();
+		services.AddSingleton<IBackupOperationCancellation, BackupOperationCancellation>();
 		services.AddSingleton<IBackupSnapshotSource, BackupSnapshotSource>();
 		services.AddSingleton<IBackupArchiveWriter, BackupArchiveWriter>();
 		services.AddSingleton<IBackupArchiveReader, BackupArchiveReader>();

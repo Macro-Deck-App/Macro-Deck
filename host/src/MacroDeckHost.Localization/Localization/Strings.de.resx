@@ -779,6 +779,43 @@
   <data name="Backup.Progress.ByteDetail" xml:space="preserve">
     <value>{processed} von {total}</value>
   </data>
+  <data name="Backup.Progress.RestoreCancelledToast" xml:space="preserve">
+    <value>Wiederherstellung abgebrochen</value>
+  </data>
+  <data name="Backup.Progress.CancelledToast" xml:space="preserve">
+    <value>Sicherung abgebrochen</value>
+  </data>
+  <data name="Backup.Progress.CancelRestore" xml:space="preserve">
+    <value>Wiederherstellung abbrechen</value>
+  </data>
+  <data name="Backup.Progress.Cancel" xml:space="preserve">
+    <value>Sicherung abbrechen</value>
+  </data>
+  <data name="Backup.Progress.StageVerifying" xml:space="preserve">
+    <value>Sicherung wird überprüft</value>
+  </data>
+  <data name="Backup.Progress.StageCopying" xml:space="preserve">
+    <value>Deine Daten werden kopiert und verschlüsselt</value>
+  </data>
+  <data name="Backup.Progress.StagePreparing" xml:space="preserve">
+    <value>Vorbereitung</value>
+  </data>
+  <data name="Backup.Progress.TitleRestoring" xml:space="preserve">
+    <value>Sicherung wird wiederhergestellt</value>
+  </data>
+  <data name="Backup.Progress.TitleCreating" xml:space="preserve">
+    <value>Sicherung wird erstellt</value>
+  </data>
+  <data name="Backup.Progress.CheckingBackup" xml:space="preserve">
+    <value>Sicherung wird geprüft</value>
+  </data>
+  <data name="Backup.Progress.CreatingSafetyBackup" xml:space="preserve">
+    <value>Sicherheitskopie wird erstellt</value>
+  </data>
+  <data name="Backup.Progress.Percent" xml:space="preserve">
+    <value>{percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Backup.RecoveryKey.CreatedTitle" xml:space="preserve">
     <value>Wiederherstellungsschlüssel speichern</value>
   </data>
@@ -1112,6 +1149,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Bootstrapper.Update.Later" xml:space="preserve">
     <value>Später</value>
   </data>
+  <data name="Bootstrapper.Update.BackupCancelled" xml:space="preserve">
+    <value>Das Update wurde nicht installiert, weil seine Sicherung abgebrochen wurde.</value>
+  </data>
   <data name="Bootstrapper.Update.LinuxNotSupported" xml:space="preserve">
     <value>Macro Deck installiert Updates unter Linux nicht selbst. Lade die neue Version von {downloadPageUrl} herunter und aktualisiere deine AppImage-, DEB- oder RPM-Installation.</value>
   </data>
@@ -1145,9 +1185,35 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Du hast aktuell {version}</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpStatus" xml:space="preserve">
+    <value>Vor dem Update wird eine Sicherung erstellt …</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CancelBackup" xml:space="preserve">
+    <value>Update abbrechen</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpProgressStatus" xml:space="preserve">
+    <value>Vor dem Update wird eine Sicherung erstellt … {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Wird heruntergeladen … {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.One" xml:space="preserve">
+    <value>noch etwa {count} Min.</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.Other" xml:space="preserve">
+    <value>noch etwa {count} Min.</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.One" xml:space="preserve">
+    <value>noch etwa {count} s</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.Other" xml:space="preserve">
+    <value>noch etwa {count} s</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
     <value>Das Update ist heruntergeladen. Macro Deck installiert es, wenn du es beendest.</value>
@@ -9990,6 +10056,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Page.InstallFailed" xml:space="preserve">
     <value>Das Plugin konnte nicht installiert werden</value>
   </data>
+  <data name="Integrations.Page.InstallCancelled" xml:space="preserve">
+    <value>Plugin-Update abgebrochen. Es wurde nichts geändert.</value>
+  </data>
   <data name="Integrations.Page.InstallFromFileAction" xml:space="preserve">
     <value>Aus Datei installieren …</value>
   </data>
@@ -17895,6 +17964,25 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Update wird vorbereitet …</value>
   </data>
+  <data name="Shell.Splash.StepInstall" xml:space="preserve">
+    <value>Update installieren</value>
+  </data>
+  <data name="Shell.Splash.StepBackup" xml:space="preserve">
+    <value>Daten sichern</value>
+  </data>
+  <data name="Shell.Splash.CancelUpdate" xml:space="preserve">
+    <value>Update abbrechen</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackup" xml:space="preserve">
+    <value>Sicherung wird erstellt …</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackupProgress" xml:space="preserve">
+    <value>Sicherung wird erstellt … {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
+  <data name="Shell.Splash.InstallingUpdate" xml:space="preserve">
+    <value>Update wird installiert …</value>
+  </data>
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Macro Deck wird beendet …</value>
   </data>
@@ -17906,6 +17994,10 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Store.BackingUpEllipsis" xml:space="preserve">
     <value>Sicherung wird erstellt…</value>
+  </data>
+  <data name="Store.BackingUpProgress" xml:space="preserve">
+    <value>Sicherung wird erstellt… {percent}%</value>
+    <comment>[percent:int]</comment>
   </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Abgebrochen</value>
@@ -18009,19 +18101,19 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>noch etwa {count} Min.</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaMinutesLeft.Other" xml:space="preserve">
     <value>noch etwa {count} Min.</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.One" xml:space="preserve">
     <value>noch etwa {count} s</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.Other" xml:space="preserve">
     <value>noch etwa {count} s</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.Failed" xml:space="preserve">
     <value>Fehlgeschlagen</value>

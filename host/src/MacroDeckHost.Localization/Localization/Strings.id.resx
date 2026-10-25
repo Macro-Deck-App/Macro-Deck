@@ -779,6 +779,43 @@
   <data name="Backup.Progress.ByteDetail" xml:space="preserve">
     <value>{processed} dari {total}</value>
   </data>
+  <data name="Backup.Progress.RestoreCancelledToast" xml:space="preserve">
+    <value>Pemulihan dibatalkan</value>
+  </data>
+  <data name="Backup.Progress.CancelledToast" xml:space="preserve">
+    <value>Pencadangan dibatalkan</value>
+  </data>
+  <data name="Backup.Progress.CancelRestore" xml:space="preserve">
+    <value>Batalkan pemulihan</value>
+  </data>
+  <data name="Backup.Progress.Cancel" xml:space="preserve">
+    <value>Batalkan pencadangan</value>
+  </data>
+  <data name="Backup.Progress.StageVerifying" xml:space="preserve">
+    <value>Memverifikasi cadangan</value>
+  </data>
+  <data name="Backup.Progress.StageCopying" xml:space="preserve">
+    <value>Menyalin dan mengenkripsi data</value>
+  </data>
+  <data name="Backup.Progress.StagePreparing" xml:space="preserve">
+    <value>Persiapan</value>
+  </data>
+  <data name="Backup.Progress.TitleRestoring" xml:space="preserve">
+    <value>Memulihkan cadangan</value>
+  </data>
+  <data name="Backup.Progress.TitleCreating" xml:space="preserve">
+    <value>Membuat cadangan</value>
+  </data>
+  <data name="Backup.Progress.CheckingBackup" xml:space="preserve">
+    <value>Memeriksa cadangan</value>
+  </data>
+  <data name="Backup.Progress.CreatingSafetyBackup" xml:space="preserve">
+    <value>Membuat cadangan pengaman</value>
+  </data>
+  <data name="Backup.Progress.Percent" xml:space="preserve">
+    <value>{percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Backup.RecoveryKey.CreatedTitle" xml:space="preserve">
     <value>Simpan kunci pemulihan Anda</value>
   </data>
@@ -1112,6 +1149,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Bootstrapper.Update.Later" xml:space="preserve">
     <value>Nanti</value>
   </data>
+  <data name="Bootstrapper.Update.BackupCancelled" xml:space="preserve">
+    <value>Pembaruan tidak dipasang karena pencadangannya dibatalkan.</value>
+  </data>
   <data name="Bootstrapper.Update.LinuxNotSupported" xml:space="preserve">
     <value>Macro Deck tidak memasang pembaruan sendiri di Linux. Unduh versi baru dari {downloadPageUrl} dan perbarui instalasi AppImage, DEB, atau RPM Anda.</value>
   </data>
@@ -1145,9 +1185,35 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Anda saat ini memakai {version}</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpStatus" xml:space="preserve">
+    <value>Membuat cadangan sebelum pembaruan…</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CancelBackup" xml:space="preserve">
+    <value>Batalkan pembaruan</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpProgressStatus" xml:space="preserve">
+    <value>Membuat cadangan sebelum pembaruan… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Mengunduh… {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.One" xml:space="preserve">
+    <value>sisa sekitar {count} menit</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.Other" xml:space="preserve">
+    <value>sisa sekitar {count} menit</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.One" xml:space="preserve">
+    <value>sisa sekitar {count} detik</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.Other" xml:space="preserve">
+    <value>sisa sekitar {count} detik</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
     <value>Pembaruan sudah diunduh. Macro Deck akan memasangnya saat Anda keluar.</value>
@@ -9993,6 +10059,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Page.InstallFailed" xml:space="preserve">
     <value>Plugin tidak dapat dipasang</value>
   </data>
+  <data name="Integrations.Page.InstallCancelled" xml:space="preserve">
+    <value>Pembaruan plugin dibatalkan. Tidak ada yang diubah.</value>
+  </data>
   <data name="Integrations.Page.InstallFromFileAction" xml:space="preserve">
     <value>Pasang dari file…</value>
   </data>
@@ -17898,6 +17967,25 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Menyiapkan pembaruan…</value>
   </data>
+  <data name="Shell.Splash.StepInstall" xml:space="preserve">
+    <value>Pasang pembaruan</value>
+  </data>
+  <data name="Shell.Splash.StepBackup" xml:space="preserve">
+    <value>Cadangkan data</value>
+  </data>
+  <data name="Shell.Splash.CancelUpdate" xml:space="preserve">
+    <value>Batalkan pembaruan</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackup" xml:space="preserve">
+    <value>Membuat cadangan…</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackupProgress" xml:space="preserve">
+    <value>Membuat cadangan… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
+  <data name="Shell.Splash.InstallingUpdate" xml:space="preserve">
+    <value>Memasang pembaruan…</value>
+  </data>
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Menghentikan Macro Deck…</value>
   </data>
@@ -17909,6 +17997,10 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Store.BackingUpEllipsis" xml:space="preserve">
     <value>Mencadangkan…</value>
+  </data>
+  <data name="Store.BackingUpProgress" xml:space="preserve">
+    <value>Mencadangkan… {percent}%</value>
+    <comment>[percent:int]</comment>
   </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Dibatalkan</value>
@@ -18012,19 +18104,19 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>sisa sekitar {count} menit</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaMinutesLeft.Other" xml:space="preserve">
     <value>sisa sekitar {count} menit</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.One" xml:space="preserve">
     <value>sisa sekitar {count} detik</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.Other" xml:space="preserve">
     <value>sisa sekitar {count} detik</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.Failed" xml:space="preserve">
     <value>Gagal</value>

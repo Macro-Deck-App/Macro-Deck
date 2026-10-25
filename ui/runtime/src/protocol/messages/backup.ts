@@ -84,6 +84,10 @@ export interface CreateBackupResponse extends ResultResponse {
 
 export interface DeleteBackupResponse extends ResultResponse {}
 
+export interface CancelBackupOperationResponse {
+  success: boolean;
+}
+
 export interface GetBackupSettingsResponse {
   scheduleFrequency: string;
   scheduleTimeOfDay: string;
@@ -140,6 +144,7 @@ export interface GetBackupStatusResponse {
   percentComplete?: number;
   bytesProcessed?: number;
   totalBytes?: number;
+  etaSeconds?: number;
   backupId?: string;
   error?: string;
   errorMessage?: string;

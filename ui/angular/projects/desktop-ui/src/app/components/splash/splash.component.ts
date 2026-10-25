@@ -1,4 +1,9 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+
+export interface SplashStep {
+  label: string;
+  state: 'done' | 'current' | 'pending';
+}
 
 @Component({
   selector: 'app-splash',
@@ -10,4 +15,9 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 })
 export class SplashComponent {
   readonly status = input('');
+  readonly progress = input<number | null>(null);
+  readonly details = input<readonly string[]>([]);
+  readonly steps = input<readonly SplashStep[]>([]);
+  readonly cancelLabel = input<string | null>(null);
+  readonly cancel = output<void>();
 }

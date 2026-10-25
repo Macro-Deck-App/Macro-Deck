@@ -104,7 +104,10 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 
 		return result.Success
 			? new PreUpdateBackupOutcome(true, false, null, result.Data!.BackupId)
-			: new PreUpdateBackupOutcome(false, false, result.ErrorMessage, null);
+			: new PreUpdateBackupOutcome(false, false, result.ErrorMessage, null)
+			{
+				Cancelled = result.Error == BackupError.Cancelled
+			};
 	}
 
 	private async Task<BackupSettings> GetBackupSettings()

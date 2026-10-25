@@ -359,6 +359,13 @@ public sealed class PluginInstaller : IPluginInstaller
 			return null;
 		}
 
+		if (outcome.Cancelled)
+		{
+			return PluginInstallResult.Fail(PluginInstallError.Cancelled,
+				$"The backup before updating '{pluginId}' was cancelled, so the plugin was not updated.",
+				pluginId);
+		}
+
 		return PluginInstallResult.Fail(PluginInstallError.Failed,
 			$"The backup before updating '{pluginId}' failed, so the plugin was not updated. "
 			+ (outcome.Reason ?? "The backup could not be created."),

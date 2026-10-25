@@ -53,7 +53,10 @@ public interface IRestoreLock
 	bool IsRestorePending { get; }
 }
 
-public sealed record PreUpdateBackupOutcome(bool Success, bool Skipped, string? Reason, Guid? BackupId);
+public sealed record PreUpdateBackupOutcome(bool Success, bool Skipped, string? Reason, Guid? BackupId)
+{
+	public bool Cancelled { get; init; }
+}
 
 public interface IPreUpdateBackupCoordinator : IRestoreLock
 {

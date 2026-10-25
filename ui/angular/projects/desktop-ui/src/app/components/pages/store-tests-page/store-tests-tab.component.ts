@@ -6,9 +6,11 @@ import { LoadingStateComponent } from '../../feedback/loading-state/loading-stat
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { formatRelativeTime } from '../../shell/settings-modal/relative-time.util';
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
+import { BackupService } from '../../../services/backup.service';
 import { SettingsModalService } from '../../../services/settings-modal.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreTestsService } from '../../../services/store-tests.service';
+import { backupEta, backupPercent, storeOperationBackup } from '../../../util/backup-progress-display';
 import { formatBytes } from '../../../util/format-bytes';
 import {
   formatEta,
@@ -74,6 +76,7 @@ export class StoreTestsTabComponent implements OnInit {
   private readonly toasts = inject(ToastService);
   private readonly settingsModal = inject(SettingsModalService);
   private readonly operations = inject(StoreOperationService);
+  private readonly backups = inject(BackupService);
   protected readonly service = inject(StoreTestsService);
 
   protected readonly pluginIcon = storeKindIcon('Plugin');
@@ -194,7 +197,7 @@ export class StoreTestsTabComponent implements OnInit {
       buildCount: this.localization.translateKey(AppStrings.Store.Tests.BuildCount, { count: test.builds.length }),
       installedTestBuild,
       returnAction,
-      returnPercent: returnAction === 'progress' ? storeOperationPercent(storeOperation!) : null,
+      returnPercent: returnAction === 'progress' ? this.operationPercent(storeOperation!) : null,
       returnProgressLabel: returnAction === 'progress' ? this.progressLabel(storeOperation!) : '',
       returnFailure: canReturn && !live && storeOperation?.state === 'Failed'
         ? this.localization.translateKey(storeOperationErrorKey(storeOperation.error))
@@ -223,7 +226,7 @@ export class StoreTestsTabComponent implements OnInit {
       available: formatRelativeTime(build.availableAt, (key, args) => this.localization.translateKey(key, args)),
       size: formatBytes(build.sizeInBytes),
       operation: forBuild,
-      percent: forBuild ? storeOperationPercent(forBuild) : null,
+      percent: forBuild ? this.operationPercent(forBuild) : null,
       progressLabel: forBuild ? this.progressLabel(forBuild) : '',
       failure: !live && forBuild?.state === 'Failed'
         ? this.localization.translateKey(storeOperationErrorKey(forBuild.error))
@@ -231,7 +234,21 @@ export class StoreTestsTabComponent implements OnInit {
     };
   }
 
+  private operationPercent(operation: StoreOperationBody): number | null {
+    const backup = storeOperationBackup(operation, this.backups.operation());
+    return backup ? backupPercent(backup) : storeOperationPercent(operation);
+  }
+
   private progressLabel(operation: StoreOperationBody): string {
+    const backup = storeOperationBackup(operation, this.backups.operation());
+    if (backup) {
+      const percent = backupPercent(backup);
+      const readout = percent === null
+        ? this.localization.translateKey(AppStrings.Store.BackingUpEllipsis)
+        : this.localization.translateKey(AppStrings.Store.BackingUpProgress, { percent });
+      const eta = backupEta(backup, this.localization);
+      return eta ? `${readout} · ${eta}` : readout;
+    }
     if (operation.state === 'Downloading') {
       const readout = storeOperationByteReadout(operation, this.localization);
       const eta = formatEta(operation.etaSeconds, this.localization);

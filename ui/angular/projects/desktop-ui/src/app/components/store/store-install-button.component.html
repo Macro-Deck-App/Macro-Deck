@@ -156,8 +156,26 @@
   }
   @case ('backingUp') {
     <div class="store-progress">
-      <div class="progress-bar indeterminate" role="progressbar" [attr.aria-valuetext]="'macrodeck.app:Store.BackingUp' | translate"></div>
-      <span class="progress-readout">{{ 'macrodeck.app:Store.BackingUpEllipsis' | translate }}</span>
+      <div
+        class="progress-bar"
+        [class.indeterminate]="backupPercent() === null"
+        role="progressbar"
+        [attr.aria-valuenow]="backupPercent()"
+        [attr.aria-valuemin]="backupPercent() !== null ? 0 : null"
+        [attr.aria-valuemax]="backupPercent() !== null ? 100 : null"
+        [attr.aria-valuetext]="backupReadout()">
+        @if (backupPercent() !== null) {
+          <div class="progress-fill" [style.width.%]="backupPercent()"></div>
+        }
+      </div>
+      <span class="progress-readout">
+        {{ backupReadout() }}
+        @if (backupEta(); as remaining) {
+          <span class="progress-separator" aria-hidden="true">·</span>
+          <span>{{ remaining }}</span>
+        }
+      </span>
+      <button type="button" class="progress-cancel" (click)="cancelBackup()">{{ 'macrodeck:Common.Cancel' | translate }}</button>
     </div>
   }
   @case ('installing') {

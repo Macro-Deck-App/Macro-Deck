@@ -779,6 +779,43 @@
   <data name="Backup.Progress.ByteDetail" xml:space="preserve">
     <value>{processed} of {total}</value>
   </data>
+  <data name="Backup.Progress.RestoreCancelledToast" xml:space="preserve">
+    <value>Restore cancelled</value>
+  </data>
+  <data name="Backup.Progress.CancelledToast" xml:space="preserve">
+    <value>Backup cancelled</value>
+  </data>
+  <data name="Backup.Progress.CancelRestore" xml:space="preserve">
+    <value>Cancel restore</value>
+  </data>
+  <data name="Backup.Progress.Cancel" xml:space="preserve">
+    <value>Cancel backup</value>
+  </data>
+  <data name="Backup.Progress.StageVerifying" xml:space="preserve">
+    <value>Verifying the backup</value>
+  </data>
+  <data name="Backup.Progress.StageCopying" xml:space="preserve">
+    <value>Copying and encrypting your data</value>
+  </data>
+  <data name="Backup.Progress.StagePreparing" xml:space="preserve">
+    <value>Preparing</value>
+  </data>
+  <data name="Backup.Progress.TitleRestoring" xml:space="preserve">
+    <value>Restoring backup</value>
+  </data>
+  <data name="Backup.Progress.TitleCreating" xml:space="preserve">
+    <value>Creating backup</value>
+  </data>
+  <data name="Backup.Progress.CheckingBackup" xml:space="preserve">
+    <value>Checking the backup</value>
+  </data>
+  <data name="Backup.Progress.CreatingSafetyBackup" xml:space="preserve">
+    <value>Creating a safety backup</value>
+  </data>
+  <data name="Backup.Progress.Percent" xml:space="preserve">
+    <value>{percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Backup.RecoveryKey.CreatedTitle" xml:space="preserve">
     <value>Save your recovery key</value>
   </data>
@@ -1112,6 +1149,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Bootstrapper.Update.Later" xml:space="preserve">
     <value>Later</value>
   </data>
+  <data name="Bootstrapper.Update.BackupCancelled" xml:space="preserve">
+    <value>The update was not installed because its backup was cancelled.</value>
+  </data>
   <data name="Bootstrapper.Update.LinuxNotSupported" xml:space="preserve">
     <value>Macro Deck does not install updates itself on Linux. Download the new version from {downloadPageUrl} and update your AppImage, DEB or RPM install.</value>
   </data>
@@ -1145,9 +1185,35 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>You currently have {version}</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpStatus" xml:space="preserve">
+    <value>Creating a backup before the update…</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CancelBackup" xml:space="preserve">
+    <value>Cancel update</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpProgressStatus" xml:space="preserve">
+    <value>Creating a backup before the update… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Downloading… {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.One" xml:space="preserve">
+    <value>about {count} min left</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.Other" xml:space="preserve">
+    <value>about {count} min left</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.One" xml:space="preserve">
+    <value>about {count} s left</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.Other" xml:space="preserve">
+    <value>about {count} s left</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
     <value>The update is downloaded. Macro Deck installs it when you quit.</value>
@@ -9994,6 +10060,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Page.InstallFailed" xml:space="preserve">
     <value>The plugin could not be installed</value>
   </data>
+  <data name="Integrations.Page.InstallCancelled" xml:space="preserve">
+    <value>Plugin update cancelled. Nothing was changed.</value>
+  </data>
   <data name="Integrations.Page.InstallFromFileAction" xml:space="preserve">
     <value>Install from file…</value>
   </data>
@@ -17899,6 +17968,25 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Preparing update…</value>
   </data>
+  <data name="Shell.Splash.StepInstall" xml:space="preserve">
+    <value>Install the update</value>
+  </data>
+  <data name="Shell.Splash.StepBackup" xml:space="preserve">
+    <value>Back up your data</value>
+  </data>
+  <data name="Shell.Splash.CancelUpdate" xml:space="preserve">
+    <value>Cancel update</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackup" xml:space="preserve">
+    <value>Creating a backup…</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackupProgress" xml:space="preserve">
+    <value>Creating a backup… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
+  <data name="Shell.Splash.InstallingUpdate" xml:space="preserve">
+    <value>Installing the update…</value>
+  </data>
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Stopping Macro Deck…</value>
   </data>
@@ -17910,6 +17998,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.BackingUpEllipsis" xml:space="preserve">
     <value>Backing up…</value>
+  </data>
+  <data name="Store.BackingUpProgress" xml:space="preserve">
+    <value>Backing up… {percent}%</value>
+    <comment>[percent:int]</comment>
   </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Cancelled</value>
@@ -18013,19 +18105,19 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>about {count} min left</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaMinutesLeft.Other" xml:space="preserve">
     <value>about {count} min left</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.One" xml:space="preserve">
     <value>about {count} s left</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.Other" xml:space="preserve">
     <value>about {count} s left</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.Failed" xml:space="preserve">
     <value>Failed</value>

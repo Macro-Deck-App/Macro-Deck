@@ -35,8 +35,9 @@ function baseView(overrides = {}) {
     notes: NOTES,
     noChangelog: 'No release notes were published for this version.',
     status: null,
-    downloading: false,
+    progressVisible: false,
     progressPercent: null,
+    detail: null,
     actions: [
       { id: 'later', label: 'Later', primary: false },
       { id: 'install', label: 'Download & install', primary: true },
@@ -150,7 +151,7 @@ test('a button runs its action', async () => {
 
 test('a running download shows its progress and an error is marked as one', async () => {
   const { window, document, state } = await load(baseView({
-    downloading: true,
+    progressVisible: true,
     progressPercent: 42,
     status: { kind: 'info', text: 'Downloading… 42%' },
     actions: [{ id: 'cancel', label: 'Cancel download', primary: false }],
@@ -168,6 +169,27 @@ test('a running download shows its progress and an error is marked as one', asyn
   assert.ok(status.classList.contains('update__status--error'));
 });
 
+test('the backup before an install shows its progress and the time left', async () => {
+  const { document } = await load(baseView({
+    progressVisible: true,
+    progressPercent: 37,
+    status: { kind: 'info', text: 'Creating a backup before the update… 37%' },
+    detail: 'about 2 min left',
+    actions: [],
+  }));
+
+  assert.equal(document.getElementById('progress').hidden, false);
+  assert.equal(document.getElementById('bar').value, 37);
+  assert.equal(document.getElementById('detail').hidden, false);
+  assert.equal(document.getElementById('detail').textContent, 'about 2 min left');
+});
+
+test('the time left is hidden while none is known', async () => {
+  const { document } = await load(baseView());
+
+  assert.equal(document.getElementById('detail').hidden, true);
+});
+
 test('no action has focus, so a stray keystroke cannot install', async () => {
   const { document } = await load(baseView());
 
@@ -182,7 +204,7 @@ test('the page is marked with the language of its texts', async () => {
 
 test('download progress is not announced on every percent', async () => {
   const { document } = await load(baseView({
-    downloading: true,
+    progressVisible: true,
     progressPercent: 10,
     status: { kind: 'info', text: 'Downloading… 10%' },
     actions: [{ id: 'cancel', label: 'Cancel download', primary: false }],

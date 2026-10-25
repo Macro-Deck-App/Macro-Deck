@@ -16,6 +16,8 @@ public sealed class BackupOperationProgressEvent
 
 	public long? TotalBytes { get; set; }
 
+	public int? EtaSeconds { get; set; }
+
 	public Guid? BackupId { get; set; }
 
 	public string? Error { get; set; }

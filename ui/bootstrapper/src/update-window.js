@@ -196,11 +196,15 @@
     status.hidden = !view.status;
     status.textContent = view.status?.text ?? '';
     status.classList.toggle('update__status--error', view.status?.kind === 'error');
-    status.setAttribute('aria-live', view.downloading ? 'off' : 'polite');
+    status.setAttribute('aria-live', view.progressVisible ? 'off' : 'polite');
 
-    document.getElementById('progress').hidden = !view.downloading;
+    const detail = document.getElementById('detail');
+    detail.hidden = !view.detail;
+    detail.textContent = view.detail ?? '';
+
+    document.getElementById('progress').hidden = !view.progressVisible;
     const bar = document.getElementById('bar');
-    bar.setAttribute('aria-valuetext', view.downloading ? view.status?.text ?? '' : '');
+    bar.setAttribute('aria-valuetext', view.progressVisible ? view.status?.text ?? '' : '');
     if (view.progressPercent === null || view.progressPercent === undefined) {
       bar.removeAttribute('value');
     } else {

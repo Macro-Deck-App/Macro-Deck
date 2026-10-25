@@ -779,6 +779,43 @@
   <data name="Backup.Progress.ByteDetail" xml:space="preserve">
     <value>{processed} / {total}</value>
   </data>
+  <data name="Backup.Progress.RestoreCancelledToast" xml:space="preserve">
+    <value>復元をキャンセルしました</value>
+  </data>
+  <data name="Backup.Progress.CancelledToast" xml:space="preserve">
+    <value>バックアップをキャンセルしました</value>
+  </data>
+  <data name="Backup.Progress.CancelRestore" xml:space="preserve">
+    <value>復元をキャンセル</value>
+  </data>
+  <data name="Backup.Progress.Cancel" xml:space="preserve">
+    <value>バックアップをキャンセル</value>
+  </data>
+  <data name="Backup.Progress.StageVerifying" xml:space="preserve">
+    <value>バックアップを検証</value>
+  </data>
+  <data name="Backup.Progress.StageCopying" xml:space="preserve">
+    <value>データをコピーして暗号化</value>
+  </data>
+  <data name="Backup.Progress.StagePreparing" xml:space="preserve">
+    <value>準備</value>
+  </data>
+  <data name="Backup.Progress.TitleRestoring" xml:space="preserve">
+    <value>バックアップを復元中</value>
+  </data>
+  <data name="Backup.Progress.TitleCreating" xml:space="preserve">
+    <value>バックアップを作成中</value>
+  </data>
+  <data name="Backup.Progress.CheckingBackup" xml:space="preserve">
+    <value>バックアップを確認しています</value>
+  </data>
+  <data name="Backup.Progress.CreatingSafetyBackup" xml:space="preserve">
+    <value>安全のためのバックアップを作成しています</value>
+  </data>
+  <data name="Backup.Progress.Percent" xml:space="preserve">
+    <value>{percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Backup.RecoveryKey.CreatedTitle" xml:space="preserve">
     <value>復旧キーを保存してください</value>
   </data>
@@ -1112,6 +1149,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Bootstrapper.Update.Later" xml:space="preserve">
     <value>後で</value>
   </data>
+  <data name="Bootstrapper.Update.BackupCancelled" xml:space="preserve">
+    <value>バックアップがキャンセルされたため、更新はインストールされませんでした。</value>
+  </data>
   <data name="Bootstrapper.Update.LinuxNotSupported" xml:space="preserve">
     <value>Macro Deck は Linux では自分で更新をインストールしません。{downloadPageUrl} から新しいバージョンをダウンロードし、AppImage、DEB、または RPM のインストールを更新してください。</value>
   </data>
@@ -1145,9 +1185,35 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>現在のバージョン: {version}</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpStatus" xml:space="preserve">
+    <value>更新の前にバックアップを作成しています…</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CancelBackup" xml:space="preserve">
+    <value>更新をキャンセル</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpProgressStatus" xml:space="preserve">
+    <value>更新の前にバックアップを作成しています… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>ダウンロード中… {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.One" xml:space="preserve">
+    <value>残り約 {count} 分</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.Other" xml:space="preserve">
+    <value>残り約 {count} 分</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.One" xml:space="preserve">
+    <value>残り約 {count} 秒</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.Other" xml:space="preserve">
+    <value>残り約 {count} 秒</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
     <value>更新をダウンロードしました。Macro Deck は終了時にインストールします。</value>
@@ -9993,6 +10059,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Page.InstallFailed" xml:space="preserve">
     <value>プラグインをインストールできませんでした</value>
   </data>
+  <data name="Integrations.Page.InstallCancelled" xml:space="preserve">
+    <value>プラグインの更新をキャンセルしました。何も変更されていません。</value>
+  </data>
   <data name="Integrations.Page.InstallFromFileAction" xml:space="preserve">
     <value>ファイルからインストール…</value>
   </data>
@@ -17898,6 +17967,25 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>更新を準備しています…</value>
   </data>
+  <data name="Shell.Splash.StepInstall" xml:space="preserve">
+    <value>更新をインストール</value>
+  </data>
+  <data name="Shell.Splash.StepBackup" xml:space="preserve">
+    <value>データをバックアップ</value>
+  </data>
+  <data name="Shell.Splash.CancelUpdate" xml:space="preserve">
+    <value>更新をキャンセル</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackup" xml:space="preserve">
+    <value>バックアップを作成しています…</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackupProgress" xml:space="preserve">
+    <value>バックアップを作成しています… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
+  <data name="Shell.Splash.InstallingUpdate" xml:space="preserve">
+    <value>更新をインストールしています…</value>
+  </data>
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Macro Deck を停止しています…</value>
   </data>
@@ -17909,6 +17997,10 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Store.BackingUpEllipsis" xml:space="preserve">
     <value>バックアップ中…</value>
+  </data>
+  <data name="Store.BackingUpProgress" xml:space="preserve">
+    <value>バックアップ中… {percent}%</value>
+    <comment>[percent:int]</comment>
   </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>キャンセルしました</value>
@@ -18012,19 +18104,19 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>残り約 {count} 分</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaMinutesLeft.Other" xml:space="preserve">
     <value>残り約 {count} 分</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.One" xml:space="preserve">
     <value>残り約 {count} 秒</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.Other" xml:space="preserve">
     <value>残り約 {count} 秒</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.Failed" xml:space="preserve">
     <value>失敗</value>

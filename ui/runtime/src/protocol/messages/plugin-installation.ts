@@ -85,6 +85,7 @@ export interface GetInstalledPluginsResponse {
 }
 
 export const PLUGIN_INSTALL_ERROR_ALREADY_INSTALLED = 'already_installed';
+export const PLUGIN_INSTALL_ERROR_CANCELLED = 'cancelled';
 
 export const PLUGIN_WARNING_ARTIFACT_UNSIGNED = 'unsigned';
 export const PLUGIN_WARNING_SIGNATURE_UNVERIFIED = 'signature_unverified';

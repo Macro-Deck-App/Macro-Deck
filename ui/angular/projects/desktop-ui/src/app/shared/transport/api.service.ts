@@ -11,6 +11,7 @@ import {
   BackupRecoveryKeyResponse,
   BindCatalogVariableRequest,
   BindCatalogVariableResponse,
+  CancelBackupOperationResponse,
   CancelIconImportBatchResponse,
   CancelRestoreRequest,
   CancelRestoreResponse,
@@ -2504,6 +2505,10 @@ export class ApiService {
 
   deleteBackup(backupId: string): Promise<DeleteBackupResponse> {
     return this.http('DELETE', `/api/backups/${encodeURIComponent(backupId)}`);
+  }
+
+  cancelBackupOperation(operationId: string): Promise<CancelBackupOperationResponse> {
+    return this.http('POST', `/api/backups/operations/${encodeURIComponent(operationId)}/cancel`);
   }
 
   getBackupSettings(): Promise<GetBackupSettingsResponse> {

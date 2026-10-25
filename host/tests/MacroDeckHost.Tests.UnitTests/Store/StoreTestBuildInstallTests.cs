@@ -2,10 +2,12 @@ using System.Security.Cryptography;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Signing.TestSupport;
+using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Installation;
+using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Services;
@@ -23,10 +25,9 @@ using MacroDeckHost.Tests.UnitTests.Icons;
 using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.Plugins.Trust;
+using MacroDeckHost.Tests.UnitTests.Store.Reviews;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
-using MacroDeckHost.Application.Plugins.Runtime;
-using MacroDeckHost.Tests.UnitTests.Store.Reviews;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -52,6 +53,7 @@ internal sealed class StoreTestBuildInstallTests
 	private PluginInstaller _pluginInstaller = null!;
 	private InMemoryPluginTrustRecordRepository _trustRecords = null!;
 	private FakeDeveloperModePreferences _preferences = null!;
+	private RecordingBackupCoordinator _backups = null!;
 	private IconTestHarness _iconHarness = null!;
 	private string _sourceDirectory = null!;
 
@@ -75,6 +77,7 @@ internal sealed class StoreTestBuildInstallTests
 		_catalog = new StoreCatalog();
 		_consent = new StoreInstallConsent();
 		_preferences = new FakeDeveloperModePreferences();
+		_backups = new RecordingBackupCoordinator(() => [.. _tracker.Snapshot().Select(op => op.State)]);
 		_trustRecords = new InMemoryPluginTrustRecordRepository();
 		_iconHarness = new IconTestHarness();
 
@@ -94,6 +97,7 @@ internal sealed class StoreTestBuildInstallTests
 		services.AddScoped<IProfilePortabilityService>(_ => throw new NotSupportedException());
 		services.AddSingleton<IStorePlatformClient>(_platform);
 		services.AddSingleton<IStoreTestInstallationStore>(_testInstallations);
+		services.AddSingleton<IPreUpdateBackupCoordinator>(_backups);
 		var provider = services.BuildServiceProvider();
 
 		var trustEvaluator = new PluginTrustEvaluator(manifestReader,
@@ -330,6 +334,41 @@ internal sealed class StoreTestBuildInstallTests
 	}
 
 	[Test]
+	public async Task A_test_build_that_replaces_an_installed_plugin_shows_its_backup_step()
+	{
+		var trusted = await _pluginInstaller.Install(PluginArtifactSource.FromPath(await TrustedArtifact("1.1.0")),
+			new PluginInstallRequest());
+		Assert.That(trusted.Success, Is.True, trusted.ErrorMessage);
+		var build = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42");
+
+		var result = await InstallTestBuild(build);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Completed), result.ErrorMessage);
+			Assert.That(_backups.StatesDuringBackup, Does.Contain(StoreOperationState.BackingUp));
+		});
+	}
+
+	[Test]
+	public async Task Cancelling_the_backup_before_a_plugin_update_cancels_the_update()
+	{
+		var trusted = await _pluginInstaller.Install(PluginArtifactSource.FromPath(await TrustedArtifact("1.1.0")),
+			new PluginInstallRequest());
+		Assert.That(trusted.Success, Is.True, trusted.ErrorMessage);
+		var build = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42");
+		_backups.CancelBackups = true;
+
+		var result = await InstallTestBuild(build);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Cancelled));
+			Assert.That(ActiveVersion(), Is.EqualTo("1.1.0"), "nothing is replaced without its backup");
+		});
+	}
+
+	[Test]
 	public async Task A_newer_build_of_the_same_version_replaces_the_installed_one()
 	{
 		var first = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42");
@@ -493,5 +532,35 @@ internal sealed class StoreTestBuildInstallTests
 			Assert.That(manual.Success, Is.True, manual.ErrorMessage);
 			Assert.That(_testInstallations.Find(PluginId), Is.Null);
 		});
+	}
+
+	private sealed class RecordingBackupCoordinator(Func<IReadOnlyList<StoreOperationState>> states)
+		: IPreUpdateBackupCoordinator
+	{
+		public List<StoreOperationState> StatesDuringBackup { get; } = [];
+
+		public bool CancelBackups { get; set; }
+
+		public bool IsRestorePending => false;
+
+		public Task<PreUpdateBackupOutcome> EnsureBeforePluginUpdate(
+			string pluginId,
+			string? batchId,
+			Action? starting = null,
+			CancellationToken cancellationToken = default)
+		{
+			starting?.Invoke();
+			StatesDuringBackup.AddRange(states());
+			return Task.FromResult(CancelBackups
+				? new PreUpdateBackupOutcome(false, false, "The backup was cancelled.", null) { Cancelled = true }
+				: new PreUpdateBackupOutcome(true, false, null, Guid.NewGuid()));
+		}
+
+		public Task<PreUpdateBackupOutcome> CreateBeforeHostUpdate(
+			string? version,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

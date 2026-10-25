@@ -39,4 +39,24 @@ describe('SplashComponent', () => {
     expect(statusMessage()?.textContent).toBe('Connecting to Macro Deck…');
     expect(fixture.nativeElement.textContent).not.toContain('Preparing update…');
   });
+
+  it('shows a filled bar instead of the spinner once the progress is known', async () => {
+    fixture.componentRef.setInput('status', 'Creating a backup… 30%');
+    fixture.componentRef.setInput('progress', 30);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const bar = fixture.nativeElement.querySelector('[role="progressbar"]');
+    expect(bar?.getAttribute('aria-valuenow')).toBe('30');
+    expect(fixture.nativeElement.querySelector('.spinner')).toBeNull();
+  });
+
+  it('keeps the spinner while the progress is unknown', async () => {
+    fixture.componentRef.setInput('status', 'Preparing update…');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.spinner')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[role="progressbar"]')).toBeNull();
+  });
 });

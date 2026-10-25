@@ -24,6 +24,7 @@ public sealed class TriggerBeforeHostUpdateBackupRequestMessageHandler
 		{
 			Success = outcome.Success,
 			Skipped = outcome.Skipped,
+			Cancelled = outcome.Cancelled,
 			Reason = outcome.Reason,
 			BackupId = outcome.BackupId
 		};
