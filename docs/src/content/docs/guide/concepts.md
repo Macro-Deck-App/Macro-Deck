@@ -799,9 +799,11 @@ Macro Deck tells you about things that need your attention in three ways.
   a small form. Whatever you press on one screen closes the dialog on every other screen too, and the
   integration gets your answer once.
 - **The notifications list** in the desktop app keeps what happened: login problems, available updates,
-  results of imports and whatever integrations report. Entries you have not looked at are marked as unread.
-  Use **Mark as read** on an entry, or **Mark all as read**. Closing a short message or a dialog never removes its
-  entry from the list, and removing an entry never closes a message that is still showing.
+  results of imports and whatever integrations report. Entries that wait for you, such as an update ready to
+  install or a plugin asking for access, are listed first under **Requires attention**. Entries you have not
+  looked at carry a dot: click it to mark that entry as read. **Mark all as read** and **Clear all** are in the
+  **⋮** menu at the top of the list. Closing a short message or a dialog never removes its entry from the list,
+  and removing an entry never closes a message that is still showing.
 
 Short messages and dialogs appear in the desktop app, in the web client and in the Companion app. A screen that
 connects while a dialog is open shows it right away. Each message says where it comes from: Macro Deck itself,

@@ -23,7 +23,20 @@ export class PluginAdbConsentService {
   readonly downloading = signal(false);
   readonly downloadError = signal<string | null>(null);
 
-  async allow(notificationId: string): Promise<boolean> {
+  private readonly _allowing = signal<string | null>(null);
+  readonly allowing = this._allowing.asReadonly();
+  private inFlight: Promise<boolean> | null = null;
+
+  allow(notificationId: string): Promise<boolean> {
+    this.inFlight ??= this.grant(notificationId).finally(() => {
+      this.inFlight = null;
+      this._allowing.set(null);
+    });
+    return this.inFlight;
+  }
+
+  private async grant(notificationId: string): Promise<boolean> {
+    this._allowing.set(notificationId);
     const response = await this.api.updateAdbSettings({ enabled: true, allowPlugins: true })
       .catch(() => null);
     if (!response?.success) {
@@ -31,7 +44,8 @@ export class PluginAdbConsentService {
       this.settingsModal.open('adb');
       return false;
     }
-    this.notificationCenter.dismiss(notificationId);
+    // The host withdraws every ADB request once plugins may use ADB, before it answers.
+    this.notificationCenter.resolveLocally(isAdbConsentRequest);
     if (!response.resolvedExecutablePath) {
       this.downloadError.set(null);
       this.offeringDownload.set(true);

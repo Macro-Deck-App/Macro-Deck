@@ -17843,6 +17843,15 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Отметить все как прочитанные</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>Другие действия с уведомлениями</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Требует внимания</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Ранее</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Непрочитанные</value>
   </data>

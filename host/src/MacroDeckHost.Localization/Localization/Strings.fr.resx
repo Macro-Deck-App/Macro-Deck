@@ -17842,6 +17842,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
     <value>Tout marquer comme lu</value>
   </data>
+  <data name="Shell.Notifications.MoreActions" xml:space="preserve">
+    <value>Autres actions sur les notifications</value>
+  </data>
+  <data name="Shell.Notifications.Section.RequiresAttention" xml:space="preserve">
+    <value>Requiert ton attention</value>
+  </data>
+  <data name="Shell.Notifications.Section.Earlier" xml:space="preserve">
+    <value>Plus anciennes</value>
+  </data>
   <data name="Shell.Notifications.Unread" xml:space="preserve">
     <value>Non lue</value>
   </data>

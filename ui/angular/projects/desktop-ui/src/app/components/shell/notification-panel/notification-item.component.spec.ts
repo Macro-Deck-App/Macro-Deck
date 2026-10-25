@@ -60,9 +60,52 @@ describe('NotificationItemComponent', () => {
     fixture.componentRef.setInput('notification', notification({ severity: 'Success' }));
     fixture.detectChanges();
 
-    const badge = fixture.nativeElement.querySelector('.ni-severity') as HTMLElement;
-    expect(badge.classList).toContain('issue-badge-success');
-    expect(badge.querySelector('.icon-check')).not.toBeNull();
+    const glyph = fixture.nativeElement.querySelector('.ni-glyph') as HTMLElement;
+    expect(glyph.classList).toContain('ni-glyph-success');
+    expect(glyph.querySelector('.icon-circle-check')).not.toBeNull();
+  });
+
+  it('gives every severity its own icon, so an error never looks like a warning', () => {
+    const iconOf = (severity: UserNotification['severity']): string => {
+      fixture.componentRef.setInput('notification', notification({ severity }));
+      fixture.detectChanges();
+      const icon = fixture.nativeElement.querySelector('.ni-glyph .icon') as HTMLElement;
+      return Array.from(icon.classList).find(name => name.startsWith('icon-') && !/^icon-(xs|sm|md|lg|xl)$/.test(name))!;
+    };
+
+    const icons = (['Info', 'Success', 'Warning', 'Error'] as const).map(iconOf);
+
+    expect(new Set(icons).size).toBe(4);
+  });
+
+  it('makes the main action of a notification that needs the user primary and keeps the rest secondary', () => {
+    fixture.componentRef.setInput('attention', true);
+    fixture.componentRef.setInput('notification', notification({
+      actions: [{ kind: 'OpenUpdateDetails' }, { kind: 'InstallUpdate' }, { kind: 'DismissNotification' }],
+    }));
+    fixture.detectChanges();
+
+    const classes = Array.from(fixture.nativeElement.querySelectorAll('.ni-action button'))
+      .map(button => (button as HTMLElement).className);
+
+    expect(classes[0]).toContain('sb-secondary');
+    expect(classes[1]).toContain('sb-primary');
+    expect(classes[2]).toContain('sb-ghost');
+  });
+
+  it('disables its actions and swallows clicks while a response is pending', () => {
+    const emitted: unknown[] = [];
+    fixture.componentInstance.action.subscribe(event => emitted.push(event));
+    fixture.componentRef.setInput('attention', true);
+    fixture.componentRef.setInput('pending', true);
+    fixture.componentRef.setInput('notification', notification({ actions: [{ kind: 'EnablePluginAdb' }] }));
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('.ni-action button') as HTMLButtonElement;
+    expect(button.disabled).toBeTrue();
+    fixture.componentInstance.onAction(new MouseEvent('click'), { kind: 'EnablePluginAdb' });
+
+    expect(emitted).toEqual([]);
   });
 
   it('marks an unread entry and offers to mark it read, but only that one', () => {
@@ -76,7 +119,8 @@ describe('NotificationItemComponent', () => {
 
     fixture.componentRef.setInput('notification', notification({ read: false }));
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.ni-unread-dot')?.getAttribute('aria-label')).toBe('Unread');
+    expect(fixture.nativeElement.querySelector('.ni-title')?.textContent).toContain('Unread');
+    expect(fixture.nativeElement.querySelector('.ni-mark-read button')?.getAttribute('aria-label')).toBe('Mark as read');
 
     (fixture.nativeElement.querySelector('.ni-mark-read button') as HTMLButtonElement).click();
     expect(marked).toEqual(['n1']);
