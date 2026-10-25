@@ -76,6 +76,12 @@ port** there. Tap **Continue**.
 
 ![Adding a connection by address on Android: host 192.168.1.20, port 8391 and the name Streaming Computer](../../../../assets/guide/companion/android-enter-address.png)
 
+If Macro Deck is behind a reverse proxy with HTTPS, such as nginx, Caddy or Traefik with a Let's Encrypt
+certificate, type the proxy's domain without `https://` and its port, usually 443. The app notices that the
+address only answers over HTTPS and uses HTTPS for it by itself; **Prefer HTTPS** is not needed for that. The
+certificate has to be one the phone or tablet already trusts, issued for that domain, and the proxy has to pass
+WebSocket connections through. Android 7.1 and older may not trust Let's Encrypt certificates.
+
 ### Plug in a USB cable
 
 A phone or tablet can also reach Macro Deck through a USB cable, with or without USB debugging. The app then
