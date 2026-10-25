@@ -338,6 +338,10 @@ export default defineConfig({
 									],
 								},
 								{
+									label: 'Public API',
+									items: ['creator-portal/public-api'],
+								},
+								{
 									label: 'Reference',
 									items: ['creator-portal/release-workflow'],
 								},
