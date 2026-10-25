@@ -37,7 +37,7 @@ describe('FooterBarComponent', () => {
   }
 
   const cases: Array<[string, string]> = [
-    ['Donate', 'https://ko-fi.com/manuelmayer'],
+    ['Donate', 'https://macro-deck.app/donate'],
     ['Join Discord', 'https://discord.macro-deck.app'],
     ['Report Bug', 'https://github.com/Macro-Deck-App/Macro-Deck/issues'],
   ];

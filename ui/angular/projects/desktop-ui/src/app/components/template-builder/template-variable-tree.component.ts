@@ -275,7 +275,7 @@ export class TemplateVariableTreeComponent {
   });
 
   private integrationName(integrationId: string): string {
-    return this.integrationService.integrations().find(i => i.id === integrationId)?.name ?? integrationId;
+    return this.integrationService.displayName(integrationId);
   }
 
   private readonly displayNameOf = (variable: Variable): string =>

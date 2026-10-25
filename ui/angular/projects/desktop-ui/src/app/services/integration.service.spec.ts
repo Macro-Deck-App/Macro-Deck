@@ -261,6 +261,24 @@ describe('IntegrationService catalogue refresh', () => {
     expect(repro?.variableCount).toBe(2);
   });
 
+  it('names a system integration that is not listed as an integration', async () => {
+    apiSpy.getIntegrations.and.resolveTo({
+      integrations: [ipc()],
+      systemIntegrations: [{ id: 'app.macro-deck.music-player', name: 'Music Player' }],
+    });
+    await service.loadIntegrations();
+
+    expect(service.integrations().map(i => i.id)).toEqual(['app.macro-deck.spotify']);
+    expect(service.displayName('app.macro-deck.music-player')).toBe('Music Player');
+  });
+
+  it('falls back to the id for an owner the host did not name', async () => {
+    apiSpy.getIntegrations.and.resolveTo(response(ipc()));
+    await service.loadIntegrations();
+
+    expect(service.displayName('app.macro-deck.music-player')).toBe('app.macro-deck.music-player');
+  });
+
   it('refreshes without showing the loading state', async () => {
     apiSpy.getIntegrations.and.resolveTo(response(ipc()));
     await service.loadIntegrations();

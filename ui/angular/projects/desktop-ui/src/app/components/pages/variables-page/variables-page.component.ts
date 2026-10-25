@@ -149,7 +149,7 @@ export class VariablesPageComponent {
   }
 
   private integrationDisplayName(integrationId: string): string {
-    return this.integrationService.integrations().find(i => i.id === integrationId)?.name ?? integrationId;
+    return this.integrationService.displayName(integrationId);
   }
 
   private select(source: VariableSourceFilter): void {

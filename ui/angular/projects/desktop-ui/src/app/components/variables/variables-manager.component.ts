@@ -1017,7 +1017,7 @@ export class VariablesManagerComponent implements OnInit {
   }
 
   private integrationDisplayName(integrationId: string): string {
-    return this.integrationService.integrations().find(i => i.id === integrationId)?.name ?? integrationId;
+    return this.integrationService.displayName(integrationId);
   }
 
   private defaultCreateForm(): CreateForm {
