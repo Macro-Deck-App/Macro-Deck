@@ -35,4 +35,5 @@ Create Project  ->  Version  ->  Submit for Review  ->  Approved  ->  Store
 - [Publish an icon pack](/creator-portal/publish-icon-pack/): versions and package upload.
 - [Review and release](/creator-portal/review/): what happens after you submit.
 - [Testers](/creator-portal/testers/): let people install a plugin before it is reviewed.
+- [Public API](/creator-portal/public-api/): read your Projects, their status and analytics with an API token.
 - [Release workflow reference](/creator-portal/release-workflow/): inputs and error messages.
