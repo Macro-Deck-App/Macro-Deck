@@ -12,6 +12,7 @@ import {
   sliderThumbDiameterPx,
   sliderThumbOffsetPx,
   sliderThumbStrokePx,
+  sliderTrackInsetPx,
   snapSliderLevel,
 } from './bar';
 import { UiComponentEvents } from './component-events';
@@ -361,6 +362,11 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
     ctx.setClassName(track, 'widget-slider-track');
     ctx.setStyle(track, vertical ? 'width' : 'height', px(thickness));
     ctx.setStyle(track, vertical ? 'height' : 'width', null);
+    const inset = px(sliderTrackInsetPx(thickness));
+    ctx.setStyle(track, vertical ? 'top' : 'left', inset);
+    ctx.setStyle(track, vertical ? 'bottom' : 'right', inset);
+    ctx.setStyle(track, vertical ? 'left' : 'top', null);
+    ctx.setStyle(track, vertical ? 'right' : 'bottom', null);
     ctx.setStyle(track, 'border-radius', px(thickness / 2));
 
     const fill = ctx.part('sliderFill', 'div', undefined, track);

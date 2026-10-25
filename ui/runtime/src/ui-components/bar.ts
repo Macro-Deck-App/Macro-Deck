@@ -73,6 +73,12 @@ export function sliderThumbDiameterPx(thicknessPx: number): number {
   return Math.max(0, 2.5 * thicknessPx - sliderThumbStrokePx(thicknessPx));
 }
 
+// The thumb's ring at either end only touches the tip of a full-length track, and the antialiased
+// edge leaks it, so the track stops a ring's width short of each end, inside the ring.
+export function sliderTrackInsetPx(thicknessPx: number): number {
+  return sliderThumbStrokePx(thicknessPx);
+}
+
 export function sliderThumbOffsetPx(level: number, extentPx: number, thicknessPx: number): number {
   const stroke = sliderThumbStrokePx(thicknessPx);
   const inset = 1.25 * thicknessPx + stroke / 2;
