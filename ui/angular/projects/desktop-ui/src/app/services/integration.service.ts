@@ -32,6 +32,7 @@ export class IntegrationService {
   private readonly localization = inject(LocalizationService);
 
   readonly integrations = signal<Integration[]>([]);
+  private readonly systemIntegrationNames = signal<ReadonlyMap<string, string>>(new Map());
   readonly isLoading = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly selectedIntegrationId = signal<string | null>(null);
@@ -54,6 +55,12 @@ export class IntegrationService {
 
   constructor() {
     this.subscribeToEvents();
+  }
+
+  displayName(integrationId: string): string {
+    return this.integrations().find(i => i.id === integrationId)?.name
+      ?? this.systemIntegrationNames().get(integrationId)
+      ?? integrationId;
   }
 
   private subscribeToEvents(): void {
@@ -121,6 +128,8 @@ export class IntegrationService {
         return;
       }
       this.integrations.set((response.integrations || []).map(this.mapIntegration));
+      this.systemIntegrationNames.set(new Map((response.systemIntegrations ?? []).map(entry =>
+        [entry.id, resolveLocalizedText(entry.name, this.localization)])));
       for (const event of this.issuesDuringFetch.values()) {
         this.applyIssues(event);
       }

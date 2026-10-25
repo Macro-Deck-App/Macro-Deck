@@ -208,6 +208,6 @@ export class UiPreviewsTabComponent {
 
   private ownerLabel(ownerId: string): string {
     if (ownerId === '') return this.localization.translateKey(AppStrings.Developer.Previews.BuiltInSource);
-    return this.integrationService.integrations().find(i => i.id === ownerId)?.name ?? ownerId;
+    return this.integrationService.displayName(ownerId);
   }
 }

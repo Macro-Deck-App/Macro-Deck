@@ -51,6 +51,7 @@ describe('VariablesPageComponent', () => {
     variable('2', 'integration', 'spotify'),
     variable('3', 'integration', 'spotify'),
     variable('4', 'integration', 'obs'),
+    variable('5', 'integration', 'app.macro-deck.email'),
   ];
 
   function setQueryParams(params: Record<string, string>): void {
@@ -80,6 +81,7 @@ describe('VariablesPageComponent', () => {
         ipcIntegration('spotify', 'Spotify', 2),
         ipcIntegration('obs', 'OBS Studio', 1),
       ],
+      systemIntegrations: [{ id: 'app.macro-deck.email', name: 'Email' }],
     });
     apiSpy.getVariableCatalogProviders.and.resolveTo({ providers: catalogProviders });
     apiSpy.discoverCatalogVariables.and.resolveTo({ nodes: [], hasMore: false, available: true });
@@ -113,16 +115,28 @@ describe('VariablesPageComponent', () => {
   });
 
   it('counts variables per source', () => {
-    expect(component.totalCount()).toBe(4);
+    expect(component.totalCount()).toBe(5);
     expect(component.userCount()).toBe(1);
   });
 
   it('derives one rail entry per integration - providing, cataloging, or both - sorted by name', () => {
     expect(component.integrationSources()).toEqual([
+      { integrationId: 'app.macro-deck.email', name: 'Email', count: 1 },
       { integrationId: 'home-assistant', name: 'home-assistant', count: 0 },
       { integrationId: 'obs', name: 'OBS Studio', count: 1 },
       { integrationId: 'spotify', name: 'Spotify', count: 2 },
     ]);
+  });
+
+  it('names a system integration in the rail and the heading instead of showing its id', () => {
+    const railText = Array.from(fixture.nativeElement.querySelectorAll('shared-rail-item') as NodeListOf<Element>)
+      .map(el => el.textContent ?? '');
+
+    setQueryParams({ integrationId: 'app.macro-deck.email' });
+
+    expect(railText.some(text => text.includes('Email'))).toBeTrue();
+    expect(railText.some(text => text.includes('app.macro-deck.email'))).toBeFalse();
+    expect(component.managerTitle()).toBe('Email');
   });
 
   it('lists an integration that both provides variables and offers a catalog exactly once', () => {
