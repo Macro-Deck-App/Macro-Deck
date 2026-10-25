@@ -10,7 +10,7 @@ use tauri::{AppHandle, Manager, Theme, UriSchemeContext, WebviewUrl, WebviewWind
 use crate::appearance::{self, Appearance, ThemeMode};
 use crate::localization::{self, keys};
 use crate::logging;
-use crate::update_state::{UpdateFailure, UpdatePhase, UpdateSnapshot};
+use crate::update_state::{BackupProgress, UpdateFailure, UpdatePhase, UpdateSnapshot};
 use crate::updater::{self, UpdateInstallStrategy};
 
 pub const UPDATE_WINDOW: &str = "update";
@@ -212,8 +212,9 @@ pub(crate) struct WindowView {
     pub notes_link: String,
     pub no_changelog: String,
     pub status: Option<WindowStatus>,
-    pub downloading: bool,
+    pub progress_visible: bool,
     pub progress_percent: Option<u8>,
+    pub detail: Option<String>,
     pub actions: Vec<WindowAction>,
 }
 
@@ -279,11 +280,45 @@ fn offer_status(strategy: UpdateInstallStrategy, version: Option<&str>) -> Optio
         .and_then(info)
 }
 
+fn installing_status(backup: Option<&BackupProgress>) -> String {
+    match backup {
+        Some(BackupProgress {
+            percent: Some(percent),
+            ..
+        }) => localization::t_args(
+            keys::UPDATE_WINDOW_BACKING_UP_PROGRESS_STATUS,
+            &[("percent", &percent.to_string())],
+        ),
+        Some(_) => localization::t(keys::UPDATE_WINDOW_BACKING_UP_STATUS),
+        None => localization::t(keys::UPDATE_WINDOW_INSTALLING_STATUS),
+    }
+}
+
+fn eta_text(seconds: u64) -> String {
+    if seconds < 60 {
+        localization::t_plural(
+            keys::UPDATE_WINDOW_ETA_SECONDS_LEFT,
+            seconds.max(1) as i64,
+            &[],
+        )
+    } else {
+        localization::t_plural(
+            keys::UPDATE_WINDOW_ETA_MINUTES_LEFT,
+            ((seconds + 30) / 60) as i64,
+            &[],
+        )
+    }
+}
+
 pub(crate) fn view(snapshot: &UpdateSnapshot, action_error: Option<&str>) -> WindowView {
     let version = snapshot.version.as_deref();
     let strategy = snapshot.install_strategy;
     let later = || action(ActionId::Later, keys::UPDATE_LATER, false);
     let action_error = || action_error.map(str::to_string).and_then(error);
+    let backup = snapshot
+        .backup
+        .as_ref()
+        .filter(|_| snapshot.phase == UpdatePhase::Installing);
     let (status, actions) = match snapshot.phase {
         UpdatePhase::Available => (
             action_error().or_else(|| offer_status(strategy, version)),
@@ -324,7 +359,19 @@ pub(crate) fn view(snapshot: &UpdateSnapshot, action_error: Option<&str>) -> Win
             ],
         ),
         UpdatePhase::Installing => (
-            info(localization::t(keys::UPDATE_WINDOW_INSTALLING_STATUS)),
+            info(installing_status(backup)),
+            if backup.is_some() {
+                vec![action(
+                    ActionId::Cancel,
+                    keys::UPDATE_WINDOW_CANCEL_BACKUP,
+                    false,
+                )]
+            } else {
+                Vec::new()
+            },
+        ),
+        UpdatePhase::Failed if snapshot.quit_install_failed => (
+            snapshot.error.clone().and_then(error).or_else(action_error),
             Vec::new(),
         ),
         UpdatePhase::Failed
@@ -370,11 +417,15 @@ pub(crate) fn view(snapshot: &UpdateSnapshot, action_error: Option<&str>) -> Win
         notes_link: localization::t(keys::UPDATE_WINDOW_RELEASE_NOTES_LINK),
         no_changelog: localization::t(keys::UPDATE_WINDOW_NO_CHANGELOG),
         status,
-        downloading: snapshot.phase == UpdatePhase::Downloading,
-        progress_percent: snapshot
-            .progress
-            .as_ref()
-            .and_then(|progress| progress.percent),
+        progress_visible: snapshot.phase == UpdatePhase::Downloading || backup.is_some(),
+        progress_percent: match backup {
+            Some(backup) => backup.percent,
+            None => snapshot
+                .progress
+                .as_ref()
+                .and_then(|progress| progress.percent),
+        },
+        detail: backup.and_then(|backup| backup.eta_seconds).map(eta_text),
         actions,
     }
 }
@@ -620,6 +671,13 @@ fn paint_background(app: &AppHandle) {
     });
 }
 
+pub async fn wait_until_closed(app: &AppHandle, limit: Duration) {
+    let deadline = std::time::Instant::now() + limit;
+    while app.get_webview_window(UPDATE_WINDOW).is_some() && std::time::Instant::now() < deadline {
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+}
+
 pub fn close(app: &AppHandle) {
     // An offer still waiting for the user has no window yet, so it is withdrawn before that check.
     BACKGROUND_OFFER
@@ -660,7 +718,13 @@ fn run_action(app: &AppHandle, id: ActionId) {
         }
         ActionId::Cancel => {
             let app = app.clone();
-            tauri::async_runtime::spawn(async move { updater::cancel_update_download(app).await });
+            tauri::async_runtime::spawn(async move {
+                if updater::snapshot(&app).phase == UpdatePhase::Installing {
+                    updater::cancel_pre_update_backup(app).await;
+                } else {
+                    updater::cancel_update_download(app).await;
+                }
+            });
         }
         ActionId::DownloadPage => {
             let _ = crate::external_url::open(app, updater::DOWNLOAD_PAGE_URL);
@@ -865,10 +929,106 @@ mod tests {
         state.record_progress(50, Some(200));
         let view = view(&state.snapshot(), None);
 
-        assert!(view.downloading);
+        assert!(view.progress_visible);
         assert_eq!(view.progress_percent, Some(25));
         assert!(view.status.as_ref().unwrap().text.contains("25"));
         assert_eq!(action_ids(&view), [ActionId::Cancel]);
+    }
+
+    fn installing(backup: Option<BackupProgress>) -> WindowView {
+        let mut state = state(UpdateInstallStrategy::InApp);
+        assert!(state.try_begin_install());
+        state.record_backup_progress(backup);
+        view(&state.snapshot(), None)
+    }
+
+    #[test]
+    fn the_backup_before_an_install_shows_its_progress_and_the_time_left() {
+        let view = installing(Some(BackupProgress {
+            operation_id: "backup-1".to_string(),
+            percent: Some(37),
+            eta_seconds: Some(125),
+        }));
+
+        assert!(view.progress_visible);
+        assert_eq!(view.progress_percent, Some(37));
+        assert_eq!(
+            view.status.as_ref().unwrap().text,
+            localization::t_args(
+                keys::UPDATE_WINDOW_BACKING_UP_PROGRESS_STATUS,
+                &[("percent", "37")]
+            )
+        );
+        assert_eq!(
+            view.detail,
+            Some(localization::t_plural(
+                keys::UPDATE_WINDOW_ETA_MINUTES_LEFT,
+                2,
+                &[]
+            ))
+        );
+        assert_eq!(action_ids(&view), [ActionId::Cancel]);
+    }
+
+    #[test]
+    fn the_install_after_the_backup_cannot_be_cancelled() {
+        let view = installing(None);
+
+        assert!(view.actions.is_empty());
+    }
+
+    #[test]
+    fn a_backup_without_a_percentage_yet_shows_an_indeterminate_bar() {
+        let view = installing(Some(BackupProgress {
+            operation_id: "backup-1".to_string(),
+            percent: None,
+            eta_seconds: None,
+        }));
+
+        assert!(view.progress_visible);
+        assert_eq!(view.progress_percent, None);
+        assert_eq!(
+            view.status.as_ref().unwrap().text,
+            localization::t(keys::UPDATE_WINDOW_BACKING_UP_STATUS)
+        );
+        assert_eq!(view.detail, None);
+    }
+
+    #[test]
+    fn the_install_after_the_backup_says_it_installs() {
+        let view = installing(None);
+
+        assert!(!view.progress_visible);
+        assert_eq!(
+            view.status.as_ref().unwrap().text,
+            localization::t(keys::UPDATE_WINDOW_INSTALLING_STATUS)
+        );
+    }
+
+    #[test]
+    fn backup_progress_reported_after_the_install_ended_is_dropped() {
+        let mut state = state(UpdateInstallStrategy::InApp);
+        assert!(state.try_begin_install());
+        state.record_install_failed("The backup failed.".to_string());
+        state.record_backup_progress(Some(BackupProgress {
+            operation_id: "backup-1".to_string(),
+            percent: Some(80),
+            eta_seconds: None,
+        }));
+
+        assert!(!view(&state.snapshot(), None).progress_visible);
+    }
+
+    #[test]
+    fn a_failed_install_on_quit_shows_why_and_offers_no_retry() {
+        let mut state = state(UpdateInstallStrategy::InApp);
+        assert!(state.try_begin_install());
+        state.record_install_failed("The backup failed.".to_string());
+        state.record_quit_install_failed();
+        let view = view(&state.snapshot(), None);
+
+        assert_eq!(view.status.as_ref().unwrap().text, "The backup failed.");
+        assert!(view.actions.is_empty());
     }
 
     #[test]

@@ -1,1 +1,1 @@
-export { SplashComponent } from './splash.component';
+export { SplashComponent, type SplashStep } from './splash.component';

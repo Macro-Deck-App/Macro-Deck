@@ -15,6 +15,10 @@ public sealed record BackupOperationStatus(
 	string? ErrorMessage,
 	DateTimeOffset UpdatedAt)
 {
+	public int? EtaSeconds { get; init; }
+
+	public double? ProgressFraction { get; init; }
+
 	public static BackupOperationStatus Idle(DateTimeOffset now)
 	{
 		return new BackupOperationStatus(null,

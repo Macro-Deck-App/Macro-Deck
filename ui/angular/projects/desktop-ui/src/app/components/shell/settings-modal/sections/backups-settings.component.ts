@@ -1,5 +1,5 @@
 import { untracked, effect, computed, ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { AppStrings, BackupComponentCatalogEntry, BackupComponentGroup, BackupComponentGroupInfo, BackupSummary } from '@macro-deck/runtime';
+import { AppStrings, BackupComponentCatalogEntry, BackupComponentGroup, BackupComponentGroupInfo, BackupSummary, GetBackupStatusResponse } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, SettingsSectionComponent, ToastService, TranslatePipe } from '@shared';
 import { BackupPreviewModalComponent } from '../../../backup/backup-preview-modal/backup-preview-modal.component';
 import { BackupProgressCardComponent } from '../../../backup/backup-progress-card/backup-progress-card.component';
@@ -7,6 +7,7 @@ import { BackupRestoreModalComponent } from '../../../backup/backup-restore-moda
 import { RecoveryKeyPromptModalComponent } from '../../../backup/recovery-key-prompt-modal/recovery-key-prompt-modal.component';
 import { ConfirmationModalComponent } from '../../../overlay/confirmation-modal/confirmation-modal.component';
 import { BackupService } from '../../../../services/backup.service';
+import { isActiveBackupStage } from '../../../../util/backup-progress-display';
 import { BackupListComponent } from './backup-list.component';
 import { BackupRecoveryKeySettingsComponent } from './backup-recovery-key-settings.component';
 import { BackupScheduleSettingsComponent } from './backup-schedule-settings.component';
@@ -64,15 +65,51 @@ export class BackupsSettingsComponent {
   readonly modal = signal<BackupsModalState>({ kind: 'none' });
 
   protected readonly operation = this.backupService.operation;
+  protected readonly inlineOperation = computed(() => {
+    const op = this.operation();
+    return op && this.backupService.progressDialogHidden() && isActiveBackupStage(op.stage) ? op : null;
+  });
 
-  protected readonly operationFailed = computed(() => this.operation()?.stage === 'Failed');
+  protected readonly visibleOperation = computed(() => {
+    const op = this.operation();
+    return op && this.backupService.progressDialogHidden() && isActiveBackupStage(op.stage) ? null : op;
+  });
+
+  protected readonly operationFailed = computed(() => {
+    const op = this.operation();
+    return op?.stage === 'Failed' && op.error !== 'Cancelled';
+  });
 
   protected dismissOperation(): void {
+    const op = this.operation();
+    if (op && isActiveBackupStage(op.stage)) {
+      this.backupService.hideProgressDialog();
+      return;
+    }
     this.backupService.dismissOperation();
+  }
+
+  protected showOperationDetails(): void {
+    this.backupService.showProgressDialog();
+  }
+
+  protected cancelOperation(operation: GetBackupStatusResponse): void {
+    if (operation.operationId) {
+      void this.backupService.cancelOperation(operation.operationId);
+    }
   }
 
   private readonly clearFinishedOperation = effect(() => {
     const op = this.operation();
+    if (op?.stage === 'Failed' && op.error === 'Cancelled') {
+      untracked(() => {
+        this.toastService.show(this.localization.translateKey(op.kind === 'Restore'
+          ? AppStrings.Backup.Progress.RestoreCancelledToast
+          : AppStrings.Backup.Progress.CancelledToast), { variant: 'info' });
+        this.backupService.dismissOperation();
+      });
+      return;
+    }
     if (op?.stage !== 'Completed') {
       return;
     }
@@ -91,7 +128,7 @@ export class BackupsSettingsComponent {
     this.creating.set(true);
     try {
       const result = await this.backupService.createBackup();
-      if (!result.ok) {
+      if (!result.ok && !result.cancelled) {
         this.toastService.show(result.error, { variant: 'error' });
       }
     } finally {
@@ -182,7 +219,7 @@ export class BackupsSettingsComponent {
     const outcome = await this.backupService.prepareRestore(state.backup.id, state.components, state.recoveryKey);
     if (outcome.status === 'error') {
       this.toastService.show(outcome.message, { variant: 'error' });
-    } else if (outcome.status !== 'staged') {
+    } else if (outcome.status !== 'staged' && outcome.status !== 'cancelled') {
       this.toastService.show(this.localization.translateKey(AppStrings.Settings.Backups.RecoveryKeyRequiredToast), { variant: 'error' });
     }
   }

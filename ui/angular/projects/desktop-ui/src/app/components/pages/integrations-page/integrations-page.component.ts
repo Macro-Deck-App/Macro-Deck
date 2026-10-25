@@ -8,7 +8,7 @@ import {
   IntegrationStatusFilter,
   IntegrationTypeFilter,
 } from '../../../services/integration-filter.service';
-import { AppStrings, IpcProvidedCapability, PLUGIN_INSTALL_ERROR_ALREADY_INSTALLED, PluginCompatibilityReport, PluginCompatibilityState, PluginInstallActionResponse, LocalizedText, resolveLocalizedText, Strings } from '@macro-deck/runtime';
+import { AppStrings, IpcProvidedCapability, PLUGIN_INSTALL_ERROR_ALREADY_INSTALLED, PLUGIN_INSTALL_ERROR_CANCELLED, PluginCompatibilityReport, PluginCompatibilityState, PluginInstallActionResponse, LocalizedText, resolveLocalizedText, Strings } from '@macro-deck/runtime';
 import { ApiService, ButtonComponent, CheckboxComponent, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ToastService, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
@@ -295,6 +295,11 @@ export class IntegrationsPageComponent implements OnInit {
 
     this.pendingInstall.set(null);
     this.replaceTarget.set(null);
+
+    if (result?.error?.code === PLUGIN_INSTALL_ERROR_CANCELLED) {
+      this.toast.show(this.localization.translateKey(AppStrings.Integrations.Page.InstallCancelled), { variant: 'info' });
+      return;
+    }
 
     if (!result?.success) {
       this.toast.show(this.localization.translateKey(AppStrings.Integrations.Page.InstallFailed), {

@@ -1,26 +1,18 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
-import { AppStrings, BackupComponentCatalogEntry, BackupComponentGroupInfo, BackupDependencyWarningDto, BackupListChangedEvent, BackupOperationProgressEvent, BackupOperationStage, BackupRecoveryKeyStateChangedEvent, BackupSummary, GetBackupRecoveryKeyStateResponse, GetBackupSettingsResponse, GetBackupStatusResponse, LocalizedText, PendingRestoreSummary, RestorePendingEvent, UpdateBackupSettingsRequest, resolveLocalizedText } from '@macro-deck/runtime';
+import { AppStrings, BackupComponentCatalogEntry, BackupComponentGroupInfo, BackupDependencyWarningDto, BackupListChangedEvent, BackupOperationProgressEvent, BackupRecoveryKeyStateChangedEvent, BackupSummary, GetBackupRecoveryKeyStateResponse, GetBackupSettingsResponse, GetBackupStatusResponse, LocalizedText, PendingRestoreSummary, RestorePendingEvent, UpdateBackupSettingsRequest, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import type { BackupComponentGroup } from '@macro-deck/runtime';
+import { isActiveBackupStage, isTerminalBackupStage } from '../util/backup-progress-display';
 import { downloadFile } from '../util/download-file';
 import { shellBridge } from '../util/shell-bridge';
 
-const TERMINAL_STAGES: ReadonlySet<string> = new Set(['Completed', 'Failed']);
+const CANCELLED_ERROR = 'Cancelled';
 
 function sortNewestFirst(backups: readonly BackupSummary[]): BackupSummary[] {
   return [...backups].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 }
 
-const ACTIVE_STAGES: ReadonlySet<BackupOperationStage> = new Set<BackupOperationStage>([
-  'Preparing',
-  'CreatingSnapshot',
-  'Encrypting',
-  'Saving',
-  'Validating',
-  'Restoring',
-]);
-
-export type BackupOperationResult = { ok: true } | { ok: false; error: string };
+export type BackupOperationResult = { ok: true } | { ok: false; error: string; cancelled?: boolean };
 
 export type BackupRecoveryKeyOutcome =
   | { status: 'success'; key: string; state: GetBackupRecoveryKeyStateResponse }
@@ -55,6 +47,7 @@ export type PrepareRestoreOutcome =
     }
   | { status: 'recoveryKeyRequired' }
   | { status: 'recoveryKeyInvalid' }
+  | { status: 'cancelled' }
   | { status: 'error'; message: string };
 
 export type CommitRestoreOutcome =
@@ -75,10 +68,12 @@ export class BackupService {
   readonly settings = signal<GetBackupSettingsResponse | null>(null);
   readonly recoveryKey = signal<GetBackupRecoveryKeyStateResponse | null>(null);
   readonly downloading = signal<ReadonlySet<string>>(new Set());
+  private restoreOperationId: string | null = null;
+  readonly progressDialogHidden = signal(false);
 
   readonly running: Signal<boolean> = computed(() => {
     const op = this.operation();
-    return !!op && ACTIVE_STAGES.has(op.stage);
+    return !!op && isActiveBackupStage(op.stage);
   });
 
   readonly canMutate: Signal<boolean> = computed(() => !this.running() && !this.pendingRestore());
@@ -89,6 +84,15 @@ export class BackupService {
 
   dismissOperation(): void {
     this.operation.set(null);
+    this.progressDialogHidden.set(false);
+  }
+
+  hideProgressDialog(): void {
+    this.progressDialogHidden.set(true);
+  }
+
+  showProgressDialog(): void {
+    this.progressDialogHidden.set(false);
   }
 
   async load(): Promise<void> {
@@ -141,11 +145,23 @@ export class BackupService {
     try {
       const response = await this.api.createBackup({ note, protected: protect });
       if (!response.success) {
-        return { ok: false, error: response.error?.message ?? this.localization.translateKey(AppStrings.Errors.Backup.CreateFailed) };
+        return {
+          ok: false,
+          error: response.error?.message ?? this.localization.translateKey(AppStrings.Errors.Backup.CreateFailed),
+          cancelled: response.error?.code === CANCELLED_ERROR,
+        };
       }
       return { ok: true };
     } catch (error) {
       return { ok: false, error: errorMessage(error, this.localization.translateKey(AppStrings.Errors.Backup.OperationFailed)) };
+    }
+  }
+
+  async cancelOperation(operationId: string): Promise<void> {
+    try {
+      await this.api.cancelBackupOperation(operationId);
+    } catch (error) {
+      console.error('Failed to cancel the backup operation:', error);
     }
   }
 
@@ -245,6 +261,9 @@ export class BackupService {
   ): Promise<PrepareRestoreOutcome> {
     try {
       const response = await this.api.prepareRestore({ backupId, components, recoveryKey });
+      if (!response.success && response.error?.code === CANCELLED_ERROR) {
+        return { status: 'cancelled' };
+      }
       if (!response.success) {
         return mapRecoveryKeyError(response.error?.code) ?? {
           status: 'error',
@@ -368,11 +387,22 @@ export class BackupService {
   }
 
   private applyOperation(status: GetBackupStatusResponse, fromPush: boolean): void {
-    if (status.stage === 'Idle' || (!fromPush && TERMINAL_STAGES.has(status.stage))) {
+    if (status.stage === 'Idle' || (!fromPush && isTerminalBackupStage(status.stage))) {
+      this.progressDialogHidden.set(false);
       this.operation.set(null);
       return;
     }
 
+    if (status.kind === 'Restore') {
+      this.restoreOperationId = isActiveBackupStage(status.stage) ? status.operationId ?? null : null;
+    } else if (this.restoreOperationId && status.trigger === 'BeforeRestore' && isTerminalBackupStage(status.stage)) {
+      // The safety backup runs inside a restore: its end is not the end of what the user started.
+      return;
+    }
+
+    if (!isActiveBackupStage(status.stage)) {
+      this.progressDialogHidden.set(false);
+    }
     this.operation.set(status);
   }
 

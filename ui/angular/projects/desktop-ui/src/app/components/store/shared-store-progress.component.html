@@ -33,7 +33,7 @@
               <div class="fill" [style.width.%]="percent(operation)"></div>
             }
           </div>
-          @if (operation.state === 'Downloading') {
+          @if (operation.state === 'Downloading' || (operation.state === 'BackingUp' && (readout(operation) || eta(operation)))) {
             <span class="readout">
               {{ readout(operation) }}
               @if (eta(operation); as remaining) {
@@ -41,6 +41,9 @@
                 <span>{{ remaining }}</span>
               }
             </span>
+          }
+          @if (operation.state === 'BackingUp') {
+            <button type="button" class="retry" (click)="cancel(operation)">{{ 'macrodeck:Common.Cancel' | translate }}</button>
           }
         }
 

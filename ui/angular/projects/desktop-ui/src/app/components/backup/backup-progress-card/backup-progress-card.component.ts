@@ -1,22 +1,35 @@
-import { ChangeDetectionStrategy, Component, Input, computed, inject, signal } from '@angular/core';
-import { AppStrings, BackupOperationStage, GetBackupStatusResponse } from '@macro-deck/runtime';
-import { LocalizationService } from '@shared';
+import { ChangeDetectionStrategy, Component, Input, computed, inject, output, signal } from '@angular/core';
+import { AppStrings, BackupOperationStage, BackupTrigger, GetBackupStatusResponse } from '@macro-deck/runtime';
+import { ButtonComponent, LocalizationService } from '@shared';
+import { backupEta, backupPercent, isActiveBackupStage } from '../../../util/backup-progress-display';
 import { formatBytes } from '../../../util/format-bytes';
 
-const PHASE_LABEL_KEYS: Partial<Record<BackupOperationStage, string>> = {
-  Preparing: AppStrings.Backup.Phase.Preparing,
-  CreatingSnapshot: AppStrings.Backup.Phase.CreatingSnapshot,
-  Encrypting: AppStrings.Backup.Phase.Encrypting,
-  Saving: AppStrings.Backup.Phase.Saving,
-  Validating: AppStrings.Backup.Phase.Validating,
-  Restoring: AppStrings.Backup.Phase.Restoring,
-  Completed: AppStrings.Backup.Phase.Completed,
-  Failed: AppStrings.Backup.Phase.Failed,
+type StageState = 'done' | 'current' | 'pending';
+
+interface StageRow {
+  label: string;
+  state: StageState;
+}
+
+const TRIGGER_LABEL_KEYS: Record<BackupTrigger, string> = {
+  Manual: AppStrings.Settings.Backups.TriggerManual,
+  Scheduled: AppStrings.Settings.Backups.TriggerScheduled,
+  BeforeHostUpdate: AppStrings.Settings.Backups.TriggerBeforeHostUpdate,
+  BeforePluginUpdate: AppStrings.Settings.Backups.TriggerBeforePluginUpdate,
+  BeforeRestore: AppStrings.Settings.Backups.TriggerBeforeRestore,
+  Imported: AppStrings.Settings.Backups.TriggerImported,
 };
+
+const CREATE_STAGES: readonly { key: string; stages: readonly BackupOperationStage[] }[] = [
+  { key: AppStrings.Backup.Progress.StagePreparing, stages: ['Preparing', 'CreatingSnapshot'] },
+  { key: AppStrings.Backup.Progress.StageCopying, stages: ['Encrypting', 'Saving'] },
+  { key: AppStrings.Backup.Progress.StageVerifying, stages: ['Validating'] },
+];
 
 @Component({
   selector: 'shared-backup-progress-card',
   standalone: true,
+  imports: [ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './backup-progress-card.component.html',
   styleUrls: ['./backup-progress-card.component.scss'],
@@ -29,37 +42,60 @@ export class BackupProgressCardComponent {
     this.status.set(value);
   }
 
-  protected readonly status = signal<GetBackupStatusResponse | null>(null);
+  @Input()
+  set cancellable(value: boolean) {
+    this.canCancel.set(value);
+  }
 
-  protected readonly phaseText = computed(() => {
+  @Input()
+  set compact(value: boolean) {
+    this.isCompact.set(value);
+  }
+
+  readonly cancel = output<void>();
+
+  protected readonly status = signal<GetBackupStatusResponse | null>(null);
+  private readonly canCancel = signal(false);
+  protected readonly isCompact = signal(false);
+
+  private readonly restoring = computed(() => {
     const op = this.status();
-    if (!op || op.stage === 'Idle') {
-      return '';
-    }
-    const key = PHASE_LABEL_KEYS[op.stage];
-    return key ? this.localization.translateKey(key) : op.stage;
+    return op?.kind === 'Restore' || (op?.kind === 'Create' && op.trigger === 'BeforeRestore');
+  });
+
+  protected readonly running = computed(() => {
+    const op = this.status();
+    return !!op && isActiveBackupStage(op.stage);
   });
 
   protected readonly isFailed = computed(() => this.status()?.stage === 'Failed');
   protected readonly isDone = computed(() => this.status()?.stage === 'Completed');
 
-  protected readonly percent = computed<number | null>(() => {
+  protected readonly title = computed(() => this.localization.translateKey(this.restoring()
+    ? AppStrings.Backup.Progress.TitleRestoring
+    : AppStrings.Backup.Progress.TitleCreating));
+
+  protected readonly subtitle = computed(() => {
     const op = this.status();
-    if (!op) {
+    if (!op || this.restoring()) {
       return null;
     }
-    if (op.percentComplete !== undefined && op.percentComplete !== null) {
-      return clampPercent(op.percentComplete);
-    }
-    if (op.bytesProcessed != null && op.totalBytes) {
-      return clampPercent(Math.round((op.bytesProcessed / op.totalBytes) * 100));
-    }
-    return null;
+    const key = TRIGGER_LABEL_KEYS[op.trigger];
+    return key ? this.localization.translateKey(key) : null;
   });
+
+  protected readonly percent = computed(() => this.running() ? backupPercent(this.status()) : null);
+
+  protected readonly percentText = computed(() => {
+    const percent = this.percent();
+    return percent === null ? null : this.localization.translateKey(AppStrings.Backup.Progress.Percent, { percent });
+  });
+
+  protected readonly eta = computed(() => backupEta(this.status(), this.localization));
 
   protected readonly byteDetail = computed<string | null>(() => {
     const op = this.status();
-    if (!op || op.bytesProcessed == null) {
+    if (!op || !this.running() || op.bytesProcessed == null) {
       return null;
     }
     const processed = formatBytes(op.bytesProcessed);
@@ -67,8 +103,29 @@ export class BackupProgressCardComponent {
       ? this.localization.translateKey(AppStrings.Backup.Progress.ByteDetail, { processed, total: formatBytes(op.totalBytes) })
       : processed;
   });
-}
 
-function clampPercent(value: number): number {
-  return Math.min(100, Math.max(0, Math.round(value)));
+  protected readonly stages = computed<StageRow[]>(() => {
+    const op = this.status();
+    if (!op || !this.running()) {
+      return [];
+    }
+    if (this.restoring()) {
+      const inSafetyBackup = op.kind === 'Create';
+      return [
+        { label: this.localization.translateKey(AppStrings.Backup.Progress.CheckingBackup), state: inSafetyBackup ? 'done' : 'current' },
+        { label: this.localization.translateKey(AppStrings.Backup.Progress.CreatingSafetyBackup), state: inSafetyBackup ? 'current' : 'pending' },
+      ];
+    }
+    const current = CREATE_STAGES.findIndex(stage => stage.stages.includes(op.stage));
+    return CREATE_STAGES.map((stage, index) => ({
+      label: this.localization.translateKey(stage.key),
+      state: index < current ? 'done' : index === current ? 'current' : 'pending',
+    }));
+  });
+
+  protected readonly cancelLabel = computed(() => this.localization.translateKey(this.restoring()
+    ? AppStrings.Backup.Progress.CancelRestore
+    : AppStrings.Backup.Progress.Cancel));
+
+  protected readonly showCancel = computed(() => this.canCancel() && this.running() && !!this.status()?.operationId);
 }

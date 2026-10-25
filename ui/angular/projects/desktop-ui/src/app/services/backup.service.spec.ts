@@ -1,7 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { EMPTY } from 'rxjs';
-import { PrepareRestoreResponse } from '@macro-deck/runtime';
+import { EMPTY, Subject } from 'rxjs';
+import { GetBackupStatusResponse, PrepareRestoreResponse } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { BackupService } from './backup.service';
 
@@ -229,5 +229,71 @@ describe('BackupService', () => {
       expect(apiSpy.downloadBackup).toHaveBeenCalledOnceWith('b1');
       expect(outcome).toEqual({ status: 'saved' });
     });
+  });
+});
+
+describe('BackupService during a restore', () => {
+  let progress: Subject<GetBackupStatusResponse>;
+  let service: BackupService;
+
+  beforeEach(() => {
+    progress = new Subject<GetBackupStatusResponse>();
+    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['onNotification']);
+    apiSpy.onNotification.and.callFake(((type: string) =>
+      type === 'BackupOperationProgressEvent' ? progress.asObservable() : EMPTY) as never);
+
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection(), BackupService, { provide: ApiService, useValue: apiSpy }],
+    });
+    service = TestBed.inject(BackupService);
+  });
+
+  function status(overrides: Partial<GetBackupStatusResponse>): GetBackupStatusResponse {
+    return { kind: 'Create', stage: 'Saving', trigger: 'BeforeRestore', updatedAt: '2026-01-01T00:00:00Z', ...overrides };
+  }
+
+  it('keeps the restore running when its safety backup finishes', () => {
+    progress.next(status({ operationId: 'restore', kind: 'Restore', stage: 'Restoring' }));
+    progress.next(status({ operationId: 'safety', stage: 'Saving', percentComplete: 90 }));
+
+    progress.next(status({ operationId: 'safety', stage: 'Completed', percentComplete: 100 }));
+
+    expect(service.running()).toBeTrue();
+    expect(service.operation()?.stage).not.toBe('Completed');
+  });
+
+  it('keeps the restore running when it goes on after a failed safety backup', () => {
+    progress.next(status({ operationId: 'restore', kind: 'Restore', stage: 'Restoring' }));
+    progress.next(status({ operationId: 'safety', stage: 'Saving' }));
+
+    progress.next(status({ operationId: 'safety', stage: 'Failed', errorMessage: 'Disk full' }));
+
+    expect(service.operation()?.stage).not.toBe('Failed');
+  });
+
+  it('ends with the restore itself', () => {
+    progress.next(status({ operationId: 'restore', kind: 'Restore', stage: 'Restoring' }));
+    progress.next(status({ operationId: 'safety', stage: 'Completed', percentComplete: 100 }));
+
+    progress.next(status({ operationId: 'restore', kind: 'Restore', stage: 'Completed' }));
+
+    expect(service.operation()?.kind).toBe('Restore');
+    expect(service.operation()?.stage).toBe('Completed');
+    expect(service.running()).toBeFalse();
+  });
+
+  it('shows the next backup\'s dialog again when the previous one ended unseen', () => {
+    progress.next(status({ operationId: 'a', trigger: 'Manual', stage: 'Saving' }));
+    service.hideProgressDialog();
+
+    progress.next(status({ operationId: 'a', trigger: 'Manual', stage: 'Idle' }));
+
+    expect(service.progressDialogHidden()).toBeFalse();
+  });
+
+  it('still reports a finished backup that is not part of a restore', () => {
+    progress.next(status({ operationId: 'manual', trigger: 'Manual', stage: 'Completed' }));
+
+    expect(service.operation()?.stage).toBe('Completed');
   });
 });

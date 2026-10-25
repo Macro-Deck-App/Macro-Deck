@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { AppStrings, StoreOperationBody } from '@macro-deck/runtime';
 import { LocalizationService, TranslatePipe } from '@shared';
+import { BackupService } from '../../services/backup.service';
 import { StoreOperationService } from '../../services/store-operation.service';
 import { UpdateModalService } from '../../services/update-modal.service';
 import { UpdateService } from '../../services/update.service';
+import { backupEta, backupPercent, storeOperationBackup } from '../../util/backup-progress-display';
 import { formatEta, isTerminalStoreOperationState, storeOperationByteReadout, storeOperationErrorKey, storeOperationPercent, storeOperationStateLabelKey } from '../../util/store-operation-display';
 
 const AUTO_DISMISS_DELAY_MS = 4000;
@@ -18,6 +20,7 @@ const AUTO_DISMISS_DELAY_MS = 4000;
 })
 export class SharedStoreProgressComponent {
   private readonly operations = inject(StoreOperationService);
+  private readonly backups = inject(BackupService);
   private readonly localization = inject(LocalizationService);
   protected readonly updates = inject(UpdateService);
   private readonly updateModal = inject(UpdateModalService);
@@ -49,14 +52,22 @@ export class SharedStoreProgressComponent {
   }
 
   protected percent(operation: StoreOperationBody): number | null {
-    return storeOperationPercent(operation);
+    const backup = storeOperationBackup(operation, this.backups.operation());
+    return backup ? backupPercent(backup) : storeOperationPercent(operation);
   }
 
   protected readout(operation: StoreOperationBody): string {
+    if (operation.state === 'BackingUp') {
+      const percent = this.percent(operation);
+      return percent === null ? '' : this.localization.translateKey(AppStrings.Backup.Progress.Percent, { percent });
+    }
     return storeOperationByteReadout(operation, this.localization);
   }
 
   protected eta(operation: StoreOperationBody): string | null {
+    if (operation.state === 'BackingUp') {
+      return backupEta(storeOperationBackup(operation, this.backups.operation()), this.localization);
+    }
     return formatEta(operation.etaSeconds, this.localization);
   }
 
@@ -84,6 +95,10 @@ export class SharedStoreProgressComponent {
     }
 
     void this.operations.dismiss(operation.id);
+  }
+
+  protected cancel(operation: StoreOperationBody): void {
+    void this.operations.cancel(operation.id);
   }
 
   protected retry(operation: StoreOperationBody): void {

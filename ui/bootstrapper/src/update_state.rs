@@ -134,6 +134,13 @@ pub(crate) struct DownloadProgress {
     pub(crate) percent: Option<u8>,
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub(crate) struct BackupProgress {
+    pub(crate) operation_id: String,
+    pub(crate) percent: Option<u8>,
+    pub(crate) eta_seconds: Option<u64>,
+}
+
 // A total of zero never happens on a real release artifact, but a
 // content-length header of "0" must not be read as "already 100% done";
 // falling back to a megabyte bucket keeps the progress event throttled
@@ -168,6 +175,10 @@ pub(crate) struct UpdateSnapshot {
     pub(crate) progress: Option<DownloadProgress>,
     pub(crate) last_checked_at: Option<u64>,
     pub(crate) install_on_quit: bool,
+    #[serde(skip)]
+    pub(crate) backup: Option<BackupProgress>,
+    #[serde(skip)]
+    pub(crate) quit_install_failed: bool,
 }
 
 pub(crate) struct UpdateState {
@@ -193,6 +204,8 @@ pub(crate) struct UpdateState {
     pub(crate) last_check_at: Option<u64>,
     pub(crate) last_tick_at: u64,
     install_on_quit: bool,
+    backup: Option<BackupProgress>,
+    quit_install_failed: bool,
 }
 
 impl UpdateState {
@@ -228,6 +241,8 @@ impl UpdateState {
             last_check_at: None,
             last_tick_at: 0,
             install_on_quit: false,
+            backup: None,
+            quit_install_failed: false,
         }
     }
 
@@ -367,7 +382,21 @@ impl UpdateState {
         }
         self.phase = UpdatePhase::Installing;
         self.install_on_quit = false;
+        self.backup = None;
+        self.quit_install_failed = false;
         true
+    }
+
+    pub(crate) fn record_quit_install_failed(&mut self) {
+        self.quit_install_failed = self.phase == UpdatePhase::Failed;
+    }
+
+    // Ignored outside Installing, so a poll that answers after the backup
+    // ended cannot bring its progress back.
+    pub(crate) fn record_backup_progress(&mut self, progress: Option<BackupProgress>) {
+        if self.phase == UpdatePhase::Installing {
+            self.backup = progress;
+        }
     }
 
     // Used for both a failed download and a failed install: either way the
@@ -375,6 +404,7 @@ impl UpdateState {
     // going back to `Available`) is what tells the UI there is something to
     // show the user, not just a quiet retry point.
     pub(crate) fn record_install_failed(&mut self, error: String) {
+        self.backup = None;
         self.phase = UpdatePhase::Failed;
         self.install_on_quit = false;
         self.error = Some(error);
@@ -466,6 +496,8 @@ impl UpdateState {
             progress: self.progress.clone(),
             last_checked_at: self.last_check_at,
             install_on_quit: self.install_on_quit && self.phase == UpdatePhase::Downloaded,
+            backup: self.backup.clone(),
+            quit_install_failed: self.quit_install_failed,
         }
     }
 }

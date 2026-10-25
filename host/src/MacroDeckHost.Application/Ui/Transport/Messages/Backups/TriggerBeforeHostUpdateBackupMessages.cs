@@ -11,6 +11,8 @@ public sealed class TriggerBeforeHostUpdateBackupResponse
 
 	public bool Skipped { get; set; }
 
+	public bool Cancelled { get; set; }
+
 	public string? Reason { get; set; }
 
 	public Guid? BackupId { get; set; }

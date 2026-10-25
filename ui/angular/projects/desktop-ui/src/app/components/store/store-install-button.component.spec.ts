@@ -1,8 +1,10 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AppStrings, StoreCatalogItemBody, StoreOperationBody } from '@macro-deck/runtime';
+import { AppStrings, GetBackupStatusResponse, StoreCatalogItemBody, StoreOperationBody } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
+import { BackupService } from '../../services/backup.service';
 import { DeveloperModeService } from '../../services/developer-mode.service';
+import { StoreOperationService } from '../../services/store-operation.service';
 import { StoreInstallButtonComponent } from './store-install-button.component';
 import { provideLocalizationTesting } from '../../../testing/localization-test-support';
 
@@ -566,5 +568,109 @@ describe('StoreInstallButtonComponent prominent states', () => {
 
     expect(button).toBeGreaterThan(0);
     expect(status).toBe(button);
+  });
+});
+
+describe('StoreInstallButtonComponent while backing up before an update', () => {
+  let fixture: ComponentFixture<StoreInstallButtonComponent>;
+  const backupOperation = signal<GetBackupStatusResponse | null>(null);
+  let storeOperations: { cancel: jasmine.Spy };
+
+  function backingUp(): StoreOperationBody {
+    return {
+      id: 'op-1',
+      kind: 'Update',
+      extensionKind: 'Plugin',
+      packageId: 'com.acme.deck-tools',
+      version: '1.1.0',
+      previousVersion: '1.0.0',
+      displayName: 'Deck Tools',
+      state: 'BackingUp',
+      bytesDownloaded: 0,
+      startedAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:01Z',
+      canRetry: false,
+    };
+  }
+
+  function backup(overrides: Partial<GetBackupStatusResponse> = {}): GetBackupStatusResponse {
+    return {
+      operationId: 'backup-1',
+      kind: 'Create',
+      stage: 'Saving',
+      trigger: 'BeforePluginUpdate',
+      percentComplete: 64,
+      updatedAt: '2026-01-01T00:00:01Z',
+      ...overrides,
+    };
+  }
+
+  async function setup(): Promise<void> {
+    TestBed.configureTestingModule({
+      imports: [StoreInstallButtonComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: DeveloperModeService, useValue: { enabled: signal(false), ensureLoaded: () => Promise.resolve() } },
+        { provide: BackupService, useValue: { operation: backupOperation } },
+        { provide: StoreOperationService, useValue: storeOperations },
+      ],
+    });
+    fixture = TestBed.createComponent(StoreInstallButtonComponent);
+    fixture.componentRef.setInput('item', {
+      kind: 'Plugin',
+      id: 'com.acme.deck-tools',
+      name: 'Deck Tools',
+      latestVersion: '1.1.0',
+      installedVersion: '1.0.0',
+      installState: 'UpdateAvailable',
+      trust: 'RegistryAuthenticated',
+      hasIcon: false,
+    } as StoreCatalogItemBody);
+    fixture.componentRef.setInput('operation', backingUp());
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  function bar(): HTMLElement {
+    return fixture.nativeElement.querySelector('[role="progressbar"]');
+  }
+
+  beforeEach(() => {
+    backupOperation.set(null);
+    storeOperations = { cancel: jasmine.createSpy('cancel').and.resolveTo(null) };
+  });
+
+  it('cancels the update, and with it its backup', async () => {
+    backupOperation.set(backup());
+    await setup();
+
+    (fixture.nativeElement.querySelector('.progress-cancel') as HTMLButtonElement).click();
+
+    expect(storeOperations.cancel).toHaveBeenCalledOnceWith('op-1');
+  });
+
+  it('fills the bar with the backup\'s real progress and names it', async () => {
+    backupOperation.set(backup({ etaSeconds: 30 }));
+    await setup();
+
+    expect(bar().classList).not.toContain('indeterminate');
+    expect(bar().getAttribute('aria-valuenow')).toBe('64');
+    expect(fixture.nativeElement.querySelector('.progress-readout').textContent).toContain('64%');
+  });
+
+  it('stays indeterminate while the backup has no percentage yet', async () => {
+    backupOperation.set(backup({ stage: 'CreatingSnapshot', percentComplete: undefined }));
+    await setup();
+
+    expect(bar().classList).toContain('indeterminate');
+    expect(bar().getAttribute('aria-valuenow')).toBeNull();
+  });
+
+  it('does not show the progress of a backup that belongs to something else', async () => {
+    backupOperation.set(backup({ trigger: 'Scheduled' }));
+    await setup();
+
+    expect(bar().classList).toContain('indeterminate');
   });
 });

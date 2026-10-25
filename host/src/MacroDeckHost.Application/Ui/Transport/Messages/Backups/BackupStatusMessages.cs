@@ -18,6 +18,8 @@ public sealed class GetBackupStatusResponse
 
 	public long? TotalBytes { get; set; }
 
+	public int? EtaSeconds { get; set; }
+
 	public Guid? BackupId { get; set; }
 
 	public string? Error { get; set; }

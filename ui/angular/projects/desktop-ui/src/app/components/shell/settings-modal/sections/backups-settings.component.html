@@ -1,11 +1,11 @@
-@if (operation(); as op) {
+@if (visibleOperation(); as op) {
   <shared-modal
     [heading]="(operationFailed() ? 'macrodeck.app:Settings.Backups.FailedHeading' : 'macrodeck.app:Settings.Backups.WorkingHeading') | translate"
     [showFooter]="operationFailed()"
     [closeOnOverlay]="operationFailed()"
     maxWidth="420px"
     (close)="dismissOperation()">
-    <shared-backup-progress-card [operation]="op" />
+    <shared-backup-progress-card [operation]="op" [cancellable]="true" (cancel)="cancelOperation(op)" />
     <div modal-footer>
       <shared-button variant="secondary" (clicked)="dismissOperation()">{{ 'macrodeck:Common.Close' | translate }}</shared-button>
     </div>
@@ -36,6 +36,20 @@
         {{ 'macrodeck.app:Settings.Backups.CreateButton' | translate }}
       </shared-button>
     </div>
+
+    @if (inlineOperation(); as op) {
+      <div class="bks-running">
+        <shared-backup-progress-card [operation]="op" [compact]="true" />
+        <div class="bks-running-actions">
+          <shared-button variant="secondary" size="compact" (click)="showOperationDetails()">
+            {{ 'macrodeck.app:Settings.License.ShowDetails' | translate }}
+          </shared-button>
+          <shared-button variant="danger-ghost" size="compact" (click)="cancelOperation(op)">
+            {{ 'macrodeck:Common.Cancel' | translate }}
+          </shared-button>
+        </div>
+      </div>
+    }
 
     <app-backup-list
       (previewRequested)="onPreview($event)"

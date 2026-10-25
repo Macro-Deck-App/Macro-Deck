@@ -46,6 +46,9 @@ public class BackupsController : ControllerBase
 	private readonly IUiTransportMessageHandler<CommitRestoreRequest, CommitRestoreResponse> _commitRestore;
 	private readonly IUiTransportMessageHandler<CancelRestoreRequest, CancelRestoreResponse> _cancelRestore;
 
+	private readonly IUiTransportMessageHandler<CancelBackupOperationRequest, CancelBackupOperationResponse>
+		_cancelOperation;
+
 	private readonly
 		IUiTransportMessageHandler<TriggerBeforeHostUpdateBackupRequest, TriggerBeforeHostUpdateBackupResponse>
 		_triggerBeforeHostUpdate;
@@ -73,6 +76,7 @@ public class BackupsController : ControllerBase
 		IUiTransportMessageHandler<PrepareRestoreRequest, PrepareRestoreResponse> prepareRestore,
 		IUiTransportMessageHandler<CommitRestoreRequest, CommitRestoreResponse> commitRestore,
 		IUiTransportMessageHandler<CancelRestoreRequest, CancelRestoreResponse> cancelRestore,
+		IUiTransportMessageHandler<CancelBackupOperationRequest, CancelBackupOperationResponse> cancelOperation,
 		IUiTransportMessageHandler<TriggerBeforeHostUpdateBackupRequest, TriggerBeforeHostUpdateBackupResponse>
 			triggerBeforeHostUpdate,
 		AppBackups.IBackupService backupService,
@@ -95,6 +99,7 @@ public class BackupsController : ControllerBase
 		_prepareRestore = prepareRestore;
 		_commitRestore = commitRestore;
 		_cancelRestore = cancelRestore;
+		_cancelOperation = cancelOperation;
 		_triggerBeforeHostUpdate = triggerBeforeHostUpdate;
 		_backupService = backupService;
 		_storageRegistry = storageRegistry;
@@ -112,6 +117,12 @@ public class BackupsController : ControllerBase
 	public Task<CreateBackupResponse> Create(CreateBackupRequest body, CancellationToken ct)
 	{
 		return _createBackup.Handle(body, ct).AsTask();
+	}
+
+	[HttpPost("operations/{operationId:guid}/cancel")]
+	public Task<CancelBackupOperationResponse> CancelOperation(Guid operationId, CancellationToken ct)
+	{
+		return _cancelOperation.Handle(new CancelBackupOperationRequest { OperationId = operationId }, ct).AsTask();
 	}
 
 	[HttpDelete("{backupId:guid}")]

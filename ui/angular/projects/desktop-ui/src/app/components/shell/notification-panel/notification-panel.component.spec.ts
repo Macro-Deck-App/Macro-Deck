@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { CompanionAppStatus, UpdateAdbSettingsResponse, UserNotification, UserNotificationAction } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
+import { BackupService } from '../../../services/backup.service';
 import { ExternalLinkService } from '../../../services/external-link.service';
 import { IconPackService } from '../../../services/icon-pack.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
@@ -40,6 +41,8 @@ describe('NotificationPanelComponent', () => {
   let updateModalOpenSpy: jasmine.Spy;
   let updateInstallSpy: jasmine.Spy;
   let updateCancelSpy: jasmine.Spy;
+  let backupCancelSpy: jasmine.Spy;
+  let backupShowSpy: jasmine.Spy;
   let updateAdbSettingsSpy: jasmine.Spy;
   let openExternalSpy: jasmine.Spy;
 
@@ -105,6 +108,8 @@ describe('NotificationPanelComponent', () => {
     updateModalOpenSpy = jasmine.createSpy('open');
     updateInstallSpy = jasmine.createSpy('install').and.returnValue(new Promise<void>(() => {}));
     updateCancelSpy = jasmine.createSpy('cancelDownload').and.resolveTo(undefined);
+    backupCancelSpy = jasmine.createSpy('cancelOperation').and.resolveTo(undefined);
+    backupShowSpy = jasmine.createSpy('showProgressDialog');
     openExternalSpy = jasmine.createSpy('open');
 
     await TestBed.configureTestingModule({
@@ -134,6 +139,7 @@ describe('NotificationPanelComponent', () => {
         { provide: UpdateModalService, useValue: { open: updateModalOpenSpy } },
         { provide: UpdateService, useValue: { install: updateInstallSpy, cancelDownload: updateCancelSpy } },
         { provide: IconPackService, useValue: { cancelBatch: cancelBatchSpy } },
+        { provide: BackupService, useValue: { operation: signal(null), cancelOperation: backupCancelSpy, showProgressDialog: backupShowSpy } },
         { provide: ExternalLinkService, useValue: { open: openExternalSpy } },
         {
           provide: RestartNoticeService,
@@ -464,6 +470,19 @@ describe('NotificationPanelComponent', () => {
     fixture.componentInstance.onCancel(notification({ kind: 'Update', cancelKey: 'update-download' }));
 
     expect(updateCancelSpy).toHaveBeenCalled();
+  });
+
+  it('brings back the full backup dialog from a backup notification', () => {
+    fixture.componentInstance.onShowBackupDetails();
+
+    expect(backupShowSpy).toHaveBeenCalled();
+    expect(settingsOpenSpy).toHaveBeenCalledWith('backups');
+  });
+
+  it('cancels the backup behind a backup notification', () => {
+    fixture.componentInstance.onCancel(notification({ kind: 'General', cancelKey: 'backup:op-7' }));
+
+    expect(backupCancelSpy).toHaveBeenCalledOnceWith('op-7');
   });
 
   it('ignores a cancel on an update notification with no cancelKey', () => {

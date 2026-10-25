@@ -1,83 +1,105 @@
-<div class="ni-row" [class.ni-unread]="isUnread" [class.ni-attention]="attention" [attr.aria-busy]="pending || null">
-  <span class="ni-glyph {{ severityClass }}" aria-hidden="true">
-    <span class="icon {{ severityIcon }} icon-sm"></span>
-  </span>
-
-  <div class="ni-body">
-    <div class="ni-head">
-      <span class="ni-title" [title]="notification.title">
-        @if (isUnread) {
-          <span class="ni-sr-only">{{ appStrings.Shell.Notifications.Unread | translate }}</span>
+@if (runningBackup; as backup) {
+  <div class="ni-row ni-backup" [class.ni-unread]="isUnread">
+    <div class="ni-body">
+      <shared-backup-progress-card [operation]="backup" [compact]="true" />
+      <span class="ni-time">
+        {{ relativeTime }}
+        @if (sourceCategoryLabel; as category) {
+          <span class="ni-source">{{ category }}</span>
         }
-        {{ notification.title }}
       </span>
-      <div class="ni-controls">
-        @if (isUnread) {
-          <shared-button
-            class="ni-mark-read"
-            variant="ghost"
-            iconOnly
-            [sharedTooltip]="appStrings.Shell.Notifications.MarkRead | translate"
-            [ariaLabel]="appStrings.Shell.Notifications.MarkRead | translate"
-            (click)="onMarkRead($event)">
-            <span class="ni-unread-dot" aria-hidden="true"></span>
-          </shared-button>
-        }
-
-        @if (!notification.progress) {
-          <shared-button
-            class="ni-dismiss"
-            variant="ghost"
-            iconOnly
-            [sharedTooltip]="appStrings.Shell.Notifications.Dismiss | translate"
-            [ariaLabel]="appStrings.Shell.Notifications.Dismiss | translate"
-            (click)="onDismiss($event)">
-            <span class="icon icon-x icon-sm" aria-hidden="true"></span>
-          </shared-button>
-        }
-      </div>
-    </div>
-    @if (notification.message) {
-      <span class="ni-message">{{ notification.message }}</span>
-    }
-    @if (notification.progress) {
-      <div
-        class="ni-progress-bar"
-        [class.indeterminate]="progressPercent === null"
-        role="progressbar"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        [attr.aria-valuenow]="progressPercent">
-        @if (progressPercent !== null) {
-          <div class="ni-progress-fill" [style.width.%]="progressPercent"></div>
-        }
-      </div>
-      <span class="ni-progress-label">{{ progressLabel }}</span>
-    }
-
-    <span class="ni-time">
-      {{ relativeTime }}
-      @if (sourceCategoryLabel; as category) {
-        <span class="ni-source">{{ category }}@if (sourceName; as name) {<span class="ni-source-name">{{ name }}</span>}</span>
-      }
-    </span>
-
-    <div class="ni-actions">
-      @for (item of actionList; track item.kind) {
-        <shared-button
-          class="ni-action"
-          [variant]="variantFor(item)"
-          [loading]="pending && variantFor(item) === 'primary'"
-          [disabled]="pending"
-          (click)="onAction($event, item)">
-          <span>{{ labelFor(item) }}</span>
+      <div class="ni-actions">
+        <shared-button class="ni-action" variant="secondary" (click)="onShowDetails($event)">
+          <span>{{ appStrings.Settings.License.ShowDetails | translate }}</span>
         </shared-button>
-      }
-      @if (notification.cancelKey) {
         <shared-button class="ni-action ni-cancel-action" variant="danger-ghost" (click)="onCancel($event)">
           <span>{{ commonStrings.Common.Cancel | translate }}</span>
         </shared-button>
-      }
+      </div>
     </div>
   </div>
-</div>
+} @else {
+  <div class="ni-row" [class.ni-unread]="isUnread" [class.ni-attention]="attention" [attr.aria-busy]="pending || null">
+    <span class="ni-glyph {{ severityClass }}" aria-hidden="true">
+      <span class="icon {{ severityIcon }} icon-sm"></span>
+    </span>
+
+    <div class="ni-body">
+      <div class="ni-head">
+        <span class="ni-title" [title]="notification.title">
+          @if (isUnread) {
+            <span class="ni-sr-only">{{ appStrings.Shell.Notifications.Unread | translate }}</span>
+          }
+          {{ notification.title }}
+        </span>
+        <div class="ni-controls">
+          @if (isUnread) {
+            <shared-button
+              class="ni-mark-read"
+              variant="ghost"
+              iconOnly
+              [sharedTooltip]="appStrings.Shell.Notifications.MarkRead | translate"
+              [ariaLabel]="appStrings.Shell.Notifications.MarkRead | translate"
+              (click)="onMarkRead($event)">
+              <span class="ni-unread-dot" aria-hidden="true"></span>
+            </shared-button>
+          }
+
+          @if (!notification.progress) {
+            <shared-button
+              class="ni-dismiss"
+              variant="ghost"
+              iconOnly
+              [sharedTooltip]="appStrings.Shell.Notifications.Dismiss | translate"
+              [ariaLabel]="appStrings.Shell.Notifications.Dismiss | translate"
+              (click)="onDismiss($event)">
+              <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+            </shared-button>
+          }
+        </div>
+      </div>
+      @if (notification.message) {
+        <span class="ni-message">{{ notification.message }}</span>
+      }
+      @if (notification.progress) {
+        <div
+          class="ni-progress-bar"
+          [class.indeterminate]="progressPercent === null"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-valuenow]="progressPercent">
+          @if (progressPercent !== null) {
+            <div class="ni-progress-fill" [style.width.%]="progressPercent"></div>
+          }
+        </div>
+        <span class="ni-progress-label">{{ progressLabel }}</span>
+      }
+
+      <span class="ni-time">
+        {{ relativeTime }}
+        @if (sourceCategoryLabel; as category) {
+          <span class="ni-source">{{ category }}@if (sourceName; as name) {<span class="ni-source-name">{{ name }}</span>}</span>
+        }
+      </span>
+
+      <div class="ni-actions">
+        @for (item of actionList; track item.kind) {
+          <shared-button
+            class="ni-action"
+            [variant]="variantFor(item)"
+            [loading]="pending && variantFor(item) === 'primary'"
+            [disabled]="pending"
+            (click)="onAction($event, item)">
+            <span>{{ labelFor(item) }}</span>
+          </shared-button>
+        }
+        @if (notification.cancelKey) {
+          <shared-button class="ni-action ni-cancel-action" variant="danger-ghost" (click)="onCancel($event)">
+            <span>{{ commonStrings.Common.Cancel | translate }}</span>
+          </shared-button>
+        }
+      </div>
+    </div>
+  </div>
+}

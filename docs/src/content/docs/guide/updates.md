@@ -23,8 +23,9 @@ time you quit Macro Deck, it installs the update before it closes. The new versi
 start, which shows what's new.
 
 Quit with **Quit** in the tray icon's menu, or on macOS with **Macro Deck > Quit Macro Deck** (Cmd+Q).
-Quitting takes a little longer then: Macro Deck makes the backup set in **Settings > Backups** and installs
-the update, and on Windows the installer's progress window shows briefly. If the backup takes longer than
+Quitting takes a little longer then: the update window opens and shows Macro Deck making the backup set in
+**Settings > Backups** and installing the update, and on Windows the installer's progress window shows briefly.
+If the install fails, the update window says why, and Macro Deck quits when you close it or after 30 seconds. If the backup takes longer than
 two minutes, Macro Deck quits without installing and downloads the update again at the next start. If
 that happens every time, install the update with **Install now** instead.
 
@@ -64,7 +65,10 @@ top-right corner, which goes away once Macro Deck is up to date. The icon's menu
 entry with the new version. It opens the update window right away and brings it to the front.
 
 With **Before Macro Deck updates** turned on in **Settings > Backups**, Macro Deck makes a backup before it
-installs. See [Backups](/guide/backups/).
+installs. The update window shows the backup with its progress and, once it can be estimated, the time left,
+before it says the update is installing. The Macro Deck window shows the same as step 1 of 2, the backup, and
+step 2 of 2, the install. **Cancel update** in either window stops the backup and leaves the update
+uninstalled; you can install it again later. See [Backups](/guide/backups/).
 
 ## Extension updates
 
@@ -94,7 +98,8 @@ installed from a file, or one installed from the Store before this setting exist
 update it once from the Store to include it. Profile templates are never updated automatically.
 
 With **Before plugin updates** turned on in **Settings > Backups**, Macro Deck makes one backup before a
-batch of plugin updates. The Store shows this as its own **Backing up** step before the update installs, so
+batch of plugin updates. The Store shows this as its own **Backing up** step, with its progress and a **Cancel** link that stops the
+update, before the update installs, so
 an update takes longer than a first-time install of the same plugin. Turn the setting off if you would
 rather not wait for it.
 

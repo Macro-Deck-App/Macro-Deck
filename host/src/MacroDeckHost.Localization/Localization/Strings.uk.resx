@@ -779,6 +779,43 @@
   <data name="Backup.Progress.ByteDetail" xml:space="preserve">
     <value>{processed} з {total}</value>
   </data>
+  <data name="Backup.Progress.RestoreCancelledToast" xml:space="preserve">
+    <value>Відновлення скасовано</value>
+  </data>
+  <data name="Backup.Progress.CancelledToast" xml:space="preserve">
+    <value>Резервне копіювання скасовано</value>
+  </data>
+  <data name="Backup.Progress.CancelRestore" xml:space="preserve">
+    <value>Скасувати відновлення</value>
+  </data>
+  <data name="Backup.Progress.Cancel" xml:space="preserve">
+    <value>Скасувати резервне копіювання</value>
+  </data>
+  <data name="Backup.Progress.StageVerifying" xml:space="preserve">
+    <value>Перевірка резервної копії</value>
+  </data>
+  <data name="Backup.Progress.StageCopying" xml:space="preserve">
+    <value>Копіювання та шифрування даних</value>
+  </data>
+  <data name="Backup.Progress.StagePreparing" xml:space="preserve">
+    <value>Підготовка</value>
+  </data>
+  <data name="Backup.Progress.TitleRestoring" xml:space="preserve">
+    <value>Відновлення резервної копії</value>
+  </data>
+  <data name="Backup.Progress.TitleCreating" xml:space="preserve">
+    <value>Створення резервної копії</value>
+  </data>
+  <data name="Backup.Progress.CheckingBackup" xml:space="preserve">
+    <value>Перевірка резервної копії</value>
+  </data>
+  <data name="Backup.Progress.CreatingSafetyBackup" xml:space="preserve">
+    <value>Створення страхової копії</value>
+  </data>
+  <data name="Backup.Progress.Percent" xml:space="preserve">
+    <value>{percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Backup.RecoveryKey.CreatedTitle" xml:space="preserve">
     <value>Збережіть ключ відновлення</value>
   </data>
@@ -1112,6 +1149,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Bootstrapper.Update.Later" xml:space="preserve">
     <value>Пізніше</value>
   </data>
+  <data name="Bootstrapper.Update.BackupCancelled" xml:space="preserve">
+    <value>Оновлення не встановлено, бо його резервне копіювання скасовано.</value>
+  </data>
   <data name="Bootstrapper.Update.LinuxNotSupported" xml:space="preserve">
     <value>Macro Deck на Linux не встановлює оновлення самостійно. Завантажте нову версію з {downloadPageUrl} і оновіть встановлений AppImage, DEB або RPM.</value>
   </data>
@@ -1145,9 +1185,35 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Зараз у вас {version}</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpStatus" xml:space="preserve">
+    <value>Створення резервної копії перед оновленням…</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CancelBackup" xml:space="preserve">
+    <value>Скасувати оновлення</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.BackingUpProgressStatus" xml:space="preserve">
+    <value>Створення резервної копії перед оновленням… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Завантаження… {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.One" xml:space="preserve">
+    <value>приблизно {count} хв залишилось</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaMinutesLeft.Other" xml:space="preserve">
+    <value>приблизно {count} хв залишилось</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, a minute or more.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.One" xml:space="preserve">
+    <value>приблизно {count} с залишилось</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.EtaSecondsLeft.Other" xml:space="preserve">
+    <value>приблизно {count} с залишилось</value>
+    <comment>[plural][count:int] Remaining time of the backup before an update, under a minute.</comment>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
     <value>Оновлення завантажено. Macro Deck встановить його, коли ви закриєте програму.</value>
@@ -9993,6 +10059,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Page.InstallFailed" xml:space="preserve">
     <value>Не вдалося встановити плагін</value>
   </data>
+  <data name="Integrations.Page.InstallCancelled" xml:space="preserve">
+    <value>Оновлення плагіна скасовано. Нічого не змінено.</value>
+  </data>
   <data name="Integrations.Page.InstallFromFileAction" xml:space="preserve">
     <value>Встановити з файлу…</value>
   </data>
@@ -14803,6 +14872,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Імпорт значків до {pack}</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>Не вдалося виконати відновлення</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Нічого з цього не можна імпортувати як значок.</value>
   </data>
@@ -17907,6 +17979,25 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Shell.Splash.PreparingUpdate" xml:space="preserve">
     <value>Підготовка оновлення…</value>
   </data>
+  <data name="Shell.Splash.StepInstall" xml:space="preserve">
+    <value>Встановлення оновлення</value>
+  </data>
+  <data name="Shell.Splash.StepBackup" xml:space="preserve">
+    <value>Резервне копіювання даних</value>
+  </data>
+  <data name="Shell.Splash.CancelUpdate" xml:space="preserve">
+    <value>Скасувати оновлення</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackup" xml:space="preserve">
+    <value>Створення резервної копії…</value>
+  </data>
+  <data name="Shell.Splash.CreatingBackupProgress" xml:space="preserve">
+    <value>Створення резервної копії… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
+  <data name="Shell.Splash.InstallingUpdate" xml:space="preserve">
+    <value>Встановлення оновлення…</value>
+  </data>
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Зупинка Macro Deck…</value>
   </data>
@@ -17918,6 +18009,10 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Store.BackingUpEllipsis" xml:space="preserve">
     <value>Створення резервної копії…</value>
+  </data>
+  <data name="Store.BackingUpProgress" xml:space="preserve">
+    <value>Створення резервної копії… {percent}%</value>
+    <comment>[percent:int]</comment>
   </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Скасовано</value>
@@ -18021,19 +18116,19 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>приблизно {count} хв залишилось</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaMinutesLeft.Other" xml:space="preserve">
     <value>приблизно {count} хв залишилось</value>
-    <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, a minute or more.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.One" xml:space="preserve">
     <value>приблизно {count} с залишилось</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.EtaSecondsLeft.Other" xml:space="preserve">
     <value>приблизно {count} с залишилось</value>
-    <comment>[plural][count:int] Remaining download time, under a minute.</comment>
+    <comment>[plural][count:int] Remaining time of a download or backup, under a minute.</comment>
   </data>
   <data name="Store.Failed" xml:space="preserve">
     <value>Не вдалося</value>

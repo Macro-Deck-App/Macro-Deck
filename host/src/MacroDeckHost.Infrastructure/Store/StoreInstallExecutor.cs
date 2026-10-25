@@ -259,13 +259,15 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			Force = replacesVersionDirectory,
 			RetainDownload = false,
 			BackupBatchId = backupBatchId,
-			Stage = stage => _tracker.Transition(operationId,
-				stage == PluginInstallStage.BackingUp
-					? StoreOperationState.BackingUp
-					: StoreOperationState.Installing)
+			Stage = stage => TransitionToStage(operationId, stage)
 		};
 
 		var result = await _pluginInstaller.Install(source, request, cancellationToken);
+		if (TransitionWhenCancelled(operationId, result))
+		{
+			return;
+		}
+
 		if (!result.Success)
 		{
 			_tracker.Transition(operationId,
@@ -352,9 +354,15 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				ExpectedPluginId = operation.PackageId,
 				AllowUnsigned = true,
 				Force = true,
-				RetainDownload = false
+				RetainDownload = false,
+				Stage = stage => TransitionToStage(operationId, stage)
 			};
 			var result = await _pluginInstaller.Install(source, request, cancellationToken);
+			if (TransitionWhenCancelled(operationId, result))
+			{
+				return;
+			}
+
 			if (!result.Success)
 			{
 				_tracker.Transition(operationId,
@@ -582,6 +590,26 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		{
 			_logger.Warning(ex, "Failed to delete store staging directory {Directory}", directory);
 		}
+	}
+
+	private bool TransitionWhenCancelled(Guid operationId, PluginInstallResult result)
+	{
+		if (result.Success || result.Error != PluginInstallError.Cancelled)
+		{
+			return false;
+		}
+
+		_tracker.Transition(operationId,
+			StoreOperationState.Cancelled,
+			StoreOperationError.Cancelled,
+			result.ErrorMessage ?? "Cancelled.");
+		return true;
+	}
+
+	private void TransitionToStage(Guid operationId, PluginInstallStage stage)
+	{
+		_tracker.Transition(operationId,
+			stage == PluginInstallStage.BackingUp ? StoreOperationState.BackingUp : StoreOperationState.Installing);
 	}
 
 	private static StoreOperationError MapPluginError(PluginInstallResult result)

@@ -2,8 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, ou
 import { NgTemplateOutlet } from '@angular/common';
 import { AppStrings, StoreCatalogItemBody, StoreOperationBody } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe } from '@shared';
+import { BackupService } from '../../services/backup.service';
 import { DeveloperModeService } from '../../services/developer-mode.service';
+import { StoreOperationService } from '../../services/store-operation.service';
 import { TooltipDirective } from '../overlay/tooltip/tooltip.directive';
+import { backupEta, backupPercent, storeOperationBackup } from '../../util/backup-progress-display';
 import { compareVersions, sameVersion } from '../../util/semver-compare';
 import { formatEta, storeOperationByteReadout, storeOperationErrorKey, storeOperationPercent } from '../../util/store-operation-display';
 
@@ -58,6 +61,8 @@ export class StoreInstallButtonComponent {
   readonly manage = output<StoreManageAction>();
 
   private readonly developerMode = inject(DeveloperModeService);
+  private readonly backups = inject(BackupService);
+  private readonly storeOperations = inject(StoreOperationService);
 
   constructor() {
     // Only asked once the host has already refused this install for being unsigned: nothing is
@@ -190,6 +195,26 @@ export class StoreInstallButtonComponent {
   });
 
   protected readonly errorDetail = computed(() => this.operation()?.errorMessage ?? null);
+
+  protected readonly backup = computed(() => storeOperationBackup(this.operation(), this.backups.operation()));
+
+  protected readonly backupPercent = computed(() => backupPercent(this.backup()));
+
+  protected readonly backupReadout = computed(() => {
+    const percent = this.backupPercent();
+    return percent === null
+      ? this.localization.translateKey(AppStrings.Store.BackingUpEllipsis)
+      : this.localization.translateKey(AppStrings.Store.BackingUpProgress, { percent });
+  });
+
+  protected readonly backupEta = computed(() => backupEta(this.backup(), this.localization));
+
+  protected cancelBackup(): void {
+    const op = this.operation();
+    if (op) {
+      void this.storeOperations.cancel(op.id);
+    }
+  }
 
   protected readonly isUnsignedRefusal = computed(() => {
     const op = this.operation();

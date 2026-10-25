@@ -39,7 +39,7 @@
 // report failed - the host is down, or was never brought up - so the user has
 // at least one way to hear about an update.
 
-use std::sync::atomic::{AtomicI64, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 
@@ -668,6 +668,16 @@ enum DownloadOutcome {
 
 static DOWNLOAD_CANCEL: Mutex<Option<tokio::sync::oneshot::Sender<()>>> = Mutex::new(None);
 
+pub async fn cancel_pre_update_backup(app: AppHandle) {
+    let operation_id = lock_state(&app)
+        .snapshot()
+        .backup
+        .map(|backup| backup.operation_id);
+    if let Some(operation_id) = operation_id {
+        host::cancel_backup_operation(&app, &operation_id).await;
+    }
+}
+
 #[tauri::command]
 pub async fn cancel_update_download(_app: AppHandle) {
     let sender = {
@@ -965,35 +975,53 @@ pub fn update_mode_changed(app: &AppHandle, mode: UpdateMode) {
     }
 }
 
-pub(crate) async fn install_on_quit(app: &AppHandle) -> bool {
+static INSTALL_ON_QUIT_RUNNING: AtomicBool = AtomicBool::new(false);
+
+pub(crate) fn install_on_quit_running() -> bool {
+    INSTALL_ON_QUIT_RUNNING.load(Ordering::SeqCst)
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(crate) enum QuitInstall {
+    NotPending,
+    Installed,
+    Failed,
+}
+
+pub(crate) async fn install_on_quit(app: &AppHandle) -> QuitInstall {
     if update_mode::current(app) != UpdateMode::Automatic {
-        return false;
+        return QuitInstall::NotPending;
     }
     let pending = {
         let mut guard = lock_state(app);
         let Some(version) = guard.version.clone() else {
-            return false;
+            return QuitInstall::NotPending;
         };
         if pending_download_version().as_deref() != Some(version.as_str())
             || !guard.claim_install_on_quit()
         {
-            return false;
+            return QuitInstall::NotPending;
         }
         take_matching_pending_download(&version)
     };
     let Some(pending) = pending else {
-        return false;
+        return QuitInstall::NotPending;
     };
     logging::info(&format!(
         "[updater] installing {} on quit",
         pending.update.version
     ));
+    INSTALL_ON_QUIT_RUNNING.store(true, Ordering::SeqCst);
+    update_window::show(app);
     emit_state_and_report(app).await;
-    match perform_install(app, pending.update, pending.bytes, AfterInstall::Exit).await {
-        Ok(()) => true,
+    let result = perform_install(app, pending.update, pending.bytes, AfterInstall::Exit).await;
+    INSTALL_ON_QUIT_RUNNING.store(false, Ordering::SeqCst);
+    match result {
+        Ok(()) => QuitInstall::Installed,
         Err(error) => {
             logging::error(&format!("[updater] install on quit failed: {error}"));
-            false
+            lock_state(app).record_quit_install_failed();
+            QuitInstall::Failed
         }
     }
 }
@@ -1293,10 +1321,20 @@ async fn perform_install(
         AfterInstall::Restart => host::PRE_UPDATE_BACKUP_TIMEOUT,
         AfterInstall::Exit => host::QUIT_PRE_UPDATE_BACKUP_TIMEOUT,
     };
-    if let Err(error) =
-        host::create_pre_update_backup(app, Some(&update.version), backup_timeout).await
+    if let Err(failure) =
+        host::create_pre_update_backup(app, Some(&update.version), backup_timeout, |progress| {
+            lock_state(app).record_backup_progress(progress)
+        })
+        .await
     {
-        let message = localization::t_args(keys::UPDATE_BACKUP_FAILED, &[("error", &error)]);
+        let message = match failure {
+            host::PreUpdateBackupFailure::Cancelled => {
+                localization::t(keys::UPDATE_BACKUP_CANCELLED)
+            }
+            host::PreUpdateBackupFailure::Failed(error) => {
+                localization::t_args(keys::UPDATE_BACKUP_FAILED, &[("error", &error)])
+            }
+        };
         {
             let mut guard = lock_state(app);
             guard.record_install_failed(message.clone());
@@ -1393,6 +1431,8 @@ mod tests {
             progress: None,
             last_checked_at: None,
             install_on_quit: false,
+            backup: None,
+            quit_install_failed: false,
         }
     }
 

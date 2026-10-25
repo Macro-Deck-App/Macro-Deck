@@ -25,6 +25,7 @@ public sealed class RestoreService : IRestoreService
 	private const int SupportedEncryptionVersion = 1;
 
 	private readonly IBackupOperationGate _gate;
+	private readonly IBackupOperationCancellation _cancellation;
 	private readonly IBackupProgressReporter _progress;
 	private readonly IBackupCatalog _catalog;
 	private readonly IBackupStorageRegistry _storageRegistry;
@@ -48,6 +49,7 @@ public sealed class RestoreService : IRestoreService
 
 	public RestoreService(
 		IBackupOperationGate gate,
+		IBackupOperationCancellation cancellation,
 		IBackupProgressReporter progress,
 		IBackupCatalog catalog,
 		IBackupStorageRegistry storageRegistry,
@@ -63,6 +65,7 @@ public sealed class RestoreService : IRestoreService
 		_keyRing = keyRing;
 		_logger = logger.ForContext<RestoreService>();
 		_gate = gate;
+		_cancellation = cancellation;
 		_progress = progress;
 		_catalog = catalog;
 		_storageRegistry = storageRegistry;
@@ -123,6 +126,8 @@ public sealed class RestoreService : IRestoreService
 		}
 
 		var operationId = lease.OperationId;
+		using var cancellation = _cancellation.Begin(operationId, cancellationToken);
+		var token = cancellation.Token;
 		var restoreId = Guid.NewGuid();
 		string? stagingDirectory = null;
 		var succeeded = false;
@@ -131,7 +136,7 @@ public sealed class RestoreService : IRestoreService
 		{
 			ReportStatus(operationId, BackupOperationStage.Preparing, request.BackupId);
 
-			var descriptor = await _catalog.Find(request.BackupId, cancellationToken);
+			var descriptor = await _catalog.Find(request.BackupId, token);
 			if (descriptor is null)
 			{
 				return Fail(operationId, request.BackupId, BackupError.NotFound, "The backup was not found.");
@@ -146,7 +151,7 @@ public sealed class RestoreService : IRestoreService
 					"The storage provider is not available.");
 			}
 
-			var opened = await provider.OpenRead(descriptor.StorageId, cancellationToken);
+			var opened = await provider.OpenRead(descriptor.StorageId, token);
 			if (!opened.Success)
 			{
 				return Fail(operationId, request.BackupId, opened.Error!.Value, opened.ErrorMessage);
@@ -179,7 +184,7 @@ public sealed class RestoreService : IRestoreService
 					"This archive uses an encryption scheme this version of Macro Deck does not support.");
 			}
 
-			var keyResult = await ResolveRecoveryKey(manifest, request.RecoveryKey, cancellationToken);
+			var keyResult = await ResolveRecoveryKey(manifest, request.RecoveryKey, token);
 			if (!keyResult.Success)
 			{
 				return Fail(operationId, request.BackupId, keyResult.Error!.Value, keyResult.ErrorMessage);
@@ -195,7 +200,7 @@ public sealed class RestoreService : IRestoreService
 			await _archiveReader.DecryptPayload(archive,
 				keyResult.Data!,
 				payloadPath,
-				cancellationToken: cancellationToken);
+				cancellationToken: token);
 
 			var selection = BackupComponentSelection.Expand(request.Components,
 				BackupComponentGroups.AllIds.Except(request.Components).ToList());
@@ -221,7 +226,7 @@ public sealed class RestoreService : IRestoreService
 				{
 					contentIndex = await JsonSerializer.DeserializeAsync<BackupContentIndex>(indexStream,
 						PersistenceJsonOptions.Default,
-						cancellationToken);
+						token);
 				}
 
 				if (contentIndex is null)
@@ -235,7 +240,7 @@ public sealed class RestoreService : IRestoreService
 				var filesResult = await ExtractFiles(payloadZip,
 					contentIndex.Entries.Where(entry => effective.Contains(entry.Component)),
 					applyDirectory,
-					cancellationToken);
+					token);
 				if (!filesResult.Success)
 				{
 					return Fail(operationId, request.BackupId, filesResult.Error!.Value, filesResult.ErrorMessage);
@@ -255,7 +260,7 @@ public sealed class RestoreService : IRestoreService
 					var databaseResult = await ExtractDatabase(payloadZip,
 						contentIndex,
 						stagingDirectory,
-						cancellationToken);
+						token);
 					if (!databaseResult.Success)
 					{
 						return Fail(operationId,
@@ -305,14 +310,14 @@ public sealed class RestoreService : IRestoreService
 			var safetyBackup = await _backupService.Create(new CreateBackupRequest(BackupTrigger.BeforeRestore,
 					$"Before restoring backup {request.BackupId:N}",
 					true),
-				cancellationToken);
+				token);
 
 			if (safetyBackup.Success)
 			{
 				safetyBackupId = safetyBackup.Data!.BackupId;
 				safetyBackupCreated = true;
 			}
-			else if (!proceedWithoutSafetyBackup)
+			else if (!proceedWithoutSafetyBackup || safetyBackup.Error == BackupError.Cancelled)
 			{
 				return Fail(operationId, request.BackupId, safetyBackup.Error!.Value, safetyBackup.ErrorMessage);
 			}
@@ -349,6 +354,16 @@ public sealed class RestoreService : IRestoreService
 				selection.Warnings,
 				safetyBackupId,
 				safetyBackupCreated));
+		}
+		catch (OperationCanceledException) when (cancellation.IsCancelled || cancellationToken.IsCancellationRequested)
+		{
+			var cancelled = Fail(operationId, request.BackupId, BackupError.Cancelled, "The restore was cancelled.");
+			if (cancellationToken.IsCancellationRequested)
+			{
+				throw;
+			}
+
+			return cancelled;
 		}
 		catch (BackupCryptoException e)
 		{

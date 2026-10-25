@@ -5,9 +5,47 @@
     <h1 class="title">Macro Deck</h1>
 
     <div class="status">
-      <div class="spinner"></div>
+      @if (progress() === null) {
+        <div class="spinner"></div>
+      } @else {
+        <div
+          class="progress-bar"
+          role="progressbar"
+          [attr.aria-valuenow]="progress()"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-valuetext]="status()">
+          <div class="progress-fill" [style.width.%]="progress()"></div>
+        </div>
+      }
       @if (status()) {
         <p class="status-message">{{ status() }}</p>
+      }
+      @if (details().length > 0) {
+        <p class="status-detail">
+          @for (detail of details(); track $index) {
+            @if (!$first) {
+              <span class="status-separator" aria-hidden="true">·</span>
+            }
+            <span>{{ detail }}</span>
+          }
+        </p>
+      }
+      @if (steps().length > 0) {
+        <ol class="status-steps">
+          @for (step of steps(); track step.label) {
+            <li
+              class="status-step"
+              [class.status-step-done]="step.state === 'done'"
+              [class.status-step-current]="step.state === 'current'">
+              <span class="status-step-marker" aria-hidden="true"></span>
+              <span>{{ step.label }}</span>
+            </li>
+          }
+        </ol>
+      }
+      @if (cancelLabel(); as label) {
+        <button type="button" class="cancel-button" (click)="cancel.emit()">{{ label }}</button>
       }
     </div>
   </div>

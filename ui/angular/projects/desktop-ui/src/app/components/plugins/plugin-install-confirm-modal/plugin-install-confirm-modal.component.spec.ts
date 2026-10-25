@@ -1,19 +1,23 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
+import { BackupOperationStage, BackupTrigger, GetBackupStatusResponse, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
 import { BackupService } from '../../../services/backup.service';
 import { PluginInstallConfirmModalComponent } from './plugin-install-confirm-modal.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
 
 describe('PluginInstallConfirmModalComponent', () => {
   let fixture: ComponentFixture<PluginInstallConfirmModalComponent>;
-  const backupOperation = signal<{ stage: string; trigger: string } | null>(null);
+  const backupOperation = signal<GetBackupStatusResponse | null>(null);
   const backupFake = {
     operation: backupOperation,
     running: () => ['Preparing', 'CreatingSnapshot', 'Encrypting', 'Saving'].includes(backupOperation()?.stage ?? ''),
   };
 
   beforeEach(() => backupOperation.set(null));
+
+  function backupStatus(stage: BackupOperationStage, trigger: BackupTrigger, percentComplete?: number): GetBackupStatusResponse {
+    return { operationId: 'op-1', kind: 'Create', stage, trigger, percentComplete, updatedAt: '2026-10-24T20:00:00Z' };
+  }
 
   function inspection(overrides: Partial<PluginInstallActionResponse> = {}): PluginInstallActionResponse {
     return {
@@ -210,20 +214,30 @@ describe('PluginInstallConfirmModalComponent', () => {
     expect(primaryLabel()).toBe('Installing…');
   });
 
+  it('shows the real progress of the backup that runs before the plugin is replaced', async () => {
+    await setup(inspection());
+    fixture.componentRef.setInput('busy', true);
+    backupOperation.set(backupStatus('Saving', 'BeforePluginUpdate', 37));
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('shared-backup-progress-card');
+    expect(card?.textContent).toContain('37%');
+  });
+
   it('says a backup is being created while the pre-update backup runs, then returns to installing', async () => {
     await setup(inspection());
     fixture.componentRef.setInput('busy', true);
-    backupOperation.set({ stage: 'CreatingSnapshot', trigger: 'BeforePluginUpdate' });
+    backupOperation.set(backupStatus('CreatingSnapshot', 'BeforePluginUpdate'));
     fixture.detectChanges();
 
     expect(primaryLabel()).toBe('Backing up…');
 
-    backupOperation.set({ stage: 'Completed', trigger: 'BeforePluginUpdate' });
+    backupOperation.set(backupStatus('Completed', 'BeforePluginUpdate'));
     fixture.detectChanges();
 
     expect(primaryLabel()).toBe('Installing…');
 
-    backupOperation.set({ stage: 'Failed', trigger: 'BeforePluginUpdate' });
+    backupOperation.set(backupStatus('Failed', 'BeforePluginUpdate'));
     fixture.detectChanges();
 
     expect(primaryLabel()).toBe('Installing…');
@@ -232,7 +246,7 @@ describe('PluginInstallConfirmModalComponent', () => {
   it('ignores a backup that was not started for a plugin update', async () => {
     await setup(inspection());
     fixture.componentRef.setInput('busy', true);
-    backupOperation.set({ stage: 'Saving', trigger: 'Manual' });
+    backupOperation.set(backupStatus('Saving', 'Manual'));
     fixture.detectChanges();
 
     expect(primaryLabel()).toBe('Installing…');
@@ -241,7 +255,7 @@ describe('PluginInstallConfirmModalComponent', () => {
   it('shows the plain label again once the install is no longer busy', async () => {
     await setup(inspection());
     fixture.componentRef.setInput('busy', true);
-    backupOperation.set({ stage: 'Saving', trigger: 'BeforePluginUpdate' });
+    backupOperation.set(backupStatus('Saving', 'BeforePluginUpdate'));
     fixture.detectChanges();
     fixture.componentRef.setInput('busy', false);
     fixture.detectChanges();

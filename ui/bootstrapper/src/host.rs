@@ -20,7 +20,7 @@ use crate::host_supervisor::{Decision, ExitAction, Supervisor, MAX_RESTART_ATTEM
 use crate::localization::{self, keys};
 use crate::logging::{self, LogTail};
 use crate::loopback_secret;
-use crate::update_state::{UpdateFailure, UpdateSnapshot};
+use crate::update_state::{BackupProgress, UpdateFailure, UpdateSnapshot};
 
 pub const BUILD_CHANNEL: &str = env!("MACRODECK_BUILD_CHANNEL");
 
@@ -1435,6 +1435,9 @@ pub const PRE_UPDATE_BACKUP_TIMEOUT: Duration = Duration::from_secs(600);
 
 pub const QUIT_PRE_UPDATE_BACKUP_TIMEOUT: Duration = Duration::from_secs(120);
 
+const PRE_UPDATE_BACKUP_POLL_INTERVAL: Duration = Duration::from_millis(500);
+const BACKUP_STATUS_TIMEOUT: Duration = Duration::from_secs(2);
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct PreUpdateBackupBody<'a> {
@@ -1446,6 +1449,8 @@ struct PreUpdateBackupBody<'a> {
 pub struct PreUpdateBackupResponse {
     pub success: bool,
     pub skipped: bool,
+    #[serde(default)]
+    pub cancelled: bool,
     pub error: Option<String>,
 }
 
@@ -1453,22 +1458,50 @@ pub struct PreUpdateBackupResponse {
 /// running host: an unreachable or unparseable answer must not read as permission to proceed.
 pub fn interpret_pre_update_backup_response(
     response: Option<PreUpdateBackupResponse>,
-) -> Result<(), String> {
+) -> Result<(), PreUpdateBackupFailure> {
     let Some(response) = response else {
-        return Err(localization::t(keys::UPDATE_BACKUP_UNCONFIRMED));
+        return Err(PreUpdateBackupFailure::Failed(localization::t(
+            keys::UPDATE_BACKUP_UNCONFIRMED,
+        )));
     };
 
-    if response.skipped {
+    if response.skipped || response.success {
         return Ok(());
     }
 
-    if response.success {
-        return Ok(());
+    if response.cancelled {
+        return Err(PreUpdateBackupFailure::Cancelled);
     }
 
-    Err(response
-        .error
-        .unwrap_or_else(|| localization::t(keys::UPDATE_BACKUP_GENERIC_FAILURE)))
+    Err(PreUpdateBackupFailure::Failed(
+        response
+            .error
+            .unwrap_or_else(|| localization::t(keys::UPDATE_BACKUP_GENERIC_FAILURE)),
+    ))
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum PreUpdateBackupFailure {
+    Failed(String),
+    Cancelled,
+}
+
+pub async fn cancel_backup_operation(app: &AppHandle, operation_id: &str) {
+    let state = app.state::<Arc<HostState>>();
+    let Some(port) = managed_port(&state) else {
+        return;
+    };
+    let Ok(client) = loopback_secret::http_client(BACKUP_STATUS_TIMEOUT) else {
+        return;
+    };
+    let request = client.post(format!(
+        "http://127.0.0.1:{port}/api/backups/operations/{operation_id}/cancel"
+    ));
+    if let Err(error) = loopback_secret::authorize(request, port).await.send().await {
+        logging::warn(&format!(
+            "[host] cancelling the pre-update backup failed: {error}"
+        ));
+    }
 }
 
 async fn post_pre_update_backup(
@@ -1490,17 +1523,83 @@ async fn post_pre_update_backup(
         .await
 }
 
+#[derive(Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct BackupStatusResponse {
+    pub operation_id: Option<String>,
+    pub kind: String,
+    pub stage: String,
+    pub trigger: String,
+    pub percent_complete: Option<i64>,
+    pub eta_seconds: Option<i64>,
+}
+
+pub fn pre_update_backup_progress(
+    bound: &mut Option<String>,
+    status: &BackupStatusResponse,
+) -> Option<BackupProgress> {
+    let running = matches!(
+        status.stage.as_str(),
+        "Preparing" | "CreatingSnapshot" | "Encrypting" | "Saving" | "Validating"
+    );
+    if bound.is_none() && running && status.kind == "Create" && status.trigger == "BeforeHostUpdate"
+    {
+        bound.clone_from(&status.operation_id);
+    }
+    if !running || bound.is_none() || *bound != status.operation_id {
+        return None;
+    }
+    Some(BackupProgress {
+        operation_id: bound.clone()?,
+        percent: status
+            .percent_complete
+            .map(|percent| percent.clamp(0, 100) as u8),
+        eta_seconds: status
+            .eta_seconds
+            .and_then(|seconds| u64::try_from(seconds).ok()),
+    })
+}
+
+async fn get_backup_status(port: u16) -> Result<BackupStatusResponse, reqwest::Error> {
+    let client = loopback_secret::http_client(BACKUP_STATUS_TIMEOUT)?;
+    let request = client.get(format!("http://127.0.0.1:{port}/api/backups/status"));
+    loopback_secret::authorize(request, port)
+        .await
+        .send()
+        .await?
+        .json::<BackupStatusResponse>()
+        .await
+}
+
 pub async fn create_pre_update_backup(
     app: &AppHandle,
     version: Option<&str>,
     timeout: Duration,
-) -> Result<(), String> {
+    on_progress: impl Fn(Option<BackupProgress>),
+) -> Result<(), PreUpdateBackupFailure> {
     let state = app.state::<Arc<HostState>>();
     let Some(port) = managed_port(&state) else {
-        return Err(localization::t(keys::UPDATE_BACKUP_HOST_UNREACHABLE));
+        return Err(PreUpdateBackupFailure::Failed(localization::t(
+            keys::UPDATE_BACKUP_HOST_UNREACHABLE,
+        )));
     };
 
-    match post_pre_update_backup(port, version, timeout).await {
+    let post = post_pre_update_backup(port, version, timeout);
+    tokio::pin!(post);
+    let mut bound = None;
+    let outcome = loop {
+        tokio::select! {
+            result = &mut post => break result,
+            () = tokio::time::sleep(PRE_UPDATE_BACKUP_POLL_INTERVAL) => {
+                if let Ok(status) = get_backup_status(port).await {
+                    on_progress(pre_update_backup_progress(&mut bound, &status));
+                }
+            }
+        }
+    };
+    on_progress(None);
+
+    match outcome {
         Ok(response) => interpret_pre_update_backup_response(Some(response)),
         Err(error) => {
             logging::warn(&format!("[host] pre-update backup request failed: {error}"));
@@ -1572,6 +1671,93 @@ mod tests {
     use crate::update_state::UpdateState;
     use crate::updater::UpdateInstallStrategy;
 
+    fn backup_status(operation_id: &str, trigger: &str, stage: &str) -> BackupStatusResponse {
+        BackupStatusResponse {
+            operation_id: Some(operation_id.to_string()),
+            kind: "Create".to_string(),
+            stage: stage.to_string(),
+            trigger: trigger.to_string(),
+            percent_complete: Some(40),
+            eta_seconds: Some(90),
+        }
+    }
+
+    #[test]
+    fn a_cancelled_backup_stops_the_update_as_cancelled() {
+        let response = PreUpdateBackupResponse {
+            success: false,
+            skipped: false,
+            cancelled: true,
+            error: None,
+        };
+
+        assert_eq!(
+            interpret_pre_update_backup_response(Some(response)),
+            Err(PreUpdateBackupFailure::Cancelled)
+        );
+    }
+
+    #[test]
+    fn the_backup_made_for_the_update_is_followed() {
+        let mut bound = None;
+
+        let progress = pre_update_backup_progress(
+            &mut bound,
+            &backup_status("update", "BeforeHostUpdate", "Saving"),
+        );
+
+        assert_eq!(
+            progress,
+            Some(BackupProgress {
+                operation_id: "update".to_string(),
+                percent: Some(40),
+                eta_seconds: Some(90)
+            })
+        );
+    }
+
+    #[test]
+    fn a_scheduled_backup_holding_the_lease_is_not_shown_as_the_update_backup() {
+        let mut bound = None;
+
+        let progress = pre_update_backup_progress(
+            &mut bound,
+            &backup_status("scheduled", "Scheduled", "Saving"),
+        );
+
+        assert_eq!(progress, None);
+        assert_eq!(bound, None);
+    }
+
+    #[test]
+    fn a_later_backup_does_not_replace_the_one_already_followed() {
+        let mut bound = None;
+        pre_update_backup_progress(
+            &mut bound,
+            &backup_status("update", "BeforeHostUpdate", "Saving"),
+        );
+
+        let progress = pre_update_backup_progress(
+            &mut bound,
+            &backup_status("other", "BeforeHostUpdate", "Saving"),
+        );
+
+        assert_eq!(progress, None);
+    }
+
+    #[test]
+    fn a_finished_backup_from_an_earlier_attempt_is_not_followed() {
+        let mut bound = None;
+
+        let progress = pre_update_backup_progress(
+            &mut bound,
+            &backup_status("earlier", "BeforeHostUpdate", "Completed"),
+        );
+
+        assert_eq!(progress, None);
+        assert_eq!(bound, None);
+    }
+
     fn idle_update_state() -> UpdateState {
         UpdateState::idle(
             "3.0.0".to_string(),
@@ -1626,6 +1812,7 @@ mod tests {
         let response = PreUpdateBackupResponse {
             success: true,
             skipped: false,
+            cancelled: false,
             error: None,
         };
 
@@ -1638,6 +1825,7 @@ mod tests {
             success: false,
             skipped: true,
             error: None,
+            cancelled: false,
         };
 
         assert!(interpret_pre_update_backup_response(Some(response)).is_ok());
@@ -1648,12 +1836,16 @@ mod tests {
         let response = PreUpdateBackupResponse {
             success: false,
             skipped: false,
+            cancelled: false,
             error: Some("the disk is full".to_string()),
         };
 
         let error = interpret_pre_update_backup_response(Some(response)).unwrap_err();
 
-        assert!(error.contains("the disk is full"));
+        assert_eq!(
+            error,
+            PreUpdateBackupFailure::Failed("the disk is full".to_string())
+        );
     }
 
     // Fail closed: a host that is too old to know this endpoint, or that died mid-backup, answers with

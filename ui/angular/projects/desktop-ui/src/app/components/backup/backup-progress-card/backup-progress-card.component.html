@@ -1,29 +1,74 @@
 @if (status(); as op) {
   <div class="bpc" [class.bpc-failed]="isFailed()" [class.bpc-done]="isDone()">
     <div class="bpc-head">
-      @if (!isFailed() && !isDone()) {
-        <span class="bpc-spinner" aria-hidden="true"></span>
-      } @else {
-        <span class="icon bpc-icon" [class.icon-alert-triangle]="isFailed()" [class.icon-check]="isDone()" aria-hidden="true"></span>
-      }
-      <span class="bpc-phase">{{ phaseText() }}</span>
-      @if (percent(); as pct) {
-        <span class="bpc-percent">{{ pct }}%</span>
+      <span class="bpc-badge" aria-hidden="true">
+        @if (isFailed()) {
+          <span class="icon icon-lg icon-alert-triangle"></span>
+        } @else if (isDone()) {
+          <span class="icon icon-lg icon-check"></span>
+        } @else {
+          <span class="icon icon-lg icon-layers"></span>
+        }
+      </span>
+      <div class="bpc-titles">
+        <span class="bpc-title">{{ title() }}</span>
+        @if (subtitle(); as sub) {
+          <span class="bpc-subtitle">{{ sub }}</span>
+        }
+      </div>
+      @if (percentText(); as pct) {
+        <span class="bpc-percent">{{ pct }}</span>
       }
     </div>
 
-    @if (!isFailed() && !isDone()) {
-      <div class="bpc-bar" [class.bpc-bar-indeterminate]="percent() === null">
+    @if (running()) {
+      <div
+        class="bpc-bar"
+        [class.bpc-bar-indeterminate]="percent() === null"
+        role="progressbar"
+        [attr.aria-valuenow]="percent()"
+        [attr.aria-valuemin]="percent() !== null ? 0 : null"
+        [attr.aria-valuemax]="percent() !== null ? 100 : null"
+        [attr.aria-label]="title()">
         <div class="bpc-bar-fill" [style.width.%]="percent() ?? 100"></div>
       </div>
     }
 
-    @if (byteDetail(); as detail) {
-      <span class="bpc-detail">{{ detail }}</span>
+    @if (byteDetail() || eta()) {
+      <div class="bpc-detail">
+        <span>{{ byteDetail() }}</span>
+        <span>{{ eta() }}</span>
+      </div>
+    }
+
+    @if (!isCompact() && stages().length > 0) {
+      <ol class="bpc-stages">
+        @for (stage of stages(); track stage.label) {
+          <li
+            class="bpc-stage"
+            [class.bpc-stage-done]="stage.state === 'done'"
+            [class.bpc-stage-current]="stage.state === 'current'">
+            <span class="bpc-marker" aria-hidden="true">
+              @if (stage.state === 'done') {
+                <span class="icon icon-check"></span>
+              } @else if (stage.state === 'current') {
+                <span class="bpc-spinner"></span>
+              }
+            </span>
+            <span>{{ stage.label }}</span>
+          </li>
+        }
+      </ol>
     }
 
     @if (isFailed() && op.errorMessage) {
       <span class="bpc-error">{{ op.errorMessage }}</span>
+    }
+
+    @if (!isCompact() && showCancel()) {
+      <div class="bpc-actions">
+        <shared-button variant="secondary" (click)="cancel.emit()">{{ cancelLabel() }}</shared-button>
+      </div>
     }
   </div>
 }

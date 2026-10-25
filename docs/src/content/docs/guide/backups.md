@@ -12,6 +12,15 @@ Choose **Create backup**. Under **Schedule** you can also let Macro Deck make ba
 before Macro Deck or plugin updates. **Keep latest** sets how many backups stay before older ones are
 deleted.
 
+While a backup is made, Macro Deck shows which step it is on and how far it is, and once it can estimate it,
+about how long is left. Until then the bar only shows that it is working. Backups that Macro Deck makes on its
+own show the same progress: before a Macro Deck update, before a plugin update and before a restore.
+
+A running backup also appears in the notification center with its progress and a **Cancel** button, so you
+can follow it after closing its dialog; a finished backup stays there as **Backup completed**, a failed one as
+an error. **Cancel backup** stops a backup while it runs and keeps nothing of it. When the backup was made before an
+update, a plugin update or a restore, cancelling it cancels that too, so nothing changes without its backup.
+
 Use **Download** in a backup's menu to save it as a `.macroDeckBackup` file, for example to keep a copy
 somewhere else or to move to another computer. In the Macro Deck app you choose where to save it; in a
 browser it goes to your downloads.
@@ -33,8 +42,9 @@ When you regenerate the recovery key, backups made before that still need the ol
 Imported fonts belong to **Icons, icon packs and fonts**. Restoring that group from a backup made before
 Macro Deck could import fonts removes the fonts you imported since.
 
-The restore is applied the next time Macro Deck starts. The installed app restarts on its own. Macro Deck
-first makes a backup marked **Safety backup**, so you can go back.
+The restore is applied the next time Macro Deck starts. The installed app restarts on its own. Before that,
+Macro Deck checks the backup you chose (step 1 of 2) and then makes a backup marked **Safety backup** (step 2
+of 2), so you can go back.
 
 ## Restore a backup from another computer
 
