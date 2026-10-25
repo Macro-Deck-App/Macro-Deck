@@ -40,7 +40,7 @@ internal sealed class LaunchApplicationActionDefinition : IActionDefinition
 				fileExtensions: pathExtensions),
 			ActionParameter.Text("arguments",
 				AppStrings.Integrations.System.Actions.LaunchApplication.ArgumentsLabel(),
-				AppStrings.Integrations.System.Actions.SupportsVariablesHint()),
+				AppStrings.Integrations.System.Actions.SupportsVariablesHint("{{ vars.name }}")),
 			ActionParameter.Folder("workingDirectory",
 				AppStrings.Integrations.System.Actions.WorkingDirectoryLabel(),
 				AppStrings.Integrations.System.Actions.LaunchApplication.WorkingDirectoryDescription()),

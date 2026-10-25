@@ -8677,8 +8677,8 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Type Text</value>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextParameterDescription" xml:space="preserve">
-    <value>The text to type. Supports variables/templates, e.g. {{ vars.name }}.</value>
-    <comment>The literal {{ vars.name }} is Macro Deck's own template syntax shown as an example, not a translation placeholder.</comment>
+    <value>The text to type. Supports variables/templates, e.g. {example}.</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Hello World</value>
@@ -11512,7 +11512,8 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Sleep</value>
   </data>
   <data name="Integrations.System.Actions.SupportsVariablesHint" xml:space="preserve">
-    <value>Supports variables: {{ vars.name }}</value>
+    <value>Supports variables: {example}</value>
+    <comment>{example} is filled with Macro Deck's own template syntax ({{ vars.name }}); keep it as it is.</comment>
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Amount (%)</value>

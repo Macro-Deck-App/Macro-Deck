@@ -42,7 +42,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			defaultValue: "default"),
 		ActionParameter.MultilineText("command",
 			AppStrings.Integrations.System.Actions.RunCommand.CommandLabel(),
-			AppStrings.Integrations.System.Actions.SupportsVariablesHint(),
+			AppStrings.Integrations.System.Actions.SupportsVariablesHint("{{ vars.name }}"),
 			required: true),
 		ActionParameter.Folder("workingDirectory",
 			AppStrings.Integrations.System.Actions.WorkingDirectoryLabel()),
