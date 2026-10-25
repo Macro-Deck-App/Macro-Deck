@@ -14871,6 +14871,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Importování ikon do {pack}</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>Obnovení se nezdařilo</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Nic z toho nebylo možné importovat jako ikonu.</value>
   </data>

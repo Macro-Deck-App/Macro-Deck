@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, boolea
 
 import {
   AppStrings,
+  GetBackupStatusResponse,
   Strings,
   UserNotification,
   UserNotificationAction,
@@ -16,6 +17,9 @@ import {
   TranslatePipe,
 } from '@shared';
 import { TooltipDirective } from '../../overlay/tooltip/tooltip.directive';
+import { BackupService } from '../../../services/backup.service';
+import { BackupProgressCardComponent } from '../../backup/backup-progress-card/backup-progress-card.component';
+import { BACKUP_CANCEL_KEY_PREFIX, isActiveBackupStage } from '../../../util/backup-progress-display';
 
 const SEVERITY_ICON: Record<UserNotificationSeverity, string> = {
   Info: 'icon-info',
@@ -79,13 +83,14 @@ export function requiresAttention(notification: UserNotification): boolean {
 @Component({
   selector: 'app-notification-item',
   standalone: true,
-  imports: [ButtonComponent, TooltipDirective, TranslatePipe],
+  imports: [BackupProgressCardComponent, ButtonComponent, TooltipDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notification-item.component.html',
   styleUrls: ['./notification-item.component.scss'],
 })
 export class NotificationItemComponent {
   private readonly localization = inject(LocalizationService);
+  private readonly backups = inject(BackupService);
   protected readonly appStrings = AppStrings;
   protected readonly commonStrings = Strings;
 
@@ -97,6 +102,7 @@ export class NotificationItemComponent {
   @Output() dismissed = new EventEmitter<string>();
   @Output() markRead = new EventEmitter<string>();
   @Output() cancel = new EventEmitter<UserNotification>();
+  @Output() showDetails = new EventEmitter<UserNotification>();
 
   protected get severityIcon(): string {
     return SEVERITY_ICON[this.notification.severity];
@@ -142,6 +148,13 @@ export class NotificationItemComponent {
     return formatRelativeTime(this.notification.timestamp, (key, args) => this.localization.translateKey(key, args));
   }
 
+  protected get runningBackup(): GetBackupStatusResponse | null {
+    const operation = this.backups.operation();
+    return this.notification.cancelKey?.startsWith(BACKUP_CANCEL_KEY_PREFIX) && operation && isActiveBackupStage(operation.stage)
+      ? operation
+      : null;
+  }
+
   protected get progressPercent(): number | null {
     const progress = this.notification.progress;
     if (!progress || !progress.total || progress.total <= 0) {
@@ -181,6 +194,11 @@ export class NotificationItemComponent {
   onMarkRead(event: MouseEvent): void {
     event.stopPropagation();
     this.markRead.emit(this.notification.id);
+  }
+
+  onShowDetails(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showDetails.emit(this.notification);
   }
 
   onCancel(event: MouseEvent): void {

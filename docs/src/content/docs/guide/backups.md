@@ -16,7 +16,9 @@ While a backup is made, Macro Deck shows which step it is on and how far it is, 
 about how long is left. Until then the bar only shows that it is working. Backups that Macro Deck makes on its
 own show the same progress: before a Macro Deck update, before a plugin update and before a restore.
 
-**Cancel backup** stops a backup while it runs and keeps nothing of it. When the backup was made before an
+A running backup also appears in the notification center with its progress and a **Cancel** button, so you
+can follow it after closing its dialog; a finished backup stays there as **Backup completed**, a failed one as
+an error. **Cancel backup** stops a backup while it runs and keeps nothing of it. When the backup was made before an
 update, a plugin update or a restore, cancelling it cancels that too, so nothing changes without its backup.
 
 Use **Download** in a backup's menu to save it as a `.macroDeckBackup` file, for example to keep a copy

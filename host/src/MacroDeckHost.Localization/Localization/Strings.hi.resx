@@ -14872,6 +14872,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>{pack} में आइकन आयात हो रहे हैं</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>पुनर्स्थापना विफल रही</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>वहाँ कुछ भी आइकन के रूप में आयात नहीं किया जा सका।</value>
   </data>

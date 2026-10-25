@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
@@ -121,7 +122,7 @@ public class BackupEndpointsTests
 	[Test]
 	public async Task Creating_a_backup_reports_real_progress_that_only_moves_forward()
 	{
-		var created = await ReadJson(await Send(HttpMethod.Post, "/api/backups", new { note = "progress" }));
+		var created = await CreateBackup("progress");
 		var backupId = created.GetProperty("backup").GetProperty("id").GetGuid();
 
 		var reports = _progress.Reports.Where(status => status.BackupId == backupId).ToList();
@@ -165,6 +166,87 @@ public class BackupEndpointsTests
 			Assert.That(status.GetProperty("error").GetString(), Is.EqualTo("Cancelled"));
 			Assert.That(next.GetProperty("success").GetBoolean(), Is.True, "the next backup is not blocked");
 		});
+	}
+
+	[Test]
+	public async Task A_finished_backup_is_reported_in_the_notification_center()
+	{
+		var store = _host.Services.GetRequiredService<IUserNotificationStore>();
+		Guid? operationId = null;
+		string? entryId = null;
+
+		void Watch()
+		{
+			if (operationId is { } id && entryId is null)
+			{
+				entryId = store.Snapshot().FirstOrDefault(entry => entry.CancelKey == $"backup:{id:D}")?.Id;
+			}
+		}
+
+		store.Changed += Watch;
+		_progress.OnReport = status =>
+		{
+			if (status.Kind == BackupOperationKind.Create && status.OperationId is { } id)
+			{
+				operationId ??= id;
+			}
+		};
+
+		await CreateBackup("notified");
+		_progress.OnReport = null;
+
+		Assert.That(() => entryId, Is.Not.Null.After(3000, 50), "the running backup was listed");
+		Assert.That(() => store.Snapshot()
+				.Any(entry => entry.Id == entryId
+					&& entry.Severity == UserNotificationSeverity.Success
+					&& entry.Progress is null
+					&& entry.CancelKey is null),
+			Is.True.After(3000, 50),
+			"the same entry ends as completed");
+		store.Changed -= Watch;
+	}
+
+	[Test]
+	public async Task A_cancelled_backup_leaves_no_entry_in_the_notification_center()
+	{
+		var store = _host.Services.GetRequiredService<IUserNotificationStore>();
+		Guid? operationId = null;
+		string? entryId = null;
+
+		void Watch()
+		{
+			if (operationId is { } id && entryId is null)
+			{
+				entryId = store.Snapshot()
+					.FirstOrDefault(entry => entry.CancelKey == $"backup:{id:D}" && entry.Progress is not null)
+					?.Id;
+			}
+		}
+
+		store.Changed += Watch;
+		var cancellation = _host.Services.GetRequiredService<IBackupOperationCancellation>();
+		_progress.OnReport = status =>
+		{
+			if (status.Kind != BackupOperationKind.Create || status.OperationId is not { } id)
+			{
+				return;
+			}
+
+			operationId = id;
+			if (status.Stage == BackupOperationStage.Validating)
+			{
+				cancellation.Cancel(id);
+			}
+		};
+
+		await ReadJson(await Send(HttpMethod.Post, "/api/backups", new { note = "cancel me" }));
+		_progress.OnReport = null;
+
+		Assert.That(() => entryId, Is.Not.Null.After(3000, 50), "a running backup is listed with its cancel key");
+		Assert.That(() => store.Snapshot().Any(entry => entry.Id == entryId),
+			Is.False.After(3000, 50),
+			"the cancelled backup's entry is removed");
+		store.Changed -= Watch;
 	}
 
 	[Test]
@@ -286,8 +368,16 @@ public class BackupEndpointsTests
 
 	private async Task<string?> CreateBackupId(string note)
 	{
-		var created = await ReadJson(await Send(HttpMethod.Post, "/api/backups", new { note }));
+		var created = await CreateBackup(note);
 		return created.GetProperty("backup").GetProperty("id").GetString();
+	}
+
+	private async Task<JsonElement> CreateBackup(string note)
+	{
+		var response = await Send(HttpMethod.Post, "/api/backups", new { note });
+		var raw = await response.Content.ReadAsStringAsync();
+		Assert.That(raw, Does.Contain("\"success\":true"), $"{(int)response.StatusCode} {raw}");
+		return JsonDocument.Parse(raw).RootElement;
 	}
 
 	// A backup archive carries the data protection key ring, the auth signing key, the TLS private key and
@@ -394,7 +484,7 @@ public class BackupEndpointsTests
 	[Test]
 	public async Task Component_groups_cross_the_wire_by_name()
 	{
-		var created = await ReadJson(await Send(HttpMethod.Post, "/api/backups", new { note = "wire format" }));
+		var created = await CreateBackup("wire format");
 		var backupId = created.GetProperty("backup").GetProperty("id").GetString();
 		var components = created.GetProperty("backup").GetProperty("components");
 

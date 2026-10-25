@@ -14869,6 +14869,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Symbole werden in {pack} importiert</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>Wiederherstellung fehlgeschlagen</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Nichts davon konnte als Symbol importiert werden.</value>
   </data>

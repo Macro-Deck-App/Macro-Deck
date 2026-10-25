@@ -164,6 +164,36 @@ describe('BackupsSettingsComponent', () => {
       expect(fixture.nativeElement.querySelector('shared-modal')).toBeNull();
     });
 
+    it('shows the running backup in the section while its dialog is closed, with a way back', async () => {
+      fixture = await create();
+      await pushStatus('Saving');
+      await closeModalWithX();
+
+      const running = fixture.nativeElement.querySelector('.bks-running') as HTMLElement;
+      expect(running?.querySelector('shared-backup-progress-card')).toBeTruthy();
+
+      const details = Array.from(running.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+        .find(button => button.textContent?.includes('Show details'));
+      details!.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('shared-modal shared-backup-progress-card')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('.bks-running')).toBeNull();
+    });
+
+    it('comes back when the details are asked for again', async () => {
+      fixture = await create();
+      await pushStatus('Saving');
+      await closeModalWithX();
+
+      TestBed.inject(BackupService).showProgressDialog();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('shared-modal shared-backup-progress-card')).toBeTruthy();
+    });
+
     it('still shows a failure of a backup whose dialog was closed', async () => {
       fixture = await create();
       await pushStatus('Saving');

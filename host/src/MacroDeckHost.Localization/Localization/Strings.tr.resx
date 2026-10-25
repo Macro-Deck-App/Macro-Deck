@@ -14872,6 +14872,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>{pack} paketine simgeler aktarılıyor</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>Geri yükleme başarısız oldu</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Orada simge olarak aktarılabilecek bir şey yok.</value>
   </data>

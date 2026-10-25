@@ -14872,6 +14872,9 @@
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>جارٍ استيراد الأيقونات إلى {pack}</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>فشلت الاستعادة</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>لا يوجد هنا ما يمكن استيراده كأيقونة.</value>
   </data>

@@ -1,7 +1,8 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserNotification } from '@macro-deck/runtime';
+import { GetBackupStatusResponse, UserNotification } from '@macro-deck/runtime';
+import { BackupService } from '../../../services/backup.service';
 import { NotificationItemComponent } from './notification-item.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
 
@@ -319,5 +320,63 @@ describe('NotificationItemComponent', () => {
       const button = fixture.nativeElement.querySelector('.ni-dismiss button') as HTMLElement;
       expect(button.getAttribute('aria-label')).toBe('Dismiss notification');
     });
+  });
+});
+
+describe('NotificationItemComponent for a running backup', () => {
+  let fixture: ComponentFixture<NotificationItemComponent>;
+  const operation = signal<GetBackupStatusResponse | null>(null);
+
+  beforeEach(async () => {
+    operation.set({
+      operationId: 'op-1',
+      kind: 'Create',
+      stage: 'Saving',
+      trigger: 'Scheduled',
+      percentComplete: 42,
+      etaSeconds: 30,
+      updatedAt: '2026-07-28T10:00:00+00:00',
+    });
+    await TestBed.configureTestingModule({
+      imports: [NotificationItemComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: BackupService, useValue: { operation } },
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(NotificationItemComponent);
+    fixture.componentRef.setInput('notification', {
+      id: 'n1',
+      sequence: 1,
+      timestamp: '2026-07-28T10:00:00+00:00',
+      severity: 'Info',
+      kind: 'General',
+      title: 'Creating backup',
+      progress: { processed: 40, total: 100 },
+      cancelKey: 'backup:op-1',
+    } satisfies UserNotification);
+    fixture.detectChanges();
+  });
+
+  it('shows the same backup card as the dialog, with the live percentage and remaining time', () => {
+    const card = fixture.nativeElement.querySelector('shared-backup-progress-card') as HTMLElement;
+
+    expect(card).toBeTruthy();
+    expect(card.querySelector('.bpc-title')?.textContent).toContain('Creating backup');
+    expect(card.querySelector('.bpc-percent')?.textContent?.trim()).toBe('42%');
+    expect(card.querySelector('.bpc-detail')?.textContent).toContain('30 s');
+    expect(card.querySelector('.bpc-stages')).toBeNull();
+  });
+
+  it('offers to show the full dialog again', () => {
+    let shown = 0;
+    fixture.componentInstance.showDetails.subscribe(() => shown++);
+
+    const button = Array.from(fixture.nativeElement.querySelectorAll('.ni-action button') as NodeListOf<HTMLButtonElement>)
+      .find(b => b.textContent?.includes('Show details'));
+    button!.click();
+
+    expect(shown).toBe(1);
   });
 });

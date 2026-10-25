@@ -14872,6 +14872,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>{pack}에 아이콘을 가져오는 중</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>복원에 실패했습니다</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>아이콘으로 가져올 수 있는 항목이 없습니다.</value>
   </data>

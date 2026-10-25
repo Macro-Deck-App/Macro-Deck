@@ -14872,6 +14872,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>正在将图标导入 {pack}</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>恢复失败</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>其中没有可作为图标导入的内容。</value>
   </data>

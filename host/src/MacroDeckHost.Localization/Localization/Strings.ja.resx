@@ -14872,6 +14872,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>{pack} にアイコンをインポートしています</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>復元に失敗しました</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>アイコンとしてインポートできるものはありませんでした。</value>
   </data>

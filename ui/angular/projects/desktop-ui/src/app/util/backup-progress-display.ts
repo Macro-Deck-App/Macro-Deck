@@ -2,6 +2,8 @@ import { BackupOperationStage, BackupTrigger, GetBackupStatusResponse, StoreOper
 import { LocalizationService } from '@shared';
 import { formatEta } from './store-operation-display';
 
+export const BACKUP_CANCEL_KEY_PREFIX = 'backup:';
+
 const ACTIVE_STAGES: ReadonlySet<BackupOperationStage> = new Set<BackupOperationStage>([
   'Preparing',
   'CreatingSnapshot',

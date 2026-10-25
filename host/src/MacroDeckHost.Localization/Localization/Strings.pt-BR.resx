@@ -14872,6 +14872,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Importando ícones para {pack}</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>Falha na restauração</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Nada ali pôde ser importado como ícone.</value>
   </data>

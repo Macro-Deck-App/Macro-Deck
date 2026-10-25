@@ -60,6 +60,10 @@
   min-width: 0;
 }
 
+.ni-backup .ni-body {
+  gap: var(--space-3);
+}
+
 .ni-head {
   display: flex;
   align-items: flex-start;

@@ -41,7 +41,7 @@
       </div>
     }
 
-    @if (stages().length > 0) {
+    @if (!isCompact() && stages().length > 0) {
       <ol class="bpc-stages">
         @for (stage of stages(); track stage.label) {
           <li
@@ -65,7 +65,7 @@
       <span class="bpc-error">{{ op.errorMessage }}</span>
     }
 
-    @if (showCancel()) {
+    @if (!isCompact() && showCancel()) {
       <div class="bpc-actions">
         <shared-button variant="secondary" (click)="cancel.emit()">{{ cancelLabel() }}</shared-button>
       </div>

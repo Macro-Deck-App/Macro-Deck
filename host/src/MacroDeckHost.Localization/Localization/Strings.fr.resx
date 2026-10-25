@@ -14871,6 +14871,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Importation des icônes dans {pack}</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>Échec de la restauration</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Rien n'a pu être importé comme icône.</value>
   </data>

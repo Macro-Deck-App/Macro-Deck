@@ -69,6 +69,7 @@ export class BackupService {
   readonly recoveryKey = signal<GetBackupRecoveryKeyStateResponse | null>(null);
   readonly downloading = signal<ReadonlySet<string>>(new Set());
   private restoreOperationId: string | null = null;
+  readonly progressDialogHidden = signal(false);
 
   readonly running: Signal<boolean> = computed(() => {
     const op = this.operation();
@@ -83,6 +84,15 @@ export class BackupService {
 
   dismissOperation(): void {
     this.operation.set(null);
+    this.progressDialogHidden.set(false);
+  }
+
+  hideProgressDialog(): void {
+    this.progressDialogHidden.set(true);
+  }
+
+  showProgressDialog(): void {
+    this.progressDialogHidden.set(false);
   }
 
   async load(): Promise<void> {
@@ -378,6 +388,7 @@ export class BackupService {
 
   private applyOperation(status: GetBackupStatusResponse, fromPush: boolean): void {
     if (status.stage === 'Idle' || (!fromPush && isTerminalBackupStage(status.stage))) {
+      this.progressDialogHidden.set(false);
       this.operation.set(null);
       return;
     }
@@ -389,6 +400,9 @@ export class BackupService {
       return;
     }
 
+    if (!isActiveBackupStage(status.stage)) {
+      this.progressDialogHidden.set(false);
+    }
     this.operation.set(status);
   }
 

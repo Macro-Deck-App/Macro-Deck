@@ -65,11 +65,14 @@ export class BackupsSettingsComponent {
   readonly modal = signal<BackupsModalState>({ kind: 'none' });
 
   protected readonly operation = this.backupService.operation;
-  private readonly hiddenWhileRunning = signal(false);
+  protected readonly inlineOperation = computed(() => {
+    const op = this.operation();
+    return op && this.backupService.progressDialogHidden() && isActiveBackupStage(op.stage) ? op : null;
+  });
 
   protected readonly visibleOperation = computed(() => {
     const op = this.operation();
-    return op && this.hiddenWhileRunning() && isActiveBackupStage(op.stage) ? null : op;
+    return op && this.backupService.progressDialogHidden() && isActiveBackupStage(op.stage) ? null : op;
   });
 
   protected readonly operationFailed = computed(() => {
@@ -80,18 +83,15 @@ export class BackupsSettingsComponent {
   protected dismissOperation(): void {
     const op = this.operation();
     if (op && isActiveBackupStage(op.stage)) {
-      this.hiddenWhileRunning.set(true);
+      this.backupService.hideProgressDialog();
       return;
     }
     this.backupService.dismissOperation();
   }
 
-  private readonly showAgainWhenDone = effect(() => {
-    const op = this.operation();
-    if (!op || !isActiveBackupStage(op.stage)) {
-      untracked(() => this.hiddenWhileRunning.set(false));
-    }
-  });
+  protected showOperationDetails(): void {
+    this.backupService.showProgressDialog();
+  }
 
   protected cancelOperation(operation: GetBackupStatusResponse): void {
     if (operation.operationId) {

@@ -282,6 +282,15 @@ describe('BackupService during a restore', () => {
     expect(service.running()).toBeFalse();
   });
 
+  it('shows the next backup\'s dialog again when the previous one ended unseen', () => {
+    progress.next(status({ operationId: 'a', trigger: 'Manual', stage: 'Saving' }));
+    service.hideProgressDialog();
+
+    progress.next(status({ operationId: 'a', trigger: 'Manual', stage: 'Idle' }));
+
+    expect(service.progressDialogHidden()).toBeFalse();
+  });
+
   it('still reports a finished backup that is not part of a restore', () => {
     progress.next(status({ operationId: 'manual', trigger: 'Manual', stage: 'Completed' }));
 

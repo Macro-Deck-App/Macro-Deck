@@ -14872,6 +14872,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Pictogrammen importeren in {pack}</value>
   </data>
+  <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
+    <value>Terugzetten mislukt</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Er kon niets als pictogram worden geïmporteerd.</value>
   </data>

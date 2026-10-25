@@ -47,10 +47,16 @@ export class BackupProgressCardComponent {
     this.canCancel.set(value);
   }
 
+  @Input()
+  set compact(value: boolean) {
+    this.isCompact.set(value);
+  }
+
   readonly cancel = output<void>();
 
   protected readonly status = signal<GetBackupStatusResponse | null>(null);
   private readonly canCancel = signal(false);
+  protected readonly isCompact = signal(false);
 
   private readonly restoring = computed(() => {
     const op = this.status();

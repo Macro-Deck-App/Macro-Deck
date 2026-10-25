@@ -6825,6 +6825,9 @@ export const AppStrings = {
 		UpdateDownloading: 'macrodeck.app:Notifications.UpdateDownloading',
 		UpdateFailed: 'macrodeck.app:Notifications.UpdateFailed',
 		UpdateReady: 'macrodeck.app:Notifications.UpdateReady',
+		Backup: {
+			RestoreFailed: 'macrodeck.app:Notifications.Backup.RestoreFailed',
+		},
 		IconImport: {
 			CompletedWithWarnings: 'macrodeck.app:Notifications.IconImport.CompletedWithWarnings',
 			DefaultPackName: 'macrodeck.app:Notifications.IconImport.DefaultPackName',
@@ -15471,6 +15474,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Nav.Store': 'Store',
 	'macrodeck.app:Nav.Variables': 'Variables',
 	'macrodeck.app:Notifications.ActionFailed': '"{name}" failed',
+	'macrodeck.app:Notifications.Backup.RestoreFailed': 'Restore failed',
 	'macrodeck.app:Notifications.CompanionLicenseDownloaded': 'Companion license downloaded',
 	'macrodeck.app:Notifications.CompanionLicenseDownloadedMessage': 'Macro Deck downloaded the Companion license saved to your Macro Deck account and hands it to every Companion app that connects.',
 	'macrodeck.app:Notifications.CompanionLicenseReceived': 'Companion license received',

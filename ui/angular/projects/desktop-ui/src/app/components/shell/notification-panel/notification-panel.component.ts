@@ -7,12 +7,14 @@ import { LocalizationService, SidePanelComponent, TranslatePipe } from '@shared'
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { DropdownMenuComponent } from '../../overlay/dropdown-menu/dropdown-menu.component';
 import { TooltipDirective } from '../../overlay/tooltip/tooltip.directive';
+import { BackupService } from '../../../services/backup.service';
 import { IconPackService } from '../../../services/icon-pack.service';
 import { ExternalLinkService } from '../../../services/external-link.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
 import { PluginAdbConsentService } from '../../../services/plugin-adb-consent.service';
 import { PluginCompanionConsentService } from '../../../services/plugin-companion-consent.service';
 import { RestartNoticeService, SettingsModalService, UpdateModalService, UpdateService } from '../../../services';
+import { BACKUP_CANCEL_KEY_PREFIX } from '../../../util/backup-progress-display';
 import { NotificationActionEvent, NotificationItemComponent, requiresAttention } from './notification-item.component';
 
 const DOWNLOAD_PAGE_URL = 'https://macro-deck.app/download';
@@ -43,6 +45,7 @@ export class NotificationPanelComponent {
   private readonly updateModal = inject(UpdateModalService);
   private readonly updateService = inject(UpdateService);
   private readonly iconPacks = inject(IconPackService);
+  private readonly backups = inject(BackupService);
   private readonly restartNotice = inject(RestartNoticeService);
   private readonly adbConsent = inject(PluginAdbConsentService);
   private readonly companionConsent = inject(PluginCompanionConsentService);
@@ -159,11 +162,19 @@ export class NotificationPanelComponent {
     await this.restartNotice.restartNow();
   }
 
+  onShowBackupDetails(): void {
+    this.backups.showProgressDialog();
+    this.settingsModal.open('backups');
+    this.closed.emit();
+  }
+
   onCancel(notification: UserNotification): void {
     if (notification.kind === 'IconImport' && notification.cancelKey) {
       void this.iconPacks.cancelBatch(notification.cancelKey);
     } else if (notification.kind === 'Update' && notification.cancelKey) {
       void this.updateService.cancelDownload();
+    } else if (notification.cancelKey?.startsWith(BACKUP_CANCEL_KEY_PREFIX)) {
+      void this.backups.cancelOperation(notification.cancelKey.slice(BACKUP_CANCEL_KEY_PREFIX.length));
     }
   }
 }
