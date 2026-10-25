@@ -202,8 +202,14 @@ export interface SetIntegrationEnabledRequest {
   enabled: boolean;
 }
 
+export interface IpcSystemIntegrationName {
+  id: string;
+  name: LocalizedText;
+}
+
 export interface GetIntegrationsResponse {
   integrations: IpcIntegration[];
+  systemIntegrations?: IpcSystemIntegrationName[];
 }
 
 export interface SetIntegrationEnabledResponse extends ResultResponse {}

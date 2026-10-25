@@ -101,7 +101,7 @@ export class LogsTabComponent {
   readonly integrationSources = computed(() =>
     integrationLogSources(
       this.logs.sources(),
-      id => this.integrationService.integrations().find(integration => integration.id === id)?.name ?? id,
+      id => this.integrationService.displayName(id),
     ));
 
   readonly timeRangeOptions = computed<SelectOption[]>(() =>
@@ -146,8 +146,7 @@ export class LogsTabComponent {
       case 'bootstrapper':
         return this.localization.translateKey(AppStrings.Settings.About.Bootstrapper);
       case 'integration':
-        return this.integrationService.integrations()
-          .find(integration => integration.id === source.integrationId)?.name ?? source.integrationId;
+        return this.integrationService.displayName(source.integrationId);
     }
   });
 

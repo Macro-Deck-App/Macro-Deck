@@ -44,6 +44,18 @@ internal sealed class MusicPlayerSystemIntegrationTests
 		});
 	}
 
+	[Test]
+	public async Task Clients_receive_the_album_colour_integration_name_to_label_its_variables()
+	{
+		var registry = await Registry(new Dictionary<string, bool>());
+
+		var listed = await new GetIntegrationsRequestMessageHandler(registry, null!, null!)
+			.Handle(new GetIntegrationsRequest(), CancellationToken.None);
+
+		Assert.That(listed.SystemIntegrations.Single(entry => entry.Id == MusicPlayerIntegration.IntegrationId).Name,
+			Is.EqualTo(new MusicPlayerIntegration().Name));
+	}
+
 	private static async Task<IntegrationRegistry> Registry(Dictionary<string, bool> stored)
 	{
 		var integration = new MusicPlayerIntegration();

@@ -50,6 +50,11 @@ public class GetIntegrationsRequestMessageHandler
 		{
 			if (integration is ISystemIntegration)
 			{
+				response.SystemIntegrations.Add(new SystemIntegrationName
+				{
+					Id = integration.Id,
+					Name = integration.Name
+				});
 				continue;
 			}
 
