@@ -7,7 +7,7 @@ The Public API reads what the Creator Portal shows you about your Projects: the 
 Project's status, the status of one Project, and its analytics. It only reads and never changes anything.
 
 ```text
-https://api.macro-deck.app/api/public/v1
+https://creators.macro-deck.app/api/public/v1
 ```
 
 ## API tokens
@@ -39,7 +39,7 @@ Send the token as a Bearer token:
 
 ```bash
 curl -H "Authorization: Bearer $MACRO_DECK_TOKEN" \
-  https://api.macro-deck.app/api/public/v1/projects
+  https://creators.macro-deck.app/api/public/v1/projects
 ```
 
 A token only ever reads its own context. Projects of other people, of other Organizations, and of your other
