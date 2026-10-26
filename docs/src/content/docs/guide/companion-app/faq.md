@@ -62,6 +62,19 @@ or open its deck, the app says so and names both versions. Update Macro Deck on 
 computer is updated. For a computer with a Macro Deck from before this check, the list can still show **Online**;
 its deck says so when you open it.
 
+## Macro Deck is behind a reverse proxy with HTTPS and the app does not connect
+
+Update the app to the latest version. A connection to a reverse proxy, added by typing its domain and port as
+described in [Set up and connect](/guide/companion-app/setup/#enter-the-address), then switches to HTTPS by
+itself. This also applies to a connection you added earlier that says it is not a Macro Deck host, or that it is
+offline. Turning on **Prefer HTTPS** is
+not needed; that setting is for the certificate authority of Macro Deck itself.
+
+If it still does not connect, check in a browser on the same phone or tablet that the address opens Macro Deck
+without a certificate warning, and that the proxy passes WebSocket connections through. If the connection
+trusts the certificate authority of Macro Deck and the proxy's certificate is refused, the app asks you to review
+that certificate authority: check the date and time on the device and the proxy's certificate instead.
+
 ## Nothing happens when I tap an NFC tag
 
 Check that the screen is on and, on Android, unlocked, and that NFC is turned on. On iPhone, tap the banner iOS
