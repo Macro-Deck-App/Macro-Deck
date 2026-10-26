@@ -20823,9 +20823,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Cette action n'a pas encore fourni d'icône.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>Cet aperçu affiche l'icône configurée manuellement. Le bouton lui-même affichera ce que fournit le fournisseur.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Impossible d'importer l'icône déposée</value>
   </data>

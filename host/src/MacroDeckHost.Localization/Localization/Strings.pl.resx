@@ -20823,9 +20823,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Ta akcja nie dostarczyła jeszcze ikony.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>Ten podgląd pokazuje ręcznie skonfigurowaną ikonę. Sam przycisk pokaże to, co dostarczy dostawca.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Nie udało się zaimportować upuszczonej ikony</value>
   </data>

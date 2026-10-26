@@ -20842,9 +20842,6 @@
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>لم يوفّر هذا الإجراء أيقونة بعد.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>تعرض هذه المعاينة الأيقونة المضبوطة يدوياً. الزر نفسه سيعرض ما يوفّره المزوّد.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>تعذّر استيراد الأيقونة المُفلَتة</value>
   </data>

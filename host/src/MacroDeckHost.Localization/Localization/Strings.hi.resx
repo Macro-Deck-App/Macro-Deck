@@ -20842,9 +20842,6 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>इस क्रिया ने अभी तक कोई आइकन नहीं दिया है।</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>यह पूर्वावलोकन मैन्युअल रूप से कॉन्फ़िगर किया गया आइकन दिखाता है। बटन स्वयं वही दिखाएगा जो प्रदाता देता है।</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>छोड़ा गया आइकन आयात नहीं हो सका</value>
   </data>

@@ -368,6 +368,14 @@ internal sealed class WidgetIconProviderPollServiceTests
 			return Task.FromResult(WidgetIconResolution.Inactive);
 		}
 
+		public Task<WidgetIconResolution> ResolveDraft(
+			string? data,
+			string resourceKey,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(WidgetIconResolution.Inactive);
+		}
+
 		public TimeSpan? GetProviderPollInterval(Guid widgetId)
 		{
 			return PollIntervalByWidget.TryGetValue(widgetId, out var interval) ? interval : null;

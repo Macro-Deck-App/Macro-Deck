@@ -414,6 +414,146 @@ public class WidgetIconServiceTests
 		});
 	}
 
+	[Test]
+	public async Task ADraft_ShowsTheIconItsProviderSupplies_WithoutTheDraftBeingStored()
+	{
+		var stored = SinglePlayerWidget(out var action);
+		action.SnapshotToReturn = BytesSnapshot("etag-1");
+		action.ContentByVersion = _ => new ActionIconContent(_newTrackBytes, "image/png");
+		var fixture = new Fixture(stored);
+		fixture.Integrations.Add(new FakeIntegration { Id = "spotify", Actions = [action] });
+
+		var result = await fixture.Service.ResolveDraft(EditorDraft("blk-9", "current-track"), "draft-key");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.IsActive, Is.True);
+			Assert.That(fixture.ResourceStore.TryGet(result.Resource!.ResourceId, out var content), Is.True);
+			Assert.That(content.Content.ToArray(), Is.EqualTo(_newTrackBytes));
+		});
+	}
+
+	[Test]
+	public async Task ADraft_WithoutAnIconProvider_OrWithItsBlockDisabled_KeepsTheConfiguredIcon()
+	{
+		var stored = SinglePlayerWidget(out var action);
+		action.SnapshotToReturn = BytesSnapshot("etag-1");
+		var fixture = new Fixture(stored);
+		fixture.Integrations.Add(new FakeIntegration { Id = "spotify", Actions = [action] });
+
+		var withoutProvider = await fixture.Service.ResolveDraft("{\"stateMode\":false,\"flows\":\"[]\"}",
+			"draft-key");
+		var disabledBlock = await fixture.Service.ResolveDraft(EditorDraft("blk-9", "current-track", true),
+			"draft-key");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(withoutProvider, Is.EqualTo(WidgetIconResolution.Inactive));
+			Assert.That(disabledBlock, Is.EqualTo(WidgetIconResolution.Inactive));
+			Assert.That(action.GetActionIconCallCount, Is.EqualTo(0));
+		});
+	}
+
+	[Test]
+	public async Task ADraftWithAnotherIcon_NeverReplacesTheStoredButtonsIcon()
+	{
+		var stored = SinglePlayerWidget(out var action);
+		action.ContentByVersion = version => version == "etag-2"
+			? new ActionIconContent(_newTrackBytes, "image/png")
+			: new ActionIconContent([1, 2, 3, 4], "image/png");
+		var fixture = new Fixture(stored);
+		fixture.Integrations.Add(new FakeIntegration { Id = "spotify", Actions = [action] });
+
+		action.SnapshotToReturn = BytesSnapshot("etag-1");
+		var deck = await fixture.Service.Resolve(stored.Id);
+		action.SnapshotToReturn = BytesSnapshot("etag-2");
+		var draft = await fixture.Service.ResolveDraft(stored.Data, $"{stored.Id:N}-preview");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(draft.Resource!.ResourceId, Is.Not.EqualTo(deck.Resource!.ResourceId));
+			Assert.That(fixture.ResourceStore.TryGet(deck.Resource.ResourceId, out var deckContent), Is.True);
+			Assert.That(deckContent.Content.ToArray(), Is.EqualTo(new byte[] { 1, 2, 3, 4 }));
+		});
+	}
+
+	[Test]
+	public async Task SwitchingToAnotherProvider_ThatReportsTheSameVersion_ShowsTheNewProvidersIcon()
+	{
+		var stored = SinglePlayerWidget(out var first);
+		first.SnapshotToReturn = BytesSnapshot("on");
+		first.ContentByVersion = _ => new ActionIconContent([1, 2, 3, 4], "image/png");
+		var second = new FakeIconProviderAction
+		{
+			Id = "microphone",
+			SnapshotToReturn = BytesSnapshot("on"),
+			ContentByVersion = _ => new ActionIconContent(_newTrackBytes, "image/png")
+		};
+		var fixture = new Fixture(stored);
+		fixture.Integrations.Add(new FakeIntegration { Id = "spotify", Actions = [first, second] });
+
+		await fixture.Service.ResolveDraft(EditorDraft("blk-9", "current-track"), "draft-key");
+		var switched = await fixture.Service.ResolveDraft(EditorDraft("blk-9", "microphone"), "draft-key");
+
+		Assert.That(fixture.ResourceStore.TryGet(switched.Resource!.ResourceId, out var content), Is.True);
+		Assert.That(content.Content.ToArray(), Is.EqualTo(_newTrackBytes));
+	}
+
+	[Test]
+	public async Task ANewProviderWhoseImageCannotBeFetched_NeverShowsThePreviousProvidersImage()
+	{
+		var stored = SinglePlayerWidget(out var first);
+		first.SnapshotToReturn = BytesSnapshot("on");
+		var second = new FakeIconProviderAction
+			{ Id = "microphone", SnapshotToReturn = BytesSnapshot("on"), ContentUnavailable = true };
+		var fixture = new Fixture(stored);
+		fixture.Integrations.Add(new FakeIntegration { Id = "spotify", Actions = [first, second] });
+
+		await fixture.Service.ResolveDraft(EditorDraft("blk-9", "current-track"), "draft-key");
+		var switched = await fixture.Service.ResolveDraft(EditorDraft("blk-9", "microphone"), "draft-key");
+
+		Assert.That(switched, Is.EqualTo(WidgetIconResolution.Blank));
+	}
+
+	private static string EditorDraft(string blockId, string actionId, bool disabled = false)
+	{
+		var flows = new JsonArray(new JsonObject
+		{
+			["triggerId"] = "onShortPress",
+			["triggerType"] = "onShortPress",
+			["children"] = new JsonArray(new JsonObject
+			{
+				["id"] = blockId,
+				["type"] = "action",
+				["blockType"] = "spotify." + actionId,
+				["integrationId"] = "spotify",
+				["actionId"] = actionId,
+				["disabled"] = disabled,
+				["parameters"] = new JsonArray(new JsonObject
+				{
+					["name"] = "device",
+					["type"] = "text",
+					["label"] = "Device",
+					["value"] = "desk"
+				})
+			})
+		});
+
+		return new JsonObject
+		{
+			["stateMode"] = false,
+			["label"] = "On",
+			["flows"] = flows.ToJsonString(),
+			["iconProvider"] = new JsonObject
+			{
+				["blockId"] = blockId,
+				["integrationId"] = "spotify",
+				["actionId"] = actionId,
+				["actionLabel"] = actionId
+			}
+		}.ToJsonString();
+	}
+
 	private static async Task<bool> AcceptOnceOrTimeoutAsync(TcpListener listener)
 	{
 		try
@@ -671,6 +811,7 @@ public class WidgetIconServiceTests
 
 		public ActionIconSnapshot? SnapshotToReturn { get; set; }
 		public Func<string, ActionIconContent?>? ContentByVersion { get; set; }
+		public bool ContentUnavailable { get; set; }
 		public ActionResult Result { get; set; } = ActionResult.Success();
 
 		public int ExecuteCount { get; private set; }
@@ -697,8 +838,10 @@ public class WidgetIconServiceTests
 		{
 			GetActionIconContentCallCount++;
 			ContentCallVersions.Add(version);
-			var content = ContentByVersion?.Invoke(version) ?? new ActionIconContent([1, 2, 3, 4], "image/png");
-			return Task.FromResult<ActionIconContent?>(content);
+			var content = ContentUnavailable
+				? null
+				: ContentByVersion?.Invoke(version) ?? new ActionIconContent([1, 2, 3, 4], "image/png");
+			return Task.FromResult(content);
 		}
 
 		public IActionExecutor CreateExecutor()

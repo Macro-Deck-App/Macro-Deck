@@ -192,13 +192,13 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			return null;
 		}
 
-		// The Preview surface has no stored widget (widget.Id is Guid.Empty for it - see
-		// _previewWidgetPlaceholder), so this always resolves to Inactive there: the preview keeps
-		// showing the configured icon, matching IWidgetStateService.Resolve's own established blind spot
-		// for the same surface.
-		var iconProviderState
-			= new UiState<WidgetIconResolution>(await ResolveInitialIconProviderAsync(widget.Id, cancellationToken)
-				.ConfigureAwait(false));
+		var draftData = interactive || data.ValueKind != JsonValueKind.Object ? null : data.GetRawText();
+		var iconProviderState = new UiState<WidgetIconResolution>(await ResolveInitialIconProviderAsync(widget,
+				interactive,
+				variableScopeWidgetId,
+				draftData,
+				cancellationToken)
+			.ConfigureAwait(false));
 
 		// The state the button is actually in, not the one its data last stored: a mapping or a provider
 		// decides that, and the stored activeStateId it falls back to is only ever meaningful while
@@ -237,7 +237,8 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			_uiTransport,
 			_labelRenders,
 			interactive,
-			variableScopeWidgetId);
+			variableScopeWidgetId,
+			draftData);
 
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,
@@ -277,12 +278,21 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 	/// already showing the right image rather than the configured icon for one frame. Uses its own scope -
 	/// <see cref="IWidgetIconService" /> is scoped, and this provider is a singleton.</summary>
 	private async Task<WidgetIconResolution> ResolveInitialIconProviderAsync(
-		Guid widgetId,
+		WidgetEntity widget,
+		bool interactive,
+		string? variableScopeWidgetId,
+		string? draftData,
 		CancellationToken cancellationToken)
 	{
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var iconService = scope.ServiceProvider.GetRequiredService<IWidgetIconService>();
-		return await iconService.Resolve(widgetId, cancellationToken).ConfigureAwait(false);
+		return await ActionButtonWidgetSession.ResolveIconProvider(iconService,
+				widget,
+				interactive,
+				variableScopeWidgetId,
+				draftData,
+				cancellationToken)
+			.ConfigureAwait(false);
 	}
 
 	/// <summary>Resolves the label's initial display text host-side, so a Liquid template never reaches the

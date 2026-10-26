@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
+using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Actions;
@@ -306,6 +307,56 @@ public class ActionButtonWidgetUiProviderTests
 		await session.DisposeAsync();
 	}
 
+	private const string IconProviderDraftData =
+		"{\"stateMode\":false,\"label\":\"On\",\"flows\":\"[]\","
+		+ "\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"probe\",\"actionId\":\"camera\"}}";
+
+	[Test]
+	public async Task A_preview_scoped_to_a_stored_widget_shows_the_icon_its_draft_provider_supplies()
+	{
+		var scopeWidgetId = Guid.NewGuid();
+		var iconService = new FakeWidgetIconService
+		{
+			DraftResolution = WidgetIconResolution.Active(new UiResource { ResourceId = "provider-draft" })
+		};
+		var provider = Provider(new StubFolderCache(), new RecordingTriggerService(), iconService: iconService);
+
+		var session = await provider.CreateSessionAsync(PreviewRequest(IconProviderDraftData, scopeWidgetId.ToString()),
+			CancellationToken.None);
+
+		var button = FindById(session!.BuildTree().Root, "actionButton")!;
+		var draftCall = iconService.DraftCalls.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(JsonSerializer.Serialize(button.Properties["source"]), Does.Contain("provider-draft"));
+			Assert.That(draftCall.ResourceKey, Is.Not.EqualTo(scopeWidgetId.ToString("N")));
+			Assert.That(draftCall.Data, Does.Contain("\"iconProvider\""));
+		});
+
+		await session.DisposeAsync();
+	}
+
+	[Test]
+	public async Task A_preview_with_no_widget_behind_it_keeps_the_configured_icon()
+	{
+		var iconService = new FakeWidgetIconService
+		{
+			DraftResolution = WidgetIconResolution.Active(new UiResource { ResourceId = "provider-draft" })
+		};
+		var provider = Provider(new StubFolderCache(), new RecordingTriggerService(), iconService: iconService);
+
+		var session = await provider.CreateSessionAsync(PreviewRequest(IconProviderDraftData, null),
+			CancellationToken.None);
+
+		var button = FindById(session!.BuildTree().Root, "actionButton")!;
+		Assert.That(button.Properties.TryGetValue("source", out var source)
+				? JsonSerializer.Serialize(source)
+				: string.Empty,
+			Does.Not.Contain("provider-draft"));
+
+		await session.DisposeAsync();
+	}
+
 	[Test]
 	public async Task A_preview_with_no_scope_still_renders_its_draft_label_without_the_widgets_variables()
 	{
@@ -443,7 +494,8 @@ public class ActionButtonWidgetUiProviderTests
 		IHostLockState? lockState = null,
 		VariableRegistry? variables = null,
 		IWidgetRenderSignals? renderSignals = null,
-		FakeWidgetStateService? stateService = null)
+		FakeWidgetStateService? stateService = null,
+		FakeWidgetIconService? iconService = null)
 	{
 		var readiness = new StartupReadiness();
 		readiness.MarkCachesReady();
@@ -455,7 +507,7 @@ public class ActionButtonWidgetUiProviderTests
 			// The real service and renderer, so a scoped preview is proved against actual variable
 			// resolution rather than against a fake that merely echoes what it was handed.
 			: new LabelTextService(folderCache, new VariableTemplateRenderer(variables), readiness));
-		services.AddScoped<IWidgetIconService>(_ => new FakeWidgetIconService());
+		services.AddScoped<IWidgetIconService>(_ => iconService ?? new FakeWidgetIconService());
 		services.AddScoped<IWidgetStateService>(_ => stateService ?? new FakeWidgetStateService());
 		services.AddScoped<IAppPreferenceService>(_ => new FakeLocalizationPreferences());
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
@@ -613,7 +665,7 @@ public class ActionButtonWidgetUiProviderTests
 
 	private sealed class FakeWidgetIconResources : IWidgetIconResources
 	{
-		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(
+		public Task<UiResource?> ResolveAsync(
 			WidgetIconReference? reference,
 			WidgetIconLimit limit,
 			CancellationToken cancellationToken)
@@ -621,11 +673,11 @@ public class ActionButtonWidgetUiProviderTests
 			return ResolveAsync(reference, cancellationToken);
 		}
 
-		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(
+		public Task<UiResource?> ResolveAsync(
 			WidgetIconReference? reference,
 			CancellationToken cancellationToken)
 		{
-			return Task.FromResult<MacroDeck.Ui.Model.Resources.UiResource?>(null);
+			return Task.FromResult<UiResource?>(null);
 		}
 
 		public void Evict(Guid iconId)
@@ -646,6 +698,23 @@ public class ActionButtonWidgetUiProviderTests
 		public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
 		{
 			return Task.FromResult(WidgetIconResolution.Inactive);
+		}
+
+		public WidgetIconResolution DraftResolution { get; set; } = WidgetIconResolution.Inactive;
+
+		public List<(string? Data, string ResourceKey)> DraftCalls { get; } = [];
+
+		public Task<WidgetIconResolution> ResolveDraft(
+			string? data,
+			string resourceKey,
+			CancellationToken cancellationToken = default)
+		{
+			lock (DraftCalls)
+			{
+				DraftCalls.Add((data, resourceKey));
+			}
+
+			return Task.FromResult(DraftResolution);
 		}
 
 		public TimeSpan? GetProviderPollInterval(Guid widgetId)

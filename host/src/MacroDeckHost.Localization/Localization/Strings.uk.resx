@@ -20842,9 +20842,6 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Ця дія ще не надала значка.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>Цей попередній перегляд показує значок, налаштований вручну. Сама кнопка показуватиме те, що надає провайдер.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Не вдалося імпортувати перетягнутий значок</value>
   </data>

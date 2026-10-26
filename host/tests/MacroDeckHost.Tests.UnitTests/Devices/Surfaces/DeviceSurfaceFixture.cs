@@ -592,6 +592,14 @@ internal sealed class FakeWidgetIconService : IWidgetIconService
 		return Task.FromResult(_resolutions.GetValueOrDefault((widgetId, limit), WidgetIconResolution.Inactive));
 	}
 
+	public Task<WidgetIconResolution> ResolveDraft(
+		string? data,
+		string resourceKey,
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(WidgetIconResolution.Inactive);
+	}
+
 	public TimeSpan? GetProviderPollInterval(Guid widgetId)
 	{
 		return null;

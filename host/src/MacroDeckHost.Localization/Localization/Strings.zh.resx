@@ -20824,9 +20824,6 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>此动作尚未提供图标。</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>此预览显示的是手动配置的图标。按钮本身会显示提供方提供的内容。</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>无法导入拖放的图标</value>
   </data>

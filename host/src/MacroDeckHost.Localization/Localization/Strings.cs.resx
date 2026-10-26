@@ -20823,9 +20823,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Tato akce zatím neposkytla ikonu.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>Tento náhled zobrazuje ručně nastavenou ikonu. Samotné tlačítko zobrazí to, co poskytne poskytovatel.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Přetaženou ikonu se nepodařilo importovat</value>
   </data>

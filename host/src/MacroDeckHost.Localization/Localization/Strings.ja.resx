@@ -20842,9 +20842,6 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>このアクションはまだアイコンを提供していません。</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>このプレビューには手動で設定したアイコンが表示されています。ボタン自体には、提供元が指定したアイコンが表示されます。</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>ドロップされたアイコンをインポートできませんでした</value>
   </data>

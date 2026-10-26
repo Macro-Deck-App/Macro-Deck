@@ -1598,11 +1598,6 @@ internal static class ActionButtonWidgetConfigView
 										Severity = "warning",
 										Text = AppStrings.Widgets.Editor.IconProviderNoIconYet()
 									}
-								},
-								new UiProse
-								{
-									Key = $"iconProviderPreviewNote{keySuffix}",
-									Text = AppStrings.Widgets.Editor.IconProviderPreviewNote()
 								}
 							]
 						}

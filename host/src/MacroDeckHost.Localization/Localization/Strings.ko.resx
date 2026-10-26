@@ -20842,9 +20842,6 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>이 액션은 아직 아이콘을 제공하지 않았습니다.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>이 미리 보기는 직접 설정한 아이콘을 보여 줍니다. 실제 버튼에는 제공자가 전달하는 아이콘이 표시됩니다.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>놓은 아이콘을 가져올 수 없습니다</value>
   </data>

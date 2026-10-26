@@ -20842,9 +20842,6 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Это действие ещё не передало значок.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>В предпросмотре показан значок, настроенный вручную. Сама кнопка будет показывать значок, который передаёт поставщик.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Не удалось импортировать перетащенный значок</value>
   </data>

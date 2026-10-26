@@ -20821,9 +20821,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Diese Aktion hat noch kein Symbol bereitgestellt.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>Diese Vorschau zeigt das manuell festgelegte Symbol. Der Button selbst zeigt, was der Provider liefert.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Das abgelegte Symbol konnte nicht importiert werden</value>
   </data>
