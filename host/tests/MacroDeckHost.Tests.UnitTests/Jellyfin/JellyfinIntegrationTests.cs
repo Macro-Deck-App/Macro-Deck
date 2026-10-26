@@ -237,12 +237,37 @@ internal sealed class JellyfinIntegrationTests
 	public async Task Devices_with_the_same_name_can_be_told_apart()
 	{
 		_context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("a", "Firefox"), Session("b", "Firefox")];
+		_client.Sessions = [Session("a", "Firefox", Movie()), Session("b", "Firefox", Movie())];
 
 		await InitializeAndWaitForDevicesAsync(2);
 
 		Assert.That(_integration.GetInstances().Skip(1).Select(instance => instance.DisplayName),
 			Is.EquivalentTo(new[] { "Home · Firefox (1)", "Home · Firefox (2)" }));
+	}
+
+	[Test]
+	public async Task A_cast_that_returns_under_a_new_id_stays_the_same_player()
+	{
+		var start = DateTimeOffset.UtcNow;
+		_context.AddServer("Home", variableKey: "home");
+		_client.Sessions = [Session("first", "Google Cast", lastActivity: start)];
+		await InitializeAndWaitForDevicesAsync(1);
+		var cast = _integration.GetInstances()[1];
+
+		_client.Sessions =
+		[
+			Session("first", "Google Cast", lastActivity: start),
+			Session("second", "Google Cast", Movie(), lastActivity: start.AddMinutes(1))
+		];
+		await WaitUntilAsync(() => _integration.Runtimes[0].Devices.Find("second") is not null);
+
+		var state = await _integration.GetPlayer(cast.Id)!.GetStateAsync();
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integration.GetInstances().Skip(1).Select(instance => (instance.Id, instance.DisplayName)),
+				Is.EqualTo(new[] { (cast.Id, "Home · Google Cast") }));
+			Assert.That(state.TrackName, Is.EqualTo("Big Buck Bunny"));
+		});
 	}
 
 	[Test]

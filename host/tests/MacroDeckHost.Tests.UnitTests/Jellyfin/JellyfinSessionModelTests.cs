@@ -213,17 +213,169 @@ internal sealed class JellyfinDeviceRegistryTests
 	}
 
 	[Test]
-	public void Devices_sharing_a_name_get_distinct_keys_that_do_not_change_later()
+	public void Same_named_clients_playing_at_once_get_distinct_keys_that_do_not_change_later()
 	{
 		var registry = new JellyfinDeviceRegistry();
-		registry.Observe(Map(Session("a", "Chrome")), _now, _ => false);
-		registry.Observe(Map(Session("a", "Chrome"), Session("b", "Chrome")), _now, _ => false);
-		registry.Observe(Map(Session("b", "Chrome")), _now.AddDays(1), _ => false);
+		registry.Observe(Map(Session("a", "Chrome", Movie(), lastActivity: _now)), _now, _ => false);
+		registry.Observe(Map(Session("a", "Chrome", Movie(), lastActivity: _now.AddMinutes(1)),
+				Session("b", "Chrome", Movie(), lastActivity: _now.AddMinutes(2))),
+			_now,
+			_ => false);
+		registry.Observe(Map(Session("a", "Chrome", lastActivity: _now.AddMinutes(3)),
+				Session("b", "Chrome", lastActivity: _now.AddMinutes(4))),
+			_now.AddDays(1),
+			_ => false);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(registry.Find("a")!.Key, Is.EqualTo("chrome"));
 			Assert.That(registry.Find("b")!.Key, Is.EqualTo("chrome_2"));
+		});
+	}
+
+	[Test]
+	public void A_cast_that_returns_under_a_new_id_keeps_its_device_while_the_old_session_is_still_listed()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(Cast("first", _now)), _now, _ => false);
+		var original = registry.Find("first")!;
+
+		var bothListed = Map(Cast("first", _now), Cast("second", _now.AddMinutes(5)));
+		registry.Observe(bothListed, _now, _ => false);
+		registry.Observe(bothListed, _now, _ => false);
+		registry.Load(registry.Serialize());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.Devices, Has.Count.EqualTo(1));
+			Assert.That(registry.Find("first"), Is.Null);
+			Assert.That(registry.Find("second")!.Key, Is.EqualTo(original.Key));
+			Assert.That(registry.Find("second")!.LocalId, Is.EqualTo(original.LocalId));
+		});
+	}
+
+	[Test]
+	public void Same_named_idle_clients_share_one_device_that_follows_the_latest_activity()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(Session("a", "Chrome", lastActivity: _now)), _now, _ => false);
+
+		registry.Observe(Map(Session("a", "Chrome", lastActivity: _now),
+				Session("b", "Chrome", lastActivity: _now.AddMinutes(1))),
+			_now,
+			_ => false);
+		var followsB = registry.Find("b");
+
+		registry.Observe(Map(Session("a", "Chrome", lastActivity: _now.AddMinutes(2)),
+				Session("b", "Chrome", lastActivity: _now.AddMinutes(1))),
+			_now,
+			_ => false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(followsB?.Key, Is.EqualTo("chrome"));
+			Assert.That(registry.Devices.Select(device => (device.DeviceId, device.Key)),
+				Is.EqualTo(new[] { ("a", "chrome") }));
+		});
+	}
+
+	[Test]
+	public void A_new_id_takes_over_the_idle_namesake_and_leaves_the_playing_one_alone()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(Cast("p", _now, Movie()), Cast("q", _now, Movie())), _now, _ => false);
+		var playingKey = registry.Find("p")!.Key;
+		var idleKey = registry.Find("q")!.Key;
+
+		registry.Observe(Map(Cast("p", _now.AddMinutes(1), Movie()),
+				Cast("q", _now.AddMinutes(1)),
+				Cast("r", _now.AddMinutes(2))),
+			_now,
+			_ => false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.Devices, Has.Count.EqualTo(2));
+			Assert.That(registry.Find("p")!.Key, Is.EqualTo(playingKey));
+			Assert.That(registry.Find("r")!.Key, Is.EqualTo(idleKey));
+		});
+	}
+
+	[Test]
+	public void Among_equally_recent_stored_duplicates_the_one_with_the_base_key_is_taken_over()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Load("""
+					  [
+					  	{"DeviceId":"x3","Name":"Google Cast","Client":"Chromecast","Key":"google_cast_3","LastSeen":"2026-10-07T00:00:00+00:00","IsControllable":true},
+					  	{"DeviceId":"x1","Name":"Google Cast","Client":"Chromecast","Key":"google_cast","LastSeen":"2026-10-07T00:00:00+00:00","IsControllable":true},
+					  	{"DeviceId":"x2","Name":"Google Cast","Client":"Chromecast","Key":"google_cast_2","LastSeen":"2026-10-07T00:00:00+00:00","IsControllable":true}
+					  ]
+					  """);
+
+		registry.Observe(Map(Cast("new", _now)), _now, _ => false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.Devices, Has.Count.EqualTo(3));
+			Assert.That(registry.Find("new")!.Key, Is.EqualTo("google_cast"));
+			Assert.That(registry.Find("new")!.LocalId, Is.EqualTo(JellyfinDeviceRegistry.LocalIdFor("x1")));
+			Assert.That(registry.Find("x2")!.LocalId, Is.EqualTo(JellyfinDeviceRegistry.LocalIdFor("x2")));
+		});
+	}
+
+	[Test]
+	public void A_new_cast_follows_its_listed_predecessor_and_leftovers_leave_stored_duplicates_alone()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Load("""
+					  [
+					  	{"DeviceId":"x1","Name":"Google Cast","Client":"Chromecast","Key":"google_cast","LastSeen":"2026-10-07T00:00:00+00:00","IsControllable":true},
+					  	{"DeviceId":"x2","Name":"Google Cast","Client":"Chromecast","Key":"google_cast_2","LastSeen":"2026-10-07T00:00:00+00:00","IsControllable":true}
+					  ]
+					  """);
+
+		registry.Observe(Map(Cast("c1", _now)), _now, _ => false);
+		registry.Observe(Map(Cast("c1", _now), Cast("c2", _now.AddMinutes(1))), _now, _ => false);
+		registry.Observe(Map(Cast("c1", _now), Cast("c2", _now.AddMinutes(1)), Cast("c3", _now.AddMinutes(2), Movie())),
+			_now,
+			_ => false);
+		registry.Observe(Map(Cast("c1", _now), Cast("c2", _now.AddMinutes(1)), Cast("c3", _now.AddMinutes(2), Movie())),
+			_now,
+			_ => false);
+
+		Assert.That(registry.Devices.Select(device => (device.DeviceId, device.Key)),
+			Is.EquivalentTo(new[] { ("c3", "google_cast"), ("x2", "google_cast_2") }));
+	}
+
+	[Test]
+	public void A_same_named_client_of_another_app_is_a_device_of_its_own()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(Cast("cast", _now)), _now, _ => false);
+		registry.Observe(Map(Session("web", "Google Cast", lastActivity: _now.AddMinutes(1))), _now, _ => false);
+
+		Assert.That(registry.Devices.Select(device => device.DeviceId), Is.EquivalentTo(new[] { "cast", "web" }));
+	}
+
+	[Test]
+	public void A_device_reusing_an_id_that_was_taken_over_gets_its_own_local_id()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(Cast("x", _now)), _now, _ => false);
+		registry.Observe(Map(Cast("x", _now), Cast("y", _now.AddMinutes(1))), _now, _ => false);
+
+		registry.Observe(Map(Cast("y", _now.AddMinutes(2), Movie()),
+				Session("x", "Kitchen", lastActivity: _now.AddMinutes(3))),
+			_now,
+			_ => false);
+		registry.Load(registry.Serialize());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.FindByLocalId(JellyfinDeviceRegistry.LocalIdFor("x"))!.DeviceId, Is.EqualTo("y"));
+			Assert.That(registry.Find("x")!.LocalId, Is.Not.EqualTo(registry.Find("y")!.LocalId));
+			Assert.That(registry.FindByLocalId(registry.Find("x")!.LocalId)!.DeviceId, Is.EqualTo("x"));
 		});
 	}
 
@@ -258,5 +410,10 @@ internal sealed class JellyfinDeviceRegistryTests
 	private static IReadOnlyList<JellyfinSession> Map(params JellyfinSessionDto[] sessions)
 	{
 		return JellyfinSessionMapper.Map(sessions, "macro-deck-device");
+	}
+
+	private static JellyfinSessionDto Cast(string deviceId, DateTimeOffset lastActivity, JellyfinItemDto? item = null)
+	{
+		return Session(deviceId, "Google Cast", item, lastActivity: lastActivity) with { Client = "Chromecast" };
 	}
 }
