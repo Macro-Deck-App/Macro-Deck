@@ -20842,9 +20842,6 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Deze actie heeft nog geen pictogram geleverd.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>Deze voorbeeldweergave toont het handmatig ingestelde pictogram. De knop zelf toont wat de provider levert.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Het neergezette pictogram kon niet worden geïmporteerd</value>
   </data>

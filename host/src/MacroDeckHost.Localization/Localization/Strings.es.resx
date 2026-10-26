@@ -20823,9 +20823,6 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Esta acción aún no ha proporcionado un icono.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>Esta vista previa muestra el icono configurado manualmente. El botón mostrará lo que proporcione el proveedor.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>No se pudo importar el icono soltado</value>
   </data>

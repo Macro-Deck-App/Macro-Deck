@@ -59,6 +59,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	private readonly LabelRenderChannel _labelRenders;
 	private readonly bool _interactive;
 	private readonly string? _variableScopeWidgetId;
+	private readonly string? _draftData;
 
 	// A synthetic subscriber identity, exactly like a connected client's connection id would be, so this
 	// session can register itself in the same trackers a legacy WebSocket subscription uses: that is what
@@ -149,7 +150,8 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		IUiTransport uiTransport,
 		LabelRenderChannel labelRenders,
 		bool interactive,
-		string? variableScopeWidgetId = null)
+		string? variableScopeWidgetId = null,
+		string? draftData = null)
 	{
 		ArgumentNullException.ThrowIfNull(configState);
 		ArgumentNullException.ThrowIfNull(activeState);
@@ -186,6 +188,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		_labelRenders = labelRenders;
 		_interactive = interactive;
 		_variableScopeWidgetId = variableScopeWidgetId;
+		_draftData = draftData;
 		_activeStateIsExplicit = configState.Peek().StoredActiveStateId is not null;
 	}
 
@@ -236,6 +239,14 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 			if (_variableScopeWidgetId is not null)
 			{
 				_variableChangedSubscription = _renderSignals.SubscribeVariableChanged(ScheduleDraftLabelResolution);
+			}
+
+			// Raised only when the stored widget's own provider changes its icon, so a draft that adopts a
+			// different provider shows the snapshot from when this preview opened.
+			if (Guid.TryParse(_variableScopeWidgetId, out var scopeWidgetId))
+			{
+				_widgetIconChangedSubscription = _renderSignals.SubscribeWidgetIconChanged(scopeWidgetId.ToString(),
+					ScheduleIconResolution);
 			}
 
 			return;
@@ -835,7 +846,13 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	{
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var iconService = scope.ServiceProvider.GetRequiredService<IWidgetIconService>();
-		var resolution = await iconService.Resolve(_widget.Id, cancellationToken).ConfigureAwait(false);
+		var resolution = await ResolveIconProvider(iconService,
+				_widget,
+				_interactive,
+				_variableScopeWidgetId,
+				_draftData,
+				cancellationToken)
+			.ConfigureAwait(false);
 
 		cancellationToken.ThrowIfCancellationRequested();
 
@@ -851,6 +868,24 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 				_iconProviderState.Value = resolution;
 			}
 		}
+	}
+
+	internal static Task<WidgetIconResolution> ResolveIconProvider(
+		IWidgetIconService iconService,
+		WidgetEntity widget,
+		bool interactive,
+		string? variableScopeWidgetId,
+		string? draftData,
+		CancellationToken cancellationToken)
+	{
+		if (interactive)
+		{
+			return iconService.Resolve(widget.Id, cancellationToken);
+		}
+
+		return Guid.TryParse(variableScopeWidgetId, out var scopeWidgetId)
+			? iconService.ResolveDraft(draftData, $"{scopeWidgetId:N}-preview", cancellationToken)
+			: Task.FromResult(WidgetIconResolution.Inactive);
 	}
 
 	/// <summary>

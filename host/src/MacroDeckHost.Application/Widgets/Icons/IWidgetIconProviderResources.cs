@@ -8,14 +8,16 @@ namespace MacroDeckHost.Application.Widgets.Icons;
 
 /// <summary>
 /// Registers the bytes behind an icon-provider action's snapshot into <see cref="IUiResourceStore" />, one
-/// entry per widget rather than one per <c>Version</c>: <see cref="ResolveAsync" /> is keyed by widget id
-/// and registers every fetch under that same host-generated, stable, widget-scoped resource name, so a new
+/// entry per widget rather than one per <c>Version</c>: <see cref="ResolveAsync" /> is keyed by a host-generated
+/// resource key (the widget id, or a separate key for an editor draft of it) and registers every fetch under
+/// that same stable, widget-scoped resource name, so a new
 /// track replaces the previous entry instead of leaking one per track the way keying on the provider's own
 /// (arbitrary, potentially oversized, ':'/'/'-bearing) reference would (issue #425 - <c>IUiResourceStore</c>
 /// is an unbounded dictionary with no eviction).
 ///
 /// <para>
-/// A version already cached is never re-fetched - what makes per-track polling affordable. Oversized or
+/// A version already cached for the same provider is never re-fetched - what makes per-track polling
+/// affordable. Oversized or
 /// disallowed-media-type bytes are registered as nothing (treated as "no icon") rather than thrown out of
 /// a session's resolve loop, and a content fetch that raced a newer version (returned null) never
 /// overwrites what is already cached, so the next resolve for the now-current version tries again instead
@@ -25,7 +27,8 @@ namespace MacroDeckHost.Application.Widgets.Icons;
 public interface IWidgetIconProviderResources
 {
 	Task<UiResource?> ResolveAsync(
-		Guid widgetId,
+		string resourceKey,
+		string providerFingerprint,
 		string version,
 		Func<CancellationToken, Task<ActionIconContent?>> fetchContent,
 		CancellationToken cancellationToken);
@@ -46,7 +49,7 @@ public sealed class WidgetIconProviderResources : IWidgetIconProviderResources
 
 	private readonly IUiResourceStore _resourceStore;
 	private readonly ILogger _logger;
-	private readonly Dictionary<Guid, (string Version, UiResource? Resource)> _cache = new();
+	private readonly Dictionary<string, CachedIcon> _cache = new(StringComparer.Ordinal);
 	private readonly Lock _sync = new();
 
 	public WidgetIconProviderResources(IUiResourceStore resourceStore, ILogger logger)
@@ -56,15 +59,17 @@ public sealed class WidgetIconProviderResources : IWidgetIconProviderResources
 	}
 
 	public async Task<UiResource?> ResolveAsync(
-		Guid widgetId,
+		string resourceKey,
+		string providerFingerprint,
 		string version,
 		Func<CancellationToken, Task<ActionIconContent?>> fetchContent,
 		CancellationToken cancellationToken)
 	{
 		lock (_sync)
 		{
-			if (_cache.TryGetValue(widgetId, out var cached)
-				&& string.Equals(cached.Version, version, StringComparison.Ordinal))
+			if (_cache.TryGetValue(resourceKey, out var cached)
+				&& string.Equals(cached.Version, version, StringComparison.Ordinal)
+				&& string.Equals(cached.ProviderFingerprint, providerFingerprint, StringComparison.Ordinal))
 			{
 				return cached.Resource;
 			}
@@ -83,7 +88,7 @@ public sealed class WidgetIconProviderResources : IWidgetIconProviderResources
 		}
 		catch (Exception exception)
 		{
-			_logger.Warning(exception, "Failed to fetch provider icon content for widget {WidgetId}", widgetId);
+			_logger.Warning(exception, "Failed to fetch provider icon content for {ResourceKey}", resourceKey);
 			content = null;
 		}
 #pragma warning restore CA1031
@@ -96,27 +101,29 @@ public sealed class WidgetIconProviderResources : IWidgetIconProviderResources
 			// instead of being stuck believing this version was already tried.
 			lock (_sync)
 			{
-				return _cache.TryGetValue(widgetId, out var previous) ? previous.Resource : null;
+				return _cache.TryGetValue(resourceKey, out var previous)
+					&& string.Equals(previous.ProviderFingerprint, providerFingerprint, StringComparison.Ordinal)
+						? previous.Resource
+						: null;
 			}
 		}
 
-		var resource = TryRegister(widgetId, content);
+		var resource = TryRegister(resourceKey, content);
 
 		lock (_sync)
 		{
-			_cache[widgetId] = (version, resource);
+			_cache[resourceKey] = new CachedIcon(providerFingerprint, version, resource);
 		}
 
 		return resource;
 	}
 
-	private UiResource? TryRegister(Guid widgetId, ActionIconContent content)
+	private UiResource? TryRegister(string resourceKey, ActionIconContent content)
 	{
 		if (!_allowedMediaTypes.Contains(content.MediaType))
 		{
-			_logger.Warning(
-				"Provider icon for widget {WidgetId} was not registered: media type '{MediaType}' is not allowed",
-				widgetId,
+			_logger.Warning("Provider icon {ResourceKey} was not registered: media type '{MediaType}' is not allowed",
+				resourceKey,
 				content.MediaType);
 			return null;
 		}
@@ -124,8 +131,8 @@ public sealed class WidgetIconProviderResources : IWidgetIconProviderResources
 		if (content.Data.Length > ProtocolLimits.MaxUiResourceBytes)
 		{
 			_logger.Warning(
-				"Provider icon for widget {WidgetId} was not registered: {ByteLength} bytes exceeds the {Limit} byte limit",
-				widgetId,
+				"Provider icon {ResourceKey} was not registered: {ByteLength} bytes exceeds the {Limit} byte limit",
+				resourceKey,
 				content.Data.Length,
 				ProtocolLimits.MaxUiResourceBytes);
 			return null;
@@ -134,9 +141,11 @@ public sealed class WidgetIconProviderResources : IWidgetIconProviderResources
 		return _resourceStore.Register(new UiResourceRegistration
 		{
 			OwnerId = OwnerId,
-			Name = widgetId.ToString("N"),
+			Name = resourceKey,
 			MediaType = content.MediaType,
 			Content = content.Data
 		});
 	}
+
+	private sealed record CachedIcon(string ProviderFingerprint, string Version, UiResource? Resource);
 }

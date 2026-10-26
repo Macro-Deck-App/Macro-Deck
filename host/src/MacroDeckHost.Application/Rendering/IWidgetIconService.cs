@@ -45,6 +45,11 @@ public interface IWidgetIconService
 		WidgetIconLimit limit,
 		CancellationToken cancellationToken = default);
 
+	Task<WidgetIconResolution> ResolveDraft(
+		string? data,
+		string resourceKey,
+		CancellationToken cancellationToken = default);
+
 	/// <summary>
 	/// How often the widget's icon-provider action asked to be polled, or null when the widget has no
 	/// usable provider right now. Synchronous and side-effect free - it never reads the provider itself,

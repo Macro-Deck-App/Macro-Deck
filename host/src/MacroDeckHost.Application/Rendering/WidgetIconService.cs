@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Integrations;
@@ -57,13 +58,32 @@ public sealed class WidgetIconService : IWidgetIconService
 			return WidgetIconResolution.Inactive;
 		}
 
-		var model = ActionButtonStateModel.Read(widget.Data);
+		return await ResolveData(widget.Data, widgetId.ToString("N"), limit, cancellationToken).ConfigureAwait(false);
+	}
+
+	public async Task<WidgetIconResolution> ResolveDraft(
+		string? data,
+		string resourceKey,
+		CancellationToken cancellationToken = default)
+	{
+		await _readiness.WhenReady.WaitAsync(cancellationToken);
+
+		return await ResolveData(data, resourceKey, WidgetIconLimit.Host, cancellationToken).ConfigureAwait(false);
+	}
+
+	private async Task<WidgetIconResolution> ResolveData(
+		string? data,
+		string resourceKey,
+		WidgetIconLimit limit,
+		CancellationToken cancellationToken)
+	{
+		var model = ActionButtonStateModel.Read(data);
 		if (model.IconProvider is not { } provider)
 		{
 			return WidgetIconResolution.Inactive;
 		}
 
-		var resolved = FindProviderAction(widget, provider);
+		var resolved = FindProviderAction(data, provider);
 		if (resolved is null)
 		{
 			return WidgetIconResolution.Inactive;
@@ -103,7 +123,8 @@ public sealed class WidgetIconService : IWidgetIconService
 			return WidgetIconResolution.Blank;
 		}
 
-		var bytesResource = await _providerResources.ResolveAsync(widgetId,
+		var bytesResource = await _providerResources.ResolveAsync(resourceKey,
+				resolved.Value.Fingerprint,
 				snapshot.Version,
 				fetchToken => resolved.Value.Action
 					.GetActionIconContentAsync(resolved.Value.Parameters, snapshot.Version, fetchToken),
@@ -127,7 +148,7 @@ public sealed class WidgetIconService : IWidgetIconService
 			return null;
 		}
 
-		return FindProviderAction(widget, provider)?.Action.IconPollInterval;
+		return FindProviderAction(widget.Data, provider)?.Action.IconPollInterval;
 	}
 
 	private static async Task<ActionIconSnapshot?> TryReadSnapshot(
@@ -156,7 +177,8 @@ public sealed class WidgetIconService : IWidgetIconService
 
 	private readonly record struct ResolvedProvider(
 		IIconProviderActionDefinition Action,
-		IReadOnlyDictionary<string, object?> Parameters);
+		IReadOnlyDictionary<string, object?> Parameters,
+		string Fingerprint);
 
 	/// <summary>
 	/// The guard chain an icon-provider block must pass before it is ever read: found and enabled, its
@@ -166,9 +188,9 @@ public sealed class WidgetIconService : IWidgetIconService
 	/// (ADR 0056/0032's closed eight-leaf family does not grow a ninth leaf for it) - a plugin action whose
 	/// descriptor said <c>ProvidesIcon</c> is instead reached through <see cref="RemoteIconProviderActionRegistry" />.
 	/// </summary>
-	private ResolvedProvider? FindProviderAction(WidgetEntity widget, ActionButtonIconProvider provider)
+	private ResolvedProvider? FindProviderAction(string? data, ActionButtonIconProvider provider)
 	{
-		if (!ActionFlowJson.TryFindBlock(ActionFlowJson.ParseFlows(widget.Data), provider.BlockId, out var block)
+		if (!ActionFlowJson.TryFindBlock(ActionFlowJson.ParseFlows(data), provider.BlockId, out var block)
 			|| block is null
 			|| block.Disabled)
 		{
@@ -203,7 +225,21 @@ public sealed class WidgetIconService : IWidgetIconService
 		}
 
 		var parameters = ActionParameterConverter.ToNullable(block.Parameters.ToDictionary(p => p.Name, p => p.Value));
-		return new ResolvedProvider(iconProvider, parameters);
+		return new ResolvedProvider(iconProvider, parameters, Fingerprint(integrationId, actionId, block));
+	}
+
+	private static string Fingerprint(string integrationId, string actionId, ActionBlock block)
+	{
+		var parameters = block.Parameters
+			.OrderBy(p => p.Name, StringComparer.Ordinal)
+			.Select(p => p.Name + "=" + RawText(p.Value));
+
+		return string.Join('\n', new[] { integrationId, actionId, block.Id }.Concat(parameters));
+
+		static string RawText(JsonElement value)
+		{
+			return value.ValueKind == JsonValueKind.Undefined ? string.Empty : value.GetRawText();
+		}
 	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)

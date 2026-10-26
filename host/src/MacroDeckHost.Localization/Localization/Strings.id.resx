@@ -20842,9 +20842,6 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>Aksi ini belum menyediakan ikon.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>Pratinjau ini menampilkan ikon yang diatur secara manual. Tombol itu sendiri akan menampilkan apa yang disediakan oleh penyedia.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Ikon yang dijatuhkan tidak dapat diimpor</value>
   </data>

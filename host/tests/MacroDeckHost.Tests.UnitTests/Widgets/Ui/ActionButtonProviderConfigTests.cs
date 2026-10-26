@@ -392,7 +392,7 @@ public class ActionButtonProviderConfigTests
 	}
 
 	[Test]
-	public async Task An_icon_provider_that_has_no_icon_yet_says_so_next_to_the_preview_note()
+	public async Task An_icon_provider_that_has_no_icon_yet_says_so_without_claiming_the_preview_ignores_it()
 	{
 		_cover.Icon = null;
 		var host = Render(new { flows = Flow(Block("b1", "cover")) });
@@ -403,7 +403,7 @@ public class ActionButtonProviderConfigTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(host.ToCanonicalJson(), Does.Contain("Widgets.Editor.IconProviderNoIconYet"));
-			Assert.That(host.ToCanonicalJson(), Does.Contain("Widgets.Editor.IconProviderPreviewNote"));
+			Assert.That(host.ToCanonicalJson(), Does.Not.Contain("Widgets.Editor.IconProviderPreviewNote"));
 		});
 	}
 

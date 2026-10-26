@@ -242,6 +242,14 @@ internal sealed class ContractWidgetIcons : IWidgetIconService
 		return Resolve(widgetId, cancellationToken);
 	}
 
+	public Task<WidgetIconResolution> ResolveDraft(
+		string? data,
+		string resourceKey,
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(WidgetIconResolution.Inactive);
+	}
+
 	public TimeSpan? GetProviderPollInterval(Guid widgetId)
 	{
 		return null;

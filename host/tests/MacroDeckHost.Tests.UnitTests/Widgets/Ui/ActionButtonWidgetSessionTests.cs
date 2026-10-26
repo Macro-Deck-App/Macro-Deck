@@ -444,6 +444,54 @@ public class ActionButtonWidgetSessionTests
 	}
 
 	[Test]
+	public async Task An_open_preview_follows_its_stored_widgets_provider_icon_change()
+	{
+		var scopeWidgetId = Guid.NewGuid();
+		var signals = new WidgetRenderSignals();
+		var iconService = new FakeWidgetIconService();
+		var fixture = Build(TwoStateData,
+			false,
+			renderSignals: signals,
+			iconService: iconService,
+			variableScopeWidgetId: scopeWidgetId.ToString());
+
+		iconService.DraftResolution = WidgetIconResolution.Active(new UiResource { ResourceId = "provider-v2" });
+		signals.RaiseWidgetIconChanged(scopeWidgetId);
+		await fixture.Session.WaitForIconResolutionAsync();
+		await fixture.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Host.ById("actionButton").Property("source")!.Value.GetProperty("resourceId")
+					.GetString(),
+				Is.EqualTo("provider-v2"));
+			Assert.That(iconService.DraftCalls.Last().Data, Is.EqualTo(TwoStateData));
+			Assert.That(iconService.ResolveCallCount, Is.Zero);
+		});
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	[Test]
+	public async Task A_preview_ignores_provider_icon_changes_of_other_widgets()
+	{
+		var signals = new WidgetRenderSignals();
+		var iconService = new FakeWidgetIconService();
+		var fixture = Build(TwoStateData,
+			false,
+			renderSignals: signals,
+			iconService: iconService,
+			variableScopeWidgetId: Guid.NewGuid().ToString());
+
+		signals.RaiseWidgetIconChanged(Guid.NewGuid());
+		await fixture.Session.WaitForIconResolutionAsync();
+
+		Assert.That(iconService.DraftCalls, Is.Empty);
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	[Test]
 	public async Task An_icon_invalidation_for_an_icon_this_button_does_not_reference_is_ignored()
 	{
 		var icons = new FakeWidgetIconResources();
@@ -786,7 +834,8 @@ public class ActionButtonWidgetSessionTests
 		IWidgetIconResources? iconResources = null,
 		IWidgetRenderSignals? renderSignals = null,
 		UiResource? imageResource = null,
-		FakeWidgetIconService? iconService = null)
+		FakeWidgetIconService? iconService = null,
+		string? variableScopeWidgetId = null)
 	{
 		var config = ActionButtonWidgetData.Parse(JsonDocument.Parse(data).RootElement);
 		var configState = new UiState<ActionButtonWidgetData>(config);
@@ -830,7 +879,9 @@ public class ActionButtonWidgetSessionTests
 			signals,
 			transport,
 			labelRenders,
-			interactive);
+			interactive,
+			variableScopeWidgetId,
+			interactive ? null : data);
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,
 			labelText,
@@ -891,6 +942,23 @@ public class ActionButtonWidgetSessionTests
 		{
 			ResolveCallCount++;
 			return Task.FromResult(Resolution);
+		}
+
+		public WidgetIconResolution DraftResolution { get; set; } = WidgetIconResolution.Inactive;
+
+		public List<(string? Data, string ResourceKey)> DraftCalls { get; } = [];
+
+		public Task<WidgetIconResolution> ResolveDraft(
+			string? data,
+			string resourceKey,
+			CancellationToken cancellationToken = default)
+		{
+			lock (DraftCalls)
+			{
+				DraftCalls.Add((data, resourceKey));
+			}
+
+			return Task.FromResult(DraftResolution);
 		}
 
 		public TimeSpan? GetProviderPollInterval(Guid widgetId)

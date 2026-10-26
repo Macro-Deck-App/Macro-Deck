@@ -20844,9 +20844,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Editor.IconProviderNoIconYet" xml:space="preserve">
     <value>This action has not provided an icon yet.</value>
   </data>
-  <data name="Widgets.Editor.IconProviderPreviewNote" xml:space="preserve">
-    <value>This preview shows the manually configured icon. The button itself will show what the provider supplies.</value>
-  </data>
   <data name="Widgets.Editor.ImportIconFailed" xml:space="preserve">
     <value>Could not import the dropped icon</value>
   </data>
