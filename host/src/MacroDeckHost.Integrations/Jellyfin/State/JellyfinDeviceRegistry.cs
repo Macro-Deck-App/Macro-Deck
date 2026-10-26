@@ -12,10 +12,8 @@ internal sealed record JellyfinKnownDevice(
 	string Client,
 	string Key,
 	DateTimeOffset LastSeen,
-	bool IsControllable = true)
-{
-	public string LocalId => JellyfinDeviceRegistry.LocalIdFor(DeviceId);
-}
+	string LocalId,
+	bool IsControllable = true);
 
 internal sealed class JellyfinDeviceRegistry
 {
@@ -83,7 +81,8 @@ internal sealed class JellyfinDeviceRegistry
 					device.Client,
 					device.Key,
 					device.LastSeen,
-					device.IsControllable))
+					device.IsControllable,
+					device.LocalId))
 				.ToList());
 		}
 	}
@@ -99,41 +98,79 @@ internal sealed class JellyfinDeviceRegistry
 		}
 	}
 
+	// Some clients, Google Cast among them, report a new DeviceId per connection, and Jellyfin keeps listing the
+	// old session until logout or restart, so an idle older namesake session is a leftover, not a new device.
 	public bool Observe(IReadOnlyList<JellyfinSession> sessions, DateTimeOffset now, Func<string, bool> isKeyTaken)
 	{
 		var changed = false;
 		lock (_sync)
 		{
+			var observed = sessions.Where(session => session.SupportsMediaControl || session.IsActive).ToList();
+			var listed = observed.GroupBy(session => session.DeviceId, StringComparer.Ordinal)
+				.ToDictionary(group => group.Key,
+					group => new ListedDevice(group.Any(session => session.IsActive),
+						group.Max(session => session.LastActivity)),
+					StringComparer.Ordinal);
+
 			var present = new HashSet<string>(StringComparer.Ordinal);
-			foreach (var session in sessions.Where(session => session.SupportsMediaControl || session.IsActive))
+			var takenOver = new HashSet<string>(StringComparer.Ordinal);
+			foreach (var session in observed
+				.OrderBy(session => _devices.ContainsKey(session.DeviceId) ? 0 : 1)
+				.ThenByDescending(session => session.LastActivity))
 			{
-				present.Add(session.DeviceId);
 				if (_devices.TryGetValue(session.DeviceId, out var known))
 				{
-					var updated = known with
-					{
-						Name = session.DeviceName,
-						Client = session.Client,
-						IsControllable = known.IsControllable || session.SupportsMediaControl,
-						LastSeen = now - known.LastSeen >= _lastSeenResolution ? now : known.LastSeen
-					};
-
-					if (updated != known)
-					{
-						_devices[session.DeviceId] = updated;
-						changed = true;
-					}
-
+					present.Add(session.DeviceId);
+					changed |= Update(known, session, now);
 					continue;
 				}
 
-				var key = AllocateKey(session.DeviceName, isKeyTaken);
+				var namesakes = _devices.Values
+					.Where(device => string.Equals(device.Name, session.DeviceName, StringComparison.Ordinal)
+						&& string.Equals(device.Client, session.Client, StringComparison.Ordinal))
+					.Select(device => (Device: device, Current: listed.GetValueOrDefault(device.DeviceId)))
+					.ToList();
+
+				if (!session.IsActive
+					&& namesakes.Any(candidate => candidate.Current is { } current
+						&& current.LastActivity >= session.LastActivity))
+				{
+					continue;
+				}
+
+				var target = namesakes
+					.Where(candidate => !takenOver.Contains(candidate.Device.LocalId)
+						&& (candidate.Current is null
+							|| !candidate.Current.IsPlaying && candidate.Current.LastActivity < session.LastActivity))
+					.OrderByDescending(candidate => candidate.Current?.LastActivity)
+					.ThenByDescending(candidate => candidate.Device.LastSeen)
+					.ThenBy(candidate => candidate.Device.Key, StringComparer.Ordinal)
+					.Select(candidate => candidate.Device)
+					.FirstOrDefault();
+
+				if (target is not null)
+				{
+					_devices.Remove(target.DeviceId);
+					_devices[session.DeviceId] = target with
+					{
+						DeviceId = session.DeviceId,
+						IsControllable = target.IsControllable || session.SupportsMediaControl,
+						LastSeen = now
+					};
+					takenOver.Add(target.LocalId);
+					present.Add(session.DeviceId);
+					changed = true;
+					continue;
+				}
+
 				_devices[session.DeviceId] = new JellyfinKnownDevice(session.DeviceId,
 					session.DeviceName,
 					session.Client,
-					key,
+					AllocateKey(session.DeviceName, isKeyTaken),
 					now,
+					AllocateLocalId(session.DeviceId),
 					session.SupportsMediaControl);
+				present.Add(session.DeviceId);
 				changed = true;
 			}
 
@@ -148,6 +185,37 @@ internal sealed class JellyfinDeviceRegistry
 		}
 
 		return changed;
+	}
+
+	private bool Update(JellyfinKnownDevice known, JellyfinSession session, DateTimeOffset now)
+	{
+		var updated = known with
+		{
+			Name = session.DeviceName,
+			Client = session.Client,
+			IsControllable = known.IsControllable || session.SupportsMediaControl,
+			LastSeen = now - known.LastSeen >= _lastSeenResolution ? now : known.LastSeen
+		};
+
+		if (updated == known)
+		{
+			return false;
+		}
+
+		_devices[session.DeviceId] = updated;
+		return true;
+	}
+
+	private string AllocateLocalId(string deviceId)
+	{
+		var used = _devices.Values.Select(device => device.LocalId).ToHashSet(StringComparer.Ordinal);
+		var candidate = LocalIdFor(deviceId);
+		for (var suffix = 2; used.Contains(candidate); suffix++)
+		{
+			candidate = LocalIdFor($"{deviceId}#{suffix}");
+		}
+
+		return candidate;
 	}
 
 	private string AllocateKey(string deviceName, Func<string, bool> isKeyTaken)
@@ -181,6 +249,7 @@ internal sealed class JellyfinDeviceRegistry
 					device.Client ?? string.Empty,
 					device.Key,
 					device.LastSeen,
+					string.IsNullOrEmpty(device.LocalId) ? LocalIdFor(device.DeviceId) : device.LocalId,
 					device.IsControllable ?? true))
 				.ToList();
 		}
@@ -196,5 +265,8 @@ internal sealed class JellyfinDeviceRegistry
 		string? Client,
 		string Key,
 		DateTimeOffset LastSeen,
-		bool? IsControllable);
+		bool? IsControllable,
+		string? LocalId = null);
+
+	private sealed record ListedDevice(bool IsPlaying, DateTimeOffset LastActivity);
 }
