@@ -400,6 +400,158 @@ public class ApplicationFocusCoordinatorTests
 		Assert.That(_navigator.Calls, Is.Empty);
 	}
 
+	[Test]
+	public async Task OnFocusChanged_RefocusAfterAConfirmedReturn_OpensTheRuleFolderAgainAndReturnsAgain()
+	{
+		var deviceA = Guid.NewGuid();
+		MarkOnline(deviceA);
+		var baseline = await AddFolder("Baseline", 0);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "game", true, 1);
+		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
+
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Confirm(deviceA, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+		await Confirm(deviceA, baseline.Id);
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Confirm(deviceA, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+
+		Assert.That(NavigatedFolders(), Is.EqualTo(new[] { ruleFolder.Id, baseline.Id, ruleFolder.Id, baseline.Id }));
+	}
+
+	[Test]
+	public async Task OnFocusChanged_RefocusBeforeTheReturnWasReported_NextFocusLossStillReturnsToTheOriginalBaseline()
+	{
+		var deviceA = Guid.NewGuid();
+		MarkOnline(deviceA);
+		var baseline = await AddFolder("Baseline", 0);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "game", true, 1);
+		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
+
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Confirm(deviceA, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Acknowledge(1, baseline.Id);
+		await Acknowledge(2, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+
+		Assert.That(NavigatedFolders(), Is.EqualTo(new[] { ruleFolder.Id, baseline.Id, ruleFolder.Id, baseline.Id }));
+	}
+
+	[Test]
+	public async Task OnFocusChanged_TwoRoundTripsBeforeAnyReport_TheNextRoundTripStillOpensAndReturns()
+	{
+		var deviceA = Guid.NewGuid();
+		MarkOnline(deviceA);
+		var baseline = await AddFolder("Baseline", 0);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "game", true, 1);
+		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
+
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+		for (var index = 0; index < 4; index++)
+		{
+			await Acknowledge(index, _navigator.Calls[index].FolderId);
+		}
+
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Confirm(deviceA, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+
+		Assert.That(NavigatedFolders().Skip(4), Is.EqualTo(new[] { ruleFolder.Id, baseline.Id }));
+	}
+
+	[Test]
+	public async Task OnFolderReported_EveryConnectionOfADeviceEchoingTheToken_KeepsOpeningAndReturning()
+	{
+		var deviceA = Guid.NewGuid();
+		MarkOnline(deviceA);
+		MarkOnline(deviceA);
+		var baseline = await AddFolder("Baseline", 0);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "game", true, 1);
+		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
+
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Confirm(deviceA, ruleFolder.Id);
+		await Confirm(deviceA, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Acknowledge(1, baseline.Id);
+		await Acknowledge(2, ruleFolder.Id);
+		await Acknowledge(1, baseline.Id);
+		await Acknowledge(2, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+
+		Assert.That(NavigatedFolders(), Is.EqualTo(new[] { ruleFolder.Id, baseline.Id, ruleFolder.Id, baseline.Id }));
+	}
+
+	[Test]
+	public async Task OnFocusChanged_DeviceReportingFromInsideTheNavigation_KeepsOpeningAndReturning()
+	{
+		var deviceA = Guid.NewGuid();
+		MarkOnline(deviceA);
+		var baseline = await AddFolder("Baseline", 0);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "game", true, 1);
+		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
+		_navigator.OnNavigate = (deviceId, folderId, token) => _coordinator.OnFolderReported(deviceId,
+			folderId,
+			token.ToString("D"),
+			false,
+			CancellationToken.None);
+
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+
+		Assert.That(NavigatedFolders(), Is.EqualTo(new[] { ruleFolder.Id, baseline.Id, ruleFolder.Id, baseline.Id }));
+	}
+
+	[Test]
+	public async Task OnFolderReported_ResyncAfterAnUndeliveredReturn_MakesTheResyncFolderTheNextBaseline()
+	{
+		var deviceA = Guid.NewGuid();
+		MarkOnline(deviceA);
+		var baseline = await AddFolder("Baseline", 0);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "game", true, 1);
+		var elsewhere = await AddFolder("Elsewhere", 2);
+		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
+
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Confirm(deviceA, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+		await _coordinator.OnFolderReported(deviceA, elsewhere.Id, null, true, CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Confirm(deviceA, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+
+		Assert.That(_navigator.Calls.Last().FolderId, Is.EqualTo(elsewhere.Id));
+	}
+
+	[Test]
+	public async Task OnFolderReported_ManualNavigationWhileAReturnIsOutstanding_DropsTheChain()
+	{
+		var deviceA = Guid.NewGuid();
+		MarkOnline(deviceA);
+		var baseline = await AddFolder("Baseline", 0);
+		var ruleFolder = await AddFolderWithRule("Rule", deviceA, "game", true, 1);
+		var elsewhere = await AddFolder("Elsewhere", 2);
+		await _coordinator.OnFolderReported(deviceA, baseline.Id, null, false, CancellationToken.None);
+
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await Confirm(deviceA, ruleFolder.Id);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("game"), CancellationToken.None);
+		await _coordinator.OnFolderReported(deviceA, elsewhere.Id, null, false, CancellationToken.None);
+		await _coordinator.OnFocusChanged(App("browser"), CancellationToken.None);
+
+		Assert.That(_navigator.Calls, Has.Count.EqualTo(3));
+	}
+
 	private void MarkOnline(Guid deviceId)
 	{
 		var connectionId = $"conn-{++_connectionCounter}";
@@ -415,6 +567,21 @@ public class ApplicationFocusCoordinatorTests
 	{
 		var token = _navigator.Calls.Last(c => c.DeviceId == deviceId).Token;
 		return _coordinator.OnFolderReported(deviceId, folderId, token.ToString("D"), false, CancellationToken.None);
+	}
+
+	private Task Acknowledge(int callIndex, Guid folderId)
+	{
+		var call = _navigator.Calls[callIndex];
+		return _coordinator.OnFolderReported(call.DeviceId,
+			folderId,
+			call.Token.ToString("D"),
+			false,
+			CancellationToken.None);
+	}
+
+	private Guid[] NavigatedFolders()
+	{
+		return _navigator.Calls.Select(call => call.FolderId).ToArray();
 	}
 
 	private async Task<FolderEntity> AddFolder(string name, int order)
@@ -482,14 +649,21 @@ public class ApplicationFocusCoordinatorTests
 	{
 		public List<(Guid DeviceId, Guid FolderId, Guid Token)> Calls { get; } = [];
 
-		public Task<bool> ChangeFolderOnDeviceAsync(
+		public Func<Guid, Guid, Guid, Task>? OnNavigate { get; set; }
+
+		public async Task<bool> ChangeFolderOnDeviceAsync(
 			Guid deviceId,
 			Guid folderId,
 			Guid navigationToken,
 			CancellationToken cancellationToken)
 		{
 			Calls.Add((deviceId, folderId, navigationToken));
-			return Task.FromResult(true);
+			if (OnNavigate is { } onNavigate)
+			{
+				await onNavigate(deviceId, folderId, navigationToken);
+			}
+
+			return true;
 		}
 
 		public Task<bool> ChangeProfileOnDeviceAsync(
