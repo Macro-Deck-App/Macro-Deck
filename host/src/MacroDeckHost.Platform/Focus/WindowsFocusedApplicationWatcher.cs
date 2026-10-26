@@ -31,6 +31,8 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 	// from under a callback the OS may still invoke.
 	private readonly Win32WinEvent.WinEventProc _proc;
 
+	private readonly IFocusedWindowReader _foregroundReader;
+
 	private readonly Thread _pumpThread;
 
 	private volatile bool _hookInstalled;
@@ -39,7 +41,13 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 	private int _disposed;
 
 	public WindowsFocusedApplicationWatcher()
+		: this(new WindowsFocusedWindowReader())
 	{
+	}
+
+	internal WindowsFocusedApplicationWatcher(IFocusedWindowReader foregroundReader)
+	{
+		_foregroundReader = foregroundReader;
 		_proc = OnForegroundChanged;
 
 		// Deliberately not disposed: on the timeout path below this constructor returns while the pump
@@ -83,7 +91,7 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 		// seed" can never clobber the newer value with a stale one.
 		lock (_gate)
 		{
-			if (ReadForegroundWindow() is { } seed)
+			if (_foregroundReader.Read() is { } seed)
 			{
 				_channel.Writer.TryWrite(seed);
 			}
@@ -187,7 +195,7 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 		}
 	}
 
-	private void OnForegroundChanged(
+	internal void OnForegroundChanged(
 		IntPtr hook,
 		uint eventType,
 		IntPtr hwnd,
@@ -206,14 +214,14 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 				return;
 			}
 
-			if (WindowsFocusedWindowResolver.Resolve(hwnd) is not { } info)
-			{
-				return;
-			}
-
+			// The event's window may no longer be in front: Windows 11 raises a late event for the Alt+Tab
+			// switcher after the chosen window has already taken the foreground.
 			lock (_gate)
 			{
-				_channel.Writer.TryWrite(info);
+				if (_foregroundReader.Read() is { } info)
+				{
+					_channel.Writer.TryWrite(info);
+				}
 			}
 		}
 		catch (Exception e)
@@ -223,11 +231,5 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 			// here must be an ordinary return.
 			_logger.Error(e, "The Windows focus-change callback failed");
 		}
-	}
-
-	private static FocusedAppInfo? ReadForegroundWindow()
-	{
-		var window = Win32Windows.GetForegroundWindow();
-		return window == IntPtr.Zero ? null : WindowsFocusedWindowResolver.Resolve(window);
 	}
 }

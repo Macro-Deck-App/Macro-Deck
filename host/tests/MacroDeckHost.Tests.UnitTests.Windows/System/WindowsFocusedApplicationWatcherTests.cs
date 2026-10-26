@@ -1,5 +1,8 @@
+using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Platform.Focus;
+using MacroDeckHost.Platform.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.Windows.System;
 
@@ -86,5 +89,78 @@ public class WindowsFocusedApplicationWatcherTests
 
 			using var second = new WindowsFocusedApplicationWatcher();
 		});
+	}
+
+	[Test]
+	public async Task A_late_foreground_event_for_a_window_no_longer_in_front_reports_the_window_in_front()
+	{
+		var target = new FocusedAppInfo(43508, @"C:\Jellyfin\JellyfinMediaPlayer.exe", "JellyfinMediaPlayer", null);
+		using var watcher = new WindowsFocusedApplicationWatcher(new ForegroundReader(target));
+		using var cts = new CancellationTokenSource();
+
+		var items = new ConcurrentQueue<FocusedAppInfo>();
+		var enumeration = Task.Run(async () =>
+		{
+			await foreach (var info in watcher.WatchAsync(cts.Token))
+			{
+				items.Enqueue(info);
+			}
+		});
+
+		await WaitForCount(items, 1);
+
+		RaiseForeground(watcher, new IntPtr(0x1001));
+		RaiseForeground(watcher, GetDesktopWindow());
+
+		await WaitForCount(items, 3);
+		await cts.CancelAsync();
+		try
+		{
+			await enumeration.WaitAsync(TimeSpan.FromSeconds(5));
+		}
+		catch (OperationCanceledException)
+		{
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(items, Has.Count.GreaterThanOrEqualTo(3));
+			Assert.That(items, Has.All.EqualTo(target));
+		});
+	}
+
+	private static void RaiseForeground(WindowsFocusedApplicationWatcher watcher, IntPtr window)
+	{
+		watcher.OnForegroundChanged(IntPtr.Zero,
+			Win32WinEvent.EventSystemForeground,
+			window,
+			Win32WinEvent.ObjidWindow,
+			Win32WinEvent.ChildidSelf,
+			0,
+			0);
+	}
+
+	private static async Task WaitForCount(ConcurrentQueue<FocusedAppInfo> items, int count)
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
+		while (items.Count < count && DateTime.UtcNow < deadline)
+		{
+			await Task.Delay(10);
+		}
+	}
+
+	[DllImport("user32.dll")]
+	private static extern IntPtr GetDesktopWindow();
+
+	private sealed class ForegroundReader(FocusedAppInfo foreground) : IFocusedWindowReader
+	{
+		public bool IsSupported => true;
+
+		public string? UnsupportedReason => null;
+
+		public FocusedAppInfo? Read()
+		{
+			return foreground;
+		}
 	}
 }
