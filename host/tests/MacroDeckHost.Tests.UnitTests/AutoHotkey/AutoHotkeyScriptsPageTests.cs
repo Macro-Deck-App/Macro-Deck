@@ -677,22 +677,9 @@ internal sealed partial class AutoHotkeyScriptsPageTests
 	private static async Task WaitUntilAsync(Func<bool> condition)
 	{
 		var deadline = DateTime.UtcNow.AddSeconds(5);
-		while (!Holds(condition) && DateTime.UtcNow < deadline)
+		while (!condition() && DateTime.UtcNow < deadline)
 		{
 			await Task.Delay(20);
-		}
-	}
-
-	// Run output reaches the view from another thread, so a read can land between a patch and its tree.
-	private static bool Holds(Func<bool> condition)
-	{
-		try
-		{
-			return condition();
-		}
-		catch (UiTestAssertionException)
-		{
-			return false;
 		}
 	}
 

@@ -408,6 +408,33 @@ public sealed class UiTestHost
 			return;
 		}
 
+		Apply(drained);
+		var producedTree = _view.Tree;
+
+		// The view may be written from another thread between the drain and the tree read. Its patches are queued
+		// together with that newer tree, so drain them too instead of comparing trees a flush apart.
+		while (producedTree.Revision != _appliedTree.Revision && _view.DrainPatches() is { Count: > 0 } later)
+		{
+			Apply(later);
+			producedTree = _view.Tree;
+		}
+
+		var applied = UiCanonicalJson.Serialize(_appliedTree);
+		var produced = UiCanonicalJson.Serialize(producedTree);
+
+		if (!string.Equals(applied, produced, StringComparison.Ordinal))
+		{
+			throw new UiTestAssertionException(
+				"Applying the view's own patches did not reproduce the view's own tree, so the patch stream and "
+				+ $"the producer disagree at revision {_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}."
+				+ $"\napplied:  {applied}\nproduced: {produced}");
+		}
+
+		_root = null;
+	}
+
+	private void Apply(IReadOnlyList<UiPatch> drained)
+	{
 		foreach (var patch in drained)
 		{
 			var result = UiTreeApplier.Apply(_appliedTree, patch);
@@ -423,19 +450,6 @@ public sealed class UiTestHost
 			_appliedTree = result.Tree;
 			_patches.Add(patch);
 		}
-
-		var applied = UiCanonicalJson.Serialize(_appliedTree);
-		var produced = UiCanonicalJson.Serialize(_view.Tree);
-
-		if (!string.Equals(applied, produced, StringComparison.Ordinal))
-		{
-			throw new UiTestAssertionException(
-				"Applying the view's own patches did not reproduce the view's own tree, so the patch stream and "
-				+ $"the producer disagree at revision {_appliedTree.Revision.ToString(CultureInfo.InvariantCulture)}."
-				+ $"\napplied:  {applied}\nproduced: {produced}");
-		}
-
-		_root = null;
 	}
 
 	/// <summary>Rebuilds the queryable node index when the tree moved on.</summary>
