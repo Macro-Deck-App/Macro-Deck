@@ -14,11 +14,15 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 		string OwningIdentity,
 		bool ReturnOnFocusLoss);
 
+	private const int IssuedNavigationCapacity = 16;
+
 	private readonly Lock _sync = new();
 
 	private readonly Dictionary<Guid, Guid> _currentFolderByDevice = [];
 
 	private readonly Dictionary<Guid, ChainState> _chainByDevice = [];
+
+	private readonly Dictionary<Guid, List<(Guid Token, Guid FolderId)>> _issuedByDevice = [];
 
 	private FocusedApplication? _current;
 
@@ -66,7 +70,7 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 					&& chain.BaselineFolderId != Guid.Empty
 					&& _folderCache.GetFolderById(chain.BaselineFolderId) is not null)
 				{
-					toNavigate.Add((deviceId, chain.BaselineFolderId, Guid.NewGuid()));
+					toNavigate.Add(Issue(deviceId, chain.BaselineFolderId));
 				}
 			}
 
@@ -88,17 +92,7 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 					continue;
 				}
 
-				var baseline = _chainByDevice.TryGetValue(deviceId, out var priorChain)
-					? priorChain.BaselineFolderId
-					: _currentFolderByDevice.GetValueOrDefault(deviceId, Guid.Empty);
-
-				var token = Guid.NewGuid();
-				_chainByDevice[deviceId] = new ChainState(baseline,
-					match.Folder.Id,
-					token,
-					match.Rule.ApplicationIdentity,
-					match.Rule.ReturnOnFocusLoss);
-				toNavigate.Add((deviceId, match.Folder.Id, token));
+				toNavigate.Add(Acquire(deviceId, match.Folder, match.Rule));
 			}
 		}
 
@@ -121,16 +115,14 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 		{
 			_currentFolderByDevice[deviceId] = folderId;
 
-			if (_chainByDevice.TryGetValue(deviceId, out var chain))
+			if (isResync)
 			{
-				var tokenMatches = navigationToken is not null
-					&& Guid.TryParse(navigationToken, out var parsedToken)
-					&& parsedToken == chain.Token;
-
-				if (!tokenMatches && !isResync)
-				{
-					_chainByDevice.Remove(deviceId);
-				}
+				_issuedByDevice.Remove(deviceId);
+			}
+			else if (!IsOwnNavigation(deviceId, navigationToken))
+			{
+				_chainByDevice.Remove(deviceId);
+				_issuedByDevice.Remove(deviceId);
 			}
 
 			if (isResync && _current is { } app)
@@ -154,6 +146,7 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 			if (!online)
 			{
 				_chainByDevice.Remove(deviceId);
+				_issuedByDevice.Remove(deviceId);
 			}
 			else if (_current is { } app)
 			{
@@ -260,17 +253,64 @@ public sealed class ApplicationFocusCoordinator : IApplicationFocusCoordinator
 			return null;
 		}
 
-		var baseline = _chainByDevice.TryGetValue(deviceId, out var priorChain)
-			? priorChain.BaselineFolderId
+		return Acquire(deviceId, match.Folder, match.Rule);
+	}
+
+	private (Guid DeviceId, Guid FolderId, Guid Token) Acquire(Guid deviceId, FolderEntity folder, FolderFocusRule rule)
+	{
+		var baseline = BaselineFor(deviceId);
+		var navigation = Issue(deviceId, folder.Id);
+		_chainByDevice[deviceId] = new ChainState(baseline,
+			folder.Id,
+			navigation.Token,
+			rule.ApplicationIdentity,
+			rule.ReturnOnFocusLoss);
+		return navigation;
+	}
+
+	private Guid BaselineFor(Guid deviceId)
+	{
+		if (_chainByDevice.TryGetValue(deviceId, out var chain))
+		{
+			return chain.BaselineFolderId;
+		}
+
+		return _issuedByDevice.TryGetValue(deviceId, out var issued) && issued.Count > 0
+			? issued[^1].FolderId
 			: _currentFolderByDevice.GetValueOrDefault(deviceId, Guid.Empty);
+	}
+
+	// Recorded under the lock before the navigator runs: a device surface reports the folder
+	// synchronously from inside ChangeFolderOnDeviceAsync.
+	private (Guid DeviceId, Guid FolderId, Guid Token) Issue(Guid deviceId, Guid folderId)
+	{
+		if (!_issuedByDevice.TryGetValue(deviceId, out var issued))
+		{
+			issued = [];
+			_issuedByDevice[deviceId] = issued;
+		}
 
 		var token = Guid.NewGuid();
-		_chainByDevice[deviceId] = new ChainState(baseline,
-			match.Folder.Id,
-			token,
-			match.Rule.ApplicationIdentity,
-			match.Rule.ReturnOnFocusLoss);
-		return (deviceId, match.Folder.Id, token);
+		issued.Add((token, folderId));
+		if (issued.Count > IssuedNavigationCapacity)
+		{
+			issued.RemoveAt(0);
+		}
+
+		return (deviceId, folderId, token);
+	}
+
+	// Entries stay after an acknowledgement: every connection of a device echoes the same token.
+	private bool IsOwnNavigation(Guid deviceId, string? navigationToken)
+	{
+		if (navigationToken is null || !Guid.TryParse(navigationToken, out var token))
+		{
+			return false;
+		}
+
+		return _chainByDevice.TryGetValue(deviceId, out var chain) && chain.Token == token
+			|| _issuedByDevice.TryGetValue(deviceId, out var issued)
+			&& issued.Exists(entry => entry.Token == token);
 	}
 
 	// A provider device holds no WebSocket connection, so connection counts alone would report every one
