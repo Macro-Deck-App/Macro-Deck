@@ -407,6 +407,7 @@ public class Startup
 		services.AddHostedService<InstallationIdInitializeBackgroundService>();
 		services.AddHostedService<KeyRingProtectionStartupService>();
 		services.AddHostedService<PublicListenerUnavailableBackgroundService>();
+		services.AddHostedService<RestoreFailureBackgroundService>();
 		services.AddHostedService<AutostartRefreshBackgroundService>();
 		services.AddHostedService<LogTailBackgroundService>();
 		services.AddHostedService<UserNotificationBroadcastBackgroundService>();
@@ -426,6 +427,7 @@ public class Startup
 		services.AddSingleton<IPersistenceRecoveryReporter, PersistenceRecoveryNotifier>();
 		services.AddScoped<INetworkRestartNotifier, NetworkRestartNotifier>();
 		services.AddScoped<IPublicListenerUnavailableNotifier, PublicListenerUnavailableNotifier>();
+		services.AddScoped<IRestoreFailureNotifier, RestoreFailureNotifier>();
 		services.AddSingleton<IFontCatalog>(sp => new SkiaFontCatalog(sp.GetRequiredService<IMacroDeckPaths>()));
 		services.AddSingleton<IUserFontLibrary, FileSystemUserFontLibrary>();
 		services.AddSingleton<LabelRenderChannel>();
@@ -1040,6 +1042,8 @@ public class Startup
 			{
 				session.MarkRestoreApplied();
 			}
+
+			session.MarkRestoreFailed(HostStartupFacts.RestoreFailure);
 
 			return session;
 		});

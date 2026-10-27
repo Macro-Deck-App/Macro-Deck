@@ -104,6 +104,12 @@ public sealed class RestoreService : IRestoreService
 		bool proceedWithoutSafetyBackup = false,
 		CancellationToken cancellationToken = default)
 	{
+		if (_pendingStore.Read<PendingRestoreDocument>(MarkerPath(), false) is { } pending
+			&& StagedRestoreApplier.HasBegun(pending))
+		{
+			return Result.Fail<PreparedRestore, BackupError>(BackupError.RestorePending);
+		}
+
 		var leaseResult = await _gate.Acquire(BackupOperationKind.Restore,
 			BackupTrigger.BeforeRestore,
 			_leaseTimeout,
@@ -469,6 +475,12 @@ public sealed class RestoreService : IRestoreService
 		if (document is null || document.RestoreId != restoreId)
 		{
 			return Result.Fail(BackupError.NotFound, "No matching pending restore was found.");
+		}
+
+		// Its staging directory holds the original files until the next start finishes rolling it back.
+		if (StagedRestoreApplier.HasBegun(document))
+		{
+			return Result.Fail(BackupError.RestorePending);
 		}
 
 		_pendingStore.Delete(markerPath);

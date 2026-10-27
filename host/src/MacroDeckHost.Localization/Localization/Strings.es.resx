@@ -14874,6 +14874,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Error en la restauración</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>No se pudo restaurar la copia de seguridad. Tus datos están como antes de la restauración.</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>No se pudo restaurar la copia de seguridad y parte de tus datos aún no se ha podido devolver a su sitio. Reinicia Macro Deck para terminar de hacerlo.</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>No se pudo importar nada como icono.</value>
   </data>

@@ -1,3 +1,5 @@
+using MacroDeckHost.Application.Backups;
+
 namespace MacroDeckHost;
 
 /// <summary>
@@ -7,4 +9,6 @@ namespace MacroDeckHost;
 public static class HostStartupFacts
 {
 	public static bool RestoreApplied { get; set; }
+
+	public static RestoreFailure RestoreFailure { get; set; }
 }

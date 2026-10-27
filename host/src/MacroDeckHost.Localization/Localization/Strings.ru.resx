@@ -14875,6 +14875,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Не удалось выполнить восстановление</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>Не удалось восстановить резервную копию. Данные остались в том состоянии, в котором были до восстановления.</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>Не удалось восстановить резервную копию, и часть данных пока не удалось вернуть на место. Перезапустите Macro Deck, чтобы завершить возврат.</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Ничто из найденного не может быть импортировано как значок.</value>
   </data>

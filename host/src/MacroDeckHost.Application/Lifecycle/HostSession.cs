@@ -1,3 +1,5 @@
+using MacroDeckHost.Application.Backups;
+
 namespace MacroDeckHost.Application.Lifecycle;
 
 /// <summary>
@@ -11,8 +13,15 @@ public sealed class HostSession
 
 	public bool RestoreApplied { get; private set; }
 
+	public RestoreFailure RestoreFailure { get; private set; }
+
 	public void MarkRestoreApplied()
 	{
 		RestoreApplied = true;
+	}
+
+	public void MarkRestoreFailed(RestoreFailure failure)
+	{
+		RestoreFailure = failure;
 	}
 }

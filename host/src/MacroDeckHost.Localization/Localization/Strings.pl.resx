@@ -14874,6 +14874,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Przywracanie nie powiodło się</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>Nie udało się przywrócić kopii zapasowej. Dane pozostały w stanie sprzed przywracania.</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>Nie udało się przywrócić kopii zapasowej, a części danych nie udało się jeszcze przenieść z powrotem. Uruchom ponownie Macro Deck, aby to dokończyć.</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Nic z tego nie dało się zaimportować jako ikony.</value>
   </data>

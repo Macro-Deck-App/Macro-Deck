@@ -139,6 +139,193 @@ public class StagedRestoreApplierTests
 		Assert.That(Read("keys/host-identity.key"), Is.EqualTo("restored-identity"));
 	}
 
+	[Test]
+	public void An_apply_interrupted_while_moving_the_current_files_aside_leaves_the_original_data()
+	{
+		var document = StageKitchenOfficeRestore();
+		Interrupt(document, ["data/profiles/kitchen.json"], []);
+
+		var outcome = StagedRestoreApplier.ApplyPending(_paths);
+
+		AssertOriginalProfiles(outcome);
+	}
+
+	[Test]
+	public void An_apply_interrupted_while_moving_the_restored_files_in_leaves_the_original_data()
+	{
+		var document = StageKitchenOfficeRestore();
+		Interrupt(document, ["data/profiles/kitchen.json", "data/profiles/office.json"], ["data/profiles/office.json"]);
+
+		var outcome = StagedRestoreApplier.ApplyPending(_paths);
+
+		AssertOriginalProfiles(outcome);
+	}
+
+	[Test]
+	public void An_apply_interrupted_after_every_file_moved_leaves_the_original_data()
+	{
+		var document = StageKitchenOfficeRestore();
+		Interrupt(document,
+			["data/profiles/kitchen.json", "data/profiles/office.json"],
+			["data/profiles/office.json", "data/profiles/studio.json"]);
+
+		var outcome = StagedRestoreApplier.ApplyPending(_paths);
+
+		AssertOriginalProfiles(outcome);
+	}
+
+	[Test]
+	public void A_recovery_interrupted_part_way_is_completed_by_the_next_start()
+	{
+		var document = StageKitchenOfficeRestore();
+		Interrupt(document,
+			["data/profiles/kitchen.json", "data/profiles/office.json"],
+			["data/profiles/office.json", "data/profiles/studio.json"]);
+		MoveInto(document.ApplyDirectory, DataPath("data/profiles/office.json"), "data/profiles/office.json");
+		MoveInto(document.ApplyDirectory, DataPath("data/profiles/studio.json"), "data/profiles/studio.json");
+		MoveFromRollback(document, "data/profiles/kitchen.json");
+
+		var outcome = StagedRestoreApplier.ApplyPending(_paths);
+
+		AssertOriginalProfiles(outcome);
+	}
+
+	[Test]
+	public void A_rollback_that_cannot_finish_keeps_everything_for_the_next_start()
+	{
+		var document = StageKitchenOfficeRestore();
+		Interrupt(document, ["data/profiles/kitchen.json", "data/profiles/office.json"], ["data/profiles/office.json"]);
+		var obstacle = Path.Combine(document.ApplyDirectory, "data", "profiles", "office.json");
+		Directory.CreateDirectory(obstacle);
+
+		var blocked = StagedRestoreApplier.ApplyPending(_paths);
+		var keptForRetry = File.Exists(MarkerPath) && StagedRestoreApplier.HasBegun(document);
+		Directory.Delete(obstacle);
+		var retried = StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(blocked, Is.EqualTo(StagedRestoreOutcome.RollbackIncomplete));
+			Assert.That(keptForRetry, Is.True, "the marker and the begun staging must survive for the next start");
+		});
+		AssertOriginalProfiles(retried);
+	}
+
+	[Test]
+	public void A_restore_staged_after_a_recovered_interruption_applies_normally()
+	{
+		var interrupted = StageKitchenOfficeRestore();
+		Interrupt(interrupted,
+			["data/profiles/kitchen.json", "data/profiles/office.json"],
+			["data/profiles/office.json"]);
+		StagedRestoreApplier.ApplyPending(_paths);
+
+		Stage([BackupComponentGroup.Profiles], ("data/profiles/office.json", "second-attempt"));
+		var outcome = StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(StagedRestoreOutcome.Applied));
+			Assert.That(ProfileFiles(),
+				Is.EquivalentTo(new Dictionary<string, string> { ["office.json"] = "second-attempt" }));
+			Assert.That(File.Exists(MarkerPath), Is.False);
+		});
+	}
+
+	[Test]
+	public void A_failed_apply_also_removes_the_restored_files_that_had_no_local_counterpart()
+	{
+		Write("data/profiles/kitchen.json", "local-only");
+		var document = Stage([BackupComponentGroup.Profiles],
+			("data/profiles/new.json", "from-backup"),
+			("data/profiles/studio.json", "from-backup"));
+		Directory.CreateDirectory(Path.Combine(_paths.ProfilesDirectory, "studio.json"));
+
+		var outcome = StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(StagedRestoreOutcome.Abandoned));
+			Assert.That(ProfileFiles(),
+				Is.EquivalentTo(new Dictionary<string, string> { ["kitchen.json"] = "local-only" }));
+			Assert.That(Directory.Exists(document.StagingDirectory), Is.False);
+		});
+	}
+
+	private PendingRestoreDocument StageKitchenOfficeRestore()
+	{
+		Write("data/profiles/kitchen.json", "local-only");
+		Write("data/profiles/office.json", "local-edit");
+		Write("data/scripts/greet.json", "untouched");
+
+		return Stage([BackupComponentGroup.Profiles],
+			("data/profiles/office.json", "from-backup"),
+			("data/profiles/studio.json", "from-backup"));
+	}
+
+	private void AssertOriginalProfiles(StagedRestoreOutcome outcome)
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(StagedRestoreOutcome.Abandoned));
+			Assert.That(ProfileFiles(),
+				Is.EquivalentTo(new Dictionary<string, string>
+				{
+					["kitchen.json"] = "local-only",
+					["office.json"] = "local-edit"
+				}),
+				"an interrupted restore must leave the data exactly as it was before");
+			Assert.That(Read("data/scripts/greet.json"), Is.EqualTo("untouched"));
+			Assert.That(File.Exists(MarkerPath), Is.False, "the marker must go, or every start retries it forever");
+		});
+	}
+
+	private void Interrupt(PendingRestoreDocument document, string[] movedAside, string[] applied)
+	{
+		File.WriteAllText(Path.Combine(document.StagingDirectory, "journal.json"), "[]");
+
+		foreach (var relative in movedAside)
+		{
+			MoveInto(Path.Combine(document.StagingDirectory, "rollback"), DataPath(relative), relative);
+		}
+
+		foreach (var relative in applied)
+		{
+			var target = DataPath(relative);
+			Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+			File.Move(Path.Combine(document.ApplyDirectory, Native(relative)), target);
+		}
+	}
+
+	private void MoveFromRollback(PendingRestoreDocument document, string relative)
+	{
+		File.Move(Path.Combine(document.StagingDirectory, "rollback", Native(relative)), DataPath(relative));
+	}
+
+	private static void MoveInto(string root, string source, string relative)
+	{
+		var target = Path.Combine(root, Native(relative));
+		Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+		File.Move(source, target);
+	}
+
+	private Dictionary<string, string> ProfileFiles()
+	{
+		return Directory.EnumerateFiles(_paths.ProfilesDirectory, "*", SearchOption.AllDirectories)
+			.ToDictionary(path => Path.GetRelativePath(_paths.ProfilesDirectory, path).Replace('\\', '/'),
+				File.ReadAllText);
+	}
+
+	private string DataPath(string relative)
+	{
+		return Path.Combine(_paths.BaseDirectory, Native(relative));
+	}
+
+	private static string Native(string relative)
+	{
+		return relative.Replace('/', Path.DirectorySeparatorChar);
+	}
+
 	private string MarkerPath => Path.Combine(_paths.RestoreStagingDirectory, PendingRestoreDocument.FileName);
 
 	private PendingRestoreDocument Stage(
