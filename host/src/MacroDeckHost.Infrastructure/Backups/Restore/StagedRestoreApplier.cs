@@ -74,7 +74,7 @@ public static class StagedRestoreApplier
 				return RollBackAndAbandon(paths, markerPath, document);
 			}
 
-			if (document is null || !Validate(document))
+			if (document is null || !Validate(paths, document))
 			{
 				Abandon(paths, markerPath, document);
 
@@ -164,7 +164,7 @@ public static class StagedRestoreApplier
 		}
 	}
 
-	private static bool Validate(PendingRestoreDocument document)
+	private static bool Validate(IMacroDeckPaths paths, PendingRestoreDocument document)
 	{
 		if (!Directory.Exists(document.ApplyDirectory))
 		{
@@ -173,7 +173,19 @@ public static class StagedRestoreApplier
 
 		foreach (var file in document.Files)
 		{
-			var staged = Path.Combine(document.ApplyDirectory, ToNativePath(file.RelativePath));
+			var staged = BackupArchiveLimits.ResolveInside(document.ApplyDirectory, file.RelativePath);
+			if (!BackupArchiveLimits.IsRestorableEntry(file.RelativePath, file.Component)
+				|| staged is null
+				|| BackupArchiveLimits.ResolveInside(paths.DataRootDirectory, file.RelativePath) is null)
+			{
+				Log.Error("The staged restore names {Path} for {Component}, which a restore may not write; "
+					+ "the installation is left untouched",
+					file.RelativePath,
+					file.Component);
+
+				return false;
+			}
+
 			if (!MatchesStagedHash(staged, file.Sha256))
 			{
 				Log.Error("The staged restore is incomplete at {Path}; the installation is left untouched",
@@ -462,9 +474,9 @@ public static class StagedRestoreApplier
 
 		foreach (var file in SelectedFiles(document))
 		{
-			var staged = Path.Combine(document.ApplyDirectory, ToNativePath(file.RelativePath));
-			var target = Path.Combine(paths.DataRootDirectory, ToNativePath(file.RelativePath));
-			if (File.Exists(staged) || !File.Exists(target))
+			var staged = BackupArchiveLimits.ResolveInside(document.ApplyDirectory, file.RelativePath);
+			var target = BackupArchiveLimits.ResolveInside(paths.DataRootDirectory, file.RelativePath);
+			if (staged is null || target is null || File.Exists(staged) || !File.Exists(target))
 			{
 				continue;
 			}

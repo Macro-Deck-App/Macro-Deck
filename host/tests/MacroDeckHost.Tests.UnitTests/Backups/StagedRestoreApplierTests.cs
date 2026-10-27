@@ -80,6 +80,68 @@ public class StagedRestoreApplierTests
 	}
 
 	[Test]
+	public void A_staged_file_that_points_outside_the_data_folder_is_never_moved_there()
+	{
+		Write("data/profiles/kitchen.json", "before");
+		var outside = Path.Combine(Path.GetDirectoryName(_paths.BaseDirectory)!, $"md04-{Guid.NewGuid():N}.txt");
+		var document = Stage([BackupComponentGroup.Profiles], ("data/profiles/kitchen.json", "after"));
+		var escaping = $"data/profiles/../../../{Path.GetFileName(outside)}";
+		var staged = Path.Combine(document.ApplyDirectory, Native(escaping));
+		File.WriteAllText(staged, "payload");
+		document.Files.Add(new PendingRestoreFile
+		{
+			RelativePath = escaping,
+			Sha256 = Sha256(staged),
+			Component = BackupComponentGroup.Profiles
+		});
+		File.WriteAllText(MarkerPath, JsonSerializer.Serialize(document, _json));
+
+		try
+		{
+			var outcome = StagedRestoreApplier.ApplyPending(_paths);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(outcome, Is.EqualTo(StagedRestoreOutcome.Abandoned));
+				Assert.That(File.Exists(outside), Is.False);
+				Assert.That(Read("data/profiles/kitchen.json"), Is.EqualTo("before"));
+				Assert.That(File.Exists(MarkerPath), Is.False);
+			});
+		}
+		finally
+		{
+			File.Delete(outside);
+		}
+	}
+
+	[Test]
+	public void A_staged_file_tagged_with_a_group_that_does_not_own_it_is_not_applied()
+	{
+		Write("data/profiles/kitchen.json", "before");
+		Write("keys/auth-signing.key", "local-signing-key");
+		var document = Stage([BackupComponentGroup.Profiles], ("data/profiles/kitchen.json", "after"));
+		var staged = Path.Combine(document.ApplyDirectory, Native("keys/auth-signing.key"));
+		Directory.CreateDirectory(Path.GetDirectoryName(staged)!);
+		File.WriteAllText(staged, "foreign-signing-key");
+		document.Files.Add(new PendingRestoreFile
+		{
+			RelativePath = "keys/auth-signing.key",
+			Sha256 = Sha256(staged),
+			Component = BackupComponentGroup.Profiles
+		});
+		File.WriteAllText(MarkerPath, JsonSerializer.Serialize(document, _json));
+
+		var outcome = StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(StagedRestoreOutcome.Abandoned));
+			Assert.That(Read("keys/auth-signing.key"), Is.EqualTo("local-signing-key"));
+			Assert.That(Read("data/profiles/kitchen.json"), Is.EqualTo("before"));
+		});
+	}
+
+	[Test]
 	public void AppliesOnlyOnceAcrossRepeatedStarts()
 	{
 		Write("data/profiles/kitchen.json", "before");
