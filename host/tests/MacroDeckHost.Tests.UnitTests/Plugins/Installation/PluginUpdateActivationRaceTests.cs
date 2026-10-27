@@ -53,6 +53,7 @@ internal sealed class PluginUpdateActivationRaceTests
 		services.AddSingleton<IPluginRegistrationRepository>(_registrations);
 		services.AddSingleton<IPluginTrustRecordRepository>(_trustRecords);
 		services.AddSingleton<IPluginTrustBaseline>(new FakePluginTrustBaseline());
+		services.AddSingleton<IPluginRegistrationService>(new RevokingRegistrationService(_registrations));
 		var provider = services.BuildServiceProvider();
 		var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
 
@@ -344,6 +345,41 @@ internal sealed class PluginUpdateActivationRaceTests
 	}
 
 	[Test]
+	public async Task An_uninstall_during_a_restart_leaves_no_process_behind()
+	{
+		await InstallVersion("1.0.0");
+		var launchesBefore = _launcher.Requests.Count;
+		using var entered = new ManualResetEventSlim();
+		using var release = new ManualResetEventSlim();
+		_trust.BeforeEvaluate = _ =>
+		{
+			_trust.BeforeEvaluate = null;
+			entered.Set();
+			release.Wait(TimeSpan.FromSeconds(10));
+		};
+
+		var restart = Task.Run(() => _supervisor.Restart(PluginId));
+		Assert.That(entered.Wait(TimeSpan.FromSeconds(10)), Is.True, "precondition: the restart reached trust");
+		var uninstall = _installer.Uninstall(PluginId, new PluginUninstallRequest());
+		for (var i = 0; i < 500 && LastStopReason() != PluginStopReason.UserRequested; i++)
+		{
+			await Task.Delay(TimeSpan.FromMilliseconds(10));
+		}
+
+		release.Set();
+		var restartResult = await restart;
+		var uninstalled = await uninstall;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(uninstalled.Success, Is.True, uninstalled.ErrorMessage);
+			Assert.That(restartResult.Success, Is.False, "the restart was overtaken by the uninstall");
+			Assert.That(_launcher.Requests, Has.Count.EqualTo(launchesBefore), "nothing launched after the stop");
+			Assert.That(_launcher.StartedProcesses.Count(process => !process.HasExited), Is.Zero);
+		});
+	}
+
+	[Test]
 	public async Task A_cancelled_wait_for_a_hold_does_not_take_it()
 	{
 		await InstallVersion("1.0.0");
@@ -443,6 +479,11 @@ internal sealed class PluginUpdateActivationRaceTests
 		return _supervisor.Snapshot().FirstOrDefault(s => s.PluginId == pluginId)?.State;
 	}
 
+	private PluginStopReason? LastStopReason()
+	{
+		return _supervisor.Snapshot().FirstOrDefault(s => s.PluginId == PluginId)?.LastStopReason;
+	}
+
 	private async Task WaitForState(PluginRuntimeState state)
 	{
 		for (var i = 0; i < 500 && CurrentState() != state; i++)
@@ -519,6 +560,45 @@ internal sealed class PluginUpdateActivationRaceTests
 		public HttpClient CreateClient(string name)
 		{
 			throw new NotSupportedException();
+		}
+	}
+
+	private sealed class RevokingRegistrationService : IPluginRegistrationService
+	{
+		private readonly IPluginRegistrationRepository _registrations;
+
+		public RevokingRegistrationService(IPluginRegistrationRepository registrations)
+		{
+			_registrations = registrations;
+		}
+
+		public Task<PluginRegistrationResult> Register(
+			string pluginId,
+			string displayName,
+			Guid? accessTokenId,
+			string origin,
+			bool allowInstalledId = false)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<PluginRegistrationResult> ReplaceSecret(
+			string pluginId,
+			string displayName,
+			Guid? accessTokenId,
+			string origin)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<PluginRegistrationEntity?> Authenticate(string pluginId, string secret)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task Revoke(string pluginId)
+		{
+			return _registrations.Revoke(pluginId, DateTime.UtcNow);
 		}
 	}
 

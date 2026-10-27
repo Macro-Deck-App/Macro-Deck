@@ -501,6 +501,10 @@ public sealed class PluginInstaller : IPluginInstaller
 				}
 			}
 
+			// The first stop aborts a launch in flight before it spawns; the second, under the hold, waits for
+			// a process that was already published so nothing runs from the directory being deleted.
+			await _supervisor.Stop(pluginId, PluginStopReason.UserRequested, cancellationToken);
+			await using var hold = await _supervisor.HoldLaunches(pluginId, cancellationToken);
 			await _supervisor.Stop(pluginId, PluginStopReason.UserRequested, cancellationToken);
 
 			if (!TryDeleteDirectoryWithRetries(versionsDirectory))
