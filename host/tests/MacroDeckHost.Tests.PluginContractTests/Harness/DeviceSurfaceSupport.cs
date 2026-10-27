@@ -621,7 +621,8 @@ internal static class ContractDeck
 			new ContractAppPreferences(),
 			new ContractIconPacks(),
 			new ContractNoDefaultShortPress(),
-			colors ?? new ColorReferenceResolver(new VariableRegistry()));
+			colors ?? new ColorReferenceResolver(new VariableRegistry()),
+			Serilog.Core.Logger.None);
 	}
 
 	/// <summary>The deck itself: a Studio profile whose default grid is 3x5, a Home folder that inherits

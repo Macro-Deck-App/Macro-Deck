@@ -47,6 +47,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 		services.AddSingleton<MacroDeckHost.Application.Widgets.IWidgetDefaultShortPress>(
 			new ContractNoDefaultShortPress());
 		services.AddSingleton<DeviceSurfaceBuilder>();
+		services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
 		services.AddSingleton<IColorReferenceResolver>(new ColorReferenceResolver(new VariableRegistry()));
 		services
 			.AddSingleton<IUiTransportMessageHandler<ExecuteActionButtonTriggerRequest,
