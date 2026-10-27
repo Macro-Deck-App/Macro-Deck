@@ -183,37 +183,45 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				return TakenOver();
 			}
 
-			await entry.Gate.WaitAsync(ct);
-			bool alreadyRunning;
-			bool wasFailed;
+			var stamp = await BeginLaunch(entry);
 			try
 			{
-				alreadyRunning = entry.State is PluginRuntimeState.Starting or PluginRuntimeState.Running;
-				wasFailed = entry.State == PluginRuntimeState.Failed;
+				await entry.Gate.WaitAsync(ct);
+				bool alreadyRunning;
+				bool wasFailed;
+				try
+				{
+					alreadyRunning = entry.State is PluginRuntimeState.Starting or PluginRuntimeState.Running;
+					wasFailed = entry.State == PluginRuntimeState.Failed;
+				}
+				finally
+				{
+					entry.Gate.Release();
+				}
+
+				if (alreadyRunning)
+				{
+					return PluginSupervisorResult.Fail(PluginSupervisorError.AlreadyRunning);
+				}
+
+				if (wasFailed)
+				{
+					ResetRestartBudget(entry);
+				}
+
+				var result = await AttemptLaunch(entry, installed!, stamp, true, ct);
+				if (result.Success)
+				{
+					await PersistStartedUnlessStopped(entry, stamp);
+					await PublishRuntimeChanged(ct);
+				}
+
+				return result;
 			}
 			finally
 			{
-				entry.Gate.Release();
+				await EndLaunch(entry);
 			}
-
-			if (alreadyRunning)
-			{
-				return PluginSupervisorResult.Fail(PluginSupervisorError.AlreadyRunning);
-			}
-
-			if (wasFailed)
-			{
-				ResetRestartBudget(entry);
-			}
-
-			var result = await AttemptLaunch(entry, installed!, true, ct);
-			if (result.Success)
-			{
-				await _stateStore.Save(pluginId, true);
-				await PublishRuntimeChanged(ct);
-			}
-
-			return result;
 		}
 		catch (Exception ex)
 		{
@@ -236,47 +244,30 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 			var entry = GetOrCreateEntry(pluginId);
 
+			IPluginProcess? process;
+			string? launchId;
 			await entry.Gate.WaitAsync(cancellationToken);
-			bool canStop;
 			try
 			{
-				canStop = entry.State is PluginRuntimeState.Starting
-					or PluginRuntimeState.Running
-					or PluginRuntimeState.Backoff;
+				if (!TryDecideStopLocked(entry, reason, out process, out launchId))
+				{
+					return PluginSupervisorResult.Fail(PluginSupervisorError.NotRunning);
+				}
+
+				// In the section that decides the stop, so it orders against PersistStartedUnlessStopped.
+				if (reason == PluginStopReason.UserRequested)
+				{
+					await _stateStore.Save(pluginId, false);
+				}
 			}
 			finally
 			{
 				entry.Gate.Release();
 			}
 
-			if (!canStop)
+			if (process is not null)
 			{
-				return PluginSupervisorResult.Fail(PluginSupervisorError.NotRunning);
-			}
-
-			if (reason == PluginStopReason.UserRequested)
-			{
-				await _stateStore.Save(pluginId, false);
-			}
-
-			if (entry.Process is null)
-			{
-				await entry.Gate.WaitAsync(cancellationToken);
-				try
-				{
-					entry.State = PluginRuntimeState.Stopped;
-					entry.Health = PluginHealthState.Unknown;
-					entry.NextRestartAt = null;
-					entry.LastStopReason = reason;
-				}
-				finally
-				{
-					entry.Gate.Release();
-				}
-			}
-			else
-			{
-				await InitiateTermination(entry, reason, cancellationToken);
+				await TerminateAfterIntentSet(entry, cancellationToken, process, launchId);
 			}
 
 			await PublishRuntimeChanged(cancellationToken);
@@ -314,32 +305,19 @@ public sealed class PluginSupervisor : IPluginSupervisor
 					return NotSupervisable(pluginId);
 				}
 
-				await entry.Gate.WaitAsync(cancellationToken);
-				var running = entry.State is PluginRuntimeState.Starting
-					or PluginRuntimeState.Running
-					or PluginRuntimeState.Backoff;
-				entry.Gate.Release();
-
-				if (running)
+				var stamp = await BeginLaunch(entry);
+				try
 				{
-					if (entry.Process is not null)
-					{
-						await InitiateTermination(entry, PluginStopReason.ManualRestart, cancellationToken);
-					}
+					result = await RestartClaimed(entry, installed!, stamp, cancellationToken);
 				}
-
-				ResetRestartBudget(entry);
-
-				result = await AttemptLaunch(entry, installed!, true, cancellationToken);
+				finally
+				{
+					await EndLaunch(entry);
+				}
 			}
 			finally
 			{
 				entry.LaunchClaim.Release();
-			}
-
-			if (result.Success)
-			{
-				await _stateStore.Save(pluginId, true);
 			}
 
 			await PublishRuntimeChanged(cancellationToken);
@@ -350,6 +328,54 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			PluginInfrastructureLog.RestartFailed(_logger, pluginId, ex);
 			return PluginSupervisorResult.Fail(PluginSupervisorError.Failed, ex.Message);
 		}
+	}
+
+	private async Task<PluginSupervisorResult> RestartClaimed(
+		PluginRuntimeEntry entry,
+		InstalledPlugin installed,
+		int stamp,
+		CancellationToken ct)
+	{
+		IPluginProcess? process;
+		string? launchId;
+		bool stopped;
+
+		await entry.Gate.WaitAsync(ct);
+		try
+		{
+			stopped = entry.StopRequests != stamp;
+			process = stopped ? null : entry.Process;
+			launchId = entry.LaunchId;
+			if (process is not null)
+			{
+				entry.PendingIntent = PluginStopReason.ManualRestart;
+				entry.State = PluginRuntimeState.Stopping;
+			}
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+
+		if (stopped)
+		{
+			return StopOvertookLaunch();
+		}
+
+		if (process is not null)
+		{
+			await TerminateAfterIntentSet(entry, ct, process, launchId);
+		}
+
+		ResetRestartBudget(entry);
+
+		var result = await AttemptLaunch(entry, installed, stamp, true, ct);
+		if (result.Success)
+		{
+			await PersistStartedUnlessStopped(entry, stamp);
+		}
+
+		return result;
 	}
 
 	// Every plugin can burn its full graceful budget and then the same budget again waiting for a kill
@@ -376,23 +402,21 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	{
 		try
 		{
-			if (entry.Process is not null)
+			IPluginProcess? process;
+			string? launchId;
+			await entry.Gate.WaitAsync(ct);
+			try
 			{
-				await InitiateTermination(entry, reason, ct);
+				TryDecideStopLocked(entry, reason, out process, out launchId);
 			}
-			else if (entry.State is PluginRuntimeState.Backoff or PluginRuntimeState.Starting)
+			finally
 			{
-				await entry.Gate.WaitAsync(ct);
-				try
-				{
-					entry.State = PluginRuntimeState.Stopped;
-					entry.NextRestartAt = null;
-					entry.LastStopReason = reason;
-				}
-				finally
-				{
-					entry.Gate.Release();
-				}
+				entry.Gate.Release();
+			}
+
+			if (process is not null)
+			{
+				await TerminateAfterIntentSet(entry, ct, process, launchId);
 			}
 		}
 		catch (Exception ex)
@@ -646,21 +670,118 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		try
 		{
-			if (entry.State != expectedState
-				|| expectedState == PluginRuntimeState.Stopped && !MayRelaunchStopped(entry)
-				|| expectedState == PluginRuntimeState.Backoff && _takeovers.IsActive(entry.PluginId)
-				|| !TryResolveInstalled(entry.PluginId, out var installed)
-				|| installed!.ActiveVersion is null)
+			var stamp = await BeginLaunch(entry);
+			try
 			{
-				return;
-			}
+				// The tick's desired state can predate a Stop that finished while it worked on other plugins.
+				if (entry.State != expectedState
+					|| expectedState == PluginRuntimeState.Stopped && !MayRelaunchStopped(entry)
+					|| expectedState == PluginRuntimeState.Stopped && !IsDesiredStarted(entry.PluginId)
+					|| expectedState == PluginRuntimeState.Backoff && _takeovers.IsActive(entry.PluginId)
+					|| !TryResolveInstalled(entry.PluginId, out var installed)
+					|| installed!.ActiveVersion is null)
+				{
+					return;
+				}
 
-			await AttemptLaunch(entry, installed, true, ct);
+				await AttemptLaunch(entry, installed, stamp, true, ct);
+			}
+			finally
+			{
+				await EndLaunch(entry);
+			}
 		}
 		finally
 		{
 			entry.LaunchClaim.Release();
 		}
+	}
+
+	private bool IsDesiredStarted(string pluginId)
+	{
+		return _stateStore.Load().TryGetValue(pluginId, out var started) && started;
+	}
+
+	private static async Task<int> BeginLaunch(PluginRuntimeEntry entry)
+	{
+		await entry.Gate.WaitAsync(CancellationToken.None);
+		try
+		{
+			entry.LaunchInFlight = true;
+			return entry.StopRequests;
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+	}
+
+	private static async Task EndLaunch(PluginRuntimeEntry entry)
+	{
+		await entry.Gate.WaitAsync(CancellationToken.None);
+		try
+		{
+			entry.LaunchInFlight = false;
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+	}
+
+	// Under the Gate so it orders against a Stop, which saves false in the section that decides the stop.
+	private async Task PersistStartedUnlessStopped(PluginRuntimeEntry entry, int stamp)
+	{
+		await entry.Gate.WaitAsync(CancellationToken.None);
+		try
+		{
+			if (entry.StopRequests == stamp)
+			{
+				await _stateStore.Save(entry.PluginId, true);
+			}
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+	}
+
+	private static bool TryDecideStopLocked(
+		PluginRuntimeEntry entry,
+		PluginStopReason reason,
+		out IPluginProcess? process,
+		out string? launchId)
+	{
+		process = entry.Process;
+		launchId = entry.LaunchId;
+
+		if (process is not null)
+		{
+			entry.PendingIntent = reason;
+			entry.State = PluginRuntimeState.Stopping;
+		}
+		else if (entry.LaunchInFlight
+			|| entry.State is PluginRuntimeState.Starting or PluginRuntimeState.Running or PluginRuntimeState.Backoff)
+		{
+			entry.State = PluginRuntimeState.Stopped;
+			entry.Health = PluginHealthState.Unknown;
+			entry.NextRestartAt = null;
+			entry.LastStopReason = reason;
+		}
+		else
+		{
+			return false;
+		}
+
+		entry.StopRequests++;
+		return true;
+	}
+
+	private PluginSupervisorResult StopOvertookLaunch()
+	{
+		return _hostShuttingDown || _sessionEnd.IsEnding
+			? PluginSupervisorResult.Fail(PluginSupervisorError.HostShuttingDown)
+			: PluginSupervisorResult.Fail(PluginSupervisorError.NotRunning);
 	}
 
 	private async Task EvaluateStarting(
@@ -968,32 +1089,6 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		return succeeded;
 	}
 
-	private async Task InitiateTermination(PluginRuntimeEntry entry, PluginStopReason reason, CancellationToken ct)
-	{
-		IPluginProcess? process;
-		string? launchId;
-
-		await entry.Gate.WaitAsync(ct);
-		try
-		{
-			process = entry.Process;
-			if (process is null)
-			{
-				return;
-			}
-
-			entry.PendingIntent = reason;
-			entry.State = PluginRuntimeState.Stopping;
-			launchId = entry.LaunchId;
-		}
-		finally
-		{
-			entry.Gate.Release();
-		}
-
-		await TerminateAfterIntentSet(entry, ct, process, launchId);
-	}
-
 	private async Task TerminateAfterIntentSet(
 		PluginRuntimeEntry entry,
 		CancellationToken ct,
@@ -1253,6 +1348,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	private async Task<PluginSupervisorResult> AttemptLaunch(
 		PluginRuntimeEntry entry,
 		InstalledPlugin installed,
+		int stamp,
 		bool allowStartupGraceRetry,
 		CancellationToken ct)
 	{
@@ -1264,6 +1360,24 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		if (_takeovers.IsActive(installed.PluginId))
 		{
 			return TakenOver();
+		}
+
+		await entry.Gate.WaitAsync(ct);
+		try
+		{
+			if (entry.Process is not null)
+			{
+				return PluginSupervisorResult.Fail(PluginSupervisorError.AlreadyRunning);
+			}
+
+			if (entry.StopRequests != stamp)
+			{
+				return StopOvertookLaunch();
+			}
+		}
+		finally
+		{
+			entry.Gate.Release();
 		}
 
 		var manifestResult
@@ -1397,9 +1511,16 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		var now = _timeProvider.GetUtcNow();
 
-		await entry.Gate.WaitAsync(ct);
+		// From here on no gate wait takes the caller's token: a cancelled wait would strand a Starting entry
+		// without a process, or a spawned process that was never published and so never watched.
+		await entry.Gate.WaitAsync(CancellationToken.None);
 		try
 		{
+			if (entry.StopRequests != stamp)
+			{
+				return StopOvertookLaunch();
+			}
+
 			entry.DisplayName = manifest.Name;
 			entry.Version = manifest.Version;
 			entry.MetadataSeededForVersion = manifest.Version;
@@ -1432,11 +1553,14 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 		catch (Exception ex)
 		{
-			await entry.Gate.WaitAsync(ct);
+			await entry.Gate.WaitAsync(CancellationToken.None);
 			try
 			{
 				entry.LastError = ex.Message;
-				HandleAutomaticExitLocked(entry, now, allowStartupGraceRetry);
+				if (entry.StopRequests == stamp)
+				{
+					HandleAutomaticExitLocked(entry, now, allowStartupGraceRetry);
+				}
 			}
 			finally
 			{
@@ -1448,7 +1572,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		var abortedForTakeover = false;
 		var abortedForShutdown = false;
-		await entry.Gate.WaitAsync(ct);
+		var abortedForStop = false;
+		await entry.Gate.WaitAsync(CancellationToken.None);
 		try
 		{
 			if (_takeovers.IsActive(entry.PluginId))
@@ -1460,6 +1585,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			{
 				entry.State = PluginRuntimeState.Stopped;
 				abortedForShutdown = true;
+			}
+			else if (entry.StopRequests != stamp)
+			{
+				abortedForStop = true;
 			}
 		}
 		finally
@@ -1475,6 +1604,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		if (abortedForShutdown)
 		{
 			return PluginSupervisorResult.Fail(PluginSupervisorError.HostShuttingDown);
+		}
+
+		if (abortedForStop)
+		{
+			return StopOvertookLaunch();
 		}
 
 		var launchId = Guid.CreateVersion7().ToString();
@@ -1525,11 +1659,14 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		{
 			_launchTokenService.Discard(launchId);
 
-			await entry.Gate.WaitAsync(ct);
+			await entry.Gate.WaitAsync(CancellationToken.None);
 			try
 			{
 				entry.LastError = ex.Message;
-				HandleAutomaticExitLocked(entry, _timeProvider.GetUtcNow(), false);
+				if (entry.StopRequests == stamp)
+				{
+					HandleAutomaticExitLocked(entry, _timeProvider.GetUtcNow(), false);
+				}
 			}
 			finally
 			{
@@ -1548,7 +1685,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		});
 
 		bool takenOverAfterStart;
-		await entry.Gate.WaitAsync(ct);
+		var stoppedAfterStart = false;
+		await entry.Gate.WaitAsync(CancellationToken.None);
 		try
 		{
 			entry.Process = process;
@@ -1563,6 +1701,15 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				entry.PendingIntent = PluginStopReason.DevelopmentTakeover;
 				entry.State = PluginRuntimeState.Stopping;
 			}
+			else if (entry.StopRequests != stamp || _hostShuttingDown || _sessionEnd.IsEnding)
+			{
+				// A stop that found no process yet recorded its reason in LastStopReason.
+				entry.PendingIntent = entry.StopRequests != stamp
+					? entry.LastStopReason
+					: PluginStopReason.HostShutdown;
+				entry.State = PluginRuntimeState.Stopping;
+				stoppedAfterStart = true;
+			}
 		}
 		finally
 		{
@@ -1575,6 +1722,12 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		{
 			_ = TerminateForTakeoverInBackground(entry, process, launchId);
 			return TakenOver();
+		}
+
+		if (stoppedAfterStart)
+		{
+			_ = TerminateInBackground(entry, process, launchId, CancellationToken.None);
+			return StopOvertookLaunch();
 		}
 
 		return PluginSupervisorResult.Ok();
@@ -1873,6 +2026,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		public string? LastError;
 		public bool StartupGraceRetried;
 		public bool IntegrityFailed;
+		public bool LaunchInFlight;
+		public int StopRequests;
 
 		public PluginStopReason PendingIntent = PluginStopReason.None;
 	}
