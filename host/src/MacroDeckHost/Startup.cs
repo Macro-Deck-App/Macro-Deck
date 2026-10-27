@@ -432,6 +432,7 @@ public class Startup
 		services.AddSingleton<IUserFontLibrary, FileSystemUserFontLibrary>();
 		services.AddSingleton<LabelRenderChannel>();
 		services.AddSingleton<LabelSubscriptionTracker>();
+		services.AddSingleton<LabelRenderFailureLog>();
 		services.AddScoped<ILabelTextService, LabelTextService>();
 		services.AddSingleton<WidgetStateEvalChannel>();
 		services.AddSingleton<WidgetStateSubscriptionTracker>();

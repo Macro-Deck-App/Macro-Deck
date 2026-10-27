@@ -53,7 +53,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 
 	private readonly ServiceProvider _services;
 
-	public DeviceSurfaceFixture(IIconService? icons = null)
+	public DeviceSurfaceFixture(IIconService? icons = null, ILabelTextService? labelText = null)
 	{
 		Time = new ManualTimeProvider();
 		Profiles = new FakeProfileRegistry();
@@ -77,13 +77,14 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		services.AddSingleton<IProfileRegistry>(Profiles);
 		services.AddSingleton<IWidgetStateService>(WidgetStates);
 		services.AddSingleton<IWidgetIconService>(WidgetIcons);
-		services.AddSingleton<ILabelTextService>(Labels);
+		services.AddSingleton(labelText ?? Labels);
 		services.AddSingleton(TestLocalization.Resolver);
 		services.AddSingleton(TestLocalization.Preferences);
 		services.AddSingleton<IIconPackCache>(Icons);
 		services.AddSingleton<IUiResourceStore>(Resources);
 		services.AddSingleton<IWidgetDefaultShortPress>(DefaultShortPress);
 		services.AddSingleton<DeviceSurfaceBuilder>();
+		services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
 		services.AddSingleton<IColorReferenceResolver>(new ColorReferenceResolver(new VariableRegistry()));
 		if (icons is not null)
 		{
@@ -542,6 +543,12 @@ internal sealed class RecordingTriggerHandler
 internal sealed class FakeWidgetStateService : IWidgetStateService
 {
 	private readonly Dictionary<Guid, WidgetStateResolution> _states = [];
+	private readonly HashSet<Guid> _failing = [];
+
+	public void Fail(Guid widgetId)
+	{
+		_failing.Add(widgetId);
+	}
 
 	public void Set(Guid widgetId, string stateId, string label)
 	{
@@ -553,6 +560,11 @@ internal sealed class FakeWidgetStateService : IWidgetStateService
 
 	public Task<WidgetStateResolution?> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
 	{
+		if (_failing.Contains(widgetId))
+		{
+			throw new InvalidOperationException("state resolution failed");
+		}
+
 		return Task.FromResult(_states.GetValueOrDefault(widgetId));
 	}
 

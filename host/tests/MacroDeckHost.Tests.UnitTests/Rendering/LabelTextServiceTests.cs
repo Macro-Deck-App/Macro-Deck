@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -37,7 +38,10 @@ public class LabelTextServiceTests
 		VariableRegistry registry,
 		params WidgetEntity[] widgets)
 	{
-		return new LabelTextService(new FakeFolderCache(widgets), new VariableTemplateRenderer(registry), readiness);
+		return new LabelTextService(new FakeFolderCache(widgets),
+			new VariableTemplateRenderer(registry),
+			readiness,
+			new LabelRenderFailureLog(Serilog.Core.Logger.None));
 	}
 
 	[Test]
@@ -312,6 +316,71 @@ public class LabelTextServiceTests
 				"reading the rendered value instead of availability would give \"By n/v\" here");
 			Assert.That(byUndeclared, Is.Null);
 		});
+	}
+
+	[Test]
+	public async Task ResolveText_ShowsThePlaceholder_WhenAFilterCannotHandleAnUnavailableVariable()
+	{
+		var widget = Button(Guid.NewGuid(), "{\"label\":\"{{ vars.cpu | round: 1 }}\"}");
+		var registry = new VariableRegistry();
+		registry.Upsert(Numeric("cpu", "12.345"), false);
+		var service = Service(ReadySignal(), registry, widget);
+
+		var text = await service.ResolveText(widget.Id, "off");
+
+		Assert.That(text, Is.EqualTo(VariableTemplateRenderer.UnavailablePlaceholder));
+	}
+
+	[Test]
+	public async Task ResolveText_ShowsThePlaceholder_ForALabelWithATemplateSyntaxError()
+	{
+		var widget = Button(Guid.NewGuid(), "{\"label\":\"CPU {{ vars.cpu }\"}");
+		var registry = new VariableRegistry();
+		registry.Upsert(Numeric("cpu", "12.345"));
+		var service = Service(ReadySignal(), registry, widget);
+
+		var text = await service.ResolveText(widget.Id, "off");
+
+		Assert.That(text, Is.EqualTo(VariableTemplateRenderer.UnavailablePlaceholder));
+	}
+
+	[Test]
+	public async Task ResolveText_RendersTheLabelAgain_OnceTheVariableIsAvailable()
+	{
+		var widget = Button(Guid.NewGuid(), "{\"label\":\"{{ vars.cpu | round: 1 }}\"}");
+		var registry = new VariableRegistry();
+		var cpu = Numeric("cpu", "12.345");
+		registry.Upsert(cpu, false);
+		var service = Service(ReadySignal(), registry, widget);
+		await service.ResolveText(widget.Id, "off");
+
+		registry.SetAvailable(cpu.Id, true);
+		var text = await service.ResolveText(widget.Id, "off");
+
+		Assert.That(text, Is.EqualTo("12.3"));
+	}
+
+	[Test]
+	public async Task ResolvePreview_ShowsThePlaceholder_ForAHalfTypedTemplate()
+	{
+		var service = Service(ReadySignal(), new VariableRegistry());
+
+		var text = await service.ResolvePreview(new LabelImagePreviewRequest { Label = "CPU {{ vars.cpu }" });
+
+		Assert.That(text, Is.EqualTo(VariableTemplateRenderer.UnavailablePlaceholder));
+	}
+
+	private static VariableEntity Numeric(string name, string value)
+	{
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = VariableType.Numeric,
+			Classification = VariableClassification.User,
+			Value = value
+		};
 	}
 
 	[Test]

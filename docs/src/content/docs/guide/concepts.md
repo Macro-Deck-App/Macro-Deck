@@ -484,6 +484,10 @@ Values you can show and use anywhere:
 
 Show one in a label with `{{ vars.deaths }}`, like the **Deaths: 3** button above.
 
+A variable that is unavailable, for example while its integration is offline, shows `n/v`. So does a
+label that cannot be shown, such as `{{ vars.cpu | round: 1 }}` while `cpu` is unavailable or a
+template with a typo; the other buttons on the page keep updating.
+
 A user variable is **Text**, **Numeric**, **Boolean** or **Color**. A Color variable holds a color such as
 `#3366ff` that widgets, folder backgrounds and the accent color can follow, see
 [Colors from a variable](/guide/tips/#colors-from-a-variable).
