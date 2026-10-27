@@ -165,6 +165,16 @@ impl Supervisor {
         self.phase = Phase::Stopping;
     }
 
+    pub fn resume(&mut self) -> bool {
+        if self.phase != Phase::Stopping {
+            return false;
+        }
+        self.phase = Phase::Starting;
+        self.attempts = 0;
+        self.healthy_since = None;
+        true
+    }
+
     pub fn give_up(&mut self) {
         if self.phase != Phase::Stopping {
             self.phase = Phase::GaveUp;
@@ -186,6 +196,34 @@ mod tests {
 
     fn crash(supervisor: &mut Supervisor, generation: u64, now: Instant) -> ExitAction {
         supervisor.on_exit(generation, Some(1), false, now)
+    }
+
+    #[test]
+    fn a_host_stopped_for_an_update_can_be_started_again_from_scratch() {
+        let now = Instant::now();
+        let (mut supervisor, _) = running(now);
+        assert!(matches!(supervisor.on_failure(), Decision::Retry { .. }));
+        supervisor.begin_stop();
+
+        assert!(supervisor.resume());
+        let generation = supervisor
+            .begin_attempt()
+            .expect("a new attempt after the resume");
+        assert!(supervisor.on_ready(generation, now));
+        assert_eq!(supervisor.phase(), Phase::Running);
+        assert_eq!(supervisor.attempts(), 0);
+    }
+
+    #[test]
+    fn only_a_stopped_host_resumes() {
+        let now = Instant::now();
+        let (mut supervisor, _) = running(now);
+        assert!(!supervisor.resume());
+        assert_eq!(supervisor.phase(), Phase::Running);
+
+        let mut idle = Supervisor::new();
+        assert!(!idle.resume());
+        assert_eq!(idle.phase(), Phase::Idle);
     }
 
     #[test]
