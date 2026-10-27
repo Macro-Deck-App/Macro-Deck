@@ -54,7 +54,7 @@ internal static class FeedParser
 	private static readonly XNamespace _dc = "http://purl.org/dc/elements/1.1/";
 	private static readonly XNamespace _media = "http://search.yahoo.com/mrss/";
 
-	public static ParsedFeed Parse(byte[] content, Uri baseUrl)
+	public static ParsedFeed Parse(byte[] content, Uri baseUrl, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(content);
 		ArgumentNullException.ThrowIfNull(baseUrl);
@@ -63,20 +63,21 @@ internal static class FeedParser
 
 		if (root.Name == _atom + "feed")
 		{
-			return ParseAtom(root, baseUrl);
+			return ParseAtom(root, baseUrl, cancellationToken);
 		}
 
 		if (root.Name.LocalName == "rss" && root.Element("channel") is { } channel)
 		{
+			var items = Items(channel.Elements("item"), cancellationToken);
 			return new ParsedFeed(FeedText.SingleLine(channel.Element("title")?.Value),
-				[.. channel.Elements("item").Take(MaxItems).Select(item => ParseRssItem(item, baseUrl))]);
+				[.. items.Select(item => ParseRssItem(item, baseUrl))]);
 		}
 
 		if (root.Name.LocalName == "RDF")
 		{
 			var title = root.Element(_rss1 + "channel")?.Element(_rss1 + "title")?.Value;
-			return new ParsedFeed(FeedText.SingleLine(title),
-				[.. root.Elements(_rss1 + "item").Take(MaxItems).Select(item => ParseRssItem(item, baseUrl))]);
+			var items = Items(root.Elements(_rss1 + "item"), cancellationToken);
+			return new ParsedFeed(FeedText.SingleLine(title), [.. items.Select(item => ParseRssItem(item, baseUrl))]);
 		}
 
 		throw new FeedParseException();
@@ -107,14 +108,22 @@ internal static class FeedParser
 		}
 	}
 
-	private static ParsedFeed ParseAtom(XElement feed, Uri baseUrl)
+	private static IEnumerable<XElement> Items(IEnumerable<XElement> items, CancellationToken cancellationToken)
+	{
+		foreach (var item in items.Take(MaxItems))
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			yield return item;
+		}
+	}
+
+	private static ParsedFeed ParseAtom(XElement feed, Uri baseUrl, CancellationToken cancellationToken)
 	{
 		var feedAuthor = AtomAuthor(feed);
 
 		return new ParsedFeed(AtomText(feed.Element(_atom + "title"), true),
 		[
-			.. feed.Elements(_atom + "entry")
-				.Take(MaxItems)
+			.. Items(feed.Elements(_atom + "entry"), cancellationToken)
 				.Select(entry => ParseAtomEntry(entry, baseUrl, feedAuthor))
 		]);
 	}

@@ -134,7 +134,7 @@ internal sealed class FeedRuntime : IAsyncDisposable
 
 			var outcome = fetch.Status switch
 			{
-				FeedFetchStatus.Ok => Parse(current, fetch, now),
+				FeedFetchStatus.Ok => Parse(current, fetch, now, stopping.Token),
 				FeedFetchStatus.NotModified => FeedStateUpdate.ApplyNotModified(current, fetch, now),
 				_ => FeedStateUpdate.ApplyFailure(current, fetch.Error ?? FeedErrorCodes.Network, now)
 			};
@@ -261,11 +261,15 @@ internal sealed class FeedRuntime : IAsyncDisposable
 		}
 	}
 
-	private FeedRefreshOutcome Parse(FeedStateDocument current, FeedFetchResult fetch, DateTimeOffset now)
+	private FeedRefreshOutcome Parse(
+		FeedStateDocument current,
+		FeedFetchResult fetch,
+		DateTimeOffset now,
+		CancellationToken cancellationToken)
 	{
 		try
 		{
-			var parsed = FeedParser.Parse(fetch.Content ?? [], fetch.FinalUrl ?? Settings.Url);
+			var parsed = FeedParser.Parse(fetch.Content ?? [], fetch.FinalUrl ?? Settings.Url, cancellationToken);
 			return FeedStateUpdate.ApplyContent(current, parsed, Settings, fetch, now);
 		}
 		catch (FeedParseException)

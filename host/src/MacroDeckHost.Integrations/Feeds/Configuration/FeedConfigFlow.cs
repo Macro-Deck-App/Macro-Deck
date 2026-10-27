@@ -80,7 +80,7 @@ public sealed class FeedConfigFlow : IConfigFlow
 		ParsedFeed parsed;
 		try
 		{
-			parsed = FeedParser.Parse(fetch.Content ?? [], fetch.FinalUrl ?? url);
+			parsed = FeedParser.Parse(fetch.Content ?? [], fetch.FinalUrl ?? url, cancellationToken);
 		}
 		catch (FeedParseException)
 		{
