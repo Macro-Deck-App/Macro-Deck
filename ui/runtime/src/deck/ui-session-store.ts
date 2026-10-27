@@ -5,12 +5,14 @@ import { applyUiPatch, UiPatch } from '../ui-framework/ui-patch';
 interface SessionEntry {
   tree: UiNode;
   revision: number;
+  awaitingTree: boolean;
 }
 
 export class UiSessionStore {
   private readonly entries: { [sessionId: string]: SessionEntry } = {};
   private readonly revisionStore: WritableStore<number> = store(0);
   private listeners: Array<(sessionId: string | null) => void> = [];
+  private resyncListeners: Array<(sessionId: string) => void> = [];
 
   get changed(): ReadableStore<number> {
     return this.revisionStore;
@@ -24,6 +26,17 @@ export class UiSessionStore {
       live = false;
       const at = this.listeners.indexOf(listener);
       if (at >= 0) this.listeners = this.listeners.slice(0, at).concat(this.listeners.slice(at + 1));
+    };
+  }
+
+  onResyncNeeded(listener: (sessionId: string) => void): () => void {
+    this.resyncListeners.push(listener);
+    let live = true;
+    return () => {
+      if (!live) return;
+      live = false;
+      const at = this.resyncListeners.indexOf(listener);
+      if (at >= 0) this.resyncListeners = this.resyncListeners.slice(0, at).concat(this.resyncListeners.slice(at + 1));
     };
   }
 
@@ -47,22 +60,24 @@ export class UiSessionStore {
   }
 
   treeUpdated(sessionId: string, revision: number, tree: UiNode): void {
-    this.entries[sessionId] = { tree, revision };
+    this.entries[sessionId] = { tree, revision, awaitingTree: false };
     this.revisionStore.update(value => value + 1);
     this.announce(sessionId);
   }
 
   patched(sessionId: string, patch: UiPatch): boolean {
     const entry = this.entries[sessionId];
-    if (!entry) return false;
+    if (!entry || entry.awaitingTree) return false;
 
     const next = applyUiPatch(entry.tree, entry.revision, patch);
     if (next === null) {
-      this.invalidated(sessionId);
+      entry.awaitingTree = true;
+      const notified = this.resyncListeners.slice();
+      for (let index = 0; index < notified.length; index++) notified[index](sessionId);
       return false;
     }
 
-    this.entries[sessionId] = { tree: next, revision: patch.toRevision };
+    this.entries[sessionId] = { tree: next, revision: patch.toRevision, awaitingTree: false };
     this.revisionStore.update(value => value + 1);
     this.announce(sessionId);
     return true;
