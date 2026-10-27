@@ -6,8 +6,9 @@ packages:
     license: LicenseRef-SixLabors-Split-1.0
     reviewed: >-
       Six Labors Split License 1.0 (the package LICENSE). Macro Deck is distributed under the Apache
-      License 2.0 and uses ImageSharp 3.x under the license's Open Source exemption. ImageSharp 4 is held
-      back in renovate.json because it changes these terms.
+      License 2.0 and uses ImageSharp 3.1 under the license's Open Source exemption. ImageSharp 3.2 and 4
+      are held back in renovate.json because they add a build time license key check that every
+      contributor and CI job would have to satisfy.
     notice: |
       SixLabors.ImageSharp (https://github.com/SixLabors/ImageSharp)
       Used for icon image processing (decode, resize, WebP encoding).
