@@ -14875,6 +14875,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>還原失敗</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>無法還原備份。資料維持還原前的狀態。</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>無法還原備份，部分資料尚未放回原位。請重新啟動 Macro Deck 以完成此作業。</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>其中沒有可匯入為圖示的內容。</value>
   </data>

@@ -44,19 +44,65 @@ describe('UiSessionStore', () => {
     expect(sessions.revision('s1')).toBe(5);
   });
 
-  it('drops the session when a patch starts from a revision it never reached', () => {
+  it('keeps the tree it could not advance and asks once for a whole one', () => {
+    const asked: string[] = [];
+    sessions.onResyncNeeded(id => asked.push(id));
     sessions.treeUpdated('s1', 4, tree('before'));
 
     expect(sessions.patched('s1', setText(7, 8, 'after'))).toBeFalse();
-    // Not left showing a stale tree: the caller has to ask for a fresh one.
-    expect(sessions.has('s1')).toBeFalse();
+
+    expect(asked).toEqual(['s1']);
+    expect(sessions.has('s1')).toBeTrue();
+    expect(sessions.tree('s1')!.properties!['text']).toBe('before');
+    expect(sessions.revision('s1')).toBe(4);
   });
 
-  it('drops the session rather than keeping a tree it could not advance', () => {
+  it('asks for a whole tree when a patch carries nothing to apply', () => {
+    const asked: string[] = [];
+    sessions.onResyncNeeded(id => asked.push(id));
     sessions.treeUpdated('s1', 4, tree('before'));
+
     sessions.patched('s1', { fromRevision: 4, toRevision: 5, operations: [] });
 
-    expect(sessions.has('s1')).toBeFalse();
+    expect(asked).toEqual(['s1']);
+  });
+
+  it('discards every patch while it waits for the whole tree, without asking again', () => {
+    const asked: string[] = [];
+    sessions.onResyncNeeded(id => asked.push(id));
+    sessions.treeUpdated('s1', 4, tree('before'));
+    sessions.patched('s1', setText(7, 8, 'lost'));
+
+    expect(sessions.patched('s1', setText(4, 5, 'stale'))).toBeFalse();
+    expect(sessions.patched('s1', setText(8, 9, 'later'))).toBeFalse();
+
+    expect(asked).toEqual(['s1']);
+    expect(sessions.tree('s1')!.properties!['text']).toBe('before');
+  });
+
+  it('applies patches again once the whole tree arrived, and asks again on the next failure', () => {
+    const asked: string[] = [];
+    sessions.onResyncNeeded(id => asked.push(id));
+    sessions.treeUpdated('s1', 4, tree('before'));
+    sessions.patched('s1', setText(7, 8, 'lost'));
+
+    sessions.treeUpdated('s1', 8, tree('fresh'));
+    expect(sessions.patched('s1', setText(8, 9, 'next'))).toBeTrue();
+    expect(sessions.tree('s1')!.properties!['text']).toBe('next');
+
+    sessions.patched('s1', setText(12, 13, 'lost again'));
+    expect(asked).toEqual(['s1', 's1']);
+  });
+
+  it('stops asking a listener that unsubscribed', () => {
+    const asked: string[] = [];
+    const stop = sessions.onResyncNeeded(id => asked.push(id));
+    stop();
+    sessions.treeUpdated('s1', 4, tree('before'));
+
+    sessions.patched('s1', setText(7, 8, 'after'));
+
+    expect(asked).toEqual([]);
   });
 
   it('ignores a patch for a session it does not hold', () => {
@@ -155,7 +201,7 @@ describe('UiSessionStore', () => {
       expect(other).toEqual(['s1']);
     });
 
-    it('reports a rejected patch as one drop, leaving changed to fire once', () => {
+    it('reports nothing for a rejected patch, since the tree on screen did not change', () => {
       sessions.treeUpdated('s1', 4, tree('before'));
       const seen: Array<string | null> = [];
       let changedCount = 0;
@@ -164,9 +210,9 @@ describe('UiSessionStore', () => {
 
       sessions.patched('s1', setText(7, 8, 'after'));
 
-      expect(seen).toEqual(['s1']);
-      expect(changedCount).toBe(1);
-      expect(sessions.has('s1')).toBeFalse();
+      expect(seen).toEqual([]);
+      expect(changedCount).toBe(0);
+      expect(sessions.has('s1')).toBeTrue();
     });
   });
 });

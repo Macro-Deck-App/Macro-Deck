@@ -14875,6 +14875,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>復元に失敗しました</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>バックアップを復元できませんでした。データは復元前の状態のままです。</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>バックアップを復元できず、一部のデータをまだ元に戻せていません。Macro Deck を再起動して元に戻す処理を完了してください。</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>アイコンとしてインポートできるものはありませんでした。</value>
   </data>

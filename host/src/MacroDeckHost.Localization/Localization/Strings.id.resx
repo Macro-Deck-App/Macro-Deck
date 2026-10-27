@@ -14875,6 +14875,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Pemulihan gagal</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>Cadangan tidak dapat dipulihkan. Data tetap seperti sebelum pemulihan.</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>Cadangan tidak dapat dipulihkan, dan sebagian data belum dapat dikembalikan. Mulai ulang Macro Deck untuk menyelesaikannya.</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Tidak ada yang dapat diimpor sebagai ikon.</value>
   </data>

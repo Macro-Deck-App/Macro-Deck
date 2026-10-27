@@ -85,6 +85,27 @@ public class ActionButtonWidgetUiProviderTests
 	}
 
 	[Test]
+	public async Task A_widget_surface_session_opens_with_a_placeholder_when_its_label_fails_to_render()
+	{
+		const string roundedData = "{\"label\":\"{{ vars.cpu | round: 1 }}\",\"flows\":\"[]\",\"stateMode\":false}";
+		var widgetId = Guid.NewGuid();
+		var folderCache = new StubFolderCache();
+		folderCache.AddFolder(new WidgetEntity
+			{ Id = widgetId, Type = WidgetTypeIds.ActionButton, Data = roundedData });
+		var variables = new VariableRegistry();
+		variables.Upsert(WidgetVariable(widgetId, "cpu", "12.345"), false);
+
+		var provider = Provider(folderCache, new RecordingTriggerService(), variables: variables);
+		var session = await provider.CreateSessionAsync(Request(UiSurfaceKinds.Widget, widgetId, roundedData),
+			CancellationToken.None);
+
+		Assert.That(session, Is.Not.Null);
+		Assert.That(LabelText(session!), Is.EqualTo(VariableTemplateRenderer.UnavailablePlaceholder));
+
+		await session.DisposeAsync();
+	}
+
+	[Test]
 	public async Task A_widget_surface_session_declares_press_events_and_a_press_runs_the_trigger()
 	{
 		var widgetId = Guid.NewGuid();
@@ -506,7 +527,10 @@ public class ActionButtonWidgetUiProviderTests
 			? new FakeLabelTextService()
 			// The real service and renderer, so a scoped preview is proved against actual variable
 			// resolution rather than against a fake that merely echoes what it was handed.
-			: new LabelTextService(folderCache, new VariableTemplateRenderer(variables), readiness));
+			: new LabelTextService(folderCache,
+				new VariableTemplateRenderer(variables),
+				readiness,
+				new LabelRenderFailureLog(Serilog.Core.Logger.None)));
 		services.AddScoped<IWidgetIconService>(_ => iconService ?? new FakeWidgetIconService());
 		services.AddScoped<IWidgetStateService>(_ => stateService ?? new FakeWidgetStateService());
 		services.AddScoped<IAppPreferenceService>(_ => new FakeLocalizationPreferences());

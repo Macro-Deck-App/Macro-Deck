@@ -1670,6 +1670,169 @@ describe('Client', () => {
     });
   });
 
+  describe('a live tile whose patch does not apply', () => {
+    const notify = (client: Client, type: string, body: unknown) =>
+      (client as unknown as { onNotification(type: string, payload: unknown): void }).onNotification(type, body);
+    const text = (value: string) => ({ id: 'root', type: 'ui.text', properties: { text: value } });
+    const snapshot = (client: Client, sessionId: string, revision: number, value: string) =>
+      notify(client, 'UiSessionTreeUpdatedEvent', { sessionId, revision, tree: { revision, root: text(value) } });
+    const patch = (client: Client, sessionId: string, from: number, to: number, value: string) =>
+      notify(client, 'UiSessionPatchedEvent', {
+        sessionId,
+        fromRevision: from,
+        toRevision: to,
+        patch: {
+          fromRevision: from,
+          toRevision: to,
+          operations: [{ op: 'set-properties', nodeId: 'root', properties: { text: value } }],
+        },
+      });
+    const shown = (sessions: WidgetSessions) =>
+      (sessions.treeFor('w1')?.properties as { text?: string } | undefined)?.text;
+
+    interface Deck {
+      client: Client;
+      sessions: WidgetSessions;
+      sent: Array<{ type: string; payload: unknown }>;
+      attachesOf(sessionId: string): number;
+    }
+
+    const onDeck = async (
+      attach: (sessionId: string, call: number) => Promise<unknown> = () => Promise.resolve({ accepted: true }),
+    ): Promise<Deck> => {
+      twoProfiles();
+      for (const profileId of ['profile-a', 'profile-b']) {
+        (host.foldersByProfile[profileId][0] as { widgets: unknown[] }).widgets = [
+          { id: 'w1', type: 'Clock', positionX: 0, positionY: 0, width: 1, height: 1, data: '{}' },
+        ];
+      }
+      const client = build();
+      await client.probe();
+      spyOn(client.connection, 'connect');
+      const sent: Array<{ type: string; payload: unknown }> = [];
+      let opened = 0;
+      let attaches = 0;
+      spyOn(client.connection, 'request').and.callFake(((type: string, payload: unknown) => {
+        sent.push({ type, payload });
+        if (type === 'OpenWidgetUiSession') {
+          opened++;
+          return Promise.resolve({ accepted: true, sessionId: 's' + opened });
+        }
+        if (type === 'AttachUiSession') {
+          attaches++;
+          return attach((payload as Array<{ sessionId: string }>)[0].sessionId, attaches);
+        }
+        return Promise.resolve(undefined);
+      }) as never);
+      await client.signIn('owner', 'secret');
+      client.connection.state.set('connected');
+      await settle();
+      const sessions = (client as unknown as { widgetSessions: WidgetSessions }).widgetSessions;
+      expect(client.deck.displayedWidgets.map(widget => widget.id)).toEqual(['w1']);
+      snapshot(client, 's1', 1, '10:00');
+      const attachesOf = (sessionId: string) => sent.filter(call =>
+        call.type === 'AttachUiSession'
+        && (call.payload as Array<{ sessionId: string }>)[0].sessionId === sessionId).length;
+      expect(attachesOf('s1')).toBe(1);
+      expect(shown(sessions)).toBe('10:00');
+      return { client, sessions, sent, attachesOf };
+    };
+
+    it('asks the host for the whole tree again and keeps updating once it arrives', async () => {
+      const { client, sessions, attachesOf } = await onDeck();
+
+      patch(client, 's1', 3, 4, '10:01');
+      await settle();
+
+      expect(attachesOf('s1')).toBe(2);
+      expect(shown(sessions)).toBe('10:00');
+
+      snapshot(client, 's1', 4, '10:01');
+      patch(client, 's1', 4, 5, '10:02');
+
+      expect(shown(sessions)).toBe('10:02');
+    });
+
+    it('asks once for a burst of patches that cannot apply, and again only after the next tree', async () => {
+      const { client, attachesOf } = await onDeck();
+
+      patch(client, 's1', 3, 4, 'a');
+      patch(client, 's1', 4, 5, 'b');
+      patch(client, 's1', 5, 6, 'c');
+      await settle();
+      expect(attachesOf('s1')).toBe(2);
+
+      snapshot(client, 's1', 6, 'c');
+      patch(client, 's1', 9, 10, 'd');
+      await settle();
+      expect(attachesOf('s1')).toBe(3);
+    });
+
+    it('opens a new session when the host no longer knows the one it is asked to resend', async () => {
+      const { client, sessions, sent } = await onDeck((_sessionId, call) =>
+        Promise.resolve(call === 2 ? { accepted: false, code: 'SESSION_NOT_FOUND' } : { accepted: true }));
+
+      patch(client, 's1', 3, 4, '10:01');
+      await settle();
+
+      expect(sent.filter(call => call.type === 'OpenWidgetUiSession').length).toBe(2);
+      snapshot(client, 's2', 1, '10:05');
+      expect(shown(sessions)).toBe('10:05');
+    });
+
+    it('closes the old session before opening a new one when asking again fails on a live socket', async () => {
+      const { client, sent } = await onDeck((_sessionId, call) => call === 2
+        ? Promise.reject(new Error('Too many pending WebSocket requests'))
+        : Promise.resolve({ accepted: true }));
+
+      patch(client, 's1', 3, 4, '10:01');
+      await settle();
+
+      const order = sent.map(call => call.type);
+      const closed = order.indexOf('CloseUiSession');
+      expect(closed).toBeGreaterThan(-1);
+      expect(sent[closed].payload).toEqual(['s1']);
+      expect(order.lastIndexOf('OpenWidgetUiSession')).toBeGreaterThan(closed);
+      expect(order.filter(type => type === 'OpenWidgetUiSession').length).toBe(2);
+    });
+
+    it('offers a session it could not get a whole tree for to be opened again, as a folder view needs', async () => {
+      const offered: string[] = [];
+      const { client } = await onDeck((_sessionId, call) =>
+        Promise.resolve(call === 2 ? { accepted: false, code: 'SESSION_NOT_FOUND' } : { accepted: true }));
+      client.reopenableSessions.subscribe(lost => { if (lost) offered.push(lost.sessionId); });
+
+      patch(client, 's1', 3, 4, '10:01');
+      await settle();
+
+      expect(offered).toEqual(['s1']);
+    });
+
+    it('does not chase a session the dropped connection already took with it', async () => {
+      let failAttach: (reason: unknown) => void = () => undefined;
+      const ended: string[] = [];
+      const { client, attachesOf } = await onDeck((_sessionId, call) => call === 2
+        ? new Promise((_resolve, reject) => { failAttach = reject; })
+        : Promise.resolve({ accepted: true }));
+      client.endedSessions.subscribe(gone => { if (gone) ended.push(gone.sessionId); });
+
+      patch(client, 's1', 3, 4, '10:01');
+      await settle();
+      expect(attachesOf('s1')).toBe(2);
+
+      client.connection.state.set('reconnecting');
+      failAttach(new Error('socket closed'));
+      await settle();
+      patch(client, 's1', 7, 8, '10:02');
+      client.connection.state.set('connected');
+      await settle();
+
+      expect(attachesOf('s1')).toBe(2);
+      expect(ended).toEqual([]);
+      expect(attachesOf('s2')).toBe(1);
+    });
+  });
+
   describe('a session that ends without being asked to', () => {
     const revoke = (client: Client) =>
       (client as unknown as { onNotification(type: string, payload: unknown): void })

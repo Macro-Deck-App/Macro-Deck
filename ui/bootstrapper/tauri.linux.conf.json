@@ -25,7 +25,7 @@
           "libstdc++6",
           "zlib1g",
           "libssl3 | libssl3t64 | libssl1.1",
-          "libicu76 | libicu74 | libicu72 | libicu71 | libicu70",
+          "libicu78 | libicu76 | libicu74 | libicu72 | libicu71 | libicu70",
           "shared-mime-info",
           "desktop-file-utils"
         ]

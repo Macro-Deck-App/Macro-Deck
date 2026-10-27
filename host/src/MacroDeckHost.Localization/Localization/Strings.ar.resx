@@ -14875,6 +14875,12 @@
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>فشلت الاستعادة</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>تعذّرت استعادة النسخة الاحتياطية. بياناتك كما كانت قبل الاستعادة.</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>تعذّرت استعادة النسخة الاحتياطية، ولم يُتمكَّن بعد من إعادة جزء من بياناتك إلى مكانه. أعد تشغيل Macro Deck لإكمال ذلك.</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>لا يوجد هنا ما يمكن استيراده كأيقونة.</value>
   </data>

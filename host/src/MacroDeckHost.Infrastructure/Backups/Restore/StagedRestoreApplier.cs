@@ -14,6 +14,7 @@ public enum StagedRestoreOutcome
 	NothingPending,
 	Applied,
 	Abandoned,
+	RollbackIncomplete,
 	Locked
 }
 
@@ -54,9 +55,9 @@ public static class StagedRestoreApplier
 				FileAccess.ReadWrite,
 				FileShare.None);
 		}
-		catch (IOException)
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 		{
-			Log.Error("A restore is staged but another process holds the data directory; skipping it");
+			Log.Error(e, "A restore is staged but the data directory cannot be locked; skipping it");
 
 			return StagedRestoreOutcome.Locked;
 		}
@@ -64,41 +65,90 @@ public static class StagedRestoreApplier
 		using (lockFile)
 		{
 			var document = ReadDocument(markerPath);
-			if (document is null || !Validate(document))
+			if (document is not null && HasBegun(document))
+			{
+				Log.Warning("A previous start was interrupted while applying the staged restore of backup {BackupId}; "
+					+ "rolling the installation back",
+					document.BackupId);
+
+				return RollBackAndAbandon(paths, markerPath, document);
+			}
+
+			if (document is null || !Validate(paths, document))
 			{
 				Abandon(paths, markerPath, document);
 
 				return StagedRestoreOutcome.Abandoned;
 			}
 
-			var journalPath = Path.Combine(document.StagingDirectory, JournalFileName);
-			var journal = new List<RestoreJournalEntry>();
-
 			try
 			{
-				ApplyFiles(paths, document, journal, journalPath);
+				ApplyFiles(paths, document);
 				ApplyTables(paths, document);
 			}
 			catch (Exception e)
 			{
 				Log.Error(e, "Applying the staged restore failed; rolling the installation back");
-				RollBack(paths, document, journal);
-				Abandon(paths, markerPath, document);
 
-				return StagedRestoreOutcome.Abandoned;
+				return RollBackAndAbandon(paths, markerPath, document);
 			}
 
-			File.Delete(markerPath);
-			TryDeleteDirectory(document.StagingDirectory);
-
-			// The archive deliberately omits caches and staging directories, so recreate whatever the
-			// swap removed before the rest of startup expects them to exist.
-			paths.EnsureDirectoriesExist();
+			CompleteApply(paths, markerPath, document);
 
 			Log.Information("Applied the staged restore of backup {BackupId}", document.BackupId);
 
 			return StagedRestoreOutcome.Applied;
 		}
+	}
+
+	public static bool HasBegun(PendingRestoreDocument document)
+	{
+		return File.Exists(Path.Combine(document.StagingDirectory, JournalFileName));
+	}
+
+	private static void CompleteApply(IMacroDeckPaths paths, string markerPath, PendingRestoreDocument document)
+	{
+		// The journal goes first: a marker left without it fails validation and is abandoned on the next
+		// start, while marker and journal together would roll the files back over the committed tables.
+		var journalDeleted = TryDeleteFile(Path.Combine(document.StagingDirectory, JournalFileName));
+		if (!TryDeleteFile(markerPath) && !journalDeleted)
+		{
+			Log.Error("The applied restore of backup {BackupId} could not be marked complete; "
+				+ "the next start rolls its files back",
+				document.BackupId);
+		}
+
+		TryDeleteDirectory(document.StagingDirectory);
+
+		// The archive deliberately omits caches and staging directories, so recreate whatever the
+		// swap removed before the rest of startup expects them to exist.
+		try
+		{
+			paths.EnsureDirectoriesExist();
+		}
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+		{
+			Log.Error(e, "Could not recreate the data directories after the restore");
+		}
+	}
+
+	private static StagedRestoreOutcome RollBackAndAbandon(
+		IMacroDeckPaths paths,
+		string markerPath,
+		PendingRestoreDocument document)
+	{
+		if (!RollBack(paths, document))
+		{
+			Log.Error("The staged restore of backup {BackupId} could not be rolled back completely; "
+				+ "the next start tries again",
+				document.BackupId);
+
+			return StagedRestoreOutcome.RollbackIncomplete;
+		}
+
+		Abandon(paths, markerPath, document);
+
+		return StagedRestoreOutcome.Abandoned;
 	}
 
 	private static PendingRestoreDocument? ReadDocument(string markerPath)
@@ -108,13 +158,13 @@ public static class StagedRestoreApplier
 			return JsonSerializer.Deserialize<PendingRestoreDocument>(File.ReadAllBytes(markerPath),
 				PersistenceJsonOptions.Default);
 		}
-		catch (Exception e) when (e is JsonException or IOException)
+		catch (Exception e) when (e is JsonException or IOException or UnauthorizedAccessException)
 		{
 			return null;
 		}
 	}
 
-	private static bool Validate(PendingRestoreDocument document)
+	private static bool Validate(IMacroDeckPaths paths, PendingRestoreDocument document)
 	{
 		if (!Directory.Exists(document.ApplyDirectory))
 		{
@@ -123,8 +173,20 @@ public static class StagedRestoreApplier
 
 		foreach (var file in document.Files)
 		{
-			var staged = Path.Combine(document.ApplyDirectory, ToNativePath(file.RelativePath));
-			if (!File.Exists(staged) || !string.Equals(Sha256(staged), file.Sha256, StringComparison.OrdinalIgnoreCase))
+			var staged = BackupArchiveLimits.ResolveInside(document.ApplyDirectory, file.RelativePath);
+			if (!BackupArchiveLimits.IsRestorableEntry(file.RelativePath, file.Component)
+				|| staged is null
+				|| BackupArchiveLimits.ResolveInside(paths.DataRootDirectory, file.RelativePath) is null)
+			{
+				Log.Error("The staged restore names {Path} for {Component}, which a restore may not write; "
+					+ "the installation is left untouched",
+					file.RelativePath,
+					file.Component);
+
+				return false;
+			}
+
+			if (!MatchesStagedHash(staged, file.Sha256))
 			{
 				Log.Error("The staged restore is incomplete at {Path}; the installation is left untouched",
 					file.RelativePath);
@@ -136,47 +198,76 @@ public static class StagedRestoreApplier
 		return document.DatabasePath is null || File.Exists(document.DatabasePath);
 	}
 
-	private static void ApplyFiles(
-		IMacroDeckPaths paths,
-		PendingRestoreDocument document,
-		List<RestoreJournalEntry> journal,
-		string journalPath)
+	private static bool MatchesStagedHash(string staged, string sha256)
+	{
+		try
+		{
+			return File.Exists(staged) && string.Equals(Sha256(staged), sha256, StringComparison.OrdinalIgnoreCase);
+		}
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+		{
+			Log.Error(e, "Could not read the staged file {Path}", staged);
+
+			return false;
+		}
+	}
+
+	private static void ApplyFiles(IMacroDeckPaths paths, PendingRestoreDocument document)
 	{
 		var selected = document.Components.ToHashSet();
 		var rollbackRoot = Path.Combine(document.StagingDirectory, RollbackDirectoryName);
 		Directory.CreateDirectory(rollbackRoot);
 
+		// The journal is durable before the first file moves: a start that finds it rolls back instead of
+		// validating, because from here on apply/ and the data folder may each hold only part of the files.
+		WriteJournal(Path.Combine(document.StagingDirectory, JournalFileName),
+			new RestoreJournal { CreatedDirectories = MissingDirectories(paths, SelectedFiles(document)) });
+
 		foreach (var relative in CurrentFilesOwnedBy(paths, selected, document))
 		{
-			var entry = new RestoreJournalEntry { RelativePath = relative };
 			var current = Path.Combine(paths.DataRootDirectory, ToNativePath(relative));
 			var aside = Path.Combine(rollbackRoot, ToNativePath(relative));
 
 			Directory.CreateDirectory(Path.GetDirectoryName(aside)!);
 			File.Move(current, aside, true);
-			entry.MovedAside = true;
-			journal.Add(entry);
-			WriteJournal(journalPath, journal);
 		}
 
-		foreach (var file in document.Files.Where(file => selected.Contains(file.Component)))
+		foreach (var file in SelectedFiles(document))
 		{
 			var staged = Path.Combine(document.ApplyDirectory, ToNativePath(file.RelativePath));
 			var target = Path.Combine(paths.DataRootDirectory, ToNativePath(file.RelativePath));
 
 			Directory.CreateDirectory(Path.GetDirectoryName(target)!);
 			File.Move(staged, target, true);
-
-			var entry = journal.FirstOrDefault(candidate => candidate.RelativePath == file.RelativePath);
-			if (entry is null)
-			{
-				entry = new RestoreJournalEntry { RelativePath = file.RelativePath };
-				journal.Add(entry);
-			}
-
-			entry.Applied = true;
-			WriteJournal(journalPath, journal);
 		}
+	}
+
+	private static List<string> MissingDirectories(IMacroDeckPaths paths, IEnumerable<PendingRestoreFile> files)
+	{
+		var missing = new HashSet<string>(StringComparer.Ordinal);
+
+		foreach (var relative in files.Select(file => file.RelativePath))
+		{
+			for (var slash = relative.LastIndexOf('/'); slash > 0; slash = relative.LastIndexOf('/', slash - 1))
+			{
+				var directory = relative[..slash];
+				if (Directory.Exists(Path.Combine(paths.DataRootDirectory, ToNativePath(directory))))
+				{
+					break;
+				}
+
+				missing.Add(directory);
+			}
+		}
+
+		return [.. missing];
+	}
+
+	private static IEnumerable<PendingRestoreFile> SelectedFiles(PendingRestoreDocument document)
+	{
+		var selected = document.Components.ToHashSet();
+
+		return document.Files.Where(file => selected.Contains(file.Component));
 	}
 
 	private static void ApplyTables(IMacroDeckPaths paths, PendingRestoreDocument document)
@@ -363,66 +454,201 @@ public static class StagedRestoreApplier
 		}
 	}
 
-	private static void RollBack(
-		IMacroDeckPaths paths,
-		PendingRestoreDocument document,
-		List<RestoreJournalEntry> journal)
+	// Must stay safe to rerun after being killed itself: every restored file goes back to apply/ before
+	// any original returns over it. Created folders go in between, an original may need the same path.
+	private static bool RollBack(IMacroDeckPaths paths, PendingRestoreDocument document)
 	{
-		var rollbackRoot = Path.Combine(document.StagingDirectory, RollbackDirectoryName);
-
-		for (var i = journal.Count - 1; i >= 0; i--)
+		if (!ReturnRestoredFiles(paths, document))
 		{
-			var entry = journal[i];
-			if (!entry.MovedAside)
+			return false;
+		}
+
+		var directoriesRemoved = RemoveCreatedDirectories(paths, document);
+
+		return ReturnOriginals(paths, document) && directoriesRemoved;
+	}
+
+	private static bool ReturnRestoredFiles(IMacroDeckPaths paths, PendingRestoreDocument document)
+	{
+		var failures = 0;
+
+		foreach (var file in SelectedFiles(document))
+		{
+			var staged = BackupArchiveLimits.ResolveInside(document.ApplyDirectory, file.RelativePath);
+			var target = BackupArchiveLimits.ResolveInside(paths.DataRootDirectory, file.RelativePath);
+			if (staged is null || target is null || File.Exists(staged) || !File.Exists(target))
 			{
 				continue;
 			}
 
-			var aside = Path.Combine(rollbackRoot, ToNativePath(entry.RelativePath));
-			var target = Path.Combine(paths.DataRootDirectory, ToNativePath(entry.RelativePath));
+			if (!TryMove(target, staged, file.RelativePath))
+			{
+				failures++;
+			}
+		}
+
+		return failures == 0;
+	}
+
+	private static bool ReturnOriginals(IMacroDeckPaths paths, PendingRestoreDocument document)
+	{
+		var rollbackRoot = Path.Combine(document.StagingDirectory, RollbackDirectoryName);
+		string[] originals;
+		try
+		{
+			originals = Directory.Exists(rollbackRoot)
+				? Directory.GetFiles(rollbackRoot, "*", SearchOption.AllDirectories)
+				: [];
+		}
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+		{
+			Log.Error(e, "Could not list the files the restore set aside");
+
+			return false;
+		}
+
+		var failures = 0;
+
+		foreach (var aside in originals)
+		{
+			var relative = Path.GetRelativePath(rollbackRoot, aside);
+			if (!TryMove(aside, Path.Combine(paths.DataRootDirectory, relative), relative))
+			{
+				failures++;
+			}
+		}
+
+		return failures == 0;
+	}
+
+	private static bool RemoveCreatedDirectories(IMacroDeckPaths paths, PendingRestoreDocument document)
+	{
+		var journal = ReadJournal(Path.Combine(document.StagingDirectory, JournalFileName));
+		if (journal is null)
+		{
+			return false;
+		}
+
+		var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(paths.DataRootDirectory))
+			+ Path.DirectorySeparatorChar;
+		var failures = 0;
+
+		foreach (var relative in journal.CreatedDirectories.OrderByDescending(directory => directory.Length))
+		{
+			var absolute = Path.GetFullPath(Path.Combine(paths.DataRootDirectory, ToNativePath(relative)));
+			if (!absolute.StartsWith(root, StringComparison.Ordinal) || !Directory.Exists(absolute))
+			{
+				continue;
+			}
 
 			try
 			{
-				if (File.Exists(aside))
+				if (Directory.EnumerateFileSystemEntries(absolute).Any())
 				{
-					Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-					File.Move(aside, target, true);
+					Log.Warning("Kept the folder {Path}: it holds content the restore did not put there", relative);
+
+					continue;
 				}
+
+				Directory.Delete(absolute);
 			}
-			catch (IOException e)
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{
-				Log.Error(e, "Could not roll {Path} back", entry.RelativePath);
+				Log.Error(e, "Could not remove the folder {Path} the restore created", relative);
+				failures++;
 			}
+		}
+
+		return failures == 0;
+	}
+
+	private static RestoreJournal? ReadJournal(string path)
+	{
+		try
+		{
+			if (!File.Exists(path))
+			{
+				return new RestoreJournal();
+			}
+
+			return JsonSerializer.Deserialize<RestoreJournal>(File.ReadAllBytes(path), PersistenceJsonOptions.Default)
+				?? new RestoreJournal();
+		}
+		catch (JsonException)
+		{
+			// A journal from an older host or one cut short by a kill records no folders.
+			return new RestoreJournal();
+		}
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+		{
+			Log.Error(e, "Could not read the restore journal");
+
+			return null;
+		}
+	}
+
+	private static bool TryMove(string source, string destination, string relativePath)
+	{
+		try
+		{
+			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+			File.Move(source, destination, true);
+
+			return true;
+		}
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+		{
+			Log.Error(e, "Could not roll {Path} back", relativePath);
+
+			return false;
 		}
 	}
 
 	private static void Abandon(IMacroDeckPaths paths, string markerPath, PendingRestoreDocument? document)
 	{
-		try
-		{
-			File.Delete(markerPath);
+		TryDeleteFile(markerPath);
 
-			if (document is not null && Directory.Exists(document.StagingDirectory))
+		if (document is not null && Directory.Exists(document.StagingDirectory))
+		{
+			var failed = document.StagingDirectory
+				+ ".failed-"
+				+ DateTime.UtcNow.ToString("yyyyMMddTHHmmssZ", System.Globalization.CultureInfo.InvariantCulture);
+			try
 			{
-				var failed = document.StagingDirectory
-					+ ".failed-"
-					+ DateTime.UtcNow.ToString("yyyyMMddTHHmmssZ", System.Globalization.CultureInfo.InvariantCulture);
 				Directory.Move(document.StagingDirectory, failed);
 			}
-		}
-		catch (IOException e)
-		{
-			Log.Error(e, "Could not clean up the abandoned restore staging directory");
+			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+			{
+				Log.Error(e,
+					"Could not set the abandoned restore staging directory {Path} aside",
+					document.StagingDirectory);
+			}
 		}
 
 		Log.Warning("A staged restore was abandoned; the installation was left as it was");
 	}
 
-	private static void WriteJournal(string path, List<RestoreJournalEntry> journal)
+	private static void WriteJournal(string path, RestoreJournal journal)
 	{
 		using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-		JsonSerializer.Serialize(stream, journal, PersistenceJsonOptions.Default);
+		stream.Write(JsonSerializer.SerializeToUtf8Bytes(journal, PersistenceJsonOptions.Default));
 		stream.Flush(true);
+	}
+
+	private static bool TryDeleteFile(string path)
+	{
+		try
+		{
+			File.Delete(path);
+
+			return true;
+		}
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+		{
+			Log.Error(e, "Could not delete {Path}", path);
+
+			return false;
+		}
 	}
 
 	private static void Execute(SqliteConnection connection, string sql, SqliteTransaction? transaction = null)
@@ -454,8 +680,14 @@ public static class StagedRestoreApplier
 				Directory.Delete(path, true);
 			}
 		}
-		catch (IOException)
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 		{
+			Log.Warning(e, "Could not delete the restore staging directory {Path}", path);
 		}
+	}
+
+	private sealed class RestoreJournal
+	{
+		public List<string> CreatedDirectories { get; init; } = [];
 	}
 }

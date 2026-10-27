@@ -15,15 +15,18 @@ public sealed class LabelTextService : ILabelTextService
 	private readonly IFolderCache _folderCache;
 	private readonly IVariableTemplateRenderer _templateRenderer;
 	private readonly StartupReadiness _readiness;
+	private readonly LabelRenderFailureLog _failures;
 
 	public LabelTextService(
 		IFolderCache folderCache,
 		IVariableTemplateRenderer templateRenderer,
-		StartupReadiness readiness)
+		StartupReadiness readiness,
+		LabelRenderFailureLog failures)
 	{
 		_folderCache = folderCache;
 		_templateRenderer = templateRenderer;
 		_readiness = readiness;
+		_failures = failures;
 	}
 
 	public async Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
@@ -50,7 +53,18 @@ public sealed class LabelTextService : ILabelTextService
 			return null;
 		}
 
-		var resolved = await _templateRenderer.RenderAsync(labelText, VariableScope.Widget, widgetId.ToString());
+		string resolved;
+		try
+		{
+			resolved = await _templateRenderer.RenderAsync(labelText, VariableScope.Widget, widgetId.ToString());
+		}
+		catch (Exception exception) when (exception is not OperationCanceledException)
+		{
+			_failures.Failed(widgetId, state, labelText, exception);
+			return VariableTemplateRenderer.UnavailablePlaceholder;
+		}
+
+		_failures.Succeeded(widgetId, state);
 		return string.IsNullOrEmpty(resolved) ? null : resolved;
 	}
 
@@ -62,7 +76,17 @@ public sealed class LabelTextService : ILabelTextService
 
 		var label = request.Label ?? string.Empty;
 		var scope = string.IsNullOrEmpty(request.ScopeRefId) ? VariableScope.Global : VariableScope.Widget;
-		var resolved = await _templateRenderer.RenderAsync(label, scope, request.ScopeRefId);
+		string resolved;
+		try
+		{
+			resolved = await _templateRenderer.RenderAsync(label, scope, request.ScopeRefId);
+		}
+		catch (Exception exception) when (exception is not OperationCanceledException)
+		{
+			_failures.PreviewFailed(exception);
+			return VariableTemplateRenderer.UnavailablePlaceholder;
+		}
+
 		return string.IsNullOrEmpty(resolved) ? null : resolved;
 	}
 

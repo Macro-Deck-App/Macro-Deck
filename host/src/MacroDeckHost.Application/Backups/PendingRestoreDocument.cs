@@ -37,12 +37,3 @@ public sealed class PendingRestoreFile
 
 	public BackupComponentGroup Component { get; set; }
 }
-
-public sealed class RestoreJournalEntry
-{
-	public string RelativePath { get; set; } = string.Empty;
-
-	public bool MovedAside { get; set; }
-
-	public bool Applied { get; set; }
-}

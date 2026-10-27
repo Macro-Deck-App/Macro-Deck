@@ -16,6 +16,7 @@ using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
+using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Application.Devices.Surfaces;
 
@@ -73,6 +74,7 @@ public sealed class DeviceSurfaceBuilder
 	private readonly IIconPackCache _icons;
 	private readonly IWidgetDefaultShortPress _defaultShortPress;
 	private readonly IColorReferenceResolver _colors;
+	private readonly ILogger _logger;
 
 	public DeviceSurfaceBuilder(
 		IProfileRegistry profiles,
@@ -83,9 +85,11 @@ public sealed class DeviceSurfaceBuilder
 		IAppPreferenceService preferences,
 		IIconPackCache icons,
 		IWidgetDefaultShortPress defaultShortPress,
-		IColorReferenceResolver colors)
+		IColorReferenceResolver colors,
+		ILogger logger)
 	{
 		_colors = colors;
+		_logger = logger;
 		_icons = icons;
 		_defaultShortPress = defaultShortPress;
 		_profiles = profiles;
@@ -265,10 +269,29 @@ public sealed class DeviceSurfaceBuilder
 		CancellationToken cancellationToken)
 	{
 		var isPersisted = Guid.TryParse(widget.Id, out var widgetId);
-		var state = isPersisted ? await _widgetStates.Resolve(widgetId, cancellationToken) : null;
+		WidgetStateResolution? state = null;
+		try
+		{
+			state = isPersisted ? await _widgetStates.Resolve(widgetId, cancellationToken) : null;
+		}
+		catch (Exception exception) when (exception is not OperationCanceledException)
+		{
+			_logger.Error(exception, "Failed to resolve the device surface state of widget {WidgetId}", widget.Id);
+		}
+
 		var stateId = state?.StateId;
 
-		var appearance = await BuildAppearance(widget, widgetId, isPersisted, stateId, iconContext, cancellationToken);
+		DeviceSurfaceAppearance appearance;
+		try
+		{
+			appearance = await BuildAppearance(widget, widgetId, isPersisted, stateId, iconContext, cancellationToken);
+		}
+		catch (Exception exception) when (exception is not OperationCanceledException)
+		{
+			_logger.Error(exception, "Failed to build the device surface appearance of widget {WidgetId}", widget.Id);
+			appearance = new DeviceSurfaceAppearance();
+		}
+
 		if (isPersisted)
 		{
 			subscriptions.Add(new DeviceSurfaceSubscription(widgetId, stateId ?? LabelGroups.Normalize(string.Empty)));

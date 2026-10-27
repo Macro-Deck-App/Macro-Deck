@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Auth;
+using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Usb;
@@ -101,9 +102,19 @@ public static class Program
 			// The only safe point to swap the data root: nothing has opened the database, the Data Protection
 			// key ring, the TLS private key or a plugin binary yet. The applier takes its own exclusive lock
 			// because the single-instance probe above is a best-effort HTTP check, not a lock.
-			var restoreOutcome = StagedRestoreApplier.ApplyPending(paths);
+			StagedRestoreOutcome restoreOutcome;
+			using (StartupHeartbeat.Start(Console.Out, StartupHeartbeat.Interval))
+			{
+				restoreOutcome = StagedRestoreApplier.ApplyPending(paths);
+			}
 
 			HostStartupFacts.RestoreApplied = restoreOutcome == StagedRestoreOutcome.Applied;
+			HostStartupFacts.RestoreFailure = restoreOutcome switch
+			{
+				StagedRestoreOutcome.Abandoned => RestoreFailure.NotApplied,
+				StagedRestoreOutcome.RollbackIncomplete => RestoreFailure.RollbackIncomplete,
+				_ => RestoreFailure.None
+			};
 
 			DatabaseMigrationHelper.MigrateDatabase(paths);
 

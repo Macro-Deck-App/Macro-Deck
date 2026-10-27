@@ -14875,6 +14875,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>恢复失败</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>无法还原备份。数据保持还原前的状态。</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>无法还原备份，部分数据尚未恢复原位。请重新启动 Macro Deck 以完成恢复。</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>其中没有可作为图标导入的内容。</value>
   </data>

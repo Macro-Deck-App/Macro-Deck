@@ -211,6 +211,24 @@ describe('screensaver', () => {
     expect(dismissed).toBe(0);
   });
 
+  it('stays on its session and keeps drawing when a patch cannot apply', async () => {
+    const view = mount();
+    view.show();
+    await settle();
+    sessions.treeUpdated(sessionId(), 1, clockTree);
+
+    sessions.patched(sessionId(), {
+      fromRevision: 5,
+      toRevision: 6,
+      operations: [{ op: 'set-properties', nodeId: 'root', properties: { text: '12:01' } }],
+    });
+    await settle();
+
+    expect(sent('OpenScreenSaverUiSession').length).toBe(1);
+    expect(sent('CloseUiSession').length).toBe(0);
+    expect(view.element.textContent).toContain('12:00');
+  });
+
   it('hides rather than looping when it loses its session again before anything was shown', async () => {
     const view = mount();
     view.show();

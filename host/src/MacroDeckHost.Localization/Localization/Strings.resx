@@ -14877,6 +14877,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Restore failed</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>The backup could not be restored. Your data is as it was before the restore.</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>The backup could not be restored, and some of your data could not be put back yet. Restart Macro Deck to finish putting it back.</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Nothing there could be imported as an icon.</value>
   </data>
