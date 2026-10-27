@@ -12,7 +12,7 @@ internal static partial class FeedText
 			return null;
 		}
 
-		var withoutCode = CodeBlocks().Replace(text, string.Empty);
+		var withoutCode = StyleBlocks().Replace(ScriptBlocks().Replace(text, string.Empty), string.Empty);
 		var withBreaks = LineBreakTags().Replace(withoutCode, "\n");
 		var withoutTags = Tags().Replace(withBreaks, string.Empty);
 		var decoded = WebUtility.HtmlDecode(withoutTags).Replace("\r\n", "\n", StringComparison.Ordinal);
@@ -63,13 +63,21 @@ internal static partial class FeedText
 		return match.Success ? WebUtility.HtmlDecode(match.Groups["src"].Value) : null;
 	}
 
-	[GeneratedRegex(@"<\s*(script|style)\b[^>]*>.*?<\s*/\s*\1\s*>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
-	private static partial Regex CodeBlocks();
+	// Feed text is untrusted, so markup patterns use the linear engine. One script|style alternation is
+	// quadratic even there, which is why script and style blocks are removed by separate patterns.
+	[GeneratedRegex(@"<\s*script\b[^>]*>.*?<\s*/\s*script\s*>",
+		RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.NonBacktracking)]
+	private static partial Regex ScriptBlocks();
 
-	[GeneratedRegex(@"<\s*br\s*/?\s*>|<\s*/\s*(p|div|li|tr|h[1-6])\s*>", RegexOptions.IgnoreCase)]
+	[GeneratedRegex(@"<\s*style\b[^>]*>.*?<\s*/\s*style\s*>",
+		RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.NonBacktracking)]
+	private static partial Regex StyleBlocks();
+
+	[GeneratedRegex(@"<\s*br\s*/?\s*>|<\s*/\s*(p|div|li|tr|h[1-6])\s*>",
+		RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
 	private static partial Regex LineBreakTags();
 
-	[GeneratedRegex(@"<[^>]*>")]
+	[GeneratedRegex(@"<[^>]*>", RegexOptions.NonBacktracking)]
 	private static partial Regex Tags();
 
 	[GeneratedRegex(@"\n[ \t]*\n(?:[ \t]*\n)+")]
@@ -78,6 +86,7 @@ internal static partial class FeedText
 	[GeneratedRegex(@"\s+")]
 	private static partial Regex Whitespace();
 
-	[GeneratedRegex("""<img\b[^>]*?\bsrc\s*=\s*["'](?<src>[^"']+)["']""", RegexOptions.IgnoreCase)]
+	[GeneratedRegex("""<img\b[^>]*?\bsrc\s*=\s*["'](?<src>[^"']+)["']""",
+		RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
 	private static partial Regex ImageSource();
 }
