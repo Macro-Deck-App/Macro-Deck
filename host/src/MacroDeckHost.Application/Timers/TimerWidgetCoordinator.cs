@@ -172,24 +172,6 @@ public sealed class TimerWidgetCoordinator
 		}
 	}
 
-	public async Task PruneMissingAsync()
-	{
-		var present = _folders.GetAllFolders()
-			.SelectMany(folder => folder.Widgets)
-			.Select(widget => widget.Id)
-			.ToHashSet();
-
-		foreach (var widgetId in _store.WidgetIds.Where(id => !present.Contains(id)))
-		{
-			await ForgetAsync(widgetId).ConfigureAwait(false);
-
-			await using var scope = _scopeFactory.CreateAsyncScope();
-			await scope.ServiceProvider.GetRequiredService<Services.IVariableService>()
-				.DeleteByScopeInstance(VariableScope.Widget, widgetId.ToString())
-				.ConfigureAwait(false);
-		}
-	}
-
 	private async Task AskForDurationAsync(TimerWidgetSnapshot snapshot, string? originClientId, Guid? originDeviceId)
 	{
 		if (string.IsNullOrEmpty(originClientId))

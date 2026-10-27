@@ -39,10 +39,4 @@ public sealed class CalendarWidgetLifecycle
 		_triggers.RequestReplan();
 		_changes.Notify();
 	}
-
-	public void ProfileDeleted()
-	{
-		_triggers.RequestReplan();
-		_changes.Notify();
-	}
 }

@@ -27,6 +27,7 @@ public class ProfileServiceTests
 			new InMemoryDeviceRepository(),
 			mediator,
 			new WidgetSecretCloner(new FakeSecretService()),
+			new WidgetSecretScrubber(new FakeSecretService()),
 			new NullWidgetVariableCloner());
 	}
 
