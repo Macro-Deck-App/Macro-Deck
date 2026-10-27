@@ -194,6 +194,27 @@ describe('folder view', () => {
     expect((events[0].payload as [{ sessionId: string }])[0].sessionId).toBe('s2');
   });
 
+  it('keeps drawing its tree while the host resends one a patch could not advance', async () => {
+    const mounted = mount();
+    const content = mounted.element.querySelector('.wc-folder-view-content') as HTMLElement;
+    Object.defineProperty(content, 'clientWidth', { value: 300 });
+    Object.defineProperty(content, 'clientHeight', { value: 200 });
+    mounted.open('f1');
+    await accept(0, 's1');
+    sessions.treeUpdated('s1', 1, buttonTree);
+    mounted.paint();
+
+    sessions.patched('s1', {
+      fromRevision: 5,
+      toRevision: 6,
+      operations: [{ op: 'set-properties', nodeId: 'play', properties: { label: 'x' } }],
+    });
+    mounted.paint();
+
+    expect(mounted.element.querySelector('[data-node-id="play"]') !== null).toBeTrue();
+    expect(opens().length).toBe(1);
+  });
+
   it('opens again when the session is lost before it showed anything', async () => {
     const mounted = mount();
     mounted.open('f1');

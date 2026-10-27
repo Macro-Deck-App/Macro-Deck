@@ -283,6 +283,7 @@ export class Client {
     });
 
     this.widgetSessions = new WidgetSessions(this.connection, this.sessions);
+    this.sessions.onResyncNeeded(sessionId => this.resync(sessionId));
     this.hostLock = new HostLock(this.http);
 
     this.connection.state.subscribe(state => {
@@ -859,6 +860,33 @@ export class Client {
     return true;
   }
 
+  // Attach is idempotent and always pushes a fresh snapshot, which is what a patch that could not
+  // apply needs. A dropped socket already cleared the store, so its rejection is left alone.
+  private resync(sessionId: string): void {
+    this.connection.request<{ accepted?: boolean; code?: string }>('AttachUiSession', [{ sessionId }]).then(
+      response => {
+        if (!response || response.accepted !== true) this.resyncFailed(sessionId, response?.code);
+      },
+      () => this.resyncFailed(sessionId, undefined));
+  }
+
+  private resyncFailed(sessionId: string, code: string | undefined): void {
+    if (!this.sessions.has(sessionId)) return;
+    // A rejected request does not prove the host dropped the session, so it is closed before a
+    // replacement is opened rather than left attached and streaming.
+    void this.connection.request('CloseUiSession', [sessionId]).catch(() => undefined);
+    this.sessionEnded(sessionId, true, code);
+  }
+
+  private sessionEnded(sessionId: string, reopenable: boolean, code: string | undefined): void {
+    this.sessions.invalidated(sessionId);
+    this.widgetSessions.sessionClosed(sessionId);
+    // The widget is still on the deck, so it needs a session again.
+    this.widgetSessions.sync(this.deck.displayedWidgets);
+    if (reopenable) this.reopenableSessionStore.set({ sessionId });
+    this.endedSessionStore.set({ sessionId, code });
+  }
+
   private handleForbidden(): void {
     if (this.implicitlyTrusted || !this.app.conditions.get().authenticated) return;
     if (!this.hasSufficientScope()) this.endSession();
@@ -1197,17 +1225,10 @@ export class Client {
       case 'UiSessionInvalidatedEvent':
       case 'UiSessionClosedEvent':
         if (typeof body['sessionId'] === 'string') {
-          this.sessions.invalidated(body['sessionId']);
-          this.widgetSessions.sessionClosed(body['sessionId']);
-          // The widget is still on the deck, so it needs a session again.
-          this.widgetSessions.sync(this.deck.displayedWidgets);
-          if (type === 'UiSessionInvalidatedEvent' && body['retryable'] === true) {
-            this.reopenableSessionStore.set({ sessionId: body['sessionId'] });
-          }
-          this.endedSessionStore.set({
-            sessionId: body['sessionId'],
-            code: typeof body['code'] === 'string' ? body['code'] : undefined,
-          });
+          this.sessionEnded(
+            body['sessionId'],
+            type === 'UiSessionInvalidatedEvent' && body['retryable'] === true,
+            typeof body['code'] === 'string' ? body['code'] : undefined);
         }
         break;
       case 'FolderNavigationEvent':
