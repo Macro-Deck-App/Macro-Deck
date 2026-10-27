@@ -2934,6 +2934,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Sebuah build pengembangan telah mengambil alih plugin ini. Akhiri pengambilalihan sebelum memasang atau memperbaruinya.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Sebagian data tersimpan plugin tidak dapat dihapus karena sebuah file masih digunakan, jadi plugin tidak dicopot. Tutup program yang menggunakannya, lalu coba lagi.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>Plugin tidak dapat dihentikan, jadi tidak ada yang dihapus. Coba lagi.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck sedang dimatikan, jadi plugin tidak dijalankan.</value>
   </data>
@@ -10125,7 +10131,7 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Copot plugin?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Biarkan tidak dicentang untuk menyimpan pengaturan plugin ini, sehingga saat dipasang ulang nanti, plugin melanjutkan dari titik terakhir. Ini tidak memengaruhi cara {name} diatur di tempat lain di Macro Deck.</value>
+    <value>Biarkan tidak dicentang untuk menyimpan pengaturan plugin ini beserta akun dan koneksi yang diatur untuknya, sehingga saat dipasang ulang nanti, plugin melanjutkan dari titik terakhir. Centang untuk menghapusnya juga, termasuk kredensial masuk yang tersimpan. Ini tidak memengaruhi cara {name} diatur di tempat lain di Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Copot…</value>

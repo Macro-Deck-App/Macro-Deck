@@ -2934,6 +2934,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Сборка для разработки заменила этот плагин. Завершите замену, прежде чем устанавливать или обновлять его.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Не удалось удалить часть сохранённых данных плагина: файл всё ещё используется, поэтому плагин не удалён. Закройте программы, которые его используют, и повторите попытку.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>Не удалось остановить плагин, поэтому ничего не удалено. Повторите попытку.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck завершает работу, поэтому плагин не был запущен.</value>
   </data>
@@ -10125,7 +10131,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Удалить плагин?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Оставьте этот флажок снятым, чтобы сохранить собственные настройки плагина: тогда при повторной установке он продолжит с того места, где вы остановились. Это не влияет на настройку {name} в других частях Macro Deck.</value>
+    <value>Оставьте этот флажок снятым, чтобы сохранить собственные настройки плагина, а также настроенные для него учётные записи и подключения: тогда при повторной установке он продолжит с того места, где вы остановились. Если установить флажок, они тоже будут удалены вместе с сохранёнными данными для входа. Это не влияет на настройку {name} в других частях Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Удалить…</value>

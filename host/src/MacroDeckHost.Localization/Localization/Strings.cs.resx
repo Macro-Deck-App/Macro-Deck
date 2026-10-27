@@ -2935,6 +2935,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Tento plugin převzalo vývojové sestavení. Před instalací nebo aktualizací je nutné převzetí ukončit.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Některá uložená data pluginu nebylo možné smazat, protože se soubor stále používá, proto plugin nebyl odinstalován. Zavřete programy, které ho používají, a zkuste to znovu.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>Plugin se nepodařilo zastavit, proto nebylo nic odstraněno. Zkuste to znovu.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se vypíná, proto plugin nebyl spuštěn.</value>
   </data>
@@ -10124,7 +10130,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Odinstalovat plugin?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Ponechte vypnuté pro zachování vlastního nastavení pluginu, aby na ně mohl navázat při pozdější opětovné instalaci. Nemá to vliv na to, jak je {name} nastaven jinde v Macro Deck.</value>
+    <value>Ponechte vypnuté pro zachování vlastního nastavení pluginu a účtů a připojení, která jsou pro něj nastavena, aby na ně mohl navázat při pozdější opětovné instalaci. Po zapnutí se smažou i ty, včetně uložených přihlašovacích údajů. Nemá to vliv na to, jak je {name} nastaven jinde v Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Odinstalovat…</value>

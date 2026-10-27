@@ -1,14 +1,19 @@
+using System.Text.Json;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Plugin.Protocol.Versioning;
+using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Compatibility;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Logging;
 using MacroDeckHost.Application.Plugins.Trust;
+using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Store.Testing;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Infrastructure.Store;
@@ -35,6 +40,10 @@ internal sealed class PluginInstallerUninstallTests
 	private PluginInstallationCatalog _catalog = null!;
 	private JsonStoreTestInstallationStore _testInstallations = null!;
 	private string _sourceDirectory = null!;
+	private InMemoryConfigEntryRepository _configEntries = null!;
+	private FakeSecretService _secrets = null!;
+	private IntegrationConfigStore _configStore = null!;
+	private RemotePluginSnapshotStore _snapshots = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -80,6 +89,16 @@ internal sealed class PluginInstallerUninstallTests
 		services.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>();
 		_testInstallations = new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None);
 		services.AddSingleton<IStoreTestInstallationStore>(_testInstallations);
+		_configEntries = new InMemoryConfigEntryRepository();
+		_secrets = new FakeSecretService();
+		_configStore = new IntegrationConfigStore(_configEntries, _secrets);
+		_snapshots = new RemotePluginSnapshotStore(_paths, Serilog.Core.Logger.None);
+		services.AddSingleton<IIntegrationConfigEntryRepository>(_configEntries);
+		services.AddSingleton<ISecretService>(_secrets);
+		services.AddScoped<IIntegrationConfigStore, IntegrationConfigStore>();
+		services.AddSingleton<IRemotePluginSnapshotStore>(_snapshots);
+		services.AddSingleton(TestLocalization.Resolver);
+		services.AddSingleton(TestLocalization.Preferences);
 		var provider = services.BuildServiceProvider();
 
 		_installer = new PluginInstaller(_paths,
@@ -105,6 +124,7 @@ internal sealed class PluginInstallerUninstallTests
 	[TearDown]
 	public void TearDown()
 	{
+		_snapshots.Dispose();
 		_paths.Cleanup();
 	}
 
@@ -492,6 +512,226 @@ internal sealed class PluginInstallerUninstallTests
 				"the plugin must have an integration before uninstalling can be shown to remove it");
 			Assert.That(_integrationRegistrar.IsRegistered(PluginId), Is.False);
 		});
+	}
+
+	// --- what deleting the stored data deletes ---------------------------------------------------
+
+	private async Task<(Guid EntryId, Guid SecretId)> SeedConnection(string integrationId)
+	{
+		var secretId = _secrets.Store("api-token");
+		var values = new Dictionary<string, JsonElement>
+		{
+			["host"] = JsonSerializer.SerializeToElement("example.local"),
+			["token"] = JsonSerializer.SerializeToElement(new Dictionary<string, string>
+			{
+				[SecretReferenceJson.PropertyName] = secretId.ToString()
+			})
+		};
+
+		var entryId = await _configStore.Create(integrationId, "Account", values);
+		return (entryId, secretId);
+	}
+
+	[Test]
+	public async Task Deleting_the_data_deletes_the_plugins_connections_and_their_credentials_but_no_one_elses()
+	{
+		await Install(BuildArtifact());
+		var own = await SeedConnection(PluginId);
+		var other = await SeedConnection("com.example.other");
+
+		var result = await _installer.Uninstall(PluginId, new PluginUninstallRequest { KeepData = false });
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(await _configStore.List(PluginId), Is.Empty);
+			Assert.That(await _secrets.Resolve(own.SecretId), Is.Null);
+			Assert.That((await _configStore.List("com.example.other")).Select(entry => entry.Id),
+				Is.EqualTo(new[] { other.EntryId }));
+			Assert.That(await _secrets.Resolve(other.SecretId), Is.EqualTo("api-token"));
+		});
+	}
+
+	[Test]
+	public async Task Keeping_the_data_keeps_the_plugins_connections_and_their_credentials()
+	{
+		await Install(BuildArtifact());
+		var own = await SeedConnection(PluginId);
+
+		var result = await _installer.Uninstall(PluginId, new PluginUninstallRequest { KeepData = true });
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That((await _configStore.List(PluginId)).Select(entry => entry.Id),
+				Is.EqualTo(new[] { own.EntryId }));
+			Assert.That(await _secrets.Resolve(own.SecretId), Is.EqualTo("api-token"));
+		});
+	}
+
+	[Test]
+	public async Task Deleting_the_data_forgets_the_capabilities_the_host_remembered_for_the_plugin()
+	{
+		await Install(BuildArtifact());
+		await _snapshots.SaveAsync(RemotePluginCapabilitySnapshot.Empty(PluginId));
+		await _snapshots.SaveAsync(RemotePluginCapabilitySnapshot.Empty("com.example.other"));
+
+		var result = await _installer.Uninstall(PluginId, new PluginUninstallRequest { KeepData = false });
+
+		using var reloaded = new RemotePluginSnapshotStore(_paths, Serilog.Core.Logger.None);
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(_snapshots.Has(PluginId), Is.False);
+			Assert.That(reloaded.Has(PluginId), Is.False, "the forgotten snapshot must not come back after a restart");
+			Assert.That(reloaded.Has("com.example.other"), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Data_that_cannot_be_deleted_leaves_the_plugin_installed_so_the_user_can_try_again()
+	{
+		Assume.That(OperatingSystem.IsWindows() || Environment.UserName != "root",
+			"root ignores the read-only folder this test relies on");
+		await Install(BuildArtifact(), new PluginInstallRequest { StartAfterActivation = false });
+		var own = await SeedConnection(PluginId);
+		await _snapshots.SaveAsync(RemotePluginCapabilitySnapshot.Empty(PluginId));
+		var dataDirectory = PluginInstallPaths.DataDirectory(_paths.PluginsDirectory, PluginId);
+		Directory.CreateDirectory(dataDirectory);
+		var dataFile = Path.Combine(dataDirectory, "settings.json");
+		await File.WriteAllTextAsync(dataFile, "{}");
+
+		PluginInstallResult blocked;
+		using (LockAgainstDeletion(dataDirectory, dataFile))
+		{
+			blocked = await _installer.Uninstall(PluginId, new PluginUninstallRequest { KeepData = false });
+		}
+
+		var stillInstalled
+			= _catalog.Discover().Any(plugin => plugin.PluginId == PluginId && plugin.Versions.Count > 0);
+		var stillRegistered = _integrationRegistrar.IsRegistered(PluginId);
+		var connectionsAfterTheFailedAttempt = (await _configStore.List(PluginId)).Count;
+		var retried = await _installer.Uninstall(PluginId, new PluginUninstallRequest { KeepData = false });
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(blocked.Success, Is.False, "data that is still there must not be reported as deleted");
+			Assert.That(blocked.Error, Is.EqualTo(PluginInstallError.Failed));
+			Assert.That(blocked.ErrorMessage, Is.Not.Empty);
+			Assert.That(stillInstalled, Is.True, "the dialog the user retries from needs the plugin to still be there");
+			Assert.That(stillRegistered, Is.True);
+			Assert.That(connectionsAfterTheFailedAttempt, Is.EqualTo(1));
+			Assert.That(retried.Success, Is.True, retried.ErrorMessage);
+			Assert.That(Directory.Exists(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, PluginId)),
+				Is.False);
+			Assert.That(await _configStore.List(PluginId), Is.Empty);
+			Assert.That(await _secrets.Resolve(own.SecretId), Is.Null);
+			Assert.That(_snapshots.Has(PluginId), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_that_cannot_be_stopped_is_not_uninstalled()
+	{
+		await Install(BuildArtifact());
+		var versionsDirectory = PluginInstallPaths.VersionsDirectory(_paths.PluginsDirectory, PluginId);
+		_supervisor.StopOutcome = _ => PluginSupervisorResult.Fail(PluginSupervisorError.Failed, "terminate failed");
+
+		var result = await _installer.Uninstall(PluginId, new PluginUninstallRequest { KeepData = false });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.False);
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.Failed));
+			Assert.That(Directory.Exists(versionsDirectory),
+				Is.True,
+				"nothing may be deleted from under a process that may still be running");
+		});
+	}
+
+	[TestCase(PluginSupervisorError.NotRunning)]
+	[TestCase(PluginSupervisorError.NotInstalled)]
+	[TestCase(PluginSupervisorError.SelfRegistering)]
+	public async Task A_plugin_that_was_not_running_is_still_uninstalled(PluginSupervisorError stopError)
+	{
+		await Install(BuildArtifact());
+		_supervisor.StopOutcome = _ => PluginSupervisorResult.Fail(stopError);
+
+		var result = await _installer.Uninstall(PluginId, new PluginUninstallRequest { KeepData = false });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(Directory.Exists(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, PluginId)),
+				Is.False);
+		});
+	}
+
+	// Windows refuses to delete a file another handle holds; elsewhere a read-only folder refuses it.
+	private static IDisposable LockAgainstDeletion(string directory, string file)
+	{
+		if (OperatingSystem.IsWindows())
+		{
+			return new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None);
+		}
+
+		var mode = File.GetUnixFileMode(directory);
+		File.SetUnixFileMode(directory, UnixFileMode.UserRead | UnixFileMode.UserExecute);
+		return new RestoreUnixFileMode(directory, mode);
+	}
+
+	private sealed class RestoreUnixFileMode : IDisposable
+	{
+		private readonly string _path;
+		private readonly UnixFileMode _mode;
+
+		public RestoreUnixFileMode(string path, UnixFileMode mode)
+		{
+			_path = path;
+			_mode = mode;
+		}
+
+		public void Dispose()
+		{
+			if (!OperatingSystem.IsWindows())
+			{
+				File.SetUnixFileMode(_path, _mode);
+			}
+		}
+	}
+
+	private sealed class InMemoryConfigEntryRepository : IIntegrationConfigEntryRepository
+	{
+		private readonly List<IntegrationConfigEntryEntity> _entries = [];
+
+		public Task<IReadOnlyList<IntegrationConfigEntryEntity>> GetByIntegrationId(string integrationId)
+		{
+			return Task.FromResult<IReadOnlyList<IntegrationConfigEntryEntity>>(_entries
+				.Where(entry => entry.IntegrationId == integrationId)
+				.ToList());
+		}
+
+		public Task<IntegrationConfigEntryEntity?> GetById(Guid id)
+		{
+			return Task.FromResult(_entries.FirstOrDefault(entry => entry.Id == id));
+		}
+
+		public Task Create(IntegrationConfigEntryEntity entry)
+		{
+			_entries.Add(entry);
+			return Task.CompletedTask;
+		}
+
+		public Task Update(IntegrationConfigEntryEntity entry)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task TryDeleteById(Guid id)
+		{
+			_entries.RemoveAll(entry => entry.Id == id);
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class NoHttpClientFactory : IHttpClientFactory

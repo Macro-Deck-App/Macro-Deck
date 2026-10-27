@@ -607,6 +607,11 @@ internal sealed class EmptyRemotePluginSnapshotStore : IRemotePluginSnapshotStor
 	{
 		return Task.CompletedTask;
 	}
+
+	public Task RemoveAsync(string pluginId, CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 }
 
 /// <summary>

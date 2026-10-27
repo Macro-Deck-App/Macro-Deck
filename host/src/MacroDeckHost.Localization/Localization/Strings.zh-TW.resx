@@ -2934,6 +2934,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>開發版本已接管此外掛。請先結束接管，再安裝或更新它。</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>由於有檔案仍在使用中，外掛的部分已儲存資料無法刪除，因此未解除安裝外掛。請關閉正在使用該檔案的程式，然後再試一次。</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>無法停止外掛，因此未移除任何內容。請再試一次。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在關閉，因此未啟動外掛。</value>
   </data>
@@ -10125,7 +10131,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>要解除安裝外掛嗎？</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>保持關閉即可保留外掛自身的設定，之後重新安裝時會從上次的狀態繼續。這不會影響 Macro Deck 其他地方中 {name} 的設定。</value>
+    <value>保持關閉即可保留外掛自身的設定，以及為其設定的帳戶和連線，之後重新安裝時會從上次的狀態繼續。開啟後會一併刪除這些內容，包括已儲存的登入憑證。這不會影響 Macro Deck 其他地方中 {name} 的設定。</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>解除安裝…</value>

@@ -2935,6 +2935,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Une build de développement a pris le contrôle de cette extension. Termine la prise de contrôle avant de l'installer ou de la mettre à jour.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Certaines données enregistrées de l'extension n'ont pas pu être supprimées, car un fichier est encore utilisé ; l'extension n'a donc pas été désinstallée. Ferme les programmes qui l'utilisent et réessaie.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>Impossible d'arrêter l'extension, rien n'a donc été supprimé. Réessaie.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck est en cours de fermeture, l'extension n'a donc pas été démarrée.</value>
   </data>
@@ -10124,7 +10130,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Désinstaller l'extension ?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Laisse cette option désactivée pour conserver les propres paramètres de l'extension, afin que la réinstaller plus tard reprenne là où tu t'es arrêté. Cela n'affecte pas la configuration de {name} ailleurs dans Macro Deck.</value>
+    <value>Laisse cette option désactivée pour conserver les propres paramètres de l'extension ainsi que les comptes et connexions configurés pour elle, afin que la réinstaller plus tard reprenne là où tu t'es arrêté. Active-la pour les supprimer aussi, identifiants enregistrés compris. Cela n'affecte pas la configuration de {name} ailleurs dans Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Désinstaller…</value>

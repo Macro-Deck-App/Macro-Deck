@@ -2934,6 +2934,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>開発ビルドがこのプラグインを引き継いでいます。インストールまたは更新する前に、引き継ぎを終了してください。</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>使用中のファイルがあるため、プラグインの保存データの一部を削除できず、プラグインはアンインストールされませんでした。そのファイルを使用しているプログラムを閉じてから、もう一度お試しください。</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>プラグインを停止できなかったため、何も削除されていません。もう一度お試しください。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck が終了処理中のため、プラグインは起動されませんでした。</value>
   </data>
@@ -10125,7 +10131,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>プラグインをアンインストールしますか？</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>オフのままにすると、プラグイン独自の設定が保持されるため、後で再インストールしたときに続きから利用できます。これは Macro Deck 内の {name} の他の設定には影響しません。</value>
+    <value>オフのままにすると、プラグイン独自の設定と、プラグイン用に設定したアカウントや接続が保持されるため、後で再インストールしたときに続きから利用できます。オンにすると、保存されたサインイン情報も含めてそれらも削除されます。これは Macro Deck 内の {name} の他の設定には影響しません。</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>アンインストール…</value>

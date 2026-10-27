@@ -77,6 +77,16 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore, IDis
 		return Task.CompletedTask;
 	}
 
+	public Task RemoveAsync(string pluginId, CancellationToken cancellationToken = default)
+	{
+		if (_byPluginId.TryRemove(pluginId, out _))
+		{
+			WriteToDisk();
+		}
+
+		return Task.CompletedTask;
+	}
+
 	// A plugin's registration can still finish after the host stopped; once disposed, the store must not
 	// recreate files in a data directory that may already be being removed.
 	public void Dispose()

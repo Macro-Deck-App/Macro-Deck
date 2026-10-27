@@ -2934,6 +2934,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>A development build has taken over this plugin. End the takeover before installing or updating it.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Some of the plugin's stored data could not be deleted because a file is still in use, so the plugin was not uninstalled. Close any program that uses it and try again.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>The plugin could not be stopped, so nothing was removed. Try again.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck is shutting down, so the plugin was not started.</value>
   </data>
@@ -10126,7 +10132,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Uninstall plugin?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Leave this off to keep the plugin's own settings, so reinstalling it later picks up where you left off. It does not affect how {name} is set up elsewhere in Macro Deck.</value>
+    <value>Leave this off to keep the plugin's own settings and the accounts and connections set up for it, so reinstalling it later picks up where you left off. Turn it on to delete them as well, saved sign-ins included. It does not affect how {name} is set up elsewhere in Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Uninstall…</value>

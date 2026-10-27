@@ -2935,6 +2935,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Kompilacja deweloperska przejęła tę wtyczkę. Przed instalacją lub aktualizacją zakończ przejęcie.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Części zapisanych danych wtyczki nie udało się usunąć, ponieważ plik jest nadal używany, więc wtyczka nie została odinstalowana. Zamknij programy, które go używają, i spróbuj ponownie.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>Nie udało się zatrzymać wtyczki, więc nic nie zostało usunięte. Spróbuj ponownie.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck jest zamykany, więc wtyczka nie została uruchomiona.</value>
   </data>
@@ -10124,7 +10130,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Odinstalować wtyczkę?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Pozostaw wyłączone, aby zachować własne ustawienia wtyczki, dzięki czemu ponowna instalacja będzie kontynuowana od tego miejsca. Nie wpływa to na sposób skonfigurowania {name} gdzie indziej w Macro Deck.</value>
+    <value>Pozostaw wyłączone, aby zachować własne ustawienia wtyczki oraz skonfigurowane dla niej konta i połączenia, dzięki czemu ponowna instalacja będzie kontynuowana od tego miejsca. Po włączeniu zostaną one również usunięte, łącznie z zapisanymi danymi logowania. Nie wpływa to na sposób skonfigurowania {name} gdzie indziej w Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Odinstaluj…</value>

@@ -128,6 +128,11 @@ public class GetActionProviderIconRequestMessageHandlerTests
 		{
 			return Task.CompletedTask;
 		}
+
+		public Task RemoveAsync(string pluginId, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class UnusedInvoker : IPluginCapabilityInvoker

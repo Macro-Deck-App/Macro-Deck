@@ -9,6 +9,7 @@ using MacroDeck.Plugin.Analyzers;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Versioning;
+using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
@@ -505,7 +506,25 @@ public sealed class PluginInstaller : IPluginInstaller
 			// a process that was already published so nothing runs from the directory being deleted.
 			await _supervisor.Stop(pluginId, PluginStopReason.UserRequested, cancellationToken);
 			await using var hold = await _supervisor.HoldLaunches(pluginId, cancellationToken);
-			await _supervisor.Stop(pluginId, PluginStopReason.UserRequested, cancellationToken);
+			var stopped = await _supervisor.Stop(pluginId, PluginStopReason.UserRequested, cancellationToken);
+			cancellationToken.ThrowIfCancellationRequested();
+			if (stopped.Error == PluginSupervisorError.Failed)
+			{
+				return PluginInstallResult.Fail(PluginInstallError.Failed,
+					await ActiveLocalization.Resolve(_scopeFactory, AppStrings.Errors.Plugins.UninstallStopFailed()),
+					pluginId);
+			}
+
+			// Before anything irreversible: a failure here leaves the plugin installed and listed, so the
+			// user can retry from the same dialog.
+			var dataDirectory = PluginInstallPaths.DataDirectory(_paths.PluginsDirectory, pluginId);
+			if (!request.KeepData && !TryDeleteDirectoryWithRetries(dataDirectory))
+			{
+				return PluginInstallResult.Fail(PluginInstallError.Failed,
+					await ActiveLocalization.Resolve(_scopeFactory,
+						AppStrings.Errors.Plugins.UninstallDataNotDeleted()),
+					pluginId);
+			}
 
 			if (!TryDeleteDirectoryWithRetries(versionsDirectory))
 			{
@@ -536,6 +555,11 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			await _integrationRegistrar.ForgetAsync(pluginId, cancellationToken);
 
+			if (!request.KeepData)
+			{
+				await DeleteStoredConfiguration(pluginId, cancellationToken);
+			}
+
 			_adbConsent?.Dismiss(pluginId);
 			_companionConsent?.Dismiss(pluginId);
 
@@ -556,6 +580,19 @@ public sealed class PluginInstaller : IPluginInstaller
 
 		await SyncIconPacksAfterChange(pluginId, uninstalled);
 		return uninstalled;
+	}
+
+	private async Task DeleteStoredConfiguration(string pluginId, CancellationToken cancellationToken)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var configStore = scope.ServiceProvider.GetRequiredService<IIntegrationConfigStore>();
+		foreach (var entry in await configStore.List(pluginId))
+		{
+			await configStore.Delete(entry.Id);
+		}
+
+		await scope.ServiceProvider.GetRequiredService<IRemotePluginSnapshotStore>()
+			.RemoveAsync(pluginId, cancellationToken);
 	}
 
 	// Never under the plugin gate: the sync may wait for startup readiness and must not hold installs up.
