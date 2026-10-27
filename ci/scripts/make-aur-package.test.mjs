@@ -33,6 +33,7 @@ const DEBIAN_TO_ARCH = new Map([
   ['libssl3', 'openssl'],
   ['libssl3t64', 'openssl'],
   ['libssl1.1', 'openssl'],
+  ['libicu78', 'icu'],
   ['libicu76', 'icu'],
   ['libicu74', 'icu'],
   ['libicu72', 'icu'],
