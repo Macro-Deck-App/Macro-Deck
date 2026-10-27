@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Integrations.System;
@@ -220,6 +221,41 @@ public class RunCommandActionTests
 
 	[Test]
 	[Platform(Exclude = "Win")]
+	[UnsupportedOSPlatform("windows")]
+	public async Task RunCommand_without_output_capture_runs_the_command_outside_the_host_process_group()
+	{
+		using var pidFile = new PidFile();
+		var action = new RunCommandActionDefinition(new VariableApiAccessor { Current = new RecordingVariableApi() });
+
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = new Dictionary<string, object>
+				{
+					["shell"] = "default",
+					["command"] = pidFile.LongRunningCommand,
+					["timeout"] = 1
+				}
+			});
+		var pid = await pidFile.ReadPid();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+			Assert.That(pid, Is.Not.Null);
+			Assert.That(GetSid(pid!.Value), Is.EqualTo(pid.Value), "the command leads its own session");
+			Assert.That(GetPgid(pid.Value), Is.Not.EqualTo(GetPgid(0)), "the command left the host's process group");
+		});
+	}
+
+	[DllImport("libc", EntryPoint = "getsid", SetLastError = true)]
+	private static extern int GetSid(int pid);
+
+	[DllImport("libc", EntryPoint = "getpgid", SetLastError = true)]
+	private static extern int GetPgid(int pid);
+
+	[Test]
+	[Platform(Exclude = "Win")]
 	public void IsOnPath_finds_only_programs_that_exist()
 	{
 		Assert.Multiple(() =>
@@ -289,14 +325,21 @@ public class RunCommandActionTests
 			File.Delete(_path);
 		}
 
-		private async Task<Process?> Find()
+		public async Task<int?> ReadPid()
 		{
 			for (var attempt = 0; attempt < 30 && !File.Exists(_path); attempt++)
 			{
 				await Task.Delay(100);
 			}
 
-			if (!File.Exists(_path) || !int.TryParse((await File.ReadAllTextAsync(_path)).Trim(), out var pid))
+			return File.Exists(_path) && int.TryParse((await File.ReadAllTextAsync(_path)).Trim(), out var pid)
+				? pid
+				: null;
+		}
+
+		private async Task<Process?> Find()
+		{
+			if (await ReadPid() is not { } pid)
 			{
 				return null;
 			}
