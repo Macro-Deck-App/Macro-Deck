@@ -38,6 +38,11 @@ public sealed record PluginSupervisorResult(bool Success, PluginSupervisorError?
 	}
 }
 
+public interface IPluginLaunchHold : IAsyncDisposable
+{
+	Task<PluginSupervisorResult> Start(CancellationToken cancellationToken = default);
+}
+
 public interface IPluginSupervisor
 {
 	IReadOnlyList<PluginRuntimeSnapshot> Snapshot();
@@ -62,4 +67,8 @@ public interface IPluginSupervisor
 	Task Reconcile(CancellationToken cancellationToken = default);
 
 	Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default);
+
+	// Waits for an in-flight launch, then keeps every other launch of the plugin out until disposed.
+	// Stop and StopAll never wait for it.
+	Task<IPluginLaunchHold> HoldLaunches(string pluginId, CancellationToken cancellationToken = default);
 }

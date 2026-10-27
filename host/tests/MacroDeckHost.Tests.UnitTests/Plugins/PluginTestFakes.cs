@@ -571,6 +571,31 @@ internal sealed class FakePluginSupervisor : IPluginSupervisor
 		SuspendCalls.Add(pluginId);
 		return OnSuspend?.Invoke(pluginId) ?? Task.CompletedTask;
 	}
+
+	public Task<IPluginLaunchHold> HoldLaunches(string pluginId, CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult<IPluginLaunchHold>(new DelegatingLaunchHold(ct => Start(pluginId, ct)));
+	}
+}
+
+internal sealed class DelegatingLaunchHold : IPluginLaunchHold
+{
+	private readonly Func<CancellationToken, Task<PluginSupervisorResult>> _start;
+
+	public DelegatingLaunchHold(Func<CancellationToken, Task<PluginSupervisorResult>> start)
+	{
+		_start = start;
+	}
+
+	public Task<PluginSupervisorResult> Start(CancellationToken cancellationToken = default)
+	{
+		return _start(cancellationToken);
+	}
+
+	public ValueTask DisposeAsync()
+	{
+		return ValueTask.CompletedTask;
+	}
 }
 
 internal sealed class FakeDotnetMuxerLocator : IDotnetMuxerLocator

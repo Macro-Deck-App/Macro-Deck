@@ -127,6 +127,12 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 		return Task.CompletedTask;
 	}
 
+	public Task<IPluginLaunchHold> HoldLaunches(string pluginId, CancellationToken cancellationToken = default)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+		return Task.FromResult<IPluginLaunchHold>(new DelegatingLaunchHold(ct => Start(pluginId, ct)));
+	}
+
 	public bool IsRunning(string pluginId)
 	{
 		return Snapshot()

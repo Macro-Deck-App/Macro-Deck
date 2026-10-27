@@ -70,6 +70,11 @@ internal sealed class EmptyPluginSupervisor : IPluginSupervisor
 	{
 		throw new NotSupportedException();
 	}
+
+	public Task<IPluginLaunchHold> HoldLaunches(string pluginId, CancellationToken cancellationToken = default)
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class EmptyInstallationCatalog : IPluginInstallationCatalog
