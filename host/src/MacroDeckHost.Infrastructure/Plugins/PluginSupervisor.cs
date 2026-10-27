@@ -137,6 +137,42 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	{
 		try
 		{
+			if (!TryResolveInstalled(pluginId, out _))
+			{
+				return NotSupervisable(pluginId);
+			}
+
+			var entry = GetOrCreateEntry(pluginId);
+
+			await entry.LaunchClaim.WaitAsync(cancellationToken);
+			try
+			{
+				return await StartClaimed(entry, cancellationToken);
+			}
+			finally
+			{
+				entry.LaunchClaim.Release();
+			}
+		}
+		catch (Exception ex)
+		{
+			PluginInfrastructureLog.StartFailed(_logger, pluginId, ex);
+			return PluginSupervisorResult.Fail(PluginSupervisorError.Failed, ex.Message);
+		}
+	}
+
+	public async Task<IPluginLaunchHold> HoldLaunches(string pluginId, CancellationToken cancellationToken = default)
+	{
+		var entry = GetOrCreateEntry(pluginId);
+		await entry.LaunchClaim.WaitAsync(cancellationToken);
+		return new LaunchHold(this, entry);
+	}
+
+	private async Task<PluginSupervisorResult> StartClaimed(PluginRuntimeEntry entry, CancellationToken ct)
+	{
+		var pluginId = entry.PluginId;
+		try
+		{
 			if (!TryResolveInstalled(pluginId, out var installed))
 			{
 				return NotSupervisable(pluginId);
@@ -147,9 +183,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				return TakenOver();
 			}
 
-			var entry = GetOrCreateEntry(pluginId);
-
-			await entry.Gate.WaitAsync(cancellationToken);
+			await entry.Gate.WaitAsync(ct);
 			bool alreadyRunning;
 			bool wasFailed;
 			try
@@ -172,11 +206,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				ResetRestartBudget(entry);
 			}
 
-			var result = await AttemptLaunch(entry, installed!, true, cancellationToken);
+			var result = await AttemptLaunch(entry, installed!, true, ct);
 			if (result.Success)
 			{
 				await _stateStore.Save(pluginId, true);
-				await PublishRuntimeChanged(cancellationToken);
+				await PublishRuntimeChanged(ct);
 			}
 
 			return result;
@@ -271,23 +305,38 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 			var entry = GetOrCreateEntry(pluginId);
 
-			await entry.Gate.WaitAsync(cancellationToken);
-			var running = entry.State is PluginRuntimeState.Starting
-				or PluginRuntimeState.Running
-				or PluginRuntimeState.Backoff;
-			entry.Gate.Release();
-
-			if (running)
+			PluginSupervisorResult result;
+			await entry.LaunchClaim.WaitAsync(cancellationToken);
+			try
 			{
-				if (entry.Process is not null)
+				if (!TryResolveInstalled(pluginId, out installed))
 				{
-					await InitiateTermination(entry, PluginStopReason.ManualRestart, cancellationToken);
+					return NotSupervisable(pluginId);
 				}
+
+				await entry.Gate.WaitAsync(cancellationToken);
+				var running = entry.State is PluginRuntimeState.Starting
+					or PluginRuntimeState.Running
+					or PluginRuntimeState.Backoff;
+				entry.Gate.Release();
+
+				if (running)
+				{
+					if (entry.Process is not null)
+					{
+						await InitiateTermination(entry, PluginStopReason.ManualRestart, cancellationToken);
+					}
+				}
+
+				ResetRestartBudget(entry);
+
+				result = await AttemptLaunch(entry, installed!, true, cancellationToken);
+			}
+			finally
+			{
+				entry.LaunchClaim.Release();
 			}
 
-			ResetRestartBudget(entry);
-
-			var result = await AttemptLaunch(entry, installed!, true, cancellationToken);
 			if (result.Success)
 			{
 				await _stateStore.Save(pluginId, true);
@@ -520,12 +569,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		switch (entry.State)
 		{
 			case PluginRuntimeState.Stopped:
-				if (wantsStarted
-					&& installed?.ActiveVersion is not null
-					&& !entry.IntegrityFailed
-					&& !_takeovers.IsActive(entry.PluginId))
+				if (wantsStarted && installed?.ActiveVersion is not null && MayRelaunchStopped(entry))
 				{
-					await AttemptLaunch(entry, installed, true, ct);
+					await RelaunchFromReconcile(entry, PluginRuntimeState.Stopped, ct);
 				}
 
 				break;
@@ -558,7 +604,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				}
 				else if (entry.NextRestartAt is { } next && now >= next)
 				{
-					await AttemptLaunch(entry, installed, true, ct);
+					await RelaunchFromReconcile(entry, PluginRuntimeState.Backoff, ct);
 				}
 
 				break;
@@ -578,6 +624,42 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			case PluginRuntimeState.Stopping:
 			case PluginRuntimeState.Failed:
 				break;
+		}
+	}
+
+	private bool MayRelaunchStopped(PluginRuntimeEntry entry)
+	{
+		return !entry.IntegrityFailed && !_takeovers.IsActive(entry.PluginId);
+	}
+
+	// Skips the tick while another launch or an installer hold owns the plugin. The catalog is read again
+	// under the claim because the tick's own copy can predate an activation and name the old version.
+	private async Task RelaunchFromReconcile(
+		PluginRuntimeEntry entry,
+		PluginRuntimeState expectedState,
+		CancellationToken ct)
+	{
+		if (!entry.LaunchClaim.Wait(0, CancellationToken.None))
+		{
+			return;
+		}
+
+		try
+		{
+			if (entry.State != expectedState
+				|| expectedState == PluginRuntimeState.Stopped && !MayRelaunchStopped(entry)
+				|| expectedState == PluginRuntimeState.Backoff && _takeovers.IsActive(entry.PluginId)
+				|| !TryResolveInstalled(entry.PluginId, out var installed)
+				|| installed!.ActiveVersion is null)
+			{
+				return;
+			}
+
+			await AttemptLaunch(entry, installed, true, ct);
+		}
+		finally
+		{
+			entry.LaunchClaim.Release();
 		}
 	}
 
@@ -1713,6 +1795,35 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
+	private sealed class LaunchHold : IPluginLaunchHold
+	{
+		private readonly PluginSupervisor _supervisor;
+		private readonly PluginRuntimeEntry _entry;
+		private int _released;
+
+		public LaunchHold(PluginSupervisor supervisor, PluginRuntimeEntry entry)
+		{
+			_supervisor = supervisor;
+			_entry = entry;
+		}
+
+		public Task<PluginSupervisorResult> Start(CancellationToken cancellationToken = default)
+		{
+			ObjectDisposedException.ThrowIf(Volatile.Read(ref _released) != 0, this);
+			return _supervisor.StartClaimed(_entry, cancellationToken);
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			if (Interlocked.Exchange(ref _released, 1) == 0)
+			{
+				_entry.LaunchClaim.Release();
+			}
+
+			return ValueTask.CompletedTask;
+		}
+	}
+
 	private sealed class PluginRuntimeEntry
 	{
 		public PluginRuntimeEntry(string pluginId)
@@ -1724,6 +1835,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		public string PluginId { get; }
 
 		public SemaphoreSlim Gate { get; } = new(1, 1);
+
+		public SemaphoreSlim LaunchClaim { get; } = new(1, 1);
 
 		public string DisplayName;
 		public string Version = string.Empty;

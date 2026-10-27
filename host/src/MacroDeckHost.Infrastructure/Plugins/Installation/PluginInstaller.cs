@@ -420,7 +420,9 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			var warnings = CollectWarnings(manifest, trust);
 
-			var result = await ActivateAndValidate(pluginId,
+			var hold = await _supervisor.HoldLaunches(pluginId, cancellationToken);
+			var result = await ActivateAndValidate(hold,
+				pluginId,
 				version,
 				warnings,
 				HasEntrypointForThisHost(manifest),
@@ -920,6 +922,10 @@ public sealed class PluginInstaller : IPluginInstaller
 		var trustWritten = false;
 		var handedOver = false;
 
+		// Held from before the in-place move until ActivateAndValidate has started the new version, so the
+		// reconcile loop cannot relaunch the plugin while its files and current.json are being swapped.
+		var hold = await _supervisor.HoldLaunches(manifest.Id, cancellationToken);
+
 		IReadOnlyList<PluginInstallWarning> warnings;
 		bool canStart;
 		bool previouslyDeclaredAdb;
@@ -973,18 +979,30 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 		finally
 		{
-			if (replacesInPlace && !handedOver)
+			if (!handedOver)
 			{
-				await RestoreReplacedVersion(manifest.Id,
-					versionDirectory,
-					displacedDirectory,
-					trustWritten ? trustUndo : null,
-					wasRunning);
+				try
+				{
+					if (replacesInPlace)
+					{
+						await RestoreReplacedVersion(hold,
+							manifest.Id,
+							versionDirectory,
+							displacedDirectory,
+							trustWritten ? trustUndo : null,
+							wasRunning);
+					}
+				}
+				finally
+				{
+					await hold.DisposeAsync();
+				}
 			}
 		}
 
 		var rollback = new PluginRollbackPlan(displacedDirectory, true, trustUndo);
-		var result = await ActivateAndValidate(manifest.Id,
+		var result = await ActivateAndValidate(hold,
+			manifest.Id,
 			manifest.Version,
 			warnings,
 			canStart,
@@ -1030,7 +1048,10 @@ public sealed class PluginInstaller : IPluginInstaller
 		};
 	}
 
+	// Takes ownership of the hold: it is released once the new version has been started, so the reconcile
+	// loop can drive its health check and startup retry, and a fresh hold is taken for a rollback.
 	private async Task<PluginInstallResult> ActivateAndValidate(
+		IPluginLaunchHold hold,
 		string pluginId,
 		string version,
 		IReadOnlyList<PluginInstallWarning> warnings,
@@ -1039,70 +1060,87 @@ public sealed class PluginInstaller : IPluginInstaller
 		bool? runningBeforeInstall,
 		CancellationToken cancellationToken)
 	{
-		var previousVersion = ActiveVersionOf(pluginId);
-		var wasRunning = runningBeforeInstall ?? IsRunning(pluginId);
+		string? previousVersion;
+		bool wasRunning;
+		PluginSupervisorResult start;
 
-		await _supervisor.Stop(pluginId, PluginStopReason.Update, cancellationToken);
-
-		try
+		await using (hold)
 		{
-			WriteCurrentVersion(pluginId, version);
-			_catalog.Invalidate();
+			previousVersion = ActiveVersionOf(pluginId);
+			wasRunning = runningBeforeInstall ?? IsRunning(pluginId);
+
+			await _supervisor.Stop(pluginId, PluginStopReason.Update, cancellationToken);
+
+			try
+			{
+				WriteCurrentVersion(pluginId, version);
+				_catalog.Invalidate();
+			}
+			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+			{
+				var undone = await RollBack(hold,
+					pluginId,
+					version,
+					previousVersion,
+					wasRunning,
+					rollback,
+					cancellationToken);
+
+				return PluginInstallResult.Fail(PluginInstallError.ActivationFailed,
+					ex.Message,
+					pluginId,
+					version,
+					previousVersion,
+					undone,
+					warnings);
+			}
+
+			PluginInstallerLog.Activated(_logger, pluginId, version, previousVersion ?? "nothing");
+
+			try
+			{
+				await RevokeRegistrationRow(pluginId);
+				await _sessionRegistry.TerminateForPlugin(pluginId,
+					ProtocolCloseCodes.RegistrationRejected,
+					"The plugin id is now claimed by an installed plugin.");
+			}
+			catch (Exception ex)
+			{
+				PluginInstallerLog.IdClaimFailed(_logger, pluginId, ex);
+			}
+
+			// A takeover can still begin while this activation runs. Ending it after the revoke keeps it from
+			// outliving its credential and lets the start below run.
+			_takeovers.Finish(pluginId);
+
+			var blocked = warnings.Any(warning => warning.Severity == PluginInstallWarningSeverity.Blocking);
+			if (!startAfterActivation || blocked)
+			{
+				return PluginInstallResult.Ok(pluginId, version, previousVersion, true, warnings);
+			}
+
+			start = await hold.Start(cancellationToken);
 		}
-		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-		{
-			var undone = await RollBack(pluginId,
-				version,
-				previousVersion,
-				wasRunning,
-				rollback,
-				cancellationToken);
 
-			return PluginInstallResult.Fail(PluginInstallError.ActivationFailed,
-				ex.Message,
-				pluginId,
-				version,
-				previousVersion,
-				undone,
-				warnings);
-		}
-
-		PluginInstallerLog.Activated(_logger, pluginId, version, previousVersion ?? "nothing");
-
-		try
-		{
-			await RevokeRegistrationRow(pluginId);
-			await _sessionRegistry.TerminateForPlugin(pluginId,
-				ProtocolCloseCodes.RegistrationRejected,
-				"The plugin id is now claimed by an installed plugin.");
-		}
-		catch (Exception ex)
-		{
-			PluginInstallerLog.IdClaimFailed(_logger, pluginId, ex);
-		}
-
-		// A takeover can still begin while this activation runs. Ending it after the revoke keeps it from
-		// outliving its credential and lets the start below run.
-		_takeovers.Finish(pluginId);
-
-		var blocked = warnings.Any(warning => warning.Severity == PluginInstallWarningSeverity.Blocking);
-		if (!startAfterActivation || blocked)
-		{
-			return PluginInstallResult.Ok(pluginId, version, previousVersion, true, warnings);
-		}
-
-		if (await ReachesHealthy(pluginId, cancellationToken))
+		if (await ReachesHealthy(pluginId, version, start, cancellationToken))
 		{
 			return PluginInstallResult.Ok(pluginId, version, previousVersion, true, warnings);
 		}
 
 		PluginInstallerLog.HealthValidationFailed(_logger, pluginId, version);
-		var rolledBack = await RollBack(pluginId,
-			version,
-			previousVersion,
-			wasRunning,
-			rollback,
-			cancellationToken);
+
+		// The wait for the hold ignores the caller's token: a cancelled update must still be rolled back.
+		bool rolledBack;
+		await using (var rollbackHold = await _supervisor.HoldLaunches(pluginId, CancellationToken.None))
+		{
+			rolledBack = await RollBack(rollbackHold,
+				pluginId,
+				version,
+				previousVersion,
+				wasRunning,
+				rollback,
+				cancellationToken);
+		}
 
 		return PluginInstallResult.Fail(PluginInstallError.HealthValidationFailed,
 			$"Version {version} did not become healthy.",
@@ -1114,6 +1152,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	}
 
 	private async Task<bool> RollBack(
+		IPluginLaunchHold hold,
 		string pluginId,
 		string failedVersion,
 		string? previousVersion,
@@ -1158,7 +1197,7 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			if (restartPrevious && previousVersion is not null && Directory.Exists(previousDirectory))
 			{
-				await _supervisor.Start(pluginId, cancellationToken);
+				await hold.Start(cancellationToken);
 			}
 
 			PluginInstallerLog.RolledBack(_logger, pluginId, previousVersion ?? "no active version");
@@ -1187,6 +1226,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		DateTime InstalledAt);
 
 	private async Task RestoreReplacedVersion(
+		IPluginLaunchHold hold,
 		string pluginId,
 		string versionDirectory,
 		string displacedDirectory,
@@ -1203,7 +1243,7 @@ public sealed class PluginInstaller : IPluginInstaller
 
 		if (restart)
 		{
-			await _supervisor.Start(pluginId, CancellationToken.None);
+			await hold.Start(CancellationToken.None);
 		}
 	}
 
@@ -1225,10 +1265,13 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 	}
 
-	private async Task<bool> ReachesHealthy(string pluginId, CancellationToken cancellationToken)
+	private async Task<bool> ReachesHealthy(
+		string pluginId,
+		string version,
+		PluginSupervisorResult start,
+		CancellationToken cancellationToken)
 	{
-		var start = await _supervisor.Start(pluginId, cancellationToken);
-		if (!start.Success)
+		if (!start.Success && !(start.Error == PluginSupervisorError.AlreadyRunning && IsRunning(pluginId, version)))
 		{
 			return false;
 		}
@@ -1621,8 +1664,8 @@ public sealed class PluginInstaller : IPluginInstaller
 	{
 		for (var attempt = 1;; attempt++)
 		{
-			// Windows refuses to move the directory a running plugin works in, and the reconcile loop can
-			// relaunch a plugin stopped for an update, so it is stopped again before every attempt.
+			// Windows refuses to move the directory a running plugin works in. The caller's launch hold keeps
+			// the reconcile loop from relaunching it, the stop is repeated so a retry never moves a live one.
 			await _supervisor.Stop(pluginId, PluginStopReason.Update, cancellationToken);
 
 			try
@@ -1738,12 +1781,13 @@ public sealed class PluginInstaller : IPluginInstaller
 			?.ActiveVersion?.Version;
 	}
 
-	private bool IsRunning(string pluginId)
+	private bool IsRunning(string pluginId, string? version = null)
 	{
 		var snapshot = _supervisor.Snapshot()
 			.FirstOrDefault(entry => string.Equals(entry.PluginId, pluginId, StringComparison.Ordinal));
 
-		return snapshot?.State is PluginRuntimeState.Running or PluginRuntimeState.Starting;
+		return snapshot?.State is PluginRuntimeState.Running or PluginRuntimeState.Starting
+			&& (version is null || string.Equals(snapshot.Version, version, StringComparison.Ordinal));
 	}
 
 	private void WriteCurrentVersion(string pluginId, string version)
