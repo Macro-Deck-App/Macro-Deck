@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.MusicPlayer;
@@ -790,9 +791,7 @@ public sealed class FlowExecutor : IFlowExecutor
 			{
 				"keyvalue" => ConvertKeyValueParameter(parameter.Value, variables),
 				"hotkey" or "object" or "json" => ConvertJsonElement(parameter.Value) ?? parameter.Value.GetRawText(),
-				"keyboardsequence" =>
-					_conditionEvaluator.RenderTemplateString(parameter.Value.GetRawText(), variables)
-					?? parameter.Value.GetRawText(),
+				"keyboardsequence" or "keyboard-sequence" => RenderJsonStringLeaves(parameter.Value, variables),
 				_ => parameter.Value.GetRawText()
 			};
 		}
@@ -881,6 +880,50 @@ public sealed class FlowExecutor : IFlowExecutor
 		}
 
 		return result;
+	}
+
+	private string RenderJsonStringLeaves(JsonElement element, VariableContext variables)
+	{
+		using var buffer = new MemoryStream();
+		using (var writer = new Utf8JsonWriter(buffer))
+		{
+			WriteRenderedJson(writer, element, variables);
+		}
+
+		return Encoding.UTF8.GetString(buffer.ToArray());
+	}
+
+	private void WriteRenderedJson(Utf8JsonWriter writer, JsonElement element, VariableContext variables)
+	{
+		switch (element.ValueKind)
+		{
+			case JsonValueKind.Object:
+				writer.WriteStartObject();
+				foreach (var property in element.EnumerateObject())
+				{
+					writer.WritePropertyName(property.Name);
+					WriteRenderedJson(writer, property.Value, variables);
+				}
+
+				writer.WriteEndObject();
+				break;
+			case JsonValueKind.Array:
+				writer.WriteStartArray();
+				foreach (var item in element.EnumerateArray())
+				{
+					WriteRenderedJson(writer, item, variables);
+				}
+
+				writer.WriteEndArray();
+				break;
+			case JsonValueKind.String:
+				var raw = element.GetString() ?? string.Empty;
+				writer.WriteStringValue(_conditionEvaluator.RenderTemplateString(raw, variables) ?? raw);
+				break;
+			default:
+				element.WriteTo(writer);
+				break;
+		}
 	}
 
 	private static object? ConvertJsonElement(JsonElement element)
