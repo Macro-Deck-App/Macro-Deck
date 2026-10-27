@@ -136,6 +136,9 @@ public IReadOnlyList<ActionParameter> Parameters { get; } =
 `Url`, `Icon`, `Image`, `KeyboardSequence`, `KeyboardCombo` and `WidgetTarget`. The executor reads
 values by `Name` from `context.Parameters`. The key names in `Hotkey`, `KeyboardCombo` and
 `KeyboardSequence` values are listed under [Keyboard combos](/features/events/#keyboard-combos).
+A `KeyboardSequence` value arrives as a JSON string. The host renders each string value inside it as a
+template on its own, so a rendered value, such as event text, only ever becomes the content of that
+string and never adds, removes or changes steps.
 
 A `Color` parameter receives `#rrggbb`. The user can bind it to a
 [Color variable](/features/variables/#color-variables); the host resolves it when the action runs and drops
