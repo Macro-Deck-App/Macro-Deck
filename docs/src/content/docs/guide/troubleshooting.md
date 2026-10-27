@@ -257,6 +257,15 @@ anything signed with that certificate. Wait for an update signed with a new cert
 plugin if you no longer trust it. Installing or updating it from the Store fails with the message that
 Macro Deck could not verify who published the package.
 
+## A plugin update says it is signed by a different publisher
+
+The package or Store update was signed by someone other than the publisher of the version you already have,
+so Macro Deck kept your installed version. A package that claims to be an update of a plugin but comes from
+another publisher could take over everything that plugin stores, such as its accounts and settings. Get
+updates from the plugin's own publisher. If the plugin really changed hands, or you want to switch to the
+other publisher's package, uninstall the plugin first and tick **Also delete the plugin's stored data**,
+then install it again.
+
 ## A reverse proxy or firewall blocks a connection to a service
 
 Some reverse proxies and anti-bot protections reject requests they take for automated traffic, so an

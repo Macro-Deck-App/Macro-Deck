@@ -62,5 +62,9 @@ public enum PluginInstallError
 
 	/// <summary>An installed plugin was admitted as trusted; this update would install at a lower trust
 	/// tier, which is refused even with consent.</summary>
-	TrustDowngrade
+	TrustDowngrade,
+
+	/// <summary>An installed plugin was admitted as trusted under one publisher's certificate subject; this
+	/// package verifies as trusted but was issued to a different subject, so it is refused.</summary>
+	SignerMismatch
 }

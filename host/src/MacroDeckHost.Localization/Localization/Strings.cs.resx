@@ -2935,6 +2935,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Tento plugin převzalo vývojové sestavení. Před instalací nebo aktualizací je nutné převzetí ukončit.</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Tento plugin je podepsán jiným vydavatelem než již nainstalovaná verze, a proto nebyl nainstalován.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se vypíná, proto plugin nebyl spuštěn.</value>
   </data>

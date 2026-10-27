@@ -56,6 +56,7 @@ internal static class PluginInstallErrorExitCode
 			PluginInstallError.SignatureUnverifiable => ExitCode.InternalError,
 			PluginInstallError.UnsignedNotPermitted => ExitCode.InternalError,
 			PluginInstallError.TrustDowngrade => ExitCode.InternalError,
+			PluginInstallError.SignerMismatch => ExitCode.InternalError,
 
 			// Never a named member in practice - see this type's own remarks.
 			_ => ExitCode.InternalError

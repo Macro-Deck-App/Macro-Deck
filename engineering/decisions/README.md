@@ -69,6 +69,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0108 - UI events carry their origin, and config entries are a plugin capability](0108-ui-events-carry-their-origin-and-config-entries-are-a-plugin-capability.md)
 - [0109 - Battery devices are a host-brokered catalog every plugin may read](0109-battery-devices-are-a-host-brokered-catalog-every-plugin-may-read.md)
 - [0110 - Plugins reach Companion devices through a permission-gated host API](0110-plugins-reach-companion-devices-through-a-permission-gated-host-api.md)
+- [0112 - A trusted plugin id stays with its publisher](0112-a-trusted-plugin-id-stays-with-its-publisher.md)
 
 ## Macro Deck UI
 

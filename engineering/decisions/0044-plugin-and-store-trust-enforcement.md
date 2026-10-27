@@ -135,6 +135,8 @@ launch gate; it is gated by possession of its credential and is never reported a
 
 ## Consequences
 
+- Amended by [ADR 0112](0112-a-trusted-plugin-id-stays-with-its-publisher.md): a trusted plugin id is also
+  pinned to the certificate subject it was admitted from, on every source including the Store.
 - Amended by [ADR 0096](0096-offline-root-with-an-online-issuer.md): revocation is fed from the signed
   registry's `revokedKeys`, covers a certificate's issuer, and refuses install and update only; activation
   and launch of an installed version no longer consult it.

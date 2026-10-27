@@ -1,10 +1,14 @@
 namespace MacroDeckHost.Application.Plugins.Trust;
 
+public sealed record PluginSignerIdentity(string Kind, string Id);
+
 public sealed record PluginTrustResult
 {
 	public required PluginTrustVerdict Verdict { get; init; }
 
 	public string? CertificateId { get; init; }
+
+	public PluginSignerIdentity? Signer { get; init; }
 
 	public string? Message { get; init; }
 

@@ -73,6 +73,7 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 		var services = new ServiceCollection();
 		services.AddSingleton<IPluginRegistrationRepository, InMemoryPluginRegistrationRepository>();
 		services.AddSingleton<IPluginTrustRecordRepository>(_trustRecords);
+		services.AddSingleton(TestLocalization.Resolver);
 		services.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>();
 		services.AddScoped<IAppPreferenceService>(_ => _preferences);
 		var provider = services.BuildServiceProvider();
@@ -455,6 +456,207 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 			new PluginInstallRequest { AllowUnsigned = true });
 
 		Assert.That(result.Error, Is.EqualTo(PluginInstallError.TrustDowngrade));
+	}
+
+	private Task<string> OtherPublisherArtifact(string version = "1.0.0")
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+			PluginId,
+			version,
+			fileName: $"other-publisher-{version}-{Guid.NewGuid():N}.macroDeckPlugin",
+			subjectId: "creator-2");
+	}
+
+	private string ActiveVersion()
+	{
+		_catalog.Invalidate();
+		return _catalog.Discover().First(p => p.PluginId == PluginId).ActiveVersion!.Version;
+	}
+
+	private async Task InstallTrusted(string version = "1.0.0")
+	{
+		var installed = await _installer.Install(PluginArtifactSource.FromPath(await TrustedArtifact(version)),
+			new PluginInstallRequest());
+		Assert.That(installed.Success, Is.True, installed.ErrorMessage);
+	}
+
+	[TestCase(PluginArtifactSourceKind.LocalPath)]
+	[TestCase(PluginArtifactSourceKind.Upload)]
+	[TestCase(PluginArtifactSourceKind.Url)]
+	[TestCase(PluginArtifactSourceKind.TestBuild)]
+	public async Task A_trusted_update_signed_by_another_publisher_is_refused_and_keeps_the_installed_version(
+		PluginArtifactSourceKind kind)
+	{
+		await InstallTrusted();
+		var recordBefore = await _trustRecords.GetVersion(PluginId, "1.0.0");
+
+		var result = await InstallFromKind(kind,
+			await OtherPublisherArtifact("1.1.0"),
+			new PluginInstallRequest { AllowUnsigned = true });
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.SignerMismatch), result.ErrorMessage);
+			Assert.That(result.ErrorMessage, Is.Not.Empty);
+			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
+			Assert.That(Directory.Exists(PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory,
+					PluginId,
+					"1.1.0")),
+				Is.False);
+			Assert.That(await _trustRecords.GetVersion(PluginId, "1.1.0"), Is.Null);
+			Assert.That(await _trustRecords.GetVersion(PluginId, "1.0.0"), Is.SameAs(recordBefore));
+		});
+	}
+
+	[Test]
+	public async Task A_forced_reinstall_of_the_same_version_signed_by_another_publisher_is_refused()
+	{
+		await InstallTrusted();
+		var certificateBefore = (await _trustRecords.GetVersion(PluginId, "1.0.0"))!.CertificateId;
+
+		var result = await _installer.Install(PluginArtifactSource.FromPath(await OtherPublisherArtifact()),
+			new PluginInstallRequest { Force = true });
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.SignerMismatch), result.ErrorMessage);
+			Assert.That((await _trustRecords.GetVersion(PluginId, "1.0.0"))!.CertificateId,
+				Is.EqualTo(certificateBefore));
+		});
+	}
+
+	[Test]
+	public async Task An_update_from_the_same_publisher_under_a_rotated_certificate_installs()
+	{
+		var installed = await _installer.Install(PluginArtifactSource.FromPath(await TrustedArtifact()),
+			new PluginInstallRequest());
+		Assert.That(installed.Success, Is.True, installed.ErrorMessage);
+
+		var update = await _installer.Install(PluginArtifactSource.FromPath(await TrustedArtifact("1.1.0")),
+			new PluginInstallRequest());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(update.Success, Is.True, update.ErrorMessage);
+			Assert.That(update.Signature?.CertificateId, Is.Not.EqualTo(installed.Signature?.CertificateId));
+			Assert.That(ActiveVersion(), Is.EqualTo("1.1.0"));
+		});
+	}
+
+	[Test]
+	public async Task An_update_signed_through_a_new_issuer_by_the_same_publisher_installs()
+	{
+		await InstallTrusted();
+
+		var update = await _installer.Install(
+			PluginArtifactSource.FromPath(await IssuerSignedArtifact(TestPki.IssueIssuer(), "1.1.0")),
+			new PluginInstallRequest());
+
+		Assert.That(update.Success, Is.True, update.ErrorMessage);
+	}
+
+	[Test]
+	public async Task The_admitted_signer_is_recorded_with_the_trust_record()
+	{
+		await InstallTrusted();
+
+		var record = await _trustRecords.GetVersion(PluginId, "1.0.0");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(record?.SignerKind, Is.EqualTo("creator"));
+			Assert.That(record?.SignerId, Is.EqualTo("creator-1"));
+		});
+	}
+
+	[Test]
+	public async Task An_unsigned_test_build_in_between_does_not_release_the_signer_pin()
+	{
+		await InstallTrusted();
+		var testBuild = await InstallFromKind(PluginArtifactSourceKind.TestBuild,
+			await UnsignedArtifact("1.1.0"),
+			new PluginInstallRequest { AllowUnsigned = true });
+		Assert.That(testBuild.Success, Is.True, testBuild.ErrorMessage);
+
+		var result = await _installer.Install(PluginArtifactSource.FromPath(await OtherPublisherArtifact("1.2.0")),
+			new PluginInstallRequest());
+
+		Assert.That(result.Error, Is.EqualTo(PluginInstallError.SignerMismatch), result.ErrorMessage);
+	}
+
+	[Test]
+	public async Task Pruning_the_only_trusted_version_keeps_its_record_and_the_signer_pin()
+	{
+		await InstallTrusted();
+		foreach (var version in new[] { "1.1.0-t1", "1.1.0-t2", "1.1.0-t3" })
+		{
+			var testBuild = await InstallFromKind(PluginArtifactSourceKind.TestBuild,
+				await UnsignedArtifact(version),
+				new PluginInstallRequest { AllowUnsigned = true });
+			Assert.That(testBuild.Success, Is.True, testBuild.ErrorMessage);
+		}
+
+		Assert.That(Directory.Exists(PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, PluginId, "1.0.0")),
+			Is.False,
+			"the trusted version was expected to be pruned");
+
+		var result = await _installer.Install(PluginArtifactSource.FromPath(await OtherPublisherArtifact("1.2.0")),
+			new PluginInstallRequest());
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(await _trustRecords.GetVersion(PluginId, "1.0.0"), Is.Not.Null);
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.SignerMismatch), result.ErrorMessage);
+		});
+	}
+
+	[Test]
+	public async Task A_first_signed_version_over_unsigned_ones_pins_its_publisher()
+	{
+		var unsigned = await _installer.Install(PluginArtifactSource.FromPath(await UnsignedArtifact()),
+			new PluginInstallRequest { AllowUnsigned = true });
+		Assert.That(unsigned.Success, Is.True, unsigned.ErrorMessage);
+		await InstallTrusted("1.1.0");
+
+		var result = await _installer.Install(PluginArtifactSource.FromPath(await OtherPublisherArtifact("1.2.0")),
+			new PluginInstallRequest());
+
+		Assert.That(result.Error, Is.EqualTo(PluginInstallError.SignerMismatch), result.ErrorMessage);
+	}
+
+	[Test]
+	public async Task An_unsigned_update_over_an_unsigned_plugin_still_installs_with_consent()
+	{
+		var first = await _installer.Install(PluginArtifactSource.FromPath(await UnsignedArtifact()),
+			new PluginInstallRequest { AllowUnsigned = true });
+		Assert.That(first.Success, Is.True, first.ErrorMessage);
+
+		var update = await _installer.Install(PluginArtifactSource.FromPath(await UnsignedArtifact("1.1.0")),
+			new PluginInstallRequest { AllowUnsigned = true });
+
+		Assert.That(update.Success, Is.True, update.ErrorMessage);
+	}
+
+	[Test]
+	public async Task A_record_without_a_stored_signer_admits_only_its_own_certificate()
+	{
+		var artifact = await TrustedArtifact();
+		var installed = await _installer.Install(PluginArtifactSource.FromPath(artifact), new PluginInstallRequest());
+		Assert.That(installed.Success, Is.True, installed.ErrorMessage);
+		var record = (await _trustRecords.GetVersion(PluginId, "1.0.0"))!;
+		record.SignerKind = null;
+		record.SignerId = null;
+
+		var rotated = await _installer.Install(PluginArtifactSource.FromPath(await TrustedArtifact("1.1.0")),
+			new PluginInstallRequest());
+		var sameCertificate = await _installer.Install(PluginArtifactSource.FromPath(artifact),
+			new PluginInstallRequest { Force = true });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(rotated.Error, Is.EqualTo(PluginInstallError.SignerMismatch), rotated.ErrorMessage);
+			Assert.That(sameCertificate.Success, Is.True, sameCertificate.ErrorMessage);
+		});
 	}
 
 	[Test]
