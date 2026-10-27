@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Text.Json;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Backups.Storage;
 using MacroDeckHost.Application.Events;
@@ -218,29 +217,20 @@ public sealed class RestoreService : IRestoreService
 
 			using (var payloadZip = ZipFile.OpenRead(payloadPath))
 			{
-				var indexEntry = payloadZip.GetEntry(BackupFileNames.ContentIndexEntry);
-				if (indexEntry is null)
+				var indexResult = await BackupContentIndexReader.Read(payloadZip, token);
+				if (!indexResult.Success)
 				{
-					return Fail(operationId,
-						request.BackupId,
-						BackupError.InvalidArchive,
-						"The archive content index is missing.");
+					return Refuse(operationId, request.BackupId, indexResult.Error!.Value, indexResult.ErrorMessage);
 				}
 
-				BackupContentIndex? contentIndex;
-				await using (var indexStream = indexEntry.Open())
+				var contentIndex = indexResult.Data!;
+				var entriesResult = CheckEntries(payloadZip, contentIndex, applyDirectory);
+				if (!entriesResult.Success)
 				{
-					contentIndex = await JsonSerializer.DeserializeAsync<BackupContentIndex>(indexStream,
-						PersistenceJsonOptions.Default,
-						token);
-				}
-
-				if (contentIndex is null)
-				{
-					return Fail(operationId,
+					return Refuse(operationId,
 						request.BackupId,
-						BackupError.InvalidArchive,
-						"The archive content index could not be read.");
+						entriesResult.Error!.Value,
+						entriesResult.ErrorMessage);
 				}
 
 				var filesResult = await ExtractFiles(payloadZip,
@@ -249,7 +239,9 @@ public sealed class RestoreService : IRestoreService
 					token);
 				if (!filesResult.Success)
 				{
-					return Fail(operationId, request.BackupId, filesResult.Error!.Value, filesResult.ErrorMessage);
+					return filesResult.Error == BackupError.TooLarge
+						? Refuse(operationId, request.BackupId, BackupError.TooLarge, filesResult.ErrorMessage)
+						: Fail(operationId, request.BackupId, filesResult.Error!.Value, filesResult.ErrorMessage);
 				}
 
 				files = filesResult.Data!;
@@ -269,10 +261,12 @@ public sealed class RestoreService : IRestoreService
 						token);
 					if (!databaseResult.Success)
 					{
-						return Fail(operationId,
-							request.BackupId,
-							databaseResult.Error!.Value,
-							databaseResult.ErrorMessage);
+						return databaseResult.Error == BackupError.TooLarge
+							? Refuse(operationId, request.BackupId, BackupError.TooLarge, databaseResult.ErrorMessage)
+							: Fail(operationId,
+								request.BackupId,
+								databaseResult.Error!.Value,
+								databaseResult.ErrorMessage);
 					}
 
 					databasePath = databaseResult.Data;
@@ -374,6 +368,10 @@ public sealed class RestoreService : IRestoreService
 		catch (BackupCryptoException e)
 		{
 			return Fail(operationId, request.BackupId, MapCryptoError(e.Result), e.Message);
+		}
+		catch (InvalidDataException e)
+		{
+			return Refuse(operationId, request.BackupId, BackupError.InvalidArchive, e.Message);
 		}
 		catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidOperationException)
 		{
@@ -513,13 +511,29 @@ public sealed class RestoreService : IRestoreService
 					$"The staged file '{entry.Path}' is missing from the archive.");
 			}
 
-			var targetPath = Path.Combine(applyDirectory, ToNativePath(entry.Path));
+			var targetPath = BackupArchiveLimits.ResolveInside(applyDirectory, entry.Path);
+			if (targetPath is null)
+			{
+				return Result.Fail<List<PendingRestoreFile>, BackupError>(BackupError.InvalidArchive,
+					$"The archive entry '{entry.Path}' points outside the restore folder.");
+			}
+
 			Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
 
+			bool withinLimit;
 			await using (var source = zipEntry.Open())
 			await using (var target = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
 			{
-				await source.CopyToAsync(target, cancellationToken);
+				withinLimit = await BackupContentIndexReader.CopyBounded(source,
+					target,
+					zipEntry.Length,
+					cancellationToken);
+			}
+
+			if (!withinLimit)
+			{
+				return Result.Fail<List<PendingRestoreFile>, BackupError>(BackupError.TooLarge,
+					$"The archive entry '{entry.Path}' expands beyond its recorded size.");
 			}
 
 			if (!string.Equals(Sha256(targetPath), entry.Sha256, StringComparison.OrdinalIgnoreCase))
@@ -539,6 +553,46 @@ public sealed class RestoreService : IRestoreService
 		return Result.Ok<List<PendingRestoreFile>, BackupError>(files);
 	}
 
+	private static Result<BackupError> CheckEntries(
+		ZipArchive payloadZip,
+		BackupContentIndex contentIndex,
+		string applyDirectory)
+	{
+		if (payloadZip.Entries.Count > BackupArchiveLimits.MaxInnerEntries
+			|| contentIndex.Entries.Count > BackupArchiveLimits.MaxInnerEntries)
+		{
+			return Result.Fail(BackupError.TooLarge, "The archive holds more entries than a backup can.");
+		}
+
+		if (payloadZip.GetEntry(BackupFileNames.DatabaseEntry) is { Length: > BackupArchiveLimits.MaxSingleEntryBytes })
+		{
+			return Result.Fail(BackupError.TooLarge, "The archive database is too large.");
+		}
+
+		var seen = new HashSet<string>(StringComparer.Ordinal);
+		var total = 0L;
+
+		foreach (var entry in contentIndex.Entries)
+		{
+			if (!BackupArchiveLimits.IsRestorableEntry(entry.Path, entry.Component)
+				|| BackupArchiveLimits.ResolveInside(applyDirectory, entry.Path) is null
+				|| !seen.Add(entry.Path))
+			{
+				return Result.Fail(BackupError.InvalidArchive,
+					$"The archive entry '{entry.Path}' tagged {entry.Component} cannot be restored safely.");
+			}
+
+			var size = Math.Max(entry.Size, payloadZip.GetEntry(BackupFileNames.FilesPrefix + entry.Path)?.Length ?? 0);
+			total += size;
+			if (size > BackupArchiveLimits.MaxSingleEntryBytes || total > BackupArchiveLimits.MaxTotalPlaintextBytes)
+			{
+				return Result.Fail(BackupError.TooLarge, $"The archive entry '{entry.Path}' is too large to restore.");
+			}
+		}
+
+		return Result.Ok<BackupError>();
+	}
+
 	private static async Task<Result<string, BackupError>> ExtractDatabase(
 		ZipArchive payloadZip,
 		BackupContentIndex contentIndex,
@@ -554,10 +608,20 @@ public sealed class RestoreService : IRestoreService
 
 		var databasePath = Path.Combine(stagingDirectory, "database.db");
 
+		bool withinLimit;
 		await using (var source = databaseEntry.Open())
 		await using (var target = new FileStream(databasePath, FileMode.Create, FileAccess.Write, FileShare.None))
 		{
-			await source.CopyToAsync(target, cancellationToken);
+			withinLimit = await BackupContentIndexReader.CopyBounded(source,
+				target,
+				databaseEntry.Length,
+				cancellationToken);
+		}
+
+		if (!withinLimit)
+		{
+			return Result.Fail<string, BackupError>(BackupError.TooLarge,
+				"The archive database expands beyond its recorded size.");
 		}
 
 		var expectedHash = contentIndex.Database?.Sha256;
@@ -664,6 +728,18 @@ public sealed class RestoreService : IRestoreService
 		return Result.Fail<PreparedRestore, BackupError>(error, errorMessage);
 	}
 
+	// The detail quotes archive content an attacker controls, so the user only gets the localized message.
+	private Result<PreparedRestore, BackupError> Refuse(
+		Guid operationId,
+		Guid? backupId,
+		BackupError error,
+		string? detail)
+	{
+		_logger.Warning("Refused to restore backup {BackupId}: {Detail}", backupId, detail);
+
+		return Fail(operationId, backupId, error, null);
+	}
+
 	private static BackupError MapCryptoError(BackupDecryptResult result)
 	{
 		return result switch
@@ -681,11 +757,6 @@ public sealed class RestoreService : IRestoreService
 		using var stream = File.OpenRead(path);
 
 		return Convert.ToHexStringLower(SHA256.HashData(stream));
-	}
-
-	private static string ToNativePath(string relativePath)
-	{
-		return relativePath.Replace('/', Path.DirectorySeparatorChar);
 	}
 
 	private static void TryDeleteDirectory(string path)

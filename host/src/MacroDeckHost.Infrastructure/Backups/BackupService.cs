@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Backups.Retention;
 using MacroDeckHost.Application.Backups.Storage;
@@ -659,22 +658,13 @@ public sealed class BackupService : IBackupService
 
 			using var payload = new FileStream(tempPath, FileMode.Open, FileAccess.Read, FileShare.Read);
 			using var zip = new ZipArchive(payload, ZipArchiveMode.Read);
-			var entry = zip.GetEntry(BackupFileNames.ContentIndexEntry);
-			if (entry is null)
+			var read = await BackupContentIndexReader.Read(zip, cancellationToken);
+			if (!read.Success)
 			{
 				return DeclaredComponents(manifest);
 			}
 
-			using var entryStream = entry.Open();
-			var index = await JsonSerializer.DeserializeAsync<BackupContentIndex>(entryStream,
-				PersistenceJsonOptions.Default,
-				cancellationToken);
-
-			if (index is null)
-			{
-				return DeclaredComponents(manifest);
-			}
-
+			var index = read.Data!;
 			var byId = index.Components.ToDictionary(component => component.Id);
 
 			return
