@@ -150,14 +150,14 @@
       "allowedVersions": "<3.0.0"
     },
     {
-      "description": "ImageSharp 4 enforces a build time license key for direct dependencies, which every contributor and CI job would have to supply. Held until that trade is decided (see PR 808).",
+      "description": "ImageSharp 3.2 and 4 enforce a build time license key for direct dependencies, which every contributor and CI job would have to supply. Held until that trade is decided (see PR 808).",
       "matchManagers": [
         "nuget"
       ],
       "matchPackageNames": [
         "SixLabors.ImageSharp"
       ],
-      "allowedVersions": "<4.0.0"
+      "allowedVersions": "<3.2.0"
     },
     {
       "matchManagers": [
