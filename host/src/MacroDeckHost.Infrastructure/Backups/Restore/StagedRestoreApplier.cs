@@ -14,6 +14,7 @@ public enum StagedRestoreOutcome
 	NothingPending,
 	Applied,
 	Abandoned,
+	RollbackIncomplete,
 	Locked
 }
 
@@ -64,6 +65,15 @@ public static class StagedRestoreApplier
 		using (lockFile)
 		{
 			var document = ReadDocument(markerPath);
+			if (document is not null && HasBegun(document))
+			{
+				Log.Warning("A previous start was interrupted while applying the staged restore of backup {BackupId}; "
+					+ "rolling the installation back",
+					document.BackupId);
+
+				return RollBackAndAbandon(paths, markerPath, document);
+			}
+
 			if (document is null || !Validate(document))
 			{
 				Abandon(paths, markerPath, document);
@@ -71,21 +81,16 @@ public static class StagedRestoreApplier
 				return StagedRestoreOutcome.Abandoned;
 			}
 
-			var journalPath = Path.Combine(document.StagingDirectory, JournalFileName);
-			var journal = new List<RestoreJournalEntry>();
-
 			try
 			{
-				ApplyFiles(paths, document, journal, journalPath);
+				ApplyFiles(paths, document);
 				ApplyTables(paths, document);
 			}
 			catch (Exception e)
 			{
 				Log.Error(e, "Applying the staged restore failed; rolling the installation back");
-				RollBack(paths, document, journal);
-				Abandon(paths, markerPath, document);
 
-				return StagedRestoreOutcome.Abandoned;
+				return RollBackAndAbandon(paths, markerPath, document);
 			}
 
 			File.Delete(markerPath);
@@ -99,6 +104,30 @@ public static class StagedRestoreApplier
 
 			return StagedRestoreOutcome.Applied;
 		}
+	}
+
+	public static bool HasBegun(PendingRestoreDocument document)
+	{
+		return File.Exists(Path.Combine(document.StagingDirectory, JournalFileName));
+	}
+
+	private static StagedRestoreOutcome RollBackAndAbandon(
+		IMacroDeckPaths paths,
+		string markerPath,
+		PendingRestoreDocument document)
+	{
+		if (!RollBack(paths, document))
+		{
+			Log.Error("The staged restore of backup {BackupId} could not be rolled back completely; "
+				+ "the next start tries again",
+				document.BackupId);
+
+			return StagedRestoreOutcome.RollbackIncomplete;
+		}
+
+		Abandon(paths, markerPath, document);
+
+		return StagedRestoreOutcome.Abandoned;
 	}
 
 	private static PendingRestoreDocument? ReadDocument(string markerPath)
@@ -136,47 +165,40 @@ public static class StagedRestoreApplier
 		return document.DatabasePath is null || File.Exists(document.DatabasePath);
 	}
 
-	private static void ApplyFiles(
-		IMacroDeckPaths paths,
-		PendingRestoreDocument document,
-		List<RestoreJournalEntry> journal,
-		string journalPath)
+	private static void ApplyFiles(IMacroDeckPaths paths, PendingRestoreDocument document)
 	{
 		var selected = document.Components.ToHashSet();
 		var rollbackRoot = Path.Combine(document.StagingDirectory, RollbackDirectoryName);
 		Directory.CreateDirectory(rollbackRoot);
 
+		// The journal is durable before the first file moves: a start that finds it rolls back instead of
+		// validating, because from here on apply/ and the data folder may each hold only part of the files.
+		WriteJournal(Path.Combine(document.StagingDirectory, JournalFileName));
+
 		foreach (var relative in CurrentFilesOwnedBy(paths, selected, document))
 		{
-			var entry = new RestoreJournalEntry { RelativePath = relative };
 			var current = Path.Combine(paths.DataRootDirectory, ToNativePath(relative));
 			var aside = Path.Combine(rollbackRoot, ToNativePath(relative));
 
 			Directory.CreateDirectory(Path.GetDirectoryName(aside)!);
 			File.Move(current, aside, true);
-			entry.MovedAside = true;
-			journal.Add(entry);
-			WriteJournal(journalPath, journal);
 		}
 
-		foreach (var file in document.Files.Where(file => selected.Contains(file.Component)))
+		foreach (var file in SelectedFiles(document))
 		{
 			var staged = Path.Combine(document.ApplyDirectory, ToNativePath(file.RelativePath));
 			var target = Path.Combine(paths.DataRootDirectory, ToNativePath(file.RelativePath));
 
 			Directory.CreateDirectory(Path.GetDirectoryName(target)!);
 			File.Move(staged, target, true);
-
-			var entry = journal.FirstOrDefault(candidate => candidate.RelativePath == file.RelativePath);
-			if (entry is null)
-			{
-				entry = new RestoreJournalEntry { RelativePath = file.RelativePath };
-				journal.Add(entry);
-			}
-
-			entry.Applied = true;
-			WriteJournal(journalPath, journal);
 		}
+	}
+
+	private static IEnumerable<PendingRestoreFile> SelectedFiles(PendingRestoreDocument document)
+	{
+		var selected = document.Components.ToHashSet();
+
+		return document.Files.Where(file => selected.Contains(file.Component));
 	}
 
 	private static void ApplyTables(IMacroDeckPaths paths, PendingRestoreDocument document)
@@ -363,36 +385,64 @@ public static class StagedRestoreApplier
 		}
 	}
 
-	private static void RollBack(
-		IMacroDeckPaths paths,
-		PendingRestoreDocument document,
-		List<RestoreJournalEntry> journal)
+	// Must stay safe to rerun after being killed itself: every restored file goes back to apply/ before
+	// any original returns over it.
+	private static bool RollBack(IMacroDeckPaths paths, PendingRestoreDocument document)
 	{
-		var rollbackRoot = Path.Combine(document.StagingDirectory, RollbackDirectoryName);
+		var failures = 0;
 
-		for (var i = journal.Count - 1; i >= 0; i--)
+		foreach (var file in SelectedFiles(document))
 		{
-			var entry = journal[i];
-			if (!entry.MovedAside)
+			var staged = Path.Combine(document.ApplyDirectory, ToNativePath(file.RelativePath));
+			var target = Path.Combine(paths.DataRootDirectory, ToNativePath(file.RelativePath));
+			if (File.Exists(staged) || !File.Exists(target))
 			{
 				continue;
 			}
 
-			var aside = Path.Combine(rollbackRoot, ToNativePath(entry.RelativePath));
-			var target = Path.Combine(paths.DataRootDirectory, ToNativePath(entry.RelativePath));
+			if (!TryMove(target, staged, file.RelativePath))
+			{
+				failures++;
+			}
+		}
 
-			try
+		if (failures > 0)
+		{
+			return false;
+		}
+
+		var rollbackRoot = Path.Combine(document.StagingDirectory, RollbackDirectoryName);
+		if (!Directory.Exists(rollbackRoot))
+		{
+			return true;
+		}
+
+		foreach (var aside in Directory.GetFiles(rollbackRoot, "*", SearchOption.AllDirectories))
+		{
+			var relative = Path.GetRelativePath(rollbackRoot, aside);
+			if (!TryMove(aside, Path.Combine(paths.DataRootDirectory, relative), relative))
 			{
-				if (File.Exists(aside))
-				{
-					Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-					File.Move(aside, target, true);
-				}
+				failures++;
 			}
-			catch (IOException e)
-			{
-				Log.Error(e, "Could not roll {Path} back", entry.RelativePath);
-			}
+		}
+
+		return failures == 0;
+	}
+
+	private static bool TryMove(string source, string destination, string relativePath)
+	{
+		try
+		{
+			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+			File.Move(source, destination, true);
+
+			return true;
+		}
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+		{
+			Log.Error(e, "Could not roll {Path} back", relativePath);
+
+			return false;
 		}
 	}
 
@@ -418,10 +468,10 @@ public static class StagedRestoreApplier
 		Log.Warning("A staged restore was abandoned; the installation was left as it was");
 	}
 
-	private static void WriteJournal(string path, List<RestoreJournalEntry> journal)
+	private static void WriteJournal(string path)
 	{
 		using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-		JsonSerializer.Serialize(stream, journal, PersistenceJsonOptions.Default);
+		stream.Write("{}"u8);
 		stream.Flush(true);
 	}
 

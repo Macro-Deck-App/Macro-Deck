@@ -14875,6 +14875,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>पुनर्स्थापना विफल रही</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>बैकअप पुनर्स्थापित नहीं किया जा सका। आपका डेटा पुनर्स्थापना से पहले जैसा ही है।</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>बैकअप पुनर्स्थापित नहीं किया जा सका, और आपके कुछ डेटा को अभी तक वापस नहीं रखा जा सका। इसे पूरा करने के लिए Macro Deck को फिर से शुरू करें।</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>वहाँ कुछ भी आइकन के रूप में आयात नहीं किया जा सका।</value>
   </data>

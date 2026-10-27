@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Auth;
+using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Usb;
@@ -104,6 +105,12 @@ public static class Program
 			var restoreOutcome = StagedRestoreApplier.ApplyPending(paths);
 
 			HostStartupFacts.RestoreApplied = restoreOutcome == StagedRestoreOutcome.Applied;
+			HostStartupFacts.RestoreFailure = restoreOutcome switch
+			{
+				StagedRestoreOutcome.Abandoned => RestoreFailure.NotApplied,
+				StagedRestoreOutcome.RollbackIncomplete => RestoreFailure.RollbackIncomplete,
+				_ => RestoreFailure.None
+			};
 
 			DatabaseMigrationHelper.MigrateDatabase(paths);
 

@@ -6827,6 +6827,8 @@ export const AppStrings = {
 		UpdateReady: 'macrodeck.app:Notifications.UpdateReady',
 		Backup: {
 			RestoreFailed: 'macrodeck.app:Notifications.Backup.RestoreFailed',
+			RestoreNotCompletedMessage: 'macrodeck.app:Notifications.Backup.RestoreNotCompletedMessage',
+			RestoreRollbackIncompleteMessage: 'macrodeck.app:Notifications.Backup.RestoreRollbackIncompleteMessage',
 		},
 		IconImport: {
 			CompletedWithWarnings: 'macrodeck.app:Notifications.IconImport.CompletedWithWarnings',
@@ -15474,6 +15476,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Nav.Variables': 'Variables',
 	'macrodeck.app:Notifications.ActionFailed': '"{name}" failed',
 	'macrodeck.app:Notifications.Backup.RestoreFailed': 'Restore failed',
+	'macrodeck.app:Notifications.Backup.RestoreNotCompletedMessage': 'The backup could not be restored. Your data is as it was before the restore.',
+	'macrodeck.app:Notifications.Backup.RestoreRollbackIncompleteMessage': 'The backup could not be restored, and some of your data could not be put back yet. Restart Macro Deck to finish putting it back.',
 	'macrodeck.app:Notifications.CompanionLicenseDownloaded': 'Companion license downloaded',
 	'macrodeck.app:Notifications.CompanionLicenseDownloadedMessage': 'Macro Deck downloaded the Companion license saved to your Macro Deck account and hands it to every Companion app that connects.',
 	'macrodeck.app:Notifications.CompanionLicenseReceived': 'Companion license received',

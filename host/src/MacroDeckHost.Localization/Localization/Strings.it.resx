@@ -14874,6 +14874,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Ripristino non riuscito</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>Non è stato possibile ripristinare il backup. I tuoi dati sono come prima del ripristino.</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>Non è stato possibile ripristinare il backup e una parte dei tuoi dati non è ancora stata rimessa a posto. Riavvia Macro Deck per completare l’operazione.</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Niente di tutto questo poteva essere importato come icona.</value>
   </data>

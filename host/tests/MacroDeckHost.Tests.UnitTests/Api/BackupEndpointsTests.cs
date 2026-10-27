@@ -332,6 +332,54 @@ public class BackupEndpointsTests
 		}
 	}
 
+	[Test]
+	public async Task A_restore_still_being_rolled_back_can_be_neither_cancelled_nor_replaced()
+	{
+		var backupId = await CreateBackupId("restore source");
+		var paths = _host.Services.GetRequiredService<IMacroDeckPaths>();
+		var restoreId = Guid.NewGuid();
+		var staging = Path.Combine(paths.RestoreStagingDirectory, restoreId.ToString("N"));
+		var original = Path.Combine(staging, "rollback", "data", "profiles", "kitchen.json");
+		Directory.CreateDirectory(Path.GetDirectoryName(original)!);
+		File.WriteAllText(original, "original");
+		File.WriteAllText(Path.Combine(staging, "journal.json"), "{}");
+		var marker = Path.Combine(paths.RestoreStagingDirectory, PendingRestoreDocument.FileName);
+		File.WriteAllText(marker,
+			JsonSerializer.Serialize(new PendingRestoreDocument
+				{
+					RestoreId = restoreId,
+					BackupId = Guid.NewGuid(),
+					Components = [BackupComponentGroup.Profiles],
+					StagingDirectory = staging,
+					ApplyDirectory = Path.Combine(staging, "apply")
+				},
+				PersistenceJsonOptions.Default));
+		var markerBefore = File.ReadAllText(marker);
+
+		try
+		{
+			var cancel = await ReadJson(await Send(HttpMethod.Post, "/api/backups/restore/cancel", new { restoreId }));
+			var prepare = await ReadJson(await Send(HttpMethod.Post,
+				"/api/backups/restore/prepare",
+				new { backupId, components = new[] { "Profiles" } }));
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(cancel.GetProperty("success").GetBoolean(), Is.False);
+				Assert.That(cancel.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("RestorePending"));
+				Assert.That(prepare.GetProperty("success").GetBoolean(), Is.False);
+				Assert.That(prepare.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("RestorePending"));
+				Assert.That(File.ReadAllText(original), Is.EqualTo("original"));
+				Assert.That(File.ReadAllText(marker), Is.EqualTo(markerBefore));
+			});
+		}
+		finally
+		{
+			File.Delete(marker);
+			Directory.Delete(staging, true);
+		}
+	}
+
 	private void CancelRestoreWhenSafetyBackupCompletes()
 	{
 		var cancellation = _host.Services.GetRequiredService<IBackupOperationCancellation>();

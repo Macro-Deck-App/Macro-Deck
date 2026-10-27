@@ -14872,6 +14872,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Wiederherstellung fehlgeschlagen</value>
   </data>
+  <data name="Notifications.Backup.RestoreNotCompletedMessage" xml:space="preserve">
+    <value>Die Sicherung konnte nicht wiederhergestellt werden. Deine Daten sind so wie vor der Wiederherstellung.</value>
+  </data>
+  <data name="Notifications.Backup.RestoreRollbackIncompleteMessage" xml:space="preserve">
+    <value>Die Sicherung konnte nicht wiederhergestellt werden, und ein Teil deiner Daten konnte noch nicht zurückgelegt werden. Starte Macro Deck neu, um das abzuschließen.</value>
+  </data>
   <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
     <value>Nichts davon konnte als Symbol importiert werden.</value>
   </data>
