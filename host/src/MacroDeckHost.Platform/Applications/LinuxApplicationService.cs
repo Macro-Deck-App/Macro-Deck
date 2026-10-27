@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using MacroDeckHost.Platform.DesktopEntries;
+using MacroDeckHost.Platform.Processes;
 using Serilog;
 
 namespace MacroDeckHost.Platform.Applications;
@@ -61,7 +62,7 @@ internal sealed class LinuxApplicationService(ILogger logger) : ApplicationServi
 			startInfo.ArgumentList.Add(path);
 		}
 
-		Process.Start(startInfo);
+		DetachedProcess.Start(startInfo);
 	}
 
 	protected override void StartFile(string path)
@@ -73,7 +74,7 @@ internal sealed class LinuxApplicationService(ILogger logger) : ApplicationServi
 			return;
 		}
 
-		Process.Start(opener);
+		DetachedProcess.Start(opener);
 	}
 
 	protected override void StartWebsite(string url)
@@ -85,7 +86,7 @@ internal sealed class LinuxApplicationService(ILogger logger) : ApplicationServi
 			return;
 		}
 
-		Process.Start(opener);
+		DetachedProcess.Start(opener);
 	}
 
 	internal static bool OpensWithDefaultApplication(string target)
@@ -141,7 +142,7 @@ internal sealed class LinuxApplicationService(ILogger logger) : ApplicationServi
 		}
 
 		ApplyWorkingDirectory(startInfo, workingDirectory);
-		Process.Start(startInfo);
+		DetachedProcess.Start(startInfo);
 	}
 
 	private static string? JoinArguments(string? fromEntry, string? fromAction)

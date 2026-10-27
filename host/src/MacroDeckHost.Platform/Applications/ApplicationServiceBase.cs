@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using MacroDeckHost.Platform.Processes;
 using Serilog;
 
 namespace MacroDeckHost.Platform.Applications;
@@ -89,12 +90,12 @@ internal abstract partial class ApplicationServiceBase(ILogger logger) : IApplic
 
 	protected virtual void StartFile(string path)
 	{
-		Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+		DetachedProcess.Start(new ProcessStartInfo(path) { UseShellExecute = true });
 	}
 
 	protected virtual void StartWebsite(string url)
 	{
-		Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+		DetachedProcess.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 	}
 
 	internal static bool IsWebsiteUrl(string url)
@@ -159,7 +160,7 @@ internal abstract partial class ApplicationServiceBase(ILogger logger) : IApplic
 		}
 
 		ApplyWorkingDirectory(startInfo, workingDirectory);
-		Process.Start(startInfo);
+		DetachedProcess.Start(startInfo);
 	}
 
 	protected static void ApplyWorkingDirectory(ProcessStartInfo startInfo, string? workingDirectory)
