@@ -102,7 +102,11 @@ public static class Program
 			// The only safe point to swap the data root: nothing has opened the database, the Data Protection
 			// key ring, the TLS private key or a plugin binary yet. The applier takes its own exclusive lock
 			// because the single-instance probe above is a best-effort HTTP check, not a lock.
-			var restoreOutcome = StagedRestoreApplier.ApplyPending(paths);
+			StagedRestoreOutcome restoreOutcome;
+			using (StartupHeartbeat.Start(Console.Out, StartupHeartbeat.Interval))
+			{
+				restoreOutcome = StagedRestoreApplier.ApplyPending(paths);
+			}
 
 			HostStartupFacts.RestoreApplied = restoreOutcome == StagedRestoreOutcome.Applied;
 			HostStartupFacts.RestoreFailure = restoreOutcome switch
