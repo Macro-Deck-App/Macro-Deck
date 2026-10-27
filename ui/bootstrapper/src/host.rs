@@ -87,6 +87,10 @@ const READY_TIMEOUT: Duration = Duration::from_secs(60);
 
 const RETRY_READY_TIMEOUT: Duration = Duration::from_secs(30);
 
+// Must match StartupHeartbeat.Line in the host. The host prints it while it applies or rolls back a
+// staged restore before it listens; the ready timeout then counts from the last one.
+const HOST_HEARTBEAT_LINE: &str = "macrodeck-host-heartbeat";
+
 const UNRESPONSIVE_STOP_TIMEOUT: Duration = Duration::from_secs(5);
 
 // Mirrors the host's own configured HostOptions.ShutdownTimeout (not the shorter per-plugin grace
@@ -119,6 +123,7 @@ pub struct HostState {
     pub ready: AtomicBool,
     pub shutdown_expected: AtomicBool,
     pub log_tail: Arc<LogTail>,
+    heartbeat: Arc<HostHeartbeat>,
     stopping: AtomicBool,
     ui_port: AtomicU16,
     supervisor: Mutex<Supervisor>,
@@ -134,6 +139,7 @@ impl HostState {
             ready: AtomicBool::new(false),
             shutdown_expected: AtomicBool::new(false),
             log_tail: Arc::new(LogTail::new(40)),
+            heartbeat: Arc::new(HostHeartbeat::default()),
             stopping: AtomicBool::new(false),
             ui_port: AtomicU16::new(0),
             supervisor: Mutex::new(Supervisor::new()),
@@ -460,20 +466,62 @@ fn exit_failure_reason(code: Option<i32>, log: &str) -> String {
     }
 }
 
-fn pipe_to_tail<R: std::io::Read + Send + 'static>(reader: R, tail: Arc<LogTail>) {
-    std::thread::spawn(move || drain_into_tail(reader, &tail));
+#[derive(Default)]
+pub struct HostHeartbeat {
+    last: Mutex<Option<Instant>>,
+}
+
+impl HostHeartbeat {
+    fn beat(&self, at: Instant) {
+        if let Ok(mut last) = self.last.lock() {
+            *last = Some(at);
+        }
+    }
+
+    fn last(&self) -> Option<Instant> {
+        self.last.lock().ok().and_then(|last| *last)
+    }
+
+    fn clear(&self) {
+        if let Ok(mut last) = self.last.lock() {
+            *last = None;
+        }
+    }
+}
+
+pub fn ready_deadline(
+    started: Instant,
+    last_heartbeat: Option<Instant>,
+    timeout: Duration,
+) -> Instant {
+    last_heartbeat.map_or(started, |beat| beat.max(started)) + timeout
+}
+
+fn pipe_to_tail<R: std::io::Read + Send + 'static>(
+    reader: R,
+    tail: Arc<LogTail>,
+    heartbeat: Arc<HostHeartbeat>,
+) {
+    std::thread::spawn(move || drain_into_tail(reader, &tail, &heartbeat));
 }
 
 // Reads to the end whatever the output holds: stopping early closes the pipe, and every later write
 // by the host, or by a program it started, then fails or raises SIGPIPE.
-fn drain_into_tail<R: std::io::Read>(reader: R, tail: &LogTail) {
+fn drain_into_tail<R: std::io::Read>(reader: R, tail: &LogTail, heartbeat: &HostHeartbeat) {
     let mut reader = BufReader::new(reader);
     let mut line = Vec::new();
     loop {
         line.clear();
         match reader.read_until(b'\n', &mut line) {
             Ok(0) => return,
-            Ok(_) => tail.push_chunk(&crate::redact::redact(&String::from_utf8_lossy(&line))),
+            Ok(_) => {
+                let text = String::from_utf8_lossy(&line);
+                if text.trim() == HOST_HEARTBEAT_LINE {
+                    heartbeat.beat(Instant::now());
+                } else {
+                    tail.push_chunk(&crate::redact::redact(&text));
+                }
+            }
             Err(error) if error.kind() == std::io::ErrorKind::Interrupted => {}
             Err(_) => return,
         }
@@ -667,15 +715,16 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
     }
 
     state.log_tail.clear();
+    state.heartbeat.clear();
     let mut child = command
         .spawn()
         .map_err(|error| LaunchError::SpawnFailed(error.to_string()))?;
 
     if let Some(stdout) = child.stdout.take() {
-        pipe_to_tail(stdout, state.log_tail.clone());
+        pipe_to_tail(stdout, state.log_tail.clone(), state.heartbeat.clone());
     }
     if let Some(stderr) = child.stderr.take() {
-        pipe_to_tail(stderr, state.log_tail.clone());
+        pipe_to_tail(stderr, state.log_tail.clone(), state.heartbeat.clone());
     }
 
     #[cfg(windows)]
@@ -1111,8 +1160,8 @@ async fn wait_for_ready(
     port: u16,
     timeout: Duration,
 ) -> AttemptOutcome {
-    let deadline = Instant::now() + timeout;
-    while Instant::now() < deadline {
+    let started = Instant::now();
+    while Instant::now() < ready_deadline(started, state.heartbeat.last(), timeout) {
         if let Some(code) = exit_of(state, generation) {
             return AttemptOutcome::Exited(code);
         }
@@ -2204,12 +2253,92 @@ mod tests {
         drain_into_tail(
             std::io::Cursor::new(b"first\n\xff\xfe broken\nlast\n".to_vec()),
             &tail,
+            &HostHeartbeat::default(),
         );
 
         let lines = tail.joined();
         assert!(lines.contains("first"));
         assert!(lines.contains("broken"));
         assert!(lines.contains("last"));
+    }
+
+    #[test]
+    fn the_heartbeat_line_matches_the_host_constant() {
+        assert_eq!(HOST_HEARTBEAT_LINE, "macrodeck-host-heartbeat");
+    }
+
+    #[test]
+    fn a_heartbeat_line_counts_as_a_sign_of_life_and_stays_out_of_the_log() {
+        let tail = LogTail::new(10);
+        let heartbeat = HostHeartbeat::default();
+        let before = Instant::now();
+
+        drain_into_tail(
+            std::io::Cursor::new(b"applying restore\nmacrodeck-host-heartbeat\r\n".to_vec()),
+            &tail,
+            &heartbeat,
+        );
+
+        assert!(heartbeat.last().is_some_and(|beat| beat >= before));
+        assert_eq!(tail.joined(), "applying restore");
+    }
+
+    #[test]
+    fn a_host_still_applying_a_restore_is_not_timed_out() {
+        let started = Instant::now();
+        let heartbeat = HostHeartbeat::default();
+        heartbeat.beat(started + Duration::from_secs(55));
+
+        let deadline = ready_deadline(started, heartbeat.last(), READY_TIMEOUT);
+
+        assert!(deadline > started + READY_TIMEOUT + Duration::from_secs(50));
+    }
+
+    #[test]
+    fn the_ready_wait_keeps_waiting_while_heartbeats_arrive_and_times_out_after_they_stop() {
+        let state = HostState::new();
+        let port = allocate_free_port().expect("a free loopback port");
+        let timeout = Duration::from_secs(2);
+        let beats_for = Duration::from_secs(3);
+        let heartbeat = state.heartbeat.clone();
+        let started = Instant::now();
+        let beater = std::thread::spawn(move || {
+            while started.elapsed() < beats_for {
+                heartbeat.beat(Instant::now());
+                std::thread::sleep(Duration::from_millis(100));
+            }
+        });
+
+        let outcome = tauri::async_runtime::block_on(wait_for_ready(&state, 1, port, timeout));
+        let elapsed = started.elapsed();
+        beater.join().expect("the heartbeat thread");
+
+        assert!(matches!(outcome, AttemptOutcome::TimedOut));
+        assert!(
+            elapsed >= beats_for,
+            "timed out after {elapsed:?}, while heartbeats were still arriving"
+        );
+    }
+
+    #[test]
+    fn a_host_that_reports_nothing_still_times_out_after_the_ready_timeout() {
+        let started = Instant::now();
+
+        assert_eq!(
+            ready_deadline(started, None, RETRY_READY_TIMEOUT),
+            started + RETRY_READY_TIMEOUT
+        );
+    }
+
+    #[test]
+    fn a_heartbeat_from_before_the_attempt_does_not_shorten_its_timeout() {
+        let earlier = Instant::now();
+        let started = earlier + Duration::from_secs(10);
+
+        assert_eq!(
+            ready_deadline(started, Some(earlier), READY_TIMEOUT),
+            started + READY_TIMEOUT
+        );
     }
 
     #[test]
