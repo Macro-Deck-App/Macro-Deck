@@ -244,6 +244,36 @@ fn linux_bundle_declares_runtime_dependencies() {
 }
 
 #[test]
+fn linux_deb_accepts_the_icu_of_every_supported_release() {
+    // Debian and Ubuntu put the ICU major in the package name and offer no unversioned runtime
+    // package, so every supported release from the libc6 floor on needs its own alternative.
+    let supported = [
+        ("Ubuntu 22.04", "libicu70"),
+        ("Ubuntu 24.04", "libicu74"),
+        ("Ubuntu 25.10", "libicu76"),
+        ("Ubuntu 26.04", "libicu78"),
+        ("Debian 12", "libicu72"),
+        ("Debian 13", "libicu76"),
+        ("Debian testing", "libicu78"),
+    ];
+    let cfg = load("tauri.linux.conf.json");
+    let alternatives = cfg["bundle"]["linux"]["deb"]["depends"]
+        .as_array()
+        .expect("bundle.linux.deb.depends must be an array")
+        .iter()
+        .filter_map(|value| value.as_str())
+        .flat_map(|entry| entry.split('|'))
+        .map(|alternative| alternative.split('(').next().unwrap_or_default().trim())
+        .collect::<Vec<_>>();
+    for (release, package) in supported {
+        assert!(
+            alternatives.contains(&package),
+            "bundle.linux.deb.depends must accept {package}, the ICU of {release}"
+        );
+    }
+}
+
+#[test]
 fn linux_rpm_declares_a_release() {
     let cfg = load("tauri.linux.conf.json");
     let release = cfg["bundle"]["linux"]["rpm"]["release"].as_str();
