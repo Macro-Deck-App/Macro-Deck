@@ -67,6 +67,36 @@ internal static class AppImageEnvironment
 		return startInfo;
 	}
 
+	// AppRun points LD_LIBRARY_PATH at the bundle's older libraries, so a system program the host
+	// starts with it fails to load and exits 127. Run after any caller edits to the environment.
+	public static void RestoreOutside(ProcessStartInfo startInfo)
+	{
+		if (OperatingSystem.IsWindows()
+			|| !startInfo.Environment.TryGetValue("APPDIR", out var appDir)
+			|| appDir is null
+			|| !Path.IsPathRooted(appDir)
+			|| appDir.TrimEnd('/').Length == 0)
+		{
+			return;
+		}
+
+		var environment = new Dictionary<string, string>(StringComparer.Ordinal);
+		foreach (var (name, value) in startInfo.Environment)
+		{
+			if (value is not null)
+			{
+				environment[name] = value;
+			}
+		}
+
+		var outside = Outside(environment, BundleRoots(appDir));
+		startInfo.Environment.Clear();
+		foreach (var (name, value) in outside)
+		{
+			startInfo.Environment[name] = value;
+		}
+	}
+
 	internal static Dictionary<string, string> Outside(
 		IReadOnlyDictionary<string, string> environment,
 		IReadOnlyList<string> roots)

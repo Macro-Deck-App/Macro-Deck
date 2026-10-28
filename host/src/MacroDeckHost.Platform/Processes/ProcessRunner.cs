@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using MacroDeckHost.Platform.Applications;
 
 namespace MacroDeckHost.Platform.Processes;
 
@@ -22,6 +23,7 @@ internal static class ProcessRunner
 			startInfo.ArgumentList.Add(argument);
 		}
 
+		AppImageEnvironment.RestoreOutside(startInfo);
 		using var process = Process.Start(startInfo)
 			?? throw new InvalidOperationException($"Failed to start '{fileName}'.");
 
@@ -63,6 +65,7 @@ internal static class ProcessRunner
 		}
 
 		ApplyEnvironment(startInfo, environment);
+		AppImageEnvironment.RestoreOutside(startInfo);
 
 		using var process = Process.Start(startInfo)
 			?? throw new InvalidOperationException($"Failed to start '{fileName}'.");
@@ -110,6 +113,7 @@ internal static class ProcessRunner
 		}
 
 		ApplyEnvironment(startInfo, environment);
+		AppImageEnvironment.RestoreOutside(startInfo);
 		return Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start '{fileName}'.");
 	}
 
@@ -141,6 +145,7 @@ internal static class ProcessRunner
 				CreateNoWindow = true
 			};
 			startInfo.ArgumentList.Add(command);
+			AppImageEnvironment.RestoreOutside(startInfo);
 
 			using var process = Process.Start(startInfo);
 			if (process is null)

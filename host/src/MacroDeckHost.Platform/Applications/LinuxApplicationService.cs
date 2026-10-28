@@ -123,6 +123,7 @@ internal sealed class LinuxApplicationService(ILogger logger) : ApplicationServi
 			var startInfo = new ProcessStartInfo("wmctrl") { UseShellExecute = false };
 			startInfo.ArgumentList.Add("-xa");
 			startInfo.ArgumentList.Add(name);
+			AppImageEnvironment.RestoreOutside(startInfo);
 			Process.Start(startInfo);
 		}
 		catch (Exception exception)
@@ -162,6 +163,7 @@ internal sealed class LinuxApplicationService(ILogger logger) : ApplicationServi
 			var startInfo = new ProcessStartInfo("chmod") { UseShellExecute = false };
 			startInfo.ArgumentList.Add("+x");
 			startInfo.ArgumentList.Add(path);
+			AppImageEnvironment.RestoreOutside(startInfo);
 			Process.Start(startInfo)?.WaitForExit(2000);
 		}
 		catch (Exception exception)

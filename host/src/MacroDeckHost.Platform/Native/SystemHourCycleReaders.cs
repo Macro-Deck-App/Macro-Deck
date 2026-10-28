@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using MacroDeckHost.Platform.Applications;
 
 namespace MacroDeckHost.Platform.Native;
 
@@ -205,6 +206,7 @@ internal sealed class LinuxHourCycleReader
 		startInfo.ArgumentList.Add("get");
 		startInfo.ArgumentList.Add("org.gnome.desktop.interface");
 		startInfo.ArgumentList.Add("clock-format");
+		AppImageEnvironment.RestoreOutside(startInfo);
 
 		try
 		{
