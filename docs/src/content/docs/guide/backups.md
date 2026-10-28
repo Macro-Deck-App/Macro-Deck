@@ -46,6 +46,10 @@ The restore is applied the next time Macro Deck starts. The installed app restar
 Macro Deck checks the backup you chose (step 1 of 2) and then makes a backup marked **Safety backup** (step 2
 of 2), so you can go back.
 
+A backup from a newer version of Macro Deck that stores its data in a way this version does not know cannot
+be restored. Macro Deck says so while it checks the backup, before anything changes; update Macro Deck
+first, then restore it.
+
 If the restore cannot finish, for example because Macro Deck was closed while it was being applied, Macro
 Deck puts your data back the way it was before the restore and shows a **Restore failed** notification.
 Nothing from the backup is kept, so start the restore again. If the notification asks you to restart, some
