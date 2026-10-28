@@ -132,4 +132,48 @@ public class SecretApprovalCatalogTests
 	{
 		return new ClaimsPrincipal(new ClaimsIdentity([new Claim(AuthDefaults.ScopeClaim, scope)], "test"));
 	}
+
+	[TestCase(
+		"""{ "id": "s1", "type": "step", "integrationId": "integration", "actionId": "send", "parameters": PARAMS }""")]
+	[TestCase("""{ "id": "s1", "type": "step", "blockType": "integration.send", "parameters": PARAMS }""")]
+	public async Task
+		A_block_the_executor_runs_as_an_action_without_the_action_type_is_backfilled_listed_and_approvable(
+			string blockTemplate)
+	{
+		string Flows(string url)
+		{
+			var parameters
+				= $$"""[{ "name": "url", "type": "url", "value": "{{url}}" }, { "name": "token", "type": "secret", "value": {{Ref(_token)}} }]""";
+			return SecretApprovalFixture.Flows(blockTemplate.Replace("PARAMS", parameters, StringComparison.Ordinal));
+		}
+
+		var owner = FlowOwner.Automation(Guid.NewGuid());
+		_fixture.Files.Backfilled.Remove(SecretApprovalGroup.Automations);
+		_fixture.Ledger.LoadGroup(SecretApprovalGroup.Automations,
+			new Dictionary<Guid, IReadOnlyList<(FlowOwner Owner, string? Flows)>>
+			{
+				[owner.Id] = [(owner, Flows("https://home.example"))]
+			});
+		var backfilled = await _fixture.Run(owner, Flows("https://home.example"));
+
+		var automation = new AutomationEntity { Id = owner.Id, Name = "Lights", Flows = Flows("https://home.example") };
+		await _automations.AddOrUpdate(automation, SecretApprovalWrite.Approve);
+		automation.Flows = Flows("https://attacker.example");
+		await _automations.AddOrUpdate(automation, SecretApprovalWrite.Withhold);
+		var pending = await _fixture.Run(owner, automation.Flows);
+		var listed = _catalog.Pending().Items.Single();
+		var approved = _catalog.Approve(Request(listed));
+		var afterApproval = await _fixture.Run(owner, automation.Flows);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(backfilled.Actions.Single().Status, Is.EqualTo(ActionOutcomeStatus.Succeeded));
+			Assert.That(pending.Actions.Single().Status, Is.EqualTo(ActionOutcomeStatus.Skipped));
+			Assert.That(listed.BlockId, Is.EqualTo("s1"));
+			Assert.That(listed.ActionId, Is.EqualTo("send"));
+			Assert.That(approved.Success, Is.True);
+			Assert.That(afterApproval.Actions.Single().Status, Is.EqualTo(ActionOutcomeStatus.Succeeded));
+			Assert.That(_fixture.Action.CapturedParameters!["token"], Is.EqualTo("tok"));
+		});
+	}
 }
