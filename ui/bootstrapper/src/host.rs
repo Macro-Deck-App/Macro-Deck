@@ -3,6 +3,7 @@
 // again on quit (graceful shutdown endpoint first, kill as fallback).
 
 use std::ffi::OsString;
+use std::future::Future;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -114,6 +115,8 @@ pub const RELAUNCH_MARKER_ENVIRONMENT_VARIABLE: &str = "MACRODECK_RELAUNCH";
 pub const RELAUNCH_SETTLE_DELAY: Duration = Duration::from_millis(1500);
 
 const STOP_POLL_INTERVAL: Duration = Duration::from_millis(250);
+
+const SHUTDOWN_RETRY_INTERVAL: Duration = Duration::from_secs(1);
 
 pub struct HostState {
     child: Mutex<Option<(u64, Child)>>,
@@ -1223,8 +1226,8 @@ pub fn stop_before_exit(app: &AppHandle) {
     #[cfg(windows)]
     tauri::async_runtime::block_on(async {
         let stop = async {
-            let port = request_stop(app, SESSION_END_REASON).await;
-            wait_until_stopped(app, port, SESSION_END_STOP_TIMEOUT).await
+            let port = begin_shutdown(app);
+            stop_gracefully(app, port, SESSION_END_REASON, SESSION_END_STOP_TIMEOUT).await
         };
         if !matches!(
             tokio::time::timeout(SESSION_END_STOP_TIMEOUT, stop).await,
@@ -1296,27 +1299,94 @@ fn begin_stop(state: &HostState) {
     }
 }
 
-async fn request_stop(app: &AppHandle, reason: &str) -> Option<u16> {
+fn begin_shutdown(app: &AppHandle) -> Option<u16> {
     let state = app.state::<Arc<HostState>>();
     begin_stop(&state);
     state.shutdown_expected.store(true, Ordering::SeqCst);
 
     let port = managed_port(&state);
-    match port {
-        Some(port) => {
-            if let Err(error) = post_shutdown(port, reason).await {
-                logging::warn(&format!("[host] shutdown request failed: {error}"));
-            }
-        }
-        None => logging::warn("[host] no loopback port known; skipping the shutdown request"),
+    if port.is_none() {
+        logging::warn("[host] no loopback port known; skipping the shutdown request");
     }
     port
 }
 
-async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) -> bool {
-    let port = request_stop(app, reason).await;
+// The budget restarts once the host accepts, so a host that started late still gets its full shutdown.
+async fn stop_gracefully(
+    app: &AppHandle,
+    port: Option<u16>,
+    reason: &str,
+    graceful_timeout: Duration,
+) -> bool {
+    let mut attempts = 0u32;
+    let request = || {
+        attempts += 1;
+        let attempt = attempts;
+        async move {
+            let Some(port) = port else {
+                return false;
+            };
+            match post_shutdown(port, reason).await {
+                Ok(()) => {
+                    if attempt > 1 {
+                        logging::info(&format!(
+                            "[host] the host accepted the shutdown request on attempt {attempt}"
+                        ));
+                    }
+                    true
+                }
+                Err(error) => {
+                    if attempt == 1 {
+                        logging::warn(&format!(
+                            "[host] shutdown request failed: {error}; retrying until the host accepts it"
+                        ));
+                    }
+                    false
+                }
+            }
+        }
+    };
+    request_until_stopped(request, || host_stopped(app, port), graceful_timeout).await
+}
 
-    if wait_until_stopped(app, port, graceful_timeout).await {
+async fn request_until_stopped<Request, Requested, Stopped, Checked>(
+    mut request: Request,
+    mut stopped: Stopped,
+    timeout: Duration,
+) -> bool
+where
+    Request: FnMut() -> Requested,
+    Requested: Future<Output = bool>,
+    Stopped: FnMut() -> Checked,
+    Checked: Future<Output = bool>,
+{
+    let mut deadline = Instant::now() + timeout;
+    let mut accepted = false;
+    let mut next_request = Instant::now();
+    loop {
+        let now = Instant::now();
+        if !accepted && now >= next_request {
+            let remaining = deadline.saturating_duration_since(now);
+            accepted = matches!(tokio::time::timeout(remaining, request()).await, Ok(true));
+            if accepted {
+                deadline = Instant::now() + timeout;
+            }
+            next_request = Instant::now() + SHUTDOWN_RETRY_INTERVAL;
+        }
+        if stopped().await {
+            return true;
+        }
+        if Instant::now() >= deadline {
+            return false;
+        }
+        tokio::time::sleep(STOP_POLL_INTERVAL).await;
+    }
+}
+
+async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) -> bool {
+    let port = begin_shutdown(app);
+
+    if stop_gracefully(app, port, reason, graceful_timeout).await {
         return true;
     }
 
@@ -1437,7 +1507,8 @@ async fn post_shutdown(port: u16, reason: &str) -> Result<(), reqwest::Error> {
     loopback_secret::authorize(request, port)
         .await
         .send()
-        .await?;
+        .await?
+        .error_for_status()?;
     Ok(())
 }
 
@@ -2469,5 +2540,100 @@ mod tests {
             "Macro Deck Host"
         );
         assert_eq!(host_binary_name_for("Production", false), "Macro Deck Host");
+    }
+
+    fn serve_host_that_listens_after(delay: Duration) -> (u16, Arc<AtomicBool>) {
+        let port = allocate_free_port().expect("a free loopback port");
+        let exited = Arc::new(AtomicBool::new(false));
+        let flag = exited.clone();
+        std::thread::spawn(move || {
+            use std::io::{Read, Write};
+            std::thread::sleep(delay);
+            let listener = std::net::TcpListener::bind(("127.0.0.1", port)).unwrap();
+            for stream in listener.incoming() {
+                let Ok(mut stream) = stream else {
+                    continue;
+                };
+                let mut request = Vec::new();
+                let mut buffer = [0u8; 4096];
+                while !request.windows(4).any(|window| window == b"\r\n\r\n") {
+                    match stream.read(&mut buffer) {
+                        Ok(0) | Err(_) => break,
+                        Ok(read) => request.extend_from_slice(&buffer[..read]),
+                    }
+                }
+                let shutdown = request.starts_with(b"POST /api/host/shutdown");
+                let status = if shutdown { "200 OK" } else { "404 Not Found" };
+                let _ = stream.write_all(
+                    format!("HTTP/1.1 {status}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+                        .as_bytes(),
+                );
+                if shutdown {
+                    flag.store(true, Ordering::SeqCst);
+                    return;
+                }
+            }
+        });
+        (port, exited)
+    }
+
+    #[test]
+    fn a_host_that_starts_listening_after_the_quit_still_gets_the_shutdown_request() {
+        let (port, exited) = serve_host_that_listens_after(Duration::from_millis(700));
+        let started = Instant::now();
+
+        let stopped = tauri::async_runtime::block_on(request_until_stopped(
+            || async move { post_shutdown(port, "quit").await.is_ok() },
+            || {
+                let exited = exited.clone();
+                async move { exited.load(Ordering::SeqCst) }
+            },
+            Duration::from_secs(5),
+        ));
+
+        assert!(
+            stopped,
+            "the host was never asked to shut down once it listened"
+        );
+        assert!(started.elapsed() < Duration::from_secs(5));
+    }
+
+    #[test]
+    fn a_refused_shutdown_request_does_not_count_as_delivered() {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        std::thread::spawn(move || {
+            use std::io::{Read, Write};
+            for mut stream in listener.incoming().flatten() {
+                let mut buffer = [0u8; 4096];
+                let _ = stream.read(&mut buffer);
+                let _ = stream.write_all(
+                    b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+                );
+            }
+        });
+
+        let result = tauri::async_runtime::block_on(post_shutdown(port, "quit"));
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn a_host_that_accepts_the_request_late_still_gets_the_whole_graceful_budget() {
+        let timeout = Duration::from_secs(3);
+        let started = Instant::now();
+        let accepted_from = Duration::from_millis(1500);
+        let exits_at = Duration::from_millis(3500);
+
+        let stopped = tauri::async_runtime::block_on(request_until_stopped(
+            || async move { started.elapsed() >= accepted_from },
+            || async move { started.elapsed() >= exits_at },
+            timeout,
+        ));
+
+        assert!(
+            stopped,
+            "the host was given up on before its shutdown could finish"
+        );
     }
 }
