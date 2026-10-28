@@ -1063,6 +1063,27 @@
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck 未完整更新</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>未設定 {variable}。請在「設定 &gt; AI 用戶端」中重新安裝 Claude Desktop 擴充功能。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck 未在執行。請啟動 Macro Deck 後再試一次。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>存取權杖已被撤銷或刪除，Macro Deck 拒絕了它。請在「設定 &gt; AI 用戶端」中建立新權杖，然後重新安裝擴充功能。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck 已鎖定或不支援 AI 用戶端，因此沒有可用的 MCP 伺服器。請解除鎖定 Macro Deck 後再試一次。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck 拒絕了要求（HTTP {status}）。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>在收到回應之前，與 Macro Deck 的連線已中斷。要求可能已執行，重試前請先確認。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>MCP 工作階段尚未初始化。</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>關於 Macro Deck</value>
   </data>
@@ -2939,6 +2960,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>此復原金鑰無法解鎖此安裝。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>此存取權杖已無法使用。請建立新權杖以下載擴充功能。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Claude Desktop 擴充功能僅適用於在 macOS 和 Windows 上安裝的 Macro Deck 應用程式。</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>請選擇一個提供者。</value>
@@ -17161,6 +17188,18 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>最低等級</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>下載 Claude Desktop 擴充功能</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>在 Claude Desktop 中開啟下載的檔案，即可在其中安裝 Macro Deck。此檔案包含這個權杖，安裝後請將其刪除。</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>無法儲存 Claude Desktop 擴充功能</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>AI 用戶端</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>用戶端設定</value>
   </data>
@@ -17207,6 +17246,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>從未</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>其他用戶端</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>允許</value>
@@ -25410,6 +25452,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>將 {name} 傳給一個已核准且使用機密的區塊</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>讓 Claude 使用這部電腦上的 Macro Deck 設定：檢視和建立按鈕、資料夾和自動化，並執行動作。Claude 永遠看不到機密。</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>請輸入一個值。</value>

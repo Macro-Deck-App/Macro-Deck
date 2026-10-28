@@ -6,13 +6,20 @@ import { CopyValueComponent } from '../../../copy-value/copy-value.component';
 import { EmptyStateComponent } from '../../../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../../../forms/select/select.component';
 import { ConfirmationModalComponent } from '../../../overlay/confirmation-modal/confirmation-modal.component';
+import { FileSaveService } from '../../../../services/file-save.service';
 import { McpSettingsService } from '../../../../services/mcp-settings.service';
 import { McpProviderPolicy, McpRiskMode, McpToken } from '../../../../shared/transport/mcp-messages';
 
 interface RevealedToken {
+  id: string;
   name: string;
   plaintext: string;
 }
+
+export type McpClientKind = 'claude-code' | 'vscode' | 'other';
+
+const SERVER_NAME = 'macro-deck';
+const EXTENSION_FILE_NAME = 'macro-deck.mcpb';
 
 @Component({
   selector: 'app-ai-clients-settings',
@@ -39,6 +46,7 @@ export class AiClientsSettingsComponent {
   readonly mcp = inject(McpSettingsService);
   private readonly toast = inject(ToastService);
   private readonly localization = inject(LocalizationService);
+  private readonly fileSave = inject(FileSaveService);
 
   @ViewChild(ModalComponent) private modal?: ModalComponent;
 
@@ -53,8 +61,18 @@ export class AiClientsSettingsComponent {
   readonly createName = signal('');
   readonly creating = signal(false);
   readonly revealed = signal<RevealedToken | null>(null);
+  readonly downloadingExtension = signal(false);
+  readonly client = signal<McpClientKind>('claude-code');
   readonly revokeCandidate = signal<McpToken | null>(null);
   readonly removeCandidate = signal<McpToken | null>(null);
+
+  readonly clientOptions = computed<SelectOption[]>(() => [
+    { value: 'claude-code', label: 'Claude Code' },
+    { value: 'vscode', label: 'VS Code' },
+    { value: 'other', label: this.localization.translateKey(AppStrings.Settings.Mcp.OtherClients) },
+  ]);
+
+  readonly extensionAvailable = computed(() => this.mcp.endpoint()?.extensionAvailable === true);
 
   readonly configSnippet = computed(() => {
     const token = this.revealed();
@@ -62,11 +80,19 @@ export class AiClientsSettingsComponent {
     if (!token || !url) {
       return '';
     }
-    return JSON.stringify({
-      mcpServers: {
-        'macro-deck': { type: 'http', url, headers: { Authorization: `Bearer ${token.plaintext}` } },
-      },
-    }, null, 2);
+    const authorization = `Bearer ${token.plaintext}`;
+    switch (this.client()) {
+      case 'claude-code':
+        return `claude mcp add --transport http ${SERVER_NAME} ${url} --header "Authorization: ${authorization}"`;
+      case 'vscode':
+        return JSON.stringify({
+          servers: { [SERVER_NAME]: { type: 'http', url, headers: { Authorization: authorization } } },
+        }, null, 2);
+      default:
+        return JSON.stringify({
+          mcpServers: { [SERVER_NAME]: { type: 'http', url, headers: { Authorization: authorization } } },
+        }, null, 2);
+    }
   });
 
   constructor() {
@@ -100,7 +126,7 @@ export class AiClientsSettingsComponent {
     try {
       const response = await this.mcp.createToken({ name });
       if (response.success && response.token && response.plaintext) {
-        this.revealed.set({ name: response.token.name, plaintext: response.plaintext });
+        this.revealed.set({ id: response.token.id, name: response.token.name, plaintext: response.plaintext });
       } else {
         this.showError(response.error?.message, AppStrings.Developer.Tokens.CreateFailed);
       }
@@ -108,6 +134,34 @@ export class AiClientsSettingsComponent {
       this.showError(undefined, AppStrings.Developer.Tokens.CreateFailed);
     } finally {
       this.creating.set(false);
+    }
+  }
+
+  selectClient(value: string): void {
+    this.client.set(value as McpClientKind);
+  }
+
+  async downloadExtension(): Promise<void> {
+    const token = this.revealed();
+    if (!token || this.downloadingExtension()) {
+      return;
+    }
+
+    this.downloadingExtension.set(true);
+    try {
+      const download = await this.mcp.downloadClaudeDesktopExtension(token.id, token.plaintext);
+      if (!download.ok) {
+        this.showError(download.response.error?.message, AppStrings.Settings.Mcp.ClaudeDesktopSaveFailed);
+        return;
+      }
+      const result = await this.fileSave.save(download.blob, EXTENSION_FILE_NAME);
+      if (result.status === 'error') {
+        this.showError(result.message, AppStrings.Settings.Mcp.ClaudeDesktopSaveFailed);
+      }
+    } catch {
+      this.showError(undefined, AppStrings.Settings.Mcp.ClaudeDesktopSaveFailed);
+    } finally {
+      this.downloadingExtension.set(false);
     }
   }
 

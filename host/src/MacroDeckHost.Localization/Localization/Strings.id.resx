@@ -1063,6 +1063,27 @@ Tutup aplikasi yang memakai port tersebut (atau Macro Deck yang masih berjalan) 
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck belum sepenuhnya diperbarui</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} belum diatur. Instal ulang ekstensi Claude Desktop dari Pengaturan &gt; Klien AI.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck tidak berjalan. Mulai Macro Deck, lalu coba lagi.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck menolak token akses karena token tersebut sudah dicabut atau dihapus. Buat token baru di Pengaturan &gt; Klien AI, lalu instal ulang ekstensi.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Server MCP Macro Deck tidak tersedia karena aplikasi terkunci atau tidak mendukung klien AI. Buka kunci Macro Deck, lalu coba lagi.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck menolak permintaan (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>Koneksi ke Macro Deck terputus sebelum ada jawaban. Permintaan mungkin sudah dijalankan, jadi periksa dulu sebelum mencobanya lagi.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>Sesi MCP belum diinisialisasi.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Tentang Macro Deck</value>
   </data>
@@ -2939,6 +2960,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Kunci pemulihan itu tidak membuka instalasi ini.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Token akses ini tidak dapat digunakan lagi. Buat token baru untuk mengunduh ekstensi.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Ekstensi Claude Desktop hanya tersedia di aplikasi Macro Deck yang terpasang di macOS dan Windows.</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>Pilih penyedia.</value>
@@ -17161,6 +17188,18 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Tingkat minimum</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Unduh untuk Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Buka berkas yang diunduh di Claude Desktop untuk memasang Macro Deck di sana. Berkas ini berisi token ini, jadi hapus setelah pemasangan.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Ekstensi Claude Desktop tidak dapat disimpan</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>Klien AI</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>Konfigurasi klien</value>
   </data>
@@ -17207,6 +17246,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Belum pernah</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Klien lain</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>Izinkan</value>
@@ -25410,6 +25452,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>meneruskan {name} ke blok disetujui yang memakai rahasia</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Memungkinkan Claude bekerja dengan pengaturan Macro Deck di komputer ini: melihat dan membuat tombol, folder, dan otomatisasi, serta menjalankan aksi. Claude tidak pernah melihat rahasia.</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>Masukkan nilai.</value>

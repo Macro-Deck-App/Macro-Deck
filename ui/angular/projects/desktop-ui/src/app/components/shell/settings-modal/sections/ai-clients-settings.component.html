@@ -137,8 +137,25 @@
       <div class="ai-clients__reveal">
         <p class="ai-clients__hint">{{ 'macrodeck.app:Developer.Tokens.RevealWarning' | translate:{ name: token.name } }}</p>
         <shared-copy-value data-testid="mcp-token-value" [label]="'macrodeck.app:Developer.Tokens.TokenValueLabel' | translate" [value]="token.plaintext" [fallbackZIndex]="1100" />
+        @if (extensionAvailable()) {
+          <div class="ai-clients__extension">
+            <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.ClaudeDesktopHint' | translate }}</p>
+            <shared-button type="button" variant="secondary" data-testid="mcp-download-extension" [loading]="downloadingExtension()" (click)="downloadExtension()">
+              {{ 'macrodeck.app:Settings.Mcp.ClaudeDesktopAction' | translate }}
+            </shared-button>
+          </div>
+        }
         @if (configSnippet()) {
-          <shared-copy-value [label]="'macrodeck.app:Settings.Mcp.ConfigLabel' | translate" [value]="configSnippet()" [fallbackZIndex]="1100" />
+          <div class="form-group">
+            <span class="form-label">{{ 'macrodeck.app:Settings.Mcp.ClientSelectLabel' | translate }}</span>
+            <shared-select
+              data-testid="mcp-client-select"
+              [ariaLabel]="'macrodeck.app:Settings.Mcp.ClientSelectLabel' | translate"
+              [options]="clientOptions()"
+              [ngModel]="client()"
+              (ngModelChange)="selectClient($event)" />
+          </div>
+          <shared-copy-value data-testid="mcp-client-config" [label]="'macrodeck.app:Settings.Mcp.ConfigLabel' | translate" [value]="configSnippet()" [fallbackZIndex]="1100" />
         }
         <shared-button-group align="end">
           <shared-button type="button" variant="primary" (click)="acknowledgeReveal()">

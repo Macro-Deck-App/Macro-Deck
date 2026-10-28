@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { AppStrings } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
-import { CreateMcpTokenRequest, CreateMcpTokenResponse, McpConnection, McpEndpoint, McpProviderPolicy, McpRiskMode, McpToken, McpTokenActionResponse } from '../shared/transport/mcp-messages';
+import { ClaudeDesktopExtensionDownload, CreateMcpTokenRequest, CreateMcpTokenResponse, McpConnection, McpEndpoint, McpProviderPolicy, McpRiskMode, McpToken, McpTokenActionResponse } from '../shared/transport/mcp-messages';
 
 @Injectable({ providedIn: 'root' })
 export class McpSettingsService {
@@ -57,6 +57,10 @@ export class McpSettingsService {
         provider.integrationId === integrationId ? { ...provider, override: mode } : provider));
     }
     return response;
+  }
+
+  downloadClaudeDesktopExtension(id: string, token: string): Promise<ClaudeDesktopExtensionDownload> {
+    return this.api.downloadClaudeDesktopExtension(id, token);
   }
 
   async deleteToken(id: string): Promise<McpTokenActionResponse> {

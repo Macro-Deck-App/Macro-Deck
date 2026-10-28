@@ -34,7 +34,9 @@ public record McpConnectionBody(
 
 public record GetMcpConnectionsResponse(IReadOnlyList<McpConnectionBody> Connections);
 
-public record GetMcpEndpointResponse(bool Available, string? Url, string ContractVersion);
+public record GetMcpEndpointResponse(bool Available, string? Url, string ContractVersion, bool ExtensionAvailable);
+
+public record DownloadClaudeDesktopExtensionBody(string? Token);
 
 public record McpProviderPolicyBody(
 	string IntegrationId,
@@ -55,17 +57,20 @@ public class McpController : ControllerBase
 	private readonly IMcpConnections _connections;
 	private readonly IMcpRiskPolicy _policy;
 	private readonly IIntegrationRegistry _integrations;
+	private readonly McpTextResolver _text;
 
 	public McpController(
 		IMcpTokenService tokenService,
 		IMcpConnections connections,
 		IMcpRiskPolicy policy,
-		IIntegrationRegistry integrations)
+		IIntegrationRegistry integrations,
+		McpTextResolver text)
 	{
 		_tokenService = tokenService;
 		_connections = connections;
 		_policy = policy;
 		_integrations = integrations;
+		_text = text;
 	}
 
 	[HttpGet("policy")]
@@ -102,7 +107,39 @@ public class McpController : ControllerBase
 	{
 		return new GetMcpEndpointResponse(true,
 			$"http://127.0.0.1:{HostEndpoints.PublicPort}{McpPaths.Endpoint}",
-			McpContract.Version);
+			McpContract.Version,
+			ClaudeDesktopExtension.IsAvailable());
+	}
+
+	[HttpPost("tokens/{id:guid}/claude-desktop-extension")]
+	public async Task<IActionResult> DownloadClaudeDesktopExtension(Guid id, DownloadClaudeDesktopExtensionBody body)
+	{
+		var executable = ClaudeDesktopExtension.ShellExecutable();
+		var platform = ClaudeDesktopExtension.CurrentPlatform();
+		if (executable is null || platform is null)
+		{
+			return Conflict(Failure("extension_unavailable", AppStrings.Errors.Mcp.ExtensionUnavailable()));
+		}
+
+		var token = string.IsNullOrEmpty(body.Token) ? null : await _tokenService.Find(body.Token);
+		if (token is null || token.Id != id)
+		{
+			return NotFound(Failure("invalid_token", AppStrings.Errors.Mcp.ExtensionTokenInvalid()));
+		}
+
+		if (token.RevokedAt is not null)
+		{
+			return Conflict(Failure("token_revoked", AppStrings.Errors.Mcp.ExtensionTokenInvalid()));
+		}
+
+		var description = await _text.Resolve(AppStrings.Mcp.Extension.Description()) ?? string.Empty;
+		var archive = ClaudeDesktopExtension.Build(new ClaudeDesktopExtensionContent(executable,
+			platform,
+			body.Token!,
+			ClaudeDesktopExtension.VersionOf(typeof(McpController).Assembly.GetName().Version),
+			description));
+		Response.Headers.CacheControl = "no-store";
+		return File(archive, "application/zip", ClaudeDesktopExtension.FileName);
 	}
 
 	[HttpGet("tokens")]

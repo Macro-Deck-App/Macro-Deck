@@ -1063,6 +1063,27 @@
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck обновлён не полностью</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>Переменная {variable} не задана. Установите расширение для Claude Desktop заново в разделе Настройки &gt; ИИ-клиенты.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck не запущен. Запустите Macro Deck и повторите попытку.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck отклонил токен доступа: он был отозван или удалён. Создайте новый токен в разделе Настройки &gt; ИИ-клиенты и установите расширение заново.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Сервер MCP в Macro Deck недоступен: приложение заблокировано или не поддерживает ИИ-клиентов. Разблокируйте Macro Deck и повторите попытку.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck отклонил запрос (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>Соединение с Macro Deck прервалось до получения ответа. Запрос мог быть выполнен, поэтому проверьте это перед повтором.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>Сеанс MCP не инициализирован.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>О Macro Deck</value>
   </data>
@@ -2939,6 +2960,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Этот ключ восстановления не открывает данную установку.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Этот токен доступа больше нельзя использовать. Создайте новый токен, чтобы скачать расширение.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Расширение для Claude Desktop доступно только в установленном приложении Macro Deck для macOS и Windows.</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>Выберите поставщика.</value>
@@ -17161,6 +17188,18 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Минимальный уровень</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Скачать для Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Откройте скачанный файл в Claude Desktop, чтобы установить туда Macro Deck. Файл содержит этот токен, поэтому удалите его после установки.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Не удалось сохранить расширение для Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>ИИ-клиент</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>Конфигурация клиента</value>
   </data>
@@ -17207,6 +17246,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Никогда</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Другие клиенты</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>Разрешать</value>
@@ -25410,6 +25452,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>передача {name} в одобренный блок с секретом</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Позволяет Claude работать с настройкой Macro Deck на этом компьютере: просматривать и создавать кнопки, папки и автоматизации, а также выполнять действия. Claude никогда не видит секреты.</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>Введите значение.</value>
