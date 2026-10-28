@@ -1411,6 +1411,21 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Menunggu otorisasi…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Otorisasi selesai</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Jendela ini dapat ditutup untuk kembali ke Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Kembali ke Macro Deck untuk melihat penyebabnya dan coba lagi. Jendela ini dapat ditutup.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Otorisasi tidak dapat dicocokkan</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Jendela ini dapat ditutup.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Tampilan ini sementara tidak tersedia. Lanjutkan dengan kolom di bawah.</value>
   </data>

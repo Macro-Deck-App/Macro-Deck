@@ -1411,6 +1411,21 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Wachten op autorisatie…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Autorisatie voltooid</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Je kunt dit venster sluiten en teruggaan naar Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Ga terug naar Macro Deck om de reden te zien en probeer het opnieuw. Je kunt dit venster sluiten.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Autorisatie kon niet worden gekoppeld</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Je kunt dit venster sluiten.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Deze weergave is tijdelijk niet beschikbaar. Ga verder met de velden hieronder.</value>
   </data>

@@ -1411,6 +1411,21 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>प्राधिकरण की प्रतीक्षा है…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>प्राधिकरण पूरा हुआ</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>आप यह विंडो बंद करके Macro Deck पर लौट सकते हैं।</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>कारण देखने और फिर से प्रयास करने के लिए Macro Deck पर लौटें। आप यह विंडो बंद कर सकते हैं।</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>प्राधिकरण का मिलान नहीं हो सका</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>आप यह विंडो बंद कर सकते हैं।</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>यह व्यू अभी उपलब्ध नहीं है। नीचे दिए फ़ील्ड के साथ जारी रखें।</value>
   </data>

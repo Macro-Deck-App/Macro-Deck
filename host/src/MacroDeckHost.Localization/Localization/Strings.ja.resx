@@ -1411,6 +1411,21 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>認可を待っています…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>認可が完了しました</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>このウィンドウを閉じて Macro Deck に戻ってください。</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Macro Deck に戻って理由を確認し、もう一度お試しください。このウィンドウは閉じてかまいません。</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>認可を照合できませんでした</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>このウィンドウは閉じてかまいません。</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>この表示は一時的に利用できません。下のフィールドで続行してください。</value>
   </data>

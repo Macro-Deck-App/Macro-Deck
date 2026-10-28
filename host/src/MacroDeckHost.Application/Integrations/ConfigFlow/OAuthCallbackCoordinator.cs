@@ -44,6 +44,14 @@ public sealed class OAuthCallbackCoordinator : IOAuthCallbackCoordinator
 		return _pending.TryGetValue(state, out var pending) ? pending.Code : null;
 	}
 
+	public void ExpectCallback(string state)
+	{
+		if (!string.IsNullOrEmpty(state) && _pending.TryGetValue(state, out var pending))
+		{
+			pending.ClearCode();
+		}
+	}
+
 	public async Task<bool> HandleCallbackAsync(
 		string state,
 		string? code,
@@ -56,7 +64,14 @@ public sealed class OAuthCallbackCoordinator : IOAuthCallbackCoordinator
 			return false;
 		}
 
-		pending.Code = code;
+		// The state reaches plugins and the provider, so once an attempt captured a code nobody else
+		// holding the state may replace it; a new External step re-arms it through ExpectCallback.
+		var alreadyCaptured = string.IsNullOrEmpty(code) ? pending.Code is not null : !pending.TryCaptureCode(code);
+		if (alreadyCaptured)
+		{
+			_logger.Warning("Ignored an OAuth callback for a state that already received a code");
+			return false;
+		}
 
 		await _transport.Send(new ConfigFlowAuthorizedNotification
 			{
@@ -79,6 +94,8 @@ public sealed class OAuthCallbackCoordinator : IOAuthCallbackCoordinator
 
 	private sealed class Pending
 	{
+		private string? _code;
+
 		public Pending(Guid flowId)
 		{
 			FlowId = flowId;
@@ -86,6 +103,16 @@ public sealed class OAuthCallbackCoordinator : IOAuthCallbackCoordinator
 
 		public Guid FlowId { get; }
 
-		public string? Code { get; set; }
+		public string? Code => Volatile.Read(ref _code);
+
+		public bool TryCaptureCode(string code)
+		{
+			return Interlocked.CompareExchange(ref _code, code, null) is null;
+		}
+
+		public void ClearCode()
+		{
+			Volatile.Write(ref _code, null);
+		}
 	}
 }

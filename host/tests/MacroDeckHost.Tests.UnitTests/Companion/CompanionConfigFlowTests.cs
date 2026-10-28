@@ -196,6 +196,10 @@ internal sealed class CompanionConfigFlowTests
 			return null;
 		}
 
+		public void ExpectCallback(string state)
+		{
+		}
+
 		public Task<bool> HandleCallbackAsync(
 			string state,
 			string? code,
