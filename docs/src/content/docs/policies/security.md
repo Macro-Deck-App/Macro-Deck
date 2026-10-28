@@ -387,7 +387,9 @@ push, pull, install, uninstall, connect) are refused for plugins and built-in in
 operations (keys, taps, swipes, text, starting and stopping an app, opening a URI, reboot, screenshot, screen
 status) still run, so a deck button bound to one keeps working; each is a fixed command whose arguments the
 host validates and quotes. A plugin allowed to use ADB can therefore, for example, type text or capture the
-screen of an attached device while the computer is locked.
+screen of an attached device while the computer is locked. On Linux the host cannot detect the lock and is
+never in the locked state, so none of these operations are refused there and deck actions keep running on a
+locked computer.
 
 <a id="companion-devices"></a>
 

@@ -9,7 +9,8 @@ iPad. On iPhone and iPad, the **Run Script** action in Shortcuts does the same w
 [Shortcuts and Siri](/guide/companion-app/ios/#shortcuts-and-siri).
 
 A script runs the same way it does from Shortcuts: it needs a license or a running trial, the computer reachable
-over the network, and the computer unlocked. Scripts cannot run over a USB cable this way. Only scripts that do
+over the network, and the computer unlocked (on Windows and macOS; a locked Linux computer still runs it, see
+[Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked)). Scripts cannot run over a USB cable this way. Only scripts that do
 not run on a widget are offered.
 
 ## Turn it on
@@ -138,6 +139,8 @@ Then choose where it goes:
 
 Tapping a shortcut runs the script with the values you set, without opening Macro Deck, and a short message says
 whether it ran. If the computer is off, unreachable or locked, the message says so and the script does not run.
+A locked Linux computer still runs it, see
+[Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked).
 
 The values are saved with the shortcut on your device. Do not put a password or a token into an input. To change
 the values, remove the shortcut and create it again. Remove a home screen shortcut on the home screen, and a line

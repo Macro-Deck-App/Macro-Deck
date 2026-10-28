@@ -23,7 +23,8 @@ Siri:
 
 **Run Script** lists every script of your saved computers that does not run on a widget. It needs a license or a
 running trial, the device unlocked, and the computer reachable over the network: scripts cannot run over a USB
-cable from Shortcuts. If the computer is locked, the script does not run. When a script takes longer, Shortcuts
+cable from Shortcuts. If a Windows or Mac computer is locked, the script does not run; a locked Linux computer
+still runs it, see [Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked). When a script takes longer, Shortcuts
 says it started and is still running.
 
 With the Shortcuts app's own automations, a script can run when you arrive home, at a time of day, when a Focus

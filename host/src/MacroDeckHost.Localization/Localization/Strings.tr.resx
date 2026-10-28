@@ -17484,7 +17484,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Anahtar halkasını korumak için yedek kurtarma anahtarınızı dışa aktarın. O zamana kadar diskte okunabilir kalır.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Bu bilgisayar kilitliyken, burada ne seçerseniz seçin, eylem çalıştırılmasını engeller.</value>
+    <value>Bu bilgisayar kilitliyken, burada ne seçerseniz seçin, eylem çalıştırılmasını engeller. Linux'ta Macro Deck bu bilgisayarın kilitli olduğunu algılayamaz; bu nedenle eylemler çalışmaya devam eder ve bağlı istemciler kilitlenmez.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Kilit ekranı</value>

@@ -17484,7 +17484,7 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Exporteer je herstelsleutel van de back-up om de sleutelbos te beschermen. Tot die tijd blijft hij leesbaar op schijf.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blokkeert het uitvoeren van acties zolang deze computer is vergrendeld, wat je hier ook kiest.</value>
+    <value>Blokkeert het uitvoeren van acties zolang deze computer is vergrendeld, wat je hier ook kiest. Op Linux kan Macro Deck niet zien dat deze computer is vergrendeld, dus acties blijven gewoon draaien en verbonden clients worden niet vergrendeld.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Vergrendelscherm</value>

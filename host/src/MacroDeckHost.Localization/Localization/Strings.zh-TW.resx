@@ -17484,7 +17484,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>請匯出您的備份復原金鑰以保護金鑰環。在此之前，它會以可直接讀取的方式保存在磁碟上。</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>無論您在此選擇什麼，只要此電腦處於鎖定狀態，就會封鎖動作執行。</value>
+    <value>無論您在此選擇什麼，只要此電腦處於鎖定狀態，就會封鎖動作執行。在 Linux 上，Macro Deck 無法偵測此電腦是否已鎖定，因此動作會繼續執行，已連線的用戶端也不會被鎖定。</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>鎖定畫面</value>

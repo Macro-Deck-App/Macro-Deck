@@ -17483,7 +17483,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Esporta la tua chiave di ripristino di backup per proteggere il portachiavi. Fino ad allora resta leggibile sul disco.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blocca l'esecuzione delle azioni mentre questo computer è bloccato, qualunque sia la scelta fatta qui.</value>
+    <value>Blocca l'esecuzione delle azioni mentre questo computer è bloccato, qualunque sia la scelta fatta qui. Su Linux, Macro Deck non riesce a rilevare che questo computer è bloccato, quindi le azioni continuano a essere eseguite e i client connessi non vengono bloccati.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Schermata di blocco</value>

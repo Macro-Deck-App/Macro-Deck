@@ -16429,7 +16429,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Settings.Security.KeyRing.Unprotected.NoKeystore': 'This system offers no secret storage Macro Deck can use, so the key ring stays readable on disk.',
 	'macrodeck.app:Settings.Security.KeyRing.Unprotected.Portable': 'Portable installations keep the key ring readable, so they still work on another computer.',
 	'macrodeck.app:Settings.Security.KeyRing.Unprotected.RecoveryKeyNotExported': 'Export your backup recovery key to protect the key ring. Until then it stays readable on disk.',
-	'macrodeck.app:Settings.Security.LockScreenDescription': 'Blocks action execution while this computer is locked, no matter what you choose here.',
+	'macrodeck.app:Settings.Security.LockScreenDescription': 'Blocks action execution while this computer is locked, no matter what you choose here. On Linux, Macro Deck cannot tell that this computer is locked, so actions keep running and connected clients are not locked.',
 	'macrodeck.app:Settings.Security.LockScreenHeading': 'Lock screen',
 	'macrodeck.app:Settings.Security.LockScreenToggleDescription': 'While this computer is locked, connected web clients show a lock screen instead of the deck. Turning this off only keeps the deck visible - locking this computer still blocks every action.',
 	'macrodeck.app:Settings.Security.LockScreenToggleLabel': 'Lock clients when this computer is locked',

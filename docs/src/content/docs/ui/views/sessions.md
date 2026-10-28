@@ -199,7 +199,8 @@ plugin, or of an integration served the same way, never reach the provider - the
 hardware presses and actions from running then. The client's request is refused with `HOST_LOCKED`, and a
 press, long press, double press, tap, change, adjust, swipe or end of a drag shows the client the same
 "locked" failure a refused action shows. `reveal` is still delivered, so a widget can keep its content up to
-date. You do not need a lock check of your own.
+date. You do not need a lock check of your own. On Linux the host cannot detect the lock and is never in the
+locked state, so these events are always delivered there.
 
 ## The lifecycle every surface shares
 
