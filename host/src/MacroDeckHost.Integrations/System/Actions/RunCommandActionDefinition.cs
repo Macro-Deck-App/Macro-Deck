@@ -4,6 +4,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Platform.Applications;
 using MacroDeckHost.Platform.Processes;
 using Serilog;
 
@@ -212,6 +213,8 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			{
 				startInfo.WorkingDirectory = workingDirectory;
 			}
+
+			AppImageEnvironment.RestoreOutside(startInfo);
 
 			Process? process = null;
 			using var cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);

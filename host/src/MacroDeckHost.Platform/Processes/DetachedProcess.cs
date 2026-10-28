@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.Versioning;
+using MacroDeckHost.Platform.Applications;
 using MacroDeckHost.Platform.Native;
 
 namespace MacroDeckHost.Platform.Processes;
@@ -30,6 +31,7 @@ internal static class DetachedProcess
 	[UnsupportedOSPlatform("windows")]
 	public static Task<int> Spawn(ProcessStartInfo startInfo)
 	{
+		AppImageEnvironment.RestoreOutside(startInfo);
 		var environment = startInfo.Environment
 			.Where(variable => variable.Value is not null)
 			.Select(variable => $"{variable.Key}={variable.Value}")
