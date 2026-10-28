@@ -76,6 +76,19 @@ pub fn claim_quit() -> bool {
     !QUITTING.swap(true, Ordering::SeqCst)
 }
 
+pub fn quitting_while<T, E>(step: impl FnOnce() -> Result<T, E>) -> Result<T, E> {
+    hold_quitting(&QUITTING, step)
+}
+
+fn hold_quitting<T, E>(flag: &AtomicBool, step: impl FnOnce() -> Result<T, E>) -> Result<T, E> {
+    let was_quitting = flag.swap(true, Ordering::SeqCst);
+    let result = step();
+    if result.is_err() && !was_quitting {
+        flag.store(false, Ordering::SeqCst);
+    }
+    result
+}
+
 pub fn request_quit(app: &AppHandle) {
     if QUITTING.swap(true, Ordering::SeqCst) {
         return;
@@ -386,7 +399,42 @@ fn main() {
 mod tests {
     use tauri::plugin::Plugin;
 
-    use super::{decide_exit, quit_steps, ExitRequest, QuitInstall, QuitSteps};
+    use std::sync::atomic::{AtomicBool, Ordering};
+
+    use super::{decide_exit, hold_quitting, quit_steps, ExitRequest, QuitInstall, QuitSteps};
+
+    fn quit_can_be_claimed(flag: &AtomicBool) -> bool {
+        !flag.swap(true, Ordering::SeqCst)
+    }
+
+    #[test]
+    fn quit_works_again_after_an_install_that_failed_without_quitting() {
+        let flag = AtomicBool::new(false);
+
+        let result = hold_quitting(&flag, || Err::<(), _>("bundle not writable"));
+
+        assert!(result.is_err());
+        assert!(quit_can_be_claimed(&flag));
+    }
+
+    #[test]
+    fn a_failed_install_on_quit_keeps_the_app_quitting() {
+        let flag = AtomicBool::new(true);
+
+        let _ = hold_quitting(&flag, || Err::<(), _>("bundle not writable"));
+
+        assert!(!quit_can_be_claimed(&flag));
+    }
+
+    #[test]
+    fn the_app_is_quitting_while_the_install_runs_and_after_it_succeeds() {
+        let flag = AtomicBool::new(false);
+
+        let seen = hold_quitting(&flag, || Ok::<_, ()>(flag.load(Ordering::SeqCst)));
+
+        assert_eq!(seen, Ok(true));
+        assert!(!quit_can_be_claimed(&flag));
+    }
 
     #[test]
     fn a_failed_install_on_quit_stops_the_host_and_shows_the_failure_before_exiting() {

@@ -1412,6 +1412,21 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Oczekiwanie na autoryzację…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Autoryzacja zakończona</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>To okno można zamknąć i wrócić do Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Przyczyna jest widoczna w Macro Deck, gdzie można spróbować ponownie. To okno można zamknąć.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Nie można dopasować autoryzacji</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>To okno można zamknąć.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Ten widok jest tymczasowo niedostępny. Kontynuuj, korzystając z pól poniżej.</value>
   </data>
@@ -2934,6 +2949,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Kompilacja deweloperska przejęła tę wtyczkę. Przed instalacją lub aktualizacją zakończ przejęcie.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Ta wtyczka jest podpisana przez innego wydawcę niż już zainstalowana wersja, więc nie została zainstalowana.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Części zapisanych danych wtyczki nie udało się usunąć, ponieważ plik jest nadal używany, więc wtyczka nie została odinstalowana. Zamknij programy, które go używają, i spróbuj ponownie.</value>

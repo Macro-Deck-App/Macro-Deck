@@ -251,6 +251,33 @@ The host resolves a package to exactly one verdict:
 | An update to a plugin installed as `Trusted` | No, regardless of consent |
 | An update Macro Deck found for you | Only ever reported to you, never installed unsigned on your behalf |
 
+**A plugin id stays with the publisher it was first admitted from.** Once a version of a plugin was admitted
+as `Trusted`, a later package for the same plugin id - a higher version, an older one, or a forced reinstall
+of the same version - must be signed under a certificate issued to the same subject: the certificate's
+`subject.kind` and `subject.id`, the publisher the Creator Portal verified. The certificate id is not
+compared, so a publisher whose certificate is rotated or re-issued, or whose certificate comes from a new
+issuer, keeps updating. A package that verifies as `Trusted` but was issued to another subject is refused
+with `SignerMismatch` (`signer_mismatch` over HTTP), and the installed version stays active.
+
+| Situation | Outcome |
+| --- | --- |
+| A file you select or upload, or a URL, signed by another publisher | Refused, with or without consent |
+| A Store install, update or automatic update signed by another publisher | Refused; the Store marks the operation failed and does not offer a retry |
+| A test build signed by another publisher | Refused. Real test builds are unsigned and are not compared |
+| An unsigned update over an unsigned plugin | Unchanged: there is no publisher to compare, so the per-install confirmation decides |
+| The first signed version over unsigned ones | Installed, and its publisher is compared from then on |
+
+The comparison uses the most recently admitted trusted version of the plugin id. Its record is kept even
+after its version folder is pruned, so pruning never lowers the trust tier either: an unsigned package is
+still refused as a downgrade. A version admitted before Macro Deck recorded the subject is matched by its
+exact certificate id instead, so a rotated certificate over such a version is refused until the plugin is
+reinstalled. A Creator Portal [transfer](/creator-portal/projects/#transfer-a-project) of a signed plugin
+changes the subject too, so installed copies refuse the new publisher's releases. Uninstalling clears the
+comparison; unless you also delete the plugin's
+stored data, a package from another publisher installed afterwards receives that data. Verifiers read the
+subject from `PackageVerifyResult.Subject` in `MacroDeck.Signing`. See
+[ADR 0112](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0112-a-trusted-plugin-id-stays-with-its-publisher.md).
+
 Icon packs and profile templates have no signature of their own and are unaffected. A signature that is
 *present but does not verify* is a failure, not a weaker kind of unsigned: no confirmation installs it. An
 unknown signature algorithm fails closed rather than being treated more leniently than no signature.

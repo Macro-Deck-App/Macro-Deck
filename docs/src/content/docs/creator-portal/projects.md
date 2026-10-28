@@ -70,7 +70,9 @@ declined.
 
 After a transfer:
 
-- The Package ID stays the same, so installed copies keep updating.
+- The Package ID stays the same. Installed copies of a plugin that was released signed refuse releases
+  signed with the new publisher's key, because Macro Deck never lets another publisher replace an installed
+  signed plugin: their users have to uninstall and reinstall it.
 - The Store shows the new publisher from the next release on, and releases are signed with the new
   publisher's key.
 - For a plugin, the next build must name the new publisher as `publisher.name` in its `manifest.json`.

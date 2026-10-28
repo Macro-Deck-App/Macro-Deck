@@ -1412,6 +1412,21 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>In attesa di autorizzazione…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Autorizzazione completata</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Puoi chiudere questa finestra e tornare a Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Torna a Macro Deck per vedere il motivo e riprovare. Puoi chiudere questa finestra.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Impossibile associare l'autorizzazione</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Puoi chiudere questa finestra.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Questa visualizzazione non è temporaneamente disponibile. Continua con i campi qui sotto.</value>
   </data>
@@ -2934,6 +2949,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Una build di sviluppo ha preso il controllo di questo plugin. Termina la presa di controllo prima di installarlo o aggiornarlo.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Questo plugin è firmato da un autore diverso da quello della versione che hai già, quindi non è stato installato.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Alcuni dati salvati del plugin non sono stati eliminati perché un file è ancora in uso, quindi il plugin non è stato disinstallato. Chiudi i programmi che lo usano e riprova.</value>

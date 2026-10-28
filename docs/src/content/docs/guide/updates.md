@@ -70,6 +70,9 @@ before it says the update is installing. The Macro Deck window shows the same as
 step 2 of 2, the install. **Cancel update** in either window stops the backup and leaves the update
 uninstalled; you can install it again later. See [Backups](/guide/backups/).
 
+While Macro Deck asks for the recovery key when it starts, it cannot read its data and so cannot make a
+backup. An update you install then goes ahead without one.
+
 ## Extension updates
 
 Plugins and icon packs from the Store have their own updates, set in **Settings > Store**.

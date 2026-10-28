@@ -56,14 +56,3 @@ public sealed class CalendarWidgetsDeletedHandler(CalendarWidgetLifecycle lifecy
 		return lifecycle.DeletedAsync(notification.WidgetIds);
 	}
 }
-
-// A deleted profile takes its folders out of the cache without a deletion notice per widget.
-public sealed class CalendarWidgetProfileDeletedHandler(CalendarWidgetLifecycle lifecycle)
-	: INotificationHandler<ProfileDeletedNotification>
-{
-	public ValueTask Handle(ProfileDeletedNotification notification, CancellationToken cancellationToken)
-	{
-		lifecycle.ProfileDeleted();
-		return ValueTask.CompletedTask;
-	}
-}

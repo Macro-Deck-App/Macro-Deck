@@ -232,7 +232,14 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	public bool SupportsBackgroundSend => _display != IntPtr.Zero;
 
 	public KeyModifier BackgroundModifiers
-		=> KeyModifier.Control | KeyModifier.Shift | KeyModifier.Alt | KeyModifier.Meta;
+		=> KeyModifier.Control
+			| KeyModifier.Shift
+			| KeyModifier.Alt
+			| KeyModifier.Meta
+			| KeyModifier.RightControl
+			| KeyModifier.RightShift
+			| KeyModifier.RightAlt
+			| KeyModifier.RightMeta;
 
 	public string? GetForegroundProcessName()
 	{
@@ -358,14 +365,52 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		}
 
 		var keycode = keysymToKeycode(keysym);
-		if (keycode == 0
-			&& key is >= KeyCode.A and <= KeyCode.Z
-			&& NativeKeys.TryGetWindowsScanCode(key, out var letter))
+		if (keycode != 0)
+		{
+			return keycode;
+		}
+
+		if (key is >= KeyCode.A and <= KeyCode.Z && NativeKeys.TryGetWindowsScanCode(key, out var letter))
 		{
 			return letter + evdevOffset;
 		}
 
-		return keycode;
+		// A layout can put another keysym on a modifier key (AltGr puts ISO_Level3_Shift on Right Alt),
+		// so a modifier no key is labelled with presses its physical key.
+		return TryGetModifierEvdevCode(key, out var modifier) ? modifier + evdevOffset : 0;
+	}
+
+	internal static uint ResolveStateMask(
+		KeyCode key,
+		uint keycode,
+		Func<uint, nuint> lookup,
+		Func<nuint, uint> keysymToModifiers)
+	{
+		if (!TryGetStateMask(key, out var fallback))
+		{
+			return 0;
+		}
+
+		var keysym = lookup(keycode);
+		return keysym == 0 ? fallback : keysymToModifiers(keysym);
+	}
+
+	private static bool TryGetModifierEvdevCode(KeyCode key, out uint evdevCode)
+	{
+		evdevCode = key switch
+		{
+			KeyCode.LeftControl => 29,
+			KeyCode.LeftShift => 42,
+			KeyCode.RightShift => 54,
+			KeyCode.LeftAlt => 56,
+			KeyCode.RightControl => 97,
+			KeyCode.RightAlt => 100,
+			KeyCode.LeftMeta => 125,
+			KeyCode.RightMeta => 126,
+			_ => 0u
+		};
+
+		return evdevCode != 0;
 	}
 
 	private static bool TryGetKeysym(KeyCode key, out nuint keysym)
@@ -599,7 +644,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		private readonly IntPtr _display;
 		private readonly nuint _root;
 		private readonly IReadOnlyList<nuint> _windows;
-		private uint _state;
+		private readonly Dictionary<KeyCode, uint> _heldMasks = new();
 
 		public LinuxTargetWindow(IntPtr display, nuint root, IReadOnlyList<nuint> windows)
 		{
@@ -674,21 +719,31 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 				return;
 			}
 
-			if (TryGetStateMask(key, out var mask))
+			if (press)
 			{
-				if (press)
+				var mask = ResolveStateMask(key,
+					keycode,
+					code => LookupKeysym(_display, code, 0),
+					keysym => XkbKeysymToModifiers(_display, keysym));
+				if (mask != 0)
 				{
-					_state |= mask;
+					_heldMasks[key] = mask;
 				}
-				else
-				{
-					_state &= ~mask;
-				}
+			}
+			else
+			{
+				_heldMasks.Remove(key);
+			}
+
+			var eventState = 0u;
+			foreach (var mask in _heldMasks.Values)
+			{
+				eventState |= mask;
 			}
 
 			foreach (var window in _windows)
 			{
-				SendKeyEvent(_display, _root, window, keycode, _state, press);
+				SendKeyEvent(_display, _root, window, keycode, eventState, press);
 			}
 
 			_ = XFlush(_display);

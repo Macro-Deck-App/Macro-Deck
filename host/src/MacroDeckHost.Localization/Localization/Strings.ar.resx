@@ -1411,6 +1411,21 @@
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>في انتظار التفويض…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>اكتمل التفويض</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>أغلق هذه النافذة وارجع إلى Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>ارجع إلى Macro Deck لمعرفة السبب والمحاولة مرة أخرى. يمكن إغلاق هذه النافذة.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>تعذّرت مطابقة التفويض</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>يمكن إغلاق هذه النافذة.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>هذا العرض غير متاح مؤقتًا. تابع باستخدام الحقول أدناه.</value>
   </data>
@@ -2933,6 +2948,9 @@
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>استبدلت نسخة تطوير هذا المكوّن الإضافي. أنهِ الاستبدال قبل تثبيته أو تحديثه.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>هذا المكوّن الإضافي موقّع من ناشر مختلف عن ناشر الإصدار الذي لديك، لذلك لم يُثبَّت.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>تعذّر حذف بعض البيانات المحفوظة للمكوّن الإضافي لأن ملفاً لا يزال قيد الاستخدام، لذا لم يتم إلغاء تثبيته. أغلق البرامج التي تستخدمه ثم حاول مرة أخرى.</value>

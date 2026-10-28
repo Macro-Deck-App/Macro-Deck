@@ -271,4 +271,91 @@ public class JsonUserVariableStoreTests
 		Assert.That(loaded, Has.Count.EqualTo(2));
 		Assert.That(loaded.Select(v => v.Name), Is.EquivalentTo(["First", "Second"]));
 	}
+
+	[Test]
+	public void Saves_after_an_unreadable_load_keep_every_unreadable_copy()
+	{
+		var path = Path.Combine(_paths.DataDirectory, "user-variables.json");
+		var originals = WriteUnreadableCopies(path);
+
+		Assert.That(_store.Load(), Is.Empty);
+		_store.Save([NewUserVariable("First")]);
+		_store.Save([NewUserVariable("Second")]);
+
+		Assert.That(SurvivingContents(path), Is.SupersetOf(originals));
+	}
+
+	[Test]
+	public void A_save_before_any_load_keeps_every_unreadable_copy()
+	{
+		var path = Path.Combine(_paths.DataDirectory, "user-variables.json");
+		var originals = WriteUnreadableCopies(path);
+
+		_store.Save([NewUserVariable("First")]);
+		_store.Save([NewUserVariable("Second")]);
+
+		Assert.That(SurvivingContents(path), Is.SupersetOf(originals));
+	}
+
+	[Test]
+	public void A_lone_unreadable_pending_write_does_not_stop_saving()
+	{
+		var path = Path.Combine(_paths.DataDirectory, "user-variables.json");
+		Directory.CreateDirectory(_paths.DataDirectory);
+		File.WriteAllText(path + ".tmp", "[{ \"id\": \"pending");
+
+		Assert.That(_store.Load(), Is.Empty);
+		_store.Save([NewUserVariable("First")]);
+
+		var reloaded = new JsonUserVariableStore(_paths, new LoggerConfiguration().CreateLogger()).Load();
+		Assert.That(reloaded.Select(variable => variable.Name), Is.EqualTo(new[] { "First" }));
+	}
+
+	[Test]
+	public void A_store_recovered_from_its_backup_keeps_saving()
+	{
+		var path = Path.Combine(_paths.DataDirectory, "user-variables.json");
+		new JsonUserVariableStore(_paths, new LoggerConfiguration().CreateLogger()).Save([
+			NewUserVariable("Recovered")
+		]);
+		File.Move(path, path + ".bak");
+		File.WriteAllText(path, "[{ \"id\": \"primary");
+
+		Assert.That(_store.Load().Select(variable => variable.Name), Is.EqualTo(new[] { "Recovered" }));
+		_store.Save([NewUserVariable("Saved")]);
+
+		var reloaded = new JsonUserVariableStore(_paths, new LoggerConfiguration().CreateLogger()).Load();
+		Assert.That(reloaded.Select(variable => variable.Name), Is.EqualTo(new[] { "Saved" }));
+	}
+
+	private static string[] WriteUnreadableCopies(string path)
+	{
+		Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+		string[] originals = ["[{ \"id\": \"primary", "[{ \"id\": \"backup", "[{ \"id\": \"pending"];
+		File.WriteAllText(path, originals[0]);
+		File.WriteAllText(path + ".bak", originals[1]);
+		File.WriteAllText(path + ".tmp", originals[2]);
+		return originals;
+	}
+
+	private static string[] SurvivingContents(string path)
+	{
+		return Directory
+			.GetFiles(Path.GetDirectoryName(path)!, Path.GetFileName(path) + "*")
+			.Select(File.ReadAllText)
+			.ToArray();
+	}
+
+	private static VariableEntity NewUserVariable(string name)
+	{
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = VariableType.Text,
+			Classification = VariableClassification.User,
+			Value = name
+		};
+	}
 }

@@ -1412,6 +1412,21 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>En attente d'autorisation…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Autorisation terminée</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Tu peux fermer cette fenêtre et revenir à Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Reviens à Macro Deck pour voir la raison et réessayer. Tu peux fermer cette fenêtre.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Impossible d'associer l'autorisation</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Tu peux fermer cette fenêtre.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Cette vue est temporairement indisponible. Continue avec les champs ci-dessous.</value>
   </data>
@@ -2934,6 +2949,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Une build de développement a pris le contrôle de cette extension. Termine la prise de contrôle avant de l'installer ou de la mettre à jour.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Cette extension est signée par un autre éditeur que la version que tu as déjà, elle n'a donc pas été installée.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Certaines données enregistrées de l'extension n'ont pas pu être supprimées, car un fichier est encore utilisé ; l'extension n'a donc pas été désinstallée. Ferme les programmes qui l'utilisent et réessaie.</value>

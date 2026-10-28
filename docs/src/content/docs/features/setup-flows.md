@@ -252,7 +252,9 @@ return ConfigFlowResult.Complete("Example", new Dictionary<string, ConfigFlowVal
 
 Macro Deck owns the redirect endpoint and matches the callback to your flow through `State`. You build the
 provider's authorize URL and exchange the code; `AuthorizationCode` is `null` until the callback has
-arrived. Show `RedirectUri` as a copy value when the user has to register it with the provider. Do not
+arrived. Each `External` result accepts one code: the first callback that carries one sets
+`AuthorizationCode`, and later callbacks with the same `State` are ignored until the flow returns `External`
+again. A callback that only reports an error leaves it `null`. Show `RedirectUri` as a copy value when the user has to register it with the provider. Do not
 start your own callback listener. The built-in Spotify integration is a complete example.
 
 A flow that talks to the service while it runs, to test a connection or exchange a code, should send the

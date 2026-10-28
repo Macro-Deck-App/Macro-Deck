@@ -717,9 +717,10 @@ internal sealed class PluginUpdateActivationRaceTests
 			string version,
 			string admittedVerdict,
 			string? certificateId,
+			PluginSignerIdentity? signer,
 			DateTime installedAt)
 		{
-			return _inner.Upsert(pluginId, version, admittedVerdict, certificateId, installedAt);
+			return _inner.Upsert(pluginId, version, admittedVerdict, certificateId, signer, installedAt);
 		}
 
 		public Task DeleteForPlugin(string pluginId)

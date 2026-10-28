@@ -30,7 +30,9 @@ internal static class SignedPluginArtifacts
 		IReadOnlyList<string>? keyUsage = null,
 		DateTimeOffset? notBefore = null,
 		DateTimeOffset? notAfter = null,
-		TestPki.IssuedCertificate? issuer = null)
+		TestPki.IssuedCertificate? issuer = null,
+		string subjectKind = "creator",
+		string subjectId = "creator-1")
 	{
 		var digest = PluginArtifactBuilder.Sha256Of(Encoding.UTF8.GetBytes(content));
 		var filesBlock =
@@ -49,11 +51,13 @@ internal static class SignedPluginArtifacts
 			.WithFile(ManifestJson.EntrypointExecutable, content)
 			.WriteTo(directory, $"unsigned-{Guid.NewGuid():N}.macroDeckPlugin");
 
-		var issued = TestPki.IssueCertificate(keyUsage: keyUsage,
-			notBefore: notBefore,
-			notAfter: notAfter,
-			signingRoot: signingRoot,
-			issuer: issuer);
+		var issued = TestPki.IssueCertificate(subjectKind,
+			keyUsage,
+			notBefore,
+			notAfter,
+			signingRoot,
+			issuer: issuer,
+			subjectId: subjectId);
 
 		// Deserialized directly rather than routed through TestPki.VerifyChain: that helper throws on a
 		// certificate that does not verify, which is exactly what a wrong-purpose or not-yet-valid fixture

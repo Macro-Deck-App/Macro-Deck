@@ -322,3 +322,62 @@ describe('shared-ui-node the five new configuration node types (issue #837)', ()
     });
   });
 });
+
+describe('shared-ui-node bound-value chips with a long name', () => {
+  const longName = 'system_audio_output_sennheiser_main_volume_percent_of_a_very_long_device_name_example';
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  async function renderNarrow(root: UiNode): Promise<{ rendered: RenderedTree; host: HTMLElement }> {
+    const rendered = await renderTree(root);
+    const host = el(rendered);
+    host.style.display = 'block';
+    host.style.width = '240px';
+    host.style.overflow = 'hidden';
+    host.scrollIntoView({ block: 'start' });
+    await tick(rendered);
+    return { rendered, host };
+  }
+
+  function expectReachable(button: HTMLElement, container: HTMLElement): void {
+    const b = button.getBoundingClientRect();
+    const c = container.getBoundingClientRect();
+    expect(b.width).toBeGreaterThan(0);
+    expect(b.left).toBeGreaterThanOrEqual(c.left);
+    expect(b.right).toBeLessThanOrEqual(c.right);
+    const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    expect(hit !== null && button.contains(hit)).withContext('the remove button is the element under its own centre').toBeTrue();
+  }
+
+  it('keeps the variable picker\'s Remove button inside the field and clears the binding', async () => {
+    const root: UiNode = { id: 'n', type: 'variable-picker', properties: { value: longName, events: ['change'] } };
+    const { rendered, host } = await renderNarrow(root);
+
+    const text = host.querySelector('.config-node-chip-text') as HTMLElement;
+    expect(text.title).toBe(longName);
+    expect(text.textContent).toContain(longName);
+
+    const button = host.querySelector('.config-node-chip shared-button button') as HTMLButtonElement;
+    expectReachable(button, host);
+
+    button.click();
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: '' }]);
+  });
+
+  it('keeps the action picker\'s Remove button inside the field and clears the selection', async () => {
+    const root: UiNode = { id: 'n', type: 'action-picker', properties: { value: longName, events: ['change'] } };
+    const { rendered, host } = await renderNarrow(root);
+
+    expect((host.querySelector('.config-node-chip-text') as HTMLElement).title).toBe(longName);
+
+    const button = host.querySelector('.config-node-chip shared-button button') as HTMLButtonElement;
+    expectReachable(button, host);
+
+    button.click();
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: '' }]);
+  });
+});

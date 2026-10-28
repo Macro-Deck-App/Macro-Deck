@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Domain.Entities;
 
 namespace MacroDeckHost.Application.Persistence.Repositories;
@@ -8,7 +9,13 @@ public interface IPluginTrustRecordRepository
 
 	Task<IReadOnlyList<PluginTrustRecordEntity>> GetForPlugin(string pluginId);
 
-	Task Upsert(string pluginId, string version, string admittedVerdict, string? certificateId, DateTime installedAt);
+	Task Upsert(
+		string pluginId,
+		string version,
+		string admittedVerdict,
+		string? certificateId,
+		PluginSignerIdentity? signer,
+		DateTime installedAt);
 
 	Task DeleteForPlugin(string pluginId);
 

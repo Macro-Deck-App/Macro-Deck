@@ -111,6 +111,9 @@ installed 1.0.0  <  Store 1.1.0  ->  shown as an update
   when either version fails to parse.
 - An update is only reported to the user. It is never installed unsigned on their behalf. Once a plugin is
   installed as signed, an unsigned update to it is refused, even if the user consents.
+- An update signed for another publisher than the installed version is refused from every source, the Store
+  included. See
+  [signing](/policies/security/#signing-the-creator-portal-signs-and-the-host-verifies-before-install-and-before-every-load).
 - The host verifies every package before install and again before every launch. Editing files after
   installation stops the plugin from loading.
 

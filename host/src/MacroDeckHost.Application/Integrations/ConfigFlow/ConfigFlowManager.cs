@@ -328,6 +328,7 @@ public class ConfigFlowManager : IConfigFlowManager
 					null);
 
 			case ConfigFlowResultKind.External:
+				_oauth.ExpectCallback(active.OAuthState);
 				return new ConfigFlowSubmitOutcome(true,
 					result.Kind,
 					null,

@@ -52,6 +52,7 @@ public static class DatabaseMigrationHelper
 
 			try
 			{
+				RefuseNewerDatabase(context);
 				LegacyEvolveMigrations.UpgradeIfNeeded(context);
 				ReleaseStaleMigrationLock((SqliteConnection)context.Database.GetDbConnection());
 			}
@@ -65,6 +66,24 @@ public static class DatabaseMigrationHelper
 		catch (Exception ex) when (ex is not DatabaseMigrationException)
 		{
 			throw new DatabaseMigrationException($"The database {databasePath} could not be migrated.", ex);
+		}
+	}
+
+	// EF Core skips applied migrations it does not know, so an older host would run on a newer schema.
+	private static void RefuseNewerDatabase(DatabaseContext context)
+	{
+		var unknown = context.Database.GetAppliedMigrations()
+			.Except(context.Database.GetMigrations(), StringComparer.Ordinal)
+			.Order(StringComparer.Ordinal)
+			.ToList();
+
+		if (unknown.Count > 0)
+		{
+			throw new DatabaseMigrationException(
+				$"The database was migrated by a newer Macro Deck (migrations {string.Join(", ", unknown)}).")
+			{
+				FromNewerHost = true
+			};
 		}
 	}
 

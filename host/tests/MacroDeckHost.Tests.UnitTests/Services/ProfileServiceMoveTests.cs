@@ -33,6 +33,7 @@ public class ProfileServiceMoveTests
 			new InMemoryDeviceRepository(),
 			_mediator,
 			new WidgetSecretCloner(new FakeSecretService()),
+			new WidgetSecretScrubber(new FakeSecretService()),
 			new NullWidgetVariableCloner());
 	}
 

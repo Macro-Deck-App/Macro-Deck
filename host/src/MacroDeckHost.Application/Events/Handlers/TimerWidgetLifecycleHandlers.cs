@@ -110,19 +110,3 @@ public sealed class TimerWidgetsDeletedHandler : INotificationHandler<WidgetsDel
 		}
 	}
 }
-
-// A deleted profile takes its folders out of the cache without a deletion notice per widget.
-public sealed class TimerWidgetProfileDeletedHandler : INotificationHandler<ProfileDeletedNotification>
-{
-	private readonly TimerWidgetCoordinator _timers;
-
-	public TimerWidgetProfileDeletedHandler(TimerWidgetCoordinator timers)
-	{
-		_timers = timers;
-	}
-
-	public async ValueTask Handle(ProfileDeletedNotification notification, CancellationToken cancellationToken)
-	{
-		await _timers.PruneMissingAsync().ConfigureAwait(false);
-	}
-}

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Platform.Applications;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Adb;
@@ -289,6 +290,7 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 			startInfo.ArgumentList.Add(argument);
 		}
 
+		AppImageEnvironment.RestoreOutside(startInfo);
 		var process = Process.Start(startInfo)
 			?? throw new InvalidOperationException($"Failed to start '{executablePath}'.");
 		if (closeStandardInput)

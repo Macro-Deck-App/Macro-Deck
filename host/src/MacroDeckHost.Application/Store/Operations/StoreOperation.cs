@@ -68,6 +68,7 @@ public sealed record StoreOperation
 			or StoreOperationError.VersionNotFound
 			or StoreOperationError.UnsignedNotPermitted
 			or StoreOperationError.TrustDowngrade
+			or StoreOperationError.SignerMismatch
 			or StoreOperationError.SignatureInvalid
 			or StoreOperationError.SignatureUntrusted
 			or StoreOperationError.MalformedPackage

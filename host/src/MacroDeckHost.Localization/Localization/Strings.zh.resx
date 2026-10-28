@@ -1411,6 +1411,21 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>正在等待授权…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>授权完成</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>可以关闭此窗口并返回 Macro Deck。</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>请返回 Macro Deck 查看原因并重试。可以关闭此窗口。</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>无法匹配此授权</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>可以关闭此窗口。</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>此视图暂时不可用。请继续填写下方的字段。</value>
   </data>
@@ -2933,6 +2948,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>开发版本已接管此插件。请先结束接管，再安装或更新它。</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>此插件由与你已有版本不同的发布者签名，因此未被安装。</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>由于有文件仍在使用中，插件的部分已存储数据未能删除，因此未卸载插件。请关闭正在使用该文件的程序，然后重试。</value>

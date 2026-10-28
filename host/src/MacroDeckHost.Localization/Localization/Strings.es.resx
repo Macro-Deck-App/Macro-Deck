@@ -1412,6 +1412,21 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Esperando autorización…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Autorización completada</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Puedes cerrar esta ventana y volver a Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Vuelve a Macro Deck para ver el motivo e inténtalo de nuevo. Puedes cerrar esta ventana.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>No se pudo asociar la autorización</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Puedes cerrar esta ventana.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Esta vista no está disponible temporalmente. Continúa con los campos de abajo.</value>
   </data>
@@ -2934,6 +2949,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Una compilación de desarrollo ha sustituido este complemento. Termina la sustitución antes de instalarlo o actualizarlo.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Este complemento está firmado por un editor distinto al de la versión que ya tienes, así que no se instaló.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>No se pudieron eliminar algunos datos guardados del complemento porque un archivo sigue en uso, así que no se ha desinstalado. Cierra los programas que lo usen y vuelve a intentarlo.</value>

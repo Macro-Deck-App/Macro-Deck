@@ -1411,6 +1411,21 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Yetkilendirme bekleniyor…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Yetkilendirme tamamlandı</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Bu pencereyi kapatıp Macro Deck'e dönebilirsiniz.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Nedenini görmek ve yeniden denemek için Macro Deck'e dönün. Bu pencereyi kapatabilirsiniz.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Yetkilendirme eşleştirilemedi</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Bu pencereyi kapatabilirsiniz.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Bu görünüm geçici olarak kullanılamıyor. Aşağıdaki alanlarla devam edin.</value>
   </data>
@@ -2933,6 +2948,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Bir geliştirme derlemesi bu eklentinin yerine geçti. Yüklemeden ya da güncellemeden önce devralmayı sonlandırın.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Bu eklenti, sahip olduğunuz sürümden farklı bir yayımcı tarafından imzalandığı için yüklenmedi.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Bir dosya hâlâ kullanımda olduğu için eklentinin kayıtlı verilerinin bir kısmı silinemedi, bu yüzden eklenti kaldırılmadı. Onu kullanan programları kapatın ve yeniden deneyin.</value>

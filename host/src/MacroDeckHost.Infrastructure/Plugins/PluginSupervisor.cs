@@ -1931,6 +1931,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			version,
 			PluginTrustRecordVerdicts.From(onDisk.Verdict),
 			onDisk.CertificateId,
+			onDisk.Signer,
 			_timeProvider.GetUtcNow().UtcDateTime);
 	}
 

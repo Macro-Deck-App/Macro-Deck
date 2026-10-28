@@ -24,6 +24,10 @@ public static class LockedHostApplicationBuilderExtensions
 		// Without this the bootstrapper's graceful stop is skipped and the host is killed after 5s.
 		"/api/host/shutdown",
 
+		// The bootstrapper aborts every update unless this answers. A locked host skips the backup it
+		// cannot make, and the controller still admits only the bootstrapper's loopback caller.
+		"/api/backups/before-host-update",
+
 		// So the gate renders in the user's language rather than in key names.
 		"/api/localization"
 	];

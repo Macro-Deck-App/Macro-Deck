@@ -1412,6 +1412,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Čekání na autorizaci…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Autorizace dokončena</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Toto okno lze zavřít a vrátit se do Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Důvod je zobrazen v Macro Deck, kde lze akci zopakovat. Toto okno lze zavřít.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Autorizaci nelze přiřadit</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Toto okno lze zavřít.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Toto zobrazení je dočasně nedostupné. Pokračujte s poli níže.</value>
   </data>
@@ -2934,6 +2949,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Tento plugin převzalo vývojové sestavení. Před instalací nebo aktualizací je nutné převzetí ukončit.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Tento plugin je podepsán jiným vydavatelem než již nainstalovaná verze, a proto nebyl nainstalován.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Některá uložená data pluginu nebylo možné smazat, protože se soubor stále používá, proto plugin nebyl odinstalován. Zavřete programy, které ho používají, a zkuste to znovu.</value>

@@ -1411,6 +1411,21 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Warten auf Autorisierung…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Autorisierung abgeschlossen</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Du kannst dieses Fenster schließen und zu Macro Deck zurückkehren.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Kehre zu Macro Deck zurück, um den Grund zu sehen und es erneut zu versuchen. Du kannst dieses Fenster schließen.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Autorisierung konnte nicht zugeordnet werden</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Du kannst dieses Fenster schließen.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Diese Ansicht ist vorübergehend nicht verfügbar. Mach mit den Feldern unten weiter.</value>
   </data>
@@ -2933,6 +2948,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Ein Entwicklungs-Build hat dieses Plugin übernommen. Beende die Übernahme, bevor du es installierst oder aktualisierst.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Dieses Plugin ist von einem anderen Herausgeber signiert als die Version, die du bereits hast, daher wurde es nicht installiert.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Einige gespeicherte Daten des Plugins konnten nicht gelöscht werden, weil eine Datei noch verwendet wird, daher wurde das Plugin nicht deinstalliert. Schließe alle Programme, die sie verwenden, und versuche es erneut.</value>

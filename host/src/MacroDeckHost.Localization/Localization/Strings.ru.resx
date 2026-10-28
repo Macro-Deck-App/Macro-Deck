@@ -1411,6 +1411,21 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Ожидание авторизации…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Авторизация завершена</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Закройте это окно и вернитесь в Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Вернитесь в Macro Deck, чтобы узнать причину и повторить попытку. Это окно можно закрыть.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Не удалось сопоставить авторизацию</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Это окно можно закрыть.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Этот раздел временно недоступен. Продолжите с полями ниже.</value>
   </data>
@@ -2933,6 +2948,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Сборка для разработки заменила этот плагин. Завершите замену, прежде чем устанавливать или обновлять его.</value>
+  </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Этот плагин подписан другим издателем, чем уже установленная версия, поэтому он не установлен.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Не удалось удалить часть сохранённых данных плагина: файл всё ещё используется, поэтому плагин не удалён. Закройте программы, которые его используют, и повторите попытку.</value>

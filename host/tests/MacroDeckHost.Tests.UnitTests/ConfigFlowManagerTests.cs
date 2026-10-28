@@ -59,7 +59,10 @@ public class ConfigFlowManagerTests
 			_logger);
 	}
 
-	private ConfigFlowManager CreateManager(IIntegration integration, IHostListenerState listenerState)
+	private ConfigFlowManager CreateManager(
+		IIntegration integration,
+		IHostListenerState listenerState,
+		IOAuthCallbackCoordinator? oauth = null)
 	{
 		var registry = new FakeIntegrationRegistry();
 		registry.Add(integration);
@@ -73,7 +76,7 @@ public class ConfigFlowManagerTests
 		return new ConfigFlowManager(registry,
 			scopeFactory,
 			_lifecycle,
-			_oauth,
+			oauth ?? _oauth,
 			listenerState,
 			new EmptyRemotePluginSnapshotStore(),
 			new ConfigFlowUiProviderRegistry(() => uiSessionBroker, _logger),
@@ -426,6 +429,28 @@ public class ConfigFlowManagerTests
 			Assert.That(outcome.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
 			Assert.That(TestLocalization.Resolve(outcome.Message), Is.Not.Null.And.Not.Empty);
 			Assert.That(outcome.ExternalUrl, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task Signing_in_again_within_one_flow_hands_the_flow_the_new_code()
+	{
+		using var logger = new LoggerConfiguration().CreateLogger();
+		var oauth = new OAuthCallbackCoordinator(new RecordingUiTransport(), logger);
+		var integration = new OAuthConfigFlowIntegration();
+		var manager = CreateManager(integration, new FakeHostListenerState(), oauth);
+		var start = await manager.StartAsync("cf-oauth", CancellationToken.None);
+
+		await manager.SubmitAsync(start.FlowId, "connect", Values(), CancellationToken.None);
+		var state = integration.LastFlow!.Session!.State;
+		await oauth.HandleCallbackAsync(state, "first-code", null, CancellationToken.None);
+		await manager.SubmitAsync(start.FlowId, "connect", Values(), CancellationToken.None);
+		var accepted = await oauth.HandleCallbackAsync(state, "second-code", null, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(accepted, Is.True);
+			Assert.That(integration.LastFlow.Session.AuthorizationCode, Is.EqualTo("second-code"));
 		});
 	}
 
@@ -830,9 +855,11 @@ public class ConfigFlowManagerTests
 			return Task.CompletedTask;
 		}
 
+		public OAuthTouchingConfigFlow? LastFlow { get; private set; }
+
 		public IConfigFlow CreateConfigFlow()
 		{
-			return new OAuthTouchingConfigFlow();
+			return LastFlow = new OAuthTouchingConfigFlow();
 		}
 
 		public bool IsInitialized => true;
@@ -840,6 +867,8 @@ public class ConfigFlowManagerTests
 
 	private sealed class OAuthTouchingConfigFlow : IConfigFlow
 	{
+		public IOAuthSession? Session { get; private set; }
+
 		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
 		{
 			return Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep { StepId = "connect", Fields = [] }));
@@ -851,6 +880,7 @@ public class ConfigFlowManagerTests
 			IConfigFlowContext context,
 			CancellationToken cancellationToken)
 		{
+			Session = context.OAuth;
 			return Task.FromResult(ConfigFlowResult.External(context.OAuth.RedirectUri, "resume"));
 		}
 	}
@@ -971,6 +1001,10 @@ public class ConfigFlowManagerTests
 		public string? GetCode(string state)
 		{
 			return null;
+		}
+
+		public void ExpectCallback(string state)
+		{
 		}
 
 		public Task<bool> HandleCallbackAsync(

@@ -746,10 +746,17 @@ internal sealed class PluginInstallerTests
 	[Test]
 	public async Task A_forced_reinstall_of_the_active_version_that_fails_health_restores_the_original()
 	{
-		_trust.InstalledResult = PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-original");
+		var publisher = new PluginSignerIdentity("creator", "creator-1");
+		_trust.InstalledResult = PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-original") with
+		{
+			Signer = publisher
+		};
 		await Install(BuildArtifact(payload: "original"));
 
-		_trust.InstalledResult = PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-broken");
+		_trust.InstalledResult = PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-broken") with
+		{
+			Signer = publisher
+		};
 		_supervisor.FailsToStart = _ => ReadEntrypoint("1.0.0") == "broken";
 		string? certificateWhenOriginalStarted = null;
 		_supervisor.OnStart = _ =>
