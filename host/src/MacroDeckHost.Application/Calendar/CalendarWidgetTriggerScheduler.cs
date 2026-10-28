@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -130,6 +131,7 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 						Scope = VariableScope.Widget,
 						ScopeRefId = widget.Id.ToString(),
 						OwnerWidgetId = widget.Id,
+						Owner = FlowOwner.Widget(widget.Id),
 						Origin = ExecutionOrigin.Host,
 						EventParameters = parameters
 					},

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Persistence.Scripts;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Entities;
 using Serilog;
 
@@ -11,16 +12,18 @@ public sealed class ScriptCache : IScriptCache, IDisposable
 {
 	private readonly IScriptStore _store;
 	private readonly ILogger _logger;
+	private readonly SecretApprovalLedger? _approvals;
 	private readonly ConcurrentDictionary<Guid, ScriptEntity> _scripts = new();
 	private readonly SemaphoreSlim _initializationLock = new(1, 1);
 	private readonly SemaphoreSlim _updateLock = new(1, 1);
 	private bool _isInitialized;
 	private bool _disposed;
 
-	public ScriptCache(IScriptStore store, ILogger logger)
+	public ScriptCache(IScriptStore store, ILogger logger, SecretApprovalLedger? approvals = null)
 	{
 		_store = store;
 		_logger = logger;
+		_approvals = approvals;
 	}
 
 	public async Task InitializeCache()
@@ -43,6 +46,9 @@ public sealed class ScriptCache : IScriptCache, IDisposable
 				_scripts.TryAdd(file.Id, ToEntity(file));
 			}
 
+			_approvals?.LoadGroup(SecretApprovalGroup.Scripts,
+				_scripts.Values.ToDictionary(entity => entity.Id, ApprovalOwners));
+
 			_isInitialized = true;
 		}
 		finally
@@ -63,12 +69,25 @@ public sealed class ScriptCache : IScriptCache, IDisposable
 		return _scripts.Values.ToList();
 	}
 
-	public async Task AddOrUpdate(ScriptEntity script)
+	public Task AddOrUpdate(ScriptEntity script)
+	{
+		return AddOrUpdate(script, SecretApprovalWrite.Preserve);
+	}
+
+	public async Task AddOrUpdate(ScriptEntity script, SecretApprovalWrite write)
 	{
 		await _updateLock.WaitAsync();
 		try
 		{
 			_scripts.AddOrUpdate(script.Id, script, (_, _) => script);
+			if (_approvals is not null)
+			{
+				var owner = FlowOwner.Script(script.Id);
+				_approvals.Assign(owner, SecretApprovalGroup.Scripts, script.Id);
+				_approvals.Record(owner, FlowSecretBlocks.FromFlows(script.Flows), write);
+				_approvals.SavePartition(SecretApprovalGroup.Scripts, script.Id);
+			}
+
 			_store.Save(ToFile(script));
 		}
 		finally
@@ -85,6 +104,7 @@ public sealed class ScriptCache : IScriptCache, IDisposable
 			if (_scripts.TryRemove(id, out _))
 			{
 				_store.Delete(id);
+				_approvals?.DeletePartition(SecretApprovalGroup.Scripts, id);
 			}
 		}
 		finally
@@ -133,5 +153,10 @@ public sealed class ScriptCache : IScriptCache, IDisposable
 			CreatedAt = script.CreatedAt,
 			UpdatedAt = script.UpdatedAt
 		};
+	}
+
+	private static IReadOnlyList<(FlowOwner Owner, string? Flows)> ApprovalOwners(ScriptEntity entity)
+	{
+		return [(FlowOwner.Script(entity.Id), entity.Flows)];
 	}
 }

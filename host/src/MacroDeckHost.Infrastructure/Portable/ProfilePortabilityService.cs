@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Persistence.Profiles;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Profiles;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -19,20 +20,25 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 	private readonly IPortableAssetManager _assetManager;
 	private readonly IMediator _mediator;
 	private readonly ILogger _logger;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
 	public ProfilePortabilityService(
 		IProfileCache profileCache,
 		IFolderCache folderCache,
 		IPortableAssetManager assetManager,
 		IMediator mediator,
-		ILogger logger)
+		ILogger logger,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_profileCache = profileCache;
 		_folderCache = folderCache;
 		_assetManager = assetManager;
 		_mediator = mediator;
 		_logger = logger;
+		_writeAuthority = writeAuthority;
 	}
+
+	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
 
 	public Result<string, PortabilityError> GetExportFileName(Guid profileId)
 	{
@@ -137,9 +143,12 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 		{
 			var assetIdMap = await _assetManager.Import(content, iconFiles, fontFiles, cancellationToken);
 			var mintedIds = MintIds(content.Profile);
-			var (profile, folders) = BuildEntities(content.Profile, assetIdMap, mintedIds);
+			var (profile, folders) = BuildEntities(content.Profile,
+				assetIdMap,
+				mintedIds,
+				PortableSecretReferences.CarriedBy(content, assetIdMap));
 
-			await _profileCache.AddOrUpdateAggregate(profile, folders);
+			await _profileCache.AddOrUpdateAggregate(profile, folders, Approval);
 
 			await _assetManager.RestoreWidgetVariables(content, mintedIds, cancellationToken);
 
@@ -180,7 +189,8 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 	private (ProfileEntity Profile, List<FolderEntity> Folders) BuildEntities(
 		ProfileFile source,
 		IReadOnlyDictionary<Guid, Guid> assetIdMap,
-		IReadOnlyDictionary<Guid, Guid> mintedIds)
+		IReadOnlyDictionary<Guid, Guid> mintedIds,
+		IReadOnlySet<Guid> carriedSecrets)
 	{
 		var importedAt = DateTime.UtcNow;
 		var hasCompleteSourceChronology = source.Folders.All(folder => folder.CreatedAt != default);
@@ -240,7 +250,7 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 						Width = widget.Width,
 						Height = widget.Height,
 						Data = PortableActionButtonStateNormalizer.Normalize(widget.Type,
-							PortableGuidRemapper.Remap(widget.Data, idMap)),
+							PortableSecretReferences.Remap(widget.Data, idMap, carriedSecrets)),
 						IsPinned = widget.IsPinned,
 						PinScope = widget.PinScope,
 						CreatedAt = DateTime.UtcNow

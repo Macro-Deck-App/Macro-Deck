@@ -32,6 +32,10 @@ export const routes: Routes = [
         loadComponent: () => import('./components/pages').then(m => m.AutomationsPageComponent)
       },
       {
+        path: 'approvals',
+        loadComponent: () => import('./components/pages').then(m => m.SecretApprovalsPageComponent)
+      },
+      {
         path: 'integrations',
         loadComponent: () => import('./components/pages').then(m => m.IntegrationsPageComponent)
       },

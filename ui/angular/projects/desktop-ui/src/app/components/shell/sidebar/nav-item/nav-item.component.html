@@ -4,7 +4,11 @@
       <span class="nav-activity" aria-hidden="true"></span>
     }
     @if (item.indicator) {
-      <span class="nav-indicator" aria-live="polite">{{ item.indicator }}</span>
+      <span
+        class="nav-indicator"
+        aria-live="polite"
+        [attr.role]="item.indicatorLabel ? 'status' : null"
+        [attr.aria-label]="item.indicatorLabel ?? null">{{ item.indicator }}</span>
     }
     @switch (item.icon) {
       @case ('grid') {
@@ -15,6 +19,9 @@
       }
       @case ('zap') {
         <span class="icon icon-zap icon-lg"></span>
+      }
+      @case ('shield-check') {
+        <span class="icon icon-shield-check icon-lg"></span>
       }
       @case ('puzzle') {
         <span class="icon icon-puzzle icon-lg"></span>

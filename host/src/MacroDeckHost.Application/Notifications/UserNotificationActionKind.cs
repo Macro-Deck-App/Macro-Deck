@@ -24,5 +24,7 @@ public enum UserNotificationActionKind
 	OpenDownloadPage,
 	OpenTroubleshootingGuide,
 
-	EnablePluginCompanionDevices
+	EnablePluginCompanionDevices,
+
+	OpenSecretApprovals
 }

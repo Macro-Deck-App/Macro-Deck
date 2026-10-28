@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
@@ -17,15 +18,18 @@ public sealed class RunActionFlowRequestMessageHandler
 	private readonly IFlowExecutor _flowExecutor;
 	private readonly ILogger _logger;
 	private readonly TimeSpan _executionTimeout;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
 	public RunActionFlowRequestMessageHandler(
 		IFlowExecutor flowExecutor,
 		ILogger logger,
-		TimeSpan? executionTimeout = null)
+		TimeSpan? executionTimeout = null,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_flowExecutor = flowExecutor;
 		_logger = logger.ForContext<RunActionFlowRequestMessageHandler>();
 		_executionTimeout = executionTimeout ?? _defaultExecutionTimeout;
+		_writeAuthority = writeAuthority;
 	}
 
 	public async ValueTask<RunActionFlowResponse> Handle(
@@ -61,6 +65,8 @@ public sealed class RunActionFlowRequestMessageHandler
 					Scope = scope ?? VariableScope.Global,
 					ScopeRefId = request.ScopeRefId,
 					OwnerWidgetId = OwnerWidgetIdOf(scope, request.ScopeRefId),
+					Owner = FlowOwnerOf(scope, request.ScopeRefId),
+					TrustedDraft = _writeAuthority?.Mode == SecretApprovalMode.Approve,
 					OriginClientId = request.ClientId
 				},
 				timeoutSource.Token);
@@ -134,6 +140,22 @@ public sealed class RunActionFlowRequestMessageHandler
 	private static Guid? OwnerWidgetIdOf(VariableScope? scope, string? scopeRefId)
 	{
 		return scope == VariableScope.Widget && Guid.TryParse(scopeRefId, out var widgetId) ? widgetId : null;
+	}
+
+	private static FlowOwner? FlowOwnerOf(VariableScope? scope, string? scopeRefId)
+	{
+		if (!Guid.TryParse(scopeRefId, out var id))
+		{
+			return null;
+		}
+
+		return scope switch
+		{
+			VariableScope.Widget => FlowOwner.Widget(id),
+			VariableScope.Automation => FlowOwner.Automation(id),
+			VariableScope.Script => FlowOwner.Script(id),
+			_ => null
+		};
 	}
 
 	private static string DescribeTimeout(TimeSpan timeout)

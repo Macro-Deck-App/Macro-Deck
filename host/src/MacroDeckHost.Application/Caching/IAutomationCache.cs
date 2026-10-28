@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Entities;
 
 namespace MacroDeckHost.Application.Caching;
@@ -13,4 +14,9 @@ public interface IAutomationCache
 	Task AddOrUpdate(AutomationEntity automation);
 
 	Task Remove(Guid id);
+
+	Task AddOrUpdate(AutomationEntity automation, SecretApprovalWrite write)
+	{
+		return AddOrUpdate(automation);
+	}
 }

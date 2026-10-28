@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -24,6 +25,7 @@ public class FolderService : IFolderService
 	private readonly IWidgetSecretScrubber _widgetSecretScrubber;
 	private readonly IWidgetVariableCloner _widgetVariableCloner;
 	private readonly IFolderViewRegistry _folderViews;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
 	public FolderService(
 		IFolderCache folderCache,
@@ -33,7 +35,8 @@ public class FolderService : IFolderService
 		IWidgetSecretCloner widgetSecretCloner,
 		IWidgetSecretScrubber widgetSecretScrubber,
 		IWidgetVariableCloner widgetVariableCloner,
-		IFolderViewRegistry folderViews)
+		IFolderViewRegistry folderViews,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_folderCache = folderCache;
 		_profileCache = profileCache;
@@ -43,7 +46,10 @@ public class FolderService : IFolderService
 		_widgetSecretScrubber = widgetSecretScrubber;
 		_widgetVariableCloner = widgetVariableCloner;
 		_folderViews = folderViews;
+		_writeAuthority = writeAuthority;
 	}
+
+	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
 
 	public async Task<Result<FolderEntity, FolderError>> Create(
 		Guid profileId,
@@ -103,7 +109,7 @@ public class FolderService : IFolderService
 		var effectiveColumns = GridInheritance.ResolveColumns(folder, profileFolders, profile.DefaultColumns);
 		PinnedWidgetLayout.GrowToFitPinned(folder, profileFolders, effectiveColumns, effectiveRows);
 
-		await _folderCache.AddOrUpdate(folder);
+		await _folderCache.AddOrUpdate(folder, Approval);
 
 		await _mediator.Publish(new FolderCreatedNotification(folder));
 
@@ -352,7 +358,6 @@ public class FolderService : IFolderService
 			folder.EmptyCellStyle = parsedEmptyCellStyle;
 		}
 
-
 		var changedStartFolders = isDefault is true
 			? StartFolderInvariant.MarkAsStart(profileFolders, folder)
 			: replacementStart is not null
@@ -361,11 +366,11 @@ public class FolderService : IFolderService
 
 		if (hasPlacementChange)
 		{
-			await _folderCache.AddOrUpdateRange(placementChanges);
+			await _folderCache.AddOrUpdateRange(placementChanges, Approval);
 		}
 		else
 		{
-			await _folderCache.AddOrUpdate(folder);
+			await _folderCache.AddOrUpdate(folder, Approval);
 		}
 
 		foreach (var changed in changedStartFolders.Where(changed => changed.Id != folder.Id))
@@ -508,7 +513,7 @@ public class FolderService : IFolderService
 
 		duplicateFolder.Widgets = duplicatedWidgets;
 
-		await _folderCache.AddOrUpdate(duplicateFolder);
+		await _folderCache.AddOrUpdate(duplicateFolder, Approval);
 
 		foreach (var (duplicateId, sourceId) in sourceWidgetIdsByDuplicateId)
 		{
@@ -610,7 +615,7 @@ public class FolderService : IFolderService
 
 		var batch = placementChanges.Concat(changedStartFolders).DistinctBy(changed => changed.Id).ToList();
 
-		await _folderCache.AddOrUpdateRange(batch);
+		await _folderCache.AddOrUpdateRange(batch, Approval);
 
 		await _mediator.Publish(new FoldersReorderedNotification(folder.ProfileId, batch));
 
@@ -655,7 +660,7 @@ public class FolderService : IFolderService
 
 		folder.FocusRules = folder.FocusRules.Where(existing => existing.Id != ruleId).Append(normalizedRule).ToList();
 
-		await _folderCache.AddOrUpdate(folder);
+		await _folderCache.AddOrUpdate(folder, Approval);
 
 		await _mediator.Publish(new FolderFocusRuleChangedNotification(folderId));
 
@@ -678,7 +683,7 @@ public class FolderService : IFolderService
 
 		folder.FocusRules = folder.FocusRules.Where(existing => existing.Id != ruleId).ToList();
 
-		await _folderCache.AddOrUpdate(folder);
+		await _folderCache.AddOrUpdate(folder, Approval);
 
 		await _mediator.Publish(new FolderFocusRuleRemovedNotification(folderId, ruleId));
 

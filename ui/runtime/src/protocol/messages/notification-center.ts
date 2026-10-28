@@ -24,7 +24,8 @@ export type UserNotificationActionKind =
   | 'EnablePluginAdb'
   | 'OpenDownloadPage'
   | 'OpenTroubleshootingGuide'
-  | 'EnablePluginCompanionDevices';
+  | 'EnablePluginCompanionDevices'
+  | 'OpenSecretApprovals';
 
 export interface UserNotificationAction {
   kind: UserNotificationActionKind;

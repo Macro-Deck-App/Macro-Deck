@@ -506,7 +506,7 @@ public class FolderPortabilityServiceTests
 		var secretId = _harness.Secrets.Store("hunter2", SecretKind.Password);
 		var (profile, root, _) = await _harness.SeedProfile(null);
 		var source = await _harness.AddFolder(profile.Id, "Lights");
-		_harness.AddWidget(source.Id, $"{{\"$secret\":\"{secretId}\"}}");
+		_harness.AddWidget(source.Id, PortabilityTestHarness.SecretFlowData(secretId));
 
 		var export = await _harness.FolderService.Export(source.Id,
 			new PortableExportOptions { IncludeSecrets = true, Password = "export-password" },

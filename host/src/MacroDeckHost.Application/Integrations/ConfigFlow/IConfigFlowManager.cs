@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.ConfigFlow;
+using MacroDeckHost.Application.Secrets.Approvals;
 
 namespace MacroDeckHost.Application.Integrations.ConfigFlow;
 
@@ -55,4 +56,26 @@ public interface IConfigFlowManager
 		CancellationToken cancellationToken);
 
 	Task AbandonAsync(Guid flowId, CancellationToken cancellationToken);
+
+	Task<ConfigFlowStartOutcome> StartAsync(
+		string integrationId,
+		string? title,
+		Guid? entryId,
+		SecretApprovalMode writer,
+		CancellationToken cancellationToken)
+	{
+		return StartAsync(integrationId, title, entryId, cancellationToken);
+	}
+
+	Task<ConfigFlowSubmitOutcome> SubmitAsync(
+		Guid flowId,
+		string stepId,
+		IReadOnlyDictionary<string, JsonElement> values,
+		IReadOnlyCollection<string> clearedSecretFields,
+		int? stepIndex,
+		SecretApprovalMode writer,
+		CancellationToken cancellationToken)
+	{
+		return SubmitAsync(flowId, stepId, values, clearedSecretFields, stepIndex, cancellationToken);
+	}
 }

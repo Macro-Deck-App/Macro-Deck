@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -22,6 +23,7 @@ public class ProfileService : IProfileService
 	private readonly IWidgetSecretCloner _widgetSecretCloner;
 	private readonly IWidgetSecretScrubber _widgetSecretScrubber;
 	private readonly IWidgetVariableCloner _widgetVariableCloner;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
 	public ProfileService(
 		IProfileCache profileCache,
@@ -30,7 +32,8 @@ public class ProfileService : IProfileService
 		IMediator mediator,
 		IWidgetSecretCloner widgetSecretCloner,
 		IWidgetSecretScrubber widgetSecretScrubber,
-		IWidgetVariableCloner widgetVariableCloner)
+		IWidgetVariableCloner widgetVariableCloner,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_profileCache = profileCache;
 		_folderCache = folderCache;
@@ -39,7 +42,10 @@ public class ProfileService : IProfileService
 		_widgetSecretCloner = widgetSecretCloner;
 		_widgetSecretScrubber = widgetSecretScrubber;
 		_widgetVariableCloner = widgetVariableCloner;
+		_writeAuthority = writeAuthority;
 	}
+
+	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
 
 	public async Task<Result<ProfileEntity, ProfileError>> Create(
 		string name,
@@ -123,7 +129,7 @@ public class ProfileService : IProfileService
 			IsDefault = true,
 			CreatedAt = DateTime.UtcNow
 		};
-		await _profileCache.AddOrUpdateAggregate(profile, [startFolder]);
+		await _profileCache.AddOrUpdateAggregate(profile, [startFolder], Approval);
 
 		await _mediator.Publish(new ProfileCreatedNotification(profile));
 		await _mediator.Publish(new FolderCreatedNotification(startFolder));
@@ -443,7 +449,7 @@ public class ProfileService : IProfileService
 			folders.Add(folder);
 		}
 
-		await _profileCache.AddOrUpdateAggregate(profile, folders);
+		await _profileCache.AddOrUpdateAggregate(profile, folders, Approval);
 
 		foreach (var (copyId, sourceId) in sourceWidgetIdsByCopyId)
 		{

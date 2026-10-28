@@ -55,6 +55,7 @@ const ACTION_LABEL: Record<Exclude<UserNotificationActionKind, 'None'>, string> 
   OpenDownloadPage: AppStrings.Settings.Update.OpenDownloadPageAction,
   OpenTroubleshootingGuide: AppStrings.Shell.Notifications.Action.OpenTroubleshootingGuide,
   EnablePluginCompanionDevices: AppStrings.Shell.Notifications.Action.EnablePluginAdb,
+  OpenSecretApprovals: AppStrings.Shell.Notifications.Action.OpenSecretApprovals,
 };
 
 const ATTENTION_ACTIONS: ReadonlySet<UserNotificationActionKind> = new Set<UserNotificationActionKind>([

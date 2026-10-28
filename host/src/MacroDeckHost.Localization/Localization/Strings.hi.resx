@@ -2497,6 +2497,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>क्रिया ने समय पर जवाब नहीं दिया</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
+    <value>यह चरण एक सीक्रेट का उपयोग करता है और आपकी स्वीकृति की प्रतीक्षा कर रहा है।</value>
+  </data>
   <data name="Errors.Actions.ServiceUnreachable" xml:space="preserve">
     <value>सेवा तक पहुँचा नहीं जा सका।</value>
   </data>
@@ -2688,9 +2691,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Config.FlowExpired" xml:space="preserve">
     <value>कॉन्फ़िग प्रवाह सत्र समाप्त हो गया है। कृपया फिर से शुरू करें।</value>
   </data>
+  <data name="Errors.Config.ForeignSecretReference" xml:space="preserve">
+    <value>यह मान ऐसे सीक्रेट को संदर्भित करता है जो इस कॉन्फ़िगरेशन का हिस्सा नहीं है।</value>
+  </data>
   <data name="Errors.Config.InvalidEntryId" xml:space="preserve">
     <value>'{id}' एक मान्य कॉन्फ़िग एंट्री ID नहीं है</value>
     <comment>[id:string]</comment>
+  </data>
+  <data name="Errors.Config.ReconfigureRequiresApp" xml:space="preserve">
+    <value>सीक्रेट वाला कॉन्फ़िगरेशन केवल Macro Deck ऐप में बदला जा सकता है।</value>
   </data>
   <data name="Errors.Device.LoadFailed" xml:space="preserve">
     <value>डिवाइस लोड करना विफल रहा</value>
@@ -3052,6 +3061,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Errors.Scripts.NotFound" xml:space="preserve">
     <value>स्क्रिप्ट नहीं मिली</value>
+  </data>
+  <data name="Errors.Secrets.ApprovalChanged" xml:space="preserve">
+    <value>इस बीच यह चरण बदल गया है। कृपया इसकी फिर से समीक्षा करें।</value>
+  </data>
+  <data name="Errors.Secrets.ApprovalNotFound" xml:space="preserve">
+    <value>यह चरण अब मौजूद नहीं है।</value>
   </data>
   <data name="Errors.Secrets.NotFound" xml:space="preserve">
     <value>सीक्रेट '{id}' नहीं मिला</value>
@@ -14803,6 +14818,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Nav.Scripts" xml:space="preserve">
     <value>स्क्रिप्ट</value>
   </data>
+  <data name="Nav.SecretApprovals" xml:space="preserve">
+    <value>स्वीकृतियाँ</value>
+  </data>
   <data name="Nav.Store" xml:space="preserve">
     <value>स्टोर</value>
   </data>
@@ -14995,6 +15013,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
     <value>{name} एक इंस्टॉल किए गए प्लगइन को बदलना चाहता है और Macro Deck में आपकी मंज़ूरी का इंतज़ार कर रहा है।</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.SecretApprovalPendingMessage" xml:space="preserve">
+    <value>सीक्रेट का उपयोग करने वाला एक चरण बदला गया है और आपकी स्वीकृति तक रुका रहेगा।</value>
+  </data>
+  <data name="Notifications.SecretApprovalPendingTitle" xml:space="preserve">
+    <value>एक चरण आपकी स्वीकृति की प्रतीक्षा कर रहा है</value>
   </data>
   <data name="Notifications.StoreAutoUpdateFailed.One" xml:space="preserve">
     <value>{count} स्वचालित एक्सटेंशन अपडेट विफल हुआ</value>
@@ -15649,6 +15673,82 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Scripts.ValidationHint" xml:space="preserve">
     <value>कुछ क्रियाओं को अभी मान चाहिए।</value>
+  </data>
+  <data name="SecretApprovals.AlsoUsedBy" xml:space="preserve">
+    <value>इनके द्वारा भी उपयोग किया गया: {owners}</value>
+    <comment>[owners:string]</comment>
+  </data>
+  <data name="SecretApprovals.Approve" xml:space="preserve">
+    <value>स्वीकृत करें</value>
+  </data>
+  <data name="SecretApprovals.ApproveFailed" xml:space="preserve">
+    <value>चरण स्वीकृत नहीं हो सका।</value>
+  </data>
+  <data name="SecretApprovals.ApprovedColumn" xml:space="preserve">
+    <value>स्वीकृत</value>
+  </data>
+  <data name="SecretApprovals.ChangedBadge" xml:space="preserve">
+    <value>स्वीकृति के बाद बदला गया</value>
+  </data>
+  <data name="SecretApprovals.ChangedTag" xml:space="preserve">
+    <value>बदला गया</value>
+  </data>
+  <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
+    <value>स्वीकृति के लिए कुछ भी प्रतीक्षा में नहीं है</value>
+  </data>
+  <data name="SecretApprovals.EmptyMessage" xml:space="preserve">
+    <value>सीक्रेट का उपयोग करने वाले सभी चरण स्वीकृत हैं।</value>
+  </data>
+  <data name="SecretApprovals.Intro" xml:space="preserve">
+    <value>सीक्रेट का उपयोग करने वाले चरण आपकी स्वीकृति के बाद ही चलते हैं। देखें कि क्या बदला है, फिर उन्हें स्वीकृत करें।</value>
+  </data>
+  <data name="SecretApprovals.LoadFailed" xml:space="preserve">
+    <value>स्वीकृतियाँ लोड नहीं हो सकीं।</value>
+  </data>
+  <data name="SecretApprovals.Loading" xml:space="preserve">
+    <value>स्वीकृतियाँ लोड हो रही हैं…</value>
+  </data>
+  <data name="SecretApprovals.NewBadge" xml:space="preserve">
+    <value>नया चरण</value>
+  </data>
+  <data name="SecretApprovals.NotSet" xml:space="preserve">
+    <value>सेट नहीं है</value>
+  </data>
+  <data name="SecretApprovals.NowColumn" xml:space="preserve">
+    <value>अभी</value>
+  </data>
+  <data name="SecretApprovals.OwnerKind.Automation" xml:space="preserve">
+    <value>ऑटोमेशन</value>
+  </data>
+  <data name="SecretApprovals.OwnerKind.Script" xml:space="preserve">
+    <value>स्क्रिप्ट</value>
+  </data>
+  <data name="SecretApprovals.OwnerKind.Widget" xml:space="preserve">
+    <value>विजेट</value>
+  </data>
+  <data name="SecretApprovals.OwnerWithContext" xml:space="preserve">
+    <value>{owner} ({context})</value>
+    <comment>[owner:string] [context:string]</comment>
+  </data>
+  <data name="SecretApprovals.PendingCount.One" xml:space="preserve">
+    <value>{count} चरण स्वीकृति की प्रतीक्षा में है</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="SecretApprovals.PendingCount.Other" xml:space="preserve">
+    <value>स्वीकृति की प्रतीक्षा में: {count}</value>
+    <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="SecretApprovals.SecretValue" xml:space="preserve">
+    <value>सीक्रेट</value>
+  </data>
+  <data name="SecretApprovals.SettingColumn" xml:space="preserve">
+    <value>सेटिंग</value>
+  </data>
+  <data name="SecretApprovals.Title" xml:space="preserve">
+    <value>स्वीकृतियाँ</value>
+  </data>
+  <data name="SecretApprovals.UnknownBadge" xml:space="preserve">
+    <value>अभी समीक्षा नहीं हुई</value>
   </data>
   <data name="Settings.About.ApacheLicenseLabel" xml:space="preserve">
     <value>Apache License 2.0</value>
@@ -17917,6 +18017,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Shell.Notifications.Action.OpenLogs" xml:space="preserve">
     <value>लॉग खोलें</value>
+  </data>
+  <data name="Shell.Notifications.Action.OpenSecretApprovals" xml:space="preserve">
+    <value>समीक्षा करें</value>
   </data>
   <data name="Shell.Notifications.Action.OpenTroubleshootingGuide" xml:space="preserve">
     <value>समस्या निवारण</value>

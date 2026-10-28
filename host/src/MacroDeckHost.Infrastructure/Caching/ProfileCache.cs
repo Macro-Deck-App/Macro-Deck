@@ -1,8 +1,10 @@
 using System.Collections.Concurrent;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using Serilog;
@@ -14,6 +16,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 	private readonly IProfileStore _store;
 	private readonly ILogger _logger;
 	private readonly IFontCatalog _fontCatalog;
+	private readonly SecretApprovalLedger? _approvals;
 	private readonly ConcurrentDictionary<Guid, ProfileEntity> _profiles = new();
 	private readonly ConcurrentDictionary<Guid, FolderEntity> _folders = new();
 	private readonly SemaphoreSlim _initializationLock = new(1, 1);
@@ -26,11 +29,16 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 	// Optional so the many existing callers that construct a ProfileCache without a font concern keep
 	// compiling; production resolution always supplies the registered IFontCatalog regardless of this
 	// default, since the DI container fills a registered parameter type before falling back to it.
-	public ProfileCache(IProfileStore store, ILogger logger, IFontCatalog? fontCatalog = null)
+	public ProfileCache(
+		IProfileStore store,
+		ILogger logger,
+		IFontCatalog? fontCatalog = null,
+		SecretApprovalLedger? approvals = null)
 	{
 		_store = store;
 		_logger = logger;
 		_fontCatalog = fontCatalog ?? NullFontCatalog.Instance;
+		_approvals = approvals;
 	}
 
 	public async Task InitializeCache()
@@ -50,6 +58,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 
 			var loadResult = _store.LoadAll();
 			HadUnreadableProfiles = loadResult.UnreadableCount > 0;
+			var repairedProfiles = new List<Guid>();
 
 			foreach (var file in loadResult.Profiles)
 			{
@@ -70,8 +79,16 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 
 				if (repaired)
 				{
-					TryPersist(profile.Id);
+					repairedProfiles.Add(profile.Id);
 				}
+			}
+
+			_approvals?.LoadGroup(SecretApprovalGroup.Profiles,
+				_profiles.Keys.ToDictionary(profileId => profileId, ApprovalOwnersOf));
+
+			foreach (var profileId in repairedProfiles)
+			{
+				TryPersist(profileId);
 			}
 
 			_isInitialized = true;
@@ -135,7 +152,15 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		}
 	}
 
-	public async Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders)
+	public Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders)
+	{
+		return AddOrUpdateAggregate(profile, folders, SecretApprovalWrite.Preserve);
+	}
+
+	public async Task AddOrUpdateAggregate(
+		ProfileEntity profile,
+		IReadOnlyCollection<FolderEntity> folders,
+		SecretApprovalWrite write)
 	{
 		await _updateLock.WaitAsync();
 		try
@@ -153,7 +178,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			}
 
 			NormalizeStartFolder(profile.Id);
-			TryPersist(profile.Id);
+			TryPersist(profile.Id, write, folders.SelectMany(entry => entry.Widgets).Select(entry => entry.Id));
 		}
 		finally
 		{
@@ -177,6 +202,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			}
 
 			_store.Delete(id);
+			_approvals?.DeletePartition(SecretApprovalGroup.Profiles, id);
 			_logger.Information("Removed profile with id {ProfileId}", id);
 			return removed;
 		}
@@ -216,7 +242,12 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			.ToList();
 	}
 
-	public async Task AddOrUpdateFolder(FolderEntity folder)
+	public Task AddOrUpdateFolder(FolderEntity folder)
+	{
+		return AddOrUpdateFolder(folder, SecretApprovalWrite.Preserve);
+	}
+
+	public async Task AddOrUpdateFolder(FolderEntity folder, SecretApprovalWrite write)
 	{
 		await _updateLock.WaitAsync();
 		try
@@ -226,9 +257,16 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			WidgetFontFaceMigration.Normalize([folder], _fontCatalog);
 			WidgetIconReferenceMigration.Normalize([folder]);
 
+			var previousProfileId = _folders.TryGetValue(folder.Id, out var previous)
+				? previous.ProfileId
+				: folder.ProfileId;
 			_folders.AddOrUpdate(folder.Id, folder, (_, _) => folder);
 			NormalizeStartFolder(folder.ProfileId);
-			TryPersist(folder.ProfileId);
+			TryPersist(folder.ProfileId, write, folder.Widgets.Select(entry => entry.Id));
+			if (previousProfileId != folder.ProfileId)
+			{
+				TryPersist(previousProfileId);
+			}
 		}
 		finally
 		{
@@ -236,20 +274,32 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		}
 	}
 
-	public async Task AddOrUpdateFolders(IReadOnlyCollection<FolderEntity> folders)
+	public Task AddOrUpdateFolders(IReadOnlyCollection<FolderEntity> folders)
+	{
+		return AddOrUpdateFolders(folders, SecretApprovalWrite.Preserve);
+	}
+
+	public async Task AddOrUpdateFolders(IReadOnlyCollection<FolderEntity> folders, SecretApprovalWrite write)
 	{
 		await _updateLock.WaitAsync();
 		try
 		{
+			var affected = new HashSet<Guid>();
 			foreach (var folder in folders)
 			{
+				if (_folders.TryGetValue(folder.Id, out var previous))
+				{
+					affected.Add(previous.ProfileId);
+				}
+
 				_folders.AddOrUpdate(folder.Id, folder, (_, _) => folder);
+				affected.Add(folder.ProfileId);
 			}
 
-			foreach (var profileId in folders.Select(folder => folder.ProfileId).Distinct())
+			foreach (var profileId in affected)
 			{
 				NormalizeStartFolder(profileId);
-				TryPersist(profileId);
+				TryPersist(profileId, write, folders.SelectMany(entry => entry.Widgets).Select(entry => entry.Id));
 			}
 		}
 		finally
@@ -321,6 +371,11 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 
 	public void AddWidget(Guid folderId, WidgetEntity widget)
 	{
+		AddWidget(folderId, widget, SecretApprovalWrite.Preserve);
+	}
+
+	public void AddWidget(Guid folderId, WidgetEntity widget, SecretApprovalWrite write)
+	{
 		_updateLock.Wait();
 		try
 		{
@@ -335,7 +390,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			WidgetIconReferenceMigration.Normalize(widget);
 
 			folder.Widgets.Add(widget);
-			TryPersist(folder.ProfileId);
+			TryPersist(folder.ProfileId, write, [widget.Id]);
 		}
 		finally
 		{
@@ -344,6 +399,11 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 	}
 
 	public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+	{
+		AddWidgets(folderId, widgets, SecretApprovalWrite.Preserve);
+	}
+
+	public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets, SecretApprovalWrite write)
 	{
 		_updateLock.Wait();
 		try
@@ -363,7 +423,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				folder.Widgets.Add(widget);
 			}
 
-			TryPersist(folder.ProfileId);
+			TryPersist(folder.ProfileId, write, widgets.Select(entry => entry.Id));
 		}
 		finally
 		{
@@ -372,6 +432,11 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 	}
 
 	public void UpdateWidget(Guid folderId, WidgetEntity widget)
+	{
+		UpdateWidget(folderId, widget, SecretApprovalWrite.Preserve);
+	}
+
+	public void UpdateWidget(Guid folderId, WidgetEntity widget, SecretApprovalWrite write)
 	{
 		_updateLock.Wait();
 		try
@@ -388,7 +453,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			}
 
 			folder.Widgets[index] = widget;
-			TryPersist(folder.ProfileId);
+			TryPersist(folder.ProfileId, write, [widget.Id]);
 		}
 		finally
 		{
@@ -397,6 +462,11 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 	}
 
 	public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+	{
+		UpdateWidgets(folderId, widgets, SecretApprovalWrite.Preserve);
+	}
+
+	public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets, SecretApprovalWrite write)
 	{
 		_updateLock.Wait();
 		try
@@ -417,7 +487,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				folder.Widgets[index] = widget;
 			}
 
-			TryPersist(folder.ProfileId);
+			TryPersist(folder.ProfileId, write, widgets.Select(entry => entry.Id));
 		}
 		finally
 		{
@@ -498,6 +568,15 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 
 	public void ReplaceWidgets(Guid folderId, IReadOnlyList<Guid> removeIds, IReadOnlyList<WidgetEntity> addWidgets)
 	{
+		ReplaceWidgets(folderId, removeIds, addWidgets, SecretApprovalWrite.Preserve);
+	}
+
+	public void ReplaceWidgets(
+		Guid folderId,
+		IReadOnlyList<Guid> removeIds,
+		IReadOnlyList<WidgetEntity> addWidgets,
+		SecretApprovalWrite write)
+	{
 		_updateLock.Wait();
 		try
 		{
@@ -513,7 +592,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				folder.Widgets.Add(widget);
 			}
 
-			TryPersist(folder.ProfileId);
+			TryPersist(folder.ProfileId, write, addWidgets.Select(entry => entry.Id));
 		}
 		finally
 		{
@@ -523,14 +602,50 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 
 	private bool TryPersist(Guid profileId)
 	{
+		return TryPersist(profileId, SecretApprovalWrite.Preserve, []);
+	}
+
+	// Only the widgets this write carries are recorded with its mode; every other widget of the profile is
+	// rewritten unchanged and must never be approved by it.
+	private bool TryPersist(Guid profileId, SecretApprovalWrite write, IEnumerable<Guid> writtenWidgets)
+	{
 		if (!_profiles.TryGetValue(profileId, out var profile))
 		{
 			_logger.Warning("Skipped persisting unknown profile {ProfileId}", profileId);
 			return true;
 		}
 
-		var folders = _folders.Values.Where(f => f.ProfileId == profileId);
+		var folders = _folders.Values.Where(f => f.ProfileId == profileId).ToList();
+		RecordApprovals(profileId, write, writtenWidgets.ToHashSet());
 		return _store.Save(ProfileFileMapper.ToFile(profile, folders));
+	}
+
+	private void RecordApprovals(Guid profileId, SecretApprovalWrite write, HashSet<Guid> writtenWidgets)
+	{
+		if (_approvals is null)
+		{
+			return;
+		}
+
+		foreach (var (owner, flows) in ApprovalOwnersOf(profileId))
+		{
+			_approvals.Assign(owner, SecretApprovalGroup.Profiles, profileId);
+			_approvals.Record(owner,
+				FlowSecretBlocks.FromFlows(flows),
+				writtenWidgets.Contains(owner.Id) ? write : SecretApprovalWrite.Preserve);
+		}
+
+		_approvals.SavePartition(SecretApprovalGroup.Profiles, profileId);
+	}
+
+	private IReadOnlyList<(FlowOwner Owner, string? Flows)> ApprovalOwnersOf(Guid profileId)
+	{
+		return _folders.Values
+			.Where(folder => folder.ProfileId == profileId)
+			.SelectMany(folder => folder.Widgets)
+			.Select(widget => (FlowOwner.Widget(widget.Id),
+				WidgetFlowsJson.TryExtract(widget.Data, out var flows) ? flows : null))
+			.ToList();
 	}
 
 	private void NormalizeStartFolder(Guid profileId)

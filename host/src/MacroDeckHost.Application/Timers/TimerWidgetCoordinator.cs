@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -307,6 +308,7 @@ public sealed class TimerWidgetCoordinator
 						Scope = VariableScope.Widget,
 						ScopeRefId = widgetId.ToString(),
 						OwnerWidgetId = widgetId,
+						Owner = FlowOwner.Widget(widgetId),
 						Origin = ExecutionOrigin.Host
 					},
 					CancellationToken.None)

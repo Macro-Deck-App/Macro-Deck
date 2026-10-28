@@ -136,6 +136,9 @@ public IReadOnlyList<ActionParameter> Parameters { get; } =
 `Url`, `Icon`, `Image`, `KeyboardSequence`, `KeyboardCombo` and `WidgetTarget`. The executor reads
 values by `Name` from `context.Parameters`. The key names in `Hotkey`, `KeyboardCombo` and
 `KeyboardSequence` values are listed under [Keyboard combos](/features/events/#keyboard-combos).
+A secret the user picks for a `Secret` or `Password` parameter, also as a declared child of an `Object`
+or the item of an `Array`, arrives in `context.Parameters` as plaintext; no other parameter ever receives
+a decrypted secret. See [secret resolution in flows](/policies/compatibility/#secret-resolution-in-flows).
 A `KeyboardSequence` value arrives as a JSON string. The host renders each string value inside it as a
 template on its own, so a rendered value, such as event text, only ever becomes the content of that
 string and never adds, removes or changes steps.

@@ -726,17 +726,6 @@ public class FlowExecutorTests
 	}
 
 	[Test]
-	public async Task Secret_reference_is_resolved_to_plaintext()
-	{
-		var id = _secretService.Store("super-secret");
-		var parameters = await Execute($$"""
-										 [{ "name": "apiKey", "type": "password", "value": { "$secret": "{{id}}" } }]
-										 """);
-
-		Assert.That(parameters["apiKey"], Is.EqualTo("super-secret"));
-	}
-
-	[Test]
 	public async Task Hotkey_object_is_passed_structured()
 	{
 		var parameters = await Execute("""

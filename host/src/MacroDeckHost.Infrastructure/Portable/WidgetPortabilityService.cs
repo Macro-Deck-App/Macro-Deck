@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -16,20 +17,25 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 	private readonly IPortableAssetManager _assetManager;
 	private readonly IMediator _mediator;
 	private readonly ILogger _logger;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
 	public WidgetPortabilityService(
 		IFolderCache folderCache,
 		IProfileCache profileCache,
 		IPortableAssetManager assetManager,
 		IMediator mediator,
-		ILogger logger)
+		ILogger logger,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_folderCache = folderCache;
 		_profileCache = profileCache;
 		_assetManager = assetManager;
 		_mediator = mediator;
 		_logger = logger;
+		_writeAuthority = writeAuthority;
 	}
+
+	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
 
 	public async Task<Result<byte[], PortabilityError>> Export(
 		Guid folderId,
@@ -149,6 +155,7 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		try
 		{
 			var assetIdMap = await _assetManager.Import(content, outcome.Icons, outcome.Fonts, cancellationToken);
+			var carriedSecrets = PortableSecretReferences.CarriedBy(content, assetIdMap);
 
 			var created = new List<WidgetEntity>();
 			var widgetIdMap = new Dictionary<Guid, Guid>();
@@ -166,11 +173,11 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 					Width = widget.Width,
 					Height = widget.Height,
 					Data = PortableActionButtonStateNormalizer.Normalize(widget.Type,
-						PortableGuidRemapper.Remap(widget.Data, assetIdMap)),
+						PortableSecretReferences.Remap(widget.Data, assetIdMap, carriedSecrets)),
 					CreatedAt = DateTime.UtcNow
 				};
 
-				_folderCache.AddWidget(folderId, entity);
+				_folderCache.AddWidget(folderId, entity, Approval);
 				created.Add(entity);
 				if (widget.SourceId.HasValue)
 				{

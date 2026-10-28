@@ -305,7 +305,7 @@ public class ProfilePortabilityServiceTests
 	public async Task Export_WithSecrets_ThenImport_RecreatesAndRemapsTheSecret()
 	{
 		var secretId = _harness.Secrets.Store("hunter2", SecretKind.Password);
-		var (source, _, _) = await _harness.SeedProfile($"{{\"$secret\":\"{secretId}\"}}");
+		var (source, _, _) = await _harness.SeedProfile(PortabilityTestHarness.SecretFlowData(secretId));
 
 		var export = await _harness.ProfileService.Export(source.Id,
 			new PortableExportOptions { IncludeSecrets = true, Password = "export-password" },

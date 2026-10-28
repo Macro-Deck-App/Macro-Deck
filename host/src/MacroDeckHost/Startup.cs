@@ -116,6 +116,7 @@ using MacroDeckHost.Infrastructure.Migration.MacroDeck2;
 using MacroDeckHost.Infrastructure.Portable;
 using MacroDeckHost.Infrastructure.Rendering;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.OptionsSources;
 using MacroDeckHost.Infrastructure.Triggers;
@@ -862,6 +863,16 @@ public class Startup
 
 		services.AddScoped<ISecretRepository, SecretRepository>();
 		services.AddScoped<ISecretService, SecretService>();
+		services.AddScoped<SecretWriteAuthority>();
+		services.AddSingleton<ISecretLineage, SecretLineageIndex>();
+		services.AddSingleton<ISecretApprovalFiles, JsonSecretApprovalFiles>();
+		services.AddSingleton(provider => new SecretApprovalLedger((integrationId, actionId)
+				=> provider.GetService<IIntegrationRegistry>()?.FindAction(integrationId, actionId),
+			provider.GetRequiredService<ISecretLineage>(),
+			provider.GetRequiredService<ISecretApprovalFiles>(),
+			provider.GetRequiredService<Serilog.ILogger>()));
+		services.AddSingleton<ISecretApprovals>(provider => provider.GetRequiredService<SecretApprovalLedger>());
+		services.AddScoped<SecretApprovalCatalog>();
 		services.AddScoped<IWidgetSecretCloner, WidgetSecretCloner>();
 		services.AddScoped<IWidgetVariableCloner, WidgetVariableCloner>();
 		services.AddScoped<IWidgetSecretScrubber, WidgetSecretScrubber>();
@@ -1205,6 +1216,11 @@ public class Startup
 		app.UseRateLimiter();
 		app.UseAuthentication();
 		app.UseAuthorization();
+		app.Use(async (context, next) =>
+		{
+			context.RequestServices.GetRequiredService<SecretWriteAuthority>().Grant(context.User);
+			await next();
+		});
 		app.UseEndpoints(endpoints =>
 		{
 			endpoints.MapControllers();

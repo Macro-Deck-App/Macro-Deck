@@ -92,6 +92,18 @@ describe('NavItemComponent', () => {
     }
   });
 
+  it('names a counted indicator for assistive technology and renders none without a count', () => {
+    setItem({ id: 'approvals', label: 'Approvals', icon: 'shield-check', route: '/approvals', indicator: '2', indicatorLabel: '2 steps waiting for approval' });
+
+    const indicator = fixture.nativeElement.querySelector('.nav-indicator') as HTMLElement;
+    expect(indicator.textContent?.trim()).toBe('2');
+    expect(indicator.getAttribute('aria-label')).toBe('2 steps waiting for approval');
+
+    setItem({ id: 'approvals', label: 'Approvals', icon: 'shield-check', route: '/approvals', indicator: null });
+
+    expect(fixture.nativeElement.querySelector('.nav-indicator')).toBeNull();
+  });
+
   it('renders a disabled item as a non-interactive element', () => {
     setItem({ id: 'dev', label: 'Developer', icon: 'code', route: '/developer', disabled: true });
 

@@ -2497,6 +2497,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Действие не ответило вовремя</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
+    <value>Этот шаг использует секрет и ожидает подтверждения.</value>
+  </data>
   <data name="Errors.Actions.ServiceUnreachable" xml:space="preserve">
     <value>Не удалось связаться со службой.</value>
   </data>
@@ -2688,9 +2691,15 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Config.FlowExpired" xml:space="preserve">
     <value>Сеанс настройки истёк. Начните заново.</value>
   </data>
+  <data name="Errors.Config.ForeignSecretReference" xml:space="preserve">
+    <value>Это значение ссылается на секрет, который не относится к этой конфигурации.</value>
+  </data>
   <data name="Errors.Config.InvalidEntryId" xml:space="preserve">
     <value>«{id}» не является допустимым ID записи конфигурации</value>
     <comment>[id:string]</comment>
+  </data>
+  <data name="Errors.Config.ReconfigureRequiresApp" xml:space="preserve">
+    <value>Конфигурацию с секретами можно изменить только в приложении Macro Deck.</value>
   </data>
   <data name="Errors.Device.LoadFailed" xml:space="preserve">
     <value>Не удалось загрузить устройства</value>
@@ -3052,6 +3061,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Errors.Scripts.NotFound" xml:space="preserve">
     <value>Скрипт не найден</value>
+  </data>
+  <data name="Errors.Secrets.ApprovalChanged" xml:space="preserve">
+    <value>Тем временем этот шаг изменился. Проверьте его ещё раз.</value>
+  </data>
+  <data name="Errors.Secrets.ApprovalNotFound" xml:space="preserve">
+    <value>Этот шаг больше не существует.</value>
   </data>
   <data name="Errors.Secrets.NotFound" xml:space="preserve">
     <value>Секрет «{id}» не найден</value>
@@ -14803,6 +14818,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Nav.Scripts" xml:space="preserve">
     <value>Скрипты</value>
   </data>
+  <data name="Nav.SecretApprovals" xml:space="preserve">
+    <value>Подтверждения</value>
+  </data>
   <data name="Nav.Store" xml:space="preserve">
     <value>Магазин</value>
   </data>
@@ -14995,6 +15013,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
     <value>{name} хочет заменить установленный плагин и ожидает вашего подтверждения в Macro Deck.</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.SecretApprovalPendingMessage" xml:space="preserve">
+    <value>Шаг, использующий секрет, был изменён и приостановлен до подтверждения.</value>
+  </data>
+  <data name="Notifications.SecretApprovalPendingTitle" xml:space="preserve">
+    <value>Шаг ожидает подтверждения</value>
   </data>
   <data name="Notifications.StoreAutoUpdateFailed.One" xml:space="preserve">
     <value>Не удалось автоматически обновить 1 расширение</value>
@@ -15649,6 +15673,82 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Scripts.ValidationHint" xml:space="preserve">
     <value>Некоторым действиям ещё нужно значение.</value>
+  </data>
+  <data name="SecretApprovals.AlsoUsedBy" xml:space="preserve">
+    <value>Также используется: {owners}</value>
+    <comment>[owners:string]</comment>
+  </data>
+  <data name="SecretApprovals.Approve" xml:space="preserve">
+    <value>Подтвердить</value>
+  </data>
+  <data name="SecretApprovals.ApproveFailed" xml:space="preserve">
+    <value>Не удалось подтвердить шаг.</value>
+  </data>
+  <data name="SecretApprovals.ApprovedColumn" xml:space="preserve">
+    <value>Подтверждено</value>
+  </data>
+  <data name="SecretApprovals.ChangedBadge" xml:space="preserve">
+    <value>Изменён после подтверждения</value>
+  </data>
+  <data name="SecretApprovals.ChangedTag" xml:space="preserve">
+    <value>Изменено</value>
+  </data>
+  <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
+    <value>Нет шагов, ожидающих подтверждения</value>
+  </data>
+  <data name="SecretApprovals.EmptyMessage" xml:space="preserve">
+    <value>Все шаги, использующие секрет, подтверждены.</value>
+  </data>
+  <data name="SecretApprovals.Intro" xml:space="preserve">
+    <value>Шаги, использующие секрет, выполняются только после подтверждения. Проверьте, что изменилось, и подтвердите их.</value>
+  </data>
+  <data name="SecretApprovals.LoadFailed" xml:space="preserve">
+    <value>Не удалось загрузить подтверждения.</value>
+  </data>
+  <data name="SecretApprovals.Loading" xml:space="preserve">
+    <value>Загрузка подтверждений…</value>
+  </data>
+  <data name="SecretApprovals.NewBadge" xml:space="preserve">
+    <value>Новый шаг</value>
+  </data>
+  <data name="SecretApprovals.NotSet" xml:space="preserve">
+    <value>Не задано</value>
+  </data>
+  <data name="SecretApprovals.NowColumn" xml:space="preserve">
+    <value>Сейчас</value>
+  </data>
+  <data name="SecretApprovals.OwnerKind.Automation" xml:space="preserve">
+    <value>Автоматизация</value>
+  </data>
+  <data name="SecretApprovals.OwnerKind.Script" xml:space="preserve">
+    <value>Скрипт</value>
+  </data>
+  <data name="SecretApprovals.OwnerKind.Widget" xml:space="preserve">
+    <value>Виджет</value>
+  </data>
+  <data name="SecretApprovals.OwnerWithContext" xml:space="preserve">
+    <value>{owner} ({context})</value>
+    <comment>[owner:string] [context:string]</comment>
+  </data>
+  <data name="SecretApprovals.PendingCount.One" xml:space="preserve">
+    <value>{count} шаг ожидает подтверждения</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="SecretApprovals.PendingCount.Other" xml:space="preserve">
+    <value>Ожидают подтверждения: {count}</value>
+    <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="SecretApprovals.SecretValue" xml:space="preserve">
+    <value>Секрет</value>
+  </data>
+  <data name="SecretApprovals.SettingColumn" xml:space="preserve">
+    <value>Параметр</value>
+  </data>
+  <data name="SecretApprovals.Title" xml:space="preserve">
+    <value>Подтверждения</value>
+  </data>
+  <data name="SecretApprovals.UnknownBadge" xml:space="preserve">
+    <value>Ещё не проверено</value>
   </data>
   <data name="Settings.About.ApacheLicenseLabel" xml:space="preserve">
     <value>Apache License 2.0</value>
@@ -17917,6 +18017,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Shell.Notifications.Action.OpenLogs" xml:space="preserve">
     <value>Открыть журналы</value>
+  </data>
+  <data name="Shell.Notifications.Action.OpenSecretApprovals" xml:space="preserve">
+    <value>Проверить</value>
   </data>
   <data name="Shell.Notifications.Action.OpenTroubleshootingGuide" xml:space="preserve">
     <value>Устранение неполадок</value>

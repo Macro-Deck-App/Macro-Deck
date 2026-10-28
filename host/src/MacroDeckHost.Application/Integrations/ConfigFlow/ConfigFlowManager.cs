@@ -3,6 +3,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
@@ -67,10 +68,20 @@ public class ConfigFlowManager : IConfigFlowManager
 		return StartAsync(integrationId, null, null, cancellationToken);
 	}
 
+	public Task<ConfigFlowStartOutcome> StartAsync(
+		string integrationId,
+		string? title,
+		Guid? entryId,
+		CancellationToken cancellationToken)
+	{
+		return StartAsync(integrationId, title, entryId, SecretApprovalMode.Preserve, cancellationToken);
+	}
+
 	public async Task<ConfigFlowStartOutcome> StartAsync(
 		string integrationId,
 		string? title,
 		Guid? entryId,
+		SecretApprovalMode writer,
 		CancellationToken cancellationToken)
 	{
 		var integration = _registry.Integrations.FirstOrDefault(i => i.Id == integrationId);
@@ -110,6 +121,16 @@ public class ConfigFlowManager : IConfigFlowManager
 			}
 		}
 
+		if (writer == SecretApprovalMode.Withhold && HoldsSecrets(existingEntry))
+		{
+			await using var refusalScope = _scopeFactory.CreateAsyncScope();
+			return new ConfigFlowStartOutcome(true,
+				Guid.Empty,
+				null,
+				await ActiveLocalization.Resolve(refusalScope.ServiceProvider,
+					AppStrings.Errors.Config.ReconfigureRequiresApp()));
+		}
+
 		var flowId = Guid.NewGuid();
 		var registration = _oauth.Register(flowId);
 		var context = new ConfigFlowContext(_oauth,
@@ -139,7 +160,8 @@ public class ConfigFlowManager : IConfigFlowManager
 			registration.State,
 			existingEntry?.Id ?? Guid.NewGuid(),
 			existingEntry,
-			title);
+			title,
+			writer);
 		if (existingEntry is not null)
 		{
 			foreach (var (key, value) in existingEntry.Values)
@@ -227,7 +249,7 @@ public class ConfigFlowManager : IConfigFlowManager
 		return SubmitAsync(flowId, stepId, values, clearedSecretFields, null, cancellationToken);
 	}
 
-	public async Task<ConfigFlowSubmitOutcome> SubmitAsync(
+	public Task<ConfigFlowSubmitOutcome> SubmitAsync(
 		Guid flowId,
 		string stepId,
 		IReadOnlyDictionary<string, JsonElement> values,
@@ -235,9 +257,43 @@ public class ConfigFlowManager : IConfigFlowManager
 		int? stepIndex,
 		CancellationToken cancellationToken)
 	{
+		return SubmitAsync(flowId,
+			stepId,
+			values,
+			clearedSecretFields,
+			stepIndex,
+			SecretApprovalMode.Preserve,
+			cancellationToken);
+	}
+
+	public async Task<ConfigFlowSubmitOutcome> SubmitAsync(
+		Guid flowId,
+		string stepId,
+		IReadOnlyDictionary<string, JsonElement> values,
+		IReadOnlyCollection<string> clearedSecretFields,
+		int? stepIndex,
+		SecretApprovalMode writer,
+		CancellationToken cancellationToken)
+	{
 		if (!_flows.TryGetValue(flowId, out var active))
 		{
 			return new ConfigFlowSubmitOutcome(false, ConfigFlowResultKind.Error, null, null, null, null);
+		}
+
+		LocalizedText? refusal = null;
+		if ((writer == SecretApprovalMode.Withhold || active.Writer == SecretApprovalMode.Withhold)
+			&& HoldsSecrets(active.ExistingEntry))
+		{
+			refusal = AppStrings.Errors.Config.ReconfigureRequiresApp();
+		}
+		else if (values.Any(value => IsForeignSecretReference(active, value.Key, value.Value)))
+		{
+			refusal = AppStrings.Errors.Config.ForeignSecretReference();
+		}
+
+		if (refusal is { } refusalText)
+		{
+			return new ConfigFlowSubmitOutcome(true, ConfigFlowResultKind.Error, null, refusalText, null, null);
 		}
 
 		if (stepIndex is { } index && index >= 0 && index < active.History.Count)
@@ -493,6 +549,24 @@ public class ConfigFlowManager : IConfigFlowManager
 		}
 	}
 
+	private static bool HoldsSecrets(ConfigEntryRecord? entry)
+	{
+		return entry?.Values.Values.Any(DeclaredSecretWalker.ContainsReference) == true;
+	}
+
+	// A client may only hand back a reference this entry already stores under the same key: any other
+	// id would make the flow decrypt, and the entry later serve, a secret it never owned.
+	private static bool IsForeignSecretReference(ActiveFlow active, string key, JsonElement value)
+	{
+		if (!DeclaredSecretWalker.ContainsReference(value))
+		{
+			return false;
+		}
+
+		return active.ExistingEntry?.Values.TryGetValue(key, out var retained) != true
+			|| !JsonElement.DeepEquals(retained, value);
+	}
+
 	private static void RememberSecretFields(ActiveFlow active, ConfigFlowStep? step)
 	{
 		if (step is null)
@@ -615,8 +689,10 @@ public class ConfigFlowManager : IConfigFlowManager
 			string oauthState,
 			Guid entryId,
 			ConfigEntryRecord? existingEntry,
-			string? requestedTitle)
+			string? requestedTitle,
+			SecretApprovalMode writer)
 		{
+			Writer = writer;
 			IntegrationId = integrationId;
 			IntegrationName = integrationName;
 			Flow = flow;
@@ -628,6 +704,8 @@ public class ConfigFlowManager : IConfigFlowManager
 		}
 
 		public string IntegrationId { get; }
+
+		public SecretApprovalMode Writer { get; }
 
 		public LocalizedText IntegrationName { get; }
 

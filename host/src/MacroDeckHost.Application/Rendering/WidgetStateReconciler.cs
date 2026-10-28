@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
@@ -269,6 +270,7 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 				Scope = VariableScope.Widget,
 				ScopeRefId = widgetId.ToString(),
 				OwnerWidgetId = widgetId,
+				Owner = FlowOwner.Widget(widgetId),
 				Origin = ExecutionOrigin.Host,
 				EventParameters = new Dictionary<string, object?>
 				{

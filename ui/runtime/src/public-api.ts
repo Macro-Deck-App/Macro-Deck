@@ -1175,11 +1175,17 @@ export {
   type UpdateScriptResponse,
 } from './protocol/messages/script';
 export {
+  type ApproveSecretBlockRequest,
+  type ApproveSecretBlockResponse,
   type CloneSecretResponse,
   type CreateSecretRequest,
   type CreateSecretResponse,
   type DeleteSecretResponse,
+  type GetSecretApprovalsResponse,
   type RevealSecretResponse,
+  type SecretApprovalItem,
+  type SecretApprovalOwnerKind,
+  type SecretApprovalParameter,
   type SecretKind,
   type UpdateSecretRequest,
   type UpdateSecretResponse,

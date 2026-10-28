@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -16,16 +17,21 @@ public class AutomationService : IAutomationService
 	private readonly IAutomationCache _automationCache;
 	private readonly IMediator _mediator;
 	private readonly IWidgetVariableCloner _variableCloner;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
 	public AutomationService(
 		IAutomationCache automationCache,
 		IMediator mediator,
-		IWidgetVariableCloner variableCloner)
+		IWidgetVariableCloner variableCloner,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_automationCache = automationCache;
 		_mediator = mediator;
 		_variableCloner = variableCloner;
+		_writeAuthority = writeAuthority;
 	}
+
+	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
 
 	public IReadOnlyList<AutomationEntity> GetAll()
 	{
@@ -63,7 +69,7 @@ public class AutomationService : IAutomationService
 			UpdatedAt = now
 		};
 
-		await _automationCache.AddOrUpdate(automation);
+		await _automationCache.AddOrUpdate(automation, Approval);
 		await _mediator.Publish(new AutomationCreatedNotification(automation));
 
 		return Result.Ok<AutomationEntity, AutomationError>(automation);
@@ -116,7 +122,7 @@ public class AutomationService : IAutomationService
 
 		automation.UpdatedAt = DateTime.UtcNow;
 
-		await _automationCache.AddOrUpdate(automation);
+		await _automationCache.AddOrUpdate(automation, Approval);
 		await _mediator.Publish(new AutomationUpdatedNotification(automation));
 
 		return Result.Ok<AutomationEntity, AutomationError>(automation);

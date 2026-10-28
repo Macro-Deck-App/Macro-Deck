@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Deck;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Application.Actions;
@@ -43,4 +44,9 @@ public sealed class FlowExecutionRequest
 	public IReadOnlyDictionary<string, object?>? EventParameters { get; init; }
 
 	public IReadOnlyDictionary<string, object?>? ScriptInputs { get; init; }
+
+	public FlowOwner? Owner { get; init; }
+
+	// Set only for an unsaved draft run by an admin principal; stored flows never decrypt through it.
+	public bool TrustedDraft { get; init; }
 }

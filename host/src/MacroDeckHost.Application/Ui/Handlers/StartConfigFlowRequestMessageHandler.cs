@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Integrations.ConfigFlow;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.ConfigFlow;
@@ -10,10 +11,12 @@ public class StartConfigFlowRequestMessageHandler
 	: IUiTransportMessageHandler<StartConfigFlowRequest, StartConfigFlowResponse>
 {
 	private readonly IConfigFlowManager _manager;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
-	public StartConfigFlowRequestMessageHandler(IConfigFlowManager manager)
+	public StartConfigFlowRequestMessageHandler(IConfigFlowManager manager, SecretWriteAuthority? writeAuthority = null)
 	{
 		_manager = manager;
+		_writeAuthority = writeAuthority;
 	}
 
 	public async ValueTask<StartConfigFlowResponse> Handle(
@@ -55,6 +58,7 @@ public class StartConfigFlowRequestMessageHandler
 		var outcome = await _manager.StartAsync(request.IntegrationId,
 			request.Title,
 			entryId,
+			_writeAuthority?.Mode ?? SecretApprovalMode.Preserve,
 			cancellationToken);
 
 		if (!outcome.Supported)
