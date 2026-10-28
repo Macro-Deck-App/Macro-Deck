@@ -2952,6 +2952,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>यह प्लगइन उस संस्करण से अलग प्रकाशक द्वारा साइन किया गया है जो आपके पास पहले से है, इसलिए इसे इंस्टॉल नहीं किया गया।</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>प्लगइन का कुछ सहेजा गया डेटा नहीं हटाया जा सका क्योंकि एक फ़ाइल अभी उपयोग में है, इसलिए प्लगइन अनइंस्टॉल नहीं किया गया। उसका उपयोग करने वाले प्रोग्राम बंद करें और फिर से कोशिश करें।</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>प्लगइन को रोका नहीं जा सका, इसलिए कुछ भी नहीं हटाया गया। फिर से कोशिश करें।</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck बंद हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया।</value>
   </data>
@@ -10143,7 +10149,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>प्लगइन अनइंस्टॉल करें?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>प्लगइन की अपनी सेटिंग्स रखने के लिए इसे बंद न करें, ताकि बाद में फिर इंस्टॉल करने पर वहीं से काम शुरू हो। इससे Macro Deck में {name} कैसे सेट है, इस पर असर नहीं पड़ता।</value>
+    <value>प्लगइन की अपनी सेटिंग्स और उसके लिए सेट किए गए खाते और कनेक्शन रखने के लिए इसे बंद रहने दें, ताकि बाद में फिर इंस्टॉल करने पर वहीं से काम शुरू हो। इसे चालू करने पर सहेजी गई साइन-इन जानकारी सहित ये भी हट जाते हैं। इससे Macro Deck में अन्य जगहों पर {name} कैसे सेट है, इस पर असर नहीं पड़ता।</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>अनइंस्टॉल करें…</value>

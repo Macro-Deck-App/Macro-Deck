@@ -2952,6 +2952,12 @@
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>هذا المكوّن الإضافي موقّع من ناشر مختلف عن ناشر الإصدار الذي لديك، لذلك لم يُثبَّت.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>تعذّر حذف بعض البيانات المحفوظة للمكوّن الإضافي لأن ملفاً لا يزال قيد الاستخدام، لذا لم يتم إلغاء تثبيته. أغلق البرامج التي تستخدمه ثم حاول مرة أخرى.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>تعذّر إيقاف المكوّن الإضافي، لذا لم تتم إزالة أي شيء. حاول مرة أخرى.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>يتم إيقاف تشغيل Macro Deck، لذلك لم يتم تشغيل المكوّن الإضافي.</value>
   </data>
@@ -10143,7 +10149,7 @@
     <value>هل تريد إلغاء تثبيت المكوّن الإضافي؟</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>اتركه غير محدّد للاحتفاظ بإعدادات المكوّن الإضافي الخاصة به، فتستأنف من حيث توقفت عند إعادة تثبيته لاحقاً. لا يؤثر ذلك في إعداد {name} في أماكن أخرى من Macro Deck.</value>
+    <value>اتركه غير محدّد للاحتفاظ بإعدادات المكوّن الإضافي الخاصة به وبالحسابات والاتصالات المُعدّة له، فتستأنف من حيث توقفت عند إعادة تثبيته لاحقاً. حدّده لحذفها أيضاً، بما في ذلك بيانات تسجيل الدخول المحفوظة. لا يؤثر ذلك في إعداد {name} في أماكن أخرى من Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>إلغاء التثبيت…</value>

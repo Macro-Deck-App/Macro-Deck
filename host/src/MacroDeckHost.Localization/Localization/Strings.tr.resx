@@ -2952,6 +2952,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Bu eklenti, sahip olduğunuz sürümden farklı bir yayımcı tarafından imzalandığı için yüklenmedi.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Bir dosya hâlâ kullanımda olduğu için eklentinin kayıtlı verilerinin bir kısmı silinemedi, bu yüzden eklenti kaldırılmadı. Onu kullanan programları kapatın ve yeniden deneyin.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>Eklenti durdurulamadı, bu yüzden hiçbir şey kaldırılmadı. Yeniden deneyin.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck kapanıyor, bu nedenle eklenti başlatılmadı.</value>
   </data>
@@ -10143,7 +10149,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Eklenti kaldırılsın mı?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Eklentinin kendi ayarlarını korumak için bunu kapalı bırakın; böylece daha sonra yeniden yüklediğinizde kaldığınız yerden devam eder. Bu, {name} öğesinin Macro Deck'teki diğer kurulumlarını etkilemez.</value>
+    <value>Eklentinin kendi ayarlarını ve onun için kurulan hesapları ve bağlantıları korumak için bunu kapalı bırakın; böylece daha sonra yeniden yüklediğinizde kaldığınız yerden devam eder. Açarsanız kayıtlı oturum açma bilgileri dahil bunlar da silinir. Bu, {name} öğesinin Macro Deck'teki diğer kurulumlarını etkilemez.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Kaldır…</value>

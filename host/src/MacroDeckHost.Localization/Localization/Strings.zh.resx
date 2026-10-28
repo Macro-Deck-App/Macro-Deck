@@ -2952,6 +2952,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>此插件由与你已有版本不同的发布者签名，因此未被安装。</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>由于有文件仍在使用中，插件的部分已存储数据未能删除，因此未卸载插件。请关闭正在使用该文件的程序，然后重试。</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>无法停止插件，因此未删除任何内容。请重试。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在关闭，因此未启动插件。</value>
   </data>
@@ -10143,7 +10149,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>要卸载插件吗？</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>不勾选则保留插件自身的设置，这样以后重新安装时可以接着之前的状态使用。这不会影响{name}在 Macro Deck 其他位置的设置。</value>
+    <value>不勾选则保留插件自身的设置以及为其设置的账户和连接，这样以后重新安装时可以接着之前的状态使用。勾选后会将它们一并删除，包括已保存的登录凭据。这不会影响{name}在 Macro Deck 其他位置的设置。</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>卸载…</value>

@@ -2953,6 +2953,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Este complemento está firmado por un editor distinto al de la versión que ya tienes, así que no se instaló.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>No se pudieron eliminar algunos datos guardados del complemento porque un archivo sigue en uso, así que no se ha desinstalado. Cierra los programas que lo usen y vuelve a intentarlo.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>No se pudo detener el complemento, así que no se ha eliminado nada. Vuelve a intentarlo.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se está cerrando, por lo que el complemento no se ha iniciado.</value>
   </data>
@@ -10142,7 +10148,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>¿Desinstalar el complemento?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Déjalo desactivado para conservar la configuración propia del complemento, de modo que al reinstalarlo más adelante continúe donde lo dejaste. No afecta a cómo está configurado {name} en el resto de Macro Deck.</value>
+    <value>Déjalo desactivado para conservar la configuración propia del complemento y las cuentas y conexiones configuradas para él, de modo que al reinstalarlo más adelante continúe donde lo dejaste. Actívalo para eliminarlas también, incluidas las credenciales guardadas. No afecta a cómo está configurado {name} en el resto de Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Desinstalar…</value>

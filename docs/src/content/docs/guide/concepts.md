@@ -941,6 +941,10 @@ installed icon pack's page has **Open in Library**. The other way round, a plugi
 **Integrations** and a Store icon pack under **Library > Icon Packs** have **View in Store**, for the
 description and release notes. An installed plugin is uninstalled from the **General** details of its page
 under **Integrations**, or from its Store page. Uninstalling a plugin also removes the variables it provided.
+On its **Integrations** page you can also tick **Also delete the plugin's stored data**: that deletes the
+plugin's own files and the accounts and connections set up for it, saved sign-ins included. Uninstalling from
+the Store keeps them, so a later reinstall picks up where you left off. If one of its files is still in use, the
+plugin stays installed and a message says its data could not be deleted; close whatever uses it and try again.
 
 A `macrodeck://` link to an item opens its page in Macro Deck, and a message appears if the item is no longer
 in the Store. See [Store links](/reference/store-links/) for the details, including the AppImage limitation.

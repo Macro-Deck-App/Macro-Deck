@@ -2952,6 +2952,12 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Este plugin foi assinado por um publicador diferente do da versão já instalada, então não foi instalado.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Não foi possível excluir parte dos dados salvos do plugin porque um arquivo ainda está em uso, então o plugin não foi desinstalado. Feche os programas que o usam e tente novamente.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>Não foi possível parar o plugin, então nada foi removido. Tente novamente.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>O Macro Deck está sendo encerrado, então o plugin não foi iniciado.</value>
   </data>
@@ -10143,7 +10149,7 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>Desinstalar plugin?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Deixe desmarcado para manter as configurações próprias do plugin, para que a reinstalação depois continue de onde parou. Isso não afeta como {name} está configurado em outras partes do Macro Deck.</value>
+    <value>Deixe desmarcado para manter as configurações próprias do plugin e as contas e conexões configuradas para ele, para que a reinstalação depois continue de onde parou. Marque para excluí-las também, incluindo as credenciais salvas. Isso não afeta como {name} está configurado em outras partes do Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Desinstalar…</value>

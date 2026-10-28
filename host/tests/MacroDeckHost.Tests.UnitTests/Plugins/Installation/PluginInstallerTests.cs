@@ -3,8 +3,10 @@ using System.Text;
 using System.Text.Json;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
+using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Compatibility;
 using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Installation;
@@ -71,6 +73,9 @@ internal sealed class PluginInstallerTests
 		services.AddSingleton<IPluginAccessTokenRepository, InMemoryPluginAccessTokenRepository>();
 		services.AddSingleton<IPluginTrustRecordRepository, InMemoryPluginTrustRecordRepository>();
 		services.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>();
+		services.AddSingleton<IIntegrationConfigStore, FakeIntegrationConfigStore>();
+		services.AddSingleton<IRemotePluginSnapshotStore>(_ => new RemotePluginSnapshotStore(_paths,
+			Serilog.Core.Logger.None));
 		services.AddSingleton<IPluginRegistrationService>(provider => new PluginRegistrationService(
 			provider.GetRequiredService<IPluginRegistrationRepository>(),
 			provider.GetRequiredService<IPluginAccessTokenRepository>(),

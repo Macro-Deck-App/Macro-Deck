@@ -451,5 +451,11 @@ public class RemotePluginSnapshotRefresherTests
 			_byPluginId[snapshot.PluginId] = snapshot;
 			return Task.CompletedTask;
 		}
+
+		public Task RemoveAsync(string pluginId, CancellationToken cancellationToken = default)
+		{
+			_byPluginId.Remove(pluginId);
+			return Task.CompletedTask;
+		}
 	}
 }

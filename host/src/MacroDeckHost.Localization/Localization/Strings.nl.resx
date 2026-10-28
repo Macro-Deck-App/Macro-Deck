@@ -2952,6 +2952,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Deze plug-in is ondertekend door een andere uitgever dan de versie die je al hebt, dus is hij niet geïnstalleerd.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Een deel van de opgeslagen gegevens van de plug-in kon niet worden verwijderd omdat een bestand nog in gebruik is, dus de plug-in is niet verwijderd. Sluit de programma's die het gebruiken en probeer het opnieuw.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>De plug-in kon niet worden gestopt, dus er is niets verwijderd. Probeer het opnieuw.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wordt afgesloten, daarom is de plug-in niet gestart.</value>
   </data>
@@ -10143,7 +10149,7 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Plug-in verwijderen?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Laat dit uitgeschakeld om de eigen instellingen van de plug-in te bewaren, zodat je bij opnieuw installeren verdergaat waar je gebleven was. Dit heeft geen invloed op hoe {name} elders in Macro Deck is ingesteld.</value>
+    <value>Laat dit uitgeschakeld om de eigen instellingen van de plug-in en de accounts en verbindingen die ervoor zijn ingesteld te bewaren, zodat je bij opnieuw installeren verdergaat waar je gebleven was. Schakel het in om ook die te verwijderen, opgeslagen aanmeldgegevens inbegrepen. Dit heeft geen invloed op hoe {name} elders in Macro Deck is ingesteld.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Verwijderen…</value>

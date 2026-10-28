@@ -2952,6 +2952,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Цей плагін підписано іншим видавцем, ніж встановлену у вас версію, тому його не встановлено.</value>
   </data>
+  <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
+    <value>Не вдалося видалити частину збережених даних плагіна: файл досі використовується, тому плагін не видалено. Закрийте програми, які його використовують, і спробуйте ще раз.</value>
+  </data>
+  <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
+    <value>Не вдалося зупинити плагін, тому нічого не видалено. Спробуйте ще раз.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck завершує роботу, тому плагін не було запущено.</value>
   </data>
@@ -10143,7 +10149,7 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Видалити плагін?</value>
   </data>
   <data name="Integrations.Page.UninstallHint" xml:space="preserve">
-    <value>Залиште вимкненим, щоб зберегти власні налаштування плагіна: після повторного встановлення він продовжить із того місця, де ви зупинилися. Це не впливає на те, як {name} налаштовано в інших місцях Macro Deck.</value>
+    <value>Залиште вимкненим, щоб зберегти власні налаштування плагіна, а також налаштовані для нього облікові записи й підключення: після повторного встановлення він продовжить із того місця, де ви зупинилися. Якщо ввімкнути, їх також буде видалено разом зі збереженими даними для входу. Це не впливає на те, як {name} налаштовано в інших місцях Macro Deck.</value>
   </data>
   <data name="Integrations.Page.UninstallMenuAction" xml:space="preserve">
     <value>Видалити…</value>
