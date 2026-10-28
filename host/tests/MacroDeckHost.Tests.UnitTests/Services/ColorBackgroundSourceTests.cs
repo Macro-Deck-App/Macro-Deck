@@ -46,6 +46,7 @@ public class ColorBackgroundSourceTests
 			new InMemoryDeviceRepository(),
 			new RecordingMediator(),
 			new WidgetSecretCloner(secrets),
+			new WidgetSecretScrubber(secrets),
 			new NullWidgetVariableCloner());
 
 		var registry = new VariableRegistry();

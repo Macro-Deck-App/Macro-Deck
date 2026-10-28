@@ -27,8 +27,6 @@ public sealed class TimerWidgetStore
 		return _entries.ContainsKey(widgetId);
 	}
 
-	public IReadOnlyCollection<Guid> WidgetIds => [.. _entries.Keys];
-
 	public TimerWidgetSnapshot? Get(Guid widgetId)
 	{
 		if (!_entries.TryGetValue(widgetId, out var entry))

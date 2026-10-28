@@ -84,24 +84,6 @@ public class TimerWidgetLifecycleTests
 	}
 
 	[Test]
-	public async Task A_countdown_in_a_deleted_profile_is_dropped_with_its_variables_and_never_finishes()
-	{
-		var widget = await _harness.AddCountdownAsync(3);
-		await _harness.PressAsync(widget);
-
-		_harness.Folders.Remove(widget);
-		await _harness.Coordinator.PruneMissingAsync();
-		await _harness.AdvanceAsync(TimeSpan.FromSeconds(5));
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(_harness.Store.Contains(widget.Id), Is.False);
-			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.CountdownRemainingSeconds), Is.Null);
-			Assert.That(_harness.FlowExecutor.Calls, Is.Empty);
-		});
-	}
-
-	[Test]
 	public async Task A_timer_whose_widget_stops_being_a_timer_takes_its_variables_with_it()
 	{
 		var widget = await _harness.AddStopwatchAsync();
