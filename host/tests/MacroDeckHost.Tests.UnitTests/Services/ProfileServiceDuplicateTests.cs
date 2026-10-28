@@ -46,6 +46,7 @@ public class ProfileServiceDuplicateTests
 			new InMemoryDeviceRepository(),
 			_mediator,
 			new WidgetSecretCloner(_secrets),
+			new WidgetSecretScrubber(_secrets),
 			new WidgetVariableCloner(_variables, new LoggerConfiguration().CreateLogger()));
 
 		var otherProfileId = Guid.NewGuid();

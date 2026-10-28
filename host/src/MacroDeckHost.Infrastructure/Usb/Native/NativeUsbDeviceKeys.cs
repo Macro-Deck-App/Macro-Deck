@@ -3,7 +3,7 @@ using System.Text;
 namespace MacroDeckHost.Infrastructure.Usb.Native;
 
 // Throttles and rate limits key a bridged connection on this instead of its loopback address. The
-// separator of LoginThrottle's "key|username" format never appears in it.
+// separator of LoginThrottle's "key|login" format never appears in it.
 internal static class NativeUsbDeviceKeys
 {
 	public const string Prefix = "usb:";

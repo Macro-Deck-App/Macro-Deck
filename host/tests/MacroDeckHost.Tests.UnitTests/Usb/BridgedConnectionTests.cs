@@ -132,8 +132,9 @@ public class BridgedConnectionTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That($"{BridgedConnectionStamp.ClientKey(bridged)}|alice", Is.EqualTo("usb:EXAMPLE0001|alice"));
-			Assert.That($"{BridgedConnectionStamp.ClientKey(local)}|alice", Is.EqualTo("127.0.0.1|alice"));
+			Assert.That(LoginThrottle.LoginKey(BridgedConnectionStamp.ClientKey(bridged)),
+				Is.EqualTo("usb:EXAMPLE0001|login"));
+			Assert.That(LoginThrottle.LoginKey(BridgedConnectionStamp.ClientKey(local)), Is.EqualTo("127.0.0.1|login"));
 			Assert.That(HostIdentityRateLimit.AddressKey(bridged), Is.EqualTo(DeviceKey));
 			Assert.That(HostIdentityRateLimit.NetworkKey(bridged), Is.Null);
 			Assert.That(HostIdentityRateLimit.AddressKey(local), Is.EqualTo("127.0.0.1"));
@@ -145,9 +146,9 @@ public class BridgedConnectionTests
 	public void One_bridged_device_failing_logins_does_not_lock_out_another_device_or_local_clients()
 	{
 		var throttle = new LoginThrottle(new FakeTimeProvider());
-		var first = $"{BridgedConnectionStamp.ClientKey(Context(IPAddress.Loopback, DeviceKey))}|alice";
-		var second = $"{BridgedConnectionStamp.ClientKey(Context(IPAddress.Loopback, "usb:OTHER"))}|alice";
-		var local = $"{BridgedConnectionStamp.ClientKey(Context(IPAddress.Loopback, null))}|alice";
+		var first = LoginThrottle.LoginKey(BridgedConnectionStamp.ClientKey(Context(IPAddress.Loopback, DeviceKey)));
+		var second = LoginThrottle.LoginKey(BridgedConnectionStamp.ClientKey(Context(IPAddress.Loopback, "usb:OTHER")));
+		var local = LoginThrottle.LoginKey(BridgedConnectionStamp.ClientKey(Context(IPAddress.Loopback, null)));
 
 		for (var attempt = 0; attempt < 10; attempt++)
 		{
@@ -157,7 +158,7 @@ public class BridgedConnectionTests
 		var firstThrottled = throttle.IsThrottled(first, out _);
 		var secondThrottled = throttle.IsThrottled(second, out _);
 		var localThrottled = throttle.IsThrottled(local, out _);
-		throttle.ClearUsername("alice");
+		throttle.ClearLogins();
 
 		Assert.Multiple(() =>
 		{

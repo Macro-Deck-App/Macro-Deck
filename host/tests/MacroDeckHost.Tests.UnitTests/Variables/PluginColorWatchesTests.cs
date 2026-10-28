@@ -159,20 +159,6 @@ public class PluginColorWatchesTests
 	}
 
 	[Test]
-	public async Task Deleting_the_profile_of_a_watched_widget_pushes_no_colour()
-	{
-		Add("primary", VariableType.Color, "#3366ff");
-		_watches.TrySetWatches(PluginId, [Watch("a", Reference, _widget.Id.ToString())]);
-		await NextPushAsync(0);
-
-		_folders.GetAllFolders()[0].Widgets.Remove(_widget);
-		await new ColorWatchWidgetDeletedHandler(_signal)
-			.Handle(new ProfileDeletedNotification(Guid.NewGuid()), CancellationToken.None);
-
-		Assert.That((await NextPushAsync(1)).Values.Single().Color, Is.Null);
-	}
-
-	[Test]
 	public void More_watches_than_the_limit_are_refused()
 	{
 		Assert.That(_watches.TrySetWatches(PluginId,

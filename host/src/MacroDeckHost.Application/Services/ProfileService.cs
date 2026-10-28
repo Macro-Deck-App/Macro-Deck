@@ -20,6 +20,7 @@ public class ProfileService : IProfileService
 	private readonly IDeviceRepository _deviceRepository;
 	private readonly IMediator _mediator;
 	private readonly IWidgetSecretCloner _widgetSecretCloner;
+	private readonly IWidgetSecretScrubber _widgetSecretScrubber;
 	private readonly IWidgetVariableCloner _widgetVariableCloner;
 
 	public ProfileService(
@@ -28,6 +29,7 @@ public class ProfileService : IProfileService
 		IDeviceRepository deviceRepository,
 		IMediator mediator,
 		IWidgetSecretCloner widgetSecretCloner,
+		IWidgetSecretScrubber widgetSecretScrubber,
 		IWidgetVariableCloner widgetVariableCloner)
 	{
 		_profileCache = profileCache;
@@ -35,6 +37,7 @@ public class ProfileService : IProfileService
 		_deviceRepository = deviceRepository;
 		_mediator = mediator;
 		_widgetSecretCloner = widgetSecretCloner;
+		_widgetSecretScrubber = widgetSecretScrubber;
 		_widgetVariableCloner = widgetVariableCloner;
 	}
 
@@ -320,9 +323,27 @@ public class ProfileService : IProfileService
 			return Result.Fail(ProfileError.CannotDeleteLastProfile, "Cannot delete the last profile");
 		}
 
-		await _profileCache.Remove(id);
+		var removedFolders = await _profileCache.Remove(id);
+		var removedWidgets = removedFolders.SelectMany(folder => folder.Widgets).ToList();
 
+		await _widgetSecretScrubber.ScrubUnreferencedSecrets(removedWidgets.Select(widget => widget.Data),
+			_folderCache.GetAllFolders().SelectMany(folder => folder.Widgets).Select(widget => widget.Data));
+
+		// Announced before its widgets and folders: clients leave the profile first instead of reloading it
+		// when its start folder disappears.
 		await _mediator.Publish(new ProfileDeletedNotification(id));
+
+		foreach (var widget in removedWidgets)
+		{
+			await _mediator.Publish(new WidgetDeletedNotification(widget.Id, widget.FolderId));
+		}
+
+		var childrenFirst = removedFolders
+			.OrderByDescending(folder => FolderEntityChain.AncestorsAndSelf(folder, removedFolders).Count());
+		foreach (var folder in childrenFirst)
+		{
+			await _mediator.Publish(new FolderDeletedNotification(folder.Id));
+		}
 
 		return Result.Ok<ProfileError>();
 	}

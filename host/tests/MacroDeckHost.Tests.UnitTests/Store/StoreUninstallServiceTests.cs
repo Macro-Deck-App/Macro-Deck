@@ -71,6 +71,7 @@ internal sealed class StoreUninstallServiceTests
 			new InMemoryDeviceRepository(),
 			_iconHarness.Mediator,
 			new WidgetSecretCloner(new FakeSecretService()),
+			new WidgetSecretScrubber(new FakeSecretService()),
 			new NullWidgetVariableCloner());
 
 		_updateDetector = new FakeStoreUpdateDetector();

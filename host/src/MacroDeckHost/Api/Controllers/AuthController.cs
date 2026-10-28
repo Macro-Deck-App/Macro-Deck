@@ -160,8 +160,8 @@ public class AuthController : ControllerBase
 			return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid scope.");
 		}
 
-		var throttleKey = $"{BridgedConnectionStamp.ClientKey(HttpContext)}|{body.Username}";
-		if (_loginThrottle.IsThrottled(throttleKey, out var retryAfter))
+		var throttleKey = LoginThrottle.LoginKey(BridgedConnectionStamp.ClientKey(HttpContext));
+		if (!_loginThrottle.TryReserve(throttleKey, out var retryAfter))
 		{
 			Response.Headers.RetryAfter
 				= ((int)Math.Ceiling(retryAfter.TotalSeconds)).ToString(CultureInfo.InvariantCulture);
@@ -175,8 +175,6 @@ public class AuthController : ControllerBase
 			ToDeviceRegistration(body.Device));
 		if (!result.Success || result.Data is null)
 		{
-			_loginThrottle.RegisterFailure(throttleKey);
-
 			var attemptedUsername = Truncate(body.Username, MaxAttemptedUsernameLength);
 			var failureCount = _failedLoginTracker.RegisterFailure();
 			var culture = (await _preferences.GetLocalization()).Culture;
@@ -395,10 +393,7 @@ public class AuthController : ControllerBase
 			return AuthProblem(result.Error, result.ErrorMessage);
 		}
 
-		if (await _authService.GetUsername() is { } username)
-		{
-			_loginThrottle.ClearUsername(username);
-		}
+		_loginThrottle.ClearLogins();
 
 		return NoContent();
 	}

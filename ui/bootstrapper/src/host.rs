@@ -1323,6 +1323,55 @@ pub async fn shutdown_for_update(app: &AppHandle) -> bool {
     stop_host(app, "update", UPDATE_STOP_TIMEOUT).await
 }
 
+pub async fn resume_after_failed_update(app: &AppHandle) {
+    if !is_packaged() || crate::is_quitting() {
+        return;
+    }
+    let state = app.state::<Arc<HostState>>();
+    let resumed = state
+        .supervisor
+        .lock()
+        .map(|mut supervisor| supervisor.resume())
+        .unwrap_or(false);
+    if !resumed {
+        return;
+    }
+    state.shutdown_expected.store(false, Ordering::SeqCst);
+    state.ready.store(false, Ordering::SeqCst);
+    crate::install_integrity::host_gone();
+
+    let answering = is_reachable(managed_port(&state), Duration::from_millis(300)).await;
+    if previous_host_alive(
+        state.spawned(),
+        state.exited.load(Ordering::SeqCst),
+        answering,
+    ) {
+        logging::error(
+            "[host] the host could not be stopped for the update; not starting another one",
+        );
+        give_up(
+            app,
+            Some(localization::t(keys::UPDATE_HOST_STOP_FAILED)),
+            ExitStatus::NotRecorded,
+            state.log_tail.joined(),
+        )
+        .await;
+        return;
+    }
+    logging::info("[host] restarting the host after the failed update");
+    if supervise(app, None).await {
+        crate::window::reload_main_window(app);
+    }
+}
+
+fn previous_host_alive(spawned: bool, child_exited: bool, answering: bool) -> bool {
+    if spawned {
+        !child_exited
+    } else {
+        answering
+    }
+}
+
 fn begin_stop(state: &HostState) {
     if let Ok(mut supervisor) = state.supervisor.lock() {
         supervisor.begin_stop();
@@ -2192,6 +2241,18 @@ mod tests {
     #[test]
     fn an_adopted_host_gets_its_worst_case_shutdown_before_macro_deck_relaunches() {
         assert!(ADOPTED_HOST_EXIT_GRACE > HOST_SHUTDOWN_WORST_CASE);
+    }
+
+    #[test]
+    fn a_host_that_survived_the_update_stop_is_not_started_a_second_time() {
+        assert!(previous_host_alive(true, false, false));
+        assert!(previous_host_alive(false, false, true));
+    }
+
+    #[test]
+    fn a_host_that_is_gone_after_a_failed_update_stop_is_started_again() {
+        assert!(!previous_host_alive(true, true, false));
+        assert!(!previous_host_alive(false, false, false));
     }
 
     #[test]

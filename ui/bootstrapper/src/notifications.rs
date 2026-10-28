@@ -171,7 +171,13 @@ async fn run(app: AppHandle, app_name: String, identifier: String) {
     };
 
     let mut backoff = MIN_BACKOFF;
-    while !crate::is_quitting() {
+    loop {
+        // Idles rather than ends: a failed update install clears the flag again, and a real quit
+        // ends the process anyway.
+        if crate::is_quitting() {
+            tokio::time::sleep(MIN_BACKOFF).await;
+            continue;
+        }
         let Some(port) = app.state::<Arc<HostState>>().ui_port() else {
             tokio::time::sleep(MIN_BACKOFF).await;
             continue;

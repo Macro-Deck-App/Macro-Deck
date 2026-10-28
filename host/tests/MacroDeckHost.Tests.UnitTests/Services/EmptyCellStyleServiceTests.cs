@@ -39,6 +39,7 @@ public class EmptyCellStyleServiceTests
 			new InMemoryDeviceRepository(),
 			new RecordingMediator(),
 			new WidgetSecretCloner(secrets),
+			new WidgetSecretScrubber(secrets),
 			new NullWidgetVariableCloner());
 
 		_profileId = (await _profileService.Create("Deck")).Data!.Id;

@@ -407,6 +407,7 @@ public class PluginInstallationController : ControllerBase
 			PluginInstallError.SignatureUnverifiable => "signature_unverifiable",
 			PluginInstallError.UnsignedNotPermitted => "unsigned_not_permitted",
 			PluginInstallError.TrustDowngrade => "trust_downgrade",
+			PluginInstallError.SignerMismatch => "signer_mismatch",
 			_ => "failed"
 		};
 	}

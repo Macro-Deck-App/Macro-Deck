@@ -2935,6 +2935,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Una compilación de desarrollo ha sustituido este complemento. Termina la sustitución antes de instalarlo o actualizarlo.</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Este complemento está firmado por un editor distinto al de la versión que ya tienes, así que no se instaló.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se está cerrando, por lo que el complemento no se ha iniciado.</value>
   </data>

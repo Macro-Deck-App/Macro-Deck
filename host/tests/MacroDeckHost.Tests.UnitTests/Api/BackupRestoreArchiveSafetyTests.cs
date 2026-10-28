@@ -13,9 +13,11 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Backups;
 using MacroDeckHost.Infrastructure.Backups.Crypto;
 using MacroDeckHost.Infrastructure.Persistence;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -274,6 +276,20 @@ public class BackupRestoreArchiveSafetyTests
 		}
 	}
 
+	[Test]
+	public async Task A_backup_whose_database_a_newer_host_migrated_is_refused_before_anything_is_replaced()
+	{
+		var crafted = Craft([],
+			null,
+			database => LegacyEvolveDatabase.Execute(database,
+				$"INSERT INTO \"{DatabaseMigrationHelper.HistoryTable}\" (\"MigrationId\", \"ProductVersion\") "
+				+ "VALUES ('99991231235959_FromANewerMacroDeck', '99.0.0');"));
+
+		var prepare = await PrepareImported(crafted);
+
+		await AssertRefused(prepare, nameof(BackupError.UnsupportedVersion));
+	}
+
 	private async Task AssertRefused(JsonElement prepare, string expectedCode)
 	{
 		try
@@ -342,7 +358,7 @@ public class BackupRestoreArchiveSafetyTests
 		return path;
 	}
 
-	private byte[] Craft(CraftedEntry[] additions, byte[]? indexOverride)
+	private byte[] Craft(CraftedEntry[] additions, byte[]? indexOverride, Action<string>? alterDatabase = null)
 	{
 		var key = RecoveryKey();
 		using var source = new MemoryStream(_sourceArchive);
@@ -359,12 +375,21 @@ public class BackupRestoreArchiveSafetyTests
 		using (var repacked = new ZipArchive(payload, ZipArchiveMode.Create, true))
 		{
 			BackupContentIndex? index = null;
+			byte[]? alteredDatabase = null;
 			foreach (var entry in original.Entries)
 			{
 				using var stream = entry.Open();
 				if (entry.FullName == BackupFileNames.ContentIndexEntry)
 				{
 					index = JsonSerializer.Deserialize<BackupContentIndex>(stream, PersistenceJsonOptions.Default);
+					continue;
+				}
+
+				if (entry.FullName == BackupFileNames.DatabaseEntry && alterDatabase is not null)
+				{
+					alteredDatabase = AlteredDatabase(stream, alterDatabase);
+					using var altered = repacked.CreateEntry(entry.FullName).Open();
+					altered.Write(alteredDatabase);
 					continue;
 				}
 
@@ -387,6 +412,12 @@ public class BackupRestoreArchiveSafetyTests
 					Sha256 = Convert.ToHexStringLower(SHA256.HashData(addition.Content)),
 					Component = addition.Component
 				});
+			}
+
+			if (alteredDatabase is not null)
+			{
+				index!.Database!.Size = alteredDatabase.Length;
+				index.Database.Sha256 = Convert.ToHexStringLower(SHA256.HashData(alteredDatabase));
 			}
 
 			var indexEntry = repacked.CreateEntry(BackupFileNames.ContentIndexEntry, CompressionLevel.Optimal);
@@ -414,6 +445,22 @@ public class BackupRestoreArchiveSafetyTests
 		}
 
 		return output.ToArray();
+	}
+
+	private byte[] AlteredDatabase(Stream source, Action<string> alter)
+	{
+		var path = Path.Combine(_testRoot, $"database-{Guid.NewGuid():N}.db");
+		using (var file = File.Create(path))
+		{
+			source.CopyTo(file);
+		}
+
+		alter(path);
+		SqliteConnection.ClearAllPools();
+		var bytes = File.ReadAllBytes(path);
+		File.Delete(path);
+
+		return bytes;
 	}
 
 	private byte[] RecoveryKey()

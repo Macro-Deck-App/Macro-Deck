@@ -12,5 +12,9 @@ public class PluginTrustRecordEntity : BaseEntity
 
 	public string? CertificateId { get; set; }
 
+	public string? SignerKind { get; set; }
+
+	public string? SignerId { get; set; }
+
 	public DateTime InstalledAt { get; set; }
 }

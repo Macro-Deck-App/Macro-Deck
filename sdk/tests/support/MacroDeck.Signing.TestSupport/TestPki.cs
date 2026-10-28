@@ -44,7 +44,8 @@ public static class TestPki
 		string algorithm = "ed25519",
 		(byte[] PrivateKey, byte[] PublicKey)? subjectKeyOverride = null,
 		IssuedCertificate? issuer = null,
-		string? issuerIdOverride = null)
+		string? issuerIdOverride = null,
+		string subjectId = "creator-1")
 	{
 		var subjectKeys = subjectKeyOverride ?? Ed25519KeyPair.Create();
 		var signingKey = issuer is not null ? issuer.PrivateKey : (signingRoot ?? Root).PrivateKey;
@@ -55,7 +56,7 @@ public static class TestPki
 		{
 			Schema = $"https://schemas.macro-deck.app/macrodeck-certificate-v{version}.schema.json",
 			SchemaVersion = version,
-			Subject = new SigningCertificateSubject { Kind = subjectKind, Id = "creator-1", Name = "Test Creator" },
+			Subject = new SigningCertificateSubject { Kind = subjectKind, Id = subjectId, Name = "Test Creator" },
 			Algorithm = algorithm,
 			CertificateId = certificateId,
 			PublicKey = Convert.ToBase64String(subjectKeys.PublicKey),

@@ -702,18 +702,22 @@ public sealed class PluginInstaller : IPluginInstaller
 			: PluginTrustVerdict.Unsigned;
 	}
 
-	private async Task UpsertTrustRecord(
-		string pluginId,
-		string version,
-		PluginTrustVerdict verdict,
-		string? certificateId)
+	private async Task<bool> ChangesSigner(string pluginId, PluginTrustResult incoming)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var repository = scope.ServiceProvider.GetRequiredService<IPluginTrustRecordRepository>();
+		return PluginTrustPolicy.ChangesSigner(await repository.GetForPlugin(pluginId), incoming);
+	}
+
+	private async Task UpsertTrustRecord(string pluginId, string version, PluginTrustResult trust)
 	{
 		using var scope = _scopeFactory.CreateScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IPluginTrustRecordRepository>();
 		await repository.Upsert(pluginId,
 			version,
-			PluginTrustRecordVerdicts.From(verdict),
-			certificateId,
+			PluginTrustRecordVerdicts.From(trust.Verdict),
+			trust.CertificateId,
+			trust.Signer,
 			_timeProvider.GetUtcNow().UtcDateTime);
 	}
 
@@ -722,7 +726,10 @@ public sealed class PluginInstaller : IPluginInstaller
 		using var scope = _scopeFactory.CreateScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IPluginTrustRecordRepository>();
 		return await repository.GetVersion(pluginId, version) is { } record
-			? new PriorTrustRecord(record.AdmittedVerdict, record.CertificateId, record.InstalledAt)
+			? new PriorTrustRecord(record.AdmittedVerdict,
+				record.CertificateId,
+				record.SignerKind is { } kind && record.SignerId is { } id ? new PluginSignerIdentity(kind, id) : null,
+				record.InstalledAt)
 			: null;
 	}
 
@@ -740,6 +747,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			undo.Version,
 			prior.AdmittedVerdict,
 			prior.CertificateId,
+			prior.Signer,
 			prior.InstalledAt);
 	}
 
@@ -757,11 +765,16 @@ public sealed class PluginInstaller : IPluginInstaller
 		await repository.DeleteForPlugin(pluginId);
 	}
 
-	private async Task DeleteTrustRecordVersion(string pluginId, string version)
+	// A Trusted record outlives its pruned directory: it carries the tier and the signer pin for the whole id.
+	private async Task DeleteUntrustedRecordVersion(string pluginId, string version)
 	{
 		using var scope = _scopeFactory.CreateScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IPluginTrustRecordRepository>();
-		await repository.DeleteVersion(pluginId, version);
+		var record = await repository.GetVersion(pluginId, version);
+		if (PluginTrustRecordVerdicts.Parse(record?.AdmittedVerdict) != PluginTrustVerdict.Trusted)
+		{
+			await repository.DeleteVersion(pluginId, version);
+		}
 	}
 
 	private async Task<PluginTrustGateDecision> EvaluateTrustGate(
@@ -791,7 +804,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	{
 		return action == PluginTrustGateAction.None
 			? Task.CompletedTask
-			: UpsertTrustRecord(pluginId, version, onDisk.Verdict, onDisk.CertificateId);
+			: UpsertTrustRecord(pluginId, version, onDisk);
 	}
 
 	// A record admitted as Trusted but refused by the gate (e.g. the certificate id no longer matches, or
@@ -894,6 +907,20 @@ public sealed class PluginInstaller : IPluginInstaller
 				};
 		}
 
+		if (await ChangesSigner(manifest.Id, trust))
+		{
+			var message = await ActiveLocalization.Resolve(_scopeFactory, AppStrings.Errors.Plugins.SignerMismatch());
+			return PluginInstallResult.Fail(PluginInstallError.SignerMismatch,
+					message,
+					manifest.Id,
+					manifest.Version,
+					previousVersion)
+				with
+				{
+					Publisher = manifest.Publisher, Signature = trust
+				};
+		}
+
 		// Written as an equality, never as a negation of "is trusted": widening this to admit any verdict
 		// that merely isn't a hard failure would silently reopen the unsigned-consent path to a signature
 		// that actively failed verification.
@@ -970,7 +997,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			// Before activation, not after: ActivateAndValidate starts the plugin, and the supervisor refuses
 			// to launch an installed version that has no trust record. Recording it afterwards would make the
 			// launch this method performs fail its own gate.
-			await UpsertTrustRecord(manifest.Id, manifest.Version, trust.Verdict, trust.CertificateId);
+			await UpsertTrustRecord(manifest.Id, manifest.Version, trust);
 			trustWritten = true;
 
 			// Health-gating a plugin this machine cannot launch would fail every time and roll back a
@@ -1227,6 +1254,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	private readonly record struct PriorTrustRecord(
 		string AdmittedVerdict,
 		string? CertificateId,
+		PluginSignerIdentity? Signer,
 		DateTime InstalledAt);
 
 	private async Task RestoreReplacedVersion(
@@ -1746,7 +1774,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, pluginId, version)))
 			{
 				PluginInstallerLog.PrunedVersion(_logger, pluginId, version);
-				await DeleteTrustRecordVersion(pluginId, version);
+				await DeleteUntrustedRecordVersion(pluginId, version);
 			}
 		}
 

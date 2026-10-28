@@ -3,12 +3,10 @@ using Mediator;
 
 namespace MacroDeckHost.Application.Events.Handlers;
 
-// A colour watched in a widget's scope resolves to nothing once the widget is gone. Deleting a profile
-// publishes no per-widget deletion, so it counts as one too.
+// A colour watched in a widget's scope resolves to nothing once the widget is gone.
 public sealed class ColorWatchWidgetDeletedHandler(ColorChangeSignal signal) :
 	INotificationHandler<WidgetDeletedNotification>,
-	INotificationHandler<WidgetsDeletedNotification>,
-	INotificationHandler<ProfileDeletedNotification>
+	INotificationHandler<WidgetsDeletedNotification>
 {
 	public ValueTask Handle(WidgetDeletedNotification notification, CancellationToken cancellationToken)
 	{
@@ -16,11 +14,6 @@ public sealed class ColorWatchWidgetDeletedHandler(ColorChangeSignal signal) :
 	}
 
 	public ValueTask Handle(WidgetsDeletedNotification notification, CancellationToken cancellationToken)
-	{
-		return Raise();
-	}
-
-	public ValueTask Handle(ProfileDeletedNotification notification, CancellationToken cancellationToken)
 	{
 		return Raise();
 	}

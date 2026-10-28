@@ -680,6 +680,7 @@ internal sealed class StoreInstallExecutorTests
 	[TestCase(PluginInstallError.ArtifactLimitExceeded, StoreOperationError.MalformedPackage)]
 	[TestCase(PluginInstallError.IdMismatch, StoreOperationError.MalformedPackage)]
 	[TestCase(PluginInstallError.SignatureRevoked, StoreOperationError.SignatureUntrusted)]
+	[TestCase(PluginInstallError.SignerMismatch, StoreOperationError.SignerMismatch)]
 	public async Task A_plugin_refusal_is_reported_with_the_store_error_that_describes_it(
 		PluginInstallError error,
 		StoreOperationError expected)

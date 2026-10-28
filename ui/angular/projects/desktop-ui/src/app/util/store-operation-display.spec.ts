@@ -72,6 +72,10 @@ describe('storeOperationErrorKey', () => {
     expect(storeOperationErrorKey('InstallBlockedByTakeover')).toBe(AppStrings.Errors.Plugins.InstallBlockedByTakeover);
   });
 
+  it('says a package from another publisher is why an update was refused', () => {
+    expect(storeOperationErrorKey('SignerMismatch')).toBe(AppStrings.Errors.Plugins.SignerMismatch);
+  });
+
   it('falls back to a plain sentence for a code this build does not know', () => {
     expect(storeOperationErrorKey('SomethingAddedLater')).toBe(AppStrings.Store.Error.Failed);
     expect(storeOperationErrorKey(undefined)).toBe(AppStrings.Store.Error.Failed);

@@ -623,6 +623,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			PluginInstallError.SignatureUnverifiable => StoreOperationError.SignatureUnverifiable,
 			PluginInstallError.UnsignedNotPermitted => StoreOperationError.UnsignedNotPermitted,
 			PluginInstallError.TrustDowngrade => StoreOperationError.TrustDowngrade,
+			PluginInstallError.SignerMismatch => StoreOperationError.SignerMismatch,
 			PluginInstallError.Incompatible => result.Incompatibility is PluginIncompatibility.HostTooOld
 				? StoreOperationError.RequiresNewerMacroDeck
 				: StoreOperationError.Incompatible,

@@ -39,8 +39,8 @@ internal sealed class EmptyProfileCache : IProfileCache
 		return Task.CompletedTask;
 	}
 
-	public Task Remove(Guid id)
+	public Task<IReadOnlyList<FolderEntity>> Remove(Guid id)
 	{
-		return Task.CompletedTask;
+		return Task.FromResult<IReadOnlyList<FolderEntity>>([]);
 	}
 }

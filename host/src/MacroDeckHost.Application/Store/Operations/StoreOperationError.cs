@@ -29,5 +29,6 @@ public enum StoreOperationError
 	TestBuildMismatch,
 	RequiresNewerMacroDeck,
 	VersionNotFound,
-	SignatureUnverifiable
+	SignatureUnverifiable,
+	SignerMismatch
 }

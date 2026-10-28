@@ -44,6 +44,7 @@ public class FolderServiceDeviceLockTests
 			_devices,
 			new RecordingMediator(),
 			new WidgetSecretCloner(new FakeSecretService()),
+			new WidgetSecretScrubber(new FakeSecretService()),
 			new NullWidgetVariableCloner());
 
 		var created = await _profileService.Create("Deck Profile", defaultRows: 4, defaultColumns: 4);

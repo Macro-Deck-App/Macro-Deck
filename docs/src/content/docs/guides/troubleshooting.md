@@ -495,6 +495,15 @@ not verify is never treated as unsigned, so no confirmation installs it.
 you selected or uploaded - never from a store or registry. A plugin id previously admitted as signed never
 accepts an unsigned package. Install from a local file and confirm, or install a signed build.
 
+### An update is refused with SignerMismatch
+
+`SignerMismatch` (`signer_mismatch` over HTTP). The package verifies, but its certificate was issued to a
+different subject (`subject.kind` and `subject.id`) than the installed version that was admitted as signed.
+A rotated certificate of the same publisher is accepted; a different publisher is not, from any source,
+the Store included. After a Creator Portal transfer of a signed plugin, installed copies refuse the new
+publisher's releases until the plugin is uninstalled and reinstalled. See
+[signing](/policies/security/#signing-the-creator-portal-signs-and-the-host-verifies-before-install-and-before-every-load).
+
 ### A plugin that used to work now refuses to launch
 
 Installed plugins are re-verified on every launch, because the plugin directory is user-writable. Editing
