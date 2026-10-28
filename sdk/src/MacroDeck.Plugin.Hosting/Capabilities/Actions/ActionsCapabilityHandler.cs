@@ -353,7 +353,10 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 			ProvidesState = action is IStateProviderActionDefinition,
 			ConfiguresWithUiTree = action is IUiConfigurableActionDefinition,
 			ProvidesIcon = action is IIconProviderActionDefinition,
-			Role = action.Role
+			Role = action.Role,
+			RiskCategory = action.RiskCategory == ActionRiskCategory.None
+				? null
+				: action.RiskCategory.ToString().ToLowerInvariant()
 		};
 	}
 

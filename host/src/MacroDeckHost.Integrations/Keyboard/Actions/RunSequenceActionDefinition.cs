@@ -23,6 +23,8 @@ internal sealed class RunSequenceActionDefinition : IActionDefinition
 	}
 
 	public string Id => "run-sequence";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Keyboard.Actions.RunSequenceName();
 	public LocalizedText Description => AppStrings.Integrations.Keyboard.Actions.RunSequenceDescription();
 

@@ -96,7 +96,7 @@ public static class FlowSecretBlocks
 			{
 				foreach (var flow in document.RootElement.EnumerateArray())
 				{
-					Collect(flow, blocks);
+					Collect(flow, blocks, true);
 				}
 			}
 
@@ -106,6 +106,38 @@ public static class FlowSecretBlocks
 		{
 			return [];
 		}
+	}
+
+	public static IReadOnlyList<FlowBlockSnapshot> ActionBlocksOfFlows(string? flowsJson)
+	{
+		if (string.IsNullOrWhiteSpace(flowsJson))
+		{
+			return [];
+		}
+
+		try
+		{
+			using var document = JsonDocument.Parse(flowsJson);
+			var blocks = new List<FlowBlockSnapshot>();
+			if (document.RootElement.ValueKind == JsonValueKind.Array)
+			{
+				foreach (var flow in document.RootElement.EnumerateArray())
+				{
+					Collect(flow, blocks, false);
+				}
+			}
+
+			return blocks;
+		}
+		catch (JsonException)
+		{
+			return [];
+		}
+	}
+
+	public static IReadOnlyList<FlowBlockSnapshot> ActionBlocksOfWidgetData(string? widgetData)
+	{
+		return WidgetFlowsJson.TryExtract(widgetData, out var flows) ? ActionBlocksOfFlows(flows) : [];
 	}
 
 	public static FlowBlockSnapshot? Parse(string raw)
@@ -124,7 +156,7 @@ public static class FlowSecretBlocks
 		}
 	}
 
-	private static void Collect(JsonElement node, List<FlowBlockSnapshot> blocks)
+	private static void Collect(JsonElement node, List<FlowBlockSnapshot> blocks, bool secretCarryingOnly)
 	{
 		if (node.ValueKind != JsonValueKind.Object)
 		{
@@ -136,7 +168,7 @@ public static class FlowSecretBlocks
 			FlowBlockContent.StringProperty(node, "blockType")))
 		{
 			var content = FlowBlockContent.FromJson(node);
-			if (content.CarriesSecretReference)
+			if (!secretCarryingOnly || content.CarriesSecretReference)
 			{
 				blocks.Add(new FlowBlockSnapshot(FlowBlockContent.StringProperty(node, "id") ?? string.Empty,
 					node.GetRawText(),
@@ -149,7 +181,7 @@ public static class FlowSecretBlocks
 		{
 			foreach (var child in children.EnumerateArray())
 			{
-				Collect(child, blocks);
+				Collect(child, blocks, secretCarryingOnly);
 			}
 		}
 
@@ -158,7 +190,7 @@ public static class FlowSecretBlocks
 		{
 			foreach (var branch in branches.EnumerateArray())
 			{
-				Collect(branch, blocks);
+				Collect(branch, blocks, secretCarryingOnly);
 			}
 		}
 	}

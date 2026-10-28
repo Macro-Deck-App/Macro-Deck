@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace MacroDeckHost.Application.Ui.Transport.Messages.Scripts;
 
 public class RunScriptRequest
@@ -11,4 +13,8 @@ public class RunScriptRequest
 	public Dictionary<string, object?>? Inputs { get; set; }
 
 	public string? OwnerWidgetId { get; set; }
+
+	// Host-internal: set only by the MCP server, never read from the wire.
+	[JsonIgnore]
+	public Guid? McpTokenId { get; set; }
 }

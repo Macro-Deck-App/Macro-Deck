@@ -2940,6 +2940,18 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>そのリカバリーキーでは、このインストールのロックを解除できません。</value>
   </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>プロバイダーを選択してください。</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>このアクセス トークンは既に失効しています。</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>64 文字以内の名前を入力してください。</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>その ID のアクセス トークンは存在しません。</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>移行を完了できませんでした。</value>
   </data>
@@ -17149,6 +17161,92 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>最小レベル</value>
   </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>クライアント構成</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>接続開始</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} 件の接続</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>{count} 件の接続</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>接続中の AI クライアントはありません。</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>接続中のクライアント</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Claude や VS Code などの AI アシスタントが Model Context Protocol (MCP) を通じて設定を確認・構築し、アクションを実行できるようにします。シークレットを読み取ることはできません。</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>アクセス トークンはまだありません</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>トークンを作成して AI クライアントに追加すると、Macro Deck に接続できます。</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>接続できるのはこのコンピューター上のアプリだけです。Macro Deck の起動時にポートが使用中の場合、アドレスは変わります。</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>サーバー アドレス</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>MCP サーバーは現在利用できません。</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>AI クライアント</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>AI クライアントの設定を読み込めませんでした</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>許可</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>事前に確認するアクション: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>事前に確認</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>既定: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>プロバイダーごとに、AI クライアントがアクションを直接実行できるか、事前に確認が必要か、まったく実行できないかを選択します。AI クライアントが作成するフロー内のアクションにも適用されます。</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>オフ</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>設定を保存できませんでした</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>AI クライアントが実行できるアクション</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} は完全に削除されます。既に失効しているため、使用されることはありません。</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} はすぐに使えなくなり、これを使用しているすべての AI クライアントが切断されます。</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>アクセス トークン</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>不明なクライアント</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Macro Deck アカウント</value>
   </data>
@@ -25264,5 +25362,59 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>ここに記事の短い要約が表示されます。</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>AI クライアントが続行する前に、Macro Deck で確認が必要です: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>許可</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>変数 {name} の変更（シークレットを使う承認済みブロックが読み取ります）</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action}（{provider}）</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action}（{provider}）、値: {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>シークレット</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>ブラウザーで開く Macro Deck のページでシークレット {label} を入力してください。値は Macro Deck の中にとどまります。</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>{name} をシークレットを使う承認済みブロックに渡すこと</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>値を入力してください。</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>このリンクは無効になりました</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>このリンクは使用済みか、有効期限が切れています。AI クライアントにシークレットをもう一度要求させてください。</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} が Macro Deck にシークレットの保存を求めています: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>シークレットの入力</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>入力内容を見られるのは Macro Deck だけです。{client} が受け取るのはアクションで使える参照だけで、値は渡されません。</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>シークレットを保存</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>シークレットを保存しました</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>このタブを閉じて {client} に戻れます。</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>シークレット</value>
   </data>
 </root>

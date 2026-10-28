@@ -503,6 +503,11 @@ follows the same rule. `403` reuses `UNAUTHENTICATED`: the wire vocabulary has n
 Rate limits: enrolment shares one bucket; session exchange is per plugin id; pairing creation and
 redemption are limited separately.
 
+## Other credentials
+
+An MCP access token is not a plugin credential: it opens only the [MCP server](/reference/mcp/) and is
+refused on every plugin endpoint, as plugin credentials are refused on `/mcp`.
+
 ## See also
 
 - [Debugging plugins](/guides/debugging/) - approve the pairing prompt, or enrol headlessly, then reuse

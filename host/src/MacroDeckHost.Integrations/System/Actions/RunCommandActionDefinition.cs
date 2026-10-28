@@ -20,6 +20,8 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 	}
 
 	public string Id => "run-command";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Programs;
 	public LocalizedText Name => AppStrings.Integrations.System.Actions.RunCommand.Name();
 	public LocalizedText Description => AppStrings.Integrations.System.Actions.RunCommand.Description();
 

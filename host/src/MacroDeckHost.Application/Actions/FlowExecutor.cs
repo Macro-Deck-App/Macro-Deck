@@ -5,6 +5,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Localization;
@@ -49,6 +50,7 @@ public sealed class FlowExecutor : IFlowExecutor
 	private readonly WidgetOptimisticStateStore? _optimisticStates;
 	private readonly WidgetStateEvalChannel? _stateEvalQueue;
 	private readonly ISecretApprovals? _approvals;
+	private readonly IMcpExecutionRegistry? _mcpExecutions;
 
 	public FlowExecutor(
 		IIntegrationRegistry integrationRegistry,
@@ -65,7 +67,8 @@ public sealed class FlowExecutor : IFlowExecutor
 		ILogger logger,
 		WidgetOptimisticStateStore? optimisticStates = null,
 		WidgetStateEvalChannel? stateEvalQueue = null,
-		ISecretApprovals? approvals = null)
+		ISecretApprovals? approvals = null,
+		IMcpExecutionRegistry? mcpExecutions = null)
 	{
 		_integrationRegistry = integrationRegistry;
 		_variableRenderer = variableRenderer;
@@ -82,6 +85,7 @@ public sealed class FlowExecutor : IFlowExecutor
 		_optimisticStates = optimisticStates;
 		_stateEvalQueue = stateEvalQueue;
 		_approvals = approvals;
+		_mcpExecutions = mcpExecutions;
 	}
 
 	public async Task<FlowExecutionResult> ExecuteAsync(
@@ -89,6 +93,7 @@ public sealed class FlowExecutor : IFlowExecutor
 		CancellationToken cancellationToken)
 	{
 		var stopwatch = Stopwatch.StartNew();
+		using var mcpScope = McpExecutionScope.Enter(request.McpTokenId);
 
 		// Host-autonomous triggers (schedules, startup/server-lifecycle events, in-process integration
 		// events, and the widget-state reconciler) mark their requests Origin = Host and deliberately
@@ -479,6 +484,7 @@ public sealed class FlowExecutor : IFlowExecutor
 			optimisticGeneration = _optimisticStates.Begin(optimisticIdentity);
 		}
 
+		using var mcpLease = McpExecutionScope.Current is not null ? _mcpExecutions?.Enter(integrationId) : null;
 		try
 		{
 			var executor = action.CreateExecutor();

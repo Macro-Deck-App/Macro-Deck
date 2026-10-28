@@ -161,6 +161,24 @@ for an ordinary action. A role fixes the parameters: `ActionRoles.LaunchApplicat
 new button to a built-in action with that role; a plugin's action with the role is never chosen, so a
 plugin never receives the dropped path. A Macro Deck release from before `Role` ignores it.
 
+`RiskCategory` says what the action can do outside Macro Deck: `Scripts` (runs code), `Programs` (starts,
+stops or opens programs, runs a command), `Input` (keystrokes, mouse or text), `Network` (requests to an
+address the parameters choose), `Files` (opens, reads or writes files) or `Power` (shuts down, restarts,
+suspends). The default is `None`. Macro Deck asks the user before an AI client connected over
+[MCP](/reference/mcp/) runs an action that declares a category; the user can change that per provider.
+A plugin's actions are asked about whatever they declare, so leaving it unset never lets an AI client run
+your action unasked. Declare the category that fits best, so the user sees why Macro Deck asks.
+
+```csharp
+public sealed class RunCommandAction : IActionDefinition
+{
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Programs;
+	// ...
+}
+```
+
+A Macro Deck release from before `RiskCategory` ignores it.
+
 `ActionRoles.RunScript` and `ActionRoles.RunRemoteScript` mark an action that runs a Macro Deck script, here
 or on another instance. Such an action takes a required dynamic-choice `scriptId`; an option may carry the
 metadata `scriptInputs` (the script's inputs as a JSON array) and `runsOnWidget` (`"true"`). The action

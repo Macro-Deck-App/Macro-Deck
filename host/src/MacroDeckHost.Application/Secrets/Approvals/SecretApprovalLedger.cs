@@ -137,7 +137,8 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 					key.Withheld.Add(block.Raw);
 				}
 				else if (write.Mode == SecretApprovalMode.Approve
-					|| write.Mode == SecretApprovalMode.Rewrite && RewritesApproved(key, write.Rewriter, normalized))
+					|| write.Mode == SecretApprovalMode.Rewrite && RewritesApproved(key, write.Rewriter, normalized)
+					|| write.Mode == SecretApprovalMode.Restore && RestoresApproved(write.Restored, normalized))
 				{
 					key.Approved.Add(block.Raw);
 				}
@@ -415,6 +416,11 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 	{
 		return rewriter is not null
 			&& key.Approved.Any(snapshot => SnapshotNormalized(rewriter(snapshot)) == normalized);
+	}
+
+	private bool RestoresApproved(IReadOnlyCollection<string>? restored, string normalized)
+	{
+		return restored is not null && restored.Any(snapshot => SnapshotNormalized(snapshot) == normalized);
 	}
 
 	private (HashSet<string> Approved, HashSet<string> Withheld) BuildIndex()

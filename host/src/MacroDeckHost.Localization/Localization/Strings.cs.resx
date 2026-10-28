@@ -2941,6 +2941,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Tento obnovovací klíč tuto instalaci neodemyká.</value>
   </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Zvolte poskytovatele.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>Tento přístupový token je již odvolán.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>Zadejte název o délce nejvýše 64 znaků.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>Přístupový token s tímto ID neexistuje.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Migraci se nepodařilo dokončit.</value>
   </data>
@@ -17148,6 +17160,92 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Minimální úroveň</value>
   </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>Konfigurace klienta</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Připojeno od</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} připojení</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>Připojení: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>Není připojen žádný klient AI.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Připojení klienti</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Asistenti AI, jako je Claude nebo VS Code, mohou přes Model Context Protocol (MCP) procházet a sestavovat nastavení a spouštět akce. Tajné údaje nikdy číst nemohou.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>Zatím žádné přístupové tokeny</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Vytvořte token a přidejte ho do klienta AI, aby se mohl připojit k Macro Deck.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>Připojit se mohou jen aplikace v tomto počítači. Adresa se změní, pokud je její port při spuštění Macro Deck obsazen.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Adresa serveru</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>Server MCP teď není dostupný.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>Klienti AI</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>Nastavení klientů AI se nepodařilo načíst</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Nikdy</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>Povolit</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Nejprve se ptá u: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Nejprve se zeptat</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>Výchozí: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>U každého poskytovatele zvolte, zda klienti AI mohou jeho akce spouštět přímo, musí se nejprve zeptat, nebo je spouštět nesmí. Platí to i pro akce v tocích, které klienti AI vytvoří.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Vypnuto</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>Nastavení se nepodařilo uložit</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Akce, které mohou klienti AI spouštět</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Obnovit</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} bude trvale odstraněn. Je již odvolán, takže ho nic nemůže použít.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} okamžitě přestane fungovat a každý klient AI, který ho používá, bude odpojen.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Přístupové tokeny</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Neznámý klient</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Účet Macro Deck</value>
   </data>
@@ -25242,5 +25340,59 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Zde se zobrazí krátké shrnutí článku.</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Macro Deck potřebuje potvrzení, než klient AI bude pokračovat: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>Povolit</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>změna proměnné {name}, kterou čte schválený blok s tajným údajem</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}) s hodnotami {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>tajný údaj</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Zadejte tajný údaj {label} na stránce Macro Deck, která se otevře v prohlížeči. Hodnota zůstane v Macro Deck.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>předání {name} schválenému bloku s tajným údajem</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Zadejte hodnotu.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>Tento odkaz již není platný</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>Odkaz již byl použit nebo vypršel. Požádejte klienta AI o nové vyžádání tajného údaje.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} žádá Macro Deck o uložení tajného údaje: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Zadání tajného údaje</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Zadaný text vidí pouze Macro Deck. {client} obdrží odkaz použitelný v akcích, nikdy hodnotu.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Uložit tajný údaj</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Tajný údaj byl uložen</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>Tuto kartu lze zavřít a vrátit se do {client}.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Tajný údaj</value>
   </data>
 </root>

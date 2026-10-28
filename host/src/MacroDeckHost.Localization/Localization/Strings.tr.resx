@@ -2940,6 +2940,18 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Bu kurtarma anahtarı bu kurulumun kilidini açmıyor.</value>
   </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Bir sağlayıcı seçin.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>Bu erişim belirteci zaten iptal edildi.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>En fazla 64 karakterlik bir ad girin.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>Bu kimliğe sahip bir erişim belirteci yok.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Geçiş tamamlanamadı.</value>
   </data>
@@ -17149,6 +17161,92 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>En düşük düzey</value>
   </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>İstemci yapılandırması</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Bağlanma zamanı</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} bağlantı</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>{count} bağlantı</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>Bağlı yapay zekâ istemcisi yok.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Bağlı istemciler</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Claude veya VS Code gibi yapay zekâ asistanlarının Model Context Protocol (MCP) üzerinden kurulumunuzu incelemesine, oluşturmasına ve eylem çalıştırmasına izin verin. Gizli değerlerinizi asla okuyamazlar.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>Henüz erişim belirteci yok</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Bir belirteç oluşturun ve Macro Deck'e bağlamak için yapay zekâ istemcinize ekleyin.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>Yalnızca bu bilgisayardaki uygulamalar bağlanabilir. Macro Deck başlarken bağlantı noktası doluysa adres değişir.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Sunucu adresi</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>MCP sunucusu şu anda kullanılamıyor.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>Yapay zekâ istemcileri</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>Yapay zekâ istemcisi ayarları yüklenemedi</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Hiçbir zaman</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>İzin ver</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Önce sorduğu eylemler: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Önce sor</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>Varsayılan: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>Her sağlayıcı için yapay zekâ istemcilerinin eylemlerini doğrudan çalıştırabileceğini, önce size sorması gerektiğini veya hiç çalıştıramayacağını seçin. Bu, yapay zekâ istemcilerinin oluşturduğu akışlardaki eylemler için de geçerlidir.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Kapalı</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>Ayar kaydedilemedi</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Yapay zekâ istemcilerinin çalıştırabileceği eylemler</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} kalıcı olarak silinir. Zaten iptal edildiği için hiçbir şey onu kullanamaz.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} hemen çalışmayı bırakır ve onu kullanan tüm yapay zekâ istemcilerinin bağlantısı kesilir.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Erişim belirteçleri</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Bilinmeyen istemci</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Macro Deck hesabı</value>
   </data>
@@ -25264,5 +25362,59 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Yazının kısa bir özeti burada görünür.</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Yapay zekâ istemcisi devam etmeden önce Macro Deck onayınızı istiyor: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>İzin ver</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>gizli değer kullanan onaylı bir bloğun okuduğu {name} değişkenini değiştirmek</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}), değerler: {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>gizli değer</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Tarayıcınızda açılan Macro Deck sayfasına {label} gizli değerini girin. Değer Macro Deck içinde kalır.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>{name} değerini gizli değer kullanan onaylı bir bloğa aktarmak</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Bir değer girin.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>Bu bağlantı artık geçerli değil</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>Zaten kullanıldı veya süresi doldu. Yapay zekâ istemcisinden gizli değeri yeniden istemesini isteyin.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client}, Macro Deck'ten bir gizli değeri kaydetmesini istiyor: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Gizli değer girin</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Yazdıklarınızı yalnızca Macro Deck görür. {client} eylemlerde kullanabileceği bir başvuru alır, değeri asla almaz.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Gizli değeri kaydet</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Gizli değer kaydedildi</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>Bu sekmeyi kapatıp {client} uygulamasına dönebilirsiniz.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Gizli değer</value>
   </data>
 </root>

@@ -15,6 +15,8 @@ internal sealed class ButtonUpActionDefinition : IActionDefinition
 	}
 
 	public string Id => "button-up";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Mouse.Actions.ButtonUp.Name();
 	public LocalizedText Description => AppStrings.Integrations.Mouse.Actions.ButtonUp.Description();
 

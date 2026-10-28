@@ -18,6 +18,8 @@ internal sealed class KeyDownActionDefinition : IActionDefinition
 	}
 
 	public string Id => "key-down";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Keyboard.Actions.KeyDownName();
 	public LocalizedText Description => AppStrings.Integrations.Keyboard.Actions.KeyDownDescription();
 

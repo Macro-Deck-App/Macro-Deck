@@ -15,6 +15,8 @@ internal sealed class ButtonDownActionDefinition : IActionDefinition
 	}
 
 	public string Id => "button-down";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Mouse.Actions.ButtonDown.Name();
 	public LocalizedText Description => AppStrings.Integrations.Mouse.Actions.ButtonDown.Description();
 

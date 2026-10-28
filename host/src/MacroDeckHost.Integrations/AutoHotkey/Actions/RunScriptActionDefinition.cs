@@ -16,6 +16,8 @@ internal sealed class RunScriptActionDefinition : IDynamicOptionsActionDefinitio
 
 	public string Id => AutoHotkeyActions.RunScriptId;
 
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Scripts;
+
 	public LocalizedText Name => Strings.Name();
 
 	public LocalizedText Description => Strings.Description();

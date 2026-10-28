@@ -408,6 +408,16 @@ import {
   WidgetTypeCatalogChangedEvent,
   WidgetTypeFavoritesChangedEvent,
 } from '@macro-deck/runtime';
+import {
+  CreateMcpTokenRequest,
+  CreateMcpTokenResponse,
+  GetMcpConnectionsResponse,
+  GetMcpPolicyResponse,
+  GetMcpTokensResponse,
+  McpEndpoint,
+  McpTokenActionResponse,
+  SetMcpPolicyRequest,
+} from './mcp-messages';
 import { v4 as uuidv4 } from 'uuid';
 
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
@@ -891,6 +901,38 @@ export class ApiService {
 
   deletePluginToken(id: string): Promise<DeletePluginTokenResponse> {
     return this.http('DELETE', `/api/plugin-tokens/${encodeURIComponent(id)}`);
+  }
+
+  getMcpEndpoint(): Promise<McpEndpoint> {
+    return this.http('GET', '/api/mcp/endpoint');
+  }
+
+  getMcpTokens(): Promise<GetMcpTokensResponse> {
+    return this.http('GET', '/api/mcp/tokens');
+  }
+
+  createMcpToken(request: CreateMcpTokenRequest): Promise<CreateMcpTokenResponse> {
+    return this.http('POST', '/api/mcp/tokens', request);
+  }
+
+  revokeMcpToken(id: string): Promise<McpTokenActionResponse> {
+    return this.http('POST', `/api/mcp/tokens/${encodeURIComponent(id)}/revoke`);
+  }
+
+  deleteMcpToken(id: string): Promise<McpTokenActionResponse> {
+    return this.http('DELETE', `/api/mcp/tokens/${encodeURIComponent(id)}`);
+  }
+
+  getMcpConnections(): Promise<GetMcpConnectionsResponse> {
+    return this.http('GET', '/api/mcp/connections');
+  }
+
+  getMcpPolicy(): Promise<GetMcpPolicyResponse> {
+    return this.http('GET', '/api/mcp/policy');
+  }
+
+  setMcpPolicy(request: SetMcpPolicyRequest): Promise<McpTokenActionResponse> {
+    return this.http('PUT', '/api/mcp/policy', request);
   }
 
   getPluginSessions(): Promise<GetPluginSessionsResponse> {

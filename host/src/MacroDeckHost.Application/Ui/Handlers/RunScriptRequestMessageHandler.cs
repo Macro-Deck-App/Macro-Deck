@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Scripts;
@@ -60,6 +61,7 @@ public class RunScriptRequestMessageHandler : IUiTransportMessageHandler<RunScri
 			};
 		}
 
+		using var mcpScope = McpExecutionScope.Enter(request.McpTokenId);
 		var result = await _scriptRunner.RunAsync(id,
 			request.ClientId,
 			cancellationToken,

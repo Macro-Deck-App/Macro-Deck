@@ -13,6 +13,7 @@ import { SettingsCategory, SettingsModalService } from '../../../services/settin
 import { AboutSettingsComponent } from './sections/about-settings.component';
 import { AccountSettingsComponent } from './sections/account-settings.component';
 import { AdbSettingsComponent } from './sections/adb-settings.component';
+import { AiClientsSettingsComponent } from './sections/ai-clients-settings.component';
 import { AppearanceSettingsComponent } from './sections/appearance-settings.component';
 import { BackupsSettingsComponent } from './sections/backups-settings.component';
 import { DeveloperSettingsComponent } from './sections/developer-settings.component';
@@ -69,7 +70,7 @@ const PINNED_CATEGORY_LABEL_KEYS: Partial<Record<SettingsCategory, string>> = {
     StartupSettingsComponent, LanguageSettingsComponent,
     SecuritySettingsComponent, NetworkSettingsComponent, DevicesSettingsComponent, AdbSettingsComponent,
     UsbSettingsComponent,
-    CompanionAppSettingsComponent,
+    CompanionAppSettingsComponent, AiClientsSettingsComponent,
     BackupsSettingsComponent, MigrationSettingsComponent,
     HttpSettingsComponent, LoggingSettingsComponent, DeveloperSettingsComponent, ExperimentsSettingsComponent, ExtensionsSettingsComponent, AboutSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -119,6 +120,7 @@ export class SettingsModalComponent {
           { id: 'devices', label: text(Strings.Settings.Devices), icon: 'device-desktop' },
           { id: 'usb', label: text(AppStrings.Settings.Usb.Heading), icon: 'usb' },
           { id: 'license', label: text(AppStrings.Settings.CompanionApp.Heading), icon: 'device-tablet' },
+          { id: 'ai-clients', label: text(AppStrings.Settings.Mcp.Heading), icon: 'bot' },
         ],
       },
 

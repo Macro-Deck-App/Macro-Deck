@@ -5,5 +5,6 @@ public enum SecretApprovalMode
 	Preserve = 0,
 	Approve,
 	Rewrite,
-	Withhold
+	Withhold,
+	Restore
 }

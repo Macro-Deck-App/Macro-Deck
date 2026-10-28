@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
@@ -23,14 +24,17 @@ public sealed class ExecuteActionRequestMessageHandler
 	private readonly IMusicPlayerPollNudge _musicPlayerPollNudge;
 	private readonly IHostLockState _lockState;
 	private readonly ILogger _logger;
+	private readonly IMcpExecutionRegistry? _mcpExecutions;
 
 	public ExecuteActionRequestMessageHandler(
 		IIntegrationRegistry integrationRegistry,
 		IActionInteractions interactions,
 		IMusicPlayerPollNudge musicPlayerPollNudge,
 		IHostLockState lockState,
-		ILogger logger)
+		ILogger logger,
+		IMcpExecutionRegistry? mcpExecutions = null)
 	{
+		_mcpExecutions = mcpExecutions;
 		_integrationRegistry = integrationRegistry;
 		_interactions = interactions;
 		_musicPlayerPollNudge = musicPlayerPollNudge;
@@ -70,6 +74,10 @@ public sealed class ExecuteActionRequestMessageHandler
 
 		var executionId = Guid.NewGuid();
 		var stopwatch = Stopwatch.StartNew();
+		using var mcpScope = McpExecutionScope.Enter(request.McpTokenId);
+		using var mcpLease = request.McpTokenId is not null
+			? _mcpExecutions?.Enter(request.IntegrationId, request.McpConsentedVariables)
+			: null;
 		try
 		{
 			var executor = action.CreateExecutor();

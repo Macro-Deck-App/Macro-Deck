@@ -17,6 +17,8 @@ internal sealed class PressKeyActionDefinition : IActionDefinition
 	}
 
 	public string Id => "press-key";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Keyboard.Actions.PressKeyName();
 	public LocalizedText Description => AppStrings.Integrations.Keyboard.Actions.PressKeyDescription();
 

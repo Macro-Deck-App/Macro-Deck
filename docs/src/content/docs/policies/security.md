@@ -16,6 +16,7 @@ or shipped but not implemented, is stated as such.
 | Plugin process | Scope `plugin`: the plugin protocol surface, and nothing else | Not sandboxed: it runs with the user's full privileges. Declared permissions are [not enforced](#permissions-declared-not-enforced), except `host:adb`, `host:companion-devices` and `host:desktop-notifications` |
 | Deck clients (web client, companion) | Scope `client`: the viewer-safe endpoints | Plugin endpoints refuse them |
 | LAN callers and browsers | The public listener's API and web client | Every plugin endpoint refuses them |
+| MCP clients (AI assistants) | Scope `mcp`: the tools of [the MCP server](/reference/mcp/), on the loopback listener only | Never a secret value; see [MCP clients](#mcp-clients) |
 | Creator Portal and Store | Signing Store plugins after checking the publishing workflow's provenance; publishing the signed registry and its revoked keys | Revocation refuses new installs and updates, not a plugin that is already installed |
 
 ## Network exposure
@@ -184,6 +185,17 @@ var apiKey = await context.Config.GetSecretAsync(entry.Id, "api_key");
 
 See [setup flows](/features/setup-flows/#secrets) and
 [ADR 0047](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0047-secrets-backups-and-restore.md).
+
+## MCP clients
+
+An AI client connected to [the MCP server](/reference/mcp/) is treated as an untrusted writer, not as the
+user:
+
+- Its token opens only `/mcp`, only on the loopback listener, and never an admin, client or plugin
+  endpoint. Browser pages are refused by the `Host` and `Origin` checks.
+- No tool returns a secret value. Secrets appear as `{"$secret":"<id>"}` references, and a new secret is
+  typed by the user into a one-time Macro Deck page, never into the client.
+- Revoking the token in **Settings > AI clients** cuts off its open requests and sessions immediately.
 
 ## Signing and install trust
 

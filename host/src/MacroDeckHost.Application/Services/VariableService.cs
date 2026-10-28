@@ -737,6 +737,22 @@ public class VariableService : IVariableService
 		await _mediator.Publish(new VariableDeletedNotification(existing));
 	}
 
+	public async Task<bool> RestoreUserVariable(VariableEntity snapshot)
+	{
+		if (snapshot.Classification != VariableClassification.User
+			|| snapshot.FileSource is not null
+			|| snapshot.TemplateSource is not null
+			|| !VariableNameSanitizer.IsValid(snapshot.Name)
+			|| !_registry.TryAdd(snapshot, true))
+		{
+			return false;
+		}
+
+		PersistUserVariables();
+		await _mediator.Publish(new VariableCreatedNotification(snapshot));
+		return true;
+	}
+
 	private async Task<Result<VariableEntity, VariableError>> CreateInternal(
 		string name,
 		VariableScope scope,
