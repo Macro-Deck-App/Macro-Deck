@@ -49,7 +49,7 @@
     <!-- A state operator (isEmpty/isAvailable/…) ignores the filter value entirely; no control to show. -->
   } @else if (isVariable) {
     <span class="param-variable-chip">
-      <span class="chip-text">{{ variableLabel }}</span>
+      <span class="chip-text" [title]="variableLabel">{{ variableLabel }}</span>
       <button
         type="button"
         class="chip-clear"

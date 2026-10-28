@@ -30,7 +30,7 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
         <label>{{ 'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate }}</label>
         @if (isReference) {
           <span class="param-variable-chip">
-            <span class="chip-text">{{ referenceLabel }}</span>
+            <span class="chip-text" [title]="referenceLabel">{{ referenceLabel }}</span>
             <button type="button" class="chip-clear" (click)="clearValue()" [attr.aria-label]="'macrodeck.app:ActionBuilder.Param.ClearVariable' | translate">
               <span class="icon icon-x icon-xs"></span>
             </button>

@@ -13,7 +13,7 @@ import { UiRenderContext } from '../../ui-render/ui-render-context';
   template: `
     @if (value(); as name) {
       <span class="config-node-chip">
-        <span class="config-node-chip-text">{{ name }}</span>
+        <span class="config-node-chip-text" [title]="name">{{ name }}</span>
         <shared-button variant="ghost" size="compact" (click)="valueChange.emit('')">{{
           'macrodeck:Common.Remove' | translate
         }}</shared-button>
@@ -27,15 +27,28 @@ import { UiRenderContext } from '../../ui-render/ui-render-context';
     }
   `,
   styles: `
+    @use '../../../../styles/index' as ds;
+
     .config-node-chip {
       display: inline-flex;
       align-items: center;
       gap: var(--space-1);
+      max-width: 100%;
+      min-width: 0;
       padding: var(--space-1) var(--space-2);
       background-color: var(--color-bg-hover);
       border-radius: var(--radius-sm);
       color: var(--color-text-primary);
       font-size: var(--text-sm);
+    }
+
+    .config-node-chip-text {
+      @include ds.truncate;
+      min-width: 0;
+    }
+
+    .config-node-chip > shared-button {
+      flex: 0 0 auto;
     }
   `,
 })

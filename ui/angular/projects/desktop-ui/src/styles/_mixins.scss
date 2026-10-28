@@ -311,9 +311,17 @@
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     align-self: flex-start;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .param-variable-chip .chip-text {
+    @include truncate;
+    min-width: 0;
   }
 
   .param-variable-chip .chip-clear {
+    flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
