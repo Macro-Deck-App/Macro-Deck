@@ -72,18 +72,16 @@ export class NavigationService {
       [
         { id: 'scripts', label: text(AppStrings.Nav.Scripts), icon: 'list-play', route: '/scripts' },
         { id: 'automations', label: text(AppStrings.Nav.Automations), icon: 'zap', route: '/automations' },
-        {
-          id: 'approvals',
-          label: text(AppStrings.Nav.SecretApprovals),
-          icon: 'shield-check',
-          route: '/approvals',
-          indicator: pendingApprovals > 0
-            ? pendingApprovals > MAX_INDICATOR_COUNT ? `${MAX_INDICATOR_COUNT}+` : `${pendingApprovals}`
-            : null,
-          indicatorLabel: pendingApprovals > 0
-            ? this.localization.translateKey(AppStrings.SecretApprovals.PendingCount, { count: pendingApprovals })
-            : null,
-        },
+        ...(pendingApprovals > 0
+          ? [{
+            id: 'approvals',
+            label: text(AppStrings.Nav.SecretApprovals),
+            icon: 'shield-check',
+            route: '/approvals',
+            indicator: pendingApprovals > MAX_INDICATOR_COUNT ? `${MAX_INDICATOR_COUNT}+` : `${pendingApprovals}`,
+            indicatorLabel: this.localization.translateKey(AppStrings.SecretApprovals.PendingCount, { count: pendingApprovals }),
+          }]
+          : []),
       ],
       [
         { id: 'variables', label: text(AppStrings.Nav.Variables), icon: 'braces-x', route: '/variables' },

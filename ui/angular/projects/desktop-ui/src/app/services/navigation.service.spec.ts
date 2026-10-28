@@ -94,9 +94,14 @@ describe('NavigationService', () => {
   describe('approvals entry', () => {
     const approvalsItem = () => service.mainNavGroups().flat().find(item => item.id === 'approvals');
 
-    it('links to the approvals page without a count while nothing waits for approval', () => {
+    it('is not listed while nothing waits for approval', () => {
+      expect(approvalsItem()).toBeUndefined();
+    });
+
+    it('links to the approvals page while something waits for approval', () => {
+      secretApprovalsStub.count.set(1);
+
       expect(approvalsItem()?.route).toBe('/approvals');
-      expect(approvalsItem()?.indicator).toBeNull();
     });
 
     it('shows how many steps wait for approval, with a spoken label', () => {
@@ -106,13 +111,12 @@ describe('NavigationService', () => {
       expect(approvalsItem()?.indicatorLabel).toBe('3 steps waiting for approval');
     });
 
-    it('hides the count again once everything is approved', () => {
+    it('disappears again once everything is approved', () => {
       secretApprovalsStub.count.set(1);
       expect(approvalsItem()?.indicatorLabel).toBe('1 step waiting for approval');
 
       secretApprovalsStub.count.set(0);
-      expect(approvalsItem()?.indicator).toBeNull();
-      expect(approvalsItem()?.indicatorLabel).toBeNull();
+      expect(approvalsItem()).toBeUndefined();
     });
   });
 

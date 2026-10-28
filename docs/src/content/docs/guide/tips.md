@@ -186,8 +186,9 @@ to store a new random number in a variable each time the action runs.
 
 A step that uses a stored secret, such as a webhook URL or a token, only runs in the form you saved it in
 the app. If something else changed it, the step pauses, Macro Deck tells you in the notifications, and
-**Approvals** in the sidebar lists it with what changed. Check the values, then choose **Approve**. Until
-then the step is skipped and the rest of the flow still runs.
+**Approvals** appears in the sidebar and lists it with what changed. Check the values, then choose
+**Approve**. Until then the step is skipped and the rest of the flow still runs. Once nothing is waiting,
+**Approvals** leaves the sidebar again.
 
 ## Share and back up
 

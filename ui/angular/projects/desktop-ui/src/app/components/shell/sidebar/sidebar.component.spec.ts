@@ -82,7 +82,7 @@ describe('NavigationService main groups', () => {
   it('groups the main navigation as designed', () => {
     expect(service.mainNavGroups().map(group => group.map(entry => entry.id))).toEqual([
       ['deck'],
-      ['scripts', 'automations', 'approvals'],
+      ['scripts', 'automations'],
       ['variables', 'integrations', 'library'],
       ['store'],
     ]);
@@ -190,7 +190,7 @@ describe('sidebar geometry', () => {
       const fixture = render(collapsed);
       const items = itemsOf(fixture);
 
-      expect(items.length).toBe(11);
+      expect(items.length).toBe(10);
       for (const item of items) {
         expect(item.getBoundingClientRect().height)
           .withContext(`"${item.textContent?.trim()}" collapsed: ${collapsed}`)
