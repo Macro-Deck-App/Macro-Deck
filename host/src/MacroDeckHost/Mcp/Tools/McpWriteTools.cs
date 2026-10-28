@@ -25,17 +25,20 @@ public sealed class McpWriteTools
 	private readonly IMcpJournal _journal;
 	private readonly SecretWriteAuthority _authority;
 	private readonly McpConfirmationText _confirmation;
+	private readonly McpConfirmationGate _gate;
 
 	public McpWriteTools(
 		IMcpChangeSet changes,
 		IMcpJournal journal,
 		SecretWriteAuthority authority,
-		McpConfirmationText confirmation)
+		McpConfirmationText confirmation,
+		McpConfirmationGate gate)
 	{
 		_changes = changes;
 		_journal = journal;
 		_authority = authority;
 		_confirmation = confirmation;
+		_gate = gate;
 	}
 
 	[McpServerTool(Name = "apply_changes", Title = "Apply changes", Destructive = true, UseStructuredContent = true)]
@@ -51,7 +54,8 @@ public sealed class McpWriteTools
 			+ "profile|folder|widget|automation|script|variable, id?, ref?, data? }.")]
 		List<McpChange> changes,
 		[Description("Validate only and report what would need the user's confirmation.")]
-		bool dryRun = false)
+		bool dryRun = false,
+		CancellationToken cancellationToken = default)
 	{
 		_authority.Use(SecretApprovalWrite.Withhold);
 		var tokenId = McpConsent.TokenId(context);
@@ -77,11 +81,11 @@ public sealed class McpWriteTools
 			texts.Add(await _confirmation.For(confirmation));
 		}
 
-		McpConsent.Require(server,
+		await _gate.Require(server,
 			context,
 			validation.Confirmations.Select(confirmation => $"{confirmation.Kind}: {confirmation.Detail}").ToList(),
-			await _confirmation.Message(texts),
-			await _confirmation.Title());
+			texts,
+			cancellationToken);
 
 		var result = await _changes.Apply(tokenId,
 			changes,

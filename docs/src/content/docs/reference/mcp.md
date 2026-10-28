@@ -180,8 +180,8 @@ Rules the batch is checked against:
 
 - Every action block that is new or changed against the stored version is checked against the
   [action policy](#action-policy): a provider turned off fails the batch with `PROVIDER_BLOCKED`, one
-  that asks first makes the host ask the user once, through form elicitation, before anything is
-  written. This also covers blocks the host runs on its own later: timers, schedules, calendars and
+  that asks first makes the host ask the user once (see [Action policy](#action-policy)) before
+  anything is written. This also covers blocks the host runs on its own later: timers, schedules, calendars and
   widget states.
 - A `{"$secret":"<id>"}` reference is accepted only if this client created the secret with
   `set_secret` (or the block is unchanged), otherwise `FOREIGN_SECRET_REF`.
@@ -251,8 +251,19 @@ first (**Ask first**), or may not run them at all (**Off**), in **Settings > AI 
 
 If the stored policy cannot be read, every provider is treated as **Off** until the user saves it again.
 
-Asking first uses form elicitation in the client (`CONFIRMATION_DECLINED` when the user says no,
-`CONFIRMATION_UNAVAILABLE` when the client cannot ask). The answer is bound to that exact call.
+Asking first, and the confirmations for protected variables and steering values, use form elicitation
+in the client when it declares `elicitation.form` (or an empty `elicitation` capability). A client that
+declares only `elicitation.url` gets a URL elicitation for a one-time Macro Deck page
+`http://127.0.0.1:<port>/mcp/confirm/<id>` instead, with the same guards as the secret page: loopback
+only, `Host` and `Origin` checked, valid for 5 minutes and for one answer. The page names the token, the
+actions with their provider, for run_action also its values (secret values only as "a secret"), and offers **Allow** and
+**Decline**; once it is answered the host sends `notifications/elicitation/complete`. The answer is bound
+to that exact call either way.
+
+| Code | When |
+| --- | --- |
+| `CONFIRMATION_DECLINED` | The user said no, did not open the page, or did not answer it in time |
+| `CONFIRMATION_UNAVAILABLE` | The client declares neither form nor URL elicitation |
 
 ## Variables and attribution
 

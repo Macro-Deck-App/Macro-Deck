@@ -25366,8 +25366,32 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>A short summary of the article appears here.</value>
   </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Allowed</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Declined</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Allow it only if you asked the AI client for exactly this.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>It was already answered or has expired. Ask the AI client to try again.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} asks Macro Deck to do this:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Confirm an AI client request</value>
+  </data>
   <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
     <value>Macro Deck needs your confirmation before the AI client continues: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Allow or decline on the Macro Deck page that opens in your browser: {details}</value>
   </data>
   <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
     <value>Allow</value>

@@ -25341,8 +25341,32 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Aquí aparece un breve resumen del artículo.</value>
   </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Permitido</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Rechazar</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Rechazado</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Permítelo solo si pediste exactamente esto al cliente de IA.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>Ya se respondió o ha caducado. Pide al cliente de IA que lo intente de nuevo.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} pide a Macro Deck que haga esto:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Confirma una solicitud del cliente de IA</value>
+  </data>
   <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
     <value>Macro Deck necesita tu confirmación antes de que el cliente de IA continúe: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Permite o rechaza en la página de Macro Deck que se abre en tu navegador: {details}</value>
   </data>
   <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
     <value>Permitir</value>

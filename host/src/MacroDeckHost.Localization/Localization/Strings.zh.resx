@@ -25345,8 +25345,32 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>文章的简短摘要显示在这里。</value>
   </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>已允许</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>拒绝</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>已拒绝</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>仅当你确实要求 AI 客户端执行此操作时才允许。</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>该请求已被答复或已过期。请让 AI 客户端重试。</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} 请求 Macro Deck 执行以下操作：</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>确认 AI 客户端请求</value>
+  </data>
   <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
     <value>AI 客户端继续之前，Macro Deck 需要你的确认：{details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>请在浏览器中打开的 Macro Deck 页面上允许或拒绝：{details}</value>
   </data>
   <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
     <value>允许</value>

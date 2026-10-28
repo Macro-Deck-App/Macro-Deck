@@ -25363,8 +25363,32 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>ここに記事の短い要約が表示されます。</value>
   </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>許可しました</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>拒否</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>拒否しました</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>AI クライアントにまさにこの操作を依頼した場合にのみ許可してください。</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>すでに回答済みか、期限が切れています。AI クライアントにもう一度試すよう依頼してください。</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} が Macro Deck に次の操作を求めています:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>AI クライアントの要求の確認</value>
+  </data>
   <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
     <value>AI クライアントが続行する前に、Macro Deck で確認が必要です: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>ブラウザーで開く Macro Deck のページで許可または拒否してください: {details}</value>
   </data>
   <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
     <value>許可</value>

@@ -25363,8 +25363,32 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Hier verschijnt een korte samenvatting van het artikel.</value>
   </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Toegestaan</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Weigeren</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Geweigerd</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Sta het alleen toe als je de AI-client precies hierom hebt gevraagd.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>Er is al op gereageerd of het is verlopen. Vraag de AI-client het opnieuw te proberen.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} vraagt Macro Deck om het volgende te doen:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Bevestig een verzoek van de AI-client</value>
+  </data>
   <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
     <value>Macro Deck heeft je bevestiging nodig voordat de AI-client verdergaat: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Sta toe of weiger op de Macro Deck-pagina die in je browser opent: {details}</value>
   </data>
   <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
     <value>Toestaan</value>

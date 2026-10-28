@@ -25363,8 +25363,32 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Здесь появляется краткое описание статьи.</value>
   </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Разрешено</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Отклонить</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Отклонено</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Разрешайте, только если вы просили ИИ-клиента именно об этом.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>На запрос уже ответили, или срок его действия истёк. Попросите ИИ-клиента повторить попытку.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} просит Macro Deck выполнить следующее:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Подтвердите запрос ИИ-клиента</value>
+  </data>
   <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
     <value>Прежде чем ИИ-клиент продолжит, Macro Deck требуется ваше подтверждение: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Разрешите или отклоните на странице Macro Deck, которая откроется в браузере: {details}</value>
   </data>
   <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
     <value>Разрешить</value>

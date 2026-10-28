@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -25,6 +26,7 @@ namespace MacroDeckHost.Tests.UnitTests.Mcp;
 public partial class McpEndpointTests
 {
 	private const string LegacyProtocol = "2025-11-25";
+	private static readonly ElicitationCapability _noElicitation = new();
 	private const string SecretValue = "correct-horse-battery-staple";
 
 	private static readonly string[] _mcpContractTools =
@@ -160,9 +162,18 @@ public partial class McpEndpointTests
 			"/mcp/secret-entry/0123456789abcdef0123456789abcdef",
 			FakeConnectionShape.LoopbackWithoutCredential,
 			origin: "http://evil.example");
+		var confirmation = await Send(HttpMethod.Post,
+			"/mcp/confirm/0123456789abcdef0123456789abcdef",
+			FakeConnectionShape.LoopbackWithoutCredential,
+			origin: "http://evil.example");
+		var publicConfirmation = await Send(HttpMethod.Get,
+			"/mcp/confirm/0123456789abcdef0123456789abcdef",
+			FakeConnectionShape.PublicLan);
 
 		await Assert.MultipleAsync(() =>
 		{
+			Assert.That(confirmation.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(publicConfirmation.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
 			Assert.That(foreignOrigin.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(crossSite.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(rebound.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
@@ -296,6 +307,34 @@ public partial class McpEndpointTests
 	}
 
 	[Test]
+	public async Task The_token_list_reports_created_and_last_used_in_utc_and_in_order()
+	{
+		var created = await CreateToken();
+		await using (var client = await Connect(created.Plaintext, null))
+		{
+			await client.ListToolsAsync();
+		}
+
+		var list = await Send(HttpMethod.Get, "/api/mcp/tokens", FakeConnectionShape.Loopback);
+		var entry = (await list.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("tokens")
+			.EnumerateArray()
+			.Single(token => token.GetProperty("id").GetGuid() == created.Id);
+		var createdAt = entry.GetProperty("createdAt").GetString()!;
+		var lastUsedAt = entry.GetProperty("lastUsedAt").GetString()!;
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(createdAt, Does.EndWith("Z"));
+			Assert.That(lastUsedAt, Does.EndWith("Z"));
+			Assert.That(DateTimeOffset.Parse(createdAt, CultureInfo.InvariantCulture),
+				Is.LessThanOrEqualTo(DateTimeOffset.Parse(lastUsedAt, CultureInfo.InvariantCulture)));
+			Assert.That(DateTimeOffset.Parse(createdAt, CultureInfo.InvariantCulture),
+				Is.EqualTo(DateTimeOffset.UtcNow).Within(TimeSpan.FromMinutes(1)));
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
 	public async Task Token_admin_endpoints_create_list_revoke_and_delete()
 	{
 		var created = await CreateToken();
@@ -352,7 +391,8 @@ public partial class McpEndpointTests
 	private async Task<McpClient> Connect(
 		string token,
 		string? protocolVersion,
-		Func<ElicitRequestParams?, CancellationToken, ValueTask<ElicitResult>>? elicitation = null)
+		Func<ElicitRequestParams?, CancellationToken, ValueTask<ElicitResult>>? elicitation = null,
+		ElicitationCapability? capability = null)
 	{
 		var http = new HttpClient(new ShapeHandler(_host.GetTestServer().CreateHandler()))
 		{
@@ -374,8 +414,11 @@ public partial class McpEndpointTests
 			ProtocolVersion = protocolVersion,
 			Capabilities = new ClientCapabilities
 			{
-				Elicitation = new ElicitationCapability
-					{ Url = new UrlElicitationCapability(), Form = new FormElicitationCapability() }
+				Elicitation = ReferenceEquals(capability, _noElicitation)
+					? null
+					: capability
+					?? new ElicitationCapability
+						{ Url = new UrlElicitationCapability(), Form = new FormElicitationCapability() }
 			},
 			Handlers = new McpClientHandlers { ElicitationHandler = elicitation }
 		};

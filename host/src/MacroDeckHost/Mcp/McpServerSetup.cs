@@ -18,7 +18,9 @@ public static class McpServerSetup
 		services.AddSingleton<IMcpConnections>(provider => provider.GetRequiredService<McpConnectionRegistry>());
 		services.AddScoped<McpTextResolver>();
 		services.AddScoped<McpConfirmationText>();
+		services.AddScoped<McpConfirmationGate>();
 		services.AddSingleton<IMcpSecretEntryStore, McpSecretEntryStore>();
+		services.AddSingleton<IMcpConfirmationStore, McpConfirmationStore>();
 		services.AddSingleton<IMcpExecutionRegistry, McpExecutionRegistry>();
 		services.AddSingleton<IMcpProtectedReferences, McpProtectedReferences>();
 		services.AddSingleton<IMcpVariableWriteGuard, McpVariableWriteGuard>();
@@ -104,5 +106,6 @@ public static class McpServerSetup
 	{
 		endpoints.MapMcp(McpPaths.Endpoint).RequireAuthorization(AuthPolicies.Mcp);
 		endpoints.MapMcpSecretEntryPage();
+		endpoints.MapMcpConfirmationPage();
 	}
 }

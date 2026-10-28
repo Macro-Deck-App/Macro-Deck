@@ -25341,8 +25341,32 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Tutaj pojawia się krótkie podsumowanie artykułu.</value>
   </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Zezwolono</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Odrzuć</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Odrzucono</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Należy zezwolić tylko wtedy, gdy klient AI został poproszony dokładnie o to.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>Żądanie zostało już obsłużone lub wygasło. Należy poprosić klienta AI o ponowną próbę.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} prosi Macro Deck o wykonanie następujących czynności:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Potwierdzenie żądania klienta AI</value>
+  </data>
   <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
     <value>Macro Deck wymaga potwierdzenia, zanim klient AI będzie kontynuował: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Należy zezwolić lub odmówić na stronie Macro Deck otwartej w przeglądarce: {details}</value>
   </data>
   <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
     <value>Zezwól</value>

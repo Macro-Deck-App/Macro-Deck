@@ -134,9 +134,16 @@ public class McpTokenService : IMcpTokenService
 		{
 			Id = entity.Id,
 			Name = entity.Name,
-			CreatedAt = entity.CreatedAt,
-			LastUsedAt = entity.LastUsedAt,
-			RevokedAt = entity.RevokedAt
+			CreatedAt = AsUtc(entity.CreatedAt),
+			LastUsedAt = entity.LastUsedAt is { } lastUsed ? AsUtc(lastUsed) : null,
+			RevokedAt = entity.RevokedAt is { } revoked ? AsUtc(revoked) : null
 		};
+	}
+
+	private static DateTime AsUtc(DateTime value)
+	{
+		return value.Kind == DateTimeKind.Local
+			? value.ToUniversalTime()
+			: DateTime.SpecifyKind(value, DateTimeKind.Utc);
 	}
 }

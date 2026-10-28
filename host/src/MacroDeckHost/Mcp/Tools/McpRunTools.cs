@@ -32,6 +32,7 @@ public sealed class McpRunTools
 	private readonly SecretWriteAuthority _authority;
 	private readonly McpTextResolver _text;
 	private readonly McpConfirmationText _confirmation;
+	private readonly McpConfirmationGate _gate;
 
 	public McpRunTools(
 		IUiTransportMessageHandler<ExecuteActionRequest, ExecuteActionResponse> executeAction,
@@ -43,9 +44,11 @@ public sealed class McpRunTools
 		IMcpSecretLedger secrets,
 		SecretWriteAuthority authority,
 		McpTextResolver text,
-		McpConfirmationText confirmation)
+		McpConfirmationText confirmation,
+		McpConfirmationGate gate)
 	{
 		_confirmation = confirmation;
+		_gate = gate;
 		_executeAction = executeAction;
 		_runScript = runScript;
 		_triggerEvent = triggerEvent;
@@ -96,7 +99,7 @@ public sealed class McpRunTools
 				await _confirmation.ProtectedVariable(name)));
 		}
 
-		await Confirm(server, context, details);
+		await Confirm(server, context, details, cancellationToken);
 
 		var response = await _executeAction.Handle(new ExecuteActionRequest
 			{
@@ -149,7 +152,7 @@ public sealed class McpRunTools
 			details.Add(($"{McpConfirmationKinds.SteeringValue}: {name}", await _confirmation.SteeringValue(name)));
 		}
 
-		await Confirm(server, context, details);
+		await Confirm(server, context, details, cancellationToken);
 
 		var response = await _runScript.Handle(new RunScriptRequest
 			{
@@ -197,7 +200,7 @@ public sealed class McpRunTools
 			details.Add(($"{McpConfirmationKinds.SteeringValue}: {name}", await _confirmation.SteeringValue(name)));
 		}
 
-		await Confirm(server, context, details);
+		await Confirm(server, context, details, cancellationToken);
 
 		var response = await _triggerEvent.Handle(new TriggerEventRequest
 			{
@@ -233,17 +236,18 @@ public sealed class McpRunTools
 		}
 	}
 
-	private async Task Confirm(
+	private Task Confirm(
 		McpServer server,
 		RequestContext<CallToolRequestParams> context,
-		List<(string Code, string Text)> details)
+		List<(string Code, string Text)> details,
+		CancellationToken cancellationToken)
 	{
 		var distinct = details.DistinctBy(detail => detail.Code, StringComparer.Ordinal).ToList();
-		McpConsent.Require(server,
+		return _gate.Require(server,
 			context,
 			distinct.Select(detail => detail.Code).ToList(),
-			await _confirmation.Message(distinct.Select(detail => detail.Text)),
-			await _confirmation.Title());
+			distinct.Select(detail => detail.Text).ToList(),
+			cancellationToken);
 	}
 
 	private void RefuseForeignSecrets(Guid tokenId, string serialized)

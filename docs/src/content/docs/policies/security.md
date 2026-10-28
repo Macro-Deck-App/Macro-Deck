@@ -195,6 +195,9 @@ user:
   endpoint. Browser pages are refused by the `Host` and `Origin` checks.
 - No tool returns a secret value. Secrets appear as `{"$secret":"<id>"}` references, and a new secret is
   typed by the user into a one-time Macro Deck page, never into the client.
+- An action that asks first is confirmed by the user in the client's own dialog or, for a client that can
+  only open links, on a one-time Macro Deck confirmation page with the same loopback, `Host`/`Origin`,
+  one-time and expiry rules as the secret page.
 - Revoking the token in **Settings > AI clients** cuts off its open requests and sessions immediately.
 
 ## Signing and install trust

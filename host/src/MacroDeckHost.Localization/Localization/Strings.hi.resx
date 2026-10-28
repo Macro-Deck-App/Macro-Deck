@@ -25363,8 +25363,32 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>लेख का एक छोटा सारांश यहाँ दिखाई देता है।</value>
   </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>अनुमति दी गई</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>अस्वीकार करें</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>अस्वीकार किया गया</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>इसकी अनुमति तभी दें जब आपने AI क्लाइंट से ठीक यही करने को कहा हो।</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>इसका उत्तर पहले ही दिया जा चुका है या यह समाप्त हो गया है। AI क्लाइंट से फिर से प्रयास करने को कहें।</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} Macro Deck से यह करने का अनुरोध करता है:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>AI क्लाइंट के अनुरोध की पुष्टि करें</value>
+  </data>
   <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
     <value>AI क्लाइंट के आगे बढ़ने से पहले Macro Deck को आपकी पुष्टि चाहिए: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>अपने ब्राउज़र में खुलने वाले Macro Deck पेज पर अनुमति दें या अस्वीकार करें: {details}</value>
   </data>
   <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
     <value>अनुमति दें</value>

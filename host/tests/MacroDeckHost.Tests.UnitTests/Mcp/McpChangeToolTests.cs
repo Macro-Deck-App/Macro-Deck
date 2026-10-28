@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Mcp;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Client;
@@ -470,6 +471,92 @@ public partial class McpEndpointTests
 		{
 			await SetPolicy(null);
 		}
+	}
+
+	[TestCase("allow", false)]
+	[TestCase("decline", true)]
+	public async Task A_client_with_only_url_elicitation_confirms_on_the_macro_deck_page(string decision, bool refused)
+	{
+		await EnsureTestIntegration();
+		var token = await CreateToken();
+		string? page = null;
+		HttpStatusCode? replay = null;
+		await using var client = await Connect(token.Plaintext,
+			LegacyProtocol,
+			async (request, cancellationToken) =>
+			{
+				var path = new Uri(request!.Url!).PathAndQuery;
+				page = await (await Send(HttpMethod.Get, path, FakeConnectionShape.LoopbackWithoutCredential)).Content
+					.ReadAsStringAsync(cancellationToken);
+				var form = new Dictionary<string, string>
+					{ ["nonce"] = NonceField().Match(page).Groups[1].Value, ["decision"] = decision };
+				Assert.That((await PostPageForm(path, form)).StatusCode, Is.EqualTo(HttpStatusCode.OK));
+				replay = (await PostPageForm(path, form)).StatusCode;
+				return new ElicitResult { Action = "accept" };
+			},
+			new ElicitationCapability { Url = new UrlElicitationCapability() });
+		await SetPolicy(McpRiskMode.Confirm);
+		var executedBefore = _send.ExecuteCount;
+		try
+		{
+			var run = await client.CallToolAsync("run_action",
+				new Dictionary<string, object?>
+				{
+					["integrationId"] = TestIntegration,
+					["actionId"] = SendAction,
+					["parameters"] = new Dictionary<string, object?> { ["target"] = "visible-target" }
+				});
+
+			await Assert.MultipleAsync(() =>
+			{
+				Assert.That(page, Does.Contain("test client").And.Contain("visible-target"));
+				Assert.That(replay, Is.EqualTo(HttpStatusCode.NotFound));
+				Assert.That(JsonSerializer.Serialize(run).Contains(McpConsent.Declined), Is.EqualTo(refused));
+				Assert.That(_send.ExecuteCount, Is.EqualTo(refused ? executedBefore : executedBefore + 1));
+				return Task.CompletedTask;
+			});
+		}
+		finally
+		{
+			await SetPolicy(null);
+		}
+	}
+
+	[Test]
+	public async Task A_client_without_any_elicitation_cannot_run_an_ask_first_action()
+	{
+		await EnsureTestIntegration();
+		var token = await CreateToken();
+		await using var client = await Connect(token.Plaintext, LegacyProtocol, null, _noElicitation);
+		await SetPolicy(McpRiskMode.Confirm);
+		var executedBefore = _send.ExecuteCount;
+		try
+		{
+			var run = await client.CallToolAsync("run_action",
+				new Dictionary<string, object?>
+				{
+					["integrationId"] = TestIntegration,
+					["actionId"] = SendAction,
+					["parameters"] = new Dictionary<string, object?> { ["target"] = "x" }
+				});
+
+			Assert.That(JsonSerializer.Serialize(run), Does.Contain(McpConsent.Unavailable));
+			Assert.That(_send.ExecuteCount, Is.EqualTo(executedBefore));
+		}
+		finally
+		{
+			await SetPolicy(null);
+		}
+	}
+
+	private async Task<HttpResponseMessage> PostPageForm(string path, Dictionary<string, string> form)
+	{
+		using var request = new HttpRequestMessage(HttpMethod.Post, path);
+		request.Headers.Add(FakeConnectionStartupFilter.ShapeHeader,
+			nameof(FakeConnectionShape.LoopbackWithoutCredential));
+		request.Headers.Add("Origin", "http://localhost");
+		request.Content = new FormUrlEncodedContent(form);
+		return await _client.SendAsync(request);
 	}
 
 	[Test]
