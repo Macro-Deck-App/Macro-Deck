@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Infrastructure.Triggers;
@@ -41,7 +42,7 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 		_index.Changed += OnIndexChanged;
 		try
 		{
-			var due = new Dictionary<EventTarget, DateTimeOffset>();
+			var due = new Dictionary<EventTarget, Planned>();
 
 			while (!stoppingToken.IsCancellationRequested)
 			{
@@ -66,7 +67,7 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 		}
 	}
 
-	private DateTimeOffset? Plan(Dictionary<EventTarget, DateTimeOffset> due, DateTimeOffset now)
+	private DateTimeOffset? Plan(Dictionary<EventTarget, Planned> due, DateTimeOffset now)
 	{
 		var timeZone = TimeZoneInfo.Local;
 		var subscriptions = _index.FindByProvider(TimeEventProvider.ProviderIdValue);
@@ -77,21 +78,20 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 			var target = subscription.Target;
 			live.Add(target);
 
-			if (due.ContainsKey(target))
+			var fingerprint = Fingerprint(subscription);
+			if (due.TryGetValue(target, out var planned) && planned.Schedule == fingerprint)
 			{
 				continue;
 			}
 
-			var schedule = TriggerSchedule.TryCreate(subscription);
-			if (schedule is null)
+			var next = TriggerSchedule.TryCreate(subscription)?.NextOccurrence(now, timeZone);
+			if (next is null)
 			{
-				continue;
+				due.Remove(target);
 			}
-
-			var next = schedule.NextOccurrence(now, timeZone);
-			if (next is not null)
+			else
 			{
-				due[target] = next.Value;
+				due[target] = new Planned(next.Value, fingerprint);
 			}
 		}
 
@@ -100,17 +100,17 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 			due.Remove(stale);
 		}
 
-		return due.Count == 0 ? null : due.Values.Min();
+		return due.Count == 0 ? null : due.Values.Min(planned => planned.At);
 	}
 
 	private Task FireDue(
-		Dictionary<EventTarget, DateTimeOffset> due,
+		Dictionary<EventTarget, Planned> due,
 		DateTimeOffset now,
 		CancellationToken cancellationToken)
 	{
 		var timeZone = TimeZoneInfo.Local;
 
-		foreach (var (target, scheduledFor) in due.Where(entry => entry.Value <= now).ToList())
+		foreach (var (target, planned) in due.Where(entry => entry.Value.At <= now).ToList())
 		{
 			var subscription = _index.Find(target);
 			var schedule = subscription is null ? null : TriggerSchedule.TryCreate(subscription);
@@ -120,6 +120,23 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 				continue;
 			}
 
+			var fingerprint = Fingerprint(subscription);
+			if (planned.Schedule != fingerprint)
+			{
+				var replanned = schedule.NextOccurrence(now, timeZone);
+				if (replanned is null)
+				{
+					due.Remove(target);
+				}
+				else
+				{
+					due[target] = new Planned(replanned.Value, fingerprint);
+				}
+
+				continue;
+			}
+
+			var scheduledFor = planned.At;
 			_bus.Publish(new EventOccurrence(subscription.EventId,
 				new Dictionary<string, object?>(StringComparer.Ordinal)
 				{
@@ -135,11 +152,24 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 			}
 			else
 			{
-				due[target] = next.Value;
+				due[target] = new Planned(next.Value, fingerprint);
 			}
 		}
 
 		return Task.CompletedTask;
+	}
+
+	private static string Fingerprint(EventSubscription subscription)
+	{
+		var configuration = subscription.Configuration
+			.OrderBy(entry => entry.Key, StringComparer.Ordinal)
+			.Select(entry => $"{entry.Key}\u001f{entry.Value.Operator}\u001f{RawText(entry.Value.Value)}");
+		return string.Join('\u001e', configuration.Prepend(subscription.EventId));
+	}
+
+	private static string RawText(JsonElement value)
+	{
+		return value.ValueKind == JsonValueKind.Undefined ? string.Empty : value.GetRawText();
 	}
 
 	private static TimeSpan Clamp(TimeSpan sleep)
@@ -157,4 +187,6 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 		{
 		}
 	}
+
+	private readonly record struct Planned(DateTimeOffset At, string Schedule);
 }
