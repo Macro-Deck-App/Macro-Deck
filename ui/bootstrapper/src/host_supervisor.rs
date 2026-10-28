@@ -89,6 +89,31 @@ impl Supervisor {
         true
     }
 
+    pub fn adopt(&mut self, now: Instant) -> Option<u64> {
+        if self.phase != Phase::Idle {
+            return None;
+        }
+        self.generation += 1;
+        self.exited = None;
+        self.phase = Phase::Running;
+        self.healthy_since = Some(now);
+        self.ever_running = true;
+        Some(self.generation)
+    }
+
+    // An adopted host is not our child, so its exit code is unknowable: a restart request and a
+    // crash look the same, and both relaunch Macro Deck, whose new instance spawns its own host.
+    pub fn on_adopted_exit(&mut self, generation: u64, shutdown_expected: bool) -> ExitAction {
+        if generation != self.generation {
+            return ExitAction::Ignore;
+        }
+        self.exited = Some((generation, None));
+        match self.phase {
+            Phase::Running if !shutdown_expected => ExitAction::Relaunch,
+            _ => ExitAction::Ignore,
+        }
+    }
+
     pub fn begin_attempt(&mut self) -> Option<u64> {
         if !matches!(self.phase, Phase::Starting | Phase::Recovering) {
             return None;
@@ -196,6 +221,54 @@ mod tests {
 
     fn crash(supervisor: &mut Supervisor, generation: u64, now: Instant) -> ExitAction {
         supervisor.on_exit(generation, Some(1), false, now)
+    }
+
+    fn adopted(now: Instant) -> (Supervisor, u64) {
+        let mut supervisor = Supervisor::new();
+        let generation = supervisor.adopt(now).unwrap();
+        (supervisor, generation)
+    }
+
+    #[test]
+    fn an_adopted_host_that_goes_away_relaunches_macro_deck() {
+        let (mut supervisor, generation) = adopted(Instant::now());
+
+        assert_eq!(
+            supervisor.on_adopted_exit(generation, false),
+            ExitAction::Relaunch
+        );
+    }
+
+    #[test]
+    fn an_adopted_host_that_goes_away_during_a_stop_is_left_alone() {
+        let (mut supervisor, generation) = adopted(Instant::now());
+        supervisor.begin_stop();
+
+        assert_eq!(
+            supervisor.on_adopted_exit(generation, false),
+            ExitAction::Ignore
+        );
+    }
+
+    #[test]
+    fn an_adopted_host_that_was_asked_to_shut_down_is_left_alone() {
+        let (mut supervisor, generation) = adopted(Instant::now());
+
+        assert_eq!(
+            supervisor.on_adopted_exit(generation, true),
+            ExitAction::Ignore
+        );
+    }
+
+    #[test]
+    fn a_host_is_adopted_only_by_a_supervisor_that_has_not_started_one() {
+        let now = Instant::now();
+        let (mut running, _) = running(now);
+        assert_eq!(running.adopt(now), None);
+
+        let (mut adopted, _) = adopted(now);
+        assert_eq!(adopted.adopt(now), None);
+        assert_eq!(adopted.begin_attempt(), None);
     }
 
     #[test]

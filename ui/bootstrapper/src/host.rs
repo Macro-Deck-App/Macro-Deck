@@ -70,6 +70,12 @@ const FORCED_STOP_TIMEOUT: Duration = Duration::from_secs(10);
 
 const REPLACED_HOST_STOP_TIMEOUT: Duration = QUIT_STOP_TIMEOUT;
 
+// Kestrel releases the port at the start of a graceful shutdown while the process lives on for up to
+// the host's shutdown timeout; relaunching sooner could start a second host on the same data root.
+const ADOPTED_HOST_EXIT_GRACE: Duration = QUIT_STOP_TIMEOUT;
+
+const ADOPTED_HOST_POLL_INTERVAL: Duration = Duration::from_millis(250);
+
 const LEGACY_HOST_STOP_TIMEOUT: Duration = Duration::from_secs(10);
 
 const ADOPTION_PROBE_TIMEOUT: Duration = Duration::from_secs(1);
@@ -122,6 +128,7 @@ pub struct HostState {
     pub exited: AtomicBool,
     pub ready: AtomicBool,
     pub shutdown_expected: AtomicBool,
+    adopted: AtomicBool,
     pub log_tail: Arc<LogTail>,
     heartbeat: Arc<HostHeartbeat>,
     stopping: AtomicBool,
@@ -138,6 +145,7 @@ impl HostState {
             exited: AtomicBool::new(false),
             ready: AtomicBool::new(false),
             shutdown_expected: AtomicBool::new(false),
+            adopted: AtomicBool::new(false),
             log_tail: Arc::new(LogTail::new(40)),
             heartbeat: Arc::new(HostHeartbeat::default()),
             stopping: AtomicBool::new(false),
@@ -565,7 +573,16 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
                 logging::info(&format!(
                     "[host] adopting running host on loopback port {port}"
                 ));
+                let generation = state
+                    .supervisor
+                    .lock()
+                    .ok()
+                    .and_then(|mut supervisor| supervisor.adopt(Instant::now()));
                 state.ui_port.store(port, Ordering::SeqCst);
+                if let Some(generation) = generation {
+                    state.adopted.store(true, Ordering::SeqCst);
+                    spawn_adoption_monitor(app.clone(), generation, port);
+                }
                 state.ready.store(true, Ordering::SeqCst);
                 crate::install_integrity::host_ready(app);
                 adopt_host_culture(app, port).await;
@@ -921,18 +938,7 @@ fn spawn_exit_monitor(app: AppHandle, generation: u64) {
             }
             ExitAction::Relaunch => {
                 logging::info("[host] restart requested by the host; relaunching Macro Deck");
-                let handle = app.clone();
-                let dispatched = app.run_on_main_thread(move || {
-                    crate::mark_quitting(&handle);
-                    if !relaunch(&handle) {
-                        crate::clear_quitting();
-                        report_failed_restart(&handle, code);
-                    }
-                });
-                if let Err(error) = dispatched {
-                    logging::error(&format!("[host] could not dispatch the relaunch: {error}"));
-                    report_failed_restart(&app, code);
-                }
+                relaunch_for_host(&app, code);
             }
             ExitAction::Recover => {
                 logging::error(&format!("[host] exited unexpectedly with code {code:?}"));
@@ -945,6 +951,68 @@ fn spawn_exit_monitor(app: AppHandle, generation: u64) {
                     }
                 });
             }
+        }
+    });
+}
+
+fn relaunch_for_host(app: &AppHandle, code: Option<i32>) {
+    let handle = app.clone();
+    let dispatched = app.run_on_main_thread(move || {
+        crate::mark_quitting(&handle);
+        if !relaunch(&handle) {
+            crate::clear_quitting();
+            report_failed_restart(&handle, code);
+        }
+    });
+    if let Err(error) = dispatched {
+        logging::error(&format!("[host] could not dispatch the relaunch: {error}"));
+        report_failed_restart(app, code);
+    }
+}
+
+fn adopted_generation_is_current(state: &HostState, generation: u64) -> bool {
+    state
+        .supervisor
+        .lock()
+        .map(|supervisor| supervisor.exit_of(generation).is_none() && !supervisor.is_stopping())
+        .unwrap_or(false)
+}
+
+// The bind probe fails while anything listens on the port, accepting or not, so a host that is
+// alive but hung is never mistaken for gone and doubled.
+fn spawn_adoption_monitor(app: AppHandle, generation: u64, port: u16) {
+    std::thread::spawn(move || {
+        let state = app.state::<Arc<HostState>>();
+        loop {
+            if !adopted_generation_is_current(&state, generation) {
+                return;
+            }
+            if is_port_free(port) {
+                break;
+            }
+            std::thread::sleep(ADOPTED_HOST_POLL_INTERVAL);
+        }
+
+        state.exited.store(true, Ordering::SeqCst);
+        state.ready.store(false, Ordering::SeqCst);
+        loopback_secret::forget_verified_port();
+        crate::install_integrity::host_gone();
+        if !adopted_generation_is_current(&state, generation) {
+            return;
+        }
+        logging::warn(&format!(
+            "[host] the adopted host released loopback port {port}; its exit code is unknown, relaunching Macro Deck once it had time to exit"
+        ));
+        std::thread::sleep(ADOPTED_HOST_EXIT_GRACE);
+
+        let shutdown_expected = state.shutdown_expected.load(Ordering::SeqCst);
+        let action = state
+            .supervisor
+            .lock()
+            .map(|mut supervisor| supervisor.on_adopted_exit(generation, shutdown_expected))
+            .unwrap_or(ExitAction::Ignore);
+        if action == ExitAction::Relaunch {
+            relaunch_for_host(&app, None);
         }
     });
 }
@@ -1201,7 +1269,11 @@ async fn wait_for_exit(state: &HostState, generation: u64, timeout: Duration) ->
 pub async fn stop(app: &AppHandle) {
     let state = app.state::<Arc<HostState>>();
     begin_stop(&state);
-    if !state.spawned() || state.exited.load(Ordering::SeqCst) {
+    if !host_to_stop(
+        state.spawned(),
+        state.adopted.load(Ordering::SeqCst),
+        state.exited.load(Ordering::SeqCst),
+    ) {
         return;
     }
     if state.stopping.swap(true, Ordering::SeqCst) {
@@ -1214,7 +1286,13 @@ pub async fn stop(app: &AppHandle) {
 // Blocking here keeps the process, and with it the host's job, alive until Server stopped is out.
 pub fn stop_before_exit(app: &AppHandle) {
     let state = app.state::<Arc<HostState>>();
-    if crate::is_quitting() || !state.spawned() || state.exited.load(Ordering::SeqCst) {
+    if crate::is_quitting()
+        || !host_to_stop(
+            state.spawned(),
+            state.adopted.load(Ordering::SeqCst),
+            state.exited.load(Ordering::SeqCst),
+        )
+    {
         return;
     }
     logging::info("[host] exiting while the host is still running; stopping it first");
@@ -1235,6 +1313,10 @@ pub fn stop_before_exit(app: &AppHandle) {
     });
     #[cfg(not(windows))]
     tauri::async_runtime::block_on(stop_host(app, "exit", QUIT_STOP_TIMEOUT));
+}
+
+pub fn host_to_stop(spawned: bool, adopted: bool, exited: bool) -> bool {
+    (spawned || adopted) && !exited
 }
 
 pub async fn shutdown_for_update(app: &AppHandle) -> bool {
@@ -2135,6 +2217,30 @@ mod tests {
     fn an_adopted_host_counts_as_stopped_once_it_stops_answering() {
         assert!(!is_stopped(false, false, true, true));
         assert!(is_stopped(false, false, false, true));
+    }
+
+    #[test]
+    fn quitting_stops_an_adopted_host_as_well_as_a_spawned_one() {
+        assert!(host_to_stop(false, true, false));
+        assert!(host_to_stop(true, false, false));
+        assert!(!host_to_stop(false, false, false));
+        assert!(!host_to_stop(false, true, true));
+        assert!(!host_to_stop(true, false, true));
+    }
+
+    #[test]
+    fn a_listening_port_is_not_free_even_when_nothing_accepts_on_it() {
+        let listener = std::net::TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let port = listener.local_addr().unwrap().port();
+        assert!(!is_port_free(port));
+
+        drop(listener);
+        assert!(is_port_free(port));
+    }
+
+    #[test]
+    fn an_adopted_host_gets_its_worst_case_shutdown_before_macro_deck_relaunches() {
+        assert!(ADOPTED_HOST_EXIT_GRACE > HOST_SHUTDOWN_WORST_CASE);
     }
 
     #[test]
