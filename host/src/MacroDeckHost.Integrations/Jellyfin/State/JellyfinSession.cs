@@ -54,6 +54,7 @@ internal sealed record JellyfinSession(
 	bool IsTranscoding,
 	string? RepeatMode,
 	bool IsShuffled,
+	string? Address = null,
 	DateTimeOffset ReceivedAt = default)
 {
 	private static readonly TimeSpan _checkInTolerance = TimeSpan.FromSeconds(2);
@@ -140,7 +141,8 @@ internal static class JellyfinSessionMapper
 			&& (string.Equals(playState?.PlayMethod, "Transcode", StringComparison.OrdinalIgnoreCase)
 				|| dto.TranscodingInfo is { IsVideoDirect: false } or { IsAudioDirect: false }),
 			playState?.RepeatMode,
-			string.Equals(playState?.PlaybackOrder, "Shuffle", StringComparison.OrdinalIgnoreCase));
+			string.Equals(playState?.PlaybackOrder, "Shuffle", StringComparison.OrdinalIgnoreCase),
+			string.IsNullOrWhiteSpace(dto.RemoteEndPoint) ? null : dto.RemoteEndPoint.Trim());
 	}
 
 	public static JellyfinMediaItem MapItem(JellyfinItemDto dto)

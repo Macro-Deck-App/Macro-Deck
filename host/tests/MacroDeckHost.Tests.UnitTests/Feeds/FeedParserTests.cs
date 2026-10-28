@@ -92,12 +92,68 @@ internal sealed class FeedParserTests
 	}
 
 	[Test]
-	public void A_document_with_a_dtd_is_refused()
+	public void A_feed_with_a_public_doctype_is_parsed()
+	{
+		const string xml = """
+						   <?xml version="1.0"?>
+						   <!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN"
+						     "http://my.netscape.com/publish/formats/rss-0.91.dtd">
+						   <rss version="0.91">
+						     <channel>
+						       <title>Netscape</title>
+						       <item><title>First</title><link>https://example.com/1</link></item>
+						     </channel>
+						   </rss>
+						   """;
+
+		var feed = FeedParser.Parse(Encoding.UTF8.GetBytes(xml), _feedUrl);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(feed.Title, Is.EqualTo("Netscape"));
+			Assert.That(feed.Items.Select(item => item.Title), Is.EqualTo(new[] { "First" }));
+		});
+	}
+
+	[Test]
+	public void An_external_entity_is_never_resolved()
 	{
 		const string xml = """
 						   <?xml version="1.0"?>
 						   <!DOCTYPE rss [<!ENTITY secret SYSTEM "file:///etc/passwd">]>
 						   <rss version="2.0"><channel><title>&secret;</title></channel></rss>
+						   """;
+
+		Assert.Throws<FeedParseException>(() => FeedParser.Parse(Encoding.UTF8.GetBytes(xml), _feedUrl));
+	}
+
+	[Test]
+	public void An_inline_entity_is_never_expanded()
+	{
+		const string xml = """
+						   <?xml version="1.0"?>
+						   <!DOCTYPE rss [<!ENTITY marker "expanded-marker">]>
+						   <rss version="2.0"><channel><title>&marker;</title></channel></rss>
+						   """;
+
+		var exception = Assert.Throws<FeedParseException>(()
+			=> FeedParser.Parse(Encoding.UTF8.GetBytes(xml), _feedUrl));
+
+		Assert.That(exception?.ToString(), Does.Not.Contain("expanded-marker"));
+	}
+
+	[Test]
+	public void An_entity_expansion_bomb_is_refused()
+	{
+		const string xml = """
+						   <?xml version="1.0"?>
+						   <!DOCTYPE rss [
+						     <!ENTITY a "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">
+						     <!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">
+						     <!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;">
+						     <!ENTITY d "&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;">
+						   ]>
+						   <rss version="2.0"><channel><title>&d;</title></channel></rss>
 						   """;
 
 		Assert.Throws<FeedParseException>(() => FeedParser.Parse(Encoding.UTF8.GetBytes(xml), _feedUrl));

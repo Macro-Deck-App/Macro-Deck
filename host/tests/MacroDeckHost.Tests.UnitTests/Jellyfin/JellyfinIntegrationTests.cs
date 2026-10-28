@@ -271,6 +271,33 @@ internal sealed class JellyfinIntegrationTests
 	}
 
 	[Test]
+	public async Task Same_named_casts_at_different_addresses_stay_two_players()
+	{
+		var start = DateTimeOffset.UtcNow;
+		_context.AddServer("Home", variableKey: "home");
+		_client.Sessions =
+			[Session("kitchen", "Google Cast", lastActivity: start) with { RemoteEndPoint = "10.0.0.11" }];
+		await InitializeAndWaitForDevicesAsync(1);
+		var kitchen = _integration.GetInstances()[1];
+
+		_client.Sessions =
+		[
+			Session("kitchen", "Google Cast", lastActivity: start) with { RemoteEndPoint = "10.0.0.11" },
+			Session("bedroom", "Google Cast", lastActivity: start.AddMinutes(1)) with { RemoteEndPoint = "10.0.0.12" }
+		];
+		await WaitUntilAsync(() => _integration.Runtimes[0].Devices.Find("bedroom") is not null);
+		var players = _integration.GetInstances().Skip(1).Select(instance => instance.Id).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integration.Runtimes[0].Devices.Find("kitchen")?.LocalId,
+				Is.EqualTo(JellyfinDeviceRegistry.LocalIdFor("kitchen")));
+			Assert.That(players, Has.Count.EqualTo(2));
+			Assert.That(players, Does.Contain(kitchen.Id));
+		});
+	}
+
+	[Test]
 	public async Task Device_variables_fall_back_to_typed_empties_when_playback_ends()
 	{
 		var entry = _context.AddServer("Home", variableKey: "home");
