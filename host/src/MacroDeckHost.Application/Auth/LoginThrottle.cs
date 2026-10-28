@@ -1,10 +1,9 @@
-using System.Collections.Concurrent;
-
 namespace MacroDeckHost.Application.Auth;
 
 public class LoginThrottle
 {
 	private const int DefaultFreeAttempts = 5;
+	private const string LoginKeySuffix = "|login";
 	private static readonly TimeSpan _defaultBaseLockout = TimeSpan.FromSeconds(30);
 	private static readonly TimeSpan _defaultMaxLockout = TimeSpan.FromMinutes(15);
 	private static readonly TimeSpan _entryLifetime = TimeSpan.FromHours(1);
@@ -13,7 +12,8 @@ public class LoginThrottle
 	private readonly int _freeAttempts;
 	private readonly TimeSpan _baseLockout;
 	private readonly TimeSpan _maxLockout;
-	private readonly ConcurrentDictionary<string, Entry> _entries = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Lock _lock = new();
+	private readonly Dictionary<string, Entry> _entries = new(StringComparer.OrdinalIgnoreCase);
 
 	public LoginThrottle(
 		TimeProvider timeProvider,
@@ -27,75 +27,102 @@ public class LoginThrottle
 		_maxLockout = maxLockout ?? _defaultMaxLockout;
 	}
 
+	public static string LoginKey(string clientKey)
+	{
+		return clientKey + LoginKeySuffix;
+	}
+
 	public bool IsThrottled(string key, out TimeSpan retryAfter)
 	{
-		retryAfter = TimeSpan.Zero;
-		PruneStaleEntries();
-
-		if (!_entries.TryGetValue(key, out var entry) || entry.LockedUntil is null)
+		lock (_lock)
 		{
-			return false;
+			var now = _timeProvider.GetUtcNow();
+			PruneStaleEntries(now);
+			retryAfter = RemainingLockout(key, now);
+			return retryAfter > TimeSpan.Zero;
 		}
+	}
 
-		var remaining = entry.LockedUntil.Value - _timeProvider.GetUtcNow();
-		if (remaining <= TimeSpan.Zero)
+	// Check and count in one step, so a parallel burst cannot all pass the check before any failure is
+	// recorded. The attempt counts as a failure until RegisterSuccess clears it.
+	public bool TryReserve(string key, out TimeSpan retryAfter)
+	{
+		lock (_lock)
 		{
-			return false;
-		}
+			var now = _timeProvider.GetUtcNow();
+			PruneStaleEntries(now);
+			retryAfter = RemainingLockout(key, now);
+			if (retryAfter > TimeSpan.Zero)
+			{
+				return false;
+			}
 
-		retryAfter = remaining;
-		return true;
+			CountFailure(key, now);
+			return true;
+		}
 	}
 
 	public void RegisterFailure(string key)
 	{
-		var now = _timeProvider.GetUtcNow();
-		_entries.AddOrUpdate(key,
-			_ => new Entry(1, null, now),
-			(_, entry) =>
-			{
-				var failures = entry.Failures + 1;
-				DateTimeOffset? lockedUntil = null;
-				if (failures >= _freeAttempts)
-				{
-					var factor = Math.Min(failures - _freeAttempts, 8);
-					var lockout = TimeSpan.FromTicks(Math.Min(_baseLockout.Ticks * (1L << factor),
-						_maxLockout.Ticks));
-					lockedUntil = now + lockout;
-				}
-
-				return new Entry(failures, lockedUntil, now);
-			});
+		lock (_lock)
+		{
+			CountFailure(key, _timeProvider.GetUtcNow());
+		}
 	}
 
 	public void RegisterSuccess(string key)
 	{
-		_entries.TryRemove(key, out _);
+		lock (_lock)
+		{
+			_entries.Remove(key);
+		}
 	}
 
-	public void ClearUsername(string username)
+	public void ClearLogins()
 	{
-		var name = username.Trim();
-		foreach (var key in _entries.Keys)
+		lock (_lock)
 		{
-			var separator = key.IndexOf('|');
-			if (separator >= 0
-				&& string.Equals(key[(separator + 1)..].Trim(), name, StringComparison.OrdinalIgnoreCase))
+			foreach (var key in _entries.Keys.Where(key => key.EndsWith(LoginKeySuffix, StringComparison.Ordinal))
+				.ToList())
 			{
-				_entries.TryRemove(key, out _);
+				_entries.Remove(key);
 			}
 		}
 	}
 
-	private void PruneStaleEntries()
+	private TimeSpan RemainingLockout(string key, DateTimeOffset now)
 	{
-		var cutoff = _timeProvider.GetUtcNow() - _entryLifetime;
-		foreach (var (key, entry) in _entries)
+		if (!_entries.TryGetValue(key, out var entry) || entry.LockedUntil is not { } lockedUntil)
 		{
-			if (entry.LastFailureAt < cutoff)
-			{
-				_entries.TryRemove(key, out _);
-			}
+			return TimeSpan.Zero;
+		}
+
+		var remaining = lockedUntil - now;
+		return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
+	}
+
+	private void CountFailure(string key, DateTimeOffset now)
+	{
+		var failures = _entries.TryGetValue(key, out var entry) ? entry.Failures + 1 : 1;
+		DateTimeOffset? lockedUntil = null;
+		if (failures >= _freeAttempts)
+		{
+			var factor = Math.Min(failures - _freeAttempts, 8);
+			var lockout = TimeSpan.FromTicks(Math.Min(_baseLockout.Ticks * (1L << factor), _maxLockout.Ticks));
+			lockedUntil = now + lockout;
+		}
+
+		_entries[key] = new Entry(failures, lockedUntil, now);
+	}
+
+	private void PruneStaleEntries(DateTimeOffset now)
+	{
+		var cutoff = now - _entryLifetime;
+		foreach (var key in _entries.Where(pair => pair.Value.LastFailureAt < cutoff)
+			.Select(pair => pair.Key)
+			.ToList())
+		{
+			_entries.Remove(key);
 		}
 	}
 
