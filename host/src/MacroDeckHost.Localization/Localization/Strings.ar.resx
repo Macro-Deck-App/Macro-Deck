@@ -1411,6 +1411,21 @@
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>في انتظار التفويض…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>اكتمل التفويض</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>أغلق هذه النافذة وارجع إلى Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>ارجع إلى Macro Deck لمعرفة السبب والمحاولة مرة أخرى. يمكن إغلاق هذه النافذة.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>تعذّرت مطابقة التفويض</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>يمكن إغلاق هذه النافذة.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>هذا العرض غير متاح مؤقتًا. تابع باستخدام الحقول أدناه.</value>
   </data>

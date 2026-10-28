@@ -1412,6 +1412,21 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>In attesa di autorizzazione…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Autorizzazione completata</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Puoi chiudere questa finestra e tornare a Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Torna a Macro Deck per vedere il motivo e riprovare. Puoi chiudere questa finestra.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Impossibile associare l'autorizzazione</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Puoi chiudere questa finestra.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Questa visualizzazione non è temporaneamente disponibile. Continua con i campi qui sotto.</value>
   </data>

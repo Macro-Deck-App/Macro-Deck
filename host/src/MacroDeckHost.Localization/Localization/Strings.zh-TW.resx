@@ -1411,6 +1411,21 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>等待授權中…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>授權完成</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>可以關閉此視窗並返回 Macro Deck。</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>請返回 Macro Deck 查看原因並重試。可以關閉此視窗。</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>無法比對此授權</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>可以關閉此視窗。</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>此檢視目前無法使用。請繼續填寫下方欄位。</value>
   </data>

@@ -10,6 +10,8 @@ public interface IOAuthCallbackCoordinator
 
 	string? GetCode(string state);
 
+	void ExpectCallback(string state);
+
 	Task<bool> HandleCallbackAsync(string state, string? code, string? errorCode, CancellationToken cancellationToken);
 
 	void Release(string state);

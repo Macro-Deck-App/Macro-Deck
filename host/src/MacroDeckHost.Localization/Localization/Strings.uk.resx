@@ -1411,6 +1411,21 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Очікування авторизації…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Авторизацію завершено</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>Закрийте це вікно й поверніться до Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Поверніться до Macro Deck, щоб дізнатися причину й повторити спробу. Це вікно можна закрити.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Не вдалося зіставити авторизацію</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>Це вікно можна закрити.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>Це подання тимчасово недоступне. Продовжте з полями нижче.</value>
   </data>

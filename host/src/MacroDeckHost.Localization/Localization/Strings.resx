@@ -1411,6 +1411,21 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="ConfigFlow.WaitingForAuthorization" xml:space="preserve">
     <value>Waiting for authorization…</value>
   </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteTitle" xml:space="preserve">
+    <value>Authorization complete</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.CompleteMessage" xml:space="preserve">
+    <value>You can close this window and return to Macro Deck.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.FailedMessage" xml:space="preserve">
+    <value>Return to Macro Deck to see the reason and try again. You can close this window.</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedTitle" xml:space="preserve">
+    <value>Authorization could not be matched</value>
+  </data>
+  <data name="ConfigFlow.OAuthCallback.UnmatchedMessage" xml:space="preserve">
+    <value>You can close this window.</value>
+  </data>
   <data name="ConfigUi.ViewUnavailable" xml:space="preserve">
     <value>This view is temporarily unavailable. Continue with the fields below.</value>
   </data>
