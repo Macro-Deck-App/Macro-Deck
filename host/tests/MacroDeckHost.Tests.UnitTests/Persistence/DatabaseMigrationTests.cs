@@ -3,6 +3,8 @@ using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Serilog;
 
 namespace MacroDeckHost.Tests.UnitTests.Persistence;
@@ -56,13 +58,16 @@ public class DatabaseMigrationTests
 	}
 
 	[Test]
-	public void The_ef_core_schema_matches_the_schema_the_evolve_scripts_built()
+	public void The_initial_ef_core_migration_matches_the_schema_the_evolve_scripts_built()
 	{
 		var legacy = DatabasePath("legacy");
 		var fresh = DatabasePath("fresh");
 		LegacyEvolveDatabase.Create(legacy, LegacyEvolveDatabase.Newest);
 
-		DatabaseMigrationHelper.Migrate(fresh);
+		using (var context = new DatabaseContext(Log.Logger, fresh))
+		{
+			context.GetService<IMigrator>().Migrate(InitialMigration());
+		}
 
 		Assert.That(LegacyEvolveDatabase.DescribeSchema(fresh),
 			Is.EqualTo(LegacyEvolveDatabase.DescribeSchema(legacy)));
@@ -85,19 +90,18 @@ public class DatabaseMigrationTests
 	}
 
 	[Test]
-	public void A_database_at_the_newest_evolve_script_only_gains_the_migration_history()
+	public void A_database_at_the_newest_evolve_script_gains_the_history_and_the_later_migrations_only()
 	{
 		var path = DatabasePath("current");
 		LegacyEvolveDatabase.Create(path, LegacyEvolveDatabase.Newest);
 		SeedUser(path);
-		var schemaBefore = LegacyEvolveDatabase.DescribeSchema(path);
 		var evolveHistoryBefore = EvolveHistory(path);
 
 		DatabaseMigrationHelper.Migrate(path);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(LegacyEvolveDatabase.DescribeSchema(path), Is.EqualTo(schemaBefore));
+			Assert.That(LegacyEvolveDatabase.DescribeSchema(path), Is.EqualTo(FreshSchema()));
 			Assert.That(EvolveHistory(path), Is.EqualTo(evolveHistoryBefore));
 			Assert.That(AppliedMigrations(path), Is.EqualTo(ShippedMigrations()));
 			Assert.That(LegacyEvolveDatabase.Query(path, "SELECT u_username FROM app_user;"), Is.EqualTo(["admin"]));
@@ -129,6 +133,24 @@ public class DatabaseMigrationTests
 			Assert.That(LegacyEvolveDatabase.Query(path, "SELECT pr_display_name, pr_origin FROM plugin_registration;"),
 				Is.EqualTo(["Demo|developer-token"]));
 		});
+	}
+
+	[Test]
+	public void A_plugin_trust_record_from_before_signers_were_recorded_keeps_its_admission_without_a_signer()
+	{
+		var path = DatabasePath("trust");
+		LegacyEvolveDatabase.Create(path, LegacyEvolveDatabase.Newest);
+		LegacyEvolveDatabase.Execute(path,
+			"INSERT INTO plugin_trust_record (ptr_id, ptr_plugin_id, ptr_version, ptr_admitted_verdict, "
+			+ "ptr_certificate_id, ptr_installed_at, ptr_created_at) "
+			+ $"VALUES ('{RegistrationId}', 'demo.plugin', '1.0.0', 'Trusted', 'cert_1', '2026-01-01', '2026-01-01');");
+
+		DatabaseMigrationHelper.Migrate(path);
+
+		Assert.That(LegacyEvolveDatabase.Query(path,
+				"SELECT ptr_admitted_verdict, ptr_certificate_id, ptr_signer_kind, ptr_signer_id "
+				+ "FROM plugin_trust_record;"),
+			Is.EqualTo(["Trusted|cert_1|null|null"]));
 	}
 
 	[Test]
@@ -231,6 +253,11 @@ public class DatabaseMigrationTests
 	{
 		using var context = new DatabaseContext(Log.Logger, DatabasePath("unused"));
 		return [.. context.Database.GetMigrations().Order(StringComparer.Ordinal)];
+	}
+
+	private string InitialMigration()
+	{
+		return ShippedMigrations().Single(migration => migration.EndsWith("_Initial", StringComparison.Ordinal));
 	}
 
 	private static List<string> EvolveHistory(string path)

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -88,8 +89,9 @@ public class LegacyBackupRestoreEndpointsTests
 			Assert.That(LegacyEvolveDatabase.Query(_paths.DatabasePath, "SELECT u_username FROM app_user;"),
 				Is.EqualTo(["before-switch"]));
 			Assert.That(LegacyEvolveDatabase.Query(_paths.DatabasePath,
-					$"SELECT \"MigrationId\" FROM \"{DatabaseMigrationHelper.HistoryTable}\";"),
-				Has.Count.EqualTo(1));
+					$"SELECT \"MigrationId\" FROM \"{DatabaseMigrationHelper.HistoryTable}\" "
+					+ "ORDER BY \"MigrationId\";"),
+				Is.EqualTo(ShippedMigrations()));
 		});
 	}
 
@@ -210,5 +212,11 @@ public class LegacyBackupRestoreEndpointsTests
 				next(app);
 			};
 		}
+	}
+
+	private List<string> ShippedMigrations()
+	{
+		using var context = new DatabaseContext(Log.Logger, Path.Combine(_dataDir, "shipped-migrations.db"));
+		return [.. context.Database.GetMigrations().Order(StringComparer.Ordinal)];
 	}
 }

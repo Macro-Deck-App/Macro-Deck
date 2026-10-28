@@ -67,7 +67,10 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 			? PluginTrustVerdict.Revoked
 			: PluginTrustVerdict.Trusted;
 
-		var result = PluginTrustResult.Of(trustVerdict, certificateId, revocation.Message, revocation.Status);
+		var result = PluginTrustResult.Of(trustVerdict, certificateId, revocation.Message, revocation.Status) with
+		{
+			Signer = verified.Subject is { } signer ? new PluginSignerIdentity(signer.Kind, signer.Id) : null
+		};
 		PluginTrustLog.Evaluated(_logger, subject, trustVerdict, certificateId);
 		return result;
 	}

@@ -107,7 +107,8 @@ internal sealed class PluginTrustWireMappingTests
 			PluginInstallError.SignatureRevoked,
 			PluginInstallError.SignatureUnverifiable,
 			PluginInstallError.UnsignedNotPermitted,
-			PluginInstallError.TrustDowngrade
+			PluginInstallError.TrustDowngrade,
+			PluginInstallError.SignerMismatch
 		};
 
 		Assert.Multiple(() =>

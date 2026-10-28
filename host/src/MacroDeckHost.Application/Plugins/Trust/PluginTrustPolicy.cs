@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Plugins.Installation;
+using MacroDeckHost.Domain.Entities;
 
 namespace MacroDeckHost.Application.Plugins.Trust;
 
@@ -34,5 +35,38 @@ public static class PluginTrustPolicy
 		return sourceKind != PluginArtifactSourceKind.TestBuild
 			&& admittedVerdict == PluginTrustVerdict.Trusted
 			&& newVerdict != PluginTrustVerdict.Trusted;
+	}
+
+	// The certificate subject is the publisher the Platform verified, stable across certificate rotation. A row
+	// written before signers were recorded has no subject, so only its own certificate still matches it.
+	public static bool ChangesSigner(IEnumerable<PluginTrustRecordEntity> records, PluginTrustResult incoming)
+	{
+		ArgumentNullException.ThrowIfNull(records);
+		ArgumentNullException.ThrowIfNull(incoming);
+
+		if (incoming.Verdict != PluginTrustVerdict.Trusted)
+		{
+			return false;
+		}
+
+		var pin = records
+			.Where(record => PluginTrustRecordVerdicts.Parse(record.AdmittedVerdict) == PluginTrustVerdict.Trusted)
+			.OrderByDescending(record => record.InstalledAt)
+			.ThenByDescending(record => record.CreatedAt)
+			.FirstOrDefault();
+
+		if (pin is null)
+		{
+			return false;
+		}
+
+		if (pin.SignerKind is null || pin.SignerId is null)
+		{
+			return !string.Equals(pin.CertificateId, incoming.CertificateId, StringComparison.Ordinal);
+		}
+
+		return incoming.Signer is not { } signer
+			|| !string.Equals(pin.SignerKind, signer.Kind, StringComparison.Ordinal)
+			|| !string.Equals(pin.SignerId, signer.Id, StringComparison.Ordinal);
 	}
 }

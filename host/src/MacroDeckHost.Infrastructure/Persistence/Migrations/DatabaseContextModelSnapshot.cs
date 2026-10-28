@@ -345,6 +345,14 @@ namespace MacroDeckHost.DatabaseMigrations
                         .HasColumnType("TEXT")
                         .HasColumnName("ptr_plugin_id");
 
+                    b.Property<string>("SignerId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ptr_signer_id");
+
+                    b.Property<string>("SignerKind")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ptr_signer_kind");
+
                     b.Property<string>("Version")
                         .IsRequired()
                         .HasColumnType("TEXT")

@@ -2934,6 +2934,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Een ontwikkelbuild heeft deze plug-in overgenomen. Beëindig de overname voordat je hem installeert of bijwerkt.</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Deze plug-in is ondertekend door een andere uitgever dan de versie die je al hebt, dus is hij niet geïnstalleerd.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wordt afgesloten, daarom is de plug-in niet gestart.</value>
   </data>

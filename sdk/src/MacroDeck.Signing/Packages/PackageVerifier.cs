@@ -239,7 +239,8 @@ public static class PackageVerifier
 
 			return PackageVerifyResult.Ok(format, trusted.Certificate.CertificateId) with
 			{
-				IssuerCertificateId = trusted.Issuer?.CertificateId
+				IssuerCertificateId = trusted.Issuer?.CertificateId,
+				Subject = trusted.Certificate.Subject
 			};
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -273,6 +274,12 @@ public sealed record PackageVerifyResult
 	/// <summary>The <c>certificateId</c> of the issuer certificate that signed the package's certificate, or
 	/// <see langword="null"/> when the root signed it directly.</summary>
 	public string? IssuerCertificateId { get; init; }
+
+	/// <summary>Who the package's certificate was issued to, taken from the certificate that verified against the
+	/// root, or <see langword="null"/> when verification failed. <see cref="SigningCertificateSubject.Kind"/> and
+	/// <see cref="SigningCertificateSubject.Id"/> identify the publisher across certificate rotations; the
+	/// <see cref="CertificateId"/> does not.</summary>
+	public SigningCertificateSubject? Subject { get; init; }
 
 	public SigningError? Error { get; init; }
 

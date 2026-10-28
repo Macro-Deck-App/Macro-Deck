@@ -108,6 +108,8 @@ export function storeOperationErrorKey(code: string | null | undefined): string 
       return AppStrings.Store.Error.UnsignedNotPermitted;
     case 'TrustDowngrade':
       return AppStrings.Store.Error.TrustDowngrade;
+    case 'SignerMismatch':
+      return AppStrings.Errors.Plugins.SignerMismatch;
     case 'ChecksumMismatch':
     case 'SizeMismatch':
       return AppStrings.Store.Error.DownloadMismatch;

@@ -19,6 +19,8 @@ public class PluginTrustRecordEntityConfig : BaseEntityConfig<PluginTrustRecordE
 		builder.Property(x => x.Version).HasColumnName(ColumnPrefix + "version");
 		builder.Property(x => x.AdmittedVerdict).HasColumnName(ColumnPrefix + "admitted_verdict");
 		builder.Property(x => x.CertificateId).HasColumnName(ColumnPrefix + "certificate_id");
+		builder.Property(x => x.SignerKind).HasColumnName(ColumnPrefix + "signer_kind");
+		builder.Property(x => x.SignerId).HasColumnName(ColumnPrefix + "signer_id");
 		builder.Property(x => x.InstalledAt).HasColumnName(ColumnPrefix + "installed_at");
 
 		builder.HasIndex(x => new { x.PluginId, x.Version })

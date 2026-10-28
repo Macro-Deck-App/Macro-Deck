@@ -74,6 +74,7 @@ public sealed class PluginTrustBaselineBackgroundService : HostReadyBackgroundSe
 				active.Version,
 				PluginTrustRecordVerdicts.Unsigned,
 				null,
+				null,
 				now);
 			grandfathered++;
 		}
