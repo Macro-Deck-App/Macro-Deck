@@ -78,7 +78,8 @@ When the server cannot be reached, rejects the sign-in or does not answer like A
 so and shows no numbers, so it never shows old values as if they were current. It updates again by itself
 once the server is back.
 
-Pressing a widget button does nothing while your computer is locked.
+On Windows and macOS, pressing a widget button does nothing while your computer is locked. On Linux it keeps
+working, see [Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked).
 
 ## Variables
 

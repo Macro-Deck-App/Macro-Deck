@@ -24,8 +24,9 @@ script it stands for are saved in the app on your device, so a tag only works on
 
 ![The NFC tags settings on Android, on a device without NFC, with a tag that runs a script and one that opens the deck](../../../../assets/guide/companion/android-nfc-tags.png)
 
-Running a script needs a license or a running trial, the computer reachable over the network and unlocked, the
-same as running it from the deck. Scripts cannot run over a USB cable from a tag; a tag that only opens the deck
+Running a script needs a license or a running trial, the computer reachable over the network and, on Windows
+and macOS, unlocked, the same as running it from the deck. A locked Linux computer still runs it, see
+[Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked). Scripts cannot run over a USB cable from a tag; a tag that only opens the deck
 works over USB on Android.
 
 ## Manage tags

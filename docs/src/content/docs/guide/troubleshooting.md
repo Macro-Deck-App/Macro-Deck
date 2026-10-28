@@ -121,14 +121,27 @@ it again with that package manager instead, for example `sudo apt install --rein
 
 ## Buttons do nothing and devices show a lock screen
 
-Macro Deck does not run actions while the computer it runs on is locked. Unlock the computer and try
-again.
+On Windows and macOS, Macro Deck does not run actions while the computer it runs on is locked. Unlock the
+computer and try again. Linux works differently, see
+[Buttons still work while a Linux computer is locked](#buttons-still-work-while-a-linux-computer-is-locked).
 
 Connected devices show a lock screen for as long as the computer is locked. You can keep the deck
 visible instead by turning off **Lock clients when this computer is locked** in
 **Settings > Security**. Actions stay blocked either way, and so do widgets and dialogs that come from a
 plugin or an integration, such as the Twitch and YouTube chat: pressing one shows that the computer is
 locked, and the widget keeps showing its content.
+
+## Buttons still work while a Linux computer is locked
+
+On Linux, Macro Deck cannot tell whether the computer is locked, so locking it changes nothing for Macro
+Deck. Connected devices keep showing the deck, and anyone using one of them or a hardware deck can still press
+buttons, run scripts and use widgets. Their actions run on the locked computer as if it were unlocked, for
+example opening websites, starting programs or running commands. **Lock clients when this computer is
+locked** in **Settings > Security** has no effect there, and the **System** integration's **Locked** variable
+(`system_locked`) has no value.
+
+If nobody else should be able to use the computer through Macro Deck while you are away, quit Macro Deck
+before you leave it.
 
 ## A dialog says it cannot be shown
 

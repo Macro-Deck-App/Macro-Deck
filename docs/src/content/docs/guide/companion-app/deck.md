@@ -148,7 +148,9 @@ While the computer running Macro Deck is locked, the deck shows a lock screen an
 **Locked on the computer**. The deck comes back by itself once you unlock the computer. To keep the deck
 visible instead, turn off **Lock clients when this computer is locked** in **Settings > Security**; Macro
 Deck still runs no actions from a device while the computer is locked. See
-[Troubleshooting](/guide/troubleshooting/#buttons-do-nothing-and-devices-show-a-lock-screen).
+[Troubleshooting](/guide/troubleshooting/#buttons-do-nothing-and-devices-show-a-lock-screen). This applies to
+Windows and macOS: on Linux the deck stays visible and keeps working while the computer is locked, see
+[Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked).
 
 ## When the connection drops
 
