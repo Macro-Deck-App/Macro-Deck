@@ -311,6 +311,17 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 			};
 		}
 
+		// Text operators whatever the operands look like: a code or an ID that parses as a number is still
+		// matched as text, so they are answered before the numeric switch, which has no arm for them.
+		if (op is "contains" or "startsWith")
+		{
+			var text = Stringify(left);
+			var part = Stringify(right);
+			return op == "contains"
+				? text.Contains(part, StringComparison.Ordinal)
+				: text.StartsWith(part, StringComparison.Ordinal);
+		}
+
 		if (TryGetDouble(left, out var leftNumber) && TryGetDouble(right, out var rightNumber))
 		{
 			return op switch
@@ -337,8 +348,6 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 		{
 			"==" => string.Equals(leftText, rightText, StringComparison.Ordinal),
 			"!=" => !string.Equals(leftText, rightText, StringComparison.Ordinal),
-			"contains" => leftText.Contains(rightText, StringComparison.Ordinal),
-			"startsWith" => leftText.StartsWith(rightText, StringComparison.Ordinal),
 			">" => string.CompareOrdinal(leftText, rightText) > 0,
 			"<" => string.CompareOrdinal(leftText, rightText) < 0,
 			">=" => string.CompareOrdinal(leftText, rightText) >= 0,
