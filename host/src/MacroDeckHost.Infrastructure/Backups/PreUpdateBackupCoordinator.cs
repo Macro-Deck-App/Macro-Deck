@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Backups;
+using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,8 @@ namespace MacroDeckHost.Infrastructure.Backups;
 
 public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 {
+	private const string KeyRingLockedReason = "KeyRingLocked";
+
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly Lock _sync = new();
 	private readonly HashSet<string> _backedUpBatchIds = [];
@@ -30,6 +33,13 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 		string? version,
 		CancellationToken cancellationToken = default)
 	{
+		// A backup needs the recovery key, which a locked key ring cannot read and could be made to mint
+		// under scratch keys. Skipping lets the update that may fix the lock still be installed.
+		if (IsKeyRingLocked())
+		{
+			return new PreUpdateBackupOutcome(true, true, KeyRingLockedReason, null);
+		}
+
 		var settings = await GetBackupSettings();
 		if (!settings.BeforeHostUpdate)
 		{
@@ -108,6 +118,14 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 			{
 				Cancelled = result.Error == BackupError.Cancelled
 			};
+	}
+
+	private bool IsKeyRingLocked()
+	{
+		using var scope = _scopeFactory.CreateScope();
+
+		return scope.ServiceProvider.GetRequiredService<IKeyRingProtectionService>().Status.State
+			== KeyRingProtectionState.Locked;
 	}
 
 	private async Task<BackupSettings> GetBackupSettings()
