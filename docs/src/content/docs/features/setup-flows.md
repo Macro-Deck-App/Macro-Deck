@@ -207,6 +207,9 @@ return ConfigFlowResult.Complete(title, new Dictionary<string, ConfigFlowValue>
 - `Complete` can add values the user never saw, such as tokens from an OAuth exchange. `Secret` values are
   encrypted, `Plain` values stored as they are. A secret with an empty value is skipped.
 - Secrets never belong in logs or in user-visible errors - log the failure type, not the value.
+- A client submits a secret as plaintext. A submitted `{ "$secret": "<id>" }` is refused unless it is the
+  reference the reconfigured entry already stores under the same key, so a flow can never be handed a
+  secret that belongs to something else.
 
 ## Reading the entry at runtime
 

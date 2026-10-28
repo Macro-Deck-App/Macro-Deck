@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Entities;
 using Mediator;
 
@@ -20,6 +21,7 @@ public sealed class IconReferenceRewriter(
 	public async Task<int> Replace(Guid fromIconId, Guid toIconId, CancellationToken cancellationToken)
 	{
 		var map = new Dictionary<Guid, Guid> { [fromIconId] = toIconId };
+		var approval = SecretApprovalWrite.Rewrite(snapshot => PortableGuidRemapper.Remap(snapshot, map) ?? snapshot);
 		var rewritten = 0;
 
 		foreach (var folder in folderCache.GetAllFolders())
@@ -37,7 +39,7 @@ public sealed class IconReferenceRewriter(
 
 			if (changedWidgets.Count > 0)
 			{
-				folderCache.UpdateWidgets(folder.Id, changedWidgets);
+				folderCache.UpdateWidgets(folder.Id, changedWidgets, approval);
 				foreach (var widget in changedWidgets)
 				{
 					await mediator.Publish(new WidgetUpdatedNotification(widget, true), cancellationToken);
@@ -63,7 +65,7 @@ public sealed class IconReferenceRewriter(
 			{
 				automation.Flows = flows;
 				automation.UpdatedAt = DateTime.UtcNow;
-				await automationCache.AddOrUpdate(automation);
+				await automationCache.AddOrUpdate(automation, approval);
 				await mediator.Publish(new AutomationUpdatedNotification(automation), cancellationToken);
 				rewritten++;
 			}
@@ -76,7 +78,7 @@ public sealed class IconReferenceRewriter(
 			{
 				script.Flows = flows;
 				script.UpdatedAt = DateTime.UtcNow;
-				await scriptCache.AddOrUpdate(script);
+				await scriptCache.AddOrUpdate(script, approval);
 				await mediator.Publish(new ScriptUpdatedNotification(script), cancellationToken);
 				rewritten++;
 			}

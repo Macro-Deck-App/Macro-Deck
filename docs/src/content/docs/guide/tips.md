@@ -182,6 +182,13 @@ to store a new random number in a variable each time the action runs.
   unavailable, and running the action then reports that the output does not exist. These actions need an OBS
   whose obs-websocket is version 5.7 or newer; with an older one they report that.
 
+## Approvals
+
+A step that uses a stored secret, such as a webhook URL or a token, only runs in the form you saved it in
+the app. If something else changed it, the step pauses, Macro Deck tells you in the notifications, and
+**Approvals** in the sidebar lists it with what changed. Check the values, then choose **Approve**. Until
+then the step is skipped and the rest of the flow still runs.
+
 ## Share and back up
 
 - Export a widget, folder or profile and import it anywhere, or share the file.

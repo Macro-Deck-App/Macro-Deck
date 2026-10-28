@@ -835,7 +835,7 @@ Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter,
 [Discord Webhooks](/guide/discord-webhooks/), Google Calendar,
 Outlook Calendar, [email over IMAP](#connect-an-imap-account), [AdGuard Home](/guide/adguard-home/), [Steam](/guide/steam/) and more. Turn on the ones you use under **Integrations**.
 
-![The Integrations page listing ADB, Discord, Email (IMAP), Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
+![The Integrations page, 5 of 28 enabled, listing ADB, AdGuard Home, Discord, Discord Webhooks, Email (IMAP), Google Calendar and Home Assistant](../../../assets/guide/integrations.png)
 
 Open an integration or plugin to see what it provides. **Capabilities** on its **Overview** lists everything
 it brings along with how many of each, for example 12 actions, 3 widgets or 2 batteries; choose a row to open

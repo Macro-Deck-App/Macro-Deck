@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -59,7 +60,7 @@ public static class ShortPressFlowJson
 		var def = ActionParameterDefMapper.Map(parameter);
 		var node = JsonSerializer.SerializeToNode(def, _serializerOptions)!.AsObject();
 
-		node["type"] = ControlType(def.Type);
+		node["type"] = ActionParameterControlTypes.Of(def.Type);
 		node["label"] = def.Label.IsEmpty ? def.Name : localization.Resolve(def.Label, culture);
 		node["description"] = localization.Resolve(def.Description, culture) ?? string.Empty;
 		node["placeholder"] = localization.Resolve(def.Placeholder, culture);
@@ -97,40 +98,6 @@ public static class ShortPressFlowJson
 			TransportParameterType.MultiSelect or TransportParameterType.Array => new JsonArray(),
 			TransportParameterType.KeyValue or TransportParameterType.Object => new JsonObject(),
 			_ => JsonValue.Create(string.Empty)
-		};
-	}
-
-	private static string ControlType(TransportParameterType type)
-	{
-		return type switch
-		{
-			TransportParameterType.Number => "number",
-			TransportParameterType.Boolean => "boolean",
-			TransportParameterType.Choice => "choice",
-			TransportParameterType.Password => "password",
-			TransportParameterType.Secret => "secret",
-			TransportParameterType.DynamicChoice => "dynamic-choice",
-			TransportParameterType.Autocomplete => "autocomplete",
-			TransportParameterType.MultiSelect => "multiselect",
-			TransportParameterType.Color => "color",
-			TransportParameterType.File => "file",
-			TransportParameterType.Folder => "folder",
-			TransportParameterType.Hotkey => "hotkey",
-			TransportParameterType.Duration => "duration",
-			TransportParameterType.DateTime => "datetime",
-			TransportParameterType.Json => "json",
-			TransportParameterType.Code => "code",
-			TransportParameterType.KeyValue => "keyvalue",
-			TransportParameterType.Object => "object",
-			TransportParameterType.Array => "array",
-			TransportParameterType.IpAddress => "ipaddress",
-			TransportParameterType.Url => "url",
-			TransportParameterType.Icon => "icon",
-			TransportParameterType.Image => "image",
-			TransportParameterType.KeyboardSequence => "keyboard-sequence",
-			TransportParameterType.KeyboardCombo => "keyboard-combo",
-			TransportParameterType.WidgetTarget => "widget-target",
-			_ => "string"
 		};
 	}
 

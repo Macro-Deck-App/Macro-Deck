@@ -85,13 +85,14 @@ describe('LogsTabComponent', () => {
     appended = new Subject<LogEntriesAppendedNotification>();
     apiSpy = jasmine.createSpyObj<ApiService>(
       'ApiService',
-      ['getLogs', 'getLogSources', 'getIntegrations', 'onNotification', 'invoke', 'getNotifications'],
+      ['getLogs', 'getLogSources', 'getIntegrations', 'onNotification', 'invoke', 'getNotifications', 'getSecretApprovals'],
       {
         connectionState$: new BehaviorSubject<ConnectionState>('connected').asObservable(),
         connectionStateSignal: signal<ConnectionState>('connected').asReadonly(),
       },
     );
     apiSpy.getNotifications.and.resolveTo({ notifications: [] });
+    apiSpy.getSecretApprovals.and.resolveTo({ count: 0, items: [] });
     apiSpy.getLogs.and.resolveTo(page(entries));
     apiSpy.getLogSources.and.resolveTo({
       sources: [

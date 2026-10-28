@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Text;
+using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Persistence;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
@@ -36,21 +38,30 @@ internal sealed class PortabilityTestHarness : IDisposable
 	public ProfilePortabilityService ProfileService { get; }
 	public WidgetPortabilityService WidgetService { get; }
 	public FolderPortabilityService FolderService { get; }
+	public SecretApprovalLedger Approvals { get; }
+
+	public CapturingActionDefinition SecretAction { get; } = new()
+	{
+		Id = "send",
+		Parameters = [ActionParameter.Secret("token"), ActionParameter.Text("note")]
+	};
 
 	public PortabilityTestHarness(Serilog.ILogger? importLogger = null)
 	{
 		FontCatalog = new SkiaFontCatalog([], () => [], Icons.Paths.FontsDirectory);
 		UserFonts = new FileSystemUserFontLibrary(FontCatalog, Icons.Paths);
-		ProfileCache = new ProfileCache(new InMemoryProfileStore(), Icons.Logger, FontCatalog);
-		ProfileCache.InitializeCache().GetAwaiter().GetResult();
-		FolderCache = new FolderCache(ProfileCache);
-		ScriptCache = new ScriptCache(new InMemoryScriptStore(), Icons.Logger);
-		ScriptCache.InitializeCache().GetAwaiter().GetResult();
 		Integrations = new ConfigurableIntegrationRegistry([
 			StubIntegration.Create("app.macro-deck.obs", "OBS Studio", true),
 			StubIntegration.Create("app.macro-deck.keyboard", "Keyboard"),
 			StubIntegration.Create("app.macro-deck.music-player", "Music Player", system: true)
 		]);
+		Integrations.Actions[("app.macro-deck.obs", SecretAction.Id)] = SecretAction;
+		Approvals = new SecretApprovalLedger(Integrations.FindAction, null, null, Icons.Logger);
+		ProfileCache = new ProfileCache(new InMemoryProfileStore(), Icons.Logger, FontCatalog, Approvals);
+		ProfileCache.InitializeCache().GetAwaiter().GetResult();
+		FolderCache = new FolderCache(ProfileCache);
+		ScriptCache = new ScriptCache(new InMemoryScriptStore(), Icons.Logger);
+		ScriptCache.InitializeCache().GetAwaiter().GetResult();
 		Variables = TestVariableServices.Create(VariableRegistry, new NullUserVariableStore(), Icons.Mediator);
 		VariableCloner = new WidgetVariableCloner(Variables, Icons.Logger);
 		Scripts = new ScriptService(ScriptCache, Icons.Mediator, VariableCloner);
@@ -66,7 +77,8 @@ internal sealed class PortabilityTestHarness : IDisposable
 			FontCatalog,
 			UserFonts,
 			OwnerRegistry,
-			Icons.Logger);
+			Icons.Logger,
+			Approvals);
 		var logger = importLogger ?? Icons.Logger;
 		ProfileService
 			= new ProfilePortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, logger);
@@ -152,6 +164,16 @@ internal sealed class PortabilityTestHarness : IDisposable
 		return icon;
 	}
 
+	public static string SecretFlowData(Guid secretId, string noteJson = "\"\"")
+	{
+		return $$$"""
+				  {"flows":[{"triggerId":"t1","triggerType":"onShortPress","children":[
+				    {"id":"b1","type":"action","blockType":"app.macro-deck.obs.send","integrationId":"app.macro-deck.obs",
+				     "actionId":"send","parameters":[{"name":"token","type":"secret","value":{"$secret":"{{{secretId}}}"}},
+				     {"name":"note","type":"string","value":{{{noteJson}}}}]}]}]}
+				  """;
+	}
+
 	public static byte[] MasterBytesFor(string name)
 	{
 		return Encoding.UTF8.GetBytes($"master:{name}");
@@ -185,7 +207,7 @@ internal sealed class PortabilityTestHarness : IDisposable
 			Height = 1,
 			Data = widgetData
 		};
-		FolderCache.AddWidget(folder.Id, widget);
+		FolderCache.AddWidget(folder.Id, widget, SecretApprovalWrite.Approve);
 
 		return (profile, folder, widget);
 	}
@@ -240,7 +262,7 @@ internal sealed class PortabilityTestHarness : IDisposable
 			Data = data,
 			IsPinned = isPinned
 		};
-		FolderCache.AddWidget(folderId, widget);
+		FolderCache.AddWidget(folderId, widget, SecretApprovalWrite.Approve);
 		return widget;
 	}
 

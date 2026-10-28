@@ -334,9 +334,11 @@ internal sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
 
 	public IReadOnlyList<IIntegration> Integrations => _integrations;
 
+	public Dictionary<(string IntegrationId, string ActionId), IActionDefinition> Actions { get; } = [];
+
 	public IActionDefinition? FindAction(string integrationId, string actionId)
 	{
-		return null;
+		return Actions.GetValueOrDefault((integrationId, actionId));
 	}
 
 	public IActionDefinition? FindAction(QualifiedId id)

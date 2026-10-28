@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Enums;
 using Serilog;
@@ -62,6 +63,9 @@ public sealed class EventTriggerRunner : IEventTriggerRunner
 				Scope = source.Value.Scope,
 				ScopeRefId = source.Value.ScopeRefId,
 				OwnerWidgetId = source.Value.OwnerWidgetId,
+				Owner = subscription.Owner.Kind == EventTriggerOwnerKind.Automation
+					? FlowOwner.Automation(subscription.Owner.Id)
+					: FlowOwner.Widget(subscription.Owner.Id),
 				EventParameters = occurrence.Parameters,
 				Origin = ExecutionOrigin.Host
 			},

@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Integrations.ConfigFlow;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.ConfigFlow;
@@ -12,10 +13,14 @@ public class SubmitConfigFlowStepRequestMessageHandler
 	: IUiTransportMessageHandler<SubmitConfigFlowStepRequest, SubmitConfigFlowStepResponse>
 {
 	private readonly IConfigFlowManager _manager;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
-	public SubmitConfigFlowStepRequestMessageHandler(IConfigFlowManager manager)
+	public SubmitConfigFlowStepRequestMessageHandler(
+		IConfigFlowManager manager,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_manager = manager;
+		_writeAuthority = writeAuthority;
 	}
 
 	public async ValueTask<SubmitConfigFlowStepResponse> Handle(
@@ -32,6 +37,7 @@ public class SubmitConfigFlowStepRequestMessageHandler
 			request.Values,
 			request.ClearedSecretFields,
 			request.StepIndex,
+			_writeAuthority?.Mode ?? SecretApprovalMode.Preserve,
 			cancellationToken);
 
 		if (!outcome.FlowFound)

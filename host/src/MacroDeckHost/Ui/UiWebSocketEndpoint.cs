@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Channels;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Devices;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.WebSockets;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -119,6 +120,7 @@ public sealed class UiWebSocketEndpoint(
 			}
 
 			connectionScope = scopes.CreateScope();
+			connectionScope.ServiceProvider.GetRequiredService<SecretWriteAuthority>().Grant(principal);
 			dispatcher = ActivatorUtilities.CreateInstance<UiWebSocketDispatcher>(connectionScope.ServiceProvider,
 				connectionId,
 				principal,

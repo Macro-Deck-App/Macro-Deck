@@ -3,10 +3,13 @@ import { AppStrings, Strings } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
 import { NavItem } from '../domain/navigation.interface';
 import { NotificationCenterService } from './notification-center.service';
+import { SecretApprovalService } from './secret-approval.service';
 
 export function formatBuildVersion(version: string, isDevelopmentBuild: boolean, commit: string | null): string {
   return isDevelopmentBuild ? `dev/${commit ?? 'unknown'}` : version;
 }
+
+const MAX_INDICATOR_COUNT = 99;
 
 export const SIDEBAR_COLLAPSED_KEY = 'md.sidebar.userCollapsed';
 
@@ -40,6 +43,7 @@ export function isWorkspaceConstrained(availableWidth: number, rootFontSizePx: n
 export class NavigationService {
   private readonly notificationCenter = inject(NotificationCenterService);
   private readonly localization = inject(LocalizationService);
+  private readonly secretApprovals = inject(SecretApprovalService);
 
   private readonly userCollapsed = signal(readPersistedCollapsed());
   private readonly spaceConstrained = signal(false);
@@ -59,6 +63,7 @@ export class NavigationService {
 
   readonly mainNavGroups = computed<NavItem[][]>(() => {
     const text = (key: string): string => this.localization.translateKey(key);
+    const pendingApprovals = this.secretApprovals.count();
 
     return [
       [
@@ -67,6 +72,18 @@ export class NavigationService {
       [
         { id: 'scripts', label: text(AppStrings.Nav.Scripts), icon: 'list-play', route: '/scripts' },
         { id: 'automations', label: text(AppStrings.Nav.Automations), icon: 'zap', route: '/automations' },
+        {
+          id: 'approvals',
+          label: text(AppStrings.Nav.SecretApprovals),
+          icon: 'shield-check',
+          route: '/approvals',
+          indicator: pendingApprovals > 0
+            ? pendingApprovals > MAX_INDICATOR_COUNT ? `${MAX_INDICATOR_COUNT}+` : `${pendingApprovals}`
+            : null,
+          indicatorLabel: pendingApprovals > 0
+            ? this.localization.translateKey(AppStrings.SecretApprovals.PendingCount, { count: pendingApprovals })
+            : null,
+        },
       ],
       [
         { id: 'variables', label: text(AppStrings.Nav.Variables), icon: 'braces-x', route: '/variables' },

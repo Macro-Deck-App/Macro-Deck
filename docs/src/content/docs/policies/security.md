@@ -178,6 +178,9 @@ var apiKey = await context.Config.GetSecretAsync(entry.Id, "api_key");
 | Key ring protected by the OS | The Data Protection key ring on disk under the host's data root is encrypted under a key in the OS credential store - Windows Credential Manager, macOS keychain, or Secret Service on Linux - so a copy of the data directory does not carry the key that opens it |
 | Honest fallback | With no credential store, and in a portable installation, the key ring stays readable on disk and the host reports that state rather than implying protection |
 | Never log or show | Secrets never belong in logs or user-visible errors: log the failure type, not the value |
+| Decrypted only where declared | A flow's secret reference is decrypted only into a parameter the action declares as `Secret` or `Password`, nested ones included; see [secret resolution in flows](/policies/compatibility/#secret-resolution-in-flows) |
+| Approved blocks only | A flow step that uses a secret runs only in the exact form the user approved. Editing in the app approves it; any other change pauses the step as **waiting for approval** until the user approves it under **Approvals** |
+| Variables are not part of the approval | An approved step that takes its other values from variables, script inputs, event parameters or an earlier step in the same flow uses whatever those hold when it runs |
 
 See [setup flows](/features/setup-flows/#secrets) and
 [ADR 0047](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0047-secrets-backups-and-restore.md).

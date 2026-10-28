@@ -7,6 +7,8 @@ import {
   AdvanceWebClientTargetProvisioningRequest,
   ApiError,
   ApprovePluginPairingRequestRequest,
+  ApproveSecretBlockRequest,
+  ApproveSecretBlockResponse,
   AuthStatusResponse,
   BackupRecoveryKeyResponse,
   BindCatalogVariableRequest,
@@ -104,6 +106,7 @@ import {
   FolderViewCatalogChangedEvent,
   ScreenSaverCatalogChangedEvent,
   GetScreenSaversResponse,
+  GetSecretApprovalsResponse,
   GetAboutInfoResponse,
   GetThirdPartyNoticesResponse,
   GetActionButtonStateOptionsRequest,
@@ -1947,6 +1950,14 @@ export class ApiService {
 
   cloneSecret(id: string): Promise<CloneSecretResponse> {
     return this.http('POST', `/api/secrets/${encodeURIComponent(id)}/clone`);
+  }
+
+  getSecretApprovals(): Promise<GetSecretApprovalsResponse> {
+    return this.http('GET', '/api/secret-approvals');
+  }
+
+  approveSecretBlock(request: ApproveSecretBlockRequest): Promise<ApproveSecretBlockResponse> {
+    return this.http('POST', '/api/secret-approvals/approve', request);
   }
 
   renderLabelPreview(request: LabelImagePreviewRequest): Promise<string | null> {

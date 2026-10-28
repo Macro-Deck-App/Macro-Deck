@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Persistence.Profiles;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Profiles;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -21,20 +22,25 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 	private readonly IPortableAssetManager _assetManager;
 	private readonly IMediator _mediator;
 	private readonly ILogger _logger;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
 	public FolderPortabilityService(
 		IProfileCache profileCache,
 		IFolderCache folderCache,
 		IPortableAssetManager assetManager,
 		IMediator mediator,
-		ILogger logger)
+		ILogger logger,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_profileCache = profileCache;
 		_folderCache = folderCache;
 		_assetManager = assetManager;
 		_mediator = mediator;
 		_logger = logger;
+		_writeAuthority = writeAuthority;
 	}
+
+	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
 
 	public Result<string, PortabilityError> GetExportFileName(Guid folderId)
 	{
@@ -196,15 +202,16 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 				idMap[oldId] = newId;
 			}
 
+			var carriedSecrets = PortableSecretReferences.CarriedBy(content, idMap);
 			foreach (var widget in folders.SelectMany(folder => folder.Widgets))
 			{
 				widget.Data = PortableActionButtonStateNormalizer.Normalize(widget.Type,
-					PortableGuidRemapper.Remap(widget.Data, idMap));
+					PortableSecretReferences.Remap(widget.Data, idMap, carriedSecrets));
 			}
 
 			foreach (var folder in folders)
 			{
-				await _folderCache.AddOrUpdate(folder);
+				await _folderCache.AddOrUpdate(folder, Approval);
 			}
 
 			// The minted ids only, never idMap: that one also carries imported asset ids, whose targets are

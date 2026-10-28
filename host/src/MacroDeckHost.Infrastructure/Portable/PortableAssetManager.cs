@@ -9,6 +9,7 @@ using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Scripts;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
@@ -43,6 +44,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 	private readonly IUserFontLibrary _userFonts;
 	private readonly IIconPackOwnerRegistry _ownerRegistry;
 	private readonly ILogger _logger;
+	private readonly ISecretApprovals? _approvals;
 
 	public PortableAssetManager(
 		IIconPackCache iconPackCache,
@@ -57,7 +59,8 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		IFontCatalog fontCatalog,
 		IUserFontLibrary userFonts,
 		IIconPackOwnerRegistry ownerRegistry,
-		ILogger logger)
+		ILogger logger,
+		ISecretApprovals? approvals = null)
 	{
 		_fontCatalog = fontCatalog;
 		_ownerRegistry = ownerRegistry;
@@ -72,6 +75,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		_preferences = preferences;
 		_localization = localization;
 		_logger = logger;
+		_approvals = approvals;
 	}
 
 	public async Task<PortableAssetBundle> Collect(
@@ -132,7 +136,11 @@ public sealed class PortableAssetManager : IPortableAssetManager
 			});
 		}
 
-		var secrets = options.IncludeSecrets ? await CollectSecrets(referencingData) : [];
+		var secretSources = widgets
+			.Select(widget => (FlowOwner.Widget(widget.Id), FlowSecretBlocks.FromWidgetData(widget.Data)))
+			.Concat(scripts.Select(script => (FlowOwner.Script(script.Id), FlowSecretBlocks.FromFlows(script.Flows))))
+			.ToList();
+		var secrets = options.IncludeSecrets ? await CollectSecrets(secretSources) : [];
 		var variables = await CollectVariables(widgets);
 		var scriptVariables = await CollectScriptVariables(scripts);
 		var culture = (await _preferences.GetLocalization()).Culture;
@@ -551,7 +559,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 			idMap[secret.Id] = newId;
 		}
 
-		await ImportScripts(content, idMap, cancellationToken);
+		await ImportScripts(content, idMap, PortableSecretReferences.CarriedBy(content, idMap), cancellationToken);
 
 		return idMap;
 	}
@@ -601,6 +609,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 	private async Task ImportScripts(
 		PortableContent content,
 		Dictionary<Guid, Guid> idMap,
+		IReadOnlySet<Guid> carriedSecrets,
 		CancellationToken cancellationToken)
 	{
 		if (content.Scripts.Count == 0)
@@ -619,7 +628,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 
 			var result = await _scriptService.Create(script.Name,
 				script.Description,
-				PortableGuidRemapper.Remap(script.Flows, idMap),
+				PortableSecretReferences.Remap(script.Flows, idMap, carriedSecrets) ?? string.Empty,
 				idMap[script.Id],
 				script.Inputs,
 				script.RunsOnWidget);
@@ -960,14 +969,18 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		};
 	}
 
-	private async Task<List<PortableSecret>> CollectSecrets(IReadOnlyList<string?> widgetData)
+	private async Task<List<PortableSecret>> CollectSecrets(
+		IReadOnlyList<(FlowOwner Owner, IReadOnlyList<FlowBlockSnapshot> Blocks)> sources)
 	{
 		var secretIds = new HashSet<Guid>();
-		foreach (var data in widgetData)
+		if (_approvals is not null)
 		{
-			foreach (var id in SecretReferences.Extract(data))
+			foreach (var (owner, blocks) in sources)
 			{
-				secretIds.Add(id);
+				secretIds.UnionWith(ApprovedSecretReferences.Collect(_approvals,
+					_integrationRegistry.FindAction,
+					owner,
+					blocks));
 			}
 		}
 

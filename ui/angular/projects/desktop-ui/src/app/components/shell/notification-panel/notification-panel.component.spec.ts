@@ -413,6 +413,12 @@ describe('NotificationPanelComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/developer'], { queryParams: { tab: 'logs' } });
   });
 
+  it('opens the approvals page for a step that waits for secret approval', () => {
+    fireAction(notification(), { kind: 'OpenSecretApprovals' });
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/approvals']);
+  });
+
   it('opens the installed extensions for an extension update notification', () => {
     fireAction(notification(), { kind: 'OpenExtensionStore', target: 'installed' });
 

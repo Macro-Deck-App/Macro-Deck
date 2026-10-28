@@ -1,7 +1,11 @@
 using System.Text.Json;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Infrastructure.Portable;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
@@ -190,11 +194,51 @@ public class PortableArchiveDeclarationTests
 	}
 
 	[Test]
+	public async Task An_export_carries_only_secrets_at_declared_positions_of_approved_blocks()
+	{
+		var declared = _harness.Secrets.Store("token", SecretKind.Secret);
+		var undeclared = _harness.Secrets.Store("smuggled", SecretKind.Secret);
+		var pending = _harness.Secrets.Store("pending", SecretKind.Secret);
+		var (source, folder, _) = await _harness.SeedProfile(PortabilityTestHarness.SecretFlowData(declared,
+			$$"""{"$secret":"{{undeclared}}"}"""));
+		var pendingWidget = new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			FolderId = folder.Id,
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = 1,
+			Data = PortabilityTestHarness.SecretFlowData(pending)
+		};
+		_harness.FolderCache.AddWidget(folder.Id, pendingWidget, SecretApprovalWrite.Withhold);
+
+		var export = await _harness.ProfileService.Export(source.Id,
+			new PortableExportOptions { IncludeSecrets = true, Password = "export-password" },
+			CancellationToken.None);
+		var info = (await Inspector().Inspect(export.Data!, CancellationToken.None)).Data!;
+
+		Assert.That(info.SecretCount, Is.EqualTo(1));
+	}
+
+	[Test]
+	public async Task An_import_drops_references_to_secrets_the_archive_does_not_carry()
+	{
+		var local = _harness.Secrets.Store("local-token", SecretKind.Secret);
+		var (source, _, _) = await _harness.SeedProfile(PortabilityTestHarness.SecretFlowData(local));
+		var export = await _harness.ProfileService.Export(source.Id,
+			new PortableExportOptions { IncludeSecrets = false },
+			CancellationToken.None);
+
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
+
+		var imported = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id).Single().Widgets.Single();
+		Assert.That(SecretReferences.Extract(imported.Data), Is.Empty);
+	}
+
+	[Test]
 	public async Task Inspect_AnEncryptedArchive_AnswersWithoutThePassword()
 	{
 		var secretId = _harness.Secrets.Store("hunter2", SecretKind.Password);
-		var (source, _, _) = await _harness.SeedProfile(
-			$"{{\"integrationId\":\"{ObsId}\",\"$secret\":\"{secretId}\"}}");
+		var (source, _, _) = await _harness.SeedProfile(PortabilityTestHarness.SecretFlowData(secretId));
 		var export = await _harness.ProfileService.Export(source.Id,
 			new PortableExportOptions { IncludeSecrets = true, Password = "export-password" },
 			CancellationToken.None);

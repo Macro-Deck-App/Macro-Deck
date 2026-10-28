@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 
@@ -91,5 +92,44 @@ public sealed class FolderCache : IFolderCache
 	public void ReplaceWidgets(Guid folderId, IReadOnlyList<Guid> removeIds, IReadOnlyList<WidgetEntity> addWidgets)
 	{
 		_profileCache.ReplaceWidgets(folderId, removeIds, addWidgets);
+	}
+
+	public Task AddOrUpdate(FolderEntity folder, SecretApprovalWrite write)
+	{
+		return _profileCache.AddOrUpdateFolder(folder, write);
+	}
+
+	public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders, SecretApprovalWrite write)
+	{
+		return _profileCache.AddOrUpdateFolders(folders, write);
+	}
+
+	public void AddWidget(Guid folderId, WidgetEntity widget, SecretApprovalWrite write)
+	{
+		_profileCache.AddWidget(folderId, widget, write);
+	}
+
+	public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets, SecretApprovalWrite write)
+	{
+		_profileCache.AddWidgets(folderId, widgets, write);
+	}
+
+	public void UpdateWidget(Guid folderId, WidgetEntity widget, SecretApprovalWrite write)
+	{
+		_profileCache.UpdateWidget(folderId, widget, write);
+	}
+
+	public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets, SecretApprovalWrite write)
+	{
+		_profileCache.UpdateWidgets(folderId, widgets, write);
+	}
+
+	public void ReplaceWidgets(
+		Guid folderId,
+		IReadOnlyList<Guid> removeIds,
+		IReadOnlyList<WidgetEntity> addWidgets,
+		SecretApprovalWrite write)
+	{
+		_profileCache.ReplaceWidgets(folderId, removeIds, addWidgets, write);
 	}
 }

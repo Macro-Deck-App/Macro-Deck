@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -16,13 +17,21 @@ public class ScriptService : IScriptService
 	private readonly IScriptCache _scriptCache;
 	private readonly IMediator _mediator;
 	private readonly IWidgetVariableCloner _variableCloner;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
-	public ScriptService(IScriptCache scriptCache, IMediator mediator, IWidgetVariableCloner variableCloner)
+	public ScriptService(
+		IScriptCache scriptCache,
+		IMediator mediator,
+		IWidgetVariableCloner variableCloner,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_scriptCache = scriptCache;
 		_mediator = mediator;
 		_variableCloner = variableCloner;
+		_writeAuthority = writeAuthority;
 	}
+
+	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
 
 	public IReadOnlyList<ScriptEntity> GetAll()
 	{
@@ -75,7 +84,7 @@ public class ScriptService : IScriptService
 			UpdatedAt = now
 		};
 
-		await _scriptCache.AddOrUpdate(script);
+		await _scriptCache.AddOrUpdate(script, Approval);
 		await _mediator.Publish(new ScriptCreatedNotification(script));
 
 		return Result.Ok<ScriptEntity, ScriptError>(script);
@@ -142,7 +151,7 @@ public class ScriptService : IScriptService
 
 		script.UpdatedAt = DateTime.UtcNow;
 
-		await _scriptCache.AddOrUpdate(script);
+		await _scriptCache.AddOrUpdate(script, Approval);
 		await _mediator.Publish(new ScriptUpdatedNotification(script));
 
 		return Result.Ok<ScriptEntity, ScriptError>(script);

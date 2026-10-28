@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -19,6 +20,7 @@ public class WidgetService : IWidgetService
 	private readonly IWidgetSecretScrubber _widgetSecretScrubber;
 	private readonly IWidgetSecretCloner _widgetSecretCloner;
 	private readonly IWidgetVariableCloner _widgetVariableCloner;
+	private readonly SecretWriteAuthority? _writeAuthority;
 
 	public WidgetService(
 		IFolderCache folderCache,
@@ -26,7 +28,8 @@ public class WidgetService : IWidgetService
 		IMediator mediator,
 		IWidgetSecretScrubber widgetSecretScrubber,
 		IWidgetSecretCloner widgetSecretCloner,
-		IWidgetVariableCloner widgetVariableCloner)
+		IWidgetVariableCloner widgetVariableCloner,
+		SecretWriteAuthority? writeAuthority = null)
 	{
 		_folderCache = folderCache;
 		_profileCache = profileCache;
@@ -34,7 +37,10 @@ public class WidgetService : IWidgetService
 		_widgetSecretScrubber = widgetSecretScrubber;
 		_widgetSecretCloner = widgetSecretCloner;
 		_widgetVariableCloner = widgetVariableCloner;
+		_writeAuthority = writeAuthority;
 	}
+
+	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
 
 	public async Task<Result<WidgetEntity, WidgetError>> Create(
 		Guid folderId,
@@ -86,7 +92,7 @@ public class WidgetService : IWidgetService
 		// copied widget) so deleting the source later cannot scrub a secret the new widget still uses.
 		widget.Data = await _widgetSecretCloner.CloneReferencedSecrets(widget.Data);
 
-		_folderCache.AddWidget(folderId, widget);
+		_folderCache.AddWidget(folderId, widget, Approval);
 
 		if (sourceWidgetId is { } source)
 		{
@@ -156,7 +162,7 @@ public class WidgetService : IWidgetService
 			|| ReferenceEquals(existing, widget)
 			|| !string.Equals(existing.Data, widget.Data, StringComparison.Ordinal);
 
-		_folderCache.UpdateWidget(widget.FolderId, widget);
+		_folderCache.UpdateWidget(widget.FolderId, widget, Approval);
 
 		await _mediator.Publish(new WidgetUpdatedNotification(widget, dataChanged));
 
@@ -301,7 +307,7 @@ public class WidgetService : IWidgetService
 
 		widget.IsPinned = pinned;
 		widget.PinScope = resultingScope;
-		_folderCache.UpdateWidget(folderId, widget);
+		_folderCache.UpdateWidget(folderId, widget, Approval);
 
 		await _mediator.Publish(new WidgetUpdatedNotification(widget, false));
 
@@ -422,7 +428,7 @@ public class WidgetService : IWidgetService
 
 			// One persisted write for both halves of the swap - never observable as a delete followed
 			// by a separate create (issue #213).
-			_folderCache.ReplaceWidgets(folderId, replaceIds, created);
+			_folderCache.ReplaceWidgets(folderId, replaceIds, created, Approval);
 
 			foreach (var data in dataSnapshots)
 			{
@@ -439,7 +445,7 @@ public class WidgetService : IWidgetService
 		}
 		else
 		{
-			_folderCache.AddWidgets(folderId, created);
+			_folderCache.AddWidgets(folderId, created, Approval);
 
 			foreach (var (targetId, sourceWidgetId) in sourceWidgetIdsByTargetId)
 			{
@@ -580,7 +586,7 @@ public class WidgetService : IWidgetService
 			return Result.Ok<List<WidgetEntity>, WidgetError>(targets);
 		}
 
-		_folderCache.UpdateWidgets(folderId, changed);
+		_folderCache.UpdateWidgets(folderId, changed, Approval);
 
 		await _mediator.Publish(new WidgetsUpdatedNotification(folderId, changed));
 

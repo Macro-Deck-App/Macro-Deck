@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -112,6 +113,7 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 					Scope = VariableScope.Widget,
 					ScopeRefId = widget.Id.ToString(),
 					OwnerWidgetId = widget.Id,
+					Owner = FlowOwner.Widget(widget.Id),
 					OriginClientId = originClientId,
 					OriginDeviceId = originDeviceId
 				},

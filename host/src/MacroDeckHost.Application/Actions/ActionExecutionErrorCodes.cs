@@ -34,4 +34,6 @@ public static class ActionExecutionErrorCodes
 	public const string Unavailable = "UNAVAILABLE";
 
 	public const string HostLocked = "HOST_LOCKED";
+
+	public const string SecretApprovalPending = "SECRET_APPROVAL_PENDING";
 }

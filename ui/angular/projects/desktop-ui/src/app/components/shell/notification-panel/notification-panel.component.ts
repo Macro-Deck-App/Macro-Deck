@@ -98,6 +98,9 @@ export class NotificationPanelComponent {
       case 'OpenIconPacks':
         void this.router.navigate(['/library/icon-packs']);
         break;
+      case 'OpenSecretApprovals':
+        void this.router.navigate(['/approvals']);
+        break;
       case 'OpenUpdateSettings':
         this.settingsModal.open('about');
         break;

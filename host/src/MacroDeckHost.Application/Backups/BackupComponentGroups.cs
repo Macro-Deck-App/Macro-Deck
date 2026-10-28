@@ -62,6 +62,7 @@ public static class BackupComponentGroups
 				Prefix("keys/key-"),
 				File("keys/kek.escrow"),
 				File("data/integration-states.json"),
+				File("data/secret-lineage.json"),
 				// Private integration state belongs with the config entries it describes. Profiles and
 				// automations require Integrations, so names pinned here come back wherever they are used.
 				Dir("data/integration-data")

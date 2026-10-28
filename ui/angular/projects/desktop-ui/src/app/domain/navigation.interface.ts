@@ -7,6 +7,7 @@ export interface NavItem {
   disabled?: boolean;
   badge?: string;
   indicator?: string | null;
+  indicatorLabel?: string | null;
   activity?: boolean;
 }
 

@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using Microsoft.AspNetCore.DataProtection;
@@ -10,11 +11,16 @@ public class SecretService : ISecretService
 {
 	private readonly ISecretRepository _secretRepository;
 	private readonly IDataProtector _protector;
+	private readonly ISecretLineage? _lineage;
 
-	public SecretService(ISecretRepository secretRepository, IDataProtectionProvider dataProtectionProvider)
+	public SecretService(
+		ISecretRepository secretRepository,
+		IDataProtectionProvider dataProtectionProvider,
+		ISecretLineage? lineage = null)
 	{
 		_secretRepository = secretRepository;
 		_protector = dataProtectionProvider.CreateProtector("MacroDeck.Secrets");
+		_lineage = lineage;
 	}
 
 	public async Task<Guid> Create(string value, SecretKind kind)
@@ -77,6 +83,7 @@ public class SecretService : ISecretService
 		};
 
 		await _secretRepository.Create(copy);
+		_lineage?.RecordClone(secret.Id, copy.Id);
 
 		return copy.Id;
 	}

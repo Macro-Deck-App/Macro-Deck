@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -44,6 +45,8 @@ public class ConfigFlowManagerTests
 		var services = new ServiceCollection();
 		services.AddSingleton<ISecretService>(_secretService);
 		services.AddSingleton<IIntegrationConfigStore>(_store);
+		services.AddSingleton(TestLocalization.Resolver);
+		services.AddSingleton(TestLocalization.Preferences);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
 		var uiSessionBroker = new RecordingUiSessionBroker();
@@ -67,6 +70,8 @@ public class ConfigFlowManagerTests
 		var services = new ServiceCollection();
 		services.AddSingleton<ISecretService>(_secretService);
 		services.AddSingleton<IIntegrationConfigStore>(_store);
+		services.AddSingleton(TestLocalization.Resolver);
+		services.AddSingleton(TestLocalization.Preferences);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
 		var uiSessionBroker = new RecordingUiSessionBroker();
@@ -116,6 +121,8 @@ public class ConfigFlowManagerTests
 		var services = new ServiceCollection();
 		services.AddSingleton<ISecretService>(_secretService);
 		services.AddSingleton<IIntegrationConfigStore>(_store);
+		services.AddSingleton(TestLocalization.Resolver);
+		services.AddSingleton(TestLocalization.Preferences);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 		var uiSessionBroker = new RecordingUiSessionBroker();
 		var manager = new ConfigFlowManager(registry,
@@ -135,45 +142,127 @@ public class ConfigFlowManagerTests
 	}
 
 	[Test]
-	public async Task SubmitAsync_resolves_secret_to_plaintext_then_persists_reference()
+	public async Task SubmitAsync_hands_a_typed_secret_to_the_flow_then_persists_only_a_reference()
 	{
 		var start = await _manager.StartAsync("cf", CancellationToken.None);
-		var flowId = Guid.Parse(start.FlowId.ToString());
 
-		var goodSecret = _secretService.Store("super-secret-key");
-
-		var wrongSecret = _secretService.Store("nope");
-		var invalid = await _manager.SubmitAsync(flowId,
+		var invalid = await _manager.SubmitAsync(start.FlowId,
 			"connection",
-			Values(("apiKey", SecretRef(wrongSecret))),
+			Values(("apiKey", JsonValue("nope"))),
 			CancellationToken.None);
-		Assert.That(invalid.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
-
-		var advanced = await _manager.SubmitAsync(flowId,
+		var advanced = await _manager.SubmitAsync(start.FlowId,
 			"connection",
-			Values(("apiKey", SecretRef(goodSecret))),
+			Values(("apiKey", JsonValue("super-secret-key"))),
 			CancellationToken.None);
-		Assert.That(advanced.Kind, Is.EqualTo(ConfigFlowResultKind.Step));
-		Assert.That(advanced.Step!.StepId, Is.EqualTo("workspace"));
-
-		Assert.That(_integration.Flow.LastInput!["apiKey"], Is.EqualTo("super-secret-key"));
-
-		var done = await _manager.SubmitAsync(flowId,
+		var flowInput = _integration.Flow.LastInput!["apiKey"];
+		var done = await _manager.SubmitAsync(start.FlowId,
 			"workspace",
 			Values(("name", JsonValue("Prod"))),
 			CancellationToken.None);
 
-		Assert.That(done.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
-		Assert.That(done.EntryId, Is.Not.Null);
+		var created = _store.Created.Single();
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(invalid.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+			Assert.That(advanced.Kind, Is.EqualTo(ConfigFlowResultKind.Step));
+			Assert.That(flowInput, Is.EqualTo("super-secret-key"));
+			Assert.That(done.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
+			Assert.That(SecretReferenceJson.TryGet(created.Values["apiKey"], out var secretId), Is.True);
+			Assert.That(await _secretService.Resolve(secretId), Is.EqualTo("super-secret-key"));
+			Assert.That(created.Values["name"].GetString(), Is.EqualTo("Prod"));
+			Assert.That(_lifecycle.Reinitialized, Does.Contain("cf"));
+		});
+	}
 
-		Assert.That(_store.Created, Has.Count.EqualTo(1));
-		var created = _store.Created[0];
-		Assert.That(created.IntegrationId, Is.EqualTo("cf"));
-		Assert.That(SecretReferenceJson.TryGet(created.Values["apiKey"], out var secretId), Is.True);
-		Assert.That(secretId, Is.EqualTo(goodSecret));
-		Assert.That(created.Values["name"].GetString(), Is.EqualTo("Prod"));
+	[Test]
+	public async Task A_new_entry_flow_refuses_a_submitted_secret_reference_and_never_decrypts_it()
+	{
+		var foreign = _secretService.Store("someone-elses-token");
+		var start = await _manager.StartAsync("cf", CancellationToken.None);
 
-		Assert.That(_lifecycle.Reinitialized, Does.Contain("cf"));
+		var outcome = await _manager.SubmitAsync(start.FlowId,
+			"connection",
+			Values(("apiKey", SecretRef(foreign))),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+			Assert.That(outcome.Message.IsEmpty, Is.False);
+			Assert.That(_integration.Flow.LastInput, Is.Null);
+			Assert.That(_store.Created, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_reconfigure_refuses_a_secret_reference_the_entry_does_not_already_hold()
+	{
+		SeedExistingSecretEntry();
+		var foreign = _secretService.Store("someone-elses-token");
+		var entryId = _store.Existing.Single().Id;
+		var start = await _manager.StartAsync("cf", null, entryId, CancellationToken.None);
+
+		var outcome = await _manager.SubmitAsync(start.FlowId,
+			"connection",
+			Values(("apiKey", SecretRef(foreign))),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+			Assert.That(_integration.Flow.LastInput, Is.Null);
+			Assert.That(_store.Replaced, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_reconfigure_accepts_the_reference_the_entry_already_holds_for_that_key()
+	{
+		var retained = SeedExistingSecretEntry();
+		var entryId = _store.Existing.Single().Id;
+		var start = await _manager.StartAsync("cf", null, entryId, CancellationToken.None);
+
+		var outcome = await _manager.SubmitAsync(start.FlowId,
+			"connection",
+			Values(("apiKey", SecretRef(retained))),
+			CancellationToken.None);
+
+		Assert.That(outcome.Kind, Is.EqualTo(ConfigFlowResultKind.Step));
+	}
+
+	[Test]
+	public async Task An_untrusted_writer_cannot_reconfigure_an_entry_that_holds_secrets()
+	{
+		SeedExistingSecretEntry();
+		var entryId = _store.Existing.Single().Id;
+
+		var outcome = await _manager.StartAsync("cf",
+			null,
+			entryId,
+			SecretApprovalMode.Withhold,
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome.FlowId, Is.EqualTo(Guid.Empty));
+			Assert.That(outcome.ErrorMessage, Is.Not.Empty);
+			Assert.That(_integration.Flow.LastInput, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task An_untrusted_writer_can_still_create_a_new_entry()
+	{
+		var start = await _manager.StartAsync("cf", null, null, SecretApprovalMode.Withhold, CancellationToken.None);
+		var advanced = await _manager.SubmitAsync(start.FlowId,
+			"connection",
+			Values(("apiKey", JsonValue("super-secret-key"))),
+			[],
+			null,
+			SecretApprovalMode.Withhold,
+			CancellationToken.None);
+
+		Assert.That(advanced.Kind, Is.EqualTo(ConfigFlowResultKind.Step));
 	}
 
 	[Test]
@@ -437,10 +526,9 @@ public class ConfigFlowManagerTests
 		var manager = CreateManager(integration, listenerState);
 
 		var start = await manager.StartAsync("cf", CancellationToken.None);
-		var secret = _secretService.Store("super-secret-key");
 		var advanced = await manager.SubmitAsync(start.FlowId,
 			"connection",
-			Values(("apiKey", SecretRef(secret))),
+			Values(("apiKey", JsonValue("super-secret-key"))),
 			CancellationToken.None);
 		var done = await manager.SubmitAsync(start.FlowId,
 			"workspace",
@@ -546,10 +634,9 @@ public class ConfigFlowManagerTests
 			flowId = start.FlowId;
 		}
 
-		var secret = _secretService.Store("super-secret-key");
 		await _manager.SubmitAsync(flowId.Value,
 			"connection",
-			Values(("apiKey", SecretRef(secret))),
+			Values(("apiKey", JsonValue("super-secret-key"))),
 			CancellationToken.None);
 
 		return await _manager.SubmitAsync(flowId.Value,
@@ -566,6 +653,8 @@ public class ConfigFlowManagerTests
 		var services = new ServiceCollection();
 		services.AddSingleton<ISecretService>(_secretService);
 		services.AddSingleton<IIntegrationConfigStore>(_store);
+		services.AddSingleton(TestLocalization.Resolver);
+		services.AddSingleton(TestLocalization.Preferences);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 		var registry = new IntegrationRegistry(scopeFactory,
 			new Companion.CompanionHarness.MemoryStateStore(new Dictionary<string, bool>

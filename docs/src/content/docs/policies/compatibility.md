@@ -164,6 +164,25 @@ Two things did **not** change:
   `ConfigFlowResultDto.EntryTitle` stays a plain string on purpose: the host stores it as the configured
   entry's name, which the user then owns and can rename.
 
+## Secret resolution in flows
+
+A flow refers to a secret as `{ "$secret": "<id>" }`. The host decrypts such a reference only where the
+action **declares** a `Secret` or `Password` parameter, read from the action's own parameter list, never
+from the type a stored block names. That includes declared children of an `Object` parameter and the
+`ItemTemplate` of an `Array` parameter. Anywhere else the reference arrives as an empty string.
+
+- A plugin that declares its secret with `ActionParameter.Secret` or `ActionParameter.Password` receives
+  the plaintext exactly as before.
+- A reference in a parameter the plugin declares with any other type, or does not declare at all, no
+  longer reaches it. A declared parameter is converted by its declared type.
+- Secrets nested in a declared `Object` or `Array` parameter are now decrypted; before they arrived as the
+  reference object.
+- A config-flow submit that carries a secret reference the entry does not already hold under that key is
+  refused with an error.
+
+This was treated as hardening, not a contract break: no published plugin read a secret through an
+undeclared parameter. See [secrets in configuration](/policies/security/#secrets-in-configuration).
+
 ## Versions
 
 | Version | Scheme | Breaks allowed |
