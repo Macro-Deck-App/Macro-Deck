@@ -41,6 +41,7 @@ public class ProfileServiceGridTests
 				new InMemoryDeviceRepository(),
 				new RecordingMediator(),
 				new WidgetSecretCloner(new FakeSecretService()),
+				new WidgetSecretScrubber(new FakeSecretService()),
 				new NullWidgetVariableCloner());
 		_widgetService = new WidgetService(folderCache,
 			_cache,

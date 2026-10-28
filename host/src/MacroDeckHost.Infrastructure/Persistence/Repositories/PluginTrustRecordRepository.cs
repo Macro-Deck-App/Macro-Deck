@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +30,7 @@ public class PluginTrustRecordRepository : IPluginTrustRecordRepository
 		string version,
 		string admittedVerdict,
 		string? certificateId,
+		PluginSignerIdentity? signer,
 		DateTime installedAt)
 	{
 		var existing = await _context.PluginTrustRecords
@@ -43,6 +45,8 @@ public class PluginTrustRecordRepository : IPluginTrustRecordRepository
 				Version = version,
 				AdmittedVerdict = admittedVerdict,
 				CertificateId = certificateId,
+				SignerKind = signer?.Kind,
+				SignerId = signer?.Id,
 				InstalledAt = installedAt,
 				CreatedAt = installedAt
 			};
@@ -75,6 +79,8 @@ public class PluginTrustRecordRepository : IPluginTrustRecordRepository
 
 		existing.AdmittedVerdict = admittedVerdict;
 		existing.CertificateId = certificateId;
+		existing.SignerKind = signer?.Kind;
+		existing.SignerId = signer?.Id;
 		existing.InstalledAt = installedAt;
 
 		await _context.SaveChangesAsync();

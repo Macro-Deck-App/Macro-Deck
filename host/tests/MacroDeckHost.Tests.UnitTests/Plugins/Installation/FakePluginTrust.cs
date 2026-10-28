@@ -47,6 +47,7 @@ internal sealed class InMemoryPluginTrustRecordRepository : IPluginTrustRecordRe
 		string version,
 		string admittedVerdict,
 		string? certificateId,
+		PluginSignerIdentity? signer,
 		DateTime installedAt)
 	{
 		_records[(pluginId, version)] = new PluginTrustRecordEntity
@@ -56,6 +57,8 @@ internal sealed class InMemoryPluginTrustRecordRepository : IPluginTrustRecordRe
 			Version = version,
 			AdmittedVerdict = admittedVerdict,
 			CertificateId = certificateId,
+			SignerKind = signer?.Kind,
+			SignerId = signer?.Id,
 			InstalledAt = installedAt
 		};
 

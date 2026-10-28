@@ -2943,6 +2943,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>開発ビルドがこのプラグインを引き継いでいます。インストールまたは更新する前に、引き継ぎを終了してください。</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>このプラグインは、既に入手しているバージョンとは別の公開者によって署名されているため、インストールしませんでした。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck が終了処理中のため、プラグインは起動されませんでした。</value>
   </data>

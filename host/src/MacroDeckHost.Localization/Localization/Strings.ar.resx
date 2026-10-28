@@ -2943,6 +2943,9 @@
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>استبدلت نسخة تطوير هذا المكوّن الإضافي. أنهِ الاستبدال قبل تثبيته أو تحديثه.</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>هذا المكوّن الإضافي موقّع من ناشر مختلف عن ناشر الإصدار الذي لديك، لذلك لم يُثبَّت.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>يتم إيقاف تشغيل Macro Deck، لذلك لم يتم تشغيل المكوّن الإضافي.</value>
   </data>

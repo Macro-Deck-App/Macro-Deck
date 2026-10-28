@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 
-import { ActionBlock, ActionBlockParameter, EventDefinition, GetActionParameterOptionsResponse, WIDGET_TARGET_SELF } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, EventDefinition, GetActionParameterOptionsResponse, WIDGET_TARGET_SELF, isVariableReference } from '@macro-deck/runtime';
 import { ApiService, IconImageService, VariableService } from '@shared';
 import { ActionOptionsService, ResolvedActionParameterOption } from '../../../../services/action-options.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
@@ -1028,6 +1028,53 @@ describe('ParamRowComponent widget-action state options (issue #718)', () => {
     const values = component.dynOptions()?.map(o => o.value);
     expect(values).toContain('current');
     expect(values).toContain('draft-state');
+  });
+});
+
+describe('ParamRowComponent variable chip with a long name', () => {
+  const longName = 'system_audio_output_sennheiser_main_volume_percent_of_a_very_long_device_name_example';
+
+  it('keeps the clear button inside a narrow row and clears the reference', async () => {
+    const store = jasmine.createSpyObj<ActionFlowStore>('ActionFlowStore', ['updateParam', 'errorsFor', 'cacheParamLabel']);
+    store.errorsFor.and.returnValue([]);
+    TestBed.configureTestingModule({
+      imports: [ParamRowComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ApiService, useValue: fakeApiService() },
+        { provide: ActionFlowStore, useValue: store },
+        { provide: ActionOptionsService, useValue: {} },
+      ],
+    });
+    const fixture = TestBed.createComponent(ParamRowComponent);
+    fixture.componentRef.setInput('blockId', 'block-1');
+    fixture.componentRef.setInput(
+      'param',
+      { name: 'delay', type: 'number', label: 'Delay', value: { $var: longName } } satisfies ActionBlockParameter);
+    const host = fixture.nativeElement as HTMLElement;
+    host.style.display = 'block';
+    host.style.width = '240px';
+    host.style.overflow = 'hidden';
+    fixture.detectChanges();
+    await fixture.whenStable();
+    host.scrollIntoView({ block: 'start' });
+
+    const text = host.querySelector('.param-variable-chip .chip-text') as HTMLElement;
+    expect(text.title).toBe(`{{ vars.${longName} }}`);
+
+    const clear = host.querySelector('.param-variable-chip .chip-clear') as HTMLButtonElement;
+    const b = clear.getBoundingClientRect();
+    const c = host.getBoundingClientRect();
+    expect(b.left).toBeGreaterThanOrEqual(c.left);
+    expect(b.right).toBeLessThanOrEqual(c.right);
+    const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    expect(hit !== null && clear.contains(hit)).withContext('the clear button is the element under its own centre').toBeTrue();
+
+    clear.click();
+
+    const args = store.updateParam.calls.mostRecent().args;
+    expect(args[1]).toBe('delay');
+    expect(isVariableReference(args[2])).toBeFalse();
   });
 });
 

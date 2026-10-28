@@ -125,4 +125,70 @@ public class LoginThrottleTests
 
 		Assert.That(defaultThrottle.IsThrottled("key", out _), Is.False);
 	}
+
+	[Test]
+	public async Task Parallel_reservations_on_one_key_admit_only_the_free_attempts()
+	{
+		using var start = new Barrier(32);
+		var attempts = Enumerable.Range(0, 32)
+			.Select(_ => Task.Factory.StartNew(() =>
+				{
+					start.SignalAndWait();
+					return _throttle.TryReserve("key", out var _);
+				},
+				TaskCreationOptions.LongRunning))
+			.ToArray();
+
+		var admitted = await Task.WhenAll(attempts);
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(admitted.Count(granted => granted), Is.EqualTo(5));
+			Assert.That(_throttle.IsThrottled("key", out var retryAfter), Is.True);
+			Assert.That(retryAfter, Is.GreaterThan(TimeSpan.Zero));
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public void A_refused_reservation_reports_the_remaining_lockout()
+	{
+		for (var i = 0; i < 5; i++)
+		{
+			_throttle.TryReserve("key", out _);
+		}
+
+		_time.Advance(TimeSpan.FromSeconds(10));
+		var admitted = _throttle.TryReserve("key", out var retryAfter);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(admitted, Is.False);
+			Assert.That(retryAfter, Is.EqualTo(TimeSpan.FromSeconds(20)));
+		});
+	}
+
+	[Test]
+	public void Clearing_logins_lifts_every_source_and_leaves_other_buckets_alone()
+	{
+		var first = LoginThrottle.LoginKey("203.0.113.7");
+		var second = LoginThrottle.LoginKey("usb:EXAMPLE0001");
+		for (var i = 0; i < 5; i++)
+		{
+			_throttle.RegisterFailure(first);
+			_throttle.RegisterFailure(second);
+			_throttle.RegisterFailure("203.0.113.7|device-enrollment");
+			_throttle.RegisterFailure("pairing-code");
+		}
+
+		_throttle.ClearLogins();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_throttle.IsThrottled(first, out _), Is.False);
+			Assert.That(_throttle.IsThrottled(second, out _), Is.False);
+			Assert.That(_throttle.IsThrottled("203.0.113.7|device-enrollment", out _), Is.True);
+			Assert.That(_throttle.IsThrottled("pairing-code", out _), Is.True);
+		});
+	}
 }

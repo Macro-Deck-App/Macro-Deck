@@ -2943,6 +2943,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Збірка для розробки перейняла цей плагін. Завершіть перехоплення, перш ніж встановлювати або оновлювати його.</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Цей плагін підписано іншим видавцем, ніж встановлену у вас версію, тому його не встановлено.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck завершує роботу, тому плагін не було запущено.</value>
   </data>

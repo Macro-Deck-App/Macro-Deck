@@ -83,8 +83,8 @@ dialler already closed.
 A stamped connection is not a local request: `LoopbackConnection.IsLocalRequest` is false for it, so the
 plugin endpoints stay closed to it, including to other apps on the phone. Loopback trust is unchanged.
 Throttles and rate limits key a bridged request on its device (`usb:<serial>`, or `usb:<bus>-<port path>`
-without a serial, and `usb:<udid>` on iOS) instead of 127.0.0.1, keeping the `|username` suffix, so one phone
-cannot lock out another or the desktop. adb reverse traffic is never stamped and keeps ADR 0030's behaviour.
+without a serial, and `usb:<udid>` on iOS) instead of 127.0.0.1, so one phone cannot lock out another or the
+desktop. adb reverse traffic is never stamped and keeps ADR 0030's behaviour.
 
 ### Android: nothing is sent to a device nobody chose
 

@@ -2943,6 +2943,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>开发版本已接管此插件。请先结束接管，再安装或更新它。</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>此插件由与你已有版本不同的发布者签名，因此未被安装。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在关闭，因此未启动插件。</value>
   </data>

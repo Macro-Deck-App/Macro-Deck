@@ -19,7 +19,7 @@ public interface IProfileCache
 
 	Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders);
 
-	Task Remove(Guid id);
+	Task<IReadOnlyList<FolderEntity>> Remove(Guid id);
 
 	Task AddOrUpdateAggregate(
 		ProfileEntity profile,

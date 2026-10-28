@@ -2943,6 +2943,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Sebuah build pengembangan telah mengambil alih plugin ini. Akhiri pengambilalihan sebelum memasang atau memperbaruinya.</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Plugin ini ditandatangani oleh penerbit yang berbeda dari versi yang sudah Anda miliki, sehingga tidak dipasang.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck sedang dimatikan, jadi plugin tidak dijalankan.</value>
   </data>

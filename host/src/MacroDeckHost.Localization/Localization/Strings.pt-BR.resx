@@ -2943,6 +2943,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Um build de desenvolvimento assumiu este plugin. Encerre a substituição antes de instalá-lo ou atualizá-lo.</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Este plugin foi assinado por um publicador diferente do da versão já instalada, então não foi instalado.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>O Macro Deck está sendo encerrado, então o plugin não foi iniciado.</value>
   </data>

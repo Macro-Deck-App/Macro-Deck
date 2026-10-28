@@ -186,20 +186,25 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		}
 	}
 
-	public async Task Remove(Guid id)
+	public async Task<IReadOnlyList<FolderEntity>> Remove(Guid id)
 	{
 		await _updateLock.WaitAsync();
 		try
 		{
 			_profiles.TryRemove(id, out _);
+			var removed = new List<FolderEntity>();
 			foreach (var folderId in _folders.Values.Where(f => f.ProfileId == id).Select(f => f.Id).ToList())
 			{
-				_folders.TryRemove(folderId, out _);
+				if (_folders.TryRemove(folderId, out var folder))
+				{
+					removed.Add(folder);
+				}
 			}
 
 			_store.Delete(id);
 			_approvals?.DeletePartition(SecretApprovalGroup.Profiles, id);
 			_logger.Information("Removed profile with id {ProfileId}", id);
+			return removed;
 		}
 		finally
 		{

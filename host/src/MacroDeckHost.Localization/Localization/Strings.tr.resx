@@ -2943,6 +2943,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
     <value>Bir geliştirme derlemesi bu eklentinin yerine geçti. Yüklemeden ya da güncellemeden önce devralmayı sonlandırın.</value>
   </data>
+  <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
+    <value>Bu eklenti, sahip olduğunuz sürümden farklı bir yayımcı tarafından imzalandığı için yüklenmedi.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck kapanıyor, bu nedenle eklenti başlatılmadı.</value>
   </data>

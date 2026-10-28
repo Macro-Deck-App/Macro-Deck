@@ -49,7 +49,10 @@ internal static class LegacyEvolveMigrations
 		if (unknown.Count > 0)
 		{
 			throw new DatabaseMigrationException(
-				$"The database was migrated by a newer Macro Deck (version {unknown.Max()}).");
+				$"The database was migrated by a newer Macro Deck (version {unknown.Max()}).")
+			{
+				FromNewerHost = true
+			};
 		}
 
 		var lastApplied = applied.Count == 0 ? null : applied.Max();

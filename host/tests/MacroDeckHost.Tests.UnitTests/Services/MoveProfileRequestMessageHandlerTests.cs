@@ -29,6 +29,7 @@ public class MoveProfileRequestMessageHandlerTests
 			new InMemoryDeviceRepository(),
 			new RecordingMediator(),
 			new WidgetSecretCloner(new FakeSecretService()),
+			new WidgetSecretScrubber(new FakeSecretService()),
 			new NullWidgetVariableCloner()));
 
 		_first = Guid.NewGuid();

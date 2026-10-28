@@ -239,6 +239,11 @@ and cannot check Companion licenses; both come back once the service runs again.
 with this computer shows it as offline until then, without asking you to pair it again, and keeps its
 own license or trial.
 
+If the window says the database was migrated by a newer Macro Deck, this data folder was last used by a newer
+version than the one you started, for example after switching back to an older release. Macro Deck stops
+before it changes anything, so your data is unchanged: install the newest Macro Deck you used with this data
+again.
+
 If the host does not start although nothing seems to use the port, a host left over from an earlier
 Macro Deck may still be running and can no longer be taken over. End the **Macro Deck Host** process in
 Task Manager or Activity Monitor, then choose **Restart Macro Deck**.
@@ -256,6 +261,15 @@ that vouches for it. The installed version keeps working, but Macro Deck refuses
 anything signed with that certificate. Wait for an update signed with a new certificate, or uninstall the
 plugin if you no longer trust it. Installing or updating it from the Store fails with the message that
 Macro Deck could not verify who published the package.
+
+## A plugin update says it is signed by a different publisher
+
+The package or Store update was signed by someone other than the publisher of the version you already have,
+so Macro Deck kept your installed version. A package that claims to be an update of a plugin but comes from
+another publisher could take over everything that plugin stores, such as its accounts and settings. Get
+updates from the plugin's own publisher. If the plugin really changed hands, or you want to switch to the
+other publisher's package, uninstall the plugin first and tick **Also delete the plugin's stored data**,
+then install it again.
 
 ## A reverse proxy or firewall blocks a connection to a service
 

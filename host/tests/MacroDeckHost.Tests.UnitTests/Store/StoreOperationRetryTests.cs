@@ -13,6 +13,7 @@ internal sealed class StoreOperationRetryTests
 	[TestCase(StoreOperationError.VersionNotFound)]
 	[TestCase(StoreOperationError.UnsignedNotPermitted)]
 	[TestCase(StoreOperationError.TrustDowngrade)]
+	[TestCase(StoreOperationError.SignerMismatch)]
 	[TestCase(StoreOperationError.SignatureInvalid)]
 	[TestCase(StoreOperationError.SignatureUntrusted)]
 	[TestCase(StoreOperationError.MalformedPackage)]

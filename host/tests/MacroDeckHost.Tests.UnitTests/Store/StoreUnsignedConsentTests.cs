@@ -83,6 +83,7 @@ internal sealed class StoreUnsignedConsentTests
 		services.AddSingleton<IPluginRegistrationRepository, InMemoryPluginRegistrationRepository>();
 		services.AddSingleton<IPluginAccessTokenRepository, InMemoryPluginAccessTokenRepository>();
 		services.AddSingleton<IPluginTrustRecordRepository>(_trustRecords);
+		services.AddSingleton(TestLocalization.Resolver);
 		services.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>();
 		services.AddScoped<IAppPreferenceService>(_ => _preferences);
 		services.AddScoped<IIconPackRestoreService>(_ => _iconHarness.RestoreService);
@@ -326,6 +327,35 @@ internal sealed class StoreUnsignedConsentTests
 		{
 			Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
 			Assert.That(result.Error, Is.EqualTo(StoreOperationError.TrustDowngrade));
+			Assert.That(_pluginCatalog.Discover().First(plugin => plugin.PluginId == PluginId).ActiveVersion?.Version,
+				Is.EqualTo("1.0.0"));
+		});
+	}
+
+	private Task<string> OtherPublisherArtifact(string version)
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+			PluginId,
+			version,
+			fileName: $"other-publisher-{Guid.NewGuid():N}.macroDeckPlugin",
+			subjectId: "creator-2");
+	}
+
+	[Test]
+	public async Task A_registry_release_signed_by_another_publisher_is_refused_and_keeps_the_installed_version()
+	{
+		var trusted = await _pluginInstaller.Install(PluginArtifactSource.FromPath(await TrustedArtifact()),
+			new PluginInstallRequest());
+		Assert.That(trusted.Success, Is.True, trusted.ErrorMessage);
+		await PublishAndServe(await OtherPublisherArtifact("1.1.0"), "1.1.0");
+
+		var result = await InstallFromStore(false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
+			Assert.That(result.Error, Is.EqualTo(StoreOperationError.SignerMismatch), result.ErrorMessage);
+			Assert.That(result.CanRetry, Is.False);
 			Assert.That(_pluginCatalog.Discover().First(plugin => plugin.PluginId == PluginId).ActiveVersion?.Version,
 				Is.EqualTo("1.0.0"));
 		});

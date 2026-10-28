@@ -633,9 +633,9 @@ internal sealed class WidgetStateCompatibilityContractTests
 			return Task.CompletedTask;
 		}
 
-		public Task Remove(Guid id)
+		public Task<IReadOnlyList<FolderEntity>> Remove(Guid id)
 		{
-			return Task.CompletedTask;
+			return Task.FromResult<IReadOnlyList<FolderEntity>>([]);
 		}
 	}
 }
