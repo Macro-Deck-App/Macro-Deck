@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -29,7 +30,19 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 	private const string TokenEndpoint = "https://discord.com/api/oauth2/token";
 
 	private static readonly ILogger _logger = IntegrationLog.For<DiscordOAuthClient>(DiscordIntegration.IntegrationId);
-	private static readonly HttpClient _http = IntegrationHttp.CreateClient(TimeSpan.FromSeconds(20));
+	private static readonly HttpClient _shared = IntegrationHttp.CreateClient(TimeSpan.FromSeconds(20));
+
+	private readonly HttpClient _http;
+
+	public DiscordOAuthClient()
+		: this(_shared)
+	{
+	}
+
+	internal DiscordOAuthClient(HttpClient http)
+	{
+		_http = http;
+	}
 
 	public Task<DiscordTokens> ExchangeCodeAsync(
 		string clientId,
@@ -64,7 +77,7 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 			cancellationToken);
 	}
 
-	private static async Task<DiscordTokens> PostAsync(
+	private async Task<DiscordTokens> PostAsync(
 		string clientId,
 		string clientSecret,
 		Dictionary<string, string> form,
@@ -83,7 +96,10 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 		{
 			var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 			_logger.Warning("Discord token request failed with {Status}: {Body}", (int)response.StatusCode, body);
-			throw new DiscordOAuthException(DescribeFailure(body));
+			throw new DiscordOAuthException(DescribeFailure(body))
+			{
+				IsTransient = response.StatusCode is HttpStatusCode.TooManyRequests || (int)response.StatusCode >= 500
+			};
 		}
 
 		var payload = await response.Content
@@ -157,4 +173,6 @@ internal sealed class DiscordOAuthException : Exception
 	public DiscordOAuthException()
 	{
 	}
+
+	public bool IsTransient { get; init; }
 }
