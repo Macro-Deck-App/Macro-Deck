@@ -286,6 +286,10 @@ public sealed class RestoreService : IRestoreService
 				{
 					DatabaseMigrationHelper.Migrate(databasePath);
 				}
+				catch (DatabaseMigrationException ex) when (ex.FromNewerHost)
+				{
+					return Refuse(operationId, request.BackupId, BackupError.UnsupportedVersion, ex.Message);
+				}
 				catch (DatabaseMigrationException)
 				{
 					return Fail(operationId,

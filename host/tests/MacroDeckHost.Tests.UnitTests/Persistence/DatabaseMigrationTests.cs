@@ -15,6 +15,7 @@ public class DatabaseMigrationTests
 	private const string FirstTokenId = "BBBBBBBB-0000-0000-0000-000000000001";
 	private const string RotatedTokenId = "BBBBBBBB-0000-0000-0000-000000000002";
 	private const string RegistrationId = "CCCCCCCC-0000-0000-0000-000000000001";
+	private const string NewerMigrationId = "99991231235959_FromANewerMacroDeck";
 
 	private static readonly Version _pluginRegistryVersion = new(1, 9, 0, 0);
 
@@ -167,6 +168,32 @@ public class DatabaseMigrationTests
 		{
 			Assert.That(() => DatabaseMigrationHelper.Migrate(path), Throws.TypeOf<DatabaseMigrationException>());
 			Assert.That(LegacyEvolveDatabase.Tables(path), Does.Not.Contain(DatabaseMigrationHelper.HistoryTable));
+		});
+	}
+
+	[Test]
+	public void A_database_migrated_by_a_newer_host_is_refused_untouched()
+	{
+		var path = DatabasePath("newer-ef");
+		DatabaseMigrationHelper.Migrate(path);
+		LegacyEvolveDatabase.Execute(path,
+			$"INSERT INTO \"{DatabaseMigrationHelper.HistoryTable}\" (\"MigrationId\", \"ProductVersion\") "
+			+ $"VALUES ('{NewerMigrationId}', '99.0.0');");
+		LegacyEvolveDatabase.Execute(path,
+			$"INSERT INTO \"{DatabaseMigrationHelper.LockTable}\" (\"Id\", \"Timestamp\") VALUES (1, '2026-01-01');");
+		var historyBefore = AppliedMigrations(path);
+		var schemaBefore = LegacyEvolveDatabase.DescribeSchema(path);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(() => DatabaseMigrationHelper.Migrate(path),
+				Throws.TypeOf<DatabaseMigrationException>().With.Message.Contains(NewerMigrationId));
+			Assert.That(AppliedMigrations(path), Is.EqualTo(historyBefore));
+			Assert.That(LegacyEvolveDatabase.DescribeSchema(path), Is.EqualTo(schemaBefore));
+			Assert.That(LegacyEvolveDatabase.Query(path,
+					$"SELECT count(*) FROM \"{DatabaseMigrationHelper.LockTable}\";"),
+				Is.EqualTo(["1"]),
+				"a refused database is left exactly as the newer host wrote it");
 		});
 	}
 
