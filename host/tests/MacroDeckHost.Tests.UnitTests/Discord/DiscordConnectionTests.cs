@@ -1,3 +1,4 @@
+using System.Net;
 using MacroDeckHost.Integrations.Discord.Auth;
 using MacroDeckHost.Integrations.Discord.Connections;
 using MacroDeckHost.Integrations.Discord.Protocol;
@@ -280,6 +281,104 @@ internal sealed class DiscordConnectionTests
 		await WaitForAsync(() => connection.NeedsReauthorization);
 
 		Assert.That(connection.IsConnected, Is.False);
+	}
+
+	[Test]
+	public async Task A_token_endpoint_timeout_is_retried_instead_of_ending_the_reconnects()
+	{
+		using var endpoint = new FakeDiscordTokenEndpoint()
+			.Hangs()
+			.Answers(HttpStatusCode.OK, FakeDiscordTokenEndpoint.FreshTokens);
+		using var http = new HttpClient(endpoint, false) { Timeout = TimeSpan.FromMilliseconds(100) };
+		using var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1),
+			TimeSpan.FromMilliseconds(20),
+			null,
+			new DiscordOAuthClient(http));
+		connection.Start();
+
+		await WaitForAsync(() => connection.State.IsConnected);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(endpoint.RequestCount, Is.EqualTo(2));
+			Assert.That(connection.NeedsReauthorization, Is.False);
+		});
+	}
+
+	[TestCase(HttpStatusCode.TooManyRequests)]
+	[TestCase(HttpStatusCode.InternalServerError)]
+	[TestCase(HttpStatusCode.BadGateway)]
+	[TestCase(HttpStatusCode.ServiceUnavailable)]
+	public async Task A_transient_token_endpoint_failure_is_retried_without_asking_to_authorize_again(
+		HttpStatusCode status)
+	{
+		using var endpoint = new FakeDiscordTokenEndpoint()
+			.Answers(status, "<html>error code: 1015</html>")
+			.Answers(HttpStatusCode.OK, FakeDiscordTokenEndpoint.FreshTokens);
+		using var http = new HttpClient(endpoint, false);
+		using var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1),
+			TimeSpan.FromMilliseconds(20),
+			null,
+			new DiscordOAuthClient(http));
+		connection.Start();
+
+		await WaitForAsync(() => connection.State.IsConnected);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(endpoint.RequestCount, Is.EqualTo(2));
+			Assert.That(connection.NeedsReauthorization, Is.False);
+			Assert.That(_persisted.Single().AccessToken, Is.EqualTo("fresh-access"));
+		});
+	}
+
+	[Test]
+	public async Task Disposing_during_a_token_refresh_does_not_retry()
+	{
+		using var endpoint = new FakeDiscordTokenEndpoint()
+			.Hangs()
+			.Answers(HttpStatusCode.OK, FakeDiscordTokenEndpoint.FreshTokens);
+		using var http = new HttpClient(endpoint, false);
+		var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1),
+			TimeSpan.FromMilliseconds(20),
+			null,
+			new DiscordOAuthClient(http));
+		connection.Start();
+		await WaitForAsync(() => endpoint.RequestCount == 1);
+
+		connection.Dispose();
+		await Task.Delay(150);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(endpoint.RequestCount, Is.EqualTo(1));
+			Assert.That(connection.NeedsReauthorization, Is.False);
+			Assert.That(connection.State, Is.EqualTo(DiscordState.Disconnected));
+		});
+	}
+
+	[TestCase("""{"error":"invalid_grant"}""")]
+	[TestCase("""{"error":"invalid_client"}""")]
+	public async Task A_rejected_token_request_still_asks_to_authorize_again(string body)
+	{
+		using var endpoint = new FakeDiscordTokenEndpoint()
+			.Answers(HttpStatusCode.BadRequest, body)
+			.Answers(HttpStatusCode.OK, FakeDiscordTokenEndpoint.FreshTokens);
+		using var http = new HttpClient(endpoint, false);
+		using var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1),
+			TimeSpan.FromMilliseconds(20),
+			null,
+			new DiscordOAuthClient(http));
+		connection.Start();
+
+		await WaitForAsync(() => connection.NeedsReauthorization);
+		await Task.Delay(100);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(endpoint.RequestCount, Is.EqualTo(1));
+			Assert.That(connection.State.IsConnected, Is.False);
+		});
 	}
 
 	[Test]
@@ -692,10 +791,11 @@ internal sealed class DiscordConnectionTests
 	private DiscordConnection Create(
 		DateTimeOffset? expiresAt = null,
 		TimeSpan? reconnectDelay = null,
-		Action<DiscordState, DiscordState>? onStateChanged = null)
+		Action<DiscordState, DiscordState>? onStateChanged = null,
+		IDiscordOAuthClient? oauth = null)
 	{
 		return new DiscordConnection(() => _client,
-			_oauth,
+			oauth ?? _oauth,
 			"123456",
 			"secret",
 			new DiscordTokens("stored-access", "stored-refresh", expiresAt, "rpc rpc.voice.read rpc.voice.write"),

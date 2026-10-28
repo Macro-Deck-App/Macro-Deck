@@ -497,7 +497,7 @@ internal sealed class DiscordConnection : IDisposable
 			DetachClient();
 			ScheduleReconnect();
 		}
-		catch (DiscordOAuthException ex)
+		catch (DiscordOAuthException ex) when (!ex.IsTransient)
 		{
 			_logger.Warning(ex, "Discord authorization is no longer valid");
 			NeedsReauthorization = true;
@@ -509,7 +509,8 @@ internal sealed class DiscordConnection : IDisposable
 			NeedsReauthorization = true;
 			DetachClient();
 		}
-		catch (OperationCanceledException)
+		// An HttpClient timeout is an OperationCanceledException too; only disposal may end the retries.
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{
 			DetachClient();
 		}
