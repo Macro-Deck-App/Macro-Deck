@@ -32,24 +32,32 @@ internal sealed class WindowsApplicationService(ILogger logger) : ApplicationSer
 		var activated = false;
 		var deadline = Environment.TickCount64 + ActivationBudgetMs;
 
-		foreach (var process in ProcessMatcher.Find(path))
+		var processes = ProcessMatcher.Find(path);
+		try
 		{
-			try
+			foreach (var process in processes)
 			{
-				var remaining = (int)Math.Clamp(deadline - Environment.TickCount64,
-					MinimumVerifyMs,
-					ActivationBudgetMs);
-				var handle = process.MainWindowHandle;
-				if (handle != IntPtr.Zero && Win32Foreground.TryActivate(handle, remaining))
+				try
 				{
-					activated = true;
-					break;
+					var remaining = (int)Math.Clamp(deadline - Environment.TickCount64,
+						MinimumVerifyMs,
+						ActivationBudgetMs);
+					var handle = process.MainWindowHandle;
+					if (handle != IntPtr.Zero && Win32Foreground.TryActivate(handle, remaining))
+					{
+						activated = true;
+						break;
+					}
+				}
+				catch (Exception exception)
+				{
+					Logger.Warning(exception, "Failed to focus application '{Path}'", path);
 				}
 			}
-			catch (Exception exception)
-			{
-				Logger.Warning(exception, "Failed to focus application '{Path}'", path);
-			}
+		}
+		finally
+		{
+			ProcessMatcher.Dispose(processes);
 		}
 
 		if (!activated)

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using MacroDeckHost.Platform.ShellLinks;
 
 namespace MacroDeckHost.Platform.Applications;
 
@@ -12,8 +13,9 @@ internal static class ProcessMatcher
 			return [];
 		}
 
-		var normalizedPath = Normalize(configuredPath);
-		var nameFallback = SafeFileNameWithoutExtension(configuredPath);
+		var candidates = CandidatePaths(configuredPath);
+		var normalizedPaths = candidates.Select(Normalize).ToList();
+		var names = candidates.Select(SafeFileNameWithoutExtension).Where(name => name.Length > 0).ToList();
 
 		var byPath = new List<Process>();
 		var byName = new List<Process>();
@@ -22,23 +24,38 @@ internal static class ProcessMatcher
 		{
 			var executablePath = TryGetExecutablePath(process);
 			if (executablePath is not null
-				&& string.Equals(Normalize(executablePath), normalizedPath, StringComparison.OrdinalIgnoreCase))
+				&& normalizedPaths.Contains(Normalize(executablePath), StringComparer.OrdinalIgnoreCase))
 			{
 				byPath.Add(process);
 			}
-			else if (!string.IsNullOrEmpty(nameFallback)
-				&& string.Equals(process.ProcessName, nameFallback, StringComparison.OrdinalIgnoreCase))
+			else if (names.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase))
 			{
 				byName.Add(process);
 			}
+			else
+			{
+				process.Dispose();
+			}
 		}
 
-		return byPath.Count > 0 ? byPath : byName;
+		var matches = byPath.Count > 0 ? byPath : byName;
+		Dispose(byPath.Count > 0 ? byName : byPath);
+		return matches;
 	}
 
 	public static bool IsRunning(string configuredPath)
 	{
-		return Find(configuredPath).Count > 0;
+		var matches = Find(configuredPath);
+		Dispose(matches);
+		return matches.Count > 0;
+	}
+
+	public static void Dispose(IEnumerable<Process> processes)
+	{
+		foreach (var process in processes)
+		{
+			process.Dispose();
+		}
 	}
 
 	public static string? TryGetExecutablePath(Process process)
@@ -53,6 +70,32 @@ internal static class ProcessMatcher
 			return null;
 		}
 		catch (InvalidOperationException)
+		{
+			return null;
+		}
+	}
+
+	private static List<string> CandidatePaths(string configuredPath)
+	{
+		var target = TryReadShortcutTarget(configuredPath.Trim());
+		return target is null ? [configuredPath] : [target, configuredPath];
+	}
+
+	private static string? TryReadShortcutTarget(string path)
+	{
+		if (!Path.GetExtension(path).Equals(".lnk", StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
+		{
+			return null;
+		}
+
+		try
+		{
+			var link = WindowsShellLinkParser.TryParseFile(path);
+
+			// With arguments (cmd.exe /k, Update.exe --processStart) the target alone is not the app the link starts.
+			return link is { TargetPath: not null, Arguments: null } ? link.TargetPath : null;
+		}
+		catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
 		{
 			return null;
 		}
