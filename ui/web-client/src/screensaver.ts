@@ -12,6 +12,7 @@ import {
   type UiNodeRenderHandle,
   type UiRenderHost,
 } from '@macro-deck/runtime';
+import { MAX_BUSY_RETRIES, TOO_MANY_SESSIONS, busyRetryDelayMs } from './busy-retry';
 
 const SWALLOWED_EVENTS = ['pointerdown', 'pointerup', 'click', 'touchstart', 'touchend'];
 
@@ -40,6 +41,8 @@ export class ScreenSaver {
   private box: UiComponentBox = { width: null, height: null };
   private observer: ResizeObserver | null = null;
   private cooldown: ReturnType<typeof setTimeout> | null = null;
+  private busyRetries = 0;
+  private retry: ReturnType<typeof setTimeout> | null = null;
   private readonly unsubscribe: () => void;
 
   constructor(private readonly options: ScreenSaverOptions) {
@@ -100,9 +103,14 @@ export class ScreenSaver {
         response => {
           if (!this.showing) return;
           if (!response || response.accepted !== true || typeof response.sessionId !== 'string') {
+            if (response && response.code === TOO_MANY_SESSIONS && this.busyRetries < MAX_BUSY_RETRIES) {
+              this.retryLater();
+              return;
+            }
             this.giveBack();
             return;
           }
+          this.busyRetries = 0;
           this.sessionId = response.sessionId;
           this.interactive = response.interactive === true;
           void this.options.connection.request('AttachUiSession', [{ sessionId: response.sessionId }]);
@@ -115,12 +123,28 @@ export class ScreenSaver {
 
   private close(): void {
     this.dropTree();
+    this.cancelRetry();
     if (this.sessionId !== null) {
       void this.options.connection.request('CloseUiSession', [{ sessionId: this.sessionId }])
         .catch(() => undefined);
     }
     this.sessionId = null;
     this.interactive = false;
+  }
+
+  private retryLater(): void {
+    const delay = busyRetryDelayMs(this.busyRetries++);
+    this.retry = setTimeout(() => {
+      this.retry = null;
+      if (this.showing && this.sessionId === null) this.open();
+    }, delay);
+  }
+
+  private cancelRetry(): void {
+    this.busyRetries = 0;
+    if (this.retry === null) return;
+    clearTimeout(this.retry);
+    this.retry = null;
   }
 
   private dismiss(): void {

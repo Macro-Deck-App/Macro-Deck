@@ -1072,8 +1072,11 @@ Advertised at runtime in the protocol descriptor and again in the session respon
 | `maxUiResourceBytesPerPlugin` / `maxUiResourcesPerPlugin` | 48 MiB / 1024 |
 | `maxUiAttachmentsPerSession` | 16 |
 | `maxUiSessionsPerProvider` | 8 |
+| `maxUiWidgetSessionsPerProvider` | 128 |
 
-The `maxUi*` limits are optional in the descriptor; a host predating the `ui` capability omits them.
+`maxUiWidgetSessionsPerProvider` counts `widget` and `preview` sessions per viewer, and
+`maxUiSessionsPerProvider` counts `folder` and `screensaver` sessions per viewer and every other surface per
+provider; see [how the UI session limits are measured](/ui/views/sessions/#limits). The `maxUi*` limits are optional in the descriptor; a host predating the `ui` capability omits them.
 
 | Timeout | Value |
 | --- | --- |

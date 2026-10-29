@@ -10,6 +10,7 @@ import {
   type UiRenderHost,
   type UiComponentBox,
 } from '@macro-deck/runtime';
+import { MAX_BUSY_RETRIES, TOO_MANY_SESSIONS, busyRetryDelayMs } from './busy-retry';
 
 const NAVIGATION_HIDDEN = 'hidden';
 const MAX_REOPENS_WITHOUT_A_TREE = 3;
@@ -19,6 +20,7 @@ interface OpenResponse {
   sessionId?: string;
   viewId?: string;
   navigation?: string;
+  code?: string;
 }
 
 export interface FolderViewOptions {
@@ -45,6 +47,8 @@ export class FolderView {
   private navigation = '';
   private rejected = false;
   private reopensWithoutTree = 0;
+  private busyRetries = 0;
+  private retry: ReturnType<typeof setTimeout> | null = null;
   private box: UiComponentBox = { width: null, height: null };
   private observer: ResizeObserver | null = null;
 
@@ -99,6 +103,12 @@ export class FolderView {
         this.navigation = response && response.navigation ? response.navigation : '';
 
         if (!response || response.accepted !== true || typeof response.sessionId !== 'string') {
+          if (response && response.code === TOO_MANY_SESSIONS && this.busyRetries < MAX_BUSY_RETRIES) {
+            this.retryLater(folderId);
+            this.paint();
+            return;
+          }
+
           // Rejected, which is not the same as no tree yet: both draw nothing, and telling someone
           // their folder is broken while it is merely loading is worse than a moment of blank.
           this.rejected = true;
@@ -106,6 +116,7 @@ export class FolderView {
           return;
         }
 
+        this.busyRetries = 0;
         this.sessionId = response.sessionId;
         void this.options.connection.request('AttachUiSession', [{ sessionId: response.sessionId }]);
         this.paint();
@@ -117,6 +128,21 @@ export class FolderView {
       });
 
     this.paint();
+  }
+
+  private retryLater(folderId: string): void {
+    const delay = busyRetryDelayMs(this.busyRetries++);
+    this.retry = setTimeout(() => {
+      this.retry = null;
+      if (this.openedFolderId === folderId) this.request(folderId);
+    }, delay);
+  }
+
+  private cancelRetry(): void {
+    this.busyRetries = 0;
+    if (this.retry === null) return;
+    clearTimeout(this.retry);
+    this.retry = null;
   }
 
   paint(): void {
@@ -141,6 +167,7 @@ export class FolderView {
 
   close(): void {
     this.dropTree();
+    this.cancelRetry();
     if (this.sessionId !== null) {
       void this.options.connection.request('CloseUiSession', [{ sessionId: this.sessionId }])
         .catch(() => undefined);

@@ -231,6 +231,10 @@ protocol descriptor and the session response - read them from there, never hard-
 | Update rate and burst | Per session, not per provider - one busy view cannot starve another. |
 | `maxUiResourceBytes` | Both a `UiResource`'s declared `byteLength` in a plugin's tree and the bytes the host's resource store accepts for one resource a plugin registers. A `byteLength` of `null` is accepted. |
 | `maxUiResourceBytesPerPlugin` / `maxUiResourcesPerPlugin` | The bytes and the number of [resources](/ui/reference/resources/#registering-your-own-images) one plugin may have registered at once. |
+| `maxUiWidgetSessionsPerProvider` | Open `widget` and `preview` sessions of one provider for one viewer (the device that owns them). The same deck on three devices can give your provider up to three times as many sessions. |
+| `maxUiSessionsPerProvider` | Open `folder` and `screensaver` sessions of one provider for one viewer, and, as a separate count, every other surface (`config`, `dialog`, `page`) of one provider across all viewers. |
+
+A session over one of these caps is refused with `TOO_MANY_SESSIONS`. Clients retry a refused `widget`, `folder` or `screensaver` session with backoff, because those slots free up as other sessions of the same viewer close.
 
 ## What a refused update looks like
 
