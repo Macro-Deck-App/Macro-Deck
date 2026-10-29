@@ -8,6 +8,8 @@ namespace MacroDeckHost.Infrastructure.Backups;
 
 public sealed class BackupSnapshotSource : IBackupSnapshotSource
 {
+	private static readonly TimeSpan _busyTimeout = TimeSpan.FromSeconds(10);
+
 	private readonly IMacroDeckPaths _paths;
 
 	public BackupSnapshotSource(IMacroDeckPaths paths)
@@ -57,6 +59,7 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 
 		await source.OpenAsync(cancellationToken);
 		await destination.OpenAsync(cancellationToken);
+		await SetBusyTimeout(source, cancellationToken);
 		source.BackupDatabase(destination);
 		// The copy inherits WAL; rollback mode writes the strip into the archived file itself instead of a
 		// -wal sidecar only a checkpoint on close would fold in, and keeps archives in their old format.
@@ -95,6 +98,15 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 		{
 			// A snapshot taken before either table existed has nothing to strip.
 		}
+	}
+
+	// BackupDatabase does not retry a busy database the way Microsoft.Data.Sqlite commands do; SQLite's own
+	// busy handler makes it wait for a host write that holds the lock instead of failing the backup.
+	private static async Task SetBusyTimeout(SqliteConnection source, CancellationToken ct)
+	{
+		await using var command = source.CreateCommand();
+		command.CommandText = $"PRAGMA busy_timeout = {(int)_busyTimeout.TotalMilliseconds};";
+		await command.ExecuteNonQueryAsync(ct);
 	}
 
 	private static async Task SetRollbackJournal(SqliteConnection destination, CancellationToken ct)
