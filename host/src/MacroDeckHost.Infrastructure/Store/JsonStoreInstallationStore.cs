@@ -13,6 +13,7 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 
 	private readonly Lock _gate = new();
 	private readonly string _path;
+	private readonly ILogger _logger;
 	private readonly DurableJsonFile _files;
 
 	public JsonStoreInstallationStore(
@@ -21,6 +22,7 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 		IPersistenceRecoveryReporter? recoveryReporter = null)
 	{
 		_path = Path.Combine(paths.StoreDirectory, FileName);
+		_logger = logger;
 		_files = new DurableJsonFile("store installations",
 			PersistenceJsonOptions.Default,
 			logger,
@@ -50,7 +52,11 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 
 		lock (_gate)
 		{
-			var records = Read();
+			if (ReadForWrite() is not { } records)
+			{
+				return;
+			}
+
 			var previous = records.FirstOrDefault(existing => Same(existing, record.Kind, record.PackageId));
 			records.RemoveAll(existing => Same(existing, record.Kind, record.PackageId));
 			// An update keeps the first install time, so it cannot restart the rating prompt wait.
@@ -66,8 +72,7 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 	{
 		lock (_gate)
 		{
-			var records = Read();
-			if (records.RemoveAll(record => Same(record, kind, packageId)) > 0)
+			if (ReadForWrite() is { } records && records.RemoveAll(record => Same(record, kind, packageId)) > 0)
 			{
 				_files.Write(_path, records);
 			}
@@ -77,6 +82,23 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 	private List<StoreInstallationRecord> Read()
 	{
 		return _files.Read<List<StoreInstallationRecord>>(_path) ?? [];
+	}
+
+	private List<StoreInstallationRecord>? ReadForWrite()
+	{
+		if (_files.Read<List<StoreInstallationRecord>>(_path) is { } records)
+		{
+			return records;
+		}
+
+		if (!File.Exists(_path) && !File.Exists(_path + DurableJsonFile.BackupSuffix))
+		{
+			return [];
+		}
+
+		_logger.Warning("The store installation file {Path} could not be read; it is not saved until it is repaired",
+			_path);
+		return null;
 	}
 
 	private static bool Same(StoreInstallationRecord record, StoreExtensionKind kind, string packageId)

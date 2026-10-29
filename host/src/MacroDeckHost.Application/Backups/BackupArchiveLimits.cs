@@ -48,6 +48,7 @@ public static class BackupArchiveLimits
 	{
 		return IsSafeEntryPath(path)
 			&& !BackupComponentGroups.IsExcluded(path!)
+			&& !BackupComponentGroups.IsSidecar(path!)
 			&& BackupComponentGroups.Owner(path!) == component;
 	}
 

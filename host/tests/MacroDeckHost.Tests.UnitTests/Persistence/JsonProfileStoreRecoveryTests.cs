@@ -393,6 +393,41 @@ public class JsonProfileStoreRecoveryTests
 		});
 	}
 
+	[Test]
+	public void A_deleted_profile_stays_deleted_after_a_restart()
+	{
+		var id = Guid.NewGuid();
+		_store.Save(new ProfileFile { Id = id, Name = "V1" });
+		_store.Save(new ProfileFile { Id = id, Name = "V2" });
+
+		_store.Delete(id);
+		var reopened = new JsonProfileStore(_paths, new LoggerConfiguration().CreateLogger());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reopened.LoadAll().Profiles, Is.Empty);
+			Assert.That(Directory.EnumerateFiles(_paths.ProfilesDirectory, id + "*"), Is.Empty);
+		});
+	}
+
+	[Test]
+	[Platform(Include = "Win", Reason = "Only Windows refuses to delete a file another handle has open")]
+	public void A_delete_that_cannot_remove_the_backup_keeps_the_current_profile_instead_of_an_older_one()
+	{
+		var id = Guid.NewGuid();
+		_store.Save(new ProfileFile { Id = id, Name = "V1" });
+		_store.Save(new ProfileFile { Id = id, Name = "V2" });
+
+		using (new FileStream(PrimaryPathFor(id) + ".bak", FileMode.Open, FileAccess.Read, FileShare.Read))
+		{
+			_store.Delete(id);
+		}
+
+		var reopened = new JsonProfileStore(_paths, new LoggerConfiguration().CreateLogger());
+
+		Assert.That(reopened.LoadAll().Profiles.Single().Name, Is.EqualTo("V2"));
+	}
+
 	private string PrimaryPathFor(Guid id)
 	{
 		return Path.Combine(_paths.ProfilesDirectory, id + ".json");

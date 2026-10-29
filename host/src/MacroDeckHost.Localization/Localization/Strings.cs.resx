@@ -880,8 +880,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>Naplánováno</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>Účty a zařízení se obnoví bez integrací a tajných údajů. Pokud záloha pochází z jiného počítače nebo je starší, všichni budou odhlášeni a zařízení bude nutné znovu spárovat.</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>Účty a zařízení se obnoví bez profilů. Zařízení odkazující na počáteční profil, který již neexistuje, se vrátí k výchozímu.</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>Nastavení aplikace se obnoví bez integrací a tajných údajů. Pokud záloha pochází z jiného počítače nebo je starší, může být nutné znovu nastavit HTTPS.</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>Automatizace se obnoví bez integrací a tajných údajů.</value>
@@ -894,6 +900,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>{group} se obnoví bez {dependency}, takže některé části nemusí fungovat.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>Integrace a tajné údaje se obnoví bez účtů. Pokud záloha pochází z jiného počítače nebo je starší, všichni budou odhlášeni a zařízení bude nutné znovu spárovat.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>Integrace a tajné údaje se obnoví bez nastavení aplikace. Pokud záloha pochází z jiného počítače nebo je starší, může být nutné znovu nastavit HTTPS.</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>Pluginy se obnoví bez integrací a tajných údajů. Přihlašovací údaje pluginů budou chybět.</value>
@@ -921,6 +933,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>Macro Deck nemohl použít kryptografickou službu operačního systému. Ve Windows ověřte, že běží služba CNG Key Isolation (KeyIso), nebo restartujte počítač.</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>Tuto složku dat naposledy použila novější verze Macro Deck. Nainstalujte tuto verzi znovu; data nebyla změněna.</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Chybí spustitelný soubor hostitele Macro Deck:
@@ -2588,6 +2603,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>Zálohu se nepodařilo importovat</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>Tuto zálohu nelze obnovit v této verzi Macro Deck</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Zálohu se nepodařilo prozkoumat</value>

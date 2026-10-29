@@ -252,8 +252,8 @@ and cannot check Companion licenses; both come back once the service runs again.
 with this computer shows it as offline until then, without asking you to pair it again, and keeps its
 own license or trial.
 
-If the window says the database was migrated by a newer Macro Deck, this data folder was last used by a newer
-version than the one you started, for example after switching back to an older release. Macro Deck stops
+If the window says this data folder was last used by a newer version of Macro Deck, you started an older
+version than the one that used it last, for example after switching back to an older release. Macro Deck stops
 before it changes anything, so your data is unchanged: install the newest Macro Deck you used with this data
 again.
 

@@ -167,26 +167,17 @@ public sealed class RestoreService : IRestoreService
 			var manifest = _archiveReader.ReadManifest(archive);
 			if (manifest is null)
 			{
-				return Fail(operationId,
-					request.BackupId,
-					BackupError.InvalidArchive,
-					"The archive manifest could not be read.");
+				return Fail(operationId, request.BackupId, BackupError.InvalidArchive, null);
 			}
 
 			if (manifest.FormatVersion > BackupArchiveManifest.CurrentFormatVersion)
 			{
-				return Fail(operationId,
-					request.BackupId,
-					BackupError.UnsupportedVersion,
-					"This archive was created by a newer version of Macro Deck.");
+				return Fail(operationId, request.BackupId, BackupError.UnsupportedVersion, null);
 			}
 
 			if (manifest.Encryption.Version != SupportedEncryptionVersion)
 			{
-				return Fail(operationId,
-					request.BackupId,
-					BackupError.UnsupportedEncryption,
-					"This archive uses an encryption scheme this version of Macro Deck does not support.");
+				return Fail(operationId, request.BackupId, BackupError.UnsupportedEncryption, null);
 			}
 
 			var keyResult = await ResolveRecoveryKey(manifest, request.RecoveryKey, token);
@@ -290,12 +281,9 @@ public sealed class RestoreService : IRestoreService
 				{
 					return Refuse(operationId, request.BackupId, BackupError.UnsupportedVersion, ex.Message);
 				}
-				catch (DatabaseMigrationException)
+				catch (DatabaseMigrationException ex)
 				{
-					return Fail(operationId,
-						request.BackupId,
-						BackupError.UnsupportedVersion,
-						"This backup is from a version of Macro Deck that is incompatible with this installation.");
+					return Refuse(operationId, request.BackupId, BackupError.IncompatibleVersion, ex.Message);
 				}
 			}
 

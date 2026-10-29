@@ -62,11 +62,17 @@ internal sealed class DurableJsonFile
 		}
 	}
 
+	// A lone .bak is a document to EnumerateDocumentPaths, so it goes first: if it stays, the primary stays
+	// too, and an interrupted delete leaves the record whole instead of resurrecting an older copy.
 	public void Delete(string path)
 	{
-		TryDelete(path);
+		if (!TryDelete(path + BackupSuffix))
+		{
+			return;
+		}
+
 		TryDelete(path + TempSuffix);
-		TryDelete(path + BackupSuffix);
+		TryDelete(path);
 	}
 
 	public static IEnumerable<string> EnumerateDocumentPaths(string directory, string extension)
@@ -255,7 +261,7 @@ internal sealed class DurableJsonFile
 		return candidate.Value;
 	}
 
-	private string? PreserveCorrupt(string path)
+	public string? PreserveCorrupt(string path)
 	{
 		try
 		{
@@ -346,7 +352,7 @@ internal sealed class DurableJsonFile
 		}
 	}
 
-	private void TryDelete(string path)
+	private bool TryDelete(string path)
 	{
 		try
 		{
@@ -354,10 +360,13 @@ internal sealed class DurableJsonFile
 			{
 				File.Delete(path);
 			}
+
+			return true;
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 		{
 			_logger.Warning(ex, "Failed to delete {DataKind} file {Path}", _dataKind, path);
+			return false;
 		}
 	}
 

@@ -22,13 +22,15 @@ public sealed class KekEscrowStore
 	public const string FileName = "kek.escrow";
 
 	private readonly DurableJsonFile _file;
+	private readonly ILogger _logger;
 	private readonly TimeProvider _timeProvider;
 
 	public KekEscrowStore(ILogger logger, TimeProvider timeProvider)
 	{
+		_logger = logger.ForContext<KekEscrowStore>();
 		_file = new DurableJsonFile("key ring escrow",
 			PersistenceJsonOptions.Default,
-			logger.ForContext<KekEscrowStore>(),
+			_logger,
 			PersistenceBackup.KeepLastKnownGood);
 		_timeProvider = timeProvider;
 	}
@@ -59,7 +61,21 @@ public sealed class KekEscrowStore
 	public KekEscrowResult AddWrap(string keysDirectory, ReadOnlySpan<byte> kek, ReadOnlySpan<byte> recoveryKey)
 	{
 		var kekId = KeyRingKeyDerivation.DeriveKekId(kek);
+		var path = PathFor(keysDirectory);
 		var document = Read(keysDirectory);
+
+		// Writing over an escrow that cannot be read would rotate it into the backup and drop the last
+		// good copy, so it is set aside first and nothing is written when that fails.
+		if (document is null && File.Exists(path))
+		{
+			if (_file.PreserveCorrupt(path) is not { } preservedPath)
+			{
+				return KekEscrowResult.Unreadable;
+			}
+
+			_logger.Warning("Set the unreadable key ring escrow aside as {PreservedPath} and started a new one",
+				preservedPath);
+		}
 
 		if (document is not null && !string.Equals(document.KekId, kekId, StringComparison.Ordinal))
 		{
@@ -94,7 +110,7 @@ public sealed class KekEscrowStore
 				Tag = Convert.ToBase64String(sealedValue.Tag)
 			});
 
-			_file.Write(PathFor(keysDirectory), document);
+			_file.Write(path, document);
 
 			return KekEscrowResult.Ok;
 		}

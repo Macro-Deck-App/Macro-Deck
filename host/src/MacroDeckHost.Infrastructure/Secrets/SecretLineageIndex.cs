@@ -20,6 +20,7 @@ public sealed class SecretLineageIndex : ISecretLineage
 	private readonly DurableJsonFile _file;
 	private readonly Lock _gate = new();
 	private Dictionary<Guid, Guid>? _parents;
+	private bool _unreadable;
 
 	public SecretLineageIndex(
 		IMacroDeckPaths paths,
@@ -56,6 +57,15 @@ public sealed class SecretLineageIndex : ISecretLineage
 		{
 			var parents = Parents();
 			parents[cloneId] = sourceId;
+			if (_unreadable)
+			{
+				_logger.Warning("The secret lineage file {Path} could not be read; the lineage of secret {SecretId} "
+					+ "is kept until restart only",
+					_path,
+					cloneId);
+				return;
+			}
+
 			try
 			{
 				Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
@@ -70,6 +80,18 @@ public sealed class SecretLineageIndex : ISecretLineage
 
 	private Dictionary<Guid, Guid> Parents()
 	{
-		return _parents ??= _file.Read<Dictionary<Guid, Guid>>(_path) ?? new Dictionary<Guid, Guid>();
+		if (_parents is not null)
+		{
+			return _parents;
+		}
+
+		_parents = _file.Read<Dictionary<Guid, Guid>>(_path);
+		if (_parents is null)
+		{
+			_unreadable = File.Exists(_path) || File.Exists(_path + DurableJsonFile.BackupSuffix);
+			_parents = new Dictionary<Guid, Guid>();
+		}
+
+		return _parents;
 	}
 }

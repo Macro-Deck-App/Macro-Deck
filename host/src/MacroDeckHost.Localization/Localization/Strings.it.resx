@@ -880,8 +880,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>Pianificato</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>Account e dispositivi vengono ripristinati senza integrazioni e credenziali. Se il backup è stato creato su un altro computer o tempo fa, tutti vengono disconnessi e i dispositivi devono essere abbinati di nuovo.</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>Account e dispositivi vengono ripristinati senza i profili. Un dispositivo che punta a un profilo di avvio non più esistente torna a quello predefinito.</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>Le impostazioni dell'app vengono ripristinate senza integrazioni e credenziali. Se il backup è stato creato su un altro computer o tempo fa, potrebbe essere necessario configurare di nuovo HTTPS.</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>Le automazioni vengono ripristinate senza integrazioni e credenziali.</value>
@@ -894,6 +900,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>{group} viene ripristinato senza {dependency}, quindi alcune parti potrebbero non funzionare.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>Le integrazioni e le credenziali vengono ripristinate senza gli account. Se il backup è stato creato su un altro computer o tempo fa, tutti vengono disconnessi e i dispositivi devono essere abbinati di nuovo.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>Le integrazioni e le credenziali vengono ripristinate senza le impostazioni dell'app. Se il backup è stato creato su un altro computer o tempo fa, potrebbe essere necessario configurare di nuovo HTTPS.</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>I plugin vengono ripristinati senza integrazioni e credenziali. Le credenziali dei plugin risulteranno mancanti.</value>
@@ -921,6 +933,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>Macro Deck non è riuscito a usare il servizio di crittografia del sistema operativo. Su Windows, assicurati che il servizio CNG Key Isolation (KeyIso) sia in esecuzione oppure riavvia il computer.</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>Questa cartella dei dati è stata usata per ultima da una versione più recente di Macro Deck. Reinstalla quella versione; i tuoi dati non sono stati modificati.</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Il file eseguibile host di Macro Deck è mancante:
@@ -2588,6 +2603,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>Impossibile importare il backup</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>Questo backup non può essere ripristinato con questa versione di Macro Deck</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Impossibile analizzare il backup</value>

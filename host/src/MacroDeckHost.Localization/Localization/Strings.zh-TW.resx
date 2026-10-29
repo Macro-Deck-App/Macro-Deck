@@ -879,8 +879,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>排程</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>還原帳戶與裝置時不會還原整合與機密。如果備份來自另一台電腦或建立時間較早，所有人都會被登出，裝置需要重新配對。</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>還原帳戶與裝置時不會還原設定檔。指向已不存在之啟動設定檔的裝置，會改用預設設定檔。</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>還原應用程式設定時不會還原整合與機密。如果備份來自另一台電腦或建立時間較早，可能需要重新設定 HTTPS。</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>還原自動化時不會還原整合與機密。</value>
@@ -893,6 +899,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>還原 {group} 時不會還原 {dependency}，因此部分功能可能無法運作。</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>還原整合與機密時不會還原帳戶。如果備份來自另一台電腦或建立時間較早，所有人都會被登出，裝置需要重新配對。</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>還原整合與機密時不會還原應用程式設定。如果備份來自另一台電腦或建立時間較早，可能需要重新設定 HTTPS。</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>還原外掛時不會還原整合與機密。外掛的認證資料將會遺失。</value>
@@ -920,6 +932,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>Macro Deck 無法使用作業系統的加密服務。在 Windows 上，請確認 CNG Key Isolation (KeyIso) 服務正在執行，或重新啟動電腦。</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>此資料資料夾上次由較新版本的 Macro Deck 使用。請重新安裝該版本；資料未被變更。</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>缺少 Macro Deck 主機執行檔：
@@ -2587,6 +2602,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>無法匯入備份</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>無法使用此版本的 Macro Deck 還原此備份</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>無法檢查備份</value>

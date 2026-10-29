@@ -186,6 +186,68 @@ public class KekEscrowStoreTests
 		Assert.That(_store.TryOpen(other, recoveryKey).Result, Is.EqualTo(KekEscrowResult.NoMatchingWrap));
 	}
 
+	[Test]
+	public void A_new_wrap_sets_an_unreadable_escrow_aside_instead_of_rotating_it_away()
+	{
+		var path = KekEscrowStore.PathFor(_keysDirectory);
+		File.WriteAllText(path, "{ damaged");
+		File.WriteAllText(path + ".bak", "{ damaged too");
+		var kek = KeyRingKeyDerivation.CreateKek();
+		var recoveryKey = RandomNumberGenerator.GetBytes(BackupKeyDerivation.RecoveryKeyBytes);
+
+		var result = _store.AddWrap(_keysDirectory, kek, recoveryKey);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.EqualTo(KekEscrowResult.Ok));
+			Assert.That(_store.TryOpen(_keysDirectory, recoveryKey).Kek, Is.EqualTo(kek));
+			Assert.That(Directory.GetFiles(_keysDirectory, KekEscrowStore.FileName + ".corrupt-*")
+					.Select(File.ReadAllText),
+				Is.EqualTo(new[] { "{ damaged" }));
+			Assert.That(File.ReadAllText(path + ".bak"), Is.EqualTo("{ damaged too"));
+		});
+	}
+
+	[Test]
+	public void A_new_wrap_sets_aside_an_escrow_written_by_a_newer_version()
+	{
+		var recoveryKey = RandomNumberGenerator.GetBytes(BackupKeyDerivation.RecoveryKeyBytes);
+		var kek = KeyRingKeyDerivation.CreateKek();
+		_store.AddWrap(_keysDirectory, kek, recoveryKey);
+		var path = KekEscrowStore.PathFor(_keysDirectory);
+		BumpVersion(path);
+		var newer = File.ReadAllText(path);
+
+		_store.AddWrap(_keysDirectory, kek, recoveryKey);
+
+		Assert.That(Directory.GetFiles(_keysDirectory, KekEscrowStore.FileName + ".corrupt-*").Select(File.ReadAllText),
+			Is.EqualTo(new[] { newer }));
+	}
+
+	[Test]
+	[Platform(Include = "Win", Reason = "Only Windows refuses to move a file another handle has open")]
+	public void An_unreadable_escrow_that_cannot_be_set_aside_is_left_exactly_as_it_was()
+	{
+		var path = KekEscrowStore.PathFor(_keysDirectory);
+		File.WriteAllText(path, "{ damaged");
+		File.WriteAllText(path + ".bak", "{ damaged too");
+
+		KekEscrowResult result;
+		using (new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+		{
+			result = _store.AddWrap(_keysDirectory,
+				KeyRingKeyDerivation.CreateKek(),
+				RandomNumberGenerator.GetBytes(BackupKeyDerivation.RecoveryKeyBytes));
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.EqualTo(KekEscrowResult.Unreadable));
+			Assert.That(File.ReadAllText(path), Is.EqualTo("{ damaged"));
+			Assert.That(File.ReadAllText(path + ".bak"), Is.EqualTo("{ damaged too"));
+		});
+	}
+
 	private static void BumpVersion(string path)
 	{
 		var bytes = File.ReadAllBytes(path);

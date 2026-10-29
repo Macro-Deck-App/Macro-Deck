@@ -39,6 +39,20 @@ When you regenerate the recovery key, backups made before that still need the ol
 2. Choose what to restore. Anything you select replaces the same data on this installation.
 3. Confirm with **Restore**.
 
+Some parts depend on others, so selecting one also selects what it needs. You can clear those again, and
+the dialog then explains what will not work.
+
+Integrations, app settings and accounts depend on each other: the integrations hold the keys that protect
+the HTTPS certificate in the app settings and the sign-in and pairing keys of the accounts. Profiles,
+scripts, automations and plugins need integrations, and accounts need profiles. So selecting any of these
+groups also selects integrations, app settings and accounts, and with them profiles, plugins, variables and
+icons. Clear what you do not want to replace. If you leave out one of integrations, app settings and
+accounts and the backup was made on another computer or some time ago, everyone may be signed out, devices
+may have to be paired again, or HTTPS may have to be set up again.
+
+A backup from another computer that was made with a version before Macro Deck 3.0.0-beta.5 has no pairing
+key, so devices have to be paired again after restoring it.
+
 Imported fonts belong to **Icons, icon packs and fonts**. Restoring that group from a backup made before
 Macro Deck could import fonts removes the fonts you imported since.
 
@@ -48,7 +62,8 @@ of 2), so you can go back.
 
 A backup from a newer version of Macro Deck that stores its data in a way this version does not know cannot
 be restored. Macro Deck says so while it checks the backup, before anything changes; update Macro Deck
-first, then restore it.
+first, then restore it. A backup whose data this version cannot convert, for example because the backup is
+damaged, is refused the same way and says that it cannot be restored with this version.
 
 If the restore cannot finish, for example because Macro Deck was closed while it was being applied, Macro
 Deck puts your data back the way it was before the restore and shows a **Restore failed** notification.

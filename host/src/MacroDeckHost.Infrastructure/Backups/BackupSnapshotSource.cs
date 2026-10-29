@@ -25,7 +25,7 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 		{
 			var relative = Path.GetRelativePath(_paths.DataRootDirectory, absolute).Replace('\\', '/');
 
-			if (BackupComponentGroups.IsExcluded(relative) || IsUnwantedSidecar(relative))
+			if (BackupComponentGroups.IsExcluded(relative) || BackupComponentGroups.IsSidecar(relative))
 			{
 				continue;
 			}
@@ -139,14 +139,5 @@ public sealed class BackupSnapshotSource : IBackupSnapshotSource
 	private static string Unpooled(string databasePath)
 	{
 		return new SqliteConnectionStringBuilder { DataSource = databasePath, Pooling = false }.ToString();
-	}
-
-	// A .tmp is a write the source host had not published yet. Startup recovery republishes anything
-	// recoverable, so anything still named .tmp here is a write this installation never validated and
-	// must not be carried into another one. Quarantined copies are damaged by definition.
-	private static bool IsUnwantedSidecar(string relativePath)
-	{
-		return relativePath.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase)
-			|| relativePath.Contains(".corrupt-", StringComparison.OrdinalIgnoreCase);
 	}
 }

@@ -34,10 +34,12 @@ public sealed class PluginRuntimeStateStore : IPluginRuntimeStateStore
 	{
 		lock (_lock)
 		{
-			var states = new Dictionary<string, bool>(Load())
+			if (ReadForWrite() is not { } states)
 			{
-				[pluginId] = started
-			};
+				return Task.CompletedTask;
+			}
+
+			states[pluginId] = started;
 			Write(states);
 		}
 
@@ -48,14 +50,31 @@ public sealed class PluginRuntimeStateStore : IPluginRuntimeStateStore
 	{
 		lock (_lock)
 		{
-			var states = new Dictionary<string, bool>(Load());
-			if (states.Remove(pluginId))
+			if (ReadForWrite() is { } states && states.Remove(pluginId))
 			{
 				Write(states);
 			}
 		}
 
 		return Task.CompletedTask;
+	}
+
+	private Dictionary<string, bool>? ReadForWrite()
+	{
+		if (_files.Read<Dictionary<string, bool>>(_filePath) is { } states)
+		{
+			return states;
+		}
+
+		if (!File.Exists(_filePath) && !File.Exists(_filePath + DurableJsonFile.BackupSuffix))
+		{
+			return new Dictionary<string, bool>();
+		}
+
+		_logger.Warning("The plugin runtime state file {Path} could not be read; it is not saved until it is "
+			+ "repaired",
+			_filePath);
+		return null;
 	}
 
 	private void Write(Dictionary<string, bool> states)

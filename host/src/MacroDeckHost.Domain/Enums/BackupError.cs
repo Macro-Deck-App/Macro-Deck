@@ -22,5 +22,6 @@ public enum BackupError
 	ValidationError,
 	TooLarge,
 	DesktopOnly,
-	FileLocked
+	FileLocked,
+	IncompatibleVersion
 }

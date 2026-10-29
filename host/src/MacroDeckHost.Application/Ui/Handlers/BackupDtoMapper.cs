@@ -155,6 +155,7 @@ public static class BackupDtoMapper
 			BackupError.TooLarge => AppStrings.Errors.Backup.TooLarge(),
 			BackupError.DesktopOnly => AppStrings.Errors.Backup.DesktopOnly(),
 			BackupError.FileLocked => AppStrings.Errors.Backup.FileLocked(),
+			BackupError.IncompatibleVersion => AppStrings.Errors.Backup.IncompatibleVersion(),
 			_ => AppStrings.Errors.Backup.OperationFailed()
 		};
 	}
