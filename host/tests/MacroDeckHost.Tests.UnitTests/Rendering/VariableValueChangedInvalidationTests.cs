@@ -96,6 +96,76 @@ public class VariableValueChangedInvalidationTests
 		Assert.That(Drain(queue), Is.EquivalentTo([owner.Id]));
 	}
 
+	[Test]
+	public async Task CreatingOrDeletingAReferencedVariable_RerendersTheLabelsThatShowIt()
+	{
+		var referencing = Button(Guid.NewGuid(), "{\"label\":\"{{ vars.foo }}\"}");
+		var other = Button(Guid.NewGuid(), "{\"label\":\"static\"}");
+		var queue = new LabelRenderChannel();
+		var subscriptions = new LabelSubscriptionTracker();
+		subscriptions.Add("conn1", referencing.Id.ToString(), "off");
+		subscriptions.Add("conn1", other.Id.ToString(), "off");
+		var signals = new RecordingRenderSignals();
+		var handler = new VariableValueChangedNotificationHandler(IndexOver(referencing, other),
+			queue,
+			subscriptions,
+			signals);
+
+		await handler.Handle(new VariableCreatedNotification(Variable("foo", VariableScope.Global)),
+			CancellationToken.None);
+		var afterCreate = Drain(queue);
+		await handler.Handle(new VariableDeletedNotification(Variable("foo", VariableScope.Global)),
+			CancellationToken.None);
+		var afterDelete = Drain(queue);
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(afterCreate, Is.EquivalentTo([referencing.Id]));
+			Assert.That(afterDelete, Is.EquivalentTo([referencing.Id]));
+			Assert.That(signals.VariableChanges, Is.EqualTo(2));
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task RenamingAVariable_RerendersLabelsShowingTheOldAndTheNewName()
+	{
+		var showsOld = Button(Guid.NewGuid(), "{\"label\":\"{{ vars.foo }}\"}");
+		var showsNew = Button(Guid.NewGuid(), "{\"label\":\"{{ vars.bar }}\"}");
+		var queue = new LabelRenderChannel();
+		var subscriptions = new LabelSubscriptionTracker();
+		subscriptions.Add("conn1", showsOld.Id.ToString(), "off");
+		subscriptions.Add("conn1", showsNew.Id.ToString(), "off");
+		var handler = new VariableValueChangedNotificationHandler(IndexOver(showsOld, showsNew),
+			queue,
+			subscriptions,
+			new RecordingRenderSignals());
+
+		await handler.Handle(new VariableUpdatedNotification(Variable("bar", VariableScope.Global), "foo"),
+			CancellationToken.None);
+
+		Assert.That(Drain(queue), Is.EquivalentTo([showsOld.Id, showsNew.Id]));
+	}
+
+	[Test]
+	public async Task CreatingAButtonsStateVariable_RerendersItsLabelShowingTheState()
+	{
+		var owner = Button(Guid.NewGuid(), "{\"label\":\"A {{ vars.state }}\"}");
+		var queue = new LabelRenderChannel();
+		var subscriptions = new LabelSubscriptionTracker();
+		subscriptions.Add("conn1", owner.Id.ToString(), "off");
+		var handler = new VariableValueChangedNotificationHandler(IndexOver(owner),
+			queue,
+			subscriptions,
+			new RecordingRenderSignals());
+
+		await handler.Handle(new VariableCreatedNotification(
+				Variable("state", VariableScope.Widget, owner.Id.ToString())),
+			CancellationToken.None);
+
+		Assert.That(Drain(queue), Is.EquivalentTo([owner.Id]));
+	}
+
 	private sealed class FakeFolderCache : IFolderCache
 	{
 		private readonly FolderEntity _folder;

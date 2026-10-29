@@ -453,6 +453,7 @@ public class Startup
 		services.AddSingleton<WidgetOptimisticStateStore>();
 		services.AddScoped<IWidgetStateService, WidgetStateService>();
 		services.AddScoped<IWidgetStateReconciler, WidgetStateReconciler>();
+		services.AddSingleton<WidgetStateChangeFlowRunner>();
 		services.AddSingleton<IWidgetStatePublisher, WidgetStatePublisher>();
 		services.AddSingleton<IWidgetRenderSignals, WidgetRenderSignals>();
 

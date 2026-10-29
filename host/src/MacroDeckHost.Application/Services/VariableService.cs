@@ -576,12 +576,13 @@ public class VariableService : IVariableService
 				$"A variable named '{canonicalName}' already exists in this scope");
 		}
 
+		var previousName = existing.Name;
 		if (!_registry.Rename(existing.Id, canonicalName, DateTime.UtcNow))
 		{
 			return Result.Fail<VariableEntity, VariableError>(VariableError.NotFound, "Variable not found");
 		}
 
-		await _mediator.Publish(new VariableUpdatedNotification(existing));
+		await _mediator.Publish(new VariableUpdatedNotification(existing, previousName));
 		return Result.Ok<VariableEntity, VariableError>(existing);
 	}
 

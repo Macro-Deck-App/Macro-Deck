@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeck.Localization;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Rendering;
@@ -952,7 +953,8 @@ public class VariableBroadcastTests
 
 		var mediator = new FanOutMediator();
 		mediator.Register(new VariableUpdatedBroadcastHandler(channel, new VariableChangeNotifier()));
-		mediator.Register(new VariableValueChangedStateMappingHandler(index, evalQueue));
+		mediator.Register<VariableValueChangedNotification>(
+			new VariableValueChangedStateMappingHandler(index, evalQueue));
 
 		var service = TestVariableServices.Create(registry, new NullUserVariableStore(), mediator);
 		var created = await service.CreateUserVariable("a", VariableScope.Global, null, VariableType.Text, "1", null);
@@ -982,7 +984,7 @@ public class VariableBroadcastTests
 
 		var mediator = new FanOutMediator();
 		mediator.Register(new VariableUpdatedBroadcastHandler(channel, new VariableChangeNotifier()));
-		mediator.Register(new VariableValueChangedNotificationHandler(index,
+		mediator.Register<VariableValueChangedNotification>(new VariableValueChangedNotificationHandler(index,
 			labelQueue,
 			labelSubscriptions,
 			new RecordingRenderSignals()));
