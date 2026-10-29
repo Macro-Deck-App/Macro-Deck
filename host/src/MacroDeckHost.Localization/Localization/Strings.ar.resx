@@ -2940,6 +2940,18 @@
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>مفتاح الاسترداد هذا لا يفتح هذا التثبيت.</value>
   </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>اختر مزوّدًا.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>تم إبطال رمز الوصول هذا بالفعل.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>أدخل اسمًا لا يتجاوز 64 حرفًا.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>لا يوجد رمز وصول بهذا المعرّف.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>تعذّر إكمال الترحيل.</value>
   </data>
@@ -17149,6 +17161,92 @@
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>أدنى مستوى</value>
   </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>إعداد العميل</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>متصل منذ</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>اتصال واحد</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>الاتصالات: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>لا يوجد عميل ذكاء اصطناعي متصل.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>العملاء المتصلون</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>اسمح لمساعدي الذكاء الاصطناعي مثل Claude أو VS Code بفحص إعدادك وبنائه وتشغيل الإجراءات عبر Model Context Protocol (MCP). لا يمكنهم قراءة أسرارك أبدًا.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>لا توجد رموز وصول بعد</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>أنشئ رمزًا وأضفه إلى عميل الذكاء الاصطناعي لتوصيله بـ Macro Deck.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>استخدم هذا العنوان على هذا الكمبيوتر. على كمبيوتر آخر في شبكتك، استبدل 127.0.0.1 بعنوان هذا الكمبيوتر في الشبكة. يحتاج كل اتصال إلى رمز وصول.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>عنوان الخادم</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>خادم MCP غير متاح حاليًا.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>عملاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>تعذر تحميل إعدادات عملاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>أبدًا</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>السماح</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>يسأل أولًا عن: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>اسأل أولًا</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>الافتراضي: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>اختر لكل مزوّد ما إذا كان يمكن لعملاء الذكاء الاصطناعي تشغيل إجراءاته مباشرة أو يجب أن يسألوك أولًا أو لا يمكنهم تشغيلها إطلاقًا. ينطبق ذلك أيضًا على الإجراءات في التدفقات التي ينشئها عملاء الذكاء الاصطناعي.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>إيقاف</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>تعذر حفظ الإعداد</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>الإجراءات التي يمكن لعملاء الذكاء الاصطناعي تشغيلها</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>تحديث</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>سيُحذف {name} نهائيًا. لقد أُبطل بالفعل، لذا لا يمكن لأي شيء استخدامه.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>يتوقف {name} عن العمل فورًا ويُفصل كل عميل ذكاء اصطناعي يستخدمه.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>رموز الوصول</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>عميل غير معروف</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>حساب Macro Deck</value>
   </data>
@@ -25264,5 +25362,83 @@
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>يظهر هنا ملخص قصير للمقالة.</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>تم السماح</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>تم الرفض</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>اسمح بذلك فقط إذا طلبت هذا تحديدًا من عميل الذكاء الاصطناعي.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>تمت الإجابة عنه بالفعل أو انتهت صلاحيته. اطلب من عميل الذكاء الاصطناعي المحاولة مرة أخرى.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>يطلب {client} من Macro Deck تنفيذ ما يلي:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>تأكيد طلب عميل الذكاء الاصطناعي</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>يحتاج Macro Deck إلى تأكيدك قبل أن يتابع عميل الذكاء الاصطناعي: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>اسمح أو ارفض في صفحة Macro Deck التي تفتح في المتصفح: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>السماح</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>تغيير المتغير {name} الذي تقرؤه كتلة معتمدة تستخدم سرًا</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}) بالقيم {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>سر</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>أدخل السر {label} في صفحة Macro Deck التي تُفتح في المتصفح. تبقى القيمة في Macro Deck.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>تمرير {name} إلى كتلة معتمدة تستخدم سرًا</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>أدخل قيمة.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>لم يعد هذا الرابط صالحًا</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>تم استخدامه بالفعل أو انتهت صلاحيته. اطلب من عميل الذكاء الاصطناعي طلب السر مرة أخرى.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>يطلب {client} من Macro Deck حفظ سر: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>إدخال سر</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>لا يرى ما تكتبه إلا Macro Deck. يحصل {client} على مرجع يمكن استخدامه في الإجراءات، ولا يحصل على القيمة أبدًا.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>حفظ السر</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>تم حفظ السر</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>يمكنك إغلاق علامة التبويب هذه والعودة إلى {client}.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>السر</value>
   </data>
 </root>

@@ -31,5 +31,13 @@ public interface IActionDefinition
 	/// </summary>
 	string? Role => null;
 
+	/// <summary>
+	/// What the action can do outside Macro Deck, <see cref="ActionRiskCategory.None" /> by default. Macro
+	/// Deck asks the user before an automated caller such as an AI client runs an action of any other
+	/// category; the user may change that per provider. A Macro Deck release from before this property, and
+	/// a caller that does not know a category, ignore it, so it never makes an action run without asking.
+	/// </summary>
+	ActionRiskCategory RiskCategory => ActionRiskCategory.None;
+
 	IActionExecutor CreateExecutor();
 }

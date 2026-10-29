@@ -45,6 +45,8 @@ public abstract class RemoteActionDefinition(
 
 	public string? Role => Descriptor.Role;
 
+	public ActionRiskCategory RiskCategory => Descriptor.RiskCategory;
+
 	public IActionExecutor CreateExecutor()
 	{
 		return new RemoteActionExecutor(Invoker, PluginId, Descriptor.LocalId);

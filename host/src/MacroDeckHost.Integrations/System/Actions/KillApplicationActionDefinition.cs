@@ -15,6 +15,8 @@ internal sealed class KillApplicationActionDefinition : IActionDefinition
 	}
 
 	public string Id => "kill-application";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Programs;
 	public LocalizedText Name => AppStrings.Integrations.System.Actions.KillApplication.Name();
 	public LocalizedText Description => AppStrings.Integrations.System.Actions.KillApplication.Description();
 

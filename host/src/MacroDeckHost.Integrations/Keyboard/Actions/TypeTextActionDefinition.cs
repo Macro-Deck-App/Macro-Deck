@@ -15,6 +15,8 @@ internal sealed class TypeTextActionDefinition : IActionDefinition
 	}
 
 	public string Id => "type-text";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Keyboard.Actions.TypeTextName();
 	public LocalizedText Description => AppStrings.Integrations.Keyboard.Actions.TypeTextDescription();
 

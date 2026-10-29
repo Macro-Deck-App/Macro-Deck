@@ -17,6 +17,8 @@ internal sealed class KeyUpActionDefinition : IActionDefinition
 	}
 
 	public string Id => "key-up";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Keyboard.Actions.KeyUpName();
 	public LocalizedText Description => AppStrings.Integrations.Keyboard.Actions.KeyUpDescription();
 

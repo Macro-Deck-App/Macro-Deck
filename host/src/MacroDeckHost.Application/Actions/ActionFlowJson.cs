@@ -40,6 +40,45 @@ internal static class ActionFlowJson
 		return JsonSerializer.Deserialize<List<ActionFlow>>(flowsJson, _jsonOptions) ?? [];
 	}
 
+	// The one dispatch rule: the executor runs exactly these blocks as integration actions, and approval,
+	// backfill and export classify blocks through it too.
+	public static bool IsActionBlock(string? type, string? integrationId, string? blockType)
+	{
+		var normalized = type?.ToLowerInvariant();
+		if (normalized == "action")
+		{
+			return true;
+		}
+
+		return normalized is not ("delay" or "condition" or "switch" or "loop" or "flow-control" or "trigger")
+			&& (!string.IsNullOrWhiteSpace(integrationId)
+				|| !string.IsNullOrWhiteSpace(blockType) && blockType.Contains('.', StringComparison.Ordinal));
+	}
+
+	public static (string? IntegrationId, string? ActionId) ResolveActionIdentity(
+		string? integrationId,
+		string? actionId,
+		string? blockType)
+	{
+		if (!string.IsNullOrWhiteSpace(integrationId) && !string.IsNullOrWhiteSpace(actionId))
+		{
+			return (integrationId, actionId);
+		}
+
+		if (string.IsNullOrWhiteSpace(blockType))
+		{
+			return (null, null);
+		}
+
+		var separatorIndex = blockType.IndexOf('.', StringComparison.Ordinal);
+		if (separatorIndex <= 0 || separatorIndex >= blockType.Length - 1)
+		{
+			return (null, null);
+		}
+
+		return (blockType[..separatorIndex], blockType[(separatorIndex + 1)..]);
+	}
+
 	/// <summary>Depth-first search through every flow's blocks, including inside condition branches.</summary>
 	public static bool TryFindBlock(IEnumerable<ActionFlow> flows, string blockId, out ActionBlock? block)
 	{

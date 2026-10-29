@@ -54,6 +54,13 @@ public sealed record ActionDescriptorDto
 	/// existed sends.
 	/// </summary>
 	public string? Role { get; init; }
+
+	/// <summary>
+	/// Mirrors <c>IActionDefinition.RiskCategory</c> as its lower-case name (<c>scripts</c>, <c>programs</c>,
+	/// <c>input</c>, <c>network</c>, <c>files</c>, <c>power</c>). Additive within protocol major 3: absent means
+	/// none, which is what a plugin built before this existed sends; a host reads an unknown value as none.
+	/// </summary>
+	public string? RiskCategory { get; init; }
 }
 
 /// <summary>The full result of the <c>actions</c> capability's <c>describe</c> operation.</summary>

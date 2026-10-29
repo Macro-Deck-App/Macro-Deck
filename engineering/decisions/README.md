@@ -30,6 +30,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0085 - The connect link is a binary record written as decimal digits](0085-compact-connect-link.md)
 - [0086 - The host proves its identity to the companion app](0086-host-identity-key.md)
 - [0087 - The Companion license is a signed bearer token the host keeps and hands out](0087-companion-license-token.md)
+- [0113 - The MCP server is an untrusted principal](0113-the-mcp-server-is-an-untrusted-principal.md)
 
 ## Decks, flows and content
 

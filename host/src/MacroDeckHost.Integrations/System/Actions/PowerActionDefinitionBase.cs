@@ -25,6 +25,8 @@ internal abstract class PowerActionDefinitionBase : IActionDefinition
 
 	public virtual MacroDeckPlatform Platforms => MacroDeckPlatform.All;
 
+	public virtual ActionRiskCategory RiskCategory => ActionRiskCategory.Power;
+
 	public IActionExecutor CreateExecutor()
 	{
 		return new Executor(_power, _operation);

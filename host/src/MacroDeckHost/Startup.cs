@@ -47,8 +47,10 @@ using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Infrastructure.Licensing;
 using MacroDeckHost.Licensing;
+using MacroDeckHost.Mcp;
 using MacroDeck.Sdk.Companion;
 using MacroDeckHost.CompanionApp;
 using MacroDeckHost.Application.CompanionApp;
@@ -246,6 +248,7 @@ public class Startup
 			.AddScheme<AuthenticationSchemeOptions, LoopbackAuthenticationHandler>(AuthDefaults.LoopbackScheme, null)
 			.AddScheme<AuthenticationSchemeOptions, PluginSessionAuthenticationHandler>(PluginAuthSchemes.PluginSession,
 				null)
+			.AddScheme<AuthenticationSchemeOptions, McpTokenAuthenticationHandler>(McpAuthSchemes.McpToken, null)
 			.AddJwtBearer();
 
 		var adminPolicy = new AuthorizationPolicyBuilder()
@@ -259,6 +262,13 @@ public class Startup
 				{
 					policy.RequireAuthenticatedUser()
 						.RequireClaim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope, AuthDefaults.ClientScope);
+				})
+			.AddPolicy(AuthPolicies.Mcp,
+				policy =>
+				{
+					policy.AddAuthenticationSchemes(McpAuthSchemes.McpToken)
+						.RequireAuthenticatedUser()
+						.RequireClaim(AuthDefaults.ScopeClaim, AuthDefaults.McpScope);
 				})
 			.SetDefaultPolicy(adminPolicy)
 			.SetFallbackPolicy(adminPolicy);
@@ -662,6 +672,9 @@ public class Startup
 		services.AddScoped<IPluginRegistrationRepository, PluginRegistrationRepository>();
 		services.AddScoped<IPluginAccessTokenRepository, PluginAccessTokenRepository>();
 		services.AddScoped<IPluginTokenService, PluginTokenService>();
+		services.AddScoped<IMcpAccessTokenRepository, McpAccessTokenRepository>();
+		services.AddScoped<IMcpTokenService, McpTokenService>();
+		services.AddMacroDeckMcp();
 		services.AddScoped<IPluginRegistrationService, PluginRegistrationService>();
 		services.AddScoped<IPluginSessionService, PluginSessionService>();
 		services.AddScoped<IPluginIdentityReconciler, PluginIdentityReconciler>();
@@ -1200,9 +1213,11 @@ public class Startup
 				// action on it is gated on LoopbackConnection.IsTrusted, an ambient credential, so
 				// without this any page the user has open could drive a device attached to this machine.
 				!context.Request.Path.StartsWithSegments("/api/client-targets")
-				&& !context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),
+				&& !context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets")
+				&& !McpPaths.IsMcpRequest(context.Request.Path),
 			branch => branch.UseCors("AllowAny"));
 
+		app.UseMcpRequestGuard();
 		app.UseSpaShellNoCache();
 
 		// API responses are live state, so they must not be storable either. Without any
@@ -1222,6 +1237,7 @@ public class Startup
 			context.RequestServices.GetRequiredService<SecretWriteAuthority>().Grant(context.User);
 			await next();
 		});
+		app.UseMcpSessionBinding();
 		app.UseEndpoints(endpoints =>
 		{
 			endpoints.MapControllers();
@@ -1232,6 +1248,7 @@ public class Startup
 			{
 				endpoints.MapUiWebSocket();
 				endpoints.MapPluginWebSocket();
+				endpoints.MapMacroDeckMcp();
 			}
 
 			endpoints.MapFallbackToFile("admin/{**path}", "admin/index.html").AllowAnonymous();

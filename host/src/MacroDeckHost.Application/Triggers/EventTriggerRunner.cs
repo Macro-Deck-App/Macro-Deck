@@ -67,7 +67,8 @@ public sealed class EventTriggerRunner : IEventTriggerRunner
 					? FlowOwner.Automation(subscription.Owner.Id)
 					: FlowOwner.Widget(subscription.Owner.Id),
 				EventParameters = occurrence.Parameters,
-				Origin = ExecutionOrigin.Host
+				Origin = ExecutionOrigin.Host,
+				McpTokenId = occurrence.McpTokenId
 			},
 			cancellationToken);
 

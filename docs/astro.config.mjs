@@ -298,6 +298,7 @@ export default defineConfig({
 										'reference/authentication',
 										'reference/protocol',
 										'reference/websocket',
+										'reference/mcp',
 										...openAPISidebarGroups,
 										'reference/conformance',
 										'reference/analyzers',
