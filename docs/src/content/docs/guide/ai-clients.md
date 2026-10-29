@@ -50,9 +50,13 @@ While the new token is shown, choose your client under **AI client**, then copy 
 
 Macro Deck never edits a client's configuration for you.
 
-These configurations contain the address under **Server address**. Macro Deck keeps that address, but if
-its port is taken when Macro Deck starts, it picks another one. Copy the new address into your client's
-configuration then.
+These configurations contain the address under **Server address**, which uses the port shown in
+**Settings > Network**. It stays the same until you change that port.
+
+To use an AI client on another computer in your network, replace `127.0.0.1` in the configuration with
+the network address of the computer running Macro Deck, and allow Macro Deck through its firewall as for
+your other devices. The access token is what keeps other people in your network out, so treat it like a
+password. On a network you do not trust, connect only clients on this computer.
 
 ## What an AI client can and cannot do
 
