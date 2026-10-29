@@ -1063,6 +1063,27 @@ Close the application using the port (or a still-running Macro Deck) and try aga
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck was not updated completely</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} is not set. Install the Claude Desktop extension from Settings &gt; AI clients again.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck is not running. Start Macro Deck and try again.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck rejected the access token: it was revoked or deleted. Create a new token in Settings &gt; AI clients and install the extension again.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck has no MCP server available: it is locked or does not support AI clients. Unlock Macro Deck and try again.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck refused the request (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>The connection to Macro Deck was lost before it answered. The request may have run, so check before you retry it.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>The MCP session has not been initialized.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>About Macro Deck</value>
   </data>
@@ -2939,6 +2960,24 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>That recovery key does not unlock this installation.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>This access token can no longer be used. Create a new token to download the extension.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>The Claude Desktop extension is only available in the installed Macro Deck app on macOS and Windows.</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Choose a provider.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>This access token is already revoked.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>Enter a name of up to 64 characters.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>No access token with that id exists.</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>The migration could not be completed.</value>
@@ -17151,6 +17190,107 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Minimum level</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Download for Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Open the downloaded file in Claude Desktop to install Macro Deck there. The file contains this token, so delete it after installing.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Could not save the Claude Desktop extension</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>AI client</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>Client configuration</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Connected since</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} connection</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>{count} connections</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>No AI client is connected.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Connected clients</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Let AI assistants such as Claude or VS Code inspect and build your setup and run actions through the Model Context Protocol (MCP). They can never read your secrets.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>No access tokens yet</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Create a token and add it to your AI client to connect it to Macro Deck.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>Use this address on this computer. On another computer in your network, replace 127.0.0.1 with this computer's network address. Every connection needs an access token.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Server address</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>The MCP server is not available right now.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>AI clients</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>Could not load the AI client settings</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Other clients</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Asks first for: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Ask first</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>Default: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>Choose per provider whether AI clients may run its actions directly, must ask you first, or may not run them at all. This also covers actions in flows that AI clients create.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>Could not save the setting</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Actions AI clients may run</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} is deleted for good. It is already revoked, so nothing can use it.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} stops working immediately and every AI client using it is disconnected.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Access tokens</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Unknown client</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Macro Deck account</value>
   </data>
@@ -25273,5 +25413,86 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>A short summary of the article appears here.</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Allowed</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Declined</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Allow it only if you asked the AI client for exactly this.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>It was already answered or has expired. Ask the AI client to try again.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} asks Macro Deck to do this:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Confirm an AI client request</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Macro Deck needs your confirmation before the AI client continues: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Allow or decline on the Macro Deck page that opens in your browser: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>changing the variable {name}, which an approved block that uses a secret reads</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}) with {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>a secret</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Enter the secret {label} on the Macro Deck page that opens in your browser. The value stays in Macro Deck.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>passing {name} to an approved block that uses a secret</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Lets Claude work with your Macro Deck setup on this computer: inspect and build buttons, folders and automations, and run actions. Claude never sees your secrets.</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Enter a value.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>This link is no longer valid</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>It was already used or has expired. Ask the AI client to request the secret again.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} asks Macro Deck to store a secret: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Enter a secret</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Only Macro Deck sees what you type. {client} gets a reference it can use in actions, never the value.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Save secret</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Secret saved</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>You can close this tab and go back to {client}.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Secret</value>
   </data>
 </root>

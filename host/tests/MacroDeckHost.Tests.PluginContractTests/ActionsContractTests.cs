@@ -8,6 +8,7 @@ using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
+using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeckHost.Tests.PluginContractTests.Harness;
@@ -119,6 +120,33 @@ internal sealed class ActionsContractTests : CapabilityContractFixture
 		Assert.That(integration.Actions.ToDictionary(action => action.Id, action => action.Role),
 			Is.EqualTo(new Dictionary<string, string?>
 				{ ["launch"] = ActionRoles.LaunchApplication, ["plain"] = null }));
+	}
+
+	[Test]
+	public async Task A_plugin_action_declaring_a_risk_category_exposes_it_on_the_host()
+	{
+		var runner = new TestRiskAction("run", ActionRiskCategory.Programs);
+		var legacy = new TestRoleAction("legacy", null);
+
+		var integration = await ConnectAsync([new ActionsCapabilityHandler([new TestIntegration(runner, legacy)])],
+			[Action("run"), Action("legacy")],
+			[CapabilityKinds.Actions]);
+
+		Assert.That(integration.Actions.ToDictionary(action => action.Id, action => action.RiskCategory),
+			Is.EqualTo(new Dictionary<string, ActionRiskCategory>
+				{ ["run"] = ActionRiskCategory.Programs, ["legacy"] = ActionRiskCategory.None }));
+	}
+
+	[Test]
+	public void A_host_reads_an_absent_or_unknown_risk_category_as_none()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(ActionCatalogMapper.ParseRiskCategory(null), Is.EqualTo(ActionRiskCategory.None));
+			Assert.That(ActionCatalogMapper.ParseRiskCategory("telepathy"), Is.EqualTo(ActionRiskCategory.None));
+			Assert.That(ActionCatalogMapper.ParseRiskCategory("4"), Is.EqualTo(ActionRiskCategory.None));
+			Assert.That(ActionCatalogMapper.ParseRiskCategory("power"), Is.EqualTo(ActionRiskCategory.Power));
+		});
 	}
 
 	[Test]

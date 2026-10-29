@@ -158,6 +158,7 @@ describe('UiSessionService widget sessions', () => {
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'openConfigUiSession',
       'openWidgetUiSession',
+      'openUiPreviewSession',
       'attachUiSession',
       'detachUiSession',
       'closeUiSession',
@@ -199,6 +200,78 @@ describe('UiSessionService widget sessions', () => {
           useValue: { translateKey: (key: string) => key, translate: (key: string) => key },
         },
       ],
+    });
+  });
+
+  describe('when the provider has no session slot free', () => {
+    const busy = { accepted: false, sessionId: '', code: 'TOO_MANY_SESSIONS', message: 'full' };
+    const flush = async () => {
+      for (let turn = 0; turn < 6; turn++) await Promise.resolve();
+    };
+
+    beforeEach(() => jasmine.clock().install());
+    afterEach(() => jasmine.clock().uninstall());
+
+    it('opens a widget again after a backoff instead of showing the refusal', async () => {
+      api.openWidgetUiSession.and.returnValues(Promise.resolve(busy), Promise.resolve({
+        accepted: true,
+        sessionId: 'widget-session-1'
+      }));
+      const handle = TestBed.inject(UiSessionService).open({ kind: 'widget', widgetId: 'w1' });
+      await flush();
+
+      expect(handle.rejection()).toBeNull();
+      jasmine.clock().tick(1000);
+      await flush();
+
+      expect(api.openWidgetUiSession).toHaveBeenCalledTimes(2);
+      expect(api.attachUiSession).toHaveBeenCalledWith('widget-session-1');
+      expect(handle.rejection()).toBeNull();
+    });
+
+    it('shows the refusal once the last attempt is refused too', async () => {
+      api.openWidgetUiSession.and.returnValue(Promise.resolve(busy));
+      const handle = TestBed.inject(UiSessionService).open({ kind: 'widget', widgetId: 'w1' });
+      await flush();
+      for (const delay of [1000, 2000, 4000, 8000, 16000, 16000]) {
+        jasmine.clock().tick(delay);
+        await flush();
+      }
+
+      expect(api.openWidgetUiSession).toHaveBeenCalledTimes(7);
+      expect(handle.rejection()).toEqual({ code: 'TOO_MANY_SESSIONS', message: 'full' });
+    });
+
+    it('never opens again once closed while it waits', async () => {
+      api.openWidgetUiSession.and.returnValue(Promise.resolve(busy));
+      const handle = TestBed.inject(UiSessionService).open({ kind: 'widget', widgetId: 'w1' });
+      await flush();
+      handle.close();
+      jasmine.clock().tick(60000);
+      await flush();
+
+      expect(api.openWidgetUiSession).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the refusal of a configuration surface at once', async () => {
+      api.openConfigUiSession.and.returnValue(Promise.resolve(busy));
+      const handle = TestBed.inject(UiSessionService).open({
+        kind: 'config',
+        entryPoint: UiConfigEntryPoints.WidgetConfig,
+        widgetId: 'w1',
+        configUiModelVersion: UiModelVersions.Current
+      });
+      await flush();
+
+      expect(handle.rejection()).toEqual({ code: 'TOO_MANY_SESSIONS', message: 'full' });
+    });
+
+    it('shows the refusal of a developer preview at once', async () => {
+      api.openUiPreviewSession.and.returnValue(Promise.resolve(busy));
+      const handle = TestBed.inject(UiSessionService).open({ kind: 'preview', previewId: 'p1' });
+      await flush();
+
+      expect(handle.rejection()).toEqual({ code: 'TOO_MANY_SESSIONS', message: 'full' });
     });
   });
 

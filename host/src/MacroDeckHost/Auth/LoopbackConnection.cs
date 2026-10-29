@@ -46,7 +46,7 @@ public static class LoopbackConnection
 
 	// A page in the user's browser must not ride on the desktop session cookie or a proxied secret.
 	// Sec-Fetch-Site is set by the browser itself; without it, an Origin other than our own is foreign.
-	private static bool IsCrossOriginBrowserRequest(HttpRequest request)
+	internal static bool IsCrossOriginBrowserRequest(HttpRequest request)
 	{
 		var site = request.Headers["Sec-Fetch-Site"].ToString();
 		if (site.Length > 0)
@@ -66,7 +66,7 @@ public static class LoopbackConnection
 			|| LoopbackSecret.MatchesSessionCookie(context.Request.Cookies[SessionCookieName(context)]);
 	}
 
-	private static bool HasLoopbackHost(HttpRequest request)
+	internal static bool HasLoopbackHost(HttpRequest request)
 	{
 		var host = request.Host.Host;
 		return string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase)

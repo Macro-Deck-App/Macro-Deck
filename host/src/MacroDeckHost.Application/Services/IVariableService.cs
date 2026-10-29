@@ -57,6 +57,11 @@ public interface IVariableService
 
 	Task<Result<VariableError>> DeleteUserVariable(Guid id);
 
+	Task<bool> RestoreUserVariable(VariableEntity snapshot)
+	{
+		return Task.FromResult(false);
+	}
+
 	Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
 		string integrationId,
 		string name,

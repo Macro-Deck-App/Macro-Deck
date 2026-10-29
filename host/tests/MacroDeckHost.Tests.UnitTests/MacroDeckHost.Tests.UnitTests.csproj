@@ -11,6 +11,7 @@
 
     <ItemGroup>
     <None Update="Auth/host-identity-vector.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Mcp/Fixtures/mcpb-manifest-v0.3.schema.json" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="Architecture/IntegrationBoundary.baseline" LogicalName="IntegrationBoundary.baseline" />
     <EmbeddedResource Include="Ui/Resources/BundledIcons/Icons/**/*" />
     <None Include="../../../docs/public/fonts/Anta-Regular.ttf" Link="Rendering/Fixtures/Anta-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
@@ -18,6 +19,7 @@
 
   <ItemGroup>
         <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="JsonSchema.Net" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="NUnit" />

@@ -68,8 +68,9 @@ macrodeck_host_attempt_${MDHOOK}:
 	; unexpected crash. The template's own check, so the user still gets the usual prompt, and
 	; the template's copy right after this hook then finds nothing left to do. Inside the retry
 	; loop because a Retry is worthless if the shell came back meanwhile; it is a no-op when
-	; nothing matches.
-	!insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
+	; nothing matches. A full path: the check asks Restart Manager which processes use that file,
+	; which also ends AI-client bridges (MacroDeck.exe mcp) that would keep the image locked.
+	!insertmacro CheckIfAppIsRunning "$INSTDIR\${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
 
 	DetailPrint "Waiting for ${MACRODECK_HOST_BINARY} to stop..."
 	; $INSTDIR\host, never $INSTDIR: during an in-place upgrade the old uninstaller runs from

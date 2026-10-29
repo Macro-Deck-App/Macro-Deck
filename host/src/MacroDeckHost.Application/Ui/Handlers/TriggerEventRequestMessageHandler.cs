@@ -77,7 +77,7 @@ public sealed class TriggerEventRequestMessageHandler
 			request.Parameters);
 		var parameters = coerced.ToDictionary(p => p.Key, p => (object?)p.Value, StringComparer.Ordinal);
 
-		var occurrence = new EventOccurrence(request.EventId, parameters);
+		var occurrence = new EventOccurrence(request.EventId, parameters, McpTokenId: request.McpTokenId);
 		var queued = _index.Find(request.EventId)
 			.Count(subscription => !EventSubscriptionMatcher.QuickReject(subscription, occurrence));
 

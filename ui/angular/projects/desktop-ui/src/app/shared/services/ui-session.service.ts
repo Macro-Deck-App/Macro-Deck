@@ -104,6 +104,9 @@ class NullUiSessionHandle implements UiSessionHandle {
 }
 
 const MAX_REOPENS_WITHOUT_A_TREE = 3;
+const MAX_BUSY_RETRIES = 6;
+
+const TOO_MANY_SESSIONS = 'TOO_MANY_SESSIONS';
 
 const SESSION_CLOSED = 'SESSION_CLOSED';
 const SESSION_FORBIDDEN = 'SESSION_FORBIDDEN';
@@ -131,6 +134,8 @@ class LiveUiSessionHandle implements UiSessionHandle {
   private uploadsInFlight = 0;
   private heldEvents: UiNodeEvent[] = [];
   private starts = 0;
+  private busyRetries = 0;
+  private busyRetry: ReturnType<typeof setTimeout> | null = null;
   private recovering: Promise<void> | null = null;
   private refusedEvents: UiNodeEvent[] = [];
 
@@ -261,6 +266,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
   close(): void {
     if (this.closed) return;
     this.closed = true;
+    this.cancelBusyRetry();
     this.subscription.unsubscribe();
     this.reportListeners.clear();
     this.settleFlushes();
@@ -312,6 +318,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
   }
 
   private async start(): Promise<void> {
+    this.cancelBusyRetry();
     const start = ++this.starts;
     const opened = await this.openSession();
     if (this.closed || start !== this.starts) {
@@ -321,14 +328,39 @@ class LiveUiSessionHandle implements UiSessionHandle {
     }
 
     if (!opened?.accepted) {
+      if (opened?.code === TOO_MANY_SESSIONS && this.retriesWhenBusy() && this.busyRetries < MAX_BUSY_RETRIES) {
+        this.retryWhenFree();
+        return;
+      }
+      this.busyRetries = 0;
       this.rejection.set({ code: opened?.code, message: opened?.message });
       return;
     }
 
+    this.busyRetries = 0;
     this.rejection.set(null);
     this.sessionId = opened.sessionId;
     this.generation.update(value => value + 1);
     await this.attach(true);
+  }
+
+  private retriesWhenBusy(): boolean {
+    return this.request.kind === 'widget' || this.request.kind === 'folder';
+  }
+
+  private retryWhenFree(): void {
+    const delay = Math.min(1000 * 2 ** this.busyRetries, 16000);
+    this.busyRetries++;
+    this.busyRetry = setTimeout(() => {
+      this.busyRetry = null;
+      if (!this.closed) void this.start();
+    }, delay);
+  }
+
+  private cancelBusyRetry(): void {
+    if (this.busyRetry === null) return;
+    clearTimeout(this.busyRetry);
+    this.busyRetry = null;
   }
 
   private openSession(): Promise<{ accepted: boolean; sessionId: string; code?: string; message?: string } | null> {

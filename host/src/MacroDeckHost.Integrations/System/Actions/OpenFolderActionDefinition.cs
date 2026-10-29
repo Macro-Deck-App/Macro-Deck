@@ -15,6 +15,8 @@ internal sealed class OpenFolderActionDefinition : IActionDefinition
 	}
 
 	public string Id => "open-folder";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Files;
 	public LocalizedText Name => AppStrings.Integrations.System.Actions.OpenFolder.Name();
 	public LocalizedText Description => AppStrings.Integrations.System.Actions.OpenFolder.Description();
 

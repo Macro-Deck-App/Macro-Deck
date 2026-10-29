@@ -9,6 +9,7 @@ export type SettingsCategory =
   | 'network'
   | 'devices'
   | 'license'
+  | 'ai-clients'
   | 'extensions'
   | 'adb'
   | 'usb'

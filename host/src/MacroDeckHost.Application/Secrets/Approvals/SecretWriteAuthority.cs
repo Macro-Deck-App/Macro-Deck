@@ -7,14 +7,24 @@ namespace MacroDeckHost.Application.Secrets.Approvals;
 // scope (pumps, timers, reconcilers) therefore writes with Preserve.
 public sealed class SecretWriteAuthority
 {
-	public SecretApprovalMode Mode { get; private set; } = SecretApprovalMode.Preserve;
+	private SecretApprovalWrite _write = SecretApprovalWrite.Preserve;
 
-	public SecretApprovalWrite Write => new(Mode);
+	public SecretApprovalMode Mode => _write.Mode;
+
+	public SecretApprovalWrite Write => _write;
 
 	public void Grant(ClaimsPrincipal? principal)
 	{
-		Mode = principal?.HasClaim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope) == true
-			? SecretApprovalMode.Approve
-			: SecretApprovalMode.Preserve;
+		_write = principal?.HasClaim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope) == true
+			? SecretApprovalWrite.Approve
+			: principal?.HasClaim(AuthDefaults.ScopeClaim, AuthDefaults.McpScope) == true
+				? SecretApprovalWrite.Withhold
+				: SecretApprovalWrite.Preserve;
+	}
+
+	// The MCP server writes as an untrusted principal; its undo journal alone restores recorded approvals.
+	public void Use(SecretApprovalWrite write)
+	{
+		_write = write;
 	}
 }

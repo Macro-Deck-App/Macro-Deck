@@ -13,6 +13,7 @@ public static class AuthDefaults
 	public const string ScopeClaim = "scope";
 	public const string AdminScope = "admin";
 	public const string ClientScope = "client";
+	public const string McpScope = "mcp";
 
 	public const string DeviceClaim = "device";
 

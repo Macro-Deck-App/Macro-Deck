@@ -15,6 +15,8 @@ internal sealed class OpenFileActionDefinition : IActionDefinition
 	}
 
 	public string Id => "open-file";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Files;
 	public LocalizedText Name => AppStrings.Integrations.System.Actions.OpenFile.Name();
 	public LocalizedText Description => AppStrings.Integrations.System.Actions.OpenFile.Description();
 

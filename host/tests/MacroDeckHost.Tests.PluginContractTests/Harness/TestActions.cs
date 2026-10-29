@@ -102,3 +102,8 @@ internal sealed class TestRoleAction(string id, string? role) : TestAction(id), 
 {
 	public string? Role { get; } = role;
 }
+
+internal sealed class TestRiskAction(string id, ActionRiskCategory category) : TestAction(id), IActionDefinition
+{
+	public ActionRiskCategory RiskCategory { get; } = category;
+}

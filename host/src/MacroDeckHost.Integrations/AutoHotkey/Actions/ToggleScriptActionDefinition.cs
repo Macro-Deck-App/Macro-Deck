@@ -25,6 +25,8 @@ internal sealed class ToggleScriptActionDefinition : IDynamicOptionsActionDefini
 
 	public string Id => AutoHotkeyActions.ToggleId;
 
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Scripts;
+
 	public LocalizedText Name => Strings.Name();
 
 	public LocalizedText Description => Strings.Description();

@@ -17,6 +17,8 @@ internal sealed class RestartScriptActionDefinition : IDynamicOptionsActionDefin
 
 	public string Id => AutoHotkeyActions.RestartId;
 
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Scripts;
+
 	public LocalizedText Name => Strings.Name();
 
 	public LocalizedText Description => Strings.Description();

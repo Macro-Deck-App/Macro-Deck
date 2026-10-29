@@ -18,12 +18,9 @@ public sealed record FlowBlockContent(
 
 	public static FlowBlockContent FromJson(JsonElement block)
 	{
-		var integrationId = StringProperty(block, "integrationId");
-		var actionId = StringProperty(block, "actionId");
-		if (string.IsNullOrWhiteSpace(integrationId) || string.IsNullOrWhiteSpace(actionId))
-		{
-			(integrationId, actionId) = SplitBlockType(StringProperty(block, "blockType"));
-		}
+		var (integrationId, actionId) = ActionFlowJson.ResolveActionIdentity(StringProperty(block, "integrationId"),
+			StringProperty(block, "actionId"),
+			StringProperty(block, "blockType"));
 
 		var parameters = new List<FlowBlockParameter>();
 		if (TryGetProperty(block, "parameters", out var stored) && stored.ValueKind == JsonValueKind.Array)
@@ -47,22 +44,6 @@ public sealed record FlowBlockContent(
 		}
 
 		return new FlowBlockContent(integrationId, actionId, parameters);
-	}
-
-	public static (string? IntegrationId, string? ActionId) SplitBlockType(string? blockType)
-	{
-		if (string.IsNullOrWhiteSpace(blockType))
-		{
-			return (null, null);
-		}
-
-		var separatorIndex = blockType.IndexOf('.', StringComparison.Ordinal);
-		if (separatorIndex <= 0 || separatorIndex >= blockType.Length - 1)
-		{
-			return (null, null);
-		}
-
-		return (blockType[..separatorIndex], blockType[(separatorIndex + 1)..]);
 	}
 
 	internal static string? StringProperty(JsonElement element, string name)
@@ -115,7 +96,7 @@ public static class FlowSecretBlocks
 			{
 				foreach (var flow in document.RootElement.EnumerateArray())
 				{
-					Collect(flow, blocks);
+					Collect(flow, blocks, true);
 				}
 			}
 
@@ -125,6 +106,38 @@ public static class FlowSecretBlocks
 		{
 			return [];
 		}
+	}
+
+	public static IReadOnlyList<FlowBlockSnapshot> ActionBlocksOfFlows(string? flowsJson)
+	{
+		if (string.IsNullOrWhiteSpace(flowsJson))
+		{
+			return [];
+		}
+
+		try
+		{
+			using var document = JsonDocument.Parse(flowsJson);
+			var blocks = new List<FlowBlockSnapshot>();
+			if (document.RootElement.ValueKind == JsonValueKind.Array)
+			{
+				foreach (var flow in document.RootElement.EnumerateArray())
+				{
+					Collect(flow, blocks, false);
+				}
+			}
+
+			return blocks;
+		}
+		catch (JsonException)
+		{
+			return [];
+		}
+	}
+
+	public static IReadOnlyList<FlowBlockSnapshot> ActionBlocksOfWidgetData(string? widgetData)
+	{
+		return WidgetFlowsJson.TryExtract(widgetData, out var flows) ? ActionBlocksOfFlows(flows) : [];
 	}
 
 	public static FlowBlockSnapshot? Parse(string raw)
@@ -143,17 +156,19 @@ public static class FlowSecretBlocks
 		}
 	}
 
-	private static void Collect(JsonElement node, List<FlowBlockSnapshot> blocks)
+	private static void Collect(JsonElement node, List<FlowBlockSnapshot> blocks, bool secretCarryingOnly)
 	{
 		if (node.ValueKind != JsonValueKind.Object)
 		{
 			return;
 		}
 
-		if (string.Equals(FlowBlockContent.StringProperty(node, "type"), "action", StringComparison.OrdinalIgnoreCase))
+		if (ActionFlowJson.IsActionBlock(FlowBlockContent.StringProperty(node, "type"),
+			FlowBlockContent.StringProperty(node, "integrationId"),
+			FlowBlockContent.StringProperty(node, "blockType")))
 		{
 			var content = FlowBlockContent.FromJson(node);
-			if (content.CarriesSecretReference)
+			if (!secretCarryingOnly || content.CarriesSecretReference)
 			{
 				blocks.Add(new FlowBlockSnapshot(FlowBlockContent.StringProperty(node, "id") ?? string.Empty,
 					node.GetRawText(),
@@ -166,7 +181,7 @@ public static class FlowSecretBlocks
 		{
 			foreach (var child in children.EnumerateArray())
 			{
-				Collect(child, blocks);
+				Collect(child, blocks, secretCarryingOnly);
 			}
 		}
 
@@ -175,7 +190,7 @@ public static class FlowSecretBlocks
 		{
 			foreach (var branch in branches.EnumerateArray())
 			{
-				Collect(branch, blocks);
+				Collect(branch, blocks, secretCarryingOnly);
 			}
 		}
 	}

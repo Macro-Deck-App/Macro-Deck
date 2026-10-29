@@ -44,6 +44,21 @@ internal sealed class AdbIntegrationTests
 	}
 
 	[Test]
+	public void Actions_that_reach_outside_macro_deck_declare_their_risk_category()
+	{
+		var categories = _integration.Actions.ToDictionary(action => action.Id, action => action.RiskCategory);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(categories["start-app"], Is.EqualTo(ActionRiskCategory.Programs));
+			Assert.That(categories["input-text"], Is.EqualTo(ActionRiskCategory.Input));
+			Assert.That(categories["key-event"], Is.EqualTo(ActionRiskCategory.Input));
+			Assert.That(categories["reboot"], Is.EqualTo(ActionRiskCategory.Power));
+			Assert.That(categories["wake"], Is.EqualTo(ActionRiskCategory.None));
+		});
+	}
+
+	[Test]
 	public void The_integration_is_identified()
 	{
 		var attribute = (MacroDeckIntegrationAttribute)typeof(AdbIntegration)

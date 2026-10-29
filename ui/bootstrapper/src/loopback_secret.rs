@@ -92,7 +92,11 @@ pub fn persisted_path(config_dir: &Path) -> PathBuf {
 }
 
 pub fn load(config_dir: &Path) -> Option<String> {
-    std::fs::read_to_string(persisted_path(config_dir))
+    load_file(&persisted_path(config_dir))
+}
+
+pub fn load_file(path: &Path) -> Option<String> {
+    std::fs::read_to_string(path)
         .ok()
         .map(|raw| raw.trim().to_string())
         .filter(|v| is_valid_secret(v))
@@ -169,6 +173,18 @@ pub async fn prove(port: u16, timeout: Duration) -> bool {
     let Some(secret) = secret() else {
         return false;
     };
+    let proven = prove_with(&secret, port, timeout).await;
+    if let Ok(mut current) = CURRENT.lock() {
+        if proven {
+            current.verified_port = Some(port);
+        } else if current.verified_port == Some(port) {
+            current.verified_port = None;
+        }
+    }
+    proven
+}
+
+pub async fn prove_with(secret: &str, port: u16, timeout: Duration) -> bool {
     let nonce = new_nonce();
     let Ok(client) = http_client(timeout) else {
         return false;
@@ -184,21 +200,18 @@ pub async fn prove(port: u16, timeout: Duration) -> bool {
         }
         _ => None,
     };
-    let proven = match (
+    match (
         answer.and_then(|answer| hex::decode(answer.proof).ok()),
-        keyed(&secret, &format!("{PROOF_LABEL}{nonce}")),
+        keyed(secret, &format!("{PROOF_LABEL}{nonce}")),
     ) {
         (Some(answer), Some(expected)) => expected.verify_slice(&answer).is_ok(),
         _ => false,
-    };
-    if let Ok(mut current) = CURRENT.lock() {
-        if proven {
-            current.verified_port = Some(port);
-        } else if current.verified_port == Some(port) {
-            current.verified_port = None;
-        }
     }
-    proven
+}
+
+#[cfg(test)]
+pub fn proof_for(secret: &str, nonce: &str) -> Option<String> {
+    mac(secret, &format!("{PROOF_LABEL}{nonce}"))
 }
 
 pub async fn secret_for(port: u16) -> Option<String> {

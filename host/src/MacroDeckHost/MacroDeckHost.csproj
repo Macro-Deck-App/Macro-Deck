@@ -75,6 +75,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="ModelContextProtocol.AspNetCore" />
         <PackageReference Include="Serilog" />
         <PackageReference Include="Serilog.Extensions.Hosting" />
         <PackageReference Include="Serilog.Sinks.Console" />

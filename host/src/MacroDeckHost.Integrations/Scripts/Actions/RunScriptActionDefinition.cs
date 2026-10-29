@@ -16,6 +16,8 @@ internal sealed class RunScriptActionDefinition : IDynamicOptionsActionDefinitio
 	}
 
 	public string Id => "run-script";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Scripts;
 	public string? Role => ActionRoles.RunScript;
 	public LocalizedText Name => AppStrings.Integrations.Scripts.Actions.RunScriptName();
 	public LocalizedText Description => AppStrings.Integrations.Scripts.Actions.RunScriptDescription();

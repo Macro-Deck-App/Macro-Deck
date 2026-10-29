@@ -146,6 +146,73 @@ public sealed class UiWebSocketOversizedMessageTests
 		});
 	}
 
+	[Test]
+	public async Task A_response_that_cannot_be_serialized_is_reported_and_the_session_carries_on()
+	{
+		var socket = new RecordingWebSocket();
+		var channel = Channel.CreateUnbounded<UiWebSocketEnvelope>();
+		using var cancellation = new CancellationTokenSource();
+		channel.Writer.TryWrite(Unserializable("response", "request-1"));
+		channel.Writer.TryWrite(Small());
+		channel.Writer.TryComplete();
+
+		await UiWebSocketEndpoint.WriteAsync(socket, channel.Reader, cancellation, TimeProvider.System);
+
+		var sent = socket.Sent.Select(Read).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sent.Select(envelope => envelope.Kind), Is.EqualTo(new[] { "error", "message" }));
+			Assert.That(sent[0].CorrelationId, Is.EqualTo("request-1"));
+			Assert.That(socket.Aborted, Is.False, "one unserializable message must not end the session");
+			Assert.That(cancellation.IsCancellationRequested, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_pushed_message_that_cannot_be_serialized_is_dropped_and_the_session_carries_on()
+	{
+		var socket = new RecordingWebSocket();
+		var channel = Channel.CreateUnbounded<UiWebSocketEnvelope>();
+		using var cancellation = new CancellationTokenSource();
+		channel.Writer.TryWrite(Unserializable("message", null));
+		channel.Writer.TryWrite(Small());
+		channel.Writer.TryComplete();
+
+		await UiWebSocketEndpoint.WriteAsync(socket, channel.Reader, cancellation, TimeProvider.System);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(socket.Sent.Select(Read).Select(envelope => envelope.Type),
+				Is.EqualTo(new[] { "AfterTheFailure" }));
+			Assert.That(socket.Aborted, Is.False);
+			Assert.That(socket.ClosedWith, Is.Null);
+			Assert.That(cancellation.IsCancellationRequested, Is.False);
+		});
+	}
+
+	private static UiWebSocketEnvelope Unserializable(string kind, string? correlationId)
+	{
+		return new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
+			kind,
+			"Unserializable",
+			null,
+			correlationId,
+			double.NaN,
+			null);
+	}
+
+	private static UiWebSocketEnvelope Small()
+	{
+		return new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
+			"message",
+			"AfterTheFailure",
+			null,
+			null,
+			"small",
+			null);
+	}
+
 	private static UiWebSocketEnvelope Oversized(string kind, string? correlationId)
 	{
 		return new UiWebSocketEnvelope(UiWebSocketProtocol.Version,

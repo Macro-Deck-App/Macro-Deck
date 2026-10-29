@@ -15,6 +15,7 @@ const tree = (text: string): UiNode =>
 class FakeConnection {
   readonly calls: Array<{ type: string; payload: unknown }> = [];
   accept = true;
+  refusalCode: string | undefined = undefined;
   attach = true;
   holdAttach = false;
   private heldAttaches: Array<{ resolve: (value: unknown) => void; reject: (reason: unknown) => void }> = [];
@@ -23,7 +24,11 @@ class FakeConnection {
   request<T>(type: string, payload?: unknown): Promise<T> {
     this.calls.push({ type, payload });
     if (type === 'OpenWidgetUiSession') {
-      return Promise.resolve({ accepted: this.accept, sessionId: `s${++this.next}` } as unknown as T);
+      return Promise.resolve({
+        accepted: this.accept,
+        sessionId: `s${++this.next}`,
+        code: this.accept ? undefined : this.refusalCode,
+      } as unknown as T);
     }
     if (type === 'AttachUiSession') {
       if (this.holdAttach) {
@@ -481,6 +486,88 @@ describe('WidgetSessions', () => {
     expect(connection.calls.filter(c => c.type === 'OpenWidgetUiSession').length).toBe(2);
     store.treeUpdated('s2', 1, tree('Lights'));
     expect(sessions.treeFor('w1')).toBeDefined();
+  });
+
+  describe('when the provider has no session slot free', () => {
+    beforeEach(() => {
+      connection.accept = false;
+      connection.refusalCode = 'TOO_MANY_SESSIONS';
+    });
+
+    it('asks again after a backoff and shows the tile once a slot frees up', async () => {
+      sessions.sync([widget('w1')]);
+      await settle();
+      clock.advance(999);
+      await settle();
+      expect(connection.opens()).toBe(1);
+
+      connection.accept = true;
+      clock.advance(1);
+      await settle();
+
+      expect(connection.opens()).toBe(2);
+      store.treeUpdated('s2', 1, tree('Lights'));
+      expect(sessions.treeFor('w1')).toBeDefined();
+    });
+
+    it('waits longer before each further attempt and gives up after the last one', async () => {
+      sessions.sync([widget('w1')]);
+      await settle();
+      for (const delay of [1000, 2000, 4000, 8000, 16000, 16000]) {
+        clock.advance(delay - 1);
+        await settle();
+        const before = connection.opens();
+        clock.advance(1);
+        await settle();
+        expect(connection.opens()).toBe(before + 1);
+      }
+
+      clock.advance(60000);
+      await settle();
+      expect(connection.opens()).toBe(7);
+    });
+
+    it('neither opens early nor twice when the deck changes while it waits', async () => {
+      sessions.sync([widget('w1')]);
+      await settle();
+      sessions.sync([widget('w1')]);
+      await settle();
+      expect(connection.opens()).toBe(1);
+
+      clock.advance(1000);
+      await settle();
+      expect(connection.opens()).toBe(2);
+    });
+
+    it('stops asking once the widget left the deck', async () => {
+      sessions.sync([widget('w1')]);
+      await settle();
+      sessions.sync([]);
+      clock.advance(60000);
+      await settle();
+
+      expect(connection.opens()).toBe(1);
+    });
+
+    it('stops asking when the connection drops', async () => {
+      sessions.sync([widget('w1')]);
+      await settle();
+      sessions.reset();
+      clock.advance(60000);
+      await settle();
+
+      expect(connection.opens()).toBe(1);
+    });
+
+    it('does not ask again on its own for any other refusal', async () => {
+      connection.refusalCode = 'PROVIDER_UNAVAILABLE';
+      sessions.sync([widget('w1')]);
+      await settle();
+      clock.advance(60000);
+      await settle();
+
+      expect(connection.opens()).toBe(1);
+    });
   });
 
   it('forgets everything when the connection drops, because the host does too', async () => {

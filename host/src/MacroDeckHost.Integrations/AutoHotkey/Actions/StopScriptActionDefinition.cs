@@ -17,6 +17,8 @@ internal sealed class StopScriptActionDefinition : IDynamicOptionsActionDefiniti
 
 	public string Id => AutoHotkeyActions.StopId;
 
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Scripts;
+
 	public LocalizedText Name => Strings.Name();
 
 	public LocalizedText Description => Strings.Description();

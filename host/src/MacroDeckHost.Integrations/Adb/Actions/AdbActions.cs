@@ -45,7 +45,8 @@ internal static class AdbActions
 				(target, parameters, ct) => RequireText(parameters,
 					"package",
 					"A package name is required.",
-					package => target.RunAsync(device => device.StartAppAsync(package, ct)))),
+					package => target.RunAsync(device => device.StartAppAsync(package, ct))),
+				ActionRiskCategory.Programs),
 
 			new AdbActionDefinition(services,
 				"stop-app",
@@ -92,7 +93,8 @@ internal static class AdbActions
 				(target, parameters, ct) => RequireText(parameters,
 					"text",
 					"Text is required.",
-					text => target.RunAsync(device => device.InputTextAsync(text, ct)))),
+					text => target.RunAsync(device => device.InputTextAsync(text, ct))),
+				ActionRiskCategory.Input),
 
 			new AdbActionDefinition(services,
 				"key-event",
@@ -112,7 +114,8 @@ internal static class AdbActions
 					return Enum.TryParse<AndroidKey>(raw, out var key)
 						? target.RunAsync(device => device.SendKeyAsync(key, ct))
 						: Task.FromResult(AdbOutcome.Fail(AndroidDeviceErrorCode.InvalidArgument, "Unknown key."));
-				}),
+				},
+				ActionRiskCategory.Input),
 
 			new AdbActionDefinition(services,
 				"tap",
@@ -208,7 +211,8 @@ internal static class AdbActions
 						? parsed
 						: AndroidRebootMode.Normal;
 					return target.RunAsync(device => device.RebootAsync(mode, ct));
-				}),
+				},
+				ActionRiskCategory.Power),
 
 			new ScreenshotActionDefinition(services)
 		];

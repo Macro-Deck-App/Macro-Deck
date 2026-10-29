@@ -1,4 +1,5 @@
 import { GridWidget, UiSessionStore, type UiNode } from '@macro-deck/runtime';
+import { MAX_BUSY_RETRIES, TOO_MANY_SESSIONS, busyRetryDelayMs } from './busy-retry';
 
 interface SessionOpener {
   request<T>(type: string, payload?: unknown): Promise<T>;
@@ -21,13 +22,14 @@ function args(...values: unknown[]): unknown[] {
 interface OpenResponse {
   accepted?: boolean;
   sessionId?: string;
+  code?: string;
 }
 
 export const WIDGET_SESSION_MEMO_CAPACITY = 120;
 export const WIDGET_SESSION_CLOSE_GRACE_MS = 1000;
 const MAX_REOPENS_WITHOUT_A_TREE = 3;
 
-type HandshakeOutcome = 'live' | 'refused' | 'ended';
+type HandshakeOutcome = 'live' | 'refused' | 'busy' | 'ended';
 
 export class WidgetSessions {
   private readonly sessionByWidget: { [widgetId: string]: string } = {};
@@ -36,6 +38,8 @@ export class WidgetSessions {
   private readonly wanted: { [widgetId: string]: true } = {};
   private readonly reopens: { [widgetId: string]: number } = {};
   private readonly closing: { [widgetId: string]: unknown } = {};
+  private readonly retrying: { [widgetId: string]: unknown } = {};
+  private readonly busyRetries: { [widgetId: string]: number } = {};
   private readonly outdated: { [widgetId: string]: true } = {};
 
   private readonly lastTree: { [widgetId: string]: UiNode } = {};
@@ -95,6 +99,12 @@ export class WidgetSessions {
     }
     for (let index = 0; index < widgets.length; index++) this.wanted[widgets[index].id] = true;
 
+    for (const widgetId in this.retrying) {
+      if (Object.prototype.hasOwnProperty.call(this.retrying, widgetId) && !this.wanted[widgetId]) {
+        this.cancelRetry(widgetId);
+      }
+    }
+
     for (const widgetId in this.sessionByWidget) {
       if (!Object.prototype.hasOwnProperty.call(this.sessionByWidget, widgetId)) continue;
       if (this.wanted[widgetId]) this.cancelClose(widgetId);
@@ -104,7 +114,7 @@ export class WidgetSessions {
 
     for (let index = 0; index < widgets.length; index++) {
       const widget = widgets[index];
-      if (this.sessionByWidget[widget.id] || this.opening[widget.id]) continue;
+      if (this.sessionByWidget[widget.id] || this.opening[widget.id] || this.isRetrying(widget.id)) continue;
       void this.open(widget);
     }
   }
@@ -129,6 +139,9 @@ export class WidgetSessions {
   }
 
   reset(): void {
+    for (const widgetId in this.retrying) {
+      if (Object.prototype.hasOwnProperty.call(this.retrying, widgetId)) this.cancelRetry(widgetId);
+    }
     for (const widgetId in this.sessionByWidget) {
       if (Object.prototype.hasOwnProperty.call(this.sessionByWidget, widgetId)) {
         this.cancelClose(widgetId);
@@ -167,8 +180,9 @@ export class WidgetSessions {
 
   private async open(widget: GridWidget): Promise<void> {
     this.opening[widget.id] = true;
+    let outcome: HandshakeOutcome = 'refused';
     try {
-      while (await this.handshake(widget) === 'ended' && this.wanted[widget.id]) {
+      while ((outcome = await this.handshake(widget)) === 'ended' && this.wanted[widget.id]) {
         const reopens = (this.reopens[widget.id] ?? 0) + 1;
         if (reopens > MAX_REOPENS_WITHOUT_A_TREE) return;
         this.reopens[widget.id] = reopens;
@@ -176,6 +190,34 @@ export class WidgetSessions {
     } finally {
       delete this.opening[widget.id];
     }
+    if (outcome === 'busy') this.retryLater(widget);
+    else delete this.busyRetries[widget.id];
+  }
+
+  private retryLater(widget: GridWidget): void {
+    const attempt = this.busyRetries[widget.id] ?? 0;
+    if (!this.wanted[widget.id] || attempt >= MAX_BUSY_RETRIES) {
+      delete this.busyRetries[widget.id];
+      return;
+    }
+    this.busyRetries[widget.id] = attempt + 1;
+    this.retrying[widget.id] = this.timers.set(() => {
+      delete this.retrying[widget.id];
+      if (this.wanted[widget.id] && !this.sessionByWidget[widget.id] && !this.opening[widget.id]) {
+        void this.open(widget);
+      }
+    }, busyRetryDelayMs(attempt));
+  }
+
+  private isRetrying(widgetId: string): boolean {
+    return Object.prototype.hasOwnProperty.call(this.retrying, widgetId);
+  }
+
+  private cancelRetry(widgetId: string): void {
+    delete this.busyRetries[widgetId];
+    if (!this.isRetrying(widgetId)) return;
+    this.timers.clear(this.retrying[widgetId]);
+    delete this.retrying[widgetId];
   }
 
   // The host tells only attached connections when a session ends, so a session that dies between
@@ -188,7 +230,9 @@ export class WidgetSessions {
     } catch {
       return 'refused';
     }
-    if (!response || response.accepted !== true || typeof response.sessionId !== 'string') return 'refused';
+    if (!response || response.accepted !== true || typeof response.sessionId !== 'string') {
+      return response?.code === TOO_MANY_SESSIONS ? 'busy' : 'refused';
+    }
 
     const sessionId = response.sessionId;
     this.sessionByWidget[widget.id] = sessionId;
@@ -279,6 +323,7 @@ export class WidgetSessions {
 
   private close(widgetId: string): void {
     this.cancelClose(widgetId);
+    this.cancelRetry(widgetId);
     const sessionId = this.sessionByWidget[widgetId];
     delete this.sessionByWidget[widgetId];
     delete this.reopens[widgetId];

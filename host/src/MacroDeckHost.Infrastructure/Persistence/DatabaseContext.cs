@@ -47,6 +47,8 @@ public class DatabaseContext : DbContext
 
 	public DbSet<PluginAccessTokenEntity> PluginAccessTokens => Set<PluginAccessTokenEntity>();
 
+	public DbSet<McpAccessTokenEntity> McpAccessTokens => Set<McpAccessTokenEntity>();
+
 	public DbSet<PluginRegistrationEntity> PluginRegistrations => Set<PluginRegistrationEntity>();
 
 	public DbSet<PluginTrustRecordEntity> PluginTrustRecords => Set<PluginTrustRecordEntity>();

@@ -62,6 +62,28 @@ public class SystemIntegrationTests
 	}
 
 	[Test]
+	public void Actions_that_reach_outside_macro_deck_declare_their_risk_category()
+	{
+		using var integration = Create();
+
+		var categories = integration.Actions.ToDictionary(action => action.Id, action => action.RiskCategory);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(categories["run-command"], Is.EqualTo(ActionRiskCategory.Programs));
+			Assert.That(categories["launch-application"], Is.EqualTo(ActionRiskCategory.Programs));
+			Assert.That(categories["kill-application"], Is.EqualTo(ActionRiskCategory.Programs));
+			Assert.That(categories["open-file"], Is.EqualTo(ActionRiskCategory.Files));
+			Assert.That(categories["open-folder"], Is.EqualTo(ActionRiskCategory.Files));
+			Assert.That(categories["shut-down"], Is.EqualTo(ActionRiskCategory.Power));
+			Assert.That(categories["restart"], Is.EqualTo(ActionRiskCategory.Power));
+			Assert.That(categories["sleep"], Is.EqualTo(ActionRiskCategory.Power));
+			Assert.That(categories["lock-computer"], Is.EqualTo(ActionRiskCategory.None));
+			Assert.That(categories["set-volume"], Is.EqualTo(ActionRiskCategory.None));
+		});
+	}
+
+	[Test]
 	public void Exposes_all_sixteen_actions_with_stable_ids()
 	{
 		var integration = Create();

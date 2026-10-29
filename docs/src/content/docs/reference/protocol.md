@@ -182,6 +182,10 @@ are listed in the descriptor's `capabilityKinds`:
   the optional `isShareable` (`VariableDefinition.IsShareable`), additively in major `3` and within each
   kind's capability version. An absent `role` means no role and an absent `isShareable` means `true`,
   which is what a plugin built before them sends; an older host ignores both.
+- `ActionDescriptorDto` gained the optional `riskCategory` (`IActionDefinition.RiskCategory` as its
+  lower-case name: `scripts`, `programs`, `input`, `network`, `files`, `power`), additively in major `3`
+  and within capability version `1`. An absent or unknown value means none, which is what a plugin built
+  before it sends; an older host ignores it.
 - `actions` `execute` arguments gained the optional `scriptId` and `automationId`
   (`ActionExecutionContext.ScriptId` and `AutomationId`), additively in major `3` and within capability
   version `1`. A host that predates them leaves them out, which a plugin reads as a step outside a script

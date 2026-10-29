@@ -1063,6 +1063,27 @@ Bağlantı noktasını kullanan uygulamayı (veya hâlâ çalışan bir Macro De
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck tamamen güncellenemedi</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} ayarlanmamış. Claude Desktop uzantısını Ayarlar &gt; Yapay zekâ istemcileri bölümünden yeniden yükleyin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck çalışmıyor. Macro Deck'i başlatıp yeniden deneyin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck erişim belirtecini reddetti, çünkü belirteç iptal edildi veya silindi. Ayarlar &gt; Yapay zekâ istemcileri bölümünde yeni bir belirteç oluşturun ve uzantıyı yeniden yükleyin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck'te kullanılabilir bir MCP sunucusu yok, çünkü uygulama kilitli veya yapay zekâ istemcilerini desteklemiyor. Macro Deck'in kilidini açıp yeniden deneyin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck isteği reddetti (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>Macro Deck ile bağlantı yanıt gelmeden koptu. İstek çalışmış olabilir, bu yüzden yeniden denemeden önce kontrol edin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>MCP oturumu başlatılmadı.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Macro Deck hakkında</value>
   </data>
@@ -2939,6 +2960,24 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Bu kurtarma anahtarı bu kurulumun kilidini açmıyor.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Bu erişim belirteci artık kullanılamaz. Uzantıyı indirmek için yeni bir belirteç oluşturun.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Claude Desktop uzantısı yalnızca macOS ve Windows'a yüklenmiş Macro Deck uygulamasında kullanılabilir.</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Bir sağlayıcı seçin.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>Bu erişim belirteci zaten iptal edildi.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>En fazla 64 karakterlik bir ad girin.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>Bu kimliğe sahip bir erişim belirteci yok.</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Geçiş tamamlanamadı.</value>
@@ -17149,6 +17188,107 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>En düşük düzey</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Claude Desktop için indir</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Macro Deck'i yüklemek için indirilen dosyayı Claude Desktop'ta açın. Dosya bu belirteci içerdiğinden yüklemeden sonra silin.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Claude Desktop uzantısı kaydedilemedi</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>Yapay zekâ istemcisi</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>İstemci yapılandırması</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Bağlanma zamanı</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} bağlantı</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>{count} bağlantı</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>Bağlı yapay zekâ istemcisi yok.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Bağlı istemciler</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Claude veya VS Code gibi yapay zekâ asistanlarının Model Context Protocol (MCP) üzerinden kurulumunuzu incelemesine, oluşturmasına ve eylem çalıştırmasına izin verin. Gizli değerlerinizi asla okuyamazlar.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>Henüz erişim belirteci yok</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Bir belirteç oluşturun ve Macro Deck'e bağlamak için yapay zekâ istemcinize ekleyin.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>Bu bilgisayarda bu adresi kullanın. Ağınızdaki başka bir bilgisayarda 127.0.0.1 yerine bu bilgisayarın ağ adresini yazın. Her bağlantı için bir erişim belirteci gerekir.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Sunucu adresi</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>MCP sunucusu şu anda kullanılamıyor.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>Yapay zekâ istemcileri</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>Yapay zekâ istemcisi ayarları yüklenemedi</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Hiçbir zaman</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Diğer istemciler</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>İzin ver</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Önce sorduğu eylemler: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Önce sor</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>Varsayılan: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>Her sağlayıcı için yapay zekâ istemcilerinin eylemlerini doğrudan çalıştırabileceğini, önce size sorması gerektiğini veya hiç çalıştıramayacağını seçin. Bu, yapay zekâ istemcilerinin oluşturduğu akışlardaki eylemler için de geçerlidir.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Kapalı</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>Ayar kaydedilemedi</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Yapay zekâ istemcilerinin çalıştırabileceği eylemler</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} kalıcı olarak silinir. Zaten iptal edildiği için hiçbir şey onu kullanamaz.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} hemen çalışmayı bırakır ve onu kullanan tüm yapay zekâ istemcilerinin bağlantısı kesilir.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Erişim belirteçleri</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Bilinmeyen istemci</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Macro Deck hesabı</value>
   </data>
@@ -25270,5 +25410,86 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Yazının kısa bir özeti burada görünür.</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>İzin verildi</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Reddedildi</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Yalnızca yapay zekâ istemcisinden tam olarak bunu istediyseniz izin verin.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>Bu istek zaten yanıtlandı veya süresi doldu. Yapay zekâ istemcisinden tekrar denemesini isteyin.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client}, Macro Deck'ten şunu yapmasını istiyor:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Yapay zekâ istemcisi isteğini onaylayın</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Yapay zekâ istemcisi devam etmeden önce Macro Deck onayınızı istiyor: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Tarayıcınızda açılan Macro Deck sayfasında izin verin veya reddedin: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>İzin ver</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>gizli değer kullanan onaylı bir bloğun okuduğu {name} değişkenini değiştirmek</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}), değerler: {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>gizli değer</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Tarayıcınızda açılan Macro Deck sayfasına {label} gizli değerini girin. Değer Macro Deck içinde kalır.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>{name} değerini gizli değer kullanan onaylı bir bloğa aktarmak</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Claude'un bu bilgisayardaki Macro Deck kurulumunuzla çalışmasını sağlar: düğmeleri, klasörleri ve otomasyonları görüntüleyip oluşturabilir ve eylemleri çalıştırabilir. Claude gizli değerlerinizi asla görmez.</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Bir değer girin.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>Bu bağlantı artık geçerli değil</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>Zaten kullanıldı veya süresi doldu. Yapay zekâ istemcisinden gizli değeri yeniden istemesini isteyin.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client}, Macro Deck'ten bir gizli değeri kaydetmesini istiyor: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Gizli değer girin</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Yazdıklarınızı yalnızca Macro Deck görür. {client} eylemlerde kullanabileceği bir başvuru alır, değeri asla almaz.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Gizli değeri kaydet</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Gizli değer kaydedildi</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>Bu sekmeyi kapatıp {client} uygulamasına dönebilirsiniz.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Gizli değer</value>
   </data>
 </root>

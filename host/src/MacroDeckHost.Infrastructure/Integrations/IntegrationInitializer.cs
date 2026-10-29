@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Email;
@@ -204,13 +205,15 @@ public sealed class IntegrationInitializer
 	{
 		var scope = _serviceScopeFactory.CreateAsyncScope();
 		var variableService = scope.ServiceProvider.GetRequiredService<IVariableService>();
+		var mcpWriteGuard = scope.ServiceProvider.GetService<IMcpVariableWriteGuard>();
 
 		var variableApi = new IntegrationVariableApi(integration.Id,
 			variableService,
 			_refreshSignal,
 			_pollingInvalidation,
 			_variableHistory,
-			new VariableBindingAppender(_bindingStore, _timeProvider));
+			new VariableBindingAppender(_bindingStore, _timeProvider),
+			mcpWriteGuard);
 		var widgetApi = new IntegrationWidgetApi(integration.Id, _widgetApi, _widgetIconInvalidator, _widgetData);
 		var config = new IntegrationConfig(integration.Id, _serviceScopeFactory);
 
@@ -218,7 +221,9 @@ public sealed class IntegrationInitializer
 			id => new IntegrationEventPublisher(id, _eventBus, _bindingTracker, _logger));
 
 		var context = new IntegrationContext(variableApi,
-			_userVariableApi,
+			mcpWriteGuard is null
+				? _userVariableApi
+				: new McpGuardedUserVariableApi(integration.Id, _userVariableApi, mcpWriteGuard),
 			config,
 			_deckNavigator,
 			_scriptApi,

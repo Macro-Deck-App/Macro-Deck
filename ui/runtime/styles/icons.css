@@ -365,6 +365,10 @@
   mask-image: url('./icons/bell.svg');
   -webkit-mask-image: url('./icons/bell.svg');
 }
+.icon-bot {
+  mask-image: url('./icons/bot.svg');
+  -webkit-mask-image: url('./icons/bot.svg');
+}
 .icon-shield-check {
   mask-image: url('./icons/shield-check.svg');
   -webkit-mask-image: url('./icons/shield-check.svg');

@@ -1063,6 +1063,27 @@
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck 未完整更新</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>未设置 {variable}。请在“设置 &gt; AI 客户端”中重新安装 Claude Desktop 扩展。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck 未运行。请启动 Macro Deck 后重试。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>访问令牌已被撤销或删除，Macro Deck 拒绝了它。请在“设置 &gt; AI 客户端”中创建新令牌，然后重新安装扩展。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck 已锁定或不支持 AI 客户端，因此没有可用的 MCP 服务器。请解锁 Macro Deck 后重试。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck 拒绝了请求（HTTP {status}）。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>在收到响应之前，与 Macro Deck 的连接已断开。请求可能已执行，重试前请先检查。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>MCP 会话尚未初始化。</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>关于 Macro Deck</value>
   </data>
@@ -2939,6 +2960,24 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>该恢复密钥无法解锁此安装。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>此访问令牌已无法使用。请创建新令牌以下载扩展。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Claude Desktop 扩展仅在 macOS 和 Windows 上安装的 Macro Deck 应用中可用。</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>请选择一个提供方。</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>此访问令牌已被吊销。</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>请输入不超过 64 个字符的名称。</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>不存在具有该 ID 的访问令牌。</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>无法完成迁移。</value>
@@ -17149,6 +17188,107 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>最低级别</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>下载 Claude Desktop 扩展</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>在 Claude Desktop 中打开下载的文件，即可在其中安装 Macro Deck。该文件包含此令牌，安装后请将其删除。</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>无法保存 Claude Desktop 扩展</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>AI 客户端</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>客户端配置</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>连接时间</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} 个连接</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>{count} 个连接</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>没有已连接的 AI 客户端。</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>已连接的客户端</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>允许 Claude 或 VS Code 等 AI 助手通过模型上下文协议 (MCP) 查看和构建配置并运行操作。它们永远无法读取密钥。</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>尚无访问令牌</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>创建一个令牌并将其添加到 AI 客户端，即可连接到 Macro Deck。</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>在此电脑上使用此地址。在网络中的其他电脑上，将 127.0.0.1 替换为此电脑的网络地址。每个连接都需要访问令牌。</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>服务器地址</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>MCP 服务器当前不可用。</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>AI 客户端</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>无法加载 AI 客户端设置</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>从未</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>其他客户端</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>允许</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>以下操作先询问：{actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>先询问</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>默认：{mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>按提供方选择 AI 客户端可以直接运行其操作、必须先询问，还是完全不能运行。这也适用于 AI 客户端创建的流程中的操作。</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>无法保存设置</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>AI 客户端可以运行的操作</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} 将被永久删除。它已被吊销，因此无法再被使用。</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} 将立即失效，所有使用它的 AI 客户端都会断开连接。</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>访问令牌</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>未知客户端</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Macro Deck 账户</value>
   </data>
@@ -25252,5 +25392,86 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>文章的简短摘要显示在这里。</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>已允许</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>拒绝</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>已拒绝</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>仅当你确实要求 AI 客户端执行此操作时才允许。</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>该请求已被答复或已过期。请让 AI 客户端重试。</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} 请求 Macro Deck 执行以下操作：</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>确认 AI 客户端请求</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>AI 客户端继续之前，Macro Deck 需要你的确认：{details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>请在浏览器中打开的 Macro Deck 页面上允许或拒绝：{details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>允许</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>更改变量 {name}，一个已批准且使用密钥的块会读取它</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action}（{provider}）</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action}（{provider}），参数：{values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>密钥</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>在浏览器中打开的 Macro Deck 页面上输入密钥 {label}。该值仅保存在 Macro Deck 中。</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>将 {name} 传给一个已批准且使用密钥的块</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>让 Claude 使用此电脑上的 Macro Deck 配置：查看和创建按钮、文件夹和自动化，并运行操作。Claude 永远看不到密钥。</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>请输入一个值。</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>此链接已失效</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>该链接已被使用或已过期。请让 AI 客户端重新请求密钥。</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} 请求 Macro Deck 保存一个密钥：{label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>输入密钥</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>只有 Macro Deck 能看到输入的内容。{client} 只会获得可在操作中使用的引用，永远不会获得值本身。</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>保存密钥</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>密钥已保存</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>可以关闭此标签页并返回 {client}。</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>密钥</value>
   </data>
 </root>

@@ -3,6 +3,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Infrastructure.Mcp;
 using MacroDeckHost.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Serilog;
@@ -94,6 +95,7 @@ public static class StagedRestoreApplier
 			}
 
 			CompleteApply(paths, markerPath, document);
+			McpStateStore.DeleteJournal(paths);
 
 			Log.Information("Applied the staged restore of backup {BackupId}", document.BackupId);
 

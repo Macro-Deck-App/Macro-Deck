@@ -1063,6 +1063,27 @@
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck оновлено не повністю</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>Змінну {variable} не задано. Установіть розширення для Claude Desktop знову в розділі Налаштування &gt; ШІ-клієнти.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck не запущено. Запустіть Macro Deck і спробуйте ще раз.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck відхилив токен доступу: його відкликано або видалено. Створіть новий токен у розділі Налаштування &gt; ШІ-клієнти та встановіть розширення знову.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Сервер MCP у Macro Deck недоступний: застосунок заблоковано або він не підтримує ШІ-клієнтів. Розблокуйте Macro Deck і спробуйте ще раз.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck відхилив запит (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>З'єднання з Macro Deck перервалося до отримання відповіді. Запит міг виконатися, тому перевірте це перед повтором.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>Сеанс MCP не ініціалізовано.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Про Macro Deck</value>
   </data>
@@ -2939,6 +2960,24 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Цей ключ відновлення не розблоковує цю інсталяцію.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Цей токен доступу більше не можна використовувати. Створіть новий токен, щоб завантажити розширення.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Розширення для Claude Desktop доступне лише у встановленому застосунку Macro Deck для macOS і Windows.</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Виберіть постачальника.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>Цей токен доступу вже відкликано.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>Введіть назву довжиною не більше 64 символів.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>Токена доступу з таким ідентифікатором не існує.</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Міграцію не вдалося завершити.</value>
@@ -17149,6 +17188,107 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Мінімальний рівень</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Завантажити для Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Відкрийте завантажений файл у Claude Desktop, щоб установити туди Macro Deck. Файл містить цей токен, тому видаліть його після встановлення.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Не вдалося зберегти розширення для Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>ШІ-клієнт</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>Конфігурація клієнта</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Підключено з</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} підключення</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>Підключення: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>Немає підключених ШІ-клієнтів.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Підключені клієнти</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Дозвольте ШІ-асистентам, як-от Claude або VS Code, переглядати й будувати вашу конфігурацію та запускати дії через Model Context Protocol (MCP). Читати ваші секрети вони не можуть.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>Токенів доступу ще немає</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Створіть токен і додайте його до ШІ-клієнта, щоб підключити його до Macro Deck.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>На цьому комп'ютері використовуйте цю адресу. На іншому комп'ютері в мережі замініть 127.0.0.1 мережевою адресою цього комп'ютера. Для кожного підключення потрібен токен доступу.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Адреса сервера</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>Сервер MCP зараз недоступний.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>ШІ-клієнти</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>Не вдалося завантажити налаштування ШІ-клієнтів</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Ніколи</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Інші клієнти</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>Дозволяти</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Спершу питає для: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Спершу питати</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>Типово: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>Виберіть для кожного постачальника, чи можуть ШІ-клієнти запускати його дії одразу, мають спершу запитати вас або не можуть запускати їх зовсім. Це стосується й дій у потоках, які створюють ШІ-клієнти.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Вимкнено</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>Не вдалося зберегти налаштування</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Дії, які можуть запускати ШІ-клієнти</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Оновити</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} буде видалено назавжди. Його вже відкликано, тож ніщо не може його використати.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} одразу перестане працювати, а всі ШІ-клієнти, які його використовують, буде відключено.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Токени доступу</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Невідомий клієнт</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Обліковий запис Macro Deck</value>
   </data>
@@ -25270,5 +25410,86 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Тут з'являється короткий опис статті.</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Дозволено</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Відхилити</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Відхилено</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Дозволяйте, лише якщо ви просили ШІ-клієнта саме про це.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>На запит уже відповіли, або термін його дії минув. Попросіть ШІ-клієнта спробувати ще раз.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} просить Macro Deck виконати таке:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Підтвердьте запит ШІ-клієнта</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Перш ніж ШІ-клієнт продовжить, Macro Deck потрібне ваше підтвердження: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Дозвольте або відхиліть на сторінці Macro Deck, що відкриється в браузері: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>Дозволити</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>зміна змінної {name}, яку читає схвалений блок із секретом</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}) зі значеннями {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>секрет</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Введіть секрет {label} на сторінці Macro Deck, яка відкриється в браузері. Значення залишається в Macro Deck.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>передавання {name} до схваленого блоку із секретом</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Дає Claude змогу працювати з налаштуванням Macro Deck на цьому комп'ютері: переглядати й створювати кнопки, папки та автоматизації, а також виконувати дії. Claude ніколи не бачить секретів.</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Введіть значення.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>Це посилання більше не дійсне</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>Посилання вже використано або його строк минув. Попросіть ШІ-клієнт запросити секрет ще раз.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} просить Macro Deck зберегти секрет: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Введення секрету</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Введений текст бачить лише Macro Deck. {client} отримує посилання для використання в діях, але ніколи не значення.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Зберегти секрет</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Секрет збережено</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>Цю вкладку можна закрити й повернутися до {client}.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Секрет</value>
   </data>
 </root>

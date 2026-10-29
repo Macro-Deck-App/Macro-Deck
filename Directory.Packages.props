@@ -18,13 +18,14 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
     <!-- Transitive pin: Microsoft.Extensions.Http 10.0.1 already floors this at 10.0.2 via
          Microsoft.Extensions.Logging.Abstractions; 10.0.1 would be a downgrade (NU1109). -->
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
     <!-- MacroDeck.Signing: .NET ships no in-box Ed25519 primitive, and the plugin signature format is
          Ed25519 over the canonical plugin digest. NSec is libsodium-backed and is what the offline root
          and certificate generator already used to issue the certificates in the field, so the same
          primitive verifies them. -->
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.3.0" />
     <PackageVersion Include="NSec.Cryptography" Version="26.4.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />

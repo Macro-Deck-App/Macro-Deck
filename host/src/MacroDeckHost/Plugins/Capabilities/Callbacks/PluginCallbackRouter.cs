@@ -11,6 +11,7 @@ using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Applications;
 using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Deck;
@@ -76,6 +77,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IWidgetApi _widgetApi;
 	private readonly IWidgetIconInvalidator _widgetIconInvalidator;
 	private readonly IUserVariableApi _userVariableApi;
+	private readonly IMcpVariableWriteGuard? _mcpWriteGuard;
 	private readonly IActionInteractions _actionInteractions;
 	private readonly IUiSessionSink _uiSessions;
 	private readonly IPluginDeviceRegistry _deviceRegistry;
@@ -176,8 +178,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		IWeatherBroadcastTrigger? weatherTrigger = null,
 		ILocaleApi? locale = null,
 		IMusicPlayerAlbumColor? albumColor = null,
-		PluginDesktopNotificationCallbacks? desktopNotifications = null)
+		PluginDesktopNotificationCallbacks? desktopNotifications = null,
+		IMcpVariableWriteGuard? mcpWriteGuard = null)
 	{
+		_mcpWriteGuard = mcpWriteGuard;
 		_desktopNotifications = desktopNotifications;
 		_weatherTrigger = weatherTrigger;
 		_albumColor = albumColor;
@@ -451,8 +455,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		CancellationToken cancellationToken)
 	{
 		await using var scope = _scopeFactory.CreateAsyncScope();
-		var variableApi
-			= new IntegrationVariableApi(pluginId, scope.ServiceProvider.GetRequiredService<IVariableService>());
+		var variableApi = new IntegrationVariableApi(pluginId,
+			scope.ServiceProvider.GetRequiredService<IVariableService>(),
+			mcpWriteGuard: scope.ServiceProvider.GetService<IMcpVariableWriteGuard>());
 
 		switch (payload.Operation)
 		{
@@ -674,8 +679,6 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			return HostLocked();
 		}
 
-		_ = pluginId;
-
 		switch (payload.Operation)
 		{
 			case HostOperations.UserVariables.Apply:
@@ -684,6 +687,12 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				if (arguments is null || !Enum.TryParse<UserVariableOperation>(arguments.Operation, out var operation))
 				{
 					return MissingArguments();
+				}
+
+				if (_mcpWriteGuard is not null
+					&& McpGuardedUserVariableApi.Refused(_mcpWriteGuard, pluginId, arguments.Name) is { } refusal)
+				{
+					return HostCallbackResult.Ok(refusal);
 				}
 
 				var result = await _userVariableApi.ApplyInContextAsync(arguments.Name,

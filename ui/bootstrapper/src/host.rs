@@ -237,7 +237,7 @@ pub fn choose_port(
     }
 }
 
-fn read_persisted_port(config_dir: &Path) -> Option<u16> {
+pub fn read_persisted_port(config_dir: &Path) -> Option<u16> {
     std::fs::read_to_string(config_dir.join(PERSISTED_PORT_FILE))
         .ok()
         .and_then(|raw| parse_port(&raw))

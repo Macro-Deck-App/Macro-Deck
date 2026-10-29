@@ -15,6 +15,8 @@ internal sealed class ClickActionDefinition : IActionDefinition
 	}
 
 	public string Id => "click";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Mouse.Actions.Click.Name();
 	public LocalizedText Description => AppStrings.Integrations.Mouse.Actions.Click.Description();
 
