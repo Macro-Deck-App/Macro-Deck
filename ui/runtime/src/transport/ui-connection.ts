@@ -108,7 +108,7 @@ export class UiConnection {
           try {
             notified[index](type, payload);
           } catch (error) {
-            console.error(`A listener for ${type} failed.`, error);
+            console.error('A listener for %s failed.', type, error);
           }
         }
       });

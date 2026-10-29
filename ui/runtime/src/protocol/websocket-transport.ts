@@ -161,7 +161,7 @@ export class WebSocketTransport {
     try {
       handler();
     } catch (error) {
-      console.error(`A handler for ${type} failed.`, error);
+      console.error('A handler for %s failed.', type, error);
     }
   }
 
