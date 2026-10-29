@@ -53,6 +53,11 @@ public static class BackupHttp
 				}
 			}
 		}
+		catch (OperationCanceledException)
+		{
+			DeleteStaged(stagedPath);
+			throw;
+		}
 		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 		{
 			DeleteStaged(stagedPath);

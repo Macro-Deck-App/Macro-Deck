@@ -17183,6 +17183,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Yerel ağda göster</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Bunu yalnızca bu bilgisayarda nginx, Caddy veya Traefik gibi bir ters proxy çalışıyor ve bağlantıları Macro Deck’e iletiyorsa açın. Macro Deck bu durumda her istemci için proxy’nin bildirdiği adresi ve HTTPS durumunu kullanır.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Bu bilgisayardaki bir ters proxy arkasında</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT bu başlatma için ayarlı ve bağlantı noktasını ({port}) belirliyor. Bu geçersiz kılma kaldırılana kadar yapılandırılan değer kullanılmaz.</value>
     <comment>[port:int]</comment>

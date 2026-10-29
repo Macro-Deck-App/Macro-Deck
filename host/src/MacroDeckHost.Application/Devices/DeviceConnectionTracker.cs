@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
@@ -18,6 +19,7 @@ public sealed class DeviceConnectionTracker
 		public string? ClientId;
 		public string? Key;
 		public Action? Abort;
+		public ClaimsPrincipal? Principal;
 	}
 
 	private readonly record struct PendingDisconnect(DateTime At, Guid? DeviceId, string? ClientId);
@@ -43,13 +45,14 @@ public sealed class DeviceConnectionTracker
 
 	public CancellationToken ShutdownToken => _shutdown.Token;
 
-	public void Attach(string connectionId, Guid? deviceId, Action abort)
+	public void Attach(string connectionId, Guid? deviceId, Action abort, ClaimsPrincipal? principal = null)
 	{
 		var entry = GetOrAdd(connectionId);
 		lock (_sync)
 		{
 			entry.DeviceId = deviceId;
 			entry.Abort = abort;
+			entry.Principal = principal;
 		}
 	}
 
@@ -192,6 +195,22 @@ public sealed class DeviceConnectionTracker
 		lock (_sync)
 		{
 			aborts = _connections.Values.Where(entry => entry.DeviceId == deviceId)
+				.Select(entry => entry.Abort)
+				.ToArray();
+		}
+
+		foreach (var abort in aborts)
+		{
+			abort?.Invoke();
+		}
+	}
+
+	public void AbortWhere(Func<ClaimsPrincipal, bool> predicate)
+	{
+		Action?[] aborts;
+		lock (_sync)
+		{
+			aborts = _connections.Values.Where(entry => entry.Principal is { } principal && predicate(principal))
 				.Select(entry => entry.Abort)
 				.ToArray();
 		}

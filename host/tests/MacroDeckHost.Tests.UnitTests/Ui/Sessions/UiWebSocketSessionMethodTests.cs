@@ -203,6 +203,22 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 		Assert.That(refused!.Code, Is.EqualTo("forbidden"));
 	}
 
+	[Test]
+	public void A_device_connection_cannot_open_a_config_session()
+	{
+		using var dispatcher = DispatcherFor("c-device",
+			new Claim(AuthDefaults.DeviceClaim, DeviceA),
+			new Claim(AuthDefaults.ScopeClaim, AuthDefaults.ClientScope));
+		var payload = JsonSerializer.SerializeToElement(new object[]
+				{ new OpenConfigUiSessionRequest { EntryPoint = "action-config", IntegrationId = ProviderId } },
+			UiWebSocketProtocol.Json);
+
+		var refused = Assert.ThrowsAsync<UiWebSocketDispatchException>(() =>
+			dispatcher.DispatchAsync("OpenConfigUiSession", payload, CancellationToken.None));
+
+		Assert.That(refused!.Code, Is.EqualTo("forbidden"));
+	}
+
 	private static async Task Register(UiWebSocketDispatcher dispatcher, string clientId)
 	{
 		var payload = JsonSerializer.SerializeToElement(new object[] { clientId }, UiWebSocketProtocol.Json);

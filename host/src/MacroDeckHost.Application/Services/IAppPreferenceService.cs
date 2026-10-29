@@ -43,7 +43,8 @@ public record NetworkSettings(
 	string? TlsAuthorityFingerprint,
 	DateTimeOffset? TlsAuthorityNotBefore,
 	DateTimeOffset? TlsAuthorityNotAfter,
-	bool DiscoveryEnabled);
+	bool DiscoveryEnabled,
+	bool ReverseProxyTrusted);
 
 public record AdbSettings(
 	bool Enabled,
@@ -109,14 +110,15 @@ public interface IAppPreferenceService
 
 	Task<NetworkSettings> GetNetwork();
 
-	// Unlike the TLS parameters, a null discoveryEnabled keeps the stored value, so a caller that only
-	// changes the port or TLS never switches network discovery on or off as a side effect.
+	// Unlike the TLS parameters, a null discoveryEnabled or reverseProxyTrusted keeps the stored value, so a
+	// caller that only changes the port or TLS never switches either on or off as a side effect.
 	Task<NetworkSettings> SetNetwork(
 		int? publicPort,
 		bool? tlsEnabled = null,
 		string? tlsMode = null,
 		int? tlsHttpsPort = null,
-		bool? discoveryEnabled = null);
+		bool? discoveryEnabled = null,
+		bool? reverseProxyTrusted = null);
 
 	Task<AdbSettings> GetAdb();
 

@@ -17180,6 +17180,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Im lokalen Netzwerk anzeigen</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Schalte das nur ein, wenn auf diesem Computer ein Reverse Proxy wie nginx, Caddy oder Traefik läuft und Verbindungen an Macro Deck weiterleitet. Macro Deck übernimmt dann für jeden Client die Adresse und den HTTPS-Status, die der Proxy meldet.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Hinter einem Reverse Proxy auf diesem Computer</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT ist für diesen Start gesetzt und bestimmt den Port ({port}). Der konfigurierte Wert bleibt ungenutzt, bis diese Überschreibung entfernt wird.</value>
     <comment>[port:int]</comment>

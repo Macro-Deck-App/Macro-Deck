@@ -17183,6 +17183,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>ローカルネットワークに表示</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>nginx、Caddy、Traefik などのリバースプロキシがこのコンピューターで動作し、接続を Macro Deck に転送している場合にのみオンにしてください。Macro Deck は各クライアントについて、プロキシが伝えるアドレスと HTTPS の状態を使用します。</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>このコンピューター上のリバースプロキシ経由</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>この起動では MACRO_DECK_PORT が設定されており、ポート ({port}) を決めています。この上書きを削除するまで、設定された値は使用されません。</value>
     <comment>[port:int]</comment>

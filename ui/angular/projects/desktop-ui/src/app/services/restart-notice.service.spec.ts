@@ -46,6 +46,7 @@ describe('RestartNoticeService', () => {
     tlsAuthorityNotBefore: null,
     tlsAuthorityNotAfter: null,
     discoveryEnabled: true,
+    reverseProxyTrusted: false,
   };
 
   beforeEach(() => {

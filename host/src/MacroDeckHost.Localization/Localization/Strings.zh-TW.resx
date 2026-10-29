@@ -17183,6 +17183,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>在區域網路上顯示</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>僅在此電腦上執行 nginx、Caddy 或 Traefik 等反向 Proxy，並將連線轉送給 Macro Deck 時才開啟。開啟後，Macro Deck 會使用 Proxy 回報的每個用戶端位址與 HTTPS 狀態。</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>位於此電腦上的反向 Proxy 之後</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>本次啟動已設定 MACRO_DECK_PORT，並決定使用的連接埠（{port}）。在移除此覆寫之前，已設定的值不會生效。</value>
     <comment>[port:int]</comment>

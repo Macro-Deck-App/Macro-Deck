@@ -61,6 +61,7 @@ public class GetNetworkSettingsRequestMessageHandler
 			RestartSupported = view.RestartSupported,
 			RestartUnsupportedReason = view.RestartUnsupportedReason,
 			DiscoveryEnabled = view.DiscoveryEnabled,
+			ReverseProxyTrusted = view.ReverseProxyTrusted,
 			MinimumPublicPort = PublicPortSelector.MinimumConfigurablePort,
 			MaximumPublicPort = PublicPortSelector.MaximumConfigurablePort
 		};

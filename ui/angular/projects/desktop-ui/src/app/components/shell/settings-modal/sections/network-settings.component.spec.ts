@@ -46,6 +46,7 @@ describe('NetworkSettingsComponent', () => {
     tlsAuthorityNotBefore: null,
     tlsAuthorityNotAfter: null,
     discoveryEnabled: true,
+    reverseProxyTrusted: false,
   };
 
   const connectionInfo = {
@@ -316,6 +317,22 @@ describe('NetworkSettingsComponent', () => {
 
     expect(fixture.componentInstance.tlsBusy()).toBeTrue();
     expect(api.updateNetworkSettings).not.toHaveBeenCalled();
+  });
+
+  it('shows whether a reverse proxy on this computer is trusted', async () => {
+    installApi({ reverseProxyTrusted: true });
+    const fixture = await create();
+
+    expect(fixture.componentInstance.reverseProxyTrusted()).toBeTrue();
+  });
+
+  it('switches reverse proxy trust with the configured port and no TLS values', async () => {
+    installApi({ publicPort: 9100, activePublicPort: 8193 });
+    const fixture = await create();
+
+    await fixture.componentInstance.setReverseProxyTrusted(true);
+
+    expect(api.updateNetworkSettings).toHaveBeenCalledOnceWith({ publicPort: 9100, reverseProxyTrusted: true });
   });
 
   it('shows the host identity fingerprint', async () => {

@@ -17183,6 +17183,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Tampilkan di jaringan lokal</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Aktifkan hanya jika reverse proxy seperti nginx, Caddy, atau Traefik berjalan di komputer ini dan meneruskan koneksi ke Macro Deck. Macro Deck lalu memakai alamat dan status HTTPS yang dilaporkan proxy untuk setiap klien.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Di balik reverse proxy di komputer ini</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT diatur untuk peluncuran ini dan menentukan port ({port}). Nilai yang dikonfigurasi tetap tidak dipakai sampai pengaturan ini dihapus.</value>
     <comment>[port:int]</comment>

@@ -17183,6 +17183,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>स्थानीय नेटवर्क पर दिखाएँ</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>इसे केवल तभी चालू करें जब इस कंप्यूटर पर nginx, Caddy या Traefik जैसा कोई रिवर्स प्रॉक्सी चल रहा हो और कनेक्शन Macro Deck तक पहुँचाता हो। तब Macro Deck हर क्लाइंट के लिए वह पता और HTTPS स्थिति उपयोग करता है जो प्रॉक्सी बताता है।</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>इस कंप्यूटर पर रिवर्स प्रॉक्सी के पीछे</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>इस लॉन्च के लिए MACRO_DECK_PORT सेट है और पोर्ट ({port}) वही तय करता है। जब तक यह ओवरराइड हटाया नहीं जाता, कॉन्फ़िगर किया गया मान अप्रयुक्त रहता है।</value>
     <comment>[port:int]</comment>

@@ -26,7 +26,7 @@ public enum StagedRestoreOutcome
 public static class StagedRestoreApplier
 {
 	private const string JournalFileName = "journal.json";
-	private const string LockFileName = "restore.lock";
+	internal const string LockFileName = "restore.lock";
 	private const string RollbackDirectoryName = "rollback";
 
 	private static readonly HashSet<string> _migrationHistoryTables = new(StringComparer.OrdinalIgnoreCase)

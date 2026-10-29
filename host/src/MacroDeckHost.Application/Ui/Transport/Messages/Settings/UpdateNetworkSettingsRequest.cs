@@ -11,4 +11,6 @@ public class UpdateNetworkSettingsRequest
 	public int? TlsHttpsPort { get; set; }
 
 	public bool? DiscoveryEnabled { get; set; }
+
+	public bool? ReverseProxyTrusted { get; set; }
 }

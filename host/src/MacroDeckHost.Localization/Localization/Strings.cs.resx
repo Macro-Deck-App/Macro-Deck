@@ -17182,6 +17182,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Zobrazit v místní síti</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Zapněte pouze v případě, že na tomto počítači běží reverzní proxy, například nginx, Caddy nebo Traefik, a předává připojení do Macro Deck. Macro Deck pak u každého klienta použije adresu a stav HTTPS, které proxy hlásí.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Za reverzní proxy na tomto počítači</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>Pro toto spuštění je nastavena proměnná MACRO_DECK_PORT, která určuje port ({port}). Nastavená hodnota zůstává nevyužitá, dokud toto přepsání nebude odstraněno.</value>
     <comment>[port:int]</comment>

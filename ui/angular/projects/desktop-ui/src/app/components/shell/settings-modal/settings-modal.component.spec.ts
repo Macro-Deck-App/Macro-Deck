@@ -32,6 +32,7 @@ const TLS_DEFAULTS = {
   tlsAuthorityNotBefore: null,
   tlsAuthorityNotAfter: null,
   discoveryEnabled: true,
+  reverseProxyTrusted: false,
 };
 
 const ENGLISH_SETTINGS_LABELS: Record<string, string> = {

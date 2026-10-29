@@ -18,6 +18,7 @@ public class AuthService : IAuthService
 	private readonly IDeviceEnrollmentStore _deviceEnrollments;
 	private readonly PairingCodeStore _pairingCodes;
 	private readonly AccessTokenCutoff _accessTokenCutoff;
+	private readonly DeviceConnectionTracker _connections;
 	private readonly RefreshServingEpoch _servingEpoch;
 	private readonly ILastServedRotation _lastRotation;
 	private readonly IAppPreferenceService _appPreferences;
@@ -33,6 +34,7 @@ public class AuthService : IAuthService
 		IDeviceEnrollmentStore deviceEnrollments,
 		PairingCodeStore pairingCodes,
 		AccessTokenCutoff accessTokenCutoff,
+		DeviceConnectionTracker connections,
 		RefreshServingEpoch servingEpoch,
 		ILastServedRotation lastRotation,
 		IAppPreferenceService appPreferences,
@@ -47,6 +49,7 @@ public class AuthService : IAuthService
 		_deviceEnrollments = deviceEnrollments;
 		_pairingCodes = pairingCodes;
 		_accessTokenCutoff = accessTokenCutoff;
+		_connections = connections;
 		_servingEpoch = servingEpoch;
 		_lastRotation = lastRotation;
 		_appPreferences = appPreferences;
@@ -166,9 +169,17 @@ public class AuthService : IAuthService
 		DeviceRegistration? device = null)
 	{
 		var user = await _userRepository.GetSingle();
-		if (user is null
-			|| !string.Equals(user.Username, username.Trim(), StringComparison.OrdinalIgnoreCase)
-			|| !_passwordHasher.Verify(password, user.PasswordHash))
+		if (user is null)
+		{
+			return Result.Fail<LoginResult, AuthError>(AuthError.InvalidCredentials, "Invalid username or password.");
+		}
+
+		// The hash runs whatever the username, so the response time does not tell a caller whether it was right.
+		var passwordMatches = _passwordHasher.Verify(password, user.PasswordHash);
+		var trimmed = username.Trim();
+		if (trimmed.Length > AuthDefaults.MaxUsernameLength
+			|| !string.Equals(user.Username, trimmed, StringComparison.OrdinalIgnoreCase)
+			|| !passwordMatches)
 		{
 			return Result.Fail<LoginResult, AuthError>(AuthError.InvalidCredentials, "Invalid username or password.");
 		}
@@ -356,7 +367,7 @@ public class AuthService : IAuthService
 		var changedAt = UtcNow();
 		_accessTokenCutoff.Set(changedAt);
 		await SetPassword(user, newPassword, changedAt);
-		await _deviceService.EndAllSessions();
+		await EndAllSessions();
 
 		return Result.Ok<AuthError>();
 	}
@@ -378,7 +389,7 @@ public class AuthService : IAuthService
 		var now = UtcNow();
 		_accessTokenCutoff.Set(now);
 		await SetPassword(user, newPassword, now);
-		await _deviceService.EndAllSessions();
+		await EndAllSessions();
 		_pairingCodes.Rotate(now);
 		_deviceEnrollments.Clear();
 
@@ -405,9 +416,15 @@ public class AuthService : IAuthService
 		_accessTokenCutoff.Set(now);
 		await _userRepository.Update(user);
 		await _refreshTokenRepository.RevokeAllForUser(user.Id, now);
-		await _deviceService.EndAllSessions();
+		await EndAllSessions();
 
 		return Result.Ok<AuthError>();
+	}
+
+	private async Task EndAllSessions()
+	{
+		await _deviceService.EndAllSessions();
+		_connections.AbortWhere(_accessTokenCutoff.Rejects);
 	}
 
 	private async Task SetPassword(UserEntity user, string newPassword, DateTime now)

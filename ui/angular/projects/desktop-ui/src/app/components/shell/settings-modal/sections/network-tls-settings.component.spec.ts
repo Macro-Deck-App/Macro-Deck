@@ -44,6 +44,7 @@ describe('NetworkTlsSettingsComponent', () => {
     tlsAuthorityNotBefore: null,
     tlsAuthorityNotAfter: null,
     discoveryEnabled: true,
+    reverseProxyTrusted: false,
   };
 
   let current: GetNetworkSettingsResponse;

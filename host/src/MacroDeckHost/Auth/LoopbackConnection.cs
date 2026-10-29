@@ -32,11 +32,13 @@ public static class LoopbackConnection
 		return HostEndpoints.TryGetLoopbackPort(out var loopbackPort) && context.Connection.LocalPort == loopbackPort;
 	}
 
-	// A connection bridged from a USB link without debugging is not local, although it comes from loopback.
+	// A connection bridged from a USB link without debugging is not local, although it comes from loopback,
+	// and neither is a request a reverse proxy on this computer passed on for someone else.
 	public static bool IsLocalRequest(HttpContext context)
 	{
 		var connection = context.Connection;
 		return context.Features.Get<IBridgedConnectionFeature>() is null
+			&& !ReverseProxyForwarding.CarriesForwardingHeaders(context.Request)
 			&& connection.RemoteIpAddress is not null
 			&& IPAddress.IsLoopback(connection.RemoteIpAddress)
 			&& HasLoopbackHost(context.Request);

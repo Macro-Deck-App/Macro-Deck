@@ -33,6 +33,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string TlsHttpsPortKey = "network.tls.httpsPort";
 
 	public const string DiscoveryEnabledKey = "network.discovery.enabled";
+	public const string ReverseProxyTrustedKey = "network.reverse-proxy.trusted";
 
 	public const string AdbEnabledKey = "adb.enabled";
 	public const string AdbExecutablePathKey = "adb.executablePath";
@@ -274,12 +275,14 @@ public partial class AppPreferenceService : IAppPreferenceService
 		var storedTlsMode = (await _repository.GetByKey(TlsModeKey))?.Value;
 		var storedTlsHttpsPort = (await _repository.GetByKey(TlsHttpsPortKey))?.Value;
 		var storedDiscoveryEnabled = (await _repository.GetByKey(DiscoveryEnabledKey))?.Value;
+		var storedReverseProxyTrusted = (await _repository.GetByKey(ReverseProxyTrustedKey))?.Value;
 
 		return BuildNetworkSettings(NormalizePublicPort(storedPort),
 			NormalizeTlsEnabled(storedTlsEnabled),
 			PublicTlsSelector.ParseMode(storedTlsMode),
 			NormalizeTlsHttpsPort(storedTlsHttpsPort),
-			NormalizeFlag(storedDiscoveryEnabled, true));
+			NormalizeFlag(storedDiscoveryEnabled, true),
+			NormalizeFlag(storedReverseProxyTrusted, false));
 	}
 
 	public async Task<NetworkSettings> SetNetwork(
@@ -287,10 +290,12 @@ public partial class AppPreferenceService : IAppPreferenceService
 		bool? tlsEnabled = null,
 		string? tlsMode = null,
 		int? tlsHttpsPort = null,
-		bool? discoveryEnabled = null)
+		bool? discoveryEnabled = null,
+		bool? reverseProxyTrusted = null)
 	{
 		var current = await GetNetwork();
 		var resolvedDiscoveryEnabled = discoveryEnabled ?? current.DiscoveryEnabled;
+		var resolvedReverseProxyTrusted = reverseProxyTrusted ?? current.ReverseProxyTrusted;
 
 		var resolvedPort = NormalizePublicPort(publicPort?.ToString(CultureInfo.InvariantCulture));
 		var resolvedTlsEnabled = tlsEnabled ?? PublicTlsSelector.DefaultTlsEnabled;
@@ -326,11 +331,18 @@ public partial class AppPreferenceService : IAppPreferenceService
 			await _repository.SetValue(DiscoveryEnabledKey, resolvedDiscoveryEnabled.ToString());
 		}
 
+		if (resolvedReverseProxyTrusted != current.ReverseProxyTrusted)
+		{
+			await _repository.SetValue(ReverseProxyTrustedKey, resolvedReverseProxyTrusted.ToString());
+			ReverseProxyTrust.Enabled = resolvedReverseProxyTrusted;
+		}
+
 		return BuildNetworkSettings(resolvedPort,
 			resolvedTlsEnabled,
 			resolvedTlsMode,
 			resolvedTlsHttpsPort,
-			resolvedDiscoveryEnabled);
+			resolvedDiscoveryEnabled,
+			resolvedReverseProxyTrusted);
 	}
 
 	public async Task<AdbSettings> GetAdb()
@@ -687,7 +699,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 		bool tlsEnabled,
 		PublicTlsMode tlsMode,
 		int tlsHttpsPort,
-		bool discoveryEnabled)
+		bool discoveryEnabled,
+		bool reverseProxyTrusted)
 	{
 		var certificateInfo = _certificateStore?.ReadInfo();
 		var authorityInfo = _certificateStore?.ReadAuthorityInfo();
@@ -724,7 +737,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 			authorityInfo?.Fingerprint,
 			authorityInfo?.NotBefore,
 			authorityInfo?.NotAfter,
-			discoveryEnabled);
+			discoveryEnabled,
+			reverseProxyTrusted);
 	}
 
 	private static int NormalizePublicPort(string? value)

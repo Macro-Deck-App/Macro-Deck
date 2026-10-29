@@ -7679,6 +7679,8 @@ export const AppStrings = {
 			RestartConfirmMessage: 'macrodeck.app:Settings.Network.RestartConfirmMessage',
 			RestartNowAction: 'macrodeck.app:Settings.Network.RestartNowAction',
 			RestartRequiredNote: 'macrodeck.app:Settings.Network.RestartRequiredNote',
+			ReverseProxyDescription: 'macrodeck.app:Settings.Network.ReverseProxyDescription',
+			ReverseProxyLabel: 'macrodeck.app:Settings.Network.ReverseProxyLabel',
 			Tls: {
 				AuthorityDescription: 'macrodeck.app:Settings.Network.Tls.AuthorityDescription',
 				AuthorityFingerprintLabel: 'macrodeck.app:Settings.Network.Tls.AuthorityFingerprintLabel',
@@ -16351,6 +16353,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Settings.Network.RestartConfirmMessage': 'Macro Deck restarts to listen on the new port. Connected devices are disconnected and reconnect on the new port.',
 	'macrodeck.app:Settings.Network.RestartNowAction': 'Restart now',
 	'macrodeck.app:Settings.Network.RestartRequiredNote': 'Port {configuredPort} takes effect after Macro Deck restarts. Until then, clients keep connecting on port {activePort}.',
+	'macrodeck.app:Settings.Network.ReverseProxyDescription': 'Turn this on only if a reverse proxy such as nginx, Caddy or Traefik runs on this computer and passes connections on to Macro Deck. Macro Deck then uses the address and HTTPS state the proxy reports for each client.',
+	'macrodeck.app:Settings.Network.ReverseProxyLabel': 'Behind a reverse proxy on this computer',
 	'macrodeck.app:Settings.Network.Tls.AuthorityDescription': 'Macro Deck signs its own certificate with this authority. Devices install it once and keep working when the certificate is renewed.',
 	'macrodeck.app:Settings.Network.Tls.AuthorityFingerprintLabel': 'Authority fingerprint',
 	'macrodeck.app:Settings.Network.Tls.AuthorityHeading': 'Local certificate authority',
