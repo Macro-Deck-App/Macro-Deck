@@ -14,13 +14,16 @@ public sealed class McpConfirmationGate
 	private readonly McpTextResolver _resolver;
 	private readonly IMcpConfirmationStore _store;
 	private readonly TimeProvider _timeProvider;
+	private readonly IHttpContextAccessor _httpContext;
 
 	public McpConfirmationGate(
 		McpConfirmationText text,
 		McpTextResolver resolver,
 		IMcpConfirmationStore store,
-		TimeProvider timeProvider)
+		TimeProvider timeProvider,
+		IHttpContextAccessor httpContext)
 	{
+		_httpContext = httpContext;
 		_text = text;
 		_resolver = resolver;
 		_store = store;
@@ -82,7 +85,7 @@ public sealed class McpConfirmationGate
 				fingerprint);
 		}
 
-		if (elicitation?.Url is null || !HostEndpoints.TryGetLoopbackPort(out var port))
+		if (elicitation?.Url is null || McpPageUrl.Origin(_httpContext.HttpContext) is not { } origin)
 		{
 			throw McpToolErrors.Create(McpConsent.Unavailable,
 				"This needs the user's confirmation, and the client supports neither form nor URL elicitation: "
@@ -98,7 +101,7 @@ public sealed class McpConfirmationGate
 			{
 				Mode = "url",
 				ElicitationId = entry.Id,
-				Url = $"http://127.0.0.1:{port}{McpPaths.Confirmation}/{entry.Id}",
+				Url = $"{origin}{McpPaths.Confirmation}/{entry.Id}",
 				Message = await _resolver.Resolve(AppStrings.Mcp.Elicitation.ConfirmOnPage(string.Join("; ", lines)))
 					?? string.Empty
 			},

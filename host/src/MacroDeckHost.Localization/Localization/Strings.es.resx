@@ -17190,7 +17190,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Crea un token y añádelo a tu cliente de IA para conectarlo con Macro Deck.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>Solo las apps de este equipo pueden conectarse. La dirección cambia si su puerto está ocupado cuando Macro Deck se inicia.</value>
+    <value>Usa esta dirección en este equipo. En otro equipo de tu red, sustituye 127.0.0.1 por la dirección de red de este equipo. Cada conexión necesita un token de acceso.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Dirección del servidor</value>

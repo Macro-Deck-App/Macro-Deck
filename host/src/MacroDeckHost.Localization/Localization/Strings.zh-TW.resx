@@ -17191,7 +17191,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>建立一個權杖並加入 AI 用戶端，即可連線到 Macro Deck。</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>只有此電腦上的應用程式可以連線。如果 Macro Deck 啟動時連接埠已被占用，位址會改變。</value>
+    <value>在此電腦上使用此位址。在網路中的其他電腦上，請將 127.0.0.1 替換為此電腦的網路位址。每個連線都需要存取權杖。</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>伺服器位址</value>

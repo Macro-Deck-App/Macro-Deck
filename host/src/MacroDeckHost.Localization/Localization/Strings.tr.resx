@@ -17191,7 +17191,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Bir belirteç oluşturun ve Macro Deck'e bağlamak için yapay zekâ istemcinize ekleyin.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>Yalnızca bu bilgisayardaki uygulamalar bağlanabilir. Macro Deck başlarken bağlantı noktası doluysa adres değişir.</value>
+    <value>Bu bilgisayarda bu adresi kullanın. Ağınızdaki başka bir bilgisayarda 127.0.0.1 yerine bu bilgisayarın ağ adresini yazın. Her bağlantı için bir erişim belirteci gerekir.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Sunucu adresi</value>

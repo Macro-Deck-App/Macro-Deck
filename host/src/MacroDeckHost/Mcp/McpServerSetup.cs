@@ -14,6 +14,7 @@ public static class McpServerSetup
 {
 	public static void AddMacroDeckMcp(this IServiceCollection services)
 	{
+		services.AddHttpContextAccessor();
 		services.AddSingleton<McpConnectionRegistry>();
 		services.AddSingleton<IMcpConnections>(provider => provider.GetRequiredService<McpConnectionRegistry>());
 		services.AddScoped<McpTextResolver>();

@@ -25,9 +25,15 @@ public sealed class McpSecretTools
 	private readonly IMcpSecretEntryStore _store;
 	private readonly McpTextResolver _text;
 	private readonly TimeProvider _timeProvider;
+	private readonly IHttpContextAccessor _httpContext;
 
-	public McpSecretTools(IMcpSecretEntryStore store, McpTextResolver text, TimeProvider timeProvider)
+	public McpSecretTools(
+		IMcpSecretEntryStore store,
+		McpTextResolver text,
+		TimeProvider timeProvider,
+		IHttpContextAccessor httpContext)
 	{
+		_httpContext = httpContext;
 		_store = store;
 		_text = text;
 		_timeProvider = timeProvider;
@@ -61,7 +67,7 @@ public sealed class McpSecretTools
 		}
 
 		if (!Guid.TryParse(context.User?.FindFirst(McpClaimTypes.TokenId)?.Value, out var tokenId)
-			|| !HostEndpoints.TryGetLoopbackPort(out var port))
+			|| McpPageUrl.Origin(_httpContext.HttpContext) is not { } origin)
 		{
 			throw McpToolErrors.Create(ElicitationUnavailable, "The secret page is not available.");
 		}
@@ -87,7 +93,7 @@ public sealed class McpSecretTools
 			{
 				Mode = "url",
 				ElicitationId = entry.Id,
-				Url = $"http://127.0.0.1:{port}{McpPaths.SecretEntry}/{entry.Id}",
+				Url = $"{origin}{McpPaths.SecretEntry}/{entry.Id}",
 				Message = await _text.Resolve(AppStrings.Mcp.Elicitation.SetSecret(trimmedLabel)) ?? string.Empty
 			},
 			entry.Id);

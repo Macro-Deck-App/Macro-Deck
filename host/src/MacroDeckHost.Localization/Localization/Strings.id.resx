@@ -17191,7 +17191,7 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Buat token lalu tambahkan ke klien AI untuk menghubungkannya ke Macro Deck.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>Hanya aplikasi di komputer ini yang dapat terhubung. Alamat berubah jika port-nya sedang dipakai saat Macro Deck dimulai.</value>
+    <value>Gunakan alamat ini di komputer ini. Di komputer lain dalam jaringan, ganti 127.0.0.1 dengan alamat jaringan komputer ini. Setiap koneksi memerlukan token akses.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Alamat server</value>

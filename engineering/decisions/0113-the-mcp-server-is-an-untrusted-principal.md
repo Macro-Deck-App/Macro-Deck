@@ -16,12 +16,13 @@ revisions still need a session.
 
 ## Decision
 
-- The host serves MCP itself, at `/mcp` on the private loopback listener only, as a host feature and not
-  as a built-in integration. Tools call the existing transport handlers and services; they never call
+- The host serves MCP itself, at `/mcp` on the public listener and on the private loopback listener, as
+  a host feature and not as a built-in integration. The public port is stable, so a client configuration
+  does not go stale, and a client on another computer in the network can connect. Tools call the existing transport handlers and services; they never call
   the host's own REST API.
 - A new scope `mcp` with its own token type, created and revoked by the user. The token opens only
-  `/mcp`, and no other credential opens `/mcp`. `Host` and `Origin` are checked on every request so
-  browser pages cannot reach it. Sessions are bound to the token that created them.
+  `/mcp`, and no other credential opens `/mcp`. `Origin` and `Sec-Fetch-Site` are checked on every
+  request, and `Host` on the loopback listener, so browser pages cannot reach it. Sessions are bound to the token that created them.
 - The tool set is an explicit allowlist and a public contract, `macrodeck-mcp/1`: names, arguments,
   result fields and error codes are additive-only. Titles and descriptions are English contract text.
 - No tool returns or decrypts a secret. Secrets are references; a new secret is typed by the user into a
@@ -49,7 +50,8 @@ revisions still need a session.
   keep the no-secret rule; a reflection test refuses tools that depend on secret-returning handlers.
 - Attribution by provider fails closed: a write the same provider makes for another reason during an MCP
   run is refused, and a write an accepted action makes after the grace period is not attributed.
-- The loopback port can change between starts, so a client configuration can go stale.
+- Anyone in the local network who holds a token can use it, and over plain HTTP a token or a secret
+  typed into the secret page can be read in transit on an untrusted network.
 - Sessions for pre-`2026-07-28` clients depend on a deprecated SDK mode that can be dropped once those
   clients are gone.
 

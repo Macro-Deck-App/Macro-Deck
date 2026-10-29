@@ -100,9 +100,9 @@ public class McpController : ControllerBase
 	[HttpGet("endpoint")]
 	public GetMcpEndpointResponse Endpoint()
 	{
-		return HostEndpoints.TryGetLoopbackPort(out var port)
-			? new GetMcpEndpointResponse(true, $"http://127.0.0.1:{port}{McpPaths.Endpoint}", McpContract.Version)
-			: new GetMcpEndpointResponse(false, null, McpContract.Version);
+		return new GetMcpEndpointResponse(true,
+			$"http://127.0.0.1:{HostEndpoints.PublicPort}{McpPaths.Endpoint}",
+			McpContract.Version);
 	}
 
 	[HttpGet("tokens")]

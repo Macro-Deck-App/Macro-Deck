@@ -17190,7 +17190,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Vytvořte token a přidejte ho do klienta AI, aby se mohl připojit k Macro Deck.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>Připojit se mohou jen aplikace v tomto počítači. Adresa se změní, pokud je její port při spuštění Macro Deck obsazen.</value>
+    <value>Na tomto počítači použijte tuto adresu. Na jiném počítači v síti nahraďte 127.0.0.1 síťovou adresou tohoto počítače. Každé připojení vyžaduje přístupový token.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Adresa serveru</value>

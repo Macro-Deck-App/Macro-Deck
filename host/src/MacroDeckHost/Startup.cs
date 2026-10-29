@@ -1213,7 +1213,8 @@ public class Startup
 				// action on it is gated on LoopbackConnection.IsTrusted, an ambient credential, so
 				// without this any page the user has open could drive a device attached to this machine.
 				!context.Request.Path.StartsWithSegments("/api/client-targets")
-				&& !context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),
+				&& !context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets")
+				&& !McpPaths.IsMcpRequest(context.Request.Path),
 			branch => branch.UseCors("AllowAny"));
 
 		app.UseMcpRequestGuard();

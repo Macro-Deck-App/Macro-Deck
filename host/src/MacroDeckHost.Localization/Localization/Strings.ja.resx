@@ -17191,7 +17191,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>トークンを作成して AI クライアントに追加すると、Macro Deck に接続できます。</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>接続できるのはこのコンピューター上のアプリだけです。Macro Deck の起動時にポートが使用中の場合、アドレスは変わります。</value>
+    <value>このコンピューターではこのアドレスを使います。ネットワーク内の別のコンピューターでは、127.0.0.1 をこのコンピューターのネットワークアドレスに置き換えてください。接続にはアクセス トークンが必要です。</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>サーバー アドレス</value>

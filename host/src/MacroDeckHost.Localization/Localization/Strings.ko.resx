@@ -17191,7 +17191,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>토큰을 만들어 AI 클라이언트에 추가하면 Macro Deck에 연결됩니다.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>이 컴퓨터의 앱만 연결할 수 있습니다. Macro Deck이 시작될 때 포트가 사용 중이면 주소가 바뀝니다.</value>
+    <value>이 컴퓨터에서는 이 주소를 사용하세요. 네트워크의 다른 컴퓨터에서는 127.0.0.1을 이 컴퓨터의 네트워크 주소로 바꾸세요. 모든 연결에는 액세스 토큰이 필요합니다.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>서버 주소</value>

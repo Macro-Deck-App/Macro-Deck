@@ -17191,7 +17191,7 @@
     <value>أنشئ رمزًا وأضفه إلى عميل الذكاء الاصطناعي لتوصيله بـ Macro Deck.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>لا يمكن الاتصال إلا للتطبيقات الموجودة على هذا الكمبيوتر. يتغير العنوان إذا كان منفذه مشغولًا عند بدء Macro Deck.</value>
+    <value>استخدم هذا العنوان على هذا الكمبيوتر. على كمبيوتر آخر في شبكتك، استبدل 127.0.0.1 بعنوان هذا الكمبيوتر في الشبكة. يحتاج كل اتصال إلى رمز وصول.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>عنوان الخادم</value>

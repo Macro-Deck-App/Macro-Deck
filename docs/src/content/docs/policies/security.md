@@ -16,7 +16,7 @@ or shipped but not implemented, is stated as such.
 | Plugin process | Scope `plugin`: the plugin protocol surface, and nothing else | Not sandboxed: it runs with the user's full privileges. Declared permissions are [not enforced](#permissions-declared-not-enforced), except `host:adb`, `host:companion-devices` and `host:desktop-notifications` |
 | Deck clients (web client, companion) | Scope `client`: the viewer-safe endpoints | Plugin endpoints refuse them |
 | LAN callers and browsers | The public listener's API and web client | Every plugin endpoint refuses them |
-| MCP clients (AI assistants) | Scope `mcp`: the tools of [the MCP server](/reference/mcp/), on the loopback listener only | Never a secret value; see [MCP clients](#mcp-clients) |
+| MCP clients (AI assistants) | Scope `mcp`: the tools of [the MCP server](/reference/mcp/), on the public and the loopback listener | Never a secret value; see [MCP clients](#mcp-clients) |
 | Creator Portal and Store | Signing Store plugins after checking the publishing workflow's provenance; publishing the signed registry and its revoked keys | Revocation refuses new installs and updates, not a plugin that is already installed |
 
 ## Network exposure
@@ -191,13 +191,14 @@ See [setup flows](/features/setup-flows/#secrets) and
 An AI client connected to [the MCP server](/reference/mcp/) is treated as an untrusted writer, not as the
 user:
 
-- Its token opens only `/mcp`, only on the loopback listener, and never an admin, client or plugin
-  endpoint. Browser pages are refused by the `Host` and `Origin` checks.
+- Its token opens only `/mcp`, and never an admin, client or plugin endpoint. `/mcp` is also served on
+  the public listener so clients on other computers in the network can connect; the token is the only
+  credential there, sent over plain HTTP. Browser pages are refused by the `Origin` checks.
 - No tool returns a secret value. Secrets appear as `{"$secret":"<id>"}` references, and a new secret is
   typed by the user into a one-time Macro Deck page, never into the client.
 - An action that asks first is confirmed by the user in the client's own dialog or, for a client that can
-  only open links, on a one-time Macro Deck confirmation page with the same loopback, `Host`/`Origin`,
-  one-time and expiry rules as the secret page.
+  only open links, on a one-time Macro Deck confirmation page with the same `Origin`, one-time and
+  expiry rules as the secret page.
 - Revoking the token in **Settings > AI clients** cuts off its open requests and sessions immediately.
 
 ## Signing and install trust

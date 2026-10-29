@@ -150,35 +150,65 @@ public partial class McpEndpointTests
 	}
 
 	[Test]
-	public async Task Browser_pages_and_other_listeners_cannot_reach_the_endpoint()
+	public async Task Browser_pages_cannot_reach_the_endpoint_on_any_listener()
 	{
 		var token = await CreateToken();
 
 		var foreignOrigin = await PostInitialize(token.Plaintext, origin: "http://evil.example");
 		var crossSite = await PostInitialize(token.Plaintext, secFetchSite: "cross-site");
 		var rebound = await PostInitialize(token.Plaintext, host: "rebind.example");
-		var publicListener = await PostInitialize(token.Plaintext, FakeConnectionShape.PublicLan);
+		var publicCrossSite = await PostInitialize(token.Plaintext,
+			FakeConnectionShape.PublicLan,
+			secFetchSite: "cross-site");
+		var publicForeignOrigin = await PostInitialize(token.Plaintext,
+			FakeConnectionShape.PublicLan,
+			"http://evil.example");
+		var lanOnPrivatePort = await PostInitialize(token.Plaintext, FakeConnectionShape.LanOnPrivatePort);
+		using var preflightRequest = new HttpRequestMessage(HttpMethod.Options, "/mcp");
+		preflightRequest.Headers.Add(FakeConnectionStartupFilter.ShapeHeader, nameof(FakeConnectionShape.PublicLan));
+		preflightRequest.Headers.Add("Origin", "http://evil.example");
+		preflightRequest.Headers.Add("Access-Control-Request-Method", "POST");
+		preflightRequest.Headers.Add("Access-Control-Request-Headers", "authorization");
+		using var preflight = await _client.SendAsync(preflightRequest);
 		var page = await Send(HttpMethod.Get,
 			"/mcp/secret-entry/0123456789abcdef0123456789abcdef",
 			FakeConnectionShape.LoopbackWithoutCredential,
 			origin: "http://evil.example");
 		var confirmation = await Send(HttpMethod.Post,
 			"/mcp/confirm/0123456789abcdef0123456789abcdef",
-			FakeConnectionShape.LoopbackWithoutCredential,
+			FakeConnectionShape.PublicLan,
 			origin: "http://evil.example");
-		var publicConfirmation = await Send(HttpMethod.Get,
-			"/mcp/confirm/0123456789abcdef0123456789abcdef",
-			FakeConnectionShape.PublicLan);
 
 		await Assert.MultipleAsync(() =>
 		{
 			Assert.That(confirmation.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-			Assert.That(publicConfirmation.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
 			Assert.That(foreignOrigin.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(crossSite.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(rebound.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-			Assert.That(publicListener.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+			Assert.That(publicCrossSite.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(publicForeignOrigin.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(lanOnPrivatePort.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+			Assert.That(preflight.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
 			Assert.That(page.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task A_client_elsewhere_in_the_network_connects_with_a_token_on_the_public_port()
+	{
+		var token = await CreateToken();
+
+		var withToken = await PostInitialize(token.Plaintext, FakeConnectionShape.PublicLan, host: "192.168.1.20:8191");
+		var withoutToken = await PostInitialize(null, FakeConnectionShape.PublicLan, host: "192.168.1.20:8191");
+		var endpoint = await Send(HttpMethod.Get, "/api/mcp/endpoint", FakeConnectionShape.Loopback);
+		var url = (await endpoint.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("url").GetString();
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(withToken.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(withoutToken.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(url, Is.EqualTo($"http://127.0.0.1:{HostEndpoints.PublicPort}/mcp"));
 			return Task.CompletedTask;
 		});
 	}
@@ -286,7 +316,7 @@ public partial class McpEndpointTests
 			Assert.That(result.IsError, Is.Not.True);
 			Assert.That(raw, Does.Not.Contain(SecretValue));
 			Assert.That(stored, Is.EqualTo(SecretValue));
-			Assert.That(url, Does.StartWith("http://127.0.0.1:"));
+			Assert.That(url, Does.StartWith("http://localhost/mcp/secret-entry/"));
 			Assert.That(reused.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
 			return Task.CompletedTask;
 		});

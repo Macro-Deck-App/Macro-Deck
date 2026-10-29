@@ -17190,7 +17190,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Crée un jeton et ajoute-le à ton client IA pour le connecter à Macro Deck.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>Seules les applications de cet ordinateur peuvent se connecter. L'adresse change si son port est occupé au démarrage de Macro Deck.</value>
+    <value>Utilise cette adresse sur cet ordinateur. Sur un autre ordinateur de ton réseau, remplace 127.0.0.1 par l'adresse réseau de cet ordinateur. Chaque connexion nécessite un jeton d'accès.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Adresse du serveur</value>

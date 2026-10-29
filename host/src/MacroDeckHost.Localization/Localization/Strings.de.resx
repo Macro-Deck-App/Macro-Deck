@@ -17188,7 +17188,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Erstelle ein Token und füge es deinem KI-Client hinzu, um ihn mit Macro Deck zu verbinden.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>Nur Apps auf diesem Computer können sich verbinden. Die Adresse ändert sich, wenn ihr Port beim Start von Macro Deck belegt ist.</value>
+    <value>Auf diesem Computer verwendest du diese Adresse. Auf einem anderen Computer in deinem Netzwerk ersetzt du 127.0.0.1 durch die Netzwerkadresse dieses Computers. Jede Verbindung braucht ein Zugriffstoken.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Serveradresse</value>

@@ -20,12 +20,15 @@
   </shared-settings-section>
 
   <shared-settings-section [heading]="'macrodeck.app:Settings.Mcp.TokensTitle' | translate">
-    <div class="ai-clients__toolbar">
-      <shared-button variant="primary" data-testid="mcp-create-token" (click)="openCreateModal()">
-        <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
-        {{ 'macrodeck.app:Developer.Tokens.CreateTokenAction' | translate }}
-      </shared-button>
-    </div>
+    <shared-button
+      settingsSectionAction
+      variant="primary"
+      size="compact"
+      data-testid="mcp-create-token"
+      (click)="openCreateModal()">
+      <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Developer.Tokens.CreateTokenAction' | translate }}
+    </shared-button>
 
     @if (mcp.tokens().length === 0) {
       <shared-empty-state
@@ -93,11 +96,14 @@
   </shared-settings-section>
 
   <shared-settings-section [heading]="'macrodeck.app:Settings.Mcp.ConnectionsTitle' | translate">
-    <div class="ai-clients__toolbar">
-      <shared-button variant="secondary" [loading]="mcp.loading()" (click)="refresh()">
-        {{ 'macrodeck.app:Settings.Mcp.RefreshAction' | translate }}
-      </shared-button>
-    </div>
+    <shared-button
+      settingsSectionAction
+      variant="secondary"
+      size="compact"
+      [loading]="mcp.loading()"
+      (click)="refresh()">
+      {{ 'macrodeck.app:Settings.Mcp.RefreshAction' | translate }}
+    </shared-button>
     @if (mcp.connections().length === 0) {
       <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.ConnectionsEmpty' | translate }}</p>
     } @else {

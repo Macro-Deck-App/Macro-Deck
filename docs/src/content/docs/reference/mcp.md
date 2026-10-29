@@ -13,7 +13,7 @@ client and tool authors. The reasoning is in
 
 ```http
 POST /mcp HTTP/1.1
-Host: 127.0.0.1:<loopback port>
+Host: 127.0.0.1:<public port>
 Authorization: Bearer mdmcp_<token>
 Content-Type: application/json
 Accept: application/json, text/event-stream
@@ -24,14 +24,16 @@ Accept: application/json, text/event-stream
 | | |
 | --- | --- |
 | Transport | Streamable HTTP at `/mcp` |
-| Listener | The private loopback listener only. The public (LAN) listener answers `404`. |
+| Listeners | The public listener (the port in **Settings > Network**, reachable from the local network) and the private loopback listener the desktop app and the Claude Desktop extension use |
 | Protocol revisions | `2026-07-28` (stateless, elicitation as multi round-trip results) and `2025-11-25` and earlier (a session with `Mcp-Session-Id`) on the same endpoint |
 | Credential | An MCP access token the user creates in **Settings > AI clients** |
 | Contract | `macrodeck-mcp/1`, versioned in every tool's `_meta.contractVersion` |
 
-The address is shown in **Settings > AI clients**. The loopback port is persisted, but a host that finds
-it taken at start picks a new one, so a client configured with the old address stops connecting; copy
-the address again from the settings page.
+The address is shown in **Settings > AI clients**: `http://127.0.0.1:<public port>/mcp` on the same
+computer, or the computer's network address instead of `127.0.0.1` from another one. The public port
+only changes when the user changes it. It is plain HTTP, so on an untrusted network a token can be read
+in transit; revoke it if that may have happened. When HTTPS is turned on for network connections, the
+HTTPS port serves `/mcp` as well.
 
 ## Access tokens
 
@@ -49,16 +51,17 @@ The token is accepted **only** on `/mcp`:
 
 ## Browser and DNS-rebinding protection
 
-Every request to `/mcp` and to the secret page is refused unless:
+Every request to `/mcp`, the secret page and the confirmation page is refused unless:
 
 | Check | Refusal |
 | --- | --- |
-| It arrives on the loopback listener from a loopback address | `404` |
-| `Host` is `localhost` or a loopback address | `403` |
+| On the loopback listener: it comes from a loopback address | `404` |
+| On the loopback listener: `Host` is `localhost` or a loopback address | `403` |
 | `Origin` is absent or the listener's own origin, and `Sec-Fetch-Site` is absent, `same-origin` or `none` | `403` |
 
-Native MCP clients send no `Origin`, so they pass. A web page in the user's browser cannot reach the
-endpoint, even through a hostname that resolves to `127.0.0.1`.
+Native MCP clients send no `Origin`, so they pass. A web page in a browser cannot reach the endpoint,
+neither through the network address nor through a hostname that resolves to this computer. On the
+public listener the MCP token is the only credential; nothing else limits which computer connects.
 
 While the host's key ring is locked, `/mcp` and the secret page are not mapped and answer `404`.
 
@@ -138,9 +141,13 @@ such entry.
 | `label` | string, 1-100 characters | What the user sees on the page |
 
 The client must declare the `elicitation.url` capability. The host sends a URL elicitation for a
-one-time page `http://127.0.0.1:<port>/mcp/secret-entry/<id>`, valid for 10 minutes and for one
+one-time page `<origin>/mcp/secret-entry/<id>`, valid for 10 minutes and for one
 submission. After the user accepted and saved the value, the result is
 `{ secret: { "$secret": "<id>" }, kind, label }`.
+
+`<origin>` is the scheme and address the client reached the host on, so the page opens on the computer
+the client runs on. Over the public listener the value travels like the token: plain HTTP within the
+local network.
 
 | Code | When |
 | --- | --- |
@@ -254,8 +261,8 @@ If the stored policy cannot be read, every provider is treated as **Off** until 
 Asking first, and the confirmations for protected variables and steering values, use form elicitation
 in the client when it declares `elicitation.form` (or an empty `elicitation` capability). A client that
 declares only `elicitation.url` gets a URL elicitation for a one-time Macro Deck page
-`http://127.0.0.1:<port>/mcp/confirm/<id>` instead, with the same guards as the secret page: loopback
-only, `Host` and `Origin` checked, valid for 5 minutes and for one answer. The page names the token, the
+`<origin>/mcp/confirm/<id>` instead, with the same guards as the secret page, valid for 5 minutes and
+for one answer. The page names the token, the
 actions with their provider, for run_action also its values (secret values only as "a secret"), and offers **Allow** and
 **Decline**; once it is answered the host sends `notifications/elicitation/complete`. The answer is bound
 to that exact call either way.

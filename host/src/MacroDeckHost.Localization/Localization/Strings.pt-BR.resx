@@ -17191,7 +17191,7 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>Crie um token e adicione-o ao cliente de IA para conectá-lo ao Macro Deck.</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>Só apps neste computador podem se conectar. O endereço muda se a porta estiver ocupada quando o Macro Deck iniciar.</value>
+    <value>Use este endereço neste computador. Em outro computador da rede, substitua 127.0.0.1 pelo endereço de rede deste computador. Toda conexão precisa de um token de acesso.</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Endereço do servidor</value>

@@ -17191,7 +17191,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>एक टोकन बनाएँ और उसे Macro Deck से जोड़ने के लिए अपने AI क्लाइंट में जोड़ें।</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>केवल इस कंप्यूटर के ऐप कनेक्ट कर सकते हैं। Macro Deck शुरू होने पर पोर्ट व्यस्त होने पर पता बदल जाता है।</value>
+    <value>इस कंप्यूटर पर यह पता इस्तेमाल करें। अपने नेटवर्क के किसी दूसरे कंप्यूटर पर 127.0.0.1 को इस कंप्यूटर के नेटवर्क पते से बदलें। हर कनेक्शन के लिए ऐक्सेस टोकन ज़रूरी है।</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>सर्वर पता</value>

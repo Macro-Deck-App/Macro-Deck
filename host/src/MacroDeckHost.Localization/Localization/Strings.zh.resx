@@ -17191,7 +17191,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>创建一个令牌并将其添加到 AI 客户端，即可连接到 Macro Deck。</value>
   </data>
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
-    <value>只有此电脑上的应用可以连接。如果 Macro Deck 启动时端口已被占用，地址会改变。</value>
+    <value>在此电脑上使用此地址。在网络中的其他电脑上，将 127.0.0.1 替换为此电脑的网络地址。每个连接都需要访问令牌。</value>
   </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>服务器地址</value>

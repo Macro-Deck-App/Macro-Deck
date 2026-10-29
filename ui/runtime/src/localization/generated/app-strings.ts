@@ -16432,7 +16432,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Settings.Mcp.Description': 'Let AI assistants such as Claude or VS Code inspect and build your setup and run actions through the Model Context Protocol (MCP). They can never read your secrets.',
 	'macrodeck.app:Settings.Mcp.EmptyHeading': 'No access tokens yet',
 	'macrodeck.app:Settings.Mcp.EmptyMessage': 'Create a token and add it to your AI client to connect it to Macro Deck.',
-	'macrodeck.app:Settings.Mcp.EndpointHint': 'Only apps on this computer can connect. The address changes if its port is taken when Macro Deck starts.',
+	'macrodeck.app:Settings.Mcp.EndpointHint': 'Use this address on this computer. On another computer in your network, replace 127.0.0.1 with this computer\'s network address. Every connection needs an access token.',
 	'macrodeck.app:Settings.Mcp.EndpointLabel': 'Server address',
 	'macrodeck.app:Settings.Mcp.EndpointUnavailable': 'The MCP server is not available right now.',
 	'macrodeck.app:Settings.Mcp.Heading': 'AI clients',
