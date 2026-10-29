@@ -6,6 +6,12 @@
   background-color: var(--color-bg-secondary);
 }
 
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-shell-reconnecting);
+}
+
 .splash-content {
   text-align: center;
   animation: ds-fade-in 0.5s ease-out;
