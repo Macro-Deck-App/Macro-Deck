@@ -266,8 +266,6 @@ export const DOM_API_EXCEPTIONS = {
     'A field on the wire, not the DOM property: whether the music integration has a session.',
   'runtime/src/protocol/messages/integration.ts:isConnected':
     'A field on the wire, not the DOM property: whether a battery reports itself as connected.',
-  'web-client/src/icon-prefetch.ts:requestIdleCallback':
-    'Feature-detected before it is called, falling back to setTimeout.',
   'runtime/src/render/text-fit.ts:ResizeObserver':
     'Guarded on `typeof ResizeObserver`, and supplied by polyfills.legacy.js on the floor.',
   'runtime/src/ui-components/ui-first-fit.component.ts:ResizeObserver': 'As the renderer above.',

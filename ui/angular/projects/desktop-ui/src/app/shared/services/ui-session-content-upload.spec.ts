@@ -26,6 +26,7 @@ describe('UiSessionService page sessions and content uploads', () => {
       'onUiSessionParameterValuesReported',
       'onUiSessionFlushed',
     ]);
+    Object.defineProperty(api, 'connectionState$', { value: NEVER });
     api.onUiSessionTreeUpdated.and.returnValue(NEVER);
     api.onUiSessionPatched.and.returnValue(NEVER);
     api.onUiSessionInvalidated.and.returnValue(NEVER);

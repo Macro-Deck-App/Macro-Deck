@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 
 import type { UiNode, UiNodeEvent } from '@macro-deck/runtime';
-import { ApiService, ButtonComponent, ConnectionState, TranslatePipe, UiSessionHandle, UiSessionRejection, UiSessionService } from '@shared';
+import { ButtonComponent, TranslatePipe, UiSessionHandle, UiSessionRejection, UiSessionService } from '@shared';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { UiContentUploader } from '../../ui-render/ui-render-context';
@@ -45,7 +45,6 @@ export class IntegrationUiPagePanelComponent {
   readonly available = input(true);
 
   private readonly uiSessions = inject(UiSessionService);
-  private readonly api = inject(ApiService);
 
   private readonly session = signal<UiSessionHandle | null>(null);
 
@@ -59,8 +58,6 @@ export class IntegrationUiPagePanelComponent {
   protected readonly contentUploader: UiContentUploader = (nodeId, text) =>
     this.session()?.uploadContent?.(nodeId, text) ?? Promise.resolve(null);
 
-  private reconnectBaseline: ConnectionState | null = null;
-
   constructor() {
     effect(() => {
       const integrationId = this.integrationId();
@@ -70,16 +67,6 @@ export class IntegrationUiPagePanelComponent {
         if (available) this.open(integrationId, pageId);
         else this.close();
       });
-    });
-
-    // The host drops every session of a connection that went away, so a reconnect has to open the page again.
-    effect(() => {
-      const state = this.api.connectionStateSignal();
-      const previous = this.reconnectBaseline;
-      this.reconnectBaseline = state;
-      if (previous !== null && previous !== 'connected' && state === 'connected' && untracked(this.available)) {
-        untracked(() => this.open(this.integrationId(), this.pageId()));
-      }
     });
 
     inject(DestroyRef).onDestroy(() => this.close());

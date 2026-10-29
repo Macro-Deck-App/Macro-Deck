@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { NEVER, Subject } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject } from 'rxjs';
 
 import { UiSessionService } from './ui-session.service';
 import { ToastService } from './toast.service';
-import { ApiService } from '../transport';
+import { ApiService, type ConnectionState } from '../transport';
 import { LocalizationService } from '../localization';
 import { UiConfigEntryPoints, UiModelVersions } from '@macro-deck/runtime';
 
@@ -31,7 +31,8 @@ describe('UiSessionService version negotiation', () => {
       'onUiSessionParameterValuesReported',
       'onUiSessionFlushed',
       'flushUiSession',
-    ]);
+    ], { connectionState$: new BehaviorSubject<ConnectionState>('connected') });
+    api.sendUiEvent.and.resolveTo({ accepted: true });
     api.onUiSessionTreeUpdated.and.returnValue(NEVER);
     api.onUiSessionPatched.and.returnValue(NEVER);
     api.onUiSessionInvalidated.and.returnValue(NEVER);
@@ -168,7 +169,8 @@ describe('UiSessionService widget sessions', () => {
       'onUiSessionParameterValuesReported',
       'onUiSessionFlushed',
       'flushUiSession',
-    ]);
+    ], { connectionState$: new BehaviorSubject<ConnectionState>('connected') });
+    api.sendUiEvent.and.resolveTo({ accepted: true });
     api.onUiSessionTreeUpdated.and.returnValue(treeUpdated);
     api.onUiSessionPatched.and.returnValue(NEVER);
     api.onUiSessionInvalidated.and.returnValue(invalidated);
@@ -359,7 +361,8 @@ describe('UiSessionService sessions that end before or while they are shown', ()
       'onUiSessionParameterValuesReported',
       'onUiSessionFlushed',
       'flushUiSession',
-    ]);
+    ], { connectionState$: new BehaviorSubject<ConnectionState>('connected') });
+    api.sendUiEvent.and.resolveTo({ accepted: true });
     api.onUiSessionTreeUpdated.and.returnValue(treeUpdated);
     api.onUiSessionPatched.and.returnValue(patched);
     api.onUiSessionInvalidated.and.returnValue(invalidated);
@@ -546,7 +549,7 @@ describe('UiSessionService reported values and flush', () => {
       'onUiSessionParameterValuesReported',
       'onUiSessionFlushed',
       'flushUiSession',
-    ]);
+    ], { connectionState$: new BehaviorSubject<ConnectionState>('connected') });
     api.onUiSessionTreeUpdated.and.returnValue(NEVER);
     api.onUiSessionPatched.and.returnValue(NEVER);
     api.onUiSessionInvalidated.and.returnValue(NEVER);
@@ -607,5 +610,192 @@ describe('UiSessionService reported values and flush', () => {
     const handle = await openHandle();
 
     await expectAsync(handle.flush!()).toBeResolved();
+  });
+});
+
+describe('UiSessionService sessions across a reconnect', () => {
+  let api: jasmine.SpyObj<ApiService>;
+  let connection: BehaviorSubject<ConnectionState>;
+  let opened: number;
+  let parameters: Record<string, unknown>;
+
+  const attached = (sessionId: string) => ({
+    accepted: true, sessionId, surfaceKind: 'config', sessionMode: 'exclusive', revision: 3,
+  });
+  const notAttached = (sessionId: string) => ({
+    accepted: false, sessionId, code: 'SESSION_NOT_FOUND', message: 'gone', surfaceKind: '', sessionMode: '', revision: 0,
+  });
+  const configRequest = () => ({
+    kind: 'config' as const,
+    entryPoint: UiConfigEntryPoints.ActionConfig,
+    integrationId: 'com.example.demo',
+    actionId: 'com.example.demo.toggle',
+    parameters,
+    configUiModelVersion: 0,
+  });
+
+  beforeEach(() => {
+    connection = new BehaviorSubject<ConnectionState>('connected');
+    opened = 0;
+    parameters = { device: 'old' };
+    api = jasmine.createSpyObj<ApiService>('ApiService', [
+      'openConfigUiSession',
+      'attachUiSession',
+      'closeUiSession',
+      'sendUiEvent',
+      'onUiSessionTreeUpdated',
+      'onUiSessionPatched',
+      'onUiSessionInvalidated',
+      'onUiSessionClosed',
+      'onUiSessionParameterValuesReported',
+      'onUiSessionFlushed',
+      'flushUiSession',
+    ], { connectionState$: connection });
+    api.onUiSessionTreeUpdated.and.returnValue(NEVER);
+    api.onUiSessionPatched.and.returnValue(NEVER);
+    api.onUiSessionInvalidated.and.returnValue(NEVER);
+    api.onUiSessionClosed.and.returnValue(NEVER);
+    api.onUiSessionParameterValuesReported.and.returnValue(NEVER);
+    api.onUiSessionFlushed.and.returnValue(NEVER);
+    api.openConfigUiSession.and.callFake(() => Promise.resolve({ accepted: true, sessionId: `config-session-${++opened}` }));
+    api.attachUiSession.and.callFake(sessionId => Promise.resolve(attached(sessionId)));
+    api.closeUiSession.and.resolveTo(true);
+    api.sendUiEvent.and.resolveTo({ accepted: true });
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        UiSessionService,
+        { provide: ApiService, useValue: api },
+        { provide: ToastService, useValue: jasmine.createSpyObj<ToastService>('ToastService', ['show']) },
+        { provide: LocalizationService, useValue: { translateKey: (key: string) => key } },
+      ],
+    });
+  });
+
+  async function openEditor() {
+    const handle = TestBed.inject(UiSessionService).open(configRequest);
+    await settle();
+    return handle;
+  }
+
+  async function reconnect() {
+    connection.next('reconnecting');
+    connection.next('connected');
+    await settle();
+  }
+
+  const sentTo = () => api.sendUiEvent.calls.allArgs()
+    .map(([request]) => ({ sessionId: request.sessionId, nodeId: request.nodeId }));
+
+  it('keeps the session it had while the host still holds it for this device', async () => {
+    const handle = await openEditor();
+
+    await reconnect();
+    handle.send({ nodeId: 'device', name: 'change', data: 'new' });
+    await settle();
+
+    expect(api.openConfigUiSession).toHaveBeenCalledTimes(1);
+    expect(api.attachUiSession).toHaveBeenCalledWith('config-session-1');
+    expect(sentTo()).toEqual([{ sessionId: 'config-session-1', nodeId: 'device' }]);
+    expect(handle.generation()).toBe(1);
+  });
+
+  it('opens a new session with the current values once the old one is gone', async () => {
+    const handle = await openEditor();
+    parameters = { device: 'edited' };
+    api.attachUiSession.and.callFake(sessionId => Promise.resolve(
+      sessionId === 'config-session-1' ? notAttached(sessionId) : attached(sessionId)));
+
+    await reconnect();
+    handle.send({ nodeId: 'device', name: 'change', data: 'newer' });
+    await settle();
+
+    expect(api.closeUiSession).toHaveBeenCalledWith('config-session-1');
+    expect(api.openConfigUiSession.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
+      parameters: { device: 'edited' },
+    }));
+    expect(sentTo().at(-1)).toEqual({ sessionId: 'config-session-2', nodeId: 'device' });
+    expect(handle.generation()).toBe(2);
+  });
+
+  it('re-attaches once and re-sends refused edits in order when the connection is not attached', async () => {
+    const handle = await openEditor();
+    let attachedAgain = false;
+    api.sendUiEvent.and.callFake(() => Promise.resolve(attachedAgain
+      ? { accepted: true }
+      : { accepted: false, code: 'SESSION_FORBIDDEN', message: 'not attached' }));
+    api.attachUiSession.and.callFake(sessionId => {
+      attachedAgain = true;
+      return Promise.resolve(attached(sessionId));
+    });
+    api.attachUiSession.calls.reset();
+
+    handle.send({ nodeId: 'first', name: 'change' });
+    handle.send({ nodeId: 'second', name: 'change' });
+    await settle();
+
+    expect(api.attachUiSession).toHaveBeenCalledTimes(1);
+    expect(sentTo()).toEqual([
+      { sessionId: 'config-session-1', nodeId: 'first' },
+      { sessionId: 'config-session-1', nodeId: 'second' },
+      { sessionId: 'config-session-1', nodeId: 'first' },
+      { sessionId: 'config-session-1', nodeId: 'second' },
+    ]);
+    expect(api.openConfigUiSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('reopens when an edit is refused because the session no longer exists', async () => {
+    const handle = await openEditor();
+    api.sendUiEvent.and.resolveTo({ accepted: false, code: 'SESSION_NOT_FOUND', message: 'gone' });
+    api.attachUiSession.and.callFake(sessionId => Promise.resolve(
+      sessionId === 'config-session-1' ? notAttached(sessionId) : attached(sessionId)));
+
+    handle.send({ nodeId: 'device', name: 'change' });
+    await settle();
+
+    expect(api.openConfigUiSession).toHaveBeenCalledTimes(2);
+    expect(handle.generation()).toBe(2);
+  });
+
+  it('shows the session as ended when the host closed it, instead of reviving it', async () => {
+    const handle = await openEditor();
+    api.sendUiEvent.and.resolveTo({ accepted: false, code: 'SESSION_CLOSED', message: 'ended' });
+
+    handle.send({ nodeId: 'device', name: 'change' });
+    await settle();
+
+    expect(handle.fault?.()).toEqual({ code: 'SESSION_CLOSED', message: 'ended' });
+    expect(api.openConfigUiSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('brings a view that had ended back after a reconnect', async () => {
+    const handle = await openEditor();
+    api.sendUiEvent.and.resolveTo({ accepted: false, code: 'SESSION_CLOSED', message: 'ended' });
+    handle.send({ nodeId: 'device', name: 'change' });
+    await settle();
+
+    await reconnect();
+
+    expect(api.openConfigUiSession).toHaveBeenCalledTimes(2);
+    expect(handle.generation()).toBe(2);
+  });
+
+  it('closes a session that only finished opening after a reconnect replaced it', async () => {
+    let finishFirstOpen: (value: { accepted: boolean; sessionId: string }) => void = () => undefined;
+    api.openConfigUiSession.and.returnValues(
+      new Promise(resolve => { finishFirstOpen = resolve; }),
+      Promise.resolve({ accepted: true, sessionId: 'config-session-2' }));
+    const handle = TestBed.inject(UiSessionService).open(configRequest);
+
+    await reconnect();
+    finishFirstOpen({ accepted: true, sessionId: 'config-session-1' });
+    await settle();
+    handle.send({ nodeId: 'device', name: 'change' });
+    await settle();
+
+    expect(api.closeUiSession).toHaveBeenCalledWith('config-session-1');
+    expect(handle.generation()).toBe(1);
+    expect(sentTo()).toEqual([{ sessionId: 'config-session-2', nodeId: 'device' }]);
   });
 });

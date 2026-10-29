@@ -239,6 +239,113 @@ describe('UiConnection', () => {
     await expectAsync(build().request('AnyThing')).toBeRejected();
   });
 
+  const connected = async (connection: UiConnection) => {
+    connection.connect();
+    await settle();
+    FakeWebSocket.instances.at(-1)!.handshake();
+    await settle();
+    FakeWebSocket.instances.at(-1)!.answerPending();
+    await settle();
+  };
+
+  it('keeps notifying later listeners when one of them throws', async () => {
+    const connection = build();
+    spyOn(console, 'error');
+    connection.onNotification(() => { throw new Error('broken listener'); });
+    const seen: string[] = [];
+    connection.onNotification(type => seen.push(type));
+    await connected(connection);
+
+    FakeWebSocket.instances[0].reply({ protocolVersion: 1, kind: 'message', type: 'DeckChanged' });
+
+    expect(seen).toEqual(['DeckChanged']);
+    expect(connection.state.get()).toBe('connected');
+    connection.disconnect();
+  });
+
+  it('replaces a connection that has gone silent when asked to reconnect now', async () => {
+    jasmine.clock().mockDate(new Date(2026, 0, 1));
+    const connection = build();
+    await connected(connection);
+
+    jasmine.clock().tick(35_000);
+    connection.reconnectNow();
+    await settle();
+
+    expect(FakeWebSocket.instances.length).toBe(2);
+    expect(connection.state.get()).toBe('reconnecting');
+    connection.disconnect();
+  });
+
+  it('keeps a connection that is still hearing from the host', async () => {
+    jasmine.clock().mockDate(new Date(2026, 0, 1));
+    const connection = build();
+    await connected(connection);
+
+    jasmine.clock().tick(5_000);
+    connection.reconnectNow();
+    await settle();
+
+    expect(FakeWebSocket.instances.length).toBe(1);
+    expect(connection.state.get()).toBe('connected');
+    connection.disconnect();
+  });
+
+  it('does not restart a dial that is still in progress', async () => {
+    const connection = build();
+    connection.connect();
+    await settle();
+
+    connection.reconnectNow();
+    connection.replaceNow();
+    await settle();
+
+    expect(FakeWebSocket.instances.length).toBe(1);
+    connection.disconnect();
+  });
+
+  it('does not restart a redial that is still minting its ticket', async () => {
+    const connection = build();
+    await connected(connection);
+    FakeWebSocket.instances[0].close();
+    jasmine.clock().tick(2000);
+
+    connection.reconnectNow();
+    await settle();
+
+    expect(ticketCalls.length).toBe(2);
+    expect(FakeWebSocket.instances.length).toBe(2);
+    connection.disconnect();
+  });
+
+  it('dials afresh when connected again after a disconnect, even with the old dial unfinished', async () => {
+    const connection = build();
+    connection.connect();
+    connection.disconnect();
+    connection.connect();
+    await settle();
+
+    expect(ticketCalls.length).toBe(2);
+    connection.disconnect();
+  });
+
+  it('replaces even a live connection after a network change', async () => {
+    jasmine.clock().mockDate(new Date(2026, 0, 1));
+    const connection = build();
+    await connected(connection);
+
+    connection.replaceNow();
+    await settle();
+    FakeWebSocket.instances[1].handshake();
+    await settle();
+    FakeWebSocket.instances[1].answerPending();
+    await settle();
+
+    expect(FakeWebSocket.instances.length).toBe(2);
+    expect(connection.state.get()).toBe('connected');
+    connection.disconnect();
+  });
+
   it('passes host notifications to every listener until it is dropped', async () => {
     const connection = build();
     const seen: string[] = [];

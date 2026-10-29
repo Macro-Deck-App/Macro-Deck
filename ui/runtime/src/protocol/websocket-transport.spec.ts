@@ -116,6 +116,90 @@ describe('WebSocketTransport', () => {
     await Promise.allSettled(pending);
   });
 
+  it('keeps the connection and the other handlers when one handler throws', async () => {
+    const closed = jasmine.createSpy('closed');
+    const transport = new WebSocketTransport(closed);
+    const connected = transport.connect('ws://host/ws/ui?ticket=secret');
+    const socket = FakeWebSocket.instances[0];
+    socket.open();
+    socket.receive({ protocolVersion: 1, kind: 'welcome' });
+    await connected;
+    spyOn(console, 'error');
+    const typed = jasmine.createSpy('typed');
+    const any = jasmine.createSpy('any');
+    transport.on('NotificationEvent', () => { throw new Error('renderer failed'); });
+    transport.on('NotificationEvent', typed);
+    transport.onAny(() => { throw new Error('listener failed'); });
+    transport.onAny(any);
+
+    socket.receive({ protocolVersion: 1, kind: 'message', type: 'NotificationEvent', payload: { id: 1 } });
+    socket.receive({ protocolVersion: 1, kind: 'message', type: 'NotificationEvent', payload: { id: 2 } });
+
+    expect(typed).toHaveBeenCalledTimes(2);
+    expect(any).toHaveBeenCalledWith('NotificationEvent', { id: 2 });
+    expect(closed).not.toHaveBeenCalled();
+    expect(socket.readyState).toBe(FakeWebSocket.OPEN);
+  });
+
+  it('still closes on a frame that is not JSON', async () => {
+    const closed = jasmine.createSpy('closed');
+    const transport = new WebSocketTransport(closed);
+    const connected = transport.connect('ws://host/ws/ui?ticket=secret');
+    const socket = FakeWebSocket.instances[0];
+    socket.open();
+    socket.receive({ protocolVersion: 1, kind: 'welcome' });
+    await connected;
+
+    socket.onmessage?.({ data: 'not json' } as MessageEvent);
+
+    expect(closed).toHaveBeenCalledTimes(1);
+  });
+
+  describe('when the link goes silent', () => {
+    beforeEach(() => jasmine.clock().install());
+    afterEach(() => jasmine.clock().uninstall());
+
+    it('tears down at once, without waiting for the browser to finish closing', async () => {
+      const closed = jasmine.createSpy('closed');
+      const transport = new WebSocketTransport(closed);
+      const connected = transport.connect('ws://host/ws/ui?ticket=secret');
+      const socket = FakeWebSocket.instances[0];
+      socket.open();
+      socket.receive({ protocolVersion: 1, kind: 'welcome' });
+      await connected;
+      const pending = transport.request('WatchVariables', [[]]);
+      // A dead link leaves the browser socket in CLOSING until its own handshake times out.
+      socket.close = () => { socket.readyState = 2; };
+
+      jasmine.clock().tick(60_000);
+
+      expect(closed).toHaveBeenCalledTimes(1);
+      await expectAsync(pending).toBeRejected();
+      const late = jasmine.createSpy('late');
+      transport.onAny(late);
+      socket.receive({ protocolVersion: 1, kind: 'message', type: 'VariablesChangedEvent', payload: {} });
+      socket.onclose?.();
+      expect(late).not.toHaveBeenCalled();
+      expect(closed).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops counting as live once a host ping is overdue', async () => {
+      jasmine.clock().mockDate(new Date(2026, 0, 1));
+      const transport = new WebSocketTransport(() => undefined);
+      const connected = transport.connect('ws://host/ws/ui?ticket=secret');
+      const socket = FakeWebSocket.instances[0];
+      socket.open();
+      socket.receive({ protocolVersion: 1, kind: 'welcome' });
+      await connected;
+
+      jasmine.clock().tick(25_000);
+      expect(transport.live).toBeTrue();
+      socket.receive({ protocolVersion: 1, kind: 'ping', id: 'ping-1' });
+      jasmine.clock().tick(31_000);
+      expect(transport.live).toBeFalse();
+    });
+  });
+
   it('does not leak a correlation when serializing the request fails', async () => {
     const transport = new WebSocketTransport(() => undefined);
     const connected = transport.connect('ws://host/ws/ui?ticket=secret');

@@ -208,26 +208,22 @@ describe('UiTreeWidgetComponent', () => {
       expect(opens.length).toBe(1);
     });
 
-    it('re-opens after the connection drops and recovers, retaining the last tree meanwhile', () => {
+    it('keeps its session through a dropped connection, retaining the last tree until the recovered one', () => {
       const fixture = createFixture({ widgetId: 'w1' });
       handles[0].root.set(textNode(0.5, 'first'));
       fixture.detectChanges();
-      expect(renderedRootOf(fixture)).toEqual(textNode(0.5, 'first'));
 
       connectionState.set('reconnecting');
       fixture.detectChanges();
-      expect(opens.length).toBe(1);
-
+      handles[0].root.set(null);
       connectionState.set('connected');
       fixture.detectChanges();
 
-      expect(opens.length).toBe(2);
-      expect(handles[0].closed).toBeTrue();
-      expect(handles[1].closed).toBeFalse();
-      expect(handles[1].root()).toBeNull();
+      expect(opens.length).toBe(1);
+      expect(handles[0].closed).toBeFalse();
       expect(renderedRootOf(fixture)).toEqual(textNode(0.5, 'first'));
 
-      handles[1].root.set(textNode(0.5, 'second'));
+      handles[0].root.set(textNode(0.5, 'second'));
       fixture.detectChanges();
       expect(renderedRootOf(fixture)).toEqual(textNode(0.5, 'second'));
     });

@@ -1,9 +1,8 @@
 import {
   ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, input, output,
-  signal, untracked, viewChild,
+  signal, viewChild,
 } from '@angular/core';
 
-import { ApiService, ConnectionState } from '../../transport';
 import { UiSessionHandle, UiSessionService } from '../../services/ui-session.service';
 import { UiNode, UiNodeEvent, type UiComponentBox } from '@macro-deck/runtime';
 import { TranslatePipe } from '../../localization';
@@ -41,7 +40,6 @@ export class FolderViewHostComponent {
   readonly changeView = output<void>();
 
   private readonly uiSessions = inject(UiSessionService);
-  private readonly api = inject(ApiService);
   private readonly treeContext = inject(UiWidgetTreeContext);
   private readonly folderViews = inject(FolderViewService);
 
@@ -63,27 +61,12 @@ export class FolderViewHostComponent {
   private readonly navigation = computed(() => this.folderViews.find(this.viewId())?.navigation ?? '');
 
   private openedFolderId: string | null = null;
-  private reconnectBaseline: ConnectionState | null = null;
   private resizeObserver: ResizeObserver | null = null;
 
   constructor() {
     effect(() => {
       const folderId = this.folderId();
       if (folderId !== this.openedFolderId) this.open(folderId);
-    });
-
-    effect(() => {
-      const state = this.api.connectionStateSignal();
-      if (this.reconnectBaseline === null) {
-        this.reconnectBaseline = state;
-        return;
-      }
-      // A dropped session is gone on the host too, so reconnecting has to reopen rather than resync.
-      // untracked: reading the folder id here would make a folder change re-run the reconnect effect too.
-      if (state === 'connected' && this.reconnectBaseline !== 'connected') {
-        untracked(() => this.open(this.folderId()));
-      }
-      this.reconnectBaseline = state;
     });
 
     effect(() => {

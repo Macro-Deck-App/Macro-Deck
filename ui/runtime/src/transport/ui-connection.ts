@@ -27,6 +27,7 @@ export class UiConnection {
   private transport: WebSocketTransport | null = null;
   private wanted = false;
   private attempt = 0;
+  private dialing = false;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly listeners: Array<(type: string, payload: unknown) => void> = [];
 
@@ -51,18 +52,30 @@ export class UiConnection {
 
   connect(): void {
     this.wanted = true;
-    if (this.transport || this.state.get() === 'connecting') return;
+    if (this.transport || this.dialing) return;
+    this.dialing = true;
     this.state.set(this.state.get() === 'disconnected' ? 'connecting' : 'reconnecting');
     void this.establish(++this.attempt);
   }
 
+  // A connection still being dialled is never replaced: resume and network hooks fire repeatedly on a
+  // slow link, and each replacement would start the dial over.
   reconnectNow(): void {
     this.clearRetry();
+    if (this.transport && this.state.get() === 'connected' && !this.transport.live) this.abandon(this.transport);
+    this.connect();
+  }
+
+  // For a network change: the old socket may look alive while its route is already gone.
+  replaceNow(): void {
+    this.clearRetry();
+    if (this.transport && this.state.get() === 'connected') this.abandon(this.transport);
     this.connect();
   }
 
   disconnect(): void {
     this.wanted = false;
+    this.dialing = false;
     this.clearRetry();
     if (this.transport) {
       const closing = this.transport;
@@ -91,7 +104,13 @@ export class UiConnection {
       opening = transport;
       transport.onAny((type, payload) => {
         const notified = this.listeners.slice();
-        for (let index = 0; index < notified.length; index++) notified[index](type, payload);
+        for (let index = 0; index < notified.length; index++) {
+          try {
+            notified[index](type, payload);
+          } catch (error) {
+            console.error('A listener for %s failed.', type, error);
+          }
+        }
       });
       this.transport = transport;
 
@@ -112,11 +131,13 @@ export class UiConnection {
         return;
       }
 
+      this.dialing = false;
       this.clearRetry();
       this.state.set('connected');
     } catch (error) {
       if (opening && this.transport === opening) this.abandon(opening);
       if (!this.isCurrent(attempt)) return;
+      this.dialing = false;
 
       this.state.set(this.wanted ? 'reconnecting' : 'disconnected');
       // A refused ticket is not a host that is merely away, so retrying it forever would spin - but

@@ -466,6 +466,26 @@ describe('Client', () => {
       expect(host.pathsFor('GET', '/api/localization').length).toBe(requestCount);
     });
 
+    it('picks up a language change made while the socket was down', async () => {
+      const client = build();
+      await client.probe();
+      await client.signIn('owner', 'secret');
+      client.connection.state.set('connected');
+      await settle();
+      expect(client.localization.culture()).toBe('en');
+
+      client.connection.state.set('reconnecting');
+      host.localizationAnswer = {
+        culture: 'de-DE',
+        translations: { [ClientAppStrings.Auth.SignIn]: 'Anmelden' },
+      };
+      client.connection.state.set('connected');
+      await settle();
+
+      expect(client.localization.culture()).toBe('de-DE');
+      expect(client.translate(ClientAppStrings.Auth.SignIn)).toBe('Anmelden');
+    });
+
     it('stops when the session ends', async () => {
       host.localizationFailCount = Infinity;
       const client = build();

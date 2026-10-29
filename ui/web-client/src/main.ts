@@ -26,7 +26,6 @@ import { ServerClock } from './server-clock';
 import { Shell } from './shell';
 import { WakeLock } from './wake-lock';
 import { setupPwa } from './pwa';
-import { IconPrefetch } from './icon-prefetch';
 import { startNetworkWatch } from './network-watch';
 import { startSessionResume } from './session-resume';
 import { fetchHostCommit, hardRefresh, startVersionCheck, withCacheBust } from './version-check';
@@ -168,20 +167,6 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
 
   startNetworkWatch({ retryNow: () => client.retryNow() });
 
-  const icons = new IconPrefetch({
-    baseUrl: hostBaseUrl,
-    folders: () => client.deck.folders.get(),
-    currentFolderId: () => client.deck.location.get().folderId,
-    resolveGrid: folder => client.gridFor(folder),
-    outerMargin: 0,
-    fixedSize: () => {
-      const resolution = iconResolution.get();
-      return resolution === 'auto' ? undefined : resolution;
-    },
-  });
-  client.deck.folders.subscribe(() => icons.warm());
-  client.deck.location.subscribe(() => icons.warm());
-
   window.addEventListener('resize', () => shell.resize());
   client.localization.onChange(() => {
     shell.repaint();
@@ -192,10 +177,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   fonts.onChange(() => shell.repaint());
   uiFont.onChange(() => shell.repaint());
   rendering.onChange(() => shell.repaint());
-  iconResolution.onChange(() => {
-    shell.repaint();
-    icons.warm();
-  });
+  iconResolution.onChange(() => shell.repaint());
   appearance.onChange(() => shell.repaint());
   motion.onChange(() => shell.repaint());
   appearance.setPersistence((mode, accent) => void client.saveAppearance(mode, accent));

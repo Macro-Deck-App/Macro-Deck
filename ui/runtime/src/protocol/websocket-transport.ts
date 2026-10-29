@@ -14,6 +14,9 @@ export interface WebSocketEnvelope {
 export class WebSocketTransport {
   private static readonly PROTOCOL_VERSION = 1;
   private static readonly STALE_AFTER_MS = 60_000;
+  // The host pings every 20 s (UiWebSocketEndpoint), so a link silent for longer has missed one.
+  private static readonly HOST_PING_INTERVAL_MS = 20_000;
+  private static readonly LIVE_WITHIN_MS = WebSocketTransport.HOST_PING_INTERVAL_MS * 1.5;
   private static readonly MAX_PENDING_REQUESTS = 256;
   private socket: WebSocket | null = null;
   private readonly handlers = new Map<string, Set<(payload: unknown) => void>>();
@@ -21,6 +24,7 @@ export class WebSocketTransport {
   private readonly pending = new Map<string, { resolve: (value: unknown) => void; reject: (reason: unknown) => void }>();
   private sequence = 0;
   private staleTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastInboundAt = 0;
   private closed = false;
 
   constructor(private readonly onClose: () => void) {}
@@ -32,26 +36,29 @@ export class WebSocketTransport {
       socket.onopen = () => this.write({ protocolVersion: 1, kind: 'hello' });
       socket.onerror = () => {
         reject(new Error('WebSocket connection failed.'));
-        socket.close();
+        this.fail();
       };
       socket.onmessage = event => {
+        if (this.closed) return;
+        let envelope: WebSocketEnvelope;
         try {
-          const envelope = JSON.parse(String(event.data)) as WebSocketEnvelope;
-          this.refreshStaleTimer();
-          if (envelope.protocolVersion !== WebSocketTransport.PROTOCOL_VERSION) {
-            reject(new Error('Unsupported UI WebSocket protocol.'));
-            socket.close();
-            return;
-          }
-          if (envelope.kind === 'welcome') {
-            resolve();
-            return;
-          }
-          this.receive(envelope);
+          envelope = JSON.parse(String(event.data)) as WebSocketEnvelope;
         } catch (error) {
           reject(error);
-          socket.close();
+          this.fail();
+          return;
         }
+        this.refreshStaleTimer();
+        if (envelope.protocolVersion !== WebSocketTransport.PROTOCOL_VERSION) {
+          reject(new Error('Unsupported UI WebSocket protocol.'));
+          this.fail();
+          return;
+        }
+        if (envelope.kind === 'welcome') {
+          resolve();
+          return;
+        }
+        this.receive(envelope);
       };
       socket.onclose = () => {
         reject(new Error('WebSocket closed before the handshake completed.'));
@@ -60,6 +67,12 @@ export class WebSocketTransport {
     });
     this.refreshStaleTimer();
     await welcome;
+  }
+
+  get live(): boolean {
+    return !this.closed
+      && this.socket?.readyState === WebSocket.OPEN
+      && Date.now() - this.lastInboundAt < WebSocketTransport.LIVE_WITHIN_MS;
   }
 
   on<T>(type: string, handler: (payload: T) => void): () => void {
@@ -131,8 +144,9 @@ export class WebSocketTransport {
       return;
     }
     if (envelope.kind === 'message' && envelope.type) {
-      this.handlers.get(envelope.type)?.forEach(handler => handler(envelope.payload));
-      this.anyHandlers.forEach(handler => handler(envelope.type!, envelope.payload));
+      const type = envelope.type;
+      this.handlers.get(type)?.forEach(handler => WebSocketTransport.notify(type, () => handler(envelope.payload)));
+      this.anyHandlers.forEach(handler => WebSocketTransport.notify(type, () => handler(type, envelope.payload)));
       return;
     }
     if ((envelope.kind === 'response' || envelope.kind === 'error') && envelope.correlationId) {
@@ -143,14 +157,30 @@ export class WebSocketTransport {
     }
   }
 
+  private static notify(type: string, handler: () => void): void {
+    try {
+      handler();
+    } catch (error) {
+      console.error('A handler for %s failed.', type, error);
+    }
+  }
+
   private write(envelope: WebSocketEnvelope): void {
     if (this.socket?.readyState !== WebSocket.OPEN) throw new Error('WebSocket is not connected.');
     this.socket.send(JSON.stringify(envelope));
   }
 
   private refreshStaleTimer(): void {
+    this.lastInboundAt = Date.now();
     if (this.staleTimer) clearTimeout(this.staleTimer);
-    this.staleTimer = setTimeout(() => this.socket?.close(), WebSocketTransport.STALE_AFTER_MS);
+    this.staleTimer = setTimeout(() => this.fail(), WebSocketTransport.STALE_AFTER_MS);
+  }
+
+  // A dead link holds the browser socket in CLOSING until its own handshake times out, so teardown
+  // cannot wait for onclose.
+  private fail(): void {
+    this.socket?.close();
+    this.close();
   }
 
   private close(): void {

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Subject } from 'rxjs';
+import { NEVER, Subject } from 'rxjs';
 
 import { GridWidget, WidgetData, WidgetType } from '@macro-deck/runtime';
 import { IWidgetComponent } from '../../widget-definition.interface';
@@ -55,6 +55,7 @@ describe('WidgetGhostComponent', () => {
     apiSpy.closeUiSession.and.returnValue(Promise.resolve({ success: true } as never));
     apiSpy.onWidgetTypeCatalogChanged.and.callFake(() => new Subject());
     Object.defineProperty(apiSpy, 'connectionStateSignal', { value: signal('disconnected') });
+    Object.defineProperty(apiSpy, 'connectionState$', { value: NEVER });
 
     TestBed.configureTestingModule({
       providers: [
