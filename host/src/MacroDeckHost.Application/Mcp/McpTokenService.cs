@@ -12,6 +12,8 @@ public interface IMcpTokenService
 
 	Task<McpAccessToken?> Authenticate(string rawToken);
 
+	Task<McpAccessToken?> Find(string rawToken);
+
 	Task<McpAccessTokenRevokeResult> Revoke(Guid id);
 
 	Task<McpAccessTokenDeleteResult> Delete(Guid id);
@@ -66,13 +68,8 @@ public class McpTokenService : IMcpTokenService
 
 	public async Task<McpAccessToken?> Authenticate(string rawToken)
 	{
-		if (string.IsNullOrEmpty(rawToken) || !rawToken.StartsWith(TokenPrefix, StringComparison.Ordinal))
-		{
-			return null;
-		}
-
-		var entity = await _repository.GetByHash(TokenHasher.Hash(rawToken));
-		if (entity is null || !TokenHasher.Verify(rawToken, entity.TokenHash) || entity.RevokedAt is not null)
+		var entity = await FindEntity(rawToken);
+		if (entity is null || entity.RevokedAt is not null)
 		{
 			return null;
 		}
@@ -85,6 +82,12 @@ public class McpTokenService : IMcpTokenService
 		}
 
 		return ToDto(entity);
+	}
+
+	public async Task<McpAccessToken?> Find(string rawToken)
+	{
+		var entity = await FindEntity(rawToken);
+		return entity is null ? null : ToDto(entity);
 	}
 
 	public async Task<McpAccessTokenRevokeResult> Revoke(Guid id)
@@ -126,6 +129,17 @@ public class McpTokenService : IMcpTokenService
 		}
 
 		return McpAccessTokenDeleteResult.Deleted;
+	}
+
+	private async Task<McpAccessTokenEntity?> FindEntity(string rawToken)
+	{
+		if (string.IsNullOrEmpty(rawToken) || !rawToken.StartsWith(TokenPrefix, StringComparison.Ordinal))
+		{
+			return null;
+		}
+
+		var entity = await _repository.GetByHash(TokenHasher.Hash(rawToken));
+		return entity is null || !TokenHasher.Verify(rawToken, entity.TokenHash) ? null : entity;
 	}
 
 	private static McpAccessToken ToDto(McpAccessTokenEntity entity)

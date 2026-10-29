@@ -48,7 +48,7 @@ Var UpdateMode
 ; when it actually generates an installer, so under /PPO !addplugindir is echoed rather than
 ; applied and the first nsis_tauri_utils:: call aborts the run. No script that calls a plugin
 ; can be preprocessed.
-!macro CheckIfAppIsRunning executableName productName
+!macro CheckIfAppIsRunning executablePath productName
 	!if "${MACRODECK_HOST_BINARY}" != "MacroDeckHost.exe"
 		!error "issue #131 regression: a release build selected ${MACRODECK_HOST_BINARY}"
 	!endif

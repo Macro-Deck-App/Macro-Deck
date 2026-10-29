@@ -22,6 +22,7 @@ export interface McpEndpoint {
   available: boolean;
   url?: string | null;
   contractVersion: string;
+  extensionAvailable?: boolean;
 }
 
 export interface GetMcpTokensResponse {
@@ -42,6 +43,10 @@ export interface CreateMcpTokenResponse extends ResultResponse {
 }
 
 export type McpTokenActionResponse = ResultResponse;
+
+export type ClaudeDesktopExtensionDownload =
+  | { ok: true; blob: Blob }
+  | { ok: false; response: McpTokenActionResponse };
 
 export type McpRiskMode = 'Allow' | 'Confirm' | 'Off';
 

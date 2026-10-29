@@ -49,6 +49,41 @@ The token is accepted **only** on `/mcp`:
   `/mcp`.
 - A session created with one token cannot be continued with another (`403`).
 
+## Claude Desktop extension and stdio bridge
+
+For clients that start a local stdio server instead of speaking HTTP, the Macro Deck desktop app's own
+executable doubles as a bridge:
+
+```sh
+MACRODECK_MCP_TOKEN=mdmcp_<token> <Macro Deck executable> mcp
+```
+
+It reads newline-delimited JSON-RPC on stdin, forwards it to `/mcp` with the token as bearer credential,
+and writes the responses and server requests (elicitations included) to stdout. Diagnostics go to stderr.
+
+- It never starts Macro Deck or opens a window. It finds the running host through the loopback port file
+  in the app's configuration directory, and sends the token only after that host proved the desktop app's
+  loopback secret. Nothing depends on `TMPDIR`, which Claude Desktop does not pass on.
+- When the session is lost (the host restarted, also on another port), it re-initializes with the
+  client's original `initialize` and replays a request only when it provably never reached the host. A
+  request that was in flight is answered with a JSON-RPC error instead, so a tool call never runs twice.
+- Without a host, with a rejected token (`401`) or while `/mcp` is unavailable (`404`), every request
+  gets a JSON-RPC error that says so, in the operating system's language. Without `MACRODECK_MCP_TOKEN`
+  it exits with status 2.
+- For development, a host started without the desktop app can be reached by setting both
+  `MACRODECK_HOST_PORT` and `MACRODECK_LOOPBACK_SECRET_FILE` (a file holding that host's loopback secret).
+  The pair is honoured only because the environment comes from the user's own client configuration, and
+  the port still has to prove that secret before the token is sent. Setting only one of them has no
+  effect.
+
+**Download for Claude Desktop** in **Settings > AI clients** builds a
+[Claude Desktop Extension](https://github.com/modelcontextprotocol/mcpb) (`.mcpb`, manifest version 0.3)
+of type `binary` that runs this bridge from the installed app, with the new token in its `env`. It is
+offered on macOS and Windows when the host was started by the installed desktop app. The admin endpoint
+behind it is `POST /api/mcp/tokens/{id}/claude-desktop-extension` with `{ "token": "<plaintext>" }`;
+it answers `application/zip`, or the settings' JSON error body with `invalid_token`, `token_revoked` or
+`extension_unavailable`. `GET /api/mcp/endpoint` reports whether it is offered in `extensionAvailable`.
+
 ## Browser and DNS-rebinding protection
 
 Every request to `/mcp`, the secret page and the confirmation page is refused unless:

@@ -1063,6 +1063,27 @@ Finder에서 Macro Deck을 응용 프로그램 폴더(또는 홈 폴더의 응�
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck 업데이트가 완전하게 끝나지 않았습니다</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable}이(가) 설정되지 않았습니다. 설정 &gt; AI 클라이언트에서 Claude Desktop 확장 프로그램을 다시 설치하세요.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck이 실행 중이 아닙니다. Macro Deck을 시작한 후 다시 시도하세요.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>액세스 토큰이 취소되었거나 삭제되어 Macro Deck이 거부했습니다. 설정 &gt; AI 클라이언트에서 새 토큰을 만들고 확장 프로그램을 다시 설치하세요.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck이 잠겨 있거나 AI 클라이언트를 지원하지 않아 MCP 서버를 사용할 수 없습니다. Macro Deck 잠금을 해제한 후 다시 시도하세요.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck이 요청을 거부했습니다(HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>응답을 받기 전에 Macro Deck과의 연결이 끊어졌습니다. 요청이 실행되었을 수 있으니 다시 시도하기 전에 확인하세요.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>MCP 세션이 초기화되지 않았습니다.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Macro Deck 정보</value>
   </data>
@@ -2939,6 +2960,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>이 복구 키로는 이 설치본의 잠금을 해제할 수 없습니다.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>이 액세스 토큰은 더 이상 사용할 수 없습니다. 확장 프로그램을 다운로드하려면 새 토큰을 만드세요.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Claude Desktop 확장 프로그램은 macOS 및 Windows에 설치된 Macro Deck 앱에서만 사용할 수 있습니다.</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>공급자를 선택하세요.</value>
@@ -17161,6 +17188,18 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>최소 수준</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Claude Desktop용 다운로드</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>다운로드한 파일을 Claude Desktop에서 열면 Macro Deck이 설치됩니다. 이 파일에는 이 토큰이 들어 있으므로 설치 후 삭제하세요.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Claude Desktop 확장 프로그램을 저장할 수 없습니다</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>AI 클라이언트</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>클라이언트 구성</value>
   </data>
@@ -17207,6 +17246,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>없음</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>기타 클라이언트</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>허용</value>
@@ -25410,6 +25452,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>비밀을 사용하는 승인된 블록에 {name} 전달</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Claude가 이 컴퓨터의 Macro Deck 설정을 다룰 수 있게 합니다. 버튼, 폴더, 자동화를 확인하고 만들며 작업을 실행할 수 있습니다. Claude는 비밀을 절대 볼 수 없습니다.</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>값을 입력하세요.</value>

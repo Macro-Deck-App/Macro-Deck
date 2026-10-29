@@ -25,6 +25,7 @@ mod launch_handoff;
 mod localization;
 mod logging;
 mod loopback_secret;
+mod mcp_bridge;
 mod menu;
 mod notifications;
 mod opened_files;
@@ -219,6 +220,12 @@ fn opener_plugin<R: tauri::Runtime>() -> impl tauri::plugin::Plugin<R> {
 }
 
 fn main() {
+    // Before anything Tauri: an AI client's bridge process must never claim or forward to the
+    // single-instance lock, open a window or touch the running app.
+    if mcp_bridge::is_invocation(std::env::args_os()) {
+        std::process::exit(mcp_bridge::run());
+    }
+
     // A relaunch races the instance that started it: the single-instance lock is only released once
     // that process is gone, and claiming it too early makes this instance forward its argv to a
     // dying process and exit - the app would simply disappear.

@@ -1064,6 +1064,27 @@ Chiudi l'applicazione che utilizza la porta (o un Macro Deck ancora in esecuzion
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck non è stato aggiornato completamente</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} non è impostata. Reinstalla l'estensione per Claude Desktop da Impostazioni &gt; Client IA.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck non è in esecuzione. Avvia Macro Deck e riprova.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck ha rifiutato il token di accesso: è stato revocato o eliminato. Crea un nuovo token in Impostazioni &gt; Client IA e reinstalla l'estensione.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck non ha un server MCP disponibile: è bloccato o non supporta i client IA. Sblocca Macro Deck e riprova.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck ha rifiutato la richiesta (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>La connessione a Macro Deck si è interrotta prima della risposta. La richiesta potrebbe essere stata eseguita, quindi controlla prima di riprovare.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>La sessione MCP non è stata inizializzata.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Informazioni su Macro Deck</value>
   </data>
@@ -2940,6 +2961,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Quella chiave di ripristino non sblocca questa installazione.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Questo token di accesso non può più essere usato. Crea un nuovo token per scaricare l'estensione.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>L'estensione per Claude Desktop è disponibile solo nell'app Macro Deck installata su macOS e Windows.</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>Scegli un fornitore.</value>
@@ -17160,6 +17187,18 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Livello minimo</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Scarica per Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Apri il file scaricato in Claude Desktop per installarvi Macro Deck. Il file contiene questo token, quindi eliminalo dopo l'installazione.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Impossibile salvare l'estensione per Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>Client IA</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>Configurazione del client</value>
   </data>
@@ -17206,6 +17245,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Mai</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Altri client</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>Consenti</value>
@@ -25388,6 +25430,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>passaggio di {name} a un blocco approvato che usa un segreto</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Permette a Claude di lavorare con la tua configurazione di Macro Deck su questo computer: vedere e creare pulsanti, cartelle e automazioni ed eseguire azioni. Claude non vede mai i tuoi segreti.</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>Inserisci un valore.</value>

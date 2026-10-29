@@ -409,6 +409,7 @@ import {
   WidgetTypeFavoritesChangedEvent,
 } from '@macro-deck/runtime';
 import {
+  ClaudeDesktopExtensionDownload,
   CreateMcpTokenRequest,
   CreateMcpTokenResponse,
   GetMcpConnectionsResponse,
@@ -921,6 +922,19 @@ export class ApiService {
 
   deleteMcpToken(id: string): Promise<McpTokenActionResponse> {
     return this.http('DELETE', `/api/mcp/tokens/${encodeURIComponent(id)}`);
+  }
+
+  async downloadClaudeDesktopExtension(id: string, token: string): Promise<ClaudeDesktopExtensionDownload> {
+    const response = await this.fetchWithAuth(`/api/mcp/tokens/${encodeURIComponent(id)}/claude-desktop-extension`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    if (response.ok) {
+      return { ok: true, blob: await response.blob() };
+    }
+    const failure = await response.json().catch(() => null) as McpTokenActionResponse | null;
+    return { ok: false, response: failure ?? { success: false } };
   }
 
   getMcpConnections(): Promise<GetMcpConnectionsResponse> {

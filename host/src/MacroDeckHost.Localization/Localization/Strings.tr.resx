@@ -1063,6 +1063,27 @@ Bağlantı noktasını kullanan uygulamayı (veya hâlâ çalışan bir Macro De
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck tamamen güncellenemedi</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} ayarlanmamış. Claude Desktop uzantısını Ayarlar &gt; Yapay zekâ istemcileri bölümünden yeniden yükleyin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck çalışmıyor. Macro Deck'i başlatıp yeniden deneyin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck erişim belirtecini reddetti, çünkü belirteç iptal edildi veya silindi. Ayarlar &gt; Yapay zekâ istemcileri bölümünde yeni bir belirteç oluşturun ve uzantıyı yeniden yükleyin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck'te kullanılabilir bir MCP sunucusu yok, çünkü uygulama kilitli veya yapay zekâ istemcilerini desteklemiyor. Macro Deck'in kilidini açıp yeniden deneyin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck isteği reddetti (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>Macro Deck ile bağlantı yanıt gelmeden koptu. İstek çalışmış olabilir, bu yüzden yeniden denemeden önce kontrol edin.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>MCP oturumu başlatılmadı.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Macro Deck hakkında</value>
   </data>
@@ -2939,6 +2960,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Bu kurtarma anahtarı bu kurulumun kilidini açmıyor.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Bu erişim belirteci artık kullanılamaz. Uzantıyı indirmek için yeni bir belirteç oluşturun.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Claude Desktop uzantısı yalnızca macOS ve Windows'a yüklenmiş Macro Deck uygulamasında kullanılabilir.</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>Bir sağlayıcı seçin.</value>
@@ -17161,6 +17188,18 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>En düşük düzey</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Claude Desktop için indir</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Macro Deck'i yüklemek için indirilen dosyayı Claude Desktop'ta açın. Dosya bu belirteci içerdiğinden yüklemeden sonra silin.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Claude Desktop uzantısı kaydedilemedi</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>Yapay zekâ istemcisi</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>İstemci yapılandırması</value>
   </data>
@@ -17207,6 +17246,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Hiçbir zaman</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Diğer istemciler</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>İzin ver</value>
@@ -25410,6 +25452,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>{name} değerini gizli değer kullanan onaylı bir bloğa aktarmak</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Claude'un bu bilgisayardaki Macro Deck kurulumunuzla çalışmasını sağlar: düğmeleri, klasörleri ve otomasyonları görüntüleyip oluşturabilir ve eylemleri çalıştırabilir. Claude gizli değerlerinizi asla görmez.</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>Bir değer girin.</value>

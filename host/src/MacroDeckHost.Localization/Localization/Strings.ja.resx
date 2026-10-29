@@ -1063,6 +1063,27 @@ Finder で Macro Deck を「アプリケーション」フォルダー（また�
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck の更新が完了していません</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} が設定されていません。[設定] &gt; [AI クライアント] から Claude Desktop 拡張機能をもう一度インストールしてください。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck が実行されていません。Macro Deck を起動してから、もう一度お試しください。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>アクセス トークンが取り消されたか削除されたため、Macro Deck が拒否しました。[設定] &gt; [AI クライアント] で新しいトークンを作成し、拡張機能をもう一度インストールしてください。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck がロックされているか AI クライアントに対応していないため、MCP サーバーを利用できません。Macro Deck のロックを解除してから、もう一度お試しください。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck がリクエストを拒否しました (HTTP {status})。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>応答を受け取る前に Macro Deck との接続が切れました。リクエストが実行された可能性があるため、再試行する前に確認してください。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>MCP セッションが初期化されていません。</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Macro Deck について</value>
   </data>
@@ -2939,6 +2960,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>そのリカバリーキーでは、このインストールのロックを解除できません。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>このアクセス トークンは使用できなくなりました。拡張機能をダウンロードするには、新しいトークンを作成してください。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Claude Desktop 拡張機能は、macOS と Windows にインストールした Macro Deck アプリでのみ利用できます。</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>プロバイダーを選択してください。</value>
@@ -17161,6 +17188,18 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>最小レベル</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Claude Desktop 用にダウンロード</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>ダウンロードしたファイルを Claude Desktop で開くと、Macro Deck がインストールされます。このファイルにはこのトークンが含まれているため、インストール後に削除してください。</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Claude Desktop 拡張機能を保存できませんでした</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>AI クライアント</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>クライアント構成</value>
   </data>
@@ -17207,6 +17246,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>なし</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>その他のクライアント</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>許可</value>
@@ -25410,6 +25452,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>{name} をシークレットを使う承認済みブロックに渡すこと</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>このコンピューターの Macro Deck の構成を Claude が扱えるようにします。ボタン、フォルダー、オートメーションの確認と作成、アクションの実行ができます。Claude がシークレットを見ることはありません。</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>値を入力してください。</value>

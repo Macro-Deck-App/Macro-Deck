@@ -1063,6 +1063,27 @@
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>لم يكتمل تحديث Macro Deck</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>لم يتم تعيين {variable}. أعد تثبيت إضافة Claude Desktop من الإعدادات &gt; عملاء الذكاء الاصطناعي.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck لا يعمل. شغّل Macro Deck وحاول مرة أخرى.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>رفض Macro Deck رمز الوصول لأنه أُلغي أو حُذف. أنشئ رمزًا جديدًا في الإعدادات &gt; عملاء الذكاء الاصطناعي وأعد تثبيت الإضافة.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>لا يتوفر خادم MCP في Macro Deck لأنه مقفل أو لا يدعم عملاء الذكاء الاصطناعي. ألغِ قفل Macro Deck وحاول مرة أخرى.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>رفض Macro Deck الطلب (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>انقطع الاتصال بـ Macro Deck قبل وصول الرد. ربما نُفّذ الطلب، لذا تحقق من ذلك قبل إعادة المحاولة.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>لم تتم تهيئة جلسة MCP.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>حول Macro Deck</value>
   </data>
@@ -2939,6 +2960,12 @@
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>مفتاح الاسترداد هذا لا يفتح هذا التثبيت.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>لم يعد من الممكن استخدام رمز الوصول هذا. أنشئ رمزًا جديدًا لتنزيل الإضافة.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>إضافة Claude Desktop متاحة فقط في تطبيق Macro Deck المثبّت على macOS وWindows.</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>اختر مزوّدًا.</value>
@@ -17161,6 +17188,18 @@
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>أدنى مستوى</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>تنزيل لـ Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>افتح الملف الذي تم تنزيله في Claude Desktop لتثبيت Macro Deck فيه. يحتوي الملف على هذا الرمز، لذا احذفه بعد التثبيت.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>تعذر حفظ إضافة Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>عميل الذكاء الاصطناعي</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>إعداد العميل</value>
   </data>
@@ -17207,6 +17246,9 @@
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>أبدًا</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>عملاء آخرون</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>السماح</value>
@@ -25410,6 +25452,9 @@
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>تمرير {name} إلى كتلة معتمدة تستخدم سرًا</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>يتيح لـ Claude العمل مع إعداد Macro Deck على هذا الكمبيوتر: عرض الأزرار والمجلدات والأتمتة وإنشاؤها وتشغيل الإجراءات. لا يرى Claude أسرارك أبدًا.</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>أدخل قيمة.</value>

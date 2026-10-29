@@ -1064,6 +1064,27 @@ Zavřete aplikaci používající tento port (nebo stále běžící Macro Deck)
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck nebyl aktualizován úplně</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>Proměnná {variable} není nastavena. Rozšíření pro Claude Desktop znovu nainstalujte v Nastavení &gt; Klienti AI.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck není spuštěný. Spusťte Macro Deck a zkuste to znovu.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck odmítl přístupový token, protože byl odvolán nebo smazán. V Nastavení &gt; Klienti AI vytvořte nový token a rozšíření znovu nainstalujte.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck nemá dostupný server MCP, protože je zamčený nebo nepodporuje klienty AI. Odemkněte Macro Deck a zkuste to znovu.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck požadavek odmítl (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>Spojení s Macro Deck se přerušilo dřív, než přišla odpověď. Požadavek se mohl provést, před opakováním to proto zkontrolujte.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>Relace MCP nebyla inicializována.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>O aplikaci Macro Deck</value>
   </data>
@@ -2940,6 +2961,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Tento obnovovací klíč tuto instalaci neodemyká.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Tento přístupový token již nelze použít. Pro stažení rozšíření vytvořte nový token.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Rozšíření pro Claude Desktop je dostupné jen v nainstalované aplikaci Macro Deck v systémech macOS a Windows.</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>Zvolte poskytovatele.</value>
@@ -17160,6 +17187,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Minimální úroveň</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Stáhnout pro Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Otevřete stažený soubor v Claude Desktop a nainstalujte do něj Macro Deck. Soubor obsahuje tento token, proto jej po instalaci smažte.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Rozšíření pro Claude Desktop se nepodařilo uložit</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>Klient AI</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>Konfigurace klienta</value>
   </data>
@@ -17206,6 +17245,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Nikdy</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Ostatní klienti</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>Povolit</value>
@@ -25388,6 +25430,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>předání {name} schválenému bloku s tajným údajem</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Umožňuje Claudovi pracovat s nastavením Macro Decku na tomto počítači: prohlížet a vytvářet tlačítka, složky a automatizace a spouštět akce. Claude nikdy neuvidí tajné údaje.</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>Zadejte hodnotu.</value>

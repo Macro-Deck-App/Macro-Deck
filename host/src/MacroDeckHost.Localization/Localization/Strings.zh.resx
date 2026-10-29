@@ -1063,6 +1063,27 @@
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck 未完整更新</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>未设置 {variable}。请在“设置 &gt; AI 客户端”中重新安装 Claude Desktop 扩展。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck 未运行。请启动 Macro Deck 后重试。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>访问令牌已被撤销或删除，Macro Deck 拒绝了它。请在“设置 &gt; AI 客户端”中创建新令牌，然后重新安装扩展。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck 已锁定或不支持 AI 客户端，因此没有可用的 MCP 服务器。请解锁 Macro Deck 后重试。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck 拒绝了请求（HTTP {status}）。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>在收到响应之前，与 Macro Deck 的连接已断开。请求可能已执行，重试前请先检查。</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>MCP 会话尚未初始化。</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>关于 Macro Deck</value>
   </data>
@@ -2939,6 +2960,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>该恢复密钥无法解锁此安装。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>此访问令牌已无法使用。请创建新令牌以下载扩展。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Claude Desktop 扩展仅在 macOS 和 Windows 上安装的 Macro Deck 应用中可用。</value>
   </data>
   <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
     <value>请选择一个提供方。</value>
@@ -17161,6 +17188,18 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>最低级别</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>下载 Claude Desktop 扩展</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>在 Claude Desktop 中打开下载的文件，即可在其中安装 Macro Deck。该文件包含此令牌，安装后请将其删除。</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>无法保存 Claude Desktop 扩展</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>AI 客户端</value>
+  </data>
   <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
     <value>客户端配置</value>
   </data>
@@ -17207,6 +17246,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>从未</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>其他客户端</value>
   </data>
   <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
     <value>允许</value>
@@ -25392,6 +25434,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
     <value>将 {name} 传给一个已批准且使用密钥的块</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>让 Claude 使用此电脑上的 Macro Deck 配置：查看和创建按钮、文件夹和自动化，并运行操作。Claude 永远看不到密钥。</value>
   </data>
   <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
     <value>请输入一个值。</value>

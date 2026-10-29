@@ -523,6 +523,48 @@ look different from an image editor:
   than 20 ms, such as in an animation of 60 frames per second, are combined: the animation keeps its
   length but shows fewer frames.
 
+## An AI client cannot connect
+
+First check that Macro Deck is running. If Macro Deck asks you to **Enter your recovery key**, its key
+ring is locked and AI clients cannot connect until you unlock it with your backup recovery key. Then look
+for the case that fits.
+
+- **It stopped connecting after you changed the port** in **Settings > Network**. Copy **Server
+  address** from **Settings > AI clients** into your client's configuration again. The Claude Desktop
+  extension finds Macro Deck on its own. A request that was running while Macro Deck restarted can fail
+  once; ask again.
+- **It runs on another computer and cannot reach Macro Deck.** Check that the configuration uses the
+  network address of the computer running Macro Deck instead of `127.0.0.1`, and go through the network
+  checks under [A device cannot connect](#a-device-cannot-connect).
+- **It is rejected (401 Unauthorized), or the extension says the access token was rejected.** The token
+  was revoked or removed. Create a new token in **Settings > AI clients** and update your client's
+  configuration, or install the Claude Desktop extension again from a new download.
+- **Claude Desktop lost Macro Deck after a Macro Deck update.** The update closes the extension so it can
+  replace Macro Deck. Turn the extension off and on again in Claude Desktop's settings, or restart Claude
+  Desktop.
+
+See [AI clients](/guide/ai-clients/) for how clients connect.
+
+## An AI client cannot do something
+
+The client usually shows the code Macro Deck answered with. The full list is in
+[the developer reference](/reference/mcp/#common-error-codes).
+
+- **It cannot ask you for a secret** (`ELICITATION_UNAVAILABLE`). Your client cannot open Macro Deck's
+  secret page, so it cannot store a new secret. Secret references it makes up itself are refused
+  (`FOREIGN_SECRET_REF`). Enter the secret in Macro Deck yourself, or use a client that supports URL
+  elicitation.
+- **The secret page says the request expired** (`SECRET_ENTRY_EXPIRED`). A secret page works once and for
+  10 minutes. Ask the client to try again.
+- **An action is refused** (`PROVIDER_BLOCKED`). Its provider is set to **Off** under **Actions AI clients
+  may run** in **Settings > AI clients**.
+- **An action that asks first did not run** (`CONFIRMATION_DECLINED`). You chose **Decline**, or the
+  Macro Deck page for clients without their own confirmation dialog was not answered within 5 minutes.
+  Ask the client to try again and answer the question.
+- **It cannot ask you before an action** (`CONFIRMATION_UNAVAILABLE`). The provider is set to **Ask
+  first**, but your client can show neither its own question nor a Macro Deck page. Set the provider to
+  **Allow** if the client may run its actions without asking, or use a client that can ask.
+
 ## Installing on Linux
 
 - **The stable APT suite is empty:** there is no stable release of Macro Deck 3 yet. Use the beta
