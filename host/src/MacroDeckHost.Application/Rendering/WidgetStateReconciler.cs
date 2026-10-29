@@ -15,6 +15,17 @@ namespace MacroDeckHost.Application.Rendering;
 public interface IWidgetStateReconciler
 {
 	Task<WidgetStateReconciliation> Reconcile(Guid widgetId, CancellationToken cancellationToken = default);
+
+	Task<WidgetStateReconciliation> Reconcile(
+		Guid widgetId,
+		StateChangeFlowDispatch dispatch,
+		CancellationToken cancellationToken = default);
+}
+
+public enum StateChangeFlowDispatch
+{
+	Inline,
+	Detached
 }
 
 /// <summary>
@@ -60,6 +71,7 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 	private readonly IAppPreferenceService _preferences;
 	private readonly ILocalizationResolver _localization;
 	private readonly ILogger _logger;
+	private readonly WidgetStateChangeFlowRunner _flowRunner;
 	private readonly WidgetOptimisticStateStore? _optimisticStates;
 
 	public WidgetStateReconciler(
@@ -74,6 +86,7 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 		IAppPreferenceService preferences,
 		ILocalizationResolver localization,
 		ILogger logger,
+		WidgetStateChangeFlowRunner flowRunner,
 		WidgetOptimisticStateStore? optimisticStates = null)
 	{
 		_stateService = stateService;
@@ -87,10 +100,19 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 		_preferences = preferences;
 		_localization = localization;
 		_logger = logger.ForContext<WidgetStateReconciler>();
+		_flowRunner = flowRunner;
 		_optimisticStates = optimisticStates;
 	}
 
-	public async Task<WidgetStateReconciliation> Reconcile(Guid widgetId, CancellationToken cancellationToken = default)
+	public Task<WidgetStateReconciliation> Reconcile(Guid widgetId, CancellationToken cancellationToken = default)
+	{
+		return Reconcile(widgetId, StateChangeFlowDispatch.Inline, cancellationToken);
+	}
+
+	public async Task<WidgetStateReconciliation> Reconcile(
+		Guid widgetId,
+		StateChangeFlowDispatch dispatch,
+		CancellationToken cancellationToken = default)
 	{
 		var resolution = await _stateService.Resolve(widgetId, cancellationToken);
 		if (resolution is null)
@@ -109,7 +131,7 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 
 		if (!IsCurrent(resolution))
 		{
-			return await Reconcile(widgetId, cancellationToken);
+			return await Reconcile(widgetId, dispatch, cancellationToken);
 		}
 
 		var scopeRefId = widgetId.ToString();
@@ -134,7 +156,7 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 
 		if (!IsCurrent(resolution))
 		{
-			return await Reconcile(widgetId, cancellationToken);
+			return await Reconcile(widgetId, dispatch, cancellationToken);
 		}
 
 		var previous = _store.GetAndSet(widgetId, resolution.StateId);
@@ -155,7 +177,14 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 		// once the flow finished cannot see anything the flow paints in between (issue #678).
 		await PublishTransition(widgetId, reconciliation, cancellationToken);
 
-		if (transitioned)
+		if (transitioned && dispatch == StateChangeFlowDispatch.Detached)
+		{
+			if (StateChangeRequest(widgetId, resolution.StateId, previous) is { } request)
+			{
+				_flowRunner.RunDetached(widgetId, request);
+			}
+		}
+		else if (transitioned)
 		{
 			var depth = _reconcileDepth.AddOrUpdate(widgetId, 1, static (_, d) => d + 1);
 			try
@@ -255,41 +284,37 @@ public sealed class WidgetStateReconciler : IWidgetStateReconciler
 		string? previousStateId,
 		CancellationToken cancellationToken)
 	{
+		if (StateChangeRequest(widgetId, stateId, previousStateId) is { } request)
+		{
+			await _flowRunner.RunInline(widgetId, _flowExecutor, request, cancellationToken);
+		}
+	}
+
+	// The state changed because a variable, a poll, or an explicit-state action moved it - never
+	// because of a client press - so this runs host-initiated and skips the host-lock gate.
+	private FlowExecutionRequest? StateChangeRequest(Guid widgetId, string stateId, string? previousStateId)
+	{
 		var widget = FindWidget(widgetId);
 		if (widget is null)
 		{
-			return;
+			return null;
 		}
 
-		// The state changed because a variable, a poll, or an explicit-state action moved it - never
-		// because of a client press - so this runs host-initiated and skips the host-lock gate.
-		var result = await _flowExecutor.ExecuteAsync(new FlowExecutionRequest
-			{
-				FlowsSource = widget.Data,
-				Trigger = TriggerSelector.ByType(WidgetTriggerTypes.StateChange),
-				Scope = VariableScope.Widget,
-				ScopeRefId = widgetId.ToString(),
-				OwnerWidgetId = widgetId,
-				Owner = FlowOwner.Widget(widgetId),
-				Origin = ExecutionOrigin.Host,
-				EventParameters = new Dictionary<string, object?>
-				{
-					["state"] = stateId,
-					["previousState"] = previousStateId
-				}
-			},
-			cancellationToken);
-
-		if (result.Status != FlowExecutionStatus.Succeeded)
+		return new FlowExecutionRequest
 		{
-			_logger.Warning("onStateChange flow for widget {WidgetId} finished as {Status} (execution {ExecutionId}): "
-				+ "{ErrorCode} {ErrorMessage}",
-				widgetId,
-				result.Status,
-				result.ExecutionId,
-				result.ErrorCode,
-				result.ErrorMessage.ToString());
-		}
+			FlowsSource = widget.Data,
+			Trigger = TriggerSelector.ByType(WidgetTriggerTypes.StateChange),
+			Scope = VariableScope.Widget,
+			ScopeRefId = widgetId.ToString(),
+			OwnerWidgetId = widgetId,
+			Owner = FlowOwner.Widget(widgetId),
+			Origin = ExecutionOrigin.Host,
+			EventParameters = new Dictionary<string, object?>
+			{
+				["state"] = stateId,
+				["previousState"] = previousStateId
+			}
+		};
 	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)

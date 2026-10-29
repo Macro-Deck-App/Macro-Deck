@@ -77,8 +77,8 @@ public interface IWidgetRenderSignals
 	void RaiseWidgetIconChanged(Guid widgetId);
 
 	/// <summary>Raised beside <c>VariableValueChangedNotificationHandler</c>'s own work, for every
-	/// variable that changed value - see <see cref="SubscribeVariableChanged" /> for why this one is
-	/// ungated.</summary>
+	/// variable that changed value or was created, deleted or renamed - see
+	/// <see cref="SubscribeVariableChanged" /> for why this one is ungated.</summary>
 	void RaiseVariableChanged();
 }
 

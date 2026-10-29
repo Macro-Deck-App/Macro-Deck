@@ -31,6 +31,7 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 	private readonly IFolderCache _folderCache;
 	private readonly IWidgetVariableIndex _variableIndex;
 	private readonly StartupReadiness _readiness;
+	private readonly WidgetStateChangeFlowRunner _flowRunner;
 	private readonly ILogger _logger;
 	private readonly WidgetOptimisticStateStore? _optimisticStates;
 	private readonly TimeProvider _timeProvider;
@@ -45,6 +46,7 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 		IFolderCache folderCache,
 		IWidgetVariableIndex variableIndex,
 		StartupReadiness readiness,
+		WidgetStateChangeFlowRunner flowRunner,
 		ILogger logger,
 		WidgetOptimisticStateStore? optimisticStates = null,
 		TimeProvider? timeProvider = null)
@@ -56,6 +58,7 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 		_folderCache = folderCache;
 		_variableIndex = variableIndex;
 		_readiness = readiness;
+		_flowRunner = flowRunner;
 		_logger = logger;
 		_optimisticStates = optimisticStates;
 		_timeProvider = timeProvider ?? TimeProvider.System;
@@ -203,9 +206,14 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 
 	private async Task Process(Guid widgetId, CancellationToken cancellationToken)
 	{
+		if (_flowRunner.TryDefer(widgetId))
+		{
+			return;
+		}
+
 		using var scope = _scopeFactory.CreateScope();
 		var reconciler = scope.ServiceProvider.GetRequiredService<IWidgetStateReconciler>();
 
-		await reconciler.Reconcile(widgetId, cancellationToken);
+		await reconciler.Reconcile(widgetId, StateChangeFlowDispatch.Detached, cancellationToken);
 	}
 }

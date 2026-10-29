@@ -154,6 +154,75 @@ public class WidgetStateMappingInvalidationTests
 		Assert.That(Drain(queue), Is.EquivalentTo([legacy.Id]));
 	}
 
+	[Test]
+	public async Task CreatingOrDeletingAReadVariable_ReEvaluatesTheButtonsThatReadIt()
+	{
+		var bound = Button(Guid.NewGuid(), BoundOnCpu);
+		var unbound = Button(Guid.NewGuid(), "{\"mode\":\"toggle\"}");
+		var queue = new WidgetStateEvalChannel();
+		var handler = new VariableValueChangedStateMappingHandler(IndexOver(bound, unbound), queue);
+
+		await handler.Handle(new VariableCreatedNotification(Variable("cpu", VariableScope.Global)),
+			CancellationToken.None);
+		var afterCreate = Drain(queue);
+		await handler.Handle(new VariableDeletedNotification(Variable("cpu", VariableScope.Global)),
+			CancellationToken.None);
+		var afterDelete = Drain(queue);
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(afterCreate, Is.EquivalentTo([bound.Id]));
+			Assert.That(afterDelete, Is.EquivalentTo([bound.Id]));
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task RenamingAVariable_ReEvaluatesButtonsReadingTheOldAndTheNewName()
+	{
+		var readsOld = Button(Guid.NewGuid(), BoundOnCpu);
+		var readsNew = Button(Guid.NewGuid(), BoundOnLocal);
+		var queue = new WidgetStateEvalChannel();
+		var handler = new VariableValueChangedStateMappingHandler(IndexOver(readsOld, readsNew), queue);
+
+		await handler.Handle(new VariableUpdatedNotification(Variable("local", VariableScope.Global), "cpu"),
+			CancellationToken.None);
+
+		Assert.That(Drain(queue), Is.EquivalentTo([readsOld.Id, readsNew.Id]));
+	}
+
+	[Test]
+	public async Task CreatingAWidgetVariableThatShadowsAGlobalOne_ReEvaluatesOnlyItsOwner()
+	{
+		var owner = Button(Guid.NewGuid(), BoundOnLocal);
+		var unrelated = Button(Guid.NewGuid(), BoundOnLocal);
+		var queue = new WidgetStateEvalChannel();
+		var handler = new VariableValueChangedStateMappingHandler(IndexOver(owner, unrelated), queue);
+
+		await handler.Handle(new VariableCreatedNotification(
+				Variable("local", VariableScope.Widget, owner.Id.ToString())),
+			CancellationToken.None);
+
+		Assert.That(Drain(queue), Is.EquivalentTo([owner.Id]));
+	}
+
+	[Test]
+	public async Task CreatingAButtonsOwnStateVariable_DoesNotReEnqueueIt()
+	{
+		var selfReferencing = Button(Guid.NewGuid(),
+			"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}],"
+			+ "\"stateMapping\":{\"rules\":[{\"id\":\"r\",\"stateId\":\"b\",\"when\":{\"kind\":\"compare\",\"id\":\"c\","
+			+ "\"left\":{\"$var\":\"state\"},\"operator\":\"==\",\"right\":\"a\"}}],\"fallbackStateId\":\"a\"}}");
+		var queue = new WidgetStateEvalChannel();
+		var handler = new VariableValueChangedStateMappingHandler(IndexOver(selfReferencing), queue);
+
+		await handler.Handle(new VariableCreatedNotification(
+				Variable("state", VariableScope.Widget, selfReferencing.Id.ToString())),
+			CancellationToken.None);
+
+		Assert.That(Drain(queue), Is.Empty);
+	}
+
 	private sealed class FakeFolderCache : IFolderCache
 	{
 		private readonly FolderEntity _folder;

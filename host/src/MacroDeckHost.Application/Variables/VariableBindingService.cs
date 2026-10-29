@@ -253,6 +253,8 @@ public sealed class VariableBindingService : IVariableBindingService
 				return Fail(VariableBindingError.NotFound, "No binding for this variable");
 			}
 
+			var previousName = entity.Name;
+
 			// UpdateUserVariable cannot be reused here: it hard-rejects anything that is not User-classified.
 			if (!_registry.Rename(variableId, canonical, DateTime.UtcNow))
 			{
@@ -266,7 +268,9 @@ public sealed class VariableBindingService : IVariableBindingService
 				return Fail(VariableBindingError.StoreUnavailable, "Could not persist the rename");
 			}
 
-			await _mediator.Publish(new VariableUpdatedNotification(entity), cancellationToken).ConfigureAwait(false);
+			var renamedFrom = string.Equals(previousName, entity.Name, StringComparison.Ordinal) ? null : previousName;
+			await _mediator.Publish(new VariableUpdatedNotification(entity, renamedFrom), cancellationToken)
+				.ConfigureAwait(false);
 
 			return Result.Ok<VariableBindingError>();
 		}

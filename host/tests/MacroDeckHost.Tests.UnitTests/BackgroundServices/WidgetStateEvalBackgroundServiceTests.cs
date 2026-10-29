@@ -48,6 +48,7 @@ internal sealed class WidgetStateEvalBackgroundServiceTests
 			folderCache,
 			new NoOpWidgetVariableIndex(),
 			readiness,
+			TestStateChangeFlowRunner.Create(),
 			Serilog.Log.Logger,
 			timeProvider: _time);
 	}

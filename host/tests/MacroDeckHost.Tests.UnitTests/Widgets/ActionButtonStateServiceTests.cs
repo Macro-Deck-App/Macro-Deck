@@ -267,7 +267,8 @@ public class ActionButtonStateServiceTests
 				writeLock,
 				TestLocalization.Preferences,
 				TestLocalization.Resolver,
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				TestStateChangeFlowRunner.Create());
 
 			Service = new ActionButtonStateService(folderCache, writeLock, Widgets, reconciler);
 		}

@@ -103,7 +103,8 @@ public class WidgetStateVariablesAndPushTests
 			new WidgetDataWriteLock(),
 			TestLocalization.Preferences,
 			TestLocalization.Resolver,
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			TestStateChangeFlowRunner.Create());
 
 		await reconciler.Reconcile(widget.Id);
 		Assert.That(await harness.Service.GetByScope(VariableScope.Widget, widget.Id.ToString()),

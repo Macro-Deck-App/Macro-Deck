@@ -303,7 +303,8 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			writeLock,
 			TestLocalization.Preferences,
 			TestLocalization.Resolver,
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			TestStateChangeFlowRunner.Create());
 
 		return new ActionButtonStateService(folders, writeLock, widgets, reconciler);
 	}

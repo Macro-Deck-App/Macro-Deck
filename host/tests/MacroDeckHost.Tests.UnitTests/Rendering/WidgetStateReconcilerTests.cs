@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Persistence;
@@ -9,9 +10,12 @@ using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
+using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.Rendering;
 
@@ -51,7 +55,8 @@ public class WidgetStateReconcilerTests
 			new WidgetDataWriteLock(),
 			TestLocalization.Preferences,
 			TestLocalization.Resolver,
-			Serilog.Log.Logger);
+			Log.Logger,
+			TestStateChangeFlowRunner.Create(flow));
 		return (reconciler, flow, vars, store, publisher);
 	}
 
@@ -178,7 +183,8 @@ public class WidgetStateReconcilerTests
 			new WidgetDataWriteLock(),
 			TestLocalization.Preferences,
 			TestLocalization.Resolver,
-			Serilog.Log.Logger,
+			Log.Logger,
+			TestStateChangeFlowRunner.Create(),
 			optimisticStates);
 
 		var result = await reconciler.Reconcile(widget.Id);
@@ -260,7 +266,8 @@ public class WidgetStateReconcilerTests
 			new WidgetDataWriteLock(),
 			TestLocalization.Preferences,
 			TestLocalization.Resolver,
-			Serilog.Log.Logger);
+			Log.Logger,
+			TestStateChangeFlowRunner.Create());
 
 		var ticks = Task.Run(async () =>
 		{
@@ -349,6 +356,260 @@ public class WidgetStateReconcilerTests
 			Assert.That(flow.Triggers, Is.EqualTo(new[] { "onStateChange" }));
 			Assert.That(result.StateId, Is.EqualTo("on"));
 		});
+	}
+
+	[Test]
+	public async Task DetachedReconcile_PublishesTheTransitionAndReturnsWhileItsFlowIsStillRunning()
+	{
+		var widget = BoundButton(Guid.NewGuid());
+		var (reconciler, flow, _, _, publisher) = Build(widget, "off", "on");
+		var flowStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var publishedWhenFlowStarted = -1;
+		flow.OnExecuting = () =>
+		{
+			publishedWhenFlowStarted = publisher.Published.Count;
+			flowStarted.TrySetResult();
+			return release.Task;
+		};
+
+		await reconciler.Reconcile(widget.Id, StateChangeFlowDispatch.Detached);
+		var result = await reconciler.Reconcile(widget.Id, StateChangeFlowDispatch.Detached)
+			.WaitAsync(TimeSpan.FromSeconds(5));
+		await flowStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		release.SetResult();
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(result.Transitioned, Is.True);
+			Assert.That(publishedWhenFlowStarted, Is.EqualTo(2));
+			Assert.That(flow.Requests.Single().EventParameters!["state"], Is.EqualTo("on"));
+			Assert.That(flow.Requests.Single().EventParameters!["previousState"], Is.EqualTo("off"));
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task ASlowOnStateChangeFlow_DoesNotHoldUpAnotherButtonsState()
+	{
+		var first = BoundButton(Guid.NewGuid());
+		var second = BoundButton(Guid.NewGuid());
+		var harness = await StartQueue(first, second);
+		var firstFlowStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		harness.Flow.OnExecuting = () =>
+		{
+			firstFlowStarted.TrySetResult();
+			return release.Task;
+		};
+
+		try
+		{
+			harness.States.Set(first.Id, "on");
+			harness.Queue.Enqueue(first.Id);
+			await firstFlowStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+			harness.States.Set(second.Id, "on");
+			harness.Queue.Enqueue(second.Id);
+
+			await WaitUntil(() => harness.Store.TryGet(second.Id) == "on");
+		}
+		finally
+		{
+			release.TrySetResult();
+			await harness.Service.StopAsync(CancellationToken.None);
+		}
+	}
+
+	[Test]
+	public async Task TransitionsAButtonsFlowCausesOnItself_SettleWithoutFiringItAgain()
+	{
+		var widget = BoundButton(Guid.NewGuid());
+		var harness = await StartQueue(widget);
+		var runs = 0;
+		var flowFinished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		string? stateWhileFlowRuns = null;
+		harness.Flow.OnExecuting = async () =>
+		{
+			if (Interlocked.Increment(ref runs) > 1)
+			{
+				return;
+			}
+
+			harness.States.Set(widget.Id, "off");
+			harness.Queue.Enqueue(widget.Id);
+			await Task.Delay(400);
+			stateWhileFlowRuns = harness.Store.TryGet(widget.Id);
+			harness.States.Set(widget.Id, "on");
+			harness.Queue.Enqueue(widget.Id);
+			flowFinished.TrySetResult();
+		};
+
+		try
+		{
+			harness.States.Set(widget.Id, "on");
+			harness.Queue.Enqueue(widget.Id);
+			await flowFinished.Task.WaitAsync(TimeSpan.FromSeconds(5));
+			harness.States.Set(widget.Id, "off");
+			harness.Queue.Enqueue(widget.Id);
+			await WaitUntil(() => harness.Store.TryGet(widget.Id) == "off" && harness.Flow.Triggers.Count == 2);
+
+			await Assert.MultipleAsync(() =>
+			{
+				Assert.That(stateWhileFlowRuns, Is.EqualTo("on"));
+				Assert.That(harness.Flow.Triggers, Has.Count.EqualTo(2));
+				return Task.CompletedTask;
+			});
+		}
+		finally
+		{
+			await harness.Service.StopAsync(CancellationToken.None);
+		}
+	}
+
+	[Test]
+	public async Task AButtonWhoseFlowFaulted_IsReconciledAgainAfterwards()
+	{
+		var widget = BoundButton(Guid.NewGuid());
+		var harness = await StartQueue(widget);
+		var runs = 0;
+		harness.Flow.OnExecuting = async () =>
+		{
+			if (Interlocked.Increment(ref runs) > 1)
+			{
+				return;
+			}
+
+			harness.States.Set(widget.Id, "off");
+			harness.Queue.Enqueue(widget.Id);
+			await Task.Delay(400);
+			throw new InvalidOperationException("the flow failed");
+		};
+
+		try
+		{
+			harness.States.Set(widget.Id, "on");
+			harness.Queue.Enqueue(widget.Id);
+
+			await WaitUntil(() => harness.Store.TryGet(widget.Id) == "off");
+		}
+		finally
+		{
+			await harness.Service.StopAsync(CancellationToken.None);
+		}
+	}
+
+	[Test]
+	public async Task AFailedOnStateChangeFlowFromAnExplicitStateChange_IsLogged()
+	{
+		var widget = BoundButton(Guid.NewGuid());
+		var events = new List<LogEvent>();
+		using var logger = new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(events.Add))
+			.CreateLogger();
+		var flow = new RecordingFlowExecutor { Status = FlowExecutionStatus.Failed };
+		var reconciler = new WidgetStateReconciler(new QueuedStateService("off", "on"),
+			new WidgetDerivedStateStore(),
+			new RecordingVariableService(),
+			flow,
+			new NoOpWidgetStatePublisher(),
+			new FakeFolderCache(widget),
+			new NotSupportedWidgetService(),
+			new WidgetDataWriteLock(),
+			TestLocalization.Preferences,
+			TestLocalization.Resolver,
+			logger,
+			TestStateChangeFlowRunner.Create(logger: logger));
+
+		await reconciler.Reconcile(widget.Id);
+		await reconciler.Reconcile(widget.Id);
+
+		Assert.That(events.Where(e => e.Level == LogEventLevel.Warning)
+				.Select(e => e.MessageTemplate.Text),
+			Has.Some.StartsWith("onStateChange flow for widget"));
+	}
+
+	private static async Task WaitUntil(Func<bool> condition)
+	{
+		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+		while (!condition())
+		{
+			await Task.Delay(20, timeout.Token);
+		}
+	}
+
+	private static async Task<QueueHarness> StartQueue(params WidgetEntity[] widgets)
+	{
+		var states = new PerWidgetStateService();
+		foreach (var widget in widgets)
+		{
+			states.Set(widget.Id, "off");
+		}
+
+		var queue = new WidgetStateEvalChannel();
+		var flow = new RecordingFlowExecutor();
+		var store = new WidgetDerivedStateStore();
+		var folders = new FakeFolderCache(widgets);
+		var runner = TestStateChangeFlowRunner.Create(flow, queue);
+		var reconciler = new WidgetStateReconciler(states,
+			store,
+			new RecordingVariableService(),
+			flow,
+			new NoOpWidgetStatePublisher(),
+			folders,
+			new NotSupportedWidgetService(),
+			new WidgetDataWriteLock(),
+			TestLocalization.Preferences,
+			TestLocalization.Resolver,
+			Log.Logger,
+			runner);
+		var services = new ServiceCollection()
+			.AddScoped<IWidgetStateReconciler>(_ => reconciler)
+			.AddScoped<IWidgetStateService>(_ => states)
+			.BuildServiceProvider();
+		var readiness = new StartupReadiness();
+		readiness.MarkCachesReady();
+		readiness.MarkVariablesReady();
+		var service = new WidgetStateEvalBackgroundService(new RunningHostLifetime(),
+			queue,
+			services.GetRequiredService<IServiceScopeFactory>(),
+			new WidgetStateSubscriptionTracker(),
+			folders,
+			new WidgetVariableIndex(folders),
+			readiness,
+			runner,
+			Log.Logger);
+		await service.StartAsync(CancellationToken.None);
+		await WaitUntil(() => widgets.All(widget => store.TryGet(widget.Id) == "off"));
+		return new QueueHarness(service, queue, states, flow, store);
+	}
+
+	private sealed record QueueHarness(
+		WidgetStateEvalBackgroundService Service,
+		WidgetStateEvalChannel Queue,
+		PerWidgetStateService States,
+		RecordingFlowExecutor Flow,
+		WidgetDerivedStateStore Store);
+
+	private sealed class PerWidgetStateService : IWidgetStateService
+	{
+		private readonly ConcurrentDictionary<Guid, string> _states = new();
+
+		public void Set(Guid widgetId, string stateId)
+		{
+			_states[widgetId] = stateId;
+		}
+
+		public Task<WidgetStateResolution?> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(_states.TryGetValue(widgetId, out var stateId)
+				? new WidgetStateResolution(stateId, stateId == "on" ? "On" : "Off", [], false)
+				: null);
+		}
+
+		public TimeSpan? GetProviderPollInterval(Guid widgetId)
+		{
+			return null;
+		}
 	}
 
 	private sealed class RecordingStatePublisher : IWidgetStatePublisher
@@ -518,6 +779,8 @@ public class WidgetStateReconcilerTests
 
 		public Func<Task>? OnExecuting { get; set; }
 
+		public FlowExecutionStatus Status { get; set; } = FlowExecutionStatus.Succeeded;
+
 		public async Task<FlowExecutionResult> ExecuteAsync(
 			FlowExecutionRequest request,
 			CancellationToken cancellationToken)
@@ -533,7 +796,7 @@ public class WidgetStateReconcilerTests
 			return new FlowExecutionResult
 			{
 				ExecutionId = Guid.NewGuid(),
-				Status = FlowExecutionStatus.Succeeded,
+				Status = Status,
 				MatchedFlows = 1
 			};
 		}
