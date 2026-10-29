@@ -290,6 +290,19 @@ public class BackupRestoreArchiveSafetyTests
 		await AssertRefused(prepare, nameof(BackupError.UnsupportedVersion));
 	}
 
+	[Test]
+	public async Task A_backup_whose_database_cannot_be_migrated_is_refused_as_incompatible()
+	{
+		var crafted = Craft([],
+			null,
+			database => LegacyEvolveDatabase.Execute(database,
+				$"DELETE FROM \"{DatabaseMigrationHelper.HistoryTable}\";"));
+
+		var prepare = await PrepareImported(crafted);
+
+		await AssertRefused(prepare, nameof(BackupError.IncompatibleVersion));
+	}
+
 	private async Task AssertRefused(JsonElement prepare, string expectedCode)
 	{
 		try

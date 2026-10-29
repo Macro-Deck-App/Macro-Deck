@@ -12,6 +12,7 @@ public sealed class JsonStoreTestInstallationStore : IStoreTestInstallationStore
 
 	private readonly Lock _gate = new();
 	private readonly string _path;
+	private readonly ILogger _logger;
 	private readonly DurableJsonFile _files;
 
 	public JsonStoreTestInstallationStore(
@@ -20,6 +21,7 @@ public sealed class JsonStoreTestInstallationStore : IStoreTestInstallationStore
 		IPersistenceRecoveryReporter? recoveryReporter = null)
 	{
 		_path = Path.Combine(paths.StoreDirectory, FileName);
+		_logger = logger;
 		_files = new DurableJsonFile("store test installations",
 			PersistenceJsonOptions.Default,
 			logger,
@@ -41,7 +43,11 @@ public sealed class JsonStoreTestInstallationStore : IStoreTestInstallationStore
 
 		lock (_gate)
 		{
-			var records = Read();
+			if (ReadForWrite() is not { } records)
+			{
+				return;
+			}
+
 			records.RemoveAll(existing => Same(existing, record.PluginId));
 			records.Add(record);
 			_files.Write(_path, records);
@@ -52,8 +58,7 @@ public sealed class JsonStoreTestInstallationStore : IStoreTestInstallationStore
 	{
 		lock (_gate)
 		{
-			var records = Read();
-			if (records.RemoveAll(record => Same(record, pluginId)) > 0)
+			if (ReadForWrite() is { } records && records.RemoveAll(record => Same(record, pluginId)) > 0)
 			{
 				_files.Write(_path, records);
 			}
@@ -63,6 +68,24 @@ public sealed class JsonStoreTestInstallationStore : IStoreTestInstallationStore
 	private List<StoreTestInstallationRecord> Read()
 	{
 		return _files.Read<List<StoreTestInstallationRecord>>(_path) ?? [];
+	}
+
+	private List<StoreTestInstallationRecord>? ReadForWrite()
+	{
+		if (_files.Read<List<StoreTestInstallationRecord>>(_path) is { } records)
+		{
+			return records;
+		}
+
+		if (!File.Exists(_path) && !File.Exists(_path + DurableJsonFile.BackupSuffix))
+		{
+			return [];
+		}
+
+		_logger.Warning("The store test installation file {Path} could not be read; it is not saved until it is "
+			+ "repaired",
+			_path);
+		return null;
 	}
 
 	private static bool Same(StoreTestInstallationRecord record, string pluginId)

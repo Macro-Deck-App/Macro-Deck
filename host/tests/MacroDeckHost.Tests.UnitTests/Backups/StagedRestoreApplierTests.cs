@@ -6,7 +6,9 @@ using System.Text.Json.Serialization;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Backups.Restore;
+using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using Serilog;
 
 namespace MacroDeckHost.Tests.UnitTests.Backups;
 
@@ -189,6 +191,32 @@ public class StagedRestoreApplierTests
 				Is.EqualTo("current-identity"),
 				"an archive from before the identity key existed must not unpair every device");
 		});
+	}
+
+	[Test]
+	public void A_write_left_unpublished_before_the_restart_does_not_undo_the_restored_file()
+	{
+		Write("data/user-variables.json", VariablesJson("local"));
+		Stage([BackupComponentGroup.Variables], ("data/user-variables.json", VariablesJson("from-backup")));
+		Write("data/user-variables.json.tmp", VariablesJson("pending"));
+		File.SetLastWriteTimeUtc(DataPath("data/user-variables.json.tmp"), DateTime.UtcNow.AddMinutes(1));
+
+		StagedRestoreApplier.ApplyPending(_paths);
+		var loaded = new JsonUserVariableStore(_paths, new LoggerConfiguration().CreateLogger()).Load();
+
+		Assert.That(loaded.Single().Value, Is.EqualTo("from-backup"));
+	}
+
+	[Test]
+	public void A_quarantined_copy_survives_a_restore_of_its_group()
+	{
+		Write("data/user-variables.json", VariablesJson("local"));
+		Write("data/user-variables.json.corrupt-20261028-120000-000", "damaged");
+		Stage([BackupComponentGroup.Variables], ("data/user-variables.json", VariablesJson("from-backup")));
+
+		StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.That(Read("data/user-variables.json.corrupt-20261028-120000-000"), Is.EqualTo("damaged"));
 	}
 
 	[Test]
@@ -831,6 +859,12 @@ public class StagedRestoreApplierTests
 	{
 		return File.ReadAllText(Path.Combine(_paths.BaseDirectory,
 			relativePath.Replace('/', Path.DirectorySeparatorChar)));
+	}
+
+	private static string VariablesJson(string value)
+	{
+		return "[{\"id\":\"01a18443-5f55-76cf-a8fa-26c30240d6b8\",\"name\":\"restored\",\"scope\":\"Global\","
+			+ $"\"type\":\"Text\",\"classification\":\"User\",\"value\":\"{value}\"}}]";
 	}
 
 	private bool Exists(string relativePath)

@@ -27,6 +27,13 @@ describe('backup component groups', () => {
     expect(message).not.toContain('Integrations>');
   });
 
+  it('names what splitting the key ring from the keys it protects costs, in both directions', () => {
+    expect(backupDependencyWarningMessage('Integrations', 'Accounts', t)).toContain('paired again');
+    expect(backupDependencyWarningMessage('Accounts', 'Integrations', t)).toContain('paired again');
+    expect(backupDependencyWarningMessage('Integrations', 'AppSettings', t)).toContain('HTTPS');
+    expect(backupDependencyWarningMessage('AppSettings', 'Integrations', t)).toContain('HTTPS');
+  });
+
   // A pair the host reports but this catalogue has no wording for must still read as a sentence rather
   // than leaking an identifier into the dialog.
   it('falls back to a readable sentence for an unlisted pair', () => {

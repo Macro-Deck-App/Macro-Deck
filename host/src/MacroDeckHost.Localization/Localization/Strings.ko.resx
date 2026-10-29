@@ -879,8 +879,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>예약됨</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>계정 및 기기는 연동 및 비밀 값 없이 복원됩니다. 백업이 다른 컴퓨터에서 만들어졌거나 오래된 경우 모든 사용자가 로그아웃되고 기기를 다시 페어링해야 합니다.</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>계정 및 기기는 프로필 없이 복원됩니다. 더 이상 존재하지 않는 시작 프로필을 가리키는 기기는 기본값으로 대체됩니다.</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>앱 설정은 연동 및 비밀 값 없이 복원됩니다. 백업이 다른 컴퓨터에서 만들어졌거나 오래된 경우 HTTPS를 다시 설정해야 할 수 있습니다.</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>자동화는 연동 및 비밀 값 없이 복원됩니다.</value>
@@ -893,6 +899,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>{group} 항목은 {dependency} 없이 복원되므로 일부 기능이 작동하지 않을 수 있습니다.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>연동 및 비밀 값은 계정 없이 복원됩니다. 백업이 다른 컴퓨터에서 만들어졌거나 오래된 경우 모든 사용자가 로그아웃되고 기기를 다시 페어링해야 합니다.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>연동 및 비밀 값은 앱 설정 없이 복원됩니다. 백업이 다른 컴퓨터에서 만들어졌거나 오래된 경우 HTTPS를 다시 설정해야 할 수 있습니다.</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>플러그인은 연동 및 비밀 값 없이 복원됩니다. 플러그인 자격 증명이 없을 수 있습니다.</value>
@@ -920,6 +932,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>Macro Deck에서 운영 체제의 암호화 서비스를 사용할 수 없습니다. Windows에서 CNG Key Isolation(KeyIso) 서비스가 실행 중인지 확인하거나 컴퓨터를 다시 시작하세요.</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>이 데이터 폴더는 마지막으로 더 최신 버전의 Macro Deck에서 사용되었습니다. 해당 버전을 다시 설치하세요. 데이터는 변경되지 않았습니다.</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck 호스트 바이너리가 없습니다:
@@ -2587,6 +2602,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>백업을 가져올 수 없습니다</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>이 버전의 Macro Deck에서는 이 백업을 복원할 수 없습니다</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>백업을 확인할 수 없습니다</value>

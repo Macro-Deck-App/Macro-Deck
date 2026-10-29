@@ -19,6 +19,7 @@ public sealed class JsonStoreRegistryStateStore : IStoreRegistryStateStore
 
 	private readonly Lock _gate = new();
 	private readonly string _path;
+	private readonly ILogger _logger;
 	private readonly DurableJsonFile _files;
 
 	public JsonStoreRegistryStateStore(
@@ -27,6 +28,7 @@ public sealed class JsonStoreRegistryStateStore : IStoreRegistryStateStore
 		IPersistenceRecoveryReporter? recoveryReporter = null)
 	{
 		_path = Path.Combine(paths.StoreRegistryDirectory, FileName);
+		_logger = logger;
 		_files = new DurableJsonFile("store registry state",
 			PersistenceJsonOptions.Default,
 			logger,
@@ -50,7 +52,20 @@ public sealed class JsonStoreRegistryStateStore : IStoreRegistryStateStore
 
 		lock (_gate)
 		{
-			var states = _files.Read<List<StoreRegistryState>>(_path) ?? [];
+			var states = _files.Read<List<StoreRegistryState>>(_path);
+			if (states is null)
+			{
+				if (File.Exists(_path) || File.Exists(_path + DurableJsonFile.BackupSuffix))
+				{
+					_logger.Warning("The store registry state file {Path} could not be read; it is not saved until "
+						+ "it is repaired",
+						_path);
+					return;
+				}
+
+				states = [];
+			}
+
 			states.RemoveAll(existing =>
 				string.Equals(existing.Origin, state.Origin, StringComparison.OrdinalIgnoreCase));
 			states.Add(state);

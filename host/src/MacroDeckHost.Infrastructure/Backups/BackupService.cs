@@ -35,6 +35,7 @@ public sealed class BackupService : IBackupService
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly TimeProvider _time;
 	private readonly DurableJsonFile _importedStore;
+	private readonly ILogger _logger;
 
 	public BackupService(
 		IBackupOperationGate gate,
@@ -63,9 +64,10 @@ public sealed class BackupService : IBackupService
 		_paths = paths;
 		_scopeFactory = scopeFactory;
 		_time = time;
+		_logger = logger.ForContext<BackupService>();
 		_importedStore = new DurableJsonFile("imported backups",
 			PersistenceJsonOptions.Default,
-			logger.ForContext<BackupService>());
+			_logger);
 	}
 
 	public async Task<Result<BackupDescriptor, BackupError>> Create(
@@ -283,14 +285,12 @@ public sealed class BackupService : IBackupService
 			var manifest = _archiveReader.ReadManifest(stream);
 			if (manifest is null)
 			{
-				return Result.Fail<BackupInspection, BackupError>(BackupError.InvalidArchive,
-					"The archive manifest could not be read.");
+				return Result.Fail<BackupInspection, BackupError>(BackupError.InvalidArchive);
 			}
 
 			if (manifest.FormatVersion > BackupArchiveManifest.CurrentFormatVersion)
 			{
-				return Result.Fail<BackupInspection, BackupError>(BackupError.UnsupportedVersion,
-					"This archive was created by a newer version of Macro Deck.");
+				return Result.Fail<BackupInspection, BackupError>(BackupError.UnsupportedVersion);
 			}
 
 			await using var scope = _scopeFactory.CreateAsyncScope();
@@ -369,14 +369,12 @@ public sealed class BackupService : IBackupService
 			var manifest = _archiveReader.ReadManifest(stream);
 			if (manifest is null)
 			{
-				return Result.Fail<BackupDescriptor, BackupError>(BackupError.InvalidArchive,
-					"The archive manifest could not be read.");
+				return Result.Fail<BackupDescriptor, BackupError>(BackupError.InvalidArchive);
 			}
 
 			if (manifest.FormatVersion > BackupArchiveManifest.CurrentFormatVersion)
 			{
-				return Result.Fail<BackupDescriptor, BackupError>(BackupError.UnsupportedVersion,
-					"This archive was created by a newer version of Macro Deck.");
+				return Result.Fail<BackupDescriptor, BackupError>(BackupError.UnsupportedVersion);
 			}
 
 			var existing = await _catalog.Find(manifest.BackupId, cancellationToken);
@@ -686,7 +684,17 @@ public sealed class BackupService : IBackupService
 	private void MarkImported(Guid backupId)
 	{
 		var path = ImportedBackupRegistry.ResolvePath(_paths);
-		var document = _importedStore.Read<ImportedBackupsDocument>(path, false) ?? new ImportedBackupsDocument();
+		var document = _importedStore.Read<ImportedBackupsDocument>(path, false);
+		if (document is null && (File.Exists(path) || File.Exists(path + DurableJsonFile.BackupSuffix)))
+		{
+			_logger.Warning("The imported backups file {Path} could not be read; backup {BackupId} is not marked "
+				+ "as imported",
+				path,
+				backupId);
+			return;
+		}
+
+		document ??= new ImportedBackupsDocument();
 		if (document.BackupIds.Contains(backupId))
 		{
 			return;

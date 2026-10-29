@@ -19,6 +19,7 @@ public sealed class JsonSecretApprovalFiles : ISecretApprovalFiles
 	private readonly ILogger _logger;
 	private readonly DurableJsonFile _files;
 	private readonly Lock _gate = new();
+	private readonly HashSet<string> _unreadable = new(StringComparer.Ordinal);
 
 	public JsonSecretApprovalFiles(
 		IMacroDeckPaths paths,
@@ -62,6 +63,11 @@ public sealed class JsonSecretApprovalFiles : ISecretApprovalFiles
 				}
 
 				var partition = _files.Read<SecretApprovalPartition>(path);
+				if (partition is null)
+				{
+					_unreadable.Add(path);
+				}
+
 				loads.Add(new SecretApprovalPartitionLoad(partitionId, partition, partition is null));
 			}
 		}
@@ -76,6 +82,19 @@ public sealed class JsonSecretApprovalFiles : ISecretApprovalFiles
 			try
 			{
 				var path = PathFor(group, partitionId);
+
+				// The ledger rebuilds a partition from memory, where an unreadable one holds no approvals, so
+				// saving it would replace the unreadable copies with an empty or partial record.
+				if (_unreadable.Contains(path))
+				{
+					_logger.Warning(
+						"Secret approvals of {Group} partition {PartitionId} could not be read; they are not saved "
+						+ "until the file is repaired",
+						group,
+						partitionId);
+					return;
+				}
+
 				if (partition.Owners.Count == 0)
 				{
 					if (File.Exists(path))
@@ -105,7 +124,9 @@ public sealed class JsonSecretApprovalFiles : ISecretApprovalFiles
 		{
 			try
 			{
-				_files.Delete(PathFor(group, partitionId));
+				var path = PathFor(group, partitionId);
+				_files.Delete(path);
+				_unreadable.Remove(path);
 			}
 			catch (Exception ex)
 			{

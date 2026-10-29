@@ -116,6 +116,8 @@ pub const HOST_RESTART_EXIT_CODE: i32 = 86;
 
 pub const HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE: i32 = 87;
 
+pub const HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE: i32 = 88;
+
 pub const RELAUNCH_MARKER_ENVIRONMENT_VARIABLE: &str = "MACRODECK_RELAUNCH";
 
 pub const RELAUNCH_SETTLE_DELAY: Duration = Duration::from_millis(1500);
@@ -472,6 +474,8 @@ pub fn startup_failure_reason(log: &str) -> String {
 fn exit_failure_reason(code: Option<i32>, log: &str) -> String {
     if code == Some(HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE) {
         localization::t(keys::ERRORS_CRYPTOGRAPHY_UNAVAILABLE)
+    } else if code == Some(HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE) {
+        localization::t(keys::ERRORS_DATABASE_FROM_NEWER_VERSION)
     } else {
         startup_failure_reason(log)
     }
@@ -1206,7 +1210,10 @@ async fn give_up(app: &AppHandle, reason: Option<String>, exit: ExitStatus, log:
             if !detect_port_conflict(&log)
                 && !matches!(
                     exit,
-                    ExitStatus::Code(HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE)
+                    ExitStatus::Code(
+                        HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE
+                            | HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE
+                    )
                 ) =>
         {
             None
@@ -2391,6 +2398,19 @@ mod tests {
         let message = exit_failure_reason(Some(HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE), "boom");
         assert!(message.contains("cryptography service"));
         assert!(message.contains("CNG Key Isolation"));
+    }
+
+    #[test]
+    fn a_database_from_a_newer_version_is_explained_instead_of_the_log() {
+        let message = exit_failure_reason(Some(HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE), "boom");
+        assert!(message.contains("newer version of Macro Deck"));
+        assert!(!message.contains("did not start"));
+    }
+
+    #[test]
+    fn the_newer_database_exit_code_matches_the_host_constant() {
+        // Keep in sync with HostExitCodes.DatabaseFromNewerVersion in the .NET host.
+        assert_eq!(HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE, 88);
     }
 
     #[test]

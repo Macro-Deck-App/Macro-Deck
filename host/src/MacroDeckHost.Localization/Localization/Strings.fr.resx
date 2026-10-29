@@ -880,8 +880,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>Planifiée</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>Les comptes et appareils sont restaurés sans les intégrations et les secrets. Si la sauvegarde a été faite sur un autre ordinateur ou il y a un certain temps, tout le monde est déconnecté et les appareils doivent être associés à nouveau.</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>Les comptes et appareils sont restaurés sans les profils. Un appareil pointant vers un profil de démarrage qui n'existe plus revient au profil par défaut.</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>Les paramètres de l'application sont restaurés sans les intégrations et les secrets. Si la sauvegarde a été faite sur un autre ordinateur ou il y a un certain temps, il faudra peut-être reconfigurer HTTPS.</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>Les automatisations sont restaurées sans les intégrations et les secrets.</value>
@@ -894,6 +900,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>{group} est restauré sans {dependency}, donc certaines parties peuvent ne pas fonctionner.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>Les intégrations et les secrets sont restaurés sans les comptes. Si la sauvegarde a été faite sur un autre ordinateur ou il y a un certain temps, tout le monde est déconnecté et les appareils doivent être associés à nouveau.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>Les intégrations et les secrets sont restaurés sans les paramètres de l'application. Si la sauvegarde a été faite sur un autre ordinateur ou il y a un certain temps, il faudra peut-être reconfigurer HTTPS.</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>Les extensions sont restaurées sans les intégrations et les secrets. Les identifiants d'extension seront manquants.</value>
@@ -921,6 +933,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>Macro Deck n'a pas pu utiliser le service de chiffrement du système d'exploitation. Sous Windows, vérifie que le service CNG Key Isolation (KeyIso) est en cours d'exécution, ou redémarre l'ordinateur.</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>Ce dossier de données a été utilisé en dernier par une version plus récente de Macro Deck. Réinstalle cette version ; tes données n'ont pas été modifiées.</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Le binaire hôte de Macro Deck est introuvable:
@@ -2588,6 +2603,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>La sauvegarde n'a pas pu être importée</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>Cette sauvegarde ne peut pas être restaurée avec cette version de Macro Deck</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>La sauvegarde n'a pas pu être inspectée</value>

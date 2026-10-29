@@ -77,4 +77,8 @@ const WARNING_KEYS: Readonly<Record<string, string>> = {
   'Automations>Integrations': AppStrings.Backup.Warning.AutomationsWithoutIntegrations,
   'Plugins>Integrations': AppStrings.Backup.Warning.PluginsWithoutIntegrations,
   'Accounts>Profiles': AppStrings.Backup.Warning.AccountsWithoutProfiles,
+  'Accounts>Integrations': AppStrings.Backup.Warning.AccountsWithoutIntegrations,
+  'AppSettings>Integrations': AppStrings.Backup.Warning.AppSettingsWithoutIntegrations,
+  'Integrations>AppSettings': AppStrings.Backup.Warning.IntegrationsWithoutAppSettings,
+  'Integrations>Accounts': AppStrings.Backup.Warning.IntegrationsWithoutAccounts,
 };

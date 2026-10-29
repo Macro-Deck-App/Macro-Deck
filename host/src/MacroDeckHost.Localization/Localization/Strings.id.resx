@@ -879,8 +879,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>Terjadwal</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>Akun dan perangkat dipulihkan tanpa integrasi dan rahasia. Jika cadangan dibuat di komputer lain atau sudah lama, semua orang akan keluar dan perangkat perlu dipasangkan ulang.</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>Akun dan perangkat dipulihkan tanpa profil. Perangkat yang mengarah ke profil awal yang sudah tidak ada akan kembali ke profil bawaan.</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>Pengaturan aplikasi dipulihkan tanpa integrasi dan rahasia. Jika cadangan dibuat di komputer lain atau sudah lama, HTTPS mungkin perlu disiapkan ulang.</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>Otomasi dipulihkan tanpa integrasi dan rahasia.</value>
@@ -893,6 +899,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>{group} dipulihkan tanpa {dependency}, jadi sebagian fungsinya mungkin tidak bekerja.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>Integrasi dan rahasia dipulihkan tanpa akun. Jika cadangan dibuat di komputer lain atau sudah lama, semua orang akan keluar dan perangkat perlu dipasangkan ulang.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>Integrasi dan rahasia dipulihkan tanpa pengaturan aplikasi. Jika cadangan dibuat di komputer lain atau sudah lama, HTTPS mungkin perlu disiapkan ulang.</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>Plugin dipulihkan tanpa integrasi dan rahasia. Kredensial plugin akan hilang.</value>
@@ -920,6 +932,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>Macro Deck tidak dapat menggunakan layanan kriptografi sistem operasi. Di Windows, pastikan layanan CNG Key Isolation (KeyIso) sedang berjalan, atau mulai ulang komputer.</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>Folder data ini terakhir digunakan oleh versi Macro Deck yang lebih baru. Instal ulang versi tersebut; data tidak diubah.</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>File biner host Macro Deck tidak ditemukan:
@@ -2587,6 +2602,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>Cadangan tidak dapat diimpor</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>Cadangan ini tidak dapat dipulihkan dengan versi Macro Deck ini</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Cadangan tidak dapat diperiksa</value>

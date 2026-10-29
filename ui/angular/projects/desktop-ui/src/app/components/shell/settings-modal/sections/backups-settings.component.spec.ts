@@ -412,7 +412,7 @@ describe('BackupsSettingsComponent', () => {
 
       const pickModal = fixture.debugElement.query(By.directive(BackupRestoreModalComponent));
       expect(pickModal).toBeTruthy();
-      (pickModal.componentInstance as BackupRestoreModalComponent).confirmed.emit(['Plugins']);
+      (pickModal.componentInstance as BackupRestoreModalComponent).confirmed.emit(['Plugins', 'Integrations']);
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('shared-confirmation-modal').textContent)
@@ -424,7 +424,7 @@ describe('BackupsSettingsComponent', () => {
       await fixture.whenStable();
 
       expect(api.prepareRestore).toHaveBeenCalledOnceWith({
-        backupId: 'f', components: ['Plugins'], recoveryKey: 'the-right-key',
+        backupId: 'f', components: ['Plugins', 'Integrations'], recoveryKey: 'the-right-key',
       });
     });
 
@@ -438,6 +438,22 @@ describe('BackupsSettingsComponent', () => {
 
       const pickModal = fixture.debugElement.query(By.directive(BackupRestoreModalComponent));
       (pickModal.componentInstance as BackupRestoreModalComponent).confirmed.emit(['Profiles']);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('shared-confirmation-modal').textContent)
+        .not.toContain('Macro Deck uses the recovery key you just entered');
+    });
+
+    it('does not claim the recovery key changes when integrations were unchecked', async () => {
+      fixture = await create();
+      answerInspect();
+
+      await fixture.componentInstance.onRestoreRequested(foreign);
+      await settle();
+      await submitRecoveryKey('the-right-key');
+
+      const pickModal = fixture.debugElement.query(By.directive(BackupRestoreModalComponent));
+      (pickModal.componentInstance as BackupRestoreModalComponent).confirmed.emit(['Plugins']);
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelector('shared-confirmation-modal').textContent)

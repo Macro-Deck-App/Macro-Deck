@@ -879,8 +879,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>Scheduled</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>Accounts and devices are restored without integrations and secrets. If the backup was made on another computer or some time ago, everyone is signed out and devices have to be paired again.</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>Accounts and devices are restored without profiles. A device pointing at a startup profile that no longer exists falls back to the default.</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>App settings are restored without integrations and secrets. If the backup was made on another computer or some time ago, HTTPS may have to be set up again.</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>Automations are restored without integrations and secrets.</value>
@@ -893,6 +899,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>{group} is restored without {dependency}, so parts of it may not work.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>Integrations and secrets are restored without accounts. If the backup was made on another computer or some time ago, everyone is signed out and devices have to be paired again.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>Integrations and secrets are restored without app settings. If the backup was made on another computer or some time ago, HTTPS may have to be set up again.</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>Plugins are restored without integrations and secrets. Plugin credentials will be missing.</value>
@@ -920,6 +932,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>Macro Deck could not use the operating system's cryptography service. On Windows, make sure the CNG Key Isolation service (KeyIso) is running, or restart the computer.</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>This data folder was last used by a newer version of Macro Deck. Install that version again; your data has not been changed.</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>The Macro Deck host binary is missing:
@@ -2587,6 +2602,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>The backup could not be imported</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>This backup cannot be restored with this version of Macro Deck</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>The backup could not be inspected</value>

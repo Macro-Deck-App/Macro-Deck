@@ -879,8 +879,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>За розкладом</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>Облікові записи та пристрої відновлюються без інтеграцій і секретів. Якщо резервну копію створено на іншому комп'ютері або давно, усі сеанси буде завершено, а пристрої доведеться сполучити знову.</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>Облікові записи та пристрої відновлюються без профілів. Пристрій, який вказує на стартовий профіль, що більше не існує, переходить до профілю за замовчуванням.</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>Налаштування застосунку відновлюються без інтеграцій і секретів. Якщо резервну копію створено на іншому комп'ютері або давно, може знадобитися знову налаштувати HTTPS.</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>Автоматизації відновлюються без інтеграцій і секретів.</value>
@@ -893,6 +899,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>{group} відновлюється без: {dependency}, тому окремі частини можуть не працювати.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>Інтеграції та секрети відновлюються без облікових записів. Якщо резервну копію створено на іншому комп'ютері або давно, усі сеанси буде завершено, а пристрої доведеться сполучити знову.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>Інтеграції та секрети відновлюються без налаштувань застосунку. Якщо резервну копію створено на іншому комп'ютері або давно, може знадобитися знову налаштувати HTTPS.</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>Плагіни відновлюються без інтеграцій і секретів. Облікових даних плагінів не буде.</value>
@@ -920,6 +932,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>Macro Deck не вдалося використати службу криптографії операційної системи. У Windows переконайтеся, що службу CNG Key Isolation (KeyIso) запущено, або перезавантажте комп'ютер.</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>Цю папку даних востаннє використовувала новіша версія Macro Deck. Установіть цю версію знову; дані не змінено.</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Відсутній виконуваний файл хоста Macro Deck:
@@ -2587,6 +2602,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>Не вдалося імпортувати резервну копію</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>Цю резервну копію неможливо відновити в цій версії Macro Deck</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Не вдалося перевірити резервну копію</value>

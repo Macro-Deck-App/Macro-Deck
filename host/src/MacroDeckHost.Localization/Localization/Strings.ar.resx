@@ -879,8 +879,14 @@
   <data name="Backup.Trigger.Scheduled" xml:space="preserve">
     <value>مجدولة</value>
   </data>
+  <data name="Backup.Warning.AccountsWithoutIntegrations" xml:space="preserve">
+    <value>تُستعاد الحسابات والأجهزة دون التكاملات والأسرار. إذا أُنشئت النسخة الاحتياطية على كمبيوتر آخر أو منذ مدة، فسيُسجَّل خروج الجميع ويجب إقران الأجهزة من جديد.</value>
+  </data>
   <data name="Backup.Warning.AccountsWithoutProfiles" xml:space="preserve">
     <value>تُستعاد الحسابات والأجهزة دون ملفات تعريف. الجهاز الذي يشير إلى ملف تعريف بدء غير موجود يعود إلى الملف الافتراضي.</value>
+  </data>
+  <data name="Backup.Warning.AppSettingsWithoutIntegrations" xml:space="preserve">
+    <value>تُستعاد إعدادات التطبيق دون التكاملات والأسرار. إذا أُنشئت النسخة الاحتياطية على كمبيوتر آخر أو منذ مدة، فقد يلزم إعداد HTTPS من جديد.</value>
   </data>
   <data name="Backup.Warning.AutomationsWithoutIntegrations" xml:space="preserve">
     <value>تُستعاد الأتمتة دون تكاملات وأسرار.</value>
@@ -893,6 +899,12 @@
   </data>
   <data name="Backup.Warning.Generic" xml:space="preserve">
     <value>يُستعاد {group} دون {dependency}، لذلك قد لا يعمل بعض أجزائه.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAccounts" xml:space="preserve">
+    <value>تُستعاد التكاملات والأسرار دون الحسابات. إذا أُنشئت النسخة الاحتياطية على كمبيوتر آخر أو منذ مدة، فسيُسجَّل خروج الجميع ويجب إقران الأجهزة من جديد.</value>
+  </data>
+  <data name="Backup.Warning.IntegrationsWithoutAppSettings" xml:space="preserve">
+    <value>تُستعاد التكاملات والأسرار دون إعدادات التطبيق. إذا أُنشئت النسخة الاحتياطية على كمبيوتر آخر أو منذ مدة، فقد يلزم إعداد HTTPS من جديد.</value>
   </data>
   <data name="Backup.Warning.PluginsWithoutIntegrations" xml:space="preserve">
     <value>تُستعاد المكوّنات الإضافية دون تكاملات وأسرار. ستكون بيانات اعتماد المكوّن الإضافي مفقودة.</value>
@@ -920,6 +932,9 @@
   </data>
   <data name="Bootstrapper.Errors.CryptographyUnavailable" xml:space="preserve">
     <value>تعذّر على Macro Deck استخدام خدمة التشفير في نظام التشغيل. في Windows، تأكّد من تشغيل خدمة CNG Key Isolation (KeyIso)، أو أعد تشغيل الكمبيوتر.</value>
+  </data>
+  <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
+    <value>استُخدم مجلد البيانات هذا آخر مرة بإصدار أحدث من Macro Deck. ثبّت ذلك الإصدار مرة أخرى؛ لم تتغير البيانات.</value>
   </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>ملف المضيف التنفيذي لـ Macro Deck مفقود:
@@ -2587,6 +2602,9 @@
   </data>
   <data name="Errors.Backup.ImportFailed" xml:space="preserve">
     <value>تعذّر استيراد النسخة الاحتياطية</value>
+  </data>
+  <data name="Errors.Backup.IncompatibleVersion" xml:space="preserve">
+    <value>لا يمكن استعادة هذه النسخة الاحتياطية بهذا الإصدار من Macro Deck</value>
   </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>تعذّر فحص النسخة الاحتياطية</value>

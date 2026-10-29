@@ -52,7 +52,7 @@ public static class BackupComponentGroups
 			],
 			[]),
 		new(BackupComponentGroup.Integrations,
-			[],
+			[BackupComponentGroup.AppSettings, BackupComponentGroup.Accounts],
 			// The Data Protection key ring and the escrow that recovers the key wrapping it, and nothing
 			// else under keys/. The secret rows are meaningless without the ring that protected them,
 			// and on another machine the ring is meaningless without the escrow, so all three move
@@ -69,7 +69,7 @@ public static class BackupComponentGroups
 			],
 			["secret", "integration_config_entry"]),
 		new(BackupComponentGroup.AppSettings,
-			[],
+			[BackupComponentGroup.Integrations],
 			[File("config/adb-state.json"), Dir("resources"), Prefix("keys/public-tls.")],
 			["app_preference"]),
 		new(BackupComponentGroup.Plugins,
@@ -95,7 +95,7 @@ public static class BackupComponentGroups
 			[Dir("data/automations")],
 			[]),
 		new(BackupComponentGroup.Accounts,
-			[BackupComponentGroup.Profiles],
+			[BackupComponentGroup.Profiles, BackupComponentGroup.Integrations],
 			[File("keys/auth-signing.key"), File("keys/host-identity.key")],
 			["app_user", "refresh_token", "device"])
 	];
@@ -139,6 +139,12 @@ public static class BackupComponentGroups
 		return ExcludedPrefixes.Any(prefix => relativePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 	}
 
+	public static bool IsSidecar(string relativePath)
+	{
+		return relativePath.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase)
+			|| relativePath.Contains(".corrupt-", StringComparison.OrdinalIgnoreCase);
+	}
+
 	public static bool IsRestorablePreferenceKey(string key)
 	{
 		return !PreferenceKeyDenyPrefixes.Any(prefix => key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
@@ -163,10 +169,11 @@ public static class BackupComponentGroups
 		{
 			BackupPathRuleKind.Directory => relativePath.StartsWith(rule.Value + "/",
 				StringComparison.OrdinalIgnoreCase),
-			// A durable JSON document can be published as its own .bak sidecar, so the sidecar belongs to
-			// whichever group owns the document itself.
+			// A durable JSON document can be published from its .bak or .tmp sidecar, so both belong to the
+			// group of the document. Quarantined .corrupt- copies are never read back and stay unowned.
 			BackupPathRuleKind.File => relativePath.Equals(rule.Value, StringComparison.OrdinalIgnoreCase)
-				|| relativePath.Equals(rule.Value + ".bak", StringComparison.OrdinalIgnoreCase),
+				|| relativePath.Equals(rule.Value + ".bak", StringComparison.OrdinalIgnoreCase)
+				|| relativePath.Equals(rule.Value + ".tmp", StringComparison.OrdinalIgnoreCase),
 			BackupPathRuleKind.Prefix => relativePath.StartsWith(rule.Value, StringComparison.OrdinalIgnoreCase),
 			_ => false
 		};

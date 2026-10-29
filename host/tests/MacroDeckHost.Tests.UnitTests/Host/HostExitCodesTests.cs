@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using MacroDeckHost.Infrastructure.Persistence;
 
 namespace MacroDeckHost.Tests.UnitTests.Host;
 
@@ -14,6 +15,25 @@ public class HostExitCodesTests
 	public void The_cryptography_unavailable_exit_code_is_the_one_the_shell_expects()
 	{
 		Assert.That(HostExitCodes.CryptographyUnavailable, Is.EqualTo(87));
+	}
+
+	[Test]
+	public void The_newer_database_exit_code_is_the_one_the_shell_expects()
+	{
+		Assert.That(HostExitCodes.DatabaseFromNewerVersion, Is.EqualTo(88));
+	}
+
+	[Test]
+	public void A_database_from_a_newer_macro_deck_is_reported_with_its_own_exit_code()
+	{
+		var refusal = new DatabaseMigrationException("newer") { FromNewerHost = true };
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(HostExitCodes.ForStartupFailure(refusal), Is.EqualTo(HostExitCodes.DatabaseFromNewerVersion));
+			Assert.That(HostExitCodes.ForStartupFailure(new DatabaseMigrationException("damaged history")),
+				Is.EqualTo(HostExitCodes.Failed));
+		});
 	}
 
 	[TestCase(unchecked((int)0x800706D9))]

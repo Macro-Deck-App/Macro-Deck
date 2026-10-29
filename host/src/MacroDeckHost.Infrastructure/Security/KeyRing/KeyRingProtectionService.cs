@@ -112,7 +112,12 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 			{
 				// The escrow is written before anything else. From this instant the key is recoverable
 				// from the recovery key alone, whatever fails next.
-				_escrow.AddWrap(_paths.KeysDirectory, kek, recoveryKey.Span);
+				if (_escrow.AddWrap(_paths.KeysDirectory, kek, recoveryKey.Span) != KekEscrowResult.Ok)
+				{
+					_logger.Error("Could not write the key ring escrow; leaving the key ring as it is");
+
+					return Result.Fail(KeyRingProtectionError.EscrowUnreadable);
+				}
 
 				if (_store.Write(_identity, kek) != KekStoreStatus.Found)
 				{
@@ -184,9 +189,9 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 
 			try
 			{
-				_escrow.AddWrap(_paths.KeysDirectory, kek, recoveryKey.Span);
-
-				return Result.Ok<KeyRingProtectionError>();
+				return _escrow.AddWrap(_paths.KeysDirectory, kek, recoveryKey.Span) == KekEscrowResult.Ok
+					? Result.Ok<KeyRingProtectionError>()
+					: Result.Fail(KeyRingProtectionError.EscrowUnreadable);
 			}
 			catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 			{

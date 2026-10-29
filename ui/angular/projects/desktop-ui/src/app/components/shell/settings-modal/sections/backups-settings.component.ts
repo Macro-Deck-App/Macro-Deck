@@ -206,7 +206,7 @@ export class BackupsSettingsComponent {
       backup: state.backup,
       components,
       recoveryKey: state.recoveryKey,
-      adoptsRecoveryKey: !state.backup.decryptableLocally && restoresSecrets(components, state.catalog),
+      adoptsRecoveryKey: !state.backup.decryptableLocally && components.includes('Integrations'),
     });
   }
 
@@ -255,18 +255,4 @@ export class BackupsSettingsComponent {
     this.modal.set({ kind: 'none' });
     this.toastService.show(outcome.message, { variant: 'error' });
   }
-}
-
-function restoresSecrets(components: BackupComponentGroup[], catalog: BackupComponentCatalogEntry[]): boolean {
-  const requires = new Map(catalog.map(entry => [entry.id, entry.requires]));
-  const seen = new Set<BackupComponentGroup>();
-  const pending = [...components];
-  while (pending.length > 0) {
-    const group = pending.pop()!;
-    if (!seen.has(group)) {
-      seen.add(group);
-      pending.push(...(requires.get(group) ?? []));
-    }
-  }
-  return seen.has('Integrations');
 }
