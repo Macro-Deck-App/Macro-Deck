@@ -363,7 +363,17 @@ public sealed class UiWebSocketEndpoint(
 		{
 			await foreach (var envelope in reader.ReadAllAsync(cancellation.Token))
 			{
-				var bytes = JsonSerializer.SerializeToUtf8Bytes(envelope, UiWebSocketProtocol.Json);
+				byte[] bytes;
+				try
+				{
+					bytes = JsonSerializer.SerializeToUtf8Bytes(envelope, UiWebSocketProtocol.Json);
+				}
+				catch (Exception exception) when (exception is not OutOfMemoryException)
+				{
+					await ReportUnserializable(socket, envelope, exception, timeProvider, cancellation);
+					continue;
+				}
+
 				if (bytes.Length > UiWebSocketProtocol.MaxMessageBytes)
 				{
 					if (await ReportOversized(socket, envelope, bytes.Length, timeProvider, cancellation))
@@ -386,6 +396,37 @@ public sealed class UiWebSocketEndpoint(
 			await cancellation.CancelAsync();
 			socket.Abort();
 		}
+	}
+
+	// Unlike an oversized push, an unserializable one is dropped rather than ending the session: pushes are
+	// replayed on reconnect, so closing would end every reconnect the same way.
+	private static async Task ReportUnserializable(
+		WebSocket socket,
+		UiWebSocketEnvelope envelope,
+		Exception exception,
+		TimeProvider timeProvider,
+		CancellationTokenSource cancellation)
+	{
+		_logger.Error(exception,
+			"Outbound UI message {Kind}/{Type} could not be serialized and was not sent",
+			envelope.Kind,
+			envelope.Type ?? "-");
+
+		if (envelope.CorrelationId is null)
+		{
+			return;
+		}
+
+		var error = new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
+			"error",
+			envelope.Type,
+			null,
+			envelope.CorrelationId,
+			null,
+			new UiWebSocketError("failed"));
+
+		var bytes = JsonSerializer.SerializeToUtf8Bytes(error, UiWebSocketProtocol.Json);
+		await WebSocketMessageIo.SendTextAsync(socket, bytes, _sendDeadline, timeProvider, cancellation.Token);
 	}
 
 	// Reports an envelope too large to send and says whether the session may continue. This used to abort

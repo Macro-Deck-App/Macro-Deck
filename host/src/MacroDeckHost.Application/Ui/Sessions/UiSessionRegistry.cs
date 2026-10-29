@@ -172,11 +172,9 @@ public sealed class UiSessionRegistry : IDisposable
 
 		record.LastRefillAt = record.CreatedAt;
 
-		// A widget or preview surface is counted against its own cap: those are per widget per viewer, so a
-		// provider supplying a widget type carries one per tile on screen, while every other surface is one
-		// at a time. See ProtocolLimits.MaxUiWidgetSessionsPerProvider.
-		var isWidgetSurface = IsWidgetSurface(surface.Kind);
-		var cap = isWidgetSurface
+		// Plugins rely on the caps being counted the way ProtocolLimits documents them.
+		var bucket = CapBucketOf(surface.Kind);
+		var cap = bucket == UiSessionCapBucket.Widget
 			? ProtocolLimits.MaxUiWidgetSessionsPerProvider
 			: ProtocolLimits.MaxUiSessionsPerProvider;
 
@@ -186,7 +184,9 @@ public sealed class UiSessionRegistry : IDisposable
 			foreach (var candidate in _bySessionId.Values)
 			{
 				if (string.Equals(candidate.ProviderId, providerId, StringComparison.Ordinal)
-					&& IsWidgetSurface(candidate.Surface.Kind) == isWidgetSurface)
+					&& CapBucketOf(candidate.Surface.Kind) == bucket
+					&& (bucket == UiSessionCapBucket.Provider
+						|| string.Equals(candidate.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal)))
 				{
 					forProvider++;
 				}
@@ -645,10 +645,23 @@ public sealed class UiSessionRegistry : IDisposable
 		}
 	}
 
-	private static bool IsWidgetSurface(string? surfaceKind)
+	private static UiSessionCapBucket CapBucketOf(string? surfaceKind)
 	{
-		return string.Equals(surfaceKind, UiSurfaceKinds.Widget, StringComparison.Ordinal)
-			|| string.Equals(surfaceKind, UiSurfaceKinds.Preview, StringComparison.Ordinal);
+		return surfaceKind switch
+		{
+			UiSurfaceKinds.Widget or UiSurfaceKinds.Preview => UiSessionCapBucket.Widget,
+			UiSurfaceKinds.Folder or UiSurfaceKinds.ScreenSaver => UiSessionCapBucket.Viewer,
+			_ => UiSessionCapBucket.Provider
+		};
+	}
+
+	private enum UiSessionCapBucket
+	{
+		Widget,
+
+		Viewer,
+
+		Provider
 	}
 
 	private static string NormalizeMode(string sessionMode)
