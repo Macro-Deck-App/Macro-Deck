@@ -33,7 +33,6 @@ import {
   widgetTileFilled,
   widgetTileTransparent,
 } from '@macro-deck/runtime';
-import { ApiService, ConnectionState } from '../../../transport';
 import { UiSessionHandle, UiSessionOpenRequest, UiSessionService } from '../../../services/ui-session.service';
 import { PressFeedback } from '../../../util/press-feedback';
 import { UiNodePressedEvent } from '../../ui-render/ui-node-event-bus';
@@ -85,7 +84,6 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly treeContext = inject(UiWidgetTreeContext);
   private readonly uiSessions = inject(UiSessionService);
-  private readonly api = inject(ApiService);
 
   protected readonly treeBox = signal<UiComponentBox>({ width: null, height: null });
 
@@ -105,24 +103,11 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
   private openedForWidgetId: string | undefined;
   private previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-  private reconnectBaseline: ConnectionState | null = null;
 
   constructor() {
     effect(() => {
       const root = this.handleSignal()?.root() ?? null;
       if (root !== null) this.renderedRoot.set(root);
-    });
-
-    effect(() => {
-      const state = this.api.connectionStateSignal();
-      if (this.reconnectBaseline === null) {
-        this.reconnectBaseline = state;
-        return;
-      }
-      if (state === 'connected' && this.reconnectBaseline !== 'connected') {
-        this.openSession();
-      }
-      this.reconnectBaseline = state;
     });
   }
 

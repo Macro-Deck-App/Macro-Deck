@@ -98,18 +98,17 @@ describe('IntegrationUiPagePanelComponent', () => {
     expect(handles[0].close).toHaveBeenCalled();
   });
 
-  it('opens the page again after the connection to the host came back', async () => {
+  it('keeps the page session open while the connection to the host drops and comes back', async () => {
     const fixture = await render();
 
     connection.set('reconnecting');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(handles.length).toBe(1);
-
     connection.set('connected');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(handles.length).toBe(2);
-    expect(handles[0].close).toHaveBeenCalled();
+
+    expect(handles.length).toBe(1);
+    expect(handles[0].close).not.toHaveBeenCalled();
   });
 });

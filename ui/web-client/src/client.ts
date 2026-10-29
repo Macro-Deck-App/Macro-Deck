@@ -308,6 +308,7 @@ export class Client {
           // down was pushed to nobody.
           void this.loadAppearance();
         }
+        if (this.hasConnected) void this.loadLocalization();
         this.hasConnected = true;
         // A connect that followed a refresh-and-reconnect completed cleanly, so the next 401 on this
         // socket is a fresh occurrence rather than the same tight loop continuing.
@@ -1042,7 +1043,7 @@ export class Client {
     if (this.app.conditions.get().authenticated) {
       this.clearSessionRetryTimer();
       void this.retrySession();
-      this.connection.reconnectNow();
+      this.connection.replaceNow();
     } else if (this.hostUnreachable) {
       void this.probe();
     }

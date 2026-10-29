@@ -18,7 +18,7 @@ import {
   UI_COMPONENT_CELL,
   isComponentProfileType,
 } from '@macro-deck/runtime';
-import { ApiService, ButtonComponent, ConnectionState, TranslatePipe, UiSessionHandle, UiSessionOpenRequest, UiSessionRejection, UiSessionService, UiWidgetTreeComponent, UiWidgetTreeContext } from '@shared';
+import { ButtonComponent, TranslatePipe, UiSessionHandle, UiSessionOpenRequest, UiSessionRejection, UiSessionService, UiWidgetTreeComponent, UiWidgetTreeContext } from '@shared';
 import { UiTreeComponent } from '../../../ui-render/ui-tree.component';
 
 export interface CanvasSize {
@@ -89,7 +89,6 @@ export class PreviewCanvasComponent implements OnDestroy {
   protected readonly presets = SIZE_PRESETS;
 
   private readonly uiSessions = inject(UiSessionService);
-  private readonly api = inject(ApiService);
   private readonly treeContext = inject(UiWidgetTreeContext);
 
   private readonly handleSignal = signal<UiSessionHandle | null>(null);
@@ -132,7 +131,6 @@ export class PreviewCanvasComponent implements OnDestroy {
   private sizeEmitTimer: ReturnType<typeof setTimeout> | null = null;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private retryAttempt = 0;
-  private reconnectBaseline: ConnectionState | null = null;
   private dragAxis: HandleAxis | null = null;
   private dragStart: CanvasSize = { width: 0, height: 0 };
   private dragOrigin = { x: 0, y: 0 };
@@ -175,18 +173,6 @@ export class PreviewCanvasComponent implements OnDestroy {
     effect(() => {
       const size = this.size();
       untracked(() => this.scheduleSizeEmit(size));
-    });
-
-    effect(() => {
-      const state = this.api.connectionStateSignal();
-      if (this.reconnectBaseline === null) {
-        this.reconnectBaseline = state;
-        return;
-      }
-      if (state === 'connected' && this.reconnectBaseline !== 'connected' && untracked(this.available)) {
-        this.openSession();
-      }
-      this.reconnectBaseline = state;
     });
   }
 
