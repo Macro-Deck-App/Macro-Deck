@@ -175,19 +175,27 @@ internal abstract partial class ApplicationServiceBase(ILogger logger) : IApplic
 
 	private Task StopMatchingAsync(string path)
 	{
-		foreach (var process in ProcessMatcher.Find(path))
+		var processes = ProcessMatcher.Find(path);
+		try
 		{
-			try
+			foreach (var process in processes)
 			{
-				if (!process.CloseMainWindow())
+				try
 				{
-					process.Kill();
+					if (!process.CloseMainWindow())
+					{
+						process.Kill();
+					}
+				}
+				catch (Exception exception)
+				{
+					Logger.Warning(exception, "Failed to stop application '{Path}'", path);
 				}
 			}
-			catch (Exception exception)
-			{
-				Logger.Warning(exception, "Failed to stop application '{Path}'", path);
-			}
+		}
+		finally
+		{
+			ProcessMatcher.Dispose(processes);
 		}
 
 		return Task.CompletedTask;

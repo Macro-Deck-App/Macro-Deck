@@ -5,7 +5,7 @@ using Serilog;
 namespace MacroDeckHost.Platform.Notifications;
 
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsNotificationService(ILogger logger) : IPlatformNotificationService
+internal sealed class WindowsNotificationService : IPlatformNotificationService
 {
 	private const int NimAdd = 0x00;
 	private const int NimDelete = 0x02;
@@ -15,37 +15,36 @@ internal sealed class WindowsNotificationService(ILogger logger) : IPlatformNoti
 	private const int IdiInformation = 32516;
 
 	private static readonly IntPtr _hwndMessage = new(-3);
-
-	private readonly ILogger _logger = logger.ForContext<WindowsNotificationService>();
+	private static readonly TimeSpan _defaultLifetime = TimeSpan.FromSeconds(8);
 
 	private static int _nextId;
 
+	private readonly ILogger _logger;
+	private readonly TimeSpan _lifetime;
+
+	public WindowsNotificationService(ILogger logger)
+		: this(logger, _defaultLifetime)
+	{
+	}
+
+	internal WindowsNotificationService(ILogger logger, TimeSpan lifetime)
+	{
+		_logger = logger.ForContext<WindowsNotificationService>();
+		_lifetime = lifetime;
+	}
+
 	public bool IsSupported => true;
 
-	public Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
+	public async Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
 	{
-		var window = CreateWindowExW(0,
-			"STATIC",
-			"MacroDeckNotify",
-			0,
-			0,
-			0,
-			0,
-			0,
-			_hwndMessage,
-			IntPtr.Zero,
-			IntPtr.Zero,
-			IntPtr.Zero);
-		if (window == IntPtr.Zero)
-		{
-			_logger.Warning("Failed to create owner window for notification");
-			return Task.CompletedTask;
-		}
+		await ShowCoreAsync(title, message);
+	}
 
+	internal Task<IntPtr> ShowCoreAsync(string title, string message)
+	{
 		var data = new NotifyIconData
 		{
 			cbSize = (uint)Marshal.SizeOf<NotifyIconData>(),
-			hWnd = window,
 			uID = (uint)Interlocked.Increment(ref _nextId),
 			uFlags = NifIcon | NifInfo,
 			hIcon = LoadIconW(IntPtr.Zero, IdiInformation),
@@ -54,28 +53,61 @@ internal sealed class WindowsNotificationService(ILogger logger) : IPlatformNoti
 			dwInfoFlags = NiifInfo
 		};
 
-		if (!Shell_NotifyIconW(NimAdd, ref data))
+		var shown = new TaskCompletionSource<IntPtr>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		// Win32 only lets the creating thread destroy a window, so one thread owns it from creation to removal.
+		var thread = new Thread(() => ShowOnOwnThread(data, shown)) { IsBackground = true };
+		thread.Start();
+		return shown.Task;
+	}
+
+	private void ShowOnOwnThread(NotifyIconData data, TaskCompletionSource<IntPtr> shown)
+	{
+		var window = IntPtr.Zero;
+		try
 		{
-			_logger.Warning("Shell_NotifyIcon (add) failed");
-			DestroyWindow(window);
-			return Task.CompletedTask;
-		}
-
-		_ = Task.Run(async () =>
+			window = CreateWindowExW(0,
+				"STATIC",
+				"MacroDeckNotify",
+				0,
+				0,
+				0,
+				0,
+				0,
+				_hwndMessage,
+				IntPtr.Zero,
+				IntPtr.Zero,
+				IntPtr.Zero);
+			if (window == IntPtr.Zero)
 			{
-				try
-				{
-					await Task.Delay(TimeSpan.FromSeconds(8), CancellationToken.None);
-				}
-				finally
-				{
-					Shell_NotifyIconW(NimDelete, ref data);
-					DestroyWindow(window);
-				}
-			},
-			CancellationToken.None);
+				_logger.Warning("Failed to create owner window for notification");
+				return;
+			}
 
-		return Task.CompletedTask;
+			data.hWnd = window;
+			if (!Shell_NotifyIconW(NimAdd, ref data))
+			{
+				_logger.Warning("Shell_NotifyIcon (add) failed");
+				return;
+			}
+
+			shown.TrySetResult(window);
+			Thread.Sleep(_lifetime);
+			Shell_NotifyIconW(NimDelete, ref data);
+		}
+		catch (Exception exception)
+		{
+			_logger.Warning(exception, "Failed to show notification");
+		}
+		finally
+		{
+			if (window != IntPtr.Zero)
+			{
+				DestroyWindow(window);
+			}
+
+			shown.TrySetResult(IntPtr.Zero);
+		}
 	}
 
 	private static string Truncate(string value, int maxLength)

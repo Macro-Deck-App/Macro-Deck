@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Platform.DesktopEntries;
+using MacroDeckHost.Platform.ShellLinks;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Icons.AppIcons;
@@ -9,7 +10,6 @@ namespace MacroDeckHost.Infrastructure.Icons.AppIcons;
 public sealed class AppIconExtractor : IAppIconExtractor
 {
 	private const int MaxSourceBytes = 64 * 1024 * 1024;
-	private const int MaxShortcutBytes = 1024 * 1024;
 	private const int MaxShortcutLines = 2048;
 	private const int MaxIndirections = 4;
 	private const string FallbackName = "icon";
@@ -206,13 +206,7 @@ public sealed class AppIconExtractor : IAppIconExtractor
 
 	private string? ResolveShellLink(string path)
 	{
-		if (new FileInfo(path).Length > MaxShortcutBytes)
-		{
-			_logger.Debug("{Path} is too large to be a shell link", path);
-			return null;
-		}
-
-		var link = WindowsShellLinkParser.TryParse(File.ReadAllBytes(path));
+		var link = WindowsShellLinkParser.TryParseFile(path);
 		if (link is null)
 		{
 			_logger.Debug("{Path} is not a readable shell link", path);

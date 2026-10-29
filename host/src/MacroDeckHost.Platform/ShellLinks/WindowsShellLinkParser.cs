@@ -2,12 +2,14 @@ using System.Buffers.Binary;
 using System.Globalization;
 using System.Text;
 
-namespace MacroDeckHost.Infrastructure.Icons.AppIcons;
+namespace MacroDeckHost.Platform.ShellLinks;
 
-internal sealed record ShellLinkTarget(string? TargetPath, string? IconLocation);
+internal sealed record ShellLinkTarget(string? TargetPath, string? Arguments, string? IconLocation);
 
 internal static class WindowsShellLinkParser
 {
+	private const int MaxFileBytes = 1024 * 1024;
+
 	private const int ShellLinkHeaderSize = 0x4C;
 	private const int LinkFlagsOffset = 0x14;
 	private const int ClsidOffset = 0x04;
@@ -38,6 +40,11 @@ internal static class WindowsShellLinkParser
 		0x01, 0x14, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46
 	];
+
+	public static ShellLinkTarget? TryParseFile(string path)
+	{
+		return new FileInfo(path).Length > MaxFileBytes ? null : TryParse(File.ReadAllBytes(path));
+	}
 
 	public static ShellLinkTarget? TryParse(byte[] bytes)
 	{
@@ -72,7 +79,7 @@ internal static class WindowsShellLinkParser
 		}
 
 		var unicode = (flags & IsUnicode) != 0;
-		ReadOnlySpan<uint> leadingStrings = [HasName, HasRelativePath, HasWorkingDir, HasArguments];
+		ReadOnlySpan<uint> leadingStrings = [HasName, HasRelativePath, HasWorkingDir];
 		foreach (var flag in leadingStrings)
 		{
 			if ((flags & flag) != 0 && !TryReadStringData(span, ref offset, unicode, out _))
@@ -81,13 +88,21 @@ internal static class WindowsShellLinkParser
 			}
 		}
 
+		string? arguments = null;
+		if ((flags & HasArguments) != 0 && !TryReadStringData(span, ref offset, unicode, out arguments))
+		{
+			return null;
+		}
+
 		string? iconLocation = null;
 		if ((flags & HasIconLocation) != 0 && !TryReadStringData(span, ref offset, unicode, out iconLocation))
 		{
 			return null;
 		}
 
-		return new ShellLinkTarget(NormalizePath(targetPath), NormalizeIconLocation(iconLocation));
+		return new ShellLinkTarget(NormalizePath(targetPath),
+			NormalizePath(arguments),
+			NormalizeIconLocation(iconLocation));
 	}
 
 	private static bool TrySkipIdList(ReadOnlySpan<byte> span, ref int offset)
