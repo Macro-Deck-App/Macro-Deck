@@ -369,7 +369,8 @@ internal sealed class HostLockStateBackgroundServiceTests
 			bool? tlsEnabled = null,
 			string? tlsMode = null,
 			int? tlsHttpsPort = null,
-			bool? discoveryEnabled = null)
+			bool? discoveryEnabled = null,
+			bool? reverseProxyTrusted = null)
 		{
 			throw new NotSupportedException();
 		}

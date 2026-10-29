@@ -68,7 +68,8 @@ public class UpdateNetworkSettingsRequestMessageHandler
 			&& effectiveTlsEnabled == current.TlsEnabled
 			&& effectiveTlsMode == current.TlsMode
 			&& effectiveTlsHttpsPort == current.TlsHttpsPort
-			&& (request.DiscoveryEnabled is null || request.DiscoveryEnabled == current.DiscoveryEnabled);
+			&& (request.DiscoveryEnabled is null || request.DiscoveryEnabled == current.DiscoveryEnabled)
+			&& (request.ReverseProxyTrusted is null || request.ReverseProxyTrusted == current.ReverseProxyTrusted);
 
 		// Discovery is passed through unresolved: SetNetwork resolves an omitted value from its own fresh
 		// read, so a TLS-only save racing a discovery save cannot write back the stale value read above.
@@ -78,7 +79,8 @@ public class UpdateNetworkSettingsRequestMessageHandler
 				effectiveTlsEnabled,
 				effectiveTlsMode.ToString(),
 				effectiveTlsHttpsPort,
-				request.DiscoveryEnabled);
+				request.DiscoveryEnabled,
+				request.ReverseProxyTrusted);
 
 		if (!unchanged)
 		{

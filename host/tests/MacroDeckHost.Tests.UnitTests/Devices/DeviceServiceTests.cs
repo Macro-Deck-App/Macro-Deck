@@ -680,6 +680,7 @@ public class DeviceServiceTests
 			new DeviceEnrollmentStore(),
 			new PairingCodeStore(),
 			new AccessTokenCutoff(),
+			_tracker,
 			new RefreshServingEpoch(),
 			new FakeLastServedRotation(),
 			new FakeOnboardingPreferences(),

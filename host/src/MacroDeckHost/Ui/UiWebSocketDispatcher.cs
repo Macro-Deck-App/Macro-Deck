@@ -231,7 +231,15 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			? parsed
 			: (Guid?)null;
 
-		_deviceConnections.Attach(_connectionId, deviceId, _abort);
+		_deviceConnections.Attach(_connectionId, deviceId, _abort, _principal);
+
+		// A cutoff set between the check above and Attach aborted the tracked connections without this one.
+		if (_accessTokenCutoff.Rejects(_principal))
+		{
+			_deviceConnections.Remove(_connectionId);
+			return Task.FromResult(false);
+		}
+
 		return Task.FromResult(true);
 	}
 
@@ -330,7 +338,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 				"AttachUiSession" => _uiSessions.Attach(Arg<UiAttachSessionRequest>(payload, 0).SessionId,
 					_connectionId,
 					OwnerPrincipal()),
-				"OpenConfigUiSession" => OpenConfigUiSession(Arg<OpenConfigUiSessionRequest>(payload, 0)),
+				"OpenConfigUiSession" when IsAdmin => OpenConfigUiSession(Arg<OpenConfigUiSessionRequest>(payload, 0)),
 				"OpenWidgetUiSession" => OpenWidgetUiSession(Arg<OpenWidgetUiSessionRequest>(payload, 0)),
 				"ListUiPreviews" when IsAdmin => await _listUiPreviews.Handle(new ListUiPreviewsRequest(),
 					cancellationToken),
@@ -656,6 +664,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			or "SubscribeLogs"
 			or "UnsubscribeLogs"
 			or "ListUiPreviews"
+			or "OpenConfigUiSession"
 			or "OpenUiPreviewSession"
 			or "OpenPageUiSession";
 	}

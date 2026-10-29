@@ -148,6 +148,7 @@ using MacroDeckHost.Infrastructure.Plugins.IconPacks;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Infrastructure.Plugins.Jobs;
 using MacroDeckHost.Infrastructure.Plugins.Trust;
+using MacroDeckHost.Api.Support;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Infrastructure.Security.KeyRing;
@@ -232,7 +233,8 @@ public class Startup
 		{
 			options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 			options.GlobalLimiter = PartitionedRateLimiter.CreateChained(HostIdentityRateLimit.Create(),
-				LegacyLicenseTransferRateLimit.Create());
+				LegacyLicenseTransferRateLimit.Create(),
+				DeviceSetupDiagnosticsRateLimit.Create());
 		});
 
 		services.AddSingleton<IConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
@@ -1198,6 +1200,8 @@ public class Startup
 		// would touch a secret store the host cannot read.
 		app.UseLockedHostGate();
 
+		app.UseTrustedReverseProxy();
+
 		// api/plugin-pairing is excluded alongside the ProtocolConstants.All plugin paths even though it
 		// does not start with /api/plugins: LoopbackConnection.IsTrusted, which every action on that
 		// controller requires, rides on an ambient session cookie, so without this exclusion any website the
@@ -1214,6 +1218,7 @@ public class Startup
 				// without this any page the user has open could drive a device attached to this machine.
 				!context.Request.Path.StartsWithSegments("/api/client-targets")
 				&& !context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets")
+				&& !context.Request.Path.StartsWithSegments(DeviceSetupDiagnosticsRateLimit.Path)
 				&& !McpPaths.IsMcpRequest(context.Request.Path),
 			branch => branch.UseCors("AllowAny"));
 

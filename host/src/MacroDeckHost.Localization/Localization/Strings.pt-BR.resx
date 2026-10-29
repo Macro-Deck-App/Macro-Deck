@@ -17323,6 +17323,12 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Mostrar na rede local</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Ative somente se um proxy reverso como nginx, Caddy ou Traefik estiver em execução neste computador e encaminhar as conexões para o Macro Deck. O Macro Deck passa a usar o endereço e o estado de HTTPS que o proxy informa para cada cliente.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Atrás de um proxy reverso neste computador</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT está definido para esta inicialização e determina a porta ({port}). O valor configurado fica sem uso até que essa substituição seja removida.</value>
     <comment>[port:int]</comment>

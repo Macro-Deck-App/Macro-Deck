@@ -17323,6 +17323,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Показувати в локальній мережі</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Вмикайте, лише якщо на цьому комп’ютері працює зворотний проксі, наприклад nginx, Caddy або Traefik, і передає підключення до Macro Deck. Тоді Macro Deck використовує для кожного клієнта адресу та стан HTTPS, які повідомляє проксі.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>За зворотним проксі на цьому комп’ютері</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>Для цього запуску задано MACRO_DECK_PORT, і він визначає порт ({port}). Налаштоване значення не використовується, доки це перевизначення не буде видалено.</value>
     <comment>[port:int]</comment>

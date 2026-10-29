@@ -17323,6 +17323,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>로컬 네트워크에 표시</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>nginx, Caddy, Traefik 같은 리버스 프록시가 이 컴퓨터에서 실행되며 연결을 Macro Deck으로 전달하는 경우에만 켜세요. 그러면 Macro Deck은 각 클라이언트에 대해 프록시가 알려 주는 주소와 HTTPS 상태를 사용합니다.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>이 컴퓨터의 리버스 프록시 뒤에서 실행</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>이번 실행에서 MACRO_DECK_PORT가 설정되어 포트({port})를 결정합니다. 이 재정의를 제거하기 전까지 구성된 값은 사용되지 않습니다.</value>
     <comment>[port:int]</comment>

@@ -17323,6 +17323,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Tonen op het lokale netwerk</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Zet dit alleen aan als er op deze computer een reverse proxy zoals nginx, Caddy of Traefik draait die verbindingen doorgeeft aan Macro Deck. Macro Deck gebruikt dan per client het adres en de HTTPS-status die de proxy doorgeeft.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Achter een reverse proxy op deze computer</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT is ingesteld voor deze start en bepaalt de poort ({port}). De ingestelde waarde blijft ongebruikt zolang die override niet is verwijderd.</value>
     <comment>[port:int]</comment>

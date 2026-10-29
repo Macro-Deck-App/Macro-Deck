@@ -17323,6 +17323,12 @@
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>إظهاره على الشبكة المحلية</value>
   </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>فعّل هذا الخيار فقط إذا كان وكيل عكسي مثل nginx أو Caddy أو Traefik يعمل على هذا الكمبيوتر ويمرر الاتصالات إلى Macro Deck. عندها يستخدم Macro Deck العنوان وحالة HTTPS اللذين يبلغ عنهما الوكيل لكل عميل.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>خلف وكيل عكسي على هذا الكمبيوتر</value>
+  </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>المتغير MACRO_DECK_PORT مضبوط لهذا التشغيل ويحدد المنفذ ({port}). تبقى القيمة المُعدّة غير مستخدمة إلى أن تُزال هذه الأولوية.</value>
     <comment>[port:int]</comment>

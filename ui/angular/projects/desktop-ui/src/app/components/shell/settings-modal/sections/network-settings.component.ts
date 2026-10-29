@@ -50,11 +50,13 @@ export class NetworkSettingsComponent {
 
   readonly discoveryEnabled = signal(true);
   readonly discoverySaving = signal(false);
+  readonly reverseProxyTrusted = signal(false);
+  readonly reverseProxySaving = signal(false);
   readonly tlsBusy = signal(false);
 
   // A save sends every TLS value it read earlier, so two overlapping saves can undo each other.
   readonly discoveryLocked = computed(() =>
-    !this.loaded() || this.saving() || this.discoverySaving() || this.tlsBusy());
+    !this.loaded() || this.saving() || this.discoverySaving() || this.reverseProxySaving() || this.tlsBusy());
 
   readonly networkState = signal<GetNetworkSettingsResponse | null>(null);
 
@@ -152,6 +154,31 @@ export class NetworkSettingsComponent {
     }
   }
 
+  async setReverseProxyTrusted(value: boolean): Promise<void> {
+    if (this.discoveryLocked()) {
+      return;
+    }
+
+    this.reverseProxySaving.set(true);
+    this.reverseProxyTrusted.set(value);
+    this.error.set(null);
+    try {
+      const response = await this.api.updateNetworkSettings({
+        publicPort: this.configuredPort(),
+        reverseProxyTrusted: value,
+      });
+      this.applyState(response);
+      if (!response.success) {
+        this.error.set(response.error ?? this.localization.translateKey(AppStrings.Settings.Network.Tls.SaveFailed));
+      }
+    } catch {
+      this.error.set(this.localization.translateKey(AppStrings.Settings.Network.Tls.SaveFailed));
+      await this.load();
+    } finally {
+      this.reverseProxySaving.set(false);
+    }
+  }
+
   askToRestart(): void {
     if (this.canRestart()) {
       this.restartPromptOpen.set(true);
@@ -213,6 +240,7 @@ export class NetworkSettingsComponent {
     this.restartSupported.set(state.restartSupported);
     this.restartUnsupportedReason.set(state.restartUnsupportedReason);
     this.discoveryEnabled.set(state.discoveryEnabled);
+    this.reverseProxyTrusted.set(state.reverseProxyTrusted);
     this.draft.set(String(state.publicPort));
   }
 }

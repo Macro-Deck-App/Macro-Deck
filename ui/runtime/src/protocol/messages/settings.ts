@@ -132,6 +132,7 @@ export interface GetNetworkSettingsResponse {
   tlsAuthorityNotAfter: string | null;
 
   discoveryEnabled: boolean;
+  reverseProxyTrusted: boolean;
 }
 
 export interface UpdateNetworkSettingsRequest {
@@ -140,6 +141,7 @@ export interface UpdateNetworkSettingsRequest {
   tlsMode?: TlsMode;
   tlsHttpsPort?: number;
   discoveryEnabled?: boolean;
+  reverseProxyTrusted?: boolean;
 }
 
 export interface UpdateNetworkSettingsResponse extends GetNetworkSettingsResponse {

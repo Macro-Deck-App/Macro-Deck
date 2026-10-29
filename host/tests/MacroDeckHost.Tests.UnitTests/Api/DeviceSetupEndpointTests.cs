@@ -11,6 +11,7 @@ using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -40,6 +41,7 @@ public class DeviceSetupEndpointTests
 	[TearDown]
 	public void TearDown()
 	{
+		SqliteConnection.ClearAllPools();
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
@@ -158,6 +160,49 @@ public class DeviceSetupEndpointTests
 				Assert.That(value, Does.Contain("forged"), name);
 			}
 		});
+
+		await host.StopAsync();
+	}
+
+	[Test]
+	public async Task Diagnostics_reports_past_the_hourly_limit_are_refused_and_not_logged()
+	{
+		var events = new List<LogEvent>();
+		using var logger = new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(events.Add)).CreateLogger();
+		using var host = await StartHost(new FakeCertificateStore(_now), logger);
+		using var client = host.GetTestClient();
+
+		var statuses = new List<HttpStatusCode>();
+		for (var i = 0; i < 6; i++)
+		{
+			var response = await client.PostAsync("/api/device-setup/diagnostics",
+				new StringContent("""{"stage":"boot","message":"failed"}""", Encoding.UTF8, "application/json"));
+			statuses.Add(response.StatusCode);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(statuses.Take(5), Is.All.EqualTo(HttpStatusCode.NoContent));
+			Assert.That(statuses[5], Is.EqualTo(HttpStatusCode.TooManyRequests));
+			Assert.That(events.Count(e => e.Properties.ContainsKey("Stage")), Is.EqualTo(5));
+		});
+
+		await host.StopAsync();
+	}
+
+	[Test]
+	public async Task A_foreign_page_gets_no_cors_grant_for_diagnostics()
+	{
+		using var host = await StartHost(new FakeCertificateStore(_now));
+		using var client = host.GetTestClient();
+		using var preflight = new HttpRequestMessage(HttpMethod.Options, "/api/device-setup/diagnostics");
+		preflight.Headers.Add("Origin", "http://foreign.example");
+		preflight.Headers.Add("Access-Control-Request-Method", "POST");
+		preflight.Headers.Add("Access-Control-Request-Headers", "content-type");
+
+		var response = await client.SendAsync(preflight);
+
+		Assert.That(response.Headers.Contains("Access-Control-Allow-Origin"), Is.False);
 
 		await host.StopAsync();
 	}

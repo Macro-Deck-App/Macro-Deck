@@ -27,6 +27,7 @@ public class AuthServiceTests
 	private DeviceSessionGuard _sessionGuard = null!;
 	private InMemoryDeviceRepository _devices = null!;
 	private StartupReadiness _readiness = null!;
+	private FakePasswordHasher _hasher = null!;
 
 	private static readonly DeviceRegistration _phone = new(null,
 		null,
@@ -56,6 +57,7 @@ public class AuthServiceTests
 		_epoch = new RefreshServingEpoch();
 		_lastRotation = new FakeLastServedRotation();
 		_sessionGuard = new DeviceSessionGuard();
+		_hasher = new FakePasswordHasher();
 		BuildService();
 	}
 
@@ -63,7 +65,7 @@ public class AuthServiceTests
 	{
 		_service = new AuthService(_users,
 			_tokens,
-			new FakePasswordHasher(),
+			_hasher,
 			new FakeAccessTokenIssuer(_time),
 			new DeviceService(_devices,
 				_tokens,
@@ -81,6 +83,7 @@ public class AuthServiceTests
 			new DeviceEnrollmentStore(),
 			_pairingCodes,
 			_cutoff,
+			_connections,
 			_epoch,
 			_lastRotation,
 			_preferences,
@@ -200,6 +203,64 @@ public class AuthServiceTests
 			Assert.That(wrongUsername.Error, Is.EqualTo(AuthError.InvalidCredentials));
 			Assert.That(_tokens.Tokens, Is.Empty);
 		});
+	}
+
+	[Test]
+	public async Task A_wrong_username_costs_a_password_verification_like_a_right_one()
+	{
+		await _service.Setup("admin", "password123");
+
+		var before = _hasher.Verifications;
+		await _service.Login("nobody", "nope", AuthScope.Client);
+		var afterWrongUsername = _hasher.Verifications;
+		await _service.Login("admin", "nope", AuthScope.Client);
+		var afterRightUsername = _hasher.Verifications;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterWrongUsername - before, Is.EqualTo(1));
+			Assert.That(afterRightUsername - afterWrongUsername, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_username_longer_than_the_limit_is_refused_as_invalid_credentials()
+	{
+		await _service.Setup("admin", "password123");
+
+		var result = await _service.Login(new string('a', 200_000), "password123", AuthScope.Client);
+
+		Assert.That(result.Error, Is.EqualTo(AuthError.InvalidCredentials));
+	}
+
+	[Test]
+	public async Task Changing_the_password_ends_sockets_without_a_device_that_predate_it()
+	{
+		await _service.Setup("admin", "password123");
+		var issuedBefore = Principal(_time.GetUtcNow().AddSeconds(-10));
+		var issuedAfter = Principal(_time.GetUtcNow().AddSeconds(10));
+		var beforeAborts = 0;
+		var afterAborts = 0;
+		var desktopAborts = 0;
+		_connections.Attach("admin-before", null, () => beforeAborts++, issuedBefore);
+		_connections.Attach("admin-after", null, () => afterAborts++, issuedAfter);
+		_connections.Attach("desktop", null, () => desktopAborts++, new ClaimsPrincipal(new ClaimsIdentity()));
+
+		await _service.ChangePassword("password123", "newpassword1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(beforeAborts, Is.EqualTo(1));
+			Assert.That(afterAborts, Is.Zero);
+			Assert.That(desktopAborts, Is.Zero);
+		});
+
+		static ClaimsPrincipal Principal(DateTimeOffset issuedAt)
+		{
+			return new ClaimsPrincipal(new ClaimsIdentity([
+				new Claim("iat", issuedAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture))
+			]));
+		}
 	}
 
 	[Test]

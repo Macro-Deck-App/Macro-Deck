@@ -49,7 +49,8 @@ public class NetworkListenerIdentityTests
 			null,
 			null,
 			null,
-			true);
+			true,
+			false);
 	}
 
 	// A fresh installation stores no TLS rows at all, so the reported configuration comes from the same

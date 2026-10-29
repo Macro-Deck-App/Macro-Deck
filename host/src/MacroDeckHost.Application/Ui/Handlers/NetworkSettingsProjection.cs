@@ -38,7 +38,8 @@ internal readonly record struct NetworkSettingsProjection(
 	bool RestartRequired,
 	bool RestartSupported,
 	string? RestartUnsupportedReason,
-	bool DiscoveryEnabled)
+	bool DiscoveryEnabled,
+	bool ReverseProxyTrusted)
 {
 	public static NetworkSettingsProjection From(NetworkSettings settings, RestartAvailability restart)
 	{
@@ -82,6 +83,7 @@ internal readonly record struct NetworkSettingsProjection(
 			restartRequired,
 			restart.Supported,
 			restart.Reason,
-			settings.DiscoveryEnabled);
+			settings.DiscoveryEnabled,
+			settings.ReverseProxyTrusted);
 	}
 }
