@@ -48,7 +48,7 @@ graduate to it automatically while stable installations never receive a beta.
 
 ### The channel and the mode are bootstrapper-owned preferences
 
-Both are stored as bare tokens in files (`update-channel-v2`, `update-mode`) inside the same
+Both are stored as bare tokens in files (`md-update-channel`, `update-mode`) inside the same
 `app_config_dir()` the loopback port uses, and both are **re-read on every call** so a change takes
 effect on the next check without a restart. They live in the bootstrapper because they must be readable
 before the host is up, and they decide whether and which signed release metadata the shell fetches — the

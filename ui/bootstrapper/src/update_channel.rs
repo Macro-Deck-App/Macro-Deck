@@ -20,7 +20,7 @@ use crate::updater;
 
 // A new name resets the beta opt-in for 3.0.0: every beta build stored beta as
 // its default, so the old update-channel file cannot tell a choice from a default.
-const STORE_FILE_NAME: &str = "update-channel-v2";
+const STORE_FILE_NAME: &str = "md-update-channel";
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
