@@ -146,10 +146,11 @@ public sealed class BackupService : IBackupService
 				dataBytes));
 
 			var archivePath = Path.Combine(stagingDirectory, "archive" + BackupFileNames.Extension);
+			BackupContentIndex contentIndex;
 			await using (var archiveStream
 				= new FileStream(archivePath, FileMode.Create, FileAccess.Write, FileShare.None))
 			{
-				await _archiveWriter.Write(archiveStream,
+				contentIndex = await _archiveWriter.Write(archiveStream,
 					new BackupArchiveWriteRequest(manifest, plan, databaseCopyPath, written),
 					recoveryKey,
 					token);
@@ -225,6 +226,11 @@ public sealed class BackupService : IBackupService
 
 			// The backup is stored and reported Completed: a cancel arriving now must not turn it into a failure.
 			await PublishListChanged("created", CancellationToken.None);
+			if (contentIndex.Skipped.Count > 0)
+			{
+				await PublishIncomplete(backupId, contentIndex.Skipped.Count);
+			}
+
 			await _retention.Apply(CancellationToken.None);
 
 			return Result.Ok<BackupDescriptor, BackupError>(descriptor);
@@ -709,6 +715,17 @@ public sealed class BackupService : IBackupService
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
 		await publisher.Publish(new BackupListChangedNotification(reason), cancellationToken);
+	}
+
+	private async Task PublishIncomplete(Guid backupId, int skippedFiles)
+	{
+		_logger.Warning("Backup {BackupId} was stored without {SkippedFiles} file(s) that could not be read",
+			backupId,
+			skippedFiles);
+		await using var scope = _scopeFactory.CreateAsyncScope();
+		var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
+		await publisher.Publish(new BackupCompletedIncompleteNotification(backupId, skippedFiles),
+			CancellationToken.None);
 	}
 
 	private static BackupArchiveManifest BuildManifest(

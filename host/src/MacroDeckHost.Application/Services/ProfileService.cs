@@ -324,12 +324,12 @@ public class ProfileService : IProfileService
 			return Result.Fail(ProfileError.NotFound, "Profile not found");
 		}
 
-		if (_profileCache.GetAll().Count <= 1)
+		var removedFolders = await _profileCache.RemoveUnlessLast(id);
+		if (removedFolders is null)
 		{
 			return Result.Fail(ProfileError.CannotDeleteLastProfile, "Cannot delete the last profile");
 		}
 
-		var removedFolders = await _profileCache.Remove(id);
 		var removedWidgets = removedFolders.SelectMany(folder => folder.Widgets).ToList();
 
 		await _widgetSecretScrubber.ScrubUnreferencedSecrets(removedWidgets.Select(widget => widget.Data),

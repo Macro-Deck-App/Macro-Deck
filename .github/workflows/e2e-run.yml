@@ -26,8 +26,6 @@ env:
   # The Angular CLI declares a node floor of 22.22.3, and a bare major can resolve below it.
   NODE_VERSION: '^22.22.3'
   BUILD_CHANNEL: Production
-  E2E_LOOPBACK_PORT: 5191
-  E2E_PUBLIC_PORT: 8192
 
 jobs:
   e2e:
@@ -69,37 +67,14 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
 
-      # Plays the bootstrapper's part: one secret for the host and for Playwright, masked in the log.
-      - name: Generate loopback secret
-        run: |
-          secret=$(openssl rand -hex 32)
-          echo "::add-mask::$secret"
-          echo "MACRODECK_LOOPBACK_SECRET=$secret" >> "$GITHUB_ENV"
-
-      - name: Start isolated Macro Deck host
-        env:
-          MACRO_DECK_HOST_BINARY: ${{ github.workspace }}/ui/bootstrapper/host-publish/Macro Deck Host
-          MACRO_DECK_HOST_LOG: ${{ runner.temp }}/macro-deck-host.log
-          MACRO_DECK_SUPERVISOR_LOG: ${{ runner.temp }}/macro-deck-host-supervisor.log
-          MACRO_DECK_DATA_DIRECTORY: ${{ runner.temp }}/macro-deck-e2e-data
-          MACRODECK_HOST_PORT: ${{ env.E2E_LOOPBACK_PORT }}
-          MACRO_DECK_PORT: ${{ env.E2E_PUBLIC_PORT }}
-        run: |
-          mkdir -p "$MACRO_DECK_DATA_DIRECTORY"
-          bash ./e2e/scripts/host-supervisor.sh &
-          echo $! > "${{ runner.temp }}/macro-deck-supervisor.pid"
-
-      - name: Wait for host
-        run: |
-          timeout 60 bash -c 'until curl --fail --silent --show-error "http://127.0.0.1:${{ env.E2E_LOOPBACK_PORT }}/api/auth/status" >/dev/null; do sleep 1; done'
-          timeout 60 bash -c 'until curl --fail --silent --show-error "http://127.0.0.1:${{ env.E2E_PUBLIC_PORT }}/api/auth/status" >/dev/null; do sleep 1; done'
-
+      # Plays the bootstrapper's part for every spec file: each starts its own staged host with its own
+      # data directory, ports, temp directory and loopback secret (e2e/tests/support/host.js).
       - name: Run Playwright E2E tests
         working-directory: e2e
         env:
-          MACRO_DECK_LOOPBACK_URL: http://127.0.0.1:${{ env.E2E_LOOPBACK_PORT }}
-          MACRO_DECK_PUBLIC_URL: http://127.0.0.1:${{ env.E2E_PUBLIC_PORT }}
-          MACRO_DECK_SUPERVISOR_LOG: ${{ runner.temp }}/macro-deck-host-supervisor.log
+          MACRO_DECK_HOST_BINARY: ${{ github.workspace }}/ui/bootstrapper/host-publish/Macro Deck Host
+          E2E_RUN_DIR: ${{ runner.temp }}/e2e-run
+          E2E_SECRETS_FILE: ${{ runner.temp }}/e2e-loopback-secrets.txt
           SUITE: ${{ inputs.suite }}
           FILTER: ${{ inputs.filter }}
         shell: bash
@@ -113,21 +88,23 @@ jobs:
           fi
           npx playwright test "${args[@]}"
 
+      # Only the host and supervisor logs leave the run directory: the data directories hold key material.
+      - name: Collect host logs
+        if: always()
+        run: |
+          mkdir -p e2e/host-logs
+          for log in "${{ runner.temp }}"/e2e-run/*/macro-deck-host*.log; do
+            [[ -f "$log" ]] || continue
+            cp "$log" "e2e/host-logs/$(basename "$(dirname "$log")")-$(basename "$log")"
+          done
+
       - name: Redact Playwright diagnostics
         id: redact
         if: always()
         env:
           E2E_PASSWORD: macro-deck-e2e-password
-        run: python3 e2e/scripts/redact-playwright-artifacts.py e2e/test-results e2e/playwright-report
-
-      - name: Stop Macro Deck host
-        if: always()
-        run: |
-          pid_file="${{ runner.temp }}/macro-deck-supervisor.pid"
-          if [[ -f "$pid_file" ]]; then
-            kill "$(cat "$pid_file")" 2>/dev/null || true
-            wait "$(cat "$pid_file")" 2>/dev/null || true
-          fi
+          E2E_SECRETS_FILE: ${{ runner.temp }}/e2e-loopback-secrets.txt
+        run: python3 e2e/scripts/redact-playwright-artifacts.py e2e/test-results e2e/playwright-report e2e/host-logs
 
       - name: Upload E2E diagnostics
         if: always() && steps.redact.outcome == 'success'
@@ -139,8 +116,7 @@ jobs:
           path: |
             e2e/playwright-report/
             e2e/test-results/
-            ${{ runner.temp }}/macro-deck-host.log
-            ${{ runner.temp }}/macro-deck-host-supervisor.log
+            e2e/host-logs/
 
       - name: Write run summary
         if: always()
@@ -151,6 +127,6 @@ jobs:
             echo "- Commit: \`${GITHUB_SHA}\`"
             echo "- Suite: \`${{ inputs.suite }}\`"
             echo "- Filter: \`${{ inputs.filter || 'none' }}\`"
-            echo "- Data root: isolated runner temp directory"
+            echo "- Data root: one isolated host per spec file under the runner temp directory"
             echo "- Host build channel: \`${{ env.BUILD_CHANNEL }}\`"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -6850,6 +6850,8 @@ export const AppStrings = {
 		UpdateFailed: 'macrodeck.app:Notifications.UpdateFailed',
 		UpdateReady: 'macrodeck.app:Notifications.UpdateReady',
 		Backup: {
+			Incomplete: 'macrodeck.app:Notifications.Backup.Incomplete',
+			IncompleteMessage: 'macrodeck.app:Notifications.Backup.IncompleteMessage',
 			RestoreFailed: 'macrodeck.app:Notifications.Backup.RestoreFailed',
 			RestoreNotCompletedMessage: 'macrodeck.app:Notifications.Backup.RestoreNotCompletedMessage',
 			RestoreRollbackIncompleteMessage: 'macrodeck.app:Notifications.Backup.RestoreRollbackIncompleteMessage',
@@ -15547,6 +15549,9 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Nav.Store': 'Store',
 	'macrodeck.app:Nav.Variables': 'Variables',
 	'macrodeck.app:Notifications.ActionFailed': '"{name}" failed',
+	'macrodeck.app:Notifications.Backup.Incomplete': 'Backup is incomplete',
+	'macrodeck.app:Notifications.Backup.IncompleteMessage.One': 'The backup was saved, but 1 file could not be read and is missing from it. Close any program that is using it, then create the backup again.',
+	'macrodeck.app:Notifications.Backup.IncompleteMessage.Other': 'The backup was saved, but {count} files could not be read and are missing from it. Close any programs that are using them, then create the backup again.',
 	'macrodeck.app:Notifications.Backup.RestoreFailed': 'Restore failed',
 	'macrodeck.app:Notifications.Backup.RestoreNotCompletedMessage': 'The backup could not be restored. Your data is as it was before the restore.',
 	'macrodeck.app:Notifications.Backup.RestoreRollbackIncompleteMessage': 'The backup could not be restored, and some of your data could not be put back yet. Restart Macro Deck to finish putting it back.',

@@ -94,8 +94,8 @@ const READY_TIMEOUT: Duration = Duration::from_secs(60);
 
 const RETRY_READY_TIMEOUT: Duration = Duration::from_secs(30);
 
-// Must match StartupHeartbeat.Line in the host. The host prints it while it applies or rolls back a
-// staged restore before it listens; the ready timeout then counts from the last one.
+// Must match StartupHeartbeat.Line in the host. The host prints it while it applies a staged restore or
+// migrates the database before it listens; the ready timeout then counts from the last one.
 const HOST_HEARTBEAT_LINE: &str = "macrodeck-host-heartbeat";
 
 const UNRESPONSIVE_STOP_TIMEOUT: Duration = Duration::from_secs(5);

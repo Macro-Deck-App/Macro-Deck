@@ -116,7 +116,12 @@ public static class Program
 				_ => RestoreFailure.None
 			};
 
-			DatabaseMigrationHelper.MigrateDatabase(paths);
+			// A migration of a large database on a slow disk can outlast the bootstrapper's ready timeout, which
+			// would otherwise kill a host that is busy rather than hung.
+			using (StartupHeartbeat.Start(Console.Out, StartupHeartbeat.Interval))
+			{
+				DatabaseMigrationHelper.MigrateDatabase(paths);
+			}
 
 			var preferences = EarlyAppPreferenceReader.TryReadMany(paths,
 				AppPreferenceService.PublicPortKey,

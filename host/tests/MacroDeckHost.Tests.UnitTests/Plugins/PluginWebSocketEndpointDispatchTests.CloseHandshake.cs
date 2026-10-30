@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Runtime;
+using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Plugins;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Tests.UnitTests.Auth;
@@ -151,7 +152,8 @@ public partial class PluginWebSocketEndpointDispatchTests
 	private static (PluginWebSocketEndpoint Endpoint, PluginSessionRegistry Registry) CreateSocketEndpoint(
 		TimeProvider clock,
 		IHostApplicationLifetime? lifetime = null,
-		PluginConnectionLifetime? connectionLifetime = null)
+		PluginConnectionLifetime? connectionLifetime = null,
+		IEventBus? eventBus = null)
 	{
 		var registry = new PluginSessionRegistry(clock, Serilog.Core.Logger.None);
 		var statePusher
@@ -170,7 +172,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 			new FakePluginCallbackRouter(),
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
 			statePusher,
-			new FakeEventBus(),
+			eventBus ?? new FakeEventBus(),
 			new LoginThrottle(clock),
 			clock,
 			new RecordingMediator(),

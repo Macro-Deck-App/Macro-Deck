@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
@@ -12,8 +13,11 @@ using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Logging;
 using MacroDeckHost.Application.Plugins.Trust;
+using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Store;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -37,6 +41,7 @@ internal sealed class PluginInstallerTests
 	private RecordingConsentNotifier _adbConsent = null!;
 	private FakeIntegrationRegistrar _integrationRegistrar = null!;
 	private FakePluginTrustEvaluator _trust = null!;
+	private IPluginTrustEvaluator _trustEvaluator = null!;
 	private IPluginTrustRecordRepository _trustRecords = null!;
 	private string _sourceDirectory = null!;
 
@@ -73,6 +78,7 @@ internal sealed class PluginInstallerTests
 		services.AddSingleton<IPluginAccessTokenRepository, InMemoryPluginAccessTokenRepository>();
 		services.AddSingleton<IPluginTrustRecordRepository, InMemoryPluginTrustRecordRepository>();
 		services.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>();
+		services.AddScoped<IAppPreferenceService>(_ => new FakeDeveloperModePreferences());
 		services.AddSingleton<IIntegrationConfigStore, FakeIntegrationConfigStore>();
 		services.AddSingleton<IRemotePluginSnapshotStore>(_ => new RemotePluginSnapshotStore(_paths,
 			Serilog.Core.Logger.None));
@@ -87,6 +93,7 @@ internal sealed class PluginInstallerTests
 		var provider = services.BuildServiceProvider();
 		_trustRecords = provider.GetRequiredService<IPluginTrustRecordRepository>();
 		_trust = new FakePluginTrustEvaluator();
+		_trustEvaluator = _trust;
 
 		_adbConsent = new RecordingConsentNotifier();
 		_newInstaller = iconPackSync => new PluginInstaller(_paths,
@@ -95,7 +102,7 @@ internal sealed class PluginInstallerTests
 				options,
 				Serilog.Core.Logger.None),
 			new PluginArtifactCache(_paths, options, Serilog.Core.Logger.None),
-			_trust,
+			_trustEvaluator,
 			new PluginDependencyResolver(_catalog, manifestReader),
 			manifestReader,
 			_catalog,
@@ -545,6 +552,47 @@ internal sealed class PluginInstallerTests
 		});
 	}
 
+	// The ZIP directory stays intact and only the first entry's deflate stream is overwritten: a 0xFF
+	// first byte declares the reserved block type 3, which no inflater accepts.
+	private string CorruptDeflateArtifact()
+	{
+		var path = Path.Combine(_sourceDirectory, "corrupt.macroDeckPlugin");
+		using (var archive = ZipFile.Open(path, ZipArchiveMode.Create))
+		{
+			var payloadEntry = archive.CreateEntry(ManifestJson.EntrypointExecutable, CompressionLevel.Optimal);
+			using (var payload = payloadEntry.Open())
+			{
+				payload.Write(new byte[64 * 1024]);
+			}
+
+			using var manifest = new StreamWriter(archive.CreateEntry(PluginArtifactFiles.ManifestFileName).Open());
+			manifest.Write(ManifestJson.Build("1.0.0", PluginId, null));
+		}
+
+		var bytes = File.ReadAllBytes(path);
+		var dataStart = 30 + BitConverter.ToUInt16(bytes, 26) + BitConverter.ToUInt16(bytes, 28);
+		bytes.AsSpan(dataStart, 16).Fill(0xFF);
+		File.WriteAllBytes(path, bytes);
+		return path;
+	}
+
+	[Test]
+	public async Task A_corrupt_archive_is_refused_as_an_invalid_archive()
+	{
+		var artifact = CorruptDeflateArtifact();
+
+		var inspected = await _installer.Inspect(PluginArtifactSource.FromPath(artifact));
+		var installed = await Install(artifact, new PluginInstallRequest { AllowUnsigned = true });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(inspected.Error, Is.EqualTo(PluginInstallError.InvalidArchive));
+			Assert.That(installed.Success, Is.False);
+			Assert.That(installed.Error, Is.EqualTo(PluginInstallError.InvalidArchive));
+			Assert.That(ActiveVersion(), Is.Null);
+		});
+	}
+
 	[Test]
 	public async Task A_local_artifact_is_never_deleted_by_the_installer()
 	{
@@ -560,10 +608,21 @@ internal sealed class PluginInstallerTests
 	}
 
 
-	[Test]
-	public async Task An_unsigned_artifact_installs()
+	private void UseProductionTrustEvaluator()
 	{
-		var result = await Install(BuildArtifact());
+		_trustEvaluator = new PluginTrustEvaluator(new PluginManifestReader(),
+			new StoreRegistryRevocationSource(new StoreCatalog()),
+			PluginTrustOptions.Default,
+			Serilog.Core.Logger.None);
+		_installer = _newInstaller(null);
+	}
+
+	[Test]
+	public async Task An_unsigned_artifact_installs_after_consent()
+	{
+		UseProductionTrustEvaluator();
+
+		var result = await Install(BuildArtifact(), new PluginInstallRequest { AllowUnsigned = true });
 
 		Assert.Multiple(() =>
 		{
@@ -574,43 +633,51 @@ internal sealed class PluginInstallerTests
 	}
 
 	[Test]
-	public async Task A_well_formed_signature_this_host_cannot_verify_does_not_block_installation()
+	public async Task A_well_formed_signature_this_host_cannot_verify_blocks_installation_even_with_consent()
 	{
+		UseProductionTrustEvaluator();
 		var signature = Convert.ToBase64String(new byte[64]);
 		var artifact = BuildArtifact(extraManifestBlocks:
 			$$"""
-			  "signature": { "algorithm": "ed25519", "keyId": "unknown-key", "value": "{{signature}}" }
+			  "signature": {
+			  	"algorithm": "ed25519",
+			  	"keyId": "unknown-key",
+			  	"value": "{{signature}}",
+			  	"signedAt": "2026-01-01T00:00:00Z"
+			  }
 			  """);
 
-		var result = await Install(artifact);
+		var result = await Install(artifact, new PluginInstallRequest { AllowUnsigned = true });
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(result.Success, Is.True, result.ErrorMessage);
-			Assert.That(result.Activated, Is.True);
-			Assert.That(result.HasBlockingWarning, Is.False);
+			Assert.That(result.Success, Is.False);
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.SignatureInvalid));
+			Assert.That(ActiveVersion(), Is.Null);
 		});
 	}
 
 	[Test]
-	public async Task A_signature_of_an_unknown_algorithm_does_not_block_installation()
+	public async Task A_signature_of_an_unknown_algorithm_fails_closed_even_with_consent()
 	{
+		UseProductionTrustEvaluator();
 		var artifact = BuildArtifact(extraManifestBlocks:
 			$$"""
 			  "signature": {
 			  	"algorithm": "some-future-scheme",
 			  	"keyId": "k",
-			  	"value": "{{Convert.ToBase64String(new byte[64])}}"
+			  	"value": "{{Convert.ToBase64String(new byte[64])}}",
+			  	"signedAt": "2026-01-01T00:00:00Z"
 			  }
 			  """);
 
-		var result = await Install(artifact);
+		var result = await Install(artifact, new PluginInstallRequest { AllowUnsigned = true });
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(result.Success, Is.True, result.ErrorMessage);
-			Assert.That(result.Activated, Is.True);
-			Assert.That(result.HasBlockingWarning, Is.False);
+			Assert.That(result.Success, Is.False);
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.SignatureUnverifiable));
+			Assert.That(ActiveVersion(), Is.Null);
 		});
 	}
 

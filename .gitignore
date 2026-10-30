@@ -184,3 +184,4 @@ docs/.astro/
 # Playwright E2E output
 playwright-report/
 test-results/
+e2e/host-logs/

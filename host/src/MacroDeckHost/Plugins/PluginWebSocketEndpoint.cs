@@ -643,6 +643,18 @@ public sealed class PluginWebSocketEndpoint
 				{
 					await RouteQueuedAsync(connection, pluginId, sessionId, envelope, cancellationToken);
 				}
+				catch (Exception exception) when (exception is not (OperationCanceledException
+					or WebSocketException
+					or OutOfMemoryException))
+				{
+					// One failing message must not end this lane: the receive loop would keep the session
+					// alive while every later queued message went unanswered.
+					PluginWebSocketLog.QueuedMessageFailed(_logger, pluginId, envelope.Type, exception);
+					await SendProtocolErrorAsync(connection,
+						ProtocolErrorCodes.InternalError,
+						envelope.Id,
+						cancellationToken);
+				}
 				finally
 				{
 					Interlocked.Decrement(ref dispatch.Depth);

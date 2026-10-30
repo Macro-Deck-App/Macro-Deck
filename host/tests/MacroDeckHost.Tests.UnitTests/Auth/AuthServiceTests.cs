@@ -689,7 +689,7 @@ public class AuthServiceTests
 		var deviceAborts = 0;
 		var desktopAborts = 0;
 		_connections.Attach("device-connection", deviceId, () => deviceAborts++);
-		_connections.Attach("desktop-connection", null, () => desktopAborts++);
+		_connections.Attach("desktop-connection", null, () => desktopAborts++, true);
 
 		await _service.ResetPassword("newpassword1");
 		var again = await _service.Login("admin",

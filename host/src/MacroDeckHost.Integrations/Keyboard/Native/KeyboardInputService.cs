@@ -264,20 +264,28 @@ public sealed class KeyboardInputService : IKeyboardInputService
 	{
 		lock (_gate)
 		{
-			foreach (var modifierKey in modifierKeys)
+			// A key the platform failed to press must not leave the modifiers before it held system wide.
+			var pressed = new Stack<KeyCode>();
+			try
 			{
-				emitter.Down(modifierKey);
-			}
+				foreach (var modifierKey in modifierKeys)
+				{
+					emitter.Down(modifierKey);
+					pressed.Push(modifierKey);
+				}
 
-			if (key != KeyCode.None)
-			{
-				emitter.Down(key);
-				emitter.Up(key);
+				if (key != KeyCode.None)
+				{
+					emitter.Down(key);
+					pressed.Push(key);
+				}
 			}
-
-			for (var i = modifierKeys.Count - 1; i >= 0; i--)
+			finally
 			{
-				emitter.Up(modifierKeys[i]);
+				while (pressed.TryPop(out var down))
+				{
+					emitter.Up(down);
+				}
 			}
 		}
 	}
@@ -499,6 +507,7 @@ public sealed class KeyboardInputService : IKeyboardInputService
 		private readonly IKeyboardTargetWindow? _window;
 		private readonly IDisposable? _focus;
 		private readonly HashSet<KeyCode> _heldInWindow = [];
+		private readonly HashSet<KeyCode> _heldGlobally = [];
 
 		public Session(
 			KeyboardInputService owner,
@@ -531,11 +540,7 @@ public sealed class KeyboardInputService : IKeyboardInputService
 
 		public Task KeyDownAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
 		{
-			if (!HoldsInWindow)
-			{
-				return _owner.KeyDownAsync(modifiers, key, cancellationToken);
-			}
-
+			_owner.EnsureSupported();
 			return Task.Run(() =>
 				{
 					cancellationToken.ThrowIfCancellationRequested();
@@ -543,10 +548,10 @@ public sealed class KeyboardInputService : IKeyboardInputService
 					{
 						foreach (var modifierKey in _owner._layout.ExpandModifiers(modifiers))
 						{
-							HoldInWindow(modifierKey);
+							Hold(modifierKey);
 						}
 
-						HoldInWindow(key);
+						Hold(key);
 					}
 				},
 				cancellationToken);
@@ -554,24 +559,39 @@ public sealed class KeyboardInputService : IKeyboardInputService
 
 		public Task KeyUpAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
 		{
-			if (!HoldsInWindow)
-			{
-				return _owner.KeyUpAsync(modifiers, key, cancellationToken);
-			}
-
+			_owner.EnsureSupported();
 			return Task.Run(() =>
 				{
 					cancellationToken.ThrowIfCancellationRequested();
 					lock (_owner._gate)
 					{
-						ReleaseInWindow(key);
+						Release(key);
 						foreach (var modifierKey in _owner._layout.ExpandModifiers(modifiers))
 						{
-							ReleaseInWindow(modifierKey);
+							Release(modifierKey);
 						}
 					}
 				},
 				cancellationToken);
+		}
+
+		public void ReleaseHeldKeys()
+		{
+			lock (_owner._gate)
+			{
+				foreach (var key in _heldInWindow)
+				{
+					_emitter.Up(key);
+				}
+
+				_heldInWindow.Clear();
+				foreach (var key in _heldGlobally)
+				{
+					_owner.ReleaseKey(key);
+				}
+
+				_heldGlobally.Clear();
+			}
 		}
 
 		public void Dispose()
@@ -590,18 +610,31 @@ public sealed class KeyboardInputService : IKeyboardInputService
 			_window?.Dispose();
 		}
 
-		private void HoldInWindow(KeyCode key)
+		private void Hold(KeyCode key)
 		{
 			if (key == KeyCode.None)
 			{
 				return;
 			}
 
-			_emitter.Down(key);
-			_heldInWindow.Add(key);
+			if (HoldsInWindow)
+			{
+				_emitter.Down(key);
+				_heldInWindow.Add(key);
+				return;
+			}
+
+			// Only a key this session put down is this session's to release on failure; one another
+			// sequence already holds stays with that sequence.
+			var alreadyHeld = _owner._heldKeys.Contains(key);
+			_owner.HoldKey(key);
+			if (!alreadyHeld)
+			{
+				_heldGlobally.Add(key);
+			}
 		}
 
-		private void ReleaseInWindow(KeyCode key)
+		private void Release(KeyCode key)
 		{
 			if (_heldInWindow.Remove(key))
 			{
@@ -609,6 +642,7 @@ public sealed class KeyboardInputService : IKeyboardInputService
 				return;
 			}
 
+			_heldGlobally.Remove(key);
 			_owner.ReleaseKey(key);
 		}
 	}

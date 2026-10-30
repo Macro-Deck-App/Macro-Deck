@@ -14932,6 +14932,17 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Mengimpor ikon ke {pack}</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>Cadangan tidak lengkap</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>Cadangan sudah disimpan, tetapi 1 file tidak dapat dibaca dan tidak termasuk di dalamnya. Tutup program yang menggunakannya, lalu buat cadangan lagi.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>Cadangan sudah disimpan, tetapi {count} file tidak dapat dibaca dan tidak termasuk di dalamnya. Tutup program yang menggunakannya, lalu buat cadangan lagi.</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Pemulihan gagal</value>
   </data>

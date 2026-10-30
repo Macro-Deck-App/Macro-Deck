@@ -14932,6 +14932,17 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Импорт значков в {pack}</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>Резервная копия неполная</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>Резервная копия сохранена, но в ней отсутствует 1 файл, который не удалось прочитать. Закройте программу, которая его использует, и создайте резервную копию заново.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>Резервная копия сохранена, но в ней отсутствуют файлы, которые не удалось прочитать (файлов: {count}). Закройте программы, которые их используют, и создайте резервную копию заново.</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Не удалось выполнить восстановление</value>
   </data>

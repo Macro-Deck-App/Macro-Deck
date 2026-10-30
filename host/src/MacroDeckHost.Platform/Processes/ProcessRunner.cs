@@ -10,26 +10,9 @@ internal static class ProcessRunner
 		IReadOnlyList<string> arguments,
 		CancellationToken cancellationToken = default)
 	{
-		var startInfo = new ProcessStartInfo(fileName)
-		{
-			RedirectStandardOutput = true,
-			RedirectStandardError = true,
-			UseShellExecute = false,
-			CreateNoWindow = true
-		};
-
-		foreach (var argument in arguments)
-		{
-			startInfo.ArgumentList.Add(argument);
-		}
-
-		AppImageEnvironment.RestoreOutside(startInfo);
-		using var process = Process.Start(startInfo)
-			?? throw new InvalidOperationException($"Failed to start '{fileName}'.");
-
-		var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-		await process.WaitForExitAsync(cancellationToken);
-		return output;
+		// Both pipes are drained, or a child that fills stderr blocks forever on a write nobody reads.
+		var result = await RunWithResultAsync(fileName, arguments, null, cancellationToken);
+		return result.StandardOutput;
 	}
 
 	public readonly record struct ProcessResult(int ExitCode, string StandardOutput, string StandardError)

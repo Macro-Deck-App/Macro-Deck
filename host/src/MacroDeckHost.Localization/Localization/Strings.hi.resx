@@ -14932,6 +14932,17 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>{pack} में आइकन आयात हो रहे हैं</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>बैकअप अधूरा है</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>बैकअप सहेज लिया गया, लेकिन 1 फ़ाइल पढ़ी नहीं जा सकी और वह इसमें शामिल नहीं है। उसे उपयोग कर रहे प्रोग्राम को बंद करें, फिर बैकअप दोबारा बनाएं।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>बैकअप सहेज लिया गया, लेकिन कुछ फ़ाइलें पढ़ी नहीं जा सकीं और इसमें शामिल नहीं हैं (संख्या: {count})। उन्हें उपयोग कर रहे प्रोग्राम बंद करें, फिर बैकअप दोबारा बनाएं।</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>पुनर्स्थापना विफल रही</value>
   </data>

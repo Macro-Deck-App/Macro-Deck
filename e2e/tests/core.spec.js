@@ -1,137 +1,43 @@
-import { readFile } from 'node:fs/promises';
-import { expect, test } from '@playwright/test';
-import { LOOPBACK_URL, PUBLIC_URL } from '../playwright.config.js';
-import { loopbackHeaders, openDesktop } from './loopback.js';
+import { expect, test, useIsolatedHost } from './support/fixtures.js';
+import { flow, PASSWORD, USERNAME } from './support/seed.js';
+import {
+  clickProfileAction,
+  connectWebClient,
+  expectLivePush,
+  openDesktop,
+  openProfileMenu,
+  openWebClient,
+  pressWebTile,
+  selectDesktopProfile,
+  signInWebClient,
+  watchForUnexpectedFailures,
+  webDeck,
+} from './support/pages.js';
 
-const USERNAME = 'e2e-user';
-const PASSWORD = 'macro-deck-e2e-password';
 const PROFILE_NAME = 'E2E Profile';
 const RENAMED_PROFILE_NAME = 'E2E Persisted Profile';
 const PROFILE_COLUMNS = 6;
 const PROFILE_ROWS = 4;
 const WIDGET_LABEL = 'E2E Action';
 const TEMP_PROFILE_NAME = 'E2E Delete Me';
-const SUPERVISOR_LOG = process.env.MACRO_DECK_SUPERVISOR_LOG;
 
-function watchForUnexpectedFailures(page) {
-  const failures = [];
-  let hostOutageExpected = false;
+// The only spec that clicks through first-run setup, so its host starts without an account. The
+// locators match on English text, so the host is told to serve English whatever the machine runs.
+useIsolatedHost('core', { prepare: api => api.useEnglish() });
 
-  page.on('pageerror', error => {
-    if (!hostOutageExpected) {
-      failures.push(`pageerror: ${error.message}`);
-    }
-  });
-  page.on('response', response => {
-    if (!hostOutageExpected && response.status() >= 500 && response.url().includes('/api/')) {
-      failures.push(`${response.status()} ${response.request().method()} ${response.url()}`);
-    }
-  });
-
-  const assertNone = () => expect(failures, failures.join('\n')).toEqual([]);
-
-  // Runs a step that deliberately takes the host down. In-flight calls are lost there however they
-  // fail, so those are an expected outcome of the restart, not a regression.
-  assertNone.whileHostIsRestarting = async run => {
-    hostOutageExpected = true;
-    try {
-      return await run();
-    } finally {
-      hostOutageExpected = false;
-    }
-  };
-
-  return assertNone;
-}
-
-async function waitForHost(request) {
-  await expect.poll(async () => {
-    try {
-      const response = await request.get(`${LOOPBACK_URL}/api/auth/status`);
-      return response.ok();
-    } catch {
-      return false;
-    }
-  }, { timeout: 30_000 }).toBe(true);
-}
-
-// Every locator below matches on English text. Stating that dependency here means a moved default
-// fails once, instead of later as a pile of unfindable elements.
-async function assertHostServesEnglish(request) {
-  const response = await request.get(`${LOOPBACK_URL}/api/localization`, { headers: loopbackHeaders() });
-  expect(response.ok()).toBe(true);
-
-  const localization = await response.json();
+async function assertHostServesEnglish(api) {
+  const localization = await api.get('/api/localization');
   expect(localization.culture).toBe('en');
   expect(localization.translations['macrodeck:Common.Save']).toBe('Save');
-}
-
-async function getProfiles(request) {
-  const response = await request.get(`${LOOPBACK_URL}/api/profiles`, { headers: loopbackHeaders() });
-  expect(response.ok()).toBe(true);
-  return (await response.json()).profiles;
-}
-
-async function getHostStartCount() {
-  if (!SUPERVISOR_LOG) {
-    return null;
-  }
-  try {
-    const log = await readFile(SUPERVISOR_LOG, 'utf8');
-    return log.split('Starting Macro Deck host').length - 1;
-  } catch {
-    return 0;
-  }
-}
-
-async function openProfileMenu(page, profileName) {
-  await page.getByRole('button', { name: profileName, exact: true }).click();
-}
-
-async function clickProfileAction(page, profileName, action) {
-  await openProfileMenu(page, profileName);
-  const profileRow = page.locator('.profile-list-item').filter({
-    has: page.getByText(profileName, { exact: true }),
-  });
-  await expect(profileRow).toBeVisible();
-  await profileRow.getByRole('button', { name: `More actions for ${profileName}` }).click();
-  await page.locator('.menu-item').filter({ hasText: new RegExp(`^\\s*${action}\\s*$`) }).click();
-}
-
-async function selectProfile(page, profileName) {
-  const trigger = page.locator('shared-dropdown-menu.profile-dropdown .dropdown-trigger');
-  await expect(trigger).toBeVisible();
-  if ((await trigger.innerText()).trim() === profileName) {
-    return;
-  }
-  await trigger.click();
-  await page.locator('.profile-list-select').filter({ hasText: profileName }).click();
-  await expect(trigger).toContainText(profileName);
-}
-
-async function loginWebClient(page) {
-  await page.goto(PUBLIC_URL);
-  await signInWebClient(page);
-}
-
-// Waits for the deck, not for the settings gear: the gear sits above the sign-in card too, so
-// waiting on it carries on while the sign-in is still in flight.
-async function signInWebClient(page) {
-  await expect(page.getByText('Sign in to continue')).toBeVisible();
-  await page.getByRole('button', { name: 'Password', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Username' }).fill(USERNAME);
-  await page.locator('input[name="password"]').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.locator('.wc-deck')).toBeVisible();
 }
 
 test.describe('Macro Deck core E2E', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test('@smoke completes first-run setup through the Admin UI', async ({ page, request }) => {
+  test('@smoke completes first-run setup through the Admin UI', async ({ page, api, host }) => {
     const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
 
-    await openDesktop(page);
+    await openDesktop(page, host);
     await expect(page.getByRole('heading', { name: 'Welcome to Macro Deck' })).toBeVisible();
 
     await page.getByLabel('Username').fill(USERNAME);
@@ -140,11 +46,8 @@ test.describe('Macro Deck core E2E', () => {
     await page.getByRole('button', { name: 'Create account' }).click();
 
     await expect(page.getByRole('heading', { name: 'Welcome to Macro Deck', exact: true })).toBeHidden();
-    await expect.poll(async () => {
-      const response = await request.get(`${LOOPBACK_URL}/api/auth/status`);
-      return response.ok() ? (await response.json()).setupComplete : false;
-    }).toBe(true);
-    const withoutSecret = await request.get(`${LOOPBACK_URL}/api/profiles`);
+    await expect.poll(async () => (await api.get('/api/auth/status')).setupComplete).toBe(true);
+    const withoutSecret = await api.request.get(`${host.loopbackUrl}/api/profiles`);
     expect(withoutSecret.status()).toBe(401);
 
     // Creating the account is what makes the host owe a wizard, and it has no skip and no close
@@ -176,16 +79,16 @@ test.describe('Macro Deck core E2E', () => {
     await linksStep.getByRole('button', { name: 'Get started' }).click();
     await expect(linksStep).toBeHidden();
 
-    await assertHostServesEnglish(request);
+    await assertHostServesEnglish(api);
 
     assertNoUnexpectedFailures();
   });
 
-  test('@smoke creates a profile, changes its grid defaults, and adds an Action Button', async ({ page, request }) => {
+  test('@smoke creates a profile, changes its grid defaults, and adds an Action Button', async ({ page, api, host }) => {
     const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
-    await openDesktop(page);
+    await openDesktop(page, host);
 
-    const profiles = await getProfiles(request);
+    const profiles = await api.profiles();
     const selectedName = profiles.toSorted((a, b) => a.order - b.order)[0]?.name ?? 'No Profile';
 
     await openProfileMenu(page, selectedName);
@@ -231,21 +134,22 @@ test.describe('Macro Deck core E2E', () => {
     await clickProfileAction(page, TEMP_PROFILE_NAME, 'Delete');
     const deleteModal = page.getByRole('dialog', { name: 'Delete Profile' });
     await deleteModal.getByRole('button', { name: 'Delete', exact: true }).click();
-    await expect.poll(async () => (await getProfiles(request)).some(profile => profile.name === TEMP_PROFILE_NAME)).toBe(false);
+    await expect.poll(async () => (await api.profiles()).some(profile => profile.name === TEMP_PROFILE_NAME))
+      .toBe(false);
 
-    const currentProfiles = await getProfiles(request);
+    const currentProfiles = await api.profiles();
     expect(currentProfiles.some(profile => profile.name === RENAMED_PROFILE_NAME)).toBe(true);
-    await selectProfile(page, RENAMED_PROFILE_NAME);
+    await selectDesktopProfile(page, RENAMED_PROFILE_NAME);
 
     assertNoUnexpectedFailures();
   });
 
-  test('@smoke signs into the Web Client, signs out, and signs back in', async ({ browser }) => {
+  test('@smoke signs into the Web Client, signs out, and signs back in', async ({ browser, host }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
 
-    await loginWebClient(page);
+    await openWebClient(page, host);
     await page.getByRole('button', { name: 'Open Macro Deck settings' }).click();
     await page.getByRole('button', { name: 'Sign out' }).click();
 
@@ -255,75 +159,71 @@ test.describe('Macro Deck core E2E', () => {
     await context.close();
   });
 
-  test('@smoke signs into the Web Client with the pairing code the desktop shows', async ({ browser, request }) => {
+  test('@smoke signs into the Web Client with the pairing code the desktop shows', async ({ browser, api, host }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
 
-    const pairing = await request.get(`${LOOPBACK_URL}/api/auth/pairing-code`, { headers: loopbackHeaders() });
-    expect(pairing.ok()).toBe(true);
-    const { code } = await pairing.json();
+    const code = await api.pairingCode();
 
-    await page.goto(PUBLIC_URL);
+    await page.goto(host.publicUrl);
     await expect(page.getByText('Sign in to continue')).toBeVisible();
     await page.getByRole('textbox', { name: 'Pairing code' }).fill(`${code.slice(0, 3)} ${code.slice(3)}`);
-    await expect(page.locator('.wc-deck')).toBeVisible();
+    await expect(webDeck(page)).toBeVisible();
 
     assertNoUnexpectedFailures();
     await context.close();
   });
 
-  test('@smoke persists profile, widget, and grid state across a real host restart and reconnects the Web Client', async ({ page, request, browser }) => {
+  // E2E-CONN-01: a Web Client that only looks connected after the restart cannot pass, because the
+  // label change and the press both have to cross the new socket.
+  test('@smoke persists profile, widget, and grid state across a real host restart and reconnects the Web Client', async ({ page, api, host, browser }) => {
     const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
-    await openDesktop(page);
-    await selectProfile(page, RENAMED_PROFILE_NAME);
+    await openDesktop(page, host);
+    await selectDesktopProfile(page, RENAMED_PROFILE_NAME);
     await expect(page.getByText(`${PROFILE_COLUMNS} × ${PROFILE_ROWS} Grid`)).toBeVisible();
     await expect(page.locator('shared-widget-item')).toHaveCount(1);
     await expect(page.getByText(WIDGET_LABEL, { exact: true })).toBeVisible();
 
-    const webContext = await browser.newContext();
-    const webPage = await webContext.newPage();
-    const assertNoUnexpectedWebFailures = watchForUnexpectedFailures(webPage);
-    await loginWebClient(webPage);
+    await api.variable('e2e_restart_presses', { type: 'numeric', value: 0 });
+    const reconnectProfile = await api.profile('E2E Reconnect', { columns: 3, rows: 2 });
+    const counter = await api.actionButton(reconnectProfile.rootFolder.id, {
+      label: 'Count',
+      flows: [flow.shortPress(flow.setVariable('e2e_restart_presses', 1, 'add'))],
+    });
 
-    await assertNoUnexpectedFailures.whileHostIsRestarting(() =>
-      assertNoUnexpectedWebFailures.whileHostIsRestarting(async () => {
-        const startsBeforeRestart = await getHostStartCount();
+    const web = await connectWebClient(browser, host, api);
+    const assertNoUnexpectedWebFailures = watchForUnexpectedFailures(web.page);
+    await api.openProfileOnDevice(web.device.id, reconnectProfile.id);
+    await expectLivePush(web.page, api, counter.id);
+
+    await assertNoUnexpectedFailures.whileHostIsDown(() =>
+      assertNoUnexpectedWebFailures.whileHostIsDown(async () => {
+        const startsBeforeRestart = host.starts;
         // The Admin UI reloads itself once it reconnects to the new host session. A reload of our own
         // would race that one, and the page could then reload again under the next step.
         const adminReloaded = page.waitForEvent('load', { timeout: 30_000 });
-        const restart = await request.post(`${LOOPBACK_URL}/api/host/restart`, {
-          data: { reason: 'e2e-persistence' },
-          headers: loopbackHeaders(),
-        });
-        expect(restart.ok()).toBe(true);
-        expect(await restart.json()).toMatchObject({ supported: true, success: true });
-
-        if (startsBeforeRestart !== null) {
-          await expect.poll(async () => await getHostStartCount(), { timeout: 30_000 })
-            .toBeGreaterThan(startsBeforeRestart);
-        } else {
-          await page.waitForTimeout(500);
-        }
-        await waitForHost(request);
+        await api.restart('e2e-persistence');
+        await host.waitForRestart(startsBeforeRestart);
         await expect.poll(async () => {
-          const persistedProfiles = await getProfiles(request);
-          const profile = persistedProfiles.find(item => item.name === RENAMED_PROFILE_NAME);
+          const profile = (await api.profiles()).find(item => item.name === RENAMED_PROFILE_NAME);
           return profile ? `${profile.defaultColumns}x${profile.defaultRows}` : null;
         }, { timeout: 30_000 }).toBe(`${PROFILE_COLUMNS}x${PROFILE_ROWS}`);
 
-        await expect(webPage.getByRole('button', { name: 'Open Macro Deck settings' }))
-          .toBeVisible({ timeout: 30_000 });
+        await expectLivePush(web.page, api, counter.id, undefined, 30_000);
         await adminReloaded;
       }));
 
-    await selectProfile(page, RENAMED_PROFILE_NAME);
+    await pressWebTile(web, counter.id);
+    await expect.poll(() => api.variableValue('e2e_restart_presses')).toBe('1');
+
+    await selectDesktopProfile(page, RENAMED_PROFILE_NAME);
     await expect(page.getByText(`${PROFILE_COLUMNS} × ${PROFILE_ROWS} Grid`)).toBeVisible();
     await expect(page.locator('shared-widget-item')).toHaveCount(1);
     await expect(page.getByText(WIDGET_LABEL, { exact: true })).toBeVisible();
 
     assertNoUnexpectedFailures();
     assertNoUnexpectedWebFailures();
-    await webContext.close();
+    await web.context.close();
   });
 });

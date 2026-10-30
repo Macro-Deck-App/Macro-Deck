@@ -47,19 +47,34 @@ public sealed class KeyboardSequenceExecutor : IKeyboardSequenceExecutor
 		var repeat = Math.Clamp(sequence.Repeat <= 0 ? 1 : sequence.Repeat, 1, MaxSequenceRepeat);
 		var repeatDelay = Math.Clamp(sequence.RepeatDelayMs, 0, MaxDelayMs);
 
-		for (var iteration = 0; iteration < repeat; iteration++)
+		var completed = false;
+		try
 		{
-			cancellationToken.ThrowIfCancellationRequested();
-
-			foreach (var step in sequence.Steps)
+			for (var iteration = 0; iteration < repeat; iteration++)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				await ExecuteStepAsync(session, step, cancellationToken).ConfigureAwait(false);
+
+				foreach (var step in sequence.Steps)
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+					await ExecuteStepAsync(session, step, cancellationToken).ConfigureAwait(false);
+				}
+
+				if (iteration < repeat - 1 && repeatDelay > 0)
+				{
+					await Task.Delay(repeatDelay, cancellationToken).ConfigureAwait(false);
+				}
 			}
 
-			if (iteration < repeat - 1 && repeatDelay > 0)
+			completed = true;
+		}
+		finally
+		{
+			// A sequence that was stopped or failed never reached its own key ups. Released before the session
+			// ends, so focus never goes back to the previous window with a modifier still down.
+			if (!completed)
 			{
-				await Task.Delay(repeatDelay, cancellationToken).ConfigureAwait(false);
+				session.ReleaseHeldKeys();
 			}
 		}
 

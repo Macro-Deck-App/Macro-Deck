@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <NoWarn>$(NoWarn);CA1707</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
+
+    <!-- The host and both fixture plugins run as real processes from their own build output; these
+         references only order the build, nothing here links against their assemblies. -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeckHost\MacroDeckHost.csproj" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\..\sdk\tests\fixtures\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.csproj"
+                          ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\..\sdk\tests\fixtures\MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin\MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin.csproj"
+                          ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Plugin.Testing\MacroDeck.Plugin.Testing.csproj" />
+        <ProjectReference Include="..\..\..\protocol\src\MacroDeck.Plugin.Protocol\MacroDeck.Plugin.Protocol.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework" />
+    </ItemGroup>
+
+</Project>

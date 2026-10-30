@@ -1,16 +1,4 @@
-import { createHmac, randomBytes } from 'node:crypto';
-
-export function loopbackSecret() {
-  const secret = process.env.MACRODECK_LOOPBACK_SECRET;
-  if (!secret) {
-    throw new Error('MACRODECK_LOOPBACK_SECRET must be exported for the host and for Playwright');
-  }
-  return secret;
-}
-
-export function loopbackHeaders() {
-  return { 'X-MacroDeck-Loopback-Secret': loopbackSecret() };
-}
+import { createHmac } from 'node:crypto';
 
 // The same session code the bootstrapper mints for its window (ui/bootstrapper/src/loopback_secret.rs).
 export function sessionCode(secret, nowSeconds, nonce) {
@@ -19,14 +7,4 @@ export function sessionCode(secret, nowSeconds, nonce) {
     .update(`macro-deck-loopback-code:${expiry}.${nonce}`)
     .digest('hex');
   return `${expiry}.${nonce}.${tag}`;
-}
-
-export async function openDesktop(page) {
-  // A Production host opens the live Platform's announcement at any moment. Dismiss it with a bare click
-  // event: a real click's mousedown would close whatever menu the interrupted step had just opened.
-  await page.addLocatorHandler(page.locator('app-announcement-modal .modal-overlay'), async overlay => {
-    await overlay.getByRole('button', { name: 'Got it' }).dispatchEvent('click');
-  });
-  const code = sessionCode(loopbackSecret(), Math.floor(Date.now() / 1000), randomBytes(16).toString('hex'));
-  await page.goto(`/api/auth/loopback-session?code=${code}`);
 }

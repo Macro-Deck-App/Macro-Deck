@@ -3,7 +3,7 @@ namespace MacroDeckHost;
 internal sealed class StartupHeartbeat : IDisposable
 {
 	// Keep in sync with HOST_HEARTBEAT_LINE in ui/bootstrapper/src/host.rs: the bootstrapper extends
-	// its ready timeout from the last line it read, so a long restore apply is not killed.
+	// its ready timeout from the last line it read, so a long restore apply or migration is not killed.
 	public const string Line = "macrodeck-host-heartbeat";
 
 	public static readonly TimeSpan Interval = TimeSpan.FromSeconds(5);

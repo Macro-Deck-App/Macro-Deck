@@ -647,8 +647,8 @@ internal sealed class PluginSupervisorTests
 		var supervisor = CreateSupervisor();
 		await supervisor.Start(PluginId);
 
-		// The very first early exit gets one free startup-grace retry that does not count against the
-		// budget (the TOCTOU health-port race), so exhausting a MaxRestarts budget takes one extra crash.
+		// The first early exit gets one free startup-grace retry outside the budget (the TOCTOU health-port
+		// race). After it, MaxRestarts automatic restarts are granted and only the next crash is terminal.
 		for (var i = 0; i < _options.MaxRestarts + 1; i++)
 		{
 			var process = _launcher.StartedProcesses[^1];
@@ -658,8 +658,22 @@ internal sealed class PluginSupervisorTests
 			await supervisor.Reconcile();
 		}
 
+		var withinBudget = supervisor.Snapshot().Single(s => s.PluginId == PluginId);
+		Assert.Multiple(() =>
+		{
+			Assert.That(withinBudget.State, Is.Not.EqualTo(PluginRuntimeState.Failed));
+			Assert.That(withinBudget.RestartCount, Is.EqualTo(_options.MaxRestarts));
+			Assert.That(_launcher.Requests, Has.Count.EqualTo(_options.MaxRestarts + 2));
+		});
+
+		_launcher.StartedProcesses[^1].CompleteExit(-1);
+		await Task.Delay(30);
+		_time.Advance(TimeSpan.FromMinutes(1));
+		await supervisor.Reconcile();
+
 		var snapshot = supervisor.Snapshot().Single(s => s.PluginId == PluginId);
 		Assert.That(snapshot.State, Is.EqualTo(PluginRuntimeState.Failed));
+		Assert.That(snapshot.LastError, Does.Contain($"Exceeded {_options.MaxRestarts} restarts"));
 
 		var launchCountAtFailure = _launcher.Requests.Count;
 		await supervisor.Reconcile();

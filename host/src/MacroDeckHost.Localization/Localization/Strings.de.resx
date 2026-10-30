@@ -14929,6 +14929,17 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Symbole werden in {pack} importiert</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>Sicherung ist unvollständig</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>Die Sicherung wurde gespeichert, aber 1 Datei konnte nicht gelesen werden und fehlt darin. Schließe das Programm, das sie verwendet, und erstelle die Sicherung erneut.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>Die Sicherung wurde gespeichert, aber {count} Dateien konnten nicht gelesen werden und fehlen darin. Schließe die Programme, die sie verwenden, und erstelle die Sicherung erneut.</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Wiederherstellung fehlgeschlagen</value>
   </data>

@@ -21,6 +21,10 @@ can follow it after closing its dialog; a finished backup stays there as **Backu
 an error. **Cancel backup** stops a backup while it runs and keeps nothing of it. When the backup was made before an
 update, a plugin update or a restore, cancelling it cancels that too, so nothing changes without its backup.
 
+If Macro Deck cannot read a file while it makes a backup, for example because another program has it open,
+the backup is still saved without that file and the notification center shows **Backup is incomplete**.
+Close the program that uses the file and create the backup again.
+
 Use **Download** in a backup's menu to save it as a `.macroDeckBackup` file, for example to keep a copy
 somewhere else or to move to another computer. In the Macro Deck app you choose where to save it; in a
 browser it goes to your downloads.
@@ -32,6 +36,10 @@ that made it. Show it in **Settings > Backups > Recovery key** with **Show recov
 somewhere safe, separate from your backups.
 
 When you regenerate the recovery key, backups made before that still need the old key.
+
+If Macro Deck can no longer read the stored recovery key, the next backup creates a new one, and **Recovery
+key** says that the key has never been shown. Show the new key and keep it as well: backups made before
+still need the key you saved earlier.
 
 ## Restore a backup
 

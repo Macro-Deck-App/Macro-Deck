@@ -215,6 +215,10 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			return PluginInstallResult.Fail(PluginInstallError.Cancelled, "The inspection was cancelled.");
 		}
+		catch (InvalidDataException ex)
+		{
+			return CorruptArchive(ex);
+		}
 		finally
 		{
 			DeleteDirectory(stagingDirectory);
@@ -300,10 +304,22 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			return PluginInstallResult.Fail(PluginInstallError.Cancelled, "The installation was cancelled.");
 		}
+		catch (InvalidDataException ex)
+		{
+			return CorruptArchive(ex);
+		}
 		finally
 		{
 			DeleteDirectory(stagingDirectory);
 		}
+	}
+
+	// The artifact reader throws for an entry whose compressed stream is corrupt rather than reporting it,
+	// and such an archive is exactly what InvalidArchive names: not a readable ZIP.
+	private static PluginInstallResult CorruptArchive(InvalidDataException exception)
+	{
+		return PluginInstallResult.Fail(PluginInstallError.InvalidArchive,
+			$"The artifact is not a readable archive: {exception.Message}");
 	}
 
 	private async Task<PluginInstallResult?> RefuseWhileTakenOver(string pluginId, string version)

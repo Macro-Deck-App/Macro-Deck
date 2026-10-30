@@ -21,6 +21,18 @@ public interface IProfileCache
 
 	Task<IReadOnlyList<FolderEntity>> Remove(Guid id);
 
+	// Null when the profile is the last one. The check and the removal must be one step, or two deletes
+	// running together can each see the other's profile and remove both.
+	async Task<IReadOnlyList<FolderEntity>?> RemoveUnlessLast(Guid id)
+	{
+		if (GetAll().Count <= 1)
+		{
+			return null;
+		}
+
+		return await Remove(id);
+	}
+
 	Task AddOrUpdateAggregate(
 		ProfileEntity profile,
 		IReadOnlyCollection<FolderEntity> folders,

@@ -14932,6 +14932,17 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>{pack}에 아이콘을 가져오는 중</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>백업이 완전하지 않습니다</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>백업이 저장되었지만 파일 1개를 읽을 수 없어 백업에 포함되지 않았습니다. 해당 파일을 사용 중인 프로그램을 닫은 후 백업을 다시 만드세요.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>백업이 저장되었지만 파일 {count}개를 읽을 수 없어 백업에 포함되지 않았습니다. 해당 파일을 사용 중인 프로그램을 닫은 후 백업을 다시 만드세요.</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>복원에 실패했습니다</value>
   </data>

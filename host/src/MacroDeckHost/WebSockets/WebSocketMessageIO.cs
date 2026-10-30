@@ -14,6 +14,7 @@ internal static class WebSocketMessageIo
 	{
 		var buffer = new byte[16 * 1024];
 		using var accumulated = new MemoryStream();
+		var oversized = false;
 
 		while (true)
 		{
@@ -28,12 +29,17 @@ internal static class WebSocketMessageIo
 				throw new InvalidDataException("A text WebSocket message was required.");
 			}
 
-			if (accumulated.Length + result.Count > maxMessageBytes)
+			if (oversized || accumulated.Length + result.Count > maxMessageBytes)
 			{
 				if (rejectOversized)
 				{
 					throw new InvalidDataException("The WebSocket message exceeded the size limit.");
 				}
+
+				// Drained and returned empty so the reader answers MALFORMED_ENVELOPE as the protocol
+				// documents; keeping the fitting fragments would splice them into a different message.
+				oversized = true;
+				accumulated.SetLength(0);
 			}
 			else
 			{
@@ -42,7 +48,7 @@ internal static class WebSocketMessageIo
 
 			if (result.EndOfMessage)
 			{
-				return accumulated.ToArray();
+				return oversized ? [] : accumulated.ToArray();
 			}
 		}
 	}

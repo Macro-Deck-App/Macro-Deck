@@ -231,7 +231,10 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			? parsed
 			: (Guid?)null;
 
-		_deviceConnections.Attach(_connectionId, deviceId, _abort);
+		_deviceConnections.Attach(_connectionId,
+			deviceId,
+			_abort,
+			_principal.Identity?.AuthenticationType == AuthDefaults.LoopbackScheme);
 		return Task.FromResult(true);
 	}
 
@@ -330,7 +333,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 				"AttachUiSession" => _uiSessions.Attach(Arg<UiAttachSessionRequest>(payload, 0).SessionId,
 					_connectionId,
 					OwnerPrincipal()),
-				"OpenConfigUiSession" => OpenConfigUiSession(Arg<OpenConfigUiSessionRequest>(payload, 0)),
+				"OpenConfigUiSession" when IsAdmin => OpenConfigUiSession(Arg<OpenConfigUiSessionRequest>(payload, 0)),
 				"OpenWidgetUiSession" => OpenWidgetUiSession(Arg<OpenWidgetUiSessionRequest>(payload, 0)),
 				"ListUiPreviews" when IsAdmin => await _listUiPreviews.Handle(new ListUiPreviewsRequest(),
 					cancellationToken),
@@ -657,7 +660,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			or "UnsubscribeLogs"
 			or "ListUiPreviews"
 			or "OpenUiPreviewSession"
-			or "OpenPageUiSession";
+			or "OpenPageUiSession"
+			or "OpenConfigUiSession";
 	}
 
 	private static T Arg<T>(JsonElement? payload, int index)

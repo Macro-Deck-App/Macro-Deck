@@ -28,14 +28,32 @@ internal sealed class FakeKeyboardInputProvider : IKeyboardInputProvider
 	{
 	}
 
+	public KeyCode? FailOnKeyDown { get; set; }
+
+	public Action<KeyCode>? AfterKeyDown { get; set; }
+
+	public List<string>? Timeline { get; set; }
+
+	// Keys down and not yet up, as the operating system would see them.
+	public IReadOnlyCollection<KeyCode> Pressed
+		=> Events.GroupBy(e => e.Key).Where(g => g.Last().Down).Select(g => g.Key).ToList();
+
 	public void KeyDown(KeyCode key)
 	{
+		if (key == FailOnKeyDown)
+		{
+			throw new InvalidOperationException($"The platform refused {key}.");
+		}
+
 		Events.Add((key, true));
+		Timeline?.Add($"down:{key}");
+		AfterKeyDown?.Invoke(key);
 	}
 
 	public void KeyUp(KeyCode key)
 	{
 		Events.Add((key, false));
+		Timeline?.Add($"up:{key}");
 	}
 
 	public void TypeUnicode(string text)
@@ -64,6 +82,7 @@ internal sealed class FakeTargetWindow : IKeyboardTargetWindow
 	public int RestoreCalls { get; private set; }
 	public bool CanFocus { get; set; } = true;
 	public bool Disposed { get; private set; }
+	public List<string>? Timeline { get; set; }
 
 	public IDisposable? Focus()
 	{
@@ -103,6 +122,7 @@ internal sealed class FakeTargetWindow : IKeyboardTargetWindow
 		public void Dispose()
 		{
 			_owner.RestoreCalls++;
+			_owner.Timeline?.Add("restore-focus");
 		}
 	}
 }

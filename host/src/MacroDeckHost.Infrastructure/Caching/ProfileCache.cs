@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Persistence;
+using MacroDeckHost.Application.Persistence.Profiles;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Secrets.Approvals;
@@ -19,6 +20,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 	private readonly SecretApprovalLedger? _approvals;
 	private readonly ConcurrentDictionary<Guid, ProfileEntity> _profiles = new();
 	private readonly ConcurrentDictionary<Guid, FolderEntity> _folders = new();
+	private readonly ConcurrentDictionary<Guid, ProfileFile> _persisted = new();
 	private readonly SemaphoreSlim _initializationLock = new(1, 1);
 	private readonly SemaphoreSlim _updateLock = new(1, 1);
 	private bool _isInitialized;
@@ -72,6 +74,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				repaired |= WidgetIconReferenceMigration.Normalize(folders);
 
 				_profiles.TryAdd(file.Id, profile);
+				_persisted.TryAdd(file.Id, file);
 				foreach (var folder in folders)
 				{
 					_folders.TryAdd(folder.Id, folder);
@@ -120,7 +123,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		try
 		{
 			_profiles.AddOrUpdate(profile.Id, profile, (_, _) => profile);
-			TryPersist(profile.Id);
+			Persist(profile.Id);
 		}
 		finally
 		{
@@ -139,7 +142,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				if (_profiles.TryGetValue(id, out var profile) && profile.Order != order)
 				{
 					profile.Order = order;
-					TryPersist(id);
+					Persist(id);
 					changed.Add(profile);
 				}
 			}
@@ -178,7 +181,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			}
 
 			NormalizeStartFolder(profile.Id);
-			TryPersist(profile.Id, write, folders.SelectMany(entry => entry.Widgets).Select(entry => entry.Id));
+			Persist(profile.Id, write, folders.SelectMany(entry => entry.Widgets).Select(entry => entry.Id));
 		}
 		finally
 		{
@@ -191,25 +194,44 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		await _updateLock.WaitAsync();
 		try
 		{
-			_profiles.TryRemove(id, out _);
-			var removed = new List<FolderEntity>();
-			foreach (var folderId in _folders.Values.Where(f => f.ProfileId == id).Select(f => f.Id).ToList())
-			{
-				if (_folders.TryRemove(folderId, out var folder))
-				{
-					removed.Add(folder);
-				}
-			}
-
-			_store.Delete(id);
-			_approvals?.DeletePartition(SecretApprovalGroup.Profiles, id);
-			_logger.Information("Removed profile with id {ProfileId}", id);
-			return removed;
+			return RemoveLocked(id);
 		}
 		finally
 		{
 			_updateLock.Release();
 		}
+	}
+
+	public async Task<IReadOnlyList<FolderEntity>?> RemoveUnlessLast(Guid id)
+	{
+		await _updateLock.WaitAsync();
+		try
+		{
+			return _profiles.Count <= 1 ? null : RemoveLocked(id);
+		}
+		finally
+		{
+			_updateLock.Release();
+		}
+	}
+
+	private List<FolderEntity> RemoveLocked(Guid id)
+	{
+		_profiles.TryRemove(id, out _);
+		var removed = new List<FolderEntity>();
+		foreach (var folderId in _folders.Values.Where(f => f.ProfileId == id).Select(f => f.Id).ToList())
+		{
+			if (_folders.TryRemove(folderId, out var folder))
+			{
+				removed.Add(folder);
+			}
+		}
+
+		_store.Delete(id);
+		_persisted.TryRemove(id, out _);
+		_approvals?.DeletePartition(SecretApprovalGroup.Profiles, id);
+		_logger.Information("Removed profile with id {ProfileId}", id);
+		return removed;
 	}
 
 
@@ -262,10 +284,10 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				: folder.ProfileId;
 			_folders.AddOrUpdate(folder.Id, folder, (_, _) => folder);
 			NormalizeStartFolder(folder.ProfileId);
-			TryPersist(folder.ProfileId, write, folder.Widgets.Select(entry => entry.Id));
+			Persist(folder.ProfileId, write, folder.Widgets.Select(entry => entry.Id));
 			if (previousProfileId != folder.ProfileId)
 			{
-				TryPersist(previousProfileId);
+				Persist(previousProfileId);
 			}
 		}
 		finally
@@ -299,7 +321,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			foreach (var profileId in affected)
 			{
 				NormalizeStartFolder(profileId);
-				TryPersist(profileId, write, folders.SelectMany(entry => entry.Widgets).Select(entry => entry.Id));
+				Persist(profileId, write, folders.SelectMany(entry => entry.Widgets).Select(entry => entry.Id));
 			}
 		}
 		finally
@@ -390,7 +412,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			WidgetIconReferenceMigration.Normalize(widget);
 
 			folder.Widgets.Add(widget);
-			TryPersist(folder.ProfileId, write, [widget.Id]);
+			Persist(folder.ProfileId, write, [widget.Id]);
 		}
 		finally
 		{
@@ -423,7 +445,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				folder.Widgets.Add(widget);
 			}
 
-			TryPersist(folder.ProfileId, write, widgets.Select(entry => entry.Id));
+			Persist(folder.ProfileId, write, widgets.Select(entry => entry.Id));
 		}
 		finally
 		{
@@ -453,7 +475,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			}
 
 			folder.Widgets[index] = widget;
-			TryPersist(folder.ProfileId, write, [widget.Id]);
+			Persist(folder.ProfileId, write, [widget.Id]);
 		}
 		finally
 		{
@@ -487,7 +509,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				folder.Widgets[index] = widget;
 			}
 
-			TryPersist(folder.ProfileId, write, widgets.Select(entry => entry.Id));
+			Persist(folder.ProfileId, write, widgets.Select(entry => entry.Id));
 		}
 		finally
 		{
@@ -519,7 +541,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				widget.Height = placement.Height;
 			}
 
-			TryPersist(folder.ProfileId);
+			Persist(folder.ProfileId);
 		}
 		finally
 		{
@@ -538,7 +560,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			}
 
 			folder.Widgets.RemoveAll(w => w.Id == widgetId);
-			TryPersist(folder.ProfileId);
+			Persist(folder.ProfileId);
 		}
 		finally
 		{
@@ -558,7 +580,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 
 			var idSet = widgetIds.ToHashSet();
 			folder.Widgets.RemoveAll(w => idSet.Contains(w.Id));
-			TryPersist(folder.ProfileId);
+			Persist(folder.ProfileId);
 		}
 		finally
 		{
@@ -592,7 +614,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				folder.Widgets.Add(widget);
 			}
 
-			TryPersist(folder.ProfileId, write, addWidgets.Select(entry => entry.Id));
+			Persist(folder.ProfileId, write, addWidgets.Select(entry => entry.Id));
 		}
 		finally
 		{
@@ -617,7 +639,52 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 
 		var folders = _folders.Values.Where(f => f.ProfileId == profileId).ToList();
 		RecordApprovals(profileId, write, writtenWidgets.ToHashSet());
-		return _store.Save(ProfileFileMapper.ToFile(profile, folders));
+		var file = ProfileFileMapper.ToFile(profile, folders);
+		if (!_store.Save(file))
+		{
+			return false;
+		}
+
+		_persisted[profileId] = file;
+		return true;
+	}
+
+	private void Persist(Guid profileId)
+	{
+		Persist(profileId, SecretApprovalWrite.Preserve, []);
+	}
+
+	// A failed write puts the profile back to what is on disk before it is reported, so the cache never
+	// shows a change that a restart would lose, and a later save cannot write it out unannounced.
+	private void Persist(Guid profileId, SecretApprovalWrite write, IEnumerable<Guid> writtenWidgets)
+	{
+		if (TryPersist(profileId, write, writtenWidgets))
+		{
+			return;
+		}
+
+		RestorePersisted(profileId);
+		throw new ProfilePersistenceException(profileId);
+	}
+
+	private void RestorePersisted(Guid profileId)
+	{
+		foreach (var folderId in _folders.Values.Where(f => f.ProfileId == profileId).Select(f => f.Id).ToList())
+		{
+			_folders.TryRemove(folderId, out _);
+		}
+
+		if (!_persisted.TryGetValue(profileId, out var file))
+		{
+			_profiles.TryRemove(profileId, out _);
+			return;
+		}
+
+		_profiles[profileId] = ProfileFileMapper.ToProfileEntity(file);
+		foreach (var folder in ProfileFileMapper.ToFolderEntities(file))
+		{
+			_folders[folder.Id] = folder;
+		}
 	}
 
 	private void RecordApprovals(Guid profileId, SecretApprovalWrite write, HashSet<Guid> writtenWidgets)
