@@ -48,7 +48,7 @@ graduate to it automatically while stable installations never receive a beta.
 
 ### The channel and the mode are bootstrapper-owned preferences
 
-Both are stored as bare tokens in files (`update-channel`, `update-mode`) inside the same
+Both are stored as bare tokens in files (`update-channel-v2`, `update-mode`) inside the same
 `app_config_dir()` the loopback port uses, and both are **re-read on every call** so a change takes
 effect on the next check without a restart. They live in the bootstrapper because they must be readable
 before the host is up, and they decide whether and which signed release metadata the shell fetches — the
@@ -57,6 +57,11 @@ host has no role in update checking at all.
 The channel's first-launch default follows the running version: Beta if the baked release version is a
 prerelease, Stable otherwise. It reads `updater::current_version`, never the package version, because a
 beta RPM is bundled at a mapped stable version and reading that would misclassify it.
+
+The file was renamed from `update-channel` for 3.0.0 to end the beta programme for everyone: each beta
+build had stored its default there, which made a default indistinguishable from a choice. The old file is
+ignored and left in place. A prerelease built from the renamed code would store Beta in the new file, so
+the reset only holds for installs that reach 3.0.0 without running such a build.
 
 The mode is `off` / `notifyOnly` / `automatic`, and `periodic_action(mode, install_strategy)` is
 evaluated **before any feed is queried**, so Off contacts nothing rather than merely suppressing the
