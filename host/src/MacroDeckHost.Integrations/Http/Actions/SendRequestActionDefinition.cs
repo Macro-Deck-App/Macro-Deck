@@ -21,6 +21,8 @@ internal sealed class SendRequestActionDefinition : IActionDefinition
 
 	public string Id => "send-request";
 
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Network;
+
 	public LocalizedText Name => AppStrings.Integrations.Http.Actions.SendRequestName();
 
 	public LocalizedText Description => AppStrings.Integrations.Http.Actions.SendRequestDescription();

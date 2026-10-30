@@ -116,6 +116,11 @@ public class IntegrationRegistry : IIntegrationRegistry
 		return _origins.TryGetValue(integrationId, out var origin) ? origin : IntegrationOrigin.BuiltIn;
 	}
 
+	public bool TryGetOrigin(string integrationId, out IntegrationOrigin origin)
+	{
+		return _origins.TryGetValue(integrationId, out origin);
+	}
+
 	public void SetEnabled(string integrationId, bool enabled)
 	{
 		if (_integrations.TryGetValue(integrationId, out var integration) && integration is ISystemIntegration)

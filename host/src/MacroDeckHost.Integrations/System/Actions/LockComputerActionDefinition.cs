@@ -1,3 +1,4 @@
+using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Integrations.System.Power;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
@@ -12,6 +13,8 @@ internal sealed class LockComputerActionDefinition : PowerActionDefinitionBase
 	}
 
 	public override string Id => "lock-computer";
+
+	public override ActionRiskCategory RiskCategory => ActionRiskCategory.None;
 	public override LocalizedText Name => AppStrings.Integrations.System.Actions.LockComputer.Name();
 
 	public override LocalizedText Description =>

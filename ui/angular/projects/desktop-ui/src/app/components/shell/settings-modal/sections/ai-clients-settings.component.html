@@ -1,0 +1,210 @@
+<div class="ai-clients">
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Mcp.Heading' | translate"
+    [description]="'macrodeck.app:Settings.Mcp.Description' | translate">
+    @if (mcp.loadError(); as message) {
+      <shared-error-banner [message]="message" [dismissible]="false" />
+    }
+
+    @if (mcp.endpoint(); as endpoint) {
+      @if (endpoint.available && endpoint.url) {
+        <shared-copy-value
+          data-testid="mcp-endpoint"
+          [label]="'macrodeck.app:Settings.Mcp.EndpointLabel' | translate"
+          [value]="endpoint.url" />
+        <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.EndpointHint' | translate }}</p>
+      } @else {
+        <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.EndpointUnavailable' | translate }}</p>
+      }
+    }
+  </shared-settings-section>
+
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Mcp.TokensTitle' | translate">
+    <shared-button
+      settingsSectionAction
+      variant="primary"
+      size="compact"
+      data-testid="mcp-create-token"
+      (click)="openCreateModal()">
+      <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Developer.Tokens.CreateTokenAction' | translate }}
+    </shared-button>
+
+    @if (mcp.tokens().length === 0) {
+      <shared-empty-state
+        icon="lock"
+        [heading]="'macrodeck.app:Settings.Mcp.EmptyHeading' | translate"
+        [message]="'macrodeck.app:Settings.Mcp.EmptyMessage' | translate" />
+    } @else {
+      <ul class="ai-clients__list">
+        @for (token of mcp.tokens(); track token.id) {
+          <li class="ai-clients__row" data-testid="mcp-token-row" [class.is-revoked]="!!token.revokedAt">
+            <div class="ai-clients__name-col">
+              <span class="ai-clients__name">{{ token.name }}</span>
+              @if (token.revokedAt) {
+                <span class="ai-clients__badge">{{ 'macrodeck.app:Developer.Tokens.RevokedBadge' | translate }}</span>
+              }
+              <span class="ai-clients__secondary">{{ 'macrodeck.app:Settings.Mcp.ConnectionCount' | translate:{ count: token.connectionCount } }}</span>
+            </div>
+            <dl class="ai-clients__stats">
+              <div>
+                <dt>{{ 'macrodeck.app:Developer.Tokens.CreatedLabel' | translate }}</dt>
+                <dd>{{ formatDate(token.createdAt) }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'macrodeck.app:Developer.Tokens.LastUsedLabel' | translate }}</dt>
+                <dd>{{ formatDate(token.lastUsedAt) }}</dd>
+              </div>
+            </dl>
+            <div class="ai-clients__actions">
+              @if (token.revokedAt) {
+                <shared-button variant="danger-ghost" data-testid="mcp-remove-token" (click)="requestRemove(token)">
+                  {{ 'macrodeck.app:Developer.Tokens.RemoveAction' | translate }}
+                </shared-button>
+              } @else {
+                <shared-button variant="danger-ghost" data-testid="mcp-revoke-token" (click)="requestRevoke(token)">
+                  {{ 'macrodeck.app:Developer.Tokens.RevokeAction' | translate }}
+                </shared-button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </shared-settings-section>
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Mcp.PolicyTitle' | translate"
+    [description]="'macrodeck.app:Settings.Mcp.PolicyDescription' | translate">
+    <ul class="ai-clients__list">
+      @for (provider of mcp.providers(); track provider.integrationId) {
+        <li class="ai-clients__row" data-testid="mcp-policy-row">
+          <div class="ai-clients__name-col">
+            <span class="ai-clients__name">{{ providerName(provider) }}</span>
+            @if (!provider.override && provider.confirmedActions.length > 0 && provider.defaultMode === 'Allow') {
+              <span class="ai-clients__secondary">{{ 'macrodeck.app:Settings.Mcp.PolicyAsksFirst' | translate:{ actions: confirmedActionNames(provider) } }}</span>
+            }
+          </div>
+          <shared-select
+            class="ai-clients__policy"
+            [options]="optionsFor(provider)"
+            [ngModel]="provider.override ?? ''"
+            (ngModelChange)="changePolicy(provider, $event)" />
+        </li>
+      }
+    </ul>
+  </shared-settings-section>
+
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Mcp.ConnectionsTitle' | translate">
+    <shared-button
+      settingsSectionAction
+      variant="secondary"
+      size="compact"
+      [loading]="mcp.loading()"
+      (click)="refresh()">
+      {{ 'macrodeck.app:Settings.Mcp.RefreshAction' | translate }}
+    </shared-button>
+    @if (mcp.connections().length === 0) {
+      <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.ConnectionsEmpty' | translate }}</p>
+    } @else {
+      <ul class="ai-clients__list">
+        @for (connection of mcp.connections(); track connection.tokenId + connection.connectedAt) {
+          <li class="ai-clients__row" data-testid="mcp-connection-row">
+            <div class="ai-clients__name-col">
+              <span class="ai-clients__name">{{ clientLabel(connection.clientName, connection.clientVersion) }}</span>
+              <span class="ai-clients__secondary">{{ connection.tokenName }}</span>
+            </div>
+            <dl class="ai-clients__stats">
+              <div>
+                <dt>{{ 'macrodeck.app:Settings.Mcp.ConnectedSinceLabel' | translate }}</dt>
+                <dd>{{ formatDate(connection.connectedAt) }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'macrodeck.app:Developer.Tokens.LastUsedLabel' | translate }}</dt>
+                <dd>{{ formatDate(connection.lastSeenAt) }}</dd>
+              </div>
+            </dl>
+          </li>
+        }
+      </ul>
+    }
+  </shared-settings-section>
+</div>
+
+@if (createModalOpen()) {
+  <shared-modal [heading]="'macrodeck.app:Developer.Tokens.CreateTokenAction' | translate" size="small" [showFooter]="false" (close)="cancelCreateModal()">
+    @if (revealed(); as token) {
+      <div class="ai-clients__reveal">
+        <p class="ai-clients__hint">{{ 'macrodeck.app:Developer.Tokens.RevealWarning' | translate:{ name: token.name } }}</p>
+        <shared-copy-value data-testid="mcp-token-value" [label]="'macrodeck.app:Developer.Tokens.TokenValueLabel' | translate" [value]="token.plaintext" [fallbackZIndex]="1100" />
+        @if (extensionAvailable()) {
+          <div class="ai-clients__extension">
+            <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.ClaudeDesktopHint' | translate }}</p>
+            <shared-button type="button" variant="secondary" data-testid="mcp-download-extension" [loading]="downloadingExtension()" (click)="downloadExtension()">
+              {{ 'macrodeck.app:Settings.Mcp.ClaudeDesktopAction' | translate }}
+            </shared-button>
+          </div>
+        }
+        @if (configSnippet()) {
+          <div class="form-group">
+            <span class="form-label">{{ 'macrodeck.app:Settings.Mcp.ClientSelectLabel' | translate }}</span>
+            <shared-select
+              data-testid="mcp-client-select"
+              [ariaLabel]="'macrodeck.app:Settings.Mcp.ClientSelectLabel' | translate"
+              [options]="clientOptions()"
+              [ngModel]="client()"
+              (ngModelChange)="selectClient($event)" />
+          </div>
+          <shared-copy-value data-testid="mcp-client-config" [label]="'macrodeck.app:Settings.Mcp.ConfigLabel' | translate" [value]="configSnippet()" [fallbackZIndex]="1100" />
+        }
+        <shared-button-group align="end">
+          <shared-button type="button" variant="primary" (click)="acknowledgeReveal()">
+            {{ 'macrodeck.app:Developer.Tokens.CopiedItAction' | translate }}
+          </shared-button>
+        </shared-button-group>
+      </div>
+    } @else {
+      <form class="ai-clients__form" (ngSubmit)="submitCreate()">
+        <label class="form-group">
+          <span class="form-label">{{ 'macrodeck.app:Developer.Tokens.NameFieldLabel' | translate }}</span>
+          <shared-input
+            data-testid="mcp-token-name"
+            [ngModel]="createName()"
+            (ngModelChange)="createName.set($event)"
+            name="name"
+            [inputMaxlength]="64"
+            required
+            [autofocus]="true" />
+        </label>
+        <shared-button-group align="end">
+          <shared-button type="button" variant="secondary" (click)="cancelCreateModal()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+          <shared-button type="submit" variant="primary" data-testid="mcp-token-submit" [loading]="creating()" [disabled]="!createName().trim()">
+            {{ 'macrodeck:Common.Create' | translate }}
+          </shared-button>
+        </shared-button-group>
+      </form>
+    }
+  </shared-modal>
+}
+
+@if (revokeCandidate(); as token) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Developer.Tokens.RevokeTokenConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Mcp.RevokeConfirmMessage' | translate:{ name: token.name }"
+    [confirmText]="'macrodeck.app:Developer.Tokens.RevokeAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmRevoke()"
+    (cancel)="cancelRevoke()" />
+}
+
+@if (removeCandidate(); as token) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Developer.Tokens.RemoveConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Mcp.RemoveConfirmMessage' | translate:{ name: token.name }"
+    [confirmText]="'macrodeck.app:Developer.Tokens.RemoveAction' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    [danger]="true"
+    (confirm)="confirmRemove()"
+    (cancel)="cancelRemove()" />
+}

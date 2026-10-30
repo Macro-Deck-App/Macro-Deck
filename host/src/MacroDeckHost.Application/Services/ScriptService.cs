@@ -196,7 +196,7 @@ public class ScriptService : IScriptService
 		return Result.Ok<ScriptError>();
 	}
 
-	private static Result<ScriptEntity, ScriptError>? ValidateInputs(IReadOnlyList<ScriptInput>? inputs)
+	public static Result<ScriptEntity, ScriptError>? ValidateInputs(IReadOnlyList<ScriptInput>? inputs)
 	{
 		if (inputs is null)
 		{

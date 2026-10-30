@@ -16,6 +16,8 @@ internal sealed class DragActionDefinition : IActionDefinition
 	}
 
 	public string Id => "drag";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Mouse.Actions.Drag.Name();
 	public LocalizedText Description => AppStrings.Integrations.Mouse.Actions.Drag.Description();
 

@@ -1,3 +1,4 @@
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Plugin.Protocol.Capabilities.Actions;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 
@@ -16,7 +17,17 @@ public static class ActionCatalogMapper
 			dto.ProvidesState,
 			dto.ConfiguresWithUiTree,
 			dto.ProvidesIcon,
-			dto.Role);
+			dto.Role,
+			ParseRiskCategory(dto.RiskCategory));
+	}
+
+	public static ActionRiskCategory ParseRiskCategory(string? value)
+	{
+		return Enum.TryParse<ActionRiskCategory>(value, true, out var category)
+			&& Enum.IsDefined(category)
+			&& !int.TryParse(value, out _)
+				? category
+				: ActionRiskCategory.None;
 	}
 
 	public static IReadOnlyList<RemoteActionDescriptor> ToDomain(ActionCatalogPayload payload)
@@ -37,7 +48,10 @@ public static class ActionCatalogMapper
 			ProvidesState = descriptor.ProvidesState,
 			ConfiguresWithUiTree = descriptor.ConfiguresWithUiTree,
 			ProvidesIcon = descriptor.ProvidesIcon,
-			Role = descriptor.Role
+			Role = descriptor.Role,
+			RiskCategory = descriptor.RiskCategory == ActionRiskCategory.None
+				? null
+				: descriptor.RiskCategory.ToString().ToLowerInvariant()
 		};
 	}
 

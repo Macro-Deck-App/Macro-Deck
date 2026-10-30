@@ -83,12 +83,13 @@ internal static class FeedParser
 		throw new FeedParseException();
 	}
 
-	// External entities and DTDs are refused outright: a feed is untrusted input and needs neither.
+	// A feed is untrusted input: its DTD is skipped and nothing is resolved, so a feed that relies on a
+	// declared entity is refused instead of expanded.
 	private static XElement Load(byte[] content)
 	{
 		var settings = new XmlReaderSettings
 		{
-			DtdProcessing = DtdProcessing.Prohibit,
+			DtdProcessing = DtdProcessing.Ignore,
 			XmlResolver = null,
 			MaxCharactersInDocument = MaxCharacters,
 			MaxCharactersFromEntities = 1024,

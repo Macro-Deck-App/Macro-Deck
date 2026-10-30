@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
@@ -18,7 +19,7 @@ public sealed class DeviceConnectionTracker
 		public string? ClientId;
 		public string? Key;
 		public Action? Abort;
-		public bool CredentialFree;
+		public ClaimsPrincipal? Principal;
 	}
 
 	private readonly record struct PendingDisconnect(DateTime At, Guid? DeviceId, string? ClientId);
@@ -44,19 +45,14 @@ public sealed class DeviceConnectionTracker
 
 	public CancellationToken ShutdownToken => _shutdown.Token;
 
-	public void Attach(string connectionId, Guid? deviceId, Action abort)
-	{
-		Attach(connectionId, deviceId, abort, false);
-	}
-
-	public void Attach(string connectionId, Guid? deviceId, Action abort, bool credentialFree)
+	public void Attach(string connectionId, Guid? deviceId, Action abort, ClaimsPrincipal? principal = null)
 	{
 		var entry = GetOrAdd(connectionId);
 		lock (_sync)
 		{
 			entry.DeviceId = deviceId;
 			entry.Abort = abort;
-			entry.CredentialFree = credentialFree;
+			entry.Principal = principal;
 		}
 	}
 
@@ -209,14 +205,12 @@ public sealed class DeviceConnectionTracker
 		}
 	}
 
-	// A trusted loopback connection holds no credential a password change could invalidate, so it is the only
-	// deviceless kind left open when every signed-in session ends.
-	public void AbortDevicelessSessions()
+	public void AbortWhere(Func<ClaimsPrincipal, bool> predicate)
 	{
 		Action?[] aborts;
 		lock (_sync)
 		{
-			aborts = _connections.Values.Where(entry => entry.DeviceId is null && !entry.CredentialFree)
+			aborts = _connections.Values.Where(entry => entry.Principal is { } principal && predicate(principal))
 				.Select(entry => entry.Abort)
 				.ToArray();
 		}

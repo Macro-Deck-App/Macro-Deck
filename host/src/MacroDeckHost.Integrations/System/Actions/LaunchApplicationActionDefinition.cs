@@ -15,6 +15,8 @@ internal sealed class LaunchApplicationActionDefinition : IActionDefinition
 	}
 
 	public string Id => "launch-application";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Programs;
 	public string? Role => ActionRoles.LaunchApplication;
 	public LocalizedText Name => AppStrings.Integrations.System.Actions.LaunchApplication.Name();
 	public LocalizedText Description => AppStrings.Integrations.System.Actions.LaunchApplication.Description();

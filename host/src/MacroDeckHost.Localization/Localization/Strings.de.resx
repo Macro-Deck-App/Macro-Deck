@@ -1063,6 +1063,27 @@ Beende die Anwendung, die den Port belegt (oder ein noch laufendes Macro Deck), 
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck wurde nicht vollständig aktualisiert</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} ist nicht gesetzt. Installiere die Claude-Desktop-Erweiterung erneut über Einstellungen &gt; KI-Clients.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck läuft nicht. Starte Macro Deck und versuche es erneut.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck hat das Zugriffstoken abgelehnt: Es wurde widerrufen oder gelöscht. Erstelle unter Einstellungen &gt; KI-Clients ein neues Token und installiere die Erweiterung erneut.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck stellt keinen MCP-Server bereit: Es ist gesperrt oder unterstützt keine KI-Clients. Entsperre Macro Deck und versuche es erneut.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck hat die Anfrage abgelehnt (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>Die Verbindung zu Macro Deck wurde getrennt, bevor eine Antwort kam. Die Anfrage wurde möglicherweise ausgeführt, prüfe das also, bevor du sie wiederholst.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>Die MCP-Sitzung wurde nicht initialisiert.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Über Macro Deck</value>
   </data>
@@ -2939,6 +2960,24 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Dieser Wiederherstellungsschlüssel entsperrt diese Installation nicht.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Dieses Zugriffstoken kann nicht mehr verwendet werden. Erstelle ein neues Token, um die Erweiterung herunterzuladen.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Die Claude-Desktop-Erweiterung gibt es nur in der installierten Macro-Deck-App unter macOS und Windows.</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Wähle einen Anbieter.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>Dieses Zugriffstoken ist bereits widerrufen.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>Gib einen Namen mit höchstens 64 Zeichen ein.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>Es existiert kein Zugriffstoken mit dieser ID.</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Die Migration konnte nicht abgeschlossen werden.</value>
@@ -17157,6 +17196,107 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Mindeststufe</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Für Claude Desktop herunterladen</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Öffne die heruntergeladene Datei in Claude Desktop, um Macro Deck dort zu installieren. Die Datei enthält dieses Token, lösche sie also nach der Installation.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Die Claude-Desktop-Erweiterung konnte nicht gespeichert werden</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>KI-Client</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>Client-Konfiguration</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Verbunden seit</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} Verbindung</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>{count} Verbindungen</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>Kein KI-Client ist verbunden.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Verbundene Clients</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Lass KI-Assistenten wie Claude oder VS Code über das Model Context Protocol (MCP) dein Setup ansehen, aufbauen und Aktionen ausführen. Deine Geheimnisse können sie nie lesen.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>Noch keine Zugriffstokens</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Erstelle ein Token und füge es deinem KI-Client hinzu, um ihn mit Macro Deck zu verbinden.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>Auf diesem Computer verwendest du diese Adresse. Auf einem anderen Computer in deinem Netzwerk ersetzt du 127.0.0.1 durch die Netzwerkadresse dieses Computers. Jede Verbindung braucht ein Zugriffstoken.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Serveradresse</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>Der MCP-Server ist gerade nicht verfügbar.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>KI-Clients</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>Die Einstellungen für KI-Clients konnten nicht geladen werden</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Nie</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Andere Clients</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>Erlauben</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Fragt vorher bei: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Vorher fragen</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>Standard: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>Lege pro Anbieter fest, ob KI-Clients seine Aktionen direkt ausführen dürfen, dich vorher fragen müssen oder sie gar nicht ausführen dürfen. Das gilt auch für Aktionen in Abläufen, die KI-Clients anlegen.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Aus</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>Die Einstellung konnte nicht gespeichert werden</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Aktionen, die KI-Clients ausführen dürfen</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Aktualisieren</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} wird endgültig gelöscht. Es ist bereits widerrufen, also kann es nichts mehr nutzen.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} funktioniert sofort nicht mehr, und jeder KI-Client, der es nutzt, wird getrennt.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Zugriffstokens</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Unbekannter Client</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Macro Deck-Konto</value>
   </data>
@@ -17190,6 +17330,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Im lokalen Netzwerk anzeigen</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Schalte das nur ein, wenn auf diesem Computer ein Reverse Proxy wie nginx, Caddy oder Traefik läuft und Verbindungen an Macro Deck weiterleitet. Macro Deck übernimmt dann für jeden Client die Adresse und den HTTPS-Status, die der Proxy meldet.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Hinter einem Reverse Proxy auf diesem Computer</value>
   </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT ist für diesen Start gesetzt und bestimmt den Port ({port}). Der konfigurierte Wert bleibt ungenutzt, bis diese Überschreibung entfernt wird.</value>
@@ -25251,5 +25397,86 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Hier erscheint eine kurze Zusammenfassung des Artikels.</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Erlaubt</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Ablehnen</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Abgelehnt</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Erlaube es nur, wenn du den KI-Client genau darum gebeten hast.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>Sie wurde bereits beantwortet oder ist abgelaufen. Bitte den KI-Client, es erneut zu versuchen.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} bittet Macro Deck, Folgendes zu tun:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Anfrage eines KI-Clients bestätigen</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Macro Deck braucht deine Bestätigung, bevor der KI-Client weitermacht: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Erlaube oder lehne auf der Macro-Deck-Seite ab, die sich in deinem Browser öffnet: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>Erlauben</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>Änderung der Variable {name}, die ein freigegebener Block mit einem Geheimnis liest</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}) mit {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>ein Geheimnis</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Gib das Geheimnis {label} auf der Macro-Deck-Seite ein, die sich in deinem Browser öffnet. Der Wert bleibt in Macro Deck.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>Übergabe von {name} an einen freigegebenen Block mit einem Geheimnis</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Lässt Claude mit deinem Macro-Deck-Setup auf diesem Computer arbeiten: Buttons, Ordner und Automationen ansehen und erstellen und Aktionen ausführen. Claude sieht deine Geheimnisse nie.</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Gib einen Wert ein.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>Dieser Link ist nicht mehr gültig</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>Er wurde bereits verwendet oder ist abgelaufen. Bitte den KI-Client, das Geheimnis erneut anzufordern.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} bittet Macro Deck, ein Geheimnis zu speichern: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Geheimnis eingeben</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Nur Macro Deck sieht, was du eingibst. {client} erhält einen Verweis, den es in Aktionen nutzen kann, nie den Wert.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Geheimnis speichern</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Geheimnis gespeichert</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>Du kannst diesen Tab schließen und zu {client} zurückkehren.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Geheimnis</value>
   </data>
 </root>

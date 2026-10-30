@@ -137,20 +137,29 @@ public static class ProtocolLimits
 
 	public const int MaxUiAttachmentsPerSession = 16;
 
-	/// <summary>Bounds how much aggregate patch traffic one provider can direct at the shared inbound
-	/// queue, which is <see cref="MaxInboundQueueDepth" /> deep for the whole connection. Does not bound
-	/// widget and preview surfaces - see <see cref="MaxUiWidgetSessionsPerProvider" />.</summary>
+	/// <summary>
+	/// Bounds the UI sessions one provider may have open, and with them how much patch traffic it can direct at
+	/// the shared inbound queue, which is <see cref="MaxInboundQueueDepth" /> deep for the whole connection.
+	/// Does not bound widget and preview surfaces - see <see cref="MaxUiWidgetSessionsPerProvider" />.
+	///
+	/// <para>
+	/// Counted in two separate pools. <c>folder</c> and <c>screensaver</c> surfaces, which each device shows
+	/// on its own, are counted per provider per viewer (the session's owning device). Every other surface,
+	/// such as <c>config</c>, <c>dialog</c> and <c>page</c>, is counted per provider across all viewers.
+	/// </para>
+	/// </summary>
 	public const int MaxUiSessionsPerProvider = 8;
 
 	/// <summary>
-	/// Bounds the <c>widget</c> and <c>preview</c> surfaces one provider may have open, counted separately
-	/// from <see cref="MaxUiSessionsPerProvider" />.
+	/// Bounds the <c>widget</c> and <c>preview</c> surfaces one provider may have open for one viewer (the
+	/// session's owning device), counted separately from <see cref="MaxUiSessionsPerProvider" />.
 	///
 	/// <para>
 	/// A widget session is per widget per viewer rather than per provider, so a provider that supplies a
 	/// widget type carries as many sessions as there are tiles of it on screen - a single folder holds
 	/// dozens - while a configuration or dialog surface is one at a time. Counting both against one number
-	/// would either refuse a plugin its own deck or lift the bound off the surfaces it was earned on.
+	/// would either refuse a plugin its own deck or lift the bound off the surfaces it was earned on. The
+	/// same deck open on several devices therefore gives a provider up to this many sessions per device.
 	/// </para>
 	/// </summary>
 	public const int MaxUiWidgetSessionsPerProvider = 128;

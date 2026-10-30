@@ -18,6 +18,8 @@ internal sealed class OpenWindowSpyActionDefinition : IActionDefinition
 
 	public string Id => AutoHotkeyActions.OpenWindowSpyId;
 
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Programs;
+
 	public LocalizedText Name => Strings.Name();
 
 	public LocalizedText Description => Strings.Description();

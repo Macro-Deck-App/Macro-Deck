@@ -16,6 +16,8 @@ internal sealed class MoveCursorActionDefinition : IActionDefinition
 	}
 
 	public string Id => "move-cursor";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Mouse.Actions.MoveCursor.Name();
 	public LocalizedText Description => AppStrings.Integrations.Mouse.Actions.MoveCursor.Description();
 

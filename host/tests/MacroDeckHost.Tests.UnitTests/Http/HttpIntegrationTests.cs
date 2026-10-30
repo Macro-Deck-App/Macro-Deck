@@ -23,6 +23,13 @@ internal sealed class HttpIntegrationTests
 	}
 
 	[Test]
+	public void Every_action_declares_the_network_risk_category()
+	{
+		Assert.That(_integration.Actions.Select(action => action.RiskCategory),
+			Is.All.EqualTo(ActionRiskCategory.Network));
+	}
+
+	[Test]
 	public void The_integration_reports_its_id_name_and_version()
 	{
 		Assert.Multiple(() =>

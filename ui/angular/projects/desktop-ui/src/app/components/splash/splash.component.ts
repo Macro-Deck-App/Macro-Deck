@@ -18,6 +18,7 @@ export class SplashComponent {
   readonly progress = input<number | null>(null);
   readonly details = input<readonly string[]>([]);
   readonly steps = input<readonly SplashStep[]>([]);
+  readonly overlay = input(false);
   readonly cancelLabel = input<string | null>(null);
   readonly cancel = output<void>();
 }

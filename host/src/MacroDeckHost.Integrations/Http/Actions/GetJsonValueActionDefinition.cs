@@ -24,6 +24,8 @@ internal sealed class GetJsonValueActionDefinition : IActionDefinition
 
 	public string Id => "get-json-value";
 
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Network;
+
 	public LocalizedText Name => AppStrings.Integrations.Http.Actions.GetJsonValueName();
 
 	public LocalizedText Description => AppStrings.Integrations.Http.Actions.GetJsonValueDescription();

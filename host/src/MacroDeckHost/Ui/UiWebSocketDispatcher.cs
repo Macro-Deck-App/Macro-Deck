@@ -231,10 +231,15 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			? parsed
 			: (Guid?)null;
 
-		_deviceConnections.Attach(_connectionId,
-			deviceId,
-			_abort,
-			_principal.Identity?.AuthenticationType == AuthDefaults.LoopbackScheme);
+		_deviceConnections.Attach(_connectionId, deviceId, _abort, _principal);
+
+		// A cutoff set between the check above and Attach aborted the tracked connections without this one.
+		if (_accessTokenCutoff.Rejects(_principal))
+		{
+			_deviceConnections.Remove(_connectionId);
+			return Task.FromResult(false);
+		}
+
 		return Task.FromResult(true);
 	}
 
@@ -659,9 +664,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			or "SubscribeLogs"
 			or "UnsubscribeLogs"
 			or "ListUiPreviews"
+			or "OpenConfigUiSession"
 			or "OpenUiPreviewSession"
-			or "OpenPageUiSession"
-			or "OpenConfigUiSession";
+			or "OpenPageUiSession";
 	}
 
 	private static T Arg<T>(JsonElement? payload, int index)

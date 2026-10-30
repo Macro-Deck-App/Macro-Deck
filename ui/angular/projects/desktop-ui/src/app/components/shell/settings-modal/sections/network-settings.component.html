@@ -110,6 +110,16 @@
     </shared-settings-row>
 
     <shared-settings-row
+      [label]="'macrodeck.app:Settings.Network.ReverseProxyLabel' | translate"
+      [description]="'macrodeck.app:Settings.Network.ReverseProxyDescription' | translate">
+      <shared-toggle-switch
+        [disabled]="!loaded() || saving() || tlsBusy()"
+        [busy]="reverseProxySaving()"
+        [checked]="reverseProxyTrusted()"
+        (changed)="setReverseProxyTrusted($event)" />
+    </shared-settings-row>
+
+    <shared-settings-row
       [label]="'macrodeck.app:Shell.ConnectionPanel.Identity' | translate"
       [description]="'macrodeck.app:Settings.Network.IdentityDescription' | translate">
       @if (identityLoaded()) {

@@ -251,9 +251,10 @@ public class AuthController : ControllerBase
 	public async Task<IActionResult> RedeemDeviceEnrollment(RedeemDeviceEnrollmentRequest body)
 	{
 		var token = body.Token ?? string.Empty;
+		var enrollmentKey = LoginThrottle.EnrollmentKey(BridgedConnectionStamp.ClientKey(HttpContext));
 		string[] throttleKeys = PairingCodeStore.IsPairingCodeShape(token)
-			? [$"{BridgedConnectionStamp.ClientKey(HttpContext)}|device-enrollment", PairingCodeThrottleKey]
-			: [$"{BridgedConnectionStamp.ClientKey(HttpContext)}|device-enrollment"];
+			? [enrollmentKey, PairingCodeThrottleKey]
+			: [enrollmentKey];
 
 		var retryAfter = TimeSpan.Zero;
 		foreach (var key in throttleKeys)

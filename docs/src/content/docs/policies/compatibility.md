@@ -23,6 +23,7 @@ under [behaviour changes that moved no version](/ui/reference/compatibility/#beh
 | Analyzer diagnostic ids | `MDP1001`, …, the `MDLOC` family `MDLOC001`-`MDLOC008` | An id keeps its meaning and is never reused - see [analyzers](/reference/analyzers/). |
 | Conformance check ids | `MDC0305`, … | Stable, so you can gate CI on them - see [conformance](/reference/conformance/). |
 | Plugin `.resx` contract | the default-language file, `Strings.<culture>.resx`, named placeholders, the bracketed parameter type in a `<comment>` | A plugin's `Localization/*.resx` keeps compiling - see [Localization](/features/localization/). |
+| MCP tool contract | `macrodeck-mcp/1`: tool names, argument names, result fields, error codes | Additive-only within the contract version - see [the MCP server reference](/reference/mcp/). |
 | Macro Deck's localization catalog | `macrodeck:Common.Save`, … exposed as `MacroDeckStrings` | **Additive-only**: a shipped key is never deleted outright. |
 
 Retiring a catalog key follows the same idea as [SDK deprecation](/policies/deprecations/): the key

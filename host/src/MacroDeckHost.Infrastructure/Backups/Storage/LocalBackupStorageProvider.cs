@@ -109,6 +109,11 @@ public sealed class LocalBackupStorageProvider : IBackupStorageProvider
 				info.Length,
 				new DateTimeOffset(info.CreationTimeUtc, TimeSpan.Zero)));
 		}
+		catch (OperationCanceledException)
+		{
+			TryDelete(incompletePath);
+			throw;
+		}
 		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 		{
 			TryDelete(incompletePath);

@@ -420,6 +420,35 @@ public class CapabilityDtoSerializationTests
 		Assert.That(actual!.Role, Is.EqualTo("launch-application"));
 	}
 
+	[Test]
+	public void ActionDescriptorDto_from_a_plugin_that_predates_risk_categories_has_none()
+	{
+		const string json = "{\"localId\":\"play\",\"name\":\"Play\",\"description\":\"Plays.\",\"parameters\":[]}";
+
+		var descriptor = JsonSerializer.Deserialize<ActionDescriptorDto>(json, PluginProtocolJson.Options);
+
+		Assert.That(descriptor!.RiskCategory, Is.Null);
+	}
+
+	[Test]
+	public void ActionDescriptorDto_round_trips_its_risk_category_and_omits_an_absent_one()
+	{
+		var dto = new ActionDescriptorDto
+		{
+			LocalId = "run", Name = "Run", Description = "Runs.", Parameters = [], RiskCategory = "programs"
+		};
+		var plain = dto with { RiskCategory = null };
+
+		var json = JsonSerializer.Serialize(dto, PluginProtocolJson.Options);
+		var actual = JsonSerializer.Deserialize<ActionDescriptorDto>(json, PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(actual!.RiskCategory, Is.EqualTo("programs"));
+			Assert.That(JsonSerializer.Serialize(plain, PluginProtocolJson.Options), Does.Not.Contain("riskCategory"));
+		});
+	}
+
 	private static string InjectUnknownField(string json)
 	{
 		var body = json[..^1]; // strip only the outermost closing brace, not nested ones

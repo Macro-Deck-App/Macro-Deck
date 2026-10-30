@@ -18,6 +18,8 @@ namespace MacroDeckHost.Infrastructure.Backups;
 
 public sealed class BackupService : IBackupService
 {
+	internal const string StagingDirectoryName = "staging";
+
 	private static readonly TimeSpan _waitingTriggerTimeout = TimeSpan.FromSeconds(60);
 
 	private const double WriteWeight = 0.9;
@@ -83,7 +85,7 @@ public sealed class BackupService : IBackupService
 		using var acquiredLease = leaseResult.Data!;
 		var operationId = acquiredLease.OperationId;
 		var backupId = Guid.NewGuid();
-		var stagingDirectory = Path.Combine(_paths.BackupsDirectory, "staging", operationId.ToString("N"));
+		var stagingDirectory = Path.Combine(_paths.BackupsDirectory, StagingDirectoryName, operationId.ToString("N"));
 		using var cancellation = _cancellation.Begin(operationId, cancellationToken);
 		var token = cancellation.Token;
 

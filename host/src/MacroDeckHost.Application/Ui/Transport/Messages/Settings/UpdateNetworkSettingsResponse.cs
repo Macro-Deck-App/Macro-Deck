@@ -30,6 +30,8 @@ public class UpdateNetworkSettingsResponse
 
 	public bool DiscoveryEnabled { get; set; }
 
+	public bool ReverseProxyTrusted { get; set; }
+
 	public bool TlsEnabled { get; set; }
 
 	public string TlsMode { get; set; } = string.Empty;

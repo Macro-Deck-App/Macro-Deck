@@ -503,6 +503,26 @@ fn host_publish_is_a_single_file_launcher_on_the_staged_runtime() {
 }
 
 #[test]
+fn hooks_check_the_running_app_by_its_installed_path() {
+    let script = repository_script_code("ui/bootstrapper/installer/hooks.nsh");
+    let calls: Vec<&str> = script
+        .lines()
+        .map(str::trim)
+        .filter(|line| line.starts_with("!insertmacro CheckIfAppIsRunning"))
+        .collect();
+    assert!(
+        !calls.is_empty(),
+        "hooks.nsh must check for the running app"
+    );
+    for call in calls {
+        assert!(
+            call.contains("\"$INSTDIR\\${MAINBINARYNAME}.exe\""),
+            "CheckIfAppIsRunning must get the installed path, not a bare name: {call}"
+        );
+    }
+}
+
+#[test]
 fn hooks_include_host_lock_with_filedir() {
     let script = repository_file("ui/bootstrapper/installer/hooks.nsh");
     assert!(

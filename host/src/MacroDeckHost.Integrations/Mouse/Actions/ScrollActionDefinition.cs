@@ -15,6 +15,8 @@ internal sealed class ScrollActionDefinition : IActionDefinition
 	}
 
 	public string Id => "scroll";
+
+	public ActionRiskCategory RiskCategory => ActionRiskCategory.Input;
 	public LocalizedText Name => AppStrings.Integrations.Mouse.Actions.Scroll.Name();
 	public LocalizedText Description => AppStrings.Integrations.Mouse.Actions.Scroll.Description();
 

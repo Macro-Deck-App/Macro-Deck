@@ -82,6 +82,14 @@ address only answers over HTTPS and uses HTTPS for it by itself; **Prefer HTTPS*
 certificate has to be one the phone or tablet already trusts, issued for that domain, and the proxy has to pass
 WebSocket connections through. Android 7.1 and older may not trust Let's Encrypt certificates.
 
+When the proxy runs on the same computer as Macro Deck, turn on **Behind a reverse proxy on this computer** in
+**Settings > Network** in Macro Deck, and let the proxy send the `X-Forwarded-For` and `X-Forwarded-Proto`
+headers. Caddy and Traefik send them by default; nginx needs
+`proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` and `proxy_set_header X-Forwarded-Proto $scheme;`.
+Without the setting, Macro Deck sees every device behind the proxy as the computer itself: a few wrong passwords
+from one of them pause sign-in for all of them, and the sign-in notification shows the computer's own address.
+Plugins cannot pair or connect through a proxy.
+
 ### Plug in a USB cable
 
 A phone or tablet can also reach Macro Deck through a USB cable, with or without USB debugging. The app then

@@ -375,10 +375,6 @@ public class DeviceService : IDeviceService
 			_connectionTracker.AbortDevice(device.Id);
 			await _mediator.Publish(new DeviceChangedNotification(device.Id));
 		}
-
-		// A socket opened without a device has no entry to end it by; the caller's cutoff already refuses its
-		// token, so closing it here keeps it closed.
-		_connectionTracker.AbortDevicelessSessions();
 	}
 
 	private async Task RevokeDeviceSessions(DeviceEntity device, DateTime now)

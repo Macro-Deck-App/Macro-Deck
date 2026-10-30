@@ -647,8 +647,12 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		{
 			pending = [.. context.PendingAttachments];
 			context.PendingAttachments.Clear();
-			toGroup = context.EstablishedAttachments.Count > 0 && (pending.Length == 0 || context.ResyncRequested);
+			// A tree built for a late join can already carry a patch the registry will now ignore as stale,
+			// so whoever is attached gets it too unless they already hold this revision.
+			toGroup = context.EstablishedAttachments.Count > 0
+				&& (pending.Length == 0 || context.ResyncRequested || context.GroupRevision != revision);
 			context.ResyncRequested = false;
+			context.GroupRevision = revision;
 
 			foreach (var connectionId in pending)
 			{
@@ -689,6 +693,11 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 			ToRevision = toRevision,
 			Patch = patch
 		};
+
+		lock (context.Gate)
+		{
+			context.GroupRevision = toRevision;
+		}
 
 		context.Outbound.Enqueue(ct => _transport.SendToGroup(group, message, ct));
 	}
@@ -1077,6 +1086,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		public Dictionary<string, DateTimeOffset> LastEventByConnection { get; } = new(StringComparer.Ordinal);
 
 		public bool ResyncRequested { get; set; }
+
+		public int GroupRevision { get; set; }
 
 		public TaskCompletionSource<UiSessionOpenTicket> Ready { get; } =
 			new(TaskCreationOptions.RunContinuationsAsynchronously);

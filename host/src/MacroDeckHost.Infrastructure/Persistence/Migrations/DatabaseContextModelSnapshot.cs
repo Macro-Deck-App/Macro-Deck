@@ -212,6 +212,45 @@ namespace MacroDeckHost.DatabaseMigrations
                     b.ToTable("integration_config_entry", (string)null);
                 });
 
+            modelBuilder.Entity("MacroDeckHost.Domain.Entities.McpAccessTokenEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("mat_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("mat_created_at");
+
+                    b.Property<DateTime?>("LastUsedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("mat_last_used_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("mat_name");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("mat_revoked_at");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("mat_token_hash");
+
+                    b.HasKey("Id")
+                        .HasName("pk_mcp_access_token");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_mcp_access_token_hash");
+
+                    b.ToTable("mcp_access_token", (string)null);
+                });
+
             modelBuilder.Entity("MacroDeckHost.Domain.Entities.PluginAccessTokenEntity", b =>
                 {
                     b.Property<Guid>("Id")

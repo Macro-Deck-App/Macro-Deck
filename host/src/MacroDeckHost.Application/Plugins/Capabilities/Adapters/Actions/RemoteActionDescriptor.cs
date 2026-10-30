@@ -13,4 +13,5 @@ public sealed record RemoteActionDescriptor(
 	bool ProvidesState,
 	bool ConfiguresWithUiTree = false,
 	bool ProvidesIcon = false,
-	string? Role = null);
+	string? Role = null,
+	ActionRiskCategory RiskCategory = ActionRiskCategory.None);

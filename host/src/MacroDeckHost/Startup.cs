@@ -47,8 +47,10 @@ using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Infrastructure.Licensing;
 using MacroDeckHost.Licensing;
+using MacroDeckHost.Mcp;
 using MacroDeck.Sdk.Companion;
 using MacroDeckHost.CompanionApp;
 using MacroDeckHost.Application.CompanionApp;
@@ -146,6 +148,7 @@ using MacroDeckHost.Infrastructure.Plugins.IconPacks;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Infrastructure.Plugins.Jobs;
 using MacroDeckHost.Infrastructure.Plugins.Trust;
+using MacroDeckHost.Api.Support;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Infrastructure.Security.KeyRing;
@@ -230,7 +233,8 @@ public class Startup
 		{
 			options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 			options.GlobalLimiter = PartitionedRateLimiter.CreateChained(HostIdentityRateLimit.Create(),
-				LegacyLicenseTransferRateLimit.Create());
+				LegacyLicenseTransferRateLimit.Create(),
+				DeviceSetupDiagnosticsRateLimit.Create());
 		});
 
 		services.AddSingleton<IConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
@@ -246,6 +250,7 @@ public class Startup
 			.AddScheme<AuthenticationSchemeOptions, LoopbackAuthenticationHandler>(AuthDefaults.LoopbackScheme, null)
 			.AddScheme<AuthenticationSchemeOptions, PluginSessionAuthenticationHandler>(PluginAuthSchemes.PluginSession,
 				null)
+			.AddScheme<AuthenticationSchemeOptions, McpTokenAuthenticationHandler>(McpAuthSchemes.McpToken, null)
 			.AddJwtBearer();
 
 		var adminPolicy = new AuthorizationPolicyBuilder()
@@ -259,6 +264,13 @@ public class Startup
 				{
 					policy.RequireAuthenticatedUser()
 						.RequireClaim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope, AuthDefaults.ClientScope);
+				})
+			.AddPolicy(AuthPolicies.Mcp,
+				policy =>
+				{
+					policy.AddAuthenticationSchemes(McpAuthSchemes.McpToken)
+						.RequireAuthenticatedUser()
+						.RequireClaim(AuthDefaults.ScopeClaim, AuthDefaults.McpScope);
 				})
 			.SetDefaultPolicy(adminPolicy)
 			.SetFallbackPolicy(adminPolicy);
@@ -662,6 +674,9 @@ public class Startup
 		services.AddScoped<IPluginRegistrationRepository, PluginRegistrationRepository>();
 		services.AddScoped<IPluginAccessTokenRepository, PluginAccessTokenRepository>();
 		services.AddScoped<IPluginTokenService, PluginTokenService>();
+		services.AddScoped<IMcpAccessTokenRepository, McpAccessTokenRepository>();
+		services.AddScoped<IMcpTokenService, McpTokenService>();
+		services.AddMacroDeckMcp();
 		services.AddScoped<IPluginRegistrationService, PluginRegistrationService>();
 		services.AddScoped<IPluginSessionService, PluginSessionService>();
 		services.AddScoped<IPluginIdentityReconciler, PluginIdentityReconciler>();
@@ -1185,6 +1200,8 @@ public class Startup
 		// would touch a secret store the host cannot read.
 		app.UseLockedHostGate();
 
+		app.UseTrustedReverseProxy();
+
 		// api/plugin-pairing is excluded alongside the ProtocolConstants.All plugin paths even though it
 		// does not start with /api/plugins: LoopbackConnection.IsTrusted, which every action on that
 		// controller requires, rides on an ambient session cookie, so without this exclusion any website the
@@ -1200,9 +1217,12 @@ public class Startup
 				// action on it is gated on LoopbackConnection.IsTrusted, an ambient credential, so
 				// without this any page the user has open could drive a device attached to this machine.
 				!context.Request.Path.StartsWithSegments("/api/client-targets")
-				&& !context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),
+				&& !context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets")
+				&& !context.Request.Path.StartsWithSegments(DeviceSetupDiagnosticsRateLimit.Path)
+				&& !McpPaths.IsMcpRequest(context.Request.Path),
 			branch => branch.UseCors("AllowAny"));
 
+		app.UseMcpRequestGuard();
 		app.UseSpaShellNoCache();
 
 		// API responses are live state, so they must not be storable either. Without any
@@ -1222,6 +1242,7 @@ public class Startup
 			context.RequestServices.GetRequiredService<SecretWriteAuthority>().Grant(context.User);
 			await next();
 		});
+		app.UseMcpSessionBinding();
 		app.UseEndpoints(endpoints =>
 		{
 			endpoints.MapControllers();
@@ -1232,6 +1253,7 @@ public class Startup
 			{
 				endpoints.MapUiWebSocket();
 				endpoints.MapPluginWebSocket();
+				endpoints.MapMacroDeckMcp();
 			}
 
 			endpoints.MapFallbackToFile("admin/{**path}", "admin/index.html").AllowAnonymous();

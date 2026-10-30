@@ -1063,6 +1063,27 @@ Finder में Macro Deck को स्वयं Applications फ़ोल्�
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck पूरी तरह अपडेट नहीं हुआ</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} सेट नहीं है। सेटिंग्स &gt; AI क्लाइंट से Claude Desktop एक्सटेंशन फिर से इंस्टॉल करें।</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck नहीं चल रहा है। Macro Deck शुरू करें और फिर से कोशिश करें।</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck ने ऐक्सेस टोकन अस्वीकार कर दिया, क्योंकि उसे रद्द या हटा दिया गया है। सेटिंग्स &gt; AI क्लाइंट में नया टोकन बनाएँ और एक्सटेंशन फिर से इंस्टॉल करें।</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck में कोई MCP सर्वर उपलब्ध नहीं है, क्योंकि वह लॉक है या AI क्लाइंट का समर्थन नहीं करता। Macro Deck अनलॉक करें और फिर से कोशिश करें।</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck ने अनुरोध अस्वीकार कर दिया (HTTP {status})।</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>जवाब आने से पहले Macro Deck से कनेक्शन टूट गया। हो सकता है अनुरोध चल गया हो, इसलिए दोबारा कोशिश करने से पहले जाँच लें।</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>MCP सत्र आरंभ नहीं किया गया है।</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Macro Deck के बारे में</value>
   </data>
@@ -2939,6 +2960,24 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>यह रिकवरी कुंजी इस इंस्टॉलेशन को अनलॉक नहीं करती।</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>इस ऐक्सेस टोकन का अब उपयोग नहीं किया जा सकता। एक्सटेंशन डाउनलोड करने के लिए नया टोकन बनाएँ।</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Claude Desktop एक्सटेंशन केवल macOS और Windows पर इंस्टॉल किए गए Macro Deck ऐप में उपलब्ध है।</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>कोई प्रदाता चुनें।</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>यह ऐक्सेस टोकन पहले ही रद्द किया जा चुका है।</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>अधिकतम 64 वर्णों का नाम दर्ज करें।</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>इस ID वाला कोई ऐक्सेस टोकन मौजूद नहीं है।</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>माइग्रेशन पूरा नहीं किया जा सका।</value>
@@ -17160,6 +17199,107 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>न्यूनतम स्तर</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Claude Desktop के लिए डाउनलोड करें</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Macro Deck इंस्टॉल करने के लिए डाउनलोड की गई फ़ाइल को Claude Desktop में खोलें। इस फ़ाइल में यह टोकन है, इसलिए इंस्टॉल करने के बाद इसे हटा दें।</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Claude Desktop एक्सटेंशन सहेजा नहीं जा सका</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>AI क्लाइंट</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>क्लाइंट कॉन्फ़िगरेशन</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>कनेक्ट होने का समय</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} कनेक्शन</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>कनेक्शन: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>कोई AI क्लाइंट कनेक्ट नहीं है।</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>कनेक्टेड क्लाइंट</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Claude या VS Code जैसे AI असिस्टेंट को Model Context Protocol (MCP) के ज़रिए अपना सेटअप देखने, बनाने और एक्शन चलाने दें। वे आपके सीक्रेट कभी नहीं पढ़ सकते।</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>अभी कोई ऐक्सेस टोकन नहीं है</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>एक टोकन बनाएँ और उसे Macro Deck से जोड़ने के लिए अपने AI क्लाइंट में जोड़ें।</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>इस कंप्यूटर पर यह पता इस्तेमाल करें। अपने नेटवर्क के किसी दूसरे कंप्यूटर पर 127.0.0.1 को इस कंप्यूटर के नेटवर्क पते से बदलें। हर कनेक्शन के लिए ऐक्सेस टोकन ज़रूरी है।</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>सर्वर पता</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>MCP सर्वर अभी उपलब्ध नहीं है।</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>AI क्लाइंट</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>AI क्लाइंट सेटिंग लोड नहीं हो सकीं</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>कभी नहीं</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>अन्य क्लाइंट</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>अनुमति दें</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>इनके लिए पहले पूछता है: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>पहले पूछें</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>डिफ़ॉल्ट: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>हर प्रदाता के लिए चुनें कि AI क्लाइंट उसके एक्शन सीधे चला सकते हैं, पहले आपसे पूछें या बिल्कुल न चलाएँ। यह AI क्लाइंट द्वारा बनाए गए फ़्लो के एक्शन पर भी लागू होता है।</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>बंद</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>सेटिंग सहेजी नहीं जा सकी</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>वे एक्शन जिन्हें AI क्लाइंट चला सकते हैं</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>रीफ़्रेश करें</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} हमेशा के लिए हटा दिया जाएगा। यह पहले ही रद्द है, इसलिए कुछ भी इसका इस्तेमाल नहीं कर सकता।</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} तुरंत काम करना बंद कर देगा और इसका इस्तेमाल करने वाले हर AI क्लाइंट का कनेक्शन टूट जाएगा।</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>ऐक्सेस टोकन</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>अज्ञात क्लाइंट</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Macro Deck खाता</value>
   </data>
@@ -17193,6 +17333,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>स्थानीय नेटवर्क पर दिखाएँ</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>इसे केवल तभी चालू करें जब इस कंप्यूटर पर nginx, Caddy या Traefik जैसा कोई रिवर्स प्रॉक्सी चल रहा हो और कनेक्शन Macro Deck तक पहुँचाता हो। तब Macro Deck हर क्लाइंट के लिए वह पता और HTTPS स्थिति उपयोग करता है जो प्रॉक्सी बताता है।</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>इस कंप्यूटर पर रिवर्स प्रॉक्सी के पीछे</value>
   </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>इस लॉन्च के लिए MACRO_DECK_PORT सेट है और पोर्ट ({port}) वही तय करता है। जब तक यह ओवरराइड हटाया नहीं जाता, कॉन्फ़िगर किया गया मान अप्रयुक्त रहता है।</value>
@@ -25275,5 +25421,86 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>लेख का एक छोटा सारांश यहाँ दिखाई देता है।</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>अनुमति दी गई</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>अस्वीकार करें</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>अस्वीकार किया गया</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>इसकी अनुमति तभी दें जब आपने AI क्लाइंट से ठीक यही करने को कहा हो।</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>इसका उत्तर पहले ही दिया जा चुका है या यह समाप्त हो गया है। AI क्लाइंट से फिर से प्रयास करने को कहें।</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} Macro Deck से यह करने का अनुरोध करता है:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>AI क्लाइंट के अनुरोध की पुष्टि करें</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>AI क्लाइंट के आगे बढ़ने से पहले Macro Deck को आपकी पुष्टि चाहिए: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>अपने ब्राउज़र में खुलने वाले Macro Deck पेज पर अनुमति दें या अस्वीकार करें: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>अनुमति दें</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>वेरिएबल {name} बदलना, जिसे सीक्रेट इस्तेमाल करने वाला स्वीकृत ब्लॉक पढ़ता है</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}), मान: {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>एक सीक्रेट</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>अपने ब्राउज़र में खुलने वाले Macro Deck पेज पर सीक्रेट {label} दर्ज करें। मान Macro Deck में ही रहता है।</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>{name} को सीक्रेट इस्तेमाल करने वाले स्वीकृत ब्लॉक को देना</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Claude को इस कंप्यूटर पर आपके Macro Deck सेटअप के साथ काम करने देता है: बटन, फ़ोल्डर और ऑटोमेशन देखना और बनाना, और ऐक्शन चलाना। Claude आपके सीक्रेट कभी नहीं देखता।</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>कोई मान दर्ज करें।</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>यह लिंक अब मान्य नहीं है</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>यह पहले ही इस्तेमाल हो चुका है या इसकी अवधि समाप्त हो गई है। AI क्लाइंट से सीक्रेट फिर से माँगने के लिए कहें।</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} Macro Deck से एक सीक्रेट सहेजने के लिए कह रहा है: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>सीक्रेट दर्ज करें</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>आप जो टाइप करते हैं, उसे केवल Macro Deck देखता है। {client} को एक्शन में इस्तेमाल करने के लिए केवल एक संदर्भ मिलता है, मान कभी नहीं।</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>सीक्रेट सहेजें</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>सीक्रेट सहेजा गया</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>आप यह टैब बंद करके {client} पर लौट सकते हैं।</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>सीक्रेट</value>
   </data>
 </root>

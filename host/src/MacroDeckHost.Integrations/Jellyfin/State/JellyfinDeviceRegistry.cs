@@ -13,7 +13,8 @@ internal sealed record JellyfinKnownDevice(
 	string Key,
 	DateTimeOffset LastSeen,
 	string LocalId,
-	bool IsControllable = true);
+	bool IsControllable = true,
+	string? Address = null);
 
 internal sealed class JellyfinDeviceRegistry
 {
@@ -82,7 +83,8 @@ internal sealed class JellyfinDeviceRegistry
 					device.Key,
 					device.LastSeen,
 					device.IsControllable,
-					device.LocalId))
+					device.LocalId,
+					device.Address))
 				.ToList());
 		}
 	}
@@ -127,7 +129,8 @@ internal sealed class JellyfinDeviceRegistry
 
 				var namesakes = _devices.Values
 					.Where(device => string.Equals(device.Name, session.DeviceName, StringComparison.Ordinal)
-						&& string.Equals(device.Client, session.Client, StringComparison.Ordinal))
+						&& string.Equals(device.Client, session.Client, StringComparison.Ordinal)
+						&& SameAddress(device.Address, session.Address))
 					.Select(device => (Device: device, Current: listed.GetValueOrDefault(device.DeviceId)))
 					.ToList();
 
@@ -155,7 +158,8 @@ internal sealed class JellyfinDeviceRegistry
 					{
 						DeviceId = session.DeviceId,
 						IsControllable = target.IsControllable || session.SupportsMediaControl,
-						LastSeen = now
+						LastSeen = now,
+						Address = session.Address ?? target.Address
 					};
 					takenOver.Add(target.LocalId);
 					present.Add(session.DeviceId);
@@ -169,7 +173,8 @@ internal sealed class JellyfinDeviceRegistry
 					AllocateKey(session.DeviceName, isKeyTaken),
 					now,
 					AllocateLocalId(session.DeviceId),
-					session.SupportsMediaControl);
+					session.SupportsMediaControl,
+					session.Address);
 				present.Add(session.DeviceId);
 				changed = true;
 			}
@@ -194,7 +199,8 @@ internal sealed class JellyfinDeviceRegistry
 			Name = session.DeviceName,
 			Client = session.Client,
 			IsControllable = known.IsControllable || session.SupportsMediaControl,
-			LastSeen = now - known.LastSeen >= _lastSeenResolution ? now : known.LastSeen
+			LastSeen = now - known.LastSeen >= _lastSeenResolution ? now : known.LastSeen,
+			Address = session.Address ?? known.Address
 		};
 
 		if (updated == known)
@@ -204,6 +210,11 @@ internal sealed class JellyfinDeviceRegistry
 
 		_devices[session.DeviceId] = updated;
 		return true;
+	}
+
+	private static bool SameAddress(string? known, string? observed)
+	{
+		return known is null || observed is null || string.Equals(known, observed, StringComparison.Ordinal);
 	}
 
 	private string AllocateLocalId(string deviceId)
@@ -250,7 +261,8 @@ internal sealed class JellyfinDeviceRegistry
 					device.Key,
 					device.LastSeen,
 					string.IsNullOrEmpty(device.LocalId) ? LocalIdFor(device.DeviceId) : device.LocalId,
-					device.IsControllable ?? true))
+					device.IsControllable ?? true,
+					device.Address))
 				.ToList();
 		}
 		catch (JsonException)
@@ -266,7 +278,8 @@ internal sealed class JellyfinDeviceRegistry
 		string Key,
 		DateTimeOffset LastSeen,
 		bool? IsControllable,
-		string? LocalId = null);
+		string? LocalId = null,
+		string? Address = null);
 
 	private sealed record ListedDevice(bool IsPlaying, DateTimeOffset LastActivity);
 }

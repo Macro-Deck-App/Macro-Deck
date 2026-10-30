@@ -282,6 +282,8 @@ internal sealed class RecordingUiTransport : IUiTransport
 
 internal sealed class FakePasswordHasher : IPasswordHasher
 {
+	public int Verifications { get; private set; }
+
 	public string Hash(string password)
 	{
 		return "H:" + password;
@@ -289,6 +291,7 @@ internal sealed class FakePasswordHasher : IPasswordHasher
 
 	public bool Verify(string password, string encodedHash)
 	{
+		Verifications++;
 		return encodedHash == "H:" + password;
 	}
 }

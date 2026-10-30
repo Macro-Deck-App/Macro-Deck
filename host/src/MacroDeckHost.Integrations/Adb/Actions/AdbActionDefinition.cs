@@ -23,9 +23,11 @@ internal sealed class AdbActionDefinition : IActionDefinition
 		LocalizedText description,
 		LocalizedText deviceDescription,
 		IReadOnlyList<ActionParameter> extraParameters,
-		Func<AdbTarget, IReadOnlyDictionary<string, object>, CancellationToken, Task<AdbOutcome>> command)
+		Func<AdbTarget, IReadOnlyDictionary<string, object>, CancellationToken, Task<AdbOutcome>> command,
+		ActionRiskCategory riskCategory = ActionRiskCategory.None)
 	{
 		_services = services;
+		RiskCategory = riskCategory;
 		Id = id;
 		Name = name;
 		Description = description;
@@ -40,6 +42,8 @@ internal sealed class AdbActionDefinition : IActionDefinition
 	public LocalizedText Description { get; }
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
+
+	public ActionRiskCategory RiskCategory { get; }
 
 	public IActionExecutor CreateExecutor()
 	{

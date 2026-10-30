@@ -5,6 +5,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Localization;
@@ -49,6 +50,7 @@ public sealed class FlowExecutor : IFlowExecutor
 	private readonly WidgetOptimisticStateStore? _optimisticStates;
 	private readonly WidgetStateEvalChannel? _stateEvalQueue;
 	private readonly ISecretApprovals? _approvals;
+	private readonly IMcpExecutionRegistry? _mcpExecutions;
 
 	public FlowExecutor(
 		IIntegrationRegistry integrationRegistry,
@@ -65,7 +67,8 @@ public sealed class FlowExecutor : IFlowExecutor
 		ILogger logger,
 		WidgetOptimisticStateStore? optimisticStates = null,
 		WidgetStateEvalChannel? stateEvalQueue = null,
-		ISecretApprovals? approvals = null)
+		ISecretApprovals? approvals = null,
+		IMcpExecutionRegistry? mcpExecutions = null)
 	{
 		_integrationRegistry = integrationRegistry;
 		_variableRenderer = variableRenderer;
@@ -82,6 +85,7 @@ public sealed class FlowExecutor : IFlowExecutor
 		_optimisticStates = optimisticStates;
 		_stateEvalQueue = stateEvalQueue;
 		_approvals = approvals;
+		_mcpExecutions = mcpExecutions;
 	}
 
 	public async Task<FlowExecutionResult> ExecuteAsync(
@@ -89,6 +93,7 @@ public sealed class FlowExecutor : IFlowExecutor
 		CancellationToken cancellationToken)
 	{
 		var stopwatch = Stopwatch.StartNew();
+		using var mcpScope = McpExecutionScope.Enter(request.McpTokenId);
 
 		// Host-autonomous triggers (schedules, startup/server-lifecycle events, in-process integration
 		// events, and the widget-state reconciler) mark their requests Origin = Host and deliberately
@@ -297,11 +302,14 @@ public sealed class FlowExecutor : IFlowExecutor
 		FlowRun run,
 		CancellationToken cancellationToken)
 	{
+		if (ActionFlowJson.IsActionBlock(block.Type, block.IntegrationId, block.BlockType))
+		{
+			await ExecuteIntegrationActionAsync(block, run, cancellationToken);
+			return;
+		}
+
 		switch (block.Type.ToLowerInvariant())
 		{
-			case "action":
-				await ExecuteIntegrationActionAsync(block, run, cancellationToken);
-				break;
 			case "delay":
 				await ExecuteDelayAsync(block, await CurrentVariablesAsync(run), cancellationToken);
 				break;
@@ -321,25 +329,17 @@ public sealed class FlowExecutor : IFlowExecutor
 				await ExecuteBlocksAsync(block.Children, run, cancellationToken);
 				break;
 			default:
-				if (!string.IsNullOrWhiteSpace(block.IntegrationId) || IsIntegrationActionBlockType(block.BlockType))
-				{
-					await ExecuteIntegrationActionAsync(block, run, cancellationToken);
-				}
-				else
-				{
-					_logger.Warning("Skipping unsupported action-button block {BlockType} ({Type})",
-						block.BlockType,
-						block.Type);
-					run.Record(block.Id,
-						block.Label,
-						block.IntegrationId,
-						block.ActionId,
-						ActionOutcomeStatus.Failed,
-						ActionExecutionErrorCodes.UnsupportedBlock,
-						AppStrings.Errors.Actions.StepTypeNotSupported(),
-						0);
-				}
-
+				_logger.Warning("Skipping unsupported action-button block {BlockType} ({Type})",
+					block.BlockType,
+					block.Type);
+				run.Record(block.Id,
+					block.Label,
+					block.IntegrationId,
+					block.ActionId,
+					ActionOutcomeStatus.Failed,
+					ActionExecutionErrorCodes.UnsupportedBlock,
+					AppStrings.Errors.Actions.StepTypeNotSupported(),
+					0);
 				break;
 		}
 	}
@@ -369,7 +369,8 @@ public sealed class FlowExecutor : IFlowExecutor
 		FlowRun run,
 		CancellationToken cancellationToken)
 	{
-		var (integrationId, actionId) = ResolveActionIdentity(block);
+		var (integrationId, actionId)
+			= ActionFlowJson.ResolveActionIdentity(block.IntegrationId, block.ActionId, block.BlockType);
 		if (string.IsNullOrWhiteSpace(integrationId) || string.IsNullOrWhiteSpace(actionId))
 		{
 			_logger.Warning("Skipping action block {BlockType}: missing integration/action id", block.BlockType);
@@ -483,6 +484,7 @@ public sealed class FlowExecutor : IFlowExecutor
 			optimisticGeneration = _optimisticStates.Begin(optimisticIdentity);
 		}
 
+		using var mcpLease = McpExecutionScope.Current is not null ? _mcpExecutions?.Enter(integrationId) : null;
 		try
 		{
 			var executor = action.CreateExecutor();
@@ -1118,32 +1120,6 @@ public sealed class FlowExecutor : IFlowExecutor
 	private static bool TryGetDouble(object? value, out double number)
 	{
 		return ActionConditionEvaluator.TryGetDouble(value, out number);
-	}
-
-	private static (string? IntegrationId, string? ActionId) ResolveActionIdentity(ActionBlock block)
-	{
-		if (!string.IsNullOrWhiteSpace(block.IntegrationId) && !string.IsNullOrWhiteSpace(block.ActionId))
-		{
-			return (block.IntegrationId, block.ActionId);
-		}
-
-		if (string.IsNullOrWhiteSpace(block.BlockType))
-		{
-			return (null, null);
-		}
-
-		var separatorIndex = block.BlockType.IndexOf('.', StringComparison.Ordinal);
-		if (separatorIndex <= 0 || separatorIndex >= block.BlockType.Length - 1)
-		{
-			return (null, null);
-		}
-
-		return (block.BlockType[..separatorIndex], block.BlockType[(separatorIndex + 1)..]);
-	}
-
-	private static bool IsIntegrationActionBlockType(string? blockType)
-	{
-		return !string.IsNullOrWhiteSpace(blockType) && blockType.Contains('.', StringComparison.Ordinal);
 	}
 
 	private sealed class FlowRun

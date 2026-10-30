@@ -154,6 +154,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
   const STOPPING = 'Stopping Macro Deck…';
 
   let backupFake: { operation: WritableSignal<GetBackupStatusResponse | null>; cancelOperation: jasmine.Spy };
+  let connection: WritableSignal<ConnectionState>;
 
   beforeEach(() => {
     backupOperation = signal<GetBackupStatusResponse | null>(null);
@@ -252,7 +253,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
         {
           provide: ApiService,
           useValue: {
-            connectionStateSignal: signal<ConnectionState>(connectionState).asReadonly(),
+            connectionStateSignal: (connection = signal<ConnectionState>(connectionState)).asReadonly(),
             connectionState$: new Subject<ConnectionState>(),
             connect: jasmine.createSpy('connect'),
             getAboutInfo: jasmine.createSpy('getAboutInfo').and.resolveTo({
@@ -604,5 +605,67 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
 
     expect(statusText(fixture)).toBe(PREPARING_UPDATE);
     expect(progressValue(fixture)).toBeNull();
+  });
+
+  describe('after a connection drop (issue #1567)', () => {
+    function outlet(fixture: ReturnType<typeof TestBed.createComponent<AppComponent>>): HTMLElement | null {
+      return fixture.nativeElement.querySelector('router-outlet');
+    }
+
+    function overlay(fixture: ReturnType<typeof TestBed.createComponent<AppComponent>>): HTMLElement | null {
+      return fixture.nativeElement.querySelector('app-splash .splash-overlay');
+    }
+
+    it('shows the full splash and no page while the first connection is still being made', async () => {
+      const fixture = await createFixture('authenticated', 'reconnecting');
+
+      expect(outlet(fixture)).toBeNull();
+      expect(fixture.nativeElement.querySelector('app-splash')).not.toBeNull();
+      expect(overlay(fixture)).toBeNull();
+      expect(statusText(fixture)).toBe(CONNECTING);
+    });
+
+    it('keeps the same page mounted under a connecting overlay and gives it back on reconnect', async () => {
+      const fixture = await createFixture('authenticated', 'connected');
+      const page = outlet(fixture);
+      expect(page).not.toBeNull();
+      expect(overlay(fixture)).toBeNull();
+
+      connection.set('reconnecting');
+      await settle(fixture);
+
+      expect(outlet(fixture)).toBe(page);
+      expect(overlay(fixture)).not.toBeNull();
+      expect(statusText(fixture)).toBe(CONNECTING);
+      expect(page!.parentElement!.inert).toBeTrue();
+
+      connection.set('connected');
+      await settle(fixture);
+
+      expect(outlet(fixture)).toBe(page);
+      expect(fixture.nativeElement.querySelector('app-splash')).toBeNull();
+      expect(page!.parentElement!.inert).toBeFalse();
+    });
+
+    it('keeps page keyboard shortcuts from running while the page is hidden by the overlay', async () => {
+      const fixture = await createFixture('authenticated', 'connected');
+      const shortcut = jasmine.createSpy('shortcut');
+      document.addEventListener('keydown', shortcut);
+
+      try {
+        connection.set('disconnected');
+        await settle(fixture);
+        document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }));
+        expect(shortcut).not.toHaveBeenCalled();
+
+        connection.set('connected');
+        await settle(fixture);
+        document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }));
+        expect(shortcut).toHaveBeenCalledTimes(1);
+      } finally {
+        document.removeEventListener('keydown', shortcut);
+        fixture.destroy();
+      }
+    });
   });
 });

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
@@ -17,6 +18,7 @@ public sealed class IntegrationVariableApi : IVariableApi
 	private readonly IVariablePollingInvalidationSignal? _declarations;
 	private readonly OwnedVariableHistory? _history;
 	private readonly VariableBindingAppender? _bindings;
+	private readonly IMcpVariableWriteGuard? _mcpWriteGuard;
 
 	public IntegrationVariableApi(
 		string integrationId,
@@ -24,8 +26,10 @@ public sealed class IntegrationVariableApi : IVariableApi
 		IVariableRefreshSignal? refresh = null,
 		IVariablePollingInvalidationSignal? declarations = null,
 		OwnedVariableHistory? history = null,
-		VariableBindingAppender? bindings = null)
+		VariableBindingAppender? bindings = null,
+		IMcpVariableWriteGuard? mcpWriteGuard = null)
 	{
+		_mcpWriteGuard = mcpWriteGuard;
 		_integrationId = integrationId;
 		_service = service;
 		_refresh = refresh;
@@ -155,6 +159,13 @@ public sealed class IntegrationVariableApi : IVariableApi
 
 	public async Task SetValueAsync(Guid variableId, object? value)
 	{
+		if (_mcpWriteGuard is not null
+			&& await _service.GetById(variableId) is { } target
+			&& _mcpWriteGuard.Refuses(_integrationId, target.Name))
+		{
+			throw new InvalidOperationException(McpVariableWriteGuard.RefusalMessage);
+		}
+
 		var result = await _service.ReportIntegrationVariableValue(_integrationId, variableId, value);
 		if (!result.Success)
 		{

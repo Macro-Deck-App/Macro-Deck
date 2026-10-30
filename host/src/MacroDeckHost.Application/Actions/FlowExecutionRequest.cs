@@ -49,4 +49,6 @@ public sealed class FlowExecutionRequest
 
 	// Set only for an unsaved draft run by an admin principal; stored flows never decrypt through it.
 	public bool TrustedDraft { get; init; }
+
+	public Guid? McpTokenId { get; init; }
 }

@@ -1063,6 +1063,27 @@ Tutup aplikasi yang memakai port tersebut (atau Macro Deck yang masih berjalan) 
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck belum sepenuhnya diperbarui</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} belum diatur. Instal ulang ekstensi Claude Desktop dari Pengaturan &gt; Klien AI.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck tidak berjalan. Mulai Macro Deck, lalu coba lagi.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck menolak token akses karena token tersebut sudah dicabut atau dihapus. Buat token baru di Pengaturan &gt; Klien AI, lalu instal ulang ekstensi.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Server MCP Macro Deck tidak tersedia karena aplikasi terkunci atau tidak mendukung klien AI. Buka kunci Macro Deck, lalu coba lagi.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck menolak permintaan (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>Koneksi ke Macro Deck terputus sebelum ada jawaban. Permintaan mungkin sudah dijalankan, jadi periksa dulu sebelum mencobanya lagi.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>Sesi MCP belum diinisialisasi.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Tentang Macro Deck</value>
   </data>
@@ -2939,6 +2960,24 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Kunci pemulihan itu tidak membuka instalasi ini.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Token akses ini tidak dapat digunakan lagi. Buat token baru untuk mengunduh ekstensi.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Ekstensi Claude Desktop hanya tersedia di aplikasi Macro Deck yang terpasang di macOS dan Windows.</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Pilih penyedia.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>Token akses ini sudah dicabut.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>Masukkan nama dengan maksimal 64 karakter.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>Tidak ada token akses dengan ID tersebut.</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Migrasi tidak dapat diselesaikan.</value>
@@ -17160,6 +17199,107 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Tingkat minimum</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Unduh untuk Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Buka berkas yang diunduh di Claude Desktop untuk memasang Macro Deck di sana. Berkas ini berisi token ini, jadi hapus setelah pemasangan.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Ekstensi Claude Desktop tidak dapat disimpan</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>Klien AI</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>Konfigurasi klien</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Terhubung sejak</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} koneksi</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>{count} koneksi</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>Tidak ada klien AI yang terhubung.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Klien terhubung</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Izinkan asisten AI seperti Claude atau VS Code memeriksa dan menyusun pengaturan serta menjalankan aksi melalui Model Context Protocol (MCP). Asisten tidak pernah dapat membaca rahasia.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>Belum ada token akses</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Buat token lalu tambahkan ke klien AI untuk menghubungkannya ke Macro Deck.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>Gunakan alamat ini di komputer ini. Di komputer lain dalam jaringan, ganti 127.0.0.1 dengan alamat jaringan komputer ini. Setiap koneksi memerlukan token akses.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Alamat server</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>Server MCP sedang tidak tersedia.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>Klien AI</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>Pengaturan klien AI tidak dapat dimuat</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Belum pernah</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Klien lain</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>Izinkan</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Bertanya dahulu untuk: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Tanya dahulu</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>Default: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>Pilih per penyedia apakah klien AI boleh langsung menjalankan aksinya, harus bertanya dahulu, atau sama sekali tidak boleh menjalankannya. Ini juga berlaku untuk aksi dalam alur yang dibuat klien AI.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Nonaktif</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>Pengaturan tidak dapat disimpan</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Aksi yang boleh dijalankan klien AI</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Muat ulang</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} dihapus permanen. Token ini sudah dicabut, jadi tidak ada yang dapat memakainya.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} langsung berhenti berfungsi dan setiap klien AI yang memakainya akan diputus.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Token akses</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Klien tidak dikenal</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Akun Macro Deck</value>
   </data>
@@ -17193,6 +17333,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Tampilkan di jaringan lokal</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Aktifkan hanya jika reverse proxy seperti nginx, Caddy, atau Traefik berjalan di komputer ini dan meneruskan koneksi ke Macro Deck. Macro Deck lalu memakai alamat dan status HTTPS yang dilaporkan proxy untuk setiap klien.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Di balik reverse proxy di komputer ini</value>
   </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT diatur untuk peluncuran ini dan menentukan port ({port}). Nilai yang dikonfigurasi tetap tidak dipakai sampai pengaturan ini dihapus.</value>
@@ -25275,5 +25421,86 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Ringkasan singkat artikel muncul di sini.</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Diizinkan</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Tolak</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Ditolak</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Izinkan hanya jika Anda meminta tepat hal ini kepada klien AI.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>Permintaan ini sudah dijawab atau kedaluwarsa. Minta klien AI untuk mencoba lagi.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} meminta Macro Deck melakukan hal berikut:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Konfirmasi permintaan klien AI</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Macro Deck memerlukan konfirmasi sebelum klien AI melanjutkan: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Izinkan atau tolak di halaman Macro Deck yang terbuka di browser: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>Izinkan</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>mengubah variabel {name} yang dibaca blok disetujui yang memakai rahasia</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}) dengan {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>rahasia</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Masukkan rahasia {label} di halaman Macro Deck yang terbuka di browser. Nilainya tetap di Macro Deck.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>meneruskan {name} ke blok disetujui yang memakai rahasia</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Memungkinkan Claude bekerja dengan pengaturan Macro Deck di komputer ini: melihat dan membuat tombol, folder, dan otomatisasi, serta menjalankan aksi. Claude tidak pernah melihat rahasia.</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Masukkan nilai.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>Tautan ini sudah tidak berlaku</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>Tautan sudah dipakai atau kedaluwarsa. Minta klien AI untuk meminta rahasia lagi.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} meminta Macro Deck menyimpan rahasia: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Masukkan rahasia</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Hanya Macro Deck yang melihat yang diketik. {client} mendapat referensi yang dapat dipakai dalam aksi, tidak pernah nilainya.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Simpan rahasia</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Rahasia disimpan</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>Tab ini dapat ditutup untuk kembali ke {client}.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Rahasia</value>
   </data>
 </root>

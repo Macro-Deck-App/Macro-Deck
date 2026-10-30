@@ -41,6 +41,8 @@ internal sealed record JellyfinSessionDto
 
 	public DateTimeOffset? LastActivityDate { get; init; }
 
+	public string? RemoteEndPoint { get; init; }
+
 	public DateTimeOffset? LastPlaybackCheckIn { get; init; }
 
 	public bool SupportsMediaControl { get; init; }

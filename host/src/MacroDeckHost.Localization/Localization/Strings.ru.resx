@@ -1063,6 +1063,27 @@
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck обновлён не полностью</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>Переменная {variable} не задана. Установите расширение для Claude Desktop заново в разделе Настройки &gt; ИИ-клиенты.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck не запущен. Запустите Macro Deck и повторите попытку.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck отклонил токен доступа: он был отозван или удалён. Создайте новый токен в разделе Настройки &gt; ИИ-клиенты и установите расширение заново.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Сервер MCP в Macro Deck недоступен: приложение заблокировано или не поддерживает ИИ-клиентов. Разблокируйте Macro Deck и повторите попытку.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck отклонил запрос (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>Соединение с Macro Deck прервалось до получения ответа. Запрос мог быть выполнен, поэтому проверьте это перед повтором.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>Сеанс MCP не инициализирован.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>О Macro Deck</value>
   </data>
@@ -2939,6 +2960,24 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Этот ключ восстановления не открывает данную установку.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Этот токен доступа больше нельзя использовать. Создайте новый токен, чтобы скачать расширение.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>Расширение для Claude Desktop доступно только в установленном приложении Macro Deck для macOS и Windows.</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Выберите поставщика.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>Этот токен доступа уже отозван.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>Введите имя длиной не более 64 символов.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>Токен доступа с таким идентификатором не существует.</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Не удалось завершить миграцию.</value>
@@ -17160,6 +17199,107 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Минимальный уровень</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Скачать для Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Откройте скачанный файл в Claude Desktop, чтобы установить туда Macro Deck. Файл содержит этот токен, поэтому удалите его после установки.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>Не удалось сохранить расширение для Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>ИИ-клиент</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>Конфигурация клиента</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Подключён с</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} подключение</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>Подключения: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>Нет подключённых ИИ-клиентов.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Подключённые клиенты</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Позвольте ИИ-ассистентам, например Claude или VS Code, просматривать и собирать вашу конфигурацию и запускать действия через Model Context Protocol (MCP). Читать ваши секреты они не могут.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>Токенов доступа пока нет</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Создайте токен и добавьте его в ИИ-клиент, чтобы подключить его к Macro Deck.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>На этом компьютере используйте этот адрес. На другом компьютере в сети замените 127.0.0.1 сетевым адресом этого компьютера. Для каждого подключения нужен токен доступа.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Адрес сервера</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>Сервер MCP сейчас недоступен.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>ИИ-клиенты</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>Не удалось загрузить настройки ИИ-клиентов</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Никогда</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Другие клиенты</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>Разрешать</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Сначала спрашивает для: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Сначала спрашивать</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>По умолчанию: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>Выберите для каждого поставщика, могут ли ИИ-клиенты запускать его действия сразу, должны сначала спросить вас или не могут запускать их вовсе. Это касается и действий в потоках, которые создают ИИ-клиенты.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Выключено</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройку</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Действия, которые могут запускать ИИ-клиенты</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Обновить</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} будет удалён навсегда. Он уже отозван, поэтому ничто не может его использовать.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} сразу перестанет работать, а все ИИ-клиенты, которые его используют, будут отключены.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Токены доступа</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Неизвестный клиент</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Учётная запись Macro Deck</value>
   </data>
@@ -17193,6 +17333,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Показывать в локальной сети</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Включайте, только если на этом компьютере работает обратный прокси, например nginx, Caddy или Traefik, и передаёт подключения в Macro Deck. Тогда Macro Deck использует для каждого клиента адрес и состояние HTTPS, которые сообщает прокси.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>За обратным прокси на этом компьютере</value>
   </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT задан для этого запуска и определяет порт ({port}). Настроенное значение не используется, пока эта переменная не будет удалена.</value>
@@ -25275,5 +25421,86 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Здесь появляется краткое описание статьи.</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Разрешено</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Отклонить</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Отклонено</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Разрешайте, только если вы просили ИИ-клиента именно об этом.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>На запрос уже ответили, или срок его действия истёк. Попросите ИИ-клиента повторить попытку.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} просит Macro Deck выполнить следующее:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Подтвердите запрос ИИ-клиента</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Прежде чем ИИ-клиент продолжит, Macro Deck требуется ваше подтверждение: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Разрешите или отклоните на странице Macro Deck, которая откроется в браузере: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>Разрешить</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>изменение переменной {name}, которую читает одобренный блок с секретом</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}) со значениями {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>секрет</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Введите секрет {label} на странице Macro Deck, которая откроется в браузере. Значение остаётся в Macro Deck.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>передача {name} в одобренный блок с секретом</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Позволяет Claude работать с настройкой Macro Deck на этом компьютере: просматривать и создавать кнопки, папки и автоматизации, а также выполнять действия. Claude никогда не видит секреты.</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Введите значение.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>Эта ссылка больше не действительна</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>Ссылка уже использована или устарела. Попросите ИИ-клиент запросить секрет ещё раз.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} просит Macro Deck сохранить секрет: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Ввод секрета</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Вводимый текст видит только Macro Deck. {client} получает ссылку для использования в действиях, но никогда не значение.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Сохранить секрет</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Секрет сохранён</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>Эту вкладку можно закрыть и вернуться в {client}.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Секрет</value>
   </data>
 </root>

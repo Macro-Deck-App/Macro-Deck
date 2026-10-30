@@ -32,6 +32,7 @@ const TLS_DEFAULTS = {
   tlsAuthorityNotBefore: null,
   tlsAuthorityNotAfter: null,
   discoveryEnabled: true,
+  reverseProxyTrusted: false,
 };
 
 const ENGLISH_SETTINGS_LABELS: Record<string, string> = {
@@ -193,7 +194,7 @@ describe('SettingsModalComponent', () => {
 
   it('renders the category rail and the appearance section by default', () => {
     const railButtons = fixture.nativeElement.querySelectorAll('.settings-nav__item');
-    expect(railButtons.length).toBe(16);
+    expect(railButtons.length).toBe(17);
     expect(fixture.nativeElement.querySelector('app-appearance-settings')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.settings-modal__title')?.textContent).toContain('Appearance');
   });
@@ -318,7 +319,7 @@ describe('SettingsModalComponent', () => {
       .map(item => item.textContent?.trim())))
       .toEqual([
         ['Appearance', 'Startup', 'Language', 'Store'],
-        ['Network', 'Devices', 'USB connections', 'Companion App'],
+        ['Network', 'Devices', 'USB connections', 'Companion App', 'AI clients'],
         ['Security'],
         ['Backups', 'Migration'],
         ['ADB', 'HTTP', 'Logging', 'Developer'],
@@ -622,7 +623,7 @@ describe('SettingsModalComponent', () => {
   });
 
   it('switches to the account pane and labels it, without adding it to the category rail', () => {
-    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(16);
+    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(17);
 
     component.selectAccount();
     fixture.detectChanges();

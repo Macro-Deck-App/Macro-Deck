@@ -10,6 +10,18 @@ namespace MacroDeckHost.Tests.UnitTests.Jellyfin;
 internal sealed class JellyfinSessionModelTests
 {
 	[Test]
+	public void A_session_keeps_the_address_the_server_reports_and_a_blank_one_is_unknown()
+	{
+		var sessions = JellyfinSessionMapper.Map([
+				Session("a") with { RemoteEndPoint = " 192.168.1.20 " },
+				Session("b") with { RemoteEndPoint = "  " }
+			],
+			"macro-deck-device");
+
+		Assert.That(sessions.Select(session => session.Address), Is.EqualTo(new[] { "192.168.1.20", null }));
+	}
+
+	[Test]
 	public void An_episode_reads_as_series_and_season_with_the_series_poster()
 	{
 		var item = JellyfinSessionMapper.MapItem(Episode());
@@ -255,19 +267,19 @@ internal sealed class JellyfinDeviceRegistryTests
 	}
 
 	[Test]
-	public void Same_named_idle_clients_share_one_device_that_follows_the_latest_activity()
+	public void Same_named_idle_clients_from_one_address_share_one_device_that_follows_the_latest_activity()
 	{
 		var registry = new JellyfinDeviceRegistry();
-		registry.Observe(Map(Session("a", "Chrome", lastActivity: _now)), _now, _ => false);
+		registry.Observe(Map(At(Session("a", "Chrome", lastActivity: _now), "10.0.0.5")), _now, _ => false);
 
-		registry.Observe(Map(Session("a", "Chrome", lastActivity: _now),
-				Session("b", "Chrome", lastActivity: _now.AddMinutes(1))),
+		registry.Observe(Map(At(Session("a", "Chrome", lastActivity: _now), "10.0.0.5"),
+				At(Session("b", "Chrome", lastActivity: _now.AddMinutes(1)), "10.0.0.5")),
 			_now,
 			_ => false);
 		var followsB = registry.Find("b");
 
-		registry.Observe(Map(Session("a", "Chrome", lastActivity: _now.AddMinutes(2)),
-				Session("b", "Chrome", lastActivity: _now.AddMinutes(1))),
+		registry.Observe(Map(At(Session("a", "Chrome", lastActivity: _now.AddMinutes(2)), "10.0.0.5"),
+				At(Session("b", "Chrome", lastActivity: _now.AddMinutes(1)), "10.0.0.5")),
 			_now,
 			_ => false);
 
@@ -276,6 +288,104 @@ internal sealed class JellyfinDeviceRegistryTests
 			Assert.That(followsB?.Key, Is.EqualTo("chrome"));
 			Assert.That(registry.Devices.Select(device => (device.DeviceId, device.Key)),
 				Is.EqualTo(new[] { ("a", "chrome") }));
+		});
+	}
+
+	[Test]
+	public void Same_named_casts_at_different_addresses_listed_together_stay_separate_devices()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(At(Cast("kitchen", _now), "10.0.0.11")), _now, _ => false);
+		var kitchen = registry.Find("kitchen")!;
+
+		registry.Observe(Map(At(Cast("kitchen", _now), "10.0.0.11"),
+				At(Cast("bedroom", _now.AddMinutes(1)), "10.0.0.12")),
+			_now,
+			_ => false);
+		registry.Observe(Map(At(Cast("kitchen", _now.AddMinutes(2)), "10.0.0.11"),
+				At(Cast("bedroom", _now.AddMinutes(1)), "10.0.0.12")),
+			_now,
+			_ => false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.Devices, Has.Count.EqualTo(2));
+			Assert.That(registry.Find("kitchen"), Is.EqualTo(kitchen));
+			Assert.That(registry.Find("bedroom")!.Key, Is.EqualTo("google_cast_2"));
+			Assert.That(registry.Find("bedroom")!.LocalId, Is.Not.EqualTo(kitchen.LocalId));
+		});
+	}
+
+	[Test]
+	public void A_cast_returning_under_a_new_id_from_its_address_keeps_its_device_while_the_old_session_is_listed()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(At(Cast("first", _now), "10.0.0.11")), _now, _ => false);
+		var original = registry.Find("first")!;
+
+		registry.Observe(Map(At(Cast("first", _now), "10.0.0.11"),
+				At(Cast("second", _now.AddMinutes(5)), "10.0.0.11")),
+			_now,
+			_ => false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.Devices, Has.Count.EqualTo(1));
+			Assert.That(registry.Find("second")!.LocalId, Is.EqualTo(original.LocalId));
+		});
+	}
+
+	[Test]
+	public void A_namesake_from_another_address_does_not_take_over_a_stored_device_that_is_not_listed()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(At(Cast("kitchen", _now), "10.0.0.11")), _now, _ => false);
+		registry.Load(registry.Serialize());
+
+		registry.Observe(Map(At(Cast("bedroom", _now.AddMinutes(1)), "10.0.0.12")), _now, _ => false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.Devices.Select(device => device.DeviceId),
+				Is.EquivalentTo(new[] { "kitchen", "bedroom" }));
+			Assert.That(registry.Find("kitchen")!.Address, Is.EqualTo("10.0.0.11"));
+		});
+	}
+
+	[Test]
+	public void A_namesake_from_the_same_address_takes_over_a_stored_device_that_is_not_listed()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Observe(Map(At(Cast("first", _now), "10.0.0.11")), _now, _ => false);
+		var original = registry.Find("first")!;
+		registry.Load(registry.Serialize());
+
+		registry.Observe(Map(At(Cast("second", _now.AddMinutes(1)), "10.0.0.11")), _now, _ => false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.Devices.Select(device => device.DeviceId), Is.EqualTo(new[] { "second" }));
+			Assert.That(registry.Find("second")!.Key, Is.EqualTo(original.Key));
+		});
+	}
+
+	[Test]
+	public void A_stored_device_without_an_address_still_matches_its_namesake_and_learns_the_address()
+	{
+		var registry = new JellyfinDeviceRegistry();
+		registry.Load("""
+					  [
+					  	{"DeviceId":"x1","Name":"Google Cast","Client":"Chromecast","Key":"google_cast","LastSeen":"2026-10-07T00:00:00+00:00","IsControllable":true}
+					  ]
+					  """);
+
+		registry.Observe(Map(At(Cast("new", _now), "10.0.0.11")), _now, _ => false);
+		registry.Load(registry.Serialize());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registry.Devices.Select(device => device.DeviceId), Is.EqualTo(new[] { "new" }));
+			Assert.That(registry.Find("new")!.Address, Is.EqualTo("10.0.0.11"));
 		});
 	}
 
@@ -410,6 +520,11 @@ internal sealed class JellyfinDeviceRegistryTests
 	private static IReadOnlyList<JellyfinSession> Map(params JellyfinSessionDto[] sessions)
 	{
 		return JellyfinSessionMapper.Map(sessions, "macro-deck-device");
+	}
+
+	private static JellyfinSessionDto At(JellyfinSessionDto session, string address)
+	{
+		return session with { RemoteEndPoint = address };
 	}
 
 	private static JellyfinSessionDto Cast(string deviceId, DateTimeOffset lastActivity, JellyfinItemDto? item = null)

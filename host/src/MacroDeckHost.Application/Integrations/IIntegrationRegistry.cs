@@ -31,6 +31,12 @@ public interface IIntegrationRegistry
 
 	IntegrationOrigin GetOrigin(string integrationId);
 
+	bool TryGetOrigin(string integrationId, out IntegrationOrigin origin)
+	{
+		origin = IntegrationOrigin.Plugin;
+		return false;
+	}
+
 	Task<IntegrationRegistrationResult> RegisterAsync(
 		IIntegration integration,
 		IntegrationOrigin origin = IntegrationOrigin.BuiltIn,

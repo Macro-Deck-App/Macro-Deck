@@ -74,6 +74,7 @@ assets:
       - ui/runtime/styles/icons/battery.svg
       - ui/runtime/styles/icons/bell.svg
       - ui/runtime/styles/icons/blend.svg
+      - ui/runtime/styles/icons/bot.svg
       - ui/runtime/styles/icons/braces-x.svg
       - ui/runtime/styles/icons/bug.svg
       - ui/runtime/styles/icons/chart.svg

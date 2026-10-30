@@ -108,6 +108,11 @@ public static class Program
 				restoreOutcome = StagedRestoreApplier.ApplyPending(paths);
 			}
 
+			if (restoreOutcome is not (StagedRestoreOutcome.Locked or StagedRestoreOutcome.RollbackIncomplete))
+			{
+				BackupLeftoverSweeper.Sweep(paths);
+			}
+
 			HostStartupFacts.RestoreApplied = restoreOutcome == StagedRestoreOutcome.Applied;
 			HostStartupFacts.RestoreFailure = restoreOutcome switch
 			{
@@ -129,7 +134,11 @@ public static class Program
 				AppPreferenceService.TlsModeKey,
 				AppPreferenceService.TlsHttpsPortKey,
 				AppPreferenceService.BackupRecoveryKeyExportedAtKey,
-				AppPreferenceService.InstallationIdKey);
+				AppPreferenceService.InstallationIdKey,
+				AppPreferenceService.ReverseProxyTrustedKey);
+			var storedProxyTrust = preferences.GetValueOrDefault(AppPreferenceService.ReverseProxyTrustedKey);
+			ReverseProxyTrust.Enabled = bool.TryParse(storedProxyTrust, out var proxyTrusted) && proxyTrusted;
+
 			var configuredPort = preferences.GetValueOrDefault(AppPreferenceService.PublicPortKey);
 			var selection = PublicPortSelector.Resolve(
 				Environment.GetEnvironmentVariable(BuildConfig.PublicPortEnvironmentVariable),

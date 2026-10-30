@@ -1063,6 +1063,27 @@ Sluit de app die de poort gebruikt (of een Macro Deck dat nog draait) en probeer
   <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
     <value>Macro Deck is niet volledig bijgewerkt</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
+    <value>{variable} is niet ingesteld. Installeer de Claude Desktop-extensie opnieuw via Instellingen &gt; AI-clients.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
+    <value>Macro Deck is niet actief. Start Macro Deck en probeer het opnieuw.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.TokenRejected" xml:space="preserve">
+    <value>Macro Deck heeft het toegangstoken geweigerd: het is ingetrokken of verwijderd. Maak een nieuw token in Instellingen &gt; AI-clients en installeer de extensie opnieuw.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Unavailable" xml:space="preserve">
+    <value>Macro Deck heeft geen MCP-server beschikbaar: het is vergrendeld of ondersteunt geen AI-clients. Ontgrendel Macro Deck en probeer het opnieuw.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.Refused" xml:space="preserve">
+    <value>Macro Deck heeft het verzoek geweigerd (HTTP {status}).</value>
+  </data>
+  <data name="Bootstrapper.Mcp.ConnectionLost" xml:space="preserve">
+    <value>De verbinding met Macro Deck is verbroken voordat er een antwoord kwam. Het verzoek is mogelijk uitgevoerd, dus controleer dat voordat je het opnieuw probeert.</value>
+  </data>
+  <data name="Bootstrapper.Mcp.NotInitialized" xml:space="preserve">
+    <value>De MCP-sessie is niet geïnitialiseerd.</value>
+  </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Over Macro Deck</value>
   </data>
@@ -2939,6 +2960,24 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Errors.KeyRing.RecoveryKeyInvalid" xml:space="preserve">
     <value>Die herstelsleutel ontgrendelt deze installatie niet.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
+    <value>Dit toegangstoken kan niet meer worden gebruikt. Maak een nieuw token om de extensie te downloaden.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
+    <value>De Claude Desktop-extensie is alleen beschikbaar in de geïnstalleerde Macro Deck-app op macOS en Windows.</value>
+  </data>
+  <data name="Errors.Mcp.PolicyProviderInvalid" xml:space="preserve">
+    <value>Kies een provider.</value>
+  </data>
+  <data name="Errors.Mcp.TokenAlreadyRevoked" xml:space="preserve">
+    <value>Dit toegangstoken is al ingetrokken.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNameInvalid" xml:space="preserve">
+    <value>Voer een naam van maximaal 64 tekens in.</value>
+  </data>
+  <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
+    <value>Er bestaat geen toegangstoken met dat ID.</value>
   </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>De migratie kon niet worden voltooid.</value>
@@ -17160,6 +17199,107 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Settings.Logging.MinimumLevelLabel" xml:space="preserve">
     <value>Minimumniveau</value>
   </data>
+  <data name="Settings.Mcp.ClaudeDesktopAction" xml:space="preserve">
+    <value>Downloaden voor Claude Desktop</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
+    <value>Open het gedownloade bestand in Claude Desktop om Macro Deck daar te installeren. Het bestand bevat dit token, dus verwijder het na de installatie.</value>
+  </data>
+  <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
+    <value>De Claude Desktop-extensie kon niet worden opgeslagen</value>
+  </data>
+  <data name="Settings.Mcp.ClientSelectLabel" xml:space="preserve">
+    <value>AI-client</value>
+  </data>
+  <data name="Settings.Mcp.ConfigLabel" xml:space="preserve">
+    <value>Clientconfiguratie</value>
+  </data>
+  <data name="Settings.Mcp.ConnectedSinceLabel" xml:space="preserve">
+    <value>Verbonden sinds</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.One" xml:space="preserve">
+    <value>{count} verbinding</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionCount.Other" xml:space="preserve">
+    <value>{count} verbindingen</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.Mcp.ConnectionsEmpty" xml:space="preserve">
+    <value>Er is geen AI-client verbonden.</value>
+  </data>
+  <data name="Settings.Mcp.ConnectionsTitle" xml:space="preserve">
+    <value>Verbonden clients</value>
+  </data>
+  <data name="Settings.Mcp.Description" xml:space="preserve">
+    <value>Laat AI-assistenten zoals Claude of VS Code via het Model Context Protocol (MCP) je setup bekijken en opbouwen en acties uitvoeren. Je geheimen kunnen ze nooit lezen.</value>
+  </data>
+  <data name="Settings.Mcp.EmptyHeading" xml:space="preserve">
+    <value>Nog geen toegangstokens</value>
+  </data>
+  <data name="Settings.Mcp.EmptyMessage" xml:space="preserve">
+    <value>Maak een token en voeg het toe aan je AI-client om die met Macro Deck te verbinden.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
+    <value>Gebruik dit adres op deze computer. Vervang op een andere computer in je netwerk 127.0.0.1 door het netwerkadres van deze computer. Elke verbinding heeft een toegangstoken nodig.</value>
+  </data>
+  <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
+    <value>Serveradres</value>
+  </data>
+  <data name="Settings.Mcp.EndpointUnavailable" xml:space="preserve">
+    <value>De MCP-server is nu niet beschikbaar.</value>
+  </data>
+  <data name="Settings.Mcp.Heading" xml:space="preserve">
+    <value>AI-clients</value>
+  </data>
+  <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
+    <value>De instellingen voor AI-clients konden niet worden geladen</value>
+  </data>
+  <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
+    <value>Nooit</value>
+  </data>
+  <data name="Settings.Mcp.OtherClients" xml:space="preserve">
+    <value>Andere clients</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAllow" xml:space="preserve">
+    <value>Toestaan</value>
+  </data>
+  <data name="Settings.Mcp.PolicyAsksFirst" xml:space="preserve">
+    <value>Vraagt eerst bij: {actions}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyConfirm" xml:space="preserve">
+    <value>Eerst vragen</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDefault" xml:space="preserve">
+    <value>Standaard: {mode}</value>
+  </data>
+  <data name="Settings.Mcp.PolicyDescription" xml:space="preserve">
+    <value>Kies per provider of AI-clients de acties direct mogen uitvoeren, het eerst aan je moeten vragen of ze helemaal niet mogen uitvoeren. Dit geldt ook voor acties in flows die AI-clients aanmaken.</value>
+  </data>
+  <data name="Settings.Mcp.PolicyOff" xml:space="preserve">
+    <value>Uit</value>
+  </data>
+  <data name="Settings.Mcp.PolicySaveFailed" xml:space="preserve">
+    <value>De instelling kon niet worden opgeslagen</value>
+  </data>
+  <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
+    <value>Acties die AI-clients mogen uitvoeren</value>
+  </data>
+  <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
+    <value>Vernieuwen</value>
+  </data>
+  <data name="Settings.Mcp.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} wordt definitief verwijderd. Het is al ingetrokken, dus niets kan het gebruiken.</value>
+  </data>
+  <data name="Settings.Mcp.RevokeConfirmMessage" xml:space="preserve">
+    <value>{name} werkt meteen niet meer en elke AI-client die het gebruikt, wordt losgekoppeld.</value>
+  </data>
+  <data name="Settings.Mcp.TokensTitle" xml:space="preserve">
+    <value>Toegangstokens</value>
+  </data>
+  <data name="Settings.Mcp.UnknownClient" xml:space="preserve">
+    <value>Onbekende client</value>
+  </data>
   <data name="Settings.Modal.AccountDefaultName" xml:space="preserve">
     <value>Macro Deck-account</value>
   </data>
@@ -17193,6 +17333,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Settings.Network.DiscoveryLabel" xml:space="preserve">
     <value>Tonen op het lokale netwerk</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyDescription" xml:space="preserve">
+    <value>Zet dit alleen aan als er op deze computer een reverse proxy zoals nginx, Caddy of Traefik draait die verbindingen doorgeeft aan Macro Deck. Macro Deck gebruikt dan per client het adres en de HTTPS-status die de proxy doorgeeft.</value>
+  </data>
+  <data name="Settings.Network.ReverseProxyLabel" xml:space="preserve">
+    <value>Achter een reverse proxy op deze computer</value>
   </data>
   <data name="Settings.Network.EnvironmentOverrideNote" xml:space="preserve">
     <value>MACRO_DECK_PORT is ingesteld voor deze start en bepaalt de poort ({port}). De ingestelde waarde blijft ongebruikt zolang die override niet is verwijderd.</value>
@@ -25275,5 +25421,86 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Widgets.Feeds.Sample.Description" xml:space="preserve">
     <value>Hier verschijnt een korte samenvatting van het artikel.</value>
+  </data>
+  <data name="Mcp.Confirmation.AllowedHeading" xml:space="preserve">
+    <value>Toegestaan</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclineAction" xml:space="preserve">
+    <value>Weigeren</value>
+  </data>
+  <data name="Mcp.Confirmation.DeclinedHeading" xml:space="preserve">
+    <value>Geweigerd</value>
+  </data>
+  <data name="Mcp.Confirmation.Hint" xml:space="preserve">
+    <value>Sta het alleen toe als je de AI-client precies hierom hebt gevraagd.</value>
+  </data>
+  <data name="Mcp.Confirmation.InvalidMessage" xml:space="preserve">
+    <value>Er is al op gereageerd of het is verlopen. Vraag de AI-client het opnieuw te proberen.</value>
+  </data>
+  <data name="Mcp.Confirmation.Lead" xml:space="preserve">
+    <value>{client} vraagt Macro Deck om het volgende te doen:</value>
+  </data>
+  <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
+    <value>Bevestig een verzoek van de AI-client</value>
+  </data>
+  <data name="Mcp.Elicitation.Confirm" xml:space="preserve">
+    <value>Macro Deck heeft je bevestiging nodig voordat de AI-client verdergaat: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmOnPage" xml:space="preserve">
+    <value>Sta toe of weiger op de Macro Deck-pagina die in je browser opent: {details}</value>
+  </data>
+  <data name="Mcp.Elicitation.ConfirmTitle" xml:space="preserve">
+    <value>Toestaan</value>
+  </data>
+  <data name="Mcp.Elicitation.ProtectedVariable" xml:space="preserve">
+    <value>de variabele {name} wijzigen, die een goedgekeurd blok met een geheim leest</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyAction" xml:space="preserve">
+    <value>{action} ({provider})</value>
+  </data>
+  <data name="Mcp.Elicitation.RiskyActionWithValues" xml:space="preserve">
+    <value>{action} ({provider}) met {values}</value>
+  </data>
+  <data name="Mcp.Elicitation.SecretValue" xml:space="preserve">
+    <value>een geheim</value>
+  </data>
+  <data name="Mcp.Elicitation.SetSecret" xml:space="preserve">
+    <value>Voer het geheim {label} in op de Macro Deck-pagina die in je browser opent. De waarde blijft in Macro Deck.</value>
+  </data>
+  <data name="Mcp.Elicitation.SteeringValue" xml:space="preserve">
+    <value>{name} doorgeven aan een goedgekeurd blok met een geheim</value>
+  </data>
+  <data name="Mcp.Extension.Description" xml:space="preserve">
+    <value>Laat Claude met je Macro Deck-configuratie op deze computer werken: knoppen, mappen en automatiseringen bekijken en maken, en acties uitvoeren. Claude ziet je geheimen nooit.</value>
+  </data>
+  <data name="Mcp.SecretEntry.EmptyValue" xml:space="preserve">
+    <value>Voer een waarde in.</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidHeading" xml:space="preserve">
+    <value>Deze link is niet meer geldig</value>
+  </data>
+  <data name="Mcp.SecretEntry.InvalidMessage" xml:space="preserve">
+    <value>Hij is al gebruikt of verlopen. Vraag de AI-client het geheim opnieuw op te vragen.</value>
+  </data>
+  <data name="Mcp.SecretEntry.Lead" xml:space="preserve">
+    <value>{client} vraagt Macro Deck een geheim op te slaan: {label}</value>
+  </data>
+  <data name="Mcp.SecretEntry.PageTitle" xml:space="preserve">
+    <value>Geheim invoeren</value>
+  </data>
+  <data name="Mcp.SecretEntry.Privacy" xml:space="preserve">
+    <value>Alleen Macro Deck ziet wat je typt. {client} krijgt een verwijzing die het in acties kan gebruiken, nooit de waarde.</value>
+  </data>
+  <data name="Mcp.SecretEntry.SaveAction" xml:space="preserve">
+    <value>Geheim opslaan</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedHeading" xml:space="preserve">
+    <value>Geheim opgeslagen</value>
+  </data>
+  <data name="Mcp.SecretEntry.SavedMessage" xml:space="preserve">
+    <value>Je kunt dit tabblad sluiten en teruggaan naar {client}.</value>
+  </data>
+  <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
+    <value>Geheim</value>
   </data>
 </root>

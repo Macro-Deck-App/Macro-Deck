@@ -48,10 +48,15 @@ const BOOTSTRAP_RETRY_MS = 1500;
           </div>
         }
         @case ('authenticated') {
-          @if (isConnected() && !installingUpdate()) {
-            <router-outlet></router-outlet>
-          } @else {
+          @if (installingUpdate() || !hasConnected()) {
             <app-splash [status]="splashStatus()" [progress]="splashProgress()" [details]="splashDetails()" [steps]="splashSteps()" [cancelLabel]="splashCancelLabel()" (cancel)="cancelUpdateBackup()"></app-splash>
+          } @else {
+            <div class="shell-outlet" [inert]="!isConnected()">
+              <router-outlet></router-outlet>
+            </div>
+            @if (!isConnected()) {
+              <app-splash [overlay]="true" [status]="splashStatus()"></app-splash>
+            }
           }
         }
         @default {
@@ -77,6 +82,10 @@ const BOOTSTRAP_RETRY_MS = 1500;
     `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
+    .shell-outlet {
+      display: contents;
+    }
+
     .auth-gate {
       display: flex;
       align-items: center;
@@ -110,6 +119,14 @@ export class AppComponent implements OnInit, OnDestroy {
   private keyRingProbeTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly isConnected = computed(() => this.api.connectionStateSignal() === 'connected');
+
+  protected readonly hasConnected = signal(false);
+
+  private readonly blockKeysWhileReconnecting = (event: KeyboardEvent): void => {
+    if (this.hasConnected() && !this.isConnected()) {
+      event.stopImmediatePropagation();
+    }
+  };
 
   protected readonly installingUpdate = computed(() => this.updateService.phase() === 'installing');
 
@@ -192,7 +209,11 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     effect(() => {
+      if (this.auth.state() !== 'authenticated') {
+        this.hasConnected.set(false);
+      }
       if (this.isConnected() && this.auth.state() === 'authenticated') {
+        this.hasConnected.set(true);
         void this.initializeApp();
         // Only now: a file the OS opened during startup waits in the shell's queue until something
         // can actually import it, so this must never run against a host that cannot answer yet.
@@ -207,6 +228,9 @@ export class AppComponent implements OnInit, OnDestroy {
     // opens a modal the UI owns on its own, and picking it is what created this page in the first
     // place - so it must not wait for a connection.
     this.menuActions.start();
+    // Capture phase on window runs before every document-level shortcut, so none of them acts on
+    // the page hidden under the reconnecting overlay.
+    window.addEventListener('keydown', this.blockKeysWhileReconnecting, true);
     this.hostSession.start();
     void this.probeKeyRingWithRetry();
   }
@@ -292,6 +316,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    window.removeEventListener('keydown', this.blockKeysWhileReconnecting, true);
     if (this.bootstrapRetryTimer !== null) {
       clearTimeout(this.bootstrapRetryTimer);
     }
