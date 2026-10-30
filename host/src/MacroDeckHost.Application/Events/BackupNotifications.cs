@@ -9,5 +9,7 @@ public sealed record BackupListChangedNotification(string Reason) : INotificatio
 
 public sealed record BackupRecoveryKeyStateChangedNotification(BackupRecoveryKeyState State) : INotification;
 
+public sealed record BackupCompletedIncompleteNotification(Guid BackupId, int SkippedFileCount) : INotification;
+
 public sealed record RestorePendingChangedNotification(PendingRestoreInfo? Pending, bool RestartSupported)
 	: INotification;

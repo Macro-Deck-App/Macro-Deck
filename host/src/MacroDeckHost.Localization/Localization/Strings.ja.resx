@@ -14971,6 +14971,17 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>{pack} にアイコンをインポートしています</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>バックアップが不完全です</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>バックアップは保存されましたが、1 件のファイルを読み取れなかったため、バックアップに含まれていません。対象のファイルを使用しているプログラムを閉じてから、もう一度バックアップを作成してください。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>バックアップは保存されましたが、{count} 件のファイルを読み取れなかったため、バックアップに含まれていません。対象のファイルを使用しているプログラムを閉じてから、もう一度バックアップを作成してください。</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>復元に失敗しました</value>
   </data>

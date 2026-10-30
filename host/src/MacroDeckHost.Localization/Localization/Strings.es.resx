@@ -14970,6 +14970,17 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Importando iconos en {pack}</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>Copia de seguridad incompleta</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>La copia de seguridad se guardó, pero no se pudo leer 1 archivo y falta en ella. Cierra el programa que lo esté usando y vuelve a crear la copia de seguridad.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>La copia de seguridad se guardó, pero no se pudieron leer {count} archivos y faltan en ella. Cierra los programas que los estén usando y vuelve a crear la copia de seguridad.</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Error en la restauración</value>
   </data>

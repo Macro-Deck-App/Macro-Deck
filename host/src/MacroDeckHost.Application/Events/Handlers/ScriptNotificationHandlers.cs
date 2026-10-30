@@ -17,7 +17,7 @@ public sealed class ScriptCreatedNotificationHandler : INotificationHandler<Scri
 	public ValueTask Handle(ScriptCreatedNotification notification, CancellationToken cancellationToken)
 	{
 		var evt = new ScriptCreatedEvent { Script = ScriptDtoMapper.ToDto(notification.Script) };
-		return new ValueTask(_uiTransport.Send(evt, cancellationToken));
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin, evt, cancellationToken));
 	}
 }
 
@@ -33,7 +33,7 @@ public sealed class ScriptUpdatedNotificationHandler : INotificationHandler<Scri
 	public ValueTask Handle(ScriptUpdatedNotification notification, CancellationToken cancellationToken)
 	{
 		var evt = new ScriptUpdatedEvent { Script = ScriptDtoMapper.ToDto(notification.Script) };
-		return new ValueTask(_uiTransport.Send(evt, cancellationToken));
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin, evt, cancellationToken));
 	}
 }
 
@@ -49,6 +49,6 @@ public sealed class ScriptDeletedNotificationHandler : INotificationHandler<Scri
 	public ValueTask Handle(ScriptDeletedNotification notification, CancellationToken cancellationToken)
 	{
 		var evt = new ScriptDeletedEvent { Id = notification.ScriptId.ToString() };
-		return new ValueTask(_uiTransport.Send(evt, cancellationToken));
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin, evt, cancellationToken));
 	}
 }

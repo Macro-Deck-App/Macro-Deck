@@ -1,21 +1,22 @@
 import { defineConfig } from '@playwright/test';
 
-export const LOOPBACK_URL = process.env.MACRO_DECK_LOOPBACK_URL ?? 'http://127.0.0.1:5191';
-export const PUBLIC_URL = process.env.MACRO_DECK_PUBLIC_URL ?? 'http://127.0.0.1:8192';
+// Every spec file starts its own staged host (tests/support/fixtures.js), so workers can run spec
+// files side by side; CI keeps one because the runner has two cores.
+const workers = Number.parseInt(process.env.E2E_WORKERS ?? '1', 10);
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 45_000,
+  timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
-  workers: 1,
+  workers,
   retries: 0,
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
   ],
   use: {
-    baseURL: LOOPBACK_URL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

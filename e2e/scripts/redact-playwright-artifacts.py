@@ -18,14 +18,26 @@ REPLACEMENTS = [
 ]
 
 PASSWORD = os.environ.get('E2E_PASSWORD', 'macro-deck-e2e-password')
-LOOPBACK_SECRET = os.environ.get('MACRODECK_LOOPBACK_SECRET', '')
+
+
+# Each spec file's host has its own loopback secret; the fixtures list them one per line in the file
+# E2E_SECRETS_FILE names, which lives outside every uploaded folder.
+def loopback_secrets() -> list[str]:
+    secrets = [os.environ.get('MACRODECK_LOOPBACK_SECRET', '')]
+    secrets_file = os.environ.get('E2E_SECRETS_FILE', '')
+    if secrets_file and Path(secrets_file).is_file():
+        secrets.extend(Path(secrets_file).read_text(encoding='utf-8').splitlines())
+    return [secret.strip() for secret in secrets if secret.strip()]
+
+
+LOOPBACK_SECRETS = loopback_secrets()
 
 
 def redact_text(text: str) -> str:
     if PASSWORD:
         text = text.replace(PASSWORD, '[REDACTED-PASSWORD]')
-    if LOOPBACK_SECRET:
-        text = text.replace(LOOPBACK_SECRET, '[REDACTED-LOOPBACK-SECRET]')
+    for secret in LOOPBACK_SECRETS:
+        text = text.replace(secret, '[REDACTED-LOOPBACK-SECRET]')
     for pattern, replacement in REPLACEMENTS:
         text = pattern.sub(replacement, text)
     return text

@@ -35,6 +35,7 @@
 
     @for (widget of paintOrdered; track widget.id) {
       <shared-widget-item
+        [attr.data-widget-id]="widget.id"
         [widget]="widget"
         [mode]="mode"
         [renderState]="renderStateFor(widget.id)"

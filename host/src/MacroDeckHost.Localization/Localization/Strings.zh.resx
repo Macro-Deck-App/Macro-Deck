@@ -14971,6 +14971,17 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>正在将图标导入 {pack}</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>备份不完整</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>备份已保存，但有 1 个文件无法读取，未包含在备份中。请关闭正在使用相关文件的程序，然后重新创建备份。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>备份已保存，但有 {count} 个文件无法读取，未包含在备份中。请关闭正在使用相关文件的程序，然后重新创建备份。</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>恢复失败</value>
   </data>

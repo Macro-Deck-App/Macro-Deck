@@ -21,7 +21,7 @@
   } @else {
     <ul class="devices-list">
       @for (device of devices(); track device.id) {
-        <li class="devices-row">
+        <li class="devices-row" [attr.data-device-id]="device.id">
           <div class="devices-row-main">
             <span class="devices-icon icon icon-{{ formFactorIcons[device.formFactor] }} icon-lg"></span>
 

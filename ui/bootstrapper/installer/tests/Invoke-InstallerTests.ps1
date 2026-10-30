@@ -205,8 +205,12 @@ function Start-FileHolder {
         [Parameter(Mandatory)][int]$HoldSeconds
     )
     $escapedPath = $Path -replace "'", "''"
-    $command = "`$fs = [System.IO.File]::Open('$escapedPath', [System.IO.FileMode]::OpenOrCreate, " +
-        "[System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::Read); " +
+    # Wait-UntilLocked probes with an exclusive open, so a first open landing on a probe fails with a
+    # sharing violation. Without the retry the holder sleeps without the lock and the probe times out.
+    $command = "`$fs = `$null; while (`$null -eq `$fs) { try { " +
+        "`$fs = [System.IO.File]::Open('$escapedPath', [System.IO.FileMode]::OpenOrCreate, " +
+        "[System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::Read) " +
+        "} catch [System.IO.IOException] { Start-Sleep -Milliseconds 10 } }; " +
         "Start-Sleep -Seconds $HoldSeconds; `$fs.Close()"
     Start-Process -FilePath $script:PowerShellExe `
         -ArgumentList @('-NoProfile', '-NonInteractive', '-Command', $command) `

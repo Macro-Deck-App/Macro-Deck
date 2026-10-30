@@ -14,4 +14,6 @@ public interface IKeyboardInputSession : IDisposable
 	Task KeyDownAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default);
 
 	Task KeyUpAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default);
+
+	void ReleaseHeldKeys();
 }

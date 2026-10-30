@@ -128,6 +128,10 @@ internal sealed class FakeKeyboardInputService : IKeyboardInputService
 			return _owner.KeyUpAsync(modifiers, key, cancellationToken);
 		}
 
+		public void ReleaseHeldKeys()
+		{
+		}
+
 		public void Dispose()
 		{
 		}

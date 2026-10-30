@@ -76,6 +76,14 @@ internal static class PluginWebSocketLog
 			pluginId);
 	}
 
+	public static void QueuedMessageFailed(ILogger logger, string pluginId, string messageType, Exception exception)
+	{
+		logger.Error(exception,
+			"Handling a {MessageType} message from plugin '{PluginId}' failed.",
+			messageType,
+			pluginId);
+	}
+
 	public static void ManagedSessionRefusedDuringTakeover(ILogger logger, string pluginId)
 	{
 		logger.Information(

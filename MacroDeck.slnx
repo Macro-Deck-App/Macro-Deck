@@ -15,6 +15,7 @@
   </Folder>
   <Folder Name="/host/tests/">
     <Project Path="host/tests/MacroDeckHost.Tests.PluginContractTests/MacroDeckHost.Tests.PluginContractTests.csproj" />
+    <Project Path="host/tests/MacroDeckHost.Tests.SystemTests/MacroDeckHost.Tests.SystemTests.csproj" />
     <Project Path="host/tests/MacroDeckHost.Tests.UnitTests/MacroDeckHost.Tests.UnitTests.csproj" />
     <Project Path="host/tests/MacroDeckHost.Tests.UnitTests.Linux/MacroDeckHost.Tests.UnitTests.Linux.csproj" />
     <Project Path="host/tests/MacroDeckHost.Tests.UnitTests.MacOS/MacroDeckHost.Tests.UnitTests.MacOS.csproj" />

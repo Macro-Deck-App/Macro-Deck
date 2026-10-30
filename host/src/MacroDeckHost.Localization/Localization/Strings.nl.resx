@@ -14971,6 +14971,17 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Notifications.IconImport.Importing" xml:space="preserve">
     <value>Pictogrammen importeren in {pack}</value>
   </data>
+  <data name="Notifications.Backup.Incomplete" xml:space="preserve">
+    <value>Back-up is onvolledig</value>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.One" xml:space="preserve">
+    <value>De back-up is opgeslagen, maar 1 bestand kon niet worden gelezen en ontbreekt erin. Sluit het programma dat het gebruikt en maak de back-up opnieuw.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.Backup.IncompleteMessage.Other" xml:space="preserve">
+    <value>De back-up is opgeslagen, maar {count} bestanden konden niet worden gelezen en ontbreken erin. Sluit de programma's die ze gebruiken en maak de back-up opnieuw.</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Notifications.Backup.RestoreFailed" xml:space="preserve">
     <value>Terugzetten mislukt</value>
   </data>

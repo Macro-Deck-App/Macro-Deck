@@ -16,7 +16,7 @@
     }
 
     @if (loaded() && publicListenerUnavailable()) {
-      <p class="network__note">
+      <p class="network__note" data-testid="network-listener-unavailable">
         <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
         <span>
           {{ 'macrodeck.app:Settings.Network.ListenerUnavailableNote' | translate:{ port: activePort() } }}

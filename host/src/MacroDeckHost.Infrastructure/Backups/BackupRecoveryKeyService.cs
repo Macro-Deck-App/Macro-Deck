@@ -85,6 +85,15 @@ public sealed class BackupRecoveryKeyService : IBackupRecoveryKeyService, IDispo
 			await StoreNewSecret(FormatKey(key));
 			await _preferences.SetValue(AppPreferenceService.BackupRecoveryKeyCreatedAtKey, FormatTimestamp());
 
+			// The key the user saved no longer opens new backups, so the replacement must read as never shown
+			// rather than inherit the old key's exported state.
+			if (preference is not null)
+			{
+				await _preferences.SetValue(AppPreferenceService.BackupRecoveryKeyExportedAtKey, string.Empty);
+				_logger.Warning("The stored backup recovery key could not be read and was replaced by {KeyId}",
+					BackupKeyDerivation.DeriveKeyId(key));
+			}
+
 			return Result.Ok<byte[], BackupError>(key);
 		}
 		finally

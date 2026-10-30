@@ -1254,7 +1254,6 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		// StartupGraceRetried is deliberately left as-is here: it is consumed at most once per backoff
 		// run (reset only on reaching Running, or on a manual Start/Restart), not once per crash.
-		entry.RestartTimestamps.Add(now);
 		entry.RestartTimestamps.RemoveAll(timestamp => now - timestamp > _options.RestartWindow);
 
 		if (PluginRestartPolicy.IsBudgetExhausted(entry.RestartTimestamps, now, _options))
@@ -1265,6 +1264,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			entry.NextRestartAt = null;
 			return;
 		}
+
+		entry.RestartTimestamps.Add(now);
 
 		entry.State = PluginRuntimeState.Backoff;
 		var delay = PluginRestartPolicy.DelayFor(entry.Attempt, _random.NextDouble());

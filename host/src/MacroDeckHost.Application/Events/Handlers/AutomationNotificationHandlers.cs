@@ -17,7 +17,7 @@ public sealed class AutomationCreatedNotificationHandler : INotificationHandler<
 	public ValueTask Handle(AutomationCreatedNotification notification, CancellationToken cancellationToken)
 	{
 		var evt = new AutomationCreatedEvent { Automation = AutomationDtoMapper.ToDto(notification.Automation) };
-		return new ValueTask(_uiTransport.Send(evt, cancellationToken));
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin, evt, cancellationToken));
 	}
 }
 
@@ -33,7 +33,7 @@ public sealed class AutomationUpdatedNotificationHandler : INotificationHandler<
 	public ValueTask Handle(AutomationUpdatedNotification notification, CancellationToken cancellationToken)
 	{
 		var evt = new AutomationUpdatedEvent { Automation = AutomationDtoMapper.ToDto(notification.Automation) };
-		return new ValueTask(_uiTransport.Send(evt, cancellationToken));
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin, evt, cancellationToken));
 	}
 }
 
@@ -49,6 +49,6 @@ public sealed class AutomationDeletedNotificationHandler : INotificationHandler<
 	public ValueTask Handle(AutomationDeletedNotification notification, CancellationToken cancellationToken)
 	{
 		var evt = new AutomationDeletedEvent { Id = notification.AutomationId.ToString() };
-		return new ValueTask(_uiTransport.Send(evt, cancellationToken));
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin, evt, cancellationToken));
 	}
 }

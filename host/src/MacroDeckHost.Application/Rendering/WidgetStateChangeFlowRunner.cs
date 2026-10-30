@@ -55,7 +55,16 @@ public sealed class WidgetStateChangeFlowRunner
 		Enter(widgetId);
 		try
 		{
-			LogResult(widgetId, await flowExecutor.ExecuteAsync(request, cancellationToken));
+			// The caller may hold no deadline of its own, a press does not, so an inline run gets the same
+			// bounds as a detached one.
+			using var runCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
+				_lifetime.ApplicationStopping);
+			runCts.CancelAfter(_maxRunDuration);
+			LogResult(widgetId, await flowExecutor.ExecuteAsync(request, runCts.Token));
+		}
+		catch (OperationCanceledException) when (_lifetime.ApplicationStopping.IsCancellationRequested
+			&& !cancellationToken.IsCancellationRequested)
+		{
 		}
 		finally
 		{
