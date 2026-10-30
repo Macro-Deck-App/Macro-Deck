@@ -18,7 +18,9 @@ use tauri::{AppHandle, Manager};
 use crate::logging;
 use crate::updater;
 
-const STORE_FILE_NAME: &str = "update-channel";
+// A new name resets the beta opt-in for 3.0.0: every beta build stored beta as
+// its default, so the old update-channel file cannot tell a choice from a default.
+const STORE_FILE_NAME: &str = "md-update-channel";
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -220,6 +222,48 @@ mod tests {
         write_stored(&dir, UpdateChannel::Stable).expect("overwrite must succeed");
         assert_eq!(read_stored(&dir), Some(UpdateChannel::Stable));
 
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    fn scenario_dir(line: u32) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!(
+            "macro-deck-update-channel-{}-{line}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).expect("scenario dir must be created");
+        dir
+    }
+
+    #[test]
+    fn the_first_stable_release_turns_off_a_beta_flag_stored_before_3_0_0() {
+        let dir = scenario_dir(line!());
+        fs::write(dir.join("update-channel"), "beta").unwrap();
+
+        assert_eq!(read_stored(&dir), None);
+        assert_eq!(
+            resolve_channel(read_stored(&dir), "3.0.0"),
+            UpdateChannel::Stable
+        );
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_choice_made_after_the_reset_survives_later_releases() {
+        let dir = scenario_dir(line!());
+        fs::write(dir.join("update-channel"), "beta").unwrap();
+
+        write_stored(&dir, UpdateChannel::Beta).unwrap();
+        assert_eq!(
+            resolve_channel(read_stored(&dir), "3.0.1"),
+            UpdateChannel::Beta
+        );
+
+        write_stored(&dir, UpdateChannel::Stable).unwrap();
+        assert_eq!(
+            resolve_channel(read_stored(&dir), "3.1.0-beta.1"),
+            UpdateChannel::Stable
+        );
         let _ = fs::remove_dir_all(&dir);
     }
 }
