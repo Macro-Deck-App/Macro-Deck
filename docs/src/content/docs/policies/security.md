@@ -260,7 +260,7 @@ The host resolves a package to exactly one verdict:
 | Certificate, or the issuer that signed it, revoked by the Store registry | `Revoked` | Yes, at install and update only |
 | Package unreadable, or algorithm unknown to this host | `VerificationUnavailable` | Yes |
 
-**`Unsigned` is the only verdict a confirmation can admit**, because nothing published today is signed yet:
+**`Unsigned` is the only verdict a confirmation can admit**, so you can still install your own builds and packages from outside the Store:
 
 | Source of an unsigned plugin | Installs? |
 | --- | --- |
