@@ -10,7 +10,6 @@ changelog:
       - area:ci
       - area:e2e
       - documentation
-      - area:docs
 
   categories:
     - title: 🔐 Security
