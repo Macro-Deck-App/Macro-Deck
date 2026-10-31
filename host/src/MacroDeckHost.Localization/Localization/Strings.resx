@@ -17661,7 +17661,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Export your backup recovery key to protect the key ring. Until then it stays readable on disk.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blocks action execution while this computer is locked, no matter what you choose here. On Linux, Macro Deck cannot tell that this computer is locked, so actions keep running and connected clients are not locked.</value>
+    <value>Blocks action execution while this computer is locked, no matter what you choose here. On Linux, this needs a desktop that reports its lock, such as GNOME or KDE Plasma. Otherwise actions keep running and connected clients are not locked.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Lock screen</value>
