@@ -2,9 +2,11 @@ using System.Reflection;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Events.Handlers;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Settings;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -438,8 +440,23 @@ public class AdbSettingsHandlersTests
 		Assert.That(response.DefaultDeviceSerial, Is.Null, "an empty string is how a text field is cleared");
 	}
 
-	// Standing guard against someone "helpfully" enriching the broadcast payload later: the send site
-	// in AdbBackgroundService is only safe because this type carries nothing admin-gated.
+	[Test]
+	public async Task A_settings_change_tells_the_admin_group_and_not_every_connection()
+	{
+		var transport = new RecordingUiTransport();
+		var handler = new AdbSettingsChangedUiRefreshHandler(transport, TimeProvider.System);
+
+		await handler.Handle(new AdbSettingsChangedNotification(new AdbSettings(true, null, true, null)),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(transport.Broadcasts, Is.Empty);
+			Assert.That(transport.GroupMessages.Single().Group, Is.EqualTo(UiAdminGroups.Admin));
+			Assert.That(transport.GroupMessages.Single().Message, Is.TypeOf<AdbStateChangedEvent>());
+		});
+	}
+
 	[Test]
 	public void AdbStateChangedEvent_carries_no_device_serial_no_executable_path_and_no_port()
 	{

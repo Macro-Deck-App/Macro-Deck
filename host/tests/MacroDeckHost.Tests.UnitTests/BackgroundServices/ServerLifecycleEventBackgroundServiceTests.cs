@@ -4,6 +4,7 @@ using System.Threading.Channels;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Infrastructure.BackgroundServices;
@@ -29,6 +30,7 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 		var index = new EventSubscriptionIndex(new StubFolderCache(), automations);
 		var runner = new RecordingTriggerRunner();
 		var readiness = new StartupReadiness();
+		var builtInRegistration = new BuiltInIntegrationRegistration();
 		var bus = new EventBus(index, new EventSampleStore(), Serilog.Core.Logger.None);
 
 		using var host = new HostBuilder()
@@ -37,6 +39,48 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 				services.AddSingleton<IEventSubscriptionIndex>(index);
 				services.AddSingleton<IEventBus>(bus);
 				services.AddSingleton(readiness);
+				services.AddSingleton(builtInRegistration);
+				services.AddSingleton(TimeProvider.System);
+				services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
+				services.AddSingleton(new DeviceConnectionTracker(bus,
+					TimeProvider.System,
+					new DeckClientTracker(Serilog.Core.Logger.None)));
+				services.AddScoped<IEventTriggerRunner>(_ => runner);
+				services.AddHostedService<EventDispatchBackgroundService>();
+				services.AddHostedService<ServerLifecycleEventBackgroundService>();
+			})
+			.Build();
+		await host.StartAsync();
+		readiness.MarkCachesReady();
+		readiness.MarkVariablesReady();
+		builtInRegistration.Complete();
+
+		await runner.FirstRun.WaitAsync(TimeSpan.FromSeconds(10));
+		await host.StopAsync();
+
+		Assert.That(runner.Runs.Select(run => (run.Owner, run.EventId)),
+			Is.EqualTo(new[] { (EventTriggerOwner.ForAutomation(automation.Id), ServerStarted) }));
+	}
+
+	[Test]
+	public async Task Event_flows_wait_for_the_built_in_integrations_and_events_raised_meanwhile_still_run()
+	{
+		var automations = new StubAutomationCache();
+		var started = automations.Add(EventFlows("server-started"));
+		var connected = automations.Add(EventFlows("client-connected"));
+		var index = new EventSubscriptionIndex(new StubFolderCache(), automations);
+		var runner = new RecordingTriggerRunner();
+		var readiness = new StartupReadiness();
+		var builtInRegistration = new BuiltInIntegrationRegistration();
+		var bus = new EventBus(index, new EventSampleStore(), Serilog.Core.Logger.None);
+
+		using var host = new HostBuilder()
+			.ConfigureServices(services =>
+			{
+				services.AddSingleton<IEventSubscriptionIndex>(index);
+				services.AddSingleton<IEventBus>(bus);
+				services.AddSingleton(readiness);
+				services.AddSingleton(builtInRegistration);
 				services.AddSingleton(TimeProvider.System);
 				services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
 				services.AddSingleton(new DeviceConnectionTracker(bus,
@@ -51,11 +95,34 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 		readiness.MarkCachesReady();
 		readiness.MarkVariablesReady();
 
-		await runner.FirstRun.WaitAsync(TimeSpan.FromSeconds(10));
+		await WaitUntil(() => index.HasSubscribers("macro-deck::client-connected"));
+		bus.Publish(new EventOccurrence("macro-deck::client-connected", new Dictionary<string, object?>()));
+		await Task.Delay(TimeSpan.FromMilliseconds(200));
+		var runsBeforeRegistration = runner.Runs.Count;
+
+		builtInRegistration.Complete();
+		await WaitUntil(() => runner.Runs.Count == 2);
 		await host.StopAsync();
 
-		Assert.That(runner.Runs.Select(run => (run.Owner, run.EventId)),
-			Is.EqualTo(new[] { (EventTriggerOwner.ForAutomation(automation.Id), ServerStarted) }));
+		Assert.Multiple(() =>
+		{
+			Assert.That(runsBeforeRegistration, Is.Zero);
+			Assert.That(runner.Runs.Select(run => run.Owner),
+				Is.EquivalentTo(new[]
+				{
+					EventTriggerOwner.ForAutomation(started.Id),
+					EventTriggerOwner.ForAutomation(connected.Id)
+				}));
+		});
+	}
+
+	private static async Task WaitUntil(Func<bool> condition)
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+		while (!condition() && DateTime.UtcNow < deadline)
+		{
+			await Task.Delay(10);
+		}
 	}
 
 	private static string EventFlows(string eventId)

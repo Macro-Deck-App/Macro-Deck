@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Connect;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Connect;
 using MacroDeckHost.Connect;
 using Serilog;
@@ -19,7 +20,7 @@ public class ConnectSessionNotifierTests
 		await notifier.StopAsync(CancellationToken.None);
 		notifier.Dispose();
 
-		Assert.That(transport.Sent.OfType<ConnectSessionChangedNotification>().Count(), Is.EqualTo(1));
+		Assert.That(AdminPushes(transport), Is.EqualTo(1));
 	}
 
 	[Test]
@@ -52,7 +53,13 @@ public class ConnectSessionNotifierTests
 		await notifier.StopAsync(CancellationToken.None);
 		notifier.Dispose();
 
-		Assert.That(transport.Sent.OfType<ConnectSessionChangedNotification>().Count(), Is.EqualTo(2));
+		Assert.That(AdminPushes(transport), Is.EqualTo(2));
+	}
+
+	private static int AdminPushes(Auth.RecordingUiTransport transport)
+	{
+		return transport.GroupMessages.Count(m
+			=> m.Group == UiAdminGroups.Admin && m.Message is ConnectSessionChangedNotification);
 	}
 
 	private static (ConnectSessionNotifier Notifier, FakeConnectSessionService Session, FakeAvatarCache Avatar,

@@ -64,7 +64,11 @@ public class OAuthCallbackCoordinatorTests
 			Assert.That(first, Is.True);
 			Assert.That(second, Is.False);
 			Assert.That(coordinator.GetCode(registration.State), Is.EqualTo("genuine-code"));
-			Assert.That(transport.Broadcasts.OfType<ConfigFlowAuthorizedNotification>().ToList(),
+			Assert.That(transport.Broadcasts, Is.Empty);
+			Assert.That(transport.GroupMessages.Where(m => m.Group == UiAdminGroups.Admin)
+					.Select(m => m.Message)
+					.OfType<ConfigFlowAuthorizedNotification>()
+					.ToList(),
 				Has.Count.EqualTo(1).And.All.Matches<ConfigFlowAuthorizedNotification>(n => n.Success));
 		});
 	}

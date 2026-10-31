@@ -10,10 +10,8 @@ public partial class UiBroadcastScopeTests
 	private static readonly string[] _clientSafeBroadcasters =
 	[
 		"MacroDeckHost.Application/Deck/DeckNavigator.cs",
-		"MacroDeckHost.Application/Events/Handlers/AdbSettingsChangedUiRefreshHandler.cs",
 		"MacroDeckHost.Application/Events/Handlers/AppearanceChangedNotificationHandler.cs",
 		"MacroDeckHost.Application/Events/Handlers/ColorVariableChangedHandler.cs",
-		"MacroDeckHost.Application/Events/Handlers/DeveloperModeChangedNotificationHandler.cs",
 		"MacroDeckHost.Application/Events/Handlers/FolderCreatedNotificationHandler.cs",
 		"MacroDeckHost.Application/Events/Handlers/FolderDeletedNotificationHandler.cs",
 		"MacroDeckHost.Application/Events/Handlers/FolderUpdatedNotificationHandler.cs",
@@ -43,17 +41,12 @@ public partial class UiBroadcastScopeTests
 		"MacroDeckHost.Application/Events/Handlers/WidgetsDeletedNotificationHandler.cs",
 		"MacroDeckHost.Application/Events/Handlers/WidgetsUpdatedNotificationHandler.cs",
 		"MacroDeckHost.Application/Icons/IconAppearanceService.cs",
-		"MacroDeckHost.Application/Integrations/ConfigFlow/OAuthCallbackCoordinator.cs",
 		"MacroDeckHost.Application/Rendering/WidgetStatePublisher.cs",
 		"MacroDeckHost.Application/Ui/Handlers/UpdateWidgetStateRequestMessageHandler.cs",
 		"MacroDeckHost.Application/VideoStreams/VideoStreamUiPushHandler.cs",
-		"MacroDeckHost.Infrastructure/BackgroundServices/AdbBackgroundService.cs",
-		"MacroDeckHost.Infrastructure/BackgroundServices/IntegrationIssueBroadcastBackgroundService.cs",
 		"MacroDeckHost.Infrastructure/BackgroundServices/MusicPlayerStateBroadcastBackgroundService.cs",
-		"MacroDeckHost.Infrastructure/BackgroundServices/NativeUsbBackgroundService.cs",
 		"MacroDeckHost.Infrastructure/BackgroundServices/NotificationBroadcastBackgroundService.cs",
-		"MacroDeckHost.Infrastructure/BackgroundServices/WeatherStateBroadcastBackgroundService.cs",
-		"MacroDeckHost/Connect/ConnectSessionNotifier.cs"
+		"MacroDeckHost.Infrastructure/BackgroundServices/WeatherStateBroadcastBackgroundService.cs"
 	];
 
 	[Test]

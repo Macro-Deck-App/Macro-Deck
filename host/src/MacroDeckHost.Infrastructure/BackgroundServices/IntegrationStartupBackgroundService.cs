@@ -49,24 +49,23 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 	{
 		_logger.Information("Starting integration discovery and initialization");
 
-		var integrations = BuiltInIntegrations.Discover(_logger).AsEnumerable();
-
-		if (!DeveloperIntegrationsEnabled())
-		{
-			integrations = integrations.Where(i => i is not ISampleIntegration);
-		}
-
-		IReadOnlyList<PendingIntegration> pending;
 		try
 		{
-			pending = await RegisterAllAsync(integrations);
+			var integrations = BuiltInIntegrations.Discover(_logger).AsEnumerable();
+
+			if (!DeveloperIntegrationsEnabled())
+			{
+				integrations = integrations.Where(i => i is not ISampleIntegration);
+			}
+
+			var pending = await RegisterAllAsync(integrations);
+			await InitializeAllAsync(pending, stoppingToken);
 		}
 		finally
 		{
+			// A background service failure leaves the host running, and event dispatch waits for this.
 			_builtInRegistration.Complete();
 		}
-
-		await InitializeAllAsync(pending, stoppingToken);
 
 		_logger.Information("All integrations initialized");
 	}
@@ -167,9 +166,23 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 		return pending;
 	}
 
-	internal Task InitializeAllAsync(IReadOnlyList<PendingIntegration> pending, CancellationToken stoppingToken)
+	internal async Task InitializeAllAsync(IReadOnlyList<PendingIntegration> pending, CancellationToken stoppingToken)
 	{
-		return Task.WhenAll(pending.Select(p => InitializeOneAsync(p, stoppingToken)));
+		var initializing = pending
+			.Select(p => (p.Integration, Initialized: InitializeOneAsync(p, stoppingToken)))
+			.ToList();
+
+		try
+		{
+			await Task.WhenAll(initializing
+				.Where(entry => entry.Integration is ISystemIntegration)
+				.Select(entry => entry.Initialized));
+		}
+		finally
+		{
+			_builtInRegistration.Complete();
+			await Task.WhenAll(initializing.Select(entry => entry.Initialized));
+		}
 	}
 
 	private async Task InitializeOneAsync(PendingIntegration pending, CancellationToken stoppingToken)
