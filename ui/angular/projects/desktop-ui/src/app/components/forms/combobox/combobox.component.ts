@@ -38,6 +38,7 @@ export interface ComboboxOption {
       [placeholder]="placeholder"
       [ngModel]="shownText()"
       [disabled]="disabled"
+      [attr.aria-label]="ariaLabel"
       [attr.role]="pickOnly ? 'combobox' : null"
       [attr.aria-autocomplete]="pickOnly ? 'list' : null"
       [attr.aria-expanded]="pickOnly ? isOpen() : null"
@@ -110,6 +111,7 @@ export class ComboboxComponent {
   @Input() value = '';
   @Input() displayLabel = '';
   @Input() placeholder = '';
+  @Input() ariaLabel: string | null = null;
   @Input() options: ComboboxOption[] = [];
   @Input() loading = false;
   @Input() filterLocally = true;

@@ -141,7 +141,7 @@ export function recordSocketFrames(page) {
 }
 
 // A tile's press is an event on the widget's UI session, and a press before that session is open
-// goes nowhere. Waits for a live session, presses once and proves exactly one press left the page.
+// waits for it. Waits for a live session, presses once and proves exactly one press left the page.
 export async function pressWebTile(client, widgetId) {
   const tile = webTile(client.page, widgetId);
   await expect(tile).toBeVisible();

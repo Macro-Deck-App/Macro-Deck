@@ -13,11 +13,13 @@ import { SelectComponent, SelectOption } from '../forms/select/select.component'
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="form-group form-group--dense face-grow"><label>{{ 'macrodeck.app:Widgets.Appearance.Font.FontLabel' | translate }}</label>
-      <shared-select class="face-select" [options]="familyOptions" [ngModel]="selectedFamily"
+      <shared-select class="face-select" [options]="familyOptions"
+        [ariaLabel]="'macrodeck.app:Widgets.Appearance.Font.FontLabel' | translate" [ngModel]="selectedFamily"
         (ngModelChange)="onFamilyChange($event)" />
     </div>
     <div class="form-group form-group--dense face-grow"><label>{{ 'macrodeck.app:Widgets.Appearance.Font.StyleLabel' | translate }}</label>
-      <shared-select class="face-select" [options]="styleOptions" [ngModel]="fontFaceId ?? ''"
+      <shared-select class="face-select" [options]="styleOptions"
+        [ariaLabel]="'macrodeck.app:Widgets.Appearance.Font.StyleLabel' | translate" [ngModel]="fontFaceId ?? ''"
         (ngModelChange)="emit($event)" />
     </div>
   `,

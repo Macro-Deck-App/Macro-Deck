@@ -17,6 +17,7 @@ let nextChipId = 0;
       [disabled]="disabled()"
       [attr.aria-expanded]="expanded()"
       [attr.title]="label()"
+      [attr.aria-labelledby]="ariaLabel() ? nameId + ' ' + labelId : null"
       [attr.aria-describedby]="count() > 0 ? countId : null"
       (click)="activate.emit()">
       @if (resetGlyph()) {
@@ -41,6 +42,7 @@ let nextChipId = 0;
       }
       <span
         class="cp-chip-label"
+        [id]="labelId"
         [class.cp-chip-missing]="missing()"
         [class.cp-chip-placeholder]="placeholder()">{{ label() }}</span>
       @if (count() > 0) {
@@ -49,12 +51,16 @@ let nextChipId = 0;
       }
       <shared-select-caret />
     </button>
+    @if (ariaLabel()) {
+      <span [id]="nameId" hidden>{{ ariaLabel() }}</span>
+    }
   `,
   styleUrls: ['./color-picker-chip.component.scss'],
 })
 export class ColorPickerChipComponent {
   readonly swatch = input<string | null>(null);
   readonly label = input('');
+  readonly ariaLabel = input<string | null>(null);
   readonly placeholder = input(false);
   readonly resetGlyph = input(false);
   readonly missing = input(false);
@@ -67,7 +73,10 @@ export class ColorPickerChipComponent {
 
   readonly button = viewChild.required<ElementRef<HTMLButtonElement>>('button');
 
-  protected readonly countId = `cp-modifier-count-${++nextChipId}`;
+  private readonly chipId = ++nextChipId;
+  protected readonly countId = `cp-modifier-count-${this.chipId}`;
+  protected readonly nameId = `cp-chip-name-${this.chipId}`;
+  protected readonly labelId = `cp-chip-label-${this.chipId}`;
 
   focus(): void {
     this.button().nativeElement.focus();

@@ -19,20 +19,30 @@ export interface MultiSelectOption {
   label?: string;
 }
 
+let nextMultiSelectId = 0;
+
 @Component({
   selector: 'shared-multi-select',
   standalone: true,
   imports: [FormsModule, OverlayPanelComponent, CheckboxComponent, SelectCaretComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <button #trigger type="button" class="ms-trigger" (click)="toggle()">
+    <button
+      #trigger
+      type="button"
+      class="ms-trigger"
+      [attr.aria-labelledby]="ariaLabel ? nameId + ' ' + valueId : null"
+      (click)="toggle()">
       @if (value.length === 0) {
-        <span class="ms-placeholder">{{ placeholder }}</span>
+        <span class="ms-placeholder" [id]="valueId">{{ placeholder }}</span>
       } @else {
-        <span class="ms-summary">{{ summary() }}</span>
+        <span class="ms-summary" [id]="valueId">{{ summary() }}</span>
       }
       <shared-select-caret />
     </button>
+    @if (ariaLabel) {
+      <span [id]="nameId" hidden>{{ ariaLabel }}</span>
+    }
 
     <shared-overlay-panel
       [anchor]="trigger"
@@ -67,11 +77,16 @@ export interface MultiSelectOption {
   styleUrls: ['./multi-select.component.scss'],
 })
 export class MultiSelectComponent {
+  private readonly idPrefix = `ms-${++nextMultiSelectId}`;
+  protected readonly nameId = `${this.idPrefix}-name`;
+  protected readonly valueId = `${this.idPrefix}-value`;
+
   private readonly localization = inject(LocalizationService);
 
   private placeholderOverride?: string;
 
   @Input() value: string[] = [];
+  @Input() ariaLabel: string | null = null;
   @Input() options: MultiSelectOption[] = [];
 
   @Input() set placeholder(value: string) {

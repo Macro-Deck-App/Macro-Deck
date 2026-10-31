@@ -17658,7 +17658,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Exporta tu clave de recuperación de la copia de seguridad para proteger el llavero. Hasta entonces, sigue siendo legible en el disco.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Bloquea la ejecución de acciones mientras este equipo está bloqueado, sin importar lo que elijas aquí. En Linux, Macro Deck no puede detectar que este equipo está bloqueado, así que las acciones se siguen ejecutando y los clientes conectados no se bloquean.</value>
+    <value>Bloquea la ejecución de acciones mientras este equipo está bloqueado, sin importar lo que elijas aquí. En Linux, esto requiere un escritorio que informe del bloqueo, como GNOME o KDE Plasma. Si no, las acciones se siguen ejecutando y los clientes conectados no se bloquean.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Pantalla de bloqueo</value>
@@ -19646,6 +19646,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>La descarga falló. {error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Si esto sigue ocurriendo, descarga la última versión desde {url} e instálala manualmente.</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>No se pudo comprobar si hay actualizaciones. {error}</value>

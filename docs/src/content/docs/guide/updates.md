@@ -56,6 +56,11 @@ once you are back on the desktop.
   when you quit Macro Deck.
 - **Later**, or closing the window, leaves the update for now.
 
+If an update cannot be downloaded or installed, the **Software update** dialog says so and points to
+[macro-deck.app/download](https://macro-deck.app/download), where you can download the latest version
+and install it by hand. If the dialog keeps failing on Windows, open the update from the tray icon's
+menu instead: that window does not depend on the main window's connection to Macro Deck.
+
 The update window opens on its own at most once per version while Macro Deck runs, when an update is found
 in the background. It never opens in **Off** or **Automatic** mode, and not when you open the Macro Deck
 window before it appears.

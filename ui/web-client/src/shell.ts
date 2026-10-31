@@ -470,7 +470,7 @@ export class Shell {
         onWidgetEvent: (widgetId, node, name, data) =>
           this.client.widgetSessions.sendEvent(widgetId, node.id, name, data),
         onWidgetTrigger: (widgetId, triggerType) =>
-          void this.client.executeTrigger(widgetId, triggerType),
+          void this.client.executeTrigger(widgetId, triggerType, true),
         geometry,
         borderRadius: grid.borderRadius,
         emptyCellStyle: grid.emptyCellStyle,

@@ -1,6 +1,8 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { ApiService } from '@shared';
 
+export const DOWNLOAD_PAGE_URL = 'https://macro-deck.app/download';
+
 // A Tauri command rejects with whatever string the Rust side returned, so an install failure can carry
 // an explanation worth showing verbatim; anything else has no user-facing text.
 export function installErrorMessage(error: unknown): string | null {
@@ -58,6 +60,8 @@ export class UpdateService {
   readonly progressPercent = computed(() => this.state().progress?.percent ?? null);
   readonly lastCheckedAt = computed(() => this.state().lastCheckedAt);
   readonly installOnQuit = computed(() => this.state().phase === 'downloaded' && this.state().installOnQuit === true);
+
+  readonly manualDownloadUrl = computed(() => this.downloadUrl() ?? DOWNLOAD_PAGE_URL);
 
   readonly isDownloading = computed(() => this.phase() === 'downloading' || this.installRequested());
   readonly canInstall = computed(() => this.phase() === 'available' || this.phase() === 'downloaded');
@@ -140,7 +144,8 @@ export class UpdateService {
           ...current,
           phase: 'failed',
           failure: 'install',
-          error: installErrorMessage(error),
+          // No delivered state means the call never reached Rust, so this is Tauri's own transport text.
+          error: current.currentVersion === '' ? null : installErrorMessage(error),
         }));
       })
       .finally(() => {

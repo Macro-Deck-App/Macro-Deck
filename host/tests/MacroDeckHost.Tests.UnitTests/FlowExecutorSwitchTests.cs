@@ -35,6 +35,7 @@ public class FlowExecutorSwitchTests
 		var variables = new VariableRegistry();
 		variables.Upsert(Var("repeat", VariableType.Text, "all"));
 		variables.Upsert(Var("level", VariableType.Numeric, "2"));
+		variables.Upsert(Var("ratio", VariableType.Numeric, "1.5"));
 		variables.Upsert(Var("live", VariableType.Boolean, "true"));
 		variables.Upsert(Var("blank", VariableType.Text, string.Empty));
 
@@ -144,6 +145,18 @@ public class FlowExecutorSwitchTests
 	public async Task Number_variable_matches_a_case_typed_as_text()
 	{
 		await Run(SwitchFlow("""{ "$var": "level" }""", "switch", Case("\"1\"", "none"), Case("\"2\"", "one")));
+
+		AssertOnlyRan(_one);
+	}
+
+	[Test]
+	[SetCulture("de-DE")]
+	public async Task Number_variable_compares_by_value_and_never_by_a_comma_case()
+	{
+		await Run(SwitchFlow("""{ "$var": "ratio" }""",
+			"switch",
+			Case("\"1,5\"", "none"),
+			Case("\"1.50\"", "one")));
 
 		AssertOnlyRan(_one);
 	}

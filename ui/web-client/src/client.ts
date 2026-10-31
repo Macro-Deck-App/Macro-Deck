@@ -15,6 +15,7 @@ import {
   type DeviceCredential,
   type DeviceLoginInfo,
   findFlowForTrigger,
+  hasRunnableFlow,
   folderFromWire,
   type GetAppearanceSettingsResponse,
   type GetLocalizationResponse,
@@ -99,6 +100,12 @@ const TREE_GESTURE_TYPES: readonly string[] = [
   WidgetType.Countdown,
   WidgetType.Stopwatch,
 ];
+
+const PRESS_EVENT_BY_TRIGGER: { readonly [triggerType: string]: string | undefined } = {
+  onShortPress: 'press',
+  onLongPress: 'long-press',
+  onDoublePress: 'double-press',
+};
 
 export interface SignInResult {
   ok: boolean;
@@ -283,6 +290,7 @@ export class Client {
     });
 
     this.widgetSessions = new WidgetSessions(this.connection, this.sessions);
+    this.widgetSessions.onPressFailed(() => this.executionFeedback.report());
     this.sessions.onResyncNeeded(sessionId => this.resync(sessionId));
     this.hostLock = new HostLock(this.http);
 
@@ -712,13 +720,25 @@ export class Client {
     this.localizationRetryTimer = null;
   }
 
-  async executeTrigger(widgetId: string, triggerType: ActionButtonTriggerType): Promise<void> {
+  async executeTrigger(widgetId: string, triggerType: ActionButtonTriggerType, fromTile = false): Promise<void> {
     const widget = this.deck.widget(widgetId);
     if (!widget) return;
 
     // The types whose tree claims the press fire through the widget-tree event pipeline instead,
     // and would run their flows twice if they also came through here.
-    if (TREE_GESTURE_TYPES.includes(widget.type)) return;
+    if (TREE_GESTURE_TYPES.includes(widget.type)) {
+      const pressEvent = PRESS_EVENT_BY_TRIGGER[triggerType];
+      if (pressEvent && (fromTile || this.widgetSessions.treeFor(widgetId) === undefined)) {
+        this.widgetSessions.pressWithoutNode(widgetId, pressEvent);
+      } else if (
+        !pressEvent
+        && this.widgetSessions.treeFor(widgetId) === undefined
+        && hasRunnableFlow((widget.data as { flows?: unknown }).flows, triggerType)
+      ) {
+        this.widgetSessions.failHalfGesture(widgetId);
+      }
+      return;
+    }
 
     const flows = (widget.data as { flows?: ActionFlow[] }).flows;
     if (Array.isArray(flows)) {
