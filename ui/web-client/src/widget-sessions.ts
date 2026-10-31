@@ -175,7 +175,7 @@ export class WidgetSessions {
   }
 
   // Replaying half a gesture is unsafe, and one tap sends both halves, so they share one report.
-  private failHalfGesture(widgetId: string): void {
+  failHalfGesture(widgetId: string): void {
     const last = this.halfGestureFailures[widgetId];
     const now = this.timers.now();
     if (last !== undefined && now - last < WIDGET_PRESS_MEMORY_MS) return;

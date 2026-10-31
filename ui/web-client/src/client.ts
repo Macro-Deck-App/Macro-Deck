@@ -15,6 +15,7 @@ import {
   type DeviceCredential,
   type DeviceLoginInfo,
   findFlowForTrigger,
+  hasRunnableFlow,
   folderFromWire,
   type GetAppearanceSettingsResponse,
   type GetLocalizationResponse,
@@ -729,6 +730,12 @@ export class Client {
       const pressEvent = PRESS_EVENT_BY_TRIGGER[triggerType];
       if (pressEvent && (fromTile || this.widgetSessions.treeFor(widgetId) === undefined)) {
         this.widgetSessions.pressWithoutNode(widgetId, pressEvent);
+      } else if (
+        !pressEvent
+        && this.widgetSessions.treeFor(widgetId) === undefined
+        && hasRunnableFlow((widget.data as { flows?: unknown }).flows, triggerType)
+      ) {
+        this.widgetSessions.failHalfGesture(widgetId);
       }
       return;
     }

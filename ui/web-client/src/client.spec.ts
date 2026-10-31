@@ -2293,6 +2293,20 @@ describe('Client', () => {
       expect(messages).toEqual([generic(client)]);
     });
 
+    it('reports a touch flow of a tile that has no tree yet, once for the whole tap', async () => {
+      const client = build();
+      const messages = reported(client);
+      const touch = (triggerType: string) => ({
+        triggerId: triggerType, triggerType, children: [{ id: 'a', type: 'action', label: 'a', actionId: 'x' }],
+      });
+      deckWith(client, 'ActionButton', { flows: [touch('onTouchStart'), touch('onTouchEnd')] });
+
+      await client.executeTrigger('w1', 'onTouchStart', true);
+      await client.executeTrigger('w1', 'onTouchEnd', true);
+
+      expect(messages).toEqual([generic(client)]);
+    });
+
     it('hands a tile gesture to the sessions once a tree exists, but leaves hardware input alone', async () => {
       const client = build();
       deckWith(client, 'ActionButton');
