@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 	private readonly IEventSubscriptionIndex _index;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly StartupReadiness _readiness;
+	private readonly BuiltInIntegrationRegistration _builtInRegistration;
 	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<EventTarget, byte> _inFlight = new();
@@ -23,6 +25,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 		IEventSubscriptionIndex index,
 		IServiceScopeFactory scopeFactory,
 		StartupReadiness readiness,
+		BuiltInIntegrationRegistration builtInRegistration,
 		ILogger logger)
 		: base(lifetime)
 	{
@@ -30,6 +33,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 		_index = index;
 		_scopeFactory = scopeFactory;
 		_readiness = readiness;
+		_builtInRegistration = builtInRegistration;
 		_logger = logger.ForContext<EventDispatchBackgroundService>();
 	}
 
@@ -37,6 +41,9 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 	{
 		await _readiness.WhenReady.WaitAsync(stoppingToken);
 		_index.Rebuild();
+
+		// Rebuilt first so events raised during this wait queue in the bus instead of being dropped.
+		await _builtInRegistration.Completed.WaitAsync(stoppingToken);
 		_readiness.MarkEventDispatchReady();
 
 		var reader = _bus.Reader;
