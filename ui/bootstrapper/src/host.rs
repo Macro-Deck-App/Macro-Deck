@@ -226,6 +226,7 @@ pub fn per_user_port_dir(
         .map(|base| base.join("macro-deck"))
 }
 
+#[cfg(any(target_os = "linux", test))]
 pub fn is_foreign_owner(file_uid: u32, own_uid: u32) -> bool {
     file_uid != own_uid
 }
