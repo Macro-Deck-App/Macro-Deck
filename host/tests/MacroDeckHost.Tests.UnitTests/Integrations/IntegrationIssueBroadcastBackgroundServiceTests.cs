@@ -1,6 +1,7 @@
 using System.Globalization;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Infrastructure.Notifications;
@@ -319,7 +320,10 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 
 	private static List<IntegrationIssuesChangedEvent> Events(RecordingUiTransport transport)
 	{
-		return transport.Broadcasts.OfType<IntegrationIssuesChangedEvent>().ToList();
+		return transport.GroupMessages.Where(m => m.Group == UiAdminGroups.Admin)
+			.Select(m => m.Message)
+			.OfType<IntegrationIssuesChangedEvent>()
+			.ToList();
 	}
 
 	private static IntegrationIssueBroadcastBackgroundService CreateService(
