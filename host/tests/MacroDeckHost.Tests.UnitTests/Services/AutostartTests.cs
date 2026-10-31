@@ -5,6 +5,94 @@ using MacroDeckHost.Infrastructure.Autostart;
 namespace MacroDeckHost.Tests.UnitTests.Services;
 
 [TestFixture]
+public class LinuxAutostartEntryTests
+{
+	private string _directory = null!;
+
+	[SetUp]
+	public void SetUp()
+	{
+		_directory = Path.Combine(Path.GetTempPath(), $"md-autostart-{Guid.NewGuid():N}");
+	}
+
+	[TearDown]
+	public void TearDown()
+	{
+		if (Directory.Exists(_directory))
+		{
+			Directory.Delete(_directory, true);
+		}
+	}
+
+	[TestCase("/opt/plain/run", false)]
+	[TestCase("/home/u/My Apps/Macro Deck.AppImage", true)]
+	[TestCase("/opt/a%20b/run", false)]
+	[TestCase("/opt/a%%b%/run%", true)]
+	[TestCase("/opt/a\\%b/run", false)]
+	[TestCase("/opt/$HOME/`id`/run", false)]
+	[TestCase("/opt/q\"uote/run", true)]
+	[TestCase("/opt/back\\slash/run\\", false)]
+	[TestCase("/home/u/--minimized/run", false)]
+	[TestCase("/opt/new\nline/tab\t/run", false)]
+	public void Entry_round_trips_through_the_file(string path, bool minimized)
+	{
+		var registrar = new LinuxAutostartRegistrar(_directory);
+		var registration = new AutostartRegistration(path, minimized);
+
+		registrar.Write(registration);
+
+		Assert.That(registrar.Read(), Is.EqualTo(registration));
+	}
+
+	[Test]
+	public void A_newline_in_the_path_cannot_add_a_key_to_the_entry()
+	{
+		var registrar = new LinuxAutostartRegistrar(_directory);
+
+		registrar.Write(new AutostartRegistration("/opt/x\nHidden=true/run", false));
+
+		var lines = File.ReadAllLines(EntryFile());
+		Assert.Multiple(() =>
+		{
+			Assert.That(lines.Count(line => line.StartsWith("Exec=", StringComparison.Ordinal)), Is.EqualTo(1));
+			Assert.That(lines.Any(line => line.StartsWith("Hidden=", StringComparison.Ordinal)), Is.False);
+		});
+	}
+
+	[TestCase("/opt/a%20b/run", "\"/opt/a%20b/run\" --autostart --minimized")]
+	[TestCase("/opt/a%c3%bc/run", "\"/opt/a%c3%bc/run\" --autostart --minimized")]
+	[TestCase("/opt/a%/run", "\"/opt/a%/run\" --autostart --minimized")]
+	[TestCase("/opt/a$b/run", "\"/opt/a$b/run\" --autostart --minimized")]
+	[TestCase("/opt/a`b/run", "\"/opt/a`b/run\" --autostart --minimized")]
+	[TestCase("/opt/back\\slash/run", "\"/opt/back\\slash/run\" --autostart --minimized")]
+	[TestCase("/opt/ends\\", "\"/opt/ends\\\" --autostart --minimized")]
+	[TestCase("/opt/ends\\\\", "\"/opt/ends\\\\\" --autostart --minimized")]
+	public void Startup_refresh_repairs_an_entry_an_older_version_left_broken(string path, string oldExec)
+	{
+		Directory.CreateDirectory(_directory);
+		File.WriteAllText(EntryFile(),
+			$"[Desktop Entry]\nType=Application\nName=Macro Deck\nExec={oldExec}\nTerminal=false\n");
+		var registrar = new LinuxAutostartRegistrar(_directory);
+		var service = new AutostartService(registrar, path);
+
+		service.RefreshRegistration();
+
+		var expected = new AutostartRegistration(path, true);
+		Assert.Multiple(() =>
+		{
+			Assert.That(registrar.Read(), Is.EqualTo(expected));
+			Assert.That(File.ReadAllText(EntryFile()),
+				Does.Contain($"Exec={AutostartEntryContent.BuildDesktopExec(expected)}"));
+		});
+	}
+
+	private string EntryFile()
+	{
+		return Path.Combine(_directory, $"{AutostartEntryContent.DesktopEntryName}.desktop");
+	}
+}
+
+[TestFixture]
 public class AutostartEntryContentTests
 {
 	[Test]
@@ -63,6 +151,37 @@ public class AutostartEntryContentTests
 				AutostartEntryContent.ParseCommandLine(AutostartEntryContent.BuildCommandLine(withoutMinimized)),
 				Is.EqualTo(withoutMinimized));
 		});
+	}
+
+	[TestCase("/opt/macro-deck/macro-deck", "\"/opt/macro-deck/macro-deck\" --autostart")]
+	[TestCase("/opt/My App/run", "\"/opt/My App/run\" --autostart")]
+	[TestCase("/opt/a%20b/run", "env \"/opt/a%%20b/run\" --autostart")]
+	[TestCase("/opt/a$b/run", "\"/opt/a\\\\$b/run\" --autostart")]
+	[TestCase("/opt/a`b/run", "\"/opt/a\\\\`b/run\" --autostart")]
+	[TestCase("/opt/a\"b/run", "\"/opt/a\\\\\"b/run\" --autostart")]
+	[TestCase("/opt/a\\b/run", "\"/opt/a\\\\\\\\b/run\" --autostart")]
+	public void DesktopExec_escapes_per_the_desktop_entry_spec(string path, string expected)
+	{
+		var registration = new AutostartRegistration(path, false);
+
+		Assert.That(AutostartEntryContent.BuildDesktopExec(registration), Is.EqualTo(expected));
+	}
+
+	[Test]
+	public void Windows_command_line_stays_unescaped()
+	{
+		var registration = new AutostartRegistration(@"C:\Program Files\100%\MacroDeck.exe", false);
+
+		Assert.That(AutostartEntryContent.BuildCommandLine(registration),
+			Is.EqualTo("\"C:\\Program Files\\100%\\MacroDeck.exe\" --autostart"));
+	}
+
+	[TestCase("\"unterminated")]
+	[TestCase("\"/opt/--autostart/x\" --tray")]
+	[TestCase("")]
+	public void ParseDesktopExec_rejects_foreign_values(string exec)
+	{
+		Assert.That(AutostartEntryContent.ParseDesktopExec(exec), Is.Null);
 	}
 
 	[Test]

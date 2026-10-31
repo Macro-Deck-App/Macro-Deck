@@ -31,6 +31,6 @@ public sealed class LinuxAutostartRegistrar : FileAutostartRegistrar
 			.Select(line => line.Trim())
 			.FirstOrDefault(line => line.StartsWith("Exec=", StringComparison.Ordinal));
 
-		return AutostartEntryContent.ParseCommandLine(execLine?["Exec=".Length..]);
+		return AutostartEntryContent.ParseDesktopExec(execLine?["Exec=".Length..]);
 	}
 }
