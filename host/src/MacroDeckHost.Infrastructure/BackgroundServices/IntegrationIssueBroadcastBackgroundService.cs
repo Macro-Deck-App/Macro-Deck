@@ -150,7 +150,8 @@ public sealed class IntegrationIssueBroadcastBackgroundService : HostReadyBackgr
 		{
 			if (_lastByIntegration.Remove(integrationId))
 			{
-				await _transport.Send(new IntegrationIssuesChangedEvent
+				await _transport.SendToGroup(UiAdminGroups.Admin,
+					new IntegrationIssuesChangedEvent
 					{
 						IntegrationId = integrationId,
 						Issues = [],
@@ -171,7 +172,8 @@ public sealed class IntegrationIssueBroadcastBackgroundService : HostReadyBackgr
 		}
 
 		_lastByIntegration[integrationId] = json;
-		await _transport.Send(new IntegrationIssuesChangedEvent
+		await _transport.SendToGroup(UiAdminGroups.Admin,
+			new IntegrationIssuesChangedEvent
 			{
 				IntegrationId = integrationId,
 				Issues = dtos,

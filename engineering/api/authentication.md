@@ -95,7 +95,7 @@ complete URI already carries the code, the normal path is one confirmation in a 
 to type. The whole account surface requires the `admin` scope, so the desktop app in its own window
 and the desktop UI opened over the public listener are both covered by one policy, while the web
 client — which holds a `client`-scope token — is deliberately unaware that Macro Deck accounts exist.
-The change notification broadcast over the UI transport carries no fields, so clients re-read the
+The change notification to admin connections carries no fields, so clients re-read the
 session rather than trusting a payload.
 
 Nothing binds the confirmation to the device that asked for it: whoever holds the code can approve it
