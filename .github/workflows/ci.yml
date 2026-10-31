@@ -3,9 +3,9 @@ name: CI
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, production]
   push:
-    branches: [main]
+    branches: [main, production]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -30,7 +30,7 @@ env:
 
 jobs:
   # A pull request runs only the jobs whose inputs it changed (ci/scripts/ci-scope.mjs maps paths to
-  # jobs); main and manual runs run everything. A skipped job counts as passed for a required check.
+  # jobs); main, production and manual runs run everything. A skipped job counts as passed for a required check.
   changes:
     name: Change scope
     runs-on: blacksmith-2vcpu-ubuntu-2404
