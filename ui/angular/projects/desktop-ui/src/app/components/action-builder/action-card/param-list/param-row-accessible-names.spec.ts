@@ -124,6 +124,15 @@ describe('ParamRowComponent accessible names', () => {
     expect(name.startsWith('Key ')).withContext(name).toBeTrue();
   });
 
+  it('names the text step of a key sequence', async () => {
+    const host = await render(parameter({
+      type: 'keyboard-sequence',
+      value: { steps: [{ type: 'text', text: '' }] } as never,
+    }));
+
+    expect(accessibleName(host.querySelector('.kse-text [role=textbox]')!)).not.toBe('');
+  });
+
   it('names the step type select of a key sequence', async () => {
     const host = await render(parameter({ type: 'keyboard-sequence' }));
 
