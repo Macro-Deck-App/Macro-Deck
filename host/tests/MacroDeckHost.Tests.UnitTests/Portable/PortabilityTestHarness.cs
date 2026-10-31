@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
@@ -22,6 +23,7 @@ namespace MacroDeckHost.Tests.UnitTests.Portable;
 internal sealed class PortabilityTestHarness : IDisposable
 {
 	public IconTestHarness Icons { get; } = new();
+	public WidgetLayoutGate LayoutGate { get; } = new();
 	public ProfileCache ProfileCache { get; }
 	public FolderCache FolderCache { get; }
 	public ScriptCache ScriptCache { get; }
@@ -83,9 +85,21 @@ internal sealed class PortabilityTestHarness : IDisposable
 		ProfileService
 			= new ProfilePortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, logger);
 		WidgetService
-			= new WidgetPortabilityService(FolderCache, ProfileCache, AssetManager, Icons.Mediator, logger);
+			= new WidgetPortabilityService(FolderCache,
+				ProfileCache,
+				AssetManager,
+				Icons.Mediator,
+				logger,
+				null,
+				LayoutGate);
 		FolderService
-			= new FolderPortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, logger);
+			= new FolderPortabilityService(ProfileCache,
+				FolderCache,
+				AssetManager,
+				Icons.Mediator,
+				logger,
+				null,
+				LayoutGate);
 	}
 
 	public async Task<Guid> AddWidgetVariable(

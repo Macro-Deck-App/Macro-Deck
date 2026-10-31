@@ -29,6 +29,45 @@ public class WidgetPortabilityServiceTests
 	}
 
 	[Test]
+	public async Task An_import_waiting_for_the_layout_gate_places_around_a_widget_added_meanwhile()
+	{
+		var (profile, sourceFolder, widget) = await _harness.SeedProfile("{}");
+		var target = await AddFolder(profile.Id, "Target");
+		var export = await _harness.WidgetService.Export(sourceFolder.Id,
+			[widget.Id],
+			PortableExportOptions.Default,
+			CancellationToken.None);
+
+		var lease = await _harness.LayoutGate.Enter();
+		var import = Task.Run(() => _harness.WidgetService.Import(target.Id,
+			1,
+			1,
+			export.Data!,
+			null,
+			CancellationToken.None));
+		await Task.Delay(100);
+		_harness.FolderCache.AddWidget(target.Id,
+			new WidgetEntity
+			{
+				Id = Guid.NewGuid(),
+				FolderId = target.Id,
+				Type = "ActionButton",
+				PositionX = 1,
+				PositionY = 1,
+				Width = 1,
+				Height = 1
+			});
+		lease.Dispose();
+
+		var result = await import.WaitAsync(TimeSpan.FromSeconds(20));
+
+		Assert.That(result.Success, Is.True);
+		var cells = _harness.FolderCache.GetFolderById(target.Id)!.Widgets
+			.Select(entry => (entry.PositionX, entry.PositionY));
+		Assert.That(cells, Is.Unique);
+	}
+
+	[Test]
 	public async Task Export_ThenImport_IntoAnotherFolder_RecreatesTheWidget_ReusingTheIcon()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
