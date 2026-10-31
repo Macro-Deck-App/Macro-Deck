@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -41,6 +42,7 @@ public sealed class McpEntityStore : IMcpEntityStore
 	private readonly IVariableService _variables;
 	private readonly ISecretApprovals _approvals;
 	private readonly IMediator _mediator;
+	private readonly WidgetLayoutGate _layoutGate;
 
 	public McpEntityStore(
 		IFolderCache folders,
@@ -49,7 +51,8 @@ public sealed class McpEntityStore : IMcpEntityStore
 		IProfileCache profiles,
 		IVariableService variables,
 		ISecretApprovals approvals,
-		IMediator mediator)
+		IMediator mediator,
+		WidgetLayoutGate? layoutGate = null)
 	{
 		_folders = folders;
 		_automations = automations;
@@ -58,6 +61,7 @@ public sealed class McpEntityStore : IMcpEntityStore
 		_variables = variables;
 		_approvals = approvals;
 		_mediator = mediator;
+		_layoutGate = layoutGate ?? new WidgetLayoutGate();
 	}
 
 	public async Task<McpJournalItem?> Capture(string entity, Guid id, McpJournalOperation operation)
@@ -257,6 +261,7 @@ public sealed class McpEntityStore : IMcpEntityStore
 		Dictionary<Guid, bool>? leftStartFolders,
 		SecretApprovalWrite write)
 	{
+		using var lease = await _layoutGate.Enter();
 		if (subtree.Folders.Count == 0 || _profiles.GetById(subtree.Folders[0].ProfileId) is null)
 		{
 			return McpRestoreResult.Failed;
@@ -298,6 +303,8 @@ public sealed class McpEntityStore : IMcpEntityStore
 			}
 		}
 
+		lease.Dispose();
+
 		foreach (var folder in subtree.Folders)
 		{
 			await _mediator.Publish(new FolderCreatedNotification(folder));
@@ -326,6 +333,7 @@ public sealed class McpEntityStore : IMcpEntityStore
 		McpJournalOperation operation,
 		SecretApprovalWrite write)
 	{
+		using var lease = await _layoutGate.Enter();
 		if (_folders.GetFolderById(widget.FolderId) is null)
 		{
 			return false;
@@ -334,11 +342,13 @@ public sealed class McpEntityStore : IMcpEntityStore
 		if (operation == McpJournalOperation.Deleted)
 		{
 			_folders.AddWidget(widget.FolderId, widget, write);
+			lease.Dispose();
 			await _mediator.Publish(new WidgetCreatedNotification(widget));
 		}
 		else
 		{
 			_folders.UpdateWidget(widget.FolderId, widget, write);
+			lease.Dispose();
 			await _mediator.Publish(new WidgetUpdatedNotification(widget));
 		}
 
@@ -352,12 +362,14 @@ public sealed class McpEntityStore : IMcpEntityStore
 			return false;
 		}
 
+		using var lease = await _layoutGate.Enter();
 		if (_folders.GetFolderById(folder.Id) is { } current)
 		{
 			folder.Widgets = current.Widgets;
 		}
 
 		await _folders.AddOrUpdate(folder, write);
+		lease.Dispose();
 		await _mediator.Publish(new FolderUpdatedNotification(folder));
 		return true;
 	}
@@ -399,12 +411,14 @@ public sealed class McpEntityStore : IMcpEntityStore
 
 	private async Task<bool> RestoreProfile(ProfileEntity profile)
 	{
+		using var lease = await _layoutGate.Enter();
 		if (_profiles.GetById(profile.Id) is null)
 		{
 			return false;
 		}
 
 		await _profiles.AddOrUpdate(profile);
+		lease.Dispose();
 		await _mediator.Publish(new ProfileUpdatedNotification(profile));
 		return true;
 	}

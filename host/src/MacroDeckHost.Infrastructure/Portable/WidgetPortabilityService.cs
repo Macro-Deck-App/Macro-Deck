@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Secrets.Approvals;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -18,6 +19,7 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 	private readonly IMediator _mediator;
 	private readonly ILogger _logger;
 	private readonly SecretWriteAuthority? _writeAuthority;
+	private readonly WidgetLayoutGate _layoutGate;
 
 	public WidgetPortabilityService(
 		IFolderCache folderCache,
@@ -25,7 +27,8 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		IPortableAssetManager assetManager,
 		IMediator mediator,
 		ILogger logger,
-		SecretWriteAuthority? writeAuthority = null)
+		SecretWriteAuthority? writeAuthority = null,
+		WidgetLayoutGate? layoutGate = null)
 	{
 		_folderCache = folderCache;
 		_profileCache = profileCache;
@@ -33,6 +36,7 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		_mediator = mediator;
 		_logger = logger;
 		_writeAuthority = writeAuthority;
+		_layoutGate = layoutGate ?? new WidgetLayoutGate();
 	}
 
 	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
@@ -130,23 +134,10 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 			return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(PortabilityError.NotFound);
 		}
 
-		var profileFolders = _folderCache.GetFoldersByProfileId(folder.ProfileId);
-		var profile = _profileCache.GetById(folder.ProfileId);
-		var effectiveColumns =
-			GridInheritance.ResolveColumns(folder, profileFolders, profile?.DefaultColumns ?? GridDefaults.Columns);
-		var effectiveRows =
-			GridInheritance.ResolveRows(folder, profileFolders, profile?.DefaultRows ?? GridDefaults.Rows);
-
 		var group = widgets
 			.Select(widget => new PortableCell(widget.PositionX, widget.PositionY, widget.Width, widget.Height))
 			.ToList();
-		var occupied = PinnedWidgetLayout
-			.DisplayedWidgets(folder, profileFolders)
-			.Select(widget => new PortableCell(widget.PositionX, widget.PositionY, widget.Width, widget.Height))
-			.ToList();
-		var positions =
-			PortableWidgetPlacement.Place(group, effectiveColumns, effectiveRows, occupied, anchorX, anchorY);
-		if (positions is null)
+		if (PlaceGroup(folder, group, anchorX, anchorY) is null)
 		{
 			return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(PortabilityError.ValidationError,
 				"Not enough free space in the folder");
@@ -156,6 +147,20 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		{
 			var assetIdMap = await _assetManager.Import(content, outcome.Icons, outcome.Fonts, cancellationToken);
 			var carriedSecrets = PortableSecretReferences.CarriedBy(content, assetIdMap);
+
+			using var lease = await _layoutGate.Enter(cancellationToken);
+			folder = _folderCache.GetFolderById(folderId);
+			if (folder is null)
+			{
+				return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(PortabilityError.NotFound);
+			}
+
+			var positions = PlaceGroup(folder, group, anchorX, anchorY);
+			if (positions is null)
+			{
+				return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(PortabilityError.ValidationError,
+					"Not enough free space in the folder");
+			}
 
 			var created = new List<WidgetEntity>();
 			var widgetIdMap = new Dictionary<Guid, Guid>();
@@ -185,6 +190,8 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 				}
 			}
 
+			lease.Dispose();
+
 			await _assetManager.RestoreWidgetVariables(content, widgetIdMap, cancellationToken);
 
 			foreach (var widget in created)
@@ -199,5 +206,25 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 			_logger.Error(ex, "Failed to import widgets archive into folder {FolderId}", folderId);
 			return Result.Fail<IReadOnlyList<WidgetEntity>, PortabilityError>(PortabilityError.StorageFailure);
 		}
+	}
+
+	private IReadOnlyList<(int X, int Y)>? PlaceGroup(
+		FolderEntity folder,
+		IReadOnlyList<PortableCell> group,
+		int anchorX,
+		int anchorY)
+	{
+		var profileFolders = _folderCache.GetFoldersByProfileId(folder.ProfileId);
+		var profile = _profileCache.GetById(folder.ProfileId);
+		var effectiveColumns =
+			GridInheritance.ResolveColumns(folder, profileFolders, profile?.DefaultColumns ?? GridDefaults.Columns);
+		var effectiveRows =
+			GridInheritance.ResolveRows(folder, profileFolders, profile?.DefaultRows ?? GridDefaults.Rows);
+		var occupied = PinnedWidgetLayout
+			.DisplayedWidgets(folder, profileFolders)
+			.Select(widget => new PortableCell(widget.PositionX, widget.PositionY, widget.Width, widget.Height))
+			.ToList();
+
+		return PortableWidgetPlacement.Place(group, effectiveColumns, effectiveRows, occupied, anchorX, anchorY);
 	}
 }

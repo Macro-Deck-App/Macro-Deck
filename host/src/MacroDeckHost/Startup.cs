@@ -565,6 +565,7 @@ public class Startup
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IScriptService, ScriptService>();
 		services.AddScoped<IAutomationService, AutomationService>();
+		services.AddSingleton<WidgetLayoutGate>();
 		services.AddScoped<IWidgetService, WidgetService>();
 		services.AddScoped<IWidgetAppearanceService, WidgetAppearanceService>();
 		services.AddScoped<IFlowExecutor, FlowExecutor>();
