@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
@@ -112,6 +113,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly INotificationManager _notifications;
 	private readonly UiClientFeatures _clientFeatures;
 	private readonly IPageUiSessionOpener? _pageUiSessions;
+	private readonly StartupReadiness _startupReadiness;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -166,10 +168,12 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		VideoStreamProviderRegistry videoStreamProviders,
 		INotificationManager notifications,
 		UiClientFeatures clientFeatures,
+		StartupReadiness startupReadiness,
 		CancellationToken connectionCancellation,
 		IPageUiSessionOpener? pageUiSessions = null)
 	{
 		_pageUiSessions = pageUiSessions;
+		_startupReadiness = startupReadiness;
 		_notifications = notifications;
 		_clientFeatures = clientFeatures;
 		_connectionId = connectionId;
@@ -338,15 +342,18 @@ public sealed class UiWebSocketDispatcher : IDisposable
 				"AttachUiSession" => _uiSessions.Attach(Arg<UiAttachSessionRequest>(payload, 0).SessionId,
 					_connectionId,
 					OwnerPrincipal()),
-				"OpenConfigUiSession" when IsAdmin => OpenConfigUiSession(Arg<OpenConfigUiSessionRequest>(payload, 0)),
-				"OpenWidgetUiSession" => OpenWidgetUiSession(Arg<OpenWidgetUiSessionRequest>(payload, 0)),
+				"OpenConfigUiSession" when IsAdmin => await OpenConfigUiSession(
+					Arg<OpenConfigUiSessionRequest>(payload, 0),
+					cancellationToken),
+				"OpenWidgetUiSession" => await OpenWidgetUiSession(Arg<OpenWidgetUiSessionRequest>(payload, 0),
+					cancellationToken),
 				"ListUiPreviews" when IsAdmin => await _listUiPreviews.Handle(new ListUiPreviewsRequest(),
 					cancellationToken),
 				"OpenUiPreviewSession" when IsAdmin => OpenUiPreviewSession(
 					Arg<OpenUiPreviewSessionRequest>(payload, 0)),
 				"OpenPageUiSession" when IsAdmin => OpenPageUiSession(Arg<OpenPageUiSessionRequest>(payload, 0)),
-				"OpenFolderUiSession" => _folderUiSessions.Open(Arg<OpenFolderUiSessionRequest>(payload, 0),
-					OwnerPrincipal()),
+				"OpenFolderUiSession" => await OpenFolderUiSession(Arg<OpenFolderUiSessionRequest>(payload, 0),
+					cancellationToken),
 				"OpenModalUiSession" => _modalUiSessions.Open(Arg<OpenModalUiSessionRequest>(payload, 0),
 					OwnerPrincipal()),
 				"CompleteUiModal" => _modalUiSessions.Complete(Arg<CompleteUiModalRequest>(payload, 0),
@@ -522,18 +529,32 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		return null;
 	}
 
-	private OpenConfigUiSessionResponse OpenConfigUiSession(OpenConfigUiSessionRequest request)
+	private async Task<OpenConfigUiSessionResponse> OpenConfigUiSession(
+		OpenConfigUiSessionRequest request,
+		CancellationToken cancellationToken)
 	{
+		await _startupReadiness.WhenReady.WaitAsync(cancellationToken);
 		var ticket = _configUiSessions.Open(request, OwnerPrincipal());
 		return new OpenConfigUiSessionResponse
 			{ Accepted = ticket.Accepted, SessionId = ticket.SessionId, Code = ticket.Code, Message = ticket.Message };
 	}
 
-	private OpenWidgetUiSessionResponse OpenWidgetUiSession(OpenWidgetUiSessionRequest request)
+	private async Task<OpenWidgetUiSessionResponse> OpenWidgetUiSession(
+		OpenWidgetUiSessionRequest request,
+		CancellationToken cancellationToken)
 	{
+		await _startupReadiness.WhenReady.WaitAsync(cancellationToken);
 		var ticket = _widgetUiSessions.Open(request, OwnerPrincipal(), IsAdmin);
 		return new OpenWidgetUiSessionResponse
 			{ Accepted = ticket.Accepted, SessionId = ticket.SessionId, Code = ticket.Code, Message = ticket.Message };
+	}
+
+	private async Task<OpenFolderUiSessionResponse> OpenFolderUiSession(
+		OpenFolderUiSessionRequest request,
+		CancellationToken cancellationToken)
+	{
+		await _startupReadiness.WhenReady.WaitAsync(cancellationToken);
+		return _folderUiSessions.Open(request, OwnerPrincipal());
 	}
 
 	private OpenUiPreviewSessionResponse OpenUiPreviewSession(OpenUiPreviewSessionRequest request)

@@ -17664,7 +17664,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Wyeksportuj zapasowy klucz odzyskiwania, aby chronić zestaw kluczy. Do tego czasu pozostaje on czytelny na dysku.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blokuje wykonywanie akcji, gdy ten komputer jest zablokowany, niezależnie od wyboru poniżej. W systemie Linux Macro Deck nie wykrywa zablokowania tego komputera, więc akcje są nadal wykonywane, a połączeni klienci nie są blokowani.</value>
+    <value>Blokuje wykonywanie akcji, gdy ten komputer jest zablokowany, niezależnie od wyboru poniżej. W systemie Linux wymaga to pulpitu zgłaszającego blokadę, na przykład GNOME lub KDE Plasma. W przeciwnym razie akcje są nadal wykonywane, a połączeni klienci nie są blokowani.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Ekran blokady</value>

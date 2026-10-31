@@ -22,6 +22,7 @@ export class WidgetTargetPickerComponent {
   @Input() hasOwnerWidget = false;
 
   @Input() valueLabel?: string;
+  @Input() ariaLabel: string | null = null;
 
   @Output() valueChange = new EventEmitter<string>();
   @Output() filterChange = new EventEmitter<string>();

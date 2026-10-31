@@ -21,6 +21,7 @@ import { LocalizationService } from '@shared';
       type="text"
       [class.du-invalid]="invalid"
       [placeholder]="placeholder"
+      [attr.aria-label]="ariaLabel"
       [ngModel]="text"
       (ngModelChange)="onInput($event)"
       (blur)="onBlur()">
@@ -31,6 +32,8 @@ export class DurationInputComponent {
   private readonly localization = inject(LocalizationService);
 
   private placeholderOverride?: string;
+
+  @Input() ariaLabel: string | null = null;
 
   @Input() set placeholder(value: string) {
     this.placeholderOverride = value;

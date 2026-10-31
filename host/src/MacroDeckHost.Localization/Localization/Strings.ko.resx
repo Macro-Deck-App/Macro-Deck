@@ -17665,7 +17665,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>키 링을 보호하려면 백업 복구 키를 내보내세요. 그전까지 키 링은 디스크에서 읽을 수 있는 상태로 남습니다.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>여기서 무엇을 선택하든 이 컴퓨터가 잠겨 있는 동안에는 작업 실행이 차단됩니다. Linux에서는 Macro Deck이 이 컴퓨터의 잠금을 감지할 수 없으므로 작업이 계속 실행되고 연결된 클라이언트도 잠기지 않습니다.</value>
+    <value>여기서 무엇을 선택하든 이 컴퓨터가 잠겨 있는 동안에는 작업 실행이 차단됩니다. Linux에서는 GNOME이나 KDE Plasma처럼 잠금을 알려 주는 데스크톱이 필요합니다. 그렇지 않으면 작업이 계속 실행되고 연결된 클라이언트도 잠기지 않습니다.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>잠금 화면</value>

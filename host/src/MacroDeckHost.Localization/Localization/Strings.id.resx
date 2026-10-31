@@ -17665,7 +17665,7 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Ekspor kunci pemulihan cadangan Anda untuk melindungi key ring. Sampai saat itu, key ring tetap dapat dibaca di disk.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Memblokir eksekusi aksi selama komputer ini terkunci, apa pun pilihan Anda di sini. Di Linux, Macro Deck tidak dapat mendeteksi bahwa komputer ini terkunci, sehingga aksi tetap berjalan dan klien yang terhubung tidak dikunci.</value>
+    <value>Memblokir eksekusi aksi selama komputer ini terkunci, apa pun pilihan Anda di sini. Di Linux, hal ini memerlukan desktop yang melaporkan penguncian, seperti GNOME atau KDE Plasma. Jika tidak, aksi tetap berjalan dan klien yang terhubung tidak dikunci.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Layar kunci</value>

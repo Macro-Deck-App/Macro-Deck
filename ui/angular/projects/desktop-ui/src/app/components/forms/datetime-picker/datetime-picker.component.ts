@@ -16,12 +16,15 @@ import { FormsModule } from '@angular/forms';
     <input
       class="dt-input"
       type="datetime-local"
+      [attr.aria-label]="ariaLabel"
       [ngModel]="localValue"
       (ngModelChange)="onInput($event)">
   `,
   styleUrls: ['./datetime-picker.component.scss'],
 })
 export class DateTimePickerComponent {
+  @Input() ariaLabel: string | null = null;
+
   localValue = '';
 
   @Input()

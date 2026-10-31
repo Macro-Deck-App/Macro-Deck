@@ -76,6 +76,27 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Color');
   });
 
+  it('names the fields of the font and border controls after their visible labels', async () => {
+    options.getOptions.and.resolveTo({
+      options: [{ value: 'clock', metadata: { appearanceProperties: 'Border,BorderColor,Font,LabelFont' } }],
+      allowsCustomValue: false,
+    });
+    const namesFor = async (actionId: string): Promise<string[]> => {
+      fixture.componentRef.setInput('block', block(actionId));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const host = fixture.nativeElement as HTMLElement;
+      const names = [...host.querySelectorAll('[aria-labelledby]')]
+        .map(element => document.getElementById(element.getAttribute('aria-labelledby')!.split(' ')[0])?.textContent ?? '');
+      return [...names, ...[...host.querySelectorAll('input[aria-label]')].map(input => input.getAttribute('aria-label')!)];
+    };
+
+    expect(await namesFor('set-border')).toEqual(jasmine.arrayContaining(['Style', 'Color']));
+    expect(fixture.nativeElement.querySelector('.cp-label')).toBeNull();
+    expect(await namesFor('set-font')).toEqual(jasmine.arrayContaining(['Font', 'Style', 'Size (%)']));
+  });
+
   it('offers an accent color picker on a slider and history graph but not on a button', async () => {
     options.getOptions.and.resolveTo({
       options: [

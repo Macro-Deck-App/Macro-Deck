@@ -17665,7 +17665,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>请导出你的备份恢复密钥以保护密钥环。在此之前，它在磁盘上保持可读。</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>这台电脑处于锁定状态时会阻止执行动作，无论你在这里如何选择。在 Linux 上，Macro Deck 无法检测这台电脑是否已锁定，因此动作会继续执行，已连接的客户端也不会被锁定。</value>
+    <value>这台电脑处于锁定状态时会阻止执行动作，无论你在这里如何选择。在 Linux 上，需要能报告锁定状态的桌面环境，例如 GNOME 或 KDE Plasma。否则动作会继续执行，已连接的客户端也不会被锁定。</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>锁屏</value>

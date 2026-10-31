@@ -7,6 +7,7 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
@@ -816,6 +817,40 @@ internal sealed class WidgetUiSessionTests
 			Assert.That(_registry.Find(sample.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Culture]
 					.GetString(),
 				Is.EqualTo("pt-BR"));
+		});
+	}
+
+	[Test]
+	public async Task A_widget_opened_while_the_host_starts_is_accepted_once_the_caches_are_ready()
+	{
+		var readiness = new StartupReadiness();
+		using var dispatcher = SessionOpenDispatcher.For(readiness, _opener);
+		var widgetId = Guid.NewGuid();
+
+		var opening = SessionOpenDispatcher.Open<OpenWidgetUiSessionResponse>(dispatcher,
+			"OpenWidgetUiSession",
+			new OpenWidgetUiSessionRequest { WidgetId = widgetId.ToString() });
+		_folders.AddWidget(new WidgetEntity { Id = widgetId, Type = WidgetTypeIds.ActionButton });
+		readiness.MarkCachesReady();
+		readiness.MarkVariablesReady();
+		var response = await opening.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.That(response.Accepted, Is.True, response.Message);
+	}
+
+	[Test]
+	public async Task A_widget_that_does_not_exist_is_still_refused_after_startup()
+	{
+		using var dispatcher = SessionOpenDispatcher.For(TestStartupReadiness.Ready(), _opener);
+
+		var response = await SessionOpenDispatcher.Open<OpenWidgetUiSessionResponse>(dispatcher,
+			"OpenWidgetUiSession",
+			new OpenWidgetUiSessionRequest { WidgetId = Guid.NewGuid().ToString() });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Accepted, Is.False);
+			Assert.That(response.Code, Is.EqualTo(UiSessionErrorCodes.ProviderUnavailable));
 		});
 	}
 

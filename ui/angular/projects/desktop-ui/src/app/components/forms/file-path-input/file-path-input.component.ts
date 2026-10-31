@@ -43,6 +43,7 @@ const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
     <shared-input
       [invalid]="invalid"
       [placeholder]="placeholder || defaultPlaceholder"
+      [ariaLabel]="ariaLabel"
       [ngModel]="value"
       (ngModelChange)="setValue($event)" />
     <shared-button variant="secondary" (click)="browse()">
@@ -65,6 +66,7 @@ export class FilePathInputComponent implements OnInit, OnDestroy {
   @Input() extensions?: string[];
   @Input() placeholder = '';
   @Input() invalid = false;
+  @Input() ariaLabel: string | null = null;
 
   @Input()
   set value(value: string) {

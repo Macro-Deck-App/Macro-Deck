@@ -87,8 +87,7 @@ dates and times are shown as digits.
 ### Computer requirements
 
 Macro Deck is built for x64 Windows and Linux and for Apple silicon Macs. There are no builds for
-Intel Macs or for ARM versions of Windows and Linux. On Windows and macOS, actions do not run while the
-computer is locked, see
+Intel Macs or for ARM versions of Windows and Linux. Actions do not run while the computer is locked, see
 [Troubleshooting](/guide/troubleshooting/#buttons-do-nothing-and-devices-show-a-lock-screen). On Linux,
-Macro Deck cannot tell that the computer is locked, so actions keep running, see
+this needs a desktop that reports its lock, such as GNOME or KDE Plasma. Elsewhere actions keep running, see
 [Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked).

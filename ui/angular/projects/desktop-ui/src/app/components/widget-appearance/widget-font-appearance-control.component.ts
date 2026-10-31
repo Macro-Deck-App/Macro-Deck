@@ -23,6 +23,7 @@ export interface WidgetFontAppearanceChange {
         (fontFaceIdChange)="emit('fontFaceId', $event)" />
       <div class="form-group form-group--dense font-size"><label>{{ 'macrodeck.app:Widgets.Appearance.Font.SizeLabel' | translate }}</label>
         <shared-input class="font-input" type="number" [min]="1" [max]="100"
+          [ariaLabel]="'macrodeck.app:Widgets.Appearance.Font.SizeLabel' | translate"
           [placeholder]="actionMode ? unchangedLabel : ''" [ngModel]="fontSizeValue"
           (ngModelChange)="emit('fontSize', $event === '' ? (actionMode ? 0 : 14) : +$event)" />
       </div>
