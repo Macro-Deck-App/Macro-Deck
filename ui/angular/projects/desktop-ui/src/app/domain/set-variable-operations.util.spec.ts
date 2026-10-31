@@ -1,3 +1,5 @@
+import { AppStrings } from '@macro-deck/runtime';
+
 import { isOperationAllowed, operationOptionsFor, operationsFor } from './set-variable-operations.util';
 
 describe('set-variable-operations.util', () => {
@@ -25,11 +27,13 @@ describe('set-variable-operations.util', () => {
   });
 
   it('labels every option it offers', () => {
-    const options = operationOptionsFor('numeric');
+    const options = operationOptionsFor(undefined, key => `translated ${key}`);
 
     expect(options).toEqual([
-      { value: 'set', label: 'Set to' },
-      { value: 'add', label: 'Add' },
+      { value: 'set', label: `translated ${AppStrings.Integrations.Variables.Actions.OperationSetTo}` },
+      { value: 'add', label: `translated ${AppStrings.Integrations.Variables.Actions.OperationAdd}` },
+      { value: 'toggle', label: `translated ${AppStrings.Integrations.Variables.Actions.OperationToggle}` },
+      { value: 'append', label: `translated ${AppStrings.Integrations.Variables.Actions.OperationAppend}` },
     ]);
   });
 
