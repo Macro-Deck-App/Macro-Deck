@@ -17671,7 +17671,7 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Exporteer je herstelsleutel van de back-up om de sleutelbos te beschermen. Tot die tijd blijft hij leesbaar op schijf.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blokkeert het uitvoeren van acties zolang deze computer is vergrendeld, wat je hier ook kiest. Op Linux kan Macro Deck niet zien dat deze computer is vergrendeld, dus acties blijven gewoon draaien en verbonden clients worden niet vergrendeld.</value>
+    <value>Blokkeert het uitvoeren van acties zolang deze computer is vergrendeld, wat je hier ook kiest. Op Linux is daarvoor een desktop nodig die de vergrendeling meldt, zoals GNOME of KDE Plasma. Anders blijven acties gewoon draaien en worden verbonden clients niet vergrendeld.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Vergrendelscherm</value>
@@ -19659,6 +19659,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>De download is mislukt. {error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Blijft dit gebeuren, download dan de nieuwste versie van {url} en installeer die handmatig.</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Kon niet controleren op updates. {error}</value>

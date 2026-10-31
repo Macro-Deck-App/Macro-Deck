@@ -17671,7 +17671,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>請匯出您的備份復原金鑰以保護金鑰環。在此之前，它會以可直接讀取的方式保存在磁碟上。</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>無論您在此選擇什麼，只要此電腦處於鎖定狀態，就會封鎖動作執行。在 Linux 上，Macro Deck 無法偵測此電腦是否已鎖定，因此動作會繼續執行，已連線的用戶端也不會被鎖定。</value>
+    <value>無論您在此選擇什麼，只要此電腦處於鎖定狀態，就會封鎖動作執行。在 Linux 上，需要會回報鎖定狀態的桌面環境，例如 GNOME 或 KDE Plasma。否則動作會繼續執行，已連線的用戶端也不會被鎖定。</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>鎖定畫面</value>
@@ -19659,6 +19659,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>下載失敗。{error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>如果此問題持續發生，請從 {url} 下載最新版本並手動安裝。</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>無法檢查更新。{error}</value>

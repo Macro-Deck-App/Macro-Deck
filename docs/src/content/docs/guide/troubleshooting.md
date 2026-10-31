@@ -121,8 +121,8 @@ it again with that package manager instead, for example `sudo apt install --rein
 
 ## Buttons do nothing and devices show a lock screen
 
-On Windows and macOS, Macro Deck does not run actions while the computer it runs on is locked. Unlock the
-computer and try again. Linux works differently, see
+Macro Deck does not run actions while the computer it runs on is locked. Unlock the computer and try again.
+Some Linux computers do not report their lock, see
 [Buttons still work while a Linux computer is locked](#buttons-still-work-while-a-linux-computer-is-locked).
 
 Connected devices show a lock screen for as long as the computer is locked. You can keep the deck
@@ -133,12 +133,18 @@ locked, and the widget keeps showing its content.
 
 ## Buttons still work while a Linux computer is locked
 
-On Linux, Macro Deck cannot tell whether the computer is locked, so locking it changes nothing for Macro
-Deck. Connected devices keep showing the deck, and anyone using one of them or a hardware deck can still press
+On Linux, Macro Deck knows that the computer is locked only when the desktop reports the lock to systemd-logind.
+GNOME and KDE Plasma do. Macro Deck cannot see the lock in these cases:
+
+- A lock screen that does not report to systemd-logind, such as many standalone lockers for window managers.
+- A system without systemd-logind.
+- Macro Deck started before you logged in to the desktop. Restart Macro Deck after logging in.
+
+Locking the computer then changes nothing for Macro Deck. Connected devices keep showing the deck, and anyone using one of them or a hardware deck can still press
 buttons, run scripts and use widgets. Their actions run on the locked computer as if it were unlocked, for
 example opening websites, starting programs or running commands. **Lock clients when this computer is
 locked** in **Settings > Security** has no effect there, and the **System** integration's **Locked** variable
-(`system_locked`) has no value.
+(`system_locked`) stays `false` or has no value.
 
 If nobody else should be able to use the computer through Macro Deck while you are away, quit Macro Deck
 before you leave it.

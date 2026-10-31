@@ -15,13 +15,15 @@ import { SelectComponent, SelectOption } from '../forms/select/select.component'
     <div class="border-form">
       <div class="form-group form-group--dense">
         <label>{{ 'macrodeck.app:Widgets.Appearance.Border.StyleLabel' | translate }}</label>
-        <shared-select class="border-select" [options]="styleOptions" [ngModel]="border?.style ?? defaultStyle"
+        <shared-select class="border-select" [options]="styleOptions"
+          [ariaLabel]="'macrodeck.app:Widgets.Appearance.Border.StyleLabel' | translate" [ngModel]="border?.style ?? defaultStyle"
           (ngModelChange)="onStyleChange($event)" />
       </div>
       @if (showsColor) {
         <div class="form-group form-group--dense">
           <label>{{ 'macrodeck.app:Widgets.Appearance.Border.ColorLabel' | translate }}</label>
           <shared-color-picker [defaultColor]="defaultColor" [resetValue]="resetColor"
+            [ariaLabel]="'macrodeck.app:Widgets.Appearance.Border.ColorLabel' | translate"
             [ngModel]="border?.color" (ngModelChange)="onColorChange($event)" />
         </div>
       }

@@ -17670,7 +17670,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Esporta la tua chiave di ripristino di backup per proteggere il portachiavi. Fino ad allora resta leggibile sul disco.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blocca l'esecuzione delle azioni mentre questo computer è bloccato, qualunque sia la scelta fatta qui. Su Linux, Macro Deck non riesce a rilevare che questo computer è bloccato, quindi le azioni continuano a essere eseguite e i client connessi non vengono bloccati.</value>
+    <value>Blocca l'esecuzione delle azioni mentre questo computer è bloccato, qualunque sia la scelta fatta qui. Su Linux serve un desktop che segnali il blocco, come GNOME o KDE Plasma. Altrimenti le azioni continuano a essere eseguite e i client connessi non vengono bloccati.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Schermata di blocco</value>
@@ -19658,6 +19658,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>Il download non è riuscito. {error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Se il problema persiste, scarica l'ultima versione da {url} e installala manualmente.</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Impossibile controllare gli aggiornamenti. {error}</value>

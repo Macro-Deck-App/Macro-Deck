@@ -24,6 +24,7 @@ import { ApiService, ButtonComponent, ButtonGroupComponent, LocalizationService,
           [type]="revealed() ? 'text' : 'password'"
           [placeholder]="value ? ('macrodeck.app:Forms.SecretInput.EnterNewValue' | translate) : placeholder"
           autocomplete="new-password"
+          [attr.aria-label]="ariaLabel"
           [ngModel]="draft()"
           (ngModelChange)="draft.set($event)"
           (keydown.enter)="save()">
@@ -89,6 +90,7 @@ export class SecretInputComponent {
 
   @Input() value: SecretReference | null = null;
   @Input() kind: SecretKind = 'Secret';
+  @Input() ariaLabel: string | null = null;
 
   @Input() set placeholder(value: string) {
     this.placeholderOverride = value;

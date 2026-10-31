@@ -17670,7 +17670,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Exporte ta clé de récupération de sauvegarde pour protéger le trousseau de clés. En attendant, il reste lisible sur le disque.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Bloque l'exécution des actions pendant que cet ordinateur est verrouillé, quel que soit ton choix ici. Sous Linux, Macro Deck ne peut pas détecter que cet ordinateur est verrouillé : les actions continuent donc de s'exécuter et les clients connectés ne sont pas verrouillés.</value>
+    <value>Bloque l'exécution des actions pendant que cet ordinateur est verrouillé, quel que soit ton choix ici. Sous Linux, il faut un bureau qui signale le verrouillage, comme GNOME ou KDE Plasma. Sinon, les actions continuent de s'exécuter et les clients connectés ne sont pas verrouillés.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Écran de verrouillage</value>
@@ -19658,6 +19658,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>Le téléchargement a échoué. {error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Si le problème persiste, télécharge la dernière version sur {url} et installe-la manuellement.</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Impossible de vérifier les mises à jour. {error}</value>

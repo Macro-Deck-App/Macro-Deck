@@ -2,6 +2,7 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Domain.Common;
@@ -54,6 +55,24 @@ internal sealed class FolderUiSessionTests
 	{
 		_broker.Dispose();
 		_registry.Dispose();
+	}
+
+	[Test]
+	public async Task A_folder_opened_while_the_host_starts_is_accepted_once_the_caches_are_ready()
+	{
+		var readiness = new StartupReadiness();
+		using var dispatcher = SessionOpenDispatcher.For(readiness, folders: _opener);
+		var folderId = Guid.NewGuid();
+
+		var opening = SessionOpenDispatcher.Open<OpenFolderUiSessionResponse>(dispatcher,
+			"OpenFolderUiSession",
+			new OpenFolderUiSessionRequest { FolderId = folderId.ToString() });
+		_folders.Add(_folderViewId, id: folderId);
+		readiness.MarkCachesReady();
+		readiness.MarkVariablesReady();
+		var response = await opening.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.That(response.Accepted, Is.True, response.Message);
 	}
 
 	[Test]
@@ -260,11 +279,11 @@ internal sealed class FolderUiSessionTests
 	{
 		private readonly List<FolderEntity> _folders = [];
 
-		public FolderEntity Add(string? viewId, string? configuration = null)
+		public FolderEntity Add(string? viewId, string? configuration = null, Guid? id = null)
 		{
 			var folder = new FolderEntity
 			{
-				Id = Guid.NewGuid(),
+				Id = id ?? Guid.NewGuid(),
 				Name = "Living Room",
 				Order = 0,
 				ViewId = viewId,

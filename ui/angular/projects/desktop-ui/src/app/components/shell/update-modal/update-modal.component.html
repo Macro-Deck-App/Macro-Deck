@@ -7,7 +7,9 @@
     @if (versionHeading(); as version) {
       <h3 class="update-modal__version">{{ version }}</h3>
     }
-    <p class="update-modal__current">{{ currentVersionLine() }}</p>
+    @if (updates.currentVersion()) {
+      <p class="update-modal__current">{{ currentVersionLine() }}</p>
+    }
 
     <div class="update-modal__meta">
       @if (releaseDate(); as date) {
@@ -64,6 +66,9 @@
       }
       @case ('failed') {
         <p class="update-modal__status update-modal__status--error">{{ failureMessage() }}</p>
+        @if (!updates.checkFailed()) {
+          <p class="update-modal__note">{{ appStrings.Update.Details.ManualDownloadHint | translate:{ url: updates.manualDownloadUrl() } }}</p>
+        }
       }
       @case ('available') {
         @if (updates.aptManaged()) {
@@ -86,6 +91,11 @@
         <shared-button variant="secondary" (click)="later()">
           {{ appStrings.Update.Details.LaterAction | translate }}
         </shared-button>
+        @if (!updates.checkFailed() && updates.downloadUrl()) {
+          <shared-button variant="secondary" (click)="openDownloadPage()">
+            {{ appStrings.Settings.Update.OpenDownloadPageAction | translate }}
+          </shared-button>
+        }
         <shared-button variant="primary" (click)="retry()">
           {{ appStrings.Settings.Update.TryAgainAction | translate }}
         </shared-button>

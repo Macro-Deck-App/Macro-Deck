@@ -5,6 +5,7 @@ using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
@@ -308,6 +309,25 @@ internal sealed class WidgetConfigUiSessionTests
 				Does.Contain("Widgets.Editor.ProviderUnavailableMessage"));
 			Assert.That(widget.Data, Is.EqualTo("{\"threshold\":42}"));
 		});
+	}
+
+	[Test]
+	public async Task A_widget_config_opened_while_the_host_starts_is_accepted_once_the_caches_are_ready()
+	{
+		var readiness = new StartupReadiness();
+		using var dispatcher = SessionOpenDispatcher.For(readiness, config: _opener);
+		var widgetId = Guid.NewGuid();
+
+		var opening = SessionOpenDispatcher.Open<OpenConfigUiSessionResponse>(dispatcher,
+			"OpenConfigUiSession",
+			new OpenConfigUiSessionRequest
+				{ EntryPoint = UiConfigEntryPoints.WidgetConfig, WidgetId = widgetId.ToString() });
+		_folders.AddWidget(new WidgetEntity { Id = widgetId, Type = WidgetTypeIds.Weather });
+		readiness.MarkCachesReady();
+		readiness.MarkVariablesReady();
+		var response = await opening.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.That(response.Accepted, Is.True, response.Message);
 	}
 
 	private ConfigUiSessionOpener NewOpener(IWidgetTypeRegistry widgetTypes)

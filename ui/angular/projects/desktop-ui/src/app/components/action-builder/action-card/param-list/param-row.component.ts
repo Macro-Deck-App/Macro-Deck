@@ -39,6 +39,12 @@ import { SelectComponent, SelectOption } from '../../../forms/select/select.comp
 import { SelectCaretComponent } from '../../../forms/select-caret/select-caret.component';
 import { WidgetIconControlComponent } from '../../../widget-appearance/widget-icon-control.component';
 
+const GROUP_PARAMETER_TYPES: ReadonlySet<string> = new Set([
+  'keyvalue', 'keyboard-combo', 'keyboard-sequence', 'icon', 'object', 'array',
+]);
+
+let nextParamRowId = 0;
+
 @Component({
   selector: 'shared-param-row',
   standalone: true,
@@ -81,6 +87,8 @@ export class ParamRowComponent implements OnInit, OnChanges {
 
   @Input() nested = false;
   @Output() nestedChange = new EventEmitter<ParameterValue>();
+
+  protected readonly labelId = `param-label-${++nextParamRowId}`;
 
   @Input() allowReferences = true;
 
@@ -212,6 +220,12 @@ export class ParamRowComponent implements OnInit, OnChanges {
 
   get secretKind(): SecretKind {
     return this.param.type === 'password' ? 'Password' : 'Secret';
+  }
+
+  protected get isLabelledGroup(): boolean {
+    return GROUP_PARAMETER_TYPES.has(this.param.type)
+      || (this.allowReferences && (this.param.type === 'password' || this.param.type === 'secret') && this.secretValue !== null)
+      || (this.param.type === 'widget-target' && this.hasOwnerWidget && this.param.value === WIDGET_TARGET_SELF);
   }
 
   get hotkeyValue(): HotkeyValue | null {

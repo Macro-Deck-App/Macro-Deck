@@ -55,7 +55,7 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 			case JsonValueKind.Number:
 			{
 				var number = value.TryGetInt64(out var i) ? (object)i : value.GetDouble();
-				return new EvaluatedSide(number, FormatDisplay(number));
+				return new EvaluatedSide(number, Stringify(number));
 			}
 
 			case JsonValueKind.True: return new EvaluatedSide(true, "true");
@@ -63,13 +63,13 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 
 			case JsonValueKind.Object:
 			{
-				var resolved = ResolveVariableReference(value, variables);
+				var resolved = ResolveReference(value, variables, ComparisonValue);
 				if (resolved is not null)
 				{
-					return new EvaluatedSide(resolved, FormatDisplay(resolved));
+					return new EvaluatedSide(resolved, Stringify(resolved));
 				}
 
-				// ResolveVariableReference returns null for two different reasons that must not be
+				// ResolveReference returns null for two different reasons that must not be
 				// treated alike: "this is a $var/$event reference and it did not resolve" (an unknown
 				// name, an unavailable provider variable, an unknown event parameter) must read as
 				// unresolvable, exactly like Null/Undefined above - not as the reference's own raw JSON
@@ -358,6 +358,14 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 
 	public static object? ResolveVariableReference(JsonElement element, VariableContext variables)
 	{
+		return ResolveReference(element, variables, ConvertVariableValue);
+	}
+
+	private static object? ResolveReference(
+		JsonElement element,
+		VariableContext variables,
+		Func<VariableEntity, object?> convert)
+	{
 		if (element.ValueKind != JsonValueKind.Object)
 		{
 			return null;
@@ -380,7 +388,12 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 			return input;
 		}
 
-		return variables.TryResolve(name, out var variable) ? ConvertVariableValue(variable) : null;
+		return variables.TryResolve(name, out var variable) ? convert(variable) : null;
+	}
+
+	private static object? ComparisonValue(VariableEntity variable)
+	{
+		return variable.Type == VariableType.Numeric ? variable.Value : ConvertVariableValue(variable);
 	}
 
 	// Whether element carries a "$var" or "$event" key at all, independent of whether that reference goes
@@ -440,6 +453,7 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 		{
 			null => string.Empty,
 			bool b => b ? "true" : "false",
+			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
 			_ => value.ToString() ?? string.Empty
 		};
 	}
@@ -467,18 +481,5 @@ public sealed class ActionConditionEvaluator : IActionConditionEvaluator
 				number = 0;
 				return false;
 		}
-	}
-
-	private static string FormatDisplay(object? value)
-	{
-		return value switch
-		{
-			null => string.Empty,
-			double d => d.ToString(CultureInfo.InvariantCulture),
-			float f => f.ToString(CultureInfo.InvariantCulture),
-			decimal m => m.ToString(CultureInfo.InvariantCulture),
-			bool b => b ? "true" : "false",
-			_ => value.ToString() ?? string.Empty
-		};
 	}
 }
