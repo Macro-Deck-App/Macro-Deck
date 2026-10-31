@@ -3,6 +3,7 @@ import { ApiService } from '../transport/api.service';
 import {
   AppStrings,
   AuthScope,
+  AuthStatusResponse,
   DeviceSessionRevokedEvent,
   isUnreachable,
   RefreshOutcome,
@@ -123,6 +124,7 @@ export class AuthService implements OnDestroy {
   private deviceRevokedSubscribed = false;
   private sessionRetryTimer: ReturnType<typeof setTimeout> | null = null;
   private sessionRetryDelayMs = INITIAL_SESSION_RETRY_DELAY_MS;
+  private trustIncident = false;
 
   // Cross-tab lock (issue #257) guarding every refresh: the `md_refresh` cookie is shared by `/`
   // and `/admin`, and `visibilitychange` fires in every tab at the same instant on unlock. Two tabs
@@ -138,6 +140,9 @@ export class AuthService implements OnDestroy {
       () => { void this.handleConnectionUnauthorized(); },
       () => this.handleForbidden(),
     );
+    this.api.connectionState$.subscribe(state => {
+      if (state === 'connected' && this._trusted()) this.endTrustIncident();
+    });
   }
 
   async bootstrap(): Promise<void> {
@@ -322,7 +327,7 @@ export class AuthService implements OnDestroy {
 
   private async handleUnauthorized(): Promise<boolean> {
     if (this._trusted()) {
-      this.requestLoopbackReauthentication();
+      this.onTrustRefused();
       return false;
     }
 
@@ -361,7 +366,7 @@ export class AuthService implements OnDestroy {
 
   private async handleConnectionUnauthorized(): Promise<void> {
     if (this._trusted()) {
-      this.requestLoopbackReauthentication();
+      this.onTrustRefused();
       return;
     }
 
@@ -375,6 +380,19 @@ export class AuthService implements OnDestroy {
       // `retrySession()`'s eventual `reconnectNow()` is what nudges it again, once the host answers.
       this.scheduleSessionRetry();
     }
+  }
+
+  // One ticket 401 arrives here twice, through both unauthorized hooks. The wait after an ask gives
+  // the shell's reload time to replace this page before the ordinary paths could show a login form.
+  private onTrustRefused(): void {
+    const asked = !this.trustIncident && this.requestLoopbackReauthentication();
+    this.trustIncident = true;
+    this.scheduleSessionRetry(asked ? LOOPBACK_REAUTH_GUARD_MS : undefined);
+  }
+
+  private endTrustIncident(): void {
+    this.trustIncident = false;
+    this.sessionRetryDelayMs = INITIAL_SESSION_RETRY_DELAY_MS;
   }
 
   // Once per 30 s per window: a shell that cannot restore trust must fall through to the ordinary
@@ -421,24 +439,30 @@ export class AuthService implements OnDestroy {
     return 'ok';
   }
 
-  private scheduleSessionRetry(): void {
+  private scheduleSessionRetry(overrideDelayMs?: number): void {
     if (this.sessionRetryTimer !== null) {
       return;
     }
-    if (this._trusted() || this._state() !== 'authenticated') {
+    if (this._state() !== 'authenticated') {
       return;
     }
 
-    const delayMs = this.sessionRetryDelayMs;
+    const delayMs = overrideDelayMs ?? this.sessionRetryDelayMs;
     this.sessionRetryTimer = setTimeout(() => {
       this.sessionRetryTimer = null;
       void this.retrySession();
     }, delayMs);
-    this.sessionRetryDelayMs = Math.min(delayMs * 2, MAX_SESSION_RETRY_DELAY_MS);
+    if (overrideDelayMs === undefined) {
+      this.sessionRetryDelayMs = Math.min(delayMs * 2, MAX_SESSION_RETRY_DELAY_MS);
+    }
   }
 
   private async retrySession(): Promise<void> {
-    if (this._trusted() || this._state() !== 'authenticated') {
+    if (this._state() !== 'authenticated') {
+      return;
+    }
+    if (this._trusted()) {
+      await this.recoverTrust();
       return;
     }
 
@@ -453,8 +477,48 @@ export class AuthService implements OnDestroy {
     }
   }
 
+  private async recoverTrust(): Promise<void> {
+    let status: AuthStatusResponse;
+    try {
+      status = await this.api.getAuthStatus();
+    } catch {
+      this.scheduleSessionRetry();
+      return;
+    }
+    if (!this._trusted() || this._state() !== 'authenticated') {
+      return;
+    }
+
+    if (status.trusted) {
+      if (this.api.isConnected) {
+        this.endTrustIncident();
+      } else {
+        this.api.reconnectNow();
+      }
+      return;
+    }
+
+    this._trusted.set(false);
+    if (!status.setupComplete) {
+      this.clearSession();
+      this._state.set('setupRequired');
+      this.api.disconnect();
+      return;
+    }
+
+    const outcome = await this.tryRefresh();
+    if (outcome === 'ok') {
+      this.endTrustIncident();
+      this.api.connect();
+    } else if (outcome === 'invalid') {
+      this.sessionLost();
+    } else {
+      this.scheduleSessionRetry();
+    }
+  }
+
   private clearSessionRetryTimer(): void {
-    this.sessionRetryDelayMs = INITIAL_SESSION_RETRY_DELAY_MS;
+    this.endTrustIncident();
     if (this.sessionRetryTimer === null) {
       return;
     }
