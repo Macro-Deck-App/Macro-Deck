@@ -852,6 +852,69 @@ describe('WidgetSessions', () => {
       expect(failures).toBe(0);
     });
 
+    for (const [title, type, name, data] of [
+      ['a tap', 'ui.text', 'tap', { pointers: 1 }],
+      ['a toggle change', 'ui.toggle', 'change', true],
+      ['a segmented change', 'ui.segmented', 'change', 1],
+    ] as Array<[string, string, string, unknown]>) {
+      it(`remembers ${title} like a press`, async () => {
+        const session = await open();
+        const node = { id: 'root', type, properties: { events: [name] } } as unknown as UiNode;
+        store.treeUpdated(session, 1, node);
+        sessions.reset();
+
+        sessions.sendEvent('w1', 'root', name, data);
+        sessions.sendEvent('w1', 'root', name, data);
+        expect(sends().length).toBe(0);
+
+        sessions.sync([widget('w1')]);
+        await settle();
+        store.treeUpdated('s2', 2, node);
+        await settle();
+
+        expect(sends().length).toBe(1);
+        expect((sends()[0].payload as Array<{ data: unknown }>)[0].data).toEqual(data);
+      });
+    }
+
+    it('fails a remembered toggle change that outlives its two seconds', async () => {
+      const session = await open();
+      store.treeUpdated(session, 1, { id: 'root', type: 'ui.toggle', properties: { events: ['change'] } } as unknown as UiNode);
+      sessions.reset();
+
+      sessions.sendEvent('w1', 'root', 'change', true);
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+
+      expect(failures).toBe(1);
+      expect(sends().length).toBe(0);
+    });
+
+    it('does not remember the change of a slider', async () => {
+      const session = await open();
+      store.treeUpdated(session, 1, { id: 'root', type: 'ui.slider', properties: { events: ['change'] } } as unknown as UiNode);
+      sessions.reset();
+
+      sessions.sendEvent('w1', 'root', 'change', 5);
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+
+      expect(failures).toBe(0);
+    });
+
+    it('fails half a gesture at once, reporting one tap once and never sending it', async () => {
+      sessions.sendEvent('w1', 'root', 'press-start');
+      sessions.sendEvent('w1', 'root', 'press-end');
+      expect(failures).toBe(1);
+
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+      sessions.sendEvent('w1', 'root', 'press-start');
+      expect(failures).toBe(2);
+
+      const session = await open();
+      store.treeUpdated(session, 1, pressable());
+      await settle();
+      expect(sends().length).toBe(0);
+    });
+
     it('does not remember anything but a press', async () => {
       sessions.sendEvent('w1', 'root', 'pointer-move');
       clock.advance(WIDGET_PRESS_MEMORY_MS);

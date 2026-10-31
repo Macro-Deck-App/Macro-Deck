@@ -1,5 +1,6 @@
 import {
   GridWidget,
+  UiComponents,
   UiSessionStore,
   emitsEvent,
   findInteractiveNode,
@@ -39,7 +40,9 @@ export const WIDGET_SESSION_CLOSE_GRACE_MS = 1000;
 export const WIDGET_PRESS_MEMORY_MS = 2000;
 const MAX_REOPENS_WITHOUT_A_TREE = 3;
 
-const REMEMBERED_EVENTS: readonly string[] = ['press', 'long-press', 'double-press'];
+const REMEMBERED_EVENTS: readonly string[] = ['press', 'long-press', 'double-press', 'tap'];
+const REMEMBERED_CHANGE_TYPES: readonly string[] = [UiComponents.Toggle, UiComponents.Segmented];
+const HALF_GESTURE_EVENTS: readonly string[] = ['press-start', 'press-end'];
 const HOST_LOCKED = 'HOST_LOCKED';
 
 type HandshakeOutcome = 'live' | 'refused' | 'busy' | 'ended';
@@ -50,6 +53,16 @@ interface PendingPress {
   readonly data: unknown;
   readonly at: number;
   readonly timer: unknown;
+}
+
+function findNode(node: UiNode, nodeId: string): UiNode | undefined {
+  if (node.id === nodeId) return node;
+  const candidates = node.fallback ? [...(node.children ?? []), node.fallback] : node.children ?? [];
+  for (let index = 0; index < candidates.length; index++) {
+    const found = findNode(candidates[index], nodeId);
+    if (found) return found;
+  }
+  return undefined;
 }
 
 function canReceive(node: UiNode, nodeId: string, name: string): boolean {
@@ -75,6 +88,7 @@ export class WidgetSessions {
   private widgetListeners: Array<(widgetId: string) => void> = [];
   private readonly pendingPresses: { [widgetId: string]: PendingPress } = {};
   private pressFailureListeners: Array<() => void> = [];
+  private readonly halfGestureFailures: { [widgetId: string]: number } = {};
 
   constructor(
     private readonly connection: SessionOpener,
@@ -122,9 +136,14 @@ export class WidgetSessions {
 
   sendEvent(widgetId: string, nodeId: string, name: string, data?: unknown): void {
     const sessionId = this.sessionByWidget[widgetId];
-    const isPress = REMEMBERED_EVENTS.includes(name);
-    if (isPress && (sessionId === undefined || !this.sessions.has(sessionId))) {
+    const isPress = this.isRemembered(widgetId, nodeId, name);
+    const ready = sessionId !== undefined && this.sessions.has(sessionId);
+    if (isPress && !ready) {
       this.rememberPress(widgetId, nodeId, name, data);
+      return;
+    }
+    if (!ready && HALF_GESTURE_EVENTS.includes(name)) {
+      this.failHalfGesture(widgetId);
       return;
     }
     if (sessionId === undefined) return;
@@ -136,13 +155,32 @@ export class WidgetSessions {
     const live = this.liveTree(widgetId);
     if (sessionId !== undefined && live !== undefined) {
       const nodeId = findInteractiveNode(live, null)?.id;
-      if (nodeId !== undefined && canReceive(live, nodeId, name)) this.dispatch(sessionId, nodeId, name, undefined, true);
+      if (nodeId !== undefined && canReceive(live, nodeId, name)) {
+        this.dispatch(sessionId, nodeId, name, undefined, true);
+      }
       return;
     }
     const memo = this.lastTree[widgetId];
     if (memo === undefined || findInteractiveNode(memo, null) !== null) {
       this.rememberPress(widgetId, null, name, undefined);
     }
+  }
+
+  private isRemembered(widgetId: string, nodeId: string, name: string): boolean {
+    if (REMEMBERED_EVENTS.includes(name)) return true;
+    if (name !== 'change') return false;
+    const tree = this.treeFor(widgetId);
+    const node = tree === undefined ? undefined : findNode(tree, nodeId);
+    return node !== undefined && REMEMBERED_CHANGE_TYPES.includes(node.type);
+  }
+
+  // Replaying half a gesture is unsafe, and one tap sends both halves, so they share one report.
+  private failHalfGesture(widgetId: string): void {
+    const last = this.halfGestureFailures[widgetId];
+    const now = this.timers.now();
+    if (last !== undefined && now - last < WIDGET_PRESS_MEMORY_MS) return;
+    this.halfGestureFailures[widgetId] = now;
+    this.notifyPressFailed();
   }
 
   private dispatch(sessionId: string, nodeId: string, name: string, data: unknown, isPress: boolean): void {
