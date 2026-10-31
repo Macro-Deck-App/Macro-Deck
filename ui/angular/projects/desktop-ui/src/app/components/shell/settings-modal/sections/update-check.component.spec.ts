@@ -222,6 +222,35 @@ describe('UpdateCheckComponent', () => {
     expect(text).toContain('Try again');
   });
 
+  it('reports an install failure with its reason and the manual download', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'failed', failure: 'install', error: 'disk full' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('disk full');
+    expect(text).not.toContain('The download failed.');
+    expect(text).toContain('https://macro-deck.app/download');
+    expect(text).not.toContain("Couldn't check for updates");
+  });
+
+  it('reports an install failure without a reason as a failed download, not a failed check', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'failed', failure: 'install', error: null })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('The download failed.');
+    expect(text).toContain('https://macro-deck.app/download');
+    expect(text).not.toContain("Couldn't check for updates");
+  });
+
   it('leaves an error state (never stuck at "checking") when the re-check request itself rejects', async () => {
     setShell({
       getUpdateState: () => Promise.resolve(makeState({ phase: 'checking' })),
