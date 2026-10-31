@@ -1,6 +1,7 @@
 import { GridWidget, UiSessionStore, type UiNode } from '@macro-deck/runtime';
 import {
   type SessionTimers,
+  WIDGET_PRESS_MEMORY_MS,
   WIDGET_SESSION_CLOSE_GRACE_MS,
   WIDGET_SESSION_MEMO_CAPACITY,
   WidgetSessions,
@@ -36,6 +37,7 @@ class FakeConnection {
       }
       return Promise.resolve({ accepted: this.attach } as unknown as T);
     }
+    if (type === 'SendUiEvent') return Promise.resolve({ accepted: true } as unknown as T);
     return Promise.resolve(undefined as T);
   }
 
@@ -53,13 +55,13 @@ class FakeConnection {
 }
 
 class FakeClock implements SessionTimers {
-  private now = 0;
+  private current = 0;
   private next = 0;
   private readonly due = new Map<number, { at: number; callback: () => void }>();
 
   set(callback: () => void, delayMs: number): unknown {
     const handle = ++this.next;
-    this.due.set(handle, { at: this.now + delayMs, callback });
+    this.due.set(handle, { at: this.current + delayMs, callback });
     return handle;
   }
 
@@ -67,10 +69,18 @@ class FakeClock implements SessionTimers {
     this.due.delete(handle as number);
   }
 
+  now(): number {
+    return this.current;
+  }
+
+  skipWithoutFiring(ms: number): void {
+    this.current += ms;
+  }
+
   advance(ms: number): void {
-    this.now += ms;
+    this.current += ms;
     for (const [handle, timer] of [...this.due]) {
-      if (timer.at > this.now) continue;
+      if (timer.at > this.current) continue;
       this.due.delete(handle);
       timer.callback();
     }
@@ -654,5 +664,248 @@ describe('WidgetSessions', () => {
     sessions.forgetAll();
 
     expect(sessions.treeFor('w1')).toBeUndefined();
+  });
+
+  describe('a press made before the session is ready', () => {
+    const pressable = (overrides: Partial<UiNode> = {}): UiNode =>
+      ({ id: 'root', type: 'ui.text', properties: { events: ['press'] }, ...overrides }) as unknown as UiNode;
+    const sends = () => connection.calls.filter(call => call.type === 'SendUiEvent');
+    let failures: number;
+
+    beforeEach(() => {
+      failures = 0;
+      sessions.onPressFailed(() => failures++);
+    });
+
+    const open = async (): Promise<string> => {
+      sessions.sync([widget('w1')]);
+      await settle();
+      return 's1';
+    };
+
+    it('delivers it once when the tree arrives, at the current revision', async () => {
+      sessions.sendEvent('w1', 'root', 'press');
+      sessions.sendEvent('w1', 'root', 'press');
+      const session = await open();
+
+      store.treeUpdated(session, 7, pressable());
+      await settle();
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+      await settle();
+
+      expect(sends().length).toBe(1);
+      expect((sends()[0].payload as Array<{ revision: number }>)[0].revision).toBe(7);
+      expect(failures).toBe(0);
+    });
+
+    it('remembers it while the session has no tree yet', async () => {
+      const session = await open();
+
+      sessions.sendEvent('w1', 'root', 'press');
+      expect(sends().length).toBe(0);
+
+      store.treeUpdated(session, 1, pressable());
+      await settle();
+      expect(sends().length).toBe(1);
+    });
+
+    it('reports it as failed after two seconds and never sends it afterwards', async () => {
+      sessions.sendEvent('w1', 'root', 'press');
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+      expect(failures).toBe(1);
+
+      const session = await open();
+      store.treeUpdated(session, 1, pressable());
+      await settle();
+
+      expect(sends().length).toBe(0);
+      expect(failures).toBe(1);
+    });
+
+    it('keeps its limit when a suspended page delayed the timer', async () => {
+      sessions.sendEvent('w1', 'root', 'press');
+      const session = await open();
+      clock.skipWithoutFiring(WIDGET_PRESS_MEMORY_MS + 1);
+
+      store.treeUpdated(session, 1, pressable());
+      await settle();
+
+      expect(sends().length).toBe(0);
+      expect(failures).toBe(1);
+    });
+
+    it('holds the deadline of the first press when the tile is tapped again', () => {
+      sessions.sendEvent('w1', 'root', 'press');
+      clock.advance(1500);
+      sessions.sendEvent('w1', 'root', 'press');
+      clock.advance(500);
+
+      expect(failures).toBe(1);
+    });
+
+    it('fails it when the tile left the deck, even if it returns in time', async () => {
+      await open();
+      store.treeUpdated('s1', 1, pressable());
+      sessions.sync([]);
+      await settle();
+      clock.advance(WIDGET_SESSION_CLOSE_GRACE_MS);
+      await settle();
+      sessions.sessionClosed('s1');
+
+      sessions.sendEvent('w1', 'root', 'press');
+      sessions.sync([]);
+      expect(failures).toBe(1);
+
+      sessions.sync([widget('w1')]);
+      await settle();
+      expect(sends().length).toBe(0);
+    });
+
+    it('fails it once when the connection is lost', () => {
+      sessions.sendEvent('w1', 'root', 'press');
+
+      sessions.reset();
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+
+      expect(failures).toBe(1);
+    });
+
+    it('drops it quietly on sign-out', () => {
+      sessions.sendEvent('w1', 'root', 'press');
+
+      sessions.forgetAll();
+      sessions.reset();
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+
+      expect(failures).toBe(0);
+    });
+
+    for (const [title, live] of [
+      ['is gone', pressable({ id: 'other' })],
+      ['no longer takes the event', { id: 'root', type: 'ui.text' } as unknown as UiNode],
+      ['is disabled', pressable({ properties: { events: ['press'], modifiers: { disabled: true } } } as Partial<UiNode>)],
+    ] as Array<[string, UiNode]>) {
+      it(`fails it when the node ${title}`, async () => {
+        sessions.sendEvent('w1', 'root', 'press');
+        const session = await open();
+
+        store.treeUpdated(session, 1, live);
+        await settle();
+
+        expect(sends().length).toBe(0);
+        expect(failures).toBe(1);
+      });
+    }
+
+    it('finds a node under a fallback', async () => {
+      sessions.sendEvent('w1', 'inner', 'press');
+      const session = await open();
+
+      store.treeUpdated(session, 1, {
+        id: 'root', type: 'ui.box', fallback: pressable({ id: 'inner' }),
+      } as unknown as UiNode);
+      await settle();
+
+      expect(sends().length).toBe(1);
+    });
+
+    it('finds the node of a press made while the tile had no tree at all', async () => {
+      sessions.pressWithoutNode('w1', 'press');
+      const session = await open();
+
+      store.treeUpdated(session, 1, pressable());
+      await settle();
+
+      expect((sends()[0].payload as Array<{ nodeId: string }>)[0].nodeId).toBe('root');
+      expect(failures).toBe(0);
+    });
+
+    it('drops a press made without a tree quietly when the tile would not have reacted', async () => {
+      sessions.pressWithoutNode('w1', 'long-press');
+      const session = await open();
+
+      store.treeUpdated(session, 1, pressable());
+      await settle();
+
+      expect(sends().length).toBe(0);
+      expect(failures).toBe(0);
+    });
+
+    it('sends at once when the tree arrived before the finger lifted', async () => {
+      const session = await open();
+      store.treeUpdated(session, 1, pressable());
+
+      sessions.pressWithoutNode('w1', 'press');
+      await settle();
+
+      expect(sends().length).toBe(1);
+    });
+
+    it('ignores a press on a remembered tree that claims no gesture', async () => {
+      const session = await open();
+      store.treeUpdated(session, 1, { id: 'root', type: 'ui.text' } as unknown as UiNode);
+      sessions.reset();
+
+      sessions.pressWithoutNode('w1', 'press');
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+
+      expect(failures).toBe(0);
+    });
+
+    it('does not remember anything but a press', async () => {
+      sessions.sendEvent('w1', 'root', 'pointer-move');
+      clock.advance(WIDGET_PRESS_MEMORY_MS);
+      const session = await open();
+      store.treeUpdated(session, 1, pressable());
+      await settle();
+
+      expect(sends().length).toBe(0);
+      expect(failures).toBe(0);
+    });
+  });
+
+  describe('a press the host does not take', () => {
+    const pressable = { id: 'root', type: 'ui.text', properties: { events: ['press'] } } as unknown as UiNode;
+    let failures: number;
+
+    const live = async (answer: unknown): Promise<void> => {
+      failures = 0;
+      sessions.onPressFailed(() => failures++);
+      sessions.sync([widget('w1')]);
+      await settle();
+      store.treeUpdated('s1', 1, pressable);
+      const request = connection.request.bind(connection);
+      connection.request = <T>(type: string, payload?: unknown): Promise<T> => type === 'SendUiEvent'
+        ? (answer instanceof Error ? Promise.reject(answer) : Promise.resolve(answer as T))
+        : request<T>(type, payload);
+    };
+
+    it('reports a refusal', async () => {
+      await live({ accepted: false, code: 'STALE_SESSION' });
+      sessions.sendEvent('w1', 'root', 'press');
+      await settle();
+      expect(failures).toBe(1);
+    });
+
+    it('reports a send that never arrived', async () => {
+      await live(new Error('connection closed'));
+      sessions.sendEvent('w1', 'root', 'press');
+      await settle();
+      expect(failures).toBe(1);
+    });
+
+    it('leaves a locked host to report it itself', async () => {
+      await live({ accepted: false, code: 'HOST_LOCKED' });
+      sessions.sendEvent('w1', 'root', 'press');
+      await settle();
+      expect(failures).toBe(0);
+    });
+
+    it('reports nothing for an accepted press', async () => {
+      await live({ accepted: true });
+      sessions.sendEvent('w1', 'root', 'press');
+      await settle();
+      expect(failures).toBe(0);
+    });
   });
 });

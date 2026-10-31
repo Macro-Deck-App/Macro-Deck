@@ -2279,6 +2279,43 @@ describe('Client', () => {
 
     const generic = (client: Client) => client.translate(ClientAppStrings.Errors.Folder.ActionRunFailed);
 
+    it('remembers a press on a tree type tile that has no tree yet, and only the press', async () => {
+      const client = build();
+      const messages = reported(client);
+      deckWith(client, 'ActionButton');
+
+      await client.executeTrigger('w1', 'onTouchStart');
+      client.widgetSessions.reset();
+      expect(messages).toEqual([]);
+
+      await client.executeTrigger('w1', 'onShortPress');
+      client.widgetSessions.reset();
+      expect(messages).toEqual([generic(client)]);
+    });
+
+    it('hands a tile gesture to the sessions once a tree exists, but leaves hardware input alone', async () => {
+      const client = build();
+      deckWith(client, 'ActionButton');
+      spyOn(client.widgetSessions, 'treeFor').and.returnValue({ id: 'root', type: 'ui.text' } as never);
+      const press = spyOn(client.widgetSessions, 'pressWithoutNode');
+
+      await client.executeTrigger('w1', 'onShortPress');
+      expect(press).not.toHaveBeenCalled();
+
+      await client.executeTrigger('w1', 'onShortPress', true);
+      expect(press).toHaveBeenCalledOnceWith('w1', 'press');
+    });
+
+    it('tells the person when a press made before its session opened did not go through', () => {
+      const client = build();
+      const messages = reported(client);
+
+      client.widgetSessions.sendEvent('w1', 'root', 'press');
+      client.widgetSessions.reset();
+
+      expect(messages).toEqual([generic(client)]);
+    });
+
     it('leaves a timer widget\'s press to its own tree rather than running it a second time', async () => {
       const client = build();
       deckWith(client, 'Countdown');

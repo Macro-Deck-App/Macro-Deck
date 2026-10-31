@@ -1,4 +1,11 @@
-import { GridWidget, UiSessionStore, type UiNode } from '@macro-deck/runtime';
+import {
+  GridWidget,
+  UiSessionStore,
+  emitsEvent,
+  findInteractiveNode,
+  nodeIsDisabledRegion,
+  type UiNode,
+} from '@macro-deck/runtime';
 import { MAX_BUSY_RETRIES, TOO_MANY_SESSIONS, busyRetryDelayMs } from './busy-retry';
 
 interface SessionOpener {
@@ -8,11 +15,13 @@ interface SessionOpener {
 export interface SessionTimers {
   set(callback: () => void, delayMs: number): unknown;
   clear(handle: unknown): void;
+  now(): number;
 }
 
 const browserTimers: SessionTimers = {
   set: (callback, delayMs) => setTimeout(callback, delayMs),
   clear: handle => clearTimeout(handle as ReturnType<typeof setTimeout>),
+  now: () => Date.now(),
 };
 
 function args(...values: unknown[]): unknown[] {
@@ -27,9 +36,28 @@ interface OpenResponse {
 
 export const WIDGET_SESSION_MEMO_CAPACITY = 120;
 export const WIDGET_SESSION_CLOSE_GRACE_MS = 1000;
+export const WIDGET_PRESS_MEMORY_MS = 2000;
 const MAX_REOPENS_WITHOUT_A_TREE = 3;
 
+const REMEMBERED_EVENTS: readonly string[] = ['press', 'long-press', 'double-press'];
+const HOST_LOCKED = 'HOST_LOCKED';
+
 type HandshakeOutcome = 'live' | 'refused' | 'busy' | 'ended';
+
+interface PendingPress {
+  readonly nodeId: string | null;
+  readonly name: string;
+  readonly data: unknown;
+  readonly at: number;
+  readonly timer: unknown;
+}
+
+function canReceive(node: UiNode, nodeId: string, name: string): boolean {
+  if (nodeIsDisabledRegion(node)) return false;
+  if (node.id === nodeId) return emitsEvent(node, name);
+  const candidates = node.fallback ? [...(node.children ?? []), node.fallback] : node.children ?? [];
+  return candidates.some(child => canReceive(child, nodeId, name));
+}
 
 export class WidgetSessions {
   private readonly sessionByWidget: { [widgetId: string]: string } = {};
@@ -45,6 +73,8 @@ export class WidgetSessions {
   private readonly lastTree: { [widgetId: string]: UiNode } = {};
   private readonly memoOrder: string[] = [];
   private widgetListeners: Array<(widgetId: string) => void> = [];
+  private readonly pendingPresses: { [widgetId: string]: PendingPress } = {};
+  private pressFailureListeners: Array<() => void> = [];
 
   constructor(
     private readonly connection: SessionOpener,
@@ -57,7 +87,10 @@ export class WidgetSessions {
       if (widgetId === undefined) return;
       delete this.reopens[widgetId];
       const tree = this.sessions.tree(sessionId);
-      if (tree !== undefined) this.remember(widgetId, tree);
+      if (tree !== undefined) {
+        this.remember(widgetId, tree);
+        this.flushPress(widgetId, sessionId, tree);
+      }
     });
   }
 
@@ -80,17 +113,95 @@ export class WidgetSessions {
     };
   }
 
+  onPressFailed(listener: () => void): () => void {
+    this.pressFailureListeners.push(listener);
+    return () => {
+      this.pressFailureListeners = this.pressFailureListeners.filter(candidate => candidate !== listener);
+    };
+  }
+
   sendEvent(widgetId: string, nodeId: string, name: string, data?: unknown): void {
     const sessionId = this.sessionByWidget[widgetId];
+    const isPress = REMEMBERED_EVENTS.includes(name);
+    if (isPress && (sessionId === undefined || !this.sessions.has(sessionId))) {
+      this.rememberPress(widgetId, nodeId, name, data);
+      return;
+    }
     if (sessionId === undefined) return;
+    this.dispatch(sessionId, nodeId, name, data, isPress);
+  }
 
-    void this.connection.request('SendUiEvent', args({
+  pressWithoutNode(widgetId: string, name: string): void {
+    const sessionId = this.sessionByWidget[widgetId];
+    const live = this.liveTree(widgetId);
+    if (sessionId !== undefined && live !== undefined) {
+      const nodeId = findInteractiveNode(live, null)?.id;
+      if (nodeId !== undefined && canReceive(live, nodeId, name)) this.dispatch(sessionId, nodeId, name, undefined, true);
+      return;
+    }
+    const memo = this.lastTree[widgetId];
+    if (memo === undefined || findInteractiveNode(memo, null) !== null) {
+      this.rememberPress(widgetId, null, name, undefined);
+    }
+  }
+
+  private dispatch(sessionId: string, nodeId: string, name: string, data: unknown, isPress: boolean): void {
+    void this.connection.request<OpenResponse | undefined>('SendUiEvent', args({
       sessionId,
       nodeId,
       name,
       data,
       revision: this.sessions.revision(sessionId),
-    })).catch(() => undefined);
+    })).then(response => {
+      // A locked host reports the refused press itself, on ActionExecutionStatusEvent.
+      if (isPress && response?.accepted !== true && response?.code !== HOST_LOCKED) this.notifyPressFailed();
+    }, () => {
+      if (isPress) this.notifyPressFailed();
+    });
+  }
+
+  private rememberPress(widgetId: string, nodeId: string | null, name: string, data: unknown): void {
+    if (this.pendingPresses[widgetId]) return;
+    this.pendingPresses[widgetId] = {
+      nodeId,
+      name,
+      data,
+      at: this.timers.now(),
+      timer: this.timers.set(() => this.failPress(widgetId), WIDGET_PRESS_MEMORY_MS),
+    };
+  }
+
+  private takePress(widgetId: string): PendingPress | undefined {
+    const press = this.pendingPresses[widgetId];
+    if (!press) return undefined;
+    this.timers.clear(press.timer);
+    delete this.pendingPresses[widgetId];
+    return press;
+  }
+
+  private failPress(widgetId: string): void {
+    if (this.takePress(widgetId)) this.notifyPressFailed();
+  }
+
+  private notifyPressFailed(): void {
+    const notified = this.pressFailureListeners.slice();
+    for (let index = 0; index < notified.length; index++) notified[index]();
+  }
+
+  // The age check stands beside the timer because a suspended page delays timers past the limit.
+  private flushPress(widgetId: string, sessionId: string, tree: UiNode): void {
+    const press = this.takePress(widgetId);
+    if (!press) return;
+    if (this.timers.now() - press.at >= WIDGET_PRESS_MEMORY_MS) {
+      this.notifyPressFailed();
+      return;
+    }
+    const nodeId = press.nodeId ?? findInteractiveNode(tree, null)?.id;
+    if (nodeId !== undefined && canReceive(tree, nodeId, press.name)) {
+      this.dispatch(sessionId, nodeId, press.name, press.data, true);
+    } else if (press.nodeId !== null) {
+      this.notifyPressFailed();
+    }
   }
 
   sync(widgets: readonly GridWidget[]): void {
@@ -98,6 +209,10 @@ export class WidgetSessions {
       if (Object.prototype.hasOwnProperty.call(this.wanted, widgetId)) delete this.wanted[widgetId];
     }
     for (let index = 0; index < widgets.length; index++) this.wanted[widgets[index].id] = true;
+
+    for (const widgetId of Object.keys(this.pendingPresses)) {
+      if (!this.wanted[widgetId]) this.failPress(widgetId);
+    }
 
     for (const widgetId in this.retrying) {
       if (Object.prototype.hasOwnProperty.call(this.retrying, widgetId) && !this.wanted[widgetId]) {
@@ -139,6 +254,7 @@ export class WidgetSessions {
   }
 
   reset(): void {
+    for (const widgetId of Object.keys(this.pendingPresses)) this.failPress(widgetId);
     for (const widgetId in this.retrying) {
       if (Object.prototype.hasOwnProperty.call(this.retrying, widgetId)) this.cancelRetry(widgetId);
     }
@@ -167,6 +283,7 @@ export class WidgetSessions {
   }
 
   forgetAll(): void {
+    for (const widgetId of Object.keys(this.pendingPresses)) this.takePress(widgetId);
     for (const widgetId in this.lastTree) {
       if (Object.prototype.hasOwnProperty.call(this.lastTree, widgetId)) delete this.lastTree[widgetId];
     }
