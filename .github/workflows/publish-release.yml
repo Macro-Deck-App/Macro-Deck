@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       run_id:
-        description: Build run to publish (run id of a successful Build on main)
+        description: Build run to publish (run id of a successful Build on main or production)
         required: true
         type: string
 
@@ -50,8 +50,8 @@ jobs:
               --jq '[.name, .conclusion, .event, .head_branch, .head_sha] | @tsv'
           )
 
-          if [ "$name" != 'Build' ] || [ "$conclusion" != 'success' ] || [ "$event" != 'workflow_dispatch' ] || [ "$branch" != 'main' ]; then
-            echo "Run $SOURCE_RUN_ID is not a successful manual Build on main (workflow=$name, conclusion=$conclusion, event=$event, branch=$branch)." >&2
+          if [ "$name" != 'Build' ] || [ "$conclusion" != 'success' ] || [ "$event" != 'workflow_dispatch' ] || { [ "$branch" != 'main' ] && [ "$branch" != 'production' ]; }; then
+            echo "Run $SOURCE_RUN_ID is not a successful manual Build on main or production (workflow=$name, conclusion=$conclusion, event=$event, branch=$branch)." >&2
             exit 1
           fi
 
