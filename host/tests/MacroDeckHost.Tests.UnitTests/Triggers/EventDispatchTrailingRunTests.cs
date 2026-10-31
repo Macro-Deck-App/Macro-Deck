@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Infrastructure.BackgroundServices;
@@ -235,6 +236,8 @@ internal sealed class EventDispatchTrailingRunTests
 			readiness.MarkCachesReady();
 			readiness.MarkVariablesReady();
 			var runner = new GatedRunner();
+			var builtInRegistration = new BuiltInIntegrationRegistration();
+			builtInRegistration.Complete();
 
 			var host = new HostBuilder()
 				.ConfigureServices(services =>
@@ -242,6 +245,7 @@ internal sealed class EventDispatchTrailingRunTests
 					services.AddSingleton<IEventSubscriptionIndex>(index);
 					services.AddSingleton<IEventBus>(bus);
 					services.AddSingleton(readiness);
+					services.AddSingleton(builtInRegistration);
 					services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
 					services.AddScoped<IEventTriggerRunner>(_ => runner);
 					services.AddHostedService<EventDispatchBackgroundService>();
