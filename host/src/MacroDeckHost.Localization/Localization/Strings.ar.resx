@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>استُخدم مجلد البيانات هذا آخر مرة بإصدار أحدث من Macro Deck. ثبّت ذلك الإصدار مرة أخرى؛ لم تتغير البيانات.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>يعمل مضيف Macro Deck آخر بالفعل ضمن هذا الحساب. أغلقه أو أعد تشغيل الكمبيوتر، ثم شغّل Macro Deck مرة أخرى.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>ملف المضيف التنفيذي لـ Macro Deck مفقود:
 {paths}</value>

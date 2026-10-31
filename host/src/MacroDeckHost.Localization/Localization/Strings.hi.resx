@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>इस डेटा फ़ोल्डर का पिछली बार Macro Deck के नए संस्करण से उपयोग किया गया था। वह संस्करण फिर से इंस्टॉल करें; आपका डेटा नहीं बदला गया है।</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>इस खाते में एक और Macro Deck होस्ट पहले से चल रहा है। उसे बंद करें या कंप्यूटर पुनः आरंभ करें, फिर Macro Deck दोबारा शुरू करें।</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck होस्ट बाइनरी गायब है:
 {paths}</value>

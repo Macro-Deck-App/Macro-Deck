@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Deze gegevensmap is het laatst gebruikt door een nieuwere versie van Macro Deck. Installeer die versie opnieuw; je gegevens zijn niet gewijzigd.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Onder dit account draait al een andere Macro Deck-host. Sluit die of start de computer opnieuw op en start Macro Deck daarna opnieuw.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Het uitvoerbare bestand van de Macro Deck-host ontbreekt:
 {paths}</value>

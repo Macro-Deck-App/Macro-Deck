@@ -191,8 +191,8 @@ maximum, factor 2). To fail instead:
 error host-not-found: No running Macro Deck host was found. Its loopback port file is written while the host runs and removed when it stops; none was readable at ... Start Macro Deck, pass --host-url <url>, or use --stub-host to run against a disposable stub host instead.
 ```
 
-`run` finds the host through `macro-deck-host.port` (or `macro-deck-host-development.port`) in the system
-temp directory, which exists only while the host runs.
+`run` finds the host through `macro-deck-host.port` (or `macro-deck-host-development.port`), which exists
+only while the host runs. See [Which host `run` uses](/cli/run/#which-host-run-uses) for where it looks.
 
 ```bash
 macrodeck-plugin run --project src/MyPlugin --stub-host                        # no Macro Deck needed
