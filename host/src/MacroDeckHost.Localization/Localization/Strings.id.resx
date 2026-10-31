@@ -14897,6 +14897,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Kunci identitas komputer ini diganti. Pada setiap ponsel atau tablet yang sudah dipasangkan, pindai ulang kode QR komputer ini agar tetap dapat digunakan.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Perulangan peristiwa dihentikan</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Peristiwa terus saling memicu, sehingga Macro Deck menghentikan rantai ini. Periksa otomasi dan widget yang saling bereaksi.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Percobaan masuk gagal</value>
   </data>

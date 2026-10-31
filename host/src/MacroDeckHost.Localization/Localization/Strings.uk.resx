@@ -14897,6 +14897,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Ключ ідентичності цього комп'ютера було замінено. На кожному сполученому телефоні чи планшеті відскануйте QR-код цього комп'ютера знову, щоб продовжити ним користуватися.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Цикл подій зупинено</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Події продовжували запускати одна одну, тому Macro Deck зупинив цей ланцюжок. Перевірте автоматизації та віджети, які реагують одне на одного.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Невдала спроба входу</value>
   </data>

@@ -51,7 +51,14 @@ public class CalendarTriggerSchedulerTests
 			[new CalendarEventProvider()],
 			Logger());
 
-		_runner = new EventTriggerRunner(_folders, _automations, events, matcher, renderer, _executor, Logger());
+		_runner = new EventTriggerRunner(_folders,
+			_automations,
+			events,
+			matcher,
+			renderer,
+			_executor,
+			new RecordingEventCascadeNotifier(),
+			Logger());
 		_services = new ServiceCollection()
 			.AddScoped<IEventTriggerContextResolver>(_ =>
 				new EventTriggerContextResolver(_folders, _automations, events, matcher, renderer))
@@ -71,6 +78,12 @@ public class CalendarTriggerSchedulerTests
 		_scheduler.Dispose();
 		_cache.Dispose();
 		_services.Dispose();
+	}
+
+	[Test]
+	public async Task The_scheduler_wakes_at_least_every_minute()
+	{
+		Assert.That(await _scheduler.RunAsync(CancellationToken.None), Is.LessThanOrEqualTo(TimeSpan.FromMinutes(1)));
 	}
 
 	[Test]

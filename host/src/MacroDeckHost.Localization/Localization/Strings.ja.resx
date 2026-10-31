@@ -14897,6 +14897,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>このコンピューターの ID キーが置き換えられました。ペアリング済みのスマートフォンやタブレットでは、このコンピューターの QR コードを再度読み取って、引き続き使用してください。</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>イベントのループを停止しました</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>イベントが互いをトリガーし続けたため、Macro Deck がこの連鎖を停止しました。互いに反応するオートメーションとウィジェットを確認してください。</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>ログインの失敗</value>
   </data>

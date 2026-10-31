@@ -14897,6 +14897,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>这台电脑的身份密钥已被替换。请在每台已配对的手机或平板上重新扫描这台电脑的二维码，才能继续使用。</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>事件循环已停止</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>事件不断相互触发，因此 Macro Deck 已停止此链。请检查相互响应的自动化和组件。</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>登录尝试失败</value>
   </data>

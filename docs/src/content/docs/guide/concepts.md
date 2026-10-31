@@ -594,6 +594,10 @@ script's. Which `count` a step sees:
 A script started with **Run Script** sees only its own variables, not those of the script, widget or
 automation that started it; pass values to it as inputs instead.
 
+**Variable Changed**, **Variable Created** and **Variable Deleted** do not run for the variables of a script
+or an automation. They do run for the variables of a widget, also when a global variable has the same
+name, because the event only knows the name.
+
 Deleting a widget, script or automation deletes its variables, and duplicating one copies them. When you
 export or share widgets, the scripts they use bring their variables along. The **Variables** page still
 lists only global variables.
@@ -697,6 +701,19 @@ starts playing.
 Scripts and automations can keep variables of their own, for example a counter only one script uses:
 choose **Variables** in the editor's toolbar. A script that runs on a widget also sees that widget's
 variables. See [Variables of a widget, script or automation](#variables-of-a-widget-script-or-automation).
+
+A trigger runs one at a time. An event that arrives while its actions are still running waits, and they run
+once more for it when they finish. If several arrive, only the newest one waits, so a flow on **OBS Scene
+Changed** ends on the scene you switched to last, even when you skipped through others. A filter is checked
+against that newest event only. This also means
+that actions which change the variable their own **Variable Changed** trigger watches run once more for
+that change; add a filter such as **Changed to** to skip it. A schedule whose actions outlast its interval
+runs again right after them.
+
+Automations and widgets can react to each other: one changes `x`, the other reacts and changes `y`, and the first
+reacts again. Macro Deck stops such a chain after 32 steps and shows a notification. Chains that pass through a
+template variable, a file variable, a widget's **On State Change** actions, a plugin or another program are not
+counted. The count never decays, so a slow chain that keeps going, such as one with a long **Wait**, stops too.
 
 ### Calendar triggers and Join Meeting
 

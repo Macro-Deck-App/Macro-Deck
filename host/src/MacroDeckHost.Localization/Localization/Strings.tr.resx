@@ -14897,6 +14897,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Bu bilgisayarın kimlik anahtarı değiştirildi. Eşleştirilmiş her telefonda veya tablette bu bilgisayarın QR kodunu yeniden tarayarak kullanmaya devam edin.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Olay döngüsü durduruldu</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Olaylar birbirini tetiklemeye devam etti, bu nedenle Macro Deck bu zinciri durdurdu. Birbirine tepki veren otomasyonları ve widget'ları kontrol edin.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Başarısız oturum açma denemesi</value>
   </data>

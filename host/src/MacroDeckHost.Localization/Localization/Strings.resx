@@ -14899,6 +14899,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>This computer's identity key was replaced. On every paired phone or tablet, scan this computer's QR code again to keep using it.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Event loop stopped</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Events kept triggering each other, so Macro Deck stopped this chain. Check the automations and widgets that react to each other.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Failed login attempt</value>
   </data>
