@@ -403,19 +403,19 @@ public class PluginDeveloperModeGateTests
 	}
 
 	[Test]
-	public async Task The_new_developer_mode_value_reaches_ui_clients_and_an_unchanged_value_pushes_nothing()
+	public async Task The_new_developer_mode_value_reaches_the_admin_ui_and_an_unchanged_value_pushes_nothing()
 	{
 		await SetDeveloperMode(true);
-		_uiTransport.Broadcasts.Clear();
+		_uiTransport.GroupMessages.Clear();
 
 		await SetDeveloperMode(false);
 		var afterOff = DeveloperSettingsEvents();
 
-		_uiTransport.Broadcasts.Clear();
+		_uiTransport.GroupMessages.Clear();
 		await SetDeveloperMode(false);
 		var afterRepeat = DeveloperSettingsEvents();
 
-		_uiTransport.Broadcasts.Clear();
+		_uiTransport.GroupMessages.Clear();
 		await SetDeveloperMode(true);
 		var afterOn = DeveloperSettingsEvents();
 
@@ -431,7 +431,10 @@ public class PluginDeveloperModeGateTests
 
 	private List<DeveloperSettingsChangedEvent> DeveloperSettingsEvents()
 	{
-		return _uiTransport.Broadcasts.OfType<DeveloperSettingsChangedEvent>().ToList();
+		return _uiTransport.GroupMessages.Where(m => m.Group == UiAdminGroups.Admin)
+			.Select(m => m.Message)
+			.OfType<DeveloperSettingsChangedEvent>()
+			.ToList();
 	}
 
 	private static string PluginIdOf(JsonElement session)

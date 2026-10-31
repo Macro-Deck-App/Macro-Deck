@@ -73,7 +73,8 @@ public sealed class OAuthCallbackCoordinator : IOAuthCallbackCoordinator
 			return false;
 		}
 
-		await _transport.Send(new ConfigFlowAuthorizedNotification
+		await _transport.SendToGroup(UiAdminGroups.Admin,
+			new ConfigFlowAuthorizedNotification
 			{
 				FlowId = pending.FlowId.ToString(),
 				Success = errorCode is null && !string.IsNullOrEmpty(code),

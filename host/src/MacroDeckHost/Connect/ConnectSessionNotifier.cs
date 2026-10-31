@@ -62,7 +62,7 @@ public sealed class ConnectSessionNotifier : IHostedService, IDisposable
 
 	private void OnSessionChanged(object? sender, ConnectSessionSnapshot snapshot)
 	{
-		_ = _transport.Send(new ConnectSessionChangedNotification());
+		_ = _transport.SendToGroup(UiAdminGroups.Admin, new ConnectSessionChangedNotification());
 
 		// Raised from inside the session's Publish, so the revalidation must never run on this call.
 		if (snapshot.Account is not null)
@@ -73,7 +73,7 @@ public sealed class ConnectSessionNotifier : IHostedService, IDisposable
 
 	private void OnAvatarChanged(object? sender, EventArgs e)
 	{
-		_ = _transport.Send(new ConnectSessionChangedNotification());
+		_ = _transport.SendToGroup(UiAdminGroups.Admin, new ConnectSessionChangedNotification());
 	}
 
 	private async Task RevalidatePeriodically(CancellationToken cancellationToken)
