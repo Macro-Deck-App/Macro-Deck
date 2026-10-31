@@ -114,6 +114,24 @@ public partial class UiSocketScopeTests
 	}
 
 	[Test]
+	public async Task A_developer_mode_change_reaches_the_admin_socket_and_not_a_client_socket()
+	{
+		await using var client = await _host.ConnectUiAsync(await _host.LoginTokenAsync("client", "Tablet"));
+		await using var admin = await _host.ConnectUiAsync(null);
+
+		var changed = await _host.SendAsync(HttpMethod.Put,
+			"/api/settings/developer",
+			new { enabled = true },
+			loopback: true);
+		Assert.That(changed.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+		await admin.WaitForAsync(message => message.Type == "DeveloperSettingsChangedEvent");
+		await client.SyncAsync();
+
+		Assert.That(client.Received.Select(message => message.Type), Does.Not.Contain("DeveloperSettingsChangedEvent"));
+	}
+
+	[Test]
 	public async Task Script_and_automation_definitions_never_reach_a_client_scope_socket()
 	{
 		await using var client = await _host.ConnectUiAsync(await _host.LoginTokenAsync("client", "Tablet"));
@@ -143,8 +161,9 @@ public partial class UiSocketScopeTests
 		await client.SyncAsync();
 
 		var leaked = client.Received
-			.Where(message => message.Type is { } type && (type.StartsWith("Script", StringComparison.Ordinal)
-				|| type.StartsWith("Automation", StringComparison.Ordinal)))
+			.Where(message => message.Type is { } type
+				&& (type.StartsWith("Script", StringComparison.Ordinal)
+					|| type.StartsWith("Automation", StringComparison.Ordinal)))
 			.Select(message => message.Type)
 			.ToList();
 		Assert.Multiple(() =>
@@ -168,7 +187,8 @@ public partial class UiSocketScopeTests
 			"MacroDeckHost",
 			"Ui",
 			"UiWebSocketDispatcher.cs"));
-		var dispatched = DispatchArm().Matches(source)
+		var dispatched = DispatchArm()
+			.Matches(source)
 			.ToDictionary(match => match.Groups["type"].Value,
 				match => match.Groups["admin"].Success,
 				StringComparer.Ordinal);
