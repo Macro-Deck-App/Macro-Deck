@@ -27,38 +27,43 @@ type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'i
       @switch (kind) {
         @case ('label') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.LabelField' | translate }}</label>
-            <shared-param-input [multiline]="true" [rows]="5" [placeholder]="'macrodeck.app:ActionBuilder.WidgetAppearance.ButtonLabelPlaceholder' | translate"
+            <shared-param-input [multiline]="true" [rows]="5"
+              [ariaLabel]="'macrodeck.app:ActionBuilder.WidgetAppearance.LabelField' | translate" [placeholder]="'macrodeck.app:ActionBuilder.WidgetAppearance.ButtonLabelPlaceholder' | translate"
               [value]="stringValue('label')" [variables]="store.pickerVariables()" [scope]="store.previewScope()"
               [scopeRefId]="store.previewScopeRefId()" (valueChange)="write('label', $event)" />
           </div>
         }
         @case ('background') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [ariaLabel]="'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate"
             [allowVariables]="true" [allowAlpha]="true" [variableScope]="store.previewScope()" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('labelColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [ariaLabel]="'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate"
             [allowVariables]="true" [allowAlpha]="true" [variableScope]="store.previewScope()" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('accentColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [ariaLabel]="'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate"
             [allowVariables]="true" [allowAlpha]="true" [variableScope]="store.previewScope()" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('iconColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [ariaLabel]="'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate"
             [allowVariables]="true" [allowAlpha]="true" [variableScope]="store.previewScope()" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('iconAppearance') {
           <div class="form-group form-group--dense"><label>{{ parameter('iconAppearance')?.label }}</label><shared-select
-            [options]="iconAppearanceOptions" [ngModel]="stringValue('iconAppearance')"
+            [ariaLabel]="parameter('iconAppearance')?.label ?? ''" [options]="iconAppearanceOptions" [ngModel]="stringValue('iconAppearance')"
             (ngModelChange)="write('iconAppearance', $event)" /></div>
         }
         @case ('icon') {
-          <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.IconField' | translate }}</label><shared-widget-icon-control [icon]="iconValue()"
+          <div class="form-group form-group--dense" role="group" [attr.aria-label]="'macrodeck.app:ActionBuilder.WidgetAppearance.IconField' | translate"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.IconField' | translate }}</label><shared-widget-icon-control [icon]="iconValue()"
             (valueChange)="writeIcon($event)" /></div>
         }
         @case ('iconDisplay') {
