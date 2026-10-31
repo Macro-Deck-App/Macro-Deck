@@ -14899,6 +14899,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Se ha sustituido la clave de identidad de este ordenador. En cada teléfono o tableta vinculado, vuelve a escanear el código QR de este ordenador para seguir usándolo.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Bucle de eventos detenido</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Los eventos se activaban entre sí sin parar, así que Macro Deck detuvo esta cadena. Revisa las automatizaciones y los widgets que reaccionan entre sí.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Intento de inicio de sesión fallido</value>
   </data>

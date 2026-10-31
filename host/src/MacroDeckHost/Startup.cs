@@ -539,6 +539,7 @@ public class Startup
 		services.AddSingleton<EventPreviewSamples>();
 		services.AddScoped<IEventSubscriptionMatcher, EventSubscriptionMatcher>();
 		services.AddScoped<IEventTriggerRunner, EventTriggerRunner>();
+		services.AddScoped<IEventCascadeNotifier, EventCascadeNotifier>();
 		services.AddScoped<IEventTriggerContextResolver, EventTriggerContextResolver>();
 
 		services.AddSingleton<VariableRegistry>();

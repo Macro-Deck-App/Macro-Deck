@@ -14900,6 +14900,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>De identiteitssleutel van deze computer is vervangen. Scan op elke gekoppelde telefoon of tablet de QR-code van deze computer opnieuw om hem te blijven gebruiken.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Gebeurtenislus gestopt</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Gebeurtenissen bleven elkaar activeren, dus Macro Deck heeft deze keten gestopt. Controleer de automatiseringen en widgets die op elkaar reageren.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Mislukte inlogpoging</value>
   </data>

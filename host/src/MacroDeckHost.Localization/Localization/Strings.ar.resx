@@ -14900,6 +14900,12 @@
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>تم استبدال مفتاح هوية هذا الكمبيوتر. على كل هاتف أو جهاز لوحي مقترن، امسح رمز الاستجابة السريعة لهذا الكمبيوتر مرة أخرى لمواصلة استخدامه.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>تم إيقاف حلقة الأحداث</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>استمرت الأحداث في تشغيل بعضها بعضًا، لذا أوقف Macro Deck هذه السلسلة. تحقق من عمليات الأتمتة والأدوات التي تتفاعل مع بعضها.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>محاولة تسجيل دخول فاشلة</value>
   </data>

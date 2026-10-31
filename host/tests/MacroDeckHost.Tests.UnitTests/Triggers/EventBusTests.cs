@@ -40,6 +40,32 @@ public class EventBusTests
 	}
 
 	[Test]
+	public async Task An_occurrence_published_inside_an_event_flow_carries_the_flows_depth()
+	{
+		Subscribe("obs", "scene-changed");
+
+		await Task.Run(() =>
+		{
+			EventCascade.Set(3);
+			_bus.Publish(Occurrence("obs::scene-changed"));
+		});
+
+		Assert.That(_bus.Reader.TryRead(out var occurrence), Is.True);
+		Assert.That(occurrence!.CascadeDepth, Is.EqualTo(3));
+	}
+
+	[Test]
+	public void An_occurrence_from_outside_any_flow_starts_a_new_chain()
+	{
+		Subscribe("obs", "scene-changed");
+
+		_bus.Publish(Occurrence("obs::scene-changed"));
+
+		Assert.That(_bus.Reader.TryRead(out var occurrence), Is.True);
+		Assert.That(occurrence!.CascadeDepth, Is.Zero);
+	}
+
+	[Test]
 	public void Publishing_with_no_subscribers_queues_nothing()
 	{
 		_bus.Publish(Occurrence("obs::scene-changed"));

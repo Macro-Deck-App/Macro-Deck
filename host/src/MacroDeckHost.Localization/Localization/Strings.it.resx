@@ -14899,6 +14899,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>La chiave di identità di questo computer è stata sostituita. Su ogni telefono o tablet associato, scansiona di nuovo il codice QR di questo computer per continuare a usarlo.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Ciclo di eventi interrotto</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Gli eventi continuavano ad attivarsi a vicenda, quindi Macro Deck ha interrotto questa catena. Controlla le automazioni e i widget che reagiscono l'uno all'altro.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Tentativo di accesso non riuscito</value>
   </data>

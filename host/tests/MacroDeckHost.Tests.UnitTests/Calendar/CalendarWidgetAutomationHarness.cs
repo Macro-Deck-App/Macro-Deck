@@ -32,6 +32,8 @@ internal sealed class CalendarWidgetAutomationHarness : IAsyncDisposable
 		services.AddSingleton<IUserVariableStore, NullUserVariableStore>();
 		services.AddTestVariableService();
 		services.AddScoped<IFlowExecutor>(_ => Executor);
+		services.AddSingleton<IActionExecutionCoordinator>(serviceProvider =>
+			new InlineActionExecutionCoordinator(serviceProvider.GetRequiredService<IServiceScopeFactory>()));
 		services.AddSingleton(TestLocalization.Resolver);
 		services.AddSingleton(TestLocalization.Preferences);
 		_services = services.BuildServiceProvider();
@@ -55,6 +57,9 @@ internal sealed class CalendarWidgetAutomationHarness : IAsyncDisposable
 	public RecordingMediator Mediator { get; } = new();
 
 	public RecordingFlowExecutor Executor { get; } = new();
+
+	public int CoordinatedRuns
+		=> ((InlineActionExecutionCoordinator)_services.GetRequiredService<IActionExecutionCoordinator>()).Runs;
 
 	public CalendarWidgetTriggerScheduler Triggers { get; }
 
