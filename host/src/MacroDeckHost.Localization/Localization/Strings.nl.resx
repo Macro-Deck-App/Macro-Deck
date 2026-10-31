@@ -1154,6 +1154,12 @@ Macro Deck is geïnstalleerd vanuit de APT-repository, dus voer sudo apt update 
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>De Macro Deck-host is niet bereikbaar, dus er kon geen back-up worden gemaakt.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck wacht op de herstelsleutel en kan zijn gegevens niet lezen, dus deze update gaat door zonder back-up.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Bijwerken zonder back-up</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck kon niet bevestigen dat een back-up is gemaakt.</value>
   </data>

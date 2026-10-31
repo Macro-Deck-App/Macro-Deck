@@ -99,13 +99,10 @@ fn icon_name() -> Option<String> {
         .map(|stem| stem.to_string_lossy().into_owned())
 }
 
-fn show(notification: &HostNotification, app_name: &str, identifier: &str) -> bool {
+fn show(title: &str, message: &str, app_name: &str, identifier: &str) -> bool {
     let _ = identifier;
     let mut builder = notify_rust::Notification::new();
-    builder
-        .summary(&notification.title)
-        .body(&notification.message)
-        .appname(app_name);
+    builder.summary(title).body(message).appname(app_name);
 
     #[cfg(target_os = "linux")]
     if let Some(icon) = icon_name() {
@@ -124,6 +121,23 @@ fn show(notification: &HostNotification, app_name: &str, identifier: &str) -> bo
             false
         }
     }
+}
+
+// For a notice of the shell's own: the host's helpers are no fallback while it is locked or stopping.
+pub async fn show_now(app: &AppHandle, title: String, message: String) -> bool {
+    let identifier = app.config().identifier.clone();
+    let app_name = app
+        .config()
+        .product_name
+        .clone()
+        .unwrap_or_else(|| identifier.clone());
+    let shown = tauri::async_runtime::spawn_blocking(move || {
+        show(&title, &message, &app_name, &identifier)
+    });
+    matches!(
+        tokio::time::timeout(SHOW_TIMEOUT, shown).await,
+        Ok(Ok(true))
+    )
 }
 
 async fn poll(
@@ -192,7 +206,9 @@ async fn run(app: AppHandle, app_name: String, identifier: String) {
                     let id = identifier.clone();
                     let shown = tokio::time::timeout(
                         SHOW_TIMEOUT,
-                        tauri::async_runtime::spawn_blocking(move || show(&payload, &name, &id)),
+                        tauri::async_runtime::spawn_blocking(move || {
+                            show(&payload.title, &payload.message, &name, &id)
+                        }),
                     )
                     .await
                     .map(|joined| joined.unwrap_or(false))

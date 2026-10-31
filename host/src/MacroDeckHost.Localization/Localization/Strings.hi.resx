@@ -1154,6 +1154,12 @@ Macro Deck उसके APT रिपॉज़िटरी से इंस्�
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Macro Deck होस्ट तक पहुँच नहीं है, इसलिए कोई बैकअप नहीं बनाया जा सका।</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck रिकवरी कुंजी की प्रतीक्षा कर रहा है और अपना डेटा नहीं पढ़ सकता, इसलिए यह अपडेट बैकअप के बिना जारी है।</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>बैकअप के बिना अपडेट हो रहा है</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck पुष्टि नहीं कर सका कि बैकअप बनाया गया है।</value>
   </data>

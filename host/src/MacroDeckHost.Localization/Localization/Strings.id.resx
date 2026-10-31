@@ -1154,6 +1154,12 @@ Macro Deck dipasang dari repositori APT-nya, jadi jalankan sudo apt update &amp;
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Host Macro Deck tidak dapat dijangkau, sehingga cadangan tidak dapat dibuat.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck sedang menunggu kunci pemulihan dan tidak dapat membaca datanya, sehingga pembaruan ini berlanjut tanpa cadangan.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Memperbarui tanpa cadangan</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck tidak dapat memastikan bahwa cadangan telah dibuat.</value>
   </data>

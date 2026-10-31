@@ -1154,6 +1154,12 @@ Macro Deck は APT リポジトリからインストールされています。�
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Macro Deck のホストに接続できないため、バックアップを作成できません。</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck は回復キーを待っていてデータを読み取れないため、この更新はバックアップなしで続行されます。</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>バックアップなしで更新しています</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>バックアップが作成されたことを確認できませんでした。</value>
   </data>

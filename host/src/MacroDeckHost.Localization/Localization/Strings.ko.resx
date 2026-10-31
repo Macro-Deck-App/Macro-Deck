@@ -1154,6 +1154,12 @@ Macro Deck은 APT 저장소에서 설치되었으므로, 새 버전이 저장소
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Macro Deck 호스트에 연결할 수 없어 백업을 만들 수 없습니다.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck이 복구 키를 기다리고 있어 데이터를 읽을 수 없으므로 이 업데이트는 백업 없이 진행됩니다.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>백업 없이 업데이트 중</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck이 백업이 만들어졌는지 확인할 수 없었습니다.</value>
   </data>
