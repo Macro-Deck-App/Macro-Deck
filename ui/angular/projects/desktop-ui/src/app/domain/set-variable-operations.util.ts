@@ -1,3 +1,4 @@
+import { AppStrings } from '@macro-deck/runtime';
 import type { VariableType } from '@macro-deck/runtime';
 import type { SelectOption } from '../components/forms/select/select.component';
 
@@ -5,11 +6,11 @@ export type SetVariableOperation = 'set' | 'add' | 'toggle' | 'append';
 
 export const SET_VARIABLE_DEFAULT_OPERATION: SetVariableOperation = 'set';
 
-const OPERATION_LABELS: Readonly<Record<SetVariableOperation, string>> = {
-  set: 'Set to',
-  add: 'Add',
-  toggle: 'Toggle',
-  append: 'Append',
+const OPERATION_LABEL_KEYS: Readonly<Record<SetVariableOperation, string>> = {
+  set: AppStrings.Integrations.Variables.Actions.OperationSetTo,
+  add: AppStrings.Integrations.Variables.Actions.OperationAdd,
+  toggle: AppStrings.Integrations.Variables.Actions.OperationToggle,
+  append: AppStrings.Integrations.Variables.Actions.OperationAppend,
 };
 
 export function operationsFor(type: VariableType | undefined): SetVariableOperation[] {
@@ -27,8 +28,8 @@ export function operationsFor(type: VariableType | undefined): SetVariableOperat
   }
 }
 
-export function operationOptionsFor(type: VariableType | undefined): SelectOption[] {
-  return operationsFor(type).map(operation => ({ value: operation, label: OPERATION_LABELS[operation] }));
+export function operationOptionsFor(type: VariableType | undefined, translate: (key: string) => string): SelectOption[] {
+  return operationsFor(type).map(operation => ({ value: operation, label: translate(OPERATION_LABEL_KEYS[operation]) }));
 }
 
 export function isOperationAllowed(operation: string, type: VariableType | undefined): boolean {
