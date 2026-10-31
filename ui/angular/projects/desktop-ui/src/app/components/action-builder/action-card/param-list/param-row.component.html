@@ -2,7 +2,7 @@
   [class.boolean]="param.type === 'boolean' && !param.literalOnly"
   [class.param-invalid]="hasError">
   <div class="param-label-line">
-    <label class="param-label">
+    <label class="param-label" [id]="labelId">
       {{ param.label }}@if (param.required) {<span class="param-required" aria-hidden="true">*</span>}
     </label>
 
@@ -59,10 +59,11 @@
       </button>
     </span>
   } @else {
-    <div class="param-value">
+    <div class="param-value" [attr.role]="isLabelledGroup ? 'group' : null" [attr.aria-labelledby]="isLabelledGroup ? labelId : null">
       @switch (param.type) {
         @case ('string') {
           <shared-param-input
+            [ariaLabel]="param.label"
             [value]="stringValue"
             [placeholder]="param.placeholder ?? ''"
             [multiline]="param.multiline ?? false"
@@ -77,6 +78,7 @@
         }
         @case ('url') {
           <shared-param-input
+            [ariaLabel]="param.label"
             [value]="stringValue"
             [placeholder]="param.placeholder ?? 'https://…'"
             [variables]="store.pickerVariables()"
@@ -90,6 +92,7 @@
         }
         @case ('ipaddress') {
           <shared-param-input
+            [ariaLabel]="param.label"
             [value]="stringValue"
             [placeholder]="param.placeholder ?? '192.168.0.1'"
             [variables]="store.pickerVariables()"
@@ -105,12 +108,14 @@
             <input
               type="range"
               class="param-slider"
+              [attr.aria-label]="param.label"
               [ngModel]="numberValue"
               (ngModelChange)="onChange(+$event)"
               [attr.min]="param.min"
               [attr.max]="param.max"
               [attr.step]="param.step ?? 1">
             <shared-input
+              [ariaLabel]="param.label"
               class="param-slider-number"
               type="number"
               [invalid]="hasError"
@@ -121,6 +126,7 @@
               (ngModelChange)="onNumberChange($event)" />
           } @else {
             <shared-input
+              [ariaLabel]="param.label"
               type="number"
               [invalid]="hasError"
               [min]="param.min"
@@ -134,10 +140,12 @@
           @if (param.literalOnly) {
             <!-- A value that cannot be variable-bound can use a pure switch. -->
             <shared-toggle-switch
+              [ariaLabel]="param.label"
               [checked]="!!primitive"
               (changed)="onChange($event)" />
           } @else {
             <shared-checkbox
+              [ariaLabel]="param.label"
               [ngModel]="primitive"
               (ngModelChange)="onChange($event)" />
           }
@@ -145,6 +153,7 @@
         @case ('choice') {
           @if (param.searchable) {
             <shared-combobox
+              [ariaLabel]="param.label"
               [value]="stringValue"
               [placeholder]="emptyOptionLabel"
               [options]="choiceOptions"
@@ -153,6 +162,7 @@
               (valueChange)="onChange($event)" />
           } @else {
             <shared-select
+              [ariaLabel]="param.label"
               [options]="choiceOptions"
               [placeholder]="emptyOptionLabel"
               [clearable]="!param.required"
@@ -163,6 +173,7 @@
         @case ('dynamic-choice') {
           @if (param.searchable) {
             <shared-combobox
+              [ariaLabel]="param.label"
               [value]="stringValue"
               [displayLabel]="autocompleteDisplayLabel"
               [placeholder]="emptyOptionLabel"
@@ -174,6 +185,7 @@
               (opened)="loadDynamicOptions()" />
           } @else {
             <shared-select
+              [ariaLabel]="param.label"
               [options]="dynamicChoiceOptions"
               [placeholder]="emptyOptionLabel"
               [clearable]="!param.required"
@@ -192,6 +204,7 @@
         }
         @case ('autocomplete') {
           <shared-combobox
+            [ariaLabel]="param.label"
             [value]="stringValue"
             [displayLabel]="autocompleteDisplayLabel"
             [placeholder]="param.placeholder ?? ''"
@@ -206,6 +219,7 @@
         }
         @case ('widget-target') {
           <shared-widget-target-picker
+            [ariaLabel]="param.label"
             [value]="stringValue"
             [options]="effectiveOptions"
             [loading]="dynLoading()"
@@ -218,6 +232,7 @@
         }
         @case ('multiselect') {
           <shared-multi-select
+            [ariaLabel]="param.label"
             [value]="arrayValue"
             [options]="effectiveOptions"
             [loading]="dynLoading()"
@@ -230,6 +245,7 @@
         @case ('password') {
           @if (allowReferences) {
             <shared-secret-input
+              [ariaLabel]="param.label"
               [value]="secretValue"
               [kind]="secretKind"
               [placeholder]="param.placeholder ?? ('macrodeck.app:ActionBuilder.Param.EnterPassword' | translate)"
@@ -237,6 +253,7 @@
             </shared-secret-input>
           } @else {
             <shared-input
+              [ariaLabel]="param.label"
               type="password"
               [placeholder]="param.placeholder ?? ('macrodeck.app:ActionBuilder.Param.EnterPassword' | translate)"
               [ngModel]="stringValue"
@@ -246,6 +263,7 @@
         @case ('secret') {
           @if (allowReferences) {
             <shared-secret-input
+              [ariaLabel]="param.label"
               [value]="secretValue"
               [kind]="secretKind"
               [placeholder]="param.placeholder ?? ('macrodeck.app:ActionBuilder.Param.EnterSecret' | translate)"
@@ -253,6 +271,7 @@
             </shared-secret-input>
           } @else {
             <shared-input
+              [ariaLabel]="param.label"
               type="password"
               [placeholder]="param.placeholder ?? ('macrodeck.app:ActionBuilder.Param.EnterSecret' | translate)"
               [ngModel]="stringValue"
@@ -261,6 +280,7 @@
         }
         @case ('color') {
           <shared-color-picker
+            [ariaLabel]="param.label"
             [ngModel]="stringValue"
             [allowVariables]="allowReferences && !param.literalOnly"
             [allowAlpha]="param.allowAlpha === true"
@@ -272,6 +292,7 @@
         }
         @case ('file') {
           <shared-file-path-input
+            [ariaLabel]="param.label"
             kind="file"
             [extensions]="browseExtensions"
             [invalid]="hasError"
@@ -281,6 +302,7 @@
         }
         @case ('folder') {
           <shared-file-path-input
+            [ariaLabel]="param.label"
             kind="folder"
             [invalid]="hasError"
             [placeholder]="param.placeholder ?? ''"
@@ -289,6 +311,7 @@
         }
         @case ('image') {
           <shared-file-path-input
+            [ariaLabel]="param.label"
             kind="image"
             [extensions]="browseExtensions"
             [invalid]="hasError"
@@ -301,6 +324,7 @@
         }
         @case ('hotkey') {
           <shared-hotkey-recorder
+            [ariaLabel]="param.label"
             [value]="hotkeyValue"
             (valueChange)="onChange($event)">
           </shared-hotkey-recorder>
@@ -324,18 +348,21 @@
         }
         @case ('duration') {
           <shared-duration-input
+            [ariaLabel]="param.label"
             [value]="numberValue"
             (valueChange)="onChange($event)">
           </shared-duration-input>
         }
         @case ('datetime') {
           <shared-datetime-picker
+            [ariaLabel]="param.label"
             [value]="stringValue"
             (valueChange)="onChange($event)">
           </shared-datetime-picker>
         }
         @case ('json') {
           <shared-code-editor
+            [ariaLabel]="param.label"
             [value]="stringValue"
             language="json"
             [placeholder]="param.placeholder ?? ''"
@@ -344,6 +371,7 @@
         }
         @case ('code') {
           <shared-code-editor
+            [ariaLabel]="param.label"
             #codeEditor
             [value]="stringValue"
             [language]="codeLanguage"

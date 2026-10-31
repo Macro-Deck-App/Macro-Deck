@@ -168,6 +168,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
   private readonly palette = inject(ColorPaletteService);
 
   public readonly label = input('');
+  public readonly ariaLabel = input<string | null>(null);
   public readonly presets = input<ColorPreset[] | undefined>(undefined);
 
   protected readonly effectivePresets = computed<ColorPreset[]>(() => this.presets() ?? []);
@@ -175,7 +176,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
   protected readonly transparentColor = TRANSPARENT_COLOR;
 
   protected readonly pickerAriaLabel = computed(() =>
-    this.label() || this.localization.translateKey(AppStrings.Forms.ColorPicker.ColorPickerLabel));
+    this.ariaLabel() || this.label() || this.localization.translateKey(AppStrings.Forms.ColorPicker.ColorPickerLabel));
 
   protected readonly defaultColorTitle = computed(() =>
     this.localization.translateKey(AppStrings.Forms.ColorPicker.DefaultColorTitle));

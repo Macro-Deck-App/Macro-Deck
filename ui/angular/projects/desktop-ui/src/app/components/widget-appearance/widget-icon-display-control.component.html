@@ -48,6 +48,7 @@
         <shared-input
           class="idc-number"
           type="number"
+          [ariaLabel]="'macrodeck.app:Widgets.Appearance.IconDisplay.ZoomLabel' | translate"
           [min]="limits.zoom.min"
           [max]="limits.zoom.max"
           [placeholder]="actionMode ? unchangedPlaceholder : ''"
@@ -70,6 +71,7 @@
         <shared-input
           class="idc-number"
           type="number"
+          [ariaLabel]="'macrodeck.app:Widgets.Appearance.IconDisplay.OpacityLabel' | translate"
           [min]="limits.opacity.min"
           [max]="limits.opacity.max"
           [placeholder]="actionMode ? unchangedPlaceholder : ''"
@@ -83,6 +85,7 @@
         <label for="icon-offset-x">{{ 'macrodeck.app:Widgets.Appearance.IconDisplay.PositionXLabel' | translate }}</label>
         <shared-input
           id="icon-offset-x"
+          [ariaLabel]="'macrodeck.app:Widgets.Appearance.IconDisplay.PositionXLabel' | translate"
           type="number"
           [min]="limits.offset.min"
           [max]="limits.offset.max"
@@ -94,6 +97,7 @@
         <label for="icon-offset-y">{{ 'macrodeck.app:Widgets.Appearance.IconDisplay.PositionYLabel' | translate }}</label>
         <shared-input
           id="icon-offset-y"
+          [ariaLabel]="'macrodeck.app:Widgets.Appearance.IconDisplay.PositionYLabel' | translate"
           type="number"
           [min]="limits.offset.min"
           [max]="limits.offset.max"

@@ -76,7 +76,8 @@
   }
 
   <div class="kse-add">
-    <shared-select class="kse-select" [options]="stepTypeOptions()" [ngModel]="newStepType"
+    <shared-select class="kse-select" [ariaLabel]="'macrodeck.app:Forms.KeyboardSequenceEditor.AddStep' | translate"
+      [options]="stepTypeOptions()" [ngModel]="newStepType"
       (ngModelChange)="newStepType = $any($event)" />
     <shared-button variant="primary" (click)="addStep()">
       <span class="icon icon-plus icon-sm" aria-hidden="true"></span>

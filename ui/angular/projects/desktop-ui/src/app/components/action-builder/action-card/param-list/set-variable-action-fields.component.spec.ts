@@ -75,6 +75,23 @@ describe('SetVariableActionFieldsComponent', () => {
     expect(fixture.debugElement.query(By.directive(ParamInputComponent))).toBeNull();
   });
 
+  it('names the operation and value fields after their visible labels', () => {
+    render(block('count'));
+    const host = fixture.nativeElement as HTMLElement;
+    const trigger = host.querySelector('button[role=combobox]')!;
+    const name = document.getElementById(trigger.getAttribute('aria-labelledby')!.split(' ')[0])!.textContent;
+
+    expect(name).toContain('Operation');
+    expect(host.querySelector('input[type=number]')!.getAttribute('aria-label')).toBe('Value');
+  });
+
+  it('names the text value field, whichever editor it renders', () => {
+    render(block('greeting'));
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('[role=textbox]')!.getAttribute('aria-label'))
+      .toBe('Value');
+  });
+
   it('offers a text field for a text variable', () => {
     render(block('greeting'));
 

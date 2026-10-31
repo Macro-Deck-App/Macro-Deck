@@ -79,6 +79,7 @@ export function detectLineSeparator(text: string): string {
         [class.ce-invalid]="!!jsonError()"
         [rows]="rows"
         spellcheck="false"
+        [attr.aria-label]="ariaLabel"
         [placeholder]="placeholder"
         [readOnly]="locked()"
         [ngModel]="ready() ? '' : value"
@@ -104,6 +105,7 @@ export class CodeEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() rows = CodeEditorComponent.defaultRows;
   @Input() placeholder = '';
+  @Input() ariaLabel: string | null = null;
   @Input() variableInsertFormat: string | null | undefined;
   @Input() contentResource: UiResource | null | undefined;
   @Input() contentUploader: CodeEditorContentUploader | null | undefined;
@@ -337,6 +339,7 @@ export class CodeEditorComponent implements OnInit, OnChanges, OnDestroy {
         // No indentWithTab: it would trap keyboard focus inside the editor.
         viewMod.keymap.of([...search.searchKeymap, ...commands.historyKeymap, ...commands.defaultKeymap]),
         viewMod.placeholder(this.placeholder),
+        viewMod.EditorView.contentAttributes.of(this.ariaLabel ? { 'aria-label': this.ariaLabel } : {}),
         theme,
         viewMod.EditorView.updateListener.of(update => {
           if (update.docChanged && !this.applyingExternalValue) {

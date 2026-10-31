@@ -37,6 +37,7 @@
       class="cp-field"
       [swatch]="fieldSwatch()"
       [label]="fieldText()"
+      [ariaLabel]="ariaLabel() || label() || null"
       [placeholder]="fieldIsPlaceholder()"
       [resetGlyph]="fieldShowsResetGlyph()"
       [missing]="missingVariableText() !== null"
