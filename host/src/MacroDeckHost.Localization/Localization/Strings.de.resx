@@ -19648,6 +19648,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Der Download ist fehlgeschlagen. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Wenn das weiterhin passiert, lade die neueste Version von {url} herunter und installiere sie manuell.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Die Suche nach Updates ist fehlgeschlagen. {error}</value>
     <comment>[error:string]</comment>

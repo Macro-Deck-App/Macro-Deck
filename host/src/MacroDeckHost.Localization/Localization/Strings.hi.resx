@@ -19651,6 +19651,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>डाउनलोड विफल हुआ। {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>यदि यह समस्या बनी रहती है, तो {url} से नवीनतम संस्करण डाउनलोड करें और उसे मैन्युअल रूप से इंस्टॉल करें।</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>अपडेट की जाँच नहीं हो सकी। {error}</value>
     <comment>[error:string]</comment>

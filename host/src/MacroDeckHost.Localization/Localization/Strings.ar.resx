@@ -19651,6 +19651,9 @@
     <value>فشل التنزيل. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>إذا استمرت هذه المشكلة، فنزّل أحدث إصدار من {url} وثبّته يدويًا.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>تعذّر التحقق من التحديثات. {error}</value>
     <comment>[error:string]</comment>
