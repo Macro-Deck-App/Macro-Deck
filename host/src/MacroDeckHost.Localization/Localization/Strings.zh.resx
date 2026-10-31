@@ -19654,6 +19654,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>下载失败。{error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>如果此问题持续出现，请从 {url} 下载最新版本并手动安装。</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>无法检查更新。{error}</value>
     <comment>[error:string]</comment>

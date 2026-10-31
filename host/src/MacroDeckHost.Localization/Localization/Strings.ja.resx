@@ -19654,6 +19654,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>ダウンロードに失敗しました。{error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>この問題が続く場合は、{url} から最新バージョンをダウンロードして手動でインストールしてください。</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>更新を確認できませんでした。{error}</value>
     <comment>[error:string]</comment>

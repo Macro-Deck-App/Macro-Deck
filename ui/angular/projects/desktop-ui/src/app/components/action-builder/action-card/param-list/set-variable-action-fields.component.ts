@@ -115,7 +115,7 @@ export class SetVariableActionFieldsComponent implements OnChanges {
   }
 
   protected get operationOptions(): SelectOption[] {
-    return operationOptionsFor(this.variableType);
+    return operationOptionsFor(this.variableType, key => this.localization.translateKey(key));
   }
 
   protected get operation(): string {

@@ -19654,6 +19654,9 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Не удалось загрузить. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Если проблема повторяется, скачайте последнюю версию с {url} и установите её вручную.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Не удалось проверить наличие обновлений. {error}</value>
     <comment>[error:string]</comment>

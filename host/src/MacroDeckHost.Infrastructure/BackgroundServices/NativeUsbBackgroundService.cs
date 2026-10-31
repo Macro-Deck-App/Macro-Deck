@@ -83,8 +83,9 @@ public sealed class NativeUsbBackgroundService : HostReadyBackgroundService
 		}
 
 		_lastBroadcast = status;
-		// No payload: serials are admin-only, and this event reaches every UI client.
-		await _transport.Send(new NativeUsbStateChangedEvent { ChangedAt = _timeProvider.GetUtcNow() }, stoppingToken);
+		await _transport.SendToGroup(UiAdminGroups.Admin,
+			new NativeUsbStateChangedEvent { ChangedAt = _timeProvider.GetUtcNow() },
+			stoppingToken);
 	}
 
 	private static bool SameStatus(NativeUsbStatus left, NativeUsbStatus right)

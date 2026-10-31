@@ -341,13 +341,24 @@ public class AuthService : IAuthService
 	public async Task Logout(string rawRefreshToken)
 	{
 		var token = await _refreshTokenRepository.GetByTokenHash(HashToken(rawRefreshToken));
-		if (token is null || token.RevokedAt is not null)
+		// A rotated cookie still speaks for the session when its refresh answer was lost or is in flight. One
+		// that was signed out stays a no-op, so replaying it cannot end a later sign-in.
+		if (token is null || token.RevokedAt is not null && token.ReplacedById is null)
 		{
 			return;
 		}
 
-		token.RevokedAt = UtcNow();
-		await _refreshTokenRepository.Update(token);
+		if (token.RevokedAt is null)
+		{
+			token.RevokedAt = UtcNow();
+			await _refreshTokenRepository.Update(token);
+		}
+
+		// A provider or removed device has no session left to end, so a refused sign-out changes nothing.
+		if (token.DeviceId is { } deviceId)
+		{
+			await _deviceService.LogoutDevice(deviceId);
+		}
 	}
 
 	public async Task<Result<AuthError>> ChangePassword(string currentPassword, string newPassword)

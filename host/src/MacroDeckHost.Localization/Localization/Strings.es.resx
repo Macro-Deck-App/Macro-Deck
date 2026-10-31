@@ -19653,6 +19653,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>La descarga falló. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Si esto sigue ocurriendo, descarga la última versión desde {url} e instálala manualmente.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>No se pudo comprobar si hay actualizaciones. {error}</value>
     <comment>[error:string]</comment>
