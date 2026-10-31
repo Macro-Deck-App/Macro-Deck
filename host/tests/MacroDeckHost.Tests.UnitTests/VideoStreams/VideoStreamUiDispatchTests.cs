@@ -255,6 +255,7 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			videoStreamProviders: _world.Registry,
 			notifications: new NullNotificationManager(),
 			clientFeatures: new UiClientFeatures(),
+			startupReadiness: TestStartupReadiness.Ready(),
 			connectionCancellation: CancellationToken.None);
 	}
 }
