@@ -17,6 +17,8 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.Extensions.Logging.Abstractions;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -168,6 +170,75 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 				Is.True,
 				"the stuck shutdown must be logged");
 		});
+	}
+
+	[Test]
+	public async Task Built_in_readiness_waits_for_system_integrations_but_not_for_a_slow_ordinary_one()
+	{
+		using var serviceProvider = BuildScopeServices();
+		var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+		var builtInRegistration = new BuiltInIntegrationRegistration();
+		var service = new IntegrationStartupBackgroundService(new LifetimeStub(),
+			new ThreadRecordingIntegrationRegistry(),
+			scopeFactory,
+			new UserNotificationStore(),
+			CreateRealInitializer(scopeFactory),
+			new RecordingMediator(),
+			builtInRegistration,
+			TimeProvider.System,
+			new LoggerConfiguration().CreateLogger());
+		var systemStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var systemRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var ordinaryRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var system = new RecordingSystemIntegration(() =>
+		{
+			systemStarted.TrySetResult();
+			return systemRelease.Task;
+		});
+		var ordinary = new RecordingIntegration { Id = "ordinary", InitializeWork = () => ordinaryRelease.Task };
+
+		var pending = await service.RegisterAllAsync([system, ordinary]);
+		var initializing = service.InitializeAllAsync(pending, CancellationToken.None);
+		await systemStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		var completedDuringSystemInitialization = builtInRegistration.IsComplete;
+
+		systemRelease.SetResult();
+		await builtInRegistration.Completed.WaitAsync(TimeSpan.FromSeconds(5));
+		var initializationStillRunning = !initializing.IsCompleted;
+		ordinaryRelease.SetResult();
+		await initializing.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(completedDuringSystemInitialization, Is.False);
+			Assert.That(initializationStillRunning, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_failed_registration_still_releases_built_in_readiness()
+	{
+		using var serviceProvider = BuildScopeServices();
+		var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+		var builtInRegistration = new BuiltInIntegrationRegistration();
+		var lifetime = new ApplicationLifetime(NullLogger<ApplicationLifetime>.Instance);
+		var service = new IntegrationStartupBackgroundService(lifetime,
+			new FixedRegistry { FailRegistration = true },
+			scopeFactory,
+			new UserNotificationStore(),
+			CreateRealInitializer(scopeFactory),
+			new RecordingMediator(),
+			builtInRegistration,
+			TimeProvider.System,
+			new LoggerConfiguration().CreateLogger());
+
+		await service.StartAsync(CancellationToken.None);
+		lifetime.NotifyStarted();
+
+		await builtInRegistration.Completed.WaitAsync(TimeSpan.FromSeconds(10));
+		await service.StopAsync(CancellationToken.None);
+
+		Assert.That(builtInRegistration.IsComplete, Is.True);
 	}
 
 	[Test]
@@ -350,6 +421,8 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			remove { }
 		}
 
+		public bool FailRegistration { get; init; }
+
 		private readonly HashSet<string> _disabled;
 
 		public FixedRegistry(params IIntegration[] integrations)
@@ -399,12 +472,44 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 			IntegrationMetadata? metadata = null)
 		{
+			if (FailRegistration)
+			{
+				throw new InvalidOperationException("registration failed");
+			}
+
 			return Task.FromResult(IntegrationRegistrationResult.Success);
 		}
 
 		public Task<bool> UnregisterAsync(string integrationId)
 		{
 			return Task.FromResult(false);
+		}
+	}
+
+	private sealed class RecordingSystemIntegration : IIntegration, ISystemIntegration
+	{
+		private readonly Func<Task> _initialize;
+
+		public RecordingSystemIntegration(Func<Task> initialize)
+		{
+			_initialize = initialize;
+		}
+
+		public bool IsActive => true;
+		public string Id => "system";
+		public LocalizedText Name => "System";
+		public string Version => "1.0.0";
+		public bool IsInitialized => true;
+		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return _initialize();
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
 		}
 	}
 
