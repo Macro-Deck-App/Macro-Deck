@@ -23,6 +23,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         type="checkbox"
         [checked]="checked()"
         [disabled]="disabledState()"
+        [attr.aria-label]="ariaLabel"
         (change)="onToggle($event)"
         (blur)="onTouched()">
       @if (label) {
@@ -34,6 +35,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 })
 export class CheckboxComponent implements ControlValueAccessor {
   @Input() label = '';
+  @Input() ariaLabel: string | null = null;
 
   @Input()
   set disabled(value: boolean) {

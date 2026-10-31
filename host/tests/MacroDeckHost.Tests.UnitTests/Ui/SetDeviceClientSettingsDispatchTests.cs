@@ -232,6 +232,7 @@ public class SetDeviceClientSettingsDispatchTests
 			null!,
 			new NullNotificationManager(),
 			new UiClientFeatures(),
+			TestStartupReadiness.Ready(),
 			CancellationToken.None);
 	}
 }

@@ -17659,7 +17659,7 @@
     <value>صدّر مفتاح استرداد النسخة الاحتياطية لحماية حلقة المفاتيح. إلى ذلك الحين تبقى قابلة للقراءة على القرص.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>يمنع تنفيذ الإجراءات أثناء قفل هذا الكمبيوتر، مهما كان اختيارك هنا. على Linux، لا يستطيع Macro Deck معرفة أن هذا الكمبيوتر مقفل، لذا تستمر الإجراءات في العمل ولا يتم قفل العملاء المتصلين.</value>
+    <value>يمنع تنفيذ الإجراءات أثناء قفل هذا الكمبيوتر، مهما كان اختيارك هنا. على Linux، يتطلب ذلك سطح مكتب يبلغ عن القفل، مثل GNOME أو KDE Plasma. وإلا تستمر الإجراءات في العمل ولا يتم قفل العملاء المتصلين.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>شاشة القفل</value>
@@ -19647,6 +19647,9 @@
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>فشل التنزيل. {error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>إذا استمرت هذه المشكلة، فنزّل أحدث إصدار من {url} وثبّته يدويًا.</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>تعذّر التحقق من التحديثات. {error}</value>

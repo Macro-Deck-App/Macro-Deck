@@ -17659,7 +17659,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Экспортируйте ключ восстановления резервных копий, чтобы защитить связку ключей. До этого она остаётся читаемой на диске.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Блокирует выполнение действий, пока этот компьютер заблокирован, что бы вы ни выбрали здесь. В Linux Macro Deck не может определить, что этот компьютер заблокирован, поэтому действия продолжают выполняться, а подключённые клиенты не блокируются.</value>
+    <value>Блокирует выполнение действий, пока этот компьютер заблокирован, что бы вы ни выбрали здесь. В Linux для этого нужна среда рабочего стола, сообщающая о блокировке, например GNOME или KDE Plasma. Иначе действия продолжают выполняться, а подключённые клиенты не блокируются.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Экран блокировки</value>
@@ -19647,6 +19647,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>Не удалось загрузить. {error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Если проблема повторяется, скачайте последнюю версию с {url} и установите её вручную.</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Не удалось проверить наличие обновлений. {error}</value>
