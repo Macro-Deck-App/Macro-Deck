@@ -3,6 +3,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Infrastructure.BackgroundServices;
@@ -132,6 +133,8 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 			var registry = new ThreadRecordingIntegrationRegistry();
 			var readiness = new StartupReadiness();
 			var runner = new RecordingTriggerRunner();
+			var builtInRegistration = new BuiltInIntegrationRegistration();
+			builtInRegistration.Complete();
 
 			var host = new HostBuilder()
 				.ConfigureServices(services =>
@@ -139,6 +142,7 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 					services.AddSingleton<IEventSubscriptionIndex>(index);
 					services.AddSingleton<IEventBus>(bus);
 					services.AddSingleton(readiness);
+					services.AddSingleton(builtInRegistration);
 					services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
 					services.AddScoped<IEventTriggerRunner>(_ => runner);
 					services.AddHostedService<EventDispatchBackgroundService>();

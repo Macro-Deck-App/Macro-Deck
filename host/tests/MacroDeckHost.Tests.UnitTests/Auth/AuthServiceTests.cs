@@ -4,6 +4,8 @@ using MacroDeckHost.Infrastructure.Auth;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Ui.Transport;
+using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -28,6 +30,7 @@ public class AuthServiceTests
 	private InMemoryDeviceRepository _devices = null!;
 	private StartupReadiness _readiness = null!;
 	private FakePasswordHasher _hasher = null!;
+	private RecordingUiTransport _transport = null!;
 
 	private static readonly DeviceRegistration _phone = new(null,
 		null,
@@ -63,6 +66,7 @@ public class AuthServiceTests
 
 	private void BuildService()
 	{
+		_transport = new RecordingUiTransport();
 		_service = new AuthService(_users,
 			_tokens,
 			_hasher,
@@ -70,7 +74,7 @@ public class AuthServiceTests
 			new DeviceService(_devices,
 				_tokens,
 				_connections,
-				new RecordingUiTransport(),
+				_transport,
 				new RecordingMediator(),
 				_time,
 				new FakeProfileRegistry(),
@@ -608,6 +612,72 @@ public class AuthServiceTests
 			Assert.That(first!.Success, Is.True);
 			Assert.That(second.Error, Is.EqualTo(AuthError.RefreshTokenReused));
 			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Logout_on_a_device_tells_the_device_and_ends_all_its_sessions()
+	{
+		await _service.Setup("admin", "password123");
+		var first = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var deviceId = first.Data!.DeviceId!.Value;
+		var second = await _service.Refresh(first.Data.RefreshToken);
+
+		await _service.Logout(second.Data!.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
+			Assert.That(_transport.GroupMessages.Any(m =>
+					m.Group == UiDeviceGroups.For(deviceId) && m.Message is DeviceSessionRevokedEvent),
+				Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Logout_with_a_rotated_cookie_still_ends_the_devices_sessions()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		await _service.Refresh(login.Data!.RefreshToken);
+
+		await _service.Logout(login.Data.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
+			Assert.That(_transport.GroupMessages.Any(m => m.Message is DeviceSessionRevokedEvent), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Logging_out_again_with_a_signed_out_cookie_leaves_a_new_sign_in_alone()
+	{
+		await _service.Setup("admin", "password123");
+		var first = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		await _service.Logout(first.Data!.RefreshToken);
+		var samePhone = _phone with { DeviceId = first.Data.DeviceId, DeviceSecret = first.Data.IssuedDeviceSecret };
+		await _service.Login("admin", "password123", AuthScope.Client, samePhone);
+
+		await _service.Logout(first.Data.RefreshToken);
+
+		Assert.That(_tokens.Tokens.Count(t => t.RevokedAt is null), Is.EqualTo(1));
+	}
+
+	[Test]
+	public async Task Logout_of_a_token_naming_a_provider_device_still_revokes_the_token()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var device = await _devices.GetById(login.Data!.DeviceId!.Value);
+		device!.ProviderId = "provider";
+
+		await _service.Logout(login.Data.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tokens.Tokens.Single().RevokedAt, Is.Not.Null);
+			Assert.That(_transport.GroupMessages, Is.Empty);
 		});
 	}
 

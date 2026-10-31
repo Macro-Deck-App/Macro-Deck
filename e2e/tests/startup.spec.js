@@ -25,9 +25,6 @@ test('an Integration Connected automation runs after a real restart', async ({ a
 });
 
 test('a Server Started automation runs once after a real restart', async ({ api, host }) => {
-  // Intermittent today: server-started can be dispatched while the built-in integrations are still
-  // being registered, and the run then fails. https://github.com/Macro-Deck-App/Macro-Deck/issues/1581
-  test.fixme(true, 'server-started races built-in integration registration (INTEGRATION_NOT_FOUND)');
   test.setTimeout(120_000);
   await api.variable('e2e_started', { value: 'never' });
   await api.variable('e2e_started_count', { type: 'numeric', value: 0 });
