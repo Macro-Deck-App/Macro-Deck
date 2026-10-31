@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using MacroDeckHost.Platform.Native;
 using MacroDeckHost.Platform.ShellLinks;
 
 namespace MacroDeckHost.Platform.Applications;
@@ -15,6 +16,16 @@ internal static class ProcessMatcher
 
 		var candidates = CandidatePaths(configuredPath);
 		var normalizedPaths = candidates.Select(Normalize).ToList();
+
+		// A bundle executable is matched by path only: names such as Electron or stable are shared by
+		// unrelated apps, and stopping by name would hit those.
+		if (OperatingSystem.IsMacOS()
+			&& MacOsBundles.IsAppBundle(configuredPath)
+			&& MacOsBundles.TryGetExecutablePath(configuredPath.Trim()) is { } bundleExecutable)
+		{
+			normalizedPaths.Add(bundleExecutable);
+		}
+
 		var names = candidates.Select(SafeFileNameWithoutExtension).Where(name => name.Length > 0).ToList();
 
 		var byPath = new List<Process>();
