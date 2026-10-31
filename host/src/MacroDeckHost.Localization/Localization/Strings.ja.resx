@@ -17659,7 +17659,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>キーリングを保護するには、バックアップの復旧キーをエクスポートしてください。それまでは、ディスク上で読み取り可能なままです。</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>このコンピューターがロックされている間は、ここでどの設定を選んでいても、アクションの実行をブロックします。Linux では、Macro Deck はこのコンピューターのロックを検出できないため、アクションは引き続き実行され、接続中のクライアントもロックされません。</value>
+    <value>このコンピューターがロックされている間は、ここでどの設定を選んでいても、アクションの実行をブロックします。Linux では、GNOME や KDE Plasma のようにロックを通知するデスクトップが必要です。それ以外の環境では、アクションは引き続き実行され、接続中のクライアントもロックされません。</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>ロック画面</value>

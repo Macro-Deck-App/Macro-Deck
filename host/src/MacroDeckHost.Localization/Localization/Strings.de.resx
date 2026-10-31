@@ -17656,7 +17656,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Exportiere deinen Backup-Wiederherstellungsschlüssel, um den Schlüsselbund zu schützen. Bis dahin bleibt er auf der Festplatte lesbar.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Die Ausführung von Aktionen wird blockiert, solange dieser Computer gesperrt ist – unabhängig von dieser Einstellung. Unter Linux erkennt Macro Deck nicht, dass dieser Computer gesperrt ist: Aktionen laufen dann weiter und verbundene Clients werden nicht gesperrt.</value>
+    <value>Die Ausführung von Aktionen wird blockiert, solange dieser Computer gesperrt ist – unabhängig von dieser Einstellung. Unter Linux muss die Desktopumgebung die Sperre melden, wie GNOME oder KDE Plasma. Sonst laufen Aktionen weiter und verbundene Clients werden nicht gesperrt.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Sperrbildschirm</value>
