@@ -1,3 +1,4 @@
+using MacroDeck.Localization;
 using MacroDeckHost.Integrations.Keyboard.Models;
 using MacroDeckHost.Integrations.Keyboard.Native;
 
@@ -8,6 +9,8 @@ internal sealed class FakeKeyboardInputService : IKeyboardInputService
 	public List<string> Calls { get; } = [];
 
 	public bool IsSupported { get; set; } = true;
+	public bool IsDegraded => false;
+	public LocalizedText DegradedReason => default;
 	public bool RequiresPermission { get; set; }
 	public bool HasPermission { get; set; } = true;
 

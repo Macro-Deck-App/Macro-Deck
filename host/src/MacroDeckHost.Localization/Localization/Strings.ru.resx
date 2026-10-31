@@ -8820,6 +8820,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Этот режим отправки клавиатуры не поддерживается на этой платформе.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Ввод с клавиатуры в Wayland ограничен</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Предоставить разрешение</value>
   </data>
@@ -8834,6 +8837,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Имитация клавиатуры недоступна</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Это сеанс Wayland, поэтому ввод с клавиатуры идёт через XWayland. Приложения, работающие через XWayland, получают нажатия и текст. Собственные приложения Wayland могут их не получать, а действия клавиатуры с целевым приложением не могут их найти.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Клавиатура</value>
@@ -11717,6 +11723,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Громкость выходного сигнала системы недоступна.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Это сеанс Wayland, поэтому Macro Deck видит только приложения, работающие через XWayland. Пока в фокусе собственное приложение Wayland, переменные активного приложения сохраняют последнее значение.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Определение активного приложения в Wayland ограничено</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Поддерживаемый GPU не найден. В Linux для метрик GPU нужен драйвер amdgpu или nvidia-smi.</value>
@@ -21586,6 +21598,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Не удалось обновить правило</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Это сеанс Wayland, поэтому Macro Deck видит только приложения, работающие через XWayland. Автоматическая активация не работает для собственных приложений Wayland.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Папка экспортирована</value>

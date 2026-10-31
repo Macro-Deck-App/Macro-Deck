@@ -8820,6 +8820,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Bu klavye hedefleme modu bu platformda desteklenmiyor.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Klavye girişi Wayland'de sınırlıdır</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>İzin ver</value>
   </data>
@@ -8834,6 +8837,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Klavye simülasyonu kullanılamıyor</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Bu bir Wayland oturumu olduğundan klavye girişi XWayland üzerinden çalışır. XWayland üzerinden çalışan uygulamalar tuşları ve metni alır. Yerel Wayland uygulamaları almayabilir ve bir uygulamayı hedefleyen klavye eylemleri onları bulamaz.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Klavye</value>
@@ -11717,6 +11723,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Sistemin çıkış ses düzeyi kullanılamıyor.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Bu bir Wayland oturumu olduğundan Macro Deck yalnızca XWayland üzerinden çalışan uygulamaları görür. Yerel bir Wayland uygulaması odaktayken odaklanan uygulama değişkenleri son değerlerini korur.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Odaklanan uygulama algılaması Wayland'de sınırlıdır</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Desteklenen bir GPU algılanmadı. Linux'ta GPU ölçümleri için amdgpu sürücüsü veya nvidia-smi gerekir.</value>
@@ -21586,6 +21598,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Kural güncellenemedi</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Bu bir Wayland oturumu olduğundan Macro Deck yalnızca XWayland üzerinden çalışan uygulamaları görür. Otomatik etkinleştirme yerel Wayland uygulamalarında işe yaramaz.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Klasör dışa aktarıldı</value>

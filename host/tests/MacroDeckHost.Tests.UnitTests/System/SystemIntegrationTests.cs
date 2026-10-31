@@ -363,6 +363,19 @@ public class SystemIntegrationTests
 	}
 
 	[Test]
+	public async Task GetIssuesAsync_warns_when_focus_detection_is_degraded()
+	{
+		var integration = Create(focusWatcher: new FakeFocusedApplicationWatcher { IsDegraded = true });
+		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(new VariableRefreshSignal()),
+			new RecordingDesktopNotifier(true)));
+
+		var issues = await integration.GetIssuesAsync();
+
+		Assert.That(issues.Select(issue => issue.Id), Is.EqualTo(new[] { "focus-limited-on-wayland" }));
+		Assert.That(issues[0].Severity, Is.EqualTo(IntegrationIssueSeverity.Warning));
+	}
+
+	[Test]
 	public async Task GetIssuesAsync_reports_no_notifications_issue_before_initialization()
 	{
 		var integration = Create();
@@ -767,6 +780,8 @@ public class SystemIntegrationTests
 		public bool IsSupported => true;
 
 		public string? UnsupportedReason => null;
+
+		public bool IsDegraded { get; init; }
 
 		public bool Disposed { get; private set; }
 

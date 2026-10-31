@@ -11,6 +11,10 @@
       </shared-error-banner>
     }
 
+    @if (supported() && capability()?.degraded) {
+      <p class="ffr-warning">{{ 'macrodeck.app:Widgets.Folder.FocusRule.WaylandDegraded' | translate }}</p>
+    }
+
     @if (!editing()) {
       @if (saveError()) {
         <shared-error-banner [message]="saveError()!" (dismiss)="saveError.set(null)"></shared-error-banner>

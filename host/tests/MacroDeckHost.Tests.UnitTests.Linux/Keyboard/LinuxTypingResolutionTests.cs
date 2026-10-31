@@ -90,4 +90,75 @@ public class LinuxTypingResolutionTests
 	{
 		Assert.That(LinuxKeyboardInputProvider.ToKeysyms("ä€"), Is.EqualTo(new nuint[] { 0xE4, 0x010020AC }));
 	}
+
+	[Test]
+	public void The_layout_never_resolves_through_the_spare_key()
+	{
+		const nuint emoji = 0x0101F600;
+
+		var resolved = LinuxKeyboardInputProvider.TryResolveOutsideSpare(emoji,
+			255,
+			8,
+			255,
+			Shift,
+			0,
+			0,
+			(keycode, _) => keycode == 255 ? emoji : 0,
+			out _);
+
+		Assert.That(resolved, Is.False);
+	}
+
+	[TestCase("😀😀", "map:1F600 key key final map:0")]
+	[TestCase("😀🎉😀", "map:1F600 key settle map:1F389 key settle map:1F600 key final map:0")]
+	[TestCase("a😀b", "layout map:1F600 key layout final map:0")]
+	[TestCase("😀a😀", "map:1F600 key layout key final map:0")]
+	[TestCase("abc", "layout layout layout")]
+	public void Out_of_layout_characters_keep_the_spare_mapping_until_they_are_read(string text, string expected)
+	{
+		Assert.That(Type(text, 255), Is.EqualTo(expected));
+	}
+
+	[Test]
+	public void The_mapping_is_cleared_when_sending_fails()
+	{
+		var log = new List<string>();
+		var spare = Spare(255, log);
+
+		Assert.Throws<InvalidOperationException>(() => LinuxKeyboardInputProvider.TypeKeysyms(
+			LinuxKeyboardInputProvider.ToKeysyms("😀"),
+			spare,
+			_ => null,
+			_ =>
+			{
+			},
+			_ => throw new InvalidOperationException()));
+
+		Assert.That(string.Join(' ', log), Is.EqualTo("map:1F600 final map:0"));
+	}
+
+	[Test]
+	public void No_spare_keycode_skips_the_character_without_touching_the_keymap()
+	{
+		Assert.That(Type("a😀", 0), Is.EqualTo("layout"));
+	}
+
+	private static string Type(string text, int spareKeycode)
+	{
+		var log = new List<string>();
+		LinuxKeyboardInputProvider.TypeKeysyms(LinuxKeyboardInputProvider.ToKeysyms(text),
+			Spare(spareKeycode, log),
+			keysym => keysym < 0x100 ? new LinuxKeyboardInputProvider.TypingKey(38, 0) : null,
+			_ => log.Add("layout"),
+			_ => log.Add("key"));
+
+		return string.Join(' ', log);
+	}
+
+	private static LinuxKeyboardInputProvider.SpareKeycode Spare(int keycode, List<string> log)
+	{
+		return new LinuxKeyboardInputProvider.SpareKeycode(keycode,
+			keysym => log.Add(keysym == 0 ? "map:0" : $"map:{keysym - 0x01000000:X}"),
+			clearing => log.Add(clearing ? "final" : "settle"));
+	}
 }

@@ -1,3 +1,5 @@
+using MacroDeck.Localization;
+
 namespace MacroDeckHost.Integrations.Keyboard.Native;
 
 public interface IKeyboardInputProvider
@@ -5,6 +7,10 @@ public interface IKeyboardInputProvider
 	string PlatformName { get; }
 
 	bool IsSupported { get; }
+
+	bool IsDegraded { get; }
+
+	LocalizedText DegradedReason { get; }
 
 	bool RequiresPermission { get; }
 

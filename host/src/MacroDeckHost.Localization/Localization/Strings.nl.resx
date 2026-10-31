@@ -8820,6 +8820,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Deze toetsenbordmodus wordt op dit platform niet ondersteund.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Toetsenbordinvoer is beperkt op Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Machtiging verlenen</value>
   </data>
@@ -8834,6 +8837,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Toetsenbordsimulatie niet beschikbaar</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Dit is een Wayland-sessie, dus toetsenbordinvoer loopt via XWayland. Apps die via XWayland draaien krijgen toetsen en tekst. Native Wayland-apps misschien niet, en toetsenbordacties die op een app zijn gericht kunnen ze niet vinden.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Toetsenbord</value>
@@ -11717,6 +11723,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Het uitvoervolume van het systeem is niet beschikbaar.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Dit is een Wayland-sessie, dus Macro Deck ziet alleen apps die via XWayland draaien. Zolang een native Wayland-app focus heeft, houden de variabelen van de gefocuste applicatie hun laatste waarde.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Herkenning van de gefocuste app is beperkt op Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Er is geen ondersteunde GPU gevonden. Op Linux hebben GPU-meetwaarden het amdgpu-stuurprogramma of nvidia-smi nodig.</value>
@@ -21586,6 +21598,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Regel bijwerken mislukt</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Dit is een Wayland-sessie, dus Macro Deck ziet alleen apps die via XWayland draaien. Automatische activering doet niets voor native Wayland-apps.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Map geëxporteerd</value>

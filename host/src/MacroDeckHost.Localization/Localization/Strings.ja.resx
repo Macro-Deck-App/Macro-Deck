@@ -8820,6 +8820,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>この送信方法は、このプラットフォームではサポートされていません。</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Wayland ではキーボード入力が制限されます</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>権限を付与</value>
   </data>
@@ -8834,6 +8837,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>キーボードのシミュレーションを利用できません</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>これは Wayland セッションのため、キーボード入力は XWayland を経由します。XWayland で動作するアプリはキーとテキストを受け取ります。ネイティブの Wayland アプリは受け取れない場合があり、アプリを対象にしたキーボードアクションからも見つけられません。</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>キーボード</value>
@@ -11717,6 +11723,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>システムの出力音量を取得できません。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>これは Wayland セッションのため、Macro Deck は XWayland で動作するアプリしか認識できません。ネイティブの Wayland アプリにフォーカスがある間、フォーカス中のアプリケーションの変数は最後の値を保持します。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Wayland ではフォーカス中のアプリの検出が制限されます</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>対応する GPU が検出されませんでした。Linux では、GPU の指標に amdgpu ドライバーまたは nvidia-smi が必要です。</value>
@@ -21586,6 +21598,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>ルールを更新できませんでした</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>これは Wayland セッションのため、Macro Deck は XWayland で動作するアプリしか認識できません。ネイティブの Wayland アプリでは自動アクティブ化は機能しません。</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>フォルダーをエクスポートしました</value>

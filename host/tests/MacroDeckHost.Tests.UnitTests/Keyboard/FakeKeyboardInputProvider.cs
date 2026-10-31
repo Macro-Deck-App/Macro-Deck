@@ -1,3 +1,4 @@
+using MacroDeck.Localization;
 using MacroDeckHost.Integrations.Keyboard.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.Keyboard;
@@ -9,6 +10,8 @@ internal sealed class FakeKeyboardInputProvider : IKeyboardInputProvider
 
 	public string PlatformName => "fake";
 	public bool IsSupported { get; set; } = true;
+	public bool IsDegraded { get; set; }
+	public LocalizedText DegradedReason { get; set; }
 	public bool RequiresPermission => false;
 	public bool HasPermission => true;
 

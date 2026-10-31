@@ -8820,6 +8820,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>이 플랫폼에서는 이 키보드 대상 지정 방식을 지원하지 않습니다.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Wayland에서는 키보드 입력이 제한됩니다</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>권한 허용</value>
   </data>
@@ -8834,6 +8837,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>키보드 시뮬레이션을 사용할 수 없음</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Wayland 세션이므로 키보드 입력은 XWayland를 통해 실행됩니다. XWayland로 실행되는 앱은 키와 텍스트를 받습니다. 네이티브 Wayland 앱은 받지 못할 수 있으며, 앱을 대상으로 하는 키보드 작업도 해당 앱을 찾지 못합니다.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>키보드</value>
@@ -11717,6 +11723,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>시스템 출력 볼륨을 사용할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Wayland 세션이므로 Macro Deck은 XWayland로 실행되는 앱만 볼 수 있습니다. 네이티브 Wayland 앱에 포커스가 있는 동안 포커스된 애플리케이션 변수는 마지막 값을 유지합니다.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Wayland에서는 포커스된 앱 감지가 제한됩니다</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>지원되는 GPU를 찾지 못했습니다. Linux에서는 GPU 지표를 위해 amdgpu 드라이버 또는 nvidia-smi가 필요합니다.</value>
@@ -21586,6 +21598,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>규칙을 업데이트할 수 없습니다</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Wayland 세션이므로 Macro Deck은 XWayland로 실행되는 앱만 볼 수 있습니다. 자동 활성화는 네이티브 Wayland 앱에서 작동하지 않습니다.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>폴더를 내보냈습니다</value>

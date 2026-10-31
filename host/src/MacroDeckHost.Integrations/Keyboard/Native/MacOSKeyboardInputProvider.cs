@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using MacroDeck.Localization;
 using MacroDeckHost.Platform.Native;
 using MacroDeckHost.Platform.Processes;
 
@@ -29,6 +30,10 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 	public string PlatformName => "macOS (Quartz CGEvent)";
 
 	public bool IsSupported => OperatingSystem.IsMacOS();
+
+	public bool IsDegraded => false;
+
+	public LocalizedText DegradedReason => default;
 
 	public bool RequiresPermission => true;
 

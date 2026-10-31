@@ -8819,6 +8819,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Questa modalità di destinazione della tastiera non è supportata su questa piattaforma.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>L'input da tastiera è limitato su Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Concedi permesso</value>
   </data>
@@ -8833,6 +8836,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Simulazione tastiera non disponibile</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Questa è una sessione Wayland, quindi l'input da tastiera passa da XWayland. Le app eseguite tramite XWayland ricevono tasti e testo. Le app Wayland native potrebbero non riceverli e le azioni da tastiera destinate a un'app non riescono a trovarle.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Tastiera</value>
@@ -11716,6 +11722,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Il volume di uscita del sistema non è disponibile.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Questa è una sessione Wayland, quindi Macro Deck vede solo le app eseguite tramite XWayland. Mentre un'app Wayland nativa ha il focus, le variabili dell'applicazione attiva mantengono l'ultimo valore.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Il rilevamento dell'app attiva è limitato su Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Nessuna GPU supportata rilevata. Su Linux le metriche GPU richiedono il driver amdgpu o nvidia-smi.</value>
@@ -21566,6 +21578,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Impossibile aggiornare la regola</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Questa è una sessione Wayland, quindi Macro Deck vede solo le app eseguite tramite XWayland. L'attivazione automatica non ha effetto sulle app Wayland native.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Cartella esportata</value>

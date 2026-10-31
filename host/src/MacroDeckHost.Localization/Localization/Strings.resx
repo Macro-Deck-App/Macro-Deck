@@ -8821,6 +8821,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>This keyboard targeting mode is not supported on this platform.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Keyboard input is limited on Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Grant permission</value>
   </data>
@@ -8835,6 +8838,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Keyboard simulation unavailable</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>This is a Wayland session, so keyboard input runs through XWayland. Apps that run through XWayland receive keys and text. Native Wayland apps may not, and keyboard actions that target an app can't find them.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Keyboard</value>
@@ -11719,6 +11725,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>The system output volume is not available.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>This is a Wayland session, so Macro Deck only sees apps that run through XWayland. While a native Wayland app has focus, the focused application variables keep their last value.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Focused app detection is limited on Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>No supported GPU was detected. On Linux, GPU metrics need the amdgpu driver or nvidia-smi.</value>
@@ -21589,6 +21601,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Could not update the rule</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>This is a Wayland session, so Macro Deck only sees apps that run through XWayland. Automatic activation does nothing for native Wayland apps.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Folder exported</value>
