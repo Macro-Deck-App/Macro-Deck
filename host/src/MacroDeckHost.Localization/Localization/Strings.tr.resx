@@ -17662,7 +17662,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Anahtar halkasını korumak için yedek kurtarma anahtarınızı dışa aktarın. O zamana kadar diskte okunabilir kalır.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Bu bilgisayar kilitliyken, burada ne seçerseniz seçin, eylem çalıştırılmasını engeller. Linux'ta Macro Deck bu bilgisayarın kilitli olduğunu algılayamaz; bu nedenle eylemler çalışmaya devam eder ve bağlı istemciler kilitlenmez.</value>
+    <value>Bu bilgisayar kilitliyken, burada ne seçerseniz seçin, eylem çalıştırılmasını engeller. Linux'ta bunun için GNOME veya KDE Plasma gibi kilidi bildiren bir masaüstü gerekir. Aksi takdirde eylemler çalışmaya devam eder ve bağlı istemciler kilitlenmez.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Kilit ekranı</value>
@@ -19650,6 +19650,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>İndirme başarısız oldu. {error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Bu sorun devam ederse en son sürümü {url} adresinden indirin ve elle kurun.</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Güncellemeler denetlenemedi. {error}</value>

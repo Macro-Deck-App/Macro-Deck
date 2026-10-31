@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use serde::{Deserialize, Serialize};
 use tauri::ipc::{InvokeBody, Request};
 use tauri::{AppHandle, Emitter, Manager};
@@ -270,9 +272,22 @@ pub async fn pick_screen_color(app: AppHandle) -> Option<String> {
     }
 }
 
+// The postMessage IPC fallback cannot carry binary, so Tauri sends the bytes as a JSON number array.
+fn save_file_bytes(body: &InvokeBody) -> Option<Cow<'_, [u8]>> {
+    match body {
+        InvokeBody::Raw(data) => Some(Cow::Borrowed(data)),
+        InvokeBody::Json(serde_json::Value::Array(values)) => values
+            .iter()
+            .map(|value| value.as_u64().and_then(|byte| u8::try_from(byte).ok()))
+            .collect::<Option<Vec<u8>>>()
+            .map(Cow::Owned),
+        InvokeBody::Json(_) => None,
+    }
+}
+
 #[tauri::command]
 pub async fn save_file(app: AppHandle, request: Request<'_>) -> Result<SaveFileResult, String> {
-    let InvokeBody::Raw(data) = request.body() else {
+    let Some(data) = save_file_bytes(request.body()) else {
         return Err("save_file expects a raw request body".to_string());
     };
 
@@ -292,7 +307,7 @@ pub async fn save_file(app: AppHandle, request: Request<'_>) -> Result<SaveFileR
         return Ok(SaveFileResult::canceled());
     };
 
-    match std::fs::write(&path, data) {
+    match std::fs::write(&path, &*data) {
         Ok(()) => Ok(SaveFileResult::saved(path.display().to_string())),
         Err(error) => {
             logging::error(&format!(
@@ -547,6 +562,29 @@ mod tests {
     #[test]
     fn drag_position_survives_a_zero_scale_factor() {
         assert_eq!(webview_position(10.0, 20.0, 0.0), (10.0, 20.0));
+    }
+
+    #[test]
+    fn save_file_takes_the_bytes_of_either_ipc_transport() {
+        assert_eq!(
+            save_file_bytes(&InvokeBody::Raw(vec![0, 255])).as_deref(),
+            Some(&[0u8, 255][..])
+        );
+        assert_eq!(
+            save_file_bytes(&InvokeBody::Json(serde_json::json!([0, 255]))).as_deref(),
+            Some(&[0u8, 255][..])
+        );
+    }
+
+    #[test]
+    fn save_file_refuses_a_body_that_is_not_bytes() {
+        for body in [
+            serde_json::json!({}),
+            serde_json::json!([256]),
+            serde_json::json!(["a"]),
+        ] {
+            assert!(save_file_bytes(&InvokeBody::Json(body)).is_none());
+        }
     }
 
     #[test]

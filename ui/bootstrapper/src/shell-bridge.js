@@ -5,6 +5,28 @@
     return;
   }
 
+  // Tauri only falls back to postMessage when its IPC fetch rejects, but a request it refuses
+  // before running a command (WebView2 can omit Origin) resolves without a Tauri-Response header.
+  var nativeFetch = window.fetch;
+  window.fetch = function (input, init) {
+    var result = nativeFetch.call(window, input, init);
+    var internals = window.__TAURI_INTERNALS__;
+    if (
+      typeof input !== 'string' ||
+      !internals ||
+      typeof internals.convertFileSrc !== 'function' ||
+      input.indexOf(internals.convertFileSrc('', 'ipc')) !== 0
+    ) {
+      return result;
+    }
+    return result.then(function (response) {
+      if (!response.ok && !response.headers.has('Tauri-Response')) {
+        throw new TypeError('Tauri refused the IPC request before running the command');
+      }
+      return response;
+    });
+  };
+
   function invoke(command, args) {
     const internals = window.__TAURI_INTERNALS__;
     if (!internals || typeof internals.invoke !== 'function') {

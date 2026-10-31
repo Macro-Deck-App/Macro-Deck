@@ -13,6 +13,8 @@ import { HotkeyValue, keyFromEvent } from '@macro-deck/runtime';
 import { ButtonComponent, ButtonGroupComponent, TranslatePipe } from '@shared';
 import { HotkeyCaptureService } from '../../../services/hotkey-capture.service';
 
+let nextHotkeyRecorderId = 0;
+
 // The key press is picked up by HotkeyCaptureService rather than by a listener on the button, which
 // would need the button to hold focus - something WebKit does not grant on click.
 @Component({
@@ -26,15 +28,19 @@ import { HotkeyCaptureService } from '../../../services/hotkey-capture.service';
         type="button"
         class="hk-field"
         [class.hk-recording]="recording()"
+        [attr.aria-labelledby]="ariaLabel ? nameId + ' ' + valueId : null"
         (click)="startRecording($event)">
         @if (recording()) {
-          <span class="hk-hint">{{ 'macrodeck.app:Forms.HotkeyRecorder.RecordingHint' | translate }}</span>
+          <span class="hk-hint" [id]="valueId">{{ 'macrodeck.app:Forms.HotkeyRecorder.RecordingHint' | translate }}</span>
         } @else if (value) {
-          <span class="hk-value">{{ display() }}</span>
+          <span class="hk-value" [id]="valueId">{{ display() }}</span>
         } @else {
-          <span class="hk-hint">{{ 'macrodeck.app:Forms.HotkeyRecorder.ClickToRecord' | translate }}</span>
+          <span class="hk-hint" [id]="valueId">{{ 'macrodeck.app:Forms.HotkeyRecorder.ClickToRecord' | translate }}</span>
         }
       </button>
+      @if (ariaLabel) {
+        <span [id]="nameId" hidden>{{ ariaLabel }}</span>
+      }
       @if (value && !recording()) {
         <shared-button
           variant="danger-ghost"
@@ -53,7 +59,12 @@ import { HotkeyCaptureService } from '../../../services/hotkey-capture.service';
   styleUrls: ['./hotkey-recorder.component.scss'],
 })
 export class HotkeyRecorderComponent implements OnDestroy {
+  private readonly idPrefix = `hk-${++nextHotkeyRecorderId}`;
+  protected readonly nameId = `${this.idPrefix}-name`;
+  protected readonly valueId = `${this.idPrefix}-value`;
+
   @Input() value: HotkeyValue | null = null;
+  @Input() ariaLabel: string | null = null;
   @Output() valueChange = new EventEmitter<HotkeyValue | null>();
 
   readonly recording = signal(false);

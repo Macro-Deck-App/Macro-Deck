@@ -17661,7 +17661,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Exportujte záložní obnovovací klíč pro ochranu klíčenky. Do té doby zůstává čitelná na disku.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blokuje spouštění akcí, když je tento počítač uzamčen, bez ohledu na to, co zde zvolíte. V Linuxu Macro Deck nerozpozná, že je tento počítač uzamčen, takže se akce dál spouštějí a připojení klienti se neuzamknou.</value>
+    <value>Blokuje spouštění akcí, když je tento počítač uzamčen, bez ohledu na to, co zde zvolíte. V Linuxu k tomu musí plocha hlásit uzamčení, například GNOME nebo KDE Plasma. Jinak se akce dál spouštějí a připojení klienti se neuzamknou.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Uzamčená obrazovka</value>
@@ -19649,6 +19649,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Update.Details.DownloadFailed" xml:space="preserve">
     <value>Stahování se nezdařilo. {error}</value>
     <comment>[error:string]</comment>
+  </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Pokud se to opakuje, stáhněte nejnovější verzi z {url} a nainstalujte ji ručně.</value>
   </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Aktualizace se nepodařilo zkontrolovat. {error}</value>

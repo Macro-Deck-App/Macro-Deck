@@ -1,6 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UpdateModalComponent } from './update-modal.component';
+import { UpdateService } from '../../../services/update.service';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
 
 function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState {
@@ -313,6 +314,57 @@ describe('UpdateModalComponent', () => {
 
     expect(cancel).toHaveBeenCalledTimes(1);
     expect(fixture.nativeElement.querySelector('progress')).toBeNull();
+  });
+
+  it('points to the manual download without raw text when the shell delivered no state', async () => {
+    const openExternal = jasmine.createSpy('openExternal').and.rejectWith('missing Origin header');
+    setShell({
+      getUpdateState: () => Promise.reject('missing Origin header'),
+      onUpdateState: () => Promise.reject('missing Origin header'),
+      installUpdate: () => Promise.reject('missing Origin header'),
+      openExternal,
+    });
+
+    const fixture = await createFixture();
+    await TestBed.inject(UpdateService).install();
+    await settle(fixture);
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('https://macro-deck.app/download');
+    expect(element.textContent).not.toContain('missing Origin header');
+    expect(element.querySelector('.update-modal__current')).toBeNull();
+    const buttons = Array.from(element.querySelectorAll('button')).map(button => button.textContent);
+    expect(buttons.some(label => label?.includes('Open download page'))).toBeFalse();
+  });
+
+  it('offers the download page on a failed background download', async () => {
+    const openExternal = jasmine.createSpy('openExternal').and.resolveTo(undefined);
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'failed', failure: 'install', error: 'disk full' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+      openExternal,
+    });
+
+    const fixture = await createFixture();
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('disk full');
+    expect(element.textContent).toContain('https://macro-deck.app/download');
+    expect(element.querySelector('.update-modal__current')).not.toBeNull();
+    const buttons = Array.from(element.querySelectorAll('button')) as HTMLButtonElement[];
+    buttons.find(button => button.textContent?.includes('Open download page'))?.click();
+    expect(openExternal).toHaveBeenCalledWith('https://macro-deck.app/download');
+  });
+
+  it('does not offer the manual download for a failed check', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'failed', failure: 'check', error: 'offline' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    expect(fixture.nativeElement.textContent).not.toContain('https://macro-deck.app/download');
   });
 
   it('shows the download error, not an up-to-date message, on a failed phase', async () => {

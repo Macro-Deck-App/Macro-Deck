@@ -73,8 +73,8 @@ asks you to confirm first. The dialog says whether the action worked, or why Twi
 - **Twitch did not allow this**: reconnect the Twitch account in **Integrations** and try again.
 
 While the computer running Macro Deck is locked, the chat dialog keeps showing the chat, but tapping a message
-shows that the computer is locked instead of selecting it. Unlock the computer, as for any other action. This
-applies to Windows and macOS, see [Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked).
+shows that the computer is locked instead of selecting it. Unlock the computer, as for any other action. Some
+locked Linux computers behave differently, see [Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked).
 
 On YouTube, **Unban** only lifts bans you made through Macro Deck during the current broadcast; lift other bans
 in YouTube Studio. See [YouTube](/guide/youtube/#moderating-youtube-chat).
@@ -205,7 +205,7 @@ The details dialog shows when an event is, its calendar, account and provider, t
 description and who is invited, with their answers. A very long description is shortened, and the
 dialog lists the first 100 people invited. **Join meeting** opens the meeting link on the
 computer running Macro Deck, not on the device you pressed. While that computer is locked, Macro Deck
-refuses to open the link on Windows and macOS, but not on Linux, see
+refuses to open the link. Some locked Linux computers still open it, see
 [Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked). The dialog opens on the device you pressed.
 
 Press a calendar widget in the **Next event** layout to open the details of the event it shows. Press an
@@ -419,6 +419,14 @@ to look at in **Switch on**, usually a variable, then add a **Case** for each va
 actions to run for it. The cases are checked from top to bottom and only the first match runs. **Otherwise**
 runs when no case matches or the variable you picked has no value. Matching works like **If / Else** with *is*: text must match exactly, so
 `all` does not match `All`, while numbers compare by value.
+
+Conditions read a number the same way on every computer, with a dot as the decimal separator, whatever
+language Windows, macOS or Linux runs in. A **Numeric** variable with the value `12.5` therefore equals `12.5`
+but not `12,5`, and *contains* `.5`. Conditions that compare such a variable with a comma number stopped matching
+in Macro Deck 3.0.1, so write the dot instead. *contains* and *starts with* look at the text saved for the
+variable, so `1.50` contains `1.50`. Macro Deck tidies a number when it saves it, so `007` is saved as
+`7`; keep codes with leading zeros in a **Text** variable. The value an event hands over, such as the
+new value of **Variable Changed**, is a number rather than the saved text, so there `1.50` reads as `1.5`.
 
 ## Button states
 
@@ -737,7 +745,7 @@ The **Join Meeting** action opens the meeting link of the event that is running 
 picks the one starting closest to now. **Calendar** limits it to one calendar. All-day events and events
 without a meeting link are skipped, and when nothing qualifies, the action fails with **No event with a
 meeting link is running or starting soon**. Like the button in the details dialog, it does not open the
-link while the computer is locked, except on Linux. Put it on a key of a hardware deck, or run it from an automation on
+link while the computer is locked. Put it on a key of a hardware deck, or run it from an automation on
 **Event Starts Soon** with a short lead time to join meetings automatically.
 
 Meeting links come from invitations, and anyone can send you an invitation, so an automation that joins

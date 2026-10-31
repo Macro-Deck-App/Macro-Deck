@@ -72,6 +72,7 @@ type KeyMode = 'record' | 'select';
         } @else {
           <shared-select
             class="kce-select"
+            [ariaLabel]="'macrodeck.app:Integrations.Keyboard.Actions.KeyParameterLabel' | translate"
             [placeholder]="'macrodeck.app:Forms.KeyboardComboEditor.SelectKeyPlaceholder' | translate"
             [options]="keyOptions()"
             [ngModel]="key"
