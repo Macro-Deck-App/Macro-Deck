@@ -19648,6 +19648,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>De download is mislukt. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Blijft dit gebeuren, download dan de nieuwste versie van {url} en installeer die handmatig.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Kon niet controleren op updates. {error}</value>
     <comment>[error:string]</comment>

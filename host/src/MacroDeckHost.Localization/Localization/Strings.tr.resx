@@ -19648,6 +19648,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>İndirme başarısız oldu. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Bu sorun devam ederse en son sürümü {url} adresinden indirin ve elle kurun.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Güncellemeler denetlenemedi. {error}</value>
     <comment>[error:string]</comment>
