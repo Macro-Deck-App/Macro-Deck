@@ -3025,6 +3025,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Nie udało się zatrzymać wtyczki, więc nic nie zostało usunięte. Spróbuj ponownie.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck wciąż się uruchamia, więc wtyczka nie została uruchomiona. Spróbuj ponownie za chwilę.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck jest zamykany, więc wtyczka nie została uruchomiona.</value>
   </data>

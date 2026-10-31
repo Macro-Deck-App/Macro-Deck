@@ -3024,6 +3024,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Eklenti durdurulamadı, bu yüzden hiçbir şey kaldırılmadı. Yeniden deneyin.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck hâlâ başlatılıyor, bu nedenle eklenti başlatılmadı. Birazdan yeniden deneyin.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck kapanıyor, bu nedenle eklenti başlatılmadı.</value>
   </data>

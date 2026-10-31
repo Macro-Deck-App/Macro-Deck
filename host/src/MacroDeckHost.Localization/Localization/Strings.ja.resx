@@ -3024,6 +3024,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>プラグインを停止できなかったため、何も削除されていません。もう一度お試しください。</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck がまだ起動中のため、プラグインは起動されませんでした。しばらくしてからもう一度お試しください。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck が終了処理中のため、プラグインは起動されませんでした。</value>
   </data>

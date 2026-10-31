@@ -420,6 +420,8 @@ internal sealed class FakeHostListenerState : IHostListenerState
 
 	public string? ActiveCertificateFingerprint { get; init; }
 
+	public Task LoopbackPortKnown => Task.CompletedTask;
+
 	public void SetLoopbackPort(int port)
 	{
 		LoopbackPort = port;

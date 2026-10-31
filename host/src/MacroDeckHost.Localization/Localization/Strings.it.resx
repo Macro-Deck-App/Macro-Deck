@@ -3025,6 +3025,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Non è stato possibile arrestare il plugin, quindi non è stato rimosso nulla. Riprova.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck si sta ancora avviando, quindi il plugin non è stato avviato. Riprova tra poco.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck si sta chiudendo, quindi il plugin non è stato avviato.</value>
   </data>
