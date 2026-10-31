@@ -3024,6 +3024,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>De plug-in kon niet worden gestopt, dus er is niets verwijderd. Probeer het opnieuw.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck is nog aan het opstarten, daarom is de plug-in niet gestart. Probeer het zo meteen opnieuw.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wordt afgesloten, daarom is de plug-in niet gestart.</value>
   </data>

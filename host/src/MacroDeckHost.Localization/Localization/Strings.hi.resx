@@ -3024,6 +3024,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>प्लगइन को रोका नहीं जा सका, इसलिए कुछ भी नहीं हटाया गया। फिर से कोशिश करें।</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck अभी शुरू हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया। कृपया कुछ देर बाद फिर से कोशिश करें।</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck बंद हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया।</value>
   </data>

@@ -3025,6 +3025,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Plugin se nepodařilo zastavit, proto nebylo nic odstraněno. Zkuste to znovu.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck se stále spouští, proto plugin nebyl spuštěn. Zkuste to znovu za chvíli.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se vypíná, proto plugin nebyl spuštěn.</value>
   </data>

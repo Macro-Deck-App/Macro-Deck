@@ -1194,6 +1194,7 @@ export const AppStrings = {
 		Plugins: {
 			DeveloperTokenAlreadyRevoked: 'macrodeck.app:Errors.Plugins.DeveloperTokenAlreadyRevoked',
 			DeveloperTokenNotRevoked: 'macrodeck.app:Errors.Plugins.DeveloperTokenNotRevoked',
+			HostNotReady: 'macrodeck.app:Errors.Plugins.HostNotReady',
 			HostShuttingDown: 'macrodeck.app:Errors.Plugins.HostShuttingDown',
 			InstallBlockedByTakeover: 'macrodeck.app:Errors.Plugins.InstallBlockedByTakeover',
 			NoDeveloperToken: 'macrodeck.app:Errors.Plugins.NoDeveloperToken',
@@ -11082,6 +11083,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.PluginToken.LoadFailed': 'Failed to load plugin tokens',
 	'macrodeck.app:Errors.Plugins.DeveloperTokenAlreadyRevoked': 'This Developer token is already revoked.',
 	'macrodeck.app:Errors.Plugins.DeveloperTokenNotRevoked': 'Revoke the token before removing it.',
+	'macrodeck.app:Errors.Plugins.HostNotReady': 'Macro Deck is still starting, so the plugin was not started. Try again in a moment.',
 	'macrodeck.app:Errors.Plugins.HostShuttingDown': 'Macro Deck is shutting down, so the plugin was not started.',
 	'macrodeck.app:Errors.Plugins.InstallBlockedByTakeover': 'A development build has taken over this plugin. End the takeover before installing or updating it.',
 	'macrodeck.app:Errors.Plugins.NoDeveloperToken': 'No Developer token with that id exists.',

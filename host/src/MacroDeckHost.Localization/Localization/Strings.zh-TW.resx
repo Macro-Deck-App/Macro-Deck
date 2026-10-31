@@ -3024,6 +3024,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>無法停止外掛，因此未移除任何內容。請再試一次。</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck 仍在啟動中，因此未啟動外掛。請稍後再試。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在關閉，因此未啟動外掛。</value>
   </data>

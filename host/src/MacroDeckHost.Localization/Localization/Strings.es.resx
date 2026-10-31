@@ -3025,6 +3025,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>No se pudo detener el complemento, así que no se ha eliminado nada. Vuelve a intentarlo.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck todavía se está iniciando, por lo que el complemento no se ha iniciado. Inténtalo de nuevo en un momento.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se está cerrando, por lo que el complemento no se ha iniciado.</value>
   </data>

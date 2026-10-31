@@ -3024,6 +3024,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Das Plugin konnte nicht beendet werden, daher wurde nichts entfernt. Versuche es erneut.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck startet noch, daher wurde das Plugin nicht gestartet. Versuche es gleich noch einmal.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wird beendet, daher wurde das Plugin nicht gestartet.</value>
   </data>

@@ -3024,6 +3024,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Не вдалося зупинити плагін, тому нічого не видалено. Спробуйте ще раз.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck ще запускається, тому плагін не було запущено. Повторіть спробу за мить.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck завершує роботу, тому плагін не було запущено.</value>
   </data>

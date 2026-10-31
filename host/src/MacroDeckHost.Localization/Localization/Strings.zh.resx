@@ -3024,6 +3024,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>无法停止插件，因此未删除任何内容。请重试。</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck 仍在启动，因此未启动插件。请稍后重试。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在关闭，因此未启动插件。</value>
   </data>
