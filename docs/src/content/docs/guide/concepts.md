@@ -420,6 +420,14 @@ actions to run for it. The cases are checked from top to bottom and only the fir
 runs when no case matches or the variable you picked has no value. Matching works like **If / Else** with *is*: text must match exactly, so
 `all` does not match `All`, while numbers compare by value.
 
+Conditions read a number the same way on every computer, with a dot as the decimal separator, whatever
+language Windows, macOS or Linux runs in. A **Numeric** variable with the value `12.5` therefore equals `12.5`
+but not `12,5`, and *contains* `.5`. Conditions that compare such a variable with a comma number stopped matching
+in Macro Deck 3.0.1, so write the dot instead. *contains* and *starts with* look at the text saved for the
+variable, so `1.50` contains `1.50`. Macro Deck tidies a number when it saves it, so `007` is saved as
+`7`; keep codes with leading zeros in a **Text** variable. The value an event hands over, such as the
+new value of **Variable Changed**, is a number rather than the saved text, so there `1.50` reads as `1.5`.
+
 ## Button states
 
 The **Mic** button has two states, **Live** and **Muted**, each with its own label and color. Every

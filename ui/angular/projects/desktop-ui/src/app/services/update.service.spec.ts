@@ -157,13 +157,32 @@ describe('UpdateService', () => {
 
   it('leaves an install failure in the failed phase with the shell-provided reason', async () => {
     const reason = 'The Macro Deck host could not be stopped, so the update was not installed.';
-    setShell({ installUpdate: () => Promise.reject(reason) });
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ currentVersion: '3.0.0', phase: 'available' })),
+      installUpdate: () => Promise.reject(reason),
+    });
+
+    const service = createService();
+    await Promise.resolve();
+    await service.install();
+
+    expect(service.phase()).toBe('failed');
+    expect(service.error()).toBe(reason);
+  });
+
+  it('never exposes the transport error of a shell that delivered no state', async () => {
+    setShell({
+      getUpdateState: () => Promise.reject('missing Origin header'),
+      installUpdate: () => Promise.reject('missing Origin header'),
+    });
 
     const service = createService();
     await service.install();
 
     expect(service.phase()).toBe('failed');
-    expect(service.error()).toBe(reason);
+    expect(service.failure()).toBe('install');
+    expect(service.error()).toBeNull();
+    expect(service.manualDownloadUrl()).toBe('https://macro-deck.app/download');
   });
 });
 

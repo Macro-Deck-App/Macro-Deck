@@ -19648,6 +19648,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Unduhan gagal. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Jika masalah ini terus terjadi, unduh versi terbaru dari {url} dan instal secara manual.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Tidak dapat memeriksa pembaruan. {error}</value>
     <comment>[error:string]</comment>
