@@ -1,9 +1,10 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { Subject } from 'rxjs';
 
-import { ActionBlock, ParameterValue, Variable } from '@macro-deck/runtime';
-import { HOST_URL_RESOLVER, InputComponent } from '@shared';
+import { ActionBlock, AppStrings, ParameterValue, Variable } from '@macro-deck/runtime';
+import { ApiService, HOST_URL_RESOLVER, InputComponent, LocalizationService } from '@shared';
 import { ParamInputComponent } from '../../../forms/param-input/param-input.component';
 import { SelectComponent } from '../../../forms/select/select.component';
 import { VariablePickerComponent } from '../../../variable-picker/variable-picker.component';
@@ -144,5 +145,66 @@ describe('SetVariableActionFieldsComponent', () => {
     fixture.nativeElement.querySelector('.chip-clear').click();
 
     expect(updateParam).toHaveBeenCalledWith('action-1', 'value', '');
+  });
+});
+
+describe('SetVariableActionFieldsComponent labels', () => {
+  const actions = AppStrings.Integrations.Variables.Actions;
+  const german = {
+    [actions.OperationSetTo]: 'Setzen auf',
+    [actions.OperationAdd]: 'Addieren',
+    [actions.OperationToggle]: 'Umschalten',
+    [actions.OperationAppend]: 'Anhängen',
+  };
+  const french = { ...german, [actions.OperationToggle]: 'Basculer' };
+
+  let getLocalization: jasmine.Spy;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    getLocalization = jasmine.createSpy('getLocalization')
+      .and.resolveTo({ culture: 'de', fallbackCulture: 'en', translations: german });
+
+    await TestBed.configureTestingModule({
+      imports: [SetVariableActionFieldsComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ApiService, useValue: {
+          getLocalization,
+          onNotification: () => new Subject(),
+          connectionStateSignal: signal('disconnected'),
+        } },
+        { provide: ActionFlowStore, useValue: {
+          updateParam: () => undefined,
+          variables: () => [],
+          pickerVariables: () => [],
+          previewScope: () => 'global',
+          previewScopeRefId: () => undefined,
+        } },
+      ],
+    }).compileComponents();
+  });
+
+  afterEach(() => localStorage.clear());
+
+  it('shows every operation in the language of the catalog and follows a change of it', async () => {
+    const localization = TestBed.inject(LocalizationService);
+    await localization.loadFromHost();
+    const fixture = TestBed.createComponent(SetVariableActionFieldsComponent);
+    fixture.componentRef.setInput('block', {
+      id: 'action-1', type: 'action', blockType: 'app.macro-deck.variables.set-variable', label: 'Set Variable',
+      color: '', parameters: [{ name: 'operation', type: 'choice', label: 'Operation', value: 'toggle' }],
+    } satisfies ActionBlock);
+    await fixture.whenStable();
+    const labels = (): string[] => fixture.debugElement.query(By.directive(SelectComponent)).componentInstance.options
+      .map((option: { label: string }) => option.label);
+
+    expect(labels()).toEqual(['Setzen auf', 'Addieren', 'Umschalten', 'Anhängen']);
+
+    getLocalization.and.resolveTo({ culture: 'fr', fallbackCulture: 'en', translations: french });
+    await localization.loadFromHost();
+    await fixture.whenStable();
+
+    expect(labels()).toEqual(['Setzen auf', 'Addieren', 'Basculer', 'Anhängen']);
   });
 });
