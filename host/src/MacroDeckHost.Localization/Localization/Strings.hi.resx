@@ -1493,6 +1493,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>क्या आप वाकई इन {count} विजेट को हटाना चाहते हैं? इसे पूर्ववत नहीं किया जा सकता।</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>विजेट हटाया नहीं जा सका</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>विजेट हटाए नहीं जा सके</value>
   </data>

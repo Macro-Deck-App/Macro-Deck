@@ -1494,6 +1494,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Veux-tu vraiment supprimer ces {count} widgets ? Cette opération est irréversible.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Échec de la suppression du widget</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Échec de la suppression des widgets</value>
   </data>

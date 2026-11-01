@@ -1493,6 +1493,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>Tem certeza de que deseja excluir estes {count} widgets? Esta ação não pode ser desfeita.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Falha ao excluir o widget</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Falha ao excluir os widgets</value>
   </data>

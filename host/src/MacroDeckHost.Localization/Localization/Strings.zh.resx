@@ -1493,6 +1493,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>确定要删除这 {count} 个组件吗？此操作无法撤销。</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>无法删除组件</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>无法删除这些组件</value>
   </data>

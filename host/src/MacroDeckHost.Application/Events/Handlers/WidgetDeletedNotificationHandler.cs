@@ -24,14 +24,7 @@ public sealed class WidgetDeletedNotificationHandler : INotificationHandler<Widg
 
 	public async ValueTask Handle(WidgetDeletedNotification notification, CancellationToken cancellationToken)
 	{
-		// A deleted widget has no configuration left to rebuild a tree from, so its sessions are closed
-		// outright rather than invalidated for a reopen - see IUiSessionBroker.CloseWidgetSessions.
-		_sessions.CloseWidgetSessions(notification.WidgetId, "The widget was deleted.");
-
-		// The synthetic per-widget provider ids (widget:<id>:*, widget-config:<id>:*) this widget ever
-		// resolved to will never be asked for again once it is gone, so their cached adapters are forgotten
-		// here rather than left in WidgetUiProviderRegistry for the life of the host.
-		_widgetUiProviders.EvictWidget(notification.WidgetId);
+		DeletedWidgetCleanup.Run(_sessions, _widgetUiProviders, notification.WidgetId);
 
 		var evt = new WidgetDeletedEvent
 		{

@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ClockData, Folder, GridWidget, WidgetData, WidgetType } from '@macro-deck/runtime';
-import { IWidgetEditorComponent, ToastService, WidgetRegistryService } from '@shared';
+import { IWidgetEditorComponent, ProfileService, ToastService, WidgetRegistryService } from '@shared';
 import { ActionCutOriginService } from '../../../services/action-cut-origin.service';
 import { FolderService, WidgetSchemaService } from '../../../services';
 import { WidgetJsonEditorComponent } from '../../widgets';
@@ -110,8 +110,10 @@ function folder(overrides: Partial<Folder> = {}): Folder {
 }
 
 describe('WidgetEditorPageComponent', () => {
+  const profiles = signal<Array<{ id: string }>>([]);
   let folderStub: {
     folders: ReturnType<typeof signal<Folder[]>>;
+    loadedFolderProfileId: string;
     loadFolders: jasmine.Spy;
     selectFolder: jasmine.Spy;
     selectedFolderId: ReturnType<typeof signal<string | null>>;
@@ -129,6 +131,7 @@ describe('WidgetEditorPageComponent', () => {
         provideZonelessChangeDetection(),
         ...provideLocalizationTesting(),
         { provide: FolderService, useValue: folderStub },
+        { provide: ProfileService, useValue: { profiles: profiles } },
         { provide: WidgetRegistryService, useValue: registryStub },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => widgetId } } } },
         { provide: Router, useValue: routerStub },
@@ -167,7 +170,9 @@ describe('WidgetEditorPageComponent', () => {
   }
 
   beforeEach(() => {
+    profiles.set([{ id: 'p1' }]);
     folderStub = {
+      loadedFolderProfileId: 'p1',
       folders: signal<Folder[]>([folder()]),
       loadFolders: jasmine.createSpy('loadFolders').and.resolveTo(undefined),
       selectFolder: jasmine.createSpy('selectFolder'),
@@ -358,6 +363,55 @@ describe('WidgetEditorPageComponent', () => {
       } finally {
         jasmine.clock().uninstall();
       }
+    });
+  });
+
+  describe('the widget disappearing', () => {
+    function withoutWidget(): void {
+      folderStub.folders.update(folders => folders.map(f => ({ ...f, widgets: [] })));
+    }
+
+    it('shows the not-found state and leaves without asking, even with unsaved edits', async () => {
+      const fixture = await createLoadedFixture();
+      editData(fixture);
+
+      withoutWidget();
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.notFound()).toBeTrue();
+      expect(fixture.componentInstance.confirmNavigation()).toBeTrue();
+    });
+
+    it('closes a leave dialog that was already open', async () => {
+      const fixture = await createLoadedFixture();
+      editData(fixture);
+      const leave = fixture.componentInstance.confirmNavigation() as Promise<boolean>;
+
+      withoutWidget();
+      await fixture.whenStable();
+
+      expect(await leave).toBeFalse();
+      expect(fixture.componentInstance.confirmingLeave()).toBeFalse();
+    });
+
+    it('shows the not-found state when the whole profile is gone', async () => {
+      const fixture = await createLoadedFixture();
+
+      profiles.set([]);
+      folderStub.folders.set([]);
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.notFound()).toBeTrue();
+    });
+
+    it('does not mistake a switch to another profile for a deletion', async () => {
+      const fixture = await createLoadedFixture();
+
+      folderStub.loadedFolderProfileId = 'other-profile';
+      folderStub.folders.set([{ ...folder(), id: 'other', widgets: [] }]);
+      await fixture.whenStable();
+
+      expect(fixture.componentInstance.notFound()).toBeFalse();
     });
   });
 

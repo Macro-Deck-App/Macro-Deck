@@ -1493,6 +1493,9 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Удалить эти виджеты ({count})? Это действие нельзя отменить.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Не удалось удалить виджет</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Не удалось удалить виджеты</value>
   </data>

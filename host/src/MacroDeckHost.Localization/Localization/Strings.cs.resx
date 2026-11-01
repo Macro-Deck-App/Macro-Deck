@@ -1494,6 +1494,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Opravdu odstranit vybrané widgety (počet: {count})? Tento krok nelze vrátit zpět.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Odstranění widgetu se nezdařilo</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Odstranění widgetů se nezdařilo</value>
   </data>

@@ -1493,6 +1493,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Are you sure you want to delete these {count} widgets? This action cannot be undone.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Failed to delete the widget</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Failed to delete the widgets</value>
   </data>
