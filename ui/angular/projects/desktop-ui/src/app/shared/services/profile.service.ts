@@ -121,7 +121,7 @@ export class ProfileService {
   }
 
   selectProfile(id: string): void {
-    if (this.selectedProfileId() !== id) {
+    if (this.selectedProfileId() !== id && this.profiles().some(profile => profile.id === id)) {
       this.selectedProfileId.set(id);
     }
   }

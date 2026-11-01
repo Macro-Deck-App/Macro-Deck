@@ -280,7 +280,7 @@ fn offer_status(strategy: UpdateInstallStrategy, version: Option<&str>) -> Optio
         .and_then(info)
 }
 
-fn installing_status(backup: Option<&BackupProgress>) -> String {
+fn installing_status(backup: Option<&BackupProgress>, backup_skipped: bool) -> String {
     match backup {
         Some(BackupProgress {
             percent: Some(percent),
@@ -290,6 +290,7 @@ fn installing_status(backup: Option<&BackupProgress>) -> String {
             &[("percent", &percent.to_string())],
         ),
         Some(_) => localization::t(keys::UPDATE_WINDOW_BACKING_UP_STATUS),
+        None if backup_skipped => localization::t(keys::UPDATE_BACKUP_SKIPPED_MESSAGE),
         None => localization::t(keys::UPDATE_WINDOW_INSTALLING_STATUS),
     }
 }
@@ -359,7 +360,7 @@ pub(crate) fn view(snapshot: &UpdateSnapshot, action_error: Option<&str>) -> Win
             ],
         ),
         UpdatePhase::Installing => (
-            info(installing_status(backup)),
+            info(installing_status(backup, snapshot.backup_skipped)),
             if backup.is_some() {
                 vec![action(
                     ActionId::Cancel,
@@ -940,6 +941,31 @@ mod tests {
         assert!(state.try_begin_install());
         state.record_backup_progress(backup);
         view(&state.snapshot(), None)
+    }
+
+    #[test]
+    fn an_update_without_a_backup_says_so_in_the_window() {
+        let mut state = state(UpdateInstallStrategy::InApp);
+        assert!(state.try_begin_install());
+        state.record_backup_skipped();
+
+        assert_eq!(
+            view(&state.snapshot(), None)
+                .status
+                .map(|status| status.text),
+            Some(localization::t(keys::UPDATE_BACKUP_SKIPPED_MESSAGE))
+        );
+    }
+
+    #[test]
+    fn the_next_install_does_not_repeat_the_skipped_backup_notice() {
+        let mut state = state(UpdateInstallStrategy::InApp);
+        assert!(state.try_begin_install());
+        state.record_backup_skipped();
+        state.record_install_failed("failed".to_string());
+        assert!(state.try_begin_install());
+
+        assert!(!state.snapshot().backup_skipped);
     }
 
     #[test]

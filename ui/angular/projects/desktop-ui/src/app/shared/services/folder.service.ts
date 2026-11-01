@@ -15,6 +15,7 @@ import {
   FolderContextMenu,
   type FolderCreatedEvent,
   type FolderDeletedEvent,
+  type ProfileDeletedEvent,
   folderFromWire,
   FolderMoveDirection,
   FolderMoveRequest,
@@ -166,6 +167,12 @@ export class FolderService {
           this.selectKnownStartOrReload(remaining);
         }
       }
+    });
+
+    this.api.onNotification<ProfileDeletedEvent>('ProfileDeletedEvent').subscribe(event => {
+      if (!event.profileId) return;
+      this.navHistory = this.navHistory.filter(entry => entry.profileId !== event.profileId);
+      this.navDepth.set(this.navHistory.length);
     });
 
     this.api.onNotification<FoldersReorderedEvent>('FoldersReorderedEvent').subscribe(event => {
@@ -338,11 +345,11 @@ export class FolderService {
     switch (event.command) {
       case 'changeTo':
         if (event.folderId) {
-          if (event.navigationToken) {
-            this.pendingNavigation = { folderId: event.folderId, token: event.navigationToken };
+          if (this.canReachProfile(event.profileId ?? null)) {
+            this.changeTo(event);
+          } else {
+            void this.changeToAfterProfileReload(event);
           }
-          this.pushNavHistory();
-          this.navigateTo(event.folderId, event.profileId ?? null);
         }
         break;
       case 'parent': {
@@ -356,7 +363,7 @@ export class FolderService {
       case 'back': {
         const previous = this.navHistory.pop();
         this.navDepth.set(this.navHistory.length);
-        if (previous) {
+        if (previous && this.canReachProfile(previous.profileId)) {
           this.navigateTo(previous.folderId, previous.profileId);
         }
         break;
@@ -374,6 +381,28 @@ export class FolderService {
 
       this.navDepth.set(this.navHistory.length);
     }
+  }
+
+  private changeTo(event: FolderNavigationEvent): void {
+    if (event.navigationToken) {
+      this.pendingNavigation = { folderId: event.folderId!, token: event.navigationToken };
+    }
+    this.pushNavHistory();
+    this.navigateTo(event.folderId!, event.profileId ?? null);
+  }
+
+  // The host validated the target, and a plugin's profile can appear without any created event.
+  private async changeToAfterProfileReload(event: FolderNavigationEvent): Promise<void> {
+    await this.profileService.loadProfiles();
+    if (this.canReachProfile(event.profileId ?? null)) {
+      this.changeTo(event);
+    }
+  }
+
+  private canReachProfile(profileId: string | null): boolean {
+    return !profileId
+      || profileId === this.profileService.selectedProfileId()
+      || this.profileService.profiles().some(profile => profile.id === profileId);
   }
 
   private navigateTo(folderId: string, profileId: string | null): void {
@@ -607,6 +636,10 @@ export class FolderService {
 
   getFolderById(id: string): DomainFolder | undefined {
     return this.folders().find(f => f.id === id);
+  }
+
+  get loadedFolderProfileId(): string | null {
+    return this.loadedProfileId;
   }
 
   findWidget(widgetId: string): GridWidget | undefined {
@@ -917,9 +950,22 @@ export class FolderService {
     }
   }
 
-  async removeWidget(widgetId: string, folderId?: string): Promise<void> {
+  async removeWidget(widgetId: string, folderId?: string): Promise<Result> {
     const targetFolderId = folderId ?? this.resolveFolderId(widgetId);
-    if (!targetFolderId) return;
+    if (!targetFolderId) {
+      return { success: false, error: { code: 'VALIDATION_ERROR', message: this.localization.translateKey(AppStrings.Errors.Folder.NoFolderSelected) } };
+    }
+
+    const removed = this.getFolderById(targetFolderId)?.widgets.find(w => w.id === widgetId);
+    const rollback = () => {
+      if (!removed) return;
+      this.folders.update(folders =>
+        folders.map(f => f.id === targetFolderId && !f.widgets.some(w => w.id === widgetId)
+          ? { ...f, widgets: [...f.widgets, removed] }
+          : f
+        )
+      );
+    };
 
     this.folders.update(folders =>
       folders.map(f => f.id === targetFolderId
@@ -929,9 +975,23 @@ export class FolderService {
     );
 
     try {
-      await this.api.deleteWidget({ id: widgetId, folderId: targetFolderId });
+      const response = await this.api.deleteWidget({ id: widgetId, folderId: targetFolderId });
+      if (!response.success) {
+        rollback();
+        console.error('Failed to delete widget:', response.error?.message);
+        return { success: false, error: response.error };
+      }
+      return { success: true };
     } catch (error) {
+      rollback();
       console.error('Failed to delete widget:', error);
+      return {
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: error instanceof Error ? error.message : this.localization.translateKey(AppStrings.Deck.DeleteWidgetFailed)
+        }
+      };
     }
   }
 

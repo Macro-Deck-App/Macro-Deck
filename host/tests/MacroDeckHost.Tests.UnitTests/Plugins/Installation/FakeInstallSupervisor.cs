@@ -26,6 +26,8 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 
 	public HashSet<string> UnhealthyPlugins { get; } = new(StringComparer.Ordinal);
 
+	public HashSet<string> NeverHealthyPlugins { get; } = new(StringComparer.Ordinal);
+
 	public List<(string PluginId, PluginStopReason Reason)> Stops { get; } = [];
 
 	public List<string> Starts { get; } = [];
@@ -39,6 +41,8 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 	public Func<string, bool>? FailsToStart { get; set; }
 
 	public Func<string, PluginSupervisorResult?>? StopOutcome { get; set; }
+
+	public Func<string, PluginSupervisorResult?>? StartOutcome { get; set; }
 
 	public IReadOnlyList<PluginRuntimeSnapshot> Snapshot()
 	{
@@ -72,9 +76,26 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 
 	public Task<PluginSupervisorResult> Start(string pluginId, CancellationToken cancellationToken = default)
 	{
+		// The real supervisor turns a cancelled token into a failed result, never an exception.
+		if (cancellationToken.IsCancellationRequested)
+		{
+			return Task.FromResult(PluginSupervisorResult.Fail(PluginSupervisorError.Failed, "cancelled"));
+		}
+
 		Starts.Add(pluginId);
 		OnStart?.Invoke(pluginId);
+		if (StartOutcome?.Invoke(pluginId) is { } refused)
+		{
+			return Task.FromResult(refused);
+		}
+
 		DesiredStartState[pluginId] = true;
+
+		if (NeverHealthyPlugins.Contains(pluginId))
+		{
+			_runtime[pluginId] = (PluginRuntimeState.Starting, PluginHealthState.Unknown);
+			return Task.FromResult(PluginSupervisorResult.Ok());
+		}
 
 		_runtime[pluginId] = UnhealthyPlugins.Contains(pluginId) || FailsToStart?.Invoke(pluginId) == true
 			? (PluginRuntimeState.Failed, PluginHealthState.Crashed)
@@ -88,6 +109,11 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 		PluginStopReason reason,
 		CancellationToken cancellationToken = default)
 	{
+		if (cancellationToken.IsCancellationRequested)
+		{
+			return Task.FromResult(PluginSupervisorResult.Fail(PluginSupervisorError.Failed, "cancelled"));
+		}
+
 		Stops.Add((pluginId, reason));
 		OnStop?.Invoke(pluginId, reason);
 		if (StopOutcome?.Invoke(pluginId) is { } outcome)
@@ -155,6 +181,7 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 
 		return new PluginRuntimeSnapshot
 		{
+			DesiredStarted = DesiredStartState.GetValueOrDefault(pluginId),
 			PluginId = pluginId,
 			DisplayName = pluginId,
 			Version = PluginRuntimeSnapshot.UnknownVersion,

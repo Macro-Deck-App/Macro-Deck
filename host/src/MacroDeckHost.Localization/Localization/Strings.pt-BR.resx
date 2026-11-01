@@ -1157,6 +1157,12 @@ O Macro Deck foi instalado pelo repositório APT, então execute sudo apt update
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>O host do Macro Deck não está acessível, então nenhum backup pôde ser criado.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>O Macro Deck está aguardando a chave de recuperação e não consegue ler seus dados, então esta atualização continua sem backup.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Atualização sem backup</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>O Macro Deck não conseguiu confirmar que um backup foi criado.</value>
   </data>
@@ -1495,6 +1501,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Tem certeza de que deseja excluir estes {count} widgets? Esta ação não pode ser desfeita.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Falha ao excluir o widget</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Falha ao excluir os widgets</value>
@@ -3029,6 +3038,24 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>O Macro Deck ainda está sendo iniciado, então o plugin não foi iniciado. Tente novamente em instantes.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Não foi possível ler o manifesto do plugin.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Este plugin não tem uma versão para este sistema.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Nenhum runtime .NET foi encontrado para iniciar este plugin. Instale um e inicie o plugin novamente.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Nenhum runtime .NET instalado atende à versão exigida {required}. Instale-a e inicie o plugin novamente.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>A instalação foi cancelada e o estado anterior foi restaurado.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>A instalação foi cancelada, mas não foi possível restaurar o estado anterior. A nova versão pode continuar ativa.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>O Macro Deck está sendo encerrado, então o plugin não foi iniciado.</value>

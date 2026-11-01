@@ -1158,6 +1158,12 @@ Macro Deck byl nainstalován z repozitáře APT. Po zveřejnění nové verze v 
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Hostitel Macro Deck není dostupný, takže nebylo možné vytvořit zálohu.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck čeká na obnovovací klíč a nemůže číst svá data, proto tato aktualizace pokračuje bez zálohy.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Aktualizace bez zálohy</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck se nepodařilo potvrdit vytvoření zálohy.</value>
   </data>
@@ -1496,6 +1502,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Opravdu odstranit vybrané widgety (počet: {count})? Tento krok nelze vrátit zpět.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Odstranění widgetu se nezdařilo</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Odstranění widgetů se nezdařilo</value>
@@ -3030,6 +3039,24 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck se stále spouští, proto plugin nebyl spuštěn. Zkuste to znovu za chvíli.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Manifest pluginu nelze přečíst.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Tento plugin nemá verzi pro tento systém.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Nebyl nalezen žádný modul runtime .NET pro spuštění tohoto pluginu. Nainstalujte jej a spusťte plugin znovu.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Žádný nainstalovaný modul runtime .NET nesplňuje požadovanou verzi {required}. Nainstalujte ji a spusťte plugin znovu.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Instalace byla zrušena a předchozí stav byl obnoven.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Instalace byla zrušena, ale předchozí stav nelze obnovit. Nová verze může být stále aktivní.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se vypíná, proto plugin nebyl spuštěn.</value>

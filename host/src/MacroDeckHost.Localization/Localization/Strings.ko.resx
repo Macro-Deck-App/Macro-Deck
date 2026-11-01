@@ -1157,6 +1157,12 @@ Macro Deck은 APT 저장소에서 설치되었으므로, 새 버전이 저장소
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Macro Deck 호스트에 연결할 수 없어 백업을 만들 수 없습니다.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck이 복구 키를 기다리고 있어 데이터를 읽을 수 없으므로 이 업데이트는 백업 없이 진행됩니다.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>백업 없이 업데이트 중</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck이 백업이 만들어졌는지 확인할 수 없었습니다.</value>
   </data>
@@ -1495,6 +1501,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>위젯 {count}개를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>위젯을 삭제하지 못했습니다</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>위젯을 삭제하지 못했습니다</value>
@@ -3029,6 +3038,24 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck이 아직 시작되는 중이므로 플러그인을 시작하지 않았습니다. 잠시 후 다시 시도하세요.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>플러그인 매니페스트를 읽을 수 없습니다.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>이 플러그인에는 이 시스템용 버전이 없습니다.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>이 플러그인을 시작할 .NET 런타임을 찾을 수 없습니다. 설치한 후 플러그인을 다시 시작하세요.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>설치된 .NET 런타임 중 필요한 버전 {required}을(를) 충족하는 것이 없습니다. 설치한 후 플러그인을 다시 시작하세요.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>설치가 취소되었고 이전 상태로 복원되었습니다.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>설치가 취소되었지만 이전 상태로 복원할 수 없습니다. 새 버전이 아직 활성 상태일 수 있습니다.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck이 종료되는 중이므로 플러그인을 시작하지 않았습니다.</value>

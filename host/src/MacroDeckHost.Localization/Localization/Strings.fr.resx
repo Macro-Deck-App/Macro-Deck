@@ -1158,6 +1158,12 @@ Macro Deck a été installé depuis son dépôt APT : exécute sudo apt update &
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>L'hôte Macro Deck n'est pas joignable, aucune sauvegarde n'a donc pu être créée.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck attend la clé de récupération et ne peut pas lire ses données : cette mise à jour se poursuit donc sans sauvegarde.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Mise à jour sans sauvegarde</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck n'a pas pu confirmer qu'une sauvegarde avait été créée.</value>
   </data>
@@ -1496,6 +1502,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Veux-tu vraiment supprimer ces {count} widgets ? Cette opération est irréversible.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Échec de la suppression du widget</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Échec de la suppression des widgets</value>
@@ -3030,6 +3039,24 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck est encore en cours de démarrage, l'extension n'a donc pas été démarrée. Réessaie dans un instant.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Le manifeste de l'extension n'a pas pu être lu.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Cette extension n'a pas de version pour ce système.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Aucun runtime .NET n'a été trouvé pour démarrer cette extension. Installe-en un, puis redémarre l'extension.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Aucun runtime .NET installé ne correspond à la version requise {required}. Installe-la, puis redémarre l'extension.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>L'installation a été annulée et l'état précédent a été restauré.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>L'installation a été annulée, mais l'état précédent n'a pas pu être restauré. La nouvelle version est peut-être encore active.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck est en cours de fermeture, l'extension n'a donc pas été démarrée.</value>

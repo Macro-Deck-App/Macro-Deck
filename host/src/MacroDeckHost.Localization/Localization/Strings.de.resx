@@ -1157,6 +1157,12 @@ Macro Deck wurde aus seinem APT-Repository installiert. Führe sudo apt update &
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Der Macro-Deck-Host ist nicht erreichbar, daher konnte keine Sicherung erstellt werden.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck wartet auf den Wiederherstellungsschlüssel und kann seine Daten nicht lesen. Dieses Update wird deshalb ohne Sicherung installiert.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Update ohne Sicherung</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck konnte nicht bestätigen, dass eine Sicherung erstellt wurde.</value>
   </data>
@@ -1495,6 +1501,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Möchtest du diese {count} Widgets wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Das Widget konnte nicht gelöscht werden</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Die Widgets konnten nicht gelöscht werden</value>
@@ -3029,6 +3038,24 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck startet noch, daher wurde das Plugin nicht gestartet. Versuche es gleich noch einmal.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Das Manifest des Plugins konnte nicht gelesen werden.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Dieses Plugin hat keine Version für dieses System.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Es wurde keine .NET-Laufzeit zum Starten dieses Plugins gefunden. Installiere eine und starte das Plugin erneut.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Keine installierte .NET-Laufzeit erfüllt die benötigte Version {required}. Installiere sie und starte das Plugin erneut.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Die Installation wurde abgebrochen und der vorherige Stand wiederhergestellt.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Die Installation wurde abgebrochen, der vorherige Stand konnte aber nicht wiederhergestellt werden. Die neue Version ist möglicherweise noch aktiv.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wird beendet, daher wurde das Plugin nicht gestartet.</value>

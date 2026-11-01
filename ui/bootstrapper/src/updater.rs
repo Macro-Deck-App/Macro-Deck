@@ -53,6 +53,7 @@ use crate::host;
 use crate::install_state;
 use crate::localization::{self, keys};
 use crate::logging;
+use crate::notifications;
 use crate::post_update_changelog;
 use crate::quit_after_update;
 use crate::release_notes;
@@ -1302,6 +1303,9 @@ fn notify_external_download(app: &AppHandle, update: &Update) {
     }
 }
 
+// A locked host stops at once and the install restarts the app, so the window would only flash.
+const BACKUP_SKIPPED_NOTICE_TIME: std::time::Duration = std::time::Duration::from_secs(5);
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 enum AfterInstall {
     Restart,
@@ -1321,26 +1325,42 @@ async fn perform_install(
         AfterInstall::Restart => host::PRE_UPDATE_BACKUP_TIMEOUT,
         AfterInstall::Exit => host::QUIT_PRE_UPDATE_BACKUP_TIMEOUT,
     };
-    if let Err(failure) =
+    let backup =
         host::create_pre_update_backup(app, Some(&update.version), backup_timeout, |progress| {
             lock_state(app).record_backup_progress(progress)
         })
-        .await
-    {
-        let message = match failure {
-            host::PreUpdateBackupFailure::Cancelled => {
-                localization::t(keys::UPDATE_BACKUP_CANCELLED)
-            }
-            host::PreUpdateBackupFailure::Failed(error) => {
-                localization::t_args(keys::UPDATE_BACKUP_FAILED, &[("error", &error)])
-            }
-        };
-        {
-            let mut guard = lock_state(app);
-            guard.record_install_failed(message.clone());
+        .await;
+    match backup {
+        Ok(host::PreUpdateBackup::Done) => {}
+        Ok(host::PreUpdateBackup::SkippedWhileLocked) => {
+            logging::warn("[updater] updating without a backup: the key ring is locked");
+            lock_state(app).record_backup_skipped();
+            update_window::show(app);
+            emit_state_and_report(app).await;
+            notifications::show_now(
+                app,
+                localization::t(keys::UPDATE_BACKUP_SKIPPED_TITLE),
+                localization::t(keys::UPDATE_BACKUP_SKIPPED_MESSAGE),
+            )
+            .await;
+            tokio::time::sleep(BACKUP_SKIPPED_NOTICE_TIME).await;
         }
-        emit_state_and_report(app).await;
-        return Err(message);
+        Err(failure) => {
+            let message = match failure {
+                host::PreUpdateBackupFailure::Cancelled => {
+                    localization::t(keys::UPDATE_BACKUP_CANCELLED)
+                }
+                host::PreUpdateBackupFailure::Failed(error) => {
+                    localization::t_args(keys::UPDATE_BACKUP_FAILED, &[("error", &error)])
+                }
+            };
+            {
+                let mut guard = lock_state(app);
+                guard.record_install_failed(message.clone());
+            }
+            emit_state_and_report(app).await;
+            return Err(message);
+        }
     }
 
     // A host that is still alive locks its own binary, so the installer would
@@ -1438,6 +1458,7 @@ mod tests {
             install_on_quit: false,
             backup: None,
             quit_install_failed: false,
+            backup_skipped: false,
         }
     }
 

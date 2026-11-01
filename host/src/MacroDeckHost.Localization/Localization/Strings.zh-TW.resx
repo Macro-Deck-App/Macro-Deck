@@ -1157,6 +1157,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>無法連線至 Macro Deck 主機，因此無法建立備份。</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck 正在等待復原金鑰，無法讀取其資料，因此此次更新將在沒有備份的情況下繼續。</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>正在更新，未建立備份</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck 無法確認備份是否已建立。</value>
   </data>
@@ -1495,6 +1501,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>確定要刪除這 {count} 個小工具嗎？此操作無法復原。</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>無法刪除小工具</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>無法刪除小工具</value>
@@ -3029,6 +3038,24 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck 仍在啟動中，因此未啟動外掛。請稍後再試。</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>無法讀取外掛資訊清單。</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>此外掛沒有適用於此系統的版本。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>找不到可啟動此外掛的 .NET 執行階段。請安裝後重新啟動外掛。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>已安裝的 .NET 執行階段皆不符合所需版本 {required}。請安裝後重新啟動外掛。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>安裝已取消，已還原先前的狀態。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>安裝已取消，但無法還原先前的狀態。新版本可能仍在使用中。</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在關閉，因此未啟動外掛。</value>

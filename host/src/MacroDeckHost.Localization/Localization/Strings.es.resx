@@ -1158,6 +1158,12 @@ Macro Deck se instaló desde su repositorio APT: ejecuta sudo apt update &amp;&a
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>No se pudo contactar con el host de Macro Deck, por lo que no se pudo crear ninguna copia de seguridad.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck está esperando la clave de recuperación y no puede leer sus datos, así que esta actualización continúa sin copia de seguridad.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Actualización sin copia de seguridad</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck no pudo confirmar que se creara una copia de seguridad.</value>
   </data>
@@ -1496,6 +1502,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>¿Seguro que quieres eliminar estos {count} widgets? Esta acción no se puede deshacer.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>No se pudo eliminar el widget</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>No se pudieron eliminar los widgets</value>
@@ -3030,6 +3039,24 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck todavía se está iniciando, por lo que el complemento no se ha iniciado. Inténtalo de nuevo en un momento.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>No se ha podido leer el manifiesto del complemento.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Este complemento no tiene una versión para este sistema.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>No se ha encontrado ningún entorno de ejecución de .NET para iniciar este complemento. Instala uno y vuelve a iniciar el complemento.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Ningún entorno de ejecución de .NET instalado cumple la versión requerida {required}. Instálala y vuelve a iniciar el complemento.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>La instalación se ha cancelado y se ha restaurado el estado anterior.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>La instalación se ha cancelado, pero no se ha podido restaurar el estado anterior. Es posible que la nueva versión siga activa.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se está cerrando, por lo que el complemento no se ha iniciado.</value>

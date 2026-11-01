@@ -1157,6 +1157,12 @@ Macro Deck is geïnstalleerd vanuit de APT-repository, dus voer sudo apt update 
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>De Macro Deck-host is niet bereikbaar, dus er kon geen back-up worden gemaakt.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck wacht op de herstelsleutel en kan zijn gegevens niet lezen, dus deze update gaat door zonder back-up.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Bijwerken zonder back-up</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck kon niet bevestigen dat een back-up is gemaakt.</value>
   </data>
@@ -1495,6 +1501,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Weet je zeker dat je deze {count} widgets wilt verwijderen? Dit kan niet ongedaan worden gemaakt.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Het verwijderen van de widget is mislukt</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Het verwijderen van de widgets is mislukt</value>
@@ -3029,6 +3038,24 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck is nog aan het opstarten, daarom is de plug-in niet gestart. Probeer het zo meteen opnieuw.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Het manifest van de plug-in kan niet worden gelezen.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Deze plug-in heeft geen versie voor dit systeem.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Er is geen .NET-runtime gevonden om deze plug-in te starten. Installeer er een en start de plug-in opnieuw.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Geen enkele geïnstalleerde .NET-runtime voldoet aan de vereiste versie {required}. Installeer deze en start de plug-in opnieuw.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>De installatie is geannuleerd en de vorige toestand is hersteld.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>De installatie is geannuleerd, maar de vorige toestand kon niet worden hersteld. De nieuwe versie is mogelijk nog actief.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wordt afgesloten, daarom is de plug-in niet gestart.</value>

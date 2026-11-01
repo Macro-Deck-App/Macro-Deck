@@ -1157,6 +1157,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Хост Macro Deck недоступний, тож резервну копію створити не вдалося.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck очікує на ключ відновлення й не може прочитати свої дані, тому оновлення виконується без резервної копії.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Оновлення без резервної копії</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck не вдалося підтвердити, що резервну копію створено.</value>
   </data>
@@ -1495,6 +1501,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Ви впевнені, що хочете видалити ці віджети ({count})? Це не можна скасувати.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Не вдалося видалити віджет</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Не вдалося видалити віджети</value>
@@ -3029,6 +3038,24 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck ще запускається, тому плагін не було запущено. Повторіть спробу за мить.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Не вдалося прочитати маніфест плагіна.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Цей плагін не має версії для цієї системи.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Не знайдено середовище виконання .NET для запуску цього плагіна. Встановіть його та запустіть плагін знову.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Жодне встановлене середовище виконання .NET не відповідає потрібній версії {required}. Встановіть її та запустіть плагін знову.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Встановлення скасовано, попередній стан відновлено.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Встановлення скасовано, але відновити попередній стан не вдалося. Нова версія може залишатися активною.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck завершує роботу, тому плагін не було запущено.</value>

@@ -1773,22 +1773,36 @@ pub struct PreUpdateBackupResponse {
     pub skipped: bool,
     #[serde(default)]
     pub cancelled: bool,
-    pub error: Option<String>,
+    #[serde(default)]
+    pub reason: Option<String>,
+}
+
+// Must match PreUpdateBackupCoordinator.KeyRingLockedReason in the host.
+const KEY_RING_LOCKED_REASON: &str = "KeyRingLocked";
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum PreUpdateBackup {
+    Done,
+    SkippedWhileLocked,
 }
 
 /// Turns the host's answer into a go/no-go for the update. Kept pure so the policy is testable without a
 /// running host: an unreachable or unparseable answer must not read as permission to proceed.
 pub fn interpret_pre_update_backup_response(
     response: Option<PreUpdateBackupResponse>,
-) -> Result<(), PreUpdateBackupFailure> {
+) -> Result<PreUpdateBackup, PreUpdateBackupFailure> {
     let Some(response) = response else {
         return Err(PreUpdateBackupFailure::Failed(localization::t(
             keys::UPDATE_BACKUP_UNCONFIRMED,
         )));
     };
 
+    if response.skipped && response.reason.as_deref() == Some(KEY_RING_LOCKED_REASON) {
+        return Ok(PreUpdateBackup::SkippedWhileLocked);
+    }
+
     if response.skipped || response.success {
-        return Ok(());
+        return Ok(PreUpdateBackup::Done);
     }
 
     if response.cancelled {
@@ -1797,7 +1811,7 @@ pub fn interpret_pre_update_backup_response(
 
     Err(PreUpdateBackupFailure::Failed(
         response
-            .error
+            .reason
             .unwrap_or_else(|| localization::t(keys::UPDATE_BACKUP_GENERIC_FAILURE)),
     ))
 }
@@ -1898,7 +1912,7 @@ pub async fn create_pre_update_backup(
     version: Option<&str>,
     timeout: Duration,
     on_progress: impl Fn(Option<BackupProgress>),
-) -> Result<(), PreUpdateBackupFailure> {
+) -> Result<PreUpdateBackup, PreUpdateBackupFailure> {
     let state = app.state::<Arc<HostState>>();
     let Some(port) = managed_port(&state) else {
         return Err(PreUpdateBackupFailure::Failed(localization::t(
@@ -2010,7 +2024,7 @@ mod tests {
             success: false,
             skipped: false,
             cancelled: true,
-            error: None,
+            reason: None,
         };
 
         assert_eq!(
@@ -2135,7 +2149,7 @@ mod tests {
             success: true,
             skipped: false,
             cancelled: false,
-            error: None,
+            reason: None,
         };
 
         assert!(interpret_pre_update_backup_response(Some(response)).is_ok());
@@ -2146,11 +2160,14 @@ mod tests {
         let response = PreUpdateBackupResponse {
             success: false,
             skipped: true,
-            error: None,
+            reason: None,
             cancelled: false,
         };
 
-        assert!(interpret_pre_update_backup_response(Some(response)).is_ok());
+        assert_eq!(
+            interpret_pre_update_backup_response(Some(response)),
+            Ok(PreUpdateBackup::Done)
+        );
     }
 
     #[test]
@@ -2159,7 +2176,7 @@ mod tests {
             success: false,
             skipped: false,
             cancelled: false,
-            error: Some("the disk is full".to_string()),
+            reason: Some("the disk is full".to_string()),
         };
 
         let error = interpret_pre_update_backup_response(Some(response)).unwrap_err();
@@ -2167,6 +2184,43 @@ mod tests {
         assert_eq!(
             error,
             PreUpdateBackupFailure::Failed("the disk is full".to_string())
+        );
+    }
+
+    fn parsed(body: &str) -> Result<PreUpdateBackup, PreUpdateBackupFailure> {
+        interpret_pre_update_backup_response(Some(serde_json::from_str(body).unwrap()))
+    }
+
+    #[test]
+    fn the_failure_text_of_the_hosts_real_answer_reaches_the_user() {
+        assert_eq!(
+            parsed(r#"{"success":false,"skipped":false,"cancelled":false,"reason":"No space"}"#),
+            Err(PreUpdateBackupFailure::Failed("No space".to_string()))
+        );
+    }
+
+    #[test]
+    fn a_failure_without_a_reason_keeps_the_generic_text() {
+        let Err(PreUpdateBackupFailure::Failed(message)) =
+            parsed(r#"{"success":false,"skipped":false,"reason":null}"#)
+        else {
+            panic!("expected a failure");
+        };
+        assert_eq!(
+            message,
+            localization::t(keys::UPDATE_BACKUP_GENERIC_FAILURE)
+        );
+    }
+
+    #[test]
+    fn a_skip_for_a_locked_key_ring_is_told_apart_from_a_backup_turned_off() {
+        assert_eq!(
+            parsed(r#"{"success":true,"skipped":true,"reason":"KeyRingLocked"}"#),
+            Ok(PreUpdateBackup::SkippedWhileLocked)
+        );
+        assert_eq!(
+            parsed(r#"{"success":true,"skipped":true,"reason":null}"#),
+            Ok(PreUpdateBackup::Done)
         );
     }
 

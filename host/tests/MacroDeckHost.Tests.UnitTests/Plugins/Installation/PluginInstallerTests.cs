@@ -79,6 +79,7 @@ internal sealed class PluginInstallerTests
 		services.AddSingleton<IPluginTrustRecordRepository, InMemoryPluginTrustRecordRepository>();
 		services.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>();
 		services.AddScoped<IAppPreferenceService>(_ => new FakeDeveloperModePreferences());
+		services.AddSingleton(TestLocalization.Resolver);
 		services.AddSingleton<IIntegrationConfigStore, FakeIntegrationConfigStore>();
 		services.AddSingleton<IRemotePluginSnapshotStore>(_ => new RemotePluginSnapshotStore(_paths,
 			Serilog.Core.Logger.None));
@@ -715,6 +716,149 @@ internal sealed class PluginInstallerTests
 			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
 			Assert.That(Directory.Exists(VersionDirectory("1.0.0")), Is.True);
 			Assert.That(Directory.Exists(VersionDirectory("1.1.0")), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Cancelling_an_update_during_health_validation_restores_the_previous_version()
+	{
+		await Install(BuildArtifact());
+		using var cancel = new CancellationTokenSource();
+		_supervisor.NeverHealthyPlugins.Add(PluginId);
+		_supervisor.OnStart = _ => cancel.CancelAfter(TimeSpan.FromMilliseconds(50));
+
+		var result = await _installer.Install(
+			PluginArtifactSource.FromPath(BuildArtifact("1.1.0", fileName: "plugin-110.macroDeckPlugin")),
+			new PluginInstallRequest(),
+			cancel.Token);
+
+		AssertCancelledBackTo1_0_0(result);
+	}
+
+	[Test]
+	public async Task Cancelling_an_update_while_it_stops_the_old_version_restores_the_previous_version()
+	{
+		await Install(BuildArtifact());
+		using var cancel = new CancellationTokenSource();
+		_supervisor.OnStop = (_, reason) =>
+		{
+			if (reason == PluginStopReason.Update)
+			{
+				cancel.Cancel();
+			}
+		};
+
+		var result = await _installer.Install(
+			PluginArtifactSource.FromPath(BuildArtifact("1.1.0", fileName: "plugin-110.macroDeckPlugin")),
+			new PluginInstallRequest(),
+			cancel.Token);
+
+		_supervisor.OnStop = null;
+		AssertCancelledBackTo1_0_0(result);
+	}
+
+	private void AssertCancelledBackTo1_0_0(PluginInstallResult result)
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.Cancelled));
+			Assert.That(result.RolledBack, Is.True);
+			Assert.That(result.ErrorMessage, Is.Not.Empty);
+			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
+			Assert.That(Directory.Exists(VersionDirectory("1.0.0")), Is.True);
+			Assert.That(Directory.Exists(VersionDirectory("1.1.0")), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Cancelling_a_first_install_during_health_validation_leaves_nothing_active()
+	{
+		using var cancel = new CancellationTokenSource();
+		_supervisor.NeverHealthyPlugins.Add(PluginId);
+		_supervisor.OnStart = _ => cancel.CancelAfter(TimeSpan.FromMilliseconds(50));
+
+		var result = await _installer.Install(PluginArtifactSource.FromPath(BuildArtifact()),
+			new PluginInstallRequest(),
+			cancel.Token);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.Cancelled));
+			Assert.That(ActiveVersion(), Is.Null);
+			Assert.That(Directory.Exists(VersionDirectory("1.0.0")), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_shutdown_that_refuses_the_restart_still_ends_on_the_previous_version()
+	{
+		await Install(BuildArtifact());
+		using var cancel = new CancellationTokenSource();
+		_supervisor.NeverHealthyPlugins.Add(PluginId);
+		_supervisor.OnStart = _ => cancel.CancelAfter(TimeSpan.FromMilliseconds(50));
+		_supervisor.StartOutcome = _ => cancel.IsCancellationRequested
+			? PluginSupervisorResult.Fail(PluginSupervisorError.HostShuttingDown)
+			: null;
+
+		var result = await _installer.Install(
+			PluginArtifactSource.FromPath(BuildArtifact("1.1.0", fileName: "plugin-110.macroDeckPlugin")),
+			new PluginInstallRequest(),
+			cancel.Token);
+
+		AssertCancelledBackTo1_0_0(result);
+	}
+
+	[Test]
+	public async Task Cancelling_an_update_of_a_stopped_plugin_keeps_it_stopped()
+	{
+		await Install(BuildArtifact());
+		await _supervisor.Stop(PluginId, PluginStopReason.UserRequested);
+		using var cancel = new CancellationTokenSource();
+		_supervisor.NeverHealthyPlugins.Add(PluginId);
+		_supervisor.OnStart = _ => cancel.CancelAfter(TimeSpan.FromMilliseconds(50));
+
+		var result = await _installer.Install(
+			PluginArtifactSource.FromPath(BuildArtifact("1.1.0", fileName: "plugin-110.macroDeckPlugin")),
+			new PluginInstallRequest(),
+			cancel.Token);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.Cancelled));
+			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
+			Assert.That(_supervisor.DesiredStartState[PluginId], Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Cancelling_a_first_install_leaves_no_auto_start_behind()
+	{
+		using var cancel = new CancellationTokenSource();
+		_supervisor.NeverHealthyPlugins.Add(PluginId);
+		_supervisor.OnStart = _ => cancel.CancelAfter(TimeSpan.FromMilliseconds(50));
+
+		await _installer.Install(PluginArtifactSource.FromPath(BuildArtifact()),
+			new PluginInstallRequest(),
+			cancel.Token);
+
+		Assert.That(_supervisor.DesiredStartState.GetValueOrDefault(PluginId), Is.False);
+	}
+
+	[Test]
+	public async Task A_cancel_after_the_new_version_proved_healthy_does_not_undo_the_install()
+	{
+		using var cancel = new CancellationTokenSource();
+		_adbConsent.OnNotify = cancel.Cancel;
+
+		var result = await _installer.Install(
+			PluginArtifactSource.FromPath(BuildArtifact("1.0.0", "\"permissions\": [\"host:adb\"]")),
+			new PluginInstallRequest(),
+			cancel.Token);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
 		});
 	}
 
