@@ -157,7 +157,7 @@ internal sealed class CachingInitializeBackgroundServiceTests
 		}
 	}
 
-	private sealed class RecordingProfileService : IProfileService
+	internal sealed class RecordingProfileService : IProfileService
 	{
 		public List<string> CreatedNames { get; } = [];
 
