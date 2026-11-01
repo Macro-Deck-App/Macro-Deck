@@ -154,6 +154,19 @@ describe('deck input', () => {
     expect(backs).toBe(1);
   });
 
+  it('presses nothing under a dialog, while a numbered button still moves the cursor', () => {
+    widgets = [widget('a', 0, 0), widget('b', 1, 0)];
+    const input = attach(map);
+    modal = true;
+
+    key('Enter');
+    key('2');
+
+    expect(activated).toEqual([]);
+    expect(triggered).toEqual([]);
+    expect(input.focusedWidgetId()).toBe('b');
+  });
+
   it('puts the cursor back at the start when the deck is replaced', () => {
     widgets = [widget('a', 0, 0), widget('b', 1, 0)];
     const input = attach(map);

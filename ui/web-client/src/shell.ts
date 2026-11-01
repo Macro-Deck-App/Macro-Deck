@@ -1,8 +1,11 @@
 import {
   activationClaim,
+  activationFor,
   ClientAppStrings,
+  emitsEvent,
   reloadFailedImages,
   renderWidgetGrid,
+  UiComponentEvents,
   type GridWidget,
   type UiRenderHost,
   type WebClientTarget,
@@ -107,8 +110,7 @@ export class Shell {
     this.deckInput = new DeckInput(
       {
         widgets: () => this.client.deck.displayedWidgets,
-        activateWidget: widgetId =>
-          activationClaim(this.client.widgetSessions.treeFor(widgetId), this.grid?.tileBox(widgetId) ?? null) === 'absorbed',
+        activateWidget: widgetId => this.activateFromInput(widgetId),
         triggerWidget: (widget: GridWidget) => {
           void this.client.executeTrigger(widget.id, 'onShortPress');
         },
@@ -489,6 +491,24 @@ export class Shell {
     this.grid.update(
       this.client.deck.displayedWidgets,
       widgetId => this.client.widgetSessions.treeFor(widgetId));
+  }
+
+  private activateFromInput(widgetId: string): boolean {
+    const sessions = this.client.widgetSessions;
+    const claim = activationClaim(sessions.treeFor(widgetId), this.grid?.tileBox(widgetId) ?? null);
+    if (claim === 'none') return false;
+    if (claim === 'absorbed') return true;
+
+    const node = claim.node;
+    const activation = activationFor(node);
+    if (activation !== null) {
+      sessions.sendEvent(widgetId, node.id, activation.name, activation.payload);
+      return true;
+    }
+    for (const name of [UiComponentEvents.PressStart, UiComponentEvents.PressEnd, UiComponentEvents.Press]) {
+      if (emitsEvent(node, name)) sessions.sendEvent(widgetId, node.id, name);
+    }
+    return true;
   }
 
   private paintWidgetTile(widgetId: string): boolean {
