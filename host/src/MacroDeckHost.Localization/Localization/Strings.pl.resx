@@ -1497,6 +1497,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Usunąć wybrane widgety? Liczba widgetów do usunięcia: {count}. Tej operacji nie można cofnąć.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Nie udało się usunąć widżetu</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Nie udało się usunąć widżetów</value>
   </data>

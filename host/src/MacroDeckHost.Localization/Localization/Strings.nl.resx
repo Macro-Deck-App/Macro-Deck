@@ -1496,6 +1496,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Weet je zeker dat je deze {count} widgets wilt verwijderen? Dit kan niet ongedaan worden gemaakt.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Het verwijderen van de widget is mislukt</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Het verwijderen van de widgets is mislukt</value>
   </data>

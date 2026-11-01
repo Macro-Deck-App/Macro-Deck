@@ -1497,6 +1497,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Sei sicuro di voler eliminare questi {count} widget? Questa operazione non può essere annullata.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Impossibile eliminare il widget</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Impossibile eliminare i widget</value>
   </data>

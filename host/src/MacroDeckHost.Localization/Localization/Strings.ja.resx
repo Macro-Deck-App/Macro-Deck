@@ -1496,6 +1496,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>{count} 件のウィジェットを削除しますか？この操作は取り消せません。</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>ウィジェットを削除できませんでした</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>ウィジェットを削除できませんでした</value>
   </data>

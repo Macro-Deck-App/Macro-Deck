@@ -20,7 +20,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ActionFlow, AppStrings, GridWidget, WidgetData, fromEditorJson, toEditorJson } from '@macro-deck/runtime';
-import { ButtonComponent, IWidgetEditorComponent, LocalizationService, SegmentedControlComponent, SegmentedOption, ToastService, TranslatePipe, WidgetRegistryService } from '@shared';
+import { ButtonComponent, IWidgetEditorComponent, LocalizationService, ProfileService, SegmentedControlComponent, SegmentedOption, ToastService, TranslatePipe, WidgetRegistryService } from '@shared';
 import { CursorPositionComponent } from '../../cursor-position/cursor-position.component';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
@@ -56,6 +56,7 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly folderService = inject(FolderService);
+  private readonly profileService = inject(ProfileService);
   private readonly registry = inject(WidgetRegistryService);
   private readonly toasts = inject(ToastService);
   private readonly cutOrigin = inject(ActionCutOriginService);
@@ -83,6 +84,15 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
   private readonly liveWidget = computed<GridWidget | null>(() => {
     const id = this.widgetId();
     return id ? this.folderService.findWidget(id) ?? null : null;
+  });
+  private readonly widgetProfileId = signal<string | null>(null);
+  private readonly widgetGone = computed(() => {
+    const profileId = this.widgetProfileId();
+    if (!profileId || this.liveWidget()) return false;
+
+    // Folders of another profile mean a switch, which leaves this widget's existence unknown.
+    return !this.profileService.profiles().some(profile => profile.id === profileId)
+      || this.folderService.loadedFolderProfileId === profileId;
   });
   readonly notFound = signal(false);
   readonly editorValid = signal(true);
@@ -172,6 +182,7 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
       this.folderService.selectFolder(folder.id);
     }
     this.widgetId.set(widgetId);
+    this.widgetProfileId.set(this.folderService.loadedFolderProfileId);
     this.lastLiveData = structuredClone(widget.data);
     this.widget.set({ ...widget, data: { ...widget.data } });
     this.followLiveWidget();
@@ -185,10 +196,25 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
       });
 
       effect(() => {
+        if (this.widgetGone()) {
+          untracked(() => this.onWidgetGone());
+        }
+      });
+
+      effect(() => {
         const dirty = this.dirty();
         untracked(() => this.editorRef?.setInput('unsavedChanges', dirty));
       });
     });
+  }
+
+  private onWidgetGone(): void {
+    this.notFound.set(true);
+    this.editorRef = null;
+    this.dirty.set(false);
+    this.confirmingLeave.set(false);
+    this.resolveLeave?.(false);
+    this.resolveLeave = null;
   }
 
   private onLiveWidgetChanged(live: GridWidget | null): void {
@@ -315,6 +341,7 @@ export class WidgetEditorPageComponent implements OnInit, OnDestroy, ConfirmsNav
   }
 
   hasUnsavedChanges(): boolean {
+    if (this.notFound()) return false;
     const data = this.widget()?.data;
     const modelDirty = !!data && !!this.savedData && !deepEqual(this.savedData, data);
     const jsonDirty = this.mode() === 'json' && this.jsonText() !== this.jsonBaseline;

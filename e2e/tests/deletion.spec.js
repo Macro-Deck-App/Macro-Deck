@@ -19,13 +19,13 @@ function sessionsOpenedSince(frames, from) {
   return opened;
 }
 
-// Sessions the host ended on its own: a close the page asked for itself proves nothing here.
+// Sessions the host ended because their widget was deleted. The page also closes the session when
+// the editor goes away, in either order, but that close carries its own reason.
 function closedByHost(frames) {
-  const closedByPage = new Set(frames.requests('CloseUiSession').map(request => request.payload?.[0]));
   return frames.received
-    .filter(message => message.type === 'UiSessionClosedEvent')
-    .map(message => message.payload?.sessionId)
-    .filter(sessionId => !closedByPage.has(sessionId));
+    .filter(message => message.type === 'UiSessionClosedEvent'
+      && message.payload?.reason === 'The widget was deleted.')
+    .map(message => message.payload?.sessionId);
 }
 
 async function openEditorOn(page, host, profile, widgetId) {
@@ -68,9 +68,6 @@ test('deleting one widget ends the editor session another desktop window holds o
 });
 
 test('deleting several widgets at once ends the editor session another desktop window holds on one of them', async ({ page, api, host }) => {
-  // Open bug: a batch delete never closes the deleted widgets' UI sessions (MD-19, MD-56).
-  // https://github.com/Macro-Deck-App/Macro-Deck/issues/1548
-  test.fail();
   const { profile, buttons } = await seedButtons(api, 'E2E Delete Many');
   const editor = await openEditorOn(page, host, profile, buttons[1].id);
 
@@ -82,4 +79,30 @@ test('deleting several widgets at once ends the editor session another desktop w
 
   await expect.poll(() => closedByHost(editor.frames).filter(id => editor.sessions.includes(id)).length)
     .toBeGreaterThan(0);
+});
+
+test('an editor left open on a deleted widget says so and leaves without asking to save', async ({ page, api, host }) => {
+  const { profile, buttons } = await seedButtons(api, 'E2E Delete Editor');
+  await openEditorOn(page, host, profile, buttons[0].id);
+
+  await api.delete(`/api/widgets/${buttons[0].id}?folderId=${profile.rootFolder.id}`);
+
+  await expect(page.getByText('This widget no longer exists.')).toBeVisible();
+  await page.getByRole('button', { name: 'Back to deck' }).first().click();
+  await expect(desktopTile(page, buttons[1].id)).toBeVisible();
+});
+
+test('a single delete the host refuses puts the widget back and shows an error', async ({ page, api, host }) => {
+  const { profile, buttons } = await seedButtons(api, 'E2E Delete Refused');
+  await openDesktopProfile(page, host, profile.name);
+  await page.route(`**/api/widgets/${buttons[0].id}?*`, route => (route.request().method() === 'DELETE'
+    ? route.fulfill({ status: 500, body: '{}' })
+    : route.continue()));
+
+  await desktopTile(page, buttons[0].id).click({ button: 'right' });
+  await page.locator('.menu-item').filter({ hasText: /^\s*Delete\s*$/ }).click();
+  await page.locator('shared-confirmation-modal').getByRole('button', { name: 'Delete' }).click();
+
+  await expect(page.locator('shared-error-banner')).toBeVisible();
+  await expect(desktopTile(page, buttons[0].id)).toBeVisible();
 });

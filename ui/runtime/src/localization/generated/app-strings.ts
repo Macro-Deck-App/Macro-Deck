@@ -606,6 +606,7 @@ export const AppStrings = {
 	},
 	Deck: {
 		ApplicationAddFailed: 'macrodeck.app:Deck.ApplicationAddFailed',
+		DeleteWidgetFailed: 'macrodeck.app:Deck.DeleteWidgetFailed',
 		DeleteWidgetHeading: 'macrodeck.app:Deck.DeleteWidgetHeading',
 		DeleteWidgetMessage: 'macrodeck.app:Deck.DeleteWidgetMessage',
 		DeleteWidgetsFailed: 'macrodeck.app:Deck.DeleteWidgetsFailed',
@@ -10605,6 +10606,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:CopyValue.CopyAriaLabel': 'Copy {label}',
 	'macrodeck.app:CopyValue.ManualCopyMessage': '{detail} Select the value below and copy it manually.',
 	'macrodeck.app:Deck.ApplicationAddFailed': 'The application could not be added',
+	'macrodeck.app:Deck.DeleteWidgetFailed': 'Failed to delete the widget',
 	'macrodeck.app:Deck.DeleteWidgetHeading.One': 'Delete Widget',
 	'macrodeck.app:Deck.DeleteWidgetHeading.Other': 'Delete Widgets',
 	'macrodeck.app:Deck.DeleteWidgetMessage.One': 'Are you sure you want to delete this widget? This action cannot be undone.',

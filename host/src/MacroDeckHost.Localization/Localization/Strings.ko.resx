@@ -1496,6 +1496,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>위젯 {count}개를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>위젯을 삭제하지 못했습니다</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>위젯을 삭제하지 못했습니다</value>
   </data>

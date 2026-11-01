@@ -107,7 +107,11 @@ describe('FolderService widget layout', () => {
     apiSpy.getWidgetTypes.and.resolveTo({ success: true, types: [] });
     Object.defineProperty(apiSpy, 'connectionStateSignal', { value: signal('disconnected') });
 
-    const profileServiceStub = { selectedProfileId: () => null, selectedProfile: () => currentProfile };
+    const profileServiceStub = {
+      selectedProfileId: () => null,
+      selectedProfile: () => currentProfile,
+      profiles: () => [],
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -1141,7 +1145,7 @@ describe('FolderService deck-navigation triggers', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: apiSpy },
-        { provide: ProfileService, useValue: { selectedProfileId, selectedProfile: () => null } },
+        { provide: ProfileService, useValue: { selectedProfileId, selectedProfile: () => null, profiles: () => [] } },
         { provide: ActionExecutionService, useValue: { waitFor: () => Promise.resolve(null) } },
       ],
     });
@@ -1283,7 +1287,7 @@ describe('FolderService action execution outcome', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: apiSpy },
-        { provide: ProfileService, useValue: { selectedProfileId: () => null, selectedProfile: () => null } },
+        { provide: ProfileService, useValue: { selectedProfileId: () => null, selectedProfile: () => null, profiles: () => [] } },
       ],
     });
 
@@ -1434,6 +1438,8 @@ describe('FolderService action execution outcome', () => {
 });
 
 describe('FolderService recursive delete', () => {
+  let knownProfiles: Array<{ id: string }>;
+  let reloadedProfiles: Array<{ id: string }>;
   let apiSpy: jasmine.SpyObj<ApiService>;
   let notifications: Map<string, Subject<unknown>>;
   let service: FolderService;
@@ -1497,7 +1503,18 @@ describe('FolderService recursive delete', () => {
     apiSpy.onWidgetTypeCatalogChanged.and.returnValue(new Subject<never>().asObservable());
     Object.defineProperty(apiSpy, 'connectionStateSignal', { value: signal('disconnected') });
 
-    const profileServiceStub = { selectedProfileId: () => null, selectedProfile: () => null };
+    knownProfiles = [{ id: 'known-profile' }];
+    reloadedProfiles = knownProfiles;
+    const profileServiceStub = {
+      selectedProfileId: () => null,
+      selectedProfile: () => null,
+      profiles: () => knownProfiles,
+      selectProfile: jasmine.createSpy('selectProfile'),
+      loadProfiles: () => {
+        knownProfiles = reloadedProfiles;
+        return Promise.resolve();
+      },
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -1568,6 +1585,60 @@ describe('FolderService recursive delete', () => {
     service.selectedFolderId.set(grandchildId);
 
     notifications.get('FolderDeletedEvent')!.next({ folderId: grandchildId } as FolderDeletedEvent);
+
+    expect(service.selectedFolderId()).toBe(survivorId);
+  });
+
+  it('prunes back-history of a deleted profile, so Back cannot reach it', () => {
+    const history = service as unknown as { navHistory: Array<{ folderId: string; profileId: string | null }> };
+    history.navHistory = [
+      { folderId: childId, profileId: 'known-profile' },
+      { folderId: survivorId, profileId: 'gone-profile' },
+    ];
+
+    notifications.get('ProfileDeletedEvent')!.next({ profileId: 'gone-profile' });
+
+    expect(history.navHistory.map(entry => entry.profileId)).toEqual(['known-profile']);
+  });
+
+  it('refuses a Back entry whose profile is unknown', () => {
+    const selected = service.selectedFolderId();
+    (service as unknown as { navHistory: Array<{ folderId: string; profileId: string | null }> }).navHistory = [
+      { folderId: survivorId, profileId: 'gone-profile' },
+    ];
+    (service as unknown as { navDepth: { set(value: number): void } }).navDepth.set(1);
+
+    service.goBack();
+
+    expect(service.selectedFolderId()).toBe(selected);
+  });
+
+  it('refuses a change to a profile the host cannot show after a reload, without a dead Back step', async () => {
+    const selected = service.selectedFolderId();
+    const depth = (service as unknown as { navHistory: unknown[] }).navHistory.length;
+
+    (service as unknown as { handleNavigation(event: object): void }).handleNavigation({
+      command: 'changeTo',
+      folderId: survivorId,
+      profileId: 'gone-profile',
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(service.selectedFolderId()).toBe(selected);
+    expect((service as unknown as { navHistory: unknown[] }).navHistory.length).toBe(depth);
+  });
+
+  it('follows a change to a profile that only a reload makes known', async () => {
+    reloadedProfiles = [{ id: 'known-profile' }, { id: 'plugin-profile' }];
+
+    (service as unknown as { handleNavigation(event: object): void }).handleNavigation({
+      command: 'changeTo',
+      folderId: survivorId,
+      profileId: 'plugin-profile',
+    });
+    await Promise.resolve();
+    await Promise.resolve();
 
     expect(service.selectedFolderId()).toBe(survivorId);
   });

@@ -1496,6 +1496,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Yakin ingin menghapus {count} widget ini? Tindakan ini tidak dapat dibatalkan.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Gagal menghapus widget</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Gagal menghapus widget</value>
   </data>

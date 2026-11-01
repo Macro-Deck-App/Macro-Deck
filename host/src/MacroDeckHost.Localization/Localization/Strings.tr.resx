@@ -1496,6 +1496,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Bu {count} widget'ı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Widget silinemedi</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Widget'lar silinemedi</value>
   </data>

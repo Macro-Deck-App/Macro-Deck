@@ -1496,6 +1496,9 @@
     <value>هل أنت متأكد من حذف هذه الأدوات ({count})؟ لا يمكن التراجع عن هذا الإجراء.</value>
     <comment>[plural] [count:int]</comment>
   </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>تعذّر حذف الأداة</value>
+  </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>تعذّر حذف الأدوات</value>
   </data>

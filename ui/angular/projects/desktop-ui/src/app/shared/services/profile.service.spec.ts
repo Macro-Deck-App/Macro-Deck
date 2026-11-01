@@ -301,4 +301,13 @@ describe('ProfileService', () => {
       expect(service.selectedProfileId()).toBe('y');
     });
   });
+
+  it('ignores a selection of a profile it does not know', async () => {
+    apiSpy.getProfiles.and.resolveTo({ profiles: [ipcProfile()] } as never);
+    await service.loadProfiles();
+
+    service.selectProfile('gone');
+
+    expect(service.selectedProfileId()).toBe('p1');
+  });
 });
