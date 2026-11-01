@@ -937,6 +937,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Tuto složku dat naposledy použila novější verze Macro Deck. Nainstalujte tuto verzi znovu; data nebyla změněna.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>V tomto účtu už běží jiný hostitel Macro Deck. Ukončete ho nebo restartujte počítač a poté Macro Deck spusťte znovu.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Chybí spustitelný soubor hostitele Macro Deck:
 {paths}</value>

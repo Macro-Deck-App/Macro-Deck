@@ -27,6 +27,67 @@ public class SingleInstanceGuardTests
 	}
 
 	[Test]
+	public async Task A_host_of_another_user_is_not_this_users_instance()
+	{
+		var directory = Directory.CreateTempSubdirectory("md-guard-").FullName;
+		var legacy = Path.Combine(directory, "legacy.port");
+		await File.WriteAllTextAsync(legacy, "5000");
+
+		var running = await SingleInstanceGuard.IsAnotherInstanceRunning([legacy],
+			_ => true,
+			_ => Task.FromResult(true));
+
+		Directory.Delete(directory, true);
+		Assert.That(running, Is.False);
+	}
+
+	[Test]
+	public async Task A_foreign_legacy_file_does_not_hide_the_own_host_and_vice_versa()
+	{
+		var directory = Directory.CreateTempSubdirectory("md-guard-").FullName;
+		var perUser = Path.Combine(directory, "per-user.port");
+		var legacy = Path.Combine(directory, "legacy.port");
+		await File.WriteAllTextAsync(perUser, "6000");
+		await File.WriteAllTextAsync(legacy, "5000");
+
+		var running = await SingleInstanceGuard.IsAnotherInstanceRunning([perUser, legacy],
+			port => port == 5000,
+			port => Task.FromResult(port == 6000));
+
+		Directory.Delete(directory, true);
+		Assert.That(running, Is.True);
+	}
+
+	[Test]
+	public async Task An_older_host_of_the_same_user_is_found_through_the_legacy_file()
+	{
+		var directory = Directory.CreateTempSubdirectory("md-guard-").FullName;
+		var legacy = Path.Combine(directory, "legacy.port");
+		await File.WriteAllTextAsync(legacy, "5000");
+
+		var running = await SingleInstanceGuard.IsAnotherInstanceRunning(
+			[Path.Combine(directory, "per-user.port"), legacy],
+			_ => false,
+			_ => Task.FromResult(true));
+
+		Directory.Delete(directory, true);
+		Assert.That(running, Is.True);
+	}
+
+	[Test]
+	public async Task A_port_file_that_cannot_be_read_is_no_instance()
+	{
+		var directory = Directory.CreateTempSubdirectory("md-guard-").FullName;
+
+		var running = await SingleInstanceGuard.IsAnotherInstanceRunning([directory],
+			_ => false,
+			_ => Task.FromResult(true));
+
+		Directory.Delete(directory, true);
+		Assert.That(running, Is.False);
+	}
+
+	[Test]
 	public async Task A_running_host_is_detected_without_holding_its_loopback_secret()
 	{
 		if (File.Exists(HostEndpoints.LoopbackPortFilePath))

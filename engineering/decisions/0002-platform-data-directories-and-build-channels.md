@@ -30,6 +30,9 @@ and cannot run at the same time; Development can run beside either.
 | `Development` (default) | `7193` / `7194` | `.data` under the working directory | `macro-deck-host-development.port` | Development-only Tauri identifier and apphost |
 | `Production` | `8193` / `8194` | Platform user-data directory, or the base directory for an unmarked publish | `macro-deck-host.port` | The installed identity |
 
+The loopback-port file lives in the system temp directory. Where that is the shared Linux `/tmp`, the host
+also writes it to `$XDG_CONFIG_HOME/macro-deck`, which readers try first; the temp file stays for older tools.
+
 Each channel reserves an adjacent HTTP/HTTPS pair. Development does not start at `8194` precisely
 because that is Production's HTTPS default; one port number meaning two things across channels is the
 confusion the pairing exists to avoid.

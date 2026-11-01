@@ -25,6 +25,124 @@ public class HostDiscoveryTests
 		Directory.Delete(_directory, true);
 	}
 
+	[TestCase(true, "/tmp/", "/cfg", "/home/a", "/cfg/macro-deck")]
+	[TestCase(true, "/tmp", "/cfg", "/home/a", "/cfg/macro-deck")]
+	[TestCase(true, "/tmp/", null, "/home/a", "/home/a/.config/macro-deck")]
+	[TestCase(true, "/tmp/", "relative", "/home/a", "/home/a/.config/macro-deck")]
+	[TestCase(true, "/tmp/", null, "relative", null)]
+	[TestCase(true, "/tmp/", null, null, null)]
+	[TestCase(true, "/tmp/own/", null, "/home/a", null)]
+	[TestCase(false, "/tmp/", null, "/home/a", null)]
+	public void The_per_user_directory_applies_only_to_the_shared_linux_tmp(
+		bool isLinux,
+		string temporaryDirectory,
+		string? configHome,
+		string? home,
+		string? expected)
+	{
+		var directory = HostDiscovery.PerUserDirectory(isLinux,
+			temporaryDirectory,
+			name => name == "XDG_CONFIG_HOME" ? configHome : home);
+
+		Assert.That(directory, Is.EqualTo(expected));
+	}
+
+	[Test]
+	public void The_per_user_file_wins_over_the_temp_directory()
+	{
+		var perUser = Directory.CreateDirectory(Path.Combine(_directory, "per-user")).FullName;
+		File.WriteAllText(Path.Combine(perUser, "macro-deck-host.port"), "6000");
+		Write("macro-deck-host.port", "5000", DateTime.UtcNow.AddMinutes(5));
+
+		var discovered = HostDiscovery.Discover(perUser, _directory, _ => ListenerState.Ours);
+
+		Assert.That(discovered?.Url, Is.EqualTo("http://127.0.0.1:6000"));
+	}
+
+	[TestCase("Ours")]
+	[TestCase("Unknown")]
+	public void An_older_host_is_still_found_through_the_temp_directory(string state)
+	{
+		var perUser = Directory.CreateDirectory(Path.Combine(_directory, "per-user")).FullName;
+		Write("macro-deck-host.port", "5000", DateTime.UtcNow);
+
+		var discovered = HostDiscovery.Discover(perUser, _directory, _ => Enum.Parse<ListenerState>(state));
+
+		Assert.That(discovered?.Url, Is.EqualTo("http://127.0.0.1:5000"));
+	}
+
+	[TestCase("Foreign")]
+	[TestCase("Gone")]
+	public void A_temp_file_of_another_user_or_a_dead_port_is_no_host(string state)
+	{
+		var perUser = Directory.CreateDirectory(Path.Combine(_directory, "per-user")).FullName;
+		Write("macro-deck-host.port", "5000", DateTime.UtcNow);
+
+		Assert.That(HostDiscovery.Discover(perUser, _directory, _ => Enum.Parse<ListenerState>(state)), Is.Null);
+	}
+
+	[Test]
+	public void A_stale_per_user_file_gives_way_to_the_host_in_the_temp_directory()
+	{
+		var perUser = Directory.CreateDirectory(Path.Combine(_directory, "per-user")).FullName;
+		File.WriteAllText(Path.Combine(perUser, "macro-deck-host.port"), "6000");
+		Write("macro-deck-host.port", "5000", DateTime.UtcNow);
+
+		var discovered = HostDiscovery.Discover(perUser,
+			_directory,
+			port => port == 6000 ? ListenerState.Gone : ListenerState.Ours);
+
+		Assert.That(discovered?.Url, Is.EqualTo("http://127.0.0.1:5000"));
+	}
+
+	[Test]
+	public void A_stale_per_user_file_now_holding_a_foreign_listener_is_no_host()
+	{
+		var perUser = Directory.CreateDirectory(Path.Combine(_directory, "per-user")).FullName;
+		File.WriteAllText(Path.Combine(perUser, "macro-deck-host.port"), "6000");
+
+		Assert.That(HostDiscovery.Discover(perUser, _directory, _ => ListenerState.Foreign), Is.Null);
+	}
+
+	[Test]
+	public void A_kernel_without_ipv6_still_tells_the_owner_of_an_ipv4_listener()
+	{
+		const string table = """
+							   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+							    0: 0100007F:1F90 00000000:0000 0A 00000000:00000000 00:00000000 00000000  1001        0 11 1 0
+							 """;
+		var files = new Dictionary<string, string>
+		{
+			["/proc/net/tcp"] = table,
+			["/proc/self/status"] = "Uid:\t1000\t1000\t1000\t1000\n"
+		};
+
+		var state = LoopbackListener.Inspect(8080,
+			path => files.TryGetValue(path, out var content) ? content : throw new FileNotFoundException(path));
+
+		Assert.That(state, Is.EqualTo(ListenerState.Foreign));
+	}
+
+	[Test]
+	public void The_proc_tables_tell_own_foreign_and_gone_listeners_apart()
+	{
+		const string table = """
+							   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+							    0: 0100007F:1F90 00000000:0000 0A 00000000:00000000 00:00000000 00000000  1000        0 11 1 0
+							    1: 0100007F:1F91 00000000:0000 0A 00000000:00000000 00:00000000 00000000  1001        0 12 1 0
+							 """;
+		const string status = "Name:\tcli\nUid:\t5\t1000\t1000\t1000\n";
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(LoopbackListener.Classify(table, status, 8080), Is.EqualTo(ListenerState.Ours));
+			Assert.That(LoopbackListener.Classify(table, status, 8081), Is.EqualTo(ListenerState.Foreign));
+			Assert.That(LoopbackListener.Classify(table, status, 9000), Is.EqualTo(ListenerState.Gone));
+			Assert.That(LoopbackListener.Classify("", status, 8080), Is.EqualTo(ListenerState.Unknown));
+			Assert.That(LoopbackListener.Classify(table, "", 8080), Is.EqualTo(ListenerState.Unknown));
+		});
+	}
+
 	[Test]
 	public void No_port_file_means_no_host()
 	{

@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Bu veri klasörü en son daha yeni bir Macro Deck sürümü tarafından kullanıldı. O sürümü yeniden yükleyin; verileriniz değiştirilmedi.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Bu hesapta başka bir Macro Deck ana bilgisayarı zaten çalışıyor. Onu kapatın veya bilgisayarı yeniden başlatın, ardından Macro Deck'i tekrar başlatın.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck ana bilgisayar ikili dosyası eksik:
 {paths}</value>
