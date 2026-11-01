@@ -15,6 +15,7 @@ using MacroDeckHost.Infrastructure.Network;
 using MacroDeckHost.Infrastructure.Network.Tls;
 using MacroDeckHost.Infrastructure.Backups.Restore;
 using MacroDeckHost.Infrastructure.Persistence;
+using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Infrastructure.Security.KeyRing;
 using MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore;
 using MacroDeckHost.Platform.Native;
@@ -112,6 +113,7 @@ public static class Program
 			if (restoreOutcome is not (StagedRestoreOutcome.Locked or StagedRestoreOutcome.RollbackIncomplete))
 			{
 				BackupLeftoverSweeper.Sweep(paths);
+				PluginStagingSweeper.Sweep(paths);
 			}
 
 			HostStartupFacts.RestoreApplied = restoreOutcome == StagedRestoreOutcome.Applied;

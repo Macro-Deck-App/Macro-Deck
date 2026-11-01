@@ -3030,6 +3030,24 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck ещё запускается, поэтому плагин не был запущен. Повторите попытку через некоторое время.</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Не удалось прочитать манифест плагина.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>У этого плагина нет версии для этой системы.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Не найдена среда выполнения .NET для запуска этого плагина. Установите её и запустите плагин снова.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Ни одна установленная среда выполнения .NET не соответствует требуемой версии {required}. Установите её и запустите плагин снова.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Установка отменена, предыдущее состояние восстановлено.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Установка отменена, но восстановить предыдущее состояние не удалось. Новая версия может оставаться активной.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck завершает работу, поэтому плагин не был запущен.</value>
   </data>

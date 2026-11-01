@@ -146,8 +146,8 @@ follows:
    `.dll`) asks for, under that file's roll-forward policy. Without a readable runtimeconfig the
    requirement is `Microsoft.NETCore.App` at `dotnetVersion`.
 2. Otherwise a system-installed `dotnet` that has them, for example for `Microsoft.WindowsDesktop.App` or
-   another .NET major. Installed runtimes are read once per host process; restart Macro Deck after
-   installing one.
+   another .NET major. After installing one, start the plugin again: a manual Start looks for runtimes
+   afresh.
 3. A system `dotnet` whose runtimes could not be listed is launched anyway; when nothing satisfies the
    requirement the plugin stays stopped (see
    [troubleshooting](/guides/troubleshooting/#a-framework-dependent-plugin-reports-a-missing-runtime)).
@@ -207,7 +207,7 @@ Numeric values are **clamped, never rejected**.
 | `health.path` | string | `/_macrodeck/health` | - | SDK health route the probe calls. |
 | `health.intervalSeconds` | integer | 15 | 5-120 | Seconds between probes. |
 | `health.timeoutSeconds` | integer | 2 | 1-10 | Seconds before one probe counts as failed. |
-| `health.unhealthyThreshold` | integer | 3 | 2-10 | Consecutive failures before the plugin is unhealthy. The floor of 2 means one missed probe never restarts a plugin. |
+| `health.unhealthyThreshold` | integer | 3 | 2-10 | Consecutive failures before the plugin is unhealthy. The floor of 2 means one missed probe never marks a plugin unhealthy. A plugin with a connected session is only degraded. |
 
 ## `permissions`
 

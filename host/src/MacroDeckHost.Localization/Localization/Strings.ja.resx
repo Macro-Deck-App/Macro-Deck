@@ -3030,6 +3030,24 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck がまだ起動中のため、プラグインは起動されませんでした。しばらくしてからもう一度お試しください。</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>プラグインのマニフェストを読み取れませんでした。</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>このプラグインにはこのシステム用のバージョンがありません。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>このプラグインを起動できる .NET ランタイムが見つかりませんでした。インストールしてから、プラグインをもう一度起動してください。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>インストール済みの .NET ランタイムは必要なバージョン {required} を満たしていません。インストールしてから、プラグインをもう一度起動してください。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>インストールはキャンセルされ、以前の状態に戻されました。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>インストールはキャンセルされましたが、以前の状態に戻せませんでした。新しいバージョンがまだ有効な可能性があります。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck が終了処理中のため、プラグインは起動されませんでした。</value>
   </data>

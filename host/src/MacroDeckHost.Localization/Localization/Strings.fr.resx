@@ -3031,6 +3031,24 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck est encore en cours de démarrage, l'extension n'a donc pas été démarrée. Réessaie dans un instant.</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Le manifeste de l'extension n'a pas pu être lu.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Cette extension n'a pas de version pour ce système.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Aucun runtime .NET n'a été trouvé pour démarrer cette extension. Installe-en un, puis redémarre l'extension.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Aucun runtime .NET installé ne correspond à la version requise {required}. Installe-la, puis redémarre l'extension.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>L'installation a été annulée et l'état précédent a été restauré.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>L'installation a été annulée, mais l'état précédent n'a pas pu être restauré. La nouvelle version est peut-être encore active.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck est en cours de fermeture, l'extension n'a donc pas été démarrée.</value>
   </data>

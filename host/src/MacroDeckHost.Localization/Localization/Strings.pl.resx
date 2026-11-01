@@ -3031,6 +3031,24 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck wciąż się uruchamia, więc wtyczka nie została uruchomiona. Spróbuj ponownie za chwilę.</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Nie można odczytać manifestu wtyczki.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Ta wtyczka nie ma wersji dla tego systemu.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Nie znaleziono środowiska uruchomieniowego .NET do uruchomienia tej wtyczki. Zainstaluj je i uruchom wtyczkę ponownie.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Żadne zainstalowane środowisko uruchomieniowe .NET nie spełnia wymaganej wersji {required}. Zainstaluj ją i uruchom wtyczkę ponownie.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Instalacja została anulowana, a poprzedni stan przywrócono.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Instalacja została anulowana, ale nie można przywrócić poprzedniego stanu. Nowa wersja może być nadal aktywna.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck jest zamykany, więc wtyczka nie została uruchomiona.</value>
   </data>

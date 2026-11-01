@@ -25,7 +25,8 @@ public record PluginRuntimeSnapshotBody(
 	DateTimeOffset? NextRestartAt,
 	string? LastError,
 	IReadOnlyList<string> BootstrapOutput,
-	bool TakenOverByDevelopmentBuild);
+	bool TakenOverByDevelopmentBuild,
+	bool DesiredStarted);
 
 public record GetPluginRuntimeResponse(IReadOnlyList<PluginRuntimeSnapshotBody> Plugins);
 
@@ -124,7 +125,8 @@ public class PluginRuntimeController : ControllerBase
 			snapshot.NextRestartAt,
 			snapshot.LastError,
 			snapshot.BootstrapOutput,
-			snapshot.TakenOverByDevelopmentBuild);
+			snapshot.TakenOverByDevelopmentBuild,
+			snapshot.DesiredStarted);
 	}
 
 	private static string ToWireState(PluginRuntimeState state)

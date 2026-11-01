@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using MacroDeck.Localization;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Plugin.Protocol.Envelope;
@@ -17,6 +18,8 @@ using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
+using MacroDeckHost.Application.Services;
+using MacroDeckHost.Localization;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -102,10 +105,15 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		var result = new List<PluginRuntimeSnapshot>();
 
+		var desired = _stateStore.Load();
+
 		foreach (var plugin in installed)
 		{
 			var entry = GetOrCreateEntry(plugin.PluginId);
-			result.Add(BuildSnapshot(entry, true));
+			result.Add(BuildSnapshot(entry, true) with
+			{
+				DesiredStarted = desired.TryGetValue(plugin.PluginId, out var started) && started
+			});
 		}
 
 		foreach (var session in sessions)
@@ -144,6 +152,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			}
 
 			var entry = GetOrCreateEntry(pluginId);
+
+			_muxerLocator.Invalidate();
 
 			await entry.LaunchClaim.WaitAsync(cancellationToken);
 			try
@@ -250,7 +260,13 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			await entry.Gate.WaitAsync(cancellationToken);
 			try
 			{
-				if (!TryDecideStopLocked(entry, reason, out process, out launchId))
+				if (reason == PluginStopReason.Update)
+				{
+					entry.TerminalLaunchFailure = false;
+				}
+
+				if (!TryDecideStopLocked(entry, reason, out process, out launchId)
+					&& !WantsAutoStartCleared(entry, reason))
 				{
 					return PluginSupervisorResult.Fail(PluginSupervisorError.NotRunning);
 				}
@@ -296,6 +312,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			}
 
 			var entry = GetOrCreateEntry(pluginId);
+
+			_muxerLocator.Invalidate();
 
 			PluginSupervisorResult result;
 			await entry.LaunchClaim.WaitAsync(cancellationToken);
@@ -654,7 +672,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 	private bool MayRelaunchStopped(PluginRuntimeEntry entry)
 	{
-		return !entry.IntegrityFailed && !_takeovers.IsActive(entry.PluginId);
+		return !entry.TerminalLaunchFailure && !_takeovers.IsActive(entry.PluginId);
 	}
 
 	// Skips the tick while another launch or an installer hold owns the plugin. The catalog is read again
@@ -696,6 +714,13 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		{
 			entry.LaunchClaim.Release();
 		}
+	}
+
+	private bool WantsAutoStartCleared(PluginRuntimeEntry entry, PluginStopReason reason)
+	{
+		return reason == PluginStopReason.UserRequested
+			&& entry.State is PluginRuntimeState.Stopped or PluginRuntimeState.Failed
+			&& IsDesiredStarted(entry.PluginId);
 	}
 
 	private bool IsDesiredStarted(string pluginId)
@@ -1356,6 +1381,40 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
+	// Terminal for this process lifetime like an integrity failure: reconcile would otherwise repeat the
+	// whole attempt every tick. The flag lands first so a failed text lookup cannot undo that.
+	private async Task<PluginSupervisorResult> RefuseLaunch(
+		PluginRuntimeEntry entry,
+		PluginSupervisorError error,
+		LocalizedText reason,
+		CancellationToken ct)
+	{
+		await entry.Gate.WaitAsync(ct);
+		try
+		{
+			entry.State = PluginRuntimeState.Stopped;
+			entry.TerminalLaunchFailure = true;
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+
+		var message = await ActiveLocalization.Resolve(_scopeFactory, reason);
+
+		await entry.Gate.WaitAsync(ct);
+		try
+		{
+			entry.LastError = message;
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+
+		return PluginSupervisorResult.Fail(error, message);
+	}
+
 	// Kestrel answers requests before ApplicationStarted publishes the port, so a plugin launched in
 	// that gap would dial port 0 forever. A launch waits it out; Stop and shutdown cut the wait short.
 	private async Task<PluginSupervisorResult?> AwaitHostPort(
@@ -1442,18 +1501,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			= _manifestReader.Read(activeVersion.ManifestPath, installed.PluginId, activeVersion.Version);
 		if (!manifestResult.Success)
 		{
-			await entry.Gate.WaitAsync(ct);
-			try
-			{
-				entry.State = PluginRuntimeState.Stopped;
-				entry.LastError = manifestResult.ErrorMessage;
-			}
-			finally
-			{
-				entry.Gate.Release();
-			}
-
-			return PluginSupervisorResult.Fail(PluginSupervisorError.ManifestInvalid, manifestResult.ErrorMessage);
+			PluginInfrastructureLog.ManifestUnreadable(_logger, entry.PluginId, manifestResult.ErrorMessage);
+			return await RefuseLaunch(entry,
+				PluginSupervisorError.ManifestInvalid,
+				AppStrings.Errors.Plugins.ManifestUnreadable(),
+				ct);
 		}
 
 		var manifest = manifestResult.Manifest!;
@@ -1474,7 +1526,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				// case must not keep relaunching a plugin whose integrity check just failed. A user-driven
 				// Start/Restart re-runs this check from scratch and clears the flag on success, so it is
 				// never a one-way lockout - just not something the automatic reconcile loop retries.
-				entry.IntegrityFailed = true;
+				entry.TerminalLaunchFailure = true;
 			}
 			finally
 			{
@@ -1498,18 +1550,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		if (candidateEntrypoint is null)
 		{
-			await entry.Gate.WaitAsync(ct);
-			try
-			{
-				entry.State = PluginRuntimeState.Stopped;
-				entry.LastError = "No entrypoint matches this host's runtime identifier.";
-			}
-			finally
-			{
-				entry.Gate.Release();
-			}
-
-			return PluginSupervisorResult.Fail(PluginSupervisorError.NoEntrypointForRuntime);
+			return await RefuseLaunch(entry,
+				PluginSupervisorError.NoEntrypointForRuntime,
+				AppStrings.Errors.Plugins.NoEntrypointForRuntime(),
+				ct);
 		}
 
 		var versionDirectory = activeVersion.VersionDirectory;
@@ -1526,20 +1570,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			var selection = _muxerLocator.Locate(requirements);
 			if (selection is null)
 			{
-				const string message = "No dotnet runtime was found to launch this framework-dependent plugin.";
-
-				await entry.Gate.WaitAsync(ct);
-				try
-				{
-					entry.State = PluginRuntimeState.Stopped;
-					entry.LastError = message;
-				}
-				finally
-				{
-					entry.Gate.Release();
-				}
-
-				return PluginSupervisorResult.Fail(PluginSupervisorError.DotnetRuntimeMissing, message);
+				_muxerLocator.Invalidate();
+				return await RefuseLaunch(entry,
+					PluginSupervisorError.DotnetRuntimeMissing,
+					AppStrings.Errors.Plugins.DotnetRuntimeNotFound(),
+					ct);
 			}
 
 			if (selection.UnmetRequirement is { } unmet)
@@ -1547,20 +1582,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 				var required = unmet.Name == DotnetFrameworkRequirement.NetCoreAppFramework
 					? unmet.Version.ToString(2)
 					: $"{unmet.Name} {unmet.Version}";
-				var message = $"No installed dotnet runtime satisfies the required version {required}.";
-
-				await entry.Gate.WaitAsync(ct);
-				try
-				{
-					entry.State = PluginRuntimeState.Stopped;
-					entry.LastError = message;
-				}
-				finally
-				{
-					entry.Gate.Release();
-				}
-
-				return PluginSupervisorResult.Fail(PluginSupervisorError.DotnetRuntimeMissing, message);
+				_muxerLocator.Invalidate();
+				return await RefuseLaunch(entry,
+					PluginSupervisorError.DotnetRuntimeMissing,
+					AppStrings.Errors.Plugins.DotnetRuntimeVersionMissing(required),
+					ct);
 			}
 
 			launchExecutablePath = selection.Muxer.ExecutablePath;
@@ -1587,7 +1613,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			entry.StartedAt = now;
 			entry.NextRestartAt = null;
 			entry.LastError = null;
-			entry.IntegrityFailed = false;
+			entry.TerminalLaunchFailure = false;
 			entry.GracefulShutdownTimeout = manifest.Shutdown is { } s
 				? TimeSpan.FromSeconds(s.GracefulTimeoutSeconds)
 				: null;
@@ -1693,8 +1719,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			["MACRO_DECK_PLUGIN_LAUNCH_ID"] = launchId,
 			["MACRO_DECK_PLUGIN_HOST_PROCESS_ID"] =
 				HostProcessIdentity.ProcessId.ToString(CultureInfo.InvariantCulture),
-			["MACRO_DECK_PLUGIN_HOST_STARTED_AT"] = HostProcessIdentity.StartedAt.ToString("O",
-				CultureInfo.InvariantCulture),
+			["MACRO_DECK_PLUGIN_HOST_STARTED_AT"] = HostProcessIdentity.StartedAtForLaunch()
+				.ToString("O",
+					CultureInfo.InvariantCulture),
 			["ASPNETCORE_URLS"] = $"http://127.0.0.1:{healthPort}"
 		};
 
@@ -2084,7 +2111,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		public DateTimeOffset? NextRestartAt;
 		public string? LastError;
 		public bool StartupGraceRetried;
-		public bool IntegrityFailed;
+		public bool TerminalLaunchFailure;
 		public bool LaunchInFlight;
 		public CancellationTokenSource? LaunchCancel;
 		public int StopRequests;

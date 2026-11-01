@@ -3030,6 +3030,24 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck 仍在啟動中，因此未啟動外掛。請稍後再試。</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>無法讀取外掛資訊清單。</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>此外掛沒有適用於此系統的版本。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>找不到可啟動此外掛的 .NET 執行階段。請安裝後重新啟動外掛。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>已安裝的 .NET 執行階段皆不符合所需版本 {required}。請安裝後重新啟動外掛。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>安裝已取消，已還原先前的狀態。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>安裝已取消，但無法還原先前的狀態。新版本可能仍在使用中。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在關閉，因此未啟動外掛。</value>
   </data>

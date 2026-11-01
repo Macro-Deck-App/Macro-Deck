@@ -3031,6 +3031,24 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck si sta ancora avviando, quindi il plugin non è stato avviato. Riprova tra poco.</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Impossibile leggere il manifesto del plugin.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Questo plugin non ha una versione per questo sistema.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Nessun runtime .NET trovato per avviare questo plugin. Installane uno, quindi avvia di nuovo il plugin.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Nessun runtime .NET installato soddisfa la versione richiesta {required}. Installala, quindi avvia di nuovo il plugin.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>L'installazione è stata annullata e lo stato precedente è stato ripristinato.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>L'installazione è stata annullata, ma non è stato possibile ripristinare lo stato precedente. La nuova versione potrebbe essere ancora attiva.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck si sta chiudendo, quindi il plugin non è stato avviato.</value>
   </data>

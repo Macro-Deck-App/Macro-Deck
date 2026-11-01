@@ -129,6 +129,24 @@ describe('ManagedPluginsSectionComponent', () => {
     return Array.from(fixture.nativeElement.querySelectorAll('.managed-plugins-menu-item'));
   }
 
+  it('enables Stop for a stopped plugin that would start on its own', async () => {
+    configure([plugin('p1', { state: 'stopped', desiredStarted: true })]);
+    fixture = await create();
+
+    const stop = (await openMenu('p1'))[1];
+
+    expect(stop.disabled).toBeFalse();
+  });
+
+  it('keeps Stop disabled for a plugin taken over by a development build', async () => {
+    configure([plugin('p1', { state: 'stopped', desiredStarted: true, takenOverByDevelopmentBuild: true })]);
+    fixture = await create();
+
+    const stop = (await openMenu('p1'))[1];
+
+    expect(stop.disabled).toBeTrue();
+  });
+
   it('disables Start while running and Stop while stopped', async () => {
     configure([plugin('p1', { state: 'running' }), plugin('p2', { state: 'stopped' })]);
     fixture = await create();

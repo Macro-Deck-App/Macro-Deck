@@ -3030,6 +3030,24 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck is still starting, so the plugin was not started. Try again in a moment.</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>The plugin's manifest could not be read.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>This plugin has no version for this system.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>No .NET runtime was found to start this plugin. Install one, then start the plugin again.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>No installed .NET runtime satisfies the required version {required}. Install it, then start the plugin again.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>The installation was cancelled and the previous state was restored.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>The installation was cancelled, but the previous state could not be restored. The new version may still be active.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck is shutting down, so the plugin was not started.</value>
   </data>

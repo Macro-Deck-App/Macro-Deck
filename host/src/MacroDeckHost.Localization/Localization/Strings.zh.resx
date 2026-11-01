@@ -3030,6 +3030,24 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck 仍在启动，因此未启动插件。请稍后重试。</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>无法读取插件清单。</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>此插件没有适用于此系统的版本。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>未找到可用于启动此插件的 .NET 运行时。请安装后重新启动插件。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>已安装的 .NET 运行时均不满足所需版本 {required}。请安装后重新启动插件。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>安装已取消，已恢复之前的状态。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>安装已取消，但无法恢复之前的状态。新版本可能仍处于活动状态。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在关闭，因此未启动插件。</value>
   </data>
